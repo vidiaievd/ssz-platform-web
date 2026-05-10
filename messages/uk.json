@@ -1,0 +1,17 @@
+{
+  "Common": {
+    "appName": "ssz-platform"
+  },
+  "Theme": {
+    "label": "Перемкнути тему",
+    "light": "Світла",
+    "dark": "Темна",
+    "system": "Системна"
+  },
+  "LanguageSwitcher": {
+    "label": "Мова"
+  },
+  "Home": {
+    "tagline": "Основу готово."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "Common": {
+    "appName": "ssz-platform"
+  },
+  "Theme": {
+    "label": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "LanguageSwitcher": {
+    "label": "Language"
+  },
+  "Home": {
+    "tagline": "Foundation ready."
+  }
+}

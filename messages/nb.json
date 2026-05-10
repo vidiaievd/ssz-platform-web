@@ -1,0 +1,17 @@
+{
+  "Common": {
+    "appName": "ssz-platform"
+  },
+  "Theme": {
+    "label": "Bytt tema",
+    "light": "Lyst",
+    "dark": "Mørkt",
+    "system": "System"
+  },
+  "LanguageSwitcher": {
+    "label": "Språk"
+  },
+  "Home": {
+    "tagline": "Grunnlaget er klart."
+  }
+}
