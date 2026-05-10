@@ -28,12 +28,12 @@ A single Next.js application uses **App Router Route Groups** to provide distinc
 src/app/
 ├── (marketing)/   # public pages (landing, pricing)
 ├── (auth)/        # login, register, password recovery
-├── (school)/      # schools and tutors workspace
-├── (student)/     # students workspace; enrolled features in (student)/enrolled/
+├── school/        # schools and tutors workspace
+├── student/       # students workspace; enrolled features in student/enrolled/
 └── layout.tsx
 ```
 
-Two student tiers (enrolled vs not) are handled as **functional gating inside `(student)/`**, not as a separate route group.
+Two student tiers (enrolled vs not) are handled as **functional gating inside `student/`**, not as a separate route group.
 
 ---
 
@@ -100,8 +100,8 @@ src/
 ├── app/                       # Next.js App Router
 │   ├── (marketing)/
 │   ├── (auth)/
-│   ├── (school)/
-│   ├── (student)/
+│   ├── school/
+│   ├── student/
 │   ├── api/                   # BFF route handlers
 │   └── layout.tsx
 ├── components/

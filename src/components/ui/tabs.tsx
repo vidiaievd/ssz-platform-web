@@ -7,12 +7,21 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
   onValueChange: (value: string) => void;
 }
 
-const TabsContext = React.createContext<{ value: string; onValueChange: (v: string) => void }>({
+const TabsContext = React.createContext<{
+  value: string;
+  onValueChange: (v: string) => void;
+}>({
   value: "",
   onValueChange: () => {},
 });
 
-const Tabs = ({ value, onValueChange, className, children, ...props }: TabsProps) => (
+const Tabs = ({
+  value,
+  onValueChange,
+  className,
+  children,
+  ...props
+}: TabsProps) => (
   <TabsContext.Provider value={{ value, onValueChange }}>
     <div className={cn("flex flex-col", className)} {...props}>
       {children}
@@ -20,19 +29,17 @@ const Tabs = ({ value, onValueChange, className, children, ...props }: TabsProps
   </TabsContext.Provider>
 );
 
-const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      role="tablist"
-      className={cn(
-        "flex border-b-2 border-border gap-0",
-        className
-      )}
-      {...props}
-    />
-  )
-);
+const TabsList = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    role="tablist"
+    className={cn("flex border-b-2 border-border gap-0", className)}
+    {...props}
+  />
+));
 TabsList.displayName = "TabsList";
 
 interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -50,37 +57,38 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
         aria-selected={active}
         onClick={() => ctx.onValueChange(value)}
         className={cn(
-          "px-5 py-[9px] text-sm font-medium capitalize cursor-pointer",
-          "border-b-2 -mb-[2px] transition-all duration-base ease-out-ssz",
+          "px-5 py-2.25 text-sm font-medium capitalize cursor-pointer",
+          "border-b-2 -mb-0.5 transition-all duration-base ease-out-ssz",
           "focus-visible:outline-none focus-visible:shadow-focus-primary rounded-t-sm",
           active
             ? "border-primary text-primary-600"
-            : "border-transparent text-[var(--ssz-text-secondary)] hover:text-[var(--ssz-text-primary)]",
-          className
+            : "border-transparent text-(--ssz-text-secondary) hover:text-(--ssz-text-primary)",
+          className,
         )}
         {...props}
       >
         {children}
       </button>
     );
-  }
+  },
 );
 TabsTrigger.displayName = "TabsTrigger";
 
-const TabsContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { value: string }>(
-  ({ className, value, ...props }, ref) => {
-    const ctx = React.useContext(TabsContext);
-    if (ctx.value !== value) return null;
-    return (
-      <div
-        ref={ref}
-        role="tabpanel"
-        className={cn("mt-6 animate-fade-in", className)}
-        {...props}
-      />
-    );
-  }
-);
+const TabsContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { value: string }
+>(({ className, value, ...props }, ref) => {
+  const ctx = React.useContext(TabsContext);
+  if (ctx.value !== value) return null;
+  return (
+    <div
+      ref={ref}
+      role="tabpanel"
+      className={cn("mt-6 animate-fade-in", className)}
+      {...props}
+    />
+  );
+});
 TabsContent.displayName = "TabsContent";
 
 /* ── Breadcrumb ───────────────────────────────── */
@@ -90,27 +98,33 @@ interface BreadcrumbItem {
   onClick?: () => void;
 }
 
-interface BreadcrumbProps extends React.HTMLAttributes<HTMLNavElement> {
+interface BreadcrumbProps extends React.HTMLAttributes<HTMLCanvasElement> {
   items: BreadcrumbItem[];
 }
 
 const Breadcrumb = ({ items, className, ...props }: BreadcrumbProps) => (
-  <nav aria-label="Breadcrumb" className={cn("flex items-center gap-1.5 text-sm", className)} {...props}>
+  <nav
+    aria-label="Breadcrumb"
+    className={cn("flex items-center gap-1.5 text-sm", className)}
+    {...props}
+  >
     {items.map((item, i) => {
       const isLast = i === items.length - 1;
       return (
         <React.Fragment key={i}>
           {isLast ? (
-            <span className="text-[var(--ssz-text-primary)] font-medium">{item.label}</span>
+            <span className="text-(--ssz-text-primary) font-medium">
+              {item.label}
+            </span>
           ) : (
             <>
               <button
                 onClick={item.onClick}
-                className="text-[var(--ssz-text-link)] hover:underline transition-colors"
+                className="text-(--ssz-text-link) hover:underline transition-colors"
               >
                 {item.label}
               </button>
-              <ChevronRight className="size-3.5 text-[var(--ssz-text-muted)]" />
+              <ChevronRight className="size-3.5 text-(--ssz-text-muted)" />
             </>
           )}
         </React.Fragment>
@@ -121,7 +135,15 @@ const Breadcrumb = ({ items, className, ...props }: BreadcrumbProps) => (
 
 /* inline minimal icon to avoid extra dep */
 const ChevronRight = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M9 6l6 6-6 6" />
   </svg>
 );

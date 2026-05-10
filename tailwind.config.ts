@@ -10,103 +10,11 @@ const config: Config = {
   theme: {
     extend: {
       /* ────────────────────────────────────────
-         COLORS — mapped from CSS variables
-         Use: bg-primary, text-primary-foreground,
-              bg-secondary, text-muted, etc.
+         NOTE: Colors are defined via CSS custom properties in globals.css.
+         Semantic aliases use @theme inline {}; scale palettes (primary-50–900,
+         etc.) use @theme {} with direct OKLCH values.
+         Tailwind v4 does not support the v3 <alpha-value> placeholder.
       ──────────────────────────────────────── */
-      colors: {
-        /* shadcn-compatible semantic aliases */
-        background:  "oklch(var(--ssz-bg-base-ch) / <alpha-value>)",
-        foreground:  "oklch(var(--ssz-text-primary-ch) / <alpha-value>)",
-        border:      "oklch(var(--ssz-border-default-ch) / <alpha-value>)",
-        input:       "oklch(var(--ssz-border-default-ch) / <alpha-value>)",
-        ring:        "oklch(var(--ssz-primary-ch) / <alpha-value>)",
-
-        primary: {
-          DEFAULT:    "oklch(var(--ssz-primary-ch) / <alpha-value>)",
-          foreground: "oklch(1 0 0 / <alpha-value>)",
-          50:  "oklch(0.97 0.025 168 / <alpha-value>)",
-          100: "oklch(0.93 0.05  168 / <alpha-value>)",
-          200: "oklch(0.87 0.075 168 / <alpha-value>)",
-          300: "oklch(0.79 0.09  168 / <alpha-value>)",
-          400: "oklch(0.70 0.10  168 / <alpha-value>)",
-          500: "oklch(0.62 0.105 168 / <alpha-value>)",
-          600: "oklch(0.54 0.10  168 / <alpha-value>)",
-          700: "oklch(0.44 0.09  168 / <alpha-value>)",
-          800: "oklch(0.34 0.07  168 / <alpha-value>)",
-          900: "oklch(0.24 0.05  168 / <alpha-value>)",
-        },
-
-        secondary: {
-          DEFAULT:    "oklch(var(--ssz-secondary-ch) / <alpha-value>)",
-          foreground: "oklch(1 0 0 / <alpha-value>)",
-          50:  "oklch(0.98 0.02  82 / <alpha-value>)",
-          100: "oklch(0.95 0.045 82 / <alpha-value>)",
-          200: "oklch(0.90 0.07  82 / <alpha-value>)",
-          300: "oklch(0.83 0.09  82 / <alpha-value>)",
-          400: "oklch(0.75 0.105 82 / <alpha-value>)",
-          500: "oklch(0.67 0.11  82 / <alpha-value>)",
-          600: "oklch(0.57 0.105 82 / <alpha-value>)",
-          700: "oklch(0.46 0.09  82 / <alpha-value>)",
-          800: "oklch(0.35 0.07  82 / <alpha-value>)",
-          900: "oklch(0.24 0.045 82 / <alpha-value>)",
-        },
-
-        neutral: {
-          0:   "oklch(1.00  0.005 80 / <alpha-value>)",
-          50:  "oklch(0.975 0.007 80 / <alpha-value>)",
-          100: "oklch(0.95  0.010 80 / <alpha-value>)",
-          200: "oklch(0.90  0.010 80 / <alpha-value>)",
-          300: "oklch(0.83  0.010 80 / <alpha-value>)",
-          400: "oklch(0.70  0.010 80 / <alpha-value>)",
-          500: "oklch(0.58  0.010 80 / <alpha-value>)",
-          600: "oklch(0.46  0.010 80 / <alpha-value>)",
-          700: "oklch(0.36  0.010 80 / <alpha-value>)",
-          800: "oklch(0.26  0.010 80 / <alpha-value>)",
-          900: "oklch(0.18  0.010 80 / <alpha-value>)",
-        },
-
-        success: {
-          DEFAULT: "oklch(0.60 0.13 145 / <alpha-value>)",
-          50:  "oklch(0.96 0.04  145 / <alpha-value>)",
-          100: "oklch(0.90 0.07  145 / <alpha-value>)",
-          300: "oklch(0.76 0.11  145 / <alpha-value>)",
-          500: "oklch(0.60 0.13  145 / <alpha-value>)",
-          700: "oklch(0.44 0.11  145 / <alpha-value>)",
-        },
-        warning: {
-          DEFAULT: "oklch(0.66 0.13 75 / <alpha-value>)",
-          50:  "oklch(0.97 0.03  75 / <alpha-value>)",
-          100: "oklch(0.92 0.065 75 / <alpha-value>)",
-          300: "oklch(0.80 0.11  75 / <alpha-value>)",
-          500: "oklch(0.66 0.13  75 / <alpha-value>)",
-          700: "oklch(0.48 0.11  75 / <alpha-value>)",
-        },
-        error: {
-          DEFAULT: "oklch(0.60 0.125 15 / <alpha-value>)",
-          50:  "oklch(0.97 0.025 15 / <alpha-value>)",
-          100: "oklch(0.92 0.055 15 / <alpha-value>)",
-          300: "oklch(0.78 0.10  15 / <alpha-value>)",
-          500: "oklch(0.60 0.125 15 / <alpha-value>)",
-          700: "oklch(0.44 0.105 15 / <alpha-value>)",
-        },
-        info: {
-          DEFAULT: "oklch(0.60 0.12 235 / <alpha-value>)",
-          50:  "oklch(0.96 0.03  235 / <alpha-value>)",
-          100: "oklch(0.91 0.055 235 / <alpha-value>)",
-          300: "oklch(0.76 0.10  235 / <alpha-value>)",
-          500: "oklch(0.60 0.12  235 / <alpha-value>)",
-          700: "oklch(0.44 0.10  235 / <alpha-value>)",
-        },
-
-        /* Semantic surface / text aliases → theme-aware via CSS vars */
-        surface:  "var(--ssz-bg-surface)",
-        subtle:   "var(--ssz-bg-subtle)",
-        muted: {
-          DEFAULT:    "var(--ssz-bg-muted)",
-          foreground: "var(--ssz-text-muted)",
-        },
-      },
 
       /* ────────────────────────────────────────
          TYPOGRAPHY

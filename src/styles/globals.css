@@ -1,7 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────
+   TAILWIND v4 THEME — CSS variable declarations
+   Required so theme() calls resolve correctly.
+   Values stay in sync with tailwind.config.ts.
+───────────────────────────────────────────── */
+@theme {
+  /* Fonts — CSS vars injected by next/font on <html>, consumed here */
+  --font-ui:      var(--font-plus-jakarta-sans), "Segoe UI", system-ui, sans-serif;
+  --font-reading: var(--font-lora), Georgia, "Times New Roman", serif;
+  --font-mono:    var(--font-jetbrains-mono), "Fira Code", monospace;
+
+  /* Scale values used via theme() in base/utility layers */
+  --text-lg:    1.125rem;
+  --leading-loose: 1.75;
+  --radius-lg:  16px;
+
+  /* Animation durations and easing */
+  --duration-fast:   100ms;
+  --duration-base:   180ms;
+  --duration-slow:   280ms;
+  --duration-slower: 400ms;
+  --ease-snap:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-ssz:  cubic-bezier(0.4, 0, 1, 1);
+  --ease-out-ssz: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tailwind v4: map :root CSS variables to color utilities.
+   @theme inline means values are referenced directly, not
+   re-emitted as new CSS variables. */
+@theme inline {
+  --color-background:             var(--background);
+  --color-foreground:             var(--foreground);
+  --color-card:                   var(--card);
+  --color-card-foreground:        var(--card-foreground);
+  --color-popover:                var(--popover);
+  --color-popover-foreground:     var(--popover-foreground);
+  --color-primary:                var(--primary);
+  --color-primary-foreground:     var(--primary-foreground);
+  --color-secondary:              var(--secondary);
+  --color-secondary-foreground:   var(--secondary-foreground);
+  --color-muted:                  var(--muted);
+  --color-muted-foreground:       var(--muted-foreground);
+  --color-accent:                 var(--accent);
+  --color-accent-foreground:      var(--accent-foreground);
+  --color-destructive:            var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border:                 var(--border);
+  --color-input:                  var(--input);
+  --color-ring:                   var(--ring);
+  /* SSZ surface aliases */
+  --color-surface:                var(--ssz-bg-surface);
+  --color-subtle:                 var(--ssz-bg-subtle);
+}
 
 /* ─────────────────────────────────────────────
    SSZ DESIGN TOKENS — CSS Custom Properties
@@ -136,16 +187,17 @@
   }
 
   body {
-    @apply bg-background font-ui text-base leading-normal transition-colors duration-slow;
+    @apply bg-background font-ui text-base leading-normal transition-colors;
+    transition-duration: var(--duration-slow);
     color: var(--ssz-text-primary);
     background: var(--ssz-bg-base);
   }
 
   /* Long-form reading contexts */
   .prose-reading {
-    font-family: theme("fontFamily.reading");
-    line-height: theme("lineHeight.loose");
-    font-size: theme("fontSize.lg");
+    font-family: theme(--font-reading);
+    line-height: theme(--leading-loose);
+    font-size: theme(--text-lg);
     color: var(--ssz-text-primary);
   }
 
@@ -162,7 +214,9 @@
 @layer utilities {
   /* Smooth theme transitions */
   .theme-transition {
-    @apply transition-colors duration-slow ease-out-ssz;
+    @apply transition-colors;
+    transition-duration: var(--duration-slow);
+    transition-timing-function: var(--ease-out-ssz);
   }
 
   /* Label / overline style */
@@ -177,12 +231,14 @@
   /* SSZ surface card base */
   .ssz-surface {
     background: var(--ssz-bg-surface);
-    border-radius: theme("borderRadius.lg");
+    border-radius: theme(--radius-lg);
     box-shadow: var(--ssz-shadow-sm);
   }
 
   .ssz-surface-hover {
-    @apply transition-shadow duration-base ease-out-ssz;
+    @apply transition-shadow;
+    transition-duration: var(--duration-base);
+    transition-timing-function: var(--ease-out-ssz);
   }
   .ssz-surface-hover:hover {
     box-shadow: var(--ssz-shadow-md);
