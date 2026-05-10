@@ -31,6 +31,8 @@ export default defineConfig({
         resolve: {
           alias: {
             '@': path.resolve(dirname, './src'),
+            'server-only': path.resolve(dirname, './src/test/server-only-shim.ts'),
+            'next/headers': path.resolve(dirname, './src/test/next-headers-shim.ts'),
           },
         },
       },

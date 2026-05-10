@@ -1,0 +1,29 @@
+import 'server-only';
+
+import { env } from '@/lib/env';
+
+export type ServiceName = 'auth' | 'profile' | 'content';
+
+const directUrls: Record<ServiceName, string | undefined> = {
+  auth: env.AUTH_SERVICE_URL,
+  profile: env.PROFILE_SERVICE_URL,
+  content: env.CONTENT_SERVICE_URL,
+};
+
+/**
+ * Resolves the upstream base URL for a logical service.
+ *
+ * If API_GATEWAY_URL is set, all services route through the gateway,
+ * prefixed with `/<service>` (the gateway handles routing internally).
+ * Otherwise, falls back to the per-service URL.
+ */
+export function resolveServiceUrl(name: ServiceName): string {
+  if (env.API_GATEWAY_URL) {
+    return `${env.API_GATEWAY_URL.replace(/\/$/, '')}/${name}`;
+  }
+  const direct = directUrls[name];
+  if (!direct) {
+    throw new Error(`No upstream configured for service "${name}".`);
+  }
+  return direct.replace(/\/$/, '');
+}
