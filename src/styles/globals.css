@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────
+   SSZ DESIGN TOKENS — CSS Custom Properties
+   Tailwind references these via tailwind.config.ts
+   Components use them directly for theme-aware values.
+───────────────────────────────────────────── */
+
+@layer base {
+
+  /* ═══ LIGHT THEME (default) ═══ */
+  :root,
+  [data-theme="light"] {
+    /* Channel values for Tailwind alpha support:
+       usage → oklch(var(--ssz-primary-ch) / 0.5) */
+    --ssz-primary-ch:    0.62 0.105 168;
+    --ssz-secondary-ch:  0.67 0.11  82;
+    --ssz-bg-base-ch:    0.975 0.007 80;
+    --ssz-text-primary-ch: 0.18 0.010 80;
+    --ssz-border-default-ch: 0.90 0.010 80;
+
+    /* Full values for direct use */
+    --ssz-bg-base:        oklch(0.975 0.007 80);
+    --ssz-bg-surface:     oklch(1.00  0.005 80);
+    --ssz-bg-subtle:      oklch(0.95  0.010 80);
+    --ssz-bg-muted:       oklch(0.90  0.010 80);
+    --ssz-bg-overlay:     oklch(0.18  0.010 80 / 0.40);
+
+    --ssz-border-default: oklch(0.90  0.010 80);
+    --ssz-border-strong:  oklch(0.83  0.010 80);
+    --ssz-border-focus:   oklch(0.62  0.105 168);
+
+    --ssz-text-primary:   oklch(0.18  0.010 80);
+    --ssz-text-secondary: oklch(0.46  0.010 80);
+    --ssz-text-muted:     oklch(0.70  0.010 80);
+    --ssz-text-inverse:   oklch(1.00  0.005 80);
+    --ssz-text-link:      oklch(0.54  0.10  168);
+    --ssz-text-link-hover:oklch(0.44  0.09  168);
+
+    --ssz-shadow-xs: 0 1px 2px oklch(0.18 0.01 80 / 0.06);
+    --ssz-shadow-sm: 0 1px 4px oklch(0.18 0.01 80 / 0.08), 0 1px 2px oklch(0.18 0.01 80 / 0.06);
+    --ssz-shadow-md: 0 4px 12px oklch(0.18 0.01 80 / 0.08), 0 2px 4px oklch(0.18 0.01 80 / 0.06);
+    --ssz-shadow-lg: 0 8px 24px oklch(0.18 0.01 80 / 0.10), 0 4px 8px oklch(0.18 0.01 80 / 0.07);
+    --ssz-shadow-xl: 0 16px 48px oklch(0.18 0.01 80 / 0.12), 0 8px 16px oklch(0.18 0.01 80 / 0.08);
+    --ssz-focus-ring: 0 0 0 3px oklch(0.62 0.105 168 / 0.30);
+
+    /* shadcn/ui compatibility aliases */
+    --background: 97.5% 0.007 80;   /* OKLCH L C H for shadcn */
+    --foreground: 18% 0.010 80;
+    --card:             var(--ssz-bg-surface);
+    --card-foreground:  var(--ssz-text-primary);
+    --popover:          var(--ssz-bg-surface);
+    --popover-foreground: var(--ssz-text-primary);
+    --primary:          oklch(0.62 0.105 168);
+    --primary-foreground: oklch(1 0 0);
+    --secondary:        oklch(0.95 0.010 80);
+    --secondary-foreground: oklch(0.18 0.010 80);
+    --muted:            oklch(0.95 0.010 80);
+    --muted-foreground: oklch(0.70 0.010 80);
+    --accent:           oklch(0.93 0.05 168);
+    --accent-foreground:oklch(0.44 0.09 168);
+    --destructive:      oklch(0.60 0.125 15);
+    --destructive-foreground: oklch(1 0 0);
+    --border:           oklch(0.90 0.010 80);
+    --input:            oklch(0.90 0.010 80);
+    --ring:             oklch(0.62 0.105 168);
+    --radius: 10px;
+  }
+
+  /* ═══ DARK THEME ═══ */
+  [data-theme="dark"],
+  .dark {
+    --ssz-primary-ch:    0.70 0.09 168;
+    --ssz-secondary-ch:  0.75 0.105 82;
+    --ssz-bg-base-ch:    0.17 0.012 240;
+    --ssz-text-primary-ch: 0.93 0.008 80;
+    --ssz-border-default-ch: 0.30 0.012 240;
+
+    --ssz-bg-base:        oklch(0.17 0.012 240);
+    --ssz-bg-surface:     oklch(0.20 0.012 240);
+    --ssz-bg-subtle:      oklch(0.23 0.012 240);
+    --ssz-bg-muted:       oklch(0.27 0.012 240);
+    --ssz-bg-overlay:     oklch(0.10 0.012 240 / 0.60);
+
+    --ssz-border-default: oklch(0.30 0.012 240);
+    --ssz-border-strong:  oklch(0.38 0.012 240);
+    --ssz-border-focus:   oklch(0.70 0.09  168);
+
+    --ssz-text-primary:   oklch(0.93 0.008 80);
+    --ssz-text-secondary: oklch(0.72 0.010 80);
+    --ssz-text-muted:     oklch(0.52 0.010 80);
+    --ssz-text-inverse:   oklch(0.18 0.010 80);
+    --ssz-text-link:      oklch(0.79 0.09  168);
+    --ssz-text-link-hover:oklch(0.87 0.075 168);
+
+    --ssz-shadow-xs: 0 1px 2px rgba(0,0,0,0.20);
+    --ssz-shadow-sm: 0 1px 4px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.18);
+    --ssz-shadow-md: 0 4px 12px rgba(0,0,0,0.28), 0 2px 4px rgba(0,0,0,0.20);
+    --ssz-shadow-lg: 0 8px 24px rgba(0,0,0,0.32), 0 4px 8px rgba(0,0,0,0.22);
+    --ssz-shadow-xl: 0 16px 48px rgba(0,0,0,0.38), 0 8px 16px rgba(0,0,0,0.26);
+    --ssz-focus-ring: 0 0 0 3px oklch(0.70 0.09 168 / 0.40);
+
+    --background: 17% 0.012 240;
+    --foreground: 93% 0.008 80;
+    --card:             var(--ssz-bg-surface);
+    --card-foreground:  var(--ssz-text-primary);
+    --popover:          var(--ssz-bg-surface);
+    --popover-foreground: var(--ssz-text-primary);
+    --primary:          oklch(0.70 0.09 168);
+    --primary-foreground: oklch(0.18 0.010 80);
+    --secondary:        oklch(0.27 0.012 240);
+    --secondary-foreground: oklch(0.93 0.008 80);
+    --muted:            oklch(0.23 0.012 240);
+    --muted-foreground: oklch(0.52 0.010 80);
+    --accent:           oklch(0.27 0.012 240);
+    --accent-foreground:oklch(0.79 0.09 168);
+    --destructive:      oklch(0.60 0.125 15);
+    --destructive-foreground: oklch(1 0 0);
+    --border:           oklch(0.30 0.012 240);
+    --input:            oklch(0.30 0.012 240);
+    --ring:             oklch(0.70 0.09 168);
+  }
+
+  /* ═══ BASE STYLES ═══ */
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background font-ui text-base leading-normal transition-colors duration-slow;
+    color: var(--ssz-text-primary);
+    background: var(--ssz-bg-base);
+  }
+
+  /* Long-form reading contexts */
+  .prose-reading {
+    font-family: theme("fontFamily.reading");
+    line-height: theme("lineHeight.loose");
+    font-size: theme("fontSize.lg");
+    color: var(--ssz-text-primary);
+  }
+
+  /* Focus ring (accessible, calm) */
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--ssz-focus-ring);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   UTILITY CLASSES
+───────────────────────────────────────────── */
+@layer utilities {
+  /* Smooth theme transitions */
+  .theme-transition {
+    @apply transition-colors duration-slow ease-out-ssz;
+  }
+
+  /* Label / overline style */
+  .label-overline {
+    @apply text-xs font-bold uppercase tracking-widest;
+    color: var(--ssz-text-muted);
+  }
+
+  /* Text wrap */
+  .text-pretty { text-wrap: pretty; }
+
+  /* SSZ surface card base */
+  .ssz-surface {
+    background: var(--ssz-bg-surface);
+    border-radius: theme("borderRadius.lg");
+    box-shadow: var(--ssz-shadow-sm);
+  }
+
+  .ssz-surface-hover {
+    @apply transition-shadow duration-base ease-out-ssz;
+  }
+  .ssz-surface-hover:hover {
+    box-shadow: var(--ssz-shadow-md);
+  }
+}
