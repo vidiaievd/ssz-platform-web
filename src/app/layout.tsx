@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { JetBrains_Mono, Lora, Plus_Jakarta_Sans } from 'next/font/google';
 
 import '@/styles/globals.css';
+import { ThemeProvider } from '@/components/shared/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
 
 const fontUI = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -37,7 +39,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className={`${fontUI.variable} ${fontReading.variable} ${fontMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+          <ThemeProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+          </ThemeProvider>
+        </body>
     </html>
   );
 }
