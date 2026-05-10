@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import '@/styles/globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/shared/theme-provider';
+import { QueryProvider } from '@/lib/query/provider';
 import { routing } from '@/lib/i18n/routing';
 
 const fontUI = Plus_Jakarta_Sans({
@@ -56,8 +57,10 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
-            {children}
-            <Toaster richColors position="top-right" />
+            <QueryProvider>
+              {children}
+              <Toaster richColors position="top-right" />
+            </QueryProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>
