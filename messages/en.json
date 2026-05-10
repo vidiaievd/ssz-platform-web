@@ -13,5 +13,16 @@
   },
   "Home": {
     "tagline": "Foundation ready."
+  },
+  "Errors": {
+    "unauthenticated": "Please sign in to continue.",
+    "forbidden": "You don't have access to this.",
+    "not_found": "We couldn't find what you were looking for.",
+    "validation": "Please check the highlighted fields.",
+    "conflict": "This conflicts with existing data.",
+    "rate_limited": "Too many requests. Please wait a moment.",
+    "upstream_unavailable": "Service temporarily unavailable. Please try again.",
+    "timeout": "The request took too long. Please try again.",
+    "unknown": "Something went wrong. Please try again."
   }
 }
