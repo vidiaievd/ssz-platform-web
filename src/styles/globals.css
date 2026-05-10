@@ -6,17 +6,111 @@
    Values stay in sync with tailwind.config.ts.
 ───────────────────────────────────────────── */
 @theme {
-  /* Fonts — CSS vars injected by next/font on <html>, consumed here */
+  /* ─── Fonts (CSS vars injected by next/font on <html>) ─── */
   --font-ui:      var(--font-plus-jakarta-sans), "Segoe UI", system-ui, sans-serif;
   --font-reading: var(--font-lora), Georgia, "Times New Roman", serif;
   --font-mono:    var(--font-jetbrains-mono), "Fira Code", monospace;
 
-  /* Scale values used via theme() in base/utility layers */
-  --text-lg:    1.125rem;
-  --leading-loose: 1.75;
-  --radius-lg:  16px;
+  /* ─── Primary color scale (teal, hue 168) ─── */
+  --color-primary-50:  oklch(0.97 0.025 168);
+  --color-primary-100: oklch(0.93 0.05  168);
+  --color-primary-200: oklch(0.87 0.075 168);
+  --color-primary-300: oklch(0.79 0.09  168);
+  --color-primary-400: oklch(0.70 0.10  168);
+  --color-primary-500: oklch(0.62 0.105 168);
+  --color-primary-600: oklch(0.54 0.10  168);
+  --color-primary-700: oklch(0.44 0.09  168);
+  --color-primary-800: oklch(0.34 0.07  168);
+  --color-primary-900: oklch(0.24 0.05  168);
 
-  /* Animation durations and easing */
+  /* ─── Secondary color scale (amber, hue 82) ─── */
+  --color-secondary-50:  oklch(0.98 0.02  82);
+  --color-secondary-100: oklch(0.95 0.045 82);
+  --color-secondary-200: oklch(0.90 0.07  82);
+  --color-secondary-300: oklch(0.83 0.09  82);
+  --color-secondary-400: oklch(0.75 0.105 82);
+  --color-secondary-500: oklch(0.67 0.11  82);
+  --color-secondary-600: oklch(0.57 0.105 82);
+  --color-secondary-700: oklch(0.46 0.09  82);
+  --color-secondary-800: oklch(0.35 0.07  82);
+  --color-secondary-900: oklch(0.24 0.045 82);
+
+  /* ─── Neutral scale ─── */
+  --color-neutral-0:   oklch(1.00  0.005 80);
+  --color-neutral-50:  oklch(0.975 0.007 80);
+  --color-neutral-100: oklch(0.95  0.010 80);
+  --color-neutral-200: oklch(0.90  0.010 80);
+  --color-neutral-300: oklch(0.83  0.010 80);
+  --color-neutral-400: oklch(0.70  0.010 80);
+  --color-neutral-500: oklch(0.58  0.010 80);
+  --color-neutral-600: oklch(0.46  0.010 80);
+  --color-neutral-700: oklch(0.36  0.010 80);
+  --color-neutral-800: oklch(0.26  0.010 80);
+  --color-neutral-900: oklch(0.18  0.010 80);
+
+  /* ─── Success ─── */
+  --color-success:     oklch(0.60 0.13 145);
+  --color-success-50:  oklch(0.96 0.04 145);
+  --color-success-100: oklch(0.90 0.07 145);
+  --color-success-300: oklch(0.76 0.11 145);
+  --color-success-500: oklch(0.60 0.13 145);
+  --color-success-700: oklch(0.44 0.11 145);
+
+  /* ─── Warning ─── */
+  --color-warning:     oklch(0.66 0.13 75);
+  --color-warning-50:  oklch(0.97 0.03  75);
+  --color-warning-100: oklch(0.92 0.065 75);
+  --color-warning-300: oklch(0.80 0.11  75);
+  --color-warning-500: oklch(0.66 0.13  75);
+  --color-warning-700: oklch(0.48 0.11  75);
+
+  /* ─── Error ─── */
+  --color-error:     oklch(0.60 0.125 15);
+  --color-error-50:  oklch(0.97 0.025 15);
+  --color-error-100: oklch(0.92 0.055 15);
+  --color-error-300: oklch(0.78 0.10  15);
+  --color-error-500: oklch(0.60 0.125 15);
+  --color-error-700: oklch(0.44 0.105 15);
+
+  /* ─── Info ─── */
+  --color-info:     oklch(0.60 0.12 235);
+  --color-info-50:  oklch(0.96 0.03  235);
+  --color-info-100: oklch(0.91 0.055 235);
+  --color-info-300: oklch(0.76 0.10  235);
+  --color-info-500: oklch(0.60 0.12  235);
+  --color-info-700: oklch(0.44 0.10  235);
+
+  /* ─── Border radius ─── */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-2xl:  32px;
+  --radius-full: 9999px;
+
+  /* ─── Box shadows ─── */
+  --shadow-xs:            0 1px 2px oklch(0.18 0.01 80 / 0.06);
+  --shadow-sm:            0 1px 4px oklch(0.18 0.01 80 / 0.08), 0 1px 2px oklch(0.18 0.01 80 / 0.06);
+  --shadow-md:            0 4px 12px oklch(0.18 0.01 80 / 0.08), 0 2px 4px oklch(0.18 0.01 80 / 0.06);
+  --shadow-lg:            0 8px 24px oklch(0.18 0.01 80 / 0.10), 0 4px 8px oklch(0.18 0.01 80 / 0.07);
+  --shadow-xl:            0 16px 48px oklch(0.18 0.01 80 / 0.12), 0 8px 16px oklch(0.18 0.01 80 / 0.08);
+  --shadow-focus-primary: 0 0 0 3px oklch(0.62 0.105 168 / 0.30);
+  --shadow-focus-error:   0 0 0 3px oklch(0.60 0.125 15  / 0.25);
+
+  /* ─── Font sizes ─── */
+  --text-2xs:              0.625rem;
+  --text-2xs--line-height: 1rem;
+  --text-lg:               1.125rem;
+  --leading-loose:         1.75;
+
+  /* ─── Animations ─── */
+  --animate-fade-in:   fade-in 180ms cubic-bezier(0.16,1,0.3,1);
+  --animate-fade-out:  fade-out 180ms cubic-bezier(0.16,1,0.3,1);
+  --animate-slide-in:  slide-in 280ms cubic-bezier(0.16,1,0.3,1);
+  --animate-spin-slow: spin-slow 1s linear infinite;
+
+  /* ─── Transition durations and easing ─── */
   --duration-fast:   100ms;
   --duration-base:   180ms;
   --duration-slow:   280ms;
@@ -55,8 +149,15 @@
 }
 
 /* ─────────────────────────────────────────────
+   KEYFRAMES
+───────────────────────────────────────────── */
+@keyframes fade-in  { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes slide-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+
+/* ─────────────────────────────────────────────
    SSZ DESIGN TOKENS — CSS Custom Properties
-   Tailwind references these via tailwind.config.ts
    Components use them directly for theme-aware values.
 ───────────────────────────────────────────── */
 
@@ -99,8 +200,8 @@
     --ssz-focus-ring: 0 0 0 3px oklch(0.62 0.105 168 / 0.30);
 
     /* shadcn/ui compatibility aliases */
-    --background: 97.5% 0.007 80;   /* OKLCH L C H for shadcn */
-    --foreground: 18% 0.010 80;
+    --background: oklch(0.975 0.007 80);
+    --foreground: oklch(0.18  0.010 80);
     --card:             var(--ssz-bg-surface);
     --card-foreground:  var(--ssz-text-primary);
     --popover:          var(--ssz-bg-surface);
@@ -154,8 +255,8 @@
     --ssz-shadow-xl: 0 16px 48px rgba(0,0,0,0.38), 0 8px 16px rgba(0,0,0,0.26);
     --ssz-focus-ring: 0 0 0 3px oklch(0.70 0.09 168 / 0.40);
 
-    --background: 17% 0.012 240;
-    --foreground: 93% 0.008 80;
+    --background: oklch(0.17 0.012 240);
+    --foreground: oklch(0.93 0.008 80);
     --card:             var(--ssz-bg-surface);
     --card-foreground:  var(--ssz-text-primary);
     --popover:          var(--ssz-bg-surface);
