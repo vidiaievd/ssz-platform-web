@@ -43,6 +43,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# generated api client (orval output)
+/src/lib/api/generated/
+
 *storybook.log
 storybook-static
 
