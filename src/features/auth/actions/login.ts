@@ -3,7 +3,7 @@
 import { AppError, isAppError } from '@/lib/errors';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { writeAuthCookies } from '@/lib/auth/cookies';
-import { ok, tryAction } from '@/lib/result';
+import { tryAction } from '@/lib/result';
 import type { AuthTokensResponse, UserRolesResponse } from '@/lib/api/generated/schemas';
 import { loginSchema, mfaChallengeSchema } from '../schemas';
 import type { LoginInput, MfaChallengeInput } from '../schemas';
