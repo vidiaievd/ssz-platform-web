@@ -3,6 +3,7 @@ import 'server-only';
 import { headers } from 'next/headers';
 
 import { readAccessToken } from '@/lib/auth/cookies';
+import { attemptRefresh } from '@/lib/auth/refresh';
 import { env } from '@/lib/env';
 import { AppError, type AppErrorCode } from '@/lib/errors';
 
@@ -34,21 +35,32 @@ export async function serverFetch<TData = unknown, TBody = unknown>(
     }
   }
 
-  const reqHeaders: Record<string, string> = {
+  const baseHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
     ...opts.headers,
   };
 
-  if (!opts.anonymous) {
-    const token = await readAccessToken();
-    if (token) reqHeaders.Authorization = `Bearer ${token}`;
-  }
-
   if (opts.forwardClientHeaders !== false) {
     const incoming = await headers();
     const acceptLanguage = incoming.get('accept-language');
-    if (acceptLanguage) reqHeaders['Accept-Language'] = acceptLanguage;
+    if (acceptLanguage) baseHeaders['Accept-Language'] = acceptLanguage;
+  }
+
+  return doRequest(url, baseHeaders, opts, false);
+}
+
+async function doRequest<TData, TBody>(
+  url: URL,
+  baseHeaders: Record<string, string>,
+  opts: ServerFetchOptions<TBody>,
+  retrying: boolean,
+): Promise<TData> {
+  const reqHeaders = { ...baseHeaders };
+
+  if (!opts.anonymous) {
+    const token = await readAccessToken();
+    if (token) reqHeaders.Authorization = `Bearer ${token}`;
   }
 
   const controller = new AbortController();
@@ -67,6 +79,13 @@ export async function serverFetch<TData = unknown, TBody = unknown>(
     });
 
     if (!response.ok) {
+      // Refresh-on-401: one transparent retry with a fresh access token.
+      if (response.status === 401 && !opts.anonymous && !retrying) {
+        const refreshed = await attemptRefresh();
+        if (refreshed) return doRequest(url, baseHeaders, opts, true);
+        throw new AppError('unauthenticated', 'Session expired — refresh failed');
+      }
+
       const code = mapStatusToCode(response.status);
       let details: unknown;
       try {
@@ -96,6 +115,7 @@ function mapStatusToCode(status: number): AppErrorCode {
   if (status === 404) return 'not_found';
   if (status === 409) return 'conflict';
   if (status === 422 || status === 400) return 'validation';
+  if (status === 423) return 'mfa_required';
   if (status === 429) return 'rate_limited';
   if (status >= 500) return 'upstream_unavailable';
   return 'unknown';

@@ -5,6 +5,7 @@ export type AppErrorCode =
   | 'validation'
   | 'conflict'
   | 'rate_limited'
+  | 'mfa_required'
   | 'upstream_unavailable'
   | 'timeout'
   | 'unknown';

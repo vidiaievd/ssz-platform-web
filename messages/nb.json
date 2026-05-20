@@ -21,8 +21,76 @@
     "validation": "Vennligst sjekk de markerte feltene.",
     "conflict": "Dette er i konflikt med eksisterende data.",
     "rate_limited": "For mange forespørsler. Vent litt og prøv igjen.",
+    "mfa_required": "Tofaktorautentisering er påkrevd.",
     "upstream_unavailable": "Tjenesten er midlertidig utilgjengelig. Prøv igjen.",
     "timeout": "Forespørselen tok for lang tid. Prøv igjen.",
     "unknown": "Noe gikk galt. Prøv igjen."
+  },
+  "Auth": {
+    "Login": {
+      "title": "Logg inn",
+      "subtitle": "Velkommen tilbake",
+      "email": "E-post",
+      "password": "Passord",
+      "forgotPassword": "Glemt passord?",
+      "submit": "Logg inn",
+      "noAccount": "Har du ikke en konto?",
+      "signUp": "Registrer deg",
+      "invalidCredentials": "Ugyldig e-post eller passord."
+    },
+    "Mfa": {
+      "title": "Tofaktorautentisering",
+      "description": "Skriv inn 6-sifret kode fra autentiseringsappen din.",
+      "code": "Autentiseringskode",
+      "codePlaceholder": "000000",
+      "submit": "Bekreft",
+      "cancel": "Tilbake til innlogging"
+    },
+    "Register": {
+      "title": "Opprett konto",
+      "subtitle": "Start din reise",
+      "email": "E-post",
+      "password": "Passord",
+      "passwordConfirm": "Bekreft passord",
+      "acceptedTerms": "Jeg godtar vilkårene og betingelsene",
+      "role": "Jeg er",
+      "roleSchool": "Skolens administrator",
+      "roleTutor": "Lærer",
+      "roleStudent": "Student",
+      "submit": "Opprett konto",
+      "hasAccount": "Har du allerede en konto?",
+      "signIn": "Logg inn",
+      "successTitle": "Sjekk e-posten din",
+      "successDescription": "Vi sendte en bekreftelseslenke til {email}."
+    },
+    "ForgotPassword": {
+      "title": "Tilbakestill passord",
+      "subtitle": "Skriv inn e-posten din, så sender vi deg en tilbakestillingslenke.",
+      "email": "E-post",
+      "submit": "Send tilbakestillingslenke",
+      "backToSignIn": "Tilbake til innlogging",
+      "successTitle": "Sjekk e-posten din",
+      "successDescription": "Hvis det finnes en konto for {email}, vil du motta en tilbakestillingslenke snart."
+    },
+    "ResetPassword": {
+      "title": "Sett nytt passord",
+      "password": "Nytt passord",
+      "passwordConfirm": "Bekreft nytt passord",
+      "submit": "Sett passord",
+      "invalidToken": "Denne tilbakestillingslenken er ugyldig eller utløpt.",
+      "successTitle": "Passord oppdatert",
+      "successDescription": "Du kan nå logge inn med ditt nye passord.",
+      "signIn": "Logg inn"
+    },
+    "VerifyEmail": {
+      "verifying": "Bekrefter e-posten din…",
+      "successTitle": "E-post bekreftet",
+      "successDescription": "E-posten din er bekreftet. Du kan nå logge inn.",
+      "errorTitle": "Bekreftelse mislyktes",
+      "errorDescription": "Lenken er ugyldig eller utløpt.",
+      "resend": "Send bekreftelses-e-post på nytt",
+      "resendSuccess": "Bekreftelses-e-post sendt.",
+      "signIn": "Logg inn"
+    }
   }
 }
