@@ -96,6 +96,7 @@ function mapStatusToCode(status: number): AppErrorCode {
   if (status === 404) return 'not_found';
   if (status === 409) return 'conflict';
   if (status === 422 || status === 400) return 'validation';
+  if (status === 423) return 'mfa_required';
   if (status === 429) return 'rate_limited';
   if (status >= 500) return 'upstream_unavailable';
   return 'unknown';
