@@ -1,4 +1,5 @@
-import { createStore } from './create-store';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 type UiState = {
   sidebarCollapsed: boolean;
@@ -6,8 +7,13 @@ type UiState = {
   setSidebarCollapsed: (collapsed: boolean) => void;
 };
 
-export const useUiStore = createStore<UiState>('ui-store', (set) => ({
-  sidebarCollapsed: false,
-  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
-  setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
-}));
+export const useUiStore = create<UiState>()(
+  persist(
+    (set) => ({
+      sidebarCollapsed: false,
+      toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+      setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
+    }),
+    { name: 'ssz-ui' },
+  ),
+);

@@ -26,6 +26,42 @@
     "timeout": "The request took too long. Please try again.",
     "unknown": "Something went wrong. Please try again."
   },
+  "Marketing": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "signIn": "Sign in",
+    "getStarted": "Get started"
+  },
+  "Nav": {
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "content": "Content",
+    "lessons": "Lessons",
+    "mySchools": "My Schools",
+    "settings": "Settings"
+  },
+  "RouteTitles": {
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "content": "Content",
+    "lessons": "Lessons",
+    "mySchools": "My Schools",
+    "settings": "Settings",
+    "enrolled": "My Schools"
+  },
+  "UserMenu": {
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "role_school": "School",
+    "role_tutor": "Tutor",
+    "role_student": "Student"
+  },
+  "EnrollmentRequired": {
+    "title": "No active enrolments",
+    "description": "Enrol with a school to unlock lessons, progress tracking, and more.",
+    "searchPlaceholder": "Search schools…",
+    "cta": "Discover schools"
+  },
   "Auth": {
     "Login": {
       "title": "Sign in",

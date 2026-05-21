@@ -26,6 +26,42 @@
     "timeout": "Запит тривав занадто довго. Спробуйте ще раз.",
     "unknown": "Щось пішло не так. Спробуйте ще раз."
   },
+  "Marketing": {
+    "features": "Можливості",
+    "pricing": "Ціни",
+    "signIn": "Увійти",
+    "getStarted": "Почати"
+  },
+  "Nav": {
+    "dashboard": "Огляд",
+    "students": "Учні",
+    "content": "Контент",
+    "lessons": "Уроки",
+    "mySchools": "Мої школи",
+    "settings": "Налаштування"
+  },
+  "RouteTitles": {
+    "dashboard": "Огляд",
+    "students": "Учні",
+    "content": "Контент",
+    "lessons": "Уроки",
+    "mySchools": "Мої школи",
+    "settings": "Налаштування",
+    "enrolled": "Мої школи"
+  },
+  "UserMenu": {
+    "settings": "Налаштування",
+    "signOut": "Вийти",
+    "role_school": "Школа",
+    "role_tutor": "Репетитор",
+    "role_student": "Студент"
+  },
+  "EnrollmentRequired": {
+    "title": "Немає активних зарахувань",
+    "description": "Зарахуйтесь до школи, щоб відкрити уроки, відстеження прогресу та більше.",
+    "searchPlaceholder": "Пошук шкіл…",
+    "cta": "Знайти школи"
+  },
   "Auth": {
     "Login": {
       "title": "Увійти",

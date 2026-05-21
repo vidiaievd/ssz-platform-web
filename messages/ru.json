@@ -26,6 +26,42 @@
     "timeout": "Запрос занял слишком много времени. Попробуйте ещё раз.",
     "unknown": "Что-то пошло не так. Попробуйте ещё раз."
   },
+  "Marketing": {
+    "features": "Возможности",
+    "pricing": "Цены",
+    "signIn": "Войти",
+    "getStarted": "Начать"
+  },
+  "Nav": {
+    "dashboard": "Обзор",
+    "students": "Ученики",
+    "content": "Контент",
+    "lessons": "Уроки",
+    "mySchools": "Мои школы",
+    "settings": "Настройки"
+  },
+  "RouteTitles": {
+    "dashboard": "Обзор",
+    "students": "Ученики",
+    "content": "Контент",
+    "lessons": "Уроки",
+    "mySchools": "Мои школы",
+    "settings": "Настройки",
+    "enrolled": "Мои школы"
+  },
+  "UserMenu": {
+    "settings": "Настройки",
+    "signOut": "Выйти",
+    "role_school": "Школа",
+    "role_tutor": "Репетитор",
+    "role_student": "Студент"
+  },
+  "EnrollmentRequired": {
+    "title": "Нет активных зачислений",
+    "description": "Запишитесь в школу, чтобы открыть уроки, отслеживание прогресса и многое другое.",
+    "searchPlaceholder": "Поиск школ…",
+    "cta": "Найти школы"
+  },
   "Auth": {
     "Login": {
       "title": "Войти",
