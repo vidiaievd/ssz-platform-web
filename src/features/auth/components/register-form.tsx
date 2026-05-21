@@ -125,7 +125,7 @@ export function RegisterForm() {
           name="role"
           render={({ field }) => (
             <RadioGroup
-              value={field.value}
+              value={field.value ?? ''}
               onValueChange={field.onChange}
               className="flex flex-col gap-2"
             >

@@ -14,7 +14,18 @@ import { loginAction } from '../actions/login';
 import { loginSchema, type LoginInput } from '../schemas';
 import { TotpStep } from './totp-step';
 
-export function LoginForm() {
+function resolvePostLoginPath(roles: string[], redirect?: string): string {
+  if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+    return redirect;
+  }
+  return roles.some((r) => r === 'school' || r === 'tutor') ? '/school' : '/student';
+}
+
+type LoginFormProps = {
+  redirect?: string;
+};
+
+export function LoginForm({ redirect }: LoginFormProps) {
   const t = useTranslations('Auth.Login');
   const tErrors = useTranslations('Errors');
   const router = useRouter();
@@ -43,17 +54,12 @@ export function LoginForm() {
         setMfaToken(result.value.mfaChallengeToken);
         return;
       }
-      const { roles } = result.value;
-      if (roles.includes('school') || roles.includes('tutor')) {
-        router.push('/school');
-      } else {
-        router.push('/student');
-      }
+      router.push(resolvePostLoginPath(result.value.roles, redirect));
     });
   }
 
   if (mfaToken) {
-    return <TotpStep mfaChallengeToken={mfaToken} onCancel={() => setMfaToken(null)} />;
+    return <TotpStep mfaChallengeToken={mfaToken} redirect={redirect} onCancel={() => setMfaToken(null)} />;
   }
 
   return (
