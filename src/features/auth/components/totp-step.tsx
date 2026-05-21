@@ -12,12 +12,20 @@ import { Field, Input } from '@/components/ui/input';
 import { mfaChallengeAction } from '../actions/login';
 import { mfaChallengeSchema, type MfaChallengeInput } from '../schemas';
 
+function resolvePostLoginPath(roles: string[], redirect?: string): string {
+  if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+    return redirect;
+  }
+  return roles.some((r) => r === 'school' || r === 'tutor') ? '/school' : '/student';
+}
+
 type TotpStepProps = {
   mfaChallengeToken: string;
+  redirect?: string;
   onCancel: () => void;
 };
 
-export function TotpStep({ mfaChallengeToken, onCancel }: TotpStepProps) {
+export function TotpStep({ mfaChallengeToken, redirect, onCancel }: TotpStepProps) {
   const t = useTranslations('Auth.Mfa');
   const tErrors = useTranslations('Errors');
   const router = useRouter();
@@ -40,12 +48,7 @@ export function TotpStep({ mfaChallengeToken, onCancel }: TotpStepProps) {
         setError('code', { message: tErrors(result.error.code) });
         return;
       }
-      const { roles } = result.value;
-      if (roles.includes('school') || roles.includes('tutor')) {
-        router.push('/school');
-      } else {
-        router.push('/student');
-      }
+      router.push(resolvePostLoginPath(result.value.roles, redirect));
     });
   }
 

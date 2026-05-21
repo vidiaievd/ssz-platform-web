@@ -29,3 +29,10 @@ export class AppError extends Error {
 export function isAppError(value: unknown): value is AppError {
   return value instanceof AppError;
 }
+
+/** Plain-object form of AppError — safe to cross the Server Action → Client boundary. */
+export type SerializedAppError = {
+  code: AppErrorCode;
+  message: string;
+  details?: unknown;
+};
