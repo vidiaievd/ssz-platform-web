@@ -26,6 +26,42 @@
     "timeout": "Forespørselen tok for lang tid. Prøv igjen.",
     "unknown": "Noe gikk galt. Prøv igjen."
   },
+  "Marketing": {
+    "features": "Funksjoner",
+    "pricing": "Priser",
+    "signIn": "Logg inn",
+    "getStarted": "Kom i gang"
+  },
+  "Nav": {
+    "dashboard": "Oversikt",
+    "students": "Elever",
+    "content": "Innhold",
+    "lessons": "Timer",
+    "mySchools": "Mine skoler",
+    "settings": "Innstillinger"
+  },
+  "RouteTitles": {
+    "dashboard": "Oversikt",
+    "students": "Elever",
+    "content": "Innhold",
+    "lessons": "Timer",
+    "mySchools": "Mine skoler",
+    "settings": "Innstillinger",
+    "enrolled": "Mine skoler"
+  },
+  "UserMenu": {
+    "settings": "Innstillinger",
+    "signOut": "Logg ut",
+    "role_school": "Skole",
+    "role_tutor": "Lærer",
+    "role_student": "Student"
+  },
+  "EnrollmentRequired": {
+    "title": "Ingen aktive påmeldinger",
+    "description": "Meld deg på en skole for å låse opp timer, fremdriftssporing og mer.",
+    "searchPlaceholder": "Søk etter skoler…",
+    "cta": "Oppdag skoler"
+  },
   "Auth": {
     "Login": {
       "title": "Logg inn",
