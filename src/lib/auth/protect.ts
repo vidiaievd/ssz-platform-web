@@ -28,3 +28,12 @@ export async function requireRole(role: string): Promise<CurrentUser> {
   if (!user.roles.includes(role)) notFound();
   return user;
 }
+
+/**
+ * Returns the authenticated user if they have any of the given roles, or 404.
+ */
+export async function requireAnyRole(roles: string[]): Promise<CurrentUser> {
+  const user = await requireUser();
+  if (!roles.some((r) => user.roles.includes(r))) notFound();
+  return user;
+}
