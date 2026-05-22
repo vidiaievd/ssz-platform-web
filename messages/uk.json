@@ -217,5 +217,64 @@
       "resendSuccess": "Лист для підтвердження надіслано.",
       "signIn": "Увійти"
     }
+  },
+  "Authoring": {
+    "page": {
+      "title": "Матеріали",
+      "subtitle": "Створюйте навчальні матеріали та керуйте ними."
+    },
+    "new": {
+      "title": "Новий контейнер",
+      "subtitle": "Створіть курс, модуль або колекцію."
+    },
+    "status": {
+      "draft": "Чернетка",
+      "published": "Опубліковано"
+    },
+    "filters": {
+      "all": "Усі",
+      "draft": "Чернетки",
+      "published": "Опубліковані"
+    },
+    "tabs": {
+      "overview": "Огляд",
+      "lessons": "Уроки",
+      "vocabulary": "Словник",
+      "grammar": "Граматика",
+      "exercises": "Вправи",
+      "tags": "Теги",
+      "sharing": "Доступ"
+    },
+    "actions": {
+      "newContainer": "Новий контейнер",
+      "edit": "Редагувати",
+      "loadMore": "Завантажити більше"
+    },
+    "fields": {
+      "type": "Тип",
+      "targetLanguage": "Мова навчання",
+      "instructionLanguage": "Мова інструкцій",
+      "level": "Рівень",
+      "slug": "Slug",
+      "slugFrozen": "Незмінний",
+      "accessTier": "Рівень доступу",
+      "accessTierHint": "Визначає, хто може записатися; видимість — окремо."
+    },
+    "accessTier": {
+      "PUBLIC": "Безкоштовно",
+      "FREE_WITHIN_SCHOOL": "Тільки школа",
+      "PAID": "Преміум",
+      "INVITE_ONLY": "Тільки за запрошенням"
+    },
+    "types": {
+      "COURSE": "Курс",
+      "MODULE": "Модуль",
+      "COLLECTION": "Колекція"
+    },
+    "empty": {
+      "containers": "Матеріалів ще немає. Створіть перший контейнер."
+    },
+    "comingSoon": "Цей розділ буде доступний у наступному кроці.",
+    "backToContent": "Повернутися до матеріалів"
   }
 }

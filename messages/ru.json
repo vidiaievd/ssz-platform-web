@@ -217,5 +217,64 @@
       "resendSuccess": "Письмо для подтверждения отправлено.",
       "signIn": "Войти"
     }
+  },
+  "Authoring": {
+    "page": {
+      "title": "Материалы",
+      "subtitle": "Создавайте учебные материалы и управляйте ими."
+    },
+    "new": {
+      "title": "Новый контейнер",
+      "subtitle": "Создайте курс, модуль или коллекцию."
+    },
+    "status": {
+      "draft": "Черновик",
+      "published": "Опубликован"
+    },
+    "filters": {
+      "all": "Все",
+      "draft": "Черновики",
+      "published": "Опубликованные"
+    },
+    "tabs": {
+      "overview": "Обзор",
+      "lessons": "Уроки",
+      "vocabulary": "Словарь",
+      "grammar": "Грамматика",
+      "exercises": "Упражнения",
+      "tags": "Теги",
+      "sharing": "Доступ"
+    },
+    "actions": {
+      "newContainer": "Новый контейнер",
+      "edit": "Редактировать",
+      "loadMore": "Загрузить ещё"
+    },
+    "fields": {
+      "type": "Тип",
+      "targetLanguage": "Язык обучения",
+      "instructionLanguage": "Язык инструкций",
+      "level": "Уровень",
+      "slug": "Slug",
+      "slugFrozen": "Неизменный",
+      "accessTier": "Уровень доступа",
+      "accessTierHint": "Определяет, кто может записаться; видимость — отдельно."
+    },
+    "accessTier": {
+      "PUBLIC": "Бесплатно",
+      "FREE_WITHIN_SCHOOL": "Только школа",
+      "PAID": "Премиум",
+      "INVITE_ONLY": "Только по приглашению"
+    },
+    "types": {
+      "COURSE": "Курс",
+      "MODULE": "Модуль",
+      "COLLECTION": "Коллекция"
+    },
+    "empty": {
+      "containers": "Материалов ещё нет. Создайте первый контейнер."
+    },
+    "comingSoon": "Этот раздел будет доступен на следующем шаге.",
+    "backToContent": "К материалам"
   }
 }

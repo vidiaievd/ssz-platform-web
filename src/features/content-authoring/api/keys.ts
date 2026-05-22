@@ -1,0 +1,18 @@
+import { keyFactory } from '@/lib/query/keys';
+
+import type { AuthoringFilters } from '../types';
+
+export const authoringKeys = keyFactory('authoring', {
+  containers: (filters?: AuthoringFilters) => ['containers', filters ?? {}] as const,
+  container: (id: string) => ['container', id] as const,
+  lessons: (containerId: string) => ['lessons', containerId] as const,
+  lesson: (id: string) => ['lesson', id] as const,
+  vocabularyList: (listId: string) => ['vocabulary-list', listId] as const,
+  vocabularyItems: (listId: string) => ['vocabulary-list', listId, 'items'] as const,
+  grammarRules: (containerId: string) => ['grammar-rules', containerId] as const,
+  grammarRule: (id: string) => ['grammar-rule', id] as const,
+  exercises: (containerId: string) => ['exercises', containerId] as const,
+  exercise: (id: string) => ['exercise', id] as const,
+  tags: (entityType: string, entityId: string) => ['tags', entityType, entityId] as const,
+  shares: (entityType: string, entityId: string) => ['shares', entityType, entityId] as const,
+});

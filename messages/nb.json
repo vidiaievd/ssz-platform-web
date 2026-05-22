@@ -217,5 +217,64 @@
       "resendSuccess": "Bekreftelses-e-post sendt.",
       "signIn": "Logg inn"
     }
+  },
+  "Authoring": {
+    "page": {
+      "title": "Innhold",
+      "subtitle": "Opprett og administrer læringsmateriell."
+    },
+    "new": {
+      "title": "Ny beholder",
+      "subtitle": "Opprett et nytt kurs, modul eller samling."
+    },
+    "status": {
+      "draft": "Utkast",
+      "published": "Publisert"
+    },
+    "filters": {
+      "all": "Alle",
+      "draft": "Utkast",
+      "published": "Publisert"
+    },
+    "tabs": {
+      "overview": "Oversikt",
+      "lessons": "Leksjoner",
+      "vocabulary": "Vokabular",
+      "grammar": "Grammatikk",
+      "exercises": "Øvelser",
+      "tags": "Tagger",
+      "sharing": "Deling"
+    },
+    "actions": {
+      "newContainer": "Ny beholder",
+      "edit": "Rediger",
+      "loadMore": "Last inn mer"
+    },
+    "fields": {
+      "type": "Type",
+      "targetLanguage": "Målspråk",
+      "instructionLanguage": "Instruksjonsspråk",
+      "level": "Nivå",
+      "slug": "Slug",
+      "slugFrozen": "Uforanderlig",
+      "accessTier": "Tilgangsnivå",
+      "accessTierHint": "Kontrollerer hvem som kan melde seg på; synlighet er separat."
+    },
+    "accessTier": {
+      "PUBLIC": "Gratis",
+      "FREE_WITHIN_SCHOOL": "Kun skole",
+      "PAID": "Premium",
+      "INVITE_ONLY": "Kun invitasjon"
+    },
+    "types": {
+      "COURSE": "Kurs",
+      "MODULE": "Modul",
+      "COLLECTION": "Samling"
+    },
+    "empty": {
+      "containers": "Ingen innhold ennå. Opprett din første beholder."
+    },
+    "comingSoon": "Denne seksjonen vil være tilgjengelig i et fremtidig steg.",
+    "backToContent": "Tilbake til innhold"
   }
 }
