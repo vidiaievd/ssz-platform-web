@@ -421,6 +421,18 @@
       "removeExample": "Remove example",
       "saveSuccess": "Rule saved."
     },
+    "publish": {
+      "trigger": "Publish",
+      "title": "Publish container",
+      "description": "Publishing is permanent and affects how this container is accessed. Please read the warnings below before confirming.",
+      "warningSlug": "The slug is frozen and cannot be changed after publishing.",
+      "warningDiscoverable": "The container becomes discoverable and accessible to students based on its access tier.",
+      "warningEvent": "A published event is emitted, which may trigger notifications.",
+      "confirmPrompt": "To confirm, type the slug exactly as shown:",
+      "confirm": "Publish",
+      "cancel": "Cancel",
+      "success": "Container published successfully."
+    },
     "tags": {
       "empty": "No tags yet.",
       "add": "Add tag",

@@ -421,6 +421,18 @@
       "removeExample": "Fjern eksempel",
       "saveSuccess": "Regel lagret."
     },
+    "publish": {
+      "trigger": "Publiser",
+      "title": "Publiser beholder",
+      "description": "Publisering er permanent og påvirker tilgangen til denne beholderen. Les advarslene nedenfor før du bekrefter.",
+      "warningSlug": "Slug-en låses og kan ikke endres etter publisering.",
+      "warningDiscoverable": "Beholderen blir synlig og tilgjengelig for elever basert på tilgangsnivå.",
+      "warningEvent": "En publiseringshendelse sendes ut, noe som kan utløse varsler.",
+      "confirmPrompt": "For å bekrefte, skriv inn slug-en nøyaktig slik den er vist:",
+      "confirm": "Publiser",
+      "cancel": "Avbryt",
+      "success": "Beholderen ble publisert."
+    },
     "tags": {
       "empty": "Ingen tagger ennå.",
       "add": "Legg til tagg",

@@ -11,6 +11,7 @@ import { ContainerForm } from './container-form';
 import { ExerciseList } from './exercise-list';
 import { GrammarList } from './grammar-list';
 import { LessonList } from './lesson-list';
+import { PublishDialog } from './publish-dialog';
 import { TagInput } from './tag-input';
 import { VocabularyTable } from './vocabulary-table';
 
@@ -60,6 +61,11 @@ export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProp
 
       <TabsContent value="overview">
         <ContainerForm mode="edit" container={container} />
+        {!container.isPublished && (
+          <div className="mt-6 border-t border-border pt-6">
+            <PublishDialog container={container} />
+          </div>
+        )}
       </TabsContent>
       <TabsContent value="lessons">
         <LessonList container={container} />

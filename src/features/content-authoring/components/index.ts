@@ -4,6 +4,7 @@ export * from './exercise-editor';
 export * from './exercise-list';
 export * from './grammar-editor';
 export * from './grammar-list';
+export * from './publish-dialog';
 export * from './tag-input';
 export * from './lesson-editor';
 export * from './lesson-list';
