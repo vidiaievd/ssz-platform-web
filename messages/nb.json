@@ -348,6 +348,32 @@
       "addExample": "Legg til eksempel",
       "removeExample": "Fjern eksempel"
     },
+    "grammar": {
+      "add": "Legg til regel",
+      "newTitle": "Ny regel",
+      "untitled": "Regel uten tittel",
+      "empty": "Ingen grammatikkregler ennå. Legg til den første.",
+      "loadError": "Kunne ikke laste grammatikkregler.",
+      "deleteSuccess": "Regel slettet.",
+      "editAriaLabel": "Rediger regel",
+      "deleteAriaLabel": "Slett regel",
+      "deleteConfirmTitle": "Slette regel?",
+      "deleteConfirmDescription": "\"{title}\" vil bli permanent slettet sammen med alle forklaringer. Dette kan ikke angres.",
+      "deleteConfirm": "Slett",
+      "deleteCancel": "Avbryt",
+      "editingLabel": "Redigerer regel",
+      "ruleTitlePlaceholder": "f.eks. Presens",
+      "explanationSection": "Forklaring",
+      "explanationLang": "Språk",
+      "explanationTitle": "Tittel",
+      "explanationTitlePlaceholder": "f.eks. Slik bruker du presens",
+      "bodyPlaceholder": "Skriv forklaring i Markdown…",
+      "examples": "Eksempler",
+      "examplePlaceholder": "f.eks. Jeg spiser et eple.",
+      "addExample": "Legg til eksempel",
+      "removeExample": "Fjern eksempel",
+      "saveSuccess": "Regel lagret."
+    },
     "empty": {
       "containers": "Ingen innhold ennå. Opprett din første beholder."
     },

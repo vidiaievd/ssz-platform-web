@@ -8,6 +8,7 @@ import { useRouter, usePathname } from '@/lib/i18n/navigation';
 import type { Container } from '@/features/content/types';
 
 import { ContainerForm } from './container-form';
+import { GrammarList } from './grammar-list';
 import { LessonList } from './lesson-list';
 import { VocabularyTable } from './vocabulary-table';
 
@@ -65,7 +66,7 @@ export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProp
         <VocabularyTable container={container} />
       </TabsContent>
       <TabsContent value="grammar">
-        <PlaceholderTab />
+        <GrammarList container={container} />
       </TabsContent>
       <TabsContent value="exercises">
         <PlaceholderTab />

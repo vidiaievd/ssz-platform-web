@@ -348,6 +348,32 @@
       "addExample": "Додати приклад",
       "removeExample": "Видалити приклад"
     },
+    "grammar": {
+      "add": "Додати правило",
+      "newTitle": "Нове правило",
+      "untitled": "Правило без назви",
+      "empty": "Граматичних правил ще немає. Додайте перше.",
+      "loadError": "Не вдалося завантажити граматичні правила.",
+      "deleteSuccess": "Правило видалено.",
+      "editAriaLabel": "Редагувати правило",
+      "deleteAriaLabel": "Видалити правило",
+      "deleteConfirmTitle": "Видалити правило?",
+      "deleteConfirmDescription": "\"{title}\" буде видалено разом з усіма поясненнями. Цю дію не можна скасувати.",
+      "deleteConfirm": "Видалити",
+      "deleteCancel": "Скасувати",
+      "editingLabel": "Редагування правила",
+      "ruleTitlePlaceholder": "напр. Теперішній час",
+      "explanationSection": "Пояснення",
+      "explanationLang": "Мова",
+      "explanationTitle": "Заголовок",
+      "explanationTitlePlaceholder": "напр. Як утворюється теперішній час",
+      "bodyPlaceholder": "Напишіть пояснення у форматі Markdown…",
+      "examples": "Приклади",
+      "examplePlaceholder": "напр. Я їм яблуко.",
+      "addExample": "Додати приклад",
+      "removeExample": "Видалити приклад",
+      "saveSuccess": "Правило збережено."
+    },
     "empty": {
       "containers": "Матеріалів ще немає. Створіть перший контейнер."
     },

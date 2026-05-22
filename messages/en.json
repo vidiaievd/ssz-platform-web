@@ -348,6 +348,32 @@
       "addExample": "Add example",
       "removeExample": "Remove example"
     },
+    "grammar": {
+      "add": "Add rule",
+      "newTitle": "New rule",
+      "untitled": "Untitled rule",
+      "empty": "No grammar rules yet. Add the first one.",
+      "loadError": "Could not load grammar rules.",
+      "deleteSuccess": "Rule deleted.",
+      "editAriaLabel": "Edit rule",
+      "deleteAriaLabel": "Delete rule",
+      "deleteConfirmTitle": "Delete rule?",
+      "deleteConfirmDescription": "\"{title}\" will be permanently deleted along with all its explanations. This cannot be undone.",
+      "deleteConfirm": "Delete",
+      "deleteCancel": "Cancel",
+      "editingLabel": "Editing rule",
+      "ruleTitlePlaceholder": "e.g. Present tense",
+      "explanationSection": "Explanation",
+      "explanationLang": "Language",
+      "explanationTitle": "Title",
+      "explanationTitlePlaceholder": "e.g. How to form the present tense",
+      "bodyPlaceholder": "Write explanation in Markdown…",
+      "examples": "Examples",
+      "examplePlaceholder": "e.g. Jeg spiser et eple.",
+      "addExample": "Add example",
+      "removeExample": "Remove example",
+      "saveSuccess": "Rule saved."
+    },
     "empty": {
       "containers": "No content yet. Create your first container."
     },
