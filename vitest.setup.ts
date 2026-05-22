@@ -1,4 +1,6 @@
 // Must be set before any module that imports env.ts
+// Clear the gateway so tests use per-service URLs (mirrors prod structure for action tests)
+delete process.env.API_GATEWAY_URL;
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
 process.env.AUTH_COOKIE_SECRET = 'x'.repeat(32);
 process.env.AUTH_SERVICE_URL = 'http://auth.test';
