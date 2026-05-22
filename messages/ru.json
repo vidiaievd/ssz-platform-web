@@ -421,6 +421,25 @@
       "removeExample": "Удалить пример",
       "saveSuccess": "Правило сохранено."
     },
+    "sharing": {
+      "collaborators": "Соавторы",
+      "empty": "Соавторов пока нет.",
+      "loadError": "Не удалось загрузить список соавторов.",
+      "addTitle": "Добавить соавтора",
+      "emailPlaceholder": "Адрес электронной почты",
+      "add": "Добавить",
+      "addSuccess": "Соавтор добавлен.",
+      "removeAriaLabel": "Удалить соавтора",
+      "removeConfirmTitle": "Удалить соавтора?",
+      "removeConfirmDescription": "{email} потеряет доступ к этому контейнеру.",
+      "removeConfirm": "Удалить",
+      "removeCancel": "Отмена",
+      "removeSuccess": "Соавтор удалён.",
+      "roles": {
+        "co_author": "Соавтор",
+        "viewer": "Читатель"
+      }
+    },
     "publish": {
       "trigger": "Опубликовать",
       "title": "Опубликовать контейнер",

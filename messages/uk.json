@@ -421,6 +421,25 @@
       "removeExample": "Видалити приклад",
       "saveSuccess": "Правило збережено."
     },
+    "sharing": {
+      "collaborators": "Співавтори",
+      "empty": "Співавторів ще немає.",
+      "loadError": "Не вдалося завантажити список співавторів.",
+      "addTitle": "Додати співавтора",
+      "emailPlaceholder": "Адреса електронної пошти",
+      "add": "Додати",
+      "addSuccess": "Співавтора додано.",
+      "removeAriaLabel": "Видалити співавтора",
+      "removeConfirmTitle": "Видалити співавтора?",
+      "removeConfirmDescription": "{email} втратить доступ до цього контейнера.",
+      "removeConfirm": "Видалити",
+      "removeCancel": "Скасувати",
+      "removeSuccess": "Співавтора видалено.",
+      "roles": {
+        "co_author": "Співавтор",
+        "viewer": "Читач"
+      }
+    },
     "publish": {
       "trigger": "Опублікувати",
       "title": "Опублікувати контейнер",

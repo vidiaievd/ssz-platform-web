@@ -421,6 +421,25 @@
       "removeExample": "Remove example",
       "saveSuccess": "Rule saved."
     },
+    "sharing": {
+      "collaborators": "Collaborators",
+      "empty": "No collaborators yet.",
+      "loadError": "Could not load collaborators.",
+      "addTitle": "Add collaborator",
+      "emailPlaceholder": "Email address",
+      "add": "Add",
+      "addSuccess": "Collaborator added.",
+      "removeAriaLabel": "Remove collaborator",
+      "removeConfirmTitle": "Remove collaborator?",
+      "removeConfirmDescription": "{email} will lose access to this container.",
+      "removeConfirm": "Remove",
+      "removeCancel": "Cancel",
+      "removeSuccess": "Collaborator removed.",
+      "roles": {
+        "co_author": "Co-author",
+        "viewer": "Viewer"
+      }
+    },
     "publish": {
       "trigger": "Publish",
       "title": "Publish container",

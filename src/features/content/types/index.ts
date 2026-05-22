@@ -121,6 +121,19 @@ export interface ExerciseDisplay {
   instructions?: string;
 }
 
+export type ShareRole = 'co_author' | 'viewer';
+
+export interface ContainerShare {
+  id: string;
+  entityType: string;
+  entityId: string;
+  userId: string;
+  userEmail: string;
+  userName?: string;
+  role: ShareRole;
+  createdAt: string;
+}
+
 export interface ContentTag {
   id: string;
   name: string;

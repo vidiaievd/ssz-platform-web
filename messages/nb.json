@@ -421,6 +421,25 @@
       "removeExample": "Fjern eksempel",
       "saveSuccess": "Regel lagret."
     },
+    "sharing": {
+      "collaborators": "Samarbeidspartnere",
+      "empty": "Ingen samarbeidspartnere ennå.",
+      "loadError": "Kunne ikke laste samarbeidspartnere.",
+      "addTitle": "Legg til samarbeidspartner",
+      "emailPlaceholder": "E-postadresse",
+      "add": "Legg til",
+      "addSuccess": "Samarbeidspartner lagt til.",
+      "removeAriaLabel": "Fjern samarbeidspartner",
+      "removeConfirmTitle": "Fjerne samarbeidspartner?",
+      "removeConfirmDescription": "{email} vil miste tilgang til denne beholderen.",
+      "removeConfirm": "Fjern",
+      "removeCancel": "Avbryt",
+      "removeSuccess": "Samarbeidspartner fjernet.",
+      "roles": {
+        "co_author": "Medforfatter",
+        "viewer": "Leser"
+      }
+    },
     "publish": {
       "trigger": "Publiser",
       "title": "Publiser beholder",

@@ -12,6 +12,7 @@ import { ExerciseList } from './exercise-list';
 import { GrammarList } from './grammar-list';
 import { LessonList } from './lesson-list';
 import { PublishDialog } from './publish-dialog';
+import { SharingPanel } from './sharing-panel';
 import { TagInput } from './tag-input';
 import { VocabularyTable } from './vocabulary-table';
 
@@ -26,11 +27,6 @@ type AuthoringTab =
 
 interface AuthoringContainerTabsProps {
   container: Container;
-}
-
-function PlaceholderTab() {
-  const t = useTranslations('Authoring');
-  return <p className="text-muted-foreground py-10 text-center text-sm">{t('comingSoon')}</p>;
 }
 
 export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProps) {
@@ -83,7 +79,7 @@ export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProp
         <TagInput entityType="container" entityId={container.id} />
       </TabsContent>
       <TabsContent value="sharing">
-        <PlaceholderTab />
+        <SharingPanel entityType="container" entityId={container.id} />
       </TabsContent>
     </Tabs>
   );
