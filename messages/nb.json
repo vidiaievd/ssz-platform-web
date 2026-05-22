@@ -251,6 +251,8 @@
       "loadMore": "Last inn mer"
     },
     "fields": {
+      "title": "Tittel",
+      "description": "Beskrivelse",
       "type": "Type",
       "targetLanguage": "Målspråk",
       "instructionLanguage": "Instruksjonsspråk",
@@ -259,6 +261,22 @@
       "slugFrozen": "Uforanderlig",
       "accessTier": "Tilgangsnivå",
       "accessTierHint": "Kontrollerer hvem som kan melde seg på; synlighet er separat."
+    },
+    "form": {
+      "titlePlaceholder": "f.eks. Norsk for nybegynnere",
+      "descriptionPlaceholder": "Kort beskrivelse av denne beholderen",
+      "targetLanguagePlaceholder": "f.eks. no, en, uk",
+      "instructionLanguagePlaceholder": "f.eks. en",
+      "levelNone": "Alle nivåer",
+      "slugPlaceholder": "f.eks. norsk-for-nybegynnere",
+      "slugTooltip": "Brukes i URL-en. Bare små bokstaver, tall og bindestreker. Kan ikke endres etter publisering.",
+      "create": "Opprett",
+      "save": "Lagre",
+      "createSuccess": "Beholder opprettet.",
+      "saveSuccess": "Endringer lagret."
+    },
+    "validation": {
+      "slugRequired": "Slug er påkrevd"
     },
     "accessTier": {
       "PUBLIC": "Gratis",

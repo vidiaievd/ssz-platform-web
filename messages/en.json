@@ -251,6 +251,8 @@
       "loadMore": "Load more"
     },
     "fields": {
+      "title": "Title",
+      "description": "Description",
       "type": "Type",
       "targetLanguage": "Target language",
       "instructionLanguage": "Instruction language",
@@ -259,6 +261,22 @@
       "slugFrozen": "Immutable",
       "accessTier": "Access tier",
       "accessTierHint": "Controls who can enrol; visibility is separate."
+    },
+    "form": {
+      "titlePlaceholder": "e.g. Norwegian for Beginners",
+      "descriptionPlaceholder": "Short description of this container",
+      "targetLanguagePlaceholder": "e.g. no, en, uk",
+      "instructionLanguagePlaceholder": "e.g. en",
+      "levelNone": "Any level",
+      "slugPlaceholder": "e.g. norwegian-for-beginners",
+      "slugTooltip": "Used in the URL. Only lowercase letters, numbers, and hyphens. Cannot be changed after publishing.",
+      "create": "Create",
+      "save": "Save",
+      "createSuccess": "Container created.",
+      "saveSuccess": "Changes saved."
+    },
+    "validation": {
+      "slugRequired": "Slug is required"
     },
     "accessTier": {
       "PUBLIC": "Free",

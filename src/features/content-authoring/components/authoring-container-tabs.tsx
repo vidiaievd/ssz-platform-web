@@ -1,13 +1,13 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter, usePathname } from '@/lib/i18n/navigation';
 import type { Container } from '@/features/content/types';
+
+import { ContainerForm } from './container-form';
 
 type AuthoringTab =
   | 'overview'
@@ -20,47 +20,6 @@ type AuthoringTab =
 
 interface AuthoringContainerTabsProps {
   container: Container;
-}
-
-function InfoRow({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <dt className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-        {label}
-      </dt>
-      <dd className="text-sm">{children}</dd>
-    </div>
-  );
-}
-
-function ContainerOverview({ container }: { container: Container }) {
-  const t = useTranslations('Authoring');
-  return (
-    <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      <InfoRow label={t('fields.type')}>{t(`types.${container.type}`)}</InfoRow>
-      <InfoRow label={t('fields.targetLanguage')}>
-        {container.targetLanguage.toUpperCase()}
-      </InfoRow>
-      {container.instructionLanguage && (
-        <InfoRow label={t('fields.instructionLanguage')}>
-          {container.instructionLanguage.toUpperCase()}
-        </InfoRow>
-      )}
-      {container.level && <InfoRow label={t('fields.level')}>{container.level}</InfoRow>}
-      <InfoRow label={t('fields.slug')}>
-        <span className="font-mono text-xs">{container.slug}</span>
-        {container.isPublished && (
-          <Badge variant="muted" className="ml-2 align-middle text-[10px]">
-            {t('fields.slugFrozen')}
-          </Badge>
-        )}
-      </InfoRow>
-      <InfoRow label={t('fields.accessTier')}>
-        {t(`accessTier.${container.accessTier}`)}
-        <p className="text-muted-foreground mt-0.5 text-xs">{t('fields.accessTierHint')}</p>
-      </InfoRow>
-    </dl>
-  );
 }
 
 function PlaceholderTab() {
@@ -95,7 +54,7 @@ export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProp
       </TabsList>
 
       <TabsContent value="overview">
-        <ContainerOverview container={container} />
+        <ContainerForm mode="edit" container={container} />
       </TabsContent>
       <TabsContent value="lessons">
         <PlaceholderTab />

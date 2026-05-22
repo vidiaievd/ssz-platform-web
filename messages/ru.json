@@ -251,6 +251,8 @@
       "loadMore": "Загрузить ещё"
     },
     "fields": {
+      "title": "Название",
+      "description": "Описание",
       "type": "Тип",
       "targetLanguage": "Язык обучения",
       "instructionLanguage": "Язык инструкций",
@@ -259,6 +261,22 @@
       "slugFrozen": "Неизменный",
       "accessTier": "Уровень доступа",
       "accessTierHint": "Определяет, кто может записаться; видимость — отдельно."
+    },
+    "form": {
+      "titlePlaceholder": "напр. Норвежский для начинающих",
+      "descriptionPlaceholder": "Краткое описание контейнера",
+      "targetLanguagePlaceholder": "напр. no, en, uk",
+      "instructionLanguagePlaceholder": "напр. en",
+      "levelNone": "Любой уровень",
+      "slugPlaceholder": "напр. norwegian-for-beginners",
+      "slugTooltip": "Используется в URL. Только строчные буквы, цифры и дефисы. Нельзя изменить после публикации.",
+      "create": "Создать",
+      "save": "Сохранить",
+      "createSuccess": "Контейнер создан.",
+      "saveSuccess": "Изменения сохранены."
+    },
+    "validation": {
+      "slugRequired": "Поле Slug обязательно"
     },
     "accessTier": {
       "PUBLIC": "Бесплатно",

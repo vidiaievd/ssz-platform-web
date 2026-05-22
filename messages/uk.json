@@ -251,6 +251,8 @@
       "loadMore": "Завантажити більше"
     },
     "fields": {
+      "title": "Назва",
+      "description": "Опис",
       "type": "Тип",
       "targetLanguage": "Мова навчання",
       "instructionLanguage": "Мова інструкцій",
@@ -259,6 +261,22 @@
       "slugFrozen": "Незмінний",
       "accessTier": "Рівень доступу",
       "accessTierHint": "Визначає, хто може записатися; видимість — окремо."
+    },
+    "form": {
+      "titlePlaceholder": "напр. Норвезька для початківців",
+      "descriptionPlaceholder": "Короткий опис контейнера",
+      "targetLanguagePlaceholder": "напр. no, en, uk",
+      "instructionLanguagePlaceholder": "напр. en",
+      "levelNone": "Будь-який рівень",
+      "slugPlaceholder": "напр. norwegian-for-beginners",
+      "slugTooltip": "Використовується в URL. Лише малі букви, цифри та дефіси. Не можна змінити після публікації.",
+      "create": "Створити",
+      "save": "Зберегти",
+      "createSuccess": "Контейнер створено.",
+      "saveSuccess": "Зміни збережено."
+    },
+    "validation": {
+      "slugRequired": "Поле Slug обов'язкове"
     },
     "accessTier": {
       "PUBLIC": "Безкоштовно",
