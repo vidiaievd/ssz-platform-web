@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
@@ -23,6 +23,8 @@ import { grammarEditorFormSchema, type GrammarEditorFormValues } from '../schema
 import { updateGrammarRuleAction, saveGrammarExplanationAction } from '../actions/grammar';
 import { useAuthoringGrammarExplanations } from '../api/use-authoring-grammar';
 import { authoringKeys } from '../api/keys';
+import { useAutosave } from '../hooks/use-autosave';
+import { AutosaveIndicator } from './autosave-indicator';
 
 interface GrammarEditorProps {
   ruleId: string;
@@ -31,18 +33,14 @@ interface GrammarEditorProps {
   onClose: () => void;
 }
 
-type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
-
 export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: GrammarEditorProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
-  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
   const [editorTab, setEditorTab] = useState<'write' | 'preview'>('write');
   const [previewHtml, setPreviewHtml] = useState('');
   const [localExplanationId, setLocalExplanationId] = useState<string | null>(null);
-  const autosaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: explanations, isLoading } = useAuthoringGrammarExplanations(ruleId);
   const defaultExplanation = explanations?.[0];
@@ -82,11 +80,21 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
 
   const bodyValue = watch('body');
 
-  useEffect(() => {
-    return () => {
-      if (autosaveRef.current) clearTimeout(autosaveRef.current);
-    };
-  }, []);
+  const autosave = useAutosave({
+    onSave: async () => {
+      const { languageCode, explanationTitle, body, examples } = getValues();
+      const result = await saveGrammarExplanationAction(ruleId, explanationId, container.id, {
+        languageCode,
+        title: explanationTitle,
+        body,
+        examples,
+      });
+      if (!result.ok) throw new Error(result.error.code);
+      if (result.value?.explanationId) setLocalExplanationId(result.value.explanationId);
+      await queryClient.invalidateQueries({ queryKey: authoringKeys.grammarExplanations(ruleId) });
+    },
+    debounceMs: 1500,
+  });
 
   useEffect(() => {
     if (editorTab !== 'preview' || !bodyValue) {
@@ -103,33 +111,8 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
       .catch(() => setPreviewHtml(''));
   }, [bodyValue, editorTab]);
 
-  function scheduleAutosave() {
-    if (autosaveRef.current) clearTimeout(autosaveRef.current);
-    autosaveRef.current = setTimeout(() => {
-      void performAutosave();
-    }, 1500);
-  }
-
-  async function performAutosave() {
-    const { languageCode, explanationTitle, body, examples } = getValues();
-    setAutosaveStatus('saving');
-    const result = await saveGrammarExplanationAction(ruleId, explanationId, container.id, {
-      languageCode,
-      title: explanationTitle,
-      body,
-      examples,
-    });
-    if (!result.ok) {
-      setAutosaveStatus('error');
-      return;
-    }
-    if (result.value?.explanationId) setLocalExplanationId(result.value.explanationId);
-    await queryClient.invalidateQueries({ queryKey: authoringKeys.grammarExplanations(ruleId) });
-    setAutosaveStatus('saved');
-  }
-
   function onSubmit(data: GrammarEditorFormValues) {
-    if (autosaveRef.current) clearTimeout(autosaveRef.current);
+    autosave.cancel();
     startTransition(async () => {
       const r1 = await updateGrammarRuleAction(ruleId, container.id, { title: data.ruleTitle });
       if (!r1.ok) {
@@ -153,7 +136,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
       await queryClient.invalidateQueries({
         queryKey: authoringKeys.grammarExplanations(ruleId),
       });
-      setAutosaveStatus('saved');
+      autosave.markSaved();
       toast.success(t('grammar.saveSuccess'));
     });
   }
@@ -173,17 +156,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-medium">{t('grammar.editingLabel')}</h3>
         <div className="flex items-center gap-3">
-          {autosaveStatus === 'saving' && (
-            <span className="text-muted-foreground text-xs">{t('lessons.autosaving')}</span>
-          )}
-          {autosaveStatus === 'saved' && (
-            <span className="text-xs text-green-600 dark:text-green-400">
-              {t('lessons.autosaved')}
-            </span>
-          )}
-          {autosaveStatus === 'error' && (
-            <span className="text-xs text-destructive">{t('lessons.autosaveError')}</span>
-          )}
+          <AutosaveIndicator status={autosave.status} savedAt={autosave.savedAt} />
           <Button variant="ghost" size="sm" type="button" onClick={onClose}>
             {t('lessons.closeEditor')}
           </Button>
@@ -263,10 +236,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
                   className="font-mono text-sm"
                   disabled={isPending}
                   {...register('body', {
-                    onChange: () => {
-                      setAutosaveStatus('idle');
-                      scheduleAutosave();
-                    },
+                    onChange: () => autosave.schedule(),
                   })}
                 />
               </TabsContent>

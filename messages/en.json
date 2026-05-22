@@ -308,6 +308,7 @@
       "previewEmpty": "Nothing to preview.",
       "autosaving": "Saving…",
       "autosaved": "Saved",
+      "autosavedAgo": "Saved {seconds}s ago",
       "autosaveError": "Autosave failed",
       "editAriaLabel": "Edit lesson",
       "deleteAriaLabel": "Delete lesson",

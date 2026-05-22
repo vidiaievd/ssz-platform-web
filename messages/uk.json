@@ -308,6 +308,7 @@
       "previewEmpty": "Нема чого відображати.",
       "autosaving": "Зберігається…",
       "autosaved": "Збережено",
+      "autosavedAgo": "Збережено {seconds}с тому",
       "autosaveError": "Автозбереження не вдалося",
       "editAriaLabel": "Редагувати урок",
       "deleteAriaLabel": "Видалити урок",

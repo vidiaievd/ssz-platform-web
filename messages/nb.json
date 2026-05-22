@@ -308,6 +308,7 @@
       "previewEmpty": "Ingenting å vise.",
       "autosaving": "Lagrer…",
       "autosaved": "Lagret",
+      "autosavedAgo": "Lagret for {seconds}s siden",
       "autosaveError": "Automatisk lagring mislyktes",
       "editAriaLabel": "Rediger leksjon",
       "deleteAriaLabel": "Slett leksjon",

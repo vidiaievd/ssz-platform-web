@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
@@ -22,6 +22,8 @@ import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 import { updateLessonAction } from '../actions/lesson';
 import { useLessonVariants } from '../api/use-authoring-lessons';
 import { authoringKeys } from '../api/keys';
+import { useAutosave } from '../hooks/use-autosave';
+import { AutosaveIndicator } from './autosave-indicator';
 
 interface LessonEditorProps {
   lessonId: string;
@@ -30,17 +32,13 @@ interface LessonEditorProps {
   onClose: () => void;
 }
 
-type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
-
 export function LessonEditor({ lessonId, lessonTitle, container, onClose }: LessonEditorProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
-  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
   const [editorTab, setEditorTab] = useState<'write' | 'preview'>('write');
   const [previewHtml, setPreviewHtml] = useState('');
-  const autosaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: variants, isLoading: variantsLoading } = useLessonVariants(lessonId);
   const defaultVariant = variants?.[0];
@@ -66,14 +64,22 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
 
   const bodyValue = watch('body');
 
-  // Cleanup autosave timer on unmount
-  useEffect(() => {
-    return () => {
-      if (autosaveRef.current) clearTimeout(autosaveRef.current);
-    };
-  }, []);
+  const autosave = useAutosave({
+    onSave: async () => {
+      const data = getValues();
+      const result = await updateLessonAction(
+        lessonId,
+        container.id,
+        defaultVariant?.id ?? null,
+        container.targetLanguage,
+        data,
+      );
+      if (!result.ok) throw new Error(result.error.code);
+      await queryClient.invalidateQueries({ queryKey: authoringKeys.lessonVariants(lessonId) });
+    },
+    debounceMs: 1500,
+  });
 
-  // Render markdown preview only when preview tab is active
   useEffect(() => {
     if (editorTab !== 'preview') return;
     if (!bodyValue) {
@@ -90,32 +96,8 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
       .catch(() => setPreviewHtml(''));
   }, [bodyValue, editorTab]);
 
-  function scheduleAutosave() {
-    if (autosaveRef.current) clearTimeout(autosaveRef.current);
-    autosaveRef.current = setTimeout(() => {
-      void performSave(getValues());
-    }, 1500);
-  }
-
-  async function performSave(data: LessonFormValues) {
-    setAutosaveStatus('saving');
-    const result = await updateLessonAction(
-      lessonId,
-      container.id,
-      defaultVariant?.id ?? null,
-      container.targetLanguage,
-      data,
-    );
-    if (!result.ok) {
-      setAutosaveStatus('error');
-      return;
-    }
-    await queryClient.invalidateQueries({ queryKey: authoringKeys.lessonVariants(lessonId) });
-    setAutosaveStatus('saved');
-  }
-
   function onSubmit(data: LessonFormValues) {
-    if (autosaveRef.current) clearTimeout(autosaveRef.current);
+    autosave.cancel();
     startTransition(async () => {
       const result = await updateLessonAction(
         lessonId,
@@ -129,7 +111,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.lessonVariants(lessonId) });
-      setAutosaveStatus('saved');
+      autosave.markSaved();
       toast.success(t('lessons.saveSuccess'));
     });
   }
@@ -148,15 +130,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-medium">{t('lessons.editingLabel')}</h3>
         <div className="flex items-center gap-3">
-          {autosaveStatus === 'saving' && (
-            <span className="text-muted-foreground text-xs">{t('lessons.autosaving')}</span>
-          )}
-          {autosaveStatus === 'saved' && (
-            <span className="text-xs text-green-600 dark:text-green-400">{t('lessons.autosaved')}</span>
-          )}
-          {autosaveStatus === 'error' && (
-            <span className="text-xs text-destructive">{t('lessons.autosaveError')}</span>
-          )}
+          <AutosaveIndicator status={autosave.status} savedAt={autosave.savedAt} />
           <Button variant="ghost" size="sm" onClick={onClose} type="button">
             {t('lessons.closeEditor')}
           </Button>
@@ -191,10 +165,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
                 className="font-mono text-sm"
                 disabled={isPending}
                 {...register('body', {
-                  onChange: () => {
-                    setAutosaveStatus('idle');
-                    scheduleAutosave();
-                  },
+                  onChange: () => autosave.schedule(),
                 })}
               />
             </TabsContent>

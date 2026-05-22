@@ -308,6 +308,7 @@
       "previewEmpty": "Нечего отображать.",
       "autosaving": "Сохранение…",
       "autosaved": "Сохранено",
+      "autosavedAgo": "Сохранено {seconds}с назад",
       "autosaveError": "Автосохранение не удалось",
       "editAriaLabel": "Редактировать урок",
       "deleteAriaLabel": "Удалить урок",
