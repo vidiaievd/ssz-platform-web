@@ -73,6 +73,7 @@ export interface VocabularyTranslation {
 export interface VocabularyExample {
   id: string;
   template: string;
+  substitution?: string;
   translations?: Record<string, string>;
 }
 

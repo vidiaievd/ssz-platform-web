@@ -9,6 +9,7 @@ import type { Container } from '@/features/content/types';
 
 import { ContainerForm } from './container-form';
 import { LessonList } from './lesson-list';
+import { VocabularyTable } from './vocabulary-table';
 
 type AuthoringTab =
   | 'overview'
@@ -61,7 +62,7 @@ export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProp
         <LessonList container={container} />
       </TabsContent>
       <TabsContent value="vocabulary">
-        <PlaceholderTab />
+        <VocabularyTable container={container} />
       </TabsContent>
       <TabsContent value="grammar">
         <PlaceholderTab />
