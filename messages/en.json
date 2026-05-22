@@ -102,6 +102,55 @@
       }
     }
   },
+  "Content": {
+    "catalogueTitle": "Course Catalogue",
+    "catalogueSubtitle": "Browse public learning materials — no sign-in required.",
+    "lessonsTitle": "My Lessons",
+    "lessonsSubtitle": "Continue learning or discover something new.",
+    "openContainer": "Open",
+    "signIn": "Sign in",
+    "signInToView": "Sign in to view this course",
+    "signInToViewDescription": "Create a free account to browse and enrol in courses.",
+    "signInToEnrol": "Sign in to enrol in this course.",
+    "retry": "Try again",
+    "empty": "Nothing here yet.",
+    "noContainers": "No courses found. Try adjusting the filters.",
+    "noLessons": "No lessons in this container yet.",
+    "noVocabulary": "No vocabulary lists in this container yet.",
+    "noGrammar": "No grammar rules in this container yet.",
+    "noExercises": "No exercises in this container yet.",
+    "noVocabularyItems": "No words found.",
+    "noLessonContent": "No content available for this lesson yet.",
+    "loadMore": "Load more",
+    "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
+    "wordCount": "{count, plural, one {# word} other {# words}}",
+    "tabLessons": "Lessons",
+    "tabVocabulary": "Vocabulary",
+    "tabGrammar": "Grammar",
+    "tabExercises": "Exercises",
+    "sectionContinueLearning": "Continue learning",
+    "sectionRecommended": "Recommended for you",
+    "searchPlaceholder": "Search courses…",
+    "filterLanguage": "Language",
+    "filterLevel": "Level",
+    "filterType": "Type",
+    "filterAll": "All",
+    "exerciseTemplate": "Type",
+    "readOnly": "Preview",
+    "hints": "Hints",
+    "exemplarAnswer": "Example answer",
+    "accessTier": {
+      "PUBLIC": "Free",
+      "FREE_WITHIN_SCHOOL": "School",
+      "PAID": "Premium",
+      "INVITE_ONLY": "Invite only"
+    },
+    "containerType": {
+      "COURSE": "Course",
+      "MODULE": "Module",
+      "COLLECTION": "Collection"
+    }
+  },
   "Auth": {
     "Login": {
       "title": "Sign in",

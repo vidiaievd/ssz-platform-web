@@ -102,6 +102,55 @@
       }
     }
   },
+  "Content": {
+    "catalogueTitle": "Каталог курсів",
+    "catalogueSubtitle": "Перегляд публічних навчальних матеріалів — без реєстрації.",
+    "lessonsTitle": "Мої уроки",
+    "lessonsSubtitle": "Продовжуйте навчання або знайдіть щось нове.",
+    "openContainer": "Відкрити",
+    "signIn": "Увійти",
+    "signInToView": "Увійдіть, щоб переглянути цей курс",
+    "signInToViewDescription": "Створіть безкоштовний акаунт, щоб переглядати та записуватися на курси.",
+    "signInToEnrol": "Увійдіть, щоб записатися на цей курс.",
+    "retry": "Спробувати знову",
+    "empty": "Тут ще нічого немає.",
+    "noContainers": "Курсів не знайдено. Спробуйте змінити фільтри.",
+    "noLessons": "В цій колекції ще немає уроків.",
+    "noVocabulary": "В цій колекції ще немає словникових списків.",
+    "noGrammar": "В цій колекції ще немає граматичних правил.",
+    "noExercises": "В цій колекції ще немає вправ.",
+    "noVocabularyItems": "Слів не знайдено.",
+    "noLessonContent": "Вміст цього уроку ще недоступний.",
+    "loadMore": "Завантажити більше",
+    "lessonCount": "{count, plural, one {# урок} few {# уроки} many {# уроків} other {# уроків}}",
+    "wordCount": "{count, plural, one {# слово} few {# слова} many {# слів} other {# слів}}",
+    "tabLessons": "Уроки",
+    "tabVocabulary": "Словник",
+    "tabGrammar": "Граматика",
+    "tabExercises": "Вправи",
+    "sectionContinueLearning": "Продовжити навчання",
+    "sectionRecommended": "Рекомендовано для вас",
+    "searchPlaceholder": "Пошук курсів…",
+    "filterLanguage": "Мова",
+    "filterLevel": "Рівень",
+    "filterType": "Тип",
+    "filterAll": "Всі",
+    "exerciseTemplate": "Тип",
+    "readOnly": "Перегляд",
+    "hints": "Підказки",
+    "exemplarAnswer": "Приклад відповіді",
+    "accessTier": {
+      "PUBLIC": "Безкоштовно",
+      "FREE_WITHIN_SCHOOL": "Школа",
+      "PAID": "Преміум",
+      "INVITE_ONLY": "Лише за запрошенням"
+    },
+    "containerType": {
+      "COURSE": "Курс",
+      "MODULE": "Модуль",
+      "COLLECTION": "Колекція"
+    }
+  },
   "Auth": {
     "Login": {
       "title": "Увійти",

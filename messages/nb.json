@@ -102,6 +102,55 @@
       }
     }
   },
+  "Content": {
+    "catalogueTitle": "Kurskatalog",
+    "catalogueSubtitle": "Bla gjennom offentlige læringsressurser – ingen innlogging nødvendig.",
+    "lessonsTitle": "Mine timer",
+    "lessonsSubtitle": "Fortsett å lære eller oppdag noe nytt.",
+    "openContainer": "Åpne",
+    "signIn": "Logg inn",
+    "signInToView": "Logg inn for å se dette kurset",
+    "signInToViewDescription": "Opprett en gratis konto for å bla og melde deg på kurs.",
+    "signInToEnrol": "Logg inn for å melde deg på dette kurset.",
+    "retry": "Prøv igjen",
+    "empty": "Ingenting her ennå.",
+    "noContainers": "Ingen kurs funnet. Prøv å justere filtrene.",
+    "noLessons": "Ingen timer i denne samlingen ennå.",
+    "noVocabulary": "Ingen ordlister i denne samlingen ennå.",
+    "noGrammar": "Ingen grammatikkregler i denne samlingen ennå.",
+    "noExercises": "Ingen øvelser i denne samlingen ennå.",
+    "noVocabularyItems": "Ingen ord funnet.",
+    "noLessonContent": "Ingen innhold tilgjengelig for denne timen ennå.",
+    "loadMore": "Last inn mer",
+    "lessonCount": "{count, plural, one {# time} other {# timer}}",
+    "wordCount": "{count, plural, one {# ord} other {# ord}}",
+    "tabLessons": "Timer",
+    "tabVocabulary": "Ordliste",
+    "tabGrammar": "Grammatikk",
+    "tabExercises": "Øvelser",
+    "sectionContinueLearning": "Fortsett å lære",
+    "sectionRecommended": "Anbefalt for deg",
+    "searchPlaceholder": "Søk etter kurs…",
+    "filterLanguage": "Språk",
+    "filterLevel": "Nivå",
+    "filterType": "Type",
+    "filterAll": "Alle",
+    "exerciseTemplate": "Type",
+    "readOnly": "Forhåndsvisning",
+    "hints": "Hint",
+    "exemplarAnswer": "Eksempelsvar",
+    "accessTier": {
+      "PUBLIC": "Gratis",
+      "FREE_WITHIN_SCHOOL": "Skole",
+      "PAID": "Premium",
+      "INVITE_ONLY": "Kun på invitasjon"
+    },
+    "containerType": {
+      "COURSE": "Kurs",
+      "MODULE": "Modul",
+      "COLLECTION": "Samling"
+    }
+  },
   "Auth": {
     "Login": {
       "title": "Logg inn",
