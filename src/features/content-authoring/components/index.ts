@@ -1,5 +1,7 @@
 export * from './authoring-container-tabs';
 export * from './container-form';
+export * from './exercise-editor';
+export * from './exercise-list';
 export * from './grammar-editor';
 export * from './grammar-list';
 export * from './lesson-editor';
