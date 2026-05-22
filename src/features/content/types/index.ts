@@ -119,3 +119,11 @@ export interface ExerciseDisplay {
   content: Record<string, unknown>;
   instructions?: string;
 }
+
+export interface ContainerVersion {
+  id: string;
+  containerId: string;
+  isPublished: boolean;
+  publishedAt?: string;
+  createdAt: string;
+}

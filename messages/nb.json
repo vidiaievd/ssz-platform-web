@@ -289,6 +289,33 @@
       "MODULE": "Modul",
       "COLLECTION": "Samling"
     },
+    "lessons": {
+      "add": "Legg til leksjon",
+      "newTitle": "Ny leksjon",
+      "untitled": "Uten tittel",
+      "empty": "Ingen leksjoner ennå. Legg til den første.",
+      "loadError": "Kunne ikke laste leksjoner.",
+      "createSuccess": "Leksjon opprettet.",
+      "saveSuccess": "Leksjon lagret.",
+      "deleteSuccess": "Leksjon slettet.",
+      "editingLabel": "Redigerer leksjon",
+      "closeEditor": "Lukk",
+      "titlePlaceholder": "f.eks. Introduksjon til grammatikk",
+      "body": "Innhold",
+      "tabWrite": "Skriv",
+      "tabPreview": "Forhåndsvisning",
+      "bodyPlaceholder": "Skriv leksjonsinnhold i Markdown…",
+      "previewEmpty": "Ingenting å vise.",
+      "autosaving": "Lagrer…",
+      "autosaved": "Lagret",
+      "autosaveError": "Automatisk lagring mislyktes",
+      "editAriaLabel": "Rediger leksjon",
+      "deleteAriaLabel": "Slett leksjon",
+      "deleteConfirmTitle": "Slette leksjon?",
+      "deleteConfirmDescription": "«{title}» vil bli permanent slettet med alt innhold. Dette kan ikke angres.",
+      "deleteConfirm": "Slett",
+      "deleteCancel": "Avbryt"
+    },
     "empty": {
       "containers": "Ingen innhold ennå. Opprett din første beholder."
     },

@@ -289,6 +289,33 @@
       "MODULE": "Module",
       "COLLECTION": "Collection"
     },
+    "lessons": {
+      "add": "Add lesson",
+      "newTitle": "New lesson",
+      "untitled": "Untitled lesson",
+      "empty": "No lessons yet. Add the first one.",
+      "loadError": "Could not load lessons.",
+      "createSuccess": "Lesson created.",
+      "saveSuccess": "Lesson saved.",
+      "deleteSuccess": "Lesson deleted.",
+      "editingLabel": "Editing lesson",
+      "closeEditor": "Close",
+      "titlePlaceholder": "e.g. Introduction to grammar",
+      "body": "Body",
+      "tabWrite": "Write",
+      "tabPreview": "Preview",
+      "bodyPlaceholder": "Write lesson content in Markdown…",
+      "previewEmpty": "Nothing to preview.",
+      "autosaving": "Saving…",
+      "autosaved": "Saved",
+      "autosaveError": "Autosave failed",
+      "editAriaLabel": "Edit lesson",
+      "deleteAriaLabel": "Delete lesson",
+      "deleteConfirmTitle": "Delete lesson?",
+      "deleteConfirmDescription": "\"{title}\" will be permanently deleted along with all its content. This cannot be undone.",
+      "deleteConfirm": "Delete",
+      "deleteCancel": "Cancel"
+    },
     "empty": {
       "containers": "No content yet. Create your first container."
     },

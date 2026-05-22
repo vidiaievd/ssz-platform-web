@@ -289,6 +289,33 @@
       "MODULE": "Модуль",
       "COLLECTION": "Коллекция"
     },
+    "lessons": {
+      "add": "Добавить урок",
+      "newTitle": "Новый урок",
+      "untitled": "Без названия",
+      "empty": "Уроков пока нет. Добавьте первый.",
+      "loadError": "Не удалось загрузить уроки.",
+      "createSuccess": "Урок создан.",
+      "saveSuccess": "Урок сохранён.",
+      "deleteSuccess": "Урок удалён.",
+      "editingLabel": "Редактирование урока",
+      "closeEditor": "Закрыть",
+      "titlePlaceholder": "напр. Введение в грамматику",
+      "body": "Содержание",
+      "tabWrite": "Редактор",
+      "tabPreview": "Предпросмотр",
+      "bodyPlaceholder": "Напишите содержание урока в формате Markdown…",
+      "previewEmpty": "Нечего отображать.",
+      "autosaving": "Сохранение…",
+      "autosaved": "Сохранено",
+      "autosaveError": "Автосохранение не удалось",
+      "editAriaLabel": "Редактировать урок",
+      "deleteAriaLabel": "Удалить урок",
+      "deleteConfirmTitle": "Удалить урок?",
+      "deleteConfirmDescription": "«{title}» будет удалён вместе со всем содержимым. Это необратимо.",
+      "deleteConfirm": "Удалить",
+      "deleteCancel": "Отмена"
+    },
     "empty": {
       "containers": "Материалов ещё нет. Создайте первый контейнер."
     },

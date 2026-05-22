@@ -8,6 +8,7 @@ import { useRouter, usePathname } from '@/lib/i18n/navigation';
 import type { Container } from '@/features/content/types';
 
 import { ContainerForm } from './container-form';
+import { LessonList } from './lesson-list';
 
 type AuthoringTab =
   | 'overview'
@@ -57,7 +58,7 @@ export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProp
         <ContainerForm mode="edit" container={container} />
       </TabsContent>
       <TabsContent value="lessons">
-        <PlaceholderTab />
+        <LessonList container={container} />
       </TabsContent>
       <TabsContent value="vocabulary">
         <PlaceholderTab />
