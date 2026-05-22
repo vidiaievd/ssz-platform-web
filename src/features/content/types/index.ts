@@ -73,6 +73,7 @@ export interface VocabularyTranslation {
 export interface VocabularyExample {
   id: string;
   template: string;
+  substitution?: string;
   translations?: Record<string, string>;
 }
 
@@ -118,4 +119,33 @@ export interface ExerciseDisplay {
   difficultyLevel?: DifficultyLevel;
   content: Record<string, unknown>;
   instructions?: string;
+}
+
+export type ShareRole = 'co_author' | 'viewer';
+
+export interface ContainerShare {
+  id: string;
+  entityType: string;
+  entityId: string;
+  userId: string;
+  userEmail: string;
+  userName?: string;
+  role: ShareRole;
+  createdAt: string;
+}
+
+export interface ContentTag {
+  id: string;
+  name: string;
+  entityType: string;
+  entityId: string;
+  createdAt: string;
+}
+
+export interface ContainerVersion {
+  id: string;
+  containerId: string;
+  isPublished: boolean;
+  publishedAt?: string;
+  createdAt: string;
 }
