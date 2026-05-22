@@ -421,6 +421,14 @@
       "removeExample": "Fjern eksempel",
       "saveSuccess": "Regel lagret."
     },
+    "tags": {
+      "empty": "Ingen tagger ennå.",
+      "add": "Legg til tagg",
+      "searchPlaceholder": "Søk eller opprett tagg…",
+      "create": "Opprett «{name}»",
+      "noResults": "Ingen treff.",
+      "removeAriaLabel": "Fjern tagg {name}"
+    },
     "empty": {
       "containers": "Ingen innhold ennå. Opprett din første beholder."
     },

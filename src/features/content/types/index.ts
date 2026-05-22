@@ -121,6 +121,14 @@ export interface ExerciseDisplay {
   instructions?: string;
 }
 
+export interface ContentTag {
+  id: string;
+  name: string;
+  entityType: string;
+  entityId: string;
+  createdAt: string;
+}
+
 export interface ContainerVersion {
   id: string;
   containerId: string;

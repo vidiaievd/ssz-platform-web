@@ -11,6 +11,7 @@ import { ContainerForm } from './container-form';
 import { ExerciseList } from './exercise-list';
 import { GrammarList } from './grammar-list';
 import { LessonList } from './lesson-list';
+import { TagInput } from './tag-input';
 import { VocabularyTable } from './vocabulary-table';
 
 type AuthoringTab =
@@ -73,7 +74,7 @@ export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProp
         <ExerciseList container={container} />
       </TabsContent>
       <TabsContent value="tags">
-        <PlaceholderTab />
+        <TagInput entityType="container" entityId={container.id} />
       </TabsContent>
       <TabsContent value="sharing">
         <PlaceholderTab />
