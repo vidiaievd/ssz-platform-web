@@ -62,6 +62,46 @@
     "searchPlaceholder": "Search schools…",
     "cta": "Discover schools"
   },
+  "Settings": {
+    "nav": {
+      "profile": "Profile",
+      "account": "Account",
+      "notifications": "Notifications"
+    }
+  },
+  "Profile": {
+    "title": "Profile",
+    "subtitle": "Manage your public profile and preferences.",
+    "save": "Save changes",
+    "saveSuccess": "Profile saved.",
+    "displayName": "Display name",
+    "bio": "Bio",
+    "uiLocale": "Interface language",
+    "instructionLocales": "Teaching languages",
+    "timezone": "Timezone",
+    "contactEmail": "Contact email",
+    "contactPhone": "Contact phone",
+    "avatar": {
+      "placeholder": "Avatar upload coming soon."
+    },
+    "sections": {
+      "avatar": "Profile photo",
+      "info": "Personal information"
+    },
+    "completeness": {
+      "label": "Profile completeness",
+      "nudge": "Add your {field} to make your profile stand out.",
+      "fields": {
+        "displayName": "display name",
+        "avatarUrl": "profile photo",
+        "bio": "bio",
+        "timezone": "timezone",
+        "instructionLocales": "teaching languages",
+        "contactEmail": "contact email",
+        "contactPhone": "contact phone"
+      }
+    }
+  },
   "Auth": {
     "Login": {
       "title": "Sign in",

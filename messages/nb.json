@@ -62,6 +62,46 @@
     "searchPlaceholder": "Søk etter skoler…",
     "cta": "Oppdag skoler"
   },
+  "Settings": {
+    "nav": {
+      "profile": "Profil",
+      "account": "Konto",
+      "notifications": "Varsler"
+    }
+  },
+  "Profile": {
+    "title": "Profil",
+    "subtitle": "Administrer din offentlige profil og innstillinger.",
+    "save": "Lagre endringer",
+    "saveSuccess": "Profil lagret.",
+    "displayName": "Visningsnavn",
+    "bio": "Biografi",
+    "uiLocale": "Grensesnittspråk",
+    "instructionLocales": "Undervisningsspråk",
+    "timezone": "Tidssone",
+    "contactEmail": "Kontakte-post",
+    "contactPhone": "Kontakttelefon",
+    "avatar": {
+      "placeholder": "Avatar-opplasting kommer snart."
+    },
+    "sections": {
+      "avatar": "Profilbilde",
+      "info": "Personlig informasjon"
+    },
+    "completeness": {
+      "label": "Profilkomplethet",
+      "nudge": "Legg til {field} for å gjøre profilen din mer synlig.",
+      "fields": {
+        "displayName": "visningsnavn",
+        "avatarUrl": "profilbilde",
+        "bio": "biografi",
+        "timezone": "tidssone",
+        "instructionLocales": "undervisningsspråk",
+        "contactEmail": "kontakte-post",
+        "contactPhone": "kontakttelefon"
+      }
+    }
+  },
   "Auth": {
     "Login": {
       "title": "Logg inn",

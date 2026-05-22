@@ -6,6 +6,15 @@ process.env.PROFILE_SERVICE_URL = 'http://profile.test';
 process.env.CONTENT_SERVICE_URL = 'http://content.test';
 
 import '@testing-library/jest-dom/vitest';
+
+// Radix UI uses ResizeObserver (e.g. Select, ScrollArea); JSDOM doesn't provide it.
+if (typeof ResizeObserver === 'undefined') {
+  global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
 import { afterAll, afterEach, beforeAll } from 'vitest';
 
 import { server } from './src/test/msw/server';

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Link } from '@/lib/i18n/navigation';
 import { LogoutButton } from '@/features/auth/components/logout-button';
+import { useMyProfile } from '@/features/profile/api/use-my-profile';
 import type { CurrentUser } from '@/features/auth/types/current-user';
 
 type UserMenuProps = {
@@ -34,10 +35,21 @@ function getRoleInitial(roles: string[]): string {
   return '?';
 }
 
+function getSettingsHref(roles: string[]): '/school/settings/profile' | '/student/settings/profile' {
+  return roles.includes('school') || roles.includes('tutor')
+    ? '/school/settings/profile'
+    : '/student/settings/profile';
+}
+
 export function UserMenu({ user }: UserMenuProps) {
   const t = useTranslations('UserMenu');
   const roleLabel = getRoleLabel(t, user.roles);
   const initial = getRoleInitial(user.roles);
+  const settingsHref = getSettingsHref(user.roles);
+
+  const { data: profile } = useMyProfile();
+  const displayName = profile?.displayName ?? roleLabel;
+  const avatarSrc = profile?.avatarUrl ?? undefined;
 
   return (
     <DropdownMenu>
@@ -46,17 +58,20 @@ export function UserMenu({ user }: UserMenuProps) {
           aria-label="User menu"
           className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Avatar name={initial} size="sm" />
+          <Avatar name={displayName || initial} src={avatarSrc} alt={displayName} size="sm" />
         </button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel className="font-normal">
-          <p className="text-sm font-medium">{roleLabel}</p>
+          <p className="text-sm font-medium">{displayName}</p>
+          {profile?.displayName && (
+            <p className="text-xs text-(--ssz-text-muted)">{roleLabel}</p>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/student/settings" className="flex items-center gap-2 cursor-pointer">
+          <Link href={settingsHref} className="flex items-center gap-2 cursor-pointer">
             <Settings className="size-4" />
             {t('settings')}
           </Link>

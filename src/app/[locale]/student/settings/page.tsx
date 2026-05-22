@@ -1,14 +1,7 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { redirect } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
 
-export default function StudentSettingsPage() {
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-semibold mb-6">Settings</h1>
-      <div className="space-y-3 max-w-xl">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-3/4" />
-      </div>
-    </div>
-  );
+export default async function StudentSettingsPage() {
+  const locale = await getLocale();
+  redirect(`/${locale}/student/settings/profile`);
 }
