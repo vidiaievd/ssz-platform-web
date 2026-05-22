@@ -62,6 +62,46 @@
     "searchPlaceholder": "Поиск школ…",
     "cta": "Найти школы"
   },
+  "Settings": {
+    "nav": {
+      "profile": "Профиль",
+      "account": "Аккаунт",
+      "notifications": "Уведомления"
+    }
+  },
+  "Profile": {
+    "title": "Профиль",
+    "subtitle": "Управляйте своим публичным профилем и настройками.",
+    "save": "Сохранить изменения",
+    "saveSuccess": "Профиль сохранён.",
+    "displayName": "Отображаемое имя",
+    "bio": "Биография",
+    "uiLocale": "Язык интерфейса",
+    "instructionLocales": "Языки преподавания",
+    "timezone": "Часовой пояс",
+    "contactEmail": "Контактная почта",
+    "contactPhone": "Контактный телефон",
+    "avatar": {
+      "placeholder": "Загрузка аватара скоро будет доступна."
+    },
+    "sections": {
+      "avatar": "Фото профиля",
+      "info": "Личная информация"
+    },
+    "completeness": {
+      "label": "Заполненность профиля",
+      "nudge": "Добавьте {field}, чтобы ваш профиль выглядел привлекательнее.",
+      "fields": {
+        "displayName": "отображаемое имя",
+        "avatarUrl": "фото профиля",
+        "bio": "биографию",
+        "timezone": "часовой пояс",
+        "instructionLocales": "языки преподавания",
+        "contactEmail": "контактную почту",
+        "contactPhone": "контактный телефон"
+      }
+    }
+  },
   "Auth": {
     "Login": {
       "title": "Войти",

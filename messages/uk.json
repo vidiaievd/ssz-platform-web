@@ -62,6 +62,46 @@
     "searchPlaceholder": "Пошук шкіл…",
     "cta": "Знайти школи"
   },
+  "Settings": {
+    "nav": {
+      "profile": "Профіль",
+      "account": "Обліковий запис",
+      "notifications": "Сповіщення"
+    }
+  },
+  "Profile": {
+    "title": "Профіль",
+    "subtitle": "Керуйте своїм публічним профілем та налаштуваннями.",
+    "save": "Зберегти зміни",
+    "saveSuccess": "Профіль збережено.",
+    "displayName": "Відображуване ім'я",
+    "bio": "Біографія",
+    "uiLocale": "Мова інтерфейсу",
+    "instructionLocales": "Мови викладання",
+    "timezone": "Часовий пояс",
+    "contactEmail": "Контактна пошта",
+    "contactPhone": "Контактний телефон",
+    "avatar": {
+      "placeholder": "Завантаження аватара незабаром."
+    },
+    "sections": {
+      "avatar": "Фото профілю",
+      "info": "Особиста інформація"
+    },
+    "completeness": {
+      "label": "Заповненість профілю",
+      "nudge": "Додайте {field}, щоб ваш профіль виглядав привабливіше.",
+      "fields": {
+        "displayName": "відображуване ім'я",
+        "avatarUrl": "фото профілю",
+        "bio": "біографію",
+        "timezone": "часовий пояс",
+        "instructionLocales": "мови викладання",
+        "contactEmail": "контактну пошту",
+        "contactPhone": "контактний телефон"
+      }
+    }
+  },
   "Auth": {
     "Login": {
       "title": "Увійти",
