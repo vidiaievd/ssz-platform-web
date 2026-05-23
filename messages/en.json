@@ -39,7 +39,8 @@
     "lessons": "Lessons",
     "mySchools": "My Schools",
     "settings": "Settings",
-    "discover": "Discover"
+    "discover": "Discover",
+    "requests": "Requests"
   },
   "RouteTitles": {
     "dashboard": "Dashboard",
@@ -487,5 +488,36 @@
     "fromPrice": "From {price} {currency}",
     "noResults": "No schools found. Try adjusting the filters.",
     "enrollComingSoon": "Enrolment request for {name} coming soon."
+  },
+  "Enrollment": {
+    "request": {
+      "title": "Request to enrol — {name}",
+      "description": "Tell the school about yourself and why you'd like to join.",
+      "messageLabel": "Message (optional)",
+      "messagePlaceholder": "Tell the school about yourself…",
+      "levelLabel": "Your current level (optional)",
+      "levelPlaceholder": "Select level",
+      "submit": "Send request",
+      "cancel": "Cancel",
+      "success": "Your enrolment request to {name} has been sent."
+    },
+    "requests": {
+      "title": "Enrolment requests",
+      "subtitle": "Track the status of your enrolment requests.",
+      "empty": "No requests yet. Discover a school and apply.",
+      "tab": {
+        "all": "All",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "sentOn": "Sent on {date}",
+    "reviewNote": "Note from school"
   }
 }

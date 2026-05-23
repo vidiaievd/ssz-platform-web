@@ -6,6 +6,7 @@ import {
   Compass,
   LayoutDashboard,
   School,
+  Send,
   Settings,
   Users,
 } from 'lucide-react';
@@ -38,6 +39,7 @@ const STUDENT_NAV: NavSection[] = [
       { href: '/student/discover', icon: Compass, labelKey: 'discover' },
       { href: '/student/lessons', icon: BookOpen, labelKey: 'lessons' },
       { href: '/student/enrolled', icon: School, labelKey: 'mySchools' },
+      { href: '/student/enrolled/requests', icon: Send, labelKey: 'requests' },
     ],
   },
   {

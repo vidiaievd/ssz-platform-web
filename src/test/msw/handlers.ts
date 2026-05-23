@@ -1,7 +1,9 @@
 import { http, HttpResponse } from 'msw';
 
 import { MOCK_SCHOOLS } from '@/app/api/discovery/schools/route';
+import { MOCK_ENROLLMENT_REQUESTS } from '@/app/api/enrollment/requests/route';
 import type { SchoolsResponse } from '@/features/discovery/types';
+import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
 
 /**
  * Default handlers shared across tests, dev, and Storybook.
@@ -31,6 +33,11 @@ export const handlers = [
       items: results,
       pageInfo: { hasNextPage: false, total: results.length },
     };
+    return HttpResponse.json(response);
+  }),
+
+  http.get('/api/enrollment/requests', () => {
+    const response: EnrollmentRequestsResponse = { items: MOCK_ENROLLMENT_REQUESTS };
     return HttpResponse.json(response);
   }),
 ];

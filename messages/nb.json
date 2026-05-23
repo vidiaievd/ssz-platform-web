@@ -39,7 +39,8 @@
     "lessons": "Timer",
     "mySchools": "Mine skoler",
     "settings": "Innstillinger",
-    "discover": "Utforsk"
+    "discover": "Utforsk",
+    "requests": "Søknader"
   },
   "RouteTitles": {
     "dashboard": "Oversikt",
@@ -487,5 +488,36 @@
     "fromPrice": "Fra {price} {currency}",
     "noResults": "Ingen skoler funnet. Prøv å justere filtrene.",
     "enrollComingSoon": "Innmeldingsforespørsel for {name} kommer snart."
+  },
+  "Enrollment": {
+    "request": {
+      "title": "Be om innmelding — {name}",
+      "description": "Fortell skolen om deg selv og hvorfor du vil bli med.",
+      "messageLabel": "Melding (valgfritt)",
+      "messagePlaceholder": "Fortell skolen om deg selv…",
+      "levelLabel": "Ditt nåværende nivå (valgfritt)",
+      "levelPlaceholder": "Velg nivå",
+      "submit": "Send søknad",
+      "cancel": "Avbryt",
+      "success": "Din innmeldingsførespørsel til {name} er sendt."
+    },
+    "requests": {
+      "title": "Innmeldingsførespørsler",
+      "subtitle": "Følg statusen på innmeldingsførespørslene dine.",
+      "empty": "Ingen førespørsler ennå. Finn en skole og søk.",
+      "tab": {
+        "all": "Alle",
+        "pending": "Venter",
+        "approved": "Godkjent",
+        "rejected": "Avvist"
+      }
+    },
+    "status": {
+      "pending": "Venter",
+      "approved": "Godkjent",
+      "rejected": "Avvist"
+    },
+    "sentOn": "Sendt {date}",
+    "reviewNote": "Notat fra skolen"
   }
 }
