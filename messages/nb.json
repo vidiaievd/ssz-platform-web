@@ -549,6 +549,17 @@
       "totalDays": "Totalt dager",
       "days": "{count, plural, one {# dag} other {# dager}}",
       "noActivity": "Start en leksjon for å bygge rekken din!"
+    },
+    "player": {
+      "exit": "Tilbake",
+      "position": "{current} / {total}",
+      "prev": "Forrige",
+      "completeAndNext": "Fullfør og neste",
+      "markComplete": "Merk som fullført",
+      "completed": "Fullført",
+      "completedToast": "Leksjon fullført! Bra jobba.",
+      "noContent": "Ingen innhold tilgjengelig for denne leksjonen ennå.",
+      "keyboardHint": "← → for å navigere · Esc for å avslutte"
     }
   }
 }

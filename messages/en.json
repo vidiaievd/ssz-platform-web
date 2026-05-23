@@ -549,6 +549,17 @@
       "totalDays": "Total days",
       "days": "{count, plural, one {# day} other {# days}}",
       "noActivity": "Start a lesson to build your streak!"
+    },
+    "player": {
+      "exit": "Back",
+      "position": "{current} / {total}",
+      "prev": "Previous",
+      "completeAndNext": "Complete & Next",
+      "markComplete": "Mark Complete",
+      "completed": "Completed",
+      "completedToast": "Lesson complete! Great work.",
+      "noContent": "No content available for this lesson yet.",
+      "keyboardHint": "← → to navigate · Esc to exit"
     }
   }
 }

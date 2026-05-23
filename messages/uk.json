@@ -549,6 +549,17 @@
       "totalDays": "Всього днів",
       "days": "{count, plural, one {# день} few {# дні} many {# днів} other {# дні}}",
       "noActivity": "Пройдіть урок, щоб розпочати серію!"
+    },
+    "player": {
+      "exit": "Назад",
+      "position": "{current} / {total}",
+      "prev": "Попередній",
+      "completeAndNext": "Завершити та далі",
+      "markComplete": "Позначити як завершений",
+      "completed": "Завершено",
+      "completedToast": "Урок завершено! Чудова робота.",
+      "noContent": "Вміст цього уроку ще недоступний.",
+      "keyboardHint": "← → для навігації · Esc для виходу"
     }
   }
 }

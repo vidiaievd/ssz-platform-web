@@ -17,7 +17,7 @@ function ContainerProgressCard({ item }: { item: ContainerProgress }) {
   const t = useTranslations('Student');
   const isStarted = item.completedItems > 0;
   const resumeHref = item.nextItemId
-    ? `/student/enrolled/lessons/${item.nextItemId}`
+    ? `/student/enrolled/lessons/${item.nextItemId}?containerId=${item.containerId}`
     : `/student/enrolled`;
 
   return (

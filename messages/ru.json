@@ -549,6 +549,17 @@
       "totalDays": "Всего дней",
       "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
       "noActivity": "Пройдите урок, чтобы начать серию!"
+    },
+    "player": {
+      "exit": "Назад",
+      "position": "{current} / {total}",
+      "prev": "Предыдущий",
+      "completeAndNext": "Завершить и далее",
+      "markComplete": "Отметить как пройденный",
+      "completed": "Пройдено",
+      "completedToast": "Урок завершён! Отличная работа.",
+      "noContent": "Содержимое этого урока пока недоступно.",
+      "keyboardHint": "← → для навигации · Esc для выхода"
     }
   }
 }

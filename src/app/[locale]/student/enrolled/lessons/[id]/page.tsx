@@ -1,20 +1,17 @@
 import { notFound } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
-import { GraduationCap, Globe } from 'lucide-react';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
-import { DataState } from '@/components/shared/data-state';
-import { LessonRenderer } from '@/features/content/components/lesson-renderer';
-import type { Lesson, LessonVariant } from '@/features/content/types';
+import { LessonPlayer } from '@/features/student/components/lesson-player';
+import type { Container, ContainerItem, Lesson, LessonVariant } from '@/features/content/types';
 
 interface Props {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ containerId?: string }>;
 }
 
-export default async function LessonPage({ params }: Props) {
-  const { id } = await params;
-  const t = await getTranslations('Content');
+export default async function LessonPage({ params, searchParams }: Props) {
+  const [{ id }, { containerId }] = await Promise.all([params, searchParams]);
 
   let lesson: Lesson;
   let variant: LessonVariant | null = null;
@@ -32,37 +29,52 @@ export default async function LessonPage({ params }: Props) {
     throw e;
   }
 
-  return (
-    <main className="container mx-auto max-w-3xl px-4 py-10">
-      <div className="text-muted-foreground mb-6 flex flex-wrap gap-4 text-sm">
-        {lesson.targetLanguage && (
-          <span className="flex items-center gap-1.5">
-            <Globe className="h-4 w-4" />
-            {lesson.targetLanguage.toUpperCase()}
-          </span>
-        )}
-        {lesson.level && (
-          <span className="flex items-center gap-1.5">
-            <GraduationCap className="h-4 w-4" />
-            {lesson.level}
-          </span>
-        )}
-      </div>
+  // Resolve container navigation context when containerId is provided.
+  let prevId: string | undefined;
+  let nextId: string | undefined;
+  let position: number | undefined;
+  let total: number | undefined;
+  let containerTitle: string | undefined;
 
-      {variant ? (
-        <LessonRenderer variant={variant} />
-      ) : (
-        <DataState
-          isEmpty
-          emptySlot={
-            <div className="py-16 text-center">
-              <p className="text-muted-foreground text-sm">{t('noLessonContent')}</p>
-            </div>
-          }
-        >
-          {null}
-        </DataState>
-      )}
-    </main>
+  if (containerId) {
+    try {
+      const container = await serverFetch<Container>({
+        service: 'content',
+        path: `/api/v1/containers/${containerId}`,
+      });
+      containerTitle = container.title;
+
+      if (container.publishedVersionId) {
+        const items = await serverFetch<ContainerItem[]>({
+          service: 'content',
+          path: `/api/v1/containers/${containerId}/versions/${container.publishedVersionId}/items`,
+        });
+
+        const lessonItems = items.filter((item) => item.contentType === 'LESSON');
+        const idx = lessonItems.findIndex((item) => item.contentId === id);
+
+        if (idx !== -1) {
+          position = idx + 1;
+          total = lessonItems.length;
+          prevId = idx > 0 ? lessonItems[idx - 1]!.contentId : undefined;
+          nextId = idx < lessonItems.length - 1 ? lessonItems[idx + 1]!.contentId : undefined;
+        }
+      }
+    } catch {
+      // Container unavailable — render player without nav context.
+    }
+  }
+
+  return (
+    <LessonPlayer
+      lesson={lesson}
+      variant={variant}
+      prevId={prevId}
+      nextId={nextId}
+      position={position}
+      total={total}
+      containerTitle={containerTitle}
+      containerId={containerId}
+    />
   );
 }

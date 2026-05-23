@@ -32,7 +32,7 @@ function LessonRow({ lesson }: { lesson: LessonPreview }) {
         </Badge>
       )}
       <Button asChild variant="ghost" size="sm" className="shrink-0">
-        <Link href={`/student/enrolled/lessons/${lesson.id}`}>
+        <Link href={`/student/enrolled/lessons/${lesson.id}?containerId=${lesson.containerId}`}>
           {t('upcomingLessons.start')}
         </Link>
       </Button>

@@ -1,3 +1,4 @@
+export * from './actions/lesson-progress';
 export * from './api/keys';
 export * from './api/use-activity-streak';
 export * from './api/use-continue-learning';
