@@ -41,12 +41,29 @@ export function Sidebar({ sections }: SidebarProps) {
           collapsed ? 'w-16' : 'w-60',
         )}
       >
-        <div className="flex flex-col flex-1 gap-4 py-4 overflow-y-auto overflow-x-hidden">
+        {/* Logo */}
+        <div
+          className={cn(
+            'flex items-center gap-2.5 border-b border-border shrink-0',
+            collapsed ? 'justify-center px-3.5 py-4.5' : 'px-4 py-4.5',
+          )}
+        >
+          <div className="size-8 rounded-lg flex items-center justify-center shrink-0 bg-primary">
+            <span className="text-[11px] font-extrabold text-white tracking-tighter">SSZ</span>
+          </div>
           {!collapsed && (
-            <div className="px-4">
-              <span className="text-sm font-semibold text-(--ssz-text-primary)">{t('appName')}</span>
+            <div>
+              <div className="text-sm font-bold text-(--ssz-text-primary) tracking-tight leading-tight">
+                SSZ Learn
+              </div>
+              <div className="text-[11px] text-(--ssz-text-muted) leading-tight">
+                Language Platform
+              </div>
             </div>
           )}
+        </div>
+
+        <div className="flex flex-col flex-1 gap-4 py-4 overflow-y-auto overflow-x-hidden">
           <nav className="flex flex-col gap-6 px-2">
             {sections.map((section, i) => (
               <SidebarSection key={i} {...section} collapsed={collapsed} />
