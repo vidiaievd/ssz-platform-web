@@ -561,5 +561,38 @@
       "noContent": "Ingen innhold tilgjengelig for denne leksjonen ennå.",
       "keyboardHint": "← → for å navigere · Esc for å avslutte"
     }
+  },
+  "Exercise": {
+    "submit": "Sjekk svar",
+    "tryAgain": "Prøv igjen",
+    "correctAnswer": "Riktig svar",
+    "verdict": {
+      "correct": "Riktig!",
+      "partial": "Delvis riktig",
+      "incorrect": "Feil"
+    },
+    "type": {
+      "cloze": "Fyll inn blankt",
+      "multiple_choice": "Flervalg",
+      "free_text": "Skriftlig svar",
+      "pronunciation": "Uttale"
+    },
+    "cloze": {
+      "ariaLabel": "Fyll-inn-blankt øvelse",
+      "blankLabel": "Blank {n}"
+    },
+    "mc": {
+      "optionsLabel": "Svaralternativer"
+    },
+    "freeText": {
+      "placeholder": "Skriv svaret ditt her…",
+      "ariaLabel": "Ditt svar"
+    },
+    "pronunciation": {
+      "mobilePrompt": "Best på mobil",
+      "mobileDescription": "Uttaleøvelser er best i VoxOrd-appen med sanntidstilbakemelding.",
+      "openApp": "Åpne i VoxOrd"
+    },
+    "unsupportedType": "Øvelsestype \"{type}\" er ikke støttet på web ennå."
   }
 }

@@ -561,5 +561,38 @@
       "noContent": "No content available for this lesson yet.",
       "keyboardHint": "← → to navigate · Esc to exit"
     }
+  },
+  "Exercise": {
+    "submit": "Check answer",
+    "tryAgain": "Try again",
+    "correctAnswer": "Correct answer",
+    "verdict": {
+      "correct": "Correct!",
+      "partial": "Partially correct",
+      "incorrect": "Incorrect"
+    },
+    "type": {
+      "cloze": "Fill in the blank",
+      "multiple_choice": "Multiple choice",
+      "free_text": "Written response",
+      "pronunciation": "Pronunciation"
+    },
+    "cloze": {
+      "ariaLabel": "Fill-in-the-blank exercise",
+      "blankLabel": "Blank {n}"
+    },
+    "mc": {
+      "optionsLabel": "Answer options"
+    },
+    "freeText": {
+      "placeholder": "Write your answer here…",
+      "ariaLabel": "Your answer"
+    },
+    "pronunciation": {
+      "mobilePrompt": "Best on mobile",
+      "mobileDescription": "Pronunciation practice is best in the VoxOrd app with real-time feedback.",
+      "openApp": "Open in VoxOrd"
+    },
+    "unsupportedType": "Exercise type \"{type}\" is not yet supported on web."
   }
 }

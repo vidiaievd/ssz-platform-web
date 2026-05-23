@@ -561,5 +561,38 @@
       "noContent": "Содержимое этого урока пока недоступно.",
       "keyboardHint": "← → для навигации · Esc для выхода"
     }
+  },
+  "Exercise": {
+    "submit": "Проверить",
+    "tryAgain": "Попробовать ещё",
+    "correctAnswer": "Правильный ответ",
+    "verdict": {
+      "correct": "Правильно!",
+      "partial": "Частично правильно",
+      "incorrect": "Неправильно"
+    },
+    "type": {
+      "cloze": "Вставьте слово",
+      "multiple_choice": "Один из вариантов",
+      "free_text": "Письменный ответ",
+      "pronunciation": "Произношение"
+    },
+    "cloze": {
+      "ariaLabel": "Упражнение на вставку слов",
+      "blankLabel": "Пропуск {n}"
+    },
+    "mc": {
+      "optionsLabel": "Варианты ответов"
+    },
+    "freeText": {
+      "placeholder": "Напишите ответ здесь…",
+      "ariaLabel": "Ваш ответ"
+    },
+    "pronunciation": {
+      "mobilePrompt": "Лучше на мобильном",
+      "mobileDescription": "Упражнения на произношение лучше выполнять в приложении VoxOrd.",
+      "openApp": "Открыть в VoxOrd"
+    },
+    "unsupportedType": "Тип упражнения \"{type}\" пока не поддерживается на веб."
   }
 }
