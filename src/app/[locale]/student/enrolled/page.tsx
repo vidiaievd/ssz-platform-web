@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { ContinueLearning } from '@/features/student/components/continue-learning';
 import { StreakWidget } from '@/features/student/components/streak-widget';
 import { UpcomingLessons } from '@/features/student/components/upcoming-lessons';
+import { VoxOrdPromo } from '@/features/student/components/voxord-promo';
 import { getMyProfile } from '@/features/profile/api/get-my-profile';
 
 export default async function EnrolledPage() {
@@ -23,6 +24,8 @@ export default async function EnrolledPage() {
       </div>
 
       <div className="space-y-10">
+        <VoxOrdPromo />
+
         <ContinueLearning />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

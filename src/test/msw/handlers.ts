@@ -2,11 +2,13 @@ import { http, HttpResponse } from 'msw';
 
 import { MOCK_SCHOOLS } from '@/app/api/discovery/schools/route';
 import { MOCK_ENROLLMENT_REQUESTS } from '@/app/api/enrollment/requests/route';
+import { MOCK_NOTIFICATIONS } from '@/app/api/notifications/route';
 import { MOCK_PROGRESS } from '@/app/api/student/progress/route';
 import { MOCK_UPCOMING } from '@/app/api/student/upcoming/route';
 import { MOCK_STREAK } from '@/app/api/student/streak/route';
 import type { SchoolsResponse } from '@/features/discovery/types';
 import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
+import type { NotificationsResponse } from '@/features/notifications/types';
 
 /**
  * Default handlers shared across tests, dev, and Storybook.
@@ -47,4 +49,10 @@ export const handlers = [
   http.get('/api/student/progress', () => HttpResponse.json(MOCK_PROGRESS)),
   http.get('/api/student/upcoming', () => HttpResponse.json(MOCK_UPCOMING)),
   http.get('/api/student/streak', () => HttpResponse.json(MOCK_STREAK)),
+
+  http.get('/api/notifications', () => {
+    const unreadCount = MOCK_NOTIFICATIONS.filter((n) => n.readAt === null).length;
+    const response: NotificationsResponse = { items: MOCK_NOTIFICATIONS, unreadCount };
+    return HttpResponse.json(response);
+  }),
 ];

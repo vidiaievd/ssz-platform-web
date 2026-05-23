@@ -550,6 +550,13 @@
       "days": "{count, plural, one {# день} few {# дні} many {# днів} other {# дні}}",
       "noActivity": "Пройдіть урок, щоб розпочати серію!"
     },
+    "voxordPromo": {
+      "title": "Практикуйте вимову на мобільному",
+      "description": "Завантажте VoxOrd, щоб тренувати мовлення та отримувати зворотний зв'язок у реальному часі.",
+      "appStore": "App Store",
+      "playStore": "Google Play",
+      "dismiss": "Закрити"
+    },
     "player": {
       "exit": "Назад",
       "position": "{current} / {total}",
@@ -594,5 +601,12 @@
       "openApp": "Відкрити у VoxOrd"
     },
     "unsupportedType": "Тип вправи \"{type}\" поки не підтримується на веб."
+  },
+  "Notifications": {
+    "title": "Сповіщення",
+    "label": "{count, plural, =0 {Сповіщення} one {# непрочитане} other {# непрочитаних}}",
+    "unread": "{count, plural, one {# непрочитане} other {# непрочитаних}}",
+    "unreadDot": "Непрочитане",
+    "empty": "Усі сповіщення прочитано!"
   }
 }

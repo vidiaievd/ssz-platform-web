@@ -550,6 +550,13 @@
       "days": "{count, plural, one {# dag} other {# dager}}",
       "noActivity": "Start en leksjon for å bygge rekken din!"
     },
+    "voxordPromo": {
+      "title": "Øv på uttale på mobil",
+      "description": "Last ned VoxOrd for å øve på tale og få sanntidstilbakemelding på uttalen din.",
+      "appStore": "App Store",
+      "playStore": "Google Play",
+      "dismiss": "Lukk"
+    },
     "player": {
       "exit": "Tilbake",
       "position": "{current} / {total}",
@@ -594,5 +601,12 @@
       "openApp": "Åpne i VoxOrd"
     },
     "unsupportedType": "Øvelsestype \"{type}\" er ikke støttet på web ennå."
+  },
+  "Notifications": {
+    "title": "Varsler",
+    "label": "{count, plural, =0 {Varsler} one {# ulest varsel} other {# uleste varsler}}",
+    "unread": "{count, plural, one {# ulest} other {# uleste}}",
+    "unreadDot": "Ulest",
+    "empty": "Ingen nye varsler!"
   }
 }

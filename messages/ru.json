@@ -550,6 +550,13 @@
       "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
       "noActivity": "Пройдите урок, чтобы начать серию!"
     },
+    "voxordPromo": {
+      "title": "Тренируйте произношение на мобильном",
+      "description": "Загрузите VoxOrd, чтобы практиковать речь и получать мгновенную обратную связь.",
+      "appStore": "App Store",
+      "playStore": "Google Play",
+      "dismiss": "Закрыть"
+    },
     "player": {
       "exit": "Назад",
       "position": "{current} / {total}",
@@ -594,5 +601,12 @@
       "openApp": "Открыть в VoxOrd"
     },
     "unsupportedType": "Тип упражнения \"{type}\" пока не поддерживается на веб."
+  },
+  "Notifications": {
+    "title": "Уведомления",
+    "label": "{count, plural, =0 {Уведомления} one {# непрочитанное} other {# непрочитанных}}",
+    "unread": "{count, plural, one {# непрочитанное} other {# непрочитанных}}",
+    "unreadDot": "Непрочитанное",
+    "empty": "Новых уведомлений нет!"
   }
 }
