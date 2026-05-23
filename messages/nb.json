@@ -519,5 +519,36 @@
     },
     "sentOn": "Sendt {date}",
     "reviewNote": "Notat fra skolen"
+  },
+  "Student": {
+    "dashboard": {
+      "greeting": "Velkommen tilbake!",
+      "greetingNamed": "Velkommen tilbake, {name}!",
+      "subtitle": "Her er hvor du slapp."
+    },
+    "continueLearning": {
+      "title": "Fortsett å lære",
+      "subtitle": "Fortsett der du slapp.",
+      "empty": "Ingen kurs er påbegynt ennå.",
+      "browseEnrolled": "Mine skoler",
+      "progress": "{completed} av {total} leksjoner",
+      "resume": "Fortsett",
+      "start": "Start"
+    },
+    "upcomingLessons": {
+      "title": "Neste opp",
+      "subtitle": "Dine neste leksjoner på tvers av kurs.",
+      "empty": "Ingen kommende leksjoner.",
+      "in": "i {container}",
+      "start": "Åpne"
+    },
+    "streak": {
+      "title": "Aktivitetsrekke",
+      "current": "Nåværende rekke",
+      "longest": "Lengste rekke",
+      "totalDays": "Totalt dager",
+      "days": "{count, plural, one {# dag} other {# dager}}",
+      "noActivity": "Start en leksjon for å bygge rekken din!"
+    }
   }
 }

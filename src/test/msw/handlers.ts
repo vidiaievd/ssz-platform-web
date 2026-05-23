@@ -2,6 +2,9 @@ import { http, HttpResponse } from 'msw';
 
 import { MOCK_SCHOOLS } from '@/app/api/discovery/schools/route';
 import { MOCK_ENROLLMENT_REQUESTS } from '@/app/api/enrollment/requests/route';
+import { MOCK_PROGRESS } from '@/app/api/student/progress/route';
+import { MOCK_UPCOMING } from '@/app/api/student/upcoming/route';
+import { MOCK_STREAK } from '@/app/api/student/streak/route';
 import type { SchoolsResponse } from '@/features/discovery/types';
 import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
 
@@ -40,4 +43,8 @@ export const handlers = [
     const response: EnrollmentRequestsResponse = { items: MOCK_ENROLLMENT_REQUESTS };
     return HttpResponse.json(response);
   }),
+
+  http.get('/api/student/progress', () => HttpResponse.json(MOCK_PROGRESS)),
+  http.get('/api/student/upcoming', () => HttpResponse.json(MOCK_UPCOMING)),
+  http.get('/api/student/streak', () => HttpResponse.json(MOCK_STREAK)),
 ];

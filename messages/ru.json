@@ -519,5 +519,36 @@
     },
     "sentOn": "Отправлено {date}",
     "reviewNote": "Примечание от школы"
+  },
+  "Student": {
+    "dashboard": {
+      "greeting": "С возвращением!",
+      "greetingNamed": "С возвращением, {name}!",
+      "subtitle": "Продолжите с того места, где остановились."
+    },
+    "continueLearning": {
+      "title": "Продолжить обучение",
+      "subtitle": "Продолжите с того места, где остановились.",
+      "empty": "Курсы в процессе не найдены.",
+      "browseEnrolled": "Мои школы",
+      "progress": "{completed} из {total} уроков",
+      "resume": "Продолжить",
+      "start": "Начать"
+    },
+    "upcomingLessons": {
+      "title": "Следующие уроки",
+      "subtitle": "Ваши следующие уроки по всем курсам.",
+      "empty": "Нет предстоящих уроков.",
+      "in": "в {container}",
+      "start": "Открыть"
+    },
+    "streak": {
+      "title": "Серия активности",
+      "current": "Текущая серия",
+      "longest": "Наибольшая серия",
+      "totalDays": "Всего дней",
+      "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
+      "noActivity": "Пройдите урок, чтобы начать серию!"
+    }
   }
 }

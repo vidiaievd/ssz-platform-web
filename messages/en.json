@@ -519,5 +519,36 @@
     },
     "sentOn": "Sent on {date}",
     "reviewNote": "Note from school"
+  },
+  "Student": {
+    "dashboard": {
+      "greeting": "Welcome back!",
+      "greetingNamed": "Welcome back, {name}!",
+      "subtitle": "Here's where you left off."
+    },
+    "continueLearning": {
+      "title": "Continue learning",
+      "subtitle": "Pick up where you left off.",
+      "empty": "No courses in progress yet.",
+      "browseEnrolled": "Browse my schools",
+      "progress": "{completed} of {total} lessons",
+      "resume": "Resume",
+      "start": "Start"
+    },
+    "upcomingLessons": {
+      "title": "Up next",
+      "subtitle": "Your next lessons across enrolled courses.",
+      "empty": "No upcoming lessons.",
+      "in": "in {container}",
+      "start": "Open"
+    },
+    "streak": {
+      "title": "Activity streak",
+      "current": "Current streak",
+      "longest": "Longest streak",
+      "totalDays": "Total days",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "noActivity": "Start a lesson to build your streak!"
+    }
   }
 }

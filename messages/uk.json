@@ -519,5 +519,36 @@
     },
     "sentOn": "Надіслано {date}",
     "reviewNote": "Примітка від школи"
+  },
+  "Student": {
+    "dashboard": {
+      "greeting": "З поверненням!",
+      "greetingNamed": "З поверненням, {name}!",
+      "subtitle": "Продовжуйте з того місця, де зупинились."
+    },
+    "continueLearning": {
+      "title": "Продовжити навчання",
+      "subtitle": "Продовжте з того місця, де зупинились.",
+      "empty": "Жодного курсу в процесі.",
+      "browseEnrolled": "Мої школи",
+      "progress": "{completed} з {total} уроків",
+      "resume": "Продовжити",
+      "start": "Почати"
+    },
+    "upcomingLessons": {
+      "title": "Наступні уроки",
+      "subtitle": "Ваші наступні уроки з усіх курсів.",
+      "empty": "Немає запланованих уроків.",
+      "in": "у {container}",
+      "start": "Відкрити"
+    },
+    "streak": {
+      "title": "Серія активності",
+      "current": "Поточна серія",
+      "longest": "Найдовша серія",
+      "totalDays": "Всього днів",
+      "days": "{count, plural, one {# день} few {# дні} many {# днів} other {# дні}}",
+      "noActivity": "Пройдіть урок, щоб розпочати серію!"
+    }
   }
 }
