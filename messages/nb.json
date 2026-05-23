@@ -38,7 +38,8 @@
     "content": "Innhold",
     "lessons": "Timer",
     "mySchools": "Mine skoler",
-    "settings": "Innstillinger"
+    "settings": "Innstillinger",
+    "discover": "Utforsk"
   },
   "RouteTitles": {
     "dashboard": "Oversikt",
@@ -466,5 +467,25 @@
     },
     "comingSoon": "Denne seksjonen vil være tilgjengelig i et fremtidig steg.",
     "backToContent": "Tilbake til innhold"
+  },
+  "Discovery": {
+    "title": "Oppdag skoler",
+    "subtitle": "Finn en skole eller lærer og begynn å lære i dag.",
+    "searchPlaceholder": "Søk etter skoler…",
+    "filterLanguage": "Språk",
+    "filterLevel": "Nivå",
+    "filterType": "Type",
+    "filterAll": "Alle",
+    "schoolType": {
+      "school": "Skole",
+      "tutor": "Privatlærer"
+    },
+    "requestEnrol": "Be om innmelding",
+    "containerCount": "{count, plural, one {# kurs} other {# kurs}}",
+    "studentCount": "{count, plural, one {# elev} other {# elever}}",
+    "free": "Gratis",
+    "fromPrice": "Fra {price} {currency}",
+    "noResults": "Ingen skoler funnet. Prøv å justere filtrene.",
+    "enrollComingSoon": "Innmeldingsforespørsel for {name} kommer snart."
   }
 }

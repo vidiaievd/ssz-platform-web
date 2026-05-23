@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {
   BookOpen,
+  Compass,
   LayoutDashboard,
   School,
   Settings,
@@ -34,6 +35,7 @@ const STUDENT_NAV: NavSection[] = [
   {
     items: [
       { href: '/student/dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
+      { href: '/student/discover', icon: Compass, labelKey: 'discover' },
       { href: '/student/lessons', icon: BookOpen, labelKey: 'lessons' },
       { href: '/student/enrolled', icon: School, labelKey: 'mySchools' },
     ],
