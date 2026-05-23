@@ -3,13 +3,16 @@
 import { useState } from 'react';
 import {
   BookOpen,
+  Compass,
   LayoutDashboard,
   School,
+  Send,
   Settings,
   Users,
 } from 'lucide-react';
 
 import type { CurrentUser } from '@/features/auth/types/current-user';
+import { NotificationBell } from '@/features/notifications';
 import { Sidebar } from './sidebar/sidebar';
 import { MobileSidebar } from './sidebar/mobile-sidebar';
 import { Topbar } from './topbar/topbar';
@@ -34,8 +37,10 @@ const STUDENT_NAV: NavSection[] = [
   {
     items: [
       { href: '/student/dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
+      { href: '/student/discover', icon: Compass, labelKey: 'discover' },
       { href: '/student/lessons', icon: BookOpen, labelKey: 'lessons' },
       { href: '/student/enrolled', icon: School, labelKey: 'mySchools' },
+      { href: '/student/enrolled/requests', icon: Send, labelKey: 'requests' },
     ],
   },
   {
@@ -69,7 +74,11 @@ export function AppShell({ variant, user, children }: AppShellProps) {
       />
 
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-        <Topbar user={user} onMenuOpen={() => setMobileOpen(true)} />
+        <Topbar
+          user={user}
+          onMenuOpen={() => setMobileOpen(true)}
+          actions={variant === 'student' ? <NotificationBell /> : undefined}
+        />
         <main className="flex-1 overflow-auto">
           {children}
         </main>

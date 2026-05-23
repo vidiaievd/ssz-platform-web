@@ -38,7 +38,9 @@
     "content": "Контент",
     "lessons": "Уроки",
     "mySchools": "Мои школы",
-    "settings": "Настройки"
+    "settings": "Настройки",
+    "discover": "Найти",
+    "requests": "Заявки"
   },
   "RouteTitles": {
     "dashboard": "Обзор",
@@ -466,5 +468,145 @@
     },
     "comingSoon": "Этот раздел будет доступен на следующем шаге.",
     "backToContent": "К материалам"
+  },
+  "Discovery": {
+    "title": "Найти школу",
+    "subtitle": "Найдите школу или репетитора и начните обучение сегодня.",
+    "searchPlaceholder": "Поиск школ…",
+    "filterLanguage": "Язык",
+    "filterLevel": "Уровень",
+    "filterType": "Тип",
+    "filterAll": "Все",
+    "schoolType": {
+      "school": "Школа",
+      "tutor": "Репетитор"
+    },
+    "requestEnrol": "Подать заявку",
+    "containerCount": "{count, plural, one {# курс} few {# курса} many {# курсов} other {# курса}}",
+    "studentCount": "{count, plural, one {# ученик} few {# ученика} many {# учеников} other {# ученика}}",
+    "free": "Бесплатно",
+    "fromPrice": "От {price} {currency}",
+    "noResults": "Школы не найдены. Попробуйте изменить фильтры.",
+    "enrollComingSoon": "Заявка на зачисление в {name} скоро появится."
+  },
+  "Enrollment": {
+    "request": {
+      "title": "Заявка на зачисление — {name}",
+      "description": "Расскажите школе о себе и почему вы хотите присоединиться.",
+      "messageLabel": "Сообщение (необязательно)",
+      "messagePlaceholder": "Расскажите школе о себе…",
+      "levelLabel": "Ваш текущий уровень (необязательно)",
+      "levelPlaceholder": "Выберите уровень",
+      "submit": "Отправить заявку",
+      "cancel": "Отменить",
+      "success": "Ваша заявка в {name} отправлена."
+    },
+    "requests": {
+      "title": "Заявки на зачисление",
+      "subtitle": "Отслеживайте статус ваших заявок.",
+      "empty": "Заявок пока нет. Найдите школу и подайте заявку.",
+      "tab": {
+        "all": "Все",
+        "pending": "На рассмотрении",
+        "approved": "Одобрено",
+        "rejected": "Отклонено"
+      }
+    },
+    "status": {
+      "pending": "На рассмотрении",
+      "approved": "Одобрено",
+      "rejected": "Отклонено"
+    },
+    "sentOn": "Отправлено {date}",
+    "reviewNote": "Примечание от школы"
+  },
+  "Student": {
+    "dashboard": {
+      "greeting": "С возвращением!",
+      "greetingNamed": "С возвращением, {name}!",
+      "subtitle": "Продолжите с того места, где остановились."
+    },
+    "continueLearning": {
+      "title": "Продолжить обучение",
+      "subtitle": "Продолжите с того места, где остановились.",
+      "empty": "Курсы в процессе не найдены.",
+      "browseEnrolled": "Мои школы",
+      "progress": "{completed} из {total} уроков",
+      "resume": "Продолжить",
+      "start": "Начать"
+    },
+    "upcomingLessons": {
+      "title": "Следующие уроки",
+      "subtitle": "Ваши следующие уроки по всем курсам.",
+      "empty": "Нет предстоящих уроков.",
+      "in": "в {container}",
+      "start": "Открыть"
+    },
+    "streak": {
+      "title": "Серия активности",
+      "current": "Текущая серия",
+      "longest": "Наибольшая серия",
+      "totalDays": "Всего дней",
+      "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
+      "noActivity": "Пройдите урок, чтобы начать серию!"
+    },
+    "voxordPromo": {
+      "title": "Тренируйте произношение на мобильном",
+      "description": "Загрузите VoxOrd, чтобы практиковать речь и получать мгновенную обратную связь.",
+      "appStore": "App Store",
+      "playStore": "Google Play",
+      "dismiss": "Закрыть"
+    },
+    "player": {
+      "exit": "Назад",
+      "position": "{current} / {total}",
+      "prev": "Предыдущий",
+      "completeAndNext": "Завершить и далее",
+      "markComplete": "Отметить как пройденный",
+      "completed": "Пройдено",
+      "completedToast": "Урок завершён! Отличная работа.",
+      "noContent": "Содержимое этого урока пока недоступно.",
+      "keyboardHint": "← → для навигации · Esc для выхода"
+    }
+  },
+  "Exercise": {
+    "submit": "Проверить",
+    "tryAgain": "Попробовать ещё",
+    "correctAnswer": "Правильный ответ",
+    "verdict": {
+      "correct": "Правильно!",
+      "partial": "Частично правильно",
+      "incorrect": "Неправильно"
+    },
+    "type": {
+      "cloze": "Вставьте слово",
+      "multiple_choice": "Один из вариантов",
+      "free_text": "Письменный ответ",
+      "pronunciation": "Произношение"
+    },
+    "cloze": {
+      "ariaLabel": "Упражнение на вставку слов",
+      "blankLabel": "Пропуск {n}"
+    },
+    "mc": {
+      "optionsLabel": "Варианты ответов"
+    },
+    "freeText": {
+      "placeholder": "Напишите ответ здесь…",
+      "ariaLabel": "Ваш ответ"
+    },
+    "pronunciation": {
+      "mobilePrompt": "Лучше на мобильном",
+      "mobileDescription": "Упражнения на произношение лучше выполнять в приложении VoxOrd.",
+      "openApp": "Открыть в VoxOrd"
+    },
+    "unsupportedType": "Тип упражнения \"{type}\" пока не поддерживается на веб."
+  },
+  "Notifications": {
+    "title": "Уведомления",
+    "label": "{count, plural, =0 {Уведомления} one {# непрочитанное} other {# непрочитанных}}",
+    "unread": "{count, plural, one {# непрочитанное} other {# непрочитанных}}",
+    "unreadDot": "Непрочитанное",
+    "empty": "Новых уведомлений нет!"
   }
 }

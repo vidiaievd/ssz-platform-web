@@ -2,8 +2,10 @@ import 'server-only';
 
 /**
  * Returns active enrollment IDs for the current user.
- * Stub implementation — returns empty until the Enrollment service is integrated (Phase 9+).
+ * Stub returns one approved enrollment so the enrolled dashboard is accessible in dev.
+ * Replace with serverFetch({ service: 'enrollment', path: '/api/v1/enrollments/me' })
+ * when the Enrollment service is available.
  */
 export async function getEnrollmentStatus(): Promise<string[]> {
-  return [];
+  return ['school-1'];
 }

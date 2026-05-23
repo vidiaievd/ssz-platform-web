@@ -38,7 +38,9 @@
     "content": "Innhold",
     "lessons": "Timer",
     "mySchools": "Mine skoler",
-    "settings": "Innstillinger"
+    "settings": "Innstillinger",
+    "discover": "Utforsk",
+    "requests": "Søknader"
   },
   "RouteTitles": {
     "dashboard": "Oversikt",
@@ -466,5 +468,145 @@
     },
     "comingSoon": "Denne seksjonen vil være tilgjengelig i et fremtidig steg.",
     "backToContent": "Tilbake til innhold"
+  },
+  "Discovery": {
+    "title": "Oppdag skoler",
+    "subtitle": "Finn en skole eller lærer og begynn å lære i dag.",
+    "searchPlaceholder": "Søk etter skoler…",
+    "filterLanguage": "Språk",
+    "filterLevel": "Nivå",
+    "filterType": "Type",
+    "filterAll": "Alle",
+    "schoolType": {
+      "school": "Skole",
+      "tutor": "Privatlærer"
+    },
+    "requestEnrol": "Be om innmelding",
+    "containerCount": "{count, plural, one {# kurs} other {# kurs}}",
+    "studentCount": "{count, plural, one {# elev} other {# elever}}",
+    "free": "Gratis",
+    "fromPrice": "Fra {price} {currency}",
+    "noResults": "Ingen skoler funnet. Prøv å justere filtrene.",
+    "enrollComingSoon": "Innmeldingsforespørsel for {name} kommer snart."
+  },
+  "Enrollment": {
+    "request": {
+      "title": "Be om innmelding — {name}",
+      "description": "Fortell skolen om deg selv og hvorfor du vil bli med.",
+      "messageLabel": "Melding (valgfritt)",
+      "messagePlaceholder": "Fortell skolen om deg selv…",
+      "levelLabel": "Ditt nåværende nivå (valgfritt)",
+      "levelPlaceholder": "Velg nivå",
+      "submit": "Send søknad",
+      "cancel": "Avbryt",
+      "success": "Din innmeldingsførespørsel til {name} er sendt."
+    },
+    "requests": {
+      "title": "Innmeldingsførespørsler",
+      "subtitle": "Følg statusen på innmeldingsførespørslene dine.",
+      "empty": "Ingen førespørsler ennå. Finn en skole og søk.",
+      "tab": {
+        "all": "Alle",
+        "pending": "Venter",
+        "approved": "Godkjent",
+        "rejected": "Avvist"
+      }
+    },
+    "status": {
+      "pending": "Venter",
+      "approved": "Godkjent",
+      "rejected": "Avvist"
+    },
+    "sentOn": "Sendt {date}",
+    "reviewNote": "Notat fra skolen"
+  },
+  "Student": {
+    "dashboard": {
+      "greeting": "Velkommen tilbake!",
+      "greetingNamed": "Velkommen tilbake, {name}!",
+      "subtitle": "Her er hvor du slapp."
+    },
+    "continueLearning": {
+      "title": "Fortsett å lære",
+      "subtitle": "Fortsett der du slapp.",
+      "empty": "Ingen kurs er påbegynt ennå.",
+      "browseEnrolled": "Mine skoler",
+      "progress": "{completed} av {total} leksjoner",
+      "resume": "Fortsett",
+      "start": "Start"
+    },
+    "upcomingLessons": {
+      "title": "Neste opp",
+      "subtitle": "Dine neste leksjoner på tvers av kurs.",
+      "empty": "Ingen kommende leksjoner.",
+      "in": "i {container}",
+      "start": "Åpne"
+    },
+    "streak": {
+      "title": "Aktivitetsrekke",
+      "current": "Nåværende rekke",
+      "longest": "Lengste rekke",
+      "totalDays": "Totalt dager",
+      "days": "{count, plural, one {# dag} other {# dager}}",
+      "noActivity": "Start en leksjon for å bygge rekken din!"
+    },
+    "voxordPromo": {
+      "title": "Øv på uttale på mobil",
+      "description": "Last ned VoxOrd for å øve på tale og få sanntidstilbakemelding på uttalen din.",
+      "appStore": "App Store",
+      "playStore": "Google Play",
+      "dismiss": "Lukk"
+    },
+    "player": {
+      "exit": "Tilbake",
+      "position": "{current} / {total}",
+      "prev": "Forrige",
+      "completeAndNext": "Fullfør og neste",
+      "markComplete": "Merk som fullført",
+      "completed": "Fullført",
+      "completedToast": "Leksjon fullført! Bra jobba.",
+      "noContent": "Ingen innhold tilgjengelig for denne leksjonen ennå.",
+      "keyboardHint": "← → for å navigere · Esc for å avslutte"
+    }
+  },
+  "Exercise": {
+    "submit": "Sjekk svar",
+    "tryAgain": "Prøv igjen",
+    "correctAnswer": "Riktig svar",
+    "verdict": {
+      "correct": "Riktig!",
+      "partial": "Delvis riktig",
+      "incorrect": "Feil"
+    },
+    "type": {
+      "cloze": "Fyll inn blankt",
+      "multiple_choice": "Flervalg",
+      "free_text": "Skriftlig svar",
+      "pronunciation": "Uttale"
+    },
+    "cloze": {
+      "ariaLabel": "Fyll-inn-blankt øvelse",
+      "blankLabel": "Blank {n}"
+    },
+    "mc": {
+      "optionsLabel": "Svaralternativer"
+    },
+    "freeText": {
+      "placeholder": "Skriv svaret ditt her…",
+      "ariaLabel": "Ditt svar"
+    },
+    "pronunciation": {
+      "mobilePrompt": "Best på mobil",
+      "mobileDescription": "Uttaleøvelser er best i VoxOrd-appen med sanntidstilbakemelding.",
+      "openApp": "Åpne i VoxOrd"
+    },
+    "unsupportedType": "Øvelsestype \"{type}\" er ikke støttet på web ennå."
+  },
+  "Notifications": {
+    "title": "Varsler",
+    "label": "{count, plural, =0 {Varsler} one {# ulest varsel} other {# uleste varsler}}",
+    "unread": "{count, plural, one {# ulest} other {# uleste}}",
+    "unreadDot": "Ulest",
+    "empty": "Ingen nye varsler!"
   }
 }

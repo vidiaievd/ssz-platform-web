@@ -38,7 +38,9 @@
     "content": "Content",
     "lessons": "Lessons",
     "mySchools": "My Schools",
-    "settings": "Settings"
+    "settings": "Settings",
+    "discover": "Discover",
+    "requests": "Requests"
   },
   "RouteTitles": {
     "dashboard": "Dashboard",
@@ -466,5 +468,145 @@
     },
     "comingSoon": "This section will be available in a future step.",
     "backToContent": "Back to content"
+  },
+  "Discovery": {
+    "title": "Discover Schools",
+    "subtitle": "Find a school or tutor and start learning today.",
+    "searchPlaceholder": "Search schools…",
+    "filterLanguage": "Language",
+    "filterLevel": "Level",
+    "filterType": "Type",
+    "filterAll": "All",
+    "schoolType": {
+      "school": "School",
+      "tutor": "Tutor"
+    },
+    "requestEnrol": "Request to Enrol",
+    "containerCount": "{count, plural, one {# course} other {# courses}}",
+    "studentCount": "{count, plural, one {# student} other {# students}}",
+    "free": "Free",
+    "fromPrice": "From {price} {currency}",
+    "noResults": "No schools found. Try adjusting the filters.",
+    "enrollComingSoon": "Enrolment request for {name} coming soon."
+  },
+  "Enrollment": {
+    "request": {
+      "title": "Request to enrol — {name}",
+      "description": "Tell the school about yourself and why you'd like to join.",
+      "messageLabel": "Message (optional)",
+      "messagePlaceholder": "Tell the school about yourself…",
+      "levelLabel": "Your current level (optional)",
+      "levelPlaceholder": "Select level",
+      "submit": "Send request",
+      "cancel": "Cancel",
+      "success": "Your enrolment request to {name} has been sent."
+    },
+    "requests": {
+      "title": "Enrolment requests",
+      "subtitle": "Track the status of your enrolment requests.",
+      "empty": "No requests yet. Discover a school and apply.",
+      "tab": {
+        "all": "All",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "sentOn": "Sent on {date}",
+    "reviewNote": "Note from school"
+  },
+  "Student": {
+    "dashboard": {
+      "greeting": "Welcome back!",
+      "greetingNamed": "Welcome back, {name}!",
+      "subtitle": "Here's where you left off."
+    },
+    "continueLearning": {
+      "title": "Continue learning",
+      "subtitle": "Pick up where you left off.",
+      "empty": "No courses in progress yet.",
+      "browseEnrolled": "Browse my schools",
+      "progress": "{completed} of {total} lessons",
+      "resume": "Resume",
+      "start": "Start"
+    },
+    "upcomingLessons": {
+      "title": "Up next",
+      "subtitle": "Your next lessons across enrolled courses.",
+      "empty": "No upcoming lessons.",
+      "in": "in {container}",
+      "start": "Open"
+    },
+    "streak": {
+      "title": "Activity streak",
+      "current": "Current streak",
+      "longest": "Longest streak",
+      "totalDays": "Total days",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "noActivity": "Start a lesson to build your streak!"
+    },
+    "voxordPromo": {
+      "title": "Practice pronunciation on mobile",
+      "description": "Download VoxOrd to practise speaking and get real-time feedback on your pronunciation.",
+      "appStore": "App Store",
+      "playStore": "Google Play",
+      "dismiss": "Dismiss"
+    },
+    "player": {
+      "exit": "Back",
+      "position": "{current} / {total}",
+      "prev": "Previous",
+      "completeAndNext": "Complete & Next",
+      "markComplete": "Mark Complete",
+      "completed": "Completed",
+      "completedToast": "Lesson complete! Great work.",
+      "noContent": "No content available for this lesson yet.",
+      "keyboardHint": "← → to navigate · Esc to exit"
+    }
+  },
+  "Exercise": {
+    "submit": "Check answer",
+    "tryAgain": "Try again",
+    "correctAnswer": "Correct answer",
+    "verdict": {
+      "correct": "Correct!",
+      "partial": "Partially correct",
+      "incorrect": "Incorrect"
+    },
+    "type": {
+      "cloze": "Fill in the blank",
+      "multiple_choice": "Multiple choice",
+      "free_text": "Written response",
+      "pronunciation": "Pronunciation"
+    },
+    "cloze": {
+      "ariaLabel": "Fill-in-the-blank exercise",
+      "blankLabel": "Blank {n}"
+    },
+    "mc": {
+      "optionsLabel": "Answer options"
+    },
+    "freeText": {
+      "placeholder": "Write your answer here…",
+      "ariaLabel": "Your answer"
+    },
+    "pronunciation": {
+      "mobilePrompt": "Best on mobile",
+      "mobileDescription": "Pronunciation practice is best in the VoxOrd app with real-time feedback.",
+      "openApp": "Open in VoxOrd"
+    },
+    "unsupportedType": "Exercise type \"{type}\" is not yet supported on web."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "label": "{count, plural, =0 {Notifications} one {# unread notification} other {# unread notifications}}",
+    "unread": "{count, plural, one {# unread} other {# unread}}",
+    "unreadDot": "Unread",
+    "empty": "You're all caught up!"
   }
 }

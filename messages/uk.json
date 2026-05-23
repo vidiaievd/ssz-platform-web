@@ -38,7 +38,9 @@
     "content": "Контент",
     "lessons": "Уроки",
     "mySchools": "Мої школи",
-    "settings": "Налаштування"
+    "settings": "Налаштування",
+    "discover": "Знайти",
+    "requests": "Заявки"
   },
   "RouteTitles": {
     "dashboard": "Огляд",
@@ -466,5 +468,145 @@
     },
     "comingSoon": "Цей розділ буде доступний у наступному кроці.",
     "backToContent": "Повернутися до матеріалів"
+  },
+  "Discovery": {
+    "title": "Знайти школу",
+    "subtitle": "Знайдіть школу або репетитора та почніть навчання сьогодні.",
+    "searchPlaceholder": "Пошук шкіл…",
+    "filterLanguage": "Мова",
+    "filterLevel": "Рівень",
+    "filterType": "Тип",
+    "filterAll": "Всі",
+    "schoolType": {
+      "school": "Школа",
+      "tutor": "Репетитор"
+    },
+    "requestEnrol": "Подати заявку",
+    "containerCount": "{count, plural, one {# курс} few {# курси} many {# курсів} other {# курсу}}",
+    "studentCount": "{count, plural, one {# учень} few {# учні} many {# учнів} other {# учня}}",
+    "free": "Безкоштовно",
+    "fromPrice": "Від {price} {currency}",
+    "noResults": "Школи не знайдено. Спробуйте змінити фільтри.",
+    "enrollComingSoon": "Заявка на зарахування до {name} незабаром."
+  },
+  "Enrollment": {
+    "request": {
+      "title": "Заявка на зарахування — {name}",
+      "description": "Розкажіть школі про себе та чому ви хочете приєднатися.",
+      "messageLabel": "Повідомлення (необов’язково)",
+      "messagePlaceholder": "Розкажіть школі про себе…",
+      "levelLabel": "Ваш поточний рівень (необов’язково)",
+      "levelPlaceholder": "Оберіть рівень",
+      "submit": "Надіслати заявку",
+      "cancel": "Скасувати",
+      "success": "Вашу заявку до {name} надіслано."
+    },
+    "requests": {
+      "title": "Заявки на зарахування",
+      "subtitle": "Відстежуйте статус ваших заявок.",
+      "empty": "Заявок ще немає. Знайдіть школу та подайте заявку.",
+      "tab": {
+        "all": "Всі",
+        "pending": "На розгляді",
+        "approved": "Схвалено",
+        "rejected": "Відхилено"
+      }
+    },
+    "status": {
+      "pending": "На розгляді",
+      "approved": "Схвалено",
+      "rejected": "Відхилено"
+    },
+    "sentOn": "Надіслано {date}",
+    "reviewNote": "Примітка від школи"
+  },
+  "Student": {
+    "dashboard": {
+      "greeting": "З поверненням!",
+      "greetingNamed": "З поверненням, {name}!",
+      "subtitle": "Продовжуйте з того місця, де зупинились."
+    },
+    "continueLearning": {
+      "title": "Продовжити навчання",
+      "subtitle": "Продовжте з того місця, де зупинились.",
+      "empty": "Жодного курсу в процесі.",
+      "browseEnrolled": "Мої школи",
+      "progress": "{completed} з {total} уроків",
+      "resume": "Продовжити",
+      "start": "Почати"
+    },
+    "upcomingLessons": {
+      "title": "Наступні уроки",
+      "subtitle": "Ваші наступні уроки з усіх курсів.",
+      "empty": "Немає запланованих уроків.",
+      "in": "у {container}",
+      "start": "Відкрити"
+    },
+    "streak": {
+      "title": "Серія активності",
+      "current": "Поточна серія",
+      "longest": "Найдовша серія",
+      "totalDays": "Всього днів",
+      "days": "{count, plural, one {# день} few {# дні} many {# днів} other {# дні}}",
+      "noActivity": "Пройдіть урок, щоб розпочати серію!"
+    },
+    "voxordPromo": {
+      "title": "Практикуйте вимову на мобільному",
+      "description": "Завантажте VoxOrd, щоб тренувати мовлення та отримувати зворотний зв'язок у реальному часі.",
+      "appStore": "App Store",
+      "playStore": "Google Play",
+      "dismiss": "Закрити"
+    },
+    "player": {
+      "exit": "Назад",
+      "position": "{current} / {total}",
+      "prev": "Попередній",
+      "completeAndNext": "Завершити та далі",
+      "markComplete": "Позначити як завершений",
+      "completed": "Завершено",
+      "completedToast": "Урок завершено! Чудова робота.",
+      "noContent": "Вміст цього уроку ще недоступний.",
+      "keyboardHint": "← → для навігації · Esc для виходу"
+    }
+  },
+  "Exercise": {
+    "submit": "Перевірити",
+    "tryAgain": "Спробувати ще",
+    "correctAnswer": "Правильна відповідь",
+    "verdict": {
+      "correct": "Правильно!",
+      "partial": "Частково правильно",
+      "incorrect": "Неправильно"
+    },
+    "type": {
+      "cloze": "Вставте слово",
+      "multiple_choice": "Один із варіантів",
+      "free_text": "Письмова відповідь",
+      "pronunciation": "Вимова"
+    },
+    "cloze": {
+      "ariaLabel": "Вправа на заповнення пропусків",
+      "blankLabel": "Пропуск {n}"
+    },
+    "mc": {
+      "optionsLabel": "Варіанти відповідей"
+    },
+    "freeText": {
+      "placeholder": "Напишіть відповідь тут…",
+      "ariaLabel": "Ваша відповідь"
+    },
+    "pronunciation": {
+      "mobilePrompt": "Краще на мобільному",
+      "mobileDescription": "Вправи на вимову найкраще виконувати в додатку VoxOrd.",
+      "openApp": "Відкрити у VoxOrd"
+    },
+    "unsupportedType": "Тип вправи \"{type}\" поки не підтримується на веб."
+  },
+  "Notifications": {
+    "title": "Сповіщення",
+    "label": "{count, plural, =0 {Сповіщення} one {# непрочитане} other {# непрочитаних}}",
+    "unread": "{count, plural, one {# непрочитане} other {# непрочитаних}}",
+    "unreadDot": "Непрочитане",
+    "empty": "Усі сповіщення прочитано!"
   }
 }

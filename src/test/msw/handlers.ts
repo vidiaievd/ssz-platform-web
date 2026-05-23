@@ -1,5 +1,15 @@
 import { http, HttpResponse } from 'msw';
 
+import { MOCK_SCHOOLS } from '@/app/api/discovery/schools/route';
+import { MOCK_ENROLLMENT_REQUESTS } from '@/app/api/enrollment/requests/route';
+import { MOCK_NOTIFICATIONS } from '@/app/api/notifications/route';
+import { MOCK_PROGRESS } from '@/app/api/student/progress/route';
+import { MOCK_UPCOMING } from '@/app/api/student/upcoming/route';
+import { MOCK_STREAK } from '@/app/api/student/streak/route';
+import type { SchoolsResponse } from '@/features/discovery/types';
+import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
+import type { NotificationsResponse } from '@/features/notifications/types';
+
 /**
  * Default handlers shared across tests, dev, and Storybook.
  * Feature-specific handlers live next to their features and are
@@ -7,4 +17,42 @@ import { http, HttpResponse } from 'msw';
  */
 export const handlers = [
   http.get('/api/health', () => HttpResponse.json({ ok: true })),
+
+  http.get('/api/discovery/schools', ({ request }) => {
+    const url = new URL(request.url);
+    const search = url.searchParams.get('search')?.toLowerCase();
+    const language = url.searchParams.get('language');
+    const level = url.searchParams.get('level');
+    const type = url.searchParams.get('type');
+
+    let results = MOCK_SCHOOLS;
+    if (search)
+      results = results.filter(
+        (s) => s.name.toLowerCase().includes(search) || s.description?.toLowerCase().includes(search),
+      );
+    if (language) results = results.filter((s) => s.targetLanguages.includes(language));
+    if (level) results = results.filter((s) => s.levels.includes(level as never));
+    if (type) results = results.filter((s) => s.type === type);
+
+    const response: SchoolsResponse = {
+      items: results,
+      pageInfo: { hasNextPage: false, total: results.length },
+    };
+    return HttpResponse.json(response);
+  }),
+
+  http.get('/api/enrollment/requests', () => {
+    const response: EnrollmentRequestsResponse = { items: MOCK_ENROLLMENT_REQUESTS };
+    return HttpResponse.json(response);
+  }),
+
+  http.get('/api/student/progress', () => HttpResponse.json(MOCK_PROGRESS)),
+  http.get('/api/student/upcoming', () => HttpResponse.json(MOCK_UPCOMING)),
+  http.get('/api/student/streak', () => HttpResponse.json(MOCK_STREAK)),
+
+  http.get('/api/notifications', () => {
+    const unreadCount = MOCK_NOTIFICATIONS.filter((n) => n.readAt === null).length;
+    const response: NotificationsResponse = { items: MOCK_NOTIFICATIONS, unreadCount };
+    return HttpResponse.json(response);
+  }),
 ];
