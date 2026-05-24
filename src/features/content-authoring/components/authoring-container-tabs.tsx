@@ -7,10 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter, usePathname } from '@/lib/i18n/navigation';
 import type { Container } from '@/features/content/types';
 
+import type { PreflightResult, SchoolRole } from '../types';
+import { deriveContainerState } from './container-state-badge';
 import { ContainerForm } from './container-form';
+import { DangerZone } from './danger-zone';
 import { ExerciseList } from './exercise-list';
 import { GrammarList } from './grammar-list';
 import { LessonList } from './lesson-list';
+import { PreflightPanel } from './preflight-panel';
 import { PublishDialog } from './publish-dialog';
 import { SharingPanel } from './sharing-panel';
 import { TagInput } from './tag-input';
@@ -27,15 +31,23 @@ type AuthoringTab =
 
 interface AuthoringContainerTabsProps {
   container: Container;
+  schoolRole?: SchoolRole;
+  preflightResult?: PreflightResult;
 }
 
-export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProps) {
+export function AuthoringContainerTabs({
+  container,
+  schoolRole = 'owner',
+  preflightResult,
+}: AuthoringContainerTabsProps) {
   const t = useTranslations('Authoring');
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
   const activeTab = (searchParams.get('tab') as AuthoringTab | null) ?? 'overview';
+  const state = deriveContainerState(container);
+  const isOwnerOrAdmin = schoolRole === 'owner' || schoolRole === 'admin';
 
   function handleTabChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -56,13 +68,37 @@ export function AuthoringContainerTabs({ container }: AuthoringContainerTabsProp
       </TabsList>
 
       <TabsContent value="overview">
-        <ContainerForm mode="edit" container={container} />
-        {!container.isPublished && (
-          <div className="mt-6 border-t border-border pt-6">
-            <PublishDialog container={container} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+          {/* Left: edit form + publish action */}
+          <div className="lg:col-span-2 space-y-6">
+            <ContainerForm mode="edit" container={container} />
+            {state === 'draft' && (
+              <div className="border-t border-border pt-6">
+                <PublishDialog container={container} />
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Right: preflight panel (draft) + danger zone */}
+          <div className="space-y-4">
+            {state === 'draft' && (
+              <PreflightPanel
+                containerId={container.id}
+                result={preflightResult}
+              />
+            )}
+            {isOwnerOrAdmin && (
+              <DangerZone
+                containerId={container.id}
+                containerTitle={container.title}
+                state={state}
+                role={schoolRole}
+              />
+            )}
+          </div>
+        </div>
       </TabsContent>
+
       <TabsContent value="lessons">
         <LessonList container={container} />
       </TabsContent>

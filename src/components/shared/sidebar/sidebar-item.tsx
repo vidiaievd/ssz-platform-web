@@ -27,9 +27,9 @@ export function SidebarItem({ href, icon: Icon, labelKey, match, collapsed }: Si
       className={cn(
         'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        'hover:bg-accent hover:text-accent-foreground',
+        'hover:bg-primary/10 hover:text-primary',
         active
-          ? 'bg-accent text-accent-foreground'
+          ? 'bg-primary/10 text-primary'
           : 'text-(--ssz-text-secondary)',
         collapsed && 'justify-center px-2',
       )}
