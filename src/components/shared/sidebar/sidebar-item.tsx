@@ -9,7 +9,8 @@ import type { NavItem } from './types';
 
 type SidebarItemProps = NavItem & { collapsed: boolean };
 
-function isActive(pathname: string, href: string, match?: NavItem['match']): boolean {
+function isActive(pathname: string | null, href: string, match?: NavItem['match']): boolean {
+  if (!pathname) return false;
   if (match) return match(pathname);
   return pathname === href || pathname.startsWith(href + '/');
 }

@@ -16,11 +16,11 @@ const buttonVariants = cva(
       variant: {
         primary: [
           "bg-primary text-white",
-          "hover:bg-primary-600 active:bg-primary-700 active:scale-[0.98]",
+          "hover:bg-primary-700 active:bg-primary-800 active:scale-[0.98]",
         ].join(" "),
         secondary: [
-          "bg-[oklch(0.67_0.11_82)] text-white",
-          "hover:bg-[oklch(0.57_0.105_82)] active:bg-[oklch(0.46_0.09_82)] active:scale-[0.98]",
+          "bg-[oklch(0.52_0.11_82)] text-white",
+          "hover:bg-[oklch(0.44_0.10_82)] active:bg-[oklch(0.36_0.09_82)] active:scale-[0.98]",
         ].join(" "),
         outline: [
           "border-[1.5px] border-primary text-primary bg-transparent",
