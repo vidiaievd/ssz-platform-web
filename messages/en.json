@@ -231,12 +231,17 @@
     },
     "status": {
       "draft": "Draft",
-      "published": "Published"
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "breadcrumb": {
+      "courses": "Courses"
     },
     "filters": {
       "all": "All",
       "draft": "Draft",
-      "published": "Published"
+      "published": "Published",
+      "archived": "Archived"
     },
     "tabs": {
       "overview": "Overview",

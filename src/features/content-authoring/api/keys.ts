@@ -1,10 +1,12 @@
 import { keyFactory } from '@/lib/query/keys';
 
-import type { AuthoringFilters } from '../types';
+import type { AuthoringFilters, ContainerListQuery } from '../types';
 
 export const authoringKeys = keyFactory('authoring', {
-  containers: (filters?: AuthoringFilters) => ['containers', filters ?? {}] as const,
+  containers: (filters?: AuthoringFilters | ContainerListQuery) => ['containers', filters ?? {}] as const,
   container: (id: string) => ['container', id] as const,
+  preflight: (id: string) => ['preflight', id] as const,
+  activity: (id: string) => ['activity', id] as const,
   lessons: (containerId: string) => ['lessons', containerId] as const,
   lesson: (id: string) => ['lesson', id] as const,
   lessonVariants: (lessonId: string) => ['lesson-variants', lessonId] as const,

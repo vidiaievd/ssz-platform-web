@@ -1,16 +1,17 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { ArrowLeft } from 'lucide-react';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/i18n/navigation';
-import type { Container } from '@/features/content/types';
+import type { Container, ContainerItem } from '@/features/content/types';
 import { AuthoringContainerTabs } from '@/features/content-authoring/components/authoring-container-tabs';
+import { ContainerStateBadge, deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
+import { CourseStatusBanner } from '@/features/content-authoring/components/course-status-banner';
+import { runPreflight } from '@/features/content-authoring/lib/preflight';
+import type { PreflightResult, SchoolRole } from '@/features/content-authoring/types';
 
 function TabsSkeleton() {
   return (
@@ -40,27 +41,61 @@ export default async function ContainerDetailPage({
     throw e;
   }
 
+  const state = deriveContainerState(container);
+
+  // Fetch preflight data server-side for draft containers to populate the status banner
+  let preflight: PreflightResult | undefined;
+  if (state === 'draft') {
+    try {
+      const itemsResp = await serverFetch<{ items: ContainerItem[] }>({
+        service: 'content',
+        path: `/api/v1/containers/${id}/versions`,
+        query: { limit: '1' },
+      }).catch(() => ({ items: [] as ContainerItem[] }));
+      preflight = runPreflight(container, itemsResp.items ?? []);
+    } catch {
+      // leave preflight undefined; banner shows without counts
+    }
+  }
+
+  // TODO: derive from Organization Service in Phase 18
+  const schoolRole: SchoolRole = 'owner';
+
   return (
-    <main className="p-8">
-      <div className="mb-8">
-        <Button variant="ghost" size="sm" className="-ml-2 mb-4" asChild>
-          <Link href="/school/content">
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            {t('backToContent')}
-          </Link>
-        </Button>
-        <div className="flex flex-wrap items-start gap-3">
-          <h1 className="text-2xl font-semibold">{container.title}</h1>
-          <Badge variant={container.isPublished ? 'success' : 'muted'}>
-            {t(container.isPublished ? 'status.published' : 'status.draft')}
-          </Badge>
-        </div>
-        {container.description && (
-          <p className="text-muted-foreground mt-1 text-sm">{container.description}</p>
-        )}
+    <main className="p-8 max-w-7xl mx-auto">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-5">
+        <Link href="/school/content" className="hover:text-foreground transition-colors">
+          {t('breadcrumb.courses')}
+        </Link>
+        <span aria-hidden>/</span>
+        <span className="text-foreground font-medium truncate max-w-xs">{container.title}</span>
+      </nav>
+
+      {/* Header */}
+      <div className="flex flex-wrap items-start gap-2 mb-4">
+        <h1 className="text-2xl font-semibold">{container.title}</h1>
+        <ContainerStateBadge state={state} className="mt-1" />
       </div>
+      {container.description && (
+        <p className="text-muted-foreground mb-4 text-sm">{container.description}</p>
+      )}
+
+      {/* Status banner */}
+      <div className="mb-6">
+        <CourseStatusBanner
+          container={container}
+          blockerCount={preflight?.blockerCount}
+          warningCount={preflight?.warningCount}
+        />
+      </div>
+
       <Suspense fallback={<TabsSkeleton />}>
-        <AuthoringContainerTabs container={container} />
+        <AuthoringContainerTabs
+          container={container}
+          schoolRole={schoolRole}
+          preflightResult={preflight}
+        />
       </Suspense>
     </main>
   );
