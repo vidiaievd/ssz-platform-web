@@ -183,14 +183,14 @@ Legend:
 | GET `/api/student/progress` (composite) | ✅ | Real: parallel fetch progress + containers, joined by containerId |
 | GET `/api/student/streak` | 🟡 | Mock |
 | GET `/api/student/upcoming` | 🟡 | Mock |
-| GET `/api/enrollment/requests` | 🟡 | Mock in [`/api/enrollment/requests`](src/app/api/enrollment/requests/route.ts) |
+| GET/POST `/api/enrollment/requests` | ✅ | Proxies to `/api/v1/requests`; MOCK removed |
 | POST `/api/v1/progress` (record progress) | ✅ | Lesson start/complete events fire via serverFetch |
 | GET `/api/v1/progress/{type}/{id}` | ❌ | |
 | PATCH `…/flag` and `…/resolve` | ❌ | |
-| POST `/api/v1/enrollments` | ❌ | |
-| GET `/api/v1/enrollments` + `/{id}` | ❌ | |
-| DELETE `/api/v1/enrollments/{id}` | ❌ | |
-| PATCH `/api/v1/enrollments/{id}/complete` | ❌ | |
+| POST `/api/v1/enrollments` | ✅ | BFF route created |
+| GET `/api/v1/enrollments` + `/{id}` | ✅ | BFF routes; `getEnrollmentStatus` uses real data |
+| DELETE `/api/v1/enrollments/{id}` | ✅ | BFF route created |
+| PATCH `/api/v1/enrollments/{id}/complete` | ✅ | BFF route created |
 | Assignments — full suite (`/api/v1/assignments/*`) | ❌ | Not implemented at all |
 | Review submissions — full suite (`/api/v1/review/submissions/*`) | ❌ | Not implemented at all |
 | SRS — full suite (`/api/v1/srs/*`) | ❌ | Not implemented at all |
@@ -225,7 +225,7 @@ Legend:
 - ✅ `/student/discover` — discover schools
 - ✅ `/student/enrolled` — enrolled overview
 - ✅ `/student/enrolled/lessons/[id]` — lesson player with navigation, exercise router
-- ✅ `/student/enrolled/requests` — enrollment requests list (mocked)
+- ✅ `/student/enrolled/requests` — enrollment requests list (real backend)
 - ✅ `/student/lessons` — lessons listing
 - ✅ `/student/settings/{profile, account, notifications}` — base settings
 - ❌ Student onboarding (post-register: create student profile, target language)
