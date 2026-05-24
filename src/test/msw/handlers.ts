@@ -1,7 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
 import { MOCK_SCHOOLS } from '@/app/api/discovery/schools/route';
-import { MOCK_ENROLLMENT_REQUESTS } from '@/app/api/enrollment/requests/route';
 import { MOCK_NOTIFICATIONS } from '@/app/api/notifications/route';
 import { MOCK_UPCOMING } from '@/app/api/student/upcoming/route';
 import { MOCK_STREAK } from '@/app/api/student/streak/route';
@@ -41,12 +40,24 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  http.get('/api/enrollment/requests', () => {
-    const response: EnrollmentRequestsResponse = { items: MOCK_ENROLLMENT_REQUESTS };
-    return HttpResponse.json(response);
-  }),
+  // Enrollment requests — real backend; default to empty list in tests.
+  http.get('/api/enrollment/requests', () =>
+    HttpResponse.json({ items: [] } as EnrollmentRequestsResponse),
+  ),
+  http.post('/api/enrollment/requests', () =>
+    HttpResponse.json(
+      { id: 'req-test', schoolId: 'school-1', schoolName: 'Test School', schoolType: 'school', status: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { status: 201 },
+    ),
+  ),
 
-  // Progress now comes from the real backend; default to empty list in tests.
+  // Course enrollments
+  http.get('/api/enrollment', () => HttpResponse.json({ items: [] })),
+  http.post('/api/enrollment', () => HttpResponse.json({ id: 'enroll-test' }, { status: 201 })),
+  http.delete('/api/enrollment/:id', () => new HttpResponse(null, { status: 204 })),
+  http.patch('/api/enrollment/:id/complete', () => HttpResponse.json({ id: 'enroll-test', status: 'completed' })),
+
+  // Progress — real backend; default to empty in tests.
   http.get('/api/student/progress', () => HttpResponse.json([] as ContainerProgress[])),
 
   // Attempt routes for tests — feature-specific tests override these.
