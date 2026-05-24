@@ -1,57 +1,76 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import type { Container, PaginatedResponse } from '@/features/content/types';
 import type { ContainerProgress } from '@/features/student/types';
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors';
 
-// Stub data until the Progress service is available.
-export const MOCK_PROGRESS: ContainerProgress[] = [
-  {
-    id: 'prog-1',
-    containerId: 'container-1',
-    containerSlug: 'norsk-a1-grunnkurs',
-    containerTitle: 'Norsk A1 — Grunnkurs',
-    containerType: 'COURSE',
-    targetLanguage: 'no',
-    level: 'A1',
-    completedItems: 7,
-    totalItems: 24,
-    progressPercent: 29,
-    lastAccessedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    nextItemId: 'lesson-8',
-    nextItemTitle: 'Lesson 8 — At the café',
-    nextItemType: 'LESSON',
-  },
-  {
-    id: 'prog-2',
-    containerId: 'container-2',
-    containerSlug: 'norsk-a2-dagligliv',
-    containerTitle: 'Norsk A2 — Dagligliv',
-    containerType: 'COURSE',
-    targetLanguage: 'no',
-    level: 'A2',
-    completedItems: 3,
-    totalItems: 18,
-    progressPercent: 17,
-    lastAccessedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    nextItemId: 'lesson-4',
-    nextItemTitle: 'Lesson 4 — Transport og reiser',
-    nextItemType: 'LESSON',
-  },
-  {
-    id: 'prog-3',
-    containerId: 'container-3',
-    containerSlug: 'norsk-ordforrad-mat',
-    containerTitle: 'Vocabulary: Food & Cooking',
-    containerType: 'COLLECTION',
-    targetLanguage: 'no',
-    completedItems: 0,
-    totalItems: 6,
-    progressPercent: 0,
-    nextItemId: 'lesson-vocab-1',
-    nextItemTitle: 'Matvarer — Grønnsaker',
-    nextItemType: 'VOCABULARY_LIST',
-  },
-];
+// Raw shape returned by the Learning Service.
+const RawProgressItem = z.object({
+  id: z.string(),
+  containerId: z.string(),
+  completedItems: z.number().int().min(0).default(0),
+  totalItems: z.number().int().min(0).default(0),
+  progressPercent: z.number().min(0).max(100).default(0),
+  lastAccessedAt: z.string().optional(),
+  nextItemId: z.string().optional(),
+  nextItemTitle: z.string().optional(),
+  nextItemType: z.string().optional(),
+});
+
+const RawProgressList = z.array(RawProgressItem);
 
 export async function GET() {
-  return NextResponse.json(MOCK_PROGRESS);
+  try {
+    // Parallel: fetch progress records + enrolled containers.
+    const [rawProgress, containersData] = await Promise.all([
+      serverFetch({ service: 'progress', path: '/api/v1/progress' }),
+      serverFetch<PaginatedResponse<Container>>({
+        service: 'content',
+        path: '/api/v1/containers',
+        query: { enrolled: 'true', pageSize: '100' },
+      }),
+    ]);
+
+    const parsed = RawProgressList.safeParse(rawProgress);
+    if (!parsed.success) {
+      return NextResponse.json([], { status: 200 });
+    }
+
+    const containerMap = new Map<string, Container>(
+      (containersData.items ?? []).map((c) => [c.id, c]),
+    );
+
+    const progress: ContainerProgress[] = parsed.data.flatMap((item) => {
+      const container = containerMap.get(item.containerId);
+      if (!container) return [];
+      return [
+        {
+          id: item.id,
+          containerId: item.containerId,
+          containerSlug: container.slug,
+          containerTitle: container.title,
+          containerType: container.type,
+          targetLanguage: container.targetLanguage,
+          level: container.level,
+          coverImageUrl: container.coverImageUrl,
+          completedItems: item.completedItems,
+          totalItems: item.totalItems,
+          progressPercent: item.progressPercent,
+          lastAccessedAt: item.lastAccessedAt,
+          nextItemId: item.nextItemId,
+          nextItemTitle: item.nextItemTitle,
+          nextItemType: item.nextItemType as ContainerProgress['nextItemType'],
+        },
+      ];
+    });
+
+    return NextResponse.json(progress);
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'unauthenticated') {
+      return NextResponse.json([], { status: 200 });
+    }
+    return NextResponse.json({ error: 'Failed to fetch progress' }, { status: 502 });
+  }
 }

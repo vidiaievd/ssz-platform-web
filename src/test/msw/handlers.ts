@@ -3,12 +3,12 @@ import { http, HttpResponse } from 'msw';
 import { MOCK_SCHOOLS } from '@/app/api/discovery/schools/route';
 import { MOCK_ENROLLMENT_REQUESTS } from '@/app/api/enrollment/requests/route';
 import { MOCK_NOTIFICATIONS } from '@/app/api/notifications/route';
-import { MOCK_PROGRESS } from '@/app/api/student/progress/route';
 import { MOCK_UPCOMING } from '@/app/api/student/upcoming/route';
 import { MOCK_STREAK } from '@/app/api/student/streak/route';
 import type { SchoolsResponse } from '@/features/discovery/types';
 import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
 import type { NotificationsResponse } from '@/features/notifications/types';
+import type { ContainerProgress } from '@/features/student/types';
 
 /**
  * Default handlers shared across tests, dev, and Storybook.
@@ -46,7 +46,18 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  http.get('/api/student/progress', () => HttpResponse.json(MOCK_PROGRESS)),
+  // Progress now comes from the real backend; default to empty list in tests.
+  http.get('/api/student/progress', () => HttpResponse.json([] as ContainerProgress[])),
+
+  // Attempt routes for tests — feature-specific tests override these.
+  http.post('/api/content/exercises/:id/attempts', () =>
+    HttpResponse.json({ attemptId: 'test-attempt-id', exerciseId: 'test-id', startedAt: new Date().toISOString() }, { status: 201 }),
+  ),
+  http.post('/api/content/exercises/:id/attempts/:attemptId/submit', () =>
+    HttpResponse.json({ verdict: 'correct' }),
+  ),
+  http.post('/api/student/progress/events', () => new HttpResponse(null, { status: 204 })),
+
   http.get('/api/student/upcoming', () => HttpResponse.json(MOCK_UPCOMING)),
   http.get('/api/student/streak', () => HttpResponse.json(MOCK_STREAK)),
 
