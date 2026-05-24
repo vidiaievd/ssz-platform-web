@@ -35,7 +35,7 @@ export const env = createEnv({
   },
 });
 
-if (!env.API_GATEWAY_URL) {
+if (typeof window === 'undefined' && !env.API_GATEWAY_URL) {
   const missing = (
     ['AUTH_SERVICE_URL', 'PROFILE_SERVICE_URL', 'CONTENT_SERVICE_URL'] as const
   ).filter((key) => !env[key]);

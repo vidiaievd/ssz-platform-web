@@ -95,8 +95,8 @@
   --shadow-md:            0 4px 12px oklch(0.18 0.01 80 / 0.08), 0 2px 4px oklch(0.18 0.01 80 / 0.06);
   --shadow-lg:            0 8px 24px oklch(0.18 0.01 80 / 0.10), 0 4px 8px oklch(0.18 0.01 80 / 0.07);
   --shadow-xl:            0 16px 48px oklch(0.18 0.01 80 / 0.12), 0 8px 16px oklch(0.18 0.01 80 / 0.08);
-  --shadow-focus-primary: 0 0 0 3px oklch(0.62 0.105 168 / 0.30);
-  --shadow-focus-error:   0 0 0 3px oklch(0.60 0.125 15  / 0.25);
+  --shadow-focus-primary: 0 0 0 3px oklch(0.52 0.105 168 / 0.30);
+  --shadow-focus-error:   0 0 0 3px oklch(0.55 0.125 15  / 0.25);
 
   /* ─── Font sizes ─── */
   --text-2xs:              0.625rem;
@@ -168,7 +168,7 @@
   [data-theme="light"] {
     /* Channel values for Tailwind alpha support:
        usage → oklch(var(--ssz-primary-ch) / 0.5) */
-    --ssz-primary-ch:    0.62 0.105 168;
+    --ssz-primary-ch:    0.52 0.105 168;
     --ssz-secondary-ch:  0.67 0.11  82;
     --ssz-bg-base-ch:    0.975 0.007 80;
     --ssz-text-primary-ch: 0.18 0.010 80;
@@ -183,13 +183,13 @@
 
     --ssz-border-default: oklch(0.90  0.010 80);
     --ssz-border-strong:  oklch(0.83  0.010 80);
-    --ssz-border-focus:   oklch(0.62  0.105 168);
+    --ssz-border-focus:   oklch(0.52  0.105 168);
 
     --ssz-text-primary:   oklch(0.18  0.010 80);
     --ssz-text-secondary: oklch(0.46  0.010 80);
     --ssz-text-muted:     oklch(0.70  0.010 80);
     --ssz-text-inverse:   oklch(1.00  0.005 80);
-    --ssz-text-link:      oklch(0.54  0.10  168);
+    --ssz-text-link:      oklch(0.52  0.10  168);
     --ssz-text-link-hover:oklch(0.44  0.09  168);
 
     --ssz-shadow-xs: 0 1px 2px oklch(0.18 0.01 80 / 0.06);
@@ -197,7 +197,7 @@
     --ssz-shadow-md: 0 4px 12px oklch(0.18 0.01 80 / 0.08), 0 2px 4px oklch(0.18 0.01 80 / 0.06);
     --ssz-shadow-lg: 0 8px 24px oklch(0.18 0.01 80 / 0.10), 0 4px 8px oklch(0.18 0.01 80 / 0.07);
     --ssz-shadow-xl: 0 16px 48px oklch(0.18 0.01 80 / 0.12), 0 8px 16px oklch(0.18 0.01 80 / 0.08);
-    --ssz-focus-ring: 0 0 0 3px oklch(0.62 0.105 168 / 0.30);
+    --ssz-focus-ring: 0 0 0 3px oklch(0.52 0.105 168 / 0.30);
 
     /* shadcn/ui compatibility aliases */
     --background: oklch(0.975 0.007 80);
@@ -206,19 +206,19 @@
     --card-foreground:  var(--ssz-text-primary);
     --popover:          var(--ssz-bg-surface);
     --popover-foreground: var(--ssz-text-primary);
-    --primary:          oklch(0.62 0.105 168);
+    --primary:          oklch(0.52 0.105 168);
     --primary-foreground: oklch(1 0 0);
     --secondary:        oklch(0.95 0.010 80);
     --secondary-foreground: oklch(0.18 0.010 80);
     --muted:            oklch(0.95 0.010 80);
-    --muted-foreground: oklch(0.70 0.010 80);
+    --muted-foreground: oklch(0.46 0.010 80);
     --accent:           oklch(0.93 0.05 168);
     --accent-foreground:oklch(0.44 0.09 168);
-    --destructive:      oklch(0.60 0.125 15);
+    --destructive:      oklch(0.55 0.125 15);
     --destructive-foreground: oklch(1 0 0);
     --border:           oklch(0.90 0.010 80);
     --input:            oklch(0.90 0.010 80);
-    --ring:             oklch(0.62 0.105 168);
+    --ring:             oklch(0.52 0.105 168);
     --radius: 10px;
   }
 
