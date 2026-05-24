@@ -709,50 +709,114 @@
   },
   "Onboarding": {
     "title": "Sett opp profilen din",
-    "subtitle": "Dette tar omtrent 2 minutter.",
-    "steps": {
-      "role": "Din rolle",
-      "profile": "Din profil",
-      "preferences": "Preferanser"
+    "skipToForm": "Hopp til skjema",
+    "back": "Tilbake",
+    "next": "Neste",
+    "finishCta": "Fullfør og gå til dashbordet",
+    "skip": {
+      "confirm": {
+        "title": "Hopp over språkpreferanser?"
+      },
+      "warning": "Vi bruker disse til å anbefale leksjoner og lærere. Uten dem vil dashbordet ditt stort sett være tomt til du legger dem til senere.",
+      "label": "Hopp over for nå"
     },
-    "role": {
-      "title": "Velkommen!",
-      "subtitle": "Du er registrert på plattformen. La oss tilpasse opplevelsen din.",
-      "student": "Student",
-      "tutor": "Lærer",
-      "roleNote": "Rollen din ble satt da du registrerte deg.",
-      "continue": "Fortsett"
+    "alreadyDone": "Profilen din er allerede satt opp",
+    "progress": {
+      "label": "Steg {current} av {total}"
     },
-    "baseProfile": {
-      "title": "Fortell oss om deg selv",
-      "subtitle": "Denne informasjonen vises på din offentlige profil.",
-      "displayName": "Visningsnavn",
-      "displayNamePlaceholder": "Ditt fulle navn eller kallenavn",
-      "uiLocale": "Grensesnittspråk",
-      "timezone": "Tidssone",
-      "back": "Tilbake",
-      "continue": "Fortsett"
+    "error": {
+      "saveFailed": "Kunne ikke lagre — prøv igjen",
+      "retry": "Prøv igjen"
     },
-    "studentPrefs": {
-      "title": "Dine språkmål",
-      "subtitle": "Vi tilpasser opplevelsen din basert på disse.",
-      "nativeLanguage": "Morsmål",
-      "nativeLanguagePlaceholder": "Velg morsmålet ditt",
-      "targetLanguages": "Språk du vil lære",
-      "targetLanguagesHelp": "Velg ett eller flere språk.",
-      "back": "Tilbake",
-      "complete": "Fullfør oppsett"
+    "step": {
+      "role": {
+        "title": "Hva tar deg hit?",
+        "subtitle": "Velg hvordan du vil bruke plattformen. Du kan endre dette senere.",
+        "student": {
+          "title": "Jeg lærer",
+          "help": "Øv på språk, ta timer hos lærere og følg fremgangen din."
+        },
+        "tutor": {
+          "title": "Jeg underviser",
+          "help": "Undervis elever, administrer timeplan og bygg din undervisningsvirksomhet."
+        }
+      },
+      "profile": {
+        "title": "Fortell oss om deg selv",
+        "subtitle": "Denne informasjonen vises på profilen din."
+      },
+      "prefs": {
+        "title": "Dine språk",
+        "subtitle": "Hjelp oss å tilpasse læringsopplevelsen din."
+      }
     },
-    "tutorPrefs": {
-      "title": "Dine undervisningspreferanser",
-      "subtitle": "Hjelp studenter med å finne deg enklere.",
-      "teachingLanguages": "Språk du underviser i",
-      "teachingLanguagesHelp": "Velg språkene du tilbyr undervisning i.",
-      "hourlyRate": "Timepris (valgfritt)",
-      "hourlyRatePlaceholder": "f.eks. 500",
-      "currency": "Valuta",
-      "back": "Tilbake",
-      "complete": "Fullfør oppsett"
+    "profile": {
+      "displayName": {
+        "label": "Visningsnavn",
+        "placeholder": "Navn eller kallenavn",
+        "error": {
+          "required": "Visningsnavn er påkrevd",
+          "min": "Må ha minst 2 tegn",
+          "max": "Maks 40 tegn"
+        }
+      },
+      "firstName": {
+        "label": "Fornavn"
+      },
+      "lastName": {
+        "label": "Etternavn"
+      },
+      "timezone": {
+        "label": "Tidssone",
+        "placeholder": "Velg tidssone"
+      },
+      "locale": {
+        "label": "Grensesnittspråk"
+      },
+      "bio": {
+        "label": "Kort bio",
+        "placeholder": "Noen ord om deg selv…",
+        "counter": "{count}/200"
+      }
+    },
+    "prefs": {
+      "native": {
+        "label": "Morsmål",
+        "placeholder": "Velg morsmålet ditt",
+        "error": {
+          "required": "Morsmål er påkrevd"
+        }
+      },
+      "targets": {
+        "heading": "Språk du vil lære",
+        "add": "Legg til et språk til",
+        "remove": "Fjern {language}",
+        "removed": "Fjernet {language}",
+        "duplicate": {
+          "error": "Du har allerede lagt til dette språket"
+        }
+      }
+    },
+    "targets": {
+      "empty": {
+        "title": "Ingen målspråk ennå",
+        "body": "Velg minst ett språk du vil lære. Du kan endre dette når som helst.",
+        "cta": "Legg til ditt første språk"
+      }
+    },
+    "cefr": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "A1_help": "Nybegynner — enkle uttrykk og hverdagsfraser",
+      "A2_help": "Grunnleggende — enkle setninger om kjente emner",
+      "B1_help": "Mellomnivå — klarer de fleste situasjoner på reise",
+      "B2_help": "Over mellomnivå — kan diskutere abstrakte emner",
+      "C1_help": "Avansert — flytende og spontant uttrykk",
+      "C2_help": "Mestring — tilsvarer en utdannet morsmålsbruker"
     }
   }
 }

@@ -1,24 +1,18 @@
-import { getTranslations } from 'next-intl/server';
-
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 
-export default async function OnboardingLayout({ children }: { children: React.ReactNode }) {
-  const t = await getTranslations('Common');
-
+export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-(--ssz-bg-base)">
+    <div className="min-h-dvh bg-(--ssz-bg-base)">
       <header className="flex items-center justify-between px-4 py-3 border-b border-(--ssz-border-base)">
-        <span className="text-sm font-semibold text-(--ssz-text-primary)">{t('appName')}</span>
-        <div className="flex items-center gap-1">
+        <span className="text-sm font-semibold text-(--ssz-text-primary) md:hidden">SSZ</span>
+        <span className="hidden md:block text-sm font-semibold text-(--ssz-text-primary) mx-auto">SSZ</span>
+        <div className="flex items-center gap-1 md:absolute md:right-4 md:top-3">
           <LanguageSwitcher />
           <ThemeToggle />
         </div>
       </header>
-
-      <main className="flex flex-1 items-start justify-center p-4 pt-12">
-        <div className="w-full max-w-lg">{children}</div>
-      </main>
+      <div className="md:px-4">{children}</div>
     </div>
   );
 }

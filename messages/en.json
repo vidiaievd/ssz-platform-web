@@ -714,50 +714,114 @@
   },
   "Onboarding": {
     "title": "Set up your profile",
-    "subtitle": "This takes about 2 minutes.",
-    "steps": {
-      "role": "Your role",
-      "profile": "Your profile",
-      "preferences": "Preferences"
+    "skipToForm": "Skip to form",
+    "back": "Back",
+    "next": "Next",
+    "finishCta": "Finish & go to my dashboard",
+    "skip": {
+      "confirm": {
+        "title": "Skip language preferences?"
+      },
+      "warning": "We use these to recommend lessons and tutors. Without them, your dashboard will be mostly empty until you add them later.",
+      "label": "Skip for now"
     },
-    "role": {
-      "title": "Welcome!",
-      "subtitle": "You're registered on the platform. Let's personalise your experience.",
-      "student": "Student",
-      "tutor": "Tutor",
-      "roleNote": "Your role was set when you registered.",
-      "continue": "Continue"
+    "alreadyDone": "Your profile is already set up",
+    "progress": {
+      "label": "Step {current} of {total}"
     },
-    "baseProfile": {
-      "title": "Tell us about yourself",
-      "subtitle": "This information will appear on your public profile.",
-      "displayName": "Display name",
-      "displayNamePlaceholder": "Your full name or nickname",
-      "uiLocale": "Interface language",
-      "timezone": "Timezone",
-      "back": "Back",
-      "continue": "Continue"
+    "error": {
+      "saveFailed": "Could not save — please try again",
+      "retry": "Retry"
     },
-    "studentPrefs": {
-      "title": "Your language goals",
-      "subtitle": "We will personalise your experience based on these.",
-      "nativeLanguage": "Native language",
-      "nativeLanguagePlaceholder": "Select your native language",
-      "targetLanguages": "Languages you want to learn",
-      "targetLanguagesHelp": "Select one or more languages.",
-      "back": "Back",
-      "complete": "Complete setup"
+    "step": {
+      "role": {
+        "title": "What brings you here?",
+        "subtitle": "Choose how you will use the platform. You can update this later.",
+        "student": {
+          "title": "I'm learning",
+          "help": "Practice languages, get lessons from tutors, and track your progress."
+        },
+        "tutor": {
+          "title": "I'm teaching",
+          "help": "Teach students, manage schedules, and grow your tutoring business."
+        }
+      },
+      "profile": {
+        "title": "Tell us about yourself",
+        "subtitle": "This information will appear on your profile."
+      },
+      "prefs": {
+        "title": "Your languages",
+        "subtitle": "Help us personalise your learning experience."
+      }
     },
-    "tutorPrefs": {
-      "title": "Your teaching preferences",
-      "subtitle": "Help students find you more easily.",
-      "teachingLanguages": "Languages you teach",
-      "teachingLanguagesHelp": "Select the languages you offer instruction in.",
-      "hourlyRate": "Hourly rate (optional)",
-      "hourlyRatePlaceholder": "e.g. 500",
-      "currency": "Currency",
-      "back": "Back",
-      "complete": "Complete setup"
+    "profile": {
+      "displayName": {
+        "label": "Display name",
+        "placeholder": "Your name or nickname",
+        "error": {
+          "required": "Display name is required",
+          "min": "Must be at least 2 characters",
+          "max": "Must be 40 characters or fewer"
+        }
+      },
+      "firstName": {
+        "label": "First name"
+      },
+      "lastName": {
+        "label": "Last name"
+      },
+      "timezone": {
+        "label": "Timezone",
+        "placeholder": "Select timezone"
+      },
+      "locale": {
+        "label": "Interface language"
+      },
+      "bio": {
+        "label": "Short bio",
+        "placeholder": "A few words about yourself…",
+        "counter": "{count}/200"
+      }
+    },
+    "prefs": {
+      "native": {
+        "label": "Native language",
+        "placeholder": "Select your native language",
+        "error": {
+          "required": "Native language is required"
+        }
+      },
+      "targets": {
+        "heading": "Languages you want to learn",
+        "add": "Add another language",
+        "remove": "Remove {language}",
+        "removed": "Removed {language}",
+        "duplicate": {
+          "error": "You have already added this language"
+        }
+      }
+    },
+    "targets": {
+      "empty": {
+        "title": "No target languages yet",
+        "body": "Pick at least one language you want to learn. You can change this any time.",
+        "cta": "Add your first language"
+      }
+    },
+    "cefr": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "A1_help": "Beginner — basic phrases and everyday expressions",
+      "A2_help": "Elementary — simple sentences on familiar topics",
+      "B1_help": "Intermediate — can handle most travel situations",
+      "B2_help": "Upper intermediate — can discuss abstract topics",
+      "C1_help": "Advanced — fluent and spontaneous expression",
+      "C2_help": "Mastery — equivalent to an educated native speaker"
     }
   }
 }
