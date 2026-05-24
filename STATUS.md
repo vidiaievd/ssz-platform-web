@@ -142,7 +142,7 @@ Legend:
 | CF-3 Danger zone — discard draft, unpublish, archive, restore, delete forever | ⚠️ | Publish ✅; unpublish/archive/restore → 501 toast |
 | CF-4 Three-state lifecycle (draft / published / archived) | ⚠️ | `ContainerState` type + `deriveContainerState` in place; `archived` state pending backend `isArchived` field |
 | CF-5 Pre-flight panel — blockers, warnings, fix links, publish anyway | ✅ | Client-side `runPreflight()` used both in BFF route and wizard |
-| CF-2 5-step Create Wizard | ❌ | Next: Step F |
+| CF-2 5-step Create Wizard | ✅ | Metadata → Structure → Teachers → Visibility → Review; draft persisted to backend on first Next click |
 
 **Pages:** [`/[locale]/school/content`](src/app/[locale]/school/content) — list with filters/search, [`/new`] simple form (wizard pending), [`/[id]`] full editor with status banner + danger zone.
 
@@ -236,7 +236,7 @@ Legend:
 ### School / Tutor
 - ✅ `/school/dashboard` — basic stub
 - ✅ `/school/content` — course list with search, state filters, sort, table/grid, bulk actions
-- ✅ `/school/content/new` — create form (5-step wizard pending)
+- ✅ `/school/content/new` — 5-step Create Wizard (CF-2)
 - ✅ `/school/content/[id]` — editor with breadcrumb, status banner, preflight panel, danger zone
 - ✅ `/school/students` — students list (basic)
 - ✅ `/school/settings/{profile, account, notifications}`
@@ -245,7 +245,7 @@ Legend:
 - ❌ Assignments hub (create, track)
 - ❌ Submissions review queue
 - ⚠️ Container publish flow — publish ✅, unpublish/archive/restore pending backend
-- ❌ 5-step Create Wizard (CF-2)
+- ✅ 5-step Create Wizard (CF-2)
 - ❌ Vocabulary translations / examples editors
 - ❌ Grammar pool management
 
@@ -283,7 +283,7 @@ In-progress (uncommitted, same branch — Course Management Flow):
 - Step C — BFF lifecycle routes (archive/restore/unpublish/duplicate/preflight/activity)
 - Step D — CF-5 `runPreflight()` + `PreflightPanel`
 - Step E — CF-3 detail page (breadcrumb, status banner, two-column overview, danger zone)
-- **Step F pending** — CF-2 5-step Create Wizard
+- Step F — CF-2 5-step Create Wizard ✅
 
 ---
 
@@ -291,6 +291,6 @@ In-progress (uncommitted, same branch — Course Management Flow):
 
 The **student experience MVP loop** works end-to-end visually: register → log in → browse catalogue → discover → enrol (mocked) → enrolled dashboard (mocked progress) → lesson player → answer exercises (local scoring).
 
-The **school/content authoring** side covers: full read/write of containers, lessons, exercises, vocabulary lists, grammar rules, tags, shares against the real backend — plus the Course Management Flow (CF-1 list with filters, CF-3 detail with danger zone, CF-5 preflight). The 5-step Create Wizard (CF-2) is the immediate next step.
+The **school/content authoring** side covers: full read/write of containers, lessons, exercises, vocabulary lists, grammar rules, tags, shares against the real backend — plus the full Course Management Flow (CF-1 list with filters, CF-2 5-step create wizard, CF-3 detail with danger zone, CF-5 preflight).
 
 Everything else listed as ❌ or 🟡 is the gap that turns the demo into a working product. The roadmap is in [`docs/plan/14-remaining-roadmap.md`](docs/plan/14-remaining-roadmap.md).
