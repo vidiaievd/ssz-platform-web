@@ -166,13 +166,13 @@ Legend:
 
 | Endpoint | Status |
 |---|---|
-| POST `/exercises/{id}/attempts` (start) | 🟡 Local simulation only |
-| POST `/exercises/{id}/attempts/{id}/submit` | 🟡 Local scoring on the client |
+| POST `/exercises/{id}/attempts` (start) | ✅ BFF route proxies to Exercise Engine |
+| POST `/exercises/{id}/attempts/{id}/submit` | ✅ BFF route; Server Action calls backend via serverFetch |
 | GET `/exercises/{id}/attempts` | ❌ |
 | GET `/exercises/{id}/attempts/{id}` | ❌ |
 | DELETE `/exercises/{id}/attempts/{id}` | ❌ |
 
-**Frontend:** [`src/features/student/exercises/`](src/features/student/exercises) — cloze, multiple-choice, free-text render and grade client-side; nothing is persisted.
+**Frontend:** [`src/features/student/exercises/`](src/features/student/exercises) — cloze, multiple-choice, free-text submit to real backend; answers persisted. `requiresReview` flag surfaces for free-text.
 
 ---
 
@@ -180,11 +180,11 @@ Legend:
 
 | Area | Status | Note |
 |---|---|---|
-| GET `/api/student/progress` (composite) | 🟡 | Mock in [`/api/student/progress`](src/app/api/student/progress/route.ts) |
+| GET `/api/student/progress` (composite) | ✅ | Real: parallel fetch progress + containers, joined by containerId |
 | GET `/api/student/streak` | 🟡 | Mock |
 | GET `/api/student/upcoming` | 🟡 | Mock |
 | GET `/api/enrollment/requests` | 🟡 | Mock in [`/api/enrollment/requests`](src/app/api/enrollment/requests/route.ts) |
-| POST `/api/v1/progress` (record progress) | ❌ | Lesson start/complete events stubbed |
+| POST `/api/v1/progress` (record progress) | ✅ | Lesson start/complete events fire via serverFetch |
 | GET `/api/v1/progress/{type}/{id}` | ❌ | |
 | PATCH `…/flag` and `…/resolve` | ❌ | |
 | POST `/api/v1/enrollments` | ❌ | |
@@ -289,7 +289,7 @@ In-progress (uncommitted, same branch — Course Management Flow):
 
 ## What "done" means today
 
-The **student experience MVP loop** works end-to-end visually: register → log in → browse catalogue → discover → enrol (mocked) → enrolled dashboard (mocked progress) → lesson player → answer exercises (local scoring).
+The **student experience MVP loop** is wired to real backends: register → log in → browse catalogue → discover → enrol (mocked) → enrolled dashboard (real progress) → lesson player (start/complete events persisted) → answer exercises (real submission to Exercise Engine).
 
 The **school/content authoring** side covers: full read/write of containers, lessons, exercises, vocabulary lists, grammar rules, tags, shares against the real backend — plus the full Course Management Flow (CF-1 list with filters, CF-2 5-step create wizard, CF-3 detail with danger zone, CF-5 preflight).
 
