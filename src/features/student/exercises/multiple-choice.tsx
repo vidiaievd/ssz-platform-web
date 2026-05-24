@@ -34,7 +34,6 @@ export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps
         exerciseId: exercise.id,
         type: 'multiple_choice',
         answer: selected,
-        content: exercise.content,
       });
       if (!res.ok) {
         toast.error(tErrors(res.error.code));

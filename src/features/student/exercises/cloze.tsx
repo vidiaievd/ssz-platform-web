@@ -47,7 +47,6 @@ export function ClozeExercise({ exercise }: ClozeExerciseProps) {
         exerciseId: exercise.id,
         type: 'cloze',
         answer: answers,
-        content: exercise.content,
       });
       if (!res.ok) {
         toast.error(tErrors(res.error.code));
