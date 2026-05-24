@@ -77,4 +77,55 @@ export const handlers = [
     const response: NotificationsResponse = { items: MOCK_NOTIFICATIONS, unreadCount };
     return HttpResponse.json(response);
   }),
+
+  // Sub-profiles — default to 404 (not yet onboarded) in tests.
+  // Feature tests that need an existing profile override these with server.use().
+  http.get('/api/profile/me/student', () => new HttpResponse(null, { status: 404 })),
+  http.post('/api/profile/me/student', () =>
+    HttpResponse.json(
+      {
+        id: 'sp-test',
+        userId: 'user-test',
+        nativeLanguage: 'en',
+        targetLanguages: ['nb'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      { status: 201 },
+    ),
+  ),
+  http.patch('/api/profile/me/student', () =>
+    HttpResponse.json({ id: 'sp-test', userId: 'user-test', nativeLanguage: 'en', targetLanguages: ['nb'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }),
+  ),
+  http.post('/api/profile/me/student/languages/:code', () =>
+    HttpResponse.json({}, { status: 201 }),
+  ),
+  http.delete('/api/profile/me/student/languages/:code', () =>
+    new HttpResponse(null, { status: 204 }),
+  ),
+
+  http.get('/api/profile/me/tutor', () => new HttpResponse(null, { status: 404 })),
+  http.post('/api/profile/me/tutor', () =>
+    HttpResponse.json(
+      {
+        id: 'tp-test',
+        userId: 'user-test',
+        teachingLanguages: ['nb'],
+        hourlyRate: null,
+        currency: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      { status: 201 },
+    ),
+  ),
+  http.patch('/api/profile/me/tutor', () =>
+    HttpResponse.json({ id: 'tp-test', userId: 'user-test', teachingLanguages: ['nb'], hourlyRate: null, currency: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }),
+  ),
+  http.post('/api/profile/me/tutor/languages/:code', () =>
+    HttpResponse.json({}, { status: 201 }),
+  ),
+  http.delete('/api/profile/me/tutor/languages/:code', () =>
+    new HttpResponse(null, { status: 204 }),
+  ),
 ];

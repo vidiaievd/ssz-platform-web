@@ -706,5 +706,53 @@
     "unread": "{count, plural, one {# ulest} other {# uleste}}",
     "unreadDot": "Ulest",
     "empty": "Ingen nye varsler!"
+  },
+  "Onboarding": {
+    "title": "Sett opp profilen din",
+    "subtitle": "Dette tar omtrent 2 minutter.",
+    "steps": {
+      "role": "Din rolle",
+      "profile": "Din profil",
+      "preferences": "Preferanser"
+    },
+    "role": {
+      "title": "Velkommen!",
+      "subtitle": "Du er registrert på plattformen. La oss tilpasse opplevelsen din.",
+      "student": "Student",
+      "tutor": "Lærer",
+      "roleNote": "Rollen din ble satt da du registrerte deg.",
+      "continue": "Fortsett"
+    },
+    "baseProfile": {
+      "title": "Fortell oss om deg selv",
+      "subtitle": "Denne informasjonen vises på din offentlige profil.",
+      "displayName": "Visningsnavn",
+      "displayNamePlaceholder": "Ditt fulle navn eller kallenavn",
+      "uiLocale": "Grensesnittspråk",
+      "timezone": "Tidssone",
+      "back": "Tilbake",
+      "continue": "Fortsett"
+    },
+    "studentPrefs": {
+      "title": "Dine språkmål",
+      "subtitle": "Vi tilpasser opplevelsen din basert på disse.",
+      "nativeLanguage": "Morsmål",
+      "nativeLanguagePlaceholder": "Velg morsmålet ditt",
+      "targetLanguages": "Språk du vil lære",
+      "targetLanguagesHelp": "Velg ett eller flere språk.",
+      "back": "Tilbake",
+      "complete": "Fullfør oppsett"
+    },
+    "tutorPrefs": {
+      "title": "Dine undervisningspreferanser",
+      "subtitle": "Hjelp studenter med å finne deg enklere.",
+      "teachingLanguages": "Språk du underviser i",
+      "teachingLanguagesHelp": "Velg språkene du tilbyr undervisning i.",
+      "hourlyRate": "Timepris (valgfritt)",
+      "hourlyRatePlaceholder": "f.eks. 500",
+      "currency": "Valuta",
+      "back": "Tilbake",
+      "complete": "Fullfør oppsett"
+    }
   }
 }

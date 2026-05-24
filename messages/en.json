@@ -711,5 +711,53 @@
     "unread": "{count, plural, one {# unread} other {# unread}}",
     "unreadDot": "Unread",
     "empty": "You're all caught up!"
+  },
+  "Onboarding": {
+    "title": "Set up your profile",
+    "subtitle": "This takes about 2 minutes.",
+    "steps": {
+      "role": "Your role",
+      "profile": "Your profile",
+      "preferences": "Preferences"
+    },
+    "role": {
+      "title": "Welcome!",
+      "subtitle": "You're registered on the platform. Let's personalise your experience.",
+      "student": "Student",
+      "tutor": "Tutor",
+      "roleNote": "Your role was set when you registered.",
+      "continue": "Continue"
+    },
+    "baseProfile": {
+      "title": "Tell us about yourself",
+      "subtitle": "This information will appear on your public profile.",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "Your full name or nickname",
+      "uiLocale": "Interface language",
+      "timezone": "Timezone",
+      "back": "Back",
+      "continue": "Continue"
+    },
+    "studentPrefs": {
+      "title": "Your language goals",
+      "subtitle": "We will personalise your experience based on these.",
+      "nativeLanguage": "Native language",
+      "nativeLanguagePlaceholder": "Select your native language",
+      "targetLanguages": "Languages you want to learn",
+      "targetLanguagesHelp": "Select one or more languages.",
+      "back": "Back",
+      "complete": "Complete setup"
+    },
+    "tutorPrefs": {
+      "title": "Your teaching preferences",
+      "subtitle": "Help students find you more easily.",
+      "teachingLanguages": "Languages you teach",
+      "teachingLanguagesHelp": "Select the languages you offer instruction in.",
+      "hourlyRate": "Hourly rate (optional)",
+      "hourlyRatePlaceholder": "e.g. 500",
+      "currency": "Currency",
+      "back": "Back",
+      "complete": "Complete setup"
+    }
   }
 }
