@@ -1,4 +1,5 @@
 export * from './authoring-container-tabs';
+export * from './create-wizard';
 export * from './container-form';
 export * from './exercise-editor';
 export * from './exercise-list';

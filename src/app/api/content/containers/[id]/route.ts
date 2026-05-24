@@ -26,3 +26,27 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to fetch container' }, { status: 502 });
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+
+  try {
+    await serverFetch({
+      service: 'content',
+      path: `/api/v1/containers/${id}`,
+      method: 'DELETE',
+    });
+    return new NextResponse(null, { status: 204 });
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'not_found') {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    if (e instanceof AppError && e.code === 'unauthenticated') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ error: 'Failed to delete container' }, { status: 502 });
+  }
+}
