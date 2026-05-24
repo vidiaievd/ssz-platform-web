@@ -15,6 +15,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       exclude: ['**/*.stories.*', '**/*.config.*', '.next/**', 'storybook-static/**'],
+      thresholds: {
+        statements: 70,
+        branches: 65,
+        functions: 70,
+        lines: 70,
+      },
     },
     projects: [
       // Unit / integration tests — jsdom
