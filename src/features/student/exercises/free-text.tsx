@@ -34,7 +34,6 @@ export function FreeTextExercise({ exercise }: FreeTextExerciseProps) {
         exerciseId: exercise.id,
         type: 'free_text',
         answer,
-        content: exercise.content,
       });
       if (!res.ok) {
         toast.error(tErrors(res.error.code));

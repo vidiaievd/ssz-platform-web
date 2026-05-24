@@ -467,7 +467,105 @@
       "containers": "Ingen innhold ennå. Opprett din første beholder."
     },
     "comingSoon": "Denne seksjonen vil være tilgjengelig i et fremtidig steg.",
-    "backToContent": "Tilbake til innhold"
+    "backToContent": "Tilbake til innhold",
+    "wizard": {
+      "steps": {
+        "metadata": "Detaljer",
+        "structure": "Struktur",
+        "teachers": "Lærere",
+        "visibility": "Synlighet",
+        "review": "Gjennomgang"
+      },
+      "shell": {
+        "saveExit": "Lagre og avslutt",
+        "back": "Tilbake",
+        "next": "Neste",
+        "saving": "Lagrer…",
+        "saved": "Alle endringer er lagret",
+        "saveError": "Kunne ikke lagre. Prøv igjen.",
+        "discardError": "Kunne ikke forkaste. Prøv igjen.",
+        "discard": {
+          "title": "Forkast kurset?",
+          "body": "Alle fremskritt vil gå tapt.",
+          "bodyWithDraft": "Det lagrede utkastet vil bli slettet permanent.",
+          "confirm": "Forkast",
+          "cancel": "Fortsett redigering"
+        }
+      },
+      "metadata": {
+        "titleLabel": "Kurstittel",
+        "titlePlaceholder": "f.eks. Norsk for nybegynnere",
+        "subtitle": "Gi kurset et navn og velg målspråk.",
+        "language": "Målspråk",
+        "languagePlaceholder": "Velg et språk",
+        "level": "Vanskelighetsgrad",
+        "levelNone": "Alle nivåer",
+        "descriptionLabel": "Kort beskrivelse",
+        "descriptionPlaceholder": "Hva vil studentene lære? (maks 240 tegn)",
+        "coverImage": "Omslagsbilde",
+        "coverPlaceholder": "https://…",
+        "coverHint": "Lim inn en bilde-URL. Kvadratisk eller liggende PNG/JPG fungerer best.",
+        "previewLabel": "Forhåndsvisning i katalog",
+        "previewTitle": "Kurstittel"
+      },
+      "structure": {
+        "subtitle": "Velg hvordan du vil organisere innholdet.",
+        "cefr": "CEFR-struktur",
+        "cefrHelp": "Oppretter 6 tomme nivåer (A1–C2) med ett startmodul hvert.",
+        "blank": "Tom start",
+        "blankHelp": "Start med et tomt kurs — legg til nivåer og moduler selv.",
+        "template": "Kopier en mal",
+        "templateHelp": "Kopier strukturen fra en eksisterende kursmal.",
+        "previewTitle": "Strukturforhåndsvisning",
+        "previewAnnotation": "Klikk på et nivånavn for å gi det nytt navn. × fjerner det.",
+        "blankPreview": "Ingen nivåer — du legger dem til i kursredigereren.",
+        "templatePreview": "Velg en mal ovenfor for å forhåndsvise strukturen."
+      },
+      "teachers": {
+        "subtitle": "Du er kurseieren. Medlærerstyring er tilgjengelig etter opprettelse.",
+        "ownerSection": "Eier",
+        "owner": "Eier",
+        "coTeach": "Medlærer",
+        "viewer": "Betrakter",
+        "coTeachersSection": "Medlærere",
+        "coTeachersComingSoon": "Invitasjon av medlærere kommer snart",
+        "coTeachersHelp": "Du kan legge til medlærere fra kursinnstillingene etter opprettelse.",
+        "matrixTitle": "Rolletillatelser",
+        "matrix": {
+          "action": "Handling",
+          "editContent": "Rediger innhold",
+          "publish": "Publiser / arkiver",
+          "manageTeachers": "Administrer lærere",
+          "grade": "Vurder og kommenter",
+          "analytics": "Se analyse",
+          "delete": "Slett kurs"
+        }
+      },
+      "visibility": {
+        "subtitle": "Kontroller hvem som kan se og melde seg på dette kurset.",
+        "inviteOnly": "Kun etter invitasjon",
+        "inviteOnlyHelp": "Skjult fra den offentlige katalogen. Studenter får tilgang via en direktelenke.",
+        "publicCatalog": "Offentlig katalog",
+        "publicCatalogHelp": "Listet i katalogen — alle kan finne og melde seg på.",
+        "internalDraft": "Kun internt",
+        "internalDraftHelp": "Synlig kun for deg og lærerteamet.",
+        "note": "Du kan endre synlighet når som helst fra kursinnstillingene."
+      },
+      "review": {
+        "subtitle": "Sjekk detaljene før du lagrer eller publiserer.",
+        "sectionMetadata": "Detaljer",
+        "sectionStructure": "Struktur",
+        "sectionTeachers": "Lærere",
+        "sectionVisibility": "Synlighet",
+        "edit": "Rediger",
+        "ownerOnly": "Kun eier",
+        "saveAsDraft": "Lagre som utkast",
+        "publish": "Publiser kurs",
+        "publishError": "Kunne ikke publisere. Sjekk hindringer i forhåndskontrollen.",
+        "publishSuccess": "Kurset er publisert!",
+        "preflightHint": "Lagre utkastet først for å se forhåndskontroller."
+      }
+    }
   },
   "Discovery": {
     "title": "Oppdag skoler",
@@ -608,5 +706,117 @@
     "unread": "{count, plural, one {# ulest} other {# uleste}}",
     "unreadDot": "Ulest",
     "empty": "Ingen nye varsler!"
+  },
+  "Onboarding": {
+    "title": "Sett opp profilen din",
+    "skipToForm": "Hopp til skjema",
+    "back": "Tilbake",
+    "next": "Neste",
+    "finishCta": "Fullfør og gå til dashbordet",
+    "skip": {
+      "confirm": {
+        "title": "Hopp over språkpreferanser?"
+      },
+      "warning": "Vi bruker disse til å anbefale leksjoner og lærere. Uten dem vil dashbordet ditt stort sett være tomt til du legger dem til senere.",
+      "label": "Hopp over for nå"
+    },
+    "alreadyDone": "Profilen din er allerede satt opp",
+    "progress": {
+      "label": "Steg {current} av {total}"
+    },
+    "error": {
+      "saveFailed": "Kunne ikke lagre — prøv igjen",
+      "retry": "Prøv igjen"
+    },
+    "step": {
+      "role": {
+        "title": "Hva tar deg hit?",
+        "subtitle": "Velg hvordan du vil bruke plattformen. Du kan endre dette senere.",
+        "student": {
+          "title": "Jeg lærer",
+          "help": "Øv på språk, ta timer hos lærere og følg fremgangen din."
+        },
+        "tutor": {
+          "title": "Jeg underviser",
+          "help": "Undervis elever, administrer timeplan og bygg din undervisningsvirksomhet."
+        }
+      },
+      "profile": {
+        "title": "Fortell oss om deg selv",
+        "subtitle": "Denne informasjonen vises på profilen din."
+      },
+      "prefs": {
+        "title": "Dine språk",
+        "subtitle": "Hjelp oss å tilpasse læringsopplevelsen din."
+      }
+    },
+    "profile": {
+      "displayName": {
+        "label": "Visningsnavn",
+        "placeholder": "Navn eller kallenavn",
+        "error": {
+          "required": "Visningsnavn er påkrevd",
+          "min": "Må ha minst 2 tegn",
+          "max": "Maks 40 tegn"
+        }
+      },
+      "firstName": {
+        "label": "Fornavn"
+      },
+      "lastName": {
+        "label": "Etternavn"
+      },
+      "timezone": {
+        "label": "Tidssone",
+        "placeholder": "Velg tidssone"
+      },
+      "locale": {
+        "label": "Grensesnittspråk"
+      },
+      "bio": {
+        "label": "Kort bio",
+        "placeholder": "Noen ord om deg selv…",
+        "counter": "{count}/200"
+      }
+    },
+    "prefs": {
+      "native": {
+        "label": "Morsmål",
+        "placeholder": "Velg morsmålet ditt",
+        "error": {
+          "required": "Morsmål er påkrevd"
+        }
+      },
+      "targets": {
+        "heading": "Språk du vil lære",
+        "add": "Legg til et språk til",
+        "remove": "Fjern {language}",
+        "removed": "Fjernet {language}",
+        "duplicate": {
+          "error": "Du har allerede lagt til dette språket"
+        }
+      }
+    },
+    "targets": {
+      "empty": {
+        "title": "Ingen målspråk ennå",
+        "body": "Velg minst ett språk du vil lære. Du kan endre dette når som helst.",
+        "cta": "Legg til ditt første språk"
+      }
+    },
+    "cefr": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "A1_help": "Nybegynner — enkle uttrykk og hverdagsfraser",
+      "A2_help": "Grunnleggende — enkle setninger om kjente emner",
+      "B1_help": "Mellomnivå — klarer de fleste situasjoner på reise",
+      "B2_help": "Over mellomnivå — kan diskutere abstrakte emner",
+      "C1_help": "Avansert — flytende og spontant uttrykk",
+      "C2_help": "Mestring — tilsvarer en utdannet morsmålsbruker"
+    }
   }
 }

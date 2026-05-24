@@ -1,47 +1,44 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-import type { EnrollmentRequest, EnrollmentRequestsResponse } from '@/features/enrollment/types';
-
-// Stub data until the Enrollment service is available.
-export const MOCK_ENROLLMENT_REQUESTS: EnrollmentRequest[] = [
-  {
-    id: 'req-1',
-    schoolId: '1',
-    schoolName: 'Oslo Norsk Akademi',
-    schoolType: 'school',
-    message: 'I moved to Oslo six months ago and need to reach B1 for the citizenship test.',
-    selfAssessedLevel: 'A2',
-    status: 'pending',
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'req-2',
-    schoolId: '5',
-    schoolName: 'Anna Solberg — Norsk Tutor',
-    schoolType: 'tutor',
-    message: 'Looking for one-on-one sessions focused on speaking.',
-    selfAssessedLevel: 'B1',
-    status: 'approved',
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-    reviewedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-    reviewNote: 'Welcome! Your first session is this Friday.',
-  },
-  {
-    id: 'req-3',
-    schoolId: '3',
-    schoolName: 'Kyiv English Hub',
-    schoolType: 'school',
-    status: 'rejected',
-    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
-    reviewedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
-    reviewNote: 'Our current cohort is full. Please reapply next term.',
-  },
-];
+import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors';
 
 export async function GET() {
-  const response: EnrollmentRequestsResponse = { items: MOCK_ENROLLMENT_REQUESTS };
-  return NextResponse.json(response);
+  try {
+    const data = await serverFetch<EnrollmentRequestsResponse>({
+      service: 'enrollment',
+      path: '/api/v1/requests',
+    });
+    return NextResponse.json(data);
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'unauthenticated') {
+      return NextResponse.json({ items: [] }, { status: 200 });
+    }
+    return NextResponse.json({ error: 'Failed to fetch enrollment requests' }, { status: 502 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  try {
+    const data = await serverFetch({
+      service: 'enrollment',
+      path: '/api/v1/requests',
+      method: 'POST',
+      body,
+    });
+    return NextResponse.json(data, { status: 201 });
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'conflict') {
+      return NextResponse.json({ error: 'Already requested' }, { status: 409 });
+    }
+    return NextResponse.json({ error: 'Failed to create enrollment request' }, { status: 502 });
+  }
 }

@@ -57,14 +57,15 @@ Legend:
 | GET `/profiles/me` | ✅ | [`/api/profile/me`](src/app/api/profile/me/route.ts) |
 | PATCH `/profiles/me` | ✅ | Settings → profile page |
 | DELETE `/profiles/me` | ❌ | — |
-| POST/GET `/profiles/me/student` | ❌ | No onboarding flow yet |
-| POST/DELETE `/profiles/me/student/languages` | ❌ | — |
-| POST `/profiles/me/tutor` | ❌ | — |
-| POST/DELETE `/profiles/me/tutor/languages` | ❌ | — |
+| POST/GET/PATCH `/profiles/me/student` | ✅ | BFF at `/api/profile/me/student` |
+| POST/DELETE `/profiles/me/student/languages` | ✅ | BFF at `/api/profile/me/student/languages/[code]` |
+| POST/GET/PATCH `/profiles/me/tutor` | ✅ | BFF at `/api/profile/me/tutor` |
+| POST/DELETE `/profiles/me/tutor/languages` | ✅ | BFF at `/api/profile/me/tutor/languages/[code]` |
 | GET `/profiles/tutors` | ❌ | — |
-| GET `/profiles/{userId}` (+ `/student`, `/tutor`) | ❌ | — |
+| GET `/profiles/{userId}` | ✅ | BFF at `/api/profile/[userId]` |
 
 **Pages:** `student/settings/profile`, `school/settings/profile` — base profile only.
+**Onboarding:** `/[locale]/onboarding` — 3-step wizard (role confirm → base profile → student/tutor preferences). Student and school layouts redirect to `/onboarding` if sub-profile is absent.
 
 ---
 
@@ -142,7 +143,7 @@ Legend:
 | CF-3 Danger zone — discard draft, unpublish, archive, restore, delete forever | ⚠️ | Publish ✅; unpublish/archive/restore → 501 toast |
 | CF-4 Three-state lifecycle (draft / published / archived) | ⚠️ | `ContainerState` type + `deriveContainerState` in place; `archived` state pending backend `isArchived` field |
 | CF-5 Pre-flight panel — blockers, warnings, fix links, publish anyway | ✅ | Client-side `runPreflight()` used both in BFF route and wizard |
-| CF-2 5-step Create Wizard | ❌ | Next: Step F |
+| CF-2 5-step Create Wizard | ✅ | Metadata → Structure → Teachers → Visibility → Review; draft persisted to backend on first Next click |
 
 **Pages:** [`/[locale]/school/content`](src/app/[locale]/school/content) — list with filters/search, [`/new`] simple form (wizard pending), [`/[id]`] full editor with status banner + danger zone.
 
@@ -166,13 +167,13 @@ Legend:
 
 | Endpoint | Status |
 |---|---|
-| POST `/exercises/{id}/attempts` (start) | 🟡 Local simulation only |
-| POST `/exercises/{id}/attempts/{id}/submit` | 🟡 Local scoring on the client |
+| POST `/exercises/{id}/attempts` (start) | ✅ BFF route proxies to Exercise Engine |
+| POST `/exercises/{id}/attempts/{id}/submit` | ✅ BFF route; Server Action calls backend via serverFetch |
 | GET `/exercises/{id}/attempts` | ❌ |
 | GET `/exercises/{id}/attempts/{id}` | ❌ |
 | DELETE `/exercises/{id}/attempts/{id}` | ❌ |
 
-**Frontend:** [`src/features/student/exercises/`](src/features/student/exercises) — cloze, multiple-choice, free-text render and grade client-side; nothing is persisted.
+**Frontend:** [`src/features/student/exercises/`](src/features/student/exercises) — cloze, multiple-choice, free-text submit to real backend; answers persisted. `requiresReview` flag surfaces for free-text.
 
 ---
 
@@ -180,17 +181,17 @@ Legend:
 
 | Area | Status | Note |
 |---|---|---|
-| GET `/api/student/progress` (composite) | 🟡 | Mock in [`/api/student/progress`](src/app/api/student/progress/route.ts) |
+| GET `/api/student/progress` (composite) | ✅ | Real: parallel fetch progress + containers, joined by containerId |
 | GET `/api/student/streak` | 🟡 | Mock |
 | GET `/api/student/upcoming` | 🟡 | Mock |
-| GET `/api/enrollment/requests` | 🟡 | Mock in [`/api/enrollment/requests`](src/app/api/enrollment/requests/route.ts) |
-| POST `/api/v1/progress` (record progress) | ❌ | Lesson start/complete events stubbed |
+| GET/POST `/api/enrollment/requests` | ✅ | Proxies to `/api/v1/requests`; MOCK removed |
+| POST `/api/v1/progress` (record progress) | ✅ | Lesson start/complete events fire via serverFetch |
 | GET `/api/v1/progress/{type}/{id}` | ❌ | |
 | PATCH `…/flag` and `…/resolve` | ❌ | |
-| POST `/api/v1/enrollments` | ❌ | |
-| GET `/api/v1/enrollments` + `/{id}` | ❌ | |
-| DELETE `/api/v1/enrollments/{id}` | ❌ | |
-| PATCH `/api/v1/enrollments/{id}/complete` | ❌ | |
+| POST `/api/v1/enrollments` | ✅ | BFF route created |
+| GET `/api/v1/enrollments` + `/{id}` | ✅ | BFF routes; `getEnrollmentStatus` uses real data |
+| DELETE `/api/v1/enrollments/{id}` | ✅ | BFF route created |
+| PATCH `/api/v1/enrollments/{id}/complete` | ✅ | BFF route created |
 | Assignments — full suite (`/api/v1/assignments/*`) | ❌ | Not implemented at all |
 | Review submissions — full suite (`/api/v1/review/submissions/*`) | ❌ | Not implemented at all |
 | SRS — full suite (`/api/v1/srs/*`) | ❌ | Not implemented at all |
@@ -225,10 +226,10 @@ Legend:
 - ✅ `/student/discover` — discover schools
 - ✅ `/student/enrolled` — enrolled overview
 - ✅ `/student/enrolled/lessons/[id]` — lesson player with navigation, exercise router
-- ✅ `/student/enrolled/requests` — enrollment requests list (mocked)
+- ✅ `/student/enrolled/requests` — enrollment requests list (real backend)
 - ✅ `/student/lessons` — lessons listing
 - ✅ `/student/settings/{profile, account, notifications}` — base settings
-- ❌ Student onboarding (post-register: create student profile, target language)
+- ✅ Student onboarding (`/onboarding` wizard — role confirm, base profile, language prefs)
 - ❌ Real assignment list / detail
 - ❌ SRS review page
 - ❌ Submissions list / detail (free-text answers awaiting review)
@@ -236,7 +237,7 @@ Legend:
 ### School / Tutor
 - ✅ `/school/dashboard` — basic stub
 - ✅ `/school/content` — course list with search, state filters, sort, table/grid, bulk actions
-- ✅ `/school/content/new` — create form (5-step wizard pending)
+- ✅ `/school/content/new` — 5-step Create Wizard (CF-2)
 - ✅ `/school/content/[id]` — editor with breadcrumb, status banner, preflight panel, danger zone
 - ✅ `/school/students` — students list (basic)
 - ✅ `/school/settings/{profile, account, notifications}`
@@ -245,7 +246,7 @@ Legend:
 - ❌ Assignments hub (create, track)
 - ❌ Submissions review queue
 - ⚠️ Container publish flow — publish ✅, unpublish/archive/restore pending backend
-- ❌ 5-step Create Wizard (CF-2)
+- ✅ 5-step Create Wizard (CF-2)
 - ❌ Vocabulary translations / examples editors
 - ❌ Grammar pool management
 
@@ -283,14 +284,14 @@ In-progress (uncommitted, same branch — Course Management Flow):
 - Step C — BFF lifecycle routes (archive/restore/unpublish/duplicate/preflight/activity)
 - Step D — CF-5 `runPreflight()` + `PreflightPanel`
 - Step E — CF-3 detail page (breadcrumb, status banner, two-column overview, danger zone)
-- **Step F pending** — CF-2 5-step Create Wizard
+- Step F — CF-2 5-step Create Wizard ✅
 
 ---
 
 ## What "done" means today
 
-The **student experience MVP loop** works end-to-end visually: register → log in → browse catalogue → discover → enrol (mocked) → enrolled dashboard (mocked progress) → lesson player → answer exercises (local scoring).
+The **student experience MVP loop** is wired to real backends: register → log in → browse catalogue → discover → enrol (mocked) → enrolled dashboard (real progress) → lesson player (start/complete events persisted) → answer exercises (real submission to Exercise Engine).
 
-The **school/content authoring** side covers: full read/write of containers, lessons, exercises, vocabulary lists, grammar rules, tags, shares against the real backend — plus the Course Management Flow (CF-1 list with filters, CF-3 detail with danger zone, CF-5 preflight). The 5-step Create Wizard (CF-2) is the immediate next step.
+The **school/content authoring** side covers: full read/write of containers, lessons, exercises, vocabulary lists, grammar rules, tags, shares against the real backend — plus the full Course Management Flow (CF-1 list with filters, CF-2 5-step create wizard, CF-3 detail with danger zone, CF-5 preflight).
 
 Everything else listed as ❌ or 🟡 is the gap that turns the demo into a working product. The roadmap is in [`docs/plan/14-remaining-roadmap.md`](docs/plan/14-remaining-roadmap.md).

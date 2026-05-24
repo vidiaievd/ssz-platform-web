@@ -472,7 +472,105 @@
       "containers": "No content yet. Create your first container."
     },
     "comingSoon": "This section will be available in a future step.",
-    "backToContent": "Back to content"
+    "backToContent": "Back to content",
+    "wizard": {
+      "steps": {
+        "metadata": "Details",
+        "structure": "Structure",
+        "teachers": "Teachers",
+        "visibility": "Visibility",
+        "review": "Review"
+      },
+      "shell": {
+        "saveExit": "Save & exit",
+        "back": "Back",
+        "next": "Next",
+        "saving": "Saving…",
+        "saved": "All changes saved",
+        "saveError": "Couldn't save. Please try again.",
+        "discardError": "Couldn't discard. Please try again.",
+        "discard": {
+          "title": "Discard course?",
+          "body": "All progress will be lost.",
+          "bodyWithDraft": "The saved draft will be deleted permanently.",
+          "confirm": "Discard",
+          "cancel": "Keep editing"
+        }
+      },
+      "metadata": {
+        "titleLabel": "Course title",
+        "titlePlaceholder": "e.g. Norwegian for Beginners",
+        "subtitle": "Give your course a name and choose its target language.",
+        "language": "Target language",
+        "languagePlaceholder": "Select a language",
+        "level": "Difficulty level",
+        "levelNone": "Any level",
+        "descriptionLabel": "Short description",
+        "descriptionPlaceholder": "What will students learn? (max 240 chars)",
+        "coverImage": "Cover image",
+        "coverPlaceholder": "https://…",
+        "coverHint": "Paste an image URL. Square or landscape PNG/JPG works best.",
+        "previewLabel": "Catalogue preview",
+        "previewTitle": "Course title"
+      },
+      "structure": {
+        "subtitle": "Choose how to organise your content.",
+        "cefr": "Scaffold from CEFR",
+        "cefrHelp": "Creates 6 empty levels (A1–C2) with a starter module each.",
+        "blank": "Blank slate",
+        "blankHelp": "Start with an empty course — add levels and modules yourself.",
+        "template": "Duplicate a template",
+        "templateHelp": "Copy the structure from an existing course template.",
+        "previewTitle": "Structure preview",
+        "previewAnnotation": "Click a level name to rename. × removes it.",
+        "blankPreview": "No levels — you'll add them in the course editor.",
+        "templatePreview": "Select a template above to preview its structure."
+      },
+      "teachers": {
+        "subtitle": "You are the course owner. Co-teacher management is available after creation.",
+        "ownerSection": "Owner",
+        "owner": "Owner",
+        "coTeach": "Co-teacher",
+        "viewer": "Viewer",
+        "coTeachersSection": "Co-teachers",
+        "coTeachersComingSoon": "Co-teacher invitations coming soon",
+        "coTeachersHelp": "You can add co-teachers from the course settings after creation.",
+        "matrixTitle": "Role permissions",
+        "matrix": {
+          "action": "Action",
+          "editContent": "Edit content",
+          "publish": "Publish / archive",
+          "manageTeachers": "Manage teachers",
+          "grade": "Grade & comment",
+          "analytics": "View analytics",
+          "delete": "Delete course"
+        }
+      },
+      "visibility": {
+        "subtitle": "Control who can see and enroll in this course.",
+        "inviteOnly": "Invite-only",
+        "inviteOnlyHelp": "Hidden from the public catalogue. Students access via a direct link.",
+        "publicCatalog": "Public catalogue",
+        "publicCatalogHelp": "Listed in the catalogue — anyone can find and enroll.",
+        "internalDraft": "Internal only",
+        "internalDraftHelp": "Visible only to you and the teaching team.",
+        "note": "You can change visibility at any time from the course settings."
+      },
+      "review": {
+        "subtitle": "Check the details before saving or publishing.",
+        "sectionMetadata": "Details",
+        "sectionStructure": "Structure",
+        "sectionTeachers": "Teachers",
+        "sectionVisibility": "Visibility",
+        "edit": "Edit",
+        "ownerOnly": "Owner only",
+        "saveAsDraft": "Save as draft",
+        "publish": "Publish course",
+        "publishError": "Couldn't publish. Check blockers in the pre-flight panel.",
+        "publishSuccess": "Course published!",
+        "preflightHint": "Save the draft first to see pre-flight checks."
+      }
+    }
   },
   "Discovery": {
     "title": "Discover Schools",
@@ -613,5 +711,117 @@
     "unread": "{count, plural, one {# unread} other {# unread}}",
     "unreadDot": "Unread",
     "empty": "You're all caught up!"
+  },
+  "Onboarding": {
+    "title": "Set up your profile",
+    "skipToForm": "Skip to form",
+    "back": "Back",
+    "next": "Next",
+    "finishCta": "Finish & go to my dashboard",
+    "skip": {
+      "confirm": {
+        "title": "Skip language preferences?"
+      },
+      "warning": "We use these to recommend lessons and tutors. Without them, your dashboard will be mostly empty until you add them later.",
+      "label": "Skip for now"
+    },
+    "alreadyDone": "Your profile is already set up",
+    "progress": {
+      "label": "Step {current} of {total}"
+    },
+    "error": {
+      "saveFailed": "Could not save — please try again",
+      "retry": "Retry"
+    },
+    "step": {
+      "role": {
+        "title": "What brings you here?",
+        "subtitle": "Choose how you will use the platform. You can update this later.",
+        "student": {
+          "title": "I'm learning",
+          "help": "Practice languages, get lessons from tutors, and track your progress."
+        },
+        "tutor": {
+          "title": "I'm teaching",
+          "help": "Teach students, manage schedules, and grow your tutoring business."
+        }
+      },
+      "profile": {
+        "title": "Tell us about yourself",
+        "subtitle": "This information will appear on your profile."
+      },
+      "prefs": {
+        "title": "Your languages",
+        "subtitle": "Help us personalise your learning experience."
+      }
+    },
+    "profile": {
+      "displayName": {
+        "label": "Display name",
+        "placeholder": "Your name or nickname",
+        "error": {
+          "required": "Display name is required",
+          "min": "Must be at least 2 characters",
+          "max": "Must be 40 characters or fewer"
+        }
+      },
+      "firstName": {
+        "label": "First name"
+      },
+      "lastName": {
+        "label": "Last name"
+      },
+      "timezone": {
+        "label": "Timezone",
+        "placeholder": "Select timezone"
+      },
+      "locale": {
+        "label": "Interface language"
+      },
+      "bio": {
+        "label": "Short bio",
+        "placeholder": "A few words about yourself…",
+        "counter": "{count}/200"
+      }
+    },
+    "prefs": {
+      "native": {
+        "label": "Native language",
+        "placeholder": "Select your native language",
+        "error": {
+          "required": "Native language is required"
+        }
+      },
+      "targets": {
+        "heading": "Languages you want to learn",
+        "add": "Add another language",
+        "remove": "Remove {language}",
+        "removed": "Removed {language}",
+        "duplicate": {
+          "error": "You have already added this language"
+        }
+      }
+    },
+    "targets": {
+      "empty": {
+        "title": "No target languages yet",
+        "body": "Pick at least one language you want to learn. You can change this any time.",
+        "cta": "Add your first language"
+      }
+    },
+    "cefr": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "A1_help": "Beginner — basic phrases and everyday expressions",
+      "A2_help": "Elementary — simple sentences on familiar topics",
+      "B1_help": "Intermediate — can handle most travel situations",
+      "B2_help": "Upper intermediate — can discuss abstract topics",
+      "C1_help": "Advanced — fluent and spontaneous expression",
+      "C2_help": "Mastery — equivalent to an educated native speaker"
+    }
   }
 }

@@ -1,14 +1,13 @@
 import { http, HttpResponse } from 'msw';
 
 import { MOCK_SCHOOLS } from '@/app/api/discovery/schools/route';
-import { MOCK_ENROLLMENT_REQUESTS } from '@/app/api/enrollment/requests/route';
 import { MOCK_NOTIFICATIONS } from '@/app/api/notifications/route';
-import { MOCK_PROGRESS } from '@/app/api/student/progress/route';
 import { MOCK_UPCOMING } from '@/app/api/student/upcoming/route';
 import { MOCK_STREAK } from '@/app/api/student/streak/route';
 import type { SchoolsResponse } from '@/features/discovery/types';
 import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
 import type { NotificationsResponse } from '@/features/notifications/types';
+import type { ContainerProgress } from '@/features/student/types';
 
 /**
  * Default handlers shared across tests, dev, and Storybook.
@@ -41,12 +40,35 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  http.get('/api/enrollment/requests', () => {
-    const response: EnrollmentRequestsResponse = { items: MOCK_ENROLLMENT_REQUESTS };
-    return HttpResponse.json(response);
-  }),
+  // Enrollment requests — real backend; default to empty list in tests.
+  http.get('/api/enrollment/requests', () =>
+    HttpResponse.json({ items: [] } as EnrollmentRequestsResponse),
+  ),
+  http.post('/api/enrollment/requests', () =>
+    HttpResponse.json(
+      { id: 'req-test', schoolId: 'school-1', schoolName: 'Test School', schoolType: 'school', status: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { status: 201 },
+    ),
+  ),
 
-  http.get('/api/student/progress', () => HttpResponse.json(MOCK_PROGRESS)),
+  // Course enrollments
+  http.get('/api/enrollment', () => HttpResponse.json({ items: [] })),
+  http.post('/api/enrollment', () => HttpResponse.json({ id: 'enroll-test' }, { status: 201 })),
+  http.delete('/api/enrollment/:id', () => new HttpResponse(null, { status: 204 })),
+  http.patch('/api/enrollment/:id/complete', () => HttpResponse.json({ id: 'enroll-test', status: 'completed' })),
+
+  // Progress — real backend; default to empty in tests.
+  http.get('/api/student/progress', () => HttpResponse.json([] as ContainerProgress[])),
+
+  // Attempt routes for tests — feature-specific tests override these.
+  http.post('/api/content/exercises/:id/attempts', () =>
+    HttpResponse.json({ attemptId: 'test-attempt-id', exerciseId: 'test-id', startedAt: new Date().toISOString() }, { status: 201 }),
+  ),
+  http.post('/api/content/exercises/:id/attempts/:attemptId/submit', () =>
+    HttpResponse.json({ verdict: 'correct' }),
+  ),
+  http.post('/api/student/progress/events', () => new HttpResponse(null, { status: 204 })),
+
   http.get('/api/student/upcoming', () => HttpResponse.json(MOCK_UPCOMING)),
   http.get('/api/student/streak', () => HttpResponse.json(MOCK_STREAK)),
 
@@ -55,4 +77,55 @@ export const handlers = [
     const response: NotificationsResponse = { items: MOCK_NOTIFICATIONS, unreadCount };
     return HttpResponse.json(response);
   }),
+
+  // Sub-profiles — default to 404 (not yet onboarded) in tests.
+  // Feature tests that need an existing profile override these with server.use().
+  http.get('/api/profile/me/student', () => new HttpResponse(null, { status: 404 })),
+  http.post('/api/profile/me/student', () =>
+    HttpResponse.json(
+      {
+        id: 'sp-test',
+        userId: 'user-test',
+        nativeLanguage: 'en',
+        targetLanguages: ['nb'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      { status: 201 },
+    ),
+  ),
+  http.patch('/api/profile/me/student', () =>
+    HttpResponse.json({ id: 'sp-test', userId: 'user-test', nativeLanguage: 'en', targetLanguages: ['nb'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }),
+  ),
+  http.post('/api/profile/me/student/languages/:code', () =>
+    HttpResponse.json({}, { status: 201 }),
+  ),
+  http.delete('/api/profile/me/student/languages/:code', () =>
+    new HttpResponse(null, { status: 204 }),
+  ),
+
+  http.get('/api/profile/me/tutor', () => new HttpResponse(null, { status: 404 })),
+  http.post('/api/profile/me/tutor', () =>
+    HttpResponse.json(
+      {
+        id: 'tp-test',
+        userId: 'user-test',
+        teachingLanguages: ['nb'],
+        hourlyRate: null,
+        currency: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      { status: 201 },
+    ),
+  ),
+  http.patch('/api/profile/me/tutor', () =>
+    HttpResponse.json({ id: 'tp-test', userId: 'user-test', teachingLanguages: ['nb'], hourlyRate: null, currency: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }),
+  ),
+  http.post('/api/profile/me/tutor/languages/:code', () =>
+    HttpResponse.json({}, { status: 201 }),
+  ),
+  http.delete('/api/profile/me/tutor/languages/:code', () =>
+    new HttpResponse(null, { status: 204 }),
+  ),
 ];
