@@ -57,14 +57,15 @@ Legend:
 | GET `/profiles/me` | ✅ | [`/api/profile/me`](src/app/api/profile/me/route.ts) |
 | PATCH `/profiles/me` | ✅ | Settings → profile page |
 | DELETE `/profiles/me` | ❌ | — |
-| POST/GET `/profiles/me/student` | ❌ | No onboarding flow yet |
-| POST/DELETE `/profiles/me/student/languages` | ❌ | — |
-| POST `/profiles/me/tutor` | ❌ | — |
-| POST/DELETE `/profiles/me/tutor/languages` | ❌ | — |
+| POST/GET/PATCH `/profiles/me/student` | ✅ | BFF at `/api/profile/me/student` |
+| POST/DELETE `/profiles/me/student/languages` | ✅ | BFF at `/api/profile/me/student/languages/[code]` |
+| POST/GET/PATCH `/profiles/me/tutor` | ✅ | BFF at `/api/profile/me/tutor` |
+| POST/DELETE `/profiles/me/tutor/languages` | ✅ | BFF at `/api/profile/me/tutor/languages/[code]` |
 | GET `/profiles/tutors` | ❌ | — |
-| GET `/profiles/{userId}` (+ `/student`, `/tutor`) | ❌ | — |
+| GET `/profiles/{userId}` | ✅ | BFF at `/api/profile/[userId]` |
 
 **Pages:** `student/settings/profile`, `school/settings/profile` — base profile only.
+**Onboarding:** `/[locale]/onboarding` — 3-step wizard (role confirm → base profile → student/tutor preferences). Student and school layouts redirect to `/onboarding` if sub-profile is absent.
 
 ---
 
@@ -228,7 +229,7 @@ Legend:
 - ✅ `/student/enrolled/requests` — enrollment requests list (real backend)
 - ✅ `/student/lessons` — lessons listing
 - ✅ `/student/settings/{profile, account, notifications}` — base settings
-- ❌ Student onboarding (post-register: create student profile, target language)
+- ✅ Student onboarding (`/onboarding` wizard — role confirm, base profile, language prefs)
 - ❌ Real assignment list / detail
 - ❌ SRS review page
 - ❌ Submissions list / detail (free-text answers awaiting review)
