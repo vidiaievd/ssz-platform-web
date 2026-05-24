@@ -1,0 +1,78 @@
+name: E2E
+
+on:
+  pull_request:
+  push:
+    branches: [master, dev]
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    env:
+      AUTH_COOKIE_SECRET: ${{ secrets.AUTH_COOKIE_SECRET || 'ci-placeholder-secret-for-build-only-not-real-32ch' }}
+      API_GATEWAY_URL: ${{ secrets.API_GATEWAY_URL || 'http://localhost:8080' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate API client
+        run: npm run api:generate
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      # Start backend services with e2e seed data.
+      # The backend docker-compose and seed script live in the ssz-platform repo.
+      # For PRs that don't have a backend available, stub-only tests still run.
+      - name: Start backend (if docker-compose available)
+        id: backend
+        continue-on-error: true
+        run: |
+          if [ -f docker-compose.e2e.yml ]; then
+            docker compose -f docker-compose.e2e.yml up -d
+            echo "backend_available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "backend_available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Run Playwright tests
+        run: npm run e2e
+        env:
+          CI: true
+          E2E_STUB_ONLY: ${{ steps.backend.outputs.backend_available == 'false' && 'true' || 'false' }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test traces
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
+      - name: Stop backend
+        if: steps.backend.outputs.backend_available == 'true'
+        run: docker compose -f docker-compose.e2e.yml down
