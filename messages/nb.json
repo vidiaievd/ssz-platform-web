@@ -818,5 +818,17 @@
       "C1_help": "Avansert — flytende og spontant uttrykk",
       "C2_help": "Mestring — tilsvarer en utdannet morsmålsbruker"
     }
+  },
+  "Media": {
+    "change": "Endre bilde",
+    "save": "Lagre bilde",
+    "discard": "Forkast",
+    "hint": "JPG, PNG, WebP eller GIF · maks 5 MB",
+    "uploadSuccess": "Bildet er oppdatert.",
+    "errors": {
+      "invalidType": "Last opp et JPG-, PNG-, WebP- eller GIF-bilde.",
+      "tooLarge": "Filen er for stor. Maksimal størrelse er 5 MB.",
+      "uploadFailed": "Opplastingen mislyktes. Prøv igjen."
+    }
   }
 }
