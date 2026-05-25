@@ -84,7 +84,7 @@
     "contactEmail": "Contact email",
     "contactPhone": "Contact phone",
     "avatar": {
-      "placeholder": "Avatar upload coming soon."
+      "placeholder": "Upload a profile photo."
     },
     "sections": {
       "avatar": "Profile photo",
