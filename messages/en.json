@@ -835,5 +835,198 @@
       "tooLarge": "File is too large. Maximum size is 5 MB.",
       "uploadFailed": "Upload failed. Please try again."
     }
+  },
+  "School": {
+    "common": {
+      "close": "Close",
+      "saving": "Saving…",
+      "stillWorking": "Still saving — please wait…",
+      "copied": "Copied!",
+      "markdown": {
+        "previewEmpty": "Nothing to preview."
+      }
+    },
+    "empty": {
+      "title": "You don't have a school yet",
+      "help": "A school is your workspace where you organise content and students.",
+      "create": {
+        "title": "Create my own school",
+        "help": "Set up a workspace, invite teachers and students."
+      },
+      "accept": {
+        "title": "Accept an invitation",
+        "help": "Paste an invite link or browse pending invites."
+      }
+    },
+    "role": {
+      "teacher": {
+        "label": "Teacher",
+        "help": "Can create courses and grade students."
+      },
+      "contentAdmin": {
+        "label": "Content admin",
+        "help": "Can manage courses but not billing."
+      },
+      "student": {
+        "label": "Student",
+        "help": "Can enroll and follow lessons."
+      }
+    },
+    "create": {
+      "progress": {
+        "label": "Step {current} of {total}"
+      },
+      "step": {
+        "basics": {
+          "title": "School basics",
+          "subtitle": "Give your school a name and tell us a bit about it."
+        },
+        "invite": {
+          "title": "Invite your first members",
+          "subtitle": "Optional — you can add more later."
+        },
+        "done": {
+          "title": "You're all set",
+          "subtitle": "Your school has been created."
+        }
+      },
+      "back": "Back",
+      "next": "Next",
+      "skip": "Skip for now",
+      "finishCta": "Go to my school",
+      "cancel": {
+        "title": "Discard school setup?",
+        "body": "Your school name and members won't be saved.",
+        "bodyWithSchool": "Your school is saved. You can finish inviting members later from Settings → Members.",
+        "confirm": "Discard",
+        "dismiss": "Keep editing",
+        "leaveForNow": "Leave for now"
+      },
+      "error": {
+        "nameTaken": "That name is already taken.",
+        "network": "Couldn't connect. Please check your connection.",
+        "retry": "Retry",
+        "saveFailed": "Couldn't save. Please try again."
+      },
+      "basics": {
+        "name": {
+          "label": "School name",
+          "placeholder": "e.g. Nordic Language Academy",
+          "help": "Visible to your students. You can change it later.",
+          "checking": "Checking availability…",
+          "available": "Name available",
+          "taken": "That name is taken. Try one of these:",
+          "checkFailed": "Couldn't check — click to retry",
+          "suggestionsLabel": "Name suggestions",
+          "error": {
+            "required": "School name is required",
+            "min": "Must be at least 3 characters",
+            "max": "Must be 60 characters or fewer"
+          }
+        },
+        "desc": {
+          "label": "Description",
+          "placeholder": "Tell students about your school…",
+          "counter": "{count}/500",
+          "tab": {
+            "write": "Write",
+            "preview": "Preview"
+          },
+          "error": {
+            "max": "Description must be 500 characters or fewer"
+          }
+        },
+        "logo": {
+          "label": "Logo",
+          "placeholder": "https://example.com/logo.png",
+          "help": "Paste an image URL. Square PNG or JPG works best.",
+          "error": {
+            "url": "Please enter a valid URL",
+            "notImage": "URL doesn't appear to be an image"
+          }
+        }
+      },
+      "invite": {
+        "add": "+ Add another",
+        "maxReached": "You've reached the 10-invite limit for this step.",
+        "remaining": "You can add {remaining} more.",
+        "skipLabel": "Skip for now",
+        "skip": {
+          "title": "Skip for now?",
+          "body": "You can invite teachers and students any time from Settings → Members.",
+          "keep": "Keep inviting",
+          "confirm": "Skip"
+        },
+        "sending": "Sending invitations…",
+        "partialFailure": "Sent {sent} invites. {failed} couldn't be delivered — share their links below.",
+        "error": {
+          "self": "You're already the owner — no need to invite yourself.",
+          "duplicate": "You've already added this email.",
+          "network": "Couldn't send invitations. Please try again."
+        },
+        "announce": {
+          "added": "Added invite row",
+          "removed": "Removed invite for {email}",
+          "sent": "Invite sent to {email}",
+          "failed": "Couldn't send to {email} — share the link instead"
+        },
+        "row": {
+          "rowLabel": "Invite row {index}",
+          "email": {
+            "placeholder": "teacher@school.no",
+            "error": {
+              "invalid": "Please enter a valid email address"
+            }
+          },
+          "role": {
+            "label": "Role"
+          }
+        },
+        "remove": "Remove {email}",
+        "linkFallback": {
+          "title": "We couldn't email {email}. Share this link instead:",
+          "copy": "Copy",
+          "openMail": "Open mail draft"
+        }
+      },
+      "done": {
+        "title": "Your school is ready",
+        "summary": "{schoolName} is set up. {n, plural, =0 {No members invited yet.} one {# member invited.} other {# members invited.}}",
+        "next": {
+          "heading": "What's next",
+          "course": {
+            "title": "Create your first course",
+            "help": "Add lessons, vocabulary, and exercises."
+          },
+          "members": {
+            "title": "Open the members page",
+            "help": "Re-send invites, add more people."
+          },
+          "settings": {
+            "title": "Customize school settings",
+            "help": "Logo, defaults, permissions."
+          }
+        }
+      },
+      "alreadyHaveSchool": "You already have a school.",
+      "draftLost": "Your school draft was lost. Starting fresh.",
+      "helper": {
+        "basics": {
+          "title": "What is a school?",
+          "bullets": {
+            "0": "A workspace for your courses and students.",
+            "1": "Invite teachers, add content, track progress.",
+            "2": "Students enrol and learn at their own pace."
+          }
+        },
+        "invite": {
+          "title": "About roles",
+          "body": "Teachers can create courses. Content admins manage content. Students enrol and learn. You can always change roles later."
+        }
+      },
+      "wizard": {
+        "next": "Next"
+      }
+    }
   }
 }
