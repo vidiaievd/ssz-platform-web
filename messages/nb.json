@@ -12,7 +12,24 @@
     "label": "Språk"
   },
   "Home": {
-    "tagline": "Grunnlaget er klart."
+    "tagline": "Grunnlaget er klart.",
+    "heroHeadline": "Lær språk. Undervis smartere.",
+    "heroSubheadline": "SSZ Learn kobler studenter med profesjonelle språkskoler og lærere. Studer i ditt eget tempo, eller ta skolen din online.",
+    "ctaStudent": "Begynn å lære gratis",
+    "ctaSchool": "For skoler og lærere",
+    "audienceStudentBadge": "For studenter",
+    "audienceStudentTitle": "Lær i ditt eget tempo",
+    "audienceStudentDesc": "Få tilgang til strukturerte språkkurs fra profesjonelle skoler og lærere. Spor fremgangen din, fullfør øvelser og studer når og hvor som helst.",
+    "audienceSchoolBadge": "For skoler og lærere",
+    "audienceSchoolTitle": "Ta skolen din online",
+    "audienceSchoolDesc": "Opprett kurs, administrer studenter og spor fremgangen deres — alt på én plattform. Publiser innhold, inviter studenter og vokse din undervisning.",
+    "featuresTitle": "Alt du trenger for å lære og undervise",
+    "feature1Title": "Strukturerte kurs",
+    "feature1Desc": "Følg profesjonelt utformede læreplaner med leksjoner, vokabular, grammatikk og interaktive øvelser.",
+    "feature2Title": "Fremgangssporing",
+    "feature2Desc": "Se forbedringen din med detaljert statistikk, streaks og læringshistorikk.",
+    "feature3Title": "Flere språk",
+    "feature3Desc": "Norsk, engelsk, ukrainsk og mer — alt på én plattform."
   },
   "Errors": {
     "unauthenticated": "Vennligst logg inn for å fortsette.",
@@ -30,7 +47,9 @@
     "features": "Funksjoner",
     "pricing": "Priser",
     "signIn": "Logg inn",
-    "getStarted": "Kom i gang"
+    "getStarted": "Kom i gang",
+    "startLearning": "Begynn å lære",
+    "forSchools": "For skoler"
   },
   "Nav": {
     "dashboard": "Oversikt",
@@ -218,6 +237,26 @@
       "resend": "Send bekreftelses-e-post på nytt",
       "resendSuccess": "Bekreftelses-e-post sendt.",
       "signIn": "Logg inn"
+    },
+    "RegisterHub": {
+      "title": "Kom i gang",
+      "subtitle": "Hvordan vil du bruke SSZ Learn?",
+      "studentTitle": "Jeg vil lære",
+      "studentDesc": "Bli med som student. Få tilgang til språkkurs fra skoler og lærere.",
+      "studentCta": "Registrer deg som student",
+      "schoolTitle": "Jeg underviser eller driver en skole",
+      "schoolDesc": "Publiser kurs, administrer studenter og vokse skolen din online.",
+      "schoolCta": "Registrer deg for skoler",
+      "hasAccount": "Har du allerede en konto?",
+      "signIn": "Logg inn"
+    },
+    "RegisterStudent": {
+      "title": "Opprett studentkonto",
+      "subtitle": "Start din språklæringsreise"
+    },
+    "RegisterSchool": {
+      "title": "Opprett skolekonto",
+      "subtitle": "Publiser kurs og administrer dine studenter"
     }
   },
   "Authoring": {

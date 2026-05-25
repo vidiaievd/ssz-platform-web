@@ -1,18 +1,12 @@
 'use server';
 
-import { z } from 'zod';
-
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
 import type { StudentProfile } from '../types';
 
-const createStudentProfileSchema = z.object({
-  nativeLanguage: z.string().min(1).nullable().optional(),
-  targetLanguages: z.array(z.string().min(1)).optional(),
-});
-
-export type CreateStudentProfileValues = z.infer<typeof createStudentProfileSchema>;
+import { createStudentProfileSchema } from '../schemas/onboarding';
+import type { CreateStudentProfileValues } from '../schemas/onboarding';
 
 export async function createStudentProfileAction(
   input: CreateStudentProfileValues,

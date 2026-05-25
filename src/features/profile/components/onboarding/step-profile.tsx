@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LOCALE_LABELS, LOCALES } from '@/lib/i18n/config';
-import { onboardingProfileSchema, type OnboardingProfileValues, saveProfileStepAction } from '../../actions/save-profile-step';
+import { onboardingProfileSchema, type OnboardingProfileValues } from '../../schemas/onboarding';
+import { saveProfileStepAction } from '../../actions/save-profile-step';
 import { useOnboardingStore } from '../../stores/onboarding-store';
 
 const TIMEZONE_GROUPS = [
