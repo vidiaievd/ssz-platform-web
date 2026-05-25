@@ -1,19 +1,12 @@
 'use server';
 
-import { z } from 'zod';
-
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
 import type { TutorProfile } from '../types';
 
-const createTutorProfileSchema = z.object({
-  teachingLanguages: z.array(z.string().min(1)).optional(),
-  hourlyRate: z.number().positive().nullable().optional(),
-  currency: z.string().length(3).nullable().optional(),
-});
-
-export type CreateTutorProfileValues = z.infer<typeof createTutorProfileSchema>;
+import { createTutorProfileSchema } from '../schemas/onboarding';
+import type { CreateTutorProfileValues } from '../schemas/onboarding';
 
 export async function createTutorProfileAction(
   input: CreateTutorProfileValues,

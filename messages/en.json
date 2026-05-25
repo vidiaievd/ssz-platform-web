@@ -12,7 +12,24 @@
     "label": "Language"
   },
   "Home": {
-    "tagline": "Foundation ready."
+    "tagline": "Foundation ready.",
+    "heroHeadline": "Learn languages. Teach smarter.",
+    "heroSubheadline": "SSZ Learn connects students with professional language schools and tutors. Study at your own pace, or bring your school online.",
+    "ctaStudent": "Start learning for free",
+    "ctaSchool": "For schools & tutors",
+    "audienceStudentBadge": "For students",
+    "audienceStudentTitle": "Learn at your own pace",
+    "audienceStudentDesc": "Access structured language courses from professional schools and tutors. Track your progress, complete exercises, and study anywhere, anytime.",
+    "audienceSchoolBadge": "For schools & tutors",
+    "audienceSchoolTitle": "Bring your school online",
+    "audienceSchoolDesc": "Create courses, manage students, and track their progress — all in one platform. Publish content, invite students, and grow your teaching.",
+    "featuresTitle": "Everything you need to learn and teach",
+    "feature1Title": "Structured courses",
+    "feature1Desc": "Follow professionally crafted curricula with lessons, vocabulary, grammar, and interactive exercises.",
+    "feature2Title": "Progress tracking",
+    "feature2Desc": "See your improvement with detailed statistics, streaks, and learning history.",
+    "feature3Title": "Multiple languages",
+    "feature3Desc": "Norwegian, English, Ukrainian and more — all in one platform."
   },
   "Errors": {
     "unauthenticated": "Please sign in to continue.",
@@ -30,7 +47,9 @@
     "features": "Features",
     "pricing": "Pricing",
     "signIn": "Sign in",
-    "getStarted": "Get started"
+    "getStarted": "Get started",
+    "startLearning": "Start learning",
+    "forSchools": "For schools"
   },
   "Nav": {
     "dashboard": "Dashboard",
@@ -218,6 +237,26 @@
       "resend": "Resend verification email",
       "resendSuccess": "Verification email sent.",
       "signIn": "Sign in"
+    },
+    "RegisterHub": {
+      "title": "Get started",
+      "subtitle": "How would you like to use SSZ Learn?",
+      "studentTitle": "I want to learn",
+      "studentDesc": "Join as a student. Access language courses from schools and tutors.",
+      "studentCta": "Sign up as student",
+      "schoolTitle": "I teach or run a school",
+      "schoolDesc": "Publish courses, manage students, and grow your school online.",
+      "schoolCta": "Sign up for schools",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "RegisterStudent": {
+      "title": "Create student account",
+      "subtitle": "Start your language learning journey"
+    },
+    "RegisterSchool": {
+      "title": "Create school account",
+      "subtitle": "Publish courses and manage your students"
     }
   },
   "Authoring": {

@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import type { OnboardingRole } from '../../stores/onboarding-store';
-import type { OnboardingProfileValues } from '../../actions/save-profile-step';
+import type { OnboardingProfileValues } from '../../schemas/onboarding';
 import type { OnboardingStep } from './step-indicator';
 import { StepIndicator } from './step-indicator';
 import { StepRole } from './step-role';

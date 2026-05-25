@@ -34,8 +34,11 @@ export function MarketingNav() {
             <Button variant="ghost" size="sm" asChild>
               <Link href="/login">{tNav('signIn')}</Link>
             </Button>
+            <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
+              <Link href="/register/school">{tNav('forSchools')}</Link>
+            </Button>
             <Button variant="primary" size="sm" asChild>
-              <Link href="/register">{tNav('getStarted')}</Link>
+              <Link href="/register/student">{tNav('startLearning')}</Link>
             </Button>
           </div>
         </div>
