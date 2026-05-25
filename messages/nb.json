@@ -830,5 +830,198 @@
       "tooLarge": "Filen er for stor. Maksimal størrelse er 5 MB.",
       "uploadFailed": "Opplastingen mislyktes. Prøv igjen."
     }
+  },
+  "School": {
+    "common": {
+      "close": "Lukk",
+      "saving": "Lagrer…",
+      "stillWorking": "Lagrer fortsatt — vennligst vent…",
+      "copied": "Kopiert!",
+      "markdown": {
+        "previewEmpty": "Ingenting å forhåndsvise."
+      }
+    },
+    "empty": {
+      "title": "Du har ingen skole ennå",
+      "help": "En skole er arbeidsplassen din der du organiserer innhold og elever.",
+      "create": {
+        "title": "Opprett min egen skole",
+        "help": "Sett opp en arbeidsplass, inviter lærere og elever."
+      },
+      "accept": {
+        "title": "Godta en invitasjon",
+        "help": "Lim inn en invitasjonslenke eller se ventende invitasjoner."
+      }
+    },
+    "role": {
+      "teacher": {
+        "label": "Lærer",
+        "help": "Kan opprette kurs og vurdere elever."
+      },
+      "contentAdmin": {
+        "label": "Innholdsadmin",
+        "help": "Kan administrere kurs, men ikke fakturering."
+      },
+      "student": {
+        "label": "Elev",
+        "help": "Kan melde seg på og følge leksjoner."
+      }
+    },
+    "create": {
+      "progress": {
+        "label": "Steg {current} av {total}"
+      },
+      "step": {
+        "basics": {
+          "title": "Skolegrunnlag",
+          "subtitle": "Gi skolen din et navn og fortell litt om den."
+        },
+        "invite": {
+          "title": "Inviter de første medlemmene",
+          "subtitle": "Valgfritt — du kan legge til flere senere."
+        },
+        "done": {
+          "title": "Alt er klart",
+          "subtitle": "Skolen din er opprettet."
+        }
+      },
+      "back": "Tilbake",
+      "next": "Neste",
+      "skip": "Hopp over for nå",
+      "finishCta": "Gå til min skole",
+      "cancel": {
+        "title": "Forkast skoleoppsettet?",
+        "body": "Skolenavn og medlemmer vil ikke bli lagret.",
+        "bodyWithSchool": "Skolen er lagret. Du kan fullføre invitasjoner senere fra Innstillinger → Medlemmer.",
+        "confirm": "Forkast",
+        "dismiss": "Fortsett redigering",
+        "leaveForNow": "Forlat for nå"
+      },
+      "error": {
+        "nameTaken": "Det navnet er allerede tatt.",
+        "network": "Kunne ikke koble til. Sjekk tilkoblingen din.",
+        "retry": "Prøv igjen",
+        "saveFailed": "Kunne ikke lagre. Prøv igjen."
+      },
+      "basics": {
+        "name": {
+          "label": "Skolenavn",
+          "placeholder": "f.eks. Nordisk Språkakademi",
+          "help": "Synlig for elevene dine. Du kan endre det senere.",
+          "checking": "Sjekker tilgjengelighet…",
+          "available": "Navn tilgjengelig",
+          "taken": "Det navnet er tatt. Prøv ett av disse:",
+          "checkFailed": "Kunne ikke sjekke — klikk for å prøve igjen",
+          "suggestionsLabel": "Navneforslag",
+          "error": {
+            "required": "Skolenavn er påkrevd",
+            "min": "Må ha minst 3 tegn",
+            "max": "Kan ha maks 60 tegn"
+          }
+        },
+        "desc": {
+          "label": "Beskrivelse",
+          "placeholder": "Fortell elever om skolen din…",
+          "counter": "{count}/500",
+          "tab": {
+            "write": "Skriv",
+            "preview": "Forhåndsvis"
+          },
+          "error": {
+            "max": "Beskrivelsen kan ha maks 500 tegn"
+          }
+        },
+        "logo": {
+          "label": "Logo",
+          "placeholder": "https://example.com/logo.png",
+          "help": "Lim inn en bilde-URL. Kvadratisk PNG eller JPG fungerer best.",
+          "error": {
+            "url": "Skriv inn en gyldig URL",
+            "notImage": "URL ser ikke ut til å være et bilde"
+          }
+        }
+      },
+      "invite": {
+        "add": "+ Legg til en til",
+        "maxReached": "Du har nådd grensen på 10 invitasjoner for dette trinnet.",
+        "remaining": "Du kan legge til {remaining} til.",
+        "skipLabel": "Hopp over for nå",
+        "skip": {
+          "title": "Hoppe over for nå?",
+          "body": "Du kan invitere lærere og elever når som helst fra Innstillinger → Medlemmer.",
+          "keep": "Fortsett å invitere",
+          "confirm": "Hopp over"
+        },
+        "sending": "Sender invitasjoner…",
+        "partialFailure": "Sendte {sent} invitasjoner. {failed} kunne ikke leveres — del lenkene nedenfor.",
+        "error": {
+          "self": "Du er allerede eier — du trenger ikke invitere deg selv.",
+          "duplicate": "Du har allerede lagt til denne e-postadressen.",
+          "network": "Kunne ikke sende invitasjoner. Prøv igjen."
+        },
+        "announce": {
+          "added": "La til invitasjonsrad",
+          "removed": "Fjernet invitasjon for {email}",
+          "sent": "Invitasjon sendt til {email}",
+          "failed": "Kunne ikke sende til {email} — del lenken i stedet"
+        },
+        "row": {
+          "rowLabel": "Invitasjonsrad {index}",
+          "email": {
+            "placeholder": "laerer@skole.no",
+            "error": {
+              "invalid": "Skriv inn en gyldig e-postadresse"
+            }
+          },
+          "role": {
+            "label": "Rolle"
+          }
+        },
+        "remove": "Fjern {email}",
+        "linkFallback": {
+          "title": "Vi kunne ikke sende e-post til {email}. Del denne lenken i stedet:",
+          "copy": "Kopier",
+          "openMail": "Åpne e-postutkast"
+        }
+      },
+      "done": {
+        "title": "Skolen din er klar",
+        "summary": "{schoolName} er satt opp. {n, plural, =0 {Ingen medlemmer invitert ennå.} one {# medlem invitert.} other {# medlemmer invitert.}}",
+        "next": {
+          "heading": "Hva er neste steg",
+          "course": {
+            "title": "Opprett ditt første kurs",
+            "help": "Legg til leksjoner, vokabular og øvelser."
+          },
+          "members": {
+            "title": "Åpne medlemssiden",
+            "help": "Send invitasjoner på nytt, legg til flere."
+          },
+          "settings": {
+            "title": "Tilpass skoleinnstillinger",
+            "help": "Logo, standarder, tillatelser."
+          }
+        }
+      },
+      "alreadyHaveSchool": "Du har allerede en skole.",
+      "draftLost": "Skoleutkastet ditt gikk tapt. Starter på nytt.",
+      "helper": {
+        "basics": {
+          "title": "Hva er en skole?",
+          "bullets": {
+            "0": "En arbeidsplass for kursene og elevene dine.",
+            "1": "Inviter lærere, legg til innhold, spor fremgang.",
+            "2": "Elever melder seg på og lærer i eget tempo."
+          }
+        },
+        "invite": {
+          "title": "Om roller",
+          "body": "Lærere kan lage kurs. Innholdsadminer administrerer innhold. Elever melder seg på og lærer. Du kan alltid endre roller senere."
+        }
+      },
+      "wizard": {
+        "next": "Neste"
+      }
+    }
   }
 }

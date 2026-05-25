@@ -1,6 +1,6 @@
 # Project Status — ssz-platform-web
 
-> Snapshot of what is implemented vs. what remains. Updated: 2026-05-25 (after Phase 17 — Media uploads).
+> Snapshot of what is implemented vs. what remains. Updated: 2026-05-25 (after Phase 18 — School management).
 > Source of truth for "where are we now". Source of truth for "where to next" is [`docs/plan/14-remaining-roadmap.md`](docs/plan/14-remaining-roadmap.md).
 
 Legend:
@@ -74,17 +74,21 @@ Legend:
 | Endpoint | Status | Frontend touchpoint |
 |---|---|---|
 | GET schools discovery (composite) | ✅ | [`/api/discovery/schools`](src/app/api/discovery/schools/route.ts), used by catalogue pages |
-| POST `/schools` (create) | ❌ | — |
-| GET `/schools` (my schools) | ❌ | — |
-| GET `/schools/{id}` | ❌ | — |
-| PATCH `/schools/{id}` | ❌ | — |
-| DELETE `/schools/{id}` | ❌ | — |
-| POST `/schools/{id}/members` | ❌ | — |
-| DELETE `/schools/{id}/members/{userId}` | ❌ | — |
-| POST `/schools/{id}/invitations` | ❌ | — |
-| POST `/schools/invitations/{token}/accept` | ❌ | — |
+| GET `/schools/name-available` | ✅ | BFF at [`/api/schools/name-available`](src/app/api/schools/name-available/route.ts) |
+| POST `/schools` (create) | ✅ | BFF at [`/api/schools`](src/app/api/schools/route.ts); forwards Idempotency-Key |
+| GET `/schools` (my schools) | ✅ | BFF at [`/api/schools`](src/app/api/schools/route.ts) |
+| GET `/schools/{id}` | ✅ | BFF at [`/api/schools/[id]`](src/app/api/schools/[id]/route.ts) |
+| PATCH `/schools/{id}` | ✅ | BFF at [`/api/schools/[id]`](src/app/api/schools/[id]/route.ts) |
+| DELETE `/schools/{id}` | ✅ | BFF at [`/api/schools/[id]`](src/app/api/schools/[id]/route.ts) |
+| POST `/schools/{id}/members` | ✅ | BFF at [`/api/schools/[id]/members`](src/app/api/schools/[id]/members/route.ts) |
+| DELETE `/schools/{id}/members/{userId}` | ✅ | BFF at [`/api/schools/[id]/members/[userId]`](src/app/api/schools/[id]/members/[userId]/route.ts) |
+| GET `/schools/{id}/invitations` | ✅ | BFF at [`/api/schools/[id]/invitations`](src/app/api/schools/[id]/invitations/route.ts) |
+| POST `/schools/{id}/invitations` | ✅ | BFF at [`/api/schools/[id]/invitations`](src/app/api/schools/[id]/invitations/route.ts) |
+| POST `/schools/invitations/{token}/accept` | ✅ | BFF at [`/api/schools/invitations/[token]/accept`](src/app/api/schools/invitations/[token]/accept/route.ts) |
 
-**Pages:** marketing catalogue (`/(marketing)/catalogue`) and a school dashboard stub. No school CRUD, no member management.
+**Feature module:** `src/features/school/` — types, Zod schemas (`basicsSchema`, `inviteRowSchema`), TanStack Query hooks (`useMySchools`, `useSchool`, `useNameAvailability`, `useCreateSchool`, `useUpdateSchool`, `useInviteMember`, `useAcceptInvitation`), Zustand wizard store (`useCreateWizardStore`, persisted to `ssz:school:create:v1`).
+
+**Pages:** marketing catalogue (`/(marketing)/catalogue`), school dashboard (real data via `useMySchools`), 3-step create wizard at `/school/new`.
 
 ---
 
@@ -235,14 +239,14 @@ Legend:
 - ❌ Submissions list / detail (free-text answers awaiting review)
 
 ### School / Tutor
-- ✅ `/school/dashboard` — basic stub
+- ✅ `/school/dashboard` — real data via `useMySchools`; loading/error/empty states
 - ✅ `/school/content` — course list with search, state filters, sort, table/grid, bulk actions
 - ✅ `/school/content/new` — 5-step Create Wizard (CF-2)
 - ✅ `/school/content/[id]` — editor with breadcrumb, status banner, preflight panel, danger zone
 - ✅ `/school/students` — students list (basic)
 - ✅ `/school/settings/{profile, account, notifications}`
-- ❌ Create / manage a school (Organization Service not wired)
-- ❌ Members & invitations
+- ✅ `/school/new` — 3-step create wizard (basics → invite → done); Zustand-persisted draft, idempotent creation, per-row invite status
+- ⚠️ Members & invitations — BFF routes wired, UI management pages not yet built
 - ❌ Assignments hub (create, track)
 - ❌ Submissions review queue
 - ⚠️ Container publish flow — publish ✅, unpublish/archive/restore pending backend
@@ -269,22 +273,22 @@ Legend:
 
 ## Recent work (context)
 
-Last committed stream (`feature/student-experience` branch — student experience MVP):
+Last committed stream (`feature/media` branch — Media uploads + Phase 18 School management):
 ```
-5cf15b9 feat(student): design system alignment — stat/course/lesson cards, sidebar logo, dashboard page
-c7255ff feat(student): notifications bell, VoxOrd promo, exercise tests
-02eeb98 feat(student): exercise interaction
-8d71ea0 feat(student): lesson player with navigation
-3a95c9c feat(student): enrolled dashboard
+6055cd8 chore(status): update STATUS.md for Phase 17 (media uploads)
+f5d3e7e test(media): upload helper unit tests with FakeXHR and stubbed presigned URL
+1eaeae5 feat(media): wire avatar picker into profile settings via updateAvatarAction
+3e3e3b7 feat(media): asset-picker component with preview + progress, add Media i18n namespace
+a519685 feat(media): feature module — types, upload helper with progress, query hooks
 ```
 
-In-progress (uncommitted, same branch — Course Management Flow):
-- Step A — foundation types, `slugify`, `Stepper`, `ContainerStateBadge`
-- Step B — CF-1 course list (search, filters, sort, table/grid, bulk, pagination)
-- Step C — BFF lifecycle routes (archive/restore/unpublish/duplicate/preflight/activity)
-- Step D — CF-5 `runPreflight()` + `PreflightPanel`
-- Step E — CF-3 detail page (breadcrumb, status banner, two-column overview, danger zone)
-- Step F — CF-2 5-step Create Wizard ✅
+In-progress (uncommitted, `feature/media` branch — Phase 18 School management):
+- BFF routes: `GET/POST /api/schools`, `GET /api/schools/name-available`, `GET/PATCH/DELETE /api/schools/[id]`, members + invitations routes, invitation accept
+- Feature module: `src/features/school/` — types, Zod schemas, TanStack Query hooks, Zustand wizard store (`ssz:school:create:v1`)
+- UI: `SchoolEmptyState`, 3-step create wizard (basics form with name availability check → invite list with per-row send states → done card), wizard layout, `MarkdownEditor` shared component
+- Dashboard: rewritten as client component with `useMySchools()`, full loading/error/empty states
+- i18n: `School` namespace added to all 4 locales (en/nb/uk/ru)
+- Tests: `create-wizard-store.test.ts` (11 tests), `schools/route.test.ts` (8 tests), `name-available/route.test.ts` (6 tests)
 
 ---
 
