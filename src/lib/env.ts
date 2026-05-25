@@ -15,6 +15,7 @@ export const env = createEnv({
     EXERCISE_SERVICE_URL: z.string().url().optional(),
     PROGRESS_SERVICE_URL: z.string().url().optional(),
     ENROLLMENT_SERVICE_URL: z.string().url().optional(),
+    MEDIA_SERVICE_URL: z.string().url().optional(),
 
     AUTH_COOKIE_SECRET: z.string().min(32),
 
@@ -35,6 +36,7 @@ export const env = createEnv({
     EXERCISE_SERVICE_URL: process.env.EXERCISE_SERVICE_URL,
     PROGRESS_SERVICE_URL: process.env.PROGRESS_SERVICE_URL,
     ENROLLMENT_SERVICE_URL: process.env.ENROLLMENT_SERVICE_URL,
+    MEDIA_SERVICE_URL: process.env.MEDIA_SERVICE_URL,
     AUTH_COOKIE_SECRET: process.env.AUTH_COOKIE_SECRET,
     UPSTREAM_TIMEOUT_MS: process.env.UPSTREAM_TIMEOUT_MS,
     NEXT_PUBLIC_ENABLE_DEV_ROUTES: process.env.NEXT_PUBLIC_ENABLE_DEV_ROUTES,

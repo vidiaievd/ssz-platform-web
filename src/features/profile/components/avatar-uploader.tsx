@@ -1,22 +1,38 @@
 'use client';
 
+import { useTransition } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
-import { Avatar } from '@/components/ui/avatar';
+import { AssetPicker } from '@/features/media';
 import { useMyProfile } from '../api/use-my-profile';
+import { updateAvatarAction } from '../actions/update-avatar';
+import { profileKeys } from '../api/keys';
 
 export function AvatarUploader() {
-  const t = useTranslations('Profile');
+  const tErrors = useTranslations('Errors');
   const { data: profile } = useMyProfile();
+  const queryClient = useQueryClient();
+  const [, startTransition] = useTransition();
+
+  async function handleUploaded(assetUrl: string) {
+    startTransition(async () => {
+      const result = await updateAvatarAction(assetUrl);
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: profileKeys.me() });
+    });
+  }
 
   return (
-    <div className="flex items-center gap-4">
-      <Avatar
-        src={profile?.avatarUrl ?? undefined}
-        name={profile?.displayName}
-        size="xl"
-      />
-      <p className="text-sm text-(--ssz-text-muted)">{t('avatar.placeholder')}</p>
-    </div>
+    <AssetPicker
+      currentUrl={profile?.avatarUrl}
+      name={profile?.displayName}
+      purpose="avatar"
+      onUploaded={handleUploaded}
+    />
   );
 }

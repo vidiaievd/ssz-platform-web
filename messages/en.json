@@ -84,7 +84,7 @@
     "contactEmail": "Contact email",
     "contactPhone": "Contact phone",
     "avatar": {
-      "placeholder": "Avatar upload coming soon."
+      "placeholder": "Upload a profile photo."
     },
     "sections": {
       "avatar": "Profile photo",
@@ -822,6 +822,18 @@
       "B2_help": "Upper intermediate — can discuss abstract topics",
       "C1_help": "Advanced — fluent and spontaneous expression",
       "C2_help": "Mastery — equivalent to an educated native speaker"
+    }
+  },
+  "Media": {
+    "change": "Change photo",
+    "save": "Save photo",
+    "discard": "Discard",
+    "hint": "JPG, PNG, WebP or GIF · max 5 MB",
+    "uploadSuccess": "Photo updated.",
+    "errors": {
+      "invalidType": "Please upload a JPG, PNG, WebP, or GIF image.",
+      "tooLarge": "File is too large. Maximum size is 5 MB.",
+      "uploadFailed": "Upload failed. Please try again."
     }
   }
 }

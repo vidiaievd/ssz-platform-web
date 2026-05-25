@@ -1,6 +1,6 @@
 # Project Status — ssz-platform-web
 
-> Snapshot of what is implemented vs. what remains. Updated: 2026-05-24 (after CF-1…CF-3/CF-5 Course Management Flow).
+> Snapshot of what is implemented vs. what remains. Updated: 2026-05-25 (after Phase 17 — Media uploads).
 > Source of truth for "where are we now". Source of truth for "where to next" is [`docs/plan/14-remaining-roadmap.md`](docs/plan/14-remaining-roadmap.md).
 
 Legend:
@@ -64,7 +64,7 @@ Legend:
 | GET `/profiles/tutors` | ❌ | — |
 | GET `/profiles/{userId}` | ✅ | BFF at `/api/profile/[userId]` |
 
-**Pages:** `student/settings/profile`, `school/settings/profile` — base profile only.
+**Pages:** `student/settings/profile`, `school/settings/profile` — base profile + avatar upload (via Media Service).
 **Onboarding:** `/[locale]/onboarding` — 3-step wizard (role confirm → base profile → student/tutor preferences). Student and school layouts redirect to `/onboarding` if sub-profile is absent.
 
 ---
@@ -153,13 +153,13 @@ Legend:
 
 | Endpoint | Status |
 |---|---|
-| POST `/media/uploads/request` | ❌ |
-| POST `/media/uploads/{id}/finalize` | ❌ |
-| GET `/media/assets` | ❌ |
-| GET `/media/assets/{id}` | ❌ |
-| DELETE `/media/assets/{id}` | ❌ |
+| POST `/media/uploads/request` | ✅ BFF at `/api/media/uploads/request` |
+| POST `/media/uploads/{id}/finalize` | ✅ BFF at `/api/media/uploads/[assetId]/finalize` |
+| GET `/media/assets` | ✅ BFF at `/api/media/assets` |
+| GET `/media/assets/{id}` | ✅ BFF at `/api/media/assets/[id]` |
+| DELETE `/media/assets/{id}` | ✅ BFF at `/api/media/assets/[id]` |
 
-**Consequence:** no avatar upload, no media for lessons/exercises.
+**Frontend:** `src/features/media/` — two-step presigned-URL upload helper (`uploadAsset`), `AssetPicker` component with preview + progress bar. Avatar upload wired into profile settings (`student/settings/profile`, `school/settings/profile`) via `updateAvatarAction`. Media for lessons/exercises deferred.
 
 ---
 
