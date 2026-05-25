@@ -15,6 +15,7 @@
     "prepare": "husky",
     "api:generate": "orval",
     "ci:check": "npm run api:generate && npm run typecheck && npm run lint && npm run test:coverage && npm run build",
+    "docker:dev": "cd ../ssz-platform/infrastructure &&docker compose --env-file .env.dev up -d",
     "test": "vitest --project unit",
     "test:run": "vitest run --project unit",
     "test:coverage": "vitest run --project unit --coverage",
