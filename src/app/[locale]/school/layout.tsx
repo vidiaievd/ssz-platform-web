@@ -10,12 +10,10 @@ import { profileKeys } from '@/features/profile/api/keys';
 import { AppShell } from '@/components/shared/app-shell';
 
 export default async function SchoolLayout({ children }: { children: React.ReactNode }) {
-  const user = await requireAnyRole(['school', 'tutor']);
+  const user = await requireAnyRole(['tutor', 'school_admin']);
   const locale = await getLocale();
 
-  // School-admin role doesn't require a tutor sub-profile — only tutors do.
-  const isTutor = user.roles.includes('tutor') && !user.roles.includes('school');
-  if (isTutor) {
+  if (user.roles.includes('tutor')) {
     const tutorProfile = await getTutorProfile();
     if (!tutorProfile) redirect(`/${locale}/onboarding`);
   }

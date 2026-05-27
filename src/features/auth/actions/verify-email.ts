@@ -2,19 +2,94 @@
 
 import { AppError } from '@/lib/errors';
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { writeAuthCookies } from '@/lib/auth/cookies';
 import { tryAction } from '@/lib/result';
+import type { AuthTokensResponse } from '@/lib/api/generated/schemas';
+
+export type VerifyEmailResult = {
+  roles: string[];
+  // TODO: remove debug fields before merging
+  _debug?: {
+    step: string;
+    rawVerifyResponse?: unknown;
+    rawMeResponse?: unknown;
+    errorMessage?: string;
+    errorStack?: string;
+  };
+};
 
 export async function verifyEmailConfirmAction(token: string) {
-  return tryAction(async () => {
+  return tryAction(async (): Promise<VerifyEmailResult> => {
     if (!token) throw new AppError('validation', 'Token is required');
 
-    await serverFetch({
-      service: 'auth',
-      path: '/api/v1/auth/email/verify/confirm',
-      method: 'POST',
-      body: { token },
-      anonymous: true,
-    });
+    // Step 1: verify token
+    let rawVerifyResponse: unknown;
+    let tokens: AuthTokensResponse;
+    try {
+      tokens = await serverFetch<AuthTokensResponse>({
+        service: 'auth',
+        path: '/auth/email/verify/confirm',
+        method: 'POST',
+        body: { token },
+        anonymous: true,
+      });
+      rawVerifyResponse = tokens;
+    } catch (e) {
+      const err = e as Error;
+      return {
+        roles: [],
+        _debug: {
+          step: 'serverFetch /email/verify/confirm FAILED',
+          errorMessage: err?.message,
+          errorStack: err?.stack,
+        },
+      };
+    }
+
+    // Step 2: write cookies
+    try {
+      await writeAuthCookies({
+        accessToken: tokens.accessToken!,
+        refreshToken: tokens.refreshToken!,
+      });
+    } catch (e) {
+      const err = e as Error;
+      return {
+        roles: [],
+        _debug: {
+          step: 'writeAuthCookies FAILED',
+          rawVerifyResponse,
+          errorMessage: err?.message,
+          errorStack: err?.stack,
+        },
+      };
+    }
+
+    // Step 3: fetch roles
+    let rawMeResponse: unknown;
+    try {
+      const me = await serverFetch<{ roles: string[] }>({
+        service: 'auth',
+        path: '/auth/me',
+        anonymous: true,
+        headers: { Authorization: `Bearer ${tokens.accessToken}` },
+      });
+      rawMeResponse = me;
+      return {
+        roles: me.roles ?? [],
+        _debug: { step: 'OK', rawVerifyResponse, rawMeResponse },
+      };
+    } catch (e) {
+      const err = e as Error;
+      return {
+        roles: [],
+        _debug: {
+          step: 'serverFetch /auth/me FAILED',
+          rawVerifyResponse,
+          errorMessage: err?.message,
+        },
+      };
+    }
   });
 }
 
@@ -22,7 +97,7 @@ export async function resendVerificationAction() {
   return tryAction(async () => {
     await serverFetch({
       service: 'auth',
-      path: '/api/v1/auth/email/verify/request',
+      path: '/auth/email/verify/request',
       method: 'POST',
     });
   });

@@ -16,6 +16,8 @@ function makeProfile(overrides: Partial<Profile> = {}): Profile {
     timezone: 'UTC',
     contactEmail: null,
     contactPhone: null,
+    hasStudentProfile: false,
+    hasTutorProfile: false,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
     ...overrides,

@@ -23,10 +23,10 @@ export type Invitation = {
   role: Exclude<SchoolRole, 'OWNER'>;
   status: InvitationStatus;
   token: string;
-  inviteUrl?: string;
-  deliveryFailed?: boolean;
-  createdAt: string;
+  inviteUrl: string;
   expiresAt: string;
+  deliveryStatus: string;
+  createdAt: string;
 };
 
 export type NameAvailabilityResponse = {

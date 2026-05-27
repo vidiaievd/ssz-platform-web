@@ -12,11 +12,10 @@ export async function GET(request: NextRequest) {
   if (!entityType || !entityId) {
     return NextResponse.json({ error: 'entityType and entityId are required' }, { status: 400 });
   }
-
   try {
     const data = await serverFetch<ContainerShare[]>({
       service: 'content',
-      path: `/shares?entityType=${entityType}&entityId=${entityId}`,
+      path: `/api/v1/${entityType}/${entityId}/shares`,
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -32,7 +31,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const share = await serverFetch<ContainerShare>({
       service: 'content',
-      path: '/shares',
+      path: '/api/v1/content-shares',
       method: 'POST',
       body,
     });

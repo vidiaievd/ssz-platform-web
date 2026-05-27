@@ -49,7 +49,7 @@ export function StepPrefs({ headingRef }: StepPrefsProps) {
     [nativeLanguage, ...targets.filter((_, i) => i !== idx).map((t) => t.code)].filter(Boolean);
 
   function addTarget() {
-    const updated = [...targets, { code: '', level: '' as CEFRLevel }];
+    const updated = [...targets, { code: '' }];
     setTargets(updated);
     setNewRowIdx(updated.length - 1);
     syncDraft(nativeLanguage, updated);
@@ -99,7 +99,7 @@ export function StepPrefs({ headingRef }: StepPrefsProps) {
   function handleFinish() {
     if (!validate()) return;
 
-    const incompleteIdx = targets.findIndex((t) => !t.code || !t.level);
+    const incompleteIdx = targets.findIndex((t) => !t.code);
     if (incompleteIdx !== -1) {
       toast.error(t('error.saveFailed'));
       return;
@@ -108,7 +108,7 @@ export function StepPrefs({ headingRef }: StepPrefsProps) {
     startTransition(async () => {
       const result = await savePrefsStepAction({
         nativeLanguage,
-        targetLanguages: targets as Array<{ code: string; level: CEFRLevel }>,
+        targetLanguages: targets,
       });
       if (!result.ok) {
         toast.error(t('error.saveFailed'));
@@ -189,7 +189,7 @@ export function StepPrefs({ headingRef }: StepPrefsProps) {
               <TargetLanguageRow
                 key={idx}
                 code={target.code}
-                level={target.level}
+                level={target.level ?? ''}
                 excludeCodes={targetExcluded(idx)}
                 onCodeChange={(code) => updateTargetCode(idx, code)}
                 onLevelChange={(level) => updateTargetLevel(idx, level)}

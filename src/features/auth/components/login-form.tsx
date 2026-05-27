@@ -1,24 +1,44 @@
-'use client';
+"use client";
 
-import { useState, useTransition } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslations } from 'next-intl';
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 
-import { Link, useRouter } from '@/lib/i18n/navigation';
-import { Button } from '@/components/ui/button';
-import { Field, Input } from '@/components/ui/input';
-import type { AppErrorCode } from '@/lib/errors';
+import { Link, useRouter } from "@/lib/i18n/navigation";
+import { Button } from "@/components/ui/button";
+import { Field, Input } from "@/components/ui/input";
+import type { AppErrorCode } from "@/lib/errors";
 
-import { loginAction } from '../actions/login';
-import { loginSchema, type LoginInput } from '../schemas';
-import { TotpStep } from './totp-step';
+import { loginAction } from "../actions/login";
+import { loginSchema, type LoginInput } from "../schemas";
+import { TotpStep } from "./totp-step";
 
-function resolvePostLoginPath(roles: string[], redirect?: string): string {
-  if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+function resolvePostLoginPath(
+  auth: {
+    roles: string[];
+    hasStudentProfile: boolean;
+    hasTutorProfile: boolean;
+  },
+  redirect?: string,
+): string {
+  if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
     return redirect;
   }
-  return roles.some((r) => r === 'school' || r === 'tutor') ? '/school' : '/student';
+  if (auth.roles.includes("school_admin")) {
+    return "/school/dashboard";
+  }
+  if (auth.roles.includes("tutor")) {
+    return auth.hasTutorProfile
+      ? "/school/dashboard"
+      : "/onboarding?step=profile";
+  }
+  if (auth.roles.includes("student")) {
+    return auth.hasStudentProfile
+      ? "/student/dashboard"
+      : "/onboarding?step=profile";
+  }
+  return "/student/dashboard";
 }
 
 type LoginFormProps = {
@@ -26,8 +46,8 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ redirect }: LoginFormProps) {
-  const t = useTranslations('Auth.Login');
-  const tErrors = useTranslations('Errors');
+  const t = useTranslations("Auth.Login");
+  const tErrors = useTranslations("Errors");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -46,43 +66,63 @@ export function LoginForm({ redirect }: LoginFormProps) {
       if (!result.ok) {
         const code = result.error.code as AppErrorCode;
         setServerError(
-          code === 'unauthenticated' ? t('invalidCredentials') : tErrors(code),
+          code === "unauthenticated" ? t("invalidCredentials") : tErrors(code),
         );
         return;
       }
-      if (result.value.stage === 'mfa') {
+      if (result.value.stage === "mfa") {
         setMfaToken(result.value.mfaChallengeToken);
         return;
       }
-      router.push(resolvePostLoginPath(result.value.roles, redirect));
+      router.push(resolvePostLoginPath(result.value, redirect));
     });
   }
 
   if (mfaToken) {
-    return <TotpStep mfaChallengeToken={mfaToken} redirect={redirect} onCancel={() => setMfaToken(null)} />;
+    return (
+      <TotpStep
+        mfaChallengeToken={mfaToken}
+        redirect={redirect}
+        onCancel={() => setMfaToken(null)}
+      />
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
-      <Field label={t('email')} htmlFor="email" error={errors.email?.message} required>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      className="flex flex-col gap-4"
+    >
+      <Field
+        label={t("email")}
+        htmlFor="email"
+        error={errors.email?.message}
+        required
+      >
         <Input
           id="email"
           type="email"
           autoComplete="email"
           hasError={!!errors.email}
           disabled={isPending}
-          {...register('email')}
+          {...register("email")}
         />
       </Field>
 
-      <Field label={t('password')} htmlFor="password" error={errors.password?.message} required>
+      <Field
+        label={t("password")}
+        htmlFor="password"
+        error={errors.password?.message}
+        required
+      >
         <Input
           id="password"
           type="password"
           autoComplete="current-password"
           hasError={!!errors.password}
           disabled={isPending}
-          {...register('password')}
+          {...register("password")}
         />
       </Field>
 
@@ -91,7 +131,7 @@ export function LoginForm({ redirect }: LoginFormProps) {
           href="/forgot-password"
           className="text-sm text-[var(--ssz-text-link)] hover:underline"
         >
-          {t('forgotPassword')}
+          {t("forgotPassword")}
         </Link>
       </div>
 
@@ -102,13 +142,16 @@ export function LoginForm({ redirect }: LoginFormProps) {
       )}
 
       <Button type="submit" loading={isPending} className="w-full">
-        {t('submit')}
+        {t("submit")}
       </Button>
 
       <p className="text-center text-sm text-[var(--ssz-text-muted)]">
-        {t('noAccount')}{' '}
-        <Link href="/register" className="text-[var(--ssz-text-link)] hover:underline">
-          {t('signUp')}
+        {t("noAccount")}{" "}
+        <Link
+          href="/register"
+          className="text-[var(--ssz-text-link)] hover:underline"
+        >
+          {t("signUp")}
         </Link>
       </p>
     </form>

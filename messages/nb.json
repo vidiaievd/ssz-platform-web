@@ -17,6 +17,7 @@
     "heroSubheadline": "SSZ Learn kobler studenter med profesjonelle språkskoler og lærere. Studer i ditt eget tempo, eller ta skolen din online.",
     "ctaStudent": "Begynn å lære gratis",
     "ctaSchool": "For skoler og lærere",
+    "ctaDashboard": "Gå til min oversikt",
     "audienceStudentBadge": "For studenter",
     "audienceStudentTitle": "Lær i ditt eget tempo",
     "audienceStudentDesc": "Få tilgang til strukturerte språkkurs fra profesjonelle skoler og lærere. Spor fremgangen din, fullfør øvelser og studer når og hvor som helst.",
@@ -49,7 +50,8 @@
     "signIn": "Logg inn",
     "getStarted": "Kom i gang",
     "startLearning": "Begynn å lære",
-    "forSchools": "For skoler"
+    "forSchools": "For skoler",
+    "goToDashboard": "Min oversikt"
   },
   "Nav": {
     "dashboard": "Oversikt",
@@ -234,6 +236,7 @@
       "successDescription": "E-posten din er bekreftet. Du kan nå logge inn.",
       "errorTitle": "Bekreftelse mislyktes",
       "errorDescription": "Lenken er ugyldig eller utløpt.",
+      "errorExpired": "Lenken har utløpt. Be om en ny bekreftelses-e-post nedenfor.",
       "resend": "Send bekreftelses-e-post på nytt",
       "resendSuccess": "Bekreftelses-e-post sendt.",
       "signIn": "Logg inn"
@@ -248,7 +251,8 @@
       "schoolDesc": "Publiser kurs, administrer studenter og vokse skolen din online.",
       "schoolCta": "Registrer deg for skoler",
       "hasAccount": "Har du allerede en konto?",
-      "signIn": "Logg inn"
+      "signIn": "Logg inn",
+      "back": "Tilbake"
     },
     "RegisterStudent": {
       "title": "Opprett studentkonto",
@@ -257,6 +261,20 @@
     "RegisterSchool": {
       "title": "Opprett skolekonto",
       "subtitle": "Publiser kurs og administrer dine studenter"
+    },
+    "RegisterTutor": {
+      "title": "Opprett lærerkonto",
+      "subtitle": "Undervis dine studenter selvstendig"
+    },
+    "RegisterOrg": {
+      "title": "Hvordan underviser du?",
+      "subtitle": "Velg alternativet som passer best for deg",
+      "schoolTitle": "Jeg driver en skole eller et språksenter",
+      "schoolDesc": "Registrer en skole, inviter lærere og administrer studenter på ett sted.",
+      "schoolCta": "Registrer en skole",
+      "tutorTitle": "Jeg er privatlærer",
+      "tutorDesc": "Undervis selvstendig, sett din egen timeplan og inviter studenter direkte.",
+      "tutorCta": "Registrer deg som lærer"
     }
   },
   "Authoring": {
@@ -787,6 +805,10 @@
       "prefs": {
         "title": "Dine språk",
         "subtitle": "Hjelp oss å tilpasse læringsopplevelsen din."
+      },
+      "tutor": {
+        "title": "Din lærerprofil",
+        "subtitle": "Fortell oss hvilke språk du underviser og hvordan du jobber."
       }
     },
     "profile": {
@@ -856,6 +878,31 @@
       "B2_help": "Over mellomnivå — kan diskutere abstrakte emner",
       "C1_help": "Avansert — flytende og spontant uttrykk",
       "C2_help": "Mestring — tilsvarer en utdannet morsmålsbruker"
+    },
+    "tutor": {
+      "languages": {
+        "heading": "Språk du underviser",
+        "add": "Legg til et språk",
+        "remove": "Fjern språk",
+        "added": "Språkrad lagt til",
+        "removed": "Språkrad fjernet",
+        "error": {
+          "required": "Legg til minst ett undervisningsspråk og velg ferdighetsnivå."
+        }
+      },
+      "proficiency": {
+        "label": "Ferdighetsnivå",
+        "placeholder": "Nivå"
+      },
+      "hourlyRate": {
+        "label": "Timepris (valgfritt)",
+        "placeholder": "f.eks. 25"
+      },
+      "specializations": {
+        "label": "Spesialiseringer (valgfritt)",
+        "hint": "Kommaseparert, f.eks. grammatikk, samtale, eksamenforberedelse",
+        "placeholder": "grammatikk, samtale"
+      }
     }
   },
   "Media": {

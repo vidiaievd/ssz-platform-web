@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils';
 
-export type OnboardingStep = 'role' | 'profile' | 'prefs';
+export type OnboardingStep = 'profile' | 'prefs';
 
-const STEPS: OnboardingStep[] = ['role', 'profile', 'prefs'];
+const STEPS: OnboardingStep[] = ['profile', 'prefs'];
 
 type StepIndicatorProps = {
   currentStep: OnboardingStep;

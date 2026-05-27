@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const data = await serverFetch<EnrollmentRequestsResponse>({
       service: 'enrollment',
-      path: '/requests',
+      path: '/api/v1/enrollments',
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
   try {
     const data = await serverFetch({
       service: 'enrollment',
-      path: '/requests',
+      path: '/api/v1/enrollments',
       method: 'POST',
       body,
     });
