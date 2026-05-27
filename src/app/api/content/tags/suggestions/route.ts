@@ -2,23 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 
+// Backend returns PaginatedResult<TagResponseDto>
+type TagResponseDto = { id: string; name: string; slug: string };
+type PaginatedTags = { items: TagResponseDto[] };
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const entityType = searchParams.get('entityType');
   const q = searchParams.get('q') ?? '';
 
-  if (!entityType) {
-    return NextResponse.json({ error: 'entityType is required' }, { status: 400 });
-  }
-
   try {
-    const query = new URLSearchParams({ entityType });
-    if (q) query.set('q', q);
-    const data = await serverFetch<string[]>({
+    // The backend exposes GET /api/v1/tags with a `search` param for full-text
+    // filtering — use it as the autocomplete/suggestions source (first 10 results).
+    const data = await serverFetch<PaginatedTags>({
       service: 'content',
-      path: `/api/v1/tags/suggestions?${query}`,
+      path: '/api/v1/tags',
+      query: { search: q || undefined, limit: 10, page: 1 },
     });
-    return NextResponse.json(data);
+    const names = (data?.items ?? []).map((t) => t.name);
+    return NextResponse.json(names);
   } catch {
     // Suggestions are best-effort; return empty array on failure
     return NextResponse.json([]);

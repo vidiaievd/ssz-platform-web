@@ -10,7 +10,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   try {
     const data = await serverFetch({
       service: 'organization',
-      path: `/schools/${id}/invitations`,
+      path: `/api/v1/schools/${id}/invitations`,
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   try {
     const data = await serverFetch<BackendInvitationResponse>({
       service: 'organization',
-      path: `/schools/${id}/invitations`,
+      path: `/api/v1/schools/${id}/invitations`,
       method: 'POST',
       body,
     });
