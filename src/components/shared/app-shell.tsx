@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import {
   BookOpen,
   Compass,
@@ -18,20 +19,22 @@ import { MobileSidebar } from './sidebar/mobile-sidebar';
 import { Topbar } from './topbar/topbar';
 import type { NavSection } from './sidebar/types';
 
-const SCHOOL_NAV: NavSection[] = [
-  {
-    items: [
-      { href: '/school/dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
-      { href: '/school/students', icon: Users, labelKey: 'students' },
-      { href: '/school/content', icon: BookOpen, labelKey: 'content' },
-    ],
-  },
-  {
-    items: [
-      { href: '/school/settings', icon: Settings, labelKey: 'settings' },
-    ],
-  },
-];
+function buildSchoolNav(schoolId: string): NavSection[] {
+  return [
+    {
+      items: [
+        { href: `/school/${schoolId}/dashboard`, icon: LayoutDashboard, labelKey: 'dashboard' },
+        { href: `/school/${schoolId}/students`, icon: Users, labelKey: 'students' },
+        { href: `/school/${schoolId}/content`, icon: BookOpen, labelKey: 'content' },
+      ],
+    },
+    {
+      items: [
+        { href: `/school/${schoolId}/settings`, icon: Settings, labelKey: 'settings' },
+      ],
+    },
+  ];
+}
 
 const STUDENT_NAV: NavSection[] = [
   {
@@ -50,9 +53,7 @@ const STUDENT_NAV: NavSection[] = [
   },
 ];
 
-const NAV_CONFIGS = { school: SCHOOL_NAV, student: STUDENT_NAV } as const;
-
-export type AppShellVariant = keyof typeof NAV_CONFIGS;
+export type AppShellVariant = 'school' | 'student';
 
 type AppShellProps = {
   variant: AppShellVariant;
@@ -62,7 +63,12 @@ type AppShellProps = {
 
 export function AppShell({ variant, user, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const sections = NAV_CONFIGS[variant];
+  const params = useParams<{ schoolId?: string }>();
+
+  const sections: NavSection[] =
+    variant === 'school'
+      ? buildSchoolNav(params.schoolId ?? '')
+      : STUDENT_NAV;
 
   return (
     <div className="flex h-screen overflow-hidden bg-(--ssz-bg-base)">

@@ -923,6 +923,10 @@
     }
   },
   "School": {
+    "dashboard": {
+      "notFound": "School not found.",
+      "placeholder": "Full dashboard metrics coming soon."
+    },
     "common": {
       "close": "Close",
       "loading": "Loading…",

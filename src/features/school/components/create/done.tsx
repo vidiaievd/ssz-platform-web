@@ -44,13 +44,14 @@ function NextStepCard({ icon, title, helper, href }: NextStepCardProps) {
 }
 
 type WizardDoneCardProps = {
+  schoolId: string;
   schoolName: string;
   invitedCount: number;
   /** Called when the user clicks "Go to dashboard". Parent clears the wizard store. */
   onGoToDashboard: () => void;
 };
 
-export function WizardDoneCard({ schoolName, invitedCount, onGoToDashboard }: WizardDoneCardProps) {
+export function WizardDoneCard({ schoolId, schoolName, invitedCount, onGoToDashboard }: WizardDoneCardProps) {
   const t = useTranslations('School');
   const headingRef = useRef<HTMLHeadingElement>(null);
   const ctaRef = useRef<HTMLButtonElement>(null);
@@ -104,19 +105,19 @@ export function WizardDoneCard({ schoolName, invitedCount, onGoToDashboard }: Wi
             icon={<BookOpenText className="h-5 w-5" />}
             title={t('create.done.next.course.title')}
             helper={t('create.done.next.course.help')}
-            href="/school/content/new"
+            href={`/school/${schoolId}/content/new`}
           />
           <NextStepCard
             icon={<Users className="h-5 w-5" />}
             title={t('create.done.next.members.title')}
             helper={t('create.done.next.members.help')}
-            href="/school/students"
+            href={`/school/${schoolId}/students`}
           />
           <NextStepCard
             icon={<Settings2 className="h-5 w-5" />}
             title={t('create.done.next.settings.title')}
             helper={t('create.done.next.settings.help')}
-            href="/school/settings"
+            href={`/school/${schoolId}/settings`}
           />
         </ul>
       </div>

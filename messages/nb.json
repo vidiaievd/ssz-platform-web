@@ -918,6 +918,10 @@
     }
   },
   "School": {
+    "dashboard": {
+      "notFound": "Skolen ble ikke funnet.",
+      "placeholder": "Fullstendige dashbord-statistikker kommer snart."
+    },
     "common": {
       "close": "Lukk",
       "loading": "Laster…",

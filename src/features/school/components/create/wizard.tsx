@@ -220,8 +220,9 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
 
   /** Called from the Done card CTA — clears persisted wizard state then navigates. */
   function handleFinish() {
+    const id = schoolId; // capture before reset() clears it
     reset();
-    router.push('/school/dashboard');
+    router.push(id ? `/school/${id}/dashboard` : '/school');
   }
 
   async function handleBasicsNext(values: BasicsFormValues) {
@@ -349,6 +350,7 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
         {isDoneStep ? (
           <div className="px-6 py-8">
             <WizardDoneCard
+              schoolId={effectiveSchoolId ?? ''}
               schoolName={basicsDraft.name}
               invitedCount={invitedCount}
               onGoToDashboard={handleFinish}
