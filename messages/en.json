@@ -1010,6 +1010,22 @@
             "max": "Must be 60 characters or fewer"
           }
         },
+        "slug": {
+          "label": "School URL",
+          "placeholder": "nordic-language-academy",
+          "help": "Your school's unique address. Only lowercase letters, numbers, and hyphens.",
+          "checking": "Checking availability…",
+          "available": "URL available",
+          "taken": "That URL is taken. Try one of these:",
+          "checkFailed": "Couldn't check — click to retry",
+          "suggestionsLabel": "URL suggestions",
+          "error": {
+            "required": "School URL is required",
+            "min": "Must be at least 3 characters",
+            "max": "Must be 60 characters or fewer",
+            "format": "Only lowercase letters, numbers, and hyphens allowed"
+          }
+        },
         "desc": {
           "label": "Description",
           "placeholder": "Tell students about your school…",
@@ -1024,11 +1040,38 @@
         },
         "logo": {
           "label": "Logo",
-          "placeholder": "https://example.com/logo.png",
-          "help": "Paste an image URL. Square PNG or JPG works best.",
+          "upload": "Upload logo",
+          "change": "Change logo",
+          "remove": "Remove",
+          "help": "PNG, JPG, SVG or WebP · max 2 MB. Square images work best.",
           "error": {
-            "url": "Please enter a valid URL",
-            "notImage": "URL doesn't appear to be an image"
+            "type": "Please choose a PNG, JPG, SVG, or WebP image",
+            "size": "Image must be smaller than 2 MB",
+            "upload": "Upload failed. Please try again."
+          }
+        },
+        "contact": {
+          "toggle": "Add contact & web presence",
+          "toggleHide": "Hide contact & web presence",
+          "website": {
+            "label": "Website",
+            "placeholder": "https://my-school.com",
+            "error": {
+              "url": "Please enter a valid URL"
+            }
+          },
+          "email": {
+            "label": "Contact email",
+            "placeholder": "hello@my-school.com",
+            "help": "Public contact address for student enquiries.",
+            "error": {
+              "email": "Please enter a valid email address"
+            }
+          },
+          "city": {
+            "label": "City",
+            "placeholder": "Oslo",
+            "help": "Helps students find local schools. Write \"Online\" if fully remote."
           }
         }
       },

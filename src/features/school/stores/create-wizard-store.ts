@@ -8,8 +8,13 @@ export type WizardStep = 'basics' | 'invite' | 'done';
 
 export type BasicsDraft = {
   name: string;
+  slug: string;
+  slugEditedByUser: boolean;
   description: string;
   logoUrl: string;
+  website: string;
+  contactEmail: string;
+  city: string;
 };
 
 type WizardState = {
@@ -40,7 +45,16 @@ const initialState: WizardState = {
   step: 'basics',
   schoolId: null,
   idempotencyKey: crypto.randomUUID(),
-  basicsDraft: { name: '', description: '', logoUrl: '' },
+  basicsDraft: {
+    name: '',
+    slug: '',
+    slugEditedByUser: false,
+    description: '',
+    logoUrl: '',
+    website: '',
+    contactEmail: '',
+    city: '',
+  },
   invitesDraft: [emptyRow],
   isSaving: false,
   lastError: null,

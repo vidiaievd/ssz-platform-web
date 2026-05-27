@@ -2,8 +2,19 @@ import { z } from 'zod';
 
 export const basicsSchema = z.object({
   name: z.string().trim().min(3, 'min').max(60, 'max'),
+  slug: z
+    .string()
+    .trim()
+    .min(3, 'min')
+    .max(60, 'max')
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'format')
+    .optional()
+    .or(z.literal('')),
   description: z.string().max(500, 'max').optional(),
   logoUrl: z.string().url('url').optional().or(z.literal('')),
+  website: z.string().url('url').optional().or(z.literal('')),
+  contactEmail: z.string().email('email').optional().or(z.literal('')),
+  city: z.string().trim().max(100, 'max').optional(),
 });
 
 export type BasicsFormValues = z.infer<typeof basicsSchema>;

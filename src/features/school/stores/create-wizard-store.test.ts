@@ -8,7 +8,16 @@ beforeEach(() => {
   useCreateWizardStore.setState({
     step: 'basics',
     schoolId: null,
-    basicsDraft: { name: '', description: '', logoUrl: '' },
+    basicsDraft: {
+      name: '',
+      slug: '',
+      slugEditedByUser: false,
+      description: '',
+      logoUrl: '',
+      website: '',
+      contactEmail: '',
+      city: '',
+    },
     invitesDraft: [{ email: '', role: 'STUDENT' }],
     isSaving: false,
     lastError: null,
