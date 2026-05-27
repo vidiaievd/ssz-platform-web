@@ -171,7 +171,7 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
         // Only advance if we have the required context
         if (urlStep === 'invite' && !urlId && !schoolId) {
           // Can't show invite without a school — fall back to basics
-          router.replace('/school/new?step=basics');
+          router.replace('/onboarding/school?step=basics');
           return;
         }
         setStep(urlStep as WizardStep);
@@ -247,11 +247,11 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
         toast.dismiss('slow-save');
         setSchoolId(school.id);
         setStep('invite');
-        router.replace(`/school/new?step=invite&id=${school.id}`);
+        router.replace(`/onboarding/school?step=invite&id=${school.id}`);
       } else {
         await updateSchool(body);
         setStep('invite');
-        router.replace(`/school/new?step=invite&id=${schoolId}`);
+        router.replace(`/onboarding/school?step=invite&id=${schoolId}`);
       }
     } catch (e) {
       const err = e as { status?: number; message?: string };
@@ -271,13 +271,13 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
   function handleInvitesDone(count: number) {
     setInvitedCount(count);
     setStep('done');
-    router.replace(`/school/new?step=done&id=${schoolId}`);
+    router.replace(`/onboarding/school?step=done&id=${schoolId}`);
   }
 
   function handleBack() {
     if (step === 'invite') {
       setStep('basics');
-      router.replace(`/school/new?step=basics${schoolId ? `&id=${schoolId}` : ''}`);
+      router.replace(`/onboarding/school?step=basics${schoolId ? `&id=${schoolId}` : ''}`);
     }
   }
 
