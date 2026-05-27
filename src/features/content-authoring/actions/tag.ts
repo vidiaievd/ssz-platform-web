@@ -14,7 +14,7 @@ export async function addTagAction(entityType: string, entityId: string, name: s
 
     const tag = await serverFetch<ContentTag>({
       service: 'content',
-      path: '/api/v1/tags',
+      path: '/tags',
       method: 'POST',
       body: { entityType, entityId, name: trimmed },
     });
@@ -28,7 +28,7 @@ export async function removeTagAction(tagId: string, entityType: string, entityI
   return tryAction(async () => {
     await serverFetch({
       service: 'content',
-      path: `/api/v1/tags/${tagId}`,
+      path: `/tags/${tagId}`,
       method: 'DELETE',
     });
 

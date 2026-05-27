@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const data = await serverFetch({
       service: 'media',
-      path: '/api/v1/media/assets',
+      path: '/media/assets',
     });
     return NextResponse.json(data);
   } catch (e) {

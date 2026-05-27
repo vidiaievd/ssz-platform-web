@@ -15,7 +15,7 @@ export async function forgotPasswordAction(input: ForgotPasswordInput) {
 
     await serverFetch({
       service: 'auth',
-      path: '/api/v1/auth/password/forgot',
+      path: '/auth/password/forgot',
       method: 'POST',
       body: { email: parsed.data.email },
       anonymous: true,

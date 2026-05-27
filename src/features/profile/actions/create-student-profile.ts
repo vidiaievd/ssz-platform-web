@@ -19,7 +19,7 @@ export async function createStudentProfileAction(
 
     return serverFetch<StudentProfile>({
       service: 'profile',
-      path: '/api/v1/profiles/me/student',
+      path: '/profiles/me/student',
       method: 'POST',
       body: parsed.data,
     });

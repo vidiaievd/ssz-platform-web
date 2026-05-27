@@ -37,7 +37,7 @@ describe('GET /api/schools', () => {
     const body = await res.json();
     expect(body).toEqual([SCHOOL]);
     expect(mockServerFetch).toHaveBeenCalledWith(
-      expect.objectContaining({ service: 'organization', path: '/api/v1/schools' }),
+      expect.objectContaining({ service: 'organization', path: '/schools' }),
     );
   });
 

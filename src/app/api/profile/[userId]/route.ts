@@ -11,7 +11,7 @@ export async function GET(
   try {
     const data = await serverFetch({
       service: 'profile',
-      path: `/api/v1/profiles/${userId}`,
+      path: `/profiles/${userId}`,
     });
     return NextResponse.json(data);
   } catch (e) {

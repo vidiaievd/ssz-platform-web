@@ -18,14 +18,14 @@ export async function GET(
       if (draft) {
         const versions = await serverFetch<ContainerVersion[]>({
           service: 'content',
-          path: `/api/v1/containers/${id}/versions`,
+          path: `/containers/${id}/versions`,
         });
         const draftVersion = versions.find((v) => !v.isPublished) ?? versions[0];
         versionId = draftVersion?.id ?? null;
       } else {
         const container = await serverFetch<Container>({
           service: 'content',
-          path: `/api/v1/containers/${id}`,
+          path: `/containers/${id}`,
         });
         versionId = container.publishedVersionId ?? null;
       }
@@ -37,7 +37,7 @@ export async function GET(
 
     const items = await serverFetch<ContainerItem[]>({
       service: 'content',
-      path: `/api/v1/containers/${id}/versions/${versionId}/items`,
+      path: `/containers/${id}/versions/${versionId}/items`,
     });
     return NextResponse.json(items);
   } catch (e) {

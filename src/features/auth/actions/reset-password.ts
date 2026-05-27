@@ -15,7 +15,7 @@ export async function resetPasswordAction(input: ResetPasswordInput) {
 
     await serverFetch({
       service: 'auth',
-      path: '/api/v1/auth/password/reset',
+      path: '/auth/password/reset',
       method: 'POST',
       body: { token: parsed.data.token, newPassword: parsed.data.password },
       anonymous: true,

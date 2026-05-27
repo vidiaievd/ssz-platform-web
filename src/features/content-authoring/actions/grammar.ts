@@ -27,7 +27,7 @@ export async function createGrammarRuleAction(
 
     const rule = await serverFetch<GrammarRule>({
       service: 'content',
-      path: '/api/v1/grammar-rules',
+      path: '/grammar-rules',
       method: 'POST',
       body: { title: parsed.data.title, targetLanguage, containerId },
     });
@@ -50,7 +50,7 @@ export async function updateGrammarRuleAction(
 
     await serverFetch({
       service: 'content',
-      path: `/api/v1/grammar-rules/${ruleId}`,
+      path: `/grammar-rules/${ruleId}`,
       method: 'PATCH',
       body: { title: parsed.data.title },
     });
@@ -63,7 +63,7 @@ export async function deleteGrammarRuleAction(ruleId: string, containerId: strin
   return tryAction(async () => {
     await serverFetch({
       service: 'content',
-      path: `/api/v1/grammar-rules/${ruleId}`,
+      path: `/grammar-rules/${ruleId}`,
       method: 'DELETE',
     });
     revalidatePath(`/school/content/${containerId}`);
@@ -93,7 +93,7 @@ export async function saveGrammarExplanationAction(
     if (explanationId) {
       await serverFetch({
         service: 'content',
-        path: `/api/v1/grammar-rules/${ruleId}/explanations/${explanationId}`,
+        path: `/grammar-rules/${ruleId}/explanations/${explanationId}`,
         method: 'PATCH',
         body: explanationBody,
       });
@@ -101,7 +101,7 @@ export async function saveGrammarExplanationAction(
     } else {
       const explanation = await serverFetch<GrammarExplanation>({
         service: 'content',
-        path: `/api/v1/grammar-rules/${ruleId}/explanations`,
+        path: `/grammar-rules/${ruleId}/explanations`,
         method: 'POST',
         body: explanationBody,
       });

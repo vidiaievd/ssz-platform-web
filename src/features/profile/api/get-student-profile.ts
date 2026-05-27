@@ -8,7 +8,7 @@ export async function getStudentProfile(): Promise<StudentProfile | null> {
   try {
     return await serverFetch<StudentProfile>({
       service: 'profile',
-      path: '/api/v1/profiles/me/student',
+      path: '/profiles/me/student',
     });
   } catch (e) {
     if (e instanceof AppError && (e.code === 'not_found' || e.code === 'unauthenticated')) {

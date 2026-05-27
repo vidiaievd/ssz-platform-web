@@ -19,7 +19,7 @@ export async function POST(
   try {
     const data = await serverFetch({
       service: 'exercises',
-      path: `/api/v1/exercises/${id}/attempts`,
+      path: `/exercises/${id}/attempts`,
       method: 'POST',
     });
 

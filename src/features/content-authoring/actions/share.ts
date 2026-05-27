@@ -19,7 +19,7 @@ export async function addShareAction(
 
     const share = await serverFetch<ContainerShare>({
       service: 'content',
-      path: '/api/v1/shares',
+      path: '/shares',
       method: 'POST',
       body: { entityType, entityId, email: trimmed, role },
     });
@@ -37,7 +37,7 @@ export async function removeShareAction(
   return tryAction(async () => {
     await serverFetch({
       service: 'content',
-      path: `/api/v1/shares/${shareId}`,
+      path: `/shares/${shareId}`,
       method: 'DELETE',
     });
 

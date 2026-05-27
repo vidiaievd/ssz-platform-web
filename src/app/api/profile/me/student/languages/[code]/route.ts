@@ -11,7 +11,7 @@ export async function POST(
   try {
     const data = await serverFetch({
       service: 'profile',
-      path: '/api/v1/profiles/me/student/languages',
+      path: '/profiles/me/student/languages',
       method: 'POST',
       body: { language: code },
     });
@@ -32,7 +32,7 @@ export async function DELETE(
   try {
     await serverFetch({
       service: 'profile',
-      path: `/api/v1/profiles/me/student/languages/${code}`,
+      path: `/profiles/me/student/languages/${code}`,
       method: 'DELETE',
     });
     return new NextResponse(null, { status: 204 });

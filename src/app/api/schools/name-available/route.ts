@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const data = await serverFetch({
       service: 'organization',
-      path: '/api/v1/schools/name-available',
+      path: '/schools/name-available',
       query: { name: name.trim() },
     });
     return NextResponse.json(data);

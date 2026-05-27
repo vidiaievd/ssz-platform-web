@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const data = await serverFetch<ContainerShare[]>({
       service: 'content',
-      path: `/api/v1/shares?entityType=${entityType}&entityId=${entityId}`,
+      path: `/shares?entityType=${entityType}&entityId=${entityId}`,
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const share = await serverFetch<ContainerShare>({
       service: 'content',
-      path: '/api/v1/shares',
+      path: '/shares',
       method: 'POST',
       body,
     });

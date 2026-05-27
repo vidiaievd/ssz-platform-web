@@ -17,7 +17,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   try {
     await serverFetch({
       service: 'organization',
-      path: `/api/v1/schools/${id}/members`,
+      path: `/schools/${id}/members`,
       method: 'POST',
       body,
     });

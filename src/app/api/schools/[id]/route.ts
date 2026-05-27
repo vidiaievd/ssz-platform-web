@@ -8,7 +8,7 @@ type Params = { params: Promise<{ id: string }> };
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
   try {
-    const data = await serverFetch({ service: 'organization', path: `/api/v1/schools/${id}` });
+    const data = await serverFetch({ service: 'organization', path: `/schools/${id}` });
     return NextResponse.json(data);
   } catch (e) {
     if (e instanceof AppError && e.code === 'unauthenticated') {
@@ -36,7 +36,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   try {
     await serverFetch({
       service: 'organization',
-      path: `/api/v1/schools/${id}`,
+      path: `/schools/${id}`,
       method: 'PATCH',
       body,
     });
@@ -60,7 +60,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     await serverFetch({
       service: 'organization',
-      path: `/api/v1/schools/${id}`,
+      path: `/schools/${id}`,
       method: 'DELETE',
     });
     return new NextResponse(null, { status: 204 });

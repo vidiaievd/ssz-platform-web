@@ -55,7 +55,7 @@ describe('updateProfileAction', () => {
     expect(mockServerFetch).toHaveBeenCalledWith(
       expect.objectContaining({
         service: 'profile',
-        path: '/api/v1/profiles/me',
+        path: '/profiles/me',
         method: 'PATCH',
       }),
     );

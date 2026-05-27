@@ -18,7 +18,7 @@ export async function updateAvatarAction(avatarUrl: string) {
 
     return await serverFetch<Profile>({
       service: 'profile',
-      path: '/api/v1/profiles/me',
+      path: '/profiles/me',
       method: 'PATCH',
       body: { avatarUrl: parsed.data.avatarUrl },
     });

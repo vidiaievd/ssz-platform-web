@@ -12,7 +12,7 @@ export async function POST(
   try {
     const data = await serverFetch({
       service: 'media',
-      path: `/api/v1/media/uploads/${assetId}/finalize`,
+      path: `/media/uploads/${assetId}/finalize`,
       method: 'POST',
     });
     return NextResponse.json(data);

@@ -13,7 +13,7 @@ export async function GET(
   try {
     const data = await serverFetch<Container>({
       service: 'content',
-      path: `/api/v1/containers/${id}`,
+      path: `/containers/${id}`,
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -36,7 +36,7 @@ export async function DELETE(
   try {
     await serverFetch({
       service: 'content',
-      path: `/api/v1/containers/${id}`,
+      path: `/containers/${id}`,
       method: 'DELETE',
     });
     return new NextResponse(null, { status: 204 });

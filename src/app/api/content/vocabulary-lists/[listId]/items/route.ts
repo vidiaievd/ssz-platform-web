@@ -18,7 +18,7 @@ export async function GET(
   try {
     const data = await serverFetch<PaginatedResponse<VocabularyItem>>({
       service: 'content',
-      path: `/api/v1/vocabulary-lists/${listId}/items`,
+      path: `/vocabulary-lists/${listId}/items`,
       query,
     });
     return NextResponse.json(data);

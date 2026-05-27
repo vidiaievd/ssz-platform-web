@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   try {
     await serverFetch({
       service: 'progress',
-      path: '/api/v1/progress',
+      path: '/progress',
       method: 'POST',
       body: parsed.data,
     });

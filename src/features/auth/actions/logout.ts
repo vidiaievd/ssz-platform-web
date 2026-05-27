@@ -8,7 +8,7 @@ export async function logoutAction() {
   try {
     await serverFetch({
       service: 'auth',
-      path: '/api/v1/auth/logout',
+      path: '/auth/logout',
       method: 'POST',
     });
   } catch {

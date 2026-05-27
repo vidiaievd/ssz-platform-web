@@ -28,7 +28,7 @@ export async function createVocabularyListAction(
 
     const list = await serverFetch<VocabularyList>({
       service: 'content',
-      path: '/api/v1/vocabulary-lists',
+      path: '/vocabulary-lists',
       method: 'POST',
       body: {
         title,
@@ -67,7 +67,7 @@ export async function saveVocabularyItemAction(
     if (itemId) {
       await serverFetch({
         service: 'content',
-        path: `/api/v1/vocabulary-lists/${listId}/items/${itemId}`,
+        path: `/vocabulary-lists/${listId}/items/${itemId}`,
         method: 'PATCH',
         body: itemBody,
       });
@@ -75,7 +75,7 @@ export async function saveVocabularyItemAction(
     } else {
       const item = await serverFetch<VocabularyItem>({
         service: 'content',
-        path: `/api/v1/vocabulary-lists/${listId}/items`,
+        path: `/vocabulary-lists/${listId}/items`,
         method: 'POST',
         body: itemBody,
       });
@@ -87,7 +87,7 @@ export async function saveVocabularyItemAction(
       translations.map(({ languageCode, translation }) =>
         serverFetch({
           service: 'content',
-          path: `/api/v1/vocabulary-lists/${listId}/items/${savedItemId}/translations/${languageCode}`,
+          path: `/vocabulary-lists/${listId}/items/${savedItemId}/translations/${languageCode}`,
           method: 'PUT',
           body: { translation },
         }),
@@ -99,7 +99,7 @@ export async function saveVocabularyItemAction(
       removed.translationLangs.map((lang) =>
         serverFetch({
           service: 'content',
-          path: `/api/v1/vocabulary-lists/${listId}/items/${savedItemId}/translations/${lang}`,
+          path: `/vocabulary-lists/${listId}/items/${savedItemId}/translations/${lang}`,
           method: 'DELETE',
         }).catch(() => {}),
       ),
@@ -111,13 +111,13 @@ export async function saveVocabularyItemAction(
         serverId
           ? serverFetch({
               service: 'content',
-              path: `/api/v1/vocabulary-lists/${listId}/items/${savedItemId}/examples/${serverId}`,
+              path: `/vocabulary-lists/${listId}/items/${savedItemId}/examples/${serverId}`,
               method: 'PATCH',
               body: { template, substitution },
             })
           : serverFetch({
               service: 'content',
-              path: `/api/v1/vocabulary-lists/${listId}/items/${savedItemId}/examples`,
+              path: `/vocabulary-lists/${listId}/items/${savedItemId}/examples`,
               method: 'POST',
               body: { template, substitution },
             }),
@@ -129,7 +129,7 @@ export async function saveVocabularyItemAction(
       removed.exampleIds.map((exId) =>
         serverFetch({
           service: 'content',
-          path: `/api/v1/vocabulary-lists/${listId}/items/${savedItemId}/examples/${exId}`,
+          path: `/vocabulary-lists/${listId}/items/${savedItemId}/examples/${exId}`,
           method: 'DELETE',
         }).catch(() => {}),
       ),
@@ -148,7 +148,7 @@ export async function deleteVocabularyItemAction(
   return tryAction(async () => {
     await serverFetch({
       service: 'content',
-      path: `/api/v1/vocabulary-lists/${listId}/items/${itemId}`,
+      path: `/vocabulary-lists/${listId}/items/${itemId}`,
       method: 'DELETE',
     });
     revalidatePath(`/school/content/${containerId}`);

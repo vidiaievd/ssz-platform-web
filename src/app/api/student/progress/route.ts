@@ -25,10 +25,10 @@ export async function GET() {
   try {
     // Parallel: fetch progress records + enrolled containers.
     const [rawProgress, containersData] = await Promise.all([
-      serverFetch({ service: 'progress', path: '/api/v1/progress' }),
+      serverFetch({ service: 'progress', path: '/progress' }),
       serverFetch<PaginatedResponse<Container>>({
         service: 'content',
-        path: '/api/v1/containers',
+        path: '/containers',
         query: { enrolled: 'true', pageSize: '100' },
       }),
     ]);

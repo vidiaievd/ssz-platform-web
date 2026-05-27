@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const data = await serverFetch<PaginatedResponse<GrammarRule>>({
       service: 'content',
-      path: '/api/v1/grammar-rules',
+      path: '/grammar-rules',
       query,
     });
     return NextResponse.json(data);

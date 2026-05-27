@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     if (q) query.set('q', q);
     const data = await serverFetch<string[]>({
       service: 'content',
-      path: `/api/v1/tags/suggestions?${query}`,
+      path: `/tags/suggestions?${query}`,
     });
     return NextResponse.json(data);
   } catch {

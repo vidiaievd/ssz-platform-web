@@ -13,7 +13,7 @@ export async function GET(
   try {
     const data = await serverFetch<Container>({
       service: 'content',
-      path: `/api/v1/containers/slug/${slug}`,
+      path: `/containers/slug/${slug}`,
       anonymous: false,
     });
     return NextResponse.json(data);

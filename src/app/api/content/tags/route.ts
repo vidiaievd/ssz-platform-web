@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const data = await serverFetch<ContentTag[]>({
       service: 'content',
-      path: `/api/v1/tags?entityType=${entityType}&entityId=${entityId}`,
+      path: `/tags?entityType=${entityType}&entityId=${entityId}`,
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const tag = await serverFetch<ContentTag>({
       service: 'content',
-      path: '/api/v1/tags',
+      path: '/tags',
       method: 'POST',
       body,
     });

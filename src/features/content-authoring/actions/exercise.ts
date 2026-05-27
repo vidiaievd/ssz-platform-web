@@ -48,7 +48,7 @@ export async function createExerciseAction(
 
     const exercise = await serverFetch<ExerciseDisplay>({
       service: 'content',
-      path: '/api/v1/exercises',
+      path: '/exercises',
       method: 'POST',
       body: {
         containerId,
@@ -78,7 +78,7 @@ export async function updateExerciseAction(
 
     await serverFetch({
       service: 'content',
-      path: `/api/v1/exercises/${exerciseId}`,
+      path: `/exercises/${exerciseId}`,
       method: 'PATCH',
       body: {
         content: buildContent(parsed.data),
@@ -95,7 +95,7 @@ export async function deleteExerciseAction(exerciseId: string, containerId: stri
   return tryAction(async () => {
     await serverFetch({
       service: 'content',
-      path: `/api/v1/exercises/${exerciseId}`,
+      path: `/exercises/${exerciseId}`,
       method: 'DELETE',
     });
     revalidatePath(`/school/content/${containerId}`);
