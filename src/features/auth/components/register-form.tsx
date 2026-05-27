@@ -131,7 +131,7 @@ export function RegisterForm() {
             >
               {(
                 [
-                  { value: "school", label: t("roleSchool") },
+                  { value: "school_admin", label: t("roleSchool") },
                   { value: "tutor", label: t("roleTutor") },
                   { value: "student", label: t("roleStudent") },
                 ] as const

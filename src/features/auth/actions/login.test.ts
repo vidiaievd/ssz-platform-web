@@ -29,15 +29,17 @@ const TOKENS = {
   refreshTokenExpiresAt: '',
 };
 
+const ME_RESPONSE = { userId: 'user-1', email: 'user@example.com', roles: ['student'], emailVerified: true };
+const PROFILE_NO_PROFILE = { hasStudentProfile: false, hasTutorProfile: false };
+
 describe('loginAction', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns authenticated stage with roles on success', async () => {
     server.use(
       http.post('http://auth.test/api/v1/auth/login', () => HttpResponse.json(TOKENS)),
-      http.get('http://auth.test/api/v1/auth/roles', () =>
-        HttpResponse.json({ roles: ['student'] }),
-      ),
+      http.get('http://auth.test/api/v1/auth/me', () => HttpResponse.json(ME_RESPONSE)),
+      http.get('http://profile.test/api/v1/profiles/me', () => HttpResponse.json(PROFILE_NO_PROFILE)),
     );
 
     const result = await loginAction({ email: 'user@example.com', password: 'ValidPass1!' });
@@ -47,18 +49,37 @@ describe('loginAction', () => {
     expect(result.value.stage).toBe('authenticated');
     if (result.value.stage !== 'authenticated') return;
     expect(result.value.roles).toEqual(['student']);
+    expect(result.value.hasStudentProfile).toBe(false);
+    expect(result.value.hasTutorProfile).toBe(false);
   });
 
   it('writes auth cookies on successful login', async () => {
     server.use(
       http.post('http://auth.test/api/v1/auth/login', () => HttpResponse.json(TOKENS)),
-      http.get('http://auth.test/api/v1/auth/roles', () => HttpResponse.json({ roles: [] })),
+      http.get('http://auth.test/api/v1/auth/me', () => HttpResponse.json(ME_RESPONSE)),
+      http.get('http://profile.test/api/v1/profiles/me', () => HttpResponse.json(PROFILE_NO_PROFILE)),
     );
 
     await loginAction({ email: 'user@example.com', password: 'ValidPass1!' });
 
     expect(mockCookieSet).toHaveBeenCalledWith('ssz_at', 'access-token', expect.any(Object));
     expect(mockCookieSet).toHaveBeenCalledWith('ssz_rt', 'refresh-token', expect.any(Object));
+  });
+
+  it('treats 404 from profile as no profile', async () => {
+    server.use(
+      http.post('http://auth.test/api/v1/auth/login', () => HttpResponse.json(TOKENS)),
+      http.get('http://auth.test/api/v1/auth/me', () => HttpResponse.json(ME_RESPONSE)),
+      http.get('http://profile.test/api/v1/profiles/me', () => new HttpResponse(null, { status: 404 })),
+    );
+
+    const result = await loginAction({ email: 'user@example.com', password: 'ValidPass1!' });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    if (result.value.stage !== 'authenticated') return;
+    expect(result.value.hasStudentProfile).toBe(false);
+    expect(result.value.hasTutorProfile).toBe(false);
   });
 
   it('returns err with unauthenticated on 401', async () => {
@@ -109,8 +130,11 @@ describe('mfaChallengeAction', () => {
   it('returns authenticated stage with roles on success', async () => {
     server.use(
       http.post('http://auth.test/api/v1/auth/mfa/challenge', () => HttpResponse.json(TOKENS)),
-      http.get('http://auth.test/api/v1/auth/roles', () =>
-        HttpResponse.json({ roles: ['school'] }),
+      http.get('http://auth.test/api/v1/auth/me', () =>
+        HttpResponse.json({ userId: 'user-1', email: 'user@example.com', roles: ['tutor'], emailVerified: true }),
+      ),
+      http.get('http://profile.test/api/v1/profiles/me', () =>
+        HttpResponse.json({ hasStudentProfile: false, hasTutorProfile: true }),
       ),
     );
 
@@ -123,7 +147,8 @@ describe('mfaChallengeAction', () => {
     if (!result.ok) return;
     expect(result.value.stage).toBe('authenticated');
     if (result.value.stage !== 'authenticated') return;
-    expect(result.value.roles).toContain('school');
+    expect(result.value.roles).toContain('tutor');
+    expect(result.value.hasTutorProfile).toBe(true);
   });
 
   it('returns err on 401 from MFA endpoint', async () => {

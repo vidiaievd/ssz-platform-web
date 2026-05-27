@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { registerAction } from "../actions/register";
 import { passwordSchema } from "../schemas";
@@ -21,7 +20,6 @@ const schoolSchema = z
     email: z.string().email(),
     password: passwordSchema,
     passwordConfirm: z.string(),
-    role: z.enum(["school", "tutor"]),
     acceptedTerms: z.literal(true, { message: "You must accept the terms" }),
   })
   .refine((d) => d.password === d.passwordConfirm, {
@@ -31,7 +29,11 @@ const schoolSchema = z
 
 type SchoolInput = z.infer<typeof schoolSchema>;
 
-export function SchoolRegisterForm() {
+type Props = {
+  role: 'school_admin' | 'tutor';
+};
+
+export function SchoolRegisterForm({ role }: Props) {
   const t = useTranslations("Auth.Register");
   const tErrors = useTranslations("Errors");
   const [isPending, startTransition] = useTransition();
@@ -49,7 +51,7 @@ export function SchoolRegisterForm() {
   function onSubmit(data: SchoolInput) {
     setServerError(null);
     startTransition(async () => {
-      const result = await registerAction(data);
+      const result = await registerAction({ ...data, role });
       if (!result.ok) {
         if (result.error.code === "conflict") {
           setError("email", { message: tErrors("conflict") });
@@ -70,7 +72,7 @@ export function SchoolRegisterForm() {
           {t("successDescription", { email: successEmail })}
         </p>
         <Link
-          href="/login?redirect=/school"
+          href="/login"
           className="text-sm text-(--ssz-text-link) hover:underline"
         >
           {t("signIn")}
@@ -116,32 +118,6 @@ export function SchoolRegisterForm() {
           hasError={!!errors.passwordConfirm}
           disabled={isPending}
           {...register("passwordConfirm")}
-        />
-      </Field>
-
-      <Field label={t("role")} error={errors.role?.message}>
-        <Controller
-          control={control}
-          name="role"
-          render={({ field }) => (
-            <RadioGroup
-              value={field.value ?? ""}
-              onValueChange={field.onChange}
-              className="flex flex-col gap-2"
-            >
-              {(
-                [
-                  { value: "school", label: t("roleSchool") },
-                  { value: "tutor", label: t("roleTutor") },
-                ] as const
-              ).map(({ value, label }) => (
-                <div key={value} className="flex items-center gap-2">
-                  <RadioGroupItem value={value} id={`role-${value}`} disabled={isPending} />
-                  <Label htmlFor={`role-${value}`}>{label}</Label>
-                </div>
-              ))}
-            </RadioGroup>
-          )}
         />
       </Field>
 
