@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+
 type NextStepCardProps = {
   icon: React.ReactNode;
   title: string;
@@ -43,15 +44,16 @@ function NextStepCard({ icon, title, helper, href }: NextStepCardProps) {
 }
 
 type WizardDoneCardProps = {
-  schoolId: string;
   schoolName: string;
   invitedCount: number;
+  /** Called when the user clicks "Go to dashboard". Parent clears the wizard store. */
+  onGoToDashboard: () => void;
 };
 
-export function WizardDoneCard({ schoolId, schoolName, invitedCount }: WizardDoneCardProps) {
+export function WizardDoneCard({ schoolName, invitedCount, onGoToDashboard }: WizardDoneCardProps) {
   const t = useTranslations('School');
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const ctaRef = useRef<HTMLAnchorElement>(null);
+  const ctaRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -64,9 +66,9 @@ export function WizardDoneCard({ schoolId, schoolName, invitedCount }: WizardDon
       <div
         className={cn(
           'flex h-14 w-14 items-center justify-center rounded-full',
-          'bg-[var(--ssz-color-primary-600)] text-white',
+          'bg-(--ssz-color-primary-600) text-white',
           'motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in-0',
-          'duration-[var(--ssz-duration-slow)]',
+          'duration-(--ssz-duration-slow)',
         )}
         aria-hidden
       >
@@ -77,7 +79,7 @@ export function WizardDoneCard({ schoolId, schoolName, invitedCount }: WizardDon
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className="font-[Lora] text-3xl leading-[1.25] text-(--ssz-text-primary) focus-visible:outline-none"
+          className="font-[Lora] text-3xl leading-tight text-(--ssz-text-primary) focus-visible:outline-none"
         >
           {t('create.done.title')}
         </h1>
@@ -86,10 +88,8 @@ export function WizardDoneCard({ schoolId, schoolName, invitedCount }: WizardDon
         </p>
       </div>
 
-      <Button asChild size="lg">
-        <Link ref={ctaRef} href={`/school/dashboard`}>
-          {t('create.finishCta')}
-        </Link>
+      <Button ref={ctaRef} size="lg" onClick={onGoToDashboard}>
+        {t('create.finishCta')}
       </Button>
 
       <div className="w-full max-w-2xl">

@@ -1,12 +1,21 @@
 'use client';
 
-import { useMySchools } from '@/features/school';
+import { useMySchools, useSchool, useCreateWizardStore } from '@/features/school';
 import { SchoolEmptyState } from '@/components/school/empty-state';
 
 export default function SchoolDashboardPage() {
   const { data: schools, isLoading, isError, refetch } = useMySchools();
 
-  if (isLoading || !schools) {
+  // Fallback: if the /schools list endpoint returns empty (known backend issue
+  // where GET /api/v1/schools may not filter by the authenticated user yet),
+  // try fetching the school directly by the ID stored in the wizard store.
+  const wizardSchoolId = useCreateWizardStore((s) => s.schoolId);
+  const canTryFallback = !isLoading && !isError && schools?.length === 0 && Boolean(wizardSchoolId);
+  const { data: fallbackSchool, isLoading: isFallbackLoading } = useSchool(
+    canTryFallback ? (wizardSchoolId ?? '') : '',
+  );
+
+  if (isLoading || (canTryFallback && isFallbackLoading)) {
     return <SchoolEmptyState isLoading />;
   }
 
@@ -19,12 +28,11 @@ export default function SchoolDashboardPage() {
     );
   }
 
-  if (schools.length === 0) {
+  const school = schools?.[0] ?? (canTryFallback ? fallbackSchool : null) ?? null;
+
+  if (!school) {
     return <SchoolEmptyState />;
   }
-
-  // Real dashboard — shows the first school (multi-school support is future scope)
-  const school = schools[0]!;
 
   return (
     <main className="p-8">

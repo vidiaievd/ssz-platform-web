@@ -920,6 +920,7 @@
   "School": {
     "common": {
       "close": "Lukk",
+      "loading": "Laster…",
       "saving": "Lagrer…",
       "stillWorking": "Lagrer fortsatt — vennligst vent…",
       "copied": "Kopiert!",

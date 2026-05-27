@@ -925,6 +925,7 @@
   "School": {
     "common": {
       "close": "Close",
+      "loading": "Loading…",
       "saving": "Saving…",
       "stillWorking": "Still saving — please wait…",
       "copied": "Copied!",

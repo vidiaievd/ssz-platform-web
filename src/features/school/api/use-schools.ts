@@ -14,14 +14,28 @@ import { schoolKeys } from './keys';
 
 // ── My schools ────────────────────────────────────────────────────────────────
 
+type SchoolsPayload =
+  | School[]
+  | { items: School[] }
+  | { schools: School[] }
+  | { data: School[] };
+
+function normaliseSchools(payload: SchoolsPayload): School[] {
+  if (Array.isArray(payload)) return payload;
+  if ('items' in payload && Array.isArray(payload.items)) return payload.items;
+  if ('schools' in payload && Array.isArray(payload.schools)) return payload.schools;
+  if ('data' in payload && Array.isArray(payload.data)) return payload.data;
+  return [];
+}
+
 export function useMySchools() {
   return useQuery({
     queryKey: schoolKeys.mine(),
     queryFn: async () => {
       const res = await fetch('/api/schools');
       if (!res.ok) throw new Error('Failed to fetch schools');
-      const data = (await res.json()) as School[] | { items: School[] };
-      return Array.isArray(data) ? data : (data.items ?? []);
+      const data = (await res.json()) as SchoolsPayload;
+      return normaliseSchools(data);
     },
   });
 }

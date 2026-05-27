@@ -7,6 +7,8 @@ import { getQueryClient } from '@/lib/query/client';
 import { getMyProfile } from '@/features/profile/api/get-my-profile';
 import { getTutorProfile } from '@/features/profile/api/get-tutor-profile';
 import { profileKeys } from '@/features/profile/api/keys';
+import { getMySchools } from '@/features/school/api/get-my-schools';
+import { schoolKeys } from '@/features/school/api/keys';
 import { AppShell } from '@/components/shared/app-shell';
 
 export default async function SchoolLayout({ children }: { children: React.ReactNode }) {
@@ -19,10 +21,16 @@ export default async function SchoolLayout({ children }: { children: React.React
   }
 
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: profileKeys.me(),
-    queryFn: getMyProfile,
-  });
+  await Promise.all([
+    queryClient.prefetchQuery({
+      queryKey: profileKeys.me(),
+      queryFn: getMyProfile,
+    }),
+    queryClient.prefetchQuery({
+      queryKey: schoolKeys.mine(),
+      queryFn: getMySchools,
+    }),
+  ]);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

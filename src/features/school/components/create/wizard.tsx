@@ -129,6 +129,25 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
   const searchParams = useSearchParams();
   const store = useCreateWizardStore();
 
+  // ── Wait for Zustand persist to rehydrate from localStorage ───────────────
+  // Without this guard the server renders initialState (step='basics'),
+  // which causes a flash before the stored step is applied on the client.
+  const [storeHydrated, setStoreHydrated] = useState(false);
+
+  useEffect(() => {
+    // Subscribe first so we never miss the event if hydration finishes
+    // between the subscription and the check below.
+    const unsub = useCreateWizardStore.persist.onFinishHydration(() => setStoreHydrated(true));
+
+    // If already hydrated (e.g. fast devices where it completes synchronously),
+    // fire inside a microtask to satisfy react-hooks/no-set-state-in-effect-body.
+    void (async () => {
+      if (useCreateWizardStore.persist.hasHydrated()) setStoreHydrated(true);
+    })();
+
+    return unsub;
+  }, []);
+
   const [discardOpen, setDiscardOpen] = useState(false);
   const [invitedCount, setInvitedCount] = useState(0);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -196,6 +215,12 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
 
   function handleDiscard() {
     if (!schoolId) reset();
+    router.push('/school/dashboard');
+  }
+
+  /** Called from the Done card CTA — clears persisted wizard state then navigates. */
+  function handleFinish() {
+    reset();
     router.push('/school/dashboard');
   }
 
@@ -267,6 +292,25 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
     done: t('create.step.done.subtitle'),
   };
 
+  // ── Show skeleton until localStorage state is ready ─────────────────────
+  if (!storeHydrated) {
+    return (
+      <div
+        className={cn(
+          'relative mx-auto my-0 md:my-12',
+          'bg-surface border border-(--ssz-border-default)',
+          'rounded-none md:rounded-(--ssz-radius-xl) shadow-none md:shadow-(--ssz-shadow-md)',
+          'max-w-4xl min-h-dvh md:min-h-105',
+          'flex items-center justify-center',
+        )}
+        aria-busy="true"
+        aria-label={t('common.loading')}
+      >
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-(--ssz-border-default) border-t-(--ssz-color-primary-600)" />
+      </div>
+    );
+  }
+
   const isDoneStep = step === 'done';
 
   // Guard: if somehow on invite step without a schoolId, redirect to basics
@@ -278,13 +322,13 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
       <div
         className={cn(
           'relative mx-auto my-0 md:my-12 overflow-hidden',
-          'bg-(--ssz-bg-surface) border border-(--ssz-border-default)',
-          'rounded-none md:rounded-[var(--ssz-radius-xl)] shadow-none md:shadow-[var(--ssz-shadow-md)]',
+          'bg-surface border border-(--ssz-border-default)',
+          'rounded-none md:rounded-(--ssz-radius-xl) shadow-none md:shadow-(--ssz-shadow-md)',
           'max-w-4xl min-h-dvh md:min-h-0',
         )}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-4 bg-(--ssz-bg-surface) border-b border-(--ssz-border-default)">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-4 bg-surface border-b border-(--ssz-border-default)">
           <div className="flex items-center gap-4">
             <span className="font-[Lora] font-semibold text-(--ssz-color-primary-600)">SSZ</span>
             {!isDoneStep && <StepIndicator current={step} />}
@@ -294,7 +338,7 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
               type="button"
               onClick={handleClose}
               aria-label={t('common.close')}
-              className="rounded-md p-1.5 text-(--ssz-text-muted) hover:text-(--ssz-text-primary) hover:bg-(--ssz-bg-subtle) transition-colors"
+              className="rounded-md p-1.5 text-(--ssz-text-muted) hover:text-(--ssz-text-primary) hover:bg-subtle transition-colors"
             >
               <X className="h-5 w-5" aria-hidden />
             </button>
@@ -305,9 +349,9 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
         {isDoneStep ? (
           <div className="px-6 py-8">
             <WizardDoneCard
-              schoolId={effectiveSchoolId ?? ''}
               schoolName={basicsDraft.name}
               invitedCount={invitedCount}
+              onGoToDashboard={handleFinish}
             />
           </div>
         ) : (
@@ -318,7 +362,7 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
                 <h1
                   ref={headingRef}
                   tabIndex={-1}
-                  className="font-[Lora] text-2xl md:text-3xl leading-[1.25] text-(--ssz-text-primary) focus-visible:outline-none"
+                  className="font-[Lora] text-2xl md:text-3xl leading-tight text-(--ssz-text-primary) focus-visible:outline-none"
                 >
                   {stepTitles[step]}
                 </h1>
