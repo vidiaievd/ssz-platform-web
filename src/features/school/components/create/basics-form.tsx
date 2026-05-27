@@ -101,7 +101,7 @@ export function SchoolBasicsForm({ onSubmit, formId }: SchoolBasicsFormProps) {
           writeLabel={t('create.basics.desc.tab.write')}
           previewLabel={t('create.basics.desc.tab.preview')}
           previewEmpty={t('common.markdown.previewEmpty')}
-          counterLabel={t('create.basics.desc.counter')}
+          counterLabel={t('create.basics.desc.counter', { count: watchedDesc.length })}
           hasError={Boolean(errors.description)}
         />
         {errors.description && (

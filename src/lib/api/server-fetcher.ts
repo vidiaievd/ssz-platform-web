@@ -9,6 +9,40 @@ import { AppError, type AppErrorCode } from '@/lib/errors';
 
 import { resolveServiceUrl, type ServiceName } from './services';
 
+const SENSITIVE_KEYS = /password|token|secret|code|credential|authorization/i;
+
+function redactBody(body: unknown): unknown {
+  if (body === null || typeof body !== 'object') return body;
+  if (Array.isArray(body)) return body.map(redactBody);
+  return Object.fromEntries(
+    Object.entries(body as Record<string, unknown>).map(([k, v]) => [
+      k,
+      SENSITIVE_KEYS.test(k) ? '[REDACTED]' : redactBody(v),
+    ]),
+  );
+}
+
+function logUpstream(
+  direction: '→' | '←' | '✗',
+  method: string,
+  url: URL,
+  extra: { status?: number; durationMs?: number; body?: unknown } = {},
+) {
+  if (!env.LOG_UPSTREAM_REQUESTS || env.NODE_ENV === 'production') return;
+
+  const parts: string[] = [`[BFF] ${direction}`, ` ${method.padEnd(6)}`, url.toString()];
+  if (extra.status !== undefined) parts.splice(2, 0, String(extra.status));
+  if (extra.durationMs !== undefined) parts.push(`+${extra.durationMs}ms`);
+
+  const isError = direction === '✗' || (extra.status !== undefined && extra.status >= 400);
+  const log = isError ? console.warn : console.log;
+  log(parts.join('  '));
+
+  if (extra.body !== undefined) {
+    console.log('        body:', JSON.stringify(redactBody(extra.body), null, 2));
+  }
+}
+
 export type ServerFetchOptions<TBody = unknown> = {
   service: ServiceName;
   path: string;
@@ -69,23 +103,32 @@ async function doRequest<TData, TBody>(
     opts.timeoutMs ?? env.UPSTREAM_TIMEOUT_MS,
   );
 
+  const method = opts.method ?? 'GET';
+  const startMs = Date.now();
+
+  logUpstream('→', method, url, { body: opts.body });
+
   try {
     const response = await fetch(url, {
-      method: opts.method ?? 'GET',
+      method,
       headers: reqHeaders,
       body: opts.body ? JSON.stringify(opts.body) : undefined,
       signal: controller.signal,
       cache: 'no-store',
     });
 
+    const durationMs = Date.now() - startMs;
+
     if (!response.ok) {
       // Refresh-on-401: one transparent retry with a fresh access token.
       if (response.status === 401 && !opts.anonymous && !retrying) {
+        logUpstream('←', method, url, { status: 401, durationMs });
         const refreshed = await attemptRefresh();
         if (refreshed) return doRequest(url, baseHeaders, opts, true);
         throw new AppError('unauthenticated', 'Session expired — refresh failed');
       }
 
+      logUpstream('←', method, url, { status: response.status, durationMs });
       const code = mapStatusToCode(response.status);
       let details: unknown;
       try {
@@ -96,13 +139,17 @@ async function doRequest<TData, TBody>(
       throw new AppError(code, `Upstream ${response.status} on ${opts.service}${opts.path}`, details);
     }
 
+    logUpstream('←', method, url, { status: response.status, durationMs });
+
     if (response.status === 204) return undefined as TData;
     return (await response.json()) as TData;
   } catch (err) {
     if (err instanceof AppError) throw err;
     if (err instanceof DOMException && err.name === 'AbortError') {
+      logUpstream('✗', method, url, { durationMs: Date.now() - startMs });
       throw new AppError('timeout', `Timeout calling ${opts.service}${opts.path}`, null, err);
     }
+    logUpstream('✗', method, url, { durationMs: Date.now() - startMs });
     throw new AppError('upstream_unavailable', `Upstream call failed: ${opts.service}${opts.path}`, null, err);
   } finally {
     clearTimeout(timeout);

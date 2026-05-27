@@ -21,6 +21,11 @@ export const env = createEnv({
     AUTH_COOKIE_SECRET: z.string().min(32),
 
     UPSTREAM_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
+
+    LOG_UPSTREAM_REQUESTS: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((v) => v === 'true'),
   },
   client: {
     NEXT_PUBLIC_ENABLE_DEV_ROUTES: z
@@ -41,6 +46,7 @@ export const env = createEnv({
     ORGANIZATION_SERVICE_URL: process.env.ORGANIZATION_SERVICE_URL,
     AUTH_COOKIE_SECRET: process.env.AUTH_COOKIE_SECRET,
     UPSTREAM_TIMEOUT_MS: process.env.UPSTREAM_TIMEOUT_MS,
+    LOG_UPSTREAM_REQUESTS: process.env.LOG_UPSTREAM_REQUESTS,
     NEXT_PUBLIC_ENABLE_DEV_ROUTES: process.env.NEXT_PUBLIC_ENABLE_DEV_ROUTES,
   },
 });

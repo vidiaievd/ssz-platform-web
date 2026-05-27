@@ -1,15 +1,25 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/lib/i18n/navigation';
 import { Button } from '@/components/ui/button';
+import { getCurrentUser } from '@/features/auth/api/get-current-user';
+import { LogoutButton } from '@/features/auth/components/logout-button';
 import { LanguageSwitcher } from './language-switcher';
 import { ThemeToggle } from './theme-toggle';
 
-export function MarketingNav() {
-  const t = useTranslations('Common');
-  const tNav = useTranslations('Marketing');
+function getDashboardHref(roles: string[]): string {
+  return roles.some((r) => r === 'school_admin' || r === 'tutor')
+    ? '/school/dashboard'
+    : '/student/dashboard';
+}
+
+export async function MarketingNav() {
+  const [t, tNav, tUser, user] = await Promise.all([
+    getTranslations('Common'),
+    getTranslations('Marketing'),
+    getTranslations('UserMenu'),
+    getCurrentUser(),
+  ]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-(--ssz-bg-base)/95 backdrop-blur supports-[backdrop-filter]:bg-(--ssz-bg-base)/60">
@@ -31,15 +41,28 @@ export function MarketingNav() {
           <LanguageSwitcher />
           <ThemeToggle />
           <div className="ml-2 flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">{tNav('signIn')}</Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
-              <Link href="/register/school">{tNav('forSchools')}</Link>
-            </Button>
-            <Button variant="primary" size="sm" asChild>
-              <Link href="/register/student">{tNav('startLearning')}</Link>
-            </Button>
+            {user ? (
+              <>
+                <LogoutButton variant="ghost" size="sm">
+                  {tUser('signOut')}
+                </LogoutButton>
+                <Button variant="primary" size="sm" asChild>
+                  <Link href={getDashboardHref(user.roles)}>{tNav('goToDashboard')}</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/login">{tNav('signIn')}</Link>
+                </Button>
+                <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
+                  <Link href="/register?step=org">{tNav('forSchools')}</Link>
+                </Button>
+                <Button variant="primary" size="sm" asChild>
+                  <Link href="/register/student">{tNav('startLearning')}</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -9,7 +9,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   const user = await getCurrentUser();
   if (user) {
     const locale = await getLocale();
-    const isMgmt = user.roles.some((r) => r === 'school' || r === 'tutor');
+    const isMgmt = user.roles.some((r) => r === 'school_admin' || r === 'tutor');
     redirect(`/${locale}${isMgmt ? '/school' : '/student'}`);
   }
 

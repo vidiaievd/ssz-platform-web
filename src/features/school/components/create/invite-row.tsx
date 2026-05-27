@@ -19,7 +19,7 @@ import { InviteLinkFallback } from './invite-link-fallback';
 export type InviteRowState =
   | { kind: 'idle' }
   | { kind: 'sending' }
-  | { kind: 'sent'; inviteUrl?: string; deliveryFailed?: boolean }
+  | { kind: 'sent'; inviteUrl: string; expiresAt: string }
   | { kind: 'error'; message: string };
 
 type InviteRowProps = {
@@ -125,8 +125,8 @@ export const InviteRow = forwardRef<HTMLInputElement, InviteRowProps>(function I
         </div>
       </div>
 
-      {/* Invite link fallback */}
-      {rowState.kind === 'sent' && rowState.deliveryFailed && rowState.inviteUrl && (
+      {/* Invite link — always shown on success so user can share manually */}
+      {rowState.kind === 'sent' && (
         <InviteLinkFallback email={value.email} inviteUrl={rowState.inviteUrl} />
       )}
     </div>

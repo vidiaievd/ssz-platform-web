@@ -4,12 +4,12 @@ import { AppError, isAppError } from '@/lib/errors';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { writeAuthCookies } from '@/lib/auth/cookies';
 import { tryAction } from '@/lib/result';
-import type { AuthTokensResponse, UserRolesResponse } from '@/lib/api/generated/schemas';
+import type { AuthTokensResponse } from '@/lib/api/generated/schemas';
 import { loginSchema, mfaChallengeSchema } from '../schemas';
 import type { LoginInput, MfaChallengeInput } from '../schemas';
 
 export type LoginActionResult =
-  | { stage: 'authenticated'; roles: string[] }
+  | { stage: 'authenticated'; roles: string[]; hasStudentProfile: boolean; hasTutorProfile: boolean }
   | { stage: 'mfa'; mfaChallengeToken: string };
 
 export async function loginAction(input: LoginInput) {
@@ -23,7 +23,7 @@ export async function loginAction(input: LoginInput) {
     try {
       tokens = await serverFetch<AuthTokensResponse>({
         service: 'auth',
-        path: '/api/v1/auth/login',
+        path: '/auth/login',
         method: 'POST',
         body: { email: parsed.data.email, password: parsed.data.password },
         anonymous: true,
@@ -51,7 +51,7 @@ export async function mfaChallengeAction(input: MfaChallengeInput) {
 
     const tokens = await serverFetch<AuthTokensResponse>({
       service: 'auth',
-      path: '/api/v1/auth/mfa/challenge',
+      path: '/auth/mfa/challenge',
       method: 'POST',
       body: { mfaChallengeToken: parsed.data.mfaChallengeToken, code: parsed.data.code },
       anonymous: true,
@@ -61,18 +61,34 @@ export async function mfaChallengeAction(input: MfaChallengeInput) {
   });
 }
 
-async function finishLogin(tokens: AuthTokensResponse): Promise<{ stage: 'authenticated'; roles: string[] }> {
+async function finishLogin(tokens: AuthTokensResponse): Promise<LoginActionResult & { stage: 'authenticated' }> {
   await writeAuthCookies({
     accessToken: tokens.accessToken!,
     refreshToken: tokens.refreshToken!,
   });
 
-  const rolesData = await serverFetch<UserRolesResponse>({
-    service: 'auth',
-    path: '/api/v1/auth/roles',
-    anonymous: true,
-    headers: { Authorization: `Bearer ${tokens.accessToken}` },
-  });
+  const authHeader = { Authorization: `Bearer ${tokens.accessToken}` };
 
-  return { stage: 'authenticated', roles: rolesData.roles ?? [] };
+  const [meResult, profileResult] = await Promise.allSettled([
+    serverFetch<{ roles: string[] }>({
+      service: 'auth',
+      path: '/auth/me',
+      anonymous: true,
+      headers: authHeader,
+    }),
+    serverFetch<{ hasStudentProfile: boolean; hasTutorProfile: boolean }>({
+      service: 'profile',
+      path: '/profiles/me',
+      anonymous: true,
+      headers: authHeader,
+    }),
+  ]);
+
+  const roles = meResult.status === 'fulfilled' ? (meResult.value.roles ?? []) : [];
+  const hasStudentProfile =
+    profileResult.status === 'fulfilled' ? profileResult.value.hasStudentProfile : false;
+  const hasTutorProfile =
+    profileResult.status === 'fulfilled' ? profileResult.value.hasTutorProfile : false;
+
+  return { stage: 'authenticated', roles, hasStudentProfile, hasTutorProfile };
 }

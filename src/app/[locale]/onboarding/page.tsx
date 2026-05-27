@@ -12,19 +12,18 @@ export default async function OnboardingPage() {
   const user = await requireUser();
   const locale = await getLocale();
 
-  const isTutorOrSchool = user.roles.some((r) => r === 'tutor' || r === 'school');
-  const role: OnboardingRole = isTutorOrSchool ? 'tutor' : 'student';
+  const profile = await getMyProfile();
 
-  // Already onboarded — redirect to dashboard.
-  if (role === 'student') {
+  if (profile?.hasStudentProfile) {
     const studentProfile = await getStudentProfile();
     if (studentProfile) redirect(`/${locale}/student/dashboard`);
-  } else {
+  }
+  if (profile?.hasTutorProfile) {
     const tutorProfile = await getTutorProfile();
     if (tutorProfile) redirect(`/${locale}/school/dashboard`);
   }
 
-  const profile = await getMyProfile();
+  const role: OnboardingRole = user.roles.includes('tutor') ? 'tutor' : 'student';
 
   const detectedTimezone =
     typeof Intl !== 'undefined'

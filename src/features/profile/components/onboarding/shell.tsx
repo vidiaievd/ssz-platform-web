@@ -8,15 +8,15 @@ import type { OnboardingRole } from '../../stores/onboarding-store';
 import type { OnboardingProfileValues } from '../../schemas/onboarding';
 import type { OnboardingStep } from './step-indicator';
 import { StepIndicator } from './step-indicator';
-import { StepRole } from './step-role';
 import { StepProfile } from './step-profile';
 import { StepPrefs } from './step-prefs';
+import { StepTutor } from './step-tutor';
 
-const STEP_ORDER: OnboardingStep[] = ['role', 'profile', 'prefs'];
+const STEP_ORDER: OnboardingStep[] = ['profile', 'prefs'];
 
 function resolveStep(raw: string | null): OnboardingStep {
-  if (raw === 'profile' || raw === 'prefs') return raw;
-  return 'role';
+  if (raw === 'prefs') return 'prefs';
+  return 'profile';
 }
 
 type OnboardingShellProps = {
@@ -36,6 +36,10 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
   }, [currentStep]);
 
   const progressLabel = t('progress.label', { current: currentIdx + 1, total: STEP_ORDER.length });
+
+  const prefsStep = role === 'tutor'
+    ? <StepTutor headingRef={headingRef} />
+    : <StepPrefs headingRef={headingRef} />;
 
   return (
     <>
@@ -57,15 +61,10 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
             </div>
           </div>
           <div id="onboarding-form" className="px-8 pb-10">
-            {currentStep === 'role' && (
-              <StepRole initialRole={role} headingRef={headingRef} />
-            )}
             {currentStep === 'profile' && (
               <StepProfile initialValues={initialProfileValues} headingRef={headingRef} />
             )}
-            {currentStep === 'prefs' && (
-              <StepPrefs headingRef={headingRef} />
-            )}
+            {currentStep === 'prefs' && prefsStep}
           </div>
         </div>
       </div>
@@ -79,15 +78,10 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
           </div>
         </div>
         <div id="onboarding-form" className="flex-1 overflow-y-auto px-4 py-6">
-          {currentStep === 'role' && (
-            <StepRole initialRole={role} headingRef={headingRef} />
-          )}
           {currentStep === 'profile' && (
             <StepProfile initialValues={initialProfileValues} headingRef={headingRef} />
           )}
-          {currentStep === 'prefs' && (
-            <StepPrefs headingRef={headingRef} />
-          )}
+          {currentStep === 'prefs' && prefsStep}
         </div>
       </div>
     </>
