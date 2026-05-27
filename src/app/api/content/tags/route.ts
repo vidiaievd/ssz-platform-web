@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const data = await serverFetch<ContentTag[]>({
       service: 'content',
-      path: `/api/v1/${entityType}/${entityId}/tags`,
+      path: `/${entityType}/${entityId}/tags`,
     });
     return NextResponse.json(data);
   } catch (e) {

@@ -17,10 +17,12 @@ const directUrls: Record<ServiceName, string | undefined> = {
 
 /**
  * Resolves the upstream base URL for a logical service.
+ * The result is used as the `base` in serverFetch:
  *
- * If API_GATEWAY_URL is set, all services route through the gateway.
- * nginx routes by API path (/api/v1/auth/*, /api/v1/profiles/*, etc.),
- * so no service-name prefix is added — the path from serverFetch provides it.
+ *   URL = base + UPSTREAM_API_PREFIX + path
+ *       = "http://localhost:80" + "/api/v1" + "/schools/name-available"
+ *
+ * If API_GATEWAY_URL is set, all services route through it.
  * Otherwise, falls back to the per-service URL.
  */
 export function resolveServiceUrl(name: ServiceName): string {

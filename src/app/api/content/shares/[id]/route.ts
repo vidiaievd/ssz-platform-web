@@ -11,7 +11,7 @@ export async function DELETE(
   try {
     await serverFetch({
       service: 'content',
-      path: `/api/v1/content-shares/${id}`,
+      path: `/content-shares/${id}`,
       method: 'DELETE',
     });
     return new NextResponse(null, { status: 204 });
