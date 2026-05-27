@@ -1071,6 +1071,7 @@
         }
       },
       "invite": {
+        "noSchoolYet": "Gå tilbake til trinn 1 og lagre skolen din før du inviterer medlemmer.",
         "add": "+ Legg til en til",
         "maxReached": "Du har nådd grensen på 10 invitasjoner for dette trinnet.",
         "remaining": "Du kan legge til {remaining} til.",

@@ -1076,6 +1076,7 @@
         }
       },
       "invite": {
+        "noSchoolYet": "Go back to Step 1 and save your school before inviting members.",
         "add": "+ Add another",
         "maxReached": "You've reached the 10-invite limit for this step.",
         "remaining": "You can add {remaining} more.",
