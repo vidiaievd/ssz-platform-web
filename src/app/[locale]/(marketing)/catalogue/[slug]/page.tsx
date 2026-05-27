@@ -24,7 +24,7 @@ export default async function CatalogueContainerPage({ params }: Props) {
   try {
     container = await serverFetch<Container>({
       service: 'content',
-      path: `/api/v1/containers/slug/${slug}`,
+      path: `/containers/slug/${slug}`,
       anonymous: false,
     });
   } catch (e) {

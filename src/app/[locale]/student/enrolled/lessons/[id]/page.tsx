@@ -18,10 +18,10 @@ export default async function LessonPage({ params, searchParams }: Props) {
 
   try {
     [lesson, variant] = await Promise.all([
-      serverFetch<Lesson>({ service: 'content', path: `/api/v1/lessons/${id}` }),
+      serverFetch<Lesson>({ service: 'content', path: `/lessons/${id}` }),
       serverFetch<LessonVariant>({
         service: 'content',
-        path: `/api/v1/lessons/${id}/variants/best`,
+        path: `/lessons/${id}/variants/best`,
       }).catch(() => null),
     ]);
   } catch (e) {
@@ -40,14 +40,14 @@ export default async function LessonPage({ params, searchParams }: Props) {
     try {
       const container = await serverFetch<Container>({
         service: 'content',
-        path: `/api/v1/containers/${containerId}`,
+        path: `/containers/${containerId}`,
       });
       containerTitle = container.title;
 
       if (container.publishedVersionId) {
         const items = await serverFetch<ContainerItem[]>({
           service: 'content',
-          path: `/api/v1/containers/${containerId}/versions/${container.publishedVersionId}/items`,
+          path: `/containers/${containerId}/versions/${container.publishedVersionId}/items`,
         });
 
         const lessonItems = items.filter((item) => item.contentType === 'LESSON');

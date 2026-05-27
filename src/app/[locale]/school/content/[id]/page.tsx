@@ -34,7 +34,7 @@ export default async function ContainerDetailPage({
   try {
     container = await serverFetch<Container>({
       service: 'content',
-      path: `/api/v1/containers/${id}`,
+      path: `/containers/${id}`,
     });
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') notFound();
@@ -49,7 +49,7 @@ export default async function ContainerDetailPage({
     try {
       const itemsResp = await serverFetch<{ items: ContainerItem[] }>({
         service: 'content',
-        path: `/api/v1/containers/${id}/versions`,
+        path: `/containers/${id}/versions`,
         query: { limit: '1' },
       }).catch(() => ({ items: [] as ContainerItem[] }));
       preflight = runPreflight(container, itemsResp.items ?? []);
