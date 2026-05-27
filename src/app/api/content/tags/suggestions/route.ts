@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     // filtering — use it as the autocomplete/suggestions source (first 10 results).
     const data = await serverFetch<PaginatedTags>({
       service: 'content',
-      path: '/api/v1/tags',
+      path: '/tags',
       query: { search: q || undefined, limit: 10, page: 1 },
     });
     const names = (data?.items ?? []).map((t) => t.name);
