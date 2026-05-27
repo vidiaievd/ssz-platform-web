@@ -10,7 +10,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   try {
     const data = await serverFetch({
       service: 'organization',
-      path: `/api/v1/schools/${id}/invitations`,
+      path: `/schools/${id}/invitations`,
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -24,6 +24,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
   }
 }
 
+type BackendInvitationResponse = {
+  invitationId: string;
+  token: string;
+  expiresAt: string;
+  deliveryStatus: string;
+};
+
 export async function POST(request: NextRequest, { params }: Params) {
   const { id } = await params;
   let body: unknown;
@@ -34,13 +41,18 @@ export async function POST(request: NextRequest, { params }: Params) {
   }
 
   try {
-    const data = await serverFetch({
+    const data = await serverFetch<BackendInvitationResponse>({
       service: 'organization',
-      path: `/api/v1/schools/${id}/invitations`,
+      path: `/schools/${id}/invitations`,
       method: 'POST',
       body,
     });
-    return NextResponse.json(data, { status: 201 });
+    const origin = request.nextUrl.origin;
+    const inviteUrl = `${origin}/accept-invite?token=${data.token}`;
+    return NextResponse.json(
+      { invitationId: data.invitationId, token: data.token, inviteUrl, expiresAt: data.expiresAt, deliveryStatus: data.deliveryStatus },
+      { status: 201 },
+    );
   } catch (e) {
     if (e instanceof AppError && e.code === 'unauthenticated') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

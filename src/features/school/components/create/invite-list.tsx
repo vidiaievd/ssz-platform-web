@@ -130,7 +130,7 @@ export function InviteList({ schoolId, tutorEmail, onDone, formId }: InviteListP
               ? {
                   kind: 'sent',
                   inviteUrl: inv.inviteUrl,
-                  deliveryFailed: inv.deliveryFailed,
+                  expiresAt: inv.expiresAt,
                 }
               : st,
           ),

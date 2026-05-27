@@ -10,6 +10,8 @@ export type Profile = {
   timezone: string;
   contactEmail: string | null;
   contactPhone: string | null;
+  hasStudentProfile: boolean;
+  hasTutorProfile: boolean;
   createdAt: string;
   updatedAt: string;
 };

@@ -17,6 +17,7 @@
     "heroSubheadline": "SSZ Learn connects students with professional language schools and tutors. Study at your own pace, or bring your school online.",
     "ctaStudent": "Start learning for free",
     "ctaSchool": "For schools & tutors",
+    "ctaDashboard": "Go to my dashboard",
     "audienceStudentBadge": "For students",
     "audienceStudentTitle": "Learn at your own pace",
     "audienceStudentDesc": "Access structured language courses from professional schools and tutors. Track your progress, complete exercises, and study anywhere, anytime.",
@@ -49,7 +50,8 @@
     "signIn": "Sign in",
     "getStarted": "Get started",
     "startLearning": "Start learning",
-    "forSchools": "For schools"
+    "forSchools": "For schools",
+    "goToDashboard": "My dashboard"
   },
   "Nav": {
     "dashboard": "Dashboard",
@@ -234,6 +236,7 @@
       "successDescription": "Your email has been verified. You can now sign in.",
       "errorTitle": "Verification failed",
       "errorDescription": "The link is invalid or has expired.",
+      "errorExpired": "The link has expired. Request a new verification email below.",
       "resend": "Resend verification email",
       "resendSuccess": "Verification email sent.",
       "signIn": "Sign in"
@@ -248,7 +251,8 @@
       "schoolDesc": "Publish courses, manage students, and grow your school online.",
       "schoolCta": "Sign up for schools",
       "hasAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "back": "Back"
     },
     "RegisterStudent": {
       "title": "Create student account",
@@ -257,6 +261,20 @@
     "RegisterSchool": {
       "title": "Create school account",
       "subtitle": "Publish courses and manage your students"
+    },
+    "RegisterTutor": {
+      "title": "Create tutor account",
+      "subtitle": "Teach your students independently"
+    },
+    "RegisterOrg": {
+      "title": "How do you teach?",
+      "subtitle": "Choose the option that best describes you",
+      "schoolTitle": "I run a school or language center",
+      "schoolDesc": "Register a school, invite teachers, and manage your students all in one place.",
+      "schoolCta": "Register a school",
+      "tutorTitle": "I'm a private tutor",
+      "tutorDesc": "Teach independently, set your own schedule, and invite students directly.",
+      "tutorCta": "Register as tutor"
     }
   },
   "Authoring": {
@@ -792,6 +810,10 @@
       "prefs": {
         "title": "Your languages",
         "subtitle": "Help us personalise your learning experience."
+      },
+      "tutor": {
+        "title": "Your teaching profile",
+        "subtitle": "Tell us which languages you teach and how you work."
       }
     },
     "profile": {
@@ -861,6 +883,31 @@
       "B2_help": "Upper intermediate — can discuss abstract topics",
       "C1_help": "Advanced — fluent and spontaneous expression",
       "C2_help": "Mastery — equivalent to an educated native speaker"
+    },
+    "tutor": {
+      "languages": {
+        "heading": "Languages you teach",
+        "add": "Add another language",
+        "remove": "Remove language",
+        "added": "Language row added",
+        "removed": "Language row removed",
+        "error": {
+          "required": "Add at least one teaching language and select a proficiency level."
+        }
+      },
+      "proficiency": {
+        "label": "Proficiency",
+        "placeholder": "Level"
+      },
+      "hourlyRate": {
+        "label": "Hourly rate (optional)",
+        "placeholder": "e.g. 25"
+      },
+      "specializations": {
+        "label": "Specializations (optional)",
+        "hint": "Comma-separated, e.g. grammar, conversation, exam prep",
+        "placeholder": "grammar, conversation"
+      }
     }
   },
   "Media": {
