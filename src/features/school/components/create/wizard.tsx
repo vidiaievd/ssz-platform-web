@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -28,6 +28,7 @@ import { HelperIllustrationPanel } from './helper-panel';
 
 const STEPS: WizardStep[] = ['basics', 'invite', 'done'];
 const STEP_NUMBERS: Record<WizardStep, number> = { basics: 1, invite: 2, done: 3 };
+const VALID_STEPS = new Set<string>(STEPS);
 
 // ── Step indicator ─────────────────────────────────────────────────────────────
 
@@ -53,19 +54,19 @@ function StepIndicator({ current }: { current: WizardStep }) {
           <div key={step} className="flex items-center gap-2">
             <div
               className={cn(
-                'h-2 w-2 rounded-full transition-colors duration-[var(--ssz-duration-base)]',
+                'h-2 w-2 rounded-full transition-colors duration-(--ssz-duration-base)',
                 isActive
-                  ? 'bg-[var(--ssz-color-primary-600)] scale-125'
+                  ? 'bg-(--ssz-color-primary-600) scale-125'
                   : isCompleted
-                    ? 'bg-[var(--ssz-color-primary-300)]'
+                    ? 'bg-(--ssz-color-primary-300)'
                     : 'bg-[var(--ssz-neutral-200)]',
               )}
             />
             {i < STEPS.length - 1 && (
               <div
                 className={cn(
-                  'hidden md:block h-px w-12 transition-colors duration-[var(--ssz-duration-base)]',
-                  isCompleted ? 'bg-[var(--ssz-color-primary-300)]' : 'bg-[var(--ssz-border-default)]',
+                  'hidden md:block h-px w-12 transition-colors duration-(--ssz-duration-base)',
+                  isCompleted ? 'bg-(--ssz-color-primary-300)' : 'bg-(--ssz-border-default)',
                 )}
               />
             )}
@@ -125,7 +126,27 @@ type CreateSchoolWizardProps = {
 export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
   const t = useTranslations('School');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const store = useCreateWizardStore();
+
+  // ── Wait for Zustand persist to rehydrate from localStorage ───────────────
+  // Without this guard the server renders initialState (step='basics'),
+  // which causes a flash before the stored step is applied on the client.
+  const [storeHydrated, setStoreHydrated] = useState(false);
+
+  useEffect(() => {
+    // Subscribe first so we never miss the event if hydration finishes
+    // between the subscription and the check below.
+    const unsub = useCreateWizardStore.persist.onFinishHydration(() => setStoreHydrated(true));
+
+    // If already hydrated (e.g. fast devices where it completes synchronously),
+    // fire inside a microtask to satisfy react-hooks/no-set-state-in-effect-body.
+    void (async () => {
+      if (useCreateWizardStore.persist.hasHydrated()) setStoreHydrated(true);
+    })();
+
+    return unsub;
+  }, []);
 
   const [discardOpen, setDiscardOpen] = useState(false);
   const [invitedCount, setInvitedCount] = useState(0);
@@ -136,6 +157,29 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
 
   const { mutateAsync: createSchool } = useCreateSchool();
   const { mutateAsync: updateSchool } = useUpdateSchool(schoolId ?? '');
+
+  // ── Hydrate step + schoolId from URL params on mount ──────────────────────
+  useEffect(() => {
+    void (async () => {
+      const urlStep = searchParams.get('step');
+      const urlId = searchParams.get('id');
+
+      if (urlId && urlId !== schoolId) {
+        setSchoolId(urlId);
+      }
+      if (urlStep && VALID_STEPS.has(urlStep) && urlStep !== step) {
+        // Only advance if we have the required context
+        if (urlStep === 'invite' && !urlId && !schoolId) {
+          // Can't show invite without a school — fall back to basics
+          router.replace('/onboarding/school?step=basics');
+          return;
+        }
+        setStep(urlStep as WizardStep);
+      }
+    })();
+    // Run once on mount only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Focus heading on step change
   useEffect(() => {
@@ -151,7 +195,15 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [discardOpen]);
 
-  const isDirty = Boolean(basicsDraft.name.trim() || basicsDraft.description || basicsDraft.logoUrl);
+  const isDirty = Boolean(
+    basicsDraft.name.trim() ||
+      basicsDraft.description ||
+      basicsDraft.logoUrl ||
+      basicsDraft.slug ||
+      basicsDraft.website ||
+      basicsDraft.contactEmail ||
+      basicsDraft.city,
+  );
 
   function handleClose() {
     if (isDirty || schoolId) {
@@ -166,17 +218,26 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
     router.push('/school/dashboard');
   }
 
+  /** Called from the Done card CTA — clears persisted wizard state then navigates. */
+  function handleFinish() {
+    reset();
+    router.push('/school/dashboard');
+  }
+
   async function handleBasicsNext(values: BasicsFormValues) {
     setIsSaving(true);
     setLastError(null);
     const body = {
       name: values.name,
+      slug: values.slug || undefined,
       description: values.description || undefined,
       avatarUrl: values.logoUrl || undefined,
+      website: values.website || undefined,
+      contactEmail: values.contactEmail || undefined,
+      city: values.city || undefined,
     };
     try {
       if (!schoolId) {
-        // First time — create
         const slowToast = setTimeout(
           () => toast.info(t('common.stillWorking'), { id: 'slow-save' }),
           8000,
@@ -186,12 +247,11 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
         toast.dismiss('slow-save');
         setSchoolId(school.id);
         setStep('invite');
-        router.replace(`/school/new?step=invite&id=${school.id}`);
+        router.replace(`/onboarding/school?step=invite&id=${school.id}`);
       } else {
-        // Returning from Back — patch
         await updateSchool(body);
         setStep('invite');
-        router.replace(`/school/new?step=invite&id=${schoolId}`);
+        router.replace(`/onboarding/school?step=invite&id=${schoolId}`);
       }
     } catch (e) {
       const err = e as { status?: number; message?: string };
@@ -211,13 +271,13 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
   function handleInvitesDone(count: number) {
     setInvitedCount(count);
     setStep('done');
-    router.replace(`/school/new?step=done&id=${schoolId}`);
+    router.replace(`/onboarding/school?step=done&id=${schoolId}`);
   }
 
   function handleBack() {
     if (step === 'invite') {
       setStep('basics');
-      router.replace(`/school/new?step=basics${schoolId ? `&id=${schoolId}` : ''}`);
+      router.replace(`/onboarding/school?step=basics${schoolId ? `&id=${schoolId}` : ''}`);
     }
   }
 
@@ -232,7 +292,29 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
     done: t('create.step.done.subtitle'),
   };
 
+  // ── Show skeleton until localStorage state is ready ─────────────────────
+  if (!storeHydrated) {
+    return (
+      <div
+        className={cn(
+          'relative mx-auto my-0 md:my-12',
+          'bg-surface border border-(--ssz-border-default)',
+          'rounded-none md:rounded-(--ssz-radius-xl) shadow-none md:shadow-(--ssz-shadow-md)',
+          'max-w-4xl min-h-dvh md:min-h-105',
+          'flex items-center justify-center',
+        )}
+        aria-busy="true"
+        aria-label={t('common.loading')}
+      >
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-(--ssz-border-default) border-t-(--ssz-color-primary-600)" />
+      </div>
+    );
+  }
+
   const isDoneStep = step === 'done';
+
+  // Guard: if somehow on invite step without a schoolId, redirect to basics
+  const effectiveSchoolId = schoolId ?? searchParams.get('id');
 
   return (
     <>
@@ -240,15 +322,15 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
       <div
         className={cn(
           'relative mx-auto my-0 md:my-12 overflow-hidden',
-          'bg-[var(--ssz-bg-surface)] border border-(--ssz-border-default)',
-          'rounded-none md:rounded-[var(--ssz-radius-xl)] shadow-none md:shadow-[var(--ssz-shadow-md)]',
+          'bg-surface border border-(--ssz-border-default)',
+          'rounded-none md:rounded-(--ssz-radius-xl) shadow-none md:shadow-(--ssz-shadow-md)',
           'max-w-4xl min-h-dvh md:min-h-0',
         )}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-4 bg-[var(--ssz-bg-surface)] border-b border-(--ssz-border-default)">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-4 bg-surface border-b border-(--ssz-border-default)">
           <div className="flex items-center gap-4">
-            <span className="font-[Lora] font-semibold text-[var(--ssz-color-primary-600)]">SSZ</span>
+            <span className="font-[Lora] font-semibold text-(--ssz-color-primary-600)">SSZ</span>
             {!isDoneStep && <StepIndicator current={step} />}
           </div>
           {!isDoneStep && (
@@ -256,7 +338,7 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
               type="button"
               onClick={handleClose}
               aria-label={t('common.close')}
-              className="rounded-md p-1.5 text-(--ssz-text-muted) hover:text-(--ssz-text-primary) hover:bg-(--ssz-bg-subtle) transition-colors"
+              className="rounded-md p-1.5 text-(--ssz-text-muted) hover:text-(--ssz-text-primary) hover:bg-subtle transition-colors"
             >
               <X className="h-5 w-5" aria-hidden />
             </button>
@@ -267,9 +349,9 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
         {isDoneStep ? (
           <div className="px-6 py-8">
             <WizardDoneCard
-              schoolId={schoolId ?? ''}
               schoolName={basicsDraft.name}
               invitedCount={invitedCount}
+              onGoToDashboard={handleFinish}
             />
           </div>
         ) : (
@@ -280,7 +362,7 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
                 <h1
                   ref={headingRef}
                   tabIndex={-1}
-                  className="font-[Lora] text-2xl md:text-3xl leading-[1.25] text-(--ssz-text-primary) focus-visible:outline-none"
+                  className="font-[Lora] text-2xl md:text-3xl leading-tight text-(--ssz-text-primary) focus-visible:outline-none"
                 >
                   {stepTitles[step]}
                 </h1>
@@ -296,13 +378,23 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
                 {step === 'basics' && (
                   <SchoolBasicsForm onSubmit={handleBasicsNext} formId={formId} />
                 )}
-                {step === 'invite' && schoolId && (
+                {step === 'invite' && effectiveSchoolId && (
                   <InviteList
-                    schoolId={schoolId}
+                    schoolId={effectiveSchoolId}
                     tutorEmail={tutorEmail}
                     onDone={handleInvitesDone}
                     formId={formId}
                   />
+                )}
+                {step === 'invite' && !effectiveSchoolId && (
+                  <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+                    <p className="text-(--ssz-text-secondary) text-sm">
+                      {t('create.invite.noSchoolYet')}
+                    </p>
+                    <Button type="button" variant="outline" onClick={handleBack}>
+                      {t('create.back')}
+                    </Button>
+                  </div>
                 )}
               </div>
 
@@ -311,7 +403,7 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
                 className={cn(
                   'mt-8 flex items-center justify-between gap-4',
                   'sticky bottom-0 md:static',
-                  'bg-[var(--ssz-bg-surface)]/95 md:bg-transparent backdrop-blur md:backdrop-blur-none',
+                  'bg-(--ssz-bg-surface)/95 md:bg-transparent backdrop-blur md:backdrop-blur-none',
                   'border-t border-(--ssz-border-default) md:border-t-0',
                   '-mx-6 px-6 md:mx-0 md:px-0 py-4 md:py-0',
                   'pb-[env(safe-area-inset-bottom)] md:pb-0',
@@ -328,9 +420,9 @@ export function CreateSchoolWizard({ tutorEmail }: CreateSchoolWizardProps) {
                 <Button
                   type="submit"
                   form={formId}
-                  disabled={isSaving}
+                  loading={isSaving}
                 >
-                  {step === 'invite' ? t('create.next') : t('create.next')}
+                  {t('create.next')}
                 </Button>
               </div>
             </div>

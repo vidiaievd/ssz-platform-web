@@ -3,7 +3,11 @@
 import { useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { LogOut } from 'lucide-react';
 
+import { LogoutButton } from '@/features/auth/components/logout-button';
+import { LanguageSwitcher } from '@/components/shared/language-switcher';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
 import type { OnboardingRole } from '../../stores/onboarding-store';
 import type { OnboardingProfileValues } from '../../schemas/onboarding';
 import type { OnboardingStep } from './step-indicator';
@@ -26,6 +30,7 @@ type OnboardingShellProps = {
 
 export function OnboardingShell({ role, initialProfileValues }: OnboardingShellProps) {
   const t = useTranslations('Onboarding');
+  const tUser = useTranslations('UserMenu');
   const searchParams = useSearchParams();
   const currentStep = resolveStep(searchParams.get('step'));
   const currentIdx = STEP_ORDER.indexOf(currentStep);
@@ -50,6 +55,19 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
       >
         {t('skipToForm')}
       </a>
+
+      {/* Page header */}
+      <header className="flex items-center justify-between px-4 py-3 border-b border-(--ssz-border-base)">
+        <span className="text-sm font-semibold text-(--ssz-text-primary) md:hidden">SSZ</span>
+        <span className="hidden md:block text-sm font-semibold text-(--ssz-text-primary) mx-auto">SSZ</span>
+        <div className="flex items-center gap-1 md:absolute md:right-4 md:top-3">
+          <LanguageSwitcher />
+          <ThemeToggle />
+          <LogoutButton variant="ghost" size="icon" aria-label={tUser('signOut')}>
+            <LogOut className="size-4" />
+          </LogoutButton>
+        </div>
+      </header>
 
       {/* Desktop: centered card */}
       <div className="hidden md:block max-w-2xl mx-auto my-12">

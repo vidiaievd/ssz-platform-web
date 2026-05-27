@@ -125,7 +125,7 @@ export function SchoolEmptyState({ isLoading, error, onRetry }: SchoolEmptyState
           icon={<Building2 className="h-5 w-5" />}
           title={t('empty.create.title')}
           helper={t('empty.create.help')}
-          href="/school/new"
+          href="/onboarding/school"
           variant="primary"
         />
         <EmptyStateActionCard

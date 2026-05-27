@@ -3,8 +3,12 @@ export type SchoolRole = 'OWNER' | 'ADMIN' | 'CONTENT_ADMIN' | 'TEACHER' | 'STUD
 export type School = {
   id: string;
   name: string;
+  slug?: string | null;
   description?: string | null;
   avatarUrl?: string | null;
+  website?: string | null;
+  contactEmail?: string | null;
+  city?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -34,10 +38,19 @@ export type NameAvailabilityResponse = {
   suggestions: string[];
 };
 
+export type SlugAvailabilityResponse = {
+  available: boolean;
+  suggestions: string[];
+};
+
 export type CreateSchoolBody = {
   name: string;
+  slug?: string;
   description?: string;
   avatarUrl?: string;
+  website?: string;
+  contactEmail?: string;
+  city?: string;
 };
 
 export type InviteMemberBody = {

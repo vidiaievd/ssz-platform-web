@@ -920,6 +920,7 @@
   "School": {
     "common": {
       "close": "Lukk",
+      "loading": "Laster…",
       "saving": "Lagrer…",
       "stillWorking": "Lagrer fortsatt — vennligst vent…",
       "copied": "Kopiert!",
@@ -1005,6 +1006,22 @@
             "max": "Kan ha maks 60 tegn"
           }
         },
+        "slug": {
+          "label": "Skole-URL",
+          "placeholder": "nordisk-sprakakademi",
+          "help": "Skolens unike adresse. Kun små bokstaver, tall og bindestreker.",
+          "checking": "Sjekker tilgjengelighet…",
+          "available": "URL er ledig",
+          "taken": "Den URL-en er tatt. Prøv en av disse:",
+          "checkFailed": "Kunne ikke sjekke — klikk for å prøve igjen",
+          "suggestionsLabel": "URL-forslag",
+          "error": {
+            "required": "Skole-URL er påkrevd",
+            "min": "Må være minst 3 tegn",
+            "max": "Kan ha maks 60 tegn",
+            "format": "Kun små bokstaver, tall og bindestreker er tillatt"
+          }
+        },
         "desc": {
           "label": "Beskrivelse",
           "placeholder": "Fortell elever om skolen din…",
@@ -1019,15 +1036,43 @@
         },
         "logo": {
           "label": "Logo",
-          "placeholder": "https://example.com/logo.png",
-          "help": "Lim inn en bilde-URL. Kvadratisk PNG eller JPG fungerer best.",
+          "upload": "Last opp logo",
+          "change": "Bytt logo",
+          "remove": "Fjern",
+          "help": "PNG, JPG, SVG eller WebP · maks 2 MB. Kvadratiske bilder fungerer best.",
           "error": {
-            "url": "Skriv inn en gyldig URL",
-            "notImage": "URL ser ikke ut til å være et bilde"
+            "type": "Velg et PNG-, JPG-, SVG- eller WebP-bilde",
+            "size": "Bildet må være mindre enn 2 MB",
+            "upload": "Opplasting mislyktes. Prøv igjen."
+          }
+        },
+        "contact": {
+          "toggle": "Legg til kontakt og nettilstedeværelse",
+          "toggleHide": "Skjul kontakt og nettilstedeværelse",
+          "website": {
+            "label": "Nettsted",
+            "placeholder": "https://min-skole.no",
+            "error": {
+              "url": "Skriv inn en gyldig URL"
+            }
+          },
+          "email": {
+            "label": "Kontakt-e-post",
+            "placeholder": "hei@min-skole.no",
+            "help": "Offentlig kontaktadresse for henvendelser fra studenter.",
+            "error": {
+              "email": "Skriv inn en gyldig e-postadresse"
+            }
+          },
+          "city": {
+            "label": "By",
+            "placeholder": "Oslo",
+            "help": "Hjelper studenter å finne lokale skoler. Skriv «Online» hvis du er helt digital."
           }
         }
       },
       "invite": {
+        "noSchoolYet": "Gå tilbake til trinn 1 og lagre skolen din før du inviterer medlemmer.",
         "add": "+ Legg til en til",
         "maxReached": "Du har nådd grensen på 10 invitasjoner for dette trinnet.",
         "remaining": "Du kan legge til {remaining} til.",

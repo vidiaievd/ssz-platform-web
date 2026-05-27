@@ -7,11 +7,26 @@ import type {
   Invitation,
   InviteMemberBody,
   NameAvailabilityResponse,
+  SlugAvailabilityResponse,
   School,
 } from '../types';
 import { schoolKeys } from './keys';
 
 // ── My schools ────────────────────────────────────────────────────────────────
+
+type SchoolsPayload =
+  | School[]
+  | { items: School[] }
+  | { schools: School[] }
+  | { data: School[] };
+
+function normaliseSchools(payload: SchoolsPayload): School[] {
+  if (Array.isArray(payload)) return payload;
+  if ('items' in payload && Array.isArray(payload.items)) return payload.items;
+  if ('schools' in payload && Array.isArray(payload.schools)) return payload.schools;
+  if ('data' in payload && Array.isArray(payload.data)) return payload.data;
+  return [];
+}
 
 export function useMySchools() {
   return useQuery({
@@ -19,8 +34,8 @@ export function useMySchools() {
     queryFn: async () => {
       const res = await fetch('/api/schools');
       if (!res.ok) throw new Error('Failed to fetch schools');
-      const data = (await res.json()) as School[] | { items: School[] };
-      return Array.isArray(data) ? data : (data.items ?? []);
+      const data = (await res.json()) as SchoolsPayload;
+      return normaliseSchools(data);
     },
   });
 }
@@ -50,6 +65,23 @@ export function useNameAvailability(name: string) {
       const res = await fetch(`/api/schools/name-available?name=${encodeURIComponent(trimmed)}`);
       if (!res.ok) throw new Error('Name check failed');
       return (await res.json()) as NameAvailabilityResponse;
+    },
+    enabled: trimmed.length >= 3,
+    staleTime: 30_000,
+    retry: false,
+  });
+}
+
+// ── Slug availability ─────────────────────────────────────────────────────────
+
+export function useSlugAvailability(slug: string) {
+  const trimmed = slug.trim();
+  return useQuery({
+    queryKey: schoolKeys.slugAvailable(trimmed),
+    queryFn: async () => {
+      const res = await fetch(`/api/schools/slug-available?slug=${encodeURIComponent(trimmed)}`);
+      if (!res.ok) throw new Error('Slug check failed');
+      return (await res.json()) as SlugAvailabilityResponse;
     },
     enabled: trimmed.length >= 3,
     staleTime: 30_000,
