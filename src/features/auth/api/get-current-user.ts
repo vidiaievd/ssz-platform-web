@@ -12,7 +12,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   try {
     const data = await serverFetch<UserRolesResponse>({
       service: 'auth',
-      path: '/api/v1/auth/roles',
+      path: '/auth/roles',
     });
     return { roles: data.roles ?? [] };
   } catch {

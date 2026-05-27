@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const data = await serverFetch({
       service: 'profile',
-      path: '/api/v1/profiles/me/tutor',
+      path: '/profiles/me/tutor',
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = await serverFetch({
       service: 'profile',
-      path: '/api/v1/profiles/me/tutor',
+      path: '/profiles/me/tutor',
       method: 'POST',
       body,
     });
@@ -41,7 +41,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const data = await serverFetch({
       service: 'profile',
-      path: '/api/v1/profiles/me/tutor',
+      path: '/profiles/me/tutor',
       method: 'PATCH',
       body,
     });

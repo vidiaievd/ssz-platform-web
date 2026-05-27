@@ -13,7 +13,7 @@ export async function GET(
   try {
     const data = await serverFetch<GrammarExplanation[]>({
       service: 'content',
-      path: `/api/v1/grammar-rules/${id}/explanations`,
+      path: `/grammar-rules/${id}/explanations`,
     });
     return NextResponse.json(data);
   } catch (e) {

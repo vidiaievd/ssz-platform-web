@@ -27,7 +27,7 @@ export async function POST(
   try {
     const data = await serverFetch({
       service: 'exercises',
-      path: `/api/v1/exercises/${id}/attempts/${attemptId}/submit`,
+      path: `/exercises/${id}/attempts/${attemptId}/submit`,
       method: 'POST',
       body,
     });

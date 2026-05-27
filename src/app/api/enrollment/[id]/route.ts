@@ -12,7 +12,7 @@ export async function GET(
   try {
     const data = await serverFetch({
       service: 'enrollment',
-      path: `/api/v1/enrollments/${id}`,
+      path: `/enrollments/${id}`,
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -32,7 +32,7 @@ export async function DELETE(
   try {
     await serverFetch({
       service: 'enrollment',
-      path: `/api/v1/enrollments/${id}`,
+      path: `/enrollments/${id}`,
       method: 'DELETE',
     });
     return new NextResponse(null, { status: 204 });

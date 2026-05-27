@@ -27,7 +27,7 @@ export async function submitAttemptAction(input: SubmitAttemptInput) {
     // 1. Start attempt — get an attemptId from the Exercise Engine.
     const startRaw = await serverFetch({
       service: 'exercises',
-      path: `/api/v1/exercises/${input.exerciseId}/attempts`,
+      path: `/exercises/${input.exerciseId}/attempts`,
       method: 'POST',
     });
 
@@ -40,7 +40,7 @@ export async function submitAttemptAction(input: SubmitAttemptInput) {
     // 2. Submit the answer.
     const submitRaw = await serverFetch({
       service: 'exercises',
-      path: `/api/v1/exercises/${input.exerciseId}/attempts/${attemptId}/submit`,
+      path: `/exercises/${input.exerciseId}/attempts/${attemptId}/submit`,
       method: 'POST',
       body: { answer: input.answer },
     });

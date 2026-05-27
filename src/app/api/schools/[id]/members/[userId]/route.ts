@@ -10,7 +10,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     await serverFetch({
       service: 'organization',
-      path: `/api/v1/schools/${id}/members/${userId}`,
+      path: `/schools/${id}/members/${userId}`,
       method: 'DELETE',
     });
     return new NextResponse(null, { status: 204 });

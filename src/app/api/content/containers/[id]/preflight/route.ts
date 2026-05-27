@@ -13,10 +13,10 @@ export async function GET(
 
   try {
     const [container, itemsResp] = await Promise.all([
-      serverFetch<Container>({ service: 'content', path: `/api/v1/containers/${id}` }),
+      serverFetch<Container>({ service: 'content', path: `/containers/${id}` }),
       serverFetch<{ items: ContainerItem[] }>({
         service: 'content',
-        path: `/api/v1/containers/${id}/versions`,
+        path: `/containers/${id}/versions`,
         query: { limit: '1' },
       }).catch(() => ({ items: [] })),
     ]);

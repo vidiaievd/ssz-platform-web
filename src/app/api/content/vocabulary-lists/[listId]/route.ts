@@ -13,7 +13,7 @@ export async function GET(
   try {
     const data = await serverFetch<VocabularyList>({
       service: 'content',
-      path: `/api/v1/vocabulary-lists/${listId}`,
+      path: `/vocabulary-lists/${listId}`,
     });
     return NextResponse.json(data);
   } catch (e) {

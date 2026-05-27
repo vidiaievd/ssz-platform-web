@@ -9,7 +9,7 @@ export async function publishContainerAction(containerId: string) {
   return tryAction(async () => {
     await serverFetch({
       service: 'content',
-      path: `/api/v1/containers/${containerId}/publish`,
+      path: `/containers/${containerId}/publish`,
       method: 'POST',
     });
     revalidatePath(`/school/content/${containerId}`);

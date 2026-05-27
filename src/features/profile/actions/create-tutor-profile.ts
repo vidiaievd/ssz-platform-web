@@ -19,7 +19,7 @@ export async function createTutorProfileAction(
 
     return serverFetch<TutorProfile>({
       service: 'profile',
-      path: '/api/v1/profiles/me/tutor',
+      path: '/profiles/me/tutor',
       method: 'POST',
       body: parsed.data,
     });

@@ -18,7 +18,7 @@ export async function registerAction(input: RegisterInput) {
 
     const result = await serverFetch<RegisterResponse>({
       service: 'auth',
-      path: '/api/v1/auth/register',
+      path: '/auth/register',
       method: 'POST',
       body: { email, password, role: role ?? null },
       anonymous: true,

@@ -13,7 +13,7 @@ export async function GET(
   try {
     const data = await serverFetch<LessonVariant>({
       service: 'content',
-      path: `/api/v1/lessons/${id}/variants/best`,
+      path: `/lessons/${id}/variants/best`,
     });
     return NextResponse.json(data);
   } catch (e) {

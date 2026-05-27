@@ -13,7 +13,7 @@ async function getDraftVersionId(containerId: string): Promise<string | null> {
   try {
     const versions = await serverFetch<ContainerVersion[]>({
       service: 'content',
-      path: `/api/v1/containers/${containerId}/versions`,
+      path: `/containers/${containerId}/versions`,
     });
     return versions.find((v) => !v.isPublished)?.id ?? null;
   } catch {
@@ -35,7 +35,7 @@ export async function createLessonAction(
 
     const lesson = await serverFetch<Lesson>({
       service: 'content',
-      path: '/api/v1/lessons',
+      path: '/lessons',
       method: 'POST',
       body: { title, targetLanguage, containerId },
     });
@@ -44,7 +44,7 @@ export async function createLessonAction(
     if (body) {
       const variant = await serverFetch<LessonVariant>({
         service: 'content',
-        path: `/api/v1/lessons/${lesson.id}/variants`,
+        path: `/lessons/${lesson.id}/variants`,
         method: 'POST',
         body: { title, body, targetLanguage },
       });
@@ -72,7 +72,7 @@ export async function updateLessonAction(
 
     await serverFetch({
       service: 'content',
-      path: `/api/v1/lessons/${lessonId}`,
+      path: `/lessons/${lessonId}`,
       method: 'PATCH',
       body: { title },
     });
@@ -81,14 +81,14 @@ export async function updateLessonAction(
       if (variantId) {
         await serverFetch({
           service: 'content',
-          path: `/api/v1/lessons/${lessonId}/variants/${variantId}`,
+          path: `/lessons/${lessonId}/variants/${variantId}`,
           method: 'PATCH',
           body: { body, title },
         });
       } else {
         await serverFetch<LessonVariant>({
           service: 'content',
-          path: `/api/v1/lessons/${lessonId}/variants`,
+          path: `/lessons/${lessonId}/variants`,
           method: 'POST',
           body: { title, body, targetLanguage },
         });
@@ -103,7 +103,7 @@ export async function deleteLessonAction(lessonId: string, containerId: string) 
   return tryAction(async () => {
     await serverFetch({
       service: 'content',
-      path: `/api/v1/lessons/${lessonId}`,
+      path: `/lessons/${lessonId}`,
       method: 'DELETE',
     });
     revalidatePath(`/school/content/${containerId}`);
@@ -118,7 +118,7 @@ export async function reorderLessonsAction(containerId: string, orderedItemIds: 
     }
     await serverFetch({
       service: 'content',
-      path: `/api/v1/containers/${containerId}/versions/${versionId}/items/reorder`,
+      path: `/containers/${containerId}/versions/${versionId}/items/reorder`,
       method: 'PUT',
       body: { orderedIds: orderedItemIds },
     });

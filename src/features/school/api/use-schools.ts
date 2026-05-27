@@ -43,14 +43,15 @@ export function useSchool(id: string) {
 // ── Name availability ─────────────────────────────────────────────────────────
 
 export function useNameAvailability(name: string) {
+  const trimmed = name.trim();
   return useQuery({
-    queryKey: schoolKeys.nameAvailable(name),
+    queryKey: schoolKeys.nameAvailable(trimmed),
     queryFn: async () => {
-      const res = await fetch(`/api/schools/name-available?name=${encodeURIComponent(name)}`);
+      const res = await fetch(`/api/schools/name-available?name=${encodeURIComponent(trimmed)}`);
       if (!res.ok) throw new Error('Name check failed');
       return (await res.json()) as NameAvailabilityResponse;
     },
-    enabled: name.trim().length >= 3,
+    enabled: trimmed.length >= 3,
     staleTime: 30_000,
     retry: false,
   });

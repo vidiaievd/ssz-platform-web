@@ -11,7 +11,7 @@ export async function getMyProfile(): Promise<Profile | null> {
   try {
     return await serverFetch<Profile>({
       service: 'profile',
-      path: '/api/v1/profiles/me',
+      path: '/profiles/me',
     });
   } catch {
     return null;

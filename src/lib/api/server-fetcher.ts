@@ -45,6 +45,11 @@ function logUpstream(
 
 export type ServerFetchOptions<TBody = unknown> = {
   service: ServiceName;
+  /**
+   * Resource path relative to UPSTREAM_API_PREFIX.
+   * Do NOT include the version prefix — it is prepended automatically.
+   * @example '/schools/name-available'   // resolves to /api/v1/schools/name-available
+   */
   path: string;
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   query?: Record<string, string | number | boolean | undefined | null>;
@@ -62,7 +67,8 @@ export async function serverFetch<TData = unknown, TBody = unknown>(
   opts: ServerFetchOptions<TBody>,
 ): Promise<TData> {
   const base = resolveServiceUrl(opts.service);
-  const url = new URL(`${base}${opts.path}`);
+  const prefix = env.UPSTREAM_API_PREFIX.replace(/\/$/, '');
+  const url = new URL(`${base}${prefix}${opts.path}`);
   if (opts.query) {
     for (const [k, v] of Object.entries(opts.query)) {
       if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
@@ -128,7 +134,6 @@ async function doRequest<TData, TBody>(
         throw new AppError('unauthenticated', 'Session expired — refresh failed');
       }
 
-      logUpstream('←', method, url, { status: response.status, durationMs });
       const code = mapStatusToCode(response.status);
       let details: unknown;
       try {
@@ -136,13 +141,18 @@ async function doRequest<TData, TBody>(
       } catch {
         details = null;
       }
+      logUpstream('←', method, url, { status: response.status, durationMs, body: details });
       throw new AppError(code, `Upstream ${response.status} on ${opts.service}${opts.path}`, details);
     }
 
-    logUpstream('←', method, url, { status: response.status, durationMs });
+    if (response.status === 204) {
+      logUpstream('←', method, url, { status: 204, durationMs });
+      return undefined as TData;
+    }
 
-    if (response.status === 204) return undefined as TData;
-    return (await response.json()) as TData;
+    const data = (await response.json()) as TData;
+    logUpstream('←', method, url, { status: response.status, durationMs, body: data });
+    return data;
   } catch (err) {
     if (err instanceof AppError) throw err;
     if (err instanceof DOMException && err.name === 'AbortError') {

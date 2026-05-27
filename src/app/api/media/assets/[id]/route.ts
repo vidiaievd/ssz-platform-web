@@ -12,7 +12,7 @@ export async function GET(
   try {
     const data = await serverFetch({
       service: 'media',
-      path: `/api/v1/media/assets/${id}`,
+      path: `/media/assets/${id}`,
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -32,7 +32,7 @@ export async function DELETE(
   try {
     await serverFetch({
       service: 'media',
-      path: `/api/v1/media/assets/${id}`,
+      path: `/media/assets/${id}`,
       method: 'DELETE',
     });
     return new NextResponse(null, { status: 204 });

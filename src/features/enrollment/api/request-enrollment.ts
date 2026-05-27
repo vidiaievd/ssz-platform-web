@@ -19,7 +19,7 @@ export async function requestEnrollmentAction(
 
     const data = await serverFetch<EnrollmentRequest>({
       service: 'enrollment',
-      path: '/api/v1/requests',
+      path: '/requests',
       method: 'POST',
       body: { schoolId, ...parsed.data },
     });

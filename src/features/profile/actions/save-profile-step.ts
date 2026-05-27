@@ -16,7 +16,7 @@ export async function saveProfileStepAction(input: OnboardingProfileValues) {
 
     await serverFetch({
       service: 'profile',
-      path: '/api/v1/profiles/me',
+      path: '/profiles/me',
       method: 'PATCH',
       body: {
         displayName: parsed.data.displayName,

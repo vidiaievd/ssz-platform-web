@@ -12,7 +12,7 @@ export async function PATCH(
   try {
     const data = await serverFetch({
       service: 'enrollment',
-      path: `/api/v1/enrollments/${id}/complete`,
+      path: `/enrollments/${id}/complete`,
       method: 'PATCH',
     });
     return NextResponse.json(data);

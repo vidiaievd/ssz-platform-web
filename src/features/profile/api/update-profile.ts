@@ -15,7 +15,7 @@ export async function updateProfileAction(input: UpdateProfileInput) {
 
     return await serverFetch<Profile>({
       service: 'profile',
-      path: '/api/v1/profiles/me',
+      path: '/profiles/me',
       method: 'PATCH',
       body: parsed.data,
     });

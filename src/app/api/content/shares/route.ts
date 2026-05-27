@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
   if (!entityType || !entityId) {
     return NextResponse.json({ error: 'entityType and entityId are required' }, { status: 400 });
   }
-
   try {
     const data = await serverFetch<ContainerShare[]>({
       service: 'content',

@@ -8,7 +8,7 @@ import { tryAction } from '@/lib/result';
 async function recordProgressEvent(contentId: string, event: 'started' | 'completed') {
   await serverFetch({
     service: 'progress',
-    path: '/api/v1/progress',
+    path: '/progress',
     method: 'POST',
     body: { contentId, contentType: 'LESSON', event },
   });

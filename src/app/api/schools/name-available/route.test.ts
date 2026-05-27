@@ -52,7 +52,7 @@ describe('GET /api/schools/name-available', () => {
     expect(mockServerFetch).toHaveBeenCalledWith(
       expect.objectContaining({
         service: 'organization',
-        path: '/api/v1/schools/name-available',
+        path: '/schools/name-available',
         query: { name: 'Unique School Name' },
       }),
     );

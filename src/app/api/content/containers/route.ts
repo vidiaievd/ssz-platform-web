@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const data = await serverFetch<PaginatedResponse<Container>>({
       service: 'content',
-      path: '/api/v1/containers',
+      path: '/containers',
       query,
       anonymous: false,
     });

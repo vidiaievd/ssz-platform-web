@@ -26,7 +26,7 @@ export async function createContainerAction(input: ContainerFormValues) {
 
     const container = await serverFetch<Container>({
       service: 'content',
-      path: '/api/v1/containers',
+      path: '/containers',
       method: 'POST',
       body: {
         title: data.title,
@@ -67,7 +67,7 @@ export async function updateContainerAction(id: string, input: ContainerFormValu
 
     await serverFetch({
       service: 'content',
-      path: `/api/v1/containers/${id}`,
+      path: `/containers/${id}`,
       method: 'PATCH',
       body,
     });

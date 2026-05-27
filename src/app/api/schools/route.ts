@@ -5,7 +5,7 @@ import { AppError } from '@/lib/errors';
 
 export async function GET() {
   try {
-    const data = await serverFetch({ service: 'organization', path: '/api/v1/schools' });
+    const data = await serverFetch({ service: 'organization', path: '/schools' });
     return NextResponse.json(data);
   } catch (e) {
     if (e instanceof AppError && e.code === 'unauthenticated') {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
   try {
     const data = await serverFetch({
       service: 'organization',
-      path: '/api/v1/schools',
+      path: '/schools',
       method: 'POST',
       body,
       headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,

@@ -10,7 +10,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
   try {
     await serverFetch({
       service: 'organization',
-      path: `/api/v1/schools/invitations/${token}/accept`,
+      path: `/schools/invitations/${token}/accept`,
       method: 'POST',
     });
     return new NextResponse(null, { status: 204 });

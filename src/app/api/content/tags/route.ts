@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const tag = await serverFetch<ContentTag>({
       service: 'content',
-      path: '/api/v1/tags',
+      path: '/tags',
       method: 'POST',
       body,
     });

@@ -24,7 +24,7 @@ export async function getEnrollmentStatus(): Promise<string[]> {
   try {
     const raw = await serverFetch({
       service: 'enrollment',
-      path: '/api/v1/enrollments',
+      path: '/enrollments',
     });
 
     const parsed = EnrollmentList.safeParse(raw);
