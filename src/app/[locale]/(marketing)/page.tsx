@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { GraduationCap, BookOpen, Layers, TrendingUp, Globe } from 'lucide-react';
 
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
@@ -7,15 +6,14 @@ import { Link } from '@/lib/i18n/navigation';
 import { Button } from '@/components/ui/button';
 
 export default async function HomePage() {
-  const user = await getCurrentUser();
+  const [user, t] = await Promise.all([
+    getCurrentUser(),
+    getTranslations('Home'),
+  ]);
 
-  if (user) {
-    const locale = await getLocale();
-    const isMgmt = user.roles.some((r) => r === 'school' || r === 'tutor');
-    redirect(`/${locale}${isMgmt ? '/school/dashboard' : '/student/dashboard'}`);
-  }
-
-  const t = await getTranslations('Home');
+  const dashboardHref = user?.roles.some((r) => r === 'school_admin' || r === 'tutor')
+    ? '/school/dashboard'
+    : '/student/dashboard';
 
   return (
     <main>
@@ -39,12 +37,20 @@ export default async function HomePage() {
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button variant="primary" size="lg" asChild>
-              <Link href="/register/student">{t('ctaStudent')}</Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link href="/register/school">{t('ctaSchool')}</Link>
-            </Button>
+            {user ? (
+              <Button variant="primary" size="lg" asChild>
+                <Link href={dashboardHref}>{t('ctaDashboard')}</Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="primary" size="lg" asChild>
+                  <Link href="/register/student">{t('ctaStudent')}</Link>
+                </Button>
+                <Button variant="outline" size="lg" asChild>
+                  <Link href="/register?step=org">{t('ctaSchool')}</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -98,7 +104,7 @@ export default async function HomePage() {
             </p>
             <div className="mt-6">
               <Button variant="outline" size="sm" asChild>
-                <Link href="/register/school">{t('ctaSchool')}</Link>
+                <Link href="/register?step=org">{t('ctaSchool')}</Link>
               </Button>
             </div>
           </div>
