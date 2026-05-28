@@ -9,7 +9,7 @@ import { ThemeToggle } from './theme-toggle';
 
 function getDashboardHref(roles: string[]): string {
   return roles.some((r) => r === 'school_admin' || r === 'tutor')
-    ? '/school/dashboard'
+    ? '/school'
     : '/student/dashboard';
 }
 

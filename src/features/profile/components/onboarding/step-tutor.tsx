@@ -138,7 +138,7 @@ export function StepTutor({ headingRef }: StepTutorProps) {
         toast.error(t('error.saveFailed'));
         return;
       }
-      router.replace(`/${locale}/school/dashboard`);
+      router.replace(`/${locale}/school`);
     });
   }
 
@@ -149,7 +149,7 @@ export function StepTutor({ headingRef }: StepTutorProps) {
         toast.error(t('error.saveFailed'));
         return;
       }
-      router.replace(`/${locale}/school/dashboard`);
+      router.replace(`/${locale}/school`);
     });
   }
 
