@@ -7,8 +7,8 @@ import { useSchool } from '@/features/school';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function SchoolDashboardPage() {
-  const { schoolId } = useParams<{ schoolId: string }>();
-  const { data: school, isLoading } = useSchool(schoolId);
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const { data: school, isLoading } = useSchool(schoolSlug);
   const t = useTranslations('School');
 
   if (isLoading) {

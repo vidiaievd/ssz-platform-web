@@ -13,29 +13,39 @@ import { AppShell } from '@/components/shared/app-shell';
 
 type Props = {
   children: React.ReactNode;
-  params: Promise<{ schoolId: string }>;
+  params: Promise<{ schoolSlug: string }>;
 };
 
 export default async function SchoolInstanceLayout({ children, params }: Props) {
-  const { schoolId } = await params;
+  const { schoolSlug } = await params;
   const user = await requireAnyRole(['tutor', 'school_admin']);
   const locale = await getLocale();
 
   const queryClient = getQueryClient();
-  const [school] = await Promise.all([
+  const [schools] = await Promise.all([
     queryClient.fetchQuery({
-      queryKey: schoolKeys.detail(schoolId),
-      queryFn: () => getSchool(schoolId),
+      queryKey: schoolKeys.mine(),
+      queryFn: getMySchools,
     }),
     queryClient.prefetchQuery({
       queryKey: profileKeys.me(),
       queryFn: getMyProfile,
     }),
-    queryClient.prefetchQuery({
-      queryKey: schoolKeys.mine(),
-      queryFn: getMySchools,
-    }),
   ]);
+
+  // Resolve slug (or UUID fallback) to a concrete school record.
+  let school = schools.find((s) => s.slug === schoolSlug) ?? schools.find((s) => s.id === schoolSlug) ?? null;
+
+  // If not found in the cached list, try a direct server lookup (e.g. UUID passed directly).
+  if (!school) {
+    school = await queryClient.fetchQuery({
+      queryKey: schoolKeys.detail(schoolSlug),
+      queryFn: () => getSchool(schoolSlug),
+    });
+  } else {
+    // Seed the detail cache under the slug key so client-side useSchool(schoolSlug) hits it.
+    queryClient.setQueryData(schoolKeys.detail(schoolSlug), school);
+  }
 
   // If the school doesn't exist or the user has no access, fall back to the
   // school index which will redirect to their first accessible school.

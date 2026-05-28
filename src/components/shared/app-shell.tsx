@@ -63,11 +63,11 @@ type AppShellProps = {
 
 export function AppShell({ variant, user, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const params = useParams<{ schoolId?: string }>();
+  const params = useParams<{ schoolSlug?: string }>();
 
   const sections: NavSection[] =
     variant === 'school'
-      ? buildSchoolNav(params.schoolId ?? '')
+      ? buildSchoolNav(params.schoolSlug ?? '')
       : STUDENT_NAV;
 
   return (

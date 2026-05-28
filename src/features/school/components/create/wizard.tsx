@@ -136,7 +136,7 @@ export function CreateSchoolWizard({ tutorEmail: _tutorEmail }: CreateSchoolWiza
       toast.dismiss('slow-save');
       setIsNavigating(true);
       reset();
-      router.push(`/school/${school.id}/dashboard`);
+      router.push(`/school/${school.slug ?? school.id}/dashboard`);
     } catch (e) {
       const err = e as { status?: number; message?: string };
       if (err.status === 409) {

@@ -12,7 +12,8 @@ export default async function SchoolIndexPage() {
   const schools = await getMySchools();
 
   if (schools.length > 0) {
-    redirect(`/${locale}/school/${schools[0]!.id}/dashboard`);
+    const first = schools[0]!;
+    redirect(`/${locale}/school/${first.slug ?? first.id}/dashboard`);
   }
 
   redirect(`/${locale}/onboarding/school`);
