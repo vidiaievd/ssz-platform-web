@@ -12,7 +12,7 @@ export default async function HomePage() {
   ]);
 
   const dashboardHref = user?.roles.some((r) => r === 'school_admin' || r === 'tutor')
-    ? '/school/dashboard'
+    ? '/school'
     : '/student/dashboard';
 
   return (

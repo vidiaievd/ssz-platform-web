@@ -25,9 +25,9 @@ function TabsSkeleton() {
 export default async function ContainerDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ schoolSlug: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { schoolSlug, id } = await params;
   const t = await getTranslations('Authoring');
 
   let container: Container;
@@ -65,7 +65,10 @@ export default async function ContainerDetailPage({
     <main className="p-8 max-w-7xl mx-auto">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-5">
-        <Link href="/school/content" className="hover:text-foreground transition-colors">
+        <Link
+          href={`/school/${schoolSlug}/content`}
+          className="hover:text-foreground transition-colors"
+        >
           {t('breadcrumb.courses')}
         </Link>
         <span aria-hidden>/</span>

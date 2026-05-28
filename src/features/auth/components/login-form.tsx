@@ -12,34 +12,8 @@ import type { AppErrorCode } from "@/lib/errors";
 
 import { loginAction } from "../actions/login";
 import { loginSchema, type LoginInput } from "../schemas";
+import { resolvePostLoginPath } from "../utils/resolve-post-login-path";
 import { TotpStep } from "./totp-step";
-
-function resolvePostLoginPath(
-  auth: {
-    roles: string[];
-    hasStudentProfile: boolean;
-    hasTutorProfile: boolean;
-  },
-  redirect?: string,
-): string {
-  if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
-    return redirect;
-  }
-  if (auth.roles.includes("school_admin")) {
-    return "/school/dashboard";
-  }
-  if (auth.roles.includes("tutor")) {
-    return auth.hasTutorProfile
-      ? "/school/dashboard"
-      : "/onboarding?step=profile";
-  }
-  if (auth.roles.includes("student")) {
-    return auth.hasStudentProfile
-      ? "/student/dashboard"
-      : "/onboarding?step=profile";
-  }
-  return "/student/dashboard";
-}
 
 type LoginFormProps = {
   redirect?: string;

@@ -923,6 +923,10 @@
     }
   },
   "School": {
+    "dashboard": {
+      "notFound": "School not found.",
+      "placeholder": "Full dashboard metrics coming soon."
+    },
     "common": {
       "close": "Close",
       "loading": "Loading…",
@@ -960,34 +964,18 @@
       }
     },
     "create": {
-      "progress": {
-        "label": "Step {current} of {total}"
-      },
       "step": {
         "basics": {
           "title": "School basics",
           "subtitle": "Give your school a name and tell us a bit about it."
-        },
-        "invite": {
-          "title": "Invite your first members",
-          "subtitle": "Optional — you can add more later."
-        },
-        "done": {
-          "title": "You're all set",
-          "subtitle": "Your school has been created."
         }
       },
-      "back": "Back",
       "next": "Next",
-      "skip": "Skip for now",
-      "finishCta": "Go to my school",
       "cancel": {
         "title": "Discard school setup?",
         "body": "Your school name and members won't be saved.",
-        "bodyWithSchool": "Your school is saved. You can finish inviting members later from Settings → Members.",
         "confirm": "Discard",
-        "dismiss": "Keep editing",
-        "leaveForNow": "Leave for now"
+        "dismiss": "Keep editing"
       },
       "error": {
         "nameTaken": "That name is already taken.",
@@ -1076,71 +1064,6 @@
           }
         }
       },
-      "invite": {
-        "noSchoolYet": "Go back to Step 1 and save your school before inviting members.",
-        "add": "+ Add another",
-        "maxReached": "You've reached the 10-invite limit for this step.",
-        "remaining": "You can add {remaining} more.",
-        "skipLabel": "Skip for now",
-        "skip": {
-          "title": "Skip for now?",
-          "body": "You can invite teachers and students any time from Settings → Members.",
-          "keep": "Keep inviting",
-          "confirm": "Skip"
-        },
-        "sending": "Sending invitations…",
-        "partialFailure": "Sent {sent} invites. {failed} couldn't be delivered — share their links below.",
-        "error": {
-          "self": "You're already the owner — no need to invite yourself.",
-          "duplicate": "You've already added this email.",
-          "network": "Couldn't send invitations. Please try again."
-        },
-        "announce": {
-          "added": "Added invite row",
-          "removed": "Removed invite for {email}",
-          "sent": "Invite sent to {email}",
-          "failed": "Couldn't send to {email} — share the link instead"
-        },
-        "row": {
-          "rowLabel": "Invite row {index}",
-          "email": {
-            "placeholder": "teacher@school.no",
-            "error": {
-              "invalid": "Please enter a valid email address"
-            }
-          },
-          "role": {
-            "label": "Role"
-          }
-        },
-        "remove": "Remove {email}",
-        "linkFallback": {
-          "title": "We couldn't email {email}. Share this link instead:",
-          "copy": "Copy",
-          "openMail": "Open mail draft"
-        }
-      },
-      "done": {
-        "title": "Your school is ready",
-        "summary": "{schoolName} is set up. {n, plural, =0 {No members invited yet.} one {# member invited.} other {# members invited.}}",
-        "next": {
-          "heading": "What's next",
-          "course": {
-            "title": "Create your first course",
-            "help": "Add lessons, vocabulary, and exercises."
-          },
-          "members": {
-            "title": "Open the members page",
-            "help": "Re-send invites, add more people."
-          },
-          "settings": {
-            "title": "Customize school settings",
-            "help": "Logo, defaults, permissions."
-          }
-        }
-      },
-      "alreadyHaveSchool": "You already have a school.",
-      "draftLost": "Your school draft was lost. Starting fresh.",
       "helper": {
         "basics": {
           "title": "What is a school?",
@@ -1149,14 +1072,7 @@
             "1": "Invite teachers, add content, track progress.",
             "2": "Students enrol and learn at their own pace."
           }
-        },
-        "invite": {
-          "title": "About roles",
-          "body": "Teachers can create courses. Content admins manage content. Students enrol and learn. You can always change roles later."
         }
-      },
-      "wizard": {
-        "next": "Next"
       }
     }
   }
