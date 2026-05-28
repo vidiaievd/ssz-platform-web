@@ -20,6 +20,14 @@ export async function GET(request: NextRequest) {
     if (e instanceof AppError && e.code === 'unauthenticated') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    // Backend returns 400 "Validation failed (uuid is expected)" because
+    // the slug-available endpoint is not yet implemented and the router
+    // falls through to GET /schools/{id} which expects a UUID.
+    // Treat this as "endpoint unavailable" — optimistically report available:true
+    // so the wizard form is not blocked.
+    if (e instanceof AppError && e.code === 'validation') {
+      return NextResponse.json({ available: true, suggestions: [] });
+    }
     return NextResponse.json({ error: 'Slug check failed' }, { status: 502 });
   }
 }

@@ -23,8 +23,8 @@ type SchoolBasicsFormProps = {
 
 export function SchoolBasicsForm({ onSubmit, formId }: SchoolBasicsFormProps) {
   const t = useTranslations('School');
-  const { basicsDraft, setBasicsDraft, descriptionTab, setDescriptionTab } =
-    useCreateWizardStore();
+  const { basicsDraft, setBasicsDraft } = useCreateWizardStore();
+  const [descriptionTab, setDescriptionTab] = useState<'write' | 'preview'>('write');
 
   const [nameAvailable, setNameAvailable] = useState<boolean | null>(null);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);

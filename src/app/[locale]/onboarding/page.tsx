@@ -20,7 +20,8 @@ export default async function OnboardingPage() {
   }
   if (profile?.hasTutorProfile) {
     const tutorProfile = await getTutorProfile();
-    if (tutorProfile) redirect(`/${locale}/school/dashboard`);
+    // /school redirects to the first school's dashboard (multi-school routing)
+    if (tutorProfile) redirect(`/${locale}/school`);
   }
 
   const role: OnboardingRole = user.roles.includes('tutor') ? 'tutor' : 'student';

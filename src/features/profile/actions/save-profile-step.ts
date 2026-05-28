@@ -21,6 +21,9 @@ export async function saveProfileStepAction(input: OnboardingProfileValues) {
       body: {
         displayName: parsed.data.displayName,
         timezone: parsed.data.timezone,
+        // Backend returns the field as "locale" in GET responses, so we send both.
+        // TODO: reconcile once backend confirms the canonical PATCH field name.
+        locale: parsed.data.uiLocale,
         uiLocale: parsed.data.uiLocale,
         bio: parsed.data.bio || null,
       },
