@@ -22,21 +22,21 @@ type UserMenuProps = {
 };
 
 function getRoleLabel(t: ReturnType<typeof useTranslations<'UserMenu'>>, roles: string[]): string {
-  if (roles.includes('school')) return t('role_school');
+  if (roles.includes('school_admin')) return t('role_school');
   if (roles.includes('tutor')) return t('role_tutor');
   if (roles.includes('student')) return t('role_student');
   return '';
 }
 
 function getRoleInitial(roles: string[]): string {
-  if (roles.includes('school')) return 'SC';
+  if (roles.includes('school_admin')) return 'SC';
   if (roles.includes('tutor')) return 'TU';
   if (roles.includes('student')) return 'ST';
   return '?';
 }
 
 function getSettingsHref(roles: string[]): '/school/settings/profile' | '/student/settings/profile' {
-  return roles.includes('school') || roles.includes('tutor')
+  return roles.includes('school_admin') || roles.includes('tutor')
     ? '/school/settings/profile'
     : '/student/settings/profile';
 }
@@ -58,7 +58,7 @@ export function UserMenu({ user }: UserMenuProps) {
           aria-label="User menu"
           className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Avatar name={displayName || initial} src={avatarSrc} alt={displayName} size="sm" />
+          <Avatar name={displayName || initial} src={avatarSrc} alt={displayName} size="md" />
         </button>
       </DropdownMenuTrigger>
 

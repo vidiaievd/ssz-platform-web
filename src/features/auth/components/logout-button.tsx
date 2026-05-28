@@ -8,20 +8,21 @@ import { useRouter } from '@/lib/i18n/navigation';
 import { Button, type ButtonProps } from '@/components/ui/button';
 
 import { logoutAction } from '../actions/logout';
-import { authKeys } from '../api/keys';
 
-type LogoutButtonProps = Omit<ButtonProps, 'onClick' | 'loading'>;
+type LogoutButtonProps = Omit<ButtonProps, 'loading'>;
 
-export function LogoutButton({ children, ...props }: LogoutButtonProps) {
+export function LogoutButton({ children, onClick, ...props }: LogoutButtonProps) {
   const [isPending, startTransition] = useTransition();
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  function handleLogout() {
+  function handleLogout(e: React.MouseEvent<HTMLButtonElement>) {
+    onClick?.(e);
     startTransition(async () => {
       await logoutAction();
-      queryClient.removeQueries({ queryKey: authKeys.me() });
+      queryClient.clear();
       router.push('/');
+      router.refresh();
     });
   }
 
