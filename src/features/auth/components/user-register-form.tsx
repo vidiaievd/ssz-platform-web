@@ -34,7 +34,7 @@ type Props = {
   role: 'school_admin' | 'tutor';
 };
 
-export function SchoolRegisterForm({ role }: Props) {
+export function UserRegisterForm({ role }: Props) {
   const t = useTranslations("Auth.Register");
   const tErrors = useTranslations("Errors");
   const [isPending, startTransition] = useTransition();
