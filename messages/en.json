@@ -1076,5 +1076,25 @@
         }
       }
     }
+  },
+  "Tutor": {
+    "dashboard": {
+      "greeting": "Welcome back! 👋",
+      "greetingNamed": "Welcome back, {name}! 👋",
+      "subtitle": "Here's an overview of your tutoring activity.",
+      "stats": {
+        "students": "Active students",
+        "lessons": "Lessons this month",
+        "rating": "Average rating"
+      },
+      "upcoming": {
+        "title": "Upcoming lessons",
+        "empty": "No upcoming lessons scheduled."
+      },
+      "students": {
+        "title": "Recent students",
+        "empty": "No students yet. Share your profile to get started."
+      }
+    }
   }
 }
