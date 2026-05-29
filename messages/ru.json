@@ -209,7 +209,8 @@
       "hasAccount": "Уже есть аккаунт?",
       "signIn": "Войти",
       "successTitle": "Проверьте электронную почту",
-      "successDescription": "Мы отправили ссылку для подтверждения на {email}."
+      "successDescription": "Мы отправили ссылку для подтверждения на {email}.",
+      "emailTaken": "Аккаунт с таким email уже существует."
     },
     "ForgotPassword": {
       "title": "Восстановление пароля",

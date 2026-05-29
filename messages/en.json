@@ -209,7 +209,8 @@
       "hasAccount": "Already have an account?",
       "signIn": "Sign in",
       "successTitle": "Check your email",
-      "successDescription": "We sent a verification link to {email}."
+      "successDescription": "We sent a verification link to {email}.",
+      "emailTaken": "An account with this email already exists."
     },
     "ForgotPassword": {
       "title": "Reset password",

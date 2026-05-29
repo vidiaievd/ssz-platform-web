@@ -5,6 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -54,9 +55,11 @@ export function SchoolRegisterForm({ role }: Props) {
       const result = await registerAction({ ...data, role });
       if (!result.ok) {
         if (result.error.code === "conflict") {
-          setError("email", { message: tErrors("conflict") });
+          setError("email", { message: t("emailTaken") });
+          toast.error(t("emailTaken"));
         } else {
           setServerError(tErrors(result.error.code));
+          toast.error(tErrors(result.error.code));
         }
         return;
       }

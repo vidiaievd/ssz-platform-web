@@ -209,7 +209,8 @@
       "hasAccount": "Har du allerede en konto?",
       "signIn": "Logg inn",
       "successTitle": "Sjekk e-posten din",
-      "successDescription": "Vi sendte en bekreftelseslenke til {email}."
+      "successDescription": "Vi sendte en bekreftelseslenke til {email}.",
+      "emailTaken": "Det finnes allerede en konto med denne e-postadressen."
     },
     "ForgotPassword": {
       "title": "Tilbakestill passord",
