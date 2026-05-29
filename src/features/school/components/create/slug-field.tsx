@@ -6,18 +6,10 @@ import { Check, Loader2, RefreshCw, X } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { generateSlug } from '@/lib/utils/slug';
 import { useSlugAvailability } from '../../api/use-schools';
 
-/** Converts an arbitrary school name into a valid slug candidate. */
-export function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '') // strip diacritics
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 60);
-}
+export { generateSlug };
 
 type SlugFieldProps = {
   value: string;

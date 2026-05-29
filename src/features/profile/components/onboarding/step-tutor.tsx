@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { generateSlug } from '@/lib/utils/slug';
 import { saveTutorStepAction, skipTutorStepAction } from '../../actions/save-prefs-step';
 import { useOnboardingStore } from '../../stores/onboarding-store';
 import { PROFICIENCY_LEVELS } from '../../schemas/onboarding';
@@ -47,7 +48,7 @@ export function StepTutor({ headingRef }: StepTutorProps) {
   const [isSkipping, startSkipTransition] = useTransition();
   const liveRegionId = useId();
 
-  const { tutorDraft, setTutorDraft } = useOnboardingStore();
+  const { tutorDraft, setTutorDraft, profileDraft } = useOnboardingStore();
 
   const [rows, setRows] = useState<TeachingLanguageRow[]>(
     tutorDraft.teachingLanguages.length > 0
@@ -138,7 +139,7 @@ export function StepTutor({ headingRef }: StepTutorProps) {
         toast.error(t('error.saveFailed'));
         return;
       }
-      router.replace(`/${locale}/school`);
+      router.replace(`/${locale}/tutor/${generateSlug(profileDraft.displayName)}/dashboard`);
     });
   }
 
@@ -149,7 +150,7 @@ export function StepTutor({ headingRef }: StepTutorProps) {
         toast.error(t('error.saveFailed'));
         return;
       }
-      router.replace(`/${locale}/school`);
+      router.replace(`/${locale}/tutor/${generateSlug(profileDraft.displayName)}/dashboard`);
     });
   }
 
@@ -174,7 +175,7 @@ export function StepTutor({ headingRef }: StepTutorProps) {
       <div className="space-y-3">
         <p className="text-sm font-medium text-(--ssz-text-primary)">{t('tutor.languages.heading')}</p>
         {rowsError && (
-          <p role="alert" className="text-sm text-[var(--ssz-color-error-600)]">{rowsError}</p>
+          <p role="alert" className="text-sm text-(--ssz-color-error-600)">{rowsError}</p>
         )}
         <div className="space-y-2">
           {rows.map((row, idx) => (
@@ -193,7 +194,7 @@ export function StepTutor({ headingRef }: StepTutorProps) {
                 onValueChange={(v) => updateProficiency(idx, v as ProficiencyLevel)}
                 disabled={isLoading || !row.code}
               >
-                <SelectTrigger className="w-[130px]" aria-label={t('tutor.proficiency.label')}>
+                <SelectTrigger className="w-32.5" aria-label={t('tutor.proficiency.label')}>
                   <SelectValue placeholder={t('tutor.proficiency.placeholder')} />
                 </SelectTrigger>
                 <SelectContent>

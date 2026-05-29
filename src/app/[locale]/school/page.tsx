@@ -16,9 +16,15 @@ export default async function SchoolIndexPage() {
     redirect(`/${locale}/school/${first.slug ?? first.id}/dashboard`);
   }
 
-  if (user?.roles.includes('student')) {
-    redirect(`/${locale}/student/dashboard`);
+  if (user?.roles.includes('school_admin')) {
+    redirect(`/${locale}/onboarding/school`);
   }
 
-  redirect(`/${locale}/onboarding/school`);
+  // Private tutors get their own workspace, not the school workspace.
+  // Checked before student because tutors always carry the student role too.
+  if (user?.roles.includes('tutor')) {
+    redirect(`/${locale}/tutor`);
+  }
+
+  redirect(`/${locale}/student/dashboard`);
 }
