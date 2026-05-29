@@ -14,7 +14,7 @@ export async function createStudentProfileAction(
   return tryAction(async () => {
     const parsed = createStudentProfileSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     return serverFetch<StudentProfile>({

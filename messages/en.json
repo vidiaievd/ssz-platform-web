@@ -209,7 +209,8 @@
       "hasAccount": "Already have an account?",
       "signIn": "Sign in",
       "successTitle": "Check your email",
-      "successDescription": "We sent a verification link to {email}."
+      "successDescription": "We sent a verification link to {email}.",
+      "emailTaken": "An account with this email already exists."
     },
     "ForgotPassword": {
       "title": "Reset password",
@@ -1073,6 +1074,26 @@
             "2": "Students enrol and learn at their own pace."
           }
         }
+      }
+    }
+  },
+  "Tutor": {
+    "dashboard": {
+      "greeting": "Welcome back! 👋",
+      "greetingNamed": "Welcome back, {name}! 👋",
+      "subtitle": "Here's an overview of your tutoring activity.",
+      "stats": {
+        "students": "Active students",
+        "lessons": "Lessons this month",
+        "rating": "Average rating"
+      },
+      "upcoming": {
+        "title": "Upcoming lessons",
+        "empty": "No upcoming lessons scheduled."
+      },
+      "students": {
+        "title": "Recent students",
+        "empty": "No students yet. Share your profile to get started."
       }
     }
   }

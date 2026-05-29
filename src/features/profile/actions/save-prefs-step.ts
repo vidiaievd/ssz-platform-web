@@ -11,7 +11,7 @@ export async function savePrefsStepAction(input: OnboardingPrefsValues) {
   return tryAction(async () => {
     const parsed = onboardingPrefsSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     await serverFetch({
@@ -43,13 +43,13 @@ export async function saveTutorStepAction(input: OnboardingTutorValues) {
   return tryAction(async () => {
     const parsed = onboardingTutorSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     await serverFetch({
       service: 'profile',
       path: '/profiles/me/tutor',
-      method: 'POST',
+      method: 'PATCH',
       body: {
         teachingLanguages: parsed.data.teachingLanguages,
         hourlyRate: parsed.data.hourlyRate ?? null,
@@ -64,7 +64,7 @@ export async function skipTutorStepAction() {
     await serverFetch({
       service: 'profile',
       path: '/profiles/me/tutor',
-      method: 'POST',
+      method: 'PATCH',
       body: { teachingLanguages: [], hourlyRate: null, specializations: [] },
     });
   });

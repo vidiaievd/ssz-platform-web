@@ -13,7 +13,7 @@ export async function updateAvatarAction(avatarUrl: string) {
   return tryAction(async () => {
     const parsed = schema.safeParse({ avatarUrl });
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid avatar URL', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid avatar URL', parsed.error.flatten((i) => i.message));
     }
 
     return await serverFetch<Profile>({

@@ -16,7 +16,7 @@ export async function loginAction(input: LoginInput) {
   return tryAction(async (): Promise<LoginActionResult> => {
     const parsed = loginSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     let tokens: AuthTokensResponse;
@@ -46,7 +46,7 @@ export async function mfaChallengeAction(input: MfaChallengeInput) {
   return tryAction(async () => {
     const parsed = mfaChallengeSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     const tokens = await serverFetch<AuthTokensResponse>({

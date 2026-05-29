@@ -10,7 +10,7 @@ export async function updateProfileAction(input: UpdateProfileInput) {
   return tryAction(async () => {
     const parsed = updateProfileSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     return await serverFetch<Profile>({

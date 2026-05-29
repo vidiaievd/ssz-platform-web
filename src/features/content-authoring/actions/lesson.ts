@@ -29,7 +29,7 @@ export async function createLessonAction(
   return tryAction(async () => {
     const parsed = lessonFormSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
     const { title, body } = parsed.data;
 
@@ -66,7 +66,7 @@ export async function updateLessonAction(
   return tryAction(async () => {
     const parsed = lessonFormSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
     const { title, body } = parsed.data;
 

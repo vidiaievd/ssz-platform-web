@@ -19,6 +19,23 @@ import { MobileSidebar } from "./sidebar/mobile-sidebar";
 import { Topbar } from "./topbar/topbar";
 import type { NavSection } from "./sidebar/types";
 
+function buildTutorNav(tutorSlug: string): NavSection[] {
+  return [
+    {
+      items: [
+        { href: `/tutor/${tutorSlug}/dashboard`, icon: LayoutDashboard, labelKey: "dashboard" },
+        { href: `/tutor/${tutorSlug}/students`, icon: Users, labelKey: "students" },
+        { href: `/tutor/${tutorSlug}/content`, icon: BookOpen, labelKey: "content" },
+      ],
+    },
+    {
+      items: [
+        { href: `/tutor/${tutorSlug}/settings`, icon: Settings, labelKey: "settings" },
+      ],
+    },
+  ];
+}
+
 function buildSchoolNav(schoolId: string): NavSection[] {
   return [
     {
@@ -73,7 +90,7 @@ const STUDENT_NAV: NavSection[] = [
   },
 ];
 
-export type AppShellVariant = "school" | "student";
+export type AppShellVariant = "school" | "student" | "tutor";
 
 type AppShellProps = {
   variant: AppShellVariant;
@@ -83,12 +100,14 @@ type AppShellProps = {
 
 export function AppShell({ variant, user, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const params = useParams<{ schoolSlug?: string }>();
+  const params = useParams<{ schoolSlug?: string; tutorSlug?: string }>();
 
   const sections: NavSection[] =
     variant === "school"
       ? buildSchoolNav(params.schoolSlug ?? "")
-      : STUDENT_NAV;
+      : variant === "tutor"
+        ? buildTutorNav(params.tutorSlug ?? "")
+        : STUDENT_NAV;
 
   return (
     <div className="flex h-screen overflow-hidden bg-(--ssz-bg-base)">

@@ -209,7 +209,8 @@
       "hasAccount": "Har du allerede en konto?",
       "signIn": "Logg inn",
       "successTitle": "Sjekk e-posten din",
-      "successDescription": "Vi sendte en bekreftelseslenke til {email}."
+      "successDescription": "Vi sendte en bekreftelseslenke til {email}.",
+      "emailTaken": "Det finnes allerede en konto med denne e-postadressen."
     },
     "ForgotPassword": {
       "title": "Tilbakestill passord",
@@ -1068,6 +1069,26 @@
             "2": "Elever melder seg på og lærer i eget tempo."
           }
         }
+      }
+    }
+  },
+  "Tutor": {
+    "dashboard": {
+      "greeting": "Velkommen tilbake! 👋",
+      "greetingNamed": "Velkommen tilbake, {name}! 👋",
+      "subtitle": "Her er en oversikt over din undervisningsaktivitet.",
+      "stats": {
+        "students": "Aktive elever",
+        "lessons": "Timer denne måneden",
+        "rating": "Gjennomsnittlig vurdering"
+      },
+      "upcoming": {
+        "title": "Kommende timer",
+        "empty": "Ingen kommende timer planlagt."
+      },
+      "students": {
+        "title": "Nylige elever",
+        "empty": "Ingen elever ennå. Del profilen din for å komme i gang."
       }
     }
   }

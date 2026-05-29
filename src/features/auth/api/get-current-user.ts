@@ -1,11 +1,13 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import { readAccessToken } from '@/lib/auth/cookies';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import type { UserRolesResponse } from '@/lib/api/generated/schemas';
 import type { CurrentUser } from '../types/current-user';
 
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+export const getCurrentUser = cache(async function (): Promise<CurrentUser | null> {
   const token = await readAccessToken();
   if (!token) return null;
 
@@ -18,4 +20,4 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   } catch {
     return null;
   }
-}
+});

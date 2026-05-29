@@ -43,7 +43,7 @@ export async function createExerciseAction(
   return tryAction(async () => {
     const parsed = exerciseFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     const exercise = await serverFetch<ExerciseDisplay>({
@@ -73,7 +73,7 @@ export async function updateExerciseAction(
   return tryAction(async () => {
     const parsed = exerciseFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     await serverFetch({

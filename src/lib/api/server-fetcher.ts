@@ -150,7 +150,12 @@ async function doRequest<TData, TBody>(
       return undefined as TData;
     }
 
-    const data = (await response.json()) as TData;
+    const text = await response.text();
+    if (!text.trim()) {
+      logUpstream('←', method, url, { status: response.status, durationMs });
+      return undefined as TData;
+    }
+    const data = JSON.parse(text) as TData;
     logUpstream('←', method, url, { status: response.status, durationMs, body: data });
     return data;
   } catch (err) {

@@ -14,7 +14,7 @@ export async function requestEnrollmentAction(
   return tryAction(async () => {
     const parsed = enrollmentRequestSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     const data = await serverFetch<EnrollmentRequest>({

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { LOCALES } from '@/lib/i18n/config';
 import { CEFR_LEVELS } from '../stores/onboarding-store';
 
-export const PROFICIENCY_LEVELS = ['NATIVE', 'C2', 'C1', 'B2', 'B1'] as const;
+export const PROFICIENCY_LEVELS = ['NATIVE', 'FLUENT', 'ADVANCED', 'INTERMEDIATE'] as const;
 export type ProficiencyLevel = (typeof PROFICIENCY_LEVELS)[number];
 
 export const onboardingProfileSchema = z.object({

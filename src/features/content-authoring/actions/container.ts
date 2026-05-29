@@ -13,7 +13,7 @@ export async function createContainerAction(input: ContainerFormValues) {
   return tryAction(async () => {
     const parsed = containerFormSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     const data = parsed.data;
@@ -49,7 +49,7 @@ export async function updateContainerAction(id: string, input: ContainerFormValu
   return tryAction(async () => {
     const parsed = containerFormSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     const data = parsed.data;

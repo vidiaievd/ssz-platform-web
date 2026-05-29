@@ -69,37 +69,21 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
         </div>
       </header>
 
-      {/* Desktop: centered card */}
-      <div className="hidden md:block max-w-2xl mx-auto my-12">
-        <div className="rounded-[var(--ssz-radius-xl)] border bg-(--ssz-bg-surface) shadow-[var(--ssz-shadow-md)]">
-          <div className="px-8 pt-8 pb-2">
-            <div className="flex items-center justify-between mb-6">
+      {/* Single render — responsive layout via classes */}
+      <div className="flex flex-col flex-1 md:block md:max-w-2xl md:mx-auto md:my-12">
+        <div className="flex flex-col flex-1 md:flex-none md:rounded-(--ssz-radius-xl) md:border md:bg-surface md:shadow-(--ssz-shadow-md)">
+          <div className="px-4 pt-4 pb-2 md:px-8 md:pt-8 md:pb-0">
+            <div className="flex items-center justify-between md:mb-6">
               <StepIndicator currentStep={currentStep} progressLabel={progressLabel} />
               <span className="text-xs text-(--ssz-text-muted)">{progressLabel}</span>
             </div>
           </div>
-          <div id="onboarding-form" className="px-8 pb-10">
+          <div id="onboarding-form" className="flex-1 px-4 py-6 md:px-8 md:pb-10">
             {currentStep === 'profile' && (
               <StepProfile initialValues={initialProfileValues} headingRef={headingRef} />
             )}
             {currentStep === 'prefs' && prefsStep}
           </div>
-        </div>
-      </div>
-
-      {/* Mobile: full-bleed */}
-      <div className="flex flex-col min-h-dvh md:hidden">
-        <div className="px-4 pt-4 pb-2">
-          <div className="flex items-center justify-between">
-            <StepIndicator currentStep={currentStep} progressLabel={progressLabel} />
-            <span className="text-xs text-(--ssz-text-muted)">{progressLabel}</span>
-          </div>
-        </div>
-        <div id="onboarding-form" className="flex-1 overflow-y-auto px-4 py-6">
-          {currentStep === 'profile' && (
-            <StepProfile initialValues={initialProfileValues} headingRef={headingRef} />
-          )}
-          {currentStep === 'prefs' && prefsStep}
         </div>
       </div>
     </>
