@@ -22,7 +22,7 @@ export async function createGrammarRuleAction(
   return tryAction(async () => {
     const parsed = grammarRuleFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     const rule = await serverFetch<GrammarRule>({
@@ -45,7 +45,7 @@ export async function updateGrammarRuleAction(
   return tryAction(async () => {
     const parsed = grammarRuleFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     await serverFetch({
@@ -79,7 +79,7 @@ export async function saveGrammarExplanationAction(
   return tryAction(async () => {
     const parsed = grammarExplanationFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
     const { languageCode, title, body, examples } = parsed.data;
     const explanationBody = {

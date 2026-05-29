@@ -108,7 +108,9 @@ export function StepTutor({ headingRef }: StepTutorProps) {
   function validate(): boolean {
     const incomplete = rows.some((r) => !r.code || !r.proficiency);
     if (incomplete || rows.filter((r) => r.code).length === 0) {
-      setRowsError(t('tutor.languages.error.required'));
+      const msg = t('tutor.languages.error.required');
+      setRowsError(msg);
+      toast.error(msg);
       return false;
     }
     setRowsError('');

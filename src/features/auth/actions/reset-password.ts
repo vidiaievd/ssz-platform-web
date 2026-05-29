@@ -10,7 +10,7 @@ export async function resetPasswordAction(input: ResetPasswordInput) {
   return tryAction(async () => {
     const parsed = resetPasswordSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     await serverFetch({

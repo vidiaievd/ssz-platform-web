@@ -11,7 +11,7 @@ export async function registerAction(input: RegisterInput) {
   return tryAction(async () => {
     const parsed = registerSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     const { email, password, role } = parsed.data;

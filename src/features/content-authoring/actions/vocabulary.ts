@@ -22,7 +22,7 @@ export async function createVocabularyListAction(
   return tryAction(async () => {
     const parsed = vocabularyListFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
     const { title, description } = parsed.data;
 
@@ -53,7 +53,7 @@ export async function saveVocabularyItemAction(
   return tryAction(async () => {
     const parsed = vocabularyItemFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
     const { lemma, ipa, partOfSpeech, translations, examples } = parsed.data;
 

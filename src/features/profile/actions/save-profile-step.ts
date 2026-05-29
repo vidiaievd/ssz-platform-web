@@ -11,7 +11,7 @@ export async function saveProfileStepAction(input: OnboardingProfileValues) {
   return tryAction(async () => {
     const parsed = onboardingProfileSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten());
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
     await serverFetch({
