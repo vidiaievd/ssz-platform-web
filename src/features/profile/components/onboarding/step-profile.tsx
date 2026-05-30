@@ -4,7 +4,6 @@ import { useTransition } from 'react';
 import { useForm, useController, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -87,11 +86,11 @@ const TIMEZONE_GROUPS = [
 type StepProfileProps = {
   initialValues: OnboardingProfileValues;
   headingRef?: React.RefObject<HTMLHeadingElement | null>;
+  onNext: () => void;
 };
 
-export function StepProfile({ initialValues, headingRef }: StepProfileProps) {
+export function StepProfile({ initialValues, headingRef, onNext }: StepProfileProps) {
   const t = useTranslations('Onboarding');
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const setProfileDraft = useOnboardingStore((s) => s.setProfileDraft);
@@ -129,12 +128,8 @@ export function StepProfile({ initialValues, headingRef }: StepProfileProps) {
         toast.error(t('error.saveFailed'));
         return;
       }
-      router.push('?step=prefs');
+      onNext();
     });
-  }
-
-  function handleBack() {
-    router.push('?step=role');
   }
 
   return (
@@ -251,10 +246,7 @@ export function StepProfile({ initialValues, headingRef }: StepProfileProps) {
         {errors.bio && <p className="text-xs text-error">{errors.bio.message}</p>}
       </div>
 
-      <div className="flex justify-between pt-2">
-        <Button type="button" variant="ghost" onClick={handleBack} disabled={isPending}>
-          {t('back')}
-        </Button>
+      <div className="flex justify-end pt-2">
         <Button type="submit" loading={isPending}>
           {t('next')}
         </Button>

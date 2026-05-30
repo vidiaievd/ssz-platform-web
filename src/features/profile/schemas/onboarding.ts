@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { LOCALES } from '@/lib/i18n/config';
-import { CEFR_LEVELS } from '../stores/onboarding-store';
+import { CEFR_LEVELS } from '../lib/cefr-levels';
 
 export const PROFICIENCY_LEVELS = ['NATIVE', 'FLUENT', 'ADVANCED', 'INTERMEDIATE'] as const;
 export type ProficiencyLevel = (typeof PROFICIENCY_LEVELS)[number];
@@ -27,7 +27,11 @@ export const onboardingPrefsSchema = z.object({
     .array(
       z.object({
         code: z.string().min(2),
-        level: z.enum(CEFR_LEVELS).optional(),
+        level: z.preprocess(
+          // Coerce any non-CEFR value (null, "", stale persisted strings) to undefined
+          (v) => ((CEFR_LEVELS as readonly string[]).includes(v as string) ? v : undefined),
+          z.enum(CEFR_LEVELS).optional(),
+        ),
       }),
     )
     .max(10)
