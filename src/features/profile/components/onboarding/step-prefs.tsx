@@ -3,8 +3,6 @@
 import { useState, useTransition, useId } from 'react';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import {
@@ -28,12 +26,12 @@ import { TargetLanguageRow } from './target-language-row';
 
 type StepPrefsProps = {
   headingRef?: React.RefObject<HTMLHeadingElement | null>;
+  onBack: () => void;
+  onDone: () => void;
 };
 
-export function StepPrefs({ headingRef }: StepPrefsProps) {
+export function StepPrefs({ headingRef, onBack, onDone }: StepPrefsProps) {
   const t = useTranslations('Onboarding');
-  const locale = useLocale();
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isSkipping, startSkipTransition] = useTransition();
   const liveRegionId = useId();
@@ -114,7 +112,7 @@ export function StepPrefs({ headingRef }: StepPrefsProps) {
         toast.error(t('error.saveFailed'));
         return;
       }
-      router.replace(`/${locale}/student/dashboard`);
+      onDone();
     });
   }
 
@@ -125,12 +123,8 @@ export function StepPrefs({ headingRef }: StepPrefsProps) {
         toast.error(t('error.saveFailed'));
         return;
       }
-      router.replace(`/${locale}/student/dashboard`);
+      onDone();
     });
-  }
-
-  function handleBack() {
-    router.push('?step=profile');
   }
 
   const isLoading = isPending || isSkipping;
@@ -242,7 +236,7 @@ export function StepPrefs({ headingRef }: StepPrefsProps) {
             </AlertDialogContent>
           </AlertDialog>
 
-          <Button type="button" variant="ghost" onClick={handleBack} disabled={isLoading}>
+          <Button type="button" variant="ghost" onClick={onBack} disabled={isLoading}>
             {t('back')}
           </Button>
         </div>

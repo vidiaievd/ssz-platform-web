@@ -10,8 +10,7 @@ import { verifyEmailConfirmAction, resendVerificationAction } from '../actions/v
 
 function resolvePostVerifyPath(roles: string[]): string {
   if (roles.includes('school_admin')) return '/onboarding/school';
-  if (roles.includes('tutor')) return '/onboarding?step=profile';
-  return '/onboarding?step=profile';
+  return '/onboarding';
 }
 
 type VerifyEmailStatusProps = {

@@ -3,8 +3,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type CEFRLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
-export const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
+import type { CEFRLevel } from '../lib/cefr-levels';
+
+export type { CEFRLevel } from '../lib/cefr-levels';
+export { CEFR_LEVELS } from '../lib/cefr-levels';
 export type OnboardingRole = 'student' | 'tutor';
 export type TargetLanguage = { code: string; level?: CEFRLevel };
 

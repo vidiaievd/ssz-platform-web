@@ -9,21 +9,18 @@ import { OnboardingShell } from '@/features/profile/components/onboarding/shell'
 import type { OnboardingRole } from '@/features/profile/stores/onboarding-store';
 
 export default async function OnboardingPage() {
-  const user = await requireUser();
-  const locale = await getLocale();
-
-  const profile = await getMyProfile();
+  const [user, locale] = await Promise.all([requireUser(), getLocale()]);
   const role: OnboardingRole = user.roles.includes('tutor') ? 'tutor' : 'student';
 
-  // Guard: redirect users who have already completed onboarding.
-  // We check only the sub-profile relevant to the user's role — hasStudentProfile /
-  // hasTutorProfile flags reflect the assigned role, not whether a sub-profile exists.
-  if (role === 'tutor') {
-    const tutorProfile = await getTutorProfile();
-    if (tutorProfile) redirect(`/${locale}/school`);
-  } else {
-    const studentProfile = await getStudentProfile();
-    if (studentProfile) redirect(`/${locale}/student/dashboard`);
+  // Step navigation is client-side (no URL changes), so the server component renders once.
+  // Fetch base profile (for form pre-fill) and sub-profile (guard) in parallel.
+  const [profile, existingSubProfile] = await Promise.all([
+    getMyProfile(),
+    role === 'student' ? getStudentProfile() : getTutorProfile(),
+  ]);
+
+  if (existingSubProfile) {
+    redirect(role === 'tutor' ? `/${locale}/school` : `/${locale}/student/dashboard`);
   }
 
   const detectedTimezone =

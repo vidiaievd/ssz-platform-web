@@ -1,14 +1,16 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRef, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { LogOut } from 'lucide-react';
 
+import { useRouter } from '@/lib/i18n/navigation';
+import { generateSlug } from '@/lib/utils/slug';
 import { LogoutButton } from '@/features/auth/components/logout-button';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import type { OnboardingRole } from '../../stores/onboarding-store';
+import { useOnboardingStore } from '../../stores/onboarding-store';
 import type { OnboardingProfileValues } from '../../schemas/onboarding';
 import type { OnboardingStep } from './step-indicator';
 import { StepIndicator } from './step-indicator';
@@ -18,11 +20,6 @@ import { StepTutor } from './step-tutor';
 
 const STEP_ORDER: OnboardingStep[] = ['profile', 'prefs'];
 
-function resolveStep(raw: string | null): OnboardingStep {
-  if (raw === 'prefs') return 'prefs';
-  return 'profile';
-}
-
 type OnboardingShellProps = {
   role: OnboardingRole;
   initialProfileValues: OnboardingProfileValues;
@@ -31,10 +28,11 @@ type OnboardingShellProps = {
 export function OnboardingShell({ role, initialProfileValues }: OnboardingShellProps) {
   const t = useTranslations('Onboarding');
   const tUser = useTranslations('UserMenu');
-  const searchParams = useSearchParams();
-  const currentStep = resolveStep(searchParams.get('step'));
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState<OnboardingStep>('profile');
   const currentIdx = STEP_ORDER.indexOf(currentStep);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const profileDraft = useOnboardingStore((s) => s.profileDraft);
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -42,9 +40,28 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
 
   const progressLabel = t('progress.label', { current: currentIdx + 1, total: STEP_ORDER.length });
 
-  const prefsStep = role === 'tutor'
-    ? <StepTutor headingRef={headingRef} />
-    : <StepPrefs headingRef={headingRef} />;
+  function goToPrefs() {
+    setCurrentStep('prefs');
+  }
+
+  function goToProfile() {
+    setCurrentStep('profile');
+  }
+
+  function handleDoneStudent() {
+    router.replace('/student/dashboard');
+  }
+
+  function handleDoneTutor() {
+    router.replace(`/tutor/${generateSlug(profileDraft.displayName)}/dashboard`);
+  }
+
+  const prefsStep =
+    role === 'tutor' ? (
+      <StepTutor headingRef={headingRef} onBack={goToProfile} onDone={handleDoneTutor} />
+    ) : (
+      <StepPrefs headingRef={headingRef} onBack={goToProfile} onDone={handleDoneStudent} />
+    );
 
   return (
     <>
@@ -80,7 +97,7 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
           </div>
           <div id="onboarding-form" className="flex-1 px-4 py-6 md:px-8 md:pb-10">
             {currentStep === 'profile' && (
-              <StepProfile initialValues={initialProfileValues} headingRef={headingRef} />
+              <StepProfile initialValues={initialProfileValues} headingRef={headingRef} onNext={goToPrefs} />
             )}
             {currentStep === 'prefs' && prefsStep}
           </div>

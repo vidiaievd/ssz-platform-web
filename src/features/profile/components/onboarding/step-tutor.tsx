@@ -3,8 +3,6 @@
 import { useState, useTransition, useId } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import {
@@ -38,12 +36,12 @@ type TeachingLanguageRow = { code: string; proficiency: ProficiencyLevel | '' };
 
 type StepTutorProps = {
   headingRef?: React.RefObject<HTMLHeadingElement | null>;
+  onBack: () => void;
+  onDone: () => void;
 };
 
-export function StepTutor({ headingRef }: StepTutorProps) {
+export function StepTutor({ headingRef, onBack, onDone }: StepTutorProps) {
   const t = useTranslations('Onboarding');
-  const locale = useLocale();
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isSkipping, startSkipTransition] = useTransition();
   const liveRegionId = useId();
@@ -141,7 +139,7 @@ export function StepTutor({ headingRef }: StepTutorProps) {
         toast.error(t('error.saveFailed'));
         return;
       }
-      router.replace(`/${locale}/tutor/${generateSlug(profileDraft.displayName)}/dashboard`);
+      onDone();
     });
   }
 
@@ -152,12 +150,8 @@ export function StepTutor({ headingRef }: StepTutorProps) {
         toast.error(t('error.saveFailed'));
         return;
       }
-      router.replace(`/${locale}/tutor/${generateSlug(profileDraft.displayName)}/dashboard`);
+      onDone();
     });
-  }
-
-  function handleBack() {
-    router.push('?step=profile');
   }
 
   return (
@@ -293,7 +287,7 @@ export function StepTutor({ headingRef }: StepTutorProps) {
             </AlertDialogContent>
           </AlertDialog>
 
-          <Button type="button" variant="ghost" onClick={handleBack} disabled={isLoading}>
+          <Button type="button" variant="ghost" onClick={onBack} disabled={isLoading}>
             {t('back')}
           </Button>
         </div>
