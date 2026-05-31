@@ -13,7 +13,7 @@ export function resolvePostLoginPath(
     return '/school';
   }
   if (auth.roles.includes('tutor')) {
-    return auth.hasTutorProfile ? '/school' : '/onboarding?step=profile';
+    return auth.hasTutorProfile ? '/tutor' : '/onboarding?step=profile';
   }
   if (auth.roles.includes('student')) {
     return auth.hasStudentProfile ? '/student/dashboard' : '/onboarding?step=profile';

@@ -53,7 +53,8 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
   }
 
   function handleDoneTutor() {
-    router.replace(`/tutor/${generateSlug(profileDraft.displayName)}/dashboard`);
+    const slug = generateSlug(profileDraft.displayName);
+    router.replace(slug ? `/tutor/${slug}/dashboard` : '/tutor');
   }
 
   const prefsStep =

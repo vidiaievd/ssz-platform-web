@@ -25,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { generateSlug } from '@/lib/utils/slug';
 import { saveTutorStepAction, skipTutorStepAction } from '../../actions/save-prefs-step';
 import { useOnboardingStore } from '../../stores/onboarding-store';
 import { PROFICIENCY_LEVELS } from '../../schemas/onboarding';
@@ -46,7 +45,7 @@ export function StepTutor({ headingRef, onBack, onDone }: StepTutorProps) {
   const [isSkipping, startSkipTransition] = useTransition();
   const liveRegionId = useId();
 
-  const { tutorDraft, setTutorDraft, profileDraft } = useOnboardingStore();
+  const { tutorDraft, setTutorDraft } = useOnboardingStore();
 
   const [rows, setRows] = useState<TeachingLanguageRow[]>(
     tutorDraft.teachingLanguages.length > 0

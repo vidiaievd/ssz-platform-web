@@ -20,7 +20,7 @@ export default async function OnboardingPage() {
   ]);
 
   if (existingSubProfile) {
-    redirect(role === 'tutor' ? `/${locale}/school` : `/${locale}/student/dashboard`);
+    redirect(role === 'tutor' ? `/${locale}/tutor` : `/${locale}/student/dashboard`);
   }
 
   const detectedTimezone =
