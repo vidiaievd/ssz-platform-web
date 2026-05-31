@@ -7,11 +7,7 @@ import { Link, useRouter } from '@/lib/i18n/navigation';
 import { Button } from '@/components/ui/button';
 
 import { verifyEmailConfirmAction, resendVerificationAction } from '../actions/verify-email';
-
-function resolvePostVerifyPath(roles: string[]): string {
-  if (roles.includes('school_admin')) return '/onboarding/school';
-  return '/onboarding';
-}
+import { resolvePostLoginPath } from '../utils/resolve-post-login-path';
 
 type VerifyEmailStatusProps = {
   token: string;
@@ -37,7 +33,8 @@ export function VerifyEmailStatus({ token }: VerifyEmailStatusProps) {
         return;
       }
       setStatus('success');
-      router.replace(resolvePostVerifyPath(result.value.roles));
+      // New users have no profile yet at verify-time; resolver returns onboarding paths.
+      router.replace(resolvePostLoginPath({ roles: result.value.roles, hasStudentProfile: false, hasTutorProfile: false }));
     });
   }, [token, router]);
 
