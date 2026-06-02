@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 
+import { toast } from "sonner";
+
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -50,7 +52,8 @@ export function StudentRegisterForm() {
       const result = await registerAction({ ...data, role: "student" });
       if (!result.ok) {
         if (result.error.code === "conflict") {
-          setError("email", { message: tErrors("conflict") });
+          setError("email", { message: t("emailTaken") });
+          toast.error(t("emailTaken"));
         } else {
           setServerError(tErrors(result.error.code));
         }
