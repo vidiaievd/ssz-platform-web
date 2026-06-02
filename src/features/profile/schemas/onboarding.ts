@@ -50,7 +50,6 @@ export const onboardingTutorSchema = z.object({
         proficiency: z.enum(PROFICIENCY_LEVELS),
       }),
     )
-    .min(1, 'At least one teaching language is required')
     .max(10),
   hourlyRate: z.number().positive().nullable().optional(),
   specializations: z.array(z.string().min(1)).max(10).optional(),

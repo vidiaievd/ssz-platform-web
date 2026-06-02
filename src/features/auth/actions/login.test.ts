@@ -22,6 +22,12 @@ vi.mock('next/headers', () => ({
 // Imported after vi.mock so shims are in place
 const { loginAction, mfaChallengeAction } = await import('./login');
 
+function fakeJwt(payload: Record<string, unknown>): string {
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  return `${header}.${body}.fakesig`;
+}
+
 const TOKENS = {
   accessToken: 'access-token',
   refreshToken: 'refresh-token',
@@ -121,6 +127,40 @@ describe('loginAction', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.error.code).toBe('validation');
+  });
+
+  it('propagates emailVerified: false from a JWT with email_verified: false', async () => {
+    const unverifiedToken = fakeJwt({ sub: 'user-1', email_verified: false });
+    server.use(
+      http.post('http://auth.test/api/v1/auth/login', () =>
+        HttpResponse.json({ ...TOKENS, accessToken: unverifiedToken }),
+      ),
+      http.get('http://auth.test/api/v1/auth/me', () => HttpResponse.json(ME_RESPONSE)),
+      http.get('http://profile.test/api/v1/profiles/me', () => HttpResponse.json(PROFILE_NO_PROFILE)),
+    );
+
+    const result = await loginAction({ email: 'user@example.com', password: 'ValidPass1!' });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    if (result.value.stage !== 'authenticated') return;
+    expect(result.value.emailVerified).toBe(false);
+  });
+
+  it('returns emailVerified: undefined when the access token is not a valid JWT', async () => {
+    server.use(
+      http.post('http://auth.test/api/v1/auth/login', () => HttpResponse.json(TOKENS)),
+      http.get('http://auth.test/api/v1/auth/me', () => HttpResponse.json(ME_RESPONSE)),
+      http.get('http://profile.test/api/v1/profiles/me', () => HttpResponse.json(PROFILE_NO_PROFILE)),
+    );
+
+    const result = await loginAction({ email: 'user@example.com', password: 'ValidPass1!' });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    if (result.value.stage !== 'authenticated') return;
+    // 'access-token' is not a JWT, so email_verified cannot be decoded
+    expect(result.value.emailVerified).toBeUndefined();
   });
 });
 
