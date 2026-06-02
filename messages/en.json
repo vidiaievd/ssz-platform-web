@@ -257,15 +257,30 @@
     },
     "RegisterStudent": {
       "title": "Create student account",
-      "subtitle": "Start your language learning journey"
+      "subtitle": "Start your language learning journey",
+      "valueProp": {
+        "1": "Learn at your own pace",
+        "2": "Get personalised content recommendations",
+        "3": "Track your progress over time"
+      }
     },
     "RegisterSchool": {
       "title": "Create school account",
-      "subtitle": "Publish courses and manage your students"
+      "subtitle": "Publish courses and manage your students",
+      "valueProp": {
+        "1": "Your own workspace for teaching",
+        "2": "Invite teachers and students",
+        "3": "Create courses and track progress"
+      }
     },
     "RegisterTutor": {
       "title": "Create tutor account",
-      "subtitle": "Teach your students independently"
+      "subtitle": "Teach your students independently",
+      "valueProp": {
+        "1": "Manage your students in one place",
+        "2": "Create and assign custom exercises",
+        "3": "See how your students are progressing"
+      }
     },
     "RegisterOrg": {
       "title": "How do you teach?",

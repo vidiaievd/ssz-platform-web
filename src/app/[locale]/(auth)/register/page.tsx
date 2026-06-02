@@ -100,7 +100,7 @@ export default function RegisterHubPage() {
       <div className="flex flex-col gap-3">
         <Link
           href="/register/student"
-          className="group flex items-start gap-4 rounded-xl border border-border bg-surface p-5 transition-all hover:border-primary hover:shadow-(--ssz-shadow-sm)"
+          className="group flex items-start gap-4 rounded-xl border border-border bg-surface p-5 transition-all hover:border-(--ssz-border-strong) hover:shadow-(--ssz-shadow-sm)"
         >
           <div
             className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-lg"
@@ -114,7 +114,7 @@ export default function RegisterHubPage() {
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-(--ssz-text-primary)">{t('studentTitle')}</p>
             <p className="mt-0.5 text-sm text-(--ssz-text-secondary)">{t('studentDesc')}</p>
-            <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors group-hover:gap-2">
+            <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-(--ssz-text-secondary) transition-colors group-hover:gap-2 group-hover:text-(--ssz-text-primary)">
               {t('studentCta')}
               <ArrowRight className="size-3.5" />
             </span>
