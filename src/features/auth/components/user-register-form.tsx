@@ -31,7 +31,7 @@ const schoolSchema = z
 type SchoolInput = z.infer<typeof schoolSchema>;
 
 type Props = {
-  role: 'school_admin' | 'tutor';
+  role: 'student' | 'tutor' | 'school_admin';
 };
 
 export function UserRegisterForm({ role }: Props) {

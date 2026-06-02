@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Check } from 'lucide-react';
 
-import { StudentRegisterForm } from '@/features/auth/components/student-register-form';
+import { UserRegisterForm } from '@/features/auth/components/user-register-form';
 
 export default async function RegisterStudentPage() {
   const t = await getTranslations('Auth.RegisterStudent');
@@ -22,7 +22,7 @@ export default async function RegisterStudentPage() {
         ))}
       </ul>
 
-      <StudentRegisterForm />
+      <UserRegisterForm role="student" />
     </div>
   );
 }
