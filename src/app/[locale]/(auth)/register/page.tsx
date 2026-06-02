@@ -62,11 +62,11 @@ export default function RegisterHubPage() {
           >
             <div
               className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-lg"
-              style={{ background: 'oklch(0.60 0.12 280 / 0.12)' }}
+              style={{ background: 'oklch(var(--ssz-tutor-ch) / 0.12)' }}
             >
               <UserCheck
                 className="size-5"
-                style={{ color: 'oklch(0.60 0.12 280)' }}
+                style={{ color: 'oklch(var(--ssz-tutor-ch))' }}
               />
             </div>
             <div className="min-w-0 flex-1">

@@ -170,6 +170,7 @@
        usage → oklch(var(--ssz-primary-ch) / 0.5) */
     --ssz-primary-ch:    0.52 0.105 168;
     --ssz-secondary-ch:  0.67 0.11  82;
+    --ssz-tutor-ch:      0.60 0.12  280;
     --ssz-bg-base-ch:    0.975 0.007 80;
     --ssz-text-primary-ch: 0.18 0.010 80;
     --ssz-border-default-ch: 0.90 0.010 80;
@@ -227,6 +228,7 @@
   .dark {
     --ssz-primary-ch:    0.70 0.09 168;
     --ssz-secondary-ch:  0.75 0.105 82;
+    --ssz-tutor-ch:      0.75 0.11  280;
     --ssz-bg-base-ch:    0.17 0.012 240;
     --ssz-text-primary-ch: 0.93 0.008 80;
     --ssz-border-default-ch: 0.30 0.012 240;

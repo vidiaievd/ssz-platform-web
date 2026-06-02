@@ -121,4 +121,53 @@ test.describe('Onboarding flow @stub', () => {
     // No AlertDialog overlay
     await expect(page.getByRole('alertdialog')).not.toBeVisible();
   });
+
+  /**
+   * Full register → verify → onboarding → dashboard (live backend required).
+   * Skipped automatically when E2E_STUB_ONLY=true.
+   */
+  test('register → verify → complete onboarding → student dashboard (live backend)', async ({
+    page,
+  }) => {
+    test.skip(
+      process.env['E2E_STUB_ONLY'] === 'true',
+      'Requires live backend with e2e seed',
+    );
+
+    const email = `onboard-${Date.now()}@e2e.test`;
+    const password = 'OnboardTest1!';
+
+    // 1. Register as student
+    await page.goto('/en/register/student');
+    await page.locator('#email').fill(email);
+    await page.locator('#password').fill(password);
+    await page.locator('#passwordConfirm').fill(password);
+    await page.locator('#acceptedTerms').check();
+    await page.getByRole('button', { name: 'Create account' }).click();
+    await expect(page).toHaveURL(/\/verify-email/, { timeout: 8000 });
+
+    // 2. Verify email via debug endpoint
+    const tokenRes = await page.request.get(
+      `/api/dev/last-verification-token?email=${encodeURIComponent(email)}`,
+    );
+    expect(tokenRes.ok()).toBeTruthy();
+    const { token } = await tokenRes.json() as { token: string };
+    await page.goto(`/en/verify-email?token=${token}`);
+
+    // 3. Should land on onboarding
+    await expect(page).toHaveURL(/\/onboarding/, { timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /Tell us about yourself/i })).toBeVisible();
+
+    // 4. Complete profile step
+    await page.locator('#displayName').fill('E2E Student');
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    // 5. Skip preferences step (optional)
+    await expect(page.getByText('Skip for now')).toBeVisible({ timeout: 8000 });
+    await page.getByText('Skip for now').click();
+    await page.getByRole('button', { name: 'Skip anyway' }).click();
+
+    // 6. Should reach student dashboard
+    await expect(page).toHaveURL(/\/student\/dashboard/, { timeout: 10000 });
+  });
 });
