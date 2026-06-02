@@ -75,26 +75,21 @@ export async function saveTutorStepAction(input: OnboardingTutorValues) {
       throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
-    await serverFetch({
-      service: 'profile',
-      path: '/profiles/me/tutor',
-      method: 'PATCH',
-      body: {
-        teachingLanguages: parsed.data.teachingLanguages,
-        hourlyRate: parsed.data.hourlyRate ?? null,
-        specializations: parsed.data.specializations ?? [],
-      },
-    });
-  });
-}
+    const body = {
+      teachingLanguages: parsed.data.teachingLanguages,
+      hourlyRate: parsed.data.hourlyRate ?? null,
+      specializations: parsed.data.specializations ?? [],
+    };
 
-export async function skipTutorStepAction() {
-  return tryAction(async () => {
-    await serverFetch({
-      service: 'profile',
-      path: '/profiles/me/tutor',
-      method: 'PATCH',
-      body: { teachingLanguages: [], hourlyRate: null, specializations: [] },
-    });
+    try {
+      await serverFetch({ service: 'profile', path: '/profiles/me/tutor', method: 'POST', body });
+    } catch (e) {
+      // 409 means the tutor profile already exists — update it instead.
+      if (e instanceof AppError && e.code === 'conflict') {
+        await serverFetch({ service: 'profile', path: '/profiles/me/tutor', method: 'PATCH', body });
+        return;
+      }
+      throw e;
+    }
   });
 }
