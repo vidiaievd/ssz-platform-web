@@ -38,6 +38,11 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
     headingRef.current?.focus();
   }, [currentStep]);
 
+  const stepNames = [
+    t('shell.step.profile'),
+    role === 'tutor' ? t('shell.step.tutor') : t('shell.step.prefs'),
+  ];
+
   const progressLabel = t('progress.label', { current: currentIdx + 1, total: STEP_ORDER.length });
 
   function goToPrefs() {
@@ -87,14 +92,14 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
         </div>
       </header>
 
-      {/* Single render — responsive layout via classes */}
       <div className="flex flex-col flex-1 md:block md:max-w-2xl md:mx-auto md:my-12">
         <div className="flex flex-col flex-1 md:flex-none md:rounded-(--ssz-radius-xl) md:border md:bg-surface md:shadow-(--ssz-shadow-md)">
           <div className="px-4 pt-4 pb-2 md:px-8 md:pt-8 md:pb-0">
-            <div className="flex items-center justify-between md:mb-6">
-              <StepIndicator currentStep={currentStep} progressLabel={progressLabel} />
-              <span className="text-xs text-(--ssz-text-muted)">{progressLabel}</span>
-            </div>
+            <StepIndicator
+              currentStep={currentStep}
+              progressLabel={progressLabel}
+              stepNames={stepNames}
+            />
           </div>
           <div id="onboarding-form" className="flex-1 px-4 py-6 md:px-8 md:pb-10">
             {currentStep === 'profile' && (

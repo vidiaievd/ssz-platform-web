@@ -802,7 +802,15 @@
     },
     "alreadyDone": "Your profile is already set up",
     "progress": {
-      "label": "Step {current} of {total}"
+      "label": "Step {current} of {total}",
+      "labelNamed": "Step {current} of {total}: {name}"
+    },
+    "shell": {
+      "step": {
+        "profile": "Profile",
+        "prefs": "Preferences",
+        "tutor": "Details"
+      }
     },
     "error": {
       "saveFailed": "Could not save — please try again",
