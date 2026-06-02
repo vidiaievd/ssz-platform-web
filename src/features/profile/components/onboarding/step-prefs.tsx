@@ -1,27 +1,17 @@
 'use client';
 
-import { useState, useTransition, useId } from 'react';
+import { useState, useTransition, useId, useRef, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/input';
 import { savePrefsStepAction, skipPrefsStepAction } from '../../actions/save-prefs-step';
 import { useOnboardingStore } from '../../stores/onboarding-store';
 import type { CEFRLevel, TargetLanguage } from '../../stores/onboarding-store';
 import { LanguageCombobox } from './language-combobox';
+import { LanguagesIllustration } from './languages-illustration';
 import { TargetLanguageRow } from './target-language-row';
 
 type StepPrefsProps = {
@@ -35,6 +25,7 @@ export function StepPrefs({ headingRef, onBack, onDone }: StepPrefsProps) {
   const [isPending, startTransition] = useTransition();
   const [isSkipping, startSkipTransition] = useTransition();
   const liveRegionId = useId();
+  const skipCalloutRef = useRef<HTMLButtonElement>(null);
 
   const { languagesDraft, setLanguagesDraft } = useOnboardingStore();
   const [nativeLanguage, setNativeLanguage] = useState(languagesDraft.nativeLanguage);
@@ -42,6 +33,14 @@ export function StepPrefs({ headingRef, onBack, onDone }: StepPrefsProps) {
   const [newRowIdx, setNewRowIdx] = useState<number | null>(null);
   const [liveMessage, setLiveMessage] = useState('');
   const [nativeError, setNativeError] = useState('');
+  const [skipCalloutVisible, setSkipCalloutVisible] = useState(false);
+
+  // Move focus to "Skip anyway" when callout appears
+  useEffect(() => {
+    if (skipCalloutVisible) {
+      skipCalloutRef.current?.focus();
+    }
+  }, [skipCalloutVisible]);
 
   const targetExcluded = (idx: number) =>
     [nativeLanguage, ...targets.filter((_, i) => i !== idx).map((t) => t.code)].filter(Boolean);
@@ -51,6 +50,7 @@ export function StepPrefs({ headingRef, onBack, onDone }: StepPrefsProps) {
     setTargets(updated);
     setNewRowIdx(updated.length - 1);
     syncDraft(nativeLanguage, updated);
+    setSkipCalloutVisible(false);
   }
 
   function updateTargetCode(idx: number, code: string) {
@@ -116,7 +116,11 @@ export function StepPrefs({ headingRef, onBack, onDone }: StepPrefsProps) {
     });
   }
 
-  function handleSkip() {
+  function handleSkipLinkClick() {
+    setSkipCalloutVisible(true);
+  }
+
+  function handleSkipConfirm() {
     startSkipTransition(async () => {
       const result = await skipPrefsStepAction();
       if (!result.ok) {
@@ -165,10 +169,7 @@ export function StepPrefs({ headingRef, onBack, onDone }: StepPrefsProps) {
 
         {targets.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-8 text-center">
-            <div className="h-24 w-32 rounded-lg bg-subtle flex items-center justify-center text-(--ssz-text-muted) text-xs">
-              {/* [needs asset] */}
-              📚
-            </div>
+            <LanguagesIllustration className="h-24 w-32" />
             <div>
               <p className="font-medium text-(--ssz-text-primary)">{t('targets.empty.title')}</p>
               <p className="mt-1 text-sm text-(--ssz-text-secondary)">{t('targets.empty.body')}</p>
@@ -208,6 +209,51 @@ export function StepPrefs({ headingRef, onBack, onDone }: StepPrefsProps) {
         )}
       </div>
 
+      {/* Skip affordance — inline callout, not AlertDialog */}
+      <div className="space-y-3">
+        {!skipCalloutVisible && (
+          <button
+            type="button"
+            onClick={handleSkipLinkClick}
+            disabled={isLoading}
+            className="text-sm text-(--ssz-text-muted) underline-offset-4 hover:underline disabled:opacity-50"
+          >
+            {t('skip.label')}
+          </button>
+        )}
+
+        {skipCalloutVisible && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="rounded-(--ssz-radius-md) border border-(--ssz-border-default) bg-subtle px-4 py-3 space-y-3"
+          >
+            <p className="text-sm text-(--ssz-text-secondary)">{t('skip.callout.body')}</p>
+            <div className="flex items-center gap-2">
+              <Button
+                ref={skipCalloutRef}
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleSkipConfirm}
+                disabled={isLoading}
+                loading={isSkipping}
+              >
+                {t('skip.callout.confirm')}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={addTarget}
+                disabled={isLoading}
+              >
+                {t('skip.callout.cancel')}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Screen-reader live region for add/remove announcements */}
       <div id={liveRegionId} aria-live="polite" className="sr-only">
         {liveMessage}
@@ -215,31 +261,9 @@ export function StepPrefs({ headingRef, onBack, onDone }: StepPrefsProps) {
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-2">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button type="button" variant="ghost" size="sm" disabled={isLoading}>
-                {t('skip.label')}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('skip.confirm.title')}</AlertDialogTitle>
-                <AlertDialogDescription>{t('skip.warning')}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('back')}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleSkip} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  {t('skip.label')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <Button type="button" variant="ghost" onClick={onBack} disabled={isLoading}>
-            {t('back')}
-          </Button>
-        </div>
+        <Button type="button" variant="ghost" onClick={onBack} disabled={isLoading}>
+          {t('back')}
+        </Button>
 
         <Button
           type="button"

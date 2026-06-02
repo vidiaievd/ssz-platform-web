@@ -5,19 +5,8 @@ import { Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Field, Input } from '@/components/ui/input';
+import { Field, Input, Textarea } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -25,11 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { saveTutorStepAction, skipTutorStepAction } from '../../actions/save-prefs-step';
+import { saveTutorStepAction } from '../../actions/save-prefs-step';
 import { useOnboardingStore } from '../../stores/onboarding-store';
 import { PROFICIENCY_LEVELS } from '../../schemas/onboarding';
 import type { ProficiencyLevel } from '../../schemas/onboarding';
 import { LanguageCombobox } from './language-combobox';
+
+const CURRENCIES = ['EUR', 'USD', 'NOK', 'UAH'] as const;
+type Currency = (typeof CURRENCIES)[number];
 
 type TeachingLanguageRow = { code: string; proficiency: ProficiencyLevel | '' };
 
@@ -42,7 +34,6 @@ type StepTutorProps = {
 export function StepTutor({ headingRef, onBack, onDone }: StepTutorProps) {
   const t = useTranslations('Onboarding');
   const [isPending, startTransition] = useTransition();
-  const [isSkipping, startSkipTransition] = useTransition();
   const liveRegionId = useId();
 
   const { tutorDraft, setTutorDraft } = useOnboardingStore();
@@ -50,18 +41,19 @@ export function StepTutor({ headingRef, onBack, onDone }: StepTutorProps) {
   const [rows, setRows] = useState<TeachingLanguageRow[]>(
     tutorDraft.teachingLanguages.length > 0
       ? tutorDraft.teachingLanguages.map((l) => ({ code: l.code, proficiency: l.proficiency as ProficiencyLevel }))
-      : [{ code: '', proficiency: '' }],
+      : [],
   );
   const [hourlyRate, setHourlyRate] = useState(
     tutorDraft.hourlyRate !== null ? String(tutorDraft.hourlyRate) : '',
   );
-  const [specializations, setSpecializations] = useState(
+  const [currency, setCurrency] = useState<Currency>('EUR');
+  const [experience, setExperience] = useState(
     tutorDraft.specializations.join(', '),
   );
   const [liveMessage, setLiveMessage] = useState('');
-  const [rowsError, setRowsError] = useState('');
 
-  const isLoading = isPending || isSkipping;
+  const isLoading = isPending;
+  const experienceLength = experience.length;
 
   function excludeForRow(idx: number) {
     return rows.filter((_, i) => i !== idx).map((r) => r.code).filter(Boolean);
@@ -88,7 +80,6 @@ export function StepTutor({ headingRef, onBack, onDone }: StepTutorProps) {
   }
 
   function removeRow(idx: number) {
-    if (rows.length <= 1) return;
     const updated = rows.filter((_, i) => i !== idx);
     setRows(updated);
     syncDraft(updated);
@@ -102,49 +93,23 @@ export function StepTutor({ headingRef, onBack, onDone }: StepTutorProps) {
     setTutorDraft({ teachingLanguages: filled });
   }
 
-  function validate(): boolean {
-    const incomplete = rows.some((r) => !r.code || !r.proficiency);
-    if (incomplete || rows.filter((r) => r.code).length === 0) {
-      const msg = t('tutor.languages.error.required');
-      setRowsError(msg);
-      toast.error(msg);
-      return false;
-    }
-    setRowsError('');
-    return true;
-  }
-
   function handleFinish() {
-    if (!validate()) return;
-
     const teachingLanguages = rows
       .filter((r) => r.code && r.proficiency)
       .map((r) => ({ code: r.code, proficiency: r.proficiency as ProficiencyLevel }));
 
     const rate = hourlyRate ? parseFloat(hourlyRate) : null;
-    const specs = specializations
-      .split(/[,\n]/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .slice(0, 10);
 
     startTransition(async () => {
       const result = await saveTutorStepAction({
         teachingLanguages,
         hourlyRate: rate && !isNaN(rate) ? rate : null,
-        specializations: specs,
+        specializations: experience
+          .split(/[,\n]/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .slice(0, 10),
       });
-      if (!result.ok) {
-        toast.error(t('error.saveFailed'));
-        return;
-      }
-      onDone();
-    });
-  }
-
-  function handleSkip() {
-    startSkipTransition(async () => {
-      const result = await skipTutorStepAction();
       if (!result.ok) {
         toast.error(t('error.saveFailed'));
         return;
@@ -169,49 +134,52 @@ export function StepTutor({ headingRef, onBack, onDone }: StepTutorProps) {
       {/* Teaching languages */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-(--ssz-text-primary)">{t('tutor.languages.heading')}</p>
-        {rowsError && (
-          <p role="alert" className="text-sm text-(--ssz-color-error-600)">{rowsError}</p>
-        )}
-        <div className="space-y-2">
-          {rows.map((row, idx) => (
-            <div key={idx} className="flex items-start gap-2">
-              <div className="flex-1 min-w-0">
-                <LanguageCombobox
-                  value={row.code}
-                  onChange={(code) => updateCode(idx, code)}
-                  placeholder={t('prefs.native.placeholder')}
-                  exclude={excludeForRow(idx)}
+
+        {rows.length === 0 ? (
+          <p className="text-sm text-(--ssz-text-muted)">{t('tutor.languages.emptyHint')}</p>
+        ) : (
+          <div className="space-y-2">
+            {rows.map((row, idx) => (
+              <div key={idx} className="flex items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <LanguageCombobox
+                    value={row.code}
+                    onChange={(code) => updateCode(idx, code)}
+                    placeholder={t('prefs.native.placeholder')}
+                    exclude={excludeForRow(idx)}
+                    disabled={isLoading}
+                  />
+                </div>
+                <Select
+                  value={row.proficiency}
+                  onValueChange={(v) => updateProficiency(idx, v as ProficiencyLevel)}
+                  disabled={isLoading || !row.code}
+                >
+                  <SelectTrigger className="w-32.5" aria-label={t('tutor.proficiency.label')}>
+                    <SelectValue placeholder={t('tutor.proficiency.placeholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PROFICIENCY_LEVELS.map((level) => (
+                      <SelectItem key={level} value={level}>{level}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeRow(idx)}
                   disabled={isLoading}
-                />
+                  aria-label={t('tutor.languages.remove')}
+                  className="shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-              <Select
-                value={row.proficiency}
-                onValueChange={(v) => updateProficiency(idx, v as ProficiencyLevel)}
-                disabled={isLoading || !row.code}
-              >
-                <SelectTrigger className="w-32.5" aria-label={t('tutor.proficiency.label')}>
-                  <SelectValue placeholder={t('tutor.proficiency.placeholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {PROFICIENCY_LEVELS.map((level) => (
-                    <SelectItem key={level} value={level}>{level}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removeRow(idx)}
-                disabled={isLoading || rows.length <= 1}
-                aria-label={t('tutor.languages.remove')}
-                className="shrink-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
         {rows.length < 10 && (
           <Button
             type="button"
@@ -226,70 +194,80 @@ export function StepTutor({ headingRef, onBack, onDone }: StepTutorProps) {
         )}
       </div>
 
-      {/* Hourly rate */}
+      {/* Hourly rate + currency */}
       <Field label={t('tutor.hourlyRate.label')} htmlFor="hourly-rate">
-        <Input
-          id="hourly-rate"
-          type="number"
-          min={0}
-          step={0.01}
-          placeholder={t('tutor.hourlyRate.placeholder')}
-          value={hourlyRate}
-          onChange={(e) => setHourlyRate(e.target.value)}
-          disabled={isLoading}
-        />
+        <div className="flex gap-2">
+          <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)} disabled={isLoading}>
+            <SelectTrigger className="w-24 shrink-0" aria-label={t('tutor.hourlyRate.currency.label')}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input
+            id="hourly-rate"
+            type="number"
+            min={0}
+            step={1}
+            placeholder={t('tutor.hourlyRate.placeholder')}
+            value={hourlyRate}
+            onChange={(e) => setHourlyRate(e.target.value)}
+            disabled={isLoading}
+            className="flex-1"
+            aria-label={t('tutor.hourlyRate.label')}
+          />
+        </div>
       </Field>
 
-      {/* Specializations */}
-      <Field
-        label={t('tutor.specializations.label')}
-        htmlFor="specializations"
-        hint={t('tutor.specializations.hint')}
-      >
-        <Input
-          id="specializations"
-          placeholder={t('tutor.specializations.placeholder')}
-          value={specializations}
-          onChange={(e) => setSpecializations(e.target.value)}
+      {/* Experience */}
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-baseline justify-between">
+          <label htmlFor="experience" className="text-sm font-medium text-(--ssz-text-primary)">
+            {t('tutor.experience.label')}
+          </label>
+          <span
+            aria-live="polite"
+            className={
+              experienceLength >= 400
+                ? 'text-xs text-(--ssz-color-error-600)'
+                : experienceLength >= 360
+                  ? 'text-xs text-(--ssz-color-warning-600)'
+                  : 'text-xs text-(--ssz-text-muted)'
+            }
+          >
+            {t('tutor.experience.counter', { count: experienceLength })}
+          </span>
+        </div>
+        <Textarea
+          id="experience"
+          rows={4}
+          placeholder={t('tutor.experience.placeholder')}
+          value={experience}
+          onChange={(e) => setExperience(e.target.value)}
           disabled={isLoading}
+          maxLength={400}
         />
-      </Field>
+        <p className="text-xs text-(--ssz-text-muted)">{t('tutor.experience.hint')}</p>
+      </div>
+
+      {/* Reassurance */}
+      <p className="text-sm text-(--ssz-text-muted) leading-relaxed">
+        {t('tutor.reassurance')}
+      </p>
 
       {/* Screen-reader live region */}
       <div id={liveRegionId} aria-live="polite" className="sr-only">
         {liveMessage}
       </div>
 
-      {/* Footer */}
+      {/* Footer — no skip button; Continue works as skip since all fields optional */}
       <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-2">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button type="button" variant="ghost" size="sm" disabled={isLoading}>
-                {t('skip.label')}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('skip.confirm.title')}</AlertDialogTitle>
-                <AlertDialogDescription>{t('skip.warning')}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('back')}</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleSkip}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  {t('skip.label')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <Button type="button" variant="ghost" onClick={onBack} disabled={isLoading}>
-            {t('back')}
-          </Button>
-        </div>
+        <Button type="button" variant="ghost" onClick={onBack} disabled={isLoading}>
+          {t('back')}
+        </Button>
 
         <Button
           type="button"

@@ -794,11 +794,12 @@
     "next": "Next",
     "finishCta": "Finish & go to my dashboard",
     "skip": {
-      "confirm": {
-        "title": "Skip language preferences?"
-      },
-      "warning": "We use these to recommend lessons and tutors. Without them, your dashboard will be mostly empty until you add them later.",
-      "label": "Skip for now"
+      "label": "Skip for now",
+      "callout": {
+        "body": "No problem — you can add languages from your profile settings any time. Skipping will mean we can't personalise your recommendations yet.",
+        "confirm": "Skip anyway",
+        "cancel": "Add a language"
+      }
     },
     "alreadyDone": "Your profile is already set up",
     "progress": {
@@ -891,9 +892,9 @@
     },
     "targets": {
       "empty": {
-        "title": "No target languages yet",
-        "body": "Pick at least one language you want to learn. You can change this any time.",
-        "cta": "Add your first language"
+        "title": "What would you like to learn?",
+        "body": "Add a language to get personalised content recommendations. You can always change this later.",
+        "cta": "Add a language"
       }
     },
     "cefr": {
@@ -913,13 +914,11 @@
     "tutor": {
       "languages": {
         "heading": "Languages you teach",
+        "emptyHint": "Which languages do you teach?",
         "add": "Add another language",
         "remove": "Remove language",
         "added": "Language row added",
-        "removed": "Language row removed",
-        "error": {
-          "required": "Add at least one teaching language and select a proficiency level."
-        }
+        "removed": "Language row removed"
       },
       "proficiency": {
         "label": "Proficiency",
@@ -927,13 +926,18 @@
       },
       "hourlyRate": {
         "label": "Hourly rate (optional)",
-        "placeholder": "e.g. 25"
+        "placeholder": "e.g. 350",
+        "currency": {
+          "label": "Currency"
+        }
       },
-      "specializations": {
-        "label": "Specializations (optional)",
-        "hint": "Comma-separated, e.g. grammar, conversation, exam prep",
-        "placeholder": "grammar, conversation"
-      }
+      "experience": {
+        "label": "About your teaching experience",
+        "placeholder": "e.g. 5 years teaching business Norwegian to Ukrainian professionals…",
+        "hint": "Optional — 400 characters max",
+        "counter": "{count}/400"
+      },
+      "reassurance": "You can update all of this — and add a photo, certificates, and availability — from your tutor profile once you're in."
     }
   },
   "Media": {
