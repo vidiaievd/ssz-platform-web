@@ -150,7 +150,7 @@ export function StepProfile({ initialValues, headingRef, onNext }: StepProfilePr
             className={
               bioLength >= 200
                 ? 'text-xs text-(--ssz-color-error-600)'
-                : bioLength >= 180
+                : bioLength >= 160
                   ? 'text-xs text-(--ssz-color-warning-600)'
                   : 'text-xs text-(--ssz-text-muted)'
             }
