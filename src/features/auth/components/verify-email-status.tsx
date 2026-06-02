@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 
 import { verifyEmailConfirmAction, resendVerificationAction } from '../actions/verify-email';
 import { resolvePostLoginPath } from '../utils/resolve-post-login-path';
+import { track } from '@/lib/analytics/track';
 
 type VerifyEmailStatusProps = {
   token: string;
@@ -25,13 +26,16 @@ export function VerifyEmailStatus({ token }: VerifyEmailStatusProps) {
   useEffect(() => {
     if (calledRef.current) return;
     calledRef.current = true;
+    track({ name: 'verify_opened' });
 
     verifyEmailConfirmAction(token).then((result) => {
       if (!result.ok) {
+        track({ name: 'verify_failed', code: result.error.code });
         setStatus('error');
         setErrorCode(result.error.code);
         return;
       }
+      track({ name: 'verify_succeeded' });
       setStatus('success');
       // New users have no profile yet at verify-time; resolver returns onboarding paths.
       router.replace(resolvePostLoginPath({ roles: result.value.roles, hasStudentProfile: false, hasTutorProfile: false }));
@@ -41,7 +45,10 @@ export function VerifyEmailStatus({ token }: VerifyEmailStatusProps) {
   function handleResend() {
     startTransition(async () => {
       const result = await resendVerificationAction();
-      if (result.ok) setResendDone(true);
+      if (result.ok) {
+        track({ name: 'verify_resent' });
+        setResendDone(true);
+      }
     });
   }
 
