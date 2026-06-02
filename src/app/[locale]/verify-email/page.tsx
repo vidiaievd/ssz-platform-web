@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
-import { getTranslations } from 'next-intl/server';
 
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { CheckEmailScreen } from '@/features/auth/components/check-email-screen';
 import { VerifyEmailStatus } from '@/features/auth/components/verify-email-status';
 
 type VerifyEmailPageProps = {
@@ -10,7 +10,6 @@ type VerifyEmailPageProps = {
 };
 
 export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
-  const t = await getTranslations('Auth.VerifyEmail');
   const { token } = await searchParams;
 
   return (
@@ -25,22 +24,17 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
 
       <main className="flex flex-1 items-center justify-center p-4">
         <div className="w-full max-w-sm">
-          <div className="flex flex-col gap-6">
-            <div className="text-center">
-              <h1 className="text-2xl font-semibold text-(--ssz-text-primary)">{t('verifying')}</h1>
-            </div>
-            {token ? (
-              <Suspense
-                fallback={
-                  <p className="text-center text-sm text-(--ssz-text-muted)">{t('verifying')}</p>
-                }
-              >
-                <VerifyEmailStatus token={token} />
-              </Suspense>
-            ) : (
-              <p className="text-center text-sm text-error">{t('errorDescription')}</p>
-            )}
-          </div>
+          {token ? (
+            <Suspense
+              fallback={
+                <p className="text-center text-sm text-(--ssz-text-muted)">…</p>
+              }
+            >
+              <VerifyEmailStatus token={token} />
+            </Suspense>
+          ) : (
+            <CheckEmailScreen />
+          )}
         </div>
       </main>
     </div>

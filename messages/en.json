@@ -233,14 +233,16 @@
     },
     "VerifyEmail": {
       "verifying": "Verifying your email…",
+      "checkTitle": "Check your email",
+      "checkBody": "We sent a link to your inbox. Click it to activate your account — you'll be taken straight to setup.",
       "successTitle": "Email verified",
       "successDescription": "Your email has been verified. You can now sign in.",
       "errorTitle": "Verification failed",
       "errorDescription": "The link is invalid or has expired.",
       "errorExpired": "The link has expired. Request a new verification email below.",
-      "resend": "Resend verification email",
-      "resendSuccess": "Verification email sent.",
-      "signIn": "Sign in"
+      "resend": "Resend email",
+      "resendSuccess": "Email sent! Check your inbox again.",
+      "signIn": "Already verified? Sign in"
     },
     "RegisterHub": {
       "title": "Get started",
