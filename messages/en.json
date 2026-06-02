@@ -996,11 +996,12 @@
     "create": {
       "step": {
         "basics": {
-          "title": "School basics",
-          "subtitle": "Give your school a name and tell us a bit about it."
+          "title": "Set up your school",
+          "subtitle": "Takes about 2 minutes. You can edit everything later."
         }
       },
       "next": "Next",
+      "submit": "Create school",
       "cancel": {
         "title": "Discard school setup?",
         "body": "Your school name and members won't be saved.",
@@ -1095,14 +1096,16 @@
         }
       },
       "helper": {
-        "basics": {
-          "title": "What is a school?",
-          "bullets": {
-            "0": "A workspace for your courses and students.",
-            "1": "Invite teachers, add content, track progress.",
-            "2": "Students enrol and learn at their own pace."
-          }
-        }
+        "title": "What you get",
+        "bullets": {
+          "0": "Your own school workspace",
+          "1": "Invite teachers and students",
+          "2": "Create and publish courses",
+          "3": "Track student progress",
+          "4": "Assign exercises with due dates"
+        },
+        "reassurance": "You can customise everything — name, description, logo — from settings.",
+        "mobileTrigger": "What you'll get"
       }
     }
   },

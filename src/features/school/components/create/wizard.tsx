@@ -225,8 +225,8 @@ export function CreateSchoolWizard({ tutorEmail: _tutorEmail }: CreateSchoolWiza
                 'pb-[env(safe-area-inset-bottom)] md:pb-0',
               )}
             >
-              <Button type="submit" form={formId} loading={isSaving}>
-                {t('create.next')}
+              <Button type="submit" form={formId} loading={isSaving} aria-busy={isSaving}>
+                {t('create.submit')}
               </Button>
             </div>
           </div>
