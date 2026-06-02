@@ -48,6 +48,11 @@ export function LoginForm({ redirect }: LoginFormProps) {
         setMfaToken(result.value.mfaChallengeToken);
         return;
       }
+      // Guard: backend may issue tokens before email verification.
+      if (result.value.emailVerified === false) {
+        router.push("/verify-email");
+        return;
+      }
       router.push(resolvePostLoginPath(result.value, redirect));
     });
   }

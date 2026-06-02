@@ -20,6 +20,20 @@ export async function requireUser(): Promise<CurrentUser> {
 }
 
 /**
+ * Returns the authenticated user, or redirects to /verify-email if the JWT
+ * explicitly marks the session as unverified (email_verified: false).
+ * Falls back to requireUser() when the claim is absent.
+ */
+export async function requireVerifiedUser(): Promise<CurrentUser> {
+  const user = await requireUser();
+  if (user.emailVerified === false) {
+    const locale = await getLocale();
+    redirect(`/${locale}/verify-email`);
+  }
+  return user;
+}
+
+/**
  * Returns the authenticated user if they have the given role, or 404.
  * Use to gate sections of the app to a specific role.
  */

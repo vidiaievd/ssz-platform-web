@@ -42,6 +42,10 @@ export function TotpStep({ mfaChallengeToken, redirect, onCancel }: TotpStepProp
         setError('code', { message: tErrors(result.error.code) });
         return;
       }
+      if (result.value.emailVerified === false) {
+        router.push("/verify-email");
+        return;
+      }
       router.push(resolvePostLoginPath(result.value, redirect));
     });
   }

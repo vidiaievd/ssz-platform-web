@@ -3,13 +3,20 @@
 import { AppError, isAppError } from '@/lib/errors';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { writeAuthCookies } from '@/lib/auth/cookies';
+import { decodeJwtPayload } from '@/lib/auth/decode-jwt';
 import { tryAction } from '@/lib/result';
 import type { AuthTokensResponse } from '@/lib/api/generated/schemas';
 import { loginSchema, mfaChallengeSchema } from '../schemas';
 import type { LoginInput, MfaChallengeInput } from '../schemas';
 
 export type LoginActionResult =
-  | { stage: 'authenticated'; roles: string[]; hasStudentProfile: boolean; hasTutorProfile: boolean }
+  | {
+      stage: 'authenticated';
+      roles: string[];
+      hasStudentProfile: boolean;
+      hasTutorProfile: boolean;
+      emailVerified?: boolean;
+    }
   | { stage: 'mfa'; mfaChallengeToken: string };
 
 export async function loginAction(input: LoginInput) {
@@ -69,6 +76,11 @@ async function finishLogin(tokens: AuthTokensResponse): Promise<LoginActionResul
 
   const authHeader = { Authorization: `Bearer ${tokens.accessToken}` };
 
+  // Decode JWT payload to detect email_verified without an extra round-trip.
+  const payload = decodeJwtPayload(tokens.accessToken!);
+  const emailVerified =
+    typeof payload?.email_verified === 'boolean' ? payload.email_verified : undefined;
+
   const [meResult, profileResult] = await Promise.allSettled([
     serverFetch<{ roles: string[] }>({
       service: 'auth',
@@ -90,5 +102,5 @@ async function finishLogin(tokens: AuthTokensResponse): Promise<LoginActionResul
   const hasTutorProfile =
     profileResult.status === 'fulfilled' ? profileResult.value.hasTutorProfile : false;
 
-  return { stage: 'authenticated', roles, hasStudentProfile, hasTutorProfile };
+  return { stage: 'authenticated', roles, hasStudentProfile, hasTutorProfile, emailVerified };
 }
