@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { GraduationCap, BookOpen, Building2, UserCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 
 import { Link } from '@/lib/i18n/navigation';
+import { track } from '@/lib/analytics/track';
 
 type Step = 'hub' | 'org';
 
@@ -14,6 +15,10 @@ export default function RegisterHubPage() {
   const tOrg = useTranslations('Auth.RegisterOrg');
   const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>(searchParams.get('step') === 'org' ? 'org' : 'hub');
+
+  useEffect(() => {
+    track({ name: 'register_started' });
+  }, []);
 
   if (step === 'org') {
     return (
@@ -35,6 +40,7 @@ export default function RegisterHubPage() {
         <div className="flex flex-col gap-3">
           <Link
             href="/register/school"
+            onClick={() => track({ name: 'register_role_selected', role: 'school_admin' })}
             className="group flex items-start gap-4 rounded-xl border border-border bg-surface p-5 transition-all hover:border-(--ssz-border-strong) hover:shadow-(--ssz-shadow-sm)"
           >
             <div
@@ -58,6 +64,7 @@ export default function RegisterHubPage() {
 
           <Link
             href="/register/tutor"
+            onClick={() => track({ name: 'register_role_selected', role: 'tutor' })}
             className="group flex items-start gap-4 rounded-xl border border-border bg-surface p-5 transition-all hover:border-(--ssz-border-strong) hover:shadow-(--ssz-shadow-sm)"
           >
             <div
@@ -100,6 +107,7 @@ export default function RegisterHubPage() {
       <div className="flex flex-col gap-3">
         <Link
           href="/register/student"
+          onClick={() => track({ name: 'register_role_selected', role: 'student' })}
           className="group flex items-start gap-4 rounded-xl border border-border bg-surface p-5 transition-all hover:border-(--ssz-border-strong) hover:shadow-(--ssz-shadow-sm)"
         >
           <div

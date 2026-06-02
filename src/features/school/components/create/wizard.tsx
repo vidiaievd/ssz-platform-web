@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics/track';
 import type { BasicsFormValues } from '../../schemas';
 import { useCreateWizardStore } from '../../stores/create-wizard-store';
 import { useCreateSchool } from '../../api/use-schools';
@@ -78,9 +79,15 @@ export function CreateSchoolWizard({ tutorEmail: _tutorEmail }: CreateSchoolWiza
   const { mutateAsync: createSchool } = useCreateSchool();
 
   useEffect(() => {
-    const unsub = useCreateWizardStore.persist.onFinishHydration(() => setStoreHydrated(true));
+    const unsub = useCreateWizardStore.persist.onFinishHydration(() => {
+      setStoreHydrated(true);
+      track({ name: 'school_create_started' });
+    });
     void (async () => {
-      if (useCreateWizardStore.persist.hasHydrated()) setStoreHydrated(true);
+      if (useCreateWizardStore.persist.hasHydrated()) {
+        setStoreHydrated(true);
+        track({ name: 'school_create_started' });
+      }
     })();
     return unsub;
   }, []);
@@ -134,11 +141,14 @@ export function CreateSchoolWizard({ tutorEmail: _tutorEmail }: CreateSchoolWiza
       const school = await createSchool({ body, idempotencyKey: store.idempotencyKey });
       clearTimeout(slowToast);
       toast.dismiss('slow-save');
+      track({ name: 'school_create_succeeded' });
       setIsNavigating(true);
       reset();
       router.push(`/school/${school.slug ?? school.id}/dashboard`);
     } catch (e) {
       const err = e as { status?: number; message?: string };
+      const reason = err.status === 409 ? 'name_taken' : 'network';
+      track({ name: 'school_create_failed', reason });
       if (err.status === 409) {
         toast.error(t('create.error.nameTaken'));
       } else {

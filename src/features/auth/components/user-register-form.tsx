@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 
 import { registerAction } from "../actions/register";
 import { passwordSchema } from "../schemas";
+import { track } from "@/lib/analytics/track";
 
 const schoolSchema = z
   .object({
@@ -51,10 +52,12 @@ export function UserRegisterForm({ role }: Props) {
 
   function onSubmit(data: SchoolInput) {
     setServerError(null);
+    track({ name: 'register_submitted', role });
     startTransition(async () => {
       const result = await registerAction({ ...data, role });
       if (!result.ok) {
         if (result.error.code === "conflict") {
+          track({ name: 'register_email_conflict' });
           setError("email", { message: t("emailTaken") });
           toast.error(t("emailTaken"));
         } else {

@@ -6,6 +6,7 @@ import { LogOut } from 'lucide-react';
 
 import { useRouter } from '@/lib/i18n/navigation';
 import { generateSlug } from '@/lib/utils/slug';
+import { track } from '@/lib/analytics/track';
 import { LogoutButton } from '@/features/auth/components/logout-button';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
@@ -35,6 +36,10 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
   const profileDraft = useOnboardingStore((s) => s.profileDraft);
 
   useEffect(() => {
+    track({ name: 'onboarding_started', role });
+  }, [role]);
+
+  useEffect(() => {
     headingRef.current?.focus();
   }, [currentStep]);
 
@@ -46,6 +51,7 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
   const progressLabel = t('progress.label', { current: currentIdx + 1, total: STEP_ORDER.length });
 
   function goToPrefs() {
+    track({ name: 'onboarding_step_completed', step: 'profile' });
     setCurrentStep('prefs');
   }
 
@@ -54,10 +60,12 @@ export function OnboardingShell({ role, initialProfileValues }: OnboardingShellP
   }
 
   function handleDoneStudent() {
+    track({ name: 'onboarding_finished', role: 'student' });
     router.replace('/student/dashboard');
   }
 
   function handleDoneTutor() {
+    track({ name: 'onboarding_finished', role: 'tutor' });
     const slug = generateSlug(profileDraft.displayName);
     router.replace(slug ? `/tutor/${slug}/dashboard` : '/tutor');
   }
