@@ -19,7 +19,7 @@ vi.mock('@/features/auth/components/logout-button', () => ({
 
 describe('UserMenu', () => {
   it('shows School role label for school user', async () => {
-    renderWithProviders(<UserMenu user={{ roles: ['school'] }} />);
+    renderWithProviders(<UserMenu user={{ roles: ['school_admin'] }} />);
     await userEvent.click(screen.getByRole('button', { name: /user menu/i }));
     expect(screen.getByText('School')).toBeInTheDocument();
   });
