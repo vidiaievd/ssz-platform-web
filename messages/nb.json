@@ -233,14 +233,16 @@
     },
     "VerifyEmail": {
       "verifying": "Bekrefter e-posten din…",
+      "checkTitle": "Sjekk e-posten din",
+      "checkBody": "Vi sendte en lenke til innboksen din. Klikk på den for å aktivere kontoen din — du tas rett til oppsett.",
       "successTitle": "E-post bekreftet",
       "successDescription": "E-posten din er bekreftet. Du kan nå logge inn.",
       "errorTitle": "Bekreftelse mislyktes",
       "errorDescription": "Lenken er ugyldig eller utløpt.",
       "errorExpired": "Lenken har utløpt. Be om en ny bekreftelses-e-post nedenfor.",
-      "resend": "Send bekreftelses-e-post på nytt",
-      "resendSuccess": "Bekreftelses-e-post sendt.",
-      "signIn": "Logg inn"
+      "resend": "Send e-post på nytt",
+      "resendSuccess": "E-post sendt! Sjekk innboksen din igjen.",
+      "signIn": "Allerede bekreftet? Logg inn"
     },
     "RegisterHub": {
       "title": "Kom i gang",
@@ -257,15 +259,30 @@
     },
     "RegisterStudent": {
       "title": "Opprett studentkonto",
-      "subtitle": "Start din språklæringsreise"
+      "subtitle": "Start din språklæringsreise",
+      "valueProp": {
+        "1": "Lær i ditt eget tempo",
+        "2": "Få personlige innholdsanbefalinger",
+        "3": "Spor fremgangen din over tid"
+      }
     },
     "RegisterSchool": {
       "title": "Opprett skolekonto",
-      "subtitle": "Publiser kurs og administrer dine studenter"
+      "subtitle": "Publiser kurs og administrer dine studenter",
+      "valueProp": {
+        "1": "Ditt eget undervisningsarbeidssted",
+        "2": "Inviter lærere og studenter",
+        "3": "Opprett kurs og spor fremgang"
+      }
     },
     "RegisterTutor": {
       "title": "Opprett lærerkonto",
-      "subtitle": "Undervis dine studenter selvstendig"
+      "subtitle": "Undervis dine studenter selvstendig",
+      "valueProp": {
+        "1": "Administrer studentene dine på ett sted",
+        "2": "Lag og tildel egendefinerte oppgaver",
+        "3": "Se hvordan studentene dine utvikler seg"
+      }
     },
     "RegisterOrg": {
       "title": "Hvordan underviser du?",
@@ -772,15 +789,24 @@
     "next": "Neste",
     "finishCta": "Fullfør og gå til dashbordet",
     "skip": {
-      "confirm": {
-        "title": "Hopp over språkpreferanser?"
-      },
-      "warning": "Vi bruker disse til å anbefale leksjoner og lærere. Uten dem vil dashbordet ditt stort sett være tomt til du legger dem til senere.",
-      "label": "Hopp over for nå"
+      "label": "Hopp over for nå",
+      "callout": {
+        "body": "Ingen problem — du kan legge til språk fra profilinnstillingene dine når som helst. Å hoppe over betyr at vi ikke kan tilpasse anbefalingene dine ennå.",
+        "confirm": "Hopp over likevel",
+        "cancel": "Legg til et språk"
+      }
     },
     "alreadyDone": "Profilen din er allerede satt opp",
     "progress": {
-      "label": "Steg {current} av {total}"
+      "label": "Steg {current} av {total}",
+      "labelNamed": "Steg {current} av {total}: {name}"
+    },
+    "shell": {
+      "step": {
+        "profile": "Profil",
+        "prefs": "Preferanser",
+        "tutor": "Detaljer"
+      }
     },
     "error": {
       "saveFailed": "Kunne ikke lagre — prøv igjen",
@@ -861,9 +887,9 @@
     },
     "targets": {
       "empty": {
-        "title": "Ingen målspråk ennå",
-        "body": "Velg minst ett språk du vil lære. Du kan endre dette når som helst.",
-        "cta": "Legg til ditt første språk"
+        "title": "Hva vil du lære?",
+        "body": "Legg til et språk for å få personlige innholdsanbefalinger. Du kan alltid endre dette senere.",
+        "cta": "Legg til et språk"
       }
     },
     "cefr": {
@@ -883,13 +909,11 @@
     "tutor": {
       "languages": {
         "heading": "Språk du underviser",
+        "emptyHint": "Hvilke språk underviser du i?",
         "add": "Legg til et språk",
         "remove": "Fjern språk",
         "added": "Språkrad lagt til",
-        "removed": "Språkrad fjernet",
-        "error": {
-          "required": "Legg til minst ett undervisningsspråk og velg ferdighetsnivå."
-        }
+        "removed": "Språkrad fjernet"
       },
       "proficiency": {
         "label": "Ferdighetsnivå",
@@ -897,13 +921,18 @@
       },
       "hourlyRate": {
         "label": "Timepris (valgfritt)",
-        "placeholder": "f.eks. 25"
+        "placeholder": "f.eks. 350",
+        "currency": {
+          "label": "Valuta"
+        }
       },
-      "specializations": {
-        "label": "Spesialiseringer (valgfritt)",
-        "hint": "Kommaseparert, f.eks. grammatikk, samtale, eksamenforberedelse",
-        "placeholder": "grammatikk, samtale"
-      }
+      "experience": {
+        "label": "Om undervisningserfaring",
+        "placeholder": "f.eks. 5 år med undervisning i norsk for ukrainske fagpersoner…",
+        "hint": "Valgfritt — maks 400 tegn",
+        "counter": "{count}/400"
+      },
+      "reassurance": "Du kan oppdatere alt dette — og legge til bilde, sertifikater og tilgjengelighet — fra tutorprofilen din."
     }
   },
   "Media": {
@@ -962,11 +991,12 @@
     "create": {
       "step": {
         "basics": {
-          "title": "Skolegrunnlag",
-          "subtitle": "Gi skolen din et navn og fortell litt om den."
+          "title": "Sett opp skolen din",
+          "subtitle": "Tar ca. 2 minutter. Du kan redigere alt etterpå."
         }
       },
       "next": "Neste",
+      "submit": "Opprett skole",
       "cancel": {
         "title": "Forkast skoleoppsettet?",
         "body": "Skolenavn og medlemmer vil ikke bli lagret.",
@@ -1061,14 +1091,16 @@
         }
       },
       "helper": {
-        "basics": {
-          "title": "Hva er en skole?",
-          "bullets": {
-            "0": "En arbeidsplass for kursene og elevene dine.",
-            "1": "Inviter lærere, legg til innhold, spor fremgang.",
-            "2": "Elever melder seg på og lærer i eget tempo."
-          }
-        }
+        "title": "Hva du får",
+        "bullets": {
+          "0": "Ditt eget skolarbeidssted",
+          "1": "Inviter lærere og studenter",
+          "2": "Opprett og publiser kurs",
+          "3": "Spor elevenes fremgang",
+          "4": "Gi oppgaver med frister"
+        },
+        "reassurance": "Du kan tilpasse alt — navn, beskrivelse, logo — fra innstillingene.",
+        "mobileTrigger": "Hva du vil få"
       }
     }
   },
