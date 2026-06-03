@@ -17,7 +17,7 @@ export async function fetchDashboardKpis(schoolId: string): Promise<WidgetResult
   return safeWidgetFetch(() =>
     serverFetch<KpisPayload>({
       service: 'analytics',
-      path: `/schools/${schoolId}/dashboard/kpis`,
+      path: `/analytics/schools/${schoolId}/kpis`,
     }),
   );
 }
@@ -29,7 +29,7 @@ export async function fetchAtRisk(
   return safeWidgetFetch(() =>
     serverFetch<AtRiskPayload>({
       service: 'analytics',
-      path: `/schools/${schoolId}/dashboard/at-risk`,
+      path: `/analytics/schools/${schoolId}/at-risk`,
       query: { limit },
     }),
   );
@@ -39,7 +39,7 @@ export async function fetchCourseHealth(schoolId: string): Promise<WidgetResult<
   return safeWidgetFetch(() =>
     serverFetch<CourseHealthPayload>({
       service: 'analytics',
-      path: `/schools/${schoolId}/dashboard/courses/health`,
+      path: `/analytics/schools/${schoolId}/courses/health`,
     }),
   );
 }
@@ -52,7 +52,7 @@ export async function fetchActivity(
   return safeWidgetFetch(() =>
     serverFetch<ActivityPayload>({
       service: 'analytics',
-      path: `/schools/${schoolId}/activity`,
+      path: `/analytics/schools/${schoolId}/activity`,
       query: { limit, ...(cursor ? { cursor } : {}) },
     }),
   );

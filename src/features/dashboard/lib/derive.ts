@@ -7,7 +7,6 @@ type SchoolWithType = { type?: string | null };
 
 export function deriveSchoolType(school: SchoolWithType): SchoolType {
   if (school.type === 'HYBRID') return 'hybrid';
-  // TODO(backend): confirm 'ONLINE' is the only other value; default until field arrives
   return 'online';
 }
 
@@ -54,7 +53,6 @@ export function deriveViewerRole(
     if (mapped) return mapped;
   }
 
-  // TODO(backend): confirm members[].role shape — see backend-todo.md §School Dashboard #0
   // Degrade to teacher (minimum dashboard access) when role cannot be resolved
   console.warn(
     `[dashboard] could not resolve role for user ${viewerUserId} in school — defaulting to teacher`,

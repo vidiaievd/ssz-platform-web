@@ -1,8 +1,7 @@
 import { headers } from 'next/headers';
 import { Suspense } from 'react';
 
-import { getSchool } from '@/features/school/api/get-school';
-import { getMySchools } from '@/features/school/api/get-my-schools';
+import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { deriveViewerRole, deriveSchoolType, deriveDataState, computeOnboarding } from '@/features/dashboard/lib/derive';
 import { canSeeWidget } from '@/features/dashboard/lib/roles';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
@@ -48,6 +47,26 @@ function adaptKpis(result: WidgetResult<KpisPayload>): WidgetData<Kpi[]> {
   return { status: 'ok', data: kpis };
 }
 
+function tagToIconKey(tag: ActivityItem['tag']): ActivityItem['iconKey'] {
+  switch (tag) {
+    case 'people': return 'user';
+    case 'content': return 'book';
+    case 'review': return 'flag';
+    case 'milestone': return 'star';
+    default: return 'user';
+  }
+}
+
+function tagToTone(tag: ActivityItem['tag']): ActivityItem['tone'] {
+  switch (tag) {
+    case 'people': return 'primary';
+    case 'content': return 'success';
+    case 'review': return 'warning';
+    case 'milestone': return 'success';
+    default: return 'neutral';
+  }
+}
+
 function adaptActivity(result: WidgetResult<ActivityPayload>): WidgetData<ActivityItem[]> {
   if ('status' in (result as object) && (result as Unavailable).status === 'unavailable') {
     return { status: 'unavailable' };
@@ -60,8 +79,8 @@ function adaptActivity(result: WidgetResult<ActivityPayload>): WidgetData<Activi
     what: item.what,
     target: item.target ?? '',
     time: item.occurredAt,
-    iconKey: 'user' as const,
-    tone: 'neutral' as const,
+    iconKey: tagToIconKey(item.tag),
+    tone: tagToTone(item.tag),
     tag: item.tag,
   }));
   return { status: 'ok', data: items };
@@ -124,15 +143,13 @@ export default async function SchoolDashboardPage({ params }: Props) {
   await headers(); // opt into dynamic rendering
 
   // ── 1. Resolve school + viewer role ────────────────────────────────────────
-  const [user, schools] = await Promise.all([
+  // GET /api/v1/schools/by-slug/{slug} returns the full SchoolResponseDto
+  // including members[].role, which is required for role derivation.
+  const [user, school] = await Promise.all([
     getCurrentUser(),
-    getMySchools(),
+    getSchoolBySlug(schoolSlug),
   ]);
 
-  let school = schools.find((s) => s.slug === schoolSlug) ?? schools.find((s) => s.id === schoolSlug) ?? null;
-  if (!school) {
-    school = await getSchool(schoolSlug);
-  }
   if (!school) {
     return (
       <main className="p-6">

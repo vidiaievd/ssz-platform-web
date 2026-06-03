@@ -13,7 +13,7 @@ export async function nudgeAtRiskStudents(schoolSlug: string, schoolId: string):
   try {
     const data = await serverFetch<{ nudged: number }>({
       service: 'analytics',
-      path: `/schools/${schoolId}/dashboard/nudge`,
+      path: `/analytics/schools/${schoolId}/nudge`,
       method: 'POST',
       body: { scope: 'all-at-risk' },
     });

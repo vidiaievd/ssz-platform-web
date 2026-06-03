@@ -14,7 +14,7 @@ import {
 import type { KpisPayload, AtRiskPayload, CourseHealthPayload, ActivityPayload } from './types';
 
 // serverFetch builds: ANALYTICS_SERVICE_URL + /api/v1 + path
-// → http://analytics.test/api/v1/schools/<id>/dashboard/kpis
+// → http://analytics.test/api/v1/analytics/schools/<id>/kpis
 
 const SCHOOL_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -51,7 +51,7 @@ const MOCK_ACTIVITY: ActivityPayload = {
 describe('fetchDashboardKpis', () => {
   it('returns KPI payload on 200', async () => {
     server.use(
-      http.get(`http://analytics.test/api/v1/schools/${SCHOOL_ID}/dashboard/kpis`, () =>
+      http.get(`http://analytics.test/api/v1/analytics/schools/${SCHOOL_ID}/kpis`, () =>
         HttpResponse.json(MOCK_KPIS),
       ),
     );
@@ -61,7 +61,7 @@ describe('fetchDashboardKpis', () => {
 
   it('returns { status: unavailable } when analytics service is down', async () => {
     server.use(
-      http.get(`http://analytics.test/api/v1/schools/${SCHOOL_ID}/dashboard/kpis`, () =>
+      http.get(`http://analytics.test/api/v1/analytics/schools/${SCHOOL_ID}/kpis`, () =>
         HttpResponse.json({}, { status: 503 }),
       ),
     );
@@ -73,7 +73,7 @@ describe('fetchDashboardKpis', () => {
 describe('fetchAtRisk', () => {
   it('returns at-risk payload on 200', async () => {
     server.use(
-      http.get(`http://analytics.test/api/v1/schools/${SCHOOL_ID}/dashboard/at-risk`, () =>
+      http.get(`http://analytics.test/api/v1/analytics/schools/${SCHOOL_ID}/at-risk`, () =>
         HttpResponse.json(MOCK_AT_RISK),
       ),
     );
@@ -83,7 +83,7 @@ describe('fetchAtRisk', () => {
 
   it('returns { status: unavailable } on 403 (teacher role)', async () => {
     server.use(
-      http.get(`http://analytics.test/api/v1/schools/${SCHOOL_ID}/dashboard/at-risk`, () =>
+      http.get(`http://analytics.test/api/v1/analytics/schools/${SCHOOL_ID}/at-risk`, () =>
         HttpResponse.json({ message: 'Forbidden' }, { status: 403 }),
       ),
     );
@@ -95,7 +95,7 @@ describe('fetchAtRisk', () => {
 describe('fetchCourseHealth', () => {
   it('returns course health on 200', async () => {
     server.use(
-      http.get(`http://analytics.test/api/v1/schools/${SCHOOL_ID}/dashboard/courses/health`, () =>
+      http.get(`http://analytics.test/api/v1/analytics/schools/${SCHOOL_ID}/courses/health`, () =>
         HttpResponse.json(MOCK_COURSE_HEALTH),
       ),
     );
@@ -107,7 +107,7 @@ describe('fetchCourseHealth', () => {
 describe('fetchActivity', () => {
   it('returns activity feed on 200', async () => {
     server.use(
-      http.get(`http://analytics.test/api/v1/schools/${SCHOOL_ID}/activity`, () =>
+      http.get(`http://analytics.test/api/v1/analytics/schools/${SCHOOL_ID}/activity`, () =>
         HttpResponse.json(MOCK_ACTIVITY),
       ),
     );
@@ -118,7 +118,7 @@ describe('fetchActivity', () => {
   it('forwards limit query param', async () => {
     let capturedLimit: string | null = null;
     server.use(
-      http.get(`http://analytics.test/api/v1/schools/${SCHOOL_ID}/activity`, ({ request }) => {
+      http.get(`http://analytics.test/api/v1/analytics/schools/${SCHOOL_ID}/activity`, ({ request }) => {
         capturedLimit = new URL(request.url).searchParams.get('limit');
         return HttpResponse.json(MOCK_ACTIVITY);
       }),
