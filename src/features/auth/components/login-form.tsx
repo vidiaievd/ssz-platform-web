@@ -48,6 +48,10 @@ export function LoginForm({ redirect }: LoginFormProps) {
         setMfaToken(result.value.mfaChallengeToken);
         return;
       }
+      if (result.value.stage === "email_not_verified") {
+        router.push("/verify-email");
+        return;
+      }
       // Guard: backend may issue tokens before email verification.
       if (result.value.emailVerified === false) {
         router.push("/verify-email");
@@ -108,7 +112,7 @@ export function LoginForm({ redirect }: LoginFormProps) {
       <div className="flex justify-end">
         <Link
           href="/forgot-password"
-          className="text-sm text-[var(--ssz-text-link)] hover:underline"
+          className="text-sm text-(--ssz-text-link) hover:underline"
         >
           {t("forgotPassword")}
         </Link>
@@ -124,11 +128,11 @@ export function LoginForm({ redirect }: LoginFormProps) {
         {t("submit")}
       </Button>
 
-      <p className="text-center text-sm text-[var(--ssz-text-muted)]">
+      <p className="text-center text-sm text-(--ssz-text-muted)">
         {t("noAccount")}{" "}
         <Link
           href="/register"
-          className="text-[var(--ssz-text-link)] hover:underline"
+          className="text-(--ssz-text-link) hover:underline"
         >
           {t("signUp")}
         </Link>
