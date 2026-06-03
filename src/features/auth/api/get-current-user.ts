@@ -12,17 +12,18 @@ export const getCurrentUser = cache(async function (): Promise<CurrentUser | nul
   const token = await readAccessToken();
   if (!token) return null;
 
-  // Decode JWT payload for email_verified claim (no signature check — routing only).
+  // Decode JWT payload for email_verified + sub (userId) claims — routing only.
   const payload = decodeJwtPayload(token);
   const emailVerified =
     typeof payload?.email_verified === 'boolean' ? payload.email_verified : undefined;
+  const userId = typeof payload?.sub === 'string' ? payload.sub : undefined;
 
   try {
     const data = await serverFetch<UserRolesResponse>({
       service: 'auth',
       path: '/auth/roles',
     });
-    return { roles: data.roles ?? [], emailVerified };
+    return { roles: data.roles ?? [], emailVerified, userId };
   } catch {
     return null;
   }

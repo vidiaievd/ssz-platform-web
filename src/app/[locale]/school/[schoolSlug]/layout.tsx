@@ -9,7 +9,9 @@ import { profileKeys } from '@/features/profile/api/keys';
 import { getMySchools } from '@/features/school/api/get-my-schools';
 import { getSchool } from '@/features/school/api/get-school';
 import { schoolKeys } from '@/features/school/api/keys';
+import { deriveViewerRole, deriveSchoolType } from '@/features/dashboard/lib/derive';
 import { AppShell } from '@/components/shared/app-shell';
+import type { SchoolContext } from '@/components/shared/app-shell';
 
 type Props = {
   children: React.ReactNode;
@@ -53,9 +55,20 @@ export default async function SchoolInstanceLayout({ children, params }: Props) 
     redirect(`/${locale}/school`);
   }
 
+  // Derive per-school role and school type for shell gating.
+  // ownerId check works from list-endpoint payloads; members[] needed for admin/teacher.
+  const role = user.userId ? deriveViewerRole(school, user.userId) : 'admin';
+  const schoolType = deriveSchoolType(school);
+
+  const schoolContext: SchoolContext = {
+    role,
+    schoolType,
+    school: { name: school.name, slug: school.slug ?? school.id },
+  };
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <AppShell variant="school" user={user}>
+      <AppShell variant="school" user={user} schoolContext={schoolContext}>
         {children}
       </AppShell>
     </HydrationBoundary>
