@@ -30,17 +30,6 @@ import type {
 
 type WidgetResult<T> = T | Unavailable;
 
-function toWidgetData<T>(result: WidgetResult<T>): WidgetData<T> {
-  if (result && typeof result === 'object' && 'status' in result && (result as Unavailable).status === 'unavailable') {
-    return { status: 'unavailable' };
-  }
-  const data = result as T;
-  if (data === null || data === undefined || (Array.isArray(data) && data.length === 0)) {
-    return { status: 'empty' };
-  }
-  return { status: 'ok', data };
-}
-
 function adaptKpis(result: WidgetResult<KpisPayload>): WidgetData<Kpi[]> {
   if ('status' in (result as object) && (result as Unavailable).status === 'unavailable') {
     return { status: 'unavailable' };
@@ -118,7 +107,6 @@ import { ActivityFeed } from '@/features/dashboard/components/activity-feed';
 import { OnboardingChecklist } from '@/features/dashboard/components/onboarding-checklist';
 import { QuickActions } from '@/features/dashboard/components/quick-actions';
 import { TipCard } from '@/features/dashboard/components/tip-card';
-import { TrialBanner } from '@/features/dashboard/components/trial-banner';
 import { CourseHealth } from '@/features/dashboard/components/course-health';
 import { AtRiskList } from '@/features/dashboard/components/at-risk-list';
 import { ReviewQueueCard } from '@/features/dashboard/components/review-queue-card';
