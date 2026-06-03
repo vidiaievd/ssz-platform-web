@@ -11,11 +11,13 @@ import type { CurrentUser } from '@/features/auth/types/current-user';
 type TopbarProps = {
   user: CurrentUser;
   onMenuOpen: () => void;
+  /** Slot rendered after the mobile menu button — used for SchoolSwitcher. */
+  leading?: React.ReactNode;
   breadcrumbs?: React.ReactNode;
   actions?: React.ReactNode;
 };
 
-export function Topbar({ user, onMenuOpen, breadcrumbs, actions }: TopbarProps) {
+export function Topbar({ user, onMenuOpen, leading, breadcrumbs, actions }: TopbarProps) {
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card px-4">
       <Button
@@ -27,6 +29,8 @@ export function Topbar({ user, onMenuOpen, breadcrumbs, actions }: TopbarProps) 
       >
         <Menu className="size-5" />
       </Button>
+
+      {leading}
 
       <div className="flex-1 min-w-0">
         {breadcrumbs}
