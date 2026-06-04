@@ -2,7 +2,7 @@ import 'server-only';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
-import { groupAlerts, teacherLoad, type GroupForOps } from '@/lib/groups/operations';
+import { groupAlerts, teacherLoad, slotsOverlap, type GroupForOps } from '@/lib/groups/operations';
 // groupCacheTags are used by mutations (revalidateTag) — queries use no-store for now
 // until serverFetch is extended to accept next.tags.
 import type {
@@ -324,4 +324,133 @@ export async function getTeacherLoads(
     };
   }
   return result;
+}
+
+// ── Modal data fetchers ───────────────────────────────────────────────────────
+
+export type TeacherAssignCandidate = {
+  userId: string;
+  name: string;
+  avatarUrl: string | null;
+  maxWeeklyHours: number;
+  langs: string[];
+  currentHours: number;
+  currentGroups: number;
+  currentConflicts: number;
+  langFit: boolean;
+  conflictsWithGroup: boolean;
+};
+
+/**
+ * All teachers for the assign-teacher modal with pre-computed conflict/fit flags.
+ */
+export async function getTeacherAssignCandidates(
+  schoolId: string,
+  groupId: string,
+): Promise<{
+  groupName: string;
+  groupLang: string;
+  groupSlots: Slot[];
+  candidates: TeacherAssignCandidate[];
+}> {
+  const [groupData, teachers, timetable] = await Promise.all([
+    getGroup(schoolId, groupId),
+    getSchoolTeachers(schoolId),
+    getTimetable(schoolId),
+  ]);
+
+  if (!groupData) {
+    return { groupName: '', groupLang: 'en', groupSlots: [], candidates: [] };
+  }
+
+  const existingIds = new Set(groupData.teachers.map((t) => t.userId));
+
+  const candidates: TeacherAssignCandidate[] = teachers.map((t) => {
+    const tt = timetable.find((x) => x.userId === t.userId);
+    // Lessons in the timetable represent recurring weekly slots (day + time).
+    const teacherSlots = (tt?.lessons ?? []).map((l) => ({
+      day: l.day,
+      start: l.start,
+      end: l.end,
+      room: '',
+    }));
+    const conflictsWithGroup = groupData.slots.some((gs) =>
+      teacherSlots.some((ts) => slotsOverlap(ts, gs)),
+    );
+    return {
+      userId: t.userId,
+      name: t.name,
+      avatarUrl: t.avatarUrl,
+      maxWeeklyHours: t.maxWeeklyHours,
+      langs: t.langs,
+      currentHours: tt?.hours ?? 0,
+      currentGroups: tt?.groups ?? 0,
+      currentConflicts: tt?.conflicts ?? 0,
+      langFit: t.langs.some((l) => l.toLowerCase() === groupData.lang.toLowerCase()),
+      conflictsWithGroup,
+    };
+  });
+
+  return {
+    groupName: groupData.name,
+    groupLang: groupData.lang,
+    groupSlots: groupData.slots,
+    // Exclude teachers already assigned to the group
+    candidates: candidates.filter((c) => !existingIds.has(c.userId)),
+  };
+}
+
+export type StudentCandidate = {
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  level: string;
+};
+
+/**
+ * School students not yet enrolled in the group — for the add-students modal.
+ */
+export async function getStudentCandidates(
+  schoolId: string,
+  groupId: string,
+): Promise<{
+  groupName: string;
+  currentCount: number;
+  capacity: { min: number; max: number };
+  candidates: StudentCandidate[];
+}> {
+  const [groupData, allMembers] = await Promise.all([
+    getGroup(schoolId, groupId),
+    safeOrgFetch<OrgMember[]>(() =>
+      serverFetch({
+        service: 'organization',
+        path: `/schools/${schoolId}/members`,
+        query: { role: 'STUDENT' },
+      }),
+    ),
+  ]);
+
+  if (!groupData || !allMembers) {
+    return { groupName: '', currentCount: 0, capacity: { min: 0, max: 999 }, candidates: [] };
+  }
+
+  const rosterIds = new Set(groupData.roster.map((s) => s.userId));
+
+  const candidates: StudentCandidate[] = allMembers
+    .filter((m) => m.role === 'STUDENT' && !rosterIds.has(m.userId))
+    .map((m) => ({
+      userId: m.userId,
+      name: m.name ?? '',
+      email: m.email ?? '',
+      avatarUrl: m.avatarUrl ?? null,
+      level: 'A1',
+    }));
+
+  return {
+    groupName: groupData.name,
+    currentCount: groupData.studentCount,
+    capacity: groupData.capacity,
+    candidates,
+  };
 }
