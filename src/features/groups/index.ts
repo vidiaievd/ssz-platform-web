@@ -60,3 +60,6 @@ export { duplicateGroup } from './api/mutations';
 export { TeacherAssignModal } from './components/teacher-assign-modal';
 export { StudentAssignModal } from './components/student-assign-modal';
 export type { TeacherAssignCandidate, StudentCandidate } from './api/queries';
+export { GroupCreateFlow } from './components/group-create-flow';
+export { SlotEditor } from './components/slot-editor';
+export { useGroupCreateWizardStore } from './stores/create-wizard-store';

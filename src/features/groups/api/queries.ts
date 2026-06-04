@@ -400,6 +400,29 @@ export async function getTeacherAssignCandidates(
   };
 }
 
+/**
+ * All school students (for the wizard, where no group exists yet).
+ */
+export async function getSchoolStudents(schoolId: string): Promise<StudentCandidate[]> {
+  const raw = await safeOrgFetch<OrgMember[]>(() =>
+    serverFetch({
+      service: 'organization',
+      path: `/schools/${schoolId}/members`,
+      query: { role: 'STUDENT' },
+    }),
+  );
+  if (!raw) return [];
+  return raw
+    .filter((m) => m.role === 'STUDENT')
+    .map((m) => ({
+      userId: m.userId,
+      name: m.name ?? '',
+      email: m.email ?? '',
+      avatarUrl: m.avatarUrl ?? null,
+      level: 'A1',
+    }));
+}
+
 export type StudentCandidate = {
   userId: string;
   name: string;
