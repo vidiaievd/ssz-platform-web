@@ -214,7 +214,9 @@ export function TimetableGrid({ teacher, schoolSlug }: Props) {
   const conflictIndices = findConflictPairs(lessons);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" role="region" aria-label="Weekly timetable">
+      {/* Minimum width so the grid is usable on mobile (horizontal scroll) */}
+      <div style={{ minWidth: 480 }}>
       {/* Day headers */}
       <div className="flex" style={{ paddingLeft: 44 }}>
         {DAYS.map((day) => (
@@ -240,6 +242,7 @@ export function TimetableGrid({ teacher, schoolSlug }: Props) {
             schoolSlug={schoolSlug}
           />
         ))}
+      </div>
       </div>
     </div>
   );

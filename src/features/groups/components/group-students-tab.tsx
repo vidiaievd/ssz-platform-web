@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useOptimistic } from 'react';
+import { useState, useTransition, useOptimistic, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Search, UserPlus, X } from 'lucide-react';
@@ -36,6 +36,7 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
   const [query, setQuery] = useState('');
   const [pending, startTransition] = useTransition();
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const liveRef = useRef<HTMLDivElement>(null);
 
   // Optimistic removals: hide students immediately when remove is clicked.
   const [optimisticRoster, applyOptimisticRemove] = useOptimistic(
@@ -75,6 +76,9 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
 
   return (
     <div className="space-y-4">
+      {/* Screen-reader live region for mutation announcements */}
+      <div ref={liveRef} aria-live="polite" aria-atomic="true" className="sr-only" />
+
       {/* Capacity summary */}
       <div className="rounded-lg border border-border p-4 flex items-center gap-6 bg-card">
         <div className="flex-1 max-w-[200px]">
