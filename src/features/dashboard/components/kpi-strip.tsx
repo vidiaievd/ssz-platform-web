@@ -4,10 +4,20 @@ import { kpiSetFor } from '../lib/roles';
 import { KpiCard } from './kpi-card';
 
 const KPI_LABELS: Record<Kpi['key'], string> = {
-  active_students_7d: 'Active Students · 7d',
+  // owner / admin — operations-weighted (v3)
+  active_groups:        'Active Groups',
+  active_students_7d:   'Active Students · 7d',
+  avg_teacher_load:     'Avg. Teacher Load',
+  scheduling_conflicts: 'Scheduling Conflicts',
+  // teacher — personal view
+  my_groups:            'My Groups',
+  my_students:          'My Students',
+  lessons_per_week:     'Lessons · wk',
+  my_load:              'My Load',
+  // legacy (analytics service)
   lessons_completed_7d: 'Lessons Completed · 7d',
-  pending_reviews: 'Pending Reviews',
-  at_risk: 'At-Risk Students',
+  pending_reviews:      'Pending Reviews',
+  at_risk:              'At-Risk Students',
 };
 
 type KpiStripProps = {

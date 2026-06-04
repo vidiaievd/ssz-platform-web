@@ -60,6 +60,53 @@ export type ActivityPayload = {
   nextCursor: string | null;
 };
 
+// ─── Groups health (API response shape) ───────────────────────────────────────
+
+export type GroupAlert = {
+  type: string;
+  severity: string;
+  label: string;
+};
+
+export type GroupHealthItem = {
+  id: string;
+  name: string;
+  lang: string;
+  level: string;
+  primaryTeacherName: string | null;
+  studentCount: number;
+  max: number;
+  alerts: GroupAlert[];
+};
+
+export type GroupsHealthPayload = {
+  activeCount: number;
+  groups: GroupHealthItem[];
+  attentionCount: number;
+};
+
+// ─── Teacher workload (API response shape) ─────────────────────────────────────
+
+export type TeacherLoadItem = {
+  id: string;
+  name: string;
+  avatarUrl?: string | null;
+  hours: number;
+  max: number;
+  pct: number;
+  overloaded: boolean;
+  groups: number;
+  langs?: string[];
+  conflicts: number;
+};
+
+export type TeacherLoadPayload = {
+  overloadedCount: number;
+  avgLoadPct: number;
+  conflictCount: number;
+  teachers: TeacherLoadItem[];
+};
+
 // ─── BFF composite response ────────────────────────────────────────────────────
 
 export type Unavailable = { status: 'unavailable' };

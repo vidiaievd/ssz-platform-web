@@ -99,19 +99,22 @@ describe('deriveViewerRole', () => {
 // ─── computeOnboarding ───────────────────────────────────────────────────────
 
 describe('computeOnboarding', () => {
+  // v3 — 6-step path: logo → course → group+schedule → teacher → assign → students
   const baseInput = {
     school: { avatarUrl: null, description: null },
     membersCount: 1,
     coursesCount: 0,
+    groupsCount: 0,
     hasPublishedLesson: false,
     hasPendingInvitation: false,
+    hasAssignedTeacher: false,
   };
 
   it('returns 0 completed for a brand-new school', () => {
     const result = computeOnboarding(baseInput);
     expect(result.completed).toBe(0);
-    expect(result.total).toBe(5);
-    expect(result.minutesLeft).toBe(25); // 5+2+5+3+10
+    expect(result.total).toBe(6);
+    expect(result.minutesLeft).toBe(22); // 5+5+5+2+2+3
   });
 
   it('marks create-course done when coursesCount > 0', () => {
@@ -119,6 +122,12 @@ describe('computeOnboarding', () => {
     const item = result.items.find((i) => i.key === 'create-course');
     expect(item?.done).toBe(true);
     expect(result.completed).toBe(1);
+  });
+
+  it('marks create-group-schedule done when groupsCount > 0', () => {
+    const result = computeOnboarding({ ...baseInput, groupsCount: 1 });
+    const item = result.items.find((i) => i.key === 'create-group-schedule');
+    expect(item?.done).toBe(true);
   });
 
   it('marks invite-teacher done when membersCount > 1', () => {
@@ -130,6 +139,12 @@ describe('computeOnboarding', () => {
   it('marks invite-teacher done when there is a pending invitation', () => {
     const result = computeOnboarding({ ...baseInput, hasPendingInvitation: true });
     const item = result.items.find((i) => i.key === 'invite-teacher');
+    expect(item?.done).toBe(true);
+  });
+
+  it('marks assign-teacher-group done when hasAssignedTeacher is true', () => {
+    const result = computeOnboarding({ ...baseInput, hasAssignedTeacher: true });
+    const item = result.items.find((i) => i.key === 'assign-teacher-group');
     expect(item?.done).toBe(true);
   });
 
@@ -151,16 +166,10 @@ describe('computeOnboarding', () => {
     expect(item?.done).toBe(false);
   });
 
-  it('marks publish-lesson done when hasPublishedLesson is true', () => {
-    const result = computeOnboarding({ ...baseInput, hasPublishedLesson: true });
-    const item = result.items.find((i) => i.key === 'publish-lesson');
-    expect(item?.done).toBe(true);
-  });
-
   it('computes minutesLeft for remaining items only', () => {
-    // Only create-course done: remaining = invite-teacher(2) + fill-branding(5) + invite-students(3) + publish-lesson(10) = 20
+    // create-course done (5 min off): remaining = fill-branding(5)+create-group-schedule(5)+invite-teacher(2)+assign-teacher-group(2)+invite-students(3) = 17
     const result = computeOnboarding({ ...baseInput, coursesCount: 1 });
-    expect(result.minutesLeft).toBe(20);
+    expect(result.minutesLeft).toBe(17);
   });
 
   it('returns 0 minutesLeft when all items are done', () => {
@@ -168,10 +177,12 @@ describe('computeOnboarding', () => {
       school: { avatarUrl: 'https://x.com/logo.png', description: 'A school' },
       membersCount: 5,
       coursesCount: 2,
+      groupsCount: 1,
       hasPublishedLesson: true,
       hasPendingInvitation: false,
+      hasAssignedTeacher: true,
     });
     expect(result.minutesLeft).toBe(0);
-    expect(result.completed).toBe(5);
+    expect(result.completed).toBe(6);
   });
 });

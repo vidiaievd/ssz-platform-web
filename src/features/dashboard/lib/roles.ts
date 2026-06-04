@@ -13,6 +13,7 @@ import type {
 const ALL_NAV: NavId[] = [
   'dashboard',
   'courses',
+  'groups',
   'students',
   'teachers',
   'analytics',
@@ -22,7 +23,8 @@ const ALL_NAV: NavId[] = [
   'settings',
 ];
 
-const TEACHER_NAV: NavId[] = ['dashboard', 'courses', 'students'];
+// teacher can see their own cohorts + timetable via Groups
+const TEACHER_NAV: NavId[] = ['dashboard', 'courses', 'groups', 'students'];
 const EDITOR_NAV: NavId[] = ['courses', 'moderation'];
 
 export function navGating(role: DashboardRole): Record<NavId, 'enabled' | 'locked'> {
@@ -36,19 +38,22 @@ export function navGating(role: DashboardRole): Record<NavId, 'enabled' | 'locke
 
 // ─── KPI set ─────────────────────────────────────────────────────────────────
 
+// v3: operations-weighted KPIs for owner/admin (spec §5, KpiCard)
 const OWNER_KPI_KEYS: Kpi['key'][] = [
+  'active_groups',
   'active_students_7d',
-  'lessons_completed_7d',
-  'pending_reviews',
-  'at_risk',
+  'avg_teacher_load',
+  'scheduling_conflicts',
 ];
 
 const ADMIN_KPI_KEYS: Kpi['key'][] = OWNER_KPI_KEYS;
 
+// teacher sees their own workload
 const TEACHER_KPI_KEYS: Kpi['key'][] = [
-  'active_students_7d',
-  'lessons_completed_7d',
-  'pending_reviews', // teacher sees own review queue, not owner's
+  'my_groups',
+  'my_students',
+  'lessons_per_week',
+  'my_load',
 ];
 
 const EDITOR_KPI_KEYS: Kpi['key'][] = ['lessons_completed_7d', 'pending_reviews'];
@@ -69,61 +74,21 @@ export function kpiSetFor(role: DashboardRole): Kpi['key'][] {
 // ─── Quick actions ────────────────────────────────────────────────────────────
 
 const OWNER_ACTIONS: QuickAction[] = [
-  { id: 'new-course', labelKey: 'Dashboard.school.actions.newCourse', icon: 'BookPlus', href: '#' },
-  {
-    id: 'invite-teacher',
-    labelKey: 'Dashboard.school.actions.inviteTeacher',
-    icon: 'UserPlus',
-    href: '#',
-  },
-  {
-    id: 'enroll-student',
-    labelKey: 'Dashboard.school.actions.enrollStudent',
-    icon: 'GraduationCap',
-    href: '#',
-  },
-  {
-    id: 'import-csv',
-    labelKey: 'Dashboard.school.actions.importCsv',
-    icon: 'Upload',
-    href: '#',
-  },
-  {
-    id: 'edit-branding',
-    labelKey: 'Dashboard.school.actions.editBranding',
-    icon: 'Palette',
-    href: '#',
-  },
-  {
-    id: 'monthly-report',
-    labelKey: 'Dashboard.school.actions.monthlyReport',
-    icon: 'FileBarChart',
-    href: '#',
-  },
+  { id: 'new-course',         labelKey: 'Dashboard.school.actions.newCourse',       icon: 'BookPlus',     href: '#' },
+  { id: 'new-group',          labelKey: 'Dashboard.school.actions.newGroup',        icon: 'Layers',       href: '#' },
+  { id: 'invite-teacher',     labelKey: 'Dashboard.school.actions.inviteTeacher',   icon: 'UserPlus',     href: '#' },
+  { id: 'enroll-student',     labelKey: 'Dashboard.school.actions.enrollStudent',   icon: 'GraduationCap',href: '#' },
+  { id: 'teacher-timetable',  labelKey: 'Dashboard.school.actions.teacherTimetable',icon: 'CalendarDays', href: '#' },
+  { id: 'monthly-report',     labelKey: 'Dashboard.school.actions.monthlyReport',   icon: 'FileBarChart', href: '#' },
 ];
 
-const ADMIN_ACTIONS: QuickAction[] = OWNER_ACTIONS.filter((a) => a.id !== 'edit-branding');
+const ADMIN_ACTIONS: QuickAction[] = OWNER_ACTIONS;
 
 const TEACHER_ACTIONS: QuickAction[] = [
-  { id: 'new-lesson', labelKey: 'Dashboard.school.actions.newLesson', icon: 'FilePlus', href: '#' },
-  {
-    id: 'schedule-class',
-    labelKey: 'Dashboard.school.actions.scheduleClass',
-    icon: 'CalendarPlus',
-    href: '#',
-  },
-  {
-    id: 'grade-queue',
-    labelKey: 'Dashboard.school.actions.gradeQueue',
-    icon: 'ClipboardCheck',
-    href: '#',
-  },
-  {
-    id: 'message-class',
-    labelKey: 'Dashboard.school.actions.messageClass',
-    icon: 'MessageSquare',
-    href: '#',
-  },
+  { id: 'new-lesson',     labelKey: 'Dashboard.school.actions.newLesson',     icon: 'FilePlus',     href: '#' },
+  { id: 'my-groups',      labelKey: 'Dashboard.school.actions.myGroups',      icon: 'Layers',       href: '#' },
+  { id: 'my-timetable',   labelKey: 'Dashboard.school.actions.myTimetable',   icon: 'CalendarDays', href: '#' },
+  { id: 'grade-queue',    labelKey: 'Dashboard.school.actions.gradeQueue',    icon: 'ClipboardCheck',href: '#' },
 ];
 
 export function quickActionsFor(role: DashboardRole): QuickAction[] {
@@ -146,19 +111,33 @@ export function canSeeWidget(
   ctx: { role: DashboardRole; dataState: DataState; schoolType: SchoolType },
 ): boolean {
   const { role, dataState, schoolType } = ctx;
+  const isAdmin = role === 'owner' || role === 'admin';
 
   switch (widget) {
     case 'kpis':
       return true;
 
+    // Non-dismissible operations banner — admins only, full state, only when issues exist
+    // (visibility here = "can potentially show"; actual render checks counts)
+    case 'operationsBanner':
+      return isAdmin && dataState === 'full';
+
+    // Groups widget — admins see school-wide attention list; teachers see own groups
+    case 'groupsWidget':
+      return role !== 'editor' && dataState !== 'empty';
+
+    // Teacher workload — admins only (teacher sees own KPIs instead)
+    case 'teacherWorkload':
+      return isAdmin && dataState !== 'empty';
+
     case 'activity':
       return dataState !== 'empty';
 
     case 'courseHealth':
-      return (role === 'owner' || role === 'admin') && dataState === 'full';
+      return isAdmin && dataState === 'full';
 
     case 'atRisk':
-      return (role === 'owner' || role === 'admin') && dataState !== 'empty';
+      return isAdmin && dataState !== 'empty';
 
     case 'reviewQueue':
       return role === 'owner' && dataState === 'full';

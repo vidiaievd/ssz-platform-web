@@ -10,6 +10,8 @@ import {
   fetchAtRisk,
   fetchCourseHealth,
   fetchActivity,
+  fetchGroupsHealth,
+  fetchTeacherLoad,
 } from '@/lib/dashboard/queries';
 
 import type {
@@ -18,14 +20,37 @@ import type {
   ActivityItem,
   CourseHealthRow,
   AtRiskStudent,
+  GroupsHealthData,
+  TeacherWorkloadData,
+  Alert,
+  AlertType,
+  AlertSeverity,
 } from '@/features/dashboard/types';
 import type {
   KpisPayload,
   AtRiskPayload,
   CourseHealthPayload,
   ActivityPayload,
+  GroupsHealthPayload,
+  TeacherLoadPayload,
   Unavailable,
 } from '@/lib/dashboard/types';
+
+import { KpiStrip } from '@/features/dashboard/components/kpi-strip';
+import { ActivityFeed } from '@/features/dashboard/components/activity-feed';
+import { OnboardingChecklist } from '@/features/dashboard/components/onboarding-checklist';
+import { QuickActions } from '@/features/dashboard/components/quick-actions';
+import { TipCard } from '@/features/dashboard/components/tip-card';
+import { CourseHealth } from '@/features/dashboard/components/course-health';
+import { AtRiskList } from '@/features/dashboard/components/at-risk-list';
+import { ReviewQueueCard } from '@/features/dashboard/components/review-queue-card';
+import { TodaysClassesCard } from '@/features/dashboard/components/todays-classes-card';
+import { TeacherQueueCard } from '@/features/dashboard/components/teacher-queue-card';
+import { WidgetCard } from '@/features/dashboard/components/widget-card';
+import { OperationsBanner } from '@/features/dashboard/components/operations-banner';
+import { GroupsWidget } from '@/features/dashboard/components/groups-widget';
+import { TeacherWorkloadWidget } from '@/features/dashboard/components/teacher-workload-widget';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type WidgetResult<T> = T | Unavailable;
 
@@ -121,18 +146,51 @@ function adaptAtRisk(result: WidgetResult<AtRiskPayload>): WidgetData<{ students
   return { status: 'ok', data: { students, total: payload.total } };
 }
 
-import { KpiStrip } from '@/features/dashboard/components/kpi-strip';
-import { ActivityFeed } from '@/features/dashboard/components/activity-feed';
-import { OnboardingChecklist } from '@/features/dashboard/components/onboarding-checklist';
-import { QuickActions } from '@/features/dashboard/components/quick-actions';
-import { TipCard } from '@/features/dashboard/components/tip-card';
-import { CourseHealth } from '@/features/dashboard/components/course-health';
-import { AtRiskList } from '@/features/dashboard/components/at-risk-list';
-import { ReviewQueueCard } from '@/features/dashboard/components/review-queue-card';
-import { TodaysClassesCard } from '@/features/dashboard/components/todays-classes-card';
-import { TeacherQueueCard } from '@/features/dashboard/components/teacher-queue-card';
-import { WidgetCard } from '@/features/dashboard/components/widget-card';
-import { Skeleton } from '@/components/ui/skeleton';
+function adaptGroupsHealth(result: WidgetResult<GroupsHealthPayload>): WidgetData<GroupsHealthData> {
+  if ('status' in (result as object) && (result as Unavailable).status === 'unavailable') {
+    return { status: 'unavailable' };
+  }
+  const payload = result as GroupsHealthPayload;
+  if (!payload.groups || payload.groups.length === 0) return { status: 'empty' };
+  return {
+    status: 'ok',
+    data: {
+      activeCount: payload.activeCount,
+      attentionCount: payload.attentionCount,
+      groups: payload.groups.map((g) => ({
+        id: g.id,
+        name: g.name,
+        lang: g.lang,
+        level: g.level,
+        primaryTeacherName: g.primaryTeacherName,
+        studentCount: g.studentCount,
+        max: g.max,
+        alerts: g.alerts.map((a) => ({
+          type: a.type as AlertType,
+          severity: a.severity as AlertSeverity,
+          label: a.label,
+        } satisfies Alert)),
+      })),
+    },
+  };
+}
+
+function adaptTeacherWorkload(result: WidgetResult<TeacherLoadPayload>): WidgetData<TeacherWorkloadData> {
+  if ('status' in (result as object) && (result as Unavailable).status === 'unavailable') {
+    return { status: 'unavailable' };
+  }
+  const payload = result as TeacherLoadPayload;
+  if (!payload.teachers || payload.teachers.length === 0) return { status: 'empty' };
+  return {
+    status: 'ok',
+    data: {
+      overloadedCount: payload.overloadedCount,
+      avgLoadPct: payload.avgLoadPct,
+      conflictCount: payload.conflictCount,
+      teachers: payload.teachers,
+    },
+  };
+}
 
 type Props = {
   params: Promise<{ schoolSlug: string; locale: string }>;
@@ -143,8 +201,6 @@ export default async function SchoolDashboardPage({ params }: Props) {
   await headers(); // opt into dynamic rendering
 
   // ── 1. Resolve school + viewer role ────────────────────────────────────────
-  // GET /api/v1/schools/by-slug/{slug} returns the full SchoolResponseDto
-  // including members[].role, which is required for role derivation.
   const [user, school] = await Promise.all([
     getCurrentUser(),
     getSchoolBySlug(schoolSlug),
@@ -162,11 +218,13 @@ export default async function SchoolDashboardPage({ params }: Props) {
   const schoolType = deriveSchoolType(school);
 
   // ── 2. Parallel widget data fetch ──────────────────────────────────────────
-  const [kpis, atRisk, courseHealth, activity] = await Promise.all([
+  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload] = await Promise.all([
     fetchDashboardKpis(school.id),
     fetchAtRisk(school.id, 3),
     fetchCourseHealth(school.id),
     fetchActivity(school.id, 6),
+    fetchGroupsHealth(school.id, role),
+    fetchTeacherLoad(school.id),
   ]);
 
   // ── 3. Adapt to WidgetData<T> + derive data state ─────────────────────────
@@ -174,20 +232,40 @@ export default async function SchoolDashboardPage({ params }: Props) {
   const activityWidget = adaptActivity(activity);
   const courseHealthWidget = adaptCourseHealth(courseHealth);
   const atRiskWidget = adaptAtRisk(atRisk);
+  const groupsHealthWidget = adaptGroupsHealth(groupsHealth);
+  const teacherWorkloadWidget = adaptTeacherWorkload(teacherWorkload);
 
   const hasActivity = activityWidget.status === 'ok' && activityWidget.data.length > 0;
   const coursesCount = courseHealthWidget.status === 'ok' ? courseHealthWidget.data.length : 0;
+  const groupsCount = groupsHealthWidget.status === 'ok' ? groupsHealthWidget.data.activeCount : 0;
   const membersCount = 1; // conservative — full count not fetched here
 
   const dataState = deriveDataState({ membersCount, coursesCount, hasActivity });
 
-  // ── 4. Compute onboarding ──────────────────────────────────────────────────
+  // ── 4. Derive operations banner counts ────────────────────────────────────
+  const conflictCount =
+    teacherWorkloadWidget.status === 'ok'
+      ? teacherWorkloadWidget.data.conflictCount
+      : 0;
+  const noTeacherCount =
+    groupsHealthWidget.status === 'ok'
+      ? groupsHealthWidget.data.groups.filter((g) => g.alerts.some((a) => a.type === 'no-primary')).length
+      : 0;
+
+  // ── 5. Compute onboarding ──────────────────────────────────────────────────
+  const hasAssignedTeacher =
+    groupsHealthWidget.status === 'ok'
+      ? groupsHealthWidget.data.groups.some((g) => g.primaryTeacherName !== null)
+      : false;
+
   const onboarding = computeOnboarding({
     school: { avatarUrl: school.avatarUrl, description: school.description },
     membersCount,
     coursesCount,
+    groupsCount,
     hasPublishedLesson: coursesCount > 0,
     hasPendingInvitation: false,
+    hasAssignedTeacher,
   });
 
   const ctx = { role, dataState, schoolType };
@@ -204,6 +282,15 @@ export default async function SchoolDashboardPage({ params }: Props) {
           <p className="mt-1 text-sm text-(--ssz-text-secondary)">{school.description}</p>
         )}
       </div>
+
+      {/* Operations banner — above trial, above KPIs, non-dismissible */}
+      {canSeeWidget('operationsBanner', ctx) && (
+        <OperationsBanner
+          conflictCount={conflictCount}
+          noTeacherCount={noTeacherCount}
+          schoolSlug={schoolSlugDisplay}
+        />
+      )}
 
       {/* Trial banner (owner-only, when trial data available) */}
       {canSeeWidget('trialBanner', ctx) && null /* trial always null until billing service */}
@@ -227,6 +314,17 @@ export default async function SchoolDashboardPage({ params }: Props) {
 
         {/* Left column */}
         <div className="space-y-5">
+
+          {/* Groups widget — leads the left column (v3) */}
+          {canSeeWidget('groupsWidget', ctx) && (
+            <Suspense fallback={<WidgetCard title="Groups" loading />}>
+              <GroupsWidget
+                groupsHealth={groupsHealthWidget}
+                role={role}
+                schoolSlug={schoolSlugDisplay}
+              />
+            </Suspense>
+          )}
 
           {/* Activity feed */}
           {canSeeWidget('activity', ctx) && (
@@ -257,7 +355,7 @@ export default async function SchoolDashboardPage({ params }: Props) {
           {canSeeWidget('todaysClasses', ctx) && (
             <Suspense fallback={<WidgetCard title="Today's classes" loading />}>
               <TodaysClassesCard
-                todaysClasses={{ status: 'unavailable' }} // TODO(backend): scheduling service
+                todaysClasses={{ status: 'unavailable' }}
                 teacherView={role === 'teacher'}
               />
             </Suspense>
@@ -267,6 +365,16 @@ export default async function SchoolDashboardPage({ params }: Props) {
         {/* Right column */}
         <div className="space-y-5">
 
+          {/* Teacher workload — leads the right column (v3) */}
+          {canSeeWidget('teacherWorkload', ctx) && (
+            <Suspense fallback={<WidgetCard title="Teacher workload" loading />}>
+              <TeacherWorkloadWidget
+                teacherWorkload={teacherWorkloadWidget}
+                schoolSlug={schoolSlugDisplay}
+              />
+            </Suspense>
+          )}
+
           {/* Quick actions */}
           <QuickActions role={role} schoolSlug={schoolSlugDisplay} />
 
@@ -274,7 +382,6 @@ export default async function SchoolDashboardPage({ params }: Props) {
           {canSeeWidget('reviewQueue', ctx) && (
             <Suspense fallback={<WidgetCard title="Needs your review" loading />}>
               <ReviewQueueCard reviewQueue={{ status: 'unavailable' }} />
-              {/* TODO(backend): publish-approval queue — see backend-todo.md */}
             </Suspense>
           )}
 

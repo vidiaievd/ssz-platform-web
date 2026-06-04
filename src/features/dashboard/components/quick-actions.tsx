@@ -1,14 +1,15 @@
 import {
   BookPlus,
-  UserPlus,
-  GraduationCap,
-  Upload,
-  Palette,
+  CalendarDays,
+  ClipboardCheck,
   FileBarChart,
   FilePlus,
-  CalendarPlus,
-  ClipboardCheck,
+  GraduationCap,
+  Layers,
   MessageSquare,
+  Palette,
+  Upload,
+  UserPlus,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -20,28 +21,33 @@ import { quickActionsFor } from '../lib/roles';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   BookPlus,
-  UserPlus,
-  GraduationCap,
-  Upload,
-  Palette,
+  CalendarDays,
+  ClipboardCheck,
   FileBarChart,
   FilePlus,
-  CalendarPlus,
-  ClipboardCheck,
+  GraduationCap,
+  Layers,
   MessageSquare,
+  Palette,
+  Upload,
+  UserPlus,
 };
 
 const ACTION_LABELS: Record<string, string> = {
-  'new-course': 'New course',
-  'invite-teacher': 'Invite teacher',
-  'enroll-student': 'Enroll student',
-  'import-csv': 'Import CSV',
-  'edit-branding': 'Edit branding',
-  'monthly-report': 'Monthly report',
-  'new-lesson': 'New lesson',
-  'schedule-class': 'Schedule class',
-  'grade-queue': 'Grade queue',
-  'message-class': 'Message class',
+  'new-course':        'New course',
+  'new-group':         'New group',
+  'invite-teacher':    'Invite teacher',
+  'enroll-student':    'Enroll student',
+  'import-csv':        'Import CSV',
+  'edit-branding':     'Edit branding',
+  'teacher-timetable': 'Teacher timetable',
+  'monthly-report':    'Monthly report',
+  'new-lesson':        'New lesson',
+  'my-groups':         'My groups',
+  'my-timetable':      'My timetable',
+  'schedule-class':    'Schedule class',
+  'grade-queue':       'Grade queue',
+  'message-class':     'Message class',
 };
 
 type QuickActionsProps = {
@@ -50,18 +56,21 @@ type QuickActionsProps = {
 };
 
 function resolveHref(action: QuickAction, schoolSlug: string): string {
-  // Map actions to existing routes; unbuilt routes get closest existing section
   const routes: Record<string, string> = {
-    'new-course': `/school/${schoolSlug}/content`,
-    'invite-teacher': `/school/${schoolSlug}/students`, // TODO: dedicated invite page
-    'enroll-student': `/school/${schoolSlug}/students`,
-    'import-csv': `/school/${schoolSlug}/students`,
-    'edit-branding': `/school/${schoolSlug}/settings`,
-    'monthly-report': `/school/${schoolSlug}/dashboard`, // TODO: analytics section
-    'new-lesson': `/school/${schoolSlug}/content`,
-    'schedule-class': `/school/${schoolSlug}/dashboard`, // TODO: schedule section
-    'grade-queue': `/school/${schoolSlug}/dashboard`, // TODO: review queue section
-    'message-class': `/school/${schoolSlug}/students`,
+    'new-course':        `/school/${schoolSlug}/content`,
+    'new-group':         `/school/${schoolSlug}/groups/new`,
+    'invite-teacher':    `/school/${schoolSlug}/students`,
+    'enroll-student':    `/school/${schoolSlug}/students`,
+    'import-csv':        `/school/${schoolSlug}/students`,
+    'edit-branding':     `/school/${schoolSlug}/settings`,
+    'teacher-timetable': `/school/${schoolSlug}/groups?view=timetable`,
+    'monthly-report':    `/school/${schoolSlug}/dashboard`,
+    'new-lesson':        `/school/${schoolSlug}/content`,
+    'my-groups':         `/school/${schoolSlug}/groups`,
+    'my-timetable':      `/school/${schoolSlug}/groups?view=timetable`,
+    'schedule-class':    `/school/${schoolSlug}/groups`,
+    'grade-queue':       `/school/${schoolSlug}/dashboard`,
+    'message-class':     `/school/${schoolSlug}/students`,
   };
   return routes[action.id] ?? `/school/${schoolSlug}/dashboard`;
 }

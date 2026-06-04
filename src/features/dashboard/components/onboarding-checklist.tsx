@@ -15,11 +15,12 @@ type OnboardingChecklistProps = {
 };
 
 const ITEM_LABELS: Record<string, string> = {
-  'create-course': 'Create your first course',
-  'invite-teacher': 'Invite a teacher',
-  'fill-branding': 'Set up school branding',
-  'invite-students': 'Invite students',
-  'publish-lesson': 'Publish your first lesson',
+  'fill-branding':         'Upload your school logo',
+  'create-course':         'Create your first course',
+  'create-group-schedule': 'Create a group & set its schedule',
+  'invite-teacher':        'Invite a teacher',
+  'assign-teacher-group':  'Assign a teacher to the group',
+  'invite-students':       'Add your first students',
 };
 
 export function OnboardingChecklist({ onboarding }: OnboardingChecklistProps) {

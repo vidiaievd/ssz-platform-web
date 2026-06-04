@@ -1,7 +1,15 @@
 import 'server-only';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
-import type { KpisPayload, AtRiskPayload, CourseHealthPayload, ActivityPayload, Unavailable } from './types';
+import type {
+  KpisPayload,
+  AtRiskPayload,
+  CourseHealthPayload,
+  ActivityPayload,
+  GroupsHealthPayload,
+  TeacherLoadPayload,
+  Unavailable,
+} from './types';
 
 type WidgetResult<T> = T | Unavailable;
 
@@ -54,6 +62,30 @@ export async function fetchActivity(
       service: 'analytics',
       path: `/analytics/schools/${schoolId}/activity`,
       query: { limit, ...(cursor ? { cursor } : {}) },
+    }),
+  );
+}
+
+export async function fetchGroupsHealth(
+  schoolId: string,
+  role: string,
+): Promise<WidgetResult<GroupsHealthPayload>> {
+  return safeWidgetFetch(() =>
+    serverFetch<GroupsHealthPayload>({
+      service: 'analytics',
+      path: `/analytics/schools/${schoolId}/dashboard/groups-health`,
+      query: { role },
+    }),
+  );
+}
+
+export async function fetchTeacherLoad(
+  schoolId: string,
+): Promise<WidgetResult<TeacherLoadPayload>> {
+  return safeWidgetFetch(() =>
+    serverFetch<TeacherLoadPayload>({
+      service: 'analytics',
+      path: `/analytics/schools/${schoolId}/dashboard/teacher-load`,
     }),
   );
 }

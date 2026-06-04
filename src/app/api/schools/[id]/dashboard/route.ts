@@ -149,8 +149,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
     school: { avatarUrl: school.avatarUrl, description: school.description },
     membersCount,
     coursesCount,
+    groupsCount: 0, // TODO(backend): fetch groups count when groups service is available
     hasPublishedLesson,
     hasPendingInvitation,
+    hasAssignedTeacher: false, // TODO(backend): fetch from groups service
   });
 
   const composite: DashboardCompositeResponse = {

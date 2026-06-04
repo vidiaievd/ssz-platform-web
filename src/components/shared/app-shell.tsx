@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import {
   BookOpen,
   Compass,
+  Layers,
   LayoutDashboard,
   School,
   Send,
@@ -31,7 +32,7 @@ export type SchoolContext = {
 function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSection[] {
   const gating = schoolCtx ? navGating(schoolCtx.role) : null;
 
-  function disabled(navId: 'dashboard' | 'courses' | 'students' | 'settings'): boolean {
+  function disabled(navId: 'dashboard' | 'courses' | 'groups' | 'students' | 'settings'): boolean {
     return gating ? gating[navId] === 'locked' : false;
   }
 
@@ -46,17 +47,24 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
           lockReason: "Nav.locked.ownerOnly",
         },
         {
+          href: `/school/${schoolSlug}/content`,
+          icon: BookOpen,
+          labelKey: "content",
+          disabled: disabled('courses'),
+        },
+        {
+          href: `/school/${schoolSlug}/groups`,
+          icon: Layers,
+          labelKey: "groups",
+          disabled: disabled('groups'),
+          lockReason: "Nav.locked.adminOnly",
+        },
+        {
           href: `/school/${schoolSlug}/students`,
           icon: Users,
           labelKey: "students",
           disabled: disabled('students'),
           lockReason: "Nav.locked.adminOnly",
-        },
-        {
-          href: `/school/${schoolSlug}/content`,
-          icon: BookOpen,
-          labelKey: "content",
-          disabled: disabled('courses'),
         },
       ],
     },

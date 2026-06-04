@@ -21,10 +21,11 @@ describe('navGating', () => {
     expect(Object.values(gating).every((v) => v === 'enabled')).toBe(true);
   });
 
-  it('teacher sees only dashboard/courses/students enabled', () => {
+  it('teacher sees dashboard/courses/groups/students enabled', () => {
     const gating = navGating('teacher');
     expect(gating.dashboard).toBe('enabled');
     expect(gating.courses).toBe('enabled');
+    expect(gating.groups).toBe('enabled');
     expect(gating.students).toBe('enabled');
     expect(gating.teachers).toBe('locked');
     expect(gating.analytics).toBe('locked');
@@ -47,19 +48,26 @@ describe('navGating', () => {
 // ─── kpiSetFor ────────────────────────────────────────────────────────────────
 
 describe('kpiSetFor', () => {
-  it('owner gets all 4 KPIs including at_risk', () => {
-    expect(kpiSetFor('owner')).toContain('at_risk');
-    expect(kpiSetFor('owner')).toHaveLength(4);
+  // v3: operations-weighted KPIs for owner/admin
+  it('owner gets 4 operations KPIs', () => {
+    const keys = kpiSetFor('owner');
+    expect(keys).toContain('active_groups');
+    expect(keys).toContain('active_students_7d');
+    expect(keys).toContain('avg_teacher_load');
+    expect(keys).toContain('scheduling_conflicts');
+    expect(keys).toHaveLength(4);
   });
 
-  it('admin gets all 4 KPIs', () => {
-    expect(kpiSetFor('admin')).toContain('at_risk');
-    expect(kpiSetFor('admin')).toHaveLength(4);
+  it('admin gets same 4 operations KPIs as owner', () => {
+    expect(kpiSetFor('admin')).toEqual(kpiSetFor('owner'));
   });
 
-  it('teacher does not get at_risk KPI', () => {
-    expect(kpiSetFor('teacher')).not.toContain('at_risk');
-    expect(kpiSetFor('teacher')).toHaveLength(3);
+  it('teacher gets personal workload KPIs (my_groups, my_students, lessons_per_week, my_load)', () => {
+    const keys = kpiSetFor('teacher');
+    expect(keys).toContain('my_groups');
+    expect(keys).toContain('my_load');
+    expect(keys).not.toContain('at_risk');
+    expect(keys).toHaveLength(4);
   });
 
   it('editor gets minimal KPI set', () => {
@@ -71,19 +79,24 @@ describe('kpiSetFor', () => {
 // ─── quickActionsFor ──────────────────────────────────────────────────────────
 
 describe('quickActionsFor', () => {
-  it('owner includes edit-branding action', () => {
+  it('owner includes new-group and teacher-timetable actions (v3)', () => {
     const ids = quickActionsFor('owner').map((a) => a.id);
-    expect(ids).toContain('edit-branding');
+    expect(ids).toContain('new-group');
+    expect(ids).toContain('teacher-timetable');
+    expect(ids).toContain('new-course');
   });
 
-  it('admin excludes edit-branding action', () => {
-    const ids = quickActionsFor('admin').map((a) => a.id);
-    expect(ids).not.toContain('edit-branding');
+  it('admin gets same actions as owner (v3)', () => {
+    expect(quickActionsFor('admin').map((a) => a.id)).toEqual(
+      quickActionsFor('owner').map((a) => a.id),
+    );
   });
 
-  it('teacher gets teacher-specific actions', () => {
+  it('teacher gets my-groups and my-timetable actions (v3)', () => {
     const ids = quickActionsFor('teacher').map((a) => a.id);
     expect(ids).toContain('new-lesson');
+    expect(ids).toContain('my-groups');
+    expect(ids).toContain('my-timetable');
     expect(ids).toContain('grade-queue');
     expect(ids).not.toContain('new-course');
   });

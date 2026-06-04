@@ -9,8 +9,71 @@ export type WidgetData<T> =
   | { status: 'empty' }
   | { status: 'unavailable'; reason?: string };
 
+// ── Operations alerts ─────────────────────────────────────────────────────────
+export type AlertType = 'no-primary' | 'conflict' | 'overload' | 'over' | 'under';
+export type AlertSeverity = 'danger' | 'warn';
+
+export interface Alert {
+  type: AlertType;
+  severity: AlertSeverity;
+  label: string;
+}
+
+// ── Groups health (dashboard view model) ──────────────────────────────────────
+export interface GroupHealth {
+  id: string;
+  name: string;
+  lang: string;
+  level: string;
+  primaryTeacherName: string | null;
+  studentCount: number;
+  max: number;
+  alerts: Alert[];
+}
+
+export interface GroupsHealthData {
+  activeCount: number;
+  attentionCount: number;
+  groups: GroupHealth[];
+}
+
+// ── Teacher workload (dashboard view model) ───────────────────────────────────
+export interface TeacherLoad {
+  id: string;
+  name: string;
+  avatarUrl?: string | null;
+  hours: number;
+  max: number;
+  pct: number;
+  overloaded: boolean;
+  groups: number;
+  langs?: string[];
+  conflicts: number;
+}
+
+export interface TeacherWorkloadData {
+  overloadedCount: number;
+  avgLoadPct: number;
+  conflictCount: number;
+  teachers: TeacherLoad[];
+}
+
 export interface Kpi {
-  key: 'active_students_7d' | 'lessons_completed_7d' | 'pending_reviews' | 'at_risk';
+  key:
+    // owner / admin — operations-weighted
+    | 'active_groups'
+    | 'active_students_7d'
+    | 'avg_teacher_load'
+    | 'scheduling_conflicts'
+    // teacher — personal view
+    | 'my_groups'
+    | 'my_students'
+    | 'lessons_per_week'
+    | 'my_load'
+    // legacy (kept for backwards-compat with analytics service)
+    | 'lessons_completed_7d'
+    | 'pending_reviews'
+    | 'at_risk';
   value: number | '—';
   delta?: string;
   trend?: Trend;
@@ -92,6 +155,8 @@ export interface DashboardData {
   schoolType: SchoolType;
   trial: { daysLeft: number } | null;
   kpis: WidgetData<Kpi[]>;
+  groupsHealth: WidgetData<GroupsHealthData>;
+  teacherWorkload: WidgetData<TeacherWorkloadData>;
   activity: WidgetData<ActivityItem[]>;
   courseHealth: WidgetData<CourseHealthRow[]>;
   atRisk: WidgetData<{ students: AtRiskStudent[]; total: number }>;
@@ -104,6 +169,7 @@ export interface DashboardData {
 export type NavId =
   | 'dashboard'
   | 'courses'
+  | 'groups'
   | 'students'
   | 'teachers'
   | 'analytics'
@@ -114,6 +180,9 @@ export type NavId =
 
 export type WidgetId =
   | 'kpis'
+  | 'operationsBanner'
+  | 'groupsWidget'
+  | 'teacherWorkload'
   | 'activity'
   | 'courseHealth'
   | 'atRisk'
