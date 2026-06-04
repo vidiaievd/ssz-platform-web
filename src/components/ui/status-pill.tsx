@@ -1,0 +1,31 @@
+import { cn } from '@/lib/utils';
+
+type Tone = 'neutral' | 'accent' | 'warning' | 'destructive' | 'success';
+
+type StatusPillProps = {
+  tone?: Tone;
+  children: React.ReactNode;
+  className?: string;
+};
+
+const toneClasses: Record<Tone, string> = {
+  neutral: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
+  accent: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300',
+  warning: 'bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300',
+  destructive: 'bg-error-100 text-error-700 dark:bg-error-900/30 dark:text-error-300',
+  success: 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300',
+};
+
+export function StatusPill({ tone = 'neutral', children, className }: StatusPillProps) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold leading-none',
+        toneClasses[tone],
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}

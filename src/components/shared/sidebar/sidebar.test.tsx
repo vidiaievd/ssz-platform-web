@@ -23,6 +23,15 @@ const SECTIONS: NavSection[] = [
   },
 ];
 
+const SECTIONS_WITH_LOCKED: NavSection[] = [
+  {
+    items: [
+      { href: '/school/dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
+      { href: '/school/settings', icon: Settings, labelKey: 'settings', disabled: true, lockReason: 'locked.adminOnly' },
+    ],
+  },
+];
+
 describe('Sidebar', () => {
   beforeEach(() => {
     useUiStore.setState({ sidebarCollapsed: false });
@@ -54,6 +63,31 @@ describe('Sidebar', () => {
     useUiStore.setState({ sidebarCollapsed: true });
     renderWithProviders(<Sidebar sections={SECTIONS} />);
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
+  });
+
+  it('renders disabled item as aria-disabled span, not a link', () => {
+    renderWithProviders(<Sidebar sections={SECTIONS_WITH_LOCKED} />);
+    const settingsText = screen.getByText('Settings');
+    // The disabled item renders as a span, not a link.
+    const container = settingsText.closest('[aria-disabled="true"]');
+    expect(container).toBeInTheDocument();
+    expect(container?.tagName.toLowerCase()).not.toBe('a');
+  });
+
+  it('shows school-type pill for hybrid schools', () => {
+    renderWithProviders(<Sidebar sections={SECTIONS} schoolType="hybrid" />);
+    expect(screen.getByText('Hybrid')).toBeInTheDocument();
+  });
+
+  it('shows online pill for online schools', () => {
+    renderWithProviders(<Sidebar sections={SECTIONS} schoolType="online" />);
+    expect(screen.getByText('Online only')).toBeInTheDocument();
+  });
+
+  it('does not show school-type pill when schoolType is absent', () => {
+    renderWithProviders(<Sidebar sections={SECTIONS} />);
+    expect(screen.queryByText('Hybrid')).not.toBeInTheDocument();
+    expect(screen.queryByText('Online only')).not.toBeInTheDocument();
   });
 
   it('collapse state persists across remounts', () => {

@@ -55,8 +55,9 @@
   },
   "Nav": {
     "dashboard": "Oversikt",
-    "students": "Elever",
     "content": "Innhold",
+    "groups": "Grupper",
+    "students": "Elever",
     "lessons": "Timer",
     "mySchools": "Mine skoler",
     "settings": "Innstillinger",

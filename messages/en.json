@@ -55,8 +55,9 @@
   },
   "Nav": {
     "dashboard": "Dashboard",
-    "students": "Students",
     "content": "Content",
+    "groups": "Groups",
+    "students": "Students",
     "lessons": "Lessons",
     "mySchools": "My Schools",
     "settings": "Settings",

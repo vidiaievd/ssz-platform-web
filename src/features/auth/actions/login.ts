@@ -17,7 +17,8 @@ export type LoginActionResult =
       hasTutorProfile: boolean;
       emailVerified?: boolean;
     }
-  | { stage: 'mfa'; mfaChallengeToken: string };
+  | { stage: 'mfa'; mfaChallengeToken: string }
+  | { stage: 'email_not_verified' };
 
 export async function loginAction(input: LoginInput) {
   return tryAction(async (): Promise<LoginActionResult> => {
@@ -41,6 +42,9 @@ export async function loginAction(input: LoginInput) {
         if (typeof mfaChallengeToken === 'string') {
           return { stage: 'mfa', mfaChallengeToken };
         }
+      }
+      if (isAppError(e) && e.code === 'forbidden') {
+        return { stage: 'email_not_verified' };
       }
       throw e;
     }

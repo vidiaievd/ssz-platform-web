@@ -7,6 +7,7 @@ process.env.AUTH_SERVICE_URL = 'http://auth.test';
 process.env.PROFILE_SERVICE_URL = 'http://profile.test';
 process.env.CONTENT_SERVICE_URL = 'http://content.test';
 process.env.ORGANIZATION_SERVICE_URL = 'http://organization.test';
+process.env.ANALYTICS_SERVICE_URL = 'http://analytics.test';
 
 import '@testing-library/jest-dom/vitest';
 

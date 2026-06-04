@@ -1,5 +1,6 @@
 'use client';
 
+import { Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
@@ -15,11 +16,52 @@ function isActive(pathname: string | null, href: string, match?: NavItem['match'
   return pathname === href || pathname.startsWith(href + '/');
 }
 
-export function SidebarItem({ href, icon: Icon, labelKey, match, collapsed }: SidebarItemProps) {
+export function SidebarItem({
+  href,
+  icon: Icon,
+  labelKey,
+  match,
+  collapsed,
+  disabled,
+  lockReason,
+}: SidebarItemProps) {
   const t = useTranslations('Nav');
   const pathname = usePathname();
   const active = isActive(pathname, href, match);
   const label = t(labelKey as Parameters<typeof t>[0]);
+
+  if (disabled) {
+    const content = (
+      <span
+        aria-disabled="true"
+        className={cn(
+          'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium',
+          'opacity-40 cursor-not-allowed select-none',
+          collapsed && 'justify-center px-2',
+        )}
+      >
+        <Icon className="size-5 shrink-0" aria-hidden="true" />
+        {!collapsed && <span className="truncate flex-1">{label}</span>}
+        {!collapsed && <Lock className="size-3.5 shrink-0 ml-auto" aria-hidden="true" />}
+      </span>
+    );
+
+    if (collapsed || lockReason) {
+      // In collapsed mode show the label; in expanded mode show a generic lock reason.
+      // Full i18n for lockReason added in Phase 7.
+      const tooltipText = collapsed ? label : 'Access restricted';
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {content}
+          </TooltipTrigger>
+          <TooltipContent side="right">{tooltipText}</TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return content;
+  }
 
   const link = (
     <Link

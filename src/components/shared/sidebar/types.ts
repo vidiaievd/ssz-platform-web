@@ -6,6 +6,10 @@ export type NavItem = {
   /** Key within the 'Nav' translation namespace. */
   labelKey: string;
   match?: (pathname: string) => boolean;
+  /** Role-gated: render as non-interactive with lock affordance. */
+  disabled?: boolean;
+  /** i18n key for the tooltip explaining why the item is locked. */
+  lockReason?: string;
 };
 
 export type NavSection = {

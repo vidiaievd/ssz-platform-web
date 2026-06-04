@@ -1,5 +1,11 @@
 export type SchoolRole = 'OWNER' | 'ADMIN' | 'CONTENT_ADMIN' | 'TEACHER' | 'STUDENT';
 
+export type SchoolMemberRecord = {
+  userId: string;
+  role?: SchoolRole;
+  joinedAt?: string;
+};
+
 export type School = {
   id: string;
   name: string;
@@ -9,6 +15,12 @@ export type School = {
   website?: string | null;
   contactEmail?: string | null;
   city?: string | null;
+  /** 'ONLINE' | 'HYBRID' — from org-service SchoolResponseDto */
+  type?: 'ONLINE' | 'HYBRID' | null;
+  /** UUID of the school owner — used for per-school role derivation */
+  ownerId?: string | null;
+  /** Members list — present in school detail responses, may be absent in list responses */
+  members?: SchoolMemberRecord[];
   createdAt: string;
   updatedAt: string;
 };

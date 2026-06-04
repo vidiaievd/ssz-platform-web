@@ -17,6 +17,7 @@ export const env = createEnv({
     ENROLLMENT_SERVICE_URL: z.string().url().optional(),
     MEDIA_SERVICE_URL: z.string().url().optional(),
     ORGANIZATION_SERVICE_URL: z.string().url().optional(),
+    ANALYTICS_SERVICE_URL: z.string().url().optional(),
 
     AUTH_COOKIE_SECRET: z.string().min(32),
 
@@ -51,6 +52,7 @@ export const env = createEnv({
     ENROLLMENT_SERVICE_URL: process.env.ENROLLMENT_SERVICE_URL,
     MEDIA_SERVICE_URL: process.env.MEDIA_SERVICE_URL,
     ORGANIZATION_SERVICE_URL: process.env.ORGANIZATION_SERVICE_URL,
+    ANALYTICS_SERVICE_URL: process.env.ANALYTICS_SERVICE_URL,
     AUTH_COOKIE_SECRET: process.env.AUTH_COOKIE_SECRET,
     UPSTREAM_TIMEOUT_MS: process.env.UPSTREAM_TIMEOUT_MS,
     UPSTREAM_API_PREFIX: process.env.UPSTREAM_API_PREFIX,

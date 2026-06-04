@@ -9,14 +9,14 @@ import { useUiStore } from "@/stores/ui-store";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarSection } from "./sidebar-section";
 import type { NavSection } from "./types";
-import type { CurrentUser } from "@/features/auth/types/current-user";
 
 type SidebarProps = {
   sections: NavSection[];
-  user?: CurrentUser;
+  /** When provided, renders a school-type pill in the sidebar footer. */
+  schoolType?: 'online' | 'hybrid';
 };
 
-export function Sidebar({ sections }: SidebarProps) {
+export function Sidebar({ sections, schoolType }: SidebarProps) {
   const t = useTranslations("Common");
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
@@ -77,7 +77,14 @@ export function Sidebar({ sections }: SidebarProps) {
             ))}
           </nav>
         </div>
-        <div className="border-t border-border p-2">
+        <div className="border-t border-border p-2 flex flex-col gap-1">
+          {schoolType && !collapsed && (
+            <div className="px-2 py-1">
+              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium bg-primary/10 text-primary">
+                {schoolType === 'hybrid' ? 'Hybrid' : 'Online only'}
+              </span>
+            </div>
+          )}
           <button
             onClick={toggleSidebar}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}

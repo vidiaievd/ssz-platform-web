@@ -55,8 +55,9 @@
   },
   "Nav": {
     "dashboard": "Обзор",
-    "students": "Ученики",
     "content": "Контент",
+    "groups": "Группы",
+    "students": "Ученики",
     "lessons": "Уроки",
     "mySchools": "Мои школы",
     "settings": "Настройки",
