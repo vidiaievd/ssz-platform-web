@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useOptimistic } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Search, UserPlus, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -9,7 +10,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/ui/status-pill';
 import { CapacityMeter } from '@/components/shared/operations';
-import { removeStudent } from '../api/mutations';
+import { removeStudent, addStudents } from '../api/mutations';
 import type { RosterStudent, Group } from '../types';
 
 type Tone = 'neutral' | 'success' | 'warning' | 'destructive';
@@ -36,20 +37,39 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
   const [pending, startTransition] = useTransition();
   const [removingId, setRemovingId] = useState<string | null>(null);
 
+  // Optimistic removals: hide students immediately when remove is clicked.
+  const [optimisticRoster, applyOptimisticRemove] = useOptimistic(
+    roster,
+    (current: RosterStudent[], removedId: string) =>
+      current.filter((s) => s.userId !== removedId),
+  );
+
   const filtered = query.trim()
-    ? roster.filter(
+    ? optimisticRoster.filter(
         (s) =>
           s.name.toLowerCase().includes(query.toLowerCase()) ||
           s.email.toLowerCase().includes(query.toLowerCase()),
       )
-    : roster;
+    : optimisticRoster;
 
-  function handleRemove(userId: string) {
-    setRemovingId(userId);
+  function handleRemove(student: RosterStudent) {
+    setRemovingId(student.userId);
     startTransition(async () => {
-      await removeStudent(schoolId, group.id, userId);
+      applyOptimisticRemove(student.userId);
+      await removeStudent(schoolId, group.id, student.userId);
       setRemovingId(null);
       router.refresh();
+      toast(`Removed ${student.name}`, {
+        action: {
+          label: 'Undo',
+          onClick: () => {
+            startTransition(async () => {
+              await addStudents(schoolId, group.id, [student.userId]);
+              router.refresh();
+            });
+          },
+        },
+      });
     });
   }
 
@@ -99,9 +119,9 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-16 text-center">
           <p className="text-sm text-(--ssz-text-muted)">
-            {roster.length === 0 ? 'No students enrolled yet.' : 'No students match your search.'}
+            {optimisticRoster.length === 0 ? 'No students enrolled yet.' : 'No students match your search.'}
           </p>
-          {roster.length === 0 && (
+          {optimisticRoster.length === 0 && (
             <Button size="sm" asChild>
               <a href={addStudentsHref}>Add students</a>
             </Button>
@@ -172,7 +192,7 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => handleRemove(student.userId)}
+                        onClick={() => handleRemove(student)}
                         disabled={isRemoving}
                         aria-label={`Remove ${student.name}`}
                         className="text-(--ssz-text-muted) hover:text-error-600"

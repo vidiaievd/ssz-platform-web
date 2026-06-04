@@ -57,3 +57,6 @@ export { TeacherRow } from './components/teacher-row';
 export { filterGroups, attentionCount } from './lib/filter-groups';
 export type { GroupFilter, Segment, SortKey } from './lib/filter-groups';
 export { duplicateGroup } from './api/mutations';
+export { TeacherAssignModal } from './components/teacher-assign-modal';
+export { StudentAssignModal } from './components/student-assign-modal';
+export type { TeacherAssignCandidate, StudentCandidate } from './api/queries';
