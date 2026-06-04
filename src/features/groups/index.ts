@@ -45,3 +45,10 @@ export {
   type SlotInput,
   type TeacherAssignInput,
 } from './schemas';
+
+export { GroupsList } from './components/groups-list';
+export { GroupHealthRow } from './components/group-health-row';
+export { GroupStatusPill } from './components/group-status-pill';
+export { GroupListFilters } from './components/group-list-filters';
+export { filterGroups, attentionCount } from './lib/filter-groups';
+export type { GroupFilter, Segment, SortKey } from './lib/filter-groups';
