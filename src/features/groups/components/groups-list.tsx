@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Users, CalendarRange } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -70,7 +71,8 @@ type Props = {
   filter: GroupFilter;
 };
 
-export function GroupsList({ groups, schoolSlug, filter }: Props) {
+export async function GroupsList({ groups, schoolSlug, filter }: Props) {
+  const t = await getTranslations('Groups');
   const baseHref = `/school/${schoolSlug}`;
   const newGroupHref = `${baseHref}/groups/new`;
   const timetableHref = `${baseHref}/groups/timetable`;
@@ -87,15 +89,15 @@ export function GroupsList({ groups, schoolSlug, filter }: Props) {
       {/* Page header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-(--ssz-text-primary)">Groups</h1>
+          <h1 className="text-2xl font-bold text-(--ssz-text-primary)">{t('list.title')}</h1>
           <p className="mt-0.5 text-sm text-(--ssz-text-secondary)">
             {total} {total === 1 ? 'group' : 'groups'}
-            {active > 0 && <> · {active} active</>}
+            {active > 0 && <> · {active} {t('list.active')}</>}
             {attention > 0 && (
               <>
                 {' · '}
                 <span className="font-semibold text-error-600 dark:text-error-400">
-                  {attention} need{attention === 1 ? 's' : ''} attention
+                  {attention} {attention === 1 ? t('list.attentionSingular') : t('list.attention')}
                 </span>
               </>
             )}
@@ -106,11 +108,11 @@ export function GroupsList({ groups, schoolSlug, filter }: Props) {
           <Button variant="ghost" size="sm" asChild>
             <Link href={timetableHref}>
               <CalendarRange className="size-4 mr-1.5" aria-hidden="true" />
-              Teacher timetable
+              {t('list.timetable')}
             </Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href={newGroupHref}>New group</Link>
+            <Link href={newGroupHref}>{t('list.newGroup')}</Link>
           </Button>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { MoreHorizontal, Pencil, Copy, Archive, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -25,6 +26,7 @@ type Props = {
 type Dialog = 'archive' | 'delete' | null;
 
 export function GroupDetailActions({ group, schoolSlug }: Props) {
+  const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [editOpen, setEditOpen] = useState(false);
@@ -41,7 +43,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
     startTransition(async () => {
       const result = await duplicateGroup(schoolId, group.id);
       if (result.ok && result.id) {
-        toast.success('Group duplicated as draft');
+        toast.success(t('detail.duplicated'));
         router.push(`/school/${schoolSlug}/groups/${result.id}`);
       } else {
         toast.error('Failed to duplicate group');
@@ -53,7 +55,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
     startTransition(async () => {
       const result = await archiveGroup(schoolId, group.id);
       if (result.ok) {
-        toast.success('Group archived');
+        toast.success(t('detail.archived'));
         router.refresh();
       } else {
         toast.error('Failed to archive group');
@@ -66,7 +68,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
     startTransition(async () => {
       const result = await deleteGroup(schoolId, group.id);
       if (result.ok) {
-        toast.success('Group deleted');
+        toast.success(t('detail.deleted'));
         router.push(listHref);
       } else {
         toast.error('Failed to delete group');
@@ -80,7 +82,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
       <div className="flex items-center gap-2 shrink-0">
         <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
           <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
-          Edit
+          {t('detail.edit')}
         </Button>
 
         <DropdownMenu>
@@ -92,12 +94,12 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleDuplicate} disabled={isPending}>
               <Copy className="size-3.5 mr-2" aria-hidden="true" />
-              Duplicate
+              {t('detail.duplicate')}
             </DropdownMenuItem>
             {group.status !== 'archived' && (
               <DropdownMenuItem onClick={() => setDialog('archive')}>
                 <Archive className="size-3.5 mr-2" aria-hidden="true" />
-                Archive
+                {t('detail.archive')}
               </DropdownMenuItem>
             )}
             {canDelete && (
@@ -108,7 +110,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
                   className="text-error-600 focus:text-error-600"
                 >
                   <Trash2 className="size-3.5 mr-2" aria-hidden="true" />
-                  Delete
+                  {t('detail.delete')}
                 </DropdownMenuItem>
               </>
             )}
@@ -128,9 +130,9 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
       <AlertDialog open={dialog === 'archive'} onOpenChange={(o) => !o && setDialog(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive this group?</AlertDialogTitle>
+            <AlertDialogTitle>{t('detail.archiveTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Archiving will make the group read-only. You can unarchive it later by contacting support.
+              {t('detail.archiveBody')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -140,7 +142,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
               onClick={handleArchive}
               disabled={isPending}
             >
-              {isPending ? 'Archiving…' : 'Archive'}
+              {isPending ? t('detail.archiving') : t('detail.archive')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -150,19 +152,19 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
       <AlertDialog open={dialog === 'delete'} onOpenChange={(o) => !o && setDialog(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this group?</AlertDialogTitle>
+            <AlertDialogTitle>{t('detail.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action is permanent and cannot be undone. The group and all its data will be removed.
+              {t('detail.deleteBody')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('edit.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               variant="danger"
               onClick={handleDelete}
               disabled={isPending}
             >
-              {isPending ? 'Deleting…' : 'Delete'}
+              {isPending ? t('detail.deleting') : t('detail.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

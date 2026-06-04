@@ -1,6 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { CapacityMeter } from '@/components/shared/operations';
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function GroupTabs({ group, roster, lessons, schoolSlug }: Props) {
+  const t = useTranslations('Groups');
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -51,13 +53,13 @@ export function GroupTabs({ group, roster, lessons, schoolSlug }: Props) {
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange}>
-      <TabsList>
-        <TabsTrigger value="overview">Overview</TabsTrigger>
+      <TabsList className="overflow-x-auto">
+        <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
         <TabsTrigger value="students">
-          Students{roster.length > 0 ? ` ${roster.length}` : ''}
+          {t('tabs.students')}{roster.length > 0 ? ` ${roster.length}` : ''}
         </TabsTrigger>
-        <TabsTrigger value="teachers">Teachers</TabsTrigger>
-        <TabsTrigger value="schedule">Schedule</TabsTrigger>
+        <TabsTrigger value="teachers">{t('tabs.teachers')}</TabsTrigger>
+        <TabsTrigger value="schedule">{t('tabs.schedule')}</TabsTrigger>
       </TabsList>
 
       {/* ── Overview ──────────────────────────────────────────────────────── */}

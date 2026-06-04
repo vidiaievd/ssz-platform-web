@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Search, X, ArrowDownUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -19,13 +20,14 @@ type Props = {
   draftsCount: number;
 };
 
-const SORT_LABELS: Record<SortKey, string> = {
-  alerts:   'Most alerts',
-  name:     'Name A–Z',
-  students: 'Most students',
-};
-
 export function GroupListFilters({ attentionCount, draftsCount }: Props) {
+  const t = useTranslations('Groups');
+
+  const sortLabels: Record<SortKey, string> = {
+    alerts:   t('filter.sortAlerts'),
+    name:     t('filter.sortName'),
+    students: t('filter.sortStudents'),
+  };
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -85,8 +87,8 @@ export function GroupListFilters({ attentionCount, draftsCount }: Props) {
           type="search"
           value={inputValue}
           onChange={(e) => handleSearchChange(e.target.value)}
-          placeholder="Search groups…"
-          aria-label="Search groups by name, course, or teacher"
+          placeholder={t('filter.search')}
+          aria-label={t('filter.search')}
           className={cn(
             'h-9 w-52 rounded-md border border-input bg-background',
             'pl-8 pr-8 text-sm text-(--ssz-text-primary)',
@@ -112,14 +114,14 @@ export function GroupListFilters({ attentionCount, draftsCount }: Props) {
           active={segment === 'all'}
           onClick={() => updateParam({ segment: 'all' })}
         >
-          All
+          {t('filter.all')}
         </SegmentButton>
         <SegmentButton
           active={segment === 'attention'}
           onClick={() => updateParam({ segment: 'attention' })}
           danger={attentionCount > 0}
         >
-          Needs attention
+          {t('filter.attention')}
           {attentionCount > 0 && (
             <span className={cn(
               'ml-1 inline-flex items-center justify-center rounded-full px-1.5 min-w-[18px] h-[18px]',
@@ -136,7 +138,7 @@ export function GroupListFilters({ attentionCount, draftsCount }: Props) {
           active={segment === 'drafts'}
           onClick={() => updateParam({ segment: 'drafts' })}
         >
-          Drafts
+          {t('filter.drafts')}
           {draftsCount > 0 && (
             <span className={cn(
               'ml-1 inline-flex items-center justify-center rounded-full px-1.5 min-w-[18px] h-[18px]',
@@ -157,17 +159,17 @@ export function GroupListFilters({ attentionCount, draftsCount }: Props) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1.5 text-(--ssz-text-secondary)">
               <ArrowDownUp className="size-3.5" aria-hidden="true" />
-              {SORT_LABELS[sort]}
+              {sortLabels[sort]}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+            {(Object.keys(sortLabels) as SortKey[]).map((key) => (
               <DropdownMenuItem
                 key={key}
                 onClick={() => updateParam({ sort: key })}
                 className={sort === key ? 'font-semibold' : ''}
               >
-                {SORT_LABELS[key]}
+                {sortLabels[key]}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
