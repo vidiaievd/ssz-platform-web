@@ -63,3 +63,6 @@ export type { TeacherAssignCandidate, StudentCandidate } from './api/queries';
 export { GroupCreateFlow } from './components/group-create-flow';
 export { SlotEditor } from './components/slot-editor';
 export { useGroupCreateWizardStore } from './stores/create-wizard-store';
+export { TeacherTimetable } from './components/teacher-timetable';
+export { TimetableGrid } from './components/timetable-grid';
+export { TeacherSelector } from './components/teacher-selector';
