@@ -103,6 +103,23 @@ export async function publishGroup(schoolId: string, groupId: string): Promise<M
   }
 }
 
+export async function duplicateGroup(
+  schoolId: string,
+  groupId: string,
+): Promise<MutationResult & { id?: string }> {
+  try {
+    const result = await serverFetch<{ id: string }>({
+      service: 'organization',
+      path: `/schools/${schoolId}/groups/${groupId}/duplicate`,
+      method: 'POST',
+    });
+    invalidate(groupCacheTags.groups(schoolId));
+    return { ok: true, id: result.id };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
 export async function archiveGroup(schoolId: string, groupId: string): Promise<MutationResult> {
   try {
     await serverFetch({
