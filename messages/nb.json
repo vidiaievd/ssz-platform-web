@@ -1124,5 +1124,231 @@
         "empty": "Ingen elever ennå. Del profilen din for å komme i gang."
       }
     }
+  },
+  "Groups": {
+    "list": {
+      "title": "Grupper",
+      "newGroup": "Ny gruppe",
+      "timetable": "Lærertimeplan",
+      "attention": "trenger oppfølging",
+      "attentionSingular": "trenger oppfølging",
+      "active": "aktiv",
+      "empty": {
+        "title": "Ingen grupper ennå",
+        "description": "Opprett din første gruppe for å komme i gang.",
+        "action": "Ny gruppe"
+      },
+      "filteredEmpty": "Ingen grupper samsvarer med filtrene dine."
+    },
+    "filter": {
+      "search": "Søk i grupper…",
+      "all": "Alle",
+      "attention": "Trenger oppfølging",
+      "drafts": "Utkast",
+      "sortAlerts": "Flest varsler",
+      "sortName": "Navn A–Å",
+      "sortStudents": "Flest elever"
+    },
+    "status": {
+      "draft": "Utkast",
+      "active": "Aktiv",
+      "archived": "Arkivert"
+    },
+    "alert": {
+      "noPrimary": "Ingen primærlærer tildelt",
+      "conflict": "Timeplankollisjon",
+      "overload": "Lærer overbelastet",
+      "over": "Over kapasitet",
+      "under": "Under minimum"
+    },
+    "row": {
+      "noTeacher": "Ingen lærer",
+      "online": "Nettbasert",
+      "inPerson": "Fysisk",
+      "ok": "OK"
+    },
+    "resolve": {
+      "actionRequired": "Handling kreves",
+      "attentionNeeded": "Krever oppmerksomhet",
+      "fix": "Fiks →"
+    },
+    "tabs": {
+      "overview": "Oversikt",
+      "students": "Elever",
+      "teachers": "Lærere",
+      "schedule": "Timeplan"
+    },
+    "overview": {
+      "teachersHeading": "Lærere",
+      "rosterHeading": "Elevliste",
+      "scheduleHeading": "Timeplan",
+      "noTeachers": "Ingen lærere tildelt."
+    },
+    "students": {
+      "search": "Søk etter elever…",
+      "addStudents": "Legg til elever",
+      "noEnrolled": "Ingen elever påmeldt ennå.",
+      "noMatch": "Ingen elever samsvarer med søket ditt.",
+      "removed": "{name} er fjernet",
+      "undo": "Angre",
+      "status": {
+        "active": "Aktiv",
+        "atRisk": "I faresonen",
+        "new": "Ny",
+        "finished": "Ferdig",
+        "clash": "Timeplankollisjon",
+        "unassigned": "Ikke tildelt"
+      }
+    },
+    "teachers": {
+      "primaryHeading": "Primærlærer",
+      "coPrimaryHeading": "Medlærer",
+      "subsHeading": "Vikarer",
+      "noPrimary": "Ingen primærlærer",
+      "noPrimaryDescription": "Gruppen kan ikke ha timer uten en primærlærer.",
+      "assignPrimary": "Tildel primærlærer",
+      "assignTeacher": "Tildel lærer",
+      "noCoPrimary": "Ingen — valgfritt.",
+      "role": {
+        "primary": "Primær",
+        "coPrimary": "Medlærer",
+        "substitute": "Vikar"
+      },
+      "overloaded": "Overbelastet",
+      "conflict": "Kollisjon"
+    },
+    "schedule": {
+      "recurringHeading": "Fast timeplan",
+      "upcomingHeading": "Kommende timer",
+      "noSlots": "Ingen faste timer konfigurert.",
+      "noLessons": "Ingen kommende timer planlagt.",
+      "sub": "Vikar"
+    },
+    "detail": {
+      "back": "Grupper",
+      "edit": "Rediger",
+      "duplicate": "Dupliser",
+      "archive": "Arkiver",
+      "delete": "Slett",
+      "archiveTitle": "Arkivere denne gruppen?",
+      "archiveBody": "Arkivering gjør gruppen skrivebeskyttet.",
+      "deleteTitle": "Slette denne gruppen?",
+      "deleteBody": "Denne handlingen er permanent og kan ikke angres.",
+      "duplicated": "Gruppe duplisert som utkast",
+      "archived": "Gruppe arkivert",
+      "deleted": "Gruppe slettet",
+      "updated": "Gruppe oppdatert",
+      "archiving": "Arkiverer…",
+      "deleting": "Sletter…"
+    },
+    "edit": {
+      "title": "Rediger gruppe",
+      "description": "Oppdater denne gruppens detaljer og innstillinger.",
+      "save": "Lagre endringer",
+      "saving": "Lagrer…",
+      "cancel": "Avbryt",
+      "success": "Gruppe oppdatert",
+      "error": "Kunne ikke oppdatere gruppen"
+    },
+    "wizard": {
+      "title": "Ny gruppe",
+      "subtitle": "Grupper opprettes som utkast. Publiser når lærere og timeplan er bekreftet.",
+      "steps": {
+        "course": "Kurs",
+        "details": "Detaljer",
+        "schedule": "Timeplan",
+        "teachers": "Lærere",
+        "students": "Elever",
+        "review": "Gjennomgang"
+      },
+      "cancel": "Avbryt",
+      "back": "Tilbake",
+      "continue": "Fortsett",
+      "createGroup": "Opprett gruppe",
+      "creating": "Oppretter…",
+      "created": "Gruppe opprettet som utkast"
+    },
+    "assignTeacher": {
+      "title": "Tildel lærer",
+      "description": "Tildeler til {groupName} · språk: {lang}",
+      "role": "Rolle",
+      "roleOptions": {
+        "primary": "Primær",
+        "coPrimary": "Medlærer",
+        "substitute": "Vikar"
+      },
+      "substituteFrom": "Fra dato",
+      "substituteTo": "Til dato",
+      "substituteReason": "Årsak",
+      "reasonRequired": "Årsak er påkrevd for vikarer.",
+      "reasonPlaceholder": "f.eks. Sykefravær, ferie…",
+      "search": "Søk etter lærere…",
+      "noTeachers": "Alle lærere er allerede tildelt.",
+      "langMismatch": "språkavvik",
+      "timeClash": "tidskollisjon",
+      "validationOk": "Klar til tildeling",
+      "validationConflict": "Timeplankollisjon: {name} har allerede en time på dette tidspunktet.",
+      "validationLangMismatch": "Språkavvik: læreren snakker {teacherLang}, gruppens språk er {groupLang}.",
+      "validationOverload": "Dette vil gi {name} {projected}/{max}t per uke.",
+      "errorNoPrimary": "Tildel en primærlærer først før du legger til en medlærer.",
+      "errorBlocked": "Denne tildelingen er ikke tillatt.",
+      "errorGeneric": "Tildeling mislyktes. Prøv igjen.",
+      "assign": "Tildel lærer",
+      "assignAnyway": "Tildel uansett",
+      "assigning": "Tildeler…",
+      "cancel": "Avbryt",
+      "successSimple": "Tildelt {name} som {role}",
+      "successWithWarnings": "Tildelt {name} som {role} — {count} advarsel overstyrt"
+    },
+    "addStudents": {
+      "title": "Legg til elever",
+      "description": "Legger til i {groupName}. Velg én eller flere elever.",
+      "search": "Søk etter navn eller e-post…",
+      "overCapWarning": "Å legge til {count} gir gruppen {projected} elever, over {max}-setegrensen.",
+      "underMinNote": "Merk: gruppen vil fortsatt være under minimum ({min}) etter at du har lagt til.",
+      "noStudents": "Alle skolens elever er allerede påmeldt i denne gruppen.",
+      "noMatch": "Ingen elever samsvarer med søket ditt.",
+      "add": "Legg til elever",
+      "adding": "Legger til…",
+      "addOverride": "Legg til {count} (overstyring av kapasitet)",
+      "cancel": "Avbryt",
+      "success": "La til {count} elev",
+      "successPlural": "La til {count} elever",
+      "successOverride": "La til {count} elever (over kapasitet — overstyring brukt)",
+      "error": "Kunne ikke legge til elever. Prøv igjen."
+    },
+    "timetable": {
+      "title": "Lærertimeplan",
+      "subtitle": "Ukentlig plan, arbeidsbelastning og timeplankollisjon.",
+      "back": "Grupper",
+      "teacherListLabel": "Lærere",
+      "noTeachers": "Ingen aktive lærere med planlagte grupper funnet.",
+      "clear": "Ledig",
+      "overBy": "Over med {n}t",
+      "loadPct": "{pct}% belastning",
+      "legend": {
+        "lesson": "Time",
+        "subCover": "Vikardekning",
+        "conflict": "Kollisjon"
+      },
+      "conflictListTitle": "timeplankollisjon",
+      "conflictListTitlePlural": "timeplankollisjon",
+      "conflictItem": "{day} kollisjon: {groupA} overlapper {groupB} — flytt en time eller omfordel"
+    },
+    "slot": {
+      "add": "Legg til time",
+      "noSlots": "Ingen faste timer. Legg til minst én.",
+      "atLeastOne": "Minst én time er påkrevd.",
+      "overlap": "Overlapper med en annen time",
+      "endBeforeStart": "Slutttid må være etter starttid",
+      "roomRequired": "Rom er påkrevd for fysiske grupper",
+      "fields": {
+        "day": "Dag",
+        "start": "Start",
+        "end": "Slutt",
+        "room": "Rom",
+        "roomLabel": "Rom *"
+      }
+    }
   }
 }

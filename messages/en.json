@@ -1129,5 +1129,231 @@
         "empty": "No students yet. Share your profile to get started."
       }
     }
+  },
+  "Groups": {
+    "list": {
+      "title": "Groups",
+      "newGroup": "New group",
+      "timetable": "Teacher timetable",
+      "attention": "need attention",
+      "attentionSingular": "needs attention",
+      "active": "active",
+      "empty": {
+        "title": "No groups yet",
+        "description": "Create your first group to get started.",
+        "action": "New group"
+      },
+      "filteredEmpty": "No groups match your filters."
+    },
+    "filter": {
+      "search": "Search groups…",
+      "all": "All",
+      "attention": "Needs attention",
+      "drafts": "Drafts",
+      "sortAlerts": "Most alerts",
+      "sortName": "Name A–Z",
+      "sortStudents": "Most students"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "alert": {
+      "noPrimary": "No primary teacher assigned",
+      "conflict": "Schedule conflict",
+      "overload": "Teacher overloaded",
+      "over": "Over capacity",
+      "under": "Under minimum"
+    },
+    "row": {
+      "noTeacher": "No teacher",
+      "online": "Online",
+      "inPerson": "In-person",
+      "ok": "OK"
+    },
+    "resolve": {
+      "actionRequired": "Action required",
+      "attentionNeeded": "Attention needed",
+      "fix": "Fix →"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "students": "Students",
+      "teachers": "Teachers",
+      "schedule": "Schedule"
+    },
+    "overview": {
+      "teachersHeading": "Teachers",
+      "rosterHeading": "Roster",
+      "scheduleHeading": "Schedule",
+      "noTeachers": "No teachers assigned."
+    },
+    "students": {
+      "search": "Search students…",
+      "addStudents": "Add students",
+      "noEnrolled": "No students enrolled yet.",
+      "noMatch": "No students match your search.",
+      "removed": "Removed {name}",
+      "undo": "Undo",
+      "status": {
+        "active": "Active",
+        "atRisk": "At risk",
+        "new": "New",
+        "finished": "Finished",
+        "clash": "Schedule clash",
+        "unassigned": "Unassigned"
+      }
+    },
+    "teachers": {
+      "primaryHeading": "Primary teacher",
+      "coPrimaryHeading": "Co-primary teacher",
+      "subsHeading": "Substitutes",
+      "noPrimary": "No primary teacher",
+      "noPrimaryDescription": "This group cannot run lessons without a primary teacher.",
+      "assignPrimary": "Assign primary",
+      "assignTeacher": "Assign teacher",
+      "noCoPrimary": "None — optional.",
+      "role": {
+        "primary": "Primary",
+        "coPrimary": "Co-primary",
+        "substitute": "Substitute"
+      },
+      "overloaded": "Overloaded",
+      "conflict": "Conflict"
+    },
+    "schedule": {
+      "recurringHeading": "Recurring schedule",
+      "upcomingHeading": "Upcoming lessons",
+      "noSlots": "No recurring slots configured.",
+      "noLessons": "No upcoming lessons scheduled.",
+      "sub": "Sub"
+    },
+    "detail": {
+      "back": "Groups",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "archive": "Archive",
+      "delete": "Delete",
+      "archiveTitle": "Archive this group?",
+      "archiveBody": "Archiving will make the group read-only.",
+      "deleteTitle": "Delete this group?",
+      "deleteBody": "This action is permanent and cannot be undone.",
+      "duplicated": "Group duplicated as draft",
+      "archived": "Group archived",
+      "deleted": "Group deleted",
+      "updated": "Group updated",
+      "archiving": "Archiving…",
+      "deleting": "Deleting…"
+    },
+    "edit": {
+      "title": "Edit group",
+      "description": "Update this group’s details and settings.",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "success": "Group updated",
+      "error": "Failed to update group"
+    },
+    "wizard": {
+      "title": "New group",
+      "subtitle": "Groups are created as drafts. Publish when teachers and schedule are confirmed.",
+      "steps": {
+        "course": "Course",
+        "details": "Details",
+        "schedule": "Schedule",
+        "teachers": "Teachers",
+        "students": "Students",
+        "review": "Review"
+      },
+      "cancel": "Cancel",
+      "back": "Back",
+      "continue": "Continue",
+      "createGroup": "Create group",
+      "creating": "Creating…",
+      "created": "Group created as draft"
+    },
+    "assignTeacher": {
+      "title": "Assign teacher",
+      "description": "Assigning to {groupName} · lang: {lang}",
+      "role": "Role",
+      "roleOptions": {
+        "primary": "Primary",
+        "coPrimary": "Co-primary",
+        "substitute": "Substitute"
+      },
+      "substituteFrom": "From date",
+      "substituteTo": "To date",
+      "substituteReason": "Reason",
+      "reasonRequired": "Reason is required for substitutes.",
+      "reasonPlaceholder": "e.g. Sick leave, vacation…",
+      "search": "Search teachers…",
+      "noTeachers": "All teachers are already assigned.",
+      "langMismatch": "lang mismatch",
+      "timeClash": "time clash",
+      "validationOk": "Good to assign",
+      "validationConflict": "Schedule conflict: {name} already has a lesson at this time.",
+      "validationLangMismatch": "Language mismatch: teacher speaks {teacherLang}, group language is {groupLang}.",
+      "validationOverload": "This would bring {name} to {projected}/{max}h per week.",
+      "errorNoPrimary": "Assign a primary teacher first before adding a co-primary.",
+      "errorBlocked": "This assignment is not allowed.",
+      "errorGeneric": "Assignment failed. Please try again.",
+      "assign": "Assign teacher",
+      "assignAnyway": "Assign anyway",
+      "assigning": "Assigning…",
+      "cancel": "Cancel",
+      "successSimple": "Assigned {name} as {role}",
+      "successWithWarnings": "Assigned {name} as {role} — {count} warning overridden"
+    },
+    "addStudents": {
+      "title": "Add students",
+      "description": "Adding to {groupName}. Select one or more students.",
+      "search": "Search by name or email…",
+      "overCapWarning": "Adding {count} brings the group to {projected}, above the {max}-seat cap. You can still add with an override.",
+      "underMinNote": "Note: group will still be under minimum ({min}) after adding.",
+      "noStudents": "All school students are already enrolled in this group.",
+      "noMatch": "No students match your search.",
+      "add": "Add students",
+      "adding": "Adding…",
+      "addOverride": "Add {count} (override capacity)",
+      "cancel": "Cancel",
+      "success": "Added {count} student",
+      "successPlural": "Added {count} students",
+      "successOverride": "Added {count} students (over capacity — override applied)",
+      "error": "Failed to add students. Please try again."
+    },
+    "timetable": {
+      "title": "Teacher timetable",
+      "subtitle": "Weekly schedule, workload, and scheduling conflicts.",
+      "back": "Groups",
+      "teacherListLabel": "Teachers",
+      "noTeachers": "No active teachers with scheduled groups found.",
+      "clear": "Clear",
+      "overBy": "Over by {n}h",
+      "loadPct": "{pct}% load",
+      "legend": {
+        "lesson": "Lesson",
+        "subCover": "Sub cover",
+        "conflict": "Conflict"
+      },
+      "conflictListTitle": "schedule conflict",
+      "conflictListTitlePlural": "schedule conflicts",
+      "conflictItem": "{day} clash: {groupA} overlaps {groupB} — move one slot or reassign"
+    },
+    "slot": {
+      "add": "Add slot",
+      "noSlots": "No recurring slots. Add at least one.",
+      "atLeastOne": "At least one slot is required.",
+      "overlap": "Overlaps with another slot",
+      "endBeforeStart": "End must be after start",
+      "roomRequired": "Room is required for in-person",
+      "fields": {
+        "day": "Day",
+        "start": "Start",
+        "end": "End",
+        "room": "Room",
+        "roomLabel": "Room *"
+      }
+    }
   }
 }
