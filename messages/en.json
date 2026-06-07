@@ -1355,5 +1355,95 @@
         "roomLabel": "Room *"
       }
     }
+  },
+  "Students": {
+    "notFound": "School not found.",
+    "common": {
+      "cancel": "Cancel",
+      "undo": "Undo"
+    },
+    "list": {
+      "title": "Students",
+      "enrolled": "enrolled",
+      "atRisk": "at risk",
+      "unassigned": "unassigned",
+      "importCsv": "Import CSV",
+      "bulkMessage": "Bulk message",
+      "enroll": "Enroll student",
+      "emptyTitle": "No students yet",
+      "emptyDescription": "Enroll your first student to get started.",
+      "filteredEmpty": "No students match your filters."
+    },
+    "detail": {
+      "backToStudents": "Back to students",
+      "groups": "Groups",
+      "teachers": "Teachers",
+      "progress": "Progress",
+      "details": "Details",
+      "language": "Language",
+      "level": "Level",
+      "status": "Status",
+      "groupsCount": "Groups",
+      "enrolledDate": "Enrolled",
+      "lastActive": "Last active",
+      "progressAriaLabel": "{pct}% complete",
+      "notInAnyGroup": "Not in any group yet.",
+      "addToGroup": "Add to group",
+      "openGroup": "Open group {name}",
+      "nudge": "Nudge",
+      "nudgeSending": "Sending…",
+      "nudgeSent": "Nudge sent to {name}",
+      "nudgeFailed": "Failed to send nudge.",
+      "nudgeAriaLabel": "Send nudge to {name}",
+      "removedFromGroup": "Removed from {group}",
+      "removeFailed": "Failed to remove from group.",
+      "removeFromGroupAriaLabel": "Remove from {group}",
+      "clashBanner": "{groupA} overlaps {groupB} on {day} at {time}. Move the student to a different group session."
+    },
+    "enroll": {
+      "title": "Enroll student",
+      "description": "Add students individually or paste a list of emails.",
+      "emailsLabel": "Email addresses",
+      "emailsPlaceholder": "one@example.com\ntwo@example.com",
+      "emailsHint": "Separate emails with commas, semicolons, or new lines.",
+      "checkEmails": "Check emails",
+      "targetGroup": "Assign to group (optional)",
+      "noGroup": "No group",
+      "submit": "Enroll {count}",
+      "submitDefault": "Enroll",
+      "failed": "Enrollment failed. Please try again."
+    },
+    "addToGroup": {
+      "title": "Add {name} to group",
+      "description": "Select a group. Capacity and schedule clash are shown.",
+      "searchPlaceholder": "Search groups…",
+      "searchAriaLabel": "Search groups",
+      "noGroups": "No groups found.",
+      "clashWarning": "{name} already has a group with a conflicting schedule.",
+      "clashConfirm": "I understand the schedule conflict and want to proceed.",
+      "clashAcknowledged": "Added with schedule clash acknowledged.",
+      "clashBlocked": "Cannot add: schedule clash.",
+      "overCapacity": "Group will be over capacity ({projected}/{max}).",
+      "submit": "Add to group",
+      "added": "Added {name} to {group}",
+      "addedWithWarning": "Added {name} to {group}",
+      "failed": "Failed to add to group."
+    },
+    "bulkMessage": {
+      "title": "Send message",
+      "description": "Send a message to all students in the current selection.",
+      "audience": "Audience",
+      "recipients": "{count} students",
+      "subject": "Subject",
+      "subjectPlaceholder": "Message subject…",
+      "body": "Message",
+      "bodyPlaceholder": "Write your message here…",
+      "send": "Send to {count}",
+      "sent": "Message sent to {count} students",
+      "failed": "Failed to send message."
+    },
+    "onboard": {
+      "invitationBanner": "You have been invited to join a school. Complete your profile to get started."
+    }
   }
 }
