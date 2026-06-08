@@ -1350,5 +1350,95 @@
         "roomLabel": "Кімната *"
       }
     }
+  },
+  "Students": {
+    "notFound": "Школу не знайдено.",
+    "common": {
+      "cancel": "Скасувати",
+      "undo": "Скасувати дію"
+    },
+    "list": {
+      "title": "Студенти",
+      "enrolled": "зараховано",
+      "atRisk": "під загрозою",
+      "unassigned": "без групи",
+      "importCsv": "Імпорт CSV",
+      "bulkMessage": "Масове повідомлення",
+      "enroll": "Зарахувати студента",
+      "emptyTitle": "Студентів ще немає",
+      "emptyDescription": "Зарахуйте першого студента, щоб розпочати.",
+      "filteredEmpty": "Студентів за цими фільтрами не знайдено."
+    },
+    "detail": {
+      "backToStudents": "Назад до студентів",
+      "groups": "Групи",
+      "teachers": "Вчителі",
+      "progress": "Прогрес",
+      "details": "Деталі",
+      "language": "Мова",
+      "level": "Рівень",
+      "status": "Статус",
+      "groupsCount": "Групи",
+      "enrolledDate": "Зараховано",
+      "lastActive": "Остання активність",
+      "progressAriaLabel": "{pct}% виконано",
+      "notInAnyGroup": "Ще не в жодній групі.",
+      "addToGroup": "Додати до групи",
+      "openGroup": "Відкрити групу {name}",
+      "nudge": "Нагадати",
+      "nudgeSending": "Надсилання…",
+      "nudgeSent": "Нагадування надіслано {name}",
+      "nudgeFailed": "Не вдалося надіслати нагадування.",
+      "nudgeAriaLabel": "Надіслати нагадування {name}",
+      "removedFromGroup": "Видалено з {group}",
+      "removeFailed": "Не вдалося видалити з групи.",
+      "removeFromGroupAriaLabel": "Видалити з {group}",
+      "clashBanner": "{groupA} перетинається з {groupB} у {day} о {time}. Перемістіть студента до іншої групи."
+    },
+    "enroll": {
+      "title": "Зарахувати студента",
+      "description": "Додайте студентів окремо або вставте список email-адрес.",
+      "emailsLabel": "Email-адреси",
+      "emailsPlaceholder": "один@приклад.com\nдва@приклад.com",
+      "emailsHint": "Розділяйте email комами, крапками з комою або новими рядками.",
+      "checkEmails": "Перевірити email",
+      "targetGroup": "Призначити до групи (необов'язково)",
+      "noGroup": "Без групи",
+      "submit": "Зарахувати {count}",
+      "submitDefault": "Зарахувати",
+      "failed": "Зарахування не вдалося. Спробуйте ще раз."
+    },
+    "addToGroup": {
+      "title": "Додати {name} до групи",
+      "description": "Оберіть групу. Показано місткість і конфлікти розкладу.",
+      "searchPlaceholder": "Пошук груп…",
+      "searchAriaLabel": "Пошук груп",
+      "noGroups": "Групи не знайдено.",
+      "clashWarning": "{name} вже має групу з конфліктним розкладом.",
+      "clashConfirm": "Я розумію конфлікт розкладу і хочу продовжити.",
+      "clashAcknowledged": "Додано з підтвердженням конфлікту розкладу.",
+      "clashBlocked": "Неможливо додати: конфлікт розкладу.",
+      "overCapacity": "Група перевищить місткість ({projected}/{max}).",
+      "submit": "Додати до групи",
+      "added": "Додано {name} до {group}",
+      "addedWithWarning": "Додано {name} до {group}",
+      "failed": "Не вдалося додати до групи."
+    },
+    "bulkMessage": {
+      "title": "Надіслати повідомлення",
+      "description": "Надішліть повідомлення всім студентам у поточній вибірці.",
+      "audience": "Аудиторія",
+      "recipients": "{count} студентів",
+      "subject": "Тема",
+      "subjectPlaceholder": "Тема повідомлення…",
+      "body": "Повідомлення",
+      "bodyPlaceholder": "Напишіть ваше повідомлення тут…",
+      "send": "Надіслати {count}",
+      "sent": "Повідомлення надіслано {count} студентам",
+      "failed": "Не вдалося надіслати повідомлення."
+    },
+    "onboard": {
+      "invitationBanner": "Вас запросили приєднатися до школи. Заповніть свій профіль, щоб розпочати."
+    }
   }
 }
