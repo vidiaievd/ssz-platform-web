@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { getSchoolBySlug } from "@/features/school/api/get-school-by-slug";
 import { getCommandCenter } from "@/features/teachers/api/queries";
+import { getPendingCount } from "@/features/invitations/api/queries";
 import { CommandCenterClient } from "@/features/teachers/components/command-center/command-center-client";
 
 type Props = {
@@ -21,7 +22,10 @@ export default async function TeachersPage({ params }: Props) {
     );
   }
 
-  const data = await getCommandCenter(school.id);
+  const [data, pendingTeacherInviteCount] = await Promise.all([
+    getCommandCenter(school.id),
+    getPendingCount(school.id, 'teachers'),
+  ]);
   const isHybrid = school.type === "HYBRID";
 
   if ("status" in data) {
@@ -38,6 +42,7 @@ export default async function TeachersPage({ params }: Props) {
       schoolSlug={schoolSlug}
       isHybrid={isHybrid}
       initial={data}
+      pendingTeacherInviteCount={pendingTeacherInviteCount}
     />
   );
 }

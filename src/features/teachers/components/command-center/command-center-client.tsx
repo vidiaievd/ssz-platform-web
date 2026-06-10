@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { removeTeacher } from "../../api/mutations";
 import type { CommandCenterResponse } from "../../api/queries";
+import { PendingInvitesLink } from "@/features/invitations/components/pending-invites-link";
 import { WorkloadKpiRow } from "./workload-kpi-row";
 import { TeacherLoadTable } from "./teacher-load-table";
 import { PriorityQueue } from "./priority-queue";
@@ -20,12 +21,15 @@ type CommandCenterClientProps = {
   schoolSlug: string;
   isHybrid: boolean;
   initial: CommandCenterResponse;
+  pendingTeacherInviteCount?: number;
 };
 
 export function CommandCenterClient({
   schoolId,
+  schoolSlug,
   isHybrid,
   initial,
+  pendingTeacherInviteCount = 0,
 }: CommandCenterClientProps) {
   const t = useTranslations("Teachers.commandCenter");
   const tRoster = useTranslations("Teachers.roster");
@@ -70,6 +74,14 @@ export function CommandCenterClient({
 
   return (
     <main className="p-4 sm:p-6 space-y-5">
+      {/* Pending invitations indicator */}
+      {pendingTeacherInviteCount > 0 && (
+        <PendingInvitesLink
+          count={pendingTeacherInviteCount}
+          href={`/school/${schoolSlug}/invitations?audience=teachers`}
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-(--ssz-text-primary)">
