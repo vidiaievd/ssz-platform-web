@@ -8,9 +8,23 @@ import {
   teacherConflicts,
   teacherLoad,
   projectedCapacity,
+  prepHours,
+  effectiveLoad,
+  dayPeak,
+  consecPeak,
+  softCost,
+  healthState,
+  withinAvailability,
+  teacherSpeaks,
+  validateAssignment,
+  scoreCandidate,
+  rankCandidates,
+  forecast,
+  WORKLOAD_POLICY,
   type GroupForOps,
   type Slot,
 } from './operations';
+import type { AvailabilityBlock } from '@/features/teachers/types';
 
 // ── slotsOverlap ──────────────────────────────────────────────────────────────
 
@@ -277,5 +291,311 @@ describe('projectedCapacity', () => {
   it('exact max is not over', () => {
     expect(projectedCapacity(group, 4).over).toBe(false);
     expect(projectedCapacity(group, 4).projected).toBe(12);
+  });
+});
+
+// ── prepHours / effectiveLoad ─────────────────────────────────────────────────
+
+describe('prepHours', () => {
+  it('calculates prep from contact and distinct courses', () => {
+    expect(prepHours(10, 2)).toBeCloseTo(10 * 0.3 + 2 * 1.0);
+  });
+
+  it('zero contact with courses yields course-only prep', () => {
+    expect(prepHours(0, 3)).toBeCloseTo(3.0);
+  });
+});
+
+describe('effectiveLoad', () => {
+  it('sums contact and prep', () => {
+    expect(effectiveLoad(10, 3)).toBe(13);
+  });
+});
+
+// ── dayPeak ───────────────────────────────────────────────────────────────────
+
+describe('dayPeak', () => {
+  const s = (day: string, start: string, end: string): Slot =>
+    ({ day, start, end, room: '' }) as Slot;
+
+  it('returns 0 for empty slots', () => {
+    expect(dayPeak([])).toBe(0);
+  });
+
+  it('picks the busiest day', () => {
+    const slots = [
+      s('Mon', '09:00', '10:00'), // 1h
+      s('Mon', '11:00', '12:30'), // 1.5h → Mon = 2.5h
+      s('Tue', '09:00', '10:00'), // 1h
+    ];
+    expect(dayPeak(slots)).toBeCloseTo(2.5);
+  });
+});
+
+// ── consecPeak ────────────────────────────────────────────────────────────────
+
+describe('consecPeak', () => {
+  const s = (day: string, start: string, end: string): Slot =>
+    ({ day, start, end, room: '' }) as Slot;
+
+  it('returns 0 for empty slots', () => {
+    expect(consecPeak([])).toBe(0);
+  });
+
+  it('merges adjacent back-to-back slots', () => {
+    const slots = [
+      s('Mon', '09:00', '10:00'),
+      s('Mon', '10:00', '11:30'),
+      s('Mon', '12:00', '13:00'), // gap → separate run
+    ];
+    expect(consecPeak(slots)).toBeCloseTo(2.5);
+  });
+
+  it('handles run spanning across midday', () => {
+    const slots = [
+      s('Tue', '11:00', '12:00'),
+      s('Tue', '12:00', '13:30'),
+    ];
+    expect(consecPeak(slots)).toBeCloseTo(2.5);
+  });
+
+  it('consecutive slots on different days are independent runs', () => {
+    const slots = [
+      s('Mon', '09:00', '11:00'),
+      s('Tue', '09:00', '11:00'),
+    ];
+    expect(consecPeak(slots)).toBeCloseTo(2.0);
+  });
+});
+
+// ── healthState ───────────────────────────────────────────────────────────────
+
+describe('healthState', () => {
+  it('ok when all within limits', () => {
+    expect(healthState(6, 10, 0, 3, 3)).toBe('ok');
+  });
+
+  it('danger when contact exceeds cap', () => {
+    expect(healthState(11, 10, 0, 3, 3)).toBe('danger');
+  });
+
+  it('danger when conflict count > 0', () => {
+    expect(healthState(5, 10, 1, 3, 3)).toBe('danger');
+  });
+
+  it('warn when near cap', () => {
+    // 9/10 = 90% ≥ 85% NEAR_CAP_RATIO
+    expect(healthState(9, 10, 0, 3, 3)).toBe('warn');
+  });
+
+  it('warn when consecPeak exceeds MAX_CONSECUTIVE by 1', () => {
+    // cp = MAX_CONSECUTIVE+1 = 5 → warn (danger threshold is > MAX_CONSECUTIVE+1)
+    expect(healthState(4, 10, 0, 3, WORKLOAD_POLICY.MAX_CONSECUTIVE + 1)).toBe('warn');
+  });
+
+  it('danger when consecPeak exceeds MAX_CONSECUTIVE+1', () => {
+    expect(healthState(4, 10, 0, 3, WORKLOAD_POLICY.MAX_CONSECUTIVE + 2)).toBe('danger');
+  });
+});
+
+// ── withinAvailability ────────────────────────────────────────────────────────
+
+describe('withinAvailability', () => {
+  const block = (type: 'available' | 'preferred' | 'unavailable'): AvailabilityBlock => ({
+    blockId: 'b1', teacherId: 't1',
+    dayOfWeek: 'Mon', startTime: '08:00', endTime: '20:00',
+    type, recurring: true, validFrom: null, validTo: null,
+  });
+
+  it('returns true when slot fits in available block', () => {
+    expect(withinAvailability({ day: 'Mon', start: '09:00', end: '10:00' }, [block('available')])).toBe(true);
+  });
+
+  it('returns true when slot fits in preferred block', () => {
+    expect(withinAvailability({ day: 'Mon', start: '09:00', end: '10:00' }, [block('preferred')])).toBe(true);
+  });
+
+  it('returns false when type is unavailable', () => {
+    expect(withinAvailability({ day: 'Mon', start: '09:00', end: '10:00' }, [block('unavailable')])).toBe(false);
+  });
+
+  it('returns false when slot exceeds block end', () => {
+    expect(withinAvailability({ day: 'Mon', start: '19:00', end: '21:00' }, [block('available')])).toBe(false);
+  });
+
+  it('returns false for empty blocks', () => {
+    expect(withinAvailability({ day: 'Mon', start: '09:00', end: '10:00' }, [])).toBe(false);
+  });
+});
+
+// ── validateAssignment ────────────────────────────────────────────────────────
+
+describe('validateAssignment', () => {
+  const baseCtx = {
+    candidateLangs: ['en'],
+    groupLang: 'en',
+    candidateSlots: [] as Slot[],
+    newSlot: { day: 'Mon' as const, start: '10:00', end: '11:00' },
+    availabilityBlocks: [] as AvailabilityBlock[],
+    contactHoursAfter: 5,
+    cap: 10,
+  };
+
+  it('returns ok for a valid assignment', () => {
+    expect(validateAssignment(baseCtx)).toEqual({ ok: true });
+  });
+
+  it('blocks on language mismatch', () => {
+    const ctx = { ...baseCtx, groupLang: 'fr' };
+    const result = validateAssignment(ctx);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.conflictType).toBe('language');
+  });
+
+  it('blocks when cap exceeded', () => {
+    const ctx = { ...baseCtx, contactHoursAfter: 11 };
+    const result = validateAssignment(ctx);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.conflictType).toBe('cap_exceeded');
+  });
+
+  it('blocks on overlap with existing slot', () => {
+    const ctx = {
+      ...baseCtx,
+      candidateSlots: [{ day: 'Mon' as const, start: '10:30', end: '11:30', room: '' }],
+    };
+    const result = validateAssignment(ctx);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.conflictType).toBe('overlap');
+  });
+
+  it('blocks sub_loop', () => {
+    const ctx = { ...baseCtx, isSubLoop: true };
+    const result = validateAssignment(ctx);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.conflictType).toBe('sub_loop');
+  });
+});
+
+// ── scoreCandidate / rankCandidates ───────────────────────────────────────────
+
+const lesson = { lang: 'en', durationHours: 1.5 };
+const baseCandidate = {
+  teacherId: 't1', name: 'Alice', avatarUrl: null,
+  langs: ['en'],
+  currentContactHours: 4,
+  maxWeeklyContactHours: 10,
+  isFreeAtSlot: true,
+  isFamiliar: false,
+  isSubLoop: false,
+};
+
+describe('scoreCandidate', () => {
+  it('returns ineligible when candidate does not speak the language', () => {
+    const c = { ...baseCandidate, langs: ['fr'] };
+    const result = scoreCandidate(c, lesson);
+    expect(result.eligible).toBe(false);
+    expect(result.classification).toBe('ineligible');
+    expect(result.fitScore).toBe(0);
+    expect(result.factors.canLang).toBe(false);
+  });
+
+  it('returns ineligible when candidate is not free', () => {
+    const c = { ...baseCandidate, isFreeAtSlot: false };
+    const result = scoreCandidate(c, lesson);
+    expect(result.eligible).toBe(false);
+    expect(result.factors.free).toBe(false);
+  });
+
+  it('classifies best when score ≥ 80', () => {
+    const c = { ...baseCandidate, isFamiliar: true, currentContactHours: 0 };
+    const result = scoreCandidate(c, lesson);
+    expect(result.eligible).toBe(true);
+    expect(result.fitScore).toBeGreaterThanOrEqual(80);
+    expect(result.classification).toBe('best');
+  });
+
+  it('flags wouldOverload when adding lesson exceeds cap', () => {
+    const c = { ...baseCandidate, currentContactHours: 9, maxWeeklyContactHours: 10 };
+    const result = scoreCandidate(c, lesson); // 9 + 1.5 = 10.5 > 10
+    expect(result.factors.wouldOverload).toBe(true);
+  });
+});
+
+describe('rankCandidates', () => {
+  it('sorts eligible before ineligible', () => {
+    const pool = [
+      { ...baseCandidate, teacherId: 't1', langs: ['fr'] }, // ineligible
+      { ...baseCandidate, teacherId: 't2', langs: ['en'] }, // eligible
+    ];
+    const ranked = rankCandidates(pool, lesson);
+    expect(ranked[0]!.eligible).toBe(true);
+    expect(ranked[1]!.eligible).toBe(false);
+  });
+
+  it('tie-breaks by teacherId when scores are equal', () => {
+    const pool = [
+      { ...baseCandidate, teacherId: 'tz', currentContactHours: 4 },
+      { ...baseCandidate, teacherId: 'ta', currentContactHours: 4 },
+    ];
+    const ranked = rankCandidates(pool, lesson);
+    expect(ranked[0]!.teacherId).toBe('ta');
+  });
+});
+
+// ── forecast ──────────────────────────────────────────────────────────────────
+
+describe('forecast', () => {
+  const baseline = {
+    studentCount: 80,
+    activeTeacherCount: 3,
+    perLanguage: [
+      { lang: 'en', teacherCount: 2, groupCount: 3, studentCount: 50 },
+      { lang: 'nb', teacherCount: 1, groupCount: 2, studentCount: 30 },
+    ],
+  };
+
+  const params = {
+    growth: 0.2,
+    terms: 3,
+    groupSize: 10,
+    hoursPerGroup: 2,
+    contractPerTeacher: 8,
+  };
+
+  it('generates projection for each term', () => {
+    const result = forecast(params, baseline);
+    expect(result.projection).toHaveLength(3);
+    expect(result.projection[0]!.term).toBe(1);
+  });
+
+  it('compounds growth correctly', () => {
+    const result = forecast(params, baseline);
+    const term1Students = Math.round(80 * 1.2);
+    const term2Students = Math.round(80 * Math.pow(1.2, 2));
+    expect(result.projection[0]!.contactHours).toBe(
+      Math.ceil(term1Students / 10) * 2,
+    );
+    expect(result.projection[1]!.contactHours).toBe(
+      Math.ceil(term2Students / 10) * 2,
+    );
+  });
+
+  it('identifies bottleneck as the most strained language', () => {
+    const result = forecast(params, baseline);
+    expect(result.bottleneck).not.toBeNull();
+  });
+
+  it('hireGap is non-negative', () => {
+    const result = forecast(params, baseline);
+    expect(result.hireGap).toBeGreaterThanOrEqual(0);
+  });
+
+  it('zero growth keeps student count flat', () => {
+    const zeroGrowth = { ...params, growth: 0 };
+    const result = forecast(zeroGrowth, baseline);
+    const term1Students = 80; // no growth
+    const expectedGroups = Math.ceil(term1Students / 10);
+    expect(result.projection[0]!.contactHours).toBe(expectedGroups * 2);
   });
 });

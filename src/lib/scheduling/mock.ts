@@ -5,7 +5,20 @@
  */
 
 import type { Slot, Lesson, TimetableTeacher, OpsWarning } from '@/features/groups/types';
-import type { SchedulingProvider } from './provider';
+import type { SchedulingProvider, CommandCenterData, MutationResult } from './provider';
+import type {
+  AvailabilityBlock,
+  Absence,
+  SubstituteRequest,
+  SubstituteCandidate,
+  CurriculumPlan,
+  ForecastParams,
+  ForecastResult,
+  WorkloadKpis,
+  TeacherLoadRow,
+  Vacancy,
+  RoomLoad,
+} from '@/features/teachers/types';
 import {
   FIXTURE_SLOTS,
   FIXTURE_DEFAULT_SLOTS,
@@ -13,11 +26,26 @@ import {
   FIXTURE_TEACHER_META,
   FIXTURE_SCHOOL_TEACHERS,
   FIXTURE_GROUP_META,
+  FIXTURE_TEACHER_LANGS,
+  FIXTURE_TEACHER_EMPLOYMENT as _FIXTURE_TEACHER_EMPLOYMENT,
+  FIXTURE_AVAILABILITY,
+  FIXTURE_ABSENCES,
+  FIXTURE_SUB_REQUESTS,
+  FIXTURE_CURRICULUM,
+  FIXTURE_ALERTS,
 } from './fixtures';
 import {
   teacherLoad,
   teacherConflicts,
   nextLessons as computeNextLessons,
+  prepHours,
+  effectiveLoad,
+  dayPeak,
+  consecPeak,
+  healthState,
+  rankCandidates,
+  forecast as computeForecast,
+  WORKLOAD_POLICY,
   type GroupForOps,
 } from '@/lib/groups/operations';
 
@@ -51,7 +79,6 @@ export const mockProvider: SchedulingProvider = {
   },
 
   async putSlots(groupId: string, slots: Slot[]): Promise<void> {
-    // In-memory mutation for tests (resets on process restart).
     FIXTURE_SLOTS[groupId] = slots;
   },
 
@@ -133,7 +160,6 @@ export const mockProvider: SchedulingProvider = {
         const myGroups = activeGroups.filter(
           (g) => g.primaryTeacherId === tid || g.coPrimaryTeacherId === tid,
         );
-        // Emit one warning per conflicting group pair
         for (let i = 0; i < myGroups.length; i++) {
           for (let j = i + 1; j < myGroups.length; j++) {
             const gA = myGroups[i]!;
@@ -164,7 +190,252 @@ export const mockProvider: SchedulingProvider = {
   },
 
   async studentClashes(_schoolId: string, _userId: string): Promise<OpsWarning[]> {
-    // No student clash fixtures yet — returns empty for now.
     return [];
+  },
+
+  // ── Teacher management ────────────────────────────────────────────────────
+
+  async commandCenter(schoolId: string): Promise<CommandCenterData> {
+    const teacherIds = FIXTURE_SCHOOL_TEACHERS[schoolId] ?? [];
+    const activeGroups = allActiveGroupsForOps();
+
+    let overloadedCount = 0;
+    let clashCount = 0;
+    let totalUtilPct = 0;
+    let totalSpare = 0;
+    const teacherRows: TeacherLoadRow[] = [];
+
+    for (const tid of teacherIds) {
+      const meta = FIXTURE_TEACHER_META[tid];
+      const maxContact = FIXTURE_TEACHER_MAX_HOURS[tid] ?? 20;
+      const langs = FIXTURE_TEACHER_LANGS[tid] ?? [];
+      const load = teacherLoad({ id: tid, maxWeeklyHours: maxContact }, activeGroups);
+
+      const myGroups = activeGroups.filter(
+        (g) => g.primaryTeacherId === tid || g.coPrimaryTeacherId === tid,
+      );
+      const distinctCourses = new Set(myGroups.map((g) => FIXTURE_GROUP_META[g.id]?.lang ?? 'xx')).size;
+      const prep = prepHours(load.hours, distinctCourses);
+      const effective = effectiveLoad(load.hours, prep);
+      const mySlots = myGroups.flatMap((g) => g.slots);
+      const dp = dayPeak(mySlots);
+      const cp = consecPeak(mySlots);
+      const conflicts = teacherConflicts(tid, activeGroups);
+      const state = healthState(load.hours, maxContact, conflicts, dp, cp);
+
+      const utilPct = maxContact > 0 ? Math.round((load.hours / maxContact) * 100) : 0;
+      totalUtilPct += utilPct;
+      totalSpare += Math.max(0, maxContact - load.hours);
+      if (load.overloaded) overloadedCount++;
+      if (conflicts > 0) clashCount++;
+
+      teacherRows.push({
+        teacherId: tid,
+        name: meta?.name ?? tid,
+        avatarUrl: meta?.avatarUrl ?? null,
+        languages: langs,
+        contactHours: load.hours,
+        prepHours: prep,
+        effectiveLoad: effective,
+        utilizationPct: utilPct,
+        healthState: state,
+        groupCount: load.groups,
+        conflictCount: conflicts,
+        maxWeeklyContactHours: maxContact,
+      });
+    }
+
+    const vacancies: Vacancy[] = Object.entries(FIXTURE_GROUP_META)
+      .filter(([, m]) => m.status === 'active' && !m.primaryTeacherId)
+      .map(([gid, m]) => ({
+        groupId: gid,
+        groupName: m.name,
+        lang: m.lang,
+        kind: 'no-primary' as const,
+      }));
+
+    const roomLoad: RoomLoad[] = [];
+
+    const kpis: WorkloadKpis = {
+      utilizationAvgPct: teacherIds.length > 0 ? Math.round(totalUtilPct / teacherIds.length) : 0,
+      spareCapacityHours: totalSpare,
+      overloadedCount,
+      clashCount,
+      vacancyCount: vacancies.length,
+    };
+
+    return {
+      kpis,
+      teachers: teacherRows.sort((a, b) => b.utilizationPct - a.utilizationPct),
+      violations: FIXTURE_ALERTS,
+      vacancies,
+      roomLoad,
+    };
+  },
+
+  async getAvailability(teacherId: string): Promise<AvailabilityBlock[]> {
+    return FIXTURE_AVAILABILITY[teacherId] ?? [];
+  },
+
+  async putAvailability(teacherId: string, blocks: AvailabilityBlock[]): Promise<void> {
+    FIXTURE_AVAILABILITY[teacherId] = blocks;
+  },
+
+  async listAbsences(schoolId: string): Promise<Absence[]> {
+    const teacherIds = new Set(FIXTURE_SCHOOL_TEACHERS[schoolId] ?? []);
+    return FIXTURE_ABSENCES.filter((a) => teacherIds.has(a.teacherId));
+  },
+
+  async reportAbsence(input): Promise<{ absenceId: string; createdRequests: SubstituteRequest[] }> {
+    const absenceId = `absence-${Date.now()}`;
+    const absence: Absence = {
+      absenceId,
+      teacherId: input.teacherId,
+      kind: input.kind,
+      scope: input.scope,
+      from: input.from,
+      to: input.to,
+      reason: input.reason,
+      affectedLessonCount: 2,
+      coveredCount: 0,
+    };
+    FIXTURE_ABSENCES.push(absence);
+
+    const req: SubstituteRequest = {
+      requestId: `req-${Date.now()}`,
+      lessonId: `lesson-auto-${Date.now()}`,
+      groupId: 'group-a1',
+      groupName: 'English A1 Morning',
+      originalTeacherId: input.teacherId,
+      coverWindow: { from: input.from, to: input.to ?? input.from },
+      urgency: 'upcoming',
+      status: 'open',
+      lang: 'en',
+      day: 'Mon',
+      start: '18:00',
+      end: '19:30',
+    };
+    FIXTURE_SUB_REQUESTS.push(req);
+
+    return { absenceId, createdRequests: [req] };
+  },
+
+  async coverQueue(schoolId: string): Promise<SubstituteRequest[]> {
+    const teacherIds = new Set(FIXTURE_SCHOOL_TEACHERS[schoolId] ?? []);
+    return FIXTURE_SUB_REQUESTS.filter(
+      (r) => r.status === 'open' && teacherIds.has(r.originalTeacherId),
+    );
+  },
+
+  async candidates(requestId: string): Promise<SubstituteCandidate[]> {
+    const req = FIXTURE_SUB_REQUESTS.find((r) => r.requestId === requestId);
+    if (!req) return [];
+
+    const lessonDuration =
+      (parseInt(req.end.replace(':', '')) - parseInt(req.start.replace(':', ''))) / 100;
+
+    const pool = Object.entries(FIXTURE_TEACHER_META)
+      .filter(([tid]) => tid !== req.originalTeacherId)
+      .map(([tid, meta]) => {
+        const maxHours = FIXTURE_TEACHER_MAX_HOURS[tid] ?? 20;
+        const activeGroups = allActiveGroupsForOps();
+        const load = teacherLoad({ id: tid, maxWeeklyHours: maxHours }, activeGroups);
+        const langs = FIXTURE_TEACHER_LANGS[tid] ?? [];
+        const mySlots = activeGroups
+          .filter((g) => g.primaryTeacherId === tid || g.coPrimaryTeacherId === tid)
+          .flatMap((g) => g.slots);
+        const isFree = !mySlots.some(
+          (s) => s.day === req.day &&
+            parseInt(s.start.replace(':', '')) < parseInt(req.end.replace(':', '')) &&
+            parseInt(s.end.replace(':', '')) > parseInt(req.start.replace(':', '')),
+        );
+        return {
+          teacherId: tid,
+          name: meta.name,
+          avatarUrl: meta.avatarUrl,
+          langs,
+          currentContactHours: load.hours,
+          maxWeeklyContactHours: maxHours,
+          isFreeAtSlot: isFree,
+          isFamiliar: activeGroups.some(
+            (g) =>
+              (g.primaryTeacherId === tid || g.coPrimaryTeacherId === tid) &&
+              g.id === req.groupId,
+          ),
+          isSubLoop: false,
+        };
+      });
+
+    return rankCandidates(pool, { lang: req.lang, durationHours: lessonDuration }, WORKLOAD_POLICY);
+  },
+
+  async assignSubstitute(
+    requestId: string,
+    substituteTeacherId: string,
+    _override?: boolean,
+  ): Promise<MutationResult> {
+    const idx = FIXTURE_SUB_REQUESTS.findIndex((r) => r.requestId === requestId);
+    if (idx === -1) return { ok: false, error: 'Request not found' };
+
+    const req = FIXTURE_SUB_REQUESTS[idx]!;
+    const activeGroups = allActiveGroupsForOps();
+    const maxHours = FIXTURE_TEACHER_MAX_HOURS[substituteTeacherId] ?? 20;
+    const load = teacherLoad({ id: substituteTeacherId, maxWeeklyHours: maxHours }, activeGroups);
+    const lessonDuration =
+      (parseInt(req.end.replace(':', '')) - parseInt(req.start.replace(':', ''))) / 100;
+
+    if (load.hours + lessonDuration > maxHours && !_override) {
+      return { ok: false, error: 'cap_exceeded' };
+    }
+
+    FIXTURE_SUB_REQUESTS[idx] = { ...req, status: 'closed' };
+    return { ok: true };
+  },
+
+  async getCurriculum(groupId: string): Promise<CurriculumPlan> {
+    return (
+      FIXTURE_CURRICULUM[groupId] ?? {
+        planId: `plan-${groupId}`,
+        groupId,
+        units: [],
+        targetWeeklyHours: WORKLOAD_POLICY.HOURS_PER_GROUP_DEFAULT,
+        progressPct: 0,
+      }
+    );
+  },
+
+  async putCurriculum(groupId: string, plan: CurriculumPlan): Promise<void> {
+    FIXTURE_CURRICULUM[groupId] = plan;
+  },
+
+  async computeForecast(schoolId: string, params: ForecastParams): Promise<ForecastResult> {
+    const teacherIds = FIXTURE_SCHOOL_TEACHERS[schoolId] ?? [];
+    const activeGroups = allActiveGroupsForOps();
+
+    const langCounts: Record<string, { teacherCount: number; groupCount: number; studentCount: number }> = {};
+    for (const tid of teacherIds) {
+      const langs = FIXTURE_TEACHER_LANGS[tid] ?? [];
+      for (const lang of langs) {
+        if (!langCounts[lang]) langCounts[lang] = { teacherCount: 0, groupCount: 0, studentCount: 0 };
+        langCounts[lang]!.teacherCount++;
+      }
+    }
+    for (const g of activeGroups) {
+      const meta = FIXTURE_GROUP_META[g.id];
+      if (!meta) continue;
+      if (!langCounts[meta.lang]) langCounts[meta.lang] = { teacherCount: 0, groupCount: 0, studentCount: 0 };
+      langCounts[meta.lang]!.groupCount++;
+      langCounts[meta.lang]!.studentCount += g.studentCount;
+    }
+
+    const totalStudents = activeGroups.reduce((acc, g) => acc + g.studentCount, 0);
+
+    const baseline = {
+      studentCount: totalStudents,
+      activeTeacherCount: teacherIds.length,
+      perLanguage: Object.entries(langCounts).map(([lang, counts]) => ({ lang, ...counts })),
+    };
+
+    return computeForecast(params, baseline);
   },
 };

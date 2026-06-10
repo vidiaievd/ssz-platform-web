@@ -25,4 +25,37 @@ export const realProvider: SchedulingProvider = {
   async studentClashes(_schoolId: string, _userId: string) {
     throw new Error('scheduling-service not ready');
   },
+  async commandCenter(_schoolId: string) {
+    throw new Error('scheduling-service not ready');
+  },
+  async getAvailability(_teacherId: string) {
+    throw new Error('scheduling-service not ready');
+  },
+  async putAvailability(_teacherId: string, _blocks: unknown[]) {
+    throw new Error('scheduling-service not ready');
+  },
+  async listAbsences(_schoolId: string) {
+    throw new Error('scheduling-service not ready');
+  },
+  async reportAbsence(_input: unknown) {
+    throw new Error('scheduling-service not ready');
+  },
+  async coverQueue(_schoolId: string) {
+    throw new Error('scheduling-service not ready');
+  },
+  async candidates(_requestId: string) {
+    throw new Error('scheduling-service not ready');
+  },
+  async assignSubstitute(_requestId: string, _substituteTeacherId: string) {
+    throw new Error('scheduling-service not ready');
+  },
+  async getCurriculum(_groupId: string) {
+    throw new Error('scheduling-service not ready');
+  },
+  async putCurriculum(_groupId: string, _plan: unknown) {
+    throw new Error('scheduling-service not ready');
+  },
+  async computeForecast(_schoolId: string, _params: unknown) {
+    throw new Error('scheduling-service not ready');
+  },
 };

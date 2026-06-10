@@ -4,6 +4,13 @@
  */
 
 import type { Slot } from '@/features/groups/types';
+import type {
+  AvailabilityBlock,
+  Absence,
+  SubstituteRequest,
+  CurriculumPlan,
+  Alert,
+} from '@/features/teachers/types';
 
 // group-id → weekly slots
 export const FIXTURE_SLOTS: Record<string, Slot[]> = {
@@ -121,3 +128,162 @@ export const FIXTURE_GROUP_META: Record<string, {
     endDate: '2026-06-30',
   },
 };
+
+// ── Teacher management fixtures ───────────────────────────────────────────────
+
+// teacher-id → languages
+export const FIXTURE_TEACHER_LANGS: Record<string, string[]> = {
+  'teacher-x': ['en', 'nb'],
+  'teacher-y': ['de', 'fr'],
+  'teacher-z': ['uk', 'en'],
+};
+
+// teacher-id → employment type
+export const FIXTURE_TEACHER_EMPLOYMENT: Record<string, 'full' | 'part' | 'contract'> = {
+  'teacher-x': 'full',
+  'teacher-y': 'part',
+  'teacher-z': 'contract',
+};
+
+// teacher-id → availability blocks
+export const FIXTURE_AVAILABILITY: Record<string, AvailabilityBlock[]> = {
+  'teacher-x': [
+    {
+      blockId: 'avail-x-1', teacherId: 'teacher-x',
+      dayOfWeek: 'Mon', startTime: '08:00', endTime: '22:00',
+      type: 'available', recurring: true, validFrom: null, validTo: null,
+    },
+    {
+      blockId: 'avail-x-2', teacherId: 'teacher-x',
+      dayOfWeek: 'Wed', startTime: '08:00', endTime: '22:00',
+      type: 'available', recurring: true, validFrom: null, validTo: null,
+    },
+    {
+      blockId: 'avail-x-3', teacherId: 'teacher-x',
+      dayOfWeek: 'Fri', startTime: '08:00', endTime: '22:00',
+      type: 'preferred', recurring: true, validFrom: null, validTo: null,
+    },
+  ],
+  'teacher-y': [
+    {
+      blockId: 'avail-y-1', teacherId: 'teacher-y',
+      dayOfWeek: 'Mon', startTime: '07:00', endTime: '14:00',
+      type: 'available', recurring: true, validFrom: null, validTo: null,
+    },
+    {
+      blockId: 'avail-y-2', teacherId: 'teacher-y',
+      dayOfWeek: 'Tue', startTime: '07:00', endTime: '14:00',
+      type: 'available', recurring: true, validFrom: null, validTo: null,
+    },
+    {
+      blockId: 'avail-y-3', teacherId: 'teacher-y',
+      dayOfWeek: 'Wed', startTime: '07:00', endTime: '14:00',
+      type: 'available', recurring: true, validFrom: null, validTo: null,
+    },
+    {
+      blockId: 'avail-y-4', teacherId: 'teacher-y',
+      dayOfWeek: 'Thu', startTime: '07:00', endTime: '14:00',
+      type: 'available', recurring: true, validFrom: null, validTo: null,
+    },
+    {
+      blockId: 'avail-y-5', teacherId: 'teacher-y',
+      dayOfWeek: 'Fri', startTime: '07:00', endTime: '14:00',
+      type: 'available', recurring: true, validFrom: null, validTo: null,
+    },
+  ],
+  'teacher-z': [],
+};
+
+// absences for school-1
+export const FIXTURE_ABSENCES: Absence[] = [
+  {
+    absenceId: 'absence-1',
+    teacherId: 'teacher-x',
+    kind: 'leave',
+    scope: 'window',
+    from: '2026-06-20',
+    to: '2026-06-27',
+    reason: 'Planned vacation',
+    affectedLessonCount: 4,
+    coveredCount: 0,
+  },
+];
+
+// open substitute requests
+export const FIXTURE_SUB_REQUESTS: SubstituteRequest[] = [
+  {
+    requestId: 'req-1',
+    lessonId: 'group-a1-lesson-0',
+    groupId: 'group-a1',
+    groupName: 'English A1 Morning',
+    originalTeacherId: 'teacher-x',
+    coverWindow: { from: '2026-06-20', to: '2026-06-20' },
+    urgency: 'upcoming',
+    status: 'open',
+    lang: 'en',
+    day: 'Mon',
+    start: '18:00',
+    end: '19:30',
+  },
+  {
+    requestId: 'req-2',
+    lessonId: 'group-a1-lesson-1',
+    groupId: 'group-a1',
+    groupName: 'English A1 Morning',
+    originalTeacherId: 'teacher-x',
+    coverWindow: { from: '2026-06-22', to: '2026-06-22' },
+    urgency: 'upcoming',
+    status: 'open',
+    lang: 'en',
+    day: 'Wed',
+    start: '18:00',
+    end: '19:30',
+  },
+];
+
+// curriculum plans
+export const FIXTURE_CURRICULUM: Record<string, CurriculumPlan> = {
+  'group-a1': {
+    planId: 'plan-a1',
+    groupId: 'group-a1',
+    targetWeeklyHours: 3,
+    progressPct: 40,
+    units: [
+      { unitId: 'u1', title: 'Present Simple', order: 1, plannedSessions: 4, deliveredSessions: 4, requiredLevel: 'A1', status: 'done' },
+      { unitId: 'u2', title: 'Past Simple', order: 2, plannedSessions: 4, deliveredSessions: 2, requiredLevel: 'A1', status: 'active' },
+      { unitId: 'u3', title: 'Future Tenses', order: 3, plannedSessions: 6, deliveredSessions: 0, requiredLevel: 'A2', status: 'planned' },
+    ],
+  },
+  'group-c2': {
+    planId: 'plan-c2',
+    groupId: 'group-c2',
+    targetWeeklyHours: 3,
+    progressPct: 75,
+    units: [
+      { unitId: 'u4', title: 'Advanced Grammar', order: 1, plannedSessions: 8, deliveredSessions: 6, requiredLevel: 'C1', status: 'active' },
+      { unitId: 'u5', title: 'Academic Writing', order: 2, plannedSessions: 8, deliveredSessions: 0, requiredLevel: 'C2', status: 'planned' },
+    ],
+  },
+};
+
+// active alerts
+export const FIXTURE_ALERTS: Alert[] = [
+  {
+    alertId: 'alert-1',
+    kind: 'conflict',
+    severity: 'danger',
+    state: 'raised',
+    teacherId: 'teacher-x',
+    message: 'Schedule conflict: group-a1 and group-b1 overlap on Monday 18:00–19:30',
+    occurredAt: '2026-06-08T09:00:00Z',
+  },
+  {
+    alertId: 'alert-2',
+    kind: 'overload',
+    severity: 'danger',
+    state: 'raised',
+    teacherId: 'teacher-y',
+    message: 'Teacher overloaded: 10h contact vs 8h cap',
+    occurredAt: '2026-06-08T09:01:00Z',
+  },
+];

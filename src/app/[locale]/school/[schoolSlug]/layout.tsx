@@ -64,6 +64,7 @@ export default async function SchoolInstanceLayout({ children, params }: Props) 
     role,
     schoolType,
     school: { name: school.name, slug: school.slug ?? school.id },
+    schoolId: school.id,
   };
 
   return (

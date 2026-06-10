@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import {
   BookOpen,
   Compass,
+  GraduationCap,
   Layers,
   LayoutDashboard,
   School,
@@ -17,6 +18,7 @@ import type { CurrentUser } from "@/features/auth/types/current-user";
 import type { DashboardRole, SchoolType } from "@/features/dashboard/types";
 import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
+import { AlertBadge } from "./topbar/alert-badge";
 import { Sidebar } from "./sidebar/sidebar";
 import { MobileSidebar } from "./sidebar/mobile-sidebar";
 import { Topbar } from "./topbar/topbar";
@@ -27,12 +29,13 @@ export type SchoolContext = {
   role: DashboardRole;
   schoolType: SchoolType;
   school: { name: string; slug: string };
+  schoolId: string;
 };
 
 function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSection[] {
   const gating = schoolCtx ? navGating(schoolCtx.role) : null;
 
-  function disabled(navId: 'dashboard' | 'courses' | 'groups' | 'students' | 'settings'): boolean {
+  function disabled(navId: 'dashboard' | 'courses' | 'groups' | 'students' | 'teachers' | 'settings'): boolean {
     return gating ? gating[navId] === 'locked' : false;
   }
 
@@ -64,6 +67,13 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
           icon: Users,
           labelKey: "students",
           disabled: disabled('students'),
+          lockReason: "Nav.locked.adminOnly",
+        },
+        {
+          href: `/school/${schoolSlug}/teachers`,
+          icon: GraduationCap,
+          labelKey: "teachers",
+          disabled: disabled('teachers'),
           lockReason: "Nav.locked.adminOnly",
         },
       ],
@@ -162,7 +172,13 @@ export function AppShell({ variant, user, schoolContext, children }: AppShellPro
           user={user}
           onMenuOpen={() => setMobileOpen(true)}
           leading={schoolSwitcher}
-          actions={variant === "student" ? <NotificationBell /> : undefined}
+          actions={
+          variant === "student" ? (
+            <NotificationBell />
+          ) : variant === "school" ? (
+            <AlertBadge schoolId={schoolContext?.schoolId} />
+          ) : undefined
+        }
         />
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
