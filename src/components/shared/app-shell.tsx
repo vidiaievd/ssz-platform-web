@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Layers,
   LayoutDashboard,
+  MailCheck,
   School,
   Send,
   Settings,
@@ -35,7 +36,7 @@ export type SchoolContext = {
 function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSection[] {
   const gating = schoolCtx ? navGating(schoolCtx.role) : null;
 
-  function disabled(navId: 'dashboard' | 'courses' | 'groups' | 'students' | 'teachers' | 'settings'): boolean {
+  function disabled(navId: 'dashboard' | 'courses' | 'groups' | 'students' | 'teachers' | 'invitations' | 'settings'): boolean {
     return gating ? gating[navId] === 'locked' : false;
   }
 
@@ -76,6 +77,12 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
           disabled: disabled('teachers'),
           lockReason: "Nav.locked.adminOnly",
         },
+        {
+          href: `/school/${schoolSlug}/invitations`,
+          icon: MailCheck,
+          labelKey: "invitations",
+          disabled: disabled('invitations'),
+        },
       ],
     },
     {
@@ -98,6 +105,7 @@ function buildTutorNav(tutorSlug: string): NavSection[] {
       items: [
         { href: `/tutor/${tutorSlug}/dashboard`, icon: LayoutDashboard, labelKey: "dashboard" },
         { href: `/tutor/${tutorSlug}/students`, icon: Users, labelKey: "students" },
+        { href: `/tutor/${tutorSlug}/invitations`, icon: MailCheck, labelKey: "invitations" },
         { href: `/tutor/${tutorSlug}/content`, icon: BookOpen, labelKey: "content" },
       ],
     },

@@ -2,16 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
+import { getInvitationsProvider } from '@/lib/invitations/provider';
+import type { InvitationRole, InvitationStatus } from '@/features/invitations/types';
 
 type Params = { params: Promise<{ id: string }> };
 
-export async function GET(_req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, { params }: Params) {
   const { id } = await params;
+  const { searchParams } = req.nextUrl;
+  const role = searchParams.get('role') as InvitationRole | null;
+  const status = searchParams.get('status') as InvitationStatus | null;
+  const search = searchParams.get('search') ?? undefined;
+
   try {
-    const data = await serverFetch({
-      service: 'organization',
-      path: `/schools/${id}/invitations`,
-    });
+    const provider = getInvitationsProvider();
+    const data = await provider.list(
+      id,
+      {
+        role: role ?? undefined,
+        status: status ?? undefined,
+        search,
+      },
+    );
     return NextResponse.json(data);
   } catch (e) {
     if (e instanceof AppError && e.code === 'unauthenticated') {

@@ -63,7 +63,8 @@
     "mySchools": "My Schools",
     "settings": "Settings",
     "discover": "Discover",
-    "requests": "Requests"
+    "requests": "Requests",
+    "invitations": "Invitations"
   },
   "RouteTitles": {
     "dashboard": "Dashboard",
@@ -1643,6 +1644,85 @@
       "ok": "Healthy",
       "warn": "Warning",
       "danger": "Critical"
+    }
+  },
+  "Invitations": {
+    "page": {
+      "title": "Invitations",
+      "pendingSummary": "{count, plural, one {# pending} other {# pending}}",
+      "expiredSummary": "{count, plural, one {# expired} other {# expired}}",
+      "noPending": "No pending invitations"
+    },
+    "tabs": {
+      "all": "All",
+      "teachers": "Teachers",
+      "students": "Students",
+      "staff": "Staff"
+    },
+    "table": {
+      "recipient": "Recipient",
+      "roleGroup": "Role / Group",
+      "status": "Status",
+      "sent": "Sent",
+      "expires": "Expires",
+      "actions": "Actions",
+      "empty": "No invitations yet",
+      "retry": "Try again",
+      "invitedBy": "by {name}"
+    },
+    "status": {
+      "accepted": "Accepted",
+      "pending": "Pending",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
+    "expiry": {
+      "dash": "—",
+      "expired": "Expired",
+      "soon": "Expiring soon",
+      "availableIn": "Available in {mins} min"
+    },
+    "actions": {
+      "resend": "Resend",
+      "copyLink": "Copy link",
+      "revoke": "Revoke",
+      "linkCopied": "Link copied"
+    },
+    "resend": {
+      "success": "Invitation resent",
+      "alreadyAccepted": "Invitation was already accepted",
+      "throttled": "Too many resends — try again later",
+      "gone": "Invitation no longer exists",
+      "error": "Failed to resend invitation",
+      "cooldownHint": "Available in {mins} min"
+    },
+    "revoke": {
+      "title": "Revoke invitation?",
+      "description": "The invitation to {email} will be revoked and can no longer be used. You can invite them again later.",
+      "confirm": "Revoke",
+      "cancel": "Cancel",
+      "success": "Invitation revoked",
+      "undo": "Undo",
+      "alreadyAccepted": "Cannot revoke — invitation was already accepted",
+      "gone": "Invitation was already revoked or expired",
+      "error": "Failed to revoke invitation"
+    },
+    "pendingLink": {
+      "singular": "1 invitation pending →",
+      "plural": "{count} invitations pending →"
+    },
+    "roles": {
+      "TEACHER": "Teacher",
+      "STUDENT": "Student",
+      "ADMIN": "Admin",
+      "CONTENT_ADMIN": "Content Admin",
+      "SCHEDULER": "Scheduler"
+    },
+    "a11y": {
+      "loadingLabel": "Loading invitations",
+      "listLabel": "Invitations list",
+      "actionsLabel": "Actions for {email}",
+      "pendingLabel": "{count} pending"
     }
   }
 }

@@ -63,7 +63,8 @@
     "mySchools": "Mine skoler",
     "settings": "Innstillinger",
     "discover": "Utforsk",
-    "requests": "Søknader"
+    "requests": "Søknader",
+    "invitations": "Invitasjoner"
   },
   "RouteTitles": {
     "dashboard": "Oversikt",
@@ -1464,21 +1465,259 @@
         "clashes": "Timeplankonflikter",
         "vacancies": "Ledige stillinger"
       },
-      "table": { "name": "Lærer", "load": "Belastning", "langs": "Språk", "groups": "Grupper", "conflicts": "Konflikter" },
-      "priorityQueue": { "title": "Trenger oppfølging", "empty": "Ingen problemer å løse.", "offload": "Avlast", "arrangeCover": "Ordne vikar", "openSchedule": "Åpne timeplan", "vacancyMessage": "{lang} — {group} mangler primærlærer" },
-      "roomUtilization": { "title": "Romutnyttelse" }
+      "table": {
+        "name": "Lærer",
+        "load": "Belastning",
+        "langs": "Språk",
+        "groups": "Grupper",
+        "conflicts": "Konflikter"
+      },
+      "priorityQueue": {
+        "title": "Trenger oppfølging",
+        "empty": "Ingen problemer å løse.",
+        "offload": "Avlast",
+        "arrangeCover": "Ordne vikar",
+        "openSchedule": "Åpne timeplan",
+        "vacancyMessage": "{lang} — {group} mangler primærlærer"
+      },
+      "roomUtilization": {
+        "title": "Romutnyttelse"
+      }
     },
     "roster": {
-      "addModal": { "title": "Legg til lærer", "emailLabel": "E-postadresse", "hoursLabel": "Maks kontakttimer per uke", "employmentLabel": "Ansettelsestype", "employmentFull": "Heltid", "employmentPart": "Deltid", "employmentContract": "Kontrakt", "inviteButton": "Send invitasjon", "addButton": "Legg til skolen", "onboardButton": "Inviter til onboarding", "lookingUp": "Søker…", "notFound": "Ingen konto funnet — sender registreringsinvitasjon", "foundTeacher": "Fant lærerprofil", "foundUser": "Fant bruker — vil onboarde som lærer", "noLangs": "Ingen undervisningsspråk angitt", "cancelButton": "Avbryt" },
-      "removeGuard": { "title": "Kan ikke fjerne lærer", "body": "Denne læreren er primærlærer i {count} aktiv(e) gruppe(r). Tilordne primær først:", "confirm": "Bekreft fjerning", "undo": "Angre fjerning" }
+      "addModal": {
+        "title": "Legg til lærer",
+        "emailLabel": "E-postadresse",
+        "hoursLabel": "Maks kontakttimer per uke",
+        "employmentLabel": "Ansettelsestype",
+        "employmentFull": "Heltid",
+        "employmentPart": "Deltid",
+        "employmentContract": "Kontrakt",
+        "inviteButton": "Send invitasjon",
+        "addButton": "Legg til skolen",
+        "onboardButton": "Inviter til onboarding",
+        "lookingUp": "Søker…",
+        "notFound": "Ingen konto funnet — sender registreringsinvitasjon",
+        "foundTeacher": "Fant lærerprofil",
+        "foundUser": "Fant bruker — vil onboarde som lærer",
+        "noLangs": "Ingen undervisningsspråk angitt",
+        "cancelButton": "Avbryt"
+      },
+      "removeGuard": {
+        "title": "Kan ikke fjerne lærer",
+        "body": "Denne læreren er primærlærer i {count} aktiv(e) gruppe(r). Tilordne primær først:",
+        "confirm": "Bekreft fjerning",
+        "undo": "Angre fjerning"
+      }
     },
-    "schedule": { "title": "Timeplan", "weekLabel": "Uke", "loadBreakdown": "Belastningsdetaljer", "contact": "Kontakt", "prep": "Forberedelse", "effective": "Effektiv belastning", "utilization": "Utnyttelse", "dayPeak": "Dagstopp", "consecPeak": "Sammenhengende topp", "softCost": "Planleggingskostnad", "curriculumCarried": "Pensum", "availabilityEditor": "Rediger tilgjengelighet", "absenceList": "Fravær", "reportAbsence": "Rapporter fravær", "arrangecover": "Ordne vikar", "teacherSwitcher": "Bytt lærer", "overloadTitle": "Overbelastet", "nearCapTitle": "Nær kapasitetsgrense", "conflicts": "{count} timeplankonflikt(er)", "utilizationWarning": "Utnyttelse {pct}% — nærmer seg grensen", "dayPeakWarning": "Dagstopp {hours}t — overskrider daglig maks", "consecPeakWarning": "{count} sammenhengende timer — tretthetrisiko", "preferred": "Foretrukket", "available": "Tilgjengelig", "unavailable": "Ikke tilgjengelig" },
-    "availability": { "available": "Tilgjengelig", "preferred": "Foretrukket", "unavailable": "Ikke tilgjengelig", "recurring": "Gjentakende", "saveButton": "Lagre tilgjengelighet" },
-    "absence": { "title": "Rapporter fravær", "kindLabel": "Type", "kindSick": "Sykefravær", "kindLeave": "Planlagt ferie", "kindVacancy": "Vakanse", "scopeLabel": "Varighet", "scopeToday": "Bare i dag", "scopeWindow": "Datoperiode", "scopePermanent": "Permanent", "fromLabel": "Fra", "toLabel": "Til", "reasonLabel": "Årsak", "submitButton": "Rapporter", "affectedLessons": "{count} timer berørt", "covered": "{covered}/{total} dekket", "arrangecover": "Ordne vikar" },
-    "substitutions": { "title": "Vikarkonsoll", "reportAbsence": "Rapporter fravær", "empty": "Ingen åpne vikarbehov.", "urgencyToday": "I dag", "urgencyUpcoming": "Kommende", "urgencyOpen": "Åpen", "candidateList": { "title": "Kandidater", "assign": "Tildel", "undo": "Angre", "noEligible": "Ingen kvalifiserte kandidater funnet.", "classificationBest": "Beste valg", "classificationGood": "Godt valg", "classificationOk": "Mulig", "classificationIneligible": "Ikke kvalifisert" }, "bulkCover": "Dekk alle med beste", "bulkProgress": "{covered} dekket, {flagged} flagget" },
-    "curriculum": { "title": "Pensumsplanlegger", "selectGroup": "Velg gruppe", "targetHours": "Mål ukentlige timer", "units": "Enheter", "addUnit": "Legg til enhet", "statusPlanned": "Planlagt", "statusActive": "Aktiv", "statusDone": "Ferdig", "statusOverridden": "Overstyrt", "deliver": "Merk levert", "override": "Overstyr", "overrideReason": "Årsak til overstyring", "lessonMapper": "Enhet–Time-kobling" },
-    "forecast": { "title": "Prognose og kapasitet", "export": "Eksport plan", "sliders": { "growth": "Elevvekst (%/term)", "terms": "Termer å projisere", "groupSize": "Elever per gruppe", "hoursPerGroup": "Timer per gruppe/uke", "contractPerTeacher": "Kontraktstimer/lærer" }, "headline": "Lærere nødvendig", "projectionChart": "Bemanningsprognose", "languageGap": "Gap per språk", "bottleneck": "Flaskehals", "bottleneckDetail": "{lang} er ved {util}% projisert utnyttelse", "openHiringPlan": "Åpne ansettelsesplan", "saveScenario": "Lagre scenario", "scenarios": "Lagrede scenarioer", "riskLow": "Lav", "riskMedium": "Middels", "riskHigh": "Høy" },
-    "alerts": { "title": "Varsler", "open": "åpne", "empty": "Ingen åpne varsler.", "acknowledge": "Bekreft", "ackLabel": "Bekreft varsel", "ackError": "Kunne ikke bekrefte varselet", "kindOverload": "Overbelastning", "kindNearCap": "Nær kapasitet", "kindDailyBreach": "Daglig grense brutt", "kindConflict": "Timeplankonflik", "kindVacancy": "Vakanse", "kindUncovered": "Udekket time", "kindSubOverload": "Vikarbelamring", "kindBottleneck": "Språkflaskehals" },
-    "healthState": { "ok": "Frisk", "warn": "Advarsel", "danger": "Kritisk" }
+    "schedule": {
+      "title": "Timeplan",
+      "weekLabel": "Uke",
+      "loadBreakdown": "Belastningsdetaljer",
+      "contact": "Kontakt",
+      "prep": "Forberedelse",
+      "effective": "Effektiv belastning",
+      "utilization": "Utnyttelse",
+      "dayPeak": "Dagstopp",
+      "consecPeak": "Sammenhengende topp",
+      "softCost": "Planleggingskostnad",
+      "curriculumCarried": "Pensum",
+      "availabilityEditor": "Rediger tilgjengelighet",
+      "absenceList": "Fravær",
+      "reportAbsence": "Rapporter fravær",
+      "arrangecover": "Ordne vikar",
+      "teacherSwitcher": "Bytt lærer",
+      "overloadTitle": "Overbelastet",
+      "nearCapTitle": "Nær kapasitetsgrense",
+      "conflicts": "{count} timeplankonflikt(er)",
+      "utilizationWarning": "Utnyttelse {pct}% — nærmer seg grensen",
+      "dayPeakWarning": "Dagstopp {hours}t — overskrider daglig maks",
+      "consecPeakWarning": "{count} sammenhengende timer — tretthetrisiko",
+      "preferred": "Foretrukket",
+      "available": "Tilgjengelig",
+      "unavailable": "Ikke tilgjengelig"
+    },
+    "availability": {
+      "available": "Tilgjengelig",
+      "preferred": "Foretrukket",
+      "unavailable": "Ikke tilgjengelig",
+      "recurring": "Gjentakende",
+      "saveButton": "Lagre tilgjengelighet"
+    },
+    "absence": {
+      "title": "Rapporter fravær",
+      "kindLabel": "Type",
+      "kindSick": "Sykefravær",
+      "kindLeave": "Planlagt ferie",
+      "kindVacancy": "Vakanse",
+      "scopeLabel": "Varighet",
+      "scopeToday": "Bare i dag",
+      "scopeWindow": "Datoperiode",
+      "scopePermanent": "Permanent",
+      "fromLabel": "Fra",
+      "toLabel": "Til",
+      "reasonLabel": "Årsak",
+      "submitButton": "Rapporter",
+      "affectedLessons": "{count} timer berørt",
+      "covered": "{covered}/{total} dekket",
+      "arrangecover": "Ordne vikar"
+    },
+    "substitutions": {
+      "title": "Vikarkonsoll",
+      "reportAbsence": "Rapporter fravær",
+      "empty": "Ingen åpne vikarbehov.",
+      "urgencyToday": "I dag",
+      "urgencyUpcoming": "Kommende",
+      "urgencyOpen": "Åpen",
+      "candidateList": {
+        "title": "Kandidater",
+        "assign": "Tildel",
+        "undo": "Angre",
+        "noEligible": "Ingen kvalifiserte kandidater funnet.",
+        "classificationBest": "Beste valg",
+        "classificationGood": "Godt valg",
+        "classificationOk": "Mulig",
+        "classificationIneligible": "Ikke kvalifisert"
+      },
+      "bulkCover": "Dekk alle med beste",
+      "bulkProgress": "{covered} dekket, {flagged} flagget"
+    },
+    "curriculum": {
+      "title": "Pensumsplanlegger",
+      "selectGroup": "Velg gruppe",
+      "targetHours": "Mål ukentlige timer",
+      "units": "Enheter",
+      "addUnit": "Legg til enhet",
+      "statusPlanned": "Planlagt",
+      "statusActive": "Aktiv",
+      "statusDone": "Ferdig",
+      "statusOverridden": "Overstyrt",
+      "deliver": "Merk levert",
+      "override": "Overstyr",
+      "overrideReason": "Årsak til overstyring",
+      "lessonMapper": "Enhet–Time-kobling"
+    },
+    "forecast": {
+      "title": "Prognose og kapasitet",
+      "export": "Eksport plan",
+      "sliders": {
+        "growth": "Elevvekst (%/term)",
+        "terms": "Termer å projisere",
+        "groupSize": "Elever per gruppe",
+        "hoursPerGroup": "Timer per gruppe/uke",
+        "contractPerTeacher": "Kontraktstimer/lærer"
+      },
+      "headline": "Lærere nødvendig",
+      "projectionChart": "Bemanningsprognose",
+      "languageGap": "Gap per språk",
+      "bottleneck": "Flaskehals",
+      "bottleneckDetail": "{lang} er ved {util}% projisert utnyttelse",
+      "openHiringPlan": "Åpne ansettelsesplan",
+      "saveScenario": "Lagre scenario",
+      "scenarios": "Lagrede scenarioer",
+      "riskLow": "Lav",
+      "riskMedium": "Middels",
+      "riskHigh": "Høy"
+    },
+    "alerts": {
+      "title": "Varsler",
+      "open": "åpne",
+      "empty": "Ingen åpne varsler.",
+      "acknowledge": "Bekreft",
+      "ackLabel": "Bekreft varsel",
+      "ackError": "Kunne ikke bekrefte varselet",
+      "kindOverload": "Overbelastning",
+      "kindNearCap": "Nær kapasitet",
+      "kindDailyBreach": "Daglig grense brutt",
+      "kindConflict": "Timeplankonflik",
+      "kindVacancy": "Vakanse",
+      "kindUncovered": "Udekket time",
+      "kindSubOverload": "Vikarbelamring",
+      "kindBottleneck": "Språkflaskehals"
+    },
+    "healthState": {
+      "ok": "Frisk",
+      "warn": "Advarsel",
+      "danger": "Kritisk"
+    }
+  },
+  "Invitations": {
+    "page": {
+      "title": "Invitasjoner",
+      "pendingSummary": "{count, plural, one {# venter} other {# venter}}",
+      "expiredSummary": "{count, plural, one {# utløpt} other {# utløpt}}",
+      "noPending": "Ingen ventende invitasjoner"
+    },
+    "tabs": {
+      "all": "Alle",
+      "teachers": "Lærere",
+      "students": "Studenter",
+      "staff": "Personale"
+    },
+    "table": {
+      "recipient": "Mottaker",
+      "roleGroup": "Rolle / Gruppe",
+      "status": "Status",
+      "sent": "Sendt",
+      "expires": "Utløper",
+      "actions": "Handlinger",
+      "empty": "Ingen invitasjoner ennå",
+      "retry": "Prøv igjen",
+      "invitedBy": "av {name}"
+    },
+    "status": {
+      "accepted": "Akseptert",
+      "pending": "Venter",
+      "expired": "Utløpt",
+      "revoked": "Tilbakekalt"
+    },
+    "expiry": {
+      "dash": "—",
+      "expired": "Utløpt",
+      "soon": "Utløper snart",
+      "availableIn": "Tilgjengelig om {mins} min"
+    },
+    "actions": {
+      "resend": "Send på nytt",
+      "copyLink": "Kopier lenke",
+      "revoke": "Tilbakekall",
+      "linkCopied": "Lenke kopiert"
+    },
+    "resend": {
+      "success": "Invitasjon sendt på nytt",
+      "alreadyAccepted": "Invitasjonen ble allerede akseptert",
+      "throttled": "For mange forsendelser — prøv igjen senere",
+      "gone": "Invitasjonen eksisterer ikke lenger",
+      "error": "Kunne ikke sende invitasjon på nytt",
+      "cooldownHint": "Tilgjengelig om {mins} min"
+    },
+    "revoke": {
+      "title": "Tilbakekalle invitasjon?",
+      "description": "Invitasjonen til {email} vil bli tilbakekalt og kan ikke lenger brukes. Du kan invitere dem igjen senere.",
+      "confirm": "Tilbakekall",
+      "cancel": "Avbryt",
+      "success": "Invitasjon tilbakekalt",
+      "undo": "Angre",
+      "alreadyAccepted": "Kan ikke tilbakekalle — invitasjonen ble allerede akseptert",
+      "gone": "Invitasjonen ble allerede tilbakekalt eller utløpt",
+      "error": "Kunne ikke tilbakekalle invitasjon"
+    },
+    "pendingLink": {
+      "singular": "1 invitasjon venter →",
+      "plural": "{count} invitasjoner venter →"
+    },
+    "roles": {
+      "TEACHER": "Lærer",
+      "STUDENT": "Student",
+      "ADMIN": "Admin",
+      "CONTENT_ADMIN": "Innholdsadmin",
+      "SCHEDULER": "Planlegger"
+    },
+    "a11y": {
+      "loadingLabel": "Laster invitasjoner",
+      "listLabel": "Invitasjonsliste",
+      "actionsLabel": "Handlinger for {email}",
+      "pendingLabel": "{count} venter"
+    }
   }
 }

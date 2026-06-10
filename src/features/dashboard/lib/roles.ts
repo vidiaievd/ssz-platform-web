@@ -16,6 +16,7 @@ const ALL_NAV: NavId[] = [
   'groups',
   'students',
   'teachers',
+  'invitations',
   'analytics',
   'branding',
   'permissions',

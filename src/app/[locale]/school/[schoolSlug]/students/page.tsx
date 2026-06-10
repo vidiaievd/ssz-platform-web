@@ -10,6 +10,8 @@ import { StudentsList } from '@/features/students/components/students-list';
 import { Button } from '@/components/ui/button';
 import { segmentPredicate } from '@/lib/students/status';
 import type { SegmentKey } from '@/features/students/types';
+import { getPendingCount } from '@/features/invitations/api/queries';
+import { PendingInvitesLink } from '@/features/invitations/components/pending-invites-link';
 
 type Props = {
   params: Promise<{ schoolSlug: string; locale: string }>;
@@ -32,9 +34,10 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
   }
 
   const activeSegment = (segment as SegmentKey | undefined) ?? 'all';
-  const { items: students, total } = await getStudents(school.id, {
-    search: q,
-  });
+  const [{ items: students, total }, pendingInvitesCount] = await Promise.all([
+    getStudents(school.id, { search: q }),
+    getPendingCount(school.id, 'students'),
+  ]);
 
   const atRiskCount = students.filter(segmentPredicate('at-risk')).length;
   const unassignedCount = students.filter(segmentPredicate('no-group')).length;
@@ -90,6 +93,14 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
           </Button>
         </div>
       </div>
+
+      {/* Pending invites indicator */}
+      {pendingInvitesCount > 0 && (
+        <PendingInvitesLink
+          count={pendingInvitesCount}
+          href={`/school/${schoolSlug}/invitations?audience=students`}
+        />
+      )}
 
       {/* Filter island (client) */}
       <StudentsFilters students={students} />

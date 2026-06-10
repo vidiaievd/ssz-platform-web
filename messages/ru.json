@@ -63,7 +63,8 @@
     "mySchools": "Мои школы",
     "settings": "Настройки",
     "discover": "Найти",
-    "requests": "Заявки"
+    "requests": "Заявки",
+    "invitations": "Приглашения"
   },
   "RouteTitles": {
     "dashboard": "Обзор",
@@ -1457,22 +1458,266 @@
       "export": "Экспорт",
       "empty": "В этой школе пока нет учителей.",
       "emptyCta": "Добавьте первого учителя",
-      "kpis": { "utilization": "Ср. загрузка", "spareCapacity": "Свободная мощность", "overloaded": "Перегружено", "clashes": "Конфликты расписания", "vacancies": "Вакансии" },
-      "table": { "name": "Учитель", "load": "Нагрузка", "langs": "Языки", "groups": "Группы", "conflicts": "Конфликты" },
-      "priorityQueue": { "title": "Требует внимания", "empty": "Нет проблем для решения.", "offload": "Разгрузить", "arrangeCover": "Организовать замену", "openSchedule": "Открыть расписание", "vacancyMessage": "{lang} — в группе {group} нет основного учителя" },
-      "roomUtilization": { "title": "Загрузка кабинетов" }
+      "kpis": {
+        "utilization": "Ср. загрузка",
+        "spareCapacity": "Свободная мощность",
+        "overloaded": "Перегружено",
+        "clashes": "Конфликты расписания",
+        "vacancies": "Вакансии"
+      },
+      "table": {
+        "name": "Учитель",
+        "load": "Нагрузка",
+        "langs": "Языки",
+        "groups": "Группы",
+        "conflicts": "Конфликты"
+      },
+      "priorityQueue": {
+        "title": "Требует внимания",
+        "empty": "Нет проблем для решения.",
+        "offload": "Разгрузить",
+        "arrangeCover": "Организовать замену",
+        "openSchedule": "Открыть расписание",
+        "vacancyMessage": "{lang} — в группе {group} нет основного учителя"
+      },
+      "roomUtilization": {
+        "title": "Загрузка кабинетов"
+      }
     },
     "roster": {
-      "addModal": { "title": "Добавить учителя", "emailLabel": "Электронная почта", "hoursLabel": "Макс. часов в неделю", "employmentLabel": "Тип занятости", "employmentFull": "Полная ставка", "employmentPart": "Частичная ставка", "employmentContract": "Контракт", "inviteButton": "Отправить приглашение", "addButton": "Добавить в школу", "onboardButton": "Пригласить к регистрации", "lookingUp": "Поиск…", "notFound": "Аккаунт не найден — отправить приглашение", "foundTeacher": "Найден профиль учителя", "foundUser": "Найден пользователь — регистрация как учитель", "noLangs": "Языки преподавания не указаны", "cancelButton": "Отмена" },
-      "removeGuard": { "title": "Невозможно удалить учителя", "body": "Этот учитель является основным в {count} активной(ых) группе(ах). Сначала назначьте другого основного:", "confirm": "Подтвердить удаление", "undo": "Отменить удаление" }
+      "addModal": {
+        "title": "Добавить учителя",
+        "emailLabel": "Электронная почта",
+        "hoursLabel": "Макс. часов в неделю",
+        "employmentLabel": "Тип занятости",
+        "employmentFull": "Полная ставка",
+        "employmentPart": "Частичная ставка",
+        "employmentContract": "Контракт",
+        "inviteButton": "Отправить приглашение",
+        "addButton": "Добавить в школу",
+        "onboardButton": "Пригласить к регистрации",
+        "lookingUp": "Поиск…",
+        "notFound": "Аккаунт не найден — отправить приглашение",
+        "foundTeacher": "Найден профиль учителя",
+        "foundUser": "Найден пользователь — регистрация как учитель",
+        "noLangs": "Языки преподавания не указаны",
+        "cancelButton": "Отмена"
+      },
+      "removeGuard": {
+        "title": "Невозможно удалить учителя",
+        "body": "Этот учитель является основным в {count} активной(ых) группе(ах). Сначала назначьте другого основного:",
+        "confirm": "Подтвердить удаление",
+        "undo": "Отменить удаление"
+      }
     },
-    "schedule": { "title": "Расписание", "weekLabel": "Неделя", "loadBreakdown": "Детали нагрузки", "contact": "Контакт", "prep": "Подготовка", "effective": "Эффективная нагрузка", "utilization": "Загрузка", "dayPeak": "Пик дня", "consecPeak": "Непрерывный пик", "softCost": "Стоимость планирования", "curriculumCarried": "Учебный план", "availabilityEditor": "Редактировать доступность", "absenceList": "Отсутствия", "reportAbsence": "Сообщить об отсутствии", "arrangecover": "Организовать замену", "teacherSwitcher": "Сменить учителя", "overloadTitle": "Перегрузка", "nearCapTitle": "Близко к лимиту", "conflicts": "{count} конфликт(ов) расписания", "utilizationWarning": "Загрузка {pct}% — приближается к лимиту", "dayPeakWarning": "Пик дня {hours}ч — превышен дневной лимит", "consecPeakWarning": "{count} подряд уроков — риск усталости", "preferred": "Предпочтительно", "available": "Доступно", "unavailable": "Недоступно" },
-    "availability": { "available": "Доступен", "preferred": "Предпочтительно", "unavailable": "Недоступен", "recurring": "Повторяющийся", "saveButton": "Сохранить доступность" },
-    "absence": { "title": "Сообщить об отсутствии", "kindLabel": "Тип", "kindSick": "Больничный", "kindLeave": "Отпуск", "kindVacancy": "Вакансия", "scopeLabel": "Продолжительность", "scopeToday": "Только сегодня", "scopeWindow": "Диапазон дат", "scopePermanent": "Постоянно", "fromLabel": "С", "toLabel": "По", "reasonLabel": "Причина", "submitButton": "Сообщить", "affectedLessons": "{count} занятий затронуто", "covered": "{covered}/{total} покрыто", "arrangecover": "Организовать замену" },
-    "substitutions": { "title": "Консоль замен", "reportAbsence": "Сообщить об отсутствии", "empty": "Нет открытых запросов на замену.", "urgencyToday": "Сегодня", "urgencyUpcoming": "Скоро", "urgencyOpen": "Открыто", "candidateList": { "title": "Кандидаты", "assign": "Назначить", "undo": "Отменить", "noEligible": "Подходящих кандидатов не найдено.", "classificationBest": "Лучший", "classificationGood": "Хороший", "classificationOk": "Возможный", "classificationIneligible": "Не подходит" }, "bulkCover": "Покрыть всех лучшим", "bulkProgress": "{covered} покрыто, {flagged} отмечено" },
-    "curriculum": { "title": "Планировщик учебного плана", "selectGroup": "Выберите группу", "targetHours": "Целевые часы в неделю", "units": "Модули", "addUnit": "Добавить модуль", "statusPlanned": "Запланировано", "statusActive": "Активный", "statusDone": "Завершено", "statusOverridden": "Переопределено", "deliver": "Отметить выполненным", "override": "Переопределить", "overrideReason": "Причина переопределения", "lessonMapper": "Привязка модуль–урок" },
-    "forecast": { "title": "Прогноз и ёмкость", "export": "Экспорт плана", "sliders": { "growth": "Рост учеников (%/семестр)", "terms": "Семестров для прогноза", "groupSize": "Учеников в группе", "hoursPerGroup": "Часов на группу/неделю", "contractPerTeacher": "Контрактных часов/учитель" }, "headline": "Нужно учителей", "projectionChart": "Прогноз численности", "languageGap": "Разрыв по языкам", "bottleneck": "Узкое место", "bottleneckDetail": "{lang} — {util}% прогнозируемая загрузка", "openHiringPlan": "Открыть план найма", "saveScenario": "Сохранить сценарий", "scenarios": "Сохранённые сценарии", "riskLow": "Низкий", "riskMedium": "Средний", "riskHigh": "Высокий" },
-    "alerts": { "title": "Оповещения", "open": "открытых", "empty": "Нет открытых оповещений.", "acknowledge": "Подтвердить", "ackLabel": "Подтвердить оповещение", "ackError": "Не удалось подтвердить оповещение", "kindOverload": "Перегрузка", "kindNearCap": "Близко к пределу", "kindDailyBreach": "Превышение дневного лимита", "kindConflict": "Конфликт расписания", "kindVacancy": "Вакансия", "kindUncovered": "Непокрытое занятие", "kindSubOverload": "Перегрузка замены", "kindBottleneck": "Языковое узкое место" },
-    "healthState": { "ok": "Норма", "warn": "Предупреждение", "danger": "Критично" }
+    "schedule": {
+      "title": "Расписание",
+      "weekLabel": "Неделя",
+      "loadBreakdown": "Детали нагрузки",
+      "contact": "Контакт",
+      "prep": "Подготовка",
+      "effective": "Эффективная нагрузка",
+      "utilization": "Загрузка",
+      "dayPeak": "Пик дня",
+      "consecPeak": "Непрерывный пик",
+      "softCost": "Стоимость планирования",
+      "curriculumCarried": "Учебный план",
+      "availabilityEditor": "Редактировать доступность",
+      "absenceList": "Отсутствия",
+      "reportAbsence": "Сообщить об отсутствии",
+      "arrangecover": "Организовать замену",
+      "teacherSwitcher": "Сменить учителя",
+      "overloadTitle": "Перегрузка",
+      "nearCapTitle": "Близко к лимиту",
+      "conflicts": "{count} конфликт(ов) расписания",
+      "utilizationWarning": "Загрузка {pct}% — приближается к лимиту",
+      "dayPeakWarning": "Пик дня {hours}ч — превышен дневной лимит",
+      "consecPeakWarning": "{count} подряд уроков — риск усталости",
+      "preferred": "Предпочтительно",
+      "available": "Доступно",
+      "unavailable": "Недоступно"
+    },
+    "availability": {
+      "available": "Доступен",
+      "preferred": "Предпочтительно",
+      "unavailable": "Недоступен",
+      "recurring": "Повторяющийся",
+      "saveButton": "Сохранить доступность"
+    },
+    "absence": {
+      "title": "Сообщить об отсутствии",
+      "kindLabel": "Тип",
+      "kindSick": "Больничный",
+      "kindLeave": "Отпуск",
+      "kindVacancy": "Вакансия",
+      "scopeLabel": "Продолжительность",
+      "scopeToday": "Только сегодня",
+      "scopeWindow": "Диапазон дат",
+      "scopePermanent": "Постоянно",
+      "fromLabel": "С",
+      "toLabel": "По",
+      "reasonLabel": "Причина",
+      "submitButton": "Сообщить",
+      "affectedLessons": "{count} занятий затронуто",
+      "covered": "{covered}/{total} покрыто",
+      "arrangecover": "Организовать замену"
+    },
+    "substitutions": {
+      "title": "Консоль замен",
+      "reportAbsence": "Сообщить об отсутствии",
+      "empty": "Нет открытых запросов на замену.",
+      "urgencyToday": "Сегодня",
+      "urgencyUpcoming": "Скоро",
+      "urgencyOpen": "Открыто",
+      "candidateList": {
+        "title": "Кандидаты",
+        "assign": "Назначить",
+        "undo": "Отменить",
+        "noEligible": "Подходящих кандидатов не найдено.",
+        "classificationBest": "Лучший",
+        "classificationGood": "Хороший",
+        "classificationOk": "Возможный",
+        "classificationIneligible": "Не подходит"
+      },
+      "bulkCover": "Покрыть всех лучшим",
+      "bulkProgress": "{covered} покрыто, {flagged} отмечено"
+    },
+    "curriculum": {
+      "title": "Планировщик учебного плана",
+      "selectGroup": "Выберите группу",
+      "targetHours": "Целевые часы в неделю",
+      "units": "Модули",
+      "addUnit": "Добавить модуль",
+      "statusPlanned": "Запланировано",
+      "statusActive": "Активный",
+      "statusDone": "Завершено",
+      "statusOverridden": "Переопределено",
+      "deliver": "Отметить выполненным",
+      "override": "Переопределить",
+      "overrideReason": "Причина переопределения",
+      "lessonMapper": "Привязка модуль–урок"
+    },
+    "forecast": {
+      "title": "Прогноз и ёмкость",
+      "export": "Экспорт плана",
+      "sliders": {
+        "growth": "Рост учеников (%/семестр)",
+        "terms": "Семестров для прогноза",
+        "groupSize": "Учеников в группе",
+        "hoursPerGroup": "Часов на группу/неделю",
+        "contractPerTeacher": "Контрактных часов/учитель"
+      },
+      "headline": "Нужно учителей",
+      "projectionChart": "Прогноз численности",
+      "languageGap": "Разрыв по языкам",
+      "bottleneck": "Узкое место",
+      "bottleneckDetail": "{lang} — {util}% прогнозируемая загрузка",
+      "openHiringPlan": "Открыть план найма",
+      "saveScenario": "Сохранить сценарий",
+      "scenarios": "Сохранённые сценарии",
+      "riskLow": "Низкий",
+      "riskMedium": "Средний",
+      "riskHigh": "Высокий"
+    },
+    "alerts": {
+      "title": "Оповещения",
+      "open": "открытых",
+      "empty": "Нет открытых оповещений.",
+      "acknowledge": "Подтвердить",
+      "ackLabel": "Подтвердить оповещение",
+      "ackError": "Не удалось подтвердить оповещение",
+      "kindOverload": "Перегрузка",
+      "kindNearCap": "Близко к пределу",
+      "kindDailyBreach": "Превышение дневного лимита",
+      "kindConflict": "Конфликт расписания",
+      "kindVacancy": "Вакансия",
+      "kindUncovered": "Непокрытое занятие",
+      "kindSubOverload": "Перегрузка замены",
+      "kindBottleneck": "Языковое узкое место"
+    },
+    "healthState": {
+      "ok": "Норма",
+      "warn": "Предупреждение",
+      "danger": "Критично"
+    }
+  },
+  "Invitations": {
+    "page": {
+      "title": "Приглашения",
+      "pendingSummary": "{count, plural, one {# ожидает} few {# ожидают} many {# ожидают} other {# ожидает}}",
+      "expiredSummary": "{count, plural, one {# истекло} few {# истекло} many {# истекло} other {# истекло}}",
+      "noPending": "Нет ожидающих приглашений"
+    },
+    "tabs": {
+      "all": "Все",
+      "teachers": "Учителя",
+      "students": "Студенты",
+      "staff": "Персонал"
+    },
+    "table": {
+      "recipient": "Получатель",
+      "roleGroup": "Роль / Группа",
+      "status": "Статус",
+      "sent": "Отправлено",
+      "expires": "Действительно до",
+      "actions": "Действия",
+      "empty": "Приглашений пока нет",
+      "retry": "Попробовать снова",
+      "invitedBy": "от {name}"
+    },
+    "status": {
+      "accepted": "Принято",
+      "pending": "Ожидает",
+      "expired": "Истекло",
+      "revoked": "Отозвано"
+    },
+    "expiry": {
+      "dash": "—",
+      "expired": "Истекло",
+      "soon": "Скоро истекает",
+      "availableIn": "Доступно через {mins} мин"
+    },
+    "actions": {
+      "resend": "Отправить снова",
+      "copyLink": "Скопировать ссылку",
+      "revoke": "Отозвать",
+      "linkCopied": "Ссылка скопирована"
+    },
+    "resend": {
+      "success": "Приглашение отправлено повторно",
+      "alreadyAccepted": "Приглашение уже принято",
+      "throttled": "Слишком много отправок — попробуйте позже",
+      "gone": "Приглашение больше не существует",
+      "error": "Не удалось отправить приглашение повторно",
+      "cooldownHint": "Доступно через {mins} мин"
+    },
+    "revoke": {
+      "title": "Отозвать приглашение?",
+      "description": "Приглашение для {email} будет отозвано и не может быть использовано. Вы сможете пригласить снова позже.",
+      "confirm": "Отозвать",
+      "cancel": "Отмена",
+      "success": "Приглашение отозвано",
+      "undo": "Отменить",
+      "alreadyAccepted": "Невозможно отозвать — приглашение уже принято",
+      "gone": "Приглашение уже отозвано или истекло",
+      "error": "Не удалось отозвать приглашение"
+    },
+    "pendingLink": {
+      "singular": "1 приглашение ожидает →",
+      "plural": "{count} приглашений ожидают →"
+    },
+    "roles": {
+      "TEACHER": "Учитель",
+      "STUDENT": "Студент",
+      "ADMIN": "Админ",
+      "CONTENT_ADMIN": "Редактор",
+      "SCHEDULER": "Планировщик"
+    },
+    "a11y": {
+      "loadingLabel": "Загрузка приглашений",
+      "listLabel": "Список приглашений",
+      "actionsLabel": "Действия для {email}",
+      "pendingLabel": "{count} ожидает"
+    }
   }
 }
