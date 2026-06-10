@@ -26,10 +26,10 @@ export interface InvitationsProvider {
 }
 
 export function getInvitationsProvider(): InvitationsProvider {
-  if (process.env.INVITATIONS_BACKEND === 'real') {
+  if (process.env.INVITATIONS_BACKEND === 'mock') {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require('./real').realProvider as InvitationsProvider;
+    return require('./mock').mockProvider as InvitationsProvider;
   }
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return require('./mock').mockProvider as InvitationsProvider;
+  return require('./real').realProvider as InvitationsProvider;
 }
