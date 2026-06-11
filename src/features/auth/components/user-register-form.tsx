@@ -33,9 +33,13 @@ type SchoolInput = z.infer<typeof schoolSchema>;
 
 type Props = {
   role: 'student' | 'tutor' | 'school_admin';
+  /** Pre-fill and lock the email field (invite flow). */
+  prefillEmail?: string;
+  /** Where to redirect after successful registration (invite flow). */
+  next?: string;
 };
 
-export function UserRegisterForm({ role }: Props) {
+export function UserRegisterForm({ role, prefillEmail, next }: Props) {
   const t = useTranslations("Auth.Register");
   const tErrors = useTranslations("Errors");
   const router = useRouter();
@@ -48,7 +52,10 @@ export function UserRegisterForm({ role }: Props) {
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<SchoolInput>({ resolver: zodResolver(schoolSchema) });
+  } = useForm<SchoolInput>({
+    resolver: zodResolver(schoolSchema),
+    defaultValues: prefillEmail ? { email: prefillEmail } : undefined,
+  });
 
   function onSubmit(data: SchoolInput) {
     setServerError(null);
@@ -66,7 +73,10 @@ export function UserRegisterForm({ role }: Props) {
         }
         return;
       }
-      router.replace("/verify-email");
+      const verifyPath = next
+        ? `/verify-email?next=${encodeURIComponent(next)}`
+        : '/verify-email';
+      router.replace(verifyPath);
     });
   }
 
@@ -78,7 +88,8 @@ export function UserRegisterForm({ role }: Props) {
           type="email"
           autoComplete="email"
           hasError={!!errors.email}
-          disabled={isPending}
+          disabled={isPending || !!prefillEmail}
+          readOnly={!!prefillEmail}
           {...register("email")}
         />
       </Field>

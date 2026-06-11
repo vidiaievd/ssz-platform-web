@@ -5,6 +5,7 @@ export type {
   InvitationKind,
   InvitationStatus,
   InvitationAudience,
+  InvitePreview,
 } from './types';
 
 // Schemas
@@ -12,6 +13,7 @@ export {
   InvitationSchema,
   InvitationsListSchema,
   ResendResultSchema,
+  InvitePreviewSchema,
 } from './schemas';
 
 // Server-side only — consumers import directly to keep 'server-only' effective

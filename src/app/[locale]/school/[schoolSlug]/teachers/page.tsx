@@ -24,7 +24,7 @@ export default async function TeachersPage({ params }: Props) {
 
   const [data, pendingTeacherInviteCount] = await Promise.all([
     getCommandCenter(school.id),
-    getPendingCount(school.id, 'teachers'),
+    getPendingCount(school.id, 'teachers').catch(() => 0),
   ]);
   const isHybrid = school.type === "HYBRID";
 

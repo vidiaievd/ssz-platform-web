@@ -42,7 +42,8 @@
     "mfa_required": "Tofaktorautentisering er påkrevd.",
     "upstream_unavailable": "Tjenesten er midlertidig utilgjengelig. Prøv igjen.",
     "timeout": "Forespørselen tok for lang tid. Prøv igjen.",
-    "unknown": "Noe gikk galt. Prøv igjen."
+    "unknown": "Noe gikk galt. Prøv igjen.",
+    "gone": "Denne invitasjonsnlenken er ikke lenger gyldig."
   },
   "Marketing": {
     "features": "Funksjoner",
@@ -1718,6 +1719,60 @@
       "listLabel": "Invitasjonsliste",
       "actionsLabel": "Handlinger for {email}",
       "pendingLabel": "{count} venter"
+    }
+  },
+  "Invite": {
+    "title": {
+      "invited": "Du er invitert til {schoolName}",
+      "role": "som {role}"
+    },
+    "meta": {
+      "invitedBy": "Invitert av: {name}",
+      "forEmail": "Denne invitasjonen er til: {email}",
+      "expiresAt": "Gyldig til {date}"
+    },
+    "cta": {
+      "createAccount": "Opprett konto",
+      "signInToAccept": "Logg inn for å akseptere",
+      "accept": "Aksepter invitasjon",
+      "haveAccount": "Har du allerede en konto? Logg inn",
+      "notYou": "Ikke deg? Logg ut",
+      "signInAsInvitee": "Logg inn som {email}",
+      "goToWorkspace": "Gå til arbeidsområde",
+      "goHome": "Gå til hjem",
+      "retry": "Prøv igjen"
+    },
+    "mismatch": {
+      "title": "Denne invitasjonen er for en annen konto",
+      "body": "Den er adressert til {inviteEmail}, men du er logget inn som {currentEmail}."
+    },
+    "accept": {
+      "syncing": "Aksepterer invitasjon…",
+      "success": "Velkommen til {schoolName}!",
+      "alreadyMember": "Du er allerede medlem av denne skolen",
+      "error": "Kunne ikke akseptere invitasjonen"
+    },
+    "state": {
+      "invalid": {
+        "title": "Ugyldig lenke",
+        "body": "Denne invitasjonslenken er skadet eller allerede brukt."
+      },
+      "expired": {
+        "title": "Invitasjonen har utløpt",
+        "body": "Be skolen om å sende deg en ny invitasjon."
+      },
+      "revoked": {
+        "title": "Invitasjonen er tilbakekalt",
+        "body": "Skolen har tilbakekalt denne invitasjonen."
+      },
+      "accepted": {
+        "title": "Allerede akseptert",
+        "body": "Du har allerede akseptert denne invitasjonen."
+      },
+      "error": {
+        "title": "Kunne ikke laste invitasjonen",
+        "body": "En midlertidig feil oppstod. Vennligst prøv igjen."
+      }
     }
   }
 }

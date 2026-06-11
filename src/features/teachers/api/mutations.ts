@@ -2,6 +2,9 @@
 
 import { revalidateTag } from 'next/cache';
 
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors/app-error';
+
 function invalidate(tag: string) {
   revalidateTag(tag, {});
 }
@@ -34,20 +37,51 @@ export async function addTeacher(
     employmentType: 'full' | 'part' | 'contract';
   },
 ): Promise<AddTeacherResult> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/schools/${schoolId}/teachers`,
-    {
+  try {
+    // 1. Look up user by email
+    let user: { userId?: string; displayName?: string; roles?: string[] } | null = null;
+    try {
+      user = await serverFetch<{ userId?: string; displayName?: string; roles?: string[] }>({
+        service: 'organization',
+        path: '/users/lookup',
+        query: { email: input.email, schoolId },
+      });
+    } catch (e) {
+      if (!(e instanceof AppError && e.code === 'not_found')) throw e;
+    }
+
+    const hasTeacherRole = user?.roles?.some((r) => r === 'TEACHER' || r === 'teacher');
+
+    if (user?.userId && hasTeacherRole) {
+      // Branch 2: already a teacher — add directly as school member
+      await serverFetch({
+        service: 'organization',
+        path: `/schools/${schoolId}/members`,
+        method: 'POST',
+        body: { userId: user.userId, role: 'TEACHER' },
+      }).catch(() => {
+        // 409 = already a member, ignore
+      });
+      invalidate(`school-${schoolId}-teachers`);
+      return { success: true, data: { branch: 'added', name: user.displayName ?? input.email } };
+    }
+
+    // Branches 1 & 3: send invitation
+    const kind = user?.userId ? 'onboard' : 'register';
+    await serverFetch({
+      service: 'organization',
+      path: `/schools/${schoolId}/invitations`,
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
-      cache: 'no-store',
-    },
-  );
-  if (res.status === 409) return { success: false, error: 'conflict' };
-  if (!res.ok) return { success: false, error: 'generic' };
-  const data = (await res.json()) as InviteBranch;
-  invalidate(`school-${schoolId}-teachers`);
-  return { success: true, data };
+      body: { email: input.email, role: 'TEACHER', kind },
+    });
+    invalidate(`school-${schoolId}-teachers`);
+    return { success: true, data: { branch: kind, email: input.email } };
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'conflict') {
+      return { success: false, error: 'conflict' };
+    }
+    return { success: false, error: 'generic' };
+  }
 }
 
 export type RemoveTeacherResult =

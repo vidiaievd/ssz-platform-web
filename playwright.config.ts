@@ -21,9 +21,5 @@ export default defineConfig({
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    env: {
-      // Use the in-memory mock provider in e2e tests — no real backend needed.
-      INVITATIONS_BACKEND: 'mock',
-    },
   },
 });

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const InvitationRoleSchema = z.enum([
+export const InvitationRoleSchema = z.enum([
   'ADMIN',
   'CONTENT_ADMIN',
   'TEACHER',
@@ -8,9 +8,9 @@ const InvitationRoleSchema = z.enum([
   'SCHEDULER',
 ]);
 
-const InvitationKindSchema = z.enum(['register', 'onboard_existing']);
+export const InvitationKindSchema = z.enum(['register', 'onboard_existing']);
 
-const InvitationStatusSchema = z.enum(['pending', 'accepted', 'expired', 'revoked']);
+export const InvitationStatusSchema = z.enum(['pending', 'accepted', 'expired', 'revoked']);
 
 export const InvitationSchema = z.object({
   invitationId: z.string(),
@@ -38,3 +38,16 @@ export const ResendResultSchema = z.object({
 });
 
 export type InvitationSchemaType = z.infer<typeof InvitationSchema>;
+
+export const InvitePreviewSchema = z.object({
+  schoolName: z.string(),
+  schoolSlug: z.string(),
+  role: InvitationRoleSchema,
+  kind: InvitationKindSchema,
+  email: z.string().email(),
+  invitedByName: z.string().nullable(),
+  status: InvitationStatusSchema,
+  expiresAt: z.string(),
+});
+
+export type InvitePreviewSchemaType = z.infer<typeof InvitePreviewSchema>;

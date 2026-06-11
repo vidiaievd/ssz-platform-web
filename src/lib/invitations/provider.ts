@@ -1,4 +1,4 @@
-import type { Invitation, InvitationRole, InvitationStatus } from '@/features/invitations/types';
+import type { Invitation, InvitationRole, InvitationStatus, InvitePreview } from '@/features/invitations/types';
 import type { ISODate } from '@/features/groups/types';
 
 export type ResendResult = {
@@ -8,6 +8,13 @@ export type ResendResult = {
 };
 
 export interface InvitationsProvider {
+  /**
+   * Public preview of an invitation by token — no auth required.
+   * Throws AppError('not_found') when token is unknown.
+   * Throws AppError('gone') when the server returns 410 (expired/revoked).
+   */
+  preview(token: string): Promise<InvitePreview>;
+
   list(
     schoolId: string,
     filter?: {
@@ -26,10 +33,6 @@ export interface InvitationsProvider {
 }
 
 export function getInvitationsProvider(): InvitationsProvider {
-  if (process.env.INVITATIONS_BACKEND === 'mock') {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require('./mock').mockProvider as InvitationsProvider;
-  }
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require('./real').realProvider as InvitationsProvider;
 }

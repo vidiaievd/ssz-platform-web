@@ -6,12 +6,16 @@ import type { Invitation, InvitationAudience, InvitationStatus } from '@/feature
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+const VALID_STATUSES = new Set<string>(['pending', 'accepted', 'expired', 'revoked']);
+
 function ensureStatus(inv: Invitation): Invitation {
-  // If server didn't return a derived status, fall back to client derivation.
-  if (!inv.status) {
-    return { ...inv, status: deriveInvitationStatus(inv) };
+  // Normalize backend casing (e.g. 'Pending', 'PENDING' → 'pending').
+  const normalized = (inv.status as string | undefined)?.toLowerCase() as InvitationStatus | undefined;
+  if (normalized && VALID_STATUSES.has(normalized)) {
+    return normalized === inv.status ? inv : { ...inv, status: normalized };
   }
-  return inv;
+  // Status absent or unrecognised — derive from date fields.
+  return { ...inv, status: deriveInvitationStatus(inv) };
 }
 
 // ── School ────────────────────────────────────────────────────────────────────

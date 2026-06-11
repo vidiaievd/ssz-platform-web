@@ -3,6 +3,17 @@ import type { ISODate } from '@/features/groups/types';
 export type InvitationRole = 'ADMIN' | 'CONTENT_ADMIN' | 'TEACHER' | 'STUDENT' | 'SCHEDULER';
 export type InvitationKind = 'register' | 'onboard_existing';
 export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
+
+export type InvitePreview = {
+  schoolName: string;
+  schoolSlug: string;
+  role: InvitationRole;
+  kind: InvitationKind;
+  email: string;
+  invitedByName: string | null;
+  status: InvitationStatus;
+  expiresAt: ISODate;
+};
 export type InvitationAudience = 'all' | 'teachers' | 'students' | 'staff';
 
 export interface Invitation {

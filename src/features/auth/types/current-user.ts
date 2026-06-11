@@ -6,6 +6,11 @@ export type CurrentUser = {
    */
   userId?: string;
   /**
+   * Decoded from the JWT `email` claim — for invite email mismatch check only.
+   * Never use for access control; this is routing/display data.
+   */
+  email?: string;
+  /**
    * Decoded from the JWT payload without signature verification — routing only.
    * undefined  → claim absent, treat as verified.
    * false      → backend flagged this session as unverified.

@@ -28,13 +28,9 @@ export async function getMySchools(): Promise<School[]> {
   const token = await readAccessToken();
   if (!token) return [];
 
-  try {
-    const payload = await serverFetch<SchoolsPayload>({
-      service: 'organization',
-      path: '/schools',
-    });
-    return normalise(payload);
-  } catch {
-    return [];
-  }
+  const payload = await serverFetch<SchoolsPayload>({
+    service: 'organization',
+    path: '/schools',
+  });
+  return normalise(payload);
 }

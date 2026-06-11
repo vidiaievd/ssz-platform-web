@@ -188,6 +188,22 @@ export async function getStudent(
   };
 }
 
+// ── Groups (for enroll dialog picker) ────────────────────────────────────────
+
+export type GroupSelectOption = { id: string; name: string; lang: string; level: string };
+
+export async function getGroupsForSelect(schoolId: string): Promise<GroupSelectOption[]> {
+  try {
+    const raw = await serverFetch<Array<{ id: string; name: string; lang?: string; level?: string }>>({
+      service: 'organization',
+      path: `/schools/${schoolId}/groups`,
+    });
+    return raw.map((g) => ({ id: g.id, name: g.name, lang: g.lang ?? '', level: g.level ?? '' }));
+  } catch {
+    return [];
+  }
+}
+
 export async function getSegments(schoolId: string): Promise<Segment[]> {
   // Behind a feature flag until backend §2.4 is ready.
   // Returns built-in segments derived from predicate keys.

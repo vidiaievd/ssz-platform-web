@@ -1,12 +1,14 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { UserPlus, Upload, MessageSquare, AlertTriangle, Users } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
-import { getStudents } from '@/features/students/api/queries';
+import { getStudents, getGroupsForSelect } from '@/features/students/api/queries';
 import { StudentsFilters } from '@/features/students/components/students-filters';
 import { StudentsList } from '@/features/students/components/students-list';
+import { EnrollShell } from '@/features/students/components/enroll-shell';
 import { Button } from '@/components/ui/button';
 import { segmentPredicate } from '@/lib/students/status';
 import type { SegmentKey } from '@/features/students/types';
@@ -34,9 +36,10 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
   }
 
   const activeSegment = (segment as SegmentKey | undefined) ?? 'all';
-  const [{ items: students, total }, pendingInvitesCount] = await Promise.all([
+  const [{ items: students, total }, pendingInvitesCount, groups] = await Promise.all([
     getStudents(school.id, { search: q }),
-    getPendingCount(school.id, 'students'),
+    getPendingCount(school.id, 'students').catch(() => 0),
+    getGroupsForSelect(school.id),
   ]);
 
   const atRiskCount = students.filter(segmentPredicate('at-risk')).length;
@@ -101,6 +104,11 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
           href={`/school/${schoolSlug}/invitations?audience=students`}
         />
       )}
+
+      {/* Enroll dialog — URL-driven (?enroll=1) */}
+      <Suspense>
+        <EnrollShell schoolId={school.id} groups={groups} />
+      </Suspense>
 
       {/* Filter island (client) */}
       <StudentsFilters students={students} />

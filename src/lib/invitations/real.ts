@@ -1,10 +1,13 @@
 import 'server-only';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
-import type { Invitation } from '@/features/invitations/types';
+import { AppError } from '@/lib/errors/app-error';
+import type { Invitation, InvitePreview } from '@/features/invitations/types';
 import type { InvitationsProvider, ResendResult } from './provider';
 
 // DTOs as returned by org-service / tutoring endpoints
+
+type PreviewDto = InvitePreview;
 
 type SchoolInvitationDto = Omit<Invitation, 'token'>;
 
@@ -27,6 +30,31 @@ type ResendResponseDto = {
 };
 
 export const realProvider: InvitationsProvider = {
+  async preview(token): Promise<InvitePreview> {
+    // Try school invitation first; if not found try tutoring invitation.
+    try {
+      return await serverFetch<PreviewDto>({
+        service: 'organization',
+        path: `/schools/invitations/${token}`,
+        anonymous: true,
+      });
+    } catch (schoolErr) {
+      if (schoolErr instanceof AppError && schoolErr.code === 'not_found') {
+        try {
+          return await serverFetch<PreviewDto>({
+            service: 'organization',
+            path: `/tutoring/invitations/${token}`,
+            anonymous: true,
+          });
+        } catch (tutoringErr) {
+          // Propagate tutoring error (not_found / gone)
+          throw tutoringErr;
+        }
+      }
+      throw schoolErr;
+    }
+  },
+
   async list(schoolId, filter) {
     const data = await serverFetch<SchoolInvitationDto[]>({
       service: 'organization',

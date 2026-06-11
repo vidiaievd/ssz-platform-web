@@ -4,6 +4,8 @@ import { deriveInvitationStatus } from './status';
 // Fixed "now" for determinism: 2026-06-10T12:00:00Z
 const BASE_NOW = new Date('2026-06-10T12:00:00Z').getTime();
 
+export const FIXTURE_PREVIEW_BASE_DATE = new Date('2026-06-10T12:00:00Z');
+
 function iso(offsetDays: number): string {
   return new Date(BASE_NOW + offsetDays * 24 * 60 * 60 * 1000).toISOString();
 }

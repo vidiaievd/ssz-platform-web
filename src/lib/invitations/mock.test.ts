@@ -6,6 +6,50 @@ import { mockProvider, resetMockStore } from './mock';
 
 beforeEach(() => resetMockStore());
 
+// ── mockProvider.preview ──────────────────────────────────────────────────────
+
+describe('mockProvider.preview', () => {
+  it('returns pending preview for valid-* token', async () => {
+    const preview = await mockProvider.preview('valid-abc123');
+    expect(preview.status).toBe('pending');
+    expect(preview.schoolName).toBeTruthy();
+    expect(preview.email).toBeTruthy();
+  });
+
+  it('throws AppError gone for expired-* token', async () => {
+    await expect(mockProvider.preview('expired-abc')).rejects.toMatchObject({
+      code: 'gone',
+    });
+  });
+
+  it('throws AppError gone instance for expired-* token', async () => {
+    await expect(mockProvider.preview('expired-test')).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('returns revoked preview for revoked-* token', async () => {
+    const preview = await mockProvider.preview('revoked-xyz');
+    expect(preview.status).toBe('revoked');
+  });
+
+  it('returns accepted preview for accepted-* token', async () => {
+    const preview = await mockProvider.preview('accepted-xyz');
+    expect(preview.status).toBe('accepted');
+  });
+
+  it('throws not_found for unknown token', async () => {
+    await expect(mockProvider.preview('unknown-garbage')).rejects.toMatchObject({
+      code: 'not_found',
+    });
+  });
+
+  it('returns tutoring preview for tutoring-* token', async () => {
+    const preview = await mockProvider.preview('tutoring-abc');
+    expect(preview.status).toBe('pending');
+    expect(preview.schoolSlug).toBe('');
+    expect(preview.role).toBe('STUDENT');
+  });
+});
+
 describe('mockProvider.list', () => {
   it('returns all school fixtures without filter', async () => {
     const items = await mockProvider.list('school-1');

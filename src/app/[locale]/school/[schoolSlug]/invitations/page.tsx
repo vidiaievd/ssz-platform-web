@@ -36,9 +36,9 @@ export default async function InvitationsPage({ params, searchParams }: Props) {
   }
 
   const [allInvitations, pendingCount, expiredCount] = await Promise.all([
-    getInvitations(school.id),
-    getPendingCount(school.id, 'all'),
-    getInvitations(school.id, { status: 'expired' }).then((items) => items.length),
+    getInvitations(school.id).catch((): Awaited<ReturnType<typeof getInvitations>> => []),
+    getPendingCount(school.id, 'all').catch(() => 0),
+    getInvitations(school.id, { status: 'expired' }).then((items) => items.length).catch(() => 0),
   ]);
 
   const filtered =
@@ -81,6 +81,7 @@ export default async function InvitationsPage({ params, searchParams }: Props) {
 
       {/* Table */}
       <InvitationsTable
+        key={audience}
         invitations={filtered}
         schoolId={school.id}
       />

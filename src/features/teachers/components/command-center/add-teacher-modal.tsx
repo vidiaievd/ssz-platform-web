@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,8 @@ import {
 import { addTeacher } from "../../api/mutations";
 import type { InviteBranch } from "../../api/mutations";
 import { teacherAddSchema, type TeacherAddInput } from "../../schemas";
+
+const FULL_TIME_CONTACT_HOURS = 40;
 
 type AddTeacherModalProps = {
   schoolId: string;
@@ -53,7 +56,7 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
     defaultValues: {
       email: "",
       maxWeeklyContactHours: 20,
-      employmentType: "full",
+      employmentType: "part",
     },
   });
 
@@ -71,12 +74,13 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
       const outcome = await addTeacher(schoolId, data);
       if (outcome.success) {
         setResult(outcome.data);
-        if (outcome.data.branch === "added") {
-          setTimeout(() => {
-            onSuccess();
-            handleClose();
-          }, 1500);
+        if (outcome.data.branch !== "added") {
+          toast.success(t("inviteButton"));
         }
+        setTimeout(() => {
+          onSuccess();
+          handleClose();
+        }, 1500);
       } else {
         if (outcome.error === "conflict") {
           setError("email", { message: t("noLangs") });
@@ -111,17 +115,6 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
                 <p className="text-xs text-(--ssz-text-muted)">{result.email}</p>
               </>
             )}
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setResult(null);
-                reset();
-                if (result.branch !== "added") onSuccess();
-              }}
-            >
-              {t("inviteButton")}
-            </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2" noValidate>
@@ -149,7 +142,9 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
                 type="number"
                 min={1}
                 max={60}
+                disabled={employmentType === "full"}
                 aria-invalid={!!errors.maxWeeklyContactHours}
+                className={employmentType === "full" ? "opacity-50 cursor-not-allowed" : ""}
                 {...register("maxWeeklyContactHours", { valueAsNumber: true })}
               />
               {errors.maxWeeklyContactHours && (
@@ -163,11 +158,15 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
               <Label htmlFor="teacher-employment">{t("employmentLabel")}</Label>
               <Select
                 value={employmentType}
-                onValueChange={(v) =>
-                  setValue("employmentType", v as TeacherAddInput["employmentType"], {
-                    shouldValidate: true,
-                  })
-                }
+                onValueChange={(v) => {
+                  const type = v as TeacherAddInput["employmentType"];
+                  setValue("employmentType", type, { shouldValidate: true });
+                  if (type === "full") {
+                    setValue("maxWeeklyContactHours", FULL_TIME_CONTACT_HOURS, { shouldValidate: true });
+                  } else if (employmentType === "full") {
+                    setValue("maxWeeklyContactHours", 20, { shouldValidate: false });
+                  }
+                }}
               >
                 <SelectTrigger id="teacher-employment">
                   <SelectValue />

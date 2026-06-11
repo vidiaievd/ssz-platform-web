@@ -42,7 +42,8 @@
     "mfa_required": "Two-factor authentication is required.",
     "upstream_unavailable": "Service temporarily unavailable. Please try again.",
     "timeout": "The request took too long. Please try again.",
-    "unknown": "Something went wrong. Please try again."
+    "unknown": "Something went wrong. Please try again.",
+    "gone": "This invitation link is no longer valid."
   },
   "Marketing": {
     "features": "Features",
@@ -1723,6 +1724,60 @@
       "listLabel": "Invitations list",
       "actionsLabel": "Actions for {email}",
       "pendingLabel": "{count} pending"
+    }
+  },
+  "Invite": {
+    "title": {
+      "invited": "You've been invited to {schoolName}",
+      "role": "as {role}"
+    },
+    "meta": {
+      "invitedBy": "Invited by: {name}",
+      "forEmail": "This invitation is for: {email}",
+      "expiresAt": "Valid until {date}"
+    },
+    "cta": {
+      "createAccount": "Create account",
+      "signInToAccept": "Sign in to accept",
+      "accept": "Accept invitation",
+      "haveAccount": "Already have an account? Sign in",
+      "notYou": "Not you? Sign out",
+      "signInAsInvitee": "Sign in as {email}",
+      "goToWorkspace": "Go to workspace",
+      "goHome": "Go to home",
+      "retry": "Try again"
+    },
+    "mismatch": {
+      "title": "This invitation is for a different account",
+      "body": "It's addressed to {inviteEmail}, but you're signed in as {currentEmail}."
+    },
+    "accept": {
+      "syncing": "Accepting invitation…",
+      "success": "Welcome to {schoolName}!",
+      "alreadyMember": "You're already a member of this school",
+      "error": "Failed to accept invitation"
+    },
+    "state": {
+      "invalid": {
+        "title": "Invalid link",
+        "body": "This invitation link is damaged or has already been used."
+      },
+      "expired": {
+        "title": "Invitation expired",
+        "body": "Ask the school to send you a new invitation."
+      },
+      "revoked": {
+        "title": "Invitation revoked",
+        "body": "The school has revoked this invitation."
+      },
+      "accepted": {
+        "title": "Already accepted",
+        "body": "You've already accepted this invitation."
+      },
+      "error": {
+        "title": "Failed to load invitation",
+        "body": "A temporary error occurred. Please try again."
+      }
     }
   }
 }
