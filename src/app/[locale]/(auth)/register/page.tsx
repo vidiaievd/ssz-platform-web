@@ -18,6 +18,7 @@ export default function RegisterHubPage() {
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get('invite');
   const prefillEmail = searchParams.get('email') ?? undefined;
+  const inviteRole = (searchParams.get('role') ?? 'student') as 'school_admin' | 'tutor' | 'student';
   const [step, setStep] = useState<Step>(searchParams.get('step') === 'org' ? 'org' : 'hub');
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function RegisterHubPage() {
           <h1 className="text-2xl font-semibold text-(--ssz-text-primary)">{tInvite('title')}</h1>
         </div>
         <UserRegisterForm
-          role="student"
+          role={inviteRole}
           prefillEmail={prefillEmail}
           next={`/invite/${inviteToken}`}
         />

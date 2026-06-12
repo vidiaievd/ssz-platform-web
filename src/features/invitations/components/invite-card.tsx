@@ -7,9 +7,15 @@ import { toast } from "sonner";
 
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import type { InvitePreview } from "@/features/invitations/types";
+import type { InvitePreview, InvitationRole } from "@/features/invitations/types";
 import type { CurrentUser } from "@/features/auth/types/current-user";
 import { acceptInvitation } from "@/features/invitations/api/mutations";
+
+function inviteRoleToAuthRole(role: InvitationRole): 'school_admin' | 'tutor' | 'student' {
+  if (role === 'TEACHER') return 'tutor';
+  if (role === 'STUDENT') return 'student';
+  return 'school_admin';
+}
 
 type Props = {
   token: string;
@@ -156,7 +162,7 @@ export function InviteCard({ token, preview, currentUser, locale }: Props) {
               <>
                 <Button asChild className="w-full">
                   <Link
-                    href={`/register?invite=${token}&email=${encodeURIComponent(preview.email)}`}
+                    href={`/register?invite=${token}&email=${encodeURIComponent(preview.email)}&role=${inviteRoleToAuthRole(preview.role)}`}
                   >
                     {t("cta.createAccount")}
                   </Link>

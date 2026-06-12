@@ -2,7 +2,7 @@
 
 import { MoreHorizontal, Copy } from 'lucide-react';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,12 +46,13 @@ export function InvitationRow({
 }: Props) {
   const t = useTranslations('Invitations');
   const tRoles = useTranslations('Invitations.roles');
+  const locale = useLocale();
   const actionable = isActionable(invitation);
 
   function copyLink() {
     if (invitation.token) {
       navigator.clipboard.writeText(
-        `${window.location.origin}/accept-invite?token=${invitation.token}`,
+        `${window.location.origin}/${locale}/invite/${invitation.token}`,
       );
       toast.success(t('actions.linkCopied'));
     }

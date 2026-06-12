@@ -60,7 +60,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       body,
     });
     const origin = request.nextUrl.origin;
-    const inviteUrl = `${origin}/accept-invite?token=${data.token}`;
+    const inviteUrl = `${origin}/en/invite/${data.token}`;
     return NextResponse.json(
       { invitationId: data.invitationId, token: data.token, inviteUrl, expiresAt: data.expiresAt, deliveryStatus: data.deliveryStatus },
       { status: 201 },
