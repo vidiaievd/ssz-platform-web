@@ -77,6 +77,7 @@ export default async function SchoolInstanceLayout({ children, params }: Props) 
   const schoolType = deriveSchoolType(school);
   const schoolContext: SchoolContext = {
     role: dashboardRole,
+    schoolRole: school.myRole ?? undefined,
     schoolType,
     school: { name: school.name, slug: school.slug ?? school.id },
     schoolId: school.id,

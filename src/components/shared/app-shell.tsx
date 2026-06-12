@@ -17,9 +17,10 @@ import {
 
 import type { CurrentUser } from "@/features/auth/types/current-user";
 import type { DashboardRole, SchoolType } from "@/features/dashboard/types";
+import type { SchoolRole } from "@/features/school/types";
 import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
-import { WorkspaceSwitcher } from "@/features/workspaces";
+import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
 import { Sidebar } from "./sidebar/sidebar";
 import { MobileSidebar } from "./sidebar/mobile-sidebar";
@@ -28,6 +29,8 @@ import type { NavSection } from "./sidebar/types";
 
 export type SchoolContext = {
   role: DashboardRole;
+  /** Original SchoolRole from org-service — used for role badge and page-level guards */
+  schoolRole?: SchoolRole;
   schoolType: SchoolType;
   school: { name: string; slug: string };
   schoolId: string;
@@ -169,8 +172,17 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
         ? "private_tutor"
         : "student";
 
+  const showRoleBadge =
+    variant === "school" &&
+    schoolContext?.schoolRole &&
+    schoolContext.schoolRole !== "OWNER" &&
+    schoolContext.schoolRole !== "ADMIN";
+
   const workspaceSwitcher = (
-    <WorkspaceSwitcher activeContextKey={activeContextKey} userId={resolvedTutorId || undefined} />
+    <div className="flex items-center gap-2 min-w-0">
+      <WorkspaceSwitcher activeContextKey={activeContextKey} userId={resolvedTutorId || undefined} />
+      {showRoleBadge && <RoleBadge role={schoolContext!.schoolRole!} />}
+    </div>
   );
 
   return (

@@ -1,9 +1,13 @@
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { getSchoolBySlug } from "@/features/school/api/get-school-by-slug";
+import { getMySchoolRole } from "@/features/school/api/get-my-school-role";
 import { getCommandCenter } from "@/features/teachers/api/queries";
 import { getPendingCount } from "@/features/invitations/api/queries";
 import { CommandCenterClient } from "@/features/teachers/components/command-center/command-center-client";
+
+const ALLOWED_ROLES = ['OWNER', 'ADMIN', 'MANAGER', 'SCHEDULER'] as const;
 
 type Props = {
   params: Promise<{ schoolSlug: string; locale: string }>;
@@ -12,6 +16,11 @@ type Props = {
 export default async function TeachersPage({ params }: Props) {
   const { schoolSlug } = await params;
   const t = await getTranslations("Teachers.commandCenter");
+
+  const role = await getMySchoolRole(schoolSlug);
+  if (!role || !(ALLOWED_ROLES as readonly string[]).includes(role)) {
+    notFound();
+  }
 
   const school = await getSchoolBySlug(schoolSlug);
   if (!school) {
