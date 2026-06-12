@@ -19,11 +19,11 @@ import type { CurrentUser } from "@/features/auth/types/current-user";
 import type { DashboardRole, SchoolType } from "@/features/dashboard/types";
 import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
+import { WorkspaceSwitcher } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
 import { Sidebar } from "./sidebar/sidebar";
 import { MobileSidebar } from "./sidebar/mobile-sidebar";
 import { Topbar } from "./topbar/topbar";
-import { SchoolSwitcher } from "./topbar/school-switcher";
 import type { NavSection } from "./sidebar/types";
 
 export type SchoolContext = {
@@ -99,19 +99,19 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
   ];
 }
 
-function buildTutorNav(tutorSlug: string): NavSection[] {
+function buildTutorNav(userId: string): NavSection[] {
   return [
     {
       items: [
-        { href: `/tutor/${tutorSlug}/dashboard`, icon: LayoutDashboard, labelKey: "dashboard" },
-        { href: `/tutor/${tutorSlug}/students`, icon: Users, labelKey: "students" },
-        { href: `/tutor/${tutorSlug}/invitations`, icon: MailCheck, labelKey: "invitations" },
-        { href: `/tutor/${tutorSlug}/content`, icon: BookOpen, labelKey: "content" },
+        { href: `/tutor/${userId}/dashboard`, icon: LayoutDashboard, labelKey: "dashboard" },
+        { href: `/tutor/${userId}/students`, icon: Users, labelKey: "students" },
+        { href: `/tutor/${userId}/invitations`, icon: MailCheck, labelKey: "invitations" },
+        { href: `/tutor/${userId}/content`, icon: BookOpen, labelKey: "content" },
       ],
     },
     {
       items: [
-        { href: `/tutor/${tutorSlug}/settings`, icon: Settings, labelKey: "settings" },
+        { href: `/tutor/${userId}/settings`, icon: Settings, labelKey: "settings" },
       ],
     },
   ];
@@ -144,24 +144,34 @@ type AppShellProps = {
   variant: AppShellVariant;
   user: CurrentUser;
   schoolContext?: SchoolContext;
+  /** Stable userId for the tutor workspace nav links */
+  tutorUserId?: string;
   children: React.ReactNode;
 };
 
-export function AppShell({ variant, user, schoolContext, children }: AppShellProps) {
+export function AppShell({ variant, user, schoolContext, tutorUserId, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const params = useParams<{ schoolSlug?: string; tutorSlug?: string }>();
+  const params = useParams<{ schoolSlug?: string; userId?: string }>();
+
+  const resolvedTutorId = tutorUserId ?? params.userId ?? user.userId ?? "";
 
   const sections: NavSection[] =
     variant === "school"
       ? buildSchoolNav(params.schoolSlug ?? "", schoolContext)
       : variant === "tutor"
-        ? buildTutorNav(params.tutorSlug ?? "")
+        ? buildTutorNav(resolvedTutorId)
         : STUDENT_NAV;
 
-  const schoolSwitcher =
-    variant === "school" && schoolContext ? (
-      <SchoolSwitcher currentSchool={schoolContext.school} />
-    ) : null;
+  const activeContextKey =
+    variant === "school" && schoolContext
+      ? `school:${schoolContext.schoolId}`
+      : variant === "tutor"
+        ? "private_tutor"
+        : "student";
+
+  const workspaceSwitcher = (
+    <WorkspaceSwitcher activeContextKey={activeContextKey} userId={resolvedTutorId || undefined} />
+  );
 
   return (
     <div className="flex h-screen overflow-hidden bg-(--ssz-bg-base)">
@@ -179,14 +189,14 @@ export function AppShell({ variant, user, schoolContext, children }: AppShellPro
         <Topbar
           user={user}
           onMenuOpen={() => setMobileOpen(true)}
-          leading={schoolSwitcher}
+          leading={workspaceSwitcher}
           actions={
-          variant === "student" ? (
-            <NotificationBell />
-          ) : variant === "school" ? (
-            <AlertBadge schoolId={schoolContext?.schoolId} />
-          ) : undefined
-        }
+            variant === "student" ? (
+              <NotificationBell />
+            ) : variant === "school" ? (
+              <AlertBadge schoolId={schoolContext?.schoolId} />
+            ) : undefined
+          }
         />
         <main className="flex-1 overflow-auto">{children}</main>
       </div>

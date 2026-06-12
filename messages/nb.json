@@ -1774,5 +1774,25 @@
         "body": "En midlertidig feil oppstod. Vennligst prøv igjen."
       }
     }
+  },
+  "WorkspaceSwitcher": {
+    "trigger": "Bytt arbeidsplass",
+    "sections": {
+      "schools": "Skoler",
+      "other": "Andre"
+    },
+    "roles": {
+      "OWNER": "Eier",
+      "ADMIN": "Admin",
+      "MANAGER": "Leder",
+      "TEACHER": "Lærer",
+      "SCHEDULER": "Planlegger",
+      "CONTENT_ADMIN": "Innhold",
+      "STUDENT": "Elev"
+    },
+    "contexts": {
+      "private_tutor": "Privatlærer",
+      "student": "Elev"
+    }
   }
 }

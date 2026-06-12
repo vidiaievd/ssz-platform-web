@@ -2,27 +2,22 @@ import { redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 
 import { requireAnyRole } from '@/lib/auth/protect';
-import { getMyProfile } from '@/features/profile/api/get-my-profile';
 import { getTutorProfile } from '@/features/profile/api/get-tutor-profile';
-import { generateSlug } from '@/lib/utils/slug';
 
 export default async function TutorIndexPage() {
-  await requireAnyRole(['tutor']);
+  const user = await requireAnyRole(['tutor']);
 
-  const [locale, profile, tutorProfile] = await Promise.all([
-    getLocale(),
-    getMyProfile(),
-    getTutorProfile(),
-  ]);
+  const [locale, tutorProfile] = await Promise.all([getLocale(), getTutorProfile()]);
 
   if (!tutorProfile) {
-    redirect(`/${locale}/onboarding?step=prefs`);
+    redirect(`/${locale}/onboarding/tutor`);
   }
 
-  const slug = generateSlug(profile?.displayName ?? '');
-  if (!slug) {
-    redirect(`/${locale}/onboarding?step=profile`);
+  // Use stable userId from JWT, not a generated name-based slug
+  const userId = user.userId;
+  if (!userId) {
+    redirect(`/${locale}/onboarding/tutor`);
   }
 
-  redirect(`/${locale}/tutor/${slug}/dashboard`);
+  redirect(`/${locale}/tutor/${userId}/dashboard`);
 }
