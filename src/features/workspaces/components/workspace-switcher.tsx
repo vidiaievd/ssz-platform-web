@@ -83,25 +83,54 @@ function TriggerAvatar({ ctx }: { ctx: WorkspaceContext }) {
   return <GraduationCap className="size-5 shrink-0" />;
 }
 
+function ctxLabel(ctx: WorkspaceContext, tPrivate: string, tStudent: string): string {
+  if (ctx.type === 'school') return ctx.schoolName;
+  if (ctx.type === 'private_tutor') return tPrivate;
+  return tStudent;
+}
 
 export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
   const t = useTranslations('WorkspaceSwitcher');
   const router = useRouter();
   const locale = useLocale();
-  const { data, isError } = useWorkspaces();
+  const { data, isLoading, isError } = useWorkspaces();
   const activate = useActivateWorkspace();
 
-  if (isError) return null;
+  // 1. Loading — show skeleton
+  if (isLoading && !data) {
+    return (
+      <div className="flex items-center gap-2 rounded-md px-2 py-1.5">
+        <Skeleton className="size-6 rounded-full" />
+        <Skeleton className="h-4 w-30 hidden sm:block" />
+      </div>
+    );
+  }
+
+  // 2. Error with no cached data — hide silently
+  if (isError && !data) return null;
 
   const contexts = data?.contexts ?? [];
-  if (contexts.length <= 1) return null;
+  const activeCtx = contexts.find((c) => toContextKey(c) === activeContextKey) ?? contexts[0];
 
-  const activeCtx = contexts.find((c) => toContextKey(c) === activeContextKey) ?? contexts[0]!;
+  // 3. No matching context at all — nothing to show
+  if (!activeCtx) return null;
 
+  const label = ctxLabel(activeCtx, t('contexts.private_tutor'), t('contexts.student'));
+
+  // 4. Single context — show static label (no dropdown)
+  if (contexts.length <= 1) {
+    return (
+      <div className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-(--ssz-text-primary) min-w-0">
+        <TriggerAvatar ctx={activeCtx} />
+        <span className="truncate hidden sm:block">{label}</span>
+      </div>
+    );
+  }
+
+  // 5. Multiple contexts — full dropdown switcher
   const schoolContexts = contexts.filter((c) => c.type === 'school');
   const otherContexts = contexts.filter((c) => c.type !== 'school');
 
-  // Sort: active first, then alphabetical
   const sortedSchools = [...schoolContexts].sort((a, b) => {
     if (a.type !== 'school' || b.type !== 'school') return 0;
     const aKey = toContextKey(a);
@@ -114,19 +143,8 @@ export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
   function handleSelect(ctx: WorkspaceContext) {
     const key = toContextKey(ctx);
     if (key === activeContextKey) return;
-    const url = contextToUrl(ctx, locale, userId);
-    // Navigate immediately; activate cookie fire-and-forget
-    router.push(url);
+    router.push(contextToUrl(ctx, locale, userId));
     activate.mutate(key);
-  }
-
-  if (!data) {
-    return (
-      <div className="flex items-center gap-2 rounded-md px-2 py-1.5">
-        <Skeleton className="size-6 rounded-full" />
-        <Skeleton className="h-4 w-[120px] hidden sm:block" />
-      </div>
-    );
   }
 
   return (
@@ -136,23 +154,16 @@ export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
           'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium',
           'text-(--ssz-text-primary) hover:bg-accent transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          'min-w-[160px] max-w-[220px]',
+          'min-w-40 max-w-55',
         )}
         aria-label={t('trigger')}
       >
         <TriggerAvatar ctx={activeCtx} />
-        <span className="truncate flex-1 hidden sm:block">
-          {activeCtx.type === 'school'
-            ? activeCtx.schoolName
-            : activeCtx.type === 'private_tutor'
-              ? t('contexts.private_tutor')
-              : t('contexts.student')}
-        </span>
+        <span className="truncate flex-1 hidden sm:block">{label}</span>
         <ChevronsUpDown className="size-3.5 shrink-0 text-(--ssz-text-muted)" aria-hidden="true" />
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="w-[280px]">
-        {/* Schools section */}
+      <DropdownMenuContent align="start" className="w-70">
         {sortedSchools.length > 0 && (
           <>
             <DropdownMenuLabel className="text-xs text-(--ssz-text-muted) font-normal uppercase tracking-wider">
@@ -174,10 +185,7 @@ export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
                   )}
                 >
                   <Check
-                    className={cn(
-                      'size-3.5 shrink-0 text-primary',
-                      !isActive && 'invisible',
-                    )}
+                    className={cn('size-3.5 shrink-0 text-primary', !isActive && 'invisible')}
                     aria-hidden="true"
                   />
                   <ContextAvatar ctx={ctx} />
@@ -193,7 +201,6 @@ export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
           </>
         )}
 
-        {/* Other section (private_tutor + student) */}
         {otherContexts.length > 0 && (
           <>
             {sortedSchools.length > 0 && <DropdownMenuSeparator />}
@@ -215,10 +222,7 @@ export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
                   )}
                 >
                   <Check
-                    className={cn(
-                      'size-3.5 shrink-0 text-primary',
-                      !isActive && 'invisible',
-                    )}
+                    className={cn('size-3.5 shrink-0 text-primary', !isActive && 'invisible')}
                     aria-hidden="true"
                   />
                   <ContextAvatar ctx={ctx} />
