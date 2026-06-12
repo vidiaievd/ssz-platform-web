@@ -82,6 +82,11 @@ export default async function SchoolIndexPage() {
   if (roles.includes('tutor')) {
     redirect(`/${locale}/onboarding/tutor`);
   }
+  if (roles.includes('teacher')) {
+    // Teacher without any active school membership — awaiting invite acceptance.
+    // Must NOT redirect to /onboarding/tutor — these are different roles.
+    redirect(`/${locale}/teacher/pending`);
+  }
 
   redirect(`/${locale}/student/dashboard`);
 }
