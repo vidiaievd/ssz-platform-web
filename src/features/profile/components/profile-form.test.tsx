@@ -13,6 +13,8 @@ const PROFILE = {
   userId: 'u1',
   handle: null,
   displayName: 'Jane Doe',
+  firstName: null,
+  lastName: null,
   bio: 'I teach Norwegian.',
   avatarUrl: null,
   uiLocale: 'en',

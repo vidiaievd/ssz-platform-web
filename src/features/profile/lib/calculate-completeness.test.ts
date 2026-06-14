@@ -9,6 +9,8 @@ function makeProfile(overrides: Partial<Profile> = {}): Profile {
     userId: 'u1',
     handle: null,
     displayName: '',
+    firstName: null,
+    lastName: null,
     bio: null,
     avatarUrl: null,
     uiLocale: 'en',

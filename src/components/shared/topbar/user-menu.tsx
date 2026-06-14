@@ -48,7 +48,8 @@ export function UserMenu({ user }: UserMenuProps) {
   const settingsHref = getSettingsHref(user.roles);
 
   const { data: profile } = useMyProfile();
-  const displayName = profile?.displayName ?? roleLabel;
+  const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ');
+  const displayName = fullName || user.email || roleLabel;
   const avatarSrc = profile?.avatarUrl ?? undefined;
 
   return (
@@ -65,9 +66,7 @@ export function UserMenu({ user }: UserMenuProps) {
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel className="font-normal">
           <p className="text-sm font-medium">{displayName}</p>
-          {profile?.displayName && (
-            <p className="text-xs text-(--ssz-text-muted)">{roleLabel}</p>
-          )}
+          <p className="text-xs text-(--ssz-text-muted)">{roleLabel}</p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
