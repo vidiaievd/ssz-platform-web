@@ -790,7 +790,29 @@
     "label": "{count, plural, =0 {Notifications} one {# unread notification} other {# unread notifications}}",
     "unread": "{count, plural, one {# unread} other {# unread}}",
     "unreadDot": "Unread",
-    "empty": "You're all caught up!"
+    "empty": "You're all caught up!",
+    "types": {
+      "ENROLLMENT_APPROVED": {
+        "title": "Enrollment approved",
+        "body": "Your enrollment request was approved."
+      },
+      "ENROLLMENT_REJECTED": {
+        "title": "Enrollment rejected",
+        "body": "Your enrollment request was not approved."
+      },
+      "LESSON_ASSIGNED": {
+        "title": "Lesson assigned",
+        "body": "A new lesson has been assigned to you."
+      },
+      "NEW_MATERIAL": {
+        "title": "New material available",
+        "body": "New learning material has been added."
+      },
+      "TEACHER_PROFILE_CHANGED": {
+        "title": "Teacher updated profile",
+        "body": "A teacher in your school updated their profile information."
+      }
+    }
   },
   "Onboarding": {
     "title": "Set up your profile",

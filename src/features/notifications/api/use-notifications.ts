@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { NotificationsResponse } from '../types';
 import { notificationKeys } from './keys';
@@ -17,5 +17,18 @@ export function useNotifications() {
     queryFn: fetchNotifications,
     staleTime: 60_000,
     refetchInterval: 60_000,
+  });
+}
+
+export function useMarkRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/notifications/${id}/read`, { method: 'POST' });
+      if (!res.ok && res.status !== 204) throw new Error('Failed to mark as read');
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.list() });
+    },
   });
 }

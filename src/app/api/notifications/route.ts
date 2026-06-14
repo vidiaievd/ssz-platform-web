@@ -1,36 +1,28 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
-import type { Notification, NotificationsResponse } from '@/features/notifications/types';
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors';
+import type { NotificationsResponse } from '@/features/notifications/types';
 
-export const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: 'notif-1',
-    kind: 'enrollment_approved',
-    title: 'Enrolment approved',
-    body: 'Nordic Language Academy accepted your enrolment request.',
-    readAt: null,
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'notif-2',
-    kind: 'new_material',
-    title: 'New lesson available',
-    body: 'A new lesson "Definite articles" has been added to Norwegian for Beginners.',
-    readAt: null,
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'notif-3',
-    kind: 'lesson_assigned',
-    title: 'Lesson assigned',
-    body: 'Your tutor assigned "Verb conjugation" for this week.',
-    readAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-];
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  const query: Record<string, string> = {};
+  const cursor = searchParams.get('cursor');
+  const limit = searchParams.get('limit');
+  if (cursor) query.cursor = cursor;
+  if (limit) query.limit = limit;
 
-export async function GET() {
-  const unreadCount = MOCK_NOTIFICATIONS.filter((n) => n.readAt === null).length;
-  const response: NotificationsResponse = { items: MOCK_NOTIFICATIONS, unreadCount };
-  return NextResponse.json(response);
+  try {
+    const data = await serverFetch<NotificationsResponse>({
+      service: 'notification',
+      path: '/notifications',
+      query: Object.keys(query).length ? query : undefined,
+    });
+    return NextResponse.json(data);
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'unauthenticated') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ items: [], unreadCount: 0 }, { status: 200 });
+  }
 }

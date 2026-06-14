@@ -1,7 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
 import { MOCK_SCHOOLS } from '@/app/api/discovery/schools/route';
-import { MOCK_NOTIFICATIONS } from '@/app/api/notifications/route';
 import { MOCK_UPCOMING } from '@/app/api/student/upcoming/route';
 import { MOCK_STREAK } from '@/app/api/student/streak/route';
 import type { SchoolsResponse } from '@/features/discovery/types';
@@ -73,10 +72,11 @@ export const handlers = [
   http.get('/api/student/streak', () => HttpResponse.json(MOCK_STREAK)),
 
   http.get('/api/notifications', () => {
-    const unreadCount = MOCK_NOTIFICATIONS.filter((n) => n.readAt === null).length;
-    const response: NotificationsResponse = { items: MOCK_NOTIFICATIONS, unreadCount };
+    const response: NotificationsResponse = { items: [], unreadCount: 0 };
     return HttpResponse.json(response);
   }),
+  http.post('/api/notifications/:id/read', () => new HttpResponse(null, { status: 204 })),
+  http.post('/api/notifications/read-all', () => new HttpResponse(null, { status: 204 })),
 
   // Sub-profiles — default to 404 (not yet onboarded) in tests.
   // Feature tests that need an existing profile override these with server.use().

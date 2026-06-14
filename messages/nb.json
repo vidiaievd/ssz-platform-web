@@ -785,7 +785,29 @@
     "label": "{count, plural, =0 {Varsler} one {# ulest varsel} other {# uleste varsler}}",
     "unread": "{count, plural, one {# ulest} other {# uleste}}",
     "unreadDot": "Ulest",
-    "empty": "Ingen nye varsler!"
+    "empty": "Ingen nye varsler!",
+    "types": {
+      "ENROLLMENT_APPROVED": {
+        "title": "Påmelding godkjent",
+        "body": "Påmeldingsforespørselen din ble godkjent."
+      },
+      "ENROLLMENT_REJECTED": {
+        "title": "Påmelding avvist",
+        "body": "Påmeldingsforespørselen din ble ikke godkjent."
+      },
+      "LESSON_ASSIGNED": {
+        "title": "Leksjon tildelt",
+        "body": "En ny leksjon har blitt tildelt deg."
+      },
+      "NEW_MATERIAL": {
+        "title": "Nytt materiale tilgjengelig",
+        "body": "Nytt læremateriell har blitt lagt til."
+      },
+      "TEACHER_PROFILE_CHANGED": {
+        "title": "Lærer oppdaterte profil",
+        "body": "En lærer i skolen din oppdaterte profilinformasjonen sin."
+      }
+    }
   },
   "Onboarding": {
     "title": "Sett opp profilen din",
