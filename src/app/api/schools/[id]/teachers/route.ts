@@ -59,7 +59,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         // 409 = already a member, that's fine
       });
       return NextResponse.json(
-        { branch: 'added', name: user.displayName ?? body.email },
+        { branch: 'added', name: user.displayName ?? body.email.split('@')[0] },
         { status: 201 },
       );
     }
