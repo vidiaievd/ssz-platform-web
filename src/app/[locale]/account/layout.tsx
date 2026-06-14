@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
 import { SettingsLayout } from '@/components/shared/settings-layout';
-import { AccountBackButton } from '@/features/account';
+import { AccountBackButton, UnsavedChangesProvider } from '@/features/account';
 
 type Props = { children: React.ReactNode };
 
@@ -16,13 +16,15 @@ export default async function AccountLayout({ children }: Props) {
   ];
 
   return (
-    <div className="h-dvh flex flex-col">
-      <div className="shrink-0 border-b border-border px-3 py-2">
-        <AccountBackButton />
+    <UnsavedChangesProvider>
+      <div className="h-dvh flex flex-col">
+        <div className="shrink-0 border-b border-border px-3 py-2">
+          <AccountBackButton />
+        </div>
+        <div className="flex-1 min-h-0">
+          <SettingsLayout nav={nav}>{children}</SettingsLayout>
+        </div>
       </div>
-      <div className="flex-1 min-h-0">
-        <SettingsLayout nav={nav}>{children}</SettingsLayout>
-      </div>
-    </div>
+    </UnsavedChangesProvider>
   );
 }

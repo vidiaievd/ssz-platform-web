@@ -1990,7 +1990,13 @@
       "push": "Push",
       "comingSoon": "Coming soon"
     },
-    "back": "Back"
+    "back": "Back",
+    "unsavedChanges": {
+      "title": "Unsaved changes",
+      "description": "You have unsaved changes. If you leave, your changes will be lost.",
+      "leave": "Leave without saving",
+      "stay": "Stay on page"
+    }
   },
   "Topbar": {
     "search": {

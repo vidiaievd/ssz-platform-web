@@ -1,8 +1,9 @@
 'use client';
 
-import { usePathname } from '@/lib/i18n/navigation';
+import { usePathname, useRouter } from '@/lib/i18n/navigation';
 import { Link } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 
 type SettingsNavItem = {
   href: string;
@@ -16,6 +17,8 @@ type SettingsLayoutProps = {
 
 export function SettingsLayout({ nav, children }: SettingsLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const unsavedChanges = useUnsavedChanges();
 
   return (
     <div className="h-full flex flex-col md:flex-row">
@@ -34,6 +37,13 @@ export function SettingsLayout({ nav, children }: SettingsLayoutProps) {
                     : 'text-[var(--ssz-text-muted)] hover:bg-accent/60 hover:text-accent-foreground',
                 )}
                 aria-current={active ? 'page' : undefined}
+                onClick={(e) => {
+                  if (!unsavedChanges?.isDirty) return;
+                  e.preventDefault();
+                  unsavedChanges.guard(() =>
+                    router.push(item.href as Parameters<typeof router.push>[0]),
+                  );
+                }}
               >
                 {item.label}
               </Link>

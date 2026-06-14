@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/lib/i18n/navigation';
 import { useNavHistoryStore } from '@/stores/nav-history-store';
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 
 /**
  * Back button shown on every account settings tab. Returns the user to the
@@ -16,12 +17,20 @@ export function AccountBackButton() {
   const t = useTranslations('Account');
   const router = useRouter();
   const returnPath = useNavHistoryStore((s) => s.returnPath);
+  const unsavedChanges = useUnsavedChanges();
 
   function goBack() {
-    if (returnPath) {
-      router.push(returnPath as Parameters<typeof router.push>[0]);
+    const navigate = () => {
+      if (returnPath) {
+        router.push(returnPath as Parameters<typeof router.push>[0]);
+      } else {
+        router.push('/');
+      }
+    };
+    if (unsavedChanges) {
+      unsavedChanges.guard(navigate);
     } else {
-      router.push('/');
+      navigate();
     }
   }
 

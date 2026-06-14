@@ -1985,7 +1985,13 @@
       "push": "Push",
       "comingSoon": "Kommer snart"
     },
-    "back": "Tilbake"
+    "back": "Tilbake",
+    "unsavedChanges": {
+      "title": "Ulagrede endringer",
+      "description": "Du har ulagrede endringer. Hvis du forlater siden, mister du endringene.",
+      "leave": "Forlat uten å lagre",
+      "stay": "Bli på siden"
+    }
   },
   "Topbar": {
     "search": {

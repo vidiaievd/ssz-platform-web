@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { LOCALES } from '@/lib/i18n/config';
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 import { useMyProfile } from '../api/use-my-profile';
 import { useMyTutorProfile, useUpdateTutorProfile } from '../api/use-my-tutor-profile';
 import { updateProfileAction } from '../api/update-profile';
@@ -43,6 +44,7 @@ export function ProfileSettingsFormProvider({ children, isPrivateTutor }: Props)
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const updateTutor = useUpdateTutorProfile();
+  const unsavedChanges = useUnsavedChanges();
 
   const isLoading = profileLoading || (isPrivateTutor && tutorLoading);
 
@@ -63,6 +65,12 @@ export function ProfileSettingsFormProvider({ children, isPrivateTutor }: Props)
       currency: null,
     },
   });
+
+  const isDirty = form.formState.isDirty;
+  useEffect(() => {
+    unsavedChanges?.setDirty(isDirty);
+    return () => unsavedChanges?.setDirty(false);
+  }, [isDirty, unsavedChanges]);
 
   useEffect(() => {
     if (!profile) return;
