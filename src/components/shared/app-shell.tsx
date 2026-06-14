@@ -195,6 +195,11 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
     schoolContext.schoolRole !== "OWNER" &&
     schoolContext.schoolRole !== "ADMIN";
 
+  const canSeeSchedulingAlerts =
+    variant === "school" &&
+    !!schoolContext?.schoolRole &&
+    SCHEDULING_SCHOOL_ROLES.has(schoolContext.schoolRole);
+
   const workspaceSwitcher = (
     <div className="flex items-center gap-2 min-w-0">
       <WorkspaceSwitcher activeContextKey={activeContextKey} userId={resolvedTutorId || undefined} />
@@ -224,7 +229,7 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
           actions={
             <div className="flex items-center gap-2">
               {variant === "school" && <TrialPill />}
-              {variant === "school" && <AlertBadge schoolId={schoolContext?.schoolId} />}
+              {canSeeSchedulingAlerts && <AlertBadge schoolId={schoolContext?.schoolId} />}
               <NotificationBell />
             </div>
           }
