@@ -199,6 +199,22 @@ export interface RoomLoad {
   sessionCount: number;
 }
 
+// ── Roster view model ─────────────────────────────────────────────────────────
+
+export type RosterStatus = 'active' | 'pending' | 'suspended';
+
+export interface TeacherRosterRow {
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  languages: LangCode[];
+  role: 'TEACHER';
+  status: RosterStatus;
+  maxWeeklyHours: number;
+  joinedAt: string;
+}
+
 export interface ForecastBaseline {
   studentCount: number;
   activeTeacherCount: number;
