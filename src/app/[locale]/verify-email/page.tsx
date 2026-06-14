@@ -6,11 +6,11 @@ import { CheckEmailScreen } from '@/features/auth/components/check-email-screen'
 import { VerifyEmailStatus } from '@/features/auth/components/verify-email-status';
 
 type VerifyEmailPageProps = {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; next?: string }>;
 };
 
 export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
-  const { token } = await searchParams;
+  const { token, next } = await searchParams;
 
   return (
     <div className="flex min-h-screen flex-col bg-(--ssz-bg-base)">
@@ -30,10 +30,10 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
                 <p className="text-center text-sm text-(--ssz-text-muted)">…</p>
               }
             >
-              <VerifyEmailStatus token={token} />
+              <VerifyEmailStatus token={token} next={next} />
             </Suspense>
           ) : (
-            <CheckEmailScreen />
+            <CheckEmailScreen next={next} />
           )}
         </div>
       </main>

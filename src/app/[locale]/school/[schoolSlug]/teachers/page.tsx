@@ -1,8 +1,11 @@
-import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 
+import { getMySchoolRole } from "@/features/school/api/get-my-school-role";
 import { getSchoolBySlug } from "@/features/school/api/get-school-by-slug";
-import { getCommandCenter } from "@/features/teachers/api/queries";
-import { CommandCenterClient } from "@/features/teachers/components/command-center/command-center-client";
+import { getTeacherRoster } from "@/features/teachers/api/queries";
+import { TeacherRosterClient } from "@/features/teachers/components/roster/teacher-roster-client";
+
+const ALLOWED_ROLES = ['OWNER', 'ADMIN', 'MANAGER', 'SCHEDULER'] as const;
 
 type Props = {
   params: Promise<{ schoolSlug: string; locale: string }>;
@@ -10,34 +13,22 @@ type Props = {
 
 export default async function TeachersPage({ params }: Props) {
   const { schoolSlug } = await params;
-  const t = await getTranslations("Teachers.commandCenter");
+
+  const role = await getMySchoolRole(schoolSlug);
+  if (!role || !(ALLOWED_ROLES as readonly string[]).includes(role)) {
+    notFound();
+  }
 
   const school = await getSchoolBySlug(schoolSlug);
-  if (!school) {
-    return (
-      <main className="p-6">
-        <p className="text-sm text-(--ssz-text-muted)">{t("empty")}</p>
-      </main>
-    );
-  }
+  if (!school) notFound();
 
-  const data = await getCommandCenter(school.id);
-  const isHybrid = school.type === "HYBRID";
-
-  if ("status" in data) {
-    return (
-      <main className="p-6">
-        <p className="text-sm text-(--ssz-text-muted)">{t("empty")}</p>
-      </main>
-    );
-  }
+  const teachers = await getTeacherRoster(school.id);
 
   return (
-    <CommandCenterClient
+    <TeacherRosterClient
       schoolId={school.id}
       schoolSlug={schoolSlug}
-      isHybrid={isHybrid}
-      initial={data}
+      teachers={teachers}
     />
   );
 }

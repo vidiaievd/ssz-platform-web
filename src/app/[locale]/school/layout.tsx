@@ -5,7 +5,7 @@ import { requireAnyRole } from '@/lib/auth/protect';
 import { getTutorProfile } from '@/features/profile/api/get-tutor-profile';
 
 export default async function SchoolLayout({ children }: { children: React.ReactNode }) {
-  const user = await requireAnyRole(['tutor', 'school_admin']);
+  const user = await requireAnyRole(['tutor', 'school_admin', 'teacher']);
   const locale = await getLocale();
 
   if (user.roles.includes('tutor')) {

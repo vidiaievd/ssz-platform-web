@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,23 @@ import { addTeacher } from "../../api/mutations";
 import type { InviteBranch } from "../../api/mutations";
 import { teacherAddSchema, type TeacherAddInput } from "../../schemas";
 
+const FULL_TIME_CONTACT_HOURS = 40;
+
+const LANGUAGE_OPTIONS = [
+  { code: "nb", label: "Norsk" },
+  { code: "en", label: "English" },
+  { code: "uk", label: "Українська" },
+  { code: "ru", label: "Русский" },
+  { code: "de", label: "Deutsch" },
+  { code: "fr", label: "Français" },
+  { code: "es", label: "Español" },
+  { code: "it", label: "Italiano" },
+  { code: "pl", label: "Polski" },
+  { code: "ar", label: "العربية" },
+] as const;
+
+const LEVEL_OPTIONS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
+
 type AddTeacherModalProps = {
   schoolId: string;
   open: boolean;
@@ -45,6 +63,7 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
     setValue,
     reset,
     watch,
+    control,
     formState: { errors },
     setError,
     clearErrors,
@@ -53,11 +72,18 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
     defaultValues: {
       email: "",
       maxWeeklyContactHours: 20,
-      employmentType: "full",
+      employmentType: "part",
+      teachingLanguages: [{ code: "nb", level: "B2" }],
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "teachingLanguages",
+  });
+
   const employmentType = watch("employmentType");
+  const teachingLanguages = watch("teachingLanguages");
 
   function handleClose() {
     reset();
@@ -71,12 +97,13 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
       const outcome = await addTeacher(schoolId, data);
       if (outcome.success) {
         setResult(outcome.data);
-        if (outcome.data.branch === "added") {
-          setTimeout(() => {
-            onSuccess();
-            handleClose();
-          }, 1500);
+        if (outcome.data.branch !== "added") {
+          toast.success(t("inviteButton"));
         }
+        setTimeout(() => {
+          onSuccess();
+          handleClose();
+        }, 1500);
       } else {
         if (outcome.error === "conflict") {
           setError("email", { message: t("noLangs") });
@@ -111,17 +138,6 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
                 <p className="text-xs text-(--ssz-text-muted)">{result.email}</p>
               </>
             )}
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setResult(null);
-                reset();
-                if (result.branch !== "added") onSuccess();
-              }}
-            >
-              {t("inviteButton")}
-            </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2" noValidate>
@@ -149,7 +165,9 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
                 type="number"
                 min={1}
                 max={60}
+                disabled={employmentType === "full"}
                 aria-invalid={!!errors.maxWeeklyContactHours}
+                className={employmentType === "full" ? "opacity-50 cursor-not-allowed" : ""}
                 {...register("maxWeeklyContactHours", { valueAsNumber: true })}
               />
               {errors.maxWeeklyContactHours && (
@@ -163,11 +181,15 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
               <Label htmlFor="teacher-employment">{t("employmentLabel")}</Label>
               <Select
                 value={employmentType}
-                onValueChange={(v) =>
-                  setValue("employmentType", v as TeacherAddInput["employmentType"], {
-                    shouldValidate: true,
-                  })
-                }
+                onValueChange={(v) => {
+                  const type = v as TeacherAddInput["employmentType"];
+                  setValue("employmentType", type, { shouldValidate: true });
+                  if (type === "full") {
+                    setValue("maxWeeklyContactHours", FULL_TIME_CONTACT_HOURS, { shouldValidate: true });
+                  } else if (employmentType === "full") {
+                    setValue("maxWeeklyContactHours", 20, { shouldValidate: false });
+                  }
+                }}
               >
                 <SelectTrigger id="teacher-employment">
                   <SelectValue />
@@ -183,6 +205,86 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
                   {errors.employmentType.message}
                 </p>
               )}
+            </div>
+
+            {/* Teaching languages */}
+            <div className="space-y-2">
+              <Label>{t("langsLabel")}</Label>
+              <div className="space-y-2">
+                {fields.map((field, idx) => (
+                  <div key={field.id} className="flex gap-2 items-center">
+                    <Select
+                      value={teachingLanguages[idx]?.code ?? "nb"}
+                      onValueChange={(v) =>
+                        setValue(`teachingLanguages.${idx}.code`, v, { shouldValidate: true })
+                      }
+                    >
+                      <SelectTrigger className="flex-1" aria-label={t("langsLanguageLabel")}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LANGUAGE_OPTIONS.map((lang) => (
+                          <SelectItem key={lang.code} value={lang.code}>
+                            {lang.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select
+                      value={teachingLanguages[idx]?.level ?? "B2"}
+                      onValueChange={(v) =>
+                        setValue(
+                          `teachingLanguages.${idx}.level`,
+                          v as TeacherAddInput["teachingLanguages"][number]["level"],
+                          { shouldValidate: true },
+                        )
+                      }
+                    >
+                      <SelectTrigger className="w-24" aria-label={t("langsLevelLabel")}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LEVEL_OPTIONS.map((lvl) => (
+                          <SelectItem key={lvl} value={lvl}>
+                            {lvl}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      disabled={fields.length === 1}
+                      onClick={() => remove(idx)}
+                      aria-label={t("langsRemoveLabel")}
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ code: "nb", level: "B2" })}
+                className="mt-1"
+              >
+                <Plus className="size-4 mr-1.5" aria-hidden="true" />
+                {t("langsAddButton")}
+              </Button>
+
+              {errors.teachingLanguages && (
+                <p role="alert" className="text-xs text-error-600 dark:text-error-400">
+                  {t("langsRequired")}
+                </p>
+              )}
+
+              <p className="text-xs text-(--ssz-text-muted)">{t("langsHint")}</p>
             </div>
 
             <DialogFooter className="pt-2">

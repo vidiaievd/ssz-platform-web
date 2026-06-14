@@ -9,14 +9,7 @@ export function resolvePostLoginPath(
   if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
     return redirect;
   }
-  if (auth.roles.includes('school_admin')) {
-    return '/school';
-  }
-  if (auth.roles.includes('tutor')) {
-    return auth.hasTutorProfile ? '/tutor' : '/onboarding?step=profile';
-  }
-  if (auth.roles.includes('student')) {
-    return auth.hasStudentProfile ? '/student/dashboard' : '/onboarding?step=profile';
-  }
-  return '/student/dashboard';
+  // Single entry point: server-side workspace resolver (school/page.tsx)
+  // handles context detection and onboarding fallbacks for all roles.
+  return '/school';
 }

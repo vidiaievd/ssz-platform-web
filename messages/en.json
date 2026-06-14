@@ -42,7 +42,8 @@
     "mfa_required": "Two-factor authentication is required.",
     "upstream_unavailable": "Service temporarily unavailable. Please try again.",
     "timeout": "The request took too long. Please try again.",
-    "unknown": "Something went wrong. Please try again."
+    "unknown": "Something went wrong. Please try again.",
+    "gone": "This invitation link is no longer valid."
   },
   "Marketing": {
     "features": "Features",
@@ -63,7 +64,9 @@
     "mySchools": "My Schools",
     "settings": "Settings",
     "discover": "Discover",
-    "requests": "Requests"
+    "requests": "Requests",
+    "invitations": "Invitations",
+    "scheduling": "Scheduling"
   },
   "RouteTitles": {
     "dashboard": "Dashboard",
@@ -1489,6 +1492,28 @@
       }
     },
     "roster": {
+      "title": "Teachers",
+      "addTeacher": "Add teacher",
+      "empty": "No teachers in this school yet.",
+      "emptyCta": "Add your first teacher",
+      "tableLabel": "Teachers roster",
+      "noLanguages": "None",
+      "columns": {
+        "name": "Teacher",
+        "email": "Email",
+        "languages": "Languages",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "pending": "Pending",
+        "suspended": "Suspended"
+      },
+      "actions": {
+        "menuLabel": "{name} — actions",
+        "remove": "Remove"
+      },
       "addModal": {
         "title": "Add teacher",
         "emailLabel": "Email address",
@@ -1505,7 +1530,14 @@
         "foundTeacher": "Found teacher profile",
         "foundUser": "Found user — will onboard as teacher",
         "noLangs": "No teaching languages set — assign them in the teacher's profile",
-        "cancelButton": "Cancel"
+        "cancelButton": "Cancel",
+        "langsLabel": "Teaching languages",
+        "langsLanguageLabel": "Language",
+        "langsLevelLabel": "Level",
+        "langsAddButton": "Add language",
+        "langsRemoveLabel": "Remove language",
+        "langsRequired": "At least one teaching language is required",
+        "langsHint": "The school hires the teacher for a specific language — this will be used for group assignments."
       },
       "removeGuard": {
         "title": "Cannot remove teacher",
@@ -1643,6 +1675,190 @@
       "ok": "Healthy",
       "warn": "Warning",
       "danger": "Critical"
+    }
+  },
+  "Invitations": {
+    "page": {
+      "title": "Invitations",
+      "pendingSummary": "{count, plural, one {# pending} other {# pending}}",
+      "expiredSummary": "{count, plural, one {# expired} other {# expired}}",
+      "noPending": "No pending invitations"
+    },
+    "tabs": {
+      "all": "All",
+      "teachers": "Teachers",
+      "students": "Students",
+      "staff": "Staff"
+    },
+    "table": {
+      "recipient": "Recipient",
+      "roleGroup": "Role / Group",
+      "status": "Status",
+      "sent": "Sent",
+      "expires": "Expires",
+      "actions": "Actions",
+      "empty": "No invitations yet",
+      "retry": "Try again",
+      "invitedBy": "by {name}"
+    },
+    "status": {
+      "accepted": "Accepted",
+      "pending": "Pending",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
+    "expiry": {
+      "dash": "—",
+      "expired": "Expired",
+      "soon": "Expiring soon",
+      "availableIn": "Available in {mins} min"
+    },
+    "actions": {
+      "resend": "Resend",
+      "copyLink": "Copy link",
+      "revoke": "Revoke",
+      "linkCopied": "Link copied"
+    },
+    "resend": {
+      "success": "Invitation resent",
+      "alreadyAccepted": "Invitation was already accepted",
+      "throttled": "Too many resends — try again later",
+      "gone": "Invitation no longer exists",
+      "error": "Failed to resend invitation",
+      "cooldownHint": "Available in {mins} min"
+    },
+    "revoke": {
+      "title": "Revoke invitation?",
+      "description": "The invitation to {email} will be revoked and can no longer be used. You can invite them again later.",
+      "confirm": "Revoke",
+      "cancel": "Cancel",
+      "success": "Invitation revoked",
+      "undo": "Undo",
+      "alreadyAccepted": "Cannot revoke — invitation was already accepted",
+      "gone": "Invitation was already revoked or expired",
+      "error": "Failed to revoke invitation"
+    },
+    "pendingLink": {
+      "singular": "1 invitation pending →",
+      "plural": "{count} invitations pending →"
+    },
+    "roles": {
+      "TEACHER": "Teacher",
+      "STUDENT": "Student",
+      "ADMIN": "Admin",
+      "CONTENT_ADMIN": "Content Admin",
+      "SCHEDULER": "Scheduler"
+    },
+    "a11y": {
+      "loadingLabel": "Loading invitations",
+      "listLabel": "Invitations list",
+      "actionsLabel": "Actions for {email}",
+      "pendingLabel": "{count} pending"
+    }
+  },
+  "Invite": {
+    "title": {
+      "invited": "You've been invited to {schoolName}",
+      "role": "as {role}"
+    },
+    "meta": {
+      "invitedBy": "Invited by: {name}",
+      "forEmail": "This invitation is for: {email}",
+      "expiresAt": "Valid until {date}"
+    },
+    "cta": {
+      "createAccount": "Create account",
+      "signInToAccept": "Sign in to accept",
+      "accept": "Accept invitation",
+      "haveAccount": "Already have an account? Sign in",
+      "notYou": "Not you? Sign out",
+      "signInAsInvitee": "Sign in as {email}",
+      "goToWorkspace": "Go to workspace",
+      "goHome": "Go to home",
+      "retry": "Try again"
+    },
+    "mismatch": {
+      "title": "This invitation is for a different account",
+      "body": "It's addressed to {inviteEmail}, but you're signed in as {currentEmail}."
+    },
+    "accept": {
+      "syncing": "Accepting invitation…",
+      "success": "Welcome to {schoolName}!",
+      "alreadyMember": "You're already a member of this school",
+      "error": "Failed to accept invitation"
+    },
+    "state": {
+      "invalid": {
+        "title": "Invalid link",
+        "body": "This invitation link is damaged or has already been used."
+      },
+      "expired": {
+        "title": "Invitation expired",
+        "body": "Ask the school to send you a new invitation."
+      },
+      "revoked": {
+        "title": "Invitation revoked",
+        "body": "The school has revoked this invitation."
+      },
+      "accepted": {
+        "title": "Already accepted",
+        "body": "You've already accepted this invitation."
+      },
+      "error": {
+        "title": "Failed to load invitation",
+        "body": "A temporary error occurred. Please try again."
+      }
+    }
+  },
+  "WorkspaceSwitcher": {
+    "trigger": "Switch workspace",
+    "sections": {
+      "schools": "Schools",
+      "other": "Other"
+    },
+    "roles": {
+      "OWNER": "Owner",
+      "ADMIN": "Admin",
+      "MANAGER": "Manager",
+      "TEACHER": "Teacher",
+      "SCHEDULER": "Scheduler",
+      "CONTENT_ADMIN": "Content",
+      "STUDENT": "Student"
+    },
+    "contexts": {
+      "private_tutor": "Private tutor",
+      "student": "Student"
+    }
+  },
+  "TeacherPending": {
+    "title": "Waiting for a school invite",
+    "description": "Your account has a teacher role, but you haven't been added to any school yet. Ask your school admin to send you an invitation.",
+    "hint": "Once you accept the invite from your school, you'll be taken straight to the school workspace.",
+    "logout": "Sign out"
+  },
+  "Scheduling": {
+    "sectionTitle": "Scheduling",
+    "tabs": {
+      "overview": "Overview",
+      "cover": "Cover",
+      "curriculum": "Curriculum",
+      "forecast": "Forecast"
+    },
+    "notReady": {
+      "title": "Scheduling isn't set up yet",
+      "body": "Contact your administrator to configure the scheduling backend."
+    },
+    "cover": {
+      "title": "Substitute Console"
+    },
+    "curriculum": {
+      "title": "Curriculum Planner"
+    },
+    "forecast": {
+      "title": "Forecast & Capacity"
+    },
+    "stub": {
+      "body": "This section is coming soon."
     }
   }
 }

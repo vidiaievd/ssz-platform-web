@@ -11,9 +11,7 @@ export default async function HomePage() {
     getTranslations('Home'),
   ]);
 
-  const dashboardHref = user?.roles.some((r) => r === 'school_admin' || r === 'tutor')
-    ? '/school'
-    : '/student/dashboard';
+  const dashboardHref = '/school';
 
   return (
     <main>

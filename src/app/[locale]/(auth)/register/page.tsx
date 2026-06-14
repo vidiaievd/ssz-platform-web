@@ -7,18 +7,39 @@ import { GraduationCap, BookOpen, Building2, UserCheck, ArrowRight, ArrowLeft } 
 
 import { Link } from '@/lib/i18n/navigation';
 import { track } from '@/lib/analytics/track';
+import { UserRegisterForm } from '@/features/auth/components/user-register-form';
 
 type Step = 'hub' | 'org';
 
 export default function RegisterHubPage() {
   const t = useTranslations('Auth.RegisterHub');
   const tOrg = useTranslations('Auth.RegisterOrg');
+  const tInvite = useTranslations('Auth.Register');
   const searchParams = useSearchParams();
+  const inviteToken = searchParams.get('invite');
+  const prefillEmail = searchParams.get('email') ?? undefined;
+  const inviteRole = (searchParams.get('role') ?? 'student') as 'school_admin' | 'teacher' | 'tutor' | 'student';
   const [step, setStep] = useState<Step>(searchParams.get('step') === 'org' ? 'org' : 'hub');
 
   useEffect(() => {
     track({ name: 'register_started' });
   }, []);
+
+  // Invite flow: skip hub, show register form directly with pre-filled email.
+  if (inviteToken) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold text-(--ssz-text-primary)">{tInvite('title')}</h1>
+        </div>
+        <UserRegisterForm
+          role={inviteRole}
+          prefillEmail={prefillEmail}
+          next={`/invite/${inviteToken}`}
+        />
+      </div>
+    );
+  }
 
   if (step === 'org') {
     return (

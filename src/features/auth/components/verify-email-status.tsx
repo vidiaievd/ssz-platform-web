@@ -8,13 +8,16 @@ import { Button } from '@/components/ui/button';
 
 import { verifyEmailConfirmAction, resendVerificationAction } from '../actions/verify-email';
 import { resolvePostLoginPath } from '../utils/resolve-post-login-path';
+import { POST_VERIFY_NEXT_KEY } from './check-email-screen';
 import { track } from '@/lib/analytics/track';
 
 type VerifyEmailStatusProps = {
   token: string;
+  /** Post-verification redirect (e.g. /invite/{inviteToken}). */
+  next?: string;
 };
 
-export function VerifyEmailStatus({ token }: VerifyEmailStatusProps) {
+export function VerifyEmailStatus({ token, next }: VerifyEmailStatusProps) {
   const t = useTranslations('Auth.VerifyEmail');
   const router = useRouter();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
@@ -37,8 +40,14 @@ export function VerifyEmailStatus({ token }: VerifyEmailStatusProps) {
       }
       track({ name: 'verify_succeeded' });
       setStatus('success');
-      // New users have no profile yet at verify-time; resolver returns onboarding paths.
-      router.replace(resolvePostLoginPath({ roles: result.value.roles, hasStudentProfile: false, hasTutorProfile: false }));
+      // Prefer explicit next prop, then sessionStorage (set before email was sent),
+      // then workspace resolver as final fallback.
+      const destination =
+        next ??
+        localStorage.getItem(POST_VERIFY_NEXT_KEY) ??
+        resolvePostLoginPath({ roles: result.value.roles, hasStudentProfile: false, hasTutorProfile: false });
+      localStorage.removeItem(POST_VERIFY_NEXT_KEY);
+      router.replace(destination);
     });
   }, [token, router]);
 

@@ -32,10 +32,14 @@ const schoolSchema = z
 type SchoolInput = z.infer<typeof schoolSchema>;
 
 type Props = {
-  role: 'student' | 'tutor' | 'school_admin';
+  role: 'student' | 'teacher' | 'tutor' | 'school_admin';
+  /** Pre-fill and lock the email field (invite flow). */
+  prefillEmail?: string;
+  /** Where to redirect after successful registration (invite flow). */
+  next?: string;
 };
 
-export function UserRegisterForm({ role }: Props) {
+export function UserRegisterForm({ role, prefillEmail, next }: Props) {
   const t = useTranslations("Auth.Register");
   const tErrors = useTranslations("Errors");
   const router = useRouter();
@@ -48,7 +52,10 @@ export function UserRegisterForm({ role }: Props) {
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<SchoolInput>({ resolver: zodResolver(schoolSchema) });
+  } = useForm<SchoolInput>({
+    resolver: zodResolver(schoolSchema),
+    defaultValues: prefillEmail ? { email: prefillEmail } : undefined,
+  });
 
   function onSubmit(data: SchoolInput) {
     setServerError(null);
@@ -61,12 +68,21 @@ export function UserRegisterForm({ role }: Props) {
           setError("email", { message: t("emailTaken") });
           toast.error(t("emailTaken"));
         } else {
-          setServerError(tErrors(result.error.code));
-          toast.error(tErrors(result.error.code));
+          const details = result.error.details as Record<string, unknown> | null | undefined;
+          const backendErrors = details?.errors as Record<string, string[]> | undefined;
+          const firstBackendMessage = backendErrors
+            ? Object.values(backendErrors).flat()[0]
+            : (details?.detail as string | undefined);
+          const message = firstBackendMessage ?? tErrors(result.error.code);
+          setServerError(message);
+          toast.error(message);
         }
         return;
       }
-      router.replace("/verify-email");
+      const verifyPath = next
+        ? `/verify-email?next=${encodeURIComponent(next)}`
+        : '/verify-email';
+      router.replace(verifyPath);
     });
   }
 
@@ -78,7 +94,8 @@ export function UserRegisterForm({ role }: Props) {
           type="email"
           autoComplete="email"
           hasError={!!errors.email}
-          disabled={isPending}
+          disabled={isPending || !!prefillEmail}
+          readOnly={!!prefillEmail}
           {...register("email")}
         />
       </Field>

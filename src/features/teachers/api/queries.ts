@@ -1,8 +1,11 @@
 import 'server-only';
 import { cache } from 'react';
 
+import { serverFetch } from '@/lib/api/server-fetcher';
 import type {
   TeacherLoadRow,
+  TeacherRosterRow,
+  RosterStatus,
   WorkloadKpis,
   Vacancy,
   RoomLoad,
@@ -42,6 +45,51 @@ async function safeFetch<T>(url: string, init?: RequestInit): Promise<T | Unavai
     return { status: 'unavailable' };
   }
 }
+
+// ── Roster fetcher ────────────────────────────────────────────────────────────
+
+type OrgMemberDto = {
+  userId: string;
+  name?: string;
+  email?: string;
+  avatarUrl?: string | null;
+  role?: string;
+  langs?: string[];
+  maxWeeklyHours?: number;
+  status?: string;
+  joinedAt?: string;
+};
+
+function mapRosterStatus(s?: string): RosterStatus {
+  if (s === 'pending') return 'pending';
+  if (s === 'suspended') return 'suspended';
+  return 'active';
+}
+
+export const getTeacherRoster = cache(async (schoolId: string): Promise<TeacherRosterRow[]> => {
+  try {
+    const members = await serverFetch<OrgMemberDto[]>({
+      service: 'organization',
+      path: `/schools/${schoolId}/members`,
+      query: { role: 'TEACHER' },
+    });
+    return members
+      .filter((m) => !m.role || m.role === 'TEACHER')
+      .map((m): TeacherRosterRow => ({
+        userId: m.userId,
+        name: m.name ?? '',
+        email: m.email ?? '',
+        avatarUrl: m.avatarUrl ?? null,
+        languages: (m.langs ?? []) as TeacherRosterRow['languages'],
+        role: 'TEACHER',
+        status: mapRosterStatus(m.status),
+        maxWeeklyHours: m.maxWeeklyHours ?? 20,
+        joinedAt: m.joinedAt ?? '',
+      }));
+  } catch {
+    return [];
+  }
+});
 
 // ── RSC fetchers (with React cache for deduplication) ────────────────────────
 

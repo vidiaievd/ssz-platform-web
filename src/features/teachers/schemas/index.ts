@@ -1,9 +1,15 @@
 import { z } from 'zod';
 
+const teachingLanguageRow = z.object({
+  code: z.string().length(2),
+  level: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']),
+});
+
 export const teacherAddSchema = z.object({
   email: z.string().email(),
   maxWeeklyContactHours: z.number().min(1).max(60),
   employmentType: z.enum(['full', 'part', 'contract']),
+  teachingLanguages: z.array(teachingLanguageRow).min(1, 'at-least-one-language'),
 });
 
 export const availabilityBlockSchema = z.object({
@@ -58,6 +64,7 @@ export const curriculumUnitSchema = z.object({
   status: z.enum(['planned', 'active', 'done', 'overridden']),
 });
 
+export type TeachingLanguageRow = z.infer<typeof teachingLanguageRow>;
 export type TeacherAddInput = z.infer<typeof teacherAddSchema>;
 export type AvailabilityBlockInput = z.infer<typeof availabilityBlockSchema>;
 export type AbsenceReportInput = z.infer<typeof absenceReportSchema>;

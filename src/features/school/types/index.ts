@@ -1,4 +1,11 @@
-export type SchoolRole = 'OWNER' | 'ADMIN' | 'CONTENT_ADMIN' | 'TEACHER' | 'STUDENT';
+export type SchoolRole =
+  | 'OWNER'
+  | 'ADMIN'
+  | 'MANAGER'
+  | 'CONTENT_ADMIN'
+  | 'TEACHER'
+  | 'SCHEDULER'
+  | 'STUDENT';
 
 export type SchoolMemberRecord = {
   userId: string;
@@ -21,6 +28,10 @@ export type School = {
   ownerId?: string | null;
   /** Members list — present in school detail responses, may be absent in list responses */
   members?: SchoolMemberRecord[];
+  /** Role of the currently authenticated user in this school — injected by org-service in list responses */
+  myRole?: SchoolRole | null;
+  /** Capabilities for MANAGER role; null for all other roles */
+  myCapabilities?: string[] | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -67,5 +78,5 @@ export type CreateSchoolBody = {
 
 export type InviteMemberBody = {
   email: string;
-  role: Exclude<SchoolRole, 'OWNER'>;
+  role: Exclude<SchoolRole, 'OWNER' | 'STUDENT'>;
 };

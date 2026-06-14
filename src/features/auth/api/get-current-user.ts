@@ -17,13 +17,14 @@ export const getCurrentUser = cache(async function (): Promise<CurrentUser | nul
   const emailVerified =
     typeof payload?.email_verified === 'boolean' ? payload.email_verified : undefined;
   const userId = typeof payload?.sub === 'string' ? payload.sub : undefined;
+  const email = typeof payload?.email === 'string' ? payload.email : undefined;
 
   try {
     const data = await serverFetch<UserRolesResponse>({
       service: 'auth',
       path: '/auth/roles',
     });
-    return { roles: data.roles ?? [], emailVerified, userId };
+    return { roles: data.roles ?? [], emailVerified, userId, email };
   } catch {
     return null;
   }

@@ -14,7 +14,7 @@ export const registerSchema = z
     password: passwordSchema,
     passwordConfirm: z.string(),
     acceptedTerms: z.literal(true, { message: 'You must accept the terms' }),
-    role: z.enum(['school_admin', 'tutor', 'student']).optional(),
+    role: z.enum(['school_admin', 'teacher', 'tutor', 'student']).optional(),
   })
   .refine((data) => data.password === data.passwordConfirm, {
     message: 'Passwords do not match',
