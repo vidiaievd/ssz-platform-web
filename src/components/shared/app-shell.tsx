@@ -23,6 +23,7 @@ import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
 import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
+import { GlobalSearchTrigger } from "./topbar/global-search-trigger";
 import { TrialPill } from "./topbar/trial-pill";
 import { Sidebar } from "./sidebar/sidebar";
 import { MobileSidebar } from "./sidebar/mobile-sidebar";
@@ -219,6 +220,7 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
           onMenuOpen={() => setMobileOpen(true)}
           leading={workspaceSwitcher}
           activeContextKey={activeContextKey}
+          search={variant === "school" ? <GlobalSearchTrigger /> : undefined}
           actions={
             <div className="flex items-center gap-2">
               {variant === "school" && <TrialPill />}
