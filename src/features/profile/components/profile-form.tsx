@@ -15,7 +15,11 @@ import { useProfileSettingsForm } from '../hooks/use-profile-settings-form';
 import { LocaleSelect } from './locale-select';
 import { TimezoneSelect } from './timezone-select';
 
-export function ProfileForm() {
+type ProfileFormProps = {
+  showInstructionLocales?: boolean;
+};
+
+export function ProfileForm({ showInstructionLocales = false }: ProfileFormProps) {
   const t = useTranslations('Profile');
   const { isLoading } = useMyProfile();
   const { data: currentUser } = useCurrentUser();
@@ -110,7 +114,9 @@ export function ProfileForm() {
         <LocaleSelect name="uiLocale" control={control} disabled={isPending} />
       </Field>
 
-      <InstructionLocalesField control={control} disabled={isPending} t={t} />
+      {showInstructionLocales && (
+        <InstructionLocalesField control={control} disabled={isPending} t={t} />
+      )}
 
       <Field
         label={t('timezone')}
