@@ -11,8 +11,8 @@ import type { InvitePreview, InvitationRole } from "@/features/invitations/types
 import type { CurrentUser } from "@/features/auth/types/current-user";
 import { acceptInvitation } from "@/features/invitations/api/mutations";
 
-function inviteRoleToAuthRole(role: InvitationRole): 'school_admin' | 'tutor' | 'student' {
-  if (role === 'TEACHER') return 'tutor';
+function inviteRoleToAuthRole(role: InvitationRole): 'school_admin' | 'teacher' | 'tutor' | 'student' {
+  if (role === 'TEACHER') return 'teacher';
   if (role === 'STUDENT') return 'student';
   return 'school_admin';
 }

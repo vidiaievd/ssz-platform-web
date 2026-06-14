@@ -27,6 +27,10 @@ export const InvitationSchema = z.object({
   lastSentAt: z.string(),
   resendCount: z.number().int().min(0),
   token: z.string().nullable().optional(),
+  teachingLanguages: z
+    .array(z.object({ code: z.string(), level: z.string() }))
+    .nullable()
+    .optional(),
 });
 
 export const InvitationsListSchema = z.array(InvitationSchema);

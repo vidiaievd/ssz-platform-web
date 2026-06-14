@@ -63,11 +63,14 @@ export type AcceptInvitationResult =
 
 export async function acceptInvitation(token: string): Promise<AcceptInvitationResult> {
   try {
-    await serverFetch({
+    const res = await serverFetch<{ schoolId?: string } | null>({
       service: 'organization',
       path: `/schools/invitations/${token}/accept`,
       method: 'POST',
     });
+    if (res?.schoolId) {
+      invalidate(`school-${res.schoolId}-teachers`);
+    }
     return { ok: true, alreadyMember: false };
   } catch (schoolErr) {
     if (schoolErr instanceof AppError && schoolErr.code === 'not_found') {
