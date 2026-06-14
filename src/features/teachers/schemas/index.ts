@@ -6,6 +6,8 @@ const teachingLanguageRow = z.object({
 });
 
 export const teacherAddSchema = z.object({
+  firstName: z.string().max(100).optional(),
+  lastName: z.string().max(100).optional(),
   email: z.string().email(),
   maxWeeklyContactHours: z.number().min(1).max(60),
   employmentType: z.enum(['full', 'part', 'contract']),

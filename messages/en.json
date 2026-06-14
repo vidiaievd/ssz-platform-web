@@ -1559,7 +1559,10 @@
         "langsAddButton": "Add language",
         "langsRemoveLabel": "Remove language",
         "langsRequired": "At least one teaching language is required",
-        "langsHint": "The school hires the teacher for a specific language — this will be used for group assignments."
+        "langsHint": "The school hires the teacher for a specific language — this will be used for group assignments.",
+        "firstNameLabel": "First name",
+        "lastNameLabel": "Last name",
+        "nameHint": "Optional — used to pre-fill the teacher's registration form."
       },
       "removeGuard": {
         "title": "Cannot remove teacher",

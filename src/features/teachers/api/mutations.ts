@@ -32,6 +32,8 @@ export type AddTeacherResult =
 export async function addTeacher(
   schoolId: string,
   input: {
+    firstName?: string;
+    lastName?: string;
     email: string;
     maxWeeklyContactHours: number;
     employmentType: 'full' | 'part' | 'contract';
@@ -74,6 +76,8 @@ export async function addTeacher(
       path: `/schools/${schoolId}/invitations`,
       method: 'POST',
       body: {
+        ...(input.firstName ? { firstName: input.firstName } : {}),
+        ...(input.lastName ? { lastName: input.lastName } : {}),
         email: input.email,
         role: 'TEACHER',
         kind,

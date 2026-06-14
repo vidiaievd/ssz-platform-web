@@ -1554,7 +1554,10 @@
         "langsAddButton": "Legg til språk",
         "langsRemoveLabel": "Fjern språk",
         "langsRequired": "Minst ett undervisningsspråk er påkrevd",
-        "langsHint": "Skolen ansetter læreren for et bestemt språk — dette brukes til gruppetilordninger."
+        "langsHint": "Skolen ansetter læreren for et bestemt språk — dette brukes til gruppetilordninger.",
+        "firstNameLabel": "Fornavn",
+        "lastNameLabel": "Etternavn",
+        "nameHint": "Valgfritt — brukes til å forhåndsutfylle lærerens registreringsskjema."
       },
       "removeGuard": {
         "title": "Kan ikke fjerne lærer",
