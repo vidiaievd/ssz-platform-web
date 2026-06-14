@@ -40,9 +40,10 @@ export function VerifyEmailStatus({ token, next }: VerifyEmailStatusProps) {
       }
       track({ name: 'verify_succeeded' });
       setStatus('success');
-      // Prefer explicit next prop, then sessionStorage (set before email was sent),
-      // then workspace resolver as final fallback.
+      // Priority: auto-accepted invite redirect (server-side, cross-browser safe)
+      // → explicit next prop → localStorage fallback → workspace resolver.
       const destination =
+        result.value.acceptedInviteRedirect ??
         next ??
         localStorage.getItem(POST_VERIFY_NEXT_KEY) ??
         resolvePostLoginPath({ roles: result.value.roles, hasStudentProfile: false, hasTutorProfile: false });

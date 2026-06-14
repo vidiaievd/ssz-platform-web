@@ -36,6 +36,7 @@ export default function RegisterHubPage() {
           role={inviteRole}
           prefillEmail={prefillEmail}
           next={`/invite/${inviteToken}`}
+          inviteToken={inviteToken}
         />
       </div>
     );
