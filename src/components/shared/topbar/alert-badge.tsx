@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { Bell, Check } from "lucide-react";
+import { TriangleAlert, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -111,7 +111,7 @@ export function AlertBadge({ alerts: initialAlerts = [], schoolId }: AlertBadgeP
         aria-haspopup="dialog"
         className="relative"
       >
-        <Bell className="size-5" />
+        <TriangleAlert className="size-5" />
         {count > 0 && (
           <span
             aria-hidden="true"
