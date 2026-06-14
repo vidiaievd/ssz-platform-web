@@ -35,6 +35,7 @@ export async function addTeacher(
     email: string;
     maxWeeklyContactHours: number;
     employmentType: 'full' | 'part' | 'contract';
+    teachingLanguages: { code: string; level: string }[];
   },
 ): Promise<AddTeacherResult> {
   try {
@@ -72,7 +73,14 @@ export async function addTeacher(
       service: 'organization',
       path: `/schools/${schoolId}/invitations`,
       method: 'POST',
-      body: { email: input.email, role: 'TEACHER', kind },
+      body: {
+        email: input.email,
+        role: 'TEACHER',
+        kind,
+        maxWeeklyHours: input.maxWeeklyContactHours,
+        employmentType: input.employmentType,
+        teachingLanguages: input.teachingLanguages,
+      },
     });
     invalidate(`school-${schoolId}-teachers`);
     return { success: true, data: { branch: kind, email: input.email } };
