@@ -26,6 +26,14 @@ export const profileSchema = z.object({
 export type ProfileData = z.infer<typeof profileSchema>;
 
 export const updateProfileSchema = z.object({
+  firstName: z.string().max(100).nullable().optional(),
+  lastName: z.string().max(100).nullable().optional(),
+  // URL-safe slug: lowercase letters, digits, hyphens; 3–32 chars
+  handle: z
+    .string()
+    .regex(/^[a-z0-9-]{3,32}$/, 'Handle must be 3–32 lowercase letters, digits or hyphens')
+    .nullable()
+    .optional(),
   displayName: z.string().min(1, 'Display name is required').max(100, 'Display name is too long'),
   bio: z.string().max(500, 'Bio must be 500 characters or fewer').nullable().optional(),
   uiLocale: localeEnum,

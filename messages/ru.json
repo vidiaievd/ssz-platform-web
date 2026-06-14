@@ -115,7 +115,9 @@
     },
     "sections": {
       "avatar": "Фото профиля",
-      "info": "Личная информация"
+      "info": "Личная информация",
+      "teaching": "Профиль преподавателя",
+      "student": "Профиль ученика"
     },
     "completeness": {
       "label": "Заполненность профиля",
@@ -129,6 +131,23 @@
         "contactEmail": "контактную почту",
         "contactPhone": "контактный телефон"
       }
+    },
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "handle": "Публичная ссылка",
+    "teaching": {
+      "languages": "Языки преподавания",
+      "cefr": "Уровни преподавания (CEFR)",
+      "specializations": "Специализации",
+      "experience": "Лет опыта",
+      "certificates": "Сертификаты",
+      "rate": "Почасовая ставка",
+      "currency": "Валюта"
+    },
+    "student": {
+      "nativeLanguage": "Родной язык",
+      "targetLanguages": "Языки изучения",
+      "goals": "Цели обучения"
     }
   },
   "Content": {

@@ -30,6 +30,9 @@ export function ProfileForm() {
   const form = useForm<UpdateProfileInput>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
+      firstName: null,
+      lastName: null,
+      handle: null,
       displayName: '',
       bio: null,
       uiLocale: 'en',
@@ -51,6 +54,9 @@ export function ProfileForm() {
   useEffect(() => {
     if (!profile) return;
     reset({
+      firstName: profile.firstName ?? null,
+      lastName: profile.lastName ?? null,
+      handle: profile.handle ?? null,
       displayName: profile.displayName,
       bio: profile.bio ?? null,
       uiLocale: (LOCALES.includes(profile.uiLocale as (typeof LOCALES)[number])
@@ -72,6 +78,9 @@ export function ProfileForm() {
       if (!result.ok) {
         if (savedProfile) {
           reset({
+            firstName: savedProfile.firstName ?? null,
+            lastName: savedProfile.lastName ?? null,
+            handle: savedProfile.handle ?? null,
             displayName: savedProfile.displayName,
             bio: savedProfile.bio ?? null,
             uiLocale: savedProfile.uiLocale as UpdateProfileInput['uiLocale'],
@@ -93,6 +102,43 @@ export function ProfileForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 max-w-xl">
+      <div className="grid grid-cols-2 gap-4">
+        <Field label={t('firstName')} htmlFor="firstName" error={errors.firstName?.message}>
+          <Input
+            id="firstName"
+            autoComplete="given-name"
+            hasError={!!errors.firstName}
+            disabled={isPending}
+            {...register('firstName', { setValueAs: (v: string | null) => (!v || v.trim() === '' ? null : v) })}
+          />
+        </Field>
+        <Field label={t('lastName')} htmlFor="lastName" error={errors.lastName?.message}>
+          <Input
+            id="lastName"
+            autoComplete="family-name"
+            hasError={!!errors.lastName}
+            disabled={isPending}
+            {...register('lastName', { setValueAs: (v: string | null) => (!v || v.trim() === '' ? null : v) })}
+          />
+        </Field>
+      </div>
+
+      <Field label={t('handle')} htmlFor="handle" error={errors.handle?.message}>
+        <div className="flex items-center">
+          <span className="inline-flex h-10 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-(--ssz-text-muted)">
+            ssz.app/
+          </span>
+          <Input
+            id="handle"
+            autoComplete="off"
+            hasError={!!errors.handle}
+            disabled={isPending}
+            className="rounded-l-none"
+            {...register('handle', { setValueAs: (v: string | null) => (!v || v.trim() === '' ? null : v.trim().toLowerCase()) })}
+          />
+        </div>
+      </Field>
+
       <Field
         label={t('displayName')}
         htmlFor="displayName"

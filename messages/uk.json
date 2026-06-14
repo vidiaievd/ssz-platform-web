@@ -115,7 +115,9 @@
     },
     "sections": {
       "avatar": "Фото профілю",
-      "info": "Особиста інформація"
+      "info": "Особиста інформація",
+      "teaching": "Профіль викладача",
+      "student": "Профіль учня"
     },
     "completeness": {
       "label": "Заповненість профілю",
@@ -129,6 +131,23 @@
         "contactEmail": "контактну пошту",
         "contactPhone": "контактний телефон"
       }
+    },
+    "firstName": "Ім'я",
+    "lastName": "Прізвище",
+    "handle": "Публічне посилання",
+    "teaching": {
+      "languages": "Мови викладання",
+      "cefr": "Рівні викладання (CEFR)",
+      "specializations": "Спеціалізації",
+      "experience": "Роки досвіду",
+      "certificates": "Сертифікати",
+      "rate": "Вартість на годину",
+      "currency": "Валюта"
+    },
+    "student": {
+      "nativeLanguage": "Рідна мова",
+      "targetLanguages": "Мови вивчення",
+      "goals": "Цілі навчання"
     }
   },
   "Content": {

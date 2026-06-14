@@ -115,7 +115,9 @@
     },
     "sections": {
       "avatar": "Profilbilde",
-      "info": "Personlig informasjon"
+      "info": "Personlig informasjon",
+      "teaching": "Lærerprofil",
+      "student": "Læringsprofil"
     },
     "completeness": {
       "label": "Profilkomplethet",
@@ -129,6 +131,23 @@
         "contactEmail": "kontakte-post",
         "contactPhone": "kontakttelefon"
       }
+    },
+    "firstName": "Fornavn",
+    "lastName": "Etternavn",
+    "handle": "Offentlig lenke",
+    "teaching": {
+      "languages": "Undervisningsspråk",
+      "cefr": "Undervisningsnivåer (CEFR)",
+      "specializations": "Spesialiseringer",
+      "experience": "Års erfaring",
+      "certificates": "Sertifikater",
+      "rate": "Timepris",
+      "currency": "Valuta"
+    },
+    "student": {
+      "nativeLanguage": "Morsmål",
+      "targetLanguages": "Lærlingsspråk",
+      "goals": "Læringsmål"
     }
   },
   "Content": {

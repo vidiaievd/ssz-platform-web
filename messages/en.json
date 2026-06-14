@@ -115,7 +115,9 @@
     },
     "sections": {
       "avatar": "Profile photo",
-      "info": "Personal information"
+      "info": "Personal information",
+      "teaching": "Teaching profile",
+      "student": "Learning profile"
     },
     "completeness": {
       "label": "Profile completeness",
@@ -129,6 +131,23 @@
         "contactEmail": "contact email",
         "contactPhone": "contact phone"
       }
+    },
+    "firstName": "First name",
+    "lastName": "Last name",
+    "handle": "Public handle",
+    "teaching": {
+      "languages": "Teaching languages",
+      "cefr": "Teaching levels (CEFR)",
+      "specializations": "Specializations",
+      "experience": "Years of experience",
+      "certificates": "Certificates",
+      "rate": "Hourly rate",
+      "currency": "Currency"
+    },
+    "student": {
+      "nativeLanguage": "Native language",
+      "targetLanguages": "Learning languages",
+      "goals": "Learning goals"
     }
   },
   "Content": {
