@@ -60,6 +60,14 @@ type OrgMemberDto = {
   joinedAt?: string;
 };
 
+type ProfileSummary = {
+  userId: string;
+  displayName?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string | null;
+};
+
 function mapRosterStatus(s?: string): RosterStatus {
   if (s === 'pending') return 'pending';
   if (s === 'suspended') return 'suspended';
@@ -73,19 +81,39 @@ export const getTeacherRoster = cache(async (schoolId: string): Promise<TeacherR
       path: `/schools/${schoolId}/members`,
       query: { role: 'TEACHER' },
     });
-    return members
-      .filter((m) => !m.role || m.role === 'TEACHER')
-      .map((m): TeacherRosterRow => ({
+
+    const teacherMembers = members.filter((m) => !m.role || m.role === 'TEACHER');
+    if (teacherMembers.length === 0) return [];
+
+    // Enrich with display name + avatar from profile-service (single source of truth).
+    // Falls back to org data if profile-service is unavailable.
+    let profileMap = new Map<string, ProfileSummary>();
+    try {
+      const userIds = teacherMembers.map((m) => m.userId).join(',');
+      const profiles = await serverFetch<ProfileSummary[]>({
+        service: 'profile',
+        path: '/profiles',
+        query: { userIds },
+      });
+      profileMap = new Map(profiles.map((p) => [p.userId, p]));
+    } catch {
+      // profile-service unavailable — fall back gracefully
+    }
+
+    return teacherMembers.map((m): TeacherRosterRow => {
+      const profile = profileMap.get(m.userId);
+      return {
         userId: m.userId,
-        name: m.name ?? '',
+        name: profile?.displayName ?? m.name ?? '',
         email: m.email ?? '',
-        avatarUrl: m.avatarUrl ?? null,
+        avatarUrl: profile?.avatarUrl ?? m.avatarUrl ?? null,
         languages: (m.langs ?? []) as TeacherRosterRow['languages'],
         role: 'TEACHER',
         status: mapRosterStatus(m.status),
         maxWeeklyHours: m.maxWeeklyHours ?? 20,
         joinedAt: m.joinedAt ?? '',
-      }));
+      };
+    });
   } catch {
     return [];
   }
