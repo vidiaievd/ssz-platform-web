@@ -65,7 +65,8 @@
     "settings": "Settings",
     "discover": "Discover",
     "requests": "Requests",
-    "invitations": "Invitations"
+    "invitations": "Invitations",
+    "scheduling": "Scheduling"
   },
   "RouteTitles": {
     "dashboard": "Dashboard",
@@ -1491,6 +1492,28 @@
       }
     },
     "roster": {
+      "title": "Teachers",
+      "addTeacher": "Add teacher",
+      "empty": "No teachers in this school yet.",
+      "emptyCta": "Add your first teacher",
+      "tableLabel": "Teachers roster",
+      "noLanguages": "None",
+      "columns": {
+        "name": "Teacher",
+        "email": "Email",
+        "languages": "Languages",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "pending": "Pending",
+        "suspended": "Suspended"
+      },
+      "actions": {
+        "menuLabel": "{name} — actions",
+        "remove": "Remove"
+      },
       "addModal": {
         "title": "Add teacher",
         "emailLabel": "Email address",
@@ -1507,7 +1530,14 @@
         "foundTeacher": "Found teacher profile",
         "foundUser": "Found user — will onboard as teacher",
         "noLangs": "No teaching languages set — assign them in the teacher's profile",
-        "cancelButton": "Cancel"
+        "cancelButton": "Cancel",
+        "langsLabel": "Teaching languages",
+        "langsLanguageLabel": "Language",
+        "langsLevelLabel": "Level",
+        "langsAddButton": "Add language",
+        "langsRemoveLabel": "Remove language",
+        "langsRequired": "At least one teaching language is required",
+        "langsHint": "The school hires the teacher for a specific language — this will be used for group assignments."
       },
       "removeGuard": {
         "title": "Cannot remove teacher",
@@ -1805,5 +1835,30 @@
     "description": "Your account has a teacher role, but you haven't been added to any school yet. Ask your school admin to send you an invitation.",
     "hint": "Once you accept the invite from your school, you'll be taken straight to the school workspace.",
     "logout": "Sign out"
+  },
+  "Scheduling": {
+    "sectionTitle": "Scheduling",
+    "tabs": {
+      "overview": "Overview",
+      "cover": "Cover",
+      "curriculum": "Curriculum",
+      "forecast": "Forecast"
+    },
+    "notReady": {
+      "title": "Scheduling isn't set up yet",
+      "body": "Contact your administrator to configure the scheduling backend."
+    },
+    "cover": {
+      "title": "Substitute Console"
+    },
+    "curriculum": {
+      "title": "Curriculum Planner"
+    },
+    "forecast": {
+      "title": "Forecast & Capacity"
+    },
+    "stub": {
+      "body": "This section is coming soon."
+    }
   }
 }

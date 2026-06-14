@@ -65,7 +65,8 @@
     "settings": "Innstillinger",
     "discover": "Utforsk",
     "requests": "Søknader",
-    "invitations": "Invitasjoner"
+    "invitations": "Invitasjoner",
+    "scheduling": "Planlegging"
   },
   "RouteTitles": {
     "dashboard": "Oversikt",
@@ -1486,6 +1487,28 @@
       }
     },
     "roster": {
+      "title": "Lærere",
+      "addTeacher": "Legg til lærer",
+      "empty": "Ingen lærere i denne skolen ennå.",
+      "emptyCta": "Legg til din første lærer",
+      "tableLabel": "Læreroversikt",
+      "noLanguages": "Ingen",
+      "columns": {
+        "name": "Lærer",
+        "email": "E-post",
+        "languages": "Språk",
+        "status": "Status",
+        "actions": "Handlinger"
+      },
+      "status": {
+        "active": "Aktiv",
+        "pending": "Invitert",
+        "suspended": "Suspendert"
+      },
+      "actions": {
+        "menuLabel": "{name} — handlinger",
+        "remove": "Fjern"
+      },
       "addModal": {
         "title": "Legg til lærer",
         "emailLabel": "E-postadresse",
@@ -1502,7 +1525,14 @@
         "foundTeacher": "Fant lærerprofil",
         "foundUser": "Fant bruker — vil onboarde som lærer",
         "noLangs": "Ingen undervisningsspråk angitt",
-        "cancelButton": "Avbryt"
+        "cancelButton": "Avbryt",
+        "langsLabel": "Undervisningsspråk",
+        "langsLanguageLabel": "Språk",
+        "langsLevelLabel": "Nivå",
+        "langsAddButton": "Legg til språk",
+        "langsRemoveLabel": "Fjern språk",
+        "langsRequired": "Minst ett undervisningsspråk er påkrevd",
+        "langsHint": "Skolen ansetter læreren for et bestemt språk — dette brukes til gruppetilordninger."
       },
       "removeGuard": {
         "title": "Kan ikke fjerne lærer",
@@ -1800,5 +1830,30 @@
     "description": "Kontoen din har lærerrolle, men du er ikke lagt til i noen skole ennå. Be skolens administrator om å sende deg en invitasjon.",
     "hint": "Når du aksepterer invitasjonen fra skolen, blir du sendt direkte til skolens arbeidsområde.",
     "logout": "Logg ut"
+  },
+  "Scheduling": {
+    "sectionTitle": "Planlegging",
+    "tabs": {
+      "overview": "Oversikt",
+      "cover": "Vikarer",
+      "curriculum": "Pensum",
+      "forecast": "Prognose"
+    },
+    "notReady": {
+      "title": "Planlegging er ikke konfigurert ennå",
+      "body": "Kontakt administratoren din for å konfigurere planleggingssystemet."
+    },
+    "cover": {
+      "title": "Vikarkonsoll"
+    },
+    "curriculum": {
+      "title": "Pensumsplanlegger"
+    },
+    "forecast": {
+      "title": "Prognose og kapasitet"
+    },
+    "stub": {
+      "body": "Denne seksjonen kommer snart."
+    }
   }
 }
