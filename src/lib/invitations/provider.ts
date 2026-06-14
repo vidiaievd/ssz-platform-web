@@ -24,6 +24,12 @@ export interface InvitationsProvider {
     },
   ): Promise<Invitation[]>;
 
+  /** Cheap count without transferring the full list. Falls back to list().length if not implemented. */
+  count(
+    schoolId: string,
+    filter?: { status?: InvitationStatus; role?: InvitationRole },
+  ): Promise<number>;
+
   resend(schoolId: string, invitationId: string): Promise<ResendResult>;
   revoke(schoolId: string, invitationId: string): Promise<void>;
 

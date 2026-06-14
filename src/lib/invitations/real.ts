@@ -68,6 +68,24 @@ export const realProvider: InvitationsProvider = {
     return data;
   },
 
+  async count(schoolId, filter) {
+    try {
+      const data = await serverFetch<{ count: number }>({
+        service: 'organization',
+        path: `/schools/${schoolId}/invitations/count`,
+        query: {
+          status: filter?.status,
+          role: filter?.role,
+        },
+      });
+      return data.count;
+    } catch {
+      // B2 not yet deployed — fall back to list
+      const items = await realProvider.list(schoolId, { status: filter?.status, role: filter?.role });
+      return items.length;
+    }
+  },
+
   async resend(schoolId, invitationId): Promise<ResendResult> {
     const data = await serverFetch<ResendResponseDto>({
       service: 'organization',

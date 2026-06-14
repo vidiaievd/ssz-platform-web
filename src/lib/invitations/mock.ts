@@ -125,6 +125,13 @@ export const mockProvider: InvitationsProvider = {
     return items;
   },
 
+  async count(_schoolId, filter) {
+    let items = schoolStore.map((i) => ({ ...i }));
+    if (filter?.role) items = items.filter((i) => i.role === filter.role);
+    if (filter?.status) items = items.filter((i) => i.status === filter.status);
+    return items.length;
+  },
+
   async resend(_schoolId, invitationId) {
     const inv = find(schoolStore, invitationId);
     return doResend(inv);
