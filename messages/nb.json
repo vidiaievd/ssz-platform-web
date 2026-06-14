@@ -1828,6 +1828,18 @@
         "title": "Kunne ikke laste invitasjonen",
         "body": "En midlertidig feil oppstod. Vennligst prøv igjen."
       }
+    },
+    "greeting": {
+      "withName": "Hei, {name}!",
+      "noName": "Hei!"
+    },
+    "detail": {
+      "school": "Skole",
+      "role": "Rolle",
+      "languages": "Undervisningsspråk",
+      "invitedBy": "Invitert av",
+      "forEmail": "Denne invitasjonen er til",
+      "expiresAt": "Gyldig til"
     }
   },
   "WorkspaceSwitcher": {

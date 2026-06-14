@@ -1833,6 +1833,18 @@
         "title": "Failed to load invitation",
         "body": "A temporary error occurred. Please try again."
       }
+    },
+    "greeting": {
+      "withName": "Hello, {name}!",
+      "noName": "Hello!"
+    },
+    "detail": {
+      "school": "School",
+      "role": "Role",
+      "languages": "Teaching languages",
+      "invitedBy": "Invited by",
+      "forEmail": "This invitation is for",
+      "expiresAt": "Valid until"
     }
   },
   "WorkspaceSwitcher": {

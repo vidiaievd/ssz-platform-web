@@ -2,14 +2,29 @@
 
 import { useState, useTransition, useRef, useEffect, useMemo } from "react";
 import { useTranslations, useFormatter } from "next-intl";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Building2, Globe, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import type { InvitePreview, InvitationRole } from "@/features/invitations/types";
 import type { CurrentUser } from "@/features/auth/types/current-user";
 import { acceptInvitation } from "@/features/invitations/api/mutations";
+
+// Language endonyms — proper nouns, not translated
+const LANG_NAMES: Record<string, string> = {
+  nb: "Norsk",
+  en: "English",
+  uk: "Українська",
+  ru: "Русский",
+  de: "Deutsch",
+  fr: "Français",
+  es: "Español",
+  it: "Italiano",
+  pl: "Polski",
+  ar: "العربية",
+};
 
 function inviteRoleToAuthRole(role: InvitationRole): 'school_admin' | 'teacher' | 'tutor' | 'student' {
   if (role === 'TEACHER') return 'teacher';
@@ -58,10 +73,19 @@ export function InviteCard({ token, preview, currentUser, locale }: Props) {
     timeStyle: "short",
   });
 
-  // Email mismatch: current user's email from JWT doesn't match invite email.
   const hasEmailMismatch =
     currentUser?.email != null &&
     currentUser.email.toLowerCase() !== preview.email.toLowerCase();
+
+  // Derive greeting name from firstName + lastName
+  const greetingName = [preview.firstName, preview.lastName]
+    .filter(Boolean)
+    .join(" ") || null;
+
+  const showLanguages =
+    preview.role === "TEACHER" &&
+    Array.isArray(preview.teachingLanguages) &&
+    preview.teachingLanguages.length > 0;
 
   function handleAccept() {
     setLiveMessage(t("accept.syncing"));
@@ -74,7 +98,6 @@ export function InviteCard({ token, preview, currentUser, locale }: Props) {
         }
         if (result.reason === "terminal") {
           setLiveMessage(t("accept.error"));
-          // Hard-reload to re-render page in terminal state via RSC.
           router.refresh();
           return;
         }
@@ -93,36 +116,79 @@ export function InviteCard({ token, preview, currentUser, locale }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2 text-center">
+
+      {/* Greeting */}
+      <div className="flex flex-col gap-1 text-center">
         <h1
           ref={h1Ref}
           tabIndex={-1}
           className="text-2xl font-semibold text-(--ssz-text-primary) outline-none"
         >
-          {t("title.invited", { schoolName: preview.schoolName })}
+          {greetingName
+            ? t("greeting.withName", { name: greetingName })
+            : t("greeting.noName")}
         </h1>
         <p className="text-sm text-(--ssz-text-muted)">
-          {t("title.role", { role: tRoles(preview.role) })}
+          {t("title.invited", { schoolName: preview.schoolName })}
         </p>
       </div>
 
-      <div className="rounded-xl border border-border bg-surface px-5 py-4 flex flex-col gap-3">
-        {preview.invitedByName && (
-          <p className="text-sm text-(--ssz-text-secondary)">
-            {t("meta.invitedBy", { name: preview.invitedByName })}
-          </p>
+      {/* Invitation details card */}
+      <div className="rounded-xl border border-border bg-surface divide-y divide-border">
+
+        {/* School */}
+        <div className="flex items-start gap-3 px-5 py-3.5">
+          <Building2 className="size-4 shrink-0 mt-0.5 text-(--ssz-text-muted)" aria-hidden />
+          <div className="min-w-0">
+            <p className="text-xs text-(--ssz-text-muted) mb-0.5">{t("detail.school")}</p>
+            <p className="text-sm font-medium text-(--ssz-text-primary)">{preview.schoolName}</p>
+          </div>
+        </div>
+
+        {/* Role */}
+        <div className="flex items-start gap-3 px-5 py-3.5">
+          <UserCheck className="size-4 shrink-0 mt-0.5 text-(--ssz-text-muted)" aria-hidden />
+          <div className="min-w-0">
+            <p className="text-xs text-(--ssz-text-muted) mb-0.5">{t("detail.role")}</p>
+            <p className="text-sm font-medium text-(--ssz-text-primary)">{tRoles(preview.role)}</p>
+          </div>
+        </div>
+
+        {/* Teaching languages — teacher only */}
+        {showLanguages && (
+          <div className="flex items-start gap-3 px-5 py-3.5">
+            <Globe className="size-4 shrink-0 mt-0.5 text-(--ssz-text-muted)" aria-hidden />
+            <div className="min-w-0">
+              <p className="text-xs text-(--ssz-text-muted) mb-1.5">{t("detail.languages")}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {preview.teachingLanguages!.map(({ code, level }) => (
+                  <Badge key={code} variant="muted" className="text-xs font-normal">
+                    {LANG_NAMES[code] ?? code.toUpperCase()}
+                    <span className="ml-1.5 font-medium text-(--ssz-text-muted)">{level}</span>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
-        <p className="text-sm text-(--ssz-text-secondary)">
-          {t("meta.forEmail", { email: preview.email })}{" "}
-          <span className="font-mono text-(--ssz-text-primary)">
-            {preview.email}
-          </span>
-        </p>
-        <p
-          className={`text-sm ${expiringSoon ? "font-medium text-amber-600 dark:text-amber-400" : "text-(--ssz-text-muted)"}`}
-        >
-          {t("meta.expiresAt", { date: formattedExpiry })}
-        </p>
+
+        {/* Meta: invited by, email, expiry */}
+        <div className="px-5 py-3.5 flex flex-col gap-1.5">
+          {preview.invitedByName && (
+            <p className="text-xs text-(--ssz-text-secondary)">
+              <span className="text-(--ssz-text-muted)">{t("detail.invitedBy")}: </span>
+              {preview.invitedByName}
+            </p>
+          )}
+          <p className="text-xs text-(--ssz-text-secondary)">
+            <span className="text-(--ssz-text-muted)">{t("detail.forEmail")}: </span>
+            <span className="font-mono">{preview.email}</span>
+          </p>
+          <p className={`text-xs ${expiringSoon ? "font-medium text-amber-600 dark:text-amber-400" : "text-(--ssz-text-muted)"}`}>
+            <span className={expiringSoon ? "" : "text-(--ssz-text-muted)"}>{t("detail.expiresAt")}: </span>
+            {formattedExpiry}
+          </p>
+        </div>
       </div>
 
       {/* Email mismatch warning */}
@@ -205,11 +271,9 @@ export function InviteCard({ token, preview, currentUser, locale }: Props) {
             >
               {isPending ? t("accept.syncing") : t("cta.accept")}
             </Button>
-            {currentUser && (
-              <Button asChild variant="ghost" className="w-full">
-                <Link href="/login">{t("cta.notYou")}</Link>
-              </Button>
-            )}
+            <Button asChild variant="ghost" className="w-full">
+              <Link href="/login">{t("cta.notYou")}</Link>
+            </Button>
           </>
         )}
       </div>
