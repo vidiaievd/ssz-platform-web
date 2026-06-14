@@ -21,7 +21,7 @@ function resolveContextUrl(
   if (key === 'private_tutor') {
     const ctx = contexts.find((c) => c.type === 'private_tutor');
     if (!ctx || ctx.type !== 'private_tutor') return null;
-    return `/${locale}/tutor/${userId ?? ctx.tutorProfileId}/dashboard`;
+    return `/${locale}/tutor/${userId ?? ctx.tutorGroupId}/dashboard`;
   }
   if (key === 'student') {
     const ctx = contexts.find((c) => c.type === 'student');
@@ -49,14 +49,20 @@ export default async function SchoolIndexPage() {
   const { contexts, lastActiveContextKey } = workspaces;
   const user = await getCurrentUser();
   const userId = user?.userId;
+  const roles = user?.roles ?? [];
 
-  // Restore last active context if it still exists
+  // Restore last active context if it still exists.
+  // Skip student restoration for users with teacher role — the school workspace
+  // must win even when a user holds both roles.
   if (lastActiveContextKey) {
-    const target = resolveContextUrl(lastActiveContextKey, contexts, locale, userId);
-    if (target) redirect(target);
+    const skipStudent = lastActiveContextKey === 'student' && roles.includes('teacher');
+    if (!skipStudent) {
+      const target = resolveContextUrl(lastActiveContextKey, contexts, locale, userId);
+      if (target) redirect(target);
+    }
   }
 
-  // Default priority: school (staff role) → private tutor → student
+  // Default priority: school (staff role) → private tutor → teacher pending → student
   const schoolCtx = contexts.find(
     (c) => c.type === 'school' && STAFF_ROLES.includes(c.role),
   );
@@ -66,7 +72,14 @@ export default async function SchoolIndexPage() {
 
   const tutorCtx = contexts.find((c) => c.type === 'private_tutor');
   if (tutorCtx && tutorCtx.type === 'private_tutor') {
-    redirect(`/${locale}/tutor/${userId ?? tutorCtx.tutorProfileId}/dashboard`);
+    redirect(`/${locale}/tutor/${userId ?? tutorCtx.tutorGroupId}/dashboard`);
+  }
+
+  // Teacher role is checked before student context: a user can hold both roles
+  // (e.g. was a student before being invited as a teacher). The school workspace
+  // must win — the student context would otherwise silently redirect them away.
+  if (roles.includes('teacher')) {
+    redirect(`/${locale}/teacher/pending`);
   }
 
   const studentCtx = contexts.find((c) => c.type === 'student');
@@ -75,17 +88,11 @@ export default async function SchoolIndexPage() {
   }
 
   // No contexts — send to onboarding based on global roles
-  const roles = user?.roles ?? [];
   if (roles.includes('school_admin')) {
     redirect(`/${locale}/onboarding/school`);
   }
   if (roles.includes('tutor')) {
     redirect(`/${locale}/onboarding/tutor`);
-  }
-  if (roles.includes('teacher')) {
-    // Teacher without any active school membership — awaiting invite acceptance.
-    // Must NOT redirect to /onboarding/tutor — these are different roles.
-    redirect(`/${locale}/teacher/pending`);
   }
 
   redirect(`/${locale}/student/dashboard`);

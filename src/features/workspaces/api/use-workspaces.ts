@@ -44,6 +44,6 @@ export function useActivateWorkspace() {
 
 export function contextToUrl(ctx: WorkspaceContext, locale: string, userId?: string): string {
   if (ctx.type === 'school') return `/${locale}/school/${ctx.schoolSlug}/dashboard`;
-  if (ctx.type === 'private_tutor') return `/${locale}/tutor/${userId ?? ctx.tutorProfileId}/dashboard`;
+  if (ctx.type === 'private_tutor') return `/${locale}/tutor/${userId ?? ctx.tutorGroupId}/dashboard`;
   return `/${locale}/student/dashboard`;
 }

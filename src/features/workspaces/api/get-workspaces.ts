@@ -28,11 +28,14 @@ export const getWorkspaces = cache(async function (): Promise<WorkspacesResponse
   const token = await readAccessToken();
   if (!token) return { contexts: [], lastActiveContextKey: null };
 
-  const [schoolsResult, tutorProfileResult, rolesResult] = await Promise.allSettled([
+  const [schoolsResult, tutorGroupResult, rolesResult] = await Promise.allSettled([
     serverFetch<SchoolsPayload>({ service: 'organization', path: '/schools' }),
-    serverFetch<{ id: string } | null>({ service: 'profile', path: '/profiles/me/tutor' }),
+    serverFetch<{ id: string; name: string } | null>({ service: 'organization', path: '/tutoring/group' }),
     serverFetch<UserRolesResponse>({ service: 'auth', path: '/auth/roles' }),
   ]);
+
+  const roles =
+    rolesResult.status === 'fulfilled' ? (rolesResult.value.roles ?? []) : [];
 
   const contexts: WorkspaceContext[] = [];
 
@@ -52,20 +55,19 @@ export const getWorkspaces = cache(async function (): Promise<WorkspacesResponse
     }
   }
 
+  // Private tutor — only global role 'tutor' AND an existing tutoring group
   if (
-    tutorProfileResult.status === 'fulfilled' &&
-    tutorProfileResult.value &&
-    tutorProfileResult.value.id
+    roles.includes('tutor') &&
+    tutorGroupResult.status === 'fulfilled' &&
+    tutorGroupResult.value?.id
   ) {
     contexts.push({
       type: 'private_tutor',
-      tutorProfileId: tutorProfileResult.value.id,
-      tutorGroupName: 'Private tutor',
+      tutorGroupId: tutorGroupResult.value.id,
+      tutorGroupName: tutorGroupResult.value.name ?? 'Private tutor',
     });
   }
 
-  const roles =
-    rolesResult.status === 'fulfilled' ? (rolesResult.value.roles ?? []) : [];
   if (roles.includes('student')) {
     contexts.push({ type: 'student' });
   }

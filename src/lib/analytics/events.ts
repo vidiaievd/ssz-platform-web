@@ -1,8 +1,8 @@
 export type TrackEvent =
   // Registration hub
   | { name: 'register_started' }
-  | { name: 'register_role_selected'; role: 'student' | 'tutor' | 'school_admin' }
-  | { name: 'register_submitted'; role: 'student' | 'tutor' | 'school_admin' }
+  | { name: 'register_role_selected'; role: 'student' | 'teacher' | 'tutor' | 'school_admin' }
+  | { name: 'register_submitted'; role: 'student' | 'teacher' | 'tutor' | 'school_admin' }
   | { name: 'register_email_conflict' }
   // Email verification
   | { name: 'verify_opened' }

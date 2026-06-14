@@ -18,11 +18,14 @@ export async function GET() {
 
   type SchoolsPayload = School[] | { items: School[] } | { schools: School[] } | { data: School[] };
 
-  const [schoolsResult, tutorProfileResult, rolesResult] = await Promise.allSettled([
+  const [schoolsResult, tutorGroupResult, rolesResult] = await Promise.allSettled([
     serverFetch<SchoolsPayload>({ service: 'organization', path: '/schools' }),
-    serverFetch<{ id: string } | null>({ service: 'profile', path: '/profiles/me/tutor' }),
+    serverFetch<{ id: string; name: string } | null>({ service: 'organization', path: '/tutoring/group' }),
     serverFetch<UserRolesResponse>({ service: 'auth', path: '/auth/roles' }),
   ]);
+
+  const roles =
+    rolesResult.status === 'fulfilled' ? (rolesResult.value.roles ?? []) : [];
 
   const contexts: WorkspaceContext[] = [];
 
@@ -54,22 +57,21 @@ export async function GET() {
     }
   }
 
-  // 2. Private tutor context
+  // 2. Private tutor — only global role 'tutor' AND an existing tutoring group
+  // (GET /tutoring/group returns 404 when no group exists → allSettled catches as rejected)
   if (
-    tutorProfileResult.status === 'fulfilled' &&
-    tutorProfileResult.value &&
-    tutorProfileResult.value.id
+    roles.includes('tutor') &&
+    tutorGroupResult.status === 'fulfilled' &&
+    tutorGroupResult.value?.id
   ) {
     contexts.push({
       type: 'private_tutor',
-      tutorProfileId: tutorProfileResult.value.id,
-      tutorGroupName: 'Private tutor',
+      tutorGroupId: tutorGroupResult.value.id,
+      tutorGroupName: tutorGroupResult.value.name ?? 'Private tutor',
     });
   }
 
   // 3. Student context
-  const roles =
-    rolesResult.status === 'fulfilled' ? (rolesResult.value.roles ?? []) : [];
   if (roles.includes('student')) {
     contexts.push({ type: 'student' });
   }

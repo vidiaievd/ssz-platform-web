@@ -14,7 +14,7 @@ export type WorkspaceContext =
     }
   | {
       type: 'private_tutor';
-      tutorProfileId: string;
+      tutorGroupId: string;
       tutorGroupName: string;
     }
   | {
