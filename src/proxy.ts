@@ -15,9 +15,10 @@ export function proxy(request: NextRequest) {
   if (PROTECTED_RE.test(pathname)) {
     const hasToken = request.cookies.has('ssz_at');
     if (!hasToken) {
-      const locale = pathname.split('/')[1];
+      const locale = pathname.split('/')[1]!;
       const loginUrl = new URL(`/${locale}/login`, request.url);
-      loginUrl.searchParams.set('redirect', pathname);
+      const pathWithoutLocale = pathname.slice(locale.length + 1) || '/';
+      loginUrl.searchParams.set('redirect', pathWithoutLocale);
       return NextResponse.redirect(loginUrl);
     }
   }
