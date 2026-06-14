@@ -78,6 +78,7 @@
     "enrolled": "My Schools"
   },
   "UserMenu": {
+    "profile": "Profile",
     "settings": "Settings",
     "signOut": "Sign out",
     "role_school": "School",
@@ -1896,6 +1897,37 @@
     },
     "stub": {
       "body": "This section is coming soon."
+    }
+  },
+  "Account": {
+    "nav": {
+      "profile": "Profile",
+      "appearance": "Appearance",
+      "notifications": "Notifications",
+      "security": "Security"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Customize how the platform looks and feels.",
+      "theme": "Theme",
+      "language": "Language"
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Manage your email, password, and active sessions.",
+      "email": "Email address",
+      "password": "Password",
+      "sessions": "Active sessions",
+      "comingSoon": "Coming soon"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Choose how and when you receive notifications.",
+      "channels": "Notification channels",
+      "email": "Email",
+      "inApp": "In-app",
+      "push": "Push",
+      "comingSoon": "Coming soon"
     }
   }
 }

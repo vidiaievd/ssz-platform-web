@@ -1,6 +1,5 @@
 'use client';
 
-import { Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Avatar } from '@/components/ui/avatar';
@@ -35,17 +34,10 @@ function getRoleInitial(roles: string[]): string {
   return '?';
 }
 
-function getSettingsHref(roles: string[]): '/school/settings/profile' | '/student/settings/profile' {
-  return roles.includes('school_admin') || roles.includes('tutor')
-    ? '/school/settings/profile'
-    : '/student/settings/profile';
-}
-
 export function UserMenu({ user }: UserMenuProps) {
   const t = useTranslations('UserMenu');
   const roleLabel = getRoleLabel(t, user.roles);
   const initial = getRoleInitial(user.roles);
-  const settingsHref = getSettingsHref(user.roles);
 
   const { data: profile } = useMyProfile();
   const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ');
@@ -70,8 +62,12 @@ export function UserMenu({ user }: UserMenuProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={settingsHref} className="flex items-center gap-2 cursor-pointer">
-            <Settings className="size-4" />
+          <Link href="/account/profile" className="flex items-center gap-2 cursor-pointer">
+            {t('profile')}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/account" className="flex items-center gap-2 cursor-pointer">
             {t('settings')}
           </Link>
         </DropdownMenuItem>

@@ -1,5 +1,7 @@
-import { ProfileSettingsScreen } from '@/features/profile/components/profile-settings-screen';
+import { redirect } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
 
-export default function StudentProfileSettingsPage() {
-  return <ProfileSettingsScreen />;
+export default async function StudentProfileSettingsPage() {
+  const locale = await getLocale();
+  redirect(`/${locale}/account/profile`);
 }

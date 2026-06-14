@@ -78,6 +78,7 @@
     "enrolled": "Мої школи"
   },
   "UserMenu": {
+    "profile": "Профіль",
     "settings": "Налаштування",
     "signOut": "Вийти",
     "role_school": "Школа",
@@ -1891,6 +1892,37 @@
     },
     "stub": {
       "body": "Цей розділ незабаром з'явиться."
+    }
+  },
+  "Account": {
+    "nav": {
+      "profile": "Профіль",
+      "appearance": "Зовнішній вигляд",
+      "notifications": "Сповіщення",
+      "security": "Безпека"
+    },
+    "appearance": {
+      "title": "Зовнішній вигляд",
+      "subtitle": "Налаштуйте вигляд платформи.",
+      "theme": "Тема",
+      "language": "Мова"
+    },
+    "security": {
+      "title": "Безпека",
+      "subtitle": "Керуйте email, паролем та активними сесіями.",
+      "email": "Email-адреса",
+      "password": "Пароль",
+      "sessions": "Активні сесії",
+      "comingSoon": "Незабаром"
+    },
+    "notifications": {
+      "title": "Сповіщення",
+      "subtitle": "Оберіть, як і коли отримувати сповіщення.",
+      "channels": "Канали сповіщень",
+      "email": "Email",
+      "inApp": "У застосунку",
+      "push": "Push",
+      "comingSoon": "Незабаром"
     }
   }
 }

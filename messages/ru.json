@@ -78,6 +78,7 @@
     "enrolled": "Мои школы"
   },
   "UserMenu": {
+    "profile": "Профиль",
     "settings": "Настройки",
     "signOut": "Выйти",
     "role_school": "Школа",
@@ -1891,6 +1892,37 @@
     },
     "stub": {
       "body": "Этот раздел скоро появится."
+    }
+  },
+  "Account": {
+    "nav": {
+      "profile": "Профиль",
+      "appearance": "Внешний вид",
+      "notifications": "Уведомления",
+      "security": "Безопасность"
+    },
+    "appearance": {
+      "title": "Внешний вид",
+      "subtitle": "Настройте внешний вид платформы.",
+      "theme": "Тема",
+      "language": "Язык"
+    },
+    "security": {
+      "title": "Безопасность",
+      "subtitle": "Управление email, паролем и активными сессиями.",
+      "email": "Email-адрес",
+      "password": "Пароль",
+      "sessions": "Активные сессии",
+      "comingSoon": "Скоро"
+    },
+    "notifications": {
+      "title": "Уведомления",
+      "subtitle": "Выберите, как и когда получать уведомления.",
+      "channels": "Каналы уведомлений",
+      "email": "Email",
+      "inApp": "В приложении",
+      "push": "Push",
+      "comingSoon": "Скоро"
     }
   }
 }

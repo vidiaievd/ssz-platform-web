@@ -78,6 +78,7 @@
     "enrolled": "Mine skoler"
   },
   "UserMenu": {
+    "profile": "Profil",
     "settings": "Innstillinger",
     "signOut": "Logg ut",
     "role_school": "Skole",
@@ -1891,6 +1892,37 @@
     },
     "stub": {
       "body": "Denne seksjonen kommer snart."
+    }
+  },
+  "Account": {
+    "nav": {
+      "profile": "Profil",
+      "appearance": "Utseende",
+      "notifications": "Varsler",
+      "security": "Sikkerhet"
+    },
+    "appearance": {
+      "title": "Utseende",
+      "subtitle": "Tilpass hvordan plattformen ser ut.",
+      "theme": "Tema",
+      "language": "Språk"
+    },
+    "security": {
+      "title": "Sikkerhet",
+      "subtitle": "Administrer e-post, passord og aktive økter.",
+      "email": "E-postadresse",
+      "password": "Passord",
+      "sessions": "Aktive økter",
+      "comingSoon": "Kommer snart"
+    },
+    "notifications": {
+      "title": "Varsler",
+      "subtitle": "Velg hvordan og når du mottar varsler.",
+      "channels": "Varslingskanaler",
+      "email": "E-post",
+      "inApp": "I appen",
+      "push": "Push",
+      "comingSoon": "Kommer snart"
     }
   }
 }
