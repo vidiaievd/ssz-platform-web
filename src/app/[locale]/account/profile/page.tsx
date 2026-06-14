@@ -4,6 +4,7 @@ import { ProfileSettingsScreen } from '@/features/profile/components/profile-set
 export default async function AccountProfilePage() {
   const user = await getCurrentUser();
   const isPrivateTutor = user?.roles.includes('tutor') ?? false;
+  const isTeacher = user?.roles.includes('teacher') ?? false;
 
-  return <ProfileSettingsScreen isPrivateTutor={isPrivateTutor} />;
+  return <ProfileSettingsScreen isPrivateTutor={isPrivateTutor} isTeacher={isTeacher} />;
 }

@@ -12,6 +12,7 @@ import { Field, Input, Textarea } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LOCALE_LABELS, LOCALES } from '@/lib/i18n/config';
+import { useCurrentUser } from '@/features/auth/api/use-current-user';
 
 import { updateProfileSchema, type UpdateProfileInput } from '../schemas';
 import { useMyProfile } from '../api/use-my-profile';
@@ -20,10 +21,19 @@ import { profileKeys } from '../api/keys';
 import { LocaleSelect } from './locale-select';
 import { TimezoneSelect } from './timezone-select';
 
+function getBrowserTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return 'UTC';
+  }
+}
+
 export function ProfileForm() {
   const t = useTranslations('Profile');
   const tErrors = useTranslations('Errors');
   const { data: profile, isLoading } = useMyProfile();
+  const { data: currentUser } = useCurrentUser();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
@@ -53,6 +63,11 @@ export function ProfileForm() {
 
   useEffect(() => {
     if (!profile) return;
+    const storedTimezone = profile.timezone;
+    const timezone =
+      !storedTimezone || storedTimezone === 'UTC'
+        ? getBrowserTimezone()
+        : storedTimezone;
     reset({
       firstName: profile.firstName ?? null,
       lastName: profile.lastName ?? null,
@@ -65,7 +80,7 @@ export function ProfileForm() {
       instructionLocales: (profile.instructionLocales ?? []).filter(
         (l): l is (typeof LOCALES)[number] => LOCALES.includes(l as (typeof LOCALES)[number]),
       ),
-      timezone: profile.timezone ?? 'UTC',
+      timezone,
       contactEmail: profile.contactEmail ?? null,
       contactPhone: profile.contactPhone ?? null,
     });
@@ -102,6 +117,19 @@ export function ProfileForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 max-w-xl">
+      {currentUser?.email && (
+        <Field label={t('email')} htmlFor="account-email">
+          <Input
+            id="account-email"
+            type="email"
+            value={currentUser.email}
+            disabled
+            readOnly
+            className="text-(--ssz-text-muted)"
+          />
+        </Field>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
         <Field label={t('firstName')} htmlFor="firstName" error={errors.firstName?.message}>
           <Input

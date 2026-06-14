@@ -13,13 +13,15 @@ import { useMyProfile } from '../api/use-my-profile';
 type Props = {
   /** True only for private tutors — shows hourly rate fields in the teaching section */
   isPrivateTutor?: boolean;
+  /** True for school teachers — shows teaching profile section without tutor-only fields */
+  isTeacher?: boolean;
 };
 
-export function ProfileSettingsScreen({ isPrivateTutor = false }: Props) {
+export function ProfileSettingsScreen({ isPrivateTutor = false, isTeacher = false }: Props) {
   const t = useTranslations('Profile');
   const { data: profile, isLoading } = useMyProfile();
 
-  const showTeaching = isPrivateTutor || profile?.hasTutorProfile;
+  const showTeaching = isPrivateTutor || isTeacher || profile?.hasTutorProfile;
   const showStudent = profile?.hasStudentProfile;
 
   return (

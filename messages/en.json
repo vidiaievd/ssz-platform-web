@@ -142,13 +142,21 @@
       "experience": "Years of experience",
       "certificates": "Certificates",
       "rate": "Hourly rate",
-      "currency": "Currency"
+      "currency": "Currency",
+      "languagesEmpty": "No teaching languages added yet.",
+      "languagePlaceholder": "Add a language…",
+      "cefrLabel": "CEFR level",
+      "cefrPlaceholder": "Level",
+      "addLanguage": "Add language",
+      "removeLanguage": "Remove {code}",
+      "cancelAdd": "Cancel"
     },
     "student": {
       "nativeLanguage": "Native language",
       "targetLanguages": "Learning languages",
       "goals": "Learning goals"
-    }
+    },
+    "email": "Email address"
   },
   "Content": {
     "catalogueTitle": "Course Catalogue",
@@ -1936,8 +1944,40 @@
       "subtitle": "Manage your email, password, and active sessions.",
       "email": "Email address",
       "password": "Password",
+      "emailHint": "Your login email address. To change it, contact support.",
+      "passwordHint": "You will receive a reset link at your registered email address.",
+      "passwordResetCta": "Send password reset email",
+      "passwordResetSent": "Reset email sent.",
+      "passwordResetSentConfirm": "A password reset link has been sent to {email}.",
+      "passwordResetError": "Failed to send reset email. Please try again.",
+      "cancel": "Cancel",
+      "twoFa": {
+        "title": "Two-factor authentication",
+        "subtitle": "Add an extra layer of security to your account using an authenticator app.",
+        "enableCta": "Enable 2FA",
+        "disableCta": "Disable 2FA",
+        "scanQr": "Scan this QR code with your authenticator app",
+        "secretLabel": "Manual key",
+        "nextCta": "I have scanned the code",
+        "enterCode": "Enter the 6-digit code from your authenticator app to confirm",
+        "confirmEnable": "Confirm & enable",
+        "backupCodesTitle": "2FA enabled — save your backup codes",
+        "backupCodesHint": "Store these codes somewhere safe. Each can be used once if you lose access to your authenticator.",
+        "disableConfirm": "Enter your current TOTP code to disable 2FA",
+        "confirmDisable": "Disable 2FA",
+        "enabled": "Two-factor authentication enabled.",
+        "disabled": "Two-factor authentication disabled.",
+        "invalidCode": "Invalid or expired code.",
+        "setupError": "Failed to initiate 2FA setup.",
+        "verifyError": "Failed to verify code.",
+        "disableError": "Failed to disable 2FA."
+      },
+      "changeEmail": "Change email address",
+      "changeEmailHint": "Email change is not yet available. Support for this feature is coming soon.",
+      "changeEmailCta": "Change email",
       "sessions": "Active sessions",
-      "comingSoon": "Coming soon"
+      "sessionsHint": "View and revoke active login sessions across all your devices.",
+      "sessionsComingSoon": "Coming soon"
     },
     "notifications": {
       "title": "Notifications",
@@ -1947,7 +1987,8 @@
       "inApp": "In-app",
       "push": "Push",
       "comingSoon": "Coming soon"
-    }
+    },
+    "back": "Back"
   },
   "Topbar": {
     "search": {

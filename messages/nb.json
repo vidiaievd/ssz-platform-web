@@ -142,13 +142,21 @@
       "experience": "Års erfaring",
       "certificates": "Sertifikater",
       "rate": "Timepris",
-      "currency": "Valuta"
+      "currency": "Valuta",
+      "languagesEmpty": "Ingen undervisningsspråk lagt til ennå.",
+      "languagePlaceholder": "Legg til et språk…",
+      "cefrLabel": "CEFR-nivå",
+      "cefrPlaceholder": "Nivå",
+      "addLanguage": "Legg til språk",
+      "removeLanguage": "Fjern {code}",
+      "cancelAdd": "Avbryt"
     },
     "student": {
       "nativeLanguage": "Morsmål",
       "targetLanguages": "Lærlingsspråk",
       "goals": "Læringsmål"
-    }
+    },
+    "email": "E-postadresse"
   },
   "Content": {
     "catalogueTitle": "Kurskatalog",
@@ -1931,8 +1939,40 @@
       "subtitle": "Administrer e-post, passord og aktive økter.",
       "email": "E-postadresse",
       "password": "Passord",
-      "sessions": "Aktive økter",
-      "comingSoon": "Kommer snart"
+      "emailHint": "Din påloggings-e-post. Ta kontakt med support for å endre den.",
+      "passwordHint": "Du vil motta en tilbakestillingslenke til din registrerte e-postadresse.",
+      "passwordResetCta": "Send tilbakestillings-e-post",
+      "passwordResetSent": "Tilbakestillings-e-post sendt.",
+      "passwordResetSentConfirm": "En tilbakestillingslenke er sendt til {email}.",
+      "passwordResetError": "Klarte ikke sende e-post. Prøv igjen.",
+      "cancel": "Avbryt",
+      "twoFa": {
+        "title": "Tofaktorautentisering",
+        "subtitle": "Legg til et ekstra sikkerhetsnivå med en autentiseringsapp.",
+        "enableCta": "Aktiver 2FA",
+        "disableCta": "Deaktiver 2FA",
+        "scanQr": "Skann denne QR-koden med autentiseringsappen din",
+        "secretLabel": "Manuell nøkkel",
+        "nextCta": "Jeg har skannet koden",
+        "enterCode": "Skriv inn 6-sifret kode fra autentiseringsappen for å bekrefte",
+        "confirmEnable": "Bekreft og aktiver",
+        "backupCodesTitle": "2FA aktivert — lagre sikkerhetskodene dine",
+        "backupCodesHint": "Oppbevar disse kodene på et trygt sted. Hver kan brukes én gang.",
+        "disableConfirm": "Skriv inn gjeldende TOTP-kode for å deaktivere 2FA",
+        "confirmDisable": "Deaktiver 2FA",
+        "enabled": "Tofaktorautentisering aktivert.",
+        "disabled": "Tofaktorautentisering deaktivert.",
+        "invalidCode": "Ugyldig eller utløpt kode.",
+        "setupError": "Klarte ikke starte 2FA-oppsett.",
+        "verifyError": "Klarte ikke verifisere kode.",
+        "disableError": "Klarte ikke deaktivere 2FA."
+      },
+      "changeEmail": "Endre e-postadresse",
+      "changeEmailHint": "Det er ikke mulig å endre e-post ennå. Denne funksjonen kommer snart.",
+      "changeEmailCta": "Endre e-post",
+      "sessions": "Aktive sesjoner",
+      "sessionsHint": "Se og tilbakekall aktive innloggingssesjoner på alle enhetene dine.",
+      "sessionsComingSoon": "Kommer snart"
     },
     "notifications": {
       "title": "Varsler",
@@ -1942,7 +1982,8 @@
       "inApp": "I appen",
       "push": "Push",
       "comingSoon": "Kommer snart"
-    }
+    },
+    "back": "Tilbake"
   },
   "Topbar": {
     "search": {

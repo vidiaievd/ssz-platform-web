@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/shared/theme-provider';
+import { NavigationHistoryTracker } from '@/components/shared/navigation-history-tracker';
 import { QueryProvider } from '@/lib/query/provider';
 import { routing } from '@/lib/i18n/routing';
 
@@ -28,6 +29,7 @@ export default async function LocaleLayout({
     <NextIntlClientProvider locale={locale} messages={messages}>
       <ThemeProvider>
         <QueryProvider>
+          <NavigationHistoryTracker />
           {children}
           <Toaster richColors position="top-right" />
         </QueryProvider>
