@@ -16,8 +16,8 @@ export default async function AccountLayout({ children }: Props) {
   ];
 
   return (
-    <div className="flex flex-col min-h-full">
-      <div className="border-b border-border px-3 py-2">
+    <div className="h-dvh flex flex-col">
+      <div className="shrink-0 border-b border-border px-3 py-2">
         <AccountBackButton />
       </div>
       <div className="flex-1 min-h-0">

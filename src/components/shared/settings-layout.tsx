@@ -18,8 +18,8 @@ export function SettingsLayout({ nav, children }: SettingsLayoutProps) {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col md:flex-row min-h-full">
-      <aside className="md:w-52 shrink-0 border-b md:border-b-0 md:border-r border-border">
+    <div className="h-full flex flex-col md:flex-row">
+      <aside className="md:w-52 shrink-0 border-b md:border-b-0 md:border-r border-border md:overflow-y-auto">
         <nav aria-label="Settings navigation" className="flex md:flex-col gap-1 p-3">
           {nav.map((item) => {
             const active = pathname.endsWith(item.href) || pathname.includes(item.href + '/');
@@ -42,7 +42,7 @@ export function SettingsLayout({ nav, children }: SettingsLayoutProps) {
         </nav>
       </aside>
 
-      <div className="flex-1 min-w-0">{children}</div>
+      <div className="flex-1 min-w-0 min-h-0 overflow-y-auto">{children}</div>
     </div>
   );
 }
