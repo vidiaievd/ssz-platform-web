@@ -33,7 +33,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
               <VerifyEmailStatus token={token} next={next} />
             </Suspense>
           ) : (
-            <CheckEmailScreen />
+            <CheckEmailScreen next={next} />
           )}
         </div>
       </main>

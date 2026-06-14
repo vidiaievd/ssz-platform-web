@@ -18,7 +18,7 @@ export default function RegisterHubPage() {
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get('invite');
   const prefillEmail = searchParams.get('email') ?? undefined;
-  const inviteRole = (searchParams.get('role') ?? 'student') as 'school_admin' | 'tutor' | 'student';
+  const inviteRole = (searchParams.get('role') ?? 'student') as 'school_admin' | 'teacher' | 'tutor' | 'student';
   const [step, setStep] = useState<Step>(searchParams.get('step') === 'org' ? 'org' : 'hub');
 
   useEffect(() => {

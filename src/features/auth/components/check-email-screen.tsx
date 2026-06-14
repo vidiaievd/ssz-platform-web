@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -8,10 +8,25 @@ import { Link } from '@/lib/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { resendVerificationAction } from '../actions/verify-email';
 
-export function CheckEmailScreen() {
+export const POST_VERIFY_NEXT_KEY = 'post-verify-next';
+
+type Props = {
+  /** When set, persisted to sessionStorage so the email-link verify page can redirect there. */
+  next?: string;
+};
+
+export function CheckEmailScreen({ next }: Props) {
   const t = useTranslations('Auth.VerifyEmail');
   const [isPending, startTransition] = useTransition();
   const [resendDone, setResendDone] = useState(false);
+
+  useEffect(() => {
+    if (next) {
+      localStorage.setItem(POST_VERIFY_NEXT_KEY, next);
+    } else {
+      localStorage.removeItem(POST_VERIFY_NEXT_KEY);
+    }
+  }, [next]);
 
   function handleResend() {
     startTransition(async () => {

@@ -32,7 +32,7 @@ const schoolSchema = z
 type SchoolInput = z.infer<typeof schoolSchema>;
 
 type Props = {
-  role: 'student' | 'tutor' | 'school_admin';
+  role: 'student' | 'teacher' | 'tutor' | 'school_admin';
   /** Pre-fill and lock the email field (invite flow). */
   prefillEmail?: string;
   /** Where to redirect after successful registration (invite flow). */
@@ -68,8 +68,14 @@ export function UserRegisterForm({ role, prefillEmail, next }: Props) {
           setError("email", { message: t("emailTaken") });
           toast.error(t("emailTaken"));
         } else {
-          setServerError(tErrors(result.error.code));
-          toast.error(tErrors(result.error.code));
+          const details = result.error.details as Record<string, unknown> | null | undefined;
+          const backendErrors = details?.errors as Record<string, string[]> | undefined;
+          const firstBackendMessage = backendErrors
+            ? Object.values(backendErrors).flat()[0]
+            : (details?.detail as string | undefined);
+          const message = firstBackendMessage ?? tErrors(result.error.code);
+          setServerError(message);
+          toast.error(message);
         }
         return;
       }
