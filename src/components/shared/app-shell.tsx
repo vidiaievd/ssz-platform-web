@@ -23,6 +23,8 @@ import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
 import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
+import { GlobalSearchTrigger } from "./topbar/global-search-trigger";
+import { TrialPill } from "./topbar/trial-pill";
 import { Sidebar } from "./sidebar/sidebar";
 import { MobileSidebar } from "./sidebar/mobile-sidebar";
 import { Topbar } from "./topbar/topbar";
@@ -217,12 +219,14 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
           user={user}
           onMenuOpen={() => setMobileOpen(true)}
           leading={workspaceSwitcher}
+          activeContextKey={activeContextKey}
+          search={variant === "school" ? <GlobalSearchTrigger /> : undefined}
           actions={
-            variant === "student" ? (
+            <div className="flex items-center gap-2">
+              {variant === "school" && <TrialPill />}
+              {variant === "school" && <AlertBadge schoolId={schoolContext?.schoolId} />}
               <NotificationBell />
-            ) : variant === "school" ? (
-              <AlertBadge schoolId={schoolContext?.schoolId} />
-            ) : undefined
+            </div>
           }
         />
         <main className="flex-1 overflow-auto">{children}</main>

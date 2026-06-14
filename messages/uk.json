@@ -1924,5 +1924,15 @@
       "push": "Push",
       "comingSoon": "Незабаром"
     }
+  },
+  "Topbar": {
+    "search": {
+      "label": "Пошук",
+      "placeholder": "Пошук курсів, студентів, уроків…",
+      "comingSoon": "Пошук незабаром"
+    },
+    "trial": {
+      "daysLeft": "Пробний · {days} днів"
+    }
   }
 }

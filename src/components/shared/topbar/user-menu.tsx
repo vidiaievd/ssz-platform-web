@@ -14,10 +14,14 @@ import {
 import { Link } from '@/lib/i18n/navigation';
 import { LogoutButton } from '@/features/auth/components/logout-button';
 import { useMyProfile } from '@/features/profile/api/use-my-profile';
+import { useWorkspaces, type WorkspaceContext } from '@/features/workspaces';
+import { RoleBadge } from '@/features/workspaces';
+import type { SchoolRole } from '@/features/workspaces';
 import type { CurrentUser } from '@/features/auth/types/current-user';
 
 type UserMenuProps = {
   user: CurrentUser;
+  activeContextKey?: string;
 };
 
 function getRoleLabel(t: ReturnType<typeof useTranslations<'UserMenu'>>, roles: string[]): string {
@@ -34,24 +38,46 @@ function getRoleInitial(roles: string[]): string {
   return '?';
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+function getActiveSchoolRole(contexts: WorkspaceContext[], activeContextKey?: string): SchoolRole | null {
+  if (!activeContextKey) return null;
+  const ctx = contexts.find((c) => {
+    if (c.type === 'school') return `school:${c.schoolId}` === activeContextKey;
+    return false;
+  });
+  return ctx?.type === 'school' ? ctx.role : null;
+}
+
+export function UserMenu({ user, activeContextKey }: UserMenuProps) {
   const t = useTranslations('UserMenu');
   const roleLabel = getRoleLabel(t, user.roles);
   const initial = getRoleInitial(user.roles);
 
   const { data: profile } = useMyProfile();
+  const { data: workspaces } = useWorkspaces();
+
   const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ');
   const displayName = fullName || user.email || roleLabel;
+  const firstName = profile?.firstName || displayName.split(' ')[0] || '';
   const avatarSrc = profile?.avatarUrl ?? undefined;
+
+  const activeSchoolRole = getActiveSchoolRole(workspaces?.contexts ?? [], activeContextKey);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           aria-label="User menu"
-          className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex items-center gap-2 rounded-full pl-1 pr-2 py-1 border border-border hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Avatar name={displayName || initial} src={avatarSrc} alt={displayName} size="md" />
+          <Avatar name={displayName || initial} src={avatarSrc} alt={displayName} size="sm" />
+          <span className="hidden sm:block text-sm font-medium text-(--ssz-text-primary) max-w-24 truncate">
+            {firstName}
+          </span>
+          {activeSchoolRole && (
+            <span className="hidden sm:block">
+              <RoleBadge role={activeSchoolRole} />
+            </span>
+          )}
         </button>
       </DropdownMenuTrigger>
 
