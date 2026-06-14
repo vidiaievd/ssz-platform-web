@@ -44,3 +44,10 @@ export const updateProfileSchema = z.object({
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+export const profileSettingsSchema = updateProfileSchema.extend({
+  hourlyRate: z.number().min(0).nullable().optional(),
+  currency: z.string().max(3).nullable().optional(),
+});
+
+export type ProfileSettingsInput = z.infer<typeof profileSettingsSchema>;

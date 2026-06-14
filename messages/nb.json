@@ -156,7 +156,9 @@
       "targetLanguages": "Lærlingsspråk",
       "goals": "Læringsmål"
     },
-    "email": "E-postadresse"
+    "email": "E-postadresse",
+    "discard": "Forkast",
+    "unsavedChanges": "Du har ulagrede endringer"
   },
   "Content": {
     "catalogueTitle": "Kurskatalog",

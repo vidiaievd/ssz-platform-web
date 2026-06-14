@@ -1,122 +1,36 @@
 'use client';
 
-import { useEffect, useTransition } from 'react';
-import { useForm, useController } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useQueryClient } from '@tanstack/react-query';
+import { useController, type Control } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LOCALE_LABELS, LOCALES } from '@/lib/i18n/config';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
 
-import { updateProfileSchema, type UpdateProfileInput } from '../schemas';
+import type { ProfileSettingsInput } from '../schemas';
 import { useMyProfile } from '../api/use-my-profile';
-import { updateProfileAction } from '../api/update-profile';
-import { profileKeys } from '../api/keys';
+import { useProfileSettingsForm } from '../hooks/use-profile-settings-form';
 import { LocaleSelect } from './locale-select';
 import { TimezoneSelect } from './timezone-select';
 
-function getBrowserTimezone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  } catch {
-    return 'UTC';
-  }
-}
-
 export function ProfileForm() {
   const t = useTranslations('Profile');
-  const tErrors = useTranslations('Errors');
-  const { data: profile, isLoading } = useMyProfile();
+  const { isLoading } = useMyProfile();
   const { data: currentUser } = useCurrentUser();
-  const queryClient = useQueryClient();
-  const [isPending, startTransition] = useTransition();
-
-  const form = useForm<UpdateProfileInput>({
-    resolver: zodResolver(updateProfileSchema),
-    defaultValues: {
-      firstName: null,
-      lastName: null,
-      handle: null,
-      displayName: '',
-      bio: null,
-      uiLocale: 'en',
-      instructionLocales: [],
-      timezone: 'UTC',
-      contactEmail: null,
-      contactPhone: null,
-    },
-  });
+  const { form, isPending } = useProfileSettingsForm();
 
   const {
     register,
-    handleSubmit,
-    reset,
     control,
     formState: { errors },
   } = form;
 
-  useEffect(() => {
-    if (!profile) return;
-    const storedTimezone = profile.timezone;
-    const timezone =
-      !storedTimezone || storedTimezone === 'UTC'
-        ? getBrowserTimezone()
-        : storedTimezone;
-    reset({
-      firstName: profile.firstName ?? null,
-      lastName: profile.lastName ?? null,
-      handle: profile.handle ?? null,
-      displayName: profile.displayName,
-      bio: profile.bio ?? null,
-      uiLocale: (LOCALES.includes(profile.uiLocale as (typeof LOCALES)[number])
-        ? profile.uiLocale
-        : 'en') as UpdateProfileInput['uiLocale'],
-      instructionLocales: (profile.instructionLocales ?? []).filter(
-        (l): l is (typeof LOCALES)[number] => LOCALES.includes(l as (typeof LOCALES)[number]),
-      ),
-      timezone,
-      contactEmail: profile.contactEmail ?? null,
-      contactPhone: profile.contactPhone ?? null,
-    });
-  }, [profile, reset]);
-
-  function onSubmit(data: UpdateProfileInput) {
-    const savedProfile = profile;
-    startTransition(async () => {
-      const result = await updateProfileAction(data);
-      if (!result.ok) {
-        if (savedProfile) {
-          reset({
-            firstName: savedProfile.firstName ?? null,
-            lastName: savedProfile.lastName ?? null,
-            handle: savedProfile.handle ?? null,
-            displayName: savedProfile.displayName,
-            bio: savedProfile.bio ?? null,
-            uiLocale: savedProfile.uiLocale as UpdateProfileInput['uiLocale'],
-            instructionLocales: (savedProfile.instructionLocales ?? []) as UpdateProfileInput['instructionLocales'],
-            timezone: savedProfile.timezone ?? 'UTC',
-            contactEmail: savedProfile.contactEmail ?? null,
-            contactPhone: savedProfile.contactPhone ?? null,
-          });
-        }
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      await queryClient.invalidateQueries({ queryKey: profileKeys.me() });
-      toast.success(t('saveSuccess'));
-    });
-  }
-
   if (isLoading) return <ProfileFormSkeleton />;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 max-w-xl">
+    <div className="space-y-6 max-w-xl">
       {currentUser?.email && (
         <Field label={t('email')} htmlFor="account-email">
           <Input
@@ -236,16 +150,12 @@ export function ProfileForm() {
           {...register('contactPhone', { setValueAs: (v: string | null) => (!v || v.trim() === '' ? null : v) })}
         />
       </Field>
-
-      <Button type="submit" loading={isPending}>
-        {t('save')}
-      </Button>
-    </form>
+    </div>
   );
 }
 
 type InstructionLocalesFieldProps = {
-  control: ReturnType<typeof useForm<UpdateProfileInput>>['control'];
+  control: Control<ProfileSettingsInput>;
   disabled?: boolean;
   t: ReturnType<typeof useTranslations<'Profile'>>;
 };
@@ -292,7 +202,6 @@ function ProfileFormSkeleton() {
           <Skeleton className="h-10 w-full" />
         </div>
       ))}
-      <Skeleton className="h-10 w-24" />
     </div>
   );
 }

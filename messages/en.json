@@ -156,7 +156,9 @@
       "targetLanguages": "Learning languages",
       "goals": "Learning goals"
     },
-    "email": "Email address"
+    "email": "Email address",
+    "discard": "Discard",
+    "unsavedChanges": "You have unsaved changes"
   },
   "Content": {
     "catalogueTitle": "Course Catalogue",

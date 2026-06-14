@@ -1,23 +1,20 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
 
-import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 
-import { useMyTutorProfile, useUpdateTutorProfile } from '../api/use-my-tutor-profile';
 import {
   useMyTeachingProfile,
   useAddTeachingLanguage,
   useRemoveTeachingLanguage,
   useEnsureTeachingProfile,
 } from '../api/use-my-teaching-profile';
-import { profileKeys } from '../api/keys';
 import { TeachingLanguageEditor } from './teaching-language-editor';
+import { useProfileSettingsForm } from '../hooks/use-profile-settings-form';
 
 type Props = {
   showRate?: boolean;
@@ -26,18 +23,16 @@ type Props = {
 export function TeachingProfileSection({ showRate = false }: Props) {
   const t = useTranslations('Profile');
   const tErr = useTranslations('Errors');
-  const queryClient = useQueryClient();
 
   const { data: teaching, isLoading: teachingLoading } = useMyTeachingProfile();
-  const { data: tutor, isLoading: tutorLoading } = useMyTutorProfile();
+  const { form, isPending, isLoading: formLoading } = useProfileSettingsForm();
   const addLang = useAddTeachingLanguage();
   const removeLang = useRemoveTeachingLanguage();
   const ensureProfile = useEnsureTeachingProfile();
-  const updateTutor = useUpdateTutorProfile();
 
-  const [rate, setRate] = useState('');
-  const [currency, setCurrency] = useState('');
-  const [isPending, startTransition] = useTransition();
+  const [langPending, startLangTransition] = useTransition();
+
+  const { register, formState: { errors } } = form;
 
   async function handleAdd(code: string, level: string) {
     if (!teaching) await ensureProfile.mutateAsync();
@@ -45,7 +40,7 @@ export function TeachingProfileSection({ showRate = false }: Props) {
   }
 
   function handleRemove(code: string) {
-    startTransition(async () => {
+    startLangTransition(async () => {
       try {
         await removeLang.mutateAsync(code);
       } catch {
@@ -54,21 +49,7 @@ export function TeachingProfileSection({ showRate = false }: Props) {
     });
   }
 
-  function saveRate() {
-    const parsed = parseFloat(rate);
-    if (isNaN(parsed) || parsed < 0) return;
-    startTransition(async () => {
-      try {
-        await updateTutor.mutateAsync({ hourlyRate: parsed, currency: currency || tutor?.currency || 'USD' });
-        await queryClient.invalidateQueries({ queryKey: profileKeys.tutorMe() });
-        toast.success(t('saveSuccess'));
-      } catch {
-        toast.error(tErr('unknown'));
-      }
-    });
-  }
-
-  if (teachingLoading || (showRate && tutorLoading)) {
+  if (teachingLoading || (showRate && formLoading)) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-5 w-32" />
@@ -92,39 +73,43 @@ export function TeachingProfileSection({ showRate = false }: Props) {
           removeLabelFn={(code) => t('teaching.removeLanguage', { code })}
           languagePlaceholder={t('teaching.languagePlaceholder')}
           levelPlaceholder={t('teaching.cefrPlaceholder')}
-          disabled={isPending}
+          disabled={langPending}
         />
       </div>
 
       {showRate && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 max-w-sm">
-            <Field label={t('teaching.rate')} htmlFor="hourly-rate">
-              <Input
-                id="hourly-rate"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder={tutor?.hourlyRate?.toString() ?? '0'}
-                value={rate}
-                onChange={(e) => setRate(e.target.value)}
-                disabled={isPending}
-              />
-            </Field>
-            <Field label={t('teaching.currency')} htmlFor="currency">
-              <Input
-                id="currency"
-                placeholder={tutor?.currency ?? 'USD'}
-                maxLength={3}
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-                disabled={isPending}
-              />
-            </Field>
-          </div>
-          <Button type="button" variant="outline" onClick={saveRate} loading={isPending}>
-            {t('save')}
-          </Button>
+        <div className="grid grid-cols-2 gap-4 max-w-sm">
+          <Field
+            label={t('teaching.rate')}
+            htmlFor="hourly-rate"
+            error={errors.hourlyRate?.message}
+          >
+            <Input
+              id="hourly-rate"
+              type="number"
+              min="0"
+              step="0.01"
+              disabled={isPending}
+              {...register('hourlyRate', {
+                setValueAs: (v) => (v === '' || v === null || v === undefined ? null : Number(v)),
+              })}
+            />
+          </Field>
+          <Field
+            label={t('teaching.currency')}
+            htmlFor="currency"
+            error={errors.currency?.message}
+          >
+            <Input
+              id="currency"
+              maxLength={3}
+              disabled={isPending}
+              {...register('currency', {
+                setValueAs: (v: string | null) =>
+                  !v || v.trim() === '' ? null : v.trim().toUpperCase(),
+              })}
+            />
+          </Field>
         </div>
       )}
     </section>

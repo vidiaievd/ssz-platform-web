@@ -1,5 +1,5 @@
-export { profileSchema, updateProfileSchema } from './profile';
-export type { ProfileData, UpdateProfileInput } from './profile';
+export { profileSchema, updateProfileSchema, profileSettingsSchema } from './profile';
+export type { ProfileData, UpdateProfileInput, ProfileSettingsInput } from './profile';
 
 export {
   onboardingProfileSchema,
