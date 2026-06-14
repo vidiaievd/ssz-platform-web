@@ -35,8 +35,6 @@ export type SchoolContext = {
   schoolType: SchoolType;
   school: { name: string; slug: string };
   schoolId: string;
-  /** Show Scheduling nav item; derived from SCHEDULING_BACKEND env on the server */
-  schedulingReady?: boolean;
 };
 
 const SCHEDULING_SCHOOL_ROLES = new Set<SchoolRole>(['OWNER', 'ADMIN', 'MANAGER', 'SCHEDULER']);
@@ -49,8 +47,7 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
   }
 
   const canSeeScheduling =
-    !!schoolCtx?.schedulingReady &&
-    !!schoolCtx.schoolRole &&
+    !!schoolCtx?.schoolRole &&
     SCHEDULING_SCHOOL_ROLES.has(schoolCtx.schoolRole);
 
   const mainItems = [
