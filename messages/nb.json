@@ -158,7 +158,11 @@
     },
     "email": "E-postadresse",
     "discard": "Forkast",
-    "unsavedChanges": "Du har ulagrede endringer"
+    "unsavedChanges": "Du har ulagrede endringer",
+    "validation": {
+      "invalidEmail": "Skriv inn en gyldig e-postadresse",
+      "invalidPhone": "Skriv inn et gyldig telefonnummer"
+    }
   },
   "Content": {
     "catalogueTitle": "Kurskatalog",

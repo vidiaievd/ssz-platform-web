@@ -1,4 +1,4 @@
-export { profileSchema, updateProfileSchema, profileSettingsSchema } from './profile';
+export { profileSchema, updateProfileSchema, profileSettingsSchema, createProfileSettingsSchema } from './profile';
 export type { ProfileData, UpdateProfileInput, ProfileSettingsInput } from './profile';
 
 export {

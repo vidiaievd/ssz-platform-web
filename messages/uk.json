@@ -158,7 +158,11 @@
     },
     "email": "Електронна пошта",
     "discard": "Скасувати",
-    "unsavedChanges": "Є незбережені зміни"
+    "unsavedChanges": "Є незбережені зміни",
+    "validation": {
+      "invalidEmail": "Введіть дійсну адресу електронної пошти",
+      "invalidPhone": "Введіть дійсний номер телефону"
+    }
   },
   "Content": {
     "catalogueTitle": "Каталог курсів",

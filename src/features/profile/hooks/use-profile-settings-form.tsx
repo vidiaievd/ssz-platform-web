@@ -13,7 +13,7 @@ import { useMyProfile } from '../api/use-my-profile';
 import { useMyTutorProfile, useUpdateTutorProfile } from '../api/use-my-tutor-profile';
 import { updateProfileAction } from '../api/update-profile';
 import { profileKeys } from '../api/keys';
-import { profileSettingsSchema, type ProfileSettingsInput } from '../schemas';
+import { createProfileSettingsSchema, type ProfileSettingsInput } from '../schemas';
 
 function getBrowserTimezone(): string {
   try {
@@ -49,7 +49,12 @@ export function ProfileSettingsFormProvider({ children, isPrivateTutor }: Props)
   const isLoading = profileLoading || (isPrivateTutor && tutorLoading);
 
   const form = useForm<ProfileSettingsInput>({
-    resolver: zodResolver(profileSettingsSchema),
+    resolver: zodResolver(
+      createProfileSettingsSchema({
+        invalidEmail: t('validation.invalidEmail'),
+        invalidPhone: t('validation.invalidPhone'),
+      }),
+    ),
     defaultValues: {
       firstName: null,
       lastName: null,

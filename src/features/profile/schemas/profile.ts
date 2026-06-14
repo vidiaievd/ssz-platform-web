@@ -51,3 +51,23 @@ export const profileSettingsSchema = updateProfileSchema.extend({
 });
 
 export type ProfileSettingsInput = z.infer<typeof profileSettingsSchema>;
+
+const PHONE_REGEX = /^\+?[\d\s\-().]{7,25}$/;
+
+export function createProfileSettingsSchema(messages: {
+  invalidEmail: string;
+  invalidPhone: string;
+}) {
+  return updateProfileSchema
+    .omit({ contactEmail: true, contactPhone: true })
+    .extend({
+      contactEmail: z.string().email(messages.invalidEmail).nullable().optional(),
+      contactPhone: z
+        .string()
+        .regex(PHONE_REGEX, messages.invalidPhone)
+        .nullable()
+        .optional(),
+      hourlyRate: z.number().min(0).nullable().optional(),
+      currency: z.string().max(3).nullable().optional(),
+    });
+}

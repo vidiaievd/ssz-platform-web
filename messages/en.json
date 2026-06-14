@@ -158,7 +158,11 @@
     },
     "email": "Email address",
     "discard": "Discard",
-    "unsavedChanges": "You have unsaved changes"
+    "unsavedChanges": "You have unsaved changes",
+    "validation": {
+      "invalidEmail": "Please enter a valid email address",
+      "invalidPhone": "Please enter a valid phone number"
+    }
   },
   "Content": {
     "catalogueTitle": "Course Catalogue",
