@@ -10,6 +10,7 @@ import { getMySchools } from '@/features/school/api/get-my-schools';
 import { getSchool } from '@/features/school/api/get-school';
 import { schoolKeys } from '@/features/school/api/keys';
 import { deriveSchoolType } from '@/features/dashboard/lib/derive';
+import { isSchedulingReady } from '@/lib/scheduling/is-ready';
 import { AppShell } from '@/components/shared/app-shell';
 import { WorkspaceActivator } from '@/features/workspaces/components/workspace-activator';
 import type { SchoolContext } from '@/components/shared/app-shell';
@@ -81,6 +82,7 @@ export default async function SchoolInstanceLayout({ children, params }: Props) 
     schoolType,
     school: { name: school.name, slug: school.slug ?? school.id },
     schoolId: school.id,
+    schedulingReady: isSchedulingReady(),
   };
 
   return (

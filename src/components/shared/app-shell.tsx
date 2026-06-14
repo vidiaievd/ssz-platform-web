@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import {
   BookOpen,
+  CalendarRange,
   Compass,
   GraduationCap,
   Layers,
@@ -34,60 +35,77 @@ export type SchoolContext = {
   schoolType: SchoolType;
   school: { name: string; slug: string };
   schoolId: string;
+  /** Show Scheduling nav item; derived from SCHEDULING_BACKEND env on the server */
+  schedulingReady?: boolean;
 };
+
+const SCHEDULING_SCHOOL_ROLES = new Set<SchoolRole>(['OWNER', 'ADMIN', 'MANAGER', 'SCHEDULER']);
 
 function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSection[] {
   const gating = schoolCtx ? navGating(schoolCtx.role) : null;
 
-  function disabled(navId: 'dashboard' | 'courses' | 'groups' | 'students' | 'teachers' | 'invitations' | 'settings'): boolean {
+  function disabled(navId: 'dashboard' | 'courses' | 'groups' | 'students' | 'teachers' | 'scheduling' | 'invitations' | 'settings'): boolean {
     return gating ? gating[navId] === 'locked' : false;
   }
 
-  return [
+  const canSeeScheduling =
+    !!schoolCtx?.schedulingReady &&
+    !!schoolCtx.schoolRole &&
+    SCHEDULING_SCHOOL_ROLES.has(schoolCtx.schoolRole);
+
+  const mainItems = [
     {
-      items: [
-        {
-          href: `/school/${schoolSlug}/dashboard`,
-          icon: LayoutDashboard,
-          labelKey: "dashboard",
-          disabled: disabled('dashboard'),
-          lockReason: "Nav.locked.ownerOnly",
-        },
-        {
-          href: `/school/${schoolSlug}/content`,
-          icon: BookOpen,
-          labelKey: "content",
-          disabled: disabled('courses'),
-        },
-        {
-          href: `/school/${schoolSlug}/groups`,
-          icon: Layers,
-          labelKey: "groups",
-          disabled: disabled('groups'),
-          lockReason: "Nav.locked.adminOnly",
-        },
-        {
-          href: `/school/${schoolSlug}/students`,
-          icon: Users,
-          labelKey: "students",
-          disabled: disabled('students'),
-          lockReason: "Nav.locked.adminOnly",
-        },
-        {
-          href: `/school/${schoolSlug}/teachers`,
-          icon: GraduationCap,
-          labelKey: "teachers",
-          disabled: disabled('teachers'),
-          lockReason: "Nav.locked.adminOnly",
-        },
-        {
-          href: `/school/${schoolSlug}/invitations`,
-          icon: MailCheck,
-          labelKey: "invitations",
-          disabled: disabled('invitations'),
-        },
-      ],
+      href: `/school/${schoolSlug}/dashboard`,
+      icon: LayoutDashboard,
+      labelKey: "dashboard",
+      disabled: disabled('dashboard'),
+      lockReason: "Nav.locked.ownerOnly",
     },
+    {
+      href: `/school/${schoolSlug}/content`,
+      icon: BookOpen,
+      labelKey: "content",
+      disabled: disabled('courses'),
+    },
+    {
+      href: `/school/${schoolSlug}/groups`,
+      icon: Layers,
+      labelKey: "groups",
+      disabled: disabled('groups'),
+      lockReason: "Nav.locked.adminOnly",
+    },
+    {
+      href: `/school/${schoolSlug}/students`,
+      icon: Users,
+      labelKey: "students",
+      disabled: disabled('students'),
+      lockReason: "Nav.locked.adminOnly",
+    },
+    {
+      href: `/school/${schoolSlug}/teachers`,
+      icon: GraduationCap,
+      labelKey: "teachers",
+      disabled: disabled('teachers'),
+      lockReason: "Nav.locked.adminOnly",
+    },
+    ...(canSeeScheduling
+      ? [{
+          href: `/school/${schoolSlug}/scheduling`,
+          icon: CalendarRange,
+          labelKey: "scheduling",
+          disabled: disabled('scheduling'),
+        }]
+      : []),
+    {
+      href: `/school/${schoolSlug}/invitations`,
+      icon: MailCheck,
+      labelKey: "invitations",
+      disabled: disabled('invitations'),
+    },
+  ];
+
+  return [
+    { items: mainItems },
     {
       items: [
         {

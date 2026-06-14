@@ -172,6 +172,7 @@ export type NavId =
   | 'groups'
   | 'students'
   | 'teachers'
+  | 'scheduling'
   | 'invitations'
   | 'analytics'
   | 'branding'
