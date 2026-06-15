@@ -164,11 +164,48 @@ async function doRequest<TData, TBody>(
       logUpstream('✗', method, url, { durationMs: Date.now() - startMs });
       throw new AppError('timeout', `Timeout calling ${opts.service}${opts.path}`, null, err);
     }
+
+    // Retry once for GET requests on transient socket errors (connection reset, service
+    // restart mid-flight). The request never reached the backend so retrying is safe.
+    // POST/PATCH/DELETE are not retried — they may have side effects.
+    if (!retrying && method === 'GET' && isRetriableNetworkError(err)) {
+      logUpstream('✗', method, url, { durationMs: Date.now() - startMs });
+      await new Promise((r) => setTimeout(r, 100));
+      return doRequest(url, baseHeaders, opts, true);
+    }
+
     logUpstream('✗', method, url, { durationMs: Date.now() - startMs });
     throw new AppError('upstream_unavailable', `Upstream call failed: ${opts.service}${opts.path}`, null, err);
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/**
+ * Returns true for transient, low-level network errors that are safe to retry
+ * on idempotent requests (GET). These errors mean the request never reached the
+ * backend (or the backend dropped the connection before sending a response) so
+ * repeating the request cannot cause duplicate side-effects.
+ *
+ * Covers: socket closed, ECONNRESET, ECONNREFUSED (service restarting).
+ * Excludes: ENOTFOUND / EAI_AGAIN (DNS failure — not transient enough to auto-retry).
+ */
+function isRetriableNetworkError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const msg = err.message.toLowerCase();
+  const cause = (err as NodeJS.ErrnoException & { cause?: unknown }).cause;
+  const causeCode =
+    cause instanceof Error ? (cause as NodeJS.ErrnoException).code ?? '' : '';
+  const causeMsg = cause instanceof Error ? cause.message.toLowerCase() : '';
+
+  return (
+    msg.includes('fetch failed') ||
+    msg.includes('socket') ||
+    causeMsg.includes('socket connection was closed') ||
+    causeMsg.includes('other side closed') ||
+    causeCode === 'ECONNRESET' ||
+    causeCode === 'ECONNREFUSED'
+  );
 }
 
 function mapStatusToCode(status: number): AppErrorCode {
