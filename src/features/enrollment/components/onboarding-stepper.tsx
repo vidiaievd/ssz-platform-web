@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -70,6 +70,15 @@ export function OnboardingStepper({ membership, settings, platformResults, today
   const steps = onboardingSteps(settings);
   const [stepIndex, setStepIndex] = useState(0);
   const [done, setDone] = useState(false);
+  const stepContentRef = useRef<HTMLDivElement>(null);
+  const prevStepIndex = useRef(stepIndex);
+
+  useEffect(() => {
+    if (stepIndex !== prevStepIndex.current) {
+      prevStepIndex.current = stepIndex;
+      stepContentRef.current?.focus();
+    }
+  }, [stepIndex]);
 
   const placementDecision = resolvePlacement(
     platformResults,
@@ -184,10 +193,12 @@ export function OnboardingStepper({ membership, settings, platformResults, today
     <div className="flex flex-col gap-6">
       {/* Progress indicator */}
       {steps.length > 1 && (
-        <ol className="flex items-center gap-3">
+        <ol className="flex items-center gap-3" aria-label={t('stepsLabel')}>
           {steps.map((s, i) => (
             <li key={s} className="flex items-center gap-2">
               <span
+                aria-current={i === stepIndex ? 'step' : undefined}
+                aria-label={`${t('stepNumber', { n: i + 1 })}: ${stepLabel(s)}${i < stepIndex ? ` (${t('stepDone')})` : ''}`}
                 className={[
                   'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
                   i < stepIndex
@@ -206,18 +217,20 @@ export function OnboardingStepper({ membership, settings, platformResults, today
                     ? 'font-medium text-(--ssz-text-primary)'
                     : 'text-(--ssz-text-muted)',
                 ].join(' ')}
+                aria-hidden="true"
               >
                 {stepLabel(s)}
               </span>
               {i < steps.length - 1 && (
-                <span className="mx-1 text-(--ssz-text-muted)">›</span>
+                <span className="mx-1 text-(--ssz-text-muted)" aria-hidden="true">›</span>
               )}
             </li>
           ))}
         </ol>
       )}
 
-      {/* Step content */}
+      {/* Step content — tabIndex=-1 so focus() works without showing an outline */}
+      <div ref={stepContentRef} tabIndex={-1} className="outline-none">
       {currentStep === 'placement' && (
         <PlacementTest
           language={membership.language}
@@ -240,6 +253,7 @@ export function OnboardingStepper({ membership, settings, platformResults, today
           onComplete={advanceOrFinish}
         />
       )}
+      </div>
     </div>
   );
 }

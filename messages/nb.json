@@ -798,7 +798,10 @@
       "allDoneReview": "Vi vil gjennomgå resultatene dine og komme tilbake til deg snart.",
       "allDoneActive": "Du er nå registrert. Velkommen!",
       "goToDashboard": "Gå til dashbord",
-      "finishFailed": "Noe gikk galt. Prøv igjen."
+      "finishFailed": "Noe gikk galt. Prøv igjen.",
+      "stepsLabel": "Registreringstrinn",
+      "stepNumber": "Trinn {n}",
+      "stepDone": "fullført"
     },
     "Admin": {
       "navSettings": "Innstillinger",
