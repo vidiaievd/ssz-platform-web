@@ -2143,6 +2143,18 @@
   },
   "PublicSchool": {
     "typeOnline": "Nettskole",
-    "typeHybrid": "Nett og oppmøte"
+    "typeHybrid": "Nett og oppmøte",
+    "Cta": {
+      "apply": "Søk om å bli med",
+      "applying": "Sender søknad...",
+      "applicationSent": "Søknaden din er sendt!",
+      "applyFailed": "Kunne ikke sende søknad. Prøv igjen.",
+      "applicationPending": "Søknaden din er under behandling.",
+      "applicationRejected": "Søknaden din ble ikke godkjent.",
+      "alreadyEnrolled": "Du er registrert i denne skolen.",
+      "continueOnboarding": "Fortsett registrering",
+      "joinAsGuest": "Søk om å bli med",
+      "inviteOnly": "Denne skolen tar imot studenter kun etter invitasjon."
+    }
   }
 }

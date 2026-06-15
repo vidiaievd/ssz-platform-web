@@ -2148,6 +2148,18 @@
   },
   "PublicSchool": {
     "typeOnline": "Online school",
-    "typeHybrid": "Online & in-person"
+    "typeHybrid": "Online & in-person",
+    "Cta": {
+      "apply": "Apply to join",
+      "applying": "Applying...",
+      "applicationSent": "Your application has been sent!",
+      "applyFailed": "Failed to apply. Please try again.",
+      "applicationPending": "Your application is under review.",
+      "applicationRejected": "Your application was not accepted.",
+      "alreadyEnrolled": "You're enrolled in this school.",
+      "continueOnboarding": "Continue enrollment",
+      "joinAsGuest": "Apply to join",
+      "inviteOnly": "This school accepts students by invitation only."
+    }
   }
 }

@@ -4,6 +4,10 @@ import { getTranslations } from 'next-intl/server';
 import { Globe, MapPin, Mail } from 'lucide-react';
 
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
+import { getCurrentUser } from '@/features/auth/api/get-current-user';
+import { getEnrollmentProvider } from '@/lib/enrollment/provider';
+import { ApplyCta, type ApplyCtaState } from '@/features/enrollment/components/apply-cta';
+import type { MembershipStatus } from '@/features/enrollment/types';
 
 type Props = {
   params: Promise<{ locale: string; schoolSlug: string }>;
@@ -26,12 +30,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+function membershipStatusToCtaState(status: MembershipStatus): ApplyCtaState {
+  if (status === 'active') return 'active';
+  if (status === 'onboarding' || status === 'placement-review') return 'onboarding';
+  if (status === 'rejected' || status === 'left') return 'rejected';
+  return 'pending'; // 'pending'
+}
+
 export default async function PublicSchoolPage({ params }: Props) {
-  const { schoolSlug } = await params;
+  const { locale, schoolSlug } = await params;
   const t = await getTranslations('PublicSchool');
 
-  const school = await getSchoolBySlug(schoolSlug);
+  const [school, user] = await Promise.all([
+    getSchoolBySlug(schoolSlug),
+    getCurrentUser(),
+  ]);
   if (!school) notFound();
+
+  // Derive CTA state
+  let ctaState: ApplyCtaState = 'guest';
+  let ctaMembershipId: string | undefined;
+
+  if (user) {
+    const provider = getEnrollmentProvider();
+    const profile = await provider.getProfile(user.userId ?? '');
+    const existing = profile.memberships.find((m) => m.schoolSlug === schoolSlug);
+
+    if (existing) {
+      ctaState = membershipStatusToCtaState(existing.status);
+      ctaMembershipId = existing.id;
+    } else {
+      ctaState = 'apply';
+    }
+  }
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10 flex flex-col gap-8">
@@ -95,8 +126,15 @@ export default async function PublicSchoolPage({ params }: Props) {
         )}
       </section>
 
-      {/* Apply CTA — rendered separately in Step 5.2 */}
-      <div id="apply-cta-slot" />
+      {/* Apply CTA */}
+      <section>
+        <ApplyCta
+          state={ctaState}
+          schoolSlug={schoolSlug}
+          membershipId={ctaMembershipId}
+          locale={locale}
+        />
+      </section>
     </main>
   );
 }

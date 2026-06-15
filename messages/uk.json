@@ -2143,6 +2143,18 @@
   },
   "PublicSchool": {
     "typeOnline": "Онлайн-школа",
-    "typeHybrid": "Онлайн і очно"
+    "typeHybrid": "Онлайн і очно",
+    "Cta": {
+      "apply": "Подати заявку",
+      "applying": "Надсилаємо...",
+      "applicationSent": "Вашу заявку надіслано!",
+      "applyFailed": "Не вдалося подати заявку. Спробуйте ще раз.",
+      "applicationPending": "Ваша заявка розглядається.",
+      "applicationRejected": "Вашу заявку не прийнято.",
+      "alreadyEnrolled": "Ви зараховані до цієї школи.",
+      "continueOnboarding": "Продовжити реєстрацію",
+      "joinAsGuest": "Подати заявку",
+      "inviteOnly": "Ця школа приймає студентів лише за запрошенням."
+    }
   }
 }
