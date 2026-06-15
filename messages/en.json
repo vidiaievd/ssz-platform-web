@@ -758,7 +758,17 @@
     "joinSchool": "Join school",
     "joining": "Joining...",
     "joinedSuccessfully": "You have joined the school",
-    "joinFailed": "Failed to join school. Please try again."
+    "joinFailed": "Failed to join school. Please try again.",
+    "PlacementTest": {
+      "title": "Language placement test",
+      "subtitle": "Answer the questions to find your level",
+      "question": "{current} of {total}",
+      "next": "Next",
+      "finish": "Finish",
+      "saving": "Saving...",
+      "saveFailed": "Could not save your result. Please try again.",
+      "resultSaved": "Your level: {level}"
+    }
   },
   "Student": {
     "dashboard": {
