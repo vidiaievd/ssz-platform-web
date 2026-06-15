@@ -763,6 +763,30 @@
       "saving": "Saving...",
       "saveFailed": "Could not save your result. Please try again.",
       "resultSaved": "Your level: {level}"
+    },
+    "Availability": {
+      "subtitle": "Коли ви зазвичай доступні для уроків?",
+      "morning": "Ранок",
+      "afternoon": "День",
+      "evening": "Вечір",
+      "Mon": "Пн",
+      "Tue": "Вт",
+      "Wed": "Ср",
+      "Thu": "Чт",
+      "Fri": "Пт",
+      "Sat": "Сб",
+      "Sun": "Нд",
+      "legend": "Оберіть зручний для вас час",
+      "saving": "Зберігаємо...",
+      "submit": "Продовжити"
+    },
+    "InterviewBooking": {
+      "subtitle": "Оберіть час для вашого вступного інтерв'ю",
+      "selectSlot": "Оберіть часовий слот",
+      "book": "Записатися",
+      "booking": "Записуємо...",
+      "booked": "Інтерв'ю заброньовано",
+      "bookFailed": "Не вдалося записатися на інтерв'ю. Спробуйте ще раз."
     }
   },
   "Student": {

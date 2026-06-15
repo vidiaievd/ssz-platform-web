@@ -763,6 +763,30 @@
       "saving": "Saving...",
       "saveFailed": "Could not save your result. Please try again.",
       "resultSaved": "Your level: {level}"
+    },
+    "Availability": {
+      "subtitle": "Når er du vanligvis tilgjengelig for undervisning?",
+      "morning": "Morgen",
+      "afternoon": "Ettermiddag",
+      "evening": "Kveld",
+      "Mon": "Man",
+      "Tue": "Tir",
+      "Wed": "Ons",
+      "Thu": "Tor",
+      "Fri": "Fre",
+      "Sat": "Lør",
+      "Sun": "Søn",
+      "legend": "Velg tidspunkter som passer for deg",
+      "saving": "Lagrer...",
+      "submit": "Fortsett"
+    },
+    "InterviewBooking": {
+      "subtitle": "Velg et tidspunkt for intervjuet ditt",
+      "selectSlot": "Velg tidspunkt",
+      "book": "Book intervju",
+      "booking": "Booker...",
+      "booked": "Intervju booket",
+      "bookFailed": "Kunne ikke booke intervjuet. Prøv igjen."
     }
   },
   "Student": {

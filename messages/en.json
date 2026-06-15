@@ -768,6 +768,30 @@
       "saving": "Saving...",
       "saveFailed": "Could not save your result. Please try again.",
       "resultSaved": "Your level: {level}"
+    },
+    "Availability": {
+      "subtitle": "When are you generally available for lessons?",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening",
+      "Mon": "Mon",
+      "Tue": "Tue",
+      "Wed": "Wed",
+      "Thu": "Thu",
+      "Fri": "Fri",
+      "Sat": "Sat",
+      "Sun": "Sun",
+      "legend": "Select times that work for you",
+      "saving": "Saving...",
+      "submit": "Continue"
+    },
+    "InterviewBooking": {
+      "subtitle": "Pick a time slot for your placement interview",
+      "selectSlot": "Select interview slot",
+      "book": "Book interview",
+      "booking": "Booking...",
+      "booked": "Interview booked",
+      "bookFailed": "Could not book the interview. Please try again."
     }
   },
   "Student": {
