@@ -265,7 +265,10 @@
       "signIn": "Войти",
       "successTitle": "Проверьте электронную почту",
       "successDescription": "Мы отправили ссылку для подтверждения на {email}.",
-      "emailTaken": "Аккаунт с таким email уже существует."
+      "emailTaken": "Аккаунт с таким email уже существует.",
+      "dateOfBirth": "Date of birth",
+      "submitting": "Creating account...",
+      "joiningSchool": "You are joining {school}"
     },
     "ForgotPassword": {
       "title": "Восстановление пароля",

@@ -265,7 +265,10 @@
       "signIn": "Logg inn",
       "successTitle": "Sjekk e-posten din",
       "successDescription": "Vi sendte en bekreftelseslenke til {email}.",
-      "emailTaken": "Det finnes allerede en konto med denne e-postadressen."
+      "emailTaken": "Det finnes allerede en konto med denne e-postadressen.",
+      "dateOfBirth": "Date of birth",
+      "submitting": "Creating account...",
+      "joiningSchool": "You are joining {school}"
     },
     "ForgotPassword": {
       "title": "Tilbakestill passord",

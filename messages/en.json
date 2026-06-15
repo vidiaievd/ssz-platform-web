@@ -265,7 +265,10 @@
       "signIn": "Sign in",
       "successTitle": "Check your email",
       "successDescription": "We sent a verification link to {email}.",
-      "emailTaken": "An account with this email already exists."
+      "emailTaken": "An account with this email already exists.",
+      "dateOfBirth": "Date of birth",
+      "submitting": "Creating account...",
+      "joiningSchool": "You are joining {school}"
     },
     "ForgotPassword": {
       "title": "Reset password",

@@ -265,7 +265,10 @@
       "signIn": "Увійти",
       "successTitle": "Перевірте електронну пошту",
       "successDescription": "Ми надіслали посилання для підтвердження на {email}.",
-      "emailTaken": "Обліковий запис з такою поштою вже існує."
+      "emailTaken": "Обліковий запис з такою поштою вже існує.",
+      "dateOfBirth": "Date of birth",
+      "submitting": "Creating account...",
+      "joiningSchool": "You are joining {school}"
     },
     "ForgotPassword": {
       "title": "Відновлення паролю",
