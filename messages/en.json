@@ -2145,5 +2145,9 @@
     "trial": {
       "daysLeft": "Trial · {days} days left"
     }
+  },
+  "PublicSchool": {
+    "typeOnline": "Online school",
+    "typeHybrid": "Online & in-person"
   }
 }

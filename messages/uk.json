@@ -2140,5 +2140,9 @@
     "trial": {
       "daysLeft": "Пробний · {days} днів"
     }
+  },
+  "PublicSchool": {
+    "typeOnline": "Онлайн-школа",
+    "typeHybrid": "Онлайн і очно"
   }
 }
