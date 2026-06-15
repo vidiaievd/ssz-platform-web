@@ -792,6 +792,18 @@
       "booking": "Booking...",
       "booked": "Interview booked",
       "bookFailed": "Could not book the interview. Please try again."
+    },
+    "Onboarding": {
+      "title": "Welcome to {school}",
+      "subtitle": "Complete the steps below to finish your enrollment.",
+      "stepPlacement": "Placement",
+      "stepAvailability": "Availability",
+      "stepInterview": "Interview",
+      "allDoneTitle": "You're all set!",
+      "allDoneReview": "We'll review your results and get back to you soon.",
+      "allDoneActive": "You've been enrolled. Welcome aboard!",
+      "goToDashboard": "Go to dashboard",
+      "finishFailed": "Something went wrong. Please try again."
     }
   },
   "Student": {

@@ -787,6 +787,18 @@
       "booking": "Booker...",
       "booked": "Intervju booket",
       "bookFailed": "Kunne ikke booke intervjuet. Prøv igjen."
+    },
+    "Onboarding": {
+      "title": "Velkommen til {school}",
+      "subtitle": "Fullfør trinnene nedenfor for å fullføre påmeldingen din.",
+      "stepPlacement": "Plassering",
+      "stepAvailability": "Tilgjengelighet",
+      "stepInterview": "Intervju",
+      "allDoneTitle": "Du er klar!",
+      "allDoneReview": "Vi vil gjennomgå resultatene dine og komme tilbake til deg snart.",
+      "allDoneActive": "Du er nå registrert. Velkommen!",
+      "goToDashboard": "Gå til dashbord",
+      "finishFailed": "Noe gikk galt. Prøv igjen."
     }
   },
   "Student": {
