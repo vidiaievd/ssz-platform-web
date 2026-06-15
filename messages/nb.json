@@ -78,11 +78,14 @@
     "enrolled": "Mine skoler"
   },
   "UserMenu": {
+    "profile": "Profil",
     "settings": "Innstillinger",
     "signOut": "Logg ut",
     "role_school": "Skole",
     "role_tutor": "Lærer",
-    "role_student": "Student"
+    "role_student": "Student",
+    "theme": "Tema",
+    "language": "Språk"
   },
   "EnrollmentRequired": {
     "title": "Ingen aktive påmeldinger",
@@ -114,7 +117,9 @@
     },
     "sections": {
       "avatar": "Profilbilde",
-      "info": "Personlig informasjon"
+      "info": "Personlig informasjon",
+      "teaching": "Lærerprofil",
+      "student": "Læringsprofil"
     },
     "completeness": {
       "label": "Profilkomplethet",
@@ -126,9 +131,54 @@
         "timezone": "tidssone",
         "instructionLocales": "undervisningsspråk",
         "contactEmail": "kontakte-post",
-        "contactPhone": "kontakttelefon"
+        "contactPhone": "kontakttelefon",
+        "teachingLanguages": "undervisningsspråk",
+        "targetLanguages": "lærlingsspråk",
+        "hourlyRateCurrency": "timepris og valuta"
       }
-    }
+    },
+    "firstName": "Fornavn",
+    "lastName": "Etternavn",
+    "handle": "Offentlig lenke",
+    "teaching": {
+      "languages": "Undervisningsspråk",
+      "cefr": "Undervisningsnivåer (CEFR)",
+      "specializations": "Spesialiseringer",
+      "experience": "Års erfaring",
+      "certificates": "Sertifikater",
+      "rate": "Timepris",
+      "currency": "Valuta",
+      "languagesEmpty": "Ingen undervisningsspråk lagt til ennå.",
+      "languagePlaceholder": "Legg til et språk…",
+      "cefrLabel": "CEFR-nivå",
+      "cefrPlaceholder": "Nivå",
+      "addLanguage": "Legg til språk",
+      "removeLanguage": "Fjern {code}",
+      "cancelAdd": "Avbryt"
+    },
+    "student": {
+      "nativeLanguage": "Morsmål",
+      "targetLanguages": "Lærlingsspråk",
+      "goals": "Læringsmål"
+    },
+    "email": "E-postadresse",
+    "discard": "Forkast",
+    "unsavedChanges": "Du har ulagrede endringer",
+    "validation": {
+      "invalidEmail": "Skriv inn en gyldig e-postadresse",
+      "invalidPhone": "Skriv inn et gyldig telefonnummer"
+    },
+    "form": {
+      "requiredLegend": "* Obligatoriske felt",
+      "emailLockedTooltip": "Innloggings-e-post. Gå til Sikkerhet for å endre den."
+    },
+    "roles": {
+      "school_admin": "Skoleadmin",
+      "teacher": "Lærer",
+      "tutor": "Privatlærer",
+      "student": "Elev"
+    },
+    "saveShort": "Lagre"
   },
   "Content": {
     "catalogueTitle": "Kurskatalog",
@@ -785,7 +835,29 @@
     "label": "{count, plural, =0 {Varsler} one {# ulest varsel} other {# uleste varsler}}",
     "unread": "{count, plural, one {# ulest} other {# uleste}}",
     "unreadDot": "Ulest",
-    "empty": "Ingen nye varsler!"
+    "empty": "Ingen nye varsler!",
+    "types": {
+      "ENROLLMENT_APPROVED": {
+        "title": "Påmelding godkjent",
+        "body": "Påmeldingsforespørselen din ble godkjent."
+      },
+      "ENROLLMENT_REJECTED": {
+        "title": "Påmelding avvist",
+        "body": "Påmeldingsforespørselen din ble ikke godkjent."
+      },
+      "LESSON_ASSIGNED": {
+        "title": "Leksjon tildelt",
+        "body": "En ny leksjon har blitt tildelt deg."
+      },
+      "NEW_MATERIAL": {
+        "title": "Nytt materiale tilgjengelig",
+        "body": "Nytt læremateriell har blitt lagt til."
+      },
+      "TEACHER_PROFILE_CHANGED": {
+        "title": "Lærer oppdaterte profil",
+        "body": "En lærer i skolen din oppdaterte profilinformasjonen sin."
+      }
+    }
   },
   "Onboarding": {
     "title": "Sett opp profilen din",
@@ -950,7 +1022,9 @@
       "invalidType": "Last opp et JPG-, PNG-, WebP- eller GIF-bilde.",
       "tooLarge": "Filen er for stor. Maksimal størrelse er 5 MB.",
       "uploadFailed": "Opplastingen mislyktes. Prøv igjen."
-    }
+    },
+    "upload": "Last opp bilde",
+    "remove": "Fjern"
   },
   "School": {
     "dashboard": {
@@ -1532,7 +1606,10 @@
         "langsAddButton": "Legg til språk",
         "langsRemoveLabel": "Fjern språk",
         "langsRequired": "Minst ett undervisningsspråk er påkrevd",
-        "langsHint": "Skolen ansetter læreren for et bestemt språk — dette brukes til gruppetilordninger."
+        "langsHint": "Skolen ansetter læreren for et bestemt språk — dette brukes til gruppetilordninger.",
+        "firstNameLabel": "Fornavn",
+        "lastNameLabel": "Etternavn",
+        "nameHint": "Valgfritt — brukes til å forhåndsutfylle lærerens registreringsskjema."
       },
       "removeGuard": {
         "title": "Kan ikke fjerne lærer",
@@ -1803,6 +1880,18 @@
         "title": "Kunne ikke laste invitasjonen",
         "body": "En midlertidig feil oppstod. Vennligst prøv igjen."
       }
+    },
+    "greeting": {
+      "withName": "Hei, {name}!",
+      "noName": "Hei!"
+    },
+    "detail": {
+      "school": "Skole",
+      "role": "Rolle",
+      "languages": "Undervisningsspråk",
+      "invitedBy": "Invitert av",
+      "forEmail": "Denne invitasjonen er til",
+      "expiresAt": "Gyldig til"
     }
   },
   "WorkspaceSwitcher": {
@@ -1854,6 +1943,94 @@
     },
     "stub": {
       "body": "Denne seksjonen kommer snart."
+    }
+  },
+  "Account": {
+    "nav": {
+      "profile": "Profil",
+      "appearance": "Utseende",
+      "notifications": "Varsler",
+      "security": "Sikkerhet"
+    },
+    "appearance": {
+      "title": "Utseende",
+      "subtitle": "Tilpass hvordan plattformen ser ut.",
+      "theme": "Tema",
+      "language": "Språk"
+    },
+    "security": {
+      "title": "Sikkerhet",
+      "subtitle": "Administrer e-post, passord og aktive økter.",
+      "email": "E-postadresse",
+      "password": "Passord",
+      "emailHint": "Din påloggings-e-post. Ta kontakt med support for å endre den.",
+      "passwordHint": "Du vil motta en tilbakestillingslenke til din registrerte e-postadresse.",
+      "passwordResetCta": "Send tilbakestillingslenke til {email}",
+      "passwordResetSent": "Tilbakestillings-e-post sendt.",
+      "passwordResetSentConfirm": "En tilbakestillingslenke er sendt til {email}.",
+      "passwordResetError": "Klarte ikke sende e-post. Prøv igjen.",
+      "cancel": "Avbryt",
+      "twoFa": {
+        "title": "Tofaktorautentisering",
+        "subtitle": "Legg til et ekstra sikkerhetsnivå med en autentiseringsapp.",
+        "enableCta": "Aktiver 2FA",
+        "disableCta": "Deaktiver 2FA",
+        "scanQr": "Skann denne QR-koden med autentiseringsappen din",
+        "secretLabel": "Manuell nøkkel",
+        "nextCta": "Jeg har skannet koden",
+        "enterCode": "Skriv inn 6-sifret kode fra autentiseringsappen for å bekrefte",
+        "confirmEnable": "Bekreft og aktiver",
+        "backupCodesTitle": "2FA aktivert — lagre sikkerhetskodene dine",
+        "backupCodesHint": "Oppbevar disse kodene på et trygt sted. Hver kan brukes én gang.",
+        "disableConfirm": "Skriv inn gjeldende TOTP-kode for å deaktivere 2FA",
+        "confirmDisable": "Deaktiver 2FA",
+        "enabled": "Tofaktorautentisering aktivert.",
+        "disabled": "Tofaktorautentisering deaktivert.",
+        "invalidCode": "Ugyldig eller utløpt kode.",
+        "setupError": "Klarte ikke starte 2FA-oppsett.",
+        "verifyError": "Klarte ikke verifisere kode.",
+        "disableError": "Klarte ikke deaktivere 2FA.",
+        "statusOn": "2FA på",
+        "statusOff": "2FA av",
+        "copyKey": "Kopier nøkkel",
+        "copyAll": "Kopier alle",
+        "download": "Last ned .txt",
+        "print": "Skriv ut"
+      },
+      "changeEmail": "Endre e-postadresse",
+      "changeEmailHint": "Det er ikke mulig å endre e-post ennå. Denne funksjonen kommer snart.",
+      "changeEmailCta": "Endre e-post",
+      "sessions": "Aktive sesjoner",
+      "sessionsHint": "Se og tilbakekall aktive innloggingssesjoner på alle enhetene dine.",
+      "sessionsComingSoon": "Kommer snart",
+      "copyEmail": "Kopier e-postadresse",
+      "passwordResetCooldown": "Du kan sende på nytt om {seconds}s"
+    },
+    "notifications": {
+      "title": "Varsler",
+      "subtitle": "Velg hvordan og når du mottar varsler.",
+      "channels": "Varslingskanaler",
+      "email": "E-post",
+      "inApp": "I appen",
+      "push": "Push",
+      "comingSoon": "Kommer snart"
+    },
+    "back": "Tilbake",
+    "unsavedChanges": {
+      "title": "Ulagrede endringer",
+      "description": "Du har ulagrede endringer. Hvis du forlater siden, mister du endringene.",
+      "leave": "Forlat uten å lagre",
+      "stay": "Bli på siden"
+    }
+  },
+  "Topbar": {
+    "search": {
+      "label": "Søk",
+      "placeholder": "Søk kurs, studenter, timer…",
+      "comingSoon": "Søk kommer snart"
+    },
+    "trial": {
+      "daysLeft": "Prøve · {days} dager igjen"
     }
   }
 }

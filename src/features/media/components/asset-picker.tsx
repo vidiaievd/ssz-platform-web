@@ -19,6 +19,7 @@ type AssetPickerProps = {
   name?: string;
   purpose?: MediaPurpose;
   onUploaded: (assetUrl: string) => Promise<void> | void;
+  onRemoved?: () => Promise<void> | void;
 };
 
 type PickerState =
@@ -27,7 +28,7 @@ type PickerState =
   | { kind: 'uploading'; file: File; objectUrl: string; progress: number }
   | { kind: 'done'; objectUrl: string };
 
-export function AssetPicker({ currentUrl, name, purpose = 'avatar', onUploaded }: AssetPickerProps) {
+export function AssetPicker({ currentUrl, name, purpose = 'avatar', onUploaded, onRemoved }: AssetPickerProps) {
   const t = useTranslations('Media');
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<PickerState>({ kind: 'idle' });
@@ -118,15 +119,28 @@ export function AssetPicker({ currentUrl, name, purpose = 'avatar', onUploaded }
             </Button>
           </div>
         ) : (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => inputRef.current?.click()}
-            disabled={isUploading}
-          >
-            <Upload className="size-3.5 mr-1.5" />
-            {t('change')}
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => inputRef.current?.click()}
+              disabled={isUploading}
+            >
+              <Upload className="size-3.5 mr-1.5" />
+              {currentUrl ? t('change') : t('upload')}
+            </Button>
+            {currentUrl && onRemoved && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => void onRemoved()}
+                disabled={isUploading}
+                className="text-destructive hover:text-destructive"
+              >
+                {t('remove')}
+              </Button>
+            )}
+          </div>
         )}
 
         <p className="text-xs text-[var(--ssz-text-muted)]">

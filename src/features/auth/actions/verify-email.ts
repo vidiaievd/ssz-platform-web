@@ -2,12 +2,14 @@
 
 import { AppError } from '@/lib/errors';
 import { serverFetch } from '@/lib/api/server-fetcher';
-import { writeAuthCookies } from '@/lib/auth/cookies';
+import { writeAuthCookies, readPendingInvite, clearPendingInvite } from '@/lib/auth/cookies';
 import { tryAction } from '@/lib/result';
 import type { AuthTokensResponse } from '@/lib/api/generated/schemas';
 
 export type VerifyEmailResult = {
   roles: string[];
+  /** Set when a pending invite was auto-accepted; client should redirect here. */
+  acceptedInviteRedirect?: string;
   // TODO: remove debug fields before merging
   _debug?: {
     step: string;
@@ -67,6 +69,7 @@ export async function verifyEmailConfirmAction(token: string) {
 
     // Step 3: fetch roles
     let rawMeResponse: unknown;
+    let roles: string[] = [];
     try {
       const me = await serverFetch<{ roles: string[] }>({
         service: 'auth',
@@ -75,10 +78,7 @@ export async function verifyEmailConfirmAction(token: string) {
         headers: { Authorization: `Bearer ${tokens.accessToken}` },
       });
       rawMeResponse = me;
-      return {
-        roles: me.roles ?? [],
-        _debug: { step: 'OK', rawVerifyResponse, rawMeResponse },
-      };
+      roles = me.roles ?? [];
     } catch (e) {
       const err = e as Error;
       return {
@@ -90,6 +90,34 @@ export async function verifyEmailConfirmAction(token: string) {
         },
       };
     }
+
+    // Step 4: auto-accept pending invite (token survived email-link click via httpOnly cookie).
+    const pendingInviteToken = await readPendingInvite();
+    if (pendingInviteToken) {
+      try {
+        await serverFetch({
+          service: 'organization',
+          path: `/schools/invitations/${pendingInviteToken}/accept`,
+          method: 'POST',
+          headers: { Authorization: `Bearer ${tokens.accessToken}` },
+        });
+        await clearPendingInvite();
+        // Redirect to workspace resolver — it will pick up the new school membership.
+        return {
+          roles,
+          acceptedInviteRedirect: '/school',
+          _debug: { step: 'OK + invite accepted', rawVerifyResponse, rawMeResponse },
+        };
+      } catch {
+        // Accept failed (already accepted, revoked, expired) — clear cookie and proceed normally.
+        await clearPendingInvite();
+      }
+    }
+
+    return {
+      roles,
+      _debug: { step: 'OK', rawVerifyResponse, rawMeResponse },
+    };
   });
 }
 

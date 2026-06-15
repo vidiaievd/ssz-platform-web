@@ -27,20 +27,37 @@ const MEMBER_ROW = {
   joinedAt: '2026-06-01T00:00:00Z',
 };
 
+const PROFILE_ROW = {
+  userId: 'u1',
+  displayName: 'Anna Berg (Profile)',
+  avatarUrl: 'https://cdn/anna-profile.jpg',
+};
+
+function mockOrgThenProfile(
+  members: unknown[],
+  profiles: unknown[],
+) {
+  mockFetch.mockImplementation((opts: { service: string }) => {
+    if (opts.service === 'organization') return Promise.resolve(members);
+    if (opts.service === 'profile') return Promise.resolve(profiles);
+    return Promise.resolve([]);
+  });
+}
+
 describe('getTeacherRoster', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('maps a member row to TeacherRosterRow', async () => {
-    mockFetch.mockResolvedValue([MEMBER_ROW]);
+  it('uses profile displayName and avatarUrl over org member data', async () => {
+    mockOrgThenProfile([MEMBER_ROW], [PROFILE_ROW]);
 
     const roster = await getTeacherRoster('school-1');
 
     expect(roster).toHaveLength(1);
     expect(roster[0]).toMatchObject({
       userId: 'u1',
-      name: 'Anna Berg',
+      name: 'Anna Berg (Profile)',
+      avatarUrl: 'https://cdn/anna-profile.jpg',
       email: 'anna@example.com',
-      avatarUrl: 'https://cdn/anna.jpg',
       languages: ['nb', 'en'],
       role: 'TEACHER',
       status: 'active',
@@ -49,8 +66,33 @@ describe('getTeacherRoster', () => {
     });
   });
 
+  it('falls back to org name when profile not found', async () => {
+    mockOrgThenProfile([MEMBER_ROW], []);
+
+    const roster = await getTeacherRoster('school-1');
+
+    expect(roster[0]).toMatchObject({
+      name: 'Anna Berg',
+      avatarUrl: 'https://cdn/anna.jpg',
+    });
+  });
+
+  it('falls back to org data when profile-service throws', async () => {
+    mockFetch.mockImplementation((opts: { service: string }) => {
+      if (opts.service === 'organization') return Promise.resolve([MEMBER_ROW]);
+      return Promise.reject(new Error('profile-service down'));
+    });
+
+    const roster = await getTeacherRoster('school-1');
+
+    expect(roster[0]).toMatchObject({
+      name: 'Anna Berg',
+      avatarUrl: 'https://cdn/anna.jpg',
+    });
+  });
+
   it('defaults missing fields gracefully', async () => {
-    mockFetch.mockResolvedValue([{ userId: 'u2' }]);
+    mockOrgThenProfile([{ userId: 'u2' }], []);
 
     const roster = await getTeacherRoster('school-1');
 
@@ -68,28 +110,34 @@ describe('getTeacherRoster', () => {
   });
 
   it('maps status: pending correctly', async () => {
-    mockFetch.mockResolvedValue([{ ...MEMBER_ROW, status: 'pending' }]);
+    mockOrgThenProfile([{ ...MEMBER_ROW, status: 'pending' }], [PROFILE_ROW]);
     const roster = await getTeacherRoster('school-1');
     expect(roster[0]?.status).toBe('pending');
   });
 
-  it('returns empty array when fetch throws', async () => {
+  it('returns empty array when org fetch throws', async () => {
     mockFetch.mockRejectedValue(new Error('network error'));
     const roster = await getTeacherRoster('school-1');
     expect(roster).toEqual([]);
   });
 
+  it('returns empty array when no members', async () => {
+    mockOrgThenProfile([], []);
+    const roster = await getTeacherRoster('school-1');
+    expect(roster).toEqual([]);
+  });
+
   it('filters out non-TEACHER members', async () => {
-    mockFetch.mockResolvedValue([
-      { ...MEMBER_ROW, role: 'STUDENT' },
-      MEMBER_ROW,
-    ]);
+    mockOrgThenProfile(
+      [{ ...MEMBER_ROW, role: 'STUDENT' }, MEMBER_ROW],
+      [PROFILE_ROW],
+    );
     const roster = await getTeacherRoster('school-1');
     expect(roster).toHaveLength(1);
   });
 
-  it('calls members endpoint with role=TEACHER filter', async () => {
-    mockFetch.mockResolvedValue([MEMBER_ROW]);
+  it('calls members endpoint then profile batch with correct userIds', async () => {
+    mockOrgThenProfile([MEMBER_ROW], [PROFILE_ROW]);
 
     await getTeacherRoster('school-42');
 
@@ -100,5 +148,31 @@ describe('getTeacherRoster', () => {
         query: { role: 'TEACHER' },
       }),
     );
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        service: 'profile',
+        path: '/profiles',
+        query: { userIds: 'u1' },
+      }),
+    );
+  });
+
+  it('batches multiple teacher userIds in single profile request', async () => {
+    const member2 = { ...MEMBER_ROW, userId: 'u2', email: 'b@b.com' };
+    mockOrgThenProfile([MEMBER_ROW, member2], [
+      PROFILE_ROW,
+      { userId: 'u2', displayName: 'Bob' },
+    ]);
+
+    const roster = await getTeacherRoster('school-1');
+
+    expect(roster).toHaveLength(2);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        service: 'profile',
+        query: { userIds: 'u1,u2' },
+      }),
+    );
+    expect(roster[1]?.name).toBe('Bob');
   });
 });

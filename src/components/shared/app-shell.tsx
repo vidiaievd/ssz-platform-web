@@ -23,6 +23,8 @@ import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
 import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
+import { GlobalSearchTrigger } from "./topbar/global-search-trigger";
+import { TrialPill } from "./topbar/trial-pill";
 import { Sidebar } from "./sidebar/sidebar";
 import { MobileSidebar } from "./sidebar/mobile-sidebar";
 import { Topbar } from "./topbar/topbar";
@@ -35,8 +37,6 @@ export type SchoolContext = {
   schoolType: SchoolType;
   school: { name: string; slug: string };
   schoolId: string;
-  /** Show Scheduling nav item; derived from SCHEDULING_BACKEND env on the server */
-  schedulingReady?: boolean;
 };
 
 const SCHEDULING_SCHOOL_ROLES = new Set<SchoolRole>(['OWNER', 'ADMIN', 'MANAGER', 'SCHEDULER']);
@@ -49,8 +49,7 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
   }
 
   const canSeeScheduling =
-    !!schoolCtx?.schedulingReady &&
-    !!schoolCtx.schoolRole &&
+    !!schoolCtx?.schoolRole &&
     SCHEDULING_SCHOOL_ROLES.has(schoolCtx.schoolRole);
 
   const mainItems = [
@@ -196,6 +195,11 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
     schoolContext.schoolRole !== "OWNER" &&
     schoolContext.schoolRole !== "ADMIN";
 
+  const canSeeSchedulingAlerts =
+    variant === "school" &&
+    !!schoolContext?.schoolRole &&
+    SCHEDULING_SCHOOL_ROLES.has(schoolContext.schoolRole);
+
   const workspaceSwitcher = (
     <div className="flex items-center gap-2 min-w-0">
       <WorkspaceSwitcher activeContextKey={activeContextKey} userId={resolvedTutorId || undefined} />
@@ -220,12 +224,14 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
           user={user}
           onMenuOpen={() => setMobileOpen(true)}
           leading={workspaceSwitcher}
+          activeContextKey={activeContextKey}
+          search={variant === "school" ? <GlobalSearchTrigger /> : undefined}
           actions={
-            variant === "student" ? (
+            <div className="flex items-center gap-2">
+              {variant === "school" && <TrialPill />}
+              {canSeeSchedulingAlerts && <AlertBadge schoolId={schoolContext?.schoolId} />}
               <NotificationBell />
-            ) : variant === "school" ? (
-              <AlertBadge schoolId={schoolContext?.schoolId} />
-            ) : undefined
+            </div>
           }
         />
         <main className="flex-1 overflow-auto">{children}</main>

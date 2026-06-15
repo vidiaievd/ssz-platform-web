@@ -2,12 +2,13 @@
 
 import { AppError } from '@/lib/errors';
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { writePendingInvite } from '@/lib/auth/cookies';
 import { tryAction } from '@/lib/result';
 import type { RegisterResponse } from '@/lib/api/generated/schemas';
 import { registerSchema } from '../schemas';
 import type { RegisterInput } from '../schemas';
 
-export async function registerAction(input: RegisterInput) {
+export async function registerAction(input: RegisterInput & { inviteToken?: string }) {
   return tryAction(async () => {
     const parsed = registerSchema.safeParse(input);
     if (!parsed.success) {
@@ -23,6 +24,10 @@ export async function registerAction(input: RegisterInput) {
       body: { email, password, role: role ?? null },
       anonymous: true,
     });
+
+    if (input.inviteToken) {
+      await writePendingInvite(input.inviteToken);
+    }
 
     return { userId: result.userId, email: result.email };
   });

@@ -13,7 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useNotifications } from '../api/use-notifications';
+import { useMarkRead, useNotifications } from '../api/use-notifications';
+import type { Notification, NotificationType } from '../types';
 
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -24,9 +25,84 @@ function timeAgo(iso: string): string {
   return `${Math.floor(diffH / 24)}d ago`;
 }
 
+function resolveContent(
+  type: NotificationType,
+  t: ReturnType<typeof useTranslations<'Notifications'>>,
+): { title: string; body: string } {
+  if (type === 'TEACHER_PROFILE_CHANGED') {
+    return {
+      title: t('types.TEACHER_PROFILE_CHANGED.title'),
+      body: t('types.TEACHER_PROFILE_CHANGED.body'),
+    };
+  }
+  if (type === 'ENROLLMENT_APPROVED') {
+    return {
+      title: t('types.ENROLLMENT_APPROVED.title'),
+      body: t('types.ENROLLMENT_APPROVED.body'),
+    };
+  }
+  if (type === 'ENROLLMENT_REJECTED') {
+    return {
+      title: t('types.ENROLLMENT_REJECTED.title'),
+      body: t('types.ENROLLMENT_REJECTED.body'),
+    };
+  }
+  if (type === 'LESSON_ASSIGNED') {
+    return {
+      title: t('types.LESSON_ASSIGNED.title'),
+      body: t('types.LESSON_ASSIGNED.body'),
+    };
+  }
+  if (type === 'NEW_MATERIAL') {
+    return {
+      title: t('types.NEW_MATERIAL.title'),
+      body: t('types.NEW_MATERIAL.body'),
+    };
+  }
+  return { title: type, body: '' };
+}
+
+function NotificationItem({
+  notification,
+  t,
+  onMarkRead,
+}: {
+  notification: Notification;
+  t: ReturnType<typeof useTranslations<'Notifications'>>;
+  onMarkRead: (id: string) => void;
+}) {
+  const { title, body } = resolveContent(notification.type, t);
+
+  return (
+    <DropdownMenuItem
+      className="flex flex-col items-start gap-0.5 px-3 py-2.5"
+      onSelect={() => {
+        if (!notification.isRead) onMarkRead(notification.id);
+      }}
+    >
+      <div className="flex w-full items-start gap-2">
+        {!notification.isRead && (
+          <span
+            aria-label={t('unreadDot')}
+            className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary"
+          />
+        )}
+        <div className={!notification.isRead ? '' : 'pl-4'}>
+          <p className="text-sm font-medium leading-tight">{title}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground leading-snug">{body}</p>
+          <p className="mt-1 text-[11px] text-muted-foreground/70">
+            {timeAgo(notification.createdAt)}
+          </p>
+        </div>
+      </div>
+    </DropdownMenuItem>
+  );
+}
+
 export function NotificationBell() {
   const t = useTranslations('Notifications');
   const { data } = useNotifications();
+  const { mutate: markRead } = useMarkRead();
 
   const notifications = data?.items ?? [];
   const unreadCount = data?.unreadCount ?? 0;
@@ -68,28 +144,12 @@ export function NotificationBell() {
         ) : (
           <DropdownMenuGroup>
             {notifications.map((n) => (
-              <DropdownMenuItem
+              <NotificationItem
                 key={n.id}
-                className="flex flex-col items-start gap-0.5 px-3 py-2.5"
-              >
-                <div className="flex w-full items-start gap-2">
-                  {n.readAt === null && (
-                    <span
-                      aria-label={t('unreadDot')}
-                      className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary"
-                    />
-                  )}
-                  <div className={n.readAt === null ? '' : 'pl-4'}>
-                    <p className="text-sm font-medium leading-tight">{n.title}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground leading-snug">
-                      {n.body}
-                    </p>
-                    <p className="mt-1 text-[11px] text-muted-foreground/70">
-                      {timeAgo(n.createdAt)}
-                    </p>
-                  </div>
-                </div>
-              </DropdownMenuItem>
+                notification={n}
+                t={t}
+                onMarkRead={markRead}
+              />
             ))}
           </DropdownMenuGroup>
         )}

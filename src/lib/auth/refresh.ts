@@ -22,7 +22,7 @@ export async function attemptRefresh(): Promise<boolean> {
 async function doRefresh(): Promise<boolean> {
   const refreshToken = await readRefreshToken();
   if (!refreshToken) {
-    await clearAuthCookies();
+    await tryClearAuthCookies();
     return false;
   }
 
@@ -45,7 +45,7 @@ async function doRefresh(): Promise<boolean> {
     }
 
     if (!res.ok) {
-      await clearAuthCookies();
+      await tryClearAuthCookies();
       return false;
     }
 
@@ -56,7 +56,18 @@ async function doRefresh(): Promise<boolean> {
     });
     return true;
   } catch {
-    await clearAuthCookies();
+    await tryClearAuthCookies();
     return false;
+  }
+}
+
+// cookies().delete() is only allowed in Server Actions and Route Handlers.
+// When attemptRefresh() is called during Server Component rendering (e.g. from
+// getCurrentUser), the clear is skipped — stale cookies expire on their own.
+async function tryClearAuthCookies(): Promise<void> {
+  try {
+    await clearAuthCookies();
+  } catch {
+    // not a Server Action / Route Handler context — ignore
   }
 }

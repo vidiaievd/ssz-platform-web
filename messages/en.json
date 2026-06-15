@@ -78,11 +78,14 @@
     "enrolled": "My Schools"
   },
   "UserMenu": {
+    "profile": "Profile",
     "settings": "Settings",
     "signOut": "Sign out",
     "role_school": "School",
     "role_tutor": "Tutor",
-    "role_student": "Student"
+    "role_student": "Student",
+    "theme": "Theme",
+    "language": "Language"
   },
   "EnrollmentRequired": {
     "title": "No active enrolments",
@@ -114,7 +117,9 @@
     },
     "sections": {
       "avatar": "Profile photo",
-      "info": "Personal information"
+      "info": "Personal information",
+      "teaching": "Teaching profile",
+      "student": "Learning profile"
     },
     "completeness": {
       "label": "Profile completeness",
@@ -126,9 +131,54 @@
         "timezone": "timezone",
         "instructionLocales": "teaching languages",
         "contactEmail": "contact email",
-        "contactPhone": "contact phone"
+        "contactPhone": "contact phone",
+        "teachingLanguages": "teaching languages",
+        "targetLanguages": "learning languages",
+        "hourlyRateCurrency": "hourly rate and currency"
       }
-    }
+    },
+    "firstName": "First name",
+    "lastName": "Last name",
+    "handle": "Public handle",
+    "teaching": {
+      "languages": "Teaching languages",
+      "cefr": "Teaching levels (CEFR)",
+      "specializations": "Specializations",
+      "experience": "Years of experience",
+      "certificates": "Certificates",
+      "rate": "Hourly rate",
+      "currency": "Currency",
+      "languagesEmpty": "No teaching languages added yet.",
+      "languagePlaceholder": "Add a language…",
+      "cefrLabel": "CEFR level",
+      "cefrPlaceholder": "Level",
+      "addLanguage": "Add language",
+      "removeLanguage": "Remove {code}",
+      "cancelAdd": "Cancel"
+    },
+    "student": {
+      "nativeLanguage": "Native language",
+      "targetLanguages": "Learning languages",
+      "goals": "Learning goals"
+    },
+    "email": "Email address",
+    "discard": "Discard",
+    "unsavedChanges": "You have unsaved changes",
+    "validation": {
+      "invalidEmail": "Please enter a valid email address",
+      "invalidPhone": "Please enter a valid phone number"
+    },
+    "form": {
+      "requiredLegend": "* Required fields",
+      "emailLockedTooltip": "Login email. To change it, go to Security."
+    },
+    "roles": {
+      "school_admin": "School admin",
+      "teacher": "Teacher",
+      "tutor": "Tutor",
+      "student": "Student"
+    },
+    "saveShort": "Save"
   },
   "Content": {
     "catalogueTitle": "Course Catalogue",
@@ -790,7 +840,29 @@
     "label": "{count, plural, =0 {Notifications} one {# unread notification} other {# unread notifications}}",
     "unread": "{count, plural, one {# unread} other {# unread}}",
     "unreadDot": "Unread",
-    "empty": "You're all caught up!"
+    "empty": "You're all caught up!",
+    "types": {
+      "ENROLLMENT_APPROVED": {
+        "title": "Enrollment approved",
+        "body": "Your enrollment request was approved."
+      },
+      "ENROLLMENT_REJECTED": {
+        "title": "Enrollment rejected",
+        "body": "Your enrollment request was not approved."
+      },
+      "LESSON_ASSIGNED": {
+        "title": "Lesson assigned",
+        "body": "A new lesson has been assigned to you."
+      },
+      "NEW_MATERIAL": {
+        "title": "New material available",
+        "body": "New learning material has been added."
+      },
+      "TEACHER_PROFILE_CHANGED": {
+        "title": "Teacher updated profile",
+        "body": "A teacher in your school updated their profile information."
+      }
+    }
   },
   "Onboarding": {
     "title": "Set up your profile",
@@ -955,7 +1027,9 @@
       "invalidType": "Please upload a JPG, PNG, WebP, or GIF image.",
       "tooLarge": "File is too large. Maximum size is 5 MB.",
       "uploadFailed": "Upload failed. Please try again."
-    }
+    },
+    "upload": "Upload photo",
+    "remove": "Remove"
   },
   "School": {
     "dashboard": {
@@ -1537,7 +1611,10 @@
         "langsAddButton": "Add language",
         "langsRemoveLabel": "Remove language",
         "langsRequired": "At least one teaching language is required",
-        "langsHint": "The school hires the teacher for a specific language — this will be used for group assignments."
+        "langsHint": "The school hires the teacher for a specific language — this will be used for group assignments.",
+        "firstNameLabel": "First name",
+        "lastNameLabel": "Last name",
+        "nameHint": "Optional — used to pre-fill the teacher's registration form."
       },
       "removeGuard": {
         "title": "Cannot remove teacher",
@@ -1808,6 +1885,18 @@
         "title": "Failed to load invitation",
         "body": "A temporary error occurred. Please try again."
       }
+    },
+    "greeting": {
+      "withName": "Hello, {name}!",
+      "noName": "Hello!"
+    },
+    "detail": {
+      "school": "School",
+      "role": "Role",
+      "languages": "Teaching languages",
+      "invitedBy": "Invited by",
+      "forEmail": "This invitation is for",
+      "expiresAt": "Valid until"
     }
   },
   "WorkspaceSwitcher": {
@@ -1859,6 +1948,94 @@
     },
     "stub": {
       "body": "This section is coming soon."
+    }
+  },
+  "Account": {
+    "nav": {
+      "profile": "Profile",
+      "appearance": "Appearance",
+      "notifications": "Notifications",
+      "security": "Security"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Customize how the platform looks and feels.",
+      "theme": "Theme",
+      "language": "Language"
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Manage your email, password, and active sessions.",
+      "email": "Email address",
+      "password": "Password",
+      "emailHint": "Your login email address. To change it, contact support.",
+      "passwordHint": "You will receive a reset link at your registered email address.",
+      "passwordResetCta": "Send reset link to {email}",
+      "passwordResetSent": "Reset email sent.",
+      "passwordResetSentConfirm": "A password reset link has been sent to {email}.",
+      "passwordResetError": "Failed to send reset email. Please try again.",
+      "cancel": "Cancel",
+      "twoFa": {
+        "title": "Two-factor authentication",
+        "subtitle": "Add an extra layer of security to your account using an authenticator app.",
+        "enableCta": "Enable 2FA",
+        "disableCta": "Disable 2FA",
+        "scanQr": "Scan this QR code with your authenticator app",
+        "secretLabel": "Manual key",
+        "nextCta": "I have scanned the code",
+        "enterCode": "Enter the 6-digit code from your authenticator app to confirm",
+        "confirmEnable": "Confirm & enable",
+        "backupCodesTitle": "2FA enabled — save your backup codes",
+        "backupCodesHint": "Store these codes somewhere safe. Each can be used once if you lose access to your authenticator.",
+        "disableConfirm": "Enter your current TOTP code to disable 2FA",
+        "confirmDisable": "Disable 2FA",
+        "enabled": "Two-factor authentication enabled.",
+        "disabled": "Two-factor authentication disabled.",
+        "invalidCode": "Invalid or expired code.",
+        "setupError": "Failed to initiate 2FA setup.",
+        "verifyError": "Failed to verify code.",
+        "disableError": "Failed to disable 2FA.",
+        "statusOn": "2FA on",
+        "statusOff": "2FA off",
+        "copyKey": "Copy manual key",
+        "copyAll": "Copy all",
+        "download": "Download .txt",
+        "print": "Print"
+      },
+      "changeEmail": "Change email address",
+      "changeEmailHint": "Email change is not yet available. Support for this feature is coming soon.",
+      "changeEmailCta": "Change email",
+      "sessions": "Active sessions",
+      "sessionsHint": "View and revoke active login sessions across all your devices.",
+      "sessionsComingSoon": "Coming soon",
+      "copyEmail": "Copy email address",
+      "passwordResetCooldown": "You can resend in {seconds}s"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Choose how and when you receive notifications.",
+      "channels": "Notification channels",
+      "email": "Email",
+      "inApp": "In-app",
+      "push": "Push",
+      "comingSoon": "Coming soon"
+    },
+    "back": "Back",
+    "unsavedChanges": {
+      "title": "Unsaved changes",
+      "description": "You have unsaved changes. If you leave, your changes will be lost.",
+      "leave": "Leave without saving",
+      "stay": "Stay on page"
+    }
+  },
+  "Topbar": {
+    "search": {
+      "label": "Search",
+      "placeholder": "Search courses, students, lessons…",
+      "comingSoon": "Search is coming soon"
+    },
+    "trial": {
+      "daysLeft": "Trial · {days} days left"
     }
   }
 }

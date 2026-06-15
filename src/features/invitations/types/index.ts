@@ -13,6 +13,11 @@ export type InvitePreview = {
   invitedByName: string | null;
   status: InvitationStatus;
   expiresAt: ISODate;
+  /** Optional — set when school entered teacher name at invite time (TI.1). */
+  firstName?: string | null;
+  lastName?: string | null;
+  /** Teacher-only: languages+levels the invite is for. */
+  teachingLanguages?: Array<{ code: string; level: string }> | null;
 };
 export type InvitationAudience = 'all' | 'teachers' | 'students' | 'staff';
 

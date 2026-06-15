@@ -70,10 +70,6 @@ export interface SchedulingProvider {
 }
 
 export function getSchedulingProvider(): SchedulingProvider {
-  if (process.env.SCHEDULING_BACKEND === 'real') {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require('./real').realProvider as SchedulingProvider;
-  }
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return require('./mock').mockProvider as SchedulingProvider;
+  return require('./real').realProvider as SchedulingProvider;
 }

@@ -39,3 +39,21 @@ export async function clearAuthCookies(): Promise<void> {
   store.delete(ACCESS_TOKEN);
   store.delete(REFRESH_TOKEN);
 }
+
+const PENDING_INVITE = 'ssz_pending_invite';
+const SEVEN_DAYS = 60 * 60 * 24 * 7;
+
+export async function readPendingInvite(): Promise<string | undefined> {
+  const store = await cookies();
+  return store.get(PENDING_INVITE)?.value;
+}
+
+export async function writePendingInvite(token: string): Promise<void> {
+  const store = await cookies();
+  store.set(PENDING_INVITE, token, { ...baseOptions, maxAge: SEVEN_DAYS });
+}
+
+export async function clearPendingInvite(): Promise<void> {
+  const store = await cookies();
+  store.delete(PENDING_INVITE);
+}

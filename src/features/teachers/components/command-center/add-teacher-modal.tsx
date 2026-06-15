@@ -70,6 +70,8 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
   } = useForm<TeacherAddInput>({
     resolver: zodResolver(teacherAddSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
       email: "",
       maxWeeklyContactHours: 20,
       employmentType: "part",
@@ -141,6 +143,28 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2" noValidate>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="teacher-first-name">{t("firstNameLabel")}</Label>
+                <Input
+                  id="teacher-first-name"
+                  type="text"
+                  autoComplete="given-name"
+                  {...register("firstName")}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="teacher-last-name">{t("lastNameLabel")}</Label>
+                <Input
+                  id="teacher-last-name"
+                  type="text"
+                  autoComplete="family-name"
+                  {...register("lastName")}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-(--ssz-text-muted) -mt-2">{t("nameHint")}</p>
+
             <div className="space-y-1.5">
               <Label htmlFor="teacher-email">{t("emailLabel")}</Label>
               <Input

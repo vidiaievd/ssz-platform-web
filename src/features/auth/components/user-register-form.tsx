@@ -37,9 +37,11 @@ type Props = {
   prefillEmail?: string;
   /** Where to redirect after successful registration (invite flow). */
   next?: string;
+  /** Invite token stored server-side as httpOnly cookie to survive email-link click. */
+  inviteToken?: string;
 };
 
-export function UserRegisterForm({ role, prefillEmail, next }: Props) {
+export function UserRegisterForm({ role, prefillEmail, next, inviteToken }: Props) {
   const t = useTranslations("Auth.Register");
   const tErrors = useTranslations("Errors");
   const router = useRouter();
@@ -61,7 +63,7 @@ export function UserRegisterForm({ role, prefillEmail, next }: Props) {
     setServerError(null);
     track({ name: 'register_submitted', role });
     startTransition(async () => {
-      const result = await registerAction({ ...data, role });
+      const result = await registerAction({ ...data, role, inviteToken });
       if (!result.ok) {
         if (result.error.code === "conflict") {
           track({ name: 'register_email_conflict' });
