@@ -799,6 +799,11 @@
       "allDoneActive": "Вы зачислены. Добро пожаловать!",
       "goToDashboard": "На дашборд",
       "finishFailed": "Что-то пошло не так. Попробуйте ещё раз."
+    },
+    "Admin": {
+      "navSettings": "Настройки",
+      "navPlacement": "Уровень",
+      "navRequests": "Заявки"
     }
   },
   "Student": {

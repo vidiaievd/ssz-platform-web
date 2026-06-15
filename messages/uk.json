@@ -799,6 +799,11 @@
       "allDoneActive": "Ви зараховані. Ласкаво просимо!",
       "goToDashboard": "На дошку",
       "finishFailed": "Щось пішло не так. Спробуйте ще раз."
+    },
+    "Admin": {
+      "navSettings": "Налаштування",
+      "navPlacement": "Рівень",
+      "navRequests": "Запити"
     }
   },
   "Student": {

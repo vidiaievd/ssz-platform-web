@@ -799,6 +799,11 @@
       "allDoneActive": "Du er nå registrert. Velkommen!",
       "goToDashboard": "Gå til dashbord",
       "finishFailed": "Noe gikk galt. Prøv igjen."
+    },
+    "Admin": {
+      "navSettings": "Innstillinger",
+      "navPlacement": "Plassering",
+      "navRequests": "Forespørsler"
     }
   },
   "Student": {

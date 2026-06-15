@@ -804,6 +804,11 @@
       "allDoneActive": "You've been enrolled. Welcome aboard!",
       "goToDashboard": "Go to dashboard",
       "finishFailed": "Something went wrong. Please try again."
+    },
+    "Admin": {
+      "navSettings": "Settings",
+      "navPlacement": "Placement",
+      "navRequests": "Requests"
     }
   },
   "Student": {
