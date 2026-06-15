@@ -848,6 +848,17 @@
       "assigned": "Student assigned to group",
       "assignFailed": "Failed to assign. Please try again.",
       "availableDays": "{count} availability prefs"
+    },
+    "Approvals": {
+      "title": "Enrollment requests",
+      "subtitle": "Students awaiting manual approval to join.",
+      "empty": "No pending requests.",
+      "sourcePublic": "Public apply",
+      "accept": "Accept",
+      "reject": "Reject",
+      "accepted": "Student accepted and moved to onboarding",
+      "rejected": "Student request rejected",
+      "transitionFailed": "Action failed. Please try again."
     }
   },
   "Student": {

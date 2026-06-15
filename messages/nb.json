@@ -843,6 +843,17 @@
       "assigned": "Student tildelt gruppe",
       "assignFailed": "Kunne ikke tildele. Prøv igjen.",
       "availableDays": "{count} tilgjengelighetspreferanser"
+    },
+    "Approvals": {
+      "title": "Påmeldingsforespørsler",
+      "subtitle": "Studenter som venter på manuell godkjenning.",
+      "empty": "Ingen ventende forespørsler.",
+      "sourcePublic": "Offentlig søknad",
+      "accept": "Godkjenn",
+      "reject": "Avslå",
+      "accepted": "Student godkjent og sendt til onboarding",
+      "rejected": "Studentens forespørsel avslått",
+      "transitionFailed": "Handling mislyktes. Prøv igjen."
     }
   },
   "Student": {
