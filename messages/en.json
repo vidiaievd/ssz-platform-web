@@ -754,7 +754,11 @@
       "rejected": "Rejected"
     },
     "sentOn": "Sent on {date}",
-    "reviewNote": "Note from school"
+    "reviewNote": "Note from school",
+    "joinSchool": "Join school",
+    "joining": "Joining...",
+    "joinedSuccessfully": "You have joined the school",
+    "joinFailed": "Failed to join school. Please try again."
   },
   "Student": {
     "dashboard": {

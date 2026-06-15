@@ -749,7 +749,11 @@
       "rejected": "Відхилено"
     },
     "sentOn": "Надіслано {date}",
-    "reviewNote": "Примітка від школи"
+    "reviewNote": "Примітка від школи",
+    "joinSchool": "Join school",
+    "joining": "Joining...",
+    "joinedSuccessfully": "You have joined the school",
+    "joinFailed": "Failed to join school. Please try again."
   },
   "Student": {
     "dashboard": {

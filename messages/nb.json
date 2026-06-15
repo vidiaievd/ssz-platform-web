@@ -749,7 +749,11 @@
       "rejected": "Avvist"
     },
     "sentOn": "Sendt {date}",
-    "reviewNote": "Notat fra skolen"
+    "reviewNote": "Notat fra skolen",
+    "joinSchool": "Join school",
+    "joining": "Joining...",
+    "joinedSuccessfully": "You have joined the school",
+    "joinFailed": "Failed to join school. Please try again."
   },
   "Student": {
     "dashboard": {
