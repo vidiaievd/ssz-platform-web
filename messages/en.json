@@ -833,6 +833,21 @@
       "saving": "Saving...",
       "saved": "Settings saved",
       "saveFailed": "Failed to save settings. Please try again."
+    },
+    "PlacementQueue": {
+      "title": "Placement queue",
+      "subtitle": "Students awaiting group assignment.",
+      "empty": "No students in the placement queue.",
+      "selectGroup": "Select a group",
+      "noGroups": "No matching groups",
+      "exactMatch": "Exact",
+      "slots": "{count} slot",
+      "full": "Full",
+      "assign": "Assign",
+      "assigning": "Assigning...",
+      "assigned": "Student assigned to group",
+      "assignFailed": "Failed to assign. Please try again.",
+      "availableDays": "{count} availability prefs"
     }
   },
   "Student": {

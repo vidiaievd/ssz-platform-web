@@ -828,6 +828,21 @@
       "saving": "Lagrer...",
       "saved": "Innstillinger lagret",
       "saveFailed": "Kunne ikke lagre innstillinger. Prøv igjen."
+    },
+    "PlacementQueue": {
+      "title": "Plasseringskø",
+      "subtitle": "Studenter som venter på gruppetildeling.",
+      "empty": "Ingen studenter i plasseringskøen.",
+      "selectGroup": "Velg en gruppe",
+      "noGroups": "Ingen passende grupper",
+      "exactMatch": "Eksakt",
+      "slots": "{count} slot",
+      "full": "Full",
+      "assign": "Tildel",
+      "assigning": "Tildeler...",
+      "assigned": "Student tildelt gruppe",
+      "assignFailed": "Kunne ikke tildele. Prøv igjen.",
+      "availableDays": "{count} tilgjengelighetspreferanser"
     }
   },
   "Student": {
