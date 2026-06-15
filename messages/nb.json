@@ -804,6 +804,30 @@
       "navSettings": "Innstillinger",
       "navPlacement": "Plassering",
       "navRequests": "Forespørsler"
+    },
+    "Settings": {
+      "title": "Påmeldingsinnstillinger",
+      "subtitle": "Konfigurer velkomstopplevelsen for nye studenter.",
+      "sectionPlacement": "Plassering",
+      "placementMode": "Plasseringsmodus",
+      "placementPlatform": "Plattformtest",
+      "placementSchool": "Skoletest",
+      "placementNone": "Ingen (hopp over)",
+      "reusePlatformResult": "Gjenbruk nylig plattformresultat",
+      "maxResultAgeDays": "Maks resultatens alder (dager)",
+      "sectionInterview": "Intervju",
+      "interviewRequired": "Krev intervju",
+      "autoPlaceByScore": "Auto-plasser etter poengsum",
+      "sectionAvailability": "Tilgjengelighet",
+      "collectAvailability": "Samle inn tilgjengelighetspreferanser",
+      "sectionApproval": "Godkjenning",
+      "manualApproval": "Krev manuell godkjenning",
+      "stepPreviewLabel": "Studenten vil se disse trinnene",
+      "stepPreviewEmpty": "Ingen trinn — studenter registreres umiddelbart.",
+      "save": "Lagre innstillinger",
+      "saving": "Lagrer...",
+      "saved": "Innstillinger lagret",
+      "saveFailed": "Kunne ikke lagre innstillinger. Prøv igjen."
     }
   },
   "Student": {

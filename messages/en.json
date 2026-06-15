@@ -809,6 +809,30 @@
       "navSettings": "Settings",
       "navPlacement": "Placement",
       "navRequests": "Requests"
+    },
+    "Settings": {
+      "title": "Enrollment settings",
+      "subtitle": "Configure the onboarding experience for new students.",
+      "sectionPlacement": "Placement",
+      "placementMode": "Placement mode",
+      "placementPlatform": "Platform test",
+      "placementSchool": "School test",
+      "placementNone": "None (skip)",
+      "reusePlatformResult": "Reuse recent platform result",
+      "maxResultAgeDays": "Max result age (days)",
+      "sectionInterview": "Interview",
+      "interviewRequired": "Require interview",
+      "autoPlaceByScore": "Auto-place by score (no interview)",
+      "sectionAvailability": "Availability",
+      "collectAvailability": "Collect availability preferences",
+      "sectionApproval": "Approval",
+      "manualApproval": "Require manual approval",
+      "stepPreviewLabel": "Student will see these steps",
+      "stepPreviewEmpty": "No steps — students are enrolled immediately.",
+      "save": "Save settings",
+      "saving": "Saving...",
+      "saved": "Settings saved",
+      "saveFailed": "Failed to save settings. Please try again."
     }
   },
   "Student": {

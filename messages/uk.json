@@ -804,6 +804,30 @@
       "navSettings": "Налаштування",
       "navPlacement": "Рівень",
       "navRequests": "Запити"
+    },
+    "Settings": {
+      "title": "Налаштування зарахування",
+      "subtitle": "Налаштуйте процес приймання нових студентів.",
+      "sectionPlacement": "Рівень",
+      "placementMode": "Режим визначення рівня",
+      "placementPlatform": "Платформний тест",
+      "placementSchool": "Тест школи",
+      "placementNone": "Не визначати",
+      "reusePlatformResult": "Використовувати нещодавній результат",
+      "maxResultAgeDays": "Максимальний вік результату (днів)",
+      "sectionInterview": "Співбесіда",
+      "interviewRequired": "Обов'язкова співбесіда",
+      "autoPlaceByScore": "Автоматичне зарахування за балами",
+      "sectionAvailability": "Доступність",
+      "collectAvailability": "Збирати переваги щодо розкладу",
+      "sectionApproval": "Підтвердження",
+      "manualApproval": "Ручне підтвердження",
+      "stepPreviewLabel": "Студент побачить ці кроки",
+      "stepPreviewEmpty": "Жодних кроків — студенти зараховуються одразу.",
+      "save": "Зберегти",
+      "saving": "Зберігаємо...",
+      "saved": "Налаштування збережено",
+      "saveFailed": "Не вдалося зберегти. Спробуйте ще раз."
     }
   },
   "Student": {

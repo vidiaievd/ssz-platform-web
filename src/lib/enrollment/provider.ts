@@ -15,6 +15,7 @@ export interface EnrollmentProvider {
 
   // ── School settings ────────────────────────────────────────────────────────
   getSchoolSettings(schoolSlug: string): Promise<SchoolOnboardingSettings>;
+  saveSchoolSettings(schoolSlug: string, settings: SchoolOnboardingSettings): Promise<SchoolOnboardingSettings>;
 
   // ── Membership lifecycle ───────────────────────────────────────────────────
   createMembership(input: {

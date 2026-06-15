@@ -44,6 +44,7 @@ const FIXTURE_PROFILE: StudentProfile = {
 // ── In-memory state ────────────────────────────────────────────────────────────
 
 let membershipStore: Membership[] = [];
+let schoolSettingsStore: Record<string, SchoolOnboardingSettings> = { ...FIXTURE_SETTINGS };
 let idCounter = 1;
 
 function nextId(): string {
@@ -67,7 +68,15 @@ export const mockProvider: EnrollmentProvider = {
   },
 
   async getSchoolSettings(schoolSlug: string): Promise<SchoolOnboardingSettings> {
-    return FIXTURE_SETTINGS[schoolSlug] ?? DEFAULT_FIXTURE_SETTINGS;
+    return schoolSettingsStore[schoolSlug] ?? DEFAULT_FIXTURE_SETTINGS;
+  },
+
+  async saveSchoolSettings(
+    schoolSlug: string,
+    settings: SchoolOnboardingSettings,
+  ): Promise<SchoolOnboardingSettings> {
+    schoolSettingsStore[schoolSlug] = settings;
+    return settings;
   },
 
   async createMembership(input: {
@@ -143,5 +152,6 @@ export const mockProvider: EnrollmentProvider = {
 /** Reset in-memory state — for use in tests only. */
 export function resetMockStore(): void {
   membershipStore = [];
+  schoolSettingsStore = { ...FIXTURE_SETTINGS };
   idCounter = 1;
 }

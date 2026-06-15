@@ -804,6 +804,30 @@
       "navSettings": "Настройки",
       "navPlacement": "Уровень",
       "navRequests": "Заявки"
+    },
+    "Settings": {
+      "title": "Настройки зачисления",
+      "subtitle": "Настройте процесс приёма новых студентов.",
+      "sectionPlacement": "Уровень",
+      "placementMode": "Режим определения уровня",
+      "placementPlatform": "Платформный тест",
+      "placementSchool": "Тест школы",
+      "placementNone": "Не определять",
+      "reusePlatformResult": "Использовать недавний результат",
+      "maxResultAgeDays": "Максимальный возраст результата (дней)",
+      "sectionInterview": "Интервью",
+      "interviewRequired": "Обязательное интервью",
+      "autoPlaceByScore": "Автоматическое зачисление по баллам",
+      "sectionAvailability": "Доступность",
+      "collectAvailability": "Собирать предпочтения по расписанию",
+      "sectionApproval": "Одобрение",
+      "manualApproval": "Ручное одобрение",
+      "stepPreviewLabel": "Студент увидит эти шаги",
+      "stepPreviewEmpty": "Нет шагов — студенты зачисляются сразу.",
+      "save": "Сохранить",
+      "saving": "Сохраняем...",
+      "saved": "Настройки сохранены",
+      "saveFailed": "Не удалось сохранить. Попробуйте ещё раз."
     }
   },
   "Student": {
