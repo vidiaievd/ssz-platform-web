@@ -7,6 +7,7 @@ import { server } from '@/test/msw/server';
 import { renderWithProviders } from '@/test/render';
 
 import { ProfileForm } from './profile-form';
+import { ProfileSettingsFormProvider } from '../hooks/use-profile-settings-form';
 
 const PROFILE = {
   id: '1',
@@ -28,20 +29,23 @@ const PROFILE = {
   updatedAt: '2024-01-01T00:00:00Z',
 };
 
+const TUTOR = {
+  id: 't1',
+  userId: 'u1',
+  teachingLanguages: [],
+  hourlyRate: null,
+  currency: null,
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
+};
+
 vi.mock('../api/update-profile', () => ({
   updateProfileAction: vi.fn(),
 }));
 
 // Radix Select has side effects (ResizeObserver, portals) that interfere with
 // RHF field registration in JSDOM — replace with simple native selects.
-// vi.mock factories are hoisted above imports so we must use require().
 /* eslint-disable @typescript-eslint/no-require-imports */
-vi.mock('./locale-select', () => ({
-  LocaleSelect: ({ control }: { control: unknown }) => {
-    const { field } = require('react-hook-form').useController({ name: 'uiLocale', control });
-    return <select data-testid="locale-select" {...field} />;
-  },
-}));
 vi.mock('./timezone-select', () => ({
   TimezoneSelect: ({ control }: { control: unknown }) => {
     const { field } = require('react-hook-form').useController({ name: 'timezone', control });
@@ -50,9 +54,18 @@ vi.mock('./timezone-select', () => ({
 }));
 /* eslint-enable @typescript-eslint/no-require-imports */
 
+function renderForm() {
+  return renderWithProviders(
+    <ProfileSettingsFormProvider isPrivateTutor={false}>
+      <ProfileForm />
+    </ProfileSettingsFormProvider>,
+  );
+}
+
 async function setupWithProfile() {
   server.use(
     http.get('/api/profile/me', () => HttpResponse.json(PROFILE)),
+    http.get('/api/profile/tutor/me', () => HttpResponse.json(TUTOR)),
   );
 
   const { updateProfileAction } = await import('../api/update-profile');
@@ -64,13 +77,13 @@ describe('ProfileForm', () => {
 
   it('shows skeleton while loading', () => {
     server.use(http.get('/api/profile/me', () => new Promise(() => undefined)));
-    renderWithProviders(<ProfileForm />);
+    renderForm();
     expect(document.querySelector('[data-slot="skeleton"]') ?? document.querySelector('.animate-pulse')).toBeTruthy();
   });
 
   it('populates fields from the loaded profile', async () => {
     await setupWithProfile();
-    renderWithProviders(<ProfileForm />);
+    renderForm();
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('Jane Doe')).toBeInTheDocument();
@@ -80,13 +93,14 @@ describe('ProfileForm', () => {
 
   it('shows validation error when display name is cleared', async () => {
     const { updateProfileAction } = await setupWithProfile();
-    renderWithProviders(<ProfileForm />);
+    renderForm();
 
     await waitFor(() => screen.getByDisplayValue('Jane Doe'));
 
     const nameInput = screen.getByLabelText(/display name/i);
     await userEvent.clear(nameInput);
-    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+    // Submit the form directly to trigger validation (save bar only shows when dirty)
+    fireEvent.submit(document.querySelector('form[data-profile-form]')!);
 
     await waitFor(() => {
       expect(screen.getByText(/required/i)).toBeInTheDocument();
@@ -98,13 +112,11 @@ describe('ProfileForm', () => {
     const { updateProfileAction } = await setupWithProfile();
     updateProfileAction.mockResolvedValue({ ok: true, value: PROFILE });
 
-    renderWithProviders(<ProfileForm />);
+    renderForm();
 
-    // Wait for the form to populate from the API response
     await waitFor(() => screen.getByDisplayValue('Jane Doe'));
 
-    // Fire submit directly on the form element to bypass button-interaction quirks in JSDOM
-    fireEvent.submit(document.querySelector('form')!);
+    fireEvent.submit(document.querySelector('form[data-profile-form]')!);
 
     await waitFor(() => {
       expect(updateProfileAction).toHaveBeenCalledWith(

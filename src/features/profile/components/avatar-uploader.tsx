@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { AssetPicker } from '@/features/media';
 import { useMyProfile } from '../api/use-my-profile';
 import { updateAvatarAction } from '../actions/update-avatar';
+import { removeAvatarAction } from '../actions/remove-avatar';
 import { profileKeys } from '../api/keys';
 
 export function AvatarUploader() {
@@ -27,12 +28,24 @@ export function AvatarUploader() {
     });
   }
 
+  async function handleRemoved() {
+    startTransition(async () => {
+      const result = await removeAvatarAction();
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: profileKeys.me() });
+    });
+  }
+
   return (
     <AssetPicker
       currentUrl={profile?.avatarUrl}
       name={profile?.displayName}
       purpose="avatar"
       onUploaded={handleUploaded}
+      onRemoved={handleRemoved}
     />
   );
 }

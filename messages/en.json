@@ -83,7 +83,9 @@
     "signOut": "Sign out",
     "role_school": "School",
     "role_tutor": "Tutor",
-    "role_student": "Student"
+    "role_student": "Student",
+    "theme": "Theme",
+    "language": "Language"
   },
   "EnrollmentRequired": {
     "title": "No active enrolments",
@@ -129,7 +131,10 @@
         "timezone": "timezone",
         "instructionLocales": "teaching languages",
         "contactEmail": "contact email",
-        "contactPhone": "contact phone"
+        "contactPhone": "contact phone",
+        "teachingLanguages": "teaching languages",
+        "targetLanguages": "learning languages",
+        "hourlyRateCurrency": "hourly rate and currency"
       }
     },
     "firstName": "First name",
@@ -162,7 +167,18 @@
     "validation": {
       "invalidEmail": "Please enter a valid email address",
       "invalidPhone": "Please enter a valid phone number"
-    }
+    },
+    "form": {
+      "requiredLegend": "* Required fields",
+      "emailLockedTooltip": "Login email. To change it, go to Security."
+    },
+    "roles": {
+      "school_admin": "School admin",
+      "teacher": "Teacher",
+      "tutor": "Tutor",
+      "student": "Student"
+    },
+    "saveShort": "Save"
   },
   "Content": {
     "catalogueTitle": "Course Catalogue",
@@ -1011,7 +1027,9 @@
       "invalidType": "Please upload a JPG, PNG, WebP, or GIF image.",
       "tooLarge": "File is too large. Maximum size is 5 MB.",
       "uploadFailed": "Upload failed. Please try again."
-    }
+    },
+    "upload": "Upload photo",
+    "remove": "Remove"
   },
   "School": {
     "dashboard": {
@@ -1952,7 +1970,7 @@
       "password": "Password",
       "emailHint": "Your login email address. To change it, contact support.",
       "passwordHint": "You will receive a reset link at your registered email address.",
-      "passwordResetCta": "Send password reset email",
+      "passwordResetCta": "Send reset link to {email}",
       "passwordResetSent": "Reset email sent.",
       "passwordResetSentConfirm": "A password reset link has been sent to {email}.",
       "passwordResetError": "Failed to send reset email. Please try again.",
@@ -1976,14 +1994,22 @@
         "invalidCode": "Invalid or expired code.",
         "setupError": "Failed to initiate 2FA setup.",
         "verifyError": "Failed to verify code.",
-        "disableError": "Failed to disable 2FA."
+        "disableError": "Failed to disable 2FA.",
+        "statusOn": "2FA on",
+        "statusOff": "2FA off",
+        "copyKey": "Copy manual key",
+        "copyAll": "Copy all",
+        "download": "Download .txt",
+        "print": "Print"
       },
       "changeEmail": "Change email address",
       "changeEmailHint": "Email change is not yet available. Support for this feature is coming soon.",
       "changeEmailCta": "Change email",
       "sessions": "Active sessions",
       "sessionsHint": "View and revoke active login sessions across all your devices.",
-      "sessionsComingSoon": "Coming soon"
+      "sessionsComingSoon": "Coming soon",
+      "copyEmail": "Copy email address",
+      "passwordResetCooldown": "You can resend in {seconds}s"
     },
     "notifications": {
       "title": "Notifications",

@@ -83,7 +83,9 @@
     "signOut": "Выйти",
     "role_school": "Школа",
     "role_tutor": "Репетитор",
-    "role_student": "Студент"
+    "role_student": "Студент",
+    "theme": "Тема",
+    "language": "Язык"
   },
   "EnrollmentRequired": {
     "title": "Нет активных зачислений",
@@ -129,7 +131,10 @@
         "timezone": "часовой пояс",
         "instructionLocales": "языки преподавания",
         "contactEmail": "контактную почту",
-        "contactPhone": "контактный телефон"
+        "contactPhone": "контактный телефон",
+        "teachingLanguages": "языки преподавания",
+        "targetLanguages": "изучаемые языки",
+        "hourlyRateCurrency": "почасовая ставка и валюта"
       }
     },
     "firstName": "Имя",
@@ -162,7 +167,18 @@
     "validation": {
       "invalidEmail": "Введите корректный адрес электронной почты",
       "invalidPhone": "Введите корректный номер телефона"
-    }
+    },
+    "form": {
+      "requiredLegend": "* Обязательные поля",
+      "emailLockedTooltip": "Email для входа. Чтобы изменить — перейдите в Безопасность."
+    },
+    "roles": {
+      "school_admin": "Админ школы",
+      "teacher": "Преподаватель",
+      "tutor": "Репетитор",
+      "student": "Ученик"
+    },
+    "saveShort": "Сохранить"
   },
   "Content": {
     "catalogueTitle": "Каталог курсов",
@@ -1006,7 +1022,9 @@
       "invalidType": "Пожалуйста, загрузите изображение JPG, PNG, WebP или GIF.",
       "tooLarge": "Файл слишком большой. Максимальный размер — 5 МБ.",
       "uploadFailed": "Ошибка загрузки. Попробуйте ещё раз."
-    }
+    },
+    "upload": "Загрузить фото",
+    "remove": "Удалить"
   },
   "School": {
     "dashboard": {
@@ -1947,7 +1965,7 @@
       "password": "Пароль",
       "emailHint": "Ваш email для входа. Для изменения обратитесь в поддержку.",
       "passwordHint": "Вы получите ссылку для сброса на ваш зарегистрированный email.",
-      "passwordResetCta": "Отправить письмо для сброса пароля",
+      "passwordResetCta": "Отправить ссылку на {email}",
       "passwordResetSent": "Письмо отправлено.",
       "passwordResetSentConfirm": "Ссылка для сброса отправлена на {email}.",
       "passwordResetError": "Не удалось отправить письмо. Попробуйте ещё раз.",
@@ -1971,14 +1989,22 @@
         "invalidCode": "Неверный или просроченный код.",
         "setupError": "Не удалось начать настройку 2FA.",
         "verifyError": "Не удалось проверить код.",
-        "disableError": "Не удалось отключить 2FA."
+        "disableError": "Не удалось отключить 2FA.",
+        "statusOn": "2FA вкл.",
+        "statusOff": "2FA выкл.",
+        "copyKey": "Скопировать ключ",
+        "copyAll": "Скопировать все",
+        "download": "Скачать .txt",
+        "print": "Печать"
       },
       "changeEmail": "Изменить адрес электронной почты",
       "changeEmailHint": "Смена email пока недоступна. Эта функция появится в ближайшее время.",
       "changeEmailCta": "Изменить email",
       "sessions": "Активные сессии",
       "sessionsHint": "Просматривайте активные сессии входа на всех ваших устройствах и отзывайте их.",
-      "sessionsComingSoon": "Скоро"
+      "sessionsComingSoon": "Скоро",
+      "copyEmail": "Скопировать e-mail",
+      "passwordResetCooldown": "Повторная отправка через {seconds}с"
     },
     "notifications": {
       "title": "Уведомления",

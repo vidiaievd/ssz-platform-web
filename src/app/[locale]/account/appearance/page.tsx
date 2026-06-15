@@ -1,5 +1,5 @@
-import { AppearanceScreen } from '@/features/account/components/appearance-screen';
+import { notFound } from 'next/navigation';
 
 export default function AppearancePage() {
-  return <AppearanceScreen />;
+  notFound();
 }

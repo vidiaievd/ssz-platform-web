@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Loader2, Plus, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,13 +20,9 @@ export type TeachingLanguageEntry = { code: string; level: string };
 type DraftRow = TeachingLanguageEntry;
 
 type Props = {
-  /** Currently saved languages (rendered as disabled rows). */
   languages: TeachingLanguageEntry[];
-  /** Called when the user completes a new draft row. Must throw on failure. */
   onAdd: (code: string, level: string) => Promise<void>;
-  /** Called when the user clicks × on a saved row. */
   onRemove: (code: string) => void;
-  /** Available level options — defaults to CEFR A1–C2. */
   levels?: readonly string[];
   levelPlaceholder?: string;
   addLabel?: string;
@@ -36,16 +32,6 @@ type Props = {
   maxLanguages?: number;
 };
 
-/**
- * Reusable teaching-language rows editor.
- *
- * Saved rows (from `languages` prop) are read-only — language code is fixed,
- * level is fixed; only removal is allowed. New draft rows are fully editable
- * and auto-submit once both a language and a level are selected.
- *
- * Extracted from the onboarding StepTutor pattern so it can be reused on the
- * profile settings page connected to the TeachingProfile API.
- */
 export function TeachingLanguageEditor({
   languages,
   onAdd,
@@ -81,18 +67,17 @@ export function TeachingLanguageEditor({
     setDraftRows((prev) => prev.map((r, i) => (i === idx ? { ...r, code } : r)));
   }
 
-  async function updateDraftLevel(idx: number, level: string) {
-    const row = draftRows[idx];
-    if (!row) return;
-    const next = { code: row.code, level };
-    setDraftRows((prev) => prev.map((r, i) => (i === idx ? next : r)));
+  function updateDraftLevel(idx: number, level: string) {
+    setDraftRows((prev) => prev.map((r, i) => (i === idx ? { ...r, level } : r)));
+  }
 
-    if (!next.code) return;
+  async function submitDraftRow(idx: number) {
+    const row = draftRows[idx];
+    if (!row || !row.code || !row.level) return;
 
     setSubmittingIdx(idx);
     try {
-      await onAdd(next.code, next.level);
-      // On success the parent's `languages` prop will update via query invalidation.
+      await onAdd(row.code, row.level);
       setDraftRows((prev) => prev.filter((_, i) => i !== idx));
     } finally {
       setSubmittingIdx(null);
@@ -139,47 +124,64 @@ export function TeachingLanguageEditor({
         </div>
       ))}
 
-      {/* Draft rows — editable, auto-submit on complete */}
-      {draftRows.map((row, idx) => (
-        <div key={idx} className="flex items-start gap-2">
-          <div className="flex-1 min-w-0">
-            <LanguageCombobox
-              value={row.code}
-              onChange={(code) => updateDraftCode(idx, code)}
-              placeholder={languagePlaceholder}
-              exclude={excludeForDraft(idx)}
+      {/* Draft rows — editable, explicit Add button */}
+      {draftRows.map((row, idx) => {
+        const isSubmitting = submittingIdx === idx;
+        const canSubmit = !!row.code && !!row.level;
+        return (
+          <div key={idx} className="flex items-start gap-2">
+            <div className="flex-1 min-w-0">
+              <LanguageCombobox
+                value={row.code}
+                onChange={(code) => updateDraftCode(idx, code)}
+                placeholder={languagePlaceholder}
+                exclude={excludeForDraft(idx)}
+                disabled={isDisabled}
+              />
+            </div>
+            <Select
+              value={row.level}
+              onValueChange={(level) => updateDraftLevel(idx, level)}
+              disabled={isDisabled || !row.code}
+            >
+              <SelectTrigger className="w-24 shrink-0">
+                <SelectValue placeholder={levelPlaceholder} />
+              </SelectTrigger>
+              <SelectContent>
+                {levels.map((lvl) => (
+                  <SelectItem key={lvl} value={lvl}>{lvl}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => void submitDraftRow(idx)}
+              disabled={!canSubmit || isDisabled}
+              className="shrink-0 h-10"
+              aria-label="Add language"
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => removeDraftRow(idx)}
               disabled={isDisabled}
-            />
+              aria-label="Cancel"
+              className="shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          <Select
-            value={row.level}
-            onValueChange={(level) => void updateDraftLevel(idx, level)}
-            disabled={isDisabled || !row.code}
-          >
-            <SelectTrigger className="w-24 shrink-0">
-              <SelectValue placeholder={levelPlaceholder} />
-            </SelectTrigger>
-            <SelectContent>
-              {levels.map((lvl) => (
-                <SelectItem key={lvl} value={lvl}>{lvl}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => removeDraftRow(idx)}
-            disabled={isDisabled}
-            aria-label="Cancel"
-            className="shrink-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      ))}
+        );
+      })}
 
-      {/* Add button — matches onboarding style */}
       {canAddMore && (
         <Button
           type="button"

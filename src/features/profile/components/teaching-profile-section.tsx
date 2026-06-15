@@ -14,6 +14,7 @@ import {
   useEnsureTeachingProfile,
 } from '../api/use-my-teaching-profile';
 import { TeachingLanguageEditor } from './teaching-language-editor';
+import { CurrencySelect } from './currency-select';
 import { useProfileSettingsForm } from '../hooks/use-profile-settings-form';
 
 type Props = {
@@ -32,7 +33,7 @@ export function TeachingProfileSection({ showRate = false }: Props) {
 
   const [langPending, startLangTransition] = useTransition();
 
-  const { register, formState: { errors } } = form;
+  const { register, control, formState: { errors } } = form;
 
   async function handleAdd(code: string, level: string) {
     if (!teaching) await ensureProfile.mutateAsync();
@@ -78,7 +79,7 @@ export function TeachingProfileSection({ showRate = false }: Props) {
       </div>
 
       {showRate && (
-        <div className="grid grid-cols-2 gap-4 max-w-sm">
+        <div className="space-y-4 max-w-sm">
           <Field
             label={t('teaching.rate')}
             htmlFor="hourly-rate"
@@ -100,15 +101,7 @@ export function TeachingProfileSection({ showRate = false }: Props) {
             htmlFor="currency"
             error={errors.currency?.message}
           >
-            <Input
-              id="currency"
-              maxLength={3}
-              disabled={isPending}
-              {...register('currency', {
-                setValueAs: (v: string | null) =>
-                  !v || v.trim() === '' ? null : v.trim().toUpperCase(),
-              })}
-            />
+            <CurrencySelect control={control} disabled={isPending} />
           </Field>
         </div>
       )}

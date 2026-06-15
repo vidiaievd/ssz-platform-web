@@ -9,6 +9,7 @@ import { AvatarUploader } from './avatar-uploader';
 import { TeachingProfileSection } from './teaching-profile-section';
 import { StudentProfileSection } from './student-profile-section';
 import { ProfileSaveBar } from './profile-save-bar';
+import { RoleChips } from './role-chips';
 import { ProfileSettingsFormProvider } from '../hooks/use-profile-settings-form';
 import { useMyProfile } from '../api/use-my-profile';
 
@@ -27,9 +28,12 @@ export function ProfileSettingsScreen({ isPrivateTutor = false, isTeacher = fals
   return (
     <ProfileSettingsFormProvider isPrivateTutor={isPrivateTutor}>
       <div className="p-6 md:p-8 space-y-10 flex-1">
-        <div>
-          <h1 className="text-2xl font-semibold">{t('title')}</h1>
-          <p className="text-sm text-(--ssz-text-muted) mt-1">{t('subtitle')}</p>
+        <div className="space-y-3">
+          <div>
+            <h1 className="text-2xl font-semibold">{t('title')}</h1>
+            <p className="text-sm text-(--ssz-text-muted) mt-1">{t('subtitle')}</p>
+          </div>
+          <RoleChips />
         </div>
 
         <ProfileCompleteness />
@@ -41,7 +45,7 @@ export function ProfileSettingsScreen({ isPrivateTutor = false, isTeacher = fals
 
         <section className="space-y-4">
           <h2 className="text-base font-semibold">{t('sections.info')}</h2>
-          <ProfileForm showInstructionLocales={showTeaching} />
+          <ProfileForm />
         </section>
 
         {isLoading && (

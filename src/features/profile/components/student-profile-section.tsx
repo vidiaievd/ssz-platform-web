@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { LanguageCombobox } from './onboarding/language-combobox';
 import { useMyStudentProfile, useUpdateStudentProfile } from '../api/use-my-student-profile';
 import { profileKeys } from '../api/keys';
+import { getEnglishName } from '../lib/iso-languages';
 
 export function StudentProfileSection() {
   const t = useTranslations('Profile');
@@ -90,20 +91,26 @@ export function StudentProfileSection() {
       <Field label={t('student.targetLanguages')} htmlFor="target-lang-picker">
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
-            {targetLanguages.map((code) => (
-              <span key={code} className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm">
-                {code}
-                <button
-                  type="button"
-                  aria-label={`Remove ${code}`}
-                  disabled={isPending}
-                  onClick={() => removeTarget(code)}
-                  className="text-(--ssz-text-muted) hover:text-destructive disabled:opacity-50"
+            {targetLanguages.map((code) => {
+              const name = getEnglishName(code);
+              return (
+                <span
+                  key={code}
+                  className="inline-flex items-center gap-1.5 rounded-full border bg-secondary/40 px-3 py-1 text-sm"
                 >
-                  <X className="size-3" />
-                </button>
-              </span>
-            ))}
+                  <span>{name}</span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${name}`}
+                    disabled={isPending}
+                    onClick={() => removeTarget(code)}
+                    className="text-(--ssz-text-muted) hover:text-destructive disabled:opacity-50 leading-none"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </span>
+              );
+            })}
           </div>
           <LanguageCombobox
             id="target-lang-picker"
@@ -115,8 +122,6 @@ export function StudentProfileSection() {
           />
         </div>
       </Field>
-
-      {/* TODO(backend): learning goals field when StudentProfile.learningGoals is available */}
     </section>
   );
 }

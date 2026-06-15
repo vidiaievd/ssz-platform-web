@@ -1,25 +1,19 @@
 'use client';
 
-import { useController, type Control } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { Lock } from 'lucide-react';
 
 import { Field, Input, Textarea } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
-import { LOCALE_LABELS, LOCALES } from '@/lib/i18n/config';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
 
-import type { ProfileSettingsInput } from '../schemas';
 import { useMyProfile } from '../api/use-my-profile';
 import { useProfileSettingsForm } from '../hooks/use-profile-settings-form';
-import { LocaleSelect } from './locale-select';
 import { TimezoneSelect } from './timezone-select';
 
-type ProfileFormProps = {
-  showInstructionLocales?: boolean;
-};
-
-export function ProfileForm({ showInstructionLocales = false }: ProfileFormProps) {
+export function ProfileForm() {
   const t = useTranslations('Profile');
   const { isLoading } = useMyProfile();
   const { data: currentUser } = useCurrentUser();
@@ -31,20 +25,40 @@ export function ProfileForm({ showInstructionLocales = false }: ProfileFormProps
     formState: { errors },
   } = form;
 
+  const bio = useWatch({ control, name: 'bio' }) ?? '';
+
   if (isLoading) return <ProfileFormSkeleton />;
 
   return (
     <div className="space-y-6 max-w-xl">
+      <p className="text-xs text-(--ssz-text-muted)">
+        {t('form.requiredLegend')}
+      </p>
+
       {currentUser?.email && (
         <Field label={t('email')} htmlFor="account-email">
-          <Input
-            id="account-email"
-            type="email"
-            value={currentUser.email}
-            disabled
-            readOnly
-            className="text-(--ssz-text-muted)"
-          />
+          <div className="relative">
+            <Input
+              id="account-email"
+              type="email"
+              value={currentUser.email}
+              disabled
+              readOnly
+              className="text-(--ssz-text-muted) pr-9"
+            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-(--ssz-text-muted) cursor-default">
+                    <Lock className="size-3.5" aria-hidden />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {t('form.emailLockedTooltip')}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </Field>
       )}
 
@@ -101,22 +115,19 @@ export function ProfileForm({ showInstructionLocales = false }: ProfileFormProps
       </Field>
 
       <Field label={t('bio')} htmlFor="bio" error={errors.bio?.message}>
-        <Textarea
-          id="bio"
-          rows={3}
-          hasError={!!errors.bio}
-          disabled={isPending}
-          {...register('bio', { setValueAs: (v: string | null) => (!v || v.trim() === '' ? null : v) })}
-        />
+        <div className="space-y-1">
+          <Textarea
+            id="bio"
+            rows={3}
+            hasError={!!errors.bio}
+            disabled={isPending}
+            {...register('bio', { setValueAs: (v: string | null) => (!v || v.trim() === '' ? null : v) })}
+          />
+          <p className="text-xs text-(--ssz-text-muted) text-right tabular-nums">
+            {bio.length}/500
+          </p>
+        </div>
       </Field>
-
-      <Field label={t('uiLocale')} htmlFor="uiLocale" error={errors.uiLocale?.message} required>
-        <LocaleSelect name="uiLocale" control={control} disabled={isPending} />
-      </Field>
-
-      {showInstructionLocales && (
-        <InstructionLocalesField control={control} disabled={isPending} t={t} />
-      )}
 
       <Field
         label={t('timezone')}
@@ -157,45 +168,6 @@ export function ProfileForm({ showInstructionLocales = false }: ProfileFormProps
         />
       </Field>
     </div>
-  );
-}
-
-type InstructionLocalesFieldProps = {
-  control: Control<ProfileSettingsInput>;
-  disabled?: boolean;
-  t: ReturnType<typeof useTranslations<'Profile'>>;
-};
-
-function InstructionLocalesField({ control, disabled, t }: InstructionLocalesFieldProps) {
-  const { field } = useController({ name: 'instructionLocales', control });
-  const selected = field.value ?? [];
-
-  function toggle(locale: string) {
-    field.onChange(
-      selected.includes(locale as (typeof LOCALES)[number])
-        ? selected.filter((l) => l !== locale)
-        : [...selected, locale],
-    );
-  }
-
-  return (
-    <fieldset className="space-y-2">
-      <legend className="text-sm font-medium text-(--ssz-text-primary)">
-        {t('instructionLocales')}
-      </legend>
-      <div className="flex flex-wrap gap-4">
-        {LOCALES.map((locale) => (
-          <label key={locale} className="flex items-center gap-2 cursor-pointer">
-            <Checkbox
-              checked={selected.includes(locale)}
-              onCheckedChange={() => toggle(locale)}
-              disabled={disabled}
-            />
-            <span className="text-sm">{LOCALE_LABELS[locale]}</span>
-          </label>
-        ))}
-      </div>
-    </fieldset>
   );
 }
 

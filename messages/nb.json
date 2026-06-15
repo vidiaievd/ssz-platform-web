@@ -83,7 +83,9 @@
     "signOut": "Logg ut",
     "role_school": "Skole",
     "role_tutor": "Lærer",
-    "role_student": "Student"
+    "role_student": "Student",
+    "theme": "Tema",
+    "language": "Språk"
   },
   "EnrollmentRequired": {
     "title": "Ingen aktive påmeldinger",
@@ -129,7 +131,10 @@
         "timezone": "tidssone",
         "instructionLocales": "undervisningsspråk",
         "contactEmail": "kontakte-post",
-        "contactPhone": "kontakttelefon"
+        "contactPhone": "kontakttelefon",
+        "teachingLanguages": "undervisningsspråk",
+        "targetLanguages": "lærlingsspråk",
+        "hourlyRateCurrency": "timepris og valuta"
       }
     },
     "firstName": "Fornavn",
@@ -162,7 +167,18 @@
     "validation": {
       "invalidEmail": "Skriv inn en gyldig e-postadresse",
       "invalidPhone": "Skriv inn et gyldig telefonnummer"
-    }
+    },
+    "form": {
+      "requiredLegend": "* Obligatoriske felt",
+      "emailLockedTooltip": "Innloggings-e-post. Gå til Sikkerhet for å endre den."
+    },
+    "roles": {
+      "school_admin": "Skoleadmin",
+      "teacher": "Lærer",
+      "tutor": "Privatlærer",
+      "student": "Elev"
+    },
+    "saveShort": "Lagre"
   },
   "Content": {
     "catalogueTitle": "Kurskatalog",
@@ -1006,7 +1022,9 @@
       "invalidType": "Last opp et JPG-, PNG-, WebP- eller GIF-bilde.",
       "tooLarge": "Filen er for stor. Maksimal størrelse er 5 MB.",
       "uploadFailed": "Opplastingen mislyktes. Prøv igjen."
-    }
+    },
+    "upload": "Last opp bilde",
+    "remove": "Fjern"
   },
   "School": {
     "dashboard": {
@@ -1947,7 +1965,7 @@
       "password": "Passord",
       "emailHint": "Din påloggings-e-post. Ta kontakt med support for å endre den.",
       "passwordHint": "Du vil motta en tilbakestillingslenke til din registrerte e-postadresse.",
-      "passwordResetCta": "Send tilbakestillings-e-post",
+      "passwordResetCta": "Send tilbakestillingslenke til {email}",
       "passwordResetSent": "Tilbakestillings-e-post sendt.",
       "passwordResetSentConfirm": "En tilbakestillingslenke er sendt til {email}.",
       "passwordResetError": "Klarte ikke sende e-post. Prøv igjen.",
@@ -1971,14 +1989,22 @@
         "invalidCode": "Ugyldig eller utløpt kode.",
         "setupError": "Klarte ikke starte 2FA-oppsett.",
         "verifyError": "Klarte ikke verifisere kode.",
-        "disableError": "Klarte ikke deaktivere 2FA."
+        "disableError": "Klarte ikke deaktivere 2FA.",
+        "statusOn": "2FA på",
+        "statusOff": "2FA av",
+        "copyKey": "Kopier nøkkel",
+        "copyAll": "Kopier alle",
+        "download": "Last ned .txt",
+        "print": "Skriv ut"
       },
       "changeEmail": "Endre e-postadresse",
       "changeEmailHint": "Det er ikke mulig å endre e-post ennå. Denne funksjonen kommer snart.",
       "changeEmailCta": "Endre e-post",
       "sessions": "Aktive sesjoner",
       "sessionsHint": "Se og tilbakekall aktive innloggingssesjoner på alle enhetene dine.",
-      "sessionsComingSoon": "Kommer snart"
+      "sessionsComingSoon": "Kommer snart",
+      "copyEmail": "Kopier e-postadresse",
+      "passwordResetCooldown": "Du kan sende på nytt om {seconds}s"
     },
     "notifications": {
       "title": "Varsler",

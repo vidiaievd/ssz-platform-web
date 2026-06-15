@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { SettingsLayout } from '@/components/shared/settings-layout';
 import { AccountBackButton, UnsavedChangesProvider } from '@/features/account';
+import { NOTIFICATIONS_ENABLED } from '@/lib/config/feature-flags';
 
 type Props = { children: React.ReactNode };
 
@@ -9,10 +10,11 @@ export default async function AccountLayout({ children }: Props) {
   const t = await getTranslations('Account');
 
   const nav = [
-    { href: '/account/profile', label: t('nav.profile') },
-    { href: '/account/appearance', label: t('nav.appearance') },
-    { href: '/account/notifications', label: t('nav.notifications') },
-    { href: '/account/security', label: t('nav.security') },
+    { href: '/account/profile', label: t('nav.profile'), icon: 'UserRound' as const },
+    { href: '/account/security', label: t('nav.security'), icon: 'ShieldCheck' as const },
+    ...(NOTIFICATIONS_ENABLED
+      ? [{ href: '/account/notifications', label: t('nav.notifications'), icon: 'Bell' as const }]
+      : []),
   ];
 
   return (

@@ -83,7 +83,9 @@
     "signOut": "Вийти",
     "role_school": "Школа",
     "role_tutor": "Репетитор",
-    "role_student": "Студент"
+    "role_student": "Студент",
+    "theme": "Тема",
+    "language": "Мова"
   },
   "EnrollmentRequired": {
     "title": "Немає активних зарахувань",
@@ -129,7 +131,10 @@
         "timezone": "часовий пояс",
         "instructionLocales": "мови викладання",
         "contactEmail": "контактну пошту",
-        "contactPhone": "контактний телефон"
+        "contactPhone": "контактний телефон",
+        "teachingLanguages": "мови викладання",
+        "targetLanguages": "мови для вивчення",
+        "hourlyRateCurrency": "погодинна ставка і валюта"
       }
     },
     "firstName": "Ім'я",
@@ -162,7 +167,18 @@
     "validation": {
       "invalidEmail": "Введіть дійсну адресу електронної пошти",
       "invalidPhone": "Введіть дійсний номер телефону"
-    }
+    },
+    "form": {
+      "requiredLegend": "* Обов'язкові поля",
+      "emailLockedTooltip": "Електронна адреса для входу. Щоб змінити — перейдіть до Безпеки."
+    },
+    "roles": {
+      "school_admin": "Адмін школи",
+      "teacher": "Викладач",
+      "tutor": "Репетитор",
+      "student": "Учень"
+    },
+    "saveShort": "Зберегти"
   },
   "Content": {
     "catalogueTitle": "Каталог курсів",
@@ -1006,7 +1022,9 @@
       "invalidType": "Будь ласка, завантажте зображення JPG, PNG, WebP або GIF.",
       "tooLarge": "Файл надто великий. Максимальний розмір — 5 МБ.",
       "uploadFailed": "Помилка завантаження. Спробуйте ще раз."
-    }
+    },
+    "upload": "Завантажити фото",
+    "remove": "Видалити"
   },
   "School": {
     "dashboard": {
@@ -1947,7 +1965,7 @@
       "password": "Пароль",
       "emailHint": "Ваша email-адреса для входу. Щоб змінити її, зверніться до підтримки.",
       "passwordHint": "Ви отримаєте посилання для скидання на вашу зареєстровану адресу.",
-      "passwordResetCta": "Надіслати лист для скидання пароля",
+      "passwordResetCta": "Надіслати посилання на {email}",
       "passwordResetSent": "Лист надіслано.",
       "passwordResetSentConfirm": "Посилання для скидання надіслано на {email}.",
       "passwordResetError": "Не вдалося надіслати лист. Спробуйте ще раз.",
@@ -1971,14 +1989,22 @@
         "invalidCode": "Невірний або прострочений код.",
         "setupError": "Не вдалося розпочати налаштування 2FA.",
         "verifyError": "Не вдалося перевірити код.",
-        "disableError": "Не вдалося вимкнути 2FA."
+        "disableError": "Не вдалося вимкнути 2FA.",
+        "statusOn": "2FA увімк.",
+        "statusOff": "2FA вимк.",
+        "copyKey": "Скопіювати ключ",
+        "copyAll": "Скопіювати всі",
+        "download": "Завантажити .txt",
+        "print": "Друк"
       },
       "changeEmail": "Змінити адресу електронної пошти",
       "changeEmailHint": "Зміна email ще недоступна. Ця функція з'явиться найближчим часом.",
       "changeEmailCta": "Змінити email",
       "sessions": "Активні сесії",
       "sessionsHint": "Перегляньте активні сесії входу на всіх ваших пристроях та відкликайте їх.",
-      "sessionsComingSoon": "Незабаром"
+      "sessionsComingSoon": "Незабаром",
+      "copyEmail": "Скопіювати e-mail",
+      "passwordResetCooldown": "Повторно надіслати через {seconds}с"
     },
     "notifications": {
       "title": "Сповіщення",

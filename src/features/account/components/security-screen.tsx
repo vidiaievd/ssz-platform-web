@@ -1,14 +1,17 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { ShieldCheck, ShieldOff } from 'lucide-react';
+import { Check, Copy, Download, Printer, ShieldCheck, ShieldOff } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
 import { forgotPasswordAction } from '@/features/auth/actions/forgot-password';
+
+const RESET_COOLDOWN_SECONDS = 45;
 
 type TwoFaSetupData = {
   secretKey: string;
@@ -34,7 +37,6 @@ export function SecurityScreen() {
       </div>
 
       <EmailSection email={currentUser?.email} />
-      <ChangeEmailSection />
       <PasswordSection email={currentUser?.email} />
       <TwoFactorSection />
       <SessionsSection />
@@ -42,32 +44,46 @@ export function SecurityScreen() {
   );
 }
 
+function useCopyToClipboard(text: string | undefined) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return { copy, copied };
+}
+
 function EmailSection({ email }: { email?: string }) {
   const t = useTranslations('Account.security');
+  const { copy, copied } = useCopyToClipboard(email);
 
   return (
     <section className="space-y-3 max-w-xl">
       <h2 className="text-base font-semibold">{t('email')}</h2>
-      <Input
-        type="email"
-        value={email ?? ''}
-        disabled
-        readOnly
-        className="text-(--ssz-text-muted)"
-      />
+      <div className="flex gap-2">
+        <Input
+          type="email"
+          value={email ?? ''}
+          disabled
+          readOnly
+          className="text-(--ssz-text-muted)"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => void copy()}
+          aria-label={t('copyEmail')}
+          disabled={!email}
+        >
+          {copied ? <Check className="size-4 text-green-600" /> : <Copy className="size-4" />}
+        </Button>
+      </div>
       <p className="text-xs text-(--ssz-text-muted)">{t('emailHint')}</p>
-    </section>
-  );
-}
-
-function ChangeEmailSection() {
-  const t = useTranslations('Account.security');
-
-  return (
-    <section className="space-y-3 max-w-xl">
-      <h2 className="text-base font-semibold">{t('changeEmail')}</h2>
-      <p className="text-sm text-(--ssz-text-muted)">{t('changeEmailHint')}</p>
-      <Button variant="outline" disabled>{t('changeEmailCta')}</Button>
     </section>
   );
 }
@@ -76,6 +92,13 @@ function PasswordSection({ email }: { email?: string }) {
   const t = useTranslations('Account.security');
   const [isPending, startTransition] = useTransition();
   const [sent, setSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setInterval(() => setCooldown((c) => c - 1), 1000);
+    return () => clearInterval(id);
+  }, [cooldown]);
 
   function sendReset() {
     if (!email) return;
@@ -83,29 +106,39 @@ function PasswordSection({ email }: { email?: string }) {
       const result = await forgotPasswordAction({ email });
       if (result.ok) {
         setSent(true);
-        toast.success(t('passwordResetSent'));
+        setCooldown(RESET_COOLDOWN_SECONDS);
       } else {
         toast.error(t('passwordResetError'));
       }
     });
   }
 
+  const maskedEmail = email
+    ? email.replace(/^(.{1,3}).*(@.*)$/, (_, start, end) => `${start}***${end}`)
+    : '';
+
   return (
     <section className="space-y-3 max-w-xl">
       <h2 className="text-base font-semibold">{t('password')}</h2>
       <p className="text-sm text-(--ssz-text-muted)">{t('passwordHint')}</p>
       {sent ? (
-        <p className="text-sm text-green-600 dark:text-green-400">{t('passwordResetSentConfirm', { email: email ?? '' })}</p>
-      ) : (
-        <Button
-          variant="outline"
-          onClick={sendReset}
-          loading={isPending}
-          disabled={!email || isPending}
-        >
-          {t('passwordResetCta')}
-        </Button>
-      )}
+        <Alert variant="success">
+          {t('passwordResetSentConfirm', { email: email ?? '' })}
+          {cooldown > 0 && (
+            <span className="block mt-1 text-xs opacity-75">
+              {t('passwordResetCooldown', { seconds: cooldown })}
+            </span>
+          )}
+        </Alert>
+      ) : null}
+      <Button
+        variant="outline"
+        onClick={sendReset}
+        loading={isPending}
+        disabled={!email || isPending || cooldown > 0}
+      >
+        {t('passwordResetCta', { email: maskedEmail })}
+      </Button>
     </section>
   );
 }
@@ -122,6 +155,36 @@ function TwoFactorSection() {
   const [state, setState] = useState<TwoFaState>({ step: 'idle' });
   const [code, setCode] = useState('');
   const [isPending, startTransition] = useTransition();
+  const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedCodes, setCopiedCodes] = useState(false);
+
+  const secretKey = state.step === 'setup' ? state.data.secretKey : '';
+  const backupCodes = state.step === 'enabled' ? state.backupCodes : [];
+
+  async function copyText(text: string, setCopied: (v: boolean) => void) {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  function downloadBackupCodes(codes: string[]) {
+    const content = `SSZ Platform — 2FA backup codes\n\n${codes.join('\n')}\n\nKeep these codes safe. Each can be used once.`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ssz-backup-codes.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function printBackupCodes(codes: string[]) {
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<pre style="font-family:monospace;font-size:14px">SSZ Platform — 2FA backup codes\n\n${codes.join('\n')}\n\nKeep these codes safe. Each can be used once.</pre>`);
+    win.print();
+    win.close();
+  }
 
   function startSetup() {
     startTransition(async () => {
@@ -182,7 +245,15 @@ function TwoFactorSection() {
 
   return (
     <section className="space-y-4 max-w-xl">
-      <h2 className="text-base font-semibold">{t('twoFa.title')}</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-base font-semibold">{t('twoFa.title')}</h2>
+        {state.step === 'enabled' && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+            <ShieldCheck className="size-3" aria-hidden />
+            {t('twoFa.statusOn')}
+          </span>
+        )}
+      </div>
       <p className="text-sm text-(--ssz-text-muted)">{t('twoFa.subtitle')}</p>
 
       {state.step === 'idle' && (
@@ -200,7 +271,23 @@ function TwoFactorSection() {
             alt="2FA QR code"
             className="size-40 rounded"
           />
-          <p className="text-xs text-(--ssz-text-muted)">{t('twoFa.secretLabel')}: <code className="font-mono">{state.data.secretKey}</code></p>
+          <div className="space-y-1">
+            <p className="text-xs text-(--ssz-text-muted)">{t('twoFa.secretLabel')}</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 font-mono text-sm bg-muted rounded px-2 py-1.5 break-all">
+                {secretKey}
+              </code>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => void copyText(secretKey, setCopiedKey)}
+                aria-label={t('twoFa.copyKey')}
+              >
+                {copiedKey ? <Check className="size-4 text-green-600" /> : <Copy className="size-4" />}
+              </Button>
+            </div>
+          </div>
           <div className="flex gap-2 pt-2">
             <Button onClick={proceedToVerify} disabled={isPending}>{t('twoFa.nextCta')}</Button>
             <Button variant="ghost" onClick={cancelFlow} disabled={isPending}>{t('cancel')}</Button>
@@ -230,17 +317,49 @@ function TwoFactorSection() {
 
       {state.step === 'enabled' && (
         <div className="space-y-4">
-          <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-3">
-            <p className="text-sm font-medium text-green-700 dark:text-green-400">
-              {t('twoFa.backupCodesTitle')}
-            </p>
-            <p className="text-xs text-(--ssz-text-muted)">{t('twoFa.backupCodesHint')}</p>
-            <div className="grid grid-cols-2 gap-1">
-              {state.backupCodes.map((code) => (
-                <code key={code} className="font-mono text-sm bg-background rounded px-2 py-1">{code}</code>
-              ))}
+          <Alert
+            variant="success"
+            icon={<ShieldCheck className="size-4" />}
+            title={t('twoFa.backupCodesTitle')}
+          >
+            <div className="space-y-3 mt-1">
+              <p className="text-xs opacity-75">{t('twoFa.backupCodesHint')}</p>
+              <div className="grid grid-cols-2 gap-1">
+                {backupCodes.map((c) => (
+                  <code key={c} className="font-mono text-sm bg-background rounded px-2 py-1">{c}</code>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void copyText(backupCodes.join('\n'), setCopiedCodes)}
+                >
+                  {copiedCodes ? <Check className="size-3.5 mr-1.5 text-green-600" /> : <Copy className="size-3.5 mr-1.5" />}
+                  {t('twoFa.copyAll')}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => downloadBackupCodes(backupCodes)}
+                >
+                  <Download className="size-3.5 mr-1.5" />
+                  {t('twoFa.download')}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => printBackupCodes(backupCodes)}
+                >
+                  <Printer className="size-3.5 mr-1.5" />
+                  {t('twoFa.print')}
+                </Button>
+              </div>
             </div>
-          </div>
+          </Alert>
           <Button
             variant="outline"
             className="text-destructive border-destructive/30 hover:bg-destructive/10"
@@ -254,7 +373,9 @@ function TwoFactorSection() {
 
       {state.step === 'disable' && (
         <div className="space-y-3 rounded-lg border border-destructive/30 p-4">
-          <p className="text-sm font-medium text-destructive">{t('twoFa.disableConfirm')}</p>
+          <Alert variant="error">
+            {t('twoFa.disableConfirm')}
+          </Alert>
           <Input
             type="text"
             inputMode="numeric"
@@ -289,7 +410,17 @@ function SessionsSection() {
     <section className="space-y-3 max-w-xl">
       <h2 className="text-base font-semibold">{t('sessions')}</h2>
       <p className="text-sm text-(--ssz-text-muted)">{t('sessionsHint')}</p>
-      <Button variant="outline" disabled>{t('sessionsComingSoon')}</Button>
+      <div className="rounded-lg border border-border divide-y divide-border animate-pulse">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex items-center justify-between px-4 py-3 gap-4">
+            <div className="space-y-1.5 flex-1">
+              <div className="h-3.5 bg-muted rounded w-40" />
+              <div className="h-3 bg-muted rounded w-24" />
+            </div>
+            <div className="h-8 w-16 bg-muted rounded" />
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

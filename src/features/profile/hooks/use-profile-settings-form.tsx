@@ -158,6 +158,7 @@ export function ProfileSettingsFormProvider({ children, isPrivateTutor }: Props)
       <form
         onSubmit={form.handleSubmit(handleSave)}
         noValidate
+        data-profile-form
         className="min-h-full flex flex-col"
       >
         {children}
