@@ -102,7 +102,7 @@ export function OnboardingStepper({ membership, settings, platformResults, today
       const res = await fetch(`/api/enrollment/memberships/${membership.id}/transition`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: nextStatus }),
+        body: JSON.stringify({ schoolId: membership.schoolId, to: nextStatus }),
       });
       if (!res.ok) throw new Error('Transition failed');
       setDone(true);
@@ -128,6 +128,7 @@ export function OnboardingStepper({ membership, settings, platformResults, today
       scope === 'platform'
         ? { language: membership.language, score, cefrLevel }
         : {
+            schoolId: membership.schoolId,
             language: membership.language,
             cefrLevel,
             score,
@@ -242,6 +243,7 @@ export function OnboardingStepper({ membership, settings, platformResults, today
       {currentStep === 'availability' && (
         <AvailabilityStep
           membershipId={membership.id}
+          schoolId={membership.schoolId ?? ''}
           onComplete={advanceOrFinish}
         />
       )}
@@ -249,7 +251,7 @@ export function OnboardingStepper({ membership, settings, platformResults, today
       {currentStep === 'interview' && (
         <InterviewBookingStep
           membershipId={membership.id}
-          schoolSlug={membership.schoolSlug}
+          schoolId={membership.schoolId ?? ''}
           onComplete={advanceOrFinish}
         />
       )}

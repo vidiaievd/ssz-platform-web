@@ -1,23 +1,27 @@
 // @vitest-environment node
 
 import { NextRequest } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 vi.mock('next/headers', () => ({
   cookies: async () => ({ get: vi.fn(), set: vi.fn(), delete: vi.fn() }),
   headers: async () => new Headers(),
 }));
 
-vi.mock('@/lib/enrollment/provider', async () => {
-  const { mockProvider } = await import('@/lib/enrollment/mock');
-  return { getEnrollmentProvider: () => mockProvider };
-});
+vi.mock('@/lib/api/server-fetcher', () => ({
+  serverFetch: vi.fn(),
+}));
 
 const { POST } = await import('./route');
-const { mockProvider, resetMockStore } = await import('@/lib/enrollment/mock');
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors/app-error';
+
+const SCHOOL_ID = 'school-uuid-1234';
+const MEMBERSHIP_ID = 'm1';
+const GROUP_ID = 'group-b1';
 
 function makeRequest(body: unknown): NextRequest {
-  return new NextRequest('http://localhost/api/enrollment/memberships/m1/assign', {
+  return new NextRequest(`http://localhost/api/enrollment/memberships/${MEMBERSHIP_ID}/assign`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -29,69 +33,49 @@ function params(membershipId: string) {
 }
 
 beforeEach(() => {
-  resetMockStore();
+  vi.mocked(serverFetch).mockReset();
 });
 
 describe('POST /api/enrollment/memberships/[membershipId]/assign', () => {
+  it('returns 400 when schoolId is missing', async () => {
+    const res = await POST(makeRequest({ groupId: GROUP_ID }), params(MEMBERSHIP_ID));
+    expect(res.status).toBe(400);
+    const body = await res.json() as { error: string };
+    expect(body.error).toMatch(/"schoolId"/);
+  });
+
   it('returns 400 when groupId is missing', async () => {
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'oslo-language-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    const res = await POST(makeRequest({}), params(m.id));
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID }), params(MEMBERSHIP_ID));
     expect(res.status).toBe(400);
     const body = await res.json() as { error: string };
     expect(body.error).toMatch(/"groupId"/);
   });
 
-  it('returns 404 for an unknown membership ID', async () => {
-    const res = await POST(makeRequest({ groupId: 'group-b1' }), params('nonexistent'));
+  it('returns 200 when backend call succeeds', async () => {
+    vi.mocked(serverFetch).mockResolvedValueOnce(undefined);
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID, groupId: GROUP_ID }), params(MEMBERSHIP_ID));
+    expect(res.status).toBe(200);
+    const body = await res.json() as { ok: boolean };
+    expect(body.ok).toBe(true);
+  });
+
+  it('returns 404 when backend returns not_found', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('not_found', 'Membership not found'));
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID, groupId: GROUP_ID }), params('nonexistent'));
     expect(res.status).toBe(404);
   });
 
-  it('returns 409 when membership is not in a state that allows assignment (pending)', async () => {
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'oslo-language-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    expect(m.status).toBe('pending');
-    // Cannot assign from pending — must be in placement-review or onboarding
-    const res = await POST(makeRequest({ groupId: 'group-b1' }), params(m.id));
+  it('returns 409 when backend returns conflict', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('conflict', 'Already assigned'));
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID, groupId: GROUP_ID }), params(MEMBERSHIP_ID));
     expect(res.status).toBe(409);
   });
 
-  it('assigns placement-review membership to a group and transitions to active', async () => {
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'oslo-language-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    // Advance to placement-review via provider (simulating admin approval + onboarding completion)
-    await mockProvider.transition(m.id, 'onboarding');
-    await mockProvider.transition(m.id, 'placement-review');
-
-    const res = await POST(makeRequest({ groupId: 'group-b1-mon' }), params(m.id));
-    expect(res.status).toBe(200);
-    const body = await res.json() as { status: string; groupId: string };
-    expect(body.status).toBe('active');
-    expect(body.groupId).toBe('group-b1-mon');
-  });
-
-  it('assigns open-school onboarding membership directly to active', async () => {
-    // open-school auto-approves → starts at onboarding
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'open-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    expect(m.status).toBe('onboarding');
-
-    const res = await POST(makeRequest({ groupId: 'group-a1-wed' }), params(m.id));
-    expect(res.status).toBe(200);
-    const body = await res.json() as { status: string; groupId: string };
-    expect(body.status).toBe('active');
-    expect(body.groupId).toBe('group-a1-wed');
+  it('calls backend with correct path and groupId', async () => {
+    vi.mocked(serverFetch).mockResolvedValueOnce(undefined);
+    await POST(makeRequest({ schoolId: SCHOOL_ID, groupId: GROUP_ID }), params(MEMBERSHIP_ID));
+    const call = vi.mocked(serverFetch).mock.calls[0]![0] as { path: string; body: unknown };
+    expect(call.path).toBe(`/schools/${SCHOOL_ID}/memberships/${MEMBERSHIP_ID}/assign-group`);
+    expect(call.body).toEqual({ groupId: GROUP_ID });
   });
 });

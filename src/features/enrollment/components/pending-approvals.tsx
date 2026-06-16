@@ -28,13 +28,14 @@ export function PendingApprovals({ memberships }: Props) {
     );
   }
 
-  async function handleTransition(membershipId: string, to: MembershipStatus) {
+  async function handleTransition(m: Membership, to: MembershipStatus) {
+    const { id: membershipId, schoolId } = m;
     setPending((prev) => ({ ...prev, [membershipId]: true }));
     try {
       const res = await fetch(`/api/enrollment/memberships/${membershipId}/transition`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to }),
+        body: JSON.stringify({ schoolId, to }),
       });
       if (!res.ok) throw new Error('Transition failed');
       toast.success(to === 'onboarding' ? t('accepted') : t('rejected'));
@@ -78,14 +79,14 @@ export function PendingApprovals({ memberships }: Props) {
                 size="sm"
                 variant="outline"
                 disabled={isBusy}
-                onClick={() => handleTransition(m.id, 'rejected')}
+                onClick={() => handleTransition(m, 'rejected')}
               >
                 {t('reject')}
               </Button>
               <Button
                 size="sm"
                 disabled={isBusy}
-                onClick={() => handleTransition(m.id, 'onboarding')}
+                onClick={() => handleTransition(m, 'onboarding')}
               >
                 {t('accept')}
               </Button>

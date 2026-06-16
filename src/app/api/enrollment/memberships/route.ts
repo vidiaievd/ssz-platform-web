@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError, isAppError } from '@/lib/errors';
-import { getEnrollmentProvider } from '@/lib/enrollment/provider';
-import type { MembershipSource } from '@/features/enrollment/types';
-import type { LangCode } from '@/features/groups/types';
+import type { PublicSchool } from '@/features/school/api/get-public-school';
+import type { MembershipSource, MembershipStatus } from '@/features/enrollment/types';
+import type { LangCode, ISODate } from '@/features/groups/types';
+
+type BackendMembership = {
+  id: string;
+  schoolId: string;
+  status: MembershipStatus;
+  source: MembershipSource;
+  language?: string;
+  createdAt: string;
+};
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -18,20 +29,44 @@ export async function POST(request: NextRequest) {
     language?: LangCode;
   };
 
-  if (!schoolSlug || !source || !language) {
-    return NextResponse.json(
-      { error: 'schoolSlug, source, and language are required' },
-      { status: 400 },
-    );
+  if (!schoolSlug || !source) {
+    return NextResponse.json({ error: 'schoolSlug and source are required' }, { status: 400 });
   }
 
   try {
-    const provider = getEnrollmentProvider();
-    const membership = await provider.createMembership({ schoolSlug, source, language });
-    return NextResponse.json(membership, { status: 201 });
+    // Resolve slug → schoolId via the public endpoint (no auth required).
+    const school = await serverFetch<PublicSchool>({
+      service: 'organization',
+      path: `/schools/public/${schoolSlug}`,
+      anonymous: true,
+    });
+
+    const membership = await serverFetch<BackendMembership>({
+      service: 'organization',
+      path: `/schools/${school.schoolId}/memberships`,
+      method: 'POST',
+      body: { source, language },
+    });
+
+    return NextResponse.json(
+      {
+        id: membership.id,
+        schoolId: membership.schoolId,
+        schoolSlug,
+        schoolName: school.schoolName,
+        status: membership.status,
+        source: membership.source,
+        language: (membership.language ?? language ?? 'nb') as LangCode,
+        createdAt: (membership.createdAt?.slice(0, 10) ?? new Date().toISOString().slice(0, 10)) as ISODate,
+      },
+      { status: 201 },
+    );
   } catch (e) {
     if (isAppError(e)) {
-      const status = e.code === 'conflict' ? 409 : e.code === 'not_found' ? 404 : 502;
+      if (e instanceof AppError && e.code === 'not_found') {
+        return NextResponse.json({ error: 'School not found' }, { status: 404 });
+      }
+      const status = e.code === 'conflict' ? 409 : 502;
       return NextResponse.json({ error: e.message }, { status });
     }
     return NextResponse.json({ error: 'Failed to create membership' }, { status: 502 });

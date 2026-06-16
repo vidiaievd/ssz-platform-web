@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAppError } from '@/lib/errors';
-import { getEnrollmentProvider } from '@/lib/enrollment/provider';
+import { serverFetch } from '@/lib/api/server-fetcher';
 import type { PlacementResult } from '@/features/enrollment/types';
 
 export async function POST(
@@ -16,8 +16,12 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const result = body as PlacementResult;
-  if (!result?.language || !result?.cefrLevel || result?.score == null) {
+  const { schoolId, language, cefrLevel, score, takenAt, scope, sourceLabel } = body as {
+    schoolId?: string;
+  } & Partial<PlacementResult>;
+
+  if (!schoolId) return NextResponse.json({ error: '"schoolId" is required' }, { status: 400 });
+  if (!language || !cefrLevel || score == null) {
     return NextResponse.json(
       { error: 'language, cefrLevel, and score are required' },
       { status: 400 },
@@ -25,12 +29,16 @@ export async function POST(
   }
 
   try {
-    const provider = getEnrollmentProvider();
-    const updated = await provider.submitPlacement(membershipId, result);
-    return NextResponse.json(updated);
+    const result = await serverFetch<PlacementResult>({
+      service: 'organization',
+      path: `/schools/${schoolId}/memberships/${membershipId}/placement`,
+      method: 'POST',
+      body: { language, cefrLevel, score, takenAt, scope, sourceLabel },
+    });
+    return NextResponse.json(result);
   } catch (e) {
     if (isAppError(e)) {
-      const status = e.code === 'not_found' ? 404 : 502;
+      const status = e.code === 'not_found' ? 404 : e.code === 'forbidden' ? 403 : 502;
       return NextResponse.json({ error: e.message }, { status });
     }
     return NextResponse.json({ error: 'Failed to submit placement' }, { status: 502 });

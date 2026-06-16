@@ -4,7 +4,6 @@ import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
 import { registerAction } from '@/features/auth/actions/register';
 import { assertAdult } from '@/lib/enrollment/assert-adult';
-import { getEnrollmentProvider } from '@/lib/enrollment/provider';
 import { studentRegisterSchema } from '../schemas/register';
 import type { StudentRegisterInput } from '../schemas/register';
 import type { EntryIntent } from '@/lib/enrollment/intent';
@@ -27,7 +26,7 @@ export async function studentRegisterAction(
     // Adult checkpoint seam (no-op now; future: guardian flow for minors)
     assertAdult({ dateOfBirth: parsed.data.dateOfBirth });
 
-    // Create the Account — identical across all three entry paths
+    // Create the account — identical across all entry paths
     const authResult = await registerAction({
       email: parsed.data.email,
       password: parsed.data.password,
@@ -40,24 +39,14 @@ export async function studentRegisterAction(
       throw new AppError(authResult.error.code, authResult.error.message, authResult.error.details);
     }
 
-    // Branch by intent — Membership is additive, Account stays the same
+    // After registration the user must log in before membership can be created.
+    // Redirect them to the appropriate starting point; the membership creation happens
+    // via the apply CTA on the school page once they are authenticated.
     if (intent.kind === 'join_school') {
-      const provider = getEnrollmentProvider();
-      await provider.createMembership({
-        schoolSlug: intent.schoolSlug,
-        source: 'public-apply',
-        language: 'nb', // TODO: derive from school's primary language in Phase 3
-      });
-      return { redirectTo: `/student/onboarding/${intent.schoolSlug}` };
+      return { redirectTo: `/s/${intent.schoolSlug}?registered=true` };
     }
 
     if (intent.kind === 'invited') {
-      const provider = getEnrollmentProvider();
-      await provider.createMembership({
-        schoolSlug: '', // resolved from token at the BFF; placeholder until backend exists
-        source: 'invite',
-        language: 'nb',
-      });
       return { redirectTo: '/student' };
     }
 

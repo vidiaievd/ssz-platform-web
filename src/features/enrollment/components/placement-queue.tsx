@@ -39,7 +39,8 @@ export function PlacementQueue({ memberships, groups }: Props) {
     );
   }
 
-  async function handleAssign(membershipId: string) {
+  async function handleAssign(m: Membership) {
+    const membershipId = m.id;
     const groupId = selectedGroup[membershipId];
     if (!groupId) return;
     setAssigning(membershipId);
@@ -47,7 +48,7 @@ export function PlacementQueue({ memberships, groups }: Props) {
       const res = await fetch(`/api/enrollment/memberships/${membershipId}/assign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ groupId }),
+        body: JSON.stringify({ schoolId: m.schoolId, groupId }),
       });
       if (!res.ok) throw new Error('Assign failed');
       toast.success(t('assigned'));
@@ -141,7 +142,7 @@ export function PlacementQueue({ memberships, groups }: Props) {
               <Button
                 size="sm"
                 disabled={!groupId || groupId === '__none__' || assigning === m.id}
-                onClick={() => handleAssign(m.id)}
+                onClick={() => handleAssign(m)}
                 className="self-end"
               >
                 {assigning === m.id ? t('assigning') : t('assign')}

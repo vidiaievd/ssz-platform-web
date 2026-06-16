@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
-import { getEnrollmentProvider } from '@/lib/enrollment/provider';
 
 export async function POST(
   request: NextRequest,
@@ -15,21 +16,23 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { groupId } = body as { groupId?: string };
-  if (!groupId) {
-    return NextResponse.json({ error: '"groupId" is required' }, { status: 400 });
-  }
+  const { schoolId, groupId } = body as { schoolId?: string; groupId?: string };
+
+  if (!schoolId) return NextResponse.json({ error: '"schoolId" is required' }, { status: 400 });
+  if (!groupId) return NextResponse.json({ error: '"groupId" is required' }, { status: 400 });
 
   try {
-    const provider = getEnrollmentProvider();
-    const updated = await provider.assignToGroup(membershipId, groupId);
-    return NextResponse.json(updated);
+    await serverFetch({
+      service: 'organization',
+      path: `/schools/${schoolId}/memberships/${membershipId}/assign-group`,
+      method: 'POST',
+      body: { groupId },
+    });
+    return NextResponse.json({ ok: true });
   } catch (e) {
     if (isAppError(e)) {
       const status =
-        e.code === 'conflict' ? 409
-        : e.code === 'not_found' ? 404
-        : 502;
+        e.code === 'conflict' ? 409 : e.code === 'not_found' ? 404 : e.code === 'forbidden' ? 403 : 502;
       return NextResponse.json({ error: e.message }, { status });
     }
     return NextResponse.json({ error: 'Failed to assign to group' }, { status: 502 });

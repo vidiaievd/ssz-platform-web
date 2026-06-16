@@ -1,32 +1,53 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { getEnrollmentProvider } from '@/lib/enrollment/provider';
-import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
+import { getPublicSchool } from '@/features/school/api/get-public-school';
+import { serverFetch } from '@/lib/api/server-fetcher';
 import { getGroups } from '@/features/groups/api/queries';
 import { PlacementQueue } from '@/features/enrollment/components/placement-queue';
-import type { Group } from '@/features/groups/types';
+import type { Membership, MembershipStatus, MembershipSource } from '@/features/enrollment/types';
+import type { Group, LangCode, ISODate } from '@/features/groups/types';
 
 type Props = {
   params: Promise<{ schoolSlug: string }>;
+};
+
+type BackendMembership = {
+  id: string;
+  schoolId: string;
+  status: MembershipStatus;
+  source: MembershipSource;
+  language?: string;
+  createdAt: string;
 };
 
 export default async function PlacementQueuePage({ params }: Props) {
   const { schoolSlug } = await params;
   const t = await getTranslations('Enrollment.PlacementQueue');
 
-  const [school, provider] = await Promise.all([
-    getSchoolBySlug(schoolSlug),
-    Promise.resolve(getEnrollmentProvider()),
-  ]);
+  const school = await getPublicSchool(schoolSlug);
   if (!school) notFound();
 
-  const [memberships, rawGroups] = await Promise.all([
-    provider.listPlacementQueue(schoolSlug),
-    getGroups(school.id),
+  const [result, rawGroups] = await Promise.all([
+    serverFetch<{ items: BackendMembership[] }>({
+      service: 'organization',
+      path: `/schools/${school.schoolId}/memberships`,
+      query: { status: 'placement-review' },
+    }).catch(() => ({ items: [] as BackendMembership[] })),
+    getGroups(school.schoolId).catch(() => []),
   ]);
 
-  // getGroups returns GroupHealthRowVM; convert to minimal Group shape for suggestGroups
+  const memberships: Membership[] = result.items.map((m) => ({
+    id: m.id,
+    schoolId: m.schoolId,
+    schoolSlug,
+    schoolName: school.schoolName,
+    status: m.status,
+    source: m.source,
+    language: (m.language ?? 'nb') as LangCode,
+    createdAt: (m.createdAt?.slice(0, 10) ?? '') as ISODate,
+  }));
+
   const groups: Group[] = rawGroups.map((g) => ({
     id: g.id,
     name: g.name,

@@ -19,10 +19,11 @@ const SLOTS = [
 
 type Props = {
   membershipId: string;
+  schoolId: string;
   onComplete: () => void | Promise<void>;
 };
 
-export function AvailabilityStep({ membershipId, onComplete }: Props) {
+export function AvailabilityStep({ membershipId, schoolId, onComplete }: Props) {
   const t = useTranslations('Enrollment.Availability');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -55,7 +56,7 @@ export function AvailabilityStep({ membershipId, onComplete }: Props) {
       const res = await fetch(`/api/enrollment/memberships/${membershipId}/availability`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prefs }),
+        body: JSON.stringify({ schoolId, prefs }),
       });
 
       if (!res.ok) throw new Error('Failed to submit availability');

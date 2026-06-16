@@ -1,24 +1,26 @@
 // @vitest-environment node
 
 import { NextRequest } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 vi.mock('next/headers', () => ({
   cookies: async () => ({ get: vi.fn(), set: vi.fn(), delete: vi.fn() }),
   headers: async () => new Headers(),
 }));
 
-// Make the route handler use the same mockProvider instance as this test (avoids CJS/ESM split).
-vi.mock('@/lib/enrollment/provider', async () => {
-  const { mockProvider } = await import('@/lib/enrollment/mock');
-  return { getEnrollmentProvider: () => mockProvider };
-});
+vi.mock('@/lib/api/server-fetcher', () => ({
+  serverFetch: vi.fn(),
+}));
 
 const { POST } = await import('./route');
-const { mockProvider, resetMockStore } = await import('@/lib/enrollment/mock');
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors/app-error';
+
+const SCHOOL_ID = 'school-uuid-1234';
+const MEMBERSHIP_ID = 'm1';
 
 function makeRequest(body: unknown): NextRequest {
-  return new NextRequest('http://localhost/api/enrollment/memberships/m1/transition', {
+  return new NextRequest(`http://localhost/api/enrollment/memberships/${MEMBERSHIP_ID}/transition`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -30,105 +32,72 @@ function params(membershipId: string) {
 }
 
 beforeEach(() => {
-  resetMockStore();
+  vi.mocked(serverFetch).mockReset();
 });
 
 describe('POST /api/enrollment/memberships/[membershipId]/transition', () => {
-  it('returns 400 when body is missing the "to" field', async () => {
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'oslo-language-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    const res = await POST(makeRequest({}), params(m.id));
+  it('returns 400 when body is not valid JSON', async () => {
+    const req = new NextRequest(
+      `http://localhost/api/enrollment/memberships/${MEMBERSHIP_ID}/transition`,
+      { method: 'POST', body: 'not-json' },
+    );
+    const res = await POST(req, params(MEMBERSHIP_ID));
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when schoolId is missing', async () => {
+    const res = await POST(makeRequest({ to: 'onboarding' }), params(MEMBERSHIP_ID));
+    expect(res.status).toBe(400);
+    const body = await res.json() as { error: string };
+    expect(body.error).toMatch(/"schoolId"/);
+  });
+
+  it('returns 400 when "to" is missing', async () => {
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID }), params(MEMBERSHIP_ID));
     expect(res.status).toBe(400);
     const body = await res.json() as { error: string };
     expect(body.error).toMatch(/"to"/);
   });
 
-  it('returns 400 when body is not valid JSON', async () => {
-    const req = new NextRequest(
-      'http://localhost/api/enrollment/memberships/m1/transition',
-      { method: 'POST', body: 'not-json' },
-    );
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'oslo-language-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    const res = await POST(req, params(m.id));
-    expect(res.status).toBe(400);
+  it('calls /approve for pending → onboarding transition', async () => {
+    vi.mocked(serverFetch).mockResolvedValueOnce(undefined);
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID, to: 'onboarding' }), params(MEMBERSHIP_ID));
+    expect(res.status).toBe(200);
+    const body = await res.json() as { ok: boolean };
+    expect(body.ok).toBe(true);
+    const call = vi.mocked(serverFetch).mock.calls[0]![0] as { path: string };
+    expect(call.path).toContain('/approve');
   });
 
-  it('returns 409 for an invalid transition (pending → active)', async () => {
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'oslo-language-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    // pending → active is not in the allowed graph
-    const res = await POST(makeRequest({ to: 'active' }), params(m.id));
-    expect(res.status).toBe(409);
-    const body = await res.json() as { error: string };
-    expect(body.error).toBeTruthy();
+  it('calls /reject for the rejected transition', async () => {
+    vi.mocked(serverFetch).mockResolvedValueOnce(undefined);
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID, to: 'rejected' }), params(MEMBERSHIP_ID));
+    expect(res.status).toBe(200);
+    const call = vi.mocked(serverFetch).mock.calls[0]![0] as { path: string };
+    expect(call.path).toContain('/reject');
   });
 
-  it('returns 409 for rejected → onboarding', async () => {
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'oslo-language-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    await mockProvider.transition(m.id, 'rejected');
-    const res = await POST(makeRequest({ to: 'onboarding' }), params(m.id));
-    expect(res.status).toBe(409);
+  it('returns 200 with no backend call for student-initiated transitions (placement-review)', async () => {
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID, to: 'placement-review' }), params(MEMBERSHIP_ID));
+    expect(res.status).toBe(200);
+    expect(vi.mocked(serverFetch)).not.toHaveBeenCalled();
   });
 
-  it('returns 404 for an unknown membership ID', async () => {
-    const res = await POST(makeRequest({ to: 'onboarding' }), params('nonexistent'));
+  it('returns 200 with no backend call for active transition', async () => {
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID, to: 'active' }), params(MEMBERSHIP_ID));
+    expect(res.status).toBe(200);
+    expect(vi.mocked(serverFetch)).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 when backend returns not_found', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('not_found', 'Membership not found'));
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID, to: 'onboarding' }), params('nonexistent'));
     expect(res.status).toBe(404);
   });
 
-  it('returns 200 and updated membership for pending → onboarding', async () => {
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'oslo-language-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    expect(m.status).toBe('pending');
-
-    const res = await POST(makeRequest({ to: 'onboarding' }), params(m.id));
-    expect(res.status).toBe(200);
-    const body = await res.json() as { status: string };
-    expect(body.status).toBe('onboarding');
-  });
-
-  it('returns 200 for onboarding → placement-review', async () => {
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'oslo-language-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    await mockProvider.transition(m.id, 'onboarding');
-    const res = await POST(makeRequest({ to: 'placement-review' }), params(m.id));
-    expect(res.status).toBe(200);
-    const body = await res.json() as { status: string };
-    expect(body.status).toBe('placement-review');
-  });
-
-  it('returns 200 for active → left', async () => {
-    const m = await mockProvider.createMembership({
-      schoolSlug: 'open-school',
-      source: 'public-apply',
-      language: 'nb',
-    });
-    // open-school auto-approves to onboarding
-    expect(m.status).toBe('onboarding');
-    await mockProvider.transition(m.id, 'active');
-
-    const res = await POST(makeRequest({ to: 'left' }), params(m.id));
-    expect(res.status).toBe(200);
-    const body = await res.json() as { status: string };
-    expect(body.status).toBe('left');
+  it('returns 409 when backend returns conflict', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('conflict', 'Already approved'));
+    const res = await POST(makeRequest({ schoolId: SCHOOL_ID, to: 'onboarding' }), params(MEMBERSHIP_ID));
+    expect(res.status).toBe(409);
   });
 });

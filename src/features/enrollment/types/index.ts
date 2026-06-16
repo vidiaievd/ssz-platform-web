@@ -55,6 +55,8 @@ export interface AvailabilityPref {
 
 export interface Membership {
   id: string;
+  /** Backend UUID — present after membership is created via the real backend. */
+  schoolId?: string;
   schoolSlug: string;
   schoolName: string;
   status: MembershipStatus;

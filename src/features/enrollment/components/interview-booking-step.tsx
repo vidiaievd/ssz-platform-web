@@ -25,11 +25,11 @@ const FIXTURE_SLOTS: InterviewSlot[] = [
 
 type Props = {
   membershipId: string;
-  schoolSlug: string;
+  schoolId: string;
   onComplete: () => void | Promise<void>;
 };
 
-export function InterviewBookingStep({ membershipId, schoolSlug: _schoolSlug, onComplete }: Props) {
+export function InterviewBookingStep({ membershipId, schoolId, onComplete }: Props) {
   const t = useTranslations('Enrollment.InterviewBooking');
   const [slots, setSlots] = useState<InterviewSlot[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -54,6 +54,7 @@ export function InterviewBookingStep({ membershipId, schoolSlug: _schoolSlug, on
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          schoolId,
           prefs: [{ day: slot.date, from: slot.from, to: slot.to }],
         }),
       });
