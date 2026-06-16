@@ -142,7 +142,6 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
           schoolSlug={schoolSlug}
           activeSegment={activeSegment}
           search={q ?? ''}
-          onEnrollAction={() => {}}
         />
       )}
     </main>

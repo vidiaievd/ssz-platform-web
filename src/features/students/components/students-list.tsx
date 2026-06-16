@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { UserPlus } from 'lucide-react';
 
@@ -14,7 +15,6 @@ type Props = {
   schoolSlug: string;
   activeSegment: SegmentKey;
   search: string;
-  onEnrollAction: () => void;
 };
 
 export function StudentsList({
@@ -22,7 +22,6 @@ export function StudentsList({
   schoolSlug,
   activeSegment,
   search,
-  onEnrollAction,
 }: Props) {
   const t = useTranslations('Students');
   const { selectedIds, toggle } = useStudentBulkSelect(students);
@@ -51,9 +50,11 @@ export function StudentsList({
             : t('list.filteredEmpty')}
         </p>
         {students.length === 0 && (
-          <Button onClick={onEnrollAction}>
-            <UserPlus className="mr-2 h-4 w-4" aria-hidden />
-            {t('list.enroll')}
+          <Button asChild>
+            <Link href="?enroll=1">
+              <UserPlus className="mr-2 h-4 w-4" aria-hidden />
+              {t('list.enroll')}
+            </Link>
           </Button>
         )}
       </div>
