@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Globe, MapPin, Mail } from 'lucide-react';
+import { Globe, MapPin } from 'lucide-react';
 
-import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
+import { getPublicSchool } from '@/features/school/api/get-public-school';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
-import { getEnrollmentProvider } from '@/lib/enrollment/provider';
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors';
 import { ApplyCta, type ApplyCtaState } from '@/features/enrollment/components/apply-cta';
 import type { MembershipStatus } from '@/features/enrollment/types';
 
@@ -13,16 +14,21 @@ type Props = {
   params: Promise<{ locale: string; schoolSlug: string }>;
 };
 
+type BackendMembership = {
+  id: string;
+  status: MembershipStatus;
+};
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { schoolSlug } = await params;
-  const school = await getSchoolBySlug(schoolSlug);
+  const school = await getPublicSchool(schoolSlug);
   if (!school) return {};
 
   return {
-    title: school.name,
+    title: school.schoolName,
     description: school.description ?? undefined,
     openGraph: {
-      title: school.name,
+      title: school.schoolName,
       description: school.description ?? undefined,
       images: school.avatarUrl ? [school.avatarUrl] : [],
       type: 'website',
@@ -34,7 +40,7 @@ function membershipStatusToCtaState(status: MembershipStatus): ApplyCtaState {
   if (status === 'active') return 'active';
   if (status === 'onboarding' || status === 'placement-review') return 'onboarding';
   if (status === 'rejected' || status === 'left') return 'rejected';
-  return 'pending'; // 'pending'
+  return 'pending';
 }
 
 export default async function PublicSchoolPage({ params }: Props) {
@@ -42,25 +48,24 @@ export default async function PublicSchoolPage({ params }: Props) {
   const t = await getTranslations('PublicSchool');
 
   const [school, user] = await Promise.all([
-    getSchoolBySlug(schoolSlug),
+    getPublicSchool(schoolSlug),
     getCurrentUser(),
   ]);
   if (!school) notFound();
 
-  // Derive CTA state
-  let ctaState: ApplyCtaState = 'guest';
+  let ctaState: ApplyCtaState = school.isOpenForApplications ? 'guest' : 'invite-only';
   let ctaMembershipId: string | undefined;
 
-  if (user) {
-    const provider = getEnrollmentProvider();
-    const profile = await provider.getProfile(user.userId ?? '');
-    const existing = profile.memberships.find((m) => m.schoolSlug === schoolSlug);
-
-    if (existing) {
-      ctaState = membershipStatusToCtaState(existing.status);
-      ctaMembershipId = existing.id;
-    } else {
-      ctaState = 'apply';
+  if (user && school.isOpenForApplications) {
+    try {
+      const membership = await serverFetch<BackendMembership>({
+        service: 'organization',
+        path: `/schools/${school.schoolId}/memberships/me`,
+      });
+      ctaState = membershipStatusToCtaState(membership.status);
+      ctaMembershipId = membership.id;
+    } catch (e) {
+      ctaState = e instanceof AppError && e.code !== 'not_found' ? 'guest' : 'apply';
     }
   }
 
@@ -72,18 +77,11 @@ export default async function PublicSchoolPage({ params }: Props) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={school.avatarUrl}
-            alt={school.name}
+            alt={school.schoolName}
             className="h-16 w-16 rounded-xl object-cover"
           />
         )}
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-(--ssz-text-primary)">{school.name}</h1>
-          {school.type && (
-            <span className="text-sm font-medium text-(--ssz-primary)">
-              {school.type === 'ONLINE' ? t('typeOnline') : t('typeHybrid')}
-            </span>
-          )}
-        </div>
+        <h1 className="text-2xl font-bold text-(--ssz-text-primary)">{school.schoolName}</h1>
 
         {school.description && (
           <p className="text-sm leading-relaxed text-(--ssz-text-secondary)">
@@ -110,17 +108,6 @@ export default async function PublicSchoolPage({ params }: Props) {
               className="underline hover:text-(--ssz-text-primary)"
             >
               {school.website.replace(/^https?:\/\//, '')}
-            </a>
-          </div>
-        )}
-        {school.contactEmail && (
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 shrink-0" />
-            <a
-              href={`mailto:${school.contactEmail}`}
-              className="underline hover:text-(--ssz-text-primary)"
-            >
-              {school.contactEmail}
             </a>
           </div>
         )}
