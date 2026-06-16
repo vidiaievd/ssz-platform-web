@@ -23,7 +23,7 @@ import type { MutationResult } from '@/features/groups/types';
 
 export type InviteBranch =
   | { branch: 'added'; name: string }
-  | { branch: 'register' | 'onboard'; email: string };
+  | { branch: 'register' | 'onboard_existing'; email: string };
 
 export type AddTeacherResult =
   | { success: true; data: InviteBranch }
@@ -70,7 +70,7 @@ export async function addTeacher(
     }
 
     // Branches 1 & 3: send invitation
-    const kind = user?.userId ? 'onboard' : 'register';
+    const kind = user?.userId ? 'onboard_existing' : 'register';
     await serverFetch({
       service: 'organization',
       path: `/schools/${schoolId}/invitations`,
@@ -84,6 +84,7 @@ export async function addTeacher(
         maxWeeklyHours: input.maxWeeklyContactHours,
         employmentType: input.employmentType,
         teachingLanguages: input.teachingLanguages,
+        ...(user?.userId ? { recipientUserId: user.userId } : {}),
       },
     });
     invalidate(`school-${schoolId}-teachers`);
