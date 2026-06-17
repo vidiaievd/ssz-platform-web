@@ -9,7 +9,10 @@ import { getMyProfile } from '@/features/profile/api/get-my-profile';
 export default async function EnrolledPage() {
   const [t, profile] = await Promise.all([
     getTranslations('Student'),
-    getMyProfile().catch(() => null),
+    getMyProfile().catch((err) => {
+      console.error('[student/enrolled] getMyProfile failed:', err);
+      return null;
+    }),
   ]);
 
   const firstName = profile?.displayName?.split(' ')[0] ?? null;

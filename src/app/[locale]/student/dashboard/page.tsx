@@ -9,7 +9,10 @@ export default async function StudentDashboardPage() {
   const [t, locale, profile] = await Promise.all([
     getTranslations('Student'),
     getLocale(),
-    getMyProfile().catch(() => null),
+    getMyProfile().catch((err) => {
+      console.error('[student/dashboard] getMyProfile failed:', err);
+      return null;
+    }),
   ]);
 
   const firstName = profile?.displayName?.split(' ')[0] ?? null;

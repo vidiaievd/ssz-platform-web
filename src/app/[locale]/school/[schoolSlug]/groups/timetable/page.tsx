@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { getTimetable } from '@/features/groups/api/queries';
 import { TeacherTimetable } from '@/features/groups/components/teacher-timetable';
+import { AlertCircle } from 'lucide-react';
 
 type Props = {
   params: Promise<{ schoolSlug: string; locale: string }>;
@@ -18,8 +19,9 @@ export default async function TimetablePage({ params, searchParams }: Props) {
   const school = await getSchoolBySlug(schoolSlug);
   if (!school) notFound();
 
-  const teachers = await getTimetable(school.id);
+  const timetableResult = await getTimetable(school.id);
 
+  const teachers = 'data' in timetableResult ? timetableResult.data : [];
   const selectedId = teacherId
     ? (teachers.find((t) => t.userId === teacherId)?.userId ?? teachers[0]?.userId ?? null)
     : (teachers[0]?.userId ?? null);
@@ -41,7 +43,15 @@ export default async function TimetablePage({ params, searchParams }: Props) {
         </p>
       </div>
 
-      {teachers.length === 0 ? (
+      {'error' in timetableResult ? (
+        <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <div>
+            <p className="font-medium">Failed to load timetable</p>
+            <p className="mt-0.5 text-destructive/80">{timetableResult.error}</p>
+          </div>
+        </div>
+      ) : teachers.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <p className="text-sm text-(--ssz-text-muted)">
             No active teachers with scheduled groups found.

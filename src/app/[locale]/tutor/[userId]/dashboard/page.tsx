@@ -4,11 +4,16 @@ import { BookOpen, Users, Star } from 'lucide-react';
 import { getMyProfile } from '@/features/profile/api/get-my-profile';
 
 export default async function TutorDashboardPage() {
-  const [t, locale, profile] = await Promise.all([
-    getTranslations('Tutor'),
-    getLocale(),
-    getMyProfile().catch(() => null),
-  ]);
+  const [t, locale] = await Promise.all([getTranslations('Tutor'), getLocale()]);
+
+  let profile: Awaited<ReturnType<typeof getMyProfile>> | null = null;
+  let profileError = false;
+  try {
+    profile = await getMyProfile();
+  } catch (err) {
+    console.error('[tutor/dashboard] getMyProfile failed:', err);
+    profileError = true;
+  }
 
   const dateLabel = new Intl.DateTimeFormat(locale, {
     weekday: 'long',
@@ -33,6 +38,9 @@ export default async function TutorDashboardPage() {
             : t('dashboard.greeting')}
         </h1>
         <p className="text-sm text-(--ssz-text-secondary)">{t('dashboard.subtitle')}</p>
+        {profileError && (
+          <p className="mt-1 text-xs text-destructive">Failed to load profile.</p>
+        )}
       </div>
 
       {/* Quick-stat cards */}

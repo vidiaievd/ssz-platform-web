@@ -65,12 +65,17 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     // Branches 1 & 3: send invitation
-    const kind = user?.userId ? 'onboard' : 'register';
+    const kind = user?.userId ? 'onboard_existing' : 'register';
     await serverFetch({
       service: 'organization',
       path: `/schools/${id}/invitations`,
       method: 'POST',
-      body: { email: body.email, role: 'TEACHER', kind },
+      body: {
+        email: body.email,
+        role: 'TEACHER',
+        kind,
+        ...(user?.userId ? { recipientUserId: user.userId } : {}),
+      },
     });
     return NextResponse.json(
       { branch: kind, email: body.email },

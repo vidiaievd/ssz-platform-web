@@ -5,8 +5,8 @@ import { cookies } from 'next/headers';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { readAccessToken } from '@/lib/auth/cookies';
+import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import type { School } from '@/features/school/types';
-import type { UserRolesResponse } from '@/lib/api/generated/schemas';
 import type { WorkspaceContext, WorkspacesResponse } from '../types';
 import { STAFF_ROLES } from '../types';
 
@@ -28,14 +28,19 @@ export const getWorkspaces = cache(async function (): Promise<WorkspacesResponse
   const token = await readAccessToken();
   if (!token) return { contexts: [], lastActiveContextKey: null };
 
-  const [schoolsResult, tutorGroupResult, rolesResult] = await Promise.allSettled([
-    serverFetch<SchoolsPayload>({ service: 'organization', path: '/schools' }),
-    serverFetch<{ id: string; name: string } | null>({ service: 'organization', path: '/tutoring/group' }),
-    serverFetch<UserRolesResponse>({ service: 'auth', path: '/auth/roles' }),
+  const [user, schoolsResult, tutorGroupResult] = await Promise.all([
+    getCurrentUser(),
+    serverFetch<SchoolsPayload>({ service: 'organization', path: '/schools' }).then(
+      (v) => ({ status: 'fulfilled' as const, value: v }),
+      () => ({ status: 'rejected' as const }),
+    ),
+    serverFetch<{ id: string; name: string } | null>({ service: 'organization', path: '/tutoring/group' }).then(
+      (v) => ({ status: 'fulfilled' as const, value: v }),
+      () => ({ status: 'rejected' as const }),
+    ),
   ]);
 
-  const roles =
-    rolesResult.status === 'fulfilled' ? (rolesResult.value.roles ?? []) : [];
+  const roles = user?.roles ?? [];
 
   const contexts: WorkspaceContext[] = [];
 

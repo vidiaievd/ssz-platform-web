@@ -38,7 +38,10 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
   const activeSegment = (segment as SegmentKey | undefined) ?? 'all';
   const [{ items: students, total }, pendingInvitesCount, groups] = await Promise.all([
     getStudents(school.id, { search: q }),
-    getPendingCount(school.id, 'students').catch(() => 0),
+    getPendingCount(school.id, 'students').catch((err) => {
+      console.error('[students/page] getPendingCount failed:', err);
+      return null;
+    }),
     getGroupsForSelect(school.id),
   ]);
 
@@ -98,12 +101,14 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
       </div>
 
       {/* Pending invites indicator */}
-      {pendingInvitesCount > 0 && (
+      {pendingInvitesCount === null ? (
+        <p className="text-sm text-destructive">Failed to load pending invitations count.</p>
+      ) : pendingInvitesCount > 0 ? (
         <PendingInvitesLink
           count={pendingInvitesCount}
           href={`/school/${schoolSlug}/invitations?audience=students`}
         />
-      )}
+      ) : null}
 
       {/* Enroll dialog — URL-driven (?enroll=1) */}
       <Suspense>
@@ -142,7 +147,6 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
           schoolSlug={schoolSlug}
           activeSegment={activeSegment}
           search={q ?? ''}
-          onEnrollAction={() => {}}
         />
       )}
     </main>

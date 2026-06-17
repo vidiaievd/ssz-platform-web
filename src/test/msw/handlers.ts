@@ -1,12 +1,40 @@
 import { http, HttpResponse } from 'msw';
 
-import { MOCK_SCHOOLS } from '@/app/api/discovery/schools/route';
 import { MOCK_UPCOMING } from '@/app/api/student/upcoming/route';
 import { MOCK_STREAK } from '@/app/api/student/streak/route';
-import type { SchoolsResponse } from '@/features/discovery/types';
+import type { School, SchoolsResponse } from '@/features/discovery/types';
 import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
 import type { NotificationsResponse } from '@/features/notifications/types';
 import type { ContainerProgress } from '@/features/student/types';
+
+const MOCK_SCHOOLS: School[] = [
+  {
+    id: '1',
+    name: 'Oslo Norsk Akademi',
+    slug: 'oslo-norsk-akademi',
+    type: 'school',
+    description: 'Comprehensive Norwegian language courses for immigrants and international students.',
+    targetLanguages: ['no'],
+    levels: ['A1', 'A2', 'B1', 'B2'],
+    location: 'Oslo',
+    containerCount: 14,
+    studentCount: 340,
+    isFree: false,
+  },
+  {
+    id: '2',
+    name: 'Bergen Språksenter',
+    slug: 'bergen-spraksenter',
+    type: 'school',
+    description: 'Language school specialising in Nynorsk and Bokmål for all proficiency levels.',
+    targetLanguages: ['no'],
+    levels: ['A1', 'A2', 'B1', 'B2', 'C1'],
+    location: 'Bergen',
+    containerCount: 9,
+    studentCount: 178,
+    isFree: false,
+  },
+];
 
 /**
  * Default handlers shared across tests, dev, and Storybook.

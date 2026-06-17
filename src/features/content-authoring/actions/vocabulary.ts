@@ -101,7 +101,9 @@ export async function saveVocabularyItemAction(
           service: 'content',
           path: `/vocabulary-lists/${listId}/items/${savedItemId}/translations/${lang}`,
           method: 'DELETE',
-        }).catch(() => {}),
+        }).catch((err) => {
+          console.error('[vocabulary] translation delete failed:', err);
+        }),
       ),
     );
 
@@ -131,7 +133,9 @@ export async function saveVocabularyItemAction(
           service: 'content',
           path: `/vocabulary-lists/${listId}/items/${savedItemId}/examples/${exId}`,
           method: 'DELETE',
-        }).catch(() => {}),
+        }).catch((err) => {
+          console.error('[vocabulary] example delete failed:', err);
+        }),
       ),
     );
 

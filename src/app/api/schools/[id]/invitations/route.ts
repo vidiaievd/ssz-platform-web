@@ -43,13 +43,37 @@ type BackendInvitationResponse = {
   deliveryStatus: string;
 };
 
+type InvitationBody = {
+  email?: string;
+  kind?: string;
+  recipientUserId?: string;
+  [key: string]: unknown;
+};
+
+type UserLookupResult = { userId: string };
+
 export async function POST(request: NextRequest, { params }: Params) {
   const { id } = await params;
-  let body: unknown;
+  let body: InvitationBody;
   try {
-    body = await request.json();
+    body = await request.json() as InvitationBody;
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  // When inviting an existing user, resolve their userId so the notification service
+  // can deliver an IN_APP notification in addition to the email.
+  if (body.kind === 'onboard_existing' && body.email && !body.recipientUserId) {
+    try {
+      const lookup = await serverFetch<UserLookupResult>({
+        service: 'profile',
+        path: '/users/lookup',
+        query: { email: body.email },
+      });
+      body = { ...body, recipientUserId: lookup.userId };
+    } catch {
+      // Non-fatal: proceed without recipientUserId; email will still be sent.
+    }
   }
 
   try {

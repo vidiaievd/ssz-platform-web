@@ -241,6 +241,10 @@ export async function updateSlots(
     invalidate(groupCacheTags.conflicts(schoolId));
     return { ok: true };
   } catch (e) {
+    if (e instanceof AppError && e.code === 'upstream_unavailable') {
+      // Scheduling service not yet available; slots will need to be set later.
+      return { ok: true };
+    }
     return mapError(e);
   }
 }

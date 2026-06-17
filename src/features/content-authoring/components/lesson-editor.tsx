@@ -93,7 +93,10 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
       .use(rehypeStringify)
       .process(bodyValue)
       .then((result) => setPreviewHtml(String(result)))
-      .catch(() => setPreviewHtml(''));
+      .catch((err) => {
+        console.error('[lesson-editor] preview render failed:', err);
+        setPreviewHtml('<p style="color:var(--destructive)">Preview unavailable</p>');
+      });
   }, [bodyValue, editorTab]);
 
   function onSubmit(data: LessonFormValues) {

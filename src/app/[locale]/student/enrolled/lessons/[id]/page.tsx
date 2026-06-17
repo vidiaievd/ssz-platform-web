@@ -22,7 +22,10 @@ export default async function LessonPage({ params, searchParams }: Props) {
       serverFetch<LessonVariant>({
         service: 'content',
         path: `/lessons/${id}/variants/best`,
-      }).catch(() => null),
+      }).catch((err) => {
+        console.error('[lessons/id] lesson variant fetch failed:', err);
+        return null;
+      }),
     ]);
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') notFound();

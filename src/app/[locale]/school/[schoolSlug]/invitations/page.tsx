@@ -36,10 +36,20 @@ export default async function InvitationsPage({ params, searchParams }: Props) {
   }
 
   const [allInvitations, pendingCount, expiredCount] = await Promise.all([
-    getInvitations(school.id).catch((): Awaited<ReturnType<typeof getInvitations>> => []),
-    getPendingCount(school.id, 'all').catch(() => 0),
-    getInvitations(school.id, { status: 'expired' }).then((items) => items.length).catch(() => 0),
+    getInvitations(school.id),
+    getPendingCount(school.id, 'all').catch((err) => {
+      console.error('[invitations/page] getPendingCount failed:', err);
+      return null;
+    }),
+    getInvitations(school.id, { status: 'expired' })
+      .then((items) => items.length)
+      .catch((err) => {
+        console.error('[invitations/page] expired invitations count failed:', err);
+        return null;
+      }),
   ]);
+
+  const countsError = pendingCount === null || expiredCount === null;
 
   const filtered =
     audience === 'all'
@@ -55,10 +65,11 @@ export default async function InvitationsPage({ params, searchParams }: Props) {
           return true;
         });
 
-  const subtitle =
-    pendingCount > 0
-      ? t('pendingSummary', { count: pendingCount }) +
-        (expiredCount > 0 ? ' · ' + t('expiredSummary', { count: expiredCount }) : '')
+  const subtitle = countsError
+    ? null
+    : pendingCount! > 0
+      ? t('pendingSummary', { count: pendingCount! }) +
+        (expiredCount! > 0 ? ' · ' + t('expiredSummary', { count: expiredCount! }) : '')
       : t('noPending');
 
   return (
@@ -70,7 +81,11 @@ export default async function InvitationsPage({ params, searchParams }: Props) {
             <MailCheck className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
             <h1 className="text-xl font-semibold">{t('title')}</h1>
           </div>
-          <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
+          {countsError ? (
+            <p className="mt-0.5 text-sm text-destructive">Failed to load invitation counts.</p>
+          ) : (
+            <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
+          )}
         </div>
       </div>
 

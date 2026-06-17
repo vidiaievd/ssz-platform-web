@@ -134,7 +134,7 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
                 <p className="text-xs text-(--ssz-text-muted)">{result.email}</p>
               </>
             )}
-            {result.branch === "onboard" && (
+            {result.branch === "onboard_existing" && (
               <>
                 <p className="text-sm text-(--ssz-text-primary)">{t("foundUser")}</p>
                 <p className="text-xs text-(--ssz-text-muted)">{result.email}</p>

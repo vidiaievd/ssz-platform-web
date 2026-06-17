@@ -34,13 +34,20 @@ function resolveContextUrl(
 export default async function SchoolIndexPage() {
   const locale = await getLocale();
 
-  const workspaces = await getWorkspaces().catch(() => null);
+  let workspaces: Awaited<ReturnType<typeof getWorkspaces>> | null = null;
+  let workspacesError: string | null = null;
+  try {
+    workspaces = await getWorkspaces();
+  } catch (err) {
+    console.error('[school/page] getWorkspaces failed:', err);
+    workspacesError = err instanceof Error ? err.message : 'Failed to load workspaces';
+  }
 
-  if (!workspaces) {
+  if (workspacesError || !workspaces) {
     return (
       <main className="flex min-h-[60vh] items-center justify-center p-8 text-center">
-        <p className="text-sm text-muted-foreground">
-          Unable to load your workspaces. Please refresh or try again later.
+        <p className="text-sm text-destructive">
+          {workspacesError ?? 'Unable to load your workspaces. Please refresh or try again later.'}
         </p>
       </main>
     );

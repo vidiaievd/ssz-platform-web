@@ -45,16 +45,18 @@ export default async function ContainerDetailPage({
 
   // Fetch preflight data server-side for draft containers to populate the status banner
   let preflight: PreflightResult | undefined;
+  let preflightError = false;
   if (state === 'draft') {
     try {
       const itemsResp = await serverFetch<{ items: ContainerItem[] }>({
         service: 'content',
         path: `/containers/${id}/versions`,
         query: { limit: '1' },
-      }).catch(() => ({ items: [] as ContainerItem[] }));
+      });
       preflight = runPreflight(container, itemsResp.items ?? []);
-    } catch {
-      // leave preflight undefined; banner shows without counts
+    } catch (err) {
+      console.error('[content/id] preflight versions fetch failed:', err);
+      preflightError = true;
     }
   }
 
@@ -91,6 +93,11 @@ export default async function ContainerDetailPage({
           blockerCount={preflight?.blockerCount}
           warningCount={preflight?.warningCount}
         />
+        {preflightError && (
+          <p className="mt-2 text-xs text-destructive">
+            Could not load readiness checks. Counts may be unavailable.
+          </p>
+        )}
       </div>
 
       <Suspense fallback={<TabsSkeleton />}>
