@@ -5,7 +5,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { MembershipRoleBadge } from "../groups/membership-role-badge";
-import type { StudentInSchool, LevelEntry, MembershipDetail } from "@/features/students/types";
+import type { StudentInSchool } from "@/features/students/types";
 import { formatDate } from "@/lib/i18n/formatters";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -94,7 +94,7 @@ export async function HistoryTab({ student, schoolSlug }: Props) {
         ) : (
           <ol className="flex flex-col gap-0 sm:flex-row sm:gap-0 sm:overflow-x-auto">
             {student.levelHistory.map((entry, i) => (
-              <li key={i} className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 min-w-[120px]">
+              <li key={i} className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 min-w-30">
                 {/* Connector line */}
                 {i > 0 && (
                   <div className="sm:hidden w-px h-4 bg-border ml-5" aria-hidden />
