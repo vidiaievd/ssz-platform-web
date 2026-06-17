@@ -11,6 +11,14 @@ import type {
   StudentsListResult,
   Segment,
   SegmentKey,
+  StudentInSchool,
+  MembershipDetail,
+  LevelEntry,
+  MembershipRole,
+  MembershipStatus,
+  GroupStatus,
+  TeacherRef,
+  Slot,
 } from '@/features/students/types';
 import type { CEFR, LangCode } from '@/features/groups/types';
 import { SEGMENT_KEYS } from '@/lib/students/status';
@@ -215,6 +223,214 @@ export async function getGroupsForSelect(schoolId: string): Promise<GroupSelectO
   } catch {
     return [];
   }
+}
+
+// ── Raw membership + history shapes ──────────────────────────────────────────
+
+type RawMembership = {
+  id?: string;
+  groupId: string;
+  groupName?: string;
+  lang?: string;
+  level?: string;
+  role?: string;
+  status?: string;
+  addedAt?: string;
+  exitedAt?: string;
+  groupStatus?: string;
+  teachers?: Array<{
+    userId: string;
+    name?: string;
+    avatarUrl?: string | null;
+    role?: string;
+  }>;
+  schedule?: Array<{ day: string; time: string; durationMin?: number }>;
+};
+
+type RawLevelEntry = {
+  level?: string;
+  startedAt?: string;
+  endedAt?: string;
+  groupId?: string;
+  groupName?: string;
+  assessedBy?: { userId: string; name?: string; avatarUrl?: string | null; role?: string };
+};
+
+function mapMembershipRole(r?: string): MembershipRole {
+  if (r === 'trial') return 'trial';
+  if (r === 'observer') return 'observer';
+  return 'student';
+}
+
+function mapMembershipStatus(s?: string): MembershipStatus {
+  if (s === 'past' || s === 'archived' || s === 'exited') return 'past';
+  return 'active';
+}
+
+function mapGroupStatus(s?: string): GroupStatus {
+  if (s === 'archived') return 'archived';
+  if (s === 'draft') return 'draft';
+  return 'active';
+}
+
+function mapSlots(raw?: Array<{ day: string; time: string; durationMin?: number }>): Slot[] {
+  return (raw ?? []).map((s) => ({ day: s.day, time: s.time, durationMin: s.durationMin }));
+}
+
+function mapTeacherRef(t: { userId: string; name?: string; avatarUrl?: string | null; role?: string }): TeacherRef {
+  return {
+    userId: t.userId,
+    name: t.name ?? '',
+    avatarUrl: t.avatarUrl ?? null,
+    role: mapTeacherRole(t.role),
+  };
+}
+
+function mapMembership(raw: RawMembership): MembershipDetail {
+  return {
+    id: raw.id ?? raw.groupId,
+    groupId: raw.groupId,
+    groupName: raw.groupName ?? '',
+    lang: (raw.lang ?? 'en') as LangCode,
+    level: (raw.level ?? 'A1') as CEFR,
+    role: mapMembershipRole(raw.role),
+    status: mapMembershipStatus(raw.status),
+    addedAt: raw.addedAt ?? new Date().toISOString().slice(0, 10),
+    exitedAt: raw.exitedAt,
+    teachers: (raw.teachers ?? []).map(mapTeacherRef),
+    schedule: mapSlots(raw.schedule),
+    groupStatus: mapGroupStatus(raw.groupStatus),
+  };
+}
+
+function mapLevelEntry(raw: RawLevelEntry): LevelEntry {
+  return {
+    level: (raw.level ?? 'A1') as CEFR,
+    startedAt: raw.startedAt ?? new Date().toISOString().slice(0, 10),
+    endedAt: raw.endedAt,
+    groupId: raw.groupId,
+    groupName: raw.groupName,
+    assessedBy: raw.assessedBy ? mapTeacherRef(raw.assessedBy) : undefined,
+  };
+}
+
+/** Derives memberships from flat groups when the /memberships endpoint is unavailable. */
+function deriveMembershipsFromGroups(groups: StudentGroupRef[]): MembershipDetail[] {
+  return groups.map((g) => ({
+    id: g.id,
+    groupId: g.id,
+    groupName: g.name,
+    lang: g.lang,
+    level: g.level,
+    role: 'student' as MembershipRole,
+    status: 'active' as MembershipStatus,
+    addedAt: new Date().toISOString().slice(0, 10),
+    teachers: (g.teachers ?? []).map((t) => ({
+      userId: t.userId,
+      name: t.name,
+      avatarUrl: t.avatarUrl ?? null,
+      role: t.role,
+    })),
+    schedule: g.scheduleSummary
+      ? [{ day: g.scheduleSummary, time: '' }]
+      : [],
+    groupStatus: 'active' as GroupStatus,
+  }));
+}
+
+/**
+ * Fetches the enriched StudentInSchool for the detail page.
+ * Tries `/memberships` and `/history` endpoints; falls back to deriving from
+ * the base student response if those endpoints are not yet available.
+ */
+export async function getStudentInSchool(
+  schoolId: string,
+  userId: string,
+): Promise<StudentInSchool | null> {
+  const scheduling = getSchedulingProvider();
+
+  const [rawStudent, membershipsResult, historyResult, clashesResult] = await Promise.allSettled([
+    serverFetch<RawStudentMember>({
+      service: 'organization',
+      path: `/schools/${schoolId}/students/${userId}`,
+    }),
+    serverFetch<RawMembership[]>({
+      service: 'organization',
+      path: `/schools/${schoolId}/students/${userId}/memberships`,
+    }),
+    serverFetch<RawLevelEntry[]>({
+      service: 'organization',
+      path: `/schools/${schoolId}/students/${userId}/history`,
+    }),
+    scheduling.studentClashes(schoolId, userId).then(
+      (data) => ({ data }),
+      (err: unknown) => {
+        if (err instanceof AppError && err.code === 'upstream_unavailable') return { data: [] };
+        return { error: err instanceof Error ? err.message : 'Failed to load clashes' };
+      },
+    ),
+  ]);
+
+  if (rawStudent.status === 'rejected') return null;
+  const raw = rawStudent.value;
+  if (!raw) return null;
+
+  const groups = (raw.groups ?? []).map(mapGroupRef);
+  const enrolledAt = raw.enrolledAt ?? new Date().toISOString().slice(0, 10);
+
+  const clashData = clashesResult.status === 'fulfilled' ? clashesResult.value : { data: [] };
+  const clashes = 'data' in clashData
+    ? (clashData.data ?? []).map((w) => ({
+        groupA: w.with ?? '',
+        groupAId: '',
+        groupB: userId,
+        groupBId: '',
+        day: w.day ?? '',
+        time: w.time ?? '',
+      }))
+    : [];
+
+  const status = deriveStatus({
+    groups,
+    clashes,
+    progress: raw.progress ?? 0,
+    lastSeen: raw.lastSeen ?? null,
+    enrolledAt,
+  });
+
+  // Memberships: try dedicated endpoint, fall back to deriving from groups
+  const memberships: MembershipDetail[] =
+    membershipsResult.status === 'fulfilled' && Array.isArray(membershipsResult.value)
+      ? membershipsResult.value.map(mapMembership)
+      : deriveMembershipsFromGroups(groups);
+
+  const levelHistory: LevelEntry[] =
+    historyResult.status === 'fulfilled' && Array.isArray(historyResult.value)
+      ? historyResult.value.map(mapLevelEntry)
+      : [];
+
+  const activeMemberships = memberships.filter((m) => m.status === 'active');
+  const teacherIds = [
+    ...new Set(activeMemberships.flatMap((m) => m.teachers.map((t) => t.userId))),
+  ];
+
+  return {
+    id: raw.userId,
+    name: raw.name ?? '',
+    email: raw.email ?? '',
+    avatarUrl: raw.avatarUrl ?? null,
+    status,
+    addedToSchoolAt: enrolledAt,
+    primaryLanguage: (raw.lang ?? 'en') as LangCode,
+    currentLevel: (raw.level ?? 'A1') as CEFR,
+    progress: Math.round((raw.progress ?? 0) * 100),
+    lastActiveAt: raw.lastSeen ?? null,
+    memberships,
+    levelHistory,
+    teacherIds,
+    clashes,
+    ...('error' in clashData && { clashesError: clashData.error }),
+  };
 }
 
 export async function getSegments(schoolId: string): Promise<Segment[]> {
