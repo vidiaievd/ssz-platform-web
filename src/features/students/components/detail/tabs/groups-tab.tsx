@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MembershipRoleBadge } from "../groups/membership-role-badge";
 import { CurrentMembershipsTable } from "../groups/current-memberships-table";
-import type { StudentInSchool, MembershipDetail, TeacherRef } from "@/features/students/types";
+import type { StudentInSchool, TeacherRef } from "@/features/students/types";
 import { formatDate } from "@/lib/i18n/formatters";
 import type { Locale } from "@/lib/i18n/config";
 

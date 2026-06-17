@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { MoreHorizontal, ExternalLink, Tag, ArrowRightLeft, UserMinus } from "lucide-react";
+import { MoreHorizontal, ExternalLink, ArrowRightLeft, UserMinus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -32,7 +30,6 @@ type Props = {
 export function MembershipRowKebab({
   groupId,
   groupName,
-  studentName,
   schoolSlug,
   onTransfer,
   onRemove,
