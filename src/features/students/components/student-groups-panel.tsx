@@ -54,7 +54,7 @@ export async function StudentGroupsPanel({ student, schoolId, schoolSlug, addToG
   if (student.groups.length === 0) {
     return (
       <div className="rounded-xl border bg-card p-6">
-        <h2 className="text-base font-semibold mb-4">{t('detail.groups')}</h2>
+        <h2 className="text-base font-semibold mb-4">{t('detail.groupsHeading')}</h2>
         <div className="flex flex-col items-center gap-4 py-8 text-center">
           <p className="text-sm text-muted-foreground">{t('detail.notInAnyGroup')}</p>
           <Button size="sm" asChild>
@@ -67,7 +67,7 @@ export async function StudentGroupsPanel({ student, schoolId, schoolSlug, addToG
 
   return (
     <div className="rounded-xl border bg-card p-6 space-y-4">
-      <h2 className="text-base font-semibold">{t('detail.groups')}</h2>
+      <h2 className="text-base font-semibold">{t('detail.groupsHeading')}</h2>
 
       <div className="space-y-3">
         {student.groups.map((g) => {
