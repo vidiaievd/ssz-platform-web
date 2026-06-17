@@ -40,7 +40,7 @@ export default async function EnrollmentLayout({ children, params }: Props) {
     const dto = await serverFetch<BackendSettings>({
       service: 'organization',
       path: `/schools/${school.schoolId}/enrollment/settings`,
-    }).catch(() => null);
+    });
     const settings = resolveOnboardingSettings(
       dto ? { approval: { mode: dto.approvalMode as 'auto' | 'manual' } } : undefined,
     );

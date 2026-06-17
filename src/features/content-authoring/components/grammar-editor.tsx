@@ -108,7 +108,10 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
       .use(rehypeStringify)
       .process(bodyValue)
       .then((r) => setPreviewHtml(String(r)))
-      .catch(() => setPreviewHtml(''));
+      .catch((err) => {
+        console.error('[grammar-editor] preview render failed:', err);
+        setPreviewHtml('<p style="color:var(--destructive)">Preview unavailable</p>');
+      });
   }, [bodyValue, editorTab]);
 
   function onSubmit(data: GrammarEditorFormValues) {

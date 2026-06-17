@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { getPublicSchool } from '@/features/school/api/get-public-school';
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
 import { OnboardingSettingsForm } from '@/features/enrollment/components/onboarding-settings-form';
 import type { PlacementMode, SchoolOnboardingSettings } from '@/features/enrollment/types';
@@ -29,10 +30,19 @@ export default async function EnrollmentSettingsPage({ params }: Props) {
   let settings: SchoolOnboardingSettings = resolveOnboardingSettings();
 
   if (school) {
-    const dto = await serverFetch<BackendSettings>({
-      service: 'organization',
-      path: `/schools/${school.schoolId}/enrollment/settings`,
-    }).catch(() => null);
+    let dto: BackendSettings | null = null;
+    try {
+      dto = await serverFetch<BackendSettings>({
+        service: 'organization',
+        path: `/schools/${school.schoolId}/enrollment/settings`,
+      });
+    } catch (err) {
+      if (err instanceof AppError && err.code === 'not_found') {
+        // School has no enrollment settings yet — use defaults
+      } else {
+        throw err;
+      }
+    }
 
     if (dto) {
       settings = resolveOnboardingSettings({

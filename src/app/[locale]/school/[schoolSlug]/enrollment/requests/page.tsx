@@ -31,7 +31,7 @@ export default async function RequestsPage({ params }: Props) {
   const dto = await serverFetch<{ approvalMode: string }>({
     service: 'organization',
     path: `/schools/${school.schoolId}/enrollment/settings`,
-  }).catch(() => null);
+  });
 
   const settings = resolveOnboardingSettings(
     dto ? { approval: { mode: dto.approvalMode as 'auto' | 'manual' } } : undefined,
@@ -44,7 +44,7 @@ export default async function RequestsPage({ params }: Props) {
     service: 'organization',
     path: `/schools/${school.schoolId}/memberships`,
     query: { status: 'pending' },
-  }).catch(() => ({ items: [] as BackendMembership[] }));
+  });
 
   const memberships: Membership[] = result.items.map((m) => ({
     id: m.id,

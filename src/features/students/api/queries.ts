@@ -2,6 +2,7 @@ import 'server-only';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
+import { AppError } from '@/lib/errors';
 import { deriveStatus } from '@/lib/students/status';
 import type {
   StudentListItem,
@@ -161,30 +162,42 @@ export async function getStudent(
 ): Promise<StudentDetail | null> {
   const scheduling = getSchedulingProvider();
 
-  const [raw, serverClashes] = await Promise.all([
+  const [raw, clashesResult] = await Promise.all([
     safeStudentsFetch<RawStudentMember>(() =>
       serverFetch({
         service: 'organization',
         path: `/schools/${schoolId}/students/${userId}`,
       }),
     ),
-    scheduling.studentClashes(schoolId, userId).catch(() => []),
+    scheduling.studentClashes(schoolId, userId).then(
+      (data) => ({ data }),
+      (err: unknown) => {
+        if (err instanceof AppError && err.code === 'upstream_unavailable') {
+          return { data: [] };
+        }
+        console.error('[students/queries] studentClashes failed:', err);
+        return { error: err instanceof Error ? err.message : 'Failed to load schedule conflicts' };
+      },
+    ),
   ]);
 
   if (!raw) return null;
 
-  const clashes = serverClashes.map((w) => ({
-    groupA: w.with ?? '',
-    groupB: userId,
-    day: w.day ?? '',
-    time: w.time ?? '',
-  }));
+  const clashes = 'data' in clashesResult
+    ? (clashesResult.data ?? []).map((w) => ({
+        groupA: w.with ?? '',
+        groupB: userId,
+        day: w.day ?? '',
+        time: w.time ?? '',
+      }))
+    : [];
 
   const base = mapStudentListItem(raw, clashes);
 
   return {
     ...base,
     clashes,
+    ...('error' in clashesResult && { clashesError: clashesResult.error }),
   };
 }
 

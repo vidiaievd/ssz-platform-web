@@ -2,6 +2,7 @@ import 'server-only';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
+import { AppError } from '@/lib/errors';
 import { groupAlerts, teacherLoad, slotsOverlap, type GroupForOps } from '@/lib/groups/operations';
 // groupCacheTags are used by mutations (revalidateTag) — queries use no-store for now
 // until serverFetch is extended to accept next.tags.
@@ -294,9 +295,20 @@ export async function getSchoolTeachers(
 /**
  * Teacher timetable view model for the timetable page.
  */
-export async function getTimetable(schoolId: string): Promise<TimetableTeacher[]> {
+export type TimetableResult = { data: TimetableTeacher[] } | { error: string };
+
+export async function getTimetable(schoolId: string): Promise<TimetableResult> {
   const scheduling = getSchedulingProvider();
-  return scheduling.teacherTimetable(schoolId);
+  try {
+    const data = await scheduling.teacherTimetable(schoolId);
+    return { data };
+  } catch (err) {
+    if (err instanceof AppError && err.code === 'upstream_unavailable') {
+      return { data: [] };
+    }
+    console.error('[groups/queries] teacherTimetable failed:', err);
+    return { error: err instanceof Error ? err.message : 'Failed to load timetable' };
+  }
 }
 
 /**
@@ -308,7 +320,10 @@ export async function getTeacherLoads(
   const scheduling = getSchedulingProvider();
   const [teachers, timetableTeachers] = await Promise.all([
     getSchoolTeachers(schoolId),
-    scheduling.teacherTimetable(schoolId),
+    scheduling.teacherTimetable(schoolId).catch((err) => {
+      console.error('[groups/queries] teacherTimetable failed:', err);
+      return [] as TimetableTeacher[];
+    }),
   ]);
 
   const result: Record<string, ReturnType<typeof teacherLoad>> = {};
@@ -353,7 +368,7 @@ export async function getTeacherAssignCandidates(
   groupSlots: Slot[];
   candidates: TeacherAssignCandidate[];
 }> {
-  const [groupData, teachers, timetable] = await Promise.all([
+  const [groupData, teachers, timetableResult] = await Promise.all([
     getGroup(schoolId, groupId),
     getSchoolTeachers(schoolId),
     getTimetable(schoolId),
@@ -363,10 +378,11 @@ export async function getTeacherAssignCandidates(
     return { groupName: '', groupLang: 'en', groupSlots: [], candidates: [] };
   }
 
+  const timetable = 'data' in timetableResult ? timetableResult.data : [];
   const existingIds = new Set(groupData.teachers.map((t) => t.userId));
 
   const candidates: TeacherAssignCandidate[] = teachers.map((t) => {
-    const tt = timetable.find((x) => x.userId === t.userId);
+    const tt = timetable.find((x: TimetableTeacher) => x.userId === t.userId);
     // Lessons in the timetable represent recurring weekly slots (day + time).
     const teacherSlots = (tt?.lessons ?? []).map((l) => ({
       day: l.day,

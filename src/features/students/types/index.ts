@@ -41,6 +41,7 @@ export interface StudentDetail extends StudentListItem {
     day: string;
     time: string;
   }>;
+  clashesError?: string;
 }
 
 export interface TeacherRef {

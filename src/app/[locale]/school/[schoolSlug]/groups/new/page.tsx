@@ -14,11 +14,12 @@ export default async function NewGroupPage({ params }: Props) {
   const school = await getSchoolBySlug(schoolSlug);
   if (!school) notFound();
 
-  const [teachers, timetable, students] = await Promise.all([
+  const [teachers, timetableResult, students] = await Promise.all([
     getSchoolTeachers(school.id),
     getTimetable(school.id),
     getSchoolStudents(school.id),
   ]);
+  const timetable = 'data' in timetableResult ? timetableResult.data : [];
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">

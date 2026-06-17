@@ -4,58 +4,27 @@
  * See backend-todo.md §3.
  */
 
+import { AppError } from '@/lib/errors';
 import type { SchedulingProvider } from './provider';
 
+const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
+
 export const realProvider: SchedulingProvider = {
-  async getSlots(_groupId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async putSlots(_groupId: string, _slots: unknown[]) {
-    throw new Error('scheduling-service not ready');
-  },
-  async nextLessons(_groupId: string, _limit: number) {
-    throw new Error('scheduling-service not ready');
-  },
-  async teacherTimetable(_schoolId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async teacherConflicts(_schoolId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async studentClashes(_schoolId: string, _userId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async commandCenter(_schoolId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async getAvailability(_teacherId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async putAvailability(_teacherId: string, _blocks: unknown[]) {
-    throw new Error('scheduling-service not ready');
-  },
-  async listAbsences(_schoolId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async reportAbsence(_input: unknown) {
-    throw new Error('scheduling-service not ready');
-  },
-  async coverQueue(_schoolId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async candidates(_requestId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async assignSubstitute(_requestId: string, _substituteTeacherId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async getCurriculum(_groupId: string) {
-    throw new Error('scheduling-service not ready');
-  },
-  async putCurriculum(_groupId: string, _plan: unknown) {
-    throw new Error('scheduling-service not ready');
-  },
-  async computeForecast(_schoolId: string, _params: unknown) {
-    throw new Error('scheduling-service not ready');
-  },
+  async getSlots(_groupId: string) { throw notReady(); },
+  async putSlots(_groupId: string, _slots: unknown[]) { throw notReady(); },
+  async nextLessons(_groupId: string, _limit: number) { throw notReady(); },
+  async teacherTimetable(_schoolId: string) { throw notReady(); },
+  async teacherConflicts(_schoolId: string) { throw notReady(); },
+  async studentClashes(_schoolId: string, _userId: string) { throw notReady(); },
+  async commandCenter(_schoolId: string) { throw notReady(); },
+  async getAvailability(_teacherId: string) { throw notReady(); },
+  async putAvailability(_teacherId: string, _blocks: unknown[]) { throw notReady(); },
+  async listAbsences(_schoolId: string) { throw notReady(); },
+  async reportAbsence(_input: unknown) { throw notReady(); },
+  async coverQueue(_schoolId: string) { throw notReady(); },
+  async candidates(_requestId: string) { throw notReady(); },
+  async assignSubstitute(_requestId: string, _substituteTeacherId: string) { throw notReady(); },
+  async getCurriculum(_groupId: string) { throw notReady(); },
+  async putCurriculum(_groupId: string, _plan: unknown) { throw notReady(); },
+  async computeForecast(_schoolId: string, _params: unknown) { throw notReady(); },
 };

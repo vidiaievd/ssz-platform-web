@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { getPublicSchool } from '@/features/school/api/get-public-school';
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
 import { OnboardingStepper } from '@/features/enrollment/components/onboarding-stepper';
 import type { Membership, MembershipStatus, MembershipSource } from '@/features/enrollment/types';
@@ -44,15 +45,24 @@ export default async function OnboardingPage({ params, searchParams }: Props) {
   if (!school) notFound();
 
   // Fetch membership and settings in parallel
+  const fetchWithNotFound = async <T,>(fetch: Promise<T>): Promise<T | null> => {
+    try {
+      return await fetch;
+    } catch (err) {
+      if (err instanceof AppError && err.code === 'not_found') return null;
+      throw err;
+    }
+  };
+
   const [backendMembership, backendSettings] = await Promise.all([
-    serverFetch<BackendMembership>({
+    fetchWithNotFound(serverFetch<BackendMembership>({
       service: 'organization',
       path: `/schools/${school.schoolId}/memberships/me`,
-    }).catch(() => null),
-    serverFetch<BackendSettings>({
+    })),
+    fetchWithNotFound(serverFetch<BackendSettings>({
       service: 'organization',
       path: `/schools/${school.schoolId}/enrollment/settings`,
-    }).catch(() => null),
+    })),
   ]);
 
   if (!backendMembership || backendMembership.id !== membershipId) notFound();

@@ -17,10 +17,9 @@ export default async function StudentDetailPage({ params }: Props) {
   const t = await getTranslations('Students');
 
   const school = await getSchoolBySlug(schoolSlug);
-  if (!school) notFound();
+  const student = school ? await getStudent(school.id, studentId) : null;
 
-  const student = await getStudent(school.id, studentId);
-  if (!student) notFound();
+  if (!school || !student) notFound();
 
   const addToGroupHref = `?add-to-group=1`;
 
@@ -36,6 +35,9 @@ export default async function StudentDetailPage({ params }: Props) {
       </Link>
 
       {/* Header + clash banner */}
+      {student.clashesError && (
+        <p className="text-sm text-destructive">{student.clashesError}</p>
+      )}
       <StudentDetailHeader
         student={student}
         schoolId={school.id}

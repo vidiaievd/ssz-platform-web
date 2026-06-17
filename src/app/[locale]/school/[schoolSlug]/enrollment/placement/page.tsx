@@ -33,8 +33,8 @@ export default async function PlacementQueuePage({ params }: Props) {
       service: 'organization',
       path: `/schools/${school.schoolId}/memberships`,
       query: { status: 'placement-review' },
-    }).catch(() => ({ items: [] as BackendMembership[] })),
-    getGroups(school.schoolId).catch(() => []),
+    }),
+    getGroups(school.schoolId),
   ]);
 
   const memberships: Membership[] = result.items.map((m) => ({

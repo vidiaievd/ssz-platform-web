@@ -18,7 +18,7 @@ export async function GET(
         service: 'content',
         path: `/containers/${id}/versions`,
         query: { limit: '1' },
-      }).catch(() => ({ items: [] })),
+      }),
     ]);
 
     const result = runPreflight(container, itemsResp.items ?? []);
