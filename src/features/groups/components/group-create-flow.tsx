@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Stepper } from '@/components/ui/stepper';
 import { cn } from '@/lib/utils';
 import { createGroup, updateSlots, assignTeacher, addStudents } from '../api/mutations';
+import { useSchoolStudents } from '../api/use-student-candidates';
 import { useGroupCreateWizardStore } from '../stores/create-wizard-store';
 import { StepCourse } from './create/step-course';
 import { StepDetails } from './create/step-details';
@@ -45,8 +46,9 @@ type Props = {
   students: StudentCandidate[];
 };
 
-export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timetable, students }: Props) {
+export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timetable, students: initialStudents }: Props) {
   const router = useRouter();
+  const { data: students } = useSchoolStudents(schoolId, { initialData: initialStudents });
   const [isPending, startTransition] = useTransition();
   const store = useGroupCreateWizardStore();
   const { currentStep, setStep, isStepValid, isSubmitting, submitError, setSubmitting, setSubmitError, reset } = store;

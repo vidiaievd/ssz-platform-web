@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Search, AlertTriangle } from 'lucide-react';
 
@@ -14,6 +15,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
 import { addStudents } from '../api/mutations';
+import { useStudentCandidates } from '../api/use-student-candidates';
+import { groupKeys } from '../api/keys';
+import { studentKeys } from '@/features/students/api/keys';
 import type { StudentCandidate } from '../api/queries';
 
 type Props = {
@@ -27,13 +31,23 @@ type Props = {
 
 export function StudentAssignModal({
   groupId,
-  groupName,
-  capacity,
-  currentCount,
-  candidates,
+  groupName: initialGroupName,
+  capacity: initialCapacity,
+  currentCount: initialCurrentCount,
+  candidates: initialCandidates,
   schoolId,
 }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { data } = useStudentCandidates(schoolId, groupId, {
+    initialData: {
+      groupName: initialGroupName,
+      currentCount: initialCurrentCount,
+      capacity: initialCapacity,
+      candidates: initialCandidates,
+    },
+  });
+  const { groupName, capacity, currentCount, candidates } = data;
   const [isPending, startTransition] = useTransition();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState('');
@@ -75,6 +89,8 @@ export function StudentAssignModal({
       if (result.ok) {
         const n = selectedIds.size;
         toast.success(`Added ${n} student${n > 1 ? 's' : ''}${overCap ? ' (over capacity — override applied)' : ''}`);
+        queryClient.invalidateQueries({ queryKey: groupKeys.studentCandidates(schoolId, groupId) });
+        queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         router.back();
         router.refresh();
       } else {
