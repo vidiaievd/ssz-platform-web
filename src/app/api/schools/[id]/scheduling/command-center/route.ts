@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { getSchoolTeachers } from '@/features/groups/api/queries';
+import { getSchoolTeachersResult } from '@/features/groups/api/queries';
 import type { TeacherLoadRow, WorkloadKpis } from '@/features/teachers/types';
 import { handleBffError } from '../../_bff-helpers';
 
@@ -14,7 +14,7 @@ type Params = { params: Promise<{ id: string }> };
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
   try {
-    const orgTeachers = await getSchoolTeachers(id);
+    const { teachers: orgTeachers, error: teachersError } = await getSchoolTeachersResult(id);
 
     const teachers: TeacherLoadRow[] = orgTeachers.map((t) => ({
       teacherId: t.userId,
@@ -39,7 +39,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
       vacancyCount: 0,
     };
 
-    return NextResponse.json({ kpis, teachers, violations: [], vacancies: [], roomLoad: [] });
+    return NextResponse.json({
+      kpis,
+      teachers,
+      violations: [],
+      vacancies: [],
+      roomLoad: [],
+      teachersError,
+    });
   } catch (e) {
     return handleBffError(e, 'Failed to fetch command center');
   }

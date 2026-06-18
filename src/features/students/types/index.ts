@@ -88,3 +88,60 @@ export interface StudentsListResult {
   total: number;
   nextCursor?: string | null;
 }
+
+// ── Detail page types (spec §2) ───────────────────────────────────────────────
+
+export type MembershipRole = 'student' | 'trial' | 'observer';
+export type MembershipStatus = 'active' | 'past';
+export type GroupStatus = 'draft' | 'active' | 'archived';
+
+export interface Slot {
+  day: string;
+  time: string;
+  durationMin?: number;
+}
+
+export interface MembershipDetail {
+  id: string;
+  groupId: string;
+  groupName: string;
+  lang: LangCode;
+  level: CEFR;
+  role: MembershipRole;
+  status: MembershipStatus;
+  addedAt: ISODate;
+  exitedAt?: ISODate;
+  teachers: TeacherRef[];
+  schedule: Slot[];
+  groupStatus: GroupStatus;
+}
+
+export interface LevelEntry {
+  level: CEFR;
+  startedAt: ISODate;
+  endedAt?: ISODate;
+  groupId?: string;
+  groupName?: string;
+  assessedBy?: TeacherRef;
+}
+
+/** Enriched student for the detail page (school-scoped). */
+export interface StudentInSchool {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatarUrl?: string | null;
+  status: StudentStatus;
+  addedToSchoolAt: ISODate;
+  primaryLanguage: LangCode;
+  currentLevel: CEFR;
+  /** 0–100 */
+  progress: number;
+  lastActiveAt: ISODate | null;
+  memberships: MembershipDetail[];
+  levelHistory: LevelEntry[];
+  teacherIds: string[];
+  clashes: Array<{ groupA: string; groupAId: string; groupB: string; groupBId: string; day: string; time: string }>;
+  clashesError?: string;
+}

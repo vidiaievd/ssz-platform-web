@@ -33,7 +33,7 @@ export function useContainers({ filters, scope = 'public', enabled = true }: Use
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
       lastPage.pageInfo.hasNextPage ? lastPage.pageInfo.nextCursor : undefined,
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
     enabled,
   });
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { TriangleAlert, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -8,61 +9,25 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ackAlert } from "@/features/teachers/api/mutations";
-import type { Alert } from "@/features/teachers/types";
+import { useCommandCenter } from "@/features/teachers/api/use-command-center";
+import { teacherKeys } from "@/features/teachers/api/keys";
 
 type AlertBadgeProps = {
-  alerts?: Alert[];
   schoolId?: string;
 };
 
 const POLL_INTERVAL_MS = 60_000;
 
-export function AlertBadge({ alerts: initialAlerts = [], schoolId }: AlertBadgeProps) {
+export function AlertBadge({ schoolId }: AlertBadgeProps) {
   const [open, setOpen] = useState(false);
-  const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
   const [isPending, startTransition] = useTransition();
   const t = useTranslations("Teachers.alerts");
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!schoolId) return;
-
-    let active = true;
-
-    ;(async () => {
-      try {
-        const res = await fetch(
-          `/api/schools/${schoolId}/scheduling/command-center`,
-          { cache: "no-store" },
-        );
-        if (!res.ok || !active) return;
-        const data = (await res.json()) as { violations?: Alert[] };
-        if (data.violations && active) setAlerts(data.violations);
-      } catch {
-        // silent — badge degrades gracefully when unavailable
-      }
-    })();
-
-    const id = setInterval(() => {
-      ;(async () => {
-        try {
-          const res = await fetch(
-            `/api/schools/${schoolId}/scheduling/command-center`,
-            { cache: "no-store" },
-          );
-          if (!res.ok || !active) return;
-          const data = (await res.json()) as { violations?: Alert[] };
-          if (data.violations && active) setAlerts(data.violations);
-        } catch {
-          // silent
-        }
-      })();
-    }, POLL_INTERVAL_MS);
-
-    return () => {
-      active = false;
-      clearInterval(id);
-    };
-  }, [schoolId]);
+  const { data } = useCommandCenter(schoolId ?? "", {
+    refetchInterval: schoolId ? POLL_INTERVAL_MS : undefined,
+  });
+  const alerts = data?.violations ?? [];
 
   // Close on outside click or Escape
   useEffect(() => {
@@ -91,8 +56,15 @@ export function AlertBadge({ alerts: initialAlerts = [], schoolId }: AlertBadgeP
     startTransition(async () => {
       const res = await ackAlert(schoolId, alertId);
       if (res.ok) {
-        setAlerts((prev) =>
-          prev.map((a) => (a.alertId === alertId ? { ...a, state: "acknowledged" as const } : a)),
+        queryClient.setQueryData(teacherKeys.commandCenter(schoolId), (old: typeof data) =>
+          old
+            ? {
+                ...old,
+                violations: old.violations.map((a) =>
+                  a.alertId === alertId ? { ...a, state: "acknowledged" as const } : a,
+                ),
+              }
+            : old,
         );
       } else {
         toast.error(t("ackError"));

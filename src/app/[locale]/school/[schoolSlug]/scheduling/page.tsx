@@ -37,6 +37,7 @@ export default async function SchedulingOverviewPage({ params }: Props) {
           violations: [],
           vacancies: [],
           roomLoad: [],
+          teachersError: 'Failed to load command center data',
         };
 
   return (

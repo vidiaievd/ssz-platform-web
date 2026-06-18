@@ -107,6 +107,11 @@ async function safeOrgFetch<T>(fn: () => Promise<T>): Promise<T | null> {
 
 // ── Public fetchers ───────────────────────────────────────────────────────────
 
+export type GetGroupsResult = {
+  groups: GroupHealthRowVM[];
+  schedulingError: string | null;
+};
+
 /**
  * Groups list with ops-derived health view models.
  * Used by the groups list RSC page.
@@ -114,7 +119,7 @@ async function safeOrgFetch<T>(fn: () => Promise<T>): Promise<T | null> {
 export async function getGroups(
   schoolId: string,
   _opts?: { role?: string },
-): Promise<GroupHealthRowVM[]> {
+): Promise<GetGroupsResult> {
   const scheduling = getSchedulingProvider();
 
   const rawGroups = await safeOrgFetch<OrgGroup[]>(() =>
@@ -123,11 +128,22 @@ export async function getGroups(
       path: `/schools/${schoolId}/groups`,
     }),
   );
-  if (!rawGroups) return [];
+  if (!rawGroups) return { groups: [], schedulingError: null };
 
-  // Fetch all slots in parallel
+  // Fetch all slots in parallel; a scheduling outage degrades to empty
+  // slots per group instead of failing the whole page.
+  let schedulingError: string | null = null;
   const slotsMap = await Promise.all(
-    rawGroups.map((g) => scheduling.getSlots(g.id).then((s) => ({ id: g.id, slots: s }))),
+    rawGroups.map((g) =>
+      scheduling
+        .getSlots(g.id)
+        .then((s) => ({ id: g.id, slots: s }))
+        .catch((err) => {
+          if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
+          schedulingError = err.message;
+          return { id: g.id, slots: [] as Slot[] };
+        }),
+    ),
   ).then((entries) => Object.fromEntries(entries.map((e) => [e.id, e.slots])));
 
   const allForOps = rawGroups.map((g) => buildGroupForOps(g, slotsMap[g.id] ?? []));
@@ -142,7 +158,7 @@ export async function getGroups(
     }
   }
 
-  return rawGroups.map((g) => {
+  const groups = rawGroups.map((g) => {
     const slots = slotsMap[g.id] ?? [];
     const forOps = buildGroupForOps(g, slots);
     const primary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
@@ -173,6 +189,8 @@ export async function getGroups(
       alerts,
     };
   });
+
+  return { groups, schedulingError };
 }
 
 /**
@@ -191,7 +209,10 @@ export async function getGroup(
         path: `/schools/${schoolId}/groups/${groupId}`,
       }),
     ),
-    scheduling.getSlots(groupId),
+    scheduling.getSlots(groupId).catch((err): Slot[] => {
+      if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
+      return [];
+    }),
     safeOrgFetch<OrgMember[]>(() =>
       serverFetch({
         service: 'organization',
@@ -266,21 +287,15 @@ export async function getGroup(
   return { ...group, roster: rosterStudents, alerts };
 }
 
-/**
- * School teachers for assign-modal and timetable.
- * Returns members with TEACHER role.
- */
-export async function getSchoolTeachers(
-  schoolId: string,
-): Promise<Array<{ userId: string; name: string; avatarUrl: string | null; maxWeeklyHours: number; langs: string[] }>> {
-  const raw = await safeOrgFetch<OrgMember[]>(() =>
-    serverFetch({
-      service: 'organization',
-      path: `/schools/${schoolId}/members`,
-      query: { role: 'TEACHER' },
-    }),
-  );
-  if (!raw) return [];
+type SchoolTeacher = {
+  userId: string;
+  name: string;
+  avatarUrl: string | null;
+  maxWeeklyHours: number;
+  langs: string[];
+};
+
+function mapSchoolTeachers(raw: OrgMember[]): SchoolTeacher[] {
   return raw
     .filter((m) => m.role === 'TEACHER')
     .map((m) => ({
@@ -290,6 +305,44 @@ export async function getSchoolTeachers(
       maxWeeklyHours: m.maxWeeklyHours ?? 20,
       langs: m.langs ?? [],
     }));
+}
+
+/**
+ * School teachers for assign-modal and timetable.
+ * Returns members with TEACHER role. Upstream failures degrade to an empty list —
+ * use getSchoolTeachersResult where the caller needs to distinguish failure from
+ * a genuinely empty roster.
+ */
+export async function getSchoolTeachers(schoolId: string): Promise<SchoolTeacher[]> {
+  const raw = await safeOrgFetch<OrgMember[]>(() =>
+    serverFetch({
+      service: 'organization',
+      path: `/schools/${schoolId}/members`,
+      query: { role: 'TEACHER' },
+    }),
+  );
+  return raw ? mapSchoolTeachers(raw) : [];
+}
+
+/**
+ * Same as getSchoolTeachers, but surfaces upstream failures instead of
+ * silently degrading to an empty list — for screens where "no teachers"
+ * and "failed to load teachers" must be rendered differently.
+ */
+export async function getSchoolTeachersResult(
+  schoolId: string,
+): Promise<{ teachers: SchoolTeacher[]; error: string | null }> {
+  try {
+    const raw = await serverFetch<OrgMember[]>({
+      service: 'organization',
+      path: `/schools/${schoolId}/members`,
+      query: { role: 'TEACHER' },
+    });
+    return { teachers: mapSchoolTeachers(raw), error: null };
+  } catch (err) {
+    if (err instanceof AppError) return { teachers: [], error: err.message };
+    throw err;
+  }
 }
 
 /**

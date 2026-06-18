@@ -1565,7 +1565,35 @@
     },
     "detail": {
       "backToStudents": "Back to students",
-      "groups": "Groups",
+      "groups": {
+        "activeHeading": "Active groups ({n})",
+        "viewAll": "View all groups →",
+        "currentHeading": "Current groups ({n})",
+        "pastHeading": "Past groups ({n})",
+        "pastEmpty": "No past group history.",
+        "empty": {
+          "title": "Not in any group yet",
+          "body": "Assign this student to a group to connect them with a teacher and timetable."
+        },
+        "cols": {
+          "group": "Group",
+          "role": "Role",
+          "teachers": "Teachers",
+          "schedule": "Schedule",
+          "since": "Since"
+        },
+        "role": {
+          "student": "Student",
+          "trial": "Trial",
+          "observer": "Observer"
+        },
+        "actions": {
+          "view": "View group",
+          "changeRole": "Change role",
+          "transfer": "Transfer to another group",
+          "remove": "Remove from group"
+        }
+      },
       "teachers": "Teachers",
       "progress": "Progress",
       "details": "Details",
@@ -1587,7 +1615,136 @@
       "removedFromGroup": "Removed from {group}",
       "removeFailed": "Failed to remove from group.",
       "removeFromGroupAriaLabel": "Remove from {group}",
-      "clashBanner": "{groupA} overlaps {groupB} on {day} at {time}. Move the student to a different group session."
+      "clashBanner": "{groupA} overlaps {groupB} on {day} at {time}. Move the student to a different group session.",
+      "back": "← Students",
+      "addedAt": "Added {date}",
+      "lastSeen": {
+        "never": "Never",
+        "value": "{relative}"
+      },
+      "actions": {
+        "nudge": "Nudge",
+        "nudgeSent": "Sent ✓",
+        "nudgeCooldown": "Sent recently",
+        "assignGroup": "Assign to group",
+        "editInfo": "Edit student info",
+        "changeLevel": "Change level",
+        "archive": "Archive student",
+        "unarchive": "Unarchive student",
+        "removeFromSchool": "Remove from school"
+      },
+      "clash": {
+        "title": "Schedule clash detected",
+        "body": "{groupA} ({dayA} {timeA}) overlaps {groupB} ({dayB} {timeB}).",
+        "cta": "View groups →"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "groups": "Groups",
+        "history": "Learning History",
+        "notes": "Notes",
+        "payments": "Payments",
+        "bonuses": "Bonuses"
+      },
+      "info": {
+        "heading": "Student information",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status",
+        "language": "Primary language",
+        "level": "Current level",
+        "addedAt": "Date added",
+        "copied": "Copied"
+      },
+      "stats": {
+        "progress": "Progress",
+        "lastSeen": "Last seen",
+        "teachers": "{n, plural, one {# teacher} other {# teachers}}",
+        "noTeacher": "No teacher"
+      },
+      "history": {
+        "levels": {
+          "heading": "Level progression",
+          "empty": {
+            "title": "No level history yet",
+            "body": "Level changes will appear here as the student progresses."
+          },
+          "present": "present",
+          "duration": "{n} months"
+        },
+        "periods": {
+          "heading": "Study periods",
+          "empty": {
+            "title": "No study periods yet"
+          },
+          "cols": {
+            "period": "Period",
+            "group": "Group",
+            "role": "Role",
+            "teachers": "Teachers",
+            "status": "Status"
+          },
+          "statusActive": "Active",
+          "statusCompleted": "Completed"
+        },
+        "teachers": {
+          "heading": "Teachers",
+          "empty": {
+            "title": "No teacher history yet"
+          }
+        }
+      },
+      "assign": {
+        "title": "Assign to group",
+        "search": "Search groups…",
+        "roleLabel": "Role",
+        "confirm": "Assign to group",
+        "confirmAnyway": "Assign anyway",
+        "clashWarning": "Adding to {group} creates a schedule clash with {existing} ({day} {time}).",
+        "overCapacity": "This group is at capacity ({current}/{max} seats).",
+        "languageMismatch": "Language mismatch",
+        "success": "Added {name} to {group}."
+      },
+      "transfer": {
+        "title": "Transfer to another group",
+        "from": "Moving from",
+        "to": "Move to",
+        "confirm": "Transfer student",
+        "success": "Moved {name} from {from} to {to}.",
+        "error": "Transfer failed — {name} is still in {from}."
+      },
+      "remove": {
+        "group": {
+          "title": "Remove from group?",
+          "heading": "Remove {name} from {group}?",
+          "body": "{name} will lose access to this group’s lessons and teacher. Their progress and history will be preserved under Past groups.",
+          "confirm": "Remove from group",
+          "success": "Removed {name} from {group}.",
+          "undo": "Undo"
+        },
+        "school": {
+          "heading": "Remove {name} from this school?",
+          "bodyWithGroups": "{name} is currently in {n, plural, one {# group} other {# groups}}. Removing them will unenroll them from all groups and delete their school membership.",
+          "bodyNoGroups": "{name} is not currently in any groups. Removing them will delete their school membership.",
+          "irreversible": "This cannot be undone.",
+          "confirm": "Remove from school"
+        }
+      },
+      "stubs": {
+        "notes": {
+          "title": "Coming soon",
+          "body": "Teacher notes will appear here."
+        },
+        "payments": {
+          "title": "Coming soon",
+          "body": "Payment history will appear here."
+        },
+        "bonuses": {
+          "title": "Coming soon",
+          "body": "Bonuses and credits will appear here."
+        }
+      },
+      "groupsHeading": "Groups"
     },
     "enroll": {
       "title": "Enroll student",

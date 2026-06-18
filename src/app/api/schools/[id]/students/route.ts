@@ -2,20 +2,20 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors/app-error';
+import { getStudents } from '@/features/students/api/queries';
+import type { SegmentKey } from '@/features/students/types';
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Params) {
   const { id } = await params;
   const { searchParams } = req.nextUrl;
-  const query: Record<string, string> = {};
-  for (const [k, v] of searchParams.entries()) query[k] = v;
 
   try {
-    const data = await serverFetch({
-      service: 'organization',
-      path: `/schools/${id}/students`,
-      query,
+    const data = await getStudents(id, {
+      segment: (searchParams.get('segment') as SegmentKey | null) ?? undefined,
+      search: searchParams.get('search') ?? undefined,
+      cursor: searchParams.get('cursor') ?? undefined,
     });
     return NextResponse.json(data);
   } catch (e) {

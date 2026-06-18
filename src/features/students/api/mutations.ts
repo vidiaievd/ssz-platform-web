@@ -210,6 +210,120 @@ export async function bulkMessage(
   }
 }
 
+// ── Transfer group ────────────────────────────────────────────────────────────
+
+export async function transferGroup(
+  schoolId: string,
+  studentId: string,
+  fromGroupId: string,
+  toGroupId: string,
+  role?: string,
+): Promise<MutationResult> {
+  try {
+    await serverFetch({
+      service: 'organization',
+      path: `/schools/${schoolId}/students/${studentId}/transfer`,
+      method: 'POST',
+      body: { fromGroupId, toGroupId, ...(role && { role }) },
+    });
+    invalidate(studentCacheTags.students(schoolId));
+    invalidate(studentCacheTags.student(studentId));
+    invalidate(groupCacheTags.group(fromGroupId));
+    invalidate(groupCacheTags.group(toGroupId));
+    invalidate(groupCacheTags.groups(schoolId));
+    invalidate(`conflicts:${schoolId}`);
+    return { ok: true };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ── Change membership role ────────────────────────────────────────────────────
+
+export async function updateMembershipRole(
+  schoolId: string,
+  groupId: string,
+  membershipId: string,
+  role: string,
+): Promise<MutationResult> {
+  try {
+    await serverFetch({
+      service: 'organization',
+      path: `/schools/${schoolId}/groups/${groupId}/members/${membershipId}`,
+      method: 'PATCH',
+      body: { role },
+    });
+    invalidate(studentCacheTags.student(membershipId));
+    invalidate(groupCacheTags.group(groupId));
+    return { ok: true };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ── Archive / unarchive student ───────────────────────────────────────────────
+
+export async function archiveStudent(
+  schoolId: string,
+  studentId: string,
+  archive: boolean,
+): Promise<MutationResult> {
+  try {
+    await serverFetch({
+      service: 'organization',
+      path: `/schools/${schoolId}/students/${studentId}`,
+      method: 'PATCH',
+      body: { status: archive ? 'archived' : 'active' },
+    });
+    invalidate(studentCacheTags.students(schoolId));
+    invalidate(studentCacheTags.student(studentId));
+    return { ok: true };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ── Remove from school ────────────────────────────────────────────────────────
+
+export async function removeFromSchool(
+  schoolId: string,
+  studentId: string,
+): Promise<MutationResult> {
+  try {
+    await serverFetch({
+      service: 'organization',
+      path: `/schools/${schoolId}/students/${studentId}`,
+      method: 'DELETE',
+    });
+    invalidate(studentCacheTags.students(schoolId));
+    return { ok: true };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ── Change level ──────────────────────────────────────────────────────────────
+
+export async function changeStudentLevel(
+  schoolId: string,
+  studentId: string,
+  level: string,
+): Promise<MutationResult> {
+  try {
+    await serverFetch({
+      service: 'organization',
+      path: `/schools/${schoolId}/students/${studentId}`,
+      method: 'PATCH',
+      body: { level },
+    });
+    invalidate(studentCacheTags.students(schoolId));
+    invalidate(studentCacheTags.student(studentId));
+    return { ok: true };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
 // ── Save segment (feature-flagged) ────────────────────────────────────────────
 
 export async function saveSegment(

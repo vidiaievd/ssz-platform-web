@@ -28,7 +28,7 @@ export default async function PlacementQueuePage({ params }: Props) {
   const school = await getPublicSchool(schoolSlug);
   if (!school) notFound();
 
-  const [result, rawGroups] = await Promise.all([
+  const [result, { groups: rawGroups }] = await Promise.all([
     serverFetch<{ items: BackendMembership[] }>({
       service: 'organization',
       path: `/schools/${school.schoolId}/memberships`,

@@ -12,6 +12,12 @@ vi.mock('@/lib/api/server-fetcher', () => ({
   serverFetch: vi.fn(),
 }));
 
+vi.mock('@/lib/scheduling/provider', () => ({
+  getSchedulingProvider: vi.fn(() => ({
+    teacherConflicts: vi.fn().mockResolvedValue([]),
+  })),
+}));
+
 const { GET, POST } = await import('./route');
 const { serverFetch } = await import('@/lib/api/server-fetcher');
 const mockFetch = vi.mocked(serverFetch);
@@ -32,29 +38,38 @@ const STUDENT = {
 describe('GET /api/schools/[id]/students', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('returns 200 with student list', async () => {
+  it('returns 200 with the enriched student list', async () => {
     mockFetch.mockResolvedValue([STUDENT]);
     const req = new NextRequest('http://localhost/api/schools/school-1/students');
     const res = await GET(req, PARAMS);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(Array.isArray(body)).toBe(true);
+    expect(body.items).toHaveLength(1);
+    expect(body.items[0].userId).toBe('u1');
+    expect(body.total).toBe(1);
   });
 
-  it('returns 401 when unauthenticated', async () => {
+  // getStudents() degrades gracefully on upstream failure (same contract as the
+  // RSC page that also calls it) rather than propagating the upstream status —
+  // a transient org-service hiccup should never crash the roster.
+  it('returns 200 with an empty list when unauthenticated', async () => {
     const { AppError } = await import('@/lib/errors');
     mockFetch.mockRejectedValue(new AppError('unauthenticated', 'No token'));
     const req = new NextRequest('http://localhost/api/schools/school-1/students');
     const res = await GET(req, PARAMS);
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.items).toEqual([]);
   });
 
-  it('returns 502 on upstream error', async () => {
+  it('returns 200 with an empty list on upstream error', async () => {
     const { AppError } = await import('@/lib/errors');
     mockFetch.mockRejectedValue(new AppError('upstream_unavailable', 'Down'));
     const req = new NextRequest('http://localhost/api/schools/school-1/students');
     const res = await GET(req, PARAMS);
-    expect(res.status).toBe(502);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.items).toEqual([]);
   });
 });
 
