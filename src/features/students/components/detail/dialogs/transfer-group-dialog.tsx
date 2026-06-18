@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { Search, Loader2 } from "lucide-react";
@@ -17,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { transferGroup } from "@/features/students/api/mutations";
+import { studentKeys } from "@/features/students/api/keys";
 import type { MembershipDetail } from "@/features/students/types";
 
 type GroupOption = {
@@ -49,6 +51,7 @@ export function TransferGroupDialog({
 }: Props) {
   const t = useTranslations("Students");
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -76,6 +79,7 @@ export function TransferGroupDialog({
         selectedId,
       );
       if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         onClose();
         router.refresh();
         toast.success(

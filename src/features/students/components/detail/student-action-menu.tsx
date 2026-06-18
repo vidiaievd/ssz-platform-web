@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { MoreHorizontal, Pencil, GraduationCap, Archive, Trash2, Loader2 } from "lucide-react";
@@ -16,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { RemoveFromSchoolDialog } from "./dialogs/remove-from-school-dialog";
 import { archiveStudent } from "@/features/students/api/mutations";
+import { studentKeys } from "@/features/students/api/keys";
 
 type Props = {
   studentId: string;
@@ -38,12 +40,14 @@ export function StudentActionMenu({
 }: Props) {
   const t = useTranslations("Students");
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
 
   function handleArchive() {
     startTransition(async () => {
       await archiveStudent(schoolId, studentId, !isArchived);
+      queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
       router.refresh();
       toast.success(isArchived ? t("detail.actions.unarchive") : t("detail.actions.archive"));
     });

@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
@@ -17,6 +18,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { removeFromSchool } from "@/features/students/api/mutations";
+import { studentKeys } from "@/features/students/api/keys";
 
 type Props = {
   open: boolean;
@@ -39,12 +41,14 @@ export function RemoveFromSchoolDialog({
 }: Props) {
   const t = useTranslations("Students");
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   function handleRemove() {
     startTransition(async () => {
       const result = await removeFromSchool(schoolId, studentId);
       if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         onClose();
         router.push(`/school/${schoolSlug}/students`);
       } else {

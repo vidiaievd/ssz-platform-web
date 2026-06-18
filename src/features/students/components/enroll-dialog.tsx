@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { Loader2, UserPlus, AlertCircle, UserCheck } from 'lucide-react';
@@ -28,6 +29,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { resolveEmail } from '../api/resolve-email';
 import { enrollStudents } from '../api/mutations';
+import { studentKeys } from '../api/keys';
 import type { EmailResolveResult } from '@/features/students/types';
 
 type GroupOption = { id: string; name: string; lang: string; level: string };
@@ -81,6 +83,7 @@ type Props = {
 export function EnrollDialog({ open, onOpenChangeAction, schoolId, groups }: Props) {
   const t = useTranslations('Students');
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [raw, setRaw] = useState('');
   const [targetGroupId, setTargetGroupId] = useState<string>('none');
   const [resolved, setResolved] = useState<ResolvedEmail[]>([]);
@@ -146,6 +149,7 @@ export function EnrollDialog({ open, onOpenChangeAction, schoolId, groups }: Pro
         if (result.invited > 0) parts.push(`${result.invited} invited`);
         if (result.attached > 0) parts.push(`${result.attached} added directly`);
         toast.success(parts.join(', '));
+        queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         router.refresh();
         handleClose();
       } else {

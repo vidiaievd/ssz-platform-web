@@ -5,8 +5,10 @@ import { toast } from 'sonner';
 import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { removeFromGroup, addToGroup } from '@/features/students/api/mutations';
+import { studentKeys } from '@/features/students/api/keys';
 
 type Props = {
   schoolId: string;
@@ -18,18 +20,21 @@ type Props = {
 export function RemoveFromGroupButton({ schoolId, groupId, userId, groupName }: Props) {
   const t = useTranslations('Students');
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   function handleRemove() {
     startTransition(async () => {
       const result = await removeFromGroup(schoolId, groupId, userId);
       if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         router.refresh();
         toast(t('detail.removedFromGroup', { group: groupName }), {
           action: {
             label: t('common.undo'),
             onClick: async () => {
               await addToGroup(schoolId, groupId, userId);
+              queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
               router.refresh();
             },
           },

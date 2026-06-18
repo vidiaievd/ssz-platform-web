@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
@@ -17,6 +18,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { removeFromGroup } from "@/features/students/api/mutations";
+import { studentKeys } from "@/features/students/api/keys";
 import type { MembershipDetail } from "@/features/students/types";
 
 type Props = {
@@ -30,12 +32,14 @@ type Props = {
 export function RemoveFromGroupDialog({ open, membership, studentName, schoolId, onClose }: Props) {
   const t = useTranslations("Students");
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   function handleRemove() {
     startTransition(async () => {
       const result = await removeFromGroup(schoolId, membership.groupId, membership.id);
       if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         onClose();
         router.refresh();
         toast.success(
