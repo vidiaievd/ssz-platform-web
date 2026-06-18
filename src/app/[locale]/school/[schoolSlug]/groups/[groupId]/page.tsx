@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { getGroup } from '@/features/groups/api/queries';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
+import { AppError } from '@/lib/errors';
 import { GroupDetail } from '@/features/groups/components/group-detail';
+import type { Lesson } from '@/features/groups/types';
 
 type Props = {
   params: Promise<{ schoolSlug: string; groupId: string; locale: string }>;
@@ -17,7 +19,12 @@ export default async function GroupDetailPage({ params }: Props) {
 
   const [data, lessons] = await Promise.all([
     getGroup(school.id, groupId),
-    getSchedulingProvider().nextLessons(groupId, 10),
+    getSchedulingProvider()
+      .nextLessons(groupId, 10)
+      .catch((err): Lesson[] => {
+        if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
+        return [];
+      }),
   ]);
 
   if (!data) notFound();

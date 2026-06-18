@@ -1,3 +1,5 @@
+import { AlertCircle } from 'lucide-react';
+
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { getGroups } from '@/features/groups/api/queries';
 import { GroupsList } from '@/features/groups/components/groups-list';
@@ -22,10 +24,19 @@ export default async function GroupsPage({ params, searchParams }: Props) {
     );
   }
 
-  const groups = await getGroups(school.id);
+  const { groups, schedulingError } = await getGroups(school.id);
 
   return (
-    <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+    <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-4">
+      {schedulingError && (
+        <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <div>
+            <p className="font-medium">Schedule data unavailable</p>
+            <p className="mt-0.5 text-destructive/80">{schedulingError}</p>
+          </div>
+        </div>
+      )}
       <GroupsList
         groups={groups}
         schoolSlug={schoolSlug}

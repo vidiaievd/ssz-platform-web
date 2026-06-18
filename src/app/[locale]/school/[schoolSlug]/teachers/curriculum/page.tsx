@@ -24,7 +24,7 @@ export default async function CurriculumPlannerPage({ params, searchParams }: Pr
     );
   }
 
-  const groups = await getGroups(school.id);
+  const { groups } = await getGroups(school.id);
   const firstGroupId = groupId ?? groups[0]?.id;
 
   const planResult = firstGroupId ? await getCurriculum(firstGroupId) : null;
