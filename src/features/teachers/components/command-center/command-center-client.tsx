@@ -2,12 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Plus, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { removeTeacher } from "../../api/mutations";
+import { useCommandCenter } from "../../api/use-command-center";
+import { teacherKeys } from "../../api/keys";
 import type { CommandCenterResponse } from "../../api/queries";
 import { PendingInvitesLink } from "@/features/invitations/components/pending-invites-link";
 import { WorkloadKpiRow } from "./workload-kpi-row";
@@ -33,11 +35,16 @@ export function CommandCenterClient({
 }: CommandCenterClientProps) {
   const t = useTranslations("Teachers.commandCenter");
   const tRoster = useTranslations("Teachers.roster");
-  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { data } = useCommandCenter(schoolId, { initialData: initial });
   const [addOpen, setAddOpen] = useState(false);
   const [, startRemove] = useTransition();
 
-  const violations = initial.violations.map((alert) => ({
+  function invalidate() {
+    queryClient.invalidateQueries({ queryKey: teacherKeys.commandCenter(schoolId) });
+  }
+
+  const violations = data.violations.map((alert) => ({
     id: alert.alertId,
     severity: alert.severity,
     message: alert.message,
@@ -61,7 +68,7 @@ export function CommandCenterClient({
             onClick: () => {},
           },
         });
-        router.refresh();
+        invalidate();
       } else {
         toast.error(tRoster("removeGuard.title"), {
           description: tRoster("removeGuard.body", { count: result.groupCount }),
@@ -70,10 +77,20 @@ export function CommandCenterClient({
     });
   }
 
-  const isEmpty = initial.teachers.length === 0;
+  const isEmpty = data.teachers.length === 0;
 
   return (
     <main className="p-4 sm:p-6 space-y-5">
+      {data.teachersError && (
+        <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <div>
+            <p className="font-medium">Failed to load teachers</p>
+            <p className="mt-0.5 text-destructive/80">{data.teachersError}</p>
+          </div>
+        </div>
+      )}
+
       {/* Pending invitations indicator */}
       {pendingTeacherInviteCount > 0 && (
         <PendingInvitesLink
@@ -107,14 +124,14 @@ export function CommandCenterClient({
       ) : (
         <>
           {/* KPI row */}
-          <WorkloadKpiRow kpis={initial.kpis} />
+          <WorkloadKpiRow kpis={data.kpis} />
 
           {/* Main content: table + sidebar */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
             {/* Teacher load table */}
             <div className="space-y-4">
               <TeacherLoadTable
-                teachers={initial.teachers}
+                teachers={data.teachers}
                 onRemove={handleRemoveTeacher}
               />
             </div>
@@ -123,10 +140,10 @@ export function CommandCenterClient({
             <div className="space-y-4">
               <PriorityQueue
                 violations={violations}
-                vacancies={initial.vacancies}
+                vacancies={data.vacancies}
               />
-              {isHybrid && initial.roomLoad.length > 0 && (
-                <RoomUtilizationList rooms={initial.roomLoad} />
+              {isHybrid && data.roomLoad.length > 0 && (
+                <RoomUtilizationList rooms={data.roomLoad} />
               )}
             </div>
           </div>
@@ -138,7 +155,7 @@ export function CommandCenterClient({
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onSuccess={() => {
-          router.refresh();
+          invalidate();
         }}
       />
     </main>
