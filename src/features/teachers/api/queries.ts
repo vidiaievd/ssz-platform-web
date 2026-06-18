@@ -27,6 +27,7 @@ export type CommandCenterResponse = {
   violations: Alert[];
   vacancies: Vacancy[];
   roomLoad: RoomLoad[];
+  teachersError?: string | null;
 };
 
 type Unavailable = { status: 'unavailable' };

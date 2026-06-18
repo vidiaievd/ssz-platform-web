@@ -4,12 +4,12 @@ import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/features/groups/api/queries', () => ({
-  getSchoolTeachers: vi.fn(),
+  getSchoolTeachersResult: vi.fn(),
 }));
 
 const { GET } = await import('./route');
-const { getSchoolTeachers } = await import('@/features/groups/api/queries');
-const mockGetTeachers = vi.mocked(getSchoolTeachers);
+const { getSchoolTeachersResult } = await import('@/features/groups/api/queries');
+const mockGetTeachers = vi.mocked(getSchoolTeachersResult);
 
 const PARAMS = { params: Promise.resolve({ id: 'school-1' }) };
 
@@ -21,7 +21,7 @@ describe('GET /api/schools/[id]/scheduling/command-center', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with composite command center data', async () => {
-    mockGetTeachers.mockResolvedValue(MOCK_ORG_TEACHERS);
+    mockGetTeachers.mockResolvedValue({ teachers: MOCK_ORG_TEACHERS, error: null });
 
     const req = new NextRequest('http://localhost/api/schools/school-1/scheduling/command-center');
     const res = await GET(req, PARAMS);
@@ -33,7 +33,20 @@ describe('GET /api/schools/[id]/scheduling/command-center', () => {
     expect(body.teachers).toHaveLength(1);
     expect(body.teachers[0].teacherId).toBe('t1');
     expect(body.violations).toHaveLength(0);
+    expect(body.teachersError).toBeNull();
     expect(mockGetTeachers).toHaveBeenCalledWith('school-1');
+  });
+
+  it('returns 200 with a teachersError when the upstream roster fetch fails', async () => {
+    mockGetTeachers.mockResolvedValue({ teachers: [], error: 'scheduling-service not ready' });
+
+    const req = new NextRequest('http://localhost/api/schools/school-1/scheduling/command-center');
+    const res = await GET(req, PARAMS);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.teachers).toHaveLength(0);
+    expect(body.teachersError).toBe('scheduling-service not ready');
   });
 
   it('returns 502 when teacher fetch throws', async () => {
