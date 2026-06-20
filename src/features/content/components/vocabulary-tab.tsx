@@ -30,7 +30,7 @@ export function VocabularyTab({ containerId, versionId }: VocabularyTabProps) {
     !!versionId,
   );
 
-  const items = (data ?? []).filter((i) => i.contentType === 'VOCABULARY_LIST');
+  const items = (data ?? []).filter((i) => i.itemType === 'vocabulary_list');
 
   return (
     <DataState
@@ -44,7 +44,7 @@ export function VocabularyTab({ containerId, versionId }: VocabularyTabProps) {
     >
       <div className="space-y-6">
         {items.map((item) => (
-          <VocabListSection key={item.id} listId={item.contentId} />
+          <VocabListSection key={item.id} listId={item.itemId} />
         ))}
       </div>
     </DataState>

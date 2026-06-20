@@ -55,9 +55,13 @@ export function GrammarList({ container }: GrammarListProps) {
 
   function handleAddRule() {
     startTransition(async () => {
-      const result = await createGrammarRuleAction(container.id, container.targetLanguage, {
-        title: t('grammar.newTitle'),
-      });
+      const result = await createGrammarRuleAction(
+        container.id,
+        container.targetLanguage,
+        container.difficultyLevel,
+        container.visibility,
+        { title: t('grammar.newTitle') },
+      );
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;

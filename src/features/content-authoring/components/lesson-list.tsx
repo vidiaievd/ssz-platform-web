@@ -58,16 +58,20 @@ export function LessonList({ container }: LessonListProps) {
 
   function handleAddLesson() {
     startTransition(async () => {
-      const result = await createLessonAction(container.id, container.targetLanguage, {
-        title: t('lessons.newTitle'),
-      });
+      const result = await createLessonAction(
+        container.id,
+        container.targetLanguage,
+        container.difficultyLevel,
+        container.visibility,
+        { title: t('lessons.newTitle') },
+      );
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.lessons(container.id) });
       setLocalItems(null);
-      setEditingLessonId(result.value.lesson.id);
+      setEditingLessonId(result.value.lessonId);
     });
   }
 
@@ -93,13 +97,13 @@ export function LessonList({ container }: LessonListProps) {
     const target = pendingDelete;
     setPendingDelete(null);
     startTransition(async () => {
-      const result = await deleteLessonAction(target.contentId, container.id);
+      const result = await deleteLessonAction(target.id, target.itemId, container.id);
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.lessons(container.id) });
-      if (editingLessonId === target.contentId) setEditingLessonId(null);
+      if (editingLessonId === target.itemId) setEditingLessonId(null);
       toast.success(t('lessons.deleteSuccess'));
     });
   }
@@ -111,7 +115,7 @@ export function LessonList({ container }: LessonListProps) {
     );
   }
 
-  const editingItem = items.find((i) => i.contentId === editingLessonId);
+  const editingItem = items.find((i) => i.itemId === editingLessonId);
 
   return (
     <div className="space-y-3">
@@ -131,7 +135,7 @@ export function LessonList({ container }: LessonListProps) {
                     size="icon"
                     type="button"
                     aria-label={t('lessons.editAriaLabel')}
-                    onClick={() => toggleEditor(item.contentId)}
+                    onClick={() => toggleEditor(item.itemId)}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -166,7 +170,7 @@ export function LessonList({ container }: LessonListProps) {
       {editingLessonId && (
         <LessonEditor
           lessonId={editingLessonId}
-          lessonTitle={editingItem?.title}
+          lessonTitle={editingItem?.title ?? undefined}
           container={container}
           onClose={() => setEditingLessonId(null)}
         />

@@ -60,13 +60,13 @@ export function ExerciseList({ container }: ExerciseListProps) {
     const target = pendingDelete;
     setPendingDelete(null);
     startTransition(async () => {
-      const result = await deleteExerciseAction(target.contentId, container.id);
+      const result = await deleteExerciseAction(target.itemId, container.id);
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.exercises(container.id) });
-      if (editingState === target.contentId) setEditingState(null);
+      if (editingState === target.itemId) setEditingState(null);
       toast.success(t('exercises.deleteSuccess'));
     });
   }
@@ -98,7 +98,7 @@ export function ExerciseList({ container }: ExerciseListProps) {
                     size="icon"
                     type="button"
                     aria-label={t('exercises.editAriaLabel')}
-                    onClick={() => toggleEditor(exercise.contentId)}
+                    onClick={() => toggleEditor(exercise.itemId)}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -115,9 +115,9 @@ export function ExerciseList({ container }: ExerciseListProps) {
                 </div>
               </div>
 
-              {editingState === exercise.contentId && (
+              {editingState === exercise.itemId && (
                 <ExerciseEditor
-                  exerciseId={exercise.contentId}
+                  exerciseId={exercise.itemId}
                   container={container}
                   onClose={() => setEditingState(null)}
                 />

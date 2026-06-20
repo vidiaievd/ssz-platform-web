@@ -56,7 +56,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
       body: '',
     },
     values: defaultVariant
-      ? { title: defaultVariant.title, body: defaultVariant.body }
+      ? { title: defaultVariant.displayTitle, body: defaultVariant.bodyMarkdown }
       : lessonTitle
         ? { title: lessonTitle, body: '' }
         : undefined,
@@ -71,7 +71,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
         lessonId,
         container.id,
         defaultVariant?.id ?? null,
-        container.targetLanguage,
+        container.difficultyLevel,
         data,
       );
       if (!result.ok) throw new Error(result.error.code);
@@ -106,7 +106,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
         lessonId,
         container.id,
         defaultVariant?.id ?? null,
-        container.targetLanguage,
+        container.difficultyLevel,
         data,
       );
       if (!result.ok) {

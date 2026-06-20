@@ -11,10 +11,12 @@ const makeCourse = (id: string, level: string): Container =>
     id,
     slug: id,
     title: id,
-    level,
-    isPublished: true,
-    accessTier: 'free',
-    ownerId: 'u1',
+    difficultyLevel: level,
+    containerType: 'course',
+    visibility: 'public',
+    accessTier: 'public_free',
+    currentPublishedVersionId: 'v1',
+    ownerUserId: 'u1',
   }) as unknown as Container;
 
 const b1Result: PlacementResult = {

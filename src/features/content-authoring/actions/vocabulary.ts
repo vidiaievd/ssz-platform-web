@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
-import type { VocabularyList, VocabularyItem } from '@/features/content/types';
+import type { DifficultyLevel, Visibility } from '@/features/content/types';
 
 import {
   vocabularyListFormSchema,
@@ -13,10 +13,21 @@ import {
   type VocabularyListFormValues,
   type VocabularyItemFormValues,
 } from '../schemas/vocabulary';
+import { addItemToDraft } from '../lib/container-items';
+
+// The UI models a usage example as a cloze template ("Jeg ___ til jobben") plus
+// the word that fills the blank ("sykler"). The backend only stores a single
+// composed sentence (exampleText) — compose/decompose at this boundary so the
+// rest of the app keeps working with template+substitution.
+function composeExampleText(template: string, substitution: string): string {
+  return substitution ? template.replace('___', substitution) : template;
+}
 
 export async function createVocabularyListAction(
   containerId: string,
   targetLanguage: string,
+  difficultyLevel: DifficultyLevel,
+  visibility: Visibility,
   data: VocabularyListFormValues,
 ) {
   return tryAction(async () => {
@@ -26,7 +37,7 @@ export async function createVocabularyListAction(
     }
     const { title, description } = parsed.data;
 
-    const list = await serverFetch<VocabularyList>({
+    const { listId } = await serverFetch<{ listId: string }>({
       service: 'content',
       path: '/vocabulary-lists',
       method: 'POST',
@@ -34,12 +45,15 @@ export async function createVocabularyListAction(
         title,
         ...(description && { description }),
         targetLanguage,
-        containerId,
+        difficultyLevel,
+        visibility,
       },
     });
 
+    await addItemToDraft(containerId, 'vocabulary_list', listId);
+
     revalidatePath(`/school/content/${containerId}`);
-    return list;
+    return { listId };
   });
 }
 
@@ -58,8 +72,8 @@ export async function saveVocabularyItemAction(
     const { lemma, ipa, partOfSpeech, translations, examples } = parsed.data;
 
     const itemBody = {
-      lemma,
-      ...(ipa && { ipa }),
+      word: lemma,
+      ...(ipa && { ipaTranscription: ipa }),
       ...(partOfSpeech && { partOfSpeech }),
     };
 
@@ -73,13 +87,13 @@ export async function saveVocabularyItemAction(
       });
       savedItemId = itemId;
     } else {
-      const item = await serverFetch<VocabularyItem>({
+      const item = await serverFetch<{ itemId: string }>({
         service: 'content',
         path: `/vocabulary-lists/${listId}/items`,
         method: 'POST',
         body: itemBody,
       });
-      savedItemId = item.id;
+      savedItemId = item.itemId;
     }
 
     // Upsert translations (PUT is idempotent)
@@ -89,7 +103,7 @@ export async function saveVocabularyItemAction(
           service: 'content',
           path: `/vocabulary-lists/${listId}/items/${savedItemId}/translations/${languageCode}`,
           method: 'PUT',
-          body: { translation },
+          body: { primaryTranslation: translation },
         }),
       ),
     );
@@ -109,21 +123,22 @@ export async function saveVocabularyItemAction(
 
     // Upsert examples
     await Promise.all(
-      examples.map(({ serverId, template, substitution }) =>
-        serverId
+      examples.map(({ serverId, template, substitution }) => {
+        const exampleText = composeExampleText(template, substitution);
+        return serverId
           ? serverFetch({
               service: 'content',
               path: `/vocabulary-lists/${listId}/items/${savedItemId}/examples/${serverId}`,
               method: 'PATCH',
-              body: { template, substitution },
+              body: { exampleText },
             })
           : serverFetch({
               service: 'content',
               path: `/vocabulary-lists/${listId}/items/${savedItemId}/examples`,
               method: 'POST',
-              body: { template, substitution },
-            }),
-      ),
+              body: { exampleText },
+            });
+      }),
     );
 
     // Delete removed examples

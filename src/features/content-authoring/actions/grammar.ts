@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
-import type { GrammarRule, GrammarExplanation } from '@/features/content/types';
+import type { DifficultyLevel, Visibility } from '@/features/content/types';
 
 import {
   grammarRuleFormSchema,
@@ -13,10 +13,24 @@ import {
   type GrammarRuleFormValues,
   type GrammarExplanationFormValues,
 } from '../schemas/grammar';
+import { addItemToDraft, listDraftItems, removeItemFromDraft } from '../lib/container-items';
+
+// The backend has no structured slot for example sentences on an explanation —
+// append them to bodyMarkdown behind a marker so they survive a round trip
+// without inventing a new backend feature. See grammar-rules/[id]/explanations
+// BFF route for the matching decompose step.
+const EXAMPLES_MARKER = '\n\n<!-- examples -->\n';
+
+function composeBodyWithExamples(body: string, examples: { text: string }[]): string {
+  if (examples.length === 0) return body;
+  return body + EXAMPLES_MARKER + examples.map((e) => `- ${e.text}`).join('\n');
+}
 
 export async function createGrammarRuleAction(
   containerId: string,
   targetLanguage: string,
+  difficultyLevel: DifficultyLevel,
+  visibility: Visibility,
   data: GrammarRuleFormValues,
 ) {
   return tryAction(async () => {
@@ -25,15 +39,23 @@ export async function createGrammarRuleAction(
       throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
-    const rule = await serverFetch<GrammarRule>({
+    const { ruleId } = await serverFetch<{ ruleId: string }>({
       service: 'content',
       path: '/grammar-rules',
       method: 'POST',
-      body: { title: parsed.data.title, targetLanguage, containerId },
+      body: {
+        title: parsed.data.title,
+        targetLanguage,
+        difficultyLevel,
+        visibility,
+        topic: 'other',
+      },
     });
 
+    await addItemToDraft(containerId, 'grammar_rule', ruleId);
+
     revalidatePath(`/school/content/${containerId}`);
-    return rule;
+    return { id: ruleId };
   });
 }
 
@@ -61,6 +83,11 @@ export async function updateGrammarRuleAction(
 
 export async function deleteGrammarRuleAction(ruleId: string, containerId: string) {
   return tryAction(async () => {
+    const items = await listDraftItems(containerId, 'grammar_rule');
+    const item = items.find((i) => i.itemId === ruleId);
+    if (item) {
+      await removeItemFromDraft(containerId, item.id);
+    }
     await serverFetch({
       service: 'content',
       path: `/grammar-rules/${ruleId}`,
@@ -74,6 +101,7 @@ export async function saveGrammarExplanationAction(
   ruleId: string,
   explanationId: string | null,
   containerId: string,
+  difficultyLevel: DifficultyLevel,
   data: GrammarExplanationFormValues,
 ) {
   return tryAction(async () => {
@@ -82,12 +110,7 @@ export async function saveGrammarExplanationAction(
       throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
     const { languageCode, title, body, examples } = parsed.data;
-    const explanationBody = {
-      languageCode,
-      title,
-      ...(body !== undefined && { body }),
-      examples: examples.map((e) => e.text),
-    };
+    const bodyMarkdown = composeBodyWithExamples(body ?? '', examples);
 
     let savedExplanationId: string;
     if (explanationId) {
@@ -95,17 +118,23 @@ export async function saveGrammarExplanationAction(
         service: 'content',
         path: `/grammar-rules/${ruleId}/explanations/${explanationId}`,
         method: 'PATCH',
-        body: explanationBody,
+        body: { displayTitle: title, bodyMarkdown },
       });
       savedExplanationId = explanationId;
     } else {
-      const explanation = await serverFetch<GrammarExplanation>({
+      const explanation = await serverFetch<{ explanationId: string }>({
         service: 'content',
         path: `/grammar-rules/${ruleId}/explanations`,
         method: 'POST',
-        body: explanationBody,
+        body: {
+          explanationLanguage: languageCode,
+          minLevel: difficultyLevel,
+          maxLevel: difficultyLevel,
+          displayTitle: title,
+          bodyMarkdown,
+        },
       });
-      savedExplanationId = explanation.id;
+      savedExplanationId = explanation.explanationId;
     }
 
     revalidatePath(`/school/content/${containerId}`);

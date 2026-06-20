@@ -53,14 +53,14 @@ export default async function LessonPage({ params, searchParams }: Props) {
           path: `/containers/${containerId}/versions/${container.currentPublishedVersionId}/items`,
         });
 
-        const lessonItems = items.filter((item) => item.contentType === 'LESSON');
-        const idx = lessonItems.findIndex((item) => item.contentId === id);
+        const lessonItems = items.filter((item) => item.itemType === 'lesson');
+        const idx = lessonItems.findIndex((item) => item.itemId === id);
 
         if (idx !== -1) {
           position = idx + 1;
           total = lessonItems.length;
-          prevId = idx > 0 ? lessonItems[idx - 1]!.contentId : undefined;
-          nextId = idx < lessonItems.length - 1 ? lessonItems[idx + 1]!.contentId : undefined;
+          prevId = idx > 0 ? lessonItems[idx - 1]!.itemId : undefined;
+          nextId = idx < lessonItems.length - 1 ? lessonItems[idx + 1]!.itemId : undefined;
         }
       }
     } catch {

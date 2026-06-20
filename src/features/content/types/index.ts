@@ -31,10 +31,15 @@ export interface Container {
 
 export interface ContainerItem {
   id: string;
+  containerVersionId: string;
   position: number;
-  contentType: ContentItemType;
-  contentId: string;
-  title?: string;
+  itemType: 'container' | 'lesson' | 'vocabulary_list' | 'grammar_rule' | 'exercise';
+  itemId: string;
+  isRequired: boolean;
+  sectionLabel?: string | null;
+  /** Display title of the referenced content, resolved server-side. */
+  title: string | null;
+  addedAt: string;
 }
 
 export interface PageInfo {
@@ -51,22 +56,25 @@ export interface PaginatedResponse<T> {
 export interface LessonVariant {
   id: string;
   lessonId: string;
-  targetLanguage: string;
-  instructionLanguage?: string;
-  title: string;
-  body: string;
-  isPublished: boolean;
-  publishedAt?: string;
+  explanationLanguage: string;
+  minLevel: DifficultyLevel;
+  maxLevel: DifficultyLevel;
+  displayTitle: string;
+  displayDescription?: string | null;
+  bodyMarkdown: string;
+  estimatedReadingMinutes?: number | null;
+  status: 'draft' | 'published';
 }
 
 export interface Lesson {
   id: string;
-  slug: string;
+  slug: string | null;
   title: string;
-  description?: string;
+  description?: string | null;
   targetLanguage: string;
-  level?: DifficultyLevel;
-  isPublished: boolean;
+  difficultyLevel: DifficultyLevel;
+  visibility: Visibility;
+  ownerUserId: string;
   createdAt: string;
   updatedAt: string;
 }

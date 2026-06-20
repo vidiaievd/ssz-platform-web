@@ -18,15 +18,21 @@ export function useLesson(id: string, enabled = true) {
   });
 }
 
-export function useBestLessonVariant(lessonId: string, enabled = true) {
+export function useBestLessonVariant(
+  lessonId: string,
+  nativeLanguage: string,
+  level: string,
+  enabled = true,
+) {
   return useQuery<LessonVariant>({
-    queryKey: contentKeys.lessonVariant(lessonId),
+    queryKey: [...contentKeys.lessonVariant(lessonId), nativeLanguage, level],
     queryFn: async () => {
-      const res = await fetch(`/api/content/lessons/${lessonId}/variant`);
+      const params = new URLSearchParams({ nativeLanguage, level });
+      const res = await fetch(`/api/content/lessons/${lessonId}/variant?${params}`);
       if (!res.ok) throw new Error('Failed to fetch lesson variant');
       return res.json() as Promise<LessonVariant>;
     },
     staleTime: 120_000,
-    enabled: enabled && !!lessonId,
+    enabled: enabled && !!lessonId && !!nativeLanguage && !!level,
   });
 }

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { GrammarRule, GrammarExplanation, PaginatedResponse } from '@/features/content/types';
+import type { ContainerItem, GrammarRule, GrammarExplanation } from '@/features/content/types';
 
 import { authoringKeys } from './keys';
 
@@ -10,12 +10,17 @@ export function useAuthoringGrammarRules(containerId: string, enabled = true) {
   return useQuery<GrammarRule[]>({
     queryKey: authoringKeys.grammarRules(containerId),
     queryFn: async () => {
-      const res = await fetch(
-        `/api/content/grammar-rules?containerId=${containerId}&limit=200`,
-      );
+      const res = await fetch(`/api/content/containers/${containerId}/items?draft=true`);
       if (!res.ok) throw new Error('Failed to fetch grammar rules');
-      const data: PaginatedResponse<GrammarRule> = await res.json();
-      return data.items;
+      const items: ContainerItem[] = await res.json();
+      return items
+        .filter((i) => i.itemType === 'grammar_rule')
+        .map((i) => ({
+          id: i.itemId,
+          title: i.title ?? '',
+          targetLanguage: '',
+          createdAt: i.addedAt,
+        }));
     },
     enabled: enabled && !!containerId,
     staleTime: 30_000,
