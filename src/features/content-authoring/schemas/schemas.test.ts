@@ -12,23 +12,19 @@ import { lessonFormSchema } from './lesson';
 describe('containerFormSchema', () => {
   const valid = {
     title: 'Norwegian A1',
-    type: 'COURSE' as const,
+    containerType: 'course' as const,
     targetLanguage: 'nb',
-    accessTier: 'PUBLIC' as const,
+    difficultyLevel: 'A1' as const,
+    visibility: 'public' as const,
+    accessTier: 'public_free' as const,
   };
 
   it('accepts minimal valid data', () => {
     expect(containerFormSchema.safeParse(valid).success).toBe(true);
   });
 
-  it('accepts all optional fields', () => {
-    const full = {
-      ...valid,
-      description: 'An intro course.',
-      instructionLanguage: 'en',
-      level: 'A1' as const,
-      slug: 'norwegian-a1',
-    };
+  it('accepts the optional description', () => {
+    const full = { ...valid, description: 'An intro course.' };
     expect(containerFormSchema.safeParse(full).success).toBe(true);
   });
 
@@ -36,28 +32,16 @@ describe('containerFormSchema', () => {
     expect(containerFormSchema.safeParse({ ...valid, title: '' }).success).toBe(false);
   });
 
-  it('rejects an invalid type', () => {
-    expect(containerFormSchema.safeParse({ ...valid, type: 'LESSON' }).success).toBe(false);
+  it('rejects an invalid containerType', () => {
+    expect(containerFormSchema.safeParse({ ...valid, containerType: 'LESSON' }).success).toBe(false);
   });
 
   it('rejects an invalid accessTier', () => {
     expect(containerFormSchema.safeParse({ ...valid, accessTier: 'PREMIUM' }).success).toBe(false);
   });
 
-  it('rejects a slug with uppercase letters', () => {
-    expect(containerFormSchema.safeParse({ ...valid, slug: 'Norwegian-A1' }).success).toBe(false);
-  });
-
-  it('rejects a slug with spaces', () => {
-    expect(containerFormSchema.safeParse({ ...valid, slug: 'norwegian a1' }).success).toBe(false);
-  });
-
-  it('rejects a slug with a trailing hyphen', () => {
-    expect(containerFormSchema.safeParse({ ...valid, slug: 'norwegian-a1-' }).success).toBe(false);
-  });
-
-  it('accepts a slug with numbers', () => {
-    expect(containerFormSchema.safeParse({ ...valid, slug: 'course-2025' }).success).toBe(true);
+  it('rejects an invalid visibility', () => {
+    expect(containerFormSchema.safeParse({ ...valid, visibility: 'everyone' }).success).toBe(false);
   });
 });
 

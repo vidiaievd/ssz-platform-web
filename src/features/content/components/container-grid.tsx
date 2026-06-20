@@ -65,7 +65,7 @@ export function ContainerGrid({ buildHref, ...queryOptions }: ContainerGridProps
           <ContainerCard
             key={container.id}
             container={container}
-            href={buildHref(container.slug)}
+            href={buildHref(container.slug ?? container.id)}
           />
         ))}
       </div>

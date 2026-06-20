@@ -100,7 +100,7 @@ export function StepCourse() {
               key={c.id}
               role="option"
               aria-selected={isSelected}
-              onClick={() => selectCourse(c.id, c.title, c.targetLanguage, c.level)}
+              onClick={() => selectCourse(c.id, c.title, c.targetLanguage, c.difficultyLevel)}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors',
                 isSelected
@@ -108,22 +108,14 @@ export function StepCourse() {
                   : 'border-border hover:bg-muted/50',
               )}
             >
-              {c.coverImageUrl ? (
-                <img
-                  src={c.coverImageUrl}
-                  alt=""
-                  className="size-8 rounded-md object-cover shrink-0"
-                />
-              ) : (
-                <div className="size-8 rounded-md bg-muted flex items-center justify-center shrink-0">
-                  <BookOpen className="size-4 text-(--ssz-text-muted)" aria-hidden="true" />
-                </div>
-              )}
+              <div className="size-8 rounded-md bg-muted flex items-center justify-center shrink-0">
+                <BookOpen className="size-4 text-(--ssz-text-muted)" aria-hidden="true" />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-(--ssz-text-primary) truncate">{c.title}</p>
                 <p className="text-xs text-(--ssz-text-muted) font-mono">
                   {c.targetLanguage.toUpperCase()}
-                  {c.level && ` · ${c.level}`}
+                  {c.difficultyLevel && ` · ${c.difficultyLevel}`}
                 </p>
               </div>
               {isSelected && (

@@ -18,7 +18,7 @@ export interface ContainerListQuery {
   state?: ContainerState | 'all';
   language?: string;
   level?: string;
-  sort?: 'recently_edited' | 'name_asc' | 'students_desc' | 'lessons_desc';
+  sort?: 'recently_edited' | 'name_asc';
   page?: number;
   pageSize?: number;
 }

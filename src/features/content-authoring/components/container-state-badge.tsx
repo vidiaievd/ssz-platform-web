@@ -24,11 +24,11 @@ export function ContainerStateBadge({ state, className }: ContainerStateBadgePro
   );
 }
 
-/** Derives ContainerState from the Container's boolean flags. */
+/** Derives ContainerState from the Container's lifecycle fields. */
 export function deriveContainerState(container: {
-  isPublished: boolean;
+  currentPublishedVersionId?: string | null;
   isArchived?: boolean;
 }): ContainerState {
   if (container.isArchived) return 'archived';
-  return container.isPublished ? 'published' : 'draft';
+  return container.currentPublishedVersionId ? 'published' : 'draft';
 }

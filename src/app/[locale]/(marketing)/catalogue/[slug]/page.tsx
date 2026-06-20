@@ -50,8 +50,8 @@ export default async function CatalogueContainerPage({ params }: Props) {
       <div className="mb-6">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <AccessTierBadgeServer tier={container.accessTier} t={t} />
-          {container.type && (
-            <Badge variant="muted">{t(`containerType.${container.type}`)}</Badge>
+          {container.containerType && (
+            <Badge variant="muted">{t(`containerType.${container.containerType}`)}</Badge>
           )}
         </div>
         <h1 className="text-3xl font-bold tracking-tight">{container.title}</h1>
@@ -65,10 +65,10 @@ export default async function CatalogueContainerPage({ params }: Props) {
               {container.targetLanguage.toUpperCase()}
             </span>
           )}
-          {container.level && (
+          {container.difficultyLevel && (
             <span className="flex items-center gap-1.5">
               <GraduationCap className="h-4 w-4" />
-              {container.level}
+              {container.difficultyLevel}
             </span>
           )}
           {container.lessonCount !== undefined && (
@@ -91,7 +91,7 @@ export default async function CatalogueContainerPage({ params }: Props) {
 
       <ContainerTabsClient
         containerId={container.id}
-        versionId={container.publishedVersionId}
+        versionId={container.currentPublishedVersionId ?? undefined}
       />
     </section>
   );
@@ -105,10 +105,11 @@ function AccessTierBadgeServer({
   t: Awaited<ReturnType<typeof getTranslations<'Content'>>>;
 }) {
   const variants: Record<Container['accessTier'], BadgeProps['variant']> = {
-    PUBLIC: 'success',
-    FREE_WITHIN_SCHOOL: 'info',
-    PAID: 'solid',
-    INVITE_ONLY: 'muted',
+    public_free: 'success',
+    free_within_school: 'info',
+    public_paid: 'solid',
+    assigned_only: 'muted',
+    entitlement_required: 'muted',
   };
   return <Badge variant={variants[tier]}>{t(`accessTier.${tier}`)}</Badge>;
 }

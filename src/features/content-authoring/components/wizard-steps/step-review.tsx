@@ -2,17 +2,19 @@
 
 import { useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Pencil, BookOpen, Layers, Users, Lock, Globe, EyeOff, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { useRouter } from '@/lib/i18n/navigation';
 import { PreflightPanel } from '@/features/content-authoring/components/preflight-panel';
 import { authoringKeys } from '@/features/content-authoring/api/keys';
 
 import { createContainerAction, updateContainerAction } from '../../actions/container';
 import { publishContainerAction } from '../../actions/publish-container';
+import { wizardPayload } from '../../lib/wizard-payload';
 import { useCreateWizardStore } from '../../stores/create-wizard';
 
 // ── Review section row ────────────────────────────────────────────────────────
@@ -86,20 +88,14 @@ function useStructureLabel() {
   };
 }
 
-// ── Access tier map ───────────────────────────────────────────────────────────
-
-const ACCESS_TIER_MAP: Record<string, 'PUBLIC' | 'FREE_WITHIN_SCHOOL' | 'PAID' | 'INVITE_ONLY'> = {
-  public_catalog: 'PUBLIC',
-  invite_only: 'INVITE_ONLY',
-  internal_draft: 'FREE_WITHIN_SCHOOL',
-};
-
 // ── Step 5: Review ────────────────────────────────────────────────────────────
 
 export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void }) {
   const t = useTranslations('Authoring');
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const contentBase = `/school/${schoolSlug}/content`;
   const store = useCreateWizardStore();
   const [isPending, startTransition] = useTransition();
   const visibilityLabel = useVisibilityLabel();
@@ -112,33 +108,19 @@ export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void 
     const params = new URLSearchParams();
     params.set('step', String(step + 1));
     if (store.draftId) params.set('draft', store.draftId);
-    router.push(`/school/content/new?${params.toString()}`);
+    router.push(`${contentBase}/new?${params.toString()}`);
   }
 
   async function ensureDraft() {
+    const payload = wizardPayload(metadata, visibility.mode);
+
     if (store.draftId) {
-      const res = await updateContainerAction(store.draftId, {
-        title: metadata.title,
-        description: metadata.description || undefined,
-        type: 'COURSE' as const,
-        targetLanguage: metadata.targetLanguage,
-        level: (metadata.level || undefined) as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | undefined,
-        slug: metadata.slug || undefined,
-        accessTier: ACCESS_TIER_MAP[visibility.mode] ?? 'INVITE_ONLY',
-      });
+      const res = await updateContainerAction(store.draftId, payload);
       if (!res.ok) throw new Error('patch failed');
       return store.draftId;
     }
 
-    const res = await createContainerAction({
-      title: metadata.title,
-      description: metadata.description || undefined,
-      type: 'COURSE' as const,
-      targetLanguage: metadata.targetLanguage,
-      level: (metadata.level || undefined) as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | undefined,
-      slug: metadata.slug || undefined,
-      accessTier: ACCESS_TIER_MAP[visibility.mode] ?? 'INVITE_ONLY',
-    });
+    const res = await createContainerAction(payload);
     if (!res.ok) throw new Error('create failed');
     store.setDraftId(res.value.id);
     return res.value.id;
@@ -156,7 +138,7 @@ export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void 
         await queryClient.invalidateQueries({ queryKey: authoringKeys.containers() });
         toast.success(t('wizard.review.publishSuccess'));
         store.reset();
-        router.push(`/school/content/${id}`);
+        router.push(`${contentBase}/${id}`);
       } catch {
         toast.error(t('wizard.review.publishError'));
       }
@@ -186,7 +168,6 @@ export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void 
             { label: t('wizard.metadata.titleLabel'), value: metadata.title },
             { label: t('wizard.metadata.language'), value: metadata.targetLanguage },
             { label: t('wizard.metadata.level'), value: metadata.level },
-            { label: t('fields.slug'), value: metadata.slug },
             { label: t('wizard.metadata.descriptionLabel'), value: metadata.description },
           ]}
         />

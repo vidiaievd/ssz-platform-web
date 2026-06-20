@@ -8,12 +8,14 @@ import type { PreflightCheck, PreflightResult } from '../types';
  * Rules per SPEC_state_machine.md → Pre-flight rules.
  */
 export function runPreflight(
+  schoolSlug: string,
   container: Container,
   items: ContainerItem[],
   options?: { currentUserRole?: 'owner' | 'admin' | 'teacher' },
 ): PreflightResult {
   const role = options?.currentUserRole ?? 'owner';
   const checks: PreflightCheck[] = [];
+  const containerBase = `/school/${schoolSlug}/content/${container.id}`;
 
   // ── Hard blockers ──────────────────────────────────────────────────────────
 
@@ -22,7 +24,7 @@ export function runPreflight(
     severity: container.title?.trim() ? 'ok' : 'blocker',
     title: 'Title required',
     fixHint: container.title?.trim() ? null : 'Add a course title',
-    fixDeepLink: container.title?.trim() ? null : `/school/content/${container.id}/edit?focus=title`,
+    fixDeepLink: container.title?.trim() ? null : `${containerBase}?focus=title`,
   });
 
   checks.push({
@@ -32,20 +34,12 @@ export function runPreflight(
     fixHint: container.targetLanguage?.length >= 2 ? null : 'Select a target language',
     fixDeepLink: container.targetLanguage?.length >= 2
       ? null
-      : `/school/content/${container.id}/edit?focus=targetLanguage`,
-  });
-
-  checks.push({
-    id: 'metadata.slug_unique',
-    severity: container.slug ? 'ok' : 'blocker',
-    title: 'Slug must be set',
-    fixHint: container.slug ? null : 'A slug is required for publishing',
-    fixDeepLink: container.slug ? null : `/school/content/${container.id}/edit?focus=slug`,
+      : `${containerBase}?focus=targetLanguage`,
   });
 
   checks.push({
     id: 'owner.assigned',
-    severity: container.ownerId ? 'ok' : 'blocker',
+    severity: container.ownerUserId ? 'ok' : 'blocker',
     title: 'Owner assigned',
     fixHint: null,
     fixDeepLink: null,
@@ -57,7 +51,7 @@ export function runPreflight(
     severity: hasItems ? 'ok' : 'blocker',
     title: 'At least 1 lesson required',
     fixHint: hasItems ? null : 'Add at least one lesson',
-    fixDeepLink: hasItems ? null : `/school/content/${container.id}?tab=lessons`,
+    fixDeepLink: hasItems ? null : `${containerBase}?tab=lessons`,
   });
 
   // ── Warnings ───────────────────────────────────────────────────────────────
@@ -69,14 +63,14 @@ export function runPreflight(
     fixHint: container.description?.trim() ? null : 'Students will see "—" in the catalogue',
     fixDeepLink: container.description?.trim()
       ? null
-      : `/school/content/${container.id}/edit?focus=description`,
+      : `${containerBase}?focus=description`,
   });
 
   checks.push({
     id: 'metadata.cover_set',
-    severity: container.coverImageUrl ? 'ok' : 'warning',
+    severity: container.coverImageMediaId ? 'ok' : 'warning',
     title: 'Cover image missing',
-    fixHint: container.coverImageUrl ? null : 'Auto-fallback to language flag',
+    fixHint: container.coverImageMediaId ? null : 'Auto-fallback to language flag',
     fixDeepLink: null,
   });
 

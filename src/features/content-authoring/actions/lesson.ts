@@ -11,11 +11,11 @@ import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 
 async function getDraftVersionId(containerId: string): Promise<string | null> {
   try {
-    const versions = await serverFetch<ContainerVersion[]>({
+    const versions = await serverFetch<{ items: ContainerVersion[] }>({
       service: 'content',
       path: `/containers/${containerId}/versions`,
     });
-    return versions.find((v) => !v.isPublished)?.id ?? null;
+    return versions.items.find((v) => v.status === 'draft')?.id ?? null;
   } catch {
     return null;
   }

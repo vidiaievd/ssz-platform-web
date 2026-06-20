@@ -33,12 +33,12 @@ export function PublishDialog({ container }: PublishDialogProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
-  const [confirmSlug, setConfirmSlug] = useState('');
+  const [confirmTitle, setConfirmTitle] = useState('');
 
-  const isMatch = confirmSlug === container.slug;
+  const isMatch = confirmTitle === container.title;
 
   function handleOpenChange(next: boolean) {
-    if (!next) setConfirmSlug('');
+    if (!next) setConfirmTitle('');
     setOpen(next);
   }
 
@@ -84,13 +84,13 @@ export function PublishDialog({ container }: PublishDialogProps) {
             <p className="text-sm">
               {t('publish.confirmPrompt')}{' '}
               <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
-                {container.slug}
+                {container.title}
               </code>
             </p>
             <Input
-              value={confirmSlug}
-              onChange={(e) => setConfirmSlug(e.target.value)}
-              placeholder={container.slug}
+              value={confirmTitle}
+              onChange={(e) => setConfirmTitle(e.target.value)}
+              placeholder={container.title}
               className="font-mono"
               autoComplete="off"
               disabled={isPending}

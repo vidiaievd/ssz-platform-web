@@ -57,7 +57,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
     resolver: zodResolver(grammarEditorFormSchema),
     defaultValues: {
       ruleTitle,
-      languageCode: container.instructionLanguage ?? 'en',
+      languageCode: 'en',
       explanationTitle: '',
       body: '',
       examples: [],

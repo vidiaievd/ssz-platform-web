@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useParams } from 'next/navigation';
 import { useRouter } from '@/lib/i18n/navigation';
 import { toast } from 'sonner';
 import { Trash2, Archive, RotateCcw, MinusCircle, UserCheck } from 'lucide-react';
@@ -89,6 +90,7 @@ function ConfirmAction({
 
 export function DangerZone({ containerId, containerTitle, state, role }: DangerZoneProps) {
   const router = useRouter();
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const [, startTransition] = useTransition();
 
   const isOwner = role === 'owner';
@@ -121,7 +123,7 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
       return;
     }
     toast.success('Container deleted');
-    startTransition(() => router.push('/school/content'));
+    startTransition(() => router.push(`/school/${schoolSlug}/content`));
   };
 
   const handlePublish = () => {

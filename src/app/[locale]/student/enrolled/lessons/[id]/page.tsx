@@ -47,10 +47,10 @@ export default async function LessonPage({ params, searchParams }: Props) {
       });
       containerTitle = container.title;
 
-      if (container.publishedVersionId) {
+      if (container.currentPublishedVersionId) {
         const items = await serverFetch<ContainerItem[]>({
           service: 'content',
-          path: `/containers/${containerId}/versions/${container.publishedVersionId}/items`,
+          path: `/containers/${containerId}/versions/${container.currentPublishedVersionId}/items`,
         });
 
         const lessonItems = items.filter((item) => item.contentType === 'LESSON');
