@@ -218,15 +218,16 @@
     "hints": "Подсказки",
     "exemplarAnswer": "Пример ответа",
     "accessTier": {
-      "PUBLIC": "Бесплатно",
-      "FREE_WITHIN_SCHOOL": "Школа",
-      "PAID": "Премиум",
-      "INVITE_ONLY": "Только по приглашению"
+      "assigned_only": "Только назначенные",
+      "entitlement_required": "Требуется доступ",
+      "free_within_school": "Школа",
+      "public_free": "Бесплатно",
+      "public_paid": "Премиум"
     },
     "containerType": {
-      "COURSE": "Курс",
-      "MODULE": "Модуль",
-      "COLLECTION": "Коллекция"
+      "course": "Курс",
+      "module": "Модуль",
+      "collection": "Коллекция"
     }
   },
   "Auth": {
@@ -390,10 +391,11 @@
       "description": "Описание",
       "type": "Тип",
       "targetLanguage": "Язык обучения",
-      "instructionLanguage": "Язык инструкций",
       "level": "Уровень",
+      "visibility": "Видимость",
+      "visibilityHint": "Кто может найти этот контейнер в каталоге.",
       "slug": "Slug",
-      "slugFrozen": "Неизменный",
+      "slugFrozen": "Генерируется автоматически при публикации",
       "accessTier": "Уровень доступа",
       "accessTierHint": "Определяет, кто может записаться; видимость — отдельно."
     },
@@ -401,10 +403,7 @@
       "titlePlaceholder": "напр. Норвежский для начинающих",
       "descriptionPlaceholder": "Краткое описание контейнера",
       "targetLanguagePlaceholder": "напр. no, en, uk",
-      "instructionLanguagePlaceholder": "напр. en",
       "levelNone": "Любой уровень",
-      "slugPlaceholder": "напр. norwegian-for-beginners",
-      "slugTooltip": "Используется в URL. Только строчные буквы, цифры и дефисы. Нельзя изменить после публикации.",
       "create": "Создать",
       "save": "Сохранить",
       "createSuccess": "Контейнер создан.",
@@ -414,15 +413,22 @@
       "slugRequired": "Поле Slug обязательно"
     },
     "accessTier": {
-      "PUBLIC": "Бесплатно",
-      "FREE_WITHIN_SCHOOL": "Только школа",
-      "PAID": "Премиум",
-      "INVITE_ONLY": "Только по приглашению"
+      "assigned_only": "Только назначенные",
+      "entitlement_required": "Требуется доступ",
+      "free_within_school": "Только школа",
+      "public_free": "Бесплатно",
+      "public_paid": "Премиум"
+    },
+    "visibility": {
+      "public": "Публичный",
+      "school_private": "Только школа",
+      "shared": "Общий",
+      "private": "Приватный"
     },
     "types": {
-      "COURSE": "Курс",
-      "MODULE": "Модуль",
-      "COLLECTION": "Коллекция"
+      "course": "Курс",
+      "module": "Модуль",
+      "collection": "Коллекция"
     },
     "lessons": {
       "add": "Добавить урок",
@@ -580,10 +586,10 @@
       "trigger": "Опубликовать",
       "title": "Опубликовать контейнер",
       "description": "Публикация необратима и влияет на доступ к этому контейнеру. Прочитайте предупреждения ниже перед подтверждением.",
-      "warningSlug": "Slug будет заморожен и не может быть изменён после публикации.",
+      "warningSlug": "URL-slug будет сгенерирован из названия и зафиксирован после публикации.",
       "warningDiscoverable": "Контейнер станет доступен ученикам в соответствии с уровнем доступа.",
       "warningEvent": "Будет отправлено событие публикации, которое может вызвать уведомления.",
-      "confirmPrompt": "Для подтверждения введите slug точно так, как показано:",
+      "confirmPrompt": "Для подтверждения введите название точно так, как показано:",
       "confirm": "Опубликовать",
       "cancel": "Отмена",
       "success": "Контейнер успешно опубликован."

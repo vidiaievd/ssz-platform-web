@@ -218,15 +218,16 @@
     "hints": "Hints",
     "exemplarAnswer": "Example answer",
     "accessTier": {
-      "PUBLIC": "Free",
-      "FREE_WITHIN_SCHOOL": "School",
-      "PAID": "Premium",
-      "INVITE_ONLY": "Invite only"
+      "assigned_only": "Assigned only",
+      "entitlement_required": "Entitlement required",
+      "free_within_school": "School",
+      "public_free": "Free",
+      "public_paid": "Premium"
     },
     "containerType": {
-      "COURSE": "Course",
-      "MODULE": "Module",
-      "COLLECTION": "Collection"
+      "course": "Course",
+      "module": "Module",
+      "collection": "Collection"
     }
   },
   "Auth": {
@@ -395,10 +396,11 @@
       "description": "Description",
       "type": "Type",
       "targetLanguage": "Target language",
-      "instructionLanguage": "Instruction language",
       "level": "Level",
+      "visibility": "Visibility",
+      "visibilityHint": "Who can discover this container in the catalogue.",
       "slug": "Slug",
-      "slugFrozen": "Immutable",
+      "slugFrozen": "Auto-generated on publish",
       "accessTier": "Access tier",
       "accessTierHint": "Controls who can enrol; visibility is separate."
     },
@@ -406,10 +408,7 @@
       "titlePlaceholder": "e.g. Norwegian for Beginners",
       "descriptionPlaceholder": "Short description of this container",
       "targetLanguagePlaceholder": "e.g. no, en, uk",
-      "instructionLanguagePlaceholder": "e.g. en",
       "levelNone": "Any level",
-      "slugPlaceholder": "e.g. norwegian-for-beginners",
-      "slugTooltip": "Used in the URL. Only lowercase letters, numbers, and hyphens. Cannot be changed after publishing.",
       "create": "Create",
       "save": "Save",
       "createSuccess": "Container created.",
@@ -419,15 +418,22 @@
       "slugRequired": "Slug is required"
     },
     "accessTier": {
-      "PUBLIC": "Free",
-      "FREE_WITHIN_SCHOOL": "School only",
-      "PAID": "Premium",
-      "INVITE_ONLY": "Invite only"
+      "assigned_only": "Assigned only",
+      "entitlement_required": "Entitlement required",
+      "free_within_school": "School only",
+      "public_free": "Free",
+      "public_paid": "Premium"
+    },
+    "visibility": {
+      "public": "Public",
+      "school_private": "School only",
+      "shared": "Shared",
+      "private": "Private"
     },
     "types": {
-      "COURSE": "Course",
-      "MODULE": "Module",
-      "COLLECTION": "Collection"
+      "course": "Course",
+      "module": "Module",
+      "collection": "Collection"
     },
     "lessons": {
       "add": "Add lesson",
@@ -585,10 +591,10 @@
       "trigger": "Publish",
       "title": "Publish container",
       "description": "Publishing is permanent and affects how this container is accessed. Please read the warnings below before confirming.",
-      "warningSlug": "The slug is frozen and cannot be changed after publishing.",
+      "warningSlug": "A URL slug will be generated from the title and frozen after publishing.",
       "warningDiscoverable": "The container becomes discoverable and accessible to students based on its access tier.",
       "warningEvent": "A published event is emitted, which may trigger notifications.",
-      "confirmPrompt": "To confirm, type the slug exactly as shown:",
+      "confirmPrompt": "To confirm, type the title exactly as shown:",
       "confirm": "Publish",
       "cancel": "Cancel",
       "success": "Container published successfully."

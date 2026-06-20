@@ -218,15 +218,16 @@
     "hints": "Hint",
     "exemplarAnswer": "Eksempelsvar",
     "accessTier": {
-      "PUBLIC": "Gratis",
-      "FREE_WITHIN_SCHOOL": "Skole",
-      "PAID": "Premium",
-      "INVITE_ONLY": "Kun på invitasjon"
+      "assigned_only": "Kun tildelt",
+      "entitlement_required": "Krever tilgang",
+      "free_within_school": "Skole",
+      "public_free": "Gratis",
+      "public_paid": "Premium"
     },
     "containerType": {
-      "COURSE": "Kurs",
-      "MODULE": "Modul",
-      "COLLECTION": "Samling"
+      "course": "Kurs",
+      "module": "Modul",
+      "collection": "Samling"
     }
   },
   "Auth": {
@@ -390,10 +391,11 @@
       "description": "Beskrivelse",
       "type": "Type",
       "targetLanguage": "Målspråk",
-      "instructionLanguage": "Instruksjonsspråk",
       "level": "Nivå",
+      "visibility": "Synlighet",
+      "visibilityHint": "Hvem som kan finne denne beholderen i katalogen.",
       "slug": "Slug",
-      "slugFrozen": "Uforanderlig",
+      "slugFrozen": "Genereres automatisk ved publisering",
       "accessTier": "Tilgangsnivå",
       "accessTierHint": "Kontrollerer hvem som kan melde seg på; synlighet er separat."
     },
@@ -401,10 +403,7 @@
       "titlePlaceholder": "f.eks. Norsk for nybegynnere",
       "descriptionPlaceholder": "Kort beskrivelse av denne beholderen",
       "targetLanguagePlaceholder": "f.eks. no, en, uk",
-      "instructionLanguagePlaceholder": "f.eks. en",
       "levelNone": "Alle nivåer",
-      "slugPlaceholder": "f.eks. norsk-for-nybegynnere",
-      "slugTooltip": "Brukes i URL-en. Bare små bokstaver, tall og bindestreker. Kan ikke endres etter publisering.",
       "create": "Opprett",
       "save": "Lagre",
       "createSuccess": "Beholder opprettet.",
@@ -414,15 +413,22 @@
       "slugRequired": "Slug er påkrevd"
     },
     "accessTier": {
-      "PUBLIC": "Gratis",
-      "FREE_WITHIN_SCHOOL": "Kun skole",
-      "PAID": "Premium",
-      "INVITE_ONLY": "Kun invitasjon"
+      "assigned_only": "Kun tildelt",
+      "entitlement_required": "Krever tilgang",
+      "free_within_school": "Kun skole",
+      "public_free": "Gratis",
+      "public_paid": "Premium"
+    },
+    "visibility": {
+      "public": "Offentlig",
+      "school_private": "Kun skole",
+      "shared": "Delt",
+      "private": "Privat"
     },
     "types": {
-      "COURSE": "Kurs",
-      "MODULE": "Modul",
-      "COLLECTION": "Samling"
+      "course": "Kurs",
+      "module": "Modul",
+      "collection": "Samling"
     },
     "lessons": {
       "add": "Legg til leksjon",
@@ -580,10 +586,10 @@
       "trigger": "Publiser",
       "title": "Publiser beholder",
       "description": "Publisering er permanent og påvirker tilgangen til denne beholderen. Les advarslene nedenfor før du bekrefter.",
-      "warningSlug": "Slug-en låses og kan ikke endres etter publisering.",
+      "warningSlug": "En URL-slug genereres fra tittelen og låses etter publisering.",
       "warningDiscoverable": "Beholderen blir synlig og tilgjengelig for elever basert på tilgangsnivå.",
       "warningEvent": "En publiseringshendelse sendes ut, noe som kan utløse varsler.",
-      "confirmPrompt": "For å bekrefte, skriv inn slug-en nøyaktig slik den er vist:",
+      "confirmPrompt": "For å bekrefte, skriv inn tittelen nøyaktig slik den er vist:",
       "confirm": "Publiser",
       "cancel": "Avbryt",
       "success": "Beholderen ble publisert."
