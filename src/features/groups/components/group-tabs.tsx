@@ -4,6 +4,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GroupHealthLine } from './group-health-line';
 import { OverviewCards } from './overview-cards';
 import { GroupStudentsTab } from './group-students-tab';
@@ -55,15 +56,33 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
   // schoolSlug as the identifier (server resolves slug → id).
   const schoolId = schoolSlug; // resolved by the BFF
 
+  const tabLabel: Record<TabKey, string> = {
+    overview: t('tabs.overview'),
+    students: roster.length > 0 ? `${t('tabs.students')} ${roster.length}` : t('tabs.students'),
+    teachers: t('tabs.teachers'),
+    schedule: t('tabs.schedule'),
+  };
+
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange}>
-      <TabsList className="overflow-x-auto">
-        <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
-        <TabsTrigger value="students">
-          {t('tabs.students')}{roster.length > 0 ? ` ${roster.length}` : ''}
-        </TabsTrigger>
-        <TabsTrigger value="teachers">{t('tabs.teachers')}</TabsTrigger>
-        <TabsTrigger value="schedule">{t('tabs.schedule')}</TabsTrigger>
+      {/* Mobile: tabs collapse into a Select mirroring the same labels/counts (spec §8). */}
+      <Select value={activeTab} onValueChange={handleTabChange}>
+        <SelectTrigger className="md:hidden w-full h-11" aria-label={t('tabs.sectionLabel')}>
+          <SelectValue>{tabLabel[activeTab]}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="overview">{tabLabel.overview}</SelectItem>
+          <SelectItem value="students">{tabLabel.students}</SelectItem>
+          <SelectItem value="teachers">{tabLabel.teachers}</SelectItem>
+          <SelectItem value="schedule">{tabLabel.schedule}</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <TabsList className="hidden md:flex overflow-x-auto">
+        <TabsTrigger value="overview">{tabLabel.overview}</TabsTrigger>
+        <TabsTrigger value="students">{tabLabel.students}</TabsTrigger>
+        <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
+        <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>
       </TabsList>
 
       {/* ── Overview ──────────────────────────────────────────────────────── */}

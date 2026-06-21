@@ -1379,7 +1379,8 @@
       "overview": "Overview",
       "students": "Students",
       "teachers": "Teachers",
-      "schedule": "Schedule"
+      "schedule": "Schedule",
+      "sectionLabel": "Section"
     },
     "overview": {
       "teachersHeading": "Teachers",

@@ -1374,7 +1374,8 @@
       "overview": "Oversikt",
       "students": "Elever",
       "teachers": "Lærere",
-      "schedule": "Timeplan"
+      "schedule": "Timeplan",
+      "sectionLabel": "Avsnitt"
     },
     "overview": {
       "teachersHeading": "Lærere",

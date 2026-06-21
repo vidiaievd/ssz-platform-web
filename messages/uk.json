@@ -1374,7 +1374,8 @@
       "overview": "Огляд",
       "students": "Учні",
       "teachers": "Учителі",
-      "schedule": "Розклад"
+      "schedule": "Розклад",
+      "sectionLabel": "Розділ"
     },
     "overview": {
       "teachersHeading": "Учителі",
