@@ -59,6 +59,7 @@ export function GroupDetail({
         group={group}
         roster={roster}
         lessons={lessons}
+        alerts={alerts}
         schoolSlug={schoolSlug}
         canManage={canManage}
       />
