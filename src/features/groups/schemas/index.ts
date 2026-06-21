@@ -66,6 +66,29 @@ export const teacherAssignSchema = z
     { message: 'End date must be on or after start date', path: ['to'] },
   );
 
+/**
+ * Edit-context schema: same shape as create, plus a hard block on shrinking
+ * capacity below the currently enrolled student count (unknowable at create time).
+ */
+export function groupEditSchema(studentCount: number) {
+  return groupCreateSchema.superRefine((d, ctx) => {
+    if (d.capacity.max < studentCount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Max must be at least ${studentCount} (current enrollment)`,
+        path: ['capacity', 'max'],
+      });
+    }
+    if (d.startDate && d.endDate && d.endDate < d.startDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'End date must be on or after start date',
+        path: ['endDate'],
+      });
+    }
+  });
+}
+
 export type GroupCreateInput = z.infer<typeof groupCreateSchema>;
 export type SlotInput = z.infer<typeof slotSchema>;
 export type TeacherAssignInput = z.infer<typeof teacherAssignSchema>;
