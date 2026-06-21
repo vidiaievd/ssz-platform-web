@@ -18,9 +18,12 @@ type Props = {
   roster: RosterStudent[];
   lessons: Lesson[];
   schoolSlug: string;
+  canManage: boolean;
 };
 
-export function GroupTabs({ group, roster, lessons, schoolSlug }: Props) {
+export function GroupTabs({ group, roster, lessons, schoolSlug, canManage }: Props) {
+  // Hiding mutate affordances behind canManage lands in a later step.
+  void canManage;
   const t = useTranslations('Groups');
   const searchParams = useSearchParams();
   const router = useRouter();

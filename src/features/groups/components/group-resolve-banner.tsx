@@ -9,6 +9,7 @@ type Props = {
   alerts: Alert[];
   groupId: string;
   schoolSlug: string;
+  canManage: boolean;
 };
 
 function fixHref(alert: Alert, groupId: string, schoolSlug: string): string {
@@ -19,7 +20,9 @@ function fixHref(alert: Alert, groupId: string, schoolSlug: string): string {
   return `${base}?tab=students`;
 }
 
-export function GroupResolveBanner({ alerts, groupId, schoolSlug }: Props) {
+export function GroupResolveBanner({ alerts, groupId, schoolSlug, canManage }: Props) {
+  // Gating the Fix-> link on canManage lands in a later step.
+  void canManage;
   if (!alerts.length) return null;
   const hasDanger = alerts.some((a) => a.severity === 'danger');
 

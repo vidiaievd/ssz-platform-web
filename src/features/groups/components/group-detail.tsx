@@ -34,9 +34,10 @@ type Props = {
   alerts: Alert[];
   lessons: Lesson[];
   schoolSlug: string;
+  canManage: boolean;
 };
 
-export function GroupDetail({ group, roster, alerts, lessons, schoolSlug }: Props) {
+export function GroupDetail({ group, roster, alerts, lessons, schoolSlug, canManage }: Props) {
   const listHref = `/school/${schoolSlug}/groups`;
   const metaParts = [group.courseName, group.level, group.mode === 'online' ? 'Online' : 'In-person']
     .filter(Boolean)
@@ -75,6 +76,7 @@ export function GroupDetail({ group, roster, alerts, lessons, schoolSlug }: Prop
         <GroupDetailActions
           group={group}
           schoolSlug={schoolSlug}
+          canManage={canManage}
         />
       </div>
 
@@ -83,6 +85,7 @@ export function GroupDetail({ group, roster, alerts, lessons, schoolSlug }: Prop
         alerts={alerts}
         groupId={group.id}
         schoolSlug={schoolSlug}
+        canManage={canManage}
       />
 
       {/* Tab island (client) */}
@@ -91,6 +94,7 @@ export function GroupDetail({ group, roster, alerts, lessons, schoolSlug }: Prop
         roster={roster}
         lessons={lessons}
         schoolSlug={schoolSlug}
+        canManage={canManage}
       />
     </div>
   );
