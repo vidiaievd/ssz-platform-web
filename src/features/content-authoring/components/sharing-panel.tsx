@@ -106,10 +106,9 @@ export function SharingPanel({ entityType, entityId }: SharingPanelProps) {
             {shares.map((share) => (
               <div key={share.id} className="flex items-center justify-between px-4 py-3">
                 <div className="min-w-0">
-                  {share.userName && (
-                    <p className="truncate text-sm font-medium">{share.userName}</p>
-                  )}
-                  <p className="truncate text-xs text-muted-foreground">{share.userEmail}</p>
+                  <p className="truncate text-sm font-medium">
+                    {share.userName ?? share.userEmail ?? share.userId}
+                  </p>
                 </div>
                 <div className="ml-3 flex shrink-0 items-center gap-2">
                   <Badge variant={share.role === 'co_author' ? 'primary' : 'muted'}>
@@ -189,7 +188,7 @@ export function SharingPanel({ entityType, entityId }: SharingPanelProps) {
             <AlertDialogTitle>{t('sharing.removeConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
               {t('sharing.removeConfirmDescription', {
-                email: pendingRemove?.userEmail ?? '',
+                name: pendingRemove?.userName ?? pendingRemove?.userEmail ?? pendingRemove?.userId ?? '',
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>

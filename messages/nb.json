@@ -573,7 +573,7 @@
       "addSuccess": "Samarbeidspartner lagt til.",
       "removeAriaLabel": "Fjern samarbeidspartner",
       "removeConfirmTitle": "Fjerne samarbeidspartner?",
-      "removeConfirmDescription": "{email} vil miste tilgang til denne beholderen.",
+      "removeConfirmDescription": "{name} vil miste tilgang til denne beholderen.",
       "removeConfirm": "Fjern",
       "removeCancel": "Avbryt",
       "removeSuccess": "Samarbeidspartner fjernet.",
@@ -667,8 +667,7 @@
         "coTeach": "Medlærer",
         "viewer": "Betrakter",
         "coTeachersSection": "Medlærere",
-        "coTeachersComingSoon": "Invitasjon av medlærere kommer snart",
-        "coTeachersHelp": "Du kan legge til medlærere fra kursinnstillingene etter opprettelse.",
+        "coTeachersHelp": "Lagre kursdetaljene først (trinn 1) for å invitere medlærere.",
         "matrixTitle": "Rolletillatelser",
         "matrix": {
           "action": "Handling",
@@ -691,7 +690,7 @@
         "note": "Du kan endre synlighet når som helst fra kursinnstillingene."
       },
       "review": {
-        "subtitle": "Sjekk detaljene før du lagrer eller publiserer.",
+        "subtitle": "Sjekk detaljene før du oppretter kurset.",
         "sectionMetadata": "Detaljer",
         "sectionStructure": "Struktur",
         "sectionTeachers": "Lærere",
@@ -699,10 +698,9 @@
         "edit": "Rediger",
         "ownerOnly": "Kun eier",
         "saveAsDraft": "Lagre som utkast",
-        "publish": "Publiser kurs",
-        "publishError": "Kunne ikke publisere. Sjekk hindringer i forhåndskontrollen.",
-        "publishSuccess": "Kurset er publisert!",
-        "preflightHint": "Lagre utkastet først for å se forhåndskontroller."
+        "createAndContinue": "Opprett kurs",
+        "createError": "Kunne ikke opprette kurset. Vennligst prøv igjen.",
+        "createSuccess": "Kurset er opprettet — legg til leksjoner og publiser når du er klar."
       }
     }
   },

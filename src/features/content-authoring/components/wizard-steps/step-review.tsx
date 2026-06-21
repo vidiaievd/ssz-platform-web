@@ -3,17 +3,13 @@
 import { useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Pencil, BookOpen, Layers, Users, Lock, Globe, EyeOff, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/lib/i18n/navigation';
-import { PreflightPanel } from '@/features/content-authoring/components/preflight-panel';
-import { authoringKeys } from '@/features/content-authoring/api/keys';
 
 import { createContainerAction, updateContainerAction } from '../../actions/container';
-import { publishContainerAction } from '../../actions/publish-container';
 import { wizardPayload } from '../../lib/wizard-payload';
 import { useCreateWizardStore } from '../../stores/create-wizard';
 
@@ -93,7 +89,6 @@ function useStructureLabel() {
 export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void }) {
   const t = useTranslations('Authoring');
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const contentBase = `/school/${schoolSlug}/content`;
   const store = useCreateWizardStore();
@@ -126,28 +121,21 @@ export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void 
     return res.value.id;
   }
 
-  function handlePublish() {
+  function handleCreate() {
     startTransition(async () => {
       try {
         const id = await ensureDraft();
-        const res = await publishContainerAction(id);
-        if (!res.ok) {
-          toast.error(t('wizard.review.publishError'));
-          return;
-        }
-        await queryClient.invalidateQueries({ queryKey: authoringKeys.containers() });
-        toast.success(t('wizard.review.publishSuccess'));
+        toast.success(t('wizard.review.createSuccess'));
         store.reset();
         router.push(`${contentBase}/${id}`);
       } catch {
-        toast.error(t('wizard.review.publishError'));
+        toast.error(t('wizard.review.createError'));
       }
     });
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
-      {/* Summary column */}
+    <div className="mx-auto max-w-2xl">
       <div className="space-y-4">
         <div>
           <h1 className="text-2xl font-semibold text-(--ssz-text-primary) font-[Lora]">
@@ -210,24 +198,11 @@ export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void 
           <Button variant="outline" onClick={onSaveAsDraft} disabled={isPending}>
             {t('wizard.review.saveAsDraft')}
           </Button>
-          <Button onClick={handlePublish} disabled={isPending} loading={isPending}>
+          <Button onClick={handleCreate} disabled={isPending} loading={isPending}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t('wizard.review.publish')}
+            {t('wizard.review.createAndContinue')}
           </Button>
         </div>
-      </div>
-
-      {/* Preflight panel */}
-      <div className="hidden lg:block">
-        {store.draftId ? (
-          <PreflightPanel containerId={store.draftId} />
-        ) : (
-          <div className="rounded-[var(--ssz-radius-md)] border border-(--ssz-border-default) bg-(--ssz-bg-subtle) p-4 text-center">
-            <p className="text-xs text-(--ssz-text-muted)">
-              {t('wizard.review.preflightHint')}
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

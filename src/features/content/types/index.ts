@@ -142,7 +142,9 @@ export interface ContainerShare {
   entityType: string;
   entityId: string;
   userId: string;
-  userEmail: string;
+  // The backend only stores sharedWithUserId — email is unrecoverable after the
+  // fact (profile-service's batch lookup returns displayName, not email).
+  userEmail?: string;
   userName?: string;
   role: ShareRole;
   createdAt: string;

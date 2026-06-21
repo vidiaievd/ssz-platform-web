@@ -578,7 +578,7 @@
       "addSuccess": "Collaborator added.",
       "removeAriaLabel": "Remove collaborator",
       "removeConfirmTitle": "Remove collaborator?",
-      "removeConfirmDescription": "{email} will lose access to this container.",
+      "removeConfirmDescription": "{name} will lose access to this container.",
       "removeConfirm": "Remove",
       "removeCancel": "Cancel",
       "removeSuccess": "Collaborator removed.",
@@ -672,8 +672,7 @@
         "coTeach": "Co-teacher",
         "viewer": "Viewer",
         "coTeachersSection": "Co-teachers",
-        "coTeachersComingSoon": "Co-teacher invitations coming soon",
-        "coTeachersHelp": "You can add co-teachers from the course settings after creation.",
+        "coTeachersHelp": "Save the course details first (step 1) to invite co-teachers.",
         "matrixTitle": "Role permissions",
         "matrix": {
           "action": "Action",
@@ -696,7 +695,7 @@
         "note": "You can change visibility at any time from the course settings."
       },
       "review": {
-        "subtitle": "Check the details before saving or publishing.",
+        "subtitle": "Check the details before creating your course.",
         "sectionMetadata": "Details",
         "sectionStructure": "Structure",
         "sectionTeachers": "Teachers",
@@ -704,10 +703,9 @@
         "edit": "Edit",
         "ownerOnly": "Owner only",
         "saveAsDraft": "Save as draft",
-        "publish": "Publish course",
-        "publishError": "Couldn't publish. Check blockers in the pre-flight panel.",
-        "publishSuccess": "Course published!",
-        "preflightHint": "Save the draft first to see pre-flight checks."
+        "createAndContinue": "Create course",
+        "createError": "Couldn't create the course. Please try again.",
+        "createSuccess": "Course created — add lessons and publish when ready."
       }
     }
   },
