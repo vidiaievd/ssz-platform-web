@@ -29,8 +29,9 @@ export function CourseChip({ courseView, canManage, variant = 'fact', className 
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
         className={cn(
+          'py-2.5 -my-2.5 md:py-0 md:my-0',
           variant === 'fact'
-            ? 'inline-flex items-baseline gap-1 hover:underline underline-offset-2'
+            ? 'inline-flex items-center gap-1 hover:underline underline-offset-2'
             : 'text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline',
           className,
         )}

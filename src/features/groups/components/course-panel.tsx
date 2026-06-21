@@ -20,7 +20,7 @@ export function CoursePanel({ courseView, canManage, open, onOpenChange }: Props
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
+      <SheetContent className="data-[side=right]:w-full data-[side=right]:max-w-none sm:data-[side=right]:max-w-sm xl:data-[side=right]:max-w-120">
         <SheetHeader>
           <SheetTitle>{courseView.courseName ?? t('course.title')}</SheetTitle>
           <SheetDescription>{t('course.description')}</SheetDescription>

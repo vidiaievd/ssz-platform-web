@@ -59,10 +59,10 @@ export async function GroupResolveBanner({ alerts, groupId, schoolSlug, canManag
 
       <ul className="flex flex-col gap-1.5" aria-label={t('resolve.issuesLabel')}>
         {alerts.map((alert, i) => (
-          <li key={i} className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 min-w-0">
+          <li key={i} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
               <AlertChip alert={alert} />
-              <span className="text-xs text-(--ssz-text-secondary) truncate">{alert.label}</span>
+              <span className="text-xs text-(--ssz-text-secondary)">{alert.label}</span>
             </div>
             {canManage && (
               <Link

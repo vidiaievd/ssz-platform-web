@@ -125,7 +125,7 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
   return (
     <>
       <Sheet open={open} onOpenChange={(next) => !next && requestClose()}>
-        <SheetContent>
+        <SheetContent className="data-[side=right]:w-full data-[side=right]:max-w-none sm:data-[side=right]:max-w-sm xl:data-[side=right]:max-w-120">
           <SheetHeader>
             <SheetTitle>{t('edit.title')}</SheetTitle>
             <SheetDescription>{t('edit.description')}</SheetDescription>

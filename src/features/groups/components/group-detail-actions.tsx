@@ -80,18 +80,27 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
   return (
     <>
       <div className="flex items-center gap-2 shrink-0">
-        <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setEditOpen(true)}
+          className="hidden lg:inline-flex"
+        >
           <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
           {t('detail.edit')}
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label={t('detail.moreActions')}>
+            <Button variant="ghost" size="icon-sm" aria-label={t('detail.moreActions')} className="size-11 lg:size-7">
               <MoreHorizontal className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setEditOpen(true)} className="lg:hidden">
+              <Pencil className="size-3.5 mr-2" aria-hidden="true" />
+              {t('detail.edit')}
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDuplicate} disabled={isPending}>
               <Copy className="size-3.5 mr-2" aria-hidden="true" />
               {t('detail.duplicate')}
