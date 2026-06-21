@@ -371,6 +371,10 @@
     "breadcrumb": {
       "courses": "Courses"
     },
+    "sections": {
+      "noSection": "No section",
+      "assignAriaLabel": "Assign to section"
+    },
     "filters": {
       "all": "All",
       "draft": "Draft",

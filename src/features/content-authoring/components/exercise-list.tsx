@@ -24,6 +24,7 @@ import { useAuthoringExercises } from '../api/use-authoring-exercises';
 import { authoringKeys } from '../api/keys';
 import { deleteExerciseAction } from '../actions/exercise';
 import { ExerciseEditor } from './exercise-editor';
+import { SectionAssignSelect } from './section-assign-select';
 
 interface ExerciseListProps {
   container: Container;
@@ -92,7 +93,13 @@ export function ExerciseList({ container }: ExerciseListProps) {
                 <span className="text-sm font-medium">
                   {exercise.title || t('exercises.untitled')}
                 </span>
-                <div className="flex shrink-0 gap-1">
+                <div className="flex shrink-0 items-center gap-1">
+                  <SectionAssignSelect
+                    containerId={container.id}
+                    containerItemId={exercise.id}
+                    sectionId={exercise.sectionId}
+                    invalidateKeys={[authoringKeys.exercises(container.id)]}
+                  />
                   <Button
                     variant="ghost"
                     size="icon"

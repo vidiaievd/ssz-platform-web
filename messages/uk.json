@@ -367,6 +367,10 @@
       "draft": "Чернетка",
       "published": "Опубліковано"
     },
+    "sections": {
+      "noSection": "Без секції",
+      "assignAriaLabel": "Призначити секцію"
+    },
     "filters": {
       "all": "Усі",
       "draft": "Чернетки",

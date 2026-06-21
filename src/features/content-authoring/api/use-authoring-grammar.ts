@@ -20,6 +20,8 @@ export function useAuthoringGrammarRules(containerId: string, enabled = true) {
           title: i.title ?? '',
           targetLanguage: '',
           createdAt: i.addedAt,
+          containerItemId: i.id,
+          sectionId: i.sectionId,
         }));
     },
     enabled: enabled && !!containerId,

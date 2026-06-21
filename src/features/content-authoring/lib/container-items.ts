@@ -54,6 +54,21 @@ export async function removeItemFromDraft(containerId: string, containerItemId: 
   });
 }
 
+/** Assigns (or clears, with sectionId = null) the section a draft item belongs to. */
+export async function assignItemSection(
+  containerId: string,
+  containerItemId: string,
+  sectionId: string | null,
+): Promise<void> {
+  const versionId = await requireDraftVersionId(containerId);
+  await serverFetch({
+    service: 'content',
+    path: `/containers/${containerId}/versions/${versionId}/items/${containerItemId}`,
+    method: 'PATCH',
+    body: { sectionId },
+  });
+}
+
 export async function reorderDraftItems(containerId: string, orderedItemIds: string[]): Promise<void> {
   const versionId = await requireDraftVersionId(containerId);
   await serverFetch({

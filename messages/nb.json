@@ -367,6 +367,10 @@
       "draft": "Utkast",
       "published": "Publisert"
     },
+    "sections": {
+      "noSection": "Ingen seksjon",
+      "assignAriaLabel": "Tilordne til seksjon"
+    },
     "filters": {
       "all": "Alle",
       "draft": "Utkast",

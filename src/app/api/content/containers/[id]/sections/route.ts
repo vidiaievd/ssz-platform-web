@@ -1,0 +1,49 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors';
+import type { ContainerSection, Container, ContainerVersion } from '@/features/content/types';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const { searchParams } = request.nextUrl;
+  let versionId = searchParams.get('versionId');
+  const draft = searchParams.get('draft') === 'true';
+
+  try {
+    if (!versionId) {
+      if (draft) {
+        const versions = await serverFetch<{ items: ContainerVersion[] }>({
+          service: 'content',
+          path: `/containers/${id}/versions`,
+        });
+        const draftVersion = versions.items.find((v) => v.status === 'draft') ?? versions.items[0];
+        versionId = draftVersion?.id ?? null;
+      } else {
+        const container = await serverFetch<Container>({
+          service: 'content',
+          path: `/containers/${id}`,
+        });
+        versionId = container.currentPublishedVersionId ?? null;
+      }
+    }
+
+    if (!versionId) {
+      return NextResponse.json([], { status: 200 });
+    }
+
+    const sections = await serverFetch<ContainerSection[]>({
+      service: 'content',
+      path: `/containers/${id}/versions/${versionId}/sections`,
+    });
+    return NextResponse.json(sections);
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'not_found') {
+      return NextResponse.json([], { status: 200 });
+    }
+    return NextResponse.json({ error: 'Failed to fetch container sections' }, { status: 502 });
+  }
+}

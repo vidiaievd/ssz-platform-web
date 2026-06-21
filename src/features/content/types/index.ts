@@ -134,6 +134,9 @@ export interface GrammarRule {
   title: string;
   targetLanguage: string;
   createdAt: string;
+  /** The underlying container-item id — needed to assign/reorder/remove this rule within a course. */
+  containerItemId: string;
+  sectionId?: string | null;
 }
 
 export interface ExerciseDisplay {

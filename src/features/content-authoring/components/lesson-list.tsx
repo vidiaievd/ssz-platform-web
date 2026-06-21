@@ -25,6 +25,7 @@ import { authoringKeys } from '../api/keys';
 import { createLessonAction, deleteLessonAction, reorderLessonsAction } from '../actions/lesson';
 import { LessonReorder } from './lesson-reorder';
 import { LessonEditor } from './lesson-editor';
+import { SectionAssignSelect } from './section-assign-select';
 
 interface LessonListProps {
   container: Container;
@@ -129,7 +130,13 @@ export function LessonList({ container }: LessonListProps) {
                 <span className="text-sm font-medium">
                   {item.title ?? t('lessons.untitled')}
                 </span>
-                <div className="flex shrink-0 gap-1">
+                <div className="flex shrink-0 items-center gap-1">
+                  <SectionAssignSelect
+                    containerId={container.id}
+                    containerItemId={item.id}
+                    sectionId={item.sectionId}
+                    invalidateKeys={[authoringKeys.lessons(container.id)]}
+                  />
                   <Button
                     variant="ghost"
                     size="icon"

@@ -24,6 +24,7 @@ import { useAuthoringGrammarRules } from '../api/use-authoring-grammar';
 import { authoringKeys } from '../api/keys';
 import { createGrammarRuleAction, deleteGrammarRuleAction } from '../actions/grammar';
 import { GrammarEditor } from './grammar-editor';
+import { SectionAssignSelect } from './section-assign-select';
 
 interface GrammarListProps {
   container: Container;
@@ -108,7 +109,13 @@ export function GrammarList({ container }: GrammarListProps) {
                 <span className="text-sm font-medium">
                   {rule.title || t('grammar.untitled')}
                 </span>
-                <div className="flex shrink-0 gap-1">
+                <div className="flex shrink-0 items-center gap-1">
+                  <SectionAssignSelect
+                    containerId={container.id}
+                    containerItemId={rule.containerItemId}
+                    sectionId={rule.sectionId}
+                    invalidateKeys={[authoringKeys.grammarRules(container.id)]}
+                  />
                   <Button
                     variant="ghost"
                     size="icon"

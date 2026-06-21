@@ -367,6 +367,10 @@
       "draft": "Черновик",
       "published": "Опубликован"
     },
+    "sections": {
+      "noSection": "Без секции",
+      "assignAriaLabel": "Назначить секцию"
+    },
     "filters": {
       "all": "Все",
       "draft": "Черновики",
