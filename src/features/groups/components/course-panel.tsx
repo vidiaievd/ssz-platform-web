@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
 } from '@/components/ui/sheet';
-import { ChangeCourseDialog } from './change-course-dialog';
 import type { CourseView } from '../types';
 
 type Props = {
@@ -55,9 +54,9 @@ export function CoursePanel({ courseView, canManage, open, onOpenChange }: Props
 
         {canManage && (
           <SheetFooter>
-            <div className="flex items-center justify-end">
-              <ChangeCourseDialog />
-            </div>
+            <p className="text-xs text-(--ssz-text-muted) text-center sm:text-left">
+              {t('course.editHint')}
+            </p>
           </SheetFooter>
         )}
       </SheetContent>

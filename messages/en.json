@@ -1492,7 +1492,15 @@
       "discardKeepEditing": "Keep editing",
       "discardDiscard": "Discard",
       "maxBelowEnrolled": "Max must be at least {count} (current enrollment)",
-      "endBeforeStart": "End date must be on or after start date"
+      "endBeforeStart": "End date must be on or after start date",
+      "course": "Course",
+      "courseAdd": "Add course",
+      "courseChange": "Change",
+      "courseRemove": "Remove course",
+      "courseSearchPlaceholder": "Search published courses…",
+      "courseNoneOption": "No course",
+      "courseLoading": "Loading courses…",
+      "courseNoResults": "No published courses found."
     },
     "wizard": {
       "title": "New group",
@@ -1607,8 +1615,7 @@
       "units": "{count} units",
       "noCourse": "No course assigned",
       "open": "View course →",
-      "change": "Change course",
-      "changeComingSoon": "Coming soon"
+      "editHint": "Manage from this group's Edit panel."
     }
   },
   "Students": {

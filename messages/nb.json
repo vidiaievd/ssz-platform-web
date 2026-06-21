@@ -1487,7 +1487,15 @@
       "discardKeepEditing": "Fortsett å redigere",
       "discardDiscard": "Forkast",
       "maxBelowEnrolled": "Maks må være minst {count} (nåværende antall påmeldte)",
-      "endBeforeStart": "Sluttdato må være på eller etter startdato"
+      "endBeforeStart": "Sluttdato må være på eller etter startdato",
+      "course": "Kurs",
+      "courseAdd": "Legg til kurs",
+      "courseChange": "Endre",
+      "courseRemove": "Fjern kurs",
+      "courseSearchPlaceholder": "Søk i publiserte kurs…",
+      "courseNoneOption": "Ingen kurs",
+      "courseLoading": "Laster kurs…",
+      "courseNoResults": "Fant ingen publiserte kurs."
     },
     "wizard": {
       "title": "Ny gruppe",
@@ -1602,8 +1610,7 @@
       "units": "{count} enheter",
       "noCourse": "Ingen kurs tildelt",
       "open": "Vis kurs →",
-      "change": "Endre kurs",
-      "changeComingSoon": "Kommer snart"
+      "editHint": "Administreres fra gruppens redigeringspanel."
     }
   },
   "Students": {

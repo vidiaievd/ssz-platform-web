@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { GroupEditCourseField } from './group-edit-course-field';
 import { updateGroup } from '../api/mutations';
 import { groupEditSchema } from '../schemas';
 import type { Group } from '../types';
@@ -40,6 +41,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [discardOpen, setDiscardOpen] = useState(false);
+  const [courseName, setCourseName] = useState(group.courseName ?? null);
 
   const {
     register,
@@ -57,6 +59,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
     ),
     defaultValues: {
       name: group.name,
+      courseId: group.courseId,
       lang: group.lang,
       level: group.level,
       mode: group.mode,
@@ -69,6 +72,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
   const levelValue = watch('level');
   const modeValue = watch('mode');
   const capacityMax = watch('capacity.max');
+  const courseId = watch('courseId') ?? null;
 
   const maxBelowEnrolled = capacityMax !== undefined && capacityMax < group.studentCount;
 
@@ -76,6 +80,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
     startTransition(async () => {
       const result = await updateGroup(schoolId, group.id, {
         name: data.name,
+        courseId: data.courseId ?? null,
         lang: data.lang,
         level: data.level,
         mode: data.mode,
@@ -104,6 +109,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
 
   function handleDiscard() {
     reset();
+    setCourseName(group.courseName ?? null);
     setDiscardOpen(false);
     onOpenChange(false);
   }
@@ -189,6 +195,21 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
                   ))}
                 </div>
               </div>
+            </fieldset>
+
+            {/* ── Course ────────────────────────────────────────────────── */}
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-1">
+                {t('edit.course')}
+              </legend>
+              <GroupEditCourseField
+                courseId={courseId}
+                courseName={courseName}
+                onChange={(id, name) => {
+                  setValue('courseId', id, { shouldDirty: true });
+                  setCourseName(name);
+                }}
+              />
             </fieldset>
 
             {/* ── Capacity ──────────────────────────────────────────────── */}

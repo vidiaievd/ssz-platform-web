@@ -1487,7 +1487,15 @@
       "discardKeepEditing": "Продовжити редагування",
       "discardDiscard": "Скасувати",
       "maxBelowEnrolled": "Максимум має бути не менше {count} (поточна кількість зарахованих)",
-      "endBeforeStart": "Дата завершення має бути не раніше дати початку"
+      "endBeforeStart": "Дата завершення має бути не раніше дати початку",
+      "course": "Курс",
+      "courseAdd": "Додати курс",
+      "courseChange": "Змінити",
+      "courseRemove": "Видалити курс",
+      "courseSearchPlaceholder": "Пошук опублікованих курсів…",
+      "courseNoneOption": "Без курсу",
+      "courseLoading": "Завантаження курсів…",
+      "courseNoResults": "Опублікованих курсів не знайдено."
     },
     "wizard": {
       "title": "Нова група",
@@ -1602,8 +1610,7 @@
       "units": "{count} модулів",
       "noCourse": "Курс не призначено",
       "open": "Переглянути курс →",
-      "change": "Змінити курс",
-      "changeComingSoon": "Незабаром"
+      "editHint": "Керується з панелі редагування групи."
     }
   },
   "Students": {

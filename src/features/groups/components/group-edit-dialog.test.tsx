@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { renderWithProviders } from '@/test/render';
@@ -14,7 +14,14 @@ vi.mock('../api/mutations', () => ({
   updateGroup: vi.fn(),
 }));
 
-const group: Group = {
+vi.mock('@/features/content-authoring/api/use-my-containers', () => ({
+  useMyContainers: () => ({
+    data: { items: [{ id: '11111111-1111-4111-8111-111111111111', title: 'Norwegian A2 — Grammar' }] },
+    isLoading: false,
+  }),
+}));
+
+const baseGroup: Group = {
   id: 'g1',
   name: 'Norwegian A2',
   courseId: null,
@@ -31,7 +38,7 @@ const group: Group = {
   slots: [],
 };
 
-function renderDialog(onOpenChange = vi.fn()) {
+function renderDialog(onOpenChange = vi.fn(), group: Group = baseGroup) {
   return renderWithProviders(
     <GroupEditDialog group={group} schoolId="my-school" open onOpenChange={onOpenChange} />,
   );
@@ -94,5 +101,50 @@ describe('GroupEditDialog', () => {
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
     expect(screen.queryByText('Discard unsaved changes?')).not.toBeInTheDocument();
+  });
+
+  it('lets an admin attach a course to a group that has none', async () => {
+    renderDialog();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add course' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Norwegian A2 — Grammar' }));
+
+    expect(screen.getByText('Norwegian A2 — Grammar')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add course' })).not.toBeInTheDocument();
+  });
+
+  it('lets an admin remove the currently linked course', async () => {
+    renderDialog(vi.fn(), {
+      ...baseGroup,
+      courseId: '11111111-1111-4111-8111-111111111111',
+      courseName: 'Norwegian A2 — Grammar',
+    });
+
+    expect(screen.getByText('Norwegian A2 — Grammar')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove course' }));
+
+    expect(screen.queryByText('Norwegian A2 — Grammar')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add course' })).toBeInTheDocument();
+  });
+
+  it('includes the selected courseId in the save payload', async () => {
+    const { updateGroup } = await import('../api/mutations');
+    vi.mocked(updateGroup).mockResolvedValue({ ok: true });
+
+    renderDialog();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add course' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Norwegian A2 — Grammar' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(updateGroup).toHaveBeenCalledWith(
+        'my-school',
+        'g1',
+        expect.objectContaining({ courseId: '11111111-1111-4111-8111-111111111111' }),
+      ),
+    );
   });
 });

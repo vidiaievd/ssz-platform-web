@@ -1487,7 +1487,15 @@
       "discardKeepEditing": "Продолжить редактирование",
       "discardDiscard": "Отменить",
       "maxBelowEnrolled": "Максимум должен быть не меньше {count} (текущее количество зачисленных)",
-      "endBeforeStart": "Дата окончания должна быть не раньше даты начала"
+      "endBeforeStart": "Дата окончания должна быть не раньше даты начала",
+      "course": "Курс",
+      "courseAdd": "Добавить курс",
+      "courseChange": "Изменить",
+      "courseRemove": "Удалить курс",
+      "courseSearchPlaceholder": "Поиск опубликованных курсов…",
+      "courseNoneOption": "Без курса",
+      "courseLoading": "Загрузка курсов…",
+      "courseNoResults": "Опубликованные курсы не найдены."
     },
     "wizard": {
       "title": "Новая группа",
@@ -1602,8 +1610,7 @@
       "units": "{count} модулей",
       "noCourse": "Курс не назначен",
       "open": "Просмотреть курс →",
-      "change": "Изменить курс",
-      "changeComingSoon": "Скоро"
+      "editHint": "Управляется из панели редактирования группы."
     }
   },
   "Students": {
