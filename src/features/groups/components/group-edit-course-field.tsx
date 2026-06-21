@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Search, BookOpen, X } from 'lucide-react';
 
-import { useMyContainers } from '@/features/content-authoring/api/use-my-containers';
+import { useAssignableCourses } from '../api/use-assignable-courses';
 
 type Props = {
   courseId: string | null;
@@ -77,7 +77,7 @@ function CoursePicker({
 }) {
   const t = useTranslations('Groups');
   const [query, setQuery] = useState('');
-  const { data, isLoading } = useMyContainers({ state: 'published', search: query || undefined, pageSize: 20 });
+  const { data, isLoading } = useAssignableCourses({ search: query || undefined, pageSize: 20 });
   const containers = data?.items ?? [];
 
   return (

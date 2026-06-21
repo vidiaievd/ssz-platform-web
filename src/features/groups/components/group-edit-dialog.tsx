@@ -84,8 +84,8 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
         lang: data.lang,
         level: data.level,
         mode: data.mode,
-        minCapacity: data.capacity.min,
-        maxCapacity: data.capacity.max,
+        capacityMin: data.capacity.min,
+        capacityMax: data.capacity.max,
         startDate: data.startDate ?? null,
         endDate: data.endDate ?? null,
       });

@@ -93,8 +93,8 @@ export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timeta
           lang: store.lang,
           level: store.level,
           mode: store.mode,
-          minCapacity: store.capacity.min,
-          maxCapacity: store.capacity.max,
+          capacityMin: store.capacity.min,
+          capacityMax: store.capacity.max,
           ...(store.startDate && { startDate: store.startDate }),
           ...(store.endDate && { endDate: store.endDate }),
         });

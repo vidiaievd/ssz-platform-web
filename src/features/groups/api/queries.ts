@@ -29,8 +29,8 @@ type OrgGroup = {
   level?: string;
   status?: string;
   mode?: string;
-  minCapacity?: number;
-  maxCapacity?: number;
+  capacityMin?: number;
+  capacityMax?: number;
   studentCount?: number;
   startDate?: string | null;
   endDate?: string | null;
@@ -60,8 +60,10 @@ function mapGroupStatus(s?: string): Group['status'] {
   return 'draft';
 }
 
+// organization-service's GroupMode enum uses an underscore ('online' | 'in_person');
+// the frontend's GroupMode type uses a hyphen ('online' | 'in-person').
 function mapGroupMode(m?: string): Group['mode'] {
-  return m?.toLowerCase() === 'in-person' ? 'in-person' : 'online';
+  return m?.toLowerCase() === 'in_person' ? 'in-person' : 'online';
 }
 
 function mapTeacherRole(r?: string): GroupTeacher['role'] {
@@ -80,7 +82,7 @@ function buildGroupForOps(g: OrgGroup, slots: Slot[]): GroupForOps {
     coPrimaryTeacherId: coPrimary?.userId ?? null,
     slots,
     studentCount: g.studentCount ?? 0,
-    capacity: { min: g.minCapacity ?? 0, max: g.maxCapacity ?? 999 },
+    capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? 999 },
   };
 }
 
@@ -182,7 +184,7 @@ export async function getGroups(
       coPrimaryTeacher: coPrimaryInfo ? { name: coPrimaryInfo.name } : null,
       scheduleSummary: buildScheduleSummary(slots),
       studentCount: g.studentCount ?? 0,
-      capacity: { min: g.minCapacity ?? 0, max: g.maxCapacity ?? 999 },
+      capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? 999 },
       alerts,
     };
   });
@@ -280,7 +282,7 @@ export async function getGroup(
     level: (rawGroup.level ?? 'A1') as Group['level'],
     status: mapGroupStatus(rawGroup.status),
     mode: mapGroupMode(rawGroup.mode),
-    capacity: { min: rawGroup.minCapacity ?? 0, max: rawGroup.maxCapacity ?? 999 },
+    capacity: { min: rawGroup.capacityMin ?? 0, max: rawGroup.capacityMax ?? 999 },
     studentCount: rawGroup.studentCount ?? 0,
     startDate: rawGroup.startDate ?? null,
     endDate: rawGroup.endDate ?? null,

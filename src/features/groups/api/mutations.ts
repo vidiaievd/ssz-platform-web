@@ -17,6 +17,12 @@ import { groupCacheTags } from './keys';
 
 type FailResult = Extract<MutationResult, { ok: false }>;
 
+// organization-service's GroupMode enum uses an underscore ('online' | 'in_person');
+// the frontend's GroupMode type uses a hyphen ('online' | 'in-person').
+function toBackendMode(mode: string): 'online' | 'in_person' {
+  return mode === 'in-person' ? 'in_person' : 'online';
+}
+
 // organization-service requires a school UUID; callers pass either the slug
 // (from the URL) or the UUID, so resolve here before forwarding upstream.
 async function requireSchoolId(idOrSlug: string): Promise<string> {
@@ -48,7 +54,7 @@ function mapError(e: unknown): MutationResult {
 
 export async function createGroup(
   schoolId: string,
-  data: { name: string; courseId?: string | null; lang: string; level: string; mode: string; minCapacity: number; maxCapacity: number },
+  data: { name: string; courseId?: string | null; lang: string; level: string; mode: string; capacityMin: number; capacityMax: number; startDate?: string; endDate?: string },
 ): Promise<MutationResult & { id?: string }> {
   try {
     const resolvedSchoolId = await requireSchoolId(schoolId);
@@ -56,7 +62,7 @@ export async function createGroup(
       service: 'organization',
       path: `/schools/${resolvedSchoolId}/groups`,
       method: 'POST',
-      body: data,
+      body: { ...data, mode: toBackendMode(data.mode) },
     });
     invalidate(groupCacheTags.groups(schoolId));
     return { ok: true, id: result.id };
@@ -68,7 +74,7 @@ export async function createGroup(
 export async function updateGroup(
   schoolId: string,
   groupId: string,
-  data: Partial<{ name: string; courseId: string | null; lang: string; level: string; mode: string; minCapacity: number; maxCapacity: number; startDate: string | null; endDate: string | null }>,
+  data: Partial<{ name: string; courseId: string | null; lang: string; level: string; mode: string; capacityMin: number; capacityMax: number; startDate: string | null; endDate: string | null }>,
 ): Promise<MutationResult> {
   try {
     const resolvedSchoolId = await requireSchoolId(schoolId);
@@ -76,7 +82,7 @@ export async function updateGroup(
       service: 'organization',
       path: `/schools/${resolvedSchoolId}/groups/${groupId}`,
       method: 'PATCH',
-      body: data,
+      body: { ...data, mode: data.mode !== undefined ? toBackendMode(data.mode) : undefined },
     });
     invalidate(groupCacheTags.group(groupId));
     invalidate(groupCacheTags.groups(schoolId));

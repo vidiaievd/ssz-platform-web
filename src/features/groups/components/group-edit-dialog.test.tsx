@@ -14,8 +14,8 @@ vi.mock('../api/mutations', () => ({
   updateGroup: vi.fn(),
 }));
 
-vi.mock('@/features/content-authoring/api/use-my-containers', () => ({
-  useMyContainers: () => ({
+vi.mock('../api/use-assignable-courses', () => ({
+  useAssignableCourses: () => ({
     data: { items: [{ id: '11111111-1111-4111-8111-111111111111', title: 'Norwegian A2 — Grammar' }] },
     isLoading: false,
   }),
