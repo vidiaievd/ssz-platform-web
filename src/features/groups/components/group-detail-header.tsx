@@ -2,6 +2,8 @@ import { cn } from '@/lib/utils';
 import { GroupStatusPill } from './group-status-pill';
 import { GroupDetailActions } from './group-detail-actions';
 import { HeaderRiskChip } from './header-risk-chip';
+import { CourseChip } from './course-chip';
+import { deriveCourseView } from '../lib/course-view';
 import type { Group } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
@@ -43,6 +45,8 @@ type Props = {
 };
 
 export function GroupDetailHeader({ group, alerts, schoolSlug, canManage }: Props) {
+  const courseView = deriveCourseView(group);
+
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="flex items-center gap-3 min-w-0">
@@ -56,7 +60,7 @@ export function GroupDetailHeader({ group, alerts, schoolSlug, canManage }: Prop
             <HeaderRiskChip alerts={alerts} />
           </div>
           <div className="mt-1.5 flex items-center gap-3 text-sm flex-wrap">
-            {group.courseName && <Fact label="Course" value={group.courseName} />}
+            <CourseChip courseView={courseView} />
             {group.level && <Fact label="Level" value={group.level} />}
             <Fact label="Mode" value={group.mode === 'online' ? 'Online' : 'In-person'} />
           </div>

@@ -4,6 +4,8 @@ import { UserPlus, CalendarPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CapacityMeter } from '@/components/shared/operations';
 import { TeacherRow } from './teacher-row';
+import { CourseChip } from './course-chip';
+import { deriveCourseView } from '../lib/course-view';
 import type { Group, RosterStudent, Lesson } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
@@ -56,6 +58,7 @@ export function OverviewCards({ group, roster, lessons, alerts, canManage, schoo
 
   // ── Course ──
   const modeLabel = group.mode === 'online' ? 'Online' : 'In-person';
+  const courseView = deriveCourseView(group);
 
   // ── Roster ──
   const clashCount = roster.filter((s) => s.hasClash).length;
@@ -78,12 +81,7 @@ export function OverviewCards({ group, roster, lessons, alerts, canManage, schoo
       {/* Course */}
       <Card
         heading="Course"
-        footer={
-          // Step 8 wires this to the read-only Course panel.
-          <span className="text-xs font-semibold text-(--ssz-text-muted) cursor-default">
-            View course →
-          </span>
-        }
+        footer={<CourseChip courseView={courseView} variant="link" />}
       >
         {group.courseName ? (
           <p className="text-sm text-(--ssz-text-secondary)">

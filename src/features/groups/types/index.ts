@@ -30,6 +30,16 @@ export interface Group {
   slots: Slot[];
 }
 
+/** Read-only course view backing CourseChip/CoursePanel — derived from Group, no new endpoint. */
+export interface CourseView {
+  courseId: string | null;
+  courseName: string | null;
+  lang: LangCode;
+  level: CEFR;
+  /** Curriculum unit count; null when unavailable or not yet looked up. */
+  unitCount: number | null;
+}
+
 export interface GroupHealthRowVM {
   id: string; name: string; lang: LangCode; level: CEFR;
   courseName: string | null;
