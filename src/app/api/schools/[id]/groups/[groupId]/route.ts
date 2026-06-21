@@ -2,15 +2,18 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors/app-error';
+import { resolveSchoolId } from '@/features/school/api/resolve-school-id';
 
 type Params = { params: Promise<{ id: string; groupId: string }> };
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id, groupId } = await params;
+  const schoolId = await resolveSchoolId(id);
+  if (!schoolId) return NextResponse.json({ error: 'School not found' }, { status: 404 });
   try {
     const data = await serverFetch({
       service: 'organization',
-      path: `/schools/${id}/groups/${groupId}`,
+      path: `/schools/${schoolId}/groups/${groupId}`,
     });
     return NextResponse.json(data);
   } catch (e) {
@@ -20,6 +23,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const { id, groupId } = await params;
+  const schoolId = await resolveSchoolId(id);
+  if (!schoolId) return NextResponse.json({ error: 'School not found' }, { status: 404 });
+
   let body: unknown;
   try {
     body = await req.json();
@@ -30,7 +36,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const data = await serverFetch({
       service: 'organization',
-      path: `/schools/${id}/groups/${groupId}`,
+      path: `/schools/${schoolId}/groups/${groupId}`,
       method: 'PATCH',
       body,
     });
@@ -42,10 +48,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const { id, groupId } = await params;
+  const schoolId = await resolveSchoolId(id);
+  if (!schoolId) return NextResponse.json({ error: 'School not found' }, { status: 404 });
   try {
     await serverFetch({
       service: 'organization',
-      path: `/schools/${id}/groups/${groupId}`,
+      path: `/schools/${schoolId}/groups/${groupId}`,
       method: 'DELETE',
     });
     return new NextResponse(null, { status: 204 });

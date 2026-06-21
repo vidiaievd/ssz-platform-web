@@ -9,12 +9,21 @@ function invalidate(tag: string) {
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors/app-error';
+import { resolveSchoolId } from '@/features/school/api/resolve-school-id';
 import type { MutationResult, Slot } from '@/features/groups/types';
 import { groupCacheTags } from './keys';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 type FailResult = Extract<MutationResult, { ok: false }>;
+
+// organization-service requires a school UUID; callers pass either the slug
+// (from the URL) or the UUID, so resolve here before forwarding upstream.
+async function requireSchoolId(idOrSlug: string): Promise<string> {
+  const schoolId = await resolveSchoolId(idOrSlug);
+  if (!schoolId) throw new AppError('not_found', 'School not found');
+  return schoolId;
+}
 
 function mapError(e: unknown): MutationResult {
   if (e instanceof AppError && e.code === 'conflict') {
@@ -29,6 +38,9 @@ function mapError(e: unknown): MutationResult {
   if (e instanceof AppError && e.code === 'validation') {
     return { ok: false };
   }
+  if (e instanceof AppError && e.code === 'not_found') {
+    return { ok: false };
+  }
   throw e; // unexpected — let Next.js handle it
 }
 
@@ -39,9 +51,10 @@ export async function createGroup(
   data: { name: string; courseId?: string | null; lang: string; level: string; mode: string; minCapacity: number; maxCapacity: number },
 ): Promise<MutationResult & { id?: string }> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     const result = await serverFetch<{ id: string }>({
       service: 'organization',
-      path: `/schools/${schoolId}/groups`,
+      path: `/schools/${resolvedSchoolId}/groups`,
       method: 'POST',
       body: data,
     });
@@ -58,9 +71,10 @@ export async function updateGroup(
   data: Partial<{ name: string; courseId: string | null; lang: string; level: string; mode: string; minCapacity: number; maxCapacity: number; startDate: string | null; endDate: string | null }>,
 ): Promise<MutationResult> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     await serverFetch({
       service: 'organization',
-      path: `/schools/${schoolId}/groups/${groupId}`,
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}`,
       method: 'PATCH',
       body: data,
     });
@@ -74,9 +88,10 @@ export async function updateGroup(
 
 export async function deleteGroup(schoolId: string, groupId: string): Promise<MutationResult> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     await serverFetch({
       service: 'organization',
-      path: `/schools/${schoolId}/groups/${groupId}`,
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}`,
       method: 'DELETE',
     });
     invalidate(groupCacheTags.group(groupId));
@@ -90,9 +105,10 @@ export async function deleteGroup(schoolId: string, groupId: string): Promise<Mu
 
 export async function publishGroup(schoolId: string, groupId: string): Promise<MutationResult> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     await serverFetch({
       service: 'organization',
-      path: `/schools/${schoolId}/groups/${groupId}/publish`,
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}/publish`,
       method: 'POST',
     });
     invalidate(groupCacheTags.group(groupId));
@@ -108,9 +124,10 @@ export async function duplicateGroup(
   groupId: string,
 ): Promise<MutationResult & { id?: string }> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     const result = await serverFetch<{ id: string }>({
       service: 'organization',
-      path: `/schools/${schoolId}/groups/${groupId}/duplicate`,
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}/duplicate`,
       method: 'POST',
     });
     invalidate(groupCacheTags.groups(schoolId));
@@ -122,9 +139,10 @@ export async function duplicateGroup(
 
 export async function archiveGroup(schoolId: string, groupId: string): Promise<MutationResult> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     await serverFetch({
       service: 'organization',
-      path: `/schools/${schoolId}/groups/${groupId}/archive`,
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}/archive`,
       method: 'POST',
     });
     invalidate(groupCacheTags.group(groupId));
@@ -145,9 +163,10 @@ export async function assignTeacher(
   override = false,
 ): Promise<MutationResult> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     await serverFetch({
       service: 'organization',
-      path: `/schools/${schoolId}/groups/${groupId}/teachers`,
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}/teachers`,
       method: 'POST',
       query: override ? { override: true } : undefined,
       body: {
@@ -174,9 +193,10 @@ export async function removeTeacher(
   userId: string,
 ): Promise<MutationResult> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     await serverFetch({
       service: 'organization',
-      path: `/schools/${schoolId}/groups/${groupId}/teachers/${userId}`,
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}/teachers/${userId}`,
       method: 'DELETE',
     });
     invalidate(groupCacheTags.group(groupId));
@@ -198,10 +218,11 @@ export async function addStudents(
   override = false,
 ): Promise<MutationResult> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     for (const userId of userIds) {
       await serverFetch({
         service: 'organization',
-        path: `/schools/${schoolId}/groups/${groupId}/members`,
+        path: `/schools/${resolvedSchoolId}/groups/${groupId}/members`,
         method: 'POST',
         query: override ? { override: true } : undefined,
         body: { userId },
@@ -221,9 +242,10 @@ export async function removeStudent(
   userId: string,
 ): Promise<MutationResult> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     await serverFetch({
       service: 'organization',
-      path: `/schools/${schoolId}/groups/${groupId}/members/${userId}`,
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}/members/${userId}`,
       method: 'DELETE',
     });
     invalidate(groupCacheTags.group(groupId));
