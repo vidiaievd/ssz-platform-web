@@ -36,10 +36,20 @@ export interface ContainerItem {
   itemType: 'container' | 'lesson' | 'vocabulary_list' | 'grammar_rule' | 'exercise';
   itemId: string;
   isRequired: boolean;
+  sectionId?: string | null;
+  /** @deprecated free-text fallback — prefer sectionId */
   sectionLabel?: string | null;
   /** Display title of the referenced content, resolved server-side. */
   title: string | null;
   addedAt: string;
+}
+
+export interface ContainerSection {
+  id: string;
+  containerVersionId: string;
+  title: string;
+  position: number;
+  createdAt: string;
 }
 
 export interface PageInfo {

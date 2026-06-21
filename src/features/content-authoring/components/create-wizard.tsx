@@ -22,6 +22,7 @@ import { Link, useRouter } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 import { createContainerAction, updateContainerAction } from '../actions/container';
+import { syncStructureSectionsAction } from '../actions/section';
 import { wizardPayload } from '../lib/wizard-payload';
 import { useCreateWizardStore } from '../stores/create-wizard';
 import { WizardStepMetadata } from './wizard-steps/step-metadata';
@@ -102,12 +103,16 @@ export function CreateWizard() {
 
   // ── Persist on next ────────────────────────────────────────────────────────
 
+  const STRUCTURE_STEP_INDEX = 1;
+
   const handleNext = useCallback(() => {
     startTransition(async () => {
-      const { metadata, visibility } = store;
+      const { metadata, visibility, structure } = store;
       const payload = wizardPayload(metadata, visibility.mode);
 
       const nextStep = currentStep + 1;
+
+      let draftId: string;
 
       if (!store.draftId) {
         const res = await createContainerAction(payload);
@@ -115,23 +120,29 @@ export function CreateWizard() {
           toast.error(t('wizard.shell.saveError'));
           return;
         }
-        const newId = res.value.id;
-        store.setDraftId(newId);
+        draftId = res.value.id;
+        store.setDraftId(draftId);
         store.markSaved();
-        const params = new URLSearchParams();
-        params.set('step', String(nextStep + 1));
-        params.set('draft', newId);
-        router.push(`${contentBase}/new?${params.toString()}`);
-        store.setStep(nextStep);
       } else {
-        const res = await updateContainerAction(store.draftId, payload);
+        draftId = store.draftId;
+        const res = await updateContainerAction(draftId, payload);
         if (!res.ok) {
           toast.error(t('wizard.shell.saveError'));
           return;
         }
         store.markSaved();
-        navigateTo(nextStep);
       }
+
+      if (currentStep === STRUCTURE_STEP_INDEX) {
+        const titles = structure.mode === 'cefr_scaffold' ? structure.cefrLevels : [];
+        const syncRes = await syncStructureSectionsAction(draftId, titles);
+        if (!syncRes.ok) {
+          toast.error(t('wizard.shell.saveError'));
+          return;
+        }
+      }
+
+      navigateTo(nextStep, draftId);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store, currentStep, t, router]);
