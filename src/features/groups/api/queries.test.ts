@@ -33,8 +33,8 @@ const RAW_GROUP = {
   capacityMin: 4,
   capacityMax: 15,
   studentCount: 3,
-  startDate: '2026-01-01',
-  endDate: '2026-06-01',
+  startDate: '2026-01-01T00:00:00.000Z',
+  endDate: '2026-06-01T00:00:00.000Z',
   teachers: [],
   members: [],
 };
@@ -69,5 +69,14 @@ describe('getGroup', () => {
     const group = await getGroup('school-1', 'g1');
 
     expect(group?.mode).toBe('in-person');
+  });
+
+  it('truncates the backend\'s ISO datetime startDate/endDate to a bare date', async () => {
+    mockOrgFetch();
+
+    const group = await getGroup('school-1', 'g1');
+
+    expect(group?.startDate).toBe('2026-01-01');
+    expect(group?.endDate).toBe('2026-06-01');
   });
 });

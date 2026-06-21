@@ -66,6 +66,13 @@ function mapGroupMode(m?: string): Group['mode'] {
   return m?.toLowerCase() === 'in_person' ? 'in-person' : 'online';
 }
 
+// organization-service serializes Date fields as full ISO datetimes
+// (e.g. "2026-07-23T00:00:00.000Z"); <input type="date"> requires a bare
+// "YYYY-MM-DD" and silently renders empty for anything else.
+function toDateOnly(s?: string | null): string | null {
+  return s ? s.slice(0, 10) : null;
+}
+
 function mapTeacherRole(r?: string): GroupTeacher['role'] {
   if (r === 'CO_PRIMARY' || r === 'co-primary' || r === 'co_primary') return 'co-primary';
   if (r === 'SUBSTITUTE' || r === 'substitute') return 'substitute';
@@ -284,8 +291,8 @@ export async function getGroup(
     mode: mapGroupMode(rawGroup.mode),
     capacity: { min: rawGroup.capacityMin ?? 0, max: rawGroup.capacityMax ?? 999 },
     studentCount: rawGroup.studentCount ?? 0,
-    startDate: rawGroup.startDate ?? null,
-    endDate: rawGroup.endDate ?? null,
+    startDate: toDateOnly(rawGroup.startDate),
+    endDate: toDateOnly(rawGroup.endDate),
     teachers,
     slots,
   };

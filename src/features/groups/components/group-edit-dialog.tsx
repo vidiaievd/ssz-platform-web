@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { GroupEditCourseField } from './group-edit-course-field';
 import { updateGroup } from '../api/mutations';
 import { groupEditSchema } from '../schemas';
+import { todayISO } from '../lib/today-iso';
 import type { Group } from '../types';
 import type { GroupCreateInput } from '../schemas';
 
@@ -73,6 +74,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
   const modeValue = watch('mode');
   const capacityMax = watch('capacity.max');
   const courseId = watch('courseId') ?? null;
+  const startDateValue = watch('startDate');
 
   const maxBelowEnrolled = capacityMax !== undefined && capacityMax < group.studentCount;
 
@@ -261,13 +263,14 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="start-date">{t('edit.startDate')}</Label>
-                  <Input id="start-date" type="date" {...register('startDate')} />
+                  <Input id="start-date" type="date" min={todayISO()} {...register('startDate')} />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="end-date">{t('edit.endDate')}</Label>
                   <Input
                     id="end-date"
                     type="date"
+                    min={startDateValue || todayISO()}
                     {...register('endDate')}
                     aria-describedby={errors.endDate ? 'end-date-error' : undefined}
                   />
