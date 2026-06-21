@@ -1367,7 +1367,8 @@
     "resolve": {
       "actionRequired": "Потрібна дія",
       "attentionNeeded": "Потрібна увага",
-      "fix": "Виправити →"
+      "fix": "Виправити →",
+      "issuesLabel": "Питання для вирішення"
     },
     "tabs": {
       "overview": "Огляд",
@@ -1379,7 +1380,21 @@
       "teachersHeading": "Учителі",
       "rosterHeading": "Список учнів",
       "scheduleHeading": "Розклад",
-      "noTeachers": "Учителів не призначено."
+      "noTeachers": "Учителів не призначено.",
+      "courseHeading": "Курс",
+      "nextLessonHeading": "Наступний урок",
+      "ready": "Готово до запуску",
+      "notReady": "Не готово до запуску",
+      "statusUnknown": "Статус невідомий — не вдалося перевірити конфлікти",
+      "clashCount": "{count} студент із конфліктом розкладу",
+      "clashCountPlural": "{count} студентів із конфліктом розкладу",
+      "manageStudents": "Керувати студентами →",
+      "manageTeachers": "Керувати вчителями →",
+      "openSchedule": "Відкрити розклад →",
+      "addSchedule": "Додати розклад →",
+      "coPrimaryCount": "+{count} співвчитель",
+      "subCount": "{count} замісник",
+      "subCountPlural": "{count} замісників"
     },
     "students": {
       "search": "Пошук учнів…",
@@ -1445,7 +1460,29 @@
       "saving": "Збереження…",
       "cancel": "Скасувати",
       "success": "Групу оновлено",
-      "error": "Не вдалося оновити групу"
+      "error": "Не вдалося оновити групу",
+      "identity": "Загальні дані",
+      "capacity": "Місткість",
+      "dates": "Дати",
+      "name": "Назва",
+      "namePlaceholder": "напр. Норвезька A2 — Весна 2026",
+      "lang": "Код мови",
+      "langPlaceholder": "en, nb, uk, ru…",
+      "level": "Рівень",
+      "levelPlaceholder": "Виберіть рівень",
+      "mode": "Режим",
+      "minStudents": "Мін. студентів",
+      "maxStudents": "Макс. студентів",
+      "straddleNote": "{count} зараховано — мін/макс має охоплювати поточну кількість.",
+      "startDate": "Дата початку",
+      "endDate": "Дата завершення",
+      "saveHint": "Натисніть ⌘S (або Ctrl+S), щоб зберегти",
+      "discardTitle": "Скасувати незбережені зміни?",
+      "discardBody": "У вас є незбережені зміни в цій групі. Закриття зараз скасує їх.",
+      "discardKeepEditing": "Продовжити редагування",
+      "discardDiscard": "Скасувати",
+      "maxBelowEnrolled": "Максимум має бути не менше {count} (поточна кількість зарахованих)",
+      "endBeforeStart": "Дата завершення має бути не раніше дати початку"
     },
     "wizard": {
       "title": "Нова група",
@@ -1546,6 +1583,22 @@
         "room": "Кімната",
         "roomLabel": "Кімната *"
       }
+    },
+    "header": {
+      "level": "Рівень",
+      "mode": "Режим"
+    },
+    "course": {
+      "title": "Курс",
+      "description": "Деталі курсу цієї групи (лише читання).",
+      "cefr": "Рівень CEFR",
+      "language": "Мова",
+      "curriculum": "Навчальна програма",
+      "units": "{count} модулів",
+      "noCourse": "Курс не призначено",
+      "open": "Переглянути курс →",
+      "change": "Змінити курс",
+      "changeComingSoon": "Незабаром"
     }
   },
   "Students": {

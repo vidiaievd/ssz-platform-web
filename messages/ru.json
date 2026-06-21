@@ -1367,7 +1367,8 @@
     "resolve": {
       "actionRequired": "Требуется действие",
       "attentionNeeded": "Требует внимания",
-      "fix": "Исправить →"
+      "fix": "Исправить →",
+      "issuesLabel": "Вопросы для решения"
     },
     "tabs": {
       "overview": "Обзор",
@@ -1379,7 +1380,21 @@
       "teachersHeading": "Учителя",
       "rosterHeading": "Список учеников",
       "scheduleHeading": "Расписание",
-      "noTeachers": "Учителей не назначено."
+      "noTeachers": "Учителей не назначено.",
+      "courseHeading": "Курс",
+      "nextLessonHeading": "Следующий урок",
+      "ready": "Готово к запуску",
+      "notReady": "Не готово к запуску",
+      "statusUnknown": "Статус неизвестен — не удалось проверить конфликты",
+      "clashCount": "{count} студент с конфликтом расписания",
+      "clashCountPlural": "{count} студентов с конфликтом расписания",
+      "manageStudents": "Управление студентами →",
+      "manageTeachers": "Управление учителями →",
+      "openSchedule": "Открыть расписание →",
+      "addSchedule": "Добавить расписание →",
+      "coPrimaryCount": "+{count} со-учитель",
+      "subCount": "{count} заместитель",
+      "subCountPlural": "{count} заместителей"
     },
     "students": {
       "search": "Поиск учеников…",
@@ -1445,7 +1460,29 @@
       "saving": "Сохранение…",
       "cancel": "Отменить",
       "success": "Группа обновлена",
-      "error": "Не удалось обновить группу"
+      "error": "Не удалось обновить группу",
+      "identity": "Общие данные",
+      "capacity": "Вместимость",
+      "dates": "Даты",
+      "name": "Название",
+      "namePlaceholder": "напр. Норвежский A2 — Весна 2026",
+      "lang": "Код языка",
+      "langPlaceholder": "en, nb, uk, ru…",
+      "level": "Уровень",
+      "levelPlaceholder": "Выберите уровень",
+      "mode": "Режим",
+      "minStudents": "Мин. студентов",
+      "maxStudents": "Макс. студентов",
+      "straddleNote": "{count} зачислено — мин/макс должны охватывать текущее количество.",
+      "startDate": "Дата начала",
+      "endDate": "Дата окончания",
+      "saveHint": "Нажмите ⌘S (или Ctrl+S), чтобы сохранить",
+      "discardTitle": "Отменить несохранённые изменения?",
+      "discardBody": "У вас есть несохранённые изменения в этой группе. Закрытие сейчас отменит их.",
+      "discardKeepEditing": "Продолжить редактирование",
+      "discardDiscard": "Отменить",
+      "maxBelowEnrolled": "Максимум должен быть не меньше {count} (текущее количество зачисленных)",
+      "endBeforeStart": "Дата окончания должна быть не раньше даты начала"
     },
     "wizard": {
       "title": "Новая группа",
@@ -1546,6 +1583,22 @@
         "room": "Кабинет",
         "roomLabel": "Кабинет *"
       }
+    },
+    "header": {
+      "level": "Уровень",
+      "mode": "Режим"
+    },
+    "course": {
+      "title": "Курс",
+      "description": "Сведения о курсе для этой группы (только просмотр).",
+      "cefr": "Уровень CEFR",
+      "language": "Язык",
+      "curriculum": "Учебная программа",
+      "units": "{count} модулей",
+      "noCourse": "Курс не назначен",
+      "open": "Просмотреть курс →",
+      "change": "Изменить курс",
+      "changeComingSoon": "Скоро"
     }
   },
   "Students": {

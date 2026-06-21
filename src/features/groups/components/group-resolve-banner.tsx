@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { AlertCircle, AlertTriangle } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 import { cn } from '@/lib/utils';
 import { AlertChip } from '@/components/shared/operations';
@@ -26,14 +27,15 @@ function fixHref(alert: Alert, groupId: string, schoolSlug: string): string {
   }
 }
 
-export function GroupResolveBanner({ alerts, groupId, schoolSlug, canManage }: Props) {
+export async function GroupResolveBanner({ alerts, groupId, schoolSlug, canManage }: Props) {
   if (!alerts.length) return null;
+  const t = await getTranslations('Groups');
   const hasDanger = alerts.some((a) => a.severity === 'danger');
 
   return (
     <div
       role="alert"
-      aria-label={hasDanger ? 'Action required' : 'Attention needed'}
+      aria-label={hasDanger ? t('resolve.actionRequired') : t('resolve.attentionNeeded')}
       className={cn(
         'rounded-lg border px-4 py-3 flex flex-col gap-2',
         hasDanger
@@ -51,11 +53,11 @@ export function GroupResolveBanner({ alerts, groupId, schoolSlug, canManage }: P
           'text-sm font-semibold',
           hasDanger ? 'text-error-700 dark:text-error-300' : 'text-warning-700 dark:text-warning-300',
         )}>
-          {hasDanger ? 'Action required' : 'Attention needed'}
+          {hasDanger ? t('resolve.actionRequired') : t('resolve.attentionNeeded')}
         </span>
       </div>
 
-      <ul className="flex flex-col gap-1.5" aria-label="Issues to resolve">
+      <ul className="flex flex-col gap-1.5" aria-label={t('resolve.issuesLabel')}>
         {alerts.map((alert, i) => (
           <li key={i} className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
@@ -72,7 +74,7 @@ export function GroupResolveBanner({ alerts, groupId, schoolSlug, canManage }: P
                     : 'text-warning-700 dark:text-warning-400',
                 )}
               >
-                Fix →
+                {t('resolve.fix')}
               </Link>
             )}
           </li>

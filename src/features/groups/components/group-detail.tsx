@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { GroupDetailHeader } from "./group-detail-header";
 import { GroupResolveBanner } from "./group-resolve-banner";
@@ -19,7 +20,7 @@ type Props = {
   canManage: boolean;
 };
 
-export function GroupDetail({
+export async function GroupDetail({
   group,
   roster,
   alerts,
@@ -28,6 +29,7 @@ export function GroupDetail({
   schoolSlug,
   canManage,
 }: Props) {
+  const t = await getTranslations("Groups");
   const listHref = `/school/${schoolSlug}/groups`;
 
   return (
@@ -38,7 +40,7 @@ export function GroupDetail({
         className="inline-flex items-center gap-1 text-sm text-(--ssz-text-secondary) hover:text-(--ssz-text-primary) transition-colors"
       >
         <ChevronLeft className="size-3.5" aria-hidden="true" />
-        Groups
+        {t("detail.back")}
       </Link>
 
       <GroupDetailHeader

@@ -1372,7 +1372,8 @@
     "resolve": {
       "actionRequired": "Action required",
       "attentionNeeded": "Attention needed",
-      "fix": "Fix →"
+      "fix": "Fix →",
+      "issuesLabel": "Issues to resolve"
     },
     "tabs": {
       "overview": "Overview",
@@ -1384,7 +1385,21 @@
       "teachersHeading": "Teachers",
       "rosterHeading": "Roster",
       "scheduleHeading": "Schedule",
-      "noTeachers": "No teachers assigned."
+      "noTeachers": "No teachers assigned.",
+      "courseHeading": "Course",
+      "nextLessonHeading": "Next lesson",
+      "ready": "Ready to run",
+      "notReady": "Not ready to run",
+      "statusUnknown": "Status unknown — couldn’t check conflicts",
+      "clashCount": "{count} student with a schedule clash",
+      "clashCountPlural": "{count} students with a schedule clash",
+      "manageStudents": "Manage students →",
+      "manageTeachers": "Manage teachers →",
+      "openSchedule": "Open schedule →",
+      "addSchedule": "Add schedule →",
+      "coPrimaryCount": "+{count} co-primary",
+      "subCount": "{count} sub",
+      "subCountPlural": "{count} subs"
     },
     "students": {
       "search": "Search students…",
@@ -1450,7 +1465,29 @@
       "saving": "Saving…",
       "cancel": "Cancel",
       "success": "Group updated",
-      "error": "Failed to update group"
+      "error": "Failed to update group",
+      "identity": "Identity",
+      "capacity": "Capacity",
+      "dates": "Dates",
+      "name": "Name",
+      "namePlaceholder": "e.g. Norwegian A2 — Spring 2026",
+      "lang": "Language code",
+      "langPlaceholder": "en, nb, uk, ru…",
+      "level": "Level",
+      "levelPlaceholder": "Select level",
+      "mode": "Mode",
+      "minStudents": "Min students",
+      "maxStudents": "Max students",
+      "straddleNote": "{count} enrolled — min/max must straddle current roster.",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "saveHint": "Press ⌘S (or Ctrl+S) to save",
+      "discardTitle": "Discard unsaved changes?",
+      "discardBody": "You have unsaved changes to this group. Closing now will discard them.",
+      "discardKeepEditing": "Keep editing",
+      "discardDiscard": "Discard",
+      "maxBelowEnrolled": "Max must be at least {count} (current enrollment)",
+      "endBeforeStart": "End date must be on or after start date"
     },
     "wizard": {
       "title": "New group",
@@ -1551,6 +1588,22 @@
         "room": "Room",
         "roomLabel": "Room *"
       }
+    },
+    "header": {
+      "level": "Level",
+      "mode": "Mode"
+    },
+    "course": {
+      "title": "Course",
+      "description": "Read-only course details for this group.",
+      "cefr": "CEFR level",
+      "language": "Language",
+      "curriculum": "Curriculum",
+      "units": "{count} units",
+      "noCourse": "No course assigned",
+      "open": "View course →",
+      "change": "Change course",
+      "changeComingSoon": "Coming soon"
     }
   },
   "Students": {

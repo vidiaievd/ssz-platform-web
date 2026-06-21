@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import { UserPlus, CalendarPlus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 import { CapacityMeter } from '@/components/shared/operations';
@@ -62,21 +65,26 @@ export function OverviewCards({
   canManage,
   schoolSlug,
 }: Props) {
+  const t = useTranslations('Groups');
   const detailBase = `/school/${schoolSlug}/groups/${group.id}`;
 
   // ── Course ──
-  const modeLabel = group.mode === 'online' ? 'Online' : 'In-person';
+  const modeLabel = group.mode === 'online' ? t('row.online') : t('row.inPerson');
 
   // ── Roster ──
   const clashCount = roster.filter((s) => s.hasClash).length;
 
   // ── Teachers ──
-  const primary = group.teachers.find((t) => t.role === 'primary') ?? null;
-  const coPrimaryCount = group.teachers.filter((t) => t.role === 'co-primary').length;
-  const subCount = group.teachers.filter((t) => t.role === 'substitute').length;
+  const primary = group.teachers.find((gt) => gt.role === 'primary') ?? null;
+  const coPrimaryCount = group.teachers.filter((gt) => gt.role === 'co-primary').length;
+  const subCount = group.teachers.filter((gt) => gt.role === 'substitute').length;
   const teacherSummaryParts = [
-    coPrimaryCount > 0 ? `+${coPrimaryCount} co-primary` : null,
-    subCount > 0 ? `${subCount} sub${subCount > 1 ? 's' : ''}` : null,
+    coPrimaryCount > 0 ? t('overview.coPrimaryCount', { count: coPrimaryCount }) : null,
+    subCount > 0
+      ? subCount > 1
+        ? t('overview.subCountPlural', { count: subCount })
+        : t('overview.subCount', { count: subCount })
+      : null,
   ].filter(Boolean);
   const noPrimaryAlert = alerts.some((a) => a.type === 'no-primary');
 
@@ -87,7 +95,7 @@ export function OverviewCards({
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
       {/* Course */}
       <Card
-        heading="Course"
+        heading={t('overview.courseHeading')}
         footer={<CourseChip courseView={courseView} canManage={canManage} variant="link" />}
       >
         {group.courseName ? (
@@ -95,14 +103,14 @@ export function OverviewCards({
             {group.lang.toUpperCase()} · {group.courseName} · {modeLabel}
           </p>
         ) : (
-          <p className="text-sm text-(--ssz-text-muted) italic">No course assigned</p>
+          <p className="text-sm text-(--ssz-text-muted) italic">{t('course.noCourse')}</p>
         )}
       </Card>
 
       {/* Roster */}
       <Card
-        heading="Roster"
-        footer={<FooterLink href={`${detailBase}?tab=students`}>Manage students →</FooterLink>}
+        heading={t('overview.rosterHeading')}
+        footer={<FooterLink href={`${detailBase}?tab=students`}>{t('overview.manageStudents')}</FooterLink>}
       >
         <div className="space-y-2">
           <CapacityMeter
@@ -112,20 +120,22 @@ export function OverviewCards({
           />
           {group.studentCount === 0 ? (
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm text-(--ssz-text-muted) italic">No students yet</p>
+              <p className="text-sm text-(--ssz-text-muted) italic">{t('students.noEnrolled')}</p>
               {canManage && (
                 <Link
                   href={`${detailBase}/add-students`}
                   className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
                 >
                   <UserPlus className="size-3.5" aria-hidden="true" />
-                  Add students
+                  {t('students.addStudents')}
                 </Link>
               )}
             </div>
           ) : clashCount > 0 ? (
             <p className="text-xs text-error-700 dark:text-error-400">
-              {clashCount} {clashCount > 1 ? 'students' : 'student'} with a schedule clash
+              {clashCount > 1
+                ? t('overview.clashCountPlural', { count: clashCount })
+                : t('overview.clashCount', { count: clashCount })}
             </p>
           ) : null}
         </div>
@@ -133,8 +143,8 @@ export function OverviewCards({
 
       {/* Teachers */}
       <Card
-        heading="Teachers"
-        footer={<FooterLink href={`${detailBase}?tab=teachers`}>Manage teachers →</FooterLink>}
+        heading={t('overview.teachersHeading')}
+        footer={<FooterLink href={`${detailBase}?tab=teachers`}>{t('overview.manageTeachers')}</FooterLink>}
       >
         <div className="space-y-2">
           {primary ? (
@@ -152,7 +162,7 @@ export function OverviewCards({
                   noPrimaryAlert ? 'text-error-700 dark:text-error-400' : 'text-(--ssz-text-muted)',
                 )}
               >
-                No primary teacher
+                {t('teachers.noPrimary')}
               </p>
               {canManage && (
                 <Link
@@ -160,7 +170,7 @@ export function OverviewCards({
                   className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
                 >
                   <UserPlus className="size-3.5" aria-hidden="true" />
-                  Assign primary
+                  {t('teachers.assignPrimary')}
                 </Link>
               )}
             </div>
@@ -173,8 +183,8 @@ export function OverviewCards({
 
       {/* Next lesson */}
       <Card
-        heading="Next lesson"
-        footer={<FooterLink href={`${detailBase}?tab=schedule`}>Open schedule →</FooterLink>}
+        heading={t('overview.nextLessonHeading')}
+        footer={<FooterLink href={`${detailBase}?tab=schedule`}>{t('overview.openSchedule')}</FooterLink>}
       >
         {nextLesson ? (
           <p className="text-sm text-(--ssz-text-secondary)">
@@ -182,19 +192,19 @@ export function OverviewCards({
             {' · '}
             {nextLesson.teacherName}
             {nextLesson.isSubstitute && (
-              <span className="ml-1 text-xs text-(--ssz-text-muted)">(sub)</span>
+              <span className="ml-1 text-xs text-(--ssz-text-muted)">({t('schedule.sub')})</span>
             )}
           </p>
         ) : (
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm text-(--ssz-text-muted) italic">No upcoming lessons</p>
+            <p className="text-sm text-(--ssz-text-muted) italic">{t('schedule.noLessons')}</p>
             {group.slots.length === 0 && canManage && (
               <Link
                 href={`${detailBase}?tab=schedule`}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
               >
                 <CalendarPlus className="size-3.5" aria-hidden="true" />
-                Add schedule →
+                {t('overview.addSchedule')}
               </Link>
             )}
           </div>

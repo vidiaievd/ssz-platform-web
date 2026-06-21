@@ -1367,7 +1367,8 @@
     "resolve": {
       "actionRequired": "Handling kreves",
       "attentionNeeded": "Krever oppmerksomhet",
-      "fix": "Fiks →"
+      "fix": "Fiks →",
+      "issuesLabel": "Saker å løse"
     },
     "tabs": {
       "overview": "Oversikt",
@@ -1379,7 +1380,21 @@
       "teachersHeading": "Lærere",
       "rosterHeading": "Elevliste",
       "scheduleHeading": "Timeplan",
-      "noTeachers": "Ingen lærere tildelt."
+      "noTeachers": "Ingen lærere tildelt.",
+      "courseHeading": "Kurs",
+      "nextLessonHeading": "Neste time",
+      "ready": "Klar til å kjøre",
+      "notReady": "Ikke klar til å kjøre",
+      "statusUnknown": "Status ukjent — kunne ikke sjekke konflikter",
+      "clashCount": "{count} elev med tidskonflikt",
+      "clashCountPlural": "{count} elever med tidskonflikt",
+      "manageStudents": "Administrer elever →",
+      "manageTeachers": "Administrer lærere →",
+      "openSchedule": "Åpne timeplan →",
+      "addSchedule": "Legg til timeplan →",
+      "coPrimaryCount": "+{count} medlærer",
+      "subCount": "{count} vikar",
+      "subCountPlural": "{count} vikarer"
     },
     "students": {
       "search": "Søk etter elever…",
@@ -1445,7 +1460,29 @@
       "saving": "Lagrer…",
       "cancel": "Avbryt",
       "success": "Gruppe oppdatert",
-      "error": "Kunne ikke oppdatere gruppen"
+      "error": "Kunne ikke oppdatere gruppen",
+      "identity": "Identitet",
+      "capacity": "Kapasitet",
+      "dates": "Datoer",
+      "name": "Navn",
+      "namePlaceholder": "f.eks. Norsk A2 — Vår 2026",
+      "lang": "Språkkode",
+      "langPlaceholder": "en, nb, uk, ru…",
+      "level": "Nivå",
+      "levelPlaceholder": "Velg nivå",
+      "mode": "Modus",
+      "minStudents": "Min. elever",
+      "maxStudents": "Maks. elever",
+      "straddleNote": "{count} påmeldt — min/maks må omfatte nåværende antall.",
+      "startDate": "Startdato",
+      "endDate": "Sluttdato",
+      "saveHint": "Trykk ⌘S (eller Ctrl+S) for å lagre",
+      "discardTitle": "Forkaste ulagrede endringer?",
+      "discardBody": "Du har ulagrede endringer i denne gruppen. Hvis du lukker nå, blir de forkastet.",
+      "discardKeepEditing": "Fortsett å redigere",
+      "discardDiscard": "Forkast",
+      "maxBelowEnrolled": "Maks må være minst {count} (nåværende antall påmeldte)",
+      "endBeforeStart": "Sluttdato må være på eller etter startdato"
     },
     "wizard": {
       "title": "Ny gruppe",
@@ -1546,6 +1583,22 @@
         "room": "Rom",
         "roomLabel": "Rom *"
       }
+    },
+    "header": {
+      "level": "Nivå",
+      "mode": "Modus"
+    },
+    "course": {
+      "title": "Kurs",
+      "description": "Skrivebeskyttede kursdetaljer for denne gruppen.",
+      "cefr": "CEFR-nivå",
+      "language": "Språk",
+      "curriculum": "Læreplan",
+      "units": "{count} enheter",
+      "noCourse": "Ingen kurs tildelt",
+      "open": "Vis kurs →",
+      "change": "Endre kurs",
+      "changeComingSoon": "Kommer snart"
     }
   },
   "Students": {

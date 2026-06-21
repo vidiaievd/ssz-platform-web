@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 import { CoursePanel } from './course-panel';
@@ -18,6 +19,7 @@ type Props = {
 // and Overview Course card both render a CourseChip) — lighter than lifting shared
 // dialog state across the two, since the panel itself is stateless and cheap to mount twice.
 export function CourseChip({ courseView, canManage, variant = 'fact', className }: Props) {
+  const t = useTranslations('Groups');
   const [open, setOpen] = useState(false);
 
   return (
@@ -35,13 +37,13 @@ export function CourseChip({ courseView, canManage, variant = 'fact', className 
       >
         {variant === 'fact' ? (
           <>
-            <span className="text-(--ssz-text-muted)">Course</span>
+            <span className="text-(--ssz-text-muted)">{t('course.title')}</span>
             <span className="font-medium text-(--ssz-text-secondary)">
-              {courseView.courseName ?? 'No course assigned'}
+              {courseView.courseName ?? t('course.noCourse')}
             </span>
           </>
         ) : (
-          'View course →'
+          t('course.open')
         )}
       </button>
       <CoursePanel courseView={courseView} canManage={canManage} open={open} onOpenChange={setOpen} />

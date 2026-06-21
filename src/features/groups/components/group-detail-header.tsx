@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server';
+
 import { cn } from '@/lib/utils';
 import { GroupStatusPill } from './group-status-pill';
 import { GroupDetailActions } from './group-detail-actions';
@@ -8,7 +10,7 @@ import type { Alert } from '@/features/dashboard/types';
 
 // ── Lang tile ─────────────────────────────────────────────────────────────────
 
-function LangTile({ lang }: { lang: string }) {
+function LangTile({ lang, languageLabel }: { lang: string; languageLabel: string }) {
   return (
     <div
       className={cn(
@@ -16,7 +18,7 @@ function LangTile({ lang }: { lang: string }) {
         'text-sm font-bold uppercase tracking-wide',
         'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300',
       )}
-      aria-label={`Language: ${lang}`}
+      aria-label={`${languageLabel}: ${lang}`}
     >
       {lang.slice(0, 2)}
     </div>
@@ -44,11 +46,13 @@ type Props = {
   canManage: boolean;
 };
 
-export function GroupDetailHeader({ group, alerts, courseView, schoolSlug, canManage }: Props) {
+export async function GroupDetailHeader({ group, alerts, courseView, schoolSlug, canManage }: Props) {
+  const t = await getTranslations('Groups');
+
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="flex items-center gap-3 min-w-0">
-        <LangTile lang={group.lang} />
+        <LangTile lang={group.lang} languageLabel={t('course.language')} />
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-2xl font-bold text-(--ssz-text-primary) leading-tight truncate">
@@ -59,8 +63,11 @@ export function GroupDetailHeader({ group, alerts, courseView, schoolSlug, canMa
           </div>
           <div className="mt-1.5 flex items-center gap-3 text-sm flex-wrap">
             <CourseChip courseView={courseView} canManage={canManage} />
-            {group.level && <Fact label="Level" value={group.level} />}
-            <Fact label="Mode" value={group.mode === 'online' ? 'Online' : 'In-person'} />
+            {group.level && <Fact label={t('header.level')} value={group.level} />}
+            <Fact
+              label={t('header.mode')}
+              value={group.mode === 'online' ? t('row.online') : t('row.inPerson')}
+            />
           </div>
         </div>
       </div>

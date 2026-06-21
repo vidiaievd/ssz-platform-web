@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import {
@@ -35,6 +36,7 @@ type Props = {
 };
 
 export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
+  const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [discardOpen, setDiscardOpen] = useState(false);
@@ -47,7 +49,12 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
     reset,
     formState: { errors, isDirty },
   } = useForm<GroupCreateInput>({
-    resolver: zodResolver(groupEditSchema(group.studentCount)),
+    resolver: zodResolver(
+      groupEditSchema(group.studentCount, {
+        maxBelowEnrolled: t('edit.maxBelowEnrolled', { count: group.studentCount }),
+        endBeforeStart: t('edit.endBeforeStart'),
+      }),
+    ),
     defaultValues: {
       name: group.name,
       lang: group.lang,
@@ -78,11 +85,11 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
         endDate: data.endDate ?? null,
       });
       if (result.ok) {
-        toast.success('Group updated');
+        toast.success(t('edit.success'));
         onOpenChange(false);
         router.refresh();
       } else {
-        toast.error('Failed to update group');
+        toast.error(t('edit.error'));
       }
     });
   }
@@ -120,34 +127,34 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
       <Sheet open={open} onOpenChange={(next) => !next && requestClose()}>
         <SheetContent>
           <SheetHeader>
-            <SheetTitle>Edit group</SheetTitle>
-            <SheetDescription>Update this group&apos;s details and settings.</SheetDescription>
+            <SheetTitle>{t('edit.title')}</SheetTitle>
+            <SheetDescription>{t('edit.description')}</SheetDescription>
           </SheetHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 px-4 py-2 overflow-y-auto flex-1">
             {/* ── Identity ──────────────────────────────────────────────── */}
             <fieldset className="flex flex-col gap-3">
               <legend className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-1">
-                Identity
+                {t('edit.identity')}
               </legend>
 
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" {...register('name')} placeholder="e.g. Norwegian A2 — Spring 2026" aria-describedby={errors.name ? 'name-error' : undefined} />
+                <Label htmlFor="name">{t('edit.name')}</Label>
+                <Input id="name" {...register('name')} placeholder={t('edit.namePlaceholder')} aria-describedby={errors.name ? 'name-error' : undefined} />
                 {errors.name && <p id="name-error" className="text-xs text-error-600">{errors.name.message}</p>}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="lang">Language code</Label>
-                <Input id="lang" {...register('lang')} placeholder="en, nb, uk, ru…" className="uppercase" aria-describedby={errors.lang ? 'lang-error' : undefined} />
+                <Label htmlFor="lang">{t('edit.lang')}</Label>
+                <Input id="lang" {...register('lang')} placeholder={t('edit.langPlaceholder')} className="uppercase" aria-describedby={errors.lang ? 'lang-error' : undefined} />
                 {errors.lang && <p id="lang-error" className="text-xs text-error-600">{errors.lang.message}</p>}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label>Level</Label>
+                <Label>{t('edit.level')}</Label>
                 <Select value={levelValue} onValueChange={(v) => setValue('level', v as GroupCreateInput['level'], { shouldDirty: true })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select level" />
+                    <SelectValue placeholder={t('edit.levelPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CEFR_LEVELS.map((l) => (
@@ -159,7 +166,7 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label id="mode-label">Mode</Label>
+                <Label id="mode-label">{t('edit.mode')}</Label>
                 <div role="radiogroup" aria-labelledby="mode-label" className="flex rounded-md border border-input overflow-hidden">
                   {(['online', 'in-person'] as const).map((m) => (
                     <button
@@ -177,7 +184,7 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
                         m !== 'online' && 'border-l border-input',
                       )}
                     >
-                      {m === 'online' ? 'Online' : 'In-person'}
+                      {m === 'online' ? t('row.online') : t('row.inPerson')}
                     </button>
                   ))}
                 </div>
@@ -187,12 +194,12 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
             {/* ── Capacity ──────────────────────────────────────────────── */}
             <fieldset className="flex flex-col gap-2">
               <legend className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-1">
-                Capacity
+                {t('edit.capacity')}
               </legend>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="cap-min">Min students</Label>
+                  <Label htmlFor="cap-min">{t('edit.minStudents')}</Label>
                   <Input
                     id="cap-min"
                     type="number"
@@ -205,7 +212,7 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
                   )}
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="cap-max">Max students</Label>
+                  <Label htmlFor="cap-max">{t('edit.maxStudents')}</Label>
                   <Input
                     id="cap-max"
                     type="number"
@@ -217,7 +224,7 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
                     <p id="cap-max-error" className="text-xs text-error-600">{errors.capacity.max.message}</p>
                   ) : (
                     <p id="cap-max-note" className="text-xs text-(--ssz-text-muted)">
-                      {group.studentCount} enrolled — min/max must straddle current roster.
+                      {t('edit.straddleNote', { count: group.studentCount })}
                     </p>
                   )}
                 </div>
@@ -227,16 +234,16 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
             {/* ── Dates ─────────────────────────────────────────────────── */}
             <fieldset className="flex flex-col gap-2">
               <legend className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-1">
-                Dates
+                {t('edit.dates')}
               </legend>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="start-date">Start date</Label>
+                  <Label htmlFor="start-date">{t('edit.startDate')}</Label>
                   <Input id="start-date" type="date" {...register('startDate')} />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="end-date">End date</Label>
+                  <Label htmlFor="end-date">{t('edit.endDate')}</Label>
                   <Input
                     id="end-date"
                     type="date"
@@ -253,14 +260,14 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
 
           <SheetFooter>
             <p className="text-xs text-(--ssz-text-muted) text-center sm:text-left">
-              Press ⌘S (or Ctrl+S) to save
+              {t('edit.saveHint')}
             </p>
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={requestClose} disabled={isPending}>
-                Cancel
+                {t('edit.cancel')}
               </Button>
               <Button onClick={handleSubmit(onSubmit)} disabled={isPending || maxBelowEnrolled}>
-                {isPending ? 'Saving…' : 'Save changes'}
+                {isPending ? t('edit.saving') : t('edit.save')}
               </Button>
             </div>
           </SheetFooter>
@@ -271,15 +278,15 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
       <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+            <AlertDialogTitle>{t('edit.discardTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved changes to this group. Closing now will discard them.
+              {t('edit.discardBody')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogCancel>{t('edit.discardKeepEditing')}</AlertDialogCancel>
             <AlertDialogAction variant="danger" onClick={handleDiscard}>
-              Discard
+              {t('edit.discardDiscard')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
