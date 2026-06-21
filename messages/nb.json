@@ -1491,11 +1491,16 @@
       "course": "Kurs",
       "courseAdd": "Legg til kurs",
       "courseChange": "Endre",
-      "courseRemove": "Fjern kurs",
       "courseSearchPlaceholder": "Søk i publiserte kurs…",
       "courseNoneOption": "Ingen kurs",
       "courseLoading": "Laster kurs…",
-      "courseNoResults": "Fant ingen publiserte kurs."
+      "courseNoResults": "Fant ingen publiserte kurs.",
+      "materialsHeading": "Tilleggsmateriell",
+      "addMaterial": "Legg til materiell",
+      "removeMaterial": "Fjern materiell",
+      "noMaterials": "Ingen tilleggsmateriell lagt til.",
+      "materialAddError": "Kunne ikke legge til materiell",
+      "materialRemoveError": "Kunne ikke fjerne materiell"
     },
     "wizard": {
       "title": "Ny gruppe",

@@ -52,6 +52,7 @@ export default async function PlacementQueuePage({ params }: Props) {
     id: g.id,
     name: g.name,
     courseId: null,
+    materials: [],
     lang: g.lang,
     level: g.level,
     status: g.status,

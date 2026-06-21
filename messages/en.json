@@ -1496,11 +1496,16 @@
       "course": "Course",
       "courseAdd": "Add course",
       "courseChange": "Change",
-      "courseRemove": "Remove course",
       "courseSearchPlaceholder": "Search published courses…",
       "courseNoneOption": "No course",
       "courseLoading": "Loading courses…",
-      "courseNoResults": "No published courses found."
+      "courseNoResults": "No published courses found.",
+      "materialsHeading": "Additional materials",
+      "addMaterial": "Add material",
+      "removeMaterial": "Remove material",
+      "noMaterials": "No additional materials attached.",
+      "materialAddError": "Failed to add material",
+      "materialRemoveError": "Failed to remove material"
     },
     "wizard": {
       "title": "New group",

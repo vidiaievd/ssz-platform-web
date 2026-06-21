@@ -41,6 +41,7 @@ type OrgGroup = {
     toDate?: string | null;
     reason?: string | null;
   }>;
+  materials?: Array<{ id: string; courseId: string; addedAt?: string }>;
   members?: Array<{ userId: string; addedAt?: string }>;
 };
 
@@ -104,12 +105,36 @@ function buildScheduleSummary(slots: Slot[]): string {
   return `${days} ${time}`.trim();
 }
 
-async function safeOrgFetch<T>(fn: () => Promise<T>): Promise<T | null> {
+// Not organization-only despite the call sites historically being org-service —
+// resolveCourseNames() below reuses it against content-service too.
+async function safeFetch<T>(fn: () => Promise<T>): Promise<T | null> {
   try {
     return await fn();
   } catch {
     return null;
   }
+}
+
+/**
+ * Resolves course titles for however many distinct courseIds a group
+ * references (main + additional materials). organization-service only knows
+ * courseId — the title lives in content-service — so this is a separate,
+ * best-effort lookup: an individual failure (deleted/missing container)
+ * degrades that one course's name to null rather than failing the whole page.
+ */
+async function resolveCourseNames(courseIds: Array<string | null | undefined>): Promise<Map<string, string>> {
+  const unique = [...new Set(courseIds.filter((id): id is string => !!id))];
+  const entries = await Promise.all(
+    unique.map(async (id) => {
+      const c = await safeFetch<{ title: string }>(() =>
+        serverFetch({ service: 'content', path: `/containers/${id}` }),
+      );
+      return [id, c?.title ?? null] as const;
+    }),
+  );
+  return new Map(
+    entries.filter((e): e is [string, string] => e[1] !== null),
+  );
 }
 
 // ── Public fetchers ───────────────────────────────────────────────────────────
@@ -130,7 +155,7 @@ export async function getGroups(
   const scheduling = getSchedulingProvider();
 
   const [rawGroups, schoolTeachers] = await Promise.all([
-    safeOrgFetch<OrgGroup[]>(() =>
+    safeFetch<OrgGroup[]>(() =>
       serverFetch({
         service: 'organization',
         path: `/schools/${schoolId}/groups`,
@@ -161,6 +186,7 @@ export async function getGroups(
   ).then((entries) => Object.fromEntries(entries.map((e) => [e.id, e.slots])));
 
   const allForOps = rawGroups.map((g) => buildGroupForOps(g, slotsMap[g.id] ?? []));
+  const courseNames = await resolveCourseNames(rawGroups.map((g) => g.courseId));
 
   const groups = rawGroups.map((g) => {
     const slots = slotsMap[g.id] ?? [];
@@ -182,7 +208,7 @@ export async function getGroups(
       name: g.name,
       lang: g.lang ?? 'en',
       level: (g.level ?? 'A1') as GroupHealthRowVM['level'],
-      courseName: g.courseName ?? null,
+      courseName: (g.courseId && courseNames.get(g.courseId)) ?? null,
       status: mapGroupStatus(g.status),
       mode: mapGroupMode(g.mode),
       primaryTeacher: primaryInfo
@@ -209,7 +235,7 @@ export async function getGroup(
   const scheduling = getSchedulingProvider();
 
   const [rawGroup, slots, schoolStudents, schoolTeachers] = await Promise.all([
-    safeOrgFetch<OrgGroup>(() =>
+    safeFetch<OrgGroup>(() =>
       serverFetch({
         service: 'organization',
         path: `/schools/${schoolId}/groups/${groupId}`,
@@ -219,7 +245,7 @@ export async function getGroup(
       if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
       return [];
     }),
-    safeOrgFetch<OrgMember[]>(() =>
+    safeFetch<OrgMember[]>(() =>
       serverFetch({
         service: 'organization',
         path: `/schools/${schoolId}/members`,
@@ -244,7 +270,7 @@ export async function getGroup(
   // name/avatar/langs/weekly-hours.
   const teachersById = new Map(schoolTeachers.map((t) => [t.userId, t]));
 
-  const allGroups = await safeOrgFetch<OrgGroup[]>(() =>
+  const allGroups = await safeFetch<OrgGroup[]>(() =>
     serverFetch({
       service: 'organization',
       path: `/schools/${schoolId}/groups`,
@@ -280,11 +306,23 @@ export async function getGroup(
     };
   });
 
+  const courseNames = await resolveCourseNames([
+    rawGroup.courseId,
+    ...(rawGroup.materials ?? []).map((m) => m.courseId),
+  ]);
+
+  const materials: Group['materials'] = (rawGroup.materials ?? []).map((m) => ({
+    id: m.id,
+    courseId: m.courseId,
+    courseName: courseNames.get(m.courseId) ?? null,
+  }));
+
   const group: Group = {
     id: rawGroup.id,
     name: rawGroup.name,
     courseId: rawGroup.courseId ?? null,
-    courseName: rawGroup.courseName ?? null,
+    courseName: (rawGroup.courseId && courseNames.get(rawGroup.courseId)) ?? null,
+    materials,
     lang: rawGroup.lang ?? 'en',
     level: (rawGroup.level ?? 'A1') as Group['level'],
     status: mapGroupStatus(rawGroup.status),
@@ -361,7 +399,7 @@ function mapSchoolTeachers(raw: OrgMember[]): SchoolTeacher[] {
  * a genuinely empty roster.
  */
 export async function getSchoolTeachers(schoolId: string): Promise<SchoolTeacher[]> {
-  const raw = await safeOrgFetch<OrgMember[]>(() =>
+  const raw = await safeFetch<OrgMember[]>(() =>
     serverFetch({
       service: 'organization',
       path: `/schools/${schoolId}/members`,
@@ -520,7 +558,7 @@ export async function getTeacherAssignCandidates(
  * All school students (for the wizard, where no group exists yet).
  */
 export async function getSchoolStudents(schoolId: string): Promise<StudentCandidate[]> {
-  const raw = await safeOrgFetch<OrgMember[]>(() =>
+  const raw = await safeFetch<OrgMember[]>(() =>
     serverFetch({
       service: 'organization',
       path: `/schools/${schoolId}/members`,
@@ -561,7 +599,7 @@ export async function getStudentCandidates(
 }> {
   const [groupData, allMembers] = await Promise.all([
     getGroup(schoolId, groupId),
-    safeOrgFetch<OrgMember[]>(() =>
+    safeFetch<OrgMember[]>(() =>
       serverFetch({
         service: 'organization',
         path: `/schools/${schoolId}/members`,

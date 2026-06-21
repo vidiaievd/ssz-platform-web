@@ -18,9 +18,18 @@ export interface GroupTeacher {
   hours?: number; max?: number; langs?: LangCode[];
 }
 
+/** Additional material attached to a group — distinct from the group's
+ *  single, non-removable main material (Group.courseId/courseName). */
+export interface GroupMaterial {
+  id: string;
+  courseId: string;
+  courseName: string | null;
+}
+
 export interface Group {
   id: string; name: string;
   courseId: string | null; courseName?: string | null;
+  materials: GroupMaterial[];
   lang: LangCode; level: CEFR;
   status: GroupStatus; mode: GroupMode;
   capacity: { min: number; max: number };

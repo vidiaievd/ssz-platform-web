@@ -7,7 +7,7 @@ import type { Group } from '@/features/groups/types';
 
 function makeGroup(overrides: Partial<Group>): Group {
   return {
-    id: 'g1', name: 'Group 1', courseId: null,
+    id: 'g1', name: 'Group 1', courseId: null, materials: [],
     lang: 'nb', level: 'B1', status: 'active', mode: 'online',
     capacity: { min: 2, max: 8 }, studentCount: 3,
     startDate: null, endDate: null, teachers: [], slots: [],

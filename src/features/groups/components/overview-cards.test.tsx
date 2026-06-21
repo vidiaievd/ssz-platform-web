@@ -17,6 +17,7 @@ const baseGroup: Group = {
   name: 'Norwegian A2',
   courseId: null,
   courseName: null,
+  materials: [],
   lang: 'nb',
   level: 'A2',
   status: 'active',

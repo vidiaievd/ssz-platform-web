@@ -1491,11 +1491,16 @@
       "course": "Курс",
       "courseAdd": "Додати курс",
       "courseChange": "Змінити",
-      "courseRemove": "Видалити курс",
       "courseSearchPlaceholder": "Пошук опублікованих курсів…",
       "courseNoneOption": "Без курсу",
       "courseLoading": "Завантаження курсів…",
-      "courseNoResults": "Опублікованих курсів не знайдено."
+      "courseNoResults": "Опублікованих курсів не знайдено.",
+      "materialsHeading": "Додаткові матеріали",
+      "addMaterial": "Додати матеріал",
+      "removeMaterial": "Видалити матеріал",
+      "noMaterials": "Додаткових матеріалів не додано.",
+      "materialAddError": "Не вдалося додати матеріал",
+      "materialRemoveError": "Не вдалося видалити матеріал"
     },
     "wizard": {
       "title": "Нова група",

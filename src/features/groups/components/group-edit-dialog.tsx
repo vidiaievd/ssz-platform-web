@@ -22,6 +22,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { GroupEditCourseField } from './group-edit-course-field';
+import { GroupEditMaterialsField } from './group-edit-materials-field';
 import { updateGroup } from '../api/mutations';
 import { groupEditSchema } from '../schemas';
 import { todayISO } from '../lib/today-iso';
@@ -207,10 +208,24 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
               <GroupEditCourseField
                 courseId={courseId}
                 courseName={courseName}
+                excludeCourseIds={group.materials.map((m) => m.courseId)}
                 onChange={(id, name) => {
                   setValue('courseId', id, { shouldDirty: true });
                   setCourseName(name);
                 }}
+              />
+            </fieldset>
+
+            {/* ── Additional materials ──────────────────────────────────── */}
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-1">
+                {t('edit.materialsHeading')}
+              </legend>
+              <GroupEditMaterialsField
+                schoolId={schoolId}
+                groupId={group.id}
+                materials={group.materials}
+                mainCourseId={courseId}
               />
             </fieldset>
 

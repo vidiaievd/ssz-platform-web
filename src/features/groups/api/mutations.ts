@@ -215,6 +215,49 @@ export async function removeTeacher(
   }
 }
 
+// ── Additional materials ───────────────────────────────────────────────────────
+// Distinct from the group's main material (courseId, via updateGroup) — these
+// are freely added/removed, with no "can't be cleared" restriction.
+
+export async function addGroupMaterial(
+  schoolId: string,
+  groupId: string,
+  courseId: string,
+): Promise<MutationResult & { id?: string }> {
+  try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
+    const result = await serverFetch<{ id: string }>({
+      service: 'organization',
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}/materials`,
+      method: 'POST',
+      body: { courseId },
+    });
+    invalidate(groupCacheTags.group(groupId));
+    return { ok: true, id: result.id };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+export async function removeGroupMaterial(
+  schoolId: string,
+  groupId: string,
+  materialId: string,
+): Promise<MutationResult> {
+  try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
+    await serverFetch({
+      service: 'organization',
+      path: `/schools/${resolvedSchoolId}/groups/${groupId}/materials/${materialId}`,
+      method: 'DELETE',
+    });
+    invalidate(groupCacheTags.group(groupId));
+    return { ok: true };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
 // ── Roster (student members) ──────────────────────────────────────────────────
 
 export async function addStudents(
