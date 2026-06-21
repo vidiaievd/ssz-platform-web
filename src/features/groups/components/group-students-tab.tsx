@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useOptimistic, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Search, UserPlus, X } from 'lucide-react';
@@ -112,10 +113,10 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
           />
         </div>
         <Button size="sm" asChild>
-          <a href={addStudentsHref}>
+          <Link href={addStudentsHref}>
             <UserPlus className="size-3.5 mr-1.5" aria-hidden="true" />
             Add students
-          </a>
+          </Link>
         </Button>
       </div>
 
@@ -127,7 +128,7 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
           </p>
           {optimisticRoster.length === 0 && (
             <Button size="sm" asChild>
-              <a href={addStudentsHref}>Add students</a>
+              <Link href={addStudentsHref}>Add students</Link>
             </Button>
           )}
         </div>

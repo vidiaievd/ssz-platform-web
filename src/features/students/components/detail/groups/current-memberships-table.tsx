@@ -11,6 +11,8 @@ import { MembershipRowKebab } from "./membership-row-kebab";
 import { RemoveFromGroupDialog } from "../dialogs/remove-from-group-dialog";
 import { TransferGroupDialog } from "../dialogs/transfer-group-dialog";
 import type { MembershipDetail, TeacherRef } from "@/features/students/types";
+import { formatDate } from "@/lib/i18n/formatters";
+import type { Locale } from "@/lib/i18n/config";
 
 type DialogState =
   | { type: "none" }
@@ -24,8 +26,7 @@ type Props = {
   schoolId: string;
   schoolSlug: string;
   canManage: boolean;
-  /** ISO date formatter — passed from server to avoid locale mismatch */
-  formatAddedAt: (iso: string) => string;
+  locale: Locale;
 };
 
 function TeacherStack({ teachers }: { teachers: TeacherRef[] }) {
@@ -64,10 +65,12 @@ export function CurrentMembershipsTable({
   schoolId,
   schoolSlug,
   canManage,
-  formatAddedAt,
+  locale,
 }: Props) {
   const t = useTranslations("Students");
   const [dialog, setDialog] = useState<DialogState>({ type: "none" });
+  const formatAddedAt = (iso: string) =>
+    formatDate(new Date(iso), locale, { month: "short", year: "numeric" });
 
   return (
     <>

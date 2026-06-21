@@ -176,7 +176,9 @@ export async function OverviewTab({ student, schoolSlug, canEdit, groupsHref }: 
           <div className="flex items-center gap-3">
             <GraduationCap className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
             <div className="min-w-0 space-y-0.5">
-              <p className="text-xs text-(--ssz-text-secondary)">{t("detail.stats.teachers")}</p>
+              <p className="text-xs text-(--ssz-text-secondary)">
+                {t("detail.stats.teachers", { n: distinctTeachers.length })}
+              </p>
               {distinctTeachers.length === 0 ? (
                 <p className="text-sm text-(--ssz-color-error-700) dark:text-(--ssz-color-error-300)">
                   {t("detail.stats.noTeacher")}

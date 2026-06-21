@@ -150,7 +150,13 @@ export async function assignTeacher(
       path: `/schools/${schoolId}/groups/${groupId}/teachers`,
       method: 'POST',
       query: override ? { override: true } : undefined,
-      body: data,
+      body: {
+        userId: data.userId,
+        role: data.role === 'co-primary' ? 'co_primary' : data.role,
+        fromDate: data.from,
+        toDate: data.to,
+        reason: data.reason,
+      },
     });
     invalidate(groupCacheTags.group(groupId));
     invalidate(groupCacheTags.groups(schoolId));
@@ -192,13 +198,15 @@ export async function addStudents(
   override = false,
 ): Promise<MutationResult> {
   try {
-    await serverFetch({
-      service: 'organization',
-      path: `/schools/${schoolId}/groups/${groupId}/members`,
-      method: 'POST',
-      query: override ? { override: true } : undefined,
-      body: { userIds },
-    });
+    for (const userId of userIds) {
+      await serverFetch({
+        service: 'organization',
+        path: `/schools/${schoolId}/groups/${groupId}/members`,
+        method: 'POST',
+        query: override ? { override: true } : undefined,
+        body: { userId },
+      });
+    }
     invalidate(groupCacheTags.group(groupId));
     invalidate(groupCacheTags.groups(schoolId));
     return { ok: true };

@@ -90,7 +90,7 @@ export async function GroupsTab({ student, schoolSlug, schoolId, assignHref, can
             schoolId={schoolId}
             schoolSlug={schoolSlug}
             canManage={canManage}
-            formatAddedAt={formatAddedAt}
+            locale={locale}
           />
         )}
       </div>

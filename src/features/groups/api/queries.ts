@@ -35,15 +35,12 @@ type OrgGroup = {
   endDate?: string | null;
   teachers?: Array<{
     userId: string;
-    name?: string;
-    avatarUrl?: string | null;
     role?: string;
-    from?: string;
-    to?: string;
-    reason?: string;
-    maxWeeklyHours?: number;
-    langs?: string[];
+    fromDate?: string | null;
+    toDate?: string | null;
+    reason?: string | null;
   }>;
+  members?: Array<{ userId: string; addedAt?: string }>;
 };
 
 type OrgMember = {
@@ -67,7 +64,7 @@ function mapGroupMode(m?: string): Group['mode'] {
 }
 
 function mapTeacherRole(r?: string): GroupTeacher['role'] {
-  if (r === 'CO_PRIMARY' || r === 'co-primary') return 'co-primary';
+  if (r === 'CO_PRIMARY' || r === 'co-primary' || r === 'co_primary') return 'co-primary';
   if (r === 'SUBSTITUTE' || r === 'substitute') return 'substitute';
   return 'primary';
 }
@@ -122,13 +119,20 @@ export async function getGroups(
 ): Promise<GetGroupsResult> {
   const scheduling = getSchedulingProvider();
 
-  const rawGroups = await safeOrgFetch<OrgGroup[]>(() =>
-    serverFetch({
-      service: 'organization',
-      path: `/schools/${schoolId}/groups`,
-    }),
-  );
+  const [rawGroups, schoolTeachers] = await Promise.all([
+    safeOrgFetch<OrgGroup[]>(() =>
+      serverFetch({
+        service: 'organization',
+        path: `/schools/${schoolId}/groups`,
+      }),
+    ),
+    getSchoolTeachers(schoolId),
+  ]);
   if (!rawGroups) return { groups: [], schedulingError: null };
+
+  // The groups endpoint only returns bare teacher associations (userId + role);
+  // join against the school's enriched teacher roster for name/avatar/hours.
+  const teachersById = new Map(schoolTeachers.map((t) => [t.userId, t]));
 
   // Fetch all slots in parallel; a scheduling outage degrades to empty
   // slots per group instead of failing the whole page.
@@ -148,22 +152,14 @@ export async function getGroups(
 
   const allForOps = rawGroups.map((g) => buildGroupForOps(g, slotsMap[g.id] ?? []));
 
-  // Build teacher max-hours map (from org teacher metadata)
-  const teacherMaxHours: Record<string, number | null> = {};
-  for (const g of rawGroups) {
-    for (const t of g.teachers ?? []) {
-      if (!(t.userId in teacherMaxHours)) {
-        teacherMaxHours[t.userId] = t.maxWeeklyHours ?? null;
-      }
-    }
-  }
-
   const groups = rawGroups.map((g) => {
     const slots = slotsMap[g.id] ?? [];
     const forOps = buildGroupForOps(g, slots);
     const primary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
     const coPrimary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'co-primary');
-    const maxHours = primary ? (teacherMaxHours[primary.userId] ?? null) : null;
+    const primaryInfo = primary ? teachersById.get(primary.userId) : undefined;
+    const coPrimaryInfo = coPrimary ? teachersById.get(coPrimary.userId) : undefined;
+    const maxHours = primaryInfo?.maxWeeklyHours ?? null;
     const rawAlerts = groupAlerts(forOps, maxHours, allForOps);
     const alerts: Alert[] = rawAlerts.map((a) => ({
       type: a.type as AlertType,
@@ -179,10 +175,10 @@ export async function getGroups(
       courseName: g.courseName ?? null,
       status: mapGroupStatus(g.status),
       mode: mapGroupMode(g.mode),
-      primaryTeacher: primary
-        ? { name: primary.name ?? '', avatarUrl: primary.avatarUrl ?? null }
+      primaryTeacher: primaryInfo
+        ? { name: primaryInfo.name, avatarUrl: primaryInfo.avatarUrl }
         : null,
-      coPrimaryTeacher: coPrimary ? { name: coPrimary.name ?? '' } : null,
+      coPrimaryTeacher: coPrimaryInfo ? { name: coPrimaryInfo.name } : null,
       scheduleSummary: buildScheduleSummary(slots),
       studentCount: g.studentCount ?? 0,
       capacity: { min: g.minCapacity ?? 0, max: g.maxCapacity ?? 999 },
@@ -202,7 +198,7 @@ export async function getGroup(
 ): Promise<(Group & { roster: RosterStudent[]; alerts: Alert[] }) | null> {
   const scheduling = getSchedulingProvider();
 
-  const [rawGroup, slots, roster] = await Promise.all([
+  const [rawGroup, slots, schoolStudents, schoolTeachers] = await Promise.all([
     safeOrgFetch<OrgGroup>(() =>
       serverFetch({
         service: 'organization',
@@ -216,12 +212,27 @@ export async function getGroup(
     safeOrgFetch<OrgMember[]>(() =>
       serverFetch({
         service: 'organization',
-        path: `/schools/${schoolId}/groups/${groupId}/members`,
+        path: `/schools/${schoolId}/members`,
+        query: { role: 'STUDENT' },
       }),
     ),
+    getSchoolTeachers(schoolId),
   ]);
 
   if (!rawGroup) return null;
+
+  // The group endpoint only returns bare membership rows (userId + addedAt);
+  // join against the school's enriched student list for name/email/avatar.
+  const studentsById = new Map((schoolStudents ?? []).map((m) => [m.userId, m]));
+  const roster: OrgMember[] = (rawGroup.members ?? []).flatMap((member) => {
+    const student = studentsById.get(member.userId);
+    return student ? [student] : [];
+  });
+
+  // The group endpoint's teachers array is a bare association (userId + role +
+  // substitute dates); join against the school's enriched teacher roster for
+  // name/avatar/langs/weekly-hours.
+  const teachersById = new Map(schoolTeachers.map((t) => [t.userId, t]));
 
   const allGroups = await safeOrgFetch<OrgGroup[]>(() =>
     serverFetch({
@@ -236,7 +247,7 @@ export async function getGroup(
 
   const forOps = buildGroupForOps(rawGroup, slots);
   const primary = rawGroup.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
-  const maxHours = primary?.maxWeeklyHours ?? null;
+  const maxHours = primary ? (teachersById.get(primary.userId)?.maxWeeklyHours ?? null) : null;
   const rawAlerts = groupAlerts(forOps, maxHours, allForOps);
   const alerts: Alert[] = rawAlerts.map((a) => ({
     type: a.type as AlertType,
@@ -244,17 +255,20 @@ export async function getGroup(
     label: a.label,
   }));
 
-  const teachers: GroupTeacher[] = (rawGroup.teachers ?? []).map((t) => ({
-    userId: t.userId,
-    name: t.name ?? '',
-    avatarUrl: t.avatarUrl ?? null,
-    role: mapTeacherRole(t.role),
-    from: t.from,
-    to: t.to,
-    reason: t.reason,
-    max: t.maxWeeklyHours,
-    langs: t.langs,
-  }));
+  const teachers: GroupTeacher[] = (rawGroup.teachers ?? []).map((t) => {
+    const info = teachersById.get(t.userId);
+    return {
+      userId: t.userId,
+      name: info?.name ?? '',
+      avatarUrl: info?.avatarUrl ?? null,
+      role: mapTeacherRole(t.role),
+      from: t.fromDate ?? undefined,
+      to: t.toDate ?? undefined,
+      reason: t.reason ?? undefined,
+      max: info?.maxWeeklyHours,
+      langs: info?.langs,
+    };
+  });
 
   const group: Group = {
     id: rawGroup.id,
