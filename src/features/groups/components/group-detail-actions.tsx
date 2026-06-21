@@ -21,14 +21,11 @@ import type { Group } from '../types';
 type Props = {
   group: Group;
   schoolSlug: string;
-  canManage: boolean;
 };
 
 type Dialog = 'archive' | 'delete' | null;
 
-export function GroupDetailActions({ group, schoolSlug, canManage }: Props) {
-  // Gating on canManage lands in a later step; accepted here so callers can thread it through now.
-  void canManage;
+export function GroupDetailActions({ group, schoolSlug }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
