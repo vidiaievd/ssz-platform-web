@@ -41,6 +41,7 @@ export function GroupDetail({
 
       <GroupDetailHeader
         group={group}
+        alerts={alerts}
         schoolSlug={schoolSlug}
         canManage={canManage}
       />
