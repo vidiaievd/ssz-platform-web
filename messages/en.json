@@ -1457,7 +1457,11 @@
       "deleted": "Group deleted",
       "updated": "Group updated",
       "archiving": "Archiving…",
-      "deleting": "Deleting…"
+      "deleting": "Deleting…",
+      "duplicateError": "Failed to duplicate group",
+      "archiveError": "Failed to archive group",
+      "deleteError": "Failed to delete group",
+      "moreActions": "More actions"
     },
     "edit": {
       "title": "Edit group",

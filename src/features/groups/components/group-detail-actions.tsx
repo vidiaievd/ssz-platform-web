@@ -46,7 +46,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
         toast.success(t('detail.duplicated'));
         router.push(`/school/${schoolSlug}/groups/${result.id}`);
       } else {
-        toast.error('Failed to duplicate group');
+        toast.error(t('detail.duplicateError'));
       }
     });
   }
@@ -58,7 +58,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
         toast.success(t('detail.archived'));
         router.refresh();
       } else {
-        toast.error('Failed to archive group');
+        toast.error(t('detail.archiveError'));
       }
       setDialog(null);
     });
@@ -71,7 +71,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
         toast.success(t('detail.deleted'));
         router.push(listHref);
       } else {
-        toast.error('Failed to delete group');
+        toast.error(t('detail.deleteError'));
       }
       setDialog(null);
     });
@@ -87,7 +87,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="More actions">
+            <Button variant="ghost" size="icon-sm" aria-label={t('detail.moreActions')}>
               <MoreHorizontal className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -136,7 +136,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('edit.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               variant="danger"
               onClick={handleArchive}

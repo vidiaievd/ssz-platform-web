@@ -1452,7 +1452,11 @@
       "deleted": "Gruppe slettet",
       "updated": "Gruppe oppdatert",
       "archiving": "Arkiverer…",
-      "deleting": "Sletter…"
+      "deleting": "Sletter…",
+      "duplicateError": "Kunne ikke duplisere gruppen",
+      "archiveError": "Kunne ikke arkivere gruppen",
+      "deleteError": "Kunne ikke slette gruppen",
+      "moreActions": "Flere handlinger"
     },
     "edit": {
       "title": "Rediger gruppe",
