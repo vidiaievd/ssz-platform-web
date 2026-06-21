@@ -3,7 +3,7 @@ import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { renderWithProviders } from '@/test/render';
-import { GroupEditSheet } from './group-edit-sheet';
+import { GroupEditDialog } from './group-edit-dialog';
 import type { Group } from '../types';
 
 vi.mock('next/navigation', () => ({
@@ -31,17 +31,17 @@ const group: Group = {
   slots: [],
 };
 
-function renderSheet(onOpenChange = vi.fn()) {
+function renderDialog(onOpenChange = vi.fn()) {
   return renderWithProviders(
-    <GroupEditSheet group={group} schoolId="my-school" open onOpenChange={onOpenChange} />,
+    <GroupEditDialog group={group} schoolId="my-school" open onOpenChange={onOpenChange} />,
   );
 }
 
-describe('GroupEditSheet', () => {
+describe('GroupEditDialog', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('disables Save when max capacity drops below the enrolled count', async () => {
-    renderSheet();
+    renderDialog();
 
     const maxInput = screen.getByLabelText('Max students');
     await userEvent.clear(maxInput);
@@ -51,7 +51,7 @@ describe('GroupEditSheet', () => {
   });
 
   it('keeps Save enabled when max capacity stays at or above the enrolled count', async () => {
-    renderSheet();
+    renderDialog();
 
     const maxInput = screen.getByLabelText('Max students');
     await userEvent.clear(maxInput);
@@ -61,7 +61,7 @@ describe('GroupEditSheet', () => {
   });
 
   it('shows a validation error when the end date is before the start date', async () => {
-    renderSheet();
+    renderDialog();
 
     const endDateInput = screen.getByLabelText('End date');
     fireEvent.change(endDateInput, { target: { value: '2025-01-01' } });
@@ -75,7 +75,7 @@ describe('GroupEditSheet', () => {
 
   it('prompts to discard unsaved changes when closing a dirty form', async () => {
     const onOpenChange = vi.fn();
-    renderSheet(onOpenChange);
+    renderDialog(onOpenChange);
 
     const nameInput = screen.getByLabelText('Name');
     await userEvent.type(nameInput, ' updated');
@@ -88,7 +88,7 @@ describe('GroupEditSheet', () => {
 
   it('closes immediately when canceling a clean (non-dirty) form', () => {
     const onOpenChange = vi.fn();
-    renderSheet(onOpenChange);
+    renderDialog(onOpenChange);
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 

@@ -8,8 +8,8 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
-} from '@/components/ui/sheet';
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -35,7 +35,7 @@ type Props = {
   onOpenChange: (open: boolean) => void;
 };
 
-export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
+export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -108,7 +108,7 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
     onOpenChange(false);
   }
 
-  // ⌘/Ctrl+S submits while the sheet is open.
+  // ⌘/Ctrl+S submits while the dialog is open.
   useEffect(() => {
     if (!open) return;
     function handleKeydown(e: KeyboardEvent) {
@@ -124,14 +124,14 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
 
   return (
     <>
-      <Sheet open={open} onOpenChange={(next) => !next && requestClose()}>
-        <SheetContent className="data-[side=right]:w-full data-[side=right]:max-w-none sm:data-[side=right]:max-w-sm xl:data-[side=right]:max-w-120">
-          <SheetHeader>
-            <SheetTitle>{t('edit.title')}</SheetTitle>
-            <SheetDescription>{t('edit.description')}</SheetDescription>
-          </SheetHeader>
+      <Dialog open={open} onOpenChange={(next) => !next && requestClose()}>
+        <DialogContent className="flex flex-col gap-0 sm:max-w-lg max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle>{t('edit.title')}</DialogTitle>
+            <DialogDescription>{t('edit.description')}</DialogDescription>
+          </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 px-4 py-2 overflow-y-auto flex-1">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 -mx-4 px-4 py-2 overflow-y-auto flex-1">
             {/* ── Identity ──────────────────────────────────────────────── */}
             <fieldset className="flex flex-col gap-3">
               <legend className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-1">
@@ -258,7 +258,7 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
             </fieldset>
           </form>
 
-          <SheetFooter>
+          <DialogFooter className="sm:items-center sm:justify-between">
             <p className="text-xs text-(--ssz-text-muted) text-center sm:text-left">
               {t('edit.saveHint')}
             </p>
@@ -270,9 +270,9 @@ export function GroupEditSheet({ group, schoolId, open, onOpenChange }: Props) {
                 {isPending ? t('edit.saving') : t('edit.save')}
               </Button>
             </div>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Discard-while-dirty confirm */}
       <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>

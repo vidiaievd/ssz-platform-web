@@ -14,7 +14,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { GroupEditSheet } from './group-edit-sheet';
+import { GroupEditDialog } from './group-edit-dialog';
 import { archiveGroup, deleteGroup, duplicateGroup } from '../api/mutations';
 import type { Group } from '../types';
 
@@ -127,8 +127,8 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
         </DropdownMenu>
       </div>
 
-      {/* Edit sheet */}
-      <GroupEditSheet
+      {/* Edit dialog */}
+      <GroupEditDialog
         group={group}
         schoolId={schoolId}
         open={editOpen}
