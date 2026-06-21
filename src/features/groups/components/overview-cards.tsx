@@ -88,7 +88,7 @@ export function OverviewCards({
       {/* Course */}
       <Card
         heading="Course"
-        footer={<CourseChip courseView={courseView} variant="link" />}
+        footer={<CourseChip courseView={courseView} canManage={canManage} variant="link" />}
       >
         {group.courseName ? (
           <p className="text-sm text-(--ssz-text-secondary)">

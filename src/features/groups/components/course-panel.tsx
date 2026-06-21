@@ -1,17 +1,19 @@
 'use client';
 
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
 } from '@/components/ui/sheet';
+import { ChangeCourseDialog } from './change-course-dialog';
 import type { CourseView } from '../types';
 
 type Props = {
   courseView: CourseView;
+  canManage: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function CoursePanel({ courseView, open, onOpenChange }: Props) {
+export function CoursePanel({ courseView, canManage, open, onOpenChange }: Props) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
@@ -44,6 +46,14 @@ export function CoursePanel({ courseView, open, onOpenChange }: Props) {
 
           {/* Seam for future "Attached content" (spec §6.3) — no data model yet; out of scope. */}
         </div>
+
+        {canManage && (
+          <SheetFooter>
+            <div className="flex items-center justify-end">
+              <ChangeCourseDialog />
+            </div>
+          </SheetFooter>
+        )}
       </SheetContent>
     </Sheet>
   );

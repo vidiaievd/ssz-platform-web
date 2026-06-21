@@ -58,7 +58,7 @@ export function GroupDetailHeader({ group, alerts, courseView, schoolSlug, canMa
             <HeaderRiskChip alerts={alerts} />
           </div>
           <div className="mt-1.5 flex items-center gap-3 text-sm flex-wrap">
-            <CourseChip courseView={courseView} />
+            <CourseChip courseView={courseView} canManage={canManage} />
             {group.level && <Fact label="Level" value={group.level} />}
             <Fact label="Mode" value={group.mode === 'online' ? 'Online' : 'In-person'} />
           </div>
