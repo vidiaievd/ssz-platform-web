@@ -21,7 +21,7 @@ export async function getDraftVersionId(containerId: string): Promise<string | n
   }
 }
 
-async function requireDraftVersionId(containerId: string): Promise<string> {
+export async function requireDraftVersionId(containerId: string): Promise<string> {
   const versionId = await getDraftVersionId(containerId);
   if (!versionId) {
     throw new AppError('not_found', 'No draft version found for container');
