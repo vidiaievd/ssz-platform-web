@@ -14,15 +14,19 @@ type Props = {
 
 function fixHref(alert: Alert, groupId: string, schoolSlug: string): string {
   const base = `/school/${schoolSlug}/groups/${groupId}`;
-  if (alert.type === 'no-primary' || alert.type === 'conflict' || alert.type === 'overload') {
-    return `${base}?tab=teachers`;
+  switch (alert.type) {
+    case 'no-primary':
+      return `${base}/assign-teacher?role=primary`;
+    case 'conflict':
+    case 'overload':
+      return `${base}/assign-teacher`;
+    case 'over':
+    case 'under':
+      return `${base}/add-students`;
   }
-  return `${base}?tab=students`;
 }
 
 export function GroupResolveBanner({ alerts, groupId, schoolSlug, canManage }: Props) {
-  // Gating the Fix-> link on canManage lands in a later step.
-  void canManage;
   if (!alerts.length) return null;
   const hasDanger = alerts.some((a) => a.severity === 'danger');
 
@@ -58,17 +62,19 @@ export function GroupResolveBanner({ alerts, groupId, schoolSlug, canManage }: P
               <AlertChip alert={alert} />
               <span className="text-xs text-(--ssz-text-secondary) truncate">{alert.label}</span>
             </div>
-            <Link
-              href={fixHref(alert, groupId, schoolSlug)}
-              className={cn(
-                'text-xs font-semibold shrink-0 underline-offset-2 hover:underline',
-                alert.severity === 'danger'
-                  ? 'text-error-700 dark:text-error-400'
-                  : 'text-warning-700 dark:text-warning-400',
-              )}
-            >
-              Fix →
-            </Link>
+            {canManage && (
+              <Link
+                href={fixHref(alert, groupId, schoolSlug)}
+                className={cn(
+                  'text-xs font-semibold shrink-0 underline-offset-2 hover:underline',
+                  alert.severity === 'danger'
+                    ? 'text-error-700 dark:text-error-400'
+                    : 'text-warning-700 dark:text-warning-400',
+                )}
+              >
+                Fix →
+              </Link>
+            )}
           </li>
         ))}
       </ul>

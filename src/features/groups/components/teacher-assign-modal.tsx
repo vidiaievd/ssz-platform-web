@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Search, CheckCircle2, AlertCircle, AlertTriangle, X } from 'lucide-react';
 
@@ -34,6 +34,10 @@ const ROLES: { value: TeacherRole; label: string }[] = [
   { value: 'co-primary', label: 'Co-primary' },
   { value: 'substitute', label: 'Substitute' },
 ];
+
+function isTeacherRole(value: string | null): value is TeacherRole {
+  return value === 'primary' || value === 'co-primary' || value === 'substitute';
+}
 
 function RolePicker({
   value,
@@ -215,9 +219,11 @@ export function TeacherAssignModal({
   schoolSlug: _,
 }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const [role, setRole] = useState<TeacherRole>('primary');
+  const roleParam = searchParams.get('role');
+  const [role, setRole] = useState<TeacherRole>(isTeacherRole(roleParam) ? roleParam : 'primary');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [subFrom, setSubFrom] = useState('');
