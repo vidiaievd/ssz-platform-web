@@ -9,7 +9,7 @@ import { OverviewCards } from './overview-cards';
 import { GroupStudentsTab } from './group-students-tab';
 import { GroupTeachersTab } from './group-teachers-tab';
 import { GroupScheduleTab } from './group-schedule-tab';
-import type { Group, RosterStudent, Lesson } from '../types';
+import type { Group, RosterStudent, Lesson, CourseView } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
 type TabKey = 'overview' | 'students' | 'teachers' | 'schedule';
@@ -19,11 +19,12 @@ type Props = {
   roster: RosterStudent[];
   lessons: Lesson[];
   alerts: Alert[];
+  courseView: CourseView;
   schoolSlug: string;
   canManage: boolean;
 };
 
-export function GroupTabs({ group, roster, lessons, alerts, schoolSlug, canManage }: Props) {
+export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSlug, canManage }: Props) {
   const t = useTranslations('Groups');
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -74,6 +75,7 @@ export function GroupTabs({ group, roster, lessons, alerts, schoolSlug, canManag
             roster={roster}
             lessons={lessons}
             alerts={alerts}
+            courseView={courseView}
             canManage={canManage}
             schoolSlug={schoolSlug}
           />

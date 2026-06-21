@@ -13,6 +13,7 @@ import type {
   TimetableTeacher,
   GroupTeacher,
   Slot,
+  CourseView,
 } from '@/features/groups/types';
 import type { Alert } from '@/features/dashboard/types';
 import type { AlertType, AlertSeverity } from '@/lib/groups/operations';
@@ -299,6 +300,29 @@ export async function getGroup(
   }));
 
   return { ...group, roster: rosterStudents, alerts };
+}
+
+/**
+ * Course view backing CourseChip/CoursePanel. There is no course-detail GET —
+ * this derives from Group fields and best-effort enriches with a curriculum
+ * unit count. Curriculum lookup failures degrade to `unitCount: null`
+ * (the panel omits the line); this function never throws.
+ */
+export async function getGroupCourseView(group: Group): Promise<CourseView> {
+  const base: CourseView = {
+    courseId: group.courseId,
+    courseName: group.courseName ?? null,
+    lang: group.lang,
+    level: group.level,
+    unitCount: null,
+  };
+
+  try {
+    const plan = await getSchedulingProvider().getCurriculum(group.id);
+    return { ...base, unitCount: plan.units.length };
+  } catch {
+    return base;
+  }
 }
 
 type SchoolTeacher = {

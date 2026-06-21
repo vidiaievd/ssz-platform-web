@@ -5,8 +5,7 @@ import { cn } from '@/lib/utils';
 import { CapacityMeter } from '@/components/shared/operations';
 import { TeacherRow } from './teacher-row';
 import { CourseChip } from './course-chip';
-import { deriveCourseView } from '../lib/course-view';
-import type { Group, RosterStudent, Lesson } from '../types';
+import type { Group, RosterStudent, Lesson, CourseView } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
 // ── Shared card shell ─────────────────────────────────────────────────────────
@@ -49,16 +48,24 @@ type Props = {
   roster: RosterStudent[];
   lessons: Lesson[];
   alerts: Alert[];
+  courseView: CourseView;
   canManage: boolean;
   schoolSlug: string;
 };
 
-export function OverviewCards({ group, roster, lessons, alerts, canManage, schoolSlug }: Props) {
+export function OverviewCards({
+  group,
+  roster,
+  lessons,
+  alerts,
+  courseView,
+  canManage,
+  schoolSlug,
+}: Props) {
   const detailBase = `/school/${schoolSlug}/groups/${group.id}`;
 
   // ── Course ──
   const modeLabel = group.mode === 'online' ? 'Online' : 'In-person';
-  const courseView = deriveCourseView(group);
 
   // ── Roster ──
   const clashCount = roster.filter((s) => s.hasClash).length;

@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
-import { getGroup } from '@/features/groups/api/queries';
+import { getGroup, getGroupCourseView } from '@/features/groups/api/queries';
 import { canManageGroups } from '@/features/groups/lib/can-manage';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
 import { AppError } from '@/lib/errors';
@@ -34,6 +34,7 @@ export default async function GroupDetailPage({ params }: Props) {
 
   const { roster, alerts, ...group } = data;
   const canManage = canManageGroups(role);
+  const courseView = await getGroupCourseView(group);
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
@@ -42,6 +43,7 @@ export default async function GroupDetailPage({ params }: Props) {
         roster={roster}
         alerts={alerts}
         lessons={lessons}
+        courseView={courseView}
         schoolSlug={schoolSlug}
         canManage={canManage}
       />

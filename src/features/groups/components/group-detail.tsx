@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { GroupDetailHeader } from "./group-detail-header";
 import { GroupResolveBanner } from "./group-resolve-banner";
 import { GroupTabs } from "./group-tabs";
-import type { Group, RosterStudent, Lesson } from "../types";
+import type { Group, RosterStudent, Lesson, CourseView } from "../types";
 import type { Alert } from "@/features/dashboard/types";
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -14,6 +14,7 @@ type Props = {
   roster: RosterStudent[];
   alerts: Alert[];
   lessons: Lesson[];
+  courseView: CourseView;
   schoolSlug: string;
   canManage: boolean;
 };
@@ -23,6 +24,7 @@ export function GroupDetail({
   roster,
   alerts,
   lessons,
+  courseView,
   schoolSlug,
   canManage,
 }: Props) {
@@ -42,6 +44,7 @@ export function GroupDetail({
       <GroupDetailHeader
         group={group}
         alerts={alerts}
+        courseView={courseView}
         schoolSlug={schoolSlug}
         canManage={canManage}
       />
@@ -60,6 +63,7 @@ export function GroupDetail({
         roster={roster}
         lessons={lessons}
         alerts={alerts}
+        courseView={courseView}
         schoolSlug={schoolSlug}
         canManage={canManage}
       />

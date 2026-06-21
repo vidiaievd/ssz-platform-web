@@ -3,8 +3,7 @@ import { GroupStatusPill } from './group-status-pill';
 import { GroupDetailActions } from './group-detail-actions';
 import { HeaderRiskChip } from './header-risk-chip';
 import { CourseChip } from './course-chip';
-import { deriveCourseView } from '../lib/course-view';
-import type { Group } from '../types';
+import type { Group, CourseView } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
 // ── Lang tile ─────────────────────────────────────────────────────────────────
@@ -40,13 +39,12 @@ function Fact({ label, value }: { label: string; value: string }) {
 type Props = {
   group: Group;
   alerts: Alert[];
+  courseView: CourseView;
   schoolSlug: string;
   canManage: boolean;
 };
 
-export function GroupDetailHeader({ group, alerts, schoolSlug, canManage }: Props) {
-  const courseView = deriveCourseView(group);
-
+export function GroupDetailHeader({ group, alerts, courseView, schoolSlug, canManage }: Props) {
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="flex items-center gap-3 min-w-0">
