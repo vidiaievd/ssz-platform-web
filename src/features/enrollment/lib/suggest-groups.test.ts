@@ -93,6 +93,32 @@ describe('suggestGroups', () => {
     expect(result.map((r) => r.group.id)).toEqual(['active']);
   });
 
+  it('ranks same-age-band group above an otherwise-equal mismatched-band group', () => {
+    const groups = [
+      makeGroup({ id: 'teens', level: 'B1', ageBand: 'teens' }),
+      makeGroup({ id: 'adults', level: 'B1', ageBand: 'adults' }),
+    ];
+    const membership = makeMembership({ ageBand: 'adults' });
+    const result = suggestGroups(membership, groups);
+    expect(result.map((r) => r.group.id)).toEqual(['adults', 'teens']);
+    expect(result[0]!.ageBandMismatch).toBe(false);
+    expect(result[1]!.ageBandMismatch).toBe(true);
+  });
+
+  it('still includes age-band-mismatched groups, just ranked lower', () => {
+    const groups = [makeGroup({ id: 'kids', level: 'B1', ageBand: 'kids' })];
+    const membership = makeMembership({ ageBand: 'adults' });
+    const result = suggestGroups(membership, groups);
+    expect(result.map((r) => r.group.id)).toEqual(['kids']);
+  });
+
+  it('treats unset age band (membership or group) as no mismatch', () => {
+    const groups = [makeGroup({ id: 'g1', level: 'B1', ageBand: null })];
+    const membership = makeMembership({ ageBand: 'adults' });
+    const result = suggestGroups(membership, groups);
+    expect(result[0]!.ageBandMismatch).toBe(false);
+  });
+
   it('marks hasCapacity correctly', () => {
     const groups = [
       makeGroup({ id: 'full', level: 'B1', capacity: { min: 2, max: 5 }, studentCount: 5 }),
