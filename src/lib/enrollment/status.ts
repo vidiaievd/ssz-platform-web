@@ -6,13 +6,14 @@ import type {
 } from '@/features/enrollment/types';
 import type { ISODate } from '@/features/groups/types';
 
-export type OnboardingStep = 'placement' | 'availability' | 'interview';
+export type OnboardingStep = 'placement' | 'availability' | 'ageBand' | 'interview';
 
 /** Returns the ordered list of onboarding steps required by these settings. */
 export function onboardingSteps(s: SchoolOnboardingSettings): OnboardingStep[] {
   const steps: OnboardingStep[] = [];
   if (s.placement.mode !== 'none') steps.push('placement');
   if (s.availability.collect) steps.push('availability');
+  if (s.ageBands.collect) steps.push('ageBand');
   if (s.interview.required) steps.push('interview');
   return steps;
 }

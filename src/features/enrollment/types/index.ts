@@ -65,6 +65,7 @@ export interface Membership {
   /** scope='membership' — present only if school required its own placement test */
   placement?: PlacementResult;
   availability?: AvailabilityPref[];
+  ageBand?: AgeBand | null;
   groupId?: string;
   createdAt: ISODate;
 }

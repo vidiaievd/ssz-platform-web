@@ -788,6 +788,14 @@
       "saving": "Lagrer...",
       "submit": "Fortsett"
     },
+    "AgeBand": {
+      "subtitle": "Hvilken aldersgruppe tilhører du?",
+      "kids": "Barn",
+      "teens": "Tenåringer",
+      "adults": "Voksne",
+      "saving": "Lagrer...",
+      "submit": "Fortsett"
+    },
     "InterviewBooking": {
       "subtitle": "Velg et tidspunkt for intervjuet ditt",
       "selectSlot": "Velg tidspunkt",
@@ -801,6 +809,7 @@
       "subtitle": "Fullfør trinnene nedenfor for å fullføre påmeldingen din.",
       "stepPlacement": "Plassering",
       "stepAvailability": "Tilgjengelighet",
+      "stepAgeBand": "Aldersgruppe",
       "stepInterview": "Intervju",
       "allDoneTitle": "Du er klar!",
       "allDoneReview": "Vi vil gjennomgå resultatene dine og komme tilbake til deg snart.",

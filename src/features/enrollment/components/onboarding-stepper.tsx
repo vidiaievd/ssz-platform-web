@@ -10,6 +10,7 @@ import { onboardingSteps, resolveNextStatus } from '@/lib/enrollment/status';
 import { resolvePlacement } from '@/features/enrollment/lib/resolve-placement';
 import { PlacementTest } from '@/features/enrollment/components/placement-test';
 import { AvailabilityStep } from '@/features/enrollment/components/availability-step';
+import { AgeBandStep } from '@/features/enrollment/components/age-band-step';
 import { InterviewBookingStep } from '@/features/enrollment/components/interview-booking-step';
 import type { PlacementQuestion } from '@/features/enrollment/components/placement-test';
 import type { Membership, SchoolOnboardingSettings, PlacementResult } from '@/features/enrollment/types';
@@ -187,6 +188,7 @@ export function OnboardingStepper({ membership, settings, platformResults, today
   const stepLabel = (s: (typeof steps)[number]) => {
     if (s === 'placement') return t('stepPlacement');
     if (s === 'availability') return t('stepAvailability');
+    if (s === 'ageBand') return t('stepAgeBand');
     return t('stepInterview');
   };
 
@@ -244,6 +246,15 @@ export function OnboardingStepper({ membership, settings, platformResults, today
         <AvailabilityStep
           membershipId={membership.id}
           schoolId={membership.schoolId ?? ''}
+          onComplete={advanceOrFinish}
+        />
+      )}
+
+      {currentStep === 'ageBand' && (
+        <AgeBandStep
+          membershipId={membership.id}
+          schoolId={membership.schoolId ?? ''}
+          offeredAgeBands={settings.ageBands.values}
           onComplete={advanceOrFinish}
         />
       )}

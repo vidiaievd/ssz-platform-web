@@ -793,6 +793,14 @@
       "saving": "Saving...",
       "submit": "Continue"
     },
+    "AgeBand": {
+      "subtitle": "Which age group are you in?",
+      "kids": "Kids",
+      "teens": "Teens",
+      "adults": "Adults",
+      "saving": "Saving...",
+      "submit": "Continue"
+    },
     "InterviewBooking": {
       "subtitle": "Pick a time slot for your placement interview",
       "selectSlot": "Select interview slot",
@@ -806,6 +814,7 @@
       "subtitle": "Complete the steps below to finish your enrollment.",
       "stepPlacement": "Placement",
       "stepAvailability": "Availability",
+      "stepAgeBand": "Age group",
       "stepInterview": "Interview",
       "allDoneTitle": "You're all set!",
       "allDoneReview": "We'll review your results and get back to you soon.",
