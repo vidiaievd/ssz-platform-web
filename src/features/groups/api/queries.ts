@@ -175,7 +175,7 @@ export async function getGroups(
   const slotsMap = await Promise.all(
     rawGroups.map((g) =>
       scheduling
-        .getSlots(g.id)
+        .getSlots(schoolId, g.id)
         .then((s) => ({ id: g.id, slots: s }))
         .catch((err) => {
           if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
@@ -241,7 +241,7 @@ export async function getGroup(
         path: `/schools/${schoolId}/groups/${groupId}`,
       }),
     ),
-    scheduling.getSlots(groupId).catch((err): Slot[] => {
+    scheduling.getSlots(schoolId, groupId).catch((err): Slot[] => {
       if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
       return [];
     }),

@@ -313,9 +313,10 @@ export async function updateSlots(
   slots: Slot[],
 ): Promise<MutationResult> {
   try {
+    const resolvedSchoolId = await requireSchoolId(schoolId);
     const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
     const scheduling = getSchedulingProvider();
-    await scheduling.putSlots(groupId, slots);
+    await scheduling.putSlots(resolvedSchoolId, groupId, slots);
     invalidate(groupCacheTags.group(groupId));
     invalidate(groupCacheTags.conflicts(schoolId));
     return { ok: true };

@@ -2,7 +2,7 @@ import 'server-only';
 
 import { env } from '@/lib/env';
 
-export type ServiceName = 'auth' | 'profile' | 'content' | 'exercises' | 'progress' | 'enrollment' | 'media' | 'organization' | 'analytics' | 'notification';
+export type ServiceName = 'auth' | 'profile' | 'content' | 'exercises' | 'progress' | 'enrollment' | 'media' | 'organization' | 'analytics' | 'notification' | 'scheduling';
 
 const directUrls: Record<ServiceName, string | undefined> = {
   auth: env.AUTH_SERVICE_URL,
@@ -15,6 +15,7 @@ const directUrls: Record<ServiceName, string | undefined> = {
   organization: env.ORGANIZATION_SERVICE_URL,
   analytics: env.ANALYTICS_SERVICE_URL,
   notification: env.NOTIFICATION_SERVICE_URL,
+  scheduling: env.SCHEDULING_SERVICE_URL,
 };
 
 /**

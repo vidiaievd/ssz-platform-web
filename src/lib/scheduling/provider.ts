@@ -28,8 +28,8 @@ export interface CommandCenterData {
 
 export interface SchedulingProvider {
   // ── existing (groups) ──────────────────────────────────────────────────────
-  getSlots(groupId: string): Promise<Slot[]>;
-  putSlots(groupId: string, slots: Slot[]): Promise<void>;
+  getSlots(schoolId: string, groupId: string): Promise<Slot[]>;
+  putSlots(schoolId: string, groupId: string, slots: Slot[]): Promise<void>;
   nextLessons(groupId: string, limit: number): Promise<Lesson[]>;
   teacherTimetable(schoolId: string): Promise<TimetableTeacher[]>;
   teacherConflicts(schoolId: string): Promise<OpsWarning[]>;
