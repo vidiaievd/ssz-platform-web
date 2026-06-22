@@ -87,6 +87,17 @@ export interface OpsWarning {
   with?: string; day?: Weekday; time?: string;
 }
 
+/** Derived availability for a teacher against a proposed weekly slot set (no positive-availability calendar). */
+export type TeacherAvailabilityStatus = 'free' | 'conflict' | 'absent';
+export interface TeacherAvailability {
+  teacherId: string;
+  status: TeacherAvailabilityStatus;
+  /** Group whose lesson overlaps a proposed slot, when status is 'conflict'. */
+  conflictGroupId?: string | null;
+  /** Absence record covering today, when status is 'absent'. */
+  absenceId?: string | null;
+}
+
 export type MutationResult =
   | { ok: true; warnings?: OpsWarning[] }
   | { ok: false; conflicts?: OpsWarning[]; warnings?: OpsWarning[]; blocked?: 'language' | 'no-primary' };

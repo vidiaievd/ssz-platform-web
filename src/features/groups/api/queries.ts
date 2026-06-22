@@ -3,7 +3,7 @@ import 'server-only';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
 import { AppError } from '@/lib/errors';
-import { groupAlerts, teacherLoad, slotsOverlap, type GroupForOps } from '@/lib/groups/operations';
+import { groupAlerts, teacherLoad, type GroupForOps } from '@/lib/groups/operations';
 // groupCacheTags are used by mutations (revalidateTag) — queries use no-store for now
 // until serverFetch is extended to accept next.tags.
 import type {
@@ -14,6 +14,8 @@ import type {
   GroupTeacher,
   Slot,
   CourseView,
+  TeacherAvailability,
+  TeacherAvailabilityStatus,
 } from '@/features/groups/types';
 import type { Alert } from '@/features/dashboard/types';
 import type { AlertType, AlertSeverity } from '@/lib/groups/operations';
@@ -491,7 +493,7 @@ export type TeacherAssignCandidate = {
   currentGroups: number;
   currentConflicts: number;
   langFit: boolean;
-  conflictsWithGroup: boolean;
+  availabilityStatus: TeacherAvailabilityStatus;
 };
 
 /**
@@ -517,20 +519,21 @@ export async function getTeacherAssignCandidates(
   }
 
   const timetable = 'data' in timetableResult ? timetableResult.data : [];
+
+  // Derived availability (free/conflict/absent) against the group's committed
+  // slots — the time-first source of truth; degrades to "free" on outage.
+  const availability = await getSchedulingProvider()
+    .teachersAvailability(schoolId, groupData.slots)
+    .catch((err) => {
+      if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
+      return [] as TeacherAvailability[];
+    });
+  const availabilityByTeacher = new Map(availability.map((a) => [a.teacherId, a]));
+
   const existingIds = new Set(groupData.teachers.map((t) => t.userId));
 
   const candidates: TeacherAssignCandidate[] = teachers.map((t) => {
     const tt = timetable.find((x: TimetableTeacher) => x.userId === t.userId);
-    // Lessons in the timetable represent recurring weekly slots (day + time).
-    const teacherSlots = (tt?.lessons ?? []).map((l) => ({
-      day: l.day,
-      start: l.start,
-      end: l.end,
-      room: '',
-    }));
-    const conflictsWithGroup = groupData.slots.some((gs) =>
-      teacherSlots.some((ts) => slotsOverlap(ts, gs)),
-    );
     return {
       userId: t.userId,
       name: t.name,
@@ -541,7 +544,7 @@ export async function getTeacherAssignCandidates(
       currentGroups: tt?.groups ?? 0,
       currentConflicts: tt?.conflicts ?? 0,
       langFit: t.langs.some((l) => l.toLowerCase() === groupData.lang.toLowerCase()),
-      conflictsWithGroup,
+      availabilityStatus: availabilityByTeacher.get(t.userId)?.status ?? 'free',
     };
   });
 

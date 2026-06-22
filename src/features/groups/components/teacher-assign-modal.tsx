@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Search, CheckCircle2, AlertCircle, AlertTriangle, X } from 'lucide-react';
 
@@ -84,6 +85,7 @@ function TeacherOption({
   groupWeeklyHours: number;
   onSelect: () => void;
 }) {
+  const t = useTranslations('Groups');
   const projectedHours = candidate.currentHours + groupWeeklyHours;
   const wouldOverload = projectedHours > candidate.maxWeeklyHours;
   const dimmed = !candidate.langFit;
@@ -115,9 +117,14 @@ function TeacherOption({
               lang mismatch
             </span>
           )}
-          {candidate.conflictsWithGroup && (
+          {candidate.availabilityStatus === 'conflict' && (
             <span className="text-[10px] text-error-600 dark:text-error-400 font-medium">
               time clash
+            </span>
+          )}
+          {candidate.availabilityStatus === 'absent' && (
+            <span className="text-[10px] text-error-600 dark:text-error-400 font-medium">
+              {t('assignTeacher.availabilityAbsent')}
             </span>
           )}
         </div>
@@ -218,6 +225,7 @@ export function TeacherAssignModal({
   schoolId,
   schoolSlug: _,
 }: Props) {
+  const t = useTranslations('Groups');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -249,8 +257,11 @@ export function TeacherAssignModal({
     if (!selected) return { status: 'idle' };
     const errors: string[] = [];
     const warns: string[] = [];
-    if (selected.conflictsWithGroup) {
+    if (selected.availabilityStatus === 'conflict') {
       errors.push(`Schedule conflict: ${selected.name} already has a lesson at this time.`);
+    }
+    if (selected.availabilityStatus === 'absent') {
+      errors.push(t('assignTeacher.validationAbsent', { name: selected.name }));
     }
     if (!selected.langFit) {
       warns.push(
@@ -266,7 +277,7 @@ export function TeacherAssignModal({
     if (errors.length > 0) return { status: 'error', messages: [...errors, ...warns] };
     if (warns.length > 0) return { status: 'warn', messages: warns };
     return { status: 'ok' };
-  }, [selected, groupLang, groupWeeklyHours, wouldOverload]);
+  }, [selected, groupLang, groupWeeklyHours, wouldOverload, t]);
 
   const needsOverride = validationState.status === 'error' || validationState.status === 'warn';
   const canAssign =

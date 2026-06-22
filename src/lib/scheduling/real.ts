@@ -9,7 +9,7 @@ import 'server-only';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
-import type { Slot, Weekday } from '@/features/groups/types';
+import type { Slot, Weekday, TeacherAvailability } from '@/features/groups/types';
 import type { SchedulingProvider } from './provider';
 
 const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
@@ -67,6 +67,19 @@ export const realProvider: SchedulingProvider = {
       path: `/scheduling/schools/${schoolId}/groups/${groupId}/slots`,
       method: 'PUT',
       body: { slots: slots.map(toApiSlotInput) },
+    });
+  },
+
+  async teachersAvailability(schoolId: string, slots: Array<Pick<Slot, 'day' | 'start' | 'end'>>) {
+    const apiSlots = slots.map((s) => ({
+      weekday: WEEKDAY_TO_API[s.day],
+      startTime: s.start,
+      endTime: s.end,
+    }));
+    return serverFetch<TeacherAvailability[]>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/teachers/availability`,
+      query: { slots: JSON.stringify(apiSlots) },
     });
   },
 
