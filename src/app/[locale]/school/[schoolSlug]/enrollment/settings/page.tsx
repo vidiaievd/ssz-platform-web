@@ -19,6 +19,8 @@ type BackendSettings = {
   interviewRequired: boolean;
   autoPlaceByScore: boolean;
   collectAvailability: boolean;
+  ageBands: string[];
+  collectAgeBand: boolean;
   approvalMode: string;
 };
 
@@ -57,6 +59,10 @@ export default async function EnrollmentSettingsPage({ params }: Props) {
           autoPlaceByScore: dto.autoPlaceByScore,
         },
         availability: { collect: dto.collectAvailability },
+        ageBands: {
+          values: dto.ageBands as SchoolOnboardingSettings['ageBands']['values'],
+          collect: dto.collectAgeBand,
+        },
         approval: { mode: dto.approvalMode as 'auto' | 'manual' },
       });
     }

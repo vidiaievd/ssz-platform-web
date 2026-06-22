@@ -81,6 +81,8 @@ export interface StudentProfile {
   memberships: Membership[];
 }
 
+export type AgeBand = 'kids' | 'teens' | 'adults';
+
 export interface SchoolOnboardingSettings {
   placement: {
     mode: PlacementMode;
@@ -95,5 +97,6 @@ export interface SchoolOnboardingSettings {
     autoPlaceByScore: boolean;
   };
   availability: { collect: boolean };
+  ageBands: { values: AgeBand[]; collect: boolean };
   approval: { mode: 'auto' | 'manual' };
 }

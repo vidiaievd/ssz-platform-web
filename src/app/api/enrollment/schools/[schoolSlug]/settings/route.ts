@@ -16,6 +16,8 @@ type BackendSettings = {
   interviewRequired: boolean;
   autoPlaceByScore: boolean;
   collectAvailability: boolean;
+  ageBands: string[];
+  collectAgeBand: boolean;
   approvalMode: string;
 };
 
@@ -32,6 +34,7 @@ function toFrontend(dto: BackendSettings): SchoolOnboardingSettings {
       autoPlaceByScore: dto.autoPlaceByScore,
     },
     availability: { collect: dto.collectAvailability },
+    ageBands: { values: dto.ageBands as SchoolOnboardingSettings['ageBands']['values'], collect: dto.collectAgeBand },
     approval: { mode: dto.approvalMode as 'auto' | 'manual' },
   };
 }
@@ -45,6 +48,8 @@ function toBackend(s: SchoolOnboardingSettings): BackendSettings {
     interviewRequired: s.interview.required,
     autoPlaceByScore: s.interview.autoPlaceByScore,
     collectAvailability: s.availability.collect,
+    ageBands: s.ageBands.values,
+    collectAgeBand: s.ageBands.collect,
     approvalMode: s.approval.mode,
   };
 }

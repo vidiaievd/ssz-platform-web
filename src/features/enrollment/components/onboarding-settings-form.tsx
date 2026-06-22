@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -181,6 +182,50 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
             onCheckedChange={(v) =>
               setValue('availability.collect', v, { shouldDirty: true })
             }
+          />
+        </div>
+      </section>
+
+      {/* ── Age bands ────────────────────────────────────────────────── */}
+      <section className="flex flex-col gap-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
+          {t('sectionAgeBands')}
+        </h2>
+
+        <div className="flex flex-col gap-2">
+          {(['kids', 'teens', 'adults'] as const).map((band) => {
+            const values = watch('ageBands.values');
+            const checked = values.includes(band);
+            const label =
+              band === 'kids'
+                ? t('ageBandKids')
+                : band === 'teens'
+                  ? t('ageBandTeens')
+                  : t('ageBandAdults');
+            return (
+              <div key={band} className="flex items-center gap-2">
+                <Checkbox
+                  id={`age-band-${band}`}
+                  checked={checked}
+                  onCheckedChange={(v) => {
+                    const next = v
+                      ? [...values, band]
+                      : values.filter((b) => b !== band);
+                    setValue('ageBands.values', next, { shouldDirty: true });
+                  }}
+                />
+                <Label htmlFor={`age-band-${band}`}>{label}</Label>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label htmlFor="collect-age-band">{t('collectAgeBand')}</Label>
+          <Switch
+            id="collect-age-band"
+            checked={watch('ageBands.collect')}
+            onCheckedChange={(v) => setValue('ageBands.collect', v, { shouldDirty: true })}
           />
         </div>
       </section>
