@@ -1505,7 +1505,9 @@
       "removeMaterial": "Remove material",
       "noMaterials": "No additional materials attached.",
       "materialAddError": "Failed to add material",
-      "materialRemoveError": "Failed to remove material"
+      "materialRemoveError": "Failed to remove material",
+      "slotsHeading": "Schedule",
+      "slotsError": "Failed to update schedule"
     },
     "wizard": {
       "title": "New group",
@@ -1599,12 +1601,24 @@
       "overlap": "Overlaps with another slot",
       "endBeforeStart": "End must be after start",
       "roomRequired": "Room is required for in-person",
+      "label": "Slot {n}",
+      "removeAria": "Remove slot {n}",
+      "roomPlaceholder": "e.g. Room 101",
       "fields": {
         "day": "Day",
         "start": "Start",
         "end": "End",
         "room": "Room",
         "roomLabel": "Room *"
+      },
+      "weekday": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
       }
     },
     "header": {

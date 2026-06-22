@@ -23,11 +23,21 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { GroupEditCourseField } from './group-edit-course-field';
 import { GroupEditMaterialsField } from './group-edit-materials-field';
-import { updateGroup } from '../api/mutations';
+import { SlotEditor } from './slot-editor';
+import { updateGroup, updateSlots } from '../api/mutations';
 import { groupEditSchema } from '../schemas';
 import { todayISO } from '../lib/today-iso';
-import type { Group } from '../types';
+import type { DraftSlot } from '../stores/create-wizard-store';
+import type { Group, Slot } from '../types';
 import type { GroupCreateInput } from '../schemas';
+
+function toDraftSlot(slot: Slot): DraftSlot {
+  return { _id: slot.id ?? crypto.randomUUID(), day: slot.day, start: slot.start, end: slot.end, room: slot.room };
+}
+
+function toApiSlot(slot: DraftSlot): Slot {
+  return { day: slot.day, start: slot.start, end: slot.end, room: slot.room };
+}
 
 const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 
@@ -44,6 +54,8 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
   const [isPending, startTransition] = useTransition();
   const [discardOpen, setDiscardOpen] = useState(false);
   const [courseName, setCourseName] = useState(group.courseName ?? null);
+  const [slots, setSlots] = useState<DraftSlot[]>(() => group.slots.map(toDraftSlot));
+  const [slotsDirty, setSlotsDirty] = useState(false);
 
   const {
     register,
@@ -79,31 +91,51 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
 
   const maxBelowEnrolled = capacityMax !== undefined && capacityMax < group.studentCount;
 
+  function addSlot() {
+    setSlots((s) => [...s, { _id: crypto.randomUUID(), day: 'Mon', start: '09:00', end: '10:00', room: '' }]);
+    setSlotsDirty(true);
+  }
+
+  function removeSlot(id: string) {
+    setSlots((s) => s.filter((sl) => sl._id !== id));
+    setSlotsDirty(true);
+  }
+
+  function updateSlotDraft(id: string, patch: Partial<Omit<DraftSlot, '_id'>>) {
+    setSlots((s) => s.map((sl) => (sl._id === id ? { ...sl, ...patch } : sl)));
+    setSlotsDirty(true);
+  }
+
   function onSubmit(data: GroupCreateInput) {
     startTransition(async () => {
-      const result = await updateGroup(schoolId, group.id, {
-        name: data.name,
-        courseId: data.courseId ?? null,
-        lang: data.lang,
-        level: data.level,
-        mode: data.mode,
-        capacityMin: data.capacity.min,
-        capacityMax: data.capacity.max,
-        startDate: data.startDate ?? null,
-        endDate: data.endDate ?? null,
-      });
-      if (result.ok) {
+      const [result, slotsResult] = await Promise.all([
+        updateGroup(schoolId, group.id, {
+          name: data.name,
+          courseId: data.courseId ?? null,
+          lang: data.lang,
+          level: data.level,
+          mode: data.mode,
+          capacityMin: data.capacity.min,
+          capacityMax: data.capacity.max,
+          startDate: data.startDate ?? null,
+          endDate: data.endDate ?? null,
+        }),
+        slotsDirty ? updateSlots(schoolId, group.id, slots.map(toApiSlot)) : Promise.resolve({ ok: true as const }),
+      ]);
+      if (result.ok && slotsResult.ok) {
         toast.success(t('edit.success'));
         onOpenChange(false);
         router.refresh();
-      } else {
+      } else if (!result.ok) {
         toast.error(t('edit.error'));
+      } else {
+        toast.error(t('edit.slotsError'));
       }
     });
   }
 
   function requestClose() {
-    if (isDirty) {
+    if (isDirty || slotsDirty) {
       setDiscardOpen(true);
       return;
     }
@@ -112,6 +144,8 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
 
   function handleDiscard() {
     reset();
+    setSlots(group.slots.map(toDraftSlot));
+    setSlotsDirty(false);
     setCourseName(group.courseName ?? null);
     setDiscardOpen(false);
     onOpenChange(false);
@@ -213,6 +247,20 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
                   setValue('courseId', id, { shouldDirty: true });
                   setCourseName(name);
                 }}
+              />
+            </fieldset>
+
+            {/* ── Schedule ──────────────────────────────────────────────── */}
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-1">
+                {t('edit.slotsHeading')}
+              </legend>
+              <SlotEditor
+                slots={slots}
+                mode={modeValue}
+                onAdd={addSlot}
+                onRemove={removeSlot}
+                onUpdate={updateSlotDraft}
               />
             </fieldset>
 

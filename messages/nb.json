@@ -1500,7 +1500,9 @@
       "removeMaterial": "Fjern materiell",
       "noMaterials": "Ingen tilleggsmateriell lagt til.",
       "materialAddError": "Kunne ikke legge til materiell",
-      "materialRemoveError": "Kunne ikke fjerne materiell"
+      "materialRemoveError": "Kunne ikke fjerne materiell",
+      "slotsHeading": "Timeplan",
+      "slotsError": "Kunne ikke oppdatere timeplanen"
     },
     "wizard": {
       "title": "Ny gruppe",
@@ -1594,12 +1596,24 @@
       "overlap": "Overlapper med en annen time",
       "endBeforeStart": "Slutttid må være etter starttid",
       "roomRequired": "Rom er påkrevd for fysiske grupper",
+      "label": "Time {n}",
+      "removeAria": "Fjern time {n}",
+      "roomPlaceholder": "f.eks. Rom 101",
       "fields": {
         "day": "Dag",
         "start": "Start",
         "end": "Slutt",
         "room": "Rom",
         "roomLabel": "Rom *"
+      },
+      "weekday": {
+        "mon": "Mandag",
+        "tue": "Tirsdag",
+        "wed": "Onsdag",
+        "thu": "Torsdag",
+        "fri": "Fredag",
+        "sat": "Lørdag",
+        "sun": "Søndag"
       }
     },
     "header": {

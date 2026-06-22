@@ -1,6 +1,7 @@
 'use client';
 
 import { Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -8,14 +9,14 @@ import { Label } from '@/components/ui/label';
 import { slotsOverlap } from '@/lib/groups/operations';
 import type { DraftSlot, Weekday } from '../stores/create-wizard-store';
 
-const WEEKDAYS: { value: Weekday; label: string }[] = [
-  { value: 'Mon', label: 'Monday' },
-  { value: 'Tue', label: 'Tuesday' },
-  { value: 'Wed', label: 'Wednesday' },
-  { value: 'Thu', label: 'Thursday' },
-  { value: 'Fri', label: 'Friday' },
-  { value: 'Sat', label: 'Saturday' },
-  { value: 'Sun', label: 'Sunday' },
+const WEEKDAYS: { value: Weekday; key: string }[] = [
+  { value: 'Mon', key: 'mon' },
+  { value: 'Tue', key: 'tue' },
+  { value: 'Wed', key: 'wed' },
+  { value: 'Thu', key: 'thu' },
+  { value: 'Fri', key: 'fri' },
+  { value: 'Sat', key: 'sat' },
+  { value: 'Sun', key: 'sun' },
 ];
 
 type Props = {
@@ -44,13 +45,14 @@ function conflictSet(slots: DraftSlot[]): Set<string> {
 }
 
 export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = false }: Props) {
+  const t = useTranslations('Groups');
   const conflicts = conflictSet(slots);
 
   return (
     <div className="flex flex-col gap-3">
       {slots.length === 0 && (
         <p className="text-sm text-(--ssz-text-muted) text-center py-4">
-          No recurring slots. Add at least one.
+          {t('slot.noSlots')}
         </p>
       )}
 
@@ -71,12 +73,12 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-semibold text-(--ssz-text-muted) uppercase tracking-wide">
-                Slot {i + 1}
+                {t('slot.label', { n: i + 1 })}
               </span>
               {hasConflict && (
                 <span className="flex items-center gap-1 text-[11px] text-error-600 dark:text-error-400 font-medium">
                   <AlertTriangle className="size-3" aria-hidden="true" />
-                  Overlaps with another slot
+                  {t('slot.overlap')}
                 </span>
               )}
               {!readOnly && (
@@ -84,7 +86,7 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => onRemove(slot._id)}
-                  aria-label={`Remove slot ${i + 1}`}
+                  aria-label={t('slot.removeAria', { n: i + 1 })}
                   className="text-(--ssz-text-muted) hover:text-error-600 ml-auto"
                 >
                   <Trash2 className="size-3.5" />
@@ -95,7 +97,7 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {/* Day */}
               <div className="flex flex-col gap-1 sm:col-span-1">
-                <Label htmlFor={`slot-day-${slot._id}`}>Day</Label>
+                <Label htmlFor={`slot-day-${slot._id}`}>{t('slot.fields.day')}</Label>
                 <select
                   id={`slot-day-${slot._id}`}
                   value={slot.day}
@@ -108,14 +110,16 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
                   )}
                 >
                   {WEEKDAYS.map((d) => (
-                    <option key={d.value} value={d.value}>{d.label}</option>
+                    <option key={d.value} value={d.value}>
+                      {t(`slot.weekday.${d.key}` as Parameters<typeof t>[0])}
+                    </option>
                   ))}
                 </select>
               </div>
 
               {/* Start */}
               <div className="flex flex-col gap-1">
-                <Label htmlFor={`slot-start-${slot._id}`}>Start</Label>
+                <Label htmlFor={`slot-start-${slot._id}`}>{t('slot.fields.start')}</Label>
                 <input
                   id={`slot-start-${slot._id}`}
                   type="time"
@@ -132,7 +136,7 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
 
               {/* End */}
               <div className="flex flex-col gap-1">
-                <Label htmlFor={`slot-end-${slot._id}`}>End</Label>
+                <Label htmlFor={`slot-end-${slot._id}`}>{t('slot.fields.end')}</Label>
                 <input
                   id={`slot-end-${slot._id}`}
                   type="time"
@@ -147,7 +151,7 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
                   )}
                 />
                 {endBeforeStart && (
-                  <p className="text-xs text-error-600">End must be after start</p>
+                  <p className="text-xs text-error-600">{t('slot.endBeforeStart')}</p>
                 )}
               </div>
 
@@ -155,7 +159,7 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
               {mode === 'in-person' && (
                 <div className="flex flex-col gap-1">
                   <Label htmlFor={`slot-room-${slot._id}`}>
-                    Room <span className="text-error-500">*</span>
+                    {t('slot.fields.roomLabel')}
                   </Label>
                   <input
                     id={`slot-room-${slot._id}`}
@@ -163,7 +167,7 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
                     value={slot.room}
                     disabled={readOnly}
                     onChange={(e) => onUpdate(slot._id, { room: e.target.value })}
-                    placeholder="e.g. Room 101"
+                    placeholder={t('slot.roomPlaceholder')}
                     className={cn(
                       'h-9 rounded-md border border-input bg-background px-3 text-sm',
                       !slot.room.trim() && 'border-error-300',
@@ -172,7 +176,7 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
                     )}
                   />
                   {!slot.room.trim() && (
-                    <p className="text-xs text-error-600">Room is required for in-person</p>
+                    <p className="text-xs text-error-600">{t('slot.roomRequired')}</p>
                   )}
                 </div>
               )}
@@ -189,7 +193,7 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
           className="self-start gap-1.5"
         >
           <Plus className="size-3.5" aria-hidden="true" />
-          Add slot
+          {t('slot.add')}
         </Button>
       )}
     </div>
