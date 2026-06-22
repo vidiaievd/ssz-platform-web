@@ -9,7 +9,13 @@ import 'server-only';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
-import type { Slot, Weekday, TeacherAvailability } from '@/features/groups/types';
+import type {
+  Slot,
+  Weekday,
+  TeacherAvailability,
+  RawTimetableEntry,
+  RawSchoolTimetableEntry,
+} from '@/features/groups/types';
 import type { SchedulingProvider } from './provider';
 
 const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
@@ -84,7 +90,40 @@ export const realProvider: SchedulingProvider = {
   },
 
   async nextLessons(_groupId: string, _limit: number) { throw notReady(); },
-  async teacherTimetable(_schoolId: string) { throw notReady(); },
+
+  async schoolTimetable(schoolId: string) {
+    const rows = await serverFetch<
+      Array<{ teacherId: string; weekday: string; startTime: string; endTime: string; groupId: string; room: string | null }>
+    >({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/teachers/timetable`,
+    });
+    return rows.map((r): RawSchoolTimetableEntry => ({
+      teacherId: r.teacherId,
+      day: WEEKDAY_FROM_API[r.weekday] ?? 'Mon',
+      start: r.startTime,
+      end: r.endTime,
+      groupId: r.groupId,
+      room: r.room ?? null,
+    }));
+  },
+
+  async teacherWeek(schoolId: string, teacherId: string) {
+    const rows = await serverFetch<
+      Array<{ weekday: string; startTime: string; endTime: string; groupId: string; room: string | null }>
+    >({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/teachers/${teacherId}/timetable`,
+    });
+    return rows.map((r): RawTimetableEntry => ({
+      day: WEEKDAY_FROM_API[r.weekday] ?? 'Mon',
+      start: r.startTime,
+      end: r.endTime,
+      groupId: r.groupId,
+      room: r.room ?? null,
+    }));
+  },
+
   async teacherConflicts(_schoolId: string) { throw notReady(); },
   async studentClashes(_schoolId: string, _userId: string) { throw notReady(); },
   async commandCenter(_schoolId: string) { throw notReady(); },

@@ -39,7 +39,7 @@ export function OperationsBanner({ conflictCount, noTeacherCount, schoolSlug }: 
 
       <div className="flex shrink-0 items-center gap-2 pl-8 sm:pl-0">
         <Button variant="ghost" size="sm" asChild className="text-error-700 hover:text-error-900 dark:text-error-400">
-          <Link href={`${groupsHref}?view=timetable`}>Teacher timetable</Link>
+          <Link href={`${groupsHref}/timetable`}>Teacher timetable</Link>
         </Button>
         <Button size="sm" asChild className="bg-error-600 hover:bg-error-700 text-white dark:bg-error-700 dark:hover:bg-error-600">
           <Link href={groupsHref}>Review groups</Link>

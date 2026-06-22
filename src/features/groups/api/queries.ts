@@ -3,7 +3,7 @@ import 'server-only';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
 import { AppError } from '@/lib/errors';
-import { groupAlerts, teacherLoad, type GroupForOps } from '@/lib/groups/operations';
+import { groupAlerts, teacherLoad, slotsOverlap, timeToMinutes, type GroupForOps } from '@/lib/groups/operations';
 // groupCacheTags are used by mutations (revalidateTag) — queries use no-store for now
 // until serverFetch is extended to accept next.tags.
 import type {
@@ -435,20 +435,150 @@ export async function getSchoolTeachersResult(
 }
 
 /**
+ * Counts overlapping pairs among a teacher's own lessons — same heuristic as
+ * TimetableGrid's per-day conflict highlighting, aggregated to a single number.
+ */
+function countConflicts(lessons: TimetableTeacher['lessons']): number {
+  let count = 0;
+  for (let i = 0; i < lessons.length; i++) {
+    for (let j = i + 1; j < lessons.length; j++) {
+      const a = lessons[i]!;
+      const b = lessons[j]!;
+      if (slotsOverlap({ day: a.day, start: a.start, end: a.end, room: '' }, { day: b.day, start: b.start, end: b.end, room: '' })) {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+type GroupLookup = Map<string, { name: string; lang: string; regularTeacherIds: Set<string> }>;
+
+function buildGroupsLookup(rawGroups: OrgGroup[] | null): GroupLookup {
+  return new Map(
+    (rawGroups ?? []).map((g) => {
+      const regularTeacherIds = new Set(
+        (g.teachers ?? [])
+          .filter((t) => mapTeacherRole(t.role) !== 'substitute')
+          .map((t) => t.userId),
+      );
+      return [g.id, { name: g.name, lang: g.lang ?? '', regularTeacherIds }] as const;
+    }),
+  );
+}
+
+/**
+ * Joins one teacher's raw projected lessons against the group lookup to
+ * derive groupName/lang/isSubstitute, plus aggregate hours/pct/conflicts.
+ * Shared by the school-wide composition and the single-teacher view.
+ */
+function composeTimetableTeacher(
+  teacher: SchoolTeacher,
+  entries: Array<{ day: TimetableTeacher['lessons'][number]['day']; start: string; end: string; groupId: string }>,
+  groupsById: GroupLookup,
+): TimetableTeacher {
+  const lessons: TimetableTeacher['lessons'] = entries.map((e) => {
+    const group = groupsById.get(e.groupId);
+    return {
+      day: e.day,
+      start: e.start,
+      end: e.end,
+      groupId: e.groupId,
+      groupName: group?.name ?? e.groupId,
+      lang: group?.lang ?? '',
+      isSubstitute: group ? !group.regularTeacherIds.has(teacher.userId) : false,
+    };
+  });
+
+  const hours = lessons.reduce((acc, l) => acc + (timeToMinutes(l.end) - timeToMinutes(l.start)) / 60, 0);
+  const max = teacher.maxWeeklyHours;
+  const pct = max > 0 ? Math.round((hours / max) * 100) : 0;
+
+  return {
+    userId: teacher.userId,
+    name: teacher.name,
+    avatarUrl: teacher.avatarUrl,
+    hours,
+    max,
+    pct,
+    overloaded: hours > max,
+    groups: new Set(lessons.map((l) => l.groupId)).size,
+    conflicts: countConflicts(lessons),
+    lessons,
+  };
+}
+
+/**
+ * Composes the rich TimetableTeacher[] view model from scheduling-service's
+ * raw school-wide projection (one query, see SchedulingProvider.schoolTimetable)
+ * joined against organization-service's teacher roster and group list.
+ * Single source of truth for both the timetable page and getTeacherLoads.
+ */
+async function buildTimetableTeachers(schoolId: string): Promise<TimetableTeacher[]> {
+  const scheduling = getSchedulingProvider();
+  const [entries, teachers, rawGroups] = await Promise.all([
+    scheduling.schoolTimetable(schoolId),
+    getSchoolTeachers(schoolId),
+    safeFetch<OrgGroup[]>(() => serverFetch({ service: 'organization', path: `/schools/${schoolId}/groups` })),
+  ]);
+
+  const groupsById = buildGroupsLookup(rawGroups);
+
+  const entriesByTeacher = new Map<string, typeof entries>();
+  for (const entry of entries) {
+    if (!entriesByTeacher.has(entry.teacherId)) entriesByTeacher.set(entry.teacherId, []);
+    entriesByTeacher.get(entry.teacherId)!.push(entry);
+  }
+
+  return teachers.map((t) => composeTimetableTeacher(t, entriesByTeacher.get(t.userId) ?? [], groupsById));
+}
+
+/**
+ * A single teacher's own projected week (used by the teacher-facing
+ * "my schedule" page) — one A.6 call instead of the school-wide query, so the
+ * hot per-teacher path stays cheap regardless of school size.
+ */
+export type TeacherScheduleResult = { data: TimetableTeacher | null } | { error: string };
+
+export async function getTeacherSchedule(
+  schoolId: string,
+  teacherId: string,
+): Promise<TeacherScheduleResult> {
+  try {
+    const scheduling = getSchedulingProvider();
+    const [entries, teachers, rawGroups] = await Promise.all([
+      scheduling.teacherWeek(schoolId, teacherId),
+      getSchoolTeachers(schoolId),
+      safeFetch<OrgGroup[]>(() => serverFetch({ service: 'organization', path: `/schools/${schoolId}/groups` })),
+    ]);
+
+    const teacher = teachers.find((t) => t.userId === teacherId);
+    if (!teacher) return { data: null };
+
+    return { data: composeTimetableTeacher(teacher, entries, buildGroupsLookup(rawGroups)) };
+  } catch (err) {
+    if (err instanceof AppError && err.code === 'upstream_unavailable') {
+      return { data: null };
+    }
+    console.error('[groups/queries] teacherWeek failed:', err);
+    return { error: err instanceof Error ? err.message : 'Failed to load schedule' };
+  }
+}
+
+/**
  * Teacher timetable view model for the timetable page.
  */
 export type TimetableResult = { data: TimetableTeacher[] } | { error: string };
 
 export async function getTimetable(schoolId: string): Promise<TimetableResult> {
-  const scheduling = getSchedulingProvider();
   try {
-    const data = await scheduling.teacherTimetable(schoolId);
+    const data = await buildTimetableTeachers(schoolId);
     return { data };
   } catch (err) {
     if (err instanceof AppError && err.code === 'upstream_unavailable') {
       return { data: [] };
     }
-    console.error('[groups/queries] teacherTimetable failed:', err);
+    console.error('[groups/queries] schoolTimetable failed:', err);
     return { error: err instanceof Error ? err.message : 'Failed to load timetable' };
   }
 }
@@ -459,25 +589,20 @@ export async function getTimetable(schoolId: string): Promise<TimetableResult> {
 export async function getTeacherLoads(
   schoolId: string,
 ): Promise<Record<string, ReturnType<typeof teacherLoad>>> {
-  const scheduling = getSchedulingProvider();
-  const [teachers, timetableTeachers] = await Promise.all([
-    getSchoolTeachers(schoolId),
-    scheduling.teacherTimetable(schoolId).catch((err) => {
-      console.error('[groups/queries] teacherTimetable failed:', err);
-      return [] as TimetableTeacher[];
-    }),
-  ]);
+  const timetableTeachers = await buildTimetableTeachers(schoolId).catch((err) => {
+    console.error('[groups/queries] schoolTimetable failed:', err);
+    return [] as TimetableTeacher[];
+  });
 
   const result: Record<string, ReturnType<typeof teacherLoad>> = {};
-  for (const t of teachers) {
-    const tt = timetableTeachers.find((tt) => tt.userId === t.userId);
-    result[t.userId] = {
-      hours: tt?.hours ?? 0,
-      max: t.maxWeeklyHours,
-      pct: tt?.pct ?? 0,
-      overloaded: tt?.overloaded ?? false,
-      groups: tt?.groups ?? 0,
-      conflicts: tt?.conflicts ?? 0,
+  for (const tt of timetableTeachers) {
+    result[tt.userId] = {
+      hours: tt.hours,
+      max: tt.max,
+      pct: tt.pct,
+      overloaded: tt.overloaded,
+      groups: tt.groups,
+      conflicts: tt.conflicts,
     };
   }
   return result;

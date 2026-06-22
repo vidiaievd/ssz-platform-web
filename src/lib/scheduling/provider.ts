@@ -1,4 +1,11 @@
-import type { Slot, Lesson, TimetableTeacher, OpsWarning, TeacherAvailability } from '@/features/groups/types';
+import type {
+  Slot,
+  Lesson,
+  OpsWarning,
+  TeacherAvailability,
+  RawTimetableEntry,
+  RawSchoolTimetableEntry,
+} from '@/features/groups/types';
 import type {
   AvailabilityBlock,
   Absence,
@@ -36,7 +43,10 @@ export interface SchedulingProvider {
     slots: Array<Pick<Slot, 'day' | 'start' | 'end'>>,
   ): Promise<TeacherAvailability[]>;
   nextLessons(groupId: string, limit: number): Promise<Lesson[]>;
-  teacherTimetable(schoolId: string): Promise<TimetableTeacher[]>;
+  /** Raw projection of every teacher's assigned future lessons — one query for the whole school. */
+  schoolTimetable(schoolId: string): Promise<RawSchoolTimetableEntry[]>;
+  /** Raw projection of a single teacher's assigned future lessons. */
+  teacherWeek(schoolId: string, teacherId: string): Promise<RawTimetableEntry[]>;
   teacherConflicts(schoolId: string): Promise<OpsWarning[]>;
   studentClashes(schoolId: string, userId: string): Promise<OpsWarning[]>;
 

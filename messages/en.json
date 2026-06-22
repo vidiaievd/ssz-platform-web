@@ -1618,6 +1618,15 @@
       "conflictListTitlePlural": "schedule conflicts",
       "conflictItem": "{day} clash: {groupA} overlaps {groupB} — move one slot or reassign"
     },
+    "mySchedule": {
+      "title": "My schedule",
+      "subtitle": "Your weekly lessons, projected from the groups you teach.",
+      "back": "Dashboard",
+      "groupsCount": "{count, plural, one {# group} other {# groups}}",
+      "noSchedule": "No lessons scheduled yet.",
+      "loadFailed": "Failed to load your schedule.",
+      "clashes": "{count, plural, one {# clash} other {# clashes}}"
+    },
     "slot": {
       "add": "Add slot",
       "noSlots": "No recurring slots. Add at least one.",

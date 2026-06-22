@@ -84,6 +84,16 @@ export interface TimetableTeacher {
   }>;
 }
 
+/** Raw projection from scheduling-service — one teacher's assigned future lessons, undecorated. */
+export interface RawTimetableEntry {
+  day: Weekday; start: HHMM; end: HHMM; groupId: string; room: string | null;
+}
+
+/** Raw school-wide projection — same shape, every teacher in one query. */
+export interface RawSchoolTimetableEntry extends RawTimetableEntry {
+  teacherId: string;
+}
+
 export interface OpsWarning {
   type: 'conflict' | 'overload' | 'over' | 'under' | 'clash';
   with?: string; day?: Weekday; time?: string;

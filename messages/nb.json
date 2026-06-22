@@ -1613,6 +1613,15 @@
       "conflictListTitlePlural": "timeplankollisjon",
       "conflictItem": "{day} kollisjon: {groupA} overlapper {groupB} — flytt en time eller omfordel"
     },
+    "mySchedule": {
+      "title": "Min timeplan",
+      "subtitle": "Dine ukentlige timer, projisert fra gruppene du underviser.",
+      "back": "Dashbord",
+      "groupsCount": "{count, plural, one {# gruppe} other {# grupper}}",
+      "noSchedule": "Ingen timer planlagt ennå.",
+      "loadFailed": "Kunne ikke laste timeplanen din.",
+      "clashes": "{count, plural, one {# kollisjon} other {# kollisjoner}}"
+    },
     "slot": {
       "add": "Legg til time",
       "noSlots": "Ingen faste timer. Legg til minst én.",
