@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { todayISO } from '../lib/today-iso';
+import type { AgeBand } from '../types';
 
 export type Weekday = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 export type CEFR = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
@@ -32,6 +33,7 @@ export type GroupWizardDraft = {
   capacity: { min: number; max: number };
   startDate: string;
   endDate: string;
+  ageBand: AgeBand | null;
   slots: DraftSlot[];
   teachers: DraftTeacher[];
   studentIds: string[];
@@ -69,6 +71,7 @@ const BLANK_DRAFT: GroupWizardDraft = {
   capacity: { min: 0, max: 12 },
   startDate: '',
   endDate: '',
+  ageBand: null,
   slots: [],
   teachers: [],
   studentIds: [],
@@ -174,6 +177,7 @@ export const useGroupCreateWizardStore = create<WizardState & WizardActions>()(
         capacity: s.capacity,
         startDate: s.startDate,
         endDate: s.endDate,
+        ageBand: s.ageBand,
         slots: s.slots,
         teachers: s.teachers,
         studentIds: s.studentIds,

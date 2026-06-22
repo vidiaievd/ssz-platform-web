@@ -8,6 +8,7 @@ export type ISODate = string; // "YYYY-MM-DD"
 export type GroupStatus = 'draft' | 'active' | 'archived';
 export type GroupMode = 'online' | 'in-person';
 export type TeacherRole = 'primary' | 'co-primary' | 'substitute';
+export type AgeBand = 'kids' | 'teens' | 'adults';
 
 export interface Slot { id?: string; day: Weekday; start: HHMM; end: HHMM; room: string; }
 export interface Substitution { teacherId: string; from: ISODate; to: ISODate; reason: string; }
@@ -37,6 +38,7 @@ export interface Group {
   startDate: ISODate | null; endDate: ISODate | null;
   teachers: GroupTeacher[];
   slots: Slot[];
+  ageBand: AgeBand | null;
 }
 
 /** Read-only course view backing CourseChip/CoursePanel — derived from Group, no new endpoint. */

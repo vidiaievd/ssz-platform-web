@@ -63,6 +63,7 @@ export default async function PlacementQueuePage({ params }: Props) {
     endDate: null,
     teachers: [],
     slots: [],
+    ageBand: null,
   }));
 
   return (

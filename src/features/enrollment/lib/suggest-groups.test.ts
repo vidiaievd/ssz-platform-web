@@ -10,7 +10,7 @@ function makeGroup(overrides: Partial<Group>): Group {
     id: 'g1', name: 'Group 1', courseId: null, materials: [],
     lang: 'nb', level: 'B1', status: 'active', mode: 'online',
     capacity: { min: 2, max: 8 }, studentCount: 3,
-    startDate: null, endDate: null, teachers: [], slots: [],
+    startDate: null, endDate: null, teachers: [], slots: [], ageBand: null,
     ...overrides,
   };
 }

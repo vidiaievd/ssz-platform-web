@@ -1512,7 +1512,15 @@
       "materialAddError": "Failed to add material",
       "materialRemoveError": "Failed to remove material",
       "slotsHeading": "Schedule",
-      "slotsError": "Failed to update schedule"
+      "slotsError": "Failed to update schedule",
+      "ageBand": "Age band",
+      "ageBandPlaceholder": "Select age band",
+      "ageBandNone": "—"
+    },
+    "ageBand": {
+      "kids": "Kids",
+      "teens": "Teens",
+      "adults": "Adults"
     },
     "wizard": {
       "title": "New group",

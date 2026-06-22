@@ -1507,7 +1507,15 @@
       "materialAddError": "Не удалось добавить материал",
       "materialRemoveError": "Не удалось удалить материал",
       "slotsHeading": "Расписание",
-      "slotsError": "Не удалось обновить расписание"
+      "slotsError": "Не удалось обновить расписание",
+      "ageBand": "Возрастная группа",
+      "ageBandPlaceholder": "Выберите возрастную группу",
+      "ageBandNone": "—"
+    },
+    "ageBand": {
+      "kids": "Дети",
+      "teens": "Подростки",
+      "adults": "Взрослые"
     },
     "wizard": {
       "title": "Новая группа",

@@ -97,6 +97,7 @@ export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timeta
           capacityMax: store.capacity.max,
           ...(store.startDate && { startDate: store.startDate }),
           ...(store.endDate && { endDate: store.endDate }),
+          ageBand: store.ageBand,
         });
 
         if (!createResult.ok || !createResult.id) {
@@ -157,7 +158,7 @@ export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timeta
       {/* Step content */}
       <div className={cn('min-h-[320px]', isPending && 'opacity-50 pointer-events-none')}>
         {currentStep === 0 && <StepCourse />}
-        {currentStep === 1 && <StepDetails />}
+        {currentStep === 1 && <StepDetails schoolSlug={schoolSlug} />}
         {currentStep === 2 && <StepSchedule />}
         {currentStep === 3 && <StepTeachers teachers={teachers} timetable={timetable} />}
         {currentStep === 4 && <StepStudents students={students} />}

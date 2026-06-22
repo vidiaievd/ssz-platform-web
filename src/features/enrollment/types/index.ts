@@ -1,6 +1,6 @@
 import type { DifficultyLevel } from '@/features/content/types';
 import type { SchoolType } from '@/features/discovery/types';
-import type { CEFR, LangCode, ISODate } from '@/features/groups/types';
+import type { CEFR, LangCode, ISODate, AgeBand } from '@/features/groups/types';
 
 // ── Legacy enrollment-request types (existing school-side flow) ─────────────
 export type EnrollmentStatus = 'pending' | 'approved' | 'rejected';
@@ -80,8 +80,6 @@ export interface StudentProfile {
   placement: PlacementResult[];
   memberships: Membership[];
 }
-
-export type AgeBand = 'kids' | 'teens' | 'adults';
 
 export interface SchoolOnboardingSettings {
   placement: {

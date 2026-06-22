@@ -13,6 +13,8 @@ export const groupKeys = {
     ['groups', 'school-students', schoolId] as const,
   availability: (schoolId: string, slotsKey: string) =>
     ['groups', 'availability', schoolId, slotsKey] as const,
+  onboardingSettings: (schoolSlug: string) =>
+    ['groups', 'onboarding-settings', schoolSlug] as const,
 } as const;
 
 // Next.js cache tags (used with revalidateTag / fetch next.tags)

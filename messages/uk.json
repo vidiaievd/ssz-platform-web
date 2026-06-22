@@ -1507,7 +1507,15 @@
       "materialAddError": "Не вдалося додати матеріал",
       "materialRemoveError": "Не вдалося видалити матеріал",
       "slotsHeading": "Розклад",
-      "slotsError": "Не вдалося оновити розклад"
+      "slotsError": "Не вдалося оновити розклад",
+      "ageBand": "Вікова група",
+      "ageBandPlaceholder": "Виберіть вікову групу",
+      "ageBandNone": "—"
+    },
+    "ageBand": {
+      "kids": "Діти",
+      "teens": "Підлітки",
+      "adults": "Дорослі"
     },
     "wizard": {
       "title": "Нова група",

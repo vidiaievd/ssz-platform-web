@@ -1507,7 +1507,15 @@
       "materialAddError": "Kunne ikke legge til materiell",
       "materialRemoveError": "Kunne ikke fjerne materiell",
       "slotsHeading": "Timeplan",
-      "slotsError": "Kunne ikke oppdatere timeplanen"
+      "slotsError": "Kunne ikke oppdatere timeplanen",
+      "ageBand": "Aldersgruppe",
+      "ageBandPlaceholder": "Velg aldersgruppe",
+      "ageBandNone": "—"
+    },
+    "ageBand": {
+      "kids": "Barn",
+      "teens": "Tenåringer",
+      "adults": "Voksne"
     },
     "wizard": {
       "title": "Ny gruppe",

@@ -9,12 +9,25 @@ import {
 import { useGroupCreateWizardStore } from '../../stores/create-wizard-store';
 import type { CEFR } from '../../stores/create-wizard-store';
 import { todayISO } from '../../lib/today-iso';
+import { useSchoolAgeBands } from '../../api/use-school-age-bands';
+import type { AgeBand } from '../../types';
 
 const CEFR_LEVELS: CEFR[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
-export function StepDetails() {
-  const { name, lang, level, mode, capacity, startDate, endDate, setField } =
+const AGE_BAND_LABEL: Record<AgeBand, string> = {
+  kids: 'Kids',
+  teens: 'Teens',
+  adults: 'Adults',
+};
+
+type Props = {
+  schoolSlug: string;
+};
+
+export function StepDetails({ schoolSlug }: Props) {
+  const { name, lang, level, mode, capacity, startDate, endDate, ageBand, setField } =
     useGroupCreateWizardStore();
+  const { data: offeredAgeBands } = useSchoolAgeBands(schoolSlug);
 
   const capError =
     capacity.min < 0
@@ -147,6 +160,27 @@ export function StepDetails() {
         </div>
         {capError && <p className="text-xs text-error-600">{capError}</p>}
       </div>
+
+      {/* Age band (only when the school offers any) */}
+      {offeredAgeBands && offeredAgeBands.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <Label>Age band (optional)</Label>
+          <Select
+            value={ageBand ?? '__none__'}
+            onValueChange={(v) => setField('ageBand', v === '__none__' ? null : (v as AgeBand))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">—</SelectItem>
+              {offeredAgeBands.map((band) => (
+                <SelectItem key={band} value={band}>{AGE_BAND_LABEL[band]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* Dates (optional) */}
       <div className="flex flex-col gap-1.5">

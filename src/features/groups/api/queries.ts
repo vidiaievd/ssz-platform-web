@@ -36,6 +36,7 @@ type OrgGroup = {
   studentCount?: number;
   startDate?: string | null;
   endDate?: string | null;
+  ageBand?: string | null;
   teachers?: Array<{
     userId: string;
     role?: string;
@@ -333,6 +334,7 @@ export async function getGroup(
     studentCount: rawGroup.studentCount ?? 0,
     startDate: toDateOnly(rawGroup.startDate),
     endDate: toDateOnly(rawGroup.endDate),
+    ageBand: (rawGroup.ageBand ?? null) as Group['ageBand'],
     teachers,
     slots,
   };

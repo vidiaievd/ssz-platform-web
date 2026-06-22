@@ -27,8 +27,9 @@ import { SlotEditor } from './slot-editor';
 import { updateGroup, updateSlots } from '../api/mutations';
 import { groupEditSchema } from '../schemas';
 import { todayISO } from '../lib/today-iso';
+import { useSchoolAgeBands } from '../api/use-school-age-bands';
 import type { DraftSlot } from '../stores/create-wizard-store';
-import type { Group, Slot } from '../types';
+import type { Group, Slot, AgeBand } from '../types';
 import type { GroupCreateInput } from '../schemas';
 
 function toDraftSlot(slot: Slot): DraftSlot {
@@ -44,11 +45,12 @@ const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 type Props = {
   group: Group;
   schoolId: string;
+  schoolSlug: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) {
+export function GroupEditDialog({ group, schoolId, schoolSlug, open, onOpenChange }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -56,6 +58,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
   const [courseName, setCourseName] = useState(group.courseName ?? null);
   const [slots, setSlots] = useState<DraftSlot[]>(() => group.slots.map(toDraftSlot));
   const [slotsDirty, setSlotsDirty] = useState(false);
+  const { data: offeredAgeBands } = useSchoolAgeBands(schoolSlug);
 
   const {
     register,
@@ -80,6 +83,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
       capacity: group.capacity,
       startDate: group.startDate ?? undefined,
       endDate: group.endDate ?? undefined,
+      ageBand: group.ageBand,
     },
   });
 
@@ -88,6 +92,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
   const capacityMax = watch('capacity.max');
   const courseId = watch('courseId') ?? null;
   const startDateValue = watch('startDate');
+  const ageBandValue = watch('ageBand');
 
   const maxBelowEnrolled = capacityMax !== undefined && capacityMax < group.studentCount;
 
@@ -119,6 +124,7 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
           capacityMax: data.capacity.max,
           startDate: data.startDate ?? null,
           endDate: data.endDate ?? null,
+          ageBand: data.ageBand ?? null,
         }),
         slotsDirty ? updateSlots(schoolId, group.id, slots.map(toApiSlot)) : Promise.resolve({ ok: true as const }),
       ]);
@@ -316,6 +322,37 @@ export function GroupEditDialog({ group, schoolId, open, onOpenChange }: Props) 
                 </div>
               </div>
             </fieldset>
+
+            {/* ── Age band ──────────────────────────────────────────────── */}
+            {offeredAgeBands && offeredAgeBands.length > 0 && (
+              <fieldset className="flex flex-col gap-2">
+                <legend className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-1">
+                  {t('edit.ageBand')}
+                </legend>
+                <Select
+                  value={ageBandValue ?? '__none__'}
+                  onValueChange={(v) =>
+                    setValue('ageBand', v === '__none__' ? null : (v as AgeBand), { shouldDirty: true })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('edit.ageBandPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t('edit.ageBandNone')}</SelectItem>
+                    {offeredAgeBands.map((band) => (
+                      <SelectItem key={band} value={band}>
+                        {band === 'kids'
+                          ? t('ageBand.kids')
+                          : band === 'teens'
+                            ? t('ageBand.teens')
+                            : t('ageBand.adults')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </fieldset>
+            )}
 
             {/* ── Dates ─────────────────────────────────────────────────── */}
             <fieldset className="flex flex-col gap-2">

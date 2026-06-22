@@ -4,6 +4,13 @@ import { CheckCircle2, AlertTriangle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useGroupCreateWizardStore } from '../../stores/create-wizard-store';
+import type { AgeBand } from '../../types';
+
+const AGE_BAND_LABEL: Record<AgeBand, string> = {
+  kids: 'Kids',
+  teens: 'Teens',
+  adults: 'Adults',
+};
 
 type TeacherMeta = { userId: string; name: string };
 
@@ -26,7 +33,7 @@ export function StepReview({ teachers }: Props) {
   const store = useGroupCreateWizardStore();
   const {
     courseName, lang, level, name, mode, capacity,
-    startDate, endDate, slots, teachers: assignedTeachers, studentIds,
+    startDate, endDate, ageBand, slots, teachers: assignedTeachers, studentIds,
   } = store;
 
   const primary   = assignedTeachers.find((t) => t.role === 'primary');
@@ -72,6 +79,9 @@ export function StepReview({ teachers }: Props) {
             label="Dates"
             value={[startDate, endDate].filter(Boolean).join(' → ') || '—'}
           />
+        )}
+        {ageBand && (
+          <ReviewRow label="Age band" value={AGE_BAND_LABEL[ageBand]} />
         )}
         <ReviewRow
           label="Schedule"

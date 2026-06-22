@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 const CEFR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+const AGE_BANDS = ['kids', 'teens', 'adults'] as const;
 const HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 const hhmmSchema = z.string().regex(HHMM_RE, 'Must be HH:MM (24h)');
@@ -37,6 +38,7 @@ export const groupCreateSchema = z
     }),
     startDate: isodateSchema.nullable().optional(),
     endDate: isodateSchema.nullable().optional(),
+    ageBand: z.enum(AGE_BANDS).nullable().optional(),
   })
   .refine((d) => (d.capacity.min ?? 0) <= d.capacity.max, {
     message: 'Minimum must be ≤ maximum',

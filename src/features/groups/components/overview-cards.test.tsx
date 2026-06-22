@@ -28,6 +28,7 @@ const baseGroup: Group = {
   endDate: null,
   teachers: [],
   slots: [],
+  ageBand: null,
 };
 
 const courseView: CourseView = {

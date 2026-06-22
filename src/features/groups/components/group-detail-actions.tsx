@@ -131,6 +131,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
       <GroupEditDialog
         group={group}
         schoolId={schoolId}
+        schoolSlug={schoolSlug}
         open={editOpen}
         onOpenChange={setEditOpen}
       />

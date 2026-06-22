@@ -28,6 +28,10 @@ vi.mock('../api/use-assignable-courses', () => ({
   }),
 }));
 
+vi.mock('../api/use-school-age-bands', () => ({
+  useSchoolAgeBands: () => ({ data: [] }),
+}));
+
 const baseGroup: Group = {
   id: 'g1',
   name: 'Norwegian A2',
@@ -44,11 +48,12 @@ const baseGroup: Group = {
   endDate: '2026-06-01',
   teachers: [],
   slots: [],
+  ageBand: null,
 };
 
 function renderDialog(onOpenChange = vi.fn(), group: Group = baseGroup) {
   return renderWithProviders(
-    <GroupEditDialog group={group} schoolId="my-school" open onOpenChange={onOpenChange} />,
+    <GroupEditDialog group={group} schoolId="my-school" schoolSlug="my-school" open onOpenChange={onOpenChange} />,
   );
 }
 
