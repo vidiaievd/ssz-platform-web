@@ -1,6 +1,6 @@
 import type { DifficultyLevel } from '@/features/content/types';
 import type { SchoolType } from '@/features/discovery/types';
-import type { CEFR, LangCode, ISODate } from '@/features/groups/types';
+import type { CEFR, LangCode, ISODate, AgeBand } from '@/features/groups/types';
 
 // ── Legacy enrollment-request types (existing school-side flow) ─────────────
 export type EnrollmentStatus = 'pending' | 'approved' | 'rejected';
@@ -65,6 +65,7 @@ export interface Membership {
   /** scope='membership' — present only if school required its own placement test */
   placement?: PlacementResult;
   availability?: AvailabilityPref[];
+  ageBand?: AgeBand | null;
   groupId?: string;
   createdAt: ISODate;
 }
@@ -95,5 +96,6 @@ export interface SchoolOnboardingSettings {
     autoPlaceByScore: boolean;
   };
   availability: { collect: boolean };
+  ageBands: { values: AgeBand[]; collect: boolean };
   approval: { mode: 'auto' | 'manual' };
 }

@@ -16,11 +16,11 @@ interface LessonsTabProps {
 function LessonRow({ item }: { item: ContainerItem }) {
   return (
     <Link
-      href={`/student/enrolled/lessons/${item.contentId}`}
+      href={`/student/enrolled/lessons/${item.itemId}`}
       className="hover:bg-muted flex items-center gap-3 rounded-lg px-4 py-3 transition-colors"
     >
       <BookOpen className="text-muted-foreground h-4 w-4 shrink-0" />
-      <span className="text-sm font-medium">{item.title ?? item.contentId}</span>
+      <span className="text-sm font-medium">{item.title ?? item.itemId}</span>
     </Link>
   );
 }
@@ -33,7 +33,7 @@ export function LessonsTab({ containerId, versionId }: LessonsTabProps) {
     !!versionId,
   );
 
-  const items = (data ?? []).filter((i) => i.contentType === 'LESSON');
+  const items = (data ?? []).filter((i) => i.itemType === 'lesson');
 
   return (
     <DataState

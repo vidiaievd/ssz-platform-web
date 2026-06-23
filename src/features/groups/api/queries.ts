@@ -3,7 +3,7 @@ import 'server-only';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
 import { AppError } from '@/lib/errors';
-import { groupAlerts, teacherLoad, slotsOverlap, type GroupForOps } from '@/lib/groups/operations';
+import { groupAlerts, teacherLoad, slotsOverlap, timeToMinutes, type GroupForOps } from '@/lib/groups/operations';
 // groupCacheTags are used by mutations (revalidateTag) — queries use no-store for now
 // until serverFetch is extended to accept next.tags.
 import type {
@@ -13,6 +13,9 @@ import type {
   TimetableTeacher,
   GroupTeacher,
   Slot,
+  CourseView,
+  TeacherAvailability,
+  TeacherAvailabilityStatus,
 } from '@/features/groups/types';
 import type { Alert } from '@/features/dashboard/types';
 import type { AlertType, AlertSeverity } from '@/lib/groups/operations';
@@ -28,22 +31,21 @@ type OrgGroup = {
   level?: string;
   status?: string;
   mode?: string;
-  minCapacity?: number;
-  maxCapacity?: number;
+  capacityMin?: number;
+  capacityMax?: number;
   studentCount?: number;
   startDate?: string | null;
   endDate?: string | null;
+  ageBand?: string | null;
   teachers?: Array<{
     userId: string;
-    name?: string;
-    avatarUrl?: string | null;
     role?: string;
-    from?: string;
-    to?: string;
-    reason?: string;
-    maxWeeklyHours?: number;
-    langs?: string[];
+    fromDate?: string | null;
+    toDate?: string | null;
+    reason?: string | null;
   }>;
+  materials?: Array<{ id: string; courseId: string; addedAt?: string }>;
+  members?: Array<{ userId: string; addedAt?: string }>;
 };
 
 type OrgMember = {
@@ -62,12 +64,21 @@ function mapGroupStatus(s?: string): Group['status'] {
   return 'draft';
 }
 
+// organization-service's GroupMode enum uses an underscore ('online' | 'in_person');
+// the frontend's GroupMode type uses a hyphen ('online' | 'in-person').
 function mapGroupMode(m?: string): Group['mode'] {
-  return m?.toLowerCase() === 'in-person' ? 'in-person' : 'online';
+  return m?.toLowerCase() === 'in_person' ? 'in-person' : 'online';
+}
+
+// organization-service serializes Date fields as full ISO datetimes
+// (e.g. "2026-07-23T00:00:00.000Z"); <input type="date"> requires a bare
+// "YYYY-MM-DD" and silently renders empty for anything else.
+function toDateOnly(s?: string | null): string | null {
+  return s ? s.slice(0, 10) : null;
 }
 
 function mapTeacherRole(r?: string): GroupTeacher['role'] {
-  if (r === 'CO_PRIMARY' || r === 'co-primary') return 'co-primary';
+  if (r === 'CO_PRIMARY' || r === 'co-primary' || r === 'co_primary') return 'co-primary';
   if (r === 'SUBSTITUTE' || r === 'substitute') return 'substitute';
   return 'primary';
 }
@@ -82,7 +93,7 @@ function buildGroupForOps(g: OrgGroup, slots: Slot[]): GroupForOps {
     coPrimaryTeacherId: coPrimary?.userId ?? null,
     slots,
     studentCount: g.studentCount ?? 0,
-    capacity: { min: g.minCapacity ?? 0, max: g.maxCapacity ?? 999 },
+    capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? 999 },
   };
 }
 
@@ -97,12 +108,36 @@ function buildScheduleSummary(slots: Slot[]): string {
   return `${days} ${time}`.trim();
 }
 
-async function safeOrgFetch<T>(fn: () => Promise<T>): Promise<T | null> {
+// Not organization-only despite the call sites historically being org-service —
+// resolveCourseNames() below reuses it against content-service too.
+async function safeFetch<T>(fn: () => Promise<T>): Promise<T | null> {
   try {
     return await fn();
   } catch {
     return null;
   }
+}
+
+/**
+ * Resolves course titles for however many distinct courseIds a group
+ * references (main + additional materials). organization-service only knows
+ * courseId — the title lives in content-service — so this is a separate,
+ * best-effort lookup: an individual failure (deleted/missing container)
+ * degrades that one course's name to null rather than failing the whole page.
+ */
+async function resolveCourseNames(courseIds: Array<string | null | undefined>): Promise<Map<string, string>> {
+  const unique = [...new Set(courseIds.filter((id): id is string => !!id))];
+  const entries = await Promise.all(
+    unique.map(async (id) => {
+      const c = await safeFetch<{ title: string }>(() =>
+        serverFetch({ service: 'content', path: `/containers/${id}` }),
+      );
+      return [id, c?.title ?? null] as const;
+    }),
+  );
+  return new Map(
+    entries.filter((e): e is [string, string] => e[1] !== null),
+  );
 }
 
 // ── Public fetchers ───────────────────────────────────────────────────────────
@@ -122,13 +157,20 @@ export async function getGroups(
 ): Promise<GetGroupsResult> {
   const scheduling = getSchedulingProvider();
 
-  const rawGroups = await safeOrgFetch<OrgGroup[]>(() =>
-    serverFetch({
-      service: 'organization',
-      path: `/schools/${schoolId}/groups`,
-    }),
-  );
+  const [rawGroups, schoolTeachers] = await Promise.all([
+    safeFetch<OrgGroup[]>(() =>
+      serverFetch({
+        service: 'organization',
+        path: `/schools/${schoolId}/groups`,
+      }),
+    ),
+    getSchoolTeachers(schoolId),
+  ]);
   if (!rawGroups) return { groups: [], schedulingError: null };
+
+  // The groups endpoint only returns bare teacher associations (userId + role);
+  // join against the school's enriched teacher roster for name/avatar/hours.
+  const teachersById = new Map(schoolTeachers.map((t) => [t.userId, t]));
 
   // Fetch all slots in parallel; a scheduling outage degrades to empty
   // slots per group instead of failing the whole page.
@@ -136,7 +178,7 @@ export async function getGroups(
   const slotsMap = await Promise.all(
     rawGroups.map((g) =>
       scheduling
-        .getSlots(g.id)
+        .getSlots(schoolId, g.id)
         .then((s) => ({ id: g.id, slots: s }))
         .catch((err) => {
           if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
@@ -147,23 +189,16 @@ export async function getGroups(
   ).then((entries) => Object.fromEntries(entries.map((e) => [e.id, e.slots])));
 
   const allForOps = rawGroups.map((g) => buildGroupForOps(g, slotsMap[g.id] ?? []));
-
-  // Build teacher max-hours map (from org teacher metadata)
-  const teacherMaxHours: Record<string, number | null> = {};
-  for (const g of rawGroups) {
-    for (const t of g.teachers ?? []) {
-      if (!(t.userId in teacherMaxHours)) {
-        teacherMaxHours[t.userId] = t.maxWeeklyHours ?? null;
-      }
-    }
-  }
+  const courseNames = await resolveCourseNames(rawGroups.map((g) => g.courseId));
 
   const groups = rawGroups.map((g) => {
     const slots = slotsMap[g.id] ?? [];
     const forOps = buildGroupForOps(g, slots);
     const primary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
     const coPrimary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'co-primary');
-    const maxHours = primary ? (teacherMaxHours[primary.userId] ?? null) : null;
+    const primaryInfo = primary ? teachersById.get(primary.userId) : undefined;
+    const coPrimaryInfo = coPrimary ? teachersById.get(coPrimary.userId) : undefined;
+    const maxHours = primaryInfo?.maxWeeklyHours ?? null;
     const rawAlerts = groupAlerts(forOps, maxHours, allForOps);
     const alerts: Alert[] = rawAlerts.map((a) => ({
       type: a.type as AlertType,
@@ -176,16 +211,16 @@ export async function getGroups(
       name: g.name,
       lang: g.lang ?? 'en',
       level: (g.level ?? 'A1') as GroupHealthRowVM['level'],
-      courseName: g.courseName ?? null,
+      courseName: (g.courseId && courseNames.get(g.courseId)) ?? null,
       status: mapGroupStatus(g.status),
       mode: mapGroupMode(g.mode),
-      primaryTeacher: primary
-        ? { name: primary.name ?? '', avatarUrl: primary.avatarUrl ?? null }
+      primaryTeacher: primaryInfo
+        ? { name: primaryInfo.name, avatarUrl: primaryInfo.avatarUrl }
         : null,
-      coPrimaryTeacher: coPrimary ? { name: coPrimary.name ?? '' } : null,
+      coPrimaryTeacher: coPrimaryInfo ? { name: coPrimaryInfo.name } : null,
       scheduleSummary: buildScheduleSummary(slots),
       studentCount: g.studentCount ?? 0,
-      capacity: { min: g.minCapacity ?? 0, max: g.maxCapacity ?? 999 },
+      capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? 999 },
       alerts,
     };
   });
@@ -202,28 +237,43 @@ export async function getGroup(
 ): Promise<(Group & { roster: RosterStudent[]; alerts: Alert[] }) | null> {
   const scheduling = getSchedulingProvider();
 
-  const [rawGroup, slots, roster] = await Promise.all([
-    safeOrgFetch<OrgGroup>(() =>
+  const [rawGroup, slots, schoolStudents, schoolTeachers] = await Promise.all([
+    safeFetch<OrgGroup>(() =>
       serverFetch({
         service: 'organization',
         path: `/schools/${schoolId}/groups/${groupId}`,
       }),
     ),
-    scheduling.getSlots(groupId).catch((err): Slot[] => {
+    scheduling.getSlots(schoolId, groupId).catch((err): Slot[] => {
       if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
       return [];
     }),
-    safeOrgFetch<OrgMember[]>(() =>
+    safeFetch<OrgMember[]>(() =>
       serverFetch({
         service: 'organization',
-        path: `/schools/${schoolId}/groups/${groupId}/members`,
+        path: `/schools/${schoolId}/members`,
+        query: { role: 'STUDENT' },
       }),
     ),
+    getSchoolTeachers(schoolId),
   ]);
 
   if (!rawGroup) return null;
 
-  const allGroups = await safeOrgFetch<OrgGroup[]>(() =>
+  // The group endpoint only returns bare membership rows (userId + addedAt);
+  // join against the school's enriched student list for name/email/avatar.
+  const studentsById = new Map((schoolStudents ?? []).map((m) => [m.userId, m]));
+  const roster: OrgMember[] = (rawGroup.members ?? []).flatMap((member) => {
+    const student = studentsById.get(member.userId);
+    return student ? [student] : [];
+  });
+
+  // The group endpoint's teachers array is a bare association (userId + role +
+  // substitute dates); join against the school's enriched teacher roster for
+  // name/avatar/langs/weekly-hours.
+  const teachersById = new Map(schoolTeachers.map((t) => [t.userId, t]));
+
+  const allGroups = await safeFetch<OrgGroup[]>(() =>
     serverFetch({
       service: 'organization',
       path: `/schools/${schoolId}/groups`,
@@ -236,7 +286,7 @@ export async function getGroup(
 
   const forOps = buildGroupForOps(rawGroup, slots);
   const primary = rawGroup.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
-  const maxHours = primary?.maxWeeklyHours ?? null;
+  const maxHours = primary ? (teachersById.get(primary.userId)?.maxWeeklyHours ?? null) : null;
   const rawAlerts = groupAlerts(forOps, maxHours, allForOps);
   const alerts: Alert[] = rawAlerts.map((a) => ({
     type: a.type as AlertType,
@@ -244,31 +294,47 @@ export async function getGroup(
     label: a.label,
   }));
 
-  const teachers: GroupTeacher[] = (rawGroup.teachers ?? []).map((t) => ({
-    userId: t.userId,
-    name: t.name ?? '',
-    avatarUrl: t.avatarUrl ?? null,
-    role: mapTeacherRole(t.role),
-    from: t.from,
-    to: t.to,
-    reason: t.reason,
-    max: t.maxWeeklyHours,
-    langs: t.langs,
+  const teachers: GroupTeacher[] = (rawGroup.teachers ?? []).map((t) => {
+    const info = teachersById.get(t.userId);
+    return {
+      userId: t.userId,
+      name: info?.name ?? '',
+      avatarUrl: info?.avatarUrl ?? null,
+      role: mapTeacherRole(t.role),
+      from: t.fromDate ?? undefined,
+      to: t.toDate ?? undefined,
+      reason: t.reason ?? undefined,
+      max: info?.maxWeeklyHours,
+      langs: info?.langs,
+    };
+  });
+
+  const courseNames = await resolveCourseNames([
+    rawGroup.courseId,
+    ...(rawGroup.materials ?? []).map((m) => m.courseId),
+  ]);
+
+  const materials: Group['materials'] = (rawGroup.materials ?? []).map((m) => ({
+    id: m.id,
+    courseId: m.courseId,
+    courseName: courseNames.get(m.courseId) ?? null,
   }));
 
   const group: Group = {
     id: rawGroup.id,
     name: rawGroup.name,
     courseId: rawGroup.courseId ?? null,
-    courseName: rawGroup.courseName ?? null,
+    courseName: (rawGroup.courseId && courseNames.get(rawGroup.courseId)) ?? null,
+    materials,
     lang: rawGroup.lang ?? 'en',
     level: (rawGroup.level ?? 'A1') as Group['level'],
     status: mapGroupStatus(rawGroup.status),
     mode: mapGroupMode(rawGroup.mode),
-    capacity: { min: rawGroup.minCapacity ?? 0, max: rawGroup.maxCapacity ?? 999 },
+    capacity: { min: rawGroup.capacityMin ?? 0, max: rawGroup.capacityMax ?? 999 },
     studentCount: rawGroup.studentCount ?? 0,
-    startDate: rawGroup.startDate ?? null,
-    endDate: rawGroup.endDate ?? null,
+    startDate: toDateOnly(rawGroup.startDate),
+    endDate: toDateOnly(rawGroup.endDate),
+    ageBand: (rawGroup.ageBand ?? null) as Group['ageBand'],
     teachers,
     slots,
   };
@@ -285,6 +351,29 @@ export async function getGroup(
   }));
 
   return { ...group, roster: rosterStudents, alerts };
+}
+
+/**
+ * Course view backing CourseChip/CoursePanel. There is no course-detail GET —
+ * this derives from Group fields and best-effort enriches with a curriculum
+ * unit count. Curriculum lookup failures degrade to `unitCount: null`
+ * (the panel omits the line); this function never throws.
+ */
+export async function getGroupCourseView(group: Group): Promise<CourseView> {
+  const base: CourseView = {
+    courseId: group.courseId,
+    courseName: group.courseName ?? null,
+    lang: group.lang,
+    level: group.level,
+    unitCount: null,
+  };
+
+  try {
+    const plan = await getSchedulingProvider().getCurriculum(group.id);
+    return { ...base, unitCount: plan.units.length };
+  } catch {
+    return base;
+  }
 }
 
 type SchoolTeacher = {
@@ -314,7 +403,7 @@ function mapSchoolTeachers(raw: OrgMember[]): SchoolTeacher[] {
  * a genuinely empty roster.
  */
 export async function getSchoolTeachers(schoolId: string): Promise<SchoolTeacher[]> {
-  const raw = await safeOrgFetch<OrgMember[]>(() =>
+  const raw = await safeFetch<OrgMember[]>(() =>
     serverFetch({
       service: 'organization',
       path: `/schools/${schoolId}/members`,
@@ -346,20 +435,150 @@ export async function getSchoolTeachersResult(
 }
 
 /**
+ * Counts overlapping pairs among a teacher's own lessons — same heuristic as
+ * TimetableGrid's per-day conflict highlighting, aggregated to a single number.
+ */
+function countConflicts(lessons: TimetableTeacher['lessons']): number {
+  let count = 0;
+  for (let i = 0; i < lessons.length; i++) {
+    for (let j = i + 1; j < lessons.length; j++) {
+      const a = lessons[i]!;
+      const b = lessons[j]!;
+      if (slotsOverlap({ day: a.day, start: a.start, end: a.end, room: '' }, { day: b.day, start: b.start, end: b.end, room: '' })) {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+type GroupLookup = Map<string, { name: string; lang: string; regularTeacherIds: Set<string> }>;
+
+function buildGroupsLookup(rawGroups: OrgGroup[] | null): GroupLookup {
+  return new Map(
+    (rawGroups ?? []).map((g) => {
+      const regularTeacherIds = new Set(
+        (g.teachers ?? [])
+          .filter((t) => mapTeacherRole(t.role) !== 'substitute')
+          .map((t) => t.userId),
+      );
+      return [g.id, { name: g.name, lang: g.lang ?? '', regularTeacherIds }] as const;
+    }),
+  );
+}
+
+/**
+ * Joins one teacher's raw projected lessons against the group lookup to
+ * derive groupName/lang/isSubstitute, plus aggregate hours/pct/conflicts.
+ * Shared by the school-wide composition and the single-teacher view.
+ */
+function composeTimetableTeacher(
+  teacher: SchoolTeacher,
+  entries: Array<{ day: TimetableTeacher['lessons'][number]['day']; start: string; end: string; groupId: string }>,
+  groupsById: GroupLookup,
+): TimetableTeacher {
+  const lessons: TimetableTeacher['lessons'] = entries.map((e) => {
+    const group = groupsById.get(e.groupId);
+    return {
+      day: e.day,
+      start: e.start,
+      end: e.end,
+      groupId: e.groupId,
+      groupName: group?.name ?? e.groupId,
+      lang: group?.lang ?? '',
+      isSubstitute: group ? !group.regularTeacherIds.has(teacher.userId) : false,
+    };
+  });
+
+  const hours = lessons.reduce((acc, l) => acc + (timeToMinutes(l.end) - timeToMinutes(l.start)) / 60, 0);
+  const max = teacher.maxWeeklyHours;
+  const pct = max > 0 ? Math.round((hours / max) * 100) : 0;
+
+  return {
+    userId: teacher.userId,
+    name: teacher.name,
+    avatarUrl: teacher.avatarUrl,
+    hours,
+    max,
+    pct,
+    overloaded: hours > max,
+    groups: new Set(lessons.map((l) => l.groupId)).size,
+    conflicts: countConflicts(lessons),
+    lessons,
+  };
+}
+
+/**
+ * Composes the rich TimetableTeacher[] view model from scheduling-service's
+ * raw school-wide projection (one query, see SchedulingProvider.schoolTimetable)
+ * joined against organization-service's teacher roster and group list.
+ * Single source of truth for both the timetable page and getTeacherLoads.
+ */
+async function buildTimetableTeachers(schoolId: string): Promise<TimetableTeacher[]> {
+  const scheduling = getSchedulingProvider();
+  const [entries, teachers, rawGroups] = await Promise.all([
+    scheduling.schoolTimetable(schoolId),
+    getSchoolTeachers(schoolId),
+    safeFetch<OrgGroup[]>(() => serverFetch({ service: 'organization', path: `/schools/${schoolId}/groups` })),
+  ]);
+
+  const groupsById = buildGroupsLookup(rawGroups);
+
+  const entriesByTeacher = new Map<string, typeof entries>();
+  for (const entry of entries) {
+    if (!entriesByTeacher.has(entry.teacherId)) entriesByTeacher.set(entry.teacherId, []);
+    entriesByTeacher.get(entry.teacherId)!.push(entry);
+  }
+
+  return teachers.map((t) => composeTimetableTeacher(t, entriesByTeacher.get(t.userId) ?? [], groupsById));
+}
+
+/**
+ * A single teacher's own projected week (used by the teacher-facing
+ * "my schedule" page) — one A.6 call instead of the school-wide query, so the
+ * hot per-teacher path stays cheap regardless of school size.
+ */
+export type TeacherScheduleResult = { data: TimetableTeacher | null } | { error: string };
+
+export async function getTeacherSchedule(
+  schoolId: string,
+  teacherId: string,
+): Promise<TeacherScheduleResult> {
+  try {
+    const scheduling = getSchedulingProvider();
+    const [entries, teachers, rawGroups] = await Promise.all([
+      scheduling.teacherWeek(schoolId, teacherId),
+      getSchoolTeachers(schoolId),
+      safeFetch<OrgGroup[]>(() => serverFetch({ service: 'organization', path: `/schools/${schoolId}/groups` })),
+    ]);
+
+    const teacher = teachers.find((t) => t.userId === teacherId);
+    if (!teacher) return { data: null };
+
+    return { data: composeTimetableTeacher(teacher, entries, buildGroupsLookup(rawGroups)) };
+  } catch (err) {
+    if (err instanceof AppError && err.code === 'upstream_unavailable') {
+      return { data: null };
+    }
+    console.error('[groups/queries] teacherWeek failed:', err);
+    return { error: err instanceof Error ? err.message : 'Failed to load schedule' };
+  }
+}
+
+/**
  * Teacher timetable view model for the timetable page.
  */
 export type TimetableResult = { data: TimetableTeacher[] } | { error: string };
 
 export async function getTimetable(schoolId: string): Promise<TimetableResult> {
-  const scheduling = getSchedulingProvider();
   try {
-    const data = await scheduling.teacherTimetable(schoolId);
+    const data = await buildTimetableTeachers(schoolId);
     return { data };
   } catch (err) {
     if (err instanceof AppError && err.code === 'upstream_unavailable') {
       return { data: [] };
     }
-    console.error('[groups/queries] teacherTimetable failed:', err);
+    console.error('[groups/queries] schoolTimetable failed:', err);
     return { error: err instanceof Error ? err.message : 'Failed to load timetable' };
   }
 }
@@ -370,25 +589,20 @@ export async function getTimetable(schoolId: string): Promise<TimetableResult> {
 export async function getTeacherLoads(
   schoolId: string,
 ): Promise<Record<string, ReturnType<typeof teacherLoad>>> {
-  const scheduling = getSchedulingProvider();
-  const [teachers, timetableTeachers] = await Promise.all([
-    getSchoolTeachers(schoolId),
-    scheduling.teacherTimetable(schoolId).catch((err) => {
-      console.error('[groups/queries] teacherTimetable failed:', err);
-      return [] as TimetableTeacher[];
-    }),
-  ]);
+  const timetableTeachers = await buildTimetableTeachers(schoolId).catch((err) => {
+    console.error('[groups/queries] schoolTimetable failed:', err);
+    return [] as TimetableTeacher[];
+  });
 
   const result: Record<string, ReturnType<typeof teacherLoad>> = {};
-  for (const t of teachers) {
-    const tt = timetableTeachers.find((tt) => tt.userId === t.userId);
-    result[t.userId] = {
-      hours: tt?.hours ?? 0,
-      max: t.maxWeeklyHours,
-      pct: tt?.pct ?? 0,
-      overloaded: tt?.overloaded ?? false,
-      groups: tt?.groups ?? 0,
-      conflicts: tt?.conflicts ?? 0,
+  for (const tt of timetableTeachers) {
+    result[tt.userId] = {
+      hours: tt.hours,
+      max: tt.max,
+      pct: tt.pct,
+      overloaded: tt.overloaded,
+      groups: tt.groups,
+      conflicts: tt.conflicts,
     };
   }
   return result;
@@ -406,7 +620,7 @@ export type TeacherAssignCandidate = {
   currentGroups: number;
   currentConflicts: number;
   langFit: boolean;
-  conflictsWithGroup: boolean;
+  availabilityStatus: TeacherAvailabilityStatus;
 };
 
 /**
@@ -432,20 +646,21 @@ export async function getTeacherAssignCandidates(
   }
 
   const timetable = 'data' in timetableResult ? timetableResult.data : [];
+
+  // Derived availability (free/conflict/absent) against the group's committed
+  // slots — the time-first source of truth; degrades to "free" on outage.
+  const availability = await getSchedulingProvider()
+    .teachersAvailability(schoolId, groupData.slots)
+    .catch((err) => {
+      if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
+      return [] as TeacherAvailability[];
+    });
+  const availabilityByTeacher = new Map(availability.map((a) => [a.teacherId, a]));
+
   const existingIds = new Set(groupData.teachers.map((t) => t.userId));
 
   const candidates: TeacherAssignCandidate[] = teachers.map((t) => {
     const tt = timetable.find((x: TimetableTeacher) => x.userId === t.userId);
-    // Lessons in the timetable represent recurring weekly slots (day + time).
-    const teacherSlots = (tt?.lessons ?? []).map((l) => ({
-      day: l.day,
-      start: l.start,
-      end: l.end,
-      room: '',
-    }));
-    const conflictsWithGroup = groupData.slots.some((gs) =>
-      teacherSlots.some((ts) => slotsOverlap(ts, gs)),
-    );
     return {
       userId: t.userId,
       name: t.name,
@@ -456,7 +671,7 @@ export async function getTeacherAssignCandidates(
       currentGroups: tt?.groups ?? 0,
       currentConflicts: tt?.conflicts ?? 0,
       langFit: t.langs.some((l) => l.toLowerCase() === groupData.lang.toLowerCase()),
-      conflictsWithGroup,
+      availabilityStatus: availabilityByTeacher.get(t.userId)?.status ?? 'free',
     };
   });
 
@@ -473,7 +688,7 @@ export async function getTeacherAssignCandidates(
  * All school students (for the wizard, where no group exists yet).
  */
 export async function getSchoolStudents(schoolId: string): Promise<StudentCandidate[]> {
-  const raw = await safeOrgFetch<OrgMember[]>(() =>
+  const raw = await safeFetch<OrgMember[]>(() =>
     serverFetch({
       service: 'organization',
       path: `/schools/${schoolId}/members`,
@@ -514,7 +729,7 @@ export async function getStudentCandidates(
 }> {
   const [groupData, allMembers] = await Promise.all([
     getGroup(schoolId, groupId),
-    safeOrgFetch<OrgMember[]>(() =>
+    safeFetch<OrgMember[]>(() =>
       serverFetch({
         service: 'organization',
         path: `/schools/${schoolId}/members`,

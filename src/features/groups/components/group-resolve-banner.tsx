@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { AlertCircle, AlertTriangle } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 import { cn } from '@/lib/utils';
 import { AlertChip } from '@/components/shared/operations';
@@ -9,24 +10,32 @@ type Props = {
   alerts: Alert[];
   groupId: string;
   schoolSlug: string;
+  canManage: boolean;
 };
 
 function fixHref(alert: Alert, groupId: string, schoolSlug: string): string {
   const base = `/school/${schoolSlug}/groups/${groupId}`;
-  if (alert.type === 'no-primary' || alert.type === 'conflict' || alert.type === 'overload') {
-    return `${base}?tab=teachers`;
+  switch (alert.type) {
+    case 'no-primary':
+      return `${base}/assign-teacher?role=primary`;
+    case 'conflict':
+    case 'overload':
+      return `${base}/assign-teacher`;
+    case 'over':
+    case 'under':
+      return `${base}/add-students`;
   }
-  return `${base}?tab=students`;
 }
 
-export function GroupResolveBanner({ alerts, groupId, schoolSlug }: Props) {
+export async function GroupResolveBanner({ alerts, groupId, schoolSlug, canManage }: Props) {
   if (!alerts.length) return null;
+  const t = await getTranslations('Groups');
   const hasDanger = alerts.some((a) => a.severity === 'danger');
 
   return (
     <div
       role="alert"
-      aria-label={hasDanger ? 'Action required' : 'Attention needed'}
+      aria-label={hasDanger ? t('resolve.actionRequired') : t('resolve.attentionNeeded')}
       className={cn(
         'rounded-lg border px-4 py-3 flex flex-col gap-2',
         hasDanger
@@ -44,28 +53,30 @@ export function GroupResolveBanner({ alerts, groupId, schoolSlug }: Props) {
           'text-sm font-semibold',
           hasDanger ? 'text-error-700 dark:text-error-300' : 'text-warning-700 dark:text-warning-300',
         )}>
-          {hasDanger ? 'Action required' : 'Attention needed'}
+          {hasDanger ? t('resolve.actionRequired') : t('resolve.attentionNeeded')}
         </span>
       </div>
 
-      <ul className="flex flex-col gap-1.5" aria-label="Issues to resolve">
+      <ul className="flex flex-col gap-1.5" aria-label={t('resolve.issuesLabel')}>
         {alerts.map((alert, i) => (
-          <li key={i} className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 min-w-0">
+          <li key={i} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
               <AlertChip alert={alert} />
-              <span className="text-xs text-(--ssz-text-secondary) truncate">{alert.label}</span>
+              <span className="text-xs text-(--ssz-text-secondary)">{alert.label}</span>
             </div>
-            <Link
-              href={fixHref(alert, groupId, schoolSlug)}
-              className={cn(
-                'text-xs font-semibold shrink-0 underline-offset-2 hover:underline',
-                alert.severity === 'danger'
-                  ? 'text-error-700 dark:text-error-400'
-                  : 'text-warning-700 dark:text-warning-400',
-              )}
-            >
-              Fix →
-            </Link>
+            {canManage && (
+              <Link
+                href={fixHref(alert, groupId, schoolSlug)}
+                className={cn(
+                  'text-xs font-semibold shrink-0 underline-offset-2 hover:underline',
+                  alert.severity === 'danger'
+                    ? 'text-error-700 dark:text-error-400'
+                    : 'text-warning-700 dark:text-warning-400',
+                )}
+              >
+                {t('resolve.fix')}
+              </Link>
+            )}
           </li>
         ))}
       </ul>

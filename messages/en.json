@@ -218,15 +218,16 @@
     "hints": "Hints",
     "exemplarAnswer": "Example answer",
     "accessTier": {
-      "PUBLIC": "Free",
-      "FREE_WITHIN_SCHOOL": "School",
-      "PAID": "Premium",
-      "INVITE_ONLY": "Invite only"
+      "assigned_only": "Assigned only",
+      "entitlement_required": "Entitlement required",
+      "free_within_school": "School",
+      "public_free": "Free",
+      "public_paid": "Premium"
     },
     "containerType": {
-      "COURSE": "Course",
-      "MODULE": "Module",
-      "COLLECTION": "Collection"
+      "course": "Course",
+      "module": "Module",
+      "collection": "Collection"
     }
   },
   "Auth": {
@@ -370,6 +371,10 @@
     "breadcrumb": {
       "courses": "Courses"
     },
+    "sections": {
+      "noSection": "No section",
+      "assignAriaLabel": "Assign to section"
+    },
     "filters": {
       "all": "All",
       "draft": "Draft",
@@ -395,10 +400,11 @@
       "description": "Description",
       "type": "Type",
       "targetLanguage": "Target language",
-      "instructionLanguage": "Instruction language",
       "level": "Level",
+      "visibility": "Visibility",
+      "visibilityHint": "Who can discover this container in the catalogue.",
       "slug": "Slug",
-      "slugFrozen": "Immutable",
+      "slugFrozen": "Auto-generated on publish",
       "accessTier": "Access tier",
       "accessTierHint": "Controls who can enrol; visibility is separate."
     },
@@ -406,10 +412,7 @@
       "titlePlaceholder": "e.g. Norwegian for Beginners",
       "descriptionPlaceholder": "Short description of this container",
       "targetLanguagePlaceholder": "e.g. no, en, uk",
-      "instructionLanguagePlaceholder": "e.g. en",
       "levelNone": "Any level",
-      "slugPlaceholder": "e.g. norwegian-for-beginners",
-      "slugTooltip": "Used in the URL. Only lowercase letters, numbers, and hyphens. Cannot be changed after publishing.",
       "create": "Create",
       "save": "Save",
       "createSuccess": "Container created.",
@@ -419,15 +422,22 @@
       "slugRequired": "Slug is required"
     },
     "accessTier": {
-      "PUBLIC": "Free",
-      "FREE_WITHIN_SCHOOL": "School only",
-      "PAID": "Premium",
-      "INVITE_ONLY": "Invite only"
+      "assigned_only": "Assigned only",
+      "entitlement_required": "Entitlement required",
+      "free_within_school": "School only",
+      "public_free": "Free",
+      "public_paid": "Premium"
+    },
+    "visibility": {
+      "public": "Public",
+      "school_private": "School only",
+      "shared": "Shared",
+      "private": "Private"
     },
     "types": {
-      "COURSE": "Course",
-      "MODULE": "Module",
-      "COLLECTION": "Collection"
+      "course": "Course",
+      "module": "Module",
+      "collection": "Collection"
     },
     "lessons": {
       "add": "Add lesson",
@@ -572,7 +582,7 @@
       "addSuccess": "Collaborator added.",
       "removeAriaLabel": "Remove collaborator",
       "removeConfirmTitle": "Remove collaborator?",
-      "removeConfirmDescription": "{email} will lose access to this container.",
+      "removeConfirmDescription": "{name} will lose access to this container.",
       "removeConfirm": "Remove",
       "removeCancel": "Cancel",
       "removeSuccess": "Collaborator removed.",
@@ -585,10 +595,10 @@
       "trigger": "Publish",
       "title": "Publish container",
       "description": "Publishing is permanent and affects how this container is accessed. Please read the warnings below before confirming.",
-      "warningSlug": "The slug is frozen and cannot be changed after publishing.",
+      "warningSlug": "A URL slug will be generated from the title and frozen after publishing.",
       "warningDiscoverable": "The container becomes discoverable and accessible to students based on its access tier.",
       "warningEvent": "A published event is emitted, which may trigger notifications.",
-      "confirmPrompt": "To confirm, type the slug exactly as shown:",
+      "confirmPrompt": "To confirm, type the title exactly as shown:",
       "confirm": "Publish",
       "cancel": "Cancel",
       "success": "Container published successfully."
@@ -666,8 +676,7 @@
         "coTeach": "Co-teacher",
         "viewer": "Viewer",
         "coTeachersSection": "Co-teachers",
-        "coTeachersComingSoon": "Co-teacher invitations coming soon",
-        "coTeachersHelp": "You can add co-teachers from the course settings after creation.",
+        "coTeachersHelp": "Save the course details first (step 1) to invite co-teachers.",
         "matrixTitle": "Role permissions",
         "matrix": {
           "action": "Action",
@@ -690,7 +699,7 @@
         "note": "You can change visibility at any time from the course settings."
       },
       "review": {
-        "subtitle": "Check the details before saving or publishing.",
+        "subtitle": "Check the details before creating your course.",
         "sectionMetadata": "Details",
         "sectionStructure": "Structure",
         "sectionTeachers": "Teachers",
@@ -698,10 +707,9 @@
         "edit": "Edit",
         "ownerOnly": "Owner only",
         "saveAsDraft": "Save as draft",
-        "publish": "Publish course",
-        "publishError": "Couldn't publish. Check blockers in the pre-flight panel.",
-        "publishSuccess": "Course published!",
-        "preflightHint": "Save the draft first to see pre-flight checks."
+        "createAndContinue": "Create course",
+        "createError": "Couldn't create the course. Please try again.",
+        "createSuccess": "Course created — add lessons and publish when ready."
       }
     }
   },
@@ -785,6 +793,14 @@
       "saving": "Saving...",
       "submit": "Continue"
     },
+    "AgeBand": {
+      "subtitle": "Which age group are you in?",
+      "kids": "Kids",
+      "teens": "Teens",
+      "adults": "Adults",
+      "saving": "Saving...",
+      "submit": "Continue"
+    },
     "InterviewBooking": {
       "subtitle": "Pick a time slot for your placement interview",
       "selectSlot": "Select interview slot",
@@ -798,6 +814,7 @@
       "subtitle": "Complete the steps below to finish your enrollment.",
       "stepPlacement": "Placement",
       "stepAvailability": "Availability",
+      "stepAgeBand": "Age group",
       "stepInterview": "Interview",
       "allDoneTitle": "You're all set!",
       "allDoneReview": "We'll review your results and get back to you soon.",
@@ -828,6 +845,11 @@
       "autoPlaceByScore": "Auto-place by score (no interview)",
       "sectionAvailability": "Availability",
       "collectAvailability": "Collect availability preferences",
+      "sectionAgeBands": "Age bands",
+      "ageBandKids": "Kids",
+      "ageBandTeens": "Teens",
+      "ageBandAdults": "Adults",
+      "collectAgeBand": "Collect age band during onboarding",
       "sectionApproval": "Approval",
       "manualApproval": "Require manual approval",
       "stepPreviewLabel": "Student will see these steps",
@@ -1364,19 +1386,35 @@
     "resolve": {
       "actionRequired": "Action required",
       "attentionNeeded": "Attention needed",
-      "fix": "Fix →"
+      "fix": "Fix →",
+      "issuesLabel": "Issues to resolve"
     },
     "tabs": {
       "overview": "Overview",
       "students": "Students",
       "teachers": "Teachers",
-      "schedule": "Schedule"
+      "schedule": "Schedule",
+      "sectionLabel": "Section"
     },
     "overview": {
       "teachersHeading": "Teachers",
       "rosterHeading": "Roster",
       "scheduleHeading": "Schedule",
-      "noTeachers": "No teachers assigned."
+      "noTeachers": "No teachers assigned.",
+      "courseHeading": "Course",
+      "nextLessonHeading": "Next lesson",
+      "ready": "Ready to run",
+      "notReady": "Not ready to run",
+      "statusUnknown": "Status unknown — couldn’t check conflicts",
+      "clashCount": "{count} student with a schedule clash",
+      "clashCountPlural": "{count} students with a schedule clash",
+      "manageStudents": "Manage students →",
+      "manageTeachers": "Manage teachers →",
+      "openSchedule": "Open schedule →",
+      "addSchedule": "Add schedule →",
+      "coPrimaryCount": "+{count} co-primary",
+      "subCount": "{count} sub",
+      "subCountPlural": "{count} subs"
     },
     "students": {
       "search": "Search students…",
@@ -1416,7 +1454,8 @@
       "upcomingHeading": "Upcoming lessons",
       "noSlots": "No recurring slots configured.",
       "noLessons": "No upcoming lessons scheduled.",
-      "sub": "Sub"
+      "sub": "Sub",
+      "editButton": "Edit schedule"
     },
     "detail": {
       "back": "Groups",
@@ -1433,7 +1472,11 @@
       "deleted": "Group deleted",
       "updated": "Group updated",
       "archiving": "Archiving…",
-      "deleting": "Deleting…"
+      "deleting": "Deleting…",
+      "duplicateError": "Failed to duplicate group",
+      "archiveError": "Failed to archive group",
+      "deleteError": "Failed to delete group",
+      "moreActions": "More actions"
     },
     "edit": {
       "title": "Edit group",
@@ -1442,7 +1485,52 @@
       "saving": "Saving…",
       "cancel": "Cancel",
       "success": "Group updated",
-      "error": "Failed to update group"
+      "error": "Failed to update group",
+      "identity": "Identity",
+      "capacity": "Capacity",
+      "dates": "Dates",
+      "name": "Name",
+      "namePlaceholder": "e.g. Norwegian A2 — Spring 2026",
+      "lang": "Language code",
+      "langPlaceholder": "en, nb, uk, ru…",
+      "level": "Level",
+      "levelPlaceholder": "Select level",
+      "mode": "Mode",
+      "minStudents": "Min students",
+      "maxStudents": "Max students",
+      "straddleNote": "{count} enrolled — min/max must straddle current roster.",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "saveHint": "Press ⌘S (or Ctrl+S) to save",
+      "discardTitle": "Discard unsaved changes?",
+      "discardBody": "You have unsaved changes to this group. Closing now will discard them.",
+      "discardKeepEditing": "Keep editing",
+      "discardDiscard": "Discard",
+      "maxBelowEnrolled": "Max must be at least {count} (current enrollment)",
+      "endBeforeStart": "End date must be on or after start date",
+      "course": "Course",
+      "courseAdd": "Add course",
+      "courseChange": "Change",
+      "courseSearchPlaceholder": "Search published courses…",
+      "courseNoneOption": "No course",
+      "courseLoading": "Loading courses…",
+      "courseNoResults": "No published courses found.",
+      "materialsHeading": "Additional materials",
+      "addMaterial": "Add material",
+      "removeMaterial": "Remove material",
+      "noMaterials": "No additional materials attached.",
+      "materialAddError": "Failed to add material",
+      "materialRemoveError": "Failed to remove material",
+      "slotsHeading": "Schedule",
+      "slotsError": "Failed to update schedule",
+      "ageBand": "Age band",
+      "ageBandPlaceholder": "Select age band",
+      "ageBandNone": "—"
+    },
+    "ageBand": {
+      "kids": "Kids",
+      "teens": "Teens",
+      "adults": "Adults"
     },
     "wizard": {
       "title": "New group",
@@ -1480,8 +1568,10 @@
       "noTeachers": "All teachers are already assigned.",
       "langMismatch": "lang mismatch",
       "timeClash": "time clash",
+      "availabilityAbsent": "on leave",
       "validationOk": "Good to assign",
       "validationConflict": "Schedule conflict: {name} already has a lesson at this time.",
+      "validationAbsent": "{name} is on leave during this period.",
       "validationLangMismatch": "Language mismatch: teacher speaks {teacherLang}, group language is {groupLang}.",
       "validationOverload": "This would bring {name} to {projected}/{max}h per week.",
       "errorNoPrimary": "Assign a primary teacher first before adding a co-primary.",
@@ -1529,6 +1619,15 @@
       "conflictListTitlePlural": "schedule conflicts",
       "conflictItem": "{day} clash: {groupA} overlaps {groupB} — move one slot or reassign"
     },
+    "mySchedule": {
+      "title": "My schedule",
+      "subtitle": "Your weekly lessons, projected from the groups you teach.",
+      "back": "Dashboard",
+      "groupsCount": "{count, plural, one {# group} other {# groups}}",
+      "noSchedule": "No lessons scheduled yet.",
+      "loadFailed": "Failed to load your schedule.",
+      "clashes": "{count, plural, one {# clash} other {# clashes}}"
+    },
     "slot": {
       "add": "Add slot",
       "noSlots": "No recurring slots. Add at least one.",
@@ -1536,13 +1635,47 @@
       "overlap": "Overlaps with another slot",
       "endBeforeStart": "End must be after start",
       "roomRequired": "Room is required for in-person",
+      "label": "Slot {n}",
+      "removeAria": "Remove slot {n}",
+      "roomPlaceholder": "e.g. Room 101",
       "fields": {
         "day": "Day",
         "start": "Start",
         "end": "End",
         "room": "Room",
         "roomLabel": "Room *"
+      },
+      "weekday": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
       }
+    },
+    "header": {
+      "level": "Level",
+      "mode": "Mode"
+    },
+    "course": {
+      "title": "Course",
+      "description": "Course details and additional materials for this group.",
+      "cefr": "CEFR level",
+      "language": "Language",
+      "curriculum": "Curriculum",
+      "units": "{count} units",
+      "noCourse": "No course assigned",
+      "open": "View course →",
+      "editHint": "Use the Manage button on the Course card to change materials.",
+      "manage": "Manage",
+      "dialogTitle": "Manage course",
+      "dialogDescription": "Choose the group's main course and any additional materials.",
+      "updateSuccess": "Course updated",
+      "updateError": "Failed to update course",
+      "materialsCount": "+{count} additional material",
+      "materialsCountPlural": "+{count} additional materials"
     }
   },
   "Students": {

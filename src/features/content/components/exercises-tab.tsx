@@ -30,7 +30,7 @@ export function ExercisesTab({ containerId, versionId }: ExercisesTabProps) {
     !!versionId,
   );
 
-  const items = (data ?? []).filter((i) => i.contentType === 'EXERCISE');
+  const items = (data ?? []).filter((i) => i.itemType === 'exercise');
 
   return (
     <DataState
@@ -44,7 +44,7 @@ export function ExercisesTab({ containerId, versionId }: ExercisesTabProps) {
     >
       <div className="space-y-4">
         {items.map((item) => (
-          <ExerciseSection key={item.id} exerciseId={item.contentId} />
+          <ExerciseSection key={item.id} exerciseId={item.itemId} />
         ))}
       </div>
     </DataState>

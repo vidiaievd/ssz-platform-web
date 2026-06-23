@@ -15,8 +15,8 @@ interface LessonRendererProps {
 export function LessonRenderer({ variant }: LessonRendererProps) {
   return (
     <article className="prose dark:prose-invert max-w-none">
-      <h1>{variant.title}</h1>
-      <LessonBody body={variant.body} />
+      <h1>{variant.displayTitle}</h1>
+      <LessonBody body={variant.bodyMarkdown} />
     </article>
   );
 }

@@ -2,17 +2,15 @@
 
 import { useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Pencil, BookOpen, Layers, Users, Lock, Globe, EyeOff, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { PreflightPanel } from '@/features/content-authoring/components/preflight-panel';
-import { authoringKeys } from '@/features/content-authoring/api/keys';
+import { useRouter } from '@/lib/i18n/navigation';
 
 import { createContainerAction, updateContainerAction } from '../../actions/container';
-import { publishContainerAction } from '../../actions/publish-container';
+import { wizardPayload } from '../../lib/wizard-payload';
 import { useCreateWizardStore } from '../../stores/create-wizard';
 
 // ── Review section row ────────────────────────────────────────────────────────
@@ -86,20 +84,13 @@ function useStructureLabel() {
   };
 }
 
-// ── Access tier map ───────────────────────────────────────────────────────────
-
-const ACCESS_TIER_MAP: Record<string, 'PUBLIC' | 'FREE_WITHIN_SCHOOL' | 'PAID' | 'INVITE_ONLY'> = {
-  public_catalog: 'PUBLIC',
-  invite_only: 'INVITE_ONLY',
-  internal_draft: 'FREE_WITHIN_SCHOOL',
-};
-
 // ── Step 5: Review ────────────────────────────────────────────────────────────
 
 export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void }) {
   const t = useTranslations('Authoring');
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const contentBase = `/school/${schoolSlug}/content`;
   const store = useCreateWizardStore();
   const [isPending, startTransition] = useTransition();
   const visibilityLabel = useVisibilityLabel();
@@ -112,60 +103,39 @@ export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void 
     const params = new URLSearchParams();
     params.set('step', String(step + 1));
     if (store.draftId) params.set('draft', store.draftId);
-    router.push(`/school/content/new?${params.toString()}`);
+    router.push(`${contentBase}/new?${params.toString()}`);
   }
 
   async function ensureDraft() {
+    const payload = wizardPayload(metadata, visibility.mode);
+
     if (store.draftId) {
-      const res = await updateContainerAction(store.draftId, {
-        title: metadata.title,
-        description: metadata.description || undefined,
-        type: 'COURSE' as const,
-        targetLanguage: metadata.targetLanguage,
-        level: (metadata.level || undefined) as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | undefined,
-        slug: metadata.slug || undefined,
-        accessTier: ACCESS_TIER_MAP[visibility.mode] ?? 'INVITE_ONLY',
-      });
+      const res = await updateContainerAction(store.draftId, payload);
       if (!res.ok) throw new Error('patch failed');
       return store.draftId;
     }
 
-    const res = await createContainerAction({
-      title: metadata.title,
-      description: metadata.description || undefined,
-      type: 'COURSE' as const,
-      targetLanguage: metadata.targetLanguage,
-      level: (metadata.level || undefined) as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | undefined,
-      slug: metadata.slug || undefined,
-      accessTier: ACCESS_TIER_MAP[visibility.mode] ?? 'INVITE_ONLY',
-    });
+    const res = await createContainerAction(payload);
     if (!res.ok) throw new Error('create failed');
     store.setDraftId(res.value.id);
     return res.value.id;
   }
 
-  function handlePublish() {
+  function handleCreate() {
     startTransition(async () => {
       try {
         const id = await ensureDraft();
-        const res = await publishContainerAction(id);
-        if (!res.ok) {
-          toast.error(t('wizard.review.publishError'));
-          return;
-        }
-        await queryClient.invalidateQueries({ queryKey: authoringKeys.containers() });
-        toast.success(t('wizard.review.publishSuccess'));
+        toast.success(t('wizard.review.createSuccess'));
         store.reset();
-        router.push(`/school/content/${id}`);
+        router.push(`${contentBase}/${id}`);
       } catch {
-        toast.error(t('wizard.review.publishError'));
+        toast.error(t('wizard.review.createError'));
       }
     });
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
-      {/* Summary column */}
+    <div className="mx-auto max-w-2xl">
       <div className="space-y-4">
         <div>
           <h1 className="text-2xl font-semibold text-(--ssz-text-primary) font-[Lora]">
@@ -186,7 +156,6 @@ export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void 
             { label: t('wizard.metadata.titleLabel'), value: metadata.title },
             { label: t('wizard.metadata.language'), value: metadata.targetLanguage },
             { label: t('wizard.metadata.level'), value: metadata.level },
-            { label: t('fields.slug'), value: metadata.slug },
             { label: t('wizard.metadata.descriptionLabel'), value: metadata.description },
           ]}
         />
@@ -229,24 +198,11 @@ export function WizardStepReview({ onSaveAsDraft }: { onSaveAsDraft: () => void 
           <Button variant="outline" onClick={onSaveAsDraft} disabled={isPending}>
             {t('wizard.review.saveAsDraft')}
           </Button>
-          <Button onClick={handlePublish} disabled={isPending} loading={isPending}>
+          <Button onClick={handleCreate} disabled={isPending} loading={isPending}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t('wizard.review.publish')}
+            {t('wizard.review.createAndContinue')}
           </Button>
         </div>
-      </div>
-
-      {/* Preflight panel */}
-      <div className="hidden lg:block">
-        {store.draftId ? (
-          <PreflightPanel containerId={store.draftId} />
-        ) : (
-          <div className="rounded-[var(--ssz-radius-md)] border border-(--ssz-border-default) bg-(--ssz-bg-subtle) p-4 text-center">
-            <p className="text-xs text-(--ssz-text-muted)">
-              {t('wizard.review.preflightHint')}
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

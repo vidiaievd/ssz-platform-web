@@ -10,6 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const schoolSlug = _request.nextUrl.searchParams.get('schoolSlug') ?? '';
 
   try {
     const [container, itemsResp] = await Promise.all([
@@ -21,7 +22,7 @@ export async function GET(
       }),
     ]);
 
-    const result = runPreflight(container, itemsResp.items ?? []);
+    const result = runPreflight(schoolSlug, container, itemsResp.items ?? []);
     return NextResponse.json(result);
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') {

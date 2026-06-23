@@ -16,18 +16,18 @@ export async function GET(
   try {
     if (!versionId) {
       if (draft) {
-        const versions = await serverFetch<ContainerVersion[]>({
+        const versions = await serverFetch<{ items: ContainerVersion[] }>({
           service: 'content',
           path: `/containers/${id}/versions`,
         });
-        const draftVersion = versions.find((v) => !v.isPublished) ?? versions[0];
+        const draftVersion = versions.items.find((v) => v.status === 'draft') ?? versions.items[0];
         versionId = draftVersion?.id ?? null;
       } else {
         const container = await serverFetch<Container>({
           service: 'content',
           path: `/containers/${id}`,
         });
-        versionId = container.publishedVersionId ?? null;
+        versionId = container.currentPublishedVersionId ?? null;
       }
     }
 

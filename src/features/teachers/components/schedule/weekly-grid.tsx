@@ -8,7 +8,7 @@ import type { AvailabilityBlock, Weekday } from "../../types";
 const WEEKDAYS: Weekday[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 07:00 — 20:00
 
-type Lesson = {
+export type Lesson = {
   lessonId: string;
   groupName: string;
   day: Weekday;

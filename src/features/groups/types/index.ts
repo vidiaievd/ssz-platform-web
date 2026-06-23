@@ -8,6 +8,7 @@ export type ISODate = string; // "YYYY-MM-DD"
 export type GroupStatus = 'draft' | 'active' | 'archived';
 export type GroupMode = 'online' | 'in-person';
 export type TeacherRole = 'primary' | 'co-primary' | 'substitute';
+export type AgeBand = 'kids' | 'teens' | 'adults';
 
 export interface Slot { id?: string; day: Weekday; start: HHMM; end: HHMM; room: string; }
 export interface Substitution { teacherId: string; from: ISODate; to: ISODate; reason: string; }
@@ -18,9 +19,18 @@ export interface GroupTeacher {
   hours?: number; max?: number; langs?: LangCode[];
 }
 
+/** Additional material attached to a group — distinct from the group's
+ *  single, non-removable main material (Group.courseId/courseName). */
+export interface GroupMaterial {
+  id: string;
+  courseId: string;
+  courseName: string | null;
+}
+
 export interface Group {
   id: string; name: string;
   courseId: string | null; courseName?: string | null;
+  materials: GroupMaterial[];
   lang: LangCode; level: CEFR;
   status: GroupStatus; mode: GroupMode;
   capacity: { min: number; max: number };
@@ -28,6 +38,17 @@ export interface Group {
   startDate: ISODate | null; endDate: ISODate | null;
   teachers: GroupTeacher[];
   slots: Slot[];
+  ageBand: AgeBand | null;
+}
+
+/** Read-only course view backing CourseChip/CoursePanel — derived from Group, no new endpoint. */
+export interface CourseView {
+  courseId: string | null;
+  courseName: string | null;
+  lang: LangCode;
+  level: CEFR;
+  /** Curriculum unit count; null when unavailable or not yet looked up. */
+  unitCount: number | null;
 }
 
 export interface GroupHealthRowVM {
@@ -63,9 +84,30 @@ export interface TimetableTeacher {
   }>;
 }
 
+/** Raw projection from scheduling-service — one teacher's assigned future lessons, undecorated. */
+export interface RawTimetableEntry {
+  day: Weekday; start: HHMM; end: HHMM; groupId: string; room: string | null;
+}
+
+/** Raw school-wide projection — same shape, every teacher in one query. */
+export interface RawSchoolTimetableEntry extends RawTimetableEntry {
+  teacherId: string;
+}
+
 export interface OpsWarning {
   type: 'conflict' | 'overload' | 'over' | 'under' | 'clash';
   with?: string; day?: Weekday; time?: string;
+}
+
+/** Derived availability for a teacher against a proposed weekly slot set (no positive-availability calendar). */
+export type TeacherAvailabilityStatus = 'free' | 'conflict' | 'absent';
+export interface TeacherAvailability {
+  teacherId: string;
+  status: TeacherAvailabilityStatus;
+  /** Group whose lesson overlaps a proposed slot, when status is 'conflict'. */
+  conflictGroupId?: string | null;
+  /** Absence record covering today, when status is 'absent'. */
+  absenceId?: string | null;
 }
 
 export type MutationResult =

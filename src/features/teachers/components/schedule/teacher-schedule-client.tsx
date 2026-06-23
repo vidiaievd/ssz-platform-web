@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 import type { AvailabilityBlock, Absence } from "../../types";
-import { WeeklyGrid } from "./weekly-grid";
+import { WeeklyGrid, type Lesson } from "./weekly-grid";
 import { AvailabilityEditor } from "./availability-editor";
 import { AbsenceReportForm } from "./absence-report-form";
 
@@ -14,6 +14,7 @@ type TeacherScheduleClientProps = {
   teacherId: string;
   availabilityBlocks: AvailabilityBlock[];
   absences: Absence[];
+  lessons: Lesson[];
 };
 
 type PanelId = "grid" | "availability" | "absence";
@@ -23,6 +24,7 @@ export function TeacherScheduleClient({
   teacherId,
   availabilityBlocks,
   absences,
+  lessons,
 }: TeacherScheduleClientProps) {
   const t = useTranslations("Teachers.schedule");
   const router = useRouter();
@@ -79,7 +81,7 @@ export function TeacherScheduleClient({
       {activePanel === "grid" && (
         <WeeklyGrid
           availabilityBlocks={availabilityBlocks}
-          lessons={[]}
+          lessons={lessons}
         />
       )}
 

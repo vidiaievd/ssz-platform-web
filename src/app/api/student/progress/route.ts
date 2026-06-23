@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import type { Container, PaginatedResponse } from '@/features/content/types';
+import type { Container } from '@/features/content/types';
 import type { ContainerProgress } from '@/features/student/types';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
@@ -26,10 +26,10 @@ export async function GET() {
     // Parallel: fetch progress records + enrolled containers.
     const [rawProgress, containersData] = await Promise.all([
       serverFetch({ service: 'progress', path: '/progress' }),
-      serverFetch<PaginatedResponse<Container>>({
+      serverFetch<{ items: Container[] }>({
         service: 'content',
         path: '/containers',
-        query: { enrolled: 'true', pageSize: '100' },
+        query: { enrolled: 'true', limit: '100' },
       }),
     ]);
 
@@ -49,12 +49,12 @@ export async function GET() {
         {
           id: item.id,
           containerId: item.containerId,
-          containerSlug: container.slug,
+          containerSlug: container.slug ?? undefined,
           containerTitle: container.title,
-          containerType: container.type,
+          containerType: container.containerType,
           targetLanguage: container.targetLanguage,
-          level: container.level,
-          coverImageUrl: container.coverImageUrl,
+          level: container.difficultyLevel,
+          coverImageUrl: container.coverImageMediaId ?? undefined,
           completedItems: item.completedItems,
           totalItems: item.totalItems,
           progressPercent: item.progressPercent,

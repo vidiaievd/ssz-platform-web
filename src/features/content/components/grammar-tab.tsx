@@ -30,7 +30,7 @@ export function GrammarTab({ containerId, versionId }: GrammarTabProps) {
     !!versionId,
   );
 
-  const items = (data ?? []).filter((i) => i.contentType === 'GRAMMAR_RULE');
+  const items = (data ?? []).filter((i) => i.itemType === 'grammar_rule');
 
   return (
     <DataState
@@ -44,7 +44,7 @@ export function GrammarTab({ containerId, versionId }: GrammarTabProps) {
     >
       <div className="space-y-6">
         {items.map((item) => (
-          <GrammarRuleSection key={item.id} ruleId={item.contentId} />
+          <GrammarRuleSection key={item.id} ruleId={item.itemId} />
         ))}
       </div>
     </DataState>

@@ -2,11 +2,14 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors/app-error';
+import { resolveSchoolId } from '@/features/school/api/resolve-school-id';
 
 type Params = { params: Promise<{ id: string; groupId: string }> };
 
 export async function POST(req: NextRequest, { params }: Params) {
   const { id, groupId } = await params;
+  const schoolId = await resolveSchoolId(id);
+  if (!schoolId) return NextResponse.json({ error: 'School not found' }, { status: 404 });
   const override = req.nextUrl.searchParams.get('override') === 'true';
 
   let body: unknown;
@@ -19,7 +22,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   try {
     const data = await serverFetch({
       service: 'organization',
-      path: `/schools/${id}/groups/${groupId}/teachers`,
+      path: `/schools/${schoolId}/groups/${groupId}/teachers`,
       method: 'POST',
       query: override ? { override: true } : undefined,
       body,

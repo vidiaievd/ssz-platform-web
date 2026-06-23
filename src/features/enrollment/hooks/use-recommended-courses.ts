@@ -54,7 +54,7 @@ export function useRecommendedCourses(
     const near: RecommendedCourse[] = [];
 
     for (const course of courses) {
-      const level = course.level as CEFR | undefined;
+      const level = course.difficultyLevel as CEFR | undefined;
       if (!level) continue;
       if (level === cefrLevel) {
         exact.push({ course, isExactMatch: true });

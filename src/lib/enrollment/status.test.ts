@@ -45,8 +45,19 @@ describe('onboardingSteps', () => {
       placement: { mode: 'none', reusePlatformResult: false },
       interview: { required: false, autoPlaceByScore: false },
       availability: { collect: false },
+      ageBands: { values: [], collect: false },
     });
     expect(onboardingSteps(s)).toHaveLength(0);
+  });
+
+  it('ageBands.collect=true adds ageBand step after availability', () => {
+    const s = resolveOnboardingSettings({ ageBands: { values: ['kids', 'teens'], collect: true } });
+    expect(onboardingSteps(s)).toEqual([
+      'placement',
+      'availability',
+      'ageBand',
+      'interview',
+    ]);
   });
 });
 

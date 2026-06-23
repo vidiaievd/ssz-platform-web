@@ -14,7 +14,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { GroupEditSheet } from './group-edit-sheet';
+import { GroupEditDialog } from './group-edit-dialog';
 import { archiveGroup, deleteGroup, duplicateGroup } from '../api/mutations';
 import type { Group } from '../types';
 
@@ -46,7 +46,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
         toast.success(t('detail.duplicated'));
         router.push(`/school/${schoolSlug}/groups/${result.id}`);
       } else {
-        toast.error('Failed to duplicate group');
+        toast.error(t('detail.duplicateError'));
       }
     });
   }
@@ -58,7 +58,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
         toast.success(t('detail.archived'));
         router.refresh();
       } else {
-        toast.error('Failed to archive group');
+        toast.error(t('detail.archiveError'));
       }
       setDialog(null);
     });
@@ -71,7 +71,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
         toast.success(t('detail.deleted'));
         router.push(listHref);
       } else {
-        toast.error('Failed to delete group');
+        toast.error(t('detail.deleteError'));
       }
       setDialog(null);
     });
@@ -80,18 +80,27 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
   return (
     <>
       <div className="flex items-center gap-2 shrink-0">
-        <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setEditOpen(true)}
+          className="hidden lg:inline-flex"
+        >
           <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
           {t('detail.edit')}
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="More actions">
+            <Button variant="ghost" size="icon-sm" aria-label={t('detail.moreActions')} className="size-11 lg:size-7">
               <MoreHorizontal className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setEditOpen(true)} className="lg:hidden">
+              <Pencil className="size-3.5 mr-2" aria-hidden="true" />
+              {t('detail.edit')}
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDuplicate} disabled={isPending}>
               <Copy className="size-3.5 mr-2" aria-hidden="true" />
               {t('detail.duplicate')}
@@ -118,10 +127,11 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
         </DropdownMenu>
       </div>
 
-      {/* Edit sheet */}
-      <GroupEditSheet
+      {/* Edit dialog */}
+      <GroupEditDialog
         group={group}
         schoolId={schoolId}
+        schoolSlug={schoolSlug}
         open={editOpen}
         onOpenChange={setEditOpen}
       />
@@ -136,7 +146,7 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('edit.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               variant="danger"
               onClick={handleArchive}

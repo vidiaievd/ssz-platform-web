@@ -13,7 +13,7 @@ export function useAuthoringLessons(containerId: string, enabled = true) {
       const res = await fetch(`/api/content/containers/${containerId}/items?draft=true`);
       if (!res.ok) throw new Error('Failed to fetch lessons');
       const items: ContainerItem[] = await res.json();
-      return items.filter((item) => item.contentType === 'LESSON');
+      return items.filter((item) => item.itemType === 'lesson');
     },
     enabled: enabled && !!containerId,
     staleTime: 30_000,

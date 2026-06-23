@@ -11,11 +11,11 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const data = await serverFetch<LessonVariant[]>({
+    const data = await serverFetch<{ items: LessonVariant[] }>({
       service: 'content',
       path: `/lessons/${id}/variants`,
     });
-    return NextResponse.json(data);
+    return NextResponse.json(data.items);
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') {
       return NextResponse.json([], { status: 200 });

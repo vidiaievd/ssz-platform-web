@@ -1,5 +1,6 @@
 'use client';
 
+import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, XCircle, ExternalLink, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -94,10 +95,13 @@ interface PreflightPanelProps {
 }
 
 export function PreflightPanel({ containerId, result: resultProp, onPublishAnyway }: PreflightPanelProps) {
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const { data, isLoading, error, refetch } = useQuery<PreflightResult>({
-    queryKey: authoringKeys.preflight(containerId),
+    queryKey: [...authoringKeys.preflight(containerId), schoolSlug],
     queryFn: async () => {
-      const res = await fetch(`/api/content/containers/${containerId}/preflight`);
+      const res = await fetch(
+        `/api/content/containers/${containerId}/preflight?schoolSlug=${encodeURIComponent(schoolSlug)}`,
+      );
       if (!res.ok) throw new Error('Preflight failed');
       return res.json() as Promise<PreflightResult>;
     },

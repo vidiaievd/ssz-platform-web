@@ -36,10 +36,10 @@ export function ContainerCard({ container, href }: ContainerCardProps) {
               {container.targetLanguage.toUpperCase()}
             </span>
           )}
-          {container.level && (
+          {container.difficultyLevel && (
             <span className="flex items-center gap-1">
               <GraduationCap className="h-3 w-3" />
-              {container.level}
+              {container.difficultyLevel}
             </span>
           )}
           {container.lessonCount !== undefined && (
@@ -63,10 +63,11 @@ export function ContainerCard({ container, href }: ContainerCardProps) {
 function AccessTierBadge({ tier }: { tier: Container['accessTier'] }) {
   const t = useTranslations('Content');
   const variants: Record<Container['accessTier'], BadgeProps['variant']> = {
-    PUBLIC: 'success',
-    FREE_WITHIN_SCHOOL: 'info',
-    PAID: 'solid',
-    INVITE_ONLY: 'muted',
+    public_free: 'success',
+    free_within_school: 'info',
+    public_paid: 'solid',
+    assigned_only: 'muted',
+    entitlement_required: 'muted',
   };
   return <Badge variant={variants[tier]}>{t(`accessTier.${tier}`)}</Badge>;
 }

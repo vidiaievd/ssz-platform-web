@@ -218,15 +218,16 @@
     "hints": "Подсказки",
     "exemplarAnswer": "Пример ответа",
     "accessTier": {
-      "PUBLIC": "Бесплатно",
-      "FREE_WITHIN_SCHOOL": "Школа",
-      "PAID": "Премиум",
-      "INVITE_ONLY": "Только по приглашению"
+      "assigned_only": "Только назначенные",
+      "entitlement_required": "Требуется доступ",
+      "free_within_school": "Школа",
+      "public_free": "Бесплатно",
+      "public_paid": "Премиум"
     },
     "containerType": {
-      "COURSE": "Курс",
-      "MODULE": "Модуль",
-      "COLLECTION": "Коллекция"
+      "course": "Курс",
+      "module": "Модуль",
+      "collection": "Коллекция"
     }
   },
   "Auth": {
@@ -366,6 +367,10 @@
       "draft": "Черновик",
       "published": "Опубликован"
     },
+    "sections": {
+      "noSection": "Без секции",
+      "assignAriaLabel": "Назначить секцию"
+    },
     "filters": {
       "all": "Все",
       "draft": "Черновики",
@@ -390,10 +395,11 @@
       "description": "Описание",
       "type": "Тип",
       "targetLanguage": "Язык обучения",
-      "instructionLanguage": "Язык инструкций",
       "level": "Уровень",
+      "visibility": "Видимость",
+      "visibilityHint": "Кто может найти этот контейнер в каталоге.",
       "slug": "Slug",
-      "slugFrozen": "Неизменный",
+      "slugFrozen": "Генерируется автоматически при публикации",
       "accessTier": "Уровень доступа",
       "accessTierHint": "Определяет, кто может записаться; видимость — отдельно."
     },
@@ -401,10 +407,7 @@
       "titlePlaceholder": "напр. Норвежский для начинающих",
       "descriptionPlaceholder": "Краткое описание контейнера",
       "targetLanguagePlaceholder": "напр. no, en, uk",
-      "instructionLanguagePlaceholder": "напр. en",
       "levelNone": "Любой уровень",
-      "slugPlaceholder": "напр. norwegian-for-beginners",
-      "slugTooltip": "Используется в URL. Только строчные буквы, цифры и дефисы. Нельзя изменить после публикации.",
       "create": "Создать",
       "save": "Сохранить",
       "createSuccess": "Контейнер создан.",
@@ -414,15 +417,22 @@
       "slugRequired": "Поле Slug обязательно"
     },
     "accessTier": {
-      "PUBLIC": "Бесплатно",
-      "FREE_WITHIN_SCHOOL": "Только школа",
-      "PAID": "Премиум",
-      "INVITE_ONLY": "Только по приглашению"
+      "assigned_only": "Только назначенные",
+      "entitlement_required": "Требуется доступ",
+      "free_within_school": "Только школа",
+      "public_free": "Бесплатно",
+      "public_paid": "Премиум"
+    },
+    "visibility": {
+      "public": "Публичный",
+      "school_private": "Только школа",
+      "shared": "Общий",
+      "private": "Приватный"
     },
     "types": {
-      "COURSE": "Курс",
-      "MODULE": "Модуль",
-      "COLLECTION": "Коллекция"
+      "course": "Курс",
+      "module": "Модуль",
+      "collection": "Коллекция"
     },
     "lessons": {
       "add": "Добавить урок",
@@ -567,7 +577,7 @@
       "addSuccess": "Соавтор добавлен.",
       "removeAriaLabel": "Удалить соавтора",
       "removeConfirmTitle": "Удалить соавтора?",
-      "removeConfirmDescription": "{email} потеряет доступ к этому контейнеру.",
+      "removeConfirmDescription": "{name} потеряет доступ к этому контейнеру.",
       "removeConfirm": "Удалить",
       "removeCancel": "Отмена",
       "removeSuccess": "Соавтор удалён.",
@@ -580,10 +590,10 @@
       "trigger": "Опубликовать",
       "title": "Опубликовать контейнер",
       "description": "Публикация необратима и влияет на доступ к этому контейнеру. Прочитайте предупреждения ниже перед подтверждением.",
-      "warningSlug": "Slug будет заморожен и не может быть изменён после публикации.",
+      "warningSlug": "URL-slug будет сгенерирован из названия и зафиксирован после публикации.",
       "warningDiscoverable": "Контейнер станет доступен ученикам в соответствии с уровнем доступа.",
       "warningEvent": "Будет отправлено событие публикации, которое может вызвать уведомления.",
-      "confirmPrompt": "Для подтверждения введите slug точно так, как показано:",
+      "confirmPrompt": "Для подтверждения введите название точно так, как показано:",
       "confirm": "Опубликовать",
       "cancel": "Отмена",
       "success": "Контейнер успешно опубликован."
@@ -661,8 +671,7 @@
         "coTeach": "Сопреподаватель",
         "viewer": "Наблюдатель",
         "coTeachersSection": "Сопреподаватели",
-        "coTeachersComingSoon": "Приглашение сопреподавателей скоро появится",
-        "coTeachersHelp": "Вы можете добавить сопреподавателей в настройках курса после его создания.",
+        "coTeachersHelp": "Сначала сохраните детали курса (шаг 1), чтобы пригласить сопреподавателей.",
         "matrixTitle": "Разрешения ролей",
         "matrix": {
           "action": "Действие",
@@ -685,7 +694,7 @@
         "note": "Вы можете изменить видимость в любое время в настройках курса."
       },
       "review": {
-        "subtitle": "Проверьте детали перед сохранением или публикацией.",
+        "subtitle": "Проверьте детали перед созданием курса.",
         "sectionMetadata": "Детали",
         "sectionStructure": "Структура",
         "sectionTeachers": "Учителя",
@@ -693,10 +702,9 @@
         "edit": "Редактировать",
         "ownerOnly": "Только владелец",
         "saveAsDraft": "Сохранить как черновик",
-        "publish": "Опубликовать курс",
-        "publishError": "Не удалось опубликовать. Проверьте блокеры в панели предполётной проверки.",
-        "publishSuccess": "Курс опубликован!",
-        "preflightHint": "Сначала сохраните черновик, чтобы увидеть проверки."
+        "createAndContinue": "Создать курс",
+        "createError": "Не удалось создать курс. Попробуйте снова.",
+        "createSuccess": "Курс создан — добавьте уроки и опубликуйте, когда будете готовы."
       }
     }
   },
@@ -780,6 +788,14 @@
       "saving": "Сохраняем...",
       "submit": "Продолжить"
     },
+    "AgeBand": {
+      "subtitle": "К какой возрастной группе вы относитесь?",
+      "kids": "Дети",
+      "teens": "Подростки",
+      "adults": "Взрослые",
+      "saving": "Сохраняем...",
+      "submit": "Продолжить"
+    },
     "InterviewBooking": {
       "subtitle": "Выберите время для вашего вступительного интервью",
       "selectSlot": "Выберите временной слот",
@@ -793,6 +809,7 @@
       "subtitle": "Выполните шаги ниже, чтобы завершить зачисление.",
       "stepPlacement": "Уровень",
       "stepAvailability": "Доступность",
+      "stepAgeBand": "Возрастная группа",
       "stepInterview": "Интервью",
       "allDoneTitle": "Всё готово!",
       "allDoneReview": "Мы рассмотрим ваши результаты и свяжемся с вами в ближайшее время.",
@@ -823,6 +840,11 @@
       "autoPlaceByScore": "Автоматическое зачисление по баллам",
       "sectionAvailability": "Доступность",
       "collectAvailability": "Собирать предпочтения по расписанию",
+      "sectionAgeBands": "Возрастные группы",
+      "ageBandKids": "Дети",
+      "ageBandTeens": "Подростки",
+      "ageBandAdults": "Взрослые",
+      "collectAgeBand": "Собирать возрастную группу при регистрации",
       "sectionApproval": "Одобрение",
       "manualApproval": "Ручное одобрение",
       "stepPreviewLabel": "Студент увидит эти шаги",
@@ -1359,19 +1381,35 @@
     "resolve": {
       "actionRequired": "Требуется действие",
       "attentionNeeded": "Требует внимания",
-      "fix": "Исправить →"
+      "fix": "Исправить →",
+      "issuesLabel": "Вопросы для решения"
     },
     "tabs": {
       "overview": "Обзор",
       "students": "Ученики",
       "teachers": "Учителя",
-      "schedule": "Расписание"
+      "schedule": "Расписание",
+      "sectionLabel": "Раздел"
     },
     "overview": {
       "teachersHeading": "Учителя",
       "rosterHeading": "Список учеников",
       "scheduleHeading": "Расписание",
-      "noTeachers": "Учителей не назначено."
+      "noTeachers": "Учителей не назначено.",
+      "courseHeading": "Курс",
+      "nextLessonHeading": "Следующий урок",
+      "ready": "Готово к запуску",
+      "notReady": "Не готово к запуску",
+      "statusUnknown": "Статус неизвестен — не удалось проверить конфликты",
+      "clashCount": "{count} студент с конфликтом расписания",
+      "clashCountPlural": "{count} студентов с конфликтом расписания",
+      "manageStudents": "Управление студентами →",
+      "manageTeachers": "Управление учителями →",
+      "openSchedule": "Открыть расписание →",
+      "addSchedule": "Добавить расписание →",
+      "coPrimaryCount": "+{count} со-учитель",
+      "subCount": "{count} заместитель",
+      "subCountPlural": "{count} заместителей"
     },
     "students": {
       "search": "Поиск учеников…",
@@ -1411,7 +1449,8 @@
       "upcomingHeading": "Ближайшие уроки",
       "noSlots": "Регулярных уроков не настроено.",
       "noLessons": "Ближайших уроков не запланировано.",
-      "sub": "Зам"
+      "sub": "Зам",
+      "editButton": "Изменить расписание"
     },
     "detail": {
       "back": "Группы",
@@ -1428,7 +1467,11 @@
       "deleted": "Группа удалена",
       "updated": "Группа обновлена",
       "archiving": "Архивирование…",
-      "deleting": "Удаление…"
+      "deleting": "Удаление…",
+      "duplicateError": "Не удалось дублировать группу",
+      "archiveError": "Не удалось архивировать группу",
+      "deleteError": "Не удалось удалить группу",
+      "moreActions": "Дополнительные действия"
     },
     "edit": {
       "title": "Редактировать группу",
@@ -1437,7 +1480,52 @@
       "saving": "Сохранение…",
       "cancel": "Отменить",
       "success": "Группа обновлена",
-      "error": "Не удалось обновить группу"
+      "error": "Не удалось обновить группу",
+      "identity": "Общие данные",
+      "capacity": "Вместимость",
+      "dates": "Даты",
+      "name": "Название",
+      "namePlaceholder": "напр. Норвежский A2 — Весна 2026",
+      "lang": "Код языка",
+      "langPlaceholder": "en, nb, uk, ru…",
+      "level": "Уровень",
+      "levelPlaceholder": "Выберите уровень",
+      "mode": "Режим",
+      "minStudents": "Мин. студентов",
+      "maxStudents": "Макс. студентов",
+      "straddleNote": "{count} зачислено — мин/макс должны охватывать текущее количество.",
+      "startDate": "Дата начала",
+      "endDate": "Дата окончания",
+      "saveHint": "Нажмите ⌘S (или Ctrl+S), чтобы сохранить",
+      "discardTitle": "Отменить несохранённые изменения?",
+      "discardBody": "У вас есть несохранённые изменения в этой группе. Закрытие сейчас отменит их.",
+      "discardKeepEditing": "Продолжить редактирование",
+      "discardDiscard": "Отменить",
+      "maxBelowEnrolled": "Максимум должен быть не меньше {count} (текущее количество зачисленных)",
+      "endBeforeStart": "Дата окончания должна быть не раньше даты начала",
+      "course": "Курс",
+      "courseAdd": "Добавить курс",
+      "courseChange": "Изменить",
+      "courseSearchPlaceholder": "Поиск опубликованных курсов…",
+      "courseNoneOption": "Без курса",
+      "courseLoading": "Загрузка курсов…",
+      "courseNoResults": "Опубликованные курсы не найдены.",
+      "materialsHeading": "Дополнительные материалы",
+      "addMaterial": "Добавить материал",
+      "removeMaterial": "Удалить материал",
+      "noMaterials": "Дополнительные материалы не добавлены.",
+      "materialAddError": "Не удалось добавить материал",
+      "materialRemoveError": "Не удалось удалить материал",
+      "slotsHeading": "Расписание",
+      "slotsError": "Не удалось обновить расписание",
+      "ageBand": "Возрастная группа",
+      "ageBandPlaceholder": "Выберите возрастную группу",
+      "ageBandNone": "—"
+    },
+    "ageBand": {
+      "kids": "Дети",
+      "teens": "Подростки",
+      "adults": "Взрослые"
     },
     "wizard": {
       "title": "Новая группа",
@@ -1475,8 +1563,10 @@
       "noTeachers": "Все учителя уже назначены.",
       "langMismatch": "несоответствие языка",
       "timeClash": "конфликт времени",
+      "availabilityAbsent": "в отпуске",
       "validationOk": "Готово к назначению",
       "validationConflict": "Конфликт расписания: у {name} уже есть урок в это время.",
+      "validationAbsent": "{name} в отпуске в этот период.",
       "validationLangMismatch": "Несоответствие языка: учитель преподаёт {teacherLang}, язык группы — {groupLang}.",
       "validationOverload": "Это даст {name} {projected}/{max}ч в неделю.",
       "errorNoPrimary": "Сначала назначьте основного учителя, прежде чем добавлять со-учителя.",
@@ -1524,6 +1614,15 @@
       "conflictListTitlePlural": "конфликта расписания",
       "conflictItem": "{day} конфликт: {groupA} пересекается с {groupB} — перенесите урок или переназначьте"
     },
+    "mySchedule": {
+      "title": "Моё расписание",
+      "subtitle": "Ваши еженедельные занятия, спроецированные из групп, которые вы ведёте.",
+      "back": "Панель управления",
+      "groupsCount": "{count, plural, one {# группа} few {# группы} many {# групп} other {# группы}}",
+      "noSchedule": "Занятий пока не запланировано.",
+      "loadFailed": "Не удалось загрузить ваше расписание.",
+      "clashes": "{count, plural, one {# конфликт} few {# конфликта} many {# конфликтов} other {# конфликта}}"
+    },
     "slot": {
       "add": "Добавить урок",
       "noSlots": "Регулярных уроков нет. Добавьте хотя бы один.",
@@ -1531,13 +1630,47 @@
       "overlap": "Пересекается с другим уроком",
       "endBeforeStart": "Время окончания должно быть после начала",
       "roomRequired": "Кабинет обязателен для очных занятий",
+      "label": "Урок {n}",
+      "removeAria": "Удалить урок {n}",
+      "roomPlaceholder": "напр. Кабинет 101",
       "fields": {
         "day": "День",
         "start": "Начало",
         "end": "Конец",
         "room": "Кабинет",
         "roomLabel": "Кабинет *"
+      },
+      "weekday": {
+        "mon": "Понедельник",
+        "tue": "Вторник",
+        "wed": "Среда",
+        "thu": "Четверг",
+        "fri": "Пятница",
+        "sat": "Суббота",
+        "sun": "Воскресенье"
       }
+    },
+    "header": {
+      "level": "Уровень",
+      "mode": "Режим"
+    },
+    "course": {
+      "title": "Курс",
+      "description": "Сведения о курсе и дополнительные материалы этой группы.",
+      "cefr": "Уровень CEFR",
+      "language": "Язык",
+      "curriculum": "Учебная программа",
+      "units": "{count} модулей",
+      "noCourse": "Курс не назначен",
+      "open": "Просмотреть курс →",
+      "editHint": "Используйте кнопку «Управление» на карточке курса, чтобы изменить материалы.",
+      "manage": "Управление",
+      "dialogTitle": "Управление курсом",
+      "dialogDescription": "Выберите основной курс группы и дополнительные материалы.",
+      "updateSuccess": "Курс обновлён",
+      "updateError": "Не удалось обновить курс",
+      "materialsCount": "+{count} дополнительный материал",
+      "materialsCountPlural": "+{count} дополнительных материалов"
     }
   },
   "Students": {

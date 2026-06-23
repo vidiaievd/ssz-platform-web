@@ -13,7 +13,7 @@ export function useAuthoringExercises(containerId: string, enabled = true) {
       const res = await fetch(`/api/content/containers/${containerId}/items?draft=true`);
       if (!res.ok) throw new Error('Failed to fetch exercises');
       const items: ContainerItem[] = await res.json();
-      return items.filter((item) => item.contentType === 'EXERCISE');
+      return items.filter((item) => item.itemType === 'exercise');
     },
     enabled: enabled && !!containerId,
     staleTime: 30_000,

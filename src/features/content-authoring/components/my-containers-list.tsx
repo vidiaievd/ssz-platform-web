@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useDeferredValue, useOptimistic, useState, useTransition } from 'react';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
   Plus, Search, LayoutGrid, LayoutList, Globe, GraduationCap, BookOpen,
@@ -38,7 +39,7 @@ const listFilterSchema = z.object({
   state:    z.enum(['all', 'draft', 'published', 'archived']).default('all'),
   language: z.string().default(''),
   level:    z.string().default(''),
-  sort:     z.enum(['recently_edited', 'name_asc', 'students_desc', 'lessons_desc']).default('recently_edited'),
+  sort:     z.enum(['recently_edited', 'name_asc']).default('recently_edited'),
   view:     z.enum(['table', 'grid']).default('table'),
   page:     z.coerce.number().int().min(1).default(1),
 });
@@ -115,10 +116,12 @@ interface ContainerRowProps {
 
 function ContainerTableRow({ container, selected, onSelect, showCheckbox }: ContainerRowProps) {
   const state = deriveContainerState(container);
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const containerHref = `/school/${schoolSlug}/content/${container.id}`;
   return (
     <tr
       className="group border-b border-border transition-colors hover:bg-muted/40 cursor-pointer"
-      onClick={() => { window.location.href = `/school/content/${container.id}`; }}
+      onClick={() => { window.location.href = containerHref; }}
     >
       {showCheckbox && (
         <td className="w-10 px-3 py-3" onClick={(e) => e.stopPropagation()}>
@@ -136,8 +139,8 @@ function ContainerTableRow({ container, selected, onSelect, showCheckbox }: Cont
         </div>
         <div className="text-muted-foreground text-xs mt-0.5 flex gap-2">
           <span className="uppercase font-mono">{container.targetLanguage}</span>
-          {container.level && <span>·</span>}
-          {container.level && <span>{container.level}</span>}
+          {container.difficultyLevel && <span>·</span>}
+          {container.difficultyLevel && <span>{container.difficultyLevel}</span>}
         </div>
       </td>
       <td className="px-3 py-3">
@@ -154,7 +157,7 @@ function ContainerTableRow({ container, selected, onSelect, showCheckbox }: Cont
       </td>
       <td className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
         <Button variant="ghost" size="sm" asChild>
-          <Link href={`/school/content/${container.id}`}>
+          <Link href={containerHref}>
             <Pencil className="h-3.5 w-3.5" />
             <span className="sr-only">Edit {container.title}</span>
           </Link>
@@ -166,9 +169,10 @@ function ContainerTableRow({ container, selected, onSelect, showCheckbox }: Cont
 
 function ContainerGridCard({ container }: { container: Container }) {
   const state = deriveContainerState(container);
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
   return (
     <Link
-      href={`/school/content/${container.id}`}
+      href={`/school/${schoolSlug}/content/${container.id}`}
       className="flex flex-col rounded-lg border border-border bg-background overflow-hidden hover:shadow-md transition-shadow"
     >
       <div className="h-16 bg-muted flex items-center justify-center text-4xl">
@@ -181,7 +185,7 @@ function ContainerGridCard({ container }: { container: Container }) {
         </div>
         <div className="flex gap-2 text-xs text-muted-foreground font-mono">
           <span className="uppercase">{container.targetLanguage}</span>
-          {container.level && <><span>·</span><span>{container.level}</span></>}
+          {container.difficultyLevel && <><span>·</span><span>{container.difficultyLevel}</span></>}
           {container.lessonCount != null && <><span>·</span><span>{container.lessonCount}ℓ</span></>}
         </div>
       </div>
@@ -192,6 +196,8 @@ function ContainerGridCard({ container }: { container: Container }) {
 // ─── Empty states ─────────────────────────────────────────────────────────────
 
 function ListEmptyState() {
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const newHref = `/school/${schoolSlug}/content/new`;
   return (
     <div className="flex flex-col items-center gap-6 rounded-xl border-2 border-dashed border-border py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
@@ -206,22 +212,22 @@ function ListEmptyState() {
       </div>
       <div className="flex flex-wrap gap-3 justify-center">
         <Button asChild>
-          <Link href="/school/content/new">
+          <Link href={newHref}>
             <Plus className="mr-1 h-4 w-4" />
             Create from blank
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/school/content/new?template=cefr_a1">
+          <Link href={`${newHref}?template=cefr_a1`}>
             Use CEFR A1 template
           </Link>
         </Button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
         {[
-          { label: 'CEFR A1 starter', desc: '6 levels · 24 lessons', href: '/school/content/new?template=cefr_a1' },
-          { label: 'Conversation starter', desc: '4 modules · 12 lessons', href: '/school/content/new?template=conversation' },
-          { label: 'Business pack', desc: '5 modules · 20 lessons', href: '/school/content/new?template=business' },
+          { label: 'CEFR A1 starter', desc: '6 levels · 24 lessons', href: `${newHref}?template=cefr_a1` },
+          { label: 'Conversation starter', desc: '4 modules · 12 lessons', href: `${newHref}?template=conversation` },
+          { label: 'Business pack', desc: '5 modules · 20 lessons', href: `${newHref}?template=business` },
         ].map((t) => (
           <Link
             key={t.label}
@@ -301,6 +307,8 @@ interface MyContainersListProps {
 
 export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps) {
   const queryClient = useQueryClient();
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const newContainerHref = `/school/${schoolSlug}/content/new`;
   const [filters, setFilters] = useUrlFilters(listFilterSchema);
   const deferredSearch = useDeferredValue(filters.search);
 
@@ -388,7 +396,7 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
         </div>
         <div className="flex gap-2">
           <Button size="sm" asChild>
-            <Link href="/school/content/new">
+            <Link href={newContainerHref}>
               <Plus className="mr-1 h-4 w-4" />
               New course
             </Link>
@@ -452,7 +460,6 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
           <SelectContent>
             <SelectItem value="recently_edited">Recently edited</SelectItem>
             <SelectItem value="name_asc">Name A–Z</SelectItem>
-            <SelectItem value="lessons_desc">Most lessons</SelectItem>
           </SelectContent>
         </Select>
 
@@ -529,7 +536,7 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
             {containers.map((c) => <ContainerGridCard key={c.id} container={c} />)}
             {/* "+ New" tile */}
             <Link
-              href="/school/content/new"
+              href={newContainerHref}
               className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border min-h-30 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
             >
               <Plus className="h-6 w-6 mb-1" />

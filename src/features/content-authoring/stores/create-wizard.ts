@@ -7,7 +7,6 @@ export interface MetadataDraft {
   title: string;
   targetLanguage: string;
   level: string;
-  slug: string;
   description: string;
   coverImageUrl: string;
 }
@@ -38,8 +37,7 @@ export const DEFAULT_CEFR_LEVELS = [
 const INITIAL_METADATA: MetadataDraft = {
   title: '',
   targetLanguage: '',
-  level: '',
-  slug: '',
+  level: 'A1',
   description: '',
   coverImageUrl: '',
 };

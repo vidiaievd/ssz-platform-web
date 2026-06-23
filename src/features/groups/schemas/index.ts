@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 const CEFR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+const AGE_BANDS = ['kids', 'teens', 'adults'] as const;
 const HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 const hhmmSchema = z.string().regex(HHMM_RE, 'Must be HH:MM (24h)');
@@ -37,6 +38,7 @@ export const groupCreateSchema = z
     }),
     startDate: isodateSchema.nullable().optional(),
     endDate: isodateSchema.nullable().optional(),
+    ageBand: z.enum(AGE_BANDS).nullable().optional(),
   })
   .refine((d) => (d.capacity.min ?? 0) <= d.capacity.max, {
     message: 'Minimum must be ≤ maximum',
@@ -65,6 +67,32 @@ export const teacherAssignSchema = z
     },
     { message: 'End date must be on or after start date', path: ['to'] },
   );
+
+/**
+ * Edit-context schema: same shape as create, plus a hard block on shrinking
+ * capacity below the currently enrolled student count (unknowable at create time).
+ */
+export function groupEditSchema(
+  studentCount: number,
+  messages: { maxBelowEnrolled: string; endBeforeStart: string },
+) {
+  return groupCreateSchema.superRefine((d, ctx) => {
+    if (d.capacity.max < studentCount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: messages.maxBelowEnrolled,
+        path: ['capacity', 'max'],
+      });
+    }
+    if (d.startDate && d.endDate && d.endDate < d.startDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: messages.endBeforeStart,
+        path: ['endDate'],
+      });
+    }
+  });
+}
 
 export type GroupCreateInput = z.infer<typeof groupCreateSchema>;
 export type SlotInput = z.infer<typeof slotSchema>;

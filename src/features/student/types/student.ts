@@ -3,7 +3,7 @@ import type { ContentItemType, ContainerType, DifficultyLevel } from '@/features
 export interface ContainerProgress {
   id: string;
   containerId: string;
-  containerSlug: string;
+  containerSlug?: string;
   containerTitle: string;
   containerType: ContainerType;
   targetLanguage: string;

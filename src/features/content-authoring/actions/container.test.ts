@@ -22,21 +22,24 @@ const { createContainerAction, updateContainerAction } = await import('./contain
 
 const VALID_INPUT = {
   title: 'Norwegian A1',
-  type: 'COURSE' as const,
+  containerType: 'course' as const,
   targetLanguage: 'nb',
-  accessTier: 'PUBLIC' as const,
-  slug: 'norwegian-a1',
+  difficultyLevel: 'A1' as const,
+  visibility: 'public' as const,
+  accessTier: 'public_free' as const,
 };
 
 const CONTAINER_RESPONSE = {
   id: 'ctr-1',
-  slug: 'norwegian-a1',
+  slug: null,
   title: 'Norwegian A1',
-  type: 'COURSE',
+  containerType: 'course',
   targetLanguage: 'nb',
-  accessTier: 'PUBLIC',
-  isPublished: false,
-  ownerId: 'user-1',
+  difficultyLevel: 'A1',
+  visibility: 'public',
+  accessTier: 'public_free',
+  currentPublishedVersionId: null,
+  ownerUserId: 'user-1',
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };
@@ -56,20 +59,6 @@ describe('createContainerAction', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.id).toBe('ctr-1');
-    expect(result.value.slug).toBe('norwegian-a1');
-  });
-
-  it('returns a validation error when slug is missing', async () => {
-    const result = await createContainerAction({
-      title: 'Norwegian A1',
-      type: 'COURSE',
-      targetLanguage: 'nb',
-      accessTier: 'PUBLIC',
-    });
-
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.error.code).toBe('validation');
   });
 
   it('returns a validation error on invalid input', async () => {

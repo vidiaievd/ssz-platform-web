@@ -218,15 +218,16 @@
     "hints": "Hint",
     "exemplarAnswer": "Eksempelsvar",
     "accessTier": {
-      "PUBLIC": "Gratis",
-      "FREE_WITHIN_SCHOOL": "Skole",
-      "PAID": "Premium",
-      "INVITE_ONLY": "Kun på invitasjon"
+      "assigned_only": "Kun tildelt",
+      "entitlement_required": "Krever tilgang",
+      "free_within_school": "Skole",
+      "public_free": "Gratis",
+      "public_paid": "Premium"
     },
     "containerType": {
-      "COURSE": "Kurs",
-      "MODULE": "Modul",
-      "COLLECTION": "Samling"
+      "course": "Kurs",
+      "module": "Modul",
+      "collection": "Samling"
     }
   },
   "Auth": {
@@ -366,6 +367,10 @@
       "draft": "Utkast",
       "published": "Publisert"
     },
+    "sections": {
+      "noSection": "Ingen seksjon",
+      "assignAriaLabel": "Tilordne til seksjon"
+    },
     "filters": {
       "all": "Alle",
       "draft": "Utkast",
@@ -390,10 +395,11 @@
       "description": "Beskrivelse",
       "type": "Type",
       "targetLanguage": "Målspråk",
-      "instructionLanguage": "Instruksjonsspråk",
       "level": "Nivå",
+      "visibility": "Synlighet",
+      "visibilityHint": "Hvem som kan finne denne beholderen i katalogen.",
       "slug": "Slug",
-      "slugFrozen": "Uforanderlig",
+      "slugFrozen": "Genereres automatisk ved publisering",
       "accessTier": "Tilgangsnivå",
       "accessTierHint": "Kontrollerer hvem som kan melde seg på; synlighet er separat."
     },
@@ -401,10 +407,7 @@
       "titlePlaceholder": "f.eks. Norsk for nybegynnere",
       "descriptionPlaceholder": "Kort beskrivelse av denne beholderen",
       "targetLanguagePlaceholder": "f.eks. no, en, uk",
-      "instructionLanguagePlaceholder": "f.eks. en",
       "levelNone": "Alle nivåer",
-      "slugPlaceholder": "f.eks. norsk-for-nybegynnere",
-      "slugTooltip": "Brukes i URL-en. Bare små bokstaver, tall og bindestreker. Kan ikke endres etter publisering.",
       "create": "Opprett",
       "save": "Lagre",
       "createSuccess": "Beholder opprettet.",
@@ -414,15 +417,22 @@
       "slugRequired": "Slug er påkrevd"
     },
     "accessTier": {
-      "PUBLIC": "Gratis",
-      "FREE_WITHIN_SCHOOL": "Kun skole",
-      "PAID": "Premium",
-      "INVITE_ONLY": "Kun invitasjon"
+      "assigned_only": "Kun tildelt",
+      "entitlement_required": "Krever tilgang",
+      "free_within_school": "Kun skole",
+      "public_free": "Gratis",
+      "public_paid": "Premium"
+    },
+    "visibility": {
+      "public": "Offentlig",
+      "school_private": "Kun skole",
+      "shared": "Delt",
+      "private": "Privat"
     },
     "types": {
-      "COURSE": "Kurs",
-      "MODULE": "Modul",
-      "COLLECTION": "Samling"
+      "course": "Kurs",
+      "module": "Modul",
+      "collection": "Samling"
     },
     "lessons": {
       "add": "Legg til leksjon",
@@ -567,7 +577,7 @@
       "addSuccess": "Samarbeidspartner lagt til.",
       "removeAriaLabel": "Fjern samarbeidspartner",
       "removeConfirmTitle": "Fjerne samarbeidspartner?",
-      "removeConfirmDescription": "{email} vil miste tilgang til denne beholderen.",
+      "removeConfirmDescription": "{name} vil miste tilgang til denne beholderen.",
       "removeConfirm": "Fjern",
       "removeCancel": "Avbryt",
       "removeSuccess": "Samarbeidspartner fjernet.",
@@ -580,10 +590,10 @@
       "trigger": "Publiser",
       "title": "Publiser beholder",
       "description": "Publisering er permanent og påvirker tilgangen til denne beholderen. Les advarslene nedenfor før du bekrefter.",
-      "warningSlug": "Slug-en låses og kan ikke endres etter publisering.",
+      "warningSlug": "En URL-slug genereres fra tittelen og låses etter publisering.",
       "warningDiscoverable": "Beholderen blir synlig og tilgjengelig for elever basert på tilgangsnivå.",
       "warningEvent": "En publiseringshendelse sendes ut, noe som kan utløse varsler.",
-      "confirmPrompt": "For å bekrefte, skriv inn slug-en nøyaktig slik den er vist:",
+      "confirmPrompt": "For å bekrefte, skriv inn tittelen nøyaktig slik den er vist:",
       "confirm": "Publiser",
       "cancel": "Avbryt",
       "success": "Beholderen ble publisert."
@@ -661,8 +671,7 @@
         "coTeach": "Medlærer",
         "viewer": "Betrakter",
         "coTeachersSection": "Medlærere",
-        "coTeachersComingSoon": "Invitasjon av medlærere kommer snart",
-        "coTeachersHelp": "Du kan legge til medlærere fra kursinnstillingene etter opprettelse.",
+        "coTeachersHelp": "Lagre kursdetaljene først (trinn 1) for å invitere medlærere.",
         "matrixTitle": "Rolletillatelser",
         "matrix": {
           "action": "Handling",
@@ -685,7 +694,7 @@
         "note": "Du kan endre synlighet når som helst fra kursinnstillingene."
       },
       "review": {
-        "subtitle": "Sjekk detaljene før du lagrer eller publiserer.",
+        "subtitle": "Sjekk detaljene før du oppretter kurset.",
         "sectionMetadata": "Detaljer",
         "sectionStructure": "Struktur",
         "sectionTeachers": "Lærere",
@@ -693,10 +702,9 @@
         "edit": "Rediger",
         "ownerOnly": "Kun eier",
         "saveAsDraft": "Lagre som utkast",
-        "publish": "Publiser kurs",
-        "publishError": "Kunne ikke publisere. Sjekk hindringer i forhåndskontrollen.",
-        "publishSuccess": "Kurset er publisert!",
-        "preflightHint": "Lagre utkastet først for å se forhåndskontroller."
+        "createAndContinue": "Opprett kurs",
+        "createError": "Kunne ikke opprette kurset. Vennligst prøv igjen.",
+        "createSuccess": "Kurset er opprettet — legg til leksjoner og publiser når du er klar."
       }
     }
   },
@@ -780,6 +788,14 @@
       "saving": "Lagrer...",
       "submit": "Fortsett"
     },
+    "AgeBand": {
+      "subtitle": "Hvilken aldersgruppe tilhører du?",
+      "kids": "Barn",
+      "teens": "Tenåringer",
+      "adults": "Voksne",
+      "saving": "Lagrer...",
+      "submit": "Fortsett"
+    },
     "InterviewBooking": {
       "subtitle": "Velg et tidspunkt for intervjuet ditt",
       "selectSlot": "Velg tidspunkt",
@@ -793,6 +809,7 @@
       "subtitle": "Fullfør trinnene nedenfor for å fullføre påmeldingen din.",
       "stepPlacement": "Plassering",
       "stepAvailability": "Tilgjengelighet",
+      "stepAgeBand": "Aldersgruppe",
       "stepInterview": "Intervju",
       "allDoneTitle": "Du er klar!",
       "allDoneReview": "Vi vil gjennomgå resultatene dine og komme tilbake til deg snart.",
@@ -823,6 +840,11 @@
       "autoPlaceByScore": "Auto-plasser etter poengsum",
       "sectionAvailability": "Tilgjengelighet",
       "collectAvailability": "Samle inn tilgjengelighetspreferanser",
+      "sectionAgeBands": "Aldersgrupper",
+      "ageBandKids": "Barn",
+      "ageBandTeens": "Tenåringer",
+      "ageBandAdults": "Voksne",
+      "collectAgeBand": "Samle inn aldersgruppe under registrering",
       "sectionApproval": "Godkjenning",
       "manualApproval": "Krev manuell godkjenning",
       "stepPreviewLabel": "Studenten vil se disse trinnene",
@@ -1359,19 +1381,35 @@
     "resolve": {
       "actionRequired": "Handling kreves",
       "attentionNeeded": "Krever oppmerksomhet",
-      "fix": "Fiks →"
+      "fix": "Fiks →",
+      "issuesLabel": "Saker å løse"
     },
     "tabs": {
       "overview": "Oversikt",
       "students": "Elever",
       "teachers": "Lærere",
-      "schedule": "Timeplan"
+      "schedule": "Timeplan",
+      "sectionLabel": "Avsnitt"
     },
     "overview": {
       "teachersHeading": "Lærere",
       "rosterHeading": "Elevliste",
       "scheduleHeading": "Timeplan",
-      "noTeachers": "Ingen lærere tildelt."
+      "noTeachers": "Ingen lærere tildelt.",
+      "courseHeading": "Kurs",
+      "nextLessonHeading": "Neste time",
+      "ready": "Klar til å kjøre",
+      "notReady": "Ikke klar til å kjøre",
+      "statusUnknown": "Status ukjent — kunne ikke sjekke konflikter",
+      "clashCount": "{count} elev med tidskonflikt",
+      "clashCountPlural": "{count} elever med tidskonflikt",
+      "manageStudents": "Administrer elever →",
+      "manageTeachers": "Administrer lærere →",
+      "openSchedule": "Åpne timeplan →",
+      "addSchedule": "Legg til timeplan →",
+      "coPrimaryCount": "+{count} medlærer",
+      "subCount": "{count} vikar",
+      "subCountPlural": "{count} vikarer"
     },
     "students": {
       "search": "Søk etter elever…",
@@ -1411,7 +1449,8 @@
       "upcomingHeading": "Kommende timer",
       "noSlots": "Ingen faste timer konfigurert.",
       "noLessons": "Ingen kommende timer planlagt.",
-      "sub": "Vikar"
+      "sub": "Vikar",
+      "editButton": "Rediger timeplan"
     },
     "detail": {
       "back": "Grupper",
@@ -1428,7 +1467,11 @@
       "deleted": "Gruppe slettet",
       "updated": "Gruppe oppdatert",
       "archiving": "Arkiverer…",
-      "deleting": "Sletter…"
+      "deleting": "Sletter…",
+      "duplicateError": "Kunne ikke duplisere gruppen",
+      "archiveError": "Kunne ikke arkivere gruppen",
+      "deleteError": "Kunne ikke slette gruppen",
+      "moreActions": "Flere handlinger"
     },
     "edit": {
       "title": "Rediger gruppe",
@@ -1437,7 +1480,52 @@
       "saving": "Lagrer…",
       "cancel": "Avbryt",
       "success": "Gruppe oppdatert",
-      "error": "Kunne ikke oppdatere gruppen"
+      "error": "Kunne ikke oppdatere gruppen",
+      "identity": "Identitet",
+      "capacity": "Kapasitet",
+      "dates": "Datoer",
+      "name": "Navn",
+      "namePlaceholder": "f.eks. Norsk A2 — Vår 2026",
+      "lang": "Språkkode",
+      "langPlaceholder": "en, nb, uk, ru…",
+      "level": "Nivå",
+      "levelPlaceholder": "Velg nivå",
+      "mode": "Modus",
+      "minStudents": "Min. elever",
+      "maxStudents": "Maks. elever",
+      "straddleNote": "{count} påmeldt — min/maks må omfatte nåværende antall.",
+      "startDate": "Startdato",
+      "endDate": "Sluttdato",
+      "saveHint": "Trykk ⌘S (eller Ctrl+S) for å lagre",
+      "discardTitle": "Forkaste ulagrede endringer?",
+      "discardBody": "Du har ulagrede endringer i denne gruppen. Hvis du lukker nå, blir de forkastet.",
+      "discardKeepEditing": "Fortsett å redigere",
+      "discardDiscard": "Forkast",
+      "maxBelowEnrolled": "Maks må være minst {count} (nåværende antall påmeldte)",
+      "endBeforeStart": "Sluttdato må være på eller etter startdato",
+      "course": "Kurs",
+      "courseAdd": "Legg til kurs",
+      "courseChange": "Endre",
+      "courseSearchPlaceholder": "Søk i publiserte kurs…",
+      "courseNoneOption": "Ingen kurs",
+      "courseLoading": "Laster kurs…",
+      "courseNoResults": "Fant ingen publiserte kurs.",
+      "materialsHeading": "Tilleggsmateriell",
+      "addMaterial": "Legg til materiell",
+      "removeMaterial": "Fjern materiell",
+      "noMaterials": "Ingen tilleggsmateriell lagt til.",
+      "materialAddError": "Kunne ikke legge til materiell",
+      "materialRemoveError": "Kunne ikke fjerne materiell",
+      "slotsHeading": "Timeplan",
+      "slotsError": "Kunne ikke oppdatere timeplanen",
+      "ageBand": "Aldersgruppe",
+      "ageBandPlaceholder": "Velg aldersgruppe",
+      "ageBandNone": "—"
+    },
+    "ageBand": {
+      "kids": "Barn",
+      "teens": "Tenåringer",
+      "adults": "Voksne"
     },
     "wizard": {
       "title": "Ny gruppe",
@@ -1475,8 +1563,10 @@
       "noTeachers": "Alle lærere er allerede tildelt.",
       "langMismatch": "språkavvik",
       "timeClash": "tidskollisjon",
+      "availabilityAbsent": "i permisjon",
       "validationOk": "Klar til tildeling",
       "validationConflict": "Timeplankollisjon: {name} har allerede en time på dette tidspunktet.",
+      "validationAbsent": "{name} er i permisjon i denne perioden.",
       "validationLangMismatch": "Språkavvik: læreren snakker {teacherLang}, gruppens språk er {groupLang}.",
       "validationOverload": "Dette vil gi {name} {projected}/{max}t per uke.",
       "errorNoPrimary": "Tildel en primærlærer først før du legger til en medlærer.",
@@ -1524,6 +1614,15 @@
       "conflictListTitlePlural": "timeplankollisjon",
       "conflictItem": "{day} kollisjon: {groupA} overlapper {groupB} — flytt en time eller omfordel"
     },
+    "mySchedule": {
+      "title": "Min timeplan",
+      "subtitle": "Dine ukentlige timer, projisert fra gruppene du underviser.",
+      "back": "Dashbord",
+      "groupsCount": "{count, plural, one {# gruppe} other {# grupper}}",
+      "noSchedule": "Ingen timer planlagt ennå.",
+      "loadFailed": "Kunne ikke laste timeplanen din.",
+      "clashes": "{count, plural, one {# kollisjon} other {# kollisjoner}}"
+    },
     "slot": {
       "add": "Legg til time",
       "noSlots": "Ingen faste timer. Legg til minst én.",
@@ -1531,13 +1630,47 @@
       "overlap": "Overlapper med en annen time",
       "endBeforeStart": "Slutttid må være etter starttid",
       "roomRequired": "Rom er påkrevd for fysiske grupper",
+      "label": "Time {n}",
+      "removeAria": "Fjern time {n}",
+      "roomPlaceholder": "f.eks. Rom 101",
       "fields": {
         "day": "Dag",
         "start": "Start",
         "end": "Slutt",
         "room": "Rom",
         "roomLabel": "Rom *"
+      },
+      "weekday": {
+        "mon": "Mandag",
+        "tue": "Tirsdag",
+        "wed": "Onsdag",
+        "thu": "Torsdag",
+        "fri": "Fredag",
+        "sat": "Lørdag",
+        "sun": "Søndag"
       }
+    },
+    "header": {
+      "level": "Nivå",
+      "mode": "Modus"
+    },
+    "course": {
+      "title": "Kurs",
+      "description": "Kursdetaljer og tilleggsmateriell for denne gruppen.",
+      "cefr": "CEFR-nivå",
+      "language": "Språk",
+      "curriculum": "Læreplan",
+      "units": "{count} enheter",
+      "noCourse": "Ingen kurs tildelt",
+      "open": "Vis kurs →",
+      "editHint": "Bruk Behandle-knappen på kurskortet for å endre materiell.",
+      "manage": "Behandle",
+      "dialogTitle": "Behandle kurs",
+      "dialogDescription": "Velg gruppens hovedkurs og eventuelt tilleggsmateriell.",
+      "updateSuccess": "Kurs oppdatert",
+      "updateError": "Kunne ikke oppdatere kurs",
+      "materialsCount": "+{count} tilleggsmateriell",
+      "materialsCountPlural": "+{count} tilleggsmateriell"
     }
   },
   "Students": {

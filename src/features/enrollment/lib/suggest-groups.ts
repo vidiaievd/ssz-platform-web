@@ -5,6 +5,8 @@ export interface GroupSuggestion {
   group: Group;
   /** 0 = exact match, 1 = one level away */
   levelDelta: number;
+  /** False when both membership and group declare an age band and they differ — soft signal, never excludes. */
+  ageBandMismatch: boolean;
   /** How many of the student's availability prefs overlap with group slots */
   slotOverlap: number;
   hasCapacity: boolean;
@@ -36,8 +38,9 @@ function slotMatchesAvailability(
 /**
  * Suggests groups for a student membership, sorted by:
  *   1. level delta (exact match first)
- *   2. slot overlap (more overlap = better)
- *   3. groups with capacity
+ *   2. age band match (same band first — soft signal, never excludes)
+ *   3. slot overlap (more overlap = better)
+ *   4. groups with capacity
  *
  * Only groups matching the membership language and within 1 CEFR level are returned.
  */
@@ -59,12 +62,17 @@ export function suggestGroups(membership: Membership, groups: Group[]): GroupSug
       ? group.slots.filter((s) => slotMatchesAvailability(s, membership.availability)).length
       : 0;
 
-    candidates.push({ group, levelDelta: delta, slotOverlap, hasCapacity });
+    const ageBandMismatch = Boolean(
+      membership.ageBand && group.ageBand && membership.ageBand !== group.ageBand,
+    );
+
+    candidates.push({ group, levelDelta: delta, ageBandMismatch, slotOverlap, hasCapacity });
   }
 
-  // Sort: exact level > slot overlap > has capacity
+  // Sort: exact level > age band match > slot overlap > has capacity
   candidates.sort((a, b) => {
     if (a.levelDelta !== b.levelDelta) return a.levelDelta - b.levelDelta;
+    if (a.ageBandMismatch !== b.ageBandMismatch) return Number(a.ageBandMismatch) - Number(b.ageBandMismatch);
     if (b.slotOverlap !== a.slotOverlap) return b.slotOverlap - a.slotOverlap;
     return Number(b.hasCapacity) - Number(a.hasCapacity);
   });

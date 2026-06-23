@@ -7,10 +7,10 @@ import type { Group } from '@/features/groups/types';
 
 function makeGroup(overrides: Partial<Group>): Group {
   return {
-    id: 'g1', name: 'Group 1', courseId: null,
+    id: 'g1', name: 'Group 1', courseId: null, materials: [],
     lang: 'nb', level: 'B1', status: 'active', mode: 'online',
     capacity: { min: 2, max: 8 }, studentCount: 3,
-    startDate: null, endDate: null, teachers: [], slots: [],
+    startDate: null, endDate: null, teachers: [], slots: [], ageBand: null,
     ...overrides,
   };
 }
@@ -91,6 +91,32 @@ describe('suggestGroups', () => {
     const membership = makeMembership();
     const result = suggestGroups(membership, groups);
     expect(result.map((r) => r.group.id)).toEqual(['active']);
+  });
+
+  it('ranks same-age-band group above an otherwise-equal mismatched-band group', () => {
+    const groups = [
+      makeGroup({ id: 'teens', level: 'B1', ageBand: 'teens' }),
+      makeGroup({ id: 'adults', level: 'B1', ageBand: 'adults' }),
+    ];
+    const membership = makeMembership({ ageBand: 'adults' });
+    const result = suggestGroups(membership, groups);
+    expect(result.map((r) => r.group.id)).toEqual(['adults', 'teens']);
+    expect(result[0]!.ageBandMismatch).toBe(false);
+    expect(result[1]!.ageBandMismatch).toBe(true);
+  });
+
+  it('still includes age-band-mismatched groups, just ranked lower', () => {
+    const groups = [makeGroup({ id: 'kids', level: 'B1', ageBand: 'kids' })];
+    const membership = makeMembership({ ageBand: 'adults' });
+    const result = suggestGroups(membership, groups);
+    expect(result.map((r) => r.group.id)).toEqual(['kids']);
+  });
+
+  it('treats unset age band (membership or group) as no mismatch', () => {
+    const groups = [makeGroup({ id: 'g1', level: 'B1', ageBand: null })];
+    const membership = makeMembership({ ageBand: 'adults' });
+    const result = suggestGroups(membership, groups);
+    expect(result[0]!.ageBandMismatch).toBe(false);
   });
 
   it('marks hasCapacity correctly', () => {

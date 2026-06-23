@@ -4,7 +4,10 @@ import Link from "next/link";
 
 import { getSchoolBySlug } from "@/features/school/api/get-school-by-slug";
 import { getTeacherAvailability, getAbsences } from "@/features/teachers/api/queries";
+import { getTeacherSchedule } from "@/features/groups/api/queries";
+import { timeToMinutes } from "@/lib/groups/operations";
 import { TeacherScheduleClient } from "@/features/teachers/components/schedule/teacher-schedule-client";
+import type { Lesson } from "@/features/teachers/components/schedule/weekly-grid";
 
 type Props = {
   params: Promise<{ schoolSlug: string; locale: string; teacherId: string }>;
@@ -23,9 +26,10 @@ export default async function TeacherSchedulePage({ params }: Props) {
     );
   }
 
-  const [availabilityResult, absencesResult] = await Promise.all([
+  const [availabilityResult, absencesResult, scheduleResult] = await Promise.all([
     getTeacherAvailability(teacherId),
     getAbsences(school.id),
+    getTeacherSchedule(school.id, teacherId),
   ]);
 
   const availability =
@@ -33,6 +37,39 @@ export default async function TeacherSchedulePage({ params }: Props) {
   const absences = "status" in absencesResult
     ? []
     : absencesResult.filter((a) => a.teacherId === teacherId);
+
+  const scheduleLessons =
+    "data" in scheduleResult ? scheduleResult.data?.lessons ?? [] : [];
+
+  const conflictIndices = new Set<number>();
+  for (let i = 0; i < scheduleLessons.length; i++) {
+    const a = scheduleLessons[i]!;
+    for (let j = i + 1; j < scheduleLessons.length; j++) {
+      const b = scheduleLessons[j]!;
+      if (
+        a.day === b.day &&
+        timeToMinutes(a.start) < timeToMinutes(b.end) &&
+        timeToMinutes(b.start) < timeToMinutes(a.end)
+      ) {
+        conflictIndices.add(i);
+        conflictIndices.add(j);
+      }
+    }
+  }
+
+  const lessons: Lesson[] = scheduleLessons.map((l, i) => {
+    const startHour = timeToMinutes(l.start) / 60;
+    const durationHours = (timeToMinutes(l.end) - timeToMinutes(l.start)) / 60;
+    return {
+      lessonId: `${l.groupId}-${l.day}-${l.start}`,
+      groupName: l.groupName,
+      day: l.day,
+      startHour,
+      durationHours,
+      lang: l.lang,
+      hasConflict: conflictIndices.has(i),
+    };
+  });
 
   return (
     <main className="p-4 sm:p-6 space-y-5">
@@ -50,6 +87,7 @@ export default async function TeacherSchedulePage({ params }: Props) {
         teacherId={teacherId}
         availabilityBlocks={availability}
         absences={absences}
+        lessons={lessons}
       />
     </main>
   );

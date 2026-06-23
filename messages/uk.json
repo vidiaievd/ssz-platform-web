@@ -218,15 +218,16 @@
     "hints": "Підказки",
     "exemplarAnswer": "Приклад відповіді",
     "accessTier": {
-      "PUBLIC": "Безкоштовно",
-      "FREE_WITHIN_SCHOOL": "Школа",
-      "PAID": "Преміум",
-      "INVITE_ONLY": "Лише за запрошенням"
+      "assigned_only": "Лише призначені",
+      "entitlement_required": "Потрібен доступ",
+      "free_within_school": "Школа",
+      "public_free": "Безкоштовно",
+      "public_paid": "Преміум"
     },
     "containerType": {
-      "COURSE": "Курс",
-      "MODULE": "Модуль",
-      "COLLECTION": "Колекція"
+      "course": "Курс",
+      "module": "Модуль",
+      "collection": "Колекція"
     }
   },
   "Auth": {
@@ -366,6 +367,10 @@
       "draft": "Чернетка",
       "published": "Опубліковано"
     },
+    "sections": {
+      "noSection": "Без секції",
+      "assignAriaLabel": "Призначити секцію"
+    },
     "filters": {
       "all": "Усі",
       "draft": "Чернетки",
@@ -390,10 +395,11 @@
       "description": "Опис",
       "type": "Тип",
       "targetLanguage": "Мова навчання",
-      "instructionLanguage": "Мова інструкцій",
       "level": "Рівень",
+      "visibility": "Видимість",
+      "visibilityHint": "Хто може знайти цей контейнер у каталозі.",
       "slug": "Slug",
-      "slugFrozen": "Незмінний",
+      "slugFrozen": "Генерується автоматично під час публікації",
       "accessTier": "Рівень доступу",
       "accessTierHint": "Визначає, хто може записатися; видимість — окремо."
     },
@@ -401,10 +407,7 @@
       "titlePlaceholder": "напр. Норвезька для початківців",
       "descriptionPlaceholder": "Короткий опис контейнера",
       "targetLanguagePlaceholder": "напр. no, en, uk",
-      "instructionLanguagePlaceholder": "напр. en",
       "levelNone": "Будь-який рівень",
-      "slugPlaceholder": "напр. norwegian-for-beginners",
-      "slugTooltip": "Використовується в URL. Лише малі букви, цифри та дефіси. Не можна змінити після публікації.",
       "create": "Створити",
       "save": "Зберегти",
       "createSuccess": "Контейнер створено.",
@@ -414,15 +417,22 @@
       "slugRequired": "Поле Slug обов'язкове"
     },
     "accessTier": {
-      "PUBLIC": "Безкоштовно",
-      "FREE_WITHIN_SCHOOL": "Тільки школа",
-      "PAID": "Преміум",
-      "INVITE_ONLY": "Тільки за запрошенням"
+      "assigned_only": "Лише призначені",
+      "entitlement_required": "Потрібен доступ",
+      "free_within_school": "Тільки школа",
+      "public_free": "Безкоштовно",
+      "public_paid": "Преміум"
+    },
+    "visibility": {
+      "public": "Публічний",
+      "school_private": "Тільки школа",
+      "shared": "Спільний",
+      "private": "Приватний"
     },
     "types": {
-      "COURSE": "Курс",
-      "MODULE": "Модуль",
-      "COLLECTION": "Колекція"
+      "course": "Курс",
+      "module": "Модуль",
+      "collection": "Колекція"
     },
     "lessons": {
       "add": "Додати урок",
@@ -567,7 +577,7 @@
       "addSuccess": "Співавтора додано.",
       "removeAriaLabel": "Видалити співавтора",
       "removeConfirmTitle": "Видалити співавтора?",
-      "removeConfirmDescription": "{email} втратить доступ до цього контейнера.",
+      "removeConfirmDescription": "{name} втратить доступ до цього контейнера.",
       "removeConfirm": "Видалити",
       "removeCancel": "Скасувати",
       "removeSuccess": "Співавтора видалено.",
@@ -580,10 +590,10 @@
       "trigger": "Опублікувати",
       "title": "Опублікувати контейнер",
       "description": "Публікація є незворотною і впливає на доступ до цього контейнера. Прочитайте попередження нижче перед підтвердженням.",
-      "warningSlug": "Slug буде заморожено і не може бути змінено після публікації.",
+      "warningSlug": "URL-slug буде згенеровано з назви і заморожено після публікації.",
       "warningDiscoverable": "Контейнер стане доступним для учнів відповідно до рівня доступу.",
       "warningEvent": "Буде надіслано подію публікації, що може викликати сповіщення.",
-      "confirmPrompt": "Для підтвердження введіть slug точно так, як показано:",
+      "confirmPrompt": "Для підтвердження введіть назву точно так, як показано:",
       "confirm": "Опублікувати",
       "cancel": "Скасувати",
       "success": "Контейнер успішно опубліковано."
@@ -661,8 +671,7 @@
         "coTeach": "Співвикладач",
         "viewer": "Глядач",
         "coTeachersSection": "Співвикладачі",
-        "coTeachersComingSoon": "Запрошення співвикладачів незабаром",
-        "coTeachersHelp": "Ви можете додати співвикладачів у налаштуваннях курсу після його створення.",
+        "coTeachersHelp": "Спочатку збережіть деталі курсу (крок 1), щоб запросити співвикладачів.",
         "matrixTitle": "Дозволи ролей",
         "matrix": {
           "action": "Дія",
@@ -685,7 +694,7 @@
         "note": "Ви можете змінити видимість будь-коли в налаштуваннях курсу."
       },
       "review": {
-        "subtitle": "Перевірте деталі перед збереженням або публікацією.",
+        "subtitle": "Перевірте деталі перед створенням курсу.",
         "sectionMetadata": "Деталі",
         "sectionStructure": "Структура",
         "sectionTeachers": "Вчителі",
@@ -693,10 +702,9 @@
         "edit": "Редагувати",
         "ownerOnly": "Тільки власник",
         "saveAsDraft": "Зберегти як чернетку",
-        "publish": "Опублікувати курс",
-        "publishError": "Не вдалося опублікувати. Перевірте блокери в панелі перевірки.",
-        "publishSuccess": "Курс опубліковано!",
-        "preflightHint": "Спочатку збережіть чернетку, щоб побачити перевірки."
+        "createAndContinue": "Створити курс",
+        "createError": "Не вдалося створити курс. Спробуйте ще раз.",
+        "createSuccess": "Курс створено — додайте уроки та опублікуйте, коли будете готові."
       }
     }
   },
@@ -780,6 +788,14 @@
       "saving": "Зберігаємо...",
       "submit": "Продовжити"
     },
+    "AgeBand": {
+      "subtitle": "До якої вікової групи ви належите?",
+      "kids": "Діти",
+      "teens": "Підлітки",
+      "adults": "Дорослі",
+      "saving": "Зберігаємо...",
+      "submit": "Продовжити"
+    },
     "InterviewBooking": {
       "subtitle": "Оберіть час для вашого вступного інтерв'ю",
       "selectSlot": "Оберіть часовий слот",
@@ -793,6 +809,7 @@
       "subtitle": "Виконайте наведені нижче кроки, щоб завершити реєстрацію.",
       "stepPlacement": "Рівень",
       "stepAvailability": "Доступність",
+      "stepAgeBand": "Вікова група",
       "stepInterview": "Співбесіда",
       "allDoneTitle": "Все готово!",
       "allDoneReview": "Ми розглянемо ваші результати і зв'яжемося з вами найближчим часом.",
@@ -823,6 +840,11 @@
       "autoPlaceByScore": "Автоматичне зарахування за балами",
       "sectionAvailability": "Доступність",
       "collectAvailability": "Збирати переваги щодо розкладу",
+      "sectionAgeBands": "Вікові групи",
+      "ageBandKids": "Діти",
+      "ageBandTeens": "Підлітки",
+      "ageBandAdults": "Дорослі",
+      "collectAgeBand": "Збирати вікову групу під час реєстрації",
       "sectionApproval": "Підтвердження",
       "manualApproval": "Ручне підтвердження",
       "stepPreviewLabel": "Студент побачить ці кроки",
@@ -1359,19 +1381,35 @@
     "resolve": {
       "actionRequired": "Потрібна дія",
       "attentionNeeded": "Потрібна увага",
-      "fix": "Виправити →"
+      "fix": "Виправити →",
+      "issuesLabel": "Питання для вирішення"
     },
     "tabs": {
       "overview": "Огляд",
       "students": "Учні",
       "teachers": "Учителі",
-      "schedule": "Розклад"
+      "schedule": "Розклад",
+      "sectionLabel": "Розділ"
     },
     "overview": {
       "teachersHeading": "Учителі",
       "rosterHeading": "Список учнів",
       "scheduleHeading": "Розклад",
-      "noTeachers": "Учителів не призначено."
+      "noTeachers": "Учителів не призначено.",
+      "courseHeading": "Курс",
+      "nextLessonHeading": "Наступний урок",
+      "ready": "Готово до запуску",
+      "notReady": "Не готово до запуску",
+      "statusUnknown": "Статус невідомий — не вдалося перевірити конфлікти",
+      "clashCount": "{count} студент із конфліктом розкладу",
+      "clashCountPlural": "{count} студентів із конфліктом розкладу",
+      "manageStudents": "Керувати студентами →",
+      "manageTeachers": "Керувати вчителями →",
+      "openSchedule": "Відкрити розклад →",
+      "addSchedule": "Додати розклад →",
+      "coPrimaryCount": "+{count} співвчитель",
+      "subCount": "{count} замісник",
+      "subCountPlural": "{count} замісників"
     },
     "students": {
       "search": "Пошук учнів…",
@@ -1411,7 +1449,8 @@
       "upcomingHeading": "Наступні уроки",
       "noSlots": "Регулярних уроків не налаштовано.",
       "noLessons": "Наступних уроків не заплановано.",
-      "sub": "Зам"
+      "sub": "Зам",
+      "editButton": "Редагувати розклад"
     },
     "detail": {
       "back": "Групи",
@@ -1428,7 +1467,11 @@
       "deleted": "Групу видалено",
       "updated": "Групу оновлено",
       "archiving": "Архівування…",
-      "deleting": "Видалення…"
+      "deleting": "Видалення…",
+      "duplicateError": "Не вдалося дублювати групу",
+      "archiveError": "Не вдалося архівувати групу",
+      "deleteError": "Не вдалося видалити групу",
+      "moreActions": "Більше дій"
     },
     "edit": {
       "title": "Редагувати групу",
@@ -1437,7 +1480,52 @@
       "saving": "Збереження…",
       "cancel": "Скасувати",
       "success": "Групу оновлено",
-      "error": "Не вдалося оновити групу"
+      "error": "Не вдалося оновити групу",
+      "identity": "Загальні дані",
+      "capacity": "Місткість",
+      "dates": "Дати",
+      "name": "Назва",
+      "namePlaceholder": "напр. Норвезька A2 — Весна 2026",
+      "lang": "Код мови",
+      "langPlaceholder": "en, nb, uk, ru…",
+      "level": "Рівень",
+      "levelPlaceholder": "Виберіть рівень",
+      "mode": "Режим",
+      "minStudents": "Мін. студентів",
+      "maxStudents": "Макс. студентів",
+      "straddleNote": "{count} зараховано — мін/макс має охоплювати поточну кількість.",
+      "startDate": "Дата початку",
+      "endDate": "Дата завершення",
+      "saveHint": "Натисніть ⌘S (або Ctrl+S), щоб зберегти",
+      "discardTitle": "Скасувати незбережені зміни?",
+      "discardBody": "У вас є незбережені зміни в цій групі. Закриття зараз скасує їх.",
+      "discardKeepEditing": "Продовжити редагування",
+      "discardDiscard": "Скасувати",
+      "maxBelowEnrolled": "Максимум має бути не менше {count} (поточна кількість зарахованих)",
+      "endBeforeStart": "Дата завершення має бути не раніше дати початку",
+      "course": "Курс",
+      "courseAdd": "Додати курс",
+      "courseChange": "Змінити",
+      "courseSearchPlaceholder": "Пошук опублікованих курсів…",
+      "courseNoneOption": "Без курсу",
+      "courseLoading": "Завантаження курсів…",
+      "courseNoResults": "Опублікованих курсів не знайдено.",
+      "materialsHeading": "Додаткові матеріали",
+      "addMaterial": "Додати матеріал",
+      "removeMaterial": "Видалити матеріал",
+      "noMaterials": "Додаткових матеріалів не додано.",
+      "materialAddError": "Не вдалося додати матеріал",
+      "materialRemoveError": "Не вдалося видалити матеріал",
+      "slotsHeading": "Розклад",
+      "slotsError": "Не вдалося оновити розклад",
+      "ageBand": "Вікова група",
+      "ageBandPlaceholder": "Виберіть вікову групу",
+      "ageBandNone": "—"
+    },
+    "ageBand": {
+      "kids": "Діти",
+      "teens": "Підлітки",
+      "adults": "Дорослі"
     },
     "wizard": {
       "title": "Нова група",
@@ -1475,8 +1563,10 @@
       "noTeachers": "Усі вчителі вже призначені.",
       "langMismatch": "невідповідність мови",
       "timeClash": "конфлікт часу",
+      "availabilityAbsent": "у відпустці",
       "validationOk": "Готово до призначення",
       "validationConflict": "Конфлікт розкладу: {name} вже має урок у цей час.",
+      "validationAbsent": "{name} у відпустці протягом цього періоду.",
       "validationLangMismatch": "Невідповідність мови: вчитель викладає {teacherLang}, мова групи — {groupLang}.",
       "validationOverload": "Це дасть {name} {projected}/{max}г на тиждень.",
       "errorNoPrimary": "Спочатку призначте основного вчителя, перш ніж додавати співвчителя.",
@@ -1524,6 +1614,15 @@
       "conflictListTitlePlural": "конфлікти розкладу",
       "conflictItem": "{day} конфлікт: {groupA} перетинається з {groupB} — перемістіть урок або перепризначте"
     },
+    "mySchedule": {
+      "title": "Мій розклад",
+      "subtitle": "Ваші щотижневі уроки, спроєктовані з груп, які ви викладаєте.",
+      "back": "Панель керування",
+      "groupsCount": "{count, plural, one {# група} few {# групи} many {# груп} other {# груп}}",
+      "noSchedule": "Уроків ще не запланано.",
+      "loadFailed": "Не вдалося завантажити ваш розклад.",
+      "clashes": "{count, plural, one {# конфлікт} few {# конфлікти} many {# конфліктів} other {# конфліктів}}"
+    },
     "slot": {
       "add": "Додати урок",
       "noSlots": "Регулярних уроків немає. Додайте хоча б один.",
@@ -1531,13 +1630,47 @@
       "overlap": "Перетинається з іншим уроком",
       "endBeforeStart": "Час завершення має бути після початку",
       "roomRequired": "Кімната обов'язкова для очних занять",
+      "label": "Урок {n}",
+      "removeAria": "Видалити урок {n}",
+      "roomPlaceholder": "напр. Кімната 101",
       "fields": {
         "day": "День",
         "start": "Початок",
         "end": "Кінець",
         "room": "Кімната",
         "roomLabel": "Кімната *"
+      },
+      "weekday": {
+        "mon": "Понеділок",
+        "tue": "Вівторок",
+        "wed": "Середа",
+        "thu": "Четвер",
+        "fri": "П'ятниця",
+        "sat": "Субота",
+        "sun": "Неділя"
       }
+    },
+    "header": {
+      "level": "Рівень",
+      "mode": "Режим"
+    },
+    "course": {
+      "title": "Курс",
+      "description": "Деталі курсу та додаткові матеріали цієї групи.",
+      "cefr": "Рівень CEFR",
+      "language": "Мова",
+      "curriculum": "Навчальна програма",
+      "units": "{count} модулів",
+      "noCourse": "Курс не призначено",
+      "open": "Переглянути курс →",
+      "editHint": "Використайте кнопку «Керувати» на картці курсу, щоб змінити матеріали.",
+      "manage": "Керувати",
+      "dialogTitle": "Керування курсом",
+      "dialogDescription": "Виберіть основний курс групи та додаткові матеріали.",
+      "updateSuccess": "Курс оновлено",
+      "updateError": "Не вдалося оновити курс",
+      "materialsCount": "+{count} додатковий матеріал",
+      "materialsCountPlural": "+{count} додаткових матеріалів"
     }
   },
   "Students": {

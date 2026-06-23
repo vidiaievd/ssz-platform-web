@@ -57,7 +57,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
     resolver: zodResolver(grammarEditorFormSchema),
     defaultValues: {
       ruleTitle,
-      languageCode: container.instructionLanguage ?? 'en',
+      languageCode: 'en',
       explanationTitle: '',
       body: '',
       examples: [],
@@ -83,12 +83,13 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
   const autosave = useAutosave({
     onSave: async () => {
       const { languageCode, explanationTitle, body, examples } = getValues();
-      const result = await saveGrammarExplanationAction(ruleId, explanationId, container.id, {
-        languageCode,
-        title: explanationTitle,
-        body,
-        examples,
-      });
+      const result = await saveGrammarExplanationAction(
+        ruleId,
+        explanationId,
+        container.id,
+        container.difficultyLevel,
+        { languageCode, title: explanationTitle, body, examples },
+      );
       if (!result.ok) throw new Error(result.error.code);
       if (result.value?.explanationId) setLocalExplanationId(result.value.explanationId);
       await queryClient.invalidateQueries({ queryKey: authoringKeys.grammarExplanations(ruleId) });
@@ -122,12 +123,18 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
         toast.error(tErrors(r1.error.code));
         return;
       }
-      const r2 = await saveGrammarExplanationAction(ruleId, explanationId, container.id, {
-        languageCode: data.languageCode,
-        title: data.explanationTitle,
-        body: data.body,
-        examples: data.examples,
-      });
+      const r2 = await saveGrammarExplanationAction(
+        ruleId,
+        explanationId,
+        container.id,
+        container.difficultyLevel,
+        {
+          languageCode: data.languageCode,
+          title: data.explanationTitle,
+          body: data.body,
+          examples: data.examples,
+        },
+      );
       if (!r2.ok) {
         toast.error(tErrors(r2.error.code));
         return;

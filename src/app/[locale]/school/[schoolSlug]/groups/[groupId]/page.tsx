@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation';
 
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
-import { getGroup } from '@/features/groups/api/queries';
+import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
+import { getGroup, getGroupCourseView } from '@/features/groups/api/queries';
+import { canManageGroups } from '@/features/groups/lib/can-manage';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
 import { AppError } from '@/lib/errors';
 import { GroupDetail } from '@/features/groups/components/group-detail';
@@ -17,7 +19,7 @@ export default async function GroupDetailPage({ params }: Props) {
   const school = await getSchoolBySlug(schoolSlug);
   if (!school) notFound();
 
-  const [data, lessons] = await Promise.all([
+  const [data, lessons, role] = await Promise.all([
     getGroup(school.id, groupId),
     getSchedulingProvider()
       .nextLessons(groupId, 10)
@@ -25,11 +27,14 @@ export default async function GroupDetailPage({ params }: Props) {
         if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
         return [];
       }),
+    getMySchoolRole(schoolSlug),
   ]);
 
   if (!data) notFound();
 
   const { roster, alerts, ...group } = data;
+  const canManage = canManageGroups(role);
+  const courseView = await getGroupCourseView(group);
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
@@ -38,7 +43,9 @@ export default async function GroupDetailPage({ params }: Props) {
         roster={roster}
         alerts={alerts}
         lessons={lessons}
+        courseView={courseView}
         schoolSlug={schoolSlug}
+        canManage={canManage}
       />
     </main>
   );

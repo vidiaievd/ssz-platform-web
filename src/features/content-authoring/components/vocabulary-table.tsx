@@ -66,6 +66,8 @@ function CreateListSection({ container }: { container: Container }) {
       const result = await createVocabularyListAction(
         container.id,
         container.targetLanguage,
+        container.difficultyLevel,
+        container.visibility,
         data,
       );
       if (!result.ok) {

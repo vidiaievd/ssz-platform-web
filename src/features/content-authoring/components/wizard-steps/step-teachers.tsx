@@ -8,6 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+import { SharingPanel } from '../sharing-panel';
+import { useCreateWizardStore } from '../../stores/create-wizard';
+
 // ── Role matrix ────────────────────────────────────────────────────────────────
 
 const ROLE_MATRIX = [
@@ -38,6 +41,7 @@ function Check({ ok }: { ok: boolean }) {
 export function WizardStepTeachers() {
   const t = useTranslations('Authoring');
   const { data: user, isLoading } = useCurrentUser();
+  const draftId = useCreateWizardStore((s) => s.draftId);
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
@@ -76,20 +80,21 @@ export function WizardStepTeachers() {
           </div>
         </div>
 
-        {/* Co-teachers placeholder */}
+        {/* Co-teachers */}
         <div>
           <p className="mb-2 text-sm font-medium text-[var(--ssz-text-primary)]">
             {t('wizard.teachers.coTeachersSection')}
           </p>
-          <div className="rounded-[var(--ssz-radius-md)] border border-dashed border-[var(--ssz-border-default)] p-6 text-center">
-            <Users className="mx-auto mb-2 h-6 w-6 text-[var(--ssz-text-muted)]" aria-hidden />
-            <p className="text-sm text-[var(--ssz-text-secondary)]">
-              {t('wizard.teachers.coTeachersComingSoon')}
-            </p>
-            <p className="mt-1 text-xs text-[var(--ssz-text-muted)]">
-              {t('wizard.teachers.coTeachersHelp')}
-            </p>
-          </div>
+          {draftId ? (
+            <SharingPanel entityType="container" entityId={draftId} />
+          ) : (
+            <div className="rounded-[var(--ssz-radius-md)] border border-dashed border-[var(--ssz-border-default)] p-6 text-center">
+              <Users className="mx-auto mb-2 h-6 w-6 text-[var(--ssz-text-muted)]" aria-hidden />
+              <p className="text-sm text-[var(--ssz-text-secondary)]">
+                {t('wizard.teachers.coTeachersHelp')}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

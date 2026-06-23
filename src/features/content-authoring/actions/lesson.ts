@@ -5,25 +5,16 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
-import type { Lesson, LessonVariant, ContainerVersion } from '@/features/content/types';
+import type { DifficultyLevel, Visibility } from '@/features/content/types';
 
 import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
-
-async function getDraftVersionId(containerId: string): Promise<string | null> {
-  try {
-    const versions = await serverFetch<ContainerVersion[]>({
-      service: 'content',
-      path: `/containers/${containerId}/versions`,
-    });
-    return versions.find((v) => !v.isPublished)?.id ?? null;
-  } catch {
-    return null;
-  }
-}
+import { addItemToDraft, removeItemFromDraft, reorderDraftItems } from '../lib/container-items';
 
 export async function createLessonAction(
   containerId: string,
   targetLanguage: string,
+  difficultyLevel: DifficultyLevel,
+  visibility: Visibility,
   input: LessonFormValues,
 ) {
   return tryAction(async () => {
@@ -33,26 +24,34 @@ export async function createLessonAction(
     }
     const { title, body } = parsed.data;
 
-    const lesson = await serverFetch<Lesson>({
+    const { lessonId } = await serverFetch<{ lessonId: string }>({
       service: 'content',
       path: '/lessons',
       method: 'POST',
-      body: { title, targetLanguage, containerId },
+      body: { title, targetLanguage, difficultyLevel, visibility },
     });
 
     let variantId: string | undefined;
     if (body) {
-      const variant = await serverFetch<LessonVariant>({
+      const variant = await serverFetch<{ variantId: string }>({
         service: 'content',
-        path: `/lessons/${lesson.id}/variants`,
+        path: `/lessons/${lessonId}/variants`,
         method: 'POST',
-        body: { title, body, targetLanguage },
+        body: {
+          explanationLanguage: 'en',
+          minLevel: difficultyLevel,
+          maxLevel: difficultyLevel,
+          displayTitle: title,
+          bodyMarkdown: body,
+        },
       });
-      variantId = variant.id;
+      variantId = variant.variantId;
     }
 
+    const item = await addItemToDraft(containerId, 'lesson', lessonId);
+
     revalidatePath(`/school/content/${containerId}`);
-    return { lesson, variantId };
+    return { lessonId, variantId, itemId: item.id };
   });
 }
 
@@ -60,7 +59,7 @@ export async function updateLessonAction(
   lessonId: string,
   containerId: string,
   variantId: string | null,
-  targetLanguage: string,
+  difficultyLevel: DifficultyLevel,
   input: LessonFormValues,
 ) {
   return tryAction(async () => {
@@ -77,30 +76,44 @@ export async function updateLessonAction(
       body: { title },
     });
 
+    let newVariantId: string | undefined;
     if (body !== undefined) {
       if (variantId) {
         await serverFetch({
           service: 'content',
           path: `/lessons/${lessonId}/variants/${variantId}`,
           method: 'PATCH',
-          body: { body, title },
+          body: { displayTitle: title, bodyMarkdown: body },
         });
       } else {
-        await serverFetch<LessonVariant>({
+        const variant = await serverFetch<{ variantId: string }>({
           service: 'content',
           path: `/lessons/${lessonId}/variants`,
           method: 'POST',
-          body: { title, body, targetLanguage },
+          body: {
+            explanationLanguage: 'en',
+            minLevel: difficultyLevel,
+            maxLevel: difficultyLevel,
+            displayTitle: title,
+            bodyMarkdown: body,
+          },
         });
+        newVariantId = variant.variantId;
       }
     }
 
     revalidatePath(`/school/content/${containerId}`);
+    return { variantId: newVariantId };
   });
 }
 
-export async function deleteLessonAction(lessonId: string, containerId: string) {
+export async function deleteLessonAction(
+  containerItemId: string,
+  lessonId: string,
+  containerId: string,
+) {
   return tryAction(async () => {
+    await removeItemFromDraft(containerId, containerItemId);
     await serverFetch({
       service: 'content',
       path: `/lessons/${lessonId}`,
@@ -112,15 +125,6 @@ export async function deleteLessonAction(lessonId: string, containerId: string) 
 
 export async function reorderLessonsAction(containerId: string, orderedItemIds: string[]) {
   return tryAction(async () => {
-    const versionId = await getDraftVersionId(containerId);
-    if (!versionId) {
-      throw new AppError('not_found', 'No draft version found for container');
-    }
-    await serverFetch({
-      service: 'content',
-      path: `/containers/${containerId}/versions/${versionId}/items/reorder`,
-      method: 'PUT',
-      body: { orderedIds: orderedItemIds },
-    });
+    await reorderDraftItems(containerId, orderedItemIds);
   });
 }

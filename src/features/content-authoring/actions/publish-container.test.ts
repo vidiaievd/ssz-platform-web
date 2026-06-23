@@ -20,12 +20,21 @@ vi.mock('next/cache', () => ({
 
 const { publishContainerAction } = await import('./publish-container');
 
+function mockDraftVersion(containerId: string, versionId: string) {
+  server.use(
+    http.get(`http://content.test/api/v1/containers/${containerId}/versions`, () =>
+      HttpResponse.json({ items: [{ id: versionId, status: 'draft' }] }),
+    ),
+  );
+}
+
 describe('publishContainerAction', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('returns ok when the service publishes the container', async () => {
+  it('returns ok when the service publishes the draft version', async () => {
+    mockDraftVersion('ctr-1', 'ver-1');
     server.use(
-      http.post('http://content.test/api/v1/containers/ctr-1/publish', () =>
+      http.post('http://content.test/api/v1/containers/ctr-1/versions/ver-1/publish', () =>
         new HttpResponse(null, { status: 204 }),
       ),
     );
@@ -35,9 +44,10 @@ describe('publishContainerAction', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('returns conflict when the container is already published', async () => {
+  it('returns conflict when the version is already published', async () => {
+    mockDraftVersion('ctr-1', 'ver-1');
     server.use(
-      http.post('http://content.test/api/v1/containers/ctr-1/publish', () =>
+      http.post('http://content.test/api/v1/containers/ctr-1/versions/ver-1/publish', () =>
         HttpResponse.json({ title: 'Already published' }, { status: 409 }),
       ),
     );
@@ -50,8 +60,9 @@ describe('publishContainerAction', () => {
   });
 
   it('returns forbidden when the caller does not own the container', async () => {
+    mockDraftVersion('ctr-2', 'ver-2');
     server.use(
-      http.post('http://content.test/api/v1/containers/ctr-2/publish', () =>
+      http.post('http://content.test/api/v1/containers/ctr-2/versions/ver-2/publish', () =>
         HttpResponse.json({ title: 'Forbidden' }, { status: 403 }),
       ),
     );
@@ -63,9 +74,9 @@ describe('publishContainerAction', () => {
     expect(result.error.code).toBe('forbidden');
   });
 
-  it('returns not_found for an unknown container', async () => {
+  it('returns not_found when the container has no draft version', async () => {
     server.use(
-      http.post('http://content.test/api/v1/containers/ghost/publish', () =>
+      http.get('http://content.test/api/v1/containers/ghost/versions', () =>
         HttpResponse.json({ title: 'Not Found' }, { status: 404 }),
       ),
     );

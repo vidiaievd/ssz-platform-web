@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState, useTransition } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, LogOut, Trash2, Loader2, Check } from 'lucide-react';
@@ -18,10 +18,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Link } from '@/lib/i18n/navigation';
+import { Link, useRouter } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 import { createContainerAction, updateContainerAction } from '../actions/container';
+import { syncStructureSectionsAction } from '../actions/section';
+import { wizardPayload } from '../lib/wizard-payload';
 import { useCreateWizardStore } from '../stores/create-wizard';
 import { WizardStepMetadata } from './wizard-steps/step-metadata';
 import { WizardStepStructure } from './wizard-steps/step-structure';
@@ -66,6 +68,8 @@ export function CreateWizard() {
   const t = useTranslations('Authoring');
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const contentBase = `/school/${schoolSlug}/content`;
 
   const store = useCreateWizardStore();
   const [isPending, startTransition] = useTransition();
@@ -93,33 +97,22 @@ export function CreateWizard() {
     params.set('step', String(step + 1));
     const id = draftId ?? store.draftId;
     if (id) params.set('draft', id);
-    router.push(`/school/content/new?${params.toString()}`);
+    router.push(`${contentBase}/new?${params.toString()}`);
     store.setStep(step);
   }
 
   // ── Persist on next ────────────────────────────────────────────────────────
 
+  const STRUCTURE_STEP_INDEX = 1;
+
   const handleNext = useCallback(() => {
     startTransition(async () => {
-      const { metadata, visibility } = store;
-
-      const accessTierMap: Record<string, 'PUBLIC' | 'FREE_WITHIN_SCHOOL' | 'PAID' | 'INVITE_ONLY'> = {
-        public_catalog: 'PUBLIC',
-        invite_only: 'INVITE_ONLY',
-        internal_draft: 'FREE_WITHIN_SCHOOL',
-      };
-
-      const payload = {
-        title: metadata.title,
-        description: metadata.description || undefined,
-        type: 'COURSE' as const,
-        targetLanguage: metadata.targetLanguage,
-        level: (metadata.level || undefined) as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | undefined,
-        slug: metadata.slug || undefined,
-        accessTier: accessTierMap[visibility.mode] ?? 'INVITE_ONLY',
-      };
+      const { metadata, visibility, structure } = store;
+      const payload = wizardPayload(metadata, visibility.mode);
 
       const nextStep = currentStep + 1;
+
+      let draftId: string;
 
       if (!store.draftId) {
         const res = await createContainerAction(payload);
@@ -127,23 +120,29 @@ export function CreateWizard() {
           toast.error(t('wizard.shell.saveError'));
           return;
         }
-        const newId = res.value.id;
-        store.setDraftId(newId);
+        draftId = res.value.id;
+        store.setDraftId(draftId);
         store.markSaved();
-        const params = new URLSearchParams();
-        params.set('step', String(nextStep + 1));
-        params.set('draft', newId);
-        router.push(`/school/content/new?${params.toString()}`);
-        store.setStep(nextStep);
       } else {
-        const res = await updateContainerAction(store.draftId, payload);
+        draftId = store.draftId;
+        const res = await updateContainerAction(draftId, payload);
         if (!res.ok) {
           toast.error(t('wizard.shell.saveError'));
           return;
         }
         store.markSaved();
-        navigateTo(nextStep);
       }
+
+      if (currentStep === STRUCTURE_STEP_INDEX) {
+        const titles = structure.mode === 'cefr_scaffold' ? structure.cefrLevels : [];
+        const syncRes = await syncStructureSectionsAction(draftId, titles);
+        if (!syncRes.ok) {
+          toast.error(t('wizard.shell.saveError'));
+          return;
+        }
+      }
+
+      navigateTo(nextStep, draftId);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store, currentStep, t, router]);
@@ -157,30 +156,17 @@ export function CreateWizard() {
 
   const handleSaveExit = useCallback(() => {
     if (!store.draftId) {
-      router.push('/school/content');
+      router.push(contentBase);
       store.reset();
       return;
     }
     startTransition(async () => {
       const { metadata, visibility } = store;
-      const accessTierMap: Record<string, 'PUBLIC' | 'FREE_WITHIN_SCHOOL' | 'PAID' | 'INVITE_ONLY'> = {
-        public_catalog: 'PUBLIC',
-        invite_only: 'INVITE_ONLY',
-        internal_draft: 'FREE_WITHIN_SCHOOL',
-      };
-      await updateContainerAction(store.draftId!, {
-        title: metadata.title,
-        description: metadata.description || undefined,
-        type: 'COURSE' as const,
-        targetLanguage: metadata.targetLanguage,
-        level: (metadata.level || undefined) as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | undefined,
-        slug: metadata.slug || undefined,
-        accessTier: accessTierMap[visibility.mode] ?? 'INVITE_ONLY',
-      });
+      await updateContainerAction(store.draftId!, wizardPayload(metadata, visibility.mode));
       store.reset();
-      router.push('/school/content');
+      router.push(contentBase);
     });
-  }, [store, router]);
+  }, [store, router, contentBase]);
 
   // ── Discard ────────────────────────────────────────────────────────────────
 
@@ -201,8 +187,8 @@ export function CreateWizard() {
       }
     }
     store.reset();
-    router.push('/school/content');
-  }, [store, router, t]);
+    router.push(contentBase);
+  }, [store, router, t, contentBase]);
 
   // ── Steps config ───────────────────────────────────────────────────────────
 
@@ -255,7 +241,7 @@ export function CreateWizard() {
         <div className="border-b bg-[var(--ssz-bg-surface)] px-6 py-4">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
             <Button variant="ghost" size="sm" className="-ml-2" asChild>
-              <Link href="/school/content">
+              <Link href={contentBase}>
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {t('backToContent')}
               </Link>

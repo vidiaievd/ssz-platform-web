@@ -30,7 +30,7 @@ function TeacherWorkloadSkeleton() {
 }
 
 export function TeacherWorkloadWidget({ teacherWorkload, schoolSlug }: TeacherWorkloadWidgetProps) {
-  const timetableHref = `/school/${schoolSlug}/groups?view=timetable`;
+  const timetableHref = `/school/${schoolSlug}/groups/timetable`;
 
   if (teacherWorkload.status === 'unavailable') {
     return <TeacherWorkloadSkeleton />;

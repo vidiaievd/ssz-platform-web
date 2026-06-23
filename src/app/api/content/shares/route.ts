@@ -3,6 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import type { ContainerShare } from '@/features/content/types';
+import { entityTypeToUrlSlug, permissionToShareRole } from '@/features/content-authoring/lib/share-mapping';
+
+interface ContentShareResponse {
+  id: string;
+  entityType: string;
+  entityId: string;
+  sharedWithUserId: string;
+  permission: string;
+  createdAt: string;
+}
+
+interface ProfileSummary {
+  userId: string;
+  displayName: string;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -13,11 +28,24 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'entityType and entityId are required' }, { status: 400 });
   }
   try {
-    const data = await serverFetch<ContainerShare[]>({
+    const shares = await serverFetch<ContentShareResponse[]>({
       service: 'content',
-      path: `/${entityType}/${entityId}/shares`,
+      path: `/${entityTypeToUrlSlug(entityType)}/${entityId}/shares`,
     });
-    return NextResponse.json(data);
+
+    const names = await resolveDisplayNames(shares.map((s) => s.sharedWithUserId));
+
+    const result: ContainerShare[] = shares.map((s) => ({
+      id: s.id,
+      entityType: s.entityType,
+      entityId: s.entityId,
+      userId: s.sharedWithUserId,
+      userName: names.get(s.sharedWithUserId),
+      role: permissionToShareRole(s.permission),
+      createdAt: s.createdAt,
+    }));
+
+    return NextResponse.json(result);
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') {
       return NextResponse.json([], { status: 200 });
@@ -26,17 +54,20 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+// Batch-resolve display names for the share list. Email is intentionally not
+// shown — profile-service's batch lookup only exposes displayName, not email.
+async function resolveDisplayNames(userIds: string[]): Promise<Map<string, string>> {
+  const uniqueIds = Array.from(new Set(userIds));
+  if (uniqueIds.length === 0) return new Map();
+
   try {
-    const body = await request.json();
-    const share = await serverFetch<ContainerShare>({
-      service: 'content',
-      path: '/content-shares',
-      method: 'POST',
-      body,
+    const profiles = await serverFetch<ProfileSummary[]>({
+      service: 'profile',
+      path: '/profiles',
+      query: { userIds: uniqueIds.join(',') },
     });
-    return NextResponse.json(share, { status: 201 });
+    return new Map(profiles.map((p) => [p.userId, p.displayName]));
   } catch {
-    return NextResponse.json({ error: 'Failed to create share' }, { status: 502 });
+    return new Map();
   }
 }

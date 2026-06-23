@@ -13,6 +13,10 @@ export const onboardingSettingsSchema = z.object({
   availability: z.object({
     collect: z.boolean(),
   }),
+  ageBands: z.object({
+    values: z.array(z.enum(['kids', 'teens', 'adults'])),
+    collect: z.boolean(),
+  }),
   approval: z.object({
     mode: z.enum(['auto', 'manual']),
   }),

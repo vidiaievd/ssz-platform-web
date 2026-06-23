@@ -6,8 +6,7 @@ export function formatDate(
   options?: Intl.DateTimeFormatOptions,
 ) {
   return new Intl.DateTimeFormat(LOCALE_BCP47[locale], {
-    dateStyle: 'medium',
-    ...options,
+    ...(options ?? { dateStyle: 'medium' }),
   }).format(value);
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,13 +21,10 @@ import { useCreateWizardStore } from '../../stores/create-wizard';
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
 const metadataSchema = z.object({
   title: z.string().trim().min(1).max(80),
   targetLanguage: z.string().min(2).max(10),
-  level: z.string().optional(),
-  slug: z.string().max(200).regex(slugRegex, 'Only lowercase letters, numbers, and hyphens').optional().or(z.literal('')),
+  level: z.string().min(1),
   description: z.string().max(240).optional(),
   coverImageUrl: z.string().url().optional().or(z.literal('')),
 });
@@ -59,16 +56,6 @@ const LANGUAGES = [
 ] as const;
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .slice(0, 200);
-}
 
 // ── Preview card ───────────────────────────────────────────────────────────────
 
@@ -146,7 +133,6 @@ function CoursePreviewCard({
 export function WizardStepMetadata() {
   const t = useTranslations('Authoring');
   const store = useCreateWizardStore();
-  const [slugEdited, setSlugEdited] = useState(false);
 
   const {
     register,
@@ -161,7 +147,6 @@ export function WizardStepMetadata() {
       title: store.metadata.title,
       targetLanguage: store.metadata.targetLanguage,
       level: store.metadata.level,
-      slug: store.metadata.slug,
       description: store.metadata.description,
       coverImageUrl: store.metadata.coverImageUrl,
     },
@@ -172,17 +157,6 @@ export function WizardStepMetadata() {
   const level = useWatch({ control, name: 'level', defaultValue: store.metadata.level }) ?? '';
   const description = useWatch({ control, name: 'description', defaultValue: store.metadata.description }) ?? '';
   const coverImageUrl = useWatch({ control, name: 'coverImageUrl', defaultValue: store.metadata.coverImageUrl }) ?? '';
-  const slug = useWatch({ control, name: 'slug', defaultValue: store.metadata.slug }) ?? '';
-
-  // Auto-generate slug from title until user manually edits it
-  useEffect(() => {
-    if (slugEdited || store.draftId) return;
-    const generated = slugify(titleValue);
-    setValue('slug', generated, { shouldValidate: !!titleValue });
-    store.updateMetadata({ slug: generated });
-    // store and setValue are stable refs — intentionally excluded
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titleValue, slugEdited]);
 
   // Sync watched values into the store whenever they change
   useEffect(() => {
@@ -190,13 +164,12 @@ export function WizardStepMetadata() {
       title: titleValue,
       targetLanguage,
       level,
-      slug,
       description,
       coverImageUrl,
     });
     // store is a stable Zustand reference — intentionally excluded
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titleValue, targetLanguage, level, slug, description, coverImageUrl]);
+  }, [titleValue, targetLanguage, level, description, coverImageUrl]);
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
@@ -254,16 +227,18 @@ export function WizardStepMetadata() {
             </Select>
           </Field>
 
-          <Field label={t('wizard.metadata.level')} htmlFor="wizard-level">
+          <Field label={t('wizard.metadata.level')} htmlFor="wizard-level" error={errors.level?.message} required>
             <Select
               value={level}
-              onValueChange={(v) => setValue('level', v === '_none' ? '' : v)}
+              onValueChange={(v) => {
+                setValue('level', v, { shouldValidate: true });
+                void trigger('level');
+              }}
             >
               <SelectTrigger id="wizard-level" className="w-full">
-                <SelectValue placeholder={t('wizard.metadata.levelNone')} />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="_none">{t('wizard.metadata.levelNone')}</SelectItem>
                 {LEVELS.map((l) => (
                   <SelectItem key={l} value={l}>
                     {l}
@@ -273,24 +248,6 @@ export function WizardStepMetadata() {
             </Select>
           </Field>
         </div>
-
-        {/* Slug */}
-        <Field
-          label={t('fields.slug')}
-          htmlFor="wizard-slug"
-          error={errors.slug?.message}
-          hint={store.draftId ? t('fields.slugFrozen') : t('form.slugTooltip')}
-        >
-          <Input
-            id="wizard-slug"
-            placeholder={t('form.slugPlaceholder')}
-            hasError={!!errors.slug}
-            disabled={!!store.draftId}
-            {...register('slug', {
-              onChange: () => setSlugEdited(true),
-            })}
-          />
-        </Field>
 
         {/* Description */}
         <Field

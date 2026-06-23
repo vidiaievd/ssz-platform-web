@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Search, CheckCircle2, AlertCircle, AlertTriangle, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/ui/status-pill';
-import { slotsOverlap } from '@/lib/groups/operations';
+import { useTeachersAvailability } from '../../api/use-teachers-availability';
 import { useGroupCreateWizardStore } from '../../stores/create-wizard-store';
 import type { WizardTeacherRole } from '../../stores/create-wizard-store';
 import type { TimetableTeacher } from '../../types';
@@ -67,7 +68,8 @@ function TeacherCard({
 }
 
 export function StepTeachers({ teachers, timetable }: Props) {
-  const { teachers: assignedTeachers, slots, lang, addTeacher, removeTeacher } =
+  const t = useTranslations('Groups');
+  const { schoolId, teachers: assignedTeachers, slots, lang, addTeacher, removeTeacher } =
     useGroupCreateWizardStore();
   const [query, setQuery] = useState('');
   const [pickingRole, setPickingRole] = useState<WizardTeacherRole | null>(null);
@@ -75,21 +77,25 @@ export function StepTeachers({ teachers, timetable }: Props) {
   const primary    = assignedTeachers.find((t) => t.role === 'primary');
   const coPrimary  = assignedTeachers.find((t) => t.role === 'co-primary');
 
-  // Compute conflict flags for each candidate against wizard slots
+  // Derived availability (free/conflict/absent) for the wizard's draft slots —
+  // the time-first source of truth, replacing client-guessed overlap checks.
+  const { data: availability } = useTeachersAvailability(schoolId, slots);
+  const availabilityByTeacher = useMemo(
+    () => new Map((availability ?? []).map((a) => [a.teacherId, a])),
+    [availability],
+  );
+
   const candidateFlags = useMemo(() => {
-    const flags = new Map<string, { langFit: boolean; conflictsWithGroup: boolean; currentHours: number; maxHours: number }>();
-    for (const t of teachers) {
-      const tt = timetable.find((x) => x.userId === t.userId);
-      const teacherSlots = (tt?.lessons ?? []).map((l) => ({ day: l.day, start: l.start, end: l.end, room: '' }));
-      const conflictsWithGroup = slots.some((gs) =>
-        teacherSlots.some((ts) => slotsOverlap(ts, { day: gs.day, start: gs.start, end: gs.end, room: gs.room })),
-      );
-      const langFit = t.langs.some((l) => l.toLowerCase() === lang.toLowerCase());
+    const flags = new Map<string, { langFit: boolean; availabilityStatus: 'free' | 'conflict' | 'absent'; currentHours: number; maxHours: number }>();
+    for (const cand of teachers) {
+      const tt = timetable.find((x) => x.userId === cand.userId);
+      const langFit = cand.langs.some((l) => l.toLowerCase() === lang.toLowerCase());
       const currentHours = tt?.hours ?? 0;
-      flags.set(t.userId, { langFit, conflictsWithGroup, currentHours, maxHours: t.maxWeeklyHours });
+      const availabilityStatus = availabilityByTeacher.get(cand.userId)?.status ?? 'free';
+      flags.set(cand.userId, { langFit, availabilityStatus, currentHours, maxHours: cand.maxWeeklyHours });
     }
     return flags;
-  }, [teachers, timetable, slots, lang]);
+  }, [teachers, timetable, lang, availabilityByTeacher]);
 
   const assignedIds = new Set(assignedTeachers.map((t) => t.userId));
 
@@ -191,23 +197,24 @@ export function StepTeachers({ teachers, timetable }: Props) {
             {filtered.length === 0 ? (
               <p className="text-sm text-(--ssz-text-muted) text-center py-3">No teachers available.</p>
             ) : (
-              filtered.map((t) => {
-                const flags = candidateFlags.get(t.userId);
-                const hasConflict = flags?.conflictsWithGroup ?? false;
+              filtered.map((cand) => {
+                const flags = candidateFlags.get(cand.userId);
+                const hasConflict = flags?.availabilityStatus === 'conflict';
+                const isAbsent = flags?.availabilityStatus === 'absent';
                 const langMismatch = flags ? !flags.langFit : false;
-                const fillPct = Math.min((flags?.currentHours ?? 0) / (t.maxWeeklyHours || 1) * 100, 100);
+                const fillPct = Math.min((flags?.currentHours ?? 0) / (cand.maxWeeklyHours || 1) * 100, 100);
                 return (
                   <div
-                    key={t.userId}
+                    key={cand.userId}
                     role="option"
                     aria-selected={false}
-                    onClick={() => handlePick(t.userId)}
+                    onClick={() => handlePick(cand.userId)}
                     className="flex items-center gap-3 px-3 py-2 rounded-lg border border-transparent hover:bg-white dark:hover:bg-primary-900/30 cursor-pointer"
                   >
-                    <Avatar name={t.name} src={t.avatarUrl ?? undefined} size="sm" />
+                    <Avatar name={cand.name} src={cand.avatarUrl ?? undefined} size="sm" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-sm font-medium text-(--ssz-text-primary) truncate">{t.name}</span>
+                        <span className="text-sm font-medium text-(--ssz-text-primary) truncate">{cand.name}</span>
                         {langMismatch && (
                           <span className="text-[10px] text-warning-600 font-medium">lang mismatch</span>
                         )}
@@ -217,17 +224,23 @@ export function StepTeachers({ teachers, timetable }: Props) {
                             time clash
                           </span>
                         )}
+                        {isAbsent && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-error-600 font-medium">
+                            <AlertTriangle className="size-3" aria-hidden="true" />
+                            {t('assignTeacher.availabilityAbsent')}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex-1 h-1 rounded-full bg-border overflow-hidden">
                           <div className={cn('h-full rounded-full', fillPct >= 100 ? 'bg-error-500' : fillPct >= 85 ? 'bg-warning-500' : 'bg-primary')} style={{ width: `${fillPct}%` }} />
                         </div>
                         <span className="text-[11px] text-(--ssz-text-muted) font-mono whitespace-nowrap">
-                          {(flags?.currentHours ?? 0).toFixed(1)}/{t.maxWeeklyHours}h
+                          {(flags?.currentHours ?? 0).toFixed(1)}/{cand.maxWeeklyHours}h
                         </span>
                       </div>
                     </div>
-                    {hasConflict
+                    {hasConflict || isAbsent
                       ? <AlertCircle className="size-4 text-error-500 shrink-0" aria-hidden="true" />
                       : <CheckCircle2 className="size-4 text-primary shrink-0 opacity-0 group-hover:opacity-100" aria-hidden="true" />
                     }

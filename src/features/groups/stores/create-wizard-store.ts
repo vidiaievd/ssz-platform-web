@@ -3,6 +3,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import { todayISO } from '../lib/today-iso';
+import type { AgeBand } from '../types';
+
 export type Weekday = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 export type CEFR = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
 export type WizardTeacherRole = 'primary' | 'co-primary';
@@ -30,6 +33,7 @@ export type GroupWizardDraft = {
   capacity: { min: number; max: number };
   startDate: string;
   endDate: string;
+  ageBand: AgeBand | null;
   slots: DraftSlot[];
   teachers: DraftTeacher[];
   studentIds: string[];
@@ -67,6 +71,7 @@ const BLANK_DRAFT: GroupWizardDraft = {
   capacity: { min: 0, max: 12 },
   startDate: '',
   endDate: '',
+  ageBand: null,
   slots: [],
   teachers: [],
   studentIds: [],
@@ -135,7 +140,9 @@ export const useGroupCreateWizardStore = create<WizardState & WizardActions>()(
           case 1: {
             const nameOk = s.name.trim().length > 0 && s.name.trim().length <= 100;
             const capOk = s.capacity.min >= 0 && s.capacity.max >= 1 && s.capacity.max >= s.capacity.min;
-            return nameOk && capOk;
+            const startOk = !s.startDate || s.startDate >= todayISO();
+            const endOk = !s.endDate || !s.startDate || s.endDate >= s.startDate;
+            return nameOk && capOk && startOk && endOk;
           }
           case 2: {
             if (s.slots.length === 0) return false;
@@ -170,6 +177,7 @@ export const useGroupCreateWizardStore = create<WizardState & WizardActions>()(
         capacity: s.capacity,
         startDate: s.startDate,
         endDate: s.endDate,
+        ageBand: s.ageBand,
         slots: s.slots,
         teachers: s.teachers,
         studentIds: s.studentIds,

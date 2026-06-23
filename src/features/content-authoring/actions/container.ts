@@ -17,12 +17,6 @@ export async function createContainerAction(input: ContainerFormValues) {
     }
 
     const data = parsed.data;
-    if (!data.slug) {
-      throw new AppError('validation', 'Slug is required', {
-        fieldErrors: { slug: ['Slug is required'] },
-        formErrors: [],
-      });
-    }
 
     const container = await serverFetch<Container>({
       service: 'content',
@@ -31,11 +25,10 @@ export async function createContainerAction(input: ContainerFormValues) {
       body: {
         title: data.title,
         ...(data.description && { description: data.description }),
-        type: data.type,
+        containerType: data.containerType,
         targetLanguage: data.targetLanguage,
-        ...(data.instructionLanguage && { instructionLanguage: data.instructionLanguage }),
-        ...(data.level && { level: data.level }),
-        slug: data.slug,
+        difficultyLevel: data.difficultyLevel,
+        visibility: data.visibility,
         accessTier: data.accessTier,
       },
     });
@@ -53,17 +46,14 @@ export async function updateContainerAction(id: string, input: ContainerFormValu
     }
 
     const data = parsed.data;
+    // containerType cannot be changed after creation — not sent on update.
     const body: Record<string, unknown> = {
       title: data.title,
       description: data.description ?? null,
-      type: data.type,
-      targetLanguage: data.targetLanguage,
-      instructionLanguage: data.instructionLanguage ?? null,
-      level: data.level ?? null,
+      difficultyLevel: data.difficultyLevel,
+      visibility: data.visibility,
       accessTier: data.accessTier,
     };
-    // Only send slug for drafts; for published containers the field is read-only in the UI.
-    if (data.slug !== undefined) body.slug = data.slug;
 
     await serverFetch({
       service: 'content',
