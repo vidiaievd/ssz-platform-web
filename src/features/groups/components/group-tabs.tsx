@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -10,6 +11,7 @@ import { OverviewCards } from './overview-cards';
 import { GroupStudentsTab } from './group-students-tab';
 import { GroupTeachersTab } from './group-teachers-tab';
 import { GroupScheduleTab } from './group-schedule-tab';
+import { GroupEditDialog } from './group-edit-dialog';
 import type { Group, RosterStudent, Lesson, CourseView } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
@@ -32,6 +34,7 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
   const pathname = usePathname();
 
   const activeTab = (searchParams.get('tab') as TabKey | null) ?? 'overview';
+  const [editScheduleOpen, setEditScheduleOpen] = useState(false);
 
   function handleTabChange(tab: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -64,6 +67,7 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
   };
 
   return (
+    <>
     <Tabs value={activeTab} onValueChange={handleTabChange}>
       {/* Mobile: tabs collapse into a Select mirroring the same labels/counts (spec §8). */}
       <Select value={activeTab} onValueChange={handleTabChange}>
@@ -123,8 +127,22 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
 
       {/* ── Schedule ──────────────────────────────────────────────────────── */}
       <TabsContent value="schedule">
-        <GroupScheduleTab slots={group.slots} lessons={lessons} />
+        <GroupScheduleTab
+          slots={group.slots}
+          lessons={lessons}
+          canManage={canManage}
+          onEditSchedule={() => setEditScheduleOpen(true)}
+        />
       </TabsContent>
     </Tabs>
+
+      <GroupEditDialog
+        group={group}
+        schoolId={schoolId}
+        schoolSlug={schoolSlug}
+        open={editScheduleOpen}
+        onOpenChange={setEditScheduleOpen}
+      />
+    </>
   );
 }

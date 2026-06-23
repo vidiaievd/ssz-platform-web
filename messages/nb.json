@@ -1449,7 +1449,8 @@
       "upcomingHeading": "Kommende timer",
       "noSlots": "Ingen faste timer konfigurert.",
       "noLessons": "Ingen kommende timer planlagt.",
-      "sub": "Vikar"
+      "sub": "Vikar",
+      "editButton": "Rediger timeplan"
     },
     "detail": {
       "back": "Grupper",
@@ -1655,14 +1656,21 @@
     },
     "course": {
       "title": "Kurs",
-      "description": "Skrivebeskyttede kursdetaljer for denne gruppen.",
+      "description": "Kursdetaljer og tilleggsmateriell for denne gruppen.",
       "cefr": "CEFR-nivå",
       "language": "Språk",
       "curriculum": "Læreplan",
       "units": "{count} enheter",
       "noCourse": "Ingen kurs tildelt",
       "open": "Vis kurs →",
-      "editHint": "Administreres fra gruppens redigeringspanel."
+      "editHint": "Bruk Behandle-knappen på kurskortet for å endre materiell.",
+      "manage": "Behandle",
+      "dialogTitle": "Behandle kurs",
+      "dialogDescription": "Velg gruppens hovedkurs og eventuelt tilleggsmateriell.",
+      "updateSuccess": "Kurs oppdatert",
+      "updateError": "Kunne ikke oppdatere kurs",
+      "materialsCount": "+{count} tilleggsmateriell",
+      "materialsCountPlural": "+{count} tilleggsmateriell"
     }
   },
   "Students": {

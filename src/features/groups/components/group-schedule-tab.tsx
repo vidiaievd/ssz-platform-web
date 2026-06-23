@@ -1,7 +1,9 @@
 'use client';
 
-import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Calendar, Clock, MapPin, Pencil, Users } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Slot, Lesson, Weekday } from '../types';
 
@@ -17,9 +19,12 @@ const DAY_FULL: Record<Weekday, string> = {
 type Props = {
   slots: Slot[];
   lessons: Lesson[];
+  canManage: boolean;
+  onEditSchedule: () => void;
 };
 
-export function GroupScheduleTab({ slots, lessons }: Props) {
+export function GroupScheduleTab({ slots, lessons, canManage, onEditSchedule }: Props) {
+  const t = useTranslations('Groups');
   const sortedSlots = [...slots].sort(
     (a, b) => DAY_ORDER[a.day] - DAY_ORDER[b.day] || a.start.localeCompare(b.start),
   );
@@ -28,13 +33,21 @@ export function GroupScheduleTab({ slots, lessons }: Props) {
     <div className="space-y-6">
       {/* Recurring slots */}
       <section aria-labelledby="schedule-slots-heading">
-        <h3 id="schedule-slots-heading" className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-3">
-          Recurring schedule
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 id="schedule-slots-heading" className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
+            {t('schedule.recurringHeading')}
+          </h3>
+          {canManage && (
+            <Button variant="outline" size="sm" onClick={onEditSchedule}>
+              <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
+              {t('schedule.editButton')}
+            </Button>
+          )}
+        </div>
 
         {sortedSlots.length === 0 ? (
           <p className="text-sm text-(--ssz-text-muted) italic px-3 py-2">
-            No recurring slots configured.
+            {t('schedule.noSlots')}
           </p>
         ) : (
           <div className="flex flex-col gap-2">
@@ -68,12 +81,12 @@ export function GroupScheduleTab({ slots, lessons }: Props) {
       {/* Upcoming lessons */}
       <section aria-labelledby="schedule-lessons-heading">
         <h3 id="schedule-lessons-heading" className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-3">
-          Upcoming lessons
+          {t('schedule.upcomingHeading')}
         </h3>
 
         {lessons.length === 0 ? (
           <p className="text-sm text-(--ssz-text-muted) italic px-3 py-2">
-            No upcoming lessons scheduled.
+            {t('schedule.noLessons')}
           </p>
         ) : (
           <div className="flex flex-col gap-2">
@@ -97,7 +110,7 @@ export function GroupScheduleTab({ slots, lessons }: Props) {
                     {lesson.teacherName}
                     {lesson.isSubstitute && (
                       <span className="ml-1 rounded-full bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-400 px-1.5 py-0.5 text-[10px] font-semibold">
-                        Sub
+                        {t('schedule.sub')}
                       </span>
                     )}
                   </div>

@@ -16,6 +16,8 @@ type Props = {
   materials: GroupMaterial[];
   /** Main material's courseId, if set — can't also be added as an additional material. */
   mainCourseId: string | null;
+  /** Hides add/remove controls for viewers without manage rights. */
+  canManage?: boolean;
 };
 
 /**
@@ -23,7 +25,7 @@ type Props = {
  * material and of the dialog's Save button — mirrors TeacherRow's immediate
  * remove action (teacher-row.tsx) rather than the form's batched submit.
  */
-export function GroupEditMaterialsField({ schoolId, groupId, materials, mainCourseId }: Props) {
+export function GroupEditMaterialsField({ schoolId, groupId, materials, mainCourseId, canManage = true }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -74,34 +76,38 @@ export function GroupEditMaterialsField({ schoolId, groupId, materials, mainCour
               {material.courseName}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => handleRemove(material.id)}
-            disabled={isPending}
-            aria-label={t('edit.removeMaterial')}
-            className="inline-flex items-center justify-center size-6 rounded-sm text-(--ssz-text-muted) hover:text-error-600 disabled:opacity-50 shrink-0"
-          >
-            <X className="size-3.5" />
-          </button>
+          {canManage && (
+            <button
+              type="button"
+              onClick={() => handleRemove(material.id)}
+              disabled={isPending}
+              aria-label={t('edit.removeMaterial')}
+              className="inline-flex items-center justify-center size-6 rounded-sm text-(--ssz-text-muted) hover:text-error-600 disabled:opacity-50 shrink-0"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
         </div>
       ))}
 
-      {pickerOpen ? (
-        <CoursePicker
-          excludeCourseIds={excludeCourseIds}
-          onSelect={(id) => handleAdd(id)}
-          onCancel={() => setPickerOpen(false)}
-        />
-      ) : (
-        <button
-          type="button"
-          onClick={() => setPickerOpen(true)}
-          disabled={isPending}
-          className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-input px-3 py-2 text-sm font-medium text-(--ssz-text-muted) hover:border-primary hover:text-primary disabled:opacity-50"
-        >
-          <BookOpen className="size-3.5" aria-hidden="true" />
-          {t('edit.addMaterial')}
-        </button>
+      {canManage && (
+        pickerOpen ? (
+          <CoursePicker
+            excludeCourseIds={excludeCourseIds}
+            onSelect={(id) => handleAdd(id)}
+            onCancel={() => setPickerOpen(false)}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            disabled={isPending}
+            className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-input px-3 py-2 text-sm font-medium text-(--ssz-text-muted) hover:border-primary hover:text-primary disabled:opacity-50"
+          >
+            <BookOpen className="size-3.5" aria-hidden="true" />
+            {t('edit.addMaterial')}
+          </button>
+        )
       )}
     </div>
   );

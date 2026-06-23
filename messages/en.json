@@ -1454,7 +1454,8 @@
       "upcomingHeading": "Upcoming lessons",
       "noSlots": "No recurring slots configured.",
       "noLessons": "No upcoming lessons scheduled.",
-      "sub": "Sub"
+      "sub": "Sub",
+      "editButton": "Edit schedule"
     },
     "detail": {
       "back": "Groups",
@@ -1660,14 +1661,21 @@
     },
     "course": {
       "title": "Course",
-      "description": "Read-only course details for this group.",
+      "description": "Course details and additional materials for this group.",
       "cefr": "CEFR level",
       "language": "Language",
       "curriculum": "Curriculum",
       "units": "{count} units",
       "noCourse": "No course assigned",
       "open": "View course →",
-      "editHint": "Manage from this group's Edit panel."
+      "editHint": "Use the Manage button on the Course card to change materials.",
+      "manage": "Manage",
+      "dialogTitle": "Manage course",
+      "dialogDescription": "Choose the group's main course and any additional materials.",
+      "updateSuccess": "Course updated",
+      "updateError": "Failed to update course",
+      "materialsCount": "+{count} additional material",
+      "materialsCountPlural": "+{count} additional materials"
     }
   },
   "Students": {

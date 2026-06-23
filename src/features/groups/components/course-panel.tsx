@@ -2,19 +2,22 @@
 
 import { useTranslations } from 'next-intl';
 
+import { BookOpen } from 'lucide-react';
+
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
 } from '@/components/ui/sheet';
-import type { CourseView } from '../types';
+import type { CourseView, GroupMaterial } from '../types';
 
 type Props = {
   courseView: CourseView;
   canManage: boolean;
+  materials: GroupMaterial[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function CoursePanel({ courseView, canManage, open, onOpenChange }: Props) {
+export function CoursePanel({ courseView, canManage, materials, open, onOpenChange }: Props) {
   const t = useTranslations('Groups');
 
   return (
@@ -49,7 +52,28 @@ export function CoursePanel({ courseView, canManage, open, onOpenChange }: Props
             </dl>
           )}
 
-          {/* Seam for future "Attached content" (spec §6.3) — no data model yet; out of scope. */}
+          <div className="flex flex-col gap-2 pt-2 border-t border-border/60">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
+              {t('edit.materialsHeading')}
+            </h3>
+            {materials.length === 0 ? (
+              <p className="text-sm text-(--ssz-text-muted) italic">{t('edit.noMaterials')}</p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {materials.map((material) => (
+                  <li
+                    key={material.id}
+                    className="flex items-center gap-2 rounded-md border border-input px-3 py-2"
+                  >
+                    <BookOpen className="size-3.5 text-(--ssz-text-muted) shrink-0" aria-hidden="true" />
+                    <span className="text-sm font-medium text-(--ssz-text-secondary) truncate">
+                      {material.courseName}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
         {canManage && (

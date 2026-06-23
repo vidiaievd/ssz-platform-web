@@ -1,13 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { UserPlus, CalendarPlus } from 'lucide-react';
+import { UserPlus, CalendarPlus, Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { CapacityMeter } from '@/components/shared/operations';
 import { TeacherRow } from './teacher-row';
 import { CourseChip } from './course-chip';
+import { CourseManageDialog } from './course-manage-dialog';
 import type { Group, RosterStudent, Lesson, CourseView } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
@@ -15,18 +18,23 @@ import type { Alert } from '@/features/dashboard/types';
 
 function Card({
   heading,
+  headerAction,
   children,
   footer,
 }: {
   heading: string;
+  headerAction?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
   return (
     <section className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
-        {heading}
-      </h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
+          {heading}
+        </h3>
+        {headerAction}
+      </div>
       <div className="flex-1">{children}</div>
       {footer && <div className="pt-1 border-t border-border/60">{footer}</div>}
     </section>
@@ -67,9 +75,11 @@ export function OverviewCards({
 }: Props) {
   const t = useTranslations('Groups');
   const detailBase = `/school/${schoolSlug}/groups/${group.id}`;
+  const [courseDialogOpen, setCourseDialogOpen] = useState(false);
 
   // ── Course ──
   const modeLabel = group.mode === 'online' ? t('row.online') : t('row.inPerson');
+  const materialsCount = group.materials.length;
 
   // ── Roster ──
   const clashCount = roster.filter((s) => s.hasClash).length;
@@ -92,19 +102,40 @@ export function OverviewCards({
   const nextLesson = lessons[0] ?? null;
 
   return (
+    <>
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
       {/* Course */}
       <Card
         heading={t('overview.courseHeading')}
-        footer={<CourseChip courseView={courseView} canManage={canManage} variant="link" />}
-      >
-        {group.courseName ? (
-          <p className="text-sm text-(--ssz-text-secondary)">
-            {group.lang.toUpperCase()} · {group.courseName} · {modeLabel}
-          </p>
-        ) : (
-          <p className="text-sm text-(--ssz-text-muted) italic">{t('course.noCourse')}</p>
+        headerAction={canManage && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 -my-1"
+            onClick={() => setCourseDialogOpen(true)}
+          >
+            <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
+            {t('course.manage')}
+          </Button>
         )}
+        footer={<CourseChip courseView={courseView} canManage={canManage} materials={group.materials} variant="link" />}
+      >
+        <div className="space-y-1">
+          {group.courseName ? (
+            <p className="text-sm text-(--ssz-text-secondary)">
+              {group.lang.toUpperCase()} · {group.courseName} · {modeLabel}
+            </p>
+          ) : (
+            <p className="text-sm text-(--ssz-text-muted) italic">{t('course.noCourse')}</p>
+          )}
+          {materialsCount > 0 && (
+            <p className="text-xs text-(--ssz-text-muted)">
+              {materialsCount > 1
+                ? t('course.materialsCountPlural', { count: materialsCount })
+                : t('course.materialsCount', { count: materialsCount })}
+            </p>
+          )}
+        </div>
       </Card>
 
       {/* Roster */}
@@ -211,5 +242,14 @@ export function OverviewCards({
         )}
       </Card>
     </div>
+      {canManage && (
+        <CourseManageDialog
+          group={group}
+          schoolId={schoolSlug}
+          open={courseDialogOpen}
+          onOpenChange={setCourseDialogOpen}
+        />
+      )}
+    </>
   );
 }

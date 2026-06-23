@@ -62,7 +62,7 @@ export async function GroupDetailHeader({ group, alerts, courseView, schoolSlug,
             <HeaderRiskChip alerts={alerts} />
           </div>
           <div className="mt-1.5 flex items-center gap-3 text-sm flex-wrap">
-            <CourseChip courseView={courseView} canManage={canManage} />
+            <CourseChip courseView={courseView} canManage={canManage} materials={group.materials} />
             {group.level && <Fact label={t('header.level')} value={group.level} />}
             <Fact
               label={t('header.mode')}
