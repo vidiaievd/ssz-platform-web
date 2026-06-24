@@ -1,90 +1,47 @@
 'use client';
 
+import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useMarkRead, useNotifications } from '../api/use-notifications';
-import { getNotificationEntry } from '../lib/notification-registry';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useMarkAllRead, useMarkRead, useNotifications } from '../api/use-notifications';
+import type { NotificationLinkContext } from '../lib/notification-registry';
 import type { Notification } from '../types';
+import { LiveIndicator } from './live-indicator';
+import { NotificationListItem } from './notification-list-item';
 
-function timeAgo(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime();
-  const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `${diffH}h ago`;
-  return `${Math.floor(diffH / 24)}d ago`;
+const BELL_PREVIEW_LIMIT = 8;
+
+export interface NotificationBellProps {
+  linkContext: NotificationLinkContext;
+  notificationsHref?: string;
 }
 
-function resolveContent(
-  notification: Notification,
-  t: ReturnType<typeof useTranslations<'Notifications'>>,
-): { title: string; body: string } {
-  const entry = getNotificationEntry(notification.type);
-  return {
-    title: entry.resolveTitle(notification.templateData, t),
-    body: entry.resolveBody(notification.templateData, t),
-  };
-}
+function noop() {}
 
-function NotificationItem({
-  notification,
-  t,
-  onMarkRead,
-}: {
-  notification: Notification;
-  t: ReturnType<typeof useTranslations<'Notifications'>>;
-  onMarkRead: (id: string) => void;
-}) {
-  const { title, body } = resolveContent(notification, t);
-
-  return (
-    <DropdownMenuItem
-      className="flex flex-col items-start gap-0.5 px-3 py-2.5"
-      onSelect={() => {
-        if (!notification.isRead) onMarkRead(notification.id);
-      }}
-    >
-      <div className="flex w-full items-start gap-2">
-        {!notification.isRead && (
-          <span
-            aria-label={t('unreadDot')}
-            className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary"
-          />
-        )}
-        <div className={!notification.isRead ? '' : 'pl-4'}>
-          <p className="text-sm font-medium leading-tight">{title}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground leading-snug">{body}</p>
-          <p className="mt-1 text-[11px] text-muted-foreground/70">
-            {timeAgo(notification.createdAt)}
-          </p>
-        </div>
-      </div>
-    </DropdownMenuItem>
-  );
-}
-
-export function NotificationBell() {
+export function NotificationBell({ linkContext, notificationsHref }: NotificationBellProps) {
   const t = useTranslations('Notifications');
-  const { data } = useNotifications();
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const { data, isError } = useNotifications();
   const { mutate: markRead } = useMarkRead();
+  const { mutate: markAllRead } = useMarkAllRead();
 
-  const notifications = data?.items ?? [];
+  const notifications = data?.items.slice(0, BELL_PREVIEW_LIMIT) ?? [];
   const unreadCount = data?.unreadCount ?? 0;
 
+  function openNotification(notification: Notification, href: string | undefined) {
+    setOpen(false);
+    if (href) router.push(href);
+  }
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -101,34 +58,59 @@ export function NotificationBell() {
             </span>
           )}
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex items-center justify-between">
-          <span>{t('title')}</span>
-          {unreadCount > 0 && (
-            <span className="text-xs font-normal text-muted-foreground">
-              {t('unread', { count: unreadCount })}
-            </span>
-          )}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-95 p-0">
+        <div className="flex items-center justify-between px-3 pt-3 pb-2">
+          <span className="text-sm font-semibold">{t('title')}</span>
+          <LiveIndicator connected={!isError} />
+        </div>
+
         {notifications.length === 0 ? (
-          <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-            {t('empty')}
-          </div>
+          <div className="px-3 py-6 text-center text-sm text-muted-foreground">{t('empty')}</div>
         ) : (
-          <DropdownMenuGroup>
-            {notifications.map((n) => (
-              <NotificationItem
-                key={n.id}
-                notification={n}
-                t={t}
-                onMarkRead={markRead}
-              />
-            ))}
-          </DropdownMenuGroup>
+          <ScrollArea className="max-h-96">
+            <div role="list" className="px-1.5 pb-1.5">
+              {notifications.map((notification) => (
+                <NotificationListItem
+                  key={notification.id}
+                  notification={notification}
+                  variant="dropdown"
+                  linkContext={linkContext}
+                  onOpen={openNotification}
+                  onMarkRead={markRead}
+                  onMarkUnread={noop}
+                  onArchive={noop}
+                  onUnarchive={noop}
+                  onDelete={noop}
+                />
+              ))}
+            </div>
+          </ScrollArea>
         )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+
+        <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={unreadCount === 0}
+            onClick={() => markAllRead()}
+          >
+            {t('markAllAsRead')}
+          </Button>
+          {notificationsHref && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setOpen(false);
+                router.push(notificationsHref);
+              }}
+            >
+              {t('openAll')}
+            </Button>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }

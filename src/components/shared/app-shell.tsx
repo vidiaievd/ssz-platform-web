@@ -21,6 +21,7 @@ import type { DashboardRole, SchoolType } from "@/features/dashboard/types";
 import type { SchoolRole } from "@/features/school/types";
 import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
+import type { NotificationLinkContext } from "@/features/notifications";
 import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
 import { GlobalSearchTrigger } from "./topbar/global-search-trigger";
@@ -200,6 +201,18 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
     !!schoolContext?.schoolRole &&
     SCHEDULING_SCHOOL_ROLES.has(schoolContext.schoolRole);
 
+  const notificationsLinkContext: NotificationLinkContext =
+    variant === "school"
+      ? { workspaceKind: "school", schoolSlug: schoolContext?.school.slug }
+      : { workspaceKind: "student" };
+
+  const notificationsHref =
+    variant === "school" && schoolContext
+      ? `/school/${schoolContext.school.slug}/notifications`
+      : variant === "student"
+        ? "/student/notifications"
+        : undefined;
+
   const workspaceSwitcher = (
     <div className="flex items-center gap-2 min-w-0">
       <WorkspaceSwitcher activeContextKey={activeContextKey} userId={resolvedTutorId || undefined} />
@@ -230,7 +243,10 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
             <div className="flex items-center gap-2">
               {variant === "school" && <TrialPill />}
               {canSeeSchedulingAlerts && <AlertBadge schoolId={schoolContext?.schoolId} />}
-              <NotificationBell />
+              <NotificationBell
+                linkContext={notificationsLinkContext}
+                notificationsHref={notificationsHref}
+              />
             </div>
           }
         />
