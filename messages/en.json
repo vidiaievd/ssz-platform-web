@@ -990,6 +990,11 @@
       "archived": "Archived"
     },
     "filterAllTypes": "All types",
+    "loadMore": "Load more",
+    "dayGroups": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
     "selectAll": "Select all",
     "selectedCount": "{count, plural, one {# selected} other {# selected}}",
     "bulk": {
