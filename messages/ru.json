@@ -492,7 +492,8 @@
       "templatePlaceholder": "напр. Jeg ___ til jobben",
       "substitutionPlaceholder": "sykler",
       "addExample": "Добавить пример",
-      "removeExample": "Удалить пример"
+      "removeExample": "Удалить пример",
+      "pageOf": "Страница {page} из {totalPages}"
     },
     "exercises": {
       "add": "Добавить упражнение",

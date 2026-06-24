@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
@@ -21,6 +21,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import type { Container, VocabularyItem, VocabularyList } from '@/features/content/types';
 
 import { vocabularyListFormSchema, type VocabularyListFormValues } from '../schemas/vocabulary';
@@ -116,10 +122,14 @@ function ItemsSection({
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
+  const [page, setPage] = useState(1);
   const [editingItemId, setEditingItemId] = useState<string | 'new' | null>(null);
   const [pendingDelete, setPendingDelete] = useState<VocabularyItem | null>(null);
 
-  const { data: items, isLoading, isError } = useAuthoringVocabularyItems(list.id);
+  const { data, isLoading, isError } = useAuthoringVocabularyItems(list.id, page);
+  const items = data?.items;
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
 
   function confirmDelete() {
     if (!pendingDelete) return;
@@ -131,7 +141,9 @@ function ItemsSection({
         toast.error(tErrors(result.error.code));
         return;
       }
-      await queryClient.invalidateQueries({ queryKey: authoringKeys.vocabularyItems(list.id) });
+      await queryClient.invalidateQueries({
+        queryKey: authoringKeys.vocabularyItemsAll(list.id),
+      });
       if (editingItemId === target.id) setEditingItemId(null);
       toast.success(t('vocabulary.deleteSuccess'));
     });
@@ -150,7 +162,7 @@ function ItemsSection({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
-          {t('vocabulary.wordCount', { count: items?.length ?? 0 })}
+          {t('vocabulary.wordCount', { count: total })}
         </p>
         <Button
           variant="outline"
@@ -243,14 +255,49 @@ function ItemsSection({
         </div>
       )}
 
-      {editingItemId !== null && (
-        <VocabularyForm
-          listId={list.id}
-          containerId={container.id}
-          itemId={editingItemId === 'new' ? undefined : editingItemId}
-          onDone={() => setEditingItemId(null)}
-        />
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>{t('vocabulary.pageOf', { page, totalPages })}</span>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       )}
+
+      <Dialog open={editingItemId !== null} onOpenChange={(open) => !open && setEditingItemId(null)}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingItemId === 'new' ? t('vocabulary.addWord') : t('vocabulary.editWord')}
+            </DialogTitle>
+          </DialogHeader>
+          {editingItemId !== null && (
+            <VocabularyForm
+              listId={list.id}
+              containerId={container.id}
+              itemId={editingItemId === 'new' ? undefined : editingItemId}
+              onDone={() => setEditingItemId(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
         <AlertDialogContent>

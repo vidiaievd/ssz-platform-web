@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import type { ContainerItem, VocabularyList, VocabularyItem } from '@/features/content/types';
 
@@ -28,19 +28,29 @@ export function useAuthoringVocabularyLists(containerId: string, enabled = true)
   });
 }
 
-export function useAuthoringVocabularyItems(listId: string, enabled = true) {
-  return useQuery<VocabularyItem[]>({
-    queryKey: authoringKeys.vocabularyItems(listId),
+export interface VocabularyItemsPage {
+  items: VocabularyItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export const VOCABULARY_ITEMS_PAGE_SIZE = 20;
+
+export function useAuthoringVocabularyItems(listId: string, page: number, enabled = true) {
+  return useQuery<VocabularyItemsPage>({
+    queryKey: authoringKeys.vocabularyItems(listId, page),
     queryFn: async () => {
       const res = await fetch(
-        `/api/content/vocabulary-lists/${listId}/items?limit=500`,
+        `/api/content/vocabulary-lists/${listId}/items?page=${page}&limit=${VOCABULARY_ITEMS_PAGE_SIZE}`,
       );
       if (!res.ok) throw new Error('Failed to fetch vocabulary items');
-      const data: { items: VocabularyItem[] } = await res.json();
-      return data.items;
+      return res.json() as Promise<VocabularyItemsPage>;
     },
     enabled: enabled && !!listId,
     staleTime: 30_000,
+    placeholderData: keepPreviousData,
   });
 }
 

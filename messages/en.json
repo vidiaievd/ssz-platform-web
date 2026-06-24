@@ -497,7 +497,8 @@
       "templatePlaceholder": "e.g. Jeg ___ til jobben",
       "substitutionPlaceholder": "sykler",
       "addExample": "Add example",
-      "removeExample": "Remove example"
+      "removeExample": "Remove example",
+      "pageOf": "Page {page} of {totalPages}"
     },
     "exercises": {
       "add": "Add exercise",

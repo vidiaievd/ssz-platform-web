@@ -492,7 +492,8 @@
       "templatePlaceholder": "f.eks. Jeg ___ til jobben",
       "substitutionPlaceholder": "sykler",
       "addExample": "Legg til eksempel",
-      "removeExample": "Fjern eksempel"
+      "removeExample": "Fjern eksempel",
+      "pageOf": "Side {page} av {totalPages}"
     },
     "exercises": {
       "add": "Legg til øvelse",

@@ -12,7 +12,9 @@ export const authoringKeys = keyFactory('authoring', {
   lessonVariants: (lessonId: string) => ['lesson-variants', lessonId] as const,
   vocabularyLists: (containerId: string) => ['vocabulary-lists', containerId] as const,
   vocabularyList: (listId: string) => ['vocabulary-list', listId] as const,
-  vocabularyItems: (listId: string) => ['vocabulary-list', listId, 'items'] as const,
+  vocabularyItems: (listId: string, page: number) =>
+    ['vocabulary-list', listId, 'items', page] as const,
+  vocabularyItemsAll: (listId: string) => ['vocabulary-list', listId, 'items'] as const,
   vocabularyItem: (listId: string, itemId: string) => ['vocabulary-item', listId, itemId] as const,
   grammarRules: (containerId: string) => ['grammar-rules', containerId] as const,
   grammarRule: (id: string) => ['grammar-rule', id] as const,

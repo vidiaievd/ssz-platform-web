@@ -109,7 +109,7 @@ export function VocabularyForm({ listId, containerId, itemId, onDone }: Vocabula
         toast.error(tErrors(result.error.code));
         return;
       }
-      await queryClient.invalidateQueries({ queryKey: authoringKeys.vocabularyItems(listId) });
+      await queryClient.invalidateQueries({ queryKey: authoringKeys.vocabularyItemsAll(listId) });
       toast.success(t('vocabulary.saveSuccess'));
       onDone();
     });
@@ -117,7 +117,7 @@ export function VocabularyForm({ listId, containerId, itemId, onDone }: Vocabula
 
   if (isLoading && itemId) {
     return (
-      <div className="mt-4 space-y-3 rounded-lg border border-border p-4">
+      <div className="space-y-3">
         <Skeleton className="h-9 w-full" />
         <Skeleton className="h-9 w-full" />
         <Skeleton className="h-9 w-full" />
@@ -126,11 +126,7 @@ export function VocabularyForm({ listId, containerId, itemId, onDone }: Vocabula
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-border bg-surface p-4">
-      <h3 className="mb-4 text-sm font-medium">
-        {itemId ? t('vocabulary.editWord') : t('vocabulary.addWord')}
-      </h3>
-
+    <div>
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         {/* Core word fields */}
         <div className="grid gap-4 sm:grid-cols-3">
