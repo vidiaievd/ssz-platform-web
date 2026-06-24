@@ -733,10 +733,7 @@
     "request": {
       "title": "Be om innmelding — {name}",
       "description": "Fortell skolen om deg selv og hvorfor du vil bli med.",
-      "messageLabel": "Melding (valgfritt)",
-      "messagePlaceholder": "Fortell skolen om deg selv…",
       "levelLabel": "Ditt nåværende nivå (valgfritt)",
-      "levelPlaceholder": "Velg nivå",
       "submit": "Send søknad",
       "cancel": "Avbryt",
       "success": "Din innmeldingsførespørsel til {name} er sendt."
