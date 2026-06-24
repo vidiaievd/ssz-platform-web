@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useMarkAllRead, useMarkRead, useNotifications } from '../api/use-notifications';
+import { useArchive, useMarkAllRead, useMarkRead, useNotifications } from '../api/use-notifications';
 import type { NotificationLinkContext } from '../lib/notification-registry';
 import type { Notification } from '../types';
 import { LiveIndicator } from './live-indicator';
@@ -30,6 +30,7 @@ export function NotificationBell({ linkContext, notificationsHref }: Notificatio
   const { data, isError } = useNotifications();
   const { mutate: markRead } = useMarkRead();
   const { mutate: markAllRead } = useMarkAllRead();
+  const { mutate: archive } = useArchive();
 
   const notifications = data?.items.slice(0, BELL_PREVIEW_LIMIT) ?? [];
   const unreadCount = data?.unreadCount ?? 0;
@@ -79,7 +80,7 @@ export function NotificationBell({ linkContext, notificationsHref }: Notificatio
                   onOpen={openNotification}
                   onMarkRead={markRead}
                   onMarkUnread={noop}
-                  onArchive={noop}
+                  onArchive={archive}
                   onUnarchive={noop}
                   onDelete={noop}
                 />

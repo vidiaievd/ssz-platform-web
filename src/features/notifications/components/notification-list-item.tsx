@@ -131,7 +131,7 @@ export function NotificationListItem({
         {!notification.isRead && (
           <span aria-label={t('unreadDot')} className="size-2 rounded-full bg-primary" />
         )}
-        {variant === 'list' && enrollmentRequestData && !isArchived ? (
+        {enrollmentRequestData && !isArchived ? (
           <EnrollmentRequestActions
             data={enrollmentRequestData}
             applicantHref={href}
