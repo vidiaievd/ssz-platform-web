@@ -208,7 +208,7 @@ export function NotificationsPage({ linkContext, locale }: NotificationsPageProp
                 setSelected(checked === true ? new Set(visibleItems.map((n) => n.id)) : new Set())
               }
             />
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground" aria-live="polite">
               {selected.size > 0 ? t('selectedCount', { count: selected.size }) : t('selectAll')}
             </span>
           </div>

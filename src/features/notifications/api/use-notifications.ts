@@ -42,7 +42,7 @@ export function useNotificationsList(filters: NotificationsListFilters) {
     queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
       fetchNotifications({ cursor: pageParam, filter: filters.filter, type }),
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,
     refetchOnWindowFocus: true,
   });
 }
@@ -52,6 +52,23 @@ function invalidateAll(queryClient: ReturnType<typeof useQueryClient>) {
 }
 
 type InfiniteNotifications = { pages: NotificationsResponse[]; pageParams: unknown[] };
+type QueryClient = ReturnType<typeof useQueryClient>;
+type CacheSnapshot = ReturnType<typeof snapshotCaches>;
+
+/** Snapshot every notifications cache entry so a failed mutation can be rolled back. */
+function snapshotCaches(queryClient: QueryClient) {
+  return {
+    bell: queryClient.getQueriesData<NotificationsResponse>({ queryKey: notificationKeys.bell() }),
+    infinite: queryClient.getQueriesData<InfiniteNotifications>({
+      queryKey: ['notifications', 'infinite-list'],
+    }),
+  };
+}
+
+function restoreCaches(queryClient: QueryClient, snapshot: CacheSnapshot) {
+  snapshot.bell.forEach(([key, data]) => queryClient.setQueryData(key, data));
+  snapshot.infinite.forEach(([key, data]) => queryClient.setQueryData(key, data));
+}
 
 /** Optimistically toggles `isRead` for a single notification across all cached list pages. */
 function setReadInCache(
@@ -99,7 +116,12 @@ export function useMarkRead() {
       const res = await fetch(`/api/notifications/${id}/read`, { method: 'POST' });
       if (!res.ok && res.status !== 204) throw new Error('Failed to mark as read');
     },
-    onMutate: (id) => setReadInCache(queryClient, id, true),
+    onMutate: (id) => {
+      const snapshot = snapshotCaches(queryClient);
+      setReadInCache(queryClient, id, true);
+      return { snapshot };
+    },
+    onError: (_err, _id, context) => context && restoreCaches(queryClient, context.snapshot),
     onSettled: () => invalidateAll(queryClient),
   });
 }
@@ -111,7 +133,12 @@ export function useMarkUnread() {
       const res = await fetch(`/api/notifications/${id}/unread`, { method: 'POST' });
       if (!res.ok && res.status !== 204) throw new Error('Failed to mark as unread');
     },
-    onMutate: (id) => setReadInCache(queryClient, id, false),
+    onMutate: (id) => {
+      const snapshot = snapshotCaches(queryClient);
+      setReadInCache(queryClient, id, false);
+      return { snapshot };
+    },
+    onError: (_err, _id, context) => context && restoreCaches(queryClient, context.snapshot),
     onSettled: () => invalidateAll(queryClient),
   });
 }
@@ -134,7 +161,12 @@ export function useArchive() {
       const res = await fetch(`/api/notifications/${id}/archive`, { method: 'POST' });
       if (!res.ok && res.status !== 204) throw new Error('Failed to archive');
     },
-    onMutate: (id) => removeFromCache(queryClient, [id]),
+    onMutate: (id) => {
+      const snapshot = snapshotCaches(queryClient);
+      removeFromCache(queryClient, [id]);
+      return { snapshot };
+    },
+    onError: (_err, _id, context) => context && restoreCaches(queryClient, context.snapshot),
     onSettled: () => invalidateAll(queryClient),
   });
 }
@@ -146,7 +178,12 @@ export function useUnarchive() {
       const res = await fetch(`/api/notifications/${id}/unarchive`, { method: 'POST' });
       if (!res.ok && res.status !== 204) throw new Error('Failed to unarchive');
     },
-    onMutate: (id) => removeFromCache(queryClient, [id]),
+    onMutate: (id) => {
+      const snapshot = snapshotCaches(queryClient);
+      removeFromCache(queryClient, [id]);
+      return { snapshot };
+    },
+    onError: (_err, _id, context) => context && restoreCaches(queryClient, context.snapshot),
     onSettled: () => invalidateAll(queryClient),
   });
 }
@@ -158,7 +195,12 @@ export function useDeleteNotification() {
       const res = await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
       if (!res.ok && res.status !== 204) throw new Error('Failed to delete');
     },
-    onMutate: (id) => removeFromCache(queryClient, [id]),
+    onMutate: (id) => {
+      const snapshot = snapshotCaches(queryClient);
+      removeFromCache(queryClient, [id]);
+      return { snapshot };
+    },
+    onError: (_err, _id, context) => context && restoreCaches(queryClient, context.snapshot),
     onSettled: () => invalidateAll(queryClient),
   });
 }
@@ -175,10 +217,13 @@ export function useBulkAction() {
       if (!res.ok && res.status !== 204) throw new Error('Failed to perform bulk action');
     },
     onMutate: ({ ids, action }) => {
+      const snapshot = snapshotCaches(queryClient);
       if (action === 'archive' || action === 'delete') removeFromCache(queryClient, ids);
       if (action === 'read') ids.forEach((id) => setReadInCache(queryClient, id, true));
       if (action === 'unread') ids.forEach((id) => setReadInCache(queryClient, id, false));
+      return { snapshot };
     },
+    onError: (_err, _vars, context) => context && restoreCaches(queryClient, context.snapshot),
     onSettled: () => invalidateAll(queryClient),
   });
 }
