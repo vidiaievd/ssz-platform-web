@@ -61,6 +61,7 @@ export function PendingApprovals({ memberships }: Props) {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-(--ssz-text-muted)">
                   {m.language.toUpperCase()}
+                  {m.selfReportedLevel ? ` · ${m.selfReportedLevel}` : ''}
                 </span>
                 <Badge variant="muted" className="text-xs">
                   {m.source === 'public-apply' ? t('sourcePublic') : m.source}

@@ -6,7 +6,7 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
 import { PendingApprovals } from '@/features/enrollment/components/pending-approvals';
 import type { Membership, MembershipStatus, MembershipSource } from '@/features/enrollment/types';
-import type { LangCode, ISODate } from '@/features/groups/types';
+import type { CEFR, LangCode, ISODate } from '@/features/groups/types';
 
 type Props = {
   params: Promise<{ schoolSlug: string }>;
@@ -18,6 +18,7 @@ type BackendMembership = {
   status: MembershipStatus;
   source: MembershipSource;
   language?: string;
+  selfReportedLevel?: CEFR;
   createdAt: string;
 };
 
@@ -54,6 +55,7 @@ export default async function RequestsPage({ params }: Props) {
     status: m.status,
     source: m.source,
     language: (m.language ?? 'nb') as LangCode,
+    selfReportedLevel: m.selfReportedLevel,
     createdAt: (m.createdAt?.slice(0, 10) ?? '') as ISODate,
   }));
 

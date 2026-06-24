@@ -62,6 +62,8 @@ export interface Membership {
   status: MembershipStatus;
   source: MembershipSource;
   language: LangCode;
+  /** Student's own guess at their level when applying; not authoritative — superseded by placement results. */
+  selfReportedLevel?: CEFR;
   /** scope='membership' — present only if school required its own placement test */
   placement?: PlacementResult;
   availability?: AvailabilityPref[];

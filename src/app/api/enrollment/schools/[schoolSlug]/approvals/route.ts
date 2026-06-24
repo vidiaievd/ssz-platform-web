@@ -4,7 +4,7 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
 import type { PublicSchool } from '@/features/school/api/get-public-school';
 import type { MembershipStatus, MembershipSource, Membership } from '@/features/enrollment/types';
-import type { LangCode, ISODate } from '@/features/groups/types';
+import type { CEFR, LangCode, ISODate } from '@/features/groups/types';
 
 type BackendMembership = {
   id: string;
@@ -12,6 +12,7 @@ type BackendMembership = {
   status: MembershipStatus;
   source: MembershipSource;
   language?: string;
+  selfReportedLevel?: CEFR;
   createdAt: string;
 };
 
@@ -44,6 +45,7 @@ export async function GET(
       status: m.status,
       source: m.source,
       language: (m.language ?? 'nb') as LangCode,
+      selfReportedLevel: m.selfReportedLevel,
       createdAt: (m.createdAt?.slice(0, 10) ?? '') as ISODate,
     }));
 

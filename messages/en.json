@@ -739,6 +739,8 @@
       "title": "Request to enrol — {name}",
       "description": "Tell the school about yourself and why you'd like to join.",
       "levelLabel": "Your current level (optional)",
+      "languageLabel": "Language you want to learn",
+      "levelUnknown": "I don't know yet",
       "submit": "Send request",
       "cancel": "Cancel",
       "success": "Your enrolment request to {name} has been sent."

@@ -28,7 +28,11 @@ export async function requestEnrollmentAction(
       service: 'organization',
       path: `/schools/${schoolId}/memberships`,
       method: 'POST',
-      body: { source: 'public-apply', language: parsed.data.language },
+      body: {
+        source: 'public-apply',
+        language: parsed.data.language,
+        selfReportedLevel: parsed.data.selfReportedLevel,
+      },
     });
   });
 }
