@@ -149,7 +149,6 @@ export function OnboardingStepper({ membership, settings, platformResults, today
   }
 
   if (done) {
-    const nextStatus = resolveNextStatus(membership, settings);
     return (
       <div className="flex flex-col items-center gap-4 py-12 text-center">
         <CheckCircle2 className="h-12 w-12 text-green-500" />
@@ -157,9 +156,7 @@ export function OnboardingStepper({ membership, settings, platformResults, today
           {t('allDoneTitle')}
         </h2>
         <p className="max-w-sm text-sm text-(--ssz-text-secondary)">
-          {nextStatus === 'placement-review'
-            ? t('allDoneReview')
-            : t('allDoneActive')}
+          {t('allDoneReview')}
         </p>
         <button
           onClick={() => router.push('/student/dashboard')}

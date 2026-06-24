@@ -77,15 +77,17 @@ describe('POST /api/enrollment/memberships/[membershipId]/transition', () => {
     expect(call.path).toContain('/reject');
   });
 
-  it('returns 200 with no backend call for student-initiated transitions (placement-review)', async () => {
+  it('calls /complete for student-initiated transitions (placement-review)', async () => {
+    vi.mocked(serverFetch).mockResolvedValueOnce(undefined);
     const res = await POST(makeRequest({ schoolId: SCHOOL_ID, to: 'placement-review' }), params(MEMBERSHIP_ID));
     expect(res.status).toBe(200);
-    expect(vi.mocked(serverFetch)).not.toHaveBeenCalled();
+    const call = vi.mocked(serverFetch).mock.calls[0]![0] as { path: string };
+    expect(call.path).toContain('/complete');
   });
 
-  it('returns 200 with no backend call for active transition', async () => {
+  it('returns 400 for an active transition — active is only reachable via group assignment', async () => {
     const res = await POST(makeRequest({ schoolId: SCHOOL_ID, to: 'active' }), params(MEMBERSHIP_ID));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(400);
     expect(vi.mocked(serverFetch)).not.toHaveBeenCalled();
   });
 

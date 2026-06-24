@@ -69,8 +69,10 @@ describe('canTransition', () => {
   it('active → left allowed', () => expect(canTransition('active', 'left')).toBe(true));
   it('active → pending NOT allowed', () => expect(canTransition('active', 'pending')).toBe(false));
   it('rejected → active NOT allowed', () => expect(canTransition('rejected', 'active')).toBe(false));
-  it('onboarding → active allowed (auto-place shortcut)', () =>
-    expect(canTransition('onboarding', 'active')).toBe(true));
+  it('onboarding → active NOT allowed (active is only reachable via group assignment)', () =>
+    expect(canTransition('onboarding', 'active')).toBe(false));
+  it('placement-review → active allowed', () =>
+    expect(canTransition('placement-review', 'active')).toBe(true));
 });
 
 // ── resolveNextStatus ─────────────────────────────────────────────────────────
@@ -80,18 +82,18 @@ describe('resolveNextStatus', () => {
     expect(resolveNextStatus(baseMembership, DEFAULT_ONBOARDING_SETTINGS)).toBe('placement-review');
   });
 
-  it('autoPlaceByScore && !required → active (bypasses placement-review)', () => {
+  it('autoPlaceByScore && !required → still placement-review (no auto-activation)', () => {
     const s = resolveOnboardingSettings({
       interview: { required: false, autoPlaceByScore: true },
     });
-    expect(resolveNextStatus(baseMembership, s)).toBe('active');
+    expect(resolveNextStatus(baseMembership, s)).toBe('placement-review');
   });
 
-  it('!required && !autoPlaceByScore → active', () => {
+  it('!required && !autoPlaceByScore → still placement-review', () => {
     const s = resolveOnboardingSettings({
       interview: { required: false, autoPlaceByScore: false },
     });
-    expect(resolveNextStatus(baseMembership, s)).toBe('active');
+    expect(resolveNextStatus(baseMembership, s)).toBe('placement-review');
   });
 });
 
