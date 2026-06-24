@@ -36,17 +36,16 @@ type Props = {
   token: string;
   preview: InvitePreview;
   currentUser: CurrentUser | null;
-  locale: string;
 };
 
-function resolveWorkspacePath(preview: InvitePreview, locale: string): string {
+function resolveWorkspacePath(preview: InvitePreview): string {
   if (preview.role === "STUDENT" || !preview.schoolSlug) {
-    return `/${locale}/student`;
+    return "/student";
   }
-  return `/${locale}/school/${preview.schoolSlug}`;
+  return `/school/${preview.schoolSlug}`;
 }
 
-export function InviteCard({ token, preview, currentUser, locale }: Props) {
+export function InviteCard({ token, preview, currentUser }: Props) {
   const t = useTranslations("Invite");
   const tRoles = useTranslations("Invitations.roles");
   const formatter = useFormatter();
@@ -61,7 +60,7 @@ export function InviteCard({ token, preview, currentUser, locale }: Props) {
     h1Ref.current?.focus();
   }, []);
 
-  const workspacePath = resolveWorkspacePath(preview, locale);
+  const workspacePath = resolveWorkspacePath(preview);
   const { expiresDate, expiringSoon } = useMemo(() => {
     const expires = new Date(preview.expiresAt);
     const days = (expires.getTime() - now) / (1000 * 60 * 60 * 24);
