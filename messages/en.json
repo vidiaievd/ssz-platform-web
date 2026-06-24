@@ -968,11 +968,135 @@
   },
   "Notifications": {
     "title": "Notifications",
+    "subtitle": "Everything that needs your attention, in one place.",
     "label": "{count, plural, =0 {Notifications} one {# unread notification} other {# unread notifications}}",
     "unread": "{count, plural, one {# unread} other {# unread}}",
     "unreadDot": "Unread",
     "empty": "You're all caught up!",
+    "markAllAsRead": "Mark all as read",
+    "openAll": "Open all",
+    "settings": "Settings",
+    "live": "Live",
+    "reconnecting": "Reconnecting",
+    "resourceUnavailable": "This item is no longer available.",
+    "categories": {
+      "Enrollment": "Enrollment",
+      "Staff": "Staff",
+      "System": "System"
+    },
+    "tabs": {
+      "all": "All",
+      "unread": "Unread",
+      "archived": "Archived"
+    },
+    "filterAllTypes": "All types",
+    "selectAll": "Select all",
+    "selectedCount": "{count, plural, one {# selected} other {# selected}}",
+    "bulk": {
+      "markRead": "Mark as read",
+      "archive": "Archive",
+      "delete": "Delete",
+      "clear": "Clear"
+    },
+    "rowActions": {
+      "markRead": "Mark as read",
+      "markUnread": "Mark as unread",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "delete": "Delete"
+    },
+    "deleteConfirm": {
+      "title": "Delete notification?",
+      "titlePlural": "Delete {count} notifications?",
+      "description": "This can't be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "toasts": {
+      "archived": "Notification archived",
+      "deleted": "Notification deleted",
+      "markedRead": "Marked as read",
+      "undo": "Undo",
+      "actionFailed": "Something went wrong. Please try again."
+    },
+    "emptyState": {
+      "all": "You're all caught up!",
+      "unread": "No unread notifications.",
+      "archived": "No archived notifications.",
+      "category": "Nothing here for this filter."
+    },
+    "error": {
+      "title": "Couldn't load notifications.",
+      "retry": "Retry"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "viewApplicant": "View applicant",
+      "needsAction": "Needs action"
+    },
     "types": {
+      "GENERAL": {
+        "title": "Notification",
+        "body": "You have a new notification."
+      },
+      "WELCOME_EMAIL": {
+        "title": "Welcome",
+        "body": "Welcome to the platform."
+      },
+      "EMAIL_VERIFICATION": {
+        "title": "Verify your email",
+        "body": "Please verify your email address."
+      },
+      "PASSWORD_RESET": {
+        "title": "Password reset requested",
+        "body": "A password reset was requested for your account."
+      },
+      "PASSWORD_CHANGED": {
+        "title": "Password changed",
+        "body": "Your password was changed."
+      },
+      "STUDY_REMINDER": {
+        "title": "Study reminder",
+        "body": "It's time for your study session."
+      },
+      "TEACHER_ABSENCE": {
+        "title": "Teacher absence reported",
+        "body": "A teacher reported an absence."
+      },
+      "SUBSTITUTE_REQUEST": {
+        "title": "Substitute needed",
+        "body": "A lesson needs a substitute teacher."
+      },
+      "SUBSTITUTE_ASSIGNED": {
+        "title": "Substitute assigned",
+        "body": "A substitute teacher was assigned."
+      },
+      "OVERLOAD_ALERT": {
+        "title": "Teacher overload",
+        "body": "A teacher's workload exceeds capacity."
+      },
+      "VACANCY_ALERT": {
+        "title": "Open vacancy",
+        "body": "A teaching vacancy needs attention."
+      },
+      "UNCOVERED_LESSON": {
+        "title": "Uncovered lesson",
+        "body": "A lesson has no assigned teacher."
+      },
+      "SCHOOL_INVITATION": {
+        "title": "School invitation",
+        "body": "You've been invited to join a school."
+      },
+      "TEACHER_PROFILE_CHANGED": {
+        "title": "Teacher updated profile",
+        "body": "A teacher in your school updated their profile information."
+      },
+      "ENROLLMENT_REQUEST": {
+        "title": "{studentName} requested to join",
+        "titleFallback": "New enrollment request",
+        "body": "Wants to join {schoolName}."
+      },
       "ENROLLMENT_APPROVED": {
         "title": "Enrollment approved",
         "body": "Your enrollment request was approved."
@@ -981,17 +1105,13 @@
         "title": "Enrollment rejected",
         "body": "Your enrollment request was not approved."
       },
-      "LESSON_ASSIGNED": {
-        "title": "Lesson assigned",
-        "body": "A new lesson has been assigned to you."
+      "PLACEMENT_REVIEW_READY": {
+        "title": "Placement review ready",
+        "body": "Your placement review is ready."
       },
-      "NEW_MATERIAL": {
-        "title": "New material available",
-        "body": "New learning material has been added."
-      },
-      "TEACHER_PROFILE_CHANGED": {
-        "title": "Teacher updated profile",
-        "body": "A teacher in your school updated their profile information."
+      "GROUP_ASSIGNED": {
+        "title": "Group assigned",
+        "body": "You've been assigned to a group."
       }
     }
   },

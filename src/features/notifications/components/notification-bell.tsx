@@ -14,7 +14,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useMarkRead, useNotifications } from '../api/use-notifications';
-import type { Notification, NotificationType } from '../types';
+import { getNotificationEntry } from '../lib/notification-registry';
+import type { Notification } from '../types';
 
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -26,40 +27,14 @@ function timeAgo(iso: string): string {
 }
 
 function resolveContent(
-  type: NotificationType,
+  notification: Notification,
   t: ReturnType<typeof useTranslations<'Notifications'>>,
 ): { title: string; body: string } {
-  if (type === 'TEACHER_PROFILE_CHANGED') {
-    return {
-      title: t('types.TEACHER_PROFILE_CHANGED.title'),
-      body: t('types.TEACHER_PROFILE_CHANGED.body'),
-    };
-  }
-  if (type === 'ENROLLMENT_APPROVED') {
-    return {
-      title: t('types.ENROLLMENT_APPROVED.title'),
-      body: t('types.ENROLLMENT_APPROVED.body'),
-    };
-  }
-  if (type === 'ENROLLMENT_REJECTED') {
-    return {
-      title: t('types.ENROLLMENT_REJECTED.title'),
-      body: t('types.ENROLLMENT_REJECTED.body'),
-    };
-  }
-  if (type === 'LESSON_ASSIGNED') {
-    return {
-      title: t('types.LESSON_ASSIGNED.title'),
-      body: t('types.LESSON_ASSIGNED.body'),
-    };
-  }
-  if (type === 'NEW_MATERIAL') {
-    return {
-      title: t('types.NEW_MATERIAL.title'),
-      body: t('types.NEW_MATERIAL.body'),
-    };
-  }
-  return { title: type, body: '' };
+  const entry = getNotificationEntry(notification.type);
+  return {
+    title: entry.resolveTitle(notification.templateData, t),
+    body: entry.resolveBody(notification.templateData, t),
+  };
 }
 
 function NotificationItem({
@@ -71,7 +46,7 @@ function NotificationItem({
   t: ReturnType<typeof useTranslations<'Notifications'>>;
   onMarkRead: (id: string) => void;
 }) {
-  const { title, body } = resolveContent(notification.type, t);
+  const { title, body } = resolveContent(notification, t);
 
   return (
     <DropdownMenuItem
