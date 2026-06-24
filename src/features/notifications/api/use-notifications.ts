@@ -27,7 +27,7 @@ async function fetchNotifications(params: {
 /** Lightweight feed for the bell popover: first page + unread count, no pagination. */
 export function useNotifications() {
   return useQuery({
-    queryKey: notificationKeys.list(),
+    queryKey: notificationKeys.bell(),
     queryFn: () => fetchNotifications({}),
     staleTime: 60_000,
     refetchInterval: 60_000,
@@ -51,6 +51,8 @@ function invalidateAll(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: notificationKeys.all() });
 }
 
+type InfiniteNotifications = { pages: NotificationsResponse[]; pageParams: unknown[] };
+
 /** Optimistically toggles `isRead` for a single notification across all cached list pages. */
 function setReadInCache(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -59,11 +61,11 @@ function setReadInCache(
 ) {
   const patch = (n: Notification) => (n.id === id ? { ...n, isRead } : n);
 
-  queryClient.setQueriesData<NotificationsResponse>({ queryKey: notificationKeys.list() }, (data) =>
+  queryClient.setQueriesData<NotificationsResponse>({ queryKey: notificationKeys.bell() }, (data) =>
     data ? { ...data, items: data.items.map(patch) } : data,
   );
-  queryClient.setQueriesData<{ pages: NotificationsResponse[]; pageParams: unknown[] }>(
-    { queryKey: notificationKeys.all() },
+  queryClient.setQueriesData<InfiniteNotifications>(
+    { queryKey: ['notifications', 'infinite-list'] },
     (data) =>
       data
         ? {
@@ -78,11 +80,11 @@ function removeFromCache(queryClient: ReturnType<typeof useQueryClient>, ids: st
   const idSet = new Set(ids);
   const dropItems = (items: Notification[]) => items.filter((n) => !idSet.has(n.id));
 
-  queryClient.setQueriesData<NotificationsResponse>({ queryKey: notificationKeys.list() }, (data) =>
+  queryClient.setQueriesData<NotificationsResponse>({ queryKey: notificationKeys.bell() }, (data) =>
     data ? { ...data, items: dropItems(data.items) } : data,
   );
-  queryClient.setQueriesData<{ pages: NotificationsResponse[]; pageParams: unknown[] }>(
-    { queryKey: notificationKeys.all() },
+  queryClient.setQueriesData<InfiniteNotifications>(
+    { queryKey: ['notifications', 'infinite-list'] },
     (data) =>
       data
         ? { ...data, pages: data.pages.map((page) => ({ ...page, items: dropItems(page.items) })) }

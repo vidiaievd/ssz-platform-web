@@ -6,8 +6,11 @@ export interface NotificationsListFilters {
   type?: NotificationType | 'all';
 }
 
+// `bell` and `infiniteList` must not share a key prefix: cached shapes differ
+// ({ items, unreadCount } vs. an infinite-query { pages, pageParams }), and
+// query-client cache scans match by prefix.
 export const notificationKeys = keyFactory('notifications', {
   all: () => [] as const,
-  list: () => ['list'] as const,
-  infiniteList: (filters: NotificationsListFilters) => ['list', 'infinite', filters] as const,
+  bell: () => ['bell'] as const,
+  infiniteList: (filters: NotificationsListFilters) => ['infinite-list', filters] as const,
 });

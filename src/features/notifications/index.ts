@@ -1,5 +1,6 @@
 export * from './api/keys';
 export * from './api/use-notifications';
+export { EnrollmentRequestActions } from './components/enrollment-request-actions';
 export { NotificationBell } from './components/notification-bell';
 export { NotificationListItem } from './components/notification-list-item';
 export { NotificationsPage } from './components/notifications-page';

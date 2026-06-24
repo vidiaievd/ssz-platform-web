@@ -41,6 +41,27 @@ function mockListResponse(items: NotificationsResponse['items'], unreadCount = i
   );
 }
 
+function mockRoutedFetch(items: NotificationsResponse['items']) {
+  const archivedIds = new Set<string>();
+  const fetchMock = vi.fn((url: string) => {
+    if (url.includes('/transition')) {
+      return Promise.resolve({ ok: true, json: async () => ({ ok: true }) });
+    }
+    const archiveMatch = /\/api\/notifications\/([^/]+)\/archive$/.exec(url);
+    if (archiveMatch) {
+      archivedIds.add(archiveMatch[1]!);
+      return Promise.resolve({ ok: true, status: 204, json: async () => null });
+    }
+    const remaining = items.filter((n) => !archivedIds.has(n.id));
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({ items: remaining, unreadCount: remaining.length, nextCursor: null }),
+    });
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
+
 beforeEach(() => {
   push.mockClear();
   searchParamsStore.forEach((_v, k) => searchParamsStore.delete(k));
@@ -74,5 +95,28 @@ describe('NotificationsPage', () => {
     await user.click(within(row).getByText(/Maria Hansen/));
 
     await waitFor(() => expect(push).toHaveBeenCalledWith('/school/greenwood/enrollment/requests'));
+  });
+
+  it('approves an enrollment request inline and archives the notification on success', async () => {
+    const fetchMock = mockRoutedFetch([ENROLLMENT_REQUEST]);
+    const user = userEvent.setup();
+
+    renderWithProviders(
+      <NotificationsPage linkContext={{ workspaceKind: 'school', schoolSlug: 'greenwood' }} locale="en" />,
+    );
+
+    const row = await screen.findByRole('article', { name: /Maria Hansen/ });
+    await user.click(within(row).getByRole('button', { name: 'Approve' }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/enrollment/memberships/m1/transition',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ schoolId: 's1', to: 'onboarding' }),
+        }),
+      ),
+    );
+    await waitFor(() => expect(screen.queryByText(/Maria Hansen/)).not.toBeInTheDocument());
   });
 });

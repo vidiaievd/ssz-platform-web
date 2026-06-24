@@ -22,9 +22,11 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
   getNotificationEntry,
+  isEnrollmentRequestData,
   type NotificationLinkContext,
 } from '../lib/notification-registry';
 import type { Notification } from '../types';
+import { EnrollmentRequestActions } from './enrollment-request-actions';
 
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -72,6 +74,10 @@ export function NotificationListItem({
   const body = entry.resolveBody(notification.templateData, t);
   const href = entry.getLink(notification.templateData, linkContext);
   const isArchived = Boolean(notification.archivedAt);
+  const enrollmentRequestData =
+    notification.type === 'ENROLLMENT_REQUEST' && isEnrollmentRequestData(notification.templateData)
+      ? notification.templateData
+      : undefined;
 
   return (
     <div
@@ -125,7 +131,15 @@ export function NotificationListItem({
         {!notification.isRead && (
           <span aria-label={t('unreadDot')} className="size-2 rounded-full bg-primary" />
         )}
-        {actionsSlot}
+        {variant === 'list' && enrollmentRequestData && !isArchived ? (
+          <EnrollmentRequestActions
+            data={enrollmentRequestData}
+            applicantHref={href}
+            onResolved={() => onArchive(notification.id)}
+          />
+        ) : (
+          actionsSlot
+        )}
         {variant === 'list' && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

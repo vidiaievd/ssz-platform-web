@@ -46,7 +46,7 @@ export interface NotificationRegistryEntry {
   ) => string | undefined;
 }
 
-function isEnrollmentRequestData(data: unknown): data is EnrollmentRequestData {
+export function isEnrollmentRequestData(data: unknown): data is EnrollmentRequestData {
   return !!data && typeof data === 'object' && 'studentId' in data && 'membershipId' in data;
 }
 
