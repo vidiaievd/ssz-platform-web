@@ -40,7 +40,14 @@ export function DataState({
   const t = useTranslations();
 
   if (isLoading) {
-    return <>{loadingSlot ?? <DefaultLoadingSkeleton />}</>;
+    return (
+      <>
+        <span role="status" aria-live="polite" className="sr-only">
+          {t('Common.loading')}
+        </span>
+        {loadingSlot ?? <DefaultLoadingSkeleton />}
+      </>
+    );
   }
 
   if (error) {

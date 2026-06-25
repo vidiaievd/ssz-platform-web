@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
+import { RouteHeading } from '@/components/shared/route-heading';
 import { ContinueLearning } from '@/features/student/components/continue-learning';
 import { MySchoolsBand } from '@/features/student/components/my-schools-band';
 import { StreakWidget } from '@/features/student/components/streak-widget';
@@ -21,9 +22,9 @@ export default async function EnrolledPage() {
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold">
+        <RouteHeading className="text-2xl font-semibold">
           {firstName ? t('dashboard.greetingNamed', { name: firstName }) : t('dashboard.greeting')}
-        </h1>
+        </RouteHeading>
         <p className="text-muted-foreground mt-1 text-sm">{t('dashboard.subtitle')}</p>
       </div>
 

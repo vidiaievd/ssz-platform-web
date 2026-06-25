@@ -1,6 +1,7 @@
 {
   "Common": {
-    "appName": "SSZ Learn"
+    "appName": "SSZ Learn",
+    "loading": "Laster…"
   },
   "Theme": {
     "label": "Bytt tema",

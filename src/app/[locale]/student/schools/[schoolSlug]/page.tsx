@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Users } from 'lucide-react';
 
+import { RouteHeading } from '@/components/shared/route-heading';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import { getStudentSchool } from '@/features/student/api/get-student-schools';
@@ -48,7 +49,7 @@ export default async function SchoolDetailPage({ params }: Props) {
   if (school.status !== 'active') {
     return (
       <main className="container mx-auto max-w-2xl px-4 py-8">
-        <h1 className="sr-only">{t('lockedHeading', { school: school.schoolName })}</h1>
+        <RouteHeading className="sr-only">{t('lockedHeading', { school: school.schoolName })}</RouteHeading>
         <SchoolStatusCard school={school} />
       </main>
     );

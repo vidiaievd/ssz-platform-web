@@ -101,7 +101,7 @@ test.describe('Enrol and consume flow', () => {
     await expect(page.getByRole('status')).toContainText(/completed/i, { timeout: 5000 });
   });
 
-  test('full enrol flow: student requests → admin approves → student accesses content (live backend)', async ({
+  test('full enrol flow: apply → approve → onboarding → ready-to-place → admin places → schedule (live backend)', async ({
     browser,
   }) => {
     test.skip(
@@ -128,20 +128,45 @@ test.describe('Enrol and consume flow', () => {
       await studentPage.getByRole('button', { name: /send request/i }).click();
       await expect(studentPage.getByText(/request sent/i)).toBeVisible({ timeout: 5000 });
 
-      // School admin approves the request
+      // School admin approves the request — membership moves pending → onboarding,
+      // never straight to active (plan 19, Phase A).
       const adminLogin = new LoginPage(adminPage);
       await loginAs(adminLogin, SCHOOL_ADMIN);
       await expect(adminPage).toHaveURL(/\/school/, { timeout: 10000 });
 
-      await adminPage.goto('/en/school/students');
-      await adminPage.getByRole('button', { name: /approve/i }).first().click();
-      await expect(adminPage.getByText(/approved/i)).toBeVisible({ timeout: 5000 });
+      await adminPage.goto('/en/school/e2e-test-school/enrollment/requests');
+      await adminPage.getByRole('button', { name: /accept/i }).first().click();
+      await expect(adminPage.getByText(/accepted/i)).toBeVisible({ timeout: 5000 });
 
-      // Student can now access the enrolled content
-      await studentPage.goto('/en/student/enrolled');
-      await expect(studentPage).toHaveURL(/\/student\/enrolled/);
-      const dashboard = new DashboardPage(studentPage);
-      await dashboard.expectWelcomeGreeting();
+      // The onboarding wizard itself (placement test / availability / age band /
+      // interview steps) is covered by its own tests; here we drive it through the
+      // same BFF endpoint the wizard calls on its last step, to reach
+      // `placement-review` deterministically regardless of which steps this
+      // school's settings require.
+      const schoolsRes = await studentPage.request.get('/api/student/schools');
+      const schools = (await schoolsRes.json()) as Array<{ membershipId: string; schoolId: string; schoolSlug: string }>;
+      const membership = schools.find((s) => s.schoolSlug === 'e2e-test-school');
+      expect(membership, 'student should have a membership for e2e-test-school').toBeTruthy();
+
+      const transitionRes = await studentPage.request.post(
+        `/api/enrollment/memberships/${membership!.membershipId}/transition`,
+        { data: { schoolId: membership!.schoolId, to: 'placement-review' } },
+      );
+      expect(transitionRes.ok()).toBeTruthy();
+
+      // Admin places the student from the READY-TO-PLACE queue — the only path to `active`.
+      await adminPage.goto('/en/school/e2e-test-school/enrollment/placement');
+      await expect(adminPage.getByText(/placement queue/i)).toBeVisible({ timeout: 10000 });
+
+      await adminPage.getByRole('combobox', { name: /select a group/i }).first().click();
+      await adminPage.getByRole('option').first().click();
+      await adminPage.getByRole('button', { name: /^assign$/i }).first().click();
+      await expect(adminPage.getByText(/assigned to group/i)).toBeVisible({ timeout: 5000 });
+
+      // Student now sees the group schedule on their school detail page.
+      await studentPage.goto(`/en/student/schools/e2e-test-school`);
+      await expect(studentPage.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 10000 });
+      await expect(studentPage.getByText(/classmates|schedule/i).first()).toBeVisible();
     } finally {
       await studentCtx.close();
       await adminCtx.close();

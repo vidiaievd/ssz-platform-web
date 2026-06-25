@@ -5,6 +5,7 @@ import { ArrowLeft, MapPin, Wifi } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
+import { RouteHeading } from '@/components/shared/route-heading';
 import { Link } from '@/lib/i18n/navigation';
 import type { StudentSchool, SchoolTeacherSummary } from '../types';
 import { LeaveSchoolButton } from './leave-school-button';
@@ -39,7 +40,7 @@ export function GroupHeader({ school }: GroupHeaderProps) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{school.schoolName}</p>
-          <h1 className="text-2xl font-semibold">{school.groupName ?? school.schoolName}</h1>
+          <RouteHeading className="text-2xl font-semibold">{school.groupName ?? school.schoolName}</RouteHeading>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

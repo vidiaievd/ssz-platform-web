@@ -1,6 +1,7 @@
 {
   "Common": {
-    "appName": "SSZ Learn"
+    "appName": "SSZ Learn",
+    "loading": "Завантаження…"
   },
   "Theme": {
     "label": "Перемкнути тему",
