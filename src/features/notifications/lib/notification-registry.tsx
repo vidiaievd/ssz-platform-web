@@ -19,10 +19,13 @@ import {
 import type { useTranslations } from 'next-intl';
 
 import type {
+  EnrollmentApprovedData,
   EnrollmentRequestData,
+  GroupAssignedData,
   NotificationCategory,
   NotificationTemplateData,
   NotificationType,
+  PlacementReviewReadyData,
   TeacherProfileChangedData,
 } from '../types';
 
@@ -52,6 +55,18 @@ export function isEnrollmentRequestData(data: unknown): data is EnrollmentReques
 
 function isTeacherProfileChangedData(data: unknown): data is TeacherProfileChangedData {
   return !!data && typeof data === 'object' && 'teacherUserId' in data;
+}
+
+function isEnrollmentApprovedData(data: unknown): data is EnrollmentApprovedData {
+  return !!data && typeof data === 'object' && 'schoolId' in data && !('groupId' in data);
+}
+
+function isGroupAssignedData(data: unknown): data is GroupAssignedData {
+  return !!data && typeof data === 'object' && 'groupId' in data && 'groupName' in data;
+}
+
+function isPlacementReviewReadyData(data: unknown): data is PlacementReviewReadyData {
+  return !!data && typeof data === 'object' && 'schoolId' in data && 'studentId' in data;
 }
 
 const noLink: NotificationRegistryEntry['getLink'] = () => undefined;
@@ -211,8 +226,14 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     priority: 'normal',
     actionable: false,
     resolveTitle: (_data, t) => t('types.ENROLLMENT_APPROVED.title'),
-    resolveBody: (_data, t) => t('types.ENROLLMENT_APPROVED.body'),
-    getLink: noLink,
+    resolveBody: (data, t) =>
+      isEnrollmentApprovedData(data)
+        ? t('types.ENROLLMENT_APPROVED.body', { school: data.schoolName })
+        : t('types.ENROLLMENT_APPROVED.bodyFallback'),
+    getLink: (data, ctx) =>
+      ctx.workspaceKind === 'student' && isEnrollmentApprovedData(data)
+        ? `/student/enrolled#school-${data.schoolId}`
+        : undefined,
   },
   ENROLLMENT_REJECTED: {
     icon: XCircle,
@@ -227,19 +248,30 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     icon: ClipboardCheck,
     category: 'Enrollment',
     priority: 'normal',
-    actionable: false,
+    actionable: true,
     resolveTitle: (_data, t) => t('types.PLACEMENT_REVIEW_READY.title'),
-    resolveBody: (_data, t) => t('types.PLACEMENT_REVIEW_READY.body'),
-    getLink: (_data, ctx) => (ctx.workspaceKind === 'student' ? '/student/placement' : undefined),
+    resolveBody: (data, t) =>
+      isPlacementReviewReadyData(data)
+        ? t('types.PLACEMENT_REVIEW_READY.body', { school: data.schoolName })
+        : t('types.PLACEMENT_REVIEW_READY.bodyFallback'),
+    getLink: (_data, ctx) =>
+      ctx.workspaceKind === 'school' && ctx.schoolSlug ? `/school/${ctx.schoolSlug}/enrollment/placement` : undefined,
   },
   GROUP_ASSIGNED: {
     icon: Users,
     category: 'Enrollment',
     priority: 'normal',
     actionable: false,
-    resolveTitle: (_data, t) => t('types.GROUP_ASSIGNED.title'),
-    resolveBody: (_data, t) => t('types.GROUP_ASSIGNED.body'),
-    getLink: noLink,
+    resolveTitle: (data, t) =>
+      isGroupAssignedData(data) ? t('types.GROUP_ASSIGNED.title', { group: data.groupName }) : t('types.GROUP_ASSIGNED.titleFallback'),
+    resolveBody: (data, t) =>
+      isGroupAssignedData(data)
+        ? t('types.GROUP_ASSIGNED.body', { group: data.groupName, school: data.schoolName })
+        : t('types.GROUP_ASSIGNED.bodyFallback'),
+    getLink: (data, ctx) =>
+      ctx.workspaceKind === 'student' && isGroupAssignedData(data)
+        ? `/student/enrolled#school-${data.schoolId}`
+        : undefined,
   },
 };
 

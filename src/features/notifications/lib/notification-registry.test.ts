@@ -45,4 +45,38 @@ describe('notification-registry', () => {
 
     expect(entry.resolveTitle(undefined, t)).toBe(t('types.GENERAL.title'));
   });
+
+  it('deep-links ENROLLMENT_APPROVED to the school card on the student home page', () => {
+    const entry = getNotificationEntry('ENROLLMENT_APPROVED');
+    const data = { membershipId: 'm1', schoolId: 's1', schoolName: 'Greenwood School', occurredAt: new Date().toISOString() };
+
+    expect(entry.resolveBody(data, t)).toContain('Greenwood School');
+    expect(entry.getLink(data, { workspaceKind: 'student' })).toBe('/student/enrolled#school-s1');
+    expect(entry.getLink(data, { workspaceKind: 'school' })).toBeUndefined();
+  });
+
+  it('deep-links GROUP_ASSIGNED to the school card with the group name in the copy', () => {
+    const entry = getNotificationEntry('GROUP_ASSIGNED');
+    const data = {
+      membershipId: 'm1',
+      schoolId: 's1',
+      schoolName: 'Greenwood School',
+      groupId: 'g1',
+      groupName: 'Norwegian A2',
+      occurredAt: new Date().toISOString(),
+    };
+
+    expect(entry.resolveTitle(data, t)).toContain('Norwegian A2');
+    expect(entry.resolveBody(data, t)).toContain('Norwegian A2');
+    expect(entry.getLink(data, { workspaceKind: 'student' })).toBe('/student/enrolled#school-s1');
+  });
+
+  it('routes PLACEMENT_REVIEW_READY to the admin placement queue, not a student page', () => {
+    const entry = getNotificationEntry('PLACEMENT_REVIEW_READY');
+
+    expect(entry.getLink(undefined, { workspaceKind: 'school', schoolSlug: 'greenwood' })).toBe(
+      '/school/greenwood/enrollment/placement',
+    );
+    expect(entry.getLink(undefined, { workspaceKind: 'student' })).toBeUndefined();
+  });
 });

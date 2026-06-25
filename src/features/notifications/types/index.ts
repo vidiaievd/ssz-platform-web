@@ -46,9 +46,36 @@ export interface TeacherProfileChangedData {
   occurredAt: string;
 }
 
+export interface EnrollmentApprovedData {
+  membershipId: string;
+  schoolId: string;
+  schoolName: string;
+  occurredAt: string;
+}
+
+export interface GroupAssignedData {
+  membershipId: string;
+  schoolId: string;
+  schoolName: string;
+  groupId: string;
+  groupName: string;
+  occurredAt: string;
+}
+
+export interface PlacementReviewReadyData {
+  membershipId: string;
+  schoolId: string;
+  schoolName: string;
+  studentId: string;
+  occurredAt: string;
+}
+
 export type NotificationTemplateData =
   | EnrollmentRequestData
   | TeacherProfileChangedData
+  | EnrollmentApprovedData
+  | GroupAssignedData
+  | PlacementReviewReadyData
   | Record<string, unknown>;
 
 export interface Notification {

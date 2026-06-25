@@ -988,6 +988,10 @@
       "materialUntitled": "Kurs uten tittel",
       "materialUnavailable": "Ikke tilgjengelig ennå",
       "classmates": "{count, plural, one {# medelev} other {# medelever}} i gruppen din"
+    },
+    "GroupAssignedBanner": {
+      "message": "Du er i {group} hos {school}!",
+      "dismiss": "Lukk"
     }
   },
   "Exercise": {
@@ -1160,20 +1164,24 @@
         "body": "Vil bli med i {schoolName}."
       },
       "ENROLLMENT_APPROVED": {
-        "title": "Påmelding godkjent",
-        "body": "Påmeldingsforespørselen din ble godkjent."
+        "title": "Godkjent — plassering pågår",
+        "body": "{school} godkjente søknaden din. Vi gir deg beskjed når du er plassert i en gruppe.",
+        "bodyFallback": "Søknaden din ble godkjent. Plassering pågår."
       },
       "ENROLLMENT_REJECTED": {
         "title": "Påmelding avvist",
         "body": "Påmeldingsforespørselen din ble ikke godkjent."
       },
       "PLACEMENT_REVIEW_READY": {
-        "title": "Plasseringsvurdering klar",
-        "body": "Plasseringsvurderingen din er klar."
+        "title": "Elev klar for plassering",
+        "body": "En elev hos {school} har fullført onboarding og er klar til å bli plassert i en gruppe.",
+        "bodyFallback": "En elev er klar til å bli plassert i en gruppe."
       },
       "GROUP_ASSIGNED": {
-        "title": "Gruppe tildelt",
-        "body": "Du har blitt tildelt en gruppe."
+        "title": "Du er i {group}!",
+        "body": "Du har blitt tildelt {group} hos {school}. Sjekk timeplanen din.",
+        "titleFallback": "Gruppe tildelt",
+        "bodyFallback": "Du har blitt tildelt en gruppe."
       }
     }
   },

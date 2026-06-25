@@ -993,6 +993,10 @@
       "materialUntitled": "Untitled course",
       "materialUnavailable": "Not available yet",
       "classmates": "{count, plural, one {# classmate} other {# classmates}} in your group"
+    },
+    "GroupAssignedBanner": {
+      "message": "You're in {group} at {school}!",
+      "dismiss": "Dismiss"
     }
   },
   "Exercise": {
@@ -1165,20 +1169,24 @@
         "body": "Wants to join {schoolName}."
       },
       "ENROLLMENT_APPROVED": {
-        "title": "Enrollment approved",
-        "body": "Your enrollment request was approved."
+        "title": "Accepted — placement in progress",
+        "body": "{school} accepted your application. We'll notify you once you're placed in a group.",
+        "bodyFallback": "Your application was accepted. Placement is in progress."
       },
       "ENROLLMENT_REJECTED": {
         "title": "Enrollment rejected",
         "body": "Your enrollment request was not approved."
       },
       "PLACEMENT_REVIEW_READY": {
-        "title": "Placement review ready",
-        "body": "Your placement review is ready."
+        "title": "Student ready for placement",
+        "body": "A student at {school} finished onboarding and is ready to be placed in a group.",
+        "bodyFallback": "A student is ready to be placed in a group."
       },
       "GROUP_ASSIGNED": {
-        "title": "Group assigned",
-        "body": "You've been assigned to a group."
+        "title": "You're in {group}!",
+        "body": "You've been assigned to {group} at {school}. Check your schedule.",
+        "titleFallback": "Group assigned",
+        "bodyFallback": "You've been assigned to a group."
       }
     }
   },

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/i18n/navigation';
 import { useStudentSchools } from '../api/use-student-schools';
+import { GroupAssignedBanner } from './group-assigned-banner';
 import { SchoolStatusCard } from './school-status-card';
 import { SchoolSummaryCard } from './school-summary-card';
 
@@ -55,14 +56,26 @@ export function MySchoolsBand() {
           </div>
         }
       >
+        {data?.some((school) => school.status === 'active' && school.groupId && !school.groupAssignedSeenAt) && (
+          <div className="mb-4 space-y-2">
+            {data
+              .filter((school) => school.status === 'active' && school.groupId && !school.groupAssignedSeenAt)
+              .map((school) => (
+                <GroupAssignedBanner key={school.membershipId} school={school} />
+              ))}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data?.map((school) =>
-            school.status === 'active' ? (
-              <SchoolSummaryCard key={school.membershipId} school={school} />
-            ) : (
-              <SchoolStatusCard key={school.membershipId} school={school} />
-            ),
-          )}
+          {data?.map((school) => (
+            <div key={school.membershipId} id={`school-${school.schoolId}`}>
+              {school.status === 'active' ? (
+                <SchoolSummaryCard school={school} />
+              ) : (
+                <SchoolStatusCard school={school} />
+              )}
+            </div>
+          ))}
         </div>
       </DataState>
     </section>
