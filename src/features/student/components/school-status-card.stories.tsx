@@ -12,6 +12,7 @@ function fixture(overrides: Partial<StudentSchool>): StudentSchool {
     status: 'pending',
     groupId: null,
     groupName: null,
+    groupAssignedSeenAt: null,
     level: null,
     mode: null,
     ageBand: null,

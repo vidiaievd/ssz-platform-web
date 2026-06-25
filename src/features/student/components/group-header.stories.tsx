@@ -12,6 +12,7 @@ function fixture(overrides: Partial<StudentSchool>): StudentSchool {
     status: 'active',
     groupId: 'g1',
     groupName: 'A1 Evening',
+    groupAssignedSeenAt: null,
     level: 'A1',
     mode: 'online',
     ageBand: 'adults',

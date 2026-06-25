@@ -18,7 +18,7 @@ import type {
 
 // ── Backend response shapes (org-service) ──────────────────────────────────
 
-type BackendMembership = { id: string; status: MembershipStatus };
+type BackendMembership = { id: string; status: MembershipStatus; groupAssignedSeenAt?: string | null };
 
 type BackendStudentGroupMembership = {
   groupId: string;
@@ -119,6 +119,7 @@ function baseStudentSchool(school: School, membership: BackendMembership): Stude
     pendingStage: pendingStageFor(membership.status),
     groupId: null,
     groupName: null,
+    groupAssignedSeenAt: membership.groupAssignedSeenAt ?? null,
     level: null,
     mode: null,
     ageBand: null,

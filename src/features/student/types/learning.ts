@@ -90,6 +90,8 @@ export interface StudentSchool {
   pendingStage?: PendingStage;
   groupId: string | null;
   groupName: string | null;
+  /** Null once the student has dismissed the one-time group-assigned banner (or never had one). */
+  groupAssignedSeenAt: string | null;
   level: CEFR | null;
   mode: GroupMode | null;
   ageBand: AgeBand | null;

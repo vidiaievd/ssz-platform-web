@@ -1,6 +1,7 @@
 export * from './continue-learning';
 export * from './course-card';
 export * from './enrollment-stepper';
+export * from './group-assigned-banner';
 export * from './group-header';
 export * from './group-materials';
 export * from './lesson-card';
