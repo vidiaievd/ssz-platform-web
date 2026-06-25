@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { GroupHeader } from './group-header';
 import type { StudentSchool } from '../types';
@@ -29,7 +30,16 @@ function fixture(overrides: Partial<StudentSchool>): StudentSchool {
 const meta = {
   title: 'Student/GroupHeader',
   component: GroupHeader,
-  decorators: [(Story) => <div className="max-w-2xl"><Story /></div>],
+  decorators: [
+    (Story) => {
+      const client = new QueryClient();
+      return (
+        <QueryClientProvider client={client}>
+          <div className="max-w-2xl"><Story /></div>
+        </QueryClientProvider>
+      );
+    },
+  ],
 } satisfies Meta<typeof GroupHeader>;
 
 export default meta;

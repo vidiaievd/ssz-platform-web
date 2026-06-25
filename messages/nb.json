@@ -66,7 +66,8 @@
     "discover": "Utforsk",
     "requests": "Søknader",
     "invitations": "Invitasjoner",
-    "scheduling": "Planlegging"
+    "scheduling": "Planlegging",
+    "courses": "Kurs"
   },
   "RouteTitles": {
     "dashboard": "Oversikt",
@@ -228,7 +229,12 @@
       "course": "Kurs",
       "module": "Modul",
       "collection": "Samling"
-    }
+    },
+    "discoverCoursesTitle": "Utforsk kurs",
+    "discoverCoursesSubtitle": "Kurs du tar på egen hånd — i ditt eget tempo, uten timeplan eller lærer. Noen tilbys også av skolene dine.",
+    "alsoTaughtAt": "Tilbys også av {school}",
+    "startSelfStudy": "Start på egen hånd",
+    "askToBePlaced": "Be om plassering"
   },
   "Auth": {
     "Login": {
@@ -950,7 +956,9 @@
       "leftTitle": "Ikke registrert lenger",
       "leftDescription": "Du har forlatt {school}.",
       "badgeRejected": "Avslått",
-      "badgeLeft": "Forlatt"
+      "badgeLeft": "Forlatt",
+      "reapply": "Søk på nytt",
+      "discoverSelfStudy": "Utforsk selvstudiekurs"
     },
     "MySchools": {
       "title": "Mine skoler",
@@ -987,7 +995,13 @@
       "mainCourseBadge": "Hovedkurs",
       "materialUntitled": "Kurs uten tittel",
       "materialUnavailable": "Ikke tilgjengelig ennå",
-      "classmates": "{count, plural, one {# medelev} other {# medelever}} i gruppen din"
+      "classmates": "{count, plural, one {# medelev} other {# medelever}} i gruppen din",
+      "leaveAction": "Forlat skolen",
+      "leaveConfirmTitle": "Forlate denne skolen?",
+      "leaveConfirmDescription": "Du mister tilgangen til gruppen, timeplanen og materialene til {school}. Du kan søke igjen senere.",
+      "leaveCancel": "Avbryt",
+      "leaveConfirm": "Forlat skolen",
+      "leaveError": "Kunne ikke forlate skolen. Vennligst prøv igjen."
     },
     "GroupAssignedBanner": {
       "message": "Du er i {group} hos {school}!",
@@ -2640,7 +2654,8 @@
       "alreadyEnrolled": "Du er registrert i denne skolen.",
       "continueOnboarding": "Fortsett registrering",
       "joinAsGuest": "Søk om å bli med",
-      "inviteOnly": "Denne skolen tar imot studenter kun etter invitasjon."
+      "inviteOnly": "Denne skolen tar imot studenter kun etter invitasjon.",
+      "reapply": "Søk på nytt"
     }
   }
 }

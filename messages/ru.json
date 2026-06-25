@@ -66,7 +66,8 @@
     "discover": "Найти",
     "requests": "Заявки",
     "invitations": "Приглашения",
-    "scheduling": "Расписание"
+    "scheduling": "Расписание",
+    "courses": "Курсы"
   },
   "RouteTitles": {
     "dashboard": "Обзор",
@@ -228,7 +229,12 @@
       "course": "Курс",
       "module": "Модуль",
       "collection": "Коллекция"
-    }
+    },
+    "discoverCoursesTitle": "Найти курсы",
+    "discoverCoursesSubtitle": "Курсы, которые вы изучаете самостоятельно — в своём темпе, без расписания и преподавателя. Некоторые также преподаются в ваших школах.",
+    "alsoTaughtAt": "Также преподаётся в {school}",
+    "startSelfStudy": "Начать самостоятельно",
+    "askToBePlaced": "Запросить распределение"
   },
   "Auth": {
     "Login": {
@@ -950,7 +956,9 @@
       "leftTitle": "Больше не зачислены",
       "leftDescription": "Вы покинули {school}.",
       "badgeRejected": "Отклонено",
-      "badgeLeft": "Покинул(а)"
+      "badgeLeft": "Покинул(а)",
+      "reapply": "Подать заявку повторно",
+      "discoverSelfStudy": "Найти курсы для самостоятельного изучения"
     },
     "MySchools": {
       "title": "Мои школы",
@@ -987,7 +995,13 @@
       "mainCourseBadge": "Основной курс",
       "materialUntitled": "Курс без названия",
       "materialUnavailable": "Пока недоступно",
-      "classmates": "{count, plural, one {# одногруппник} few {# одногруппника} many {# одногруппников} other {# одногруппника}} в вашей группе"
+      "classmates": "{count, plural, one {# одногруппник} few {# одногруппника} many {# одногруппников} other {# одногруппника}} в вашей группе",
+      "leaveAction": "Покинуть школу",
+      "leaveConfirmTitle": "Покинуть эту школу?",
+      "leaveConfirmDescription": "Вы потеряете доступ к группе, расписанию и материалам {school}. Позже можно подать заявку снова.",
+      "leaveCancel": "Отмена",
+      "leaveConfirm": "Покинуть школу",
+      "leaveError": "Не удалось покинуть школу. Попробуйте ещё раз."
     },
     "GroupAssignedBanner": {
       "message": "Вы в {group} в {school}!",
@@ -2640,7 +2654,8 @@
       "alreadyEnrolled": "Вы зачислены в эту школу.",
       "continueOnboarding": "Продолжить регистрацию",
       "joinAsGuest": "Подать заявку",
-      "inviteOnly": "Эта школа принимает студентов только по приглашению."
+      "inviteOnly": "Эта школа принимает студентов только по приглашению.",
+      "reapply": "Подать заявку повторно"
     }
   }
 }

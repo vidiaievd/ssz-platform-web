@@ -66,7 +66,8 @@
     "discover": "Знайти",
     "requests": "Заявки",
     "invitations": "Запрошення",
-    "scheduling": "Розклад"
+    "scheduling": "Розклад",
+    "courses": "Курси"
   },
   "RouteTitles": {
     "dashboard": "Огляд",
@@ -228,7 +229,12 @@
       "course": "Курс",
       "module": "Модуль",
       "collection": "Колекція"
-    }
+    },
+    "discoverCoursesTitle": "Знайти курси",
+    "discoverCoursesSubtitle": "Курси, які ви вивчаєте самостійно — у власному темпі, без розкладу й викладача. Деякі також викладаються у ваших школах.",
+    "alsoTaughtAt": "Також викладається у {school}",
+    "startSelfStudy": "Почати самостійно",
+    "askToBePlaced": "Подати запит на розподіл"
   },
   "Auth": {
     "Login": {
@@ -950,7 +956,9 @@
       "leftTitle": "Більше не зараховані",
       "leftDescription": "Ви залишили {school}.",
       "badgeRejected": "Відхилено",
-      "badgeLeft": "Залишив(ла)"
+      "badgeLeft": "Залишив(ла)",
+      "reapply": "Подати заявку знову",
+      "discoverSelfStudy": "Знайти курси для самостійного вивчення"
     },
     "MySchools": {
       "title": "Мої школи",
@@ -987,7 +995,13 @@
       "mainCourseBadge": "Основний курс",
       "materialUntitled": "Курс без назви",
       "materialUnavailable": "Ще не доступно",
-      "classmates": "{count, plural, one {# одногрупник} few {# одногрупники} many {# одногрупників} other {# одногрупників}} у вашій групі"
+      "classmates": "{count, plural, one {# одногрупник} few {# одногрупники} many {# одногрупників} other {# одногрупників}} у вашій групі",
+      "leaveAction": "Залишити школу",
+      "leaveConfirmTitle": "Залишити цю школу?",
+      "leaveConfirmDescription": "Ви втратите доступ до групи, розкладу та матеріалів {school}. Пізніше можна подати заявку знову.",
+      "leaveCancel": "Скасувати",
+      "leaveConfirm": "Залишити школу",
+      "leaveError": "Не вдалося залишити школу. Спробуйте ще раз."
     },
     "GroupAssignedBanner": {
       "message": "Вас зараховано до {group} у {school}!",
@@ -2640,7 +2654,8 @@
       "alreadyEnrolled": "Ви зараховані до цієї школи.",
       "continueOnboarding": "Продовжити реєстрацію",
       "joinAsGuest": "Подати заявку",
-      "inviteOnly": "Ця школа приймає студентів лише за запрошенням."
+      "inviteOnly": "Ця школа приймає студентів лише за запрошенням.",
+      "reapply": "Подати заявку знову"
     }
   }
 }

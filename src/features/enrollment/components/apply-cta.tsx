@@ -62,12 +62,6 @@ export function ApplyCta({ state, schoolSlug, membershipId, language = 'nb', loc
     );
   }
 
-  if (state === 'rejected') {
-    return (
-      <p className="text-sm text-destructive">{t('applicationRejected')}</p>
-    );
-  }
-
   if (state === 'guest') {
     return (
       <Button
@@ -82,7 +76,7 @@ export function ApplyCta({ state, schoolSlug, membershipId, language = 'nb', loc
     );
   }
 
-  // state === 'apply'
+  // state === 'apply' or 'rejected' — a rejected membership is terminal, so re-applying submits a fresh one
   async function handleApply() {
     setApplying(true);
     try {
@@ -106,6 +100,17 @@ export function ApplyCta({ state, schoolSlug, membershipId, language = 'nb', loc
       toast.error(t('applyFailed'));
       setApplying(false);
     }
+  }
+
+  if (state === 'rejected') {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-destructive">{t('applicationRejected')}</p>
+        <Button onClick={handleApply} disabled={applying} variant="outline">
+          {applying ? t('applying') : t('reapply')}
+        </Button>
+      </div>
+    );
   }
 
   return (

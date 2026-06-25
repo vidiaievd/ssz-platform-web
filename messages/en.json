@@ -66,7 +66,8 @@
     "discover": "Discover",
     "requests": "Requests",
     "invitations": "Invitations",
-    "scheduling": "Scheduling"
+    "scheduling": "Scheduling",
+    "courses": "Courses"
   },
   "RouteTitles": {
     "dashboard": "Dashboard",
@@ -228,7 +229,12 @@
       "course": "Course",
       "module": "Module",
       "collection": "Collection"
-    }
+    },
+    "discoverCoursesTitle": "Discover courses",
+    "discoverCoursesSubtitle": "Courses you start on your own — self-paced, no schedule, no teacher. Some are also taught by your schools.",
+    "alsoTaughtAt": "Also taught at {school}",
+    "startSelfStudy": "Start on your own",
+    "askToBePlaced": "Ask to be placed"
   },
   "Auth": {
     "Login": {
@@ -955,7 +961,9 @@
       "leftTitle": "No longer enrolled",
       "leftDescription": "You left {school}.",
       "badgeRejected": "Rejected",
-      "badgeLeft": "Left"
+      "badgeLeft": "Left",
+      "reapply": "Re-apply",
+      "discoverSelfStudy": "Discover self-study courses"
     },
     "MySchools": {
       "title": "My schools",
@@ -992,7 +1000,13 @@
       "mainCourseBadge": "Main course",
       "materialUntitled": "Untitled course",
       "materialUnavailable": "Not available yet",
-      "classmates": "{count, plural, one {# classmate} other {# classmates}} in your group"
+      "classmates": "{count, plural, one {# classmate} other {# classmates}} in your group",
+      "leaveAction": "Leave school",
+      "leaveConfirmTitle": "Leave this school?",
+      "leaveConfirmDescription": "You'll lose access to {school}'s group, schedule, and materials. You can apply again later.",
+      "leaveCancel": "Cancel",
+      "leaveConfirm": "Leave school",
+      "leaveError": "Could not leave the school. Please try again."
     },
     "GroupAssignedBanner": {
       "message": "You're in {group} at {school}!",
@@ -2645,7 +2659,8 @@
       "alreadyEnrolled": "You're enrolled in this school.",
       "continueOnboarding": "Continue enrollment",
       "joinAsGuest": "Apply to join",
-      "inviteOnly": "This school accepts students by invitation only."
+      "inviteOnly": "This school accepts students by invitation only.",
+      "reapply": "Re-apply"
     }
   }
 }

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import { Link } from '@/lib/i18n/navigation';
 import type { StudentSchool, SchoolTeacherSummary } from '../types';
+import { LeaveSchoolButton } from './leave-school-button';
 
 interface GroupHeaderProps {
   school: StudentSchool;
@@ -24,13 +25,16 @@ export function GroupHeader({ school }: GroupHeaderProps) {
 
   return (
     <div className="space-y-4">
-      <Link
-        href="/student/enrolled"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        {t('backLink')}
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link
+          href="/student/enrolled"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          {t('backLink')}
+        </Link>
+        <LeaveSchoolButton membershipId={school.membershipId} schoolName={school.schoolName} />
+      </div>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>

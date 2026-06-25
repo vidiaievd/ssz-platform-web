@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Link } from '@/lib/i18n/navigation';
 import type { StudentSchool } from '../types';
 import { EnrollmentStepper } from './enrollment-stepper';
 
@@ -58,9 +60,20 @@ export function SchoolStatusCard({ school }: SchoolStatusCardProps) {
 
       <CardDescription>{copy.description}</CardDescription>
 
-      <div className="mt-4">
-        <EnrollmentStepper status={school.status} />
-      </div>
+      {school.status === 'rejected' ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link href={`/s/${school.schoolSlug}`}>{t('reapply')}</Link>
+          </Button>
+          <Button asChild size="sm" variant="ghost">
+            <Link href="/student/courses">{t('discoverSelfStudy')}</Link>
+          </Button>
+        </div>
+      ) : (
+        <div className="mt-4">
+          <EnrollmentStepper status={school.status} />
+        </div>
+      )}
     </Card>
   );
 }
