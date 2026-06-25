@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
 import { ContinueLearning } from '@/features/student/components/continue-learning';
+import { MySchoolsBand } from '@/features/student/components/my-schools-band';
 import { StreakWidget } from '@/features/student/components/streak-widget';
 import { UpcomingLessons } from '@/features/student/components/upcoming-lessons';
 import { VoxOrdPromo } from '@/features/student/components/voxord-promo';
@@ -27,6 +28,8 @@ export default async function EnrolledPage() {
       </div>
 
       <div className="space-y-10">
+        <MySchoolsBand />
+
         <VoxOrdPromo />
 
         <ContinueLearning />

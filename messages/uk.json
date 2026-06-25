@@ -927,6 +927,39 @@
       "completedToast": "Урок завершено! Чудова робота.",
       "noContent": "Вміст цього уроку ще недоступний.",
       "keyboardHint": "← → для навігації · Esc для виходу"
+    },
+    "SchoolStatus": {
+      "stepperLabel": "Прогрес зарахування",
+      "stepApplication": "Заявка",
+      "stepPlacement": "Розподіл рівня",
+      "stepGroup": "Група",
+      "stepSchedule": "Розклад",
+      "stepNumber": "Крок {n}",
+      "stepDone": "завершено",
+      "pendingTitle": "Заявку подано",
+      "pendingDescription": "{school} розглядає вашу заявку.",
+      "onboardingTitle": "Завершіть оформлення",
+      "onboardingDescription": "Виконайте кроки нижче, щоб {school} могла розподілити вас у групу.",
+      "placementReviewTitle": "Очікує розподілу",
+      "placementReviewDescription": "{school} підбирає для вас підходящу групу.",
+      "activeTitle": "Ви зараховані",
+      "activeDescription": "Ви зараховані до {school}.",
+      "activeDescriptionWithGroup": "Ви в групі {group} у {school}.",
+      "rejectedTitle": "Заявку не прийнято",
+      "rejectedDescription": "{school} не прийняла вашу заявку.",
+      "leftTitle": "Більше не зараховані",
+      "leftDescription": "Ви залишили {school}.",
+      "badgeRejected": "Відхилено",
+      "badgeLeft": "Залишив(ла)"
+    },
+    "MySchools": {
+      "title": "Мої школи",
+      "subtitle": "Школи, до яких ви подали заявку або в яких навчаєтесь.",
+      "empty": "Ви ще не подавали заявку до жодної школи.",
+      "browseDiscover": "Знайти школи",
+      "noUpcomingLesson": "Поки немає запланованих занять",
+      "nextLessonAt": "Наступне: {day}, {start}–{end}",
+      "classmateCount": "{count, plural, one {# одногрупник} few {# одногрупники} many {# одногрупників} other {# одногрупників}}"
     }
   },
   "Exercise": {

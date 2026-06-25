@@ -927,6 +927,39 @@
       "completedToast": "Урок завершён! Отличная работа.",
       "noContent": "Содержимое этого урока пока недоступно.",
       "keyboardHint": "← → для навигации · Esc для выхода"
+    },
+    "SchoolStatus": {
+      "stepperLabel": "Прогресс зачисления",
+      "stepApplication": "Заявка",
+      "stepPlacement": "Распределение уровня",
+      "stepGroup": "Группа",
+      "stepSchedule": "Расписание",
+      "stepNumber": "Шаг {n}",
+      "stepDone": "завершено",
+      "pendingTitle": "Заявка отправлена",
+      "pendingDescription": "{school} рассматривает вашу заявку.",
+      "onboardingTitle": "Завершите оформление",
+      "onboardingDescription": "Выполните шаги ниже, чтобы {school} могла распределить вас в группу.",
+      "placementReviewTitle": "Ожидает распределения",
+      "placementReviewDescription": "{school} подбирает для вас подходящую группу.",
+      "activeTitle": "Вы зачислены",
+      "activeDescription": "Вы зачислены в {school}.",
+      "activeDescriptionWithGroup": "Вы в группе {group} в {school}.",
+      "rejectedTitle": "Заявка не принята",
+      "rejectedDescription": "{school} не приняла вашу заявку.",
+      "leftTitle": "Больше не зачислены",
+      "leftDescription": "Вы покинули {school}.",
+      "badgeRejected": "Отклонено",
+      "badgeLeft": "Покинул(а)"
+    },
+    "MySchools": {
+      "title": "Мои школы",
+      "subtitle": "Школы, в которые вы подали заявку или зачислены.",
+      "empty": "Вы пока не подавали заявку ни в одну школу.",
+      "browseDiscover": "Найти школы",
+      "noUpcomingLesson": "Пока нет запланированных занятий",
+      "nextLessonAt": "Следующее: {day}, {start}–{end}",
+      "classmateCount": "{count, plural, one {# одногруппник} few {# одногруппника} many {# одногруппников} other {# одногруппника}}"
     }
   },
   "Exercise": {

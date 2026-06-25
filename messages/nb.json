@@ -927,6 +927,39 @@
       "completedToast": "Leksjon fullført! Bra jobba.",
       "noContent": "Ingen innhold tilgjengelig for denne leksjonen ennå.",
       "keyboardHint": "← → for å navigere · Esc for å avslutte"
+    },
+    "SchoolStatus": {
+      "stepperLabel": "Påmeldingsfremgang",
+      "stepApplication": "Søknad",
+      "stepPlacement": "Plassering",
+      "stepGroup": "Gruppe",
+      "stepSchedule": "Timeplan",
+      "stepNumber": "Trinn {n}",
+      "stepDone": "fullført",
+      "pendingTitle": "Søknad sendt",
+      "pendingDescription": "{school} vurderer søknaden din.",
+      "onboardingTitle": "Fullfør registreringen din",
+      "onboardingDescription": "Fullfør trinnene nedenfor så {school} kan plassere deg i en gruppe.",
+      "placementReviewTitle": "Venter på plassering",
+      "placementReviewDescription": "{school} finner den rette gruppen for deg.",
+      "activeTitle": "Du er registrert",
+      "activeDescription": "Du er registrert hos {school}.",
+      "activeDescriptionWithGroup": "Du er i {group} hos {school}.",
+      "rejectedTitle": "Søknaden ble ikke godkjent",
+      "rejectedDescription": "{school} godkjente ikke søknaden din.",
+      "leftTitle": "Ikke registrert lenger",
+      "leftDescription": "Du har forlatt {school}.",
+      "badgeRejected": "Avslått",
+      "badgeLeft": "Forlatt"
+    },
+    "MySchools": {
+      "title": "Mine skoler",
+      "subtitle": "Skoler du har søkt om eller er registrert hos.",
+      "empty": "Du har ikke søkt om noen skole ennå.",
+      "browseDiscover": "Utforsk skoler",
+      "noUpcomingLesson": "Ingen kommende time ennå",
+      "nextLessonAt": "Neste: {day}, {start}–{end}",
+      "classmateCount": "{count, plural, one {# medelev} other {# medelever}}"
     }
   },
   "Exercise": {

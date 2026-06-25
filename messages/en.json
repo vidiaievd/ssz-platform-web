@@ -932,6 +932,39 @@
       "completedToast": "Lesson complete! Great work.",
       "noContent": "No content available for this lesson yet.",
       "keyboardHint": "← → to navigate · Esc to exit"
+    },
+    "SchoolStatus": {
+      "stepperLabel": "Enrollment progress",
+      "stepApplication": "Application",
+      "stepPlacement": "Placement",
+      "stepGroup": "Group",
+      "stepSchedule": "Schedule",
+      "stepNumber": "Step {n}",
+      "stepDone": "completed",
+      "pendingTitle": "Application submitted",
+      "pendingDescription": "{school} is reviewing your application.",
+      "onboardingTitle": "Complete your onboarding",
+      "onboardingDescription": "Finish the steps below so {school} can place you in a group.",
+      "placementReviewTitle": "Waiting to be placed",
+      "placementReviewDescription": "{school} is finding the right group for you.",
+      "activeTitle": "You're enrolled",
+      "activeDescription": "You're enrolled at {school}.",
+      "activeDescriptionWithGroup": "You're in {group} at {school}.",
+      "rejectedTitle": "Application not accepted",
+      "rejectedDescription": "{school} did not accept your application.",
+      "leftTitle": "No longer enrolled",
+      "leftDescription": "You left {school}.",
+      "badgeRejected": "Rejected",
+      "badgeLeft": "Left"
+    },
+    "MySchools": {
+      "title": "My schools",
+      "subtitle": "Schools you've applied to or are enrolled with.",
+      "empty": "You haven't applied to a school yet.",
+      "browseDiscover": "Discover schools",
+      "noUpcomingLesson": "No upcoming lesson yet",
+      "nextLessonAt": "Next: {day}, {start}–{end}",
+      "classmateCount": "{count, plural, one {# classmate} other {# classmates}}"
     }
   },
   "Exercise": {
