@@ -46,6 +46,7 @@ const ARCHIVED: Notification = {
 const meta = {
   title: 'Notifications/NotificationListItem',
   component: NotificationListItem,
+  parameters: { nextjs: { appDirectory: true } },
   decorators: [
     (Story) => {
       const client = new QueryClient();

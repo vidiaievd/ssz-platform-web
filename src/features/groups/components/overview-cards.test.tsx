@@ -12,6 +12,11 @@ vi.mock('../api/mutations', () => ({
   removeTeacher: vi.fn(),
 }));
 
+// CourseManageDialog (mounted whenever canManage) calls useRouter() unconditionally.
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
+}));
+
 const baseGroup: Group = {
   id: 'g1',
   name: 'Norwegian A2',

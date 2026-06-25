@@ -65,11 +65,11 @@
   --color-warning-700: oklch(0.48 0.11  75);
 
   /* ─── Error ─── */
-  --color-error:     oklch(0.60 0.125 15);
+  --color-error:     oklch(0.55 0.125 15);
   --color-error-50:  oklch(0.97 0.025 15);
   --color-error-100: oklch(0.92 0.055 15);
   --color-error-300: oklch(0.78 0.10  15);
-  --color-error-500: oklch(0.60 0.125 15);
+  --color-error-500: oklch(0.55 0.125 15);
   --color-error-700: oklch(0.44 0.105 15);
 
   /* ─── Info ─── */
@@ -188,7 +188,7 @@
 
     --ssz-text-primary:   oklch(0.18  0.010 80);
     --ssz-text-secondary: oklch(0.46  0.010 80);
-    --ssz-text-muted:     oklch(0.70  0.010 80);
+    --ssz-text-muted:     oklch(0.50  0.010 80);
     --ssz-text-inverse:   oklch(1.00  0.005 80);
     --ssz-text-link:      oklch(0.52  0.10  168);
     --ssz-text-link-hover:oklch(0.44  0.09  168);
@@ -245,7 +245,7 @@
 
     --ssz-text-primary:   oklch(0.93 0.008 80);
     --ssz-text-secondary: oklch(0.72 0.010 80);
-    --ssz-text-muted:     oklch(0.52 0.010 80);
+    --ssz-text-muted:     oklch(0.65 0.010 80);
     --ssz-text-inverse:   oklch(0.18 0.010 80);
     --ssz-text-link:      oklch(0.79 0.09  168);
     --ssz-text-link-hover:oklch(0.87 0.075 168);

@@ -121,7 +121,7 @@ export function NotificationListItem({
         <time
           dateTime={notification.createdAt}
           title={new Date(notification.createdAt).toLocaleString()}
-          className="mt-1 block text-[11px] text-muted-foreground/70"
+          className="mt-1 block text-[11px] text-muted-foreground"
         >
           {timeAgo(notification.createdAt)}
         </time>
@@ -129,7 +129,7 @@ export function NotificationListItem({
 
       <div className="flex items-center gap-1.5 shrink-0">
         {!notification.isRead && (
-          <span aria-label={t('unreadDot')} className="size-2 rounded-full bg-primary" />
+          <span role="status" aria-label={t('unreadDot')} className="size-2 rounded-full bg-primary" />
         )}
         {enrollmentRequestData && !isArchived ? (
           <EnrollmentRequestActions

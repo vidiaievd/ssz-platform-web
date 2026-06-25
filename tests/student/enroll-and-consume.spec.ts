@@ -28,18 +28,24 @@ async function loginAs(loginPage: LoginPage, user: { email: string; password: st
 
 test.describe('Enrol and consume flow', () => {
   test('unauthenticated user sees public catalogue @stub', async ({ page }) => {
-    await stubJson(page, '**/api/catalogue**', {
+    await stubJson(page, '**/api/content/containers**', {
       items: [
         {
           id: '1',
           title: 'Norwegian for Beginners',
           slug: 'norwegian-for-beginners',
           description: 'Learn the basics of Norwegian.',
-          language: 'nb',
-          level: 'A1',
+          containerType: 'course',
+          targetLanguage: 'nb',
+          difficultyLevel: 'A1',
+          visibility: 'public',
+          accessTier: 'public_free',
+          ownerUserId: 'owner-1',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
         },
       ],
-      total: 1,
+      pageInfo: { hasNextPage: false, total: 1 },
     });
 
     await page.goto('/en/catalogue');
