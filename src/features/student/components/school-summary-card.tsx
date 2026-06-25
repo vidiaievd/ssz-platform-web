@@ -7,15 +7,11 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import { Link } from '@/lib/i18n/navigation';
+import { formatNextLessonLabel, getNextLessonOccurrence } from '@/lib/schedule/next-lesson';
 import type { StudentSchool } from '../types';
 
 interface SchoolSummaryCardProps {
   school: StudentSchool;
-}
-
-function formatNextLessonDay(dateIso: string, startTime: string, locale: string): string {
-  const date = new Date(`${dateIso}T${startTime}:00`);
-  return new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short' }).format(date);
 }
 
 /**
@@ -26,10 +22,11 @@ function formatNextLessonDay(dateIso: string, startTime: string, locale: string)
 export function SchoolSummaryCard({ school }: SchoolSummaryCardProps) {
   const t = useTranslations('Student.MySchools');
   const locale = useLocale();
-  const next = school.nextLesson;
-  const nextLessonLabel = next
-    ? t('nextLessonAt', { day: formatNextLessonDay(next.date, next.start, locale), start: next.start, end: next.end })
-    : null;
+  // Recomputed against the viewer's own clock so it's always genuinely in the
+  // future and can render "in N minutes" — the server-derived `nextLesson`
+  // field is a coarse fallback for the (rare) empty-schedule case only.
+  const occurrence = getNextLessonOccurrence(school.schedule);
+  const nextLessonLabel = occurrence ? formatNextLessonLabel(occurrence, locale) : null;
 
   return (
     <Link href={`/student/schools/${school.schoolSlug}`} className="block">

@@ -62,7 +62,7 @@ export default async function SchoolDetailPage({ params }: Props) {
   return (
     <main className="container mx-auto max-w-3xl px-4 py-8 space-y-8">
       <GroupHeader school={school} />
-      <WeeklySchedule schedule={school.schedule} nextLesson={school.nextLesson} />
+      <WeeklySchedule schedule={school.schedule} />
       <GroupMaterials mainCourse={mainCourse} materials={materials} />
       {school.classmateCount != null && (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">

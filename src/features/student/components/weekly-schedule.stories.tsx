@@ -12,7 +12,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Empty: Story = {
-  args: { schedule: [], nextLesson: null },
+  args: { schedule: [] },
 };
 
 export const WithSlots: Story = {
@@ -21,16 +21,5 @@ export const WithSlots: Story = {
       { day: 'Tue', start: '18:00', end: '19:30', room: 'Room B2' },
       { day: 'Thu', start: '18:00', end: '19:30', room: 'Room B2' },
     ],
-    nextLesson: null,
-  },
-};
-
-export const NextLessonHighlighted: Story = {
-  args: {
-    schedule: [
-      { day: 'Tue', start: '18:00', end: '19:30', room: 'Room B2' },
-      { day: 'Thu', start: '18:00', end: '19:30', room: 'Room B2' },
-    ],
-    nextLesson: { day: 'Thu', start: '18:00', end: '19:30', date: '2026-07-02' },
   },
 };

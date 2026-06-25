@@ -1,28 +1,30 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Calendar } from 'lucide-react';
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { ScheduleSlot, NextLesson } from '../types';
+import { formatNextLessonLabel, getNextLessonOccurrence } from '@/lib/schedule/next-lesson';
+import type { ScheduleSlot } from '../types';
 
 interface WeeklyScheduleProps {
   schedule: ScheduleSlot[];
-  nextLesson: NextLesson | null;
 }
 
 const WEEKDAY_ORDER: ScheduleSlot['day'][] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-function isNextSlot(slot: ScheduleSlot, nextLesson: NextLesson | null): boolean {
-  if (!nextLesson) return false;
-  return slot.day === nextLesson.day && slot.start === nextLesson.start && slot.end === nextLesson.end;
-}
-
-/** The group's recurring weekly slots, with the upcoming occurrence highlighted. */
-export function WeeklySchedule({ schedule, nextLesson }: WeeklyScheduleProps) {
+/**
+ * The group's recurring weekly slots, with the upcoming occurrence
+ * highlighted. The next occurrence is computed against the viewer's own
+ * clock (not a server-derived field) so it's always genuinely in the future
+ * and can show "in N minutes" for an imminent lesson.
+ */
+export function WeeklySchedule({ schedule }: WeeklyScheduleProps) {
   const t = useTranslations('Student.SchoolDetail');
+  const locale = useLocale();
+  const occurrence = getNextLessonOccurrence(schedule);
 
   const sorted = [...schedule].sort((a, b) => {
     const dayDiff = WEEKDAY_ORDER.indexOf(a.day) - WEEKDAY_ORDER.indexOf(b.day);
@@ -40,7 +42,7 @@ export function WeeklySchedule({ schedule, nextLesson }: WeeklyScheduleProps) {
       ) : (
         <ul className="divide-y divide-border">
           {sorted.map((slot, i) => {
-            const isNext = isNextSlot(slot, nextLesson);
+            const isNext = occurrence?.day === slot.day && occurrence.start === slot.start && occurrence.end === slot.end;
             return (
               <li
                 key={`${slot.day}-${slot.start}-${i}`}
@@ -58,7 +60,12 @@ export function WeeklySchedule({ schedule, nextLesson }: WeeklyScheduleProps) {
                     </p>
                   </div>
                 </div>
-                {isNext && <Badge variant="primary">{t('nextLessonBadge')}</Badge>}
+                {isNext && occurrence && (
+                  <div className="text-right">
+                    <Badge variant="primary">{t('nextLessonBadge')}</Badge>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{formatNextLessonLabel(occurrence, locale)}</p>
+                  </div>
+                )}
               </li>
             );
           })}
