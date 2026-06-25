@@ -960,6 +960,34 @@
       "noUpcomingLesson": "Пока нет запланированных занятий",
       "nextLessonAt": "Следующее: {day}, {start}–{end}",
       "classmateCount": "{count, plural, one {# одногруппник} few {# одногруппника} many {# одногруппников} other {# одногруппника}}"
+    },
+    "SchoolDetail": {
+      "backLink": "Назад к моим школам",
+      "lockedHeading": "{school} — пока не активна",
+      "modeOnline": "Онлайн",
+      "modeInPerson": "Очно",
+      "teachersLabel": "Преподаватели",
+      "teacherRolePrimary": "Преподаватель",
+      "teacherRoleCoPrimary": "Соведущий",
+      "teacherRoleSubstitute": "Замена",
+      "scheduleTitle": "Расписание на неделю",
+      "scheduleEmpty": "Расписание ещё не составлено — проверьте позже.",
+      "nextLessonBadge": "Следующее занятие",
+      "weekday": {
+        "Mon": "Понедельник",
+        "Tue": "Вторник",
+        "Wed": "Среда",
+        "Thu": "Четверг",
+        "Fri": "Пятница",
+        "Sat": "Суббота",
+        "Sun": "Воскресенье"
+      },
+      "materialsTitle": "Материалы",
+      "materialsEmpty": "Материалов пока нет.",
+      "mainCourseBadge": "Основной курс",
+      "materialUntitled": "Курс без названия",
+      "materialUnavailable": "Пока недоступно",
+      "classmates": "{count, plural, one {# одногруппник} few {# одногруппника} many {# одногруппников} other {# одногруппника}} в вашей группе"
     }
   },
   "Exercise": {

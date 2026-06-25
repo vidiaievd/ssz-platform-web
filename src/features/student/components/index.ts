@@ -1,6 +1,8 @@
 export * from './continue-learning';
 export * from './course-card';
 export * from './enrollment-stepper';
+export * from './group-header';
+export * from './group-materials';
 export * from './lesson-card';
 export * from './lesson-navigation';
 export * from './lesson-player';
@@ -8,6 +10,7 @@ export * from './lesson-progress';
 export * from './my-schools-band';
 export * from './school-status-card';
 export * from './school-summary-card';
+export * from './weekly-schedule';
 export * from './stat-card';
 export * from './streak-stats';
 export * from './streak-widget';

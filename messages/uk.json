@@ -960,6 +960,34 @@
       "noUpcomingLesson": "Поки немає запланованих занять",
       "nextLessonAt": "Наступне: {day}, {start}–{end}",
       "classmateCount": "{count, plural, one {# одногрупник} few {# одногрупники} many {# одногрупників} other {# одногрупників}}"
+    },
+    "SchoolDetail": {
+      "backLink": "Назад до моїх школ",
+      "lockedHeading": "{school} — ще не активна",
+      "modeOnline": "Онлайн",
+      "modeInPerson": "Очно",
+      "teachersLabel": "Викладачі",
+      "teacherRolePrimary": "Викладач",
+      "teacherRoleCoPrimary": "Співвикладач",
+      "teacherRoleSubstitute": "Заміна",
+      "scheduleTitle": "Розклад на тиждень",
+      "scheduleEmpty": "Розклад ще не складено — перевірте пізніше.",
+      "nextLessonBadge": "Наступне заняття",
+      "weekday": {
+        "Mon": "Понеділок",
+        "Tue": "Вівторок",
+        "Wed": "Середа",
+        "Thu": "Четвер",
+        "Fri": "П'ятниця",
+        "Sat": "Субота",
+        "Sun": "Неділя"
+      },
+      "materialsTitle": "Матеріали",
+      "materialsEmpty": "Матеріалів ще немає.",
+      "mainCourseBadge": "Основний курс",
+      "materialUntitled": "Курс без назви",
+      "materialUnavailable": "Ще не доступно",
+      "classmates": "{count, plural, one {# одногрупник} few {# одногрупники} many {# одногрупників} other {# одногрупників}} у вашій групі"
     }
   },
   "Exercise": {

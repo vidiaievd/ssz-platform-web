@@ -53,4 +53,4 @@ storybook-static
 .vscode/
 
 # claude code
-.claude/playwright-report/
+.claude

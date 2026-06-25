@@ -960,6 +960,34 @@
       "noUpcomingLesson": "Ingen kommende time ennå",
       "nextLessonAt": "Neste: {day}, {start}–{end}",
       "classmateCount": "{count, plural, one {# medelev} other {# medelever}}"
+    },
+    "SchoolDetail": {
+      "backLink": "Tilbake til mine skoler",
+      "lockedHeading": "{school} — ikke aktiv ennå",
+      "modeOnline": "Online",
+      "modeInPerson": "Fysisk",
+      "teachersLabel": "Lærere",
+      "teacherRolePrimary": "Lærer",
+      "teacherRoleCoPrimary": "Medlærer",
+      "teacherRoleSubstitute": "Vikar",
+      "scheduleTitle": "Ukeplan",
+      "scheduleEmpty": "Timeplanen er ikke satt opp ennå — sjekk tilbake senere.",
+      "nextLessonBadge": "Neste time",
+      "weekday": {
+        "Mon": "Mandag",
+        "Tue": "Tirsdag",
+        "Wed": "Onsdag",
+        "Thu": "Torsdag",
+        "Fri": "Fredag",
+        "Sat": "Lørdag",
+        "Sun": "Søndag"
+      },
+      "materialsTitle": "Materialer",
+      "materialsEmpty": "Ingen materialer ennå.",
+      "mainCourseBadge": "Hovedkurs",
+      "materialUntitled": "Kurs uten tittel",
+      "materialUnavailable": "Ikke tilgjengelig ennå",
+      "classmates": "{count, plural, one {# medelev} other {# medelever}} i gruppen din"
     }
   },
   "Exercise": {
