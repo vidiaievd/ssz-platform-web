@@ -236,7 +236,18 @@
     "discoverCoursesSubtitle": "Kurs du tar på egen hånd — i ditt eget tempo, uten timeplan eller lærer. Noen tilbys også av skolene dine.",
     "alsoTaughtAt": "Tilbys også av {school}",
     "startSelfStudy": "Start på egen hånd",
-    "askToBePlaced": "Be om plassering"
+    "askToBePlaced": "Be om plassering",
+    "SkipKnown": {
+      "quickSkim": "Hurtigsjekk",
+      "know": "Kan det",
+      "new": "Nytt for meg",
+      "skipAllKnown": "Merk alle som kjent",
+      "skipAllFailed": "Kunne ikke hoppe over listen — prøv igjen.",
+      "skippedAll": "Merket alle {count} ord som kjent.",
+      "doneSummary": "Du kjente {known} av {total} ord.",
+      "continue": "Fortsett",
+      "exit": "Avslutt"
+    }
   },
   "Auth": {
     "Login": {

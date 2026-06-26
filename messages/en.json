@@ -236,7 +236,18 @@
     "discoverCoursesSubtitle": "Courses you start on your own — self-paced, no schedule, no teacher. Some are also taught by your schools.",
     "alsoTaughtAt": "Also taught at {school}",
     "startSelfStudy": "Start on your own",
-    "askToBePlaced": "Ask to be placed"
+    "askToBePlaced": "Ask to be placed",
+    "SkipKnown": {
+      "quickSkim": "Quick skim",
+      "know": "Know it",
+      "new": "New to me",
+      "skipAllKnown": "Skip all as known",
+      "skipAllFailed": "Couldn't skip the list — try again.",
+      "skippedAll": "Marked all {count} words as known.",
+      "doneSummary": "You knew {known} of {total} words.",
+      "continue": "Continue",
+      "exit": "Exit"
+    }
   },
   "Auth": {
     "Login": {
