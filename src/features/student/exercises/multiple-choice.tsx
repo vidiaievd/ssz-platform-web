@@ -20,10 +20,11 @@ export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps
   const content = exercise.content;
 
   const question = typeof content.question === 'string' ? content.question : '';
-  const options = Array.isArray(content.options) ? (content.options as string[]) : [];
-  const correctIndex = typeof content.correctIndex === 'number' ? content.correctIndex : -1;
+  const options = Array.isArray(content.options)
+    ? (content.options as Array<{ id: string; text: string }>)
+    : [];
 
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [isPending, startTransition] = useTransition();
   const startedAtRef = useRef(0);
@@ -37,7 +38,7 @@ export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps
       const res = await submitAttemptAction({
         exerciseId: exercise.id,
         type: 'multiple_choice',
-        answer: selected,
+        answer: { correct_option_ids: [selected] },
         timeSpentSeconds: (Date.now() - startedAtRef.current) / 1000,
       });
       if (!res.ok) {
@@ -56,16 +57,17 @@ export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps
 
   const isSubmitted = result !== null;
 
-  function optionStyle(index: number) {
+  function optionStyle(optionId: string) {
     const base =
       'w-full rounded-lg border px-4 py-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
     if (!isSubmitted) {
-      return selected === index
+      return selected === optionId
         ? `${base} border-primary bg-primary/10 font-medium`
         : `${base} border-border bg-card hover:bg-muted`;
     }
-    if (index === correctIndex) return `${base} border-green-500 bg-green-50 dark:bg-green-950/30 font-medium`;
-    if (index === selected && index !== correctIndex)
+    if (optionId === selected && result?.verdict === 'correct')
+      return `${base} border-green-500 bg-green-50 dark:bg-green-950/30 font-medium`;
+    if (optionId === selected && result?.verdict !== 'correct')
       return `${base} border-red-500 bg-red-50 dark:bg-red-950/30`;
     return `${base} border-border bg-card opacity-60`;
   }
@@ -81,17 +83,17 @@ export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps
       <div className="space-y-2" role="radiogroup" aria-label={t('mc.optionsLabel')}>
         {options.map((option, i) => (
           <button
-            key={i}
+            key={option.id}
             role="radio"
-            aria-checked={selected === i}
-            className={optionStyle(i)}
-            onClick={() => !isSubmitted && setSelected(i)}
+            aria-checked={selected === option.id}
+            className={optionStyle(option.id)}
+            onClick={() => !isSubmitted && setSelected(option.id)}
             disabled={isSubmitted || isPending}
           >
             <span className="mr-3 font-mono text-muted-foreground">
               {String.fromCharCode(65 + i)}.
             </span>
-            {option}
+            {option.text}
           </button>
         ))}
       </div>

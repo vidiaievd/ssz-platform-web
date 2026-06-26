@@ -21,9 +21,11 @@ const EXERCISE: ExerciseDisplay = {
   instructions: 'Pick the correct answer.',
   content: {
     question: 'What colour is the sky?',
-    options: ['Red', 'Blue', 'Green'],
-    correctIndex: 1,
-    explanation: 'Due to Rayleigh scattering.',
+    options: [
+      { id: 'opt-red', text: 'Red' },
+      { id: 'opt-blue', text: 'Blue' },
+      { id: 'opt-green', text: 'Green' },
+    ],
   },
 };
 
