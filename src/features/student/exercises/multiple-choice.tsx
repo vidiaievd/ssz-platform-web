@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -26,6 +26,10 @@ export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps
   const [selected, setSelected] = useState<number | null>(null);
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [isPending, startTransition] = useTransition();
+  const startedAtRef = useRef(0);
+  useEffect(() => {
+    startedAtRef.current = Date.now();
+  }, []);
 
   function handleSubmit() {
     if (selected === null) return;
@@ -34,6 +38,7 @@ export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps
         exerciseId: exercise.id,
         type: 'multiple_choice',
         answer: selected,
+        timeSpentSeconds: (Date.now() - startedAtRef.current) / 1000,
       });
       if (!res.ok) {
         toast.error(tErrors(res.error.code));
@@ -46,6 +51,7 @@ export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps
   function handleRetry() {
     setSelected(null);
     setResult(null);
+    startedAtRef.current = Date.now();
   }
 
   const isSubmitted = result !== null;

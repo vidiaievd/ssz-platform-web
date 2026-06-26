@@ -16,4 +16,8 @@ export interface SubmitAttemptInput {
   exerciseId: string;
   type: ExerciseType;
   answer: unknown;
+  /** Seconds spent on the exercise before submitting — required by the Exercise Engine. */
+  timeSpentSeconds: number;
+  /** Links this attempt to a tutor assignment, when the exercise was opened from one. */
+  assignmentId?: string;
 }

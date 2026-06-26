@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -35,6 +35,10 @@ export function ClozeExercise({ exercise }: ClozeExerciseProps) {
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [isPending, startTransition] = useTransition();
   const firstInputRef = useRef<HTMLInputElement>(null);
+  const startedAtRef = useRef(0);
+  useEffect(() => {
+    startedAtRef.current = Date.now();
+  }, []);
 
   function updateAnswer(index: number, value: string) {
     setAnswers((prev) => prev.map((a, i) => (i === index ? value : a)));
@@ -47,6 +51,7 @@ export function ClozeExercise({ exercise }: ClozeExerciseProps) {
         exerciseId: exercise.id,
         type: 'cloze',
         answer: answers,
+        timeSpentSeconds: (Date.now() - startedAtRef.current) / 1000,
       });
       if (!res.ok) {
         toast.error(tErrors(res.error.code));
@@ -59,6 +64,7 @@ export function ClozeExercise({ exercise }: ClozeExerciseProps) {
   function handleRetry() {
     setAnswers(Array(blankCount).fill(''));
     setResult(null);
+    startedAtRef.current = Date.now();
     setTimeout(() => firstInputRef.current?.focus(), 0);
   }
 
