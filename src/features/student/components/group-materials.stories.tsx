@@ -51,3 +51,13 @@ export const UnpublishedMaterial: Story = {
     ],
   },
 };
+
+export const WithProgress: Story = {
+  args: {
+    mainCourse: material({ id: 'main', isMain: true, progressStatus: 'in_progress' }),
+    materials: [
+      material({ id: 'extra-1', courseId: 'course-2', courseName: 'Grammar Workbook', progressStatus: 'completed' }),
+      material({ id: 'extra-2', courseId: 'course-3', courseName: 'Listening Practice', progressStatus: 'needs_review' }),
+    ],
+  },
+};

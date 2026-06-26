@@ -5,6 +5,16 @@ import type { DifficultyLevel } from '@/features/content/types';
 /** Stages of a membership that hasn't reached `active` yet — nothing to show beyond "where it stands". */
 export type PendingStage = 'onboarding' | 'placement-review';
 
+export type LessonProgressStatus = 'not_started' | 'in_progress' | 'completed' | 'needs_review';
+
+/** A student's own progress on a single lesson — sourced from learning-service UserProgress. */
+export interface LessonProgressRecord {
+  lessonId: string;
+  status: LessonProgressStatus;
+  score: number | null;
+  completedAt: string | null;
+}
+
 export interface ScheduleSlot {
   day: Weekday;
   start: HHMM;

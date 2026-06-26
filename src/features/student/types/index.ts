@@ -11,4 +11,6 @@ export type {
   LearningCourse,
   StudentSchool,
   LearningHome,
+  LessonProgressStatus,
+  LessonProgressRecord,
 } from './learning';

@@ -6,11 +6,29 @@ import { BookOpen, ChevronRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from '@/lib/i18n/navigation';
-import type { SchoolMaterial } from '../types';
+import type { LessonProgressStatus, SchoolMaterial } from '../types';
 
 export interface MaterialWithLesson extends SchoolMaterial {
   /** First published lesson for this course — null when nothing is published yet. */
   firstLessonId: string | null;
+  /** The student's own progress on that first lesson — null when not started or unavailable. */
+  progressStatus?: LessonProgressStatus | null;
+}
+
+function ProgressBadge({ status }: { status: LessonProgressStatus }) {
+  const t = useTranslations('Student.SchoolDetail');
+
+  if (status === 'not_started') return null;
+
+  const variant = status === 'completed' ? 'success' : status === 'needs_review' ? 'warning' : 'muted';
+  const labelKey =
+    status === 'completed'
+      ? 'progressCompleted'
+      : status === 'needs_review'
+        ? 'progressNeedsReview'
+        : 'progressInProgress';
+
+  return <Badge variant={variant}>{t(labelKey)}</Badge>;
 }
 
 interface GroupMaterialsProps {
@@ -43,7 +61,10 @@ function MaterialRow({ material }: { material: MaterialWithLesson }) {
         <BookOpen className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         <p className="text-sm font-medium">{title}</p>
       </div>
-      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <div className="flex items-center gap-2">
+        {material.progressStatus && <ProgressBadge status={material.progressStatus} />}
+        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      </div>
     </Link>
   );
 }
