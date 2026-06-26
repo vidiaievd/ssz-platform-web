@@ -238,11 +238,15 @@
     "startSelfStudy": "Start på egen hånd",
     "askToBePlaced": "Be om plassering",
     "PlacementStaircase": {
+      "prompt": "Usikker på hvor du bør starte? Ta en rask nivåtest.",
+      "start": "Ta nivåtest",
       "round": "Spørsmål {round}",
       "skip": "Hopp over",
       "next": "Neste",
       "noMoreQuestions": "Vi har ingen flere spørsmål på dette nivået akkurat nå.",
-      "useLevel": "Bruk {level}"
+      "useLevel": "Bruk {level}",
+      "aboveLevel": "Du tester over dette kursets nivå ({level}) — ordforrådet er merket som kjent.",
+      "matchesLevel": "{level} ser ut til å passe godt for dette kurset."
     },
     "SkipKnown": {
       "quickSkim": "Hurtigsjekk",

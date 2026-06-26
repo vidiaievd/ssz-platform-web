@@ -238,11 +238,15 @@
     "startSelfStudy": "Start on your own",
     "askToBePlaced": "Ask to be placed",
     "PlacementStaircase": {
+      "prompt": "Not sure where to start? Take a quick placement check.",
+      "start": "Take placement check",
       "round": "Question {round}",
       "skip": "Skip",
       "next": "Next",
       "noMoreQuestions": "We're out of questions at this level for now.",
-      "useLevel": "Use {level}"
+      "useLevel": "Use {level}",
+      "aboveLevel": "You're testing above this course's level ({level}) — marked its vocabulary as known.",
+      "matchesLevel": "Looks like {level} is a good fit for this course."
     },
     "SkipKnown": {
       "quickSkim": "Quick skim",

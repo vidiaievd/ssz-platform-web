@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/lib/i18n/navigation';
 import { ContainerTabsClient } from '@/features/content/components/container-tabs';
+import { CoursePlacementPrompt } from '@/features/student/components/course-placement-prompt';
 import type { Container } from '@/features/content/types';
 
 interface Props {
@@ -87,6 +88,15 @@ export default async function CatalogueContainerPage({ params }: Props) {
             <Link href="/login">{t('signIn')}</Link>
           </Button>
         </div>
+      )}
+
+      {isAuthenticated && (
+        <CoursePlacementPrompt
+          containerId={container.id}
+          versionId={container.currentPublishedVersionId ?? undefined}
+          targetLanguage={container.targetLanguage}
+          courseDifficultyLevel={container.difficultyLevel}
+        />
       )}
 
       <ContainerTabsClient
