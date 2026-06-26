@@ -237,6 +237,13 @@
     "alsoTaughtAt": "Також викладається у {school}",
     "startSelfStudy": "Почати самостійно",
     "askToBePlaced": "Подати запит на розподіл",
+    "PlacementStaircase": {
+      "round": "Питання {round}",
+      "skip": "Пропустити",
+      "next": "Далі",
+      "noMoreQuestions": "Наразі немає більше питань на цьому рівні.",
+      "useLevel": "Використати {level}"
+    },
     "SkipKnown": {
       "quickSkim": "Швидкий огляд",
       "know": "Знаю",

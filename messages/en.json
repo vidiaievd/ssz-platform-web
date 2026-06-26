@@ -237,6 +237,13 @@
     "alsoTaughtAt": "Also taught at {school}",
     "startSelfStudy": "Start on your own",
     "askToBePlaced": "Ask to be placed",
+    "PlacementStaircase": {
+      "round": "Question {round}",
+      "skip": "Skip",
+      "next": "Next",
+      "noMoreQuestions": "We're out of questions at this level for now.",
+      "useLevel": "Use {level}"
+    },
     "SkipKnown": {
       "quickSkim": "Quick skim",
       "know": "Know it",

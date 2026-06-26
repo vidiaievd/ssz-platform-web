@@ -12,9 +12,11 @@ import { FeedbackPanel } from './feedback-panel';
 
 interface MultipleChoiceExerciseProps {
   exercise: ExerciseDisplay;
+  /** Called once after the attempt is scored — used by flows that drive their own "next" step. */
+  onAnswered?: (result: AttemptResult) => void;
 }
 
-export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps) {
+export function MultipleChoiceExercise({ exercise, onAnswered }: MultipleChoiceExerciseProps) {
   const t = useTranslations('Exercise');
   const tErrors = useTranslations('Errors');
   const content = exercise.content;
@@ -46,6 +48,7 @@ export function MultipleChoiceExercise({ exercise }: MultipleChoiceExerciseProps
         return;
       }
       setResult(res.value);
+      onAnswered?.(res.value);
     });
   }
 

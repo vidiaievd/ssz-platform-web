@@ -237,6 +237,13 @@
     "alsoTaughtAt": "Также преподаётся в {school}",
     "startSelfStudy": "Начать самостоятельно",
     "askToBePlaced": "Запросить распределение",
+    "PlacementStaircase": {
+      "round": "Вопрос {round}",
+      "skip": "Пропустить",
+      "next": "Далее",
+      "noMoreQuestions": "Сейчас больше нет вопросов на этом уровне.",
+      "useLevel": "Использовать {level}"
+    },
     "SkipKnown": {
       "quickSkim": "Быстрый просмотр",
       "know": "Знаю",

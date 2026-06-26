@@ -237,6 +237,13 @@
     "alsoTaughtAt": "Tilbys også av {school}",
     "startSelfStudy": "Start på egen hånd",
     "askToBePlaced": "Be om plassering",
+    "PlacementStaircase": {
+      "round": "Spørsmål {round}",
+      "skip": "Hopp over",
+      "next": "Neste",
+      "noMoreQuestions": "Vi har ingen flere spørsmål på dette nivået akkurat nå.",
+      "useLevel": "Bruk {level}"
+    },
     "SkipKnown": {
       "quickSkim": "Hurtigsjekk",
       "know": "Kan det",
