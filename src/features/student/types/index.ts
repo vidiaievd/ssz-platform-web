@@ -13,4 +13,7 @@ export type {
   LearningHome,
   LessonProgressStatus,
   LessonProgressRecord,
+  AssignmentContentType,
+  AssignmentStatusLower,
+  AssignedMaterial,
 } from './learning';

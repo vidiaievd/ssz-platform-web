@@ -1014,6 +1014,10 @@
       "leaveConfirm": "Leave school",
       "leaveError": "Could not leave the school. Please try again."
     },
+    "AssignedMaterials": {
+      "title": "Assigned to you",
+      "overdue": "Overdue"
+    },
     "GroupAssignedBanner": {
       "message": "You're in {group} at {school}!",
       "dismiss": "Dismiss"

@@ -1009,6 +1009,10 @@
       "leaveConfirm": "Покинуть школу",
       "leaveError": "Не удалось покинуть школу. Попробуйте ещё раз."
     },
+    "AssignedMaterials": {
+      "title": "Назначено вам",
+      "overdue": "Просрочено"
+    },
     "GroupAssignedBanner": {
       "message": "Вы в {group} в {school}!",
       "dismiss": "Закрыть"

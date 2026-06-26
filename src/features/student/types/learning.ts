@@ -15,6 +15,27 @@ export interface LessonProgressRecord {
   completedAt: string | null;
 }
 
+export type AssignmentContentType = 'CONTAINER' | 'LESSON' | 'VOCABULARY_LIST' | 'GRAMMAR_RULE' | 'EXERCISE';
+
+export type AssignmentStatusLower = 'active' | 'completed' | 'cancelled' | 'overdue';
+
+/**
+ * A piece of content a teacher/tutor explicitly assigned to the student, with a due
+ * date — distinct from the group's curriculum (browsable, no due date). Sourced from
+ * learning-service Assignment, hydrated with a display title from content-service.
+ * `href` is null when no student-facing page exists yet for this content type.
+ */
+export interface AssignedMaterial {
+  assignmentId: string;
+  contentType: AssignmentContentType;
+  contentId: string;
+  title: string;
+  status: AssignmentStatusLower;
+  dueAt: string;
+  notes: string | null;
+  href: string | null;
+}
+
 export interface ScheduleSlot {
   day: Weekday;
   start: HHMM;

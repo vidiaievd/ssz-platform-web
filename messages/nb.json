@@ -1009,6 +1009,10 @@
       "leaveConfirm": "Forlat skolen",
       "leaveError": "Kunne ikke forlate skolen. Vennligst prøv igjen."
     },
+    "AssignedMaterials": {
+      "title": "Tildelt til deg",
+      "overdue": "Forfalt"
+    },
     "GroupAssignedBanner": {
       "message": "Du er i {group} hos {school}!",
       "dismiss": "Lukk"

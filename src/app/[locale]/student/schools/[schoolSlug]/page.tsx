@@ -7,10 +7,12 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import { getStudentSchool } from '@/features/student/api/get-student-schools';
 import { getLessonProgressMap } from '@/features/student/api/get-lesson-progress';
+import { getAssignedMaterials } from '@/features/student/api/get-assigned-materials';
 import { SchoolStatusCard } from '@/features/student/components/school-status-card';
 import { GroupHeader } from '@/features/student/components/group-header';
 import { WeeklySchedule } from '@/features/student/components/weekly-schedule';
 import { GroupMaterials, type MaterialWithLesson } from '@/features/student/components/group-materials';
+import { AssignedMaterials } from '@/features/student/components/assigned-materials';
 import type { LessonProgressRecord, SchoolMaterial } from '@/features/student/types';
 import type { Container, ContainerItem } from '@/features/content/types';
 
@@ -64,7 +66,10 @@ export default async function SchoolDetailPage({ params }: Props) {
     );
   }
 
-  const progressMap = await getLessonProgressMap();
+  const [progressMap, assignedMaterials] = await Promise.all([
+    getLessonProgressMap(),
+    getAssignedMaterials(school.schoolId),
+  ]);
   const [mainCourse, materials] = await Promise.all([
     school.mainCourse ? withFirstLesson(school.mainCourse, progressMap) : Promise.resolve(null),
     Promise.all(school.materials.map((m) => withFirstLesson(m, progressMap))),
@@ -74,6 +79,7 @@ export default async function SchoolDetailPage({ params }: Props) {
     <main className="container mx-auto max-w-3xl px-4 py-8 space-y-8">
       <GroupHeader school={school} />
       <WeeklySchedule schedule={school.schedule} />
+      <AssignedMaterials assignments={assignedMaterials} />
       <GroupMaterials mainCourse={mainCourse} materials={materials} />
       {school.classmateCount != null && (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
