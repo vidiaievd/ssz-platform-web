@@ -51,7 +51,7 @@ describe('notification-registry', () => {
     const data = { membershipId: 'm1', schoolId: 's1', schoolName: 'Greenwood School', occurredAt: new Date().toISOString() };
 
     expect(entry.resolveBody(data, t)).toContain('Greenwood School');
-    expect(entry.getLink(data, { workspaceKind: 'student' })).toBe('/student/enrolled#school-s1');
+    expect(entry.getLink(data, { workspaceKind: 'student' })).toBe('/student/dashboard#school-s1');
     expect(entry.getLink(data, { workspaceKind: 'school' })).toBeUndefined();
   });
 
@@ -68,7 +68,7 @@ describe('notification-registry', () => {
 
     expect(entry.resolveTitle(data, t)).toContain('Norwegian A2');
     expect(entry.resolveBody(data, t)).toContain('Norwegian A2');
-    expect(entry.getLink(data, { workspaceKind: 'student' })).toBe('/student/enrolled#school-s1');
+    expect(entry.getLink(data, { workspaceKind: 'student' })).toBe('/student/dashboard#school-s1');
   });
 
   it('routes PLACEMENT_REVIEW_READY to the admin placement queue, not a student page', () => {

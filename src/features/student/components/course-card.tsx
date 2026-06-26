@@ -23,7 +23,7 @@ export function CourseCard({
 }: CourseCardProps) {
   const resumeHref = item.nextItemId
     ? `/student/enrolled/lessons/${item.nextItemId}?containerId=${item.containerId}`
-    : `/student/enrolled`;
+    : `/student/dashboard`;
 
   return (
     <div

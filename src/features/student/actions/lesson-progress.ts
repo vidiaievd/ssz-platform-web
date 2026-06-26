@@ -24,7 +24,7 @@ export async function markLessonStartedAction(lessonId: string) {
 export async function markLessonCompletedAction(lessonId: string) {
   return tryAction(async () => {
     await recordProgressEvent(lessonId, 'completed');
-    revalidatePath('/student/enrolled');
+    revalidatePath('/student/dashboard');
     return { lessonId, status: 'completed' as const };
   });
 }

@@ -232,7 +232,7 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         : t('types.ENROLLMENT_APPROVED.bodyFallback'),
     getLink: (data, ctx) =>
       ctx.workspaceKind === 'student' && isEnrollmentApprovedData(data)
-        ? `/student/enrolled#school-${data.schoolId}`
+        ? `/student/dashboard#school-${data.schoolId}`
         : undefined,
   },
   ENROLLMENT_REJECTED: {
@@ -270,7 +270,7 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         : t('types.GROUP_ASSIGNED.bodyFallback'),
     getLink: (data, ctx) =>
       ctx.workspaceKind === 'student' && isGroupAssignedData(data)
-        ? `/student/enrolled#school-${data.schoolId}`
+        ? `/student/dashboard#school-${data.schoolId}`
         : undefined,
   },
 };

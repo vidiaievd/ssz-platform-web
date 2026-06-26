@@ -6,7 +6,10 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { useTransitionMembership } from '@/features/enrollment/api/use-transition-membership';
+import {
+  isTransitionConflict,
+  useTransitionMembership,
+} from '@/features/enrollment/api/use-transition-membership';
 import type { EnrollmentRequestData } from '../types';
 
 export interface EnrollmentRequestActionsProps {
@@ -31,8 +34,13 @@ export function EnrollmentRequestActions({
       await transition.mutateAsync({ membershipId: data.membershipId, schoolId: data.schoolId, to });
       onResolved();
       toast.success(t('toasts.markedRead'));
-    } catch {
-      toast.error(t('toasts.actionFailed'));
+    } catch (err) {
+      if (isTransitionConflict(err)) {
+        toast.error(t('toasts.alreadyHandled'));
+        onResolved();
+      } else {
+        toast.error(t('toasts.actionFailed'));
+      }
     } finally {
       setBusy(null);
     }

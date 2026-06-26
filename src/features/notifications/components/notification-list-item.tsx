@@ -135,7 +135,10 @@ export function NotificationListItem({
           <EnrollmentRequestActions
             data={enrollmentRequestData}
             applicantHref={href}
-            onResolved={() => onArchive(notification.id)}
+            onResolved={() => {
+              onMarkRead(notification.id);
+              onArchive(notification.id);
+            }}
           />
         ) : (
           actionsSlot

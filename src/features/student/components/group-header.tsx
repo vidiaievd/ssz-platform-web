@@ -28,7 +28,7 @@ export function GroupHeader({ school }: GroupHeaderProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <Link
-          href="/student/enrolled"
+          href="/student/dashboard#my-schools-heading"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />

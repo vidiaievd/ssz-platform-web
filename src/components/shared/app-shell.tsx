@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import {
+  Bell,
   BookOpen,
   CalendarRange,
   Compass,
@@ -11,7 +12,6 @@ import {
   LayoutDashboard,
   Library,
   MailCheck,
-  School,
   Send,
   Settings,
   Users,
@@ -103,6 +103,11 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
       labelKey: "invitations",
       disabled: disabled('invitations'),
     },
+    {
+      href: `/school/${schoolSlug}/notifications`,
+      icon: Bell,
+      labelKey: "notifications",
+    },
   ];
 
   return [
@@ -150,8 +155,8 @@ const STUDENT_NAV: NavSection[] = [
       { href: "/student/discover", icon: Compass, labelKey: "discover" },
       { href: "/student/courses", icon: Library, labelKey: "courses" },
       { href: "/student/lessons", icon: BookOpen, labelKey: "lessons" },
-      { href: "/student/enrolled", icon: School, labelKey: "mySchools" },
       { href: "/student/enrolled/requests", icon: Send, labelKey: "requests" },
+      { href: "/student/notifications", icon: Bell, labelKey: "notifications" },
     ],
   },
   {

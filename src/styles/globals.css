@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* next-themes toggles `.dark` on <html> (attribute="class"). Without this,
+   Tailwind's `dark:` variant follows prefers-color-scheme instead, so it can
+   disagree with the app's actual theme and pick a dark palette while the UI
+   is rendering light (or vice versa). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ─────────────────────────────────────────────
    TAILWIND v4 THEME — CSS variable declarations
    Required so theme() calls resolve correctly.

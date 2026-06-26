@@ -73,7 +73,7 @@ export function LessonPlayer({
       } else if (e.key === 'ArrowLeft' && prevHref) {
         router.push(prevHref as never);
       } else if (e.key === 'Escape') {
-        router.push('/student/enrolled' as never);
+        router.push('/student/dashboard' as never);
       }
     }
 
@@ -94,7 +94,7 @@ export function LessonPlayer({
       if (nextHref) {
         router.push(nextHref as never);
       } else {
-        router.push('/student/enrolled' as never);
+        router.push('/student/dashboard' as never);
       }
     });
   }

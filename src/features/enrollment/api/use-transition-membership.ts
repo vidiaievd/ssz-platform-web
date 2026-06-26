@@ -10,6 +10,21 @@ export interface TransitionMembershipInput {
   to: MembershipStatus;
 }
 
+export class TransitionError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = 'TransitionError';
+  }
+}
+
+/** A 409 here means the membership already moved on (e.g. someone else approved it first). */
+export function isTransitionConflict(error: unknown): boolean {
+  return error instanceof TransitionError && error.status === 409;
+}
+
 export function useTransitionMembership() {
   return useMutation({
     mutationFn: async ({ membershipId, schoolId, to }: TransitionMembershipInput) => {
@@ -18,7 +33,10 @@ export function useTransitionMembership() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ schoolId, to }),
       });
-      if (!res.ok) throw new Error('Transition failed');
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new TransitionError(body?.error ?? 'Transition failed', res.status);
+      }
     },
   });
 }

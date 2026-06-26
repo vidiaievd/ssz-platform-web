@@ -46,7 +46,7 @@ export function EnrollmentStepper({ status }: EnrollmentStepperProps) {
   };
 
   return (
-    <ol className="flex items-center gap-3" aria-label={t('stepperLabel')}>
+    <ol className="flex flex-wrap items-center gap-y-2 gap-x-3" aria-label={t('stepperLabel')}>
       {STEPS.map((step, i) => {
         const isDone = i < currentIndex || status === 'active';
         const isCurrent = !isDone && i === currentIndex;

@@ -68,7 +68,8 @@
     "requests": "Søknader",
     "invitations": "Invitasjoner",
     "scheduling": "Planlegging",
-    "courses": "Kurs"
+    "courses": "Kurs",
+    "notifications": "Varsler"
   },
   "RouteTitles": {
     "dashboard": "Oversikt",
@@ -884,7 +885,8 @@
       "reject": "Avslå",
       "accepted": "Student godkjent og sendt til onboarding",
       "rejected": "Studentens forespørsel avslått",
-      "transitionFailed": "Handling mislyktes. Prøv igjen."
+      "transitionFailed": "Handling mislyktes. Prøv igjen.",
+      "alreadyHandled": "Denne forespørselen er allerede behandlet — listen er oppdatert."
     }
   },
   "Student": {
@@ -1098,7 +1100,8 @@
       "deleted": "Varsel slettet",
       "markedRead": "Merket som lest",
       "undo": "Angre",
-      "actionFailed": "Noe gikk feil. Prøv igjen."
+      "actionFailed": "Noe gikk feil. Prøv igjen.",
+      "alreadyHandled": "Dette er allerede behandlet."
     },
     "emptyState": {
       "all": "Ingen nye varsler!",

@@ -18,7 +18,7 @@ function ContainerProgressCard({ item }: { item: ContainerProgress }) {
   const isStarted = item.completedItems > 0;
   const resumeHref = item.nextItemId
     ? `/student/enrolled/lessons/${item.nextItemId}?containerId=${item.containerId}`
-    : `/student/enrolled`;
+    : `/student/dashboard`;
 
   return (
     <Card noPadding className="flex h-full flex-col">
@@ -109,7 +109,7 @@ export function ContinueLearning() {
           <div className="rounded-xl border border-border bg-card px-6 py-10 text-center">
             <p className="text-muted-foreground text-sm">{t('continueLearning.empty')}</p>
             <Button asChild variant="primary" size="sm" className="mt-4">
-              <Link href="/student/enrolled">{t('continueLearning.browseEnrolled')}</Link>
+              <Link href="/student/dashboard#my-schools-heading">{t('continueLearning.browseEnrolled')}</Link>
             </Button>
           </div>
         }

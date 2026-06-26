@@ -8,7 +8,10 @@ import { ClipboardList } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useTransitionMembership } from '@/features/enrollment/api/use-transition-membership';
+import {
+  isTransitionConflict,
+  useTransitionMembership,
+} from '@/features/enrollment/api/use-transition-membership';
 import type { Membership, MembershipStatus } from '@/features/enrollment/types';
 
 type Props = {
@@ -38,8 +41,13 @@ export function PendingApprovals({ memberships }: Props) {
       await transition.mutateAsync({ membershipId, schoolId, to });
       toast.success(to === 'onboarding' ? t('accepted') : t('rejected'));
       router.refresh();
-    } catch {
-      toast.error(t('transitionFailed'));
+    } catch (err) {
+      if (isTransitionConflict(err)) {
+        toast.error(t('alreadyHandled'));
+        router.refresh();
+      } else {
+        toast.error(t('transitionFailed'));
+      }
     } finally {
       setPending((prev) => ({ ...prev, [membershipId]: false }));
     }

@@ -2,8 +2,10 @@ import { getLocale, getTranslations } from 'next-intl/server';
 
 import { getMyProfile } from '@/features/profile/api/get-my-profile';
 import { ContinueLearning } from '@/features/student/components/continue-learning';
+import { MySchoolsBand } from '@/features/student/components/my-schools-band';
 import { StreakStats } from '@/features/student/components/streak-stats';
 import { UpcomingLessons } from '@/features/student/components/upcoming-lessons';
+import { VoxOrdPromo } from '@/features/student/components/voxord-promo';
 
 export default async function StudentDashboardPage() {
   const [t, locale, profile] = await Promise.all([
@@ -39,6 +41,11 @@ export default async function StudentDashboardPage() {
 
       {/* Stats grid */}
       <StreakStats />
+
+      {/* Schools the student belongs to: status, group, materials, teachers */}
+      <MySchoolsBand />
+
+      <VoxOrdPromo />
 
       {/* Main content: courses + upcoming */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">

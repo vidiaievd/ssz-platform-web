@@ -68,7 +68,8 @@
     "requests": "Requests",
     "invitations": "Invitations",
     "scheduling": "Scheduling",
-    "courses": "Courses"
+    "courses": "Courses",
+    "notifications": "Notifications"
   },
   "RouteTitles": {
     "dashboard": "Dashboard",
@@ -889,7 +890,8 @@
       "reject": "Reject",
       "accepted": "Student accepted and moved to onboarding",
       "rejected": "Student request rejected",
-      "transitionFailed": "Action failed. Please try again."
+      "transitionFailed": "Action failed. Please try again.",
+      "alreadyHandled": "This request was already handled — the list has been refreshed."
     }
   },
   "Student": {
@@ -1103,7 +1105,8 @@
       "deleted": "Notification deleted",
       "markedRead": "Marked as read",
       "undo": "Undo",
-      "actionFailed": "Something went wrong. Please try again."
+      "actionFailed": "Something went wrong. Please try again.",
+      "alreadyHandled": "This was already handled."
     },
     "emptyState": {
       "all": "You're all caught up!",
