@@ -2725,5 +2725,29 @@
       "default": "Something went wrong.",
       "retry": "Try again"
     }
+  },
+  "ExerciseRunner": {
+    "practice": "Practice",
+    "graded": "Homework",
+    "exit": "Exit exercise",
+    "setProgress": "{current} of {total}",
+    "gradedBanner": "Graded · answers are submitted to your teacher, no instant feedback.",
+    "check": "Check",
+    "submitAnswer": "Submit answer",
+    "continue": "Continue",
+    "finish": "Finish",
+    "feedback": {
+      "correct": "Correct",
+      "incorrect": "Not quite",
+      "submitted": "Answer submitted",
+      "gradedNote": "Saved for your teacher to grade. You’ll see results when it’s returned.",
+      "answerLabel": "Answer:"
+    },
+    "loading": "Loading exercise…",
+    "error": {
+      "title": "Couldn’t load this exercise",
+      "body": "Check your connection and try again. Your progress in this set is saved.",
+      "retry": "Try again"
+    }
   }
 }
