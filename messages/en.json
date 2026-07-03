@@ -2731,6 +2731,27 @@
       "loadError": "Couldn't load this unit",
       "loadErrorSub": "Something went wrong. Your progress is safe — try again.",
       "phaseDebug": "Phase: {phase}"
+    },
+    "readSection": {
+      "unitCourse": "Unit {unit} · {course}",
+      "finishedReading": "I've finished reading →",
+      "finishedListening": "I've finished listening →",
+      "finishedNext": "Finished — next: Vocabulary",
+      "showTranslation": "Show translation",
+      "hideTranslation": "Hide translation",
+      "jumpAudio": "Jump audio to this paragraph",
+      "tapToLookUp": "tap to look up",
+      "tapParagraphToJump": "Tap a paragraph to jump to it",
+      "showText": "Show text",
+      "pressPlayToListen": "Press play to begin listening",
+      "illustrationPlaceholder": "illustration",
+      "lookUpWord": "Look up",
+      "listenMode": {
+        "label": "Learning mode",
+        "read": "Read",
+        "listenText": "Listen + Text",
+        "audioOnly": "Audio only"
+      }
     }
   },
   "ExerciseRunner": {

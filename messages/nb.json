@@ -2726,6 +2726,27 @@
       "loadError": "Kunne ikke laste denne enheten",
       "loadErrorSub": "Noe gikk galt. Fremgangen din er trygg — prøv igjen.",
       "phaseDebug": "Fase: {phase}"
+    },
+    "readSection": {
+      "unitCourse": "Enhet {unit} · {course}",
+      "finishedReading": "Jeg har lest ferdig →",
+      "finishedListening": "Jeg har hørt ferdig →",
+      "finishedNext": "Ferdig — neste: Ordforråd",
+      "showTranslation": "Vis oversettelse",
+      "hideTranslation": "Skjul oversettelse",
+      "jumpAudio": "Hopp til dette avsnittet i lyden",
+      "tapToLookUp": "trykk for å slå opp",
+      "tapParagraphToJump": "Trykk på et avsnitt for å hoppe til det",
+      "showText": "Vis tekst",
+      "pressPlayToListen": "Trykk spill for å begynne å lytte",
+      "illustrationPlaceholder": "illustrasjon",
+      "lookUpWord": "Slå opp",
+      "listenMode": {
+        "label": "Læringsmodus",
+        "read": "Les",
+        "listenText": "Lytt + tekst",
+        "audioOnly": "Kun lyd"
+      }
     }
   },
   "ExerciseRunner": {

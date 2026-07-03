@@ -1,7 +1,8 @@
 'use client';
 
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 
 import { AudioPlayer } from '@/features/learning/components/audio-player';
 import {
@@ -29,8 +30,38 @@ export interface GlossaryPopoverProps {
   pos: PartOfSpeech;
   translation: string;
   audioSrc?: string;
+  /**
+   * When provided, renders an expandable "See in context" section inline in the
+   * popover, showing this sentence with the word highlighted.
+   * Takes precedence over `onSeeInContext`.
+   */
+  contextSentence?: string;
+  /** Alternative: external navigation callback. */
   onSeeInContext?: () => void;
   children: ReactNode;
+}
+
+function highlightWord(sentence: string, word: string) {
+  const re = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return sentence.split(re).map((part, i) =>
+    part.toLowerCase() === word.toLowerCase() ? (
+      <mark
+        key={i}
+        style={{
+          background: 'oklch(0.62 0.105 168 / 16%)',
+          color: 'oklch(0.44 0.09 168)',
+          borderRadius: 3,
+          padding: '0 2px',
+          fontWeight: 700,
+          fontStyle: 'normal',
+        }}
+      >
+        {part}
+      </mark>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
+  );
 }
 
 export function GlossaryPopover({
@@ -39,10 +70,12 @@ export function GlossaryPopover({
   pos,
   translation,
   audioSrc,
+  contextSentence,
   onSeeInContext,
   children,
 }: GlossaryPopoverProps) {
   const t = useTranslations('Learning.glossary');
+  const [ctxOpen, setCtxOpen] = useState(false);
   const { bg, fg } = POS_STYLES[pos];
 
   return (
@@ -90,8 +123,42 @@ export function GlossaryPopover({
             {translation}
           </div>
 
-          {/* see in context */}
-          {onSeeInContext && (
+          {/* see in context — inline expansion */}
+          {contextSentence && (
+            <div style={{ borderTop: '1px solid var(--ssz-border-default)' }}>
+              <button
+                type="button"
+                onClick={() => setCtxOpen((v) => !v)}
+                className={cn(
+                  'flex w-full items-center gap-1.5 px-3 py-2 text-left',
+                  'text-xs font-semibold text-(--ssz-color-primary-600)',
+                  'hover:bg-subtle',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--ssz-border-focus)',
+                  'transition-colors',
+                )}
+                style={{ transitionDuration: 'var(--ssz-duration-fast)' }}
+                aria-expanded={ctxOpen}
+              >
+                <span className="flex-1">{t('seeInContext')}</span>
+                {ctxOpen ? (
+                  <ChevronDown size={12} aria-hidden="true" />
+                ) : (
+                  <ChevronRight size={12} aria-hidden="true" />
+                )}
+              </button>
+              {ctxOpen && (
+                <p
+                  className="px-3 pb-3 font-reading text-[13.5px] leading-relaxed text-(--ssz-text-primary)"
+                  lang="nb"
+                >
+                  {highlightWord(contextSentence, word)}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* see in context — external navigation (legacy / non-inline) */}
+          {!contextSentence && onSeeInContext && (
             <button
               type="button"
               onClick={onSeeInContext}

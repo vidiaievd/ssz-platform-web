@@ -2726,6 +2726,27 @@
       "loadError": "Не удалось загрузить этот раздел",
       "loadErrorSub": "Что-то пошло не так. Ваш прогресс сохранён — попробуйте ещё раз.",
       "phaseDebug": "Фаза: {phase}"
+    },
+    "readSection": {
+      "unitCourse": "Раздел {unit} · {course}",
+      "finishedReading": "Я дочитал(а) →",
+      "finishedListening": "Я дослушал(а) →",
+      "finishedNext": "Готово — далее: Словарь",
+      "showTranslation": "Показать перевод",
+      "hideTranslation": "Скрыть перевод",
+      "jumpAudio": "Перейти к этому абзацу в аудио",
+      "tapToLookUp": "нажмите для перевода",
+      "tapParagraphToJump": "Нажмите на абзац, чтобы перейти к нему",
+      "showText": "Показать текст",
+      "pressPlayToListen": "Нажмите воспроизведение, чтобы начать слушать",
+      "illustrationPlaceholder": "иллюстрация",
+      "lookUpWord": "Найти",
+      "listenMode": {
+        "label": "Режим обучения",
+        "read": "Читать",
+        "listenText": "Слушать + текст",
+        "audioOnly": "Только аудио"
+      }
     }
   },
   "ExerciseRunner": {

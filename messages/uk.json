@@ -2726,6 +2726,27 @@
       "loadError": "Не вдалося завантажити цей розділ",
       "loadErrorSub": "Щось пішло не так. Ваш прогрес збережено — спробуйте ще раз.",
       "phaseDebug": "Фаза: {phase}"
+    },
+    "readSection": {
+      "unitCourse": "Розділ {unit} · {course}",
+      "finishedReading": "Я дочитав(ла) →",
+      "finishedListening": "Я дослухав(ла) →",
+      "finishedNext": "Готово — далі: Словник",
+      "showTranslation": "Показати переклад",
+      "hideTranslation": "Сховати переклад",
+      "jumpAudio": "Перейти до цього абзацу в аудіо",
+      "tapToLookUp": "натисніть для перекладу",
+      "tapParagraphToJump": "Натисніть на абзац, щоб перейти до нього",
+      "showText": "Показати текст",
+      "pressPlayToListen": "Натисніть відтворення, щоб почати слухати",
+      "illustrationPlaceholder": "ілюстрація",
+      "lookUpWord": "Знайти",
+      "listenMode": {
+        "label": "Режим навчання",
+        "read": "Читати",
+        "listenText": "Слухати + текст",
+        "audioOnly": "Лише аудіо"
+      }
     }
   },
   "ExerciseRunner": {
