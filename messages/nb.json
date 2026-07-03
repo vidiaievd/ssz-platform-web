@@ -2743,6 +2743,10 @@
       "title": "Kunne ikke laste denne øvelsen",
       "body": "Sjekk tilkoblingen din og prøv igjen. Fremgangen din i dette settet er lagret.",
       "retry": "Prøv igjen"
+    },
+    "mcq": {
+      "defaultInstruction": "Velg riktig svar",
+      "optionsLabel": "Svaralternativer"
     }
   }
 }

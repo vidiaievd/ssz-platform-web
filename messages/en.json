@@ -2748,6 +2748,10 @@
       "title": "Couldn’t load this exercise",
       "body": "Check your connection and try again. Your progress in this set is saved.",
       "retry": "Try again"
+    },
+    "mcq": {
+      "defaultInstruction": "Choose the correct answer",
+      "optionsLabel": "Answer options"
     }
   }
 }

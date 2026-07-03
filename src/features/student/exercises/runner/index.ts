@@ -10,9 +10,15 @@ export { FeedbackBar } from './feedback-bar';
 export { RunnerLoadingBody } from './loading-body';
 export { RunnerErrorBody } from './error-body';
 
+export { Instr } from './instr';
+
+export { McqBody } from './mcq-body';
+export type { McqBodyProps, McqContent, McqExpectedAnswers } from './mcq-body';
+
 export {
   deriveVisualState,
   modeAccent,
+  modeAccentSoft,
   PRACTICE_ACCENT,
   GRADED_ACCENT,
 } from './types';

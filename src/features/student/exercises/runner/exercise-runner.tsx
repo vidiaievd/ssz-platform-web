@@ -79,7 +79,7 @@ export function ExerciseRunner({
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (isLoading || isError) return;
-      const tag = (e.target as HTMLElement).tagName.toLowerCase();
+      const tag = ((e.target as HTMLElement).tagName ?? '').toLowerCase();
       const isTyping = tag === 'input' || tag === 'textarea';
 
       if (e.key === 'Enter') {
@@ -117,13 +117,13 @@ export function ExerciseRunner({
         ) : isError ? (
           <RunnerErrorBody onRetry={onRetry} accent={accent} />
         ) : (
-          <div className="w-full px-6 pb-[40px] pt-[34px]" style={{ maxWidth: 560 }}>
+          <div className="w-full px-6 pb-10 pt-8.5" style={{ maxWidth: 560 }}>
             <SetProgress idx={idx} total={total} accent={accent} />
 
             {/* Graded mode persistent banner */}
             {isGraded && (
               <div
-                className="mb-[22px] flex items-center gap-[9px] px-[14px] py-[10px]"
+                className="mb-5.5 flex items-center gap-2.25 px-3.5 py-2.5"
                 style={{
                   borderRadius: 10,
                   background: 'var(--ssz-color-secondary-100)',

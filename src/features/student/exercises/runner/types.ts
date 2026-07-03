@@ -41,3 +41,13 @@ export const GRADED_ACCENT = 'var(--ssz-color-secondary-600)' as const;
 export function modeAccent(mode: RunnerMode): string {
   return mode === 'graded' ? GRADED_ACCENT : PRACTICE_ACCENT;
 }
+
+/**
+ * Returns a very-light-tinted fill version of the mode accent (~7% opacity),
+ * used for selected-but-not-revealed option backgrounds.
+ */
+export function modeAccentSoft(mode: RunnerMode): string {
+  return mode === 'graded'
+    ? 'oklch(0.57 0.105 82 / 0.07)'
+    : 'oklch(0.62 0.105 168 / 0.07)';
+}
