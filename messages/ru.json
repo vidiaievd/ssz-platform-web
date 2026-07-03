@@ -2759,6 +2759,11 @@
       "textareaLabel": "Ваш перевод",
       "placeholder": "Пишите на {lang}…",
       "sampleAnswer": "Пример ответа"
+    },
+    "match": {
+      "defaultInstruction": "Сопоставьте каждое слово с переводом",
+      "helperIdle": "Нажмите на слово слева…",
+      "helperArmed": "Теперь нажмите на соответствие справа."
     }
   }
 }

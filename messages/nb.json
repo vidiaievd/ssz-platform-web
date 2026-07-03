@@ -2759,6 +2759,11 @@
       "textareaLabel": "Din oversettelse",
       "placeholder": "Skriv på {lang}…",
       "sampleAnswer": "Eksempelsvar"
+    },
+    "match": {
+      "defaultInstruction": "Koble hvert ord til oversettelsen",
+      "helperIdle": "Trykk på et ord til venstre…",
+      "helperArmed": "Trykk nå på samsvarende ord til høyre."
     }
   }
 }

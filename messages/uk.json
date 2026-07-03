@@ -2759,6 +2759,11 @@
       "textareaLabel": "Ваш переклад",
       "placeholder": "Пишіть {lang}…",
       "sampleAnswer": "Зразок відповіді"
+    },
+    "match": {
+      "defaultInstruction": "Поєднайте кожне слово з перекладом",
+      "helperIdle": "Торкніться слова ліворуч…",
+      "helperArmed": "Тепер торкніться відповідника праворуч."
     }
   }
 }

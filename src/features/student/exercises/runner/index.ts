@@ -22,6 +22,9 @@ export type { McqBodyProps, McqContent, McqExpectedAnswers } from './mcq-body';
 export { TranslateBody } from './translate-body';
 export type { TranslateBodyProps, TranslateContent } from './translate-body';
 
+export { MatchBody } from './match-body';
+export type { MatchBodyProps, MatchContent, MatchPair } from './match-body';
+
 export {
   deriveVisualState,
   modeAccent,
