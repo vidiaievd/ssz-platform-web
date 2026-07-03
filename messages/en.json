@@ -2752,6 +2752,12 @@
     "mcq": {
       "defaultInstruction": "Choose the correct answer",
       "optionsLabel": "Answer options"
+    },
+    "fill": {
+      "defaultInstruction": "Complete the sentence",
+      "blankLabel": "Blank",
+      "inputLabel": "Your answer",
+      "placeholder": "type…"
     }
   }
 }

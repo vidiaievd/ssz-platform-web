@@ -2747,6 +2747,12 @@
     "mcq": {
       "defaultInstruction": "Velg riktig svar",
       "optionsLabel": "Svaralternativer"
+    },
+    "fill": {
+      "defaultInstruction": "Fullfør setningen",
+      "blankLabel": "Tom",
+      "inputLabel": "Ditt svar",
+      "placeholder": "skriv…"
     }
   }
 }

@@ -2747,6 +2747,12 @@
     "mcq": {
       "defaultInstruction": "Оберіть правильну відповідь",
       "optionsLabel": "Варіанти відповідей"
+    },
+    "fill": {
+      "defaultInstruction": "Доповніть речення",
+      "blankLabel": "Пропуск",
+      "inputLabel": "Ваша відповідь",
+      "placeholder": "введіть…"
     }
   }
 }
