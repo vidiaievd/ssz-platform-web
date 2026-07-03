@@ -2786,6 +2786,19 @@
       "statWordsSeen": "words seen",
       "statAlreadyKnew": "already knew",
       "statStudiedToday": "studied today"
+    },
+    "grammarSection": {
+      "ruleLabel": "Grammar rule",
+      "examples": "More examples",
+      "ctaPractise": "Got it — let's practise →",
+      "ctaContinue": "Continue →",
+      "noRule": "No grammar note",
+      "noRuleBody": "This unit has no grammar rule. Move on to practice.",
+      "exLabel": "Grammar · quick check",
+      "exCheck": "Check →",
+      "exContinue": "Continue →",
+      "correct": "Correct!",
+      "incorrect": "Not quite"
     }
   },
   "ExerciseRunner": {

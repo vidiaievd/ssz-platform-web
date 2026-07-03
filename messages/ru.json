@@ -2781,6 +2781,19 @@
       "statWordsSeen": "слов просмотрено",
       "statAlreadyKnew": "уже знали",
       "statStudiedToday": "изучено сегодня"
+    },
+    "grammarSection": {
+      "ruleLabel": "Грамматическое правило",
+      "examples": "Больше примеров",
+      "ctaPractise": "Понял(а) — к практике →",
+      "ctaContinue": "Продолжить →",
+      "noRule": "Нет грамматической заметки",
+      "noRuleBody": "В этом разделе нет грамматического правила. Переходите к практике.",
+      "exLabel": "Грамматика · быстрая проверка",
+      "exCheck": "Проверить →",
+      "exContinue": "Продолжить →",
+      "correct": "Правильно!",
+      "incorrect": "Не совсем"
     }
   },
   "ExerciseRunner": {

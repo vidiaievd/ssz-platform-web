@@ -2781,6 +2781,19 @@
       "statWordsSeen": "слів переглянуто",
       "statAlreadyKnew": "вже знали",
       "statStudiedToday": "вивчено сьогодні"
+    },
+    "grammarSection": {
+      "ruleLabel": "Граматичне правило",
+      "examples": "Більше прикладів",
+      "ctaPractise": "Зрозумів(ла) — до практики →",
+      "ctaContinue": "Продовжити →",
+      "noRule": "Немає граматичної нотатки",
+      "noRuleBody": "У цьому розділі немає граматичного правила. Перейдіть до практики.",
+      "exLabel": "Граматика · швидка перевірка",
+      "exCheck": "Перевірити →",
+      "exContinue": "Продовжити →",
+      "correct": "Правильно!",
+      "incorrect": "Не зовсім"
     }
   },
   "ExerciseRunner": {

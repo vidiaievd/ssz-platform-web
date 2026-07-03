@@ -10,4 +10,7 @@ export type { UseUnitPhaseReturn } from './use-unit-phase';
 export { VocabSection } from './vocab-section/vocab-section';
 export type { VocabSectionProps } from './vocab-section/vocab-section';
 
+export { GrammarSection } from './grammar-section/grammar-section';
+export type { GrammarSectionProps } from './grammar-section/grammar-section';
+
 export type { UnitFlowState, UnitPhase } from './types';

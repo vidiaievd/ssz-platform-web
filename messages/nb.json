@@ -2781,6 +2781,19 @@
       "statWordsSeen": "ord sett",
       "statAlreadyKnew": "kunne fra før",
       "statStudiedToday": "studert i dag"
+    },
+    "grammarSection": {
+      "ruleLabel": "Grammatikkregel",
+      "examples": "Flere eksempler",
+      "ctaPractise": "Forstått — la oss øve →",
+      "ctaContinue": "Fortsett →",
+      "noRule": "Ingen grammatikknote",
+      "noRuleBody": "Denne enheten har ingen grammatikkregel. Gå videre til øvelse.",
+      "exLabel": "Grammatikk · rask sjekk",
+      "exCheck": "Sjekk →",
+      "exContinue": "Fortsett →",
+      "correct": "Riktig!",
+      "incorrect": "Ikke helt"
     }
   },
   "ExerciseRunner": {
