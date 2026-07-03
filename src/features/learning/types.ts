@@ -121,3 +121,68 @@ export interface CanDoItem {
 export interface CanDoResponse {
   items: CanDoItem[];
 }
+
+/* ─── Expanded module (unit payload) ─────────────────────────────── */
+
+export interface ExpandedVocabItem {
+  id: string;
+  word: string;
+  pos: string;
+  ipa?: string;
+  audioUrl?: string;
+  translation: string;
+  example?: string;
+  exampleAudioUrl?: string;
+}
+
+export interface ExpandedGrammarExample {
+  target: string;
+  translation: string;
+}
+
+export interface ExpandedGrammarRule {
+  id: string;
+  title: string;
+  explanation: string;
+  examples: ExpandedGrammarExample[];
+}
+
+export interface ExpandedLesson {
+  id: string;
+  title: string;
+  bodyMarkdown: string;
+  audioUrl?: string;
+  estimatedMinutes: number;
+}
+
+export interface ExpandedExerciseRef {
+  id: string;
+  type: string;
+}
+
+export interface ExpandedModule {
+  id: string;
+  title: string;
+  position: number;
+  cefrLevel: string;
+  lesson: ExpandedLesson;
+  vocabulary: ExpandedVocabItem[];
+  grammar?: ExpandedGrammarRule;
+  exercises: ExpandedExerciseRef[];
+  canDoDescriptors: CanDoItem[];
+}
+
+export interface UnitPayload {
+  module: ExpandedModule;
+  progress: ModuleProgress;
+}
+
+/* ─── Course Home composite ──────────────────────────────────────── */
+
+export interface CourseHomePayload {
+  progress: CourseProgress;
+  mastery: CourseMastery;
+  srsDueCount: number;
+  srsStreakDays: number;
+  canDo: CanDoResponse;
+}

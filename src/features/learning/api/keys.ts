@@ -6,4 +6,6 @@ export const learningKeys = keyFactory('learning', {
   courseProgress: (courseId: string) => ['progress', 'course', courseId] as const,
   courseMastery:  (courseId: string) => ['mastery', 'course', courseId] as const,
   canDo:          (courseId?: string) => ['can-do', courseId ?? 'all'] as const,
+  courseHome:     (courseId: string) => ['course-home', courseId] as const,
+  unitPayload:    (moduleId: string) => ['unit', moduleId] as const,
 });

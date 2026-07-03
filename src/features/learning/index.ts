@@ -6,13 +6,22 @@ export { useSrsStats } from './api/use-srs-stats';
 export { useCourseProgress } from './api/use-course-progress';
 export { useCourseMastery } from './api/use-course-mastery';
 export { useCanDo } from './api/use-can-do';
+export { useCourseHome } from './api/use-course-home';
+export { useUnitPayload } from './api/use-unit-payload';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 export type {
   CanDoItem,
   CanDoResponse,
   CourseMastery,
+  CourseHomePayload,
   CourseProgress,
+  ExpandedExerciseRef,
+  ExpandedGrammarExample,
+  ExpandedGrammarRule,
+  ExpandedLesson,
+  ExpandedModule,
+  ExpandedVocabItem,
   LessonProgress,
   LessonProgressStatus,
   ModuleProgress,
@@ -26,6 +35,7 @@ export type {
   SrsDueResponse,
   SrsHeatmapDay,
   SrsStats,
+  UnitPayload,
 } from './types';
 
 /* ─── Components ─────────────────────────────────────────────────── */
