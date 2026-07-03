@@ -2848,6 +2848,22 @@
         "caughtTitle": "You're all caught up!",
         "caughtMeta": "Great work! Come back later or preview the next unit.",
         "caughtCta": "Preview next unit"
+      },
+      "viewToggle": {
+        "units": "Unit flow",
+        "skills": "Skill index"
+      },
+      "unitFlowList": {
+        "statusDone": "Done",
+        "statusActive": "In progress",
+        "statusLocked": "Locked",
+        "lessons": "{done} of {total} lessons",
+        "continueUnit": "Continue"
+      },
+      "skillIndex": {
+        "mastery": "{pct}% mastery",
+        "jump": "Jump →",
+        "noData": "No skill data yet"
       }
     }
   },

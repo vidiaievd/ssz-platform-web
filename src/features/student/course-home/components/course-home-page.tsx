@@ -1,11 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useCourseHome, ErrorState, LearningSkeleton } from '@/features/learning';
 
 import { CourseHeader } from './course-header';
 import { ContinueHero, deriveContinueScenario } from './continue-hero';
+import { ViewToggle, type CourseView } from './view-toggle';
+import { UnitFlowList } from './unit-flow-list';
+import { SkillIndex } from './skill-index';
 
 export interface CourseHomePageProps {
   courseId: string;
@@ -14,6 +18,7 @@ export interface CourseHomePageProps {
 
 export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
   const t = useTranslations('Learning.courseHome');
+  const [activeView, setActiveView] = useState<CourseView>('units');
   const { data, isLoading, isError, refetch } = useCourseHome(courseId);
 
   if (isLoading) {
@@ -46,7 +51,7 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
     );
   }
 
-  const { courseInfo, progress, srsDueCount, overdueAssignmentCount } = data;
+  const { courseInfo, units, progress, mastery, srsDueCount, overdueAssignmentCount } = data;
 
   const scenario = deriveContinueScenario({
     overdueAssignmentCount,
@@ -55,6 +60,7 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
   });
 
   const ctaHref = buildCtaHref({ scenario, courseId, locale, modules: progress.modules });
+  const courseHref = `/${locale}/student/courses/${courseId}`;
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
@@ -66,7 +72,31 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
         <ContinueHero scenario={scenario} ctaHref={ctaHref} srsDueCount={srsDueCount} />
       </div>
 
-      {/* F3.2 / F3.3 content will be added in subsequent steps */}
+      {/* View toggle + content */}
+      <div className="mt-8">
+        <div className="mb-4">
+          <ViewToggle value={activeView} onChange={setActiveView} />
+        </div>
+
+        {activeView === 'units' ? (
+          <div
+            className="rounded-2xl border"
+            style={{
+              borderColor: 'var(--ssz-border-default)',
+              background: 'var(--ssz-bg-surface)',
+              boxShadow: 'var(--ssz-shadow-xs)',
+            }}
+          >
+            <div className="px-5">
+              <UnitFlowList units={units} courseId={courseId} locale={locale} />
+            </div>
+          </div>
+        ) : (
+          <SkillIndex skills={mastery.bySkill} courseHref={courseHref} />
+        )}
+      </div>
+
+      {/* F3.3 sidebar cards (ReviewCard + CanDoCard) — next step */}
     </main>
   );
 }

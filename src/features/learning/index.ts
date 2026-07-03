@@ -17,6 +17,8 @@ export type {
   CourseHomePayload,
   CourseInfo,
   CourseProgress,
+  UnitStatus,
+  UnitSummary,
   ExpandedExerciseRef,
   ExpandedGrammarExample,
   ExpandedGrammarRule,

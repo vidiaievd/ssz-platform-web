@@ -14,7 +14,7 @@ import type {
   CourseProgress,
   SrsDueResponse,
 } from '@/features/learning/types';
-import type { Container } from '@/features/content/types';
+import type { Container, ContainerItem } from '@/features/content/types';
 
 const PARAMS = { params: Promise.resolve({ courseId: 'course-1' }) };
 
@@ -64,9 +64,23 @@ const MOCK_CONTAINER: Partial<Container> = {
   accessTier: 'public_free',
   ownerUserId: 'user-1',
   slug: 'norwegian-b1',
+  currentPublishedVersionId: 'ver-1',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };
+
+const MOCK_ITEMS: Partial<ContainerItem>[] = [
+  {
+    id: 'ci-1',
+    itemId: 'mod-1',
+    itemType: 'container',
+    position: 1,
+    title: 'Everyday routines',
+    containerVersionId: 'ver-1',
+    isRequired: true,
+    addedAt: '2024-01-01T00:00:00Z',
+  },
+];
 
 function makeRequest() {
   return new NextRequest('http://localhost/api/learning/course-home/course-1');
@@ -78,7 +92,8 @@ function mockAllSuccess() {
     .mockResolvedValueOnce(MOCK_MASTERY)
     .mockResolvedValueOnce(MOCK_DUE)
     .mockResolvedValueOnce(MOCK_CAN_DO)
-    .mockResolvedValueOnce(MOCK_CONTAINER);
+    .mockResolvedValueOnce(MOCK_CONTAINER)
+    .mockResolvedValueOnce(MOCK_ITEMS);
 }
 
 beforeEach(() => vi.mocked(serverFetch).mockReset());
@@ -98,13 +113,30 @@ describe('GET /api/learning/course-home/[courseId]', () => {
     expect(body.srsStreakDays).toBe(7);
     expect(body.canDo).toEqual(MOCK_CAN_DO);
     expect(body.overdueAssignmentCount).toBe(0);
+    expect(body.units).toHaveLength(1);
+    expect(body.units[0]).toMatchObject({ id: 'mod-1', title: 'Everyday routines', status: 'locked', position: 1 });
   });
 
-  it('fires all five upstream calls in parallel (5 calls total)', async () => {
+  it('fires 5 parallel + 1 sequential call (6 total)', async () => {
     mockAllSuccess();
 
     await GET(makeRequest(), PARAMS);
-    expect(vi.mocked(serverFetch)).toHaveBeenCalledTimes(5);
+    expect(vi.mocked(serverFetch)).toHaveBeenCalledTimes(6);
+  });
+
+  it('returns empty units when course has no published version', async () => {
+    const containerWithoutVersion = { ...MOCK_CONTAINER, currentPublishedVersionId: null };
+    vi.mocked(serverFetch)
+      .mockResolvedValueOnce(MOCK_PROGRESS)
+      .mockResolvedValueOnce(MOCK_MASTERY)
+      .mockResolvedValueOnce(MOCK_DUE)
+      .mockResolvedValueOnce(MOCK_CAN_DO)
+      .mockResolvedValueOnce(containerWithoutVersion);
+
+    const res = await GET(makeRequest(), PARAMS);
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.units).toEqual([]);
   });
 
   it('returns 401 when any upstream is unauthenticated', async () => {

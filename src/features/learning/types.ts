@@ -177,6 +177,19 @@ export interface UnitPayload {
   progress: ModuleProgress;
 }
 
+/* ─── Unit summary (for Course Home unit list) ───────────────────── */
+
+export type UnitStatus = 'done' | 'active' | 'locked';
+
+export interface UnitSummary {
+  id: string;
+  position: number;
+  title: string;
+  status: UnitStatus;
+  completedLessons: number;
+  totalLessons: number;
+}
+
 /* ─── Course Home composite ──────────────────────────────────────── */
 
 export interface CourseInfo {
@@ -190,6 +203,8 @@ export interface CourseInfo {
 
 export interface CourseHomePayload {
   courseInfo: CourseInfo;
+  /** Ordered module list with status; empty if course has no published version. */
+  units: UnitSummary[];
   progress: CourseProgress;
   mastery: CourseMastery;
   srsDueCount: number;

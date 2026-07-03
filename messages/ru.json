@@ -2843,6 +2843,22 @@
         "caughtTitle": "Вы всё успели!",
         "caughtMeta": "Отличная работа! Возвращайтесь позже или просмотрите следующий блок.",
         "caughtCta": "Просмотреть следующий блок"
+      },
+      "viewToggle": {
+        "units": "Блоки",
+        "skills": "Навыки"
+      },
+      "unitFlowList": {
+        "statusDone": "Выполнено",
+        "statusActive": "В процессе",
+        "statusLocked": "Заблокировано",
+        "lessons": "{done} из {total} уроков",
+        "continueUnit": "Продолжить"
+      },
+      "skillIndex": {
+        "mastery": "{pct}% освоено",
+        "jump": "Перейти →",
+        "noData": "Данных о навыках пока нет"
       }
     }
   },

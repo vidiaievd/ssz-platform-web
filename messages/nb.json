@@ -2843,6 +2843,22 @@
         "caughtTitle": "Du er à jour!",
         "caughtMeta": "Godt jobbet! Kom tilbake senere eller forhåndsvis neste enhet.",
         "caughtCta": "Forhåndsvis neste enhet"
+      },
+      "viewToggle": {
+        "units": "Enhetsflyt",
+        "skills": "Ferdighetsoversikt"
+      },
+      "unitFlowList": {
+        "statusDone": "Fullført",
+        "statusActive": "Pågår",
+        "statusLocked": "Låst",
+        "lessons": "{done} av {total} leksjoner",
+        "continueUnit": "Fortsett"
+      },
+      "skillIndex": {
+        "mastery": "{pct}% mestring",
+        "jump": "Gå til →",
+        "noData": "Ingen ferdighetsmålinger ennå"
       }
     }
   },

@@ -2843,6 +2843,22 @@
         "caughtTitle": "Ви все встигли!",
         "caughtMeta": "Чудова робота! Поверніться пізніше або перегляньте наступний блок.",
         "caughtCta": "Переглянути наступний блок"
+      },
+      "viewToggle": {
+        "units": "Блоки",
+        "skills": "Навички"
+      },
+      "unitFlowList": {
+        "statusDone": "Виконано",
+        "statusActive": "В процесі",
+        "statusLocked": "Заблоковано",
+        "lessons": "{done} із {total} уроків",
+        "continueUnit": "Продовжити"
+      },
+      "skillIndex": {
+        "mastery": "{pct}% засвоєно",
+        "jump": "Перейти →",
+        "noData": "Даних про навички ще немає"
       }
     }
   },

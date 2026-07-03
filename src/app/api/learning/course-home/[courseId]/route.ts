@@ -2,15 +2,24 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
-import type { Container } from '@/features/content/types';
+import type { Container, ContainerItem } from '@/features/content/types';
 import type {
   CanDoResponse,
   CourseMastery,
   CourseHomePayload,
   CourseInfo,
   CourseProgress,
+  LessonProgressStatus,
   SrsDueResponse,
+  UnitStatus,
+  UnitSummary,
 } from '@/features/learning/types';
+
+function mapUnitStatus(s: LessonProgressStatus): UnitStatus {
+  if (s === 'completed') return 'done';
+  if (s === 'in_progress') return 'active';
+  return 'locked';
+}
 
 export async function GET(
   _request: NextRequest,
@@ -19,6 +28,7 @@ export async function GET(
   const { courseId } = await params;
 
   try {
+    /* ── Phase 1: parallel upstream calls ─────────────────────────── */
     const [progress, mastery, srsDue, canDo, container] = await Promise.all([
       serverFetch<CourseProgress>({
         service: 'progress',
@@ -42,6 +52,37 @@ export async function GET(
       }),
     ]);
 
+    /* ── Phase 2: module list (needs versionId from container) ─────── */
+    let units: UnitSummary[] = [];
+    const versionId = container.currentPublishedVersionId;
+    if (versionId) {
+      try {
+        const items = await serverFetch<ContainerItem[]>({
+          service: 'content',
+          path: `/containers/${courseId}/versions/${versionId}/items`,
+        });
+        const progressByModule = new Map(
+          progress.modules.map((m) => [m.moduleId, m]),
+        );
+        units = items
+          .filter((item) => item.itemType === 'container')
+          .sort((a, b) => a.position - b.position)
+          .map((item) => {
+            const mp = progressByModule.get(item.itemId);
+            return {
+              id: item.itemId,
+              position: item.position,
+              title: item.title ?? `Unit ${item.position}`,
+              status: mapUnitStatus(mp?.status ?? 'not_started'),
+              completedLessons: mp?.completedLessons ?? 0,
+              totalLessons: mp?.totalLessons ?? 0,
+            };
+          });
+      } catch {
+        // Non-fatal: units defaults to empty array
+      }
+    }
+
     const courseInfo: CourseInfo = {
       id: container.id,
       title: container.title,
@@ -51,6 +92,7 @@ export async function GET(
 
     const payload: CourseHomePayload = {
       courseInfo,
+      units,
       progress,
       mastery,
       srsDueCount: srsDue.dueCount,
