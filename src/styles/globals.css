@@ -169,6 +169,150 @@
 
 @layer base {
 
+  /* ═══ COLOR PALETTE — scale tokens (hue-based, theme-invariant) ═══
+     These are source-of-truth colors. Alias tokens below reference them.
+     Components must NEVER use scale tokens directly — use aliases only. */
+  :root {
+    /* Primary (Sage Teal, hue 168) */
+    --ssz-color-primary-50:  oklch(0.97 0.025 168);
+    --ssz-color-primary-100: oklch(0.93 0.05  168);
+    --ssz-color-primary-200: oklch(0.87 0.075 168);
+    --ssz-color-primary-300: oklch(0.79 0.09  168);
+    --ssz-color-primary-400: oklch(0.70 0.10  168);
+    --ssz-color-primary-500: oklch(0.62 0.105 168);
+    --ssz-color-primary-600: oklch(0.54 0.10  168);
+    --ssz-color-primary-700: oklch(0.44 0.09  168);
+    --ssz-color-primary-800: oklch(0.34 0.07  168);
+    --ssz-color-primary-900: oklch(0.24 0.05  168);
+
+    /* Secondary (Warm Amber Sand, hue 82) */
+    --ssz-color-secondary-50:  oklch(0.98 0.02  82);
+    --ssz-color-secondary-100: oklch(0.95 0.045 82);
+    --ssz-color-secondary-200: oklch(0.90 0.07  82);
+    --ssz-color-secondary-300: oklch(0.83 0.09  82);
+    --ssz-color-secondary-400: oklch(0.75 0.105 82);
+    --ssz-color-secondary-500: oklch(0.67 0.11  82);
+    --ssz-color-secondary-600: oklch(0.57 0.105 82);
+    --ssz-color-secondary-700: oklch(0.46 0.09  82);
+    --ssz-color-secondary-800: oklch(0.35 0.07  82);
+    --ssz-color-secondary-900: oklch(0.24 0.045 82);
+
+    /* Neutral (Warm Gray, hue 80) */
+    --ssz-color-neutral-0:   oklch(1.00  0.005 80);
+    --ssz-color-neutral-50:  oklch(0.975 0.007 80);
+    --ssz-color-neutral-100: oklch(0.95  0.010 80);
+    --ssz-color-neutral-200: oklch(0.90  0.010 80);
+    --ssz-color-neutral-300: oklch(0.83  0.010 80);
+    --ssz-color-neutral-400: oklch(0.70  0.010 80);
+    --ssz-color-neutral-500: oklch(0.58  0.010 80);
+    --ssz-color-neutral-600: oklch(0.46  0.010 80);
+    --ssz-color-neutral-700: oklch(0.36  0.010 80);
+    --ssz-color-neutral-800: oklch(0.26  0.010 80);
+    --ssz-color-neutral-900: oklch(0.18  0.010 80);
+
+    /* Semantic: Success */
+    --ssz-color-success-50:  oklch(0.96 0.04 145);
+    --ssz-color-success-100: oklch(0.90 0.07 145);
+    --ssz-color-success-300: oklch(0.76 0.11 145);
+    --ssz-color-success-500: oklch(0.60 0.13 145);
+    --ssz-color-success-700: oklch(0.44 0.11 145);
+
+    /* Semantic: Warning */
+    --ssz-color-warning-50:  oklch(0.97 0.03  75);
+    --ssz-color-warning-100: oklch(0.92 0.065 75);
+    --ssz-color-warning-300: oklch(0.80 0.11  75);
+    --ssz-color-warning-500: oklch(0.66 0.13  75);
+    --ssz-color-warning-700: oklch(0.48 0.11  75);
+
+    /* Semantic: Error */
+    --ssz-color-error-50:  oklch(0.97 0.025 15);
+    --ssz-color-error-100: oklch(0.92 0.055 15);
+    --ssz-color-error-300: oklch(0.78 0.10  15);
+    --ssz-color-error-500: oklch(0.55 0.125 15);
+    --ssz-color-error-700: oklch(0.44 0.105 15);
+
+    /* Semantic: Info */
+    --ssz-color-info-50:  oklch(0.96 0.03  235);
+    --ssz-color-info-100: oklch(0.91 0.055 235);
+    --ssz-color-info-300: oklch(0.76 0.10  235);
+    --ssz-color-info-500: oklch(0.60 0.12  235);
+    --ssz-color-info-700: oklch(0.44 0.10  235);
+  }
+
+  /* ═══ TYPOGRAPHY TOKENS ═══ */
+  :root {
+    --ssz-font-ui:      var(--font-plus-jakarta-sans), "Plus Jakarta Sans", system-ui, sans-serif;
+    --ssz-font-reading: var(--font-lora), "Lora", Georgia, serif;
+    --ssz-font-mono:    var(--font-jetbrains-mono), "JetBrains Mono", monospace;
+
+    --ssz-text-xs:   0.75rem;
+    --ssz-text-sm:   0.875rem;
+    --ssz-text-base: 1rem;
+    --ssz-text-lg:   1.125rem;
+    --ssz-text-xl:   1.25rem;
+    --ssz-text-2xl:  1.5rem;
+    --ssz-text-3xl:  1.875rem;
+    --ssz-text-4xl:  2.25rem;
+    --ssz-text-5xl:  3rem;
+
+    --ssz-weight-regular:  400;
+    --ssz-weight-medium:   500;
+    --ssz-weight-semibold: 600;
+    --ssz-weight-bold:     700;
+
+    --ssz-leading-tight:   1.25;
+    --ssz-leading-snug:    1.375;
+    --ssz-leading-normal:  1.5;
+    --ssz-leading-relaxed: 1.625;
+    --ssz-leading-loose:   1.75;
+
+    --ssz-tracking-tight:   -0.02em;
+    --ssz-tracking-normal:   0em;
+    --ssz-tracking-wide:     0.02em;
+    --ssz-tracking-wider:    0.04em;
+    --ssz-tracking-widest:   0.08em;
+  }
+
+  /* ═══ SPACING TOKENS (8pt system) ═══ */
+  :root {
+    --ssz-space-1:  4px;
+    --ssz-space-2:  8px;
+    --ssz-space-3:  12px;
+    --ssz-space-4:  16px;
+    --ssz-space-5:  20px;
+    --ssz-space-6:  24px;
+    --ssz-space-8:  32px;
+    --ssz-space-10: 40px;
+    --ssz-space-12: 48px;
+    --ssz-space-16: 64px;
+    --ssz-space-20: 80px;
+    --ssz-space-24: 96px;
+    --ssz-space-32: 128px;
+  }
+
+  /* ═══ BORDER RADIUS TOKENS ═══ */
+  :root {
+    --ssz-radius-xs:   4px;
+    --ssz-radius-sm:   6px;
+    --ssz-radius-md:   10px;
+    --ssz-radius-lg:   16px;
+    --ssz-radius-xl:   24px;
+    --ssz-radius-2xl:  32px;
+    --ssz-radius-full: 9999px;
+  }
+
+  /* ═══ MOTION TOKENS ═══ */
+  :root {
+    --ssz-duration-fast:   100ms;
+    --ssz-duration-base:   180ms;
+    --ssz-duration-slow:   280ms;
+    --ssz-duration-slower: 400ms;
+    --ssz-ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+    --ssz-ease-in:     cubic-bezier(0.4, 0, 1, 1);
+    --ssz-ease-inout:  cubic-bezier(0.4, 0, 0.2, 1);
+    --ssz-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   /* ═══ LIGHT THEME (default) ═══ */
   :root,
   [data-theme="light"] {
@@ -198,6 +342,10 @@
     --ssz-text-inverse:   oklch(1.00  0.005 80);
     --ssz-text-link:      oklch(0.52  0.10  168);
     --ssz-text-link-hover:oklch(0.44  0.09  168);
+
+    --ssz-interactive-primary:        var(--ssz-color-primary-500);
+    --ssz-interactive-primary-hover:  var(--ssz-color-primary-600);
+    --ssz-interactive-primary-active: var(--ssz-color-primary-700);
 
     --ssz-shadow-xs: 0 1px 2px oklch(0.18 0.01 80 / 0.06);
     --ssz-shadow-sm: 0 1px 4px oklch(0.18 0.01 80 / 0.08), 0 1px 2px oklch(0.18 0.01 80 / 0.06);
@@ -251,10 +399,14 @@
 
     --ssz-text-primary:   oklch(0.93 0.008 80);
     --ssz-text-secondary: oklch(0.72 0.010 80);
-    --ssz-text-muted:     oklch(0.65 0.010 80);
+    --ssz-text-muted:     oklch(0.52 0.010 80);
     --ssz-text-inverse:   oklch(0.18 0.010 80);
     --ssz-text-link:      oklch(0.79 0.09  168);
     --ssz-text-link-hover:oklch(0.87 0.075 168);
+
+    --ssz-interactive-primary:        var(--ssz-color-primary-400);
+    --ssz-interactive-primary-hover:  var(--ssz-color-primary-300);
+    --ssz-interactive-primary-active: var(--ssz-color-primary-200);
 
     --ssz-shadow-xs: 0 1px 2px rgba(0,0,0,0.20);
     --ssz-shadow-sm: 0 1px 4px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.18);
@@ -314,6 +466,16 @@
   :focus-visible {
     outline: none;
     box-shadow: var(--ssz-focus-ring);
+  }
+
+  /* Honour user motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
