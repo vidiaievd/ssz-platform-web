@@ -2753,6 +2753,12 @@
       "blankLabel": "Tom",
       "inputLabel": "Ditt svar",
       "placeholder": "skriv…"
+    },
+    "translate": {
+      "defaultInstruction": "Oversett setningen",
+      "textareaLabel": "Din oversettelse",
+      "placeholder": "Skriv på {lang}…",
+      "sampleAnswer": "Eksempelsvar"
     }
   }
 }

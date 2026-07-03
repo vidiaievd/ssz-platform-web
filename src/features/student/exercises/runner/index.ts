@@ -19,6 +19,9 @@ export type { FillBodyProps, FillContent, FillExpectedAnswers } from './fill-bod
 export { McqBody } from './mcq-body';
 export type { McqBodyProps, McqContent, McqExpectedAnswers } from './mcq-body';
 
+export { TranslateBody } from './translate-body';
+export type { TranslateBodyProps, TranslateContent } from './translate-body';
+
 export {
   deriveVisualState,
   modeAccent,

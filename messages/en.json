@@ -2758,6 +2758,12 @@
       "blankLabel": "Blank",
       "inputLabel": "Your answer",
       "placeholder": "type…"
+    },
+    "translate": {
+      "defaultInstruction": "Translate the sentence",
+      "textareaLabel": "Your translation",
+      "placeholder": "Write in {lang}…",
+      "sampleAnswer": "Sample answer"
     }
   }
 }

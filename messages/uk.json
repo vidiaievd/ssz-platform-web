@@ -2753,6 +2753,12 @@
       "blankLabel": "Пропуск",
       "inputLabel": "Ваша відповідь",
       "placeholder": "введіть…"
+    },
+    "translate": {
+      "defaultInstruction": "Перекладіть речення",
+      "textareaLabel": "Ваш переклад",
+      "placeholder": "Пишіть {lang}…",
+      "sampleAnswer": "Зразок відповіді"
     }
   }
 }
