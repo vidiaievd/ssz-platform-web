@@ -2794,6 +2794,28 @@
       "exContinue": "Продолжить →",
       "correct": "Правильно!",
       "incorrect": "Не совсем"
+    },
+    "practiceSection": {
+      "progress": "{current} из {total}",
+      "check": "Проверить →",
+      "skip": "Пропустить →",
+      "finish": "Завершить →",
+      "seeResults": "Посмотреть результаты →",
+      "noPractice": "В этом разделе нет упражнений",
+      "noPracticeBody": "Отлично — можно сразу перейти к результатам.",
+      "loadError": "Не удалось загрузить упражнение.",
+      "unsupported": "Неподдерживаемый тип упражнения"
+    },
+    "completeSection": {
+      "unitComplete": "Раздел {unit} завершён",
+      "subtitle": "Вы завершили этот раздел. Вот как это прошло.",
+      "canDoLabel": "Теперь вы умеете",
+      "statPerfect": "Идеально!",
+      "statMistakes": "ошибок",
+      "statWords": "слов",
+      "statXp": "XP",
+      "xpEarned": "+10",
+      "backToCourse": "Вернуться к курсу"
     }
   },
   "ExerciseRunner": {

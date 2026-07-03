@@ -2794,6 +2794,28 @@
       "exContinue": "Продовжити →",
       "correct": "Правильно!",
       "incorrect": "Не зовсім"
+    },
+    "practiceSection": {
+      "progress": "{current} з {total}",
+      "check": "Перевірити →",
+      "skip": "Пропустити →",
+      "finish": "Завершити →",
+      "seeResults": "Подивитися результати →",
+      "noPractice": "У цьому розділі немає вправ",
+      "noPracticeBody": "Чудово — можна переходити одразу до результатів.",
+      "loadError": "Не вдалося завантажити вправу.",
+      "unsupported": "Непідтримуваний тип вправи"
+    },
+    "completeSection": {
+      "unitComplete": "Розділ {unit} завершено",
+      "subtitle": "Ви завершили цей розділ. Ось як пройшло.",
+      "canDoLabel": "Тепер ви вмієте",
+      "statPerfect": "Ідеально!",
+      "statMistakes": "помилок",
+      "statWords": "слів",
+      "statXp": "XP",
+      "xpEarned": "+10",
+      "backToCourse": "Повернутися до курсу"
     }
   },
   "ExerciseRunner": {

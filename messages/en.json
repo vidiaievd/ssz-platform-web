@@ -2799,6 +2799,28 @@
       "exContinue": "Continue →",
       "correct": "Correct!",
       "incorrect": "Not quite"
+    },
+    "practiceSection": {
+      "progress": "{current} of {total}",
+      "check": "Check →",
+      "skip": "Skip →",
+      "finish": "Finish →",
+      "seeResults": "See results →",
+      "noPractice": "No exercises for this unit",
+      "noPracticeBody": "Great — you can move straight to the results.",
+      "loadError": "Couldn't load this exercise.",
+      "unsupported": "Unsupported exercise type"
+    },
+    "completeSection": {
+      "unitComplete": "Unit {unit} complete",
+      "subtitle": "You've finished this unit. Here's how it went.",
+      "canDoLabel": "You can now",
+      "statPerfect": "Perfect!",
+      "statMistakes": "mistake(s)",
+      "statWords": "words",
+      "statXp": "XP",
+      "xpEarned": "+10",
+      "backToCourse": "Back to course"
     }
   },
   "ExerciseRunner": {

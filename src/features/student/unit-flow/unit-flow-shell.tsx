@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useUnitPayload, ErrorState, LearningSkeleton } from '@/features/learning';
@@ -13,6 +13,8 @@ import type { GlossaryMap, TextParagraph } from './read-section/read-section-typ
 import { VocabSection } from './vocab-section/vocab-section';
 import { GrammarSection } from './grammar-section/grammar-section';
 import type { GrammarQuickCheck } from './grammar-section/grammar-ex';
+import { PracticeSection } from './practice-section/practice-section';
+import { CompleteSection } from './complete-section/complete-section';
 
 export interface UnitFlowShellProps {
   unitId: string;
@@ -108,6 +110,8 @@ interface ContentProps {
 }
 
 function UnitFlowContent({ courseHref, module, unitNumber, phase, setPhase }: ContentProps) {
+  const [practiceMistakes, setPracticeMistakes] = useState<string[]>([]);
+
   const glossary = useMemo(() => vocabToGlossary(module.vocabulary), [module.vocabulary]);
   const paragraphs = useMemo(() => parseParagraphs(module.lesson.bodyMarkdown), [module.lesson.bodyMarkdown]);
 
@@ -178,32 +182,25 @@ function UnitFlowContent({ courseHref, module, unitNumber, phase, setPhase }: Co
           />
         )}
 
-        {/* Remaining phases — F2.5 will fill these in */}
-        {phase !== 'read' && !isVocabPhase && !isGrammarPhase && (
-          <div className="w-full px-6 pb-32 pt-8" style={{ maxWidth: 600 }}>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-(--ssz-text-muted)">
-              {module.cefrLevel} · {module.title}
-            </p>
-            <p className="mb-6 text-sm text-(--ssz-text-secondary)">Phase: {phase}</p>
-            <div className="flex flex-wrap gap-2">
-              {(['read', 'vocab-pass', 'vocab-study', 'grammar-read', 'grammar-ex', 'practice', 'complete'] as const).map(
-                (p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPhase(p)}
-                    className={
-                      phase === p
-                        ? 'rounded-lg bg-(--ssz-color-primary-500) px-3 py-1.5 text-xs font-medium text-white'
-                        : 'rounded-lg bg-subtle px-3 py-1.5 text-xs font-medium text-(--ssz-text-secondary) hover:bg-(--ssz-border-default)'
-                    }
-                  >
-                    {p}
-                  </button>
-                ),
-              )}
-            </div>
-          </div>
+        {phase === 'practice' && (
+          <PracticeSection
+            exercises={module.exercises}
+            onComplete={(m) => {
+              setPracticeMistakes(m);
+              setPhase('complete');
+            }}
+          />
+        )}
+
+        {phase === 'complete' && (
+          <CompleteSection
+            unitNumber={unitNumber}
+            unitTitle={module.title}
+            vocabCount={module.vocabulary.length}
+            mistakes={practiceMistakes}
+            canDoDescriptors={module.canDoDescriptors}
+            courseHref={courseHref}
+          />
         )}
       </div>
     </div>

@@ -2794,6 +2794,28 @@
       "exContinue": "Fortsett →",
       "correct": "Riktig!",
       "incorrect": "Ikke helt"
+    },
+    "practiceSection": {
+      "progress": "{current} av {total}",
+      "check": "Sjekk →",
+      "skip": "Hopp over →",
+      "finish": "Fullfør →",
+      "seeResults": "Se resultater →",
+      "noPractice": "Ingen øvelser for denne enheten",
+      "noPracticeBody": "Bra — du kan gå rett til resultatene.",
+      "loadError": "Kunne ikke laste inn øvelsen.",
+      "unsupported": "Øvelsestypen støttes ikke"
+    },
+    "completeSection": {
+      "unitComplete": "Enhet {unit} fullført",
+      "subtitle": "Du har fullført denne enheten. Her er resultatet.",
+      "canDoLabel": "Du kan nå",
+      "statPerfect": "Perfekt!",
+      "statMistakes": "feil",
+      "statWords": "ord",
+      "statXp": "XP",
+      "xpEarned": "+10",
+      "backToCourse": "Tilbake til kurset"
     }
   },
   "ExerciseRunner": {
