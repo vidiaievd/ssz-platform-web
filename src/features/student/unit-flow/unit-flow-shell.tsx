@@ -4,12 +4,13 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useUnitPayload, ErrorState, LearningSkeleton } from '@/features/learning';
-import type { ExpandedVocabItem } from '@/features/learning';
+import type { ExpandedVocabItem, RefStripParagraph } from '@/features/learning';
 
 import { UFTopBar } from './uf-top-bar';
 import { useUnitPhase } from './use-unit-phase';
 import { ReadSection } from './read-section/read-section';
 import type { GlossaryMap, TextParagraph } from './read-section/read-section-types';
+import { VocabSection } from './vocab-section/vocab-section';
 
 export interface UnitFlowShellProps {
   unitId: string;
@@ -46,7 +47,7 @@ export function UnitFlowShell({ unitId, courseHref }: UnitFlowShellProps) {
     return (
       <div className="flex h-full flex-col" style={{ background: 'var(--ssz-bg-base)' }}>
         <div
-          className="sticky top-0 z-10 h-[72px] border-b border-(--ssz-border-default) bg-surface"
+          className="sticky top-0 z-10 h-18 border-b border-(--ssz-border-default) bg-surface"
           aria-hidden="true"
         />
         <div className="flex flex-1 justify-center px-6 pt-10">
@@ -108,6 +109,13 @@ function UnitFlowContent({ courseHref, module, unitNumber, phase, setPhase }: Co
   const glossary = useMemo(() => vocabToGlossary(module.vocabulary), [module.vocabulary]);
   const paragraphs = useMemo(() => parseParagraphs(module.lesson.bodyMarkdown), [module.lesson.bodyMarkdown]);
 
+  const refParagraphs = useMemo<RefStripParagraph[]>(
+    () => paragraphs.map((p) => ({ native: p.target, translation: p.translation || undefined })),
+    [paragraphs],
+  );
+
+  const isVocabPhase = phase === 'vocab-pass' || phase === 'vocab-study';
+
   return (
     <div className="flex h-full flex-col" style={{ background: 'var(--ssz-bg-base)' }}>
       <UFTopBar phase={phase} unitNumber={unitNumber} courseHref={courseHref} />
@@ -125,8 +133,19 @@ function UnitFlowContent({ courseHref, module, unitNumber, phase, setPhase }: Co
           />
         )}
 
-        {/* Remaining phases — F2.3–F2.5 will fill these in */}
-        {phase !== 'read' && (
+        {isVocabPhase && (
+          <VocabSection
+            vocab={module.vocabulary}
+            initialPhase={phase === 'vocab-study' ? 'study' : 'pass'}
+            refParagraphs={refParagraphs}
+            refTitle={module.lesson.title}
+            onStudyStart={() => setPhase('vocab-study')}
+            onContinue={() => setPhase('grammar-read')}
+          />
+        )}
+
+        {/* Remaining phases — F2.4–F2.5 will fill these in */}
+        {phase !== 'read' && !isVocabPhase && (
           <div className="w-full px-6 pb-32 pt-8" style={{ maxWidth: 600 }}>
             <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-(--ssz-text-muted)">
               {module.cefrLevel} · {module.title}
