@@ -2719,6 +2719,13 @@
     "errorState": {
       "default": "Noe gikk galt.",
       "retry": "Prøv igjen"
+    },
+    "unitFlow": {
+      "exitLabel": "Kurs",
+      "unitLabel": "ENHET {n}",
+      "loadError": "Kunne ikke laste denne enheten",
+      "loadErrorSub": "Noe gikk galt. Fremgangen din er trygg — prøv igjen.",
+      "phaseDebug": "Fase: {phase}"
     }
   },
   "ExerciseRunner": {

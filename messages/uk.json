@@ -2719,6 +2719,13 @@
     "errorState": {
       "default": "Щось пішло не так.",
       "retry": "Спробувати знову"
+    },
+    "unitFlow": {
+      "exitLabel": "Курс",
+      "unitLabel": "РОЗДІЛ {n}",
+      "loadError": "Не вдалося завантажити цей розділ",
+      "loadErrorSub": "Щось пішло не так. Ваш прогрес збережено — спробуйте ще раз.",
+      "phaseDebug": "Фаза: {phase}"
     }
   },
   "ExerciseRunner": {
