@@ -2859,6 +2859,24 @@
         "mastery": "{pct}% mestring",
         "jump": "Gå til →",
         "noData": "Ingen ferdighetsmålinger ennå"
+      },
+      "reviewCard": {
+        "title": "Daglig gjennomgang",
+        "allReviewed": "Alt gjennomgatt",
+        "allReviewedSub": "Du er a jour. Kom tilbake i morgen!",
+        "itemsDue": "til gjennomgang",
+        "reviewedToday": "{n} gjennomgatt i dag",
+        "cta": "Gjennomga {n} na",
+        "vocab": "Vokabular",
+        "exercises": "Ovelser"
+      },
+      "canDoCard": {
+        "title": "Kan-gjore-fremgang",
+        "goals": "{total} mal",
+        "recentTitle": "Nylig last opp",
+        "nextTitle": "Neste mal",
+        "inUnit": "Enhet {n}",
+        "noItems": "Fullfor enheter for a lase opp mal."
       }
     }
   },

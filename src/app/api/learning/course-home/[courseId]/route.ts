@@ -83,6 +83,26 @@ export async function GET(
       }
     }
 
+    /* ── Derive SRS breakdown from card sample ────────────────────── */
+    const sampleSize = srsDue.cards.length;
+    const vocabSample = srsDue.cards.filter(
+      (c) => c.contentType === 'VOCABULARY_WORD',
+    ).length;
+
+    let srsVocabDue: number;
+    let srsExerciseDue: number;
+    if (sampleSize === 0 || srsDue.dueCount === 0) {
+      srsVocabDue = 0;
+      srsExerciseDue = 0;
+    } else if (sampleSize >= srsDue.dueCount) {
+      srsVocabDue = vocabSample;
+      srsExerciseDue = sampleSize - vocabSample;
+    } else {
+      const scale = srsDue.dueCount / sampleSize;
+      srsVocabDue = Math.round(vocabSample * scale);
+      srsExerciseDue = srsDue.dueCount - srsVocabDue;
+    }
+
     const courseInfo: CourseInfo = {
       id: container.id,
       title: container.title,
@@ -97,6 +117,9 @@ export async function GET(
       mastery,
       srsDueCount: srsDue.dueCount,
       srsStreakDays: srsDue.streakDays,
+      srsReviewedToday: srsDue.reviewedToday,
+      srsVocabDue,
+      srsExerciseDue,
       canDo,
       overdueAssignmentCount: 0,
     };

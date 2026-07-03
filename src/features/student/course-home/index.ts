@@ -15,3 +15,9 @@ export type { UnitFlowListProps } from './components/unit-flow-list';
 
 export { SkillIndex } from './components/skill-index';
 export type { SkillIndexProps } from './components/skill-index';
+
+export { ReviewCard } from './components/review-card';
+export type { ReviewCardProps } from './components/review-card';
+
+export { CanDoCard } from './components/can-do-card';
+export type { CanDoCardProps } from './components/can-do-card';

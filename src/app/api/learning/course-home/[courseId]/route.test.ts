@@ -34,11 +34,15 @@ const MOCK_MASTERY: CourseMastery = {
 };
 
 const MOCK_DUE: SrsDueResponse = {
-  dueCount: 15,
+  dueCount: 3,
   streakDays: 7,
   dailyLimit: 20,
-  reviewedToday: 0,
-  cards: [],
+  reviewedToday: 3,
+  cards: [
+    { id: 'c1', contentType: 'VOCABULARY_WORD', contentId: 'v1', front: { word: 'hund' }, back: { definition: 'dog' }, dueAt: '2026-01-01' },
+    { id: 'c2', contentType: 'VOCABULARY_WORD', contentId: 'v2', front: { word: 'katt' }, back: { definition: 'cat' }, dueAt: '2026-01-01' },
+    { id: 'c3', contentType: 'EXERCISE',        contentId: 'e1', front: { word: 'Ex 1' }, back: { definition: 'ans' }, dueAt: '2026-01-01' },
+  ],
 };
 
 const MOCK_CAN_DO: CanDoResponse = {
@@ -109,8 +113,12 @@ describe('GET /api/learning/course-home/[courseId]', () => {
     expect(body.courseInfo).toMatchObject({ id: 'course-1', title: 'Norwegian B1', cefrLevel: 'B1', targetLanguage: 'nb' });
     expect(body.progress).toEqual(MOCK_PROGRESS);
     expect(body.mastery).toEqual(MOCK_MASTERY);
-    expect(body.srsDueCount).toBe(15);
+    expect(body.srsDueCount).toBe(3);
     expect(body.srsStreakDays).toBe(7);
+    expect(body.srsReviewedToday).toBe(3);
+    // 2 vocab cards, 1 exercise card (sample === dueCount so exact)
+    expect(body.srsVocabDue).toBe(2);
+    expect(body.srsExerciseDue).toBe(1);
     expect(body.canDo).toEqual(MOCK_CAN_DO);
     expect(body.overdueAssignmentCount).toBe(0);
     expect(body.units).toHaveLength(1);
@@ -122,6 +130,22 @@ describe('GET /api/learning/course-home/[courseId]', () => {
 
     await GET(makeRequest(), PARAMS);
     expect(vi.mocked(serverFetch)).toHaveBeenCalledTimes(6);
+  });
+
+  it('scales SRS breakdown when dueCount > sample size', async () => {
+    const largeDue: SrsDueResponse = { ...MOCK_DUE, dueCount: 30, cards: MOCK_DUE.cards };
+    vi.mocked(serverFetch)
+      .mockResolvedValueOnce(MOCK_PROGRESS)
+      .mockResolvedValueOnce(MOCK_MASTERY)
+      .mockResolvedValueOnce(largeDue)
+      .mockResolvedValueOnce(MOCK_CAN_DO)
+      .mockResolvedValueOnce(MOCK_CONTAINER)
+      .mockResolvedValueOnce(MOCK_ITEMS);
+
+    const res = await GET(makeRequest(), PARAMS);
+    const body = await res.json();
+    expect(body.srsDueCount).toBe(30);
+    expect(body.srsVocabDue + body.srsExerciseDue).toBe(30);
   });
 
   it('returns empty units when course has no published version', async () => {

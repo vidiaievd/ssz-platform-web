@@ -209,6 +209,12 @@ export interface CourseHomePayload {
   mastery: CourseMastery;
   srsDueCount: number;
   srsStreakDays: number;
+  /** Cards reviewed so far today (for streak/limit display). */
+  srsReviewedToday: number;
+  /** Estimated vocabulary cards due (derived from sample in /srs/due). */
+  srsVocabDue: number;
+  /** Estimated exercise/grammar cards due. */
+  srsExerciseDue: number;
   canDo: CanDoResponse;
   /** Overdue assignments; 0 until the assignment BFF is wired. */
   overdueAssignmentCount: number;
