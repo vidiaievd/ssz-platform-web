@@ -14,6 +14,7 @@ import type {
   CourseProgress,
   SrsDueResponse,
 } from '@/features/learning/types';
+import type { Container } from '@/features/content/types';
 
 const PARAMS = { params: Promise.resolve({ courseId: 'course-1' }) };
 
@@ -53,40 +54,57 @@ const MOCK_CAN_DO: CanDoResponse = {
   ],
 };
 
+const MOCK_CONTAINER: Partial<Container> = {
+  id: 'course-1',
+  title: 'Norwegian B1',
+  difficultyLevel: 'B1',
+  targetLanguage: 'nb',
+  containerType: 'course',
+  visibility: 'public',
+  accessTier: 'public_free',
+  ownerUserId: 'user-1',
+  slug: 'norwegian-b1',
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
+};
+
 function makeRequest() {
   return new NextRequest('http://localhost/api/learning/course-home/course-1');
+}
+
+function mockAllSuccess() {
+  vi.mocked(serverFetch)
+    .mockResolvedValueOnce(MOCK_PROGRESS)
+    .mockResolvedValueOnce(MOCK_MASTERY)
+    .mockResolvedValueOnce(MOCK_DUE)
+    .mockResolvedValueOnce(MOCK_CAN_DO)
+    .mockResolvedValueOnce(MOCK_CONTAINER);
 }
 
 beforeEach(() => vi.mocked(serverFetch).mockReset());
 
 describe('GET /api/learning/course-home/[courseId]', () => {
   it('returns a composite payload on success', async () => {
-    vi.mocked(serverFetch)
-      .mockResolvedValueOnce(MOCK_PROGRESS)
-      .mockResolvedValueOnce(MOCK_MASTERY)
-      .mockResolvedValueOnce(MOCK_DUE)
-      .mockResolvedValueOnce(MOCK_CAN_DO);
+    mockAllSuccess();
 
     const res = await GET(makeRequest(), PARAMS);
     expect(res.status).toBe(200);
 
     const body = await res.json();
+    expect(body.courseInfo).toMatchObject({ id: 'course-1', title: 'Norwegian B1', cefrLevel: 'B1', targetLanguage: 'nb' });
     expect(body.progress).toEqual(MOCK_PROGRESS);
     expect(body.mastery).toEqual(MOCK_MASTERY);
     expect(body.srsDueCount).toBe(15);
     expect(body.srsStreakDays).toBe(7);
     expect(body.canDo).toEqual(MOCK_CAN_DO);
+    expect(body.overdueAssignmentCount).toBe(0);
   });
 
-  it('fires all four upstream calls in parallel (4 calls total)', async () => {
-    vi.mocked(serverFetch)
-      .mockResolvedValueOnce(MOCK_PROGRESS)
-      .mockResolvedValueOnce(MOCK_MASTERY)
-      .mockResolvedValueOnce(MOCK_DUE)
-      .mockResolvedValueOnce(MOCK_CAN_DO);
+  it('fires all five upstream calls in parallel (5 calls total)', async () => {
+    mockAllSuccess();
 
     await GET(makeRequest(), PARAMS);
-    expect(vi.mocked(serverFetch)).toHaveBeenCalledTimes(4);
+    expect(vi.mocked(serverFetch)).toHaveBeenCalledTimes(5);
   });
 
   it('returns 401 when any upstream is unauthenticated', async () => {

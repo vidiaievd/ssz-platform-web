@@ -2,10 +2,12 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
+import type { Container } from '@/features/content/types';
 import type {
   CanDoResponse,
   CourseMastery,
   CourseHomePayload,
+  CourseInfo,
   CourseProgress,
   SrsDueResponse,
 } from '@/features/learning/types';
@@ -17,7 +19,7 @@ export async function GET(
   const { courseId } = await params;
 
   try {
-    const [progress, mastery, srsDue, canDo] = await Promise.all([
+    const [progress, mastery, srsDue, canDo, container] = await Promise.all([
       serverFetch<CourseProgress>({
         service: 'progress',
         path: `/learning/progress/courses/${courseId}`,
@@ -34,14 +36,27 @@ export async function GET(
         service: 'progress',
         path: `/can-do?courseId=${encodeURIComponent(courseId)}`,
       }),
+      serverFetch<Container>({
+        service: 'content',
+        path: `/containers/${courseId}`,
+      }),
     ]);
 
+    const courseInfo: CourseInfo = {
+      id: container.id,
+      title: container.title,
+      cefrLevel: container.difficultyLevel,
+      targetLanguage: container.targetLanguage,
+    };
+
     const payload: CourseHomePayload = {
+      courseInfo,
       progress,
       mastery,
       srsDueCount: srsDue.dueCount,
       srsStreakDays: srsDue.streakDays,
       canDo,
+      overdueAssignmentCount: 0,
     };
 
     return NextResponse.json(payload);

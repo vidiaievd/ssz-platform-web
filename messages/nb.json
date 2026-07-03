@@ -2816,6 +2816,34 @@
       "statXp": "XP",
       "xpEarned": "+10",
       "backToCourse": "Tilbake til kurset"
+    },
+    "courseHome": {
+      "loadError": "Kunne ikke laste kurset",
+      "loadErrorSub": "Noe gikk galt. Prøv igjen.",
+      "lessons": "{done} av {total} leksjoner",
+      "complete": "fullført",
+      "hero": {
+        "overdueLabel": "OPPGAVE FORFALT",
+        "overdueTitle": "Du har en forfalt oppgave",
+        "overdueMeta": "Send inn før læreren gjennomgår gruppen.",
+        "overdueCta": "Fullfør og send inn",
+        "reviewLabel": "DAGLIG GJENNOMGANG",
+        "reviewTitle": "{count} kort til gjennomgang",
+        "reviewMeta": "Hold streaken din – det tar bare noen minutter.",
+        "reviewCta": "Start gjennomgang",
+        "resumeLabel": "FORTSETT Å LÆRE",
+        "resumeTitle": "Fortsett der du slapp",
+        "resumeMeta": "Du er midt i en enhet. Fortsett!",
+        "resumeCta": "Fortsett leksjonen",
+        "startLabel": "NESTE ENHET",
+        "startTitle": "Klar for neste enhet?",
+        "startMeta": "Du har fullført forrige enhet. Start den neste.",
+        "startCta": "Start enhet",
+        "caughtLabel": "ALT ER GJORT",
+        "caughtTitle": "Du er à jour!",
+        "caughtMeta": "Godt jobbet! Kom tilbake senere eller forhåndsvis neste enhet.",
+        "caughtCta": "Forhåndsvis neste enhet"
+      }
     }
   },
   "ExerciseRunner": {

@@ -2821,6 +2821,34 @@
       "statXp": "XP",
       "xpEarned": "+10",
       "backToCourse": "Back to course"
+    },
+    "courseHome": {
+      "loadError": "Couldn't load this course",
+      "loadErrorSub": "Something went wrong. Please try again.",
+      "lessons": "{done} of {total} lessons",
+      "complete": "complete",
+      "hero": {
+        "overdueLabel": "ASSIGNMENT OVERDUE",
+        "overdueTitle": "You have an overdue assignment",
+        "overdueMeta": "Submit it before your teacher reviews the group.",
+        "overdueCta": "Finish & submit",
+        "reviewLabel": "DAILY REVIEW",
+        "reviewTitle": "{count} cards due for review",
+        "reviewMeta": "Keep your streak going — it only takes a few minutes.",
+        "reviewCta": "Start review",
+        "resumeLabel": "CONTINUE LEARNING",
+        "resumeTitle": "Continue where you left off",
+        "resumeMeta": "You're in the middle of a unit. Keep going!",
+        "resumeCta": "Continue lesson",
+        "startLabel": "NEXT UNIT",
+        "startTitle": "Ready for the next unit?",
+        "startMeta": "You've completed the previous unit. Start the next one.",
+        "startCta": "Start unit",
+        "caughtLabel": "ALL CAUGHT UP",
+        "caughtTitle": "You're all caught up!",
+        "caughtMeta": "Great work! Come back later or preview the next unit.",
+        "caughtCta": "Preview next unit"
+      }
     }
   },
   "ExerciseRunner": {

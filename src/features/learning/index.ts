@@ -15,6 +15,7 @@ export type {
   CanDoResponse,
   CourseMastery,
   CourseHomePayload,
+  CourseInfo,
   CourseProgress,
   ExpandedExerciseRef,
   ExpandedGrammarExample,

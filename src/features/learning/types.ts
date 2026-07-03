@@ -179,10 +179,22 @@ export interface UnitPayload {
 
 /* ─── Course Home composite ──────────────────────────────────────── */
 
+export interface CourseInfo {
+  id: string;
+  title: string;
+  cefrLevel: string;
+  targetLanguage: string;
+  schoolName?: string;
+  groupName?: string;
+}
+
 export interface CourseHomePayload {
+  courseInfo: CourseInfo;
   progress: CourseProgress;
   mastery: CourseMastery;
   srsDueCount: number;
   srsStreakDays: number;
   canDo: CanDoResponse;
+  /** Overdue assignments; 0 until the assignment BFF is wired. */
+  overdueAssignmentCount: number;
 }
