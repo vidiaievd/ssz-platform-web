@@ -1,3 +1,34 @@
+/* ─── API hooks ──────────────────────────────────────────────────── */
+export { learningKeys } from './api/keys';
+export { useSrsDue } from './api/use-srs-due';
+export { useSrsReview } from './api/use-srs-review';
+export { useSrsStats } from './api/use-srs-stats';
+export { useCourseProgress } from './api/use-course-progress';
+export { useCourseMastery } from './api/use-course-mastery';
+export { useCanDo } from './api/use-can-do';
+
+/* ─── Types ──────────────────────────────────────────────────────── */
+export type {
+  CanDoItem,
+  CanDoResponse,
+  CourseMastery,
+  CourseProgress,
+  LessonProgress,
+  LessonProgressStatus,
+  ModuleProgress,
+  ReviewRating,
+  ReviewRequest,
+  ReviewResponse,
+  SkillMastery,
+  SrsCard,
+  SrsCardBack,
+  SrsCardFront,
+  SrsDueResponse,
+  SrsHeatmapDay,
+  SrsStats,
+} from './types';
+
+/* ─── Components ─────────────────────────────────────────────────── */
 export { AudioPlayer } from './components/audio-player';
 export type { AudioPlayerProps } from './components/audio-player';
 
