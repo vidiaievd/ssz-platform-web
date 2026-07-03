@@ -2690,5 +2690,35 @@
       "inviteOnly": "Эта школа принимает студентов только по приглашению.",
       "reapply": "Подать заявку повторно"
     }
+  },
+  "Learning": {
+    "audio": {
+      "play": "Воспроизвести",
+      "pause": "Пауза",
+      "seekBack": "Назад 10 секунд",
+      "seekForward": "Вперёд 10 секунд",
+      "speed": "Скорость {speed}×",
+      "loading": "Загрузка аудио…",
+      "scrub": "Перемотать",
+      "player": "Аудиоплеер"
+    },
+    "refStrip": {
+      "reference": "Текст"
+    },
+    "glossary": {
+      "seeInContext": "Увидеть в контексте",
+      "listenWord": "Слушать"
+    },
+    "unitStepper": {
+      "label": "Шаги урока",
+      "readListen": "Чтение и аудио",
+      "vocabulary": "Словарь",
+      "grammar": "Грамматика",
+      "practice": "Практика"
+    },
+    "errorState": {
+      "default": "Что-то пошло не так.",
+      "retry": "Попробовать снова"
+    }
   }
 }

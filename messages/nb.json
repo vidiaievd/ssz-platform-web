@@ -2690,5 +2690,35 @@
       "inviteOnly": "Denne skolen tar imot studenter kun etter invitasjon.",
       "reapply": "Søk på nytt"
     }
+  },
+  "Learning": {
+    "audio": {
+      "play": "Spill av",
+      "pause": "Pause",
+      "seekBack": "10 sekunder tilbake",
+      "seekForward": "10 sekunder frem",
+      "speed": "{speed}× hastighet",
+      "loading": "Laster lyd…",
+      "scrub": "Spol",
+      "player": "Lydavspiller"
+    },
+    "refStrip": {
+      "reference": "Referansetekst"
+    },
+    "glossary": {
+      "seeInContext": "Se i kontekst",
+      "listenWord": "Hør"
+    },
+    "unitStepper": {
+      "label": "Enhetssteg",
+      "readListen": "Les og lytt",
+      "vocabulary": "Ordforråd",
+      "grammar": "Grammatikk",
+      "practice": "Øvelser"
+    },
+    "errorState": {
+      "default": "Noe gikk galt.",
+      "retry": "Prøv igjen"
+    }
   }
 }

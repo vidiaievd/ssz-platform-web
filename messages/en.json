@@ -2695,5 +2695,35 @@
       "inviteOnly": "This school accepts students by invitation only.",
       "reapply": "Re-apply"
     }
+  },
+  "Learning": {
+    "audio": {
+      "play": "Play",
+      "pause": "Pause",
+      "seekBack": "Back 10 seconds",
+      "seekForward": "Forward 10 seconds",
+      "speed": "{speed}× speed",
+      "loading": "Loading audio…",
+      "scrub": "Seek",
+      "player": "Audio player"
+    },
+    "refStrip": {
+      "reference": "Reference"
+    },
+    "glossary": {
+      "seeInContext": "See in context",
+      "listenWord": "Listen"
+    },
+    "unitStepper": {
+      "label": "Unit steps",
+      "readListen": "Read & Listen",
+      "vocabulary": "Vocabulary",
+      "grammar": "Grammar",
+      "practice": "Practice"
+    },
+    "errorState": {
+      "default": "Something went wrong.",
+      "retry": "Try again"
+    }
   }
 }

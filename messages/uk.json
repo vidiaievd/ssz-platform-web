@@ -2690,5 +2690,35 @@
       "inviteOnly": "Ця школа приймає студентів лише за запрошенням.",
       "reapply": "Подати заявку знову"
     }
+  },
+  "Learning": {
+    "audio": {
+      "play": "Відтворити",
+      "pause": "Пауза",
+      "seekBack": "Назад 10 секунд",
+      "seekForward": "Вперед 10 секунд",
+      "speed": "Швидкість {speed}×",
+      "loading": "Завантаження аудіо…",
+      "scrub": "Перемотати",
+      "player": "Аудіоплеєр"
+    },
+    "refStrip": {
+      "reference": "Текст"
+    },
+    "glossary": {
+      "seeInContext": "Побачити в контексті",
+      "listenWord": "Слухати"
+    },
+    "unitStepper": {
+      "label": "Кроки уроку",
+      "readListen": "Читання і аудіо",
+      "vocabulary": "Словник",
+      "grammar": "Граматика",
+      "practice": "Практика"
+    },
+    "errorState": {
+      "default": "Щось пішло не так.",
+      "retry": "Спробувати знову"
+    }
   }
 }
