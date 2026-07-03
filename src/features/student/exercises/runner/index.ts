@@ -25,6 +25,9 @@ export type { TranslateBodyProps, TranslateContent } from './translate-body';
 export { MatchBody } from './match-body';
 export type { MatchBodyProps, MatchContent, MatchPair } from './match-body';
 
+export { normAnswer, gradeMcq, gradeFill, gradeTranslate, gradeMatch } from './grading';
+export type { TranslateExpectedAnswers } from './grading';
+
 export {
   deriveVisualState,
   modeAccent,
