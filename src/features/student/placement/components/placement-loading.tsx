@@ -1,13 +1,14 @@
-/**
- * Skeleton loader for the placement test.
- * Pulses between 100% and 45% opacity on a 1.4s ease-in-out loop.
- * Reduced-motion: static blocks at 70% opacity (no animation).
- */
+'use client';
+
+import { useTranslations } from 'next-intl';
+
 export function PlacementLoading() {
+  const t = useTranslations('Placement');
+
   return (
     <div
       aria-busy="true"
-      aria-label="Loading placement test"
+      aria-label={t('loading.ariaLabel')}
       className="flex w-full flex-col gap-[14px] animate-pulse motion-reduce:animate-none motion-reduce:opacity-70"
       style={{ maxWidth: 480 }}
     >

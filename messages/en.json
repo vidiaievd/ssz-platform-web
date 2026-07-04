@@ -3085,6 +3085,9 @@
       "account": "Account",
       "chooseCourse": "Choose course",
       "placement": "Placement"
+    },
+    "seed": {
+      "success": "Vocabulary from earlier modules marked as known."
     }
   }
 }

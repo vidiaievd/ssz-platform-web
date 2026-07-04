@@ -3080,6 +3080,9 @@
       "account": "Konto",
       "chooseCourse": "Velg kurs",
       "placement": "Plassering"
+    },
+    "seed": {
+      "success": "Vokabular fra tidligere moduler er markert som kjent."
     }
   }
 }

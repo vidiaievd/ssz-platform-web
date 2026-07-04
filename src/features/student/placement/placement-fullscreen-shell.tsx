@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Globe } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -107,12 +107,15 @@ export interface PlacementFullscreenShellProps {
   modules?: PlacementModuleRow[];
   /** Called with the 1-based module index the student should start at. */
   onModuleSelect: (moduleIndex: number) => void;
+  /** Called once when a placement result is first computed. Best-effort; do not throw. */
+  onResult?: (placedLevelId: string, placedModuleIndex: number) => void;
 }
 
 export function PlacementFullscreenShell({
   targetLanguage,
   modules,
   onModuleSelect,
+  onResult,
 }: PlacementFullscreenShellProps) {
   const configure         = usePlacementStore((s) => s.configure);
   const flowState         = usePlacementStore((s) => s.flowState);
@@ -129,6 +132,14 @@ export function PlacementFullscreenShell({
   useEffect(() => {
     configure('fullscreen');
   }, [configure]);
+
+  // Fire onResult once when a placement result is first computed.
+  const onResultRef = useRef(onResult);
+  useEffect(() => { onResultRef.current = onResult; });
+  useEffect(() => {
+    if (flowState !== 'result' || placedLevelId === null || placedModuleIndex === null) return;
+    onResultRef.current?.(placedLevelId, placedModuleIndex);
+  }, [flowState, placedLevelId, placedModuleIndex]);
 
   const placedModule = modules?.find((m) => m.index === placedModuleIndex);
 

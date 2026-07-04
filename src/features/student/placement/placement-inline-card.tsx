@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { X, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -30,6 +30,8 @@ export interface PlacementInlineCardProps {
    * If omitted the card simply collapses (student stays on the current page).
    */
   onModuleSelect?: (moduleIndex: number) => void;
+  /** Called once when a placement result is first computed. Best-effort; do not throw. */
+  onResult?: (placedLevelId: string, placedModuleIndex: number) => void;
 }
 
 export function PlacementInlineCard({
@@ -37,6 +39,7 @@ export function PlacementInlineCard({
   targetLanguage,
   modules,
   onModuleSelect,
+  onResult,
 }: PlacementInlineCardProps) {
   const t = useTranslations('Placement');
 
@@ -65,6 +68,15 @@ export function PlacementInlineCard({
       }
     }
   }, [configure, containerId, dismissCard]);
+
+  // Fire onResult once when a placement result is first computed.
+  // Using a ref to always call the latest onResult without re-triggering the effect.
+  const onResultRef = useRef(onResult);
+  useEffect(() => { onResultRef.current = onResult; });
+  useEffect(() => {
+    if (flowState !== 'result' || placedLevelId === null || placedModuleIndex === null) return;
+    onResultRef.current?.(placedLevelId, placedModuleIndex);
+  }, [flowState, placedLevelId, placedModuleIndex]);
 
   function handleDismiss() {
     if (typeof window !== 'undefined') {
