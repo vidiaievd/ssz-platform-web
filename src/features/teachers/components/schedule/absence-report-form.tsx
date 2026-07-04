@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -36,7 +36,7 @@ export function AbsenceReportForm({ schoolId, teacherId, onSuccess }: AbsenceRep
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     reset,
     formState: { errors },
@@ -51,8 +51,8 @@ export function AbsenceReportForm({ schoolId, teacherId, onSuccess }: AbsenceRep
     },
   });
 
-  const scope = watch("scope");
-  const kind = watch("kind");
+  const scope = useWatch({ control, name: "scope" });
+  const kind = useWatch({ control, name: "kind" });
 
   function onSubmit(data: AbsenceReportInput) {
     startTransition(async () => {

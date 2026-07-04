@@ -62,7 +62,7 @@ function SrsError({ onRetry }: SrsErrorProps) {
 /* ── Main SRS page ──────────────────────────────────────────────────── */
 export function SrsPage() {
   const { data, isLoading, isError, refetch } = useSrsDue();
-  const { phase, seed, startSession, setPhase } = useSrsSessionStore();
+  const { phase, seed, startSession } = useSrsSessionStore();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   /* Seed the store once data arrives */

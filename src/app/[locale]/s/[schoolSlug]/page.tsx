@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
 import { Globe, MapPin } from 'lucide-react';
 
 import { getPublicSchool } from '@/features/school/api/get-public-school';
@@ -45,8 +44,6 @@ function membershipStatusToCtaState(status: MembershipStatus): ApplyCtaState {
 
 export default async function PublicSchoolPage({ params }: Props) {
   const { locale, schoolSlug } = await params;
-  const t = await getTranslations('PublicSchool');
-
   const [school, user] = await Promise.all([
     getPublicSchool(schoolSlug),
     getCurrentUser(),

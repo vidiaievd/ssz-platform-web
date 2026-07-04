@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 
 import { getMySchoolRole } from "@/features/school/api/get-my-school-role";
 import { getSchoolBySlug } from "@/features/school/api/get-school-by-slug";
@@ -15,7 +14,6 @@ type Props = {
 
 export default async function SchedulingOverviewPage({ params }: Props) {
   const { schoolSlug } = await params;
-  const t = await getTranslations("Scheduling");
 
   const role = await getMySchoolRole(schoolSlug);
   if (!role || !(ALLOWED_ROLES as readonly string[]).includes(role)) {

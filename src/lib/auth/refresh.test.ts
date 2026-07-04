@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { server } from '@/test/msw/server';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockCookieGet = vi.fn((_: string) => undefined as { value: string } | undefined);
 const mockCookieSet = vi.fn();
 const mockCookieDelete = vi.fn();

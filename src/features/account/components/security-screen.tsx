@@ -266,6 +266,7 @@ function TwoFactorSection() {
       {state.step === 'setup' && (
         <div className="space-y-4 rounded-lg border border-border p-4">
           <p className="text-sm font-medium">{t('twoFa.scanQr')}</p>
+          {/* eslint-disable-next-line @next/next/no-img-element -- data URI; next/image does not support data: URLs */}
           <img
             src={`data:image/png;base64,${state.data.qrCodeImageBase64}`}
             alt="2FA QR code"

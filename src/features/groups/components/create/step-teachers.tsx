@@ -97,14 +97,13 @@ export function StepTeachers({ teachers, timetable }: Props) {
     return flags;
   }, [teachers, timetable, lang, availabilityByTeacher]);
 
-  const assignedIds = new Set(assignedTeachers.map((t) => t.userId));
-
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
+    const assignedIds = new Set(assignedTeachers.map((t) => t.userId));
     return teachers.filter(
       (t) => !assignedIds.has(t.userId) && t.name.toLowerCase().includes(q),
     );
-  }, [teachers, assignedIds, query]);
+  }, [teachers, assignedTeachers, query]);
 
   function handlePick(userId: string) {
     if (!pickingRole) return;

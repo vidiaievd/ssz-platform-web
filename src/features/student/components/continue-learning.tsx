@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import { BookOpen, Globe, GraduationCap } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataState } from '@/components/shared/data-state';

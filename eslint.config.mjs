@@ -19,6 +19,21 @@ const eslintConfig = defineConfig([
   ]),
   ...storybook.configs["flat/recommended"],
   ...pluginQuery.configs["flat/recommended"],
+  {
+    rules: {
+      // Suppress intentionally-unused identifiers prefixed with `_`.
+      // This covers both plain vars and destructured object/array bindings.
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

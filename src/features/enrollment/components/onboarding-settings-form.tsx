@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -39,7 +39,7 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { isSubmitting, isDirty, errors },
     reset,
@@ -55,7 +55,7 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
     })();
   }, [initialSettings, reset]);
 
-  const watchedSettings = watch();
+  const watchedSettings = useWatch({ control });
   const previewSteps = onboardingSteps(watchedSettings as SchoolOnboardingSettings);
 
   async function onSubmit(data: OnboardingSettingsInput) {
@@ -72,7 +72,14 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
     reset(data);
   }
 
-  const placementMode = watch('placement.mode');
+  const placementMode = useWatch({ control, name: 'placement.mode' });
+  const reusePlatformResult = useWatch({ control, name: 'placement.reusePlatformResult' });
+  const interviewRequired = useWatch({ control, name: 'interview.required' });
+  const autoPlaceByScore = useWatch({ control, name: 'interview.autoPlaceByScore' });
+  const collectAvailability = useWatch({ control, name: 'availability.collect' });
+  const ageBandValues = useWatch({ control, name: 'ageBands.values' });
+  const collectAgeBand = useWatch({ control, name: 'ageBands.collect' });
+  const approvalMode = useWatch({ control, name: 'approval.mode' });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 max-w-lg">
@@ -109,14 +116,14 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
               <Label htmlFor="reuse-platform">{t('reusePlatformResult')}</Label>
               <Switch
                 id="reuse-platform"
-                checked={watch('placement.reusePlatformResult')}
+                checked={reusePlatformResult}
                 onCheckedChange={(v) =>
                   setValue('placement.reusePlatformResult', v, { shouldDirty: true })
                 }
               />
             </div>
 
-            {watch('placement.reusePlatformResult') && (
+            {reusePlatformResult && (
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="max-age">{t('maxResultAgeDays')}</Label>
                 <Input
@@ -148,19 +155,19 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
           <Label htmlFor="interview-required">{t('interviewRequired')}</Label>
           <Switch
             id="interview-required"
-            checked={watch('interview.required')}
+            checked={interviewRequired}
             onCheckedChange={(v) =>
               setValue('interview.required', v, { shouldDirty: true })
             }
           />
         </div>
 
-        {!watch('interview.required') && (
+        {!interviewRequired && (
           <div className="flex items-center justify-between">
             <Label htmlFor="auto-place">{t('autoPlaceByScore')}</Label>
             <Switch
               id="auto-place"
-              checked={watch('interview.autoPlaceByScore')}
+              checked={autoPlaceByScore}
               onCheckedChange={(v) =>
                 setValue('interview.autoPlaceByScore', v, { shouldDirty: true })
               }
@@ -178,7 +185,7 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
           <Label htmlFor="collect-avail">{t('collectAvailability')}</Label>
           <Switch
             id="collect-avail"
-            checked={watch('availability.collect')}
+            checked={collectAvailability}
             onCheckedChange={(v) =>
               setValue('availability.collect', v, { shouldDirty: true })
             }
@@ -194,8 +201,7 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
 
         <div className="flex flex-col gap-2">
           {(['kids', 'teens', 'adults'] as const).map((band) => {
-            const values = watch('ageBands.values');
-            const checked = values.includes(band);
+            const checked = ageBandValues.includes(band);
             const label =
               band === 'kids'
                 ? t('ageBandKids')
@@ -209,8 +215,8 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
                   checked={checked}
                   onCheckedChange={(v) => {
                     const next = v
-                      ? [...values, band]
-                      : values.filter((b) => b !== band);
+                      ? [...ageBandValues, band]
+                      : ageBandValues.filter((b) => b !== band);
                     setValue('ageBands.values', next, { shouldDirty: true });
                   }}
                 />
@@ -224,7 +230,7 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
           <Label htmlFor="collect-age-band">{t('collectAgeBand')}</Label>
           <Switch
             id="collect-age-band"
-            checked={watch('ageBands.collect')}
+            checked={collectAgeBand}
             onCheckedChange={(v) => setValue('ageBands.collect', v, { shouldDirty: true })}
           />
         </div>
@@ -239,7 +245,7 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
           <Label htmlFor="manual-approval">{t('manualApproval')}</Label>
           <Switch
             id="manual-approval"
-            checked={watch('approval.mode') === 'manual'}
+            checked={approvalMode === 'manual'}
             onCheckedChange={(v) =>
               setValue('approval.mode', v ? 'manual' : 'auto', { shouldDirty: true })
             }

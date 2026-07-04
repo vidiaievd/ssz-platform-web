@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
@@ -62,7 +62,6 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
     handleSubmit,
     setValue,
     reset,
-    watch,
     control,
     formState: { errors },
     setError,
@@ -84,8 +83,8 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
     name: "teachingLanguages",
   });
 
-  const employmentType = watch("employmentType");
-  const teachingLanguages = watch("teachingLanguages");
+  const employmentType = useWatch({ control, name: "employmentType" });
+  const teachingLanguages = useWatch({ control, name: "teachingLanguages" });
 
   function handleClose() {
     reset();
