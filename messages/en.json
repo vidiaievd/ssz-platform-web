@@ -742,6 +742,29 @@
         "createError": "Couldn't create the course. Please try again.",
         "createSuccess": "Course created — add lessons and publish when ready."
       }
+    },
+    "moduleBuilder": {
+      "untitled": "Untitled module",
+      "previewAriaLabel": "Preview {title} as student",
+      "moreAriaLabel": "More options for {title}",
+      "menuRename": "Rename",
+      "menuDuplicate": "Duplicate",
+      "menuPublish": "Publish module",
+      "menuUnpublish": "Unpublish module",
+      "menuMoveTop": "Move to top",
+      "menuMoveBottom": "Move to bottom",
+      "menuDelete": "Delete…",
+      "addModule": "Add module",
+      "sectionHead": "Modules",
+      "sectionSubhead": "in order",
+      "dragHint": "Drag to reorder",
+      "emptyTitle": "No modules yet",
+      "emptyBody": "Add your first module to start building the course.",
+      "deleteConfirmTitle": "Delete “{title}”?",
+      "deleteConfirmBody": "This will permanently delete the module and its {count, plural, one {# lesson} other {# lessons}}. This cannot be undone.",
+      "deleteConfirmCta": "Delete module",
+      "deleteCancel": "Cancel",
+      "publishDisabledTip": "Fix {count, plural, one {# blocker} other {# blockers}} first"
     }
   },
   "Discovery": {

@@ -1,9 +1,10 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import {
   DndContext,
   closestCenter,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -11,6 +12,7 @@ import {
 } from '@dnd-kit/core';
 import {
   SortableContext,
+  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
   arrayMove,
@@ -22,10 +24,13 @@ import type { ContainerItem } from '@/features/content/types';
 
 interface SortableItemProps {
   item: ContainerItem;
+  /** 1-based position within the list — used for the a11y aria-label. */
+  position: number;
+  total: number;
   children: ReactNode;
 }
 
-export function SortableItem({ item, children }: SortableItemProps) {
+export function SortableItem({ item, position, total, children }: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
   });
@@ -43,7 +48,7 @@ export function SortableItem({ item, children }: SortableItemProps) {
       <button
         type="button"
         className="cursor-grab touch-none text-muted-foreground hover:text-foreground"
-        aria-label="Drag to reorder"
+        aria-label={`Drag to reorder ${item.title ?? 'item'}, position ${position} of ${total}`}
         {...attributes}
         {...listeners}
       >
@@ -57,12 +62,15 @@ export function SortableItem({ item, children }: SortableItemProps) {
 interface LessonReorderProps {
   items: ContainerItem[];
   onReorder: (reordered: ContainerItem[]) => void;
-  children: (item: ContainerItem) => ReactNode;
+  /** Called after each reorder so the parent can announce to screen readers. */
+  onAnnounce?: (message: string) => void;
+  children: (item: ContainerItem, position: number) => ReactNode;
 }
 
-export function LessonReorder({ items, onReorder, children }: LessonReorderProps) {
+export function LessonReorder({ items, onReorder, onAnnounce, children }: LessonReorderProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
   function handleDragEnd(event: DragEndEvent) {
@@ -71,18 +79,59 @@ export function LessonReorder({ items, onReorder, children }: LessonReorderProps
 
     const oldIndex = items.findIndex((item) => item.id === active.id);
     const newIndex = items.findIndex((item) => item.id === over.id);
-    onReorder(arrayMove(items, oldIndex, newIndex));
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    onReorder(reordered);
+
+    const movedItem = items[oldIndex];
+    if (movedItem && onAnnounce) {
+      onAnnounce(
+        `${movedItem.title ?? 'Item'} moved to position ${newIndex + 1} of ${items.length}`,
+      );
+    }
   }
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-        {items.map((item) => (
-          <SortableItem key={item.id} item={item}>
-            {children(item)}
+        {items.map((item, idx) => (
+          <SortableItem key={item.id} item={item} position={idx + 1} total={items.length}>
+            {children(item, idx + 1)}
           </SortableItem>
         ))}
       </SortableContext>
     </DndContext>
+  );
+}
+
+/** Wraps a LessonReorder list with an aria-live region for keyboard-reorder announcements. */
+export function ReorderWithAnnouncer({
+  items,
+  onReorder,
+  children,
+}: Omit<LessonReorderProps, 'onAnnounce'>) {
+  const announceRef = useRef<HTMLSpanElement>(null);
+
+  function handleAnnounce(message: string) {
+    if (!announceRef.current) return;
+    announceRef.current.textContent = '';
+    // Force a DOM mutation so the live region re-announces even for the same message
+    requestAnimationFrame(() => {
+      if (announceRef.current) announceRef.current.textContent = message;
+    });
+  }
+
+  return (
+    <>
+      <span
+        ref={announceRef}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      />
+      <LessonReorder items={items} onReorder={onReorder} onAnnounce={handleAnnounce}>
+        {children}
+      </LessonReorder>
+    </>
   );
 }

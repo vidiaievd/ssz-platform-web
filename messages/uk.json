@@ -737,6 +737,29 @@
         "createError": "Не вдалося створити курс. Спробуйте ще раз.",
         "createSuccess": "Курс створено — додайте уроки та опублікуйте, коли будете готові."
       }
+    },
+    "moduleBuilder": {
+      "untitled": "Без назви",
+      "previewAriaLabel": "Переглянути {title} як студент",
+      "moreAriaLabel": "Більше опцій для {title}",
+      "menuRename": "Перейменувати",
+      "menuDuplicate": "Дублювати",
+      "menuPublish": "Опублікувати модуль",
+      "menuUnpublish": "Зняти з публікації",
+      "menuMoveTop": "Перемістити на початок",
+      "menuMoveBottom": "Перемістити в кінець",
+      "menuDelete": "Видалити…",
+      "addModule": "Додати модуль",
+      "sectionHead": "Модулі",
+      "sectionSubhead": "у порядку",
+      "dragHint": "Перетягніть для зміни порядку",
+      "emptyTitle": "Модулів ще немає",
+      "emptyBody": "Додайте перший модуль, щоб почати будувати курс.",
+      "deleteConfirmTitle": "Видалити «{title}»?",
+      "deleteConfirmBody": "Це назавжди видалить модуль і {count, plural, one {# урок} few {# уроки} many {# уроків} other {# уроків}}. Скасувати неможливо.",
+      "deleteConfirmCta": "Видалити модуль",
+      "deleteCancel": "Скасувати",
+      "publishDisabledTip": "Спочатку виправте {count, plural, one {# блокуючу проблему} few {# блокуючі проблеми} many {# блокуючих проблем} other {# блокуючих проблем}}"
     }
   },
   "Discovery": {

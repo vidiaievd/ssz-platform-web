@@ -737,6 +737,29 @@
         "createError": "Kunne ikke opprette kurset. Vennligst prøv igjen.",
         "createSuccess": "Kurset er opprettet — legg til leksjoner og publiser når du er klar."
       }
+    },
+    "moduleBuilder": {
+      "untitled": "Uten tittel",
+      "previewAriaLabel": "Forhåndsvis {title} som student",
+      "moreAriaLabel": "Flere alternativer for {title}",
+      "menuRename": "Gi nytt navn",
+      "menuDuplicate": "Dupliser",
+      "menuPublish": "Publiser modul",
+      "menuUnpublish": "Avpubliser modul",
+      "menuMoveTop": "Flytt til toppen",
+      "menuMoveBottom": "Flytt til bunnen",
+      "menuDelete": "Slett…",
+      "addModule": "Legg til modul",
+      "sectionHead": "Moduler",
+      "sectionSubhead": "i rekkefølge",
+      "dragHint": "Dra for å endre rekkefølge",
+      "emptyTitle": "Ingen moduler ennå",
+      "emptyBody": "Legg til din første modul for å begynne å bygge kurset.",
+      "deleteConfirmTitle": "Slett «{title}»?",
+      "deleteConfirmBody": "Dette sletter modulen og {count, plural, one {# leksjon} other {# leksjoner}} permanent. Dette kan ikke angres.",
+      "deleteConfirmCta": "Slett modul",
+      "deleteCancel": "Avbryt",
+      "publishDisabledTip": "Fiks {count, plural, one {# blokkering} other {# blokkeringer}} først"
     }
   },
   "Discovery": {
