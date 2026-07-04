@@ -13,7 +13,7 @@ import { useMyProfile } from '../api/use-my-profile';
 import { useProfileSettingsForm } from '../hooks/use-profile-settings-form';
 import { TimezoneSelect } from './timezone-select';
 
-export function ProfileForm() {
+export function ProfileForm({ showHandle = false }: { showHandle?: boolean }) {
   const t = useTranslations('Profile');
   const { isLoading } = useMyProfile();
   const { data: currentUser } = useCurrentUser();
@@ -83,21 +83,23 @@ export function ProfileForm() {
         </Field>
       </div>
 
-      <Field label={t('handle')} htmlFor="handle" error={errors.handle?.message}>
-        <div className="flex items-center">
-          <span className="inline-flex h-10 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-(--ssz-text-muted)">
-            ssz.app/
-          </span>
-          <Input
-            id="handle"
-            autoComplete="off"
-            hasError={!!errors.handle}
-            disabled={isPending}
-            className="rounded-l-none"
-            {...register('handle', { setValueAs: (v: string | null) => (!v || v.trim() === '' ? null : v.trim().toLowerCase()) })}
-          />
-        </div>
-      </Field>
+      {showHandle && (
+        <Field label={t('handle')} htmlFor="handle" error={errors.handle?.message}>
+          <div className="flex items-center">
+            <span className="inline-flex h-10 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-(--ssz-text-muted)">
+              ssz.app/
+            </span>
+            <Input
+              id="handle"
+              autoComplete="off"
+              hasError={!!errors.handle}
+              disabled={isPending}
+              className="rounded-l-none"
+              {...register('handle', { setValueAs: (v: string | null) => (!v || v.trim() === '' ? null : v.trim().toLowerCase()) })}
+            />
+          </div>
+        </Field>
+      )}
 
       <Field
         label={t('displayName')}
