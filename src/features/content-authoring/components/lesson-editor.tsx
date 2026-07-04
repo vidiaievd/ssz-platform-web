@@ -77,7 +77,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
       if (!result.ok) throw new Error(result.error.code);
       await queryClient.invalidateQueries({ queryKey: authoringKeys.lessonVariants(lessonId) });
     },
-    debounceMs: 1500,
+    debounceMs: 800,
   });
 
   useEffect(() => {

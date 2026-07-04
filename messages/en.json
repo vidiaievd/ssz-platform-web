@@ -765,6 +765,20 @@
       "deleteConfirmCta": "Delete module",
       "deleteCancel": "Cancel",
       "publishDisabledTip": "Fix {count, plural, one {# blocker} other {# blockers}} first"
+    },
+    "moduleSections": {
+      "readListen": "Read & Listen",
+      "vocabulary": "Vocabulary",
+      "grammar": "Grammar",
+      "practice": "Practice"
+    },
+    "modulePreview": {
+      "studentView": "Student view",
+      "fidelityLabel": "Preview mode",
+      "static": "Static",
+      "interactive": "Interactive",
+      "interactiveNote": "Switch to the student app to try exercises interactively.",
+      "note": "Updates as you edit"
     }
   },
   "Discovery": {

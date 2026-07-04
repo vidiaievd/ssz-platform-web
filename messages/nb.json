@@ -760,6 +760,20 @@
       "deleteConfirmCta": "Slett modul",
       "deleteCancel": "Avbryt",
       "publishDisabledTip": "Fiks {count, plural, one {# blokkering} other {# blokkeringer}} først"
+    },
+    "moduleSections": {
+      "readListen": "Les og lytt",
+      "vocabulary": "Vokabular",
+      "grammar": "Grammatikk",
+      "practice": "Øvelse"
+    },
+    "modulePreview": {
+      "studentView": "Studentvisning",
+      "fidelityLabel": "Forhåndsvisningsmodus",
+      "static": "Statisk",
+      "interactive": "Interaktiv",
+      "interactiveNote": "Bytt til studentappen for å prøve øvelsene interaktivt.",
+      "note": "Oppdateres mens du redigerer"
     }
   },
   "Discovery": {

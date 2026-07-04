@@ -760,6 +760,20 @@
       "deleteConfirmCta": "Удалить модуль",
       "deleteCancel": "Отмена",
       "publishDisabledTip": "Сначала исправьте {count, plural, one {# блокирующую проблему} few {# блокирующие проблемы} many {# блокирующих проблем} other {# блокирующих проблемы}}"
+    },
+    "moduleSections": {
+      "readListen": "Чтение и слушание",
+      "vocabulary": "Словарь",
+      "grammar": "Грамматика",
+      "practice": "Практика"
+    },
+    "modulePreview": {
+      "studentView": "Вид студента",
+      "fidelityLabel": "Режим предпросмотра",
+      "static": "Статичный",
+      "interactive": "Интерактивный",
+      "interactiveNote": "Переключитесь в студенческое приложение, чтобы выполнять упражнения интерактивно.",
+      "note": "Обновляется при редактировании"
     }
   },
   "Discovery": {
