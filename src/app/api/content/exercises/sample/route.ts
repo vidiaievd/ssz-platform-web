@@ -3,13 +3,16 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import type { ExerciseDisplay } from '@/features/content/types';
 
 // Content-service's exercise catalog has no random ordering — sampling happens here.
-// Only multiple_choice is currently renderable on the web client, so the staircase
-// is restricted to that template.
+// `templateCodes` (comma-separated) controls which templates are eligible;
+// defaults to `multiple_choice` for backward compatibility with the old staircase.
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const targetLanguage = searchParams.get('targetLanguage');
   const difficultyLevel = searchParams.get('difficultyLevel');
   const excludeIds = new Set(searchParams.get('excludeIds')?.split(',').filter(Boolean) ?? []);
+  const allowedCodes = new Set(
+    searchParams.get('templateCodes')?.split(',').filter(Boolean) ?? ['multiple_choice'],
+  );
 
   if (!targetLanguage || !difficultyLevel) {
     return NextResponse.json(
@@ -26,7 +29,7 @@ export async function GET(request: NextRequest) {
     });
 
     const candidates = (data.items ?? []).filter(
-      (item) => item.templateCode === 'multiple_choice' && !excludeIds.has(item.id),
+      (item) => allowedCodes.has(item.templateCode) && !excludeIds.has(item.id),
     );
 
     if (candidates.length === 0) {
