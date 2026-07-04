@@ -3084,5 +3084,27 @@
     "seed": {
       "success": "Vokabular fra tidligere moduler er markert som kjent."
     }
+  },
+  "Catalog": {
+    "enrolled": "Påmeldt",
+    "locked": "Ikke tilgjengelig ennå",
+    "free": "Gratis",
+    "canDoGoals": "{count, plural, one {# kan-gjøre-mål} other {# kan-gjøre-mål}}",
+    "discover": "Oppdag kurs",
+    "discoverSub": "Finn et kurs du kan ta på egen hånd eller med en skole.",
+    "search": "Søk etter kurs…",
+    "all": "Alle",
+    "level": "Nivå",
+    "language": "Språk",
+    "school": "Skole",
+    "free2": "Gratis",
+    "paid": "Betalt",
+    "results": "{count, plural, one {# kurs} other {# kurs}}",
+    "emptyTitle": "Ingen kurs samsvarer med filtrene",
+    "emptyBody": "Prøv å fjerne et filter eller utvide nivåområdet.",
+    "clearFilters": "Nullstill filtre",
+    "errorTitle": "Kunne ikke laste katalogen",
+    "errorBody": "Noe gikk galt hos oss.",
+    "retry": "Prøv igjen"
   }
 }

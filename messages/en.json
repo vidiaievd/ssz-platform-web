@@ -3089,5 +3089,27 @@
     "seed": {
       "success": "Vocabulary from earlier modules marked as known."
     }
+  },
+  "Catalog": {
+    "enrolled": "Enrolled",
+    "locked": "Not yet available",
+    "free": "Free",
+    "canDoGoals": "{count, plural, one {# can-do goal} other {# can-do goals}}",
+    "discover": "Discover courses",
+    "discoverSub": "Find a course to learn on your own or with a school.",
+    "search": "Search courses…",
+    "all": "All",
+    "level": "Level",
+    "language": "Language",
+    "school": "School",
+    "free2": "Free",
+    "paid": "Paid",
+    "results": "{count, plural, one {# course} other {# courses}}",
+    "emptyTitle": "No courses match your filters",
+    "emptyBody": "Try removing a filter or widening your level range.",
+    "clearFilters": "Clear filters",
+    "errorTitle": "Couldn’t load the catalog",
+    "errorBody": "Something went wrong on our end.",
+    "retry": "Try again"
   }
 }
