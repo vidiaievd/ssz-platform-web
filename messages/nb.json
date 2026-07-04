@@ -3021,9 +3021,18 @@
       "takePlacement": "Ta plasseringstesten",
       "skipToBeginning": "Hopp over — start fra begynnelsen",
       "features": {
-        "time": { "title": "Omtrent 2 minutter", "sub": "Fem korte spørsmål" },
-        "adapt": { "title": "Tilpasser seg underveis", "sub": "Spørsmålene blir lettere eller vanskeligere basert på svarene dine" },
-        "skip": { "title": "Hopp over det du kan", "sub": "Start lenger fremme i stedet for fra leksjon én" }
+        "time": {
+          "title": "Omtrent 2 minutter",
+          "sub": "Fem korte spørsmål"
+        },
+        "adapt": {
+          "title": "Tilpasser seg underveis",
+          "sub": "Spørsmålene blir lettere eller vanskeligere basert på svarene dine"
+        },
+        "skip": {
+          "title": "Hopp over det du kan",
+          "sub": "Start lenger fremme i stedet for fra leksjon én"
+        }
       }
     },
     "runner": {
@@ -3042,7 +3051,7 @@
       "eyebrow": "Du er klar for",
       "title": "Modul {n} · {moduleTitle}",
       "titleFallback": "Modul {n}",
-      "sub": "Bra — du er komfortabel rundt {level}. Vi hopper over grunnleggende og starter der det blir nyttig.",
+      "sub": "Bra — du er komfortabel rundt <strong>{level}</strong>. Vi hopper over grunnleggende og starter der det blir nyttig.",
       "known": "Kan",
       "startHere": "Start her",
       "startAt": "Start på modul {n}",

@@ -3026,9 +3026,18 @@
       "takePlacement": "Take the placement",
       "skipToBeginning": "Skip — start from the beginning",
       "features": {
-        "time": { "title": "About 2 minutes", "sub": "Five short questions" },
-        "adapt": { "title": "Adapts as you go", "sub": "Questions get easier or harder based on your answers" },
-        "skip": { "title": "Skip what you know", "sub": "Start ahead instead of from lesson one" }
+        "time": {
+          "title": "About 2 minutes",
+          "sub": "Five short questions"
+        },
+        "adapt": {
+          "title": "Adapts as you go",
+          "sub": "Questions get easier or harder based on your answers"
+        },
+        "skip": {
+          "title": "Skip what you know",
+          "sub": "Start ahead instead of from lesson one"
+        }
       }
     },
     "runner": {
@@ -3047,7 +3056,7 @@
       "eyebrow": "You're ready for",
       "title": "Module {n} · {moduleTitle}",
       "titleFallback": "Module {n}",
-      "sub": "Nice — you're comfortable around {level}. We'll skip the basics and start you where it gets useful.",
+      "sub": "Nice — you’re comfortable around <strong>{level}</strong>. We’ll skip the basics and start you where it gets useful.",
       "known": "Known",
       "startHere": "Start here",
       "startAt": "Start at Module {n}",
