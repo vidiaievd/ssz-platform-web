@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getLocale, getTranslations } from 'next-intl/server';
 
 import { getMyProfile } from '@/features/profile/api/get-my-profile';

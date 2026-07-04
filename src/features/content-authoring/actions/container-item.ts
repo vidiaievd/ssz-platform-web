@@ -4,7 +4,13 @@ import { revalidatePath } from 'next/cache';
 
 import { tryAction } from '@/lib/result';
 
-import { assignItemSection } from '../lib/container-items';
+import { assignItemSection, reorderDraftItems } from '../lib/container-items';
+
+export async function reorderContainerItemsAction(containerId: string, orderedItemIds: string[]) {
+  return tryAction(async () => {
+    await reorderDraftItems(containerId, orderedItemIds);
+  });
+}
 
 /** Assigns (or clears) which section a draft item belongs to. Used by item editors of every content type. */
 export async function assignItemSectionAction(
