@@ -15,7 +15,10 @@ import type {
   TeacherAvailability,
   RawTimetableEntry,
   RawSchoolTimetableEntry,
+  Lesson,
+  OpsWarning,
 } from '@/features/groups/types';
+import type { Absence, SubstituteRequest } from '@/features/teachers/types';
 import type { SchedulingProvider } from './provider';
 
 const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
@@ -89,7 +92,27 @@ export const realProvider: SchedulingProvider = {
     });
   },
 
-  async nextLessons(_groupId: string, _limit: number) { throw notReady(); },
+  async nextLessons(groupId: string, limit: number) {
+    const rows = await serverFetch<Array<{
+      id: string; groupId: string; date: string; startTime: string; endTime: string;
+      teacherId: string; room: string | null; status: string;
+    }>>({
+      service: 'scheduling',
+      path: `/scheduling/groups/${groupId}/lessons/next`,
+      query: { limit: String(limit) },
+    });
+    return rows.map((r): Lesson => ({
+      id: r.id,
+      groupId: r.groupId,
+      date: r.date,
+      start: r.startTime,
+      end: r.endTime,
+      teacherId: r.teacherId,
+      teacherName: '', // enriched by BFF caller when needed
+      room: r.room ?? '',
+      isSubstitute: false,
+    }));
+  },
 
   async schoolTimetable(schoolId: string) {
     const rows = await serverFetch<
@@ -124,17 +147,88 @@ export const realProvider: SchedulingProvider = {
     }));
   },
 
-  async teacherConflicts(_schoolId: string) { throw notReady(); },
-  async studentClashes(_schoolId: string, _userId: string) { throw notReady(); },
+  async teacherConflicts(schoolId: string) {
+    const rows = await serverFetch<Array<{ teacherId: string; date: string; lessonAId: string; lessonBId: string }>>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/conflicts`,
+    });
+    return rows.map((r): OpsWarning => ({ type: 'conflict', with: r.teacherId, time: r.date }));
+  },
+
+  async studentClashes(schoolId: string, userId: string) {
+    const rows = await serverFetch<Array<{ lessonAId: string; lessonBId: string; date: string; groupAId: string; groupBId: string; startTime: string }>>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/students/${userId}/clashes`,
+    });
+    return rows.map((r): OpsWarning => ({ type: 'clash', with: r.groupBId, time: r.startTime }));
+  },
+
+  // plan-28: commandCenter type mismatch — backend returns aggregate counts, web type expects
+  // enriched TeacherLoadRow[] with name/avatarUrl/lang. Needs BFF enrichment layer.
   async commandCenter(_schoolId: string) { throw notReady(); },
+
+  // plan-28: no GET/PUT per-teacher availability endpoint in scheduling-service yet
   async getAvailability(_teacherId: string) { throw notReady(); },
   async putAvailability(_teacherId: string, _blocks: unknown[]) { throw notReady(); },
-  async listAbsences(_schoolId: string) { throw notReady(); },
-  async reportAbsence(_input: unknown) { throw notReady(); },
+
+  async listAbsences(schoolId: string) {
+    const rows = await serverFetch<Array<{
+      id: string; teacherId: string; kind: string; scope: string;
+      fromDate: string; toDate: string | null; reason: string;
+    }>>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/absences`,
+    });
+    return rows.map((r): Absence => ({
+      absenceId: r.id,
+      teacherId: r.teacherId,
+      kind: r.kind as Absence['kind'],
+      scope: r.scope as Absence['scope'],
+      from: r.fromDate,
+      to: r.toDate,
+      reason: r.reason,
+      affectedLessonCount: 0, // not returned by service; enrichment pending
+      coveredCount: 0,
+    }));
+  },
+
+  async reportAbsence(input) {
+    const row = await serverFetch<{ id: string }>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${input.schoolId}/teachers/${input.teacherId}/absences`,
+      method: 'POST',
+      body: {
+        kind: input.kind,
+        scope: input.scope,
+        fromDate: input.from,
+        toDate: input.to,
+        reason: input.reason,
+      },
+    });
+    // Backend auto-generates substitute requests internally; they're not returned here.
+    return { absenceId: row.id, createdRequests: [] as SubstituteRequest[] };
+  },
+
+  // plan-28: coverQueue needs lesson enrichment (groupName, lang, day, start, end) not in SubRequestResponseDto
   async coverQueue(_schoolId: string) { throw notReady(); },
+
+  // plan-28: candidates needs teacher enrichment (name, avatarUrl, classification, factors) not in CandidateDto
   async candidates(_requestId: string) { throw notReady(); },
-  async assignSubstitute(_requestId: string, _substituteTeacherId: string) { throw notReady(); },
+
+  async assignSubstitute(requestId: string, substituteTeacherId: string) {
+    await serverFetch({
+      service: 'scheduling',
+      path: `/scheduling/substitutions/${requestId}/assign`,
+      method: 'POST',
+      body: { substituteTeacherId },
+    });
+    return { ok: true } as const;
+  },
+
+  // plan-28: getCurriculum/putCurriculum — backend units lack unitId in response; needs schema update
   async getCurriculum(_groupId: string) { throw notReady(); },
   async putCurriculum(_groupId: string, _plan: unknown) { throw notReady(); },
+
+  // plan-28: computeForecast — no backend endpoint in scheduling-service
   async computeForecast(_schoolId: string, _params: unknown) { throw notReady(); },
 };
