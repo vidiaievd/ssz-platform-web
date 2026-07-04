@@ -1,36 +1,53 @@
 import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 
-import { Skeleton } from '@/components/ui/skeleton';
-import { DiscoverCoursesGrid } from '@/features/student/components/discover-courses-grid';
+import { DiscoverCatalog } from '@/features/student/components/discover-catalog';
 
 export default async function StudentCoursesPage() {
-  const t = await getTranslations('Content');
+  const t = await getTranslations('Catalog');
 
   return (
-    <main className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">{t('discoverCoursesTitle')}</h1>
-        <p className="text-muted-foreground mt-1 text-sm">{t('discoverCoursesSubtitle')}</p>
+    <main style={{ maxWidth: 1120, margin: '0 auto', padding: '34px 36px 72px' }}>
+      {/* header block */}
+      <div style={{ marginBottom: 26 }}>
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--ssz-color-primary-500)',
+            marginBottom: 8,
+          }}
+        >
+          Catalog
+        </div>
+        <h1
+          style={{
+            fontSize: 30,
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
+            color: 'var(--ssz-text-primary)',
+            marginBottom: 8,
+            lineHeight: 1.15,
+          }}
+        >
+          {t('discover')}
+        </h1>
+        <p
+          style={{
+            fontSize: 15,
+            color: 'var(--ssz-text-secondary)',
+            maxWidth: 560,
+            lineHeight: 1.55,
+          }}
+        >
+          {t('discoverSub')}
+        </p>
       </div>
 
-      <Suspense
-        fallback={
-          <div className="space-y-6">
-            <div className="flex flex-wrap gap-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-9 w-32 rounded-md" />
-              ))}
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-52 w-full rounded-xl" />
-              ))}
-            </div>
-          </div>
-        }
-      >
-        <DiscoverCoursesGrid />
+      <Suspense>
+        <DiscoverCatalog />
       </Suspense>
     </main>
   );
