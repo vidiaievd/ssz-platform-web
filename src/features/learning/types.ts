@@ -281,6 +281,62 @@ export interface ProgressOverview {
   modules: ProgressModule[];
 }
 
+/* ─── Assignments (B7) ──────────────────────────────────────────── */
+
+export type AssignmentMode = 'graded' | 'written';
+
+export type AssignmentStatus =
+  | 'active'
+  | 'overdue'
+  | 'submitted'
+  | 'in-review'
+  | 'returned'
+  | 'completed';
+
+export interface Assignment {
+  id: string;
+  title: string;
+  mode: AssignmentMode;
+  skill: string;
+  module: string;
+  teacher: string;
+  due: string;
+  dueRel: string;
+  overdueDays: number;
+  status: AssignmentStatus;
+  brief: string;
+  /* graded only */
+  items?: number;
+  est?: string;
+  score?: number;
+  /* written only */
+  submittedAt?: string;
+  returnedAt?: string;
+  feedback?: string;
+}
+
+export interface AssignmentListResponse {
+  assignments: Assignment[];
+}
+
+export interface GradedSubmitRequest {
+  answers: { questionId: string; optionIndex: number }[];
+}
+
+export interface GradedSubmitResponse {
+  score: number;
+  totalItems: number;
+  correctItems: number;
+}
+
+export interface WrittenSubmitRequest {
+  text: string;
+}
+
+export interface WrittenDraftRequest {
+  text: string;
+}
+
 /* ─── Course Home composite ──────────────────────────────────────── */
 
 export interface CourseInfo {

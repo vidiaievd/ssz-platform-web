@@ -10,6 +10,7 @@ export { useCanDo } from './api/use-can-do';
 export { useCourseHome } from './api/use-course-home';
 export { useUnitPayload } from './api/use-unit-payload';
 export { useProgressOverview } from './api/use-progress-overview';
+export { useAssignments, useAssignment, useSubmitGradedAssignment, useSubmitWrittenAssignment, useSaveWrittenDraft } from './api/use-assignments';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 export type {
@@ -55,6 +56,14 @@ export type {
   ProgressSkillMastery,
   ProgressSrsStats,
   ProgressStudentInfo,
+  AssignmentMode,
+  AssignmentStatus,
+  Assignment,
+  AssignmentListResponse,
+  GradedSubmitRequest,
+  GradedSubmitResponse,
+  WrittenSubmitRequest,
+  WrittenDraftRequest,
 } from './types';
 
 /* ─── Session store ──────────────────────────────────────────────── */
