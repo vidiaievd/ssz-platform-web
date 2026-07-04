@@ -8,8 +8,12 @@ import { useSrsReview } from '../../api/use-srs-review';
 import { useSrsSessionStore } from '../../stores/srs-session-store';
 import type { ReviewRating } from '../../types';
 import { RatingBar } from './rating-bar';
+import { RetryBar } from './retry-bar';
 import { ReviewCard } from './review-card';
 import { SessionProgress } from './session-progress';
+
+/** Advancing overlay (no white flash while next card loads from buffer). */
+const ADVANCE_DELAY_MS = 200;
 
 export function SrsSession() {
   const t = useTranslations('Srs');
@@ -18,11 +22,16 @@ export function SrsSession() {
     index,
     cardState,
     reviewedCount,
+    revealedAt,
+    currentIdempotencyKey,
+    ratingError,
     revealAnswer,
     advanceAfterRating,
+    setCardState,
     setPhase,
     setLimitHit,
-    setPendingRating,
+    setRatingError,
+    clearRatingError,
   } = useSrsSessionStore();
 
   const card = queue[index];
@@ -31,38 +40,7 @@ export function SrsSession() {
   const showAnswerRef = useRef<HTMLButtonElement | null>(null);
   const goodButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const currentCardId = card?.id ?? '';
-  const { mutate: submitReview, isPending } = useSrsReview(currentCardId);
-
-  const handleRate = useCallback((rating: ReviewRating) => {
-    if (!card || cardState !== 'revealed' || isPending) return;
-
-    setPendingRating(rating);
-
-    const idempotencyKey = crypto.randomUUID();
-    const latencyMs = 0; // F4.2 will track the real latency
-
-    submitReview(
-      { rating, latencyMs, idempotencyKey },
-      {
-        onSuccess: ({ streakDays, milestone }) => {
-          if (milestone) {
-            toast(t('toast.milestone', { days: milestone }));
-          }
-          advanceAfterRating(rating, streakDays);
-        },
-        onError: (err) => {
-          if (err.message === 'rate_limited') {
-            setLimitHit();
-          } else {
-            toast.error(t('toast.reviewError'));
-          }
-        },
-      },
-    );
-  }, [card, cardState, isPending, submitReview, advanceAfterRating, setLimitHit, setPendingRating, t]);
-
-  /* Focus management */
+  /* ── Focus management ──────────────────────────────────────────── */
   useEffect(() => {
     if (cardState === 'front') {
       showAnswerRef.current?.focus();
@@ -71,31 +49,7 @@ export function SrsSession() {
     }
   }, [cardState, index]);
 
-  /* Keyboard shortcuts */
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === 'Escape') {
-        setPhase('entry');
-        return;
-      }
-      if (cardState === 'front' && (e.key === ' ' || e.key === 'Enter')) {
-        e.preventDefault();
-        revealAnswer();
-        return;
-      }
-      if (cardState === 'revealed') {
-        const num = parseInt(e.key);
-        if (num >= 1 && num <= 4) {
-          handleRate(num as ReviewRating);
-        }
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [cardState, handleRate, index, revealAnswer, setPhase]);
-
-  /* Announcement for screen readers */
+  /* ── aria-live announcements ────────────────────────────────────── */
   const announceRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (!announceRef.current) return;
@@ -109,11 +63,108 @@ export function SrsSession() {
     }
   }, [cardState, index, reviewedCount, t, total]);
 
+  /* ── Rating ─────────────────────────────────────────────────────── */
+  const currentCardId = card?.id ?? '';
+  const { mutate: submitReview, isPending } = useSrsReview(currentCardId);
+
+  const handleRate = useCallback(
+    (rating: ReviewRating) => {
+      if (!card || cardState !== 'revealed' || isPending) return;
+
+      const idempotencyKey = currentIdempotencyKey ?? crypto.randomUUID();
+      const latencyMs = revealedAt ? Date.now() - revealedAt : 0;
+
+      // Show the advancing overlay immediately — no white flash.
+      setCardState('advancing');
+
+      // After the visual gate, advance optimistically from the local buffer.
+      const advanceTimer = setTimeout(() => {
+        advanceAfterRating(rating, useSrsSessionStore.getState().streakDays);
+      }, ADVANCE_DELAY_MS);
+
+      submitReview(
+        { rating, latencyMs, idempotencyKey },
+        {
+          onSuccess: ({ streakDays, milestone }) => {
+            clearTimeout(advanceTimer);
+            if (milestone) {
+              toast(t('toast.milestone', { days: milestone }));
+            }
+            // Advance with the real updated streak from the server.
+            advanceAfterRating(rating, streakDays);
+          },
+          onError: (err) => {
+            clearTimeout(advanceTimer);
+            if (err.message === 'rate_limited') {
+              setLimitHit();
+            } else {
+              // Roll back the advancing overlay and show the inline retry bar.
+              setRatingError({
+                rating,
+                message: t('toast.reviewError'),
+              });
+              toast.error(t('toast.reviewError'), { id: 'srs-review-error' });
+            }
+          },
+        },
+      );
+    },
+    [
+      card,
+      cardState,
+      isPending,
+      currentIdempotencyKey,
+      revealedAt,
+      setCardState,
+      advanceAfterRating,
+      submitReview,
+      setLimitHit,
+      setRatingError,
+      t,
+    ],
+  );
+
+  /* Retry — reuses the same idempotency key (server-deduped on reconnect). */
+  const handleRetry = useCallback(() => {
+    if (!ratingError) return;
+    clearRatingError();
+    handleRate(ratingError.rating);
+  }, [ratingError, clearRatingError, handleRate]);
+
+  /* ── Keyboard shortcuts ─────────────────────────────────────────── */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      // Never fire while focus is in a form field.
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === 'Escape') {
+        setPhase('entry');
+        return;
+      }
+      if (cardState === 'front' && (e.key === ' ' || e.key === 'Enter')) {
+        e.preventDefault();
+        revealAnswer();
+        return;
+      }
+      // Number keys 1-4 are no-ops until the card is revealed.
+      if (cardState === 'revealed') {
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= 4) {
+          handleRate(num as ReviewRating);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [cardState, handleRate, revealAnswer, setPhase]);
+
   if (!card) return null;
+
+  const ratingDisabled = isPending || cardState === 'advancing';
 
   return (
     <div className="flex h-full flex-col" style={{ background: 'var(--ssz-bg-base)' }}>
-      {/* Slim progress bar + exit */}
+      {/* Progress bar + exit */}
       <div className="mx-auto w-full max-w-[40rem] px-4">
         <SessionProgress
           done={reviewedCount}
@@ -122,7 +173,7 @@ export function SrsSession() {
         />
       </div>
 
-      {/* Aria-live region */}
+      {/* aria-live region — announces new card and reveal to screen readers */}
       <div
         ref={announceRef}
         role="status"
@@ -131,23 +182,32 @@ export function SrsSession() {
         className="sr-only"
       />
 
-      {/* Card */}
+      {/* Card + inline retry */}
       <div className="flex flex-1 flex-col items-center overflow-y-auto px-4 pb-4 pt-2">
-        <div className="w-full max-w-[40rem]">
+        <div className="w-full max-w-[40rem] space-y-3">
           <ReviewCard
             card={card}
             cardState={cardState}
             onReveal={revealAnswer}
             showAnswerRef={showAnswerRef}
           />
+
+          {ratingError && (
+            <RetryBar
+              rating={ratingError.rating}
+              message={ratingError.message}
+              onRetry={handleRetry}
+              onDismiss={clearRatingError}
+            />
+          )}
         </div>
       </div>
 
-      {/* Rating bar — only shown when revealed */}
+      {/* Rating bar — only shown when revealed or advancing */}
       {(cardState === 'revealed' || cardState === 'advancing') && (
         <RatingBar
           card={card}
-          disabled={isPending || cardState === 'advancing'}
+          disabled={ratingDisabled}
           onRate={handleRate}
           goodButtonRef={goodButtonRef}
         />

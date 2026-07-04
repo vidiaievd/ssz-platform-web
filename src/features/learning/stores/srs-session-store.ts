@@ -7,6 +7,11 @@ import type { ReviewRating, SrsCard } from '../types';
 export type SrsPhase = 'entry' | 'session' | 'summary';
 export type CardState = 'front' | 'revealed' | 'advancing';
 
+export interface RatingError {
+  rating: ReviewRating;
+  message: string;
+}
+
 interface SrsSessionState {
   phase: SrsPhase;
   queue: SrsCard[];
@@ -23,31 +28,39 @@ interface SrsSessionState {
   startedAt: number | null;
   /** Session end timestamp (ms) — set when transitioning to summary. */
   endedAt: number | null;
+  /** Timestamp when the current card was revealed (ms) — for latency tracking. */
+  revealedAt: number | null;
+  /**
+   * One UUID per card reveal. Reused on retry so the server can deduplicate
+   * a duplicate POST after a flaky reconnect.
+   */
+  currentIdempotencyKey: string | null;
+  /** Set when a review POST fails with a non-429 error. Cleared on retry/advance. */
+  ratingError: RatingError | null;
   dailyLimit: number;
   streakDays: number;
   /** Set to true when the server returns 429. Terminal for the session. */
   limitHit: boolean;
-  /** Last chosen rating before a potential retry. */
-  pendingRating: ReviewRating | null;
 }
 
 interface SrsSessionActions {
   /** Seed the store from GET /due response. */
-  seed: (data: {
-    cards: SrsCard[];
-    dailyLimit: number;
-    streakDays: number;
-  }) => void;
+  seed: (data: { cards: SrsCard[]; dailyLimit: number; streakDays: number }) => void;
   startSession: () => void;
+  /** Show the answer side. Generates an idempotency key and starts the latency timer. */
   revealAnswer: () => void;
-  /** Call after a successful review POST; advances to next card or summary. */
+  /** Call after a successful review POST — advances to next card or summary. */
   advanceAfterRating: (rating: ReviewRating, streakDays: number) => void;
   /** Re-queue only the "Again" cards for a second pass. */
   queueMisses: () => void;
   setPhase: (phase: SrsPhase) => void;
   setCardState: (cardState: CardState) => void;
+  /** 429 — terminal. Jumps to summary with the limit banner. */
   setLimitHit: () => void;
-  setPendingRating: (rating: ReviewRating | null) => void;
+  /** Set when a review POST returns a retriable error. */
+  setRatingError: (error: RatingError) => void;
+  /** Clear the inline error (user tapped Retry or card was advanced). */
+  clearRatingError: () => void;
   reset: () => void;
 }
 
@@ -61,10 +74,12 @@ const initial: SrsSessionState = {
   correctCount: 0,
   startedAt: null,
   endedAt: null,
+  revealedAt: null,
+  currentIdempotencyKey: null,
+  ratingError: null,
   dailyLimit: 20,
   streakDays: 0,
   limitHit: false,
-  pendingRating: null,
 };
 
 export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()((set, get) => ({
@@ -76,7 +91,13 @@ export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()(
   startSession: () =>
     set({ phase: 'session', index: 0, cardState: 'front', startedAt: Date.now() }),
 
-  revealAnswer: () => set({ cardState: 'revealed' }),
+  revealAnswer: () =>
+    set({
+      cardState: 'revealed',
+      revealedAt: Date.now(),
+      currentIdempotencyKey: crypto.randomUUID(),
+      ratingError: null,
+    }),
 
   advanceAfterRating: (rating, streakDays) => {
     const { queue, index, reviewedCount, againIds, correctCount } = get();
@@ -86,26 +107,20 @@ export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()(
     const nextIndex = index + 1;
     const isLast = nextIndex >= queue.length;
 
+    const shared = {
+      reviewedCount: newReviewed,
+      againIds: newAgain,
+      correctCount: newCorrect,
+      streakDays,
+      revealedAt: null,
+      currentIdempotencyKey: null,
+      ratingError: null,
+    };
+
     if (isLast) {
-      set({
-        reviewedCount: newReviewed,
-        againIds: newAgain,
-        correctCount: newCorrect,
-        streakDays,
-        phase: 'summary',
-        cardState: 'front',
-        endedAt: Date.now(),
-      });
+      set({ ...shared, phase: 'summary', cardState: 'front', endedAt: Date.now() });
     } else {
-      set({
-        reviewedCount: newReviewed,
-        againIds: newAgain,
-        correctCount: newCorrect,
-        streakDays,
-        index: nextIndex,
-        cardState: 'front',
-        pendingRating: null,
-      });
+      set({ ...shared, index: nextIndex, cardState: 'front' });
     }
   },
 
@@ -120,6 +135,10 @@ export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()(
       againIds: [],
       correctCount: 0,
       startedAt: Date.now(),
+      endedAt: null,
+      revealedAt: null,
+      currentIdempotencyKey: null,
+      ratingError: null,
       phase: 'session',
       limitHit: false,
     });
@@ -128,6 +147,7 @@ export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()(
   setPhase: (phase) => set({ phase }),
   setCardState: (cardState) => set({ cardState }),
   setLimitHit: () => set({ limitHit: true, phase: 'summary', endedAt: Date.now() }),
-  setPendingRating: (pendingRating) => set({ pendingRating }),
+  setRatingError: (ratingError) => set({ ratingError, cardState: 'revealed' }),
+  clearRatingError: () => set({ ratingError: null }),
   reset: () => set(initial),
 }));

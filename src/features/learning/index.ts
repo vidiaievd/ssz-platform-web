@@ -48,7 +48,7 @@ export type {
 
 /* ─── Session store ──────────────────────────────────────────────── */
 export { useSrsSessionStore } from './stores/srs-session-store';
-export type { SrsPhase, CardState } from './stores/srs-session-store';
+export type { SrsPhase, CardState, RatingError } from './stores/srs-session-store';
 
 /* ─── Components ─────────────────────────────────────────────────── */
 export { AudioPlayer } from './components/audio-player';
@@ -96,3 +96,4 @@ export { RatingBar } from './components/srs/rating-bar';
 export { ReviewCard } from './components/srs/review-card';
 export { LimitReachedBanner } from './components/srs/limit-banner';
 export { SessionProgress } from './components/srs/session-progress';
+export { RetryBar } from './components/srs/retry-bar';
