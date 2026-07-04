@@ -2,29 +2,44 @@
 
 export type ReviewRating = 1 | 2 | 3 | 4;
 
+export interface SrsCardSentence {
+  target: string;
+  translation: string;
+}
+
 export interface SrsCardFront {
   word: string;
-  phonetic?: string;
   pos?: string;
-  audioSrc?: string;
+  audioUrl?: string;
+  listId?: string;
+  listName?: string;
 }
 
 export interface SrsCardBack {
   definition: string;
-  translation?: string;
-  examples?: string[];
-  imageSrc?: string;
+  sentences: SrsCardSentence[];
+  imageUrl?: string;
+}
+
+export type SrsCardStatus = 'due' | 'suspended';
+export type SrsCardDirection = 'forward' | 'reverse';
+
+export interface SrsCardPredicted {
+  label: string;
 }
 
 export interface SrsCard {
   id: string;
-  contentType: 'EXERCISE' | 'VOCABULARY_WORD';
-  contentId: string;
+  status: SrsCardStatus;
+  direction: SrsCardDirection;
   front: SrsCardFront;
   back: SrsCardBack;
-  stability?: number;
-  difficulty?: number;
-  dueAt: string;
+  predicted: {
+    '1': SrsCardPredicted;
+    '2': SrsCardPredicted;
+    '3': SrsCardPredicted;
+    '4': SrsCardPredicted;
+  };
 }
 
 export interface SrsDueResponse {
@@ -33,6 +48,13 @@ export interface SrsDueResponse {
   dailyLimit: number;
   reviewedToday: number;
   cards: SrsCard[];
+}
+
+export interface SrsSettings {
+  dailyLimit: number;
+  audio: boolean;
+  preferReverse: boolean;
+  disabledAudioPairs: string[];
 }
 
 export interface ReviewRequest {

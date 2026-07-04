@@ -2924,5 +2924,93 @@
       "helperIdle": "Trykk på et ord til venstre…",
       "helperArmed": "Trykk nå på samsvarende ord til høyre."
     }
+  },
+  "Srs": {
+    "entry": {
+      "start": "Start øvelse",
+      "settings": "Innstillinger",
+      "stats": "Statistikk",
+      "dueToday": "{count, plural, one {# kort til i dag} other {# kort til i dag}}",
+      "limitReachedToday": "Du har nådd dagens grense – kom tilbake i morgen.",
+      "caughtUp": {
+        "title": "Du er à jour",
+        "subtitle": "Kom tilbake i morgen.",
+        "studyNew": "Øv på nye ord manuelt"
+      }
+    },
+    "streak": {
+      "days": "{count, plural, =0 {Start en streak i dag} one {# dag på rad} other {# dager på rad}}"
+    },
+    "card": {
+      "showAnswer": "Vis svar",
+      "fromList": "fra {list}",
+      "playAudio": "Spill uttale",
+      "directionForward": "Husk betydningen",
+      "directionReverse": "Husk ordet",
+      "definitionLabel": "Definisjon",
+      "examplesLabel": "Eksempler"
+    },
+    "rating": {
+      "again": "Igjen",
+      "hard": "Vanskelig",
+      "good": "Bra",
+      "easy": "Lett",
+      "intervalIn": "om {label}",
+      "ariaAgain": "Igjen — neste øvelse {interval}",
+      "ariaHard": "Vanskelig — neste øvelse {interval}",
+      "ariaGood": "Bra — neste øvelse {interval}",
+      "ariaEasy": "Lett — neste øvelse {interval}"
+    },
+    "session": {
+      "progress": "{done} av {total} gjennomgått",
+      "newCardAnnounce": "Kort {n} av {total}",
+      "answerShownAnnounce": "Svar vist",
+      "exit": "Avslutt øvelse"
+    },
+    "summary": {
+      "title": "Ferdig for i dag",
+      "cardsReviewed": "Kort gjennomgått",
+      "accuracy": "Nøyaktighet",
+      "timeSpent": "Tid brukt",
+      "streakStatus": "Streak",
+      "reviewMisses": "Øv på feil igjen ({count})",
+      "done": "Ferdig"
+    },
+    "limit": {
+      "title": "Det er dagens grense",
+      "body": "Kom tilbake i morgen – streaken din er trygg.",
+      "cta": "Kom tilbake i morgen"
+    },
+    "settings": {
+      "title": "Øvelsesinnstillinger",
+      "dailyLimit": "Daglig grense",
+      "dailyLimitHelp": "Maks kort per dag",
+      "audio": "Lyd",
+      "audioHelp": "Spill uttale på kort",
+      "preferReverse": "Foretrekk omvendt retning",
+      "preferReverseHelp": "Vis betydningen først, husk ordet",
+      "disableAudioPair": "Deaktiver lyd for disse språkene",
+      "disableAudioPairHelp": "Skjul uttale der TTS-kvaliteten er dårlig"
+    },
+    "stats": {
+      "title": "Dine øvelsesstatistikker",
+      "retention": "Huskeevne",
+      "matureYoung": "Modne vs. unge",
+      "mature": "Modne",
+      "young": "Unge",
+      "last30": "Siste 30 dager",
+      "heatCell": "{count, plural, one {# øvelse} other {# øvelser}} den {date}",
+      "empty": "Øv på noen kort for å se statistikken din"
+    },
+    "toast": {
+      "milestone": "{days, plural, one {# dags streak!} other {# dagers streak!}} Fortsett!",
+      "reviewError": "Øvelsen ble ikke lagret. Prøv igjen.",
+      "settingsError": "Innstillingene ble ikke lagret. Prøv igjen."
+    },
+    "error": {
+      "title": "Kunne ikke laste øvelsene",
+      "body": "Fullførte øvelser er trygge. Prøv igjen.",
+      "retry": "Prøv igjen"
+    }
   }
 }

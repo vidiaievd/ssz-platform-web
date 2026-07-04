@@ -17,11 +17,11 @@ const MOCK_DUE: SrsDueResponse = {
   cards: [
     {
       id: 'card-1',
-      contentType: 'VOCABULARY_WORD',
-      contentId: 'word-1',
-      front: { word: 'sykepleier', phonetic: '/ˈsyːkə/', pos: 'noun' },
-      back: { definition: 'nurse', translation: 'sykepleier' },
-      dueAt: '2026-07-03T08:00:00Z',
+      status: 'due' as const,
+      direction: 'forward' as const,
+      front: { word: 'sykepleier', pos: 'noun', listName: 'Professions' },
+      back: { definition: 'nurse', sentences: [{ target: 'Hun er sykepleier.', translation: 'She is a nurse.' }] },
+      predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } },
     },
   ],
 };

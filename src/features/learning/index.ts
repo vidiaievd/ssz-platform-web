@@ -34,12 +34,21 @@ export type {
   SkillMastery,
   SrsCard,
   SrsCardBack,
+  SrsCardDirection,
   SrsCardFront,
+  SrsCardPredicted,
+  SrsCardSentence,
+  SrsCardStatus,
   SrsDueResponse,
   SrsHeatmapDay,
+  SrsSettings,
   SrsStats,
   UnitPayload,
 } from './types';
+
+/* ─── Session store ──────────────────────────────────────────────── */
+export { useSrsSessionStore } from './stores/srs-session-store';
+export type { SrsPhase, CardState } from './stores/srs-session-store';
 
 /* ─── Components ─────────────────────────────────────────────────── */
 export { AudioPlayer } from './components/audio-player';
@@ -74,3 +83,16 @@ export type { RefStripParagraph, RefStripProps } from './components/ref-strip';
 
 export { UnitStepper } from './components/unit-stepper';
 export type { UnitPhase, UnitStepperProps } from './components/unit-stepper';
+
+/* ─── SRS components ─────────────────────────────────────────────── */
+export { SrsPage } from './components/srs/srs-page';
+export { SrsEntry } from './components/srs/entry';
+export { SrsSession } from './components/srs/session';
+export { SessionSummary } from './components/srs/summary';
+export { StreakChip } from './components/srs/streak-chip';
+export { PosChip } from './components/srs/pos-chip';
+export { AudioButton } from './components/srs/audio-button';
+export { RatingBar } from './components/srs/rating-bar';
+export { ReviewCard } from './components/srs/review-card';
+export { LimitReachedBanner } from './components/srs/limit-banner';
+export { SessionProgress } from './components/srs/session-progress';

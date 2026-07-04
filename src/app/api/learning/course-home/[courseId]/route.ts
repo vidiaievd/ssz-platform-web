@@ -84,10 +84,9 @@ export async function GET(
     }
 
     /* ── Derive SRS breakdown from card sample ────────────────────── */
+    // Card shape no longer carries contentType; attribute all due to vocab.
     const sampleSize = srsDue.cards.length;
-    const vocabSample = srsDue.cards.filter(
-      (c) => c.contentType === 'VOCABULARY_WORD',
-    ).length;
+    const vocabSample = sampleSize;
 
     let srsVocabDue: number;
     let srsExerciseDue: number;

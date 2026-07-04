@@ -1,0 +1,122 @@
+'use client';
+
+import { CheckCircle2, BarChart2, Settings } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+import { Button } from '@/components/ui/button';
+import { Link } from '@/lib/i18n/navigation';
+import { StreakChip } from './streak-chip';
+
+/* ── Caught-up (0 due) ─────────────────────────────────────────────── */
+
+interface CaughtUpStateProps {
+  streakDays: number;
+}
+
+function CaughtUpState({ streakDays }: CaughtUpStateProps) {
+  const t = useTranslations('Srs');
+
+  return (
+    <div className="flex flex-col items-center gap-6 text-center">
+      <CheckCircle2
+        className="h-14 w-14 text-[var(--ssz-color-success-500)]"
+        aria-hidden
+      />
+      <div className="space-y-1">
+        <h1 className="text-[30px] font-bold text-[var(--ssz-text-primary)]">
+          {t('entry.caughtUp.title')}
+        </h1>
+        <p className="text-[var(--ssz-text-secondary)]">{t('entry.caughtUp.subtitle')}</p>
+      </div>
+      {streakDays > 0 && <StreakChip days={streakDays} />}
+      <div className="flex flex-col gap-2 w-full">
+        <Button asChild>
+          <Link href="/student/enrolled/vocabulary">{t('entry.caughtUp.studyNew')}</Link>
+        </Button>
+        <Button asChild variant="ghost">
+          <Link href="/student/srs/stats">
+            <BarChart2 className="mr-2 h-4 w-4" aria-hidden />
+            {t('entry.stats')}
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Due hero ──────────────────────────────────────────────────────── */
+
+interface SrsEntryProps {
+  dueCount: number;
+  streakDays: number;
+  reviewedToday: number;
+  dailyLimit: number;
+  onStart: () => void;
+  onSettings: () => void;
+}
+
+export function SrsEntry({
+  dueCount,
+  streakDays,
+  reviewedToday,
+  dailyLimit,
+  onStart,
+  onSettings,
+}: SrsEntryProps) {
+  const t = useTranslations('Srs');
+
+  if (dueCount === 0) {
+    return <CaughtUpState streakDays={streakDays} />;
+  }
+
+  const limitReached = reviewedToday >= dailyLimit;
+
+  return (
+    <div className="flex flex-col items-center gap-6 text-center">
+      <StreakChip days={streakDays} />
+
+      <div className="space-y-1">
+        <p
+          className="text-[clamp(40px,9vw,56px)] font-bold tracking-[var(--ssz-tracking-tight)] text-[var(--ssz-text-primary)]"
+          aria-label={t('entry.dueToday', { count: dueCount })}
+        >
+          {dueCount}
+        </p>
+        <p className="text-[var(--ssz-text-secondary)]">{t('entry.dueToday', { count: dueCount })}</p>
+      </div>
+
+      {limitReached && (
+        <p className="rounded-[var(--ssz-radius-lg)] bg-[var(--ssz-bg-subtle)] border border-[var(--ssz-border-default)] px-4 py-2 text-sm text-[var(--ssz-text-secondary)]">
+          {t('entry.limitReachedToday')}
+        </p>
+      )}
+
+      <div className="flex flex-col gap-2 w-full">
+        <Button
+          onClick={onStart}
+          disabled={limitReached}
+          autoFocus
+          className="w-full"
+        >
+          {t('entry.start')}
+        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={onSettings}
+            className="flex-1"
+          >
+            <Settings className="mr-2 h-4 w-4" aria-hidden />
+            {t('entry.settings')}
+          </Button>
+          <Button asChild variant="ghost" className="flex-1">
+            <Link href="/student/srs/stats">
+              <BarChart2 className="mr-2 h-4 w-4" aria-hidden />
+              {t('entry.stats')}
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

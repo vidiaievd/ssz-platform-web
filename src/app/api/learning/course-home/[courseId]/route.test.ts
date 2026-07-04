@@ -39,9 +39,9 @@ const MOCK_DUE: SrsDueResponse = {
   dailyLimit: 20,
   reviewedToday: 3,
   cards: [
-    { id: 'c1', contentType: 'VOCABULARY_WORD', contentId: 'v1', front: { word: 'hund' }, back: { definition: 'dog' }, dueAt: '2026-01-01' },
-    { id: 'c2', contentType: 'VOCABULARY_WORD', contentId: 'v2', front: { word: 'katt' }, back: { definition: 'cat' }, dueAt: '2026-01-01' },
-    { id: 'c3', contentType: 'EXERCISE',        contentId: 'e1', front: { word: 'Ex 1' }, back: { definition: 'ans' }, dueAt: '2026-01-01' },
+    { id: 'c1', status: 'due' as const, direction: 'forward' as const, front: { word: 'hund' }, back: { definition: 'dog', sentences: [] }, predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } } },
+    { id: 'c2', status: 'due' as const, direction: 'forward' as const, front: { word: 'katt' }, back: { definition: 'cat', sentences: [] }, predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } } },
+    { id: 'c3', status: 'due' as const, direction: 'forward' as const, front: { word: 'Ex 1' }, back: { definition: 'ans', sentences: [] }, predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } } },
   ],
 };
 
@@ -116,9 +116,9 @@ describe('GET /api/learning/course-home/[courseId]', () => {
     expect(body.srsDueCount).toBe(3);
     expect(body.srsStreakDays).toBe(7);
     expect(body.srsReviewedToday).toBe(3);
-    // 2 vocab cards, 1 exercise card (sample === dueCount so exact)
-    expect(body.srsVocabDue).toBe(2);
-    expect(body.srsExerciseDue).toBe(1);
+    // Card shape no longer carries contentType; all due attributed to vocab
+    expect(body.srsVocabDue).toBe(3);
+    expect(body.srsExerciseDue).toBe(0);
     expect(body.canDo).toEqual(MOCK_CAN_DO);
     expect(body.overdueAssignmentCount).toBe(0);
     expect(body.units).toHaveLength(1);
