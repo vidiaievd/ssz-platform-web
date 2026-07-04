@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   Assignment,
   AssignmentListResponse,
+  AssignmentQuestion,
+  AssignmentQuestionsResponse,
   GradedSubmitRequest,
   GradedSubmitResponse,
   WrittenSubmitRequest,
@@ -36,6 +38,20 @@ export function useAssignment(id: string) {
       return res.json() as Promise<Assignment>;
     },
     staleTime: 60_000,
+  });
+}
+
+export function useAssignmentQuestions(id: string) {
+  return useQuery<AssignmentQuestionsResponse>({
+    queryKey: learningKeys.assignmentQuestions(id),
+    queryFn: async () => {
+      const res = await fetch(`/api/learning/assignments/${id}/questions`);
+      if (res.status === 401) throw new Error('Unauthenticated');
+      if (res.status === 404) throw new Error('Assignment not found');
+      if (!res.ok) throw new Error('Failed to fetch assignment questions');
+      return res.json() as Promise<AssignmentQuestionsResponse>;
+    },
+    staleTime: 300_000,
   });
 }
 

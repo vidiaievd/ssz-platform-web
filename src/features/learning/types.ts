@@ -319,6 +319,17 @@ export interface AssignmentListResponse {
   assignments: Assignment[];
 }
 
+/* MCQ question delivered to the graded runner */
+export interface AssignmentQuestion {
+  id: string;
+  text: string;
+  options: string[];
+}
+
+export interface AssignmentQuestionsResponse {
+  questions: AssignmentQuestion[];
+}
+
 export interface GradedSubmitRequest {
   answers: { questionId: string; optionIndex: number }[];
 }

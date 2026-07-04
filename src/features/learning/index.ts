@@ -10,7 +10,7 @@ export { useCanDo } from './api/use-can-do';
 export { useCourseHome } from './api/use-course-home';
 export { useUnitPayload } from './api/use-unit-payload';
 export { useProgressOverview } from './api/use-progress-overview';
-export { useAssignments, useAssignment, useSubmitGradedAssignment, useSubmitWrittenAssignment, useSaveWrittenDraft } from './api/use-assignments';
+export { useAssignments, useAssignment, useAssignmentQuestions, useSubmitGradedAssignment, useSubmitWrittenAssignment, useSaveWrittenDraft } from './api/use-assignments';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 export type {
@@ -64,6 +64,8 @@ export type {
   GradedSubmitResponse,
   WrittenSubmitRequest,
   WrittenDraftRequest,
+  AssignmentQuestion,
+  AssignmentQuestionsResponse,
 } from './types';
 
 /* ─── Session store ──────────────────────────────────────────────── */
