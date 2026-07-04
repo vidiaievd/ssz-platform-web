@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import {
+  Bell,
   BookOpen,
   CalendarRange,
   Compass,
   GraduationCap,
   Layers,
   LayoutDashboard,
+  Library,
   MailCheck,
-  School,
   Send,
   Settings,
   Users,
@@ -21,6 +22,7 @@ import type { DashboardRole, SchoolType } from "@/features/dashboard/types";
 import type { SchoolRole } from "@/features/school/types";
 import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
+import type { NotificationLinkContext } from "@/features/notifications";
 import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
 import { GlobalSearchTrigger } from "./topbar/global-search-trigger";
@@ -101,6 +103,11 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
       labelKey: "invitations",
       disabled: disabled('invitations'),
     },
+    {
+      href: `/school/${schoolSlug}/notifications`,
+      icon: Bell,
+      labelKey: "notifications",
+    },
   ];
 
   return [
@@ -146,9 +153,10 @@ const STUDENT_NAV: NavSection[] = [
         labelKey: "dashboard",
       },
       { href: "/student/discover", icon: Compass, labelKey: "discover" },
+      { href: "/student/courses", icon: Library, labelKey: "courses" },
       { href: "/student/lessons", icon: BookOpen, labelKey: "lessons" },
-      { href: "/student/enrolled", icon: School, labelKey: "mySchools" },
       { href: "/student/enrolled/requests", icon: Send, labelKey: "requests" },
+      { href: "/student/notifications", icon: Bell, labelKey: "notifications" },
     ],
   },
   {
@@ -200,10 +208,26 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
     !!schoolContext?.schoolRole &&
     SCHEDULING_SCHOOL_ROLES.has(schoolContext.schoolRole);
 
-  const workspaceSwitcher = (
+  const notificationsLinkContext: NotificationLinkContext =
+    variant === "school"
+      ? { workspaceKind: "school", schoolSlug: schoolContext?.school.slug }
+      : { workspaceKind: "student" };
+
+  const notificationsHref =
+    variant === "school" && schoolContext
+      ? `/school/${schoolContext.school.slug}/notifications`
+      : variant === "student"
+        ? "/student/notifications"
+        : undefined;
+
+  const workspaceHeader = (collapsed: boolean) => (
     <div className="flex items-center gap-2 min-w-0">
-      <WorkspaceSwitcher activeContextKey={activeContextKey} userId={resolvedTutorId || undefined} />
-      {showRoleBadge && <RoleBadge role={schoolContext!.schoolRole!} />}
+      <WorkspaceSwitcher
+        activeContextKey={activeContextKey}
+        userId={resolvedTutorId || undefined}
+        collapsed={collapsed}
+      />
+      {!collapsed && showRoleBadge && <RoleBadge role={schoolContext!.schoolRole!} />}
     </div>
   );
 
@@ -212,25 +236,29 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
       <Sidebar
         sections={sections}
         schoolType={variant === "school" ? (schoolContext?.schoolType ?? "online") : undefined}
+        header={workspaceHeader}
       />
       <MobileSidebar
         sections={sections}
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
+        header={workspaceHeader}
       />
 
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <Topbar
           user={user}
           onMenuOpen={() => setMobileOpen(true)}
-          leading={workspaceSwitcher}
           activeContextKey={activeContextKey}
           search={variant === "school" ? <GlobalSearchTrigger /> : undefined}
           actions={
             <div className="flex items-center gap-2">
               {variant === "school" && <TrialPill />}
               {canSeeSchedulingAlerts && <AlertBadge schoolId={schoolContext?.schoolId} />}
-              <NotificationBell />
+              <NotificationBell
+                linkContext={notificationsLinkContext}
+                notificationsHref={notificationsHref}
+              />
             </div>
           }
         />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -26,6 +26,10 @@ export function FreeTextExercise({ exercise }: FreeTextExerciseProps) {
   const [answer, setAnswer] = useState('');
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [isPending, startTransition] = useTransition();
+  const startedAtRef = useRef(0);
+  useEffect(() => {
+    startedAtRef.current = Date.now();
+  }, []);
 
   function handleSubmit() {
     if (!answer.trim()) return;
@@ -34,6 +38,7 @@ export function FreeTextExercise({ exercise }: FreeTextExerciseProps) {
         exerciseId: exercise.id,
         type: 'free_text',
         answer,
+        timeSpentSeconds: (Date.now() - startedAtRef.current) / 1000,
       });
       if (!res.ok) {
         toast.error(tErrors(res.error.code));
@@ -46,6 +51,7 @@ export function FreeTextExercise({ exercise }: FreeTextExerciseProps) {
   function handleRetry() {
     setAnswer('');
     setResult(null);
+    startedAtRef.current = Date.now();
   }
 
   const isSubmitted = result !== null;

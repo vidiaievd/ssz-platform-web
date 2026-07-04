@@ -53,4 +53,5 @@ storybook-static
 .vscode/
 
 # claude code
-.claude/
+.claude
+check-school.mjs.bak

@@ -8,6 +8,10 @@ import { ClipboardList } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  isTransitionConflict,
+  useTransitionMembership,
+} from '@/features/enrollment/api/use-transition-membership';
 import type { Membership, MembershipStatus } from '@/features/enrollment/types';
 
 type Props = {
@@ -17,6 +21,7 @@ type Props = {
 export function PendingApprovals({ memberships }: Props) {
   const t = useTranslations('Enrollment.Approvals');
   const router = useRouter();
+  const transition = useTransitionMembership();
   const [pending, setPending] = useState<Record<string, boolean>>({});
 
   if (memberships.length === 0) {
@@ -30,18 +35,19 @@ export function PendingApprovals({ memberships }: Props) {
 
   async function handleTransition(m: Membership, to: MembershipStatus) {
     const { id: membershipId, schoolId } = m;
+    if (!schoolId) return;
     setPending((prev) => ({ ...prev, [membershipId]: true }));
     try {
-      const res = await fetch(`/api/enrollment/memberships/${membershipId}/transition`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schoolId, to }),
-      });
-      if (!res.ok) throw new Error('Transition failed');
+      await transition.mutateAsync({ membershipId, schoolId, to });
       toast.success(to === 'onboarding' ? t('accepted') : t('rejected'));
       router.refresh();
-    } catch {
-      toast.error(t('transitionFailed'));
+    } catch (err) {
+      if (isTransitionConflict(err)) {
+        toast.error(t('alreadyHandled'));
+        router.refresh();
+      } else {
+        toast.error(t('transitionFailed'));
+      }
     } finally {
       setPending((prev) => ({ ...prev, [membershipId]: false }));
     }
@@ -63,6 +69,7 @@ export function PendingApprovals({ memberships }: Props) {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-(--ssz-text-muted)">
                   {m.language.toUpperCase()}
+                  {m.selfReportedLevel ? ` · ${m.selfReportedLevel}` : ''}
                 </span>
                 <Badge variant="muted" className="text-xs">
                   {m.source === 'public-apply' ? t('sourcePublic') : m.source}

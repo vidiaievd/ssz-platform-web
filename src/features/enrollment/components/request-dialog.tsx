@@ -1,9 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -16,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import { Field } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -24,13 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { difficultyLevels } from '@/features/content/schemas';
 import type { School } from '@/features/discovery/types';
 import { requestEnrollmentAction } from '../api/request-enrollment';
-import { enrollmentKeys } from '../api/keys';
-import { enrollmentRequestSchema } from '../schemas/enrollment-request';
-import type { EnrollmentRequestValues } from '../schemas/enrollment-request';
+
+const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 
 interface RequestDialogProps {
   school: School | null;
@@ -41,41 +35,35 @@ interface RequestDialogProps {
 export function RequestDialog({ school, open, onClose }: RequestDialogProps) {
   const t = useTranslations('Enrollment');
   const tErrors = useTranslations('Errors');
-  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
+  const [language, setLanguage] = useState<string>('');
+  const [level, setLevel] = useState<string>('');
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-    formState: { errors },
-  } = useForm<EnrollmentRequestValues>({
-    resolver: zodResolver(enrollmentRequestSchema),
-    defaultValues: { message: '', selfAssessedLevel: undefined },
-  });
-
-  const levelValue = watch('selfAssessedLevel');
+  useEffect(() => {
+    void (async () => {
+      if (open && school) {
+        setLanguage(school.targetLanguages[0] ?? '');
+        setLevel('');
+      }
+    })();
+  }, [open, school]);
 
   function handleOpenChange(next: boolean) {
-    if (!next) {
-      reset();
-      onClose();
-    }
+    if (!next) onClose();
   }
 
-  function onSubmit(values: EnrollmentRequestValues) {
+  function handleConfirm() {
     if (!school) return;
     startTransition(async () => {
-      const result = await requestEnrollmentAction(school.id, values);
+      const result = await requestEnrollmentAction(school.id, {
+        language: language || undefined,
+        selfReportedLevel: level ? (level as (typeof CEFR_LEVELS)[number]) : undefined,
+      });
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;
       }
-      await queryClient.invalidateQueries({ queryKey: enrollmentKeys.requests() });
       toast.success(t('request.success', { name: school.name }));
-      reset();
       onClose();
     });
   }
@@ -88,62 +76,51 @@ export function RequestDialog({ school, open, onClose }: RequestDialogProps) {
           <DialogDescription>{t('request.description')}</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="enrol-message">{t('request.messageLabel')}</Label>
-            <Textarea
-              id="enrol-message"
-              placeholder={t('request.messagePlaceholder')}
-              rows={4}
-              maxLength={500}
-              disabled={isPending}
-              {...register('message')}
-            />
-            {errors.message && (
-              <p className="text-destructive text-xs">{errors.message.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="enrol-level">{t('request.levelLabel')}</Label>
-            <Select
-              value={levelValue ?? 'none'}
-              onValueChange={(v) =>
-                setValue(
-                  'selfAssessedLevel',
-                  v === 'none' ? undefined : (v as EnrollmentRequestValues['selfAssessedLevel']),
-                )
-              }
-              disabled={isPending}
-            >
-              <SelectTrigger id="enrol-level">
-                <SelectValue placeholder={t('request.levelPlaceholder')} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label={t('request.languageLabel')} htmlFor="enrollment-request-language">
+            <Select value={language} onValueChange={setLanguage}>
+              <SelectTrigger id="enrollment-request-language" className="w-full">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">{t('request.levelPlaceholder')}</SelectItem>
-                {difficultyLevels.map((l) => (
-                  <SelectItem key={l} value={l}>
-                    {l}
+                {(school?.targetLanguages ?? []).map((lang) => (
+                  <SelectItem key={lang} value={lang}>
+                    {lang.toUpperCase()}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </Field>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => handleOpenChange(false)}
-              disabled={isPending}
-            >
-              {t('request.cancel')}
-            </Button>
-            <Button type="submit" variant="primary" loading={isPending} disabled={isPending}>
-              {t('request.submit')}
-            </Button>
-          </DialogFooter>
-        </form>
+          <Field label={t('request.levelLabel')} htmlFor="enrollment-request-level">
+            <Select value={level} onValueChange={setLevel}>
+              <SelectTrigger id="enrollment-request-level" className="w-full">
+                <SelectValue placeholder={t('request.levelUnknown')} />
+              </SelectTrigger>
+              <SelectContent>
+                {CEFR_LEVELS.map((lvl) => (
+                  <SelectItem key={lvl} value={lvl}>
+                    {lvl}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => handleOpenChange(false)}
+            disabled={isPending}
+          >
+            {t('request.cancel')}
+          </Button>
+          <Button type="button" variant="primary" loading={isPending} disabled={isPending} onClick={handleConfirm}>
+            {t('request.submit')}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

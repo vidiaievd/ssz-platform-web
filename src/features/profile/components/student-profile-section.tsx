@@ -24,7 +24,7 @@ export function StudentProfileSection() {
   const [newNative, setNewNative] = useState('');
   const [newTarget, setNewTarget] = useState('');
 
-  const targetLanguages: string[] = student?.targetLanguages ?? [];
+  const targetLanguages = student?.targetLanguages ?? [];
   const nativeLanguage: string = student?.nativeLanguage ?? '';
 
   function saveNative(code: string) {
@@ -41,11 +41,11 @@ export function StudentProfileSection() {
   }
 
   function addTarget(code: string) {
-    if (!code || targetLanguages.includes(code)) return;
+    if (!code || targetLanguages.some((l) => l.code === code)) return;
     setNewTarget('');
     startTransition(async () => {
       try {
-        await updateStudent.mutateAsync({ targetLanguages: [...targetLanguages, code] });
+        await updateStudent.mutateAsync({ targetLanguages: [...targetLanguages, { code }] });
         await queryClient.invalidateQueries({ queryKey: profileKeys.studentMe() });
       } catch {
         toast.error(tErr('unknown'));
@@ -56,7 +56,7 @@ export function StudentProfileSection() {
   function removeTarget(code: string) {
     startTransition(async () => {
       try {
-        await updateStudent.mutateAsync({ targetLanguages: targetLanguages.filter((l) => l !== code) });
+        await updateStudent.mutateAsync({ targetLanguages: targetLanguages.filter((l) => l.code !== code) });
         await queryClient.invalidateQueries({ queryKey: profileKeys.studentMe() });
       } catch {
         toast.error(tErr('unknown'));
@@ -91,7 +91,7 @@ export function StudentProfileSection() {
       <Field label={t('student.targetLanguages')} htmlFor="target-lang-picker">
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
-            {targetLanguages.map((code) => {
+            {targetLanguages.map(({ code }) => {
               const name = getEnglishName(code);
               return (
                 <span
@@ -117,7 +117,7 @@ export function StudentProfileSection() {
             value={newTarget}
             onChange={addTarget}
             placeholder="Add a learning language…"
-            exclude={[nativeLanguage, ...targetLanguages]}
+            exclude={[nativeLanguage, ...targetLanguages.map((l) => l.code)]}
             disabled={isPending}
           />
         </div>

@@ -87,13 +87,6 @@ export const handlers = [
   // Progress — real backend; default to empty in tests.
   http.get('/api/student/progress', () => HttpResponse.json([] as ContainerProgress[])),
 
-  // Attempt routes for tests — feature-specific tests override these.
-  http.post('/api/content/exercises/:id/attempts', () =>
-    HttpResponse.json({ attemptId: 'test-attempt-id', exerciseId: 'test-id', startedAt: new Date().toISOString() }, { status: 201 }),
-  ),
-  http.post('/api/content/exercises/:id/attempts/:attemptId/submit', () =>
-    HttpResponse.json({ verdict: 'correct' }),
-  ),
   http.post('/api/student/progress/events', () => new HttpResponse(null, { status: 204 })),
 
   http.get('/api/student/upcoming', () => HttpResponse.json(MOCK_UPCOMING)),

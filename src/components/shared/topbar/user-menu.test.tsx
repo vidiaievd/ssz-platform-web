@@ -9,6 +9,8 @@ vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({ href, children, ...props }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>{children}</a>
   ),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  usePathname: () => '/',
 }));
 
 vi.mock('@/features/auth/components/logout-button', () => ({
@@ -19,19 +21,19 @@ vi.mock('@/features/auth/components/logout-button', () => ({
 
 describe('UserMenu', () => {
   it('shows School role label for school user', async () => {
-    renderWithProviders(<UserMenu user={{ roles: ['school_admin'] }} />);
+    renderWithProviders(<UserMenu user={{ roles: ['school_admin'], email: 'admin@example.com' }} />);
     await userEvent.click(screen.getByRole('button', { name: /user menu/i }));
     expect(screen.getByText('School')).toBeInTheDocument();
   });
 
   it('shows Tutor role label for tutor user', async () => {
-    renderWithProviders(<UserMenu user={{ roles: ['tutor'] }} />);
+    renderWithProviders(<UserMenu user={{ roles: ['tutor'], email: 'tutor@example.com' }} />);
     await userEvent.click(screen.getByRole('button', { name: /user menu/i }));
     expect(screen.getByText('Tutor')).toBeInTheDocument();
   });
 
   it('shows Student role label for student user', async () => {
-    renderWithProviders(<UserMenu user={{ roles: ['student'] }} />);
+    renderWithProviders(<UserMenu user={{ roles: ['student'], email: 'student@example.com' }} />);
     await userEvent.click(screen.getByRole('button', { name: /user menu/i }));
     expect(screen.getByText('Student')).toBeInTheDocument();
   });

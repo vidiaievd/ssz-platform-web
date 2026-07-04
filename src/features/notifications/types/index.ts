@@ -1,9 +1,43 @@
 export type NotificationType =
+  | 'GENERAL'
+  | 'WELCOME_EMAIL'
+  | 'EMAIL_VERIFICATION'
+  | 'PASSWORD_RESET'
+  | 'PASSWORD_CHANGED'
+  | 'STUDY_REMINDER'
+  | 'TEACHER_ABSENCE'
+  | 'SUBSTITUTE_REQUEST'
+  | 'SUBSTITUTE_ASSIGNED'
+  | 'OVERLOAD_ALERT'
+  | 'VACANCY_ALERT'
+  | 'UNCOVERED_LESSON'
+  | 'SCHOOL_INVITATION'
+  | 'TEACHER_PROFILE_CHANGED'
+  | 'ENROLLMENT_REQUEST'
   | 'ENROLLMENT_APPROVED'
   | 'ENROLLMENT_REJECTED'
-  | 'LESSON_ASSIGNED'
-  | 'NEW_MATERIAL'
-  | 'TEACHER_PROFILE_CHANGED';
+  | 'PLACEMENT_REVIEW_READY'
+  | 'GROUP_ASSIGNED';
+
+export type NotificationCategory = 'Enrollment' | 'Staff' | 'System';
+
+export type NotificationFilter = 'all' | 'unread' | 'archived';
+
+export type NotificationBulkAction = 'read' | 'unread' | 'archive' | 'unarchive' | 'delete';
+
+export interface EnrollmentRequestData {
+  membershipId: string;
+  schoolId: string;
+  schoolName: string;
+  studentId: string;
+  studentName: string;
+  studentAvatarUrl?: string;
+  studentEmail?: string;
+  language?: string;
+  ageBand?: string;
+  source: string;
+  occurredAt: string;
+}
 
 export interface TeacherProfileChangedData {
   teacherUserId: string;
@@ -12,16 +46,49 @@ export interface TeacherProfileChangedData {
   occurredAt: string;
 }
 
+export interface EnrollmentApprovedData {
+  membershipId: string;
+  schoolId: string;
+  schoolName: string;
+  occurredAt: string;
+}
+
+export interface GroupAssignedData {
+  membershipId: string;
+  schoolId: string;
+  schoolName: string;
+  groupId: string;
+  groupName: string;
+  occurredAt: string;
+}
+
+export interface PlacementReviewReadyData {
+  membershipId: string;
+  schoolId: string;
+  schoolName: string;
+  studentId: string;
+  occurredAt: string;
+}
+
+export type NotificationTemplateData =
+  | EnrollmentRequestData
+  | TeacherProfileChangedData
+  | EnrollmentApprovedData
+  | GroupAssignedData
+  | PlacementReviewReadyData
+  | Record<string, unknown>;
+
 export interface Notification {
   id: string;
   type: NotificationType;
-  templateData?: TeacherProfileChangedData | Record<string, unknown>;
+  templateData?: NotificationTemplateData;
   isRead: boolean;
+  archivedAt?: string | null;
   createdAt: string;
 }
 
 export interface NotificationsResponse {
   items: Notification[];
   unreadCount: number;
-  nextCursor?: string;
+  nextCursor?: string | null;
 }

@@ -1,16 +1,14 @@
 import { notFound } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
-import { Globe, GraduationCap, BookOpen, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { readAccessToken } from '@/lib/auth/cookies';
 import { AppError } from '@/lib/errors';
-import type { BadgeProps } from '@/components/ui/badge';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/lib/i18n/navigation';
-import { ContainerTabsClient } from '@/features/content/components/container-tabs';
-import type { Container } from '@/features/content/types';
+import { getTranslations } from 'next-intl/server';
+import type { Container, ContainerItem } from '@/features/content/types';
+import { CourseDetailView } from '@/features/student/components/course-detail-view';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -29,7 +27,6 @@ export default async function CatalogueContainerPage({ params }: Props) {
     });
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') notFound();
-    // unauthenticated or unavailable — show sign-in prompt
     return (
       <section className="container mx-auto max-w-3xl px-4 py-16 text-center">
         <LogIn className="text-muted-foreground mx-auto mb-4 h-10 w-10" />
@@ -45,71 +42,26 @@ export default async function CatalogueContainerPage({ params }: Props) {
   const token = await readAccessToken();
   const isAuthenticated = !!token;
 
+  /* Fetch the syllabus items if a published version exists */
+  let items: ContainerItem[] = [];
+  if (container.currentPublishedVersionId) {
+    try {
+      items = await serverFetch<ContainerItem[]>({
+        service: 'content',
+        path: `/containers/${container.id}/items?versionId=${container.currentPublishedVersionId}`,
+        anonymous: !isAuthenticated,
+      });
+    } catch {
+      // syllabus unavailable — render without items
+    }
+  }
+
   return (
-    <section className="container mx-auto max-w-4xl px-4 py-10">
-      <div className="mb-6">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <AccessTierBadgeServer tier={container.accessTier} t={t} />
-          {container.containerType && (
-            <Badge variant="muted">{t(`containerType.${container.containerType}`)}</Badge>
-          )}
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight">{container.title}</h1>
-        {container.description && (
-          <p className="text-muted-foreground mt-2">{container.description}</p>
-        )}
-        <div className="text-muted-foreground mt-4 flex flex-wrap gap-4 text-sm">
-          {container.targetLanguage && (
-            <span className="flex items-center gap-1.5">
-              <Globe className="h-4 w-4" />
-              {container.targetLanguage.toUpperCase()}
-            </span>
-          )}
-          {container.difficultyLevel && (
-            <span className="flex items-center gap-1.5">
-              <GraduationCap className="h-4 w-4" />
-              {container.difficultyLevel}
-            </span>
-          )}
-          {container.lessonCount !== undefined && (
-            <span className="flex items-center gap-1.5">
-              <BookOpen className="h-4 w-4" />
-              {t('lessonCount', { count: container.lessonCount })}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {!isAuthenticated && (
-        <div className="bg-muted mb-6 flex items-center justify-between rounded-lg px-4 py-3">
-          <p className="text-muted-foreground text-sm">{t('signInToEnrol')}</p>
-          <Button asChild size="sm">
-            <Link href="/login">{t('signIn')}</Link>
-          </Button>
-        </div>
-      )}
-
-      <ContainerTabsClient
-        containerId={container.id}
-        versionId={container.currentPublishedVersionId ?? undefined}
-      />
-    </section>
+    <CourseDetailView
+      container={container}
+      items={items}
+      isEnrolled={false}
+      gatedMode="preview"
+    />
   );
-}
-
-function AccessTierBadgeServer({
-  tier,
-  t,
-}: {
-  tier: Container['accessTier'];
-  t: Awaited<ReturnType<typeof getTranslations<'Content'>>>;
-}) {
-  const variants: Record<Container['accessTier'], BadgeProps['variant']> = {
-    public_free: 'success',
-    free_within_school: 'info',
-    public_paid: 'solid',
-    assigned_only: 'muted',
-    entitlement_required: 'muted',
-  };
-  return <Badge variant={variants[tier]}>{t(`accessTier.${tier}`)}</Badge>;
 }

@@ -1,0 +1,250 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
+
+import { Instr } from './instr';
+import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
+
+/**
+ * Content schema for fill-in-the-blank exercises.
+ * `textWithBlanks` uses `___1___` markers for blank positions (one blank supported here).
+ * `gloss` is an optional italic translation shown above the sentence.
+ * `wordBank` when present activates chip-selection mode; absent = free-type input.
+ */
+export interface FillContent {
+  textWithBlanks: string;
+  gloss?: string;
+  wordBank?: string[];
+  instruction?: string;
+}
+
+export interface FillExpectedAnswers {
+  /** Map of blank index ("1") → correct answer string. */
+  answers: Record<string, string>;
+  explanation?: string;
+}
+
+export interface FillBodyProps {
+  content: FillContent;
+  /** Current value for the (first) blank. */
+  value: string;
+  onValueChange: (val: string) => void;
+  onAnswerChange: (canSubmit: boolean) => void;
+  phase: RunnerPhase;
+  /** null in graded mode. */
+  ok: boolean | null;
+  mode: RunnerMode;
+  accent: string;
+}
+
+/* ── color constants ─────────────────────────────────────────────── */
+const OK_BG   = 'var(--ssz-color-success-50)';
+const OK_LINE = 'var(--ssz-color-success-500)';
+const OK_FG   = 'oklch(0.40 0.12 145)';
+const NO_BG   = 'var(--ssz-color-error-50)';
+const NO_LINE = 'var(--ssz-color-error-500)';
+const NO_FG   = 'var(--ssz-color-error-700)';
+const READING = "var(--ssz-font-reading)";
+
+/** Split `textWithBlanks` around the first `___N___` marker. */
+function parseBlanks(text: string): { before: string; after: string } {
+  const match = /^([\s\S]*?)___\d+___([\s\S]*)$/.exec(text);
+  if (!match) return { before: text, after: '' };
+  return { before: match[1] ?? '', after: match[2] ?? '' };
+}
+
+interface ChipStyle {
+  bg: string;
+  border: string;
+  color: string;
+}
+
+function getChipStyle(
+  word: string,
+  value: string,
+  reveal: boolean,
+  ok: boolean | null,
+  accent: string,
+  accentSoft: string,
+): ChipStyle {
+  const isSel = value === word;
+  if (isSel && reveal && ok === true)
+    return { bg: OK_BG, border: OK_LINE, color: OK_FG };
+  if (isSel && reveal && ok === false)
+    return { bg: NO_BG, border: NO_LINE, color: NO_FG };
+  if (isSel)
+    return { bg: accentSoft, border: accent, color: accent };
+  return { bg: 'var(--ssz-bg-surface)', border: 'var(--ssz-border-default)', color: 'var(--ssz-text-primary)' };
+}
+
+export function FillBody({
+  content,
+  value,
+  onValueChange,
+  onAnswerChange,
+  phase,
+  ok,
+  mode,
+  accent,
+}: FillBodyProps) {
+  const t = useTranslations('ExerciseRunner');
+  const accentSoft = modeAccentSoft(mode);
+  const reveal = phase === 'feedback';
+  const isAnswering = phase === 'answering';
+  const hasWordBank = Array.isArray(content.wordBank) && content.wordBank.length > 0;
+  const { before, after } = parseBlanks(content.textWithBlanks);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  /* blank underline / text color */
+  const blankColor =
+    reveal && ok === false
+      ? NO_LINE
+      : reveal && ok === true
+      ? OK_LINE
+      : value
+      ? accent
+      : 'var(--ssz-text-muted)';
+
+  /* notify runner */
+  useEffect(() => {
+    onAnswerChange(value.trim() !== '');
+  }, [value, onAnswerChange]);
+
+  /* 1–4 keyboard shortcuts for word bank (BEHAVIOR.md §6) */
+  useEffect(() => {
+    if (!isAnswering || !hasWordBank) return;
+    function onKeyDown(e: KeyboardEvent) {
+      const tag = ((e.target as HTMLElement).tagName ?? '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      const n = parseInt(e.key, 10);
+      if (n >= 1 && n <= 4) {
+        const word = content.wordBank?.[n - 1];
+        if (word !== undefined) onValueChange(value === word ? '' : word);
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isAnswering, hasWordBank, content.wordBank, value, onValueChange]);
+
+  const instruction = content.instruction ?? t('fill.defaultInstruction');
+
+  return (
+    <>
+      <Instr>{instruction}</Instr>
+
+      {/* Gloss / translation hint */}
+      {content.gloss && (
+        <div
+          className="mb-4 text-[13.5px] italic"
+          style={{ color: 'var(--ssz-text-muted)' }}
+        >
+          {content.gloss}
+        </div>
+      )}
+
+      {/* Sentence with inline blank */}
+      <div
+        className="mb-[26px] flex flex-wrap items-baseline gap-2 leading-[1.7]"
+        style={{
+          fontFamily: READING,
+          fontSize: 22,
+          fontWeight: 500,
+          color: 'var(--ssz-text-primary)',
+        }}
+      >
+        <span>{before}</span>
+
+        {hasWordBank ? (
+          /* Word-bank mode: underlined slot showing chosen word */
+          <span
+            style={{
+              display: 'inline-block',
+              minWidth: 96,
+              textAlign: 'center',
+              padding: '0 10px',
+              borderBottom: `3px solid ${blankColor}`,
+              color: blankColor,
+              fontWeight: 700,
+              fontSize: 22,
+              fontFamily: READING,
+            }}
+            aria-label={value || t('fill.blankLabel')}
+          >
+            {value || '   '}
+          </span>
+        ) : (
+          /* Free-type mode: inline input */
+          <input
+            ref={inputRef}
+            value={value}
+            disabled={!isAnswering}
+            aria-label={t('fill.inputLabel')}
+            onChange={(e) => onValueChange(e.target.value)}
+            placeholder={t('fill.placeholder')}
+            style={{
+              fontFamily: READING,
+              fontWeight: 700,
+              fontSize: 22,
+              color: blankColor,
+              minWidth: 140,
+              width: `${Math.max(7, value.length + 2)}ch`,
+              border: 'none',
+              borderBottom: `3px solid ${blankColor}`,
+              background: 'transparent',
+              textAlign: 'center',
+              outline: 'none',
+              padding: '0 6px',
+            }}
+          />
+        )}
+
+        <span>{after}</span>
+      </div>
+
+      {/* Word bank chips */}
+      {hasWordBank && (
+        <div className="flex flex-wrap gap-[10px]">
+          {(content.wordBank ?? []).map((word, i) => {
+            const s = getChipStyle(word, value, reveal, ok, accent, accentSoft);
+            return (
+              <button
+                key={word}
+                disabled={!isAnswering}
+                onClick={() => isAnswering && onValueChange(value === word ? '' : word)}
+                style={{
+                  padding: '11px 22px',
+                  borderRadius: 10,
+                  cursor: isAnswering ? 'pointer' : 'default',
+                  border: `2px solid ${s.border}`,
+                  background: s.bg,
+                  color: s.color,
+                  fontFamily: READING,
+                  fontSize: 17,
+                  fontWeight: 600,
+                  transition: 'all 130ms var(--ssz-ease-out)',
+                }}
+                aria-pressed={value === word}
+                className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ssz-border-focus)]"
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    fontSize: 10,
+                    fontFamily: 'var(--ssz-font-ui)',
+                    fontWeight: 700,
+                    opacity: 0.5,
+                    marginRight: 7,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                {word}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+}

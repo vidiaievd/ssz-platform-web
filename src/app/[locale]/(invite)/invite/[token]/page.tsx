@@ -1,4 +1,3 @@
-import { getLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
@@ -12,7 +11,6 @@ type Params = { params: Promise<{ token: string; locale: string }> };
 
 export default async function InvitePage({ params }: Params) {
   const { token } = await params;
-  const locale = await getLocale();
 
   const [currentUser, previewResult] = await Promise.all([
     getCurrentUser(),
@@ -35,8 +33,8 @@ export default async function InvitePage({ params }: Params) {
   if (terminalState) {
     const workspacePath =
       preview.role === 'STUDENT' || !preview.schoolSlug
-        ? `/${locale}/student`
-        : `/${locale}/school/${preview.schoolSlug}`;
+        ? '/student'
+        : `/school/${preview.schoolSlug}`;
     return (
       <InviteTerminal
         state={terminalState}
@@ -51,7 +49,6 @@ export default async function InvitePage({ params }: Params) {
       token={token}
       preview={preview}
       currentUser={currentUser}
-      locale={locale}
     />
   );
 }

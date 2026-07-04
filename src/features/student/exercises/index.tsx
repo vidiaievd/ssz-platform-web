@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { Badge } from '@/components/ui/badge';
 import type { ExerciseDisplay } from '@/features/content/types';
-import type { ExerciseType } from '../types/exercise';
+import type { AttemptResult, ExerciseType } from '../types/exercise';
 import { ClozeExercise } from './cloze';
 import { FreeTextExercise } from './free-text';
 import { MultipleChoiceExercise } from './multiple-choice';
@@ -10,11 +10,13 @@ import { PronunciationExercise } from './pronunciation';
 
 interface ExerciseInteractionProps {
   exercise: ExerciseDisplay;
+  /** Currently only wired for multiple_choice — used by flows that drive their own "next" step. */
+  onAnswered?: (result: AttemptResult) => void;
 }
 
 const SUPPORTED_TYPES: ExerciseType[] = ['cloze', 'multiple_choice', 'free_text', 'pronunciation'];
 
-export function ExerciseInteraction({ exercise }: ExerciseInteractionProps) {
+export function ExerciseInteraction({ exercise, onAnswered }: ExerciseInteractionProps) {
   const t = useTranslations('Exercise');
   const type = exercise.templateCode as ExerciseType;
 
@@ -40,7 +42,9 @@ export function ExerciseInteraction({ exercise }: ExerciseInteractionProps) {
       </div>
 
       {type === 'cloze' && <ClozeExercise exercise={exercise} />}
-      {type === 'multiple_choice' && <MultipleChoiceExercise exercise={exercise} />}
+      {type === 'multiple_choice' && (
+        <MultipleChoiceExercise exercise={exercise} onAnswered={onAnswered} />
+      )}
       {type === 'free_text' && <FreeTextExercise exercise={exercise} />}
       {type === 'pronunciation' && <PronunciationExercise exercise={exercise} />}
     </div>

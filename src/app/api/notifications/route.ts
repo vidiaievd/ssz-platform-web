@@ -9,8 +9,12 @@ export async function GET(request: NextRequest) {
   const query: Record<string, string> = {};
   const cursor = searchParams.get('cursor');
   const limit = searchParams.get('limit');
+  const filter = searchParams.get('filter');
+  const type = searchParams.get('type');
   if (cursor) query.cursor = cursor;
   if (limit) query.limit = limit;
+  if (filter) query.filter = filter;
+  if (type) query.type = type;
 
   try {
     const data = await serverFetch<NotificationsResponse>({

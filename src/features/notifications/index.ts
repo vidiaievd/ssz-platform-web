@@ -1,4 +1,10 @@
 export * from './api/keys';
 export * from './api/use-notifications';
+export { EnrollmentRequestActions } from './components/enrollment-request-actions';
+export { LiveIndicator } from './components/live-indicator';
 export { NotificationBell } from './components/notification-bell';
+export { NotificationListItem } from './components/notification-list-item';
+export { NotificationsPage } from './components/notifications-page';
+export * from './lib/group-by-day';
+export * from './lib/notification-registry';
 export * from './types';

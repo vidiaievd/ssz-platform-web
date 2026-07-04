@@ -5,7 +5,7 @@ import { isAppError } from '@/lib/errors';
 import type { MembershipStatus } from '@/features/enrollment/types';
 
 type AdminTransition = 'onboarding' | 'rejected';
-type StudentTransition = 'active' | 'placement-review';
+type StudentTransition = 'placement-review';
 
 function mapError(e: unknown) {
   if (isAppError(e)) {
@@ -52,15 +52,14 @@ export async function POST(
     }
   }
 
-  // Student-initiated transition: onboarding → active | placement-review
-  const studentTransitions = new Set<StudentTransition>(['active', 'placement-review']);
+  // Student-initiated transition: onboarding → placement-review
+  const studentTransitions = new Set<StudentTransition>(['placement-review']);
   if (studentTransitions.has(to as StudentTransition)) {
     try {
       await serverFetch({
         service: 'organization',
         path: `/schools/${schoolId}/memberships/${membershipId}/complete`,
         method: 'POST',
-        body: { to },
       });
       return NextResponse.json({ ok: true });
     } catch (e) {

@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWorkspaces, useActivateWorkspace, contextToUrl } from '../api/use-workspaces';
 import { toContextKey } from '../types';
 import type { WorkspaceContext } from '../types';
@@ -23,6 +24,8 @@ import { RoleBadge } from './role-badge';
 type Props = {
   activeContextKey: string;
   userId?: string;
+  /** Render avatar-only, for the collapsed sidebar. */
+  collapsed?: boolean;
 };
 
 function monogram(name: string): string {
@@ -89,7 +92,7 @@ function ctxLabel(ctx: WorkspaceContext, tPrivate: string, tStudent: string): st
   return tStudent;
 }
 
-export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
+export function WorkspaceSwitcher({ activeContextKey, userId, collapsed }: Props) {
   const t = useTranslations('WorkspaceSwitcher');
   const router = useRouter();
   const locale = useLocale();
@@ -99,9 +102,9 @@ export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
   // 1. Loading — show skeleton
   if (isLoading && !data) {
     return (
-      <div className="flex items-center gap-2 rounded-md px-2 py-1.5">
+      <div className={cn('flex items-center gap-2 px-2 py-1.5', collapsed && 'justify-center px-0')}>
         <Skeleton className="size-6 rounded-full" />
-        <Skeleton className="h-4 w-30 hidden sm:block" />
+        {!collapsed && <Skeleton className="h-4 w-30 hidden sm:block" />}
       </div>
     );
   }
@@ -119,11 +122,25 @@ export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
 
   // 4. Single context — show static label (no dropdown)
   if (contexts.length <= 1) {
-    return (
-      <div className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-(--ssz-text-primary) min-w-0">
+    const trigger = (
+      <div
+        className={cn(
+          'flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-(--ssz-text-primary) min-w-0',
+          collapsed && 'justify-center px-0',
+        )}
+      >
         <TriggerAvatar ctx={activeCtx} />
-        <span className="truncate hidden sm:block">{label}</span>
+        {!collapsed && <span className="truncate hidden sm:block">{label}</span>}
       </div>
+    );
+
+    if (!collapsed) return trigger;
+
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+        <TooltipContent side="right">{label}</TooltipContent>
+      </Tooltip>
     );
   }
 
@@ -147,21 +164,36 @@ export function WorkspaceSwitcher({ activeContextKey, userId }: Props) {
     activate.mutate(key);
   }
 
+  const trigger = (
+    <DropdownMenuTrigger
+      className={cn(
+        'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium',
+        'text-(--ssz-text-primary) hover:bg-accent transition-colors',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        collapsed ? 'justify-center px-0' : 'min-w-40 max-w-55',
+      )}
+      aria-label={t('trigger')}
+    >
+      <TriggerAvatar ctx={activeCtx} />
+      {!collapsed && (
+        <>
+          <span className="truncate flex-1 hidden sm:block">{label}</span>
+          <ChevronsUpDown className="size-3.5 shrink-0 text-(--ssz-text-muted)" aria-hidden="true" />
+        </>
+      )}
+    </DropdownMenuTrigger>
+  );
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn(
-          'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium',
-          'text-(--ssz-text-primary) hover:bg-accent transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          'min-w-40 max-w-55',
-        )}
-        aria-label={t('trigger')}
-      >
-        <TriggerAvatar ctx={activeCtx} />
-        <span className="truncate flex-1 hidden sm:block">{label}</span>
-        <ChevronsUpDown className="size-3.5 shrink-0 text-(--ssz-text-muted)" aria-hidden="true" />
-      </DropdownMenuTrigger>
+      {collapsed ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+          <TooltipContent side="right">{label}</TooltipContent>
+        </Tooltip>
+      ) : (
+        trigger
+      )}
 
       <DropdownMenuContent align="start" className="w-70">
         {sortedSchools.length > 0 && (

@@ -1,6 +1,7 @@
 {
   "Common": {
-    "appName": "SSZ Learn"
+    "appName": "SSZ Learn",
+    "loading": "Laster…"
   },
   "Theme": {
     "label": "Bytt tema",
@@ -66,7 +67,9 @@
     "discover": "Utforsk",
     "requests": "Søknader",
     "invitations": "Invitasjoner",
-    "scheduling": "Planlegging"
+    "scheduling": "Planlegging",
+    "courses": "Kurs",
+    "notifications": "Varsler"
   },
   "RouteTitles": {
     "dashboard": "Oversikt",
@@ -228,6 +231,33 @@
       "course": "Kurs",
       "module": "Modul",
       "collection": "Samling"
+    },
+    "discoverCoursesTitle": "Utforsk kurs",
+    "discoverCoursesSubtitle": "Kurs du tar på egen hånd — i ditt eget tempo, uten timeplan eller lærer. Noen tilbys også av skolene dine.",
+    "alsoTaughtAt": "Tilbys også av {school}",
+    "startSelfStudy": "Start på egen hånd",
+    "askToBePlaced": "Be om plassering",
+    "PlacementStaircase": {
+      "prompt": "Usikker på hvor du bør starte? Ta en rask nivåtest.",
+      "start": "Ta nivåtest",
+      "round": "Spørsmål {round}",
+      "skip": "Hopp over",
+      "next": "Neste",
+      "noMoreQuestions": "Vi har ingen flere spørsmål på dette nivået akkurat nå.",
+      "useLevel": "Bruk {level}",
+      "aboveLevel": "Du tester over dette kursets nivå ({level}) — ordforrådet er merket som kjent.",
+      "matchesLevel": "{level} ser ut til å passe godt for dette kurset."
+    },
+    "SkipKnown": {
+      "quickSkim": "Hurtigsjekk",
+      "know": "Kan det",
+      "new": "Nytt for meg",
+      "skipAllKnown": "Merk alle som kjent",
+      "skipAllFailed": "Kunne ikke hoppe over listen — prøv igjen.",
+      "skippedAll": "Merket alle {count} ord som kjent.",
+      "doneSummary": "Du kjente {known} av {total} ord.",
+      "continue": "Fortsett",
+      "exit": "Avslutt"
     }
   },
   "Auth": {
@@ -492,7 +522,8 @@
       "templatePlaceholder": "f.eks. Jeg ___ til jobben",
       "substitutionPlaceholder": "sykler",
       "addExample": "Legg til eksempel",
-      "removeExample": "Fjern eksempel"
+      "removeExample": "Fjern eksempel",
+      "pageOf": "Side {page} av {totalPages}"
     },
     "exercises": {
       "add": "Legg til øvelse",
@@ -596,7 +627,54 @@
       "confirmPrompt": "For å bekrefte, skriv inn tittelen nøyaktig slik den er vist:",
       "confirm": "Publiser",
       "cancel": "Avbryt",
-      "success": "Beholderen ble publisert."
+      "success": "Publisert.",
+      "dialogTitle": "Klar til å publisere?",
+      "replacing": "Publisering erstatter gjeldende live-versjon for alle påmeldte studenter.",
+      "emptyDraft": "Dette utkastet har ingen innhold. Legg til minst ett element før publisering.",
+      "reviewGate": "Jeg har gjennomgått endringene og advarslene",
+      "releaseNotesLabel": "Utgivelsesnotater (valgfritt)",
+      "releaseNotesPlaceholder": "Hva er endret i denne versjonen? Studentene vil ikke se dette.",
+      "visibilityLabel": "Synlighet",
+      "visibilityNotice": "Denne versjonen blir tilgjengelig for alle påmeldte studenter umiddelbart.",
+      "publishing": "Publiserer…",
+      "retry": "Prøv igjen",
+      "reload": "Last inn på nytt",
+      "failure": "Kunne ikke publisere — sjekk problemene nedenfor og prøv igjen.",
+      "stale": "En nyere versjon ble publisert — last inn på nytt for å fortsette.",
+      "allPassed": "Alle kontroller bestått"
+    },
+    "versions": {
+      "title": "Versjoner",
+      "draft": "Utkast",
+      "published": "Publisert",
+      "createDraftTitle": "Opprett et utkast",
+      "createDraftBody": "Start et nytt utkast for å begynne redigering.",
+      "createDraft": "Opprett utkast",
+      "readOnlyTitle": "Skrivebeskyttet",
+      "readOnlyBody": "Du har ikke redigeringstilgang til dette innholdet.",
+      "requestAccess": "Be om redigeringstilgang",
+      "viewPublished": "Se publisert",
+      "continueEditing": "Fortsett redigering",
+      "discardDraft": "Forkast utkast",
+      "publishedOn": "Publisert",
+      "editedOn": "Sist redigert",
+      "loadError": "Kunne ikke laste versjoner.",
+      "retry": "Prøv igjen"
+    },
+    "discard": {
+      "title": "Forkaste utkast?",
+      "body": "Alle endringer i dette utkastet vil gå tapt permanent. Dette kan ikke angres.",
+      "confirm": "Forkast utkast",
+      "cancel": "Avbryt",
+      "discarding": "Forkaster…",
+      "success": "Utkast forkastet",
+      "error": "Kunne ikke forkaste utkastet. Prøv igjen."
+    },
+    "checklist": {
+      "blockers": "Blokkerende problemer",
+      "warnings": "Advarsler",
+      "passed": "Bestått",
+      "goToFix": "Fiks →"
     },
     "tags": {
       "empty": "Ingen tagger ennå.",
@@ -706,6 +784,43 @@
         "createError": "Kunne ikke opprette kurset. Vennligst prøv igjen.",
         "createSuccess": "Kurset er opprettet — legg til leksjoner og publiser når du er klar."
       }
+    },
+    "moduleBuilder": {
+      "untitled": "Uten tittel",
+      "previewAriaLabel": "Forhåndsvis {title} som student",
+      "moreAriaLabel": "Flere alternativer for {title}",
+      "menuRename": "Gi nytt navn",
+      "menuDuplicate": "Dupliser",
+      "menuPublish": "Publiser modul",
+      "menuUnpublish": "Avpubliser modul",
+      "menuMoveTop": "Flytt til toppen",
+      "menuMoveBottom": "Flytt til bunnen",
+      "menuDelete": "Slett…",
+      "addModule": "Legg til modul",
+      "sectionHead": "Moduler",
+      "sectionSubhead": "i rekkefølge",
+      "dragHint": "Dra for å endre rekkefølge",
+      "emptyTitle": "Ingen moduler ennå",
+      "emptyBody": "Legg til din første modul for å begynne å bygge kurset.",
+      "deleteConfirmTitle": "Slett «{title}»?",
+      "deleteConfirmBody": "Dette sletter modulen og {count, plural, one {# leksjon} other {# leksjoner}} permanent. Dette kan ikke angres.",
+      "deleteConfirmCta": "Slett modul",
+      "deleteCancel": "Avbryt",
+      "publishDisabledTip": "Fiks {count, plural, one {# blokkering} other {# blokkeringer}} først"
+    },
+    "moduleSections": {
+      "readListen": "Les og lytt",
+      "vocabulary": "Vokabular",
+      "grammar": "Grammatikk",
+      "practice": "Øvelse"
+    },
+    "modulePreview": {
+      "studentView": "Studentvisning",
+      "fidelityLabel": "Forhåndsvisningsmodus",
+      "static": "Statisk",
+      "interactive": "Interaktiv",
+      "interactiveNote": "Bytt til studentappen for å prøve øvelsene interaktivt.",
+      "note": "Oppdateres mens du redigerer"
     }
   },
   "Discovery": {
@@ -732,10 +847,9 @@
     "request": {
       "title": "Be om innmelding — {name}",
       "description": "Fortell skolen om deg selv og hvorfor du vil bli med.",
-      "messageLabel": "Melding (valgfritt)",
-      "messagePlaceholder": "Fortell skolen om deg selv…",
       "levelLabel": "Ditt nåværende nivå (valgfritt)",
-      "levelPlaceholder": "Velg nivå",
+      "languageLabel": "Språket du vil lære",
+      "levelUnknown": "Jeg vet ikke ennå",
       "submit": "Send søknad",
       "cancel": "Avbryt",
       "success": "Din innmeldingsførespørsel til {name} er sendt."
@@ -813,7 +927,6 @@
       "stepInterview": "Intervju",
       "allDoneTitle": "Du er klar!",
       "allDoneReview": "Vi vil gjennomgå resultatene dine og komme tilbake til deg snart.",
-      "allDoneActive": "Du er nå registrert. Velkommen!",
       "goToDashboard": "Gå til dashbord",
       "finishFailed": "Noe gikk galt. Prøv igjen.",
       "stepsLabel": "Registreringstrinn",
@@ -878,7 +991,8 @@
       "reject": "Avslå",
       "accepted": "Student godkjent og sendt til onboarding",
       "rejected": "Studentens forespørsel avslått",
-      "transitionFailed": "Handling mislyktes. Prøv igjen."
+      "transitionFailed": "Handling mislyktes. Prøv igjen.",
+      "alreadyHandled": "Denne forespørselen er allerede behandlet — listen er oppdatert."
     }
   },
   "Student": {
@@ -928,6 +1042,86 @@
       "completedToast": "Leksjon fullført! Bra jobba.",
       "noContent": "Ingen innhold tilgjengelig for denne leksjonen ennå.",
       "keyboardHint": "← → for å navigere · Esc for å avslutte"
+    },
+    "SchoolStatus": {
+      "stepperLabel": "Påmeldingsfremgang",
+      "stepApplication": "Søknad",
+      "stepPlacement": "Plassering",
+      "stepGroup": "Gruppe",
+      "stepSchedule": "Timeplan",
+      "stepNumber": "Trinn {n}",
+      "stepDone": "fullført",
+      "pendingTitle": "Søknad sendt",
+      "pendingDescription": "{school} vurderer søknaden din.",
+      "onboardingTitle": "Fullfør registreringen din",
+      "onboardingDescription": "Fullfør trinnene nedenfor så {school} kan plassere deg i en gruppe.",
+      "placementReviewTitle": "Venter på plassering",
+      "placementReviewDescription": "{school} finner den rette gruppen for deg.",
+      "activeTitle": "Du er registrert",
+      "activeDescription": "Du er registrert hos {school}.",
+      "activeDescriptionWithGroup": "Du er i {group} hos {school}.",
+      "rejectedTitle": "Søknaden ble ikke godkjent",
+      "rejectedDescription": "{school} godkjente ikke søknaden din.",
+      "leftTitle": "Ikke registrert lenger",
+      "leftDescription": "Du har forlatt {school}.",
+      "badgeRejected": "Avslått",
+      "badgeLeft": "Forlatt",
+      "reapply": "Søk på nytt",
+      "discoverSelfStudy": "Utforsk selvstudiekurs"
+    },
+    "MySchools": {
+      "title": "Mine skoler",
+      "subtitle": "Skoler du har søkt om eller er registrert hos.",
+      "empty": "Du har ikke søkt om noen skole ennå.",
+      "browseDiscover": "Utforsk skoler",
+      "noUpcomingLesson": "Ingen kommende time ennå",
+      "nextLessonAt": "Neste: {day}, {start}–{end}",
+      "classmateCount": "{count, plural, one {# medelev} other {# medelever}}"
+    },
+    "SchoolDetail": {
+      "backLink": "Tilbake til mine skoler",
+      "lockedHeading": "{school} — ikke aktiv ennå",
+      "modeOnline": "Online",
+      "modeInPerson": "Fysisk",
+      "teachersLabel": "Lærere",
+      "teacherRolePrimary": "Lærer",
+      "teacherRoleCoPrimary": "Medlærer",
+      "teacherRoleSubstitute": "Vikar",
+      "scheduleTitle": "Ukeplan",
+      "scheduleEmpty": "Timeplanen er ikke satt opp ennå — sjekk tilbake senere.",
+      "nextLessonBadge": "Neste time",
+      "weekday": {
+        "Mon": "Mandag",
+        "Tue": "Tirsdag",
+        "Wed": "Onsdag",
+        "Thu": "Torsdag",
+        "Fri": "Fredag",
+        "Sat": "Lørdag",
+        "Sun": "Søndag"
+      },
+      "materialsTitle": "Materialer",
+      "materialsEmpty": "Ingen materialer ennå.",
+      "mainCourseBadge": "Hovedkurs",
+      "materialUntitled": "Kurs uten tittel",
+      "materialUnavailable": "Ikke tilgjengelig ennå",
+      "progressInProgress": "Pågår",
+      "progressCompleted": "Fullført",
+      "progressNeedsReview": "Trenger vurdering",
+      "classmates": "{count, plural, one {# medelev} other {# medelever}} i gruppen din",
+      "leaveAction": "Forlat skolen",
+      "leaveConfirmTitle": "Forlate denne skolen?",
+      "leaveConfirmDescription": "Du mister tilgangen til gruppen, timeplanen og materialene til {school}. Du kan søke igjen senere.",
+      "leaveCancel": "Avbryt",
+      "leaveConfirm": "Forlat skolen",
+      "leaveError": "Kunne ikke forlate skolen. Vennligst prøv igjen."
+    },
+    "AssignedMaterials": {
+      "title": "Tildelt til deg",
+      "overdue": "Forfalt"
+    },
+    "GroupAssignedBanner": {
+      "message": "Du er i {group} hos {school}!",
+      "dismiss": "Lukk"
     }
   },
   "Exercise": {
@@ -965,30 +1159,160 @@
   },
   "Notifications": {
     "title": "Varsler",
+    "subtitle": "Alt som krever din oppmerksomhet, på ett sted.",
     "label": "{count, plural, =0 {Varsler} one {# ulest varsel} other {# uleste varsler}}",
     "unread": "{count, plural, one {# ulest} other {# uleste}}",
     "unreadDot": "Ulest",
     "empty": "Ingen nye varsler!",
+    "markAllAsRead": "Merk alle som lest",
+    "openAll": "Åpne alle",
+    "settings": "Innstillinger",
+    "live": "Live",
+    "reconnecting": "Kobler til på nytt",
+    "resourceUnavailable": "Dette elementet er ikke lenger tilgjengelig.",
+    "categories": {
+      "Enrollment": "Påmelding",
+      "Staff": "Ansatte",
+      "System": "System"
+    },
+    "tabs": {
+      "all": "Alle",
+      "unread": "Uleste",
+      "archived": "Arkivert"
+    },
+    "filterAllTypes": "Alle typer",
+    "loadMore": "Last mer",
+    "dayGroups": {
+      "today": "I dag",
+      "yesterday": "I går"
+    },
+    "selectAll": "Velg alle",
+    "selectedCount": "{count, plural, one {# valgt} other {# valgt}}",
+    "bulk": {
+      "markRead": "Merk som lest",
+      "archive": "Arkiver",
+      "delete": "Slett",
+      "clear": "Fjern valg"
+    },
+    "rowActions": {
+      "markRead": "Merk som lest",
+      "markUnread": "Merk som ulest",
+      "archive": "Arkiver",
+      "unarchive": "Gjenopprett fra arkiv",
+      "delete": "Slett"
+    },
+    "deleteConfirm": {
+      "title": "Slette varsel?",
+      "titlePlural": "Slette {count} varsler?",
+      "description": "Dette kan ikke angres.",
+      "cancel": "Avbryt",
+      "confirm": "Slett"
+    },
+    "toasts": {
+      "archived": "Varsel arkivert",
+      "deleted": "Varsel slettet",
+      "markedRead": "Merket som lest",
+      "undo": "Angre",
+      "actionFailed": "Noe gikk feil. Prøv igjen.",
+      "alreadyHandled": "Dette er allerede behandlet."
+    },
+    "emptyState": {
+      "all": "Ingen nye varsler!",
+      "unread": "Ingen uleste varsler.",
+      "archived": "Ingen arkiverte varsler.",
+      "category": "Ingenting her for dette filteret."
+    },
+    "error": {
+      "title": "Kunne ikke laste varsler.",
+      "retry": "Prøv igjen"
+    },
+    "actions": {
+      "approve": "Godkjenn",
+      "reject": "Avslå",
+      "viewApplicant": "Se søker",
+      "needsAction": "Krever handling"
+    },
     "types": {
+      "GENERAL": {
+        "title": "Varsel",
+        "body": "Du har et nytt varsel."
+      },
+      "WELCOME_EMAIL": {
+        "title": "Velkommen",
+        "body": "Velkommen til plattformen."
+      },
+      "EMAIL_VERIFICATION": {
+        "title": "Bekreft e-posten din",
+        "body": "Bekreft e-postadressen din."
+      },
+      "PASSWORD_RESET": {
+        "title": "Forespørsel om tilbakestilling av passord",
+        "body": "Det ble forespurt en tilbakestilling av passordet for kontoen din."
+      },
+      "PASSWORD_CHANGED": {
+        "title": "Passord endret",
+        "body": "Passordet ditt ble endret."
+      },
+      "STUDY_REMINDER": {
+        "title": "Påminnelse om læring",
+        "body": "Det er tid for læringssesjonen din."
+      },
+      "TEACHER_ABSENCE": {
+        "title": "Lærerfravær rapportert",
+        "body": "En lærer rapporterte fravær."
+      },
+      "SUBSTITUTE_REQUEST": {
+        "title": "Vikar trengs",
+        "body": "En leksjon trenger en vikarlærer."
+      },
+      "SUBSTITUTE_ASSIGNED": {
+        "title": "Vikar tildelt",
+        "body": "En vikarlærer ble tildelt."
+      },
+      "OVERLOAD_ALERT": {
+        "title": "Lærer overbelastet",
+        "body": "En lærers arbeidsmengde overstiger kapasiteten."
+      },
+      "VACANCY_ALERT": {
+        "title": "Åpen stilling",
+        "body": "En undervisningsstilling krever oppmerksomhet."
+      },
+      "UNCOVERED_LESSON": {
+        "title": "Udekket leksjon",
+        "body": "En leksjon har ingen tildelt lærer."
+      },
+      "SCHOOL_INVITATION": {
+        "title": "Skoleinvitasjon",
+        "body": "Du har blitt invitert til å bli med i en skole."
+      },
+      "TEACHER_PROFILE_CHANGED": {
+        "title": "Lærer oppdaterte profil",
+        "body": "En lærer i skolen din oppdaterte profilinformasjonen sin."
+      },
+      "ENROLLMENT_REQUEST": {
+        "title": "{studentName} ba om å bli med",
+        "titleFallback": "Ny påmeldingsforespørsel",
+        "body": "Vil bli med i {schoolName}."
+      },
       "ENROLLMENT_APPROVED": {
-        "title": "Påmelding godkjent",
-        "body": "Påmeldingsforespørselen din ble godkjent."
+        "title": "Godkjent — plassering pågår",
+        "body": "{school} godkjente søknaden din. Vi gir deg beskjed når du er plassert i en gruppe.",
+        "bodyFallback": "Søknaden din ble godkjent. Plassering pågår."
       },
       "ENROLLMENT_REJECTED": {
         "title": "Påmelding avvist",
         "body": "Påmeldingsforespørselen din ble ikke godkjent."
       },
-      "LESSON_ASSIGNED": {
-        "title": "Leksjon tildelt",
-        "body": "En ny leksjon har blitt tildelt deg."
+      "PLACEMENT_REVIEW_READY": {
+        "title": "Elev klar for plassering",
+        "body": "En elev hos {school} har fullført onboarding og er klar til å bli plassert i en gruppe.",
+        "bodyFallback": "En elev er klar til å bli plassert i en gruppe."
       },
-      "NEW_MATERIAL": {
-        "title": "Nytt materiale tilgjengelig",
-        "body": "Nytt læremateriell har blitt lagt til."
-      },
-      "TEACHER_PROFILE_CHANGED": {
-        "title": "Lærer oppdaterte profil",
-        "body": "En lærer i skolen din oppdaterte profilinformasjonen sin."
+      "GROUP_ASSIGNED": {
+        "title": "Du er i {group}!",
+        "body": "Du har blitt tildelt {group} hos {school}. Sjekk timeplanen din.",
+        "titleFallback": "Gruppe tildelt",
+        "bodyFallback": "Du har blitt tildelt en gruppe."
       }
     }
   },
@@ -2447,7 +2771,602 @@
       "alreadyEnrolled": "Du er registrert i denne skolen.",
       "continueOnboarding": "Fortsett registrering",
       "joinAsGuest": "Søk om å bli med",
-      "inviteOnly": "Denne skolen tar imot studenter kun etter invitasjon."
+      "inviteOnly": "Denne skolen tar imot studenter kun etter invitasjon.",
+      "reapply": "Søk på nytt"
+    }
+  },
+  "Learning": {
+    "audio": {
+      "play": "Spill av",
+      "pause": "Pause",
+      "seekBack": "10 sekunder tilbake",
+      "seekForward": "10 sekunder frem",
+      "speed": "{speed}× hastighet",
+      "loading": "Laster lyd…",
+      "scrub": "Spol",
+      "player": "Lydavspiller"
+    },
+    "refStrip": {
+      "reference": "Referansetekst"
+    },
+    "glossary": {
+      "seeInContext": "Se i kontekst",
+      "listenWord": "Hør"
+    },
+    "unitStepper": {
+      "label": "Enhetssteg",
+      "readListen": "Les og lytt",
+      "vocabulary": "Ordforråd",
+      "grammar": "Grammatikk",
+      "practice": "Øvelser"
+    },
+    "errorState": {
+      "default": "Noe gikk galt.",
+      "retry": "Prøv igjen"
+    },
+    "unitFlow": {
+      "exitLabel": "Kurs",
+      "unitLabel": "ENHET {n}",
+      "loadError": "Kunne ikke laste denne enheten",
+      "loadErrorSub": "Noe gikk galt. Fremgangen din er trygg — prøv igjen.",
+      "phaseDebug": "Fase: {phase}"
+    },
+    "readSection": {
+      "unitCourse": "Enhet {unit} · {course}",
+      "finishedReading": "Jeg har lest ferdig →",
+      "finishedListening": "Jeg har hørt ferdig →",
+      "finishedNext": "Ferdig — neste: Ordforråd",
+      "showTranslation": "Vis oversettelse",
+      "hideTranslation": "Skjul oversettelse",
+      "jumpAudio": "Hopp til dette avsnittet i lyden",
+      "tapToLookUp": "trykk for å slå opp",
+      "tapParagraphToJump": "Trykk på et avsnitt for å hoppe til det",
+      "showText": "Vis tekst",
+      "pressPlayToListen": "Trykk spill for å begynne å lytte",
+      "illustrationPlaceholder": "illustrasjon",
+      "lookUpWord": "Slå opp",
+      "listenMode": {
+        "label": "Læringsmodus",
+        "read": "Les",
+        "listenText": "Lytt + tekst",
+        "audioOnly": "Kun lyd"
+      }
+    },
+    "vocabSection": {
+      "passHeader": "Ordforråd · kjenner du dette ordet?",
+      "progress": "{current} av {total}",
+      "quickCheck": "Rask sjekk",
+      "listen": "Lytt",
+      "playing": "Spiller…",
+      "knowIt": "Kan det",
+      "knowItHint": "← K",
+      "newToMe": "Nytt for meg",
+      "newToMeHint": "N →",
+      "knownNote": "Ord du \"kan\" legges til side — sjekkes automatisk igjen om noen dager.",
+      "allKnownTitle": "Du kan alle {total} ordene",
+      "allKnownBody": "Ingen studiekort i dag. Systemet sjekker disse automatisk igjen om noen dager.",
+      "continueToGrammar": "Fortsett til grammatikk →",
+      "studyHeader": "Studer · {current} av {total}",
+      "tapToReveal": "Trykk for å avsløre · Space",
+      "revealMeaning": "Vis betydning",
+      "howWell": "Hvor godt kjente du det?",
+      "translation": "Oversettelse",
+      "fromTheText": "Fra teksten",
+      "showExample": "Vis eksempel",
+      "ratingHard": "Vanskelig",
+      "ratingHardSub": "Igjen snart",
+      "ratingGood": "Bra",
+      "ratingGoodSub": "Husket det",
+      "ratingEasy": "Enkelt",
+      "ratingEasySub": "Visste det",
+      "nothingToStudy": "Ingenting å studere",
+      "doneTitle": "Gjennomgang fullført",
+      "doneBody": "Disse ordene er nå i din spaced-repetition-plan.",
+      "statWordsSeen": "ord sett",
+      "statAlreadyKnew": "kunne fra før",
+      "statStudiedToday": "studert i dag"
+    },
+    "grammarSection": {
+      "ruleLabel": "Grammatikkregel",
+      "examples": "Flere eksempler",
+      "ctaPractise": "Forstått — la oss øve →",
+      "ctaContinue": "Fortsett →",
+      "noRule": "Ingen grammatikknote",
+      "noRuleBody": "Denne enheten har ingen grammatikkregel. Gå videre til øvelse.",
+      "exLabel": "Grammatikk · rask sjekk",
+      "exCheck": "Sjekk →",
+      "exContinue": "Fortsett →",
+      "correct": "Riktig!",
+      "incorrect": "Ikke helt"
+    },
+    "practiceSection": {
+      "progress": "{current} av {total}",
+      "check": "Sjekk →",
+      "skip": "Hopp over →",
+      "finish": "Fullfør →",
+      "seeResults": "Se resultater →",
+      "noPractice": "Ingen øvelser for denne enheten",
+      "noPracticeBody": "Bra — du kan gå rett til resultatene.",
+      "loadError": "Kunne ikke laste inn øvelsen.",
+      "unsupported": "Øvelsestypen støttes ikke"
+    },
+    "completeSection": {
+      "unitComplete": "Enhet {unit} fullført",
+      "subtitle": "Du har fullført denne enheten. Her er resultatet.",
+      "canDoLabel": "Du kan nå",
+      "statPerfect": "Perfekt!",
+      "statMistakes": "feil",
+      "statWords": "ord",
+      "statXp": "XP",
+      "xpEarned": "+10",
+      "backToCourse": "Tilbake til kurset"
+    },
+    "courseHome": {
+      "loadError": "Kunne ikke laste kurset",
+      "loadErrorSub": "Noe gikk galt. Prøv igjen.",
+      "lessons": "{done} av {total} leksjoner",
+      "complete": "fullført",
+      "hero": {
+        "overdueLabel": "OPPGAVE FORFALT",
+        "overdueTitle": "Du har en forfalt oppgave",
+        "overdueMeta": "Send inn før læreren gjennomgår gruppen.",
+        "overdueCta": "Fullfør og send inn",
+        "reviewLabel": "DAGLIG GJENNOMGANG",
+        "reviewTitle": "{count} kort til gjennomgang",
+        "reviewMeta": "Hold streaken din – det tar bare noen minutter.",
+        "reviewCta": "Start gjennomgang",
+        "resumeLabel": "FORTSETT Å LÆRE",
+        "resumeTitle": "Fortsett der du slapp",
+        "resumeMeta": "Du er midt i en enhet. Fortsett!",
+        "resumeCta": "Fortsett leksjonen",
+        "startLabel": "NESTE ENHET",
+        "startTitle": "Klar for neste enhet?",
+        "startMeta": "Du har fullført forrige enhet. Start den neste.",
+        "startCta": "Start enhet",
+        "caughtLabel": "ALT ER GJORT",
+        "caughtTitle": "Du er à jour!",
+        "caughtMeta": "Godt jobbet! Kom tilbake senere eller forhåndsvis neste enhet.",
+        "caughtCta": "Forhåndsvis neste enhet"
+      },
+      "viewToggle": {
+        "units": "Enhetsflyt",
+        "skills": "Ferdighetsoversikt"
+      },
+      "unitFlowList": {
+        "statusDone": "Fullført",
+        "statusActive": "Pågår",
+        "statusLocked": "Låst",
+        "lessons": "{done} av {total} leksjoner",
+        "continueUnit": "Fortsett"
+      },
+      "skillIndex": {
+        "mastery": "{pct}% mestring",
+        "jump": "Gå til →",
+        "noData": "Ingen ferdighetsmålinger ennå"
+      },
+      "reviewCard": {
+        "title": "Daglig gjennomgang",
+        "allReviewed": "Alt gjennomgatt",
+        "allReviewedSub": "Du er a jour. Kom tilbake i morgen!",
+        "itemsDue": "til gjennomgang",
+        "reviewedToday": "{n} gjennomgatt i dag",
+        "cta": "Gjennomga {n} na",
+        "vocab": "Vokabular",
+        "exercises": "Ovelser"
+      },
+      "canDoCard": {
+        "title": "Kan-gjore-fremgang",
+        "goals": "{total} mal",
+        "recentTitle": "Nylig last opp",
+        "nextTitle": "Neste mal",
+        "inUnit": "Enhet {n}",
+        "noItems": "Fullfor enheter for a lase opp mal."
+      }
+    }
+  },
+  "ExerciseRunner": {
+    "practice": "Øving",
+    "graded": "Lekse",
+    "exit": "Avslutt øvelse",
+    "setProgress": "{current} av {total}",
+    "gradedBanner": "Vurdert · svar sendes til læreren din, ingen umiddelbar tilbakemelding.",
+    "check": "Sjekk",
+    "submitAnswer": "Send inn svar",
+    "continue": "Fortsett",
+    "finish": "Fullfør",
+    "feedback": {
+      "correct": "Riktig",
+      "incorrect": "Ikke helt",
+      "submitted": "Svar sendt inn",
+      "gradedNote": "Lagret for læreren din å vurdere. Du ser resultatene når det er returnert.",
+      "answerLabel": "Svar:"
+    },
+    "loading": "Laster øvelse…",
+    "error": {
+      "title": "Kunne ikke laste denne øvelsen",
+      "body": "Sjekk tilkoblingen din og prøv igjen. Fremgangen din i dette settet er lagret.",
+      "retry": "Prøv igjen"
+    },
+    "mcq": {
+      "defaultInstruction": "Velg riktig svar",
+      "optionsLabel": "Svaralternativer"
+    },
+    "fill": {
+      "defaultInstruction": "Fullfør setningen",
+      "blankLabel": "Tom",
+      "inputLabel": "Ditt svar",
+      "placeholder": "skriv…"
+    },
+    "translate": {
+      "defaultInstruction": "Oversett setningen",
+      "textareaLabel": "Din oversettelse",
+      "placeholder": "Skriv på {lang}…",
+      "sampleAnswer": "Eksempelsvar"
+    },
+    "match": {
+      "defaultInstruction": "Koble hvert ord til oversettelsen",
+      "helperIdle": "Trykk på et ord til venstre…",
+      "helperArmed": "Trykk nå på samsvarende ord til høyre."
+    }
+  },
+  "Srs": {
+    "entry": {
+      "start": "Start øvelse",
+      "settings": "Innstillinger",
+      "stats": "Statistikk",
+      "dueToday": "{count, plural, one {# kort til i dag} other {# kort til i dag}}",
+      "limitReachedToday": "Du har nådd dagens grense – kom tilbake i morgen.",
+      "caughtUp": {
+        "title": "Du er à jour",
+        "subtitle": "Kom tilbake i morgen.",
+        "studyNew": "Øv på nye ord manuelt"
+      }
+    },
+    "streak": {
+      "days": "{count, plural, =0 {Start en streak i dag} one {# dag på rad} other {# dager på rad}}"
+    },
+    "card": {
+      "showAnswer": "Vis svar",
+      "fromList": "fra {list}",
+      "playAudio": "Spill uttale",
+      "directionForward": "Husk betydningen",
+      "directionReverse": "Husk ordet",
+      "definitionLabel": "Definisjon",
+      "examplesLabel": "Eksempler"
+    },
+    "rating": {
+      "again": "Igjen",
+      "hard": "Vanskelig",
+      "good": "Bra",
+      "easy": "Lett",
+      "intervalIn": "om {label}",
+      "ariaAgain": "Igjen — neste øvelse {interval}",
+      "ariaHard": "Vanskelig — neste øvelse {interval}",
+      "ariaGood": "Bra — neste øvelse {interval}",
+      "ariaEasy": "Lett — neste øvelse {interval}"
+    },
+    "session": {
+      "progress": "{done} av {total} gjennomgått",
+      "newCardAnnounce": "Kort {n} av {total}",
+      "answerShownAnnounce": "Svar vist",
+      "exit": "Avslutt øvelse"
+    },
+    "summary": {
+      "title": "Ferdig for i dag",
+      "cardsReviewed": "Kort gjennomgått",
+      "accuracy": "Nøyaktighet",
+      "timeSpent": "Tid brukt",
+      "streakStatus": "Streak",
+      "reviewMisses": "Øv på feil igjen ({count})",
+      "done": "Ferdig"
+    },
+    "limit": {
+      "title": "Det er dagens grense",
+      "body": "Kom tilbake i morgen – streaken din er trygg.",
+      "cta": "Kom tilbake i morgen"
+    },
+    "settings": {
+      "title": "Øvelsesinnstillinger",
+      "dailyLimit": "Daglig grense",
+      "dailyLimitHelp": "Maks kort per dag",
+      "audio": "Lyd",
+      "audioHelp": "Spill uttale på kort",
+      "preferReverse": "Foretrekk omvendt retning",
+      "preferReverseHelp": "Vis betydningen først, husk ordet",
+      "disableAudioPair": "Deaktiver lyd for disse språkene",
+      "disableAudioPairHelp": "Skjul uttale der TTS-kvaliteten er dårlig"
+    },
+    "stats": {
+      "title": "Dine øvelsesstatistikker",
+      "retention": "Huskeevne",
+      "matureYoung": "Modne vs. unge",
+      "mature": "Modne",
+      "young": "Unge",
+      "last30": "Siste 30 dager",
+      "heatCell": "{count, plural, one {# øvelse} other {# øvelser}} den {date}",
+      "empty": "Øv på noen kort for å se statistikken din"
+    },
+    "toast": {
+      "milestone": "{days, plural, one {# dags streak!} other {# dagers streak!}} Fortsett!",
+      "reviewError": "Øvelsen ble ikke lagret. Prøv igjen.",
+      "settingsError": "Innstillingene ble ikke lagret. Prøv igjen."
+    },
+    "error": {
+      "title": "Kunne ikke laste øvelsene",
+      "body": "Fullførte øvelser er trygge. Prøv igjen.",
+      "retry": "Prøv igjen"
+    }
+  },
+  "Placement": {
+    "intro": {
+      "title": "Finn ditt startpunkt",
+      "body": "Svar på noen raske spørsmål, og vi hopper over det du allerede kan — rett til riktig modul. Ingen poengsum, ingen press.",
+      "bodyCompact": "Svar på noen raske spørsmål, og vi hopper over det du allerede kan. Ingen poengsum, ingen press.",
+      "takePlacement": "Ta plasseringstesten",
+      "skipToBeginning": "Hopp over — start fra begynnelsen",
+      "features": {
+        "time": {
+          "title": "Omtrent 2 minutter",
+          "sub": "Fem korte spørsmål"
+        },
+        "adapt": {
+          "title": "Tilpasser seg underveis",
+          "sub": "Spørsmålene blir lettere eller vanskeligere basert på svarene dine"
+        },
+        "skip": {
+          "title": "Hopp over det du kan",
+          "sub": "Start lenger fremme i stedet for fra leksjon én"
+        }
+      }
+    },
+    "runner": {
+      "progressCount": "{current} / {total}",
+      "levelLabel": "Tilpasser til ditt nivå",
+      "steppingUp": "Går opp",
+      "easingBack": "Går ned",
+      "mcqEyebrow": "Velg riktig svar",
+      "translateEyebrow": "Oversett til {lang}",
+      "dontKnow": "Jeg vet ikke dette",
+      "continue": "Fortsett",
+      "seeMyLevel": "Se mitt nivå",
+      "skipForNow": "Hopp over nå"
+    },
+    "result": {
+      "eyebrow": "Du er klar for",
+      "title": "Modul {n} · {moduleTitle}",
+      "titleFallback": "Modul {n}",
+      "sub": "Bra — du er komfortabel rundt <strong>{level}</strong>. Vi hopper over grunnleggende og starter der det blir nyttig.",
+      "known": "Kan",
+      "startHere": "Start her",
+      "startAt": "Start på modul {n}",
+      "startFromModule1": "Start fra modul 1 i stedet"
+    },
+    "skipped": {
+      "title": "Vi starter fra begynnelsen",
+      "body": "Ingen problem — du begynner med modul 1. Du kan ta plasseringstesten når som helst fra kurshjemmet ditt hvis du vil hoppe over senere.",
+      "goToModule1": "Gå til modul 1",
+      "takePlacement": "Ta plasseringstesten i stedet"
+    },
+    "loading": {
+      "ariaLabel": "Laster plasseringstest"
+    },
+    "error": {
+      "title": "Kunne ikke laste plasseringstesten",
+      "body": "Noe gikk galt på vår side. Du kan prøve igjen, eller bare starte fra begynnelsen og plassere deg selv senere.",
+      "retry": "Prøv igjen",
+      "startFromBeginning": "Start fra begynnelsen"
+    },
+    "inline": {
+      "offerText": "Ikke sikker på hvor du skal starte? Ta plasseringstesten",
+      "dismiss": "Lukk"
+    },
+    "onboarding": {
+      "account": "Konto",
+      "chooseCourse": "Velg kurs",
+      "placement": "Plassering"
+    },
+    "seed": {
+      "success": "Vokabular fra tidligere moduler er markert som kjent."
+    }
+  },
+  "Catalog": {
+    "enrolled": "Påmeldt",
+    "locked": "Ikke tilgjengelig ennå",
+    "free": "Gratis",
+    "canDoGoals": "{count, plural, one {# kan-gjøre-mål} other {# kan-gjøre-mål}}",
+    "discover": "Oppdag kurs",
+    "discoverSub": "Finn et kurs du kan ta på egen hånd eller med en skole.",
+    "search": "Søk etter kurs…",
+    "all": "Alle",
+    "level": "Nivå",
+    "language": "Språk",
+    "school": "Skole",
+    "free2": "Gratis",
+    "paid": "Betalt",
+    "results": "{count, plural, one {# kurs} other {# kurs}}",
+    "emptyTitle": "Ingen kurs samsvarer med filtrene",
+    "emptyBody": "Prøv å fjerne et filter eller utvide nivåområdet.",
+    "clearFilters": "Nullstill filtre",
+    "errorTitle": "Kunne ikke laste katalogen",
+    "errorBody": "Noe gikk galt hos oss.",
+    "retry": "Prøv igjen",
+    "moduleLabel": "Modul {n}",
+    "freePreview": "Gratis forhåndsvisning",
+    "done": "Fullført",
+    "enrollToUnlock": "Meld deg på for å låse opp",
+    "previewUnit": "Forhåndsvis en enhet",
+    "close": "Lukk",
+    "previewCoverPlaceholder": "ankerbilde",
+    "previewPassage": "En kort ankertekst åpner hver enhet. Du leser og lytter først, deretter møter du de nye ordene, ser grammatikken i kontekst og øver — alt bygget rundt ett praktisk mål.",
+    "listenToAudio": "Lytt til lydfilen",
+    "audioCaption": "0:48 · morsmålstaler",
+    "playAudio": "Spill av lyd",
+    "ctaEnroll": "Meld deg på — start gratis",
+    "ctaRequest": "Be om å bli med",
+    "ctaPurchase": "Få full tilgang",
+    "ctaContinue": "Fortsett å lære",
+    "noteEnroll": "Ingen kortdetaljer kreves. Start den første enheten med en gang.",
+    "noteRequest": "En lærer gjennomgår forespørselen din og plasserer deg i en gruppe. Du vil bli varslet.",
+    "notePurchase": "Engangskjøp. Livstids tilgang, inkludert fremtidige oppdateringer.",
+    "noteContinue": "Fortsett der du slapp.",
+    "noteLocked": "Fullfør det nødvendige nivået først, eller be skolen din om å åpne det.",
+    "progressCaption": "{pct}% fullført",
+    "selfStudy": "Egenstudium",
+    "syllabus": "Fagplan",
+    "syllabusCaption": "{count} moduler · ett kan-gjøre-mål hver",
+    "modules": "moduler",
+    "tryFreeTitle": "Prøv én enhet gratis",
+    "tryFreeBody": "Les, lytt og se hvordan et kan-gjøre-mål fungerer — ingen registrering.",
+    "teaserMore": "{count} flere moduler",
+    "enrolledToast": "Påmeldt — starter første enhet",
+    "requestedToast": "Forespørsel sendt — en lærer vil plassere deg snart",
+    "purchaseToast": "Omdirigerer til kassen…"
+  },
+  "Progress": {
+    "head": {
+      "eyebrow": "Din fremgang",
+      "eyebrowTeacher": "{course} · ser på elev",
+      "title": "Fremgang",
+      "switchStudent": "Bytt elev",
+      "startReview": "Start daglig repetisjon · {count}",
+      "allReviewed": "Alt er repetert i dag ✓"
+    },
+    "hero": {
+      "sublabel": "beholdt",
+      "ringLabel": "{pct}% av vokabularet beholdt",
+      "headline": "Du kan {count} ekte ting på {language}",
+      "headlineTeacher": "{count} virkelige ferdigheter så langt",
+      "body": "Fremgang måles av hva som er beholdt, ikke bare fullført.",
+      "nextUp": " Neste mål: \"{text}\"."
+    },
+    "legend": {
+      "completed": "Fullført",
+      "completedDesc": "Du gjorde det",
+      "mastered": "Mestret",
+      "masteredDesc": "Du har beholdt det"
+    },
+    "canDo": {
+      "mastered": "Mestret",
+      "completed": "Fullført",
+      "inProgress": "Pågår · {pct}%"
+    },
+    "mastery": {
+      "sectionLabel": "{skill} mestring",
+      "level": "Nivå {level}",
+      "completed": "Fullført",
+      "mastered": "Mestret",
+      "masteredOf": "mestret · {completed}% fullført",
+      "gap": "{gap}% fullført men ikke ennå beholdt — repeter for å feste det.",
+      "fullyRetained": "Fullt beholdt. Bra!"
+    },
+    "modules": {
+      "mastered": "Mestret",
+      "completed": "Fullført",
+      "inProgress": "Pågår",
+      "locked": "Låst"
+    },
+    "sections": {
+      "canDo": "Kan-gjøre-mål",
+      "canDoSub": "Daterte milepæler — ekte ferdigheter du har låst opp.",
+      "mastery": "Mestring per ferdighet",
+      "masterySub": "Fullført betyr at du gjorde det. Mestret betyr at det har festet seg.",
+      "srs": "Daglig repetisjon",
+      "srsSub": "Spredt repetisjon holder det du har lært fra å forsvinne.",
+      "reviewNow": "Repeter nå",
+      "modules": "Per modul",
+      "modulesSub": "Hvor mye av hver enhet du har fullført — og beholdt."
+    },
+    "stats": {
+      "streak": "Rekke",
+      "streakDays": "{count} dager",
+      "bestStreak": "Best: {count}",
+      "dueToday": "Forfaller i dag",
+      "doneSoFar": "{count} gjort",
+      "retention": "Bevaring",
+      "strongRecall": "Sterk gjenkalling",
+      "matured": "Modne kort",
+      "ofTotal": "av {total}"
+    },
+    "empty": {
+      "title": "Fremgangskartet ditt venter",
+      "body": "Fullfør din første leksjon for å låse opp ditt personlige fremgangskart."
+    }
+  },
+  "Assignments": {
+    "eyebrow": "Hjemmeoppgaver",
+    "title": "Oppgaver",
+    "subDefault": "Arbeid satt av læreren din, med frister.",
+    "subOverdue": "Du har {count, plural, one {# forfalt oppgave} other {# forfalte oppgaver}} — la oss ta {count, plural, one {den} other {dem}}.",
+    "filterTodo": "Å gjøre",
+    "filterSubmitted": "Innlevert",
+    "filterCompleted": "Fullført",
+    "filterAll": "Alle",
+    "backLink": "Alle oppgaver",
+    "status": {
+      "active": "Aktiv",
+      "overdue": "Forfalt",
+      "submitted": "Innlevert",
+      "inReview": "Under gjennomgang",
+      "returned": "Revider",
+      "completed": "Fullført"
+    },
+    "mode": {
+      "graded": "Vurdert",
+      "written": "Skriftlig"
+    },
+    "hero": {
+      "ctaDoItNow": "Gjør det nå",
+      "ctaRevise": "Revider og lever inn igjen",
+      "ctaStart": "Start",
+      "ctaOpen": "Åpne"
+    },
+    "empty": {
+      "title": "Ingen oppgaver her",
+      "body": "Læreren din har ikke satt noe arbeid for dette filteret ennå.",
+      "bodyAll": "Ingen oppgaver ennå — læreren din vil sette arbeid her når det er klart."
+    },
+    "error": {
+      "title": "Noe gikk galt",
+      "body": "Vi kunne ikke laste oppgavene dine akkurat nå.",
+      "retry": "Prøv igjen"
+    },
+    "graded": {
+      "introSubtitle": "Vurdert · {items} spørsmål · ~{est}",
+      "infoBanner": "Vurdert modus. Du vil ikke se om hvert svar er riktig underveis — du får poengsummen og tilbakemeldingen etter at du leverer inn. Ett forsøk teller mot kurskarakteren din.",
+      "back": "Tilbake",
+      "start": "Start vurdert oppgave",
+      "counter": "{current} / {total}",
+      "pill": "Vurdert · ingen hint",
+      "saveExit": "Lagre og avslutt",
+      "next": "Neste",
+      "submitForGrading": "Send inn for vurdering",
+      "doneLabel": "Sendt inn for vurdering",
+      "doneScore": "{score}%",
+      "doneDetail": "{correct} av {total} riktige · teller mot karakteren din",
+      "doneBack": "Tilbake til oppgaver"
+    },
+    "written": {
+      "wordCount": "{count, plural, one {# ord} other {# ord}}",
+      "wordHint": "Sikt mot {min}–{max} ord",
+      "saveDraft": "Lagre utkast",
+      "submit": "Send inn",
+      "timelineLabel": "Innleveringsstatus",
+      "step": {
+        "submitted": "Innlevert",
+        "inReview": "Under gjennomgang",
+        "feedback": "Tilbakemelding",
+        "done": "Fullført",
+        "returnedLabel": "Returnert · revider",
+        "resubmitLabel": "Send inn igjen"
+      },
+      "stateSubmitted": "Innlevert {time}",
+      "stateSubmittedSub": "Læreren din vil gjennomgå det og sende tilbakemelding.",
+      "stateInReview": "{teacher} gjennomgår arbeidet ditt",
+      "stateInReviewSub": "Tilbakemelding kommer vanligvis innen en dag.",
+      "stateReturned": "Tilbakemelding fra {teacher}",
+      "later": "Senere",
+      "reviseResubmit": "Revider og lever inn igjen",
+      "done": "Ferdig"
     }
   }
 }

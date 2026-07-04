@@ -1,0 +1,183 @@
+// @vitest-environment node
+
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
+
+vi.mock('@/lib/api/server-fetcher', () => ({ serverFetch: vi.fn() }));
+
+const { GET } = await import('./route');
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { AppError } from '@/lib/errors';
+import type {
+  CanDoResponse,
+  CourseMastery,
+  CourseProgress,
+  SrsDueResponse,
+} from '@/features/learning/types';
+import type { Container, ContainerItem } from '@/features/content/types';
+
+const PARAMS = { params: Promise.resolve({ courseId: 'course-1' }) };
+
+const MOCK_PROGRESS: CourseProgress = {
+  courseId: 'course-1',
+  totalLessons: 10,
+  completedLessons: 4,
+  percentComplete: 40,
+  modules: [],
+  lessons: [],
+};
+
+const MOCK_MASTERY: CourseMastery = {
+  courseId: 'course-1',
+  overallMastery: 72,
+  bySkill: [{ skill: 'listening', masteryPercent: 80, successCount: 8, attemptCount: 10 }],
+};
+
+const MOCK_DUE: SrsDueResponse = {
+  dueCount: 3,
+  streakDays: 7,
+  dailyLimit: 20,
+  reviewedToday: 3,
+  cards: [
+    { id: 'c1', status: 'due' as const, direction: 'forward' as const, front: { word: 'hund' }, back: { definition: 'dog', sentences: [] }, predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } } },
+    { id: 'c2', status: 'due' as const, direction: 'forward' as const, front: { word: 'katt' }, back: { definition: 'cat', sentences: [] }, predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } } },
+    { id: 'c3', status: 'due' as const, direction: 'forward' as const, front: { word: 'Ex 1' }, back: { definition: 'ans', sentences: [] }, predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } } },
+  ],
+};
+
+const MOCK_CAN_DO: CanDoResponse = {
+  items: [
+    {
+      id: 'cd-1',
+      descriptor: 'Can order food in Norwegian',
+      cefrLevel: 'A2',
+      moduleId: 'mod-1',
+      evidenceCount: 3,
+      state: 'unlocked',
+    },
+  ],
+};
+
+const MOCK_CONTAINER: Partial<Container> = {
+  id: 'course-1',
+  title: 'Norwegian B1',
+  difficultyLevel: 'B1',
+  targetLanguage: 'nb',
+  containerType: 'course',
+  visibility: 'public',
+  accessTier: 'public_free',
+  ownerUserId: 'user-1',
+  slug: 'norwegian-b1',
+  currentPublishedVersionId: 'ver-1',
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
+};
+
+const MOCK_ITEMS: Partial<ContainerItem>[] = [
+  {
+    id: 'ci-1',
+    itemId: 'mod-1',
+    itemType: 'container',
+    position: 1,
+    title: 'Everyday routines',
+    containerVersionId: 'ver-1',
+    isRequired: true,
+    addedAt: '2024-01-01T00:00:00Z',
+  },
+];
+
+function makeRequest() {
+  return new NextRequest('http://localhost/api/learning/course-home/course-1');
+}
+
+function mockAllSuccess() {
+  vi.mocked(serverFetch)
+    .mockResolvedValueOnce(MOCK_PROGRESS)
+    .mockResolvedValueOnce(MOCK_MASTERY)
+    .mockResolvedValueOnce(MOCK_DUE)
+    .mockResolvedValueOnce(MOCK_CAN_DO)
+    .mockResolvedValueOnce(MOCK_CONTAINER)
+    .mockResolvedValueOnce(MOCK_ITEMS);
+}
+
+beforeEach(() => vi.mocked(serverFetch).mockReset());
+
+describe('GET /api/learning/course-home/[courseId]', () => {
+  it('returns a composite payload on success', async () => {
+    mockAllSuccess();
+
+    const res = await GET(makeRequest(), PARAMS);
+    expect(res.status).toBe(200);
+
+    const body = await res.json();
+    expect(body.courseInfo).toMatchObject({ id: 'course-1', title: 'Norwegian B1', cefrLevel: 'B1', targetLanguage: 'nb' });
+    expect(body.progress).toEqual(MOCK_PROGRESS);
+    expect(body.mastery).toEqual(MOCK_MASTERY);
+    expect(body.srsDueCount).toBe(3);
+    expect(body.srsStreakDays).toBe(7);
+    expect(body.srsReviewedToday).toBe(3);
+    // Card shape no longer carries contentType; all due attributed to vocab
+    expect(body.srsVocabDue).toBe(3);
+    expect(body.srsExerciseDue).toBe(0);
+    expect(body.canDo).toEqual(MOCK_CAN_DO);
+    expect(body.overdueAssignmentCount).toBe(0);
+    expect(body.units).toHaveLength(1);
+    expect(body.units[0]).toMatchObject({ id: 'mod-1', title: 'Everyday routines', status: 'locked', position: 1 });
+  });
+
+  it('fires 5 parallel + 1 sequential call (6 total)', async () => {
+    mockAllSuccess();
+
+    await GET(makeRequest(), PARAMS);
+    expect(vi.mocked(serverFetch)).toHaveBeenCalledTimes(6);
+  });
+
+  it('scales SRS breakdown when dueCount > sample size', async () => {
+    const largeDue: SrsDueResponse = { ...MOCK_DUE, dueCount: 30, cards: MOCK_DUE.cards };
+    vi.mocked(serverFetch)
+      .mockResolvedValueOnce(MOCK_PROGRESS)
+      .mockResolvedValueOnce(MOCK_MASTERY)
+      .mockResolvedValueOnce(largeDue)
+      .mockResolvedValueOnce(MOCK_CAN_DO)
+      .mockResolvedValueOnce(MOCK_CONTAINER)
+      .mockResolvedValueOnce(MOCK_ITEMS);
+
+    const res = await GET(makeRequest(), PARAMS);
+    const body = await res.json();
+    expect(body.srsDueCount).toBe(30);
+    expect(body.srsVocabDue + body.srsExerciseDue).toBe(30);
+  });
+
+  it('returns empty units when course has no published version', async () => {
+    const containerWithoutVersion = { ...MOCK_CONTAINER, currentPublishedVersionId: null };
+    vi.mocked(serverFetch)
+      .mockResolvedValueOnce(MOCK_PROGRESS)
+      .mockResolvedValueOnce(MOCK_MASTERY)
+      .mockResolvedValueOnce(MOCK_DUE)
+      .mockResolvedValueOnce(MOCK_CAN_DO)
+      .mockResolvedValueOnce(containerWithoutVersion);
+
+    const res = await GET(makeRequest(), PARAMS);
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.units).toEqual([]);
+  });
+
+  it('returns 401 when any upstream is unauthenticated', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('unauthenticated', 'Not authenticated'));
+    const res = await GET(makeRequest(), PARAMS);
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 404 when the course is not found', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('not_found', 'Course not found'));
+    const res = await GET(makeRequest(), PARAMS);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 502 on upstream failure', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new Error('network error'));
+    const res = await GET(makeRequest(), PARAMS);
+    expect(res.status).toBe(502);
+  });
+});

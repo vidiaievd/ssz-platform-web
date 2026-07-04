@@ -1,6 +1,7 @@
 {
   "Common": {
-    "appName": "SSZ Learn"
+    "appName": "SSZ Learn",
+    "loading": "Loading…"
   },
   "Theme": {
     "label": "Toggle theme",
@@ -66,7 +67,9 @@
     "discover": "Discover",
     "requests": "Requests",
     "invitations": "Invitations",
-    "scheduling": "Scheduling"
+    "scheduling": "Scheduling",
+    "courses": "Courses",
+    "notifications": "Notifications"
   },
   "RouteTitles": {
     "dashboard": "Dashboard",
@@ -228,6 +231,33 @@
       "course": "Course",
       "module": "Module",
       "collection": "Collection"
+    },
+    "discoverCoursesTitle": "Discover courses",
+    "discoverCoursesSubtitle": "Courses you start on your own — self-paced, no schedule, no teacher. Some are also taught by your schools.",
+    "alsoTaughtAt": "Also taught at {school}",
+    "startSelfStudy": "Start on your own",
+    "askToBePlaced": "Ask to be placed",
+    "PlacementStaircase": {
+      "prompt": "Not sure where to start? Take a quick placement check.",
+      "start": "Take placement check",
+      "round": "Question {round}",
+      "skip": "Skip",
+      "next": "Next",
+      "noMoreQuestions": "We're out of questions at this level for now.",
+      "useLevel": "Use {level}",
+      "aboveLevel": "You're testing above this course's level ({level}) — marked its vocabulary as known.",
+      "matchesLevel": "Looks like {level} is a good fit for this course."
+    },
+    "SkipKnown": {
+      "quickSkim": "Quick skim",
+      "know": "Know it",
+      "new": "New to me",
+      "skipAllKnown": "Skip all as known",
+      "skipAllFailed": "Couldn't skip the list — try again.",
+      "skippedAll": "Marked all {count} words as known.",
+      "doneSummary": "You knew {known} of {total} words.",
+      "continue": "Continue",
+      "exit": "Exit"
     }
   },
   "Auth": {
@@ -497,7 +527,8 @@
       "templatePlaceholder": "e.g. Jeg ___ til jobben",
       "substitutionPlaceholder": "sykler",
       "addExample": "Add example",
-      "removeExample": "Remove example"
+      "removeExample": "Remove example",
+      "pageOf": "Page {page} of {totalPages}"
     },
     "exercises": {
       "add": "Add exercise",
@@ -601,7 +632,54 @@
       "confirmPrompt": "To confirm, type the title exactly as shown:",
       "confirm": "Publish",
       "cancel": "Cancel",
-      "success": "Container published successfully."
+      "success": "Published successfully.",
+      "dialogTitle": "Ready to publish?",
+      "replacing": "Publishing this will replace the current live version for all enrolled students.",
+      "emptyDraft": "This draft has no content. Add at least one item before publishing.",
+      "reviewGate": "I have reviewed the changes and warnings",
+      "releaseNotesLabel": "Release notes (optional)",
+      "releaseNotesPlaceholder": "What changed in this version? Students won't see this.",
+      "visibilityLabel": "Visibility",
+      "visibilityNotice": "This version becomes live for all enrolled students immediately.",
+      "publishing": "Publishing…",
+      "retry": "Retry",
+      "reload": "Reload",
+      "failure": "Couldn't publish — please check the issues below and try again.",
+      "stale": "A newer version was published — reload to continue.",
+      "allPassed": "All checks passed"
+    },
+    "versions": {
+      "title": "Versions",
+      "draft": "Draft",
+      "published": "Published",
+      "createDraftTitle": "Create a draft",
+      "createDraftBody": "Start a new draft to begin editing.",
+      "createDraft": "Create draft",
+      "readOnlyTitle": "Read-only",
+      "readOnlyBody": "You don't have edit access to this content.",
+      "requestAccess": "Request edit access",
+      "viewPublished": "View published",
+      "continueEditing": "Continue editing",
+      "discardDraft": "Discard draft",
+      "publishedOn": "Published",
+      "editedOn": "Last edited",
+      "loadError": "Couldn't load versions.",
+      "retry": "Retry"
+    },
+    "discard": {
+      "title": "Discard draft?",
+      "body": "All changes in this draft will be permanently lost. This cannot be undone.",
+      "confirm": "Discard draft",
+      "cancel": "Cancel",
+      "discarding": "Discarding…",
+      "success": "Draft discarded",
+      "error": "Failed to discard draft. Please try again."
+    },
+    "checklist": {
+      "blockers": "Blocking issues",
+      "warnings": "Warnings",
+      "passed": "Passed",
+      "goToFix": "Fix →"
     },
     "tags": {
       "empty": "No tags yet.",
@@ -711,6 +789,43 @@
         "createError": "Couldn't create the course. Please try again.",
         "createSuccess": "Course created — add lessons and publish when ready."
       }
+    },
+    "moduleBuilder": {
+      "untitled": "Untitled module",
+      "previewAriaLabel": "Preview {title} as student",
+      "moreAriaLabel": "More options for {title}",
+      "menuRename": "Rename",
+      "menuDuplicate": "Duplicate",
+      "menuPublish": "Publish module",
+      "menuUnpublish": "Unpublish module",
+      "menuMoveTop": "Move to top",
+      "menuMoveBottom": "Move to bottom",
+      "menuDelete": "Delete…",
+      "addModule": "Add module",
+      "sectionHead": "Modules",
+      "sectionSubhead": "in order",
+      "dragHint": "Drag to reorder",
+      "emptyTitle": "No modules yet",
+      "emptyBody": "Add your first module to start building the course.",
+      "deleteConfirmTitle": "Delete “{title}”?",
+      "deleteConfirmBody": "This will permanently delete the module and its {count, plural, one {# lesson} other {# lessons}}. This cannot be undone.",
+      "deleteConfirmCta": "Delete module",
+      "deleteCancel": "Cancel",
+      "publishDisabledTip": "Fix {count, plural, one {# blocker} other {# blockers}} first"
+    },
+    "moduleSections": {
+      "readListen": "Read & Listen",
+      "vocabulary": "Vocabulary",
+      "grammar": "Grammar",
+      "practice": "Practice"
+    },
+    "modulePreview": {
+      "studentView": "Student view",
+      "fidelityLabel": "Preview mode",
+      "static": "Static",
+      "interactive": "Interactive",
+      "interactiveNote": "Switch to the student app to try exercises interactively.",
+      "note": "Updates as you edit"
     }
   },
   "Discovery": {
@@ -737,10 +852,9 @@
     "request": {
       "title": "Request to enrol — {name}",
       "description": "Tell the school about yourself and why you'd like to join.",
-      "messageLabel": "Message (optional)",
-      "messagePlaceholder": "Tell the school about yourself…",
       "levelLabel": "Your current level (optional)",
-      "levelPlaceholder": "Select level",
+      "languageLabel": "Language you want to learn",
+      "levelUnknown": "I don't know yet",
       "submit": "Send request",
       "cancel": "Cancel",
       "success": "Your enrolment request to {name} has been sent."
@@ -818,7 +932,6 @@
       "stepInterview": "Interview",
       "allDoneTitle": "You're all set!",
       "allDoneReview": "We'll review your results and get back to you soon.",
-      "allDoneActive": "You've been enrolled. Welcome aboard!",
       "goToDashboard": "Go to dashboard",
       "finishFailed": "Something went wrong. Please try again.",
       "stepsLabel": "Enrollment steps",
@@ -883,7 +996,8 @@
       "reject": "Reject",
       "accepted": "Student accepted and moved to onboarding",
       "rejected": "Student request rejected",
-      "transitionFailed": "Action failed. Please try again."
+      "transitionFailed": "Action failed. Please try again.",
+      "alreadyHandled": "This request was already handled — the list has been refreshed."
     }
   },
   "Student": {
@@ -933,6 +1047,86 @@
       "completedToast": "Lesson complete! Great work.",
       "noContent": "No content available for this lesson yet.",
       "keyboardHint": "← → to navigate · Esc to exit"
+    },
+    "SchoolStatus": {
+      "stepperLabel": "Enrollment progress",
+      "stepApplication": "Application",
+      "stepPlacement": "Placement",
+      "stepGroup": "Group",
+      "stepSchedule": "Schedule",
+      "stepNumber": "Step {n}",
+      "stepDone": "completed",
+      "pendingTitle": "Application submitted",
+      "pendingDescription": "{school} is reviewing your application.",
+      "onboardingTitle": "Complete your onboarding",
+      "onboardingDescription": "Finish the steps below so {school} can place you in a group.",
+      "placementReviewTitle": "Waiting to be placed",
+      "placementReviewDescription": "{school} is finding the right group for you.",
+      "activeTitle": "You're enrolled",
+      "activeDescription": "You're enrolled at {school}.",
+      "activeDescriptionWithGroup": "You're in {group} at {school}.",
+      "rejectedTitle": "Application not accepted",
+      "rejectedDescription": "{school} did not accept your application.",
+      "leftTitle": "No longer enrolled",
+      "leftDescription": "You left {school}.",
+      "badgeRejected": "Rejected",
+      "badgeLeft": "Left",
+      "reapply": "Re-apply",
+      "discoverSelfStudy": "Discover self-study courses"
+    },
+    "MySchools": {
+      "title": "My schools",
+      "subtitle": "Schools you've applied to or are enrolled with.",
+      "empty": "You haven't applied to a school yet.",
+      "browseDiscover": "Discover schools",
+      "noUpcomingLesson": "No upcoming lesson yet",
+      "nextLessonAt": "Next: {day}, {start}–{end}",
+      "classmateCount": "{count, plural, one {# classmate} other {# classmates}}"
+    },
+    "SchoolDetail": {
+      "backLink": "Back to my schools",
+      "lockedHeading": "{school} — not yet active",
+      "modeOnline": "Online",
+      "modeInPerson": "In person",
+      "teachersLabel": "Teachers",
+      "teacherRolePrimary": "Teacher",
+      "teacherRoleCoPrimary": "Co-teacher",
+      "teacherRoleSubstitute": "Substitute",
+      "scheduleTitle": "Weekly schedule",
+      "scheduleEmpty": "Your schedule isn't set yet — check back soon.",
+      "nextLessonBadge": "Next lesson",
+      "weekday": {
+        "Mon": "Monday",
+        "Tue": "Tuesday",
+        "Wed": "Wednesday",
+        "Thu": "Thursday",
+        "Fri": "Friday",
+        "Sat": "Saturday",
+        "Sun": "Sunday"
+      },
+      "materialsTitle": "Materials",
+      "materialsEmpty": "No materials yet.",
+      "mainCourseBadge": "Main course",
+      "materialUntitled": "Untitled course",
+      "materialUnavailable": "Not available yet",
+      "progressInProgress": "In progress",
+      "progressCompleted": "Completed",
+      "progressNeedsReview": "Needs review",
+      "classmates": "{count, plural, one {# classmate} other {# classmates}} in your group",
+      "leaveAction": "Leave school",
+      "leaveConfirmTitle": "Leave this school?",
+      "leaveConfirmDescription": "You'll lose access to {school}'s group, schedule, and materials. You can apply again later.",
+      "leaveCancel": "Cancel",
+      "leaveConfirm": "Leave school",
+      "leaveError": "Could not leave the school. Please try again."
+    },
+    "AssignedMaterials": {
+      "title": "Assigned to you",
+      "overdue": "Overdue"
+    },
+    "GroupAssignedBanner": {
+      "message": "You're in {group} at {school}!",
+      "dismiss": "Dismiss"
     }
   },
   "Exercise": {
@@ -970,30 +1164,160 @@
   },
   "Notifications": {
     "title": "Notifications",
+    "subtitle": "Everything that needs your attention, in one place.",
     "label": "{count, plural, =0 {Notifications} one {# unread notification} other {# unread notifications}}",
     "unread": "{count, plural, one {# unread} other {# unread}}",
     "unreadDot": "Unread",
     "empty": "You're all caught up!",
+    "markAllAsRead": "Mark all as read",
+    "openAll": "Open all",
+    "settings": "Settings",
+    "live": "Live",
+    "reconnecting": "Reconnecting",
+    "resourceUnavailable": "This item is no longer available.",
+    "categories": {
+      "Enrollment": "Enrollment",
+      "Staff": "Staff",
+      "System": "System"
+    },
+    "tabs": {
+      "all": "All",
+      "unread": "Unread",
+      "archived": "Archived"
+    },
+    "filterAllTypes": "All types",
+    "loadMore": "Load more",
+    "dayGroups": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "selectAll": "Select all",
+    "selectedCount": "{count, plural, one {# selected} other {# selected}}",
+    "bulk": {
+      "markRead": "Mark as read",
+      "archive": "Archive",
+      "delete": "Delete",
+      "clear": "Clear"
+    },
+    "rowActions": {
+      "markRead": "Mark as read",
+      "markUnread": "Mark as unread",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "delete": "Delete"
+    },
+    "deleteConfirm": {
+      "title": "Delete notification?",
+      "titlePlural": "Delete {count} notifications?",
+      "description": "This can't be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "toasts": {
+      "archived": "Notification archived",
+      "deleted": "Notification deleted",
+      "markedRead": "Marked as read",
+      "undo": "Undo",
+      "actionFailed": "Something went wrong. Please try again.",
+      "alreadyHandled": "This was already handled."
+    },
+    "emptyState": {
+      "all": "You're all caught up!",
+      "unread": "No unread notifications.",
+      "archived": "No archived notifications.",
+      "category": "Nothing here for this filter."
+    },
+    "error": {
+      "title": "Couldn't load notifications.",
+      "retry": "Retry"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "viewApplicant": "View applicant",
+      "needsAction": "Needs action"
+    },
     "types": {
+      "GENERAL": {
+        "title": "Notification",
+        "body": "You have a new notification."
+      },
+      "WELCOME_EMAIL": {
+        "title": "Welcome",
+        "body": "Welcome to the platform."
+      },
+      "EMAIL_VERIFICATION": {
+        "title": "Verify your email",
+        "body": "Please verify your email address."
+      },
+      "PASSWORD_RESET": {
+        "title": "Password reset requested",
+        "body": "A password reset was requested for your account."
+      },
+      "PASSWORD_CHANGED": {
+        "title": "Password changed",
+        "body": "Your password was changed."
+      },
+      "STUDY_REMINDER": {
+        "title": "Study reminder",
+        "body": "It's time for your study session."
+      },
+      "TEACHER_ABSENCE": {
+        "title": "Teacher absence reported",
+        "body": "A teacher reported an absence."
+      },
+      "SUBSTITUTE_REQUEST": {
+        "title": "Substitute needed",
+        "body": "A lesson needs a substitute teacher."
+      },
+      "SUBSTITUTE_ASSIGNED": {
+        "title": "Substitute assigned",
+        "body": "A substitute teacher was assigned."
+      },
+      "OVERLOAD_ALERT": {
+        "title": "Teacher overload",
+        "body": "A teacher's workload exceeds capacity."
+      },
+      "VACANCY_ALERT": {
+        "title": "Open vacancy",
+        "body": "A teaching vacancy needs attention."
+      },
+      "UNCOVERED_LESSON": {
+        "title": "Uncovered lesson",
+        "body": "A lesson has no assigned teacher."
+      },
+      "SCHOOL_INVITATION": {
+        "title": "School invitation",
+        "body": "You've been invited to join a school."
+      },
+      "TEACHER_PROFILE_CHANGED": {
+        "title": "Teacher updated profile",
+        "body": "A teacher in your school updated their profile information."
+      },
+      "ENROLLMENT_REQUEST": {
+        "title": "{studentName} requested to join",
+        "titleFallback": "New enrollment request",
+        "body": "Wants to join {schoolName}."
+      },
       "ENROLLMENT_APPROVED": {
-        "title": "Enrollment approved",
-        "body": "Your enrollment request was approved."
+        "title": "Accepted — placement in progress",
+        "body": "{school} accepted your application. We'll notify you once you're placed in a group.",
+        "bodyFallback": "Your application was accepted. Placement is in progress."
       },
       "ENROLLMENT_REJECTED": {
         "title": "Enrollment rejected",
         "body": "Your enrollment request was not approved."
       },
-      "LESSON_ASSIGNED": {
-        "title": "Lesson assigned",
-        "body": "A new lesson has been assigned to you."
+      "PLACEMENT_REVIEW_READY": {
+        "title": "Student ready for placement",
+        "body": "A student at {school} finished onboarding and is ready to be placed in a group.",
+        "bodyFallback": "A student is ready to be placed in a group."
       },
-      "NEW_MATERIAL": {
-        "title": "New material available",
-        "body": "New learning material has been added."
-      },
-      "TEACHER_PROFILE_CHANGED": {
-        "title": "Teacher updated profile",
-        "body": "A teacher in your school updated their profile information."
+      "GROUP_ASSIGNED": {
+        "title": "You're in {group}!",
+        "body": "You've been assigned to {group} at {school}. Check your schedule.",
+        "titleFallback": "Group assigned",
+        "bodyFallback": "You've been assigned to a group."
       }
     }
   },
@@ -2452,7 +2776,602 @@
       "alreadyEnrolled": "You're enrolled in this school.",
       "continueOnboarding": "Continue enrollment",
       "joinAsGuest": "Apply to join",
-      "inviteOnly": "This school accepts students by invitation only."
+      "inviteOnly": "This school accepts students by invitation only.",
+      "reapply": "Re-apply"
+    }
+  },
+  "Learning": {
+    "audio": {
+      "play": "Play",
+      "pause": "Pause",
+      "seekBack": "Back 10 seconds",
+      "seekForward": "Forward 10 seconds",
+      "speed": "{speed}× speed",
+      "loading": "Loading audio…",
+      "scrub": "Seek",
+      "player": "Audio player"
+    },
+    "refStrip": {
+      "reference": "Reference"
+    },
+    "glossary": {
+      "seeInContext": "See in context",
+      "listenWord": "Listen"
+    },
+    "unitStepper": {
+      "label": "Unit steps",
+      "readListen": "Read & Listen",
+      "vocabulary": "Vocabulary",
+      "grammar": "Grammar",
+      "practice": "Practice"
+    },
+    "errorState": {
+      "default": "Something went wrong.",
+      "retry": "Try again"
+    },
+    "unitFlow": {
+      "exitLabel": "Course",
+      "unitLabel": "UNIT {n}",
+      "loadError": "Couldn't load this unit",
+      "loadErrorSub": "Something went wrong. Your progress is safe — try again.",
+      "phaseDebug": "Phase: {phase}"
+    },
+    "readSection": {
+      "unitCourse": "Unit {unit} · {course}",
+      "finishedReading": "I've finished reading →",
+      "finishedListening": "I've finished listening →",
+      "finishedNext": "Finished — next: Vocabulary",
+      "showTranslation": "Show translation",
+      "hideTranslation": "Hide translation",
+      "jumpAudio": "Jump audio to this paragraph",
+      "tapToLookUp": "tap to look up",
+      "tapParagraphToJump": "Tap a paragraph to jump to it",
+      "showText": "Show text",
+      "pressPlayToListen": "Press play to begin listening",
+      "illustrationPlaceholder": "illustration",
+      "lookUpWord": "Look up",
+      "listenMode": {
+        "label": "Learning mode",
+        "read": "Read",
+        "listenText": "Listen + Text",
+        "audioOnly": "Audio only"
+      }
+    },
+    "vocabSection": {
+      "passHeader": "Vocabulary · do you know this word?",
+      "progress": "{current} of {total}",
+      "quickCheck": "Quick check",
+      "listen": "Listen",
+      "playing": "Playing…",
+      "knowIt": "Know it",
+      "knowItHint": "← K",
+      "newToMe": "New to me",
+      "newToMeHint": "N →",
+      "knownNote": "\"Know it\" words are set aside — re-checked automatically after a few days.",
+      "allKnownTitle": "You know all {total} words",
+      "allKnownBody": "No study cards today. The system will re-check these automatically in a few days.",
+      "continueToGrammar": "Continue to Grammar →",
+      "studyHeader": "Study · {current} of {total}",
+      "tapToReveal": "Tap to reveal · Space",
+      "revealMeaning": "Reveal meaning",
+      "howWell": "How well did you know it?",
+      "translation": "Translation",
+      "fromTheText": "From the text",
+      "showExample": "Show example",
+      "ratingHard": "Hard",
+      "ratingHardSub": "Again soon",
+      "ratingGood": "Good",
+      "ratingGoodSub": "Got it",
+      "ratingEasy": "Easy",
+      "ratingEasySub": "Knew it",
+      "nothingToStudy": "Nothing to study",
+      "doneTitle": "Review complete",
+      "doneBody": "These words are now in your spaced-repetition schedule.",
+      "statWordsSeen": "words seen",
+      "statAlreadyKnew": "already knew",
+      "statStudiedToday": "studied today"
+    },
+    "grammarSection": {
+      "ruleLabel": "Grammar rule",
+      "examples": "More examples",
+      "ctaPractise": "Got it — let's practise →",
+      "ctaContinue": "Continue →",
+      "noRule": "No grammar note",
+      "noRuleBody": "This unit has no grammar rule. Move on to practice.",
+      "exLabel": "Grammar · quick check",
+      "exCheck": "Check →",
+      "exContinue": "Continue →",
+      "correct": "Correct!",
+      "incorrect": "Not quite"
+    },
+    "practiceSection": {
+      "progress": "{current} of {total}",
+      "check": "Check →",
+      "skip": "Skip →",
+      "finish": "Finish →",
+      "seeResults": "See results →",
+      "noPractice": "No exercises for this unit",
+      "noPracticeBody": "Great — you can move straight to the results.",
+      "loadError": "Couldn't load this exercise.",
+      "unsupported": "Unsupported exercise type"
+    },
+    "completeSection": {
+      "unitComplete": "Unit {unit} complete",
+      "subtitle": "You've finished this unit. Here's how it went.",
+      "canDoLabel": "You can now",
+      "statPerfect": "Perfect!",
+      "statMistakes": "mistake(s)",
+      "statWords": "words",
+      "statXp": "XP",
+      "xpEarned": "+10",
+      "backToCourse": "Back to course"
+    },
+    "courseHome": {
+      "loadError": "Couldn't load this course",
+      "loadErrorSub": "Something went wrong. Please try again.",
+      "lessons": "{done} of {total} lessons",
+      "complete": "complete",
+      "hero": {
+        "overdueLabel": "ASSIGNMENT OVERDUE",
+        "overdueTitle": "You have an overdue assignment",
+        "overdueMeta": "Submit it before your teacher reviews the group.",
+        "overdueCta": "Finish & submit",
+        "reviewLabel": "DAILY REVIEW",
+        "reviewTitle": "{count} cards due for review",
+        "reviewMeta": "Keep your streak going — it only takes a few minutes.",
+        "reviewCta": "Start review",
+        "resumeLabel": "CONTINUE LEARNING",
+        "resumeTitle": "Continue where you left off",
+        "resumeMeta": "You're in the middle of a unit. Keep going!",
+        "resumeCta": "Continue lesson",
+        "startLabel": "NEXT UNIT",
+        "startTitle": "Ready for the next unit?",
+        "startMeta": "You've completed the previous unit. Start the next one.",
+        "startCta": "Start unit",
+        "caughtLabel": "ALL CAUGHT UP",
+        "caughtTitle": "You're all caught up!",
+        "caughtMeta": "Great work! Come back later or preview the next unit.",
+        "caughtCta": "Preview next unit"
+      },
+      "viewToggle": {
+        "units": "Unit flow",
+        "skills": "Skill index"
+      },
+      "unitFlowList": {
+        "statusDone": "Done",
+        "statusActive": "In progress",
+        "statusLocked": "Locked",
+        "lessons": "{done} of {total} lessons",
+        "continueUnit": "Continue"
+      },
+      "skillIndex": {
+        "mastery": "{pct}% mastery",
+        "jump": "Jump →",
+        "noData": "No skill data yet"
+      },
+      "reviewCard": {
+        "title": "Daily review",
+        "allReviewed": "All reviewed",
+        "allReviewedSub": "You're up to date. Come back tomorrow!",
+        "itemsDue": "items due",
+        "reviewedToday": "{n} reviewed today",
+        "cta": "Review {n} now",
+        "vocab": "Vocabulary",
+        "exercises": "Exercises"
+      },
+      "canDoCard": {
+        "title": "Can-do progress",
+        "goals": "{total} goals",
+        "recentTitle": "Recently unlocked",
+        "nextTitle": "Next goal",
+        "inUnit": "Unit {n}",
+        "noItems": "Complete units to unlock can-do goals."
+      }
+    }
+  },
+  "ExerciseRunner": {
+    "practice": "Practice",
+    "graded": "Homework",
+    "exit": "Exit exercise",
+    "setProgress": "{current} of {total}",
+    "gradedBanner": "Graded · answers are submitted to your teacher, no instant feedback.",
+    "check": "Check",
+    "submitAnswer": "Submit answer",
+    "continue": "Continue",
+    "finish": "Finish",
+    "feedback": {
+      "correct": "Correct",
+      "incorrect": "Not quite",
+      "submitted": "Answer submitted",
+      "gradedNote": "Saved for your teacher to grade. You’ll see results when it’s returned.",
+      "answerLabel": "Answer:"
+    },
+    "loading": "Loading exercise…",
+    "error": {
+      "title": "Couldn’t load this exercise",
+      "body": "Check your connection and try again. Your progress in this set is saved.",
+      "retry": "Try again"
+    },
+    "mcq": {
+      "defaultInstruction": "Choose the correct answer",
+      "optionsLabel": "Answer options"
+    },
+    "fill": {
+      "defaultInstruction": "Complete the sentence",
+      "blankLabel": "Blank",
+      "inputLabel": "Your answer",
+      "placeholder": "type…"
+    },
+    "translate": {
+      "defaultInstruction": "Translate the sentence",
+      "textareaLabel": "Your translation",
+      "placeholder": "Write in {lang}…",
+      "sampleAnswer": "Sample answer"
+    },
+    "match": {
+      "defaultInstruction": "Match each word to its translation",
+      "helperIdle": "Tap a word on the left…",
+      "helperArmed": "Now tap its match on the right."
+    }
+  },
+  "Srs": {
+    "entry": {
+      "start": "Start review",
+      "settings": "Settings",
+      "stats": "Stats",
+      "dueToday": "{count, plural, one {# card due today} other {# cards due today}}",
+      "limitReachedToday": "You've hit today's limit — come back tomorrow.",
+      "caughtUp": {
+        "title": "You're all caught up",
+        "subtitle": "Come back tomorrow.",
+        "studyNew": "Study new words manually"
+      }
+    },
+    "streak": {
+      "days": "{count, plural, =0 {Start a streak today} one {# day in a row} other {# days in a row}}"
+    },
+    "card": {
+      "showAnswer": "Show answer",
+      "fromList": "from {list}",
+      "playAudio": "Play pronunciation",
+      "directionForward": "Recall the meaning",
+      "directionReverse": "Recall the word",
+      "definitionLabel": "Definition",
+      "examplesLabel": "Examples"
+    },
+    "rating": {
+      "again": "Again",
+      "hard": "Hard",
+      "good": "Good",
+      "easy": "Easy",
+      "intervalIn": "in {label}",
+      "ariaAgain": "Again — next review {interval}",
+      "ariaHard": "Hard — next review {interval}",
+      "ariaGood": "Good — next review {interval}",
+      "ariaEasy": "Easy — next review {interval}"
+    },
+    "session": {
+      "progress": "{done} of {total} reviewed",
+      "newCardAnnounce": "Card {n} of {total}",
+      "answerShownAnnounce": "Answer shown",
+      "exit": "Exit review"
+    },
+    "summary": {
+      "title": "Done for today",
+      "cardsReviewed": "Cards reviewed",
+      "accuracy": "Accuracy",
+      "timeSpent": "Time spent",
+      "streakStatus": "Streak",
+      "reviewMisses": "Review again from misses ({count})",
+      "done": "Done"
+    },
+    "limit": {
+      "title": "That's your limit for today",
+      "body": "Come back tomorrow — your streak is safe.",
+      "cta": "Come back tomorrow"
+    },
+    "settings": {
+      "title": "Review settings",
+      "dailyLimit": "Daily limit",
+      "dailyLimitHelp": "Max cards per day",
+      "audio": "Audio",
+      "audioHelp": "Play pronunciation on cards",
+      "preferReverse": "Prefer reverse direction",
+      "preferReverseHelp": "Show the meaning first, recall the word",
+      "disableAudioPair": "Disable audio for these languages",
+      "disableAudioPairHelp": "Hide pronunciation where TTS quality is poor"
+    },
+    "stats": {
+      "title": "Your review stats",
+      "retention": "Retention",
+      "matureYoung": "Mature vs young",
+      "mature": "Mature",
+      "young": "Young",
+      "last30": "Last 30 days",
+      "heatCell": "{count, plural, one {# review} other {# reviews}} on {date}",
+      "empty": "Review some cards to see your stats"
+    },
+    "toast": {
+      "milestone": "{days, plural, one {# day streak!} other {# day streak!}} Keep it up!",
+      "reviewError": "Review not saved. Try again.",
+      "settingsError": "Settings not saved. Try again."
+    },
+    "error": {
+      "title": "Couldn’t load your review",
+      "body": "Completed reviews are safe. Please try again.",
+      "retry": "Try again"
+    }
+  },
+  "Placement": {
+    "intro": {
+      "title": "Find your starting point",
+      "body": "Answer a few quick questions and we'll skip you past what you already know — straight to the right module. No score, no pressure.",
+      "bodyCompact": "Answer a few quick questions and we'll skip you past what you already know. No score, no pressure.",
+      "takePlacement": "Take the placement",
+      "skipToBeginning": "Skip — start from the beginning",
+      "features": {
+        "time": {
+          "title": "About 2 minutes",
+          "sub": "Five short questions"
+        },
+        "adapt": {
+          "title": "Adapts as you go",
+          "sub": "Questions get easier or harder based on your answers"
+        },
+        "skip": {
+          "title": "Skip what you know",
+          "sub": "Start ahead instead of from lesson one"
+        }
+      }
+    },
+    "runner": {
+      "progressCount": "{current} / {total}",
+      "levelLabel": "Adjusting to your level",
+      "steppingUp": "Stepping up",
+      "easingBack": "Easing back",
+      "mcqEyebrow": "Choose the correct answer",
+      "translateEyebrow": "Translate into {lang}",
+      "dontKnow": "I don't know this",
+      "continue": "Continue",
+      "seeMyLevel": "See my level",
+      "skipForNow": "Skip for now"
+    },
+    "result": {
+      "eyebrow": "You're ready for",
+      "title": "Module {n} · {moduleTitle}",
+      "titleFallback": "Module {n}",
+      "sub": "Nice — you’re comfortable around <strong>{level}</strong>. We’ll skip the basics and start you where it gets useful.",
+      "known": "Known",
+      "startHere": "Start here",
+      "startAt": "Start at Module {n}",
+      "startFromModule1": "Start from Module 1 instead"
+    },
+    "skipped": {
+      "title": "We'll start at the beginning",
+      "body": "No problem — you'll begin with Module 1. You can take the placement any time from your course home if you'd like to skip ahead later.",
+      "goToModule1": "Go to Module 1",
+      "takePlacement": "Take the placement instead"
+    },
+    "loading": {
+      "ariaLabel": "Loading placement test"
+    },
+    "error": {
+      "title": "Couldn't load the placement",
+      "body": "Something went wrong on our end. You can try again, or just start from the beginning and place yourself later.",
+      "retry": "Try again",
+      "startFromBeginning": "Start from the beginning"
+    },
+    "inline": {
+      "offerText": "Not sure where to start? Take the placement",
+      "dismiss": "Dismiss"
+    },
+    "onboarding": {
+      "account": "Account",
+      "chooseCourse": "Choose course",
+      "placement": "Placement"
+    },
+    "seed": {
+      "success": "Vocabulary from earlier modules marked as known."
+    }
+  },
+  "Catalog": {
+    "enrolled": "Enrolled",
+    "locked": "Not yet available",
+    "free": "Free",
+    "canDoGoals": "{count, plural, one {# can-do goal} other {# can-do goals}}",
+    "discover": "Discover courses",
+    "discoverSub": "Find a course to learn on your own or with a school.",
+    "search": "Search courses…",
+    "all": "All",
+    "level": "Level",
+    "language": "Language",
+    "school": "School",
+    "free2": "Free",
+    "paid": "Paid",
+    "results": "{count, plural, one {# course} other {# courses}}",
+    "emptyTitle": "No courses match your filters",
+    "emptyBody": "Try removing a filter or widening your level range.",
+    "clearFilters": "Clear filters",
+    "errorTitle": "Couldn’t load the catalog",
+    "errorBody": "Something went wrong on our end.",
+    "retry": "Try again",
+    "moduleLabel": "Module {n}",
+    "freePreview": "Free preview",
+    "done": "Done",
+    "enrollToUnlock": "Enroll to unlock",
+    "previewUnit": "Preview a unit",
+    "close": "Close",
+    "previewCoverPlaceholder": "anchor image",
+    "previewPassage": "A short anchor text opens every unit. You read and listen first, then meet the new words, see the grammar in context, and practice — all built around one real-world can-do goal.",
+    "listenToAudio": "Listen to the audio",
+    "audioCaption": "0:48 · native speaker",
+    "playAudio": "Play audio",
+    "ctaEnroll": "Enroll — start free",
+    "ctaRequest": "Request to join",
+    "ctaPurchase": "Get full access",
+    "ctaContinue": "Continue learning",
+    "noteEnroll": "No card required. Start the first unit right away.",
+    "noteRequest": "A teacher reviews your request and places you in a group. You’ll be notified.",
+    "notePurchase": "One-time purchase. Lifetime access, including future updates.",
+    "noteContinue": "Pick up where you left off.",
+    "noteLocked": "Complete the prerequisite level first, or ask your school to open it.",
+    "progressCaption": "{pct}% complete",
+    "selfStudy": "Self-study",
+    "syllabus": "Syllabus",
+    "syllabusCaption": "{count} modules · one can-do goal each",
+    "modules": "modules",
+    "tryFreeTitle": "Try one unit free",
+    "tryFreeBody": "Read, listen, and see how a can-do goal works — no sign-up.",
+    "teaserMore": "{count} more modules",
+    "enrolledToast": "Enrolled — starting your first unit",
+    "requestedToast": "Request sent — a teacher will place you soon",
+    "purchaseToast": "Redirecting to checkout…"
+  },
+  "Progress": {
+    "head": {
+      "eyebrow": "Your progress",
+      "eyebrowTeacher": "{course} · viewing student",
+      "title": "Progress",
+      "switchStudent": "Switch student",
+      "startReview": "Start daily review · {count}",
+      "allReviewed": "All reviewed today ✓"
+    },
+    "hero": {
+      "sublabel": "retained",
+      "ringLabel": "{pct}% of vocabulary retained",
+      "headline": "You can do {count} real things in {language}",
+      "headlineTeacher": "{count} real-world abilities so far",
+      "body": "Progress is measured by what's retained, not just finished.",
+      "nextUp": " Next up: \"{text}\"."
+    },
+    "legend": {
+      "completed": "Completed",
+      "completedDesc": "You did it",
+      "mastered": "Mastered",
+      "masteredDesc": "You've retained it"
+    },
+    "canDo": {
+      "mastered": "Mastered",
+      "completed": "Completed",
+      "inProgress": "In progress · {pct}%"
+    },
+    "mastery": {
+      "sectionLabel": "{skill} mastery",
+      "level": "Level {level}",
+      "completed": "Completed",
+      "mastered": "Mastered",
+      "masteredOf": "mastered · {completed}% completed",
+      "gap": "{gap}% completed but not yet retained — review to lock it in.",
+      "fullyRetained": "Fully retained. Nice."
+    },
+    "modules": {
+      "mastered": "Mastered",
+      "completed": "Completed",
+      "inProgress": "In progress",
+      "locked": "Locked"
+    },
+    "sections": {
+      "canDo": "Can-do achievements",
+      "canDoSub": "Dated milestones — real abilities you've unlocked.",
+      "mastery": "Mastery by skill",
+      "masterySub": "Completed means you did it. Mastered means it stuck.",
+      "srs": "Daily review",
+      "srsSub": "Spaced repetition keeps what you've learned from fading.",
+      "reviewNow": "Review now",
+      "modules": "By module",
+      "modulesSub": "How much of each unit you've completed — and retained."
+    },
+    "stats": {
+      "streak": "Streak",
+      "streakDays": "{count} days",
+      "bestStreak": "Best: {count}",
+      "dueToday": "Due today",
+      "doneSoFar": "{count} done",
+      "retention": "Retention",
+      "strongRecall": "Strong recall",
+      "matured": "Items matured",
+      "ofTotal": "of {total}"
+    },
+    "empty": {
+      "title": "Your progress map awaits",
+      "body": "Complete your first lesson to unlock your personalised progress dashboard."
+    }
+  },
+  "Assignments": {
+    "eyebrow": "Homework",
+    "title": "Assignments",
+    "subDefault": "Work set by your teacher, with due dates.",
+    "subOverdue": "You have {count, plural, one {# overdue task} other {# overdue tasks}} — let's clear {count, plural, one {it} other {them}}.",
+    "filterTodo": "To do",
+    "filterSubmitted": "Submitted",
+    "filterCompleted": "Completed",
+    "filterAll": "All",
+    "backLink": "All assignments",
+    "status": {
+      "active": "Active",
+      "overdue": "Overdue",
+      "submitted": "Submitted",
+      "inReview": "In review",
+      "returned": "Revise",
+      "completed": "Completed"
+    },
+    "mode": {
+      "graded": "Graded",
+      "written": "Written"
+    },
+    "hero": {
+      "ctaDoItNow": "Do it now",
+      "ctaRevise": "Revise & resubmit",
+      "ctaStart": "Start",
+      "ctaOpen": "Open"
+    },
+    "empty": {
+      "title": "No assignments here",
+      "body": "Your teacher hasn't set any work for this filter yet.",
+      "bodyAll": "No assignments yet — your teacher will set work here when it's ready."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "body": "We couldn't load your assignments right now.",
+      "retry": "Try again"
+    },
+    "graded": {
+      "introSubtitle": "Graded · {items} questions · ~{est}",
+      "infoBanner": "Graded mode. You won't see if each answer is right as you go — you'll get your score and feedback after you submit. One attempt counts toward your course mark.",
+      "back": "Back",
+      "start": "Start graded task",
+      "counter": "{current} / {total}",
+      "pill": "Graded · no hints",
+      "saveExit": "Save & exit",
+      "next": "Next",
+      "submitForGrading": "Submit for grading",
+      "doneLabel": "Submitted for grading",
+      "doneScore": "{score}%",
+      "doneDetail": "{correct} of {total} correct · counted toward your mark",
+      "doneBack": "Back to assignments"
+    },
+    "written": {
+      "wordCount": "{count, plural, one {# word} other {# words}}",
+      "wordHint": "Aim for {min}–{max} words",
+      "saveDraft": "Save draft",
+      "submit": "Submit",
+      "timelineLabel": "Submission status",
+      "step": {
+        "submitted": "Submitted",
+        "inReview": "In review",
+        "feedback": "Feedback",
+        "done": "Completed",
+        "returnedLabel": "Returned · revise",
+        "resubmitLabel": "Resubmit"
+      },
+      "stateSubmitted": "Submitted {time}",
+      "stateSubmittedSub": "Your teacher will review it and send feedback.",
+      "stateInReview": "{teacher} is reviewing your work",
+      "stateInReviewSub": "Feedback usually arrives within a day.",
+      "stateReturned": "Feedback from {teacher}",
+      "later": "Later",
+      "reviseResubmit": "Revise & resubmit",
+      "done": "Done"
     }
   }
 }

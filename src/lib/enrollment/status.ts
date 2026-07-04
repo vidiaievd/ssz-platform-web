@@ -20,7 +20,7 @@ export function onboardingSteps(s: SchoolOnboardingSettings): OnboardingStep[] {
 
 const ALLOWED_TRANSITIONS: Record<MembershipStatus, MembershipStatus[]> = {
   pending: ['onboarding', 'rejected'],
-  onboarding: ['placement-review', 'active'],
+  onboarding: ['placement-review'],
   'placement-review': ['active', 'rejected'],
   active: ['left'],
   rejected: [],
@@ -34,17 +34,14 @@ export function canTransition(from: MembershipStatus, to: MembershipStatus): boo
 
 /**
  * Derives the next status after onboarding steps are complete.
- * - autoPlaceByScore && !required → skip PLACEMENT_REVIEW → active
- * - interview required → placement-review (school admin assigns group)
- * - approval auto → active
+ * `active` is only reachable via admin group assignment from `placement-review` —
+ * completing onboarding never grants access directly, even for auto-place schools.
  */
 export function resolveNextStatus(
   _m: Membership,
-  s: SchoolOnboardingSettings,
+  _s: SchoolOnboardingSettings,
 ): MembershipStatus {
-  if (s.interview.required) return 'placement-review';
-  if (s.interview.autoPlaceByScore) return 'active';
-  return 'active';
+  return 'placement-review';
 }
 
 /** True when platform placement result is fresh enough to reuse for a school. */

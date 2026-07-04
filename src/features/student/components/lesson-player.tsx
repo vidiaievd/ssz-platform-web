@@ -44,6 +44,7 @@ export function LessonPlayer({
   const [isPending, startTransition] = useTransition();
   const [isCompleted, setIsCompleted] = useState(false);
   const startedRef = useRef(false);
+  const startedAtRef = useRef(0);
 
   const prevHref = prevId ? buildLessonHref(prevId, containerId) : undefined;
   const nextHref = nextId ? buildLessonHref(nextId, containerId) : undefined;
@@ -52,6 +53,7 @@ export function LessonPlayer({
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
+    startedAtRef.current = Date.now();
     void markLessonStartedAction(lesson.id);
   }, [lesson.id]);
 
@@ -73,7 +75,7 @@ export function LessonPlayer({
       } else if (e.key === 'ArrowLeft' && prevHref) {
         router.push(prevHref as never);
       } else if (e.key === 'Escape') {
-        router.push('/student/enrolled' as never);
+        router.push('/student/dashboard' as never);
       }
     }
 
@@ -83,7 +85,8 @@ export function LessonPlayer({
 
   function handleComplete() {
     startTransition(async () => {
-      const result = await markLessonCompletedAction(lesson.id);
+      const timeSpentSeconds = (Date.now() - startedAtRef.current) / 1000;
+      const result = await markLessonCompletedAction(lesson.id, timeSpentSeconds);
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;
@@ -94,7 +97,7 @@ export function LessonPlayer({
       if (nextHref) {
         router.push(nextHref as never);
       } else {
-        router.push('/student/enrolled' as never);
+        router.push('/student/dashboard' as never);
       }
     });
   }

@@ -96,7 +96,7 @@ export function UserMenu({ user, activeContextKey }: UserMenuProps) {
           aria-label="User menu"
           className="flex items-center gap-2 rounded-full pl-1 pr-2 py-1 border border-border hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Avatar name={displayName || initial} src={avatarSrc} alt={displayName} size="sm" />
+          <Avatar name={displayName || initial} src={avatarSrc} alt={displayName || undefined} size="sm" />
           <span className="hidden sm:block text-sm font-medium text-(--ssz-text-primary) max-w-24 truncate">
             {firstName}
           </span>

@@ -45,7 +45,7 @@ export function ProfileSettingsScreen({ isPrivateTutor = false, isTeacher = fals
 
         <section className="space-y-4">
           <h2 className="text-base font-semibold">{t('sections.info')}</h2>
-          <ProfileForm />
+          <ProfileForm showHandle={showTeaching} />
         </section>
 
         {isLoading && (

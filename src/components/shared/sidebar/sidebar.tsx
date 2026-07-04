@@ -14,9 +14,11 @@ type SidebarProps = {
   sections: NavSection[];
   /** When provided, renders a school-type pill in the sidebar footer. */
   schoolType?: 'online' | 'hybrid';
+  /** Sidebar header slot (workspace switcher); receives current collapsed state. */
+  header?: (collapsed: boolean) => React.ReactNode;
 };
 
-export function Sidebar({ sections, schoolType }: SidebarProps) {
+export function Sidebar({ sections, schoolType, header }: SidebarProps) {
   const t = useTranslations("Common");
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
@@ -46,28 +48,14 @@ export function Sidebar({ sections, schoolType }: SidebarProps) {
           collapsed ? "w-16" : "w-60",
         )}
       >
-        {/* Logo */}
+        {/* Workspace header */}
         <div
           className={cn(
-            "flex items-center gap-2.5 border-b border-border shrink-0",
-            collapsed ? "justify-center px-3.5 py-4.5" : "px-4 py-4.5",
+            "flex items-center border-b border-border shrink-0",
+            collapsed ? "justify-center px-3.5 py-4.5" : "px-2 py-3",
           )}
         >
-          <div className="size-8 rounded-lg flex items-center justify-center shrink-0 bg-primary">
-            <span className="text-[11px] font-extrabold text-white tracking-tighter">
-              SSZ
-            </span>
-          </div>
-          {!collapsed && (
-            <div>
-              <div className="text-sm font-bold text-(--ssz-text-primary) tracking-tight leading-tight">
-                SSZ Learn
-              </div>
-              <div className="text-[11px] text-(--ssz-text-muted) leading-tight">
-                Language Platform
-              </div>
-            </div>
-          )}
+          {header?.(collapsed)}
         </div>
 
         <div className="flex flex-col flex-1 gap-4 py-4 overflow-y-auto overflow-x-hidden">
