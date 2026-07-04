@@ -212,6 +212,75 @@ export interface UnitSummary {
   totalLessons: number;
 }
 
+/* ─── Progress dashboard (B8) ───────────────────────────────────── */
+
+export type ProgressCanDoState = 'mastered' | 'completed' | 'in-progress';
+
+export interface ProgressCanDo {
+  id: string;
+  /** First-person can-do statement, e.g. "I can order food in a café" */
+  text: string;
+  skill: string;
+  module: string;
+  /** Human-readable date string or null when in-progress */
+  date: string | null;
+  state: ProgressCanDoState;
+  /** 0–100; only present when state === 'in-progress' */
+  pct?: number;
+}
+
+export type ProgressSkillId = 'reading' | 'listening' | 'vocab' | 'grammar';
+
+export interface ProgressSkillMastery {
+  id: ProgressSkillId;
+  label: string;
+  /** 0–100: "did it" (completed exercises) */
+  completed: number;
+  /** 0–100: "retained it" (passed SRS reviews); always ≤ completed */
+  mastered: number;
+  /** e.g. "A1→A2" */
+  level: string;
+}
+
+export interface ProgressSrsStats {
+  dueToday: number;
+  reviewedToday: number;
+  /** 0–100 */
+  retention: number;
+  streak: number;
+  bestStreak: number;
+  totalItems: number;
+  maturedItems: number;
+}
+
+export type ProgressModuleStatus = 'mastered' | 'completed' | 'active' | 'locked';
+
+export interface ProgressModule {
+  id: string;
+  title: string;
+  /** 0–100 */
+  completed: number;
+  /** 0–100 */
+  mastered: number;
+  candos: number;
+  status: ProgressModuleStatus;
+}
+
+export interface ProgressStudentInfo {
+  id: string;
+  name: string;
+  courseName: string;
+  startedAt: string;
+}
+
+export interface ProgressOverview {
+  student: ProgressStudentInfo;
+  canDos: ProgressCanDo[];
+  mastery: ProgressSkillMastery[];
+  srs: ProgressSrsStats;
+  modules: ProgressModule[];
+}
+
 /* ─── Course Home composite ──────────────────────────────────────── */
 
 export interface CourseInfo {

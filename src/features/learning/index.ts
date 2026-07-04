@@ -9,6 +9,7 @@ export { useCourseMastery } from './api/use-course-mastery';
 export { useCanDo } from './api/use-can-do';
 export { useCourseHome } from './api/use-course-home';
 export { useUnitPayload } from './api/use-unit-payload';
+export { useProgressOverview } from './api/use-progress-overview';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 export type {
@@ -45,6 +46,15 @@ export type {
   SrsSettings,
   SrsStats,
   UnitPayload,
+  ProgressCanDo,
+  ProgressCanDoState,
+  ProgressModule,
+  ProgressModuleStatus,
+  ProgressOverview,
+  ProgressSkillId,
+  ProgressSkillMastery,
+  ProgressSrsStats,
+  ProgressStudentInfo,
 } from './types';
 
 /* ─── Session store ──────────────────────────────────────────────── */
