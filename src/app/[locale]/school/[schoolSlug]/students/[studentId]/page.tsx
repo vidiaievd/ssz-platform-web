@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { getSchoolBySlug } from "@/features/school/api/get-school-by-slug";
+import { getMySchoolRole } from "@/features/school/api/get-my-school-role";
 import { getStudentInSchool } from "@/features/students/api/queries";
 import { Avatar } from "@/components/ui/avatar";
 import { StatusChip } from "@/features/students/components/status-chip";
@@ -34,14 +35,17 @@ export default async function StudentDetailPage({ params, searchParams }: Props)
 
   const t = await getTranslations("Students");
 
-  const school = await getSchoolBySlug(schoolSlug);
+  const [school, role] = await Promise.all([
+    getSchoolBySlug(schoolSlug),
+    getMySchoolRole(schoolSlug),
+  ]);
   const student = school ? await getStudentInSchool(school.id, studentId) : null;
 
   if (!school || !student) notFound();
 
   const active = student.memberships.filter((m) => m.status === "active");
   const assignHref = `/school/${schoolSlug}/students/${studentId}/assign-group`;
-  const isOwner = true; // TODO: derive from school role when role claim is available
+  const isOwner = role === 'OWNER';
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-5">
