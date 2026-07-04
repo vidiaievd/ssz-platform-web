@@ -22,6 +22,7 @@ export const authoringKeys = keyFactory('authoring', {
   exercises: (containerId: string) => ['exercises', containerId] as const,
   exercise: (id: string) => ['exercise', id] as const,
   sections: (containerId: string) => ['sections', containerId] as const,
+  versions: (containerId: string) => ['versions', containerId] as const,
   tags: (entityType: string, entityId: string) => ['tags', entityType, entityId] as const,
   shares: (entityType: string, entityId: string) => ['shares', entityType, entityId] as const,
 });
