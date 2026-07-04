@@ -93,9 +93,7 @@ export default async function CatalogueContainerPage({ params }: Props) {
       {isAuthenticated && (
         <CoursePlacementPrompt
           containerId={container.id}
-          versionId={container.currentPublishedVersionId ?? undefined}
           targetLanguage={container.targetLanguage}
-          courseDifficultyLevel={container.difficultyLevel}
         />
       )}
 

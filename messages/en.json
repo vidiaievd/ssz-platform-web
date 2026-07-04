@@ -3080,6 +3080,11 @@
     "inline": {
       "offerText": "Not sure where to start? Take the placement",
       "dismiss": "Dismiss"
+    },
+    "onboarding": {
+      "account": "Account",
+      "chooseCourse": "Choose course",
+      "placement": "Placement"
     }
   }
 }

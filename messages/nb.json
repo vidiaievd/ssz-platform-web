@@ -3075,6 +3075,11 @@
     "inline": {
       "offerText": "Ikke sikker på hvor du skal starte? Ta plasseringstesten",
       "dismiss": "Lukk"
+    },
+    "onboarding": {
+      "account": "Konto",
+      "chooseCourse": "Velg kurs",
+      "placement": "Plassering"
     }
   }
 }
