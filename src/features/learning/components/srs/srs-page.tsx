@@ -10,6 +10,7 @@ import { useSrsDue } from '../../api/use-srs-due';
 import { useSrsSessionStore } from '../../stores/srs-session-store';
 import { SrsEntry } from './entry';
 import { SrsSession } from './session';
+import { SrsSettingsDialog } from './settings-dialog';
 import { SessionSummary } from './summary';
 
 /* ── Loading skeleton ───────────────────────────────────────────────── */
@@ -102,16 +103,7 @@ export function SrsPage() {
         {phase === 'summary' && <SessionSummary />}
       </div>
 
-      {/* F4.3: Settings dialog will be wired here */}
-      {settingsOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Review settings"
-          className="sr-only"
-          onKeyDown={(e) => e.key === 'Escape' && setSettingsOpen(false)}
-        />
-      )}
+      <SrsSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }
