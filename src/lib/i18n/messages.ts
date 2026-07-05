@@ -143,3 +143,99 @@ export async function loadMessages(locale: string): Promise<Messages> {
     NAMESPACES.map((ns, i) => [ns, results[i].default]),
   ) as Messages;
 }
+
+// ---------------------------------------------------------------------------
+// Per-surface namespace sets
+// Used by layout files to scope NextIntlClientProvider to only the namespaces
+// a given route segment actually needs on the client side.
+//
+// Every provider receives GLOBAL_NAMESPACES + its own surface set.
+// Nested providers replace (not merge) the parent context — so each layout
+// must include global names even if the parent already has them.
+// ---------------------------------------------------------------------------
+
+/** Namespaces required on every surface (shared components, data-state, nav). */
+export const GLOBAL_NAMESPACES = [
+  'Common',
+  'Errors',
+  'Theme',
+  'Nav',
+  'Topbar',
+  'LanguageSwitcher',
+  'UserMenu',
+] as const satisfies readonly Namespace[];
+
+export const MARKETING_NAMESPACES = [
+  'Home',
+  'Marketing',
+] as const satisfies readonly Namespace[];
+
+export const AUTH_NAMESPACES = ['Auth'] as const satisfies readonly Namespace[];
+
+export const INVITE_NAMESPACES = [
+  'Invite',
+  'Invitations',
+  'Auth',
+] as const satisfies readonly Namespace[];
+
+export const STUDENT_NAMESPACES = [
+  'Student',
+  'Learning',
+  'Srs',
+  'Exercise',
+  'ExerciseRunner',
+  'Placement',
+  'Catalog',
+  'Assignments',
+  'Progress',
+  'Content',
+  'Enrollment',
+  'EnrollmentRequired',
+  'Discovery',
+  'Notifications',
+  'Profile',
+  'PublicSchool',
+  'Settings',
+  'WorkspaceSwitcher',
+] as const satisfies readonly Namespace[];
+
+export const SCHOOL_NAMESPACES = [
+  'School',
+  'Groups',
+  'Students',
+  'Teachers',
+  'Scheduling',
+  'Invitations',
+  'Invite',
+  'Authoring',
+  'Content',
+  'Media',
+  'Notifications',
+  'Profile',
+  'Settings',
+  'Tutor',
+  'TeacherPending',
+  'WorkspaceSwitcher',
+  'Enrollment',
+] as const satisfies readonly Namespace[];
+
+export const ACCOUNT_NAMESPACES = [
+  'Account',
+  'Profile',
+  'Settings',
+] as const satisfies readonly Namespace[];
+
+export const ONBOARDING_NAMESPACES = [
+  'Onboarding',
+  'Profile',
+  'Enrollment',
+  'Placement',
+] as const satisfies readonly Namespace[];
+
+export const PUBLIC_SCHOOL_NAMESPACES = [
+  'PublicSchool',
+  'Enrollment',
+  'Discovery',
+  'Catalog',
+  'Auth',
+] as const satisfies readonly Namespace[];
