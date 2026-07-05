@@ -16,5 +16,10 @@
   "free": "Free",
   "fromPrice": "From {price} {currency}",
   "noResults": "No schools found. Try adjusting the filters.",
-  "enrollComingSoon": "Enrolment request for {name} coming soon."
+  "enrollComingSoon": "Enrolment request for {name} coming soon.",
+  "findSchool": {
+    "title": "Find a school or tutor",
+    "subtitle": "Browse the catalogue and request to join a school or book a lesson with a tutor.",
+    "cta": "Browse catalogue"
+  }
 }

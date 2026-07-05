@@ -16,5 +16,10 @@
   "free": "Gratis",
   "fromPrice": "Fra {price} {currency}",
   "noResults": "Ingen skoler funnet. Prøv å justere filtrene.",
-  "enrollComingSoon": "Innmeldingsforespørsel for {name} kommer snart."
+  "enrollComingSoon": "Innmeldingsforespørsel for {name} kommer snart.",
+  "findSchool": {
+    "title": "Finn en skole eller lærer",
+    "subtitle": "Bla gjennom katalogen og be om å bli med i en skole eller bestill en time med en privatlærer.",
+    "cta": "Bla gjennom katalogen"
+  }
 }
