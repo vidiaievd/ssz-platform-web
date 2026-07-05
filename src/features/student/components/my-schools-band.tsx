@@ -51,7 +51,7 @@ export function MySchoolsBand() {
           <div className="rounded-xl border border-border bg-card px-6 py-10 text-center">
             <p className="text-muted-foreground text-sm">{t('empty')}</p>
             <Button asChild variant="primary" size="sm" className="mt-4">
-              <Link href="/student/discover">{t('browseDiscover')}</Link>
+              <Link href="/discover">{t('browseDiscover')}</Link>
             </Button>
           </div>
         }
