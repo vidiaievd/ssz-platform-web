@@ -44,7 +44,7 @@ export function VocabSection({
   const [newWords, setNewWords] = useState<ExpandedVocabItem[]>([]);
   const [stats, setStats]       = useState<VocabStats | null>(null);
 
-  function handlePassDone({ knownIds, newWords: nw }: VocabPassResult) {
+  function handlePassDone({ newWords: nw }: VocabPassResult) {
     setNewWords(nw);
     if (nw.length === 0) {
       setPhase('all-known');

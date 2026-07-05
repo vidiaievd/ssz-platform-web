@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -38,7 +38,7 @@ export function SchoolBasicsForm({ onSubmit, formId }: SchoolBasicsFormProps) {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<BasicsFormValues>({
@@ -46,13 +46,13 @@ export function SchoolBasicsForm({ onSubmit, formId }: SchoolBasicsFormProps) {
     defaultValues: basicsDraft,
   });
 
-  const watchedName = watch('name');
-  const watchedSlug = watch('slug') ?? '';
-  const watchedDesc = watch('description') ?? '';
-  const watchedLogo = watch('logoUrl') ?? '';
-  const watchedWebsite = watch('website') ?? '';
-  const watchedContactEmail = watch('contactEmail') ?? '';
-  const watchedCity = watch('city') ?? '';
+  const watchedName = useWatch({ control, name: 'name' });
+  const watchedSlug = useWatch({ control, name: 'slug' }) ?? '';
+  const watchedDesc = useWatch({ control, name: 'description' }) ?? '';
+  const watchedLogo = useWatch({ control, name: 'logoUrl' }) ?? '';
+  const watchedWebsite = useWatch({ control, name: 'website' }) ?? '';
+  const watchedContactEmail = useWatch({ control, name: 'contactEmail' }) ?? '';
+  const watchedCity = useWatch({ control, name: 'city' }) ?? '';
 
   // Auto-generate slug from name unless user has manually edited it
   useEffect(() => {

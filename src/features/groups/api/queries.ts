@@ -153,7 +153,6 @@ export type GetGroupsResult = {
  */
 export async function getGroups(
   schoolId: string,
-  _opts?: { role?: string },
 ): Promise<GetGroupsResult> {
   const scheduling = getSchedulingProvider();
 

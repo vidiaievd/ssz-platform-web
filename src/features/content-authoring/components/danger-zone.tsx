@@ -21,7 +21,6 @@ import {
 import { Input } from '@/components/ui/input';
 
 import type { ContainerState, SchoolRole } from '../types';
-import { publishContainerAction } from '../actions/publish-container';
 
 interface DangerZoneProps {
   containerId: string;
@@ -124,18 +123,6 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
     }
     toast.success('Container deleted');
     startTransition(() => router.push(`/school/${schoolSlug}/content`));
-  };
-
-  const handlePublish = () => {
-    startTransition(async () => {
-      const result = await publishContainerAction(containerId);
-      if (!result.ok) {
-        toast.error('Failed to publish');
-        return;
-      }
-      toast.success('Published successfully');
-      router.refresh();
-    });
   };
 
   return (

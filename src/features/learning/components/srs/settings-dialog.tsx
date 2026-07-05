@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslations } from 'next-intl';
@@ -38,7 +38,7 @@ export function SrsSettingsDialog({ open, onClose }: SrsSettingsDialogProps) {
   const { data: settings, isLoading } = useSrsSettings();
   const { mutate: patch } = usePatchSrsSettings();
 
-  const { register, watch, setValue, reset } = useForm<SettingsForm>({
+  const { register, control, setValue, reset } = useForm<SettingsForm>({
     resolver: zodResolver(settingsSchema),
     defaultValues: { dailyLimit: 20, audio: true, preferReverse: false },
   });
@@ -54,9 +54,8 @@ export function SrsSettingsDialog({ open, onClose }: SrsSettingsDialogProps) {
     }
   }, [settings, reset]);
 
-  const dailyLimit = watch('dailyLimit');
-  const audio = watch('audio');
-  const preferReverse = watch('preferReverse');
+  const audio = useWatch({ control, name: 'audio' });
+  const preferReverse = useWatch({ control, name: 'preferReverse' });
 
   /* Optimistic patch on every field change */
   const patchField = (partial: Partial<SettingsForm>) => {

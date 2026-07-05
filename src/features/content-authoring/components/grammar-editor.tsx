@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -50,7 +50,6 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
     register,
     handleSubmit,
     control,
-    watch,
     getValues,
     formState: { errors },
   } = useForm<GrammarEditorFormValues>({
@@ -78,7 +77,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
     name: 'examples',
   });
 
-  const bodyValue = watch('body');
+  const bodyValue = useWatch({ control, name: 'body' });
 
   const autosave = useAutosave({
     onSave: async () => {
@@ -98,21 +97,25 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
   });
 
   useEffect(() => {
-    if (editorTab !== 'preview' || !bodyValue) {
-      setPreviewHtml('');
-      return;
-    }
-    unified()
-      .use(remarkParse)
-      .use(remarkRehype)
-      .use(rehypeSanitize)
-      .use(rehypeStringify)
-      .process(bodyValue)
-      .then((r) => setPreviewHtml(String(r)))
-      .catch((err) => {
+    void (async () => {
+      if (editorTab !== 'preview' || !bodyValue) {
+        await Promise.resolve();
+        setPreviewHtml('');
+        return;
+      }
+      try {
+        const r = await unified()
+          .use(remarkParse)
+          .use(remarkRehype)
+          .use(rehypeSanitize)
+          .use(rehypeStringify)
+          .process(bodyValue);
+        setPreviewHtml(String(r));
+      } catch (err) {
         console.error('[grammar-editor] preview render failed:', err);
         setPreviewHtml('<p style="color:var(--destructive)">Preview unavailable</p>');
-      });
+      }
+    })();
   }, [bodyValue, editorTab]);
 
   function onSubmit(data: GrammarEditorFormValues) {

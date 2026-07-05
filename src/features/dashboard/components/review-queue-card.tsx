@@ -56,7 +56,7 @@ export function ReviewQueueCard({ reviewQueue }: ReviewQueueCardProps) {
                 </p>
               </div>
               <a
-                href="#" // TODO: link to review surface
+                href="#" // plan-28: deferred — content review page not built yet
                 className="shrink-0 flex items-center gap-1 text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                 aria-label={`Open ${item.title} for review`}
               >

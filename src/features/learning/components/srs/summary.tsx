@@ -50,7 +50,6 @@ export function SessionSummary() {
     streakDays,
     limitHit,
     queueMisses,
-    setPhase,
   } = useSrsSessionStore();
 
   const elapsed = startedAt && endedAt ? endedAt - startedAt : 0;

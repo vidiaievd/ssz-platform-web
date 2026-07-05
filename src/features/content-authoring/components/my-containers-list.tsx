@@ -1,26 +1,20 @@
 'use client';
 
-import { useCallback, useDeferredValue, useOptimistic, useState, useTransition } from 'react';
+import { useCallback, useDeferredValue, useState, useTransition } from 'react';
 import { useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import {
   Plus, Search, LayoutGrid, LayoutList, Globe, GraduationCap, BookOpen,
-  Clock, X, ChevronLeft, ChevronRight, Pencil, Copy, Archive, Trash2,
+  Clock, X, ChevronLeft, ChevronRight, Pencil, Copy, Archive,
 } from 'lucide-react';
 import { z } from 'zod/v4';
 import { toast } from 'sonner';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { DataState } from '@/components/shared/data-state';
 import { Link } from '@/lib/i18n/navigation';
 import { useUrlFilters } from '@/lib/url-filters/use-url-filters';
@@ -344,16 +338,17 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
   const toggleSelect = useCallback((id: string, checked: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      checked ? next.add(id) : next.delete(id);
+      if (checked) { next.add(id); } else { next.delete(id); }
       return next;
     });
   }, []);
 
   const toggleSelectAll = useCallback(() => {
-    setSelectedIds((prev) =>
-      prev.size === containers.length ? new Set() : new Set(containers.map((c) => c.id)),
-    );
-  }, [containers]);
+    setSelectedIds((prev) => {
+      const items = data?.items ?? [];
+      return prev.size === items.length ? new Set() : new Set(items.map((c) => c.id));
+    });
+  }, [data]);
 
   const clearSelection = () => setSelectedIds(new Set());
 

@@ -50,7 +50,7 @@ export function VerifyEmailStatus({ token, next }: VerifyEmailStatusProps) {
       localStorage.removeItem(POST_VERIFY_NEXT_KEY);
       router.replace(destination);
     });
-  }, [token, router]);
+  }, [token, router, next]);
 
   function handleResend() {
     startTransition(async () => {

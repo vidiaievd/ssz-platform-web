@@ -24,7 +24,7 @@ type Props = {
   onComplete: (result: { score: number; cefrLevel: CEFR }) => void | Promise<void>;
 };
 
-export function PlacementTest({ language: _language, questions, onComplete }: Props) {
+export function PlacementTest({ questions, onComplete }: Props) {
   const t = useTranslations('Enrollment.PlacementTest');
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});

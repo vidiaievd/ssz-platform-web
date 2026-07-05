@@ -12,6 +12,7 @@ import { ContainerStateBadge, deriveContainerState } from '@/features/content-au
 import { CourseStatusBanner } from '@/features/content-authoring/components/course-status-banner';
 import { runPreflight } from '@/features/content-authoring/lib/preflight';
 import type { PreflightResult, SchoolRole } from '@/features/content-authoring/types';
+import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
 
 function TabsSkeleton() {
   return (
@@ -28,7 +29,15 @@ export default async function ContainerDetailPage({
   params: Promise<{ schoolSlug: string; id: string }>;
 }) {
   const { schoolSlug, id } = await params;
-  const t = await getTranslations('Authoring');
+  const [t, orgRole] = await Promise.all([
+    getTranslations('Authoring'),
+    getMySchoolRole(schoolSlug),
+  ]);
+
+  const schoolRole: SchoolRole =
+    orgRole === 'OWNER' ? 'owner'
+    : orgRole === 'ADMIN' || orgRole === 'MANAGER' || orgRole === 'CONTENT_ADMIN' ? 'admin'
+    : 'teacher';
 
   let container: Container;
   try {
@@ -65,9 +74,6 @@ export default async function ContainerDetailPage({
       preflightError = true;
     }
   }
-
-  // TODO: derive from Organization Service in Phase 18
-  const schoolRole: SchoolRole = 'owner';
 
   return (
     <main className="p-8 max-w-7xl mx-auto">

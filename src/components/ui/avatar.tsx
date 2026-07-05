@@ -59,6 +59,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         {...props}
       >
         {src ? (
+          // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded URL; domain not known at build time
           <img src={src} alt={alt ?? name} className="w-full h-full object-cover" />
         ) : (
           getInitials(name)

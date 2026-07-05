@@ -94,7 +94,6 @@ export function computeOnboarding(input: OnboardingInput): OnboardingState {
     membersCount,
     coursesCount,
     groupsCount,
-    hasPublishedLesson: _hasPublishedLesson,
     hasPendingInvitation,
     hasAssignedTeacher,
   } = input;

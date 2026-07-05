@@ -64,7 +64,7 @@ type CreateSchoolWizardProps = {
   tutorEmail?: string;
 };
 
-export function CreateSchoolWizard({ tutorEmail: _tutorEmail }: CreateSchoolWizardProps) {
+export function CreateSchoolWizard({ tutorEmail: _ }: CreateSchoolWizardProps) {
   const t = useTranslations('School');
   const router = useRouter();
   const store = useCreateWizardStore();

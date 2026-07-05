@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { reorderDraftItems } from '../lib/container-items';
+import { reorderContainerItemsAction } from '../actions/container-item';
 import type { ModuleItemData } from './module-row';
 import { ModuleRow } from './module-row';
 import { ReorderWithAnnouncer } from './lesson-reorder';
@@ -94,7 +94,8 @@ export function ModuleList({
     setLocalItems(reordered);
     startTransition(async () => {
       try {
-        await reorderDraftItems(courseId, reordered.map(i => i.id));
+        const result = await reorderContainerItemsAction(courseId, reordered.map(i => i.id));
+        if (!result.ok) throw new Error(result.error.code);
         onReorder(reordered);
       } catch {
         toast.error('Failed to save new order. Please try again.');

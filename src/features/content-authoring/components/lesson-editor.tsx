@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -46,7 +46,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     getValues,
     formState: { errors },
   } = useForm<LessonFormValues>({
@@ -62,7 +62,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
         : undefined,
   });
 
-  const bodyValue = watch('body');
+  const bodyValue = useWatch({ control, name: 'body' });
 
   const autosave = useAutosave({
     onSave: async () => {
@@ -81,22 +81,25 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
   });
 
   useEffect(() => {
-    if (editorTab !== 'preview') return;
-    if (!bodyValue) {
-      setPreviewHtml('');
-      return;
-    }
-    unified()
-      .use(remarkParse)
-      .use(remarkRehype)
-      .use(rehypeSanitize)
-      .use(rehypeStringify)
-      .process(bodyValue)
-      .then((result) => setPreviewHtml(String(result)))
-      .catch((err) => {
+    void (async () => {
+      if (editorTab !== 'preview') return;
+      if (!bodyValue) {
+        setPreviewHtml('');
+        return;
+      }
+      try {
+        const result = await unified()
+          .use(remarkParse)
+          .use(remarkRehype)
+          .use(rehypeSanitize)
+          .use(rehypeStringify)
+          .process(bodyValue);
+        setPreviewHtml(String(result));
+      } catch (err) {
         console.error('[lesson-editor] preview render failed:', err);
         setPreviewHtml('<p style="color:var(--destructive)">Preview unavailable</p>');
-      });
+      }
+    })();
   }, [bodyValue, editorTab]);
 
   function onSubmit(data: LessonFormValues) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useForm, useFieldArray, useController } from 'react-hook-form';
+import { useForm, useFieldArray, useController, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -115,7 +115,6 @@ export function ExerciseEditor({
     register,
     handleSubmit,
     control,
-    watch,
     formState: { errors },
   } = useForm<ExerciseFormValues>({
     resolver: zodResolver(exerciseFormSchema),
@@ -123,7 +122,7 @@ export function ExerciseEditor({
     values: exercise ? parseExerciseContent(exercise) : undefined,
   });
 
-  const templateCode = watch('templateCode');
+  const templateCode = useWatch({ control, name: 'templateCode' });
 
   const { fields: clozeAnswerFields, append: appendAnswer, remove: removeAnswer } = useFieldArray({
     control,

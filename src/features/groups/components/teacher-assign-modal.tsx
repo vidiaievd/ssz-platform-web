@@ -223,7 +223,7 @@ export function TeacherAssignModal({
   groupSlots,
   candidates,
   schoolId,
-  schoolSlug: _,
+  schoolSlug: _schoolSlug,
 }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();

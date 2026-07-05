@@ -8,7 +8,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { RouteHeading } from '@/components/shared/route-heading';
 import { Link } from '@/lib/i18n/navigation';
 import type { StudentSchool, SchoolTeacherSummary } from '../types';
-import { LeaveSchoolButton } from './leave-school-button';
+// LeaveSchoolButton hidden: organization-service has no leave command yet (plan 19 §F2)
 
 interface GroupHeaderProps {
   school: StudentSchool;
@@ -34,7 +34,7 @@ export function GroupHeader({ school }: GroupHeaderProps) {
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           {t('backLink')}
         </Link>
-        <LeaveSchoolButton membershipId={school.membershipId} schoolName={school.schoolName} />
+        {/* plan-19 §F2: leave button hidden until org-service supports active→left command */}
       </div>
 
       <div className="flex flex-wrap items-start justify-between gap-3">

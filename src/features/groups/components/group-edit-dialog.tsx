@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -64,7 +64,7 @@ export function GroupEditDialog({ group, schoolId, schoolSlug, open, onOpenChang
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     reset,
     formState: { errors, isDirty },
   } = useForm<GroupCreateInput>({
@@ -87,12 +87,12 @@ export function GroupEditDialog({ group, schoolId, schoolSlug, open, onOpenChang
     },
   });
 
-  const levelValue = watch('level');
-  const modeValue = watch('mode');
-  const capacityMax = watch('capacity.max');
-  const courseId = watch('courseId') ?? null;
-  const startDateValue = watch('startDate');
-  const ageBandValue = watch('ageBand');
+  const levelValue = useWatch({ control, name: 'level' });
+  const modeValue = useWatch({ control, name: 'mode' });
+  const capacityMax = useWatch({ control, name: 'capacity.max' });
+  const courseId = useWatch({ control, name: 'courseId' }) ?? null;
+  const startDateValue = useWatch({ control, name: 'startDate' });
+  const ageBandValue = useWatch({ control, name: 'ageBand' });
 
   const maxBelowEnrolled = capacityMax !== undefined && capacityMax < group.studentCount;
 

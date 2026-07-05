@@ -109,17 +109,6 @@ export function ReadAudioPlayer({
     [hasAudio, duration],
   );
 
-  /* expose play(from) for external paragraph-seek */
-  function seekTo(seconds: number) {
-    const el = audioRef.current;
-    if (!el || !hasAudio) return;
-    el.currentTime = seconds;
-    setPos(seconds);
-    if (!playing) {
-      void el.play().then(() => setPlaying(true)).catch(() => null);
-    }
-  }
-
   return (
     <div
       className={cn(

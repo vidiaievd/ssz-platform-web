@@ -145,7 +145,7 @@ export function ActivityFeed({ activity }: ActivityFeedProps) {
       {items.length > 0 && (
         <div className="mt-3 -mx-4 -mb-4 px-4 py-2 border-t border-border">
           <a
-            href="#" // TODO: link to full audit log section when available
+            href="#" // plan-28: deferred — audit log page not built yet
             className="text-xs font-medium text-primary hover:underline"
           >
             See full audit log →

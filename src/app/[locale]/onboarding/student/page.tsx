@@ -17,8 +17,8 @@ type Props = {
 
 export default async function OnboardStudentPage({ searchParams }: Props) {
   const { token } = await searchParams;
-  const [user, locale, t] = await Promise.all([
-    requireVerifiedUser(),
+  await requireVerifiedUser();
+  const [locale, t] = await Promise.all([
     getLocale(),
     getTranslations('Students'),
   ]);
