@@ -20,7 +20,11 @@ export function useSchools({ filters, initialData, enabled = true }: UseSchoolsO
       const params = new URLSearchParams();
       if (filters?.q) params.set('q', filters.q);
       if (filters?.type) params.set('type', filters.type);
+      if (filters?.language) params.set('language', filters.language);
+      if (filters?.level) params.set('level', filters.level);
       if (filters?.sort) params.set('sort', filters.sort);
+      if (filters?.format) params.set('format', filters.format);
+      if (filters?.freeIntro) params.set('freeIntro', filters.freeIntro);
       if (pageParam) params.set('cursor', pageParam as string);
 
       const res = await fetch(`/api/discovery/schools?${params.toString()}`);

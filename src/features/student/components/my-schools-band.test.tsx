@@ -85,7 +85,7 @@ describe('MySchoolsBand', () => {
     expect(await screen.findByText("You haven't applied to a school yet.")).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Discover schools' })).toHaveAttribute(
       'href',
-      '/student/discover',
+      '/discover',
     );
   });
 

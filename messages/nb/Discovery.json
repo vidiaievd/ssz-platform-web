@@ -1,20 +1,40 @@
 {
   "title": "Oppdag skoler",
+  "pageTitle": "Finn en skole eller lærer",
+  "pageSubtitle": "Bla gjennom akkrediterte språkskoler og uavhengige lærere. Sammenlign fagfelt, formater og priser, og utforsk de som passer din læringsmåte.",
+  "overline": "OPPDAG",
   "subtitle": "Finn en skole eller lærer og begynn å lære i dag.",
   "searchPlaceholder": "Søk etter skoler…",
   "filterLanguage": "Språk",
   "filterLevel": "Nivå",
   "filterType": "Type",
+  "filterSort": "Sorter etter",
   "filterAll": "Alle",
   "schoolType": {
     "school": "Skole",
     "tutor": "Privatlærer"
   },
+  "sort": {
+    "recommended": "Anbefalt",
+    "rating": "Høyest vurdert",
+    "priceAsc": "Pris: lav til høy",
+    "students": "Flest elever",
+    "name": "Navn (A–Å)"
+  },
+  "format": {
+    "online": "Online",
+    "inPerson": "Fysisk",
+    "freeIntro": "Gratis prøvetime"
+  },
+  "resultCount": "{count, plural, one {# resultat} other {# resultater}}",
+  "viewSchool": "Se skolen",
+  "viewProfile": "Se profilen",
   "requestEnrol": "Be om innmelding",
   "containerCount": "{count, plural, one {# kurs} other {# kurs}}",
   "studentCount": "{count, plural, one {# elev} other {# elever}}",
   "free": "Gratis",
   "fromPrice": "Fra {price} {currency}",
+  "pricePerMonth": "per måned",
   "noResults": "Ingen skoler funnet. Prøv å justere filtrene.",
   "enrollComingSoon": "Innmeldingsforespørsel for {name} kommer snart.",
   "findSchool": {

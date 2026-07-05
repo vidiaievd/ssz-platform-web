@@ -20,7 +20,7 @@ export interface FilteredPage {
 }
 
 export function filterSchools(schools: School[], query: DiscoveryQuery): FilteredPage {
-  const { q, type, sort, cursor, limit } = query;
+  const { q, type, language, level, sort, cursor, limit } = query;
 
   let results = [...schools];
 
@@ -33,6 +33,14 @@ export function filterSchools(schools: School[], query: DiscoveryQuery): Filtere
 
   if (type) {
     results = results.filter((s) => s.type === type);
+  }
+
+  if (language) {
+    results = results.filter((s) => s.targetLanguages.includes(language));
+  }
+
+  if (level) {
+    results = results.filter((s) => s.levels.includes(level));
   }
 
   switch (sort) {

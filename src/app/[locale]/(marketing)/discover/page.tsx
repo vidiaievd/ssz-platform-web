@@ -52,10 +52,15 @@ export default async function DiscoverPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">{t('title')}</h1>
-        <p className="text-muted-foreground mt-1 text-sm">{t('subtitle')}</p>
+    <div className="container mx-auto px-4 py-10">
+      <div className="mb-10 max-w-2xl">
+        <p className="label-overline mb-3 text-primary-600">{t('overline')}</p>
+        <h1 className="text-[36px] font-extrabold leading-tight tracking-tight text-(--ssz-text-primary)">
+          {t('pageTitle')}
+        </h1>
+        <p className="mt-3 text-[16px] leading-relaxed text-(--ssz-text-secondary)">
+          {t('pageSubtitle')}
+        </p>
       </div>
 
       <Suspense
