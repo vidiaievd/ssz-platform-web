@@ -18,7 +18,7 @@ import type {
   Lesson,
   OpsWarning,
 } from '@/features/groups/types';
-import type { Absence, SubstituteRequest } from '@/features/teachers/types';
+import type { Absence, SubstituteRequest, SubstituteCandidate } from '@/features/teachers/types';
 import type { SchedulingProvider } from './provider';
 
 const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
@@ -205,11 +205,105 @@ export const realProvider: SchedulingProvider = {
     return { absenceId: row.id, createdRequests: [] as SubstituteRequest[] };
   },
 
-  // plan-28: coverQueue needs lesson enrichment (groupName, lang, day, start, end) not in SubRequestResponseDto
-  async coverQueue(_schoolId: string) { throw notReady(); },
+  async coverQueue(schoolId: string) {
+    const rows = await serverFetch<Array<{
+      id: string; lessonId: string; groupId: string; originalTeacherId: string;
+      coverFrom: string; coverTo: string; urgency: string; status: string;
+    }>>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/substitutions`,
+    });
+    if (!rows.length) return [];
 
-  // plan-28: candidates needs teacher enrichment (name, avatarUrl, classification, factors) not in CandidateDto
-  async candidates(_requestId: string) { throw notReady(); },
+    // Enrichment: group name/lang from org-service, lesson times from the
+    // per-group lessons projection across the full cover window.
+    const [groups, lessonById] = await Promise.all([
+      serverFetch<Array<{ id: string; name: string; lang?: string }>>({
+        service: 'organization',
+        path: `/schools/${schoolId}/groups`,
+      }).catch(() => []),
+      (async () => {
+        const groupIds = [...new Set(rows.map((r) => r.groupId))];
+        const from = rows.map((r) => r.coverFrom.slice(0, 10)).reduce((a, b) => (a < b ? a : b));
+        const to = rows.map((r) => r.coverTo.slice(0, 10)).reduce((a, b) => (a > b ? a : b));
+        const byId = new Map<string, { id: string; date: string; startTime: string; endTime: string }>();
+        await Promise.all(
+          groupIds.map(async (gid) => {
+            const lessons = await serverFetch<Array<{ id: string; date: string; startTime: string; endTime: string }>>({
+              service: 'scheduling',
+              path: `/scheduling/groups/${gid}/lessons`,
+              query: { from, to },
+            }).catch(() => []);
+            for (const l of lessons) byId.set(l.id, l);
+          }),
+        );
+        return byId;
+      })(),
+    ]);
+    const groupById = new Map(groups.map((g) => [g.id, g]));
+
+    const WEEKDAYS: Weekday[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return rows.map((r): SubstituteRequest => {
+      const group = groupById.get(r.groupId);
+      const lesson = lessonById.get(r.lessonId);
+      const dateStr = lesson?.date ?? r.coverFrom.slice(0, 10);
+      return {
+        requestId: r.id,
+        lessonId: r.lessonId,
+        groupId: r.groupId,
+        groupName: group?.name ?? '',
+        originalTeacherId: r.originalTeacherId,
+        coverWindow: { from: r.coverFrom.slice(0, 10), to: r.coverTo.slice(0, 10) },
+        urgency: (['today', 'upcoming', 'open'].includes(r.urgency) ? r.urgency : 'open') as SubstituteRequest['urgency'],
+        status: (['open', 'closed', 'cancelled'].includes(r.status) ? r.status : 'open') as SubstituteRequest['status'],
+        lang: (group?.lang ?? 'en') as SubstituteRequest['lang'],
+        day: WEEKDAYS[new Date(`${dateStr}T00:00:00Z`).getUTCDay()] ?? 'Mon',
+        start: lesson?.startTime ?? '00:00',
+        end: lesson?.endTime ?? '00:00',
+      };
+    });
+  },
+
+  async candidates(schoolId: string, requestId: string) {
+    // The ranking service returns its full scoring breakdown (capScore 0-40,
+    // disrScore 0-20, …) alongside the declared CandidateDto fields.
+    const [cands, members] = await Promise.all([
+      serverFetch<Array<{
+        teacherId: string; eligible: boolean; fitScore: number; reasons: string[];
+        capScore?: number; disrScore?: number;
+      }>>({
+        service: 'scheduling',
+        path: `/scheduling/substitutions/${requestId}/candidates`,
+      }),
+      serverFetch<Array<{ userId: string; name?: string; avatarUrl?: string | null }>>({
+        service: 'organization',
+        path: `/schools/${schoolId}/members`,
+        query: { role: 'TEACHER' },
+      }).catch(() => []),
+    ]);
+    const memberById = new Map(members.map((m) => [m.userId, m]));
+
+    return cands.map((c): SubstituteCandidate => {
+      const member = memberById.get(c.teacherId);
+      const spareRatio = (c.capScore ?? 0) / 40;
+      return {
+        teacherId: c.teacherId,
+        name: member?.name ?? '',
+        avatarUrl: member?.avatarUrl ?? null,
+        eligible: c.eligible,
+        fitScore: c.fitScore,
+        classification: !c.eligible ? 'ineligible' : c.fitScore >= 75 ? 'best' : c.fitScore >= 50 ? 'good' : 'ok',
+        factors: {
+          canLang: !c.reasons.includes('language-mismatch'),
+          free: !c.reasons.includes('schedule-conflict'),
+          spareRatio,
+          familiar: c.reasons.includes('familiar-with-group'),
+          wouldOverload: c.eligible && spareRatio <= 0,
+          subLoop: c.eligible && (c.disrScore ?? 20) < 20,
+        },
+      };
+    });
+  },
 
   async assignSubstitute(requestId: string, substituteTeacherId: string) {
     await serverFetch({

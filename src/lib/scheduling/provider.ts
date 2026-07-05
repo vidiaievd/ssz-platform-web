@@ -53,7 +53,7 @@ export interface SchedulingProvider {
 
   // ── substitution ───────────────────────────────────────────────────────────
   coverQueue(schoolId: string): Promise<SubstituteRequest[]>;
-  candidates(requestId: string): Promise<SubstituteCandidate[]>;
+  candidates(schoolId: string, requestId: string): Promise<SubstituteCandidate[]>;
   assignSubstitute(
     requestId: string,
     substituteTeacherId: string,
