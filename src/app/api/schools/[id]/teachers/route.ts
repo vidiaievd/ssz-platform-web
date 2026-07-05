@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors/app-error';
-import { getSchedulingProvider } from '@/lib/scheduling/provider';
+import { buildCommandCenter } from '@/lib/scheduling/command-center';
 import { handleBffError } from '../_bff-helpers';
 
 type Params = { params: Promise<{ id: string }> };
@@ -10,9 +10,8 @@ type Params = { params: Promise<{ id: string }> };
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
   try {
-    const provider = getSchedulingProvider();
-    const data = await provider.commandCenter(id);
-    return NextResponse.json(data.teachers);
+    const { teachers } = await buildCommandCenter(id);
+    return NextResponse.json(teachers);
   } catch (e) {
     return handleBffError(e, 'Failed to fetch teachers');
   }

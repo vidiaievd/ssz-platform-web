@@ -12,13 +12,15 @@ vi.mock('@/lib/api/server-fetcher', () => ({
   serverFetch: vi.fn(),
 }));
 
-vi.mock('@/lib/scheduling/provider', () => ({
-  getSchedulingProvider: vi.fn(),
+vi.mock('@/lib/scheduling/command-center', () => ({
+  buildCommandCenter: vi.fn(),
 }));
 
 const { GET, POST } = await import('./route');
 const { serverFetch } = await import('@/lib/api/server-fetcher');
+const { buildCommandCenter } = await import('@/lib/scheduling/command-center');
 const mockFetch = vi.mocked(serverFetch);
+const mockBuild = vi.mocked(buildCommandCenter);
 
 const PARAMS = { params: Promise.resolve({ id: 'school-1' }) };
 
@@ -26,15 +28,13 @@ describe('GET /api/schools/[id]/teachers', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 200 with teacher list', async () => {
-    const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
-    vi.mocked(getSchedulingProvider).mockReturnValue({
-      commandCenter: vi.fn().mockResolvedValue({
-        kpis: { utilizationAvgPct: 0, spareCapacityHours: 0, overloadedCount: 0, clashCount: 0, vacancyCount: 0 },
-        teachers: [{ teacherId: 't1', name: 'Anna' }],
-        violations: [],
-        vacancies: [],
-        roomLoad: [],
-      }),
+    mockBuild.mockResolvedValue({
+      kpis: { utilizationAvgPct: 0, spareCapacityHours: 0, overloadedCount: 0, clashCount: 0, vacancyCount: 0 },
+      teachers: [{ teacherId: 't1', name: 'Anna' }],
+      violations: [],
+      vacancies: [],
+      roomLoad: [],
+      teachersError: null,
     } as never);
 
     const req = new NextRequest('http://localhost/api/schools/school-1/teachers');
@@ -46,10 +46,7 @@ describe('GET /api/schools/[id]/teachers', () => {
   });
 
   it('returns 502 when provider fails', async () => {
-    const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
-    vi.mocked(getSchedulingProvider).mockReturnValue({
-      commandCenter: vi.fn().mockRejectedValue(new Error('down')),
-    } as never);
+    mockBuild.mockRejectedValue(new Error('down'));
 
     const req = new NextRequest('http://localhost/api/schools/school-1/teachers');
     const res = await GET(req, PARAMS);

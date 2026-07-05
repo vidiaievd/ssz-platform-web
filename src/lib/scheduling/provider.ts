@@ -14,24 +14,11 @@ import type {
   CurriculumPlan,
   ForecastParams,
   ForecastResult,
-  WorkloadKpis,
-  TeacherLoadRow,
-  Vacancy,
-  RoomLoad,
-  Alert,
 } from '@/features/teachers/types';
 
 export type MutationResult =
   | { ok: true; warnings?: string[] }
   | { ok: false; error: string; details?: unknown };
-
-export interface CommandCenterData {
-  kpis: WorkloadKpis;
-  teachers: TeacherLoadRow[];
-  violations: Alert[];
-  vacancies: Vacancy[];
-  roomLoad: RoomLoad[];
-}
 
 export interface SchedulingProvider {
   // ── existing (groups) ──────────────────────────────────────────────────────
@@ -49,9 +36,6 @@ export interface SchedulingProvider {
   teacherWeek(schoolId: string, teacherId: string): Promise<RawTimetableEntry[]>;
   teacherConflicts(schoolId: string): Promise<OpsWarning[]>;
   studentClashes(schoolId: string, userId: string): Promise<OpsWarning[]>;
-
-  // ── roster / load projection ───────────────────────────────────────────────
-  commandCenter(schoolId: string): Promise<CommandCenterData>;
 
   // ── availability & absence ─────────────────────────────────────────────────
   getAvailability(teacherId: string): Promise<AvailabilityBlock[]>;

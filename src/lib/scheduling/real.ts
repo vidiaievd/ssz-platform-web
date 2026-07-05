@@ -163,10 +163,6 @@ export const realProvider: SchedulingProvider = {
     return rows.map((r): OpsWarning => ({ type: 'clash', with: r.groupBId, time: r.startTime }));
   },
 
-  // plan-28: commandCenter type mismatch — backend returns aggregate counts, web type expects
-  // enriched TeacherLoadRow[] with name/avatarUrl/lang. Needs BFF enrichment layer.
-  async commandCenter(_schoolId: string) { throw notReady(); },
-
   // plan-28: no GET/PUT per-teacher availability endpoint in scheduling-service yet
   async getAvailability(_teacherId: string) { throw notReady(); },
   async putAvailability(_teacherId: string, _blocks: unknown[]) { throw notReady(); },
