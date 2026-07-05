@@ -10,16 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { difficultyLevels } from '@/features/content/schemas';
 import { useUrlFilters } from '@/lib/url-filters/use-url-filters';
-import { schoolFiltersSchema, schoolTypes } from '../schemas';
-import type { SchoolFilters } from '../schemas';
+import { discoverFilterSchema, schoolTypes } from '../schemas';
+import type { DiscoverFilter } from '../schemas';
 
 export function DiscoverFilters() {
   const t = useTranslations('Discovery');
-  const [filters, setFilters] = useUrlFilters(schoolFiltersSchema);
+  const [filters, setFilters] = useUrlFilters(discoverFilterSchema);
 
-  function patch(update: Partial<SchoolFilters>) {
+  function patch(update: Partial<DiscoverFilter>) {
     setFilters(update);
   }
 
@@ -27,51 +26,16 @@ export function DiscoverFilters() {
     <div className="flex flex-wrap gap-3">
       <Input
         placeholder={t('searchPlaceholder')}
-        value={filters.search ?? ''}
-        onChange={(e) => patch({ search: e.target.value || undefined })}
+        value={filters.q ?? ''}
+        onChange={(e) => patch({ q: e.target.value || undefined })}
         className="max-w-xs"
         aria-label={t('searchPlaceholder')}
       />
 
       <Select
-        value={filters.language ?? 'all'}
-        onValueChange={(v) => patch({ language: v === 'all' ? undefined : v })}
-      >
-        <SelectTrigger className="w-36">
-          <SelectValue placeholder={t('filterLanguage')} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t('filterAll')}</SelectItem>
-          <SelectItem value="no">Norsk</SelectItem>
-          <SelectItem value="en">English</SelectItem>
-          <SelectItem value="uk">Українська</SelectItem>
-          <SelectItem value="ru">Русский</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Select
-        value={filters.level ?? 'all'}
-        onValueChange={(v) =>
-          patch({ level: v === 'all' ? undefined : (v as SchoolFilters['level']) })
-        }
-      >
-        <SelectTrigger className="w-28">
-          <SelectValue placeholder={t('filterLevel')} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t('filterAll')}</SelectItem>
-          {difficultyLevels.map((l) => (
-            <SelectItem key={l} value={l}>
-              {l}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select
         value={filters.type ?? 'all'}
         onValueChange={(v) =>
-          patch({ type: v === 'all' ? undefined : (v as SchoolFilters['type']) })
+          patch({ type: v === 'all' ? undefined : (v as DiscoverFilter['type']) })
         }
       >
         <SelectTrigger className="w-36">

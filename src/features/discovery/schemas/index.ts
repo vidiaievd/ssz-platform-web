@@ -25,3 +25,7 @@ export const discoveryQuerySchema = z.object({
 });
 
 export type DiscoveryQuery = z.infer<typeof discoveryQuerySchema>;
+
+/** Subset of discoveryQuerySchema used for URL-driven filter state (no cursor/limit). */
+export const discoverFilterSchema = discoveryQuerySchema.pick({ q: true, type: true, sort: true });
+export type DiscoverFilter = z.infer<typeof discoverFilterSchema>;

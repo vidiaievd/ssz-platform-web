@@ -7,12 +7,13 @@ import { Loader2 } from 'lucide-react';
 import { DataState } from '@/components/shared/data-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSchools } from '../api/use-schools';
-import type { SchoolFilters } from '../schemas';
-import type { School } from '../types';
+import type { DiscoverFilter } from '../schemas';
+import type { School, SchoolsResponse } from '../types';
 import { SchoolCard } from './school-card';
 
 interface SchoolsGridProps {
-  filters?: SchoolFilters;
+  filters?: DiscoverFilter;
+  initialData?: SchoolsResponse;
   onEnrol?: (school: School) => void;
 }
 
@@ -26,12 +27,12 @@ function GridSkeleton() {
   );
 }
 
-export function SchoolsGrid({ filters, onEnrol }: SchoolsGridProps) {
+export function SchoolsGrid({ filters, initialData, onEnrol }: SchoolsGridProps) {
   const t = useTranslations('Discovery');
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useSchools({ filters });
+    useSchools({ filters, initialData });
 
   const schools = data?.pages.flatMap((p) => p.items) ?? [];
 

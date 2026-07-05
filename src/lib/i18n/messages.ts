@@ -168,6 +168,9 @@ export const GLOBAL_NAMESPACES = [
 export const MARKETING_NAMESPACES = [
   'Home',
   'Marketing',
+  'Discovery',
+  'Enrollment',
+  'PublicSchool',
 ] as const satisfies readonly Namespace[];
 
 export const AUTH_NAMESPACES = ['Auth'] as const satisfies readonly Namespace[];

@@ -4,20 +4,26 @@ import { useState } from 'react';
 
 import { RequestDialog } from '@/features/enrollment/components/request-dialog';
 import { useUrlFilters } from '@/lib/url-filters/use-url-filters';
-import { schoolFiltersSchema } from '../schemas';
-import type { School } from '../types';
+import { discoverFilterSchema } from '../schemas';
+import type { DiscoverFilter } from '../schemas';
+import type { School, SchoolsResponse } from '../types';
 import { DiscoverFilters } from './discover-filters';
 import { SchoolsGrid } from './schools-grid';
 
-export function DiscoverSurface() {
-  const [filters] = useUrlFilters(schoolFiltersSchema);
+interface DiscoverSurfaceProps {
+  initialData?: SchoolsResponse;
+  initialQuery?: DiscoverFilter;
+}
+
+export function DiscoverSurface({ initialData }: DiscoverSurfaceProps) {
+  const [filters] = useUrlFilters(discoverFilterSchema);
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
 
   return (
     <>
       <div className="space-y-6">
         <DiscoverFilters />
-        <SchoolsGrid filters={filters} onEnrol={setSelectedSchool} />
+        <SchoolsGrid filters={filters} initialData={initialData} onEnrol={setSelectedSchool} />
       </div>
 
       <RequestDialog
