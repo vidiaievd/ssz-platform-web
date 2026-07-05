@@ -141,3 +141,67 @@ describe('realProvider.candidates', () => {
     expect(result.map((c) => c.classification)).toEqual(['good', 'good', 'ok']);
   });
 });
+
+describe('realProvider curriculum', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('maps the backend plan, computing progressPct from capped delivered sessions', async () => {
+    respondByPath({
+      '/scheduling/groups/g1/curriculum': {
+        id: 'p1',
+        groupId: 'g1',
+        schoolId: 's1',
+        targetWeeklyHours: 4,
+        units: [
+          { id: 'u1', title: 'Greetings', order: 1, plannedSessions: 4, deliveredSessions: 4, requiredLevel: 'A1', status: 'done' },
+          { id: 'u2', title: 'Numbers', order: 2, plannedSessions: 4, deliveredSessions: 6, requiredLevel: null, status: 'weird' },
+        ],
+      },
+    });
+
+    const plan = await realProvider.getCurriculum('g1');
+    expect(plan.planId).toBe('p1');
+    expect(plan.targetWeeklyHours).toBe(4);
+    expect(plan.units).toEqual([
+      { unitId: 'u1', title: 'Greetings', order: 1, plannedSessions: 4, deliveredSessions: 4, requiredLevel: 'A1', status: 'done' },
+      { unitId: 'u2', title: 'Numbers', order: 2, plannedSessions: 4, deliveredSessions: 6, requiredLevel: 'A1', status: 'planned' },
+    ]);
+    // delivered capped at planned per unit: (4 + 4) / 8
+    expect(plan.progressPct).toBe(100);
+  });
+
+  it('returns an empty plan when the group has no curriculum yet', async () => {
+    respondByPath({ '/scheduling/groups/g1/curriculum': null });
+    expect(await realProvider.getCurriculum('g1')).toEqual({
+      planId: '', groupId: 'g1', units: [], targetWeeklyHours: 0, progressPct: 0,
+    });
+  });
+
+  it('PUTs the full plan with units sorted by order', async () => {
+    respondByPath({ '/scheduling/groups/g1/curriculum': { id: 'p1' } });
+
+    await realProvider.putCurriculum('g1', {
+      planId: 'p1',
+      groupId: 'g1',
+      targetWeeklyHours: 4,
+      progressPct: 0,
+      units: [
+        { unitId: 'u2', title: 'B', order: 2, plannedSessions: 2, deliveredSessions: 0, requiredLevel: 'A1', status: 'planned' },
+        { unitId: 'u1', title: 'A', order: 1, plannedSessions: 3, deliveredSessions: 1, requiredLevel: 'A2', status: 'active' },
+      ],
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith({
+      service: 'scheduling',
+      path: '/scheduling/groups/g1/curriculum',
+      method: 'PUT',
+      body: {
+        targetWeeklyHours: 4,
+        units: [
+          { title: 'A', plannedSessions: 3, deliveredSessions: 1, requiredLevel: 'A2', status: 'active' },
+          { title: 'B', plannedSessions: 2, deliveredSessions: 0, requiredLevel: 'A1', status: 'planned' },
+        ],
+      },
+    });
+  });
+});

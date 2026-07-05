@@ -18,7 +18,7 @@ import type {
   Lesson,
   OpsWarning,
 } from '@/features/groups/types';
-import type { Absence, SubstituteRequest, SubstituteCandidate } from '@/features/teachers/types';
+import type { Absence, SubstituteRequest, SubstituteCandidate, CurriculumPlan } from '@/features/teachers/types';
 import type { SchedulingProvider } from './provider';
 
 const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
@@ -315,9 +315,65 @@ export const realProvider: SchedulingProvider = {
     return { ok: true } as const;
   },
 
-  // plan-28: getCurriculum/putCurriculum — backend units lack unitId in response; needs schema update
-  async getCurriculum(_groupId: string) { throw notReady(); },
-  async putCurriculum(_groupId: string, _plan: unknown) { throw notReady(); },
+  async getCurriculum(groupId: string) {
+    const plan = await serverFetch<{
+      id: string;
+      groupId: string;
+      targetWeeklyHours: number;
+      units: Array<{
+        id: string; title: string; order: number;
+        plannedSessions: number; deliveredSessions: number;
+        requiredLevel: string | null; status: string;
+      }>;
+    } | null>({
+      service: 'scheduling',
+      path: `/scheduling/groups/${groupId}/curriculum`,
+    });
+    if (!plan) {
+      return { planId: '', groupId, units: [], targetWeeklyHours: 0, progressPct: 0 };
+    }
+
+    const units = plan.units.map((u): CurriculumPlan['units'][number] => ({
+      unitId: u.id,
+      title: u.title,
+      order: u.order,
+      plannedSessions: u.plannedSessions,
+      deliveredSessions: u.deliveredSessions,
+      requiredLevel: (u.requiredLevel ?? 'A1') as CurriculumPlan['units'][number]['requiredLevel'],
+      status: (['planned', 'active', 'done', 'overridden'].includes(u.status) ? u.status : 'planned') as CurriculumPlan['units'][number]['status'],
+    }));
+    const planned = units.reduce((sum, u) => sum + u.plannedSessions, 0);
+    const delivered = units.reduce((sum, u) => sum + Math.min(u.deliveredSessions, u.plannedSessions), 0);
+
+    return {
+      planId: plan.id,
+      groupId: plan.groupId,
+      units,
+      targetWeeklyHours: plan.targetWeeklyHours,
+      progressPct: planned > 0 ? Math.round((delivered / planned) * 100) : 0,
+    };
+  },
+
+  async putCurriculum(groupId: string, plan: CurriculumPlan) {
+    // The upsert endpoint replaces the full unit list; order = array order.
+    await serverFetch({
+      service: 'scheduling',
+      path: `/scheduling/groups/${groupId}/curriculum`,
+      method: 'PUT',
+      body: {
+        targetWeeklyHours: plan.targetWeeklyHours,
+        units: [...plan.units]
+          .sort((a, b) => a.order - b.order)
+          .map((u) => ({
+            title: u.title,
+            plannedSessions: u.plannedSessions,
+            deliveredSessions: u.deliveredSessions,
+            requiredLevel: u.requiredLevel,
+            status: u.status,
+          })),
+      },
+    });
+  },
 
   // plan-28: computeForecast — no backend endpoint in scheduling-service
   async computeForecast(_schoolId: string, _params: unknown) { throw notReady(); },
