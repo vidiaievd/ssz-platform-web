@@ -1,0 +1,159 @@
+{
+  "title": "Varsler",
+  "subtitle": "Alt som krever din oppmerksomhet, på ett sted.",
+  "label": "{count, plural, =0 {Varsler} one {# ulest varsel} other {# uleste varsler}}",
+  "unread": "{count, plural, one {# ulest} other {# uleste}}",
+  "unreadDot": "Ulest",
+  "empty": "Ingen nye varsler!",
+  "markAllAsRead": "Merk alle som lest",
+  "openAll": "Åpne alle",
+  "settings": "Innstillinger",
+  "live": "Live",
+  "reconnecting": "Kobler til på nytt",
+  "resourceUnavailable": "Dette elementet er ikke lenger tilgjengelig.",
+  "categories": {
+    "Enrollment": "Påmelding",
+    "Staff": "Ansatte",
+    "System": "System"
+  },
+  "tabs": {
+    "all": "Alle",
+    "unread": "Uleste",
+    "archived": "Arkivert"
+  },
+  "filterAllTypes": "Alle typer",
+  "loadMore": "Last mer",
+  "dayGroups": {
+    "today": "I dag",
+    "yesterday": "I går"
+  },
+  "selectAll": "Velg alle",
+  "selectedCount": "{count, plural, one {# valgt} other {# valgt}}",
+  "bulk": {
+    "markRead": "Merk som lest",
+    "archive": "Arkiver",
+    "delete": "Slett",
+    "clear": "Fjern valg"
+  },
+  "rowActions": {
+    "markRead": "Merk som lest",
+    "markUnread": "Merk som ulest",
+    "archive": "Arkiver",
+    "unarchive": "Gjenopprett fra arkiv",
+    "delete": "Slett"
+  },
+  "deleteConfirm": {
+    "title": "Slette varsel?",
+    "titlePlural": "Slette {count} varsler?",
+    "description": "Dette kan ikke angres.",
+    "cancel": "Avbryt",
+    "confirm": "Slett"
+  },
+  "toasts": {
+    "archived": "Varsel arkivert",
+    "deleted": "Varsel slettet",
+    "markedRead": "Merket som lest",
+    "undo": "Angre",
+    "actionFailed": "Noe gikk feil. Prøv igjen.",
+    "alreadyHandled": "Dette er allerede behandlet."
+  },
+  "emptyState": {
+    "all": "Ingen nye varsler!",
+    "unread": "Ingen uleste varsler.",
+    "archived": "Ingen arkiverte varsler.",
+    "category": "Ingenting her for dette filteret."
+  },
+  "error": {
+    "title": "Kunne ikke laste varsler.",
+    "retry": "Prøv igjen"
+  },
+  "actions": {
+    "approve": "Godkjenn",
+    "reject": "Avslå",
+    "viewApplicant": "Se søker",
+    "needsAction": "Krever handling"
+  },
+  "types": {
+    "GENERAL": {
+      "title": "Varsel",
+      "body": "Du har et nytt varsel."
+    },
+    "WELCOME_EMAIL": {
+      "title": "Velkommen",
+      "body": "Velkommen til plattformen."
+    },
+    "EMAIL_VERIFICATION": {
+      "title": "Bekreft e-posten din",
+      "body": "Bekreft e-postadressen din."
+    },
+    "PASSWORD_RESET": {
+      "title": "Forespørsel om tilbakestilling av passord",
+      "body": "Det ble forespurt en tilbakestilling av passordet for kontoen din."
+    },
+    "PASSWORD_CHANGED": {
+      "title": "Passord endret",
+      "body": "Passordet ditt ble endret."
+    },
+    "STUDY_REMINDER": {
+      "title": "Påminnelse om læring",
+      "body": "Det er tid for læringssesjonen din."
+    },
+    "TEACHER_ABSENCE": {
+      "title": "Lærerfravær rapportert",
+      "body": "En lærer rapporterte fravær."
+    },
+    "SUBSTITUTE_REQUEST": {
+      "title": "Vikar trengs",
+      "body": "En leksjon trenger en vikarlærer."
+    },
+    "SUBSTITUTE_ASSIGNED": {
+      "title": "Vikar tildelt",
+      "body": "En vikarlærer ble tildelt."
+    },
+    "OVERLOAD_ALERT": {
+      "title": "Lærer overbelastet",
+      "body": "En lærers arbeidsmengde overstiger kapasiteten."
+    },
+    "VACANCY_ALERT": {
+      "title": "Åpen stilling",
+      "body": "En undervisningsstilling krever oppmerksomhet."
+    },
+    "UNCOVERED_LESSON": {
+      "title": "Udekket leksjon",
+      "body": "En leksjon har ingen tildelt lærer."
+    },
+    "SCHOOL_INVITATION": {
+      "title": "Skoleinvitasjon",
+      "body": "Du har blitt invitert til å bli med i en skole."
+    },
+    "TEACHER_PROFILE_CHANGED": {
+      "title": "Lærer oppdaterte profil",
+      "body": "En lærer i skolen din oppdaterte profilinformasjonen sin."
+    },
+    "ENROLLMENT_REQUEST": {
+      "title": "{studentName} ba om å bli med",
+      "titleFallback": "Ny påmeldingsforespørsel",
+      "body": "Vil bli med i {schoolName}."
+    },
+    "ENROLLMENT_APPROVED": {
+      "title": "Godkjent — plassering pågår",
+      "body": "{school} godkjente søknaden din. Vi gir deg beskjed når du er plassert i en gruppe.",
+      "bodyFallback": "Søknaden din ble godkjent. Plassering pågår."
+    },
+    "ENROLLMENT_REJECTED": {
+      "title": "Påmelding avvist",
+      "body": "Påmeldingsforespørselen din ble ikke godkjent."
+    },
+    "PLACEMENT_REVIEW_READY": {
+      "title": "Elev klar for plassering",
+      "body": "En elev hos {school} har fullført onboarding og er klar til å bli plassert i en gruppe.",
+      "bodyFallback": "En elev er klar til å bli plassert i en gruppe."
+    },
+    "GROUP_ASSIGNED": {
+      "title": "Du er i {group}!",
+      "body": "Du har blitt tildelt {group} hos {school}. Sjekk timeplanen din.",
+      "titleFallback": "Gruppe tildelt",
+      "bodyFallback": "Du har blitt tildelt en gruppe."
+    }
+  }
+}

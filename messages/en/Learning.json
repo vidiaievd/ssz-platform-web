@@ -1,0 +1,189 @@
+{
+  "audio": {
+    "play": "Play",
+    "pause": "Pause",
+    "seekBack": "Back 10 seconds",
+    "seekForward": "Forward 10 seconds",
+    "speed": "{speed}× speed",
+    "loading": "Loading audio…",
+    "scrub": "Seek",
+    "player": "Audio player"
+  },
+  "refStrip": {
+    "reference": "Reference"
+  },
+  "glossary": {
+    "seeInContext": "See in context",
+    "listenWord": "Listen"
+  },
+  "unitStepper": {
+    "label": "Unit steps",
+    "readListen": "Read & Listen",
+    "vocabulary": "Vocabulary",
+    "grammar": "Grammar",
+    "practice": "Practice"
+  },
+  "errorState": {
+    "default": "Something went wrong.",
+    "retry": "Try again"
+  },
+  "unitFlow": {
+    "exitLabel": "Course",
+    "unitLabel": "UNIT {n}",
+    "loadError": "Couldn't load this unit",
+    "loadErrorSub": "Something went wrong. Your progress is safe — try again.",
+    "phaseDebug": "Phase: {phase}"
+  },
+  "readSection": {
+    "unitCourse": "Unit {unit} · {course}",
+    "finishedReading": "I've finished reading →",
+    "finishedListening": "I've finished listening →",
+    "finishedNext": "Finished — next: Vocabulary",
+    "showTranslation": "Show translation",
+    "hideTranslation": "Hide translation",
+    "jumpAudio": "Jump audio to this paragraph",
+    "tapToLookUp": "tap to look up",
+    "tapParagraphToJump": "Tap a paragraph to jump to it",
+    "showText": "Show text",
+    "pressPlayToListen": "Press play to begin listening",
+    "illustrationPlaceholder": "illustration",
+    "lookUpWord": "Look up",
+    "listenMode": {
+      "label": "Learning mode",
+      "read": "Read",
+      "listenText": "Listen + Text",
+      "audioOnly": "Audio only"
+    }
+  },
+  "vocabSection": {
+    "passHeader": "Vocabulary · do you know this word?",
+    "progress": "{current} of {total}",
+    "quickCheck": "Quick check",
+    "listen": "Listen",
+    "playing": "Playing…",
+    "knowIt": "Know it",
+    "knowItHint": "← K",
+    "newToMe": "New to me",
+    "newToMeHint": "N →",
+    "knownNote": "\"Know it\" words are set aside — re-checked automatically after a few days.",
+    "allKnownTitle": "You know all {total} words",
+    "allKnownBody": "No study cards today. The system will re-check these automatically in a few days.",
+    "continueToGrammar": "Continue to Grammar →",
+    "studyHeader": "Study · {current} of {total}",
+    "tapToReveal": "Tap to reveal · Space",
+    "revealMeaning": "Reveal meaning",
+    "howWell": "How well did you know it?",
+    "translation": "Translation",
+    "fromTheText": "From the text",
+    "showExample": "Show example",
+    "ratingHard": "Hard",
+    "ratingHardSub": "Again soon",
+    "ratingGood": "Good",
+    "ratingGoodSub": "Got it",
+    "ratingEasy": "Easy",
+    "ratingEasySub": "Knew it",
+    "nothingToStudy": "Nothing to study",
+    "doneTitle": "Review complete",
+    "doneBody": "These words are now in your spaced-repetition schedule.",
+    "statWordsSeen": "words seen",
+    "statAlreadyKnew": "already knew",
+    "statStudiedToday": "studied today"
+  },
+  "grammarSection": {
+    "ruleLabel": "Grammar rule",
+    "examples": "More examples",
+    "ctaPractise": "Got it — let's practise →",
+    "ctaContinue": "Continue →",
+    "noRule": "No grammar note",
+    "noRuleBody": "This unit has no grammar rule. Move on to practice.",
+    "exLabel": "Grammar · quick check",
+    "exCheck": "Check →",
+    "exContinue": "Continue →",
+    "correct": "Correct!",
+    "incorrect": "Not quite"
+  },
+  "practiceSection": {
+    "progress": "{current} of {total}",
+    "check": "Check →",
+    "skip": "Skip →",
+    "finish": "Finish →",
+    "seeResults": "See results →",
+    "noPractice": "No exercises for this unit",
+    "noPracticeBody": "Great — you can move straight to the results.",
+    "loadError": "Couldn't load this exercise.",
+    "unsupported": "Unsupported exercise type"
+  },
+  "completeSection": {
+    "unitComplete": "Unit {unit} complete",
+    "subtitle": "You've finished this unit. Here's how it went.",
+    "canDoLabel": "You can now",
+    "statPerfect": "Perfect!",
+    "statMistakes": "mistake(s)",
+    "statWords": "words",
+    "statXp": "XP",
+    "xpEarned": "+10",
+    "backToCourse": "Back to course"
+  },
+  "courseHome": {
+    "loadError": "Couldn't load this course",
+    "loadErrorSub": "Something went wrong. Please try again.",
+    "lessons": "{done} of {total} lessons",
+    "complete": "complete",
+    "hero": {
+      "overdueLabel": "ASSIGNMENT OVERDUE",
+      "overdueTitle": "You have an overdue assignment",
+      "overdueMeta": "Submit it before your teacher reviews the group.",
+      "overdueCta": "Finish & submit",
+      "reviewLabel": "DAILY REVIEW",
+      "reviewTitle": "{count} cards due for review",
+      "reviewMeta": "Keep your streak going — it only takes a few minutes.",
+      "reviewCta": "Start review",
+      "resumeLabel": "CONTINUE LEARNING",
+      "resumeTitle": "Continue where you left off",
+      "resumeMeta": "You're in the middle of a unit. Keep going!",
+      "resumeCta": "Continue lesson",
+      "startLabel": "NEXT UNIT",
+      "startTitle": "Ready for the next unit?",
+      "startMeta": "You've completed the previous unit. Start the next one.",
+      "startCta": "Start unit",
+      "caughtLabel": "ALL CAUGHT UP",
+      "caughtTitle": "You're all caught up!",
+      "caughtMeta": "Great work! Come back later or preview the next unit.",
+      "caughtCta": "Preview next unit"
+    },
+    "viewToggle": {
+      "units": "Unit flow",
+      "skills": "Skill index"
+    },
+    "unitFlowList": {
+      "statusDone": "Done",
+      "statusActive": "In progress",
+      "statusLocked": "Locked",
+      "lessons": "{done} of {total} lessons",
+      "continueUnit": "Continue"
+    },
+    "skillIndex": {
+      "mastery": "{pct}% mastery",
+      "jump": "Jump →",
+      "noData": "No skill data yet"
+    },
+    "reviewCard": {
+      "title": "Daily review",
+      "allReviewed": "All reviewed",
+      "allReviewedSub": "You're up to date. Come back tomorrow!",
+      "itemsDue": "items due",
+      "reviewedToday": "{n} reviewed today",
+      "cta": "Review {n} now",
+      "vocab": "Vocabulary",
+      "exercises": "Exercises"
+    },
+    "canDoCard": {
+      "title": "Can-do progress",
+      "goals": "{total} goals",
+      "recentTitle": "Recently unlocked",
+      "nextTitle": "Next goal",
+      "inUnit": "Unit {n}",
+      "noItems": "Complete units to unlock can-do goals."
+    }
+  }
+}

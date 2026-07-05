@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "profile": "Profil",
+    "appearance": "Utseende",
+    "notifications": "Varsler",
+    "security": "Sikkerhet"
+  },
+  "appearance": {
+    "title": "Utseende",
+    "subtitle": "Tilpass hvordan plattformen ser ut.",
+    "theme": "Tema",
+    "language": "Språk"
+  },
+  "security": {
+    "title": "Sikkerhet",
+    "subtitle": "Administrer e-post, passord og aktive økter.",
+    "email": "E-postadresse",
+    "password": "Passord",
+    "emailHint": "Din påloggings-e-post. Ta kontakt med support for å endre den.",
+    "passwordHint": "Du vil motta en tilbakestillingslenke til din registrerte e-postadresse.",
+    "passwordResetCta": "Send tilbakestillingslenke til {email}",
+    "passwordResetSent": "Tilbakestillings-e-post sendt.",
+    "passwordResetSentConfirm": "En tilbakestillingslenke er sendt til {email}.",
+    "passwordResetError": "Klarte ikke sende e-post. Prøv igjen.",
+    "cancel": "Avbryt",
+    "twoFa": {
+      "title": "Tofaktorautentisering",
+      "subtitle": "Legg til et ekstra sikkerhetsnivå med en autentiseringsapp.",
+      "enableCta": "Aktiver 2FA",
+      "disableCta": "Deaktiver 2FA",
+      "scanQr": "Skann denne QR-koden med autentiseringsappen din",
+      "secretLabel": "Manuell nøkkel",
+      "nextCta": "Jeg har skannet koden",
+      "enterCode": "Skriv inn 6-sifret kode fra autentiseringsappen for å bekrefte",
+      "confirmEnable": "Bekreft og aktiver",
+      "backupCodesTitle": "2FA aktivert — lagre sikkerhetskodene dine",
+      "backupCodesHint": "Oppbevar disse kodene på et trygt sted. Hver kan brukes én gang.",
+      "disableConfirm": "Skriv inn gjeldende TOTP-kode for å deaktivere 2FA",
+      "confirmDisable": "Deaktiver 2FA",
+      "enabled": "Tofaktorautentisering aktivert.",
+      "disabled": "Tofaktorautentisering deaktivert.",
+      "invalidCode": "Ugyldig eller utløpt kode.",
+      "setupError": "Klarte ikke starte 2FA-oppsett.",
+      "verifyError": "Klarte ikke verifisere kode.",
+      "disableError": "Klarte ikke deaktivere 2FA.",
+      "statusOn": "2FA på",
+      "statusOff": "2FA av",
+      "copyKey": "Kopier nøkkel",
+      "copyAll": "Kopier alle",
+      "download": "Last ned .txt",
+      "print": "Skriv ut"
+    },
+    "changeEmail": "Endre e-postadresse",
+    "changeEmailHint": "Det er ikke mulig å endre e-post ennå. Denne funksjonen kommer snart.",
+    "changeEmailCta": "Endre e-post",
+    "sessions": "Aktive sesjoner",
+    "sessionsHint": "Se og tilbakekall aktive innloggingssesjoner på alle enhetene dine.",
+    "sessionsComingSoon": "Kommer snart",
+    "copyEmail": "Kopier e-postadresse",
+    "passwordResetCooldown": "Du kan sende på nytt om {seconds}s"
+  },
+  "notifications": {
+    "title": "Varsler",
+    "subtitle": "Velg hvordan og når du mottar varsler.",
+    "channels": "Varslingskanaler",
+    "email": "E-post",
+    "inApp": "I appen",
+    "push": "Push",
+    "comingSoon": "Kommer snart"
+  },
+  "back": "Tilbake",
+  "unsavedChanges": {
+    "title": "Ulagrede endringer",
+    "description": "Du har ulagrede endringer. Hvis du forlater siden, mister du endringene.",
+    "leave": "Forlat uten å lagre",
+    "stay": "Bli på siden"
+  }
+}

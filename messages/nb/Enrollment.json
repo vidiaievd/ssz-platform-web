@@ -1,0 +1,152 @@
+{
+  "request": {
+    "title": "Be om innmelding — {name}",
+    "description": "Fortell skolen om deg selv og hvorfor du vil bli med.",
+    "levelLabel": "Ditt nåværende nivå (valgfritt)",
+    "languageLabel": "Språket du vil lære",
+    "levelUnknown": "Jeg vet ikke ennå",
+    "submit": "Send søknad",
+    "cancel": "Avbryt",
+    "success": "Din innmeldingsførespørsel til {name} er sendt."
+  },
+  "requests": {
+    "title": "Innmeldingsførespørsler",
+    "subtitle": "Følg statusen på innmeldingsførespørslene dine.",
+    "empty": "Ingen førespørsler ennå. Finn en skole og søk.",
+    "tab": {
+      "all": "Alle",
+      "pending": "Venter",
+      "approved": "Godkjent",
+      "rejected": "Avvist"
+    }
+  },
+  "status": {
+    "pending": "Venter",
+    "approved": "Godkjent",
+    "rejected": "Avvist"
+  },
+  "sentOn": "Sendt {date}",
+  "reviewNote": "Notat fra skolen",
+  "joinSchool": "Join school",
+  "joining": "Joining...",
+  "joinedSuccessfully": "You have joined the school",
+  "joinFailed": "Failed to join school. Please try again.",
+  "PlacementTest": {
+    "title": "Language placement test",
+    "subtitle": "Answer the questions to find your level",
+    "question": "{current} of {total}",
+    "next": "Next",
+    "finish": "Finish",
+    "saving": "Saving...",
+    "saveFailed": "Could not save your result. Please try again.",
+    "resultSaved": "Your level: {level}"
+  },
+  "Availability": {
+    "subtitle": "Når er du vanligvis tilgjengelig for undervisning?",
+    "morning": "Morgen",
+    "afternoon": "Ettermiddag",
+    "evening": "Kveld",
+    "Mon": "Man",
+    "Tue": "Tir",
+    "Wed": "Ons",
+    "Thu": "Tor",
+    "Fri": "Fre",
+    "Sat": "Lør",
+    "Sun": "Søn",
+    "legend": "Velg tidspunkter som passer for deg",
+    "saving": "Lagrer...",
+    "submit": "Fortsett"
+  },
+  "AgeBand": {
+    "subtitle": "Hvilken aldersgruppe tilhører du?",
+    "kids": "Barn",
+    "teens": "Tenåringer",
+    "adults": "Voksne",
+    "saving": "Lagrer...",
+    "submit": "Fortsett"
+  },
+  "InterviewBooking": {
+    "subtitle": "Velg et tidspunkt for intervjuet ditt",
+    "selectSlot": "Velg tidspunkt",
+    "book": "Book intervju",
+    "booking": "Booker...",
+    "booked": "Intervju booket",
+    "bookFailed": "Kunne ikke booke intervjuet. Prøv igjen."
+  },
+  "Onboarding": {
+    "title": "Velkommen til {school}",
+    "subtitle": "Fullfør trinnene nedenfor for å fullføre påmeldingen din.",
+    "stepPlacement": "Plassering",
+    "stepAvailability": "Tilgjengelighet",
+    "stepAgeBand": "Aldersgruppe",
+    "stepInterview": "Intervju",
+    "allDoneTitle": "Du er klar!",
+    "allDoneReview": "Vi vil gjennomgå resultatene dine og komme tilbake til deg snart.",
+    "goToDashboard": "Gå til dashbord",
+    "finishFailed": "Noe gikk galt. Prøv igjen.",
+    "stepsLabel": "Registreringstrinn",
+    "stepNumber": "Trinn {n}",
+    "stepDone": "fullført"
+  },
+  "Admin": {
+    "navSettings": "Innstillinger",
+    "navPlacement": "Plassering",
+    "navRequests": "Forespørsler"
+  },
+  "Settings": {
+    "title": "Påmeldingsinnstillinger",
+    "subtitle": "Konfigurer velkomstopplevelsen for nye studenter.",
+    "sectionPlacement": "Plassering",
+    "placementMode": "Plasseringsmodus",
+    "placementPlatform": "Plattformtest",
+    "placementSchool": "Skoletest",
+    "placementNone": "Ingen (hopp over)",
+    "reusePlatformResult": "Gjenbruk nylig plattformresultat",
+    "maxResultAgeDays": "Maks resultatens alder (dager)",
+    "sectionInterview": "Intervju",
+    "interviewRequired": "Krev intervju",
+    "autoPlaceByScore": "Auto-plasser etter poengsum",
+    "sectionAvailability": "Tilgjengelighet",
+    "collectAvailability": "Samle inn tilgjengelighetspreferanser",
+    "sectionAgeBands": "Aldersgrupper",
+    "ageBandKids": "Barn",
+    "ageBandTeens": "Tenåringer",
+    "ageBandAdults": "Voksne",
+    "collectAgeBand": "Samle inn aldersgruppe under registrering",
+    "sectionApproval": "Godkjenning",
+    "manualApproval": "Krev manuell godkjenning",
+    "stepPreviewLabel": "Studenten vil se disse trinnene",
+    "stepPreviewEmpty": "Ingen trinn — studenter registreres umiddelbart.",
+    "save": "Lagre innstillinger",
+    "saving": "Lagrer...",
+    "saved": "Innstillinger lagret",
+    "saveFailed": "Kunne ikke lagre innstillinger. Prøv igjen."
+  },
+  "PlacementQueue": {
+    "title": "Plasseringskø",
+    "subtitle": "Studenter som venter på gruppetildeling.",
+    "empty": "Ingen studenter i plasseringskøen.",
+    "selectGroup": "Velg en gruppe",
+    "noGroups": "Ingen passende grupper",
+    "exactMatch": "Eksakt",
+    "slots": "{count} slot",
+    "full": "Full",
+    "assign": "Tildel",
+    "assigning": "Tildeler...",
+    "assigned": "Student tildelt gruppe",
+    "assignFailed": "Kunne ikke tildele. Prøv igjen.",
+    "availableDays": "{count} tilgjengelighetspreferanser"
+  },
+  "Approvals": {
+    "title": "Påmeldingsforespørsler",
+    "subtitle": "Studenter som venter på manuell godkjenning.",
+    "empty": "Ingen ventende forespørsler.",
+    "sourcePublic": "Offentlig søknad",
+    "accept": "Godkjenn",
+    "reject": "Avslå",
+    "accepted": "Student godkjent og sendt til onboarding",
+    "rejected": "Studentens forespørsel avslått",
+    "transitionFailed": "Handling mislyktes. Prøv igjen.",
+    "alreadyHandled": "Denne forespørselen er allerede behandlet — listen er oppdatert."
+  }
+}

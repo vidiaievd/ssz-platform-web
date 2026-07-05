@@ -1,0 +1,247 @@
+{
+  "notFound": "Школу не знайдено.",
+  "common": {
+    "cancel": "Скасувати",
+    "undo": "Скасувати дію"
+  },
+  "list": {
+    "title": "Студенти",
+    "enrolled": "зараховано",
+    "atRisk": "під загрозою",
+    "unassigned": "без групи",
+    "importCsv": "Імпорт CSV",
+    "bulkMessage": "Масове повідомлення",
+    "enroll": "Зарахувати студента",
+    "emptyTitle": "Студентів ще немає",
+    "emptyDescription": "Зарахуйте першого студента, щоб розпочати.",
+    "filteredEmpty": "Студентів за цими фільтрами не знайдено."
+  },
+  "detail": {
+    "backToStudents": "Назад до студентів",
+    "groups": {
+      "activeHeading": "Активні групи ({n})",
+      "viewAll": "Переглянути всі групи →",
+      "currentHeading": "Поточні групи ({n})",
+      "pastHeading": "Минулі групи ({n})",
+      "pastEmpty": "Немає минулої групової активності.",
+      "empty": {
+        "title": "Ще не в жодній групі",
+        "body": "Додайте учня до групи, щоб пов'язати його з учителем і розкладом."
+      },
+      "cols": {
+        "group": "Група",
+        "role": "Роль",
+        "teachers": "Вчителі",
+        "schedule": "Розклад",
+        "since": "З"
+      },
+      "role": {
+        "student": "Учень",
+        "trial": "Пробний",
+        "observer": "Спостерігач"
+      },
+      "actions": {
+        "view": "Переглянути групу",
+        "changeRole": "Змінити роль",
+        "transfer": "Перевести до іншої групи",
+        "remove": "Видалити з групи"
+      }
+    },
+    "teachers": "Вчителі",
+    "progress": "Прогрес",
+    "details": "Деталі",
+    "language": "Мова",
+    "level": "Рівень",
+    "status": "Статус",
+    "groupsCount": "Групи",
+    "enrolledDate": "Зараховано",
+    "lastActive": "Остання активність",
+    "progressAriaLabel": "{pct}% виконано",
+    "notInAnyGroup": "Ще не в жодній групі.",
+    "addToGroup": "Додати до групи",
+    "openGroup": "Відкрити групу {name}",
+    "nudge": "Нагадати",
+    "nudgeSending": "Надсилання…",
+    "nudgeSent": "Нагадування надіслано {name}",
+    "nudgeFailed": "Не вдалося надіслати нагадування.",
+    "nudgeAriaLabel": "Надіслати нагадування {name}",
+    "removedFromGroup": "Видалено з {group}",
+    "removeFailed": "Не вдалося видалити з групи.",
+    "removeFromGroupAriaLabel": "Видалити з {group}",
+    "clashBanner": "{groupA} перетинається з {groupB} у {day} о {time}. Перемістіть студента до іншої групи.",
+    "back": "← Учні",
+    "addedAt": "Додано {date}",
+    "lastSeen": {
+      "never": "Ніколи",
+      "value": "{relative}"
+    },
+    "actions": {
+      "nudge": "Нагадати",
+      "nudgeSent": "Надіслано ✓",
+      "nudgeCooldown": "Нещодавно надіслано",
+      "assignGroup": "Додати до групи",
+      "editInfo": "Редагувати інформацію",
+      "changeLevel": "Змінити рівень",
+      "archive": "Архівувати учня",
+      "unarchive": "Відновити учня",
+      "removeFromSchool": "Видалити зі школи"
+    },
+    "clash": {
+      "title": "Виявлено конфлікт розкладу",
+      "body": "{groupA} ({dayA} {timeA}) перетинається з {groupB} ({dayB} {timeB}).",
+      "cta": "Переглянути групи →"
+    },
+    "tabs": {
+      "overview": "Огляд",
+      "groups": "Групи",
+      "history": "Навчальна історія",
+      "notes": "Нотатки",
+      "payments": "Платежі",
+      "bonuses": "Бонуси"
+    },
+    "info": {
+      "heading": "Інформація про учня",
+      "email": "Електронна пошта",
+      "phone": "Телефон",
+      "status": "Статус",
+      "language": "Основна мова",
+      "level": "Поточний рівень",
+      "addedAt": "Дата додавання",
+      "copied": "Скопійовано"
+    },
+    "stats": {
+      "progress": "Прогрес",
+      "lastSeen": "Останній візит",
+      "teachers": "{n, plural, one {# вчитель} few {# вчителі} many {# вчителів} other {# вчителів}}",
+      "noTeacher": "Немає вчителя"
+    },
+    "history": {
+      "levels": {
+        "heading": "Прогрес рівнів",
+        "empty": {
+          "title": "Ще немає історії рівнів",
+          "body": "Зміни рівня відображатимуться тут у міру прогресу учня."
+        },
+        "present": "зараз",
+        "duration": "{n} місяців"
+      },
+      "periods": {
+        "heading": "Навчальні періоди",
+        "empty": {
+          "title": "Ще немає навчальних періодів"
+        },
+        "cols": {
+          "period": "Період",
+          "group": "Група",
+          "role": "Роль",
+          "teachers": "Вчителі",
+          "status": "Статус"
+        },
+        "statusActive": "Активний",
+        "statusCompleted": "Завершений"
+      },
+      "teachers": {
+        "heading": "Вчителі",
+        "empty": {
+          "title": "Ще немає історії вчителів"
+        }
+      }
+    },
+    "assign": {
+      "title": "Додати до групи",
+      "search": "Пошук груп…",
+      "roleLabel": "Роль",
+      "confirm": "Додати до групи",
+      "confirmAnyway": "Все одно додати",
+      "clashWarning": "Додавання до {group} створює конфлікт розкладу з {existing} ({day} {time}).",
+      "overCapacity": "Група заповнена ({current}/{max} місць).",
+      "languageMismatch": "Невідповідність мови",
+      "success": "Додано {name} до {group}."
+    },
+    "transfer": {
+      "title": "Перевести до іншої групи",
+      "from": "Переміщення з",
+      "to": "Переміщення до",
+      "confirm": "Перевести учня",
+      "success": "Переміщено {name} з {from} до {to}.",
+      "error": "Помилка переміщення — {name} ще у {from}."
+    },
+    "remove": {
+      "group": {
+        "title": "Видалити з групи?",
+        "heading": "Видалити {name} з {group}?",
+        "body": "{name} втратить доступ до занять і вчителя цієї групи. Прогрес і історія зберігатимуться в Минулих групах.",
+        "confirm": "Видалити з групи",
+        "success": "Видалено {name} з {group}.",
+        "undo": "Скасувати"
+      },
+      "school": {
+        "heading": "Видалити {name} з цієї школи?",
+        "bodyWithGroups": "{name} наразі у {n, plural, one {# групі} few {# групах} many {# групах} other {# групах}}. Видалення відпише їх з усіх груп і видалить членство в школі.",
+        "bodyNoGroups": "{name} наразі не в жодній групі. Видалення видалить членство в школі.",
+        "irreversible": "Це незворотно.",
+        "confirm": "Видалити зі школи"
+      }
+    },
+    "stubs": {
+      "notes": {
+        "title": "Незабаром",
+        "body": "Нотатки вчителів з'являться тут."
+      },
+      "payments": {
+        "title": "Незабаром",
+        "body": "Історія платежів з'явиться тут."
+      },
+      "bonuses": {
+        "title": "Незабаром",
+        "body": "Бонуси та кредити з'являться тут."
+      }
+    },
+    "groupsHeading": "Групи"
+  },
+  "enroll": {
+    "title": "Зарахувати студента",
+    "description": "Додайте студентів окремо або вставте список email-адрес.",
+    "emailsLabel": "Email-адреси",
+    "emailsPlaceholder": "один@приклад.com\nдва@приклад.com",
+    "emailsHint": "Розділяйте email комами, крапками з комою або новими рядками.",
+    "checkEmails": "Перевірити email",
+    "targetGroup": "Призначити до групи (необов'язково)",
+    "noGroup": "Без групи",
+    "submit": "Зарахувати {count}",
+    "submitDefault": "Зарахувати",
+    "failed": "Зарахування не вдалося. Спробуйте ще раз."
+  },
+  "addToGroup": {
+    "title": "Додати {name} до групи",
+    "description": "Оберіть групу. Показано місткість і конфлікти розкладу.",
+    "searchPlaceholder": "Пошук груп…",
+    "searchAriaLabel": "Пошук груп",
+    "noGroups": "Групи не знайдено.",
+    "clashWarning": "{name} вже має групу з конфліктним розкладом.",
+    "clashConfirm": "Я розумію конфлікт розкладу і хочу продовжити.",
+    "clashAcknowledged": "Додано з підтвердженням конфлікту розкладу.",
+    "clashBlocked": "Неможливо додати: конфлікт розкладу.",
+    "overCapacity": "Група перевищить місткість ({projected}/{max}).",
+    "submit": "Додати до групи",
+    "added": "Додано {name} до {group}",
+    "addedWithWarning": "Додано {name} до {group}",
+    "failed": "Не вдалося додати до групи."
+  },
+  "bulkMessage": {
+    "title": "Надіслати повідомлення",
+    "description": "Надішліть повідомлення всім студентам у поточній вибірці.",
+    "audience": "Аудиторія",
+    "recipients": "{count} студентів",
+    "subject": "Тема",
+    "subjectPlaceholder": "Тема повідомлення…",
+    "body": "Повідомлення",
+    "bodyPlaceholder": "Напишіть ваше повідомлення тут…",
+    "send": "Надіслати {count}",
+    "sent": "Повідомлення надіслано {count} студентам",
+    "failed": "Не вдалося надіслати повідомлення."
+  },
+  "onboard": {
+    "invitationBanner": "Вас запросили приєднатися до школи. Заповніть свій профіль, щоб розпочати."
+  }
+}

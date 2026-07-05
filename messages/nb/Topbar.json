@@ -1,0 +1,10 @@
+{
+  "search": {
+    "label": "Søk",
+    "placeholder": "Søk kurs, studenter, timer…",
+    "comingSoon": "Søk kommer snart"
+  },
+  "trial": {
+    "daysLeft": "Prøve · {days} dager igjen"
+  }
+}

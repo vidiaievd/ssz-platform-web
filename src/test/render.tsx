@@ -3,7 +3,7 @@ import { render, type RenderOptions } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import type { ReactElement, ReactNode } from 'react';
 
-import en from '../../messages/en.json';
+import { enMessages as en } from '@/lib/i18n/messages';
 
 export function makeTestQueryClient() {
   return new QueryClient({

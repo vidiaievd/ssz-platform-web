@@ -1,0 +1,10 @@
+{
+  "search": {
+    "label": "Search",
+    "placeholder": "Search courses, students, lessons…",
+    "comingSoon": "Search is coming soon"
+  },
+  "trial": {
+    "daysLeft": "Trial · {days} days left"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "sectionTitle": "Planlegging",
+  "tabs": {
+    "overview": "Oversikt",
+    "cover": "Vikarer",
+    "curriculum": "Pensum",
+    "forecast": "Prognose"
+  },
+  "notReady": {
+    "title": "Planlegging er ikke konfigurert ennå",
+    "body": "Kontakt administratoren din for å konfigurere planleggingssystemet."
+  },
+  "cover": {
+    "title": "Vikarkonsoll"
+  },
+  "curriculum": {
+    "title": "Pensumsplanlegger"
+  },
+  "forecast": {
+    "title": "Prognose og kapasitet"
+  },
+  "stub": {
+    "body": "Denne seksjonen kommer snart."
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "request": {
+    "title": "Request to enrol — {name}",
+    "description": "Tell the school about yourself and why you'd like to join.",
+    "levelLabel": "Your current level (optional)",
+    "languageLabel": "Language you want to learn",
+    "levelUnknown": "I don't know yet",
+    "submit": "Send request",
+    "cancel": "Cancel",
+    "success": "Your enrolment request to {name} has been sent."
+  },
+  "requests": {
+    "title": "Enrolment requests",
+    "subtitle": "Track the status of your enrolment requests.",
+    "empty": "No requests yet. Discover a school and apply.",
+    "tab": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    }
+  },
+  "status": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "sentOn": "Sent on {date}",
+  "reviewNote": "Note from school",
+  "joinSchool": "Join school",
+  "joining": "Joining...",
+  "joinedSuccessfully": "You have joined the school",
+  "joinFailed": "Failed to join school. Please try again.",
+  "PlacementTest": {
+    "title": "Language placement test",
+    "subtitle": "Answer the questions to find your level",
+    "question": "{current} of {total}",
+    "next": "Next",
+    "finish": "Finish",
+    "saving": "Saving...",
+    "saveFailed": "Could not save your result. Please try again.",
+    "resultSaved": "Your level: {level}"
+  },
+  "Availability": {
+    "subtitle": "When are you generally available for lessons?",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "Mon": "Mon",
+    "Tue": "Tue",
+    "Wed": "Wed",
+    "Thu": "Thu",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Sun": "Sun",
+    "legend": "Select times that work for you",
+    "saving": "Saving...",
+    "submit": "Continue"
+  },
+  "AgeBand": {
+    "subtitle": "Which age group are you in?",
+    "kids": "Kids",
+    "teens": "Teens",
+    "adults": "Adults",
+    "saving": "Saving...",
+    "submit": "Continue"
+  },
+  "InterviewBooking": {
+    "subtitle": "Pick a time slot for your placement interview",
+    "selectSlot": "Select interview slot",
+    "book": "Book interview",
+    "booking": "Booking...",
+    "booked": "Interview booked",
+    "bookFailed": "Could not book the interview. Please try again."
+  },
+  "Onboarding": {
+    "title": "Welcome to {school}",
+    "subtitle": "Complete the steps below to finish your enrollment.",
+    "stepPlacement": "Placement",
+    "stepAvailability": "Availability",
+    "stepAgeBand": "Age group",
+    "stepInterview": "Interview",
+    "allDoneTitle": "You're all set!",
+    "allDoneReview": "We'll review your results and get back to you soon.",
+    "goToDashboard": "Go to dashboard",
+    "finishFailed": "Something went wrong. Please try again.",
+    "stepsLabel": "Enrollment steps",
+    "stepNumber": "Step {n}",
+    "stepDone": "completed"
+  },
+  "Admin": {
+    "navSettings": "Settings",
+    "navPlacement": "Placement",
+    "navRequests": "Requests"
+  },
+  "Settings": {
+    "title": "Enrollment settings",
+    "subtitle": "Configure the onboarding experience for new students.",
+    "sectionPlacement": "Placement",
+    "placementMode": "Placement mode",
+    "placementPlatform": "Platform test",
+    "placementSchool": "School test",
+    "placementNone": "None (skip)",
+    "reusePlatformResult": "Reuse recent platform result",
+    "maxResultAgeDays": "Max result age (days)",
+    "sectionInterview": "Interview",
+    "interviewRequired": "Require interview",
+    "autoPlaceByScore": "Auto-place by score (no interview)",
+    "sectionAvailability": "Availability",
+    "collectAvailability": "Collect availability preferences",
+    "sectionAgeBands": "Age bands",
+    "ageBandKids": "Kids",
+    "ageBandTeens": "Teens",
+    "ageBandAdults": "Adults",
+    "collectAgeBand": "Collect age band during onboarding",
+    "sectionApproval": "Approval",
+    "manualApproval": "Require manual approval",
+    "stepPreviewLabel": "Student will see these steps",
+    "stepPreviewEmpty": "No steps — students are enrolled immediately.",
+    "save": "Save settings",
+    "saving": "Saving...",
+    "saved": "Settings saved",
+    "saveFailed": "Failed to save settings. Please try again."
+  },
+  "PlacementQueue": {
+    "title": "Placement queue",
+    "subtitle": "Students awaiting group assignment.",
+    "empty": "No students in the placement queue.",
+    "selectGroup": "Select a group",
+    "noGroups": "No matching groups",
+    "exactMatch": "Exact",
+    "slots": "{count} slot",
+    "full": "Full",
+    "assign": "Assign",
+    "assigning": "Assigning...",
+    "assigned": "Student assigned to group",
+    "assignFailed": "Failed to assign. Please try again.",
+    "availableDays": "{count} availability prefs"
+  },
+  "Approvals": {
+    "title": "Enrollment requests",
+    "subtitle": "Students awaiting manual approval to join.",
+    "empty": "No pending requests.",
+    "sourcePublic": "Public apply",
+    "accept": "Accept",
+    "reject": "Reject",
+    "accepted": "Student accepted and moved to onboarding",
+    "rejected": "Student request rejected",
+    "transitionFailed": "Action failed. Please try again.",
+    "alreadyHandled": "This request was already handled — the list has been refreshed."
+  }
+}

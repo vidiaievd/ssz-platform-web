@@ -7,6 +7,8 @@ import { ThemeProvider } from '@/components/shared/theme-provider';
 import { NavigationHistoryTracker } from '@/components/shared/navigation-history-tracker';
 import { QueryProvider } from '@/lib/query/provider';
 import { routing } from '@/lib/i18n/routing';
+import { GLOBAL_NAMESPACES } from '@/lib/i18n/messages';
+import { pickMessages } from '@/lib/i18n/pick-messages';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -26,7 +28,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={pickMessages(messages, GLOBAL_NAMESPACES)}>
       <ThemeProvider>
         <QueryProvider>
           <NavigationHistoryTracker />

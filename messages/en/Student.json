@@ -1,0 +1,129 @@
+{
+  "dashboard": {
+    "greeting": "Welcome back!",
+    "greetingNamed": "Welcome back, {name}!",
+    "subtitle": "Here's where you left off."
+  },
+  "continueLearning": {
+    "title": "Continue learning",
+    "subtitle": "Pick up where you left off.",
+    "empty": "No courses in progress yet.",
+    "browseEnrolled": "Browse my schools",
+    "progress": "{completed} of {total} lessons",
+    "resume": "Resume",
+    "start": "Start"
+  },
+  "upcomingLessons": {
+    "title": "Up next",
+    "subtitle": "Your next lessons across enrolled courses.",
+    "empty": "No upcoming lessons.",
+    "in": "in {container}",
+    "start": "Open"
+  },
+  "streak": {
+    "title": "Activity streak",
+    "current": "Current streak",
+    "longest": "Longest streak",
+    "totalDays": "Total days",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "noActivity": "Start a lesson to build your streak!"
+  },
+  "voxordPromo": {
+    "title": "Practice pronunciation on mobile",
+    "description": "Download VoxOrd to practise speaking and get real-time feedback on your pronunciation.",
+    "appStore": "App Store",
+    "playStore": "Google Play",
+    "dismiss": "Dismiss"
+  },
+  "player": {
+    "exit": "Back",
+    "position": "{current} / {total}",
+    "prev": "Previous",
+    "completeAndNext": "Complete & Next",
+    "markComplete": "Mark Complete",
+    "completed": "Completed",
+    "completedToast": "Lesson complete! Great work.",
+    "noContent": "No content available for this lesson yet.",
+    "keyboardHint": "← → to navigate · Esc to exit"
+  },
+  "SchoolStatus": {
+    "stepperLabel": "Enrollment progress",
+    "stepApplication": "Application",
+    "stepPlacement": "Placement",
+    "stepGroup": "Group",
+    "stepSchedule": "Schedule",
+    "stepNumber": "Step {n}",
+    "stepDone": "completed",
+    "pendingTitle": "Application submitted",
+    "pendingDescription": "{school} is reviewing your application.",
+    "onboardingTitle": "Complete your onboarding",
+    "onboardingDescription": "Finish the steps below so {school} can place you in a group.",
+    "placementReviewTitle": "Waiting to be placed",
+    "placementReviewDescription": "{school} is finding the right group for you.",
+    "activeTitle": "You're enrolled",
+    "activeDescription": "You're enrolled at {school}.",
+    "activeDescriptionWithGroup": "You're in {group} at {school}.",
+    "rejectedTitle": "Application not accepted",
+    "rejectedDescription": "{school} did not accept your application.",
+    "leftTitle": "No longer enrolled",
+    "leftDescription": "You left {school}.",
+    "badgeRejected": "Rejected",
+    "badgeLeft": "Left",
+    "reapply": "Re-apply",
+    "discoverSelfStudy": "Discover self-study courses"
+  },
+  "MySchools": {
+    "title": "My schools",
+    "subtitle": "Schools you've applied to or are enrolled with.",
+    "empty": "You haven't applied to a school yet.",
+    "browseDiscover": "Discover schools",
+    "noUpcomingLesson": "No upcoming lesson yet",
+    "nextLessonAt": "Next: {day}, {start}–{end}",
+    "classmateCount": "{count, plural, one {# classmate} other {# classmates}}"
+  },
+  "SchoolDetail": {
+    "backLink": "Back to my schools",
+    "lockedHeading": "{school} — not yet active",
+    "modeOnline": "Online",
+    "modeInPerson": "In person",
+    "teachersLabel": "Teachers",
+    "teacherRolePrimary": "Teacher",
+    "teacherRoleCoPrimary": "Co-teacher",
+    "teacherRoleSubstitute": "Substitute",
+    "scheduleTitle": "Weekly schedule",
+    "scheduleEmpty": "Your schedule isn't set yet — check back soon.",
+    "nextLessonBadge": "Next lesson",
+    "weekday": {
+      "Mon": "Monday",
+      "Tue": "Tuesday",
+      "Wed": "Wednesday",
+      "Thu": "Thursday",
+      "Fri": "Friday",
+      "Sat": "Saturday",
+      "Sun": "Sunday"
+    },
+    "materialsTitle": "Materials",
+    "materialsEmpty": "No materials yet.",
+    "mainCourseBadge": "Main course",
+    "materialUntitled": "Untitled course",
+    "materialUnavailable": "Not available yet",
+    "progressInProgress": "In progress",
+    "progressCompleted": "Completed",
+    "progressNeedsReview": "Needs review",
+    "classmates": "{count, plural, one {# classmate} other {# classmates}} in your group",
+    "leaveAction": "Leave school",
+    "leaveConfirmTitle": "Leave this school?",
+    "leaveConfirmDescription": "You'll lose access to {school}'s group, schedule, and materials. You can apply again later.",
+    "leaveCancel": "Cancel",
+    "leaveConfirm": "Leave school",
+    "leaveError": "Could not leave the school. Please try again."
+  },
+  "AssignedMaterials": {
+    "title": "Assigned to you",
+    "overdue": "Overdue"
+  },
+  "GroupAssignedBanner": {
+    "message": "You're in {group} at {school}!",
+    "dismiss": "Dismiss"
+  }
+}

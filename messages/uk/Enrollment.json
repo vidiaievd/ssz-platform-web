@@ -1,0 +1,152 @@
+{
+  "request": {
+    "title": "Заявка на зарахування — {name}",
+    "description": "Розкажіть школі про себе та чому ви хочете приєднатися.",
+    "levelLabel": "Ваш поточний рівень (необов’язково)",
+    "languageLabel": "Мова, яку ви хочете вивчати",
+    "levelUnknown": "Ще не знаю",
+    "submit": "Надіслати заявку",
+    "cancel": "Скасувати",
+    "success": "Вашу заявку до {name} надіслано."
+  },
+  "requests": {
+    "title": "Заявки на зарахування",
+    "subtitle": "Відстежуйте статус ваших заявок.",
+    "empty": "Заявок ще немає. Знайдіть школу та подайте заявку.",
+    "tab": {
+      "all": "Всі",
+      "pending": "На розгляді",
+      "approved": "Схвалено",
+      "rejected": "Відхилено"
+    }
+  },
+  "status": {
+    "pending": "На розгляді",
+    "approved": "Схвалено",
+    "rejected": "Відхилено"
+  },
+  "sentOn": "Надіслано {date}",
+  "reviewNote": "Примітка від школи",
+  "joinSchool": "Join school",
+  "joining": "Joining...",
+  "joinedSuccessfully": "You have joined the school",
+  "joinFailed": "Failed to join school. Please try again.",
+  "PlacementTest": {
+    "title": "Language placement test",
+    "subtitle": "Answer the questions to find your level",
+    "question": "{current} of {total}",
+    "next": "Next",
+    "finish": "Finish",
+    "saving": "Saving...",
+    "saveFailed": "Could not save your result. Please try again.",
+    "resultSaved": "Your level: {level}"
+  },
+  "Availability": {
+    "subtitle": "Коли ви зазвичай доступні для уроків?",
+    "morning": "Ранок",
+    "afternoon": "День",
+    "evening": "Вечір",
+    "Mon": "Пн",
+    "Tue": "Вт",
+    "Wed": "Ср",
+    "Thu": "Чт",
+    "Fri": "Пт",
+    "Sat": "Сб",
+    "Sun": "Нд",
+    "legend": "Оберіть зручний для вас час",
+    "saving": "Зберігаємо...",
+    "submit": "Продовжити"
+  },
+  "AgeBand": {
+    "subtitle": "До якої вікової групи ви належите?",
+    "kids": "Діти",
+    "teens": "Підлітки",
+    "adults": "Дорослі",
+    "saving": "Зберігаємо...",
+    "submit": "Продовжити"
+  },
+  "InterviewBooking": {
+    "subtitle": "Оберіть час для вашого вступного інтерв'ю",
+    "selectSlot": "Оберіть часовий слот",
+    "book": "Записатися",
+    "booking": "Записуємо...",
+    "booked": "Інтерв'ю заброньовано",
+    "bookFailed": "Не вдалося записатися на інтерв'ю. Спробуйте ще раз."
+  },
+  "Onboarding": {
+    "title": "Ласкаво просимо до {school}",
+    "subtitle": "Виконайте наведені нижче кроки, щоб завершити реєстрацію.",
+    "stepPlacement": "Рівень",
+    "stepAvailability": "Доступність",
+    "stepAgeBand": "Вікова група",
+    "stepInterview": "Співбесіда",
+    "allDoneTitle": "Все готово!",
+    "allDoneReview": "Ми розглянемо ваші результати і зв'яжемося з вами найближчим часом.",
+    "goToDashboard": "На дошку",
+    "finishFailed": "Щось пішло не так. Спробуйте ще раз.",
+    "stepsLabel": "Кроки реєстрації",
+    "stepNumber": "Крок {n}",
+    "stepDone": "виконано"
+  },
+  "Admin": {
+    "navSettings": "Налаштування",
+    "navPlacement": "Рівень",
+    "navRequests": "Запити"
+  },
+  "Settings": {
+    "title": "Налаштування зарахування",
+    "subtitle": "Налаштуйте процес приймання нових студентів.",
+    "sectionPlacement": "Рівень",
+    "placementMode": "Режим визначення рівня",
+    "placementPlatform": "Платформний тест",
+    "placementSchool": "Тест школи",
+    "placementNone": "Не визначати",
+    "reusePlatformResult": "Використовувати нещодавній результат",
+    "maxResultAgeDays": "Максимальний вік результату (днів)",
+    "sectionInterview": "Співбесіда",
+    "interviewRequired": "Обов'язкова співбесіда",
+    "autoPlaceByScore": "Автоматичне зарахування за балами",
+    "sectionAvailability": "Доступність",
+    "collectAvailability": "Збирати переваги щодо розкладу",
+    "sectionAgeBands": "Вікові групи",
+    "ageBandKids": "Діти",
+    "ageBandTeens": "Підлітки",
+    "ageBandAdults": "Дорослі",
+    "collectAgeBand": "Збирати вікову групу під час реєстрації",
+    "sectionApproval": "Підтвердження",
+    "manualApproval": "Ручне підтвердження",
+    "stepPreviewLabel": "Студент побачить ці кроки",
+    "stepPreviewEmpty": "Жодних кроків — студенти зараховуються одразу.",
+    "save": "Зберегти",
+    "saving": "Зберігаємо...",
+    "saved": "Налаштування збережено",
+    "saveFailed": "Не вдалося зберегти. Спробуйте ще раз."
+  },
+  "PlacementQueue": {
+    "title": "Черга розподілу",
+    "subtitle": "Студенти, що очікують призначення до групи.",
+    "empty": "Черга розподілу порожня.",
+    "selectGroup": "Оберіть групу",
+    "noGroups": "Немає відповідних груп",
+    "exactMatch": "Точно",
+    "slots": "{count} слот",
+    "full": "Повна",
+    "assign": "Призначити",
+    "assigning": "Призначаємо...",
+    "assigned": "Студента призначено до групи",
+    "assignFailed": "Не вдалося призначити. Спробуйте ще раз.",
+    "availableDays": "{count} преференцій"
+  },
+  "Approvals": {
+    "title": "Заявки на зарахування",
+    "subtitle": "Студенти, що очікують ручного підтвердження.",
+    "empty": "Немає заявок.",
+    "sourcePublic": "Публічна заявка",
+    "accept": "Прийняти",
+    "reject": "Відхилити",
+    "accepted": "Студента прийнято та переміщено до онбордингу",
+    "rejected": "Заявку студента відхилено",
+    "transitionFailed": "Дія не вдалася. Спробуйте ще раз.",
+    "alreadyHandled": "Цю заявку вже опрацьовано — список оновлено."
+  }
+}

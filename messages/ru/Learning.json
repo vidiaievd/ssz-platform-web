@@ -1,0 +1,189 @@
+{
+  "audio": {
+    "play": "Воспроизвести",
+    "pause": "Пауза",
+    "seekBack": "Назад 10 секунд",
+    "seekForward": "Вперёд 10 секунд",
+    "speed": "Скорость {speed}×",
+    "loading": "Загрузка аудио…",
+    "scrub": "Перемотать",
+    "player": "Аудиоплеер"
+  },
+  "refStrip": {
+    "reference": "Текст"
+  },
+  "glossary": {
+    "seeInContext": "Увидеть в контексте",
+    "listenWord": "Слушать"
+  },
+  "unitStepper": {
+    "label": "Шаги урока",
+    "readListen": "Чтение и аудио",
+    "vocabulary": "Словарь",
+    "grammar": "Грамматика",
+    "practice": "Практика"
+  },
+  "errorState": {
+    "default": "Что-то пошло не так.",
+    "retry": "Попробовать снова"
+  },
+  "unitFlow": {
+    "exitLabel": "Курс",
+    "unitLabel": "РАЗДЕЛ {n}",
+    "loadError": "Не удалось загрузить этот раздел",
+    "loadErrorSub": "Что-то пошло не так. Ваш прогресс сохранён — попробуйте ещё раз.",
+    "phaseDebug": "Фаза: {phase}"
+  },
+  "readSection": {
+    "unitCourse": "Раздел {unit} · {course}",
+    "finishedReading": "Я дочитал(а) →",
+    "finishedListening": "Я дослушал(а) →",
+    "finishedNext": "Готово — далее: Словарь",
+    "showTranslation": "Показать перевод",
+    "hideTranslation": "Скрыть перевод",
+    "jumpAudio": "Перейти к этому абзацу в аудио",
+    "tapToLookUp": "нажмите для перевода",
+    "tapParagraphToJump": "Нажмите на абзац, чтобы перейти к нему",
+    "showText": "Показать текст",
+    "pressPlayToListen": "Нажмите воспроизведение, чтобы начать слушать",
+    "illustrationPlaceholder": "иллюстрация",
+    "lookUpWord": "Найти",
+    "listenMode": {
+      "label": "Режим обучения",
+      "read": "Читать",
+      "listenText": "Слушать + текст",
+      "audioOnly": "Только аудио"
+    }
+  },
+  "vocabSection": {
+    "passHeader": "Словарь · вы знаете это слово?",
+    "progress": "{current} из {total}",
+    "quickCheck": "Быстрая проверка",
+    "listen": "Слушать",
+    "playing": "Воспроизведение…",
+    "knowIt": "Знаю",
+    "knowItHint": "← K",
+    "newToMe": "Новое для меня",
+    "newToMeHint": "N →",
+    "knownNote": "Слова «знаю» откладываются — система проверит их автоматически через несколько дней.",
+    "allKnownTitle": "Вы знаете все {total} слов",
+    "allKnownBody": "Сегодня нет карточек для изучения. Система автоматически проверит их снова через несколько дней.",
+    "continueToGrammar": "Продолжить к грамматике →",
+    "studyHeader": "Изучение · {current} из {total}",
+    "tapToReveal": "Нажмите, чтобы открыть · Space",
+    "revealMeaning": "Показать значение",
+    "howWell": "Насколько хорошо вы знали это слово?",
+    "translation": "Перевод",
+    "fromTheText": "Из текста",
+    "showExample": "Показать пример",
+    "ratingHard": "Сложно",
+    "ratingHardSub": "Повторить скоро",
+    "ratingGood": "Хорошо",
+    "ratingGoodSub": "Вспомнил(а)",
+    "ratingEasy": "Легко",
+    "ratingEasySub": "Знал(а)",
+    "nothingToStudy": "Нечего изучать",
+    "doneTitle": "Повторение завершено",
+    "doneBody": "Эти слова теперь в вашем расписании интервального повторения.",
+    "statWordsSeen": "слов просмотрено",
+    "statAlreadyKnew": "уже знали",
+    "statStudiedToday": "изучено сегодня"
+  },
+  "grammarSection": {
+    "ruleLabel": "Грамматическое правило",
+    "examples": "Больше примеров",
+    "ctaPractise": "Понял(а) — к практике →",
+    "ctaContinue": "Продолжить →",
+    "noRule": "Нет грамматической заметки",
+    "noRuleBody": "В этом разделе нет грамматического правила. Переходите к практике.",
+    "exLabel": "Грамматика · быстрая проверка",
+    "exCheck": "Проверить →",
+    "exContinue": "Продолжить →",
+    "correct": "Правильно!",
+    "incorrect": "Не совсем"
+  },
+  "practiceSection": {
+    "progress": "{current} из {total}",
+    "check": "Проверить →",
+    "skip": "Пропустить →",
+    "finish": "Завершить →",
+    "seeResults": "Посмотреть результаты →",
+    "noPractice": "В этом разделе нет упражнений",
+    "noPracticeBody": "Отлично — можно сразу перейти к результатам.",
+    "loadError": "Не удалось загрузить упражнение.",
+    "unsupported": "Неподдерживаемый тип упражнения"
+  },
+  "completeSection": {
+    "unitComplete": "Раздел {unit} завершён",
+    "subtitle": "Вы завершили этот раздел. Вот как это прошло.",
+    "canDoLabel": "Теперь вы умеете",
+    "statPerfect": "Идеально!",
+    "statMistakes": "ошибок",
+    "statWords": "слов",
+    "statXp": "XP",
+    "xpEarned": "+10",
+    "backToCourse": "Вернуться к курсу"
+  },
+  "courseHome": {
+    "loadError": "Не удалось загрузить курс",
+    "loadErrorSub": "Что-то пошло не так. Попробуйте ещё раз.",
+    "lessons": "{done} из {total} уроков",
+    "complete": "выполнено",
+    "hero": {
+      "overdueLabel": "ЗАДАНИЕ ПРОСРОЧЕНО",
+      "overdueTitle": "У вас есть просроченное задание",
+      "overdueMeta": "Сдайте его до того, как преподаватель проверит группу.",
+      "overdueCta": "Завершить и сдать",
+      "reviewLabel": "ЕЖЕДНЕВНОЕ ПОВТОРЕНИЕ",
+      "reviewTitle": "{count} карточек к повторению",
+      "reviewMeta": "Поддерживайте серию — это займёт всего несколько минут.",
+      "reviewCta": "Начать повторение",
+      "resumeLabel": "ПРОДОЛЖИТЬ ОБУЧЕНИЕ",
+      "resumeTitle": "Продолжите с того места, где остановились",
+      "resumeMeta": "Вы в середине блока. Продолжайте!",
+      "resumeCta": "Продолжить урок",
+      "startLabel": "СЛЕДУЮЩИЙ БЛОК",
+      "startTitle": "Готовы к следующему блоку?",
+      "startMeta": "Вы завершили предыдущий блок. Начните следующий.",
+      "startCta": "Начать блок",
+      "caughtLabel": "ВСЁ СДЕЛАНО",
+      "caughtTitle": "Вы всё успели!",
+      "caughtMeta": "Отличная работа! Возвращайтесь позже или просмотрите следующий блок.",
+      "caughtCta": "Просмотреть следующий блок"
+    },
+    "viewToggle": {
+      "units": "Блоки",
+      "skills": "Навыки"
+    },
+    "unitFlowList": {
+      "statusDone": "Выполнено",
+      "statusActive": "В процессе",
+      "statusLocked": "Заблокировано",
+      "lessons": "{done} из {total} уроков",
+      "continueUnit": "Продолжить"
+    },
+    "skillIndex": {
+      "mastery": "{pct}% освоено",
+      "jump": "Перейти →",
+      "noData": "Данных о навыках пока нет"
+    },
+    "reviewCard": {
+      "title": "Ежедневное повторение",
+      "allReviewed": "Всё повторено",
+      "allReviewedSub": "Вы в курсе. Возвращайтесь завтра!",
+      "itemsDue": "к повторению",
+      "reviewedToday": "{n} повторено сегодня",
+      "cta": "Повторить {n} сейчас",
+      "vocab": "Словарь",
+      "exercises": "Упражнения"
+    },
+    "canDoCard": {
+      "title": "Прогресс «Я умею»",
+      "goals": "{total} целей",
+      "recentTitle": "Недавно разблокировано",
+      "nextTitle": "Следующая цель",
+      "inUnit": "Блок {n}",
+      "noItems": "Завершите блоки, чтобы разблокировать цели."
+    }
+  }
+}

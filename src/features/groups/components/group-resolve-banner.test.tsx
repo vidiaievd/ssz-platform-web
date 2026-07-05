@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { createTranslator } from 'next-intl';
 
-import en from '../../../../messages/en.json';
+import { enMessages as en } from '@/lib/i18n/messages';
 import { GroupResolveBanner } from './group-resolve-banner';
 import type { Alert } from '@/features/dashboard/types';
 

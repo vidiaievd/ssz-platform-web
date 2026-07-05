@@ -1,0 +1,77 @@
+{
+  "eyebrow": "Homework",
+  "title": "Assignments",
+  "subDefault": "Work set by your teacher, with due dates.",
+  "subOverdue": "You have {count, plural, one {# overdue task} other {# overdue tasks}} — let's clear {count, plural, one {it} other {them}}.",
+  "filterTodo": "To do",
+  "filterSubmitted": "Submitted",
+  "filterCompleted": "Completed",
+  "filterAll": "All",
+  "backLink": "All assignments",
+  "status": {
+    "active": "Active",
+    "overdue": "Overdue",
+    "submitted": "Submitted",
+    "inReview": "In review",
+    "returned": "Revise",
+    "completed": "Completed"
+  },
+  "mode": {
+    "graded": "Graded",
+    "written": "Written"
+  },
+  "hero": {
+    "ctaDoItNow": "Do it now",
+    "ctaRevise": "Revise & resubmit",
+    "ctaStart": "Start",
+    "ctaOpen": "Open"
+  },
+  "empty": {
+    "title": "No assignments here",
+    "body": "Your teacher hasn't set any work for this filter yet.",
+    "bodyAll": "No assignments yet — your teacher will set work here when it's ready."
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "We couldn't load your assignments right now.",
+    "retry": "Try again"
+  },
+  "graded": {
+    "introSubtitle": "Graded · {items} questions · ~{est}",
+    "infoBanner": "Graded mode. You won't see if each answer is right as you go — you'll get your score and feedback after you submit. One attempt counts toward your course mark.",
+    "back": "Back",
+    "start": "Start graded task",
+    "counter": "{current} / {total}",
+    "pill": "Graded · no hints",
+    "saveExit": "Save & exit",
+    "next": "Next",
+    "submitForGrading": "Submit for grading",
+    "doneLabel": "Submitted for grading",
+    "doneScore": "{score}%",
+    "doneDetail": "{correct} of {total} correct · counted toward your mark",
+    "doneBack": "Back to assignments"
+  },
+  "written": {
+    "wordCount": "{count, plural, one {# word} other {# words}}",
+    "wordHint": "Aim for {min}–{max} words",
+    "saveDraft": "Save draft",
+    "submit": "Submit",
+    "timelineLabel": "Submission status",
+    "step": {
+      "submitted": "Submitted",
+      "inReview": "In review",
+      "feedback": "Feedback",
+      "done": "Completed",
+      "returnedLabel": "Returned · revise",
+      "resubmitLabel": "Resubmit"
+    },
+    "stateSubmitted": "Submitted {time}",
+    "stateSubmittedSub": "Your teacher will review it and send feedback.",
+    "stateInReview": "{teacher} is reviewing your work",
+    "stateInReviewSub": "Feedback usually arrives within a day.",
+    "stateReturned": "Feedback from {teacher}",
+    "later": "Later",
+    "reviseResubmit": "Revise & resubmit",
+    "done": "Done"
+  }
+}

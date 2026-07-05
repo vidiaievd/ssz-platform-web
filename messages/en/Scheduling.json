@@ -1,0 +1,25 @@
+{
+  "sectionTitle": "Scheduling",
+  "tabs": {
+    "overview": "Overview",
+    "cover": "Cover",
+    "curriculum": "Curriculum",
+    "forecast": "Forecast"
+  },
+  "notReady": {
+    "title": "Scheduling isn't set up yet",
+    "body": "Contact your administrator to configure the scheduling backend."
+  },
+  "cover": {
+    "title": "Substitute Console"
+  },
+  "curriculum": {
+    "title": "Curriculum Planner"
+  },
+  "forecast": {
+    "title": "Forecast & Capacity"
+  },
+  "stub": {
+    "body": "This section is coming soon."
+  }
+}

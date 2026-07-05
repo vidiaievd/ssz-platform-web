@@ -1,0 +1,20 @@
+{
+  "trigger": "Змінити робочий простір",
+  "sections": {
+    "schools": "Школи",
+    "other": "Інше"
+  },
+  "roles": {
+    "OWNER": "Власник",
+    "ADMIN": "Адмін",
+    "MANAGER": "Менеджер",
+    "TEACHER": "Вчитель",
+    "SCHEDULER": "Планувальник",
+    "CONTENT_ADMIN": "Контент",
+    "STUDENT": "Студент"
+  },
+  "contexts": {
+    "private_tutor": "Приватний репетитор",
+    "student": "Студент"
+  }
+}

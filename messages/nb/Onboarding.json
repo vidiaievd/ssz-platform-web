@@ -1,0 +1,153 @@
+{
+  "title": "Sett opp profilen din",
+  "skipToForm": "Hopp til skjema",
+  "back": "Tilbake",
+  "next": "Neste",
+  "finishCta": "Fullfør og gå til dashbordet",
+  "skip": {
+    "label": "Hopp over for nå",
+    "callout": {
+      "body": "Ingen problem — du kan legge til språk fra profilinnstillingene dine når som helst. Å hoppe over betyr at vi ikke kan tilpasse anbefalingene dine ennå.",
+      "confirm": "Hopp over likevel",
+      "cancel": "Legg til et språk"
+    }
+  },
+  "alreadyDone": "Profilen din er allerede satt opp",
+  "progress": {
+    "label": "Steg {current} av {total}",
+    "labelNamed": "Steg {current} av {total}: {name}"
+  },
+  "shell": {
+    "step": {
+      "profile": "Profil",
+      "prefs": "Preferanser",
+      "tutor": "Detaljer"
+    }
+  },
+  "error": {
+    "saveFailed": "Kunne ikke lagre — prøv igjen",
+    "retry": "Prøv igjen"
+  },
+  "step": {
+    "role": {
+      "title": "Hva tar deg hit?",
+      "subtitle": "Velg hvordan du vil bruke plattformen. Du kan endre dette senere.",
+      "student": {
+        "title": "Jeg lærer",
+        "help": "Øv på språk, ta timer hos lærere og følg fremgangen din."
+      },
+      "tutor": {
+        "title": "Jeg underviser",
+        "help": "Undervis elever, administrer timeplan og bygg din undervisningsvirksomhet."
+      }
+    },
+    "profile": {
+      "title": "Fortell oss om deg selv",
+      "subtitle": "Denne informasjonen vises på profilen din."
+    },
+    "prefs": {
+      "title": "Dine språk",
+      "subtitle": "Hjelp oss å tilpasse læringsopplevelsen din."
+    },
+    "tutor": {
+      "title": "Din lærerprofil",
+      "subtitle": "Fortell oss hvilke språk du underviser og hvordan du jobber."
+    }
+  },
+  "profile": {
+    "displayName": {
+      "label": "Visningsnavn",
+      "placeholder": "Navn eller kallenavn",
+      "error": {
+        "required": "Visningsnavn er påkrevd",
+        "min": "Må ha minst 2 tegn",
+        "max": "Maks 40 tegn"
+      }
+    },
+    "firstName": {
+      "label": "Fornavn"
+    },
+    "lastName": {
+      "label": "Etternavn"
+    },
+    "timezone": {
+      "label": "Tidssone",
+      "placeholder": "Velg tidssone"
+    },
+    "locale": {
+      "label": "Grensesnittspråk"
+    },
+    "bio": {
+      "label": "Kort bio",
+      "placeholder": "Noen ord om deg selv…",
+      "counter": "{count}/200"
+    }
+  },
+  "prefs": {
+    "native": {
+      "label": "Morsmål",
+      "placeholder": "Velg morsmålet ditt",
+      "error": {
+        "required": "Morsmål er påkrevd"
+      }
+    },
+    "targets": {
+      "heading": "Språk du vil lære",
+      "add": "Legg til et språk til",
+      "remove": "Fjern {language}",
+      "removed": "Fjernet {language}",
+      "duplicate": {
+        "error": "Du har allerede lagt til dette språket"
+      }
+    }
+  },
+  "targets": {
+    "empty": {
+      "title": "Hva vil du lære?",
+      "body": "Legg til et språk for å få personlige innholdsanbefalinger. Du kan alltid endre dette senere.",
+      "cta": "Legg til et språk"
+    }
+  },
+  "cefr": {
+    "A1": "A1",
+    "A2": "A2",
+    "B1": "B1",
+    "B2": "B2",
+    "C1": "C1",
+    "C2": "C2",
+    "A1_help": "Nybegynner — enkle uttrykk og hverdagsfraser",
+    "A2_help": "Grunnleggende — enkle setninger om kjente emner",
+    "B1_help": "Mellomnivå — klarer de fleste situasjoner på reise",
+    "B2_help": "Over mellomnivå — kan diskutere abstrakte emner",
+    "C1_help": "Avansert — flytende og spontant uttrykk",
+    "C2_help": "Mestring — tilsvarer en utdannet morsmålsbruker"
+  },
+  "tutor": {
+    "languages": {
+      "heading": "Språk du underviser",
+      "emptyHint": "Hvilke språk underviser du i?",
+      "add": "Legg til et språk",
+      "remove": "Fjern språk",
+      "added": "Språkrad lagt til",
+      "removed": "Språkrad fjernet"
+    },
+    "proficiency": {
+      "label": "Ferdighetsnivå",
+      "placeholder": "Nivå"
+    },
+    "hourlyRate": {
+      "label": "Timepris (valgfritt)",
+      "placeholder": "f.eks. 350",
+      "currency": {
+        "label": "Valuta"
+      }
+    },
+    "experience": {
+      "label": "Om undervisningserfaring",
+      "placeholder": "f.eks. 5 år med undervisning i norsk for ukrainske fagpersoner…",
+      "hint": "Valgfritt — maks 400 tegn",
+      "counter": "{count}/400"
+    },
+    "reassurance": "Du kan oppdatere alt dette — og legge til bilde, sertifikater og tilgjengelighet — fra tutorprofilen din."
+  }
+}

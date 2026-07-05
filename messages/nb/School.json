@@ -1,0 +1,157 @@
+{
+  "dashboard": {
+    "notFound": "Skolen ble ikke funnet.",
+    "placeholder": "Fullstendige dashbord-statistikker kommer snart."
+  },
+  "common": {
+    "close": "Lukk",
+    "loading": "Laster…",
+    "saving": "Lagrer…",
+    "stillWorking": "Lagrer fortsatt — vennligst vent…",
+    "copied": "Kopiert!",
+    "markdown": {
+      "previewEmpty": "Ingenting å forhåndsvise."
+    }
+  },
+  "empty": {
+    "title": "Du har ingen skole ennå",
+    "help": "En skole er arbeidsplassen din der du organiserer innhold og elever.",
+    "create": {
+      "title": "Opprett min egen skole",
+      "help": "Sett opp en arbeidsplass, inviter lærere og elever."
+    },
+    "accept": {
+      "title": "Godta en invitasjon",
+      "help": "Lim inn en invitasjonslenke eller se ventende invitasjoner."
+    }
+  },
+  "role": {
+    "teacher": {
+      "label": "Lærer",
+      "help": "Kan opprette kurs og vurdere elever."
+    },
+    "contentAdmin": {
+      "label": "Innholdsadmin",
+      "help": "Kan administrere kurs, men ikke fakturering."
+    },
+    "student": {
+      "label": "Elev",
+      "help": "Kan melde seg på og følge leksjoner."
+    }
+  },
+  "create": {
+    "step": {
+      "basics": {
+        "title": "Sett opp skolen din",
+        "subtitle": "Tar ca. 2 minutter. Du kan redigere alt etterpå."
+      }
+    },
+    "next": "Neste",
+    "submit": "Opprett skole",
+    "cancel": {
+      "title": "Forkast skoleoppsettet?",
+      "body": "Skolenavn og medlemmer vil ikke bli lagret.",
+      "confirm": "Forkast",
+      "dismiss": "Fortsett redigering"
+    },
+    "error": {
+      "nameTaken": "Det navnet er allerede tatt.",
+      "network": "Kunne ikke koble til. Sjekk tilkoblingen din.",
+      "retry": "Prøv igjen",
+      "saveFailed": "Kunne ikke lagre. Prøv igjen."
+    },
+    "basics": {
+      "name": {
+        "label": "Skolenavn",
+        "placeholder": "f.eks. Nordisk Språkakademi",
+        "help": "Synlig for elevene dine. Du kan endre det senere.",
+        "checking": "Sjekker tilgjengelighet…",
+        "available": "Navn tilgjengelig",
+        "taken": "Det navnet er tatt. Prøv ett av disse:",
+        "checkFailed": "Kunne ikke sjekke — klikk for å prøve igjen",
+        "suggestionsLabel": "Navneforslag",
+        "error": {
+          "required": "Skolenavn er påkrevd",
+          "min": "Må ha minst 3 tegn",
+          "max": "Kan ha maks 60 tegn"
+        }
+      },
+      "slug": {
+        "label": "Skole-URL",
+        "placeholder": "nordisk-sprakakademi",
+        "help": "Skolens unike adresse. Kun små bokstaver, tall og bindestreker.",
+        "checking": "Sjekker tilgjengelighet…",
+        "available": "URL er ledig",
+        "taken": "Den URL-en er tatt. Prøv en av disse:",
+        "checkFailed": "Kunne ikke sjekke — klikk for å prøve igjen",
+        "suggestionsLabel": "URL-forslag",
+        "error": {
+          "required": "Skole-URL er påkrevd",
+          "min": "Må være minst 3 tegn",
+          "max": "Kan ha maks 60 tegn",
+          "format": "Kun små bokstaver, tall og bindestreker er tillatt"
+        }
+      },
+      "desc": {
+        "label": "Beskrivelse",
+        "placeholder": "Fortell elever om skolen din…",
+        "counter": "{count}/500",
+        "tab": {
+          "write": "Skriv",
+          "preview": "Forhåndsvis"
+        },
+        "error": {
+          "max": "Beskrivelsen kan ha maks 500 tegn"
+        }
+      },
+      "logo": {
+        "label": "Logo",
+        "upload": "Last opp logo",
+        "change": "Bytt logo",
+        "remove": "Fjern",
+        "help": "PNG, JPG, SVG eller WebP · maks 2 MB. Kvadratiske bilder fungerer best.",
+        "error": {
+          "type": "Velg et PNG-, JPG-, SVG- eller WebP-bilde",
+          "size": "Bildet må være mindre enn 2 MB",
+          "upload": "Opplasting mislyktes. Prøv igjen."
+        }
+      },
+      "contact": {
+        "toggle": "Legg til kontakt og nettilstedeværelse",
+        "toggleHide": "Skjul kontakt og nettilstedeværelse",
+        "website": {
+          "label": "Nettsted",
+          "placeholder": "https://min-skole.no",
+          "error": {
+            "url": "Skriv inn en gyldig URL"
+          }
+        },
+        "email": {
+          "label": "Kontakt-e-post",
+          "placeholder": "hei@min-skole.no",
+          "help": "Offentlig kontaktadresse for henvendelser fra studenter.",
+          "error": {
+            "email": "Skriv inn en gyldig e-postadresse"
+          }
+        },
+        "city": {
+          "label": "By",
+          "placeholder": "Oslo",
+          "help": "Hjelper studenter å finne lokale skoler. Skriv «Online» hvis du er helt digital."
+        }
+      }
+    },
+    "helper": {
+      "title": "Hva du får",
+      "bullets": {
+        "0": "Ditt eget skolarbeidssted",
+        "1": "Inviter lærere og studenter",
+        "2": "Opprett og publiser kurs",
+        "3": "Spor elevenes fremgang",
+        "4": "Gi oppgaver med frister"
+      },
+      "reassurance": "Du kan tilpasse alt — navn, beskrivelse, logo — fra innstillingene.",
+      "mobileTrigger": "Hva du vil få"
+    }
+  }
+}

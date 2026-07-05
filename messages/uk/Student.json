@@ -1,0 +1,129 @@
+{
+  "dashboard": {
+    "greeting": "З поверненням!",
+    "greetingNamed": "З поверненням, {name}!",
+    "subtitle": "Продовжуйте з того місця, де зупинились."
+  },
+  "continueLearning": {
+    "title": "Продовжити навчання",
+    "subtitle": "Продовжте з того місця, де зупинились.",
+    "empty": "Жодного курсу в процесі.",
+    "browseEnrolled": "Мої школи",
+    "progress": "{completed} з {total} уроків",
+    "resume": "Продовжити",
+    "start": "Почати"
+  },
+  "upcomingLessons": {
+    "title": "Наступні уроки",
+    "subtitle": "Ваші наступні уроки з усіх курсів.",
+    "empty": "Немає запланованих уроків.",
+    "in": "у {container}",
+    "start": "Відкрити"
+  },
+  "streak": {
+    "title": "Серія активності",
+    "current": "Поточна серія",
+    "longest": "Найдовша серія",
+    "totalDays": "Всього днів",
+    "days": "{count, plural, one {# день} few {# дні} many {# днів} other {# дні}}",
+    "noActivity": "Пройдіть урок, щоб розпочати серію!"
+  },
+  "voxordPromo": {
+    "title": "Практикуйте вимову на мобільному",
+    "description": "Завантажте VoxOrd, щоб тренувати мовлення та отримувати зворотний зв'язок у реальному часі.",
+    "appStore": "App Store",
+    "playStore": "Google Play",
+    "dismiss": "Закрити"
+  },
+  "player": {
+    "exit": "Назад",
+    "position": "{current} / {total}",
+    "prev": "Попередній",
+    "completeAndNext": "Завершити та далі",
+    "markComplete": "Позначити як завершений",
+    "completed": "Завершено",
+    "completedToast": "Урок завершено! Чудова робота.",
+    "noContent": "Вміст цього уроку ще недоступний.",
+    "keyboardHint": "← → для навігації · Esc для виходу"
+  },
+  "SchoolStatus": {
+    "stepperLabel": "Прогрес зарахування",
+    "stepApplication": "Заявка",
+    "stepPlacement": "Розподіл рівня",
+    "stepGroup": "Група",
+    "stepSchedule": "Розклад",
+    "stepNumber": "Крок {n}",
+    "stepDone": "завершено",
+    "pendingTitle": "Заявку подано",
+    "pendingDescription": "{school} розглядає вашу заявку.",
+    "onboardingTitle": "Завершіть оформлення",
+    "onboardingDescription": "Виконайте кроки нижче, щоб {school} могла розподілити вас у групу.",
+    "placementReviewTitle": "Очікує розподілу",
+    "placementReviewDescription": "{school} підбирає для вас підходящу групу.",
+    "activeTitle": "Ви зараховані",
+    "activeDescription": "Ви зараховані до {school}.",
+    "activeDescriptionWithGroup": "Ви в групі {group} у {school}.",
+    "rejectedTitle": "Заявку не прийнято",
+    "rejectedDescription": "{school} не прийняла вашу заявку.",
+    "leftTitle": "Більше не зараховані",
+    "leftDescription": "Ви залишили {school}.",
+    "badgeRejected": "Відхилено",
+    "badgeLeft": "Залишив(ла)",
+    "reapply": "Подати заявку знову",
+    "discoverSelfStudy": "Знайти курси для самостійного вивчення"
+  },
+  "MySchools": {
+    "title": "Мої школи",
+    "subtitle": "Школи, до яких ви подали заявку або в яких навчаєтесь.",
+    "empty": "Ви ще не подавали заявку до жодної школи.",
+    "browseDiscover": "Знайти школи",
+    "noUpcomingLesson": "Поки немає запланованих занять",
+    "nextLessonAt": "Наступне: {day}, {start}–{end}",
+    "classmateCount": "{count, plural, one {# одногрупник} few {# одногрупники} many {# одногрупників} other {# одногрупників}}"
+  },
+  "SchoolDetail": {
+    "backLink": "Назад до моїх школ",
+    "lockedHeading": "{school} — ще не активна",
+    "modeOnline": "Онлайн",
+    "modeInPerson": "Очно",
+    "teachersLabel": "Викладачі",
+    "teacherRolePrimary": "Викладач",
+    "teacherRoleCoPrimary": "Співвикладач",
+    "teacherRoleSubstitute": "Заміна",
+    "scheduleTitle": "Розклад на тиждень",
+    "scheduleEmpty": "Розклад ще не складено — перевірте пізніше.",
+    "nextLessonBadge": "Наступне заняття",
+    "weekday": {
+      "Mon": "Понеділок",
+      "Tue": "Вівторок",
+      "Wed": "Середа",
+      "Thu": "Четвер",
+      "Fri": "П'ятниця",
+      "Sat": "Субота",
+      "Sun": "Неділя"
+    },
+    "materialsTitle": "Матеріали",
+    "materialsEmpty": "Матеріалів ще немає.",
+    "mainCourseBadge": "Основний курс",
+    "materialUntitled": "Курс без назви",
+    "materialUnavailable": "Ще не доступно",
+    "progressInProgress": "У процесі",
+    "progressCompleted": "Завершено",
+    "progressNeedsReview": "Потрібна перевірка",
+    "classmates": "{count, plural, one {# одногрупник} few {# одногрупники} many {# одногрупників} other {# одногрупників}} у вашій групі",
+    "leaveAction": "Залишити школу",
+    "leaveConfirmTitle": "Залишити цю школу?",
+    "leaveConfirmDescription": "Ви втратите доступ до групи, розкладу та матеріалів {school}. Пізніше можна подати заявку знову.",
+    "leaveCancel": "Скасувати",
+    "leaveConfirm": "Залишити школу",
+    "leaveError": "Не вдалося залишити школу. Спробуйте ще раз."
+  },
+  "AssignedMaterials": {
+    "title": "Призначено вам",
+    "overdue": "Термін минув"
+  },
+  "GroupAssignedBanner": {
+    "message": "Вас зараховано до {group} у {school}!",
+    "dismiss": "Закрити"
+  }
+}

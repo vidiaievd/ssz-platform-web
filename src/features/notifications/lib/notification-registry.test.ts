@@ -1,7 +1,7 @@
 import { createTranslator } from 'next-intl';
 import { describe, expect, it } from 'vitest';
 
-import en from '../../../../messages/en.json';
+import { enMessages as en } from '@/lib/i18n/messages';
 import type { EnrollmentRequestData } from '../types';
 import { getNotificationEntry } from './notification-registry';
 

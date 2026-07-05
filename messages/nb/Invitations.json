@@ -1,0 +1,79 @@
+{
+  "page": {
+    "title": "Invitasjoner",
+    "pendingSummary": "{count, plural, one {# venter} other {# venter}}",
+    "expiredSummary": "{count, plural, one {# utløpt} other {# utløpt}}",
+    "noPending": "Ingen ventende invitasjoner"
+  },
+  "tabs": {
+    "all": "Alle",
+    "teachers": "Lærere",
+    "students": "Studenter",
+    "staff": "Personale"
+  },
+  "table": {
+    "recipient": "Mottaker",
+    "roleGroup": "Rolle / Gruppe",
+    "status": "Status",
+    "sent": "Sendt",
+    "expires": "Utløper",
+    "actions": "Handlinger",
+    "empty": "Ingen invitasjoner ennå",
+    "retry": "Prøv igjen",
+    "invitedBy": "av {name}"
+  },
+  "status": {
+    "accepted": "Akseptert",
+    "pending": "Venter",
+    "expired": "Utløpt",
+    "revoked": "Tilbakekalt"
+  },
+  "expiry": {
+    "dash": "—",
+    "expired": "Utløpt",
+    "soon": "Utløper snart",
+    "availableIn": "Tilgjengelig om {mins} min"
+  },
+  "actions": {
+    "resend": "Send på nytt",
+    "copyLink": "Kopier lenke",
+    "revoke": "Tilbakekall",
+    "linkCopied": "Lenke kopiert"
+  },
+  "resend": {
+    "success": "Invitasjon sendt på nytt",
+    "alreadyAccepted": "Invitasjonen ble allerede akseptert",
+    "throttled": "For mange forsendelser — prøv igjen senere",
+    "gone": "Invitasjonen eksisterer ikke lenger",
+    "error": "Kunne ikke sende invitasjon på nytt",
+    "cooldownHint": "Tilgjengelig om {mins} min"
+  },
+  "revoke": {
+    "title": "Tilbakekalle invitasjon?",
+    "description": "Invitasjonen til {email} vil bli tilbakekalt og kan ikke lenger brukes. Du kan invitere dem igjen senere.",
+    "confirm": "Tilbakekall",
+    "cancel": "Avbryt",
+    "success": "Invitasjon tilbakekalt",
+    "undo": "Angre",
+    "alreadyAccepted": "Kan ikke tilbakekalle — invitasjonen ble allerede akseptert",
+    "gone": "Invitasjonen ble allerede tilbakekalt eller utløpt",
+    "error": "Kunne ikke tilbakekalle invitasjon"
+  },
+  "pendingLink": {
+    "singular": "1 invitasjon venter →",
+    "plural": "{count} invitasjoner venter →"
+  },
+  "roles": {
+    "TEACHER": "Lærer",
+    "STUDENT": "Student",
+    "ADMIN": "Admin",
+    "CONTENT_ADMIN": "Innholdsadmin",
+    "SCHEDULER": "Planlegger"
+  },
+  "a11y": {
+    "loadingLabel": "Laster invitasjoner",
+    "listLabel": "Invitasjonsliste",
+    "actionsLabel": "Handlinger for {email}",
+    "pendingLabel": "{count} venter"
+  }
+}

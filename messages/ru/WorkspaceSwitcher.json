@@ -1,0 +1,20 @@
+{
+  "trigger": "Переключить рабочее пространство",
+  "sections": {
+    "schools": "Школы",
+    "other": "Другое"
+  },
+  "roles": {
+    "OWNER": "Владелец",
+    "ADMIN": "Администратор",
+    "MANAGER": "Менеджер",
+    "TEACHER": "Учитель",
+    "SCHEDULER": "Планировщик",
+    "CONTENT_ADMIN": "Контент",
+    "STUDENT": "Студент"
+  },
+  "contexts": {
+    "private_tutor": "Частный репетитор",
+    "student": "Студент"
+  }
+}

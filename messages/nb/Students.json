@@ -1,0 +1,247 @@
+{
+  "notFound": "Skolen ble ikke funnet.",
+  "common": {
+    "cancel": "Avbryt",
+    "undo": "Angre"
+  },
+  "list": {
+    "title": "Elever",
+    "enrolled": "påmeldt",
+    "atRisk": "i risiko",
+    "unassigned": "uten gruppe",
+    "importCsv": "Importer CSV",
+    "bulkMessage": "Massemelding",
+    "enroll": "Registrer elev",
+    "emptyTitle": "Ingen elever ennå",
+    "emptyDescription": "Registrer din første elev for å komme i gang.",
+    "filteredEmpty": "Ingen elever matcher filtrene."
+  },
+  "detail": {
+    "backToStudents": "Tilbake til elever",
+    "groups": {
+      "activeHeading": "Aktive grupper ({n})",
+      "viewAll": "Se alle grupper →",
+      "currentHeading": "Nåværende grupper ({n})",
+      "pastHeading": "Tidligere grupper ({n})",
+      "pastEmpty": "Ingen tidligere gruppehistorikk.",
+      "empty": {
+        "title": "Ikke i noen gruppe ennå",
+        "body": "Legg til eleven i en gruppe for å koble dem til en lærer og timeplan."
+      },
+      "cols": {
+        "group": "Gruppe",
+        "role": "Rolle",
+        "teachers": "Lærere",
+        "schedule": "Timeplan",
+        "since": "Siden"
+      },
+      "role": {
+        "student": "Elev",
+        "trial": "Prøve",
+        "observer": "Observatør"
+      },
+      "actions": {
+        "view": "Se gruppe",
+        "changeRole": "Endre rolle",
+        "transfer": "Flytt til annen gruppe",
+        "remove": "Fjern fra gruppe"
+      }
+    },
+    "teachers": "Lærere",
+    "progress": "Fremgang",
+    "details": "Detaljer",
+    "language": "Språk",
+    "level": "Nivå",
+    "status": "Status",
+    "groupsCount": "Grupper",
+    "enrolledDate": "Påmeldt",
+    "lastActive": "Sist aktiv",
+    "progressAriaLabel": "{pct}% fullført",
+    "notInAnyGroup": "Ikke i noen gruppe ennå.",
+    "addToGroup": "Legg til gruppe",
+    "openGroup": "Åpne gruppe {name}",
+    "nudge": "Purr",
+    "nudgeSending": "Sender…",
+    "nudgeSent": "Purring sendt til {name}",
+    "nudgeFailed": "Klarte ikke å sende purring.",
+    "nudgeAriaLabel": "Send purring til {name}",
+    "removedFromGroup": "Fjernet fra {group}",
+    "removeFailed": "Klarte ikke å fjerne fra gruppe.",
+    "removeFromGroupAriaLabel": "Fjern fra {group}",
+    "clashBanner": "{groupA} overlapper {groupB} på {day} kl. {time}. Flytt eleven til en annen gruppe.",
+    "back": "← Elever",
+    "addedAt": "Lagt til {date}",
+    "lastSeen": {
+      "never": "Aldri",
+      "value": "{relative}"
+    },
+    "actions": {
+      "nudge": "Purr",
+      "nudgeSent": "Sendt ✓",
+      "nudgeCooldown": "Sendt nylig",
+      "assignGroup": "Legg til i gruppe",
+      "editInfo": "Rediger elevinfo",
+      "changeLevel": "Endre nivå",
+      "archive": "Arkiver elev",
+      "unarchive": "Gjenopprett elev",
+      "removeFromSchool": "Fjern fra skole"
+    },
+    "clash": {
+      "title": "Timeplankollisjon oppdaget",
+      "body": "{groupA} ({dayA} {timeA}) overlapper {groupB} ({dayB} {timeB}).",
+      "cta": "Se grupper →"
+    },
+    "tabs": {
+      "overview": "Oversikt",
+      "groups": "Grupper",
+      "history": "Læringshistorikk",
+      "notes": "Notater",
+      "payments": "Betalinger",
+      "bonuses": "Bonuser"
+    },
+    "info": {
+      "heading": "Elevinfo",
+      "email": "E-post",
+      "phone": "Telefon",
+      "status": "Status",
+      "language": "Primærspråk",
+      "level": "Nåværende nivå",
+      "addedAt": "Dato lagt til",
+      "copied": "Kopiert"
+    },
+    "stats": {
+      "progress": "Fremgang",
+      "lastSeen": "Sist sett",
+      "teachers": "{n, plural, one {# lærer} other {# lærere}}",
+      "noTeacher": "Ingen lærer"
+    },
+    "history": {
+      "levels": {
+        "heading": "Nivåprogresjon",
+        "empty": {
+          "title": "Ingen nivåhistorikk ennå",
+          "body": "Nivåendringer vises her etter hvert som eleven utvikler seg."
+        },
+        "present": "nå",
+        "duration": "{n} måneder"
+      },
+      "periods": {
+        "heading": "Studieperioder",
+        "empty": {
+          "title": "Ingen studieperioder ennå"
+        },
+        "cols": {
+          "period": "Periode",
+          "group": "Gruppe",
+          "role": "Rolle",
+          "teachers": "Lærere",
+          "status": "Status"
+        },
+        "statusActive": "Aktiv",
+        "statusCompleted": "Fullført"
+      },
+      "teachers": {
+        "heading": "Lærere",
+        "empty": {
+          "title": "Ingen lærerhistorikk ennå"
+        }
+      }
+    },
+    "assign": {
+      "title": "Legg til i gruppe",
+      "search": "Søk grupper…",
+      "roleLabel": "Rolle",
+      "confirm": "Legg til i gruppe",
+      "confirmAnyway": "Legg til likevel",
+      "clashWarning": "Å legge til i {group} skaper en timeplankollisjon med {existing} ({day} {time}).",
+      "overCapacity": "Gruppen er full ({current}/{max} plasser).",
+      "languageMismatch": "Språkfeil",
+      "success": "La til {name} i {group}."
+    },
+    "transfer": {
+      "title": "Flytt til annen gruppe",
+      "from": "Flytte fra",
+      "to": "Flytte til",
+      "confirm": "Flytt elev",
+      "success": "Flyttet {name} fra {from} til {to}.",
+      "error": "Overføring mislyktes — {name} er fortsatt i {from}."
+    },
+    "remove": {
+      "group": {
+        "title": "Fjern fra gruppe?",
+        "heading": "Fjern {name} fra {group}?",
+        "body": "{name} mister tilgang til denne gruppens leksjoner og lærer. Fremgang og historikk bevares under Tidligere grupper.",
+        "confirm": "Fjern fra gruppe",
+        "success": "Fjernet {name} fra {group}.",
+        "undo": "Angre"
+      },
+      "school": {
+        "heading": "Fjern {name} fra denne skolen?",
+        "bodyWithGroups": "{name} er for øyeblikket i {n, plural, one {# gruppe} other {# grupper}}. Fjerning vil melde dem ut av alle grupper og slette skoletilknytningen.",
+        "bodyNoGroups": "{name} er ikke i noen grupper for øyeblikket. Fjerning vil slette skoletilknytningen.",
+        "irreversible": "Dette kan ikke angres.",
+        "confirm": "Fjern fra skole"
+      }
+    },
+    "stubs": {
+      "notes": {
+        "title": "Kommer snart",
+        "body": "Lærernes notater vises her."
+      },
+      "payments": {
+        "title": "Kommer snart",
+        "body": "Betalingshistorikk vises her."
+      },
+      "bonuses": {
+        "title": "Kommer snart",
+        "body": "Bonuser og kreditter vises her."
+      }
+    },
+    "groupsHeading": "Grupper"
+  },
+  "enroll": {
+    "title": "Registrer elev",
+    "description": "Legg til elever enkeltvis eller lim inn en liste med e-poster.",
+    "emailsLabel": "E-postadresser",
+    "emailsPlaceholder": "en@eksempel.com\nto@eksempel.com",
+    "emailsHint": "Skill e-poster med komma, semikolon eller linjeskift.",
+    "checkEmails": "Sjekk e-poster",
+    "targetGroup": "Tilordne til gruppe (valgfritt)",
+    "noGroup": "Ingen gruppe",
+    "submit": "Registrer {count}",
+    "submitDefault": "Registrer",
+    "failed": "Registrering mislyktes. Prøv igjen."
+  },
+  "addToGroup": {
+    "title": "Legg {name} til gruppe",
+    "description": "Velg en gruppe. Kapasitet og timeplankollisjon vises.",
+    "searchPlaceholder": "Søk grupper…",
+    "searchAriaLabel": "Søk grupper",
+    "noGroups": "Ingen grupper funnet.",
+    "clashWarning": "{name} har allerede en gruppe med kolliderende timeplan.",
+    "clashConfirm": "Jeg forstår timeplankonflikten og vil fortsette.",
+    "clashAcknowledged": "Lagt til med timeplankollisjon bekreftet.",
+    "clashBlocked": "Kan ikke legge til: timeplankollisjon.",
+    "overCapacity": "Gruppen vil bli over kapasitet ({projected}/{max}).",
+    "submit": "Legg til gruppe",
+    "added": "La til {name} i {group}",
+    "addedWithWarning": "La til {name} i {group}",
+    "failed": "Klarte ikke å legge til gruppe."
+  },
+  "bulkMessage": {
+    "title": "Send melding",
+    "description": "Send en melding til alle elever i gjeldende utvalg.",
+    "audience": "Mottakere",
+    "recipients": "{count} elever",
+    "subject": "Emne",
+    "subjectPlaceholder": "Meldingsemne…",
+    "body": "Melding",
+    "bodyPlaceholder": "Skriv meldingen din her…",
+    "send": "Send til {count}",
+    "sent": "Melding sendt til {count} elever",
+    "failed": "Klarte ikke å sende melding."
+  },
+  "onboard": {
+    "invitationBanner": "Du har blitt invitert til å bli med i en skole. Fullfør profilen din for å komme i gang."
+  }
+}
