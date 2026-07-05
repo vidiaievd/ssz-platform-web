@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { filterSchools } from '@/features/discovery/api/filter-schools';
+import { discoveryQuerySchema } from '@/features/discovery/schemas';
+import type { School } from '@/features/discovery/types';
 import { serverFetch } from '@/lib/api/server-fetcher';
-import type { School, SchoolsResponse } from '@/features/discovery/types';
 
 type BackendPublicSchool = {
   schoolId: string;
@@ -31,13 +33,16 @@ function toFrontend(s: BackendPublicSchool): School {
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
-  const search = searchParams.get('search')?.toLowerCase();
-  const type = searchParams.get('type');
+  const parsed = discoveryQuerySchema.safeParse(
+    Object.fromEntries(request.nextUrl.searchParams),
+  );
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid query parameters' }, { status: 400 });
+  }
 
-  let schools: BackendPublicSchool[];
+  let raw: BackendPublicSchool[];
   try {
-    schools = await serverFetch<BackendPublicSchool[]>({
+    raw = await serverFetch<BackendPublicSchool[]>({
       service: 'organization',
       path: '/schools/public',
       anonymous: true,
@@ -46,22 +51,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch schools' }, { status: 502 });
   }
 
-  let results = schools.map(toFrontend);
-
-  if (search) {
-    results = results.filter(
-      (s) =>
-        s.name.toLowerCase().includes(search) ||
-        s.description?.toLowerCase().includes(search),
-    );
-  }
-  if (type) {
-    results = results.filter((s) => s.type === type);
-  }
-
-  const response: SchoolsResponse = {
-    items: results,
-    pageInfo: { hasNextPage: false, total: results.length },
-  };
-  return NextResponse.json(response);
+  const schools = raw.map(toFrontend);
+  return NextResponse.json(filterSchools(schools, parsed.data));
 }

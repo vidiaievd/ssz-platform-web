@@ -21,11 +21,13 @@ export interface School {
   isFree: boolean;
 }
 
+export interface PageInfo {
+  endCursor?: string;
+  hasNextPage: boolean;
+  total: number;
+}
+
 export interface SchoolsResponse {
   items: School[];
-  pageInfo: {
-    nextCursor?: string;
-    hasNextPage: boolean;
-    total?: number;
-  };
+  pageInfo: PageInfo;
 }

@@ -28,7 +28,7 @@ export function useSchools({ filters, enabled = true }: UseSchoolsOptions = {}) 
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
-      lastPage.pageInfo.hasNextPage ? lastPage.pageInfo.nextCursor : undefined,
+      lastPage.pageInfo.hasNextPage ? lastPage.pageInfo.endCursor : undefined,
     staleTime: 60_000,
     enabled,
   });
