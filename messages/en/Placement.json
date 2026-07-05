@@ -1,0 +1,72 @@
+{
+  "intro": {
+    "title": "Find your starting point",
+    "body": "Answer a few quick questions and we'll skip you past what you already know — straight to the right module. No score, no pressure.",
+    "bodyCompact": "Answer a few quick questions and we'll skip you past what you already know. No score, no pressure.",
+    "takePlacement": "Take the placement",
+    "skipToBeginning": "Skip — start from the beginning",
+    "features": {
+      "time": {
+        "title": "About 2 minutes",
+        "sub": "Five short questions"
+      },
+      "adapt": {
+        "title": "Adapts as you go",
+        "sub": "Questions get easier or harder based on your answers"
+      },
+      "skip": {
+        "title": "Skip what you know",
+        "sub": "Start ahead instead of from lesson one"
+      }
+    }
+  },
+  "runner": {
+    "progressCount": "{current} / {total}",
+    "levelLabel": "Adjusting to your level",
+    "steppingUp": "Stepping up",
+    "easingBack": "Easing back",
+    "mcqEyebrow": "Choose the correct answer",
+    "translateEyebrow": "Translate into {lang}",
+    "dontKnow": "I don't know this",
+    "continue": "Continue",
+    "seeMyLevel": "See my level",
+    "skipForNow": "Skip for now"
+  },
+  "result": {
+    "eyebrow": "You're ready for",
+    "title": "Module {n} · {moduleTitle}",
+    "titleFallback": "Module {n}",
+    "sub": "Nice — you’re comfortable around <strong>{level}</strong>. We’ll skip the basics and start you where it gets useful.",
+    "known": "Known",
+    "startHere": "Start here",
+    "startAt": "Start at Module {n}",
+    "startFromModule1": "Start from Module 1 instead"
+  },
+  "skipped": {
+    "title": "We'll start at the beginning",
+    "body": "No problem — you'll begin with Module 1. You can take the placement any time from your course home if you'd like to skip ahead later.",
+    "goToModule1": "Go to Module 1",
+    "takePlacement": "Take the placement instead"
+  },
+  "loading": {
+    "ariaLabel": "Loading placement test"
+  },
+  "error": {
+    "title": "Couldn't load the placement",
+    "body": "Something went wrong on our end. You can try again, or just start from the beginning and place yourself later.",
+    "retry": "Try again",
+    "startFromBeginning": "Start from the beginning"
+  },
+  "inline": {
+    "offerText": "Not sure where to start? Take the placement",
+    "dismiss": "Dismiss"
+  },
+  "onboarding": {
+    "account": "Account",
+    "chooseCourse": "Choose course",
+    "placement": "Placement"
+  },
+  "seed": {
+    "success": "Vocabulary from earlier modules marked as known."
+  }
+}

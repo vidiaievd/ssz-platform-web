@@ -1,0 +1,230 @@
+{
+  "sectionTitle": "Teachers",
+  "tabs": {
+    "command-center": "Command Center",
+    "substitutions": "Substitutes",
+    "curriculum": "Curriculum",
+    "forecast": "Forecast"
+  },
+  "commandCenter": {
+    "title": "Workload Command Center",
+    "addTeacher": "Add teacher",
+    "arrangeCover": "Arrange cover",
+    "export": "Export",
+    "empty": "No teachers in this school yet.",
+    "emptyCta": "Add your first teacher",
+    "kpis": {
+      "utilization": "Avg. utilization",
+      "spareCapacity": "Spare capacity",
+      "overloaded": "Overloaded",
+      "clashes": "Schedule clashes",
+      "vacancies": "Vacancies"
+    },
+    "table": {
+      "name": "Teacher",
+      "load": "Load",
+      "langs": "Languages",
+      "groups": "Groups",
+      "conflicts": "Conflicts"
+    },
+    "priorityQueue": {
+      "title": "Needs attention",
+      "empty": "No issues to resolve.",
+      "offload": "Offload",
+      "arrangeCover": "Arrange cover",
+      "openSchedule": "Open schedule",
+      "vacancyMessage": "{lang} — {group} has no primary teacher"
+    },
+    "roomUtilization": {
+      "title": "Room utilization"
+    }
+  },
+  "roster": {
+    "title": "Teachers",
+    "addTeacher": "Add teacher",
+    "empty": "No teachers in this school yet.",
+    "emptyCta": "Add your first teacher",
+    "tableLabel": "Teachers roster",
+    "noLanguages": "None",
+    "columns": {
+      "name": "Teacher",
+      "email": "Email",
+      "languages": "Languages",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "pending": "Pending",
+      "suspended": "Suspended"
+    },
+    "actions": {
+      "menuLabel": "{name} — actions",
+      "remove": "Remove"
+    },
+    "addModal": {
+      "title": "Add teacher",
+      "emailLabel": "Email address",
+      "hoursLabel": "Max weekly contact hours",
+      "employmentLabel": "Employment type",
+      "employmentFull": "Full-time",
+      "employmentPart": "Part-time",
+      "employmentContract": "Contract",
+      "inviteButton": "Send invitation",
+      "addButton": "Add to school",
+      "onboardButton": "Invite to onboard",
+      "lookingUp": "Looking up…",
+      "notFound": "No account found — will send registration invitation",
+      "foundTeacher": "Found teacher profile",
+      "foundUser": "Found user — will onboard as teacher",
+      "noLangs": "No teaching languages set — assign them in the teacher's profile",
+      "cancelButton": "Cancel",
+      "langsLabel": "Teaching languages",
+      "langsLanguageLabel": "Language",
+      "langsLevelLabel": "Level",
+      "langsAddButton": "Add language",
+      "langsRemoveLabel": "Remove language",
+      "langsRequired": "At least one teaching language is required",
+      "langsHint": "The school hires the teacher for a specific language — this will be used for group assignments.",
+      "firstNameLabel": "First name",
+      "lastNameLabel": "Last name",
+      "nameHint": "Optional — used to pre-fill the teacher's registration form."
+    },
+    "removeGuard": {
+      "title": "Cannot remove teacher",
+      "body": "This teacher is the primary teacher of {count} active group(s). Reassign primary first:",
+      "confirm": "Confirm removal",
+      "undo": "Undo removal"
+    }
+  },
+  "schedule": {
+    "title": "Schedule",
+    "weekLabel": "Week",
+    "loadBreakdown": "Load breakdown",
+    "contact": "Contact",
+    "prep": "Prep",
+    "effective": "Effective load",
+    "utilization": "Utilization",
+    "dayPeak": "Day peak",
+    "consecPeak": "Consecutive peak",
+    "softCost": "Scheduling cost",
+    "curriculumCarried": "Curriculum",
+    "availabilityEditor": "Edit availability",
+    "absenceList": "Absences",
+    "reportAbsence": "Report absence",
+    "arrangecover": "Arrange cover",
+    "teacherSwitcher": "Switch teacher",
+    "overloadTitle": "Overloaded",
+    "nearCapTitle": "Near capacity",
+    "conflicts": "{count} schedule conflict(s)",
+    "utilizationWarning": "Utilization at {pct}% — approaching limit",
+    "dayPeakWarning": "Day peak at {hours}h — exceeds daily cap",
+    "consecPeakWarning": "{count} consecutive lessons — fatigue risk",
+    "preferred": "Preferred",
+    "available": "Available",
+    "unavailable": "Unavailable"
+  },
+  "availability": {
+    "available": "Available",
+    "preferred": "Preferred",
+    "unavailable": "Unavailable",
+    "recurring": "Recurring",
+    "saveButton": "Save availability"
+  },
+  "absence": {
+    "title": "Report absence",
+    "kindLabel": "Type",
+    "kindSick": "Sick leave",
+    "kindLeave": "Planned leave",
+    "kindVacancy": "Vacancy",
+    "scopeLabel": "Duration",
+    "scopeToday": "Today only",
+    "scopeWindow": "Date range",
+    "scopePermanent": "Permanent",
+    "fromLabel": "From",
+    "toLabel": "To",
+    "reasonLabel": "Reason",
+    "submitButton": "Report",
+    "affectedLessons": "{count} lessons affected",
+    "covered": "{covered}/{total} covered",
+    "arrangecover": "Arrange cover"
+  },
+  "substitutions": {
+    "title": "Substitute Console",
+    "reportAbsence": "Report absence",
+    "empty": "No open substitution requests.",
+    "urgencyToday": "Today",
+    "urgencyUpcoming": "Upcoming",
+    "urgencyOpen": "Open",
+    "candidateList": {
+      "title": "Candidates",
+      "assign": "Assign",
+      "undo": "Undo",
+      "noEligible": "No eligible candidates found.",
+      "classificationBest": "Best fit",
+      "classificationGood": "Good fit",
+      "classificationOk": "Possible",
+      "classificationIneligible": "Ineligible"
+    },
+    "bulkCover": "Cover all with best",
+    "bulkProgress": "{covered} covered, {flagged} flagged"
+  },
+  "curriculum": {
+    "title": "Curriculum Planner",
+    "selectGroup": "Select group",
+    "targetHours": "Target weekly hours",
+    "units": "Units",
+    "addUnit": "Add unit",
+    "statusPlanned": "Planned",
+    "statusActive": "Active",
+    "statusDone": "Done",
+    "statusOverridden": "Overridden",
+    "deliver": "Mark delivered",
+    "override": "Override",
+    "overrideReason": "Reason for override",
+    "lessonMapper": "Unit–Lesson mapping"
+  },
+  "forecast": {
+    "title": "Forecast & Capacity",
+    "export": "Export plan",
+    "sliders": {
+      "growth": "Student growth (%/term)",
+      "terms": "Terms to project",
+      "groupSize": "Students per group",
+      "hoursPerGroup": "Hours per group/week",
+      "contractPerTeacher": "Contract hours/teacher"
+    },
+    "headline": "Teachers needed",
+    "projectionChart": "Headcount projection",
+    "languageGap": "Per-language gap",
+    "bottleneck": "Bottleneck",
+    "bottleneckDetail": "{lang} is at {util}% projected utilization",
+    "openHiringPlan": "Open hiring plan",
+    "saveScenario": "Save scenario",
+    "scenarios": "Saved scenarios",
+    "riskLow": "Low",
+    "riskMedium": "Medium",
+    "riskHigh": "High"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "open": "open",
+    "empty": "No open alerts.",
+    "acknowledge": "Acknowledge",
+    "ackLabel": "Acknowledge alert",
+    "ackError": "Failed to acknowledge alert",
+    "kindOverload": "Overload",
+    "kindNearCap": "Near capacity",
+    "kindDailyBreach": "Daily limit breach",
+    "kindConflict": "Schedule conflict",
+    "kindVacancy": "Vacancy",
+    "kindUncovered": "Uncovered lesson",
+    "kindSubOverload": "Substitute overload",
+    "kindBottleneck": "Language bottleneck"
+  },
+  "healthState": {
+    "ok": "Healthy",
+    "warn": "Warning",
+    "danger": "Critical"
+  }
+}

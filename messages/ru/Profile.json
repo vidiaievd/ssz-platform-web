@@ -1,0 +1,80 @@
+{
+  "title": "Профиль",
+  "subtitle": "Управляйте своим публичным профилем и настройками.",
+  "save": "Сохранить изменения",
+  "saveSuccess": "Профиль сохранён.",
+  "displayName": "Отображаемое имя",
+  "bio": "Биография",
+  "uiLocale": "Язык интерфейса",
+  "instructionLocales": "Языки преподавания",
+  "timezone": "Часовой пояс",
+  "contactEmail": "Контактная почта",
+  "contactPhone": "Контактный телефон",
+  "avatar": {
+    "placeholder": "Загрузка аватара скоро будет доступна."
+  },
+  "sections": {
+    "avatar": "Фото профиля",
+    "info": "Личная информация",
+    "teaching": "Профиль преподавателя",
+    "student": "Профиль ученика"
+  },
+  "completeness": {
+    "label": "Заполненность профиля",
+    "nudge": "Добавьте {field}, чтобы ваш профиль выглядел привлекательнее.",
+    "fields": {
+      "displayName": "отображаемое имя",
+      "avatarUrl": "фото профиля",
+      "bio": "биографию",
+      "timezone": "часовой пояс",
+      "instructionLocales": "языки преподавания",
+      "contactEmail": "контактную почту",
+      "contactPhone": "контактный телефон",
+      "teachingLanguages": "языки преподавания",
+      "targetLanguages": "изучаемые языки",
+      "hourlyRateCurrency": "почасовая ставка и валюта"
+    }
+  },
+  "firstName": "Имя",
+  "lastName": "Фамилия",
+  "handle": "Публичная ссылка",
+  "teaching": {
+    "languages": "Языки преподавания",
+    "cefr": "Уровни преподавания (CEFR)",
+    "specializations": "Специализации",
+    "experience": "Лет опыта",
+    "certificates": "Сертификаты",
+    "rate": "Почасовая ставка",
+    "currency": "Валюта",
+    "languagesEmpty": "Языки преподавания ещё не добавлены.",
+    "languagePlaceholder": "Добавить язык…",
+    "cefrLabel": "Рівень CEFR",
+    "cefrPlaceholder": "Уровень",
+    "addLanguage": "Добавить язык",
+    "removeLanguage": "Удалить {code}",
+    "cancelAdd": "Отмена"
+  },
+  "student": {
+    "nativeLanguage": "Родной язык",
+    "targetLanguages": "Языки изучения",
+    "goals": "Цели обучения"
+  },
+  "email": "Электронная почта",
+  "discard": "Отменить",
+  "unsavedChanges": "Есть несохранённые изменения",
+  "validation": {
+    "invalidEmail": "Введите корректный адрес электронной почты",
+    "invalidPhone": "Введите корректный номер телефона"
+  },
+  "form": {
+    "requiredLegend": "* Обязательные поля",
+    "emailLockedTooltip": "Email для входа. Чтобы изменить — перейдите в Безопасность."
+  },
+  "roles": {
+    "school_admin": "Админ школы",
+    "teacher": "Преподаватель",
+    "tutor": "Репетитор",
+    "student": "Ученик"
+  },
+  "saveShort": "Сохранить"
+}

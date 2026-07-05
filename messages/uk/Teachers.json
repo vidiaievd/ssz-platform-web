@@ -1,0 +1,230 @@
+{
+  "sectionTitle": "Вчителі",
+  "tabs": {
+    "command-center": "Командний центр",
+    "substitutions": "Заміни",
+    "curriculum": "Навчальний план",
+    "forecast": "Прогноз"
+  },
+  "commandCenter": {
+    "title": "Центр управління навантаженням",
+    "addTeacher": "Додати вчителя",
+    "arrangeCover": "Організувати заміну",
+    "export": "Експорт",
+    "empty": "У цій школі ще немає вчителів.",
+    "emptyCta": "Додайте першого вчителя",
+    "kpis": {
+      "utilization": "Сер. завантаження",
+      "spareCapacity": "Вільна ємність",
+      "overloaded": "Перевантажено",
+      "clashes": "Конфлікти розкладу",
+      "vacancies": "Вакансії"
+    },
+    "table": {
+      "name": "Вчитель",
+      "load": "Навантаження",
+      "langs": "Мови",
+      "groups": "Групи",
+      "conflicts": "Конфлікти"
+    },
+    "priorityQueue": {
+      "title": "Потребує уваги",
+      "empty": "Немає проблем для вирішення.",
+      "offload": "Зменшити навантаження",
+      "arrangeCover": "Організувати заміну",
+      "openSchedule": "Відкрити розклад",
+      "vacancyMessage": "{lang} — у групі {group} немає основного вчителя"
+    },
+    "roomUtilization": {
+      "title": "Завантаженість кімнат"
+    }
+  },
+  "roster": {
+    "title": "Викладачі",
+    "addTeacher": "Додати викладача",
+    "empty": "У цій школі ще немає викладачів.",
+    "emptyCta": "Додати першого викладача",
+    "tableLabel": "Список викладачів",
+    "noLanguages": "Немає",
+    "columns": {
+      "name": "Викладач",
+      "email": "Email",
+      "languages": "Мови",
+      "status": "Статус",
+      "actions": "Дії"
+    },
+    "status": {
+      "active": "Активний",
+      "pending": "Запрошено",
+      "suspended": "Призупинено"
+    },
+    "actions": {
+      "menuLabel": "{name} — дії",
+      "remove": "Видалити"
+    },
+    "addModal": {
+      "title": "Додати вчителя",
+      "emailLabel": "Електронна пошта",
+      "hoursLabel": "Макс. годин на тиждень",
+      "employmentLabel": "Тип зайнятості",
+      "employmentFull": "Повна ставка",
+      "employmentPart": "Часткова ставка",
+      "employmentContract": "Контракт",
+      "inviteButton": "Надіслати запрошення",
+      "addButton": "Додати до школи",
+      "onboardButton": "Запросити до реєстрації",
+      "lookingUp": "Пошук…",
+      "notFound": "Акаунт не знайдено — надіслати запрошення",
+      "foundTeacher": "Знайдено профіль вчителя",
+      "foundUser": "Знайдено користувача — реєстрація як вчитель",
+      "noLangs": "Мови викладання не вказані",
+      "cancelButton": "Скасувати",
+      "langsLabel": "Мови викладання",
+      "langsLanguageLabel": "Мова",
+      "langsLevelLabel": "Рівень",
+      "langsAddButton": "Додати мову",
+      "langsRemoveLabel": "Видалити мову",
+      "langsRequired": "Потрібна хоча б одна мова викладання",
+      "langsHint": "Школа наймає вчителя для конкретної мови — це використовується для призначення в групи.",
+      "firstNameLabel": "Ім'я",
+      "lastNameLabel": "Прізвище",
+      "nameHint": "Необов'язково — використовується для попереднього заповнення форми реєстрації вчителя."
+    },
+    "removeGuard": {
+      "title": "Неможливо видалити вчителя",
+      "body": "Цей вчитель є основним у {count} активній(их) групі(ах). Спочатку призначте іншого основного:",
+      "confirm": "Підтвердити видалення",
+      "undo": "Скасувати видалення"
+    }
+  },
+  "schedule": {
+    "title": "Розклад",
+    "weekLabel": "Тиждень",
+    "loadBreakdown": "Деталі навантаження",
+    "contact": "Контакт",
+    "prep": "Підготовка",
+    "effective": "Ефективне навантаження",
+    "utilization": "Завантаженість",
+    "dayPeak": "Пік дня",
+    "consecPeak": "Безперервний пік",
+    "softCost": "Вартість планування",
+    "curriculumCarried": "Навчальний план",
+    "availabilityEditor": "Редагувати доступність",
+    "absenceList": "Відсутності",
+    "reportAbsence": "Повідомити про відсутність",
+    "arrangecover": "Організувати заміну",
+    "teacherSwitcher": "Змінити вчителя",
+    "overloadTitle": "Перевантаження",
+    "nearCapTitle": "Близько до ліміту",
+    "conflicts": "{count} конфлікт(ів) розкладу",
+    "utilizationWarning": "Завантаженість {pct}% — наближається до ліміту",
+    "dayPeakWarning": "Пік дня {hours}г — перевищено денний ліміт",
+    "consecPeakWarning": "{count} безперервних уроків — ризик втоми",
+    "preferred": "Бажано",
+    "available": "Доступно",
+    "unavailable": "Недоступно"
+  },
+  "availability": {
+    "available": "Доступний",
+    "preferred": "Переважний",
+    "unavailable": "Недоступний",
+    "recurring": "Повторюваний",
+    "saveButton": "Зберегти доступність"
+  },
+  "absence": {
+    "title": "Повідомити про відсутність",
+    "kindLabel": "Тип",
+    "kindSick": "Лікарняний",
+    "kindLeave": "Відпустка",
+    "kindVacancy": "Вакансія",
+    "scopeLabel": "Тривалість",
+    "scopeToday": "Тільки сьогодні",
+    "scopeWindow": "Діапазон дат",
+    "scopePermanent": "Постійно",
+    "fromLabel": "З",
+    "toLabel": "По",
+    "reasonLabel": "Причина",
+    "submitButton": "Повідомити",
+    "affectedLessons": "{count} занять затронуто",
+    "covered": "{covered}/{total} покрито",
+    "arrangecover": "Організувати заміну"
+  },
+  "substitutions": {
+    "title": "Консоль замін",
+    "reportAbsence": "Повідомити про відсутність",
+    "empty": "Немає відкритих запитів на заміну.",
+    "urgencyToday": "Сьогодні",
+    "urgencyUpcoming": "Незабаром",
+    "urgencyOpen": "Відкрито",
+    "candidateList": {
+      "title": "Кандидати",
+      "assign": "Призначити",
+      "undo": "Скасувати",
+      "noEligible": "Придатних кандидатів не знайдено.",
+      "classificationBest": "Найкращий",
+      "classificationGood": "Хороший",
+      "classificationOk": "Можливий",
+      "classificationIneligible": "Не підходить"
+    },
+    "bulkCover": "Покрити всіх найкращим",
+    "bulkProgress": "{covered} покрито, {flagged} помічено"
+  },
+  "curriculum": {
+    "title": "Планувальник навчального плану",
+    "selectGroup": "Оберіть групу",
+    "targetHours": "Цільові години на тиждень",
+    "units": "Модулі",
+    "addUnit": "Додати модуль",
+    "statusPlanned": "Заплановано",
+    "statusActive": "Активний",
+    "statusDone": "Завершено",
+    "statusOverridden": "Замінено",
+    "deliver": "Позначити виконаним",
+    "override": "Замінити",
+    "overrideReason": "Причина заміни",
+    "lessonMapper": "Прив'язка модуль–урок"
+  },
+  "forecast": {
+    "title": "Прогноз і ємність",
+    "export": "Експорт плану",
+    "sliders": {
+      "growth": "Зростання учнів (%/семестр)",
+      "terms": "Семестрів для прогнозу",
+      "groupSize": "Учнів у групі",
+      "hoursPerGroup": "Годин на групу/тиждень",
+      "contractPerTeacher": "Контрактних годин/вчитель"
+    },
+    "headline": "Потрібно вчителів",
+    "projectionChart": "Прогноз чисельності",
+    "languageGap": "Розрив по мовах",
+    "bottleneck": "Вузьке місце",
+    "bottleneckDetail": "{lang} — {util}% прогнозована завантаженість",
+    "openHiringPlan": "Відкрити план найму",
+    "saveScenario": "Зберегти сценарій",
+    "scenarios": "Збережені сценарії",
+    "riskLow": "Низький",
+    "riskMedium": "Середній",
+    "riskHigh": "Високий"
+  },
+  "alerts": {
+    "title": "Сповіщення",
+    "open": "відкритих",
+    "empty": "Немає відкритих сповіщень.",
+    "acknowledge": "Підтвердити",
+    "ackLabel": "Підтвердити сповіщення",
+    "ackError": "Не вдалося підтвердити сповіщення",
+    "kindOverload": "Перевантаження",
+    "kindNearCap": "Близько до ліміту",
+    "kindDailyBreach": "Перевищення денного ліміту",
+    "kindConflict": "Конфлікт розкладу",
+    "kindVacancy": "Вакансія",
+    "kindUncovered": "Непокрите заняття",
+    "kindSubOverload": "Перевантаження заміни",
+    "kindBottleneck": "Мовне вузьке місце"
+  },
+  "healthState": {
+    "ok": "Здоровий",
+    "warn": "Попередження",
+    "danger": "Критично"
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "request": {
+    "title": "Заявка на зачисление — {name}",
+    "description": "Расскажите школе о себе и почему вы хотите присоединиться.",
+    "levelLabel": "Ваш текущий уровень (необязательно)",
+    "languageLabel": "Язык, который вы хотите изучать",
+    "levelUnknown": "Пока не знаю",
+    "submit": "Отправить заявку",
+    "cancel": "Отменить",
+    "success": "Ваша заявка в {name} отправлена."
+  },
+  "requests": {
+    "title": "Заявки на зачисление",
+    "subtitle": "Отслеживайте статус ваших заявок.",
+    "empty": "Заявок пока нет. Найдите школу и подайте заявку.",
+    "tab": {
+      "all": "Все",
+      "pending": "На рассмотрении",
+      "approved": "Одобрено",
+      "rejected": "Отклонено"
+    }
+  },
+  "status": {
+    "pending": "На рассмотрении",
+    "approved": "Одобрено",
+    "rejected": "Отклонено"
+  },
+  "sentOn": "Отправлено {date}",
+  "reviewNote": "Примечание от школы",
+  "joinSchool": "Join school",
+  "joining": "Joining...",
+  "joinedSuccessfully": "You have joined the school",
+  "joinFailed": "Failed to join school. Please try again.",
+  "PlacementTest": {
+    "title": "Language placement test",
+    "subtitle": "Answer the questions to find your level",
+    "question": "{current} of {total}",
+    "next": "Next",
+    "finish": "Finish",
+    "saving": "Saving...",
+    "saveFailed": "Could not save your result. Please try again.",
+    "resultSaved": "Your level: {level}"
+  },
+  "Availability": {
+    "subtitle": "Когда вы обычно доступны для занятий?",
+    "morning": "Утро",
+    "afternoon": "День",
+    "evening": "Вечер",
+    "Mon": "Пн",
+    "Tue": "Вт",
+    "Wed": "Ср",
+    "Thu": "Чт",
+    "Fri": "Пт",
+    "Sat": "Сб",
+    "Sun": "Вс",
+    "legend": "Выберите подходящее вам время",
+    "saving": "Сохраняем...",
+    "submit": "Продолжить"
+  },
+  "AgeBand": {
+    "subtitle": "К какой возрастной группе вы относитесь?",
+    "kids": "Дети",
+    "teens": "Подростки",
+    "adults": "Взрослые",
+    "saving": "Сохраняем...",
+    "submit": "Продолжить"
+  },
+  "InterviewBooking": {
+    "subtitle": "Выберите время для вашего вступительного интервью",
+    "selectSlot": "Выберите временной слот",
+    "book": "Записаться",
+    "booking": "Записываемся...",
+    "booked": "Интервью забронировано",
+    "bookFailed": "Не удалось записаться на интервью. Попробуйте ещё раз."
+  },
+  "Onboarding": {
+    "title": "Добро пожаловать в {school}",
+    "subtitle": "Выполните шаги ниже, чтобы завершить зачисление.",
+    "stepPlacement": "Уровень",
+    "stepAvailability": "Доступность",
+    "stepAgeBand": "Возрастная группа",
+    "stepInterview": "Интервью",
+    "allDoneTitle": "Всё готово!",
+    "allDoneReview": "Мы рассмотрим ваши результаты и свяжемся с вами в ближайшее время.",
+    "goToDashboard": "На дашборд",
+    "finishFailed": "Что-то пошло не так. Попробуйте ещё раз.",
+    "stepsLabel": "Шаги регистрации",
+    "stepNumber": "Шаг {n}",
+    "stepDone": "выполнено"
+  },
+  "Admin": {
+    "navSettings": "Настройки",
+    "navPlacement": "Уровень",
+    "navRequests": "Заявки"
+  },
+  "Settings": {
+    "title": "Настройки зачисления",
+    "subtitle": "Настройте процесс приёма новых студентов.",
+    "sectionPlacement": "Уровень",
+    "placementMode": "Режим определения уровня",
+    "placementPlatform": "Платформный тест",
+    "placementSchool": "Тест школы",
+    "placementNone": "Не определять",
+    "reusePlatformResult": "Использовать недавний результат",
+    "maxResultAgeDays": "Максимальный возраст результата (дней)",
+    "sectionInterview": "Интервью",
+    "interviewRequired": "Обязательное интервью",
+    "autoPlaceByScore": "Автоматическое зачисление по баллам",
+    "sectionAvailability": "Доступность",
+    "collectAvailability": "Собирать предпочтения по расписанию",
+    "sectionAgeBands": "Возрастные группы",
+    "ageBandKids": "Дети",
+    "ageBandTeens": "Подростки",
+    "ageBandAdults": "Взрослые",
+    "collectAgeBand": "Собирать возрастную группу при регистрации",
+    "sectionApproval": "Одобрение",
+    "manualApproval": "Ручное одобрение",
+    "stepPreviewLabel": "Студент увидит эти шаги",
+    "stepPreviewEmpty": "Нет шагов — студенты зачисляются сразу.",
+    "save": "Сохранить",
+    "saving": "Сохраняем...",
+    "saved": "Настройки сохранены",
+    "saveFailed": "Не удалось сохранить. Попробуйте ещё раз."
+  },
+  "PlacementQueue": {
+    "title": "Очередь распределения",
+    "subtitle": "Студенты, ожидающие назначения в группу.",
+    "empty": "Очередь распределения пуста.",
+    "selectGroup": "Выберите группу",
+    "noGroups": "Нет подходящих групп",
+    "exactMatch": "Точно",
+    "slots": "{count} слот",
+    "full": "Полная",
+    "assign": "Назначить",
+    "assigning": "Назначаем...",
+    "assigned": "Студент назначен в группу",
+    "assignFailed": "Не удалось назначить. Попробуйте ещё раз.",
+    "availableDays": "{count} предпочтений"
+  },
+  "Approvals": {
+    "title": "Заявки на зачисление",
+    "subtitle": "Студенты, ожидающие ручного одобрения.",
+    "empty": "Нет ожидающих заявок.",
+    "sourcePublic": "Публичная заявка",
+    "accept": "Принять",
+    "reject": "Отклонить",
+    "accepted": "Студент принят и переведён в онбординг",
+    "rejected": "Заявка студента отклонена",
+    "transitionFailed": "Действие не удалось. Попробуйте ещё раз.",
+    "alreadyHandled": "Эта заявка уже была обработана — список обновлён."
+  }
+}

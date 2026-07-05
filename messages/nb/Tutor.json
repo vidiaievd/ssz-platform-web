@@ -1,0 +1,20 @@
+{
+  "dashboard": {
+    "greeting": "Velkommen tilbake! 👋",
+    "greetingNamed": "Velkommen tilbake, {name}! 👋",
+    "subtitle": "Her er en oversikt over din undervisningsaktivitet.",
+    "stats": {
+      "students": "Aktive elever",
+      "lessons": "Timer denne måneden",
+      "rating": "Gjennomsnittlig vurdering"
+    },
+    "upcoming": {
+      "title": "Kommende timer",
+      "empty": "Ingen kommende timer planlagt."
+    },
+    "students": {
+      "title": "Nylige elever",
+      "empty": "Ingen elever ennå. Del profilen din for å komme i gang."
+    }
+  }
+}

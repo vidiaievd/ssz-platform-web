@@ -1,0 +1,189 @@
+{
+  "audio": {
+    "play": "Відтворити",
+    "pause": "Пауза",
+    "seekBack": "Назад 10 секунд",
+    "seekForward": "Вперед 10 секунд",
+    "speed": "Швидкість {speed}×",
+    "loading": "Завантаження аудіо…",
+    "scrub": "Перемотати",
+    "player": "Аудіоплеєр"
+  },
+  "refStrip": {
+    "reference": "Текст"
+  },
+  "glossary": {
+    "seeInContext": "Побачити в контексті",
+    "listenWord": "Слухати"
+  },
+  "unitStepper": {
+    "label": "Кроки уроку",
+    "readListen": "Читання і аудіо",
+    "vocabulary": "Словник",
+    "grammar": "Граматика",
+    "practice": "Практика"
+  },
+  "errorState": {
+    "default": "Щось пішло не так.",
+    "retry": "Спробувати знову"
+  },
+  "unitFlow": {
+    "exitLabel": "Курс",
+    "unitLabel": "РОЗДІЛ {n}",
+    "loadError": "Не вдалося завантажити цей розділ",
+    "loadErrorSub": "Щось пішло не так. Ваш прогрес збережено — спробуйте ще раз.",
+    "phaseDebug": "Фаза: {phase}"
+  },
+  "readSection": {
+    "unitCourse": "Розділ {unit} · {course}",
+    "finishedReading": "Я дочитав(ла) →",
+    "finishedListening": "Я дослухав(ла) →",
+    "finishedNext": "Готово — далі: Словник",
+    "showTranslation": "Показати переклад",
+    "hideTranslation": "Сховати переклад",
+    "jumpAudio": "Перейти до цього абзацу в аудіо",
+    "tapToLookUp": "натисніть для перекладу",
+    "tapParagraphToJump": "Натисніть на абзац, щоб перейти до нього",
+    "showText": "Показати текст",
+    "pressPlayToListen": "Натисніть відтворення, щоб почати слухати",
+    "illustrationPlaceholder": "ілюстрація",
+    "lookUpWord": "Знайти",
+    "listenMode": {
+      "label": "Режим навчання",
+      "read": "Читати",
+      "listenText": "Слухати + текст",
+      "audioOnly": "Лише аудіо"
+    }
+  },
+  "vocabSection": {
+    "passHeader": "Словник · ви знаєте це слово?",
+    "progress": "{current} з {total}",
+    "quickCheck": "Швидка перевірка",
+    "listen": "Слухати",
+    "playing": "Відтворення…",
+    "knowIt": "Знаю",
+    "knowItHint": "← K",
+    "newToMe": "Нове для мене",
+    "newToMeHint": "N →",
+    "knownNote": "Слова «знаю» відкладаються — система перевірить їх автоматично через кілька днів.",
+    "allKnownTitle": "Ви знаєте всі {total} слів",
+    "allKnownBody": "Сьогодні немає карток для вивчення. Система автоматично перевірить їх знову через кілька днів.",
+    "continueToGrammar": "Продовжити до граматики →",
+    "studyHeader": "Вивчення · {current} з {total}",
+    "tapToReveal": "Торкніться, щоб відкрити · Space",
+    "revealMeaning": "Показати значення",
+    "howWell": "Наскільки добре ви знали це слово?",
+    "translation": "Переклад",
+    "fromTheText": "З тексту",
+    "showExample": "Показати приклад",
+    "ratingHard": "Важко",
+    "ratingHardSub": "Повторити незабаром",
+    "ratingGood": "Добре",
+    "ratingGoodSub": "Згадав(ла)",
+    "ratingEasy": "Легко",
+    "ratingEasySub": "Знав(ла)",
+    "nothingToStudy": "Немає чого вивчати",
+    "doneTitle": "Повторення завершено",
+    "doneBody": "Ці слова тепер у вашому розкладі інтервального повторення.",
+    "statWordsSeen": "слів переглянуто",
+    "statAlreadyKnew": "вже знали",
+    "statStudiedToday": "вивчено сьогодні"
+  },
+  "grammarSection": {
+    "ruleLabel": "Граматичне правило",
+    "examples": "Більше прикладів",
+    "ctaPractise": "Зрозумів(ла) — до практики →",
+    "ctaContinue": "Продовжити →",
+    "noRule": "Немає граматичної нотатки",
+    "noRuleBody": "У цьому розділі немає граматичного правила. Перейдіть до практики.",
+    "exLabel": "Граматика · швидка перевірка",
+    "exCheck": "Перевірити →",
+    "exContinue": "Продовжити →",
+    "correct": "Правильно!",
+    "incorrect": "Не зовсім"
+  },
+  "practiceSection": {
+    "progress": "{current} з {total}",
+    "check": "Перевірити →",
+    "skip": "Пропустити →",
+    "finish": "Завершити →",
+    "seeResults": "Подивитися результати →",
+    "noPractice": "У цьому розділі немає вправ",
+    "noPracticeBody": "Чудово — можна переходити одразу до результатів.",
+    "loadError": "Не вдалося завантажити вправу.",
+    "unsupported": "Непідтримуваний тип вправи"
+  },
+  "completeSection": {
+    "unitComplete": "Розділ {unit} завершено",
+    "subtitle": "Ви завершили цей розділ. Ось як пройшло.",
+    "canDoLabel": "Тепер ви вмієте",
+    "statPerfect": "Ідеально!",
+    "statMistakes": "помилок",
+    "statWords": "слів",
+    "statXp": "XP",
+    "xpEarned": "+10",
+    "backToCourse": "Повернутися до курсу"
+  },
+  "courseHome": {
+    "loadError": "Не вдалося завантажити курс",
+    "loadErrorSub": "Щось пішло не так. Спробуйте ще раз.",
+    "lessons": "{done} із {total} уроків",
+    "complete": "виконано",
+    "hero": {
+      "overdueLabel": "ЗАВДАННЯ ПРОСТРОЧЕНО",
+      "overdueTitle": "У вас прострочене завдання",
+      "overdueMeta": "Здайте його до того, як вчитель перевірить групу.",
+      "overdueCta": "Завершити і здати",
+      "reviewLabel": "ЩОДЕННЕ ПОВТОРЕННЯ",
+      "reviewTitle": "{count} карток до повторення",
+      "reviewMeta": "Підтримуйте серію — це займе лише кілька хвилин.",
+      "reviewCta": "Почати повторення",
+      "resumeLabel": "ПРОДОВЖИТИ НАВЧАННЯ",
+      "resumeTitle": "Продовжте з того місця, де зупинились",
+      "resumeMeta": "Ви в середині блоку. Продовжуйте!",
+      "resumeCta": "Продовжити урок",
+      "startLabel": "НАСТУПНИЙ БЛОК",
+      "startTitle": "Готові до наступного блоку?",
+      "startMeta": "Ви завершили попередній блок. Почніть наступний.",
+      "startCta": "Почати блок",
+      "caughtLabel": "ВСЕ ЗРОБЛЕНО",
+      "caughtTitle": "Ви все встигли!",
+      "caughtMeta": "Чудова робота! Поверніться пізніше або перегляньте наступний блок.",
+      "caughtCta": "Переглянути наступний блок"
+    },
+    "viewToggle": {
+      "units": "Блоки",
+      "skills": "Навички"
+    },
+    "unitFlowList": {
+      "statusDone": "Виконано",
+      "statusActive": "В процесі",
+      "statusLocked": "Заблоковано",
+      "lessons": "{done} із {total} уроків",
+      "continueUnit": "Продовжити"
+    },
+    "skillIndex": {
+      "mastery": "{pct}% засвоєно",
+      "jump": "Перейти →",
+      "noData": "Даних про навички ще немає"
+    },
+    "reviewCard": {
+      "title": "Щоденне повторення",
+      "allReviewed": "Все повторено",
+      "allReviewedSub": "Ви в курсі. Поверніться завтра!",
+      "itemsDue": "до повторення",
+      "reviewedToday": "{n} повторено сьогодні",
+      "cta": "Повторити {n} зараз",
+      "vocab": "Словник",
+      "exercises": "Вправи"
+    },
+    "canDoCard": {
+      "title": "Прогрес «Я вмію»",
+      "goals": "{total} цілей",
+      "recentTitle": "Щойно розблоковано",
+      "nextTitle": "Наступна ціль",
+      "inUnit": "Блок {n}",
+      "noItems": "Завершіть блоки, щоб розблокувати цілі."
+    }
+  }
+}

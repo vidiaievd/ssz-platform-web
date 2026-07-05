@@ -1,0 +1,14 @@
+{
+  "change": "Change photo",
+  "save": "Save photo",
+  "discard": "Discard",
+  "hint": "JPG, PNG, WebP or GIF · max 5 MB",
+  "uploadSuccess": "Photo updated.",
+  "errors": {
+    "invalidType": "Please upload a JPG, PNG, WebP, or GIF image.",
+    "tooLarge": "File is too large. Maximum size is 5 MB.",
+    "uploadFailed": "Upload failed. Please try again."
+  },
+  "upload": "Upload photo",
+  "remove": "Remove"
+}

@@ -1,0 +1,13 @@
+{
+  "unauthenticated": "Vennligst logg inn for å fortsette.",
+  "forbidden": "Du har ikke tilgang til dette.",
+  "not_found": "Vi fant ikke det du lette etter.",
+  "validation": "Vennligst sjekk de markerte feltene.",
+  "conflict": "Dette er i konflikt med eksisterende data.",
+  "rate_limited": "For mange forespørsler. Vent litt og prøv igjen.",
+  "mfa_required": "Tofaktorautentisering er påkrevd.",
+  "upstream_unavailable": "Tjenesten er midlertidig utilgjengelig. Prøv igjen.",
+  "timeout": "Forespørselen tok for lang tid. Prøv igjen.",
+  "unknown": "Noe gikk galt. Prøv igjen.",
+  "gone": "Denne invitasjonsnlenken er ikke lenger gyldig."
+}

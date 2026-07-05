@@ -1,0 +1,80 @@
+{
+  "title": "Profil",
+  "subtitle": "Administrer din offentlige profil og innstillinger.",
+  "save": "Lagre endringer",
+  "saveSuccess": "Profil lagret.",
+  "displayName": "Visningsnavn",
+  "bio": "Biografi",
+  "uiLocale": "Grensesnittspråk",
+  "instructionLocales": "Undervisningsspråk",
+  "timezone": "Tidssone",
+  "contactEmail": "Kontakte-post",
+  "contactPhone": "Kontakttelefon",
+  "avatar": {
+    "placeholder": "Avatar-opplasting kommer snart."
+  },
+  "sections": {
+    "avatar": "Profilbilde",
+    "info": "Personlig informasjon",
+    "teaching": "Lærerprofil",
+    "student": "Læringsprofil"
+  },
+  "completeness": {
+    "label": "Profilkomplethet",
+    "nudge": "Legg til {field} for å gjøre profilen din mer synlig.",
+    "fields": {
+      "displayName": "visningsnavn",
+      "avatarUrl": "profilbilde",
+      "bio": "biografi",
+      "timezone": "tidssone",
+      "instructionLocales": "undervisningsspråk",
+      "contactEmail": "kontakte-post",
+      "contactPhone": "kontakttelefon",
+      "teachingLanguages": "undervisningsspråk",
+      "targetLanguages": "lærlingsspråk",
+      "hourlyRateCurrency": "timepris og valuta"
+    }
+  },
+  "firstName": "Fornavn",
+  "lastName": "Etternavn",
+  "handle": "Offentlig lenke",
+  "teaching": {
+    "languages": "Undervisningsspråk",
+    "cefr": "Undervisningsnivåer (CEFR)",
+    "specializations": "Spesialiseringer",
+    "experience": "Års erfaring",
+    "certificates": "Sertifikater",
+    "rate": "Timepris",
+    "currency": "Valuta",
+    "languagesEmpty": "Ingen undervisningsspråk lagt til ennå.",
+    "languagePlaceholder": "Legg til et språk…",
+    "cefrLabel": "CEFR-nivå",
+    "cefrPlaceholder": "Nivå",
+    "addLanguage": "Legg til språk",
+    "removeLanguage": "Fjern {code}",
+    "cancelAdd": "Avbryt"
+  },
+  "student": {
+    "nativeLanguage": "Morsmål",
+    "targetLanguages": "Lærlingsspråk",
+    "goals": "Læringsmål"
+  },
+  "email": "E-postadresse",
+  "discard": "Forkast",
+  "unsavedChanges": "Du har ulagrede endringer",
+  "validation": {
+    "invalidEmail": "Skriv inn en gyldig e-postadresse",
+    "invalidPhone": "Skriv inn et gyldig telefonnummer"
+  },
+  "form": {
+    "requiredLegend": "* Obligatoriske felt",
+    "emailLockedTooltip": "Innloggings-e-post. Gå til Sikkerhet for å endre den."
+  },
+  "roles": {
+    "school_admin": "Skoleadmin",
+    "teacher": "Lærer",
+    "tutor": "Privatlærer",
+    "student": "Elev"
+  },
+  "saveShort": "Lagre"
+}

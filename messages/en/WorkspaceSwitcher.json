@@ -1,0 +1,20 @@
+{
+  "trigger": "Switch workspace",
+  "sections": {
+    "schools": "Schools",
+    "other": "Other"
+  },
+  "roles": {
+    "OWNER": "Owner",
+    "ADMIN": "Admin",
+    "MANAGER": "Manager",
+    "TEACHER": "Teacher",
+    "SCHEDULER": "Scheduler",
+    "CONTENT_ADMIN": "Content",
+    "STUDENT": "Student"
+  },
+  "contexts": {
+    "private_tutor": "Private tutor",
+    "student": "Student"
+  }
+}

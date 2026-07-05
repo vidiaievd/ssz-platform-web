@@ -1,0 +1,45 @@
+{
+  "practice": "Øving",
+  "graded": "Lekse",
+  "exit": "Avslutt øvelse",
+  "setProgress": "{current} av {total}",
+  "gradedBanner": "Vurdert · svar sendes til læreren din, ingen umiddelbar tilbakemelding.",
+  "check": "Sjekk",
+  "submitAnswer": "Send inn svar",
+  "continue": "Fortsett",
+  "finish": "Fullfør",
+  "feedback": {
+    "correct": "Riktig",
+    "incorrect": "Ikke helt",
+    "submitted": "Svar sendt inn",
+    "gradedNote": "Lagret for læreren din å vurdere. Du ser resultatene når det er returnert.",
+    "answerLabel": "Svar:"
+  },
+  "loading": "Laster øvelse…",
+  "error": {
+    "title": "Kunne ikke laste denne øvelsen",
+    "body": "Sjekk tilkoblingen din og prøv igjen. Fremgangen din i dette settet er lagret.",
+    "retry": "Prøv igjen"
+  },
+  "mcq": {
+    "defaultInstruction": "Velg riktig svar",
+    "optionsLabel": "Svaralternativer"
+  },
+  "fill": {
+    "defaultInstruction": "Fullfør setningen",
+    "blankLabel": "Tom",
+    "inputLabel": "Ditt svar",
+    "placeholder": "skriv…"
+  },
+  "translate": {
+    "defaultInstruction": "Oversett setningen",
+    "textareaLabel": "Din oversettelse",
+    "placeholder": "Skriv på {lang}…",
+    "sampleAnswer": "Eksempelsvar"
+  },
+  "match": {
+    "defaultInstruction": "Koble hvert ord til oversettelsen",
+    "helperIdle": "Trykk på et ord til venstre…",
+    "helperArmed": "Trykk nå på samsvarende ord til høyre."
+  }
+}

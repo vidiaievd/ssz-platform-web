@@ -1,0 +1,129 @@
+{
+  "dashboard": {
+    "greeting": "Velkommen tilbake!",
+    "greetingNamed": "Velkommen tilbake, {name}!",
+    "subtitle": "Her er hvor du slapp."
+  },
+  "continueLearning": {
+    "title": "Fortsett å lære",
+    "subtitle": "Fortsett der du slapp.",
+    "empty": "Ingen kurs er påbegynt ennå.",
+    "browseEnrolled": "Mine skoler",
+    "progress": "{completed} av {total} leksjoner",
+    "resume": "Fortsett",
+    "start": "Start"
+  },
+  "upcomingLessons": {
+    "title": "Neste opp",
+    "subtitle": "Dine neste leksjoner på tvers av kurs.",
+    "empty": "Ingen kommende leksjoner.",
+    "in": "i {container}",
+    "start": "Åpne"
+  },
+  "streak": {
+    "title": "Aktivitetsrekke",
+    "current": "Nåværende rekke",
+    "longest": "Lengste rekke",
+    "totalDays": "Totalt dager",
+    "days": "{count, plural, one {# dag} other {# dager}}",
+    "noActivity": "Start en leksjon for å bygge rekken din!"
+  },
+  "voxordPromo": {
+    "title": "Øv på uttale på mobil",
+    "description": "Last ned VoxOrd for å øve på tale og få sanntidstilbakemelding på uttalen din.",
+    "appStore": "App Store",
+    "playStore": "Google Play",
+    "dismiss": "Lukk"
+  },
+  "player": {
+    "exit": "Tilbake",
+    "position": "{current} / {total}",
+    "prev": "Forrige",
+    "completeAndNext": "Fullfør og neste",
+    "markComplete": "Merk som fullført",
+    "completed": "Fullført",
+    "completedToast": "Leksjon fullført! Bra jobba.",
+    "noContent": "Ingen innhold tilgjengelig for denne leksjonen ennå.",
+    "keyboardHint": "← → for å navigere · Esc for å avslutte"
+  },
+  "SchoolStatus": {
+    "stepperLabel": "Påmeldingsfremgang",
+    "stepApplication": "Søknad",
+    "stepPlacement": "Plassering",
+    "stepGroup": "Gruppe",
+    "stepSchedule": "Timeplan",
+    "stepNumber": "Trinn {n}",
+    "stepDone": "fullført",
+    "pendingTitle": "Søknad sendt",
+    "pendingDescription": "{school} vurderer søknaden din.",
+    "onboardingTitle": "Fullfør registreringen din",
+    "onboardingDescription": "Fullfør trinnene nedenfor så {school} kan plassere deg i en gruppe.",
+    "placementReviewTitle": "Venter på plassering",
+    "placementReviewDescription": "{school} finner den rette gruppen for deg.",
+    "activeTitle": "Du er registrert",
+    "activeDescription": "Du er registrert hos {school}.",
+    "activeDescriptionWithGroup": "Du er i {group} hos {school}.",
+    "rejectedTitle": "Søknaden ble ikke godkjent",
+    "rejectedDescription": "{school} godkjente ikke søknaden din.",
+    "leftTitle": "Ikke registrert lenger",
+    "leftDescription": "Du har forlatt {school}.",
+    "badgeRejected": "Avslått",
+    "badgeLeft": "Forlatt",
+    "reapply": "Søk på nytt",
+    "discoverSelfStudy": "Utforsk selvstudiekurs"
+  },
+  "MySchools": {
+    "title": "Mine skoler",
+    "subtitle": "Skoler du har søkt om eller er registrert hos.",
+    "empty": "Du har ikke søkt om noen skole ennå.",
+    "browseDiscover": "Utforsk skoler",
+    "noUpcomingLesson": "Ingen kommende time ennå",
+    "nextLessonAt": "Neste: {day}, {start}–{end}",
+    "classmateCount": "{count, plural, one {# medelev} other {# medelever}}"
+  },
+  "SchoolDetail": {
+    "backLink": "Tilbake til mine skoler",
+    "lockedHeading": "{school} — ikke aktiv ennå",
+    "modeOnline": "Online",
+    "modeInPerson": "Fysisk",
+    "teachersLabel": "Lærere",
+    "teacherRolePrimary": "Lærer",
+    "teacherRoleCoPrimary": "Medlærer",
+    "teacherRoleSubstitute": "Vikar",
+    "scheduleTitle": "Ukeplan",
+    "scheduleEmpty": "Timeplanen er ikke satt opp ennå — sjekk tilbake senere.",
+    "nextLessonBadge": "Neste time",
+    "weekday": {
+      "Mon": "Mandag",
+      "Tue": "Tirsdag",
+      "Wed": "Onsdag",
+      "Thu": "Torsdag",
+      "Fri": "Fredag",
+      "Sat": "Lørdag",
+      "Sun": "Søndag"
+    },
+    "materialsTitle": "Materialer",
+    "materialsEmpty": "Ingen materialer ennå.",
+    "mainCourseBadge": "Hovedkurs",
+    "materialUntitled": "Kurs uten tittel",
+    "materialUnavailable": "Ikke tilgjengelig ennå",
+    "progressInProgress": "Pågår",
+    "progressCompleted": "Fullført",
+    "progressNeedsReview": "Trenger vurdering",
+    "classmates": "{count, plural, one {# medelev} other {# medelever}} i gruppen din",
+    "leaveAction": "Forlat skolen",
+    "leaveConfirmTitle": "Forlate denne skolen?",
+    "leaveConfirmDescription": "Du mister tilgangen til gruppen, timeplanen og materialene til {school}. Du kan søke igjen senere.",
+    "leaveCancel": "Avbryt",
+    "leaveConfirm": "Forlat skolen",
+    "leaveError": "Kunne ikke forlate skolen. Vennligst prøv igjen."
+  },
+  "AssignedMaterials": {
+    "title": "Tildelt til deg",
+    "overdue": "Forfalt"
+  },
+  "GroupAssignedBanner": {
+    "message": "Du er i {group} hos {school}!",
+    "dismiss": "Lukk"
+  }
+}

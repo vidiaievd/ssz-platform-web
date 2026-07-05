@@ -1,0 +1,80 @@
+{
+  "title": "Profile",
+  "subtitle": "Manage your public profile and preferences.",
+  "save": "Save changes",
+  "saveSuccess": "Profile saved.",
+  "displayName": "Display name",
+  "bio": "Bio",
+  "uiLocale": "Interface language",
+  "instructionLocales": "Teaching languages",
+  "timezone": "Timezone",
+  "contactEmail": "Contact email",
+  "contactPhone": "Contact phone",
+  "avatar": {
+    "placeholder": "Upload a profile photo."
+  },
+  "sections": {
+    "avatar": "Profile photo",
+    "info": "Personal information",
+    "teaching": "Teaching profile",
+    "student": "Learning profile"
+  },
+  "completeness": {
+    "label": "Profile completeness",
+    "nudge": "Add your {field} to make your profile stand out.",
+    "fields": {
+      "displayName": "display name",
+      "avatarUrl": "profile photo",
+      "bio": "bio",
+      "timezone": "timezone",
+      "instructionLocales": "teaching languages",
+      "contactEmail": "contact email",
+      "contactPhone": "contact phone",
+      "teachingLanguages": "teaching languages",
+      "targetLanguages": "learning languages",
+      "hourlyRateCurrency": "hourly rate and currency"
+    }
+  },
+  "firstName": "First name",
+  "lastName": "Last name",
+  "handle": "Public handle",
+  "teaching": {
+    "languages": "Teaching languages",
+    "cefr": "Teaching levels (CEFR)",
+    "specializations": "Specializations",
+    "experience": "Years of experience",
+    "certificates": "Certificates",
+    "rate": "Hourly rate",
+    "currency": "Currency",
+    "languagesEmpty": "No teaching languages added yet.",
+    "languagePlaceholder": "Add a language…",
+    "cefrLabel": "CEFR level",
+    "cefrPlaceholder": "Level",
+    "addLanguage": "Add language",
+    "removeLanguage": "Remove {code}",
+    "cancelAdd": "Cancel"
+  },
+  "student": {
+    "nativeLanguage": "Native language",
+    "targetLanguages": "Learning languages",
+    "goals": "Learning goals"
+  },
+  "email": "Email address",
+  "discard": "Discard",
+  "unsavedChanges": "You have unsaved changes",
+  "validation": {
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number"
+  },
+  "form": {
+    "requiredLegend": "* Required fields",
+    "emailLockedTooltip": "Login email. To change it, go to Security."
+  },
+  "roles": {
+    "school_admin": "School admin",
+    "teacher": "Teacher",
+    "tutor": "Tutor",
+    "student": "Student"
+  },
+  "saveShort": "Save"
+}

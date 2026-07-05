@@ -1,0 +1,72 @@
+{
+  "intro": {
+    "title": "Finn ditt startpunkt",
+    "body": "Svar på noen raske spørsmål, og vi hopper over det du allerede kan — rett til riktig modul. Ingen poengsum, ingen press.",
+    "bodyCompact": "Svar på noen raske spørsmål, og vi hopper over det du allerede kan. Ingen poengsum, ingen press.",
+    "takePlacement": "Ta plasseringstesten",
+    "skipToBeginning": "Hopp over — start fra begynnelsen",
+    "features": {
+      "time": {
+        "title": "Omtrent 2 minutter",
+        "sub": "Fem korte spørsmål"
+      },
+      "adapt": {
+        "title": "Tilpasser seg underveis",
+        "sub": "Spørsmålene blir lettere eller vanskeligere basert på svarene dine"
+      },
+      "skip": {
+        "title": "Hopp over det du kan",
+        "sub": "Start lenger fremme i stedet for fra leksjon én"
+      }
+    }
+  },
+  "runner": {
+    "progressCount": "{current} / {total}",
+    "levelLabel": "Tilpasser til ditt nivå",
+    "steppingUp": "Går opp",
+    "easingBack": "Går ned",
+    "mcqEyebrow": "Velg riktig svar",
+    "translateEyebrow": "Oversett til {lang}",
+    "dontKnow": "Jeg vet ikke dette",
+    "continue": "Fortsett",
+    "seeMyLevel": "Se mitt nivå",
+    "skipForNow": "Hopp over nå"
+  },
+  "result": {
+    "eyebrow": "Du er klar for",
+    "title": "Modul {n} · {moduleTitle}",
+    "titleFallback": "Modul {n}",
+    "sub": "Bra — du er komfortabel rundt <strong>{level}</strong>. Vi hopper over grunnleggende og starter der det blir nyttig.",
+    "known": "Kan",
+    "startHere": "Start her",
+    "startAt": "Start på modul {n}",
+    "startFromModule1": "Start fra modul 1 i stedet"
+  },
+  "skipped": {
+    "title": "Vi starter fra begynnelsen",
+    "body": "Ingen problem — du begynner med modul 1. Du kan ta plasseringstesten når som helst fra kurshjemmet ditt hvis du vil hoppe over senere.",
+    "goToModule1": "Gå til modul 1",
+    "takePlacement": "Ta plasseringstesten i stedet"
+  },
+  "loading": {
+    "ariaLabel": "Laster plasseringstest"
+  },
+  "error": {
+    "title": "Kunne ikke laste plasseringstesten",
+    "body": "Noe gikk galt på vår side. Du kan prøve igjen, eller bare starte fra begynnelsen og plassere deg selv senere.",
+    "retry": "Prøv igjen",
+    "startFromBeginning": "Start fra begynnelsen"
+  },
+  "inline": {
+    "offerText": "Ikke sikker på hvor du skal starte? Ta plasseringstesten",
+    "dismiss": "Lukk"
+  },
+  "onboarding": {
+    "account": "Konto",
+    "chooseCourse": "Velg kurs",
+    "placement": "Plassering"
+  },
+  "seed": {
+    "success": "Vokabular fra tidligere moduler er markert som kjent."
+  }
+}

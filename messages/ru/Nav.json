@@ -1,0 +1,16 @@
+{
+  "dashboard": "Обзор",
+  "content": "Контент",
+  "groups": "Группы",
+  "students": "Ученики",
+  "teachers": "Учителя",
+  "lessons": "Уроки",
+  "mySchools": "Мои школы",
+  "settings": "Настройки",
+  "discover": "Найти",
+  "requests": "Заявки",
+  "invitations": "Приглашения",
+  "scheduling": "Расписание",
+  "courses": "Курсы",
+  "notifications": "Уведомления"
+}

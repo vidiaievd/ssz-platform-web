@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "profile": "Profile",
+    "appearance": "Appearance",
+    "notifications": "Notifications",
+    "security": "Security"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "subtitle": "Customize how the platform looks and feels.",
+    "theme": "Theme",
+    "language": "Language"
+  },
+  "security": {
+    "title": "Security",
+    "subtitle": "Manage your email, password, and active sessions.",
+    "email": "Email address",
+    "password": "Password",
+    "emailHint": "Your login email address. To change it, contact support.",
+    "passwordHint": "You will receive a reset link at your registered email address.",
+    "passwordResetCta": "Send reset link to {email}",
+    "passwordResetSent": "Reset email sent.",
+    "passwordResetSentConfirm": "A password reset link has been sent to {email}.",
+    "passwordResetError": "Failed to send reset email. Please try again.",
+    "cancel": "Cancel",
+    "twoFa": {
+      "title": "Two-factor authentication",
+      "subtitle": "Add an extra layer of security to your account using an authenticator app.",
+      "enableCta": "Enable 2FA",
+      "disableCta": "Disable 2FA",
+      "scanQr": "Scan this QR code with your authenticator app",
+      "secretLabel": "Manual key",
+      "nextCta": "I have scanned the code",
+      "enterCode": "Enter the 6-digit code from your authenticator app to confirm",
+      "confirmEnable": "Confirm & enable",
+      "backupCodesTitle": "2FA enabled — save your backup codes",
+      "backupCodesHint": "Store these codes somewhere safe. Each can be used once if you lose access to your authenticator.",
+      "disableConfirm": "Enter your current TOTP code to disable 2FA",
+      "confirmDisable": "Disable 2FA",
+      "enabled": "Two-factor authentication enabled.",
+      "disabled": "Two-factor authentication disabled.",
+      "invalidCode": "Invalid or expired code.",
+      "setupError": "Failed to initiate 2FA setup.",
+      "verifyError": "Failed to verify code.",
+      "disableError": "Failed to disable 2FA.",
+      "statusOn": "2FA on",
+      "statusOff": "2FA off",
+      "copyKey": "Copy manual key",
+      "copyAll": "Copy all",
+      "download": "Download .txt",
+      "print": "Print"
+    },
+    "changeEmail": "Change email address",
+    "changeEmailHint": "Email change is not yet available. Support for this feature is coming soon.",
+    "changeEmailCta": "Change email",
+    "sessions": "Active sessions",
+    "sessionsHint": "View and revoke active login sessions across all your devices.",
+    "sessionsComingSoon": "Coming soon",
+    "copyEmail": "Copy email address",
+    "passwordResetCooldown": "You can resend in {seconds}s"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Choose how and when you receive notifications.",
+    "channels": "Notification channels",
+    "email": "Email",
+    "inApp": "In-app",
+    "push": "Push",
+    "comingSoon": "Coming soon"
+  },
+  "back": "Back",
+  "unsavedChanges": {
+    "title": "Unsaved changes",
+    "description": "You have unsaved changes. If you leave, your changes will be lost.",
+    "leave": "Leave without saving",
+    "stay": "Stay on page"
+  }
+}

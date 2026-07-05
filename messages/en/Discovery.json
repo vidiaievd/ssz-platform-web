@@ -1,0 +1,20 @@
+{
+  "title": "Discover Schools",
+  "subtitle": "Find a school or tutor and start learning today.",
+  "searchPlaceholder": "Search schools…",
+  "filterLanguage": "Language",
+  "filterLevel": "Level",
+  "filterType": "Type",
+  "filterAll": "All",
+  "schoolType": {
+    "school": "School",
+    "tutor": "Tutor"
+  },
+  "requestEnrol": "Request to Enrol",
+  "containerCount": "{count, plural, one {# course} other {# courses}}",
+  "studentCount": "{count, plural, one {# student} other {# students}}",
+  "free": "Free",
+  "fromPrice": "From {price} {currency}",
+  "noResults": "No schools found. Try adjusting the filters.",
+  "enrollComingSoon": "Enrolment request for {name} coming soon."
+}

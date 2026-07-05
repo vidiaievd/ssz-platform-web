@@ -1,0 +1,77 @@
+{
+  "eyebrow": "Hjemmeoppgaver",
+  "title": "Oppgaver",
+  "subDefault": "Arbeid satt av læreren din, med frister.",
+  "subOverdue": "Du har {count, plural, one {# forfalt oppgave} other {# forfalte oppgaver}} — la oss ta {count, plural, one {den} other {dem}}.",
+  "filterTodo": "Å gjøre",
+  "filterSubmitted": "Innlevert",
+  "filterCompleted": "Fullført",
+  "filterAll": "Alle",
+  "backLink": "Alle oppgaver",
+  "status": {
+    "active": "Aktiv",
+    "overdue": "Forfalt",
+    "submitted": "Innlevert",
+    "inReview": "Under gjennomgang",
+    "returned": "Revider",
+    "completed": "Fullført"
+  },
+  "mode": {
+    "graded": "Vurdert",
+    "written": "Skriftlig"
+  },
+  "hero": {
+    "ctaDoItNow": "Gjør det nå",
+    "ctaRevise": "Revider og lever inn igjen",
+    "ctaStart": "Start",
+    "ctaOpen": "Åpne"
+  },
+  "empty": {
+    "title": "Ingen oppgaver her",
+    "body": "Læreren din har ikke satt noe arbeid for dette filteret ennå.",
+    "bodyAll": "Ingen oppgaver ennå — læreren din vil sette arbeid her når det er klart."
+  },
+  "error": {
+    "title": "Noe gikk galt",
+    "body": "Vi kunne ikke laste oppgavene dine akkurat nå.",
+    "retry": "Prøv igjen"
+  },
+  "graded": {
+    "introSubtitle": "Vurdert · {items} spørsmål · ~{est}",
+    "infoBanner": "Vurdert modus. Du vil ikke se om hvert svar er riktig underveis — du får poengsummen og tilbakemeldingen etter at du leverer inn. Ett forsøk teller mot kurskarakteren din.",
+    "back": "Tilbake",
+    "start": "Start vurdert oppgave",
+    "counter": "{current} / {total}",
+    "pill": "Vurdert · ingen hint",
+    "saveExit": "Lagre og avslutt",
+    "next": "Neste",
+    "submitForGrading": "Send inn for vurdering",
+    "doneLabel": "Sendt inn for vurdering",
+    "doneScore": "{score}%",
+    "doneDetail": "{correct} av {total} riktige · teller mot karakteren din",
+    "doneBack": "Tilbake til oppgaver"
+  },
+  "written": {
+    "wordCount": "{count, plural, one {# ord} other {# ord}}",
+    "wordHint": "Sikt mot {min}–{max} ord",
+    "saveDraft": "Lagre utkast",
+    "submit": "Send inn",
+    "timelineLabel": "Innleveringsstatus",
+    "step": {
+      "submitted": "Innlevert",
+      "inReview": "Under gjennomgang",
+      "feedback": "Tilbakemelding",
+      "done": "Fullført",
+      "returnedLabel": "Returnert · revider",
+      "resubmitLabel": "Send inn igjen"
+    },
+    "stateSubmitted": "Innlevert {time}",
+    "stateSubmittedSub": "Læreren din vil gjennomgå det og sende tilbakemelding.",
+    "stateInReview": "{teacher} gjennomgår arbeidet ditt",
+    "stateInReviewSub": "Tilbakemelding kommer vanligvis innen en dag.",
+    "stateReturned": "Tilbakemelding fra {teacher}",
+    "later": "Senere",
+    "reviseResubmit": "Revider og lever inn igjen",
+    "done": "Ferdig"
+  }
+}

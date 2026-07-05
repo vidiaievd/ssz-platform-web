@@ -1,0 +1,33 @@
+{
+  "submit": "Перевірити",
+  "tryAgain": "Спробувати ще",
+  "correctAnswer": "Правильна відповідь",
+  "verdict": {
+    "correct": "Правильно!",
+    "partial": "Частково правильно",
+    "incorrect": "Неправильно"
+  },
+  "type": {
+    "cloze": "Вставте слово",
+    "multiple_choice": "Один із варіантів",
+    "free_text": "Письмова відповідь",
+    "pronunciation": "Вимова"
+  },
+  "cloze": {
+    "ariaLabel": "Вправа на заповнення пропусків",
+    "blankLabel": "Пропуск {n}"
+  },
+  "mc": {
+    "optionsLabel": "Варіанти відповідей"
+  },
+  "freeText": {
+    "placeholder": "Напишіть відповідь тут…",
+    "ariaLabel": "Ваша відповідь"
+  },
+  "pronunciation": {
+    "mobilePrompt": "Краще на мобільному",
+    "mobileDescription": "Вправи на вимову найкраще виконувати в додатку VoxOrd.",
+    "openApp": "Відкрити у VoxOrd"
+  },
+  "unsupportedType": "Тип вправи \"{type}\" поки не підтримується на веб."
+}

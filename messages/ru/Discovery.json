@@ -1,0 +1,20 @@
+{
+  "title": "Найти школу",
+  "subtitle": "Найдите школу или репетитора и начните обучение сегодня.",
+  "searchPlaceholder": "Поиск школ…",
+  "filterLanguage": "Язык",
+  "filterLevel": "Уровень",
+  "filterType": "Тип",
+  "filterAll": "Все",
+  "schoolType": {
+    "school": "Школа",
+    "tutor": "Репетитор"
+  },
+  "requestEnrol": "Подать заявку",
+  "containerCount": "{count, plural, one {# курс} few {# курса} many {# курсов} other {# курса}}",
+  "studentCount": "{count, plural, one {# ученик} few {# ученика} many {# учеников} other {# ученика}}",
+  "free": "Бесплатно",
+  "fromPrice": "От {price} {currency}",
+  "noResults": "Школы не найдены. Попробуйте изменить фильтры.",
+  "enrollComingSoon": "Заявка на зачисление в {name} скоро появится."
+}

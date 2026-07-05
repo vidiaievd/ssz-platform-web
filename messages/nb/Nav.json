@@ -1,0 +1,16 @@
+{
+  "dashboard": "Oversikt",
+  "content": "Innhold",
+  "groups": "Grupper",
+  "students": "Elever",
+  "teachers": "Lærere",
+  "lessons": "Timer",
+  "mySchools": "Mine skoler",
+  "settings": "Innstillinger",
+  "discover": "Utforsk",
+  "requests": "Søknader",
+  "invitations": "Invitasjoner",
+  "scheduling": "Planlegging",
+  "courses": "Kurs",
+  "notifications": "Varsler"
+}

@@ -1,0 +1,189 @@
+{
+  "audio": {
+    "play": "Spill av",
+    "pause": "Pause",
+    "seekBack": "10 sekunder tilbake",
+    "seekForward": "10 sekunder frem",
+    "speed": "{speed}× hastighet",
+    "loading": "Laster lyd…",
+    "scrub": "Spol",
+    "player": "Lydavspiller"
+  },
+  "refStrip": {
+    "reference": "Referansetekst"
+  },
+  "glossary": {
+    "seeInContext": "Se i kontekst",
+    "listenWord": "Hør"
+  },
+  "unitStepper": {
+    "label": "Enhetssteg",
+    "readListen": "Les og lytt",
+    "vocabulary": "Ordforråd",
+    "grammar": "Grammatikk",
+    "practice": "Øvelser"
+  },
+  "errorState": {
+    "default": "Noe gikk galt.",
+    "retry": "Prøv igjen"
+  },
+  "unitFlow": {
+    "exitLabel": "Kurs",
+    "unitLabel": "ENHET {n}",
+    "loadError": "Kunne ikke laste denne enheten",
+    "loadErrorSub": "Noe gikk galt. Fremgangen din er trygg — prøv igjen.",
+    "phaseDebug": "Fase: {phase}"
+  },
+  "readSection": {
+    "unitCourse": "Enhet {unit} · {course}",
+    "finishedReading": "Jeg har lest ferdig →",
+    "finishedListening": "Jeg har hørt ferdig →",
+    "finishedNext": "Ferdig — neste: Ordforråd",
+    "showTranslation": "Vis oversettelse",
+    "hideTranslation": "Skjul oversettelse",
+    "jumpAudio": "Hopp til dette avsnittet i lyden",
+    "tapToLookUp": "trykk for å slå opp",
+    "tapParagraphToJump": "Trykk på et avsnitt for å hoppe til det",
+    "showText": "Vis tekst",
+    "pressPlayToListen": "Trykk spill for å begynne å lytte",
+    "illustrationPlaceholder": "illustrasjon",
+    "lookUpWord": "Slå opp",
+    "listenMode": {
+      "label": "Læringsmodus",
+      "read": "Les",
+      "listenText": "Lytt + tekst",
+      "audioOnly": "Kun lyd"
+    }
+  },
+  "vocabSection": {
+    "passHeader": "Ordforråd · kjenner du dette ordet?",
+    "progress": "{current} av {total}",
+    "quickCheck": "Rask sjekk",
+    "listen": "Lytt",
+    "playing": "Spiller…",
+    "knowIt": "Kan det",
+    "knowItHint": "← K",
+    "newToMe": "Nytt for meg",
+    "newToMeHint": "N →",
+    "knownNote": "Ord du \"kan\" legges til side — sjekkes automatisk igjen om noen dager.",
+    "allKnownTitle": "Du kan alle {total} ordene",
+    "allKnownBody": "Ingen studiekort i dag. Systemet sjekker disse automatisk igjen om noen dager.",
+    "continueToGrammar": "Fortsett til grammatikk →",
+    "studyHeader": "Studer · {current} av {total}",
+    "tapToReveal": "Trykk for å avsløre · Space",
+    "revealMeaning": "Vis betydning",
+    "howWell": "Hvor godt kjente du det?",
+    "translation": "Oversettelse",
+    "fromTheText": "Fra teksten",
+    "showExample": "Vis eksempel",
+    "ratingHard": "Vanskelig",
+    "ratingHardSub": "Igjen snart",
+    "ratingGood": "Bra",
+    "ratingGoodSub": "Husket det",
+    "ratingEasy": "Enkelt",
+    "ratingEasySub": "Visste det",
+    "nothingToStudy": "Ingenting å studere",
+    "doneTitle": "Gjennomgang fullført",
+    "doneBody": "Disse ordene er nå i din spaced-repetition-plan.",
+    "statWordsSeen": "ord sett",
+    "statAlreadyKnew": "kunne fra før",
+    "statStudiedToday": "studert i dag"
+  },
+  "grammarSection": {
+    "ruleLabel": "Grammatikkregel",
+    "examples": "Flere eksempler",
+    "ctaPractise": "Forstått — la oss øve →",
+    "ctaContinue": "Fortsett →",
+    "noRule": "Ingen grammatikknote",
+    "noRuleBody": "Denne enheten har ingen grammatikkregel. Gå videre til øvelse.",
+    "exLabel": "Grammatikk · rask sjekk",
+    "exCheck": "Sjekk →",
+    "exContinue": "Fortsett →",
+    "correct": "Riktig!",
+    "incorrect": "Ikke helt"
+  },
+  "practiceSection": {
+    "progress": "{current} av {total}",
+    "check": "Sjekk →",
+    "skip": "Hopp over →",
+    "finish": "Fullfør →",
+    "seeResults": "Se resultater →",
+    "noPractice": "Ingen øvelser for denne enheten",
+    "noPracticeBody": "Bra — du kan gå rett til resultatene.",
+    "loadError": "Kunne ikke laste inn øvelsen.",
+    "unsupported": "Øvelsestypen støttes ikke"
+  },
+  "completeSection": {
+    "unitComplete": "Enhet {unit} fullført",
+    "subtitle": "Du har fullført denne enheten. Her er resultatet.",
+    "canDoLabel": "Du kan nå",
+    "statPerfect": "Perfekt!",
+    "statMistakes": "feil",
+    "statWords": "ord",
+    "statXp": "XP",
+    "xpEarned": "+10",
+    "backToCourse": "Tilbake til kurset"
+  },
+  "courseHome": {
+    "loadError": "Kunne ikke laste kurset",
+    "loadErrorSub": "Noe gikk galt. Prøv igjen.",
+    "lessons": "{done} av {total} leksjoner",
+    "complete": "fullført",
+    "hero": {
+      "overdueLabel": "OPPGAVE FORFALT",
+      "overdueTitle": "Du har en forfalt oppgave",
+      "overdueMeta": "Send inn før læreren gjennomgår gruppen.",
+      "overdueCta": "Fullfør og send inn",
+      "reviewLabel": "DAGLIG GJENNOMGANG",
+      "reviewTitle": "{count} kort til gjennomgang",
+      "reviewMeta": "Hold streaken din – det tar bare noen minutter.",
+      "reviewCta": "Start gjennomgang",
+      "resumeLabel": "FORTSETT Å LÆRE",
+      "resumeTitle": "Fortsett der du slapp",
+      "resumeMeta": "Du er midt i en enhet. Fortsett!",
+      "resumeCta": "Fortsett leksjonen",
+      "startLabel": "NESTE ENHET",
+      "startTitle": "Klar for neste enhet?",
+      "startMeta": "Du har fullført forrige enhet. Start den neste.",
+      "startCta": "Start enhet",
+      "caughtLabel": "ALT ER GJORT",
+      "caughtTitle": "Du er à jour!",
+      "caughtMeta": "Godt jobbet! Kom tilbake senere eller forhåndsvis neste enhet.",
+      "caughtCta": "Forhåndsvis neste enhet"
+    },
+    "viewToggle": {
+      "units": "Enhetsflyt",
+      "skills": "Ferdighetsoversikt"
+    },
+    "unitFlowList": {
+      "statusDone": "Fullført",
+      "statusActive": "Pågår",
+      "statusLocked": "Låst",
+      "lessons": "{done} av {total} leksjoner",
+      "continueUnit": "Fortsett"
+    },
+    "skillIndex": {
+      "mastery": "{pct}% mestring",
+      "jump": "Gå til →",
+      "noData": "Ingen ferdighetsmålinger ennå"
+    },
+    "reviewCard": {
+      "title": "Daglig gjennomgang",
+      "allReviewed": "Alt gjennomgatt",
+      "allReviewedSub": "Du er a jour. Kom tilbake i morgen!",
+      "itemsDue": "til gjennomgang",
+      "reviewedToday": "{n} gjennomgatt i dag",
+      "cta": "Gjennomga {n} na",
+      "vocab": "Vokabular",
+      "exercises": "Ovelser"
+    },
+    "canDoCard": {
+      "title": "Kan-gjore-fremgang",
+      "goals": "{total} mal",
+      "recentTitle": "Nylig last opp",
+      "nextTitle": "Neste mal",
+      "inUnit": "Enhet {n}",
+      "noItems": "Fullfor enheter for a lase opp mal."
+    }
+  }
+}

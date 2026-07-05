@@ -1,0 +1,247 @@
+{
+  "notFound": "Школа не найдена.",
+  "common": {
+    "cancel": "Отмена",
+    "undo": "Отменить"
+  },
+  "list": {
+    "title": "Студенты",
+    "enrolled": "зачислено",
+    "atRisk": "в зоне риска",
+    "unassigned": "без группы",
+    "importCsv": "Импорт CSV",
+    "bulkMessage": "Массовое сообщение",
+    "enroll": "Зачислить студента",
+    "emptyTitle": "Студентов пока нет",
+    "emptyDescription": "Зачислите первого студента, чтобы начать.",
+    "filteredEmpty": "По этим фильтрам студентов не найдено."
+  },
+  "detail": {
+    "backToStudents": "Назад к студентам",
+    "groups": {
+      "activeHeading": "Активные группы ({n})",
+      "viewAll": "Просмотреть все группы →",
+      "currentHeading": "Текущие группы ({n})",
+      "pastHeading": "Прошлые группы ({n})",
+      "pastEmpty": "Нет истории прошлых групп.",
+      "empty": {
+        "title": "Ещё не в группе",
+        "body": "Добавьте ученика в группу, чтобы связать его с учителем и расписанием."
+      },
+      "cols": {
+        "group": "Группа",
+        "role": "Роль",
+        "teachers": "Учителя",
+        "schedule": "Расписание",
+        "since": "С"
+      },
+      "role": {
+        "student": "Ученик",
+        "trial": "Пробный",
+        "observer": "Наблюдатель"
+      },
+      "actions": {
+        "view": "Просмотреть группу",
+        "changeRole": "Изменить роль",
+        "transfer": "Перевести в другую группу",
+        "remove": "Удалить из группы"
+      }
+    },
+    "teachers": "Преподаватели",
+    "progress": "Прогресс",
+    "details": "Детали",
+    "language": "Язык",
+    "level": "Уровень",
+    "status": "Статус",
+    "groupsCount": "Группы",
+    "enrolledDate": "Зачислен",
+    "lastActive": "Последняя активность",
+    "progressAriaLabel": "{pct}% выполнено",
+    "notInAnyGroup": "Ещё не в одной группе.",
+    "addToGroup": "Добавить в группу",
+    "openGroup": "Открыть группу {name}",
+    "nudge": "Напомнить",
+    "nudgeSending": "Отправка…",
+    "nudgeSent": "Напоминание отправлено {name}",
+    "nudgeFailed": "Не удалось отправить напоминание.",
+    "nudgeAriaLabel": "Отправить напоминание {name}",
+    "removedFromGroup": "Удалён из {group}",
+    "removeFailed": "Не удалось удалить из группы.",
+    "removeFromGroupAriaLabel": "Удалить из {group}",
+    "clashBanner": "{groupA} пересекается с {groupB} в {day} в {time}. Переместите студента в другую группу.",
+    "back": "← Ученики",
+    "addedAt": "Добавлен {date}",
+    "lastSeen": {
+      "never": "Никогда",
+      "value": "{relative}"
+    },
+    "actions": {
+      "nudge": "Напомнить",
+      "nudgeSent": "Отправлено ✓",
+      "nudgeCooldown": "Недавно отправлено",
+      "assignGroup": "Добавить в группу",
+      "editInfo": "Редактировать инфо",
+      "changeLevel": "Изменить уровень",
+      "archive": "Архивировать ученика",
+      "unarchive": "Восстановить ученика",
+      "removeFromSchool": "Удалить из школы"
+    },
+    "clash": {
+      "title": "Обнаружен конфликт расписания",
+      "body": "{groupA} ({dayA} {timeA}) пересекается с {groupB} ({dayB} {timeB}).",
+      "cta": "Просмотреть группы →"
+    },
+    "tabs": {
+      "overview": "Обзор",
+      "groups": "Группы",
+      "history": "История обучения",
+      "notes": "Заметки",
+      "payments": "Платежи",
+      "bonuses": "Бонусы"
+    },
+    "info": {
+      "heading": "Информация об ученике",
+      "email": "Электронная почта",
+      "phone": "Телефон",
+      "status": "Статус",
+      "language": "Основной язык",
+      "level": "Текущий уровень",
+      "addedAt": "Дата добавления",
+      "copied": "Скопировано"
+    },
+    "stats": {
+      "progress": "Прогресс",
+      "lastSeen": "Последний визит",
+      "teachers": "{n, plural, one {# учитель} few {# учителя} many {# учителей} other {# учителей}}",
+      "noTeacher": "Нет учителя"
+    },
+    "history": {
+      "levels": {
+        "heading": "Прогресс уровней",
+        "empty": {
+          "title": "Ещё нет истории уровней",
+          "body": "Изменения уровня будут отображаться здесь по мере продвижения ученика."
+        },
+        "present": "сейчас",
+        "duration": "{n} месяцев"
+      },
+      "periods": {
+        "heading": "Периоды обучения",
+        "empty": {
+          "title": "Ещё нет периодов обучения"
+        },
+        "cols": {
+          "period": "Период",
+          "group": "Группа",
+          "role": "Роль",
+          "teachers": "Учителя",
+          "status": "Статус"
+        },
+        "statusActive": "Активен",
+        "statusCompleted": "Завершён"
+      },
+      "teachers": {
+        "heading": "Учителя",
+        "empty": {
+          "title": "Ещё нет истории учителей"
+        }
+      }
+    },
+    "assign": {
+      "title": "Добавить в группу",
+      "search": "Поиск групп…",
+      "roleLabel": "Роль",
+      "confirm": "Добавить в группу",
+      "confirmAnyway": "Добавить в любом случае",
+      "clashWarning": "Добавление в {group} создаёт конфликт расписания с {existing} ({day} {time}).",
+      "overCapacity": "Группа заполнена ({current}/{max} мест).",
+      "languageMismatch": "Несоответствие языка",
+      "success": "Добавлен {name} в {group}."
+    },
+    "transfer": {
+      "title": "Перевести в другую группу",
+      "from": "Перемещение из",
+      "to": "Перемещение в",
+      "confirm": "Перевести ученика",
+      "success": "Перемещён {name} из {from} в {to}.",
+      "error": "Ошибка перевода — {name} всё ещё в {from}."
+    },
+    "remove": {
+      "group": {
+        "title": "Удалить из группы?",
+        "heading": "Удалить {name} из {group}?",
+        "body": "{name} потеряет доступ к урокам и учителю этой группы. Прогресс и история сохранятся в Прошлых группах.",
+        "confirm": "Удалить из группы",
+        "success": "Удалён {name} из {group}.",
+        "undo": "Отменить"
+      },
+      "school": {
+        "heading": "Удалить {name} из этой школы?",
+        "bodyWithGroups": "{name} сейчас в {n, plural, one {# группе} few {# группах} many {# группах} other {# группах}}. Удаление отпишет их из всех групп и удалит членство в школе.",
+        "bodyNoGroups": "{name} сейчас не в группах. Удаление удалит членство в школе.",
+        "irreversible": "Это необратимо.",
+        "confirm": "Удалить из школы"
+      }
+    },
+    "stubs": {
+      "notes": {
+        "title": "Скоро",
+        "body": "Заметки учителей появятся здесь."
+      },
+      "payments": {
+        "title": "Скоро",
+        "body": "История платежей появится здесь."
+      },
+      "bonuses": {
+        "title": "Скоро",
+        "body": "Бонусы и кредиты появятся здесь."
+      }
+    },
+    "groupsHeading": "Группы"
+  },
+  "enroll": {
+    "title": "Зачислить студента",
+    "description": "Добавьте студентов по одному или вставьте список email-адресов.",
+    "emailsLabel": "Email-адреса",
+    "emailsPlaceholder": "один@пример.com\nдва@пример.com",
+    "emailsHint": "Разделяйте адреса запятыми, точками с запятой или переводами строк.",
+    "checkEmails": "Проверить email",
+    "targetGroup": "Добавить в группу (необязательно)",
+    "noGroup": "Без группы",
+    "submit": "Зачислить {count}",
+    "submitDefault": "Зачислить",
+    "failed": "Зачисление не удалось. Попробуйте ещё раз."
+  },
+  "addToGroup": {
+    "title": "Добавить {name} в группу",
+    "description": "Выберите группу. Показаны вместимость и конфликты расписания.",
+    "searchPlaceholder": "Поиск групп…",
+    "searchAriaLabel": "Поиск групп",
+    "noGroups": "Группы не найдены.",
+    "clashWarning": "У {name} уже есть группа с пересекающимся расписанием.",
+    "clashConfirm": "Я понимаю конфликт расписания и хочу продолжить.",
+    "clashAcknowledged": "Добавлено с подтверждением конфликта расписания.",
+    "clashBlocked": "Невозможно добавить: конфликт расписания.",
+    "overCapacity": "Группа превысит вместимость ({projected}/{max}).",
+    "submit": "Добавить в группу",
+    "added": "Добавлен {name} в {group}",
+    "addedWithWarning": "Добавлен {name} в {group}",
+    "failed": "Не удалось добавить в группу."
+  },
+  "bulkMessage": {
+    "title": "Отправить сообщение",
+    "description": "Отправьте сообщение всем студентам в текущей выборке.",
+    "audience": "Аудитория",
+    "recipients": "{count} студентов",
+    "subject": "Тема",
+    "subjectPlaceholder": "Тема сообщения…",
+    "body": "Сообщение",
+    "bodyPlaceholder": "Напишите ваше сообщение здесь…",
+    "send": "Отправить {count}",
+    "sent": "Сообщение отправлено {count} студентам",
+    "failed": "Не удалось отправить сообщение."
+  },
+  "onboard": {
+    "invitationBanner": "Вас пригласили присоединиться к школе. Заполните профиль, чтобы начать."
+  }
+}

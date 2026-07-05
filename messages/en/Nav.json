@@ -1,0 +1,16 @@
+{
+  "dashboard": "Dashboard",
+  "content": "Content",
+  "groups": "Groups",
+  "students": "Students",
+  "teachers": "Teachers",
+  "lessons": "Lessons",
+  "mySchools": "My Schools",
+  "settings": "Settings",
+  "discover": "Discover",
+  "requests": "Requests",
+  "invitations": "Invitations",
+  "scheduling": "Scheduling",
+  "courses": "Courses",
+  "notifications": "Notifications"
+}
