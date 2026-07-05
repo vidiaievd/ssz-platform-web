@@ -10,8 +10,8 @@ import { stubJson } from "../utils/stub";
  * - Forecast dashboard: sliders update projection chart
  *
  * All tests use @stub tag (no live backend required for client-side flows).
- * Server-side data (command-center, substitutions, curriculum) comes from the
- * mock scheduling provider — no additional stubs needed for those routes.
+ * Client-side BFF calls (/api/schools/**) are intercepted by page.route stubs —
+ * the real scheduling provider is not invoked during these tests.
  */
 
 const SCHOOL_SLUG = "test-school";
