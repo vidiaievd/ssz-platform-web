@@ -55,4 +55,7 @@ storybook-static
 
 # claude code
 .claude
+CLAUDE.md
+STATUS.md
+BACKEND_BUG_members_401.md
 check-school.mjs.bak
