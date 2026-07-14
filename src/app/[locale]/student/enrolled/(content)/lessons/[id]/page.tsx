@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { LessonPlayer } from '@/features/student/components/lesson-player';
+import { getStudentProfile } from '@/features/profile/api/get-student-profile';
 import type { Container, ContainerItem, Lesson, LessonVariant } from '@/features/content/types';
 
 interface Props {
@@ -17,16 +18,29 @@ export default async function LessonPage({ params, searchParams }: Props) {
   let variant: LessonVariant | null = null;
 
   try {
-    [lesson, variant] = await Promise.all([
+    const [lessonResult, profile] = await Promise.all([
       serverFetch<Lesson>({ service: 'content', path: `/lessons/${id}` }),
-      serverFetch<LessonVariant>({
+      getStudentProfile(),
+    ]);
+    lesson = lessonResult;
+
+    const studentNativeLanguage = profile?.nativeLanguage ?? undefined;
+    const studentCurrentLevel = profile?.targetLanguages.find(
+      (t) => t.code === lesson.targetLanguage,
+    )?.level;
+
+    if (studentNativeLanguage && studentCurrentLevel) {
+      variant = await serverFetch<{ variant: LessonVariant; fallbackUsed: boolean }>({
         service: 'content',
         path: `/lessons/${id}/variants/best`,
-      }).catch((err) => {
-        console.error('[lessons/id] lesson variant fetch failed:', err);
-        return null;
-      }),
-    ]);
+        query: { studentNativeLanguage, studentCurrentLevel },
+      })
+        .then((res) => res.variant)
+        .catch((err) => {
+          console.error('[lessons/id] lesson variant fetch failed:', err);
+          return null;
+        });
+    }
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') notFound();
     throw e;
