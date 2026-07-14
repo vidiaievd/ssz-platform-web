@@ -18,7 +18,7 @@ import type {
   Lesson,
   OpsWarning,
 } from '@/features/groups/types';
-import type { Absence, SubstituteRequest } from '@/features/teachers/types';
+import type { Absence, SubstituteRequest, SubstituteCandidate, CurriculumPlan } from '@/features/teachers/types';
 import type { SchedulingProvider } from './provider';
 
 const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
@@ -163,10 +163,6 @@ export const realProvider: SchedulingProvider = {
     return rows.map((r): OpsWarning => ({ type: 'clash', with: r.groupBId, time: r.startTime }));
   },
 
-  // plan-28: commandCenter type mismatch — backend returns aggregate counts, web type expects
-  // enriched TeacherLoadRow[] with name/avatarUrl/lang. Needs BFF enrichment layer.
-  async commandCenter(_schoolId: string) { throw notReady(); },
-
   // plan-28: no GET/PUT per-teacher availability endpoint in scheduling-service yet
   async getAvailability(_teacherId: string) { throw notReady(); },
   async putAvailability(_teacherId: string, _blocks: unknown[]) { throw notReady(); },
@@ -209,11 +205,105 @@ export const realProvider: SchedulingProvider = {
     return { absenceId: row.id, createdRequests: [] as SubstituteRequest[] };
   },
 
-  // plan-28: coverQueue needs lesson enrichment (groupName, lang, day, start, end) not in SubRequestResponseDto
-  async coverQueue(_schoolId: string) { throw notReady(); },
+  async coverQueue(schoolId: string) {
+    const rows = await serverFetch<Array<{
+      id: string; lessonId: string; groupId: string; originalTeacherId: string;
+      coverFrom: string; coverTo: string; urgency: string; status: string;
+    }>>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/substitutions`,
+    });
+    if (!rows.length) return [];
 
-  // plan-28: candidates needs teacher enrichment (name, avatarUrl, classification, factors) not in CandidateDto
-  async candidates(_requestId: string) { throw notReady(); },
+    // Enrichment: group name/lang from org-service, lesson times from the
+    // per-group lessons projection across the full cover window.
+    const [groups, lessonById] = await Promise.all([
+      serverFetch<Array<{ id: string; name: string; lang?: string }>>({
+        service: 'organization',
+        path: `/schools/${schoolId}/groups`,
+      }).catch(() => []),
+      (async () => {
+        const groupIds = [...new Set(rows.map((r) => r.groupId))];
+        const from = rows.map((r) => r.coverFrom.slice(0, 10)).reduce((a, b) => (a < b ? a : b));
+        const to = rows.map((r) => r.coverTo.slice(0, 10)).reduce((a, b) => (a > b ? a : b));
+        const byId = new Map<string, { id: string; date: string; startTime: string; endTime: string }>();
+        await Promise.all(
+          groupIds.map(async (gid) => {
+            const lessons = await serverFetch<Array<{ id: string; date: string; startTime: string; endTime: string }>>({
+              service: 'scheduling',
+              path: `/scheduling/groups/${gid}/lessons`,
+              query: { from, to },
+            }).catch(() => []);
+            for (const l of lessons) byId.set(l.id, l);
+          }),
+        );
+        return byId;
+      })(),
+    ]);
+    const groupById = new Map(groups.map((g) => [g.id, g]));
+
+    const WEEKDAYS: Weekday[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return rows.map((r): SubstituteRequest => {
+      const group = groupById.get(r.groupId);
+      const lesson = lessonById.get(r.lessonId);
+      const dateStr = lesson?.date ?? r.coverFrom.slice(0, 10);
+      return {
+        requestId: r.id,
+        lessonId: r.lessonId,
+        groupId: r.groupId,
+        groupName: group?.name ?? '',
+        originalTeacherId: r.originalTeacherId,
+        coverWindow: { from: r.coverFrom.slice(0, 10), to: r.coverTo.slice(0, 10) },
+        urgency: (['today', 'upcoming', 'open'].includes(r.urgency) ? r.urgency : 'open') as SubstituteRequest['urgency'],
+        status: (['open', 'closed', 'cancelled'].includes(r.status) ? r.status : 'open') as SubstituteRequest['status'],
+        lang: (group?.lang ?? 'en') as SubstituteRequest['lang'],
+        day: WEEKDAYS[new Date(`${dateStr}T00:00:00Z`).getUTCDay()] ?? 'Mon',
+        start: lesson?.startTime ?? '00:00',
+        end: lesson?.endTime ?? '00:00',
+      };
+    });
+  },
+
+  async candidates(schoolId: string, requestId: string) {
+    // The ranking service returns its full scoring breakdown (capScore 0-40,
+    // disrScore 0-20, …) alongside the declared CandidateDto fields.
+    const [cands, members] = await Promise.all([
+      serverFetch<Array<{
+        teacherId: string; eligible: boolean; fitScore: number; reasons: string[];
+        capScore?: number; disrScore?: number;
+      }>>({
+        service: 'scheduling',
+        path: `/scheduling/substitutions/${requestId}/candidates`,
+      }),
+      serverFetch<Array<{ userId: string; name?: string; avatarUrl?: string | null }>>({
+        service: 'organization',
+        path: `/schools/${schoolId}/members`,
+        query: { role: 'TEACHER' },
+      }).catch(() => []),
+    ]);
+    const memberById = new Map(members.map((m) => [m.userId, m]));
+
+    return cands.map((c): SubstituteCandidate => {
+      const member = memberById.get(c.teacherId);
+      const spareRatio = (c.capScore ?? 0) / 40;
+      return {
+        teacherId: c.teacherId,
+        name: member?.name ?? '',
+        avatarUrl: member?.avatarUrl ?? null,
+        eligible: c.eligible,
+        fitScore: c.fitScore,
+        classification: !c.eligible ? 'ineligible' : c.fitScore >= 75 ? 'best' : c.fitScore >= 50 ? 'good' : 'ok',
+        factors: {
+          canLang: !c.reasons.includes('language-mismatch'),
+          free: !c.reasons.includes('schedule-conflict'),
+          spareRatio,
+          familiar: c.reasons.includes('familiar-with-group'),
+          wouldOverload: c.eligible && spareRatio <= 0,
+          subLoop: c.eligible && (c.disrScore ?? 20) < 20,
+        },
+      };
+    });
+  },
 
   async assignSubstitute(requestId: string, substituteTeacherId: string) {
     await serverFetch({
@@ -225,9 +315,65 @@ export const realProvider: SchedulingProvider = {
     return { ok: true } as const;
   },
 
-  // plan-28: getCurriculum/putCurriculum — backend units lack unitId in response; needs schema update
-  async getCurriculum(_groupId: string) { throw notReady(); },
-  async putCurriculum(_groupId: string, _plan: unknown) { throw notReady(); },
+  async getCurriculum(groupId: string) {
+    const plan = await serverFetch<{
+      id: string;
+      groupId: string;
+      targetWeeklyHours: number;
+      units: Array<{
+        id: string; title: string; order: number;
+        plannedSessions: number; deliveredSessions: number;
+        requiredLevel: string | null; status: string;
+      }>;
+    } | null>({
+      service: 'scheduling',
+      path: `/scheduling/groups/${groupId}/curriculum`,
+    });
+    if (!plan) {
+      return { planId: '', groupId, units: [], targetWeeklyHours: 0, progressPct: 0 };
+    }
+
+    const units = plan.units.map((u): CurriculumPlan['units'][number] => ({
+      unitId: u.id,
+      title: u.title,
+      order: u.order,
+      plannedSessions: u.plannedSessions,
+      deliveredSessions: u.deliveredSessions,
+      requiredLevel: (u.requiredLevel ?? 'A1') as CurriculumPlan['units'][number]['requiredLevel'],
+      status: (['planned', 'active', 'done', 'overridden'].includes(u.status) ? u.status : 'planned') as CurriculumPlan['units'][number]['status'],
+    }));
+    const planned = units.reduce((sum, u) => sum + u.plannedSessions, 0);
+    const delivered = units.reduce((sum, u) => sum + Math.min(u.deliveredSessions, u.plannedSessions), 0);
+
+    return {
+      planId: plan.id,
+      groupId: plan.groupId,
+      units,
+      targetWeeklyHours: plan.targetWeeklyHours,
+      progressPct: planned > 0 ? Math.round((delivered / planned) * 100) : 0,
+    };
+  },
+
+  async putCurriculum(groupId: string, plan: CurriculumPlan) {
+    // The upsert endpoint replaces the full unit list; order = array order.
+    await serverFetch({
+      service: 'scheduling',
+      path: `/scheduling/groups/${groupId}/curriculum`,
+      method: 'PUT',
+      body: {
+        targetWeeklyHours: plan.targetWeeklyHours,
+        units: [...plan.units]
+          .sort((a, b) => a.order - b.order)
+          .map((u) => ({
+            title: u.title,
+            plannedSessions: u.plannedSessions,
+            deliveredSessions: u.deliveredSessions,
+            requiredLevel: u.requiredLevel,
+            status: u.status,
+          })),
+      },
+    });
+  },
 
   // plan-28: computeForecast — no backend endpoint in scheduling-service
   async computeForecast(_schoolId: string, _params: unknown) { throw notReady(); },

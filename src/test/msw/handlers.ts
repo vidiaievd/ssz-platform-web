@@ -1,11 +1,10 @@
 import { http, HttpResponse } from 'msw';
 
-import { MOCK_UPCOMING } from '@/app/api/student/upcoming/route';
 import { MOCK_STREAK } from '@/app/api/student/streak/route';
 import type { School, SchoolsResponse } from '@/features/discovery/types';
 import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
 import type { NotificationsResponse } from '@/features/notifications/types';
-import type { ContainerProgress } from '@/features/student/types';
+import type { ContainerProgress, LessonPreview } from '@/features/student/types';
 
 const MOCK_SCHOOLS: School[] = [
   {
@@ -89,7 +88,8 @@ export const handlers = [
 
   http.post('/api/student/progress/events', () => new HttpResponse(null, { status: 204 })),
 
-  http.get('/api/student/upcoming', () => HttpResponse.json(MOCK_UPCOMING)),
+  // Upcoming lessons — real backend; default to empty in tests.
+  http.get('/api/student/upcoming', () => HttpResponse.json([] as LessonPreview[])),
   http.get('/api/student/streak', () => HttpResponse.json(MOCK_STREAK)),
 
   http.get('/api/notifications', () => {

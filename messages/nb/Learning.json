@@ -87,7 +87,31 @@
     "doneBody": "Disse ordene er nå i din spaced-repetition-plan.",
     "statWordsSeen": "ord sett",
     "statAlreadyKnew": "kunne fra før",
-    "statStudiedToday": "studert i dag"
+    "statStudiedToday": "studert i dag",
+    "forms": {
+      "showAll": "Vis alle former",
+      "show": "Vis former",
+      "hide": "Skjul former",
+      "title": "Ordformer",
+      "baseNoun": "Ubestemt",
+      "baseVerb": "Infinitiv",
+      "baseAdj": "Grunnform",
+      "gender": "Kjønn",
+      "plural": "Flertall",
+      "definiteSingular": "Bestemt ent.",
+      "definitePlural": "Bestemt fl.",
+      "class": "Klasse",
+      "present": "Presens",
+      "past": "Preteritum",
+      "perfect": "Perfektum",
+      "neuter": "Intetkjønn",
+      "comparative": "Komparativ",
+      "superlative": "Superlativ",
+      "genderMasculine": "hankjønn",
+      "genderFeminine": "hunkjønn",
+      "genderNeuter": "intetkjønn",
+      "genderCommon": "felleskjønn"
+    }
   },
   "grammarSection": {
     "ruleLabel": "Grammatikkregel",

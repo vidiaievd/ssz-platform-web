@@ -24,17 +24,7 @@ const MOCK_MODULE: ExpandedModule = {
     audioUrl: 'https://cdn.example.com/audio/lesson-1.mp3',
     estimatedMinutes: 8,
   },
-  vocabulary: [
-    {
-      id: 'v-1',
-      word: 'kaffe',
-      pos: 'noun',
-      ipa: '/ˈkaf.fə/',
-      audioUrl: 'https://cdn.example.com/audio/kaffe.mp3',
-      translation: 'coffee',
-      example: 'Jeg drikker kaffe.',
-    },
-  ],
+  vocabulary: [],
   grammar: {
     id: 'g-1',
     title: 'Indefinite articles',
@@ -53,6 +43,49 @@ const MOCK_MODULE: ExpandedModule = {
     },
   ],
 };
+
+/**
+ * Content-service emits vocab items under `vocabItems` with different field
+ * names; the BFF maps them into `vocabulary` (ExpandedVocabItem). We attach this
+ * to the module the fetcher resolves, mirroring the real upstream shape.
+ */
+const MODULE_WITH_VOCAB_ITEMS = {
+  ...MOCK_MODULE,
+  vocabItems: [
+    {
+      id: 'v-1',
+      word: 'gutt',
+      partOfSpeech: 'NOUN', // Prisma enum name; BFF normalises to 'noun'
+      ipaTranscription: '/ɡʉtː/',
+      pronunciationAudioMediaId: 'media-1',
+      grammaticalProperties: {
+        gender: 'masculine',
+        plural_form: 'gutter',
+        definite_singular: 'gutten',
+        definite_plural: 'guttene',
+      },
+      translation: { language: 'en', text: 'boy', definition: null },
+      usageExample: { text: 'Gutten leser en bok.' },
+    },
+  ],
+};
+
+const EXPECTED_VOCABULARY = [
+  {
+    id: 'v-1',
+    word: 'gutt',
+    pos: 'noun',
+    ipa: '/ɡʉtː/',
+    translation: 'boy',
+    example: 'Gutten leser en bok.',
+    grammaticalProperties: {
+      gender: 'masculine',
+      plural_form: 'gutter',
+      definite_singular: 'gutten',
+      definite_plural: 'guttene',
+    },
+  },
+];
 
 const MOCK_PROGRESS: ModuleProgress = {
   moduleId: 'mod-1',
@@ -79,6 +112,20 @@ describe('GET /api/learning/unit/[moduleId]', () => {
     const body = await res.json();
     expect(body.module).toEqual(MOCK_MODULE);
     expect(body.progress).toEqual(MOCK_PROGRESS);
+  });
+
+  it('maps content-service vocabItems into web vocabulary (with grammatical forms)', async () => {
+    vi.mocked(serverFetch)
+      .mockResolvedValueOnce(MODULE_WITH_VOCAB_ITEMS)
+      .mockResolvedValueOnce(MOCK_PROGRESS);
+
+    const res = await GET(makeRequest(), PARAMS);
+    expect(res.status).toBe(200);
+
+    const body = await res.json();
+    expect(body.module.vocabulary).toEqual(EXPECTED_VOCABULARY);
+    // The raw upstream `vocabItems` key is stripped, not leaked to the client.
+    expect(body.module.vocabItems).toBeUndefined();
   });
 
   it('fires both upstream calls (2 total)', async () => {

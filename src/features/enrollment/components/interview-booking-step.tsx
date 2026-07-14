@@ -37,7 +37,9 @@ export function InterviewBookingStep({ membershipId, schoolId, onComplete }: Pro
 
   useEffect(() => {
     void (async () => {
-      // TODO: fetch from SchedulingProvider once interview slots are available
+      // TODO(plan student-enrollment-onboarding §3.3): fetch interview slots from SchedulingProvider
+      // once scheduling-service exposes interview slots (none exist yet; interviewRequired
+      // defaults to false backend-side until then)
       setSlots(FIXTURE_SLOTS);
     })();
   }, []);

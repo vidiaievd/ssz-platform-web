@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import type { SrsRating, VocabStudyQueueItem, VocabStudyResult } from './vocab-section-types';
 import { VocabAudioBtn } from './vocab-audio-btn';
 import { VocabTagPill } from './vocab-tag-pill';
+import { VocabFormsTable, hasForms } from './vocab-forms-table';
 
 /* ─── rating config ─────────────────────────────────────────────────────────── */
 
@@ -68,10 +69,12 @@ const RATINGS: RatingDef[] = [
 interface VStudyCardProps {
   word: VocabStudyQueueItem;
   showExampleByDefault: boolean;
+  /** Section-level "show all forms" toggle — expands the paradigm table by default. */
+  showFormsByDefault: boolean;
   onRate: (r: SrsRating) => void;
 }
 
-function VStudyCard({ word, showExampleByDefault, onRate }: VStudyCardProps) {
+function VStudyCard({ word, showExampleByDefault, showFormsByDefault, onRate }: VStudyCardProps) {
   const t = useTranslations('Learning.vocabSection');
   const [flipped, setFlipped]   = useState(false);
   const [showEx, setShowEx]     = useState(showExampleByDefault);
@@ -283,6 +286,15 @@ function VStudyCard({ word, showExampleByDefault, onRate }: VStudyCardProps) {
         </button>
       ) : (
         <div>
+          {hasForms(word) && (
+            <div className="mb-4">
+              <VocabFormsTable
+                key={`${word.id}-${String(showFormsByDefault)}`}
+                item={word}
+                openByDefault={showFormsByDefault}
+              />
+            </div>
+          )}
           <p className="mb-2.5 text-center text-[11px] font-bold uppercase tracking-[0.07em] text-(--ssz-text-muted)">
             {t('howWell')}
           </p>
@@ -340,6 +352,11 @@ export function VocabStudy({ newWords, refParagraphs, refTitle, onDone }: VocabS
   );
   const [idx, setIdx]       = useState(0);
   const [refOpen, setRefOpen] = useState(false);
+  // Session-local "show all forms" preference — resets on each unit visit.
+  const [showAllForms, setShowAllForms] = useState(false);
+
+  // Only worth showing the toggle if some card actually carries a paradigm.
+  const anyForms = newWords.some(hasForms);
 
   const handleRate = useCallback(
     (rating: SrsRating) => {
@@ -400,6 +417,47 @@ export function VocabStudy({ newWords, refParagraphs, refTitle, onDone }: VocabS
         </div>
       )}
 
+      {/* Global "show all forms" toggle */}
+      {anyForms && (
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowAllForms((v) => !v)}
+            role="switch"
+            aria-checked={showAllForms}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-full border px-3 py-1.5',
+              'text-[12px] font-semibold',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
+            )}
+            style={{
+              borderColor: showAllForms
+                ? 'oklch(0.62 0.105 168 / 45%)'
+                : 'var(--ssz-border-default)',
+              background: showAllForms ? 'oklch(0.95 0.03 168)' : 'transparent',
+              color: showAllForms ? 'oklch(0.44 0.09 168)' : 'var(--ssz-text-secondary)',
+              fontFamily: 'var(--ssz-font-ui)',
+            }}
+          >
+            <span
+              aria-hidden="true"
+              className="relative inline-block h-4 w-7 rounded-full transition-colors"
+              style={{
+                background: showAllForms
+                  ? 'var(--ssz-color-primary-500)'
+                  : 'var(--ssz-border-default)',
+              }}
+            >
+              <span
+                className="absolute top-0.5 h-3 w-3 rounded-full bg-white transition-[left]"
+                style={{ left: showAllForms ? 14 : 2 }}
+              />
+            </span>
+            {t('forms.showAll')}
+          </button>
+        </div>
+      )}
+
       {/* Progress header */}
       <div className="mb-5 flex items-center justify-between">
         <p className="text-[11px] font-bold uppercase tracking-[0.07em] text-(--ssz-text-muted)">
@@ -427,6 +485,7 @@ export function VocabStudy({ newWords, refParagraphs, refTitle, onDone }: VocabS
         key={`${cur.id}_${String(cur._hitCount)}`}
         word={cur}
         showExampleByDefault={false}
+        showFormsByDefault={showAllForms}
         onRate={handleRate}
       />
     </div>

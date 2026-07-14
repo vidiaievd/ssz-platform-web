@@ -12,9 +12,7 @@ const EnrollmentItem = z.object({
   status: z.string(),
 });
 
-const EnrollmentList = z.object({
-  items: z.array(EnrollmentItem).default([]),
-});
+const EnrollmentList = z.array(EnrollmentItem);
 
 /**
  * Returns active enrollment IDs for the current user.
@@ -30,8 +28,8 @@ export async function getEnrollmentStatus(): Promise<string[]> {
     const parsed = EnrollmentList.safeParse(raw);
     if (!parsed.success) return [];
 
-    return parsed.data.items
-      .filter((e) => e.status === 'approved' || e.status === 'active')
+    return parsed.data
+      .filter((e) => e.status.toUpperCase() === 'ACTIVE')
       .map((e) => e.containerId ?? e.schoolId ?? e.id);
   } catch (e) {
     if (e instanceof AppError && e.code === 'unauthenticated') return [];

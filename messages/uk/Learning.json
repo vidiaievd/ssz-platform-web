@@ -87,7 +87,31 @@
     "doneBody": "Ці слова тепер у вашому розкладі інтервального повторення.",
     "statWordsSeen": "слів переглянуто",
     "statAlreadyKnew": "вже знали",
-    "statStudiedToday": "вивчено сьогодні"
+    "statStudiedToday": "вивчено сьогодні",
+    "forms": {
+      "showAll": "Показати всі форми",
+      "show": "Показати форми",
+      "hide": "Сховати форми",
+      "title": "Форми слова",
+      "baseNoun": "Неознач. форма",
+      "baseVerb": "Інфінітив",
+      "baseAdj": "Початкова форма",
+      "gender": "Рід",
+      "plural": "Множина",
+      "definiteSingular": "Означ. одн.",
+      "definitePlural": "Означ. мн.",
+      "class": "Клас",
+      "present": "Теп. час",
+      "past": "Мин. час",
+      "perfect": "Перфект",
+      "neuter": "Сер. рід",
+      "comparative": "Вищий ступінь",
+      "superlative": "Найвищий ступінь",
+      "genderMasculine": "чоловічий",
+      "genderFeminine": "жіночий",
+      "genderNeuter": "середній",
+      "genderCommon": "спільний"
+    }
   },
   "grammarSection": {
     "ruleLabel": "Граматичне правило",

@@ -14,24 +14,11 @@ import type {
   CurriculumPlan,
   ForecastParams,
   ForecastResult,
-  WorkloadKpis,
-  TeacherLoadRow,
-  Vacancy,
-  RoomLoad,
-  Alert,
 } from '@/features/teachers/types';
 
 export type MutationResult =
   | { ok: true; warnings?: string[] }
   | { ok: false; error: string; details?: unknown };
-
-export interface CommandCenterData {
-  kpis: WorkloadKpis;
-  teachers: TeacherLoadRow[];
-  violations: Alert[];
-  vacancies: Vacancy[];
-  roomLoad: RoomLoad[];
-}
 
 export interface SchedulingProvider {
   // ── existing (groups) ──────────────────────────────────────────────────────
@@ -50,9 +37,6 @@ export interface SchedulingProvider {
   teacherConflicts(schoolId: string): Promise<OpsWarning[]>;
   studentClashes(schoolId: string, userId: string): Promise<OpsWarning[]>;
 
-  // ── roster / load projection ───────────────────────────────────────────────
-  commandCenter(schoolId: string): Promise<CommandCenterData>;
-
   // ── availability & absence ─────────────────────────────────────────────────
   getAvailability(teacherId: string): Promise<AvailabilityBlock[]>;
   putAvailability(teacherId: string, blocks: AvailabilityBlock[]): Promise<void>;
@@ -69,7 +53,7 @@ export interface SchedulingProvider {
 
   // ── substitution ───────────────────────────────────────────────────────────
   coverQueue(schoolId: string): Promise<SubstituteRequest[]>;
-  candidates(requestId: string): Promise<SubstituteCandidate[]>;
+  candidates(schoolId: string, requestId: string): Promise<SubstituteCandidate[]>;
   assignSubstitute(
     requestId: string,
     substituteTeacherId: string,

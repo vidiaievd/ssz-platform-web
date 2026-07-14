@@ -87,7 +87,31 @@
     "doneBody": "Эти слова теперь в вашем расписании интервального повторения.",
     "statWordsSeen": "слов просмотрено",
     "statAlreadyKnew": "уже знали",
-    "statStudiedToday": "изучено сегодня"
+    "statStudiedToday": "изучено сегодня",
+    "forms": {
+      "showAll": "Показать все формы",
+      "show": "Показать формы",
+      "hide": "Скрыть формы",
+      "title": "Формы слова",
+      "baseNoun": "Неопр. форма",
+      "baseVerb": "Инфинитив",
+      "baseAdj": "Начальная форма",
+      "gender": "Род",
+      "plural": "Мн. число",
+      "definiteSingular": "Опр. ед.",
+      "definitePlural": "Опр. мн.",
+      "class": "Класс",
+      "present": "Наст. время",
+      "past": "Прош. время",
+      "perfect": "Перфект",
+      "neuter": "Ср. род",
+      "comparative": "Сравн. степень",
+      "superlative": "Превосх. степень",
+      "genderMasculine": "мужской",
+      "genderFeminine": "женский",
+      "genderNeuter": "средний",
+      "genderCommon": "общий"
+    }
   },
   "grammarSection": {
     "ruleLabel": "Грамматическое правило",

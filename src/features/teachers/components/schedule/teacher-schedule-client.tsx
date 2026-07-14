@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
+import { TEACHER_AVAILABILITY_ENABLED } from "@/lib/config/feature-flags";
+
 import type { AvailabilityBlock, Absence } from "../../types";
 import { WeeklyGrid, type Lesson } from "./weekly-grid";
 import { AvailabilityEditor } from "./availability-editor";
@@ -53,7 +55,9 @@ export function TeacherScheduleClient({
         role="tablist"
         aria-label={t("title")}
       >
-        {(["grid", "availability", "absence"] as PanelId[]).map((panel) => {
+        {(["grid", "availability", "absence"] as PanelId[])
+          .filter((panel) => panel !== "availability" || TEACHER_AVAILABILITY_ENABLED)
+          .map((panel) => {
           const isActive = activePanel === panel;
           return (
             <button
@@ -85,7 +89,7 @@ export function TeacherScheduleClient({
         />
       )}
 
-      {activePanel === "availability" && (
+      {activePanel === "availability" && TEACHER_AVAILABILITY_ENABLED && (
         <div className="max-w-2xl">
           <h2 className="text-sm font-semibold text-(--ssz-text-primary) mb-3">
             {t("availabilityEditor")}

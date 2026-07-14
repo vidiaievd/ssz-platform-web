@@ -119,6 +119,7 @@
     "edit": "Rediger",
     "duplicate": "Dupliser",
     "archive": "Arkiver",
+    "publish": "Publiser",
     "delete": "Slett",
     "archiveTitle": "Arkivere denne gruppen?",
     "archiveBody": "Arkivering gjør gruppen skrivebeskyttet.",
@@ -133,7 +134,10 @@
     "duplicateError": "Kunne ikke duplisere gruppen",
     "archiveError": "Kunne ikke arkivere gruppen",
     "deleteError": "Kunne ikke slette gruppen",
-    "moreActions": "Flere handlinger"
+    "moreActions": "Flere handlinger",
+    "published": "Gruppe publisert",
+    "publishing": "Publiserer…",
+    "publishError": "Kunne ikke publisere gruppen"
   },
   "edit": {
     "title": "Rediger gruppe",
