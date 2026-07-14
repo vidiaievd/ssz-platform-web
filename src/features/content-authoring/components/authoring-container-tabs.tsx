@@ -10,35 +10,28 @@ import type { Container } from '@/features/content/types';
 import type { PreflightResult, SchoolRole } from '../types';
 import { deriveContainerState } from './container-state-badge';
 import { ContainerForm } from './container-form';
+import { CourseStructurePanel } from './course-structure-panel';
 import { DangerZone } from './danger-zone';
-import { ExerciseList } from './exercise-list';
-import { GrammarList } from './grammar-list';
-import { LessonList } from './lesson-list';
 import { PreflightPanel } from './preflight-panel';
 import { PublishDialog } from './publish-dialog';
 import { SharingPanel } from './sharing-panel';
 import { TagInput } from './tag-input';
-import { VocabularyTable } from './vocabulary-table';
 
-type AuthoringTab =
-  | 'overview'
-  | 'lessons'
-  | 'vocabulary'
-  | 'grammar'
-  | 'exercises'
-  | 'tags'
-  | 'sharing';
+type AuthoringTab = 'overview' | 'structure' | 'tags' | 'sharing';
 
 interface AuthoringContainerTabsProps {
   container: Container;
   schoolRole?: SchoolRole;
   preflightResult?: PreflightResult;
+  /** Draft version id (always present — containers keep one draft version). Null only on fetch failure. */
+  draftVersionId: string | null;
 }
 
 export function AuthoringContainerTabs({
   container,
   schoolRole = 'owner',
   preflightResult,
+  draftVersionId,
 }: AuthoringContainerTabsProps) {
   const t = useTranslations('Authoring');
   const searchParams = useSearchParams();
@@ -59,10 +52,7 @@ export function AuthoringContainerTabs({
     <Tabs value={activeTab} onValueChange={handleTabChange}>
       <TabsList className="overflow-x-auto">
         <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
-        <TabsTrigger value="lessons">{t('tabs.lessons')}</TabsTrigger>
-        <TabsTrigger value="vocabulary">{t('tabs.vocabulary')}</TabsTrigger>
-        <TabsTrigger value="grammar">{t('tabs.grammar')}</TabsTrigger>
-        <TabsTrigger value="exercises">{t('tabs.exercises')}</TabsTrigger>
+        <TabsTrigger value="structure">{t('structure.sectionTitle')}</TabsTrigger>
         <TabsTrigger value="tags">{t('tabs.tags')}</TabsTrigger>
         <TabsTrigger value="sharing">{t('tabs.sharing')}</TabsTrigger>
       </TabsList>
@@ -99,17 +89,14 @@ export function AuthoringContainerTabs({
         </div>
       </TabsContent>
 
-      <TabsContent value="lessons">
-        <LessonList container={container} />
-      </TabsContent>
-      <TabsContent value="vocabulary">
-        <VocabularyTable container={container} />
-      </TabsContent>
-      <TabsContent value="grammar">
-        <GrammarList container={container} />
-      </TabsContent>
-      <TabsContent value="exercises">
-        <ExerciseList container={container} />
+      <TabsContent value="structure">
+        {draftVersionId ? (
+          <CourseStructurePanel containerId={container.id} versionId={draftVersionId} />
+        ) : (
+          <p className="text-muted-foreground py-10 text-center text-sm">
+            {t('structure.loadError')}
+          </p>
+        )}
       </TabsContent>
       <TabsContent value="tags">
         <TagInput entityType="container" entityId={container.id} />

@@ -51,7 +51,7 @@ export function runPreflight(
     severity: hasItems ? 'ok' : 'blocker',
     title: 'At least 1 lesson required',
     fixHint: hasItems ? null : 'Add at least one lesson',
-    fixDeepLink: hasItems ? null : `${containerBase}?tab=lessons`,
+    fixDeepLink: hasItems ? null : `${containerBase}?tab=structure`,
   });
 
   // ── Warnings ───────────────────────────────────────────────────────────────
