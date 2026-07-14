@@ -155,6 +155,13 @@ export interface ExpandedVocabItem {
   translation: string;
   example?: string;
   exampleAudioUrl?: string;
+  /**
+   * Per-language morphology paradigm (from VocabularyItem.grammaticalProperties).
+   * For Norwegian this carries `gender` plus noun/verb/adjective forms
+   * (e.g. plural_form, present_tense, neuter_form). Language-specific shape,
+   * so values are kept as a loose string map for the forms table to render.
+   */
+  grammaticalProperties?: Record<string, string>;
 }
 
 export interface ExpandedGrammarExample {

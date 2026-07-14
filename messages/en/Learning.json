@@ -87,7 +87,31 @@
     "doneBody": "These words are now in your spaced-repetition schedule.",
     "statWordsSeen": "words seen",
     "statAlreadyKnew": "already knew",
-    "statStudiedToday": "studied today"
+    "statStudiedToday": "studied today",
+    "forms": {
+      "showAll": "Show all forms",
+      "show": "Show forms",
+      "hide": "Hide forms",
+      "title": "Word forms",
+      "baseNoun": "Indefinite",
+      "baseVerb": "Infinitive",
+      "baseAdj": "Base form",
+      "gender": "Gender",
+      "plural": "Plural",
+      "definiteSingular": "Definite sg.",
+      "definitePlural": "Definite pl.",
+      "class": "Class",
+      "present": "Present",
+      "past": "Past",
+      "perfect": "Perfect",
+      "neuter": "Neuter",
+      "comparative": "Comparative",
+      "superlative": "Superlative",
+      "genderMasculine": "masculine",
+      "genderFeminine": "feminine",
+      "genderNeuter": "neuter",
+      "genderCommon": "common"
+    }
   },
   "grammarSection": {
     "ruleLabel": "Grammar rule",
