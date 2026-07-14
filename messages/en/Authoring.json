@@ -440,5 +440,24 @@
     "interactive": "Interactive",
     "interactiveNote": "Switch to the student app to try exercises interactively.",
     "note": "Updates as you edit"
+  },
+  "structure": {
+    "sectionTitle": "Curriculum",
+    "sectionHint": "Click to edit",
+    "inspectorTitle": "Inspector",
+    "emptySelection": "Select an item to inspect and edit its settings.",
+    "noLessonsYet": "No lessons yet",
+    "level": "Level",
+    "module": "Module",
+    "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
+    "levelHelp": "Levels group modules and map to CEFR bands students see in the reader.",
+    "moduleHelp": "A module is one thematic unit — the student's “Unit”. It bundles vocab, reading, grammar and practice.",
+    "duration": "Duration",
+    "xpReward": "XP reward",
+    "state": "State",
+    "loadError": "Could not load the curriculum tree.",
+    "retry": "Try again",
+    "empty": "This course has no levels yet.",
+    "titleEn": "Title (English)"
   }
 }

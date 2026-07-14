@@ -440,5 +440,24 @@
   },
   "breadcrumb": {
     "courses": "Kurs"
+  },
+  "structure": {
+    "sectionTitle": "Pensum",
+    "sectionHint": "Klikk for å redigere",
+    "inspectorTitle": "Inspektør",
+    "emptySelection": "Velg et element for å se og redigere innstillingene.",
+    "noLessonsYet": "Ingen leksjoner ennå",
+    "level": "Nivå",
+    "module": "Modul",
+    "lessonCount": "{count, plural, one {# leksjon} other {# leksjoner}}",
+    "levelHelp": "Nivåer grupperer moduler og tilsvarer CEFR-nivåene elevene ser i leseren.",
+    "moduleHelp": "En modul er én tematisk enhet — elevens «enhet». Den samler ordforråd, lesing, grammatikk og øving.",
+    "duration": "Varighet",
+    "xpReward": "XP-belønning",
+    "state": "Status",
+    "loadError": "Kunne ikke laste pensumtreet.",
+    "retry": "Prøv igjen",
+    "empty": "Dette kurset har ingen nivåer ennå.",
+    "titleEn": "Tittel (engelsk)"
   }
 }

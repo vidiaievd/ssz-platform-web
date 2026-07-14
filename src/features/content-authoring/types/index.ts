@@ -77,3 +77,15 @@ export interface AuditEvent {
   payload: Record<string, unknown>;
   createdAt: string;
 }
+
+// ─── Course structure (curriculum tree) ─────────────────────────────────────
+
+/** The node currently selected in the CurriculumTree, shown in the Inspector. */
+export type CurriculumTreeSelection =
+  | { kind: 'level'; level: import('@/features/content/types').CurriculumTreeLevelNode }
+  | { kind: 'module'; module: import('@/features/content/types').CurriculumTreeModuleNode }
+  | {
+      kind: 'item';
+      item: import('@/features/content/types').CurriculumTreeItemNode;
+      sectionTitle: string | null;
+    };
