@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 
 import { getMyProfile } from '@/features/profile/api/get-my-profile';
 import { ContinueLearning } from '@/features/student/components/continue-learning';
+import { FindSchoolBand } from '@/features/student/components/find-school-band';
 import { MySchoolsBand } from '@/features/student/components/my-schools-band';
 import { StreakStats } from '@/features/student/components/streak-stats';
 import { UpcomingLessons } from '@/features/student/components/upcoming-lessons';
@@ -46,6 +47,9 @@ export default async function StudentDashboardPage() {
 
       {/* Schools the student belongs to: status, group, materials, teachers */}
       <MySchoolsBand />
+
+      {/* Visible only when the student has no active memberships */}
+      <FindSchoolBand />
 
       <VoxOrdPromo />
 

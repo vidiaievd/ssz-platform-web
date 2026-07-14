@@ -1,20 +1,45 @@
 {
   "title": "Знайти школу",
+  "pageTitle": "Знайдіть школу або репетитора",
+  "pageSubtitle": "Переглядайте акредитовані мовні школи та незалежних репетиторів. Порівнюйте напрями, формати та ціни, щоб знайти те, що підходить саме вам.",
+  "overline": "КАТАЛОГ",
   "subtitle": "Знайдіть школу або репетитора та почніть навчання сьогодні.",
   "searchPlaceholder": "Пошук шкіл…",
   "filterLanguage": "Мова",
   "filterLevel": "Рівень",
   "filterType": "Тип",
+  "filterSort": "Сортувати за",
   "filterAll": "Всі",
   "schoolType": {
     "school": "Школа",
     "tutor": "Репетитор"
   },
+  "sort": {
+    "recommended": "Рекомендовані",
+    "rating": "Найвища оцінка",
+    "priceAsc": "Ціна: від низької",
+    "students": "Найбільше учнів",
+    "name": "Назва (А–Я)"
+  },
+  "format": {
+    "online": "Онлайн",
+    "inPerson": "Офлайн",
+    "freeIntro": "Безкоштовний вступний урок"
+  },
+  "resultCount": "{count, plural, one {# результат} few {# результати} many {# результатів} other {# результату}}",
+  "viewSchool": "Переглянути школу",
+  "viewProfile": "Переглянути профіль",
   "requestEnrol": "Подати заявку",
   "containerCount": "{count, plural, one {# курс} few {# курси} many {# курсів} other {# курсу}}",
   "studentCount": "{count, plural, one {# учень} few {# учні} many {# учнів} other {# учня}}",
   "free": "Безкоштовно",
   "fromPrice": "Від {price} {currency}",
+  "pricePerMonth": "на місяць",
   "noResults": "Школи не знайдено. Спробуйте змінити фільтри.",
-  "enrollComingSoon": "Заявка на зарахування до {name} незабаром."
+  "enrollComingSoon": "Заявка на зарахування до {name} незабаром.",
+  "findSchool": {
+    "title": "Знайдіть школу або репетитора",
+    "subtitle": "Перегляньте каталог і подайте заявку до школи або забронюйте урок з репетитором.",
+    "cta": "Переглянути каталог"
+  }
 }

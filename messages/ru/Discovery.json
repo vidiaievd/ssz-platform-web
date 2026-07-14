@@ -1,20 +1,45 @@
 {
   "title": "Найти школу",
+  "pageTitle": "Найдите школу или репетитора",
+  "pageSubtitle": "Просматривайте аккредитованные языковые школы и независимых репетиторов. Сравнивайте направления, форматы и цены, чтобы найти подходящий вариант.",
+  "overline": "КАТАЛОГ",
   "subtitle": "Найдите школу или репетитора и начните обучение сегодня.",
   "searchPlaceholder": "Поиск школ…",
   "filterLanguage": "Язык",
   "filterLevel": "Уровень",
   "filterType": "Тип",
+  "filterSort": "Сортировать по",
   "filterAll": "Все",
   "schoolType": {
     "school": "Школа",
     "tutor": "Репетитор"
   },
+  "sort": {
+    "recommended": "Рекомендуемые",
+    "rating": "Лучший рейтинг",
+    "priceAsc": "Цена: по возрастанию",
+    "students": "Больше всего учеников",
+    "name": "Название (А–Я)"
+  },
+  "format": {
+    "online": "Онлайн",
+    "inPerson": "Офлайн",
+    "freeIntro": "Бесплатный вводный урок"
+  },
+  "resultCount": "{count, plural, one {# результат} few {# результата} many {# результатов} other {# результата}}",
+  "viewSchool": "Открыть школу",
+  "viewProfile": "Открыть профиль",
   "requestEnrol": "Подать заявку",
   "containerCount": "{count, plural, one {# курс} few {# курса} many {# курсов} other {# курса}}",
   "studentCount": "{count, plural, one {# ученик} few {# ученика} many {# учеников} other {# ученика}}",
   "free": "Бесплатно",
   "fromPrice": "От {price} {currency}",
+  "pricePerMonth": "в месяц",
   "noResults": "Школы не найдены. Попробуйте изменить фильтры.",
-  "enrollComingSoon": "Заявка на зачисление в {name} скоро появится."
+  "enrollComingSoon": "Заявка на зачисление в {name} скоро появится.",
+  "findSchool": {
+    "title": "Найдите школу или репетитора",
+    "subtitle": "Просмотрите каталог и подайте заявку в школу или запишитесь на урок к репетитору.",
+    "cta": "Открыть каталог"
+  }
 }

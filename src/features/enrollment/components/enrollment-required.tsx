@@ -15,7 +15,7 @@ export async function EnrollmentRequired() {
       <h2 className="text-xl font-semibold text-(--ssz-text-primary)">{t('title')}</h2>
       <p className="mt-2 max-w-sm text-sm text-(--ssz-text-secondary)">{t('description')}</p>
       <Button asChild variant="primary" className="mt-6">
-        <Link href="/student/discover">{t('cta')}</Link>
+        <Link href="/discover">{t('cta')}</Link>
       </Button>
     </div>
   );

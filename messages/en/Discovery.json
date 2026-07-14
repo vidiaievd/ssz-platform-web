@@ -1,20 +1,45 @@
 {
   "title": "Discover Schools",
+  "pageTitle": "Find a school or tutor",
+  "pageSubtitle": "Browse accredited language schools and independent tutors. Compare focus areas, formats and pricing, then explore the ones that fit how you want to learn.",
+  "overline": "DISCOVER",
   "subtitle": "Find a school or tutor and start learning today.",
   "searchPlaceholder": "Search schools…",
   "filterLanguage": "Language",
   "filterLevel": "Level",
   "filterType": "Type",
+  "filterSort": "Sort by",
   "filterAll": "All",
   "schoolType": {
     "school": "School",
     "tutor": "Tutor"
   },
+  "sort": {
+    "recommended": "Recommended",
+    "rating": "Top rated",
+    "priceAsc": "Price: low to high",
+    "students": "Most students",
+    "name": "Name (A–Z)"
+  },
+  "format": {
+    "online": "Online",
+    "inPerson": "In person",
+    "freeIntro": "Free intro lesson"
+  },
+  "resultCount": "{count, plural, one {# result} other {# results}}",
+  "viewSchool": "View school",
+  "viewProfile": "View profile",
   "requestEnrol": "Request to Enrol",
   "containerCount": "{count, plural, one {# course} other {# courses}}",
   "studentCount": "{count, plural, one {# student} other {# students}}",
   "free": "Free",
   "fromPrice": "From {price} {currency}",
+  "pricePerMonth": "per month",
   "noResults": "No schools found. Try adjusting the filters.",
-  "enrollComingSoon": "Enrolment request for {name} coming soon."
+  "enrollComingSoon": "Enrolment request for {name} coming soon.",
+  "findSchool": {
+    "title": "Find a school or tutor",
+    "subtitle": "Browse the catalogue and request to join a school or book a lesson with a tutor.",
+    "cta": "Browse catalogue"
+  }
 }

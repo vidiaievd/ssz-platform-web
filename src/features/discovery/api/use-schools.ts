@@ -1,25 +1,30 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
+import type { InfiniteData } from '@tanstack/react-query';
 
-import type { SchoolFilters } from '../schemas';
+import type { DiscoverFilter } from '../schemas';
 import type { SchoolsResponse } from '../types';
 import { discoveryKeys } from './keys';
 
 export interface UseSchoolsOptions {
-  filters?: SchoolFilters;
+  filters?: DiscoverFilter;
+  initialData?: SchoolsResponse;
   enabled?: boolean;
 }
 
-export function useSchools({ filters, enabled = true }: UseSchoolsOptions = {}) {
+export function useSchools({ filters, initialData, enabled = true }: UseSchoolsOptions = {}) {
   return useInfiniteQuery<SchoolsResponse>({
     queryKey: discoveryKeys.schools(filters),
     queryFn: async ({ pageParam }) => {
       const params = new URLSearchParams();
-      if (filters?.search) params.set('search', filters.search);
+      if (filters?.q) params.set('q', filters.q);
+      if (filters?.type) params.set('type', filters.type);
       if (filters?.language) params.set('language', filters.language);
       if (filters?.level) params.set('level', filters.level);
-      if (filters?.type) params.set('type', filters.type);
+      if (filters?.sort) params.set('sort', filters.sort);
+      if (filters?.format) params.set('format', filters.format);
+      if (filters?.freeIntro) params.set('freeIntro', filters.freeIntro);
       if (pageParam) params.set('cursor', pageParam as string);
 
       const res = await fetch(`/api/discovery/schools?${params.toString()}`);
@@ -28,7 +33,13 @@ export function useSchools({ filters, enabled = true }: UseSchoolsOptions = {}) 
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
-      lastPage.pageInfo.hasNextPage ? lastPage.pageInfo.nextCursor : undefined,
+      lastPage.pageInfo.hasNextPage ? lastPage.pageInfo.endCursor : undefined,
+    initialData: initialData
+      ? ({
+          pages: [initialData],
+          pageParams: [undefined],
+        } satisfies InfiniteData<SchoolsResponse>)
+      : undefined,
     staleTime: 60_000,
     enabled,
   });
