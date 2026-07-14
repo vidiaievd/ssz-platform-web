@@ -237,6 +237,16 @@
     --ssz-color-info-300: oklch(0.76 0.10  235);
     --ssz-color-info-500: oklch(0.60 0.12  235);
     --ssz-color-info-700: oklch(0.44 0.10  235);
+
+    /* Lesson-type hues (CM_TYPES in design_handoff_course_management/coursemgmt/ui.jsx).
+       Theme-invariant like the scale tokens above; type chips tint them at 16% via color-mix. */
+    --ssz-type-vocab:    oklch(0.60 0.12  235);
+    --ssz-type-text:     oklch(0.62 0.105 168);
+    --ssz-type-video:    oklch(0.60 0.12  305);
+    --ssz-type-audio:    oklch(0.60 0.13  145);
+    --ssz-type-grammar:  oklch(0.62 0.12  45);
+    --ssz-type-exercise: oklch(0.66 0.13  75);
+    --ssz-type-live:     oklch(0.58 0.12  15);
   }
 
   /* ═══ TYPOGRAPHY TOKENS ═══ */
