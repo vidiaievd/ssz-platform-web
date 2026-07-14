@@ -62,7 +62,12 @@ export function CourseStructurePanel({ containerId, versionId }: CourseStructure
         {tree.levels.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
         ) : (
-          <CurriculumTree tree={tree} selectedId={selectedId} onSelect={setSelection} />
+          <CurriculumTree
+            tree={tree}
+            selectedId={selectedId}
+            onSelect={setSelection}
+            onChanged={() => refetch()}
+          />
         )}
       </div>
       <div className="ssz-surface sticky top-4 rounded-2xl border border-border p-4.5">

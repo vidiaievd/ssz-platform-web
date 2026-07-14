@@ -69,6 +69,11 @@ export async function assignItemSection(
   });
 }
 
+/**
+ * Reorders all items in a container's draft version. The backend requires
+ * `orderedItemIds` to cover every item in the version (a partial list is
+ * rejected), so callers must pass the full flattened order.
+ */
 export async function reorderDraftItems(containerId: string, orderedItemIds: string[]): Promise<void> {
   const versionId = await requireDraftVersionId(containerId);
   await serverFetch({

@@ -6,7 +6,13 @@ import { enMessages } from '@/lib/i18n/messages';
 import type { CurriculumTree as CurriculumTreeData } from '@/features/content/types';
 
 import type { CurriculumTreeSelection } from '../types';
-import { CurriculumTree } from './curriculum-tree';
+
+vi.mock('../actions/container-item', () => ({
+  reorderContainerItemsAction: vi.fn(),
+  assignItemSectionAction: vi.fn(),
+}));
+
+const { CurriculumTree } = await import('./curriculum-tree');
 
 const TREE: CurriculumTreeData = {
   versionId: 'version-1',
@@ -57,7 +63,7 @@ const TREE: CurriculumTreeData = {
 function renderTree(onSelect = vi.fn()) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CurriculumTree tree={TREE} selectedId={null} onSelect={onSelect} />
+      <CurriculumTree tree={TREE} selectedId={null} onSelect={onSelect} onChanged={vi.fn()} />
     </NextIntlClientProvider>,
   );
   return onSelect;
@@ -68,7 +74,9 @@ describe('CurriculumTree', () => {
     renderTree();
     expect(screen.getByText('A1 — Beginner')).toBeInTheDocument();
     expect(screen.getByText('Samfunn og kultur')).toBeInTheDocument();
-    expect(screen.getByText('Reinforce & read')).toBeInTheDocument();
+    // Rendered twice: once as the section header, once as the current value of
+    // each item's "move to section" select.
+    expect(screen.getAllByText('Reinforce & read').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('En vanlig arbeidsdag')).toBeInTheDocument();
   });
 
@@ -125,7 +133,7 @@ describe('CurriculumTree', () => {
     };
     render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <CurriculumTree tree={emptyTree} selectedId={null} onSelect={vi.fn()} />
+        <CurriculumTree tree={emptyTree} selectedId={null} onSelect={vi.fn()} onChanged={vi.fn()} />
       </NextIntlClientProvider>,
     );
     expect(screen.getByText('No lessons yet')).toBeInTheDocument();

@@ -15,11 +15,14 @@ import type {
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
 import { ContainerStateBadge } from './container-state-badge';
+import { CurriculumSectionItems, MoveToSectionSelect } from './curriculum-item-reorder';
 
 interface CurriculumTreeProps {
   tree: CurriculumTreeData;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
+  /** Called after a reorder or section move persists, so the caller can refetch the tree. */
+  onChanged: () => void;
 }
 
 interface TreeRowProps {
@@ -34,6 +37,7 @@ interface TreeRowProps {
   onToggle?: () => void;
   onSelect: () => void;
   state?: 'draft' | 'published' | null;
+  right?: React.ReactNode;
 }
 
 function TreeRow({
@@ -48,6 +52,7 @@ function TreeRow({
   onToggle,
   onSelect,
   state,
+  right,
 }: TreeRowProps) {
   return (
     <div
@@ -102,6 +107,7 @@ function TreeRow({
       </div>
       {meta && <span className="font-mono text-[10.5px] text-muted-foreground">{meta}</span>}
       {state && <ContainerStateBadge state={state} />}
+      {right}
     </div>
   );
 }
@@ -111,11 +117,13 @@ function ItemRow({
   sectionTitle,
   selectedId,
   onSelect,
+  right,
 }: {
   item: CurriculumTreeItemNode;
   sectionTitle: string | null;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
+  right?: React.ReactNode;
 }) {
   const def = getLessonTypeDefinition(getMaterialKind(item));
   const Icon = def.icon;
@@ -135,6 +143,7 @@ function ItemRow({
       state={item.state}
       selected={selectedId === item.id}
       onSelect={() => onSelect({ kind: 'item', item, sectionTitle })}
+      right={right}
     />
   );
 }
@@ -144,16 +153,19 @@ function ModuleNode({
   index,
   selectedId,
   onSelect,
+  onChanged,
 }: {
   module: CurriculumTreeModuleNode;
   index: number;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
+  onChanged: () => void;
 }) {
   const t = useTranslations('Authoring');
   const [expanded, setExpanded] = useState(true);
   const lessonTotal =
     mod.sections.reduce((sum, s) => sum + s.items.length, 0) + mod.ungroupedItems.length;
+  const sectionOptions = mod.sections.map((s) => ({ id: s.id, title: s.title }));
 
   return (
     <>
@@ -190,34 +202,60 @@ function ModuleNode({
                   </span>
                 </div>
               ) : (
-                section.items.map((item) => (
-                  <ItemRow
-                    key={item.id}
-                    item={item}
-                    sectionTitle={section.title}
-                    selectedId={selectedId}
-                    onSelect={onSelect}
-                  />
-                ))
+                <CurriculumSectionItems module={mod} items={section.items} onReordered={onChanged}>
+                  {(item) => (
+                    <ItemRow
+                      item={item}
+                      sectionTitle={section.title}
+                      selectedId={selectedId}
+                      onSelect={onSelect}
+                      right={
+                        sectionOptions.length > 0 ? (
+                          <MoveToSectionSelect
+                            moduleContainerId={mod.containerId}
+                            item={item}
+                            currentSectionId={section.id}
+                            sections={sectionOptions}
+                            onMoved={onChanged}
+                          />
+                        ) : undefined
+                      }
+                    />
+                  )}
+                </CurriculumSectionItems>
               )}
             </div>
           ))}
-          {mod.ungroupedItems.map((item) => (
-            <ItemRow
-              key={item.id}
-              item={item}
-              sectionTitle={null}
-              selectedId={selectedId}
-              onSelect={onSelect}
-            />
-          ))}
+          {mod.ungroupedItems.length > 0 && (
+            <CurriculumSectionItems module={mod} items={mod.ungroupedItems} onReordered={onChanged}>
+              {(item) => (
+                <ItemRow
+                  item={item}
+                  sectionTitle={null}
+                  selectedId={selectedId}
+                  onSelect={onSelect}
+                  right={
+                    sectionOptions.length > 0 ? (
+                      <MoveToSectionSelect
+                        moduleContainerId={mod.containerId}
+                        item={item}
+                        currentSectionId={null}
+                        sections={sectionOptions}
+                        onMoved={onChanged}
+                      />
+                    ) : undefined
+                  }
+                />
+              )}
+            </CurriculumSectionItems>
+          )}
         </>
       )}
     </>
   );
 }
 
-export function CurriculumTree({ tree, selectedId, onSelect }: CurriculumTreeProps) {
+export function CurriculumTree({ tree, selectedId, onSelect, onChanged }: CurriculumTreeProps) {
   const [expandedLevels, setExpandedLevels] = useState<Record<string, boolean>>({});
 
   return (
@@ -248,6 +286,7 @@ export function CurriculumTree({ tree, selectedId, onSelect }: CurriculumTreePro
                   index={mi}
                   selectedId={selectedId}
                   onSelect={onSelect}
+                  onChanged={onChanged}
                 />
               ))}
           </div>

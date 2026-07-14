@@ -6,6 +6,10 @@ import { enMessages } from '@/lib/i18n/messages';
 import type { CurriculumTree as CurriculumTreeData } from '@/features/content/types';
 
 vi.mock('../api/use-curriculum-tree', () => ({ useCurriculumTree: vi.fn() }));
+vi.mock('../actions/container-item', () => ({
+  reorderContainerItemsAction: vi.fn(),
+  assignItemSectionAction: vi.fn(),
+}));
 
 const { CourseStructurePanel } = await import('./course-structure-panel');
 import { useCurriculumTree } from '../api/use-curriculum-tree';

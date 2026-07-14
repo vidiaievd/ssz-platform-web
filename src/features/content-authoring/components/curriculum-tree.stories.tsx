@@ -104,7 +104,9 @@ function InteractiveTree() {
         : selection?.kind === 'item'
           ? selection.item.id
           : null;
-  return <CurriculumTree tree={TREE} selectedId={selectedId} onSelect={setSelection} />;
+  return (
+    <CurriculumTree tree={TREE} selectedId={selectedId} onSelect={setSelection} onChanged={() => {}} />
+  );
 }
 
 const meta = {
@@ -117,14 +119,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: { tree: TREE, selectedId: null, onSelect: () => {} },
+  args: { tree: TREE, selectedId: null, onSelect: () => {}, onChanged: () => {} },
 };
 
 export const LessonSelected: Story = {
-  args: { tree: TREE, selectedId: 'item-1', onSelect: () => {} },
+  args: { tree: TREE, selectedId: 'item-1', onSelect: () => {}, onChanged: () => {} },
 };
 
 export const Interactive: Story = {
-  args: { tree: TREE, selectedId: null, onSelect: () => {} },
+  args: { tree: TREE, selectedId: null, onSelect: () => {}, onChanged: () => {} },
   render: () => <InteractiveTree />,
 };
