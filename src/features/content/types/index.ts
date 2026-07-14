@@ -52,6 +52,57 @@ export interface ContainerSection {
   createdAt: string;
 }
 
+/**
+ * Editable curriculum tree for a course version (levels → modules → sections
+ * → items), served by content-service `GET /containers/:id/versions/:versionId/tree`
+ * (plan 30 FE1.1 / plan 29 BE2.2). Field names mirror `CurriculumTree*ResponseDto`.
+ */
+export interface CurriculumTreeItemNode {
+  id: string;
+  itemType: 'container' | 'lesson' | 'vocabulary_list' | 'grammar_rule' | 'exercise';
+  refId: string;
+  title: string | null;
+  position: number;
+  isRequired: boolean;
+  lessonKind: 'text' | 'video' | 'audio' | 'live' | null;
+  state: 'draft' | 'published' | null;
+  durationMinutes: number | null;
+  xpReward: number | null;
+}
+
+export interface CurriculumTreeSectionNode {
+  id: string;
+  title: string;
+  position: number;
+  items: CurriculumTreeItemNode[];
+}
+
+export interface CurriculumTreeModuleNode {
+  id: string;
+  containerId: string;
+  versionId: string | null;
+  title: string | null;
+  titleEn: string | null;
+  position: number;
+  isRequired: boolean;
+  sections: CurriculumTreeSectionNode[];
+  ungroupedItems: CurriculumTreeItemNode[];
+}
+
+export interface CurriculumTreeLevelNode {
+  id: string | null;
+  title: string | null;
+  position: number;
+  modules: CurriculumTreeModuleNode[];
+}
+
+export interface CurriculumTree {
+  versionId: string;
+  containerId: string;
+  levelSystem: 'cefr' | 'custom' | 'single';
+  levels: CurriculumTreeLevelNode[];
+}
+
 export interface PageInfo {
   nextCursor?: string;
   hasNextPage: boolean;
