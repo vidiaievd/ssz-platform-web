@@ -25,7 +25,7 @@ export interface LessonTypeDefinition {
   icon: LucideIcon;
   /** CSS custom property (src/styles/globals.css) carrying this type's hue. */
   hueVar: string;
-  /** next-intl key, `Authoring` namespace; JSON entries land in FE0.3. */
+  /** next-intl key, `Content` namespace (shared between school and student surfaces). */
   labelKey: string;
   /** Editor shown from the add-lesson picker (FE1.4) and edit route; wired per-type in FE2.*. */
   editorComponent?: ComponentType;

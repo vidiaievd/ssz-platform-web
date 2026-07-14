@@ -73,5 +73,14 @@
     "doneSummary": "Ви знали {known} з {total} слів.",
     "continue": "Продовжити",
     "exit": "Вийти"
+  },
+  "materialType": {
+    "vocab": "Словник",
+    "text": "Читання",
+    "video": "Відео",
+    "audio": "Аудіювання",
+    "grammar": "Граматика",
+    "exercise": "Практика",
+    "live": "Живий урок"
   }
 }

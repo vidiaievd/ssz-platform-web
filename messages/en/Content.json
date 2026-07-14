@@ -73,5 +73,14 @@
     "doneSummary": "You knew {known} of {total} words.",
     "continue": "Continue",
     "exit": "Exit"
+  },
+  "materialType": {
+    "vocab": "Vocabulary",
+    "text": "Reading",
+    "video": "Video",
+    "audio": "Listening",
+    "grammar": "Grammar",
+    "exercise": "Practice",
+    "live": "Live class"
   }
 }

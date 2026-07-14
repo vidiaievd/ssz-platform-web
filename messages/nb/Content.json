@@ -73,5 +73,14 @@
     "doneSummary": "Du kjente {known} av {total} ord.",
     "continue": "Fortsett",
     "exit": "Avslutt"
+  },
+  "materialType": {
+    "vocab": "Ordforråd",
+    "text": "Lesing",
+    "video": "Video",
+    "audio": "Lytting",
+    "grammar": "Grammatikk",
+    "exercise": "Øving",
+    "live": "Direktetime"
   }
 }

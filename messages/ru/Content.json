@@ -73,5 +73,14 @@
     "doneSummary": "Вы знали {known} из {total} слов.",
     "continue": "Продолжить",
     "exit": "Выйти"
+  },
+  "materialType": {
+    "vocab": "Словарь",
+    "text": "Чтение",
+    "video": "Видео",
+    "audio": "Аудирование",
+    "grammar": "Грамматика",
+    "exercise": "Практика",
+    "live": "Живой урок"
   }
 }
