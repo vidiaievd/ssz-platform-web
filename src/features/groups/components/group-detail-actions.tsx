@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { MoreHorizontal, Pencil, Copy, Archive, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, Copy, Archive, Trash2, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { GroupEditDialog } from './group-edit-dialog';
-import { archiveGroup, deleteGroup, duplicateGroup } from '../api/mutations';
+import { archiveGroup, deleteGroup, duplicateGroup, publishGroup } from '../api/mutations';
 import type { Group } from '../types';
 
 type Props = {
@@ -47,6 +47,18 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
         router.push(`/school/${schoolSlug}/groups/${result.id}`);
       } else {
         toast.error(t('detail.duplicateError'));
+      }
+    });
+  }
+
+  function handlePublish() {
+    startTransition(async () => {
+      const result = await publishGroup(schoolId, group.id);
+      if (result.ok) {
+        toast.success(t('detail.published'));
+        router.refresh();
+      } else {
+        toast.error(t('detail.publishError'));
       }
     });
   }
@@ -105,6 +117,12 @@ export function GroupDetailActions({ group, schoolSlug }: Props) {
               <Copy className="size-3.5 mr-2" aria-hidden="true" />
               {t('detail.duplicate')}
             </DropdownMenuItem>
+            {group.status === 'draft' && (
+              <DropdownMenuItem onClick={handlePublish} disabled={isPending}>
+                <Send className="size-3.5 mr-2" aria-hidden="true" />
+                {isPending ? t('detail.publishing') : t('detail.publish')}
+              </DropdownMenuItem>
+            )}
             {group.status !== 'archived' && (
               <DropdownMenuItem onClick={() => setDialog('archive')}>
                 <Archive className="size-3.5 mr-2" aria-hidden="true" />

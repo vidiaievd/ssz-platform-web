@@ -119,6 +119,7 @@
     "edit": "Edit",
     "duplicate": "Duplicate",
     "archive": "Archive",
+    "publish": "Publish",
     "delete": "Delete",
     "archiveTitle": "Archive this group?",
     "archiveBody": "Archiving will make the group read-only.",
@@ -133,7 +134,10 @@
     "duplicateError": "Failed to duplicate group",
     "archiveError": "Failed to archive group",
     "deleteError": "Failed to delete group",
-    "moreActions": "More actions"
+    "moreActions": "More actions",
+    "published": "Group published",
+    "publishing": "Publishing…",
+    "publishError": "Failed to publish group"
   },
   "edit": {
     "title": "Edit group",
