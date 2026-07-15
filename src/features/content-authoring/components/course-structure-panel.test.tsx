@@ -11,6 +11,8 @@ vi.mock('../actions/container-item', () => ({
   assignItemSectionAction: vi.fn(),
 }));
 vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
+vi.mock('../actions/container', () => ({ renameContainerAction: vi.fn() }));
+vi.mock('../actions/section', () => ({ renameSectionAction: vi.fn() }));
 
 const { CourseStructurePanel } = await import('./course-structure-panel');
 import { useCurriculumTree } from '../api/use-curriculum-tree';

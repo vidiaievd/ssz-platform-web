@@ -11,8 +11,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const commonArgs = { courseContainerId: 'course-1', onChanged: () => {} };
+
 export const EmptySelection: Story = {
-  args: { selection: null },
+  args: { selection: null, ...commonArgs },
 };
 
 export const LevelSelected: Story = {
@@ -21,6 +23,7 @@ export const LevelSelected: Story = {
       kind: 'level',
       level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [] },
     },
+    ...commonArgs,
   },
 };
 
@@ -40,6 +43,7 @@ export const ModuleSelected: Story = {
         ungroupedItems: [],
       },
     },
+    ...commonArgs,
   },
 };
 
@@ -61,6 +65,7 @@ export const LessonSelected: Story = {
         xpReward: 10,
       },
     },
+    ...commonArgs,
   },
 };
 
@@ -82,5 +87,6 @@ export const DraftVocabularySelected: Story = {
         xpReward: null,
       },
     },
+    ...commonArgs,
   },
 };

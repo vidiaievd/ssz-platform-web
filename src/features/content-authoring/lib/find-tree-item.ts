@@ -2,6 +2,29 @@ import type { CurriculumTree, CurriculumTreeModuleNode } from '@/features/conten
 
 import type { CurriculumTreeSelection } from '../types';
 
+/**
+ * Re-resolves the current selection against a freshly refetched tree, so
+ * in-place edits (rename, XP, state, …) don't leave the Inspector holding a
+ * stale snapshot of the node it just saved.
+ */
+export function resolveSelection(
+  tree: CurriculumTree,
+  current: CurriculumTreeSelection,
+): CurriculumTreeSelection | null {
+  if (current.kind === 'level') {
+    const level = tree.levels.find((l) => l.id === current.level.id);
+    return level ? { kind: 'level', level } : null;
+  }
+  if (current.kind === 'module') {
+    for (const level of tree.levels) {
+      const mod = level.modules.find((m) => m.id === current.module.id);
+      if (mod) return { kind: 'module', module: mod };
+    }
+    return null;
+  }
+  return findItemSelection(tree, current.item.id);
+}
+
 /** Locates a freshly created (or any) item by id and builds its tree selection, for auto-select after creation. */
 export function findItemSelection(tree: CurriculumTree, itemId: string): CurriculumTreeSelection | null {
   for (const level of tree.levels) {

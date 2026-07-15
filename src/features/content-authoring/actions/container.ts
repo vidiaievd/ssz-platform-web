@@ -38,6 +38,25 @@ export async function createContainerAction(input: ContainerFormValues) {
   });
 }
 
+/** Renames a container (e.g. a module) without touching its other fields — used by the curriculum-tree Inspector. */
+export async function renameContainerAction(id: string, title: string) {
+  return tryAction(async () => {
+    const trimmed = title.trim();
+    if (!trimmed) {
+      throw new AppError('validation', 'Invalid input', { title: ['Required'] });
+    }
+
+    await serverFetch({
+      service: 'content',
+      path: `/containers/${id}`,
+      method: 'PATCH',
+      body: { title: trimmed },
+    });
+
+    revalidatePath(`/school/content/${id}`);
+  });
+}
+
 export async function updateContainerAction(id: string, input: ContainerFormValues) {
   return tryAction(async () => {
     const parsed = containerFormSchema.safeParse(input);

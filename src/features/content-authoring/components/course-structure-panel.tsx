@@ -9,7 +9,7 @@ import type { DifficultyLevel, Visibility } from '@/features/content/types';
 
 import { useCurriculumTree } from '../api/use-curriculum-tree';
 import type { CurriculumTreeSelection } from '../types';
-import { findItemSelection } from '../lib/find-tree-item';
+import { findItemSelection, resolveSelection } from '../lib/find-tree-item';
 import { CurriculumTree } from './curriculum-tree';
 import { CurriculumInspector } from './curriculum-inspector';
 
@@ -44,10 +44,16 @@ export function CourseStructurePanel({
 
   async function handleChanged(selectItemId?: string) {
     const { data: freshTree } = await refetch();
-    if (selectItemId && freshTree) {
+    if (!freshTree) return;
+    if (selectItemId) {
       const found = findItemSelection(freshTree, selectItemId);
       if (found) setSelection(found);
+      return;
     }
+    // No specific item to select — re-resolve the current selection (if any)
+    // against the fresh tree so in-place edits (rename, …) don't leave the
+    // Inspector holding a stale snapshot of the node it just saved.
+    setSelection((current) => (current ? resolveSelection(freshTree, current) : current));
   }
 
   if (isLoading) return <StructureSkeleton />;
@@ -95,7 +101,11 @@ export function CourseStructurePanel({
       </div>
       <div className="ssz-surface sticky top-4 rounded-2xl border border-border p-4.5">
         <h2 className="mb-3 text-sm font-bold text-foreground">{t('structure.inspectorTitle')}</h2>
-        <CurriculumInspector selection={selection} />
+        <CurriculumInspector
+          selection={selection}
+          courseContainerId={containerId}
+          onChanged={() => handleChanged()}
+        />
       </div>
     </div>
   );
