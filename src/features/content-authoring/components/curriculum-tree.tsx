@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Layers } from 'lucide-react';
+import { ChevronDown, ChevronRight, Layers, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
@@ -10,19 +10,25 @@ import type {
   CurriculumTree as CurriculumTreeData,
   CurriculumTreeItemNode,
   CurriculumTreeModuleNode,
+  DifficultyLevel,
+  Visibility,
 } from '@/features/content/types';
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
 import { ContainerStateBadge } from './container-state-badge';
 import { CurriculumSectionItems, MoveToSectionSelect } from './curriculum-item-reorder';
+import { AddLessonPicker } from './add-lesson-picker';
 
 interface CurriculumTreeProps {
   tree: CurriculumTreeData;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
-  /** Called after a reorder or section move persists, so the caller can refetch the tree. */
-  onChanged: () => void;
+  /** Called after a reorder, section move, or item creation persists, so the caller can refetch the tree (and select the new item, if any). */
+  onChanged: (selectItemId?: string) => void;
+  targetLanguage: string;
+  difficultyLevel: DifficultyLevel;
+  visibility: Visibility;
 }
 
 interface TreeRowProps {
@@ -154,15 +160,22 @@ function ModuleNode({
   selectedId,
   onSelect,
   onChanged,
+  targetLanguage,
+  difficultyLevel,
+  visibility,
 }: {
   module: CurriculumTreeModuleNode;
   index: number;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
-  onChanged: () => void;
+  onChanged: (selectItemId?: string) => void;
+  targetLanguage: string;
+  difficultyLevel: DifficultyLevel;
+  visibility: Visibility;
 }) {
   const t = useTranslations('Authoring');
   const [expanded, setExpanded] = useState(true);
+  const [addLessonOpen, setAddLessonOpen] = useState(false);
   const lessonTotal =
     mod.sections.reduce((sum, s) => sum + s.items.length, 0) + mod.ungroupedItems.length;
   const sectionOptions = mod.sections.map((s) => ({ id: s.id, title: s.title }));
@@ -249,13 +262,40 @@ function ModuleNode({
               )}
             </CurriculumSectionItems>
           )}
+          <div className="pb-1.5 pt-1" style={{ paddingLeft: 8 + 2 * 20 + 22 }}>
+            <button
+              type="button"
+              onClick={() => setAddLessonOpen(true)}
+              className="flex items-center gap-1.5 text-[13px] font-semibold text-primary-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+            >
+              <Plus size={13} />
+              {t('structure.addLesson')}
+            </button>
+          </div>
+          <AddLessonPicker
+            open={addLessonOpen}
+            onOpenChange={setAddLessonOpen}
+            moduleContainerId={mod.containerId}
+            targetLanguage={targetLanguage}
+            difficultyLevel={difficultyLevel}
+            visibility={visibility}
+            onCreated={(itemId) => onChanged(itemId)}
+          />
         </>
       )}
     </>
   );
 }
 
-export function CurriculumTree({ tree, selectedId, onSelect, onChanged }: CurriculumTreeProps) {
+export function CurriculumTree({
+  tree,
+  selectedId,
+  onSelect,
+  onChanged,
+  targetLanguage,
+  difficultyLevel,
+  visibility,
+}: CurriculumTreeProps) {
   const [expandedLevels, setExpandedLevels] = useState<Record<string, boolean>>({});
 
   return (
@@ -287,6 +327,9 @@ export function CurriculumTree({ tree, selectedId, onSelect, onChanged }: Curric
                   selectedId={selectedId}
                   onSelect={onSelect}
                   onChanged={onChanged}
+                  targetLanguage={targetLanguage}
+                  difficultyLevel={difficultyLevel}
+                  visibility={visibility}
                 />
               ))}
           </div>

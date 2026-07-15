@@ -458,7 +458,8 @@
     "loadError": "Could not load the curriculum tree.",
     "retry": "Try again",
     "empty": "This course has no levels yet.",
-    "titleEn": "Title (English)"
+    "titleEn": "Title (English)",
+    "addLesson": "Add lesson"
   },
   "settings": {
     "trigger": "Settings",

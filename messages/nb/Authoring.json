@@ -458,7 +458,8 @@
     "loadError": "Kunne ikke laste pensumtreet.",
     "retry": "Prøv igjen",
     "empty": "Dette kurset har ingen nivåer ennå.",
-    "titleEn": "Tittel (engelsk)"
+    "titleEn": "Tittel (engelsk)",
+    "addLesson": "Legg til leksjon"
   },
   "settings": {
     "trigger": "Innstillinger",

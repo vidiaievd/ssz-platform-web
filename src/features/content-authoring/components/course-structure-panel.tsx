@@ -5,15 +5,21 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { DifficultyLevel, Visibility } from '@/features/content/types';
 
 import { useCurriculumTree } from '../api/use-curriculum-tree';
 import type { CurriculumTreeSelection } from '../types';
+import { findItemSelection } from '../lib/find-tree-item';
 import { CurriculumTree } from './curriculum-tree';
 import { CurriculumInspector } from './curriculum-inspector';
 
 interface CourseStructurePanelProps {
   containerId: string;
   versionId: string;
+  /** Inherited by new lessons/vocab/grammar items created via the add-lesson picker. */
+  targetLanguage: string;
+  difficultyLevel: DifficultyLevel;
+  visibility: Visibility;
 }
 
 function StructureSkeleton() {
@@ -25,10 +31,24 @@ function StructureSkeleton() {
   );
 }
 
-export function CourseStructurePanel({ containerId, versionId }: CourseStructurePanelProps) {
+export function CourseStructurePanel({
+  containerId,
+  versionId,
+  targetLanguage,
+  difficultyLevel,
+  visibility,
+}: CourseStructurePanelProps) {
   const t = useTranslations('Authoring');
   const [selection, setSelection] = useState<CurriculumTreeSelection | null>(null);
   const { data: tree, isLoading, isError, refetch } = useCurriculumTree(containerId, versionId);
+
+  async function handleChanged(selectItemId?: string) {
+    const { data: freshTree } = await refetch();
+    if (selectItemId && freshTree) {
+      const found = findItemSelection(freshTree, selectItemId);
+      if (found) setSelection(found);
+    }
+  }
 
   if (isLoading) return <StructureSkeleton />;
 
@@ -66,7 +86,10 @@ export function CourseStructurePanel({ containerId, versionId }: CourseStructure
             tree={tree}
             selectedId={selectedId}
             onSelect={setSelection}
-            onChanged={() => refetch()}
+            onChanged={handleChanged}
+            targetLanguage={targetLanguage}
+            difficultyLevel={difficultyLevel}
+            visibility={visibility}
           />
         )}
       </div>

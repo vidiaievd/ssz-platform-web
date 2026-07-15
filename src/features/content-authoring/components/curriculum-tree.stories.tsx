@@ -105,7 +105,15 @@ function InteractiveTree() {
           ? selection.item.id
           : null;
   return (
-    <CurriculumTree tree={TREE} selectedId={selectedId} onSelect={setSelection} onChanged={() => {}} />
+    <CurriculumTree
+      tree={TREE}
+      selectedId={selectedId}
+      onSelect={setSelection}
+      onChanged={() => {}}
+      targetLanguage="no"
+      difficultyLevel="A2"
+      visibility="public"
+    />
   );
 }
 
@@ -118,15 +126,21 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const commonArgs = {
+  targetLanguage: 'no',
+  difficultyLevel: 'A2',
+  visibility: 'public',
+} as const;
+
 export const Default: Story = {
-  args: { tree: TREE, selectedId: null, onSelect: () => {}, onChanged: () => {} },
+  args: { tree: TREE, selectedId: null, onSelect: () => {}, onChanged: () => {}, ...commonArgs },
 };
 
 export const LessonSelected: Story = {
-  args: { tree: TREE, selectedId: 'item-1', onSelect: () => {}, onChanged: () => {} },
+  args: { tree: TREE, selectedId: 'item-1', onSelect: () => {}, onChanged: () => {}, ...commonArgs },
 };
 
 export const Interactive: Story = {
-  args: { tree: TREE, selectedId: null, onSelect: () => {}, onChanged: () => {} },
+  args: { tree: TREE, selectedId: null, onSelect: () => {}, onChanged: () => {}, ...commonArgs },
   render: () => <InteractiveTree />,
 };

@@ -52,7 +52,13 @@ export function CourseEditorShell({
       </div>
 
       {draftVersionId ? (
-        <CourseStructurePanel containerId={container.id} versionId={draftVersionId} />
+        <CourseStructurePanel
+          containerId={container.id}
+          versionId={draftVersionId}
+          targetLanguage={container.targetLanguage}
+          difficultyLevel={container.difficultyLevel}
+          visibility={container.visibility}
+        />
       ) : (
         <p className="text-muted-foreground py-10 text-center text-sm">
           {t('structure.loadError')}

@@ -10,6 +10,7 @@ vi.mock('../actions/container-item', () => ({
   reorderContainerItemsAction: vi.fn(),
   assignItemSectionAction: vi.fn(),
 }));
+vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
 
 const { CourseStructurePanel } = await import('./course-structure-panel');
 import { useCurriculumTree } from '../api/use-curriculum-tree';
@@ -29,7 +30,13 @@ const ONE_LEVEL_TREE: CurriculumTreeData = {
 function renderPanel() {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CourseStructurePanel containerId="course-1" versionId="version-1" />
+      <CourseStructurePanel
+        containerId="course-1"
+        versionId="version-1"
+        targetLanguage="no"
+        difficultyLevel="A2"
+        visibility="public"
+      />
     </NextIntlClientProvider>,
   );
 }

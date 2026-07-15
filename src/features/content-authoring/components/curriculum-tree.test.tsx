@@ -11,6 +11,7 @@ vi.mock('../actions/container-item', () => ({
   reorderContainerItemsAction: vi.fn(),
   assignItemSectionAction: vi.fn(),
 }));
+vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
 
 const { CurriculumTree } = await import('./curriculum-tree');
 
@@ -63,7 +64,15 @@ const TREE: CurriculumTreeData = {
 function renderTree(onSelect = vi.fn()) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CurriculumTree tree={TREE} selectedId={null} onSelect={onSelect} onChanged={vi.fn()} />
+      <CurriculumTree
+        tree={TREE}
+        selectedId={null}
+        onSelect={onSelect}
+        onChanged={vi.fn()}
+        targetLanguage="no"
+        difficultyLevel="A2"
+        visibility="public"
+      />
     </NextIntlClientProvider>,
   );
   return onSelect;
@@ -133,7 +142,15 @@ describe('CurriculumTree', () => {
     };
     render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <CurriculumTree tree={emptyTree} selectedId={null} onSelect={vi.fn()} onChanged={vi.fn()} />
+        <CurriculumTree
+          tree={emptyTree}
+          selectedId={null}
+          onSelect={vi.fn()}
+          onChanged={vi.fn()}
+          targetLanguage="no"
+          difficultyLevel="A2"
+          visibility="public"
+        />
       </NextIntlClientProvider>,
     );
     expect(screen.getByText('No lessons yet')).toBeInTheDocument();
