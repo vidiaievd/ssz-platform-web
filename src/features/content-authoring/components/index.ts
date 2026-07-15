@@ -1,4 +1,4 @@
-export * from './authoring-container-tabs';
+export * from './course-editor-shell';
 export * from './course-settings-drawer';
 export * from './create-wizard';
 export * from './container-form';

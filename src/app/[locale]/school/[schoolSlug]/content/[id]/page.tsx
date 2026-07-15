@@ -7,7 +7,7 @@ import { AppError } from '@/lib/errors';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/i18n/navigation';
 import type { Container, ContainerItem, ContainerVersion } from '@/features/content/types';
-import { AuthoringContainerTabs } from '@/features/content-authoring/components/authoring-container-tabs';
+import { CourseEditorShell } from '@/features/content-authoring/components/course-editor-shell';
 import { ContainerStateBadge, deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
 import { CourseStatusBanner } from '@/features/content-authoring/components/course-status-banner';
 import { runPreflight } from '@/features/content-authoring/lib/preflight';
@@ -117,7 +117,7 @@ export default async function ContainerDetailPage({
       </div>
 
       <Suspense fallback={<TabsSkeleton />}>
-        <AuthoringContainerTabs
+        <CourseEditorShell
           container={container}
           schoolRole={schoolRole}
           preflightResult={preflight}
