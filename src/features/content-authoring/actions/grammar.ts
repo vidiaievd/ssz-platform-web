@@ -52,10 +52,10 @@ export async function createGrammarRuleAction(
       },
     });
 
-    await addItemToDraft(containerId, 'grammar_rule', ruleId);
+    const item = await addItemToDraft(containerId, 'grammar_rule', ruleId);
 
     revalidatePath(`/school/content/${containerId}`);
-    return { id: ruleId };
+    return { id: ruleId, itemId: item.id };
   });
 }
 

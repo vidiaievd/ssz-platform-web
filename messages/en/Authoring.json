@@ -464,5 +464,10 @@
     "trigger": "Settings",
     "title": "Course settings",
     "description": "Edit details, tags, sharing, and danger-zone actions for this course."
+  },
+  "addLesson": {
+    "title": "Add a lesson",
+    "description": "Choose a material type to add to this module.",
+    "defaultTitle": "New {type}"
   }
 }

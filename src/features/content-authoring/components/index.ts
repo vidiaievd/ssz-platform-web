@@ -1,3 +1,4 @@
+export * from './add-lesson-picker';
 export * from './course-editor-shell';
 export * from './course-settings-drawer';
 export * from './create-wizard';

@@ -8,6 +8,7 @@ import { tryAction } from '@/lib/result';
 import type { ExerciseDisplay } from '@/features/content/types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
+import { listDraftItems } from '../lib/container-items';
 
 function buildContent(data: ExerciseFormValues): Record<string, unknown> {
   switch (data.templateCode) {
@@ -60,8 +61,15 @@ export async function createExerciseAction(
       },
     });
 
+    // POST /exercises attaches the exercise to the container's draft version
+    // server-side (unlike lesson/vocab/grammar, there's no separate
+    // addItemToDraft call) — resolve the resulting container-item id here so
+    // callers can select the new node without a second round trip.
+    const draftItems = await listDraftItems(containerId, 'exercise');
+    const itemId = draftItems.find((i) => i.itemId === exercise.id)?.id;
+
     revalidatePath(`/school/content/${containerId}`);
-    return { exerciseId: exercise.id };
+    return { exerciseId: exercise.id, itemId };
   });
 }
 

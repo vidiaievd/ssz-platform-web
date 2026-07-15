@@ -50,10 +50,10 @@ export async function createVocabularyListAction(
       },
     });
 
-    await addItemToDraft(containerId, 'vocabulary_list', listId);
+    const item = await addItemToDraft(containerId, 'vocabulary_list', listId);
 
     revalidatePath(`/school/content/${containerId}`);
-    return { listId };
+    return { listId, itemId: item.id };
   });
 }
 

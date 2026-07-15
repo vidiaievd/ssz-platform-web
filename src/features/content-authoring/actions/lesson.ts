@@ -6,9 +6,13 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
 import type { DifficultyLevel, Visibility } from '@/features/content/types';
+import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 import { addItemToDraft, removeItemFromDraft, reorderDraftItems } from '../lib/container-items';
+
+/** `MaterialKind`s backed by a `Lesson` entity (`kind` distinguishes them server-side). */
+export type LessonKind = Extract<MaterialKind, 'text' | 'video' | 'audio' | 'live'>;
 
 export async function createLessonAction(
   containerId: string,
@@ -16,6 +20,7 @@ export async function createLessonAction(
   difficultyLevel: DifficultyLevel,
   visibility: Visibility,
   input: LessonFormValues,
+  kind: LessonKind = 'text',
 ) {
   return tryAction(async () => {
     const parsed = lessonFormSchema.safeParse(input);
@@ -28,7 +33,7 @@ export async function createLessonAction(
       service: 'content',
       path: '/lessons',
       method: 'POST',
-      body: { title, targetLanguage, difficultyLevel, visibility },
+      body: { title, targetLanguage, difficultyLevel, visibility, kind },
     });
 
     let variantId: string | undefined;

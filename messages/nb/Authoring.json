@@ -464,5 +464,10 @@
     "trigger": "Innstillinger",
     "title": "Kursinnstillinger",
     "description": "Rediger detaljer, tagger, deling og faresonehandlinger for dette kurset."
+  },
+  "addLesson": {
+    "title": "Legg til en leksjon",
+    "description": "Velg en materialtype som skal legges til i denne modulen.",
+    "defaultTitle": "Ny {type}"
   }
 }
