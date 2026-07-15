@@ -5,21 +5,22 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { DifficultyLevel, Visibility } from '@/features/content/types';
+import type { AccessTier, DifficultyLevel, Visibility } from '@/features/content/types';
 
 import { useCurriculumTree } from '../api/use-curriculum-tree';
 import type { CurriculumTreeSelection } from '../types';
-import { findItemSelection, resolveSelection } from '../lib/find-tree-item';
+import { findItemSelection, findLevelOrModuleSelection, resolveSelection } from '../lib/find-tree-item';
 import { CurriculumTree } from './curriculum-tree';
 import { CurriculumInspector } from './curriculum-inspector';
 
 interface CourseStructurePanelProps {
   containerId: string;
   versionId: string;
-  /** Inherited by new lessons/vocab/grammar items created via the add-lesson picker. */
+  /** Inherited by new lessons/vocab/grammar items (and modules) created from the tree. */
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
+  accessTier: AccessTier;
 }
 
 function StructureSkeleton() {
@@ -37,20 +38,24 @@ export function CourseStructurePanel({
   targetLanguage,
   difficultyLevel,
   visibility,
+  accessTier,
 }: CourseStructurePanelProps) {
   const t = useTranslations('Authoring');
   const [selection, setSelection] = useState<CurriculumTreeSelection | null>(null);
   const { data: tree, isLoading, isError, refetch } = useCurriculumTree(containerId, versionId);
 
-  async function handleChanged(selectItemId?: string) {
+  async function handleChanged(selectId?: string, kind: 'level' | 'module' | 'item' = 'item') {
     const { data: freshTree } = await refetch();
     if (!freshTree) return;
-    if (selectItemId) {
-      const found = findItemSelection(freshTree, selectItemId);
+    if (selectId) {
+      const found =
+        kind === 'item'
+          ? findItemSelection(freshTree, selectId)
+          : findLevelOrModuleSelection(freshTree, kind, selectId);
       if (found) setSelection(found);
       return;
     }
-    // No specific item to select — re-resolve the current selection (if any)
+    // No specific node to select — re-resolve the current selection (if any)
     // against the fresh tree so in-place edits (rename, …) don't leave the
     // Inspector holding a stale snapshot of the node it just saved.
     setSelection((current) => (current ? resolveSelection(freshTree, current) : current));
@@ -85,19 +90,17 @@ export function CourseStructurePanel({
           <h2 className="text-sm font-bold text-foreground">{t('structure.sectionTitle')}</h2>
           <span className="text-xs text-muted-foreground">{t('structure.sectionHint')}</span>
         </div>
-        {tree.levels.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
-        ) : (
-          <CurriculumTree
-            tree={tree}
-            selectedId={selectedId}
-            onSelect={setSelection}
-            onChanged={handleChanged}
-            targetLanguage={targetLanguage}
-            difficultyLevel={difficultyLevel}
-            visibility={visibility}
-          />
-        )}
+        <CurriculumTree
+          tree={tree}
+          selectedId={selectedId}
+          onSelect={setSelection}
+          onChanged={handleChanged}
+          courseContainerId={containerId}
+          targetLanguage={targetLanguage}
+          difficultyLevel={difficultyLevel}
+          visibility={visibility}
+          accessTier={accessTier}
+        />
       </div>
       <div className="ssz-surface sticky top-4 rounded-2xl border border-border p-4.5">
         <h2 className="mb-3 text-sm font-bold text-foreground">{t('structure.inspectorTitle')}</h2>

@@ -11,8 +11,15 @@ vi.mock('../actions/container-item', () => ({
   assignItemSectionAction: vi.fn(),
 }));
 vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
-vi.mock('../actions/container', () => ({ renameContainerAction: vi.fn() }));
-vi.mock('../actions/section', () => ({ renameSectionAction: vi.fn() }));
+vi.mock('../actions/container', () => ({
+  renameContainerAction: vi.fn(),
+  createModuleAction: vi.fn(),
+}));
+vi.mock('../actions/section', () => ({
+  renameSectionAction: vi.fn(),
+  createSectionAction: vi.fn(),
+  reorderSectionsAction: vi.fn(),
+}));
 
 const { CourseStructurePanel } = await import('./course-structure-panel');
 import { useCurriculumTree } from '../api/use-curriculum-tree';
@@ -38,6 +45,7 @@ function renderPanel() {
         targetLanguage="no"
         difficultyLevel="A2"
         visibility="public"
+        accessTier="free_within_school"
       />
     </NextIntlClientProvider>,
   );

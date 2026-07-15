@@ -110,9 +110,11 @@ function InteractiveTree() {
       selectedId={selectedId}
       onSelect={setSelection}
       onChanged={() => {}}
+      courseContainerId="course-1"
       targetLanguage="no"
       difficultyLevel="A2"
       visibility="public"
+      accessTier="free_within_school"
     />
   );
 }
@@ -127,9 +129,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const commonArgs = {
+  courseContainerId: 'course-1',
   targetLanguage: 'no',
   difficultyLevel: 'A2',
   visibility: 'public',
+  accessTier: 'free_within_school',
 } as const;
 
 export const Default: Story = {

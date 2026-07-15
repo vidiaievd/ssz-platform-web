@@ -459,7 +459,11 @@
     "retry": "Try again",
     "empty": "This course has no levels yet.",
     "titleEn": "Title (English)",
-    "addLesson": "Add lesson"
+    "addLesson": "Add lesson",
+    "addLevel": "Add level",
+    "addModule": "Add module",
+    "newLevelTitle": "New level",
+    "newModuleTitle": "New module"
   },
   "settings": {
     "trigger": "Settings",

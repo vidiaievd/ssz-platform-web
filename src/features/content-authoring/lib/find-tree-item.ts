@@ -25,6 +25,23 @@ export function resolveSelection(
   return findItemSelection(tree, current.item.id);
 }
 
+/** Locates a freshly created level or module by id, for auto-select after creation. */
+export function findLevelOrModuleSelection(
+  tree: CurriculumTree,
+  kind: 'level' | 'module',
+  id: string,
+): CurriculumTreeSelection | null {
+  if (kind === 'level') {
+    const level = tree.levels.find((l) => l.id === id);
+    return level ? { kind: 'level', level } : null;
+  }
+  for (const level of tree.levels) {
+    const mod = level.modules.find((m) => m.id === id);
+    if (mod) return { kind: 'module', module: mod };
+  }
+  return null;
+}
+
 /** Locates a freshly created (or any) item by id and builds its tree selection, for auto-select after creation. */
 export function findItemSelection(tree: CurriculumTree, itemId: string): CurriculumTreeSelection | null {
   for (const level of tree.levels) {

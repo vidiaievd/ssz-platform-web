@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { CurriculumTree as CurriculumTreeData } from '@/features/content/types';
@@ -12,8 +12,12 @@ vi.mock('../actions/container-item', () => ({
   assignItemSectionAction: vi.fn(),
 }));
 vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
+vi.mock('../actions/container', () => ({ createModuleAction: vi.fn() }));
+vi.mock('../actions/section', () => ({ createSectionAction: vi.fn(), reorderSectionsAction: vi.fn() }));
 
 const { CurriculumTree } = await import('./curriculum-tree');
+const { createModuleAction } = await import('../actions/container');
+const { createSectionAction } = await import('../actions/section');
 
 const TREE: CurriculumTreeData = {
   versionId: 'version-1',
@@ -61,22 +65,29 @@ const TREE: CurriculumTreeData = {
   ],
 };
 
-function renderTree(onSelect = vi.fn()) {
+function renderTree(onSelect = vi.fn(), onChanged = vi.fn()) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <CurriculumTree
         tree={TREE}
         selectedId={null}
         onSelect={onSelect}
-        onChanged={vi.fn()}
+        onChanged={onChanged}
+        courseContainerId="course-1"
         targetLanguage="no"
         difficultyLevel="A2"
         visibility="public"
+        accessTier="free_within_school"
       />
     </NextIntlClientProvider>,
   );
-  return onSelect;
+  return { onSelect, onChanged };
 }
+
+beforeEach(() => {
+  vi.mocked(createModuleAction).mockReset();
+  vi.mocked(createSectionAction).mockReset();
+});
 
 describe('CurriculumTree', () => {
   it('renders the level, its module, and section items', () => {
@@ -90,7 +101,7 @@ describe('CurriculumTree', () => {
   });
 
   it('selects the level on click', () => {
-    const onSelect = renderTree();
+    const { onSelect } = renderTree();
     fireEvent.click(screen.getByText('A1 — Beginner'));
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ kind: 'level', level: expect.objectContaining({ id: 'level-a1' }) }),
@@ -98,7 +109,7 @@ describe('CurriculumTree', () => {
   });
 
   it('selects the module on click', () => {
-    const onSelect = renderTree();
+    const { onSelect } = renderTree();
     fireEvent.click(screen.getByText('Samfunn og kultur'));
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ kind: 'module', module: expect.objectContaining({ id: 'item-module-1' }) }),
@@ -106,7 +117,7 @@ describe('CurriculumTree', () => {
   });
 
   it('selects a lesson item and reports its section title', () => {
-    const onSelect = renderTree();
+    const { onSelect } = renderTree();
     fireEvent.click(screen.getByText('En vanlig arbeidsdag'));
     const call = onSelect.mock.calls[0]?.[0] as CurriculumTreeSelection;
     expect(call.kind).toBe('item');
@@ -147,12 +158,61 @@ describe('CurriculumTree', () => {
           selectedId={null}
           onSelect={vi.fn()}
           onChanged={vi.fn()}
+          courseContainerId="course-1"
           targetLanguage="no"
           difficultyLevel="A2"
           visibility="public"
+          accessTier="free_within_school"
         />
       </NextIntlClientProvider>,
     );
     expect(screen.getByText('No lessons yet')).toBeInTheDocument();
+  });
+
+  it('creates a new level and reports it for selection', async () => {
+    vi.mocked(createSectionAction).mockResolvedValue({
+      ok: true,
+      value: { sectionId: 'level-b1', position: 1 },
+    } as never);
+    const { onChanged } = renderTree();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add level' }));
+
+    await waitFor(() => expect(onChanged).toHaveBeenCalledWith('level-b1', 'level'));
+    expect(createSectionAction).toHaveBeenCalledWith('course-1', 'New level');
+  });
+
+  it('creates a new module under a level and reports it for selection', async () => {
+    vi.mocked(createModuleAction).mockResolvedValue({
+      ok: true,
+      value: { moduleContainerId: 'module-2', itemId: 'item-module-2' },
+    } as never);
+    const { onChanged } = renderTree();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add module' }));
+
+    await waitFor(() => expect(onChanged).toHaveBeenCalledWith('item-module-2', 'module'));
+    expect(createModuleAction).toHaveBeenCalledWith(
+      'course-1',
+      'New module',
+      'no',
+      'A2',
+      'public',
+      'free_within_school',
+      'level-a1',
+    );
+  });
+
+  it('shows an error toast and does not report a change on creation failure', async () => {
+    vi.mocked(createSectionAction).mockResolvedValue({
+      ok: false,
+      error: { code: 'validation' },
+    } as never);
+    const { onChanged } = renderTree();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add level' }));
+
+    await waitFor(() => expect(createSectionAction).toHaveBeenCalled());
+    expect(onChanged).not.toHaveBeenCalled();
   });
 });

@@ -1,14 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { ChevronDown, ChevronRight, Layers, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
+  AccessTier,
   CurriculumTree as CurriculumTreeData,
   CurriculumTreeItemNode,
+  CurriculumTreeLevelNode,
   CurriculumTreeModuleNode,
   DifficultyLevel,
   Visibility,
@@ -16,19 +20,32 @@ import type {
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
+import { createModuleAction } from '../actions/container';
+import { createSectionAction } from '../actions/section';
 import { ContainerStateBadge } from './container-state-badge';
-import { CurriculumSectionItems, MoveToSectionSelect } from './curriculum-item-reorder';
+import {
+  CurriculumSectionItems,
+  MoveLevel,
+  MoveModule,
+  MoveSection,
+  MoveToSectionSelect,
+} from './curriculum-item-reorder';
 import { AddLessonPicker } from './add-lesson-picker';
+
+type ChangeKind = 'level' | 'module' | 'item';
 
 interface CurriculumTreeProps {
   tree: CurriculumTreeData;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
-  /** Called after a reorder, section move, or item creation persists, so the caller can refetch the tree (and select the new item, if any). */
-  onChanged: (selectItemId?: string) => void;
+  /** Called after a reorder, section move, or node creation persists, so the caller can refetch the tree (and select the new node, if any). */
+  onChanged: (selectId?: string, kind?: ChangeKind) => void;
+  /** The course's own container id — levels are sections on it; modules attach to it as `container`-type items. */
+  courseContainerId: string;
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
+  accessTier: AccessTier;
 }
 
 interface TreeRowProps {
@@ -160,6 +177,9 @@ function ModuleNode({
   selectedId,
   onSelect,
   onChanged,
+  tree,
+  level,
+  courseContainerId,
   targetLanguage,
   difficultyLevel,
   visibility,
@@ -168,7 +188,10 @@ function ModuleNode({
   index: number;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
-  onChanged: (selectItemId?: string) => void;
+  onChanged: (selectId?: string, kind?: ChangeKind) => void;
+  tree: CurriculumTreeData;
+  level: CurriculumTreeLevelNode;
+  courseContainerId: string;
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
@@ -198,15 +221,35 @@ function ModuleNode({
         state={null}
         selected={selectedId === mod.id}
         onSelect={() => onSelect({ kind: 'module', module: mod })}
+        right={
+          <MoveModule
+            courseContainerId={courseContainerId}
+            tree={tree}
+            level={level}
+            module={mod}
+            onMoved={onChanged}
+          />
+        }
       />
       {expanded && (
         <>
           {mod.sections.map((section) => (
             <div key={section.id}>
-              <div className="pt-1.5 pb-0.5" style={{ paddingLeft: 8 + 2 * 20 + 22 }}>
+              <div
+                className="flex items-center justify-between pt-1.5 pb-0.5"
+                style={{ paddingLeft: 8 + 2 * 20 + 22 }}
+              >
                 <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                   {section.title}
                 </span>
+                {mod.sections.length > 1 && (
+                  <MoveSection
+                    moduleContainerId={mod.containerId}
+                    sections={mod.sections}
+                    section={section}
+                    onMoved={onChanged}
+                  />
+                )}
               </div>
               {section.items.length === 0 ? (
                 <div className="pb-1.5 pt-0" style={{ paddingLeft: 8 + 2 * 20 + 22 }}>
@@ -292,14 +335,57 @@ export function CurriculumTree({
   selectedId,
   onSelect,
   onChanged,
+  courseContainerId,
   targetLanguage,
   difficultyLevel,
   visibility,
+  accessTier,
 }: CurriculumTreeProps) {
+  const t = useTranslations('Authoring');
+  const tErrors = useTranslations('Errors');
   const [expandedLevels, setExpandedLevels] = useState<Record<string, boolean>>({});
+  const [isPending, startTransition] = useTransition();
+  const [pendingLevelId, setPendingLevelId] = useState<string | null>(null);
+
+  function handleAddModule(levelSectionId: string | null) {
+    if (isPending) return;
+    setPendingLevelId(levelSectionId ?? '');
+    startTransition(async () => {
+      const result = await createModuleAction(
+        courseContainerId,
+        t('structure.newModuleTitle'),
+        targetLanguage,
+        difficultyLevel,
+        visibility,
+        accessTier,
+        levelSectionId,
+      );
+      setPendingLevelId(null);
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      onChanged(result.value.itemId, 'module');
+    });
+  }
+
+  function handleAddLevel() {
+    if (isPending) return;
+    startTransition(async () => {
+      const result = await createSectionAction(courseContainerId, t('structure.newLevelTitle'));
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      onChanged(result.value.sectionId, 'level');
+    });
+  }
 
   return (
     <div role="tree" className="flex flex-col gap-px">
+      {tree.levels.length === 0 && (
+        <p className="py-6 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
+      )}
       {tree.levels.map((level, li) => {
         const levelKey = level.id ?? `level-${li}`;
         const expanded = expandedLevels[levelKey] ?? true;
@@ -317,24 +403,57 @@ export function CurriculumTree({
               state={null}
               selected={selectedId === level.id}
               onSelect={() => onSelect({ kind: 'level', level })}
+              right={
+                level.id != null && tree.levels.length > 1 ? (
+                  <MoveLevel
+                    courseContainerId={courseContainerId}
+                    levels={tree.levels}
+                    level={level}
+                    onMoved={onChanged}
+                  />
+                ) : undefined
+              }
             />
-            {expanded &&
-              level.modules.map((mod, mi) => (
-                <ModuleNode
-                  key={mod.id}
-                  module={mod}
-                  index={mi}
-                  selectedId={selectedId}
-                  onSelect={onSelect}
-                  onChanged={onChanged}
-                  targetLanguage={targetLanguage}
-                  difficultyLevel={difficultyLevel}
-                  visibility={visibility}
-                />
-              ))}
+            {expanded && (
+              <>
+                {level.modules.map((mod, mi) => (
+                  <ModuleNode
+                    key={mod.id}
+                    module={mod}
+                    index={mi}
+                    selectedId={selectedId}
+                    onSelect={onSelect}
+                    onChanged={onChanged}
+                    tree={tree}
+                    level={level}
+                    courseContainerId={courseContainerId}
+                    targetLanguage={targetLanguage}
+                    difficultyLevel={difficultyLevel}
+                    visibility={visibility}
+                  />
+                ))}
+                <div className="pb-1.5 pt-1" style={{ paddingLeft: 8 + 1 * 20 + 22 }}>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => handleAddModule(level.id)}
+                    className="flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm disabled:opacity-50"
+                  >
+                    <Plus size={13} />
+                    {pendingLevelId === (level.id ?? '') ? '…' : t('structure.addModule')}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         );
       })}
+      <div className="mt-1 pl-2">
+        <Button variant="ghost" size="sm" disabled={isPending} onClick={handleAddLevel}>
+          <Plus size={13} />
+          {t('structure.addLevel')}
+        </Button>
+      </div>
     </div>
   );
 }

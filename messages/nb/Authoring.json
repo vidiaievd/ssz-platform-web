@@ -459,7 +459,11 @@
     "retry": "Prøv igjen",
     "empty": "Dette kurset har ingen nivåer ennå.",
     "titleEn": "Tittel (engelsk)",
-    "addLesson": "Legg til leksjon"
+    "addLesson": "Legg til leksjon",
+    "addLevel": "Legg til nivå",
+    "addModule": "Legg til modul",
+    "newLevelTitle": "Nytt nivå",
+    "newModuleTitle": "Ny modul"
   },
   "settings": {
     "trigger": "Innstillinger",

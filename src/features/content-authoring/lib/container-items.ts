@@ -2,7 +2,7 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import type { ContainerItem, ContainerVersion } from '@/features/content/types';
 
-export type ContainerItemType = 'lesson' | 'vocabulary_list' | 'grammar_rule' | 'exercise';
+export type ContainerItemType = 'lesson' | 'vocabulary_list' | 'grammar_rule' | 'exercise' | 'container';
 
 /**
  * Resolves the draft version of a container — the version that newly
