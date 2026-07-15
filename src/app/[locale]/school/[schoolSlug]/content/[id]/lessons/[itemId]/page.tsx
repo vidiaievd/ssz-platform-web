@@ -7,9 +7,10 @@ import type { Container, ContainerItem, ContainerVersion, CurriculumTree } from 
 import { deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
 import { LessonEditorShell } from '@/features/content-authoring/components/lesson-editor-shell';
 import { EditorBodyPlaceholder } from '@/features/content-authoring/components/editor-body-placeholder';
+import { InterimEditorBody } from '@/features/content-authoring/components/interim-editor-body';
 import { PublishDialog } from '@/features/content-authoring/components/publish-dialog';
 import { runPreflight } from '@/features/content-authoring/lib/preflight';
-import { findItemSelection } from '@/features/content-authoring/lib/find-tree-item';
+import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
 import { getMaterialKind } from '@/features/content-authoring/lib/material-kind';
 import type { PreflightResult } from '@/features/content-authoring/types';
 
@@ -45,9 +46,20 @@ export default async function LessonEditorPage({
     service: 'content',
     path: `/containers/${id}/versions/${draftVersion.id}/tree`,
   });
-  const selection = findItemSelection(tree, itemId);
-  if (!selection || selection.kind !== 'item') notFound();
-  const { item } = selection;
+  const found = findItemWithModule(tree, itemId);
+  if (!found) notFound();
+  const { item, moduleContainerId } = found;
+
+  let moduleContainer: Container;
+  try {
+    moduleContainer = await serverFetch<Container>({
+      service: 'content',
+      path: `/containers/${moduleContainerId}`,
+    });
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'not_found') notFound();
+    throw e;
+  }
 
   let preflight: PreflightResult | undefined;
   if (state === 'draft') {
@@ -59,6 +71,7 @@ export default async function LessonEditorPage({
   }
 
   const kind = getMaterialKind(item);
+  const backHref = `/school/${schoolSlug}/content/${id}`;
 
   return (
     <main className="mx-auto max-w-7xl p-8">
@@ -66,13 +79,13 @@ export default async function LessonEditorPage({
         kind={kind}
         title={item.title ?? t('lessons.untitled')}
         state={item.state}
-        backHref={`/school/${schoolSlug}/content/${id}`}
+        backHref={backHref}
         autosaveStatus="idle"
         autosaveSavedAt={null}
         publishSlot={<PublishDialog container={container} result={preflight} />}
         preview={<EditorBodyPlaceholder kind={kind} variant="preview" />}
       >
-        <EditorBodyPlaceholder kind={kind} variant="body" />
+        <InterimEditorBody kind={kind} item={item} moduleContainer={moduleContainer} backHref={backHref} />
       </LessonEditorShell>
     </main>
   );

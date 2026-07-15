@@ -1,4 +1,8 @@
-import type { CurriculumTree, CurriculumTreeModuleNode } from '@/features/content/types';
+import type {
+  CurriculumTree,
+  CurriculumTreeItemNode,
+  CurriculumTreeModuleNode,
+} from '@/features/content/types';
 
 import type { CurriculumTreeSelection } from '../types';
 
@@ -63,5 +67,33 @@ function findItemInModule(
   }
   const ungrouped = mod.ungroupedItems.find((i) => i.id === itemId);
   if (ungrouped) return { kind: 'item', item: ungrouped, sectionTitle: null };
+  return null;
+}
+
+export interface ItemWithModule {
+  item: CurriculumTreeItemNode;
+  sectionTitle: string | null;
+  /** The item's own Container — each module is its own Container (plan 30 §"Design ↔ backend terminology"). */
+  moduleContainerId: string;
+}
+
+/**
+ * Locates an item by id along with its enclosing module's `containerId`, needed
+ * by the per-type editors (`LessonEditor`, `GrammarEditor`, …) which take the
+ * module's full `Container` (FE2.1 lesson editor route).
+ */
+export function findItemWithModule(tree: CurriculumTree, itemId: string): ItemWithModule | null {
+  for (const level of tree.levels) {
+    for (const mod of level.modules) {
+      for (const section of mod.sections) {
+        const item = section.items.find((i) => i.id === itemId);
+        if (item) return { item, sectionTitle: section.title, moduleContainerId: mod.containerId };
+      }
+      const ungrouped = mod.ungroupedItems.find((i) => i.id === itemId);
+      if (ungrouped) {
+        return { item: ungrouped, sectionTitle: null, moduleContainerId: mod.containerId };
+      }
+    }
+  }
   return null;
 }
