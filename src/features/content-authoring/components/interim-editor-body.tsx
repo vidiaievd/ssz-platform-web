@@ -45,7 +45,6 @@ export function InterimEditorBody({ kind, item, moduleContainer, backHref }: Int
     case 'exercise':
       return <ExerciseEditor exerciseId={item.refId} container={moduleContainer} onClose={onClose} />;
     case 'text':
-    case 'video':
     case 'audio':
     case 'live':
     default:

@@ -9,6 +9,7 @@ import { LessonEditorShell } from '@/features/content-authoring/components/lesso
 import { EditorBodyPlaceholder } from '@/features/content-authoring/components/editor-body-placeholder';
 import { InterimEditorBody } from '@/features/content-authoring/components/interim-editor-body';
 import { TextEditorPane } from '@/features/content-authoring/components/text-editor-pane';
+import { VideoEditorPane } from '@/features/content-authoring/components/video-editor-pane';
 import { PublishDialog } from '@/features/content-authoring/components/publish-dialog';
 import { runPreflight } from '@/features/content-authoring/lib/preflight';
 import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
@@ -79,6 +80,16 @@ export default async function LessonEditorPage({
     <main className="mx-auto max-w-7xl p-8">
       {kind === 'text' ? (
         <TextEditorPane
+          kind={kind}
+          lessonId={item.refId}
+          lessonTitle={item.title}
+          state={item.state}
+          container={moduleContainer}
+          backHref={backHref}
+          publishSlot={publishSlot}
+        />
+      ) : kind === 'video' ? (
+        <VideoEditorPane
           kind={kind}
           lessonId={item.refId}
           lessonTitle={item.title}
