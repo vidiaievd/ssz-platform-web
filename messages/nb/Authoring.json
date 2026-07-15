@@ -525,6 +525,11 @@
     "cueEnglish": "Engelsk",
     "cueEnglishPlaceholder": "Oversettelse (valgfritt)",
     "cueAdd": "Legg til replikk",
-    "cueRemove": "Fjern replikk {position}"
+    "cueRemove": "Fjern replikk {position}",
+    "comprehensionQuestion": "Forståelsesspørsmål",
+    "comprehensionQuestionNeedsSource": "Legg til en videokilde før du legger til et forståelsesspørsmål.",
+    "comprehensionQuestionNone": "Ingen forståelsesspørsmål",
+    "comprehensionQuestionAriaLabel": "Oppgave for forståelsesspørsmål",
+    "comprehensionQuestionAddNew": "Ny oppgave"
   }
 }

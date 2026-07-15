@@ -525,6 +525,11 @@
     "cueEnglish": "Англійською",
     "cueEnglishPlaceholder": "Переклад (необов’язково)",
     "cueAdd": "Додати репліку",
-    "cueRemove": "Видалити репліку {position}"
+    "cueRemove": "Видалити репліку {position}",
+    "comprehensionQuestion": "Питання на розуміння",
+    "comprehensionQuestionNeedsSource": "Додайте джерело відео, перш ніж додавати питання на розуміння.",
+    "comprehensionQuestionNone": "Без питання на розуміння",
+    "comprehensionQuestionAriaLabel": "Вправа для питання на розуміння",
+    "comprehensionQuestionAddNew": "Нова вправа"
   }
 }

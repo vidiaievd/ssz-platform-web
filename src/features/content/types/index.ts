@@ -141,6 +141,11 @@ export interface LessonVideoCue {
   translationLine: string | null;
 }
 
+/** Comprehension-check exercise linked to a VIDEO lesson variant (BE1.2). At most one per variant. */
+export interface LessonVideoQuestion {
+  exerciseId: string;
+}
+
 /** Author-marked glossary word for a TEXT/VIDEO lesson variant (BE1.5). No unmark endpoint exists. */
 export interface GlossaryMark {
   id: string;

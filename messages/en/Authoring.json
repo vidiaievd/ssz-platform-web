@@ -525,6 +525,11 @@
     "cueEnglish": "English",
     "cueEnglishPlaceholder": "Translation (optional)",
     "cueAdd": "Add cue",
-    "cueRemove": "Remove cue {position}"
+    "cueRemove": "Remove cue {position}",
+    "comprehensionQuestion": "Comprehension question",
+    "comprehensionQuestionNeedsSource": "Add a video source before adding a comprehension question.",
+    "comprehensionQuestionNone": "No comprehension question",
+    "comprehensionQuestionAriaLabel": "Comprehension question exercise",
+    "comprehensionQuestionAddNew": "New exercise"
   }
 }

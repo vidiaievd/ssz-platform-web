@@ -8,6 +8,7 @@ import type {
   LessonParagraph,
   LessonVariant,
   LessonVideoCue,
+  LessonVideoQuestion,
 } from '@/features/content/types';
 
 import { authoringKeys } from './keys';
@@ -72,6 +73,21 @@ export function useLessonCues(lessonId: string, variantId: string | undefined) {
       const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/cues`);
       if (!res.ok) return [];
       return res.json() as Promise<LessonVideoCue[]>;
+    },
+    enabled: !!lessonId && !!variantId,
+    staleTime: 30_000,
+  });
+}
+
+export function useLessonVideoQuestion(lessonId: string, variantId: string | undefined) {
+  return useQuery<LessonVideoQuestion | null>({
+    queryKey: authoringKeys.lessonVideoQuestion(lessonId, variantId ?? ''),
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/content/lessons/${lessonId}/variants/${variantId}/comprehension-question`,
+      );
+      if (!res.ok) return null;
+      return res.json() as Promise<LessonVideoQuestion | null>;
     },
     enabled: !!lessonId && !!variantId,
     staleTime: 30_000,
