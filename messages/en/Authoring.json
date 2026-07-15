@@ -484,6 +484,7 @@
     "previewLive": "Live",
     "previewCaption": "Exactly what the learner sees in the reader. Updates as you edit.",
     "previewPlaceholder": "Preview for this material type is coming soon.",
-    "bodyPlaceholder": "The dedicated editor for this material type will be wired in an upcoming step."
+    "bodyPlaceholder": "The dedicated editor for this material type will be wired in an upcoming step.",
+    "anchorText": "Anchor text"
   }
 }

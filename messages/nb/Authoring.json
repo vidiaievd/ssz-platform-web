@@ -484,6 +484,7 @@
     "previewLive": "Live",
     "previewCaption": "Akkurat det eleven ser i leseren. Oppdateres mens du redigerer.",
     "previewPlaceholder": "Forhåndsvisning for denne materialtypen kommer snart.",
-    "bodyPlaceholder": "Den dedikerte redigeringen for denne materialtypen kommer i et kommende steg."
+    "bodyPlaceholder": "Den dedikerte redigeringen for denne materialtypen kommer i et kommende steg.",
+    "anchorText": "Ankertekst"
   }
 }

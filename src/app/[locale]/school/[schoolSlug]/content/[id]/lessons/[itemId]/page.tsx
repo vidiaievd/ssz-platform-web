@@ -8,6 +8,7 @@ import { deriveContainerState } from '@/features/content-authoring/components/co
 import { LessonEditorShell } from '@/features/content-authoring/components/lesson-editor-shell';
 import { EditorBodyPlaceholder } from '@/features/content-authoring/components/editor-body-placeholder';
 import { InterimEditorBody } from '@/features/content-authoring/components/interim-editor-body';
+import { TextEditorPane } from '@/features/content-authoring/components/text-editor-pane';
 import { PublishDialog } from '@/features/content-authoring/components/publish-dialog';
 import { runPreflight } from '@/features/content-authoring/lib/preflight';
 import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
@@ -72,21 +73,34 @@ export default async function LessonEditorPage({
 
   const kind = getMaterialKind(item);
   const backHref = `/school/${schoolSlug}/content/${id}`;
+  const publishSlot = <PublishDialog container={container} result={preflight} />;
 
   return (
     <main className="mx-auto max-w-7xl p-8">
-      <LessonEditorShell
-        kind={kind}
-        title={item.title ?? t('lessons.untitled')}
-        state={item.state}
-        backHref={backHref}
-        autosaveStatus="idle"
-        autosaveSavedAt={null}
-        publishSlot={<PublishDialog container={container} result={preflight} />}
-        preview={<EditorBodyPlaceholder kind={kind} variant="preview" />}
-      >
-        <InterimEditorBody kind={kind} item={item} moduleContainer={moduleContainer} backHref={backHref} />
-      </LessonEditorShell>
+      {kind === 'text' ? (
+        <TextEditorPane
+          kind={kind}
+          lessonId={item.refId}
+          lessonTitle={item.title}
+          state={item.state}
+          container={moduleContainer}
+          backHref={backHref}
+          publishSlot={publishSlot}
+        />
+      ) : (
+        <LessonEditorShell
+          kind={kind}
+          title={item.title ?? t('lessons.untitled')}
+          state={item.state}
+          backHref={backHref}
+          autosaveStatus="idle"
+          autosaveSavedAt={null}
+          publishSlot={publishSlot}
+          preview={<EditorBodyPlaceholder kind={kind} variant="preview" />}
+        >
+          <InterimEditorBody kind={kind} item={item} moduleContainer={moduleContainer} backHref={backHref} />
+        </LessonEditorShell>
+      )}
     </main>
   );
 }
