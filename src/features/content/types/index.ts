@@ -133,6 +133,14 @@ export interface LessonParagraph {
   translation: string | null;
 }
 
+/** Ordered transcript cue for a VIDEO lesson variant (BE1.2). */
+export interface LessonVideoCue {
+  position: number;
+  startSeconds: number;
+  targetLine: string;
+  translationLine: string | null;
+}
+
 /** Author-marked glossary word for a TEXT/VIDEO lesson variant (BE1.5). No unmark endpoint exists. */
 export interface GlossaryMark {
   id: string;

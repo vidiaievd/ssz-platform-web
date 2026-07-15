@@ -14,6 +14,7 @@ export const authoringKeys = keyFactory('authoring', {
     ['lesson-paragraphs', lessonId, variantId] as const,
   lessonGlossaryMarks: (lessonId: string, variantId: string) =>
     ['lesson-glossary-marks', lessonId, variantId] as const,
+  lessonCues: (lessonId: string, variantId: string) => ['lesson-cues', lessonId, variantId] as const,
   vocabularyLists: (containerId: string) => ['vocabulary-lists', containerId] as const,
   vocabularyList: (listId: string) => ['vocabulary-list', listId] as const,
   vocabularyItems: (listId: string, page: number) =>
