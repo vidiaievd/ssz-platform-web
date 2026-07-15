@@ -23,6 +23,7 @@ import { EditorCard } from './editor-card';
 import { TextLessonPreview } from './text-lesson-preview';
 import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
 import { GlossaryMarkPanel } from './glossary-mark-panel';
+import { HeroImageSlot } from './hero-image-slot';
 
 interface TextEditorPaneProps {
   kind: MaterialKind;
@@ -54,6 +55,7 @@ export function TextEditorPane({
     register,
     control,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm<LessonFormValues>({
     resolver: zodResolver(lessonFormSchema),
@@ -132,6 +134,15 @@ export function TextEditorPane({
               {...register('body', { onChange: () => autosave.schedule() })}
             />
           </EditorCard>
+
+          <HeroImageSlot
+            body={bodyValue ?? ''}
+            altDefault={titleValue || lessonTitle || ''}
+            onChange={(newBody) => {
+              setValue('body', newBody);
+              autosave.schedule();
+            }}
+          />
 
           <Button
             type="button"

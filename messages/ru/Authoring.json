@@ -495,6 +495,12 @@
     "glossaryMarksNoList": "В этом модуле пока нет списка слов — добавьте его, чтобы отмечать слова.",
     "glossaryMarksPickWord": "Выберите слово…",
     "glossaryMarksMark": "Отметить",
-    "glossaryMarksCaption": "Отмеченные слова становятся глоссарием модуля — {count, plural, one {# слово отмечено} few {# слова отмечено} many {# слов отмечено} other {# слова отмечено}}."
+    "glossaryMarksCaption": "Отмеченные слова становятся глоссарием модуля — {count, plural, one {# слово отмечено} few {# слова отмечено} many {# слов отмечено} other {# слова отмечено}}.",
+    "heroImage": "Изображение урока",
+    "heroImageUpload": "Загрузить изображение",
+    "heroImageReplace": "Заменить",
+    "heroImageRemove": "Удалить",
+    "heroImageAlt": "Alt-текст",
+    "heroImageAltPlaceholder": "Опишите изображение для программ чтения с экрана"
   }
 }

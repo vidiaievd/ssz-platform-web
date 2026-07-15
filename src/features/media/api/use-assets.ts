@@ -17,6 +17,19 @@ export function useMyAssets() {
   });
 }
 
+export function useMediaAsset(id: string | undefined) {
+  return useQuery({
+    queryKey: mediaKeys.asset(id ?? ''),
+    queryFn: async () => {
+      const res = await fetch(`/api/media/assets/${id}`);
+      if (!res.ok) throw new Error('Failed to fetch asset');
+      return res.json() as Promise<Pick<MediaAsset, 'id' | 'url'>>;
+    },
+    enabled: !!id,
+    staleTime: 60_000,
+  });
+}
+
 export function useDeleteAsset() {
   const queryClient = useQueryClient();
 

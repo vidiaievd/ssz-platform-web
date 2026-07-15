@@ -1,2 +1,2 @@
 export { mediaKeys } from './keys';
-export { useMyAssets, useDeleteAsset } from './use-assets';
+export { useMyAssets, useMediaAsset, useDeleteAsset } from './use-assets';

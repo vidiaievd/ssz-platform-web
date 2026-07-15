@@ -495,6 +495,12 @@
     "glossaryMarksNoList": "У цьому модулі ще немає списку слів — додайте його, щоб позначати слова.",
     "glossaryMarksPickWord": "Виберіть слово…",
     "glossaryMarksMark": "Позначити",
-    "glossaryMarksCaption": "Позначені слова стають глосарієм модуля — {count, plural, one {# слово позначено} few {# слова позначено} many {# слів позначено} other {# слова позначено}}."
+    "glossaryMarksCaption": "Позначені слова стають глосарієм модуля — {count, plural, one {# слово позначено} few {# слова позначено} many {# слів позначено} other {# слова позначено}}.",
+    "heroImage": "Зображення уроку",
+    "heroImageUpload": "Завантажити зображення",
+    "heroImageReplace": "Замінити",
+    "heroImageRemove": "Видалити",
+    "heroImageAlt": "Alt-текст",
+    "heroImageAltPlaceholder": "Опишіть зображення для програм читання з екрана"
   }
 }

@@ -495,6 +495,12 @@
     "glossaryMarksNoList": "Denne modulen har ingen ordliste ennå — legg til en for å merke ord.",
     "glossaryMarksPickWord": "Velg et ord …",
     "glossaryMarksMark": "Merk",
-    "glossaryMarksCaption": "Merkede ord blir en del av modulens ordliste — {count, plural, one {# ord merket} other {# ord merket}}."
+    "glossaryMarksCaption": "Merkede ord blir en del av modulens ordliste — {count, plural, one {# ord merket} other {# ord merket}}.",
+    "heroImage": "Leksjonsbilde",
+    "heroImageUpload": "Last opp bilde",
+    "heroImageReplace": "Erstatt",
+    "heroImageRemove": "Fjern",
+    "heroImageAlt": "Alt-tekst",
+    "heroImageAltPlaceholder": "Beskriv bildet for skjermlesere"
   }
 }

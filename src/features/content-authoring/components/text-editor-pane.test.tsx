@@ -18,6 +18,7 @@ vi.mock('../api/use-authoring-lessons', async () => {
 // isn't valid in a client test environment).
 vi.mock('./paragraph-translations-panel', () => ({ ParagraphTranslationsPanel: () => null }));
 vi.mock('./glossary-mark-panel', () => ({ GlossaryMarkPanel: () => null }));
+vi.mock('./hero-image-slot', () => ({ HeroImageSlot: () => null }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,
