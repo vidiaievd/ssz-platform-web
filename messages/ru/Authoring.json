@@ -509,6 +509,12 @@
     "audioNarrationLabel": "Подпись (необязательно)",
     "audioNarrationLabelPlaceholder": "напр. Диктор",
     "audioNarrationInvalidType": "Загрузите аудиофайл в формате MP3, OGG, WAV, AAC, FLAC или M4A.",
-    "audioNarrationTooLarge": "Файл слишком большой. Максимальный размер — 100 МБ."
+    "audioNarrationTooLarge": "Файл слишком большой. Максимальный размер — 100 МБ.",
+    "videoSource": "Источник видео",
+    "videoSourceUpload": "Загрузить видео",
+    "videoSourceReplace": "Заменить",
+    "videoSourceRemove": "Удалить",
+    "videoSourceInvalidType": "Загрузите видеофайл в формате MP4, WebM, OGG или MOV.",
+    "videoSourceTooLarge": "Файл слишком большой. Максимальный размер — 500 МБ."
   }
 }

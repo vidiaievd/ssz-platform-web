@@ -509,6 +509,12 @@
     "audioNarrationLabel": "Label (optional)",
     "audioNarrationLabelPlaceholder": "e.g. Narrator",
     "audioNarrationInvalidType": "Please upload an MP3, OGG, WAV, AAC, FLAC, or M4A audio file.",
-    "audioNarrationTooLarge": "File is too large. Maximum size is 100 MB."
+    "audioNarrationTooLarge": "File is too large. Maximum size is 100 MB.",
+    "videoSource": "Video source",
+    "videoSourceUpload": "Upload video",
+    "videoSourceReplace": "Replace",
+    "videoSourceRemove": "Remove",
+    "videoSourceInvalidType": "Please upload an MP4, WebM, OGG, or MOV video file.",
+    "videoSourceTooLarge": "File is too large. Maximum size is 500 MB."
   }
 }

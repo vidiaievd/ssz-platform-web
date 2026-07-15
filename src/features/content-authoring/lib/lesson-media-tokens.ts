@@ -1,12 +1,14 @@
 /**
  * The hero image isn't a separate field — content-service extracts media refs
  * straight out of `body_markdown` via custom protocol tokens
- * (`MarkdownMediaParserService`: `![alt](media://id)` / `[audio:id "label"]`).
- * "Hero image" here is an FE convention: the first `media://` image token in
- * the body, treated as the lesson's single cover image.
+ * (`MarkdownMediaParserService`: `![alt](media://id)` / `[audio:id "label"]` /
+ * `[video:id]`). "Hero image" here is an FE convention: the first `media://`
+ * image token in the body, treated as the lesson's single cover image.
  */
 const IMAGE_TOKEN_REGEX = /!\[([^\]]*)\]\(media:\/\/([a-zA-Z0-9_-]+)\)/;
 const AUDIO_TOKEN_REGEX = /\[audio:([a-zA-Z0-9_-]+)(?:\s+"([^"]*)")?\]/;
+// No label group — mirrors MarkdownMediaParserService.VIDEO_REGEX exactly.
+const VIDEO_TOKEN_REGEX = /\[video:([a-zA-Z0-9_-]+)\]/;
 
 export interface HeroImageToken {
   alt: string;
@@ -54,4 +56,27 @@ export function setAudioNarration(body: string, mediaId: string, label: string |
 
 export function removeAudioNarration(body: string): string {
   return body.replace(AUDIO_TOKEN_REGEX, '').replace(/\n+\s*$/, '').trimEnd();
+}
+
+export interface VideoSourceToken {
+  mediaId: string;
+}
+
+export function findVideoSource(body: string): VideoSourceToken | null {
+  const match = body.match(VIDEO_TOKEN_REGEX);
+  if (!match) return null;
+  return { mediaId: match[1] ?? '' };
+}
+
+/** Replaces the existing video token in place, or inserts a new one at the top. */
+export function setVideoSource(body: string, mediaId: string): string {
+  const token = `[video:${mediaId}]`;
+  if (VIDEO_TOKEN_REGEX.test(body)) {
+    return body.replace(VIDEO_TOKEN_REGEX, token);
+  }
+  return body.trim() ? `${token}\n\n${body}` : token;
+}
+
+export function removeVideoSource(body: string): string {
+  return body.replace(VIDEO_TOKEN_REGEX, '').replace(/^\s*\n+/, '').trimStart();
 }

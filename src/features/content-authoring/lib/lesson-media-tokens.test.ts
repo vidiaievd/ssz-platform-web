@@ -3,10 +3,13 @@ import { describe, expect, it } from 'vitest';
 import {
   findAudioNarration,
   findHeroImage,
+  findVideoSource,
   removeAudioNarration,
   removeHeroImage,
+  removeVideoSource,
   setAudioNarration,
   setHeroImage,
+  setVideoSource,
 } from './lesson-media-tokens';
 
 describe('hero image token', () => {
@@ -77,5 +80,40 @@ describe('audio narration token', () => {
     expect(removeAudioNarration('Existing body.\n\n[audio:media-2 "Narration"]')).toBe(
       'Existing body.',
     );
+  });
+});
+
+describe('video source token', () => {
+  it('finds no source in plain text', () => {
+    expect(findVideoSource('Just some text.')).toBeNull();
+  });
+
+  it('finds the video token and its media ID', () => {
+    const body = 'Intro.\n\n[video:media-3]\n\nMore text.';
+    expect(findVideoSource(body)).toEqual({ mediaId: 'media-3' });
+  });
+
+  it('inserts a new token at the top when none exists', () => {
+    expect(setVideoSource('Existing body.', 'media-3')).toBe(
+      '[video:media-3]\n\nExisting body.',
+    );
+  });
+
+  it('inserts a bare token when the body is empty', () => {
+    expect(setVideoSource('', 'media-3')).toBe('[video:media-3]');
+  });
+
+  it('replaces an existing token in place, preserving surrounding text', () => {
+    const body = 'Intro.\n\n[video:old-id]\n\nMore text.';
+    expect(setVideoSource(body, 'new-id')).toBe('Intro.\n\n[video:new-id]\n\nMore text.');
+  });
+
+  it('removes the token and collapses the resulting leading blank lines', () => {
+    const body = '[video:media-3]\n\nExisting body.';
+    expect(removeVideoSource(body)).toBe('Existing body.');
+  });
+
+  it('removeVideoSource is a no-op when there is no token', () => {
+    expect(removeVideoSource('Existing body.')).toBe('Existing body.');
   });
 });

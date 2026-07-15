@@ -509,6 +509,12 @@
     "audioNarrationLabel": "Merkelapp (valgfritt)",
     "audioNarrationLabelPlaceholder": "f.eks. Forteller",
     "audioNarrationInvalidType": "Last opp en MP3-, OGG-, WAV-, AAC-, FLAC- eller M4A-lydfil.",
-    "audioNarrationTooLarge": "Filen er for stor. Maks størrelse er 100 MB."
+    "audioNarrationTooLarge": "Filen er for stor. Maks størrelse er 100 MB.",
+    "videoSource": "Videokilde",
+    "videoSourceUpload": "Last opp video",
+    "videoSourceReplace": "Erstatt",
+    "videoSourceRemove": "Fjern",
+    "videoSourceInvalidType": "Last opp en MP4-, WebM-, OGG- eller MOV-videofil.",
+    "videoSourceTooLarge": "Filen er for stor. Maks størrelse er 500 MB."
   }
 }
