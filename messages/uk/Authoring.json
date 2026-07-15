@@ -515,6 +515,16 @@
     "videoSourceReplace": "Замінити",
     "videoSourceRemove": "Видалити",
     "videoSourceInvalidType": "Завантажте відеофайл у форматі MP4, WebM, OGG або MOV.",
-    "videoSourceTooLarge": "Файл завеликий. Максимальний розмір — 500 МБ."
+    "videoSourceTooLarge": "Файл завеликий. Максимальний розмір — 500 МБ.",
+    "cueList": "Репліки",
+    "cueListNeedsSource": "Додайте джерело відео, перш ніж додавати репліки.",
+    "cueListEmpty": "Ще немає реплік — додайте одну, щоб почати створювати транскрипт.",
+    "cueTimecode": "Таймкод (с)",
+    "cueTarget": "Рядок мовою оригіналу",
+    "cueTargetPlaceholder": "Що сказано у відео",
+    "cueEnglish": "Англійською",
+    "cueEnglishPlaceholder": "Переклад (необов’язково)",
+    "cueAdd": "Додати репліку",
+    "cueRemove": "Видалити репліку {position}"
   }
 }

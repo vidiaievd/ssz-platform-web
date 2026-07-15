@@ -515,6 +515,16 @@
     "videoSourceReplace": "Erstatt",
     "videoSourceRemove": "Fjern",
     "videoSourceInvalidType": "Last opp en MP4-, WebM-, OGG- eller MOV-videofil.",
-    "videoSourceTooLarge": "Filen er for stor. Maks størrelse er 500 MB."
+    "videoSourceTooLarge": "Filen er for stor. Maks størrelse er 500 MB.",
+    "cueList": "Repliker",
+    "cueListNeedsSource": "Legg til en videokilde før du legger til repliker.",
+    "cueListEmpty": "Ingen repliker ennå — legg til én for å begynne å bygge transkripsjonen.",
+    "cueTimecode": "Tidskode (s)",
+    "cueTarget": "Målspråklinje",
+    "cueTargetPlaceholder": "Det som sies i videoen",
+    "cueEnglish": "Engelsk",
+    "cueEnglishPlaceholder": "Oversettelse (valgfritt)",
+    "cueAdd": "Legg til replikk",
+    "cueRemove": "Fjern replikk {position}"
   }
 }

@@ -515,6 +515,16 @@
     "videoSourceReplace": "Replace",
     "videoSourceRemove": "Remove",
     "videoSourceInvalidType": "Please upload an MP4, WebM, OGG, or MOV video file.",
-    "videoSourceTooLarge": "File is too large. Maximum size is 500 MB."
+    "videoSourceTooLarge": "File is too large. Maximum size is 500 MB.",
+    "cueList": "Cues",
+    "cueListNeedsSource": "Add a video source before adding cues.",
+    "cueListEmpty": "No cues yet — add one to start building the transcript.",
+    "cueTimecode": "Timecode (s)",
+    "cueTarget": "Target line",
+    "cueTargetPlaceholder": "What's said in the video",
+    "cueEnglish": "English",
+    "cueEnglishPlaceholder": "Translation (optional)",
+    "cueAdd": "Add cue",
+    "cueRemove": "Remove cue {position}"
   }
 }
