@@ -489,6 +489,12 @@
     "paragraphTranslations": "Paragraph translations",
     "paragraphTranslationsNeedsBody": "Save the anchor text first to add paragraph translations.",
     "paragraphTranslationsEmpty": "No paragraphs yet — write the anchor text above.",
-    "paragraphTranslationPlaceholder": "Translation…"
+    "paragraphTranslationPlaceholder": "Translation…",
+    "glossaryMarks": "Glossary marks",
+    "glossaryMarksNeedsBody": "Save the anchor text first to add glossary marks.",
+    "glossaryMarksNoList": "This module has no vocabulary list yet — add one to mark glossary words.",
+    "glossaryMarksPickWord": "Pick a word…",
+    "glossaryMarksMark": "Mark",
+    "glossaryMarksCaption": "Marked words become the module glossary — {count, plural, one {# word marked} other {# words marked}}."
   }
 }

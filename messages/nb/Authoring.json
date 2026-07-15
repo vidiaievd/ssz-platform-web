@@ -489,6 +489,12 @@
     "paragraphTranslations": "Avsnittsoversettelser",
     "paragraphTranslationsNeedsBody": "Lagre ankerteksten først for å legge til avsnittsoversettelser.",
     "paragraphTranslationsEmpty": "Ingen avsnitt ennå — skriv ankerteksten over.",
-    "paragraphTranslationPlaceholder": "Oversettelse …"
+    "paragraphTranslationPlaceholder": "Oversettelse …",
+    "glossaryMarks": "Ordlistemerker",
+    "glossaryMarksNeedsBody": "Lagre ankerteksten først for å legge til ordlistemerker.",
+    "glossaryMarksNoList": "Denne modulen har ingen ordliste ennå — legg til en for å merke ord.",
+    "glossaryMarksPickWord": "Velg et ord …",
+    "glossaryMarksMark": "Merk",
+    "glossaryMarksCaption": "Merkede ord blir en del av modulens ordliste — {count, plural, one {# ord merket} other {# ord merket}}."
   }
 }

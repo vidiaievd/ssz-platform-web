@@ -489,6 +489,12 @@
     "paragraphTranslations": "Переклади абзаців",
     "paragraphTranslationsNeedsBody": "Спочатку збережіть основний текст, щоб додати переклади абзаців.",
     "paragraphTranslationsEmpty": "Абзаців ще немає — напишіть основний текст вище.",
-    "paragraphTranslationPlaceholder": "Переклад…"
+    "paragraphTranslationPlaceholder": "Переклад…",
+    "glossaryMarks": "Позначені слова",
+    "glossaryMarksNeedsBody": "Спочатку збережіть основний текст, щоб позначати слова глосарія.",
+    "glossaryMarksNoList": "У цьому модулі ще немає списку слів — додайте його, щоб позначати слова.",
+    "glossaryMarksPickWord": "Виберіть слово…",
+    "glossaryMarksMark": "Позначити",
+    "glossaryMarksCaption": "Позначені слова стають глосарієм модуля — {count, plural, one {# слово позначено} few {# слова позначено} many {# слів позначено} other {# слова позначено}}."
   }
 }

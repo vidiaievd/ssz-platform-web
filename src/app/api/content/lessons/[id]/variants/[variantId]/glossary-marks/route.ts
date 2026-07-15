@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
-import type { LessonParagraph } from '@/features/content/types';
+import type { GlossaryMark } from '@/features/content/types';
 
 export async function GET(
   _request: NextRequest,
@@ -11,15 +11,15 @@ export async function GET(
   const { id, variantId } = await params;
 
   try {
-    const data = await serverFetch<LessonParagraph[]>({
+    const data = await serverFetch<GlossaryMark[]>({
       service: 'content',
-      path: `/lessons/${id}/variants/${variantId}/paragraphs`,
+      path: `/lessons/${id}/variants/${variantId}/glossary-marks`,
     });
     return NextResponse.json(data);
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') {
       return NextResponse.json([], { status: 200 });
     }
-    return NextResponse.json({ error: 'Failed to fetch paragraph translations' }, { status: 502 });
+    return NextResponse.json({ error: 'Failed to fetch glossary marks' }, { status: 502 });
   }
 }

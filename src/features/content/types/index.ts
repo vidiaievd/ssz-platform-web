@@ -133,6 +133,13 @@ export interface LessonParagraph {
   translation: string | null;
 }
 
+/** Author-marked glossary word for a TEXT/VIDEO lesson variant (BE1.5). No unmark endpoint exists. */
+export interface GlossaryMark {
+  id: string;
+  vocabularyItemId: string;
+  occurrenceCount: number;
+}
+
 export interface Lesson {
   id: string;
   slug: string | null;

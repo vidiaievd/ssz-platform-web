@@ -22,6 +22,7 @@ import { LessonEditorShell } from './lesson-editor-shell';
 import { EditorCard } from './editor-card';
 import { TextLessonPreview } from './text-lesson-preview';
 import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
+import { GlossaryMarkPanel } from './glossary-mark-panel';
 
 interface TextEditorPaneProps {
   kind: MaterialKind;
@@ -151,6 +152,8 @@ export function TextEditorPane({
           </Button>
 
           <ParagraphTranslationsPanel lessonId={lessonId} variantId={defaultVariant?.id} />
+
+          <GlossaryMarkPanel lessonId={lessonId} variantId={defaultVariant?.id} container={container} />
         </div>
       )}
     </LessonEditorShell>

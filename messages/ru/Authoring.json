@@ -489,6 +489,12 @@
     "paragraphTranslations": "Переводы абзацев",
     "paragraphTranslationsNeedsBody": "Сначала сохраните основной текст, чтобы добавить переводы абзацев.",
     "paragraphTranslationsEmpty": "Пока нет абзацев — напишите основной текст выше.",
-    "paragraphTranslationPlaceholder": "Перевод…"
+    "paragraphTranslationPlaceholder": "Перевод…",
+    "glossaryMarks": "Отмеченные слова",
+    "glossaryMarksNeedsBody": "Сначала сохраните основной текст, чтобы отмечать слова глоссария.",
+    "glossaryMarksNoList": "В этом модуле пока нет списка слов — добавьте его, чтобы отмечать слова.",
+    "glossaryMarksPickWord": "Выберите слово…",
+    "glossaryMarksMark": "Отметить",
+    "glossaryMarksCaption": "Отмеченные слова становятся глоссарием модуля — {count, plural, one {# слово отмечено} few {# слова отмечено} many {# слов отмечено} other {# слова отмечено}}."
   }
 }
