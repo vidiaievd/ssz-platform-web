@@ -20,6 +20,17 @@ vi.mock('../actions/section', () => ({
   createSectionAction: vi.fn(),
   reorderSectionsAction: vi.fn(),
 }));
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 const { CourseStructurePanel } = await import('./course-structure-panel');
 import { useCurriculumTree } from '../api/use-curriculum-tree';
@@ -42,6 +53,7 @@ function renderPanel() {
       <CourseStructurePanel
         containerId="course-1"
         versionId="version-1"
+        schoolSlug="my-school"
         targetLanguage="no"
         difficultyLevel="A2"
         visibility="public"

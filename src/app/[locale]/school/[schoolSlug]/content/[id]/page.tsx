@@ -119,6 +119,7 @@ export default async function ContainerDetailPage({
       <Suspense fallback={<TabsSkeleton />}>
         <CourseEditorShell
           container={container}
+          schoolSlug={schoolSlug}
           schoolRole={schoolRole}
           preflightResult={preflight}
           draftVersionId={draftVersionId}

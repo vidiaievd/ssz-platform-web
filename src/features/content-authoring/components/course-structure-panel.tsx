@@ -16,6 +16,7 @@ import { CurriculumInspector } from './curriculum-inspector';
 interface CourseStructurePanelProps {
   containerId: string;
   versionId: string;
+  schoolSlug: string;
   /** Inherited by new lessons/vocab/grammar items (and modules) created from the tree. */
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
@@ -35,6 +36,7 @@ function StructureSkeleton() {
 export function CourseStructurePanel({
   containerId,
   versionId,
+  schoolSlug,
   targetLanguage,
   difficultyLevel,
   visibility,
@@ -107,6 +109,7 @@ export function CourseStructurePanel({
         <CurriculumInspector
           selection={selection}
           courseContainerId={containerId}
+          schoolSlug={schoolSlug}
           onChanged={() => handleChanged()}
         />
       </div>

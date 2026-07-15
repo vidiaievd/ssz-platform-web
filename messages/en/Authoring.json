@@ -463,7 +463,8 @@
     "addLevel": "Add level",
     "addModule": "Add module",
     "newLevelTitle": "New level",
-    "newModuleTitle": "New module"
+    "newModuleTitle": "New module",
+    "openLessonEditor": "Open lesson editor"
   },
   "settings": {
     "trigger": "Settings",
@@ -474,5 +475,15 @@
     "title": "Add a lesson",
     "description": "Choose a material type to add to this module.",
     "defaultTitle": "New {type}"
+  },
+  "editor": {
+    "backToCourse": "Back to course",
+    "showPreview": "Show preview",
+    "hidePreview": "Hide preview",
+    "previewLabel": "Student preview",
+    "previewLive": "Live",
+    "previewCaption": "Exactly what the learner sees in the reader. Updates as you edit.",
+    "previewPlaceholder": "Preview for this material type is coming soon.",
+    "bodyPlaceholder": "The dedicated editor for this material type will be wired in an upcoming step."
   }
 }

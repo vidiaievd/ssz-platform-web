@@ -8,6 +8,17 @@ import type { CurriculumTreeSelection } from '../types';
 
 vi.mock('../actions/container', () => ({ renameContainerAction: vi.fn() }));
 vi.mock('../actions/section', () => ({ renameSectionAction: vi.fn() }));
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 const { CurriculumInspector } = await import('./curriculum-inspector');
 const { renameContainerAction } = await import('../actions/container');
@@ -19,6 +30,7 @@ function renderInspector(selection: CurriculumTreeSelection | null, onChanged = 
       <CurriculumInspector
         selection={selection}
         courseContainerId="course-1"
+        schoolSlug="my-school"
         onChanged={onChanged}
       />
     </NextIntlClientProvider>,

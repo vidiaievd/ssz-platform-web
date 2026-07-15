@@ -463,7 +463,8 @@
     "addLevel": "Legg til nivå",
     "addModule": "Legg til modul",
     "newLevelTitle": "Nytt nivå",
-    "newModuleTitle": "Ny modul"
+    "newModuleTitle": "Ny modul",
+    "openLessonEditor": "Åpne leksjonsredigering"
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -474,5 +475,15 @@
     "title": "Legg til en leksjon",
     "description": "Velg en materialtype som skal legges til i denne modulen.",
     "defaultTitle": "Ny {type}"
+  },
+  "editor": {
+    "backToCourse": "Tilbake til kurset",
+    "showPreview": "Vis forhåndsvisning",
+    "hidePreview": "Skjul forhåndsvisning",
+    "previewLabel": "Elevforhåndsvisning",
+    "previewLive": "Live",
+    "previewCaption": "Akkurat det eleven ser i leseren. Oppdateres mens du redigerer.",
+    "previewPlaceholder": "Forhåndsvisning for denne materialtypen kommer snart.",
+    "bodyPlaceholder": "Den dedikerte redigeringen for denne materialtypen kommer i et kommende steg."
   }
 }

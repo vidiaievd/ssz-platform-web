@@ -49,7 +49,7 @@ const CONTAINER: Container = {
 function renderShell(draftVersionId: string | null) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CourseEditorShell container={CONTAINER} draftVersionId={draftVersionId} />
+      <CourseEditorShell container={CONTAINER} schoolSlug="my-school" draftVersionId={draftVersionId} />
     </NextIntlClientProvider>,
   );
 }

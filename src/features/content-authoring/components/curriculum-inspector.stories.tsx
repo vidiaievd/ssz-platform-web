@@ -11,7 +11,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const commonArgs = { courseContainerId: 'course-1', onChanged: () => {} };
+const commonArgs = { courseContainerId: 'course-1', schoolSlug: 'my-school', onChanged: () => {} };
 
 export const EmptySelection: Story = {
   args: { selection: null, ...commonArgs },

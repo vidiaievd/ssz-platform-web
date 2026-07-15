@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Link } from '@/lib/i18n/navigation';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type { CurriculumTreeLevelNode, CurriculumTreeModuleNode } from '@/features/content/types';
 
@@ -21,6 +23,7 @@ interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
   /** The course's own container id — levels are sections on it. */
   courseContainerId: string;
+  schoolSlug: string;
   /** Called after a rename persists, so the caller can refetch the tree. */
   onChanged: () => void;
 }
@@ -65,6 +68,7 @@ function TitleField({
 export function CurriculumInspector({
   selection,
   courseContainerId,
+  schoolSlug,
   onChanged,
 }: CurriculumInspectorProps) {
   const t = useTranslations('Authoring');
@@ -181,6 +185,12 @@ export function CurriculumInspector({
         label={t('structure.state')}
         value={item.state ? <ContainerStateBadge state={item.state} /> : '—'}
       />
+
+      <Button asChild variant="outline" size="sm">
+        <Link href={`/school/${schoolSlug}/content/${courseContainerId}/lessons/${item.id}`}>
+          {t('structure.openLessonEditor')}
+        </Link>
+      </Button>
     </div>
   );
 }

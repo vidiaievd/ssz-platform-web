@@ -13,6 +13,7 @@ import { CourseStructurePanel } from './course-structure-panel';
 
 interface CourseEditorShellProps {
   container: Container;
+  schoolSlug: string;
   schoolRole?: SchoolRole;
   preflightResult?: PreflightResult;
   /** Draft version id (always present — containers keep one draft version). Null only on fetch failure. */
@@ -26,6 +27,7 @@ interface CourseEditorShellProps {
  */
 export function CourseEditorShell({
   container,
+  schoolSlug,
   schoolRole = 'owner',
   preflightResult,
   draftVersionId,
@@ -55,6 +57,7 @@ export function CourseEditorShell({
         <CourseStructurePanel
           containerId={container.id}
           versionId={draftVersionId}
+          schoolSlug={schoolSlug}
           targetLanguage={container.targetLanguage}
           difficultyLevel={container.difficultyLevel}
           visibility={container.visibility}
