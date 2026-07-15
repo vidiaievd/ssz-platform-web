@@ -13,6 +13,10 @@ vi.mock('../api/use-authoring-lessons', async () => {
   );
   return { ...actual, useLessonVariants: vi.fn() };
 });
+// Paragraph translations have their own dedicated test suite — stub here so
+// this file doesn't also pull in the server action module (server-env access
+// isn't valid in a client test environment).
+vi.mock('./paragraph-translations-panel', () => ({ ParagraphTranslationsPanel: () => null }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,

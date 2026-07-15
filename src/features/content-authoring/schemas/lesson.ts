@@ -6,3 +6,12 @@ export const lessonFormSchema = z.object({
 });
 
 export type LessonFormValues = z.infer<typeof lessonFormSchema>;
+
+export const paragraphTranslationEntrySchema = z.object({
+  paragraphIndex: z.number().int().min(0),
+  translation: z.string().min(1).max(2_000),
+});
+
+export const paragraphTranslationsSchema = z.array(paragraphTranslationEntrySchema);
+
+export type ParagraphTranslationEntry = z.infer<typeof paragraphTranslationEntrySchema>;

@@ -485,6 +485,10 @@
     "previewCaption": "Именно то, что видит ученик в ридере. Обновляется по мере редактирования.",
     "previewPlaceholder": "Предпросмотр для этого типа материала скоро появится.",
     "bodyPlaceholder": "Специальный редактор для этого типа материала появится на следующем этапе.",
-    "anchorText": "Основной текст"
+    "anchorText": "Основной текст",
+    "paragraphTranslations": "Переводы абзацев",
+    "paragraphTranslationsNeedsBody": "Сначала сохраните основной текст, чтобы добавить переводы абзацев.",
+    "paragraphTranslationsEmpty": "Пока нет абзацев — напишите основной текст выше.",
+    "paragraphTranslationPlaceholder": "Перевод…"
   }
 }

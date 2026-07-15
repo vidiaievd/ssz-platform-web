@@ -127,6 +127,12 @@ export interface LessonVariant {
   status: 'draft' | 'published';
 }
 
+/** Paragraph-aligned bilingual translation for TEXT lesson variants (BE1.4). */
+export interface LessonParagraph {
+  target: string;
+  translation: string | null;
+}
+
 export interface Lesson {
   id: string;
   slug: string | null;

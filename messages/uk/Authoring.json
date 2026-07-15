@@ -485,6 +485,10 @@
     "previewCaption": "Саме те, що бачить студент у рідері. Оновлюється під час редагування.",
     "previewPlaceholder": "Перегляд для цього типу матеріалу з’явиться незабаром.",
     "bodyPlaceholder": "Спеціальний редактор для цього типу матеріалу буде додано на наступному етапі.",
-    "anchorText": "Основний текст"
+    "anchorText": "Основний текст",
+    "paragraphTranslations": "Переклади абзаців",
+    "paragraphTranslationsNeedsBody": "Спочатку збережіть основний текст, щоб додати переклади абзаців.",
+    "paragraphTranslationsEmpty": "Абзаців ще немає — напишіть основний текст вище.",
+    "paragraphTranslationPlaceholder": "Переклад…"
   }
 }

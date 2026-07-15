@@ -21,6 +21,7 @@ import { useAutosave } from '../hooks/use-autosave';
 import { LessonEditorShell } from './lesson-editor-shell';
 import { EditorCard } from './editor-card';
 import { TextLessonPreview } from './text-lesson-preview';
+import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
 
 interface TextEditorPaneProps {
   kind: MaterialKind;
@@ -66,18 +67,30 @@ export function TextEditorPane({
   const titleValue = useWatch({ control, name: 'title' });
   const bodyValue = useWatch({ control, name: 'body' });
 
+  async function saveLesson(data: LessonFormValues) {
+    const result = await updateLessonAction(
+      lessonId,
+      container.id,
+      defaultVariant?.id ?? null,
+      container.difficultyLevel,
+      data,
+    );
+    if (!result.ok) return result;
+    await queryClient.invalidateQueries({ queryKey: authoringKeys.lessonVariants(lessonId) });
+    if (defaultVariant) {
+      // Body edits re-split the anchor text into paragraphs — refresh the
+      // translation panel's "target" column against the newly saved split.
+      await queryClient.invalidateQueries({
+        queryKey: authoringKeys.lessonParagraphs(lessonId, defaultVariant.id),
+      });
+    }
+    return result;
+  }
+
   const autosave = useAutosave({
     onSave: async () => {
-      const data = getValues();
-      const result = await updateLessonAction(
-        lessonId,
-        container.id,
-        defaultVariant?.id ?? null,
-        container.difficultyLevel,
-        data,
-      );
+      const result = await saveLesson(getValues());
       if (!result.ok) throw new Error(result.error.code);
-      await queryClient.invalidateQueries({ queryKey: authoringKeys.lessonVariants(lessonId) });
     },
     debounceMs: 800,
   });
@@ -124,21 +137,11 @@ export function TextEditorPane({
             onClick={() => {
               autosave.cancel();
               void (async () => {
-                const data = getValues();
-                const result = await updateLessonAction(
-                  lessonId,
-                  container.id,
-                  defaultVariant?.id ?? null,
-                  container.difficultyLevel,
-                  data,
-                );
+                const result = await saveLesson(getValues());
                 if (!result.ok) {
                   toast.error(tErrors(result.error.code));
                   return;
                 }
-                await queryClient.invalidateQueries({
-                  queryKey: authoringKeys.lessonVariants(lessonId),
-                });
                 autosave.markSaved();
                 toast.success(t('lessons.saveSuccess'));
               })();
@@ -146,6 +149,8 @@ export function TextEditorPane({
           >
             {t('form.save')}
           </Button>
+
+          <ParagraphTranslationsPanel lessonId={lessonId} variantId={defaultVariant?.id} />
         </div>
       )}
     </LessonEditorShell>
