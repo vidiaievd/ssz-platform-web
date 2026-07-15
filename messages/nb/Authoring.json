@@ -459,5 +459,10 @@
     "retry": "Prøv igjen",
     "empty": "Dette kurset har ingen nivåer ennå.",
     "titleEn": "Tittel (engelsk)"
+  },
+  "settings": {
+    "trigger": "Innstillinger",
+    "title": "Kursinnstillinger",
+    "description": "Rediger detaljer, tagger, deling og faresonehandlinger for dette kurset."
   }
 }

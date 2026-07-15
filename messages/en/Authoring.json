@@ -459,5 +459,10 @@
     "retry": "Try again",
     "empty": "This course has no levels yet.",
     "titleEn": "Title (English)"
+  },
+  "settings": {
+    "trigger": "Settings",
+    "title": "Course settings",
+    "description": "Edit details, tags, sharing, and danger-zone actions for this course."
   }
 }
