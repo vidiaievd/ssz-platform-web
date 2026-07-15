@@ -24,6 +24,7 @@ import { TextLessonPreview } from './text-lesson-preview';
 import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
 import { GlossaryMarkPanel } from './glossary-mark-panel';
 import { HeroImageSlot } from './hero-image-slot';
+import { AudioNarrationRow } from './audio-narration-row';
 
 interface TextEditorPaneProps {
   kind: MaterialKind;
@@ -98,6 +99,11 @@ export function TextEditorPane({
     debounceMs: 800,
   });
 
+  function handleBodyTokenChange(newBody: string) {
+    setValue('body', newBody);
+    autosave.schedule();
+  }
+
   return (
     <LessonEditorShell
       kind={kind}
@@ -138,11 +144,10 @@ export function TextEditorPane({
           <HeroImageSlot
             body={bodyValue ?? ''}
             altDefault={titleValue || lessonTitle || ''}
-            onChange={(newBody) => {
-              setValue('body', newBody);
-              autosave.schedule();
-            }}
+            onChange={handleBodyTokenChange}
           />
+
+          <AudioNarrationRow body={bodyValue ?? ''} onChange={handleBodyTokenChange} />
 
           <Button
             type="button"

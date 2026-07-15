@@ -19,6 +19,7 @@ vi.mock('../api/use-authoring-lessons', async () => {
 vi.mock('./paragraph-translations-panel', () => ({ ParagraphTranslationsPanel: () => null }));
 vi.mock('./glossary-mark-panel', () => ({ GlossaryMarkPanel: () => null }));
 vi.mock('./hero-image-slot', () => ({ HeroImageSlot: () => null }));
+vi.mock('./audio-narration-row', () => ({ AudioNarrationRow: () => null }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,

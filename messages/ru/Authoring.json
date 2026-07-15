@@ -501,6 +501,14 @@
     "heroImageReplace": "Заменить",
     "heroImageRemove": "Удалить",
     "heroImageAlt": "Alt-текст",
-    "heroImageAltPlaceholder": "Опишите изображение для программ чтения с экрана"
+    "heroImageAltPlaceholder": "Опишите изображение для программ чтения с экрана",
+    "audioNarration": "Аудионарратив",
+    "audioNarrationUpload": "Загрузить аудио",
+    "audioNarrationReplace": "Заменить",
+    "audioNarrationRemove": "Удалить",
+    "audioNarrationLabel": "Подпись (необязательно)",
+    "audioNarrationLabelPlaceholder": "напр. Диктор",
+    "audioNarrationInvalidType": "Загрузите аудиофайл в формате MP3, OGG, WAV, AAC, FLAC или M4A.",
+    "audioNarrationTooLarge": "Файл слишком большой. Максимальный размер — 100 МБ."
   }
 }

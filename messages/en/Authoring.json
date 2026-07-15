@@ -501,6 +501,14 @@
     "heroImageReplace": "Replace",
     "heroImageRemove": "Remove",
     "heroImageAlt": "Alt text",
-    "heroImageAltPlaceholder": "Describe the image for screen readers"
+    "heroImageAltPlaceholder": "Describe the image for screen readers",
+    "audioNarration": "Audio narration",
+    "audioNarrationUpload": "Upload audio",
+    "audioNarrationReplace": "Replace",
+    "audioNarrationRemove": "Remove",
+    "audioNarrationLabel": "Label (optional)",
+    "audioNarrationLabelPlaceholder": "e.g. Narrator",
+    "audioNarrationInvalidType": "Please upload an MP3, OGG, WAV, AAC, FLAC, or M4A audio file.",
+    "audioNarrationTooLarge": "File is too large. Maximum size is 100 MB."
   }
 }

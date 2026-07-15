@@ -501,6 +501,14 @@
     "heroImageReplace": "Erstatt",
     "heroImageRemove": "Fjern",
     "heroImageAlt": "Alt-tekst",
-    "heroImageAltPlaceholder": "Beskriv bildet for skjermlesere"
+    "heroImageAltPlaceholder": "Beskriv bildet for skjermlesere",
+    "audioNarration": "Lydfortelling",
+    "audioNarrationUpload": "Last opp lyd",
+    "audioNarrationReplace": "Erstatt",
+    "audioNarrationRemove": "Fjern",
+    "audioNarrationLabel": "Merkelapp (valgfritt)",
+    "audioNarrationLabelPlaceholder": "f.eks. Forteller",
+    "audioNarrationInvalidType": "Last opp en MP3-, OGG-, WAV-, AAC-, FLAC- eller M4A-lydfil.",
+    "audioNarrationTooLarge": "Filen er for stor. Maks størrelse er 100 MB."
   }
 }
