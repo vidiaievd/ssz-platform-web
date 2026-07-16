@@ -538,6 +538,17 @@
     "audioSourceInvalidType": "Please upload an MP3, OGG, WAV, AAC, FLAC, or M4A audio file.",
     "audioSourceTooLarge": "File is too large. Maximum size is 100 MB.",
     "transcript": "Transcript",
-    "transcriptPlaceholder": "Full transcript of the listening track"
+    "transcriptPlaceholder": "Full transcript of the listening track",
+    "listeningStages": "Staged exercises",
+    "listeningStagesNeedsSource": "Add an audio source before staging exercises.",
+    "listeningStagesEmpty": "No staged exercises yet — add one to build the Listen → Gap-fill → Comprehension flow.",
+    "stageType": "Stage type",
+    "stageTypeGapFill": "Gap-fill",
+    "stageTypeComprehension": "Comprehension",
+    "stageRemove": "Remove stage {position}",
+    "stageExerciseNone": "No exercise",
+    "stageExerciseAriaLabel": "Staged exercise",
+    "stageExerciseAddNew": "New exercise",
+    "stageAdd": "Add stage"
   }
 }

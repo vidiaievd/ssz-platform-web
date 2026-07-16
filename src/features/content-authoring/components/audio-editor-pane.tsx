@@ -22,6 +22,7 @@ import { LessonEditorShell } from './lesson-editor-shell';
 import { EditorBodyPlaceholder } from './editor-body-placeholder';
 import { EditorCard } from './editor-card';
 import { AudioSourceSlot } from './audio-source-slot';
+import { ListeningStageListEditor } from './listening-stage-list-editor';
 
 interface AudioEditorPaneProps {
   kind: MaterialKind;
@@ -152,6 +153,12 @@ export function AudioEditorPane({
           >
             {t('form.save')}
           </Button>
+
+          <ListeningStageListEditor
+            lessonId={lessonId}
+            variantId={defaultVariant?.id}
+            container={container}
+          />
         </div>
       )}
     </LessonEditorShell>

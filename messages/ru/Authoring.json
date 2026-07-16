@@ -538,6 +538,17 @@
     "audioSourceInvalidType": "Загрузите аудиофайл MP3, OGG, WAV, AAC, FLAC или M4A.",
     "audioSourceTooLarge": "Файл слишком большой. Максимальный размер — 100 МБ.",
     "transcript": "Транскрипт",
-    "transcriptPlaceholder": "Полный транскрипт аудиозаписи"
+    "transcriptPlaceholder": "Полный транскрипт аудиозаписи",
+    "listeningStages": "Поэтапные упражнения",
+    "listeningStagesNeedsSource": "Добавьте источник аудио перед добавлением поэтапных упражнений.",
+    "listeningStagesEmpty": "Пока нет поэтапных упражнений — добавьте одно, чтобы выстроить последовательность Прослушать → Заполнить пропуски → Понимание.",
+    "stageType": "Тип этапа",
+    "stageTypeGapFill": "Заполнение пропусков",
+    "stageTypeComprehension": "Понимание",
+    "stageRemove": "Удалить этап {position}",
+    "stageExerciseNone": "Без упражнения",
+    "stageExerciseAriaLabel": "Поэтапное упражнение",
+    "stageExerciseAddNew": "Новое упражнение",
+    "stageAdd": "Добавить этап"
   }
 }

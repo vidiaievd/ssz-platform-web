@@ -538,6 +538,17 @@
     "audioSourceInvalidType": "Завантажте аудіофайл MP3, OGG, WAV, AAC, FLAC або M4A.",
     "audioSourceTooLarge": "Файл завеликий. Максимальний розмір — 100 МБ.",
     "transcript": "Транскрипт",
-    "transcriptPlaceholder": "Повний транскрипт аудіозапису"
+    "transcriptPlaceholder": "Повний транскрипт аудіозапису",
+    "listeningStages": "Поетапні вправи",
+    "listeningStagesNeedsSource": "Додайте джерело аудіо, перш ніж додавати поетапні вправи.",
+    "listeningStagesEmpty": "Поки немає поетапних вправ — додайте одну, щоб побудувати послідовність Прослухати → Заповнити пропуски → Розуміння.",
+    "stageType": "Тип етапу",
+    "stageTypeGapFill": "Заповнення пропусків",
+    "stageTypeComprehension": "Розуміння",
+    "stageRemove": "Видалити етап {position}",
+    "stageExerciseNone": "Без вправи",
+    "stageExerciseAriaLabel": "Поетапна вправа",
+    "stageExerciseAddNew": "Нова вправа",
+    "stageAdd": "Додати етап"
   }
 }

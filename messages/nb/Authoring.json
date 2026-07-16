@@ -538,6 +538,17 @@
     "audioSourceInvalidType": "Last opp en MP3-, OGG-, WAV-, AAC-, FLAC- eller M4A-lydfil.",
     "audioSourceTooLarge": "Filen er for stor. Maksimal størrelse er 100 MB.",
     "transcript": "Transkripsjon",
-    "transcriptPlaceholder": "Full transkripsjon av lyttesporet"
+    "transcriptPlaceholder": "Full transkripsjon av lyttesporet",
+    "listeningStages": "Trinnvise oppgaver",
+    "listeningStagesNeedsSource": "Legg til en lydkilde før du legger til trinnvise oppgaver.",
+    "listeningStagesEmpty": "Ingen trinnvise oppgaver ennå — legg til en for å bygge Lytt → Fyll inn → Forståelse-flyten.",
+    "stageType": "Trinntype",
+    "stageTypeGapFill": "Fyll inn",
+    "stageTypeComprehension": "Forståelse",
+    "stageRemove": "Fjern trinn {position}",
+    "stageExerciseNone": "Ingen oppgave",
+    "stageExerciseAriaLabel": "Trinnvis oppgave",
+    "stageExerciseAddNew": "Ny oppgave",
+    "stageAdd": "Legg til trinn"
   }
 }
