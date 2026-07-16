@@ -3,6 +3,8 @@ import { z } from 'zod';
 export const lessonFormSchema = z.object({
   title: z.string().min(1).max(200),
   body: z.string().max(50_000).optional(),
+  /** Full transcript of the listening track. AUDIO-kind lessons only (BE1.3). */
+  transcript: z.string().max(50_000).optional(),
 });
 
 export type LessonFormValues = z.infer<typeof lessonFormSchema>;
@@ -26,3 +28,13 @@ export const videoCueEntrySchema = z.object({
 export const videoCuesSchema = z.array(videoCueEntrySchema);
 
 export type VideoCueEntry = z.infer<typeof videoCueEntrySchema>;
+
+export const listeningStageEntrySchema = z.object({
+  exerciseId: z.string().min(1),
+  position: z.number().int().min(0),
+  stageType: z.enum(['gap_fill', 'comprehension']),
+});
+
+export const listeningStagesSchema = z.array(listeningStageEntrySchema);
+
+export type ListeningStageEntry = z.infer<typeof listeningStageEntrySchema>;

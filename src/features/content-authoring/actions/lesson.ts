@@ -27,7 +27,7 @@ export async function createLessonAction(
     if (!parsed.success) {
       throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
-    const { title, body } = parsed.data;
+    const { title, body, transcript } = parsed.data;
 
     const { lessonId } = await serverFetch<{ lessonId: string }>({
       service: 'content',
@@ -48,6 +48,7 @@ export async function createLessonAction(
           maxLevel: difficultyLevel,
           displayTitle: title,
           bodyMarkdown: body,
+          ...(transcript !== undefined && { transcript }),
         },
       });
       variantId = variant.variantId;
@@ -72,7 +73,7 @@ export async function updateLessonAction(
     if (!parsed.success) {
       throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
-    const { title, body } = parsed.data;
+    const { title, body, transcript } = parsed.data;
 
     await serverFetch({
       service: 'content',
@@ -82,15 +83,19 @@ export async function updateLessonAction(
     });
 
     let newVariantId: string | undefined;
-    if (body !== undefined) {
+    if (body !== undefined || transcript !== undefined) {
       if (variantId) {
         await serverFetch({
           service: 'content',
           path: `/lessons/${lessonId}/variants/${variantId}`,
           method: 'PATCH',
-          body: { displayTitle: title, bodyMarkdown: body },
+          body: {
+            displayTitle: title,
+            ...(body !== undefined && { bodyMarkdown: body }),
+            ...(transcript !== undefined && { transcript }),
+          },
         });
-      } else {
+      } else if (body) {
         const variant = await serverFetch<{ variantId: string }>({
           service: 'content',
           path: `/lessons/${lessonId}/variants`,
@@ -101,6 +106,7 @@ export async function updateLessonAction(
             maxLevel: difficultyLevel,
             displayTitle: title,
             bodyMarkdown: body,
+            ...(transcript !== undefined && { transcript }),
           },
         });
         newVariantId = variant.variantId;

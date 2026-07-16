@@ -125,6 +125,8 @@ export interface LessonVariant {
   bodyMarkdown: string;
   estimatedReadingMinutes?: number | null;
   status: 'draft' | 'published';
+  /** Full transcript of the listening track. AUDIO-kind lessons only (BE1.3). */
+  transcript?: string | null;
 }
 
 /** Paragraph-aligned bilingual translation for TEXT lesson variants (BE1.4). */
@@ -144,6 +146,15 @@ export interface LessonVideoCue {
 /** Comprehension-check exercise linked to a VIDEO lesson variant (BE1.2). At most one per variant. */
 export interface LessonVideoQuestion {
   exerciseId: string;
+}
+
+export type ListeningStageType = 'gap_fill' | 'comprehension';
+
+/** Ordered gap-fill/comprehension activity staged after an AUDIO lesson variant's transcript (BE1.3). */
+export interface LessonListeningStage {
+  exerciseId: string;
+  position: number;
+  stageType: ListeningStageType;
 }
 
 /** Author-marked glossary word for a TEXT/VIDEO lesson variant (BE1.5). No unmark endpoint exists. */

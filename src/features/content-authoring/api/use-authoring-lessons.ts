@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import type {
   ContainerItem,
   GlossaryMark,
+  LessonListeningStage,
   LessonParagraph,
   LessonVariant,
   LessonVideoCue,
@@ -73,6 +74,21 @@ export function useLessonCues(lessonId: string, variantId: string | undefined) {
       const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/cues`);
       if (!res.ok) return [];
       return res.json() as Promise<LessonVideoCue[]>;
+    },
+    enabled: !!lessonId && !!variantId,
+    staleTime: 30_000,
+  });
+}
+
+export function useListeningStages(lessonId: string, variantId: string | undefined) {
+  return useQuery<LessonListeningStage[]>({
+    queryKey: authoringKeys.lessonListeningStages(lessonId, variantId ?? ''),
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/content/lessons/${lessonId}/variants/${variantId}/listening-stages`,
+      );
+      if (!res.ok) return [];
+      return res.json() as Promise<LessonListeningStage[]>;
     },
     enabled: !!lessonId && !!variantId,
     staleTime: 30_000,
