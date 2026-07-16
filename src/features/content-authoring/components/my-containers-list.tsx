@@ -7,7 +7,7 @@ import {
   MoreVertical, Eye, Copy, Archive, ArchiveRestore, Trash2,
 } from 'lucide-react';
 import { z } from 'zod/v4';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -38,14 +38,6 @@ const listFilterSchema = z.object({
 
 const PAGE_SIZE = 25;
 
-function relativeTime(iso: string): string {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function LanguageFlag({ code }: { code: string }) {
@@ -65,42 +57,32 @@ interface ContainerRowProps {
 function ContainerTableRow({ container }: ContainerRowProps) {
   const state = deriveContainerState(container);
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const formatter = useFormatter();
   const containerHref = `/school/${schoolSlug}/content/${container.id}`;
   return (
-    <tr
-      className="group border-b border-border transition-colors hover:bg-muted/40 cursor-pointer"
-      onClick={() => { window.location.href = containerHref; }}
-    >
+    <tr className="group border-b border-border transition-colors hover:bg-muted/40">
       <td className="px-3 py-3">
         <div className="flex items-center gap-2">
           <LanguageFlag code={container.targetLanguage} />
-          <span className="font-medium text-sm">{container.title}</span>
+          <Link href={containerHref} className="font-medium text-sm hover:underline">
+            {container.title}
+          </Link>
         </div>
-        <div className="text-muted-foreground text-xs mt-0.5 flex gap-2">
+        <div className="text-muted-foreground text-xs mt-0.5 flex items-center gap-1.5">
           <span className="uppercase font-mono">{container.targetLanguage}</span>
-          {container.difficultyLevel && <span>·</span>}
-          {container.difficultyLevel && <span>{container.difficultyLevel}</span>}
+          <span aria-hidden>·</span>
+          <Clock className="h-3 w-3" />
+          {formatter.relativeTime(new Date(container.updatedAt), new Date())}
         </div>
+      </td>
+      <td className="px-3 py-3">
+        <CardMeta container={container} />
       </td>
       <td className="px-3 py-3">
         <ContainerStateBadge state={state} />
       </td>
-      <td className="px-3 py-3 font-mono text-xs text-muted-foreground">
-        {container.lessonCount != null ? `${container.lessonCount}ℓ` : '—'}
-      </td>
-      <td className="px-3 py-3">
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          {relativeTime(container.updatedAt)}
-        </div>
-      </td>
-      <td className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-        <Button variant="ghost" size="sm" asChild>
-          <Link href={containerHref}>
-            <Pencil className="h-3.5 w-3.5" />
-            <span className="sr-only">Edit {container.title}</span>
-          </Link>
-        </Button>
+      <td className="px-3 py-3 text-right">
+        <ContainerOverflowMenu container={container} state={state} />
       </td>
     </tr>
   );
@@ -451,11 +433,12 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
             <table className="w-full" role="table">
               <thead className="bg-muted/30">
                 <tr className="border-b border-border">
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">Course</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">State</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">Content</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">Edited</th>
-                  <th className="w-12" scope="col" />
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">{t('colCourse')}</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">{t('colContent')}</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">{t('colState')}</th>
+                  <th className="w-12 px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">
+                    <span className="sr-only">{t('colActions')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>

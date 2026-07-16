@@ -600,6 +600,10 @@
     "menuArchive": "Arkiver",
     "menuRestore": "Gjenopprett",
     "menuDelete": "Slett",
+    "colCourse": "Kurs",
+    "colContent": "Innhold",
+    "colState": "Status",
+    "colActions": "Handlinger",
     "moreAriaLabel": "Flere valg for {title}",
     "itemActionStub": "{action} — kommer i et senere steg"
   }

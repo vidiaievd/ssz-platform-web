@@ -600,6 +600,10 @@
     "menuArchive": "Архивировать",
     "menuRestore": "Восстановить",
     "menuDelete": "Удалить",
+    "colCourse": "Курс",
+    "colContent": "Содержимое",
+    "colState": "Статус",
+    "colActions": "Действия",
     "moreAriaLabel": "Дополнительные действия для {title}",
     "itemActionStub": "{action} — появится на следующем шаге"
   }

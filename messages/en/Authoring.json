@@ -600,6 +600,10 @@
     "menuArchive": "Archive",
     "menuRestore": "Restore",
     "menuDelete": "Delete",
+    "colCourse": "Course",
+    "colContent": "Content",
+    "colState": "State",
+    "colActions": "Actions",
     "moreAriaLabel": "More options for {title}",
     "itemActionStub": "{action} — coming in a later step"
   }
