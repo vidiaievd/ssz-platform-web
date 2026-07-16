@@ -599,5 +599,52 @@
     "colActions": "Handlinger",
     "moreAriaLabel": "Flere valg for {title}",
     "itemActionStub": "{action} — kommer i et senere steg"
+  },
+  "dangerZone": {
+    "heading": "Faresone",
+    "cancel": "Avbryt",
+    "discardDraft": {
+      "trigger": "Forkast utkast",
+      "title": "Forkaste dette utkastet?",
+      "description": "Utkastet og alt innholdet vil bli permanent slettet. Dette kan ikke angres.",
+      "confirm": "Forkast"
+    },
+    "unpublish": {
+      "trigger": "Avpubliser",
+      "title": "Avpublisere dette kurset?",
+      "description": "Studenter vil se et \"Kurs satt på pause\"-banner. Ingen nye påmeldinger godtas. Du kan publisere på nytt når som helst.",
+      "confirm": "Avpubliser",
+      "success": "Kurset er avpublisert.",
+      "error": "Kunne ikke avpublisere kurset."
+    },
+    "archive": {
+      "trigger": "Arkiver",
+      "title": "Arkivere dette kurset?",
+      "description": "Kurset skjules fra katalogen og påmelding stenges. Alt innhold og all studentfremdrift beholdes — du kan gjenopprette det når som helst.",
+      "confirm": "Arkiver",
+      "success": "Kurset er arkivert.",
+      "undo": "Angre",
+      "error": "Kunne ikke arkivere kurset."
+    },
+    "restore": {
+      "trigger": "Gjenopprett",
+      "title": "Gjenopprette dette kurset?",
+      "description": "Kurset settes tilbake til forrige tilstand.",
+      "confirm": "Gjenopprett",
+      "success": "Kurset er gjenopprettet.",
+      "error": "Kunne ikke gjenopprette kurset."
+    },
+    "deleteForever": {
+      "trigger": "Slett for godt",
+      "title": "Slette \"{title}\"?",
+      "description": "Alt innhold, alle leksjoner og all studenthistorikk for dette kurset slettes permanent etter 30 dager.",
+      "contentCounts": "Dette vil slette {modules, plural, one {# modul} other {# moduler}} og {lessons, plural, one {# leksjon} other {# leksjoner}}.",
+      "steerToArchive": "Vurder å arkivere i stedet — det beholder alt og kan angres.",
+      "typeToConfirm": "Skriv {title} for å bekrefte:",
+      "confirm": "Slett for godt",
+      "success": "Kurset er slettet.",
+      "error": "Kunne ikke slette kurset."
+    },
+    "transferOwnership": "Overfør eierskap"
   }
 }

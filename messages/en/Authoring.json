@@ -599,5 +599,52 @@
     "colActions": "Actions",
     "moreAriaLabel": "More options for {title}",
     "itemActionStub": "{action} — coming in a later step"
+  },
+  "dangerZone": {
+    "heading": "Danger zone",
+    "cancel": "Cancel",
+    "discardDraft": {
+      "trigger": "Discard draft",
+      "title": "Discard this draft?",
+      "description": "The draft and all its content will be permanently deleted. This cannot be undone.",
+      "confirm": "Discard"
+    },
+    "unpublish": {
+      "trigger": "Unpublish",
+      "title": "Unpublish this course?",
+      "description": "Students will see a \"Course paused\" banner. No new enrolments will be accepted. You can re-publish at any time.",
+      "confirm": "Unpublish",
+      "success": "Course unpublished.",
+      "error": "Failed to unpublish course."
+    },
+    "archive": {
+      "trigger": "Archive",
+      "title": "Archive this course?",
+      "description": "The course will be hidden from the catalogue and enrolment will be closed. All content and student progress is kept — you can restore it at any time.",
+      "confirm": "Archive",
+      "success": "Course archived.",
+      "undo": "Undo",
+      "error": "Failed to archive course."
+    },
+    "restore": {
+      "trigger": "Restore",
+      "title": "Restore this course?",
+      "description": "The course will be returned to its previous state.",
+      "confirm": "Restore",
+      "success": "Course restored.",
+      "error": "Failed to restore course."
+    },
+    "deleteForever": {
+      "trigger": "Delete forever",
+      "title": "Delete \"{title}\"?",
+      "description": "All content, lessons, and student history for this course will be permanently deleted after 30 days.",
+      "contentCounts": "This will delete {modules, plural, one {# module} other {# modules}} and {lessons, plural, one {# lesson} other {# lessons}}.",
+      "steerToArchive": "Consider archiving instead — it keeps everything and can be undone.",
+      "typeToConfirm": "Type {title} to confirm:",
+      "confirm": "Delete forever",
+      "success": "Course deleted.",
+      "error": "Failed to delete course."
+    },
+    "transferOwnership": "Transfer ownership"
   }
 }
