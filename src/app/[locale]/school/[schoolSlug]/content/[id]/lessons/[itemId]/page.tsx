@@ -12,6 +12,7 @@ import { TextEditorPane } from '@/features/content-authoring/components/text-edi
 import { VideoEditorPane } from '@/features/content-authoring/components/video-editor-pane';
 import { AudioEditorPane } from '@/features/content-authoring/components/audio-editor-pane';
 import { VocabularyEditorPane } from '@/features/content-authoring/components/vocabulary-editor-pane';
+import { GrammarEditorPane } from '@/features/content-authoring/components/grammar-editor-pane';
 import { PublishDialog } from '@/features/content-authoring/components/publish-dialog';
 import { runPreflight } from '@/features/content-authoring/lib/preflight';
 import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
@@ -114,6 +115,16 @@ export default async function LessonEditorPage({
         <VocabularyEditorPane
           kind={kind}
           lessonTitle={item.title}
+          state={item.state}
+          container={moduleContainer}
+          backHref={backHref}
+          publishSlot={publishSlot}
+        />
+      ) : kind === 'grammar' ? (
+        <GrammarEditorPane
+          kind={kind}
+          ruleId={item.refId}
+          ruleTitle={item.title}
           state={item.state}
           container={moduleContainer}
           backHref={backHref}

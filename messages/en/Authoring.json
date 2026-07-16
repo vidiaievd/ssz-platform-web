@@ -222,6 +222,7 @@
     "explanationTitlePlaceholder": "e.g. How to form the present tense",
     "bodyPlaceholder": "Write explanation in Markdown…",
     "examples": "Examples",
+    "examplesEmpty": "No examples yet.",
     "examplePlaceholder": "e.g. Jeg spiser et eple.",
     "addExample": "Add example",
     "removeExample": "Remove example",

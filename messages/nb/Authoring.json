@@ -219,6 +219,7 @@
     "explanationTitlePlaceholder": "f.eks. Slik bruker du presens",
     "bodyPlaceholder": "Skriv forklaring i Markdown…",
     "examples": "Eksempler",
+    "examplesEmpty": "Ingen eksempler ennå.",
     "examplePlaceholder": "f.eks. Jeg spiser et eple.",
     "addExample": "Legg til eksempel",
     "removeExample": "Fjern eksempel",

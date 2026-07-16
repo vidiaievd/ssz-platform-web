@@ -219,6 +219,7 @@
     "explanationTitlePlaceholder": "напр. Как образуется настоящее время",
     "bodyPlaceholder": "Напишите объяснение в формате Markdown…",
     "examples": "Примеры",
+    "examplesEmpty": "Пока нет примеров.",
     "examplePlaceholder": "напр. Я ем яблоко.",
     "addExample": "Добавить пример",
     "removeExample": "Удалить пример",

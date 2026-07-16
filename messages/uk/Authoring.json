@@ -219,6 +219,7 @@
     "explanationTitlePlaceholder": "напр. Як утворюється теперішній час",
     "bodyPlaceholder": "Напишіть пояснення у форматі Markdown…",
     "examples": "Приклади",
+    "examplesEmpty": "Прикладів ще немає.",
     "examplePlaceholder": "напр. Я їм яблуко.",
     "addExample": "Додати приклад",
     "removeExample": "Видалити приклад",

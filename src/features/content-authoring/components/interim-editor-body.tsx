@@ -5,7 +5,6 @@ import { useRouter } from '@/lib/i18n/navigation';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { LessonEditor } from './lesson-editor';
-import { GrammarEditor } from './grammar-editor';
 import { ExerciseEditor } from './exercise-editor';
 
 interface InterimEditorBodyProps {
@@ -18,7 +17,7 @@ interface InterimEditorBodyProps {
 
 /**
  * Dispatches to the pre-FE2 per-type editors (built for the old fixed-tabs UI)
- * as interim bodies for `LessonEditorShell`, so FE2.3–FE2.6 can each swap in a
+ * as interim bodies for `LessonEditorShell`, so FE2.4–FE2.6 can each swap in a
  * dedicated shell-native editor one type at a time without blocking on the rest.
  */
 export function InterimEditorBody({ kind, item, moduleContainer, backHref }: InterimEditorBodyProps) {
@@ -26,15 +25,6 @@ export function InterimEditorBody({ kind, item, moduleContainer, backHref }: Int
   const onClose = () => router.push(backHref);
 
   switch (kind) {
-    case 'grammar':
-      return (
-        <GrammarEditor
-          ruleId={item.refId}
-          ruleTitle={item.title ?? ''}
-          container={moduleContainer}
-          onClose={onClose}
-        />
-      );
     case 'exercise':
       return <ExerciseEditor exerciseId={item.refId} container={moduleContainer} onClose={onClose} />;
     case 'text':
