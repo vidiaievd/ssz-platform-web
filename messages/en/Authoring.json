@@ -495,7 +495,6 @@
     "previewLive": "Live",
     "previewCaption": "Exactly what the learner sees in the reader. Updates as you edit.",
     "previewPlaceholder": "Preview for this material type is coming soon.",
-    "bodyPlaceholder": "The dedicated editor for this material type will be wired in an upcoming step.",
     "anchorText": "Anchor text",
     "paragraphTranslations": "Paragraph translations",
     "paragraphTranslationsNeedsBody": "Save the anchor text first to add paragraph translations.",

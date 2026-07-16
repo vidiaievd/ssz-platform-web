@@ -150,9 +150,9 @@ export default async function LessonEditorPage({
           autosaveStatus="idle"
           autosaveSavedAt={null}
           publishSlot={publishSlot}
-          preview={<EditorBodyPlaceholder kind={kind} variant="preview" />}
+          preview={<EditorBodyPlaceholder kind={kind} />}
         >
-          <InterimEditorBody kind={kind} item={item} moduleContainer={moduleContainer} backHref={backHref} />
+          <InterimEditorBody item={item} moduleContainer={moduleContainer} backHref={backHref} />
         </LessonEditorShell>
       )}
     </main>

@@ -2,12 +2,10 @@
 
 import type { Container, CurriculumTreeItemNode } from '@/features/content/types';
 import { useRouter } from '@/lib/i18n/navigation';
-import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { LessonEditor } from './lesson-editor';
 
 interface InterimEditorBodyProps {
-  kind: MaterialKind;
   item: CurriculumTreeItemNode;
   /** The item's own module Container — every module is its own Container (see find-tree-item.ts). */
   moduleContainer: Container;
