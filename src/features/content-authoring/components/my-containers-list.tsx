@@ -222,6 +222,7 @@ function ContainerGridCard({ container }: { container: Container }) {
 // ─── Empty states ─────────────────────────────────────────────────────────────
 
 function ListEmptyState() {
+  const t = useTranslations('Authoring.list');
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const newHref = `/school/${schoolSlug}/content/new`;
   return (
@@ -230,55 +231,48 @@ function ListEmptyState() {
         <BookOpen className="h-8 w-8 text-muted-foreground" />
       </div>
       <div className="space-y-1">
-        <p className="text-base font-semibold">No courses yet</p>
-        <p className="text-sm text-muted-foreground max-w-sm">
-          A course is the top-level container. Each course has CEFR levels, modules, and lessons.
-          Start blank or use a template.
-        </p>
+        <p className="text-base font-semibold">{t('emptyTitle')}</p>
+        <p className="text-sm text-muted-foreground max-w-sm">{t('emptyBody')}</p>
       </div>
       <div className="flex flex-wrap gap-3 justify-center">
         <Button asChild>
           <Link href={newHref}>
             <Plus className="mr-1 h-4 w-4" />
-            Create from blank
+            {t('emptyCreate')}
           </Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href={`${newHref}?template=cefr_a1`}>
-            Use CEFR A1 template
+            {t('emptyTemplate')}
           </Link>
         </Button>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
-        {[
-          { label: 'CEFR A1 starter', desc: '6 levels · 24 lessons', href: `${newHref}?template=cefr_a1` },
-          { label: 'Conversation starter', desc: '4 modules · 12 lessons', href: `${newHref}?template=conversation` },
-          { label: 'Business pack', desc: '5 modules · 20 lessons', href: `${newHref}?template=business` },
-        ].map((t) => (
-          <Link
-            key={t.label}
-            href={t.href}
-            className="rounded-lg border border-border bg-muted/30 p-3 text-left hover:bg-muted transition-colors"
-          >
-            <p className="text-sm font-medium">{t.label}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t.desc}</p>
-          </Link>
-        ))}
       </div>
     </div>
   );
 }
 
-function FilteredEmptyState({ onClear }: { onClear: () => void }) {
+interface FilteredEmptyStateProps {
+  search: string;
+  filterLabel?: string;
+  onClear: () => void;
+}
+
+function FilteredEmptyState({ search, filterLabel, onClear }: FilteredEmptyStateProps) {
+  const t = useTranslations('Authoring.list');
+  const message = search && filterLabel
+    ? t('filteredEmpty', { query: search, filter: filterLabel.toLowerCase() })
+    : search
+      ? t('filteredEmptySearchOnly', { query: search })
+      : t('filteredEmptyStateOnly', { filter: (filterLabel ?? '').toLowerCase() });
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
-      <p className="text-sm text-muted-foreground">No courses match this filter.</p>
+      <p className="text-sm text-muted-foreground">{message}</p>
       <button
         type="button"
         className="text-sm text-primary underline-offset-4 hover:underline"
         onClick={onClear}
       >
-        Clear filters
+        {t('clearFilters')}
       </button>
     </div>
   );
@@ -381,13 +375,13 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
 
         <div className="flex flex-wrap items-center gap-2">
           <Segmented
-            aria-label={t('filterAll')}
+            aria-label={t('statusFilterLabel')}
             options={statusFilterOptions}
             value={filters.state}
             onValueChange={(v) => setFilters({ state: v, page: 1 })}
           />
           <Segmented
-            aria-label="View"
+            aria-label={t('viewToggleLabel')}
             options={viewOptions}
             value={filters.view}
             onValueChange={(v) => setFilters({ view: v })}
@@ -415,7 +409,13 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
         emptySlot={<ListEmptyState />}
       >
         {containers.length === 0 && hasActiveFilter ? (
-          <FilteredEmptyState onClear={clearFilters} />
+          <FilteredEmptyState
+            onClear={clearFilters}
+            search={filters.search}
+            filterLabel={filters.state !== 'all'
+              ? statusFilterOptions.find((o) => o.value === filters.state)?.label
+              : undefined}
+          />
         ) : filters.view === 'grid' ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {containers.map((c) => <ContainerGridCard key={c.id} container={c} />)}
