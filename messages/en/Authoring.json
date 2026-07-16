@@ -567,6 +567,10 @@
     "liveDurationMinutes": "{minutes} min",
     "liveCapacity": "Capacity",
     "liveJoinUrl": "Video link",
-    "livePreviewNoSchedule": "Not yet scheduled."
+    "livePreviewNoSchedule": "Not yet scheduled.",
+    "liveScheduleTitle": "Schedule",
+    "liveOptionsTitle": "Options",
+    "liveOptionRecording": "Publish recording after class",
+    "liveOptionApproval": "Require teacher approval to join"
   }
 }

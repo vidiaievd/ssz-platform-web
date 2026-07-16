@@ -567,6 +567,10 @@
     "liveDurationMinutes": "{minutes} хв",
     "liveCapacity": "Місткість",
     "liveJoinUrl": "Посилання на відео",
-    "livePreviewNoSchedule": "Ще не заплановано."
+    "livePreviewNoSchedule": "Ще не заплановано.",
+    "liveScheduleTitle": "Розклад",
+    "liveOptionsTitle": "Параметри",
+    "liveOptionRecording": "Опублікувати запис після заняття",
+    "liveOptionApproval": "Вимагати підтвердження вчителя для приєднання"
   }
 }

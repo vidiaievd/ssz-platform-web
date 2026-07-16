@@ -567,6 +567,10 @@
     "liveDurationMinutes": "{minutes} min",
     "liveCapacity": "Kapasitet",
     "liveJoinUrl": "Videolenke",
-    "livePreviewNoSchedule": "Ikke planlagt ennå."
+    "livePreviewNoSchedule": "Ikke planlagt ennå.",
+    "liveScheduleTitle": "Timeplan",
+    "liveOptionsTitle": "Alternativer",
+    "liveOptionRecording": "Publiser opptak etter timen",
+    "liveOptionApproval": "Krev lærergodkjenning for å bli med"
   }
 }

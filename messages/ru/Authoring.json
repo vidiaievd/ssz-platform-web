@@ -567,6 +567,10 @@
     "liveDurationMinutes": "{minutes} мин",
     "liveCapacity": "Вместимость",
     "liveJoinUrl": "Ссылка на видео",
-    "livePreviewNoSchedule": "Ещё не запланировано."
+    "livePreviewNoSchedule": "Ещё не запланировано.",
+    "liveScheduleTitle": "Расписание",
+    "liveOptionsTitle": "Параметры",
+    "liveOptionRecording": "Публиковать запись после занятия",
+    "liveOptionApproval": "Требовать подтверждение учителя для входа"
   }
 }
