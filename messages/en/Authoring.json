@@ -560,6 +560,13 @@
     "stageExerciseAriaLabel": "Staged exercise",
     "stageExerciseAddNew": "New exercise",
     "stageAdd": "Add stage",
-    "previewStageListen": "Listen"
+    "previewStageListen": "Listen",
+    "liveDate": "Date",
+    "liveTime": "Time",
+    "liveDuration": "Duration",
+    "liveDurationMinutes": "{minutes} min",
+    "liveCapacity": "Capacity",
+    "liveJoinUrl": "Video link",
+    "livePreviewNoSchedule": "Not yet scheduled."
   }
 }

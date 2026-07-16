@@ -560,6 +560,13 @@
     "stageExerciseAriaLabel": "Поэтапное упражнение",
     "stageExerciseAddNew": "Новое упражнение",
     "stageAdd": "Добавить этап",
-    "previewStageListen": "Прослушать"
+    "previewStageListen": "Прослушать",
+    "liveDate": "Дата",
+    "liveTime": "Время",
+    "liveDuration": "Длительность",
+    "liveDurationMinutes": "{minutes} мин",
+    "liveCapacity": "Вместимость",
+    "liveJoinUrl": "Ссылка на видео",
+    "livePreviewNoSchedule": "Ещё не запланировано."
   }
 }

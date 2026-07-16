@@ -560,6 +560,13 @@
     "stageExerciseAriaLabel": "Trinnvis oppgave",
     "stageExerciseAddNew": "Ny oppgave",
     "stageAdd": "Legg til trinn",
-    "previewStageListen": "Lytt"
+    "previewStageListen": "Lytt",
+    "liveDate": "Dato",
+    "liveTime": "Tid",
+    "liveDuration": "Varighet",
+    "liveDurationMinutes": "{minutes} min",
+    "liveCapacity": "Kapasitet",
+    "liveJoinUrl": "Videolenke",
+    "livePreviewNoSchedule": "Ikke planlagt ennå."
   }
 }

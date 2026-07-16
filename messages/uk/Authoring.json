@@ -560,6 +560,13 @@
     "stageExerciseAriaLabel": "Поетапна вправа",
     "stageExerciseAddNew": "Нова вправа",
     "stageAdd": "Додати етап",
-    "previewStageListen": "Прослухати"
+    "previewStageListen": "Прослухати",
+    "liveDate": "Дата",
+    "liveTime": "Час",
+    "liveDuration": "Тривалість",
+    "liveDurationMinutes": "{minutes} хв",
+    "liveCapacity": "Місткість",
+    "liveJoinUrl": "Посилання на відео",
+    "livePreviewNoSchedule": "Ще не заплановано."
   }
 }
