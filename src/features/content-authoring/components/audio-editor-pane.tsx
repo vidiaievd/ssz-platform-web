@@ -15,13 +15,13 @@ import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 import { updateLessonAction } from '../actions/lesson';
-import { useLessonVariants } from '../api/use-authoring-lessons';
+import { useLessonVariants, useListeningStages } from '../api/use-authoring-lessons';
 import { authoringKeys } from '../api/keys';
 import { useAutosave } from '../hooks/use-autosave';
 import { LessonEditorShell } from './lesson-editor-shell';
-import { EditorBodyPlaceholder } from './editor-body-placeholder';
 import { EditorCard } from './editor-card';
 import { AudioSourceSlot } from './audio-source-slot';
+import { AudioLessonPreview } from './audio-lesson-preview';
 import { ListeningStageListEditor } from './listening-stage-list-editor';
 
 interface AudioEditorPaneProps {
@@ -49,6 +49,7 @@ export function AudioEditorPane({
 
   const { data: variants, isLoading: variantsLoading } = useLessonVariants(lessonId);
   const defaultVariant = variants?.[0];
+  const { data: stages } = useListeningStages(lessonId, defaultVariant?.id);
 
   const {
     register,
@@ -72,6 +73,7 @@ export function AudioEditorPane({
 
   const titleValue = useWatch({ control, name: 'title' });
   const bodyValue = useWatch({ control, name: 'body' });
+  const transcriptValue = useWatch({ control, name: 'transcript' });
 
   async function saveLesson(data: LessonFormValues) {
     const result = await updateLessonAction(
@@ -108,7 +110,14 @@ export function AudioEditorPane({
       autosaveStatus={autosave.status}
       autosaveSavedAt={autosave.savedAt}
       publishSlot={publishSlot}
-      preview={<EditorBodyPlaceholder kind={kind} variant="preview" />}
+      preview={
+        <AudioLessonPreview
+          title={titleValue ?? ''}
+          body={bodyValue ?? ''}
+          transcript={transcriptValue ?? ''}
+          stages={stages ?? []}
+        />
+      }
     >
       {variantsLoading ? (
         <div className="space-y-3">

@@ -549,6 +549,7 @@
     "stageExerciseNone": "Без упражнения",
     "stageExerciseAriaLabel": "Поэтапное упражнение",
     "stageExerciseAddNew": "Новое упражнение",
-    "stageAdd": "Добавить этап"
+    "stageAdd": "Добавить этап",
+    "previewStageListen": "Прослушать"
   }
 }

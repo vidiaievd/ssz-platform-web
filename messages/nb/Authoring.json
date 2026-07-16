@@ -549,6 +549,7 @@
     "stageExerciseNone": "Ingen oppgave",
     "stageExerciseAriaLabel": "Trinnvis oppgave",
     "stageExerciseAddNew": "Ny oppgave",
-    "stageAdd": "Legg til trinn"
+    "stageAdd": "Legg til trinn",
+    "previewStageListen": "Lytt"
   }
 }

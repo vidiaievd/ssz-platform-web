@@ -549,6 +549,7 @@
     "stageExerciseNone": "Без вправи",
     "stageExerciseAriaLabel": "Поетапна вправа",
     "stageExerciseAddNew": "Нова вправа",
-    "stageAdd": "Додати етап"
+    "stageAdd": "Додати етап",
+    "previewStageListen": "Прослухати"
   }
 }
