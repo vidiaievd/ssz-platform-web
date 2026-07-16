@@ -590,6 +590,7 @@
     "emptyBody": "Et kurs er den øverste beholderen. Hvert kurs har CEFR-nivåer, moduler og leksjoner. Start tomt eller fra en mal.",
     "emptyCreate": "Opprett kurs",
     "emptyTemplate": "Bruk A1-mal",
+    "clearFilters": "Fjern filtre",
     "filteredEmpty": "Ingen kurs samsvarer med «{query}» i {filter}.",
     "newCourseTile": "Nytt kurs",
     "noTeacher": "Ingen lærer",
