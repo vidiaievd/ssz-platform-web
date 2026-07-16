@@ -274,7 +274,6 @@
     "success": "Published successfully.",
     "dialogTitle": "Ready to publish?",
     "replacing": "Publishing this will replace the current live version for all enrolled students.",
-    "emptyDraft": "This draft has no content. Add at least one item before publishing.",
     "reviewGate": "I have reviewed the changes and warnings",
     "releaseNotesLabel": "Release notes (optional)",
     "releaseNotesPlaceholder": "What changed in this version? Students won't see this.",

@@ -6,11 +6,11 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/i18n/navigation';
-import type { Container, ContainerItem, ContainerVersion } from '@/features/content/types';
+import type { Container, ContainerVersion } from '@/features/content/types';
 import { CourseEditorShell } from '@/features/content-authoring/components/course-editor-shell';
 import { ContainerStateBadge, deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
 import { CourseStatusBanner } from '@/features/content-authoring/components/course-status-banner';
-import { runPreflight } from '@/features/content-authoring/lib/preflight';
+import { getContainerPreflight } from '@/features/content-authoring/lib/get-container-preflight';
 import type { PreflightResult, SchoolRole } from '@/features/content-authoring/types';
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
 
@@ -66,13 +66,7 @@ export default async function ContainerDetailPage({
     draftVersionId = draftVersion?.id ?? null;
 
     if (state === 'draft') {
-      const items = draftVersion
-        ? await serverFetch<ContainerItem[]>({
-            service: 'content',
-            path: `/containers/${id}/versions/${draftVersion.id}/items`,
-          })
-        : [];
-      preflight = runPreflight(schoolSlug, container, items);
+      preflight = await getContainerPreflight(schoolSlug, id);
     }
   } catch (err) {
     console.error('[content/id] versions fetch failed:', err);

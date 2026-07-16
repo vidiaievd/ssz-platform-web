@@ -127,18 +127,9 @@ function DialogBody({
 
   if (!result) return null;
 
-  const isEmpty = result.checks.length === 0;
   const hasBlockers = result.blockerCount > 0;
   const warningsOnly = !hasBlockers && result.warningCount > 0;
-  const allPassed = !hasBlockers && result.warningCount === 0 && !isEmpty;
-
-  if (isEmpty) {
-    return (
-      <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
-        {t('emptyDraft')}
-      </div>
-    );
-  }
+  const allPassed = !hasBlockers && result.warningCount === 0;
 
   return (
     <div className="space-y-4">
@@ -195,12 +186,11 @@ export function PublishDialog({ container, result, trigger }: PublishDialogProps
 
   const hasBlockers = (result?.blockerCount ?? 0) > 0;
   const warningsOnly = !hasBlockers && (result?.warningCount ?? 0) > 0;
-  const isEmpty = (result?.checks.length ?? -1) === 0;
   const notesOver = notes.length > NOTES_LIMIT;
 
   const canPublish =
+    !!result &&
     !hasBlockers &&
-    !isEmpty &&
     !notesOver &&
     (!warningsOnly || reviewChecked) &&
     phase === 'form';

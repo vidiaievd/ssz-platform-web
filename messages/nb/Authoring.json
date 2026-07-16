@@ -271,7 +271,6 @@
     "success": "Publisert.",
     "dialogTitle": "Klar til å publisere?",
     "replacing": "Publisering erstatter gjeldende live-versjon for alle påmeldte studenter.",
-    "emptyDraft": "Dette utkastet har ingen innhold. Legg til minst ett element før publisering.",
     "reviewGate": "Jeg har gjennomgått endringene og advarslene",
     "releaseNotesLabel": "Utgivelsesnotater (valgfritt)",
     "releaseNotesPlaceholder": "Hva er endret i denne versjonen? Studentene vil ikke se dette.",

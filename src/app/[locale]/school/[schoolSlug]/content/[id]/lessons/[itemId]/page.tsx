@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
-import type { Container, ContainerItem, ContainerVersion, CurriculumTree } from '@/features/content/types';
+import type { Container, ContainerVersion, CurriculumTree } from '@/features/content/types';
 import { deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
 import { TextEditorPane } from '@/features/content-authoring/components/text-editor-pane';
 import { VideoEditorPane } from '@/features/content-authoring/components/video-editor-pane';
@@ -12,7 +12,7 @@ import { VocabularyEditorPane } from '@/features/content-authoring/components/vo
 import { GrammarEditorPane } from '@/features/content-authoring/components/grammar-editor-pane';
 import { ExerciseEditorPane } from '@/features/content-authoring/components/exercise-editor-pane';
 import { PublishDialog } from '@/features/content-authoring/components/publish-dialog';
-import { runPreflight } from '@/features/content-authoring/lib/preflight';
+import { getContainerPreflight } from '@/features/content-authoring/lib/get-container-preflight';
 import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
 import { getMaterialKind } from '@/features/content-authoring/lib/material-kind';
 import type { PreflightResult } from '@/features/content-authoring/types';
@@ -65,11 +65,7 @@ export default async function LessonEditorPage({
 
   let preflight: PreflightResult | undefined;
   if (state === 'draft') {
-    const items = await serverFetch<ContainerItem[]>({
-      service: 'content',
-      path: `/containers/${id}/versions/${draftVersion.id}/items`,
-    });
-    preflight = runPreflight(schoolSlug, container, items);
+    preflight = await getContainerPreflight(schoolSlug, id);
   }
 
   const kind = getMaterialKind(item);
