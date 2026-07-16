@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { ContainerItem, ExerciseDisplay } from '@/features/content/types';
+import type { ContainerItem, ExerciseWithAnswers } from '@/features/content/types';
 
 import { authoringKeys } from './keys';
 
@@ -21,13 +21,14 @@ export function useAuthoringExercises(containerId: string, enabled = true) {
 }
 
 export function useAuthoringExercise(exerciseId: string | null, enabled = true) {
-  return useQuery<ExerciseDisplay | null>({
+  return useQuery<ExerciseWithAnswers | null>({
     queryKey: authoringKeys.exercise(exerciseId ?? ''),
     queryFn: async () => {
       if (!exerciseId) return null;
-      const res = await fetch(`/api/content/exercises/${exerciseId}`);
+      // Authoring needs the correct answers to prefill the editor.
+      const res = await fetch(`/api/content/exercises/${exerciseId}/answers`);
       if (!res.ok) return null;
-      return res.json() as Promise<ExerciseDisplay>;
+      return res.json() as Promise<ExerciseWithAnswers>;
     },
     enabled: enabled && !!exerciseId,
     staleTime: 60_000,

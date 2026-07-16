@@ -240,13 +240,54 @@ export interface GrammarRule {
   sectionId?: string | null;
 }
 
+/** One template code from content-service's seeded exercise templates. */
+export type ExerciseTemplateCode =
+  | 'multiple_choice'
+  | 'fill_in_blank'
+  | 'translate_to_target'
+  | 'translate_from_target'
+  | 'match_pairs';
+
+/** A per-language instruction/hint attached to an exercise (backend sub-resource). */
+export interface ExerciseInstruction {
+  id: string;
+  exerciseId: string;
+  instructionLanguage: string;
+  instructionText: string;
+  hintText: string | null;
+}
+
+/**
+ * Exercise as returned by `GET /exercises/:id/display` — content only, answers
+ * omitted (safe for the reader). `instructions` is the per-language sub-resource
+ * list, not a plain string.
+ */
 export interface ExerciseDisplay {
   id: string;
+  exerciseTemplateId?: string;
   templateCode: string;
   targetLanguage: string;
   difficultyLevel?: DifficultyLevel;
   content: Record<string, unknown>;
-  instructions?: string;
+  instructions?: ExerciseInstruction[] | null;
+}
+
+/** Exercise as returned by `GET /exercises/:id/answers` — adds `expectedAnswers` for authoring. */
+export interface ExerciseWithAnswers extends ExerciseDisplay {
+  expectedAnswers: Record<string, unknown>;
+}
+
+/** Exercise template metadata from `GET /exercise-templates`. */
+export interface ExerciseTemplate {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  contentSchema: Record<string, unknown>;
+  answerSchema: Record<string, unknown>;
+  defaultCheckSettings: Record<string, unknown> | null;
+  supportedLanguages: string[] | null;
+  isActive: boolean;
 }
 
 export type ShareRole = 'co_author' | 'viewer';

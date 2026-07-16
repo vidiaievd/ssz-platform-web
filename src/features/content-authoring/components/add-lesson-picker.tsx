@@ -18,7 +18,7 @@ import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
 import { createGrammarRuleAction } from '../actions/grammar';
 import { createExerciseAction } from '../actions/exercise';
-import { exerciseFormSchema } from '../schemas/exercise';
+import { minimalMcqValues } from '../lib/exercise-content';
 
 interface AddLessonPickerProps {
   open: boolean;
@@ -91,13 +91,13 @@ export function AddLessonPicker({
           );
         }
         // exercise: no title-only creation — scaffold a minimal valid multiple-choice draft.
-        const parsed = exerciseFormSchema.parse({
-          templateCode: 'multiple_choice',
-          mcQuestion: title,
-          mcOptions: [{ text: 'Option 1' }, { text: 'Option 2' }],
-          mcCorrectIndex: 0,
-        });
-        return createExerciseAction(moduleContainerId, targetLanguage, parsed);
+        return createExerciseAction(
+          moduleContainerId,
+          targetLanguage,
+          difficultyLevel,
+          visibility,
+          minimalMcqValues(title),
+        );
       })();
 
       setPendingKind(null);

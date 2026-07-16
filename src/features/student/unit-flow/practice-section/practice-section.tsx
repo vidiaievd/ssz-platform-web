@@ -8,6 +8,7 @@ import type { ExpandedExerciseRef } from '@/features/learning';
 import { BottomBar, LearningSkeleton } from '@/features/learning';
 import { useExerciseDisplay } from '@/features/content/api';
 import type { ExerciseDisplay } from '@/features/content/types';
+import { primaryInstructionText } from '@/features/content/lib/instruction-text';
 import {
   McqBody,
   FeedbackBar,
@@ -43,7 +44,7 @@ function parseMcq(display: ExerciseDisplay): ParsedMcq | null {
     : [];
 
   return {
-    content: { question, options, instruction: display.instructions ?? undefined },
+    content: { question, options, instruction: primaryInstructionText(display.instructions) ?? undefined },
     expected: {
       correct_option_ids: correctIds,
       explanation: typeof ea.explanation === 'string' ? ea.explanation : undefined,

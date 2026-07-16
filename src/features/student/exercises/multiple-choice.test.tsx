@@ -18,7 +18,15 @@ const EXERCISE: ExerciseDisplay = {
   templateCode: 'multiple_choice',
   targetLanguage: 'nb',
   difficultyLevel: 'A1',
-  instructions: 'Pick the correct answer.',
+  instructions: [
+    {
+      id: 'i1',
+      exerciseId: 'ex-mc-1',
+      instructionLanguage: 'en',
+      instructionText: 'Pick the correct answer.',
+      hintText: null,
+    },
+  ],
   content: {
     question: 'What colour is the sky?',
     options: [

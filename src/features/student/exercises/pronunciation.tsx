@@ -3,6 +3,7 @@ import { Smartphone } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import type { ExerciseDisplay } from '@/features/content/types';
+import { primaryInstructionText } from '@/features/content/lib/instruction-text';
 
 interface PronunciationExerciseProps {
   exercise: ExerciseDisplay;
@@ -22,8 +23,10 @@ export function PronunciationExercise({ exercise }: PronunciationExerciseProps) 
 
   return (
     <div className="space-y-4">
-      {exercise.instructions && (
-        <p className="text-muted-foreground text-sm">{exercise.instructions}</p>
+      {primaryInstructionText(exercise.instructions) && (
+        <p className="text-muted-foreground text-sm">
+          {primaryInstructionText(exercise.instructions)}
+        </p>
       )}
 
       <div className="rounded-lg border border-border bg-card p-4 text-center">

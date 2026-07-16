@@ -33,8 +33,6 @@
   "filterAll": "All",
   "exerciseTemplate": "Type",
   "readOnly": "Preview",
-  "hints": "Hints",
-  "exemplarAnswer": "Example answer",
   "accessTier": {
     "assigned_only": "Assigned only",
     "entitlement_required": "Entitlement required",
@@ -82,5 +80,16 @@
     "grammar": "Grammar",
     "exercise": "Practice",
     "live": "Live class"
-  }
+  },
+  "exerciseTypes": {
+    "multiple_choice": "Multiple choice",
+    "fill_in_blank": "Fill in the blank",
+    "translate_to_target": "Translate to target",
+    "translate_from_target": "Translate from target",
+    "match_pairs": "Match pairs"
+  },
+  "wordBank": "Word bank",
+  "matchColumnLeft": "Items",
+  "matchColumnRight": "Matches",
+  "translatePrompt": "Translate:"
 }

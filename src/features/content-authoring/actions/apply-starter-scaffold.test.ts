@@ -19,6 +19,7 @@ vi.mock('next/cache', () => ({
 }));
 
 const { applyCefrStarterScaffoldAction } = await import('./apply-starter-scaffold');
+const { __resetExerciseTemplateCache } = await import('../lib/exercise-templates');
 
 const TITLES = {
   module: 'A1 Starter',
@@ -64,28 +65,22 @@ function mockHappyPath() {
     http.post('http://content.test/api/v1/lessons', () =>
       HttpResponse.json({ lessonId: 'lsn-1' }, { status: 201 }),
     ),
-    http.post('http://content.test/api/v1/exercises', () =>
-      HttpResponse.json({ id: 'exc-1', templateCode: 'multiple_choice', content: {} }, { status: 201 }),
-    ),
-    http.get('http://content.test/api/v1/containers/:id/versions/:versionId/items', () =>
+    http.get('http://content.test/api/v1/exercise-templates', () =>
       HttpResponse.json([
-        {
-          id: 'item-exc',
-          containerVersionId: 'v-draft',
-          position: 1,
-          itemType: 'exercise',
-          itemId: 'exc-1',
-          isRequired: true,
-          title: null,
-          addedAt: '2025-01-01T00:00:00Z',
-        },
+        { id: 'tpl-mcq', code: 'multiple_choice', name: 'Multiple Choice', contentSchema: {}, answerSchema: {}, isActive: true },
       ]),
+    ),
+    http.post('http://content.test/api/v1/exercises', () =>
+      HttpResponse.json({ exerciseId: 'exc-1' }, { status: 201 }),
     ),
   );
 }
 
 describe('applyCefrStarterScaffoldAction', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    __resetExerciseTemplateCache();
+  });
 
   it('creates a module with vocabulary, reading, listening and practice items', async () => {
     mockHappyPath();

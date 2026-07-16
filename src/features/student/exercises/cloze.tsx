@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import type { ExerciseDisplay } from '@/features/content/types';
+import { primaryInstructionText } from '@/features/content/lib/instruction-text';
 import { submitAttemptAction } from '../actions/submit-attempt';
 import type { AttemptResult } from '../types/exercise';
 import { FeedbackPanel } from './feedback-panel';
@@ -72,8 +73,10 @@ export function ClozeExercise({ exercise }: ClozeExerciseProps) {
 
   return (
     <div className="space-y-4">
-      {exercise.instructions && (
-        <p className="text-muted-foreground text-sm">{exercise.instructions}</p>
+      {primaryInstructionText(exercise.instructions) && (
+        <p className="text-muted-foreground text-sm">
+          {primaryInstructionText(exercise.instructions)}
+        </p>
       )}
 
       <div

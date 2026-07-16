@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import type { ExerciseDisplay } from '@/features/content/types';
+import { primaryInstructionText } from '@/features/content/lib/instruction-text';
 import {
   McqBody,
   TranslateBody,
@@ -48,7 +49,7 @@ function parseMcq(display: ExerciseDisplay): ParsedMcq | null {
     content: {
       question,
       options,
-      instruction: display.instructions ?? undefined,
+      instruction: primaryInstructionText(display.instructions) ?? undefined,
     },
     expected: { correct_option_ids: correctIds },
   };
@@ -78,7 +79,7 @@ function parseTranslate(display: ExerciseDisplay): ParsedTranslate | null {
       toLabel,
       sourceText,
       sampleAnswer,
-      instruction: display.instructions ?? undefined,
+      instruction: primaryInstructionText(display.instructions) ?? undefined,
     },
     expected: { accepted_answers: rawAccepted },
   };
@@ -135,12 +136,12 @@ function PlacementMcqQuestion({
       </h2>
 
       {/* Optional English gloss */}
-      {display.instructions && (
+      {primaryInstructionText(display.instructions) && (
         <p
           className="mb-[18px] italic"
           style={{ fontSize: 15, color: 'var(--ssz-text-secondary)' }}
         >
-          {display.instructions}
+          {primaryInstructionText(display.instructions)}
         </p>
       )}
 

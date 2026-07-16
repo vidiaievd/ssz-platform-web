@@ -10,7 +10,7 @@ import { createModuleAction } from './container';
 import { createLessonAction } from './lesson';
 import { createVocabularyListAction } from './vocabulary';
 import { createExerciseAction } from './exercise';
-import { exerciseFormSchema } from '../schemas/exercise';
+import { minimalMcqValues } from '../lib/exercise-content';
 
 export interface CefrStarterTitles {
   module: string;
@@ -83,13 +83,15 @@ export async function applyCefrStarterScaffoldAction(
       ),
     );
 
-    const practiceDraft = exerciseFormSchema.parse({
-      templateCode: 'multiple_choice',
-      mcQuestion: titles.practice,
-      mcOptions: [{ text: 'Option 1' }, { text: 'Option 2' }],
-      mcCorrectIndex: 0,
-    });
-    unwrap(await createExerciseAction(moduleContainerId, targetLanguage, practiceDraft));
+    unwrap(
+      await createExerciseAction(
+        moduleContainerId,
+        targetLanguage,
+        difficultyLevel,
+        visibility,
+        minimalMcqValues(titles.practice),
+      ),
+    );
 
     revalidatePath(`/school/content/${courseContainerId}`);
     return { moduleContainerId };

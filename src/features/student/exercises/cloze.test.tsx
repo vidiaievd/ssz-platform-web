@@ -18,7 +18,15 @@ const EXERCISE: ExerciseDisplay = {
   templateCode: 'cloze',
   targetLanguage: 'nb',
   difficultyLevel: 'A1',
-  instructions: 'Fill in the blanks.',
+  instructions: [
+    {
+      id: 'i1',
+      exerciseId: 'ex-cloze-1',
+      instructionLanguage: 'en',
+      instructionText: 'Fill in the blanks.',
+      hintText: null,
+    },
+  ],
   content: {
     template: 'Jeg ___ til jobben med ___.',
     answers: ['sykler', 'bussen'],

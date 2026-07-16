@@ -107,10 +107,13 @@ describe('AddLessonPicker', () => {
     expect(createExerciseAction).toHaveBeenCalledWith(
       'module-1',
       'no',
+      'A2',
+      'public',
       expect.objectContaining({
         templateCode: 'multiple_choice',
         mcQuestion: 'New Practice',
         mcOptions: [{ text: 'Option 1' }, { text: 'Option 2' }],
+        mcCorrectIndex: 0,
       }),
     );
   });

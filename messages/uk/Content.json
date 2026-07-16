@@ -33,8 +33,6 @@
   "filterAll": "Всі",
   "exerciseTemplate": "Тип",
   "readOnly": "Перегляд",
-  "hints": "Підказки",
-  "exemplarAnswer": "Приклад відповіді",
   "accessTier": {
     "assigned_only": "Лише призначені",
     "entitlement_required": "Потрібен доступ",
@@ -82,5 +80,16 @@
     "grammar": "Граматика",
     "exercise": "Практика",
     "live": "Живий урок"
-  }
+  },
+  "exerciseTypes": {
+    "multiple_choice": "Множинний вибір",
+    "fill_in_blank": "Заповніть пропуск",
+    "translate_to_target": "Переклад цільовою мовою",
+    "translate_from_target": "Переклад з цільової мови",
+    "match_pairs": "З’єднайте пари"
+  },
+  "wordBank": "Банк слів",
+  "matchColumnLeft": "Елементи",
+  "matchColumnRight": "Відповідники",
+  "translatePrompt": "Перекладіть:"
 }

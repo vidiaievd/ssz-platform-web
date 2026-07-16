@@ -67,10 +67,20 @@ beforeEach(() => {
   vi.mocked(useAuthoringExercise).mockReturnValue({
     data: {
       id: 'exercise-1',
+      exerciseTemplateId: 'tpl-mcq',
       templateCode: 'multiple_choice',
       targetLanguage: 'no',
-      content: { question: 'Hva heter du?', options: ['Ja', 'Nei', 'Kanskje'], correctIndex: 0 },
-      instructions: '',
+      difficultyLevel: 'A2',
+      content: {
+        question: 'Hva heter du?',
+        options: [
+          { id: 'opt-0', text: 'Ja' },
+          { id: 'opt-1', text: 'Nei' },
+          { id: 'opt-2', text: 'Kanskje' },
+        ],
+      },
+      expectedAnswers: { correct_option_ids: ['opt-0'] },
+      instructions: null,
     },
     isLoading: false,
   } as never);
