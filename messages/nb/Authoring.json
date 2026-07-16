@@ -115,6 +115,8 @@
     "loadError": "Kunne ikke laste vokabular.",
     "empty": "Ingen ord ennå. Legg til det første.",
     "wordCount": "{count, plural, =0 {Ingen ord} one {# ord} other {# ord}}",
+    "words": "Ord",
+    "tapToFlip": "Trykk for å snu",
     "addWord": "Legg til ord",
     "editWord": "Rediger ord",
     "deleteWord": "Slett ord",

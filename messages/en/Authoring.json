@@ -118,6 +118,8 @@
     "loadError": "Could not load vocabulary.",
     "empty": "No words yet. Add the first one.",
     "wordCount": "{count, plural, =0 {No words} one {# word} other {# words}}",
+    "words": "Words",
+    "tapToFlip": "Tap to flip",
     "addWord": "Add word",
     "editWord": "Edit word",
     "deleteWord": "Delete word",
