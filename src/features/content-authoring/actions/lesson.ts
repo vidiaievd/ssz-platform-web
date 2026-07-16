@@ -5,14 +5,12 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
-import type { DifficultyLevel, Visibility } from '@/features/content/types';
-import type { MaterialKind } from '@/lib/content/lesson-types';
+import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content/types';
 
-import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
+import { lessonFormSchema, liveScheduleSchema, type LessonFormValues, type LiveScheduleFormValues } from '../schemas/lesson';
 import { addItemToDraft, removeItemFromDraft, reorderDraftItems } from '../lib/container-items';
 
-/** `MaterialKind`s backed by a `Lesson` entity (`kind` distinguishes them server-side). */
-export type LessonKind = Extract<MaterialKind, 'text' | 'video' | 'audio' | 'live'>;
+export type { LessonKind };
 
 export async function createLessonAction(
   containerId: string,
@@ -115,6 +113,30 @@ export async function updateLessonAction(
 
     revalidatePath(`/school/content/${containerId}`);
     return { variantId: newVariantId };
+  });
+}
+
+/** LIVE-kind lessons only (BE1.6) — no variant, just title + schedule fields. */
+export async function updateLiveLessonAction(
+  lessonId: string,
+  containerId: string,
+  input: LiveScheduleFormValues,
+) {
+  return tryAction(async () => {
+    const parsed = liveScheduleSchema.safeParse(input);
+    if (!parsed.success) {
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+    }
+    const { title, liveStartsAt, liveDurationMinutes, liveJoinUrl, liveCapacity } = parsed.data;
+
+    await serverFetch({
+      service: 'content',
+      path: `/lessons/${lessonId}`,
+      method: 'PATCH',
+      body: { title, liveStartsAt, liveDurationMinutes, liveJoinUrl, liveCapacity },
+    });
+
+    revalidatePath(`/school/content/${containerId}`);
   });
 }
 

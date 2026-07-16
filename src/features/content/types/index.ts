@@ -164,6 +164,8 @@ export interface GlossaryMark {
   occurrenceCount: number;
 }
 
+export type LessonKind = 'text' | 'video' | 'audio' | 'live';
+
 export interface Lesson {
   id: string;
   slug: string | null;
@@ -173,6 +175,15 @@ export interface Lesson {
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
   ownerUserId: string;
+  kind: LessonKind;
+  /** LIVE-kind only (BE1.6). ISO 8601 datetime. */
+  liveStartsAt: string | null;
+  /** LIVE-kind only (BE1.6). */
+  liveDurationMinutes: number | null;
+  /** LIVE-kind only (BE1.6). */
+  liveJoinUrl: string | null;
+  /** LIVE-kind only (BE1.6). */
+  liveCapacity: number | null;
   createdAt: string;
   updatedAt: string;
 }

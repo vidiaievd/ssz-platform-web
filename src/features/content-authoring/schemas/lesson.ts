@@ -29,6 +29,17 @@ export const videoCuesSchema = z.array(videoCueEntrySchema);
 
 export type VideoCueEntry = z.infer<typeof videoCueEntrySchema>;
 
+/** LIVE-kind lesson schedule fields (BE1.6). All nullable — pass null to clear. */
+export const liveScheduleSchema = z.object({
+  title: z.string().min(1).max(200),
+  liveStartsAt: z.string().datetime().nullable(),
+  liveDurationMinutes: z.number().int().min(1).max(480).nullable(),
+  liveJoinUrl: z.string().url().max(500).nullable().or(z.literal('').transform(() => null)),
+  liveCapacity: z.number().int().min(1).nullable(),
+});
+
+export type LiveScheduleFormValues = z.infer<typeof liveScheduleSchema>;
+
 export const listeningStageEntrySchema = z.object({
   exerciseId: z.string().min(1),
   position: z.number().int().min(0),
