@@ -13,6 +13,7 @@ import { VideoEditorPane } from '@/features/content-authoring/components/video-e
 import { AudioEditorPane } from '@/features/content-authoring/components/audio-editor-pane';
 import { VocabularyEditorPane } from '@/features/content-authoring/components/vocabulary-editor-pane';
 import { GrammarEditorPane } from '@/features/content-authoring/components/grammar-editor-pane';
+import { ExerciseEditorPane } from '@/features/content-authoring/components/exercise-editor-pane';
 import { PublishDialog } from '@/features/content-authoring/components/publish-dialog';
 import { runPreflight } from '@/features/content-authoring/lib/preflight';
 import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
@@ -125,6 +126,16 @@ export default async function LessonEditorPage({
           kind={kind}
           ruleId={item.refId}
           ruleTitle={item.title}
+          state={item.state}
+          container={moduleContainer}
+          backHref={backHref}
+          publishSlot={publishSlot}
+        />
+      ) : kind === 'exercise' ? (
+        <ExerciseEditorPane
+          kind={kind}
+          exerciseId={item.refId}
+          lessonTitle={item.title}
           state={item.state}
           container={moduleContainer}
           backHref={backHref}
