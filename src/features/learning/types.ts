@@ -206,6 +206,34 @@ export interface UnitPayload {
   progress: ModuleProgress;
 }
 
+/* ─── Unit contents (reader sidebar/footer nav data source, BE3.1/BE3.3) ─── */
+
+export type UnitContentsItemStatus = 'locked' | 'available' | 'in_progress' | 'completed';
+
+export interface UnitContentsItem {
+  id: string;
+  contentType: string;
+  contentId: string;
+  title: string | null;
+  lessonKind: string | null;
+  durationMinutes: number | null;
+  xpReward: number | null;
+  status: UnitContentsItemStatus;
+}
+
+export interface UnitContentsSection {
+  id: string;
+  title: string;
+  items: UnitContentsItem[];
+}
+
+export interface UnitContentsResult {
+  moduleId: string;
+  moduleTitle: string | null;
+  sections: UnitContentsSection[];
+  ungroupedItems: UnitContentsItem[];
+}
+
 /* ─── Unit summary (for Course Home unit list) ───────────────────── */
 
 export type UnitStatus = 'done' | 'active' | 'locked';
