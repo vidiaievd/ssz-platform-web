@@ -29,16 +29,10 @@ const TITLES = {
 };
 
 const DRAFT_VERSION = { items: [{ id: 'v-draft', status: 'draft', containerId: 'x', createdAt: '2025-01-01T00:00:00Z' }] };
-const CONTAINER_ITEM = {
-  id: 'item-1',
-  containerVersionId: 'v-draft',
-  position: 1,
-  itemType: 'container',
-  itemId: 'x',
-  isRequired: true,
-  title: null,
-  addedAt: '2025-01-01T00:00:00Z',
-};
+// The real backend's POST .../items responds with { itemId, position } —
+// `itemId` here means "id of the newly created container-item", not "id of
+// the referenced content" as it does in the GET list response.
+const ADD_ITEM_RESPONSE = { itemId: 'item-1', position: 0 };
 
 function mockHappyPath() {
   server.use(
@@ -62,7 +56,7 @@ function mockHappyPath() {
     ),
     http.get('http://content.test/api/v1/containers/:id/versions', () => HttpResponse.json(DRAFT_VERSION)),
     http.post('http://content.test/api/v1/containers/:id/versions/:versionId/items', () =>
-      HttpResponse.json(CONTAINER_ITEM, { status: 201 }),
+      HttpResponse.json(ADD_ITEM_RESPONSE, { status: 201 }),
     ),
     http.post('http://content.test/api/v1/vocabulary-lists', () =>
       HttpResponse.json({ listId: 'voc-1' }, { status: 201 }),
@@ -74,7 +68,18 @@ function mockHappyPath() {
       HttpResponse.json({ id: 'exc-1', templateCode: 'multiple_choice', content: {} }, { status: 201 }),
     ),
     http.get('http://content.test/api/v1/containers/:id/versions/:versionId/items', () =>
-      HttpResponse.json([{ ...CONTAINER_ITEM, id: 'item-exc', itemType: 'exercise', itemId: 'exc-1' }]),
+      HttpResponse.json([
+        {
+          id: 'item-exc',
+          containerVersionId: 'v-draft',
+          position: 1,
+          itemType: 'exercise',
+          itemId: 'exc-1',
+          isRequired: true,
+          title: null,
+          addedAt: '2025-01-01T00:00:00Z',
+        },
+      ]),
     ),
   );
 }

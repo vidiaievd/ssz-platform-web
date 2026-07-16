@@ -12,9 +12,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { MATERIAL_KINDS, getLessonTypeDefinition, type MaterialKind } from '@/lib/content/lesson-types';
-import type { DifficultyLevel, Visibility } from '@/features/content/types';
+import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content/types';
 
-import { createLessonAction, type LessonKind } from '../actions/lesson';
+import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
 import { createGrammarRuleAction } from '../actions/grammar';
 import { createExerciseAction } from '../actions/exercise';

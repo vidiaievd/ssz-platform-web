@@ -10,8 +10,6 @@ import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content
 import { lessonFormSchema, liveScheduleSchema, type LessonFormValues, type LiveScheduleFormValues } from '../schemas/lesson';
 import { addItemToDraft, removeItemFromDraft, reorderDraftItems } from '../lib/container-items';
 
-export type { LessonKind };
-
 export async function createLessonAction(
   containerId: string,
   targetLanguage: string,
