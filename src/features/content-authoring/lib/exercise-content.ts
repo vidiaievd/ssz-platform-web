@@ -1,3 +1,5 @@
+import type { ExerciseInstruction } from '@/features/content/types';
+
 import { EXERCISE_TYPES, type ExerciseFormValues, type ExerciseType } from '../schemas/exercise';
 
 const EXERCISE_TYPES_SET = new Set<string>(EXERCISE_TYPES);
@@ -119,15 +121,23 @@ interface McqOption {
   text?: unknown;
 }
 
-/** `{ templateCode, content, expectedAnswers }` (backend shape) → form model. */
+/** `{ templateCode, content, expectedAnswers, instructions }` (backend shape) → form model. */
 export function parseExerciseToForm(exercise: {
   templateCode: string;
   content: Record<string, unknown>;
   expectedAnswers?: Record<string, unknown>;
+  instructions?: ExerciseInstruction[] | null;
 }): ExerciseFormValues {
-  const { templateCode, content, expectedAnswers = {} } = exercise;
+  const { templateCode, content, expectedAnswers = {}, instructions } = exercise;
   const known = (EXERCISE_TYPES_SET.has(templateCode) ? templateCode : 'multiple_choice') as ExerciseType;
-  const base: ExerciseFormValues = { ...DEFAULT_EXERCISE_VALUES, templateCode: known };
+  // Instructions are a per-language sub-resource; the editor edits the first entry.
+  const primary = instructions?.[0];
+  const base: ExerciseFormValues = {
+    ...DEFAULT_EXERCISE_VALUES,
+    templateCode: known,
+    instructions: primary?.instructionText ?? '',
+    hint: primary?.hintText ?? '',
+  };
 
   switch (known) {
     case 'multiple_choice': {

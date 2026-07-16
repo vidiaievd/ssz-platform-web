@@ -20,6 +20,24 @@ function parseOrThrow(data: ExerciseFormValues) {
   return parsed.data;
 }
 
+// Instructions are authored in the explanation language ('en', matching lesson
+// variants). The backend endpoint upserts per language and requires a non-empty
+// instructionText, so a hint-only entry can't be persisted on its own.
+const INSTRUCTION_LANGUAGE = 'en';
+
+async function upsertInstruction(exerciseId: string, instructionText: string, hintText?: string) {
+  await serverFetch({
+    service: 'content',
+    path: `/exercises/${exerciseId}/instructions`,
+    method: 'POST',
+    body: {
+      instructionLanguage: INSTRUCTION_LANGUAGE,
+      instructionText,
+      ...(hintText?.trim() && { hintText: hintText.trim() }),
+    },
+  });
+}
+
 /**
  * Creates an exercise and attaches it to the container's draft version.
  *
@@ -56,6 +74,10 @@ export async function createExerciseAction(
 
     const item = await addItemToDraft(containerId, 'exercise', exerciseId);
 
+    if (parsed.instructions?.trim()) {
+      await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
+    }
+
     revalidatePath(`/school/content/${containerId}`);
     return { exerciseId, itemId: item.id };
   });
@@ -80,6 +102,10 @@ export async function updateExerciseAction(
         ...(parsed.difficultyLevel && { difficultyLevel: parsed.difficultyLevel }),
       },
     });
+
+    if (parsed.instructions?.trim()) {
+      await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
+    }
 
     revalidatePath(`/school/content/${containerId}`);
   });

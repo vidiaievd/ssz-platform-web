@@ -175,6 +175,30 @@ describe('parseExerciseToForm', () => {
     const parsed = parseExerciseToForm({ templateCode: 'mystery', content: {} });
     expect(parsed.templateCode).toBe('multiple_choice');
   });
+
+  it('maps the first instruction entry to the instructions/hint fields', () => {
+    const parsed = parseExerciseToForm({
+      templateCode: 'multiple_choice',
+      content: { question: 'Q', options: [{ id: 'opt-0', text: 'a' }] },
+      instructions: [
+        {
+          id: 'i1',
+          exerciseId: 'e1',
+          instructionLanguage: 'en',
+          instructionText: 'Pick one.',
+          hintText: 'Look at context.',
+        },
+      ],
+    });
+    expect(parsed.instructions).toBe('Pick one.');
+    expect(parsed.hint).toBe('Look at context.');
+  });
+
+  it('defaults instructions/hint to empty when none are present', () => {
+    const parsed = parseExerciseToForm({ templateCode: 'multiple_choice', content: {} });
+    expect(parsed.instructions).toBe('');
+    expect(parsed.hint).toBe('');
+  });
 });
 
 describe('minimalMcqValues', () => {
