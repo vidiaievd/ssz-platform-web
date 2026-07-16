@@ -1,16 +1,13 @@
 import { notFound } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import type { Container, ContainerItem, ContainerVersion, CurriculumTree } from '@/features/content/types';
 import { deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
-import { LessonEditorShell } from '@/features/content-authoring/components/lesson-editor-shell';
-import { EditorBodyPlaceholder } from '@/features/content-authoring/components/editor-body-placeholder';
-import { InterimEditorBody } from '@/features/content-authoring/components/interim-editor-body';
 import { TextEditorPane } from '@/features/content-authoring/components/text-editor-pane';
 import { VideoEditorPane } from '@/features/content-authoring/components/video-editor-pane';
 import { AudioEditorPane } from '@/features/content-authoring/components/audio-editor-pane';
+import { LiveEditorPane } from '@/features/content-authoring/components/live-editor-pane';
 import { VocabularyEditorPane } from '@/features/content-authoring/components/vocabulary-editor-pane';
 import { GrammarEditorPane } from '@/features/content-authoring/components/grammar-editor-pane';
 import { ExerciseEditorPane } from '@/features/content-authoring/components/exercise-editor-pane';
@@ -26,7 +23,6 @@ export default async function LessonEditorPage({
   params: Promise<{ schoolSlug: string; id: string; itemId: string }>;
 }) {
   const { schoolSlug, id, itemId } = await params;
-  const t = await getTranslations('Authoring');
 
   let container: Container;
   try {
@@ -142,18 +138,15 @@ export default async function LessonEditorPage({
           publishSlot={publishSlot}
         />
       ) : (
-        <LessonEditorShell
+        <LiveEditorPane
           kind={kind}
-          title={item.title ?? t('lessons.untitled')}
+          lessonId={item.refId}
+          lessonTitle={item.title}
           state={item.state}
+          container={moduleContainer}
           backHref={backHref}
-          autosaveStatus="idle"
-          autosaveSavedAt={null}
           publishSlot={publishSlot}
-          preview={<EditorBodyPlaceholder kind={kind} />}
-        >
-          <InterimEditorBody item={item} moduleContainer={moduleContainer} backHref={backHref} />
-        </LessonEditorShell>
+        />
       )}
     </main>
   );
