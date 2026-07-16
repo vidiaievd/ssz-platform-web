@@ -33,6 +33,7 @@ export const authoringKeys = keyFactory('authoring', {
   sections: (containerId: string) => ['sections', containerId] as const,
   versions: (containerId: string) => ['versions', containerId] as const,
   contentCounts: (containerId: string) => ['content-counts', containerId] as const,
+  enrollmentCount: (containerId: string) => ['enrollment-count', containerId] as const,
   tree: (containerId: string, versionId: string) => ['tree', containerId, versionId] as const,
   tags: (entityType: string, entityId: string) => ['tags', entityType, entityId] as const,
   shares: (entityType: string, entityId: string) => ['shares', entityType, entityId] as const,

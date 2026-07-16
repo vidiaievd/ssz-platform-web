@@ -623,7 +623,8 @@
       "confirm": "Archive",
       "success": "Course archived.",
       "undo": "Undo",
-      "error": "Failed to archive course."
+      "error": "Failed to archive course.",
+      "enrollmentWarning": "{count, plural, one {# student is} other {# students are}} currently enrolled — they keep access until you restore or delete the course."
     },
     "restore": {
       "trigger": "Restore",

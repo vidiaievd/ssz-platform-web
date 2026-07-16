@@ -623,7 +623,8 @@
       "confirm": "Arkiver",
       "success": "Kurset er arkivert.",
       "undo": "Angre",
-      "error": "Kunne ikke arkivere kurset."
+      "error": "Kunne ikke arkivere kurset.",
+      "enrollmentWarning": "{count, plural, one {# student er} other {# studenter er}} for øyeblikket påmeldt — de beholder tilgang til du gjenoppretter eller sletter kurset."
     },
     "restore": {
       "trigger": "Gjenopprett",

@@ -142,6 +142,19 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
     staleTime: 30_000,
   });
 
+  // Only relevant while the course is published (state === 'published' below gates the Archive action).
+  const { data: enrollmentCount } = useQuery({
+    queryKey: authoringKeys.enrollmentCount(containerId),
+    queryFn: async () => {
+      const res = await fetch(`/api/content/containers/${containerId}/enrollment-count`);
+      if (!res.ok) return null;
+      const data = (await res.json()) as { count: number };
+      return data.count;
+    },
+    enabled: isOwnerOrAdmin && state === 'published',
+    staleTime: 30_000,
+  });
+
   const callLifecycle = async (
     endpoint: string,
     successMessage: string,
@@ -224,6 +237,13 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
               }
               title={t('archive.title')}
               description={t('archive.description')}
+              extraContent={
+                enrollmentCount != null && enrollmentCount > 0 ? (
+                  <p className="text-sm text-warning-700">
+                    {t('archive.enrollmentWarning', { count: enrollmentCount })}
+                  </p>
+                ) : undefined
+              }
               confirmLabel={t('archive.confirm')}
               cancelLabel={t('cancel')}
               onConfirm={handleArchive}
