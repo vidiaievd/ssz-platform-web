@@ -1,5 +1,11 @@
 'use server';
 
+/**
+ * @deprecated OLD exercise-solving system — superseded by the `runner/`
+ * exercises (placement, unit-flow practice) and the realigned authoring
+ * exercise contract. No live consumers; slated for full removal.
+ */
+
 import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 

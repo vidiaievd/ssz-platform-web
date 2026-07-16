@@ -1,3 +1,8 @@
+/**
+ * @deprecated OLD exercise-solving system — superseded by the `runner/`
+ * exercises (placement, unit-flow practice) and the realigned authoring
+ * exercise contract. No live consumers; slated for full removal.
+ */
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

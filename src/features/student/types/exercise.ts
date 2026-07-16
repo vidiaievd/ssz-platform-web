@@ -1,3 +1,8 @@
+/**
+ * @deprecated OLD exercise-solving system — superseded by the `runner/`
+ * exercises (placement, unit-flow practice) and the realigned authoring
+ * exercise contract. No live consumers; slated for full removal.
+ */
 export type ExerciseType = 'cloze' | 'multiple_choice' | 'free_text' | 'pronunciation';
 
 export type AttemptVerdict = 'correct' | 'partial' | 'incorrect';

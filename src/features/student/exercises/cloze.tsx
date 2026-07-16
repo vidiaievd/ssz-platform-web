@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * @deprecated OLD exercise-solving system — superseded by the `runner/`
+ * exercises (placement, unit-flow practice) and the realigned authoring
+ * exercise contract. No live consumers; slated for full removal.
+ */
+
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
