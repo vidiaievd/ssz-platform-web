@@ -412,6 +412,76 @@
       "createSuccess": "Kurset er opprettet — legg til leksjoner og publiser når du er klar."
     }
   },
+  "createCourse": {
+    "title": "Opprett et kurs",
+    "breadcrumb": "Nytt kurs",
+    "flowLabel": "Flyt",
+    "flowWizard": "Guidet veiviser",
+    "flowQuick": "Hurtigoppretting",
+    "cancel": "Avbryt",
+    "back": "Tilbake",
+    "continue": "Fortsett",
+    "create": "Opprett kurs",
+    "createAndOpen": "Opprett og åpne redigering",
+    "createError": "Kunne ikke opprette kurset. Prøv igjen.",
+    "createSuccess": "Kurset er opprettet — legg til leksjoner og publiser når du er klar.",
+    "steps": {
+      "basics": "Grunnleggende",
+      "levels": "Nivåer",
+      "starter": "Startinnhold"
+    },
+    "basics": {
+      "heading": "Fortell oss om kurset",
+      "titleLabel": "Kurstittel",
+      "titlePlaceholder": "f.eks. Norsk for nybegynnere",
+      "language": "Språk",
+      "languagePlaceholder": "Velg et språk",
+      "slugLabel": "Offentlig URL",
+      "slugHint": "Tildeles av plattformen når du publiserer for første gang",
+      "descriptionLabel": "Kort beskrivelse",
+      "descriptionHint": "Vises på den offentlige katalogsiden",
+      "descriptionPlaceholder": "Hva gjør dette kurset annerledes…"
+    },
+    "levels": {
+      "heading": "Hvordan er det strukturert?",
+      "subtitle": "Nivåer grupperer moduler. Dette samsvarer 1:1 med hvordan studentene ser kurset i leseren.",
+      "cefr": "CEFR (A1–C2)",
+      "cefrDesc": "Seks-nivås stillas, klart til å beskjæres. Samsvarer med studentleseren.",
+      "custom": "Egendefinerte nivåer",
+      "customDesc": "Definer din egen progresjon og navngiving.",
+      "single": "Ett nivå",
+      "singleDesc": "Én flat liste med moduler — ingen nivågruppering."
+    },
+    "starter": {
+      "heading": "Hvordan vil du starte?",
+      "subtitle": "Tomme kurs er ensomme — vi kan så én modul slik at du kan komme i gang med en gang.",
+      "blank": "Start tomt",
+      "blankDesc": "Tomt kurs. Du bygger hver modul selv.",
+      "cefr": "CEFR A1-start",
+      "cefrDesc": "1 nivå, 1 modul, 4 leksjoner (ord, lesing, lytting, øving).",
+      "recommended": "Anbefalt",
+      "clone": "Klon eksisterende kurs",
+      "cloneDesc": "Kopier struktur og innhold fra et kurs du allerede har.",
+      "cloneComingSoon": "Kommer snart",
+      "moduleTitle": "A1-start",
+      "vocabularyTitle": "Ord",
+      "readingTitle": "Lesing",
+      "listeningTitle": "Lytting",
+      "practiceTitle": "Øving"
+    },
+    "preview": {
+      "label": "Live forhåndsvisning",
+      "untitled": "Uten tittel",
+      "draftNote": "Kurset opprettes som et utkast. Ingenting er synlig for studenter før du publiserer.",
+      "meta": "{levels} · 0 leksjoner · 0 studenter"
+    },
+    "quick": {
+      "heading": "Nytt kurs",
+      "subtitle": "Det viktigste — finpuss resten senere i redigeringsverktøyet.",
+      "levelsLabel": "Nivåer",
+      "startFrom": "Start fra"
+    }
+  },
   "moduleBuilder": {
     "untitled": "Uten tittel",
     "previewAriaLabel": "Forhåndsvis {title} som student",

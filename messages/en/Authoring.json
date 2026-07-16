@@ -415,6 +415,76 @@
       "createSuccess": "Course created — add lessons and publish when ready."
     }
   },
+  "createCourse": {
+    "title": "Create a course",
+    "breadcrumb": "New course",
+    "flowLabel": "Flow",
+    "flowWizard": "Guided wizard",
+    "flowQuick": "Quick create",
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue",
+    "create": "Create course",
+    "createAndOpen": "Create & open editor",
+    "createError": "Couldn't create the course. Please try again.",
+    "createSuccess": "Course created — add lessons and publish when ready.",
+    "steps": {
+      "basics": "Basics",
+      "levels": "Levels",
+      "starter": "Starter content"
+    },
+    "basics": {
+      "heading": "Tell us about the course",
+      "titleLabel": "Course title",
+      "titlePlaceholder": "e.g. Norsk for beginners",
+      "language": "Language",
+      "languagePlaceholder": "Select a language",
+      "slugLabel": "Public URL",
+      "slugHint": "Assigned by the platform when you first publish",
+      "descriptionLabel": "Short description",
+      "descriptionHint": "Shown on the public catalog page",
+      "descriptionPlaceholder": "What makes this course different…"
+    },
+    "levels": {
+      "heading": "How is it structured?",
+      "subtitle": "Levels group modules. This maps 1:1 to how students see the course in the reader.",
+      "cefr": "CEFR (A1–C2)",
+      "cefrDesc": "Six-level scaffold, ready to prune. Matches the student reader.",
+      "custom": "Custom levels",
+      "customDesc": "Define your own progression and naming.",
+      "single": "Single level",
+      "singleDesc": "One flat list of modules — no level grouping."
+    },
+    "starter": {
+      "heading": "How do you want to start?",
+      "subtitle": "Empty courses are lonely — we can seed one module so you can play immediately.",
+      "blank": "Start blank",
+      "blankDesc": "Empty course. You build every module yourself.",
+      "cefr": "CEFR A1 starter",
+      "cefrDesc": "1 level, 1 module, 4 lessons (vocab, reading, listening, practice).",
+      "recommended": "Recommended",
+      "clone": "Clone existing course",
+      "cloneDesc": "Copy structure & content from a course you already have.",
+      "cloneComingSoon": "Coming soon",
+      "moduleTitle": "A1 Starter",
+      "vocabularyTitle": "Vocabulary",
+      "readingTitle": "Reading",
+      "listeningTitle": "Listening",
+      "practiceTitle": "Practice"
+    },
+    "preview": {
+      "label": "Live preview",
+      "untitled": "Untitled course",
+      "draftNote": "The course is created as a draft. Nothing is visible to students until you publish.",
+      "meta": "{levels} · 0 lessons · 0 students"
+    },
+    "quick": {
+      "heading": "New course",
+      "subtitle": "The essentials — refine everything later in the editor.",
+      "levelsLabel": "Levels",
+      "startFrom": "Start from"
+    }
+  },
   "moduleBuilder": {
     "untitled": "Untitled module",
     "previewAriaLabel": "Preview {title} as student",
