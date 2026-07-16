@@ -530,6 +530,14 @@
     "comprehensionQuestionNeedsSource": "Add a video source before adding a comprehension question.",
     "comprehensionQuestionNone": "No comprehension question",
     "comprehensionQuestionAriaLabel": "Comprehension question exercise",
-    "comprehensionQuestionAddNew": "New exercise"
+    "comprehensionQuestionAddNew": "New exercise",
+    "audioSource": "Audio source",
+    "audioSourceUpload": "Upload audio",
+    "audioSourceReplace": "Replace",
+    "audioSourceRemove": "Remove",
+    "audioSourceInvalidType": "Please upload an MP3, OGG, WAV, AAC, FLAC, or M4A audio file.",
+    "audioSourceTooLarge": "File is too large. Maximum size is 100 MB.",
+    "transcript": "Transcript",
+    "transcriptPlaceholder": "Full transcript of the listening track"
   }
 }

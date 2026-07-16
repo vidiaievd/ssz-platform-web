@@ -530,6 +530,14 @@
     "comprehensionQuestionNeedsSource": "Додайте джерело відео, перш ніж додавати питання на розуміння.",
     "comprehensionQuestionNone": "Без питання на розуміння",
     "comprehensionQuestionAriaLabel": "Вправа для питання на розуміння",
-    "comprehensionQuestionAddNew": "Нова вправа"
+    "comprehensionQuestionAddNew": "Нова вправа",
+    "audioSource": "Аудіоджерело",
+    "audioSourceUpload": "Завантажити аудіо",
+    "audioSourceReplace": "Замінити",
+    "audioSourceRemove": "Видалити",
+    "audioSourceInvalidType": "Завантажте аудіофайл MP3, OGG, WAV, AAC, FLAC або M4A.",
+    "audioSourceTooLarge": "Файл завеликий. Максимальний розмір — 100 МБ.",
+    "transcript": "Транскрипт",
+    "transcriptPlaceholder": "Повний транскрипт аудіозапису"
   }
 }

@@ -10,6 +10,7 @@ import { EditorBodyPlaceholder } from '@/features/content-authoring/components/e
 import { InterimEditorBody } from '@/features/content-authoring/components/interim-editor-body';
 import { TextEditorPane } from '@/features/content-authoring/components/text-editor-pane';
 import { VideoEditorPane } from '@/features/content-authoring/components/video-editor-pane';
+import { AudioEditorPane } from '@/features/content-authoring/components/audio-editor-pane';
 import { PublishDialog } from '@/features/content-authoring/components/publish-dialog';
 import { runPreflight } from '@/features/content-authoring/lib/preflight';
 import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
@@ -90,6 +91,16 @@ export default async function LessonEditorPage({
         />
       ) : kind === 'video' ? (
         <VideoEditorPane
+          kind={kind}
+          lessonId={item.refId}
+          lessonTitle={item.title}
+          state={item.state}
+          container={moduleContainer}
+          backHref={backHref}
+          publishSlot={publishSlot}
+        />
+      ) : kind === 'audio' ? (
+        <AudioEditorPane
           kind={kind}
           lessonId={item.refId}
           lessonTitle={item.title}

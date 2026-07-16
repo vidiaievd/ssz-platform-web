@@ -530,6 +530,14 @@
     "comprehensionQuestionNeedsSource": "Legg til en videokilde før du legger til et forståelsesspørsmål.",
     "comprehensionQuestionNone": "Ingen forståelsesspørsmål",
     "comprehensionQuestionAriaLabel": "Oppgave for forståelsesspørsmål",
-    "comprehensionQuestionAddNew": "Ny oppgave"
+    "comprehensionQuestionAddNew": "Ny oppgave",
+    "audioSource": "Lydkilde",
+    "audioSourceUpload": "Last opp lyd",
+    "audioSourceReplace": "Erstatt",
+    "audioSourceRemove": "Fjern",
+    "audioSourceInvalidType": "Last opp en MP3-, OGG-, WAV-, AAC-, FLAC- eller M4A-lydfil.",
+    "audioSourceTooLarge": "Filen er for stor. Maksimal størrelse er 100 MB.",
+    "transcript": "Transkripsjon",
+    "transcriptPlaceholder": "Full transkripsjon av lyttesporet"
   }
 }
