@@ -33,6 +33,7 @@ import { LessonEditorShell } from './lesson-editor-shell';
 import { EditorCard } from './editor-card';
 import { VocabularyForm } from './vocabulary-form';
 import { VocabularyLessonPreview } from './vocabulary-lesson-preview';
+import { VocabularyBulkPasteDialog } from './vocabulary-bulk-paste-dialog';
 
 interface VocabularyEditorPaneProps {
   kind: MaterialKind;
@@ -174,16 +175,19 @@ function WordListCard({ container, listId }: { container: Container; listId: str
     <EditorCard
       title={t('vocabulary.words')}
       right={
-        <Button
-          variant="outline"
-          size="sm"
-          type="button"
-          onClick={() => setEditingItemId('new')}
-          disabled={isPending}
-        >
-          <Plus className="mr-1.5 h-4 w-4" />
-          {t('vocabulary.addWord')}
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <VocabularyBulkPasteDialog listId={listId} containerId={container.id} />
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            onClick={() => setEditingItemId('new')}
+            disabled={isPending}
+          >
+            <Plus className="mr-1.5 h-4 w-4" />
+            {t('vocabulary.addWord')}
+          </Button>
+        </div>
       }
     >
       {isLoading ? (
