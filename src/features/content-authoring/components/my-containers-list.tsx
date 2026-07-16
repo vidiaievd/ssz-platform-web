@@ -242,7 +242,7 @@ function ListEmptyState() {
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href={`${newHref}?template=cefr_a1`}>
+          <Link href={`${newHref}?flow=quick`}>
             {t('emptyTemplate')}
           </Link>
         </Button>
