@@ -480,7 +480,8 @@
       "subtitle": "Det viktigste — finpuss resten senere i redigeringsverktøyet.",
       "levelsLabel": "Nivåer",
       "startFrom": "Start fra"
-    }
+    },
+    "starterError": "Kurset ble opprettet, men startinnholdet kunne ikke legges til. Du kan legge det til manuelt."
   },
   "moduleBuilder": {
     "untitled": "Uten tittel",

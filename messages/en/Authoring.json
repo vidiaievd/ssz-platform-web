@@ -483,7 +483,8 @@
       "subtitle": "The essentials — refine everything later in the editor.",
       "levelsLabel": "Levels",
       "startFrom": "Start from"
-    }
+    },
+    "starterError": "The course was created, but the starter content couldn't be seeded. You can add it manually."
   },
   "moduleBuilder": {
     "untitled": "Untitled module",

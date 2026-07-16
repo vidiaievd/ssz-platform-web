@@ -16,6 +16,15 @@ const INITIAL_BASICS: BasicsDraft = {
   description: '',
 };
 
+export const DEFAULT_CEFR_LEVELS = [
+  'A1 — Beginner',
+  'A2 — Elementary',
+  'B1 — Intermediate',
+  'B2 — Upper-Intermediate',
+  'C1 — Advanced',
+  'C2 — Proficient',
+];
+
 const INITIAL_LEVEL_SYSTEM: LevelSystem = 'cefr';
 const INITIAL_STARTER: Starter = 'cefr';
 
