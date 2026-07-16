@@ -43,6 +43,18 @@ describe('containerFormSchema', () => {
   it('rejects an invalid visibility', () => {
     expect(containerFormSchema.safeParse({ ...valid, visibility: 'everyone' }).success).toBe(false);
   });
+
+  it('accepts an omitted levelSystem', () => {
+    expect(containerFormSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it('accepts a valid levelSystem', () => {
+    expect(containerFormSchema.safeParse({ ...valid, levelSystem: 'single' }).success).toBe(true);
+  });
+
+  it('rejects an invalid levelSystem', () => {
+    expect(containerFormSchema.safeParse({ ...valid, levelSystem: 'advanced' }).success).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------

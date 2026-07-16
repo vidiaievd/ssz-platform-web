@@ -19,6 +19,8 @@ export interface Container {
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
   accessTier: AccessTier;
+  /** Create-time only; drives level-section scaffolding. Not editable after creation. */
+  levelSystem?: 'cefr' | 'custom' | 'single';
   currentPublishedVersionId?: string | null;
   ownerUserId: string;
   ownerSchoolId?: string | null;

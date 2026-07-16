@@ -31,6 +31,7 @@ export async function createContainerAction(input: ContainerFormValues) {
         difficultyLevel: data.difficultyLevel,
         visibility: data.visibility,
         accessTier: data.accessTier,
+        ...(data.levelSystem && { levelSystem: data.levelSystem }),
       },
     });
 
