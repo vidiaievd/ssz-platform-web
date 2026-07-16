@@ -4,19 +4,24 @@ import { useDeferredValue } from 'react';
 import { useParams } from 'next/navigation';
 import {
   Plus, Search, LayoutGrid, LayoutList, BookOpen, Clock, X, ChevronLeft, ChevronRight, Pencil,
+  MoreVertical, Eye, Copy, Archive, ArchiveRestore, Trash2,
 } from 'lucide-react';
 import { z } from 'zod/v4';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Segmented } from '@/components/ui/segmented';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { DataState } from '@/components/shared/data-state';
 import { Link } from '@/lib/i18n/navigation';
 import { useUrlFilters } from '@/lib/url-filters/use-url-filters';
 import type { Container } from '@/features/content/types';
 
-import type { SchoolRole } from '../types';
+import type { ContainerState, SchoolRole } from '../types';
 import { ContainerStateBadge, deriveContainerState } from './container-state-badge';
 import { useMyContainers } from '../api/use-my-containers';
 
@@ -101,29 +106,134 @@ function ContainerTableRow({ container }: ContainerRowProps) {
   );
 }
 
+function CourseCover({ language }: { language: string }) {
+  return (
+    <div className="relative h-24 shrink-0 overflow-hidden rounded-t-lg bg-linear-to-br from-primary/15 via-primary/5 to-transparent">
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-40"
+        style={{ backgroundImage: 'repeating-linear-gradient(135deg, var(--border) 0 10px, transparent 10px 20px)' }}
+      />
+      <span className="absolute right-2 top-2 font-mono text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        {language}
+      </span>
+      <span className="absolute bottom-1.5 left-2 text-3xl leading-none">
+        <LanguageFlag code={language} />
+      </span>
+    </div>
+  );
+}
+
+function CardMeta({ container }: { container: Container }) {
+  const t = useTranslations('Authoring.structure');
+  const parts = [
+    container.difficultyLevel,
+    container.lessonCount != null ? t('lessonCount', { count: container.lessonCount }) : null,
+  ].filter(Boolean);
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground font-mono">
+      {parts.map((part, i) => (
+        <span key={i} className="flex items-center gap-1.5">
+          {i > 0 && <span aria-hidden>·</span>}
+          {part}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// No teacher-assignment or enrollment data is exposed by the container list API yet —
+// the stack always renders its empty state until that lands.
+function TeacherAvatarStack() {
+  const t = useTranslations('Authoring.list');
+  return <span className="text-xs text-muted-foreground">{t('noTeacher')}</span>;
+}
+
+interface ContainerOverflowMenuProps {
+  container: Container;
+  state: ContainerState;
+}
+
+function ContainerOverflowMenu({ container, state }: ContainerOverflowMenuProps) {
+  const t = useTranslations('Authoring.list');
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const containerHref = `/school/${schoolSlug}/content/${container.id}`;
+
+  const stub = (action: string) => () => toast.info(t('itemActionStub', { action }));
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          onClick={(e) => e.stopPropagation()}
+          aria-label={t('moreAriaLabel', { title: container.title })}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenuItem asChild>
+          <Link href={containerHref}>
+            <Pencil className="h-3.5 w-3.5" />
+            {t('menuEditStructure')}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={stub(t('menuPreview'))}>
+          <Eye className="h-3.5 w-3.5" />
+          {t('menuPreview')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={stub(t('menuDuplicate'))}>
+          <Copy className="h-3.5 w-3.5" />
+          {t('menuDuplicate')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {state === 'archived' ? (
+          <DropdownMenuItem onSelect={stub(t('menuRestore'))}>
+            <ArchiveRestore className="h-3.5 w-3.5" />
+            {t('menuRestore')}
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onSelect={stub(t('menuArchive'))}>
+            <Archive className="h-3.5 w-3.5" />
+            {t('menuArchive')}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem variant="destructive" onSelect={stub(t('menuDelete'))}>
+          <Trash2 className="h-3.5 w-3.5" />
+          {t('menuDelete')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function ContainerGridCard({ container }: { container: Container }) {
   const state = deriveContainerState(container);
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const containerHref = `/school/${schoolSlug}/content/${container.id}`;
   return (
-    <Link
-      href={`/school/${schoolSlug}/content/${container.id}`}
-      className="flex flex-col rounded-lg border border-border bg-background overflow-hidden hover:shadow-md transition-shadow"
-    >
-      <div className="h-16 bg-muted flex items-center justify-center text-4xl">
-        <LanguageFlag code={container.targetLanguage} />
-      </div>
-      <div className="p-3 flex flex-col gap-1.5 flex-1">
+    <div className="group relative flex flex-col rounded-lg border border-border bg-background overflow-hidden hover:shadow-md transition-shadow">
+      <CourseCover language={container.targetLanguage} />
+      <div className="p-3 flex flex-col gap-2 flex-1">
         <div className="flex items-start justify-between gap-1">
-          <span className="text-sm font-medium leading-tight line-clamp-2">{container.title}</span>
+          <Link
+            href={containerHref}
+            className="text-sm font-medium leading-tight line-clamp-2 after:absolute after:inset-0"
+          >
+            {container.title}
+          </Link>
           <ContainerStateBadge state={state} />
         </div>
-        <div className="flex gap-2 text-xs text-muted-foreground font-mono">
-          <span className="uppercase">{container.targetLanguage}</span>
-          {container.difficultyLevel && <><span>·</span><span>{container.difficultyLevel}</span></>}
-          {container.lessonCount != null && <><span>·</span><span>{container.lessonCount}ℓ</span></>}
+        <CardMeta container={container} />
+        <div className="relative z-1 mt-auto flex items-center justify-between gap-2 pt-1">
+          <TeacherAvatarStack />
+          <ContainerOverflowMenu container={container} state={state} />
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 

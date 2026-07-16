@@ -594,8 +594,6 @@
     "filteredEmpty": "Нет курсов, соответствующих «{query}» в категории {filter}.",
     "newCourseTile": "Новый курс",
     "noTeacher": "Нет преподавателя",
-    "enrolledCount": "{count} записано",
-    "metaModules": "{count, plural, one {# модуль} few {# модуля} many {# модулей} other {# модуля}}",
     "menuEditStructure": "Редактировать структуру",
     "menuPreview": "Просмотреть как студент",
     "menuDuplicate": "Дублировать",

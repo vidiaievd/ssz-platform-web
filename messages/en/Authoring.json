@@ -594,8 +594,6 @@
     "filteredEmpty": "No courses match \"{query}\" in {filter}.",
     "newCourseTile": "New course",
     "noTeacher": "No teacher",
-    "enrolledCount": "{count} enrolled",
-    "metaModules": "{count, plural, one {# module} other {# modules}}",
     "menuEditStructure": "Edit structure",
     "menuPreview": "Preview as student",
     "menuDuplicate": "Duplicate",

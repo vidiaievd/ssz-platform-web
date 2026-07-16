@@ -594,8 +594,6 @@
     "filteredEmpty": "Ingen kurs samsvarer med «{query}» i {filter}.",
     "newCourseTile": "Nytt kurs",
     "noTeacher": "Ingen lærer",
-    "enrolledCount": "{count} påmeldt",
-    "metaModules": "{count, plural, one {# modul} other {# moduler}}",
     "menuEditStructure": "Rediger struktur",
     "menuPreview": "Forhåndsvis som student",
     "menuDuplicate": "Dupliser",
