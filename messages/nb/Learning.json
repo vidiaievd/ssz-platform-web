@@ -263,6 +263,20 @@
         "particle": "Partikkel",
         "phrase": "Uttrykk",
         "other": "Ord"
+      },
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "newWords": "{count, plural, one {# nytt ord} other {# nye ord}}",
+        "howToTranslation": "Start med de nye ordene. Trykk på et kort for å snu det — du ser oversettelsen. Åpne Alle former for full bøyning.",
+        "howToDefinition": "Start med de nye ordene. Trykk på et kort for å snu det — du ser en forklaring. Åpne Alle former for full bøyning.",
+        "levelBadgeTranslation": "A1–B1 · oversettelse",
+        "levelBadgeDefinition": "B2+ · forklaring",
+        "emptyTitle": "Ingen nye ord ennå",
+        "emptyBody": "Denne ordlisten har ingen ord ennå.",
+        "nextHeading": "Neste — bruk ordene",
+        "reviewTitle": "Gjenta tidligere ord",
+        "reviewBody": "{count, plural, one {# ord fra tidligere enheter er klart til repetisjon i dag} other {# ord fra tidligere enheter er klare til repetisjon i dag}}",
+        "reviewCta": "Repeter"
       }
     }
   }

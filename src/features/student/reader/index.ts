@@ -16,6 +16,9 @@ export type { UnitEntryRedirectProps } from './components/unit-entry-redirect';
 export { VocabFlipCard } from './components/vocab-flip-card';
 export type { VocabFlipCardProps, VocabCardMode } from './components/vocab-flip-card';
 
+export { VocabularyPage, getVocabCardMode } from './components/vocabulary-page';
+export type { VocabularyPageProps } from './components/vocabulary-page';
+
 export type {
   ReaderSidebarCourse,
   ReaderSidebarItem,

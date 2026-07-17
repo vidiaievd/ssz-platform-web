@@ -263,6 +263,20 @@
         "particle": "Particle",
         "phrase": "Phrase",
         "other": "Word"
+      },
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "newWords": "{count, plural, one {# new word} other {# new words}}",
+        "howToTranslation": "Start with the new words. Tap a card to flip it — you’ll see the translation. Open All forms for the full inflection.",
+        "howToDefinition": "Start with the new words. Tap a card to flip it — you’ll see an explanation. Open All forms for the full inflection.",
+        "levelBadgeTranslation": "A1–B1 · translation",
+        "levelBadgeDefinition": "B2+ · explanation",
+        "emptyTitle": "No new words yet",
+        "emptyBody": "This vocabulary list has no words yet.",
+        "nextHeading": "Next — use the words",
+        "reviewTitle": "Repeat earlier words",
+        "reviewBody": "{count, plural, one {# word from earlier units is ready for review today} other {# words from earlier units are ready for review today}}",
+        "reviewCta": "Review"
       }
     }
   }
