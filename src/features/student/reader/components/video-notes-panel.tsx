@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { PenLine, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { formatTimecode } from '@/features/learning';
 import { cn } from '@/lib/utils';
 
-import { formatTimecode } from '../lib/format-timecode';
 import { selectLessonNotes, useVideoNotesStore } from '../stores/video-notes-store';
 
 export interface VideoNotesPanelProps {

@@ -1,14 +1,16 @@
 'use client';
 
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 import { Pause, Play } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { GlossaryParagraph, type GlossaryIndex } from '@/features/learning';
 import type { LessonVideoCue } from '@/features/content/types';
 import { cn } from '@/lib/utils';
 
+import { GlossaryParagraph } from './glossary-paragraph';
+import { useMediaPlayer } from '../hooks/use-media-player';
 import { formatTimecode } from '../lib/format-timecode';
+import type { GlossaryIndex } from '../lib/tokenize-glossary';
 
 export interface VideoPlayerHandle {
   /** Seeks to `seconds` and resumes playback — used by the transcript's click-to-seek. */
@@ -37,66 +39,37 @@ function findActiveCue(cues: LessonVideoCue[], currentTime: number): LessonVideo
   return active;
 }
 
-/** Real `<video>` element with custom controls and a live interactive-subtitle overlay. */
+/**
+ * Real `<video>` element with custom controls and a live interactive-subtitle
+ * overlay. Shares its play/pause/seek/speed-cycle/position-persistence engine
+ * with `AudioPlayer` via `useMediaPlayer` (FE6.1's "one AudioBar").
+ */
 export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(function VideoPlayer(
   { src, label, cues, glossary, targetLang, showSubtitles, onTimeUpdate, className },
   ref,
 ) {
   const t = useTranslations('Learning.reader.video.player');
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const { playing, duration, current, speed, togglePlay, scrubTo, cycleSpeed } = useMediaPlayer(
+    videoRef,
+    !!src,
+    { persistKey: src, onTimeUpdate },
+  );
 
   useImperativeHandle(ref, () => ({
     seekTo(seconds: number) {
       const el = videoRef.current;
       if (!el) return;
-      el.currentTime = seconds;
-      setCurrentTime(seconds);
+      scrubTo(seconds);
       void el.play().catch(() => {});
     },
   }));
 
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-
-    const onTime = () => {
-      setCurrentTime(el.currentTime);
-      onTimeUpdate?.(el.currentTime);
-    };
-    const onLoaded = () => setDuration(el.duration || 0);
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
-
-    el.addEventListener('timeupdate', onTime);
-    el.addEventListener('loadedmetadata', onLoaded);
-    el.addEventListener('play', onPlay);
-    el.addEventListener('pause', onPause);
-    return () => {
-      el.removeEventListener('timeupdate', onTime);
-      el.removeEventListener('loadedmetadata', onLoaded);
-      el.removeEventListener('play', onPlay);
-      el.removeEventListener('pause', onPause);
-    };
-  }, [onTimeUpdate]);
-
-  function togglePlay() {
-    const el = videoRef.current;
-    if (!el || !src) return;
-    if (playing) el.pause();
-    else void el.play().catch(() => {});
-  }
-
   function handleSeek(e: React.ChangeEvent<HTMLInputElement>) {
-    const el = videoRef.current;
-    const value = Number(e.target.value);
-    if (el) el.currentTime = value;
-    setCurrentTime(value);
+    scrubTo(Number(e.target.value));
   }
 
-  const activeCue = showSubtitles ? findActiveCue(cues, currentTime) : null;
+  const activeCue = showSubtitles ? findActiveCue(cues, current) : null;
 
   return (
     <div
@@ -142,7 +115,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(funct
           min={0}
           max={duration || 0}
           step={0.1}
-          value={Math.min(currentTime, duration || 0)}
+          value={Math.min(current, duration || 0)}
           onChange={handleSeek}
           aria-label={t('scrubber')}
           disabled={!src}
@@ -159,8 +132,17 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(funct
             {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
           </button>
           <span className="font-mono text-[11.5px] text-white/70">
-            {formatTimecode(currentTime)} / {formatTimecode(duration)}
+            {formatTimecode(current)} / {formatTimecode(duration)}
           </span>
+          <button
+            type="button"
+            onClick={cycleSpeed}
+            disabled={!src}
+            aria-label={t('speed', { speed })}
+            className="ml-auto rounded-md border border-white/25 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-white/85 transition-colors hover:border-white/50 disabled:opacity-40 disabled:pointer-events-none"
+          >
+            {speed}×
+          </button>
         </div>
       </div>
     </div>

@@ -31,9 +31,6 @@ export type { GrammarLessonPageProps } from './components/grammar-lesson-page';
 export { LiveLessonPage } from './components/live-lesson-page';
 export type { LiveLessonPageProps } from './components/live-lesson-page';
 
-export { VideoPlayer } from './components/video-player';
-export type { VideoPlayerProps, VideoPlayerHandle } from './components/video-player';
-
 export { VideoTranscript } from './components/video-transcript';
 export type { VideoTranscriptProps } from './components/video-transcript';
 

@@ -307,7 +307,8 @@
         "noSource": "Denne leksjonen har ingen video ennå.",
         "play": "Spill av",
         "pause": "Pause",
-        "scrubber": "Videoposisjon"
+        "scrubber": "Videoposisjon",
+        "speed": "{speed}× hastighet"
       },
       "transcript": {
         "heading": "Transkripsjon",

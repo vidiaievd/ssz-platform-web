@@ -1,11 +1,23 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 
 import { VideoNotesPanel } from './video-notes-panel';
 import { useVideoNotesStore } from '../stores/video-notes-store';
+
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 function renderPanel(props: Partial<React.ComponentProps<typeof VideoNotesPanel>> = {}) {
   return render(

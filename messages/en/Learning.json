@@ -307,7 +307,8 @@
         "noSource": "This lesson doesn't have a video yet.",
         "play": "Play",
         "pause": "Pause",
-        "scrubber": "Video position"
+        "scrubber": "Video position",
+        "speed": "{speed}× speed"
       },
       "transcript": {
         "heading": "Transcript",

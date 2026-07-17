@@ -2,11 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 
-import { GlossaryParagraph, type GlossaryIndex } from '@/features/learning';
+import { GlossaryParagraph, formatTimecode, type GlossaryIndex } from '@/features/learning';
 import type { LessonVideoCue } from '@/features/content/types';
 import { cn } from '@/lib/utils';
-
-import { formatTimecode } from '../lib/format-timecode';
 
 export interface VideoTranscriptProps {
   cues: LessonVideoCue[];

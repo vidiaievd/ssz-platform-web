@@ -4,7 +4,13 @@ import { useMemo, useRef, useState } from 'react';
 import { BookOpen, Eye } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { ErrorState, LearningSkeleton, buildGlossaryIndex } from '@/features/learning';
+import {
+  ErrorState,
+  LearningSkeleton,
+  VideoPlayer,
+  buildGlossaryIndex,
+  type VideoPlayerHandle,
+} from '@/features/learning';
 import {
   useLesson,
   useBestLessonVariant,
@@ -17,7 +23,6 @@ import { useMediaAsset } from '@/features/media';
 import { findVideoSource } from '@/lib/content/lesson-media-tokens';
 import { cn } from '@/lib/utils';
 
-import { VideoPlayer, type VideoPlayerHandle } from './video-player';
 import { VideoTranscript } from './video-transcript';
 import { VideoNotesPanel } from './video-notes-panel';
 

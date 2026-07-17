@@ -99,6 +99,11 @@ export type { GlossaryParagraphProps } from './components/glossary-paragraph';
 export { buildGlossaryIndex, tokenizeGlossary } from './lib/tokenize-glossary';
 export type { GlossaryIndex, GlossaryToken } from './lib/tokenize-glossary';
 
+export { formatTimecode } from './lib/format-timecode';
+
+export { VideoPlayer } from './components/video-player';
+export type { VideoPlayerProps, VideoPlayerHandle } from './components/video-player';
+
 export { LearningSkeleton } from './components/learning-skeleton';
 export type { LearningSkeletonProps } from './components/learning-skeleton';
 
