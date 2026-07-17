@@ -4,13 +4,19 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { CourseHomePayload, UnitContentsResult } from '@/features/learning';
-import type { VocabularyItem, VocabularyList } from '@/features/content/types';
+import type { Lesson, LessonVariant, VocabularyItem, VocabularyList } from '@/features/content/types';
+import type { StudentProfile } from '@/features/profile';
 
 const useCourseHome = vi.fn();
 const useUnitContents = vi.fn();
 const useActivityStreak = vi.fn();
 const useVocabularyList = vi.fn();
 const useUnitVocabularyItems = vi.fn();
+const useLesson = vi.fn();
+const useBestLessonVariant = vi.fn();
+const useLessonParagraphs = vi.fn();
+const useLessonGlossaryMarks = vi.fn();
+const useMyStudentProfile = vi.fn();
 const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
 
 vi.mock('@/features/learning', async () => {
@@ -24,8 +30,13 @@ vi.mock('@/features/content', async () => {
     ...actual,
     useVocabularyList: (id: string) => useVocabularyList(id),
     useUnitVocabularyItems: (id: string) => useUnitVocabularyItems(id),
+    useLesson: (id: string) => useLesson(id),
+    useBestLessonVariant: (...args: unknown[]) => useBestLessonVariant(...args),
+    useLessonParagraphs: (...args: unknown[]) => useLessonParagraphs(...args),
+    useLessonGlossaryMarks: (...args: unknown[]) => useLessonGlossaryMarks(...args),
   };
 });
+vi.mock('@/features/profile', () => ({ useMyStudentProfile: () => useMyStudentProfile() }));
 vi.mock('@/features/media', () => ({ useMediaAsset: (id?: string) => useMediaAsset(id) }));
 vi.mock('next-themes', () => ({ useTheme: () => ({ resolvedTheme: 'light', setTheme: vi.fn() }) }));
 vi.mock('@/lib/i18n/navigation', () => ({
@@ -68,11 +79,11 @@ const UNIT_CONTENTS: UnitContentsResult = {
       title: 'Reinforce & read',
       items: [
         {
-          id: 'text-1',
+          id: 'audio-1',
           contentType: 'LESSON',
           contentId: 'lesson-1',
           title: 'En vanlig arbeidsdag',
-          lessonKind: 'text',
+          lessonKind: 'audio',
           durationMinutes: 8,
           xpReward: 10,
           status: 'in_progress',
@@ -116,6 +127,65 @@ const UNIT_CONTENTS_WITH_VOCAB: UnitContentsResult = {
   ],
 };
 
+const UNIT_CONTENTS_WITH_TEXT: UnitContentsResult = {
+  ...UNIT_CONTENTS,
+  sections: [
+    {
+      id: 's1',
+      title: 'Reinforce & read',
+      items: [
+        {
+          id: 'text-1',
+          contentType: 'LESSON',
+          contentId: 'lesson-1',
+          title: 'En vanlig arbeidsdag',
+          lessonKind: 'text',
+          durationMinutes: 8,
+          xpReward: 10,
+          status: 'in_progress',
+        },
+      ],
+    },
+  ],
+};
+
+const TEXT_LESSON: Lesson = {
+  id: 'lesson-1',
+  slug: 'en-vanlig-arbeidsdag',
+  title: 'En vanlig arbeidsdag',
+  targetLanguage: 'nb',
+  difficultyLevel: 'B1',
+  visibility: 'public',
+  ownerUserId: 'u1',
+  kind: 'text',
+  liveStartsAt: null,
+  liveDurationMinutes: null,
+  liveJoinUrl: null,
+  liveCapacity: null,
+  createdAt: '2026-01-01T00:00:00Z',
+  updatedAt: '2026-01-01T00:00:00Z',
+};
+
+const TEXT_VARIANT: LessonVariant = {
+  id: 'variant-1',
+  lessonId: 'lesson-1',
+  explanationLanguage: 'en',
+  minLevel: 'A1',
+  maxLevel: 'C2',
+  displayTitle: 'En vanlig arbeidsdag',
+  bodyMarkdown: 'Marta er sykepleier.',
+  status: 'published',
+};
+
+const STUDENT_PROFILE: StudentProfile = {
+  id: 'p1',
+  userId: 'u1',
+  nativeLanguage: 'en',
+  targetLanguages: [{ code: 'nb', level: 'B1' }],
+  createdAt: '2026-01-01T00:00:00Z',
+  updatedAt: '2026-01-01T00:00:00Z',
+};
+
 const VOCAB_LIST: VocabularyList = {
   id: 'list-1',
   title: 'Yrker og oppgaver',
@@ -142,7 +212,7 @@ function setup() {
 function renderShell(props: Partial<React.ComponentProps<typeof ReaderShell>> = {}) {
   return render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <ReaderShell courseId="course-1" unitId="u2" itemId="text-1" {...props}>
+      <ReaderShell courseId="course-1" unitId="u2" itemId="audio-1" {...props}>
         <div>lesson content</div>
       </ReaderShell>
     </NextIntlClientProvider>,
@@ -156,7 +226,7 @@ describe('ReaderShell', () => {
 
     expect(screen.getByText('Norsk B1')).toBeInTheDocument();
     expect(screen.getByText('lesson content')).toBeInTheDocument();
-    expect(screen.getByText('Reading · En vanlig arbeidsdag')).toBeInTheDocument();
+    expect(screen.getByText('Listening · En vanlig arbeidsdag')).toBeInTheDocument();
     expect(screen.getByText('7 days streak')).toBeInTheDocument();
   });
 
@@ -211,6 +281,34 @@ describe('ReaderShell', () => {
     expect(useVocabularyList).toHaveBeenCalledWith('list-1');
     expect(useUnitVocabularyItems).toHaveBeenCalledWith('list-1');
     expect(screen.getByText('nurse')).toBeInTheDocument();
+    expect(screen.queryByText('lesson content')).not.toBeInTheDocument();
+  });
+
+  it('renders TextLessonPage (not children) when the active item is a text lesson', () => {
+    useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
+    useUnitContents.mockReturnValue({
+      data: UNIT_CONTENTS_WITH_TEXT,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
+    useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
+    useMyStudentProfile.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: STUDENT_PROFILE,
+      refetch: vi.fn(),
+    });
+    useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: TEXT_VARIANT, refetch: vi.fn() });
+    useLessonParagraphs.mockReturnValue({ data: [{ target: 'Marta er sykepleier.', translation: 'Marta is a nurse.' }] });
+    useLessonGlossaryMarks.mockReturnValue({ data: [] });
+    useUnitVocabularyItems.mockReturnValue({ data: [] });
+
+    renderShell({ itemId: 'text-1' });
+
+    expect(useLesson).toHaveBeenCalledWith('lesson-1');
+    expect(screen.getByText('Marta er sykepleier.')).toBeInTheDocument();
     expect(screen.queryByText('lesson content')).not.toBeInTheDocument();
   });
 });

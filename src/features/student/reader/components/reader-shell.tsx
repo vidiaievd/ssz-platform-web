@@ -11,6 +11,7 @@ import { ContentsSidebar } from './contents-sidebar';
 import { ReaderTopBar } from './reader-top-bar';
 import { LessonFooterNav } from './lesson-footer-nav';
 import { VocabularyPage } from './vocabulary-page';
+import { TextLessonPage } from './text-lesson-page';
 import {
   flattenSections,
   mapCourseUnitsToSidebarUnits,
@@ -86,9 +87,11 @@ export function ReaderShell({
   const activeTitle = activeContentItem?.title ?? activeItem?.title ?? '';
 
   const activeUnit = units.find((u) => u.id === unitId);
+  const moduleVocabularyListId = allContentItems.find((i) => i.contentType === 'VOCABULARY_LIST')?.contentId;
 
-  const content =
-    activeKind === 'vocab' && activeContentItem ? (
+  let content: ReactNode = children;
+  if (activeKind === 'vocab' && activeContentItem) {
+    content = (
       <VocabularyPage
         vocabularyListId={activeContentItem.contentId}
         cefrLevel={courseInfo.cefrLevel}
@@ -98,9 +101,18 @@ export function ReaderShell({
         siblingItems={flatItems}
         currentItemId={itemId}
       />
-    ) : (
-      children
     );
+  } else if (activeKind === 'text' && activeContentItem) {
+    content = (
+      <TextLessonPage
+        lessonId={activeContentItem.contentId}
+        vocabularyListId={moduleVocabularyListId}
+        unitPosition={activeUnit?.position ?? 0}
+        courseTitle={courseInfo.title}
+        cefrLevel={courseInfo.cefrLevel}
+      />
+    );
+  }
   const effectiveMaxWidth = maxWidth ?? (activeKind === 'vocab' ? 780 : 680);
 
   return (
