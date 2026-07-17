@@ -225,6 +225,11 @@
       "xp": "{xp} XP",
       "toggleThemeToLight": "Перемкнути на світлу тему",
       "toggleThemeToDark": "Перемкнути на темну тему"
+    },
+    "footerNav": {
+      "previous": "Попередній",
+      "next": "Далі · {type}",
+      "unlocksAfterThis": "Наступний розблокується після цього"
     }
   }
 }

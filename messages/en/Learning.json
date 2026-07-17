@@ -225,6 +225,11 @@
       "xp": "{xp} XP",
       "toggleThemeToLight": "Switch to light theme",
       "toggleThemeToDark": "Switch to dark theme"
+    },
+    "footerNav": {
+      "previous": "Previous",
+      "next": "Next · {type}",
+      "unlocksAfterThis": "Next unlocks after this"
     }
   }
 }

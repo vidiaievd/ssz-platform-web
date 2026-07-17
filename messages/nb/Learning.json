@@ -225,6 +225,11 @@
       "xp": "{xp} XP",
       "toggleThemeToLight": "Bytt til lyst tema",
       "toggleThemeToDark": "Bytt til mørkt tema"
+    },
+    "footerNav": {
+      "previous": "Forrige",
+      "next": "Neste · {type}",
+      "unlocksAfterThis": "Neste låses opp etter denne"
     }
   }
 }
