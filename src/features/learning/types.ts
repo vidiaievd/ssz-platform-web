@@ -111,6 +111,29 @@ export interface CourseProgress {
   lessons: LessonProgress[];
 }
 
+/** Upserts a student's progress on one content item (BE3.3 completion). */
+export interface UpsertProgressRequest {
+  contentType: string;
+  contentId: string;
+  timeSpentSeconds: number;
+  score?: number;
+  completed: boolean;
+}
+
+export interface ProgressRecord {
+  id: string;
+  userId: string;
+  contentRef: { type: string; id: string };
+  status: string;
+  attemptsCount: number;
+  lastAttemptAt: string | null;
+  timeSpentSeconds: number;
+  score: number | null;
+  completedAt: string | null;
+  needsReviewSince: string | null;
+  reviewResolvedAt: string | null;
+}
+
 /* ─── Mastery ─────────────────────────────────────────────────────── */
 
 export interface SkillMastery {

@@ -9,6 +9,7 @@ export { useCourseMastery } from './api/use-course-mastery';
 export { useCanDo } from './api/use-can-do';
 export { useCourseHome } from './api/use-course-home';
 export { useUnitContents } from './api/use-unit-contents';
+export { useUpsertProgress } from './api/use-upsert-progress';
 export { useProgressOverview } from './api/use-progress-overview';
 export { useAssignments, useAssignment, useAssignmentQuestions, useSubmitGradedAssignment, useSubmitWrittenAssignment, useSaveWrittenDraft } from './api/use-assignments';
 
@@ -68,6 +69,8 @@ export type {
   WrittenDraftRequest,
   AssignmentQuestion,
   AssignmentQuestionsResponse,
+  UpsertProgressRequest,
+  ProgressRecord,
 } from './types';
 
 /* ─── Session store ──────────────────────────────────────────────── */

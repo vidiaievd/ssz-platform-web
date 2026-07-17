@@ -1,9 +1,15 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { ErrorState, LearningSkeleton, useCourseHome, useUnitContents } from '@/features/learning';
+import {
+  ErrorState,
+  LearningSkeleton,
+  useCourseHome,
+  useUnitContents,
+  useUpsertProgress,
+} from '@/features/learning';
 import { useActivityStreak } from '@/features/student';
 import { LANG_EMOJI } from '@/features/student/course-home';
 
@@ -49,6 +55,12 @@ export function ReaderShell({
   const courseHome = useCourseHome(courseId);
   const unitContents = useUnitContents(unitId);
   const streak = useActivityStreak();
+  const upsertProgress = useUpsertProgress(courseId, unitId);
+
+  const startedAtRef = useRef<number>(undefined);
+  useEffect(() => {
+    startedAtRef.current = Date.now();
+  }, [itemId]);
 
   const isLoading = courseHome.isLoading || unitContents.isLoading;
   const isError = courseHome.isError || unitContents.isError;
@@ -92,6 +104,22 @@ export function ReaderShell({
 
   const activeUnit = units.find((u) => u.id === unitId);
   const moduleVocabularyListId = allContentItems.find((i) => i.contentType === 'VOCABULARY_LIST')?.contentId;
+
+  function handleNext() {
+    if (activeContentItem && activeContentItem.status !== 'completed') {
+      const timeSpentSeconds = Math.max(
+        0,
+        Math.round((Date.now() - (startedAtRef.current ?? Date.now())) / 1000),
+      );
+      upsertProgress.mutate({
+        contentType: activeContentItem.contentType,
+        contentId: activeContentItem.contentId,
+        timeSpentSeconds,
+        completed: true,
+      });
+    }
+    onNextItem?.();
+  }
 
   let content: ReactNode = children;
   if (activeKind === 'vocab' && activeContentItem) {
@@ -188,7 +216,7 @@ export function ReaderShell({
           <div className="mx-auto w-full flex-1 px-8 py-8" style={{ maxWidth: effectiveMaxWidth }}>
             {content}
           </div>
-          {footer && <LessonFooterNav items={flatItems} activeItemId={itemId} onNext={onNextItem} />}
+          {footer && <LessonFooterNav items={flatItems} activeItemId={itemId} onNext={handleNext} />}
         </div>
       </main>
     </div>

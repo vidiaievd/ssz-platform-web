@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { CourseHomePayload, UnitContentsResult } from '@/features/learning';
@@ -9,6 +9,7 @@ import type { StudentProfile } from '@/features/profile';
 
 const useCourseHome = vi.fn();
 const useUnitContents = vi.fn();
+const useUpsertProgress = vi.fn();
 const useActivityStreak = vi.fn();
 const useVocabularyList = vi.fn();
 const useUnitVocabularyItems = vi.fn();
@@ -22,7 +23,12 @@ const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
 
 vi.mock('@/features/learning', async () => {
   const actual = await vi.importActual<typeof import('@/features/learning')>('@/features/learning');
-  return { ...actual, useCourseHome: () => useCourseHome(), useUnitContents: () => useUnitContents() };
+  return {
+    ...actual,
+    useCourseHome: () => useCourseHome(),
+    useUnitContents: () => useUnitContents(),
+    useUpsertProgress: (...args: unknown[]) => useUpsertProgress(...args),
+  };
 });
 vi.mock('@/features/student', () => ({ useActivityStreak: () => useActivityStreak() }));
 vi.mock('@/features/content', async () => {
@@ -291,6 +297,10 @@ function renderShell(props: Partial<React.ComponentProps<typeof ReaderShell>> = 
 }
 
 describe('ReaderShell', () => {
+  beforeEach(() => {
+    useUpsertProgress.mockReturnValue({ mutate: vi.fn() });
+  });
+
   it('renders the sidebar, topbar, content, and footer nav once data loads', () => {
     setup();
     renderShell();
@@ -306,6 +316,88 @@ describe('ReaderShell', () => {
     renderShell();
 
     expect(screen.getByText('Next unlocks after this')).toBeInTheDocument();
+  });
+
+  const TEXT_THEN_AVAILABLE: UnitContentsResult = {
+    ...UNIT_CONTENTS_WITH_TEXT,
+    sections: [
+      {
+        id: 's1',
+        title: 'Reinforce & read',
+        items: [
+          ...UNIT_CONTENTS_WITH_TEXT.sections[0]!.items,
+          { ...UNIT_CONTENTS.sections[0]!.items[0]!, status: 'available' },
+        ],
+      },
+    ],
+  };
+
+  it('marks the current item complete when the footer "Next" link is clicked', () => {
+    const mutate = vi.fn();
+    useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
+    useUnitContents.mockReturnValue({
+      data: TEXT_THEN_AVAILABLE,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    useUpsertProgress.mockReturnValue({ mutate });
+    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
+    useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
+    useMyStudentProfile.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: STUDENT_PROFILE,
+      refetch: vi.fn(),
+    });
+    useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: TEXT_VARIANT, refetch: vi.fn() });
+    useLessonParagraphs.mockReturnValue({ data: [{ target: 'Marta er sykepleier.', translation: 'Marta is a nurse.' }] });
+    useLessonGlossaryMarks.mockReturnValue({ data: [] });
+    useUnitVocabularyItems.mockReturnValue({ data: [] });
+
+    renderShell({ itemId: 'text-1' });
+    fireEvent.click(screen.getByRole('link', { name: /next/i }));
+
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ contentType: 'LESSON', contentId: 'lesson-1', completed: true }),
+    );
+  });
+
+  it('does not re-upsert progress for an already-completed item', () => {
+    const mutate = vi.fn();
+    const completedTextUnit: UnitContentsResult = {
+      ...TEXT_THEN_AVAILABLE,
+      sections: [
+        {
+          id: 's1',
+          title: 'Reinforce & read',
+          items: [
+            { ...TEXT_THEN_AVAILABLE.sections[0]!.items[0]!, status: 'completed' },
+            TEXT_THEN_AVAILABLE.sections[0]!.items[1]!,
+          ],
+        },
+      ],
+    };
+    useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
+    useUnitContents.mockReturnValue({ data: completedTextUnit, isLoading: false, isError: false, refetch: vi.fn() });
+    useUpsertProgress.mockReturnValue({ mutate });
+    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
+    useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
+    useMyStudentProfile.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: STUDENT_PROFILE,
+      refetch: vi.fn(),
+    });
+    useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: TEXT_VARIANT, refetch: vi.fn() });
+    useLessonParagraphs.mockReturnValue({ data: [{ target: 'Marta er sykepleier.', translation: 'Marta is a nurse.' }] });
+    useLessonGlossaryMarks.mockReturnValue({ data: [] });
+    useUnitVocabularyItems.mockReturnValue({ data: [] });
+
+    renderShell({ itemId: 'text-1' });
+    fireEvent.click(screen.getByRole('link', { name: /next/i }));
+
+    expect(mutate).not.toHaveBeenCalled();
   });
 
   it('shows a loading skeleton while queries are pending', () => {
