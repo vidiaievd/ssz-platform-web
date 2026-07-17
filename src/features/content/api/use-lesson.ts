@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { Lesson, LessonVariant } from '../types';
+import type { GlossaryMark, Lesson, LessonParagraph, LessonVariant } from '../types';
 import { contentKeys } from './keys';
 
 export function useLesson(id: string, enabled = true) {
@@ -34,5 +34,33 @@ export function useBestLessonVariant(
     },
     staleTime: 120_000,
     enabled: enabled && !!lessonId && !!nativeLanguage && !!level,
+  });
+}
+
+/** Paragraph-aligned bilingual translations for a TEXT lesson variant (BE1.4). */
+export function useLessonParagraphs(lessonId: string, variantId: string | undefined) {
+  return useQuery<LessonParagraph[]>({
+    queryKey: contentKeys.lessonParagraphs(lessonId, variantId ?? ''),
+    queryFn: async () => {
+      const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/paragraphs`);
+      if (!res.ok) return [];
+      return res.json() as Promise<LessonParagraph[]>;
+    },
+    staleTime: 120_000,
+    enabled: !!lessonId && !!variantId,
+  });
+}
+
+/** Author-marked glossary words for a TEXT/VIDEO lesson variant (BE1.5). */
+export function useLessonGlossaryMarks(lessonId: string, variantId: string | undefined) {
+  return useQuery<GlossaryMark[]>({
+    queryKey: contentKeys.lessonGlossaryMarks(lessonId, variantId ?? ''),
+    queryFn: async () => {
+      const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/glossary-marks`);
+      if (!res.ok) return [];
+      return res.json() as Promise<GlossaryMark[]>;
+    },
+    staleTime: 120_000,
+    enabled: !!lessonId && !!variantId,
   });
 }
