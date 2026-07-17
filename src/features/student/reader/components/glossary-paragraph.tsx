@@ -63,16 +63,19 @@ function GlossaryWord({ text, item, contextSentence }: { text: string; item: Voc
 export interface GlossaryParagraphProps {
   text: string;
   glossary: GlossaryIndex;
+  /** BCP-47 language of `text`, for assistive tech / font selection. */
+  lang?: string;
   className?: string;
   style?: React.CSSProperties;
 }
 
 /** Renders `text` with glossary-marked words as tappable lookup popovers. */
-export function GlossaryParagraph({ text, glossary, className, style }: GlossaryParagraphProps) {
+export function GlossaryParagraph({ text, glossary, lang, className, style }: GlossaryParagraphProps) {
   const tokens = useMemo(() => tokenizeGlossary(text, glossary), [text, glossary]);
 
   return (
     <p
+      lang={lang}
       className={cn('font-reading m-0 text-(--ssz-text-primary)', className)}
       style={{ textWrap: 'pretty', ...style } as React.CSSProperties}
     >

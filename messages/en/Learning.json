@@ -279,6 +279,28 @@
         "reviewBody": "{count, plural, one {# word from earlier units is ready for review today} other {# words from earlier units are ready for review today}}",
         "reviewCta": "Review"
       }
+    },
+    "text": {
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "tapToLookUp": "tap a word to look it up",
+        "showTranslation": "Show translation",
+        "hideTranslation": "Hide translation",
+        "columnTarget": "Text",
+        "columnTranslation": "Translation",
+        "paragraphOf": "Paragraph {current} of {total}",
+        "previousParagraph": "Previous paragraph",
+        "nextParagraph": "Next paragraph",
+        "noParagraphs": "This lesson has no text yet.",
+        "emptyTitle": "This lesson isn't ready for you yet",
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson."
+      },
+      "mode": {
+        "label": "Reading mode",
+        "immersive": "Immersive",
+        "bilingual": "Bilingual",
+        "focus": "Focus"
+      }
     }
   }
 }
