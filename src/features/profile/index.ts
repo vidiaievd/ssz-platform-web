@@ -1,5 +1,5 @@
 export { ProfileForm, ProfileCompleteness } from './components';
-export { useMyProfile, updateProfileAction, profileKeys, getMyProfile } from './api';
+export { useMyProfile, updateProfileAction, profileKeys } from './api';
 export { useMyStudentProfile, useUpdateStudentProfile } from './api';
 export { updateAvatarAction } from './actions/update-avatar';
 export { calculateCompleteness } from './lib';
