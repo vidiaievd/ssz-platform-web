@@ -16,6 +16,7 @@ const useLesson = vi.fn();
 const useBestLessonVariant = vi.fn();
 const useLessonParagraphs = vi.fn();
 const useLessonGlossaryMarks = vi.fn();
+const useLessonVideoCues = vi.fn();
 const useMyStudentProfile = vi.fn();
 const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
 
@@ -34,6 +35,7 @@ vi.mock('@/features/content', async () => {
     useBestLessonVariant: (...args: unknown[]) => useBestLessonVariant(...args),
     useLessonParagraphs: (...args: unknown[]) => useLessonParagraphs(...args),
     useLessonGlossaryMarks: (...args: unknown[]) => useLessonGlossaryMarks(...args),
+    useLessonVideoCues: (...args: unknown[]) => useLessonVideoCues(...args),
   };
 });
 vi.mock('@/features/profile', () => ({ useMyStudentProfile: () => useMyStudentProfile() }));
@@ -177,6 +179,34 @@ const TEXT_VARIANT: LessonVariant = {
   status: 'published',
 };
 
+const VIDEO_LESSON: Lesson = {
+  id: 'lesson-2',
+  slug: 'intervju-pa-jobben',
+  title: 'Intervju på jobben',
+  targetLanguage: 'nb',
+  difficultyLevel: 'B1',
+  visibility: 'public',
+  ownerUserId: 'u1',
+  kind: 'video',
+  liveStartsAt: null,
+  liveDurationMinutes: null,
+  liveJoinUrl: null,
+  liveCapacity: null,
+  createdAt: '2026-01-01T00:00:00Z',
+  updatedAt: '2026-01-01T00:00:00Z',
+};
+
+const VIDEO_VARIANT: LessonVariant = {
+  id: 'variant-2',
+  lessonId: 'lesson-2',
+  explanationLanguage: 'en',
+  minLevel: 'A1',
+  maxLevel: 'C2',
+  displayTitle: 'Intervju på jobben',
+  bodyMarkdown: '[video:media-1]',
+  status: 'published',
+};
+
 const STUDENT_PROFILE: StudentProfile = {
   id: 'p1',
   userId: 'u1',
@@ -309,6 +339,29 @@ describe('ReaderShell', () => {
 
     expect(useLesson).toHaveBeenCalledWith('lesson-1');
     expect(screen.getByText('Marta er sykepleier.')).toBeInTheDocument();
+    expect(screen.queryByText('lesson content')).not.toBeInTheDocument();
+  });
+
+  it('renders VideoLessonPage (not children) when the active item is a video lesson', () => {
+    useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
+    useUnitContents.mockReturnValue({ data: UNIT_CONTENTS, isLoading: false, isError: false, refetch: vi.fn() });
+    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
+    useLesson.mockReturnValue({ isLoading: false, isError: false, data: VIDEO_LESSON, refetch: vi.fn() });
+    useMyStudentProfile.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: STUDENT_PROFILE,
+      refetch: vi.fn(),
+    });
+    useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: VIDEO_VARIANT, refetch: vi.fn() });
+    useLessonVideoCues.mockReturnValue({ data: [] });
+    useLessonGlossaryMarks.mockReturnValue({ data: [] });
+    useUnitVocabularyItems.mockReturnValue({ data: [] });
+
+    renderShell({ itemId: 'video-1' });
+
+    expect(useLesson).toHaveBeenCalledWith('lesson-2');
+    expect(screen.getByRole('heading', { name: 'Intervju på jobben' })).toBeInTheDocument();
     expect(screen.queryByText('lesson content')).not.toBeInTheDocument();
   });
 });

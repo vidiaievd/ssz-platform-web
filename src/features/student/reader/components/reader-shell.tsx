@@ -12,6 +12,7 @@ import { ReaderTopBar } from './reader-top-bar';
 import { LessonFooterNav } from './lesson-footer-nav';
 import { VocabularyPage } from './vocabulary-page';
 import { TextLessonPage } from './text-lesson-page';
+import { VideoLessonPage } from './video-lesson-page';
 import {
   flattenSections,
   mapCourseUnitsToSidebarUnits,
@@ -112,8 +113,19 @@ export function ReaderShell({
         cefrLevel={courseInfo.cefrLevel}
       />
     );
+  } else if (activeKind === 'video' && activeContentItem) {
+    content = (
+      <VideoLessonPage
+        lessonId={activeContentItem.contentId}
+        vocabularyListId={moduleVocabularyListId}
+        unitPosition={activeUnit?.position ?? 0}
+        courseTitle={courseInfo.title}
+        cefrLevel={courseInfo.cefrLevel}
+      />
+    );
   }
-  const effectiveMaxWidth = maxWidth ?? (activeKind === 'vocab' ? 780 : 680);
+  const effectiveMaxWidth =
+    maxWidth ?? (activeKind === 'vocab' ? 780 : activeKind === 'video' ? 880 : 680);
 
   return (
     <div className="flex h-screen overflow-hidden">
