@@ -232,6 +232,10 @@
       "previous": "Previous",
       "next": "Next · {type}",
       "unlocksAfterThis": "Next unlocks after this"
+    },
+    "body": {
+      "comingSoonTitle": "This lesson page is on its way",
+      "comingSoonBody": "The reading experience for this material type isn't wired up yet."
     }
   }
 }

@@ -232,6 +232,10 @@
       "previous": "Forrige",
       "next": "Neste · {type}",
       "unlocksAfterThis": "Neste låses opp etter denne"
+    },
+    "body": {
+      "comingSoonTitle": "Denne leksjonssiden er på vei",
+      "comingSoonBody": "Lesevisningen for denne materialtypen er ikke koblet til ennå."
     }
   }
 }
