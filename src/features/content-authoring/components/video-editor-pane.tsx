@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
@@ -10,12 +10,15 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { buildGlossaryIndex } from '@/features/learning';
+import { useLesson, useUnitVocabularyItems } from '@/features/content';
 import type { Container } from '@/features/content/types';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 import { updateLessonAction } from '../actions/lesson';
-import { useLessonVariants, useLessonCues } from '../api/use-authoring-lessons';
+import { useLessonVariants, useLessonCues, useLessonGlossaryMarks } from '../api/use-authoring-lessons';
+import { useAuthoringVocabularyLists } from '../api/use-authoring-vocabulary';
 import { authoringKeys } from '../api/keys';
 import { useAutosave } from '../hooks/use-autosave';
 import { LessonEditorShell } from './lesson-editor-shell';
@@ -50,6 +53,16 @@ export function VideoEditorPane({
   const { data: variants, isLoading: variantsLoading } = useLessonVariants(lessonId);
   const defaultVariant = variants?.[0];
   const { data: cues } = useLessonCues(lessonId, defaultVariant?.id);
+
+  const lesson = useLesson(lessonId);
+  const { data: vocabLists } = useAuthoringVocabularyLists(container.id);
+  const vocabList = vocabLists?.[0];
+  const vocabItems = useUnitVocabularyItems(vocabList?.id ?? '', !!vocabList);
+  const { data: marks } = useLessonGlossaryMarks(lessonId, defaultVariant?.id);
+  const glossary = useMemo(() => {
+    const markedIds = new Set((marks ?? []).map((m) => m.vocabularyItemId));
+    return buildGlossaryIndex((vocabItems.data ?? []).filter((item) => markedIds.has(item.id)));
+  }, [marks, vocabItems.data]);
 
   const {
     register,
@@ -106,7 +119,13 @@ export function VideoEditorPane({
       autosaveSavedAt={autosave.savedAt}
       publishSlot={publishSlot}
       preview={
-        <VideoLessonPreview title={titleValue ?? ''} body={bodyValue ?? ''} cues={cues ?? []} />
+        <VideoLessonPreview
+          title={titleValue ?? ''}
+          body={bodyValue ?? ''}
+          cues={cues ?? []}
+          glossary={glossary}
+          targetLang={lesson.data?.targetLanguage}
+        />
       }
     >
       {variantsLoading ? (

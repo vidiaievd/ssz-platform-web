@@ -1,9 +1,10 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useMediaAsset } from '@/features/media';
+import { GlossaryParagraph, VideoPlayer, type GlossaryIndex } from '@/features/learning';
 import type { LessonVideoCue } from '@/features/content/types';
 
 import { findVideoSource } from '@/lib/content/lesson-media-tokens';
@@ -12,6 +13,8 @@ interface VideoLessonPreviewProps {
   title: string;
   body: string;
   cues: LessonVideoCue[];
+  glossary: GlossaryIndex;
+  targetLang?: string;
 }
 
 /** Finds the last cue whose startSeconds has passed, i.e. the one currently playing. */
@@ -25,13 +28,16 @@ function findActiveCue(cues: LessonVideoCue[], currentTime: number): LessonVideo
   return active;
 }
 
-/** Live "exactly what the learner sees" preview for a VIDEO lesson, rendered inside `PhoneFrame`. */
-export function VideoLessonPreview({ title, body, cues }: VideoLessonPreviewProps) {
+/**
+ * Live "exactly what the learner sees" preview for a VIDEO lesson, rendered
+ * inside `PhoneFrame`. Shares `VideoPlayer` and the glossary popover with the
+ * reader (FE6.1) instead of a plain native `<video>`.
+ */
+export function VideoLessonPreview({ title, body, cues, glossary, targetLang }: VideoLessonPreviewProps) {
   const t = useTranslations('Authoring');
   const source = findVideoSource(body);
   const { data: asset } = useMediaAsset(source?.mediaId);
   const [currentTime, setCurrentTime] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const sortedCues = [...cues].sort((a, b) => a.startSeconds - b.startSeconds);
   const activeCue = findActiveCue(sortedCues, currentTime);
@@ -44,43 +50,30 @@ export function VideoLessonPreview({ title, body, cues }: VideoLessonPreviewProp
         </div>
       </div>
 
-      {asset?.url ? (
-        <div className="relative bg-black">
-          <video
-            ref={videoRef}
-            src={asset.url}
-            controls
-            className="w-full"
-            onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-          />
-          {activeCue && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-12 flex flex-col items-center gap-0.5 px-4 text-center">
-              <span className="rounded bg-black/75 px-2 py-1 text-sm font-medium text-white">
-                {activeCue.targetLine}
-              </span>
-              {activeCue.translationLine && (
-                <span className="rounded bg-black/60 px-2 py-0.5 text-xs text-white/85">
-                  {activeCue.translationLine}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="px-4 py-3.5">
-          <p className="italic text-muted-foreground">{t('lessons.previewEmpty')}</p>
-        </div>
-      )}
+      <VideoPlayer
+        src={asset?.url}
+        label={title || t('lessons.untitled')}
+        cues={sortedCues}
+        glossary={glossary}
+        targetLang={targetLang ?? ''}
+        showSubtitles
+        onTimeUpdate={setCurrentTime}
+      />
 
       {sortedCues.length > 0 && (
         <div className="px-4 py-3.5 font-reading text-[14.5px] leading-loose text-(--ssz-text-primary)">
           {sortedCues.map((cue) => (
-            <p
-              key={cue.position}
-              className={cue === activeCue ? 'mb-2 font-semibold text-primary' : 'mb-2 text-muted-foreground'}
-            >
-              {cue.targetLine}
-            </p>
+            <div key={cue.position} className="mb-2">
+              <GlossaryParagraph
+                text={cue.targetLine}
+                glossary={glossary}
+                lang={targetLang}
+                className={cue === activeCue ? 'font-semibold text-primary' : 'text-muted-foreground'}
+              />
+              {cue === activeCue && cue.translationLine && (
+                <p className="text-xs text-muted-foreground italic">{cue.translationLine}</p>
+              )}
+            </div>
           ))}
         </div>
       )}

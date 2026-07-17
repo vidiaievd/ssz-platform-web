@@ -3,17 +3,35 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { buildGlossaryIndex } from '@/features/learning';
 import type { LessonVideoCue } from '@/features/content/types';
 
 vi.mock('@/features/media', () => ({ useMediaAsset: vi.fn() }));
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 const { VideoLessonPreview } = await import('./video-lesson-preview');
 const { useMediaAsset } = await import('@/features/media');
 
-function renderPreview(props: { title: string; body: string; cues: LessonVideoCue[] }) {
+function renderPreview(props: {
+  title: string;
+  body: string;
+  cues: LessonVideoCue[];
+  glossary?: ReturnType<typeof buildGlossaryIndex>;
+  targetLang?: string;
+}) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <VideoLessonPreview {...props} />
+      <VideoLessonPreview glossary={buildGlossaryIndex([])} {...props} />
     </NextIntlClientProvider>,
   );
 }
@@ -24,6 +42,8 @@ const CUES: LessonVideoCue[] = [
 ];
 
 beforeEach(() => {
+  vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve());
+  vi.spyOn(window.HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
   vi.mocked(useMediaAsset).mockReturnValue({
     data: { id: 'media-1', url: 'https://cdn.test/video.mp4' },
   } as never);
@@ -33,7 +53,7 @@ describe('VideoLessonPreview', () => {
   it('shows the empty state when there is no video source', () => {
     vi.mocked(useMediaAsset).mockReturnValue({ data: undefined } as never);
     renderPreview({ title: 'Greetings', body: '', cues: [] });
-    expect(screen.getByText('Nothing to preview.')).toBeInTheDocument();
+    expect(screen.getByText("This lesson doesn't have a video yet.")).toBeInTheDocument();
   });
 
   it('renders the video and the full cue list', () => {
