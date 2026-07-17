@@ -15,17 +15,6 @@ import {
 } from '../schemas/grammar';
 import { addItemToDraft, listDraftItems, removeItemFromDraft } from '../lib/container-items';
 
-// The backend has no structured slot for example sentences on an explanation —
-// append them to bodyMarkdown behind a marker so they survive a round trip
-// without inventing a new backend feature. See grammar-rules/[id]/explanations
-// BFF route for the matching decompose step.
-const EXAMPLES_MARKER = '\n\n<!-- examples -->\n';
-
-function composeBodyWithExamples(body: string, examples: { text: string }[]): string {
-  if (examples.length === 0) return body;
-  return body + EXAMPLES_MARKER + examples.map((e) => `- ${e.text}`).join('\n');
-}
-
 export async function createGrammarRuleAction(
   containerId: string,
   targetLanguage: string,
@@ -110,7 +99,7 @@ export async function saveGrammarExplanationAction(
       throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
     const { languageCode, title, body, examples } = parsed.data;
-    const bodyMarkdown = composeBodyWithExamples(body ?? '', examples);
+    const bodyMarkdown = body ?? '';
 
     let savedExplanationId: string;
     if (explanationId) {
@@ -136,6 +125,15 @@ export async function saveGrammarExplanationAction(
       });
       savedExplanationId = explanation.explanationId;
     }
+
+    await serverFetch({
+      service: 'content',
+      path: `/grammar-rules/${ruleId}/explanations/${savedExplanationId}/compare-examples`,
+      method: 'PUT',
+      body: {
+        items: examples.map((e, i) => ({ position: i, sentence: e.text, isCorrect: true })),
+      },
+    });
 
     revalidatePath(`/school/content/${containerId}`);
     return { explanationId: savedExplanationId };
