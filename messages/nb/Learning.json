@@ -370,6 +370,25 @@
         "heading": "Godt jobbet!",
         "body": "Du fullførte alle tre stadiene i lytteøvelsen. Fremgangen din er lagret, og ordene du bommet på er lagt til i repetisjon."
       }
+    },
+    "grammar": {
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
+        "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen."
+      },
+      "anchor": {
+        "label": "Fra teksten"
+      },
+      "compare": {
+        "heading": "Sammenlign"
+      },
+      "quickCheck": {
+        "label": "Rask sjekk",
+        "checkAnswer": "Sjekk svaret",
+        "correct": "Riktig!",
+        "incorrect": "Ikke helt."
+      }
     }
   }
 }

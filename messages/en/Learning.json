@@ -370,6 +370,25 @@
         "heading": "Well done!",
         "body": "You completed all three stages of the listening training. Your progress has been saved and the words you missed are added to review."
       }
+    },
+    "grammar": {
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "emptyTitle": "This lesson isn't ready for you yet",
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson."
+      },
+      "anchor": {
+        "label": "From the text"
+      },
+      "compare": {
+        "heading": "Compare"
+      },
+      "quickCheck": {
+        "label": "Quick check",
+        "checkAnswer": "Check answer",
+        "correct": "Correct!",
+        "incorrect": "Not quite."
+      }
     }
   }
 }
