@@ -217,7 +217,9 @@
       "showContents": "Show contents",
       "hideContents": "Hide contents",
       "unitLabel": "Unit {n}",
-      "locked": "Locked"
+      "locked": "Locked",
+      "durationMinutes": "{n} min",
+      "otherItems": "Other"
     },
     "topbar": {
       "courseLabel": "Course",

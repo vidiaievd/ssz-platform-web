@@ -217,7 +217,9 @@
       "showContents": "Vis innhold",
       "hideContents": "Skjul innhold",
       "unitLabel": "Enhet {n}",
-      "locked": "Låst"
+      "locked": "Låst",
+      "durationMinutes": "{n} min",
+      "otherItems": "Annet"
     },
     "topbar": {
       "courseLabel": "Kurs",

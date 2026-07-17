@@ -217,7 +217,9 @@
       "showContents": "Показать содержание",
       "hideContents": "Скрыть содержание",
       "unitLabel": "Раздел {n}",
-      "locked": "Заблокировано"
+      "locked": "Заблокировано",
+      "durationMinutes": "{n} мин",
+      "otherItems": "Другое"
     },
     "topbar": {
       "courseLabel": "Курс",

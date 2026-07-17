@@ -7,6 +7,9 @@ export type { ReaderTopBarProps } from './components/reader-top-bar';
 export { LessonFooterNav } from './components/lesson-footer-nav';
 export type { LessonFooterNavProps } from './components/lesson-footer-nav';
 
+export { ReaderShell } from './components/reader-shell';
+export type { ReaderShellProps } from './components/reader-shell';
+
 export type {
   ReaderSidebarCourse,
   ReaderSidebarItem,

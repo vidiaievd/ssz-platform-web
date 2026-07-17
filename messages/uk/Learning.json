@@ -217,7 +217,9 @@
       "showContents": "Показати зміст",
       "hideContents": "Приховати зміст",
       "unitLabel": "Розділ {n}",
-      "locked": "Заблоковано"
+      "locked": "Заблоковано",
+      "durationMinutes": "{n} хв",
+      "otherItems": "Інше"
     },
     "topbar": {
       "courseLabel": "Курс",

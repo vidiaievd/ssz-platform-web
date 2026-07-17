@@ -12,7 +12,8 @@ const LANG_HUE: Record<string, number> = {
   es: 168,
 };
 
-const LANG_EMOJI: Record<string, string> = {
+/** Also used by the reader shell breadcrumb/sidebar (features/student/reader). */
+export const LANG_EMOJI: Record<string, string> = {
   nb: '🇳🇴',
   no: '🇳🇴',
   en: '🇬🇧',
