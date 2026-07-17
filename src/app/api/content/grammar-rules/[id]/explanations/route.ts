@@ -10,30 +10,16 @@ interface BackendExplanation {
   displayTitle: string;
   bodyMarkdown: string;
   status: string;
+  compareExamples: { sentence: string }[];
 }
 
-// Mirrors the compose step in actions/grammar.ts — examples are appended to
-// bodyMarkdown behind this marker since the backend has no dedicated field for them.
-const EXAMPLES_MARKER = '\n\n<!-- examples -->\n';
-
 function toFeShape(e: BackendExplanation): GrammarExplanation {
-  const markerIndex = e.bodyMarkdown.indexOf(EXAMPLES_MARKER);
-  const body = markerIndex === -1 ? e.bodyMarkdown : e.bodyMarkdown.slice(0, markerIndex);
-  const examples =
-    markerIndex === -1
-      ? []
-      : e.bodyMarkdown
-          .slice(markerIndex + EXAMPLES_MARKER.length)
-          .split('\n')
-          .map((line) => line.replace(/^-\s*/, '').trim())
-          .filter(Boolean);
-
   return {
     id: e.id,
     languageCode: e.explanationLanguage,
     title: e.displayTitle,
-    body,
-    examples,
+    body: e.bodyMarkdown,
+    examples: e.compareExamples.map((c) => c.sentence),
     isPublished: e.status === 'published',
   };
 }
