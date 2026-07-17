@@ -13,6 +13,7 @@ import { LessonFooterNav } from './lesson-footer-nav';
 import { VocabularyPage } from './vocabulary-page';
 import { TextLessonPage } from './text-lesson-page';
 import { VideoLessonPage } from './video-lesson-page';
+import { ListeningLessonPage } from './listening-lesson-page';
 import {
   flattenSections,
   mapCourseUnitsToSidebarUnits,
@@ -121,6 +122,16 @@ export function ReaderShell({
         unitPosition={activeUnit?.position ?? 0}
         courseTitle={courseInfo.title}
         cefrLevel={courseInfo.cefrLevel}
+      />
+    );
+  } else if (activeKind === 'audio' && activeContentItem) {
+    content = (
+      <ListeningLessonPage
+        lessonId={activeContentItem.contentId}
+        unitPosition={activeUnit?.position ?? 0}
+        courseTitle={courseInfo.title}
+        cefrLevel={courseInfo.cefrLevel}
+        xpReward={activeContentItem.xpReward}
       />
     );
   }
