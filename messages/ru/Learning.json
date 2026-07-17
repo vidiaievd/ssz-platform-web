@@ -241,6 +241,29 @@
       "emptyTitle": "В этом разделе пока нет материалов",
       "emptyBody": "Загляните позже, когда учитель опубликует уроки для этого раздела.",
       "backToCourse": "Назад к курсу"
+    },
+    "vocab": {
+      "grunnform": "начальная форма",
+      "listen": "Слушать",
+      "flipHint": "Нажмите, чтобы перевернуть",
+      "flipCardLabel": "Перевернуть карточку: {word}",
+      "backLabelTranslation": "Перевод",
+      "backLabelDefinition": "Объяснение",
+      "allForms": "Все формы",
+      "pos": {
+        "noun": "Существительное",
+        "verb": "Глагол",
+        "adjective": "Прилагательное",
+        "adverb": "Наречие",
+        "pronoun": "Местоимение",
+        "preposition": "Предлог",
+        "conjunction": "Союз",
+        "interjection": "Междометие",
+        "numeral": "Числительное",
+        "particle": "Частица",
+        "phrase": "Выражение",
+        "other": "Слово"
+      }
     }
   }
 }

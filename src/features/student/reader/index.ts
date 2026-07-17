@@ -13,6 +13,9 @@ export type { ReaderShellProps } from './components/reader-shell';
 export { UnitEntryRedirect } from './components/unit-entry-redirect';
 export type { UnitEntryRedirectProps } from './components/unit-entry-redirect';
 
+export { VocabFlipCard } from './components/vocab-flip-card';
+export type { VocabFlipCardProps, VocabCardMode } from './components/vocab-flip-card';
+
 export type {
   ReaderSidebarCourse,
   ReaderSidebarItem,

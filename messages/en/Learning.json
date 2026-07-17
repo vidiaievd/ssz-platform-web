@@ -241,6 +241,29 @@
       "emptyTitle": "This unit has no material yet",
       "emptyBody": "Check back once the teacher publishes lessons for this unit.",
       "backToCourse": "Back to course"
+    },
+    "vocab": {
+      "grunnform": "base form",
+      "listen": "Listen",
+      "flipHint": "Tap to flip",
+      "flipCardLabel": "Flip card: {word}",
+      "backLabelTranslation": "Translation",
+      "backLabelDefinition": "Definition",
+      "allForms": "All forms",
+      "pos": {
+        "noun": "Noun",
+        "verb": "Verb",
+        "adjective": "Adjective",
+        "adverb": "Adverb",
+        "pronoun": "Pronoun",
+        "preposition": "Preposition",
+        "conjunction": "Conjunction",
+        "interjection": "Interjection",
+        "numeral": "Numeral",
+        "particle": "Particle",
+        "phrase": "Phrase",
+        "other": "Word"
+      }
     }
   }
 }

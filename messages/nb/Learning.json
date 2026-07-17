@@ -241,6 +241,29 @@
       "emptyTitle": "Denne enheten har ikke noe innhold ennå",
       "emptyBody": "Kom tilbake når læreren har publisert leksjoner for denne enheten.",
       "backToCourse": "Tilbake til kurset"
+    },
+    "vocab": {
+      "grunnform": "grunnform",
+      "listen": "Lytt",
+      "flipHint": "Trykk for å snu",
+      "flipCardLabel": "Snu kort: {word}",
+      "backLabelTranslation": "Oversettelse",
+      "backLabelDefinition": "Forklaring",
+      "allForms": "Alle former",
+      "pos": {
+        "noun": "Substantiv",
+        "verb": "Verb",
+        "adjective": "Adjektiv",
+        "adverb": "Adverb",
+        "pronoun": "Pronomen",
+        "preposition": "Preposisjon",
+        "conjunction": "Konjunksjon",
+        "interjection": "Interjeksjon",
+        "numeral": "Tallord",
+        "particle": "Partikkel",
+        "phrase": "Uttrykk",
+        "other": "Ord"
+      }
     }
   }
 }

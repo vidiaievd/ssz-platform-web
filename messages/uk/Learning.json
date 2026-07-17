@@ -241,6 +241,29 @@
       "emptyTitle": "У цьому розділі ще немає матеріалів",
       "emptyBody": "Поверніться пізніше, коли вчитель опублікує уроки для цього розділу.",
       "backToCourse": "Назад до курсу"
+    },
+    "vocab": {
+      "grunnform": "початкова форма",
+      "listen": "Слухати",
+      "flipHint": "Торкніться, щоб перевернути",
+      "flipCardLabel": "Перевернути картку: {word}",
+      "backLabelTranslation": "Переклад",
+      "backLabelDefinition": "Пояснення",
+      "allForms": "Усі форми",
+      "pos": {
+        "noun": "Іменник",
+        "verb": "Дієслово",
+        "adjective": "Прикметник",
+        "adverb": "Прислівник",
+        "pronoun": "Займенник",
+        "preposition": "Прийменник",
+        "conjunction": "Сполучник",
+        "interjection": "Вигук",
+        "numeral": "Числівник",
+        "particle": "Частка",
+        "phrase": "Вислів",
+        "other": "Слово"
+      }
     }
   }
 }
