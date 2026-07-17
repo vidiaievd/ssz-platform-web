@@ -189,23 +189,6 @@ export interface ExpandedExerciseRef {
   type: string;
 }
 
-export interface ExpandedModule {
-  id: string;
-  title: string;
-  position: number;
-  cefrLevel: string;
-  lesson: ExpandedLesson;
-  vocabulary: ExpandedVocabItem[];
-  grammar?: ExpandedGrammarRule;
-  exercises: ExpandedExerciseRef[];
-  canDoDescriptors: CanDoItem[];
-}
-
-export interface UnitPayload {
-  module: ExpandedModule;
-  progress: ModuleProgress;
-}
-
 /* ─── Unit contents (reader sidebar/footer nav data source, BE3.1/BE3.3) ─── */
 
 export type UnitContentsItemStatus = 'locked' | 'available' | 'in_progress' | 'completed';

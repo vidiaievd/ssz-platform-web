@@ -8,7 +8,6 @@ export { useCourseProgress } from './api/use-course-progress';
 export { useCourseMastery } from './api/use-course-mastery';
 export { useCanDo } from './api/use-can-do';
 export { useCourseHome } from './api/use-course-home';
-export { useUnitPayload } from './api/use-unit-payload';
 export { useUnitContents } from './api/use-unit-contents';
 export { useProgressOverview } from './api/use-progress-overview';
 export { useAssignments, useAssignment, useAssignmentQuestions, useSubmitGradedAssignment, useSubmitWrittenAssignment, useSaveWrittenDraft } from './api/use-assignments';
@@ -27,7 +26,6 @@ export type {
   ExpandedGrammarExample,
   ExpandedGrammarRule,
   ExpandedLesson,
-  ExpandedModule,
   ExpandedVocabItem,
   LessonProgress,
   LessonProgressStatus,
@@ -47,7 +45,6 @@ export type {
   SrsHeatmapDay,
   SrsSettings,
   SrsStats,
-  UnitPayload,
   UnitContentsItem,
   UnitContentsItemStatus,
   UnitContentsResult,
