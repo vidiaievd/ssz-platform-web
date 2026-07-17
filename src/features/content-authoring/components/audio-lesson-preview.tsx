@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { useMediaAsset } from '@/features/media';
+import { AudioPlayer } from '@/features/learning';
 import type { LessonListeningStage } from '@/features/content/types';
 
 import { findAudioNarration } from '@/lib/content/lesson-media-tokens';
@@ -32,7 +33,7 @@ export function AudioLessonPreview({ title, body, transcript, stages }: AudioLes
 
       <div className="px-4 py-3.5">
         {asset?.url ? (
-          <audio controls src={asset.url} className="w-full" />
+          <AudioPlayer src={asset.url} label={title || t('lessons.untitled')} />
         ) : (
           <p className="italic text-muted-foreground">{t('lessons.previewEmpty')}</p>
         )}
