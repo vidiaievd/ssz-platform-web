@@ -2,7 +2,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { GlossaryMark, Lesson, LessonParagraph, LessonVariant, LessonVideoCue } from '../types';
+import type {
+  GlossaryMark,
+  Lesson,
+  LessonListeningStage,
+  LessonParagraph,
+  LessonVariant,
+  LessonVideoCue,
+} from '../types';
 import { contentKeys } from './keys';
 
 export function useLesson(id: string, enabled = true) {
@@ -73,6 +80,20 @@ export function useLessonVideoCues(lessonId: string, variantId: string | undefin
       const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/cues`);
       if (!res.ok) return [];
       return res.json() as Promise<LessonVideoCue[]>;
+    },
+    staleTime: 120_000,
+    enabled: !!lessonId && !!variantId,
+  });
+}
+
+/** Ordered gap-fill/comprehension stages for an AUDIO lesson variant (BE1.3). */
+export function useLessonListeningStages(lessonId: string, variantId: string | undefined) {
+  return useQuery<LessonListeningStage[]>({
+    queryKey: contentKeys.lessonListeningStages(lessonId, variantId ?? ''),
+    queryFn: async () => {
+      const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/listening-stages`);
+      if (!res.ok) return [];
+      return res.json() as Promise<LessonListeningStage[]>;
     },
     staleTime: 120_000,
     enabled: !!lessonId && !!variantId,

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { ExerciseDisplay } from '../types';
+import type { ExerciseDisplay, ExerciseWithAnswers } from '../types';
 import { contentKeys } from './keys';
 
 export function useExerciseDisplay(id: string, enabled = true) {
@@ -12,6 +12,24 @@ export function useExerciseDisplay(id: string, enabled = true) {
       const res = await fetch(`/api/content/exercises/${id}`);
       if (!res.ok) throw new Error('Failed to fetch exercise');
       return res.json() as Promise<ExerciseDisplay>;
+    },
+    staleTime: 300_000,
+    enabled: enabled && !!id,
+  });
+}
+
+/**
+ * Exercise content + expectedAnswers. Same BFF route the authoring editor uses
+ * (`/answers`) — the listening gap-fill/comprehension stages grade client-side
+ * (BEHAVIOR.md §7), so the reader needs the answer key too, not just `/display`.
+ */
+export function useExerciseWithAnswers(id: string, enabled = true) {
+  return useQuery<ExerciseWithAnswers>({
+    queryKey: contentKeys.exerciseAnswers(id),
+    queryFn: async () => {
+      const res = await fetch(`/api/content/exercises/${id}/answers`);
+      if (!res.ok) throw new Error('Failed to fetch exercise');
+      return res.json() as Promise<ExerciseWithAnswers>;
     },
     staleTime: 300_000,
     enabled: enabled && !!id,

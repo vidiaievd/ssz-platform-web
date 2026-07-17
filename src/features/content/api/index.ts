@@ -8,7 +8,14 @@ export {
   useLessonParagraphs,
   useLessonGlossaryMarks,
   useLessonVideoCues,
+  useLessonListeningStages,
 } from './use-lesson';
-export { useVocabularyList, useVocabularyItems, useUnitVocabularyItems } from './use-vocabulary';
+export {
+  useVocabularyList,
+  useVocabularyItems,
+  useUnitVocabularyItems,
+  useIntroduceCard,
+} from './use-vocabulary';
+export type { SrsSeedKind } from './use-vocabulary';
 export { useGrammarRule, useBestGrammarExplanation } from './use-grammar-rule';
-export { useExerciseDisplay } from './use-exercise';
+export { useExerciseDisplay, useExerciseWithAnswers } from './use-exercise';
