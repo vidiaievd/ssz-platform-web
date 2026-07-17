@@ -10,6 +10,7 @@ import { LANG_EMOJI } from '@/features/student/course-home';
 import { ContentsSidebar } from './contents-sidebar';
 import { ReaderTopBar } from './reader-top-bar';
 import { LessonFooterNav } from './lesson-footer-nav';
+import { VocabularyPage } from './vocabulary-page';
 import {
   flattenSections,
   mapCourseUnitsToSidebarUnits,
@@ -34,7 +35,7 @@ export function ReaderShell({
   itemId,
   children,
   footer = true,
-  maxWidth = 680,
+  maxWidth,
   onNextItem,
 }: ReaderShellProps) {
   const t = useTranslations('Learning.reader.sidebar');
@@ -86,6 +87,22 @@ export function ReaderShell({
 
   const activeUnit = units.find((u) => u.id === unitId);
 
+  const content =
+    activeKind === 'vocab' && activeContentItem ? (
+      <VocabularyPage
+        vocabularyListId={activeContentItem.contentId}
+        cefrLevel={courseInfo.cefrLevel}
+        unitPosition={activeUnit?.position ?? 0}
+        courseTitle={courseInfo.title}
+        srsVocabDue={courseHome.data.srsVocabDue}
+        siblingItems={flatItems}
+        currentItemId={itemId}
+      />
+    ) : (
+      children
+    );
+  const effectiveMaxWidth = maxWidth ?? (activeKind === 'vocab' ? 780 : 680);
+
   return (
     <div className="flex h-screen overflow-hidden">
       <ContentsSidebar
@@ -114,8 +131,8 @@ export function ReaderShell({
           xp={0}
         />
         <div className="flex flex-1 flex-col overflow-auto">
-          <div className="mx-auto w-full flex-1 px-8 py-8" style={{ maxWidth }}>
-            {children}
+          <div className="mx-auto w-full flex-1 px-8 py-8" style={{ maxWidth: effectiveMaxWidth }}>
+            {content}
           </div>
           {footer && <LessonFooterNav items={flatItems} activeItemId={itemId} onNext={onNextItem} />}
         </div>

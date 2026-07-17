@@ -4,16 +4,29 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { CourseHomePayload, UnitContentsResult } from '@/features/learning';
+import type { VocabularyItem, VocabularyList } from '@/features/content/types';
 
 const useCourseHome = vi.fn();
 const useUnitContents = vi.fn();
 const useActivityStreak = vi.fn();
+const useVocabularyList = vi.fn();
+const useUnitVocabularyItems = vi.fn();
+const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
 
 vi.mock('@/features/learning', async () => {
   const actual = await vi.importActual<typeof import('@/features/learning')>('@/features/learning');
   return { ...actual, useCourseHome: () => useCourseHome(), useUnitContents: () => useUnitContents() };
 });
 vi.mock('@/features/student', () => ({ useActivityStreak: () => useActivityStreak() }));
+vi.mock('@/features/content', async () => {
+  const actual = await vi.importActual<typeof import('@/features/content')>('@/features/content');
+  return {
+    ...actual,
+    useVocabularyList: (id: string) => useVocabularyList(id),
+    useUnitVocabularyItems: (id: string) => useUnitVocabularyItems(id),
+  };
+});
+vi.mock('@/features/media', () => ({ useMediaAsset: (id?: string) => useMediaAsset(id) }));
 vi.mock('next-themes', () => ({ useTheme: () => ({ resolvedTheme: 'light', setTheme: vi.fn() }) }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
@@ -80,6 +93,46 @@ const UNIT_CONTENTS: UnitContentsResult = {
   ungroupedItems: [],
 };
 
+const UNIT_CONTENTS_WITH_VOCAB: UnitContentsResult = {
+  ...UNIT_CONTENTS,
+  sections: [
+    {
+      id: 's1',
+      title: 'Reinforce & read',
+      items: [
+        {
+          id: 'vocab-1',
+          contentType: 'VOCABULARY_LIST',
+          contentId: 'list-1',
+          title: 'Yrker og oppgaver',
+          lessonKind: null,
+          durationMinutes: null,
+          xpReward: null,
+          status: 'in_progress',
+        },
+        ...(UNIT_CONTENTS.sections[0]?.items ?? []),
+      ],
+    },
+  ],
+};
+
+const VOCAB_LIST: VocabularyList = {
+  id: 'list-1',
+  title: 'Yrker og oppgaver',
+  targetLanguage: 'nb',
+  createdAt: '2026-01-01T00:00:00Z',
+};
+
+const VOCAB_ITEMS: VocabularyItem[] = [
+  {
+    id: 'v1',
+    lemma: 'sykepleier',
+    partOfSpeech: 'noun',
+    translations: [{ languageCode: 'en', translation: 'nurse' }],
+    examples: [],
+  },
+];
+
 function setup() {
   useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
   useUnitContents.mockReturnValue({ data: UNIT_CONTENTS, isLoading: false, isError: false, refetch: vi.fn() });
@@ -134,5 +187,30 @@ describe('ReaderShell', () => {
     fireEvent.click(screen.getByRole('button', { name: /try again/i }));
     expect(refetchCourse).toHaveBeenCalledTimes(1);
     expect(refetchUnit).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders VocabularyPage (not children) when the active item is a vocabulary list', () => {
+    useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
+    useUnitContents.mockReturnValue({
+      data: UNIT_CONTENTS_WITH_VOCAB,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
+    useVocabularyList.mockReturnValue({ data: VOCAB_LIST, isLoading: false, isError: false, refetch: vi.fn() });
+    useUnitVocabularyItems.mockReturnValue({
+      data: VOCAB_ITEMS,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    renderShell({ itemId: 'vocab-1' });
+
+    expect(useVocabularyList).toHaveBeenCalledWith('list-1');
+    expect(useUnitVocabularyItems).toHaveBeenCalledWith('list-1');
+    expect(screen.getByText('nurse')).toBeInTheDocument();
+    expect(screen.queryByText('lesson content')).not.toBeInTheDocument();
   });
 });
