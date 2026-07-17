@@ -18,4 +18,4 @@ export {
 } from './use-vocabulary';
 export type { SrsSeedKind } from './use-vocabulary';
 export { useGrammarRule, useBestGrammarExplanation } from './use-grammar-rule';
-export { useExerciseDisplay, useExerciseWithAnswers } from './use-exercise';
+export { useExerciseDisplay, useExerciseWithAnswers, useExercisesWithAnswers } from './use-exercise';
