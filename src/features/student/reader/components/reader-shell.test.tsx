@@ -81,11 +81,13 @@ const UNIT_CONTENTS: UnitContentsResult = {
       title: 'Reinforce & read',
       items: [
         {
-          id: 'audio-1',
+          // `live` is still a reader stub (FE5.6) — used here to exercise ReaderShell's
+          // generic chrome/fallback-to-children path for a kind with no page yet.
+          id: 'live-1',
           contentType: 'LESSON',
           contentId: 'lesson-1',
           title: 'En vanlig arbeidsdag',
-          lessonKind: 'audio',
+          lessonKind: 'live',
           durationMinutes: 8,
           xpReward: 10,
           status: 'in_progress',
@@ -242,7 +244,7 @@ function setup() {
 function renderShell(props: Partial<React.ComponentProps<typeof ReaderShell>> = {}) {
   return render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <ReaderShell courseId="course-1" unitId="u2" itemId="audio-1" {...props}>
+      <ReaderShell courseId="course-1" unitId="u2" itemId="live-1" {...props}>
         <div>lesson content</div>
       </ReaderShell>
     </NextIntlClientProvider>,
@@ -256,7 +258,7 @@ describe('ReaderShell', () => {
 
     expect(screen.getByText('Norsk B1')).toBeInTheDocument();
     expect(screen.getByText('lesson content')).toBeInTheDocument();
-    expect(screen.getByText('Listening · En vanlig arbeidsdag')).toBeInTheDocument();
+    expect(screen.getByText('Live class · En vanlig arbeidsdag')).toBeInTheDocument();
     expect(screen.getByText('7 days streak')).toBeInTheDocument();
   });
 
