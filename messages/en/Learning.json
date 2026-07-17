@@ -218,6 +218,13 @@
       "hideContents": "Hide contents",
       "unitLabel": "Unit {n}",
       "locked": "Locked"
+    },
+    "topbar": {
+      "courseLabel": "Course",
+      "streakDays": "{count, plural, one {# day streak} other {# days streak}}",
+      "xp": "{xp} XP",
+      "toggleThemeToLight": "Switch to light theme",
+      "toggleThemeToDark": "Switch to dark theme"
     }
   }
 }

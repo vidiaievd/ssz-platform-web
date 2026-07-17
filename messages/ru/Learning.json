@@ -218,6 +218,13 @@
       "hideContents": "Скрыть содержание",
       "unitLabel": "Раздел {n}",
       "locked": "Заблокировано"
+    },
+    "topbar": {
+      "courseLabel": "Курс",
+      "streakDays": "{count, plural, one {Серия # день} few {Серия # дня} many {Серия # дней} other {Серия # дня}}",
+      "xp": "{xp} XP",
+      "toggleThemeToLight": "Переключить на светлую тему",
+      "toggleThemeToDark": "Переключить на тёмную тему"
     }
   }
 }

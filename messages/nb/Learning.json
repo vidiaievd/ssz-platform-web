@@ -218,6 +218,13 @@
       "hideContents": "Skjul innhold",
       "unitLabel": "Enhet {n}",
       "locked": "Låst"
+    },
+    "topbar": {
+      "courseLabel": "Kurs",
+      "streakDays": "{count, plural, one {# dags rekke} other {# dagers rekke}}",
+      "xp": "{xp} XP",
+      "toggleThemeToLight": "Bytt til lyst tema",
+      "toggleThemeToDark": "Bytt til mørkt tema"
     }
   }
 }
