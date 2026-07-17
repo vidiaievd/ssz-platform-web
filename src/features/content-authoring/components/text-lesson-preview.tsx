@@ -1,14 +1,18 @@
 import { useTranslations } from 'next-intl';
 
+import { GlossaryParagraph, type GlossaryIndex } from '@/features/learning';
+
 import { splitParagraphs } from '../lib/split-paragraphs';
 
 interface TextLessonPreviewProps {
   title: string;
   body: string;
+  glossary: GlossaryIndex;
+  lang?: string;
 }
 
 /** Live "exactly what the learner sees" preview for a TEXT lesson, rendered inside `PhoneFrame`. */
-export function TextLessonPreview({ title, body }: TextLessonPreviewProps) {
+export function TextLessonPreview({ title, body, glossary, lang }: TextLessonPreviewProps) {
   const t = useTranslations('Authoring');
   const paragraphs = splitParagraphs(body);
 
@@ -24,9 +28,7 @@ export function TextLessonPreview({ title, body }: TextLessonPreviewProps) {
           <p className="italic text-muted-foreground">{t('lessons.previewEmpty')}</p>
         ) : (
           paragraphs.map((p, i) => (
-            <p key={i} className="mb-3">
-              {p}
-            </p>
+            <GlossaryParagraph key={i} text={p} glossary={glossary} lang={lang} className="mb-3" />
           ))
         )}
       </div>

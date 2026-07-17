@@ -11,7 +11,15 @@ vi.mock('../api/use-authoring-lessons', async () => {
   const actual = await vi.importActual<typeof import('../api/use-authoring-lessons')>(
     '../api/use-authoring-lessons',
   );
-  return { ...actual, useLessonVariants: vi.fn() };
+  return { ...actual, useLessonVariants: vi.fn(), useLessonGlossaryMarks: vi.fn() };
+});
+vi.mock('../api/use-authoring-vocabulary', () => ({
+  useAuthoringVocabularyLists: vi.fn(),
+  useAuthoringVocabularyItems: vi.fn(),
+}));
+vi.mock('@/features/content', async () => {
+  const actual = await vi.importActual<typeof import('@/features/content')>('@/features/content');
+  return { ...actual, useLesson: vi.fn(), useUnitVocabularyItems: vi.fn() };
 });
 // Paragraph translations have their own dedicated test suite — stub here so
 // this file doesn't also pull in the server action module (server-env access
@@ -34,7 +42,9 @@ vi.mock('@/lib/i18n/navigation', () => ({
 
 const { TextEditorPane } = await import('./text-editor-pane');
 const { updateLessonAction } = await import('../actions/lesson');
-const { useLessonVariants } = await import('../api/use-authoring-lessons');
+const { useLessonVariants, useLessonGlossaryMarks } = await import('../api/use-authoring-lessons');
+const { useAuthoringVocabularyLists } = await import('../api/use-authoring-vocabulary');
+const { useLesson, useUnitVocabularyItems } = await import('@/features/content');
 
 const CONTAINER: Container = {
   id: 'module-1',
@@ -87,6 +97,10 @@ beforeEach(() => {
     ],
     isLoading: false,
   } as never);
+  vi.mocked(useLesson).mockReturnValue({ data: undefined, isLoading: false, isError: false } as never);
+  vi.mocked(useAuthoringVocabularyLists).mockReturnValue({ data: [] } as never);
+  vi.mocked(useUnitVocabularyItems).mockReturnValue({ data: [] } as never);
+  vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: [] } as never);
   vi.useFakeTimers({ shouldAdvanceTime: true });
 });
 
