@@ -241,6 +241,35 @@ export interface GrammarExplanation {
   isPublished: boolean;
 }
 
+/** One sentence in a "correct vs incorrect usage" compare-list attached to a grammar explanation. */
+export interface GrammarCompareExample {
+  id: string;
+  sentence: string;
+  note?: string | null;
+  isCorrect: boolean;
+}
+
+/** Single multiple-choice comprehension check attached to a grammar explanation. */
+export interface GrammarQuickCheck {
+  question: string;
+  options: string[];
+  correctOptionIndex: number;
+  explanation: string;
+}
+
+/**
+ * Richer shape of a grammar explanation for the student-facing reader (FE5.5), extending the
+ * authoring/legacy `GrammarExplanation` shape with the anchor/compare/quick-check fields the
+ * backend now returns.
+ */
+export interface GrammarExplanationDetail extends GrammarExplanation {
+  anchorText?: string | null;
+  anchorHighlights: string[];
+  anchorNote?: string | null;
+  compareExamples: GrammarCompareExample[];
+  quickCheck: GrammarQuickCheck | null;
+}
+
 export interface GrammarRule {
   id: string;
   title: string;
