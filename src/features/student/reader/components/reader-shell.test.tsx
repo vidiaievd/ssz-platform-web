@@ -81,13 +81,13 @@ const UNIT_CONTENTS: UnitContentsResult = {
       title: 'Reinforce & read',
       items: [
         {
-          // `live` is still a reader stub (FE5.6) — used here to exercise ReaderShell's
-          // generic chrome/fallback-to-children path for a kind with no page yet.
-          id: 'live-1',
-          contentType: 'LESSON',
-          contentId: 'lesson-1',
+          // `exercise` has no dedicated reader page yet — used here to exercise
+          // ReaderShell's generic chrome/fallback-to-children path.
+          id: 'item-1',
+          contentType: 'EXERCISE',
+          contentId: 'exercise-1',
           title: 'En vanlig arbeidsdag',
-          lessonKind: 'live',
+          lessonKind: null,
           durationMinutes: 8,
           xpReward: 10,
           status: 'in_progress',
@@ -209,6 +209,45 @@ const VIDEO_VARIANT: LessonVariant = {
   status: 'published',
 };
 
+const UNIT_CONTENTS_WITH_LIVE: UnitContentsResult = {
+  ...UNIT_CONTENTS,
+  sections: [
+    {
+      id: 's1',
+      title: 'Reinforce & read',
+      items: [
+        {
+          id: 'live-1',
+          contentType: 'LESSON',
+          contentId: 'lesson-3',
+          title: 'Samtaletime',
+          lessonKind: 'live',
+          durationMinutes: 30,
+          xpReward: 10,
+          status: 'in_progress',
+        },
+      ],
+    },
+  ],
+};
+
+const LIVE_LESSON: Lesson = {
+  id: 'lesson-3',
+  slug: 'samtaletime',
+  title: 'Samtaletime',
+  targetLanguage: 'nb',
+  difficultyLevel: 'B1',
+  visibility: 'public',
+  ownerUserId: 'u1',
+  kind: 'live',
+  liveStartsAt: '2026-02-01T18:00:00Z',
+  liveDurationMinutes: 45,
+  liveJoinUrl: 'https://meet.example.com/samtaletime',
+  liveCapacity: 8,
+  createdAt: '2026-01-01T00:00:00Z',
+  updatedAt: '2026-01-01T00:00:00Z',
+};
+
 const STUDENT_PROFILE: StudentProfile = {
   id: 'p1',
   userId: 'u1',
@@ -244,7 +283,7 @@ function setup() {
 function renderShell(props: Partial<React.ComponentProps<typeof ReaderShell>> = {}) {
   return render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <ReaderShell courseId="course-1" unitId="u2" itemId="live-1" {...props}>
+      <ReaderShell courseId="course-1" unitId="u2" itemId="item-1" {...props}>
         <div>lesson content</div>
       </ReaderShell>
     </NextIntlClientProvider>,
@@ -258,7 +297,7 @@ describe('ReaderShell', () => {
 
     expect(screen.getByText('Norsk B1')).toBeInTheDocument();
     expect(screen.getByText('lesson content')).toBeInTheDocument();
-    expect(screen.getByText('Live class · En vanlig arbeidsdag')).toBeInTheDocument();
+    expect(screen.getByText('Practice · En vanlig arbeidsdag')).toBeInTheDocument();
     expect(screen.getByText('7 days streak')).toBeInTheDocument();
   });
 
@@ -364,6 +403,28 @@ describe('ReaderShell', () => {
 
     expect(useLesson).toHaveBeenCalledWith('lesson-2');
     expect(screen.getByRole('heading', { name: 'Intervju på jobben' })).toBeInTheDocument();
+    expect(screen.queryByText('lesson content')).not.toBeInTheDocument();
+  });
+
+  it('renders LiveLessonPage (not children) when the active item is a live lesson', () => {
+    useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
+    useUnitContents.mockReturnValue({
+      data: UNIT_CONTENTS_WITH_LIVE,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
+    useLesson.mockReturnValue({ isLoading: false, isError: false, data: LIVE_LESSON, refetch: vi.fn() });
+
+    renderShell({ itemId: 'live-1' });
+
+    expect(useLesson).toHaveBeenCalledWith('lesson-3');
+    expect(screen.getByRole('heading', { name: 'Samtaletime' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /join session/i })).toHaveAttribute(
+      'href',
+      'https://meet.example.com/samtaletime',
+    );
     expect(screen.queryByText('lesson content')).not.toBeInTheDocument();
   });
 });
