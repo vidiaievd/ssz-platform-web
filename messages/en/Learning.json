@@ -301,6 +301,36 @@
         "bilingual": "Bilingual",
         "focus": "Focus"
       }
+    },
+    "video": {
+      "player": {
+        "noSource": "This lesson doesn't have a video yet.",
+        "play": "Play",
+        "pause": "Pause",
+        "scrubber": "Video position"
+      },
+      "transcript": {
+        "heading": "Transcript",
+        "clickToJump": "click a line to jump",
+        "empty": "This lesson has no transcript yet."
+      },
+      "notes": {
+        "heading": "My notes",
+        "atTimestamp": "at {time}",
+        "placeholder": "Add a note at this moment…",
+        "add": "Add note",
+        "empty": "No notes yet. Bookmark a moment to remember it."
+      },
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "subtitlesOn": "Subtitles on",
+        "subtitlesOff": "Subtitles off",
+        "translationOn": "Translation on",
+        "translationOff": "Translation off",
+        "tapSubtitleWords": "tap subtitle words",
+        "emptyTitle": "This lesson isn't ready for you yet",
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson."
+      }
     }
   }
 }
