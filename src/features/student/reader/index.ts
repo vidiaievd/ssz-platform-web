@@ -28,6 +28,9 @@ export type { VideoLessonPageProps } from './components/video-lesson-page';
 export { GrammarLessonPage } from './components/grammar-lesson-page';
 export type { GrammarLessonPageProps } from './components/grammar-lesson-page';
 
+export { LiveLessonPage } from './components/live-lesson-page';
+export type { LiveLessonPageProps } from './components/live-lesson-page';
+
 export { VideoPlayer } from './components/video-player';
 export type { VideoPlayerProps, VideoPlayerHandle } from './components/video-player';
 
