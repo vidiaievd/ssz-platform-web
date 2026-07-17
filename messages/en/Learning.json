@@ -389,6 +389,23 @@
         "correct": "Correct!",
         "incorrect": "Not quite."
       }
+    },
+    "live": {
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "noScheduleTitle": "Not scheduled yet",
+        "noScheduleBody": "Your teacher hasn't set a date for this live class yet. Check back later."
+      },
+      "schedule": {
+        "date": "Date",
+        "time": "Time",
+        "duration": "Duration",
+        "durationMinutes": "{minutes} min",
+        "capacity": "Capacity",
+        "joinLink": "Join link",
+        "join": "Join session"
+      },
+      "note": "This live class happens outside the platform over video call. Joining and attendance aren't tracked here."
     }
   }
 }

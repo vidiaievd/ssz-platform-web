@@ -389,6 +389,23 @@
         "correct": "Riktig!",
         "incorrect": "Ikke helt."
       }
+    },
+    "live": {
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "noScheduleTitle": "Ikke planlagt ennå",
+        "noScheduleBody": "Læreren din har ikke satt en dato for denne livetimen ennå. Sjekk tilbake senere."
+      },
+      "schedule": {
+        "date": "Dato",
+        "time": "Tid",
+        "duration": "Varighet",
+        "durationMinutes": "{minutes} min",
+        "capacity": "Kapasitet",
+        "joinLink": "Påloggingslenke",
+        "join": "Bli med i økten"
+      },
+      "note": "Denne livetimen skjer utenfor plattformen via videosamtale. Deltakelse spores ikke her."
     }
   }
 }
