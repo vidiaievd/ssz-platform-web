@@ -2,12 +2,11 @@
 
 import { Pause, Play, RotateCcw, RotateCw, Volume2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 
 import { cn } from '@/lib/utils';
 
-const SPEED_CYCLE = [1, 0.75, 1.25, 1.5] as const;
-type SpeedOption = (typeof SPEED_CYCLE)[number];
+import { useMediaPlayer } from '../hooks/use-media-player';
 
 export interface AudioPlayerProps {
   src?: string;
@@ -27,71 +26,12 @@ export function AudioPlayer({
 }: AudioPlayerProps) {
   const t = useTranslations('Learning.audio');
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [playing, setPlaying]   = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [current, setCurrent]   = useState(0);
-  const [speed, setSpeed]       = useState<SpeedOption>(1);
-  const [error, setError]       = useState(false);
-  const [loading, setLoading]   = useState(false);
-
   const hasAudio = interactive && !!src;
-  useEffect(() => {
-    const el = audioRef.current;
-    if (!el) return;
-
-    const onLoading   = () => setLoading(true);
-    const onReady     = () => { setLoading(false); setDuration(el.duration || 0); };
-    const onTime      = () => setCurrent(el.currentTime);
-    const onEnd       = () => setPlaying(false);
-    const onError     = () => { setLoading(false); setError(true); };
-
-    el.addEventListener('loadstart',    onLoading);
-    el.addEventListener('canplaythrough', onReady);
-    el.addEventListener('loadedmetadata', onReady);
-    el.addEventListener('timeupdate',   onTime);
-    el.addEventListener('ended',        onEnd);
-    el.addEventListener('error',        onError);
-    return () => {
-      el.removeEventListener('loadstart',    onLoading);
-      el.removeEventListener('canplaythrough', onReady);
-      el.removeEventListener('loadedmetadata', onReady);
-      el.removeEventListener('timeupdate',   onTime);
-      el.removeEventListener('ended',        onEnd);
-      el.removeEventListener('error',        onError);
-    };
-  }, []);
-
-  function togglePlay() {
-    const el = audioRef.current;
-    if (!el || !hasAudio || error) return;
-    if (playing) {
-      el.pause();
-      setPlaying(false);
-    } else {
-      void el.play().then(() => setPlaying(true)).catch(() => setError(true));
-    }
-  }
-
-  function seek(delta: number) {
-    const el = audioRef.current;
-    if (!el || !hasAudio) return;
-    el.currentTime = Math.max(0, Math.min(duration, el.currentTime + delta));
-  }
-
-  function cycleSpeed() {
-    const el = audioRef.current;
-    const nextIndex = (SPEED_CYCLE.indexOf(speed) + 1) % SPEED_CYCLE.length;
-    const next = SPEED_CYCLE[nextIndex] ?? 1;
-    setSpeed(next);
-    if (el) el.playbackRate = next;
-  }
+  const { playing, duration, current, speed, loading, error, togglePlay, seek, scrubTo, cycleSpeed } =
+    useMediaPlayer(audioRef, hasAudio, { persistKey: hasAudio ? src : undefined });
 
   function onScrub(e: React.ChangeEvent<HTMLInputElement>) {
-    const el = audioRef.current;
-    if (!el || !hasAudio) return;
-    const t = parseFloat(e.target.value);
-    el.currentTime = t;
-    setCurrent(t);
+    scrubTo(parseFloat(e.target.value));
   }
 
   function fmt(s: number) {
