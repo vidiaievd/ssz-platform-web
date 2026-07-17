@@ -80,3 +80,21 @@ export function setVideoSource(body: string, mediaId: string): string {
 export function removeVideoSource(body: string): string {
   return body.replace(VIDEO_TOKEN_REGEX, '').replace(/^\s*\n+/, '').trimStart();
 }
+
+const IMAGE_TOKEN_ONLY_REGEX = new RegExp(`^${IMAGE_TOKEN_REGEX.source}$`);
+const AUDIO_TOKEN_ONLY_REGEX = new RegExp(`^${AUDIO_TOKEN_REGEX.source}$`);
+const VIDEO_TOKEN_ONLY_REGEX = new RegExp(`^${VIDEO_TOKEN_REGEX.source}$`);
+
+/**
+ * True when a paragraph (as split by `MarkdownParagraphSplitterService`/
+ * `splitParagraphs`) is nothing but a hero-image/audio-narration/video-source
+ * token — readers should skip these rather than render them as prose.
+ */
+export function isMediaOnlyParagraph(paragraph: string): boolean {
+  const trimmed = paragraph.trim();
+  return (
+    IMAGE_TOKEN_ONLY_REGEX.test(trimmed) ||
+    AUDIO_TOKEN_ONLY_REGEX.test(trimmed) ||
+    VIDEO_TOKEN_ONLY_REGEX.test(trimmed)
+  );
+}

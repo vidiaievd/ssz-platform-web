@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useMediaAsset } from '@/features/media';
 import type { LessonVideoCue } from '@/features/content/types';
 
-import { findVideoSource } from '../lib/lesson-media-tokens';
+import { findVideoSource } from '@/lib/content/lesson-media-tokens';
 
 interface VideoLessonPreviewProps {
   title: string;

@@ -8,7 +8,7 @@ import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMediaAsset, uploadAsset } from '@/features/media';
 
-import { findVideoSource, removeVideoSource, setVideoSource } from '../lib/lesson-media-tokens';
+import { findVideoSource, removeVideoSource, setVideoSource } from '@/lib/content/lesson-media-tokens';
 import { EditorCard } from './editor-card';
 
 const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];

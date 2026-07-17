@@ -10,7 +10,7 @@ import { Field, Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMediaAsset, uploadAsset, ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE_BYTES } from '@/features/media';
 
-import { findHeroImage, removeHeroImage, setHeroImage } from '../lib/lesson-media-tokens';
+import { findHeroImage, removeHeroImage, setHeroImage } from '@/lib/content/lesson-media-tokens';
 import { EditorCard } from './editor-card';
 
 interface HeroImageSlotProps {

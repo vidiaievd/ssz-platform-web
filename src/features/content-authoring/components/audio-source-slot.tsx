@@ -8,7 +8,7 @@ import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMediaAsset, uploadAsset } from '@/features/media';
 
-import { findAudioNarration, removeAudioNarration, setAudioNarration } from '../lib/lesson-media-tokens';
+import { findAudioNarration, removeAudioNarration, setAudioNarration } from '@/lib/content/lesson-media-tokens';
 import { EditorCard } from './editor-card';
 
 const ACCEPTED_AUDIO_TYPES = [

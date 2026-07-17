@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useMediaAsset } from '@/features/media';
 import type { LessonListeningStage } from '@/features/content/types';
 
-import { findAudioNarration } from '../lib/lesson-media-tokens';
+import { findAudioNarration } from '@/lib/content/lesson-media-tokens';
 
 interface AudioLessonPreviewProps {
   title: string;

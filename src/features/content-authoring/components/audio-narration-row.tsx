@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
 import { useMediaAsset, uploadAsset } from '@/features/media';
 
-import { findAudioNarration, removeAudioNarration, setAudioNarration } from '../lib/lesson-media-tokens';
+import { findAudioNarration, removeAudioNarration, setAudioNarration } from '@/lib/content/lesson-media-tokens';
 import { EditorCard } from './editor-card';
 
 const ACCEPTED_AUDIO_TYPES = [

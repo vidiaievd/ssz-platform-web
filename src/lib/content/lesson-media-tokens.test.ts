@@ -4,6 +4,7 @@ import {
   findAudioNarration,
   findHeroImage,
   findVideoSource,
+  isMediaOnlyParagraph,
   removeAudioNarration,
   removeHeroImage,
   removeVideoSource,
@@ -115,5 +116,24 @@ describe('video source token', () => {
 
   it('removeVideoSource is a no-op when there is no token', () => {
     expect(removeVideoSource('Existing body.')).toBe('Existing body.');
+  });
+});
+
+describe('isMediaOnlyParagraph', () => {
+  it('is true for a paragraph that is only a hero image token', () => {
+    expect(isMediaOnlyParagraph('![Alt text](media://media-1)')).toBe(true);
+  });
+
+  it('is true for a paragraph that is only an audio narration token', () => {
+    expect(isMediaOnlyParagraph('[audio:media-2 "Narration"]')).toBe(true);
+  });
+
+  it('is true for a paragraph that is only a video source token', () => {
+    expect(isMediaOnlyParagraph('[video:media-3]')).toBe(true);
+  });
+
+  it('is false for prose, even if it contains a token plus other text', () => {
+    expect(isMediaOnlyParagraph('![Alt text](media://media-1) and some more text')).toBe(false);
+    expect(isMediaOnlyParagraph('Just some text.')).toBe(false);
   });
 });
