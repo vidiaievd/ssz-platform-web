@@ -14,6 +14,7 @@ import { VocabularyPage } from './vocabulary-page';
 import { TextLessonPage } from './text-lesson-page';
 import { VideoLessonPage } from './video-lesson-page';
 import { ListeningLessonPage } from './listening-lesson-page';
+import { GrammarLessonPage } from './grammar-lesson-page';
 import {
   flattenSections,
   mapCourseUnitsToSidebarUnits,
@@ -132,6 +133,15 @@ export function ReaderShell({
         courseTitle={courseInfo.title}
         cefrLevel={courseInfo.cefrLevel}
         xpReward={activeContentItem.xpReward}
+      />
+    );
+  } else if (activeKind === 'grammar' && activeContentItem) {
+    content = (
+      <GrammarLessonPage
+        ruleId={activeContentItem.contentId}
+        unitPosition={activeUnit?.position ?? 0}
+        courseTitle={courseInfo.title}
+        cefrLevel={courseInfo.cefrLevel}
       />
     );
   }

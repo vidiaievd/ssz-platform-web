@@ -25,6 +25,9 @@ export type { TextLessonPageProps } from './components/text-lesson-page';
 export { VideoLessonPage } from './components/video-lesson-page';
 export type { VideoLessonPageProps } from './components/video-lesson-page';
 
+export { GrammarLessonPage } from './components/grammar-lesson-page';
+export type { GrammarLessonPageProps } from './components/grammar-lesson-page';
+
 export { VideoPlayer } from './components/video-player';
 export type { VideoPlayerProps, VideoPlayerHandle } from './components/video-player';
 
