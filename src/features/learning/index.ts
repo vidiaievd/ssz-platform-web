@@ -9,6 +9,7 @@ export { useCourseMastery } from './api/use-course-mastery';
 export { useCanDo } from './api/use-can-do';
 export { useCourseHome } from './api/use-course-home';
 export { useUnitPayload } from './api/use-unit-payload';
+export { useUnitContents } from './api/use-unit-contents';
 export { useProgressOverview } from './api/use-progress-overview';
 export { useAssignments, useAssignment, useAssignmentQuestions, useSubmitGradedAssignment, useSubmitWrittenAssignment, useSaveWrittenDraft } from './api/use-assignments';
 
@@ -47,6 +48,10 @@ export type {
   SrsSettings,
   SrsStats,
   UnitPayload,
+  UnitContentsItem,
+  UnitContentsItemStatus,
+  UnitContentsResult,
+  UnitContentsSection,
   ProgressCanDo,
   ProgressCanDoState,
   ProgressModule,

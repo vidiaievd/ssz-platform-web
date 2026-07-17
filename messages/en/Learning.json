@@ -209,5 +209,15 @@
       "inUnit": "Unit {n}",
       "noItems": "Complete units to unlock can-do goals."
     }
+  },
+  "reader": {
+    "sidebar": {
+      "contentsHeading": "Contents",
+      "completed": "Completed {pct}%",
+      "showContents": "Show contents",
+      "hideContents": "Hide contents",
+      "unitLabel": "Unit {n}",
+      "locked": "Locked"
+    }
   }
 }

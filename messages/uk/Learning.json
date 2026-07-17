@@ -209,5 +209,15 @@
       "inUnit": "Блок {n}",
       "noItems": "Завершіть блоки, щоб розблокувати цілі."
     }
+  },
+  "reader": {
+    "sidebar": {
+      "contentsHeading": "Зміст",
+      "completed": "Виконано {pct}%",
+      "showContents": "Показати зміст",
+      "hideContents": "Приховати зміст",
+      "unitLabel": "Розділ {n}",
+      "locked": "Заблоковано"
+    }
   }
 }

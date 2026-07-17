@@ -209,5 +209,15 @@
       "inUnit": "Enhet {n}",
       "noItems": "Fullfor enheter for a lase opp mal."
     }
+  },
+  "reader": {
+    "sidebar": {
+      "contentsHeading": "Innhold",
+      "completed": "Fullført {pct}%",
+      "showContents": "Vis innhold",
+      "hideContents": "Skjul innhold",
+      "unitLabel": "Enhet {n}",
+      "locked": "Låst"
+    }
   }
 }
