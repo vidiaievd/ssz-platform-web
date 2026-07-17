@@ -4,12 +4,11 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
 import { Pause, Play } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { GlossaryParagraph, type GlossaryIndex } from '@/features/learning';
 import type { LessonVideoCue } from '@/features/content/types';
 import { cn } from '@/lib/utils';
 
-import { GlossaryParagraph } from './glossary-paragraph';
 import { formatTimecode } from '../lib/format-timecode';
-import type { GlossaryIndex } from '../lib/tokenize-glossary';
 
 export interface VideoPlayerHandle {
   /** Seeks to `seconds` and resumes playback — used by the transcript's click-to-seek. */

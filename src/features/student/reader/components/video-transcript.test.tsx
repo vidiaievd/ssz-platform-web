@@ -5,8 +5,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { enMessages } from '@/lib/i18n/messages';
 import type { LessonVideoCue } from '@/features/content/types';
 
+import { buildGlossaryIndex } from '@/features/learning';
+
 import { VideoTranscript } from './video-transcript';
-import { buildGlossaryIndex } from '../lib/tokenize-glossary';
 
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({

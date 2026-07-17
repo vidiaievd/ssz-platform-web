@@ -3,12 +3,11 @@
 import { useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { GlossaryPopover } from '@/features/learning';
-import type { PartOfSpeech } from '@/features/learning';
 import { useMediaAsset } from '@/features/media';
 import type { VocabularyItem } from '@/features/content/types';
 import { cn } from '@/lib/utils';
 
+import { GlossaryPopover, type PartOfSpeech } from './glossary-popover';
 import { tokenizeGlossary, type GlossaryIndex } from '../lib/tokenize-glossary';
 
 const POS_TO_TAG: Record<string, PartOfSpeech> = {

@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react';
 import { BookOpen, Eye } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { ErrorState, LearningSkeleton, buildGlossaryIndex } from '@/features/learning';
 import {
   useLesson,
   useBestLessonVariant,
@@ -20,7 +20,6 @@ import { cn } from '@/lib/utils';
 import { VideoPlayer, type VideoPlayerHandle } from './video-player';
 import { VideoTranscript } from './video-transcript';
 import { VideoNotesPanel } from './video-notes-panel';
-import { buildGlossaryIndex } from '../lib/tokenize-glossary';
 
 export interface VideoLessonPageProps {
   lessonId: string;

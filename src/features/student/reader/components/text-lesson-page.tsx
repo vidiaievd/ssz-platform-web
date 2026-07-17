@@ -4,7 +4,14 @@ import { useMemo, useState } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, Eye, EyeOff, Layers, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { AudioPlayer, ErrorState, LearningSkeleton } from '@/features/learning';
+import {
+  AudioPlayer,
+  ErrorState,
+  GlossaryParagraph,
+  LearningSkeleton,
+  buildGlossaryIndex,
+  type GlossaryIndex,
+} from '@/features/learning';
 import {
   useLesson,
   useBestLessonVariant,
@@ -17,8 +24,6 @@ import { useMediaAsset } from '@/features/media';
 import { findAudioNarration, findHeroImage, isMediaOnlyParagraph } from '@/lib/content/lesson-media-tokens';
 import { cn } from '@/lib/utils';
 
-import { GlossaryParagraph } from './glossary-paragraph';
-import { buildGlossaryIndex, type GlossaryIndex } from '../lib/tokenize-glossary';
 import { useReadingModeStore, type ReadingMode } from '../stores/reading-mode-store';
 
 export interface TextLessonPageProps {
