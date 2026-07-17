@@ -42,6 +42,8 @@ export const useVideoNotesStore = create<VideoNotesState>()(
   ),
 );
 
+const EMPTY_NOTES: VideoNote[] = [];
+
 export function selectLessonNotes(lessonId: string) {
-  return (state: VideoNotesState) => state.notesByLesson[lessonId] ?? [];
+  return (state: VideoNotesState) => state.notesByLesson[lessonId] ?? EMPTY_NOTES;
 }
