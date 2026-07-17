@@ -236,6 +236,11 @@
     "body": {
       "comingSoonTitle": "Denne leksjonssiden er på vei",
       "comingSoonBody": "Lesevisningen for denne materialtypen er ikke koblet til ennå."
+    },
+    "entry": {
+      "emptyTitle": "Denne enheten har ikke noe innhold ennå",
+      "emptyBody": "Kom tilbake når læreren har publisert leksjoner for denne enheten.",
+      "backToCourse": "Tilbake til kurset"
     }
   }
 }

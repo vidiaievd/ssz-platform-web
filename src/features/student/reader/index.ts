@@ -10,6 +10,9 @@ export type { LessonFooterNavProps } from './components/lesson-footer-nav';
 export { ReaderShell } from './components/reader-shell';
 export type { ReaderShellProps } from './components/reader-shell';
 
+export { UnitEntryRedirect } from './components/unit-entry-redirect';
+export type { UnitEntryRedirectProps } from './components/unit-entry-redirect';
+
 export type {
   ReaderSidebarCourse,
   ReaderSidebarItem,

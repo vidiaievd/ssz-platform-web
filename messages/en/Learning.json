@@ -236,6 +236,11 @@
     "body": {
       "comingSoonTitle": "This lesson page is on its way",
       "comingSoonBody": "The reading experience for this material type isn't wired up yet."
+    },
+    "entry": {
+      "emptyTitle": "This unit has no material yet",
+      "emptyBody": "Check back once the teacher publishes lessons for this unit.",
+      "backToCourse": "Back to course"
     }
   }
 }
