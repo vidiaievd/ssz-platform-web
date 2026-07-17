@@ -210,7 +210,7 @@ export function UnitFlowList({ units, courseId, locale }: UnitFlowListProps) {
         <UnitRow
           key={unit.id}
           unit={unit}
-          unitHref={`/${locale}/student/units/${unit.id}?courseId=${courseId}`}
+          unitHref={`/${locale}/student/courses/${courseId}/${unit.id}`}
         />
       ))}
     </ul>
