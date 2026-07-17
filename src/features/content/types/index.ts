@@ -193,6 +193,8 @@ export interface Lesson {
 export interface VocabularyTranslation {
   languageCode: string;
   translation: string;
+  /** Target-language dictionary-style explanation, shown to B2+ readers instead of `translation` (FE5.1). */
+  definition?: string;
 }
 
 export interface VocabularyExample {
@@ -202,6 +204,12 @@ export interface VocabularyExample {
   translations?: Record<string, string>;
 }
 
+/** One inflected form (e.g. `['Bestemt entall', 'sykepleieren']`), author-entered per item (FE5.1 "Alle former"). */
+export interface VocabularyForm {
+  label: string;
+  value: string;
+}
+
 export interface VocabularyItem {
   id: string;
   lemma: string;
@@ -209,6 +217,9 @@ export interface VocabularyItem {
   ipa?: string;
   translations: VocabularyTranslation[];
   examples: VocabularyExample[];
+  forms?: VocabularyForm[];
+  /** Media asset id for the pronunciation clip; resolve via `useMediaAsset` (FE5.1). */
+  audioMediaId?: string;
 }
 
 export interface VocabularyList {
