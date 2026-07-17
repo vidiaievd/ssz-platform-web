@@ -331,6 +331,45 @@
         "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
         "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen."
       }
+    },
+    "listening": {
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
+        "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen.",
+        "noStagesTitle": "Ingen øvelser er lagt til ennå",
+        "noStagesBody": "Denne lytteleksjonen har ingen huller- eller forståelsesoppgaver ennå."
+      },
+      "stages": {
+        "label": "Fremdrift i lytteøvelsen",
+        "listen": "Lytt",
+        "gapfill": "Fyll inn",
+        "comp": "Forståelse"
+      },
+      "listen": {
+        "heading": "Lytt nøye",
+        "body": "Spill av klippet så mange ganger du trenger. Deretter fyller du inn manglende ord og svarer på spørsmål — ingen transkripsjon ennå.",
+        "cta": "Jeg er klar — start utfylling"
+      },
+      "gapfill": {
+        "heading": "Fyll inn de tomme feltene",
+        "body": "Lytt igjen og velg ordet du hører.",
+        "checkAnswers": "Sjekk svarene",
+        "next": "Neste — forståelse",
+        "correctCount": "{correct}/{total} riktige",
+        "answerLabel": "Svar: {answer}"
+      },
+      "comp": {
+        "heading": "Forståelse",
+        "body": "Svar basert på det du hørte.",
+        "checkAnswers": "Sjekk svarene",
+        "finish": "Fullfør lytteøvelsen",
+        "score": "Poeng {score}/{total}"
+      },
+      "done": {
+        "heading": "Godt jobbet!",
+        "body": "Du fullførte alle tre stadiene i lytteøvelsen. Fremgangen din er lagret, og ordene du bommet på er lagt til i repetisjon."
+      }
     }
   }
 }

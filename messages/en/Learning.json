@@ -331,6 +331,45 @@
         "emptyTitle": "This lesson isn't ready for you yet",
         "emptyBody": "Add your native language and level in your profile to unlock this lesson."
       }
+    },
+    "listening": {
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "emptyTitle": "This lesson isn't ready for you yet",
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson.",
+        "noStagesTitle": "No practice staged yet",
+        "noStagesBody": "This listening lesson doesn't have gap-fill or comprehension activities yet."
+      },
+      "stages": {
+        "label": "Listening training progress",
+        "listen": "Listen",
+        "gapfill": "Gap-fill",
+        "comp": "Comprehension"
+      },
+      "listen": {
+        "heading": "Listen carefully",
+        "body": "Play the clip as many times as you need. You'll fill in missing words and answer questions next — no transcript yet.",
+        "cta": "I'm ready — start gap-fill"
+      },
+      "gapfill": {
+        "heading": "Fill the gaps",
+        "body": "Listen again and choose the word you hear.",
+        "checkAnswers": "Check answers",
+        "next": "Next — comprehension",
+        "correctCount": "{correct}/{total} correct",
+        "answerLabel": "Answer: {answer}"
+      },
+      "comp": {
+        "heading": "Comprehension",
+        "body": "Answer based on what you heard.",
+        "checkAnswers": "Check answers",
+        "finish": "Finish listening training",
+        "score": "Score {score}/{total}"
+      },
+      "done": {
+        "heading": "Well done!",
+        "body": "You completed all three stages of the listening training. Your progress has been saved and the words you missed are added to review."
+      }
     }
   }
 }
