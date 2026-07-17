@@ -14,7 +14,8 @@
   },
   "glossary": {
     "seeInContext": "Увидеть в контексте",
-    "listenWord": "Слушать"
+    "listenWord": "Слушать",
+    "lookUpWord": "Найти в словаре"
   },
   "unitStepper": {
     "label": "Шаги урока",

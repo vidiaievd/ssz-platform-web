@@ -14,7 +14,8 @@
   },
   "glossary": {
     "seeInContext": "Побачити в контексті",
-    "listenWord": "Слухати"
+    "listenWord": "Слухати",
+    "lookUpWord": "Знайти в словнику"
   },
   "unitStepper": {
     "label": "Кроки уроку",

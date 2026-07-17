@@ -14,7 +14,8 @@
   },
   "glossary": {
     "seeInContext": "Se i kontekst",
-    "listenWord": "Hør"
+    "listenWord": "Hør",
+    "lookUpWord": "Slå opp"
   },
   "unitStepper": {
     "label": "Enhetssteg",

@@ -14,7 +14,8 @@
   },
   "glossary": {
     "seeInContext": "See in context",
-    "listenWord": "Listen"
+    "listenWord": "Listen",
+    "lookUpWord": "Look up"
   },
   "unitStepper": {
     "label": "Unit steps",
