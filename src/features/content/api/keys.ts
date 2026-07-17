@@ -14,6 +14,8 @@ export const contentKeys = keyFactory('content', {
     ['lesson', lessonId, 'variant', variantId, 'paragraphs'] as const,
   lessonGlossaryMarks: (lessonId: string, variantId: string) =>
     ['lesson', lessonId, 'variant', variantId, 'glossary-marks'] as const,
+  lessonVideoCues: (lessonId: string, variantId: string) =>
+    ['lesson', lessonId, 'variant', variantId, 'cues'] as const,
   vocabularyList: (listId: string) => ['vocabulary-list', listId] as const,
   vocabularyItems: (listId: string) => ['vocabulary-list', listId, 'items'] as const,
   vocabularyItemsFlat: (listId: string) => ['vocabulary-list', listId, 'items', 'flat'] as const,

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { GlossaryMark, Lesson, LessonParagraph, LessonVariant } from '../types';
+import type { GlossaryMark, Lesson, LessonParagraph, LessonVariant, LessonVideoCue } from '../types';
 import { contentKeys } from './keys';
 
 export function useLesson(id: string, enabled = true) {
@@ -59,6 +59,20 @@ export function useLessonGlossaryMarks(lessonId: string, variantId: string | und
       const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/glossary-marks`);
       if (!res.ok) return [];
       return res.json() as Promise<GlossaryMark[]>;
+    },
+    staleTime: 120_000,
+    enabled: !!lessonId && !!variantId,
+  });
+}
+
+/** Ordered transcript cues for a VIDEO lesson variant (BE1.2). */
+export function useLessonVideoCues(lessonId: string, variantId: string | undefined) {
+  return useQuery<LessonVideoCue[]>({
+    queryKey: contentKeys.lessonVideoCues(lessonId, variantId ?? ''),
+    queryFn: async () => {
+      const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/cues`);
+      if (!res.ok) return [];
+      return res.json() as Promise<LessonVideoCue[]>;
     },
     staleTime: 120_000,
     enabled: !!lessonId && !!variantId,

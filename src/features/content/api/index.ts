@@ -7,6 +7,7 @@ export {
   useBestLessonVariant,
   useLessonParagraphs,
   useLessonGlossaryMarks,
+  useLessonVideoCues,
 } from './use-lesson';
 export { useVocabularyList, useVocabularyItems, useUnitVocabularyItems } from './use-vocabulary';
 export { useGrammarRule, useBestGrammarExplanation } from './use-grammar-rule';
