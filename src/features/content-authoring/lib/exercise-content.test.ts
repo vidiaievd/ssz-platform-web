@@ -210,3 +210,75 @@ describe('minimalMcqValues', () => {
     expect(expectedAnswers.correct_option_ids).toEqual(['opt-0']);
   });
 });
+
+describe('short_answer & writing_task', () => {
+  it('short_answer: builds question + reference + accepted_answers CSV', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'short_answer',
+      saQuestion: 'Når hørte Anne nyheten?',
+      saContext: 'Tekst 19A',
+      saReferenceAnswer: 'Hun hørte det på radio.',
+      saAccepted: 'på radio, på veien hjem',
+    });
+    expect(content.question).toBe('Når hørte Anne nyheten?');
+    expect(content.context).toBe('Tekst 19A');
+    expect(expectedAnswers.reference_answer).toBe('Hun hørte det på radio.');
+    expect(expectedAnswers.accepted_answers).toEqual(['på radio', 'på veien hjem']);
+  });
+
+  it('short_answer: omits context and accepted_answers when empty', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'short_answer',
+      saQuestion: 'Q?',
+      saReferenceAnswer: 'A.',
+    });
+    expect('context' in content).toBe(false);
+    expect('accepted_answers' in expectedAnswers).toBe(false);
+  });
+
+  it('short_answer: round-trips through parse', () => {
+    const values = {
+      ...base,
+      templateCode: 'short_answer' as const,
+      saQuestion: 'Q?',
+      saReferenceAnswer: 'A.',
+      saAccepted: 'a, b',
+    };
+    const { content, expectedAnswers } = buildExercisePayload(values);
+    const parsed = parseExerciseToForm({ templateCode: 'short_answer', content, expectedAnswers });
+    expect(parsed.saQuestion).toBe('Q?');
+    expect(parsed.saReferenceAnswer).toBe('A.');
+    expect(parsed.saAccepted).toBe('a, b');
+  });
+
+  it('writing_task: builds prompt + topic options with ids + min_words', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'writing_task',
+      wtPrompt: 'Skriv et leserinnlegg.',
+      wtMinWords: '60',
+      wtTopics: [{ title: 'Gratis norskkurs' }, { title: '' }, { title: 'Tog billigere' }],
+      wtRubric: 'Struktur, argument',
+    });
+    expect(content.prompt).toBe('Skriv et leserinnlegg.');
+    expect(content.min_words).toBe(60);
+    expect(content.options).toEqual([
+      { id: 'topic-0', title: 'Gratis norskkurs' },
+      { id: 'topic-1', title: 'Tog billigere' },
+    ]);
+    expect(expectedAnswers.rubric).toBe('Struktur, argument');
+  });
+
+  it('writing_task: omits options/min_words/rubric when empty', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'writing_task',
+      wtPrompt: 'Skriv.',
+    });
+    expect('options' in content).toBe(false);
+    expect('min_words' in content).toBe(false);
+    expect('rubric' in expectedAnswers).toBe(false);
+  });
+});

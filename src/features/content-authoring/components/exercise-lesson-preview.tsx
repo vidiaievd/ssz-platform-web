@@ -110,6 +110,48 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
+        {values.templateCode === 'short_answer' &&
+          (values.saQuestion ? (
+            <div>
+              <p className="mb-2.5 text-[15px] font-semibold leading-normal text-(--ssz-text-primary)">
+                {values.saQuestion}
+              </p>
+              {values.saContext && (
+                <p className="mb-2.5 text-xs text-muted-foreground">{values.saContext}</p>
+              )}
+              <div className="rounded-[11px] border border-dashed border-(--ssz-border-default) bg-subtle px-3 py-3 text-sm text-muted-foreground">
+                {t('exercises.saAnswerPlaceholderPreview')}
+              </div>
+            </div>
+          ) : (
+            empty
+          ))}
+
+        {values.templateCode === 'writing_task' &&
+          (values.wtPrompt ? (
+            <div>
+              <p className="mb-2.5 text-[15px] font-semibold leading-normal text-(--ssz-text-primary)">
+                {values.wtPrompt}
+              </p>
+              {(values.wtTopics ?? []).some((tp) => tp.title.trim()) && (
+                <div className="flex flex-col gap-2">
+                  {(values.wtTopics ?? [])
+                    .filter((tp) => tp.title.trim())
+                    .map((tp, i) => (
+                      <div
+                        key={i}
+                        className="rounded-[11px] border border-(--ssz-border-default) bg-surface px-3.5 py-3 text-sm font-medium text-(--ssz-text-primary)"
+                      >
+                        {tp.title}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            empty
+          ))}
+
         {values.instructions && (
           <p className="mt-3.5 text-xs text-muted-foreground">{values.instructions}</p>
         )}

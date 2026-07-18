@@ -32,6 +32,14 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
     { left: '', right: '' },
     { left: '', right: '' },
   ],
+  saQuestion: '',
+  saContext: '',
+  saReferenceAnswer: '',
+  saAccepted: '',
+  wtPrompt: '',
+  wtMinWords: '',
+  wtTopics: [],
+  wtRubric: '',
 };
 
 /** A minimal, valid multiple-choice draft — used to seed picker/starter exercises. */
@@ -110,6 +118,35 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
         content: { left_items: leftItems, right_items: rightItems },
         expectedAnswers: {
           pairs: pairs.map((_, i) => ({ left_id: `l-${i}`, right_id: `r-${i}` })),
+        },
+      };
+    }
+    case 'short_answer': {
+      const accepted = splitCsv(values.saAccepted);
+      return {
+        content: {
+          question: values.saQuestion?.trim() ?? '',
+          ...(values.saContext?.trim() && { context: values.saContext.trim() }),
+        },
+        expectedAnswers: {
+          reference_answer: values.saReferenceAnswer?.trim() ?? '',
+          ...(accepted.length > 0 && { accepted_answers: accepted }),
+        },
+      };
+    }
+    case 'writing_task': {
+      const topics = (values.wtTopics ?? [])
+        .filter((tp) => tp.title.trim())
+        .map((tp, i) => ({ id: `topic-${i}`, title: tp.title.trim() }));
+      const minWords = Number.parseInt(values.wtMinWords ?? '', 10);
+      return {
+        content: {
+          prompt: values.wtPrompt?.trim() ?? '',
+          ...(topics.length > 0 && { options: topics }),
+          ...(Number.isFinite(minWords) && minWords > 0 && { min_words: minWords }),
+        },
+        expectedAnswers: {
+          ...(values.wtRubric?.trim() && { rubric: values.wtRubric.trim() }),
         },
       };
     }
@@ -226,6 +263,33 @@ export function parseExerciseToForm(exercise: {
                 { left: '', right: '' },
                 { left: '', right: '' },
               ],
+      };
+    }
+    case 'short_answer': {
+      const accepted = Array.isArray(expectedAnswers.accepted_answers)
+        ? (expectedAnswers.accepted_answers as unknown[]).map(String).join(', ')
+        : '';
+      return {
+        ...base,
+        saQuestion: typeof content.question === 'string' ? content.question : '',
+        saContext: typeof content.context === 'string' ? content.context : '',
+        saReferenceAnswer:
+          typeof expectedAnswers.reference_answer === 'string' ? expectedAnswers.reference_answer : '',
+        saAccepted: accepted,
+      };
+    }
+    case 'writing_task': {
+      const topics = Array.isArray(content.options)
+        ? (content.options as Array<{ title?: unknown }>).map((o) => ({
+            title: typeof o.title === 'string' ? o.title : '',
+          }))
+        : [];
+      return {
+        ...base,
+        wtPrompt: typeof content.prompt === 'string' ? content.prompt : '',
+        wtMinWords: typeof content.min_words === 'number' ? String(content.min_words) : '',
+        wtTopics: topics,
+        wtRubric: typeof expectedAnswers.rubric === 'string' ? expectedAnswers.rubric : '',
       };
     }
   }

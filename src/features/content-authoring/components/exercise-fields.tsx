@@ -113,6 +113,12 @@ export function ExerciseFields({ control, register, errors, isPending, typeDisab
       {templateCode === 'match_pairs' && (
         <MatchPairsFields control={control} register={register} errors={errors} isPending={isPending} />
       )}
+      {templateCode === 'short_answer' && (
+        <ShortAnswerFields control={control} register={register} errors={errors} isPending={isPending} />
+      )}
+      {templateCode === 'writing_task' && (
+        <WritingTaskFields control={control} register={register} errors={errors} isPending={isPending} />
+      )}
     </div>
   );
 }
@@ -319,6 +325,111 @@ function TranslateFields({
           {t('addTranslation')}
         </Button>
       </div>
+    </div>
+  );
+}
+
+function ShortAnswerFields({ register, errors, isPending }: SubProps) {
+  const t = useTranslations('Authoring.exercises');
+  return (
+    <div className="rounded-md border border-border p-3 space-y-4">
+      <Field label={t('saQuestion')} htmlFor="ex-sa-q" error={errors.saQuestion?.message} required>
+        <Textarea
+          id="ex-sa-q"
+          rows={2}
+          placeholder={t('saQuestionPlaceholder')}
+          disabled={isPending}
+          {...register('saQuestion')}
+        />
+      </Field>
+
+      <Field label={t('saContext')} htmlFor="ex-sa-ctx">
+        <Input id="ex-sa-ctx" placeholder={t('saContextPlaceholder')} disabled={isPending} {...register('saContext')} />
+      </Field>
+
+      <Field
+        label={t('saReferenceAnswer')}
+        htmlFor="ex-sa-ref"
+        error={errors.saReferenceAnswer?.message}
+        hint={t('saReferenceAnswerHint')}
+        required
+      >
+        <Textarea
+          id="ex-sa-ref"
+          rows={2}
+          placeholder={t('saReferenceAnswerPlaceholder')}
+          disabled={isPending}
+          {...register('saReferenceAnswer')}
+        />
+      </Field>
+
+      <Field label={t('saAccepted')} htmlFor="ex-sa-acc" hint={t('saAcceptedHint')}>
+        <Input id="ex-sa-acc" placeholder={t('saAcceptedPlaceholder')} disabled={isPending} {...register('saAccepted')} />
+      </Field>
+    </div>
+  );
+}
+
+function WritingTaskFields({ control, register, errors, isPending }: SubProps) {
+  const t = useTranslations('Authoring.exercises');
+  const { fields, append, remove } = useFieldArray({ control, name: 'wtTopics' });
+
+  return (
+    <div className="rounded-md border border-border p-3 space-y-4">
+      <Field label={t('wtPrompt')} htmlFor="ex-wt-prompt" error={errors.wtPrompt?.message} required>
+        <Textarea
+          id="ex-wt-prompt"
+          rows={2}
+          placeholder={t('wtPromptPlaceholder')}
+          disabled={isPending}
+          {...register('wtPrompt')}
+        />
+      </Field>
+
+      <Field label={t('wtMinWords')} htmlFor="ex-wt-min">
+        <Input
+          id="ex-wt-min"
+          type="number"
+          min={0}
+          className="max-w-32"
+          placeholder={t('wtMinWordsPlaceholder')}
+          disabled={isPending}
+          {...register('wtMinWords')}
+        />
+      </Field>
+
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-(--ssz-text-primary)">{t('wtTopics')}</p>
+        <p className="text-xs text-muted-foreground">{t('wtTopicsHint')}</p>
+        {fields.map((field, index) => (
+          <div key={field.id} className="flex items-center gap-2">
+            <div className="flex-1">
+              <Input
+                placeholder={t('wtTopicPlaceholder')}
+                disabled={isPending}
+                {...register(`wtTopics.${index}.title`)}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => remove(index)}
+              aria-label={t('removeTopic')}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        <Button type="button" variant="ghost" size="sm" onClick={() => append({ title: '' })}>
+          <Plus className="mr-1.5 h-4 w-4" />
+          {t('addTopic')}
+        </Button>
+      </div>
+
+      <Field label={t('wtRubric')} htmlFor="ex-wt-rubric" hint={t('wtRubricHint')}>
+        <Textarea id="ex-wt-rubric" rows={2} placeholder={t('wtRubricPlaceholder')} disabled={isPending} {...register('wtRubric')} />
+      </Field>
     </div>
   );
 }

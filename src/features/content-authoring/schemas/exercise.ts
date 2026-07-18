@@ -9,6 +9,8 @@ export const EXERCISE_TYPES = [
   'translate_to_target',
   'translate_from_target',
   'match_pairs',
+  'short_answer',
+  'writing_task',
 ] as const;
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
 
@@ -47,6 +49,19 @@ export const exerciseFormSchema = z
     mpPairs: z
       .array(z.object({ left: z.string().max(500), right: z.string().max(500) }))
       .optional(),
+
+    // short_answer — `saAccepted` is a comma-separated list of exact-match
+    // shortcuts; a non-matching answer is routed for review by the engine.
+    saQuestion: z.string().max(2000).optional(),
+    saContext: z.string().max(2000).optional(),
+    saReferenceAnswer: z.string().max(2000).optional(),
+    saAccepted: z.string().max(2000).optional(),
+
+    // writing_task — `wtTopics` are optional "choose one" prompts.
+    wtPrompt: z.string().max(2000).optional(),
+    wtMinWords: z.string().max(6).optional(),
+    wtTopics: z.array(z.object({ title: z.string().max(500) })).optional(),
+    wtRubric: z.string().max(2000).optional(),
   })
   .superRefine((data, ctx) => {
     switch (data.templateCode) {
@@ -97,6 +112,25 @@ export const exerciseFormSchema = z
             path: ['mpPairs'],
             message: 'At least 2 complete pairs required',
           });
+        }
+        break;
+      }
+      case 'short_answer': {
+        if (!data.saQuestion?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['saQuestion'], message: 'Required' });
+        }
+        if (!data.saReferenceAnswer?.trim()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['saReferenceAnswer'],
+            message: 'Required',
+          });
+        }
+        break;
+      }
+      case 'writing_task': {
+        if (!data.wtPrompt?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['wtPrompt'], message: 'Required' });
         }
         break;
       }
