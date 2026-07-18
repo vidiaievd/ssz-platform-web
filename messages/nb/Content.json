@@ -86,10 +86,15 @@
     "fill_in_blank": "Fyll inn i tomrommet",
     "translate_to_target": "Oversett til målspråket",
     "translate_from_target": "Oversett fra målspråket",
-    "match_pairs": "Koble par"
+    "match_pairs": "Koble par",
+    "short_answer": "Kort svar",
+    "writing_task": "Skriveoppgave",
+    "sentence_schema": "Setningsskjema"
   },
   "wordBank": "Ordbank",
   "matchColumnLeft": "Elementer",
   "matchColumnRight": "Treff",
-  "translatePrompt": "Oversett:"
+  "translatePrompt": "Oversett:",
+  "shortAnswerAnswer": "Svar",
+  "writingTopics": "Temaer"
 }

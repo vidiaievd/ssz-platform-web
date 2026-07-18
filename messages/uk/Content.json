@@ -86,10 +86,15 @@
     "fill_in_blank": "Заповніть пропуск",
     "translate_to_target": "Переклад цільовою мовою",
     "translate_from_target": "Переклад з цільової мови",
-    "match_pairs": "З’єднайте пари"
+    "match_pairs": "З’єднайте пари",
+    "short_answer": "Коротка відповідь",
+    "writing_task": "Письмове завдання",
+    "sentence_schema": "Схема речення"
   },
   "wordBank": "Банк слів",
   "matchColumnLeft": "Елементи",
   "matchColumnRight": "Відповідники",
-  "translatePrompt": "Перекладіть:"
+  "translatePrompt": "Перекладіть:",
+  "shortAnswerAnswer": "Відповідь",
+  "writingTopics": "Теми"
 }

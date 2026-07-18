@@ -114,6 +114,72 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
             </div>
           </div>
         )}
+
+        {code === 'short_answer' && (
+          <div className="space-y-2">
+            {typeof content.question === 'string' && <p className="text-sm font-medium">{content.question}</p>}
+            {typeof content.context === 'string' && content.context && (
+              <p className="text-muted-foreground text-xs">{content.context}</p>
+            )}
+            <div className="rounded-md border border-dashed border-border px-3 py-2">
+              <p className="text-muted-foreground text-xs">{t('shortAnswerAnswer')}</p>
+            </div>
+          </div>
+        )}
+
+        {code === 'writing_task' && (
+          <div className="space-y-2">
+            {typeof content.prompt === 'string' && <p className="text-sm font-medium">{content.prompt}</p>}
+            {Array.isArray(content.options) && content.options.length > 0 && (
+              <div>
+                <p className="text-muted-foreground mb-1 text-xs font-medium">{t('writingTopics')}</p>
+                <ul className="space-y-1.5">
+                  {(content.options as LabeledItem[]).map((o, i) => (
+                    <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
+                      {typeof (o as { title?: unknown }).title === 'string'
+                        ? (o as { title: string }).title
+                        : ''}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {code === 'sentence_schema' && (
+          <div className="space-y-2">
+            {typeof content.sentence === 'string' && <p className="text-sm font-medium">{content.sentence}</p>}
+            <div className="overflow-x-auto">
+              <div className="flex min-w-max gap-1.5">
+                {(Array.isArray(content.fields) ? (content.fields as LabeledItem[]) : []).map((f, i) => (
+                  <div
+                    key={i}
+                    className="min-w-20 flex-1 rounded-md border border-dashed border-border px-2 py-2 text-center"
+                  >
+                    <p className="text-muted-foreground text-[11px] font-medium">
+                      {typeof (f as { label?: unknown }).label === 'string'
+                        ? (f as { label: string }).label
+                        : ''}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {Array.isArray(content.tokens) && content.tokens.length > 0 && (
+              <div>
+                <p className="text-muted-foreground mb-1 text-xs font-medium">{t('wordBank')}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {asItems(content.tokens).map((tok, i) => (
+                    <Badge key={i} variant="muted" className="text-xs">
+                      {tok.text}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </CardBody>
     </Card>
   );
@@ -125,4 +191,7 @@ const TYPE_LABEL_KEYS = {
   translate_to_target: true,
   translate_from_target: true,
   match_pairs: true,
+  short_answer: true,
+  writing_task: true,
+  sentence_schema: true,
 } as const;
