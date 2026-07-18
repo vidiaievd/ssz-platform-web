@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Link } from '@/lib/i18n/navigation';
 import { getLessonTypeDefinition, type MaterialKind } from '@/lib/content/lesson-types';
 
 import { ContainerStateBadge } from './container-state-badge';
@@ -31,7 +30,6 @@ export function LessonEditorShell({
   kind,
   title,
   state,
-  backHref,
   autosaveStatus,
   autosaveSavedAt,
   publishSlot,
@@ -46,13 +44,6 @@ export function LessonEditorShell({
 
   return (
     <div>
-      <Link
-        href={backHref}
-        className="mb-4 inline-block text-sm text-muted-foreground hover:text-foreground"
-      >
-        &larr; {t('editor.backToCourse')}
-      </Link>
-
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <span

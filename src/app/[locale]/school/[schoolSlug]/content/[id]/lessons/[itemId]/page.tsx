@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
+import { Breadcrumbs, type BreadcrumbItem } from '@/components/shared/breadcrumbs';
 import type { Container, ContainerVersion, CurriculumTree } from '@/features/content/types';
 import { deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
 import { TextEditorPane } from '@/features/content-authoring/components/text-editor-pane';
@@ -50,7 +52,7 @@ export default async function LessonEditorPage({
   });
   const found = findItemWithModule(tree, itemId);
   if (!found) notFound();
-  const { item, moduleContainerId } = found;
+  const { item, sectionTitle, levelTitle, moduleContainerId } = found;
 
   let moduleContainer: Container;
   try {
@@ -72,8 +74,21 @@ export default async function LessonEditorPage({
   const backHref = `/school/${schoolSlug}/content/${id}`;
   const publishSlot = <PublishDialog container={container} result={preflight} />;
 
+  const t = await getTranslations('Authoring');
+  const sectionCrumb =
+    levelTitle && sectionTitle
+      ? `${levelTitle} · ${sectionTitle}`
+      : (levelTitle ?? sectionTitle);
+  const breadcrumbItems: BreadcrumbItem[] = [
+    { label: t('breadcrumb.courses'), href: `/school/${schoolSlug}/content` },
+    { label: container.title, href: backHref },
+    ...(sectionCrumb ? [{ label: sectionCrumb }] : []),
+    { label: item.title ?? t('lessons.untitled') },
+  ];
+
   return (
     <main className="mx-auto max-w-7xl p-8">
+      <Breadcrumbs items={breadcrumbItems} className="mb-5" />
       {kind === 'text' ? (
         <TextEditorPane
           kind={kind}

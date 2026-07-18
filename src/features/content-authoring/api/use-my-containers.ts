@@ -17,7 +17,9 @@ export function useMyContainers(query?: ContainerListQuery) {
     queryKey: authoringKeys.containers(query),
     queryFn: async () => {
       // "My containers" — scoped to the current user server-side by the BFF.
-      const params = new URLSearchParams({ scope: 'owned' });
+      // Only top-level courses belong in this list; MODULE sub-containers are
+      // nested inside a course and must not surface as standalone cards.
+      const params = new URLSearchParams({ scope: 'owned', containerType: 'course' });
 
       if (query?.search)   params.set('search', query.search);
       if (query?.language) params.set('targetLanguage', query.language);

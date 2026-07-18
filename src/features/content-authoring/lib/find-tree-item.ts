@@ -73,6 +73,8 @@ function findItemInModule(
 export interface ItemWithModule {
   item: CurriculumTreeItemNode;
   sectionTitle: string | null;
+  /** Enclosing level's title (e.g. "B1"), for the editor breadcrumb. Null for `single` level systems. */
+  levelTitle: string | null;
   /** The item's own Container — each module is its own Container (plan 30 §"Design ↔ backend terminology"). */
   moduleContainerId: string;
 }
@@ -87,11 +89,22 @@ export function findItemWithModule(tree: CurriculumTree, itemId: string): ItemWi
     for (const mod of level.modules) {
       for (const section of mod.sections) {
         const item = section.items.find((i) => i.id === itemId);
-        if (item) return { item, sectionTitle: section.title, moduleContainerId: mod.containerId };
+        if (item)
+          return {
+            item,
+            sectionTitle: section.title,
+            levelTitle: level.title,
+            moduleContainerId: mod.containerId,
+          };
       }
       const ungrouped = mod.ungroupedItems.find((i) => i.id === itemId);
       if (ungrouped) {
-        return { item: ungrouped, sectionTitle: null, moduleContainerId: mod.containerId };
+        return {
+          item: ungrouped,
+          sectionTitle: null,
+          levelTitle: level.title,
+          moduleContainerId: mod.containerId,
+        };
       }
     }
   }

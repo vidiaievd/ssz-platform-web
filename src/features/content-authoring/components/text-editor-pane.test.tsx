@@ -25,7 +25,10 @@ vi.mock('@/features/content', async () => {
 // this file doesn't also pull in the server action module (server-env access
 // isn't valid in a client test environment).
 vi.mock('./paragraph-translations-panel', () => ({ ParagraphTranslationsPanel: () => null }));
-vi.mock('./glossary-mark-panel', () => ({ GlossaryMarkPanel: () => null }));
+vi.mock('./glossary-mark-panel', () => ({
+  GlossaryMarkButton: () => null,
+  GlossaryMarkedWords: () => null,
+}));
 vi.mock('./hero-image-slot', () => ({ HeroImageSlot: () => null }));
 vi.mock('./audio-narration-row', () => ({ AudioNarrationRow: () => null }));
 vi.mock('@/lib/i18n/navigation', () => ({

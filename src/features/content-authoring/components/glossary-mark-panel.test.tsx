@@ -16,7 +16,7 @@ vi.mock('../api/use-authoring-lessons', () => ({ useLessonGlossaryMarks: vi.fn()
 // jsdom doesn't implement scrollIntoView; Radix Select calls it when opening.
 Element.prototype.scrollIntoView = vi.fn();
 
-const { GlossaryMarkPanel } = await import('./glossary-mark-panel');
+const { GlossaryMarkButton, GlossaryMarkedWords } = await import('./glossary-mark-panel');
 const { markGlossaryWordAction } = await import('../actions/lesson-glossary');
 const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } = await import(
   '../api/use-authoring-vocabulary'
@@ -49,12 +49,12 @@ const ITEMS: VocabularyItem[] = [
   { id: 'vocab-2', lemma: 'lærer', translations: [], examples: [] },
 ];
 
-function renderPanel(variantId: string | undefined) {
+function renderWith(node: React.ReactNode) {
   const queryClient = new QueryClient();
   render(
     <QueryClientProvider client={queryClient}>
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <GlossaryMarkPanel lessonId="lesson-1" variantId={variantId} container={CONTAINER} />
+        {node}
       </NextIntlClientProvider>
     </QueryClientProvider>,
   );
@@ -73,9 +73,10 @@ beforeEach(() => {
   vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: [] } as never);
 });
 
-describe('GlossaryMarkPanel', () => {
+describe('GlossaryMarkButton', () => {
   it('prompts to save the anchor text first when there is no variant yet', () => {
-    renderPanel(undefined);
+    renderWith(<GlossaryMarkButton lessonId="lesson-1" variantId={undefined} container={CONTAINER} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Mark word' }));
     expect(
       screen.getByText('Save the anchor text first to add glossary marks.'),
     ).toBeInTheDocument();
@@ -83,24 +84,17 @@ describe('GlossaryMarkPanel', () => {
 
   it('shows a no-list note when the module has no vocabulary list', () => {
     vi.mocked(useAuthoringVocabularyLists).mockReturnValue({ data: [] } as never);
-    renderPanel('variant-1');
+    renderWith(<GlossaryMarkButton lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Mark word' }));
     expect(
       screen.getByText('This module has no vocabulary list yet — add one to mark glossary words.'),
     ).toBeInTheDocument();
   });
 
-  it('shows already-marked words with their lemma and occurrence count', () => {
-    const marks: GlossaryMark[] = [{ id: 'mark-1', vocabularyItemId: 'vocab-1', occurrenceCount: 2 }];
-    vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: marks } as never);
-    renderPanel('variant-1');
-    expect(screen.getByText('sykepleier ×2')).toBeInTheDocument();
-    // Already-marked words are excluded from the picker.
-    expect(screen.queryByText('sykepleier', { selector: '[role="option"]' })).not.toBeInTheDocument();
-  });
-
   it('marks the selected word and refreshes the marks query', async () => {
-    renderPanel('variant-1');
+    renderWith(<GlossaryMarkButton lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
 
+    fireEvent.click(screen.getByRole('button', { name: 'Mark word' }));
     fireEvent.click(screen.getByRole('combobox'));
     fireEvent.click(await screen.findByText('lærer'));
     fireEvent.click(screen.getByRole('button', { name: 'Mark' }));
@@ -110,5 +104,15 @@ describe('GlossaryMarkPanel', () => {
     });
 
     expect(markGlossaryWordAction).toHaveBeenCalledWith('lesson-1', 'variant-1', 'vocab-2');
+  });
+});
+
+describe('GlossaryMarkedWords', () => {
+  it('shows already-marked words with their lemma and occurrence count', () => {
+    const marks: GlossaryMark[] = [{ id: 'mark-1', vocabularyItemId: 'vocab-1', occurrenceCount: 2 }];
+    vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: marks } as never);
+    renderWith(<GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
+    expect(screen.getByText('sykepleier ×2')).toBeInTheDocument();
+    expect(screen.getByText('Marked words become the module glossary — 1 word marked.')).toBeInTheDocument();
   });
 });

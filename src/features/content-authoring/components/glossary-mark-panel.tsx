@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { Highlighter } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -20,9 +22,8 @@ import { useAuthoringVocabularyLists, useAuthoringVocabularyItems } from '../api
 import { useLessonGlossaryMarks } from '../api/use-authoring-lessons';
 import { markGlossaryWordAction } from '../actions/lesson-glossary';
 import { authoringKeys } from '../api/keys';
-import { EditorCard } from './editor-card';
 
-interface GlossaryMarkPanelProps {
+interface GlossaryMarkProps {
   lessonId: string;
   /** Undefined until the anchor text has been saved at least once (no variant yet). */
   variantId: string | undefined;
@@ -31,19 +32,13 @@ interface GlossaryMarkPanelProps {
 }
 
 /**
- * Associates existing vocabulary items with this lesson variant's glossary
- * (BE1.5). Not text-selection driven — the backend stores no span/position,
- * only `vocabularyItemId` + an auto-incrementing `occurrenceCount`, so
- * marking is "pick a word from the module's vocab list", not "select text".
- * There is no unmark endpoint.
+ * Shared read model for both the header "Mark word" popover and the inline
+ * marked-words display. Marking is vocab-item-based (BE1.5): the backend stores
+ * no span/position, only `vocabularyItemId` + an auto-incrementing
+ * `occurrenceCount`, so marking is "pick a word from the module's vocab list",
+ * not "select text". There is no unmark endpoint.
  */
-export function GlossaryMarkPanel({ lessonId, variantId, container }: GlossaryMarkPanelProps) {
-  const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
-  const queryClient = useQueryClient();
-  const [isPending, startTransition] = useTransition();
-  const [selectedItemId, setSelectedItemId] = useState('');
-
+function useGlossaryMarkData({ lessonId, variantId, container }: GlossaryMarkProps) {
   const { data: lists } = useAuthoringVocabularyLists(container.id);
   const list = lists?.[0];
   const { data: itemsPage } = useAuthoringVocabularyItems(list?.id ?? '', 1, !!list);
@@ -51,11 +46,30 @@ export function GlossaryMarkPanel({ lessonId, variantId, container }: GlossaryMa
 
   const items = itemsPage?.items ?? [];
   const markedIds = new Set((marks ?? []).map((m) => m.vocabularyItemId));
-  const unmarkedItems = items.filter((item) => !markedIds.has(item.id));
 
-  function lemmaFor(vocabularyItemId: string) {
-    return items.find((item) => item.id === vocabularyItemId)?.lemma ?? vocabularyItemId;
-  }
+  return {
+    list,
+    items,
+    marks: marks ?? [],
+    unmarkedItems: items.filter((item) => !markedIds.has(item.id)),
+    lemmaFor: (vocabularyItemId: string) =>
+      items.find((item) => item.id === vocabularyItemId)?.lemma ?? vocabularyItemId,
+  };
+}
+
+/**
+ * Header action for the anchor-text card: opens a popover to pick an existing
+ * vocabulary word and add it to this lesson variant's glossary.
+ */
+export function GlossaryMarkButton({ lessonId, variantId, container }: GlossaryMarkProps) {
+  const t = useTranslations('Authoring');
+  const tErrors = useTranslations('Errors');
+  const queryClient = useQueryClient();
+  const [isPending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState('');
+
+  const { list, unmarkedItems } = useGlossaryMarkData({ lessonId, variantId, container });
 
   function handleMark() {
     if (!variantId || !selectedItemId) return;
@@ -66,74 +80,83 @@ export function GlossaryMarkPanel({ lessonId, variantId, container }: GlossaryMa
         return;
       }
       setSelectedItemId('');
+      setOpen(false);
       await queryClient.invalidateQueries({
         queryKey: authoringKeys.lessonGlossaryMarks(lessonId, variantId),
       });
     });
   }
 
-  if (!variantId) {
-    return (
-      <EditorCard title={t('editor.glossaryMarks')}>
-        <p className="text-sm text-muted-foreground">{t('editor.glossaryMarksNeedsBody')}</p>
-      </EditorCard>
-    );
-  }
-
-  if (!list) {
-    return (
-      <EditorCard title={t('editor.glossaryMarks')}>
-        <p className="text-sm text-muted-foreground">{t('editor.glossaryMarksNoList')}</p>
-      </EditorCard>
-    );
-  }
-
   return (
-    <EditorCard title={t('editor.glossaryMarks')}>
-      <div className="flex flex-col gap-3">
-        {marks && marks.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {marks.map((mark) => (
-              <Badge key={mark.id} variant="muted">
-                {lemmaFor(mark.vocabularyItemId)}
-                {mark.occurrenceCount > 1 ? ` ×${mark.occurrenceCount}` : ''}
-              </Badge>
-            ))}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="sm" type="button">
+          <Highlighter aria-hidden /> {t('editor.glossaryMarksMarkWord')}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72">
+        {!variantId ? (
+          <p className="text-sm text-muted-foreground">{t('editor.glossaryMarksNeedsBody')}</p>
+        ) : !list ? (
+          <p className="text-sm text-muted-foreground">{t('editor.glossaryMarksNoList')}</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <Select
+              value={selectedItemId}
+              onValueChange={setSelectedItemId}
+              disabled={unmarkedItems.length === 0}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t('editor.glossaryMarksPickWord')} />
+              </SelectTrigger>
+              <SelectContent>
+                {unmarkedItems.map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.lemma}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleMark}
+              disabled={!selectedItemId || isPending}
+              loading={isPending}
+            >
+              {t('editor.glossaryMarksMark')}
+            </Button>
           </div>
         )}
+      </PopoverContent>
+    </Popover>
+  );
+}
 
-        <div className="flex items-center gap-2">
-          <Select
-            value={selectedItemId}
-            onValueChange={setSelectedItemId}
-            disabled={unmarkedItems.length === 0}
-          >
-            <SelectTrigger className="flex-1">
-              <SelectValue placeholder={t('editor.glossaryMarksPickWord')} />
-            </SelectTrigger>
-            <SelectContent>
-              {unmarkedItems.map((item) => (
-                <SelectItem key={item.id} value={item.id}>
-                  {item.lemma}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleMark}
-            disabled={!selectedItemId || isPending}
-            loading={isPending}
-          >
-            {t('editor.glossaryMarksMark')}
-          </Button>
+/**
+ * Inline display under the anchor-text render: the marked-word chips and the
+ * "N words marked" glossary caption (design_handoff_course_management).
+ */
+export function GlossaryMarkedWords({ lessonId, variantId, container }: GlossaryMarkProps) {
+  const t = useTranslations('Authoring');
+  const { marks, lemmaFor } = useGlossaryMarkData({ lessonId, variantId, container });
+
+  return (
+    <div className="mt-2 flex flex-col gap-2">
+      {marks.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {marks.map((mark) => (
+            <Badge key={mark.id} variant="muted">
+              {lemmaFor(mark.vocabularyItemId)}
+              {mark.occurrenceCount > 1 ? ` ×${mark.occurrenceCount}` : ''}
+            </Badge>
+          ))}
         </div>
-
-        <p className="text-xs text-muted-foreground">
-          {t('editor.glossaryMarksCaption', { count: marks?.length ?? 0 })}
-        </p>
-      </div>
-    </EditorCard>
+      )}
+      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Highlighter className="size-3.5" aria-hidden />
+        {t('editor.glossaryMarksCaption', { count: marks.length })}
+      </p>
+    </div>
   );
 }

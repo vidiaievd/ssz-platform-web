@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, type ReactNode } from 'react';
+import { useMemo, useRef, type ReactNode } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,7 +25,12 @@ import { LessonEditorShell } from './lesson-editor-shell';
 import { EditorCard } from './editor-card';
 import { TextLessonPreview } from './text-lesson-preview';
 import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
-import { GlossaryMarkPanel } from './glossary-mark-panel';
+import { GlossaryMarkButton, GlossaryMarkedWords } from './glossary-mark-panel';
+import {
+  MarkdownFormatMenu,
+  applyMarkdownFormat,
+  type MarkdownFormat,
+} from './markdown-format-menu';
 import { HeroImageSlot } from './hero-image-slot';
 import { AudioNarrationRow } from './audio-narration-row';
 
@@ -117,6 +122,22 @@ export function TextEditorPane({
     autosave.schedule();
   }
 
+  const bodyField = register('body', { onChange: () => autosave.schedule() });
+  const bodyRef = useRef<HTMLTextAreaElement | null>(null);
+
+  function handleFormat(format: MarkdownFormat) {
+    const el = bodyRef.current;
+    if (!el) return;
+    const next = applyMarkdownFormat(format, el.value, el.selectionStart, el.selectionEnd);
+    setValue('body', next.value, { shouldDirty: true });
+    autosave.schedule();
+    // Restore focus and selection after React commits the new value.
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(next.selStart, next.selEnd);
+    });
+  }
+
   return (
     <LessonEditorShell
       kind={kind}
@@ -151,13 +172,34 @@ export function TextEditorPane({
             />
           </Field>
 
-          <EditorCard title={t('editor.anchorText')}>
+          <EditorCard
+            title={t('editor.anchorText')}
+            right={
+              <div className="flex items-center gap-1.5">
+                <MarkdownFormatMenu onInsert={handleFormat} />
+                <GlossaryMarkButton
+                  lessonId={lessonId}
+                  variantId={defaultVariant?.id}
+                  container={container}
+                />
+              </div>
+            }
+          >
             <Textarea
               id="lesson-body"
               rows={14}
               placeholder={t('lessons.bodyPlaceholder')}
               className="font-reading text-[15px] leading-loose"
-              {...register('body', { onChange: () => autosave.schedule() })}
+              {...bodyField}
+              ref={(el) => {
+                bodyField.ref(el);
+                bodyRef.current = el;
+              }}
+            />
+            <GlossaryMarkedWords
+              lessonId={lessonId}
+              variantId={defaultVariant?.id}
+              container={container}
             />
           </EditorCard>
 
@@ -188,8 +230,6 @@ export function TextEditorPane({
           </Button>
 
           <ParagraphTranslationsPanel lessonId={lessonId} variantId={defaultVariant?.id} />
-
-          <GlossaryMarkPanel lessonId={lessonId} variantId={defaultVariant?.id} container={container} />
         </div>
       )}
     </LessonEditorShell>
