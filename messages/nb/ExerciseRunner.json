@@ -41,5 +41,25 @@
     "defaultInstruction": "Koble hvert ord til oversettelsen",
     "helperIdle": "Trykk på et ord til venstre…",
     "helperArmed": "Trykk nå på samsvarende ord til høyre."
+  },
+  "shortAnswer": {
+    "defaultInstruction": "Svar på spørsmålet",
+    "inputLabel": "Svaret ditt",
+    "placeholder": "Skriv svaret ditt…",
+    "referenceLabel": "Eksempelsvar"
+  },
+  "writing": {
+    "defaultInstruction": "Skriv teksten din",
+    "inputLabel": "Teksten din",
+    "placeholder": "Begynn å skrive…",
+    "topicsLabel": "Velg et tema",
+    "wordCount": "{count} ord",
+    "wordCountMin": "{count} / {min} ord"
+  },
+  "sentenceSchema": {
+    "defaultInstruction": "Plasser hvert ord i riktig felt",
+    "bankLabel": "Ord",
+    "bankEmpty": "Alle ord er plassert",
+    "fieldDropLabel": "Plasser i {field}"
   }
 }

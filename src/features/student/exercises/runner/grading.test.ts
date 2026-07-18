@@ -4,6 +4,8 @@ import {
   normAnswer,
   gradeMcq,
   gradeFill,
+  gradeShortAnswer,
+  gradeSentenceSchema,
   gradeTranslate,
   gradeMatch,
   type TranslateExpectedAnswers,
@@ -187,5 +189,44 @@ describe('gradeMatch', () => {
   it('returns false for a single-pair set linked wrongly', () => {
     const one: MatchPair[] = [{ id: 'a', left: 'hund', right: 'dog' }];
     expect(gradeMatch(one, { a: 'b' })).toBe(false);
+  });
+});
+
+describe('gradeShortAnswer', () => {
+  it('returns true on a normalized match of an accepted answer', () => {
+    expect(gradeShortAnswer({ reference_answer: 'x', accepted_answers: ['På radio'] }, 'på radio.')).toBe(true);
+  });
+
+  it('returns null when nothing matches (routes to review)', () => {
+    expect(gradeShortAnswer({ reference_answer: 'x', accepted_answers: ['på radio'] }, 'noe annet')).toBeNull();
+  });
+
+  it('returns null when there are no accepted_answers shortcuts', () => {
+    expect(gradeShortAnswer({ reference_answer: 'x' }, 'på radio')).toBeNull();
+  });
+
+  it('returns null for an empty answer', () => {
+    expect(gradeShortAnswer({ reference_answer: 'x', accepted_answers: ['a'] }, '   ')).toBeNull();
+  });
+});
+
+describe('gradeSentenceSchema', () => {
+  const expected = {
+    placements: [
+      { field_id: 'f1', token_ids: ['t1'] },
+      { field_id: 'f2', token_ids: ['t2', 't3'] },
+    ],
+  };
+
+  it('returns true when every field matches exactly', () => {
+    expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t2', 't3'] })).toBe(true);
+  });
+
+  it('is order-sensitive within a field', () => {
+    expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t3', 't2'] })).toBe(false);
+  });
+
+  it('returns false when a field is missing tokens', () => {
+    expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t2'] })).toBe(false);
   });
 });

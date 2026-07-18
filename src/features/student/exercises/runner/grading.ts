@@ -1,6 +1,8 @@
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
 import type { MatchPair } from './match-body';
+import type { ShortAnswerExpectedAnswers } from './short-answer-body';
+import type { SentenceSchemaExpectedAnswers } from './sentence-schema-body';
 
 export interface TranslateExpectedAnswers {
   /** One or more acceptable translations, compared after normalization. */
@@ -60,4 +62,37 @@ export function gradeMatch(
   links: Record<string, string>,
 ): boolean {
   return pairs.every((p) => links[p.id] === p.id);
+}
+
+/**
+ * Grade a short answer. Mirrors the engine: an exact (normalized) match of an
+ * `accepted_answers` shortcut is correct; anything else needs human/LLM review,
+ * so we return `null` rather than marking it wrong.
+ */
+export function gradeShortAnswer(
+  expectedAnswers: ShortAnswerExpectedAnswers,
+  value: string,
+): boolean | null {
+  const accepted = expectedAnswers.accepted_answers ?? [];
+  if (accepted.length === 0) return null;
+  const norm = normAnswer(value);
+  if (norm === '') return null;
+  return accepted.some((a) => normAnswer(a) === norm) ? true : null;
+}
+
+/**
+ * Grade a sentence-schema exercise — every field's ordered token list must
+ * match the expected placement exactly.
+ */
+export function gradeSentenceSchema(
+  expectedAnswers: SentenceSchemaExpectedAnswers,
+  value: Record<string, string[]>,
+): boolean {
+  return expectedAnswers.placements.every((p) => {
+    const submitted = value[p.field_id] ?? [];
+    return (
+      submitted.length === p.token_ids.length &&
+      p.token_ids.every((id, i) => id === submitted[i])
+    );
+  });
 }

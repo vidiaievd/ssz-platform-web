@@ -41,5 +41,25 @@
     "defaultInstruction": "Сопоставьте каждое слово с переводом",
     "helperIdle": "Нажмите на слово слева…",
     "helperArmed": "Теперь нажмите на соответствие справа."
+  },
+  "shortAnswer": {
+    "defaultInstruction": "Ответьте на вопрос",
+    "inputLabel": "Ваш ответ",
+    "placeholder": "Напишите ответ…",
+    "referenceLabel": "Образец ответа"
+  },
+  "writing": {
+    "defaultInstruction": "Напишите свой текст",
+    "inputLabel": "Ваш текст",
+    "placeholder": "Начните писать…",
+    "topicsLabel": "Выберите тему",
+    "wordCount": "{count} слов",
+    "wordCountMin": "{count} / {min} слов"
+  },
+  "sentenceSchema": {
+    "defaultInstruction": "Разместите каждое слово в правильном поле",
+    "bankLabel": "Слова",
+    "bankEmpty": "Все слова размещены",
+    "fieldDropLabel": "Разместить в {field}"
   }
 }

@@ -41,5 +41,25 @@
     "defaultInstruction": "Поєднайте кожне слово з перекладом",
     "helperIdle": "Торкніться слова ліворуч…",
     "helperArmed": "Тепер торкніться відповідника праворуч."
+  },
+  "shortAnswer": {
+    "defaultInstruction": "Дайте відповідь на запитання",
+    "inputLabel": "Ваша відповідь",
+    "placeholder": "Напишіть відповідь…",
+    "referenceLabel": "Зразок відповіді"
+  },
+  "writing": {
+    "defaultInstruction": "Напишіть свій текст",
+    "inputLabel": "Ваш текст",
+    "placeholder": "Почніть писати…",
+    "topicsLabel": "Оберіть тему",
+    "wordCount": "{count} слів",
+    "wordCountMin": "{count} / {min} слів"
+  },
+  "sentenceSchema": {
+    "defaultInstruction": "Розмістіть кожне слово у правильному полі",
+    "bankLabel": "Слова",
+    "bankEmpty": "Усі слова розміщено",
+    "fieldDropLabel": "Розмістити в {field}"
   }
 }
