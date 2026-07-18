@@ -22,6 +22,7 @@ import { VideoLessonPage } from './video-lesson-page';
 import { ListeningLessonPage } from './listening-lesson-page';
 import { GrammarLessonPage } from './grammar-lesson-page';
 import { LiveLessonPage } from './live-lesson-page';
+import { ExercisePage } from './exercise-page';
 import {
   flattenSections,
   mapCourseUnitsToSidebarUnits,
@@ -181,6 +182,9 @@ export function ReaderShell({
         courseTitle={courseInfo.title}
       />
     );
+  } else if (activeKind === 'exercise' && activeContentItem) {
+    // key: remount per item so the solver's per-exercise state resets.
+    content = <ExercisePage key={activeContentItem.contentId} exerciseId={activeContentItem.contentId} />;
   }
   const effectiveMaxWidth =
     maxWidth ?? (activeKind === 'vocab' ? 780 : activeKind === 'video' ? 880 : 680);

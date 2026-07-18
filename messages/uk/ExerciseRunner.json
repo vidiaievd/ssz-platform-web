@@ -61,5 +61,6 @@
     "bankLabel": "Слова",
     "bankEmpty": "Усі слова розміщено",
     "fieldDropLabel": "Розмістити в {field}"
-  }
+  },
+  "unsupported": "Цей тип вправи ({type}) поки не підтримується."
 }

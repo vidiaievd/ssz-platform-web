@@ -22,6 +22,9 @@ export type { VocabularyPageProps } from './components/vocabulary-page';
 export { TextLessonPage } from './components/text-lesson-page';
 export type { TextLessonPageProps } from './components/text-lesson-page';
 
+export { ExercisePage } from './components/exercise-page';
+export type { ExercisePageProps } from './components/exercise-page';
+
 export { VideoLessonPage } from './components/video-lesson-page';
 export type { VideoLessonPageProps } from './components/video-lesson-page';
 

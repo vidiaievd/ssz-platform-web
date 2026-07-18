@@ -44,6 +44,23 @@ vi.mock('@/features/content', async () => {
     useLessonVideoCues: (...args: unknown[]) => useLessonVideoCues(...args),
   };
 });
+// ExercisePage imports this deep hook directly (not via the @/features/content
+// barrel), so it must be mocked to avoid a real useQuery without a provider.
+vi.mock('@/features/content/api/use-exercise', () => ({
+  useExerciseWithAnswers: () => ({
+    data: {
+      id: 'exercise-1',
+      templateCode: 'short_answer',
+      targetLanguage: 'nb',
+      content: { question: 'Exercise question' },
+      expectedAnswers: { reference_answer: 'ref' },
+      instructions: null,
+    },
+    isLoading: false,
+    isError: false,
+    refetch: vi.fn(),
+  }),
+}));
 vi.mock('@/features/profile', () => ({ useMyStudentProfile: () => useMyStudentProfile() }));
 vi.mock('@/features/media', () => ({ useMediaAsset: (id?: string) => useMediaAsset(id) }));
 vi.mock('next-themes', () => ({ useTheme: () => ({ resolvedTheme: 'light', setTheme: vi.fn() }) }));
@@ -87,8 +104,8 @@ const UNIT_CONTENTS: UnitContentsResult = {
       title: 'Reinforce & read',
       items: [
         {
-          // `exercise` has no dedicated reader page yet — used here to exercise
-          // ReaderShell's generic chrome/fallback-to-children path.
+          // `exercise` renders ExercisePage (mocked deep hook above); the two
+          // chrome tests below use it to verify ReaderShell wiring end to end.
           id: 'item-1',
           contentType: 'EXERCISE',
           contentId: 'exercise-1',
@@ -306,7 +323,8 @@ describe('ReaderShell', () => {
     renderShell();
 
     expect(screen.getByText('Norsk B1')).toBeInTheDocument();
-    expect(screen.getByText('lesson content')).toBeInTheDocument();
+    // The exercise item renders ExercisePage in the content slot.
+    expect(screen.getByText('Exercise question')).toBeInTheDocument();
     expect(screen.getByText('Practice · En vanlig arbeidsdag')).toBeInTheDocument();
     expect(screen.getByText('7 days streak')).toBeInTheDocument();
   });

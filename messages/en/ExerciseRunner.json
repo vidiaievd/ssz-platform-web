@@ -61,5 +61,6 @@
     "bankLabel": "Words",
     "bankEmpty": "All words placed",
     "fieldDropLabel": "Place in {field}"
-  }
+  },
+  "unsupported": "This exercise type ({type}) isn’t playable yet."
 }

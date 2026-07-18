@@ -61,5 +61,6 @@
     "bankLabel": "Ord",
     "bankEmpty": "Alle ord er plassert",
     "fieldDropLabel": "Plasser i {field}"
-  }
+  },
+  "unsupported": "Denne oppgavetypen ({type}) kan ikke løses ennå."
 }

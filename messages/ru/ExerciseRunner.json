@@ -61,5 +61,6 @@
     "bankLabel": "Слова",
     "bankEmpty": "Все слова размещены",
     "fieldDropLabel": "Разместить в {field}"
-  }
+  },
+  "unsupported": "Этот тип упражнения ({type}) пока не поддерживается."
 }
