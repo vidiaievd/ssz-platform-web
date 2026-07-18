@@ -1,6 +1,13 @@
 'use client';
 
-import { useFieldArray, useController, type Control, type UseFormRegister, type FieldErrors } from 'react-hook-form';
+import {
+  useFieldArray,
+  useController,
+  useWatch,
+  type Control,
+  type UseFormRegister,
+  type FieldErrors,
+} from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Plus, X } from 'lucide-react';
 
@@ -11,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   EXERCISE_TYPES,
   DIFFICULTY_LEVELS,
+  SENTENCE_SCHEMA_TYPES,
   type ExerciseFormValues,
   type ExerciseType,
 } from '../schemas/exercise';
@@ -118,6 +126,9 @@ export function ExerciseFields({ control, register, errors, isPending, typeDisab
       )}
       {templateCode === 'writing_task' && (
         <WritingTaskFields control={control} register={register} errors={errors} isPending={isPending} />
+      )}
+      {templateCode === 'sentence_schema' && (
+        <SentenceSchemaFields control={control} register={register} errors={errors} isPending={isPending} />
       )}
     </div>
   );
@@ -430,6 +441,133 @@ function WritingTaskFields({ control, register, errors, isPending }: SubProps) {
       <Field label={t('wtRubric')} htmlFor="ex-wt-rubric" hint={t('wtRubricHint')}>
         <Textarea id="ex-wt-rubric" rows={2} placeholder={t('wtRubricPlaceholder')} disabled={isPending} {...register('wtRubric')} />
       </Field>
+    </div>
+  );
+}
+
+function SentenceSchemaFields({ control, register, errors, isPending }: SubProps) {
+  const t = useTranslations('Authoring.exercises');
+  const typeCtrl = useController({ control, name: 'ssSchemaType' });
+  const fieldsArr = useFieldArray({ control, name: 'ssFields' });
+  const tokensArr = useFieldArray({ control, name: 'ssTokens' });
+  // Watch field labels so each token's field selector stays in sync.
+  const watchedFields = useWatch({ control, name: 'ssFields' }) ?? [];
+
+  return (
+    <div className="rounded-md border border-border p-3 space-y-4">
+      <Field label={t('ssSentence')} htmlFor="ex-ss-sentence" error={errors.ssSentence?.message} required>
+        <Input
+          id="ex-ss-sentence"
+          placeholder={t('ssSentencePlaceholder')}
+          disabled={isPending}
+          {...register('ssSentence')}
+        />
+      </Field>
+
+      <Field label={t('ssSchemaType')} htmlFor="ex-ss-type">
+        <Select
+          value={typeCtrl.field.value ?? 'main'}
+          onValueChange={(v) => typeCtrl.field.onChange(v as (typeof SENTENCE_SCHEMA_TYPES)[number])}
+          disabled={isPending}
+        >
+          <SelectTrigger id="ex-ss-type" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SENTENCE_SCHEMA_TYPES.map((st) => (
+              <SelectItem key={st} value={st}>
+                {t(`ssSchemaType_${st}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+
+      {/* Fields (ordered columns of the schema) */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-(--ssz-text-primary)">{t('ssFields')}</p>
+        {typeof errors.ssFields?.message === 'string' && (
+          <p className="text-xs text-destructive">{errors.ssFields.message}</p>
+        )}
+        {fieldsArr.fields.map((field, index) => (
+          <div key={field.id} className="flex items-center gap-2">
+            <span className="w-6 shrink-0 text-xs font-mono text-(--ssz-text-muted)">{index + 1}</span>
+            <div className="flex-1">
+              <Input
+                placeholder={t('ssFieldPlaceholder')}
+                disabled={isPending}
+                {...register(`ssFields.${index}.label`)}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => fieldsArr.remove(index)}
+              disabled={fieldsArr.fields.length <= 2}
+              aria-label={t('removeField')}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        <Button type="button" variant="ghost" size="sm" onClick={() => fieldsArr.append({ label: '' })}>
+          <Plus className="mr-1.5 h-4 w-4" />
+          {t('addField')}
+        </Button>
+      </div>
+
+      {/* Tokens (words) + their target field */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-(--ssz-text-primary)">{t('ssTokens')}</p>
+        <p className="text-xs text-muted-foreground">{t('ssTokensHint')}</p>
+        {typeof errors.ssTokens?.message === 'string' && (
+          <p className="text-xs text-destructive">{errors.ssTokens.message}</p>
+        )}
+        {tokensArr.fields.map((field, index) => (
+          <div key={field.id} className="flex items-center gap-2">
+            <div className="flex-1">
+              <Input
+                placeholder={t('ssTokenPlaceholder')}
+                disabled={isPending}
+                {...register(`ssTokens.${index}.text`)}
+              />
+            </div>
+            <span className="text-(--ssz-text-muted)">→</span>
+            <select
+              className="h-9 rounded-md border border-(--ssz-border-default) bg-surface px-2 text-sm text-(--ssz-text-primary)"
+              disabled={isPending}
+              aria-label={t('ssTokenField')}
+              {...register(`ssTokens.${index}.fieldIndex`, { valueAsNumber: true })}
+            >
+              {watchedFields.map((f, fi) => (
+                <option key={fi} value={fi}>
+                  {f.label.trim() || t('ssFieldFallback', { n: fi + 1 })}
+                </option>
+              ))}
+            </select>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => tokensArr.remove(index)}
+              disabled={tokensArr.fields.length <= 2}
+              aria-label={t('removeToken')}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => tokensArr.append({ text: '', fieldIndex: 0 })}
+        >
+          <Plus className="mr-1.5 h-4 w-4" />
+          {t('addToken')}
+        </Button>
+      </div>
     </div>
   );
 }

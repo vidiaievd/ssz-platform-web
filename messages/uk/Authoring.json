@@ -173,7 +173,8 @@
       "translate_from_target": "Переклад з цільової мови",
       "match_pairs": "З’єднайте пари",
       "short_answer": "Коротка відповідь",
-      "writing_task": "Письмове завдання"
+      "writing_task": "Письмове завдання",
+      "sentence_schema": "Схема речення"
     },
     "difficultyLevel": "Складність",
     "difficultyLevelNone": "Будь-який рівень",
@@ -235,7 +236,23 @@
     "removeTopic": "Видалити тему",
     "wtRubric": "Критерії (необовʼязково)",
     "wtRubricHint": "Настанови для перевіряючого",
-    "wtRubricPlaceholder": "Структура, аргументація, граматика"
+    "wtRubricPlaceholder": "Структура, аргументація, граматика",
+    "ssSentence": "Речення",
+    "ssSentencePlaceholder": "напр. Lars har aldri likt Lotte.",
+    "ssSchemaType": "Тип речення",
+    "ssSchemaType_main": "Головне речення",
+    "ssSchemaType_subordinate": "Підрядне речення",
+    "ssFields": "Поля (колонки)",
+    "ssFieldPlaceholder": "напр. Forfelt",
+    "ssFieldFallback": "Поле {n}",
+    "addField": "Додати поле",
+    "removeField": "Видалити поле",
+    "ssTokens": "Слова",
+    "ssTokensHint": "Введіть кожне слово й оберіть поле, до якого воно належить; порядок у полі відповідає цьому списку",
+    "ssTokenPlaceholder": "Слово",
+    "ssTokenField": "Поле",
+    "addToken": "Додати слово",
+    "removeToken": "Видалити слово"
   },
   "grammar": {
     "add": "Додати правило",

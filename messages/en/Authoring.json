@@ -176,7 +176,8 @@
       "translate_from_target": "Translate from target",
       "match_pairs": "Match pairs",
       "short_answer": "Short answer",
-      "writing_task": "Writing task"
+      "writing_task": "Writing task",
+      "sentence_schema": "Sentence schema"
     },
     "difficultyLevel": "Difficulty",
     "difficultyLevelNone": "Any level",
@@ -238,7 +239,23 @@
     "removeTopic": "Remove topic",
     "wtRubric": "Rubric (optional)",
     "wtRubricHint": "Grading guidance for the reviewer",
-    "wtRubricPlaceholder": "Structure, argument, grammar"
+    "wtRubricPlaceholder": "Structure, argument, grammar",
+    "ssSentence": "Sentence",
+    "ssSentencePlaceholder": "e.g. Lars har aldri likt Lotte.",
+    "ssSchemaType": "Clause type",
+    "ssSchemaType_main": "Main clause",
+    "ssSchemaType_subordinate": "Subordinate clause",
+    "ssFields": "Fields (columns)",
+    "ssFieldPlaceholder": "e.g. Forfelt",
+    "ssFieldFallback": "Field {n}",
+    "addField": "Add field",
+    "removeField": "Remove field",
+    "ssTokens": "Words",
+    "ssTokensHint": "Type each word and choose the field it belongs to; order within a field follows this list",
+    "ssTokenPlaceholder": "Word",
+    "ssTokenField": "Field",
+    "addToken": "Add word",
+    "removeToken": "Remove word"
   },
   "grammar": {
     "add": "Add rule",

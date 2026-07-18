@@ -11,8 +11,11 @@ export const EXERCISE_TYPES = [
   'match_pairs',
   'short_answer',
   'writing_task',
+  'sentence_schema',
 ] as const;
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
+
+export const SENTENCE_SCHEMA_TYPES = ['main', 'subordinate'] as const;
 
 export const DIFFICULTY_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 
@@ -62,6 +65,15 @@ export const exerciseFormSchema = z
     wtMinWords: z.string().max(6).optional(),
     wtTopics: z.array(z.object({ title: z.string().max(500) })).optional(),
     wtRubric: z.string().max(2000).optional(),
+
+    // sentence_schema — the learner drops sentence tokens into ordered fields.
+    // Each token records which field (by index) it belongs to; -1 = unassigned.
+    ssSentence: z.string().max(2000).optional(),
+    ssSchemaType: z.enum(SENTENCE_SCHEMA_TYPES).optional(),
+    ssFields: z.array(z.object({ label: z.string().max(200) })).optional(),
+    ssTokens: z
+      .array(z.object({ text: z.string().max(200), fieldIndex: z.number().int() }))
+      .optional(),
   })
   .superRefine((data, ctx) => {
     switch (data.templateCode) {
@@ -131,6 +143,43 @@ export const exerciseFormSchema = z
       case 'writing_task': {
         if (!data.wtPrompt?.trim()) {
           ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['wtPrompt'], message: 'Required' });
+        }
+        break;
+      }
+      case 'sentence_schema': {
+        if (!data.ssSentence?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['ssSentence'], message: 'Required' });
+        }
+        const labelledFields = (data.ssFields ?? []).filter((f) => f.label.trim());
+        if (labelledFields.length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ssFields'],
+            message: 'At least 2 fields required',
+          });
+        }
+        const filledTokens = (data.ssTokens ?? []).filter((tk) => tk.text.trim());
+        if (filledTokens.length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ssTokens'],
+            message: 'At least 2 tokens required',
+          });
+        }
+        // Every filled token must be assigned to a field with a non-empty label.
+        const fieldCount = (data.ssFields ?? []).length;
+        const hasUnassigned = filledTokens.some(
+          (tk) =>
+            tk.fieldIndex < 0 ||
+            tk.fieldIndex >= fieldCount ||
+            !(data.ssFields ?? [])[tk.fieldIndex]?.label.trim(),
+        );
+        if (hasUnassigned) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ssTokens'],
+            message: 'Every word must be assigned to a field',
+          });
         }
         break;
       }

@@ -173,7 +173,8 @@
       "translate_from_target": "Oversett fra målspråket",
       "match_pairs": "Koble par",
       "short_answer": "Kort svar",
-      "writing_task": "Skriveoppgave"
+      "writing_task": "Skriveoppgave",
+      "sentence_schema": "Setningsskjema"
     },
     "difficultyLevel": "Vanskelighetsgrad",
     "difficultyLevelNone": "Alle nivåer",
@@ -235,7 +236,23 @@
     "removeTopic": "Fjern tema",
     "wtRubric": "Vurderingskriterier (valgfritt)",
     "wtRubricHint": "Veiledning for vurdering",
-    "wtRubricPlaceholder": "Struktur, argumentasjon, grammatikk"
+    "wtRubricPlaceholder": "Struktur, argumentasjon, grammatikk",
+    "ssSentence": "Setning",
+    "ssSentencePlaceholder": "f.eks. Lars har aldri likt Lotte.",
+    "ssSchemaType": "Setningstype",
+    "ssSchemaType_main": "Helsetning",
+    "ssSchemaType_subordinate": "Leddsetning",
+    "ssFields": "Felt (kolonner)",
+    "ssFieldPlaceholder": "f.eks. Forfelt",
+    "ssFieldFallback": "Felt {n}",
+    "addField": "Legg til felt",
+    "removeField": "Fjern felt",
+    "ssTokens": "Ord",
+    "ssTokensHint": "Skriv hvert ord og velg feltet det hører til; rekkefølgen i et felt følger denne listen",
+    "ssTokenPlaceholder": "Ord",
+    "ssTokenField": "Felt",
+    "addToken": "Legg til ord",
+    "removeToken": "Fjern ord"
   },
   "grammar": {
     "add": "Legg til regel",

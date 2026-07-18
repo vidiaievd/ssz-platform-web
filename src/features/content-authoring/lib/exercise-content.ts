@@ -40,6 +40,13 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   wtMinWords: '',
   wtTopics: [],
   wtRubric: '',
+  ssSentence: '',
+  ssSchemaType: 'main',
+  ssFields: [{ label: '' }, { label: '' }],
+  ssTokens: [
+    { text: '', fieldIndex: 0 },
+    { text: '', fieldIndex: 0 },
+  ],
 };
 
 /** A minimal, valid multiple-choice draft — used to seed picker/starter exercises. */
@@ -148,6 +155,49 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
         expectedAnswers: {
           ...(values.wtRubric?.trim() && { rubric: values.wtRubric.trim() }),
         },
+      };
+    }
+    case 'sentence_schema': {
+      // Keep only labelled fields; remember original index -> stable field id so
+      // token assignments (by original index) survive the filtering.
+      const fieldIdByOriginalIndex = new Map<number, string>();
+      const fields: Array<{ id: string; label: string }> = [];
+      (values.ssFields ?? []).forEach((f, originalIndex) => {
+        if (f.label.trim()) {
+          const fieldId = `f-${fields.length}`;
+          fieldIdByOriginalIndex.set(originalIndex, fieldId);
+          fields.push({ id: fieldId, label: f.label.trim() });
+        }
+      });
+
+      const tokens: Array<{ id: string; text: string }> = [];
+      // Token order within a field follows the order tokens appear in the list.
+      const tokenIdsByFieldId = new Map<string, string[]>();
+      (values.ssTokens ?? []).forEach((tk) => {
+        if (!tk.text.trim()) return;
+        const tokenId = `t-${tokens.length}`;
+        tokens.push({ id: tokenId, text: tk.text.trim() });
+        const fieldId = fieldIdByOriginalIndex.get(tk.fieldIndex);
+        if (fieldId) {
+          const arr = tokenIdsByFieldId.get(fieldId) ?? [];
+          arr.push(tokenId);
+          tokenIdsByFieldId.set(fieldId, arr);
+        }
+      });
+
+      const placements = fields.map((f) => ({
+        field_id: f.id,
+        token_ids: tokenIdsByFieldId.get(f.id) ?? [],
+      }));
+
+      return {
+        content: {
+          sentence: values.ssSentence?.trim() ?? '',
+          schema_type: values.ssSchemaType ?? 'main',
+          fields,
+          tokens,
+        },
+        expectedAnswers: { placements },
       };
     }
   }
@@ -290,6 +340,53 @@ export function parseExerciseToForm(exercise: {
         wtMinWords: typeof content.min_words === 'number' ? String(content.min_words) : '',
         wtTopics: topics,
         wtRubric: typeof expectedAnswers.rubric === 'string' ? expectedAnswers.rubric : '',
+      };
+    }
+    case 'sentence_schema': {
+      const rawFields = Array.isArray(content.fields)
+        ? (content.fields as Array<{ id?: unknown; label?: unknown }>)
+        : [];
+      const fields = rawFields.map((f) => ({
+        label: typeof f.label === 'string' ? f.label : '',
+      }));
+      const fieldIndexById = new Map<string, number>(
+        rawFields.map((f, i) => [String(f.id), i]),
+      );
+
+      // Reconstruct each token's field from the placements.
+      const placements = Array.isArray(expectedAnswers.placements)
+        ? (expectedAnswers.placements as Array<{ field_id?: unknown; token_ids?: unknown }>)
+        : [];
+      const fieldIdByTokenId = new Map<string, string>();
+      for (const p of placements) {
+        const tokenIds = Array.isArray(p.token_ids) ? (p.token_ids as unknown[]) : [];
+        for (const tid of tokenIds) fieldIdByTokenId.set(String(tid), String(p.field_id));
+      }
+
+      const rawTokens = Array.isArray(content.tokens)
+        ? (content.tokens as Array<{ id?: unknown; text?: unknown }>)
+        : [];
+      const tokens = rawTokens.map((tk) => {
+        const fieldId = fieldIdByTokenId.get(String(tk.id));
+        const fieldIndex = fieldId !== undefined ? (fieldIndexById.get(fieldId) ?? -1) : -1;
+        return { text: typeof tk.text === 'string' ? tk.text : '', fieldIndex };
+      });
+
+      const schemaType =
+        content.schema_type === 'subordinate' ? ('subordinate' as const) : ('main' as const);
+
+      return {
+        ...base,
+        ssSentence: typeof content.sentence === 'string' ? content.sentence : '',
+        ssSchemaType: schemaType,
+        ssFields: fields.length >= 2 ? fields : [{ label: '' }, { label: '' }],
+        ssTokens:
+          tokens.length >= 2
+            ? tokens
+            : [
+                { text: '', fieldIndex: 0 },
+                { text: '', fieldIndex: 0 },
+              ],
       };
     }
   }

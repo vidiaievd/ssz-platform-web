@@ -217,4 +217,68 @@ describe('exerciseFormSchema', () => {
     const paths = result.error.issues.map((i) => i.path.join('.'));
     expect(paths).toContain('mpPairs');
   });
+
+  it('short_answer: accepts a question with a reference answer', () => {
+    expect(
+      exerciseFormSchema.safeParse({
+        templateCode: 'short_answer',
+        saQuestion: 'When did Anne hear the news?',
+        saReferenceAnswer: 'On the radio.',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('short_answer: rejects when the reference answer is missing', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'short_answer',
+      saQuestion: 'Q?',
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('saReferenceAnswer');
+  });
+
+  it('writing_task: accepts a prompt', () => {
+    expect(
+      exerciseFormSchema.safeParse({ templateCode: 'writing_task', wtPrompt: 'Write a letter.' })
+        .success,
+    ).toBe(true);
+  });
+
+  it('writing_task: rejects when the prompt is missing', () => {
+    const result = exerciseFormSchema.safeParse({ templateCode: 'writing_task' });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('wtPrompt');
+  });
+
+  it('sentence_schema: accepts a sentence with 2+ fields and assigned tokens', () => {
+    expect(
+      exerciseFormSchema.safeParse({
+        templateCode: 'sentence_schema',
+        ssSentence: 'Lars har likt Lotte',
+        ssSchemaType: 'main',
+        ssFields: [{ label: 'Forfelt' }, { label: 'Verbal' }],
+        ssTokens: [
+          { text: 'Lars', fieldIndex: 0 },
+          { text: 'har', fieldIndex: 1 },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('sentence_schema: rejects a token assigned to an empty field', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'sentence_schema',
+      ssSentence: 'S',
+      ssFields: [{ label: 'A' }, { label: '' }],
+      ssTokens: [
+        { text: 'x', fieldIndex: 0 },
+        { text: 'y', fieldIndex: 1 }, // field 1 has an empty label
+      ],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('ssTokens');
+  });
 });

@@ -282,3 +282,101 @@ describe('short_answer & writing_task', () => {
     expect('rubric' in expectedAnswers).toBe(false);
   });
 });
+
+describe('sentence_schema', () => {
+  it('builds fields/tokens with ids and ordered per-field placements', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'sentence_schema',
+      ssSentence: 'Lars har aldri likt Lotte.',
+      ssSchemaType: 'main',
+      ssFields: [{ label: 'Forfelt' }, { label: 'Verbal' }, { label: 'Sluttfelt' }],
+      ssTokens: [
+        { text: 'Lars', fieldIndex: 0 },
+        { text: 'har', fieldIndex: 1 },
+        { text: 'Lotte', fieldIndex: 2 },
+      ],
+    });
+    expect(content.sentence).toBe('Lars har aldri likt Lotte.');
+    expect(content.schema_type).toBe('main');
+    expect(content.fields).toEqual([
+      { id: 'f-0', label: 'Forfelt' },
+      { id: 'f-1', label: 'Verbal' },
+      { id: 'f-2', label: 'Sluttfelt' },
+    ]);
+    expect(content.tokens).toEqual([
+      { id: 't-0', text: 'Lars' },
+      { id: 't-1', text: 'har' },
+      { id: 't-2', text: 'Lotte' },
+    ]);
+    expect(expectedAnswers.placements).toEqual([
+      { field_id: 'f-0', token_ids: ['t-0'] },
+      { field_id: 'f-1', token_ids: ['t-1'] },
+      { field_id: 'f-2', token_ids: ['t-2'] },
+    ]);
+  });
+
+  it('keeps token order within a field', () => {
+    const { expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'sentence_schema',
+      ssSentence: 'S',
+      ssFields: [{ label: 'A' }, { label: 'B' }],
+      ssTokens: [
+        { text: 'x', fieldIndex: 1 },
+        { text: 'y', fieldIndex: 0 },
+        { text: 'z', fieldIndex: 1 },
+      ],
+    });
+    expect(expectedAnswers.placements).toEqual([
+      { field_id: 'f-0', token_ids: ['t-1'] },
+      { field_id: 'f-1', token_ids: ['t-0', 't-2'] },
+    ]);
+  });
+
+  it('drops empty fields and remaps token assignments by original index', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'sentence_schema',
+      ssSentence: 'S',
+      // index 1 is empty and should be dropped; token assigned to index 2 must
+      // follow the surviving field.
+      ssFields: [{ label: 'A' }, { label: '' }, { label: 'C' }],
+      ssTokens: [
+        { text: 'a', fieldIndex: 0 },
+        { text: 'c', fieldIndex: 2 },
+      ],
+    });
+    expect(content.fields).toEqual([
+      { id: 'f-0', label: 'A' },
+      { id: 'f-1', label: 'C' },
+    ]);
+    expect(expectedAnswers.placements).toEqual([
+      { field_id: 'f-0', token_ids: ['t-0'] },
+      { field_id: 'f-1', token_ids: ['t-1'] },
+    ]);
+  });
+
+  it('round-trips through parse (field index reconstructed from placements)', () => {
+    const values = {
+      ...base,
+      templateCode: 'sentence_schema' as const,
+      ssSentence: 'Lars har likt Lotte',
+      ssSchemaType: 'subordinate' as const,
+      ssFields: [{ label: 'A' }, { label: 'B' }],
+      ssTokens: [
+        { text: 'Lars', fieldIndex: 0 },
+        { text: 'har', fieldIndex: 1 },
+      ],
+    };
+    const { content, expectedAnswers } = buildExercisePayload(values);
+    const parsed = parseExerciseToForm({ templateCode: 'sentence_schema', content, expectedAnswers });
+    expect(parsed.ssSentence).toBe('Lars har likt Lotte');
+    expect(parsed.ssSchemaType).toBe('subordinate');
+    expect(parsed.ssFields).toEqual([{ label: 'A' }, { label: 'B' }]);
+    expect(parsed.ssTokens).toEqual([
+      { text: 'Lars', fieldIndex: 0 },
+      { text: 'har', fieldIndex: 1 },
+    ]);
+  });
+});

@@ -173,7 +173,8 @@
       "translate_from_target": "Перевод с целевого языка",
       "match_pairs": "Сопоставьте пары",
       "short_answer": "Краткий ответ",
-      "writing_task": "Письменное задание"
+      "writing_task": "Письменное задание",
+      "sentence_schema": "Схема предложения"
     },
     "difficultyLevel": "Сложность",
     "difficultyLevelNone": "Любой уровень",
@@ -235,7 +236,23 @@
     "removeTopic": "Удалить тему",
     "wtRubric": "Критерии (необязательно)",
     "wtRubricHint": "Указания для проверяющего",
-    "wtRubricPlaceholder": "Структура, аргументация, грамматика"
+    "wtRubricPlaceholder": "Структура, аргументация, грамматика",
+    "ssSentence": "Предложение",
+    "ssSentencePlaceholder": "напр. Lars har aldri likt Lotte.",
+    "ssSchemaType": "Тип предложения",
+    "ssSchemaType_main": "Главное предложение",
+    "ssSchemaType_subordinate": "Придаточное предложение",
+    "ssFields": "Поля (колонки)",
+    "ssFieldPlaceholder": "напр. Forfelt",
+    "ssFieldFallback": "Поле {n}",
+    "addField": "Добавить поле",
+    "removeField": "Удалить поле",
+    "ssTokens": "Слова",
+    "ssTokensHint": "Введите каждое слово и выберите поле, к которому оно относится; порядок в поле соответствует этому списку",
+    "ssTokenPlaceholder": "Слово",
+    "ssTokenField": "Поле",
+    "addToken": "Добавить слово",
+    "removeToken": "Удалить слово"
   },
   "grammar": {
     "add": "Добавить правило",
