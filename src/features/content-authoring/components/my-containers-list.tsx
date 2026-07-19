@@ -1,65 +1,42 @@
 'use client';
 
-import { useCallback, useDeferredValue, useState, useTransition } from 'react';
+import { useDeferredValue } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  Plus, Search, LayoutGrid, LayoutList, Globe, GraduationCap, BookOpen,
-  Clock, X, ChevronLeft, ChevronRight, Pencil, Copy, Archive,
+  Plus, Search, LayoutGrid, LayoutList, BookOpen, Clock, X, ChevronLeft, ChevronRight, Pencil,
+  MoreVertical, Eye, Copy, Archive, ArchiveRestore, Trash2,
 } from 'lucide-react';
 import { z } from 'zod/v4';
+import { useFormatter, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Segmented } from '@/components/ui/segmented';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { DataState } from '@/components/shared/data-state';
 import { Link } from '@/lib/i18n/navigation';
 import { useUrlFilters } from '@/lib/url-filters/use-url-filters';
 import type { Container } from '@/features/content/types';
-import { useQueryClient } from '@tanstack/react-query';
 
-import type { ContainerState, ContainerStateCounts, SchoolRole } from '../types';
+import type { ContainerState, SchoolRole } from '../types';
 import { ContainerStateBadge, deriveContainerState } from './container-state-badge';
 import { useMyContainers } from '../api/use-my-containers';
-import { authoringKeys } from '../api/keys';
 
 // ─── URL filter schema ────────────────────────────────────────────────────────
 
 const listFilterSchema = z.object({
-  search:   z.string().default(''),
-  state:    z.enum(['all', 'draft', 'published', 'archived']).default('all'),
-  language: z.string().default(''),
-  level:    z.string().default(''),
-  sort:     z.enum(['recently_edited', 'name_asc']).default('recently_edited'),
-  view:     z.enum(['table', 'grid']).default('table'),
-  page:     z.coerce.number().int().min(1).default(1),
+  search: z.string().default(''),
+  state:  z.enum(['all', 'draft', 'published', 'archived']).default('all'),
+  view:   z.enum(['grid', 'list']).default('grid'),
+  page:   z.coerce.number().int().min(1).default(1),
 });
-type ListFilters = z.output<typeof listFilterSchema>;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const LANGUAGE_OPTIONS = [
-  { code: 'no', label: 'Norwegian' },
-  { code: 'en', label: 'English' },
-  { code: 'uk', label: 'Ukrainian' },
-  { code: 'ru', label: 'Russian' },
-  { code: 'es', label: 'Spanish' },
-  { code: 'de', label: 'German' },
-  { code: 'fr', label: 'French' },
-];
-const LEVEL_OPTIONS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 const PAGE_SIZE = 25;
-
-function relativeTime(iso: string): string {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -71,125 +48,181 @@ function LanguageFlag({ code }: { code: string }) {
   return <span aria-hidden className="text-base leading-none">{emoji}</span>;
 }
 
-function StatePillFilter({
-  state, counts, current, onClick,
-}: {
-  state: 'all' | ContainerState;
-  counts: ContainerStateCounts & { all: number };
-  current: string;
-  onClick: (s: string) => void;
-}) {
-  const labels: Record<string, string> = { all: 'All', draft: 'Draft', published: 'Published', archived: 'Archived' };
-  const countVal = counts[state as keyof typeof counts] ?? counts.all;
-  const isActive = current === state;
-  return (
-    <button
-      type="button"
-      onClick={() => onClick(state)}
-      className={[
-        'flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-        isActive
-          ? 'border-primary bg-primary text-primary-foreground'
-          : 'border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground',
-      ].join(' ')}
-    >
-      {labels[state]}
-      <span className={isActive ? 'opacity-80' : 'opacity-60'}>{countVal}</span>
-    </button>
-  );
-}
-
 // ─── Row ─────────────────────────────────────────────────────────────────────
 
 interface ContainerRowProps {
   container: Container;
-  selected: boolean;
-  onSelect: (id: string, checked: boolean) => void;
-  showCheckbox: boolean;
 }
 
-function ContainerTableRow({ container, selected, onSelect, showCheckbox }: ContainerRowProps) {
+function ContainerTableRow({ container }: ContainerRowProps) {
   const state = deriveContainerState(container);
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const formatter = useFormatter();
   const containerHref = `/school/${schoolSlug}/content/${container.id}`;
   return (
-    <tr
-      className="group border-b border-border transition-colors hover:bg-muted/40 cursor-pointer"
-      onClick={() => { window.location.href = containerHref; }}
-    >
-      {showCheckbox && (
-        <td className="w-10 px-3 py-3" onClick={(e) => e.stopPropagation()}>
-          <Checkbox
-            checked={selected}
-            onCheckedChange={(v) => onSelect(container.id, !!v)}
-            aria-label={`Select ${container.title}`}
-          />
-        </td>
-      )}
+    <tr className="group border-b border-border transition-colors hover:bg-muted/40">
       <td className="px-3 py-3">
         <div className="flex items-center gap-2">
           <LanguageFlag code={container.targetLanguage} />
-          <span className="font-medium text-sm">{container.title}</span>
+          <Link href={containerHref} className="font-medium text-sm hover:underline">
+            {container.title}
+          </Link>
         </div>
-        <div className="text-muted-foreground text-xs mt-0.5 flex gap-2">
+        <div className="text-muted-foreground text-xs mt-0.5 flex items-center gap-1.5">
           <span className="uppercase font-mono">{container.targetLanguage}</span>
-          {container.difficultyLevel && <span>·</span>}
-          {container.difficultyLevel && <span>{container.difficultyLevel}</span>}
+          <span aria-hidden>·</span>
+          <Clock className="h-3 w-3" />
+          {formatter.relativeTime(new Date(container.updatedAt), new Date())}
         </div>
+      </td>
+      <td className="px-3 py-3">
+        <CardMeta container={container} />
       </td>
       <td className="px-3 py-3">
         <ContainerStateBadge state={state} />
       </td>
-      <td className="px-3 py-3 font-mono text-xs text-muted-foreground">
-        {container.lessonCount != null ? `${container.lessonCount}ℓ` : '—'}
-      </td>
-      <td className="px-3 py-3">
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          {relativeTime(container.updatedAt)}
-        </div>
-      </td>
-      <td className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-        <Button variant="ghost" size="sm" asChild>
-          <Link href={containerHref}>
-            <Pencil className="h-3.5 w-3.5" />
-            <span className="sr-only">Edit {container.title}</span>
-          </Link>
-        </Button>
+      <td className="px-3 py-3 text-right">
+        <ContainerOverflowMenu container={container} state={state} />
       </td>
     </tr>
+  );
+}
+
+function CourseCover({ language }: { language: string }) {
+  return (
+    <div className="relative h-24 shrink-0 overflow-hidden rounded-t-lg bg-linear-to-br from-primary/15 via-primary/5 to-transparent">
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-40"
+        style={{ backgroundImage: 'repeating-linear-gradient(135deg, var(--border) 0 10px, transparent 10px 20px)' }}
+      />
+      <span className="absolute right-2 top-2 font-mono text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        {language}
+      </span>
+      <span className="absolute bottom-1.5 left-2 text-3xl leading-none">
+        <LanguageFlag code={language} />
+      </span>
+    </div>
+  );
+}
+
+function CardMeta({ container }: { container: Container }) {
+  const t = useTranslations('Authoring.structure');
+  const parts = [
+    container.difficultyLevel,
+    container.lessonCount != null ? t('lessonCount', { count: container.lessonCount }) : null,
+  ].filter(Boolean);
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground font-mono">
+      {parts.map((part, i) => (
+        <span key={i} className="flex items-center gap-1.5">
+          {i > 0 && <span aria-hidden>·</span>}
+          {part}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// No teacher-assignment or enrollment data is exposed by the container list API yet —
+// the stack always renders its empty state until that lands.
+function TeacherAvatarStack() {
+  const t = useTranslations('Authoring.list');
+  return <span className="text-xs text-muted-foreground">{t('noTeacher')}</span>;
+}
+
+interface ContainerOverflowMenuProps {
+  container: Container;
+  state: ContainerState;
+}
+
+function ContainerOverflowMenu({ container, state }: ContainerOverflowMenuProps) {
+  const t = useTranslations('Authoring.list');
+  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const containerHref = `/school/${schoolSlug}/content/${container.id}`;
+
+  const stub = (action: string) => () => toast.info(t('itemActionStub', { action }));
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          onClick={(e) => e.stopPropagation()}
+          aria-label={t('moreAriaLabel', { title: container.title })}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenuItem asChild>
+          <Link href={containerHref}>
+            <Pencil className="h-3.5 w-3.5" />
+            {t('menuEditStructure')}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={stub(t('menuPreview'))}>
+          <Eye className="h-3.5 w-3.5" />
+          {t('menuPreview')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={stub(t('menuDuplicate'))}>
+          <Copy className="h-3.5 w-3.5" />
+          {t('menuDuplicate')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {state === 'archived' ? (
+          <DropdownMenuItem onSelect={stub(t('menuRestore'))}>
+            <ArchiveRestore className="h-3.5 w-3.5" />
+            {t('menuRestore')}
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onSelect={stub(t('menuArchive'))}>
+            <Archive className="h-3.5 w-3.5" />
+            {t('menuArchive')}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem variant="destructive" onSelect={stub(t('menuDelete'))}>
+          <Trash2 className="h-3.5 w-3.5" />
+          {t('menuDelete')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
 function ContainerGridCard({ container }: { container: Container }) {
   const state = deriveContainerState(container);
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const containerHref = `/school/${schoolSlug}/content/${container.id}`;
   return (
-    <Link
-      href={`/school/${schoolSlug}/content/${container.id}`}
-      className="flex flex-col rounded-lg border border-border bg-background overflow-hidden hover:shadow-md transition-shadow"
-    >
-      <div className="h-16 bg-muted flex items-center justify-center text-4xl">
-        <LanguageFlag code={container.targetLanguage} />
-      </div>
-      <div className="p-3 flex flex-col gap-1.5 flex-1">
+    <div className="group relative flex flex-col rounded-lg border border-border bg-background overflow-hidden hover:shadow-md transition-shadow">
+      <CourseCover language={container.targetLanguage} />
+      <div className="p-3 flex flex-col gap-2 flex-1">
         <div className="flex items-start justify-between gap-1">
-          <span className="text-sm font-medium leading-tight line-clamp-2">{container.title}</span>
+          <Link
+            href={containerHref}
+            className="text-sm font-medium leading-tight line-clamp-2 after:absolute after:inset-0"
+          >
+            {container.title}
+          </Link>
           <ContainerStateBadge state={state} />
         </div>
-        <div className="flex gap-2 text-xs text-muted-foreground font-mono">
-          <span className="uppercase">{container.targetLanguage}</span>
-          {container.difficultyLevel && <><span>·</span><span>{container.difficultyLevel}</span></>}
-          {container.lessonCount != null && <><span>·</span><span>{container.lessonCount}ℓ</span></>}
+        <CardMeta container={container} />
+        <div className="relative z-1 mt-auto flex items-center justify-between gap-2 pt-1">
+          <TeacherAvatarStack />
+          <ContainerOverflowMenu container={container} state={state} />
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
 // ─── Empty states ─────────────────────────────────────────────────────────────
 
 function ListEmptyState() {
+  const t = useTranslations('Authoring.list');
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const newHref = `/school/${schoolSlug}/content/new`;
   return (
@@ -198,55 +231,48 @@ function ListEmptyState() {
         <BookOpen className="h-8 w-8 text-muted-foreground" />
       </div>
       <div className="space-y-1">
-        <p className="text-base font-semibold">No courses yet</p>
-        <p className="text-sm text-muted-foreground max-w-sm">
-          A course is the top-level container. Each course has CEFR levels, modules, and lessons.
-          Start blank or use a template.
-        </p>
+        <p className="text-base font-semibold">{t('emptyTitle')}</p>
+        <p className="text-sm text-muted-foreground max-w-sm">{t('emptyBody')}</p>
       </div>
       <div className="flex flex-wrap gap-3 justify-center">
         <Button asChild>
           <Link href={newHref}>
             <Plus className="mr-1 h-4 w-4" />
-            Create from blank
+            {t('emptyCreate')}
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href={`${newHref}?template=cefr_a1`}>
-            Use CEFR A1 template
+          <Link href={`${newHref}?flow=quick`}>
+            {t('emptyTemplate')}
           </Link>
         </Button>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
-        {[
-          { label: 'CEFR A1 starter', desc: '6 levels · 24 lessons', href: `${newHref}?template=cefr_a1` },
-          { label: 'Conversation starter', desc: '4 modules · 12 lessons', href: `${newHref}?template=conversation` },
-          { label: 'Business pack', desc: '5 modules · 20 lessons', href: `${newHref}?template=business` },
-        ].map((t) => (
-          <Link
-            key={t.label}
-            href={t.href}
-            className="rounded-lg border border-border bg-muted/30 p-3 text-left hover:bg-muted transition-colors"
-          >
-            <p className="text-sm font-medium">{t.label}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t.desc}</p>
-          </Link>
-        ))}
       </div>
     </div>
   );
 }
 
-function FilteredEmptyState({ onClear }: { onClear: () => void }) {
+interface FilteredEmptyStateProps {
+  search: string;
+  filterLabel?: string;
+  onClear: () => void;
+}
+
+function FilteredEmptyState({ search, filterLabel, onClear }: FilteredEmptyStateProps) {
+  const t = useTranslations('Authoring.list');
+  const message = search && filterLabel
+    ? t('filteredEmpty', { query: search, filter: filterLabel.toLowerCase() })
+    : search
+      ? t('filteredEmptySearchOnly', { query: search })
+      : t('filteredEmptyStateOnly', { filter: (filterLabel ?? '').toLowerCase() });
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
-      <p className="text-sm text-muted-foreground">No courses match this filter.</p>
+      <p className="text-sm text-muted-foreground">{message}</p>
       <button
         type="button"
         className="text-sm text-primary underline-offset-4 hover:underline"
         onClick={onClear}
       >
-        Clear filters
+        {t('clearFilters')}
       </button>
     </div>
   );
@@ -262,37 +288,6 @@ function ListSkeleton({ rows = 5 }: { rows?: number }) {
   );
 }
 
-// ─── Bulk action bar ──────────────────────────────────────────────────────────
-
-interface BulkBarProps {
-  count: number;
-  onClear: () => void;
-  onArchive: () => void;
-  onDuplicate: () => void;
-}
-
-function BulkActionBar({ count, onClear, onArchive, onDuplicate }: BulkBarProps) {
-  return (
-    <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2">
-      <span className="text-sm font-medium">{count} selected</span>
-      <div className="flex gap-2 ml-2">
-        <Button size="sm" variant="outline" onClick={onArchive}>
-          <Archive className="mr-1 h-3.5 w-3.5" />
-          Archive
-        </Button>
-        <Button size="sm" variant="outline" onClick={onDuplicate}>
-          <Copy className="mr-1 h-3.5 w-3.5" />
-          Duplicate
-        </Button>
-      </div>
-      <Button size="sm" variant="ghost" className="ml-auto" onClick={onClear}>
-        <X className="h-3.5 w-3.5" />
-        <span className="sr-only">Clear selection</span>
-      </Button>
-    </div>
-  );
-}
-
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface MyContainersListProps {
@@ -300,23 +295,17 @@ interface MyContainersListProps {
 }
 
 export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps) {
-  const queryClient = useQueryClient();
+  const t = useTranslations('Authoring.list');
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const newContainerHref = `/school/${schoolSlug}/content/new`;
   const [filters, setFilters] = useUrlFilters(listFilterSchema);
   const deferredSearch = useDeferredValue(filters.search);
-
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [, startTransition] = useTransition();
 
   const isOwnerOrAdmin = schoolRole === 'owner' || schoolRole === 'admin';
 
   const query = {
     search:   deferredSearch || undefined,
     state:    filters.state !== 'all' ? filters.state : undefined,
-    language: filters.language || undefined,
-    level:    filters.level || undefined,
-    sort:     filters.sort,
     page:     filters.page,
     pageSize: PAGE_SIZE,
   };
@@ -328,50 +317,21 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
   const counts = data?.counts ?? { all: 0, draft: 0, published: 0, archived: 0 };
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const hasActiveFilter =
-    filters.search !== '' ||
-    filters.state !== 'all' ||
-    filters.language !== '' ||
-    filters.level !== '';
+  const hasActiveFilter = filters.search !== '' || filters.state !== 'all';
 
-  // Selection helpers
-  const toggleSelect = useCallback((id: string, checked: boolean) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (checked) { next.add(id); } else { next.delete(id); }
-      return next;
-    });
-  }, []);
+  const clearFilters = () => setFilters({ search: '', state: 'all' });
 
-  const toggleSelectAll = useCallback(() => {
-    setSelectedIds((prev) => {
-      const items = data?.items ?? [];
-      return prev.size === items.length ? new Set() : new Set(items.map((c) => c.id));
-    });
-  }, [data]);
+  const statusFilterOptions = [
+    { value: 'all' as const, label: t('filterAll') },
+    { value: 'published' as const, label: t('filterPublished') },
+    { value: 'draft' as const, label: t('filterDrafts') },
+    { value: 'archived' as const, label: t('filterArchived') },
+  ];
 
-  const clearSelection = () => setSelectedIds(new Set());
-
-  const clearFilters = () =>
-    setFilters({ search: '', state: 'all', language: '', level: '' });
-
-  // Bulk archive stub — will wire to real BFF in Step C
-  const handleBulkArchive = () => {
-    toast.info(`Archive ${selectedIds.size} courses — coming in next step`);
-    clearSelection();
-  };
-
-  // Bulk duplicate stub
-  const handleBulkDuplicate = () => {
-    toast.info(`Duplicate ${selectedIds.size} courses — coming in next step`);
-    clearSelection();
-  };
-
-  const invalidateList = () =>
-    startTransition(() => {
-      void queryClient.invalidateQueries({ queryKey: authoringKeys.containers() });
-    });
-  void invalidateList; // suppress unused warning — used in BFF step
+  const viewOptions = [
+    { value: 'grid' as const, label: t('viewGrid'), icon: LayoutGrid },
+    { value: 'list' as const, label: t('viewList'), icon: LayoutList },
+  ];
 
   return (
     <div className="space-y-4">
@@ -380,12 +340,12 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
         <div>
           {isOwnerOrAdmin ? (
             <p className="text-sm text-muted-foreground">
-              {counts.all} courses · {counts.published} published · {counts.draft} draft
-              {counts.archived > 0 && ` · ${counts.archived} archived`}
+              {t('countsOwner', { all: counts.all, published: counts.published, draft: counts.draft })}
+              {counts.archived > 0 && t('countsArchivedSuffix', { archived: counts.archived })}
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              You teach {containers.length} of {counts.all} courses
+              {t('countsTeacher', { taught: containers.length, all: counts.all })}
             </p>
           )}
         </div>
@@ -393,127 +353,51 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
           <Button size="sm" asChild>
             <Link href={newContainerHref}>
               <Plus className="mr-1 h-4 w-4" />
-              New course
+              {t('newCourse')}
             </Link>
           </Button>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center justify-between">
         {/* Search */}
-        <div className="relative flex-1 min-w-45">
+        <div className="relative flex-1 min-w-45 max-w-65">
           <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <input
             type="search"
             value={filters.search}
             onChange={(e) => setFilters({ search: e.target.value, page: 1 })}
-            placeholder="Search courses…"
+            placeholder={t('searchPlaceholder')}
             className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
-        {/* Language filter */}
-        <Select
-          value={filters.language || '_all'}
-          onValueChange={(v) => setFilters({ language: v === '_all' ? '' : v, page: 1 })}
-        >
-          <SelectTrigger className="h-9 w-32.5">
-            <Globe className="mr-1 h-3.5 w-3.5 text-muted-foreground" />
-            <SelectValue placeholder="Language" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="_all">Any language</SelectItem>
-            {LANGUAGE_OPTIONS.map((l) => (
-              <SelectItem key={l.code} value={l.code}>{l.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Level filter */}
-        <Select
-          value={filters.level || '_all'}
-          onValueChange={(v) => setFilters({ level: v === '_all' ? '' : v, page: 1 })}
-        >
-          <SelectTrigger className="h-9 w-27.5">
-            <GraduationCap className="mr-1 h-3.5 w-3.5 text-muted-foreground" />
-            <SelectValue placeholder="Level" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="_all">Any level</SelectItem>
-            {LEVEL_OPTIONS.map((l) => (
-              <SelectItem key={l} value={l}>{l}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Sort */}
-        <Select value={filters.sort} onValueChange={(v) => setFilters({ sort: v as ListFilters['sort'], page: 1 })}>
-          <SelectTrigger className="h-9 w-42.5">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="recently_edited">Recently edited</SelectItem>
-            <SelectItem value="name_asc">Name A–Z</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* View toggle */}
-        <div className="flex rounded-md border border-border overflow-hidden">
-          <button
-            type="button"
-            aria-label="Table view"
-            aria-pressed={filters.view === 'table'}
-            onClick={() => setFilters({ view: 'table' })}
-            className={['flex h-9 w-9 items-center justify-center transition-colors',
-              filters.view === 'table' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'].join(' ')}
-          >
-            <LayoutList className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            aria-label="Grid view"
-            aria-pressed={filters.view === 'grid'}
-            onClick={() => setFilters({ view: 'grid' })}
-            className={['flex h-9 w-9 items-center justify-center border-l border-border transition-colors',
-              filters.view === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'].join(' ')}
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Segmented
+            aria-label={t('statusFilterLabel')}
+            options={statusFilterOptions}
+            value={filters.state}
+            onValueChange={(v) => setFilters({ state: v, page: 1 })}
+          />
+          <Segmented
+            aria-label={t('viewToggleLabel')}
+            options={viewOptions}
+            value={filters.view}
+            onValueChange={(v) => setFilters({ view: v })}
+          />
         </div>
       </div>
 
-      {/* State filter pills */}
-      <div className="flex flex-wrap gap-2">
-        {(['all', 'draft', 'published', 'archived'] as const).map((s) => (
-          <StatePillFilter
-            key={s}
-            state={s}
-            counts={counts}
-            current={filters.state}
-            onClick={(v) => setFilters({ state: v as ListFilters['state'], page: 1 })}
-          />
-        ))}
-        {hasActiveFilter && (
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-3 w-3" />
-            Clear
-          </button>
-        )}
-      </div>
-
-      {/* Bulk action bar */}
-      {isOwnerOrAdmin && selectedIds.size > 0 && (
-        <BulkActionBar
-          count={selectedIds.size}
-          onClear={clearSelection}
-          onArchive={handleBulkArchive}
-          onDuplicate={handleBulkDuplicate}
-        />
+      {hasActiveFilter && (
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-3 w-3" />
+          {t('clearFilters')}
+        </button>
       )}
 
       {/* Body */}
@@ -525,7 +409,13 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
         emptySlot={<ListEmptyState />}
       >
         {containers.length === 0 && hasActiveFilter ? (
-          <FilteredEmptyState onClear={clearFilters} />
+          <FilteredEmptyState
+            onClear={clearFilters}
+            search={filters.search}
+            filterLabel={filters.state !== 'all'
+              ? statusFilterOptions.find((o) => o.value === filters.state)?.label
+              : undefined}
+          />
         ) : filters.view === 'grid' ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {containers.map((c) => <ContainerGridCard key={c.id} container={c} />)}
@@ -535,7 +425,7 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
               className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border min-h-30 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
             >
               <Plus className="h-6 w-6 mb-1" />
-              <span className="text-xs font-medium">New course</span>
+              <span className="text-xs font-medium">{t('newCourseTile')}</span>
             </Link>
           </div>
         ) : (
@@ -543,31 +433,17 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
             <table className="w-full" role="table">
               <thead className="bg-muted/30">
                 <tr className="border-b border-border">
-                  {isOwnerOrAdmin && (
-                    <th className="w-10 px-3 py-2.5">
-                      <Checkbox
-                        checked={selectedIds.size > 0 && selectedIds.size === containers.length}
-                        onCheckedChange={toggleSelectAll}
-                        aria-label="Select all"
-                      />
-                    </th>
-                  )}
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">Course</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">State</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">Content</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">Edited</th>
-                  <th className="w-12" scope="col" />
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">{t('colCourse')}</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">{t('colContent')}</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">{t('colState')}</th>
+                  <th className="w-12 px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">
+                    <span className="sr-only">{t('colActions')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {containers.map((c) => (
-                  <ContainerTableRow
-                    key={c.id}
-                    container={c}
-                    selected={selectedIds.has(c.id)}
-                    onSelect={toggleSelect}
-                    showCheckbox={isOwnerOrAdmin}
-                  />
+                  <ContainerTableRow key={c.id} container={c} />
                 ))}
               </tbody>
             </table>

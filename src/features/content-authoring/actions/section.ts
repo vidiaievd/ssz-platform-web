@@ -46,7 +46,7 @@ export async function reorderSectionsAction(containerId: string, orderedSectionI
   });
 }
 
-/** Replaces the draft's sections with `titles`, used by the create-wizard's Structure step. */
+/** Replaces the draft's sections with `titles`, used by the create-course flow's CEFR level-system scaffolding. */
 export async function syncStructureSectionsAction(containerId: string, titles: string[]) {
   return tryAction(async () => {
     await syncDraftSections(containerId, titles);

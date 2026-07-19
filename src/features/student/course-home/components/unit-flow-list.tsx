@@ -168,12 +168,14 @@ function UnitRow({ unit, unitHref }: UnitRowProps) {
                 {unit.title}
               </a>
             )}
-            <p className="mt-0.5 text-xs" style={{ color: 'var(--ssz-text-muted)' }}>
-              {t('lessons', {
-                done: unit.completedLessons,
-                total: unit.totalLessons,
-              })}
-            </p>
+            {unit.totalLessons > 0 && (
+              <p className="mt-0.5 text-xs" style={{ color: 'var(--ssz-text-muted)' }}>
+                {t('lessons', {
+                  done: unit.completedLessons,
+                  total: unit.totalLessons,
+                })}
+              </p>
+            )}
           </div>
           <StatusBadge status={unit.status} label={statusLabel} />
         </div>
@@ -210,7 +212,7 @@ export function UnitFlowList({ units, courseId, locale }: UnitFlowListProps) {
         <UnitRow
           key={unit.id}
           unit={unit}
-          unitHref={`/${locale}/student/units/${unit.id}?courseId=${courseId}`}
+          unitHref={`/${locale}/student/courses/${courseId}/${unit.id}`}
         />
       ))}
     </ul>

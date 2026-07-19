@@ -14,6 +14,7 @@ import {
   type VocabularyItemFormValues,
 } from '../schemas/vocabulary';
 import { addItemToDraft } from '../lib/container-items';
+import type { BulkVocabularyRow } from '../lib/parse-vocabulary-bulk-paste';
 
 // The UI models a usage example as a cloze template ("Jeg ___ til jobben") plus
 // the word that fills the blank ("sykler"). The backend only stores a single
@@ -50,10 +51,10 @@ export async function createVocabularyListAction(
       },
     });
 
-    await addItemToDraft(containerId, 'vocabulary_list', listId);
+    const item = await addItemToDraft(containerId, 'vocabulary_list', listId);
 
     revalidatePath(`/school/content/${containerId}`);
-    return { listId };
+    return { listId, itemId: item.id };
   });
 }
 
@@ -156,6 +157,43 @@ export async function saveVocabularyItemAction(
 
     revalidatePath(`/school/content/${containerId}`);
     return { itemId: savedItemId };
+  });
+}
+
+/** Creates one item per row, sequentially, and sets its translation in `translationLanguageCode`. */
+export async function bulkCreateVocabularyItemsAction(
+  listId: string,
+  containerId: string,
+  rows: BulkVocabularyRow[],
+  translationLanguageCode: string,
+) {
+  return tryAction(async () => {
+    if (rows.length === 0) {
+      throw new AppError('validation', 'No rows to import', {});
+    }
+
+    let created = 0;
+    for (const row of rows) {
+      const item = await serverFetch<{ itemId: string }>({
+        service: 'content',
+        path: `/vocabulary-lists/${listId}/items`,
+        method: 'POST',
+        body: {
+          word: row.lemma,
+          ...(row.partOfSpeech && { partOfSpeech: row.partOfSpeech }),
+        },
+      });
+      await serverFetch({
+        service: 'content',
+        path: `/vocabulary-lists/${listId}/items/${item.itemId}/translations/${translationLanguageCode}`,
+        method: 'PUT',
+        body: { primaryTranslation: row.translation },
+      });
+      created += 1;
+    }
+
+    revalidatePath(`/school/content/${containerId}`);
+    return { created };
   });
 }
 

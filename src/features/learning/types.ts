@@ -111,6 +111,29 @@ export interface CourseProgress {
   lessons: LessonProgress[];
 }
 
+/** Upserts a student's progress on one content item (BE3.3 completion). */
+export interface UpsertProgressRequest {
+  contentType: string;
+  contentId: string;
+  timeSpentSeconds: number;
+  score?: number;
+  completed: boolean;
+}
+
+export interface ProgressRecord {
+  id: string;
+  userId: string;
+  contentRef: { type: string; id: string };
+  status: string;
+  attemptsCount: number;
+  lastAttemptAt: string | null;
+  timeSpentSeconds: number;
+  score: number | null;
+  completedAt: string | null;
+  needsReviewSince: string | null;
+  reviewResolvedAt: string | null;
+}
+
 /* ─── Mastery ─────────────────────────────────────────────────────── */
 
 export interface SkillMastery {
@@ -189,21 +212,32 @@ export interface ExpandedExerciseRef {
   type: string;
 }
 
-export interface ExpandedModule {
+/* ─── Unit contents (reader sidebar/footer nav data source, BE3.1/BE3.3) ─── */
+
+export type UnitContentsItemStatus = 'locked' | 'available' | 'in_progress' | 'completed';
+
+export interface UnitContentsItem {
   id: string;
-  title: string;
-  position: number;
-  cefrLevel: string;
-  lesson: ExpandedLesson;
-  vocabulary: ExpandedVocabItem[];
-  grammar?: ExpandedGrammarRule;
-  exercises: ExpandedExerciseRef[];
-  canDoDescriptors: CanDoItem[];
+  contentType: string;
+  contentId: string;
+  title: string | null;
+  lessonKind: string | null;
+  durationMinutes: number | null;
+  xpReward: number | null;
+  status: UnitContentsItemStatus;
 }
 
-export interface UnitPayload {
-  module: ExpandedModule;
-  progress: ModuleProgress;
+export interface UnitContentsSection {
+  id: string;
+  title: string;
+  items: UnitContentsItem[];
+}
+
+export interface UnitContentsResult {
+  moduleId: string;
+  moduleTitle: string | null;
+  sections: UnitContentsSection[];
+  ungroupedItems: UnitContentsItem[];
 }
 
 /* ─── Unit summary (for Course Home unit list) ───────────────────── */
@@ -366,10 +400,20 @@ export interface CourseInfo {
   groupName?: string;
 }
 
+export interface CourseLevelGroup {
+  /** Course-version section id (a "Leksjon" grouping of sub-lesson units). */
+  id: string;
+  title: string;
+  position: number;
+  units: UnitSummary[];
+}
+
 export interface CourseHomePayload {
   courseInfo: CourseInfo;
   /** Ordered module list with status; empty if course has no published version. */
   units: UnitSummary[];
+  /** Units grouped by their course-level ("Leksjon") section, in position order. */
+  levels: CourseLevelGroup[];
   progress: CourseProgress;
   mastery: CourseMastery;
   srsDueCount: number;

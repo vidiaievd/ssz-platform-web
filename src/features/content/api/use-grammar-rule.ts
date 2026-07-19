@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { GrammarExplanation, GrammarRule } from '../types';
+import type { GrammarExplanationDetail, GrammarRule } from '../types';
 import { contentKeys } from './keys';
 
 export function useGrammarRule(id: string, enabled = true) {
@@ -18,15 +18,21 @@ export function useGrammarRule(id: string, enabled = true) {
   });
 }
 
-export function useBestGrammarExplanation(ruleId: string, enabled = true) {
-  return useQuery<GrammarExplanation>({
-    queryKey: contentKeys.grammarExplanation(ruleId),
+export function useBestGrammarExplanation(
+  ruleId: string,
+  lang: string,
+  level: string,
+  enabled = true,
+) {
+  return useQuery<GrammarExplanationDetail>({
+    queryKey: [...contentKeys.grammarExplanation(ruleId), lang, level],
     queryFn: async () => {
-      const res = await fetch(`/api/content/grammar-rules/${ruleId}/explanation`);
+      const params = new URLSearchParams({ lang, level });
+      const res = await fetch(`/api/content/grammar-rules/${ruleId}/explanation?${params}`);
       if (!res.ok) throw new Error('Failed to fetch grammar explanation');
-      return res.json() as Promise<GrammarExplanation>;
+      return res.json() as Promise<GrammarExplanationDetail>;
     },
     staleTime: 120_000,
-    enabled: enabled && !!ruleId,
+    enabled: enabled && !!ruleId && !!lang && !!level,
   });
 }

@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from '@/lib/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Trash2, Archive, RotateCcw, MinusCircle, UserCheck } from 'lucide-react';
 
@@ -20,7 +22,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 
+import type { ContainerVersion, CurriculumTree } from '@/features/content/types';
 import type { ContainerState, SchoolRole } from '../types';
+import { authoringKeys } from '../api/keys';
 
 interface DangerZoneProps {
   containerId: string;
@@ -33,23 +37,31 @@ function ConfirmAction({
   trigger,
   title,
   description,
+  extraContent,
   confirmLabel,
+  cancelLabel,
   destructive,
   onConfirm,
   requireTypedTitle,
   expectedTitle,
+  typeToConfirmLabel,
 }: {
   trigger: React.ReactNode;
   title: string;
   description: string;
+  extraContent?: React.ReactNode;
   confirmLabel: string;
+  cancelLabel: string;
   destructive?: boolean;
   onConfirm: () => void;
   requireTypedTitle?: boolean;
   expectedTitle?: string;
+  typeToConfirmLabel?: string;
 }) {
   const [typed, setTyped] = useState('');
-  const canConfirm = requireTypedTitle ? typed === expectedTitle : true;
+  const canConfirm = requireTypedTitle
+    ? typed.trim().toLowerCase() === expectedTitle?.trim().toLowerCase()
+    : true;
 
   return (
     <AlertDialog onOpenChange={() => setTyped('')}>
@@ -59,11 +71,10 @@ function ConfirmAction({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {extraContent}
         {requireTypedTitle && (
           <div className="space-y-1.5">
-            <p className="text-sm text-muted-foreground">
-              Type <strong>{expectedTitle}</strong> to confirm:
-            </p>
+            <p className="text-sm text-muted-foreground">{typeToConfirmLabel}</p>
             <Input
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
@@ -73,7 +84,7 @@ function ConfirmAction({
           </div>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             disabled={!canConfirm}
@@ -87,7 +98,23 @@ function ConfirmAction({
   );
 }
 
+function countTreeContent(tree: CurriculumTree): { modules: number; lessons: number } {
+  let modules = 0;
+  let lessons = 0;
+  for (const level of tree.levels) {
+    modules += level.modules.length;
+    for (const mod of level.modules) {
+      lessons += mod.ungroupedItems.length;
+      for (const section of mod.sections) {
+        lessons += section.items.length;
+      }
+    }
+  }
+  return { modules, lessons };
+}
+
 export function DangerZone({ containerId, containerTitle, state, role }: DangerZoneProps) {
+  const t = useTranslations('Authoring.dangerZone');
   const router = useRouter();
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const [, startTransition] = useTransition();
@@ -95,39 +122,76 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
   const isOwner = role === 'owner';
   const isOwnerOrAdmin = role === 'owner' || role === 'admin';
 
-  const callLifecycle = async (endpoint: string, label: string) => {
+  // Lazily counted so the delete confirmation can show "N modules / N lessons" per BEHAVIOR.md.
+  const { data: contentCounts } = useQuery({
+    queryKey: authoringKeys.contentCounts(containerId),
+    queryFn: async () => {
+      const versionsRes = await fetch(`/api/content/containers/${containerId}/versions`);
+      if (!versionsRes.ok) return null;
+      const versions = (await versionsRes.json()) as ContainerVersion[];
+      const versionId = versions.find((v) => v.status === 'draft')?.id ?? versions[0]?.id;
+      if (!versionId) return { modules: 0, lessons: 0 };
+      const treeRes = await fetch(
+        `/api/content/containers/${containerId}/versions/${versionId}/tree`,
+      );
+      if (!treeRes.ok) return null;
+      const tree = (await treeRes.json()) as CurriculumTree;
+      return countTreeContent(tree);
+    },
+    enabled: isOwner,
+    staleTime: 30_000,
+  });
+
+  // Only relevant while the course is published (state === 'published' below gates the Archive action).
+  const { data: enrollmentCount } = useQuery({
+    queryKey: authoringKeys.enrollmentCount(containerId),
+    queryFn: async () => {
+      const res = await fetch(`/api/content/containers/${containerId}/enrollment-count`);
+      if (!res.ok) return null;
+      const data = (await res.json()) as { count: number };
+      return data.count;
+    },
+    enabled: isOwnerOrAdmin && state === 'published',
+    staleTime: 30_000,
+  });
+
+  const callLifecycle = async (
+    endpoint: string,
+    successMessage: string,
+    errorMessage: string,
+    toastOptions?: Parameters<typeof toast.success>[1],
+  ) => {
     const res = await fetch(`/api/content/containers/${containerId}/${endpoint}`, {
       method: 'POST',
     });
-    if (res.status === 501) {
-      toast.info(`${label} — coming soon (pending backend support)`);
-      return;
-    }
     if (!res.ok) {
-      toast.error(`Failed to ${label.toLowerCase()}`);
+      toast.error(errorMessage);
       return;
     }
-    toast.success(`${label} successful`);
+    toast.success(successMessage, toastOptions);
     startTransition(() => router.refresh());
   };
 
-  const handleUnpublish = () => void callLifecycle('unpublish', 'Unpublish');
-  const handleArchive   = () => void callLifecycle('archive', 'Archive');
-  const handleRestore   = () => void callLifecycle('restore', 'Restore');
+  const handleUnpublish = () => void callLifecycle('unpublish', t('unpublish.success'), t('unpublish.error'));
+  const handleRestore = () => void callLifecycle('restore', t('restore.success'), t('restore.error'));
+  const handleArchive = () =>
+    void callLifecycle('archive', t('archive.success'), t('archive.error'), {
+      action: { label: t('archive.undo'), onClick: handleRestore },
+    });
 
   const handleDelete = async () => {
     const res = await fetch(`/api/content/containers/${containerId}`, { method: 'DELETE' });
     if (!res.ok) {
-      toast.error('Failed to delete container');
+      toast.error(t('deleteForever.error'));
       return;
     }
-    toast.success('Container deleted');
+    toast.success(t('deleteForever.success'));
     startTransition(() => router.push(`/school/${schoolSlug}/content`));
   };
 
   return (
     <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 space-y-3">
-      <h3 className="text-sm font-semibold text-destructive">Danger zone</h3>
+      <h3 className="text-sm font-semibold text-destructive">{t('heading')}</h3>
 
       <div className="space-y-2">
         {/* Draft actions */}
@@ -136,12 +200,13 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
             trigger={
               <Button variant="danger" size="sm" className="w-full justify-start">
                 <Trash2 className="mr-2 h-3.5 w-3.5" />
-                Discard draft
+                {t('discardDraft.trigger')}
               </Button>
             }
-            title="Discard this draft?"
-            description="The draft and all its content will be permanently deleted. This cannot be undone."
-            confirmLabel="Discard"
+            title={t('discardDraft.title')}
+            description={t('discardDraft.description')}
+            confirmLabel={t('discardDraft.confirm')}
+            cancelLabel={t('cancel')}
             destructive
             onConfirm={handleDelete}
           />
@@ -154,24 +219,33 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
               trigger={
                 <Button variant="outline" size="sm" className="w-full justify-start text-warning-700 border-warning-300">
                   <MinusCircle className="mr-2 h-3.5 w-3.5" />
-                  Unpublish
+                  {t('unpublish.trigger')}
                 </Button>
               }
-              title="Unpublish this course?"
-              description="Students will see a 'Course paused' banner. No new enrolments will be accepted. You can re-publish at any time."
-              confirmLabel="Unpublish"
+              title={t('unpublish.title')}
+              description={t('unpublish.description')}
+              confirmLabel={t('unpublish.confirm')}
+              cancelLabel={t('cancel')}
               onConfirm={handleUnpublish}
             />
             <ConfirmAction
               trigger={
                 <Button variant="outline" size="sm" className="w-full justify-start text-warning-700 border-warning-300">
                   <Archive className="mr-2 h-3.5 w-3.5" />
-                  Archive
+                  {t('archive.trigger')}
                 </Button>
               }
-              title="Archive this course?"
-              description="The course will be hidden from the catalogue. Enrolment will be closed. You can restore it later."
-              confirmLabel="Archive"
+              title={t('archive.title')}
+              description={t('archive.description')}
+              extraContent={
+                enrollmentCount != null && enrollmentCount > 0 ? (
+                  <p className="text-sm text-warning-700">
+                    {t('archive.enrollmentWarning', { count: enrollmentCount })}
+                  </p>
+                ) : undefined
+              }
+              confirmLabel={t('archive.confirm')}
+              cancelLabel={t('cancel')}
               onConfirm={handleArchive}
             />
           </>
@@ -183,12 +257,13 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
             trigger={
               <Button variant="outline" size="sm" className="w-full justify-start">
                 <RotateCcw className="mr-2 h-3.5 w-3.5" />
-                Restore
+                {t('restore.trigger')}
               </Button>
             }
-            title="Restore this course?"
-            description="The course will be returned to its previous state (draft or published)."
-            confirmLabel="Restore"
+            title={t('restore.title')}
+            description={t('restore.description')}
+            confirmLabel={t('restore.confirm')}
+            cancelLabel={t('cancel')}
             onConfirm={handleRestore}
           />
         )}
@@ -199,15 +274,30 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
             trigger={
               <Button variant="danger" size="sm" className="w-full justify-start">
                 <Trash2 className="mr-2 h-3.5 w-3.5" />
-                Delete forever
+                {t('deleteForever.trigger')}
               </Button>
             }
-            title={`Delete "${containerTitle}"?`}
-            description="All content, lessons, and student history for this course will be permanently deleted after 30 days."
-            confirmLabel="Delete forever"
+            title={t('deleteForever.title', { title: containerTitle })}
+            description={t('deleteForever.description')}
+            extraContent={
+              <div className="space-y-1 text-sm text-muted-foreground">
+                {contentCounts && (
+                  <p>
+                    {t('deleteForever.contentCounts', {
+                      modules: contentCounts.modules,
+                      lessons: contentCounts.lessons,
+                    })}
+                  </p>
+                )}
+                <p>{t('deleteForever.steerToArchive')}</p>
+              </div>
+            }
+            confirmLabel={t('deleteForever.confirm')}
+            cancelLabel={t('cancel')}
             destructive
             requireTypedTitle
             expectedTitle={containerTitle}
+            typeToConfirmLabel={t('deleteForever.typeToConfirm', { title: containerTitle })}
             onConfirm={handleDelete}
           />
         )}
@@ -216,7 +306,7 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
         {isOwner && (
           <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground" disabled>
             <UserCheck className="mr-2 h-3.5 w-3.5" />
-            Transfer ownership
+            {t('transferOwnership')}
           </Button>
         )}
       </div>

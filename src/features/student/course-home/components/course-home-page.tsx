@@ -9,6 +9,7 @@ import { CourseHeader } from './course-header';
 import { ContinueHero, deriveContinueScenario } from './continue-hero';
 import { ViewToggle, type CourseView } from './view-toggle';
 import { UnitFlowList } from './unit-flow-list';
+import { LevelAccordion } from './level-accordion';
 import { SkillIndex } from './skill-index';
 import { ReviewCard } from './review-card';
 import { CanDoCard } from './can-do-card';
@@ -74,6 +75,7 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
   const {
     courseInfo,
     units,
+    levels,
     progress,
     mastery,
     canDo,
@@ -123,7 +125,11 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
                 }}
               >
                 <div className="px-5">
-                  <UnitFlowList units={units} courseId={courseId} locale={locale} />
+                  {levels.length > 0 ? (
+                    <LevelAccordion levels={levels} courseId={courseId} locale={locale} />
+                  ) : (
+                    <UnitFlowList units={units} courseId={courseId} locale={locale} />
+                  )}
                 </div>
               </div>
             ) : (
@@ -176,13 +182,13 @@ function buildCtaHref(opts: {
 
   if (scenario === 'resume') {
     const active = modules.find((m) => m.status === 'in_progress');
-    if (active) return `${base}/units/${active.moduleId}?courseId=${courseId}`;
+    if (active) return `${base}/courses/${courseId}/${active.moduleId}`;
   }
   if (scenario === 'start') {
     const next = modules.find((m) => m.status === 'not_started');
-    if (next) return `${base}/units/${next.moduleId}?courseId=${courseId}`;
+    if (next) return `${base}/courses/${courseId}/${next.moduleId}`;
   }
   const lastLocked = [...modules].reverse().find((m) => m.status === 'not_started');
-  if (lastLocked) return `${base}/units/${lastLocked.moduleId}?courseId=${courseId}`;
+  if (lastLocked) return `${base}/courses/${courseId}/${lastLocked.moduleId}`;
   return `${base}/courses`;
 }

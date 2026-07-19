@@ -20,17 +20,26 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 
-import type { ContainerItem } from '@/features/content/types';
+/** Anything sortable by this component just needs a stable id and a display title. */
+interface ReorderableItem {
+  id: string;
+  title?: string | null;
+}
 
-interface SortableItemProps {
-  item: ContainerItem;
+interface SortableItemProps<T extends ReorderableItem> {
+  item: T;
   /** 1-based position within the list — used for the a11y aria-label. */
   position: number;
   total: number;
   children: ReactNode;
 }
 
-export function SortableItem({ item, position, total, children }: SortableItemProps) {
+export function SortableItem<T extends ReorderableItem>({
+  item,
+  position,
+  total,
+  children,
+}: SortableItemProps<T>) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
   });
@@ -59,15 +68,20 @@ export function SortableItem({ item, position, total, children }: SortableItemPr
   );
 }
 
-interface LessonReorderProps {
-  items: ContainerItem[];
-  onReorder: (reordered: ContainerItem[]) => void;
+interface LessonReorderProps<T extends ReorderableItem> {
+  items: T[];
+  onReorder: (reordered: T[]) => void;
   /** Called after each reorder so the parent can announce to screen readers. */
   onAnnounce?: (message: string) => void;
-  children: (item: ContainerItem, position: number) => ReactNode;
+  children: (item: T, position: number) => ReactNode;
 }
 
-export function LessonReorder({ items, onReorder, onAnnounce, children }: LessonReorderProps) {
+export function LessonReorder<T extends ReorderableItem>({
+  items,
+  onReorder,
+  onAnnounce,
+  children,
+}: LessonReorderProps<T>) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -104,11 +118,11 @@ export function LessonReorder({ items, onReorder, onAnnounce, children }: Lesson
 }
 
 /** Wraps a LessonReorder list with an aria-live region for keyboard-reorder announcements. */
-export function ReorderWithAnnouncer({
+export function ReorderWithAnnouncer<T extends ReorderableItem>({
   items,
   onReorder,
   children,
-}: Omit<LessonReorderProps, 'onAnnounce'>) {
+}: Omit<LessonReorderProps<T>, 'onAnnounce'>) {
   const announceRef = useRef<HTMLSpanElement>(null);
 
   function handleAnnounce(message: string) {

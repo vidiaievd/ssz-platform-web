@@ -1,3 +1,8 @@
+/**
+ * @deprecated OLD exercise-solving system — superseded by the `runner/`
+ * exercises (placement, unit-flow practice) and the realigned authoring
+ * exercise contract. No live consumers; slated for full removal.
+ */
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -18,7 +23,15 @@ const EXERCISE: ExerciseDisplay = {
   templateCode: 'cloze',
   targetLanguage: 'nb',
   difficultyLevel: 'A1',
-  instructions: 'Fill in the blanks.',
+  instructions: [
+    {
+      id: 'i1',
+      exerciseId: 'ex-cloze-1',
+      instructionLanguage: 'en',
+      instructionText: 'Fill in the blanks.',
+      hintText: null,
+    },
+  ],
   content: {
     template: 'Jeg ___ til jobben med ___.',
     answers: ['sykler', 'bussen'],

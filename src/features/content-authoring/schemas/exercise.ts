@@ -1,7 +1,26 @@
 import { z } from 'zod';
 
-export const EXERCISE_TYPES = ['cloze', 'multiple_choice', 'free_text', 'pronunciation'] as const;
+// Template codes mirror content-service's seeded exercise templates exactly
+// (prisma/seed.ts). The backend resolves each code to an `exerciseTemplateId`
+// (UUID) and validates content/expectedAnswers against the template's schemas.
+export const EXERCISE_TYPES = [
+  'multiple_choice',
+  'fill_in_blank',
+  'translate_to_target',
+  'translate_from_target',
+  'match_pairs',
+  'short_answer',
+  'writing_task',
+  'sentence_schema',
+] as const;
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
+
+export const SENTENCE_SCHEMA_TYPES = ['main', 'subordinate'] as const;
+
+// Verdicts for a fill_in_blank rationale option: the accepted answer, one that
+// is grammatical but not chosen in this context, and one that simply fails.
+export const RATIONALE_VERDICTS = ['correct', 'acceptable', 'wrong'] as const;
+export type RationaleVerdict = (typeof RATIONALE_VERDICTS)[number];
 
 export const DIFFICULTY_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 
@@ -9,42 +28,183 @@ export const exerciseFormSchema = z
   .object({
     templateCode: z.enum(EXERCISE_TYPES),
     instructions: z.string().max(1000).optional(),
+    hint: z.string().max(1000).optional(),
     difficultyLevel: z.enum(DIFFICULTY_LEVELS).optional(),
-    // cloze
-    clozeTemplate: z.string().max(5000).optional(),
-    clozeAnswers: z.array(z.object({ text: z.string().min(1).max(200) })).optional(),
-    // multiple choice
+
+    // Item-level strings are NOT `.min(1)` here: the form always carries a full
+    // set of default arrays (one per template), and only the active template's
+    // entries are validated below. Emptiness is enforced per-active-type in the
+    // superRefine, and empty entries are dropped when building the payload.
+
+    // multiple_choice
     mcQuestion: z.string().max(1000).optional(),
-    mcOptions: z.array(z.object({ text: z.string().min(1).max(500) })).optional(),
+    mcContext: z.string().max(1000).optional(),
+    mcOptions: z.array(z.object({ text: z.string().max(500) })).optional(),
     mcCorrectIndex: z.number().int().min(0).optional(),
-    // free text
-    ftPrompt: z.string().max(1000).optional(),
-    ftSampleAnswer: z.string().max(2000).optional(),
-    // pronunciation
-    pronText: z.string().max(500).optional(),
-    pronIpa: z.string().max(200).optional(),
+
+    // fill_in_blank — `fibText` uses ___1___, ___2___ markers; each blank has a
+    // comma-separated list of accepted answers, plus an optional rationale
+    // matrix shown to the student as feedback after checking.
+    fibText: z.string().max(5000).optional(),
+    fibBlanks: z
+      .array(
+        z.object({
+          answers: z.string().max(500),
+          rationaleExplanation: z.string().max(1000).optional(),
+          rationaleOptions: z
+            .array(
+              z.object({
+                text: z.string().max(200),
+                verdict: z.enum(RATIONALE_VERDICTS),
+                note: z.string().max(500).optional(),
+              }),
+            )
+            .optional(),
+        }),
+      )
+      .optional(),
+    fibWordBank: z.string().max(1000).optional(),
+
+    // translate_to_target / translate_from_target
+    trSourceText: z.string().max(2000).optional(),
+    trSourceLanguage: z.string().max(10).optional(),
+    trAcceptedTranslations: z.array(z.object({ text: z.string().max(1000) })).optional(),
+
+    // match_pairs
+    mpPairs: z
+      .array(z.object({ left: z.string().max(500), right: z.string().max(500) }))
+      .optional(),
+
+    // short_answer — `saAccepted` is a comma-separated list of exact-match
+    // shortcuts; a non-matching answer is routed for review by the engine.
+    saQuestion: z.string().max(2000).optional(),
+    saContext: z.string().max(2000).optional(),
+    saReferenceAnswer: z.string().max(2000).optional(),
+    saAccepted: z.string().max(2000).optional(),
+
+    // writing_task — `wtTopics` are optional "choose one" prompts.
+    wtPrompt: z.string().max(2000).optional(),
+    wtMinWords: z.string().max(6).optional(),
+    wtTopics: z.array(z.object({ title: z.string().max(500) })).optional(),
+    wtRubric: z.string().max(2000).optional(),
+
+    // sentence_schema — the learner drops sentence tokens into ordered fields.
+    // Each token records which field (by index) it belongs to; -1 = unassigned.
+    ssSentence: z.string().max(2000).optional(),
+    ssSchemaType: z.enum(SENTENCE_SCHEMA_TYPES).optional(),
+    ssFields: z.array(z.object({ label: z.string().max(200) })).optional(),
+    ssTokens: z
+      .array(z.object({ text: z.string().max(200), fieldIndex: z.number().int() }))
+      .optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.templateCode === 'cloze' && !data.clozeTemplate?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['clozeTemplate'], message: 'Required' });
-    }
-    if (data.templateCode === 'multiple_choice') {
-      if (!data.mcQuestion?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['mcQuestion'], message: 'Required' });
+    switch (data.templateCode) {
+      case 'multiple_choice': {
+        if (!data.mcQuestion?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['mcQuestion'], message: 'Required' });
+        }
+        if ((data.mcOptions ?? []).filter((o) => o.text.trim()).length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['mcOptions'],
+            message: 'At least 2 options required',
+          });
+        }
+        break;
       }
-      if (!data.mcOptions || data.mcOptions.length < 2) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['mcOptions'],
-          message: 'At least 2 options required',
-        });
+      case 'fill_in_blank': {
+        if (!data.fibText?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['fibText'], message: 'Required' });
+        }
+        if ((data.fibBlanks ?? []).filter((b) => b.answers.trim()).length < 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['fibBlanks'],
+            message: 'At least 1 blank required',
+          });
+        }
+        break;
       }
-    }
-    if (data.templateCode === 'free_text' && !data.ftPrompt?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['ftPrompt'], message: 'Required' });
-    }
-    if (data.templateCode === 'pronunciation' && !data.pronText?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['pronText'], message: 'Required' });
+      case 'translate_to_target':
+      case 'translate_from_target': {
+        if (!data.trSourceText?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['trSourceText'], message: 'Required' });
+        }
+        if (!(data.trAcceptedTranslations ?? []).some((tr) => tr.text.trim())) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['trAcceptedTranslations'],
+            message: 'At least 1 accepted translation required',
+          });
+        }
+        break;
+      }
+      case 'match_pairs': {
+        if ((data.mpPairs ?? []).filter((p) => p.left.trim() && p.right.trim()).length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['mpPairs'],
+            message: 'At least 2 complete pairs required',
+          });
+        }
+        break;
+      }
+      case 'short_answer': {
+        if (!data.saQuestion?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['saQuestion'], message: 'Required' });
+        }
+        if (!data.saReferenceAnswer?.trim()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['saReferenceAnswer'],
+            message: 'Required',
+          });
+        }
+        break;
+      }
+      case 'writing_task': {
+        if (!data.wtPrompt?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['wtPrompt'], message: 'Required' });
+        }
+        break;
+      }
+      case 'sentence_schema': {
+        if (!data.ssSentence?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['ssSentence'], message: 'Required' });
+        }
+        const labelledFields = (data.ssFields ?? []).filter((f) => f.label.trim());
+        if (labelledFields.length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ssFields'],
+            message: 'At least 2 fields required',
+          });
+        }
+        const filledTokens = (data.ssTokens ?? []).filter((tk) => tk.text.trim());
+        if (filledTokens.length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ssTokens'],
+            message: 'At least 2 tokens required',
+          });
+        }
+        // Every filled token must be assigned to a field with a non-empty label.
+        const fieldCount = (data.ssFields ?? []).length;
+        const hasUnassigned = filledTokens.some(
+          (tk) =>
+            tk.fieldIndex < 0 ||
+            tk.fieldIndex >= fieldCount ||
+            !(data.ssFields ?? [])[tk.fieldIndex]?.label.trim(),
+        );
+        if (hasUnassigned) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ssTokens'],
+            message: 'Every word must be assigned to a field',
+          });
+        }
+        break;
+      }
     }
   });
 

@@ -1,11 +1,28 @@
 import { NextResponse } from 'next/server';
 
-// Archive is not yet supported by the Content Service backend.
-// This route returns 501 so the danger zone UI can be wired now and
-// connected to the real endpoint when the backend ships it.
-export async function POST() {
-  return NextResponse.json(
-    { error: 'not_implemented', detail: 'Archive endpoint is pending backend support.' },
-    { status: 501 },
-  );
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { isAppError } from '@/lib/errors';
+
+export async function POST(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+
+  try {
+    await serverFetch({
+      service: 'content',
+      path: `/containers/${id}/archive`,
+      method: 'POST',
+    });
+    return new NextResponse(null, { status: 204 });
+  } catch (e) {
+    if (isAppError(e)) {
+      if (e.code === 'unauthenticated') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      if (e.code === 'forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      if (e.code === 'not_found') return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      if (e.code === 'conflict') return NextResponse.json({ error: 'Course is already archived' }, { status: 409 });
+    }
+    return NextResponse.json({ error: 'Failed to archive course' }, { status: 502 });
+  }
 }

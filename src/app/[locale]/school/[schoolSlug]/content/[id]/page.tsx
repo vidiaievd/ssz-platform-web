@@ -6,11 +6,11 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/i18n/navigation';
-import type { Container, ContainerItem, ContainerVersion } from '@/features/content/types';
-import { AuthoringContainerTabs } from '@/features/content-authoring/components/authoring-container-tabs';
+import type { Container, ContainerVersion } from '@/features/content/types';
+import { CourseEditorShell } from '@/features/content-authoring/components/course-editor-shell';
 import { ContainerStateBadge, deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
 import { CourseStatusBanner } from '@/features/content-authoring/components/course-status-banner';
-import { runPreflight } from '@/features/content-authoring/lib/preflight';
+import { getContainerPreflight } from '@/features/content-authoring/lib/get-container-preflight';
 import type { PreflightResult, SchoolRole } from '@/features/content-authoring/types';
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
 
@@ -52,27 +52,25 @@ export default async function ContainerDetailPage({
 
   const state = deriveContainerState(container);
 
-  // Fetch preflight data server-side for draft containers to populate the status banner
+  // Every container keeps exactly one draft version — resolve it once for both
+  // the preflight banner (draft state only) and the curriculum structure tab.
+  let draftVersionId: string | null = null;
   let preflight: PreflightResult | undefined;
   let preflightError = false;
-  if (state === 'draft') {
-    try {
-      const versionsResp = await serverFetch<{ items: ContainerVersion[] }>({
-        service: 'content',
-        path: `/containers/${id}/versions`,
-      });
-      const draftVersion = versionsResp.items.find((v) => v.status === 'draft');
-      const items = draftVersion
-        ? await serverFetch<ContainerItem[]>({
-            service: 'content',
-            path: `/containers/${id}/versions/${draftVersion.id}/items`,
-          })
-        : [];
-      preflight = runPreflight(schoolSlug, container, items);
-    } catch (err) {
-      console.error('[content/id] preflight versions fetch failed:', err);
-      preflightError = true;
+  try {
+    const versionsResp = await serverFetch<{ items: ContainerVersion[] }>({
+      service: 'content',
+      path: `/containers/${id}/versions`,
+    });
+    const draftVersion = versionsResp.items.find((v) => v.status === 'draft');
+    draftVersionId = draftVersion?.id ?? null;
+
+    if (state === 'draft') {
+      preflight = await getContainerPreflight(schoolSlug, id);
     }
+  } catch (err) {
+    console.error('[content/id] versions fetch failed:', err);
+    if (state === 'draft') preflightError = true;
   }
 
   return (
@@ -113,10 +111,12 @@ export default async function ContainerDetailPage({
       </div>
 
       <Suspense fallback={<TabsSkeleton />}>
-        <AuthoringContainerTabs
+        <CourseEditorShell
           container={container}
+          schoolSlug={schoolSlug}
           schoolRole={schoolRole}
           preflightResult={preflight}
+          draftVersionId={draftVersionId}
         />
       </Suspense>
     </main>

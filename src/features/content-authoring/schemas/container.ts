@@ -10,6 +10,8 @@ export const accessTiers = [
   'public_free',
   'public_paid',
 ] as const;
+export const levelSystems = ['cefr', 'custom', 'single'] as const;
+export const gatingModes = ['open', 'sequential'] as const;
 
 export const containerFormSchema = z.object({
   title: z.string().min(1).max(200),
@@ -19,6 +21,10 @@ export const containerFormSchema = z.object({
   difficultyLevel: z.enum(difficultyLevels),
   visibility: z.enum(visibilities),
   accessTier: z.enum(accessTiers),
+  // Create-time only (drives level-section scaffolding); never sent on update.
+  levelSystem: z.enum(levelSystems).optional(),
+  // Course-only student unlock policy; editable after creation.
+  gatingMode: z.enum(gatingModes).optional(),
 });
 
 export type ContainerFormValues = z.infer<typeof containerFormSchema>;

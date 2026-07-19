@@ -29,7 +29,14 @@
     "defaultInstruction": "Complete the sentence",
     "blankLabel": "Blank",
     "inputLabel": "Your answer",
-    "placeholder": "type…"
+    "placeholder": "type…",
+    "rationaleTitle": "Why this answer",
+    "optionHeader": "Option",
+    "verdictHeader": "Fits?",
+    "noteHeader": "Why",
+    "verdictCorrect": "Correct",
+    "verdictAcceptable": "Possible, but not here",
+    "verdictWrong": "Wrong"
   },
   "translate": {
     "defaultInstruction": "Translate the sentence",
@@ -41,5 +48,26 @@
     "defaultInstruction": "Match each word to its translation",
     "helperIdle": "Tap a word on the left…",
     "helperArmed": "Now tap its match on the right."
-  }
+  },
+  "shortAnswer": {
+    "defaultInstruction": "Answer the question",
+    "inputLabel": "Your answer",
+    "placeholder": "Write your answer…",
+    "referenceLabel": "Sample answer"
+  },
+  "writing": {
+    "defaultInstruction": "Write your text",
+    "inputLabel": "Your text",
+    "placeholder": "Start writing…",
+    "topicsLabel": "Choose a topic",
+    "wordCount": "{count} words",
+    "wordCountMin": "{count} / {min} words"
+  },
+  "sentenceSchema": {
+    "defaultInstruction": "Place each word in the right field",
+    "bankLabel": "Words",
+    "bankEmpty": "All words placed",
+    "fieldDropLabel": "Place in {field}"
+  },
+  "unsupported": "This exercise type ({type}) isn’t playable yet."
 }

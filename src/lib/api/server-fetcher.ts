@@ -59,6 +59,12 @@ export type ServerFetchOptions<TBody = unknown> = {
    * @example '/schools/name-available'   // resolves to /api/v1/schools/name-available
    */
   path: string;
+  /**
+   * Bypasses resolveServiceUrl()/API_GATEWAY_URL and calls this base URL directly.
+   * Use only for service-to-service `/internal/*` routes, which are deliberately
+   * not exposed through the public gateway.
+   */
+  directBaseUrl?: string;
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   query?: Record<string, string | number | boolean | undefined | null>;
   body?: TBody;
@@ -74,7 +80,7 @@ export type ServerFetchOptions<TBody = unknown> = {
 export async function serverFetch<TData = unknown, TBody = unknown>(
   opts: ServerFetchOptions<TBody>,
 ): Promise<TData> {
-  const base = resolveServiceUrl(opts.service);
+  const base = opts.directBaseUrl ?? resolveServiceUrl(opts.service);
   const prefix = env.UPSTREAM_API_PREFIX.replace(/\/$/, "");
   const url = new URL(`${base}${prefix}${opts.path}`);
   if (opts.query) {

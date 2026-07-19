@@ -14,7 +14,8 @@
   },
   "glossary": {
     "seeInContext": "See in context",
-    "listenWord": "Listen"
+    "listenWord": "Listen",
+    "lookUpWord": "Look up"
   },
   "unitStepper": {
     "label": "Unit steps",
@@ -186,6 +187,9 @@
       "lessons": "{done} of {total} lessons",
       "continueUnit": "Continue"
     },
+    "levelAccordion": {
+      "units": "{done} of {total} units"
+    },
     "skillIndex": {
       "mastery": "{pct}% mastery",
       "jump": "Jump →",
@@ -208,6 +212,204 @@
       "nextTitle": "Next goal",
       "inUnit": "Unit {n}",
       "noItems": "Complete units to unlock can-do goals."
+    }
+  },
+  "reader": {
+    "sidebar": {
+      "contentsHeading": "Contents",
+      "completed": "Completed {pct}%",
+      "showContents": "Show contents",
+      "hideContents": "Hide contents",
+      "unitLabel": "Unit {n}",
+      "locked": "Locked",
+      "durationMinutes": "{n} min",
+      "otherItems": "Other"
+    },
+    "topbar": {
+      "courseLabel": "Course",
+      "streakDays": "{count, plural, one {# day streak} other {# days streak}}",
+      "xp": "{xp} XP",
+      "toggleThemeToLight": "Switch to light theme",
+      "toggleThemeToDark": "Switch to dark theme"
+    },
+    "footerNav": {
+      "previous": "Previous",
+      "next": "Next · {type}",
+      "unlocksAfterThis": "Next unlocks after this"
+    },
+    "body": {
+      "comingSoonTitle": "This lesson page is on its way",
+      "comingSoonBody": "The reading experience for this material type isn't wired up yet."
+    },
+    "entry": {
+      "emptyTitle": "This unit has no material yet",
+      "emptyBody": "Check back once the teacher publishes lessons for this unit.",
+      "backToCourse": "Back to course"
+    },
+    "vocab": {
+      "grunnform": "base form",
+      "listen": "Listen",
+      "flipHint": "Tap to flip",
+      "flipCardLabel": "Flip card: {word}",
+      "backLabelTranslation": "Translation",
+      "backLabelDefinition": "Definition",
+      "allForms": "All forms",
+      "pos": {
+        "noun": "Noun",
+        "verb": "Verb",
+        "adjective": "Adjective",
+        "adverb": "Adverb",
+        "pronoun": "Pronoun",
+        "preposition": "Preposition",
+        "conjunction": "Conjunction",
+        "interjection": "Interjection",
+        "numeral": "Numeral",
+        "particle": "Particle",
+        "phrase": "Phrase",
+        "other": "Word"
+      },
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "newWords": "{count, plural, one {# new word} other {# new words}}",
+        "howToTranslation": "Start with the new words. Tap a card to flip it — you’ll see the translation. Open All forms for the full inflection.",
+        "howToDefinition": "Start with the new words. Tap a card to flip it — you’ll see an explanation. Open All forms for the full inflection.",
+        "levelBadgeTranslation": "A1–B1 · translation",
+        "levelBadgeDefinition": "B2+ · explanation",
+        "emptyTitle": "No new words yet",
+        "emptyBody": "This vocabulary list has no words yet.",
+        "nextHeading": "Next — use the words",
+        "reviewTitle": "Repeat earlier words",
+        "reviewBody": "{count, plural, one {# word from earlier units is ready for review today} other {# words from earlier units are ready for review today}}",
+        "reviewCta": "Review"
+      }
+    },
+    "text": {
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "tapToLookUp": "tap a word to look it up",
+        "showTranslation": "Show translation",
+        "hideTranslation": "Hide translation",
+        "columnTarget": "Text",
+        "columnTranslation": "Translation",
+        "paragraphOf": "Paragraph {current} of {total}",
+        "previousParagraph": "Previous paragraph",
+        "nextParagraph": "Next paragraph",
+        "noParagraphs": "This lesson has no text yet.",
+        "emptyTitle": "This lesson isn't ready for you yet",
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson."
+      },
+      "mode": {
+        "label": "Reading mode",
+        "immersive": "Immersive",
+        "bilingual": "Bilingual",
+        "focus": "Focus"
+      }
+    },
+    "video": {
+      "player": {
+        "noSource": "This lesson doesn't have a video yet.",
+        "play": "Play",
+        "pause": "Pause",
+        "scrubber": "Video position",
+        "speed": "{speed}× speed"
+      },
+      "transcript": {
+        "heading": "Transcript",
+        "clickToJump": "click a line to jump",
+        "empty": "This lesson has no transcript yet."
+      },
+      "notes": {
+        "heading": "My notes",
+        "atTimestamp": "at {time}",
+        "placeholder": "Add a note at this moment…",
+        "add": "Add note",
+        "empty": "No notes yet. Bookmark a moment to remember it."
+      },
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "subtitlesOn": "Subtitles on",
+        "subtitlesOff": "Subtitles off",
+        "translationOn": "Translation on",
+        "translationOff": "Translation off",
+        "tapSubtitleWords": "tap subtitle words",
+        "emptyTitle": "This lesson isn't ready for you yet",
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson."
+      }
+    },
+    "listening": {
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "emptyTitle": "This lesson isn't ready for you yet",
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson.",
+        "noStagesTitle": "No practice staged yet",
+        "noStagesBody": "This listening lesson doesn't have gap-fill or comprehension activities yet."
+      },
+      "stages": {
+        "label": "Listening training progress",
+        "listen": "Listen",
+        "gapfill": "Gap-fill",
+        "comp": "Comprehension"
+      },
+      "listen": {
+        "heading": "Listen carefully",
+        "body": "Play the clip as many times as you need. You'll fill in missing words and answer questions next — no transcript yet.",
+        "cta": "I'm ready — start gap-fill"
+      },
+      "gapfill": {
+        "heading": "Fill the gaps",
+        "body": "Listen again and choose the word you hear.",
+        "checkAnswers": "Check answers",
+        "next": "Next — comprehension",
+        "correctCount": "{correct}/{total} correct",
+        "answerLabel": "Answer: {answer}"
+      },
+      "comp": {
+        "heading": "Comprehension",
+        "body": "Answer based on what you heard.",
+        "checkAnswers": "Check answers",
+        "finish": "Finish listening training",
+        "score": "Score {score}/{total}"
+      },
+      "done": {
+        "heading": "Well done!",
+        "body": "You completed all three stages of the listening training. Your progress has been saved and the words you missed are added to review."
+      }
+    },
+    "grammar": {
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "emptyTitle": "This lesson isn't ready for you yet",
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson."
+      },
+      "anchor": {
+        "label": "From the text"
+      },
+      "compare": {
+        "heading": "Compare"
+      },
+      "quickCheck": {
+        "label": "Quick check",
+        "checkAnswer": "Check answer",
+        "correct": "Correct!",
+        "incorrect": "Not quite."
+      }
+    },
+    "live": {
+      "page": {
+        "eyebrow": "Unit {unit} · {course} · {type}",
+        "noScheduleTitle": "Not scheduled yet",
+        "noScheduleBody": "Your teacher hasn't set a date for this live class yet. Check back later."
+      },
+      "schedule": {
+        "date": "Date",
+        "time": "Time",
+        "duration": "Duration",
+        "durationMinutes": "{minutes} min",
+        "capacity": "Capacity",
+        "joinLink": "Join link",
+        "join": "Join session"
+      },
+      "note": "This live class happens outside the platform over video call. Joining and attendance aren't tracked here."
     }
   }
 }

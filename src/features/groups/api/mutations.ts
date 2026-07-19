@@ -23,6 +23,15 @@ function toBackendMode(mode: string): 'online' | 'in_person' {
   return mode === 'in-person' ? 'in_person' : 'online';
 }
 
+// The UI represents "no capacity limit" as 0 (see queries.ts `capacityMin ?? 0`),
+// but organization-service models it as null and validates any set value with
+// @Min(1). Translate the 0 sentinel to null so an unset limit isn't rejected.
+function toBackendCapacity(value?: number | null): number | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value < 1) return null;
+  return value;
+}
+
 // organization-service requires a school UUID; callers pass either the slug
 // (from the URL) or the UUID, so resolve here before forwarding upstream.
 async function requireSchoolId(idOrSlug: string): Promise<string> {
@@ -62,7 +71,12 @@ export async function createGroup(
       service: 'organization',
       path: `/schools/${resolvedSchoolId}/groups`,
       method: 'POST',
-      body: { ...data, mode: toBackendMode(data.mode) },
+      body: {
+        ...data,
+        mode: toBackendMode(data.mode),
+        capacityMin: toBackendCapacity(data.capacityMin),
+        capacityMax: toBackendCapacity(data.capacityMax),
+      },
     });
     invalidate(groupCacheTags.groups(schoolId));
     return { ok: true, id: result.id };
@@ -82,7 +96,12 @@ export async function updateGroup(
       service: 'organization',
       path: `/schools/${resolvedSchoolId}/groups/${groupId}`,
       method: 'PATCH',
-      body: { ...data, mode: data.mode !== undefined ? toBackendMode(data.mode) : undefined },
+      body: {
+        ...data,
+        mode: data.mode !== undefined ? toBackendMode(data.mode) : undefined,
+        capacityMin: 'capacityMin' in data ? toBackendCapacity(data.capacityMin) : undefined,
+        capacityMax: 'capacityMax' in data ? toBackendCapacity(data.capacityMax) : undefined,
+      },
     });
     invalidate(groupCacheTags.group(groupId));
     invalidate(groupCacheTags.groups(schoolId));

@@ -5,9 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
-import type { DifficultyLevel, Visibility } from '@/features/content/types';
+import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content/types';
 
-import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
+import { lessonFormSchema, liveScheduleSchema, type LessonFormValues, type LiveScheduleFormValues } from '../schemas/lesson';
 import { addItemToDraft, removeItemFromDraft, reorderDraftItems } from '../lib/container-items';
 
 export async function createLessonAction(
@@ -16,19 +16,20 @@ export async function createLessonAction(
   difficultyLevel: DifficultyLevel,
   visibility: Visibility,
   input: LessonFormValues,
+  kind: LessonKind = 'text',
 ) {
   return tryAction(async () => {
     const parsed = lessonFormSchema.safeParse(input);
     if (!parsed.success) {
       throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
-    const { title, body } = parsed.data;
+    const { title, body, transcript } = parsed.data;
 
     const { lessonId } = await serverFetch<{ lessonId: string }>({
       service: 'content',
       path: '/lessons',
       method: 'POST',
-      body: { title, targetLanguage, difficultyLevel, visibility },
+      body: { title, targetLanguage, difficultyLevel, visibility, kind },
     });
 
     let variantId: string | undefined;
@@ -43,6 +44,7 @@ export async function createLessonAction(
           maxLevel: difficultyLevel,
           displayTitle: title,
           bodyMarkdown: body,
+          ...(transcript !== undefined && { transcript }),
         },
       });
       variantId = variant.variantId;
@@ -67,7 +69,7 @@ export async function updateLessonAction(
     if (!parsed.success) {
       throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
-    const { title, body } = parsed.data;
+    const { title, body, transcript } = parsed.data;
 
     await serverFetch({
       service: 'content',
@@ -77,15 +79,19 @@ export async function updateLessonAction(
     });
 
     let newVariantId: string | undefined;
-    if (body !== undefined) {
+    if (body !== undefined || transcript !== undefined) {
       if (variantId) {
         await serverFetch({
           service: 'content',
           path: `/lessons/${lessonId}/variants/${variantId}`,
           method: 'PATCH',
-          body: { displayTitle: title, bodyMarkdown: body },
+          body: {
+            displayTitle: title,
+            ...(body !== undefined && { bodyMarkdown: body }),
+            ...(transcript !== undefined && { transcript }),
+          },
         });
-      } else {
+      } else if (body) {
         const variant = await serverFetch<{ variantId: string }>({
           service: 'content',
           path: `/lessons/${lessonId}/variants`,
@@ -96,6 +102,7 @@ export async function updateLessonAction(
             maxLevel: difficultyLevel,
             displayTitle: title,
             bodyMarkdown: body,
+            ...(transcript !== undefined && { transcript }),
           },
         });
         newVariantId = variant.variantId;
@@ -104,6 +111,30 @@ export async function updateLessonAction(
 
     revalidatePath(`/school/content/${containerId}`);
     return { variantId: newVariantId };
+  });
+}
+
+/** LIVE-kind lessons only (BE1.6) — no variant, just title + schedule fields. */
+export async function updateLiveLessonAction(
+  lessonId: string,
+  containerId: string,
+  input: LiveScheduleFormValues,
+) {
+  return tryAction(async () => {
+    const parsed = liveScheduleSchema.safeParse(input);
+    if (!parsed.success) {
+      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+    }
+    const { title, liveStartsAt, liveDurationMinutes, liveJoinUrl, liveCapacity } = parsed.data;
+
+    await serverFetch({
+      service: 'content',
+      path: `/lessons/${lessonId}`,
+      method: 'PATCH',
+      body: { title, liveStartsAt, liveDurationMinutes, liveJoinUrl, liveCapacity },
+    });
+
+    revalidatePath(`/school/content/${containerId}`);
   });
 }
 

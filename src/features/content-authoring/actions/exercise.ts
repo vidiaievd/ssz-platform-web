@@ -5,63 +5,81 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
-import type { ExerciseDisplay } from '@/features/content/types';
+import type { DifficultyLevel, Visibility } from '@/features/content/types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
+import { buildExercisePayload } from '../lib/exercise-content';
+import { resolveExerciseTemplateId } from '../lib/exercise-templates';
+import { addItemToDraft } from '../lib/container-items';
 
-function buildContent(data: ExerciseFormValues): Record<string, unknown> {
-  switch (data.templateCode) {
-    case 'cloze':
-      return {
-        template: data.clozeTemplate ?? '',
-        blanks: (data.clozeAnswers ?? []).map((a) => ({ answer: a.text })),
-      };
-    case 'multiple_choice':
-      return {
-        question: data.mcQuestion ?? '',
-        options: (data.mcOptions ?? []).map((o) => o.text),
-        correctIndex: data.mcCorrectIndex ?? 0,
-      };
-    case 'free_text':
-      return {
-        prompt: data.ftPrompt ?? '',
-        ...(data.ftSampleAnswer && { sampleAnswer: data.ftSampleAnswer }),
-      };
-    case 'pronunciation':
-      return {
-        text: data.pronText ?? '',
-        ...(data.pronIpa && { ipa: data.pronIpa }),
-      };
+function parseOrThrow(data: ExerciseFormValues) {
+  const parsed = exerciseFormSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
   }
+  return parsed.data;
 }
 
+// Instructions are authored in the explanation language ('en', matching lesson
+// variants). The backend endpoint upserts per language and requires a non-empty
+// instructionText, so a hint-only entry can't be persisted on its own.
+const INSTRUCTION_LANGUAGE = 'en';
+
+async function upsertInstruction(exerciseId: string, instructionText: string, hintText?: string) {
+  await serverFetch({
+    service: 'content',
+    path: `/exercises/${exerciseId}/instructions`,
+    method: 'POST',
+    body: {
+      instructionLanguage: INSTRUCTION_LANGUAGE,
+      instructionText,
+      ...(hintText?.trim() && { hintText: hintText.trim() }),
+    },
+  });
+}
+
+/**
+ * Creates an exercise and attaches it to the container's draft version.
+ *
+ * `POST /exercises` needs the template UUID (`exerciseTemplateId`) plus separate
+ * `content` / `expectedAnswers` objects conforming to the template schemas, and
+ * does NOT attach to a container — so we resolve the template, build the two
+ * payloads, then attach with a follow-up `addItemToDraft` (like lesson/vocab).
+ */
 export async function createExerciseAction(
   containerId: string,
   targetLanguage: string,
+  difficultyLevel: DifficultyLevel,
+  visibility: Visibility,
   data: ExerciseFormValues,
 ) {
   return tryAction(async () => {
-    const parsed = exerciseFormSchema.safeParse(data);
-    if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
-    }
+    const parsed = parseOrThrow(data);
+    const exerciseTemplateId = await resolveExerciseTemplateId(parsed.templateCode);
+    const { content, expectedAnswers } = buildExercisePayload(parsed);
 
-    const exercise = await serverFetch<ExerciseDisplay>({
+    const { exerciseId } = await serverFetch<{ exerciseId: string }>({
       service: 'content',
       path: '/exercises',
       method: 'POST',
       body: {
-        containerId,
+        exerciseTemplateId,
         targetLanguage,
-        templateCode: parsed.data.templateCode,
-        content: buildContent(parsed.data),
-        ...(parsed.data.instructions && { instructions: parsed.data.instructions }),
-        ...(parsed.data.difficultyLevel && { difficultyLevel: parsed.data.difficultyLevel }),
+        difficultyLevel: parsed.difficultyLevel ?? difficultyLevel,
+        content,
+        expectedAnswers,
+        visibility,
       },
     });
 
+    const item = await addItemToDraft(containerId, 'exercise', exerciseId);
+
+    if (parsed.instructions?.trim()) {
+      await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
+    }
+
     revalidatePath(`/school/content/${containerId}`);
-    return { exerciseId: exercise.id };
+    return { exerciseId, itemId: item.id };
   });
 }
 
@@ -71,21 +89,23 @@ export async function updateExerciseAction(
   data: ExerciseFormValues,
 ) {
   return tryAction(async () => {
-    const parsed = exerciseFormSchema.safeParse(data);
-    if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
-    }
+    const parsed = parseOrThrow(data);
+    const { content, expectedAnswers } = buildExercisePayload(parsed);
 
     await serverFetch({
       service: 'content',
       path: `/exercises/${exerciseId}`,
       method: 'PATCH',
       body: {
-        content: buildContent(parsed.data),
-        instructions: parsed.data.instructions ?? null,
-        ...(parsed.data.difficultyLevel && { difficultyLevel: parsed.data.difficultyLevel }),
+        content,
+        expectedAnswers,
+        ...(parsed.difficultyLevel && { difficultyLevel: parsed.difficultyLevel }),
       },
     });
+
+    if (parsed.instructions?.trim()) {
+      await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
+    }
 
     revalidatePath(`/school/content/${containerId}`);
   });

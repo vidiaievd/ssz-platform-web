@@ -43,6 +43,18 @@ describe('containerFormSchema', () => {
   it('rejects an invalid visibility', () => {
     expect(containerFormSchema.safeParse({ ...valid, visibility: 'everyone' }).success).toBe(false);
   });
+
+  it('accepts an omitted levelSystem', () => {
+    expect(containerFormSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it('accepts a valid levelSystem', () => {
+    expect(containerFormSchema.safeParse({ ...valid, levelSystem: 'single' }).success).toBe(true);
+  });
+
+  it('rejects an invalid levelSystem', () => {
+    expect(containerFormSchema.safeParse({ ...valid, levelSystem: 'advanced' }).success).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -106,29 +118,6 @@ describe('grammarEditorFormSchema', () => {
 // ---------------------------------------------------------------------------
 
 describe('exerciseFormSchema', () => {
-  it('cloze: accepts valid data with a template', () => {
-    expect(
-      exerciseFormSchema.safeParse({
-        templateCode: 'cloze',
-        clozeTemplate: 'Jeg ___ norsk.',
-        clozeAnswers: [{ text: 'snakker' }],
-      }).success,
-    ).toBe(true);
-  });
-
-  it('cloze: rejects when clozeTemplate is missing', () => {
-    const result = exerciseFormSchema.safeParse({ templateCode: 'cloze' });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    const paths = result.error.issues.map((i) => i.path.join('.'));
-    expect(paths).toContain('clozeTemplate');
-  });
-
-  it('cloze: rejects when clozeTemplate is blank', () => {
-    const result = exerciseFormSchema.safeParse({ templateCode: 'cloze', clozeTemplate: '   ' });
-    expect(result.success).toBe(false);
-  });
-
   it('multiple_choice: accepts valid data with question and 2+ options', () => {
     expect(
       exerciseFormSchema.safeParse({
@@ -163,34 +152,133 @@ describe('exerciseFormSchema', () => {
     expect(paths).toContain('mcOptions');
   });
 
-  it('free_text: accepts valid data with a prompt', () => {
+  it('fill_in_blank: accepts a text with at least one blank', () => {
     expect(
       exerciseFormSchema.safeParse({
-        templateCode: 'free_text',
-        ftPrompt: 'Describe your day in Norwegian.',
+        templateCode: 'fill_in_blank',
+        fibText: 'Jeg ___1___ norsk.',
+        fibBlanks: [{ answers: 'snakker' }],
       }).success,
     ).toBe(true);
   });
 
-  it('free_text: rejects when ftPrompt is missing', () => {
-    const result = exerciseFormSchema.safeParse({ templateCode: 'free_text' });
+  it('fill_in_blank: rejects when fibText is missing', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'fill_in_blank',
+      fibBlanks: [{ answers: 'x' }],
+    });
     expect(result.success).toBe(false);
     if (result.success) return;
     const paths = result.error.issues.map((i) => i.path.join('.'));
-    expect(paths).toContain('ftPrompt');
+    expect(paths).toContain('fibText');
   });
 
-  it('pronunciation: accepts valid data with pronText', () => {
+  it('translate_to_target: accepts source text + at least one translation', () => {
     expect(
-      exerciseFormSchema.safeParse({ templateCode: 'pronunciation', pronText: 'takk' }).success,
+      exerciseFormSchema.safeParse({
+        templateCode: 'translate_to_target',
+        trSourceText: 'I speak Norwegian',
+        trAcceptedTranslations: [{ text: 'Jeg snakker norsk' }],
+      }).success,
     ).toBe(true);
   });
 
-  it('pronunciation: rejects when pronText is missing', () => {
-    const result = exerciseFormSchema.safeParse({ templateCode: 'pronunciation' });
+  it('translate_from_target: rejects when no accepted translation provided', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'translate_from_target',
+      trSourceText: 'Jeg snakker norsk',
+      trAcceptedTranslations: [{ text: ' ' }],
+    });
     expect(result.success).toBe(false);
     if (result.success) return;
     const paths = result.error.issues.map((i) => i.path.join('.'));
-    expect(paths).toContain('pronText');
+    expect(paths).toContain('trAcceptedTranslations');
+  });
+
+  it('match_pairs: accepts 2+ pairs', () => {
+    expect(
+      exerciseFormSchema.safeParse({
+        templateCode: 'match_pairs',
+        mpPairs: [
+          { left: 'hei', right: 'hello' },
+          { left: 'takk', right: 'thanks' },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('match_pairs: rejects fewer than 2 pairs', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'match_pairs',
+      mpPairs: [{ left: 'hei', right: 'hello' }],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    const paths = result.error.issues.map((i) => i.path.join('.'));
+    expect(paths).toContain('mpPairs');
+  });
+
+  it('short_answer: accepts a question with a reference answer', () => {
+    expect(
+      exerciseFormSchema.safeParse({
+        templateCode: 'short_answer',
+        saQuestion: 'When did Anne hear the news?',
+        saReferenceAnswer: 'On the radio.',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('short_answer: rejects when the reference answer is missing', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'short_answer',
+      saQuestion: 'Q?',
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('saReferenceAnswer');
+  });
+
+  it('writing_task: accepts a prompt', () => {
+    expect(
+      exerciseFormSchema.safeParse({ templateCode: 'writing_task', wtPrompt: 'Write a letter.' })
+        .success,
+    ).toBe(true);
+  });
+
+  it('writing_task: rejects when the prompt is missing', () => {
+    const result = exerciseFormSchema.safeParse({ templateCode: 'writing_task' });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('wtPrompt');
+  });
+
+  it('sentence_schema: accepts a sentence with 2+ fields and assigned tokens', () => {
+    expect(
+      exerciseFormSchema.safeParse({
+        templateCode: 'sentence_schema',
+        ssSentence: 'Lars har likt Lotte',
+        ssSchemaType: 'main',
+        ssFields: [{ label: 'Forfelt' }, { label: 'Verbal' }],
+        ssTokens: [
+          { text: 'Lars', fieldIndex: 0 },
+          { text: 'har', fieldIndex: 1 },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('sentence_schema: rejects a token assigned to an empty field', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'sentence_schema',
+      ssSentence: 'S',
+      ssFields: [{ label: 'A' }, { label: '' }],
+      ssTokens: [
+        { text: 'x', fieldIndex: 0 },
+        { text: 'y', fieldIndex: 1 }, // field 1 has an empty label
+      ],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('ssTokens');
   });
 });

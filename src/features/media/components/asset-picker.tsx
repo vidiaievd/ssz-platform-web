@@ -11,8 +11,8 @@ import { ProgressBar } from '@/components/ui/progress';
 import { uploadAsset } from '../lib/upload';
 import type { MediaPurpose } from '../types';
 
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
 type AssetPickerProps = {
   currentUrl?: string | null;

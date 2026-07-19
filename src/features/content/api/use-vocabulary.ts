@@ -40,6 +40,25 @@ export function useVocabularyItems(listId: string, enabled = true) {
   });
 }
 
+/**
+ * Fetches every item of a vocabulary list in one page — for reader surfaces
+ * (FE5.1 vocab flip-card grid) where lists are small and pagination/infinite
+ * scroll (see `useVocabularyItems`) is unnecessary UI complexity.
+ */
+export function useUnitVocabularyItems(listId: string, enabled = true) {
+  return useQuery<VocabularyItem[]>({
+    queryKey: contentKeys.vocabularyItemsFlat(listId),
+    queryFn: async () => {
+      const res = await fetch(`/api/content/vocabulary-lists/${listId}/items`);
+      if (!res.ok) throw new Error('Failed to fetch vocabulary items');
+      const data = (await res.json()) as { items: VocabularyItem[] };
+      return data.items;
+    },
+    staleTime: 120_000,
+    enabled: enabled && !!listId,
+  });
+}
+
 /** Introduces a single SRS card. Pass `seedKind` to skip-known seed it (plan 21 §4). */
 export function useIntroduceCard() {
   return useMutation({

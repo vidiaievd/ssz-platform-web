@@ -33,8 +33,6 @@
   "filterAll": "Всі",
   "exerciseTemplate": "Тип",
   "readOnly": "Перегляд",
-  "hints": "Підказки",
-  "exemplarAnswer": "Приклад відповіді",
   "accessTier": {
     "assigned_only": "Лише призначені",
     "entitlement_required": "Потрібен доступ",
@@ -73,5 +71,30 @@
     "doneSummary": "Ви знали {known} з {total} слів.",
     "continue": "Продовжити",
     "exit": "Вийти"
-  }
+  },
+  "materialType": {
+    "vocab": "Словник",
+    "text": "Читання",
+    "video": "Відео",
+    "audio": "Аудіювання",
+    "grammar": "Граматика",
+    "exercise": "Практика",
+    "live": "Живий урок"
+  },
+  "exerciseTypes": {
+    "multiple_choice": "Множинний вибір",
+    "fill_in_blank": "Заповніть пропуск",
+    "translate_to_target": "Переклад цільовою мовою",
+    "translate_from_target": "Переклад з цільової мови",
+    "match_pairs": "З’єднайте пари",
+    "short_answer": "Коротка відповідь",
+    "writing_task": "Письмове завдання",
+    "sentence_schema": "Схема речення"
+  },
+  "wordBank": "Банк слів",
+  "matchColumnLeft": "Елементи",
+  "matchColumnRight": "Відповідники",
+  "translatePrompt": "Перекладіть:",
+  "shortAnswerAnswer": "Відповідь",
+  "writingTopics": "Теми"
 }

@@ -13,7 +13,14 @@ export { RunnerErrorBody } from './error-body';
 export { Instr } from './instr';
 
 export { FillBody } from './fill-body';
-export type { FillBodyProps, FillContent, FillExpectedAnswers } from './fill-body';
+export type {
+  FillBodyProps,
+  FillContent,
+  FillExpectedAnswers,
+  FillRationale,
+  RationaleOption,
+  RationaleVerdict,
+} from './fill-body';
 
 
 export { McqBody } from './mcq-body';
@@ -25,7 +32,35 @@ export type { TranslateBodyProps, TranslateContent } from './translate-body';
 export { MatchBody } from './match-body';
 export type { MatchBodyProps, MatchContent, MatchPair } from './match-body';
 
-export { normAnswer, gradeMcq, gradeFill, gradeTranslate, gradeMatch } from './grading';
+export { ShortAnswerBody } from './short-answer-body';
+export type {
+  ShortAnswerBodyProps,
+  ShortAnswerContent,
+  ShortAnswerExpectedAnswers,
+} from './short-answer-body';
+
+export { WritingBody } from './writing-body';
+export type { WritingBodyProps, WritingContent, WritingValue, WritingTopic } from './writing-body';
+
+export { SentenceSchemaBody } from './sentence-schema-body';
+export type {
+  SentenceSchemaBodyProps,
+  SentenceSchemaContent,
+  SentenceSchemaExpectedAnswers,
+  SchemaField,
+  SchemaToken,
+  SchemaPlacements,
+} from './sentence-schema-body';
+
+export {
+  normAnswer,
+  gradeMcq,
+  gradeFill,
+  gradeTranslate,
+  gradeMatch,
+  gradeShortAnswer,
+  gradeSentenceSchema,
+} from './grading';
 export type { TranslateExpectedAnswers } from './grading';
 
 export {

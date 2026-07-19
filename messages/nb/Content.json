@@ -33,8 +33,6 @@
   "filterAll": "Alle",
   "exerciseTemplate": "Type",
   "readOnly": "Forhåndsvisning",
-  "hints": "Hint",
-  "exemplarAnswer": "Eksempelsvar",
   "accessTier": {
     "assigned_only": "Kun tildelt",
     "entitlement_required": "Krever tilgang",
@@ -73,5 +71,30 @@
     "doneSummary": "Du kjente {known} av {total} ord.",
     "continue": "Fortsett",
     "exit": "Avslutt"
-  }
+  },
+  "materialType": {
+    "vocab": "Ordforråd",
+    "text": "Lesing",
+    "video": "Video",
+    "audio": "Lytting",
+    "grammar": "Grammatikk",
+    "exercise": "Øving",
+    "live": "Direktetime"
+  },
+  "exerciseTypes": {
+    "multiple_choice": "Flervalg",
+    "fill_in_blank": "Fyll inn i tomrommet",
+    "translate_to_target": "Oversett til målspråket",
+    "translate_from_target": "Oversett fra målspråket",
+    "match_pairs": "Koble par",
+    "short_answer": "Kort svar",
+    "writing_task": "Skriveoppgave",
+    "sentence_schema": "Setningsskjema"
+  },
+  "wordBank": "Ordbank",
+  "matchColumnLeft": "Elementer",
+  "matchColumnRight": "Treff",
+  "translatePrompt": "Oversett:",
+  "shortAnswerAnswer": "Svar",
+  "writingTopics": "Temaer"
 }

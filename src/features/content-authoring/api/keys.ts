@@ -10,6 +10,15 @@ export const authoringKeys = keyFactory('authoring', {
   lessons: (containerId: string) => ['lessons', containerId] as const,
   lesson: (id: string) => ['lesson', id] as const,
   lessonVariants: (lessonId: string) => ['lesson-variants', lessonId] as const,
+  lessonParagraphs: (lessonId: string, variantId: string) =>
+    ['lesson-paragraphs', lessonId, variantId] as const,
+  lessonGlossaryMarks: (lessonId: string, variantId: string) =>
+    ['lesson-glossary-marks', lessonId, variantId] as const,
+  lessonCues: (lessonId: string, variantId: string) => ['lesson-cues', lessonId, variantId] as const,
+  lessonListeningStages: (lessonId: string, variantId: string) =>
+    ['lesson-listening-stages', lessonId, variantId] as const,
+  lessonVideoQuestion: (lessonId: string, variantId: string) =>
+    ['lesson-video-question', lessonId, variantId] as const,
   vocabularyLists: (containerId: string) => ['vocabulary-lists', containerId] as const,
   vocabularyList: (listId: string) => ['vocabulary-list', listId] as const,
   vocabularyItems: (listId: string, page: number) =>
@@ -23,6 +32,9 @@ export const authoringKeys = keyFactory('authoring', {
   exercise: (id: string) => ['exercise', id] as const,
   sections: (containerId: string) => ['sections', containerId] as const,
   versions: (containerId: string) => ['versions', containerId] as const,
+  contentCounts: (containerId: string) => ['content-counts', containerId] as const,
+  enrollmentCount: (containerId: string) => ['enrollment-count', containerId] as const,
+  tree: (containerId: string, versionId: string) => ['tree', containerId, versionId] as const,
   tags: (entityType: string, entityId: string) => ['tags', entityType, entityId] as const,
   shares: (entityType: string, entityId: string) => ['shares', entityType, entityId] as const,
 });

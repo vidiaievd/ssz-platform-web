@@ -1,5 +1,11 @@
 // @vitest-environment node
 
+/**
+ * @deprecated OLD exercise-solving system — superseded by the `runner/`
+ * exercises (placement, unit-flow practice) and the realigned authoring
+ * exercise contract. No live consumers; slated for full removal.
+ */
+
 import { describe, expect, it, vi } from 'vitest';
 
 // Mock Next.js server modules before importing the action.

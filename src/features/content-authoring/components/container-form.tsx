@@ -27,6 +27,7 @@ import {
   difficultyLevels,
   visibilities,
   accessTiers,
+  gatingModes,
   type ContainerFormValues,
 } from '../schemas/container';
 import { createContainerAction, updateContainerAction } from '../actions/container';
@@ -60,6 +61,7 @@ export function ContainerForm(props: ContainerFormProps) {
           difficultyLevel: container.difficultyLevel,
           visibility: container.visibility,
           accessTier: container.accessTier,
+          gatingMode: container.gatingMode ?? 'open',
         }
       : {
           title: '',
@@ -69,6 +71,7 @@ export function ContainerForm(props: ContainerFormProps) {
           difficultyLevel: 'A1',
           visibility: 'public',
           accessTier: 'public_free',
+          gatingMode: 'open',
         },
   });
 
@@ -76,6 +79,10 @@ export function ContainerForm(props: ContainerFormProps) {
   const levelCtrl = useController({ name: 'difficultyLevel', control });
   const visibilityCtrl = useController({ name: 'visibility', control });
   const accessTierCtrl = useController({ name: 'accessTier', control });
+  const gatingModeCtrl = useController({ name: 'gatingMode', control });
+
+  // Gating is a course-only student-unlock policy; only shown when editing a course.
+  const showGatingMode = props.mode === 'edit' && container?.containerType === 'course';
 
   function onSubmit(data: ContainerFormValues) {
     startTransition(async () => {
@@ -259,6 +266,33 @@ export function ContainerForm(props: ContainerFormProps) {
           </Select>
         </Field>
       </div>
+
+      {/* Gating mode — course-only student unlock policy */}
+      {showGatingMode && (
+        <Field
+          label={t('fields.gatingMode')}
+          htmlFor="gatingMode"
+          error={errors.gatingMode?.message}
+          hint={t('fields.gatingModeHint')}
+        >
+          <Select
+            value={gatingModeCtrl.field.value ?? 'open'}
+            onValueChange={gatingModeCtrl.field.onChange}
+            disabled={isPending}
+          >
+            <SelectTrigger id="gatingMode" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {gatingModes.map((gm) => (
+                <SelectItem key={gm} value={gm}>
+                  {t(`gatingMode.${gm}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      )}
 
       <Button type="submit" loading={isPending}>
         {props.mode === 'create' ? t('form.create') : t('form.save')}

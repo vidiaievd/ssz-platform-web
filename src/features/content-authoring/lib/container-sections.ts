@@ -64,9 +64,8 @@ export async function reorderDraftSections(
 
 /**
  * Replaces the draft version's sections with `titles`, in order. Used by the
- * create-wizard's Structure step, which only offers a coarse "pick a scaffold"
- * choice (CEFR levels or blank) before any items exist — so a full
- * delete-and-recreate is safe and simpler than diffing.
+ * create-course flow's CEFR level-system scaffolding, which runs before any
+ * items exist — so a full delete-and-recreate is safe and simpler than diffing.
  */
 export async function syncDraftSections(containerId: string, titles: string[]): Promise<void> {
   const existing = await listDraftSections(containerId);

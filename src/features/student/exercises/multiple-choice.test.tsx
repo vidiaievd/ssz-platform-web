@@ -1,3 +1,8 @@
+/**
+ * @deprecated OLD exercise-solving system — superseded by the `runner/`
+ * exercises (placement, unit-flow practice) and the realigned authoring
+ * exercise contract. No live consumers; slated for full removal.
+ */
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -18,7 +23,15 @@ const EXERCISE: ExerciseDisplay = {
   templateCode: 'multiple_choice',
   targetLanguage: 'nb',
   difficultyLevel: 'A1',
-  instructions: 'Pick the correct answer.',
+  instructions: [
+    {
+      id: 'i1',
+      exerciseId: 'ex-mc-1',
+      instructionLanguage: 'en',
+      instructionText: 'Pick the correct answer.',
+      hintText: null,
+    },
+  ],
   content: {
     question: 'What colour is the sky?',
     options: [

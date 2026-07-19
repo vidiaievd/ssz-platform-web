@@ -8,7 +8,8 @@ export { useCourseProgress } from './api/use-course-progress';
 export { useCourseMastery } from './api/use-course-mastery';
 export { useCanDo } from './api/use-can-do';
 export { useCourseHome } from './api/use-course-home';
-export { useUnitPayload } from './api/use-unit-payload';
+export { useUnitContents } from './api/use-unit-contents';
+export { useUpsertProgress } from './api/use-upsert-progress';
 export { useProgressOverview } from './api/use-progress-overview';
 export { useAssignments, useAssignment, useAssignmentQuestions, useSubmitGradedAssignment, useSubmitWrittenAssignment, useSaveWrittenDraft } from './api/use-assignments';
 
@@ -19,6 +20,7 @@ export type {
   CourseMastery,
   CourseHomePayload,
   CourseInfo,
+  CourseLevelGroup,
   CourseProgress,
   UnitStatus,
   UnitSummary,
@@ -26,7 +28,6 @@ export type {
   ExpandedGrammarExample,
   ExpandedGrammarRule,
   ExpandedLesson,
-  ExpandedModule,
   ExpandedVocabItem,
   LessonProgress,
   LessonProgressStatus,
@@ -46,7 +47,10 @@ export type {
   SrsHeatmapDay,
   SrsSettings,
   SrsStats,
-  UnitPayload,
+  UnitContentsItem,
+  UnitContentsItemStatus,
+  UnitContentsResult,
+  UnitContentsSection,
   ProgressCanDo,
   ProgressCanDoState,
   ProgressModule,
@@ -66,6 +70,8 @@ export type {
   WrittenDraftRequest,
   AssignmentQuestion,
   AssignmentQuestionsResponse,
+  UpsertProgressRequest,
+  ProgressRecord,
 } from './types';
 
 /* ─── Session store ──────────────────────────────────────────────── */
@@ -90,6 +96,17 @@ export type { ErrorStateProps } from './components/error-state';
 
 export { GlossaryPopover } from './components/glossary-popover';
 export type { GlossaryPopoverProps, PartOfSpeech } from './components/glossary-popover';
+
+export { GlossaryParagraph } from './components/glossary-paragraph';
+export type { GlossaryParagraphProps } from './components/glossary-paragraph';
+
+export { buildGlossaryIndex, tokenizeGlossary } from './lib/tokenize-glossary';
+export type { GlossaryIndex, GlossaryToken } from './lib/tokenize-glossary';
+
+export { formatTimecode } from './lib/format-timecode';
+
+export { VideoPlayer } from './components/video-player';
+export type { VideoPlayerProps, VideoPlayerHandle } from './components/video-player';
 
 export { LearningSkeleton } from './components/learning-skeleton';
 export type { LearningSkeletonProps } from './components/learning-skeleton';

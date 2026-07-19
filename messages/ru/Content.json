@@ -33,8 +33,6 @@
   "filterAll": "Все",
   "exerciseTemplate": "Тип",
   "readOnly": "Просмотр",
-  "hints": "Подсказки",
-  "exemplarAnswer": "Пример ответа",
   "accessTier": {
     "assigned_only": "Только назначенные",
     "entitlement_required": "Требуется доступ",
@@ -73,5 +71,30 @@
     "doneSummary": "Вы знали {known} из {total} слов.",
     "continue": "Продолжить",
     "exit": "Выйти"
-  }
+  },
+  "materialType": {
+    "vocab": "Словарь",
+    "text": "Чтение",
+    "video": "Видео",
+    "audio": "Аудирование",
+    "grammar": "Грамматика",
+    "exercise": "Практика",
+    "live": "Живой урок"
+  },
+  "exerciseTypes": {
+    "multiple_choice": "Множественный выбор",
+    "fill_in_blank": "Заполните пропуск",
+    "translate_to_target": "Перевод на целевой язык",
+    "translate_from_target": "Перевод с целевого языка",
+    "match_pairs": "Сопоставьте пары",
+    "short_answer": "Краткий ответ",
+    "writing_task": "Письменное задание",
+    "sentence_schema": "Схема предложения"
+  },
+  "wordBank": "Банк слов",
+  "matchColumnLeft": "Элементы",
+  "matchColumnRight": "Соответствия",
+  "translatePrompt": "Переведите:",
+  "shortAnswerAnswer": "Ответ",
+  "writingTopics": "Темы"
 }

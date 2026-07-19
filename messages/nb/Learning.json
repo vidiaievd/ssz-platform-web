@@ -14,7 +14,8 @@
   },
   "glossary": {
     "seeInContext": "Se i kontekst",
-    "listenWord": "Hør"
+    "listenWord": "Hør",
+    "lookUpWord": "Slå opp"
   },
   "unitStepper": {
     "label": "Enhetssteg",
@@ -186,6 +187,9 @@
       "lessons": "{done} av {total} leksjoner",
       "continueUnit": "Fortsett"
     },
+    "levelAccordion": {
+      "units": "{done} av {total} enheter"
+    },
     "skillIndex": {
       "mastery": "{pct}% mestring",
       "jump": "Gå til →",
@@ -208,6 +212,204 @@
       "nextTitle": "Neste mal",
       "inUnit": "Enhet {n}",
       "noItems": "Fullfor enheter for a lase opp mal."
+    }
+  },
+  "reader": {
+    "sidebar": {
+      "contentsHeading": "Innhold",
+      "completed": "Fullført {pct}%",
+      "showContents": "Vis innhold",
+      "hideContents": "Skjul innhold",
+      "unitLabel": "Enhet {n}",
+      "locked": "Låst",
+      "durationMinutes": "{n} min",
+      "otherItems": "Annet"
+    },
+    "topbar": {
+      "courseLabel": "Kurs",
+      "streakDays": "{count, plural, one {# dags rekke} other {# dagers rekke}}",
+      "xp": "{xp} XP",
+      "toggleThemeToLight": "Bytt til lyst tema",
+      "toggleThemeToDark": "Bytt til mørkt tema"
+    },
+    "footerNav": {
+      "previous": "Forrige",
+      "next": "Neste · {type}",
+      "unlocksAfterThis": "Neste låses opp etter denne"
+    },
+    "body": {
+      "comingSoonTitle": "Denne leksjonssiden er på vei",
+      "comingSoonBody": "Lesevisningen for denne materialtypen er ikke koblet til ennå."
+    },
+    "entry": {
+      "emptyTitle": "Denne enheten har ikke noe innhold ennå",
+      "emptyBody": "Kom tilbake når læreren har publisert leksjoner for denne enheten.",
+      "backToCourse": "Tilbake til kurset"
+    },
+    "vocab": {
+      "grunnform": "grunnform",
+      "listen": "Lytt",
+      "flipHint": "Trykk for å snu",
+      "flipCardLabel": "Snu kort: {word}",
+      "backLabelTranslation": "Oversettelse",
+      "backLabelDefinition": "Forklaring",
+      "allForms": "Alle former",
+      "pos": {
+        "noun": "Substantiv",
+        "verb": "Verb",
+        "adjective": "Adjektiv",
+        "adverb": "Adverb",
+        "pronoun": "Pronomen",
+        "preposition": "Preposisjon",
+        "conjunction": "Konjunksjon",
+        "interjection": "Interjeksjon",
+        "numeral": "Tallord",
+        "particle": "Partikkel",
+        "phrase": "Uttrykk",
+        "other": "Ord"
+      },
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "newWords": "{count, plural, one {# nytt ord} other {# nye ord}}",
+        "howToTranslation": "Start med de nye ordene. Trykk på et kort for å snu det — du ser oversettelsen. Åpne Alle former for full bøyning.",
+        "howToDefinition": "Start med de nye ordene. Trykk på et kort for å snu det — du ser en forklaring. Åpne Alle former for full bøyning.",
+        "levelBadgeTranslation": "A1–B1 · oversettelse",
+        "levelBadgeDefinition": "B2+ · forklaring",
+        "emptyTitle": "Ingen nye ord ennå",
+        "emptyBody": "Denne ordlisten har ingen ord ennå.",
+        "nextHeading": "Neste — bruk ordene",
+        "reviewTitle": "Gjenta tidligere ord",
+        "reviewBody": "{count, plural, one {# ord fra tidligere enheter er klart til repetisjon i dag} other {# ord fra tidligere enheter er klare til repetisjon i dag}}",
+        "reviewCta": "Repeter"
+      }
+    },
+    "text": {
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "tapToLookUp": "trykk på et ord for å slå det opp",
+        "showTranslation": "Vis oversettelse",
+        "hideTranslation": "Skjul oversettelse",
+        "columnTarget": "Tekst",
+        "columnTranslation": "Oversettelse",
+        "paragraphOf": "Avsnitt {current} av {total}",
+        "previousParagraph": "Forrige avsnitt",
+        "nextParagraph": "Neste avsnitt",
+        "noParagraphs": "Denne leksjonen har ingen tekst ennå.",
+        "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
+        "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen."
+      },
+      "mode": {
+        "label": "Lesemodus",
+        "immersive": "Fordypning",
+        "bilingual": "Tospråklig",
+        "focus": "Fokus"
+      }
+    },
+    "video": {
+      "player": {
+        "noSource": "Denne leksjonen har ingen video ennå.",
+        "play": "Spill av",
+        "pause": "Pause",
+        "scrubber": "Videoposisjon",
+        "speed": "{speed}× hastighet"
+      },
+      "transcript": {
+        "heading": "Transkripsjon",
+        "clickToJump": "klikk på en linje for å hoppe dit",
+        "empty": "Denne leksjonen har ingen transkripsjon ennå."
+      },
+      "notes": {
+        "heading": "Mine notater",
+        "atTimestamp": "ved {time}",
+        "placeholder": "Legg til et notat her…",
+        "add": "Legg til notat",
+        "empty": "Ingen notater ennå. Bokmerk et øyeblikk for å huske det."
+      },
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "subtitlesOn": "Undertekster på",
+        "subtitlesOff": "Undertekster av",
+        "translationOn": "Oversettelse på",
+        "translationOff": "Oversettelse av",
+        "tapSubtitleWords": "trykk på ord i undertekstene",
+        "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
+        "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen."
+      }
+    },
+    "listening": {
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
+        "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen.",
+        "noStagesTitle": "Ingen øvelser er lagt til ennå",
+        "noStagesBody": "Denne lytteleksjonen har ingen huller- eller forståelsesoppgaver ennå."
+      },
+      "stages": {
+        "label": "Fremdrift i lytteøvelsen",
+        "listen": "Lytt",
+        "gapfill": "Fyll inn",
+        "comp": "Forståelse"
+      },
+      "listen": {
+        "heading": "Lytt nøye",
+        "body": "Spill av klippet så mange ganger du trenger. Deretter fyller du inn manglende ord og svarer på spørsmål — ingen transkripsjon ennå.",
+        "cta": "Jeg er klar — start utfylling"
+      },
+      "gapfill": {
+        "heading": "Fyll inn de tomme feltene",
+        "body": "Lytt igjen og velg ordet du hører.",
+        "checkAnswers": "Sjekk svarene",
+        "next": "Neste — forståelse",
+        "correctCount": "{correct}/{total} riktige",
+        "answerLabel": "Svar: {answer}"
+      },
+      "comp": {
+        "heading": "Forståelse",
+        "body": "Svar basert på det du hørte.",
+        "checkAnswers": "Sjekk svarene",
+        "finish": "Fullfør lytteøvelsen",
+        "score": "Poeng {score}/{total}"
+      },
+      "done": {
+        "heading": "Godt jobbet!",
+        "body": "Du fullførte alle tre stadiene i lytteøvelsen. Fremgangen din er lagret, og ordene du bommet på er lagt til i repetisjon."
+      }
+    },
+    "grammar": {
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
+        "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen."
+      },
+      "anchor": {
+        "label": "Fra teksten"
+      },
+      "compare": {
+        "heading": "Sammenlign"
+      },
+      "quickCheck": {
+        "label": "Rask sjekk",
+        "checkAnswer": "Sjekk svaret",
+        "correct": "Riktig!",
+        "incorrect": "Ikke helt."
+      }
+    },
+    "live": {
+      "page": {
+        "eyebrow": "Enhet {unit} · {course} · {type}",
+        "noScheduleTitle": "Ikke planlagt ennå",
+        "noScheduleBody": "Læreren din har ikke satt en dato for denne livetimen ennå. Sjekk tilbake senere."
+      },
+      "schedule": {
+        "date": "Dato",
+        "time": "Tid",
+        "duration": "Varighet",
+        "durationMinutes": "{minutes} min",
+        "capacity": "Kapasitet",
+        "joinLink": "Påloggingslenke",
+        "join": "Bli med i økten"
+      },
+      "note": "Denne livetimen skjer utenfor plattformen via videosamtale. Deltakelse spores ikke her."
     }
   }
 }

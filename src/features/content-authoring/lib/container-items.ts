@@ -2,7 +2,7 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import type { ContainerItem, ContainerVersion } from '@/features/content/types';
 
-export type ContainerItemType = 'lesson' | 'vocabulary_list' | 'grammar_rule' | 'exercise';
+export type ContainerItemType = 'lesson' | 'vocabulary_list' | 'grammar_rule' | 'exercise' | 'container';
 
 /**
  * Resolves the draft version of a container — the version that newly
@@ -29,19 +29,27 @@ export async function requireDraftVersionId(containerId: string): Promise<string
   return versionId;
 }
 
-/** Attaches a piece of reusable content (lesson, vocabulary list, ...) to the container's draft version. */
+/**
+ * Attaches a piece of reusable content (lesson, vocabulary list, ...) to the
+ * container's draft version. The backend's `POST .../items` responds with
+ * `{ itemId }` — the id of the newly created container-item itself, not the
+ * `ContainerItem` shape returned by GET (where `itemId` instead means "id of
+ * the referenced content"). Only the new item's own id is ever needed by
+ * callers, so that's all this returns.
+ */
 export async function addItemToDraft(
   containerId: string,
   itemType: ContainerItemType,
   itemId: string,
-): Promise<ContainerItem> {
+): Promise<{ id: string }> {
   const versionId = await requireDraftVersionId(containerId);
-  return serverFetch<ContainerItem>({
+  const created = await serverFetch<{ itemId: string }>({
     service: 'content',
     path: `/containers/${containerId}/versions/${versionId}/items`,
     method: 'POST',
     body: { itemType, itemId },
   });
+  return { id: created.itemId };
 }
 
 /** Removes an item (by its container-item id, not the referenced content id) from the draft version. */
@@ -69,6 +77,11 @@ export async function assignItemSection(
   });
 }
 
+/**
+ * Reorders all items in a container's draft version. The backend requires
+ * `orderedItemIds` to cover every item in the version (a partial list is
+ * rejected), so callers must pass the full flattened order.
+ */
 export async function reorderDraftItems(containerId: string, orderedItemIds: string[]): Promise<void> {
   const versionId = await requireDraftVersionId(containerId);
   await serverFetch({

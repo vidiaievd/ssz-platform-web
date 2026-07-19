@@ -1,5 +1,7 @@
 'use client';
 
+import { useLocale } from 'next-intl';
+
 import { DataState } from '@/components/shared/data-state';
 import { useBestGrammarExplanation } from '../api/use-grammar-rule';
 import type { GrammarRule } from '../types';
@@ -9,8 +11,20 @@ interface GrammarReaderProps {
   ruleId: string;
 }
 
+// This preview has no enrolled-student context (authoring surface), so it resolves
+// "best" explanation using the current UI locale as the native-language hint and a
+// conservative default level, mirroring how useBestLessonVariant callers fall back
+// when no student profile is available.
+const PREVIEW_FALLBACK_LEVEL = 'A1';
+
 export function GrammarReader({ rule, ruleId }: GrammarReaderProps) {
-  const { data: explanation, isLoading, error, refetch } = useBestGrammarExplanation(ruleId);
+  const locale = useLocale();
+  const {
+    data: explanation,
+    isLoading,
+    error,
+    refetch,
+  } = useBestGrammarExplanation(ruleId, locale, PREVIEW_FALLBACK_LEVEL);
 
   return (
     <div className="rounded-lg border p-5">

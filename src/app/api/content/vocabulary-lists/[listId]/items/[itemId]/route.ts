@@ -2,34 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
-import type { VocabularyItem } from '@/features/content/types';
 
-interface BackendItemFull {
-  id: string;
-  word: string;
-  partOfSpeech: string | null;
-  ipaTranscription: string | null;
-  translations: { language: string; primaryTranslation: string }[];
-  usageExamples: { id: string; exampleText: string }[];
-}
-
-function toFeShape(item: BackendItemFull): VocabularyItem {
-  return {
-    id: item.id,
-    lemma: item.word,
-    partOfSpeech: item.partOfSpeech ?? undefined,
-    ipa: item.ipaTranscription ?? undefined,
-    translations: item.translations.map((t) => ({
-      languageCode: t.language,
-      translation: t.primaryTranslation,
-    })),
-    examples: item.usageExamples.map((e) => ({
-      id: e.id,
-      template: e.exampleText,
-      substitution: '',
-    })),
-  };
-}
+import { toFeShape, type BackendItemFull } from '../map-vocabulary-item';
 
 export async function GET(
   _request: NextRequest,
