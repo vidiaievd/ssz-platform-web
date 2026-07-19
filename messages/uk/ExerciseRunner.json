@@ -29,7 +29,14 @@
     "defaultInstruction": "Доповніть речення",
     "blankLabel": "Пропуск",
     "inputLabel": "Ваша відповідь",
-    "placeholder": "введіть…"
+    "placeholder": "введіть…",
+    "rationaleTitle": "Чому саме так",
+    "optionHeader": "Варіант",
+    "verdictHeader": "Підходить?",
+    "noteHeader": "Чому",
+    "verdictCorrect": "Правильно",
+    "verdictAcceptable": "Можливо, але не тут",
+    "verdictWrong": "Неправильно"
   },
   "translate": {
     "defaultInstruction": "Перекладіть речення",

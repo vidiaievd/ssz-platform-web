@@ -23,6 +23,7 @@ import {
   normAnswer,
   PRACTICE_ACCENT,
   type McqContent,
+  type FillRationale,
   type MatchContent,
   type MatchPair,
   type SchemaField,
@@ -124,7 +125,10 @@ function FillSolver({ display, phase, ok, onCheck }: SolverProps) {
   const [value, setValue] = useState('');
   const c = display.content;
   const rawBlanks = Array.isArray(display.expectedAnswers.blanks) ? display.expectedAnswers.blanks : [];
-  const firstAccepted = strArr((rawBlanks[0] as { accepted_answers?: unknown })?.accepted_answers);
+  const firstBlank = rawBlanks[0] as
+    | { accepted_answers?: unknown; rationale?: FillRationale }
+    | undefined;
+  const firstAccepted = strArr(firstBlank?.accepted_answers);
 
   return (
     <>
@@ -141,6 +145,7 @@ function FillSolver({ display, phase, ok, onCheck }: SolverProps) {
         ok={ok}
         mode="practice"
         accent={ACCENT}
+        rationale={firstBlank?.rationale}
       />
       {phase === 'answering' && (
         <CheckFooter

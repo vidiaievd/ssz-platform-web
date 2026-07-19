@@ -25,6 +25,25 @@ export interface FillExpectedAnswers {
   explanation?: string;
 }
 
+/** Verdict for one analysed option in the rationale matrix. */
+export type RationaleVerdict = 'correct' | 'acceptable' | 'wrong';
+
+export interface RationaleOption {
+  text: string;
+  verdict: RationaleVerdict;
+  note?: string;
+}
+
+/**
+ * Optional teaching aid shown as feedback AFTER checking: why the correct
+ * choice fits and why typical wrong choices don't. Purely presentational —
+ * it never takes part in grading.
+ */
+export interface FillRationale {
+  explanation?: string;
+  options?: RationaleOption[];
+}
+
 export interface FillBodyProps {
   content: FillContent;
   /** Current value for the (first) blank. */
@@ -36,6 +55,11 @@ export interface FillBodyProps {
   ok: boolean | null;
   mode: RunnerMode;
   accent: string;
+  /**
+   * Optional per-blank explanation matrix, rendered only in the feedback phase.
+   * Omitted for exercises authored without one — the body behaves exactly as before.
+   */
+  rationale?: FillRationale;
 }
 
 /* ── color constants ─────────────────────────────────────────────── */
@@ -78,6 +102,100 @@ function getChipStyle(
   return { bg: 'var(--ssz-bg-surface)', border: 'var(--ssz-border-default)', color: 'var(--ssz-text-primary)' };
 }
 
+/** Per-verdict colors for the rationale matrix rows. */
+function verdictStyle(verdict: RationaleVerdict): { mark: string; color: string; bg: string } {
+  if (verdict === 'correct') return { mark: '✔', color: OK_FG, bg: OK_BG };
+  if (verdict === 'acceptable')
+    return { mark: '△', color: 'var(--ssz-text-secondary)', bg: 'var(--ssz-bg-surface)' };
+  return { mark: '✗', color: NO_FG, bg: NO_BG };
+}
+
+/**
+ * Post-check teaching aid: a compact table of the candidate answers with a
+ * verdict and a short note for each. Rendered under the sentence in the
+ * feedback phase so the student learns the rule, not just the answer.
+ */
+function RationaleMatrix({ rationale }: { rationale: FillRationale }) {
+  const t = useTranslations('ExerciseRunner');
+  const options = rationale.options ?? [];
+  if (options.length === 0 && !rationale.explanation) return null;
+
+  const verdictLabel: Record<RationaleVerdict, string> = {
+    correct: t('fill.verdictCorrect'),
+    acceptable: t('fill.verdictAcceptable'),
+    wrong: t('fill.verdictWrong'),
+  };
+
+  return (
+    <section
+      className="mt-7 rounded-xl border p-4"
+      style={{
+        borderColor: 'var(--ssz-border-default)',
+        background: 'var(--ssz-bg-subtle)',
+      }}
+      aria-label={t('fill.rationaleTitle')}
+    >
+      <h3
+        className="mb-3 text-[13px] font-semibold uppercase tracking-wide"
+        style={{ color: 'var(--ssz-text-secondary)', fontFamily: 'var(--ssz-font-ui)' }}
+      >
+        {t('fill.rationaleTitle')}
+      </h3>
+
+      {rationale.explanation && (
+        <p
+          className="mb-3 text-[15px] leading-relaxed"
+          style={{ color: 'var(--ssz-text-primary)', fontFamily: READING }}
+        >
+          {rationale.explanation}
+        </p>
+      )}
+
+      {options.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left text-[14px]">
+            <thead>
+              <tr style={{ color: 'var(--ssz-text-muted)' }}>
+                <th scope="col" className="py-1 pr-3 font-medium">
+                  {t('fill.optionHeader')}
+                </th>
+                <th scope="col" className="py-1 pr-3 font-medium">
+                  {t('fill.verdictHeader')}
+                </th>
+                <th scope="col" className="py-1 font-medium">
+                  {t('fill.noteHeader')}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {options.map((opt) => {
+                const s = verdictStyle(opt.verdict);
+                return (
+                  <tr key={opt.text} style={{ background: s.bg }}>
+                    <td
+                      className="py-2 pr-3 align-top font-semibold"
+                      style={{ fontFamily: READING, color: s.color }}
+                    >
+                      {opt.text}
+                    </td>
+                    <td className="py-2 pr-3 align-top whitespace-nowrap" style={{ color: s.color }}>
+                      <span aria-hidden="true">{s.mark}</span>{' '}
+                      <span className="text-[13px]">{verdictLabel[opt.verdict]}</span>
+                    </td>
+                    <td className="py-2 align-top" style={{ color: 'var(--ssz-text-secondary)' }}>
+                      {opt.note}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function FillBody({
   content,
   value,
@@ -87,6 +205,7 @@ export function FillBody({
   ok,
   mode,
   accent,
+  rationale,
 }: FillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const accentSoft = modeAccentSoft(mode);
@@ -245,6 +364,9 @@ export function FillBody({
           })}
         </div>
       )}
+
+      {/* Explanation matrix — feedback phase only, and only when authored. */}
+      {reveal && rationale && <RationaleMatrix rationale={rationale} />}
     </>
   );
 }

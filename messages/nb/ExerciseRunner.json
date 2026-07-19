@@ -29,7 +29,14 @@
     "defaultInstruction": "Fullfør setningen",
     "blankLabel": "Tom",
     "inputLabel": "Ditt svar",
-    "placeholder": "skriv…"
+    "placeholder": "skriv…",
+    "rationaleTitle": "Hvorfor dette svaret",
+    "optionHeader": "Alternativ",
+    "verdictHeader": "Passer?",
+    "noteHeader": "Hvorfor",
+    "verdictCorrect": "Riktig",
+    "verdictAcceptable": "Mulig, men ikke her",
+    "verdictWrong": "Galt"
   },
   "translate": {
     "defaultInstruction": "Oversett setningen",

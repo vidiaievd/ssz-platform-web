@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
-import { FillBody, type FillContent } from './fill-body';
+import { FillBody, type FillContent, type FillRationale } from './fill-body';
 
 const messages = {
   ExerciseRunner: {
@@ -11,8 +11,24 @@ const messages = {
       blankLabel: 'Blank',
       inputLabel: 'Your answer',
       placeholder: 'type…',
+      rationaleTitle: 'Why this answer',
+      optionHeader: 'Option',
+      verdictHeader: 'Fits?',
+      noteHeader: 'Why',
+      verdictCorrect: 'Correct',
+      verdictAcceptable: 'Possible, but not here',
+      verdictWrong: 'Wrong',
     },
   },
+};
+
+const RATIONALE: FillRationale = {
+  explanation: 'A statement is introduced by «at».',
+  options: [
+    { text: 'at', verdict: 'correct', note: 'Statement → at.' },
+    { text: 'om', verdict: 'wrong', note: 'Only for yes/no questions.' },
+    { text: 'hvorfor', verdict: 'acceptable', note: 'Grammatical, but not in this context.' },
+  ],
 };
 
 const CONTENT_WB: FillContent = {
@@ -202,5 +218,52 @@ describe('FillBody — reveal states (word bank)', () => {
     });
     const chip = screen.getByRole('button', { name: 'hjemme' });
     expect(chip.getAttribute('style')).toContain('secondary-600');
+  });
+
+  describe('rationale matrix', () => {
+    it('is hidden while answering, even when authored', () => {
+      renderFill({ phase: 'answering', value: 'hjemme', ok: null, rationale: RATIONALE });
+      expect(screen.queryByRole('table')).toBeNull();
+      expect(screen.queryByText('Why this answer')).toBeNull();
+    });
+
+    it('renders every option with its verdict and note in the feedback phase', () => {
+      renderFill({ phase: 'feedback', value: 'hjemme', ok: true, rationale: RATIONALE });
+
+      expect(screen.getByText('Why this answer')).toBeInTheDocument();
+      expect(screen.getByText('A statement is introduced by «at».')).toBeInTheDocument();
+
+      // one row per analysed option, each carrying its verdict label and note
+      expect(screen.getByRole('table')).toBeInTheDocument();
+      expect(screen.getByText('at')).toBeInTheDocument();
+      expect(screen.getByText('Correct')).toBeInTheDocument();
+      expect(screen.getByText('Statement → at.')).toBeInTheDocument();
+      expect(screen.getByText('Wrong')).toBeInTheDocument();
+      expect(screen.getByText('Only for yes/no questions.')).toBeInTheDocument();
+      expect(screen.getByText('Possible, but not here')).toBeInTheDocument();
+    });
+
+    it('is shown after a wrong answer too, so the rule is still taught', () => {
+      renderFill({ phase: 'feedback', value: 'jobben', ok: false, rationale: RATIONALE });
+      expect(screen.getByRole('table')).toBeInTheDocument();
+      expect(screen.getByText('Statement → at.')).toBeInTheDocument();
+    });
+
+    it('renders nothing extra when the exercise has no rationale', () => {
+      renderFill({ phase: 'feedback', value: 'hjemme', ok: true });
+      expect(screen.queryByRole('table')).toBeNull();
+      expect(screen.queryByText('Why this answer')).toBeNull();
+    });
+
+    it('renders the explanation alone when no options are given', () => {
+      renderFill({
+        phase: 'feedback',
+        value: 'hjemme',
+        ok: true,
+        rationale: { explanation: 'Just the rule.' },
+      });
+      expect(screen.getByText('Just the rule.')).toBeInTheDocument();
+      expect(screen.queryByRole('table')).toBeNull();
+    });
   });
 });

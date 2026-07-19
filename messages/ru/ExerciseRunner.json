@@ -29,7 +29,14 @@
     "defaultInstruction": "Дополните предложение",
     "blankLabel": "Пропуск",
     "inputLabel": "Ваш ответ",
-    "placeholder": "введите…"
+    "placeholder": "введите…",
+    "rationaleTitle": "Почему такой ответ",
+    "optionHeader": "Вариант",
+    "verdictHeader": "Подходит?",
+    "noteHeader": "Почему",
+    "verdictCorrect": "Верно",
+    "verdictAcceptable": "Возможно, но не здесь",
+    "verdictWrong": "Неверно"
   },
   "translate": {
     "defaultInstruction": "Переведите предложение",

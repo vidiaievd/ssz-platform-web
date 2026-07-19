@@ -13,7 +13,14 @@ export { RunnerErrorBody } from './error-body';
 export { Instr } from './instr';
 
 export { FillBody } from './fill-body';
-export type { FillBodyProps, FillContent, FillExpectedAnswers } from './fill-body';
+export type {
+  FillBodyProps,
+  FillContent,
+  FillExpectedAnswers,
+  FillRationale,
+  RationaleOption,
+  RationaleVerdict,
+} from './fill-body';
 
 
 export { McqBody } from './mcq-body';
