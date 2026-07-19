@@ -47,7 +47,9 @@
     "slug": "Slug",
     "slugFrozen": "Genereres automatisk ved publisering",
     "accessTier": "Tilgangsnivå",
-    "accessTierHint": "Kontrollerer hvem som kan melde seg på; synlighet er separat."
+    "accessTierHint": "Kontrollerer hvem som kan melde seg på; synlighet er separat.",
+    "gatingMode": "Opplåsing for elever",
+    "gatingModeHint": "Hvordan delleksjoner låses opp for elevene."
   },
   "form": {
     "titlePlaceholder": "f.eks. Norsk for nybegynnere",
@@ -68,6 +70,10 @@
     "free_within_school": "Kun skole",
     "public_free": "Gratis",
     "public_paid": "Premium"
+  },
+  "gatingMode": {
+    "open": "Åpen — alle delleksjoner tilgjengelig",
+    "sequential": "Sekvensiell — låses opp én etter én"
   },
   "visibility": {
     "public": "Offentlig",

@@ -9,6 +9,7 @@ import { CourseHeader } from './course-header';
 import { ContinueHero, deriveContinueScenario } from './continue-hero';
 import { ViewToggle, type CourseView } from './view-toggle';
 import { UnitFlowList } from './unit-flow-list';
+import { LevelAccordion } from './level-accordion';
 import { SkillIndex } from './skill-index';
 import { ReviewCard } from './review-card';
 import { CanDoCard } from './can-do-card';
@@ -74,6 +75,7 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
   const {
     courseInfo,
     units,
+    levels,
     progress,
     mastery,
     canDo,
@@ -123,7 +125,11 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
                 }}
               >
                 <div className="px-5">
-                  <UnitFlowList units={units} courseId={courseId} locale={locale} />
+                  {levels.length > 0 ? (
+                    <LevelAccordion levels={levels} courseId={courseId} locale={locale} />
+                  ) : (
+                    <UnitFlowList units={units} courseId={courseId} locale={locale} />
+                  )}
                 </div>
               </div>
             ) : (

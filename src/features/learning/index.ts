@@ -20,6 +20,7 @@ export type {
   CourseMastery,
   CourseHomePayload,
   CourseInfo,
+  CourseLevelGroup,
   CourseProgress,
   UnitStatus,
   UnitSummary,

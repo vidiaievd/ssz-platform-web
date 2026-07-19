@@ -187,6 +187,9 @@
       "lessons": "{done} av {total} leksjoner",
       "continueUnit": "Fortsett"
     },
+    "levelAccordion": {
+      "units": "{done} av {total} enheter"
+    },
     "skillIndex": {
       "mastery": "{pct}% mestring",
       "jump": "Gå til →",

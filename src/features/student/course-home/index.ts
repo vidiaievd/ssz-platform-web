@@ -13,6 +13,9 @@ export type { ViewToggleProps, CourseView } from './components/view-toggle';
 export { UnitFlowList } from './components/unit-flow-list';
 export type { UnitFlowListProps } from './components/unit-flow-list';
 
+export { LevelAccordion } from './components/level-accordion';
+export type { LevelAccordionProps } from './components/level-accordion';
+
 export { SkillIndex } from './components/skill-index';
 export type { SkillIndexProps } from './components/skill-index';
 

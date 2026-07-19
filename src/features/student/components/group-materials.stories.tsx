@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
-import { GroupMaterials, type MaterialWithLesson } from './group-materials';
+import { GroupMaterials, type CourseMaterialLink } from './group-materials';
 
-function material(overrides: Partial<MaterialWithLesson>): MaterialWithLesson {
+function material(overrides: Partial<CourseMaterialLink>): CourseMaterialLink {
   return {
     id: 'mat-1',
     courseId: 'course-1',
     courseName: 'Norwegian A1 — Coursebook',
     isMain: false,
-    firstLessonId: 'lesson-1',
+    isAvailable: true,
     ...overrides,
   };
 }
@@ -47,7 +47,7 @@ export const UnpublishedMaterial: Story = {
   args: {
     mainCourse: material({ id: 'main', isMain: true }),
     materials: [
-      material({ id: 'extra-1', courseId: 'course-2', courseName: 'Coming Soon', firstLessonId: null }),
+      material({ id: 'extra-1', courseId: 'course-2', courseName: 'Coming Soon', isAvailable: false }),
     ],
   },
 };

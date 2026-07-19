@@ -8,10 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from '@/lib/i18n/navigation';
 import type { LessonProgressStatus, SchoolMaterial } from '../types';
 
-export interface MaterialWithLesson extends SchoolMaterial {
-  /** First published lesson for this course — null when nothing is published yet. */
-  firstLessonId: string | null;
-  /** The student's own progress on that first lesson — null when not started or unavailable. */
+export interface CourseMaterialLink extends SchoolMaterial {
+  /** Whether the course has published content the student can open. */
+  isAvailable: boolean;
+  /** Coarse course-level progress — null when not started, unavailable, or unknown. */
   progressStatus?: LessonProgressStatus | null;
 }
 
@@ -32,15 +32,15 @@ function ProgressBadge({ status }: { status: LessonProgressStatus }) {
 }
 
 interface GroupMaterialsProps {
-  mainCourse: MaterialWithLesson | null;
-  materials: MaterialWithLesson[];
+  mainCourse: CourseMaterialLink | null;
+  materials: CourseMaterialLink[];
 }
 
-function MaterialRow({ material }: { material: MaterialWithLesson }) {
+function MaterialRow({ material }: { material: CourseMaterialLink }) {
   const t = useTranslations('Student.SchoolDetail');
   const title = material.courseName ?? t('materialUntitled');
 
-  if (!material.firstLessonId) {
+  if (!material.isAvailable) {
     return (
       <div className="flex items-center justify-between gap-3 py-3">
         <div className="flex items-center gap-3">
@@ -54,7 +54,7 @@ function MaterialRow({ material }: { material: MaterialWithLesson }) {
 
   return (
     <Link
-      href={`/student/enrolled/lessons/${material.firstLessonId}?containerId=${material.courseId}`}
+      href={`/student/courses/${material.courseId}`}
       className="flex items-center justify-between gap-3 py-3 hover:bg-(--ssz-bg-muted) rounded-md px-1 -mx-1"
     >
       <div className="flex items-center gap-3">

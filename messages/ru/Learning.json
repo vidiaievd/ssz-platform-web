@@ -187,6 +187,9 @@
       "lessons": "{done} из {total} уроков",
       "continueUnit": "Продолжить"
     },
+    "levelAccordion": {
+      "units": "{done} из {total} блоков"
+    },
     "skillIndex": {
       "mastery": "{pct}% освоено",
       "jump": "Перейти →",

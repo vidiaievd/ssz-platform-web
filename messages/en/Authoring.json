@@ -50,7 +50,9 @@
     "slug": "Slug",
     "slugFrozen": "Auto-generated on publish",
     "accessTier": "Access tier",
-    "accessTierHint": "Controls who can enrol; visibility is separate."
+    "accessTierHint": "Controls who can enrol; visibility is separate.",
+    "gatingMode": "Student unlock",
+    "gatingModeHint": "How sub-lessons open up for students."
   },
   "form": {
     "titlePlaceholder": "e.g. Norwegian for Beginners",
@@ -71,6 +73,10 @@
     "free_within_school": "School only",
     "public_free": "Free",
     "public_paid": "Premium"
+  },
+  "gatingMode": {
+    "open": "Open — all sub-lessons available",
+    "sequential": "Sequential — unlock one after another"
   },
   "visibility": {
     "public": "Public",

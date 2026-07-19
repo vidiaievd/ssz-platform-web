@@ -28,7 +28,7 @@ export async function GET() {
       serverFetch<{ items: Container[] }>({
         service: 'content',
         path: '/containers',
-        query: { enrolled: 'true', limit: '100' },
+        query: { limit: '100' },
       }),
     ]);
 

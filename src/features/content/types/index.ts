@@ -21,6 +21,8 @@ export interface Container {
   accessTier: AccessTier;
   /** Create-time only; drives level-section scaffolding. Not editable after creation. */
   levelSystem?: 'cefr' | 'custom' | 'single';
+  /** Course-only: how sub-lessons unlock for students. Defaults to 'open'. */
+  gatingMode?: 'open' | 'sequential';
   currentPublishedVersionId?: string | null;
   ownerUserId: string;
   ownerSchoolId?: string | null;

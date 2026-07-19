@@ -400,10 +400,20 @@ export interface CourseInfo {
   groupName?: string;
 }
 
+export interface CourseLevelGroup {
+  /** Course-version section id (a "Leksjon" grouping of sub-lesson units). */
+  id: string;
+  title: string;
+  position: number;
+  units: UnitSummary[];
+}
+
 export interface CourseHomePayload {
   courseInfo: CourseInfo;
   /** Ordered module list with status; empty if course has no published version. */
   units: UnitSummary[];
+  /** Units grouped by their course-level ("Leksjon") section, in position order. */
+  levels: CourseLevelGroup[];
   progress: CourseProgress;
   mastery: CourseMastery;
   srsDueCount: number;

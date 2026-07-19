@@ -119,6 +119,8 @@ export async function updateContainerAction(id: string, input: ContainerFormValu
       difficultyLevel: data.difficultyLevel,
       visibility: data.visibility,
       accessTier: data.accessTier,
+      // Course-only; harmless no-op on other container types.
+      ...(data.gatingMode && { gatingMode: data.gatingMode }),
     };
 
     await serverFetch({

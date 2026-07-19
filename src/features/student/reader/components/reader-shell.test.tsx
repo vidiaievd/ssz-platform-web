@@ -84,6 +84,7 @@ const COURSE_HOME: CourseHomePayload = {
     { id: 'u1', position: 1, title: 'Hverdagsliv', status: 'done', completedLessons: 5, totalLessons: 5 },
     { id: 'u2', position: 2, title: 'Arbeid og studier', status: 'active', completedLessons: 1, totalLessons: 3 },
   ],
+  levels: [],
   progress: { courseId: 'course-1', totalLessons: 50, completedLessons: 17, percentComplete: 34, modules: [], lessons: [] },
   mastery: { courseId: 'course-1', overallMastery: 0, bySkill: [] },
   srsDueCount: 0,
