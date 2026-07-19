@@ -252,7 +252,24 @@
     "ssTokenPlaceholder": "Слово",
     "ssTokenField": "Поле",
     "addToken": "Добавить слово",
-    "removeToken": "Удалить слово"
+    "removeToken": "Удалить слово",
+    "fibAddRationale": "Добавить разбор",
+    "fibRationale": "Матрица объяснений",
+    "fibRationaleHint": "Показывается ученику после проверки — почему ответ подходит, а другие варианты нет.",
+    "fibRationaleExplanation": "Правило",
+    "fibRationaleExplanationPlaceholder": "напр. Утверждение вводится союзом «at».",
+    "fibRationaleOption": "Вариант",
+    "fibRationaleOptionPlaceholder": "вариант",
+    "fibRationaleVerdict": "Вердикт",
+    "fibRationaleNote": "Почему",
+    "fibRationaleNotePlaceholder": "почему подходит или нет",
+    "fibAddRationaleOption": "Добавить вариант",
+    "fibRemoveRationaleOption": "Удалить вариант",
+    "fibVerdict": {
+      "correct": "Верно",
+      "acceptable": "Возможно, но не здесь",
+      "wrong": "Неверно"
+    }
   },
   "grammar": {
     "add": "Добавить правило",

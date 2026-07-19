@@ -255,7 +255,24 @@
     "ssTokenPlaceholder": "Word",
     "ssTokenField": "Field",
     "addToken": "Add word",
-    "removeToken": "Remove word"
+    "removeToken": "Remove word",
+    "fibAddRationale": "Add explanation",
+    "fibRationale": "Explanation matrix",
+    "fibRationaleHint": "Shown to the student after checking — why the answer fits and why other options don't.",
+    "fibRationaleExplanation": "Rule",
+    "fibRationaleExplanationPlaceholder": "e.g. A statement is introduced by «at».",
+    "fibRationaleOption": "Option",
+    "fibRationaleOptionPlaceholder": "option",
+    "fibRationaleVerdict": "Verdict",
+    "fibRationaleNote": "Why",
+    "fibRationaleNotePlaceholder": "why it does or doesn't fit",
+    "fibAddRationaleOption": "Add option",
+    "fibRemoveRationaleOption": "Remove option",
+    "fibVerdict": {
+      "correct": "Correct",
+      "acceptable": "Possible, but not here",
+      "wrong": "Wrong"
+    }
   },
   "grammar": {
     "add": "Add rule",

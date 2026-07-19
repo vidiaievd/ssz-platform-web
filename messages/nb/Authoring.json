@@ -252,7 +252,24 @@
     "ssTokenPlaceholder": "Ord",
     "ssTokenField": "Felt",
     "addToken": "Legg til ord",
-    "removeToken": "Fjern ord"
+    "removeToken": "Fjern ord",
+    "fibAddRationale": "Legg til forklaring",
+    "fibRationale": "Forklaringsmatrise",
+    "fibRationaleHint": "Vises for eleven etter sjekk — hvorfor svaret passer og hvorfor andre ikke gjør det.",
+    "fibRationaleExplanation": "Regel",
+    "fibRationaleExplanationPlaceholder": "f.eks. En påstand innledes med «at».",
+    "fibRationaleOption": "Alternativ",
+    "fibRationaleOptionPlaceholder": "alternativ",
+    "fibRationaleVerdict": "Vurdering",
+    "fibRationaleNote": "Hvorfor",
+    "fibRationaleNotePlaceholder": "hvorfor det passer eller ikke",
+    "fibAddRationaleOption": "Legg til alternativ",
+    "fibRemoveRationaleOption": "Fjern alternativ",
+    "fibVerdict": {
+      "correct": "Riktig",
+      "acceptable": "Mulig, men ikke her",
+      "wrong": "Galt"
+    }
   },
   "grammar": {
     "add": "Legg til regel",

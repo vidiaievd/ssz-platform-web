@@ -17,6 +17,11 @@ export type ExerciseType = (typeof EXERCISE_TYPES)[number];
 
 export const SENTENCE_SCHEMA_TYPES = ['main', 'subordinate'] as const;
 
+// Verdicts for a fill_in_blank rationale option: the accepted answer, one that
+// is grammatical but not chosen in this context, and one that simply fails.
+export const RATIONALE_VERDICTS = ['correct', 'acceptable', 'wrong'] as const;
+export type RationaleVerdict = (typeof RATIONALE_VERDICTS)[number];
+
 export const DIFFICULTY_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 
 export const exerciseFormSchema = z
@@ -38,9 +43,26 @@ export const exerciseFormSchema = z
     mcCorrectIndex: z.number().int().min(0).optional(),
 
     // fill_in_blank — `fibText` uses ___1___, ___2___ markers; each blank has a
-    // comma-separated list of accepted answers.
+    // comma-separated list of accepted answers, plus an optional rationale
+    // matrix shown to the student as feedback after checking.
     fibText: z.string().max(5000).optional(),
-    fibBlanks: z.array(z.object({ answers: z.string().max(500) })).optional(),
+    fibBlanks: z
+      .array(
+        z.object({
+          answers: z.string().max(500),
+          rationaleExplanation: z.string().max(1000).optional(),
+          rationaleOptions: z
+            .array(
+              z.object({
+                text: z.string().max(200),
+                verdict: z.enum(RATIONALE_VERDICTS),
+                note: z.string().max(500).optional(),
+              }),
+            )
+            .optional(),
+        }),
+      )
+      .optional(),
     fibWordBank: z.string().max(1000).optional(),
 
     // translate_to_target / translate_from_target

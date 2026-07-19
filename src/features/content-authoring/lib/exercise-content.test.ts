@@ -64,6 +64,103 @@ describe('buildExercisePayload', () => {
     });
   });
 
+  it('fill_in_blank: omits rationale entirely when the author left it empty', () => {
+    const { expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'fill_in_blank',
+      fibText: 'Han sier ___1___ han er sliten.',
+      fibBlanks: [{ answers: 'at', rationaleExplanation: '   ', rationaleOptions: [] }],
+    });
+    expect(expectedAnswers).toEqual({ blanks: [{ blank_id: 1, accepted_answers: ['at'] }] });
+  });
+
+  it('fill_in_blank: builds the rationale matrix and drops options with no text', () => {
+    const { expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'fill_in_blank',
+      fibText: 'Han sier ___1___ han er sliten.',
+      fibBlanks: [
+        {
+          answers: 'at',
+          rationaleExplanation: '  A statement is introduced by «at».  ',
+          rationaleOptions: [
+            { text: ' at ', verdict: 'correct', note: ' Statement → at. ' },
+            { text: 'om', verdict: 'wrong', note: '' },
+            { text: '   ', verdict: 'acceptable', note: 'dropped — no option text' },
+          ],
+        },
+      ],
+    });
+    expect(expectedAnswers).toEqual({
+      blanks: [
+        {
+          blank_id: 1,
+          accepted_answers: ['at'],
+          rationale: {
+            explanation: 'A statement is introduced by «at».',
+            options: [
+              { text: 'at', verdict: 'correct', note: 'Statement → at.' },
+              { text: 'om', verdict: 'wrong' },
+            ],
+          },
+        },
+      ],
+    });
+  });
+
+  it('fill_in_blank: round-trips a rationale back into the form model', () => {
+    const parsed = parseExerciseToForm({
+      id: 'x',
+      templateCode: 'fill_in_blank',
+      content: { text_with_blanks: 'Han sier ___1___ han er sliten.' },
+      expectedAnswers: {
+        blanks: [
+          {
+            blank_id: 1,
+            accepted_answers: ['at'],
+            rationale: {
+              explanation: 'A statement is introduced by «at».',
+              options: [
+                { text: 'at', verdict: 'correct', note: 'Statement → at.' },
+                { text: 'om', verdict: 'wrong' },
+              ],
+            },
+          },
+        ],
+      },
+    } as Parameters<typeof parseExerciseToForm>[0]);
+
+    expect(parsed.fibBlanks).toEqual([
+      {
+        answers: 'at',
+        rationaleExplanation: 'A statement is introduced by «at».',
+        rationaleOptions: [
+          { text: 'at', verdict: 'correct', note: 'Statement → at.' },
+          { text: 'om', verdict: 'wrong', note: '' },
+        ],
+      },
+    ]);
+  });
+
+  it('fill_in_blank: falls back to a safe verdict when the stored value is unknown', () => {
+    const parsed = parseExerciseToForm({
+      id: 'x',
+      templateCode: 'fill_in_blank',
+      content: { text_with_blanks: 'Han sier ___1___ han er sliten.' },
+      expectedAnswers: {
+        blanks: [
+          {
+            blank_id: 1,
+            accepted_answers: ['at'],
+            rationale: { options: [{ text: 'om', verdict: 'bogus' }] },
+          },
+        ],
+      },
+    } as Parameters<typeof parseExerciseToForm>[0]);
+
+    expect(parsed.fibBlanks?.[0]?.rationaleOptions?.[0]?.verdict).toBe('wrong');
+  });
+
   it('translate_to_target: includes source_language; translate_from_target omits it', () => {
     const to = buildExercisePayload({
       ...base,

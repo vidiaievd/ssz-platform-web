@@ -252,7 +252,24 @@
     "ssTokenPlaceholder": "Слово",
     "ssTokenField": "Поле",
     "addToken": "Додати слово",
-    "removeToken": "Видалити слово"
+    "removeToken": "Видалити слово",
+    "fibAddRationale": "Додати пояснення",
+    "fibRationale": "Матриця пояснень",
+    "fibRationaleHint": "Показується учневі після перевірки — чому відповідь підходить, а інші ні.",
+    "fibRationaleExplanation": "Правило",
+    "fibRationaleExplanationPlaceholder": "напр. Твердження вводиться через «at».",
+    "fibRationaleOption": "Варіант",
+    "fibRationaleOptionPlaceholder": "варіант",
+    "fibRationaleVerdict": "Оцінка",
+    "fibRationaleNote": "Чому",
+    "fibRationaleNotePlaceholder": "чому підходить або ні",
+    "fibAddRationaleOption": "Додати варіант",
+    "fibRemoveRationaleOption": "Видалити варіант",
+    "fibVerdict": {
+      "correct": "Правильно",
+      "acceptable": "Можливо, але не тут",
+      "wrong": "Неправильно"
+    }
   },
   "grammar": {
     "add": "Додати правило",

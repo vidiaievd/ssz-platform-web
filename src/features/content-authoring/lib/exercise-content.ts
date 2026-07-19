@@ -1,6 +1,12 @@
 import type { ExerciseInstruction } from '@/features/content/types';
 
-import { EXERCISE_TYPES, type ExerciseFormValues, type ExerciseType } from '../schemas/exercise';
+import {
+  EXERCISE_TYPES,
+  RATIONALE_VERDICTS,
+  type ExerciseFormValues,
+  type ExerciseType,
+  type RationaleVerdict,
+} from '../schemas/exercise';
 
 const EXERCISE_TYPES_SET = new Set<string>(EXERCISE_TYPES);
 
@@ -23,7 +29,7 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   mcOptions: [{ text: '' }, { text: '' }],
   mcCorrectIndex: 0,
   fibText: '',
-  fibBlanks: [{ answers: '' }],
+  fibBlanks: [{ answers: '', rationaleExplanation: '', rationaleOptions: [] }],
   fibWordBank: '',
   trSourceText: '',
   trSourceLanguage: '',
@@ -92,7 +98,27 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
     }
     case 'fill_in_blank': {
       const blanks = (values.fibBlanks ?? [])
-        .map((b, i) => ({ blank_id: i + 1, accepted_answers: splitCsv(b.answers) }))
+        .map((b, i) => {
+          // Only options with a text carry meaning; a half-filled row is dropped
+          // rather than persisted as an empty matrix entry.
+          const options = (b.rationaleOptions ?? [])
+            .filter((o) => o.text.trim())
+            .map((o) => ({
+              text: o.text.trim(),
+              verdict: o.verdict,
+              ...(o.note?.trim() && { note: o.note.trim() }),
+            }));
+          const explanation = b.rationaleExplanation?.trim();
+          const rationale =
+            explanation || options.length > 0
+              ? { ...(explanation && { explanation }), ...(options.length > 0 && { options }) }
+              : undefined;
+          return {
+            blank_id: i + 1,
+            accepted_answers: splitCsv(b.answers),
+            ...(rationale && { rationale }),
+          };
+        })
         .filter((b) => b.accepted_answers.length > 0);
       const wordBank = splitCsv(values.fibWordBank);
       return {
@@ -256,18 +282,35 @@ export function parseExerciseToForm(exercise: {
       const blanks = rawBlanks
         .slice()
         .sort((a, b) => Number(a.blank_id ?? 0) - Number(b.blank_id ?? 0))
-        .map((b) => ({
-          answers: Array.isArray(b.accepted_answers)
-            ? (b.accepted_answers as unknown[]).map(String).join(', ')
-            : '',
-        }));
+        .map((b) => {
+          const rationale = (b as { rationale?: Record<string, unknown> }).rationale;
+          const rawOptions = Array.isArray(rationale?.options) ? rationale.options : [];
+          const options = (rawOptions as Record<string, unknown>[]).map((o) => ({
+            text: typeof o.text === 'string' ? o.text : '',
+            verdict: (RATIONALE_VERDICTS as readonly string[]).includes(String(o.verdict))
+              ? (o.verdict as RationaleVerdict)
+              : ('wrong' as RationaleVerdict),
+            note: typeof o.note === 'string' ? o.note : '',
+          }));
+          return {
+            answers: Array.isArray(b.accepted_answers)
+              ? (b.accepted_answers as unknown[]).map(String).join(', ')
+              : '',
+            rationaleExplanation:
+              typeof rationale?.explanation === 'string' ? rationale.explanation : '',
+            rationaleOptions: options,
+          };
+        });
       const wordBank = Array.isArray(content.word_bank)
         ? (content.word_bank as unknown[]).map(String).join(', ')
         : '';
       return {
         ...base,
         fibText: typeof content.text_with_blanks === 'string' ? content.text_with_blanks : '',
-        fibBlanks: blanks.length > 0 ? blanks : [{ answers: '' }],
+        fibBlanks:
+          blanks.length > 0
+            ? blanks
+            : [{ answers: '', rationaleExplanation: '', rationaleOptions: [] }],
         fibWordBank: wordBank,
       };
     }

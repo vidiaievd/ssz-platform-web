@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   useFieldArray,
   useController,
@@ -19,6 +20,7 @@ import {
   EXERCISE_TYPES,
   DIFFICULTY_LEVELS,
   SENTENCE_SCHEMA_TYPES,
+  RATIONALE_VERDICTS,
   type ExerciseFormValues,
   type ExerciseType,
 } from '../schemas/exercise';
@@ -205,6 +207,110 @@ function MultipleChoiceFields({ control, register, errors, isPending }: SubProps
   );
 }
 
+/**
+ * Optional per-blank explanation matrix. Collapsed by default so simple drills
+ * stay simple — it only expands when the author asks for it or one already
+ * exists. Lives in its own component because the nested field array needs its
+ * own hook call.
+ */
+function BlankRationaleEditor({
+  control,
+  register,
+  isPending,
+  blankIndex,
+}: Pick<SubProps, 'control' | 'register' | 'isPending'> & { blankIndex: number }) {
+  const t = useTranslations('Authoring.exercises');
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `fibBlanks.${blankIndex}.rationaleOptions`,
+  });
+  const explanation = useWatch({ control, name: `fibBlanks.${blankIndex}.rationaleExplanation` });
+  const hasContent = fields.length > 0 || Boolean(explanation);
+  const [open, setOpen] = useState(hasContent);
+
+  if (!open) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="text-xs"
+        onClick={() => setOpen(true)}
+      >
+        <Plus className="mr-1.5 h-3.5 w-3.5" />
+        {t('fibAddRationale')}
+      </Button>
+    );
+  }
+
+  return (
+    <div className="rounded-md border border-dashed border-border p-3 space-y-3">
+      <p className="text-xs font-medium text-(--ssz-text-primary)">{t('fibRationale')}</p>
+      <p className="text-xs text-(--ssz-text-muted)">{t('fibRationaleHint')}</p>
+
+      <Field label={t('fibRationaleExplanation')} htmlFor={`ex-fib-rat-${blankIndex}`}>
+        <Textarea
+          id={`ex-fib-rat-${blankIndex}`}
+          rows={2}
+          placeholder={t('fibRationaleExplanationPlaceholder')}
+          disabled={isPending}
+          {...register(`fibBlanks.${blankIndex}.rationaleExplanation`)}
+        />
+      </Field>
+
+      {fields.map((field, optionIndex) => (
+        <div key={field.id} className="flex items-start gap-2">
+          <Input
+            className="w-32 shrink-0"
+            placeholder={t('fibRationaleOptionPlaceholder')}
+            disabled={isPending}
+            aria-label={t('fibRationaleOption')}
+            {...register(`fibBlanks.${blankIndex}.rationaleOptions.${optionIndex}.text`)}
+          />
+          <select
+            className="h-9 shrink-0 rounded-md border border-border bg-transparent px-2 text-sm"
+            disabled={isPending}
+            aria-label={t('fibRationaleVerdict')}
+            {...register(`fibBlanks.${blankIndex}.rationaleOptions.${optionIndex}.verdict`)}
+          >
+            {RATIONALE_VERDICTS.map((verdict) => (
+              <option key={verdict} value={verdict}>
+                {t(`fibVerdict.${verdict}`)}
+              </option>
+            ))}
+          </select>
+          <Input
+            placeholder={t('fibRationaleNotePlaceholder')}
+            disabled={isPending}
+            aria-label={t('fibRationaleNote')}
+            {...register(`fibBlanks.${blankIndex}.rationaleOptions.${optionIndex}.note`)}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => remove(optionIndex)}
+            aria-label={t('fibRemoveRationaleOption')}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="text-xs"
+        onClick={() => append({ text: '', verdict: 'wrong', note: '' })}
+      >
+        <Plus className="mr-1.5 h-3.5 w-3.5" />
+        {t('fibAddRationaleOption')}
+      </Button>
+    </div>
+  );
+}
+
 function FillInBlankFields({ control, register, errors, isPending }: SubProps) {
   const t = useTranslations('Authoring.exercises');
   const { fields, append, remove } = useFieldArray({ control, name: 'fibBlanks' });
@@ -228,31 +334,46 @@ function FillInBlankFields({ control, register, errors, isPending }: SubProps) {
           <p className="text-xs text-destructive">{errors.fibBlanks.message}</p>
         )}
         {fields.map((field, index) => (
-          <div key={field.id} className="flex items-center gap-2">
-            <span className="w-16 shrink-0 text-xs font-mono text-(--ssz-text-muted)">
-              {t('fibBlankLabel', { n: index + 1 })}
-            </span>
-            <div className="flex-1">
-              <Input
-                placeholder={t('fibAnswersPlaceholder')}
-                hasError={!!errors.fibBlanks?.[index]?.answers}
-                disabled={isPending}
-                {...register(`fibBlanks.${index}.answers`)}
+          <div key={field.id} className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="w-16 shrink-0 text-xs font-mono text-(--ssz-text-muted)">
+                {t('fibBlankLabel', { n: index + 1 })}
+              </span>
+              <div className="flex-1">
+                <Input
+                  placeholder={t('fibAnswersPlaceholder')}
+                  hasError={!!errors.fibBlanks?.[index]?.answers}
+                  disabled={isPending}
+                  {...register(`fibBlanks.${index}.answers`)}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => remove(index)}
+                disabled={fields.length <= 1}
+                aria-label={t('removeBlank')}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="pl-18">
+              <BlankRationaleEditor
+                control={control}
+                register={register}
+                isPending={isPending}
+                blankIndex={index}
               />
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => remove(index)}
-              disabled={fields.length <= 1}
-              aria-label={t('removeBlank')}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ))}
-        <Button type="button" variant="ghost" size="sm" onClick={() => append({ answers: '' })}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => append({ answers: '', rationaleExplanation: '', rationaleOptions: [] })}
+        >
           <Plus className="mr-1.5 h-4 w-4" />
           {t('addBlank')}
         </Button>
