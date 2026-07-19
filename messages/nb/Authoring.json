@@ -269,7 +269,8 @@
       "correct": "Riktig",
       "acceptable": "Mulig, men ikke her",
       "wrong": "Galt"
-    }
+    },
+    "fibRationaleAttached": "Forklaringsmatrise lagt til — vises etter sjekk"
   },
   "grammar": {
     "add": "Legg til regel",

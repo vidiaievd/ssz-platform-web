@@ -272,7 +272,8 @@
       "correct": "Correct",
       "acceptable": "Possible, but not here",
       "wrong": "Wrong"
-    }
+    },
+    "fibRationaleAttached": "Explanation matrix attached — shown after checking"
   },
   "grammar": {
     "add": "Add rule",

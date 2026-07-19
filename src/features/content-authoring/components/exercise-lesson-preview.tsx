@@ -56,9 +56,22 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
 
         {values.templateCode === 'fill_in_blank' &&
           (values.fibText ? (
-            <p className="font-reading text-[14.5px] leading-loose text-(--ssz-text-primary)">
-              {values.fibText}
-            </p>
+            <div className="space-y-2">
+              <p className="font-reading text-[14.5px] leading-loose text-(--ssz-text-primary)">
+                {values.fibText}
+              </p>
+              {/* The matrix itself is post-check feedback, so the preview only
+                  notes that one is attached rather than reproducing it. */}
+              {(values.fibBlanks ?? []).some(
+                (b) =>
+                  b.rationaleExplanation?.trim() ||
+                  (b.rationaleOptions ?? []).some((o) => o.text.trim()),
+              ) && (
+                <p className="text-xs text-muted-foreground">
+                  {t('exercises.fibRationaleAttached')}
+                </p>
+              )}
+            </div>
           ) : (
             empty
           ))}
