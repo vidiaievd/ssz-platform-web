@@ -255,5 +255,36 @@
       "description": "Elementene kommer tilbake når de er klare. Inntil da er det ingenting å ta igjen.",
       "cta": "Åpne kursene mine"
     }
+  },
+  "trainingPage": {
+    "eyebrow": "Øv",
+    "title": "Trening",
+    "subtitle": "Korte, fokuserte økter i én ferdighet — eller en blandet økt som tilpasser seg det du trenger mest. Ikke knyttet til ett bestemt kurs.",
+    "recommended": {
+      "overline": "Anbefalt akkurat nå",
+      "cta": "Start",
+      "exercise": "{count, plural, one {# oppgave er} other {# oppgaver er}} klare — en kort økt holder grammatikken skarp.",
+      "vocabulary_word": "{count, plural, one {# nytt ord er} other {# nye ord er}} klare — en kort ordøkt hindrer dem i å falme."
+    },
+    "featured": {
+      "reviewLabel": "Repeter det som er klart",
+      "reviewDescription": "Gå gjennom elementene planen har hentet fram i dag.",
+      "reviewMeta": "{count, plural, =0 {Ingenting klart} one {# element klart} other {# elementer klare}}",
+      "mixedLabel": "Sammensatt økt",
+      "mixedDescription": "Et variert utvalg hentet fra alt du holder på med nå."
+    },
+    "byType": {
+      "title": "Øv etter type",
+      "subtitle": "Velg hva du vil jobbe med.",
+      "exercise": {
+        "label": "Oppgaver",
+        "description": "Grammatikk- og ferdighetsoppgaver fra kursene dine."
+      },
+      "vocabulary_word": {
+        "label": "Nye ord",
+        "description": "Ord som er klare for repetisjon, hentet fra alle kursene."
+      }
+    },
+    "methodNote": "Øktene bruker spaced repetition: elementer du synes er vanskelige, kommer tilbake raskere, de du kan godt, kommer tilbake senere. Kort, jevnlig trening er langt mer effektivt enn sjeldne, lange økter."
   }
 }

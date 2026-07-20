@@ -255,5 +255,36 @@
       "description": "Items come back when they're due. Until then, there's nothing to catch up on.",
       "cta": "Open my courses"
     }
+  },
+  "trainingPage": {
+    "eyebrow": "Practice",
+    "title": "Training",
+    "subtitle": "Short, focused sessions in a single skill — or a mixed set that adapts to what you need most. Not tied to any one course.",
+    "recommended": {
+      "overline": "Recommended right now",
+      "cta": "Start",
+      "exercise": "{count, plural, one {# exercise is} other {# exercises are}} ready — a short set keeps your grammar sharp.",
+      "vocabulary_word": "{count, plural, one {# new word is} other {# new words are}} ready — a short vocab set keeps them from fading."
+    },
+    "featured": {
+      "reviewLabel": "Review what's due",
+      "reviewDescription": "Work through the items your schedule has brought back today.",
+      "reviewMeta": "{count, plural, =0 {Nothing due} one {# item ready} other {# items ready}}",
+      "mixedLabel": "Complex session",
+      "mixedDescription": "A varied set drawn across everything you are currently learning."
+    },
+    "byType": {
+      "title": "Practice by type",
+      "subtitle": "Pick what to work on.",
+      "exercise": {
+        "label": "Exercises",
+        "description": "Grammar and skill drills from your courses."
+      },
+      "vocabulary_word": {
+        "label": "New words",
+        "description": "Vocabulary due for review, drawn from every course."
+      }
+    },
+    "methodNote": "Sessions use spaced repetition: items you find hard come back sooner, ones you know well come back later. Short, regular practice is far more effective than occasional long sessions."
   }
 }
