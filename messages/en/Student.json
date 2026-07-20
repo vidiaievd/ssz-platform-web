@@ -286,5 +286,14 @@
       }
     },
     "methodNote": "Sessions use spaced repetition: items you find hard come back sooner, ones you know well come back later. Short, regular practice is far more effective than occasional long sessions."
+  },
+  "progressPage": {
+    "eyebrow": "Overview",
+    "title": "Progress",
+    "subtitle": "Where you stand in each course. Just the facts — how far you've come and what's left.",
+    "empty": {
+      "title": "No progress yet",
+      "body": "Start a course and your progress will show up here."
+    }
   }
 }

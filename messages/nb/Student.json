@@ -286,5 +286,14 @@
       }
     },
     "methodNote": "Øktene bruker spaced repetition: elementer du synes er vanskelige, kommer tilbake raskere, de du kan godt, kommer tilbake senere. Kort, jevnlig trening er langt mer effektivt enn sjeldne, lange økter."
+  },
+  "progressPage": {
+    "eyebrow": "Oversikt",
+    "title": "Fremgang",
+    "subtitle": "Hvor du står i hvert kurs. Bare fakta — hvor langt du har kommet og hva som gjenstår.",
+    "empty": {
+      "title": "Ingen fremgang ennå",
+      "body": "Start et kurs, så vises fremgangen din her."
+    }
   }
 }
