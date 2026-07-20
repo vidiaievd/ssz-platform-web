@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { SrsDueResponse } from '../types';
 import { learningKeys } from './keys';
 
-export function useSrsDue() {
+export function useSrsDue(options?: { enabled?: boolean }) {
   return useQuery<SrsDueResponse>({
     queryKey: learningKeys.srsDue(),
     queryFn: async () => {
@@ -16,5 +16,6 @@ export function useSrsDue() {
     },
     staleTime: 0,
     refetchOnWindowFocus: true,
+    enabled: options?.enabled ?? true,
   });
 }

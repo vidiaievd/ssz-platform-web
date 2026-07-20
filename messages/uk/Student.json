@@ -125,5 +125,9 @@
   "GroupAssignedBanner": {
     "message": "Вас зараховано до {group} у {school}!",
     "dismiss": "Закрити"
+  },
+  "comingSoon": {
+    "title": "Незабаром",
+    "description": "Цей екран переробляють у рамках редизайну головної сторінки."
   }
 }

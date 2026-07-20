@@ -10,6 +10,8 @@ export type NavItem = {
   disabled?: boolean;
   /** i18n key for the tooltip explaining why the item is locked. */
   lockReason?: string;
+  /** Count shown as a pill next to the label (e.g. reviews due now). Omitted when 0/undefined. */
+  badge?: number;
 };
 
 export type NavSection = {

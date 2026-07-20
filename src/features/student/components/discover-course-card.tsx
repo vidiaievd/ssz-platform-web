@@ -16,7 +16,7 @@ interface DiscoverCourseCardProps {
 }
 
 /**
- * Catalogue card for `/student/courses` — like `ContainerCard`, but courses
+ * Catalogue card for `/student/catalogue` — like `ContainerCard`, but courses
  * also taught by a school get a second action ("Ask to be placed") next to
  * the self-study one, per the Discover dedup rule.
  */

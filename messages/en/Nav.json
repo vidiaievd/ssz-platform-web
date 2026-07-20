@@ -12,5 +12,11 @@
   "invitations": "Invitations",
   "scheduling": "Scheduling",
   "courses": "Courses",
-  "notifications": "Notifications"
+  "notifications": "Notifications",
+  "home": "Home",
+  "myCourses": "My courses",
+  "catalogue": "Catalogue",
+  "training": "Training",
+  "reviews": "Reviews",
+  "progress": "Progress"
 }

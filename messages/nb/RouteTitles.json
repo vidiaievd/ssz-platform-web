@@ -5,5 +5,11 @@
   "lessons": "Timer",
   "mySchools": "Mine skoler",
   "settings": "Innstillinger",
-  "enrolled": "Mine skoler"
+  "enrolled": "Mine skoler",
+  "home": "Hjem",
+  "myCourses": "Mine kurs",
+  "catalogue": "Katalog",
+  "training": "Trening",
+  "reviews": "Repetisjon og påminnelser",
+  "progress": "Fremgang"
 }

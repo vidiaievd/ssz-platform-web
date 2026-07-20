@@ -2,34 +2,41 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Bell,
+  BarChart3,
   BookOpen,
   CalendarRange,
   GraduationCap,
   Layers,
   LayoutDashboard,
-  Library,
   MailCheck,
+  Search,
   Send,
   Settings,
   Users,
+  Zap,
 } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/features/auth/types/current-user";
 import type { DashboardRole, SchoolType } from "@/features/dashboard/types";
 import type { SchoolRole } from "@/features/school/types";
 import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
 import type { NotificationLinkContext } from "@/features/notifications";
+import { useSrsDue } from "@/features/learning/api/use-srs-due";
 import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
 import { GlobalSearchTrigger } from "./topbar/global-search-trigger";
 import { TrialPill } from "./topbar/trial-pill";
 import { Sidebar } from "./sidebar/sidebar";
 import { MobileSidebar } from "./sidebar/mobile-sidebar";
+import { BottomTabBar } from "./sidebar/bottom-tab-bar";
 import { Topbar } from "./topbar/topbar";
 import type { NavSection } from "./sidebar/types";
+import type { UserMenuExtraItem } from "./topbar/user-menu";
 
 export type SchoolContext = {
   role: DashboardRole;
@@ -143,26 +150,25 @@ function buildTutorNav(userId: string): NavSection[] {
   ];
 }
 
-const STUDENT_NAV: NavSection[] = [
-  {
-    items: [
-      {
-        href: "/student/dashboard",
-        icon: LayoutDashboard,
-        labelKey: "dashboard",
-      },
-      { href: "/student/courses", icon: Library, labelKey: "courses" },
-      { href: "/student/lessons", icon: BookOpen, labelKey: "lessons" },
-      { href: "/student/enrolled/requests", icon: Send, labelKey: "requests" },
-      { href: "/student/notifications", icon: Bell, labelKey: "notifications" },
-    ],
-  },
-  {
-    items: [
-      { href: "/student/settings", icon: Settings, labelKey: "settings" },
-    ],
-  },
-];
+function buildStudentNav(reviewsDue: number): NavSection[] {
+  return [
+    {
+      items: [
+        { href: "/student/home", icon: LayoutDashboard, labelKey: "home" },
+        { href: "/student/my-courses", icon: BookOpen, labelKey: "myCourses" },
+        { href: "/student/catalogue", icon: Search, labelKey: "catalogue" },
+        { href: "/student/training", icon: Zap, labelKey: "training" },
+        { href: "/student/reviews", icon: Bell, labelKey: "reviews", badge: reviewsDue },
+        { href: "/student/progress", icon: BarChart3, labelKey: "progress" },
+      ],
+    },
+  ];
+}
+
+/** Student mobile bottom tab bar omits Progress, matching the design handoff. */
+function buildStudentMobileNav(sections: NavSection[]): NavSection["items"] {
+  return sections[0]?.items.filter((item) => item.labelKey !== "progress") ?? [];
+}
 
 export type AppShellVariant = "school" | "student" | "tutor";
 
@@ -178,6 +184,9 @@ type AppShellProps = {
 export function AppShell({ variant, user, schoolContext, tutorUserId, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const params = useParams<{ schoolSlug?: string; userId?: string }>();
+  const tNav = useTranslations("Nav");
+
+  const { data: srsDue } = useSrsDue({ enabled: variant === "student" });
 
   const resolvedTutorId = tutorUserId ?? params.userId ?? user.userId ?? "";
 
@@ -186,7 +195,16 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
       ? buildSchoolNav(params.schoolSlug ?? "", schoolContext)
       : variant === "tutor"
         ? buildTutorNav(resolvedTutorId)
-        : STUDENT_NAV;
+        : buildStudentNav(srsDue?.dueCount ?? 0);
+
+  const userMenuExtraItems: UserMenuExtraItem[] | undefined =
+    variant === "student"
+      ? [
+          { href: "/student/notifications", icon: Bell, label: tNav("notifications") },
+          { href: "/student/enrolled/requests", icon: Send, label: tNav("requests") },
+          { href: "/student/settings", icon: Settings, label: tNav("settings") },
+        ]
+      : undefined;
 
   const activeContextKey =
     variant === "school" && schoolContext
@@ -249,6 +267,7 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
           onMenuOpen={() => setMobileOpen(true)}
           activeContextKey={activeContextKey}
           search={variant === "school" ? <GlobalSearchTrigger /> : undefined}
+          userMenuExtraItems={userMenuExtraItems}
           actions={
             <div className="flex items-center gap-2">
               {variant === "school" && <TrialPill />}
@@ -260,8 +279,11 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
             </div>
           }
         />
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className={cn("flex-1 overflow-auto", variant === "student" && "pb-16 md:pb-0")}>
+          {children}
+        </main>
       </div>
+      {variant === "student" && <BottomTabBar items={buildStudentMobileNav(sections)} />}
     </div>
   );
 }

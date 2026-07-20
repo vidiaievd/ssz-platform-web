@@ -12,5 +12,11 @@
   "invitations": "Invitasjoner",
   "scheduling": "Planlegging",
   "courses": "Kurs",
-  "notifications": "Varsler"
+  "notifications": "Varsler",
+  "home": "Hjem",
+  "myCourses": "Mine kurs",
+  "catalogue": "Katalog",
+  "training": "Trening",
+  "reviews": "Repetisjon",
+  "progress": "Fremgang"
 }

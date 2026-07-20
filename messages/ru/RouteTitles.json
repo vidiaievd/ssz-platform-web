@@ -5,5 +5,11 @@
   "lessons": "Уроки",
   "mySchools": "Мои школы",
   "settings": "Настройки",
-  "enrolled": "Мои школы"
+  "enrolled": "Мои школы",
+  "home": "Главная",
+  "myCourses": "Мои курсы",
+  "catalogue": "Каталог",
+  "training": "Тренировка",
+  "reviews": "Повторение и напоминания",
+  "progress": "Прогресс"
 }

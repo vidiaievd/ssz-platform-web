@@ -125,5 +125,9 @@
   "GroupAssignedBanner": {
     "message": "You're in {group} at {school}!",
     "dismiss": "Dismiss"
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "description": "This screen is being rebuilt as part of the Home redesign."
   }
 }

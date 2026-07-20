@@ -125,5 +125,9 @@
   "GroupAssignedBanner": {
     "message": "Du er i {group} hos {school}!",
     "dismiss": "Lukk"
+  },
+  "comingSoon": {
+    "title": "Kommer snart",
+    "description": "Denne skjermen bygges om som en del av redesignet av startsiden."
   }
 }
