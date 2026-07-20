@@ -1,46 +1,45 @@
 import { getEndonym } from '@/features/profile/lib/iso-languages';
-import type { ContainerProgress } from '@/features/student/types';
+import type { StudentCourse } from '@/features/student/types';
 import type { ResumeHeroData } from '../components/resume-hero';
 
 /**
- * Container ids the student reaches through a school group, mapped to that
- * school's name. Anything absent from this map is self-study — the only two
- * sources a started course can have, so no guessing is involved.
+ * Where the reader opens for a course. A started course resumes at its next
+ * item; one that has never been opened goes to the course home, which is also
+ * the only sensible target for a course with nothing left to do.
  */
-export type SchoolCourseMap = Record<string, string>;
-
-/** Where the reader opens for a given progress row. */
-export function resumeHref(item: ContainerProgress): string {
-  return item.nextItemId
-    ? `/student/enrolled/lessons/${item.nextItemId}?containerId=${item.containerId}`
-    : `/student/my-courses`;
+export function courseHref(course: StudentCourse): string {
+  return course.nextItemId
+    ? `/student/enrolled/lessons/${course.nextItemId}?containerId=${course.containerId}`
+    : `/student/courses/${course.containerId}`;
 }
 
 /**
- * The course to surface in the hero: the most recently touched one that still
- * has a next item. A finished course is not something to "resume".
+ * The course to surface in the hero: the most recently opened one. If nothing
+ * has been opened yet, the first available course — a student with access and
+ * no history still deserves an obvious way in.
  */
-export function pickResumeCourse(items: ContainerProgress[]): ContainerProgress | null {
-  const resumable = items.filter((i) => i.nextItemId && i.nextItemTitle);
-  if (!resumable.length) return null;
-  return resumable.reduce((a, b) =>
-    (a.lastAccessedAt ?? '') >= (b.lastAccessedAt ?? '') ? a : b,
-  );
+export function pickResumeCourse(courses: StudentCourse[]): StudentCourse | null {
+  if (!courses.length) return null;
+  const started = courses.filter((c) => c.started);
+  if (!started.length) return courses[0] ?? null;
+  return started.reduce((a, b) => ((a.lastAccessedAt ?? '') >= (b.lastAccessedAt ?? '') ? a : b));
 }
 
-export function toResumeHero(item: ContainerProgress): ResumeHeroData {
+export function toResumeHero(course: StudentCourse): ResumeHeroData {
   return {
-    langCode: item.targetLanguage,
-    langName: getEndonym(item.targetLanguage),
-    level: item.level,
-    courseTitle: item.containerTitle,
-    nextItemTitle: item.nextItemTitle ?? item.containerTitle,
-    progressPercent: item.progressPercent,
-    href: resumeHref(item),
+    langCode: course.targetLanguage,
+    langName: getEndonym(course.targetLanguage),
+    level: course.level ?? undefined,
+    courseTitle: course.title,
+    nextItemTitle: course.nextItemTitle ?? course.title,
+    progressPercent: course.progressPercent,
+    href: courseHref(course),
+    started: course.started,
   };
 }
 
-/** Most recently touched first — the order the student thinks in. */
-export function byRecency(a: ContainerProgress, b: ContainerProgress): number {
+/** Started courses first, most recently touched leading; untouched keep their given order. */
+export function byRecency(a: StudentCourse, b: StudentCourse): number {
+  if (a.started !== b.started) return a.started ? -1 : 1;
   return (b.lastAccessedAt ?? '').localeCompare(a.lastAccessedAt ?? '');
 }

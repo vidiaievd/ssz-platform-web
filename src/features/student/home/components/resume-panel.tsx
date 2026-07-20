@@ -7,15 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/features/learning/components/empty-state';
 import { ErrorState } from '@/features/learning/components/error-state';
-import { useContinueLearning } from '@/features/student/api/use-continue-learning';
+import { useMyCourses } from '@/features/student/api/use-my-courses';
 import { Link } from '@/lib/i18n/navigation';
 import { pickResumeCourse, toResumeHero } from '../lib/course-view';
 import { ResumeHero } from './resume-hero';
 
-/** Wraps `ResumeHero` with the loading / empty / error states of the progress query. */
+/** Wraps `ResumeHero` with the loading / empty / error states of the courses query. */
 export function ResumePanel() {
   const t = useTranslations('Student.home.resume');
-  const { data, isLoading, error, refetch } = useContinueLearning();
+  const { data, isLoading, error, refetch } = useMyCourses();
 
   if (isLoading) {
     return <Skeleton className="h-63 w-full rounded-xl" />;

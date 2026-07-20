@@ -80,6 +80,29 @@ export interface NextClass {
   teacher: { userId: string; name: string; avatarUrl: string | null } | null;
 }
 
+/**
+ * A course the student has access to, whatever the route in: a school group's
+ * material or their own enrollment. Progress is an *overlay* here, not the
+ * source of the list — a course assigned but never opened is still a course
+ * the student has, and must appear with `started: false`.
+ */
+export interface StudentCourse {
+  containerId: string;
+  title: string;
+  targetLanguage: string;
+  level: string | null;
+  source: 'school' | 'self';
+  /** Set only when `source` is 'school'. */
+  school: { id: string; slug: string; name: string; groupId: string; groupName: string } | null;
+  started: boolean;
+  progressPercent: number;
+  completedItems: number;
+  totalItems: number;
+  lastAccessedAt: string | null;
+  nextItemId: string | null;
+  nextItemTitle: string | null;
+}
+
 /** One material attached to a group — the main course (`isMain`) or an additional one. */
 export interface SchoolMaterial {
   id: string;

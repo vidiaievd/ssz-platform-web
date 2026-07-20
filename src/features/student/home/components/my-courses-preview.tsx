@@ -8,45 +8,41 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/features/learning/components/empty-state';
 import { ErrorState } from '@/features/learning/components/error-state';
 import { getEndonym } from '@/features/profile/lib/iso-languages';
-import { useContinueLearning } from '@/features/student/api/use-continue-learning';
-import type { ContainerProgress } from '@/features/student/types';
+import { useMyCourses } from '@/features/student/api/use-my-courses';
+import type { StudentCourse } from '@/features/student/types';
 import { Link, useRouter } from '@/lib/i18n/navigation';
-import { byRecency, resumeHref, type SchoolCourseMap } from '../lib/course-view';
+import { byRecency, courseHref } from '../lib/course-view';
 import { CourseProgressCard, type CourseProgressCardData } from './course-progress-card';
 import { HSection } from './h-section';
 import { TextLink } from './text-link';
 
 const PREVIEW_LIMIT = 4;
 
-export interface MyCoursesPreviewProps {
-  /** Container ids reachable through a school group → that school's name. */
-  schoolCourses: SchoolCourseMap;
-}
-
-/** The four most recently touched courses, with a link through to the full list. */
-export function MyCoursesPreview({ schoolCourses }: MyCoursesPreviewProps) {
+/** The four most relevant courses, with a link through to the full list. */
+export function MyCoursesPreview() {
   const t = useTranslations('Student.home.myCourses');
   const format = useFormatter();
   const router = useRouter();
-  const { data, isLoading, error, refetch } = useContinueLearning();
+  const { data, isLoading, error, refetch } = useMyCourses();
 
-  function toCard(item: ContainerProgress): CourseProgressCardData {
-    const school = schoolCourses[item.containerId];
+  function toCard(course: StudentCourse): CourseProgressCardData {
     return {
-      id: item.containerId,
-      langCode: item.targetLanguage,
-      langName: getEndonym(item.targetLanguage),
-      level: item.level ?? '',
-      title: item.containerTitle,
-      source: school ? 'school' : 'self',
-      school,
-      progressPercent: item.progressPercent,
-      completedItems: item.completedItems,
-      totalItems: item.totalItems,
-      nextUnitLabel: t('lessonNumber', { n: item.completedItems + 1 }),
-      nextItemTitle: item.nextItemTitle ?? t('courseComplete'),
-      lastActiveLabel: item.lastAccessedAt
-        ? format.relativeTime(new Date(item.lastAccessedAt))
+      id: course.containerId,
+      langCode: course.targetLanguage,
+      langName: getEndonym(course.targetLanguage),
+      level: course.level ?? '',
+      title: course.title,
+      source: course.source,
+      school: course.school?.name,
+      progressPercent: course.progressPercent,
+      completedItems: course.completedItems,
+      totalItems: course.totalItems,
+      nextUnitLabel: t('lessonNumber', { n: course.completedItems + 1 }),
+      // A course never opened has no "next item" recorded — name the course's
+      // starting point rather than inventing a lesson title.
+      nextItemTitle: course.nextItemTitle ?? t('notStarted'),
+      lastActiveLabel: course.lastAccessedAt
+        ? format.relativeTime(new Date(course.lastAccessedAt))
         : undefined,
     };
   }
@@ -87,11 +83,11 @@ export function MyCoursesPreview({ schoolCourses }: MyCoursesPreviewProps) {
         </div>
       ) : (
         <div className="grid gap-3.5 sm:grid-cols-2">
-          {courses.map((item) => (
+          {courses.map((course) => (
             <CourseProgressCard
-              key={item.containerId}
-              course={toCard(item)}
-              onOpen={() => router.push(resumeHref(item))}
+              key={course.containerId}
+              course={toCard(course)}
+              onOpen={() => router.push(courseHref(course))}
             />
           ))}
         </div>

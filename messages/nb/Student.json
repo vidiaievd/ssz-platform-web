@@ -160,7 +160,9 @@
       "cta": "Fortsett leksjonen",
       "emptyTitle": "Ingenting startet ennå",
       "emptyDescription": "Velg et kurs, så dukker neste leksjon opp her.",
-      "emptyCta": "Se katalogen"
+      "emptyCta": "Se katalogen",
+      "overlineNew": "Klar når du er",
+      "ctaStart": "Start leksjonen"
     },
     "nextClass": {
       "overline": "Neste time",
@@ -192,11 +194,16 @@
       "courseComplete": "Kurset er fullført",
       "emptyTitle": "Ingen kurs ennå",
       "emptyDescription": "Kurs du starter — på egen hånd eller gjennom en skole — vises her.",
-      "emptyCta": "Se katalogen"
+      "emptyCta": "Se katalogen",
+      "notStarted": "Ikke startet ennå"
     },
     "explore": {
       "title": "Utforsk flere kurs",
       "subtitle": "Gratis, abonnement og fra skolene dine"
+    },
+    "groupAccess": {
+      "message": "{school} har plassert deg i {group} — kursmateriellet ditt er klart.",
+      "cta": "Åpne kurset"
     }
   }
 }

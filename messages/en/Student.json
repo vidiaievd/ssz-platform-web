@@ -160,7 +160,9 @@
       "cta": "Resume lesson",
       "emptyTitle": "Nothing started yet",
       "emptyDescription": "Pick a course and your next lesson will show up here.",
-      "emptyCta": "Browse the catalogue"
+      "emptyCta": "Browse the catalogue",
+      "overlineNew": "Ready when you are",
+      "ctaStart": "Start lesson"
     },
     "nextClass": {
       "overline": "Next class",
@@ -192,11 +194,16 @@
       "courseComplete": "Course complete",
       "emptyTitle": "No courses yet",
       "emptyDescription": "Courses you start — on your own or through a school — appear here.",
-      "emptyCta": "Browse the catalogue"
+      "emptyCta": "Browse the catalogue",
+      "notStarted": "Not started yet"
     },
     "explore": {
       "title": "Explore more courses",
       "subtitle": "Free, subscription & from your schools"
+    },
+    "groupAccess": {
+      "message": "{school} placed you in {group} — your course materials are ready.",
+      "cta": "Open course"
     }
   }
 }

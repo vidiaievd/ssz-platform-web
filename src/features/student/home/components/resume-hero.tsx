@@ -16,6 +16,8 @@ export interface ResumeHeroData {
   nextItemTitle: string;
   progressPercent: number;
   href: string;
+  /** Drives the overline and CTA wording — you cannot "resume" what you never opened. */
+  started?: boolean;
 }
 
 export interface ResumeHeroProps {
@@ -28,6 +30,7 @@ export function ResumeHero({ course, className }: ResumeHeroProps) {
   const t = useTranslations('Student.home.resume');
   const hue = langHue(course.langCode);
   const meta = [course.langName, course.level].filter(Boolean).join(' · ');
+  const started = course.started !== false;
 
   return (
     <section
@@ -49,7 +52,7 @@ export function ResumeHero({ course, className }: ResumeHeroProps) {
 
       <div className="relative">
         <p className="mb-2 text-[11px] font-bold tracking-[0.08em] uppercase opacity-80">
-          {t('overline')}
+          {started ? t('overline') : t('overlineNew')}
         </p>
         {meta && <p className="mb-0.75 text-[13px] opacity-85">{meta}</p>}
         <h2 className="mb-4.5 text-[23px] leading-tight font-bold tracking-[-0.02em]">
@@ -80,7 +83,7 @@ export function ResumeHero({ course, className }: ResumeHeroProps) {
           )}
         >
           <Play size={13} aria-hidden="true" />
-          {t('cta')}
+          {started ? t('cta') : t('ctaStart')}
         </Link>
       </div>
     </section>

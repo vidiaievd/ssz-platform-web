@@ -10,6 +10,7 @@ export * from './resume-hero';
 
 // Home-screen compositions (data-aware).
 export * from './home-greeting';
+export * from './group-access-notice';
 export * from './resume-panel';
 export * from './next-class-card';
 export * from './reviews-due-card';
