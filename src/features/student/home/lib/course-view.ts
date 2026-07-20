@@ -1,5 +1,6 @@
 import { getEndonym } from '@/features/profile/lib/iso-languages';
 import type { StudentCourse } from '@/features/student/types';
+import type { CourseProgressCardData } from '../components/course-progress-card';
 import type { ResumeHeroData } from '../components/resume-hero';
 
 /**
@@ -42,4 +43,40 @@ export function toResumeHero(course: StudentCourse): ResumeHeroData {
 export function byRecency(a: StudentCourse, b: StudentCourse): number {
   if (a.started !== b.started) return a.started ? -1 : 1;
   return (b.lastAccessedAt ?? '').localeCompare(a.lastAccessedAt ?? '');
+}
+
+export interface CourseCardLabels {
+  lessonNumber: (n: number) => string;
+  /** A course never opened has no "next item" recorded — its label instead. */
+  notStarted: string;
+}
+
+/**
+ * Shared `StudentCourse` → `CourseProgressCardData` mapping. Takes the
+ * caller's own resolved labels and relative-time function rather than a raw
+ * translator, so it works the same from any client component regardless of
+ * which namespace it happens to be scoped to.
+ */
+export function toCourseCardData(
+  course: StudentCourse,
+  labels: CourseCardLabels,
+  formatRelativeTime: (date: Date) => string,
+): CourseProgressCardData {
+  return {
+    id: course.containerId,
+    langCode: course.targetLanguage,
+    langName: getEndonym(course.targetLanguage),
+    level: course.level ?? '',
+    title: course.title,
+    source: course.source,
+    school: course.school?.name,
+    progressPercent: course.progressPercent,
+    completedItems: course.completedItems,
+    totalItems: course.totalItems,
+    nextUnitLabel: labels.lessonNumber(course.completedItems + 1),
+    nextItemTitle: course.nextItemTitle ?? labels.notStarted,
+    lastActiveLabel: course.lastAccessedAt
+      ? formatRelativeTime(new Date(course.lastAccessedAt))
+      : undefined,
+  };
 }

@@ -240,6 +240,20 @@ describe('getMyCourses', () => {
     expect(courses[0]).toMatchObject({ source: 'self', school: null, started: false });
   });
 
+  it('marks a self-enrolled public-free course as free rather than self-study', async () => {
+    vi.mocked(getStudentSchools).mockResolvedValue([]);
+    mockUpstreams({
+      enrollments: [{ containerId: 'course-free', status: 'ACTIVE' }],
+      containers: {
+        'course-free': container('course-free', 'Norsk A1 — Free', { accessTier: 'public_free' }),
+      },
+    });
+
+    const courses = await getMyCourses(STUDENT_ID);
+
+    expect(courses[0]).toMatchObject({ source: 'free', school: null });
+  });
+
   it('ignores non-active enrollments', async () => {
     vi.mocked(getStudentSchools).mockResolvedValue([]);
     mockUpstreams({

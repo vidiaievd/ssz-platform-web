@@ -91,7 +91,7 @@ export interface StudentCourse {
   title: string;
   targetLanguage: string;
   level: string | null;
-  source: 'school' | 'self';
+  source: 'school' | 'self' | 'free';
   /** Set only when `source` is 'school'. */
   school: { id: string; slug: string; name: string; groupId: string; groupName: string } | null;
   started: boolean;

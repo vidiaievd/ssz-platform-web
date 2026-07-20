@@ -205,5 +205,25 @@
       "message": "{school} placed you in {group} — your course materials are ready.",
       "cta": "Open course"
     }
+  },
+  "myCoursesPage": {
+    "eyebrow": "My learning",
+    "title": "My courses",
+    "subtitle": "Courses you're taking — from your schools, on your own, and from the free catalogue.",
+    "filters": {
+      "groupLabel": "Filter by source",
+      "all": "All",
+      "school": "From schools",
+      "self": "Self-study",
+      "free": "Free & public"
+    },
+    "empty": {
+      "all": "No courses yet",
+      "school": "No school courses yet",
+      "self": "No self-study courses yet",
+      "free": "No free courses yet",
+      "description": "Browse the catalogue to add a course.",
+      "cta": "Explore catalogue"
+    }
   }
 }

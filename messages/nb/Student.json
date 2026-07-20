@@ -205,5 +205,25 @@
       "message": "{school} har plassert deg i {group} — kursmateriellet ditt er klart.",
       "cta": "Åpne kurset"
     }
+  },
+  "myCoursesPage": {
+    "eyebrow": "Min læring",
+    "title": "Mine kurs",
+    "subtitle": "Kurs du følger — fra skolene dine, på egen hånd, og fra den gratis katalogen.",
+    "filters": {
+      "groupLabel": "Filtrer etter kilde",
+      "all": "Alle",
+      "school": "Fra skoler",
+      "self": "Selvstudium",
+      "free": "Gratis og offentlig"
+    },
+    "empty": {
+      "all": "Ingen kurs ennå",
+      "school": "Ingen skolekurs ennå",
+      "self": "Ingen kurs for selvstudium ennå",
+      "free": "Ingen gratis kurs ennå",
+      "description": "Bla i katalogen for å legge til et kurs.",
+      "cta": "Se katalogen"
+    }
   }
 }

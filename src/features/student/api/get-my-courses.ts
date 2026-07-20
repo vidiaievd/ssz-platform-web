@@ -192,13 +192,22 @@ export async function getMyCourses(
     const school = fromSchools.get(id) ?? null;
     const progress = progressByContainer.get(id);
 
+    // A course reached only through self-enrollment or progress, with no
+    // school attached, is 'free' when the container itself is publicly free
+    // — otherwise it's an ordinary self-study (paid/subscription) course.
+    const source = school
+      ? ('school' as const)
+      : container.accessTier === 'public_free'
+        ? ('free' as const)
+        : ('self' as const);
+
     return [
       {
         containerId: id,
         title: container.title,
         targetLanguage: container.targetLanguage,
         level: container.difficultyLevel ?? null,
-        source: school ? ('school' as const) : ('self' as const),
+        source,
         school,
         started: progress !== undefined,
         progressPercent: progress?.progressPercent ?? 0,

@@ -7,12 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/features/learning/components/empty-state';
 import { ErrorState } from '@/features/learning/components/error-state';
-import { getEndonym } from '@/features/profile/lib/iso-languages';
 import { useMyCourses } from '@/features/student/api/use-my-courses';
-import type { StudentCourse } from '@/features/student/types';
 import { Link, useRouter } from '@/lib/i18n/navigation';
-import { byRecency, courseHref } from '../lib/course-view';
-import { CourseProgressCard, type CourseProgressCardData } from './course-progress-card';
+import { byRecency, courseHref, toCourseCardData } from '../lib/course-view';
+import { CourseProgressCard } from './course-progress-card';
 import { HSection } from './h-section';
 import { TextLink } from './text-link';
 
@@ -24,28 +22,6 @@ export function MyCoursesPreview() {
   const format = useFormatter();
   const router = useRouter();
   const { data, isLoading, error, refetch } = useMyCourses();
-
-  function toCard(course: StudentCourse): CourseProgressCardData {
-    return {
-      id: course.containerId,
-      langCode: course.targetLanguage,
-      langName: getEndonym(course.targetLanguage),
-      level: course.level ?? '',
-      title: course.title,
-      source: course.source,
-      school: course.school?.name,
-      progressPercent: course.progressPercent,
-      completedItems: course.completedItems,
-      totalItems: course.totalItems,
-      nextUnitLabel: t('lessonNumber', { n: course.completedItems + 1 }),
-      // A course never opened has no "next item" recorded — name the course's
-      // starting point rather than inventing a lesson title.
-      nextItemTitle: course.nextItemTitle ?? t('notStarted'),
-      lastActiveLabel: course.lastAccessedAt
-        ? format.relativeTime(new Date(course.lastAccessedAt))
-        : undefined,
-    };
-  }
 
   const courses = [...(data ?? [])].sort(byRecency).slice(0, PREVIEW_LIMIT);
 
@@ -86,7 +62,11 @@ export function MyCoursesPreview() {
           {courses.map((course) => (
             <CourseProgressCard
               key={course.containerId}
-              course={toCard(course)}
+              course={toCourseCardData(
+                course,
+                { lessonNumber: (n) => t('lessonNumber', { n }), notStarted: t('notStarted') },
+                (d) => format.relativeTime(d),
+              )}
               onOpen={() => router.push(courseHref(course))}
             />
           ))}
