@@ -11,9 +11,6 @@
       "studyNew": "Study new words manually"
     }
   },
-  "streak": {
-    "days": "{count, plural, =0 {Start a streak today} one {# day in a row} other {# days in a row}}"
-  },
   "card": {
     "showAnswer": "Show answer",
     "fromList": "from {list}",
@@ -45,13 +42,12 @@
     "cardsReviewed": "Cards reviewed",
     "accuracy": "Accuracy",
     "timeSpent": "Time spent",
-    "streakStatus": "Streak",
     "reviewMisses": "Review again from misses ({count})",
     "done": "Done"
   },
   "limit": {
     "title": "That's your limit for today",
-    "body": "Come back tomorrow — your streak is safe.",
+    "body": "Come back tomorrow to continue.",
     "cta": "Come back tomorrow"
   },
   "settings": {
@@ -76,7 +72,6 @@
     "empty": "Review some cards to see your stats"
   },
   "toast": {
-    "milestone": "{days, plural, one {# day streak!} other {# day streak!}} Keep it up!",
     "reviewError": "Review not saved. Try again.",
     "settingsError": "Settings not saved. Try again."
   },

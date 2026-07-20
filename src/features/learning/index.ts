@@ -128,7 +128,6 @@ export { SrsPage } from './components/srs/srs-page';
 export { SrsEntry } from './components/srs/entry';
 export { SrsSession } from './components/srs/session';
 export { SessionSummary } from './components/srs/summary';
-export { StreakChip } from './components/srs/streak-chip';
 export { PosChip } from './components/srs/pos-chip';
 export { AudioButton } from './components/srs/audio-button';
 export { RatingBar } from './components/srs/rating-bar';

@@ -53,9 +53,6 @@
     "modulesSub": "Сколько из каждого раздела вы выполнили — и освоили."
   },
   "stats": {
-    "streak": "Серия",
-    "streakDays": "{count} дн.",
-    "bestStreak": "Рекорд: {count}",
     "dueToday": "На сегодня",
     "doneSoFar": "{count} выполнено",
     "retention": "Освоение",

@@ -29,9 +29,3 @@ export interface LessonPreview {
   isCompleted: boolean;
 }
 
-export interface ActivityStreak {
-  currentStreak: number;
-  longestStreak: number;
-  totalActiveDays: number;
-  lastActivityAt?: string;
-}

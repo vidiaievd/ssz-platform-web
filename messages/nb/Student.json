@@ -20,14 +20,6 @@
     "in": "i {container}",
     "start": "Åpne"
   },
-  "streak": {
-    "title": "Aktivitetsrekke",
-    "current": "Nåværende rekke",
-    "longest": "Lengste rekke",
-    "totalDays": "Totalt dager",
-    "days": "{count, plural, one {# dag} other {# dager}}",
-    "noActivity": "Start en leksjon for å bygge rekken din!"
-  },
   "voxordPromo": {
     "title": "Øv på uttale på mobil",
     "description": "Last ned VoxOrd for å øve på tale og få sanntidstilbakemelding på uttalen din.",

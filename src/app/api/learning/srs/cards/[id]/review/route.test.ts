@@ -17,7 +17,6 @@ const VALID_BODY = { rating: 3, latencyMs: 1200, idempotencyKey: 'idem-abc' };
 const MOCK_REVIEW: ReviewResponse = {
   nextDueAt: '2026-07-10T08:00:00Z',
   intervalLabel: '7 days',
-  streakDays: 6,
 };
 
 function makeRequest(body: unknown) {

@@ -134,7 +134,6 @@ function renderPage(overrides: Partial<React.ComponentProps<typeof ListeningLess
         unitPosition={4}
         courseTitle="Norsk B1"
         cefrLevel="B1"
-        xpReward={40}
         {...overrides}
       />
     </NextIntlClientProvider>,
@@ -181,7 +180,7 @@ describe('ListeningLessonPage', () => {
     expect(screen.queryByText(/Jeg jobber som/)).not.toBeInTheDocument();
   });
 
-  it('runs the full listen → gapfill → comp → done flow, scores, and awards XP', () => {
+  it('runs the full listen → gapfill → comp → done flow and scores it', () => {
     mockHappyPath();
     renderPage();
 
@@ -200,7 +199,6 @@ describe('ListeningLessonPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Finish listening training' }));
 
     expect(screen.getByText('Well done!')).toBeInTheDocument();
-    expect(screen.getByText('40 XP')).toBeInTheDocument();
     // the missed gap-fill exercise (wrong answer) is introduced into SRS review
     expect(introduceCardMutate).toHaveBeenCalledWith({ contentType: 'EXERCISE', contentId: 'ex-gap-1' });
     expect(introduceCardMutate).not.toHaveBeenCalledWith({ contentType: 'EXERCISE', contentId: 'ex-comp-1' });

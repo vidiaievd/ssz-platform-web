@@ -10,7 +10,6 @@ import type { StudentProfile } from '@/features/profile';
 const useCourseHome = vi.fn();
 const useUnitContents = vi.fn();
 const useUpsertProgress = vi.fn();
-const useActivityStreak = vi.fn();
 const useVocabularyList = vi.fn();
 const useUnitVocabularyItems = vi.fn();
 const useLesson = vi.fn();
@@ -30,7 +29,6 @@ vi.mock('@/features/learning', async () => {
     useUpsertProgress: (...args: unknown[]) => useUpsertProgress(...args),
   };
 });
-vi.mock('@/features/student', () => ({ useActivityStreak: () => useActivityStreak() }));
 vi.mock('@/features/content', async () => {
   const actual = await vi.importActual<typeof import('@/features/content')>('@/features/content');
   return {
@@ -88,7 +86,6 @@ const COURSE_HOME: CourseHomePayload = {
   progress: { courseId: 'course-1', totalLessons: 50, completedLessons: 17, percentComplete: 34, modules: [], lessons: [] },
   mastery: { courseId: 'course-1', overallMastery: 0, bySkill: [] },
   srsDueCount: 0,
-  srsStreakDays: 0,
   srsReviewedToday: 0,
   srsVocabDue: 0,
   srsExerciseDue: 0,
@@ -301,7 +298,6 @@ const VOCAB_ITEMS: VocabularyItem[] = [
 function setup() {
   useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
   useUnitContents.mockReturnValue({ data: UNIT_CONTENTS, isLoading: false, isError: false, refetch: vi.fn() });
-  useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
 }
 
 function renderShell(props: Partial<React.ComponentProps<typeof ReaderShell>> = {}) {
@@ -327,7 +323,6 @@ describe('ReaderShell', () => {
     // The exercise item renders ExercisePage in the content slot.
     expect(screen.getByText('Exercise question')).toBeInTheDocument();
     expect(screen.getByText('Practice · En vanlig arbeidsdag')).toBeInTheDocument();
-    expect(screen.getByText('7 days streak')).toBeInTheDocument();
   });
 
   it('shows the locked-next guard in the footer when the next item is locked', () => {
@@ -361,7 +356,6 @@ describe('ReaderShell', () => {
       refetch: vi.fn(),
     });
     useUpsertProgress.mockReturnValue({ mutate });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
     useMyStudentProfile.mockReturnValue({
       isLoading: false,
@@ -400,7 +394,6 @@ describe('ReaderShell', () => {
     useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
     useUnitContents.mockReturnValue({ data: completedTextUnit, isLoading: false, isError: false, refetch: vi.fn() });
     useUpsertProgress.mockReturnValue({ mutate });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
     useMyStudentProfile.mockReturnValue({
       isLoading: false,
@@ -422,7 +415,6 @@ describe('ReaderShell', () => {
   it('shows a loading skeleton while queries are pending', () => {
     useCourseHome.mockReturnValue({ data: undefined, isLoading: true, isError: false, refetch: vi.fn() });
     useUnitContents.mockReturnValue({ data: undefined, isLoading: true, isError: false, refetch: vi.fn() });
-    useActivityStreak.mockReturnValue({ data: undefined });
     renderShell();
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
@@ -433,7 +425,6 @@ describe('ReaderShell', () => {
     const refetchUnit = vi.fn();
     useCourseHome.mockReturnValue({ data: undefined, isLoading: false, isError: true, refetch: refetchCourse });
     useUnitContents.mockReturnValue({ data: undefined, isLoading: false, isError: false, refetch: refetchUnit });
-    useActivityStreak.mockReturnValue({ data: undefined });
     renderShell();
 
     fireEvent.click(screen.getByRole('button', { name: /try again/i }));
@@ -449,7 +440,6 @@ describe('ReaderShell', () => {
       isError: false,
       refetch: vi.fn(),
     });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useVocabularyList.mockReturnValue({ data: VOCAB_LIST, isLoading: false, isError: false, refetch: vi.fn() });
     useUnitVocabularyItems.mockReturnValue({
       data: VOCAB_ITEMS,
@@ -474,7 +464,6 @@ describe('ReaderShell', () => {
       isError: false,
       refetch: vi.fn(),
     });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
     useMyStudentProfile.mockReturnValue({
       isLoading: false,
@@ -497,7 +486,6 @@ describe('ReaderShell', () => {
   it('renders VideoLessonPage (not children) when the active item is a video lesson', () => {
     useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
     useUnitContents.mockReturnValue({ data: UNIT_CONTENTS, isLoading: false, isError: false, refetch: vi.fn() });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: VIDEO_LESSON, refetch: vi.fn() });
     useMyStudentProfile.mockReturnValue({
       isLoading: false,
@@ -525,7 +513,6 @@ describe('ReaderShell', () => {
       isError: false,
       refetch: vi.fn(),
     });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: LIVE_LESSON, refetch: vi.fn() });
 
     renderShell({ itemId: 'live-1' });

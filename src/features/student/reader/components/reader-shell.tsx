@@ -10,7 +10,6 @@ import {
   useUnitContents,
   useUpsertProgress,
 } from '@/features/learning';
-import { useActivityStreak } from '@/features/student';
 import { LANG_EMOJI } from '@/features/student/course-home';
 
 import { ContentsSidebar } from './contents-sidebar';
@@ -55,7 +54,6 @@ export function ReaderShell({
 
   const courseHome = useCourseHome(courseId);
   const unitContents = useUnitContents(unitId);
-  const streak = useActivityStreak();
   const upsertProgress = useUpsertProgress(courseId, unitId);
 
   const startedAtRef = useRef<number>(undefined);
@@ -162,7 +160,6 @@ export function ReaderShell({
         unitPosition={activeUnit?.position ?? 0}
         courseTitle={courseInfo.title}
         cefrLevel={courseInfo.cefrLevel}
-        xpReward={activeContentItem.xpReward}
       />
     );
   } else if (activeKind === 'grammar' && activeContentItem) {
@@ -211,10 +208,6 @@ export function ReaderShell({
           unitPosition={activeUnit?.position ?? 0}
           itemKind={activeKind}
           itemTitle={activeTitle}
-          streakDays={streak.data?.currentStreak ?? 0}
-          // XP: no cumulative-XP endpoint exists yet on any service (only
-          // per-item xpReward, see UnitContentsItem) — stubbed until BE adds one.
-          xp={0}
         />
         <div className="flex flex-1 flex-col overflow-auto">
           <div className="mx-auto w-full flex-1 px-8 py-8" style={{ maxWidth: effectiveMaxWidth }}>

@@ -44,7 +44,6 @@ export interface SrsCard {
 
 export interface SrsDueResponse {
   dueCount: number;
-  streakDays: number;
   dailyLimit: number;
   reviewedToday: number;
   cards: SrsCard[];
@@ -66,8 +65,6 @@ export interface ReviewRequest {
 export interface ReviewResponse {
   nextDueAt: string;
   intervalLabel: string;
-  streakDays: number;
-  milestone?: string;
 }
 
 export interface SrsHeatmapDay {
@@ -288,8 +285,6 @@ export interface ProgressSrsStats {
   reviewedToday: number;
   /** 0–100 */
   retention: number;
-  streak: number;
-  bestStreak: number;
   totalItems: number;
   maturedItems: number;
 }
@@ -417,8 +412,7 @@ export interface CourseHomePayload {
   progress: CourseProgress;
   mastery: CourseMastery;
   srsDueCount: number;
-  srsStreakDays: number;
-  /** Cards reviewed so far today (for streak/limit display). */
+  /** Cards reviewed so far today (for limit display). */
   srsReviewedToday: number;
   /** Estimated vocabulary cards due (derived from sample in /srs/due). */
   srsVocabDue: number;

@@ -11,9 +11,6 @@
       "studyNew": "Øv på nye ord manuelt"
     }
   },
-  "streak": {
-    "days": "{count, plural, =0 {Start en streak i dag} one {# dag på rad} other {# dager på rad}}"
-  },
   "card": {
     "showAnswer": "Vis svar",
     "fromList": "fra {list}",
@@ -45,13 +42,12 @@
     "cardsReviewed": "Kort gjennomgått",
     "accuracy": "Nøyaktighet",
     "timeSpent": "Tid brukt",
-    "streakStatus": "Streak",
     "reviewMisses": "Øv på feil igjen ({count})",
     "done": "Ferdig"
   },
   "limit": {
     "title": "Det er dagens grense",
-    "body": "Kom tilbake i morgen – streaken din er trygg.",
+    "body": "Kom tilbake i morgen for å fortsette.",
     "cta": "Kom tilbake i morgen"
   },
   "settings": {
@@ -76,7 +72,6 @@
     "empty": "Øv på noen kort for å se statistikken din"
   },
   "toast": {
-    "milestone": "{days, plural, one {# dags streak!} other {# dagers streak!}} Fortsett!",
     "reviewError": "Øvelsen ble ikke lagret. Prøv igjen.",
     "settingsError": "Innstillingene ble ikke lagret. Prøv igjen."
   },

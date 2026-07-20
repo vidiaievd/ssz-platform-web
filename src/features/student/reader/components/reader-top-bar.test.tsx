@@ -33,8 +33,6 @@ function renderTopBar(props: Partial<React.ComponentProps<typeof ReaderTopBar>> 
         unitPosition={4}
         itemKind="text"
         itemTitle="En vanlig arbeidsdag"
-        streakDays={7}
-        xp={340}
         avatarName="Alex Rivera"
         {...props}
       />
@@ -52,13 +50,6 @@ describe('ReaderTopBar', () => {
       'href',
       '/student/courses/course-1',
     );
-  });
-
-  it('renders streak and XP badges', () => {
-    renderTopBar();
-
-    expect(screen.getByText('7 days streak')).toBeInTheDocument();
-    expect(screen.getByText('340 XP')).toBeInTheDocument();
   });
 
   it('toggles theme to dark when currently light', () => {

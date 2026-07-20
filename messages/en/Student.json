@@ -20,14 +20,6 @@
     "in": "in {container}",
     "start": "Open"
   },
-  "streak": {
-    "title": "Activity streak",
-    "current": "Current streak",
-    "longest": "Longest streak",
-    "totalDays": "Total days",
-    "days": "{count, plural, one {# day} other {# days}}",
-    "noActivity": "Start a lesson to build your streak!"
-  },
   "voxordPromo": {
     "title": "Practice pronunciation on mobile",
     "description": "Download VoxOrd to practise speaking and get real-time feedback on your pronunciation.",

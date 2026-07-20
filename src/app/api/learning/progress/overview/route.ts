@@ -92,8 +92,6 @@ export async function GET(request: NextRequest) {
       dueToday:      srsDue.dueCount,
       reviewedToday: srsDue.reviewedToday,
       retention:     Math.round(srsStats.retentionRate),
-      streak:        srsDue.streakDays,
-      bestStreak:    srsDue.streakDays, // backend may add bestStreak later
       totalItems:    srsStats.matureCount + srsStats.youngCount,
       maturedItems:  srsStats.matureCount,
     };

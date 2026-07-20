@@ -53,9 +53,6 @@
     "modulesSub": "Скільки з кожного розділу ви виконали — і засвоїли."
   },
   "stats": {
-    "streak": "Серія",
-    "streakDays": "{count} дн.",
-    "bestStreak": "Рекорд: {count}",
     "dueToday": "На сьогодні",
     "doneSoFar": "{count} виконано",
     "retention": "Засвоєння",

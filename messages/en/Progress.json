@@ -53,9 +53,6 @@
     "modulesSub": "How much of each unit you've completed — and retained."
   },
   "stats": {
-    "streak": "Streak",
-    "streakDays": "{count} days",
-    "bestStreak": "Best: {count}",
     "dueToday": "Due today",
     "doneSoFar": "{count} done",
     "retention": "Retention",

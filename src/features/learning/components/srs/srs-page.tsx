@@ -71,7 +71,6 @@ export function SrsPage() {
     seed({
       cards: data.cards,
       dailyLimit: data.dailyLimit,
-      streakDays: data.streakDays,
     });
     // Only re-seed when the due data changes (window focus refetch)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,7 +91,6 @@ export function SrsPage() {
         {phase === 'entry' && (
           <SrsEntry
             dueCount={data.dueCount}
-            streakDays={data.streakDays}
             reviewedToday={data.reviewedToday}
             dailyLimit={data.dailyLimit}
             onStart={() => startSession()}

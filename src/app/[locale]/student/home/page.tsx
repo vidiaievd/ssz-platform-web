@@ -6,7 +6,6 @@ import { getMyProfile } from '@/features/profile/api/get-my-profile';
 import { ContinueLearning } from '@/features/student/components/continue-learning';
 import { FindSchoolBand } from '@/features/student/components/find-school-band';
 import { MySchoolsBand } from '@/features/student/components/my-schools-band';
-import { StreakStats } from '@/features/student/components/streak-stats';
 import { UpcomingLessons } from '@/features/student/components/upcoming-lessons';
 import { VoxOrdPromo } from '@/features/student/components/voxord-promo';
 
@@ -41,9 +40,6 @@ export default async function StudentHomePage() {
         </h1>
         <p className="text-[15px] text-(--ssz-text-secondary)">{t('dashboard.subtitle')}</p>
       </div>
-
-      {/* Stats grid */}
-      <StreakStats />
 
       {/* Schools the student belongs to: status, group, materials, teachers */}
       <MySchoolsBand />

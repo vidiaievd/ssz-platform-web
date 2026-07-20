@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Flame, Moon, Sun, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 
@@ -13,46 +13,8 @@ export interface ReaderTopBarProps {
   unitPosition: number;
   itemKind: MaterialKind;
   itemTitle: string;
-  streakDays: number;
-  xp: number;
   avatarName?: string;
   avatarSrc?: string;
-}
-
-function StreakBadge({ days }: { days: number }) {
-  const t = useTranslations('Learning.reader.topbar');
-  return (
-    <div
-      className="flex items-center gap-1.5 rounded-full border px-3 py-1.25"
-      style={{
-        background: 'var(--ssz-color-warning-100)',
-        borderColor: 'var(--ssz-color-warning-300)',
-      }}
-    >
-      <Flame size={14} style={{ color: 'var(--ssz-color-warning-700)' }} aria-hidden="true" />
-      <span className="text-[13px] font-bold" style={{ color: 'var(--ssz-color-warning-700)' }}>
-        {t('streakDays', { count: days })}
-      </span>
-    </div>
-  );
-}
-
-function XpBadge({ xp }: { xp: number }) {
-  const t = useTranslations('Learning.reader.topbar');
-  return (
-    <div
-      className="flex items-center gap-1.5 rounded-full border px-3 py-1.25"
-      style={{
-        background: 'var(--ssz-color-secondary-100)',
-        borderColor: 'var(--ssz-color-secondary-300)',
-      }}
-    >
-      <Zap size={13} style={{ color: 'var(--ssz-color-secondary-700)' }} aria-hidden="true" />
-      <span className="text-[13px] font-bold" style={{ color: 'var(--ssz-color-secondary-700)' }}>
-        {t('xp', { xp })}
-      </span>
-    </div>
-  );
 }
 
 function ThemeToggle() {
@@ -77,8 +39,6 @@ export function ReaderTopBar({
   unitPosition,
   itemKind,
   itemTitle,
-  streakDays,
-  xp,
   avatarName,
   avatarSrc,
 }: ReaderTopBarProps) {
@@ -104,8 +64,6 @@ export function ReaderTopBar({
         </span>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <StreakBadge days={streakDays} />
-        <XpBadge xp={xp} />
         <ThemeToggle />
         <Avatar name={avatarName} src={avatarSrc} size="sm" />
       </div>

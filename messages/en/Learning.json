@@ -161,7 +161,7 @@
       "overdueCta": "Finish & submit",
       "reviewLabel": "DAILY REVIEW",
       "reviewTitle": "{count} cards due for review",
-      "reviewMeta": "Keep your streak going — it only takes a few minutes.",
+      "reviewMeta": "It only takes a few minutes.",
       "reviewCta": "Start review",
       "resumeLabel": "CONTINUE LEARNING",
       "resumeTitle": "Continue where you left off",
@@ -227,8 +227,6 @@
     },
     "topbar": {
       "courseLabel": "Course",
-      "streakDays": "{count, plural, one {# day streak} other {# days streak}}",
-      "xp": "{xp} XP",
       "toggleThemeToLight": "Switch to light theme",
       "toggleThemeToDark": "Switch to dark theme"
     },

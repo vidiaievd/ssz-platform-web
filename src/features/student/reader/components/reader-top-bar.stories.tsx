@@ -17,20 +17,16 @@ export const TextLesson: Story = {
     unitPosition: 4,
     itemKind: 'text',
     itemTitle: 'En vanlig arbeidsdag',
-    streakDays: 7,
-    xp: 340,
     avatarName: 'Alex Rivera',
   },
 };
 
-export const NoStreak: Story = {
+export const VocabLesson: Story = {
   args: {
     courseHref: '/student/courses/course-1',
     unitPosition: 1,
     itemKind: 'vocab',
     itemTitle: 'Yrker og oppgaver',
-    streakDays: 0,
-    xp: 0,
     avatarName: 'Alex Rivera',
   },
 };
@@ -41,8 +37,6 @@ export const LongTitle: Story = {
     unitPosition: 12,
     itemKind: 'video',
     itemTitle: 'A very long lesson title that should be truncated with an ellipsis in the breadcrumb',
-    streakDays: 21,
-    xp: 1240,
     avatarName: 'Alex Rivera',
   },
 };

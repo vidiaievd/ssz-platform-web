@@ -57,7 +57,6 @@ interface RawSrsDue {
   cards: SrsCard[];
   reviewedToday: number;
   dailyLimit: number;
-  streakDays: number;
 }
 
 interface UnitRollup {
@@ -281,7 +280,6 @@ export async function GET(
       progress,
       mastery,
       srsDueCount,
-      srsStreakDays: rawSrsDue.streakDays,
       srsReviewedToday: rawSrsDue.reviewedToday,
       srsVocabDue,
       srsExerciseDue,

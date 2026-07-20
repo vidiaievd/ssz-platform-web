@@ -11,7 +11,6 @@ import type { SrsDueResponse } from '@/features/learning/types';
 
 const MOCK_DUE: SrsDueResponse = {
   dueCount: 12,
-  streakDays: 5,
   dailyLimit: 20,
   reviewedToday: 3,
   cards: [

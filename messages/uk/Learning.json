@@ -161,7 +161,7 @@
       "overdueCta": "Завершити і здати",
       "reviewLabel": "ЩОДЕННЕ ПОВТОРЕННЯ",
       "reviewTitle": "{count} карток до повторення",
-      "reviewMeta": "Підтримуйте серію — це займе лише кілька хвилин.",
+      "reviewMeta": "Це займе лише кілька хвилин.",
       "reviewCta": "Почати повторення",
       "resumeLabel": "ПРОДОВЖИТИ НАВЧАННЯ",
       "resumeTitle": "Продовжте з того місця, де зупинились",
@@ -227,8 +227,6 @@
     },
     "topbar": {
       "courseLabel": "Курс",
-      "streakDays": "{count, plural, one {Серія # день} few {Серія # дні} many {Серія # днів} other {Серія # дні}}",
-      "xp": "{xp} XP",
       "toggleThemeToLight": "Перемкнути на світлу тему",
       "toggleThemeToDark": "Перемкнути на темну тему"
     },

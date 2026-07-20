@@ -88,7 +88,6 @@ const RAW_SRS_DUE = {
   ],
   reviewedToday: 3,
   dailyLimit: 20,
-  streakDays: 7,
 };
 
 const MOCK_CONTAINER: Partial<Container> = {
@@ -184,7 +183,6 @@ describe('GET /api/learning/course-home/[courseId]', () => {
       ]),
     );
 
-    expect(body.srsStreakDays).toBe(7);
     expect(body.srsReviewedToday).toBe(3);
     // /srs/due no longer reports a total due count — the sample itself is treated as the count.
     expect(body.srsDueCount).toBe(3);

@@ -1,6 +1,6 @@
 'use client';
 
-import { Flame, Layers, RefreshCw, Target } from 'lucide-react';
+import { Layers, RefreshCw, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -18,7 +18,6 @@ import { RingProgress } from './ring-progress';
 
 const SUCCESS = 'var(--ssz-color-success-500)';
 const ACCENT  = 'var(--ssz-color-primary-500)';
-const FLAME   = 'oklch(0.62 0.16 45)';
 
 /* ── Section wrapper ─────────────────────────────────────────────── */
 function Section({
@@ -288,13 +287,6 @@ export function ProgressDashboard({
             gap: 14,
           }}
         >
-          <ProgressStatTile
-            icon={Flame}
-            value={t('stats.streakDays', { count: srs.streak })}
-            label={t('stats.streak')}
-            sub={t('stats.bestStreak', { count: srs.bestStreak })}
-            color={FLAME}
-          />
           <ProgressStatTile
             icon={RefreshCw}
             value={srs.dueToday}

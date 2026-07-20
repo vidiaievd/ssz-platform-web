@@ -79,19 +79,15 @@ export function SrsSession() {
 
       // After the visual gate, advance optimistically from the local buffer.
       const advanceTimer = setTimeout(() => {
-        advanceAfterRating(rating, useSrsSessionStore.getState().streakDays);
+        advanceAfterRating(rating);
       }, ADVANCE_DELAY_MS);
 
       submitReview(
         { rating, latencyMs, idempotencyKey },
         {
-          onSuccess: ({ streakDays, milestone }) => {
+          onSuccess: () => {
             clearTimeout(advanceTimer);
-            if (milestone) {
-              toast(t('toast.milestone', { days: milestone }));
-            }
-            // Advance with the real updated streak from the server.
-            advanceAfterRating(rating, streakDays);
+            advanceAfterRating(rating);
           },
           onError: (err) => {
             clearTimeout(advanceTimer);

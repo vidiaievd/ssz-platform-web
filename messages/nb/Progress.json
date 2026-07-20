@@ -53,9 +53,6 @@
     "modulesSub": "Hvor mye av hver enhet du har fullført — og beholdt."
   },
   "stats": {
-    "streak": "Rekke",
-    "streakDays": "{count} dager",
-    "bestStreak": "Best: {count}",
     "dueToday": "Forfaller i dag",
     "doneSoFar": "{count} gjort",
     "retention": "Bevaring",

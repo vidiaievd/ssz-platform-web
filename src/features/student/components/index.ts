@@ -13,7 +13,5 @@ export * from './school-status-card';
 export * from './school-summary-card';
 export * from './weekly-schedule';
 export * from './stat-card';
-export * from './streak-stats';
-export * from './streak-widget';
 export * from './upcoming-lessons';
 export * from './voxord-promo';

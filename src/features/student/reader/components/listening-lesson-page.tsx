@@ -32,8 +32,6 @@ export interface ListeningLessonPageProps {
   unitPosition: number;
   courseTitle: string;
   cefrLevel: string;
-  /** Per-item XP reward (`UnitContentsItem.xpReward`), shown on the done stage. */
-  xpReward?: number | null;
 }
 
 export function ListeningLessonPage({
@@ -41,7 +39,6 @@ export function ListeningLessonPage({
   unitPosition,
   courseTitle,
   cefrLevel,
-  xpReward,
 }: ListeningLessonPageProps) {
   const t = useTranslations('Learning.reader.listening.page');
   const tContent = useTranslations('Content');
@@ -189,7 +186,7 @@ export function ListeningLessonPage({
           }}
         />
       )}
-      {stage === 'done' && <ListeningDoneStage xpReward={xpReward} />}
+      {stage === 'done' && <ListeningDoneStage />}
     </div>
   );
 }

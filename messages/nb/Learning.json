@@ -161,7 +161,7 @@
       "overdueCta": "Fullfør og send inn",
       "reviewLabel": "DAGLIG GJENNOMGANG",
       "reviewTitle": "{count} kort til gjennomgang",
-      "reviewMeta": "Hold streaken din – det tar bare noen minutter.",
+      "reviewMeta": "Det tar bare noen minutter.",
       "reviewCta": "Start gjennomgang",
       "resumeLabel": "FORTSETT Å LÆRE",
       "resumeTitle": "Fortsett der du slapp",
@@ -227,8 +227,6 @@
     },
     "topbar": {
       "courseLabel": "Kurs",
-      "streakDays": "{count, plural, one {# dags rekke} other {# dagers rekke}}",
-      "xp": "{xp} XP",
       "toggleThemeToLight": "Bytt til lyst tema",
       "toggleThemeToDark": "Bytt til mørkt tema"
     },
