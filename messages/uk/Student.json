@@ -118,6 +118,30 @@
     "message": "Вас зараховано до {group} у {school}!",
     "dismiss": "Закрити"
   },
+  "homeCards": {
+    "sourceTag": {
+      "school": "Школа",
+      "self": "Самостійне навчання",
+      "free": "Безкоштовно",
+      "paid": "Підписка"
+    },
+    "courseProgressCard": {
+      "lessonsProgress": "{done} / {total} уроків",
+      "wordsLearned": "{count} слів вивчено",
+      "inProgress": "У процесі",
+      "upNext": "Далі · {unit}",
+      "resume": "Продовжити",
+      "lastActive": "Остання активність {when}"
+    },
+    "trainingTile": {
+      "ready": "{count} готово"
+    },
+    "cadenceCard": {
+      "title": "Ваш ритм навчання",
+      "advice": "Мало, але часто — краще, ніж рідко й довго",
+      "reviewedToday": "{count, plural, =0 {Сьогодні ще не було повторень} one {# повторення сьогодні} few {# повторення сьогодні} many {# повторень сьогодні} other {# повторення сьогодні}}"
+    }
+  },
   "comingSoon": {
     "title": "Незабаром",
     "description": "Цей екран переробляють у рамках редизайну головної сторінки."

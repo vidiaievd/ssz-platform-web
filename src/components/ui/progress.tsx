@@ -13,10 +13,12 @@ interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
   color?: string;
   /** Show percentage label on the right */
   showLabel?: boolean;
+  /** Accessible name for the progressbar role — required by WCAG 1.1.1/4.1.2. */
+  label?: string;
 }
 
 const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
-  ({ className, value, height = 6, color, showLabel = false, ...props }, ref) => {
+  ({ className, value, height = 6, color, showLabel = false, label, ...props }, ref) => {
     const pct = clamp(value, 0, 100);
     const fill = color ?? "oklch(0.62 0.105 168)";
 
@@ -26,6 +28,7 @@ const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
           className="flex-1 overflow-hidden rounded-full bg-neutral-200"
           style={{ height }}
           role="progressbar"
+          aria-label={label}
           aria-valuenow={pct}
           aria-valuemin={0}
           aria-valuemax={100}

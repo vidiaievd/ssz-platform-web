@@ -118,6 +118,30 @@
     "message": "You're in {group} at {school}!",
     "dismiss": "Dismiss"
   },
+  "homeCards": {
+    "sourceTag": {
+      "school": "School",
+      "self": "Self-study",
+      "free": "Free",
+      "paid": "Subscription"
+    },
+    "courseProgressCard": {
+      "lessonsProgress": "{done} / {total} lessons",
+      "wordsLearned": "{count} words learned",
+      "inProgress": "In progress",
+      "upNext": "Up next · {unit}",
+      "resume": "Resume",
+      "lastActive": "Last active {when}"
+    },
+    "trainingTile": {
+      "ready": "{count} ready"
+    },
+    "cadenceCard": {
+      "title": "Your study rhythm",
+      "advice": "Little and often beats long, rare sessions",
+      "reviewedToday": "{count, plural, =0 {No reviews yet today} one {# review today} other {# reviews today}}"
+    }
+  },
   "comingSoon": {
     "title": "Coming soon",
     "description": "This screen is being rebuilt as part of the Home redesign."

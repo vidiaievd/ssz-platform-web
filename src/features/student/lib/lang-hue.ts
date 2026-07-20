@@ -12,7 +12,7 @@ export interface LangHueTokens {
 }
 
 const LANGUAGE_HUES: Record<string, number> = {
-  no: 200,
+  nb: 200,
   es: 28,
   en: 200,
   fr: 300,

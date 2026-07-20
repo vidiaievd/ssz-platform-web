@@ -118,6 +118,30 @@
     "message": "Du er i {group} hos {school}!",
     "dismiss": "Lukk"
   },
+  "homeCards": {
+    "sourceTag": {
+      "school": "Skole",
+      "self": "Selvstudium",
+      "free": "Gratis",
+      "paid": "Abonnement"
+    },
+    "courseProgressCard": {
+      "lessonsProgress": "{done} / {total} leksjoner",
+      "wordsLearned": "{count} ord lært",
+      "inProgress": "Pågår",
+      "upNext": "Neste · {unit}",
+      "resume": "Fortsett",
+      "lastActive": "Sist aktiv {when}"
+    },
+    "trainingTile": {
+      "ready": "{count} klare"
+    },
+    "cadenceCard": {
+      "title": "Studierytmen din",
+      "advice": "Litt og ofte er bedre enn lange, sjeldne sesjoner",
+      "reviewedToday": "{count, plural, =0 {Ingen gjennomganger i dag ennå} one {# gjennomgang i dag} other {# gjennomganger i dag}}"
+    }
+  },
   "comingSoon": {
     "title": "Kommer snart",
     "description": "Denne skjermen bygges om som en del av redesignet av startsiden."
