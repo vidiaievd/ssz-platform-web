@@ -14,15 +14,22 @@ interface Props {
   params: Promise<{ locale: string; slug: string }>;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default async function CatalogueContainerPage({ params }: Props) {
   const { slug } = await params;
   const t = await getTranslations('Content');
+
+  // The catalogue card links by slug, falling back to the raw id for
+  // containers that don't have one (`container.slug ?? container.id`) — this
+  // route needs the matching fallback on the read side.
+  const isId = UUID_RE.test(slug);
 
   let container: Container;
   try {
     container = await serverFetch<Container>({
       service: 'content',
-      path: `/containers/slug/${slug}`,
+      path: isId ? `/containers/${slug}` : `/containers/slug/${slug}`,
       anonymous: false,
     });
   } catch (e) {
