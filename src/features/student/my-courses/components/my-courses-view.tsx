@@ -15,7 +15,7 @@ import { Link, useRouter } from '@/lib/i18n/navigation';
 import { useUrlFilters } from '@/lib/url-filters/use-url-filters';
 import { SourceFilterPills } from './source-filter-pills';
 
-const GRID_CLASS = 'grid gap-3.5 grid-cols-[repeat(auto-fill,minmax(320px,1fr))]';
+const GRID_CLASS = 'grid gap-3.5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]';
 
 /** Filterable grid of every course the student can open, backed by `?source=` in the URL. */
 export function MyCoursesView() {

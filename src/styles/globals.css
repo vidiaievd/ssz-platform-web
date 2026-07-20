@@ -364,6 +364,13 @@
     --ssz-shadow-xl: 0 16px 48px oklch(0.18 0.01 80 / 0.12), 0 8px 16px oklch(0.18 0.01 80 / 0.08);
     --ssz-focus-ring: 0 0 0 3px oklch(0.52 0.105 168 / 0.30);
 
+    /* Per-language accent tiers (see src/features/student/lib/lang-hue.ts).
+       Stored as "L C" pairs — callers append the hue to form oklch(var(--x) H). */
+    --ssz-lang-soft-lc: 0.93 0.05;
+    --ssz-lang-mid-lc:  0.79 0.09;
+    --ssz-lang-c-lc:    0.62 0.105;
+    --ssz-lang-deep-lc: 0.44 0.09;
+
     /* shadcn/ui compatibility aliases */
     --background: oklch(0.975 0.007 80);
     --foreground: oklch(0.18  0.010 80);
@@ -424,6 +431,14 @@
     --ssz-shadow-lg: 0 8px 24px rgba(0,0,0,0.32), 0 4px 8px rgba(0,0,0,0.22);
     --ssz-shadow-xl: 0 16px 48px rgba(0,0,0,0.38), 0 8px 16px rgba(0,0,0,0.26);
     --ssz-focus-ring: 0 0 0 3px oklch(0.70 0.09 168 / 0.40);
+
+    /* Per-language accent tiers, re-tuned for dark surfaces: soft/mid drop
+       lightness to sit on dark backgrounds; c/deep rise so text and fills
+       stay legible, mirroring the primary/secondary scale's own shift. */
+    --ssz-lang-soft-lc: 0.28 0.05;
+    --ssz-lang-mid-lc:  0.45 0.09;
+    --ssz-lang-c-lc:    0.72 0.105;
+    --ssz-lang-deep-lc: 0.80 0.09;
 
     --background: oklch(0.17 0.012 240);
     --foreground: oklch(0.93 0.008 80);

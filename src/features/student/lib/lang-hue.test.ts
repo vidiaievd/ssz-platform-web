@@ -5,10 +5,11 @@ import { langHue } from './lang-hue';
 describe('langHue', () => {
   it('returns distinct hue-tinted tokens for a known language code', () => {
     const nb = langHue('nb');
-    expect(nb.c).toBe('oklch(0.62 0.105 200)');
-    expect(nb.soft).toBe('oklch(0.93 0.05 200)');
-    expect(nb.mid).toBe('oklch(0.79 0.09 200)');
-    expect(nb.deep).toBe('oklch(0.44 0.09 200)');
+    expect(nb.c).toBe('oklch(var(--ssz-lang-c-lc) 200)');
+    expect(nb.soft).toBe('oklch(var(--ssz-lang-soft-lc) 200)');
+    expect(nb.mid).toBe('oklch(var(--ssz-lang-mid-lc) 200)');
+    expect(nb.deep).toBe('oklch(var(--ssz-lang-deep-lc) 200)');
+    expect(nb.ink).toBe('oklch(0.44 0.09 200)');
   });
 
   it('is case-insensitive', () => {

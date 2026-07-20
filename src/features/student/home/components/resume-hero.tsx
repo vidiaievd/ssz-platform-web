@@ -34,7 +34,7 @@ export function ResumeHero({ course, className }: ResumeHeroProps) {
 
   return (
     <section
-      style={{ background: `linear-gradient(135deg, ${hue.c}, ${hue.deep})`, '--hue-deep': hue.deep } as React.CSSProperties}
+      style={{ background: `linear-gradient(135deg, ${hue.c}, ${hue.deep})`, '--hue-deep': hue.ink } as React.CSSProperties}
       className={cn(
         'relative overflow-hidden rounded-xl p-6 text-white shadow-(--ssz-shadow-lg) sm:p-7',
         className,

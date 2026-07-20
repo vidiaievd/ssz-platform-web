@@ -18,9 +18,9 @@ export interface RecommendationBannerProps {
 export function RecommendationBanner({ kind, count, icon: Icon, hue, onStart }: RecommendationBannerProps) {
   const t = useTranslations('Student.trainingPage.recommended');
 
-  const c = `oklch(0.62 0.105 ${hue})`;
-  const soft = `oklch(0.955 0.028 ${hue})`;
-  const deep = `oklch(0.42 0.09 ${hue})`;
+  const c = `oklch(var(--ssz-lang-c-lc) ${hue})`;
+  const soft = `oklch(var(--ssz-lang-soft-lc) ${hue})`;
+  const deep = `oklch(var(--ssz-lang-deep-lc) ${hue})`;
 
   return (
     <div

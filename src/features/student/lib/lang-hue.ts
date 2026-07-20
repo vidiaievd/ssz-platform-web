@@ -3,12 +3,20 @@
  * as the `primary` design-token scale (see `src/styles/globals.css`), with
  * the hue swapped per language. `c` and `deep` are the gradient start/end
  * used by `ResumeHero`; `soft`/`mid` are for chips and light fills.
+ *
+ * `c`, `soft`, `mid` and `deep` resolve through `--ssz-lang-*-lc` CSS
+ * variables, which carry a dark-theme override — they stay correct on both
+ * a light card surface and a dark one without any JS theme detection.
+ * `ink` is the one exception: it is not theme-reactive, for the one spot
+ * (the ResumeHero CTA) where the text always sits on a fixed white chip
+ * regardless of the active theme.
  */
 export interface LangHueTokens {
   c: string;
   soft: string;
   mid: string;
   deep: string;
+  ink: string;
 }
 
 const LANGUAGE_HUES: Record<string, number> = {
@@ -26,9 +34,10 @@ const FALLBACK_HUE = LANGUAGE_HUES.en;
 export function langHue(code: string): LangHueTokens {
   const hue = LANGUAGE_HUES[code.toLowerCase()] ?? FALLBACK_HUE;
   return {
-    soft: `oklch(0.93 0.05 ${hue})`,
-    mid: `oklch(0.79 0.09 ${hue})`,
-    c: `oklch(0.62 0.105 ${hue})`,
-    deep: `oklch(0.44 0.09 ${hue})`,
+    soft: `oklch(var(--ssz-lang-soft-lc) ${hue})`,
+    mid: `oklch(var(--ssz-lang-mid-lc) ${hue})`,
+    c: `oklch(var(--ssz-lang-c-lc) ${hue})`,
+    deep: `oklch(var(--ssz-lang-deep-lc) ${hue})`,
+    ink: `oklch(0.44 0.09 ${hue})`,
   };
 }

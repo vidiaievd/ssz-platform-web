@@ -15,7 +15,12 @@ export function LangChip({ langCode, level, size = 48, className }: LangChipProp
   return (
     <div
       className={cn('relative shrink-0 overflow-hidden rounded-md', className)}
-      style={{ width: size, height: size, background: hue.soft, border: `1px solid ${hue.c}33` }}
+      style={{
+        width: size,
+        height: size,
+        background: hue.soft,
+        border: `1px solid ${hue.c.replace(/\)$/, ' / 0.2)')}`,
+      }}
     >
       <svg
         width="100%"

@@ -32,7 +32,7 @@ export function AccessTabs({ active, counts, onChange }: AccessTabsProps) {
                 'inline-flex items-center gap-2 rounded-full border-[1.5px] px-3.5 py-1.75 text-[13px] font-bold',
                 'transition-colors duration-base ease-out-ssz',
                 isActive
-                  ? 'border-(--ssz-color-primary-500) bg-[oklch(0.93_0.05_168)] text-(--ssz-color-primary-700)'
+                  ? 'border-(--ssz-color-primary-500) bg-[oklch(0.93_0.05_168)] text-(--ssz-color-primary-700) dark:border-(--ssz-color-primary-400) dark:bg-[oklch(0.30_0.05_168)] dark:text-[oklch(0.82_0.075_168)]'
                   : 'border-(--ssz-border-default) bg-surface text-(--ssz-text-secondary) hover:border-(--ssz-border-strong)',
               )}
             >
@@ -41,7 +41,7 @@ export function AccessTabs({ active, counts, onChange }: AccessTabsProps) {
                 className={cn(
                   'inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.25 text-[11px] font-bold',
                   isActive
-                    ? 'bg-white/70 text-(--ssz-color-primary-700)'
+                    ? 'bg-white/70 text-(--ssz-color-primary-700) dark:bg-black/25 dark:text-[oklch(0.82_0.075_168)]'
                     : 'bg-(--ssz-bg-subtle) text-(--ssz-text-muted)',
                 )}
               >

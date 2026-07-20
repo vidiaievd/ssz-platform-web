@@ -52,21 +52,12 @@ export function DueNowCard({ summary, onReviewAll }: DueNowCardProps) {
 
   return (
     <div className="overflow-hidden rounded-lg border-[1.5px] border-(--ssz-border-default) bg-surface shadow-(--ssz-shadow-sm)">
-      <div
-        className="flex flex-wrap items-center gap-4 border-b p-5"
-        style={{
-          background: 'oklch(0.95 0.045 82)',
-          borderBottomColor: 'oklch(0.66 0.11 70 / 0.25)',
-        }}
-      >
+      <div className="flex flex-wrap items-center gap-4 border-b border-b-[oklch(0.66_0.11_70/0.25)] bg-[oklch(0.95_0.045_82)] p-5 dark:border-b-[oklch(0.55_0.09_70/0.35)] dark:bg-[oklch(0.28_0.04_82)]">
         <div className="flex items-baseline gap-2.5">
-          <span
-            className="text-[30px] leading-none font-extrabold tracking-[-0.03em]"
-            style={{ color: 'oklch(0.42 0.09 82)' }}
-          >
+          <span className="text-[30px] leading-none font-extrabold tracking-[-0.03em] text-[oklch(0.42_0.09_82)] dark:text-[oklch(0.88_0.07_82)]">
             {summary.totalDue}
           </span>
-          <span className="text-sm font-semibold" style={{ color: 'oklch(0.44 0.09 82)' }}>
+          <span className="text-sm font-semibold text-[oklch(0.44_0.09_82)] dark:text-[oklch(0.82_0.07_82)]">
             {t('dueNow', { count: summary.totalDue })}
           </span>
         </div>
