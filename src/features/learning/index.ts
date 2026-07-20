@@ -3,6 +3,7 @@ export { learningKeys } from './api/keys';
 export { useSrsDue } from './api/use-srs-due';
 export { useSrsReview } from './api/use-srs-review';
 export { useSrsStats } from './api/use-srs-stats';
+export { useReviewsSummary } from './api/use-reviews-summary';
 export { useSrsSettings, usePatchSrsSettings } from './api/use-srs-settings';
 export { useCourseProgress } from './api/use-course-progress';
 export { useCourseMastery } from './api/use-course-mastery';
@@ -32,9 +33,13 @@ export type {
   LessonProgress,
   LessonProgressStatus,
   ModuleProgress,
+  ReviewCourseBreakdown,
+  ReviewKind,
   ReviewRating,
   ReviewRequest,
   ReviewResponse,
+  ReviewsSummary,
+  UpcomingReview,
   SkillMastery,
   SrsCard,
   SrsCardBack,

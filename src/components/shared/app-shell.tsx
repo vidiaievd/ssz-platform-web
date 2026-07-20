@@ -26,7 +26,7 @@ import type { SchoolRole } from "@/features/school/types";
 import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
 import type { NotificationLinkContext } from "@/features/notifications";
-import { useSrsDue } from "@/features/learning/api/use-srs-due";
+import { useReviewsSummary } from "@/features/learning/api/use-reviews-summary";
 import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
 import { GlobalSearchTrigger } from "./topbar/global-search-trigger";
@@ -186,7 +186,7 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
   const params = useParams<{ schoolSlug?: string; userId?: string }>();
   const tNav = useTranslations("Nav");
 
-  const { data: srsDue } = useSrsDue({ enabled: variant === "student" });
+  const { data: reviewsSummary } = useReviewsSummary({ enabled: variant === "student" });
 
   const resolvedTutorId = tutorUserId ?? params.userId ?? user.userId ?? "";
 
@@ -195,7 +195,7 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
       ? buildSchoolNav(params.schoolSlug ?? "", schoolContext)
       : variant === "tutor"
         ? buildTutorNav(resolvedTutorId)
-        : buildStudentNav(srsDue?.dueCount ?? 0);
+        : buildStudentNav(reviewsSummary?.totalDue ?? 0);
 
   const userMenuExtraItems: UserMenuExtraItem[] | undefined =
     variant === "student"

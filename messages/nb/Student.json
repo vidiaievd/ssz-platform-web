@@ -225,5 +225,35 @@
       "description": "Bla i katalogen for å legge til et kurs.",
       "cta": "Se katalogen"
     }
+  },
+  "reviewsPage": {
+    "eyebrow": "Hold det ved like",
+    "title": "Repetisjon og påminnelser",
+    "subtitle": "Ordene og reglene plattformen tror du er i ferd med å glemme — hentet fram i det øyeblikket de fester seg best.",
+    "dueNow": "{count, plural, one {element klart nå} other {elementer klare nå}}",
+    "reviewAll": "Repeter alt nå",
+    "overdue": "{count, plural, one {# element har} other {# elementer har}} ventet siden før i dag.",
+    "due": "klare",
+    "openCourse": "Åpne kurs",
+    "kind": {
+      "exercise": "Oppgaver",
+      "vocabulary_word": "Ord"
+    },
+    "unattributed": "{count, plural, one {# element er} other {# elementer er}} ikke knyttet til et kurs du har åpent nå.",
+    "methodNote": "Vi planlegger hvert element til øyeblikket rett før du ville glemt det. Da krever repetisjonen minst innsats og gir sterkest hukommelse — derfor endrer antallet seg fra dag til dag.",
+    "comingUp": {
+      "title": "Kommer snart",
+      "empty": "Oversikten over kommende repetisjoner er ikke tilgjengelig ennå — dagens kø er hele bildet foreløpig."
+    },
+    "mixed": {
+      "title": "Vil du ha en blandet økt?",
+      "description": "Kombiner repetisjoner med ny trening på tvers av alt du lærer.",
+      "cta": "Gå til trening"
+    },
+    "empty": {
+      "title": "Ingenting å repetere nå",
+      "description": "Elementene kommer tilbake når de er klare. Inntil da er det ingenting å ta igjen.",
+      "cta": "Åpne kursene mine"
+    }
   }
 }

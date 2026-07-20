@@ -225,5 +225,35 @@
       "description": "Browse the catalogue to add a course.",
       "cta": "Explore catalogue"
     }
+  },
+  "reviewsPage": {
+    "eyebrow": "Stay sharp",
+    "title": "Reviews & reminders",
+    "subtitle": "The words and rules the platform thinks you're about to forget — brought back at the moment they stick best.",
+    "dueNow": "{count, plural, one {item due now} other {items due now}}",
+    "reviewAll": "Review all now",
+    "overdue": "{count, plural, one {# item has been} other {# items have been}} waiting since before today.",
+    "due": "due",
+    "openCourse": "Open course",
+    "kind": {
+      "exercise": "Exercises",
+      "vocabulary_word": "Words"
+    },
+    "unattributed": "{count, plural, one {# item is} other {# items are}} not tied to a course you currently have open.",
+    "methodNote": "We schedule each item for the moment just before you'd forget it. Reviewing then takes the least effort and builds the strongest memory — that's why the count changes daily.",
+    "comingUp": {
+      "title": "Coming up",
+      "empty": "The look-ahead schedule isn't available yet — today's queue is the full picture for now."
+    },
+    "mixed": {
+      "title": "Prefer a mixed session?",
+      "description": "Combine due reviews with fresh practice across everything you're learning.",
+      "cta": "Go to training"
+    },
+    "empty": {
+      "title": "Nothing to review right now",
+      "description": "Items come back when they're due. Until then, there's nothing to catch up on.",
+      "cta": "Open my courses"
+    }
   }
 }

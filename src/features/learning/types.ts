@@ -384,6 +384,58 @@ export interface WrittenDraftRequest {
   text: string;
 }
 
+/* ─── Reviews & reminders composite ──────────────────────────────── */
+
+/**
+ * The only two things the SRS schedules. This mirrors `SrsContentType` in
+ * learning-service exactly — it is a closed set, not an open taxonomy, and the
+ * UI labels each value through i18n rather than showing the raw string.
+ */
+export type ReviewKind = 'exercise' | 'vocabulary_word';
+
+/** One (course × kind) row of the due-now breakdown. */
+export interface ReviewCourseBreakdown {
+  courseId: string;
+  courseTitle: string;
+  /** Target language of the course, for the language chip. */
+  language: string;
+  level: string | null;
+  kind: ReviewKind;
+  dueCount: number;
+}
+
+/** One future review batch, grouped by course and day. */
+export interface UpcomingReview {
+  courseId: string;
+  courseTitle: string;
+  language: string;
+  /** ISO day (YYYY-MM-DD) the batch comes due. */
+  dueAt: string;
+  count: number;
+}
+
+export interface ReviewsSummary {
+  /** Every card the SRS considers due right now. */
+  totalDue: number;
+  /** Subset of `totalDue` that came due before today began. */
+  overdueCount: number;
+  byKind: Record<ReviewKind, number>;
+  breakdown: ReviewCourseBreakdown[];
+  /**
+   * Reviews scheduled after now. learning-service's due queue only returns
+   * cards due at or before now, so this is empty until it can serve a
+   * look-ahead window — see the follow-up note in docs/plan/13.
+   */
+  upcoming: UpcomingReview[];
+  /**
+   * Due cards that could not be attributed to one of the student's courses
+   * (shared content, a course they lost access to, or a content-service
+   * hiccup). Surfaced rather than dropped so the rows always add up to
+   * `totalDue`.
+   */
+  unattributedDue: number;
+}
+
 /* ─── Course Home composite ──────────────────────────────────────── */
 
 export interface CourseInfo {
