@@ -1,6 +1,8 @@
 /** Multi-state access pill used on catalog cards and the course detail panel. */
 import { Check, CheckCircle, Lock, Users, Zap } from 'lucide-react';
 
+import { cn } from '@/lib/utils';
+
 export type AccessState = 'enrolled' | 'locked' | 'paid' | 'school' | 'free';
 
 /** Derive the AccessState from a container's accessTier + enrollment flag. */
@@ -34,19 +36,12 @@ export interface AccessMarkerProps {
   labels: Labels;
 }
 
-const BG: Record<AccessState, string> = {
-  enrolled: 'var(--ssz-color-success-100)',
-  locked:   'var(--ssz-bg-subtle)',
-  paid:     'var(--ssz-color-secondary-100)',
-  school:   'var(--ssz-color-info-100)',
-  free:     'var(--ssz-color-primary-100)',
-};
-const CLR: Record<AccessState, string> = {
-  enrolled: 'var(--ssz-color-success-700)',
-  locked:   'var(--ssz-text-muted)',
-  paid:     'var(--ssz-color-secondary-700)',
-  school:   'var(--ssz-color-info-700)',
-  free:     'var(--ssz-color-primary-700)',
+const CLASSES: Record<AccessState, string> = {
+  enrolled: 'bg-success-100 text-success-700',
+  locked: 'bg-subtle text-(--ssz-text-muted)',
+  paid: 'bg-secondary-100 text-secondary-700',
+  school: 'bg-info-100 text-info-700',
+  free: 'bg-primary-100 text-primary-700',
 };
 
 export function AccessMarker({ state, schoolName, price, labels }: AccessMarkerProps) {
@@ -79,22 +74,11 @@ export function AccessMarker({ state, schoolName, price, labels }: AccessMarkerP
 
   return (
     <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 5,
-        fontSize: 11.5,
-        fontWeight: 700,
-        padding: '3px 9px',
-        borderRadius: 999,
-        background: BG[state],
-        color: CLR[state],
-        maxWidth: '100%',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        lineHeight: 1.4,
-      }}
+      className={cn(
+        'inline-flex max-w-full items-center gap-1.25 overflow-hidden rounded-full px-2.25 py-0.75',
+        'text-[11.5px] leading-relaxed font-bold text-ellipsis whitespace-nowrap',
+        CLASSES[state],
+      )}
     >
       {icon}
       {text}

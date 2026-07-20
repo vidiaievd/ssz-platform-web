@@ -39,29 +39,30 @@ export interface CoverArtProps {
 }
 
 export function CoverArt({ langCode, level, height = 132, borderRadius = 12 }: CoverArtProps) {
-  const code  = langCode.toLowerCase();
-  const hue   = hueOf(code);
+  const code = langCode.toLowerCase();
+  const hue = hueOf(code);
   const patId = `cover-stripe-${code}-${level}`;
   const endonym = LANG_ENDONYM[code] ?? langCode.toUpperCase();
+  const soft = hueSoft(hue);
+  const mid = hueMid(hue);
+  const deep = hueDeep(hue);
 
   return (
     <div
       aria-hidden="true"
+      className="relative shrink-0 overflow-hidden"
       style={{
-        position: 'relative',
         height,
         borderRadius,
-        overflow: 'hidden',
-        background: hueSoft(hue),
-        border: `1px solid ${hueMid(hue)}33`,
-        flexShrink: 0,
+        background: soft,
+        border: `1px solid ${mid}33`,
       }}
     >
       {/* diagonal stripe pattern */}
       <svg
         width="100%"
         height="100%"
-        style={{ position: 'absolute', inset: 0, display: 'block' }}
+        className="absolute inset-0 block"
         preserveAspectRatio="none"
         aria-hidden="true"
       >
@@ -74,12 +75,7 @@ export function CoverArt({ langCode, level, height = 132, borderRadius = 12 }: C
             patternTransform="rotate(45)"
           >
             <rect width="14" height="14" fill="none" />
-            <line
-              x1="0" y1="0" x2="0" y2="14"
-              stroke={hueMid(hue)}
-              strokeOpacity="0.22"
-              strokeWidth="6"
-            />
+            <line x1="0" y1="0" x2="0" y2="14" stroke={mid} strokeOpacity="0.22" strokeWidth="6" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill={`url(#${patId})`} />
@@ -87,40 +83,16 @@ export function CoverArt({ langCode, level, height = 132, borderRadius = 12 }: C
 
       {/* language endonym tag — bottom-left */}
       <span
-        style={{
-          position: 'absolute',
-          left: 10,
-          bottom: 10,
-          fontFamily: 'var(--ssz-font-mono)',
-          fontSize: 10.5,
-          letterSpacing: '0.04em',
-          color: hueDeep(hue),
-          background: 'var(--ssz-bg-surface)',
-          padding: '3px 7px',
-          borderRadius: 6,
-          border: `1px solid ${hueMid(hue)}44`,
-          lineHeight: 1,
-        }}
+        className="absolute bottom-2.5 left-2.5 rounded-md px-1.75 py-0.75 font-mono text-[10.5px] leading-none tracking-[0.04em] bg-surface"
+        style={{ color: deep, border: `1px solid ${mid}44` }}
       >
         {endonym}
       </span>
 
       {/* CEFR level badge — top-right */}
       <span
-        style={{
-          position: 'absolute',
-          right: 10,
-          top: 10,
-          fontFamily: 'var(--ssz-font-mono)',
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#fff',
-          background: hueDeep(hue),
-          padding: '3px 8px',
-          borderRadius: 6,
-          letterSpacing: '0.02em',
-          lineHeight: 1,
-        }}
+        className="absolute top-2.5 right-2.5 rounded-md px-2 py-0.75 font-mono text-[11px] leading-none font-bold tracking-[0.02em] text-white"
+        style={{ background: deep }}
       >
         {level}
       </span>

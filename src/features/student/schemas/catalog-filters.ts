@@ -7,15 +7,16 @@ export const catalogFiltersSchema = z.object({
   q:      z.string().optional(),
   /** Language of instruction code (e.g. "nb", "es") */
   lang:   z.string().optional(),
-  /** Owner school name — client-side filter */
-  school: z.string().optional(),
   /** Comma-separated CEFR levels, e.g. "A1,B1" */
   levels: z.string().optional(),
-  /** Price category */
-  price:  z.enum(['free', 'paid']).optional(),
+  /** Access tab — how the course can be reached. */
+  tab:    z.enum(['all', 'free', 'paid', 'school']).optional(),
 });
 
 export type CatalogFilters = z.infer<typeof catalogFiltersSchema>;
+export type CatalogTab = NonNullable<CatalogFilters['tab']>;
+
+export const CATALOG_TABS: CatalogTab[] = ['all', 'free', 'paid', 'school'];
 
 const VALID_LEVELS = new Set<string>(difficultyLevels);
 

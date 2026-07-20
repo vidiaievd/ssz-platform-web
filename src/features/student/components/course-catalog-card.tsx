@@ -21,92 +21,44 @@ export function CourseCatalogCard({ container, href, isEnrolled = false }: Cours
 
   const markerLabels = {
     enrolled: t('enrolled'),
-    locked:   t('locked'),
-    free:     t('free'),
+    locked: t('locked'),
+    free: t('free'),
   };
 
   return (
-    <Link
-      href={href}
-      className="group block text-left"
-      aria-label={container.title}
-    >
+    <Link href={href} className="group block h-full text-left" aria-label={container.title}>
       <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          background: 'var(--ssz-bg-surface)',
-          borderRadius: 16,
-          padding: 12,
-          border: '1.5px solid var(--ssz-border-default)',
-          boxShadow: 'var(--ssz-shadow-xs)',
-          cursor: 'pointer',
-          transition: 'border-color 160ms, box-shadow 160ms, transform 160ms',
-          height: '100%',
-        }}
-        className="group-hover:border-(--ssz-color-primary-500) group-hover:[box-shadow:var(--ssz-shadow-md)] group-hover:[-translate-y-0.5] group-focus-within:[outline:2px_solid_var(--ssz-border-focus)]"
+        className={
+          'flex h-full flex-col rounded-lg border-[1.5px] border-(--ssz-border-default) bg-surface p-3 shadow-(--ssz-shadow-xs) ' +
+          'transition-[border-color,box-shadow,transform] duration-base ' +
+          'group-hover:-translate-y-0.5 group-hover:border-(--ssz-color-primary-500) group-hover:shadow-(--ssz-shadow-md) ' +
+          'group-focus-within:outline-2 group-focus-within:outline-(--ssz-border-focus)'
+        }
       >
-        <CoverArt
-          langCode={container.targetLanguage}
-          level={container.difficultyLevel}
-        />
+        <CoverArt langCode={container.targetLanguage} level={container.difficultyLevel} />
 
-        <div style={{ padding: '12px 4px 4px', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
-          <h3
-            style={{
-              fontSize: 15.5,
-              fontWeight: 700,
-              color: 'var(--ssz-text-primary)',
-              letterSpacing: '-0.01em',
-              lineHeight: 1.3,
-              margin: 0,
-            }}
-          >
+        <div className="flex flex-1 flex-col gap-2 px-1 pt-3">
+          <h3 className="text-[15.5px] leading-[1.3] font-bold tracking-[-0.01em] text-(--ssz-text-primary)">
             {container.title}
           </h3>
 
           {container.description && (
-            <p
-              style={{
-                fontSize: 12.5,
-                color: 'var(--ssz-text-secondary)',
-                lineHeight: 1.5,
-                margin: 0,
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
+            <p className="line-clamp-2 text-[12.5px] leading-normal text-(--ssz-text-secondary)">
               {container.description}
             </p>
           )}
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginTop: 'auto',
-              paddingTop: 6,
-              fontSize: 12,
-              color: 'var(--ssz-text-secondary)',
-            }}
-          >
+          <div className="mt-auto flex items-center gap-3 pt-1.5 text-xs text-(--ssz-text-secondary)">
             {container.lessonCount != null && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <Target size={13} color="var(--ssz-text-muted)" aria-hidden="true" />
+              <span className="inline-flex items-center gap-1">
+                <Target size={13} className="text-(--ssz-text-muted)" aria-hidden="true" />
                 {t('canDoGoals', { count: container.lessonCount })}
               </span>
             )}
           </div>
 
-          <div style={{ marginTop: 4 }}>
-            <AccessMarker
-              state={accessState}
-              schoolName={container.ownerName}
-              labels={markerLabels}
-            />
+          <div className="mt-1">
+            <AccessMarker state={accessState} schoolName={container.ownerName} labels={markerLabels} />
           </div>
         </div>
       </div>

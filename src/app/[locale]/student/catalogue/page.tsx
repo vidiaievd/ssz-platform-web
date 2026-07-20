@@ -7,43 +7,15 @@ export default async function StudentCataloguePage() {
   const t = await getTranslations('Catalog');
 
   return (
-    <main style={{ maxWidth: 1120, margin: '0 auto', padding: '34px 36px 72px' }}>
-      {/* header block */}
-      <div style={{ marginBottom: 26 }}>
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: 'var(--ssz-color-primary-500)',
-            marginBottom: 8,
-          }}
-        >
-          Catalog
-        </div>
-        <h1
-          style={{
-            fontSize: 30,
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            color: 'var(--ssz-text-primary)',
-            marginBottom: 8,
-            lineHeight: 1.15,
-          }}
-        >
+    <main className="mx-auto max-w-280 px-4.5 py-5.5 sm:px-9 sm:py-8.5">
+      <div className="mb-6.5">
+        <p className="mb-2 text-[11px] font-bold tracking-[0.08em] text-(--ssz-color-primary-500) uppercase">
+          {t('eyebrow')}
+        </p>
+        <h1 className="mb-2 text-[26px] leading-tight font-bold tracking-[-0.02em] text-(--ssz-text-primary) sm:text-[30px]">
           {t('discover')}
         </h1>
-        <p
-          style={{
-            fontSize: 15,
-            color: 'var(--ssz-text-secondary)',
-            maxWidth: 560,
-            lineHeight: 1.55,
-          }}
-        >
-          {t('discoverSub')}
-        </p>
+        <p className="max-w-140 text-[15px] leading-relaxed text-(--ssz-text-secondary)">{t('discoverSub')}</p>
       </div>
 
       <Suspense>
