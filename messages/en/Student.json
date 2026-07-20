@@ -145,5 +145,58 @@
   "comingSoon": {
     "title": "Coming soon",
     "description": "This screen is being rebuilt as part of the Home redesign."
+  },
+  "home": {
+    "greeting": {
+      "title": "Good to see you",
+      "titleNamed": "Good to see you, {name}",
+      "classAndReviews": "You have a class today and {count, plural, one {# review} other {# reviews}} waiting.",
+      "classOnly": "You have a class today.",
+      "reviewsOnly": "{count, plural, one {# review is} other {# reviews are}} waiting for you.",
+      "nothingPending": "Nothing is due — a good moment to learn something new."
+    },
+    "resume": {
+      "overline": "Continue where you left off",
+      "cta": "Resume lesson",
+      "emptyTitle": "Nothing started yet",
+      "emptyDescription": "Pick a course and your next lesson will show up here.",
+      "emptyCta": "Browse the catalogue"
+    },
+    "nextClass": {
+      "overline": "Next class",
+      "cta": "View class details",
+      "empty": "No class scheduled. Courses you study on your own have no fixed times."
+    },
+    "reviews": {
+      "overline": "Time to review",
+      "dueNow": "{count, plural, one {item due now} other {items due now}}",
+      "hint": "Spaced repetition brings each item back just before you would forget it.",
+      "cta": "Review {count, plural, one {# item} other {# items}}",
+      "empty": "Nothing to review right now. Items come back when they are due."
+    },
+    "training": {
+      "title": "Quick training",
+      "subtitle": "Jump straight into focused practice — or a mixed session.",
+      "allTraining": "All training",
+      "reviewLabel": "Review what's due",
+      "reviewDescription": "Work through the items your schedule has brought back today.",
+      "reviewMeta": "{count, plural, =0 {Nothing due} one {# item ready} other {# items ready}}",
+      "mixedLabel": "Mixed session",
+      "mixedDescription": "A varied set drawn across everything you are currently learning."
+    },
+    "myCourses": {
+      "title": "My courses",
+      "subtitle": "Everything you've started, in one place.",
+      "viewAll": "View all",
+      "lessonNumber": "Lesson {n}",
+      "courseComplete": "Course complete",
+      "emptyTitle": "No courses yet",
+      "emptyDescription": "Courses you start — on your own or through a school — appear here.",
+      "emptyCta": "Browse the catalogue"
+    },
+    "explore": {
+      "title": "Explore more courses",
+      "subtitle": "Free, subscription & from your schools"
+    }
   }
 }

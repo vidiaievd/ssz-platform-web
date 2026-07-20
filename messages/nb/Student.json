@@ -145,5 +145,58 @@
   "comingSoon": {
     "title": "Kommer snart",
     "description": "Denne skjermen bygges om som en del av redesignet av startsiden."
+  },
+  "home": {
+    "greeting": {
+      "title": "Godt å se deg",
+      "titleNamed": "Godt å se deg, {name}",
+      "classAndReviews": "Du har time i dag og {count, plural, one {# repetisjon} other {# repetisjoner}} som venter.",
+      "classOnly": "Du har time i dag.",
+      "reviewsOnly": "{count, plural, one {# repetisjon venter} other {# repetisjoner venter}} på deg.",
+      "nothingPending": "Ingenting forfaller — et fint tidspunkt til å lære noe nytt."
+    },
+    "resume": {
+      "overline": "Fortsett der du slapp",
+      "cta": "Fortsett leksjonen",
+      "emptyTitle": "Ingenting startet ennå",
+      "emptyDescription": "Velg et kurs, så dukker neste leksjon opp her.",
+      "emptyCta": "Se katalogen"
+    },
+    "nextClass": {
+      "overline": "Neste time",
+      "cta": "Se timedetaljer",
+      "empty": "Ingen time er planlagt. Kurs du tar på egen hånd har ingen faste tidspunkt."
+    },
+    "reviews": {
+      "overline": "Tid for repetisjon",
+      "dueNow": "{count, plural, one {element forfaller nå} other {elementer forfaller nå}}",
+      "hint": "Spaced repetition henter hvert element tilbake rett før du ville glemt det.",
+      "cta": "Repeter {count, plural, one {# element} other {# elementer}}",
+      "empty": "Ingenting å repetere nå. Elementene kommer tilbake når de forfaller."
+    },
+    "training": {
+      "title": "Rask trening",
+      "subtitle": "Hopp rett inn i målrettet øving — eller en blandet økt.",
+      "allTraining": "All trening",
+      "reviewLabel": "Repeter det som forfaller",
+      "reviewDescription": "Jobb deg gjennom elementene planen har hentet fram i dag.",
+      "reviewMeta": "{count, plural, =0 {Ingenting forfaller} one {# element klart} other {# elementer klare}}",
+      "mixedLabel": "Blandet økt",
+      "mixedDescription": "Et variert utvalg på tvers av alt du holder på med nå."
+    },
+    "myCourses": {
+      "title": "Mine kurs",
+      "subtitle": "Alt du har begynt på, samlet på ett sted.",
+      "viewAll": "Se alle",
+      "lessonNumber": "Leksjon {n}",
+      "courseComplete": "Kurset er fullført",
+      "emptyTitle": "Ingen kurs ennå",
+      "emptyDescription": "Kurs du starter — på egen hånd eller gjennom en skole — vises her.",
+      "emptyCta": "Se katalogen"
+    },
+    "explore": {
+      "title": "Utforsk flere kurs",
+      "subtitle": "Gratis, abonnement og fra skolene dine"
+    }
   }
 }

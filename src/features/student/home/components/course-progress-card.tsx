@@ -24,7 +24,8 @@ export interface CourseProgressCardData {
   wordsLearned?: number;
   nextUnitLabel: string;
   nextItemTitle: string;
-  lastActiveLabel: string;
+  /** Omitted when the course has never been opened — the line is then dropped entirely. */
+  lastActiveLabel?: string;
 }
 
 export interface CourseProgressCardProps {
@@ -110,9 +111,11 @@ export function CourseProgressCard({ course, onOpen, className }: CourseProgress
           {t('resume')}
         </span>
       </div>
-      <div className="-mt-1 text-[11px] text-(--ssz-text-muted)">
-        {t('lastActive', { when: course.lastActiveLabel })}
-      </div>
+      {course.lastActiveLabel && (
+        <div className="-mt-1 text-[11px] text-(--ssz-text-muted)">
+          {t('lastActive', { when: course.lastActiveLabel })}
+        </div>
+      )}
     </button>
   );
 }

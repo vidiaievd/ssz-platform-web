@@ -90,10 +90,14 @@ async function nextLessonForSchool(
  * when the student has none. Every upstream call is individually degradable:
  * this endpoint must never be the reason the Home screen fails.
  */
-export async function getNextClass(myUserId: string): Promise<NextClass | null> {
+export async function getNextClass(
+  myUserId: string,
+  /** Pass an already-fetched list to avoid re-running the school aggregate. */
+  prefetchedSchools?: StudentSchool[],
+): Promise<NextClass | null> {
   let schools: StudentSchool[];
   try {
-    schools = await getStudentSchools(myUserId);
+    schools = prefetchedSchools ?? (await getStudentSchools(myUserId));
   } catch {
     return null;
   }
