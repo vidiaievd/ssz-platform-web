@@ -5,6 +5,7 @@ export type {
   ScheduleSlot,
   NextLesson,
   SchoolTeacherSummary,
+  NextClass,
   SchoolMaterial,
   SelfStudyCourse,
   SchoolCourse,
