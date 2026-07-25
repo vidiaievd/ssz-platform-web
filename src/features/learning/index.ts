@@ -7,7 +7,6 @@ export { useReviewsSummary } from './api/use-reviews-summary';
 export { useSrsSettings, usePatchSrsSettings } from './api/use-srs-settings';
 export { useCourseProgress } from './api/use-course-progress';
 export { useCourseMastery } from './api/use-course-mastery';
-export { useCanDo } from './api/use-can-do';
 export { useCourseHome } from './api/use-course-home';
 export { useUnitContents } from './api/use-unit-contents';
 export { useUpsertProgress } from './api/use-upsert-progress';
