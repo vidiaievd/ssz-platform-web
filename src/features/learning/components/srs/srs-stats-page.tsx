@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Link } from '@/lib/i18n/navigation';
 import { useSrsStats } from '../../api/use-srs-stats';
-import { Heatmap } from './heatmap';
 
 /* ── Stat card ─────────────────────────────────────────────────────── */
 interface StatCardProps {
@@ -28,10 +27,23 @@ function StatCard({ label, children }: StatCardProps) {
   );
 }
 
+/** Card counts by FSRS state, in lifecycle order. */
+const STATE_ROWS = [
+  { key: 'newCount', labelKey: 'stats.stateNew' },
+  { key: 'learningCount', labelKey: 'stats.stateLearning' },
+  { key: 'reviewCount', labelKey: 'stats.stateReview' },
+  { key: 'relearningCount', labelKey: 'stats.stateRelearning' },
+  { key: 'suspendedCount', labelKey: 'stats.stateSuspended' },
+] as const;
+
 /* ── Main stats page ─────────────────────────────────────────────── */
 export function SrsStatsPage() {
   const t = useTranslations('Srs');
   const { data, isLoading, isError, refetch } = useSrsStats();
+
+  const totalCards = data
+    ? STATE_ROWS.reduce((sum, row) => sum + data[row.key], 0)
+    : 0;
 
   return (
     <TooltipProvider>
@@ -77,43 +89,52 @@ export function SrsStatsPage() {
         )}
 
         {/* Empty state */}
-        {!isLoading && !isError && data && data.heatmap.length === 0 && (
+        {!isLoading && !isError && data && totalCards === 0 && (
           <p className="text-center text-[var(--ssz-text-secondary)] py-12">
             {t('stats.empty')}
           </p>
         )}
 
-        {/* Content */}
-        {!isLoading && !isError && data && data.heatmap.length > 0 && (
+        {/* Content — the server keeps no review log, so retention over time and
+            a review heatmap cannot be computed; these are the counts it does
+            maintain (SrsStatsDto). */}
+        {!isLoading && !isError && data && totalCards > 0 && (
           <>
-            {/* Retention */}
-            <StatCard label={t('stats.retention')}>
-              <p className="text-4xl font-bold text-[var(--ssz-color-primary-700)]">
-                {Math.round(data.retentionRate * 100)}%
-              </p>
-            </StatCard>
+            <div className="grid grid-cols-2 gap-4">
+              <StatCard label={t('stats.dueNow')}>
+                <p className="text-4xl font-bold text-[var(--ssz-color-primary-700)]">
+                  {data.dueNowCount}
+                </p>
+              </StatCard>
 
-            {/* Mature vs Young */}
-            <StatCard label={t('stats.matureYoung')}>
-              <div className="flex items-end gap-6">
-                <div>
-                  <p className="text-3xl font-bold text-[var(--ssz-text-primary)]">
-                    {data.matureCount}
-                  </p>
-                  <p className="text-xs text-[var(--ssz-text-muted)]">{t('stats.mature')}</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-[var(--ssz-text-primary)]">
-                    {data.youngCount}
-                  </p>
-                  <p className="text-xs text-[var(--ssz-text-muted)]">{t('stats.young')}</p>
-                </div>
-              </div>
-            </StatCard>
+              <StatCard label={t('stats.reviewedToday')}>
+                <p className="text-4xl font-bold text-[var(--ssz-text-primary)]">
+                  {data.reviewedTodayCount}
+                </p>
+              </StatCard>
+            </div>
 
-            {/* Heatmap */}
-            <StatCard label={t('stats.last30')}>
-              <Heatmap days={data.heatmap} />
+            <StatCard label={t('stats.byState')}>
+              <dl className="space-y-2">
+                {STATE_ROWS.map(({ key, labelKey }) => (
+                  <div key={key} className="flex items-baseline justify-between gap-4">
+                    <dt className="text-sm text-[var(--ssz-text-secondary)]">
+                      {t(labelKey)}
+                    </dt>
+                    <dd className="text-lg font-semibold text-[var(--ssz-text-primary)]">
+                      {data[key]}
+                    </dd>
+                  </div>
+                ))}
+                <div className="flex items-baseline justify-between gap-4 border-t border-[var(--ssz-border-default)] pt-2">
+                  <dt className="text-sm font-semibold text-[var(--ssz-text-primary)]">
+                    {t('stats.total')}
+                  </dt>
+                  <dd className="text-lg font-bold text-[var(--ssz-text-primary)]">
+                    {totalCards}
+                  </dd>
+                </div>
+              </dl>
             </StatCard>
           </>
         )}

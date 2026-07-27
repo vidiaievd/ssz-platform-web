@@ -4,7 +4,6 @@ export { useSrsDue } from './api/use-srs-due';
 export { useSrsReview } from './api/use-srs-review';
 export { useSrsStats } from './api/use-srs-stats';
 export { useReviewsSummary } from './api/use-reviews-summary';
-export { useSrsSettings, usePatchSrsSettings } from './api/use-srs-settings';
 export { useCourseProgress } from './api/use-course-progress';
 export { useCourseMastery } from './api/use-course-mastery';
 export { useCourseHome } from './api/use-course-home';
@@ -42,14 +41,12 @@ export type {
   SkillMastery,
   SrsCard,
   SrsCardBack,
-  SrsCardDirection,
   SrsCardFront,
-  SrsCardPredicted,
-  SrsCardSentence,
-  SrsCardStatus,
+  SrsCardExample,
+  SrsPredictedInterval,
+  SrsContentType,
+  SrsCardState,
   SrsDueResponse,
-  SrsHeatmapDay,
-  SrsSettings,
   SrsStats,
   UnitContentsItem,
   UnitContentsItemStatus,
@@ -133,12 +130,9 @@ export { SrsEntry } from './components/srs/entry';
 export { SrsSession } from './components/srs/session';
 export { SessionSummary } from './components/srs/summary';
 export { PosChip } from './components/srs/pos-chip';
-export { AudioButton } from './components/srs/audio-button';
 export { RatingBar } from './components/srs/rating-bar';
 export { ReviewCard } from './components/srs/review-card';
 export { LimitReachedBanner } from './components/srs/limit-banner';
 export { SessionProgress } from './components/srs/session-progress';
 export { RetryBar } from './components/srs/retry-bar';
-export { SrsSettingsDialog } from './components/srs/settings-dialog';
 export { SrsStatsPage } from './components/srs/srs-stats-page';
-export { Heatmap } from './components/srs/heatmap';

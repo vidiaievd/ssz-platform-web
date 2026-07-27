@@ -10,15 +10,13 @@ import { AppError } from '@/lib/errors';
 import type { SrsStats } from '@/features/learning/types';
 
 const MOCK_STATS: SrsStats = {
-  retentionRate: 0.87,
-  matureCount: 142,
-  youngCount: 23,
-  totalDue: 12,
-  heatmap: [
-    { date: '2026-07-01', count: 15 },
-    { date: '2026-07-02', count: 8 },
-    { date: '2026-07-03', count: 0 },
-  ],
+  newCount: 5,
+  learningCount: 2,
+  reviewCount: 142,
+  relearningCount: 1,
+  suspendedCount: 0,
+  dueNowCount: 12,
+  reviewedTodayCount: 8,
 };
 
 beforeEach(() => vi.mocked(serverFetch).mockReset());
@@ -29,7 +27,7 @@ describe('GET /api/learning/srs/stats', () => {
     const res = await GET();
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(MOCK_STATS);
-    expect(serverFetch).toHaveBeenCalledWith({ service: 'progress', path: '/srs/stats' });
+    expect(serverFetch).toHaveBeenCalledWith({ service: 'progress', path: '/srs/stats/me' });
   });
 
   it('returns 401 when unauthenticated', async () => {

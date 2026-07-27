@@ -1,7 +1,6 @@
 {
   "entry": {
     "start": "Start øvelse",
-    "settings": "Innstillinger",
     "stats": "Statistikk",
     "dueToday": "{count, plural, one {# kort til i dag} other {# kort til i dag}}",
     "limitReachedToday": "Du har nådd dagens grense – kom tilbake i morgen.",
@@ -13,12 +12,10 @@
   },
   "card": {
     "showAnswer": "Vis svar",
-    "fromList": "fra {list}",
-    "playAudio": "Spill uttale",
-    "directionForward": "Husk betydningen",
-    "directionReverse": "Husk ordet",
     "definitionLabel": "Definisjon",
-    "examplesLabel": "Eksempler"
+    "examplesLabel": "Eksempler",
+    "noTranslation": "Ingen oversettelse tilgjengelig",
+    "fallbackLanguage": "Vist på {language}"
   },
   "rating": {
     "again": "Igjen",
@@ -50,30 +47,21 @@
     "body": "Kom tilbake i morgen for å fortsette.",
     "cta": "Kom tilbake i morgen"
   },
-  "settings": {
-    "title": "Øvelsesinnstillinger",
-    "dailyLimit": "Daglig grense",
-    "dailyLimitHelp": "Maks kort per dag",
-    "audio": "Lyd",
-    "audioHelp": "Spill uttale på kort",
-    "preferReverse": "Foretrekk omvendt retning",
-    "preferReverseHelp": "Vis betydningen først, husk ordet",
-    "disableAudioPair": "Deaktiver lyd for disse språkene",
-    "disableAudioPairHelp": "Skjul uttale der TTS-kvaliteten er dårlig"
-  },
   "stats": {
     "title": "Dine øvelsesstatistikker",
-    "retention": "Huskeevne",
-    "matureYoung": "Modne vs. unge",
-    "mature": "Modne",
-    "young": "Unge",
-    "last30": "Siste 30 dager",
-    "heatCell": "{count, plural, one {# øvelse} other {# øvelser}} den {date}",
-    "empty": "Øv på noen kort for å se statistikken din"
+    "dueNow": "Klare nå",
+    "reviewedToday": "Repetert i dag",
+    "byState": "Kort etter status",
+    "stateNew": "Nye",
+    "stateLearning": "Under innlæring",
+    "stateReview": "Til repetisjon",
+    "stateRelearning": "Læres på nytt",
+    "stateSuspended": "Satt på pause",
+    "total": "Totalt",
+    "empty": "Repeter noen kort for å se statistikken din"
   },
   "toast": {
-    "reviewError": "Øvelsen ble ikke lagret. Prøv igjen.",
-    "settingsError": "Innstillingene ble ikke lagret. Prøv igjen."
+    "reviewError": "Øvelsen ble ikke lagret. Prøv igjen."
   },
   "error": {
     "title": "Kunne ikke laste øvelsene",

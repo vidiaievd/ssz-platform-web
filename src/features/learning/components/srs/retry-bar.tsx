@@ -8,9 +8,9 @@ function ratingLabel(
   rating: ReviewRating,
   t: ReturnType<typeof useTranslations<'Srs.rating'>>,
 ): string {
-  if (rating === 1) return t('again');
-  if (rating === 2) return t('hard');
-  if (rating === 3) return t('good');
+  if (rating === 'AGAIN') return t('again');
+  if (rating === 'HARD') return t('hard');
+  if (rating === 'GOOD') return t('good');
   return t('easy');
 }
 

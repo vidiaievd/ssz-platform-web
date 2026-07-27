@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, BarChart2, Settings } from 'lucide-react';
+import { CheckCircle2, BarChart2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -45,7 +45,6 @@ interface SrsEntryProps {
   reviewedToday: number;
   dailyLimit: number;
   onStart: () => void;
-  onSettings: () => void;
 }
 
 export function SrsEntry({
@@ -53,7 +52,6 @@ export function SrsEntry({
   reviewedToday,
   dailyLimit,
   onStart,
-  onSettings,
 }: SrsEntryProps) {
   const t = useTranslations('Srs');
 
@@ -90,22 +88,12 @@ export function SrsEntry({
         >
           {t('entry.start')}
         </Button>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={onSettings}
-            className="flex-1"
-          >
-            <Settings className="mr-2 h-4 w-4" aria-hidden />
-            {t('entry.settings')}
-          </Button>
-          <Button asChild variant="ghost" className="flex-1">
-            <Link href="/student/srs/stats">
-              <BarChart2 className="mr-2 h-4 w-4" aria-hidden />
-              {t('entry.stats')}
-            </Link>
-          </Button>
-        </div>
+        <Button asChild variant="ghost" className="w-full">
+          <Link href="/student/srs/stats">
+            <BarChart2 className="mr-2 h-4 w-4" aria-hidden />
+            {t('entry.stats')}
+          </Link>
+        </Button>
       </div>
     </div>
   );

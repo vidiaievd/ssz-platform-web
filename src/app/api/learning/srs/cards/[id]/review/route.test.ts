@@ -12,11 +12,29 @@ import type { ReviewResponse } from '@/features/learning/types';
 
 const PARAMS = { params: Promise.resolve({ id: 'card-1' }) };
 
-const VALID_BODY = { rating: 3, latencyMs: 1200, idempotencyKey: 'idem-abc' };
+const VALID_BODY = {
+  rating: 'GOOD' as const,
+  reviewedAt: '2026-07-27T08:00:00.000Z',
+  idempotencyKey: 'idem-abc',
+};
 
+/** The endpoint answers with the rescheduled card itself. */
 const MOCK_REVIEW: ReviewResponse = {
-  nextDueAt: '2026-07-10T08:00:00Z',
-  intervalLabel: '7 days',
+  id: 'card-1',
+  userId: 'user-1',
+  contentType: 'VOCABULARY_WORD',
+  contentId: 'item-1',
+  state: 'REVIEW',
+  dueAt: '2026-08-03T08:00:00.000Z',
+  stability: 8.5,
+  difficulty: 5,
+  scheduledDays: 7,
+  reps: 3,
+  lapses: 0,
+  lastReviewedAt: '2026-07-27T08:00:00.000Z',
+  createdAt: '2026-07-20T08:00:00.000Z',
+  updatedAt: '2026-07-27T08:00:00.000Z',
+  predicted: [],
 };
 
 function makeRequest(body: unknown) {
@@ -40,13 +58,35 @@ describe('POST /api/learning/srs/cards/[id]/review', () => {
     );
   });
 
+  it('forwards the rating verbatim — the server takes the string enum', async () => {
+    vi.mocked(serverFetch).mockResolvedValue(MOCK_REVIEW);
+
+    await POST(makeRequest(VALID_BODY), PARAMS);
+
+    expect(serverFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: {
+          rating: 'GOOD',
+          reviewedAt: '2026-07-27T08:00:00.000Z',
+          idempotencyKey: 'idem-abc',
+        },
+      }),
+    );
+  });
+
   it('returns 400 when rating is missing', async () => {
-    const res = await POST(makeRequest({ latencyMs: 1000, idempotencyKey: 'k' }), PARAMS);
+    const res = await POST(makeRequest({ idempotencyKey: 'k' }), PARAMS);
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 when rating is out of range', async () => {
-    const res = await POST(makeRequest({ ...VALID_BODY, rating: 5 }), PARAMS);
+  it('rejects the numeric rating this route used to send', async () => {
+    const res = await POST(makeRequest({ ...VALID_BODY, rating: 3 }), PARAMS);
+    expect(res.status).toBe(400);
+    expect(serverFetch).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for an unknown rating', async () => {
+    const res = await POST(makeRequest({ ...VALID_BODY, rating: 'PERFECT' }), PARAMS);
     expect(res.status).toBe(400);
   });
 

@@ -1,83 +1,113 @@
-/* ─── SRS ─────────────────────────────────────────────────────────── */
+/* ─── SRS ─────────────────────────────────────────────────────────
+ * Mirrors learning-service's actual DTOs — application/dto/srs.dto.ts and
+ * presentation/dto/review-card.request.ts. The shapes that used to live here
+ * described an API that never existed (numeric ratings, front/back the server
+ * did not send, a settings endpoint with no route), so every consumer was
+ * broken at runtime; see the Phase 8 notes in VoxOrd's course-integration
+ * plan for the full audit.
+ * ────────────────────────────────────────────────────────────────── */
 
-export type ReviewRating = 1 | 2 | 3 | 4;
+export const REVIEW_RATINGS = ['AGAIN', 'HARD', 'GOOD', 'EASY'] as const;
 
-export interface SrsCardSentence {
-  target: string;
-  translation: string;
+/** FSRS grade. A string enum server-side, not 1..4. */
+export type ReviewRating = (typeof REVIEW_RATINGS)[number];
+
+export type SrsContentType = 'EXERCISE' | 'VOCABULARY_WORD';
+
+export type SrsCardState = 'NEW' | 'LEARNING' | 'REVIEW' | 'RELEARNING' | 'SUSPENDED';
+
+/** What each rating would schedule, computed by the server for this card. */
+export interface SrsPredictedInterval {
+  rating: ReviewRating;
+  scheduledDays: number;
+  label: string;
 }
 
+/**
+ * Word content resolved server-side (ssz-platform `4127811`). Present only on
+ * VOCABULARY_WORD cards from `/srs/due`, and absent when the content lookup
+ * failed — which is deliberately non-fatal there — so treat both as optional.
+ */
 export interface SrsCardFront {
   word: string;
-  pos?: string;
-  audioUrl?: string;
-  listId?: string;
-  listName?: string;
+  partOfSpeech: string | null;
+  ipaTranscription: string | null;
+  audioMediaId: string | null;
+  listId: string;
+}
+
+export interface SrsCardExample {
+  text: string;
+  translation: string | null;
+  audioMediaId: string | null;
 }
 
 export interface SrsCardBack {
-  definition: string;
-  sentences: SrsCardSentence[];
-  imageUrl?: string;
-}
-
-export type SrsCardStatus = 'due' | 'suspended';
-export type SrsCardDirection = 'forward' | 'reverse';
-
-export interface SrsCardPredicted {
-  label: string;
+  translation: string | null;
+  alternativeTranslations: string[];
+  definition: string | null;
+  usageNotes: string | null;
+  translationLanguage: string | null;
+  /** The translation came from a language other than the one requested. */
+  fallbackUsed: boolean;
+  /** No usable translation exists — show the target language only. */
+  immersionMode: boolean;
+  examples: SrsCardExample[];
 }
 
 export interface SrsCard {
   id: string;
-  status: SrsCardStatus;
-  direction: SrsCardDirection;
-  front: SrsCardFront;
-  back: SrsCardBack;
-  predicted: {
-    '1': SrsCardPredicted;
-    '2': SrsCardPredicted;
-    '3': SrsCardPredicted;
-    '4': SrsCardPredicted;
-  };
+  userId: string;
+  contentType: SrsContentType;
+  contentId: string;
+  state: SrsCardState;
+  /** ISO 8601. */
+  dueAt: string;
+  stability: number;
+  difficulty: number;
+  scheduledDays: number;
+  reps: number;
+  lapses: number;
+  lastReviewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Empty on the review response — the server fills it only on `/srs/due`. */
+  predicted: SrsPredictedInterval[];
+  front?: SrsCardFront | null;
+  back?: SrsCardBack | null;
 }
 
 export interface SrsDueResponse {
-  dueCount: number;
-  dailyLimit: number;
-  reviewedToday: number;
   cards: SrsCard[];
-}
-
-export interface SrsSettings {
+  reviewedToday: number;
   dailyLimit: number;
-  audio: boolean;
-  preferReverse: boolean;
-  disabledAudioPairs: string[];
+  streakDays: number;
+  /**
+   * Added by the BFF from `/srs/stats/me` — `cards` is a bounded sample
+   * (`limit`), never the true backlog, so its length must not be used here.
+   */
+  dueCount: number;
 }
 
 export interface ReviewRequest {
   rating: ReviewRating;
-  latencyMs: number;
-  idempotencyKey: string;
+  /** ISO 8601. Defaults to server time when omitted. */
+  reviewedAt?: string;
+  /** Makes a replayed submission a no-op; remembered server-side for 7 days. */
+  idempotencyKey?: string;
 }
 
-export interface ReviewResponse {
-  nextDueAt: string;
-  intervalLabel: string;
-}
-
-export interface SrsHeatmapDay {
-  date: string;
-  count: number;
-}
+/** The review endpoint returns the rescheduled card itself. */
+export type ReviewResponse = SrsCard;
 
 export interface SrsStats {
-  retentionRate: number;
-  matureCount: number;
-  youngCount: number;
-  totalDue: number;
-  heatmap: SrsHeatmapDay[];
+  newCount: number;
+  learningCount: number;
+  reviewCount: number;
+  relearningCount: number;
+  suspendedCount: number;
+  dueNowCount: number;
+  reviewedTodayCount: number;
 }
 
 /* ─── Progress ────────────────────────────────────────────────────── */
@@ -280,13 +310,17 @@ export interface ProgressSkillMastery {
   level: string;
 }
 
+/**
+ * Derived from `/srs/stats/me`, which is the only SRS aggregate the server
+ * keeps. Retention over time and mature/young splits are NOT available —
+ * learning-service stores no review log, only each card's current state.
+ */
 export interface ProgressSrsStats {
   dueToday: number;
   reviewedToday: number;
-  /** 0–100 */
-  retention: number;
-  totalItems: number;
-  maturedItems: number;
+  totalCards: number;
+  /** Cards that have graduated into the REVIEW state. */
+  cardsInReview: number;
 }
 
 export type ProgressModuleStatus = 'mastered' | 'completed' | 'active' | 'locked';

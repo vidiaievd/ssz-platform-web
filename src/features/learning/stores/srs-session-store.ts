@@ -20,9 +20,9 @@ interface SrsSessionState {
   cardState: CardState;
   /** Cards rated this session (regardless of rating). */
   reviewedCount: number;
-  /** IDs of cards rated 'Again' (rating === 1). */
+  /** IDs of cards rated AGAIN. */
   againIds: string[];
-  /** Count of cards rated Good (3) or Easy (4) — used for accuracy. */
+  /** Count of cards rated GOOD or EASY — used for accuracy. */
   correctCount: number;
   /** Session start timestamp (ms). */
   startedAt: number | null;
@@ -100,8 +100,8 @@ export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()(
   advanceAfterRating: (rating) => {
     const { queue, index, reviewedCount, againIds, correctCount } = get();
     const newReviewed = reviewedCount + 1;
-    const newAgain = rating === 1 ? [...againIds, queue[index]!.id] : againIds;
-    const newCorrect = rating >= 3 ? correctCount + 1 : correctCount;
+    const newAgain = rating === 'AGAIN' ? [...againIds, queue[index]!.id] : againIds;
+    const newCorrect = rating === 'GOOD' || rating === 'EASY' ? correctCount + 1 : correctCount;
     const nextIndex = index + 1;
     const isLast = nextIndex >= queue.length;
 
