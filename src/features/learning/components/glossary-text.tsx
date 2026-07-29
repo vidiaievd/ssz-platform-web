@@ -40,7 +40,9 @@ function toGlossaryTag(partOfSpeech?: string): PartOfSpeech {
  */
 const DECORATION: Record<GlossIntensity, { className: string; color?: string }> = {
   strong: {
-    className: 'underline decoration-solid decoration-2 underline-offset-[3px]',
+    // Thicker as well as solid: at an identical 2px the solid/dotted contrast
+    // alone reads as a texture change rather than as more urgency.
+    className: 'underline decoration-solid decoration-[3px] underline-offset-[3px]',
     color: 'oklch(0.62 0.105 168 / 85%)',
   },
   normal: {
