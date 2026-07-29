@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import {
   AudioPlayer,
   ErrorState,
-  GlossaryParagraph,
+  LessonProse,
   LearningSkeleton,
   buildGlossaryIndex,
   type GlossaryIndex,
@@ -90,7 +90,7 @@ function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang }: Mo
       <div className="flex flex-col gap-6">
         {paragraphs.map((p, i) => (
           <div key={i}>
-            <GlossaryParagraph
+            <LessonProse
               text={p.target}
               glossary={glossary}
               lang={targetLang}
@@ -149,7 +149,7 @@ function BilingualMode({ paragraphs, glossary, targetLang, translationLang }: Mo
             i < paragraphs.length - 1 && 'border-b border-(--ssz-border-default)',
           )}
         >
-          <GlossaryParagraph
+          <LessonProse
             text={p.target}
             glossary={glossary}
             lang={targetLang}
@@ -197,7 +197,7 @@ function FocusMode({ paragraphs, glossary, targetLang, translationLang }: ModePr
                   : 'border-transparent opacity-40',
               )}
             >
-              <GlossaryParagraph
+              <LessonProse
                 text={p.target}
                 glossary={glossary}
                 lang={targetLang}

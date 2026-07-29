@@ -101,6 +101,18 @@ export type { GlossaryPopoverProps, PartOfSpeech } from './components/glossary-p
 export { GlossaryParagraph } from './components/glossary-paragraph';
 export type { GlossaryParagraphProps } from './components/glossary-paragraph';
 
+export { GlossaryText } from './components/glossary-text';
+export type { GlossaryTextProps } from './components/glossary-text';
+
+export { LessonProse } from './components/lesson-prose';
+export type { LessonProseProps } from './components/lesson-prose';
+
+export { parseInlineMarkdown, sliceMarks } from './lib/parse-inline-markdown';
+export type { InlineMark, InlineMarkKind, InlineMarkdown } from './lib/parse-inline-markdown';
+
+export { parseMarkdownBlocks } from './lib/parse-markdown-blocks';
+export type { MarkdownBlock } from './lib/parse-markdown-blocks';
+
 export { buildGlossaryIndex, tokenizeGlossary } from './lib/tokenize-glossary';
 export type { GlossaryEntry, GlossaryIndex, GlossaryToken } from './lib/tokenize-glossary';
 
