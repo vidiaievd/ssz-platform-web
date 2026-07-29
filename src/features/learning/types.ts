@@ -89,6 +89,19 @@ export interface SrsDueResponse {
   dueCount: number;
 }
 
+/** One card's state from `POST /srs/cards/states`. Content ids with no card are simply absent — treat them as `NEW`. */
+export interface SrsCardStateEntry {
+  contentId: string;
+  state: SrsCardState;
+  stability: number;
+  /** ISO 8601. */
+  dueAt: string;
+}
+
+export interface SrsCardStatesResponse {
+  states: SrsCardStateEntry[];
+}
+
 export interface ReviewRequest {
   rating: ReviewRating;
   /** ISO 8601. Defaults to server time when omitted. */

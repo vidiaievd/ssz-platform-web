@@ -1,6 +1,7 @@
 /* ─── API hooks ──────────────────────────────────────────────────── */
 export { learningKeys } from './api/keys';
 export { useSrsDue } from './api/use-srs-due';
+export { useSrsCardStates } from './api/use-srs-card-states';
 export { useSrsReview } from './api/use-srs-review';
 export { useSrsStats } from './api/use-srs-stats';
 export { useReviewsSummary } from './api/use-reviews-summary';
@@ -46,6 +47,8 @@ export type {
   SrsPredictedInterval,
   SrsContentType,
   SrsCardState,
+  SrsCardStateEntry,
+  SrsCardStatesResponse,
   SrsDueResponse,
   SrsStats,
   UnitContentsItem,
