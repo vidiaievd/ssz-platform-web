@@ -13,16 +13,16 @@ import { cn } from '@/lib/utils';
 export type VocabCardMode = 'translation' | 'definition';
 
 const POS_META: Record<string, { bg: string; fg: string }> = {
-  noun: { bg: 'oklch(0.93 0.05 235)', fg: 'oklch(0.44 0.10 235)' },
-  verb: { bg: 'oklch(0.93 0.05 145)', fg: 'oklch(0.40 0.12 145)' },
-  adjective: { bg: 'oklch(0.93 0.05 75)', fg: 'oklch(0.50 0.10 75)' },
-  adverb: { bg: 'oklch(0.93 0.05 280)', fg: 'oklch(0.44 0.10 280)' },
-  pronoun: { bg: 'oklch(0.93 0.04 200)', fg: 'oklch(0.46 0.09 200)' },
-  preposition: { bg: 'oklch(0.93 0.03 15)', fg: 'oklch(0.50 0.08 15)' },
-  conjunction: { bg: 'oklch(0.93 0.03 320)', fg: 'oklch(0.50 0.08 320)' },
-  interjection: { bg: 'oklch(0.93 0.05 105)', fg: 'oklch(0.48 0.10 105)' },
-  numeral: { bg: 'oklch(0.93 0.03 260)', fg: 'oklch(0.48 0.08 260)' },
-  particle: { bg: 'oklch(0.93 0.03 340)', fg: 'oklch(0.48 0.08 340)' },
+  noun: { bg: 'var(--ssz-pos-noun-bg)', fg: 'var(--ssz-pos-noun-fg)' },
+  verb: { bg: 'var(--ssz-pos-verb-bg)', fg: 'var(--ssz-pos-verb-fg)' },
+  adjective: { bg: 'var(--ssz-pos-adj-bg)', fg: 'var(--ssz-pos-adj-fg)' },
+  adverb: { bg: 'var(--ssz-pos-adv-bg)', fg: 'var(--ssz-pos-adv-fg)' },
+  pronoun: { bg: 'var(--ssz-pos-pronoun-bg)', fg: 'var(--ssz-pos-pronoun-fg)' },
+  preposition: { bg: 'var(--ssz-pos-prep-bg)', fg: 'var(--ssz-pos-prep-fg)' },
+  conjunction: { bg: 'var(--ssz-pos-conj-bg)', fg: 'var(--ssz-pos-conj-fg)' },
+  interjection: { bg: 'var(--ssz-pos-interjection-bg)', fg: 'var(--ssz-pos-interjection-fg)' },
+  numeral: { bg: 'var(--ssz-pos-numeral-bg)', fg: 'var(--ssz-pos-numeral-fg)' },
+  particle: { bg: 'var(--ssz-pos-particle-bg)', fg: 'var(--ssz-pos-particle-fg)' },
   phrase: { bg: 'var(--ssz-bg-subtle)', fg: 'var(--ssz-text-muted)' },
   other: { bg: 'var(--ssz-bg-subtle)', fg: 'var(--ssz-text-muted)' },
 };

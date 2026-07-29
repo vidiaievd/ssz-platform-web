@@ -25,13 +25,13 @@ const OPEN_DELAY = 400;
 const CLOSE_DELAY = 150;
 
 const POS_STYLES: Record<PartOfSpeech, { bg: string; fg: string }> = {
-  noun:  { bg: 'oklch(0.93 0.05 235)', fg: 'oklch(0.44 0.10 235)' },
-  verb:  { bg: 'oklch(0.93 0.05 145)', fg: 'oklch(0.40 0.12 145)' },
-  adj:   { bg: 'oklch(0.93 0.05 75)',  fg: 'oklch(0.50 0.10 75)'  },
-  adv:   { bg: 'oklch(0.93 0.05 280)', fg: 'oklch(0.44 0.10 280)' },
-  prep:  { bg: 'oklch(0.93 0.03 15)',  fg: 'oklch(0.50 0.08 15)'  },
-  conj:  { bg: 'oklch(0.93 0.03 320)', fg: 'oklch(0.50 0.08 320)' },
-  other: { bg: 'var(--ssz-bg-subtle)', fg: 'var(--ssz-text-muted)' },
+  noun:  { bg: 'var(--ssz-pos-noun-bg)', fg: 'var(--ssz-pos-noun-fg)' },
+  verb:  { bg: 'var(--ssz-pos-verb-bg)', fg: 'var(--ssz-pos-verb-fg)' },
+  adj:   { bg: 'var(--ssz-pos-adj-bg)',  fg: 'var(--ssz-pos-adj-fg)'  },
+  adv:   { bg: 'var(--ssz-pos-adv-bg)',  fg: 'var(--ssz-pos-adv-fg)'  },
+  prep:  { bg: 'var(--ssz-pos-prep-bg)', fg: 'var(--ssz-pos-prep-fg)' },
+  conj:  { bg: 'var(--ssz-pos-conj-bg)', fg: 'var(--ssz-pos-conj-fg)' },
+  other: { bg: 'var(--ssz-bg-subtle)',   fg: 'var(--ssz-text-muted)' },
 };
 
 export interface GlossaryPopoverProps {

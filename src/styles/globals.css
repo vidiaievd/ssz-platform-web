@@ -371,6 +371,29 @@
     --ssz-lang-c-lc:    0.62 0.105;
     --ssz-lang-deep-lc: 0.44 0.09;
 
+    /* Part-of-speech badge tints (glossary popover, vocab card). Each pair keeps
+       its own hue/chroma across themes — only lightness flips in .dark below. */
+    --ssz-pos-noun-bg:         oklch(0.93 0.05 235);
+    --ssz-pos-noun-fg:         oklch(0.44 0.10 235);
+    --ssz-pos-verb-bg:         oklch(0.93 0.05 145);
+    --ssz-pos-verb-fg:         oklch(0.40 0.12 145);
+    --ssz-pos-adj-bg:          oklch(0.93 0.05  75);
+    --ssz-pos-adj-fg:          oklch(0.50 0.10  75);
+    --ssz-pos-adv-bg:          oklch(0.93 0.05 280);
+    --ssz-pos-adv-fg:          oklch(0.44 0.10 280);
+    --ssz-pos-prep-bg:         oklch(0.93 0.03  15);
+    --ssz-pos-prep-fg:         oklch(0.50 0.08  15);
+    --ssz-pos-conj-bg:         oklch(0.93 0.03 320);
+    --ssz-pos-conj-fg:         oklch(0.50 0.08 320);
+    --ssz-pos-pronoun-bg:      oklch(0.93 0.04 200);
+    --ssz-pos-pronoun-fg:      oklch(0.46 0.09 200);
+    --ssz-pos-interjection-bg: oklch(0.93 0.05 105);
+    --ssz-pos-interjection-fg: oklch(0.48 0.10 105);
+    --ssz-pos-numeral-bg:      oklch(0.93 0.03 260);
+    --ssz-pos-numeral-fg:      oklch(0.48 0.08 260);
+    --ssz-pos-particle-bg:     oklch(0.93 0.03 340);
+    --ssz-pos-particle-fg:     oklch(0.48 0.08 340);
+
     /* shadcn/ui compatibility aliases */
     --background: oklch(0.975 0.007 80);
     --foreground: oklch(0.18  0.010 80);
@@ -439,6 +462,27 @@
     --ssz-lang-mid-lc:  0.45 0.09;
     --ssz-lang-c-lc:    0.72 0.105;
     --ssz-lang-deep-lc: 0.80 0.09;
+
+    --ssz-pos-noun-bg:         oklch(0.30 0.05 235);
+    --ssz-pos-noun-fg:         oklch(0.86 0.10 235);
+    --ssz-pos-verb-bg:         oklch(0.30 0.05 145);
+    --ssz-pos-verb-fg:         oklch(0.86 0.12 145);
+    --ssz-pos-adj-bg:          oklch(0.30 0.05  75);
+    --ssz-pos-adj-fg:          oklch(0.86 0.10  75);
+    --ssz-pos-adv-bg:          oklch(0.30 0.05 280);
+    --ssz-pos-adv-fg:          oklch(0.86 0.10 280);
+    --ssz-pos-prep-bg:         oklch(0.30 0.03  15);
+    --ssz-pos-prep-fg:         oklch(0.86 0.08  15);
+    --ssz-pos-conj-bg:         oklch(0.30 0.03 320);
+    --ssz-pos-conj-fg:         oklch(0.86 0.08 320);
+    --ssz-pos-pronoun-bg:      oklch(0.30 0.04 200);
+    --ssz-pos-pronoun-fg:      oklch(0.86 0.09 200);
+    --ssz-pos-interjection-bg: oklch(0.30 0.05 105);
+    --ssz-pos-interjection-fg: oklch(0.86 0.10 105);
+    --ssz-pos-numeral-bg:      oklch(0.30 0.03 260);
+    --ssz-pos-numeral-fg:      oklch(0.86 0.08 260);
+    --ssz-pos-particle-bg:     oklch(0.30 0.03 340);
+    --ssz-pos-particle-fg:     oklch(0.86 0.08 340);
 
     --background: oklch(0.17 0.012 240);
     --foreground: oklch(0.93 0.008 80);
