@@ -204,4 +204,42 @@ describe('TextLessonPage', () => {
     expect(screen.getByText('She works at the hospital.')).toBeInTheDocument();
     expect(screen.queryByText('Marta is a nurse.')).not.toBeInTheDocument();
   });
+
+  describe('without paragraph translations', () => {
+    function mockUntranslated() {
+      mockHappyPath();
+      useLessonParagraphs.mockReturnValue({
+        data: PARAGRAPHS.map((p) => ({ ...p, translation: null })),
+      });
+    }
+
+    it('hides the bilingual mode and the show-translation toggle', () => {
+      mockUntranslated();
+      renderPage();
+
+      expect(screen.queryByRole('radio', { name: /bilingual/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /immersive/i })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /focus/i })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /show translation/i })).not.toBeInTheDocument();
+    });
+
+    it('falls back to immersive when the stored mode is bilingual', () => {
+      mockUntranslated();
+      useReadingModeStore.setState({ mode: 'bilingual' });
+      renderPage();
+
+      expect(screen.getByRole('radio', { name: /immersive/i })).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByRole('button', { name: /look up: sykepleier/i })).toBeInTheDocument();
+      // the bilingual column headers are gone with the mode
+      expect(screen.queryByText('Translation')).not.toBeInTheDocument();
+    });
+
+    it('keeps focus mode usable', () => {
+      mockUntranslated();
+      renderPage();
+
+      fireEvent.click(screen.getByRole('radio', { name: /focus/i }));
+      expect(screen.getByRole('button', { name: /next paragraph/i })).toBeInTheDocument();
+    });
+  });
 });

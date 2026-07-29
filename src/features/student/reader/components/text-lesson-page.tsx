@@ -38,7 +38,15 @@ export interface TextLessonPageProps {
 const MODES: ReadingMode[] = ['immersive', 'bilingual', 'focus'];
 const MODE_ICON = { immersive: BookOpen, bilingual: Layers, focus: Target };
 
-function ModeToggle({ mode, onChange }: { mode: ReadingMode; onChange: (m: ReadingMode) => void }) {
+function ModeToggle({
+  mode,
+  modes,
+  onChange,
+}: {
+  mode: ReadingMode;
+  modes: ReadingMode[];
+  onChange: (m: ReadingMode) => void;
+}) {
   const t = useTranslations('Learning.reader.text.mode');
   return (
     <div
@@ -46,7 +54,7 @@ function ModeToggle({ mode, onChange }: { mode: ReadingMode; onChange: (m: Readi
       aria-label={t('label')}
       className="inline-flex gap-0.5 rounded-xl border border-(--ssz-border-default) bg-(--ssz-bg-subtle) p-0.75"
     >
-      {MODES.map((m) => {
+      {modes.map((m) => {
         const active = m === mode;
         const Icon = MODE_ICON[m];
         return (
@@ -79,9 +87,11 @@ interface ModeProps {
   glossary: GlossaryIndex;
   targetLang: string;
   translationLang: string;
+  /** False when the variant has no paragraph translations — translation-dependent controls stay hidden. */
+  hasTranslations: boolean;
 }
 
-function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang }: ModeProps) {
+function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang, hasTranslations }: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
   const [showTranslation, setShowTranslation] = useState(false);
 
@@ -107,23 +117,25 @@ function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang }: Mo
           </div>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={() => setShowTranslation((v) => !v)}
-        aria-pressed={showTranslation}
-        className={cn(
-          'mt-5.5 inline-flex items-center gap-1.5 rounded-lg border-[1.5px] px-3.5 py-1.5',
-          'text-xs font-semibold transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
-          showTranslation
-            ? 'border-(--ssz-color-primary-500) text-(--ssz-color-primary-600)'
-            : 'border-(--ssz-border-default) text-(--ssz-text-secondary)',
-        )}
-        style={{ transitionDuration: 'var(--ssz-duration-fast)' }}
-      >
-        {showTranslation ? <EyeOff size={13} aria-hidden="true" /> : <Eye size={13} aria-hidden="true" />}
-        {showTranslation ? t('hideTranslation') : t('showTranslation')}
-      </button>
+      {hasTranslations && (
+        <button
+          type="button"
+          onClick={() => setShowTranslation((v) => !v)}
+          aria-pressed={showTranslation}
+          className={cn(
+            'mt-5.5 inline-flex items-center gap-1.5 rounded-lg border-[1.5px] px-3.5 py-1.5',
+            'text-xs font-semibold transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
+            showTranslation
+              ? 'border-(--ssz-color-primary-500) text-(--ssz-color-primary-600)'
+              : 'border-(--ssz-border-default) text-(--ssz-text-secondary)',
+          )}
+          style={{ transitionDuration: 'var(--ssz-duration-fast)' }}
+        >
+          {showTranslation ? <EyeOff size={13} aria-hidden="true" /> : <Eye size={13} aria-hidden="true" />}
+          {showTranslation ? t('hideTranslation') : t('showTranslation')}
+        </button>
+      )}
     </div>
   );
 }
@@ -281,6 +293,22 @@ export function TextLessonPage({
     [paragraphsQuery.data],
   );
 
+  /**
+   * Paragraph translations are optional content — most variants have none. Modes and
+   * controls that only make sense with them stay hidden until the content exists,
+   * so they light up on their own once translations are authored.
+   */
+  const hasTranslations = useMemo(
+    () => proseParagraphs.some((p) => !!p.translation?.trim()),
+    [proseParagraphs],
+  );
+  const availableModes = useMemo(
+    () => MODES.filter((m) => m !== 'bilingual' || hasTranslations),
+    [hasTranslations],
+  );
+  // A persisted 'bilingual' preference must not strand the reader on an empty screen.
+  const effectiveMode = availableModes.includes(mode) ? mode : 'immersive';
+
   const isLoading = lesson.isLoading || profile.isLoading || (profileReady && variant.isLoading);
   const isError = lesson.isError || profile.isError || (profileReady && variant.isError);
 
@@ -309,7 +337,8 @@ export function TextLessonPage({
     );
   }
 
-  const ModeComponent = mode === 'bilingual' ? BilingualMode : mode === 'focus' ? FocusMode : ImmersiveMode;
+  const ModeComponent =
+    effectiveMode === 'bilingual' ? BilingualMode : effectiveMode === 'focus' ? FocusMode : ImmersiveMode;
 
   return (
     <div>
@@ -335,7 +364,7 @@ export function TextLessonPage({
       </div>
 
       <div className="mb-5.5 flex flex-wrap items-center gap-3.5">
-        <ModeToggle mode={mode} onChange={setMode} />
+        <ModeToggle mode={effectiveMode} modes={availableModes} onChange={setMode} />
         {glossary.size > 0 && (
           <span className="flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
             <span
@@ -365,6 +394,7 @@ export function TextLessonPage({
           glossary={glossary}
           targetLang={lesson.data.targetLanguage}
           translationLang={variant.data.explanationLanguage}
+          hasTranslations={hasTranslations}
         />
       )}
     </div>
