@@ -297,13 +297,21 @@
         "nextParagraph": "Next paragraph",
         "noParagraphs": "This lesson has no text yet.",
         "emptyTitle": "This lesson isn't ready for you yet",
-        "emptyBody": "Add your native language and level in your profile to unlock this lesson."
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson.",
+        "coverage": "you know {percent}% of the marked words in this text"
       },
       "mode": {
         "label": "Reading mode",
         "immersive": "Immersive",
         "bilingual": "Bilingual",
         "focus": "Focus"
+      },
+      "gloss": {
+        "label": "Highlighting",
+        "all": "All words",
+        "unknown": "New only",
+        "off": "None",
+        "hint": "Which glossed words are underlined"
       }
     },
     "video": {

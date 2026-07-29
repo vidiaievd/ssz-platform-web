@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useMemo, type ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -8,7 +9,9 @@ import { cn } from '@/lib/utils';
 import { useIntroduceCard } from '@/features/content';
 
 import { GlossaryPopover, type PartOfSpeech } from './glossary-popover';
-import { useKnownWordsStore } from '../stores/known-words-store';
+import { useGlossIntensity } from './gloss-intensity-provider';
+import { learningKeys } from '../api/keys';
+import type { GlossIntensity } from '../lib/gloss-intensity';
 import { tokenizeGlossary, type GlossaryEntry, type GlossaryIndex } from '../lib/tokenize-glossary';
 import { getGlossaryMode } from '../lib/glossary-mode';
 import { parseInlineMarkdown, sliceMarks, type InlineMarkKind } from '../lib/parse-inline-markdown';
@@ -27,6 +30,31 @@ function toGlossaryTag(partOfSpeech?: string): PartOfSpeech {
   return (partOfSpeech && POS_TO_TAG[partOfSpeech]) || 'other';
 }
 
+/**
+ * Underline per gloss intensity. Only weight and opacity vary — hue stays put,
+ * because colour is reserved for the gloss *kind* (lexis / grammar / chunk) in
+ * plan 31 phase D.
+ *
+ * `muted` fades the decoration through its own alpha rather than the span's
+ * `opacity`, which would dim the word itself and hurt reading.
+ */
+const DECORATION: Record<GlossIntensity, { className: string; color?: string }> = {
+  strong: {
+    className: 'underline decoration-solid decoration-2 underline-offset-[3px]',
+    color: 'oklch(0.62 0.105 168 / 85%)',
+  },
+  normal: {
+    className: 'underline decoration-dotted decoration-2 underline-offset-[3px]',
+    color: 'oklch(0.62 0.105 168 / 70%)',
+  },
+  muted: {
+    className: 'underline decoration-dotted decoration-2 underline-offset-[3px]',
+    color: 'oklch(0.62 0.105 168 / 25%)',
+  },
+  // Undecorated, but still a lookup target — the word stays clickable.
+  none: { className: '' },
+};
+
 /** Wraps a run in its emphasis elements, innermost last so `strong > em` nests correctly. */
 function withEmphasis(content: ReactNode, kinds: InlineMarkKind[]): ReactNode {
   let node = content;
@@ -35,23 +63,28 @@ function withEmphasis(content: ReactNode, kinds: InlineMarkKind[]): ReactNode {
   return node;
 }
 
-/** Footer action of the full card — reports "known" to the SRS and fades the underline optimistically. */
+/**
+ * Footer action of the full card — seeds an SRS card for the word. The underline
+ * then fades out of the refetched card states rather than from local optimism,
+ * so what the reader sees is what the scheduler actually recorded.
+ */
 function IKnowThisButton({ vocabularyItemId }: { vocabularyItemId: string }) {
   const t = useTranslations('Learning.glossary');
   const tErrors = useTranslations('Errors');
+  const queryClient = useQueryClient();
   const introduceCard = useIntroduceCard();
-  const markKnown = useKnownWordsStore((s) => s.markKnown);
-  const unmarkKnown = useKnownWordsStore((s) => s.unmarkKnown);
 
   function handleClick() {
-    markKnown(vocabularyItemId);
     introduceCard.mutate(
       { contentType: 'VOCABULARY_WORD', contentId: vocabularyItemId, seedKind: 'CLAIMED_KNOWN' },
       {
-        onError: () => {
-          unmarkKnown(vocabularyItemId);
-          toast.error(tErrors('unknown'));
-        },
+        // Empty id list yields the key prefix shared by every card-states query,
+        // so the batch this word belongs to is refetched whichever text it is in.
+        onSuccess: () =>
+          queryClient.invalidateQueries({
+            queryKey: learningKeys.srsCardStates('VOCABULARY_WORD', []),
+          }),
+        onError: () => toast.error(tErrors('unknown')),
       },
     );
   }
@@ -85,7 +118,8 @@ function GlossaryWord({
   const locale = useLocale();
   const { item } = entry;
   const translation = item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
-  const known = useKnownWordsStore((s) => s.known.has(item.id));
+  const intensity = useGlossIntensity(item.id);
+  const decoration = DECORATION[intensity];
   const mode = getGlossaryMode(cefrLevel ?? '');
   const displayText =
     mode === 'definition'
@@ -112,12 +146,12 @@ function GlossaryWord({
         onClick={(e) => e.stopPropagation()}
         className={cn(
           'cursor-pointer rounded-[3px] px-px',
-          !known && 'underline decoration-dotted decoration-2 underline-offset-[3px]',
+          decoration.className,
           'transition-colors',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
         )}
         style={{
-          textDecorationColor: known ? undefined : 'oklch(0.62 0.105 168 / 70%)',
+          textDecorationColor: decoration.color,
           transitionDuration: 'var(--ssz-duration-fast)',
         }}
       >

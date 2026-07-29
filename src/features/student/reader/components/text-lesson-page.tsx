@@ -1,16 +1,20 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { BookOpen, ChevronLeft, ChevronRight, Eye, EyeOff, Layers, Target } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Eye, EyeOff, Filter, Highlighter, Layers, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import {
   AudioPlayer,
   ErrorState,
+  GlossIntensityProvider,
   LessonProse,
   LearningSkeleton,
   buildGlossaryIndex,
+  resolveGlossIntensity,
+  useSrsCardStates,
   type GlossaryIndex,
+  type GlossVisibility,
 } from '@/features/learning';
 import {
   useLesson,
@@ -75,6 +79,51 @@ function ModeToggle({
           >
             <Icon size={13} aria-hidden="true" className={active ? 'text-(--ssz-color-primary-600)' : ''} />
             {t(m)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const GLOSS_VISIBILITIES: GlossVisibility[] = ['all', 'unknown', 'off'];
+const GLOSS_ICON = { all: Highlighter, unknown: Filter, off: EyeOff };
+
+function GlossToggle({
+  visibility,
+  onChange,
+}: {
+  visibility: GlossVisibility;
+  onChange: (v: GlossVisibility) => void;
+}) {
+  const t = useTranslations('Learning.reader.text.gloss');
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t('label')}
+      className="inline-flex gap-0.5 rounded-xl border border-(--ssz-border-default) bg-(--ssz-bg-subtle) p-0.75"
+    >
+      {GLOSS_VISIBILITIES.map((v) => {
+        const active = v === visibility;
+        const Icon = GLOSS_ICON[v];
+        return (
+          <button
+            key={v}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(v)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
+              active
+                ? 'bg-surface text-(--ssz-color-primary-700) shadow-(--ssz-shadow-sm)'
+                : 'text-(--ssz-text-secondary)',
+            )}
+            style={{ transitionDuration: 'var(--ssz-duration-fast)' }}
+          >
+            <Icon size={13} aria-hidden="true" className={active ? 'text-(--ssz-color-primary-600)' : ''} />
+            {t(v)}
           </button>
         );
       })}
@@ -267,7 +316,7 @@ export function TextLessonPage({
 }: TextLessonPageProps) {
   const t = useTranslations('Learning.reader.text.page');
   const tContent = useTranslations('Content');
-  const { mode, setMode } = useReadingModeStore();
+  const { mode, setMode, glossVisibility, setGlossVisibility } = useReadingModeStore();
 
   const lesson = useLesson(lessonId);
   const profile = useMyStudentProfile();
@@ -291,6 +340,46 @@ export function TextLessonPage({
     const markedIds = new Set((marksQuery.data ?? []).map((m) => m.vocabularyItemId));
     return buildGlossaryIndex((vocabItems.data ?? []).filter((item) => markedIds.has(item.id)));
   }, [marksQuery.data, vocabItems.data]);
+
+  // The glossary index is keyed by surface form, so one item appears under
+  // several keys; the card-states request needs each word exactly once.
+  const glossedItemIds = useMemo(
+    () => [...new Set([...glossary.values()].map((entry) => entry.item.id))],
+    [glossary],
+  );
+  // Fetched regardless of the visibility setting: the coverage figure below is
+  // worth showing even when the reader has turned the underlines off.
+  const cardStates = useSrsCardStates(glossedItemIds);
+
+  const statesById = useMemo(
+    () => new Map((cardStates.data?.states ?? []).map((s) => [s.contentId, s])),
+    [cardStates.data],
+  );
+
+  // While the states are in flight `statesById` is empty, which resolves to
+  // 'normal' — the reader sees the usual glossing instead of a blank text.
+  const resolveIntensity = useMemo(
+    () => (vocabularyItemId: string) => {
+      const state = statesById.get(vocabularyItemId);
+      return resolveGlossIntensity(glossVisibility, state?.state, state?.stability);
+    },
+    [statesById, glossVisibility],
+  );
+
+  /**
+   * Share of this text's marked words the reader no longer needs marked up.
+   * Deliberately scoped to marked words: only target vocabulary is annotated, so
+   * a percentage of *all* words in the text would be a fabricated metric.
+   */
+  const coveragePercent = useMemo(() => {
+    if (glossedItemIds.length === 0 || statesById.size === 0) return null;
+    const settled = glossedItemIds.filter((id) => {
+      const state = statesById.get(id);
+      const intensity = resolveGlossIntensity('unknown', state?.state, state?.stability);
+      return intensity === 'none' || intensity === 'muted';
+    });
+    return Math.round((settled.length / glossedItemIds.length) * 100);
+  }, [glossedItemIds, statesById]);
 
   const proseParagraphs = useMemo(
     () => (paragraphsQuery.data ?? []).filter((p) => !isMediaOnlyParagraph(p.target)),
@@ -379,7 +468,8 @@ export function TextLessonPage({
 
       <div className="mb-5.5 flex flex-wrap items-center gap-3.5">
         <ModeToggle mode={effectiveMode} modes={availableModes} onChange={setMode} />
-        {glossary.size > 0 && (
+        {glossary.size > 0 && <GlossToggle visibility={glossVisibility} onChange={setGlossVisibility} />}
+        {glossary.size > 0 && glossVisibility !== 'off' && (
           <span className="flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
             <span
               className="inline-block w-6.5 align-middle border-b-[1.5px] border-dotted border-(--ssz-color-primary-500)"
@@ -387,6 +477,9 @@ export function TextLessonPage({
             />
             {t('tapToLookUp')}
           </span>
+        )}
+        {coveragePercent !== null && (
+          <span className="text-xs text-(--ssz-text-muted)">{t('coverage', { percent: coveragePercent })}</span>
         )}
       </div>
 
@@ -403,14 +496,16 @@ export function TextLessonPage({
       {proseParagraphs.length === 0 ? (
         <p className="text-sm text-(--ssz-text-muted) italic">{t('noParagraphs')}</p>
       ) : (
-        <ModeComponent
-          paragraphs={proseParagraphs}
-          glossary={glossary}
-          targetLang={lesson.data.targetLanguage}
-          translationLang={variant.data.explanationLanguage}
-          cefrLevel={cefrLevel}
-          hasTranslations={hasTranslations}
-        />
+        <GlossIntensityProvider resolve={resolveIntensity}>
+          <ModeComponent
+            paragraphs={proseParagraphs}
+            glossary={glossary}
+            targetLang={lesson.data.targetLanguage}
+            translationLang={variant.data.explanationLanguage}
+            cefrLevel={cefrLevel}
+            hasTranslations={hasTranslations}
+          />
+        </GlossIntensityProvider>
       )}
     </div>
   );

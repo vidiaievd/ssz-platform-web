@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -301,12 +302,15 @@ function setup() {
 }
 
 function renderShell(props: Partial<React.ComponentProps<typeof ReaderShell>> = {}) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
-      <ReaderShell courseId="course-1" unitId="u2" itemId="item-1" {...props}>
-        <div>lesson content</div>
-      </ReaderShell>
-    </NextIntlClientProvider>,
+    <QueryClientProvider client={queryClient}>
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <ReaderShell courseId="course-1" unitId="u2" itemId="item-1" {...props}>
+          <div>lesson content</div>
+        </ReaderShell>
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
   );
 }
 

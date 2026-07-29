@@ -1,9 +1,11 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { Lesson, LessonVariant, VocabularyItem } from '@/features/content/types';
+import type { SrsCardStateEntry } from '@/features/learning';
 import type { StudentProfile } from '@/features/profile';
 
 const useLesson = vi.fn();
@@ -26,6 +28,12 @@ vi.mock('@/features/content', async () => {
     useIntroduceCard: () => ({ mutate: vi.fn(), isPending: false }),
   };
 });
+const useSrsCardStates = vi.fn(() => ({ data: undefined }) as { data?: { states: SrsCardStateEntry[] } });
+vi.mock('@/features/learning', async () => {
+  const actual = await vi.importActual<typeof import('@/features/learning')>('@/features/learning');
+  return { ...actual, useSrsCardStates: (...args: unknown[]) => useSrsCardStates(...(args as [])) };
+});
+
 vi.mock('@/features/profile', () => ({ useMyStudentProfile: () => useMyStudentProfile() }));
 vi.mock('@/features/media', () => ({ useMediaAsset: (id?: string) => useMediaAsset(id) }));
 vi.mock('@/lib/i18n/navigation', () => ({
@@ -104,22 +112,26 @@ function mockHappyPath() {
 }
 
 function renderPage(overrides: Partial<React.ComponentProps<typeof TextLessonPage>> = {}) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
-      <TextLessonPage
-        lessonId="lesson-1"
-        vocabularyListId="list-1"
-        unitPosition={4}
-        courseTitle="Norsk B1"
-        cefrLevel="B1"
-        {...overrides}
-      />
-    </NextIntlClientProvider>,
+    <QueryClientProvider client={queryClient}>
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <TextLessonPage
+          lessonId="lesson-1"
+          vocabularyListId="list-1"
+          unitPosition={4}
+          courseTitle="Norsk B1"
+          cefrLevel="B1"
+          {...overrides}
+        />
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
   );
 }
 
 beforeEach(() => {
-  useReadingModeStore.setState({ mode: 'immersive' });
+  useReadingModeStore.setState({ mode: 'immersive', glossVisibility: 'unknown' });
+  useSrsCardStates.mockReturnValue({ data: undefined });
 });
 
 afterEach(() => {
@@ -285,6 +297,78 @@ describe('TextLessonPage', () => {
       fireEvent.click(screen.getByRole('radio', { name: /immersive/i }));
       expect(useReadingModeStore.getState().mode).toBe('immersive');
       expect(screen.getByRole('radio', { name: /immersive/i })).toHaveAttribute('aria-checked', 'true');
+    });
+  });
+
+  describe('adaptive glossing', () => {
+    const word = () => screen.getByRole('button', { name: /look up: sykepleier/i });
+
+    it('glosses normally while the card states are still loading', () => {
+      mockHappyPath();
+      renderPage();
+
+      expect(word().className).toMatch(/decoration-dotted/);
+    });
+
+    it('drops the decoration for a word the reader has retained', () => {
+      mockHappyPath();
+      useSrsCardStates.mockReturnValue({
+        data: { states: [{ contentId: 'v1', state: 'REVIEW', stability: 90, dueAt: '2026-12-01T00:00:00Z' }] },
+      });
+      renderPage();
+
+      expect(word().className).not.toMatch(/underline/);
+    });
+
+    it('marks a word in learning strongly', () => {
+      mockHappyPath();
+      useSrsCardStates.mockReturnValue({
+        data: { states: [{ contentId: 'v1', state: 'LEARNING', stability: 1, dueAt: '2026-08-01T00:00:00Z' }] },
+      });
+      renderPage();
+
+      expect(word().className).toMatch(/decoration-solid/);
+    });
+
+    it('turning glossing off removes every decoration but keeps the word clickable', () => {
+      mockHappyPath();
+      renderPage();
+
+      fireEvent.click(screen.getByRole('radio', { name: /none/i }));
+
+      expect(useReadingModeStore.getState().glossVisibility).toBe('off');
+      expect(word().className).not.toMatch(/underline/);
+
+      fireEvent.click(word());
+      expect(screen.getByText('nurse')).toBeInTheDocument();
+    });
+
+    it('showing all words ignores the retained state', () => {
+      mockHappyPath();
+      useSrsCardStates.mockReturnValue({
+        data: { states: [{ contentId: 'v1', state: 'REVIEW', stability: 90, dueAt: '2026-12-01T00:00:00Z' }] },
+      });
+      renderPage();
+
+      fireEvent.click(screen.getByRole('radio', { name: /all words/i }));
+      expect(word().className).toMatch(/decoration-dotted/);
+    });
+
+    it('reports coverage over the marked words, not over the whole text', () => {
+      mockHappyPath();
+      useSrsCardStates.mockReturnValue({
+        data: { states: [{ contentId: 'v1', state: 'REVIEW', stability: 90, dueAt: '2026-12-01T00:00:00Z' }] },
+      });
+      renderPage();
+
+      expect(screen.getByText(/you know 100% of the marked words/i)).toBeInTheDocument();
+    });
+
+    it('hides coverage until the card states arrive', () => {
+      mockHappyPath();
+      renderPage();
+
+      expect(screen.queryByText(/of the marked words/i)).not.toBeInTheDocument();
     });
   });
 });

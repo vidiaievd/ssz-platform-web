@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
@@ -55,10 +56,13 @@ const JOB_AD = [
 ].join('\n');
 
 function renderProse(text: string, items: VocabularyItem[] = []) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
-      <LessonProse text={text} glossary={buildGlossaryIndex(items)} />
-    </NextIntlClientProvider>,
+    <QueryClientProvider client={queryClient}>
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <LessonProse text={text} glossary={buildGlossaryIndex(items)} />
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
   );
 }
 

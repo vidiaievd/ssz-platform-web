@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { useReadingModeStore } from './reading-mode-store';
 
 afterEach(() => {
-  useReadingModeStore.setState({ mode: null });
+  useReadingModeStore.setState({ mode: null, glossVisibility: 'unknown' });
   window.localStorage.clear();
 });
 
@@ -21,5 +21,17 @@ describe('useReadingModeStore', () => {
     useReadingModeStore.getState().setMode('focus');
     const persisted = window.localStorage.getItem('ssz:reader:reading-mode:v2');
     expect(persisted).toContain('focus');
+  });
+
+  it('defaults gloss visibility to unknown-only', () => {
+    expect(useReadingModeStore.getState().glossVisibility).toBe('unknown');
+  });
+
+  it('updates and persists gloss visibility independently of the mode', () => {
+    useReadingModeStore.getState().setGlossVisibility('off');
+
+    expect(useReadingModeStore.getState().glossVisibility).toBe('off');
+    expect(useReadingModeStore.getState().mode).toBeNull();
+    expect(window.localStorage.getItem('ssz:reader:reading-mode:v2')).toContain('off');
   });
 });
