@@ -10,6 +10,8 @@ export interface GlossaryParagraphProps {
   glossary: GlossaryIndex;
   /** BCP-47 language of `text`, for assistive tech / font selection. */
   lang?: string;
+  /** Reader's CEFR level — selects translation vs. target-language definition (B2+). */
+  cefrLevel?: string;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -19,14 +21,14 @@ export interface GlossaryParagraphProps {
  * lookup popovers. For lesson bodies, which carry block structure (quotes,
  * lists, headings), use `LessonProse` instead.
  */
-export function GlossaryParagraph({ text, glossary, lang, className, style }: GlossaryParagraphProps) {
+export function GlossaryParagraph({ text, glossary, lang, cefrLevel, className, style }: GlossaryParagraphProps) {
   return (
     <p
       lang={lang}
       className={cn('font-reading m-0 text-(--ssz-text-primary)', className)}
       style={{ textWrap: 'pretty', ...style } as React.CSSProperties}
     >
-      <GlossaryText text={text} glossary={glossary} />
+      <GlossaryText text={text} glossary={glossary} cefrLevel={cefrLevel} />
     </p>
   );
 }

@@ -40,10 +40,10 @@ const SYKEPLEIER: VocabularyItem = {
   examples: [],
 };
 
-function renderParagraph(text: string, items: VocabularyItem[]) {
+function renderParagraph(text: string, items: VocabularyItem[], cefrLevel?: string) {
   return render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <GlossaryParagraph text={text} glossary={buildGlossaryIndex(items)} />
+      <GlossaryParagraph text={text} glossary={buildGlossaryIndex(items)} cefrLevel={cefrLevel} />
     </NextIntlClientProvider>,
   );
 }
@@ -84,6 +84,29 @@ describe('GlossaryParagraph', () => {
       expect.objectContaining({ onError: expect.any(Function) }),
     );
     expect(trigger.className).not.toMatch(/underline/);
+  });
+
+  it('shows the translation below B2', () => {
+    renderParagraph('Marta er sykepleier på sykehuset.', [SYKEPLEIER], 'B1');
+    fireEvent.click(screen.getByRole('button', { name: /look up: sykepleier/i }));
+    expect(screen.getByText('nurse')).toBeInTheDocument();
+  });
+
+  it('shows the target-language definition at B2+ when one is authored', () => {
+    const withDefinition: VocabularyItem = {
+      ...SYKEPLEIER,
+      translations: [{ languageCode: 'en', translation: 'nurse', definition: 'person who cares for the sick' }],
+    };
+    renderParagraph('Marta er sykepleier på sykehuset.', [withDefinition], 'C1');
+    fireEvent.click(screen.getByRole('button', { name: /look up: sykepleier/i }));
+    expect(screen.getByText('person who cares for the sick')).toBeInTheDocument();
+    expect(screen.queryByText('nurse')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the translation at B2+ when no definition is authored', () => {
+    renderParagraph('Marta er sykepleier på sykehuset.', [SYKEPLEIER], 'C1');
+    fireEvent.click(screen.getByRole('button', { name: /look up: sykepleier/i }));
+    expect(screen.getByText('nurse')).toBeInTheDocument();
   });
 
   it('rolls back the underline and shows an error toast when the mutation fails', async () => {

@@ -14,7 +14,15 @@ const HEADING_CLASS: Record<number, string> = {
   3: 'text-[17px] font-semibold',
 };
 
-function Blocks({ blocks, glossary }: { blocks: MarkdownBlock[]; glossary: GlossaryIndex }) {
+function Blocks({
+  blocks,
+  glossary,
+  cefrLevel,
+}: {
+  blocks: MarkdownBlock[];
+  glossary: GlossaryIndex;
+  cefrLevel?: string;
+}) {
   return (
     <>
       {blocks.map((block, i) => {
@@ -29,7 +37,7 @@ function Blocks({ blocks, glossary }: { blocks: MarkdownBlock[]; glossary: Gloss
                   HEADING_CLASS[block.level] ?? HEADING_CLASS[3],
                 )}
               >
-                <GlossaryText text={block.text} glossary={glossary} />
+                <GlossaryText text={block.text} glossary={glossary} cefrLevel={cefrLevel} />
               </Tag>
             );
           }
@@ -38,7 +46,7 @@ function Blocks({ blocks, glossary }: { blocks: MarkdownBlock[]; glossary: Gloss
               <ul key={i} className="m-0 flex list-disc flex-col gap-1 pl-5.5">
                 {block.items.map((item, j) => (
                   <li key={j} className="font-reading m-0 text-(--ssz-text-primary)">
-                    <GlossaryText text={item} glossary={glossary} />
+                    <GlossaryText text={item} glossary={glossary} cefrLevel={cefrLevel} />
                   </li>
                 ))}
               </ul>
@@ -52,7 +60,7 @@ function Blocks({ blocks, glossary }: { blocks: MarkdownBlock[]; glossary: Gloss
                   'bg-(--ssz-bg-subtle) py-4 pr-4.5 pl-4',
                 )}
               >
-                <Blocks blocks={block.blocks} glossary={glossary} />
+                <Blocks blocks={block.blocks} glossary={glossary} cefrLevel={cefrLevel} />
               </blockquote>
             );
           default:
@@ -62,7 +70,7 @@ function Blocks({ blocks, glossary }: { blocks: MarkdownBlock[]; glossary: Gloss
                 className="font-reading m-0 text-(--ssz-text-primary)"
                 style={{ textWrap: 'pretty' } as React.CSSProperties}
               >
-                <GlossaryText text={block.text} glossary={glossary} />
+                <GlossaryText text={block.text} glossary={glossary} cefrLevel={cefrLevel} />
               </p>
             );
         }
@@ -77,17 +85,19 @@ export interface LessonProseProps {
   glossary: GlossaryIndex;
   /** BCP-47 language of `text`, for assistive tech / font selection. */
   lang?: string;
+  /** Reader's CEFR level — selects translation vs. target-language definition (B2+). */
+  cefrLevel?: string;
   className?: string;
   style?: React.CSSProperties;
 }
 
 /** Renders a lesson body chunk with its markdown structure and glossary lookups. */
-export function LessonProse({ text, glossary, lang, className, style }: LessonProseProps) {
+export function LessonProse({ text, glossary, lang, cefrLevel, className, style }: LessonProseProps) {
   const blocks = useMemo(() => parseMarkdownBlocks(text), [text]);
 
   return (
     <div lang={lang} className={cn('flex flex-col gap-3.5', className)} style={style}>
-      <Blocks blocks={blocks} glossary={glossary} />
+      <Blocks blocks={blocks} glossary={glossary} cefrLevel={cefrLevel} />
     </div>
   );
 }

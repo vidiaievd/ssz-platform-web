@@ -87,11 +87,12 @@ interface ModeProps {
   glossary: GlossaryIndex;
   targetLang: string;
   translationLang: string;
+  cefrLevel: string;
   /** False when the variant has no paragraph translations — translation-dependent controls stay hidden. */
   hasTranslations: boolean;
 }
 
-function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang, hasTranslations }: ModeProps) {
+function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang, cefrLevel, hasTranslations }: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
   const [showTranslation, setShowTranslation] = useState(false);
 
@@ -104,6 +105,7 @@ function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang, hasT
               text={p.target}
               glossary={glossary}
               lang={targetLang}
+              cefrLevel={cefrLevel}
               className="text-[19px] leading-[1.9]"
             />
             {showTranslation && p.translation && (
@@ -140,7 +142,7 @@ function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang, hasT
   );
 }
 
-function BilingualMode({ paragraphs, glossary, targetLang, translationLang }: ModeProps) {
+function BilingualMode({ paragraphs, glossary, targetLang, translationLang, cefrLevel }: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
 
   return (
@@ -165,6 +167,7 @@ function BilingualMode({ paragraphs, glossary, targetLang, translationLang }: Mo
             text={p.target}
             glossary={glossary}
             lang={targetLang}
+            cefrLevel={cefrLevel}
             className="text-[17px] leading-[1.8]"
           />
           <p
@@ -179,7 +182,7 @@ function BilingualMode({ paragraphs, glossary, targetLang, translationLang }: Mo
   );
 }
 
-function FocusMode({ paragraphs, glossary, targetLang, translationLang }: ModeProps) {
+function FocusMode({ paragraphs, glossary, targetLang, translationLang, cefrLevel }: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
   const [active, setActive] = useState(0);
   const clampedActive = Math.min(active, Math.max(paragraphs.length - 1, 0));
@@ -213,6 +216,7 @@ function FocusMode({ paragraphs, glossary, targetLang, translationLang }: ModePr
                 text={p.target}
                 glossary={glossary}
                 lang={targetLang}
+                cefrLevel={cefrLevel}
                 className={on ? 'text-[20px] leading-[1.9]' : 'text-[18px] leading-[1.9]'}
               />
               {on && p.translation && (
@@ -400,6 +404,7 @@ export function TextLessonPage({
           glossary={glossary}
           targetLang={lesson.data.targetLanguage}
           translationLang={variant.data.explanationLanguage}
+          cefrLevel={cefrLevel}
           hasTranslations={hasTranslations}
         />
       )}

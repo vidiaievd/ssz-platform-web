@@ -10,6 +10,7 @@ import { useIntroduceCard } from '@/features/content';
 import { GlossaryPopover, type PartOfSpeech } from './glossary-popover';
 import { useKnownWordsStore } from '../stores/known-words-store';
 import { tokenizeGlossary, type GlossaryEntry, type GlossaryIndex } from '../lib/tokenize-glossary';
+import { getGlossaryMode } from '../lib/glossary-mode';
 import { parseInlineMarkdown, sliceMarks, type InlineMarkKind } from '../lib/parse-inline-markdown';
 
 const POS_TO_TAG: Record<string, PartOfSpeech> = {
@@ -70,11 +71,13 @@ function GlossaryWord({
   text,
   entry,
   contextSentence,
+  cefrLevel,
   children,
 }: {
   text: string;
   entry: GlossaryEntry;
   contextSentence: string;
+  cefrLevel?: string;
   children: ReactNode;
 }) {
   const t = useTranslations('Learning.glossary');
@@ -82,13 +85,18 @@ function GlossaryWord({
   const { item } = entry;
   const translation = item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
   const known = useKnownWordsStore((s) => s.known.has(item.id));
+  const mode = getGlossaryMode(cefrLevel ?? '');
+  const displayText =
+    mode === 'definition'
+      ? translation?.definition || translation?.translation || item.lemma
+      : (translation?.translation ?? item.lemma);
 
   return (
     <GlossaryPopover
       word={item.lemma}
       phonetic={item.ipa}
       pos={toGlossaryTag(item.partOfSpeech)}
-      translation={translation?.translation ?? item.lemma}
+      translation={displayText}
       audioMediaId={item.audioMediaId}
       forms={item.forms}
       form={entry.form}
@@ -122,6 +130,8 @@ export interface GlossaryTextProps {
   /** Inline markdown. Emphasis delimiters are stripped before glossary matching. */
   text: string;
   glossary: GlossaryIndex;
+  /** Reader's CEFR level — selects translation vs. target-language definition (B2+). */
+  cefrLevel?: string;
 }
 
 /**
@@ -133,7 +143,7 @@ export interface GlossaryTextProps {
  * emphasis is applied to the runs inside it. A word that is only partly
  * emphasised therefore stays a single lookup target.
  */
-export function GlossaryText({ text: raw, glossary }: GlossaryTextProps) {
+export function GlossaryText({ text: raw, glossary, cefrLevel }: GlossaryTextProps) {
   const { text, marks } = useMemo(() => parseInlineMarkdown(raw), [raw]);
   const tokens = useMemo(() => tokenizeGlossary(text, glossary), [text, glossary]);
 
@@ -145,7 +155,13 @@ export function GlossaryText({ text: raw, glossary }: GlossaryTextProps) {
         ));
 
         return token.entry ? (
-          <GlossaryWord key={token.id} text={token.text} entry={token.entry} contextSentence={text}>
+          <GlossaryWord
+            key={token.id}
+            text={token.text}
+            entry={token.entry}
+            contextSentence={text}
+            cefrLevel={cefrLevel}
+          >
             {pieces}
           </GlossaryWord>
         ) : (

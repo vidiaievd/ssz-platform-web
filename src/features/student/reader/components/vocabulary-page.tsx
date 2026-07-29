@@ -3,7 +3,7 @@
 import { BookOpen, ChevronRight, Repeat } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { ErrorState, LearningSkeleton, getGlossaryMode } from '@/features/learning';
 import { useUnitVocabularyItems, useVocabularyList } from '@/features/content';
 import { Link } from '@/lib/i18n/navigation';
 import type { DifficultyLevel } from '@/features/content/types';
@@ -11,9 +11,7 @@ import type { DifficultyLevel } from '@/features/content/types';
 import { VocabFlipCard, type VocabCardMode } from './vocab-flip-card';
 import type { ReaderSidebarItem } from '../types';
 
-export function getVocabCardMode(cefrLevel: string): VocabCardMode {
-  return cefrLevel === 'B2' || cefrLevel === 'C1' || cefrLevel === 'C2' ? 'definition' : 'translation';
-}
+export const getVocabCardMode: (cefrLevel: string) => VocabCardMode = getGlossaryMode;
 
 function findReinforceItem(
   siblingItems: ReaderSidebarItem[],

@@ -118,6 +118,9 @@ export type { GlossaryEntry, GlossaryIndex, GlossaryToken } from './lib/tokenize
 
 export { formatTimecode } from './lib/format-timecode';
 
+export { getGlossaryMode } from './lib/glossary-mode';
+export type { GlossaryMode } from './lib/glossary-mode';
+
 export { VideoPlayer } from './components/video-player';
 export type { VideoPlayerProps, VideoPlayerHandle } from './components/video-player';
 
