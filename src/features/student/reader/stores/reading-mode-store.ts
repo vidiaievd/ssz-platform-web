@@ -7,7 +7,8 @@ import { persist } from 'zustand/middleware';
 export type ReadingMode = 'immersive' | 'bilingual' | 'focus';
 
 interface ReadingModeState {
-  mode: ReadingMode;
+  /** `null` means the student never chose — the reader falls back to a level-based default. */
+  mode: ReadingMode | null;
   setMode: (mode: ReadingMode) => void;
 }
 
@@ -21,9 +22,9 @@ interface ReadingModeState {
 export const useReadingModeStore = create<ReadingModeState>()(
   persist(
     (set) => ({
-      mode: 'immersive',
+      mode: null,
       setMode: (mode) => set({ mode }),
     }),
-    { name: 'ssz:reader:reading-mode:v1' },
+    { name: 'ssz:reader:reading-mode:v2' },
   ),
 );

@@ -259,4 +259,32 @@ describe('TextLessonPage', () => {
       expect(screen.getByRole('button', { name: /next paragraph/i })).toBeInTheDocument();
     });
   });
+
+  describe('default reading mode by CEFR level', () => {
+    it('starts an A2 student in bilingual mode when they never chose', () => {
+      mockHappyPath();
+      useReadingModeStore.setState({ mode: null });
+      renderPage({ cefrLevel: 'A2' });
+
+      expect(screen.getByRole('radio', { name: /bilingual/i })).toHaveAttribute('aria-checked', 'true');
+    });
+
+    it('starts a B1 student in immersive mode when they never chose', () => {
+      mockHappyPath();
+      useReadingModeStore.setState({ mode: null });
+      renderPage({ cefrLevel: 'B1' });
+
+      expect(screen.getByRole('radio', { name: /immersive/i })).toHaveAttribute('aria-checked', 'true');
+    });
+
+    it("a manual choice overrides the level default and sticks regardless of level", () => {
+      mockHappyPath();
+      useReadingModeStore.setState({ mode: null });
+      renderPage({ cefrLevel: 'A2' });
+
+      fireEvent.click(screen.getByRole('radio', { name: /immersive/i }));
+      expect(useReadingModeStore.getState().mode).toBe('immersive');
+      expect(screen.getByRole('radio', { name: /immersive/i })).toHaveAttribute('aria-checked', 'true');
+    });
+  });
 });

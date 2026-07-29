@@ -310,8 +310,12 @@ export function TextLessonPage({
     () => MODES.filter((m) => m !== 'bilingual' || hasTranslations),
     [hasTranslations],
   );
-  // A persisted 'bilingual' preference must not strand the reader on an empty screen.
-  const effectiveMode = availableModes.includes(mode) ? mode : 'immersive';
+  // Scaffolding fades with level: A1–A2 start bilingual, B1+ start immersive.
+  // A student's own choice (once made) always wins over the level default.
+  const levelDefaultMode: ReadingMode = cefrLevel === 'A1' || cefrLevel === 'A2' ? 'bilingual' : 'immersive';
+  const desiredMode = mode ?? levelDefaultMode;
+  // A persisted/derived 'bilingual' preference must not strand the reader on an empty screen.
+  const effectiveMode = availableModes.includes(desiredMode) ? desiredMode : 'immersive';
 
   const glossaryLoading = marksQuery.isLoading || (!!vocabularyListId && vocabItems.isLoading);
   const isLoading =
