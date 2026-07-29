@@ -3,7 +3,6 @@
 import { Fragment, useMemo, type ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { useMediaAsset } from '@/features/media';
 import { cn } from '@/lib/utils';
 
 import { GlossaryPopover, type PartOfSpeech } from './glossary-popover';
@@ -45,15 +44,18 @@ function GlossaryWord({
   const t = useTranslations('Learning.glossary');
   const locale = useLocale();
   const { item } = entry;
-  const asset = useMediaAsset(item.audioMediaId);
   const translation = item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
 
   return (
     <GlossaryPopover
       word={item.lemma}
+      phonetic={item.ipa}
       pos={toGlossaryTag(item.partOfSpeech)}
       translation={translation?.translation ?? item.lemma}
-      audioSrc={asset.data?.url}
+      audioMediaId={item.audioMediaId}
+      forms={item.forms}
+      form={entry.form}
+      formLabel={entry.formLabel}
       contextSentence={contextSentence}
     >
       <span

@@ -15,7 +15,9 @@
   "glossary": {
     "seeInContext": "Побачити в контексті",
     "listenWord": "Слухати",
-    "lookUpWord": "Знайти в словнику"
+    "lookUpWord": "Знайти в словнику",
+    "clickForTranslation": "Натисніть, щоб побачити переклад",
+    "inText": "у тексті: {form} · {label}"
   },
   "unitStepper": {
     "label": "Кроки уроку",

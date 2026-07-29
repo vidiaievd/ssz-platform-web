@@ -15,7 +15,9 @@
   "glossary": {
     "seeInContext": "Se i kontekst",
     "listenWord": "Hør",
-    "lookUpWord": "Slå opp"
+    "lookUpWord": "Slå opp",
+    "clickForTranslation": "Klikk for oversettelse",
+    "inText": "i teksten: {form} · {label}"
   },
   "unitStepper": {
     "label": "Enhetssteg",

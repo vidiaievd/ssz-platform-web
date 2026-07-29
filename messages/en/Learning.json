@@ -15,7 +15,9 @@
   "glossary": {
     "seeInContext": "See in context",
     "listenWord": "Listen",
-    "lookUpWord": "Look up"
+    "lookUpWord": "Look up",
+    "clickForTranslation": "Click for translation",
+    "inText": "in the text: {form} · {label}"
   },
   "unitStepper": {
     "label": "Unit steps",

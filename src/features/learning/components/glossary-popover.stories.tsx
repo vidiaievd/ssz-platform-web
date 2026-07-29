@@ -39,6 +39,33 @@ export const Verb: Story = {
   },
 };
 
+/**
+ * The card as the reader opens it: hover a word for the preview (part of speech,
+ * IPA, which form is in the text), click it for the translation and the forms.
+ */
+export const InflectedFormInText: Story = {
+  args: {
+    word: 'sykepleier',
+    phonetic: '/ˈsyːkəˌplɛɪər/',
+    pos: 'noun',
+    translation: 'nurse',
+    form: 'sykepleieren',
+    formLabel: 'Bestemt entall',
+    forms: [
+      { label: 'Ubestemt entall', value: 'en sykepleier' },
+      { label: 'Bestemt entall', value: 'sykepleieren' },
+      { label: 'Ubestemt flertall', value: 'sykepleiere' },
+      { label: 'Bestemt flertall', value: 'sykepleierne' },
+    ],
+    contextSentence: 'Sykepleieren jobber på sykehuset i Bergen.',
+    children: (
+      <button className="rounded bg-[var(--ssz-color-primary-50)] px-1 font-reading text-sm font-semibold text-[var(--ssz-color-primary-700)] underline decoration-dotted">
+        sykepleieren
+      </button>
+    ),
+  },
+};
+
 export const WithContextLink: Story = {
   args: {
     word: 'arbeidsdag',

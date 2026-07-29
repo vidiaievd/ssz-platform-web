@@ -96,7 +96,7 @@ export { ErrorState } from './components/error-state';
 export type { ErrorStateProps } from './components/error-state';
 
 export { GlossaryPopover } from './components/glossary-popover';
-export type { GlossaryPopoverProps, PartOfSpeech } from './components/glossary-popover';
+export type { GlossaryLevel, GlossaryPopoverProps, PartOfSpeech } from './components/glossary-popover';
 
 export { GlossaryParagraph } from './components/glossary-paragraph';
 export type { GlossaryParagraphProps } from './components/glossary-paragraph';
