@@ -102,7 +102,7 @@ export { GlossaryParagraph } from './components/glossary-paragraph';
 export type { GlossaryParagraphProps } from './components/glossary-paragraph';
 
 export { buildGlossaryIndex, tokenizeGlossary } from './lib/tokenize-glossary';
-export type { GlossaryIndex, GlossaryToken } from './lib/tokenize-glossary';
+export type { GlossaryEntry, GlossaryIndex, GlossaryToken } from './lib/tokenize-glossary';
 
 export { formatTimecode } from './lib/format-timecode';
 

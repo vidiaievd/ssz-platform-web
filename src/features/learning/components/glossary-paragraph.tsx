@@ -4,11 +4,10 @@ import { useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { useMediaAsset } from '@/features/media';
-import type { VocabularyItem } from '@/features/content/types';
 import { cn } from '@/lib/utils';
 
 import { GlossaryPopover, type PartOfSpeech } from './glossary-popover';
-import { tokenizeGlossary, type GlossaryIndex } from '../lib/tokenize-glossary';
+import { tokenizeGlossary, type GlossaryEntry, type GlossaryIndex } from '../lib/tokenize-glossary';
 
 const POS_TO_TAG: Record<string, PartOfSpeech> = {
   noun: 'noun',
@@ -23,7 +22,8 @@ function toGlossaryTag(partOfSpeech?: string): PartOfSpeech {
   return (partOfSpeech && POS_TO_TAG[partOfSpeech]) || 'other';
 }
 
-function GlossaryWord({ text, item, contextSentence }: { text: string; item: VocabularyItem; contextSentence: string }) {
+function GlossaryWord({ text, entry, contextSentence }: { text: string; entry: GlossaryEntry; contextSentence: string }) {
+  const { item } = entry;
   const t = useTranslations('Learning.glossary');
   const locale = useLocale();
   const asset = useMediaAsset(item.audioMediaId);
@@ -79,8 +79,8 @@ export function GlossaryParagraph({ text, glossary, lang, className, style }: Gl
       style={{ textWrap: 'pretty', ...style } as React.CSSProperties}
     >
       {tokens.map((token) =>
-        token.item ? (
-          <GlossaryWord key={token.id} text={token.text} item={token.item} contextSentence={text} />
+        token.entry ? (
+          <GlossaryWord key={token.id} text={token.text} entry={token.entry} contextSentence={text} />
         ) : (
           <span key={token.id}>{token.text}</span>
         ),
