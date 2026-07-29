@@ -161,11 +161,56 @@ export interface LessonListeningStage {
   stageType: ListeningStageType;
 }
 
-/** Author-marked glossary word for a TEXT/VIDEO lesson variant (BE1.5). No unmark endpoint exists. */
+/**
+ * Author-marked glossary word for a TEXT/VIDEO lesson variant (BE1.5).
+ * Position-free — see `LessonTextSpan` for the positional model added in phase D.
+ */
 export interface GlossaryMark {
   id: string;
   vocabularyItemId: string;
   occurrenceCount: number;
+}
+
+export type LessonSpanKind = 'vocab' | 'grammar' | 'chunk';
+
+/** Why a span no longer holds: the body moved under it, or its referent is gone. */
+export type LessonSpanBrokenReason = 'offset' | 'ref';
+
+/** Where a broken span's snapshot text occurs in the current body (spec 16 §4.4). */
+export interface LessonSpanAnchorCandidate {
+  paragraphIndex: number;
+  charStart: number;
+  charEnd: number;
+}
+
+/**
+ * Positional author annotation over a TEXT lesson variant's body (spec 16).
+ *
+ * `charStart`/`charEnd` are a half-open UTF-16 range into the **raw markdown**
+ * of paragraph `paragraphIndex`, as split by the backend's blank-line paragraph
+ * splitter — the same numbering that keys `LessonParagraph`. They are *not*
+ * offsets into the rendered text; projecting them onto what the reader displays
+ * is the renderer's job.
+ *
+ * `broken` is computed by the server on every read and never stored. Broken
+ * spans reach authoring surfaces (`includeBroken=true`) so the author can
+ * re-anchor them, and are withheld from the reader entirely.
+ */
+export interface LessonTextSpan {
+  id: string;
+  paragraphIndex: number;
+  charStart: number;
+  charEnd: number;
+  kind: LessonSpanKind;
+  /** Vocabulary item id for `vocab`, grammar rule id for `grammar`, null for `chunk`. */
+  refId: string | null;
+  /** The text the author selected, as it read at that moment. */
+  textSnapshot: string;
+  note: string | null;
+  broken: boolean;
+  brokenReason: LessonSpanBrokenReason | null;
+  /** Always empty unless `broken`; a one-click repair is only safe when there is exactly one. */
+  reanchorCandidates: LessonSpanAnchorCandidate[];
 }
 
 export type LessonKind = 'text' | 'video' | 'audio' | 'live';

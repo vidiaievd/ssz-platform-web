@@ -7,6 +7,7 @@ export {
   useBestLessonVariant,
   useLessonParagraphs,
   useLessonGlossaryMarks,
+  useLessonTextSpans,
   useLessonVideoCues,
   useLessonListeningStages,
 } from './use-lesson';
