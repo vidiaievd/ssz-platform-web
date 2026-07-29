@@ -119,6 +119,9 @@ export type { MarkdownBlock } from './lib/parse-markdown-blocks';
 export { buildGlossaryIndex, tokenizeGlossary } from './lib/tokenize-glossary';
 export type { GlossaryEntry, GlossaryIndex, GlossaryToken } from './lib/tokenize-glossary';
 
+export { sentenceAt, splitSentences } from './lib/split-sentences';
+export type { Sentence } from './lib/split-sentences';
+
 export { formatTimecode } from './lib/format-timecode';
 
 export { getGlossaryMode } from './lib/glossary-mode';

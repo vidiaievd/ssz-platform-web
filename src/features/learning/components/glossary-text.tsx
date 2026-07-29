@@ -12,6 +12,7 @@ import { useKnownWordsStore } from '../stores/known-words-store';
 import { tokenizeGlossary, type GlossaryEntry, type GlossaryIndex } from '../lib/tokenize-glossary';
 import { getGlossaryMode } from '../lib/glossary-mode';
 import { parseInlineMarkdown, sliceMarks, type InlineMarkKind } from '../lib/parse-inline-markdown';
+import { sentenceAt, splitSentences } from '../lib/split-sentences';
 
 const POS_TO_TAG: Record<string, PartOfSpeech> = {
   noun: 'noun',
@@ -146,6 +147,9 @@ export interface GlossaryTextProps {
 export function GlossaryText({ text: raw, glossary, cefrLevel }: GlossaryTextProps) {
   const { text, marks } = useMemo(() => parseInlineMarkdown(raw), [raw]);
   const tokens = useMemo(() => tokenizeGlossary(text, glossary), [text, glossary]);
+  // Segmented once per paragraph, then looked up by token offset: the popover
+  // quotes the sentence the word sits in, not the whole paragraph.
+  const sentences = useMemo(() => splitSentences(text), [text]);
 
   return (
     <>
@@ -159,7 +163,7 @@ export function GlossaryText({ text: raw, glossary, cefrLevel }: GlossaryTextPro
             key={token.id}
             text={token.text}
             entry={token.entry}
-            contextSentence={text}
+            contextSentence={sentenceAt(sentences, token.start)}
             cefrLevel={cefrLevel}
           >
             {pieces}
