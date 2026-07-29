@@ -653,7 +653,22 @@
     "overlapError": "This selection overlaps an annotation of the same type. Adjust the selection, or remove the other one first.",
     "errorEmpty": "Select some of the anchor text to annotate it.",
     "errorCrossesParagraph": "An annotation has to stay inside one paragraph. Shorten the selection.",
-    "errorTooLong": "That selection is too long to annotate — 400 characters at most."
+    "errorTooLong": "That selection is too long to annotate — 400 characters at most.",
+    "caption": "{count, plural, one {# annotation} other {# annotations}} in this text.",
+    "delete": "Remove the annotation on “{text}”",
+    "deleted": "Annotation removed.",
+    "brokenTitle": "{count, plural, one {# annotation lost its anchor} other {# annotations lost their anchor}}",
+    "brokenBody": "The text moved under them, so students no longer see them. Reattach or remove each one.",
+    "brokenRef": "Its word or rule was deleted.",
+    "reanchor": "Reattach",
+    "reanchored": "Annotation reattached.",
+    "reanchorGone": "This text is no longer in the body.",
+    "reanchorAmbiguous": "This text now occurs more than once — select it again to reattach.",
+    "unmark": "Remove “{lemma}” from the glossary",
+    "unmarkConfirmTitle": "Remove this word from the lesson glossary?",
+    "unmarkConfirmBody": "“{lemma}” stops being part of this lesson's glossary, and its annotations in this text go with it. The module keeps the word, so other lessons and the unit vocabulary list are unaffected.",
+    "unmarkConfirm": "Remove",
+    "unmarked": "Word removed from the lesson glossary."
   },
   "list": {
     "countsOwner": "{all} courses · {published} published · {draft} draft",

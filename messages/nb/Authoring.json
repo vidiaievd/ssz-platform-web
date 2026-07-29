@@ -653,7 +653,22 @@
     "overlapError": "Utvalget overlapper en merknad av samme type. Juster utvalget, eller fjern den andre først.",
     "errorEmpty": "Merk noe av ankerteksten for å legge til en merknad.",
     "errorCrossesParagraph": "En merknad må holde seg innenfor ett avsnitt. Forkort utvalget.",
-    "errorTooLong": "Utvalget er for langt til å merkes — maks 400 tegn."
+    "errorTooLong": "Utvalget er for langt til å merkes — maks 400 tegn.",
+    "caption": "{count, plural, one {# merknad} other {# merknader}} i denne teksten.",
+    "delete": "Fjern merknaden på «{text}»",
+    "deleted": "Merknaden er fjernet.",
+    "brokenTitle": "{count, plural, one {# merknad mistet festet} other {# merknader mistet festet}}",
+    "brokenBody": "Teksten har flyttet seg under dem, så elevene ser dem ikke lenger. Fest dem på nytt, eller fjern dem.",
+    "brokenRef": "Ordet eller regelen er slettet.",
+    "reanchor": "Fest på nytt",
+    "reanchored": "Merknaden er festet på nytt.",
+    "reanchorGone": "Denne teksten finnes ikke lenger i brødteksten.",
+    "reanchorAmbiguous": "Teksten forekommer nå flere steder — merk den på nytt for å feste merknaden.",
+    "unmark": "Fjern «{lemma}» fra ordlisten",
+    "unmarkConfirmTitle": "Fjerne ordet fra leksjonens ordliste?",
+    "unmarkConfirmBody": "«{lemma}» er ikke lenger en del av ordlisten til denne leksjonen, og merknadene på ordet i denne teksten forsvinner også. Modulen beholder ordet, så andre leksjoner og ordlisten til enheten berøres ikke.",
+    "unmarkConfirm": "Fjern",
+    "unmarked": "Ordet er fjernet fra leksjonens ordliste."
   },
   "list": {
     "countsOwner": "{all} kurs · {published} publisert · {draft} utkast",

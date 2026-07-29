@@ -27,6 +27,7 @@ import { TextLessonPreview } from './text-lesson-preview';
 import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
 import { GlossaryMarkButton, GlossaryMarkedWords } from './glossary-mark-panel';
 import { TextSpanMenu } from './text-span-menu';
+import { TextSpanList } from './text-span-list';
 import {
   MarkdownFormatMenu,
   applyMarkdownFormat,
@@ -203,6 +204,11 @@ export function TextEditorPane({
                 bodyField.ref(el);
                 bodyRef.current = el;
               }}
+            />
+            <TextSpanList
+              lessonId={lessonId}
+              variantId={defaultVariant?.id}
+              container={container}
             />
             <GlossaryMarkedWords
               lessonId={lessonId}
