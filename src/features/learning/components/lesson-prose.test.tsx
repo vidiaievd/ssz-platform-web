@@ -8,6 +8,10 @@ import { buildGlossaryIndex } from '../lib/tokenize-glossary';
 
 const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
 vi.mock('@/features/media', () => ({ useMediaAsset: (id?: string) => useMediaAsset(id) }));
+vi.mock('@/features/content', async () => {
+  const actual = await vi.importActual<typeof import('@/features/content')>('@/features/content');
+  return { ...actual, useIntroduceCard: () => ({ mutate: vi.fn(), isPending: false }) };
+});
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,

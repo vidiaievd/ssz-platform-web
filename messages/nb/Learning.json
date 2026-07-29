@@ -17,7 +17,8 @@
     "listenWord": "Hør",
     "lookUpWord": "Slå opp",
     "clickForTranslation": "Klikk for oversettelse",
-    "inText": "i teksten: {form} · {label}"
+    "inText": "i teksten: {form} · {label}",
+    "iKnowThis": "Jeg kan dette ordet"
   },
   "unitStepper": {
     "label": "Enhetssteg",

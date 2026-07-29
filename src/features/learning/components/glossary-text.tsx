@@ -2,10 +2,13 @@
 
 import { Fragment, useMemo, type ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
+import { useIntroduceCard } from '@/features/content';
 
 import { GlossaryPopover, type PartOfSpeech } from './glossary-popover';
+import { useKnownWordsStore } from '../stores/known-words-store';
 import { tokenizeGlossary, type GlossaryEntry, type GlossaryIndex } from '../lib/tokenize-glossary';
 import { parseInlineMarkdown, sliceMarks, type InlineMarkKind } from '../lib/parse-inline-markdown';
 
@@ -30,6 +33,39 @@ function withEmphasis(content: ReactNode, kinds: InlineMarkKind[]): ReactNode {
   return node;
 }
 
+/** Footer action of the full card — reports "known" to the SRS and fades the underline optimistically. */
+function IKnowThisButton({ vocabularyItemId }: { vocabularyItemId: string }) {
+  const t = useTranslations('Learning.glossary');
+  const tErrors = useTranslations('Errors');
+  const introduceCard = useIntroduceCard();
+  const markKnown = useKnownWordsStore((s) => s.markKnown);
+  const unmarkKnown = useKnownWordsStore((s) => s.unmarkKnown);
+
+  function handleClick() {
+    markKnown(vocabularyItemId);
+    introduceCard.mutate(
+      { contentType: 'VOCABULARY_WORD', contentId: vocabularyItemId, seedKind: 'CLAIMED_KNOWN' },
+      {
+        onError: () => {
+          unmarkKnown(vocabularyItemId);
+          toast.error(tErrors('unknown'));
+        },
+      },
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={introduceCard.isPending}
+      className="w-full text-left text-xs font-semibold text-(--ssz-color-primary-600) disabled:opacity-50"
+    >
+      {t('iKnowThis')}
+    </button>
+  );
+}
+
 function GlossaryWord({
   text,
   entry,
@@ -45,6 +81,7 @@ function GlossaryWord({
   const locale = useLocale();
   const { item } = entry;
   const translation = item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
+  const known = useKnownWordsStore((s) => s.known.has(item.id));
 
   return (
     <GlossaryPopover
@@ -57,6 +94,7 @@ function GlossaryWord({
       form={entry.form}
       formLabel={entry.formLabel}
       contextSentence={contextSentence}
+      footer={<IKnowThisButton vocabularyItemId={item.id} />}
     >
       <span
         role="button"
@@ -65,12 +103,12 @@ function GlossaryWord({
         onClick={(e) => e.stopPropagation()}
         className={cn(
           'cursor-pointer rounded-[3px] px-px',
-          'underline decoration-dotted decoration-2 underline-offset-[3px]',
+          !known && 'underline decoration-dotted decoration-2 underline-offset-[3px]',
           'transition-colors',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
         )}
         style={{
-          textDecorationColor: 'oklch(0.62 0.105 168 / 70%)',
+          textDecorationColor: known ? undefined : 'oklch(0.62 0.105 168 / 70%)',
           transitionDuration: 'var(--ssz-duration-fast)',
         }}
       >

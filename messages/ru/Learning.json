@@ -17,7 +17,8 @@
     "listenWord": "Слушать",
     "lookUpWord": "Найти в словаре",
     "clickForTranslation": "Нажмите, чтобы увидеть перевод",
-    "inText": "в тексте: {form} · {label}"
+    "inText": "в тексте: {form} · {label}",
+    "iKnowThis": "Я знаю это слово"
   },
   "unitStepper": {
     "label": "Шаги урока",

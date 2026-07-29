@@ -23,6 +23,7 @@ vi.mock('@/features/content', async () => {
     useLessonParagraphs: (...args: unknown[]) => useLessonParagraphs(...args),
     useLessonGlossaryMarks: (...args: unknown[]) => useLessonGlossaryMarks(...args),
     useUnitVocabularyItems: (...args: unknown[]) => useUnitVocabularyItems(...args),
+    useIntroduceCard: () => ({ mutate: vi.fn(), isPending: false }),
   };
 });
 vi.mock('@/features/profile', () => ({ useMyStudentProfile: () => useMyStudentProfile() }));

@@ -17,7 +17,8 @@
     "listenWord": "Listen",
     "lookUpWord": "Look up",
     "clickForTranslation": "Click for translation",
-    "inText": "in the text: {form} · {label}"
+    "inText": "in the text: {form} · {label}",
+    "iKnowThis": "I know this word"
   },
   "unitStepper": {
     "label": "Unit steps",
