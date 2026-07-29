@@ -634,6 +634,27 @@
     "liveOptionRecording": "Publish recording after class",
     "liveOptionApproval": "Require teacher approval to join"
   },
+  "spans": {
+    "markSelection": "Annotate selection",
+    "needsBody": "Save the anchor text first to annotate it.",
+    "selected": "Selected: “{text}”",
+    "kind": "Annotation type",
+    "kindVocab": "Lexis",
+    "kindGrammar": "Grammar",
+    "kindChunk": "Chunk",
+    "pickWord": "Pick a word…",
+    "pickRule": "Pick a grammar rule…",
+    "noList": "This module has no vocabulary list yet — add one to annotate lexis.",
+    "noRules": "This module has no grammar rules yet — add one to annotate grammar.",
+    "noteLabel": "Note (optional)",
+    "notePlaceholder": "A hint for the student",
+    "create": "Annotate",
+    "createSuccess": "Annotation added.",
+    "overlapError": "This selection overlaps an annotation of the same type. Adjust the selection, or remove the other one first.",
+    "errorEmpty": "Select some of the anchor text to annotate it.",
+    "errorCrossesParagraph": "An annotation has to stay inside one paragraph. Shorten the selection.",
+    "errorTooLong": "That selection is too long to annotate — 400 characters at most."
+  },
   "list": {
     "countsOwner": "{all} courses · {published} published · {draft} draft",
     "countsArchivedSuffix": " · {archived} archived",

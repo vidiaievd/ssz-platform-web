@@ -634,6 +634,27 @@
     "liveOptionRecording": "Publiser opptak etter timen",
     "liveOptionApproval": "Krev lærergodkjenning for å bli med"
   },
+  "spans": {
+    "markSelection": "Merk utvalg",
+    "needsBody": "Lagre ankerteksten først for å kunne merke den.",
+    "selected": "Valgt: «{text}»",
+    "kind": "Type merknad",
+    "kindVocab": "Ord",
+    "kindGrammar": "Grammatikk",
+    "kindChunk": "Fast uttrykk",
+    "pickWord": "Velg et ord …",
+    "pickRule": "Velg en grammatikkregel …",
+    "noList": "Denne modulen har ingen ordliste ennå — legg til én for å merke ord.",
+    "noRules": "Denne modulen har ingen grammatikkregler ennå — legg til én for å merke grammatikk.",
+    "noteLabel": "Notat (valgfritt)",
+    "notePlaceholder": "Et hint til eleven",
+    "create": "Merk",
+    "createSuccess": "Merknaden er lagt til.",
+    "overlapError": "Utvalget overlapper en merknad av samme type. Juster utvalget, eller fjern den andre først.",
+    "errorEmpty": "Merk noe av ankerteksten for å legge til en merknad.",
+    "errorCrossesParagraph": "En merknad må holde seg innenfor ett avsnitt. Forkort utvalget.",
+    "errorTooLong": "Utvalget er for langt til å merkes — maks 400 tegn."
+  },
   "list": {
     "countsOwner": "{all} kurs · {published} publisert · {draft} utkast",
     "countsArchivedSuffix": " · {archived} arkivert",

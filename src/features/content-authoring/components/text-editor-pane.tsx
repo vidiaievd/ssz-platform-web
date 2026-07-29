@@ -26,6 +26,7 @@ import { EditorCard } from './editor-card';
 import { TextLessonPreview } from './text-lesson-preview';
 import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
 import { GlossaryMarkButton, GlossaryMarkedWords } from './glossary-mark-panel';
+import { TextSpanMenu } from './text-span-menu';
 import {
   MarkdownFormatMenu,
   applyMarkdownFormat,
@@ -177,6 +178,13 @@ export function TextEditorPane({
             right={
               <div className="flex items-center gap-1.5">
                 <MarkdownFormatMenu onInsert={handleFormat} />
+                <TextSpanMenu
+                  lessonId={lessonId}
+                  variantId={defaultVariant?.id}
+                  container={container}
+                  body={bodyValue ?? ''}
+                  textareaRef={bodyRef}
+                />
                 <GlossaryMarkButton
                   lessonId={lessonId}
                   variantId={defaultVariant?.id}

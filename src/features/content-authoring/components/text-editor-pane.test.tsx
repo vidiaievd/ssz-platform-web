@@ -29,6 +29,7 @@ vi.mock('./glossary-mark-panel', () => ({
   GlossaryMarkButton: () => null,
   GlossaryMarkedWords: () => null,
 }));
+vi.mock('./text-span-menu', () => ({ TextSpanMenu: () => null }));
 vi.mock('./hero-image-slot', () => ({ HeroImageSlot: () => null }));
 vi.mock('./audio-narration-row', () => ({ AudioNarrationRow: () => null }));
 vi.mock('@/lib/i18n/navigation', () => ({
