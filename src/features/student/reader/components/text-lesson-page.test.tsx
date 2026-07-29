@@ -206,6 +206,22 @@ describe('TextLessonPage', () => {
     expect(screen.queryByText('Marta is a nurse.')).not.toBeInTheDocument();
   });
 
+  it('shows a loading skeleton while the glossary marks are still loading', () => {
+    mockHappyPath();
+    useLessonGlossaryMarks.mockReturnValue({ data: undefined, isLoading: true });
+    renderPage();
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
+  });
+
+  it('renders the text without underlines when glossary marks fail to load', () => {
+    mockHappyPath();
+    useLessonGlossaryMarks.mockReturnValue({ data: undefined, isError: true });
+    renderPage();
+
+    expect(screen.getByText('En vanlig arbeidsdag')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /look up: sykepleier/i })).not.toBeInTheDocument();
+  });
+
   describe('without paragraph translations', () => {
     function mockUntranslated() {
       mockHappyPath();

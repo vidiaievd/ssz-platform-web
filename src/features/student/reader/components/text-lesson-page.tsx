@@ -309,7 +309,13 @@ export function TextLessonPage({
   // A persisted 'bilingual' preference must not strand the reader on an empty screen.
   const effectiveMode = availableModes.includes(mode) ? mode : 'immersive';
 
-  const isLoading = lesson.isLoading || profile.isLoading || (profileReady && variant.isLoading);
+  const glossaryLoading = marksQuery.isLoading || (!!vocabularyListId && vocabItems.isLoading);
+  const isLoading =
+    lesson.isLoading ||
+    profile.isLoading ||
+    (profileReady && variant.isLoading) ||
+    paragraphsQuery.isLoading ||
+    glossaryLoading;
   const isError = lesson.isError || profile.isError || (profileReady && variant.isError);
 
   if (isLoading) {
