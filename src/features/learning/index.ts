@@ -136,6 +136,9 @@ export type { RefStripParagraph, RefStripProps } from './components/ref-strip';
 export { UnitStepper } from './components/unit-stepper';
 export type { UnitPhase, UnitStepperProps } from './components/unit-stepper';
 
+export { WordForms } from './components/word-forms';
+export type { WordFormsProps } from './components/word-forms';
+
 /* ─── SRS components ─────────────────────────────────────────────── */
 export { SrsPage } from './components/srs/srs-page';
 export { SrsEntry } from './components/srs/entry';

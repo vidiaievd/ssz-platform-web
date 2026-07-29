@@ -1,10 +1,11 @@
 'use client';
 
-import { ChevronDown, ChevronRight, Layers, Repeat } from 'lucide-react';
+import { Repeat } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { AudioPlayer } from '@/features/learning/components/audio-player';
+import { WordForms } from '@/features/learning/components/word-forms';
 import { useMediaAsset } from '@/features/media';
 import type { VocabularyItem } from '@/features/content/types';
 import { cn } from '@/lib/utils';
@@ -45,7 +46,6 @@ export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps)
   const t = useTranslations('Learning.reader.vocab');
   const locale = useLocale();
   const [flipped, setFlipped] = useState(false);
-  const [formsOpen, setFormsOpen] = useState(false);
   const asset = useMediaAsset(item.audioMediaId);
 
   const translation =
@@ -150,51 +150,7 @@ export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps)
         </div>
       </div>
 
-      {/* Alle former drawer */}
-      {item.forms && item.forms.length > 0 && (
-        <div className="mt-2">
-          <button
-            type="button"
-            onClick={() => setFormsOpen((f) => !f)}
-            aria-expanded={formsOpen}
-            className={cn(
-              'flex w-full items-center gap-1.5 rounded-md border-[1.5px] border-(--ssz-border-default) px-3 py-2',
-              'text-xs font-semibold text-(--ssz-text-secondary)',
-              formsOpen ? 'bg-subtle' : 'bg-transparent',
-            )}
-          >
-            <Layers size={14} className="text-(--ssz-color-primary-600)" aria-hidden="true" />
-            {t('allForms')}
-            <span className="ml-auto flex">
-              {formsOpen ? (
-                <ChevronDown size={14} className="text-(--ssz-text-muted)" aria-hidden="true" />
-              ) : (
-                <ChevronRight size={14} className="text-(--ssz-text-muted)" aria-hidden="true" />
-              )}
-            </span>
-          </button>
-          {formsOpen && (
-            <div className="mt-1.5 overflow-hidden rounded-md border border-(--ssz-border-default)">
-              {item.forms.map((form, i) => (
-                <div
-                  key={form.label}
-                  className={cn(
-                    'flex items-baseline gap-2.5 px-3.5 py-2',
-                    i % 2 ? 'bg-(--ssz-bg-base)' : 'bg-surface',
-                  )}
-                >
-                  <span className="min-w-30 shrink-0 text-[11px] font-semibold text-(--ssz-text-muted)">
-                    {form.label}
-                  </span>
-                  <span className="font-reading text-[15px] font-medium text-(--ssz-text-primary)">
-                    {form.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {item.forms && item.forms.length > 0 && <WordForms forms={item.forms} />}
     </div>
   );
 }
