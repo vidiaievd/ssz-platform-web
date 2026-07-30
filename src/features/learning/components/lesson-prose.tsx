@@ -46,7 +46,7 @@ function Blocks({
               <ul key={i} className="m-0 flex list-disc flex-col gap-1 pl-5.5">
                 {block.items.map((item, j) => (
                   <li key={j} className="font-reading m-0 text-(--ssz-text-primary)">
-                    <GlossaryText text={item} glossary={glossary} cefrLevel={cefrLevel} />
+                    <GlossaryText text={item.text} glossary={glossary} cefrLevel={cefrLevel} />
                   </li>
                 ))}
               </ul>

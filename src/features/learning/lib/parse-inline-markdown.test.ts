@@ -1,10 +1,22 @@
 import { describe, expect, it } from 'vitest';
 
+import { expectValidSourceMap } from '@/test/source-map';
+
 import { parseInlineMarkdown, sliceMarks } from './parse-inline-markdown';
+
+/**
+ * The emphasis fixtures below assert `{ text, marks }` as a whole. The offset
+ * map is a third, much noisier field whose contract is checked by its own
+ * property test, so it is dropped here rather than spelled out in every case.
+ */
+function withoutMap(raw: string) {
+  const { text, marks } = parseInlineMarkdown(raw);
+  return { text, marks };
+}
 
 describe('parseInlineMarkdown', () => {
   it('returns the text unchanged when there is no emphasis', () => {
-    expect(parseInlineMarkdown('Bartek har jobbet som elektriker.')).toEqual({
+    expect(withoutMap('Bartek har jobbet som elektriker.')).toEqual({
       text: 'Bartek har jobbet som elektriker.',
       marks: [],
     });
@@ -49,16 +61,72 @@ describe('parseInlineMarkdown', () => {
   });
 
   it('leaves an unmatched delimiter in the text', () => {
-    expect(parseInlineMarkdown('5 * 3 = 15')).toEqual({ text: '5 * 3 = 15', marks: [] });
-    expect(parseInlineMarkdown('**uavsluttet')).toEqual({ text: '**uavsluttet', marks: [] });
+    expect(withoutMap('5 * 3 = 15')).toEqual({ text: '5 * 3 = 15', marks: [] });
+    expect(withoutMap('**uavsluttet')).toEqual({ text: '**uavsluttet', marks: [] });
   });
 
   it('does not treat an empty delimiter pair as emphasis', () => {
-    expect(parseInlineMarkdown('a ** b')).toEqual({ text: 'a ** b', marks: [] });
+    expect(withoutMap('a ** b')).toEqual({ text: 'a ** b', marks: [] });
   });
 
   it('leaves underscores alone', () => {
-    expect(parseInlineMarkdown('media_id_1')).toEqual({ text: 'media_id_1', marks: [] });
+    expect(withoutMap('media_id_1')).toEqual({ text: 'media_id_1', marks: [] });
+  });
+});
+
+describe('parseInlineMarkdown source map', () => {
+  // The emphasis fixtures this suite already exercises, reused as the property
+  // test's corpus per spec 16 §8 obligation 10.
+  const FIXTURES = [
+    'Bartek har jobbet som elektriker.',
+    '**Erfaren elektriker søkes**',
+    'Vi tilbyr **et godt arbeidsmiljø** til alle.',
+    'Han er *veldig* ivrig.',
+    '**Vi ønsker *virkelig* deg**',
+    '**A** og **B**',
+    '5 * 3 = 15',
+    '**uavsluttet',
+    'a ** b',
+    'media_id_1',
+    '',
+    '**',
+    '*a**b*',
+    'Søknad **med *CV*** sendes til post@nordbyelektro.no innen 15. mars.',
+  ];
+
+  it.each(FIXTURES)('maps every output character back into %j', (raw) => {
+    expectValidSourceMap(raw, parseInlineMarkdown(raw));
+  });
+
+  it('projects a stripped-text range onto the delimiters it came from', () => {
+    const raw = 'Vi tilbyr **et godt arbeidsmiljø** til alle.';
+    const { text, sourceIndexOf } = parseInlineMarkdown(raw);
+
+    // "arbeidsmiljø" sits inside the strong span; its raw offsets must skip the
+    // two leading asterisks the reader never sees. The exclusive end is one
+    // past the *last included* character, not `sourceIndexOf[end]` — see the
+    // warning on `InlineMarkdown.sourceIndexOf`.
+    const start = text.indexOf('arbeidsmiljø');
+    const end = start + 'arbeidsmiljø'.length;
+    expect(raw.slice(sourceIndexOf[start]!, sourceIndexOf[end - 1]! + 1)).toBe('arbeidsmiljø');
+  });
+
+  it('does not let a sub-range end swallow the markup that follows it', () => {
+    const raw = 'Vi tilbyr **et godt arbeidsmiljø** til alle.';
+    const { text, sourceIndexOf } = parseInlineMarkdown(raw);
+    const end = text.indexOf('arbeidsmiljø') + 'arbeidsmiljø'.length;
+
+    // The word ends flush against the closing `**`, so the next output
+    // character is the space *after* the delimiters. Reading the entry at `end`
+    // as the exclusive end would silently annotate two asterisks as well.
+    expect(sourceIndexOf[end]).toBe(raw.indexOf('** til') + 2);
+    expect(sourceIndexOf[end - 1]! + 1).toBe(raw.indexOf('** til'));
+  });
+
+  it('places the exclusive end past the closing delimiter of a trailing span', () => {
+    const raw = '**Erfaren elektriker søkes**';
+    const { text, sourceIndexOf } = parseInlineMarkdown(raw);
+    expect(sourceIndexOf[text.length]).toBe(raw.length);
   });
 });
 

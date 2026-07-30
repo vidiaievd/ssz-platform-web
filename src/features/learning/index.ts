@@ -113,8 +113,8 @@ export type { LessonProseProps } from './components/lesson-prose';
 export { parseInlineMarkdown, sliceMarks } from './lib/parse-inline-markdown';
 export type { InlineMark, InlineMarkKind, InlineMarkdown } from './lib/parse-inline-markdown';
 
-export { parseMarkdownBlocks } from './lib/parse-markdown-blocks';
-export type { MarkdownBlock } from './lib/parse-markdown-blocks';
+export { composeSourceMaps, parseMarkdownBlocks } from './lib/parse-markdown-blocks';
+export type { MappedText, MarkdownBlock } from './lib/parse-markdown-blocks';
 
 export { buildGlossaryIndex, tokenizeGlossary } from './lib/tokenize-glossary';
 export type { GlossaryEntry, GlossaryIndex, GlossaryToken } from './lib/tokenize-glossary';
