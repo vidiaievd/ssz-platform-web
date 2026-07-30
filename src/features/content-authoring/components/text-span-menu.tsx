@@ -52,8 +52,12 @@ interface TextSpanMenuProps {
  * change — drag, shift-arrow, double-click, select-all — and it fires on the
  * document rather than on the field, so it is filtered by target here.
  */
-function useTextareaSelection(textareaRef: RefObject<HTMLTextAreaElement | null>) {
+function useTextareaSelection(
+  textareaRef: RefObject<HTMLTextAreaElement | null>,
+  body: string,
+) {
   const [range, setRange] = useState<{ start: number; end: number }>({ start: 0, end: 0 });
+  const [syncedBody, setSyncedBody] = useState(body);
 
   useEffect(() => {
     function read() {
@@ -65,6 +69,17 @@ function useTextareaSelection(textareaRef: RefObject<HTMLTextAreaElement | null>
     document.addEventListener('selectionchange', read);
     return () => document.removeEventListener('selectionchange', read);
   }, [textareaRef]);
+
+  // Editing the body invalidates the offsets: the same numbers now point at
+  // different text. Dropping the range disables the trigger until the author
+  // selects again, rather than letting them annotate a stretch they never
+  // picked. Adjusted during render rather than in an effect — React's own
+  // "reset state when a prop changes" pattern, which avoids rendering one frame
+  // with the stale selection still live.
+  if (syncedBody !== body) {
+    setSyncedBody(body);
+    setRange({ start: 0, end: 0 });
+  }
 
   return range;
 }
@@ -97,7 +112,7 @@ export function TextSpanMenu({
   const [refId, setRefId] = useState('');
   const [note, setNote] = useState('');
 
-  const selection = useTextareaSelection(textareaRef);
+  const selection = useTextareaSelection(textareaRef, body);
   const coordinates = bodyRangeToSpan(body, selection.start, selection.end);
   // Frozen while the popover is open: the author's focus has moved into it, so
   // the field's selection is no longer what they are annotating.
@@ -170,7 +185,18 @@ export function TextSpanMenu({
           <TextSelect aria-hidden /> {t('spans.markSelection')}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80">
+      {/*
+        Focus stays in the textarea so the browser keeps painting the selection —
+        it stops painting it in an unfocused field, and there is no CSS for an
+        inactive selection, so letting Radix move focus here would leave the
+        author unable to see what they are annotating. The popover is still
+        reachable by Tab and still closes on Esc.
+      */}
+      <PopoverContent
+        align="end"
+        className="w-80"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         {!variantId ? (
           <p className="text-sm text-muted-foreground">{t('spans.needsBody')}</p>
         ) : !active.ok ? (

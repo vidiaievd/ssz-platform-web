@@ -107,6 +107,13 @@ export function TextEditorPane({
       await queryClient.invalidateQueries({
         queryKey: authoringKeys.lessonParagraphs(lessonId, defaultVariant.id),
       });
+      // A span's brokenness is computed server-side against the body on every
+      // read, so a body edit can break or repair spans without touching a span
+      // row. Without this the lost-anchor panel only catches up after the
+      // query goes stale.
+      await queryClient.invalidateQueries({
+        queryKey: authoringKeys.lessonTextSpans(lessonId, defaultVariant.id),
+      });
     }
     return result;
   }

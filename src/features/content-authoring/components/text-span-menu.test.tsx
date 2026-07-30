@@ -76,20 +76,22 @@ function renderMenu({
   const ref = createRef<HTMLTextAreaElement>();
   const queryClient = new QueryClient();
 
-  render(
+  const tree = (value: string) => (
     <QueryClientProvider client={queryClient}>
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <textarea ref={ref} defaultValue={body} readOnly />
+        <textarea ref={ref} defaultValue={value} readOnly />
         <TextSpanMenu
           lessonId="lesson-1"
           variantId={variantId}
           container={CONTAINER}
-          body={body}
+          body={value}
           textareaRef={ref}
         />
       </NextIntlClientProvider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
+
+  const { rerender } = render(tree(body));
 
   const el = ref.current!;
   el.focus();
@@ -99,7 +101,11 @@ function renderMenu({
     document.dispatchEvent(new Event('selectionchange'));
   });
 
-  return { queryClient };
+  return {
+    queryClient,
+    textarea: el,
+    rerenderWithBody: (next: string) => act(() => rerender(tree(next))),
+  };
 }
 
 beforeEach(() => {
@@ -229,6 +235,29 @@ describe('TextSpanMenu', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Grammar' }));
 
     expect(screen.getByRole('button', { name: 'Annotate' })).toBeDisabled();
+  });
+
+  it('keeps focus in the textarea so the selection stays visible', () => {
+    const { textarea } = renderMenu({ selection: [7, 17], variantId: 'variant-1' });
+
+    fireEvent.click(trigger());
+
+    // Radix would move focus into the popover, and browsers stop painting the
+    // selection of an unfocused field — leaving the author unable to see what
+    // they are annotating.
+    expect(screen.getByText('Selected: “sykepleier”')).toBeInTheDocument();
+    expect(document.activeElement).toBe(textarea);
+  });
+
+  it('drops the selection when the body is edited under it', () => {
+    const { rerenderWithBody } = renderMenu({ selection: [7, 17], variantId: 'variant-1' });
+    expect(trigger()).toBeEnabled();
+
+    // Same offsets, different text: annotating now would mark a stretch the
+    // author never picked.
+    rerenderWithBody('Helt annen tekst her.\n\nOg et andre avsnitt.');
+
+    expect(trigger()).toBeDisabled();
   });
 
   it('prompts to save the anchor text when the body has no variant yet', () => {
