@@ -2,10 +2,12 @@
 
 import { useMemo } from 'react';
 
+import type { LessonTextSpan } from '@/features/content/types';
 import { cn } from '@/lib/utils';
 
 import { GlossaryText } from './glossary-text';
-import { parseMarkdownBlocks, type MarkdownBlock } from '../lib/parse-markdown-blocks';
+import { parseMarkdownBlocks, type MappedText, type MarkdownBlock } from '../lib/parse-markdown-blocks';
+import { projectSpansOntoBlocks, type ProjectedSpan } from '../lib/project-span';
 import { type GlossaryIndex } from '../lib/tokenize-glossary';
 
 const HEADING_CLASS: Record<number, string> = {
@@ -14,15 +16,27 @@ const HEADING_CLASS: Record<number, string> = {
   3: 'text-[17px] font-semibold',
 };
 
+/** Everything the annotation layer needs, kept together so `Blocks` can pass it on whole. */
+interface AnnotationProps {
+  /** Author spans of this paragraph, keyed by the block node that renders each. */
+  placed: Map<MappedText, ProjectedSpan<LessonTextSpan>[]>;
+  authoredVocabulary: boolean;
+  spansHidden: boolean;
+}
+
 function Blocks({
   blocks,
   glossary,
   cefrLevel,
+  annotations,
 }: {
   blocks: MarkdownBlock[];
   glossary: GlossaryIndex;
   cefrLevel?: string;
+  annotations: AnnotationProps;
 }) {
+  const { placed, authoredVocabulary, spansHidden } = annotations;
+
   return (
     <>
       {blocks.map((block, i) => {
@@ -37,7 +51,14 @@ function Blocks({
                   HEADING_CLASS[block.level] ?? HEADING_CLASS[3],
                 )}
               >
-                <GlossaryText text={block.text} glossary={glossary} cefrLevel={cefrLevel} />
+                <GlossaryText
+                  text={block.text}
+                  glossary={glossary}
+                  cefrLevel={cefrLevel}
+                  spans={placed.get(block)}
+                  authoredVocabulary={authoredVocabulary}
+                  spansHidden={spansHidden}
+                />
               </Tag>
             );
           }
@@ -46,7 +67,14 @@ function Blocks({
               <ul key={i} className="m-0 flex list-disc flex-col gap-1 pl-5.5">
                 {block.items.map((item, j) => (
                   <li key={j} className="font-reading m-0 text-(--ssz-text-primary)">
-                    <GlossaryText text={item.text} glossary={glossary} cefrLevel={cefrLevel} />
+                    <GlossaryText
+                      text={item.text}
+                      glossary={glossary}
+                      cefrLevel={cefrLevel}
+                      spans={placed.get(item)}
+                      authoredVocabulary={authoredVocabulary}
+                      spansHidden={spansHidden}
+                    />
                   </li>
                 ))}
               </ul>
@@ -60,7 +88,12 @@ function Blocks({
                   'bg-(--ssz-bg-subtle) py-4 pr-4.5 pl-4',
                 )}
               >
-                <Blocks blocks={block.blocks} glossary={glossary} cefrLevel={cefrLevel} />
+                <Blocks
+                  blocks={block.blocks}
+                  glossary={glossary}
+                  cefrLevel={cefrLevel}
+                  annotations={annotations}
+                />
               </blockquote>
             );
           default:
@@ -70,7 +103,14 @@ function Blocks({
                 className="font-reading m-0 text-(--ssz-text-primary)"
                 style={{ textWrap: 'pretty' } as React.CSSProperties}
               >
-                <GlossaryText text={block.text} glossary={glossary} cefrLevel={cefrLevel} />
+                <GlossaryText
+                  text={block.text}
+                  glossary={glossary}
+                  cefrLevel={cefrLevel}
+                  spans={placed.get(block)}
+                  authoredVocabulary={authoredVocabulary}
+                  spansHidden={spansHidden}
+                />
               </p>
             );
         }
@@ -87,17 +127,43 @@ export interface LessonProseProps {
   lang?: string;
   /** Reader's CEFR level — selects translation vs. target-language definition (B2+). */
   cefrLevel?: string;
+  /**
+   * Author annotations anchored to this paragraph, with `charStart`/`charEnd`
+   * in the coordinates of `text` — the raw markdown, exactly as stored
+   * (spec 16 §2.1). Projecting them onto the block structure happens here.
+   */
+  spans?: LessonTextSpan[];
+  /** Spec 16 §5.3, decided per variant: authored spans replace the tokenizer entirely. */
+  authoredVocabulary?: boolean;
+  /** Gloss visibility is `off` — grammar and chunk backdrops are withheld. */
+  spansHidden?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
 
 /** Renders a lesson body chunk with its markdown structure and glossary lookups. */
-export function LessonProse({ text, glossary, lang, cefrLevel, className, style }: LessonProseProps) {
+export function LessonProse({
+  text,
+  glossary,
+  lang,
+  cefrLevel,
+  spans,
+  authoredVocabulary = false,
+  spansHidden = false,
+  className,
+  style,
+}: LessonProseProps) {
   const blocks = useMemo(() => parseMarkdownBlocks(text), [text]);
+  const placed = useMemo(() => projectSpansOntoBlocks(blocks, spans ?? []), [blocks, spans]);
 
   return (
     <div lang={lang} className={cn('flex flex-col gap-3.5', className)} style={style}>
-      <Blocks blocks={blocks} glossary={glossary} cefrLevel={cefrLevel} />
+      <Blocks
+        blocks={blocks}
+        glossary={glossary}
+        cefrLevel={cefrLevel}
+        annotations={{ placed, authoredVocabulary, spansHidden }}
+      />
     </div>
   );
 }
