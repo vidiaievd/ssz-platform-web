@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { LessonSpanKind, LessonTextSpan, VocabularyItem } from '@/features/content/types';
@@ -9,9 +9,30 @@ import { buildGlossaryIndex } from '../lib/tokenize-glossary';
 
 const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
 vi.mock('@/features/media', () => ({ useMediaAsset: (id?: string) => useMediaAsset(id) }));
+const useGrammarRule = vi.fn((_id: string) => ({
+  data: { id: 'g1', title: 'Presens perfektum', targetLanguage: 'nb', createdAt: '', containerItemId: 'c1' },
+  isLoading: false,
+}));
+const useBestGrammarExplanation = vi.fn(() => ({
+  data: {
+    id: 'e1',
+    languageCode: 'en',
+    title: 'Presens perfektum',
+    body: 'Formen er **har** + perfektum partisipp.\n\nMerk at noen verb bruker «er».',
+    isPublished: true,
+    anchorHighlights: [],
+    compareExamples: [],
+    quickCheck: null,
+  },
+}));
 vi.mock('@/features/content', async () => {
   const actual = await vi.importActual<typeof import('@/features/content')>('@/features/content');
-  return { ...actual, useIntroduceCard: () => ({ mutate: vi.fn(), isPending: false }) };
+  return {
+    ...actual,
+    useIntroduceCard: () => ({ mutate: vi.fn(), isPending: false }),
+    useGrammarRule: (id: string) => useGrammarRule(id),
+    useBestGrammarExplanation: () => useBestGrammarExplanation(),
+  };
 });
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
@@ -59,6 +80,7 @@ interface ProseOptions {
   spans?: LessonTextSpan[];
   authoredVocabulary?: boolean;
   spansHidden?: boolean;
+  explanationLanguage?: string;
 }
 
 function renderProse(text: string, items: VocabularyItem[] = [], options: ProseOptions = {}) {
@@ -161,6 +183,11 @@ describe('LessonProse', () => {
 });
 
 describe('LessonProse author spans', () => {
+  beforeEach(() => {
+    useGrammarRule.mockClear();
+    useBestGrammarExplanation.mockClear();
+  });
+
   // Two matchable surfaces of the same item: the lemma and a declared form.
   const TEXT = 'Lang erfaring teller. Mange erfaringer teller mer.';
 
@@ -268,6 +295,61 @@ describe('LessonProse author spans', () => {
 
     expect(lookups()).toHaveLength(0);
     expect(container.textContent).toBe(text);
+  });
+
+  it('keeps the chunk backdrop inert and puts the note behind a sibling marker', () => {
+    const text = 'Du må ha fagbrev som elektriker.';
+    const { container } = renderProse(text, [FAGBREV], {
+      spans: [
+        { ...spanOver(text, 'ha fagbrev som elektriker', 'chunk'), note: 'Fast uttrykk.' },
+        spanOver(text, 'fagbrev', 'vocab', FAGBREV.id),
+      ],
+      authoredVocabulary: true,
+    });
+
+    // Nesting the note trigger around the backdrop would put a button inside a
+    // button, since a chunk routinely contains glossed words.
+    const chunk = container.querySelector('[data-span-kind="chunk"]') as HTMLElement;
+    expect(chunk.querySelectorAll('button')).toHaveLength(0);
+    expect(within(chunk).getByRole('button', { name: /look up: fagbrev/i })).toBeInTheDocument();
+
+    const marker = screen.getByRole('button', { name: /show the note/i });
+    expect(chunk.contains(marker)).toBe(false);
+    fireEvent.click(marker);
+    expect(screen.getByText('Fast uttrykk.')).toBeInTheDocument();
+  });
+
+  it('gives a chunk with no note no marker at all', () => {
+    const text = 'Han har bodd her i det siste.';
+    renderProse(text, [], { spans: [spanOver(text, 'i det siste', 'chunk')] });
+    expect(screen.queryByRole('button', { name: /show the note/i })).not.toBeInTheDocument();
+  });
+
+  it('loads the grammar rule only once its marker is opened', () => {
+    const text = 'Hun har bodd i Norge i tre år.';
+    renderProse(text, [], {
+      spans: [spanOver(text, 'har bodd', 'grammar', 'g1')],
+      explanationLanguage: 'en',
+    });
+
+    expect(useGrammarRule).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: /show the grammar rule/i }));
+    expect(useGrammarRule).toHaveBeenCalledWith('g1');
+    expect(screen.getByText('Presens perfektum')).toBeInTheDocument();
+    expect(screen.getByText(/har \+ perfektum partisipp/)).toBeInTheDocument();
+  });
+
+  it('shows only the first paragraph of a long explanation, without its markup', () => {
+    const text = 'Hun har bodd i Norge i tre år.';
+    renderProse(text, [], {
+      spans: [spanOver(text, 'har bodd', 'grammar', 'g1')],
+      explanationLanguage: 'en',
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /show the grammar rule/i }));
+    // The fixture's second paragraph belongs to the grammar lesson, not here.
+    expect(screen.queryByText(/Merk at/)).not.toBeInTheDocument();
+    expect(document.body.textContent).not.toContain('**');
   });
 
   it('withholds grammar and chunk backdrops when glossing is off, keeping lexis clickable', () => {

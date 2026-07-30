@@ -18,7 +18,12 @@
     "lookUpWord": "Look up",
     "clickForTranslation": "Click for translation",
     "inText": "in the text: {form} · {label}",
-    "iKnowThis": "I know this word"
+    "iKnowThis": "I know this word",
+    "grammarKind": "Grammar",
+    "chunkKind": "Phrase",
+    "showNote": "Show the note",
+    "showRule": "Show the grammar rule",
+    "ruleUnavailable": "This rule is not available."
   },
   "unitStepper": {
     "label": "Unit steps",

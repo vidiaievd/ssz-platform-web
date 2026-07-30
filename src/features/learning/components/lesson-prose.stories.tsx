@@ -10,7 +10,7 @@ const meta = {
   component: LessonProse,
   decorators: [
     (Story) => (
-      <div className="mx-auto max-w-[46rem] p-10 text-[19px] leading-[1.9]">
+      <div className="mx-auto max-w-184 p-10 text-[19px] leading-[1.9]">
         <Story />
       </div>
     ),
@@ -55,7 +55,14 @@ function span(selection: string, kind: LessonSpanKind, refId: string | null = nu
     kind,
     refId,
     textSnapshot: selection,
-    note: kind === 'chunk' ? 'Fast uttrykk: «nylig», «den siste tiden».' : null,
+    // Storybook has no API behind it, so a grammar span leans on its note; in
+    // the reader the rule title and its first explanation load on open.
+    note:
+      kind === 'chunk'
+        ? 'Fast uttrykk: «nylig», «den siste tiden».'
+        : kind === 'grammar'
+          ? 'Presens perfektum: har + perfektum partisipp.'
+          : null,
     broken: false,
     brokenReason: null,
     reanchorCandidates: [],

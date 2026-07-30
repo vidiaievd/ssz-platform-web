@@ -107,6 +107,9 @@ export type { GlossaryParagraphProps } from './components/glossary-paragraph';
 export { GlossaryText } from './components/glossary-text';
 export type { GlossaryTextProps } from './components/glossary-text';
 
+export { SpanAnnotation } from './components/span-annotation';
+export type { AnnotationKind, SpanAnnotationProps } from './components/span-annotation';
+
 export { LessonProse } from './components/lesson-prose';
 export type { LessonProseProps } from './components/lesson-prose';
 

@@ -22,6 +22,7 @@ interface AnnotationProps {
   placed: Map<MappedText, ProjectedSpan<LessonTextSpan>[]>;
   authoredVocabulary: boolean;
   spansHidden: boolean;
+  explanationLanguage?: string;
 }
 
 function Blocks({
@@ -35,7 +36,7 @@ function Blocks({
   cefrLevel?: string;
   annotations: AnnotationProps;
 }) {
-  const { placed, authoredVocabulary, spansHidden } = annotations;
+  const { placed, authoredVocabulary, spansHidden, explanationLanguage } = annotations;
 
   return (
     <>
@@ -58,6 +59,7 @@ function Blocks({
                   spans={placed.get(block)}
                   authoredVocabulary={authoredVocabulary}
                   spansHidden={spansHidden}
+                  explanationLanguage={explanationLanguage}
                 />
               </Tag>
             );
@@ -74,6 +76,7 @@ function Blocks({
                       spans={placed.get(item)}
                       authoredVocabulary={authoredVocabulary}
                       spansHidden={spansHidden}
+                      explanationLanguage={explanationLanguage}
                     />
                   </li>
                 ))}
@@ -110,6 +113,7 @@ function Blocks({
                   spans={placed.get(block)}
                   authoredVocabulary={authoredVocabulary}
                   spansHidden={spansHidden}
+                  explanationLanguage={explanationLanguage}
                 />
               </p>
             );
@@ -137,6 +141,8 @@ export interface LessonProseProps {
   authoredVocabulary?: boolean;
   /** Gloss visibility is `off` — grammar and chunk backdrops are withheld. */
   spansHidden?: boolean;
+  /** BCP-47 language of grammar explanations, loaded when an annotation opens. */
+  explanationLanguage?: string;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -150,6 +156,7 @@ export function LessonProse({
   spans,
   authoredVocabulary = false,
   spansHidden = false,
+  explanationLanguage,
   className,
   style,
 }: LessonProseProps) {
@@ -162,7 +169,7 @@ export function LessonProse({
         blocks={blocks}
         glossary={glossary}
         cefrLevel={cefrLevel}
-        annotations={{ placed, authoredVocabulary, spansHidden }}
+        annotations={{ placed, authoredVocabulary, spansHidden, explanationLanguage }}
       />
     </div>
   );

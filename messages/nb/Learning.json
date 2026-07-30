@@ -18,7 +18,12 @@
     "lookUpWord": "Slå opp",
     "clickForTranslation": "Klikk for oversettelse",
     "inText": "i teksten: {form} · {label}",
-    "iKnowThis": "Jeg kan dette ordet"
+    "iKnowThis": "Jeg kan dette ordet",
+    "grammarKind": "Grammatikk",
+    "chunkKind": "Fast uttrykk",
+    "showNote": "Vis notatet",
+    "showRule": "Vis grammatikkregelen",
+    "ruleUnavailable": "Denne regelen er ikke tilgjengelig."
   },
   "unitStepper": {
     "label": "Enhetssteg",

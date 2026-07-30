@@ -10,6 +10,7 @@ import { useIntroduceCard } from '@/features/content';
 import type { LessonTextSpan, VocabularyItem } from '@/features/content/types';
 
 import { GlossaryPopover, type PartOfSpeech } from './glossary-popover';
+import { SpanAnnotation } from './span-annotation';
 import { useGlossIntensity } from './gloss-intensity-provider';
 import { learningKeys } from '../api/keys';
 import type { GlossIntensity } from '../lib/gloss-intensity';
@@ -215,6 +216,11 @@ export interface GlossaryTextProps {
    * clickable word.
    */
   spansHidden?: boolean;
+  /**
+   * BCP-47 language for grammar explanations, fetched when a grammar
+   * annotation is opened. Without it the popover shows the rule title alone.
+   */
+  explanationLanguage?: string;
 }
 
 /**
@@ -233,6 +239,7 @@ export function GlossaryText({
   spans,
   authoredVocabulary = false,
   spansHidden = false,
+  explanationLanguage,
 }: GlossaryTextProps) {
   const { text, marks, sourceIndexOf } = useMemo(() => parseInlineMarkdown(raw), [raw]);
   // Spans and the tokenizer are alternatives, never both (spec 16 §5.3).
@@ -337,15 +344,30 @@ export function GlossaryText({
       );
     }
 
+    // A chunk with no note explains nothing, so it gets no marker — the
+    // backdrop alone still tells the reader the words belong together.
+    const hasAnnotation = span.kind === 'grammar' ? !!span.refId || !!span.note : !!span.note;
+
     return (
-      <span
-        key={key}
-        data-span-kind={span.kind}
-        className="rounded-xs px-0.5"
-        style={{ background: SPAN_FILL[span.kind], boxDecorationBreak: 'clone' }}
-      >
-        {children}
-      </span>
+      <Fragment key={key}>
+        <span
+          data-span-kind={span.kind}
+          className="rounded-xs px-0.5"
+          style={{ background: SPAN_FILL[span.kind], boxDecorationBreak: 'clone' }}
+        >
+          {children}
+        </span>
+        {hasAnnotation && (
+          <SpanAnnotation
+            kind={span.kind}
+            surface={text.slice(from, to)}
+            note={span.note}
+            refId={span.refId}
+            explanationLanguage={explanationLanguage}
+            cefrLevel={cefrLevel}
+          />
+        )}
+      </Fragment>
     );
   }
 

@@ -18,7 +18,12 @@
     "lookUpWord": "Знайти в словнику",
     "clickForTranslation": "Натисніть, щоб побачити переклад",
     "inText": "у тексті: {form} · {label}",
-    "iKnowThis": "Я знаю це слово"
+    "iKnowThis": "Я знаю це слово",
+    "grammarKind": "Граматика",
+    "chunkKind": "Сталий вираз",
+    "showNote": "Показати примітку",
+    "showRule": "Показати правило граматики",
+    "ruleUnavailable": "Це правило недоступне."
   },
   "unitStepper": {
     "label": "Кроки уроку",

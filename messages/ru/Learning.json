@@ -18,7 +18,12 @@
     "lookUpWord": "Найти в словаре",
     "clickForTranslation": "Нажмите, чтобы увидеть перевод",
     "inText": "в тексте: {form} · {label}",
-    "iKnowThis": "Я знаю это слово"
+    "iKnowThis": "Я знаю это слово",
+    "grammarKind": "Грамматика",
+    "chunkKind": "Устойчивое выражение",
+    "showNote": "Показать заметку",
+    "showRule": "Показать правило грамматики",
+    "ruleUnavailable": "Это правило недоступно."
   },
   "unitStepper": {
     "label": "Шаги урока",
