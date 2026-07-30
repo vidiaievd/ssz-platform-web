@@ -106,6 +106,28 @@ function remapBlocks(blocks: MarkdownBlock[], outer: number[]): MarkdownBlock[] 
 }
 
 /**
+ * Every run of text in the tree, in reading order — headings, paragraphs, list
+ * items and everything nested in a quote.
+ *
+ * The nodes are returned by reference, so a caller can key a lookup on them and
+ * find it again while walking the same tree. Rendering and span projection walk
+ * the tree separately, and matching them up by index would break the moment a
+ * quote nests one level deeper.
+ */
+export function collectMappedTexts(blocks: MarkdownBlock[]): MappedText[] {
+  return blocks.flatMap((block) => {
+    switch (block.kind) {
+      case 'list':
+        return block.items;
+      case 'quote':
+        return collectMappedTexts(block.blocks);
+      default:
+        return [block];
+    }
+  });
+}
+
+/**
  * Parses one chunk of lesson markdown into block structure. `text` fields keep
  * their inline markup — `parseInlineMarkdown` handles that layer.
  *

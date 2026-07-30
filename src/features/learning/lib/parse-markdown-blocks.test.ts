@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { expectValidSourceMap } from '@/test/source-map';
 
-import { parseMarkdownBlocks, type MappedText, type MarkdownBlock } from './parse-markdown-blocks';
+import { collectMappedTexts, parseMarkdownBlocks, type MarkdownBlock } from './parse-markdown-blocks';
 
 /**
  * Structure assertions below compare whole blocks. Each one also carries a
@@ -130,20 +130,6 @@ const JOB_AD = [
   '> Søknad med CV sendes til post@nordbyelektro.no innen 15. mars.',
 ].join('\n');
 
-/** Every `MappedText` in the tree, quotes and list items included. */
-function mappedTexts(blocks: MarkdownBlock[]): MappedText[] {
-  return blocks.flatMap((block) => {
-    switch (block.kind) {
-      case 'list':
-        return block.items;
-      case 'quote':
-        return mappedTexts(block.blocks);
-      default:
-        return [{ text: block.text, sourceIndexOf: block.sourceIndexOf }];
-    }
-  });
-}
-
 describe('parseMarkdownBlocks source map', () => {
   // The structural fixtures this suite already exercises, reused as the
   // property test's corpus per spec 16 §8 obligation 10.
@@ -161,7 +147,7 @@ describe('parseMarkdownBlocks source map', () => {
   ];
 
   it.each(FIXTURES)('maps every output character back into %j', (chunk) => {
-    for (const mapped of mappedTexts(parseMarkdownBlocks(chunk))) {
+    for (const mapped of collectMappedTexts(parseMarkdownBlocks(chunk))) {
       expectValidSourceMap(chunk, mapped);
     }
   });
@@ -203,7 +189,7 @@ describe('parseMarkdownBlocks source map', () => {
 
     // The inner parse ran on the chunk with every `> ` stripped; without the
     // rebase these offsets would index that intermediate string instead.
-    for (const mapped of mappedTexts(quote.blocks)) {
+    for (const mapped of collectMappedTexts(quote.blocks)) {
       expectValidSourceMap(JOB_AD, mapped);
     }
 
