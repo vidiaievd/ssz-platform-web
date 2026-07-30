@@ -668,7 +668,11 @@
     "unmarkConfirmTitle": "Remove this word from the lesson glossary?",
     "unmarkConfirmBody": "“{lemma}” stops being part of this lesson's glossary, and its annotations in this text go with it. The module keeps the word, so other lessons and the unit vocabulary list are unaffected.",
     "unmarkConfirm": "Remove",
-    "unmarked": "Word removed from the lesson glossary."
+    "unmarked": "Word removed from the lesson glossary.",
+    "editNote": "Edit the note on “{text}”",
+    "editNoteTitle": "Edit annotation note",
+    "noteSave": "Save note",
+    "noteSaved": "Note saved."
   },
   "list": {
     "countsOwner": "{all} courses · {published} published · {draft} draft",

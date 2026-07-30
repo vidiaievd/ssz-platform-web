@@ -167,6 +167,47 @@ describe('TextSpanList', () => {
     expect(screen.queryByRole('button', { name: 'Reattach' })).not.toBeInTheDocument();
   });
 
+  it('saves an edited note without touching kind or referent', async () => {
+    renderList([span({ kind: 'chunk', refId: null, note: 'Fast uttrykk', textSnapshot: 'på grunn av' })]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit the note on “på grunn av”' }));
+    const field = screen.getByLabelText('Note (optional)');
+    expect(field).toHaveValue('Fast uttrykk');
+
+    fireEvent.change(field, { target: { value: 'Styrer genitiv her' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save note' }));
+    await flush();
+
+    // Only the note is sent: kind and refId are immutable by design, and an
+    // anchor field would move the span.
+    expect(updateTextSpanAction).toHaveBeenCalledWith('lesson-1', 'variant-1', 'span-1', {
+      note: 'Styrer genitiv her',
+    });
+  });
+
+  it('clears the note when the field is emptied', async () => {
+    renderList([span({ kind: 'chunk', refId: null, note: 'Fast uttrykk' })]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit the note on “sykepleier”' }));
+    fireEvent.change(screen.getByLabelText('Note (optional)'), { target: { value: '   ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save note' }));
+    await flush();
+
+    expect(updateTextSpanAction).toHaveBeenCalledWith('lesson-1', 'variant-1', 'span-1', {
+      note: null,
+    });
+  });
+
+  it('does not save when the edit is cancelled', () => {
+    renderList([span({ note: 'keep me' })]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit the note on “sykepleier”' }));
+    fireEvent.change(screen.getByLabelText('Note (optional)'), { target: { value: 'discard' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(updateTextSpanAction).not.toHaveBeenCalled();
+  });
+
   it('keeps a broken span until the author acts on it', async () => {
     renderList([span({ broken: true, brokenReason: 'offset', reanchorCandidates: [] })]);
     await flush();

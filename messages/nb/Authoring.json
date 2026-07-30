@@ -668,7 +668,11 @@
     "unmarkConfirmTitle": "Fjerne ordet fra leksjonens ordliste?",
     "unmarkConfirmBody": "«{lemma}» er ikke lenger en del av ordlisten til denne leksjonen, og merknadene på ordet i denne teksten forsvinner også. Modulen beholder ordet, så andre leksjoner og ordlisten til enheten berøres ikke.",
     "unmarkConfirm": "Fjern",
-    "unmarked": "Ordet er fjernet fra leksjonens ordliste."
+    "unmarked": "Ordet er fjernet fra leksjonens ordliste.",
+    "editNote": "Rediger notatet på «{text}»",
+    "editNoteTitle": "Rediger notat",
+    "noteSave": "Lagre notat",
+    "noteSaved": "Notatet er lagret."
   },
   "list": {
     "countsOwner": "{all} kurs · {published} publisert · {draft} utkast",

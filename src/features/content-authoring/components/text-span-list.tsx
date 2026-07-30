@@ -1,13 +1,21 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Trash2, Unlink } from 'lucide-react';
+import { Pencil, Trash2, Unlink } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Field, Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import type { Container, LessonSpanKind, LessonTextSpan } from '@/features/content/types';
 
 import { deleteTextSpanAction, updateTextSpanAction } from '../actions/lesson-spans';
@@ -43,6 +51,7 @@ export function TextSpanList({ lessonId, variantId, container }: TextSpanListPro
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ span: LessonTextSpan; note: string } | null>(null);
 
   const { data: spans } = useLessonTextSpans(lessonId, variantId);
   const { data: lists } = useAuthoringVocabularyLists(container.id);
@@ -108,6 +117,33 @@ export function TextSpanList({ lessonId, variantId, container }: TextSpanListPro
     });
   }
 
+  /**
+   * Saves the note. Only the note is editable: `kind` and `refId` are immutable
+   * by design (spec 16 §6.3) so the glossary-mark sync keeps one write path, and
+   * moving a span is done by re-selecting the text, which is the same gesture as
+   * creating one. An emptied field clears the note — the service trims and
+   * treats blank as null.
+   */
+  function handleSaveNote() {
+    const target = editing;
+    if (!variantId || !target) return;
+
+    setBusyId(target.span.id);
+    startTransition(async () => {
+      const result = await updateTextSpanAction(lessonId, variantId, target.span.id, {
+        note: target.note.trim() || null,
+      });
+      setBusyId(null);
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      setEditing(null);
+      toast.success(t('spans.noteSaved'));
+      await refresh();
+    });
+  }
+
   if (!variantId || all.length === 0) return null;
 
   return (
@@ -128,6 +164,17 @@ export function TextSpanList({ lessonId, variantId, container }: TextSpanListPro
                     {referent && (
                       <span className="text-(--ssz-text-secondary)">— {referent}</span>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      className="size-6 p-0"
+                      aria-label={t('spans.editNote', { text: span.textSnapshot })}
+                      disabled={isPending && busyId === span.id}
+                      onClick={() => setEditing({ span, note: span.note ?? '' })}
+                    >
+                      <Pencil className="size-3.5" aria-hidden />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -194,6 +241,36 @@ export function TextSpanList({ lessonId, variantId, container }: TextSpanListPro
           </ul>
         </div>
       )}
+
+      <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('spans.editNoteTitle')}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {t('spans.selected', { text: editing?.span.textSnapshot ?? '' })}
+          </p>
+          <Field label={t('spans.noteLabel')} htmlFor="span-note-edit">
+            <Input
+              id="span-note-edit"
+              value={editing?.note ?? ''}
+              onChange={(e) =>
+                setEditing((prev) => (prev ? { ...prev, note: e.target.value } : prev))
+              }
+              placeholder={t('spans.notePlaceholder')}
+              maxLength={500}
+            />
+          </Field>
+          <DialogFooter>
+            <Button variant="ghost" type="button" onClick={() => setEditing(null)}>
+              {t('lessons.deleteCancel')}
+            </Button>
+            <Button type="button" onClick={handleSaveNote} disabled={isPending} loading={isPending}>
+              {t('spans.noteSave')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
