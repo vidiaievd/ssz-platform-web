@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import type { Lesson, LessonVariant, VocabularyItem } from '@/features/content/types';
+import type { Lesson, LessonSpanKind, LessonTextSpan, LessonVariant, VocabularyItem } from '@/features/content/types';
 import type { SrsCardStateEntry } from '@/features/learning';
 import type { StudentProfile } from '@/features/profile';
 
@@ -12,6 +12,7 @@ const useLesson = vi.fn();
 const useBestLessonVariant = vi.fn();
 const useLessonParagraphs = vi.fn();
 const useLessonGlossaryMarks = vi.fn();
+const useLessonTextSpans = vi.fn();
 const useUnitVocabularyItems = vi.fn();
 const useMyStudentProfile = vi.fn();
 const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
@@ -24,6 +25,7 @@ vi.mock('@/features/content', async () => {
     useBestLessonVariant: (...args: unknown[]) => useBestLessonVariant(...args),
     useLessonParagraphs: (...args: unknown[]) => useLessonParagraphs(...args),
     useLessonGlossaryMarks: (...args: unknown[]) => useLessonGlossaryMarks(...args),
+    useLessonTextSpans: (...args: unknown[]) => useLessonTextSpans(...args),
     useUnitVocabularyItems: (...args: unknown[]) => useUnitVocabularyItems(...args),
     useIntroduceCard: () => ({ mutate: vi.fn(), isPending: false }),
   };
@@ -132,6 +134,8 @@ function renderPage(overrides: Partial<React.ComponentProps<typeof TextLessonPag
 beforeEach(() => {
   useReadingModeStore.setState({ mode: 'immersive', glossVisibility: 'unknown' });
   useSrsCardStates.mockReturnValue({ data: undefined });
+  // Most cases have no author spans; the ones that do override this.
+  useLessonTextSpans.mockReturnValue({ data: [], isLoading: false });
 });
 
 afterEach(() => {
@@ -369,6 +373,146 @@ describe('TextLessonPage', () => {
       renderPage();
 
       expect(screen.queryByText(/of the marked words/i)).not.toBeInTheDocument();
+    });
+  });
+  describe('author text spans', () => {
+    // Every seeded Norwegian text opens with a hero image, so paragraph 0 is
+    // never renderable and the render index is never the anchor index.
+    const HERO_PARAGRAPHS = [
+      { target: '![Marta på jobb](media://media-1)', translation: null },
+      { target: 'Marta er sykepleier.', translation: 'Marta is a nurse.' },
+      { target: 'Hun jobber på sykehuset.', translation: 'She works at the hospital.' },
+    ];
+
+    function span(
+      paragraphIndex: number,
+      paragraph: string,
+      selection: string,
+      kind: LessonSpanKind,
+      refId: string | null = null,
+    ): LessonTextSpan {
+      const charStart = paragraph.indexOf(selection);
+      if (charStart < 0) throw new Error(`fixture does not contain ${JSON.stringify(selection)}`);
+      return {
+        id: `s-${paragraphIndex}-${charStart}`,
+        paragraphIndex,
+        charStart,
+        charEnd: charStart + selection.length,
+        kind,
+        refId,
+        textSnapshot: selection,
+        note: null,
+        broken: false,
+        brokenReason: null,
+        reanchorCandidates: [],
+      };
+    }
+
+    // Spec 16 §8 obligation 13.
+    it('anchors a span by paragraph index, not by position among rendered paragraphs', () => {
+      mockHappyPath();
+      useLessonParagraphs.mockReturnValue({ data: HERO_PARAGRAPHS });
+      useLessonTextSpans.mockReturnValue({
+        data: [span(1, HERO_PARAGRAPHS[1]!.target, 'sykepleier', 'vocab', 'v1')],
+        isLoading: false,
+      });
+      renderPage();
+
+      // Paragraph 1 renders first, because the media-only paragraph 0 is
+      // filtered out. Reading the span off the render index would put it on
+      // "Hun jobber på sykehuset." and nothing would ever report the mistake.
+      const marked = screen.getAllByRole('button', { name: /look up/i });
+      expect(marked).toHaveLength(1);
+      expect(marked[0]!.textContent).toBe('sykepleier');
+      expect(marked[0]!.closest('p')?.textContent).toBe('Marta er sykepleier.');
+    });
+
+    it('puts a chunk backdrop on the paragraph the author anchored it to', () => {
+      mockHappyPath();
+      useLessonParagraphs.mockReturnValue({ data: HERO_PARAGRAPHS });
+      useLessonTextSpans.mockReturnValue({
+        data: [span(2, HERO_PARAGRAPHS[2]!.target, 'på sykehuset', 'chunk')],
+        isLoading: false,
+      });
+      const { container } = renderPage();
+
+      const marked = container.querySelectorAll('[data-span-kind="chunk"]');
+      expect(marked).toHaveLength(1);
+      expect(marked[0]!.textContent).toBe('på sykehuset');
+      expect(marked[0]!.closest('p')?.textContent).toBe('Hun jobber på sykehuset.');
+    });
+
+    // "sykepleier" is glossary-marked and occurs in both paragraphs, while the
+    // author annotated only the second one.
+    const TWICE = [
+      { target: 'Marta er sykepleier.', translation: null },
+      { target: 'Hun er en dyktig sykepleier.', translation: null },
+    ];
+
+    it('keeps the tokenizer running when the only spans are grammar or chunks', () => {
+      mockHappyPath();
+      useLessonParagraphs.mockReturnValue({ data: TWICE });
+      useLessonTextSpans.mockReturnValue({
+        data: [span(1, TWICE[1]!.target, 'dyktig sykepleier', 'chunk')],
+        isLoading: false,
+      });
+      renderPage();
+
+      // A chunk has no tokenizer counterpart to collide with, so lexis keeps
+      // its fallback and both occurrences stay marked.
+      expect(screen.getAllByRole('button', { name: /look up/i })).toHaveLength(2);
+    });
+
+    it('switches the tokenizer off for the whole variant, not just the annotated paragraph', () => {
+      mockHappyPath();
+      useLessonParagraphs.mockReturnValue({ data: TWICE });
+      useLessonTextSpans.mockReturnValue({
+        data: [span(1, TWICE[1]!.target, 'sykepleier', 'vocab', 'v1')],
+        isLoading: false,
+      });
+      renderPage();
+
+      // One vocab span anywhere in the variant makes spans the sole source of
+      // lexis highlighting, so paragraph 0's match is no longer added.
+      const marked = screen.getAllByRole('button', { name: /look up/i });
+      expect(marked).toHaveLength(1);
+      expect(marked[0]!.closest('p')?.textContent).toBe('Hun er en dyktig sykepleier.');
+    });
+
+    it('waits for the spans before painting, so the glossing does not flash', () => {
+      mockHappyPath();
+      useLessonTextSpans.mockReturnValue({ data: undefined, isLoading: true });
+      renderPage();
+
+      // Painting first would show every tokenizer match and then rewrite it.
+      expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
+    });
+
+    it('offers the highlighting toggle for a text annotated only for grammar', () => {
+      mockHappyPath();
+      // No vocabulary list at all — the toggle must still reach the backdrops.
+      useLessonGlossaryMarks.mockReturnValue({ data: [] });
+      useUnitVocabularyItems.mockReturnValue({ data: [] });
+      useLessonTextSpans.mockReturnValue({
+        data: [span(0, PARAGRAPHS[0]!.target, 'er sykepleier', 'grammar', 'g1')],
+        isLoading: false,
+      });
+      const { container } = renderPage();
+
+      expect(screen.getByRole('radiogroup', { name: /highlighting/i })).toBeInTheDocument();
+      expect(container.querySelector('[data-span-kind="grammar"]')).toBeInTheDocument();
+    });
+
+    it('withholds the backdrops when glossing is switched off', () => {
+      useReadingModeStore.setState({ mode: 'immersive', glossVisibility: 'off' });
+      mockHappyPath();
+      useLessonTextSpans.mockReturnValue({
+        data: [span(1, PARAGRAPHS[1]!.target, 'på sykehuset', 'chunk')],
+        isLoading: false,
+      });
+      const { container } = renderPage();
+
+      expect(container.querySelector('[data-span-kind]')).not.toBeInTheDocument();
     });
   });
 });

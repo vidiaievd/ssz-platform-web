@@ -13,6 +13,7 @@ import {
   buildGlossaryIndex,
   resolveGlossIntensity,
   useSrsCardStates,
+  usesAuthoredVocabulary,
   type GlossaryIndex,
   type GlossVisibility,
 } from '@/features/learning';
@@ -21,8 +22,10 @@ import {
   useBestLessonVariant,
   useLessonParagraphs,
   useLessonGlossaryMarks,
+  useLessonTextSpans,
   useUnitVocabularyItems,
 } from '@/features/content';
+import type { LessonTextSpan } from '@/features/content/types';
 import { useMyStudentProfile } from '@/features/profile';
 import { useMediaAsset } from '@/features/media';
 import { findAudioNarration, findHeroImage, isMediaOnlyParagraph } from '@/lib/content/lesson-media-tokens';
@@ -132,29 +135,55 @@ function GlossToggle({
 }
 
 interface ModeProps {
-  paragraphs: { target: string; translation: string | null }[];
+  /**
+   * Renderable paragraphs, each keeping the index it has in the variant's own
+   * paragraph split. Media-only paragraphs are filtered out before this point,
+   * so the position in this array is *not* that index — and spans are anchored
+   * to the index (spec 16 §2.4).
+   */
+  paragraphs: { index: number; target: string; translation: string | null }[];
   glossary: GlossaryIndex;
   targetLang: string;
   translationLang: string;
   cefrLevel: string;
   /** False when the variant has no paragraph translations — translation-dependent controls stay hidden. */
   hasTranslations: boolean;
+  /** Author spans of this variant, grouped by the paragraph index they anchor to. */
+  spansByParagraph: Map<number, LessonTextSpan[]>;
+  /** Spec 16 §5.3 — the variant has vocab spans, so the tokenizer is off throughout. */
+  authoredVocabulary: boolean;
+  /** Gloss visibility is `off`: grammar and chunk backdrops are withheld. */
+  spansHidden: boolean;
 }
 
-function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang, cefrLevel, hasTranslations }: ModeProps) {
+function ImmersiveMode({
+  paragraphs,
+  glossary,
+  targetLang,
+  translationLang,
+  cefrLevel,
+  hasTranslations,
+  spansByParagraph,
+  authoredVocabulary,
+  spansHidden,
+}: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
   const [showTranslation, setShowTranslation] = useState(false);
 
   return (
     <div>
       <div className="flex flex-col gap-6">
-        {paragraphs.map((p, i) => (
-          <div key={i}>
+        {paragraphs.map((p) => (
+          <div key={p.index}>
             <LessonProse
               text={p.target}
               glossary={glossary}
               lang={targetLang}
               cefrLevel={cefrLevel}
+              spans={spansByParagraph.get(p.index)}
+              authoredVocabulary={authoredVocabulary}
+              spansHidden={spansHidden}
+              explanationLanguage={translationLang}
               className="text-[19px] leading-[1.9]"
             />
             {showTranslation && p.translation && (
@@ -191,7 +220,16 @@ function ImmersiveMode({ paragraphs, glossary, targetLang, translationLang, cefr
   );
 }
 
-function BilingualMode({ paragraphs, glossary, targetLang, translationLang, cefrLevel }: ModeProps) {
+function BilingualMode({
+  paragraphs,
+  glossary,
+  targetLang,
+  translationLang,
+  cefrLevel,
+  spansByParagraph,
+  authoredVocabulary,
+  spansHidden,
+}: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
 
   return (
@@ -206,7 +244,7 @@ function BilingualMode({ paragraphs, glossary, targetLang, translationLang, cefr
       </div>
       {paragraphs.map((p, i) => (
         <div
-          key={i}
+          key={p.index}
           className={cn(
             'grid grid-cols-2 gap-x-7 py-3.5',
             i < paragraphs.length - 1 && 'border-b border-(--ssz-border-default)',
@@ -217,6 +255,10 @@ function BilingualMode({ paragraphs, glossary, targetLang, translationLang, cefr
             glossary={glossary}
             lang={targetLang}
             cefrLevel={cefrLevel}
+            spans={spansByParagraph.get(p.index)}
+            authoredVocabulary={authoredVocabulary}
+            spansHidden={spansHidden}
+            explanationLanguage={translationLang}
             className="text-[17px] leading-[1.8]"
           />
           <p
@@ -231,7 +273,16 @@ function BilingualMode({ paragraphs, glossary, targetLang, translationLang, cefr
   );
 }
 
-function FocusMode({ paragraphs, glossary, targetLang, translationLang, cefrLevel }: ModeProps) {
+function FocusMode({
+  paragraphs,
+  glossary,
+  targetLang,
+  translationLang,
+  cefrLevel,
+  spansByParagraph,
+  authoredVocabulary,
+  spansHidden,
+}: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
   const [active, setActive] = useState(0);
   const clampedActive = Math.min(active, Math.max(paragraphs.length - 1, 0));
@@ -243,7 +294,7 @@ function FocusMode({ paragraphs, glossary, targetLang, translationLang, cefrLeve
           const on = i === clampedActive;
           return (
             <div
-              key={i}
+              key={p.index}
               role="button"
               tabIndex={0}
               onClick={() => setActive(i)}
@@ -266,6 +317,10 @@ function FocusMode({ paragraphs, glossary, targetLang, translationLang, cefrLeve
                 glossary={glossary}
                 lang={targetLang}
                 cefrLevel={cefrLevel}
+                spans={spansByParagraph.get(p.index)}
+                authoredVocabulary={authoredVocabulary}
+                spansHidden={spansHidden}
+                explanationLanguage={translationLang}
                 className={on ? 'text-[20px] leading-[1.9]' : 'text-[18px] leading-[1.9]'}
               />
               {on && p.translation && (
@@ -326,6 +381,8 @@ export function TextLessonPage({
   const variant = useBestLessonVariant(lessonId, nativeLanguage ?? '', cefrLevel, profileReady);
   const paragraphsQuery = useLessonParagraphs(lessonId, variant.data?.id);
   const marksQuery = useLessonGlossaryMarks(lessonId, variant.data?.id);
+  // Broken spans are withheld server-side, so everything here is renderable.
+  const spansQuery = useLessonTextSpans(lessonId, variant.data?.id);
   const vocabItems = useUnitVocabularyItems(vocabularyListId ?? '', !!vocabularyListId);
 
   const heroImage = useMemo(() => findHeroImage(variant.data?.bodyMarkdown ?? ''), [variant.data?.bodyMarkdown]);
@@ -381,9 +438,46 @@ export function TextLessonPage({
     return Math.round((settled.length / glossedItemIds.length) * 100);
   }, [glossedItemIds, statesById]);
 
+  /**
+   * Renderable paragraphs, each carrying the index it holds in the variant's
+   * own paragraph split.
+   *
+   * Every seeded Norwegian text opens with a hero-image token, and audio
+   * narration adds another, so the media-only filter below shifts the position
+   * of everything after it. A span is anchored to the *unfiltered* index
+   * (spec 16 §2.4), and losing it here fails silently: the annotation would
+   * render on a neighbouring paragraph and still validate against the right
+   * one server-side, so nothing would ever report it.
+   */
   const proseParagraphs = useMemo(
-    () => (paragraphsQuery.data ?? []).filter((p) => !isMediaOnlyParagraph(p.target)),
+    () =>
+      (paragraphsQuery.data ?? [])
+        .map((paragraph, index) => ({ ...paragraph, index }))
+        .filter((paragraph) => !isMediaOnlyParagraph(paragraph.target)),
     [paragraphsQuery.data],
+  );
+
+  const spansByParagraph = useMemo(() => {
+    const byIndex = new Map<number, LessonTextSpan[]>();
+    for (const span of spansQuery.data ?? []) {
+      const list = byIndex.get(span.paragraphIndex);
+      if (list) list.push(span);
+      else byIndex.set(span.paragraphIndex, [span]);
+    }
+    return byIndex;
+  }, [spansQuery.data]);
+
+  /**
+   * Anything the visibility toggle can act on. A text annotated only for
+   * grammar or chunks has no vocabulary glossary, and gating the toggle on that
+   * alone would leave the reader no way to turn those backdrops off.
+   */
+  const hasGlossing = glossary.size > 0 || (spansQuery.data?.length ?? 0) > 0;
+
+  // Decided once for the whole variant, never per paragraph (spec 16 §5.3).
+  const authoredVocabulary = useMemo(
+    () => usesAuthoredVocabulary(spansQuery.data ?? []),
+    [spansQuery.data],
   );
 
   /**
@@ -406,7 +500,14 @@ export function TextLessonPage({
   // A persisted/derived 'bilingual' preference must not strand the reader on an empty screen.
   const effectiveMode = availableModes.includes(desiredMode) ? desiredMode : 'immersive';
 
-  const glossaryLoading = marksQuery.isLoading || (!!vocabularyListId && vocabItems.isLoading);
+  /**
+   * Spans are part of this gate, not a decoration layered on afterwards: they
+   * *replace* the tokenizer for the whole variant (spec 16 §5.3). Letting the
+   * text paint first would show every tokenizer match and then rewrite the
+   * highlighting once the spans land — the flash of glossing A4 removed.
+   */
+  const glossaryLoading =
+    marksQuery.isLoading || spansQuery.isLoading || (!!vocabularyListId && vocabItems.isLoading);
   const isLoading =
     lesson.isLoading ||
     profile.isLoading ||
@@ -468,7 +569,7 @@ export function TextLessonPage({
 
       <div className="mb-5.5 flex flex-wrap items-center gap-3.5">
         <ModeToggle mode={effectiveMode} modes={availableModes} onChange={setMode} />
-        {glossary.size > 0 && <GlossToggle visibility={glossVisibility} onChange={setGlossVisibility} />}
+        {hasGlossing && <GlossToggle visibility={glossVisibility} onChange={setGlossVisibility} />}
         {glossary.size > 0 && glossVisibility !== 'off' && (
           <span className="flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
             <span
@@ -504,6 +605,9 @@ export function TextLessonPage({
             translationLang={variant.data.explanationLanguage}
             cefrLevel={cefrLevel}
             hasTranslations={hasTranslations}
+            spansByParagraph={spansByParagraph}
+            authoredVocabulary={authoredVocabulary}
+            spansHidden={glossVisibility === 'off'}
           />
         </GlossIntensityProvider>
       )}

@@ -17,6 +17,7 @@ const useLesson = vi.fn();
 const useBestLessonVariant = vi.fn();
 const useLessonParagraphs = vi.fn();
 const useLessonGlossaryMarks = vi.fn();
+const useLessonTextSpans = vi.fn(() => ({ data: [], isLoading: false }));
 const useLessonVideoCues = vi.fn();
 const useMyStudentProfile = vi.fn();
 const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
@@ -40,6 +41,7 @@ vi.mock('@/features/content', async () => {
     useBestLessonVariant: (...args: unknown[]) => useBestLessonVariant(...args),
     useLessonParagraphs: (...args: unknown[]) => useLessonParagraphs(...args),
     useLessonGlossaryMarks: (...args: unknown[]) => useLessonGlossaryMarks(...args),
+    useLessonTextSpans: () => useLessonTextSpans(),
     useLessonVideoCues: (...args: unknown[]) => useLessonVideoCues(...args),
   };
 });
