@@ -317,6 +317,31 @@
         "unknown": "Bare nye",
         "off": "Ingen",
         "hint": "Hvilke ordlisteord som understrekes"
+      },
+      "check": {
+        "title": "Sjekk forståelsen",
+        "questions": "{count, plural, one {# spørsmål om denne teksten} other {# spørsmål om denne teksten}}",
+        "start": "Start sjekken",
+        "gapfill": {
+          "heading": "Fyll inn de tomme feltene",
+          "body": "Se tilbake på teksten over hvis du trenger det.",
+          "checkAnswers": "Sjekk svarene",
+          "next": "Neste — forståelse",
+          "correctCount": "{correct}/{total} riktige",
+          "answerLabel": "Svar: {answer}"
+        },
+        "comp": {
+          "heading": "Forståelse",
+          "body": "Svar basert på det du leste.",
+          "checkAnswers": "Sjekk svarene",
+          "finish": "Fullfør sjekken",
+          "score": "Poeng {score}/{total}"
+        },
+        "done": {
+          "heading": "Sjekken er fullført",
+          "body": "Det du bommet på er lagt til i repetisjonskøen din.",
+          "retry": "Prøv igjen"
+        }
       }
     },
     "video": {

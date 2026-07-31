@@ -20,8 +20,10 @@ import {
 import {
   useLesson,
   useBestLessonVariant,
+  useExercisesWithAnswers,
   useLessonParagraphs,
   useLessonGlossaryMarks,
+  useLessonListeningStages,
   useLessonTextSpans,
   useUnitVocabularyItems,
 } from '@/features/content';
@@ -32,6 +34,13 @@ import { findAudioNarration, findHeroImage, isMediaOnlyParagraph } from '@/lib/c
 import { cn } from '@/lib/utils';
 
 import { useReadingModeStore, type ReadingMode } from '../stores/reading-mode-store';
+import { TextComprehensionCheck } from './text-comprehension-check';
+import {
+  parseComprehensionExercise,
+  parseGapFillExercise,
+  type ListeningComprehensionItem,
+  type ListeningGapFillItem,
+} from '../lib/parse-listening-exercise';
 
 export interface TextLessonPageProps {
   lessonId: string;
@@ -384,6 +393,9 @@ export function TextLessonPage({
   // Broken spans are withheld server-side, so everything here is renderable.
   const spansQuery = useLessonTextSpans(lessonId, variant.data?.id);
   const vocabItems = useUnitVocabularyItems(vocabularyListId ?? '', !!vocabularyListId);
+  // The post-reading check. Deliberately outside the page's loading and error
+  // gates below: a text must render even when its check does not (spec 17 §5.4).
+  const stagesQuery = useLessonListeningStages(lessonId, variant.data?.id);
 
   const heroImage = useMemo(() => findHeroImage(variant.data?.bodyMarkdown ?? ''), [variant.data?.bodyMarkdown]);
   const narration = useMemo(
@@ -437,6 +449,46 @@ export function TextLessonPage({
     });
     return Math.round((settled.length / glossedItemIds.length) * 100);
   }, [glossedItemIds, statesById]);
+
+  const gapFillStages = useMemo(
+    () =>
+      (stagesQuery.data ?? [])
+        .filter((s) => s.stageType === 'gap_fill')
+        .sort((a, b) => a.position - b.position),
+    [stagesQuery.data],
+  );
+  const compStages = useMemo(
+    () =>
+      (stagesQuery.data ?? [])
+        .filter((s) => s.stageType === 'comprehension')
+        .sort((a, b) => a.position - b.position),
+    [stagesQuery.data],
+  );
+  const gapFillExercises = useExercisesWithAnswers(gapFillStages.map((s) => s.exerciseId));
+  const compExercises = useExercisesWithAnswers(compStages.map((s) => s.exerciseId));
+
+  // An exercise whose content does not fit the template shape is dropped rather
+  // than rendered half-parsed, exactly as the listening flow drops it.
+  const gapFillItems: ListeningGapFillItem[] = useMemo(
+    () =>
+      gapFillStages
+        .map((s, i) => {
+          const display = gapFillExercises[i]?.data;
+          return display ? parseGapFillExercise(s, display) : null;
+        })
+        .filter((item): item is ListeningGapFillItem => item !== null),
+    [gapFillStages, gapFillExercises],
+  );
+  const compItems: ListeningComprehensionItem[] = useMemo(
+    () =>
+      compStages
+        .map((s, i) => {
+          const display = compExercises[i]?.data;
+          return display ? parseComprehensionExercise(s, display) : null;
+        })
+        .filter((item): item is ListeningComprehensionItem => item !== null),
+    [compStages, compExercises],
+  );
 
   /**
    * Renderable paragraphs, each carrying the index it holds in the variant's
@@ -611,6 +663,8 @@ export function TextLessonPage({
           />
         </GlossIntensityProvider>
       )}
+
+      <TextComprehensionCheck gapFillItems={gapFillItems} compItems={compItems} />
     </div>
   );
 }

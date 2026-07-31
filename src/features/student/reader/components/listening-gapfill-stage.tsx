@@ -6,17 +6,28 @@ import { useTranslations } from 'next-intl';
 import { AudioPlayer } from '@/features/learning';
 import { normAnswer } from '@/features/student/exercises/runner';
 
-import type { ListeningGapFillItem } from '../lib/parse-listening-exercise';
+import type { ListeningGapFillItem, StageSurface } from '../lib/parse-listening-exercise';
 
 export interface ListeningGapFillStageProps {
   items: ListeningGapFillItem[];
   audioSrc?: string;
-  audioLabel: string;
+  /** Omitted on the text surface, where there is no clip to replay — the player is then not rendered at all. */
+  audioLabel?: string;
+  /** Selects the copy set; the questions themselves are the same. Defaults to the listening flow. */
+  surface?: StageSurface;
   onNext: (missedExerciseIds: string[]) => void;
 }
 
-export function ListeningGapFillStage({ items, audioSrc, audioLabel, onNext }: ListeningGapFillStageProps) {
-  const t = useTranslations('Learning.reader.listening.gapfill');
+export function ListeningGapFillStage({
+  items,
+  audioSrc,
+  audioLabel,
+  surface = 'audio',
+  onNext,
+}: ListeningGapFillStageProps) {
+  const t = useTranslations(
+    surface === 'text' ? 'Learning.reader.text.check.gapfill' : 'Learning.reader.listening.gapfill',
+  );
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [checked, setChecked] = useState(false);
 
@@ -45,9 +56,11 @@ export function ListeningGapFillStage({ items, audioSrc, audioLabel, onNext }: L
         {t('heading')}
       </h2>
       <p className="mb-5.5 text-[13.5px] text-(--ssz-text-secondary)">{t('body')}</p>
-      <div className="mb-5.5">
-        <AudioPlayer src={audioSrc} label={audioLabel} compact />
-      </div>
+      {audioLabel !== undefined && (
+        <div className="mb-5.5">
+          <AudioPlayer src={audioSrc} label={audioLabel} compact />
+        </div>
+      )}
 
       <div className="flex flex-col gap-5">
         {items.map((g, i) => {

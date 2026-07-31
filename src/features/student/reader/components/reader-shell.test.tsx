@@ -43,11 +43,15 @@ vi.mock('@/features/content', async () => {
     useLessonGlossaryMarks: (...args: unknown[]) => useLessonGlossaryMarks(...args),
     useLessonTextSpans: () => useLessonTextSpans(),
     useLessonVideoCues: (...args: unknown[]) => useLessonVideoCues(...args),
+    // The text lesson's post-reading check: not what this suite is about, and a
+    // real query here would go to the network without a route handler.
+    useLessonListeningStages: () => ({ data: [], isLoading: false, isError: false }),
   };
 });
 // ExercisePage imports this deep hook directly (not via the @/features/content
 // barrel), so it must be mocked to avoid a real useQuery without a provider.
 vi.mock('@/features/content/api/use-exercise', () => ({
+  useExercisesWithAnswers: () => [],
   useExerciseWithAnswers: () => ({
     data: {
       id: 'exercise-1',

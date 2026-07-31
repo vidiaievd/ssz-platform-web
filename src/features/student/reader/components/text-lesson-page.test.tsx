@@ -4,7 +4,14 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import type { Lesson, LessonSpanKind, LessonTextSpan, LessonVariant, VocabularyItem } from '@/features/content/types';
+import type {
+  ExerciseWithAnswers,
+  Lesson,
+  LessonSpanKind,
+  LessonTextSpan,
+  LessonVariant,
+  VocabularyItem,
+} from '@/features/content/types';
 import type { SrsCardStateEntry } from '@/features/learning';
 import type { StudentProfile } from '@/features/profile';
 
@@ -14,6 +21,9 @@ const useLessonParagraphs = vi.fn();
 const useLessonGlossaryMarks = vi.fn();
 const useLessonTextSpans = vi.fn();
 const useUnitVocabularyItems = vi.fn();
+const useLessonListeningStages = vi.fn();
+const useExercisesWithAnswers = vi.fn();
+const introduceCard = vi.fn();
 const useMyStudentProfile = vi.fn();
 const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
 
@@ -27,7 +37,9 @@ vi.mock('@/features/content', async () => {
     useLessonGlossaryMarks: (...args: unknown[]) => useLessonGlossaryMarks(...args),
     useLessonTextSpans: (...args: unknown[]) => useLessonTextSpans(...args),
     useUnitVocabularyItems: (...args: unknown[]) => useUnitVocabularyItems(...args),
-    useIntroduceCard: () => ({ mutate: vi.fn(), isPending: false }),
+    useLessonListeningStages: (...args: unknown[]) => useLessonListeningStages(...args),
+    useExercisesWithAnswers: (...args: unknown[]) => useExercisesWithAnswers(...args),
+    useIntroduceCard: () => ({ mutate: introduceCard, isPending: false }),
   };
 });
 const useSrsCardStates = vi.fn(() => ({ data: undefined }) as { data?: { states: SrsCardStateEntry[] } });
@@ -136,6 +148,10 @@ beforeEach(() => {
   useSrsCardStates.mockReturnValue({ data: undefined });
   // Most cases have no author spans; the ones that do override this.
   useLessonTextSpans.mockReturnValue({ data: [], isLoading: false });
+  // Most cases have no post-reading check either.
+  useLessonListeningStages.mockReturnValue({ data: [], isLoading: false, isError: false });
+  useExercisesWithAnswers.mockReturnValue([]);
+  introduceCard.mockReset();
 });
 
 afterEach(() => {
@@ -513,6 +529,108 @@ describe('TextLessonPage', () => {
       const { container } = renderPage();
 
       expect(container.querySelector('[data-span-kind]')).not.toBeInTheDocument();
+    });
+  });
+  describe('post-reading check', () => {
+    const COMP_EXERCISE: ExerciseWithAnswers = {
+      id: 'ex-comp',
+      templateCode: 'multiple_choice_v1',
+      targetLanguage: 'nb',
+      content: {
+        question: 'Hvor jobber Marta?',
+        options: [
+          { id: 'a', text: 'På sykehuset' },
+          { id: 'b', text: 'På skolen' },
+        ],
+      },
+      expectedAnswers: { correct_option_ids: ['a'] },
+    };
+
+    function mockCheck() {
+      useLessonListeningStages.mockReturnValue({
+        data: [{ exerciseId: 'ex-comp', position: 0, stageType: 'comprehension' }],
+        isLoading: false,
+        isError: false,
+      });
+      useExercisesWithAnswers.mockImplementation((ids: string[]) =>
+        ids.map((id) => ({ data: id === 'ex-comp' ? COMP_EXERCISE : undefined })),
+      );
+    }
+
+    it('is absent for a text with no staged exercises', () => {
+      mockHappyPath();
+      renderPage();
+
+      expect(screen.queryByText('Check your understanding')).not.toBeInTheDocument();
+    });
+
+    it('keeps the questions closed until the reader says they have read', () => {
+      mockHappyPath();
+      mockCheck();
+      renderPage();
+
+      expect(screen.getByText('Check your understanding')).toBeInTheDocument();
+      expect(screen.getByText('1 question about this text')).toBeInTheDocument();
+      expect(screen.queryByText('Hvor jobber Marta?')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Start the check' }));
+
+      expect(screen.getByText('Hvor jobber Marta?')).toBeInTheDocument();
+    });
+
+    it('asks about what was read, not what was heard, and offers no audio player', () => {
+      mockHappyPath();
+      mockCheck();
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: 'Start the check' }));
+
+      expect(screen.getByText('Answer based on what you read.')).toBeInTheDocument();
+      expect(screen.queryByText('Answer based on what you heard.')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /play/i })).not.toBeInTheDocument();
+    });
+
+    it('sends a missed question to SRS review', () => {
+      mockHappyPath();
+      mockCheck();
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Start the check' }));
+      fireEvent.click(screen.getByRole('radio', { name: 'På skolen' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Check answers' }));
+
+      expect(introduceCard).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Finish the check' }));
+
+      expect(introduceCard).toHaveBeenCalledWith({ contentType: 'EXERCISE', contentId: 'ex-comp' });
+      expect(screen.getByText('Check complete')).toBeInTheDocument();
+    });
+
+    it('does not seed the same question twice when the reader retries', () => {
+      mockHappyPath();
+      mockCheck();
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Start the check' }));
+      fireEvent.click(screen.getByRole('radio', { name: 'På skolen' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Check answers' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Finish the check' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+      fireEvent.click(screen.getByRole('radio', { name: 'På skolen' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Check answers' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Finish the check' }));
+
+      expect(introduceCard).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders the text without a check when the stages fail to load', () => {
+      mockHappyPath();
+      useLessonListeningStages.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+      renderPage();
+
+      expect(screen.getByText(/Marta er/)).toBeInTheDocument();
+      expect(screen.queryByText('Check your understanding')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument();
     });
   });
 });

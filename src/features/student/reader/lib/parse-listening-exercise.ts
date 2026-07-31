@@ -8,6 +8,14 @@ import type { ExerciseWithAnswers, LessonListeningStage } from '@/features/conte
  * listening stage (BE1.3: `LessonListeningStage` is one exercise ref each).
  */
 
+/**
+ * Which lesson the staged exercises follow: the listening flow of an AUDIO
+ * lesson, or the post-reading check of a TEXT one (spec 17 §5.5). The exercises
+ * are identical — the surface only decides the copy and whether there is audio
+ * to replay.
+ */
+export type StageSurface = 'audio' | 'text';
+
 export interface ListeningGapFillItem {
   exerciseId: string;
   position: number;

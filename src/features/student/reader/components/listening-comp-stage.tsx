@@ -6,17 +6,28 @@ import { useTranslations } from 'next-intl';
 
 import { AudioPlayer } from '@/features/learning';
 
-import type { ListeningComprehensionItem } from '../lib/parse-listening-exercise';
+import type { ListeningComprehensionItem, StageSurface } from '../lib/parse-listening-exercise';
 
 export interface ListeningCompStageProps {
   items: ListeningComprehensionItem[];
   audioSrc?: string;
-  audioLabel: string;
+  /** Omitted on the text surface, where there is no clip to replay — the player is then not rendered at all. */
+  audioLabel?: string;
+  /** Selects the copy set; the questions themselves are the same. Defaults to the listening flow. */
+  surface?: StageSurface;
   onDone: (missedExerciseIds: string[]) => void;
 }
 
-export function ListeningCompStage({ items, audioSrc, audioLabel, onDone }: ListeningCompStageProps) {
-  const t = useTranslations('Learning.reader.listening.comp');
+export function ListeningCompStage({
+  items,
+  audioSrc,
+  audioLabel,
+  surface = 'audio',
+  onDone,
+}: ListeningCompStageProps) {
+  const t = useTranslations(
+    surface === 'text' ? 'Learning.reader.text.check.comp' : 'Learning.reader.listening.comp',
+  );
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [checked, setChecked] = useState(false);
 
@@ -33,9 +44,11 @@ export function ListeningCompStage({ items, audioSrc, audioLabel, onDone }: List
         {t('heading')}
       </h2>
       <p className="mb-3 text-[13.5px] text-(--ssz-text-secondary)">{t('body')}</p>
-      <div className="mb-5.5">
-        <AudioPlayer src={audioSrc} label={audioLabel} compact />
-      </div>
+      {audioLabel !== undefined && (
+        <div className="mb-5.5">
+          <AudioPlayer src={audioSrc} label={audioLabel} compact />
+        </div>
+      )}
 
       <div className="flex flex-col gap-4.5">
         {items.map((q, i) => {

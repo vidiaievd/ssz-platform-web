@@ -317,6 +317,31 @@
         "unknown": "New only",
         "off": "None",
         "hint": "Which glossed words are underlined"
+      },
+      "check": {
+        "title": "Check your understanding",
+        "questions": "{count, plural, one {# question about this text} other {# questions about this text}}",
+        "start": "Start the check",
+        "gapfill": {
+          "heading": "Fill the gaps",
+          "body": "Look back at the text above if you need to.",
+          "checkAnswers": "Check answers",
+          "next": "Next — comprehension",
+          "correctCount": "{correct}/{total} correct",
+          "answerLabel": "Answer: {answer}"
+        },
+        "comp": {
+          "heading": "Comprehension",
+          "body": "Answer based on what you read.",
+          "checkAnswers": "Check answers",
+          "finish": "Finish the check",
+          "score": "Score {score}/{total}"
+        },
+        "done": {
+          "heading": "Check complete",
+          "body": "Anything you missed has been added to your review queue.",
+          "retry": "Try again"
+        }
       }
     },
     "video": {
