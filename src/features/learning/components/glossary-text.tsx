@@ -12,6 +12,7 @@ import type { LessonTextSpan, VocabularyItem } from '@/features/content/types';
 import { GlossaryPopover, type PartOfSpeech } from './glossary-popover';
 import { SpanAnnotation } from './span-annotation';
 import { useGlossIntensity } from './gloss-intensity-provider';
+import { useLookupReporter } from './lookup-telemetry-provider';
 import { learningKeys } from '../api/keys';
 import type { GlossIntensity } from '../lib/gloss-intensity';
 import { tokenizeGlossary, type GlossaryEntry, type GlossaryIndex } from '../lib/tokenize-glossary';
@@ -147,6 +148,7 @@ function GlossaryWord({
   const { item } = entry;
   const translation = item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
   const intensity = useGlossIntensity(item.id);
+  const reportLookup = useLookupReporter();
   const decoration = DECORATION[intensity];
   const mode = getGlossaryMode(cefrLevel ?? '');
   const displayText =
@@ -166,6 +168,7 @@ function GlossaryWord({
       formLabel={entry.formLabel}
       contextSentence={contextSentence}
       footer={<IKnowThisButton vocabularyItemId={item.id} />}
+      onOpenLevel={(level) => reportLookup(item.id, level)}
     >
       <span
         role="button"

@@ -59,6 +59,12 @@ export interface GlossaryPopoverProps {
   onSeeInContext?: () => void;
   /** Extra actions pinned under the card (B3: "I know this word"). */
   footer?: ReactNode;
+  /**
+   * Fired when the card opens, and again when a hover preview is promoted to
+   * the full card — the two moments lookup telemetry records (spec 18 §6.1).
+   * Never fired for a re-render or for closing.
+   */
+  onOpenLevel?: (level: GlossaryLevel) => void;
   children: ReactNode;
 }
 
@@ -110,6 +116,7 @@ export function GlossaryPopover({
   contextSentence,
   onSeeInContext,
   footer,
+  onOpenLevel,
   children,
 }: GlossaryPopoverProps) {
   const t = useTranslations('Learning.glossary');
@@ -141,6 +148,7 @@ export function GlossaryPopover({
     openTimer.current = setTimeout(() => {
       setLevel('preview');
       setOpen(true);
+      onOpenLevel?.('preview');
     }, OPEN_DELAY);
   }
 
@@ -158,9 +166,13 @@ export function GlossaryPopover({
       // Promote the hint in place — Radix would otherwise toggle the popover shut.
       e.preventDefault();
       setLevel('full');
+      onOpenLevel?.('full');
       return;
     }
-    if (!open) setLevel('full');
+    if (!open) {
+      setLevel('full');
+      onOpenLevel?.('full');
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -174,6 +186,7 @@ export function GlossaryPopover({
     clearTimers();
     setLevel('full');
     setOpen(true);
+    onOpenLevel?.('full');
   }
 
   const showInText = !!form && !!formLabel;

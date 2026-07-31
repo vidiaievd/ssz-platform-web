@@ -9,6 +9,7 @@ import {
   ErrorState,
   GlossIntensityProvider,
   LessonProse,
+  LookupTelemetryProvider,
   LearningSkeleton,
   buildGlossaryIndex,
   resolveGlossIntensity,
@@ -650,17 +651,19 @@ export function TextLessonPage({
         <p className="text-sm text-(--ssz-text-muted) italic">{t('noParagraphs')}</p>
       ) : (
         <GlossIntensityProvider resolve={resolveIntensity}>
-          <ModeComponent
-            paragraphs={proseParagraphs}
-            glossary={glossary}
-            targetLang={lesson.data.targetLanguage}
-            translationLang={variant.data.explanationLanguage}
-            cefrLevel={cefrLevel}
-            hasTranslations={hasTranslations}
-            spansByParagraph={spansByParagraph}
-            authoredVocabulary={authoredVocabulary}
-            spansHidden={glossVisibility === 'off'}
-          />
+          <LookupTelemetryProvider lessonId={lessonId} lessonVariantId={variant.data.id}>
+            <ModeComponent
+              paragraphs={proseParagraphs}
+              glossary={glossary}
+              targetLang={lesson.data.targetLanguage}
+              translationLang={variant.data.explanationLanguage}
+              cefrLevel={cefrLevel}
+              hasTranslations={hasTranslations}
+              spansByParagraph={spansByParagraph}
+              authoredVocabulary={authoredVocabulary}
+              spansHidden={glossVisibility === 'off'}
+            />
+          </LookupTelemetryProvider>
         </GlossIntensityProvider>
       )}
 

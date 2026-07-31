@@ -178,4 +178,68 @@ describe('GlossaryPopover', () => {
     fireEvent.click(word());
     expect(useMediaAsset).toHaveBeenCalledWith('media-1');
   });
+  describe('onOpenLevel', () => {
+    it('reports the hover preview once it actually opens, not when the pointer arrives', () => {
+      const onOpenLevel = vi.fn();
+      renderPopover({ onOpenLevel });
+
+      hoverIn();
+      expect(onOpenLevel).not.toHaveBeenCalled();
+
+      advance(400);
+      expect(onOpenLevel).toHaveBeenCalledExactlyOnceWith('preview');
+    });
+
+    it('reports the promotion of a preview to the full card', () => {
+      const onOpenLevel = vi.fn();
+      renderPopover({ onOpenLevel });
+
+      hoverIn();
+      advance(400);
+      fireEvent.click(word());
+
+      expect(onOpenLevel.mock.calls).toEqual([['preview'], ['full']]);
+    });
+
+    it('reports a single full opening for a click without hover', () => {
+      const onOpenLevel = vi.fn();
+      renderPopover({ onOpenLevel });
+
+      fireEvent.click(word());
+
+      expect(onOpenLevel).toHaveBeenCalledExactlyOnceWith('full');
+    });
+
+    it('reports the keyboard opening', () => {
+      const onOpenLevel = vi.fn();
+      renderPopover({ onOpenLevel });
+
+      fireEvent.keyDown(word(), { key: 'Enter' });
+
+      expect(onOpenLevel).toHaveBeenCalledExactlyOnceWith('full');
+    });
+
+    it('reports nothing when the hover is abandoned before the delay', () => {
+      const onOpenLevel = vi.fn();
+      renderPopover({ onOpenLevel });
+
+      hoverIn();
+      advance(200);
+      hoverOut();
+      advance(400);
+
+      expect(onOpenLevel).not.toHaveBeenCalled();
+    });
+
+    it('reports nothing when the card is closed', () => {
+      const onOpenLevel = vi.fn();
+      renderPopover({ onOpenLevel });
+
+      fireEvent.keyDown(word(), { key: 'Enter' });
+      onOpenLevel.mockClear();
+      fireEvent.keyDown(word(), { key: 'Enter' });
+
+      expect(onOpenLevel).not.toHaveBeenCalled();
+    });
+  });
 });
