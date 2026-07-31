@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, Eye, EyeOff, Filter, Highlighter, Layers, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -34,6 +34,7 @@ import { useMediaAsset } from '@/features/media';
 import { findAudioNarration, findHeroImage, isMediaOnlyParagraph } from '@/lib/content/lesson-media-tokens';
 import { cn } from '@/lib/utils';
 
+import { useScrollRestoration } from '../hooks/use-scroll-restoration';
 import { useReadingModeStore, type ReadingMode } from '../stores/reading-mode-store';
 import { TextComprehensionCheck } from './text-comprehension-check';
 import {
@@ -569,6 +570,13 @@ export function TextLessonPage({
     glossaryLoading;
   const isError = lesson.isError || profile.isError || (profileReady && variant.isError);
 
+  const scrollAnchorRef = useRef<HTMLDivElement>(null);
+  useScrollRestoration(
+    scrollAnchorRef,
+    variant.data ? `${lessonId}:${variant.data.id}` : undefined,
+    !isLoading,
+  );
+
   if (isLoading) {
     return <LearningSkeleton variant="card" rows={4} />;
   }
@@ -598,7 +606,7 @@ export function TextLessonPage({
     effectiveMode === 'bilingual' ? BilingualMode : effectiveMode === 'focus' ? FocusMode : ImmersiveMode;
 
   return (
-    <div>
+    <div ref={scrollAnchorRef}>
       {heroImage && (
         <div className="mb-6.5 h-50 overflow-hidden rounded-[20px] bg-(--ssz-bg-subtle)">
           {heroAsset.data?.url && (
