@@ -216,6 +216,26 @@ describe('TextLessonPage', () => {
     expect(screen.getByText('Marta is a nurse.')).toBeInTheDocument();
   });
 
+  it('shows the estimated reading time when the variant has one', () => {
+    mockHappyPath();
+    useBestLessonVariant.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: { ...VARIANT, estimatedReadingMinutes: 4 },
+      refetch: vi.fn(),
+    });
+    renderPage();
+
+    expect(screen.getByText('4 min read')).toBeInTheDocument();
+  });
+
+  it('hides the estimated reading time when the variant has none', () => {
+    mockHappyPath();
+    renderPage();
+
+    expect(screen.queryByText(/min read/)).not.toBeInTheDocument();
+  });
+
   it('switches to bilingual mode and shows both columns', () => {
     mockHappyPath();
     renderPage();

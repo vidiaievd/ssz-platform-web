@@ -609,8 +609,15 @@ export function TextLessonPage({
       )}
 
       <div className="mb-4.5">
-        <div className="mb-1.5 text-[11px] font-bold tracking-wider text-(--ssz-color-primary-600) uppercase">
-          {t('eyebrow', { unit: unitPosition, course: courseTitle, type: tContent('materialType.text') })}
+        <div className="mb-1.5 flex items-center justify-between gap-3">
+          <div className="text-[11px] font-bold tracking-wider text-(--ssz-color-primary-600) uppercase">
+            {t('eyebrow', { unit: unitPosition, course: courseTitle, type: tContent('materialType.text') })}
+          </div>
+          {!!variant.data.estimatedReadingMinutes && (
+            <span className="text-xs font-medium text-(--ssz-text-muted)">
+              {t('estimatedReadingMinutes', { minutes: variant.data.estimatedReadingMinutes })}
+            </span>
+          )}
         </div>
         <h1 className="font-reading mb-1.5 text-[29px] leading-[1.15] font-semibold tracking-tight text-(--ssz-text-primary)">
           {variant.data.displayTitle || lesson.data.title}

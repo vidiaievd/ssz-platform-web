@@ -303,7 +303,8 @@
         "noParagraphs": "Denne leksjonen har ingen tekst ennå.",
         "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
         "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen.",
-        "coverage": "du kan {percent} % av de markerte ordene i denne teksten"
+        "coverage": "du kan {percent} % av de markerte ordene i denne teksten",
+        "estimatedReadingMinutes": "{minutes, plural, one {# min lesetid} other {# min lesetid}}"
       },
       "mode": {
         "label": "Lesemodus",
