@@ -35,6 +35,7 @@ import {
 } from './markdown-format-menu';
 import { HeroImageSlot } from './hero-image-slot';
 import { AudioNarrationRow } from './audio-narration-row';
+import { ListeningStageListEditor } from './listening-stage-list-editor';
 
 interface TextEditorPaneProps {
   kind: MaterialKind;
@@ -251,6 +252,15 @@ export function TextEditorPane({
           </Button>
 
           <ParagraphTranslationsPanel lessonId={lessonId} variantId={defaultVariant?.id} />
+
+          {/* The check the reader meets after the text, on the same staging
+              model an AUDIO lesson uses after its transcript (spec 17). */}
+          <ListeningStageListEditor
+            lessonId={lessonId}
+            variantId={defaultVariant?.id}
+            container={container}
+            surface="text"
+          />
         </div>
       )}
     </LessonEditorShell>

@@ -11,8 +11,18 @@ vi.mock('../api/use-authoring-lessons', async () => {
   const actual = await vi.importActual<typeof import('../api/use-authoring-lessons')>(
     '../api/use-authoring-lessons',
   );
-  return { ...actual, useLessonVariants: vi.fn(), useLessonGlossaryMarks: vi.fn() };
+  return {
+    ...actual,
+    useLessonVariants: vi.fn(),
+    useLessonGlossaryMarks: vi.fn(),
+    useListeningStages: vi.fn(),
+  };
 });
+// The post-reading check editor is exercised in its own suite; here it only has
+// to prove it is mounted, so its server action and exercise picker are stubbed.
+vi.mock('../actions/listening-stages', () => ({ saveListeningStagesAction: vi.fn() }));
+vi.mock('../api/use-authoring-exercises', () => ({ useAuthoringExercises: vi.fn() }));
+vi.mock('./exercise-editor', () => ({ ExerciseEditor: () => null }));
 vi.mock('../api/use-authoring-vocabulary', () => ({
   useAuthoringVocabularyLists: vi.fn(),
   useAuthoringVocabularyItems: vi.fn(),
@@ -47,7 +57,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
 
 const { TextEditorPane } = await import('./text-editor-pane');
 const { updateLessonAction } = await import('../actions/lesson');
-const { useLessonVariants, useLessonGlossaryMarks } = await import('../api/use-authoring-lessons');
+const { useLessonVariants, useLessonGlossaryMarks, useListeningStages } = await import(
+  '../api/use-authoring-lessons',
+);
+const { useAuthoringExercises } = await import('../api/use-authoring-exercises');
 const { useAuthoringVocabularyLists } = await import('../api/use-authoring-vocabulary');
 const { useLesson, useUnitVocabularyItems } = await import('@/features/content');
 
@@ -106,6 +119,8 @@ beforeEach(() => {
   vi.mocked(useAuthoringVocabularyLists).mockReturnValue({ data: [] } as never);
   vi.mocked(useUnitVocabularyItems).mockReturnValue({ data: [] } as never);
   vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: [] } as never);
+  vi.mocked(useListeningStages).mockReturnValue({ data: [], isLoading: false } as never);
+  vi.mocked(useAuthoringExercises).mockReturnValue({ data: [], isLoading: false } as never);
   vi.useFakeTimers({ shouldAdvanceTime: true });
 });
 
@@ -140,5 +155,14 @@ describe('TextEditorPane', () => {
       'A2',
       { title: 'En vanlig arbeidsdag', body: 'Nytt avsnitt her.' },
     );
+  });
+
+  it('offers the post-reading comprehension check under the editor', () => {
+    renderPane();
+
+    expect(screen.getByText('Comprehension check')).toBeInTheDocument();
+    expect(
+      screen.getByText('No questions yet — add one to check understanding after the reading.'),
+    ).toBeInTheDocument();
   });
 });

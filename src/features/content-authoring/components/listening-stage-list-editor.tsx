@@ -33,27 +33,51 @@ interface StageRow {
   creating: boolean;
 }
 
+/**
+ * Which lesson surface the list is embedded in. Presentation only — the rows,
+ * the stage types and the full-replace save are identical either way, because
+ * the backend model is the same one (spec 17 §4).
+ */
+export type StageListSurface = 'audio' | 'text';
+
 interface ListeningStageListEditorProps {
   lessonId: string;
-  /** Undefined until an audio source has been saved at least once (no variant yet). */
+  /** Undefined until the lesson's source has been saved at least once (no variant yet). */
   variantId: string | undefined;
   container: Container;
+  surface?: StageListSurface;
 }
 
 const STAGE_TYPES: ListeningStageType[] = ['gap_fill', 'comprehension'];
 const NO_EXERCISE = '__none__';
 
+const SURFACE_COPY = {
+  audio: {
+    title: 'editor.listeningStages',
+    empty: 'editor.listeningStagesEmpty',
+    needsSource: 'editor.listeningStagesNeedsSource',
+  },
+  text: {
+    title: 'editor.textStages',
+    empty: 'editor.textStagesEmpty',
+    needsSource: 'editor.textStagesNeedsSource',
+  },
+} as const;
+
 /**
- * Ordered gap-fill/comprehension exercise list for an AUDIO lesson variant (BE1.3).
- * Full-replace on save, mirroring CueListEditor, but each row references an
- * Exercise (picked or created inline) rather than freeform text.
+ * Ordered gap-fill/comprehension exercise list for a lesson variant (BE1.3):
+ * the post-listening flow of an AUDIO lesson, the post-reading check of a TEXT
+ * one. Full-replace on save, mirroring CueListEditor, but each row references
+ * an Exercise (picked or created inline) rather than freeform text.
  */
 export function ListeningStageListEditor({
   lessonId,
   variantId,
   container,
+  surface = 'audio',
 }: ListeningStageListEditorProps) {
   const t = useTranslations('Authoring');
+  const copy = SURFACE_COPY[surface];
   const { data: stages, isLoading } = useListeningStages(lessonId, variantId);
   const { data: exercises, isLoading: isExercisesLoading } = useAuthoringExercises(container.id);
   const [rows, setRows] = useState<StageRow[]>([]);
@@ -123,15 +147,15 @@ export function ListeningStageListEditor({
 
   if (!variantId) {
     return (
-      <EditorCard title={t('editor.listeningStages')}>
-        <p className="text-sm text-muted-foreground">{t('editor.listeningStagesNeedsSource')}</p>
+      <EditorCard title={t(copy.title)}>
+        <p className="text-sm text-muted-foreground">{t(copy.needsSource)}</p>
       </EditorCard>
     );
   }
 
   if (isLoading || isExercisesLoading) {
     return (
-      <EditorCard title={t('editor.listeningStages')}>
+      <EditorCard title={t(copy.title)}>
         <div className="space-y-2">
           <Skeleton className="h-16 w-full rounded-lg" />
           <Skeleton className="h-16 w-full rounded-lg" />
@@ -142,12 +166,12 @@ export function ListeningStageListEditor({
 
   return (
     <EditorCard
-      title={t('editor.listeningStages')}
+      title={t(copy.title)}
       right={<AutosaveIndicator status={autosave.status} savedAt={autosave.savedAt} />}
     >
       <div className="flex flex-col gap-3">
         {rows.length === 0 && (
-          <p className="text-sm text-muted-foreground">{t('editor.listeningStagesEmpty')}</p>
+          <p className="text-sm text-muted-foreground">{t(copy.empty)}</p>
         )}
 
         <ReorderWithAnnouncer

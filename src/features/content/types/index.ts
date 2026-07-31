@@ -154,7 +154,11 @@ export interface LessonVideoQuestion {
 
 export type ListeningStageType = 'gap_fill' | 'comprehension';
 
-/** Ordered gap-fill/comprehension activity staged after an AUDIO lesson variant's transcript (BE1.3). */
+/**
+ * Ordered gap-fill/comprehension activity staged after a lesson variant's primary
+ * content (BE1.3): an AUDIO transcript, or a TEXT body's post-reading check
+ * (spec 17). Named for the surface it was introduced on — see spec 17 §2.1.
+ */
 export interface LessonListeningStage {
   exerciseId: string;
   position: number;
