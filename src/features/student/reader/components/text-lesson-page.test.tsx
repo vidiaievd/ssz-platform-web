@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -651,6 +651,51 @@ describe('TextLessonPage', () => {
       expect(screen.getByText(/Marta er/)).toBeInTheDocument();
       expect(screen.queryByText('Check your understanding')).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('second pass', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('offers a timed re-read once the lesson is already completed', () => {
+      mockHappyPath();
+      renderPage({ status: 'completed' });
+
+      expect(screen.getByText('Read it again?')).toBeInTheDocument();
+    });
+
+    it('does not offer a re-read for a lesson still in progress', () => {
+      mockHappyPath();
+      renderPage({ status: 'in_progress' });
+
+      expect(screen.queryByText('Read it again?')).not.toBeInTheDocument();
+    });
+
+    it('switches off highlighting and starts the stopwatch on accepting the offer', () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      mockHappyPath();
+      renderPage({ status: 'completed' });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Start timed re-read' }));
+
+      expect(useReadingModeStore.getState().glossVisibility).toBe('off');
+      expect(screen.queryByText('Read it again?')).not.toBeInTheDocument();
+
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+      // 5 words ("Marta er sykepleier." + "Hun jobber på sykehuset.") over 3s.
+      expect(screen.getByText(/0:03/)).toBeInTheDocument();
+    });
+
+    it('does not offer a re-read once highlighting is already off', () => {
+      mockHappyPath();
+      useReadingModeStore.setState({ mode: 'immersive', glossVisibility: 'off' });
+      renderPage({ status: 'completed' });
+
+      expect(screen.queryByText('Read it again?')).not.toBeInTheDocument();
     });
   });
 });

@@ -304,7 +304,11 @@
         "emptyTitle": "Цей урок ще не готовий для вас",
         "emptyBody": "Додайте рідну мову та рівень у профілі, щоб відкрити цей урок.",
         "coverage": "ти знаєш {percent}% позначених слів цього тексту",
-        "estimatedReadingMinutes": "{minutes, plural, one {# хв читання} few {# хв читання} many {# хв читання} other {# хв читання}}"
+        "estimatedReadingMinutes": "{minutes, plural, one {# хв читання} few {# хв читання} many {# хв читання} other {# хв читання}}",
+        "secondPassOfferTitle": "Прочитати ще раз?",
+        "secondPassOfferBody": "Спробуй ще раз без перекладів і підсвітки — подивись, наскільки швидко ти читаєш.",
+        "secondPassStart": "Почати повторне читання на час",
+        "secondPassStats": "{time} · {wpm} слів/хв"
       },
       "mode": {
         "label": "Режим читання",

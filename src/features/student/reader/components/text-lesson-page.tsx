@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, Eye, EyeOff, Filter, Highlighter, Layers, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -17,6 +17,7 @@ import {
   usesAuthoredVocabulary,
   type GlossaryIndex,
   type GlossVisibility,
+  type UnitContentsItemStatus,
 } from '@/features/learning';
 import {
   useLesson,
@@ -51,6 +52,21 @@ export interface TextLessonPageProps {
   unitPosition: number;
   courseTitle: string;
   cefrLevel: string;
+  /** Reader-shell's `activeContentItem.status`. Drives the second-pass re-read offer below. */
+  status?: UnitContentsItemStatus;
+}
+
+function formatMinutesSeconds(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function countWords(paragraphs: { target: string }[]): number {
+  return paragraphs.reduce(
+    (sum, p) => sum + p.target.trim().split(/\s+/).filter(Boolean).length,
+    0,
+  );
 }
 
 const MODES: ReadingMode[] = ['immersive', 'bilingual', 'focus'];
@@ -379,10 +395,23 @@ export function TextLessonPage({
   unitPosition,
   courseTitle,
   cefrLevel,
+  status,
 }: TextLessonPageProps) {
   const t = useTranslations('Learning.reader.text.page');
   const tContent = useTranslations('Content');
   const { mode, setMode, glossVisibility, setGlossVisibility } = useReadingModeStore();
+
+  // Second pass (spec-less "melochi" E3.3): offered once the reader has already
+  // completed this text. Timing starts only once they opt in, not on arrival —
+  // arriving here is often just re-reading via the sidebar, not a timed retry.
+  const [secondPassActive, setSecondPassActive] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  useEffect(() => {
+    if (!secondPassActive) return;
+    const startedAt = Date.now();
+    const interval = setInterval(() => setElapsedSeconds(Math.round((Date.now() - startedAt) / 1000)), 1000);
+    return () => clearInterval(interval);
+  }, [secondPassActive]);
 
   const lesson = useLesson(lessonId);
   const profile = useMyStudentProfile();
@@ -511,6 +540,9 @@ export function TextLessonPage({
     [paragraphsQuery.data],
   );
 
+  const wordCount = useMemo(() => countWords(proseParagraphs), [proseParagraphs]);
+  const wpm = elapsedSeconds > 0 ? Math.round(wordCount / (elapsedSeconds / 60)) : 0;
+
   const spansByParagraph = useMemo(() => {
     const byIndex = new Map<number, LessonTextSpan[]>();
     for (const span of spansQuery.data ?? []) {
@@ -634,6 +666,32 @@ export function TextLessonPage({
           <p className="text-sm text-(--ssz-text-muted) italic">{variant.data.displayDescription}</p>
         )}
       </div>
+
+      {status === 'completed' && !secondPassActive && glossVisibility !== 'off' && (
+        <div className="mb-5.5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-[1.5px] border-(--ssz-border-default) bg-surface px-4.5 py-3.5">
+          <div>
+            <p className="text-sm font-semibold text-(--ssz-text-primary)">{t('secondPassOfferTitle')}</p>
+            <p className="text-xs text-(--ssz-text-muted)">{t('secondPassOfferBody')}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setGlossVisibility('off');
+              setElapsedSeconds(0);
+              setSecondPassActive(true);
+            }}
+            className="rounded-lg border-[1.5px] border-(--ssz-color-primary-500) px-3.5 py-1.5 text-xs font-semibold text-(--ssz-color-primary-600)"
+          >
+            {t('secondPassStart')}
+          </button>
+        </div>
+      )}
+
+      {secondPassActive && (
+        <div className="mb-5.5 text-xs font-semibold text-(--ssz-text-muted)">
+          {t('secondPassStats', { time: formatMinutesSeconds(elapsedSeconds), wpm })}
+        </div>
+      )}
 
       <div className="mb-5.5 flex flex-wrap items-center gap-3.5">
         <ModeToggle mode={effectiveMode} modes={availableModes} onChange={setMode} />

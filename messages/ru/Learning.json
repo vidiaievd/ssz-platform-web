@@ -304,7 +304,11 @@
         "emptyTitle": "Этот урок пока не готов для вас",
         "emptyBody": "Добавьте родной язык и уровень в профиле, чтобы открыть этот урок.",
         "coverage": "ты знаешь {percent}% отмеченных слов этого текста",
-        "estimatedReadingMinutes": "{minutes, plural, one {# мин чтения} few {# мин чтения} many {# мин чтения} other {# мин чтения}}"
+        "estimatedReadingMinutes": "{minutes, plural, one {# мин чтения} few {# мин чтения} many {# мин чтения} other {# мин чтения}}",
+        "secondPassOfferTitle": "Прочитать ещё раз?",
+        "secondPassOfferBody": "Попробуй прочитать ещё раз без переводов и подсветки — посмотри, насколько быстро ты читаешь.",
+        "secondPassStart": "Начать повторное чтение на время",
+        "secondPassStats": "{time} · {wpm} слов/мин"
       },
       "mode": {
         "label": "Режим чтения",

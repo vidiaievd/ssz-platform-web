@@ -141,6 +141,7 @@ export function ReaderShell({
         unitPosition={activeUnit?.position ?? 0}
         courseTitle={courseInfo.title}
         cefrLevel={courseInfo.cefrLevel}
+        status={activeContentItem.status}
       />
     );
   } else if (activeKind === 'video' && activeContentItem) {

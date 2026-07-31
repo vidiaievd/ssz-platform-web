@@ -304,7 +304,11 @@
         "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
         "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen.",
         "coverage": "du kan {percent} % av de markerte ordene i denne teksten",
-        "estimatedReadingMinutes": "{minutes, plural, one {# min lesetid} other {# min lesetid}}"
+        "estimatedReadingMinutes": "{minutes, plural, one {# min lesetid} other {# min lesetid}}",
+        "secondPassOfferTitle": "Les den igjen?",
+        "secondPassOfferBody": "Prøv en gang til uten oversettelser eller markeringer, og se hvor raskt du leser.",
+        "secondPassStart": "Start tidtatt ny lesing",
+        "secondPassStats": "{time} · {wpm} ord/min"
       },
       "mode": {
         "label": "Lesemodus",

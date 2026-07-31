@@ -304,7 +304,11 @@
         "emptyTitle": "This lesson isn't ready for you yet",
         "emptyBody": "Add your native language and level in your profile to unlock this lesson.",
         "coverage": "you know {percent}% of the marked words in this text",
-        "estimatedReadingMinutes": "{minutes, plural, one {# min read} other {# min read}}"
+        "estimatedReadingMinutes": "{minutes, plural, one {# min read} other {# min read}}",
+        "secondPassOfferTitle": "Read it again?",
+        "secondPassOfferBody": "Try it once more without translations or highlights, and see how fast you read.",
+        "secondPassStart": "Start timed re-read",
+        "secondPassStats": "{time} · {wpm} wpm"
       },
       "mode": {
         "label": "Reading mode",
