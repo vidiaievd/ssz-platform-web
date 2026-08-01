@@ -83,5 +83,12 @@
     "moveDown": "Нижче",
     "dragHandle": "Перетягніть, щоб змінити порядок, позиція {n} з {total}",
     "partialScore": "{correct} із {total} рядків на своєму місці"
+  },
+  "errorCorrection": {
+    "remaining": "Виправлень зроблено: {found} із {total}",
+    "hint": "Торкніться частини речення, щоб переписати її.",
+    "editLabel": "Переписати «{text}»",
+    "partialScore": "Виправлено {correct} із {total} помилок",
+    "falsePositives": "Змінено правильних частин: {n}"
   }
 }

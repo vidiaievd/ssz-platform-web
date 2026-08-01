@@ -201,6 +201,66 @@ describe('ExercisePage', () => {
     });
   });
 
+  describe('error_correction', () => {
+    const correctionExercise = {
+      templateCode: 'error_correction',
+      content: {
+        mistake_count: 1,
+        items: [
+          {
+            id: 's-0',
+            chunks: [
+              { id: 'c-0', text: 'I could see' },
+              { id: 'c-1', text: 'she was warming up with me' },
+            ],
+          },
+        ],
+      },
+      expectedAnswers: {
+        corrections: [
+          { item_id: 's-0', chunk_id: 'c-1', accepted: ['she was warming to me'], note: 'warm to sb' },
+        ],
+      },
+    };
+
+    function rewrite(chunkText: string, replacement: string) {
+      fireEvent.click(screen.getByRole('button', { name: chunkText }));
+      fireEvent.blur(screen.getByRole('textbox'), { target: { value: replacement } });
+    }
+
+    it('needs a rewrite before it can be checked', () => {
+      mockExercise(correctionExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      expect(screen.getByRole('button', { name: 'Check' })).toBeDisabled();
+
+      rewrite('she was warming up with me', 'she was warming to me');
+      expect(screen.getByRole('button', { name: 'Check' })).toBeEnabled();
+    });
+
+    it('accepts the expected rewrite of the faulty part', () => {
+      mockExercise(correctionExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      rewrite('she was warming up with me', 'she was warming to me');
+      fireEvent.click(screen.getByRole('button', { name: 'Check' }));
+
+      expect(screen.getByText('Correct')).toBeInTheDocument();
+    });
+
+    it('reports rewriting a sound part as a false positive', () => {
+      mockExercise(correctionExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      rewrite('she was warming up with me', 'she was warming to me');
+      rewrite('I could see', 'I saw');
+      fireEvent.click(screen.getByRole('button', { name: 'Check' }));
+
+      expect(screen.getByText('Not quite')).toBeInTheDocument();
+      expect(screen.getByText(/1 correct parts were changed/)).toBeInTheDocument();
+    });
+  });
+
   it('shows an unsupported message for an unknown template', () => {
     mockExercise({ templateCode: 'mystery_type' });
     renderWithProviders(<ExercisePage exerciseId="e1" />);

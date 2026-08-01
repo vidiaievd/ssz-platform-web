@@ -91,7 +91,8 @@
     "writing_task": "Writing task",
     "sentence_schema": "Sentence schema",
     "word_bank_fill": "Word bank gap-fill",
-    "text_order": "Put in order"
+    "text_order": "Put in order",
+    "error_correction": "Find and correct mistakes"
   },
   "wordBank": "Word bank",
   "matchColumnLeft": "Items",

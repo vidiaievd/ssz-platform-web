@@ -3,6 +3,7 @@ import type { ExerciseInstruction } from '@/features/content/types';
 import {
   EXERCISE_TYPES,
   RATIONALE_VERDICTS,
+  splitChunks,
   type ExerciseFormValues,
   type ExerciseType,
   type RationaleVerdict,
@@ -56,6 +57,7 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   ],
   wbfWordBank: '',
   wbfSentences: [{ text: '', answers: [''] }],
+  ecSentences: [{ chunks: '', fixes: [{ chunkIndex: '', accepted: '', note: '' }] }],
   toKind: 'dialogue',
   toLines: [
     { text: '', speaker: '' },
@@ -233,6 +235,28 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
         expectedAnswers: { order: items.map((i) => i.id) },
       };
     }
+    case 'error_correction': {
+      const sentences = (values.ecSentences ?? []).filter((s) => s.chunks.trim());
+      const items = sentences.map((sentence, i) => ({
+        id: `s-${i}`,
+        chunks: splitChunks(sentence.chunks).map((text, j) => ({ id: `c-${j}`, text })),
+      }));
+      const corrections = sentences.flatMap((sentence, i) =>
+        (sentence.fixes ?? [])
+          .filter((fix) => fix.accepted.trim() && fix.chunkIndex.trim())
+          .map((fix) => ({
+            item_id: `s-${i}`,
+            // Authors count parts from 1; ids are 0-based.
+            chunk_id: `c-${Number(fix.chunkIndex) - 1}`,
+            accepted: splitCsv(fix.accepted),
+            ...(fix.note?.trim() && { note: fix.note.trim() }),
+          })),
+      );
+      return {
+        content: { items, mistake_count: corrections.length },
+        expectedAnswers: { corrections },
+      };
+    }
     case 'sentence_schema': {
       // Keep only labelled fields; remember original index -> stable field id so
       // token assignments (by original index) survive the filtering.
@@ -277,6 +301,18 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       };
     }
   }
+}
+
+interface EcContentItem {
+  id?: unknown;
+  chunks?: unknown[];
+}
+
+interface EcCorrection {
+  item_id?: unknown;
+  chunk_id?: unknown;
+  accepted?: unknown;
+  note?: unknown;
 }
 
 interface TextOrderItem {
@@ -450,6 +486,41 @@ export function parseExerciseToForm(exercise: {
         wtMinWords: typeof content.min_words === 'number' ? String(content.min_words) : '',
         wtTopics: topics,
         wtRubric: typeof expectedAnswers.rubric === 'string' ? expectedAnswers.rubric : '',
+      };
+    }
+    case 'error_correction': {
+      const rawItems = Array.isArray(content.items) ? (content.items as EcContentItem[]) : [];
+      const rawCorrections = Array.isArray(expectedAnswers.corrections)
+        ? (expectedAnswers.corrections as EcCorrection[])
+        : [];
+      const sentences = rawItems.map((item) => {
+        const chunks = Array.isArray(item.chunks) ? item.chunks : [];
+        const indexById = new Map(
+          chunks.map((chunk, i) => [String((chunk as { id?: unknown }).id ?? ''), i + 1]),
+        );
+        const fixes = rawCorrections
+          .filter((cor) => String(cor.item_id ?? '') === String(item.id ?? ''))
+          .map((cor) => ({
+            chunkIndex: String(indexById.get(String(cor.chunk_id ?? '')) ?? ''),
+            accepted: (Array.isArray(cor.accepted) ? cor.accepted : [])
+              .filter((a): a is string => typeof a === 'string')
+              .join(', '),
+            note: typeof cor.note === 'string' ? cor.note : '',
+          }));
+        return {
+          chunks: chunks
+            .map((chunk) =>
+              typeof (chunk as { text?: unknown }).text === 'string'
+                ? (chunk as { text: string }).text
+                : '',
+            )
+            .join(' | '),
+          fixes: fixes.length > 0 ? fixes : [{ chunkIndex: '', accepted: '', note: '' }],
+        };
+      });
+      return {
+        ...base,
+        ecSentences: sentences.length > 0 ? sentences : DEFAULT_EXERCISE_VALUES.ecSentences,
       };
     }
     case 'text_order': {

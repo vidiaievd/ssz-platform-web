@@ -11,6 +11,7 @@ import {
   type TranslateExpectedAnswers,
   checkWordBankFill,
   checkTextOrder,
+  checkErrorCorrection,
 } from './grading';
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
@@ -298,5 +299,46 @@ describe('checkTextOrder', () => {
 
     expect(result.ok).toBe(false);
     expect(result.correct).toBe(3);
+  });
+});
+
+describe('checkErrorCorrection', () => {
+  const expected = {
+    corrections: [
+      { item_id: 's-0', chunk_id: 'c-1', accepted: ['she was warming to me'], note: 'warm to sb' },
+      { item_id: 's-1', chunk_id: 'c-2', accepted: ['make up your mind'] },
+    ],
+  };
+
+  it('is ok when both mistakes are fixed and nothing else was touched', () => {
+    const result = checkErrorCorrection(expected, {
+      's-0': { 'c-1': 'She was warming to me' },
+      's-1': { 'c-2': 'make up your mind' },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.correct).toBe(2);
+    expect(result.results['s-0']!['c-1']!.outcome).toBe('fixed');
+  });
+
+  it('separates a missed mistake from a wrong rewrite', () => {
+    const result = checkErrorCorrection(expected, { 's-0': { 'c-1': 'she was warming with me' } });
+
+    expect(result.results['s-0']!['c-1']!.outcome).toBe('wrong_fix');
+    expect(result.results['s-1']!['c-2']!.outcome).toBe('missed');
+    expect(result.results['s-1']!['c-2']!.expected).toBe('make up your mind');
+    expect(result.ok).toBe(false);
+  });
+
+  it('counts a rewritten sound chunk against the score', () => {
+    const result = checkErrorCorrection(expected, {
+      's-0': { 'c-1': 'she was warming to me', 'c-0': 'I saw' },
+      's-1': { 'c-2': 'make up your mind' },
+    });
+
+    expect(result.falsePositives).toBe(1);
+    expect(result.correct).toBe(1);
+    expect(result.ok).toBe(false);
+    expect(result.results['s-0']!['c-0']!.outcome).toBe('false_positive');
   });
 });

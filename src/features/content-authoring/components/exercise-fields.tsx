@@ -24,6 +24,7 @@ import {
   MATCH_VARIANTS,
   RATIONALE_VERDICTS,
   countBlanks,
+  splitChunks,
   type ExerciseFormValues,
   type ExerciseType,
 } from '../schemas/exercise';
@@ -140,6 +141,9 @@ export function ExerciseFields({ control, register, errors, isPending, typeDisab
       )}
       {templateCode === 'text_order' && (
         <TextOrderFields control={control} register={register} errors={errors} isPending={isPending} />
+      )}
+      {templateCode === 'error_correction' && (
+        <ErrorCorrectionFields control={control} register={register} errors={errors} isPending={isPending} />
       )}
     </div>
   );
@@ -957,6 +961,168 @@ function TextOrderFields({ control, register, errors, isPending }: SubProps) {
           {t('toAddLine')}
         </Button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * error_correction — the author writes each sentence already split into parts
+ * with `|`, then names the faulty part by its number and the rewrite that
+ * replaces it. Splitting is authored rather than automatic so the chunk
+ * boundaries match the mistake exactly.
+ */
+function ErrorCorrectionFields({ control, register, errors, isPending }: SubProps) {
+  const t = useTranslations('Authoring.exercises');
+  const { fields, append, remove } = useFieldArray({ control, name: 'ecSentences' });
+  const sentences = useWatch({ control, name: 'ecSentences' });
+
+  return (
+    <div className="rounded-md border border-border p-3 space-y-3">
+      <p className="text-sm font-medium text-(--ssz-text-primary)">{t('ecSentences')}</p>
+      <p className="text-xs text-(--ssz-text-muted)">{t('ecSentencesHint')}</p>
+      {typeof errors.ecSentences?.message === 'string' && (
+        <p className="text-xs text-destructive">{errors.ecSentences.message}</p>
+      )}
+
+      {fields.map((field, index) => {
+        const chunks = splitChunks(sentences?.[index]?.chunks ?? '');
+
+        return (
+          <div key={field.id} className="space-y-2 rounded-md bg-(--ssz-bg-muted) p-2.5">
+            <div className="flex items-start gap-2">
+              <span className="w-6 shrink-0 pt-2 text-xs font-mono text-(--ssz-text-muted)">
+                {index + 1}.
+              </span>
+              <div className="flex-1">
+                <Textarea
+                  rows={2}
+                  placeholder={t('ecChunksPlaceholder')}
+                  className="font-mono text-sm"
+                  hasError={!!errors.ecSentences?.[index]?.chunks}
+                  disabled={isPending}
+                  {...register(`ecSentences.${index}.chunks`)}
+                />
+                {errors.ecSentences?.[index]?.chunks?.message && (
+                  <p className="mt-1 text-xs text-destructive">
+                    {errors.ecSentences[index].chunks.message}
+                  </p>
+                )}
+                {chunks.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {chunks.map((chunk, j) => (
+                      <span
+                        key={j}
+                        className="rounded border border-border bg-surface px-1.5 py-0.5 text-xs text-(--ssz-text-secondary)"
+                      >
+                        <span className="mr-1 font-mono text-(--ssz-text-muted)">{j + 1}</span>
+                        {chunk}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => remove(index)}
+                disabled={fields.length <= 1}
+                aria-label={t('ecRemoveSentence')}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <SentenceFixes
+              control={control}
+              register={register}
+              errors={errors}
+              isPending={isPending}
+              sentenceIndex={index}
+            />
+          </div>
+        );
+      })}
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => append({ chunks: '', fixes: [{ chunkIndex: '', accepted: '', note: '' }] })}
+      >
+        <Plus className="mr-1.5 h-4 w-4" />
+        {t('ecAddSentence')}
+      </Button>
+    </div>
+  );
+}
+
+/** The mistakes inside one error_correction sentence. */
+function SentenceFixes({
+  control,
+  register,
+  errors,
+  isPending,
+  sentenceIndex,
+}: SubProps & { sentenceIndex: number }) {
+  const t = useTranslations('Authoring.exercises');
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `ecSentences.${sentenceIndex}.fixes`,
+  });
+  const fixErrors = errors.ecSentences?.[sentenceIndex]?.fixes;
+
+  return (
+    <div className="space-y-1.5 pl-8">
+      {fields.map((field, j) => (
+        <div key={field.id} className="flex items-center gap-2">
+          <div className="w-14 shrink-0">
+            <Input
+              placeholder={t('ecChunkIndexPlaceholder')}
+              hasError={!!fixErrors?.[j]?.chunkIndex}
+              disabled={isPending}
+              {...register(`ecSentences.${sentenceIndex}.fixes.${j}.chunkIndex`)}
+            />
+          </div>
+          <div className="flex-1">
+            <Input
+              placeholder={t('ecAcceptedPlaceholder')}
+              hasError={!!fixErrors?.[j]?.accepted}
+              disabled={isPending}
+              {...register(`ecSentences.${sentenceIndex}.fixes.${j}.accepted`)}
+            />
+          </div>
+          <div className="w-40 shrink-0">
+            <Input
+              placeholder={t('ecNotePlaceholder')}
+              disabled={isPending}
+              {...register(`ecSentences.${sentenceIndex}.fixes.${j}.note`)}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => remove(j)}
+            disabled={fields.length <= 1}
+            aria-label={t('ecRemoveFix')}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+      {typeof fixErrors?.[0]?.chunkIndex?.message === 'string' && (
+        <p className="text-xs text-destructive">{fixErrors[0].chunkIndex.message}</p>
+      )}
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => append({ chunkIndex: '', accepted: '', note: '' })}
+      >
+        <Plus className="mr-1.5 h-4 w-4" />
+        {t('ecAddFix')}
+      </Button>
     </div>
   );
 }

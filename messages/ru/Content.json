@@ -91,7 +91,8 @@
     "writing_task": "Письменное задание",
     "sentence_schema": "Схема предложения",
     "word_bank_fill": "Пропуски с банком слов",
-    "text_order": "Расставить по порядку"
+    "text_order": "Расставить по порядку",
+    "error_correction": "Найти и исправить ошибки"
   },
   "wordBank": "Банк слов",
   "matchColumnLeft": "Элементы",

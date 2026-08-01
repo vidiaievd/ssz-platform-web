@@ -20,6 +20,8 @@ import {
   TextOrderBody,
   checkTextOrder,
   shuffleOrder,
+  ErrorCorrectionBody,
+  checkErrorCorrection,
   gradeMcq,
   gradeMatch,
   gradeTranslate,
@@ -41,6 +43,10 @@ import {
   type WordBankSentence,
   type OrderLine,
   type TextOrderResults,
+  type ErrorCorrectionExpected,
+  type ErrorCorrectionResults,
+  type ErrorCorrectionValue,
+  type ErrorSentence,
 } from '@/features/student/exercises/runner';
 
 /* ── types ──────────────────────────────────────────────────────────────── */
@@ -484,6 +490,86 @@ function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
+
+function ErrorCorrectionSolver({ display, phase, ok, onCheck }: SolverProps) {
+  const t = useTranslations('ExerciseRunner');
+  const [value, setValue] = useState<ErrorCorrectionValue>({});
+  const [results, setResults] = useState<ErrorCorrectionResults>({});
+  const [canSubmit, setCanSubmit] = useState(false);
+  const c = display.content;
+
+  const items: ErrorSentence[] = useMemo(
+    () =>
+      (Array.isArray(c.items) ? c.items : [])
+        .filter((it): it is { id: string; chunks: unknown } => typeof (it as { id?: unknown }).id === 'string')
+        .map((it) => ({
+          id: it.id,
+          chunks: (Array.isArray(it.chunks) ? it.chunks : [])
+            .filter((ch): ch is { id: string; text: string } => typeof (ch as { id?: unknown }).id === 'string')
+            .map((ch) => ({ id: ch.id, text: str(ch.text) })),
+        })),
+    [c.items],
+  );
+
+  const expected: ErrorCorrectionExpected = {
+    corrections: (Array.isArray(display.expectedAnswers.corrections)
+      ? display.expectedAnswers.corrections
+      : []
+    )
+      .filter((cor): cor is { item_id: string; chunk_id: string; accepted: unknown; note?: string } =>
+        typeof (cor as { chunk_id?: unknown }).chunk_id === 'string',
+      )
+      .map((cor) => ({
+        item_id: str(cor.item_id),
+        chunk_id: cor.chunk_id,
+        accepted: strArr(cor.accepted),
+        ...(str(cor.note) && { note: str(cor.note) }),
+      })),
+  };
+
+  return (
+    <>
+      <ErrorCorrectionBody
+        content={{
+          items,
+          mistakeCount:
+            typeof c.mistake_count === 'number' ? c.mistake_count : expected.corrections.length,
+          instruction: instr(display),
+        }}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={setCanSubmit}
+        phase={phase}
+        ok={ok}
+        mode="practice"
+        accent={ACCENT}
+        results={results}
+      />
+      {phase === 'answering' && (
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() => {
+            const graded = checkErrorCorrection(expected, value);
+            setResults(graded.results);
+            const tally = t('errorCorrection.partialScore', {
+              correct: graded.correct,
+              total: graded.total,
+            });
+            onCheck({
+              ok: graded.ok,
+              explanation: graded.ok
+                ? str(display.expectedAnswers.explanation) || undefined
+                : graded.falsePositives > 0
+                  ? `${tally} · ${t('errorCorrection.falsePositives', { n: graded.falsePositives })}`
+                  : tally,
+            });
+          }}
+        />
+      )}
+    </>
+  );
+}
+
 /* ── feedback banner ────────────────────────────────────────────────────── */
 
 function FeedbackBanner({ graded }: { graded: Graded }) {
@@ -536,6 +622,7 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   sentence_schema: SentenceSchemaSolver,
   word_bank_fill: WordBankFillSolver,
   text_order: TextOrderSolver,
+  error_correction: ErrorCorrectionSolver,
 };
 
 export interface ExerciseSolverProps {

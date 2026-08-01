@@ -226,9 +226,29 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
             ))}
           </ol>
         )}
+        {code === 'error_correction' && (
+          <ol className="space-y-2">
+            {(Array.isArray(content.items) ? (content.items as EcPreviewItem[]) : []).map((item, i) => (
+              <li key={i} className="flex flex-wrap items-center gap-1">
+                <span className="text-muted-foreground mr-0.5 text-xs">{i + 1}.</span>
+                {(Array.isArray(item.chunks) ? item.chunks : []).map((chunk, j) => (
+                  <span key={j} className="rounded-md border border-border px-1.5 py-0.5 text-sm">
+                    {typeof (chunk as { text?: unknown }).text === 'string'
+                      ? (chunk as { text: string }).text
+                      : ''}
+                  </span>
+                ))}
+              </li>
+            ))}
+          </ol>
+        )}
       </CardBody>
     </Card>
   );
+}
+
+interface EcPreviewItem {
+  chunks?: unknown[];
 }
 
 const TYPE_LABEL_KEYS = {
@@ -242,4 +262,5 @@ const TYPE_LABEL_KEYS = {
   sentence_schema: true,
   word_bank_fill: true,
   text_order: true,
+  error_correction: true,
 } as const;

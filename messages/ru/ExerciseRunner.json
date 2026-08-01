@@ -83,5 +83,12 @@
     "moveDown": "Ниже",
     "dragHandle": "Перетащите, чтобы изменить порядок, позиция {n} из {total}",
     "partialScore": "{correct} из {total} строк на своём месте"
+  },
+  "errorCorrection": {
+    "remaining": "Исправлений сделано: {found} из {total}",
+    "hint": "Нажмите на часть предложения, чтобы переписать её.",
+    "editLabel": "Переписать «{text}»",
+    "partialScore": "Исправлено {correct} из {total} ошибок",
+    "falsePositives": "Изменено верных частей: {n}"
   }
 }

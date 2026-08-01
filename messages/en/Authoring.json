@@ -185,7 +185,8 @@
       "writing_task": "Writing task",
       "sentence_schema": "Sentence schema",
       "word_bank_fill": "Word bank gap-fill",
-      "text_order": "Put in order"
+      "text_order": "Put in order",
+      "error_correction": "Find and correct mistakes"
     },
     "difficultyLevel": "Difficulty",
     "difficultyLevelNone": "Any level",
@@ -303,7 +304,17 @@
     "mpVariant": "Layout",
     "mpVariant_pairs": "Word pairs",
     "mpVariant_halves": "Sentence halves",
-    "mpVariantHint": "Sentence halves number the left column 1, 2, 3 … and letter the right A, B, C …"
+    "mpVariantHint": "Sentence halves number the left column 1, 2, 3 … and letter the right A, B, C …",
+    "ecSentences": "Sentences",
+    "ecSentencesHint": "Split each sentence into parts with | — the learner taps a part to rewrite it. Then name the faulty part by its number.",
+    "ecChunksPlaceholder": "I could see | that the more | I talked to Sue | she was warming up with me",
+    "ecChunkIndexPlaceholder": "Part #",
+    "ecAcceptedPlaceholder": "Correct wording (comma-separated variants)",
+    "ecNotePlaceholder": "Note (optional)",
+    "ecAddSentence": "Add sentence",
+    "ecRemoveSentence": "Remove sentence",
+    "ecAddFix": "Add mistake",
+    "ecRemoveFix": "Remove mistake"
   },
   "grammar": {
     "add": "Add rule",

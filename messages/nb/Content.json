@@ -91,7 +91,8 @@
     "writing_task": "Skriveoppgave",
     "sentence_schema": "Setningsskjema",
     "word_bank_fill": "Ordbank-lukeoppgave",
-    "text_order": "Sett i rekkefølge"
+    "text_order": "Sett i rekkefølge",
+    "error_correction": "Finn og rett feil"
   },
   "wordBank": "Ordbank",
   "matchColumnLeft": "Elementer",

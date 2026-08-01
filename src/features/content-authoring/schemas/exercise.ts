@@ -14,6 +14,7 @@ export const EXERCISE_TYPES = [
   'sentence_schema',
   'word_bank_fill',
   'text_order',
+  'error_correction',
 ] as const;
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
 
@@ -32,6 +33,13 @@ export type RationaleVerdict = (typeof RATIONALE_VERDICTS)[number];
 const splitBank = (value: string | undefined): string[] =>
   (value ?? '')
     .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+/** "a | b | c" → ["a", "b", "c"], dropping empty parts. */
+export const splitChunks = (value: string): string[] =>
+  value
+    .split('|')
     .map((s) => s.trim())
     .filter(Boolean);
 
@@ -133,6 +141,26 @@ export const exerciseFormSchema = z
     toKind: z.enum(TEXT_ORDER_KINDS).optional(),
     toLines: z
       .array(z.object({ text: z.string().max(1000), speaker: z.string().max(100).optional() }))
+      .optional(),
+
+    // error_correction — each sentence is written as chunks separated by `|`,
+    // and the faulty chunk is named by its 1-based position with the rewrite
+    // that replaces it.
+    ecSentences: z
+      .array(
+        z.object({
+          chunks: z.string().max(2000),
+          fixes: z
+            .array(
+              z.object({
+                chunkIndex: z.string().max(4),
+                accepted: z.string().max(500),
+                note: z.string().max(500).optional(),
+              }),
+            )
+            .optional(),
+        }),
+      )
       .optional(),
   })
   .superRefine((data, ctx) => {
@@ -251,6 +279,55 @@ export const exerciseFormSchema = z
             code: z.ZodIssueCode.custom,
             path: ['toLines'],
             message: 'At least 2 lines required',
+          });
+        }
+        break;
+      }
+      case 'error_correction': {
+        const sentences = (data.ecSentences ?? []).filter((s) => s.chunks.trim());
+        if (sentences.length < 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ecSentences'],
+            message: 'At least 1 sentence required',
+          });
+        }
+        let fixCount = 0;
+        sentences.forEach((sentence) => {
+          const index = (data.ecSentences ?? []).indexOf(sentence);
+          const chunkCount = splitChunks(sentence.chunks).length;
+          if (chunkCount < 2) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['ecSentences', index, 'chunks'],
+              message: 'Split the sentence into at least 2 parts with |',
+            });
+          }
+          (sentence.fixes ?? []).forEach((fix, j) => {
+            if (!fix.accepted.trim() && !fix.chunkIndex.trim()) return;
+            fixCount += 1;
+            const position = Number(fix.chunkIndex);
+            if (!Number.isInteger(position) || position < 1 || position > chunkCount) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['ecSentences', index, 'fixes', j, 'chunkIndex'],
+                message: `Part number between 1 and ${chunkCount}`,
+              });
+            }
+            if (!fix.accepted.trim()) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['ecSentences', index, 'fixes', j, 'accepted'],
+                message: 'Required',
+              });
+            }
+          });
+        });
+        if (sentences.length > 0 && fixCount === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ecSentences'],
+            message: 'At least 1 mistake required',
           });
         }
         break;

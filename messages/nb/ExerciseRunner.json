@@ -83,5 +83,12 @@
     "moveDown": "Flytt ned",
     "dragHandle": "Dra for å endre rekkefølge, plass {n} av {total}",
     "partialScore": "{correct} av {total} linjer på riktig plass"
+  },
+  "errorCorrection": {
+    "remaining": "Rettelser gjort: {found} av {total}",
+    "hint": "Trykk på en del av setningen for å skrive den om.",
+    "editLabel": "Skriv om «{text}»",
+    "partialScore": "{correct} av {total} feil rettet",
+    "falsePositives": "{n} riktige deler ble endret"
   }
 }

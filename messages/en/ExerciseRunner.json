@@ -83,5 +83,12 @@
     "moveDown": "Move down",
     "dragHandle": "Drag to reorder, position {n} of {total}",
     "partialScore": "{correct} of {total} lines in the right place"
+  },
+  "errorCorrection": {
+    "remaining": "Corrections made: {found} of {total}",
+    "hint": "Tap a part of the sentence to rewrite it.",
+    "editLabel": "Rewrite “{text}”",
+    "partialScore": "{correct} of {total} mistakes corrected",
+    "falsePositives": "{n} correct parts were changed"
   }
 }
