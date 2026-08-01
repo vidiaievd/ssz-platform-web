@@ -261,6 +261,52 @@ export interface VocabularyForm {
   value: string;
 }
 
+export type VocabularyGender = 'masculine' | 'feminine' | 'neuter' | 'common';
+
+/**
+ * The inflection paradigm as a *grid*, not a list: a noun's four cells, a verb's
+ * four tenses, an adjective's degrees. `forms` carries the same values as a flat
+ * label/value list — the two coexist because they answer different questions.
+ * `forms` is what the tokenizer matches surface forms against and what the
+ * "Alle former" drawer lists; `paradigm` is what a bøyning table can lay out in
+ * rows and columns, which a flat list cannot do without parsing its labels back.
+ *
+ * The first cell of every paradigm is the lemma itself, which is why each shape
+ * carries it under its own grammatical name rather than relying on the caller.
+ */
+export interface NounParadigm {
+  kind: 'noun';
+  gender?: VocabularyGender;
+  /** The lemma — "bil". The article (en/ei/et) is derived from `gender` at render time. */
+  indefiniteSingular: string;
+  definiteSingular?: string;
+  indefinitePlural?: string;
+  definitePlural?: string;
+}
+
+export interface VerbParadigm {
+  kind: 'verb';
+  verbClass?: string;
+  /** The lemma — "søke", without the "å" marker. */
+  infinitive: string;
+  present?: string;
+  past?: string;
+  /** Bare participle ("søkt"); the "har" auxiliary is a rendering concern. */
+  perfect?: string;
+}
+
+export interface AdjectiveParadigm {
+  kind: 'adjective';
+  /** The lemma — "erfaren". */
+  positive: string;
+  neuter?: string;
+  plural?: string;
+  comparative?: string;
+  superlative?: string;
+}
+
+export type VocabularyParadigm = NounParadigm | VerbParadigm | AdjectiveParadigm;
+
 export interface VocabularyItem {
   id: string;
   lemma: string;
@@ -269,6 +315,8 @@ export interface VocabularyItem {
   translations: VocabularyTranslation[];
   examples: VocabularyExample[];
   forms?: VocabularyForm[];
+  /** Grid-shaped view of `forms`, when the item's inflections fit a known paradigm. */
+  paradigm?: VocabularyParadigm;
   /** Media asset id for the pronunciation clip; resolve via `useMediaAsset` (FE5.1). */
   audioMediaId?: string;
 }

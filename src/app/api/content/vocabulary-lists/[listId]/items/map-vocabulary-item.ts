@@ -1,4 +1,9 @@
-import type { VocabularyForm, VocabularyItem } from '@/features/content/types';
+import type {
+  VocabularyForm,
+  VocabularyGender,
+  VocabularyItem,
+  VocabularyParadigm,
+} from '@/features/content/types';
 
 export interface BackendItemSummary {
   id: string;
@@ -62,6 +67,96 @@ function parseForms(properties: Record<string, unknown> | null | undefined): Voc
   return forms.length > 0 ? forms : undefined;
 }
 
+const GENDERS: VocabularyGender[] = ['masculine', 'feminine', 'neuter', 'common'];
+
+/** A trimmed non-empty string, or undefined — the shape every paradigm cell wants. */
+function str(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+/**
+ * The grid view of the same inflection keys `parseForms` flattens.
+ *
+ * Only the flat per-inflection keys can produce it: the documented authoring
+ * shape (`{ forms: [[label, value], …] }`) carries free-text labels that cannot
+ * be assigned to grid cells without guessing, so those items keep the flat list
+ * alone and the card falls back to rendering it.
+ *
+ * `plural_form` is deliberately read by two shapes — it is "Ubestemt flertall"
+ * for a noun and "Flertall" for an adjective, which is why the part of speech
+ * decides the shape before any key is read.
+ *
+ * Returns undefined when nothing but metadata (`gender`, `verb_class`) is
+ * present: a table whose only filled cell is the lemma teaches nothing.
+ */
+function parseParadigm(
+  lemma: string,
+  partOfSpeech: string | null,
+  properties: Record<string, unknown> | null | undefined,
+): VocabularyParadigm | undefined {
+  if (!properties) return undefined;
+
+  const gender = GENDERS.find((g) => g === properties.gender);
+  const hasTense = !!(properties.present_tense || properties.past_tense || properties.perfect_tense);
+
+  // A phrase is not a part of speech with a paradigm of its own, but the seeds
+  // conjugate verbal ones ("krysse fingrene"), so it follows its keys.
+  const kind =
+    partOfSpeech === 'noun'
+      ? 'noun'
+      : partOfSpeech === 'verb'
+        ? 'verb'
+        : partOfSpeech === 'adjective'
+          ? 'adjective'
+          : hasTense
+            ? 'verb'
+            : gender || properties.definite_singular
+              ? 'noun'
+              : undefined;
+
+  switch (kind) {
+    case 'noun': {
+      const paradigm = {
+        kind,
+        gender,
+        indefiniteSingular: lemma,
+        definiteSingular: str(properties.definite_singular),
+        indefinitePlural: str(properties.plural_form),
+        definitePlural: str(properties.definite_plural),
+      } as const;
+      return paradigm.definiteSingular || paradigm.indefinitePlural || paradigm.definitePlural
+        ? paradigm
+        : undefined;
+    }
+    case 'verb': {
+      const paradigm = {
+        kind,
+        verbClass: str(properties.verb_class),
+        infinitive: lemma,
+        present: str(properties.present_tense),
+        past: str(properties.past_tense),
+        perfect: str(properties.perfect_tense),
+      } as const;
+      return paradigm.present || paradigm.past || paradigm.perfect ? paradigm : undefined;
+    }
+    case 'adjective': {
+      const paradigm = {
+        kind,
+        positive: lemma,
+        neuter: str(properties.neuter_form),
+        plural: str(properties.plural_form),
+        comparative: str(properties.comparative),
+        superlative: str(properties.superlative),
+      } as const;
+      return paradigm.neuter || paradigm.plural || paradigm.comparative || paradigm.superlative
+        ? paradigm
+        : undefined;
+    }
+    default:
+      return undefined;
+  }
+}
+
 export function toFeShape(item: BackendItemFull): VocabularyItem {
   return {
     id: item.id,
@@ -70,6 +165,7 @@ export function toFeShape(item: BackendItemFull): VocabularyItem {
     ipa: item.ipaTranscription ?? undefined,
     audioMediaId: item.pronunciationAudioMediaId ?? undefined,
     forms: parseForms(item.grammaticalProperties),
+    paradigm: parseParadigm(item.word, item.partOfSpeech, item.grammaticalProperties),
     translations: item.translations.map((t) => ({
       languageCode: t.language,
       translation: t.primaryTranslation,
