@@ -77,5 +77,11 @@
     "blankLabel": "Пропуск у реченні {n}",
     "filledCount": "Заповнено {done} із {total} пропусків",
     "partialScore": "Правильно {correct} із {total} пропусків"
+  },
+  "textOrder": {
+    "moveUp": "Вище",
+    "moveDown": "Нижче",
+    "dragHandle": "Перетягніть, щоб змінити порядок, позиція {n} з {total}",
+    "partialScore": "{correct} із {total} рядків на своєму місці"
   }
 }

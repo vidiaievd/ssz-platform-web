@@ -90,7 +90,8 @@
     "short_answer": "Short answer",
     "writing_task": "Writing task",
     "sentence_schema": "Sentence schema",
-    "word_bank_fill": "Word bank gap-fill"
+    "word_bank_fill": "Word bank gap-fill",
+    "text_order": "Put in order"
   },
   "wordBank": "Word bank",
   "matchColumnLeft": "Items",

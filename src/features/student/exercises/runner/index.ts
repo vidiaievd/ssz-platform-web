@@ -42,6 +42,15 @@ export type {
 export { WritingBody } from './writing-body';
 export type { WritingBodyProps, WritingContent, WritingValue, WritingTopic } from './writing-body';
 
+export { TextOrderBody, shuffleOrder } from './text-order-body';
+export type {
+  TextOrderBodyProps,
+  TextOrderContent,
+  TextOrderExpectedAnswers,
+  TextOrderResults,
+  OrderLine,
+} from './text-order-body';
+
 export { WordBankFillBody, parseSentence } from './word-bank-fill-body';
 export type {
   WordBankFillBodyProps,
@@ -71,6 +80,7 @@ export {
   gradeShortAnswer,
   gradeSentenceSchema,
   checkWordBankFill,
+  checkTextOrder,
 } from './grading';
 export type { TranslateExpectedAnswers } from './grading';
 

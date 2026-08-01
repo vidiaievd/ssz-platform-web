@@ -211,6 +211,21 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
             </ol>
           </div>
         )}
+        {code === 'text_order' && (
+          <ol className="space-y-1.5">
+            {(Array.isArray(content.items) ? (content.items as LabeledItem[]) : []).map((item, i) => (
+              <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
+                <span className="text-muted-foreground mr-1.5 text-xs">{i + 1}.</span>
+                {typeof (item as { speaker?: unknown }).speaker === 'string' && (
+                  <span className="mr-1.5 font-medium">{(item as { speaker: string }).speaker}:</span>
+                )}
+                {typeof (item as { text?: unknown }).text === 'string'
+                  ? (item as { text: string }).text
+                  : ''}
+              </li>
+            ))}
+          </ol>
+        )}
       </CardBody>
     </Card>
   );
@@ -226,4 +241,5 @@ const TYPE_LABEL_KEYS = {
   writing_task: true,
   sentence_schema: true,
   word_bank_fill: true,
+  text_order: true,
 } as const;

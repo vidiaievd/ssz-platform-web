@@ -181,7 +181,8 @@
       "short_answer": "Kort svar",
       "writing_task": "Skriveoppgave",
       "sentence_schema": "Setningsskjema",
-      "word_bank_fill": "Ordbank-lukeoppgave"
+      "word_bank_fill": "Ordbank-lukeoppgave",
+      "text_order": "Sett i rekkefølge"
     },
     "difficultyLevel": "Vanskelighetsgrad",
     "difficultyLevelNone": "Alle nivåer",
@@ -286,7 +287,16 @@
     "wbfSentencePlaceholder": "Jeg liker ikke når folk ___1___ hele tiden.",
     "wbfAnswersPlaceholder": "Godkjente svar, kommaseparert",
     "wbfAddSentence": "Legg til setning",
-    "wbfRemoveSentence": "Fjern setning"
+    "wbfRemoveSentence": "Fjern setning",
+    "toKind": "Presentasjon",
+    "toKind_dialogue": "Dialog",
+    "toKind_sentences": "Setninger",
+    "toLines": "Linjer i riktig rekkefølge",
+    "toLinesHint": "Skriv dem i riktig rekkefølge — eleven ser dem stokket om.",
+    "toLinePlaceholder": "Hei, jeg heter Marina. Hva gjør du her?",
+    "toSpeakerPlaceholder": "Taler",
+    "toAddLine": "Legg til linje",
+    "toRemoveLine": "Fjern linje"
   },
   "grammar": {
     "add": "Legg til regel",

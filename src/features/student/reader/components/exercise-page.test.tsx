@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '@/test/render';
@@ -142,6 +142,62 @@ describe('ExercisePage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Check' }));
 
       expect(screen.getByText('Correct')).toBeInTheDocument();
+    });
+  });
+
+  describe('text_order', () => {
+    const orderExercise = {
+      templateCode: 'text_order',
+      content: {
+        kind: 'dialogue',
+        items: [
+          { id: 'a', text: 'Hi, I am Marina.' },
+          { id: 'b', text: 'Nice to meet you.' },
+          { id: 'c', text: 'See you around!' },
+        ],
+      },
+      expectedAnswers: { order: ['a', 'b', 'c'] },
+    };
+
+    /** Drags nothing — reorders through the per-line move buttons. */
+    function currentOrder() {
+      return screen.getAllByRole('listitem').map((li) => li.textContent ?? '');
+    }
+
+    it('starts shuffled rather than in the expected order', () => {
+      mockExercise(orderExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      expect(currentOrder()[0]).not.toContain('Hi, I am Marina.');
+    });
+
+    it('grades the arrangement the learner leaves behind', () => {
+      mockExercise(orderExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      // Whatever the shuffle produced, sort it back with the move-up buttons.
+      const wanted = ['Hi, I am Marina.', 'Nice to meet you.', 'See you around!'];
+      for (let target = 0; target < wanted.length; target++) {
+        for (;;) {
+          const at = currentOrder().findIndex((text) => text.includes(wanted[target]!));
+          if (at <= target) break;
+          const item = screen.getAllByRole('listitem')[at]!;
+          fireEvent.click(within(item).getByLabelText('Move up'));
+        }
+      }
+
+      fireEvent.click(screen.getByRole('button', { name: 'Check' }));
+      expect(screen.getByText('Correct')).toBeInTheDocument();
+    });
+
+    it('reports how many lines landed right when the order is wrong', () => {
+      mockExercise(orderExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Check' }));
+
+      expect(screen.getByText('Not quite')).toBeInTheDocument();
+      expect(screen.getByText(/of 3 lines in the right place/)).toBeInTheDocument();
     });
   });
 

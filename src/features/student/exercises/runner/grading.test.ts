@@ -10,6 +10,7 @@ import {
   gradeMatch,
   type TranslateExpectedAnswers,
   checkWordBankFill,
+  checkTextOrder,
 } from './grading';
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
@@ -273,5 +274,29 @@ describe('checkWordBankFill', () => {
     });
 
     expect(result.ok).toBe(true);
+  });
+});
+
+describe('checkTextOrder', () => {
+  const expected = { order: ['a', 'b', 'c', 'd'] };
+
+  it('is ok only for the exact sequence', () => {
+    expect(checkTextOrder(expected, ['a', 'b', 'c', 'd']).ok).toBe(true);
+    expect(checkTextOrder(expected, ['a', 'c', 'b', 'd']).ok).toBe(false);
+  });
+
+  it('counts items sitting in their own slot', () => {
+    const result = checkTextOrder(expected, ['a', 'c', 'b', 'd']);
+
+    expect(result.correct).toBe(2);
+    expect(result.total).toBe(4);
+    expect(result.results).toEqual({ a: true, b: false, c: false, d: true });
+  });
+
+  it('is never ok when items are missing, even if the rest line up', () => {
+    const result = checkTextOrder(expected, ['a', 'b', 'c']);
+
+    expect(result.ok).toBe(false);
+    expect(result.correct).toBe(3);
   });
 });

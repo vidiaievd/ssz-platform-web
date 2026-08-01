@@ -24,6 +24,11 @@ const base: ExerciseFormValues = {
   ],
   wbfWordBank: '',
   wbfSentences: [{ text: '', answers: [''] }],
+  toKind: 'dialogue',
+  toLines: [
+    { text: '', speaker: '' },
+    { text: '', speaker: '' },
+  ],
 };
 
 describe('buildExercisePayload', () => {
@@ -535,6 +540,67 @@ describe('word_bank_fill', () => {
     expect(parsed.wbfSentences).toEqual([
       { text: 'I hate it when people ___1___ all the time.', answers: ['show off'] },
       { text: 'They ___1___ and we ___2___ anyway.', answers: ['boast', 'clicked with, clicked'] },
+    ]);
+  });
+});
+
+describe('text_order', () => {
+  const values: ExerciseFormValues = {
+    ...base,
+    templateCode: 'text_order',
+    toKind: 'dialogue',
+    toLines: [
+      { text: 'Hi, I am Marina.', speaker: 'Marina' },
+      { text: 'Nice to meet you.', speaker: 'Alex' },
+      { text: '   ', speaker: '' },
+    ],
+  };
+
+  it('builds items in the authored order and answers the same sequence', () => {
+    const { content, expectedAnswers } = buildExercisePayload(values);
+
+    expect(content).toEqual({
+      kind: 'dialogue',
+      items: [
+        { id: 'line-0', text: 'Hi, I am Marina.', speaker: 'Marina' },
+        { id: 'line-1', text: 'Nice to meet you.', speaker: 'Alex' },
+      ],
+    });
+    expect(expectedAnswers).toEqual({ order: ['line-0', 'line-1'] });
+  });
+
+  it('omits an empty speaker instead of storing a blank one', () => {
+    const { content } = buildExercisePayload({
+      ...values,
+      toKind: 'sentences',
+      toLines: [
+        { text: 'First.', speaker: '' },
+        { text: 'Second.', speaker: '' },
+      ],
+    });
+
+    expect(content.items).toEqual([
+      { id: 'line-0', text: 'First.' },
+      { id: 'line-1', text: 'Second.' },
+    ]);
+  });
+
+  it('restores the authored order from expectedAnswers, not from content order', () => {
+    const parsed = parseExerciseToForm({
+      templateCode: 'text_order',
+      content: {
+        kind: 'dialogue',
+        items: [
+          { id: 'line-1', text: 'Nice to meet you.', speaker: 'Alex' },
+          { id: 'line-0', text: 'Hi, I am Marina.', speaker: 'Marina' },
+        ],
+      },
+      expectedAnswers: { order: ['line-0', 'line-1'] },
+    });
+
+    expect(parsed.toLines).toEqual([
+      { text: 'Hi, I am Marina.', speaker: 'Marina' },
+      { text: 'Nice to meet you.', speaker: 'Alex' },
     ]);
   });
 });

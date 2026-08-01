@@ -90,7 +90,8 @@
     "short_answer": "Краткий ответ",
     "writing_task": "Письменное задание",
     "sentence_schema": "Схема предложения",
-    "word_bank_fill": "Пропуски с банком слов"
+    "word_bank_fill": "Пропуски с банком слов",
+    "text_order": "Расставить по порядку"
   },
   "wordBank": "Банк слов",
   "matchColumnLeft": "Элементы",

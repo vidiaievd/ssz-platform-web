@@ -181,7 +181,8 @@
       "short_answer": "Коротка відповідь",
       "writing_task": "Письмове завдання",
       "sentence_schema": "Схема речення",
-      "word_bank_fill": "Пропуски з банком слів"
+      "word_bank_fill": "Пропуски з банком слів",
+      "text_order": "Розставити по порядку"
     },
     "difficultyLevel": "Складність",
     "difficultyLevelNone": "Будь-який рівень",
@@ -286,7 +287,16 @@
     "wbfSentencePlaceholder": "Не люблю, коли люди ___1___ увесь час.",
     "wbfAnswersPlaceholder": "Прийнятні відповіді, через кому",
     "wbfAddSentence": "Додати речення",
-    "wbfRemoveSentence": "Видалити речення"
+    "wbfRemoveSentence": "Видалити речення",
+    "toKind": "Подання",
+    "toKind_dialogue": "Діалог",
+    "toKind_sentences": "Речення",
+    "toLines": "Рядки в правильному порядку",
+    "toLinesHint": "Уводьте їх у правильному порядку — учень побачить їх перемішаними.",
+    "toLinePlaceholder": "Привіт, я Марина. Що привело тебе сюди?",
+    "toSpeakerPlaceholder": "Мовець",
+    "toAddLine": "Додати рядок",
+    "toRemoveLine": "Видалити рядок"
   },
   "grammar": {
     "add": "Додати правило",

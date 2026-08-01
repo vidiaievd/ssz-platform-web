@@ -77,5 +77,11 @@
     "blankLabel": "Пропуск в предложении {n}",
     "filledCount": "Заполнено {done} из {total} пропусков",
     "partialScore": "Верно {correct} из {total} пропусков"
+  },
+  "textOrder": {
+    "moveUp": "Выше",
+    "moveDown": "Ниже",
+    "dragHandle": "Перетащите, чтобы изменить порядок, позиция {n} из {total}",
+    "partialScore": "{correct} из {total} строк на своём месте"
   }
 }

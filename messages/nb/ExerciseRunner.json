@@ -77,5 +77,11 @@
     "blankLabel": "Luke i setning {n}",
     "filledCount": "{done} av {total} luker fylt ut",
     "partialScore": "{correct} av {total} luker riktige"
+  },
+  "textOrder": {
+    "moveUp": "Flytt opp",
+    "moveDown": "Flytt ned",
+    "dragHandle": "Dra for å endre rekkefølge, plass {n} av {total}",
+    "partialScore": "{correct} av {total} linjer på riktig plass"
   }
 }

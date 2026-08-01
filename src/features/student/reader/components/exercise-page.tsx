@@ -17,6 +17,9 @@ import {
   SentenceSchemaBody,
   WordBankFillBody,
   checkWordBankFill,
+  TextOrderBody,
+  checkTextOrder,
+  shuffleOrder,
   gradeMcq,
   gradeMatch,
   gradeTranslate,
@@ -36,6 +39,8 @@ import {
   type WordBankFillResults,
   type WordBankFillValue,
   type WordBankSentence,
+  type OrderLine,
+  type TextOrderResults,
 } from '@/features/student/exercises/runner';
 
 /* ── types ──────────────────────────────────────────────────────────────── */
@@ -409,6 +414,72 @@ function WordBankFillSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
+function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
+  const t = useTranslations('ExerciseRunner');
+  const c = display.content;
+
+  const items: OrderLine[] = useMemo(
+    () =>
+      (Array.isArray(c.items) ? c.items : [])
+        .filter((it): it is { id: string; text: string; speaker?: string } =>
+          typeof (it as { id?: unknown }).id === 'string',
+        )
+        .map((it) => ({
+          id: it.id,
+          text: str(it.text),
+          ...(str(it.speaker) && { speaker: str(it.speaker) }),
+        })),
+    [c.items],
+  );
+
+  // Seeded by the exercise id: reloading the page re-poses the same puzzle.
+  const [value, setValue] = useState<string[]>(() =>
+    shuffleOrder(
+      items.map((i) => i.id),
+      display.id,
+    ),
+  );
+  const [results, setResults] = useState<TextOrderResults>({});
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  const expectedOrder = strArr(display.expectedAnswers.order);
+
+  return (
+    <>
+      <TextOrderBody
+        content={{
+          items,
+          kind: c.kind === 'sentences' ? 'sentences' : 'dialogue',
+          instruction: instr(display),
+        }}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={setCanSubmit}
+        phase={phase}
+        ok={ok}
+        mode="practice"
+        accent={ACCENT}
+        results={results}
+      />
+      {phase === 'answering' && (
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() => {
+            const graded = checkTextOrder({ order: expectedOrder }, value);
+            setResults(graded.results);
+            onCheck({
+              ok: graded.ok,
+              explanation: graded.ok
+                ? str(display.expectedAnswers.explanation) || undefined
+                : t('textOrder.partialScore', { correct: graded.correct, total: graded.total }),
+            });
+          }}
+        />
+      )}
+    </>
+  );
+}
+
 /* ── feedback banner ────────────────────────────────────────────────────── */
 
 function FeedbackBanner({ graded }: { graded: Graded }) {
@@ -460,6 +531,7 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   writing_task: WritingSolver,
   sentence_schema: SentenceSchemaSolver,
   word_bank_fill: WordBankFillSolver,
+  text_order: TextOrderSolver,
 };
 
 export interface ExerciseSolverProps {

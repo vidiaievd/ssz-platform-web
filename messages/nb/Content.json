@@ -90,7 +90,8 @@
     "short_answer": "Kort svar",
     "writing_task": "Skriveoppgave",
     "sentence_schema": "Setningsskjema",
-    "word_bank_fill": "Ordbank-lukeoppgave"
+    "word_bank_fill": "Ordbank-lukeoppgave",
+    "text_order": "Sett i rekkefølge"
   },
   "wordBank": "Ordbank",
   "matchColumnLeft": "Elementer",

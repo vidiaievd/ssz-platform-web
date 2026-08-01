@@ -198,6 +198,26 @@ describe('exerciseFormSchema', () => {
     expect(result.error.issues.map((i) => i.path.join('.'))).toContain('wbfSentences.0.answers.1');
   });
 
+  it('text_order: accepts two or more lines', () => {
+    expect(
+      exerciseFormSchema.safeParse({
+        templateCode: 'text_order',
+        toKind: 'dialogue',
+        toLines: [{ text: 'Hei.' }, { text: 'Hei igjen.' }],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('text_order: rejects a single line', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'text_order',
+      toLines: [{ text: 'Hei.' }, { text: '  ' }],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('toLines');
+  });
+
   it('fill_in_blank: accepts a text with at least one blank', () => {
     expect(
       exerciseFormSchema.safeParse({

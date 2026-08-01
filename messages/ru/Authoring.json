@@ -181,7 +181,8 @@
       "short_answer": "Краткий ответ",
       "writing_task": "Письменное задание",
       "sentence_schema": "Схема предложения",
-      "word_bank_fill": "Пропуски с банком слов"
+      "word_bank_fill": "Пропуски с банком слов",
+      "text_order": "Расставить по порядку"
     },
     "difficultyLevel": "Сложность",
     "difficultyLevelNone": "Любой уровень",
@@ -286,7 +287,16 @@
     "wbfSentencePlaceholder": "Не люблю, когда люди ___1___ всё время.",
     "wbfAnswersPlaceholder": "Допустимые ответы, через запятую",
     "wbfAddSentence": "Добавить предложение",
-    "wbfRemoveSentence": "Удалить предложение"
+    "wbfRemoveSentence": "Удалить предложение",
+    "toKind": "Подача",
+    "toKind_dialogue": "Диалог",
+    "toKind_sentences": "Предложения",
+    "toLines": "Строки в правильном порядке",
+    "toLinesHint": "Вводите их в правильном порядке — ученик увидит их перемешанными.",
+    "toLinePlaceholder": "Привет, я Марина. Что тебя сюда привело?",
+    "toSpeakerPlaceholder": "Говорящий",
+    "toAddLine": "Добавить строку",
+    "toRemoveLine": "Удалить строку"
   },
   "grammar": {
     "add": "Добавить правило",

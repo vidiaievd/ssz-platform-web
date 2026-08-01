@@ -237,6 +237,28 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
+        {values.templateCode === 'text_order' &&
+          ((values.toLines ?? []).some((l) => l.text.trim()) ? (
+            <ol className="flex flex-col gap-1.5">
+              {(values.toLines ?? [])
+                .filter((l) => l.text.trim())
+                .map((line, i) => (
+                  <li
+                    key={i}
+                    className="rounded-[11px] border border-(--ssz-border-default) bg-surface px-3 py-2 text-sm text-(--ssz-text-primary)"
+                  >
+                    <span className="mr-1.5 text-xs text-muted-foreground">{i + 1}.</span>
+                    {line.speaker?.trim() && (
+                      <span className="mr-1.5 font-semibold">{line.speaker.trim()}:</span>
+                    )}
+                    {line.text}
+                  </li>
+                ))}
+            </ol>
+          ) : (
+            empty
+          ))}
+
         {values.instructions && (
           <p className="mt-3.5 text-xs text-muted-foreground">{values.instructions}</p>
         )}

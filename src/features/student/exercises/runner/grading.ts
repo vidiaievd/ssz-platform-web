@@ -3,6 +3,7 @@ import type { FillExpectedAnswers } from './fill-body';
 import type { MatchPair } from './match-body';
 import type { ShortAnswerExpectedAnswers } from './short-answer-body';
 import type { SentenceSchemaExpectedAnswers } from './sentence-schema-body';
+import type { TextOrderExpectedAnswers, TextOrderResults } from './text-order-body';
 import type {
   WordBankFillExpectedAnswers,
   WordBankFillResults,
@@ -132,4 +133,31 @@ export function checkWordBankFill(
   }
 
   return { ok: total > 0 && correctCount === total, results, correct: correctCount, total };
+}
+
+/**
+ * Grade an ordering exercise. Mirrors the engine's TextOrderValidator: an item
+ * counts as correct when it sits in its own slot, and an arrangement with the
+ * wrong number of items is never fully correct.
+ */
+export function checkTextOrder(
+  expectedAnswers: TextOrderExpectedAnswers,
+  value: string[],
+): { ok: boolean; results: TextOrderResults; correct: number; total: number } {
+  const results: TextOrderResults = {};
+  let correctCount = 0;
+
+  expectedAnswers.order.forEach((id, expectedIndex) => {
+    const correct = value.indexOf(id) === expectedIndex;
+    results[id] = correct;
+    if (correct) correctCount += 1;
+  });
+
+  const total = expectedAnswers.order.length;
+  return {
+    ok: value.length === total && correctCount === total,
+    results,
+    correct: correctCount,
+    total,
+  };
 }

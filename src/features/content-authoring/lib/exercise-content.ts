@@ -55,6 +55,11 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   ],
   wbfWordBank: '',
   wbfSentences: [{ text: '', answers: [''] }],
+  toKind: 'dialogue',
+  toLines: [
+    { text: '', speaker: '' },
+    { text: '', speaker: '' },
+  ],
 };
 
 /** A minimal, valid multiple-choice draft — used to seed picker/starter exercises. */
@@ -210,6 +215,19 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
         expectedAnswers: { items: answerItems },
       };
     }
+    case 'text_order': {
+      const lines = (values.toLines ?? []).filter((l) => l.text.trim());
+      const items = lines.map((l, i) => ({
+        id: `line-${i}`,
+        text: l.text.trim(),
+        ...(l.speaker?.trim() && { speaker: l.speaker.trim() }),
+      }));
+      return {
+        content: { items, kind: values.toKind ?? 'dialogue' },
+        // The authored order is the answer; content order carries no meaning.
+        expectedAnswers: { order: items.map((i) => i.id) },
+      };
+    }
     case 'sentence_schema': {
       // Keep only labelled fields; remember original index -> stable field id so
       // token assignments (by original index) survive the filtering.
@@ -254,6 +272,12 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       };
     }
   }
+}
+
+interface TextOrderItem {
+  id?: unknown;
+  text?: unknown;
+  speaker?: unknown;
 }
 
 interface WbfContentItem {
@@ -420,6 +444,24 @@ export function parseExerciseToForm(exercise: {
         wtMinWords: typeof content.min_words === 'number' ? String(content.min_words) : '',
         wtTopics: topics,
         wtRubric: typeof expectedAnswers.rubric === 'string' ? expectedAnswers.rubric : '',
+      };
+    }
+    case 'text_order': {
+      const rawItems = Array.isArray(content.items) ? (content.items as TextOrderItem[]) : [];
+      const byId = new Map(rawItems.map((it) => [String(it.id ?? ''), it]));
+      const order = Array.isArray(expectedAnswers.order)
+        ? (expectedAnswers.order as unknown[]).filter((id): id is string => typeof id === 'string')
+        : [];
+      // The authored order lives in expectedAnswers; content order is arbitrary.
+      const ordered = order.length > 0 ? order.map((id) => byId.get(id)).filter((it) => it != null) : rawItems;
+      const lines = ordered.map((it) => ({
+        text: typeof it!.text === 'string' ? it!.text : '',
+        speaker: typeof it!.speaker === 'string' ? it!.speaker : '',
+      }));
+      return {
+        ...base,
+        toKind: content.kind === 'sentences' ? 'sentences' : 'dialogue',
+        toLines: lines.length > 0 ? lines : DEFAULT_EXERCISE_VALUES.toLines,
       };
     }
     case 'word_bank_fill': {

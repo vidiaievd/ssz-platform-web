@@ -20,6 +20,7 @@ import {
   EXERCISE_TYPES,
   DIFFICULTY_LEVELS,
   SENTENCE_SCHEMA_TYPES,
+  TEXT_ORDER_KINDS,
   RATIONALE_VERDICTS,
   countBlanks,
   type ExerciseFormValues,
@@ -135,6 +136,9 @@ export function ExerciseFields({ control, register, errors, isPending, typeDisab
       )}
       {templateCode === 'word_bank_fill' && (
         <WordBankFillFields control={control} register={register} errors={errors} isPending={isPending} />
+      )}
+      {templateCode === 'text_order' && (
+        <TextOrderFields control={control} register={register} errors={errors} isPending={isPending} />
       )}
     </div>
   );
@@ -843,6 +847,93 @@ function WordBankFillFields({ control, register, errors, isPending }: SubProps) 
         >
           <Plus className="mr-1.5 h-4 w-4" />
           {t('wbfAddSentence')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * text_order — the list order is the correct order; the runner shuffles it for
+ * the learner, so authors read the dialogue top to bottom while editing.
+ */
+function TextOrderFields({ control, register, errors, isPending }: SubProps) {
+  const t = useTranslations('Authoring.exercises');
+  const { fields, append, remove } = useFieldArray({ control, name: 'toLines' });
+  const kindCtrl = useController({ control, name: 'toKind' });
+  const isDialogue = (kindCtrl.field.value ?? 'dialogue') === 'dialogue';
+
+  return (
+    <div className="rounded-md border border-border p-3 space-y-4">
+      <Field label={t('toKind')} htmlFor="ex-to-kind">
+        <Select
+          value={kindCtrl.field.value ?? 'dialogue'}
+          onValueChange={(v) => kindCtrl.field.onChange(v as (typeof TEXT_ORDER_KINDS)[number])}
+          disabled={isPending}
+        >
+          <SelectTrigger id="ex-to-kind" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TEXT_ORDER_KINDS.map((kind) => (
+              <SelectItem key={kind} value={kind}>
+                {t(`toKind_${kind}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-(--ssz-text-primary)">{t('toLines')}</p>
+        <p className="text-xs text-(--ssz-text-muted)">{t('toLinesHint')}</p>
+        {typeof errors.toLines?.message === 'string' && (
+          <p className="text-xs text-destructive">{errors.toLines.message}</p>
+        )}
+
+        {fields.map((field, index) => (
+          <div key={field.id} className="flex items-start gap-2">
+            <span className="w-6 shrink-0 pt-2 text-xs font-mono text-(--ssz-text-muted)">
+              {index + 1}.
+            </span>
+            {isDialogue && (
+              <div className="w-32 shrink-0">
+                <Input
+                  placeholder={t('toSpeakerPlaceholder')}
+                  disabled={isPending}
+                  {...register(`toLines.${index}.speaker`)}
+                />
+              </div>
+            )}
+            <div className="flex-1">
+              <Input
+                placeholder={t('toLinePlaceholder')}
+                hasError={!!errors.toLines?.[index]?.text}
+                disabled={isPending}
+                {...register(`toLines.${index}.text`)}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => remove(index)}
+              disabled={fields.length <= 2}
+              aria-label={t('toRemoveLine')}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => append({ text: '', speaker: '' })}
+        >
+          <Plus className="mr-1.5 h-4 w-4" />
+          {t('toAddLine')}
         </Button>
       </div>
     </div>

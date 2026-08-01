@@ -184,7 +184,8 @@
       "short_answer": "Short answer",
       "writing_task": "Writing task",
       "sentence_schema": "Sentence schema",
-      "word_bank_fill": "Word bank gap-fill"
+      "word_bank_fill": "Word bank gap-fill",
+      "text_order": "Put in order"
     },
     "difficultyLevel": "Difficulty",
     "difficultyLevelNone": "Any level",
@@ -289,7 +290,16 @@
     "wbfSentencePlaceholder": "I hate it when people ___1___ all the time.",
     "wbfAnswersPlaceholder": "Accepted answers, comma-separated",
     "wbfAddSentence": "Add sentence",
-    "wbfRemoveSentence": "Remove sentence"
+    "wbfRemoveSentence": "Remove sentence",
+    "toKind": "Presentation",
+    "toKind_dialogue": "Dialogue",
+    "toKind_sentences": "Sentences",
+    "toLines": "Lines in the correct order",
+    "toLinesHint": "Type them in the right order — the learner sees them shuffled.",
+    "toLinePlaceholder": "Hi, I’m Marina. What brings you here?",
+    "toSpeakerPlaceholder": "Speaker",
+    "toAddLine": "Add line",
+    "toRemoveLine": "Remove line"
   },
   "grammar": {
     "add": "Add rule",

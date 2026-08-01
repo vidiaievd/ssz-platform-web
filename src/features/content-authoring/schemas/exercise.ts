@@ -13,8 +13,11 @@ export const EXERCISE_TYPES = [
   'writing_task',
   'sentence_schema',
   'word_bank_fill',
+  'text_order',
 ] as const;
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
+
+export const TEXT_ORDER_KINDS = ['dialogue', 'sentences'] as const;
 
 export const SENTENCE_SCHEMA_TYPES = ['main', 'subordinate'] as const;
 
@@ -119,6 +122,13 @@ export const exerciseFormSchema = z
           answers: z.array(z.string().max(500)).optional(),
         }),
       )
+      .optional(),
+
+    // text_order — the list order IS the correct order; the runner shuffles it
+    // for the learner. `speaker` is an optional label for dialogue turns.
+    toKind: z.enum(TEXT_ORDER_KINDS).optional(),
+    toLines: z
+      .array(z.object({ text: z.string().max(1000), speaker: z.string().max(100).optional() }))
       .optional(),
   })
   .superRefine((data, ctx) => {
@@ -229,6 +239,16 @@ export const exerciseFormSchema = z
             }
           }
         });
+        break;
+      }
+      case 'text_order': {
+        if ((data.toLines ?? []).filter((l) => l.text.trim()).length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['toLines'],
+            message: 'At least 2 lines required',
+          });
+        }
         break;
       }
       case 'sentence_schema': {
