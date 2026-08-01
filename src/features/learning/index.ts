@@ -171,6 +171,24 @@ export type { UnitPhase, UnitStepperProps } from './components/unit-stepper';
 export { WordForms } from './components/word-forms';
 export type { WordFormsProps } from './components/word-forms';
 
+export { WordParadigmTable } from './components/word-paradigm-table';
+export type { WordParadigmTableProps } from './components/word-paradigm-table';
+
+export { WordCardPanel } from './components/word-card-panel';
+export type { WordCardPanelProps } from './components/word-card-panel';
+
+export { GlossaryTargetProvider, useGlossaryTarget } from './components/glossary-target-provider';
+export type { GlossaryTarget } from './components/glossary-target-provider';
+
+export { KnowWordButton } from './components/know-word-button';
+export { useSelectedWordStore } from './stores/selected-word-store';
+export type { SelectedWord } from './stores/selected-word-store';
+export { dictionaryUrl, DICTIONARY_HOST } from './lib/dictionary-link';
+export { toGlossaryTag } from './lib/pos-tag';
+
+export { useWordAudio } from './hooks/use-word-audio';
+export type { UseWordAudioResult, WordAudioSource } from './hooks/use-word-audio';
+
 /* ─── SRS components ─────────────────────────────────────────────── */
 export { SrsPage } from './components/srs/srs-page';
 export { SrsEntry } from './components/srs/entry';

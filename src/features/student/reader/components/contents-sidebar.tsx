@@ -41,12 +41,12 @@ function ItemRow({ item, active }: { item: ReaderSidebarSection['items'][number]
       <span
         className={cn(
           'flex size-5.5 shrink-0 items-center justify-center rounded-md',
-          done ? 'bg-primary-500' : active ? 'border-[1.5px] border-primary' : 'bg-subtle',
+          done ? 'bg-(--ssz-bg-brand-solid)' : active ? 'border-[1.5px] border-primary' : 'bg-subtle',
         )}
         aria-hidden="true"
       >
         {done ? (
-          <Check size={12} className="text-white" />
+          <Check size={12} className="text-(--ssz-text-on-brand)" />
         ) : locked ? (
           <Lock size={11} className="text-muted-foreground" />
         ) : (
@@ -118,7 +118,7 @@ function UnitBlock({ unit, activeItemId }: { unit: ReaderSidebarUnit; activeItem
         disabled={!hasChildren}
         className={cn(
           'flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors',
-          active ? 'bg-primary-500' : 'bg-transparent',
+          active ? 'bg-(--ssz-bg-brand-solid)' : 'bg-transparent',
           locked && 'opacity-55',
           hasChildren && !active && 'hover:bg-subtle',
         )}
@@ -135,25 +135,50 @@ function UnitBlock({ unit, activeItemId }: { unit: ReaderSidebarUnit; activeItem
           ) : locked ? (
             <Lock size={12} className="text-muted-foreground" />
           ) : (
-            <span className={cn('text-xs font-extrabold', active ? 'text-white' : 'text-secondary-foreground')}>
+            <span
+              className={cn(
+                'text-xs font-extrabold',
+                active ? 'text-(--ssz-text-on-brand)' : 'text-secondary-foreground',
+              )}
+            >
               {unit.position}
             </span>
           )}
         </span>
         <div className="min-w-0 flex-1">
-          <div className={cn('truncate text-[13px] leading-tight font-bold', active ? 'text-white' : 'text-foreground')}>
+          <div
+            className={cn(
+              'truncate text-[13px] leading-tight font-bold',
+              active ? 'text-(--ssz-text-on-brand)' : 'text-foreground',
+            )}
+          >
             {unit.title}
           </div>
-          <div className={cn('truncate text-[10.5px] leading-tight', active ? 'text-white/80' : 'text-muted-foreground')}>
+          {/*
+            The active row keeps its subtitle at full opacity — white/80 on the
+            brand fill is 2.78:1. Size and weight carry the hierarchy instead.
+          */}
+          <div
+            className={cn(
+              'truncate text-[10.5px] leading-tight',
+              active ? 'text-(--ssz-text-on-brand)' : 'text-muted-foreground',
+            )}
+          >
             {t('unitLabel', { n: unit.position })}
             {unit.subtitle ? ` · ${unit.subtitle}` : ''}
           </div>
         </div>
         {hasChildren &&
           (open ? (
-            <ChevronDown size={15} className={active ? 'text-white' : 'text-muted-foreground'} />
+            <ChevronDown
+              size={15}
+              className={active ? 'text-(--ssz-text-on-brand)' : 'text-muted-foreground'}
+            />
           ) : (
-            <ChevronRight size={15} className={active ? 'text-white' : 'text-muted-foreground'} />
+            <ChevronRight
+              size={15}
+              className={active ? 'text-(--ssz-text-on-brand)' : 'text-muted-foreground'}
+            />
           ))}
       </button>
       {open && hasChildren && (
@@ -193,8 +218,10 @@ export function ContentsSidebar({
         >
           <List size={20} />
         </button>
-        <div className="flex size-8 items-center justify-center rounded-[9px] bg-primary-500">
-          <span className="text-[11px] font-extrabold tracking-tighter text-white">SSZ</span>
+        <div className="flex size-8 items-center justify-center rounded-[9px] bg-(--ssz-bg-brand-solid)">
+          <span className="text-[11px] font-extrabold tracking-tighter text-(--ssz-text-on-brand)">
+            SSZ
+          </span>
         </div>
       </aside>
     );
@@ -209,8 +236,10 @@ export function ContentsSidebar({
     >
       <div className="border-b border-(--ssz-border-default) px-4 pt-4 pb-3.5">
         <div className="mb-3.5 flex items-center gap-2.5">
-          <div className="flex size-8.5 shrink-0 items-center justify-center rounded-[9px] bg-primary-500">
-            <span className="text-[13px] font-extrabold tracking-tighter text-white">SSZ</span>
+          <div className="flex size-8.5 shrink-0 items-center justify-center rounded-[9px] bg-(--ssz-bg-brand-solid)">
+            <span className="text-[13px] font-extrabold tracking-tighter text-(--ssz-text-on-brand)">
+              SSZ
+            </span>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 text-sm font-bold text-foreground">
@@ -238,7 +267,7 @@ export function ContentsSidebar({
             {course.itemsDone}/{course.itemsTotal}
           </span>
         </div>
-        <ProgressBar value={course.percentComplete} height={6} />
+        <ProgressBar value={course.percentComplete} height={6} label={t('courseProgress')} />
       </div>
       <div className="flex-1 overflow-auto px-2.5 pt-3 pb-6">
         <div className="px-2 pb-2.5 text-[10.5px] font-bold tracking-wide text-muted-foreground uppercase">

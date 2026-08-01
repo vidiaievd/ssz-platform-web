@@ -29,11 +29,14 @@ function Blocks({
   blocks,
   glossary,
   cefrLevel,
+  lang,
   annotations,
 }: {
   blocks: MarkdownBlock[];
   glossary: GlossaryIndex;
   cefrLevel?: string;
+  /** BCP-47 language of the prose — reaches the lookup card's pronunciation. */
+  lang?: string;
   annotations: AnnotationProps;
 }) {
   const { placed, authoredVocabulary, spansHidden, explanationLanguage } = annotations;
@@ -53,6 +56,7 @@ function Blocks({
                 )}
               >
                 <GlossaryText
+                  lang={lang}
                   text={block.text}
                   glossary={glossary}
                   cefrLevel={cefrLevel}
@@ -70,6 +74,7 @@ function Blocks({
                 {block.items.map((item, j) => (
                   <li key={j} className="font-reading m-0 text-(--ssz-text-primary)">
                     <GlossaryText
+                      lang={lang}
                       text={item.text}
                       glossary={glossary}
                       cefrLevel={cefrLevel}
@@ -92,6 +97,7 @@ function Blocks({
                 )}
               >
                 <Blocks
+                  lang={lang}
                   blocks={block.blocks}
                   glossary={glossary}
                   cefrLevel={cefrLevel}
@@ -107,6 +113,7 @@ function Blocks({
                 style={{ textWrap: 'pretty' } as React.CSSProperties}
               >
                 <GlossaryText
+                  lang={lang}
                   text={block.text}
                   glossary={glossary}
                   cefrLevel={cefrLevel}

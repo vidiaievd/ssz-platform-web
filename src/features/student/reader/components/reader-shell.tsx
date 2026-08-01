@@ -12,7 +12,11 @@ import {
 } from '@/features/learning';
 import { LANG_EMOJI } from '@/features/student/course-home';
 
+import { cn } from '@/lib/utils';
+
 import { ContentsSidebar } from './contents-sidebar';
+import { ReaderRailProvider, useReaderRailHost } from './reader-rail';
+import { TEXT_WIDTH_PX, useReadingModeStore } from '../stores/reading-mode-store';
 import { ReaderTopBar } from './reader-top-bar';
 import { LessonFooterNav } from './lesson-footer-nav';
 import { VocabularyPage } from './vocabulary-page';
@@ -51,6 +55,12 @@ export function ReaderShell({
 }: ReaderShellProps) {
   const t = useTranslations('Learning.reader.sidebar');
   const [collapsed, setCollapsed] = useState(false);
+  // Destructured, not held as one object: passing `rail.setContainer` to a
+  // `ref` makes the compiler treat the whole object as a ref, and reading
+  // `rail.occupied` during render then trips its refs rule.
+  const { value: railValue, setContainer: setRailContainer, occupied: railOccupied } =
+    useReaderRailHost();
+  const textWidth = useReadingModeStore((s) => s.textWidth);
 
   const courseHome = useCourseHome(courseId);
   const unitContents = useUnitContents(unitId);
@@ -66,7 +76,7 @@ export function ReaderShell({
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-(--ssz-bg-base)">
+      <div className="flex h-full items-center justify-center bg-(--ssz-bg-base)">
         <LearningSkeleton variant="list" rows={5} className="w-80" />
       </div>
     );
@@ -74,7 +84,7 @@ export function ReaderShell({
 
   if (isError || !courseHome.data || !unitContents.data) {
     return (
-      <div className="flex h-screen items-center justify-center bg-(--ssz-bg-base)">
+      <div className="flex h-full items-center justify-center bg-(--ssz-bg-base)">
         <ErrorState
           onRetry={() => {
             courseHome.refetch();
@@ -184,11 +194,27 @@ export function ReaderShell({
     // key: remount per item so the solver's per-exercise state resets.
     content = <ExercisePage key={activeContentItem.contentId} exerciseId={activeContentItem.contentId} />;
   }
+  // Only prose is reader-adjustable: the other kinds are laid out around media
+  // and cards, where width is a design decision rather than a reading-comfort one.
   const effectiveMaxWidth =
-    maxWidth ?? (activeKind === 'vocab' ? 780 : activeKind === 'video' ? 880 : 680);
+    maxWidth ??
+    (activeKind === 'vocab'
+      ? 780
+      : activeKind === 'video'
+        ? 880
+        : activeKind === 'text'
+          ? TEXT_WIDTH_PX[textWidth]
+          : 680);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    /*
+      h-full, not h-screen: this renders inside AppShell's <main>, which is
+      already a scroll area sized to the viewport minus the topbar. A second
+      full viewport height in there made the shell overflow its container by
+      exactly the topbar's height — the outer scrollbar that pushed the footer
+      nav below the fold no matter how the footer itself was positioned.
+    */
+    <div className="flex h-full overflow-hidden">
       <ContentsSidebar
         course={{
           title: courseInfo.title,
@@ -210,12 +236,45 @@ export function ReaderShell({
           itemKind={activeKind}
           itemTitle={activeTitle}
         />
-        <div className="flex flex-1 flex-col overflow-auto">
-          <div className="mx-auto w-full flex-1 px-8 py-8" style={{ maxWidth: effectiveMaxWidth }}>
-            {content}
+        <ReaderRailProvider value={railValue}>
+          <div className="flex flex-1 overflow-hidden">
+            {/*
+              The scroll lives on the inner div, not on this column, so the
+              footer nav below it is pinned to the viewport instead of sitting
+              at the end of the prose. On a six-minute text "next" was several
+              screens down; the reader had to scroll past everything to leave
+              the page even when they were done reading.
+            */}
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="flex-1 overflow-auto">
+                <div className="mx-auto w-full px-8 py-8" style={{ maxWidth: effectiveMaxWidth }}>
+                  {content}
+                </div>
+              </div>
+              {footer && (
+                <LessonFooterNav items={flatItems} activeItemId={itemId} onNext={handleNext} />
+              )}
+            </div>
+            {/*
+              Always mounted, never conditionally rendered: it is the portal
+              target, so a page's rail slot would have nowhere to go on the
+              render that decides whether the column is occupied.
+            */}
+            <aside
+              ref={setRailContainer}
+              aria-label={t('railLabel')}
+              className={cn(
+                'shrink-0 overflow-y-auto border-l border-(--ssz-border-default) bg-surface',
+                // 352px, and 384px once there is room to spare. The prose column
+                // is capped by `effectiveMaxWidth` and centred, so on a wide
+                // screen the extra width comes out of empty margin rather than
+                // out of the measure — only at the rail's own 1280px breakpoint
+                // is the trade real, and there the contents sidebar collapses.
+                railOccupied ? 'block w-88 2xl:w-96' : 'hidden w-0',
+              )}
+            />
           </div>
-          {footer && <LessonFooterNav items={flatItems} activeItemId={itemId} onNext={handleNext} />}
-        </div>
+        </ReaderRailProvider>
       </main>
     </div>
   );

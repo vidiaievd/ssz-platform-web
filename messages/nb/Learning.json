@@ -23,14 +23,22 @@
     "chunkKind": "Fast uttrykk",
     "showNote": "Vis notatet",
     "showRule": "Vis grammatikkregelen",
-    "ruleUnavailable": "Denne regelen er ikke tilgjengelig."
+    "ruleUnavailable": "Denne regelen er ikke tilgjengelig.",
+    "inflection": "Bøyning",
+    "inContext": "I teksten",
+    "closeCard": "Lukk ordkortet",
+    "lookUpIn": "Slå opp i {source}",
+    "wordCardTitle": "Ordkort",
+    "wordCardEmpty": "Trykk på et understreket ord i teksten, så dukker det opp her."
   },
   "unitStepper": {
     "label": "Enhetssteg",
     "readListen": "Les og lytt",
     "vocabulary": "Ordforråd",
     "grammar": "Grammatikk",
-    "practice": "Øvelser"
+    "practice": "Øvelser",
+    "stepCompleted": ", fullført",
+    "stepCurrent": ", gjeldende steg"
   },
   "errorState": {
     "default": "Noe gikk galt.",
@@ -231,7 +239,9 @@
       "unitLabel": "Enhet {n}",
       "locked": "Låst",
       "durationMinutes": "{n} min",
-      "otherItems": "Annet"
+      "otherItems": "Annet",
+      "railLabel": "Verktøy for leksjonen",
+      "courseProgress": "Kursfremgang"
     },
     "topbar": {
       "courseLabel": "Kurs",
@@ -260,6 +270,8 @@
       "backLabelTranslation": "Oversettelse",
       "backLabelDefinition": "Forklaring",
       "allForms": "Alle former",
+      "inflection": "Bøyning",
+      "inflectionOf": "Bøyning av {word}",
       "pos": {
         "noun": "Substantiv",
         "verb": "Verb",
@@ -303,12 +315,13 @@
         "noParagraphs": "Denne leksjonen har ingen tekst ennå.",
         "emptyTitle": "Denne leksjonen er ikke klar for deg ennå",
         "emptyBody": "Legg til morsmålet og nivået ditt i profilen for å låse opp denne leksjonen.",
-        "coverage": "du kan {percent} % av de markerte ordene i denne teksten",
+        "railAudio": "Lytt",
         "estimatedReadingMinutes": "{minutes, plural, one {# min lesetid} other {# min lesetid}}",
         "secondPassOfferTitle": "Les den igjen?",
         "secondPassOfferBody": "Prøv en gang til uten oversettelser eller markeringer, og se hvor raskt du leser.",
         "secondPassStart": "Start tidtatt ny lesing",
-        "secondPassStats": "{time} · {wpm} ord/min"
+        "secondPassStats": "{time} · {wpm} ord/min",
+        "railReading": "Lesing"
       },
       "mode": {
         "label": "Lesemodus",
@@ -347,6 +360,12 @@
           "body": "Det du bommet på er lagt til i repetisjonskøen din.",
           "retry": "Prøv igjen"
         }
+      },
+      "width": {
+        "label": "Tekstbredde",
+        "narrow": "Smal",
+        "medium": "Middels",
+        "wide": "Bred"
       }
     },
     "video": {

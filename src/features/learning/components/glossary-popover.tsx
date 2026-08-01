@@ -1,13 +1,15 @@
 'use client';
 
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Volume2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import { AudioPlayer } from '@/features/learning/components/audio-player';
 import { WordForms } from '@/features/learning/components/word-forms';
 import { useMediaAsset } from '@/features/media';
-import type { VocabularyForm } from '@/features/content/types';
+
+import { useWordAudio } from '../hooks/use-word-audio';
+import type { VocabularyForm, VocabularyParadigm } from '@/features/content/types';
 import {
   Popover,
   PopoverContent,
@@ -24,7 +26,7 @@ export type GlossaryLevel = 'preview' | 'full';
 const OPEN_DELAY = 400;
 const CLOSE_DELAY = 150;
 
-const POS_STYLES: Record<PartOfSpeech, { bg: string; fg: string }> = {
+export const POS_STYLES: Record<PartOfSpeech, { bg: string; fg: string }> = {
   noun:  { bg: 'var(--ssz-pos-noun-bg)', fg: 'var(--ssz-pos-noun-fg)' },
   verb:  { bg: 'var(--ssz-pos-verb-bg)', fg: 'var(--ssz-pos-verb-fg)' },
   adj:   { bg: 'var(--ssz-pos-adj-bg)',  fg: 'var(--ssz-pos-adj-fg)'  },
@@ -43,8 +45,12 @@ export interface GlossaryPopoverProps {
   audioSrc?: string;
   /** Resolved to a URL only when the full card opens, so a paragraph of marked words costs no requests. */
   audioMediaId?: string;
+  /** BCP-47 language of the word — picks the pronunciation voice. */
+  lang?: string;
   /** Inflected forms for the "Alle former" drawer. */
   forms?: VocabularyForm[];
+  /** Grid view of the same forms; preferred over `forms` when the item has one. */
+  paradigm?: VocabularyParadigm;
   /** The surface form met in the text — highlighted among `forms`. */
   form?: string;
   /** Label of that form ("Bestemt entall"); null when the form is the lemma itself. */
@@ -59,6 +65,13 @@ export interface GlossaryPopoverProps {
   onSeeInContext?: () => void;
   /** Extra actions pinned under the card (B3: "I know this word"). */
   footer?: ReactNode;
+  /**
+   * A panel elsewhere owns the full card, so this popover never leaves its
+   * hover hint — clicking calls `onSelect` instead of expanding in place.
+   */
+  previewOnly?: boolean;
+  /** Fired on click/Enter when the word is chosen. Paired with `previewOnly`. */
+  onSelect?: () => void;
   /**
    * Fired when the card opens, and again when a hover preview is promoted to
    * the full card — the two moments lookup telemetry records (spec 18 §6.1).
@@ -103,6 +116,62 @@ function GlossaryAudio({ mediaId, label }: { mediaId: string; label: string }) {
   return <AudioPlayer src={asset.data?.url} label={label} compact className="mt-1 shrink-0" />;
 }
 
+/**
+ * The whole popover when a panel owns the full card: the one thing a reader
+ * wants mid-sentence — what the word means — plus a way to hear it.
+ *
+ * Everything else the old hint promised ("click for translation") is now a
+ * click away in the rail, so promising it here would be a step backwards: the
+ * meaning is what the hover was for.
+ */
+function MiniPreview({
+  pos,
+  bg,
+  fg,
+  word,
+  lang,
+  translation,
+  audioMediaId,
+}: {
+  pos: PartOfSpeech;
+  bg: string;
+  fg: string;
+  word: string;
+  lang?: string;
+  translation: string;
+  audioMediaId?: string;
+}) {
+  const t = useTranslations('Learning.glossary');
+  const { play, playing, source } = useWordAudio(word, audioMediaId, lang);
+
+  return (
+    <div className="flex items-center gap-2 px-2.5 py-2">
+      <span
+        className="shrink-0 rounded-full px-1.5 py-0.5 text-[9.5px] font-bold tracking-wider uppercase"
+        style={{ background: bg, color: fg }}
+      >
+        {pos}
+      </span>
+      <span className="min-w-0 text-[13px] font-semibold text-(--ssz-text-primary)">{translation}</span>
+      {source !== 'none' && (
+        <button
+          type="button"
+          onClick={play}
+          aria-label={t('listenWord')}
+          className={cn(
+            'flex size-6 shrink-0 items-center justify-center rounded-full',
+            'text-(--ssz-text-muted) hover:bg-subtle hover:text-(--ssz-color-primary-600)',
+            'focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) focus-visible:outline-none',
+            playing && 'text-(--ssz-color-primary-600)',
+          )}
+        >
+          <Volume2 size={13} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function GlossaryPopover({
   word,
   phonetic,
@@ -110,12 +179,16 @@ export function GlossaryPopover({
   translation,
   audioSrc,
   audioMediaId,
+  lang,
   forms,
+  paradigm,
   form,
   formLabel,
   contextSentence,
   onSeeInContext,
   footer,
+  previewOnly = false,
+  onSelect,
   onOpenLevel,
   children,
 }: GlossaryPopoverProps) {
@@ -162,6 +235,14 @@ export function GlossaryPopover({
 
   function handleClick(e: React.MouseEvent) {
     clearTimers();
+    if (previewOnly) {
+      // The hint has served its purpose once the card is elsewhere; leaving it
+      // hanging over the next line is exactly what moving the card avoided.
+      e.preventDefault();
+      setOpen(false);
+      onSelect?.();
+      return;
+    }
     if (open && level === 'preview') {
       // Promote the hint in place — Radix would otherwise toggle the popover shut.
       e.preventDefault();
@@ -179,6 +260,12 @@ export function GlossaryPopover({
     if (e.key !== 'Enter' && e.key !== ' ') return;
     // The trigger is a span with role="button": neither key fires a click on it.
     e.preventDefault();
+    if (previewOnly) {
+      clearTimers();
+      setOpen(false);
+      onSelect?.();
+      return;
+    }
     if (open && level === 'full') {
       handleOpenChange(false);
       return;
@@ -203,14 +290,31 @@ export function GlossaryPopover({
         {children}
       </PopoverTrigger>
       <PopoverContent
-        data-level={level}
-        // A hint must never swallow the pointer that is still reading the line.
-        className={cn('w-64 p-0', level === 'preview' && 'pointer-events-none')}
+        data-level={previewOnly ? 'mini' : level}
+        className={cn(
+          'p-0',
+          previewOnly ? 'w-auto max-w-64' : 'w-64',
+          // A hint must never swallow the pointer that is still reading the
+          // line. The mini card is exempt: it carries a play button, and the
+          // 400ms hover intent has already filtered out mere skimming.
+          !previewOnly && level === 'preview' && 'pointer-events-none',
+        )}
         style={{ background: 'var(--ssz-bg-surface)', border: '1px solid var(--ssz-border-default)' }}
         onOpenAutoFocus={(e) => {
-          if (level === 'preview') e.preventDefault();
+          if (previewOnly || level === 'preview') e.preventDefault();
         }}
       >
+        {previewOnly ? (
+          <MiniPreview
+            pos={pos}
+            bg={bg}
+            fg={fg}
+            word={word}
+            lang={lang}
+            translation={translation}
+            audioMediaId={audioMediaId}
+          />
+        ) : (
         <div className="flex flex-col gap-0">
           {/* header */}
           <div className="flex items-start gap-2 p-3 pb-2">
@@ -263,9 +367,14 @@ export function GlossaryPopover({
                 {translation}
               </div>
 
-              {forms && forms.length > 0 && (
+              {((forms && forms.length > 0) || paradigm) && (
                 <div className="px-3 pb-1">
-                  <WordForms forms={forms} density="compact" highlightValue={form} />
+                  <WordForms
+                    forms={forms ?? []}
+                    paradigm={paradigm}
+                    density="compact"
+                    highlightValue={form}
+                  />
                 </div>
               )}
 
@@ -328,6 +437,7 @@ export function GlossaryPopover({
             </>
           )}
         </div>
+        )}
       </PopoverContent>
     </Popover>
   );

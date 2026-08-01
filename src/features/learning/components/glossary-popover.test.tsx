@@ -243,3 +243,93 @@ describe('GlossaryPopover', () => {
     });
   });
 });
+
+describe('GlossaryPopover — preview-only (a panel owns the full card)', () => {
+  function installVoice(lang: string | null) {
+    vi.stubGlobal('speechSynthesis', {
+      speak: vi.fn(),
+      cancel: vi.fn(),
+      getVoices: () => (lang ? [{ lang, name: 'Voice' }] : []),
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    });
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        lang = '';
+        voice: unknown = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(public text: string) {}
+      },
+    );
+  }
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('shows the meaning on hover instead of promising it on click', () => {
+    installVoice(null);
+    renderPopover({ previewOnly: true });
+
+    hoverIn();
+    advance(400);
+
+    expect(screen.getByText('nurse')).toBeInTheDocument();
+    expect(screen.queryByText('Click for translation')).not.toBeInTheDocument();
+  });
+
+  it('never expands into the full card', () => {
+    installVoice(null);
+    renderPopover({ previewOnly: true, contextSentence: 'Marta er sykepleier.' });
+
+    hoverIn();
+    advance(400);
+    fireEvent.click(word());
+
+    expect(screen.queryByText('See in context')).not.toBeInTheDocument();
+    expect(screen.queryByText('/ˈsyːkəˌplɛɪər/')).not.toBeInTheDocument();
+  });
+
+  it('hands the word to the panel on click and gets out of the way', () => {
+    installVoice(null);
+    const onSelect = vi.fn();
+    renderPopover({ previewOnly: true, onSelect });
+
+    hoverIn();
+    advance(400);
+    fireEvent.click(word());
+
+    expect(onSelect).toHaveBeenCalledOnce();
+    expect(screen.queryByText('nurse')).not.toBeInTheDocument();
+  });
+
+  it('hands the word over from the keyboard too', () => {
+    installVoice(null);
+    const onSelect = vi.fn();
+    renderPopover({ previewOnly: true, onSelect });
+
+    fireEvent.keyDown(word(), { key: 'Enter' });
+
+    expect(onSelect).toHaveBeenCalledOnce();
+  });
+
+  it('offers a play button when a voice for the language exists', () => {
+    installVoice('nb-NO');
+    renderPopover({ previewOnly: true, lang: 'nb-NO' });
+
+    hoverIn();
+    advance(400);
+
+    expect(screen.getByRole('button', { name: 'Listen' })).toBeInTheDocument();
+  });
+
+  it('hides the play button when nothing can pronounce the word', () => {
+    installVoice('en-US');
+    renderPopover({ previewOnly: true, lang: 'nb-NO' });
+
+    hoverIn();
+    advance(400);
+
+    expect(screen.queryByRole('button', { name: 'Listen' })).not.toBeInTheDocument();
+  });
+});

@@ -4,11 +4,19 @@ import { ChevronDown, ChevronRight, Layers } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import type { VocabularyForm } from '@/features/content/types';
+import type { VocabularyForm, VocabularyParadigm } from '@/features/content/types';
 import { cn } from '@/lib/utils';
+
+import { WordParadigmTable } from './word-paradigm-table';
 
 export interface WordFormsProps {
   forms: VocabularyForm[];
+  /**
+   * Grid view of the same forms. When the item has one the drawer holds the
+   * bøyning table; `forms` stays the fallback for items whose author-entered
+   * labels do not map onto a paradigm's cells.
+   */
+  paradigm?: VocabularyParadigm;
   /** The form met in the text — highlighted in the list. */
   highlightValue?: string;
   /** 'drawer' — as in the vocabulary card; 'compact' — for the glossary popover. */
@@ -24,6 +32,7 @@ export interface WordFormsProps {
  */
 export function WordForms({
   forms,
+  paradigm,
   highlightValue,
   density = 'drawer',
   defaultOpen = false,
@@ -32,7 +41,7 @@ export function WordForms({
   const t = useTranslations('Learning.reader.vocab');
   const [open, setOpen] = useState(defaultOpen);
 
-  if (forms.length === 0) return null;
+  if (forms.length === 0 && !paradigm) return null;
 
   const compact = density === 'compact';
   const normalizedHighlight = highlightValue?.toLocaleLowerCase();
@@ -60,7 +69,12 @@ export function WordForms({
           )}
         </span>
       </button>
-      {open && (
+      {open && paradigm && (
+        <div className={cn('overflow-x-auto', compact ? 'mt-1' : 'mt-1.5')}>
+          <WordParadigmTable paradigm={paradigm} highlightValue={highlightValue} />
+        </div>
+      )}
+      {open && !paradigm && (
         <div
           className={cn(
             'overflow-hidden rounded-md border border-(--ssz-border-default)',

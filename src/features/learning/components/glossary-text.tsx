@@ -1,38 +1,25 @@
 'use client';
 
 import { Fragment, useMemo, type ReactNode } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
-import { useIntroduceCard } from '@/features/content';
 import type { LessonTextSpan, VocabularyItem } from '@/features/content/types';
 
-import { GlossaryPopover, type PartOfSpeech } from './glossary-popover';
+import { GlossaryPopover } from './glossary-popover';
+import { KnowWordButton } from './know-word-button';
+import { toGlossaryTag } from '../lib/pos-tag';
 import { SpanAnnotation } from './span-annotation';
 import { useGlossIntensity } from './gloss-intensity-provider';
+import { useGlossaryTarget } from './glossary-target-provider';
 import { useLookupReporter } from './lookup-telemetry-provider';
-import { learningKeys } from '../api/keys';
 import type { GlossIntensity } from '../lib/gloss-intensity';
 import { tokenizeGlossary, type GlossaryEntry, type GlossaryIndex } from '../lib/tokenize-glossary';
 import { getGlossaryMode } from '../lib/glossary-mode';
 import { parseInlineMarkdown, sliceMarks, type InlineMarkKind } from '../lib/parse-inline-markdown';
 import { projectRange, type ProjectedSpan } from '../lib/project-span';
 import { sentenceAt, splitSentences } from '../lib/split-sentences';
-
-const POS_TO_TAG: Record<string, PartOfSpeech> = {
-  noun: 'noun',
-  verb: 'verb',
-  adjective: 'adj',
-  adverb: 'adv',
-  preposition: 'prep',
-  conjunction: 'conj',
-};
-
-function toGlossaryTag(partOfSpeech?: string): PartOfSpeech {
-  return (partOfSpeech && POS_TO_TAG[partOfSpeech]) || 'other';
-}
+import { useSelectedWordStore } from '../stores/selected-word-store';
 
 /**
  * Underline per gloss intensity. Only weight and opacity vary — hue stays put,
@@ -92,55 +79,19 @@ function withEmphasis(content: ReactNode, kinds: InlineMarkKind[]): ReactNode {
   return node;
 }
 
-/**
- * Footer action of the full card — seeds an SRS card for the word. The underline
- * then fades out of the refetched card states rather than from local optimism,
- * so what the reader sees is what the scheduler actually recorded.
- */
-function IKnowThisButton({ vocabularyItemId }: { vocabularyItemId: string }) {
-  const t = useTranslations('Learning.glossary');
-  const tErrors = useTranslations('Errors');
-  const queryClient = useQueryClient();
-  const introduceCard = useIntroduceCard();
-
-  function handleClick() {
-    introduceCard.mutate(
-      { contentType: 'VOCABULARY_WORD', contentId: vocabularyItemId, seedKind: 'CLAIMED_KNOWN' },
-      {
-        // Empty id list yields the key prefix shared by every card-states query,
-        // so the batch this word belongs to is refetched whichever text it is in.
-        onSuccess: () =>
-          queryClient.invalidateQueries({
-            queryKey: learningKeys.srsCardStates('VOCABULARY_WORD', []),
-          }),
-        onError: () => toast.error(tErrors('unknown')),
-      },
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={introduceCard.isPending}
-      className="w-full text-left text-xs font-semibold text-(--ssz-color-primary-600) disabled:opacity-50"
-    >
-      {t('iKnowThis')}
-    </button>
-  );
-}
-
 function GlossaryWord({
   text,
   entry,
   contextSentence,
   cefrLevel,
+  lang,
   children,
 }: {
   text: string;
   entry: GlossaryEntry;
   contextSentence: string;
   cefrLevel?: string;
+  lang?: string;
   children: ReactNode;
 }) {
   const t = useTranslations('Learning.glossary');
@@ -149,12 +100,30 @@ function GlossaryWord({
   const translation = item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
   const intensity = useGlossIntensity(item.id);
   const reportLookup = useLookupReporter();
+  const target = useGlossaryTarget();
+  const selectWord = useSelectedWordStore((s) => s.select);
   const decoration = DECORATION[intensity];
   const mode = getGlossaryMode(cefrLevel ?? '');
   const displayText =
     mode === 'definition'
       ? translation?.definition || translation?.translation || item.lemma
       : (translation?.translation ?? item.lemma);
+
+  /**
+   * With a panel on screen the card belongs there, so the click feeds the store
+   * and the popover is told to stay at its hint. Without one there is nowhere
+   * else to put the card and the popover keeps opening in full.
+   */
+  function handleSelect() {
+    if (target !== 'panel') return;
+    selectWord({
+      item,
+      form: entry.form,
+      formLabel: entry.formLabel,
+      contextSentence,
+    });
+    reportLookup(item.id, 'full');
+  }
 
   return (
     <GlossaryPopover
@@ -164,10 +133,14 @@ function GlossaryWord({
       translation={displayText}
       audioMediaId={item.audioMediaId}
       forms={item.forms}
+      paradigm={item.paradigm}
       form={entry.form}
       formLabel={entry.formLabel}
       contextSentence={contextSentence}
-      footer={<IKnowThisButton vocabularyItemId={item.id} />}
+      footer={<KnowWordButton vocabularyItemId={item.id} className="w-full" />}
+      lang={lang}
+      previewOnly={target === 'panel'}
+      onSelect={handleSelect}
       onOpenLevel={(level) => reportLookup(item.id, level)}
     >
       <span
@@ -196,6 +169,8 @@ export interface GlossaryTextProps {
   /** Inline markdown. Emphasis delimiters are stripped before glossary matching. */
   text: string;
   glossary: GlossaryIndex;
+  /** BCP-47 language of `text` — picks the pronunciation voice for a looked-up word. */
+  lang?: string;
   /** Reader's CEFR level — selects translation vs. target-language definition (B2+). */
   cefrLevel?: string;
   /**
@@ -239,6 +214,7 @@ export function GlossaryText({
   text: raw,
   glossary,
   cefrLevel,
+  lang,
   spans,
   authoredVocabulary = false,
   spansHidden = false,
@@ -304,6 +280,7 @@ export function GlossaryText({
             entry={token.entry}
             contextSentence={sentenceAt(sentences, token.start)}
             cefrLevel={cefrLevel}
+            lang={lang}
           >
             {emphasised(start, end)}
           </GlossaryWord>
@@ -341,6 +318,7 @@ export function GlossaryText({
           entry={{ item, form: form?.value ?? surface, formLabel: form?.label ?? null }}
           contextSentence={sentenceAt(sentences, from)}
           cefrLevel={cefrLevel}
+          lang={lang}
         >
           {children}
         </GlossaryWord>

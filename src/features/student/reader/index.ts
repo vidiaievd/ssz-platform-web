@@ -10,6 +10,11 @@ export type { LessonFooterNavProps } from './components/lesson-footer-nav';
 export { ReaderShell } from './components/reader-shell';
 export type { ReaderShellProps } from './components/reader-shell';
 
+export { ReaderRailSlot, useReaderRailVisible, RAIL_QUERY } from './components/reader-rail';
+
+export { TEXT_WIDTH_PX, useReadingModeStore } from './stores/reading-mode-store';
+export type { ReadingMode, TextWidth } from './stores/reading-mode-store';
+
 export { UnitEntryRedirect } from './components/unit-entry-redirect';
 export type { UnitEntryRedirectProps } from './components/unit-entry-redirect';
 

@@ -28,7 +28,11 @@ export function LessonFooterNav({ items, activeItemId, onNext, className }: Less
   return (
     <div
       className={cn(
-        'sticky bottom-0 z-20 flex items-center justify-between gap-3 border-t border-(--ssz-border-default) bg-surface px-6 py-3',
+        // Not sticky: the shell keeps this outside the scroll container, so the
+        // bar is a real sibling of the scrollport rather than the last thing in
+        // it. Sticky worked only once the reader had scrolled far enough for
+        // the element to enter the scrollport at all.
+        'shrink-0 flex items-center justify-between gap-3 border-t border-(--ssz-border-default) bg-surface px-6 py-3',
         className,
       )}
     >
@@ -59,10 +63,15 @@ export function LessonFooterNav({ items, activeItemId, onNext, className }: Less
           <Link
             href={next.href}
             onClick={onNext}
-            className="flex max-w-[55%] items-center gap-2.5 rounded-xl bg-primary-500 px-5.5 py-2.75 text-[14.5px] font-bold text-white no-underline shadow-lg shadow-primary-500/30"
+            className="flex max-w-[55%] items-center gap-2.5 rounded-xl bg-(--ssz-bg-brand-solid) px-5.5 py-2.75 text-[14.5px] font-bold text-(--ssz-text-on-brand) no-underline shadow-lg shadow-primary-500/30"
           >
             <span className="min-w-0 text-right">
-              <span className="block text-[10.5px] font-semibold tracking-wide text-white/85 uppercase">
+              {/*
+                Full opacity, not white/85: dimming a 10.5px label on the brand
+                fill drops it to 2.94:1. The size and letter-spacing already
+                separate it from the title below.
+              */}
+              <span className="block text-[10.5px] font-semibold tracking-wide uppercase">
                 {t('next', { type: tContent(next.kind) })}
               </span>
               <span className="block truncate">{next.title}</span>

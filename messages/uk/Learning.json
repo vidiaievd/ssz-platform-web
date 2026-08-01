@@ -23,14 +23,22 @@
     "chunkKind": "Сталий вираз",
     "showNote": "Показати примітку",
     "showRule": "Показати правило граматики",
-    "ruleUnavailable": "Це правило недоступне."
+    "ruleUnavailable": "Це правило недоступне.",
+    "inflection": "Відмінювання",
+    "inContext": "У тексті",
+    "closeCard": "Закрити картку слова",
+    "lookUpIn": "Подивитися в {source}",
+    "wordCardTitle": "Картка слова",
+    "wordCardEmpty": "Натисніть підкреслене слово в тексті — воно з’явиться тут."
   },
   "unitStepper": {
     "label": "Кроки уроку",
     "readListen": "Читання і аудіо",
     "vocabulary": "Словник",
     "grammar": "Граматика",
-    "practice": "Практика"
+    "practice": "Практика",
+    "stepCompleted": ", виконано",
+    "stepCurrent": ", поточний крок"
   },
   "errorState": {
     "default": "Щось пішло не так.",
@@ -231,7 +239,9 @@
       "unitLabel": "Розділ {n}",
       "locked": "Заблоковано",
       "durationMinutes": "{n} хв",
-      "otherItems": "Інше"
+      "otherItems": "Інше",
+      "railLabel": "Інструменти уроку",
+      "courseProgress": "Прогрес курсу"
     },
     "topbar": {
       "courseLabel": "Курс",
@@ -260,6 +270,8 @@
       "backLabelTranslation": "Переклад",
       "backLabelDefinition": "Пояснення",
       "allForms": "Усі форми",
+      "inflection": "Відмінювання",
+      "inflectionOf": "Відмінювання слова {word}",
       "pos": {
         "noun": "Іменник",
         "verb": "Дієслово",
@@ -303,12 +315,13 @@
         "noParagraphs": "У цьому уроці ще немає тексту.",
         "emptyTitle": "Цей урок ще не готовий для вас",
         "emptyBody": "Додайте рідну мову та рівень у профілі, щоб відкрити цей урок.",
-        "coverage": "ти знаєш {percent}% позначених слів цього тексту",
+        "railAudio": "Слухати",
         "estimatedReadingMinutes": "{minutes, plural, one {# хв читання} few {# хв читання} many {# хв читання} other {# хв читання}}",
         "secondPassOfferTitle": "Прочитати ще раз?",
         "secondPassOfferBody": "Спробуй ще раз без перекладів і підсвітки — подивись, наскільки швидко ти читаєш.",
         "secondPassStart": "Почати повторне читання на час",
-        "secondPassStats": "{time} · {wpm} слів/хв"
+        "secondPassStats": "{time} · {wpm} слів/хв",
+        "railReading": "Читання"
       },
       "mode": {
         "label": "Режим читання",
@@ -347,6 +360,12 @@
           "body": "Те, у чому ви помилилися, додано до вашої черги повторення.",
           "retry": "Спробувати ще раз"
         }
+      },
+      "width": {
+        "label": "Ширина тексту",
+        "narrow": "Вузько",
+        "medium": "Середньо",
+        "wide": "Широко"
       }
     },
     "video": {

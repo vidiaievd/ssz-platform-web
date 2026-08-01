@@ -40,7 +40,7 @@ export function UnitEntryRedirect({ courseId, unitId }: UnitEntryRedirectProps) 
 
   if (isError) {
     return (
-      <div className="flex h-screen items-center justify-center bg-(--ssz-bg-base)">
+      <div className="flex h-full items-center justify-center bg-(--ssz-bg-base)">
         <ErrorState onRetry={() => void refetch()} />
       </div>
     );
@@ -48,7 +48,7 @@ export function UnitEntryRedirect({ courseId, unitId }: UnitEntryRedirectProps) 
 
   if (!isLoading && !entryItem) {
     return (
-      <div className="flex h-screen items-center justify-center bg-(--ssz-bg-base)">
+      <div className="flex h-full items-center justify-center bg-(--ssz-bg-base)">
         <EmptyState
           title={t('emptyTitle')}
           description={t('emptyBody')}
@@ -63,7 +63,7 @@ export function UnitEntryRedirect({ courseId, unitId }: UnitEntryRedirectProps) 
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-(--ssz-bg-base)">
+    <div className="flex h-full items-center justify-center bg-(--ssz-bg-base)">
       <LearningSkeleton variant="list" rows={5} className="w-80" />
     </div>
   );

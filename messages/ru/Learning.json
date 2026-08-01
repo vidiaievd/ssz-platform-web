@@ -23,14 +23,22 @@
     "chunkKind": "Устойчивое выражение",
     "showNote": "Показать заметку",
     "showRule": "Показать правило грамматики",
-    "ruleUnavailable": "Это правило недоступно."
+    "ruleUnavailable": "Это правило недоступно.",
+    "inflection": "Словоизменение",
+    "inContext": "В тексте",
+    "closeCard": "Закрыть карточку слова",
+    "lookUpIn": "Посмотреть в {source}",
+    "wordCardTitle": "Карточка слова",
+    "wordCardEmpty": "Нажмите подчёркнутое слово в тексте — оно появится здесь."
   },
   "unitStepper": {
     "label": "Шаги урока",
     "readListen": "Чтение и аудио",
     "vocabulary": "Словарь",
     "grammar": "Грамматика",
-    "practice": "Практика"
+    "practice": "Практика",
+    "stepCompleted": ", выполнено",
+    "stepCurrent": ", текущий шаг"
   },
   "errorState": {
     "default": "Что-то пошло не так.",
@@ -231,7 +239,9 @@
       "unitLabel": "Раздел {n}",
       "locked": "Заблокировано",
       "durationMinutes": "{n} мин",
-      "otherItems": "Другое"
+      "otherItems": "Другое",
+      "railLabel": "Инструменты урока",
+      "courseProgress": "Прогресс курса"
     },
     "topbar": {
       "courseLabel": "Курс",
@@ -260,6 +270,8 @@
       "backLabelTranslation": "Перевод",
       "backLabelDefinition": "Объяснение",
       "allForms": "Все формы",
+      "inflection": "Словоизменение",
+      "inflectionOf": "Формы слова {word}",
       "pos": {
         "noun": "Существительное",
         "verb": "Глагол",
@@ -303,12 +315,13 @@
         "noParagraphs": "В этом уроке пока нет текста.",
         "emptyTitle": "Этот урок пока не готов для вас",
         "emptyBody": "Добавьте родной язык и уровень в профиле, чтобы открыть этот урок.",
-        "coverage": "ты знаешь {percent}% отмеченных слов этого текста",
+        "railAudio": "Слушать",
         "estimatedReadingMinutes": "{minutes, plural, one {# мин чтения} few {# мин чтения} many {# мин чтения} other {# мин чтения}}",
         "secondPassOfferTitle": "Прочитать ещё раз?",
         "secondPassOfferBody": "Попробуй прочитать ещё раз без переводов и подсветки — посмотри, насколько быстро ты читаешь.",
         "secondPassStart": "Начать повторное чтение на время",
-        "secondPassStats": "{time} · {wpm} слов/мин"
+        "secondPassStats": "{time} · {wpm} слов/мин",
+        "railReading": "Чтение"
       },
       "mode": {
         "label": "Режим чтения",
@@ -347,6 +360,12 @@
           "body": "То, в чём вы ошиблись, добавлено в вашу очередь повторения.",
           "retry": "Попробовать ещё раз"
         }
+      },
+      "width": {
+        "label": "Ширина текста",
+        "narrow": "Узко",
+        "medium": "Средне",
+        "wide": "Широко"
       }
     },
     "video": {

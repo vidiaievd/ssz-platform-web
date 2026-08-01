@@ -150,7 +150,7 @@ export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps)
         </div>
       </div>
 
-      {item.forms && item.forms.length > 0 && <WordForms forms={item.forms} />}
+      <WordForms forms={item.forms ?? []} paradigm={item.paradigm} />
     </div>
   );
 }

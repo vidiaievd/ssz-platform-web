@@ -23,14 +23,22 @@
     "chunkKind": "Phrase",
     "showNote": "Show the note",
     "showRule": "Show the grammar rule",
-    "ruleUnavailable": "This rule is not available."
+    "ruleUnavailable": "This rule is not available.",
+    "inflection": "Inflection",
+    "inContext": "In the text",
+    "closeCard": "Close the word card",
+    "lookUpIn": "Look it up in {source}",
+    "wordCardTitle": "Word card",
+    "wordCardEmpty": "Tap an underlined word in the text and it will appear here."
   },
   "unitStepper": {
     "label": "Unit steps",
     "readListen": "Read & Listen",
     "vocabulary": "Vocabulary",
     "grammar": "Grammar",
-    "practice": "Practice"
+    "practice": "Practice",
+    "stepCompleted": ", completed",
+    "stepCurrent": ", current step"
   },
   "errorState": {
     "default": "Something went wrong.",
@@ -231,7 +239,9 @@
       "unitLabel": "Unit {n}",
       "locked": "Locked",
       "durationMinutes": "{n} min",
-      "otherItems": "Other"
+      "otherItems": "Other",
+      "railLabel": "Lesson tools",
+      "courseProgress": "Course progress"
     },
     "topbar": {
       "courseLabel": "Course",
@@ -260,6 +270,8 @@
       "backLabelTranslation": "Translation",
       "backLabelDefinition": "Definition",
       "allForms": "All forms",
+      "inflection": "Inflection",
+      "inflectionOf": "Inflection of {word}",
       "pos": {
         "noun": "Noun",
         "verb": "Verb",
@@ -303,12 +315,13 @@
         "noParagraphs": "This lesson has no text yet.",
         "emptyTitle": "This lesson isn't ready for you yet",
         "emptyBody": "Add your native language and level in your profile to unlock this lesson.",
-        "coverage": "you know {percent}% of the marked words in this text",
+        "railAudio": "Listen",
         "estimatedReadingMinutes": "{minutes, plural, one {# min read} other {# min read}}",
         "secondPassOfferTitle": "Read it again?",
         "secondPassOfferBody": "Try it once more without translations or highlights, and see how fast you read.",
         "secondPassStart": "Start timed re-read",
-        "secondPassStats": "{time} · {wpm} wpm"
+        "secondPassStats": "{time} · {wpm} wpm",
+        "railReading": "Reading"
       },
       "mode": {
         "label": "Reading mode",
@@ -347,6 +360,12 @@
           "body": "Anything you missed has been added to your review queue.",
           "retry": "Try again"
         }
+      },
+      "width": {
+        "label": "Text width",
+        "narrow": "Narrow",
+        "medium": "Medium",
+        "wide": "Wide"
       }
     },
     "video": {

@@ -136,9 +136,9 @@ export function VocabularyPage({
               </Link>
             )}
             {showReviewCard && (
-              <div className="flex items-center gap-3 rounded-xl border-[1.5px] border-(--ssz-color-warning-300) bg-(--ssz-color-warning-50) px-4 py-3.5">
-                <div className="flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-md bg-(--ssz-color-warning-100)">
-                  <Repeat size={18} className="text-(--ssz-color-warning-500)" aria-hidden="true" />
+              <div className="flex items-center gap-3 rounded-xl border-[1.5px] border-(--ssz-border-accent-warm) bg-(--ssz-bg-accent-warm) px-4 py-3.5">
+                <div className="flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-md border border-(--ssz-border-accent-warm) bg-surface">
+                  <Repeat size={18} className="text-(--ssz-icon-accent-warm)" aria-hidden="true" />
                 </div>
                 <div className="flex-1">
                   <div className="text-sm font-bold text-(--ssz-text-primary)">{t('page.reviewTitle')}</div>
@@ -148,7 +148,7 @@ export function VocabularyPage({
                 </div>
                 <Link
                   href="/student/srs"
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border-[1.5px] border-(--ssz-color-warning-300) bg-surface px-3.5 py-2 text-xs font-semibold text-(--ssz-color-warning-700) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border-[1.5px] border-(--ssz-border-accent-warm) bg-surface px-3.5 py-2 text-xs font-semibold text-(--ssz-text-accent-warm) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
                 >
                   <Repeat size={13} aria-hidden="true" />
                   {t('page.reviewCta')}

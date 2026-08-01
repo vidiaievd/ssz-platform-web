@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { cn } from '@/lib/utils';
 import { enMessages } from '@/lib/i18n/messages';
 import type {
   ExerciseWithAnswers,
@@ -25,7 +26,9 @@ const useLessonListeningStages = vi.fn();
 const useExercisesWithAnswers = vi.fn();
 const introduceCard = vi.fn();
 const useMyStudentProfile = vi.fn();
-const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
+const useMediaAsset = vi.fn(
+  (_id?: string) => ({ data: undefined }) as { data?: { id: string; url: string } },
+);
 
 vi.mock('@/features/content', async () => {
   const actual = await vi.importActual<typeof import('@/features/content')>('@/features/content');
@@ -63,7 +66,9 @@ vi.mock('@/lib/i18n/navigation', () => ({
 }));
 
 const { TextLessonPage } = await import('./text-lesson-page');
-const { useReadingModeStore } = await import('../stores/reading-mode-store');
+const { useReadingModeStore, TEXT_WIDTH_PX } = await import('../stores/reading-mode-store');
+const { useSelectedWordStore } = await import('@/features/learning');
+const { ReaderRailProvider, useReaderRailHost } = await import('./reader-rail');
 
 const LESSON: Lesson = {
   id: 'lesson-1',
@@ -145,6 +150,8 @@ function renderPage(overrides: Partial<React.ComponentProps<typeof TextLessonPag
 
 beforeEach(() => {
   useReadingModeStore.setState({ mode: 'immersive', glossVisibility: 'unknown' });
+  // Global store: without this a word selected by an earlier case leaks into the next.
+  useSelectedWordStore.setState({ selected: null });
   useSrsCardStates.mockReturnValue({ data: undefined });
   // Most cases have no author spans; the ones that do override this.
   useLessonTextSpans.mockReturnValue({ data: [], isLoading: false });
@@ -394,22 +401,9 @@ describe('TextLessonPage', () => {
       expect(word().className).toMatch(/decoration-dotted/);
     });
 
-    it('reports coverage over the marked words, not over the whole text', () => {
-      mockHappyPath();
-      useSrsCardStates.mockReturnValue({
-        data: { states: [{ contentId: 'v1', state: 'REVIEW', stability: 90, dueAt: '2026-12-01T00:00:00Z' }] },
-      });
-      renderPage();
-
-      expect(screen.getByText(/you know 100% of the marked words/i)).toBeInTheDocument();
-    });
-
-    it('hides coverage until the card states arrive', () => {
-      mockHappyPath();
-      renderPage();
-
-      expect(screen.queryByText(/of the marked words/i)).not.toBeInTheDocument();
-    });
+    // The coverage figure this block used to assert is gone: it was frozen for
+    // the whole session (nothing the reader does in a text moves an SRS state),
+    // so it sat at the top of the rail as a number that never changed.
   });
   describe('author text spans', () => {
     // Every seeded Norwegian text opens with a hero image, so paragraph 0 is
@@ -697,5 +691,239 @@ describe('TextLessonPage', () => {
 
       expect(screen.queryByText('Read it again?')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('TextLessonPage — rail placement', () => {
+  const NARRATED: LessonVariant = {
+    ...VARIANT,
+    bodyMarkdown: `${VARIANT.bodyMarkdown}\n\n[audio:media-1 "Narration"]`,
+  };
+
+  /** The shell's rail wiring, reduced to what the page portals into. */
+  function RailHarness({ children }: { children: React.ReactNode }) {
+    const { value, setContainer, occupied } = useReaderRailHost();
+    return (
+      <ReaderRailProvider value={value}>
+        <div>{children}</div>
+        <aside data-testid="rail" ref={setContainer} className={cn(occupied ? 'w-80' : 'hidden')} />
+      </ReaderRailProvider>
+    );
+  }
+
+  function renderInShell() {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <RailHarness>
+            <TextLessonPage
+              lessonId="lesson-1"
+              vocabularyListId="list-1"
+              unitPosition={4}
+              courseTitle="Norsk B1"
+              cefrLevel="B1"
+            />
+          </RailHarness>
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+  }
+
+  function setViewportWide(wide: boolean) {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn((query: string) => ({
+        matches: wide,
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+  }
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('puts the narration player in the rail on a wide viewport', () => {
+    mockHappyPath();
+    useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: NARRATED, refetch: vi.fn() });
+    useMediaAsset.mockReturnValue({ data: { id: 'media-1', url: 'https://cdn.test/n.mp3' } });
+    setViewportWide(true);
+
+    renderInShell();
+
+    const rail = screen.getByTestId('rail');
+    expect(rail).toContainElement(screen.getByRole('region', { name: 'En vanlig arbeidsdag' }));
+  });
+
+  it('falls back to an inline player when the rail is off screen', () => {
+    mockHappyPath();
+    useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: NARRATED, refetch: vi.fn() });
+    useMediaAsset.mockReturnValue({ data: { id: 'media-1', url: 'https://cdn.test/n.mp3' } });
+    setViewportWide(false);
+
+    renderInShell();
+
+    const player = screen.getByRole('region', { name: 'En vanlig arbeidsdag' });
+    expect(screen.getByTestId('rail')).not.toContainElement(player);
+  });
+
+  it('never mounts the player twice', () => {
+    mockHappyPath();
+    useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: NARRATED, refetch: vi.fn() });
+    useMediaAsset.mockReturnValue({ data: { id: 'media-1', url: 'https://cdn.test/n.mp3' } });
+    setViewportWide(true);
+
+    renderInShell();
+
+    expect(screen.getAllByRole('region', { name: 'En vanlig arbeidsdag' })).toHaveLength(1);
+  });
+
+  it('keeps the word card in the rail even with no audio and no coverage', () => {
+    mockHappyPath();
+    setViewportWide(true);
+
+    renderInShell();
+
+    // The column must not appear and vanish as words are tapped, so the card's
+    // empty state holds it open on its own.
+    expect(screen.getByTestId('rail').className).toContain('w-80');
+    expect(screen.getByText(/Tap an underlined word/)).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('replaces the empty state with the tapped word', () => {
+    mockHappyPath();
+    setViewportWide(true);
+
+    renderInShell();
+    fireEvent.click(screen.getByText('sykepleier'));
+
+    const rail = screen.getByTestId('rail');
+    expect(rail).toContainElement(screen.getByRole('link', { name: /ordbokene\.no/ }));
+    expect(screen.queryByText(/Tap an underlined word/)).not.toBeInTheDocument();
+  });
+
+  it('keeps the reading controls in the rail, where the prose cannot scroll them away', () => {
+    mockHappyPath();
+    setViewportWide(true);
+
+    renderInShell();
+
+    const rail = screen.getByTestId('rail');
+    expect(rail).toContainElement(screen.getByRole('radiogroup', { name: 'Reading mode' }));
+    expect(rail).toContainElement(screen.getByRole('radiogroup', { name: 'Text width' }));
+  });
+
+  it('keeps the variable-height word card last, so nothing above it shifts on a lookup', () => {
+    mockHappyPath();
+    setViewportWide(true);
+
+    renderInShell();
+
+    const settings = screen.getByRole('radiogroup', { name: 'Reading mode' });
+    const card = screen.getByText(/Tap an underlined word/);
+    // DOM order is the proxy for layout here: with the card last, nothing above
+    // it can be pushed down when it grows from a hint into a full paradigm.
+    expect(settings.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('still has the settings above the card once a word is chosen', () => {
+    mockHappyPath();
+    setViewportWide(true);
+
+    renderInShell();
+    fireEvent.click(screen.getByText('sykepleier'));
+
+    const settings = screen.getByRole('radiogroup', { name: 'Reading mode' });
+    const card = screen.getByRole('link', { name: /ordbokene\.no/ });
+    expect(settings.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('drops the previous lesson\'s word when the reader moves on', () => {
+    mockHappyPath();
+    setViewportWide(true);
+
+    const { unmount } = renderInShell();
+    fireEvent.click(screen.getByText('sykepleier'));
+    expect(useSelectedWordStore.getState().selected).not.toBeNull();
+
+    // Its context sentence and highlighted form come from this variant; carrying
+    // it over would have the rail describing a word from another text.
+    unmount();
+
+    expect(useSelectedWordStore.getState().selected).toBeNull();
+  });
+
+  it('drops the labels in the rail but keeps them reachable', () => {
+    mockHappyPath();
+    setViewportWide(true);
+
+    renderInShell();
+
+    const immersive = screen.getByRole('radio', { name: 'Immersive' });
+    // Icon-only: the accessible name comes from aria-label, not from text.
+    expect(immersive).toHaveTextContent('');
+    expect(immersive).toHaveAttribute('title', 'Immersive');
+  });
+
+  it('never shows the controls twice', () => {
+    mockHappyPath();
+    setViewportWide(true);
+
+    renderInShell();
+
+    expect(screen.getAllByRole('radiogroup', { name: 'Reading mode' })).toHaveLength(1);
+  });
+
+  it('sends the lookup to the popover, not the panel, when the rail is off screen', () => {
+    mockHappyPath();
+    setViewportWide(false);
+
+    renderInShell();
+    fireEvent.click(screen.getByText('sykepleier'));
+
+    expect(screen.queryByRole('link', { name: /ordbokene\.no/ })).not.toBeInTheDocument();
+  });
+
+  it('names the word card in the rail even while a word is showing', () => {
+    mockHappyPath();
+    setViewportWide(true);
+
+    renderInShell();
+
+    // Every rail block is labelled, so the column reads as a set of named
+    // sections rather than as loose controls stacked on a card.
+    const rail = screen.getByTestId('rail');
+    expect(within(rail).getByRole('heading', { name: /word card/i })).toBeInTheDocument();
+    expect(within(rail).getByRole('heading', { name: /reading/i })).toBeInTheDocument();
+  });
+});
+
+describe('TextLessonPage — reading width', () => {
+  it('offers the three widths as a single choice', () => {
+    mockHappyPath();
+    renderPage();
+
+    const group = screen.getByRole('radiogroup', { name: 'Text width' });
+    expect(within(group).getAllByRole('radio')).toHaveLength(3);
+  });
+
+  it('defaults to medium — the strict measure left too much dead space', () => {
+    mockHappyPath();
+    renderPage();
+
+    expect(screen.getByRole('radio', { name: 'Medium' })).toBeChecked();
+  });
+
+  it('records the choice as a preference the shell can read back', () => {
+    mockHappyPath();
+    renderPage();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Wide' }));
+
+    expect(useReadingModeStore.getState().textWidth).toBe('wide');
+    expect(TEXT_WIDTH_PX.wide).toBeGreaterThan(TEXT_WIDTH_PX.medium);
+    expect(TEXT_WIDTH_PX.medium).toBeGreaterThan(TEXT_WIDTH_PX.narrow);
   });
 });

@@ -335,6 +335,36 @@ describe('ReaderShell', () => {
     expect(screen.getByText('Practice · En vanlig arbeidsdag')).toBeInTheDocument();
   });
 
+  /*
+    The shell is mounted inside AppShell's <main>, itself a scroll area already
+    sized to the viewport minus the topbar. Claiming a second viewport height
+    there overflows the container by exactly the topbar's height, and the outer
+    scrollbar that appears pushes the footer nav off screen — which no amount of
+    positioning on the footer itself can fix.
+  */
+  it('sizes itself to its container, not to the viewport', () => {
+    setup();
+    const { container } = renderShell();
+
+    const root = container.querySelector(':scope > div');
+    expect(root).toHaveClass('h-full');
+    expect(root).not.toHaveClass('h-screen');
+  });
+
+  it('keeps the footer nav outside the scrolling column', () => {
+    setup();
+    renderShell();
+
+    // A sibling of the scrollport rather than its last child: as a child it is
+    // reachable only after scrolling the whole lesson.
+    const footer = screen
+      .getByText('Next unlocks after this')
+      .closest<HTMLElement>('div[class*="border-t"]')!;
+    const scrollport = footer.parentElement!.querySelector('.overflow-auto');
+    expect(scrollport).toBeInTheDocument();
+    expect(scrollport).not.toContainElement(footer);
+  });
+
   it('shows the locked-next guard in the footer when the next item is locked', () => {
     setup();
     renderShell();

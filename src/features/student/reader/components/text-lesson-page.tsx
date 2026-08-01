@@ -1,13 +1,27 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, ChevronLeft, ChevronRight, Eye, EyeOff, Filter, Highlighter, Layers, Target } from 'lucide-react';
+import {
+  AlignJustify,
+  AlignLeft,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  Filter,
+  Highlighter,
+  Layers,
+  StretchHorizontal,
+  Target,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import {
   AudioPlayer,
   ErrorState,
   GlossIntensityProvider,
+  GlossaryTargetProvider,
   LessonProse,
   LookupTelemetryProvider,
   LearningSkeleton,
@@ -15,6 +29,8 @@ import {
   resolveGlossIntensity,
   useSrsCardStates,
   usesAuthoredVocabulary,
+  useSelectedWordStore,
+  WordCardPanel,
   type GlossaryIndex,
   type GlossVisibility,
   type UnitContentsItemStatus,
@@ -36,7 +52,8 @@ import { findAudioNarration, findHeroImage, isMediaOnlyParagraph } from '@/lib/c
 import { cn } from '@/lib/utils';
 
 import { useScrollRestoration } from '../hooks/use-scroll-restoration';
-import { useReadingModeStore, type ReadingMode } from '../stores/reading-mode-store';
+import { useReadingModeStore, type ReadingMode, type TextWidth } from '../stores/reading-mode-store';
+import { ReaderRailSlot, useReaderRailVisible } from './reader-rail';
 import { TextComprehensionCheck } from './text-comprehension-check';
 import {
   parseComprehensionExercise,
@@ -72,34 +89,53 @@ function countWords(paragraphs: { target: string }[]): number {
 const MODES: ReadingMode[] = ['immersive', 'bilingual', 'focus'];
 const MODE_ICON = { immersive: BookOpen, bilingual: Layers, focus: Target };
 
-function ModeToggle({
-  mode,
-  modes,
+/**
+ * Shared shell for the three reading toggles.
+ *
+ * `compact` drops the text labels, which is what lets the group survive the
+ * 288px of usable rail width. The label still reaches assistive tech and the
+ * pointer through `aria-label` and `title`, so only the at-a-glance reading of
+ * an unfamiliar control is lost — a first-run cost, paid once, in exchange for
+ * controls that no longer scroll away with the text.
+ */
+function ToggleGroup<T extends string>({
+  label,
+  options,
+  value,
+  icons,
+  labelOf,
   onChange,
+  compact,
 }: {
-  mode: ReadingMode;
-  modes: ReadingMode[];
-  onChange: (m: ReadingMode) => void;
+  label: string;
+  options: T[];
+  value: T;
+  icons: Record<string, typeof BookOpen>;
+  labelOf: (option: T) => string;
+  onChange: (option: T) => void;
+  compact?: boolean;
 }) {
-  const t = useTranslations('Learning.reader.text.mode');
   return (
     <div
       role="radiogroup"
-      aria-label={t('label')}
+      aria-label={label}
       className="inline-flex gap-0.5 rounded-xl border border-(--ssz-border-default) bg-(--ssz-bg-subtle) p-0.75"
     >
-      {modes.map((m) => {
-        const active = m === mode;
-        const Icon = MODE_ICON[m];
+      {options.map((option) => {
+        const active = option === value;
+        const Icon = icons[option];
         return (
           <button
-            key={m}
+            key={option}
             type="button"
             role="radio"
             aria-checked={active}
-            onClick={() => onChange(m)}
+            aria-label={labelOf(option)}
+            title={labelOf(option)}
+            onClick={() => onChange(option)}
             className={cn(
-              'flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all',
+              'flex items-center rounded-lg py-1.5 text-xs font-semibold transition-all',
+              compact ? 'px-2.5' : 'gap-1.5 px-3.5',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
               active
                 ? 'bg-surface text-(--ssz-color-primary-700) shadow-(--ssz-shadow-sm)'
@@ -107,12 +143,43 @@ function ModeToggle({
             )}
             style={{ transitionDuration: 'var(--ssz-duration-fast)' }}
           >
-            <Icon size={13} aria-hidden="true" className={active ? 'text-(--ssz-color-primary-600)' : ''} />
-            {t(m)}
+            {Icon && (
+              <Icon
+                size={13}
+                aria-hidden="true"
+                className={active && !compact ? 'text-(--ssz-color-primary-600)' : ''}
+              />
+            )}
+            {!compact && labelOf(option)}
           </button>
         );
       })}
     </div>
+  );
+}
+
+function ModeToggle({
+  mode,
+  modes,
+  onChange,
+  compact,
+}: {
+  mode: ReadingMode;
+  modes: ReadingMode[];
+  onChange: (m: ReadingMode) => void;
+  compact?: boolean;
+}) {
+  const t = useTranslations('Learning.reader.text.mode');
+  return (
+    <ToggleGroup
+      label={t('label')}
+      options={modes}
+      value={mode}
+      icons={MODE_ICON}
+      labelOf={(m) => t(m)}
+      onChange={onChange}
+      compact={compact}
+    />
   );
 }
 
@@ -122,42 +189,52 @@ const GLOSS_ICON = { all: Highlighter, unknown: Filter, off: EyeOff };
 function GlossToggle({
   visibility,
   onChange,
+  compact,
 }: {
   visibility: GlossVisibility;
   onChange: (v: GlossVisibility) => void;
+  compact?: boolean;
 }) {
   const t = useTranslations('Learning.reader.text.gloss');
   return (
-    <div
-      role="radiogroup"
-      aria-label={t('label')}
-      className="inline-flex gap-0.5 rounded-xl border border-(--ssz-border-default) bg-(--ssz-bg-subtle) p-0.75"
-    >
-      {GLOSS_VISIBILITIES.map((v) => {
-        const active = v === visibility;
-        const Icon = GLOSS_ICON[v];
-        return (
-          <button
-            key={v}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            onClick={() => onChange(v)}
-            className={cn(
-              'flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
-              active
-                ? 'bg-surface text-(--ssz-color-primary-700) shadow-(--ssz-shadow-sm)'
-                : 'text-(--ssz-text-secondary)',
-            )}
-            style={{ transitionDuration: 'var(--ssz-duration-fast)' }}
-          >
-            <Icon size={13} aria-hidden="true" className={active ? 'text-(--ssz-color-primary-600)' : ''} />
-            {t(v)}
-          </button>
-        );
-      })}
-    </div>
+    <ToggleGroup
+      label={t('label')}
+      options={GLOSS_VISIBILITIES}
+      value={visibility}
+      icons={GLOSS_ICON}
+      labelOf={(v) => t(v)}
+      onChange={onChange}
+      compact={compact}
+    />
+  );
+}
+
+const TEXT_WIDTHS: TextWidth[] = ['narrow', 'medium', 'wide'];
+const WIDTH_ICON = { narrow: AlignJustify, medium: AlignLeft, wide: StretchHorizontal };
+
+/**
+ * Reading measure as a reader preference rather than a fixed rule. The narrow
+ * end is the typographic optimum; the wide end is there because a fixed 680px
+ * column on a 1900px screen reads as wasted space whatever the rule says.
+ */
+function WidthToggle({
+  width,
+  onChange,
+}: {
+  width: TextWidth;
+  onChange: (w: TextWidth) => void;
+}) {
+  const t = useTranslations('Learning.reader.text.width');
+  return (
+    <ToggleGroup
+      label={t('label')}
+      options={TEXT_WIDTHS}
+      value={width}
+      icons={WIDTH_ICON}
+      labelOf={(w) => t(w)}
+      onChange={onChange}
+      compact
+    />
   );
 }
 
@@ -399,7 +476,12 @@ export function TextLessonPage({
 }: TextLessonPageProps) {
   const t = useTranslations('Learning.reader.text.page');
   const tContent = useTranslations('Content');
-  const { mode, setMode, glossVisibility, setGlossVisibility } = useReadingModeStore();
+  const tMode = useTranslations('Learning.reader.text.mode');
+  const tGloss = useTranslations('Learning.reader.text.gloss');
+  const tWidth = useTranslations('Learning.reader.text.width');
+  const { mode, setMode, glossVisibility, setGlossVisibility, textWidth, setTextWidth } =
+    useReadingModeStore();
+  const railVisible = useReaderRailVisible();
 
   // Second pass (spec-less "melochi" E3.3): offered once the reader has already
   // completed this text. Timing starts only once they opt in, not on arrival —
@@ -412,6 +494,12 @@ export function TextLessonPage({
     const interval = setInterval(() => setElapsedSeconds(Math.round((Date.now() - startedAt) / 1000)), 1000);
     return () => clearInterval(interval);
   }, [secondPassActive]);
+
+  // The selected word belongs to the text it was read in: its context sentence
+  // and its highlighted form are quoted from this variant. Carrying it across a
+  // navigation would leave the rail describing a word from the previous lesson.
+  const clearSelectedWord = useSelectedWordStore((s) => s.clear);
+  useEffect(() => clearSelectedWord, [lessonId, clearSelectedWord]);
 
   const lesson = useLesson(lessonId);
   const profile = useMyStudentProfile();
@@ -447,8 +535,9 @@ export function TextLessonPage({
     () => [...new Set([...glossary.values()].map((entry) => entry.item.id))],
     [glossary],
   );
-  // Fetched regardless of the visibility setting: the coverage figure below is
-  // worth showing even when the reader has turned the underlines off.
+  // Fetched regardless of the visibility setting: turning the underlines off
+  // hides them, but a word the reader already knows must stay unmarked the
+  // moment they turn glossing back on.
   const cardStates = useSrsCardStates(glossedItemIds);
 
   const statesById = useMemo(
@@ -465,21 +554,6 @@ export function TextLessonPage({
     },
     [statesById, glossVisibility],
   );
-
-  /**
-   * Share of this text's marked words the reader no longer needs marked up.
-   * Deliberately scoped to marked words: only target vocabulary is annotated, so
-   * a percentage of *all* words in the text would be a fabricated metric.
-   */
-  const coveragePercent = useMemo(() => {
-    if (glossedItemIds.length === 0 || statesById.size === 0) return null;
-    const settled = glossedItemIds.filter((id) => {
-      const state = statesById.get(id);
-      const intensity = resolveGlossIntensity('unknown', state?.state, state?.stability);
-      return intensity === 'none' || intensity === 'muted';
-    });
-    return Math.round((settled.length / glossedItemIds.length) * 100);
-  }, [glossedItemIds, statesById]);
 
   const gapFillStages = useMemo(
     () =>
@@ -640,10 +714,16 @@ export function TextLessonPage({
   return (
     <div ref={scrollAnchorRef}>
       {heroImage && (
-        <div className="mb-6.5 h-50 overflow-hidden rounded-[20px] bg-(--ssz-bg-subtle)">
+        /*
+          `object-contain` on a fixed 16:9 frame, not `object-cover` on a fixed
+          height: course art is drawn illustration, and cropping it to a ~3:1
+          band cut the figures' heads and feet off. Letterboxing against the
+          subtle background costs a little space and mangles nothing.
+        */
+        <div className="mb-6.5 aspect-video overflow-hidden rounded-[20px] bg-subtle">
           {heroAsset.data?.url && (
             // eslint-disable-next-line @next/next/no-img-element -- author-uploaded lesson asset
-            <img src={heroAsset.data.url} alt={heroImage.alt} className="h-full w-full object-cover" />
+            <img src={heroAsset.data.url} alt={heroImage.alt} className="h-full w-full object-contain" />
           )}
         </div>
       )}
@@ -693,9 +773,17 @@ export function TextLessonPage({
         </div>
       )}
 
+      {/*
+        Inline only while the rail is off screen. In the rail these same
+        controls stay put as the prose scrolls, which is the point of moving
+        them: on a six-minute text the old row was several screens above the
+        paragraph the reader wanted to change the setting for.
+      */}
+      {!railVisible && (
       <div className="mb-5.5 flex flex-wrap items-center gap-3.5">
         <ModeToggle mode={effectiveMode} modes={availableModes} onChange={setMode} />
         {hasGlossing && <GlossToggle visibility={glossVisibility} onChange={setGlossVisibility} />}
+        <WidthToggle width={textWidth} onChange={setTextWidth} />
         {glossary.size > 0 && glossVisibility !== 'off' && (
           <span className="flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
             <span
@@ -705,12 +793,84 @@ export function TextLessonPage({
             {t('tapToLookUp')}
           </span>
         )}
-        {coveragePercent !== null && (
-          <span className="text-xs text-(--ssz-text-muted)">{t('coverage', { percent: coveragePercent })}</span>
-        )}
       </div>
+      )}
 
-      {narration && (
+      {/*
+        The rail is its own scroll container, so what goes there stays on screen
+        while the prose scrolls — no sticky positioning needed. The slot is
+        rendered only when there is something to put in it: mounting it with an
+        empty body would claim the whole 320px column for padding.
+
+        Below the rail's breakpoint the slot renders nothing and these fall back
+        inline, which is why the two branches are exclusive rather than both mounted.
+      */}
+      {/*
+        One slot, not several: with separate portals the rail's order would be
+        the order the slots happened to mount in, which changes the moment a
+        section becomes conditional.
+
+        The word card comes last because it is the only block whose height
+        varies — empty hint versus a full paradigm. Anything below it would be
+        shoved down and back on every lookup, so nothing is below it.
+      */}
+      <ReaderRailSlot>
+        <div>
+        <div className="flex flex-col gap-5 p-4">
+            {narration && (
+              <section>
+                <h2 className="mb-2 text-[10.5px] font-bold tracking-wide text-(--ssz-text-muted) uppercase">
+                  {t('railAudio')}
+                </h2>
+                <AudioPlayer
+                  src={narrationAsset.data?.url}
+                  label={variant.data.displayTitle || lesson.data.title}
+                  interactive={!!narrationAsset.data?.url}
+                />
+              </section>
+            )}
+            <section>
+              <h2 className="mb-2 text-[10.5px] font-bold tracking-wide text-(--ssz-text-muted) uppercase">
+                {t('railReading')}
+              </h2>
+              {/*
+                Label beside the group rather than above it: three stacked
+                heading+control pairs would be twice as tall for no extra
+                clarity, and the rail's height is what keeps these controls
+                reachable without a scroll.
+              */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-(--ssz-text-secondary)">{tMode('label')}</span>
+                  <ModeToggle mode={effectiveMode} modes={availableModes} onChange={setMode} compact />
+                </div>
+                {hasGlossing && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-(--ssz-text-secondary)">{tGloss('label')}</span>
+                    <GlossToggle visibility={glossVisibility} onChange={setGlossVisibility} compact />
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-(--ssz-text-secondary)">{tWidth('label')}</span>
+                  <WidthToggle width={textWidth} onChange={setTextWidth} />
+                </div>
+              </div>
+              {glossary.size > 0 && glossVisibility !== 'off' && (
+                <p className="mt-2.5 flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
+                  <span
+                    className="inline-block w-6.5 border-b-[1.5px] border-dotted border-(--ssz-color-primary-500) align-middle"
+                    aria-hidden="true"
+                  />
+                  {t('tapToLookUp')}
+                </p>
+              )}
+            </section>
+          </div>
+          <WordCardPanel targetLanguage={lesson.data.targetLanguage} cefrLevel={cefrLevel} />
+        </div>
+      </ReaderRailSlot>
+
+      {narration && !railVisible && (
         <div className="mb-6.5">
           <AudioPlayer
             src={narrationAsset.data?.url}
@@ -724,6 +884,7 @@ export function TextLessonPage({
         <p className="text-sm text-(--ssz-text-muted) italic">{t('noParagraphs')}</p>
       ) : (
         <GlossIntensityProvider resolve={resolveIntensity}>
+          <GlossaryTargetProvider target={railVisible ? 'panel' : 'popover'}>
           <LookupTelemetryProvider lessonId={lessonId} lessonVariantId={variant.data.id}>
             <ModeComponent
               paragraphs={proseParagraphs}
@@ -737,6 +898,7 @@ export function TextLessonPage({
               spansHidden={glossVisibility === 'off'}
             />
           </LookupTelemetryProvider>
+          </GlossaryTargetProvider>
         </GlossIntensityProvider>
       )}
 
