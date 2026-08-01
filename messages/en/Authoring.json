@@ -299,7 +299,11 @@
     "toLinePlaceholder": "Hi, I’m Marina. What brings you here?",
     "toSpeakerPlaceholder": "Speaker",
     "toAddLine": "Add line",
-    "toRemoveLine": "Remove line"
+    "toRemoveLine": "Remove line",
+    "mpVariant": "Layout",
+    "mpVariant_pairs": "Word pairs",
+    "mpVariant_halves": "Sentence halves",
+    "mpVariantHint": "Sentence halves number the left column 1, 2, 3 … and letter the right A, B, C …"
   },
   "grammar": {
     "add": "Add rule",

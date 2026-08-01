@@ -296,7 +296,11 @@
     "toLinePlaceholder": "Hei, jeg heter Marina. Hva gjør du her?",
     "toSpeakerPlaceholder": "Taler",
     "toAddLine": "Legg til linje",
-    "toRemoveLine": "Fjern linje"
+    "toRemoveLine": "Fjern linje",
+    "mpVariant": "Oppsett",
+    "mpVariant_pairs": "Ordpar",
+    "mpVariant_halves": "Setningshalvdeler",
+    "mpVariantHint": "Setningshalvdeler nummererer venstre kolonne 1, 2, 3 … og bokstaverer høyre A, B, C …"
   },
   "grammar": {
     "add": "Legg til regel",

@@ -34,6 +34,7 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   trSourceText: '',
   trSourceLanguage: '',
   trAcceptedTranslations: [{ text: '' }],
+  mpVariant: 'pairs',
   mpPairs: [
     { left: '', right: '' },
     { left: '', right: '' },
@@ -159,7 +160,11 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       const leftItems = pairs.map((p, i) => ({ id: `l-${i}`, text: p.left.trim() }));
       const rightItems = pairs.map((p, i) => ({ id: `r-${i}`, text: p.right.trim() }));
       return {
-        content: { left_items: leftItems, right_items: rightItems },
+        content: {
+          left_items: leftItems,
+          right_items: rightItems,
+          ...(values.mpVariant === 'halves' && { variant: 'halves' }),
+        },
         expectedAnswers: {
           pairs: pairs.map((_, i) => ({ left_id: `l-${i}`, right_id: `r-${i}` })),
         },
@@ -410,6 +415,7 @@ export function parseExerciseToForm(exercise: {
       });
       return {
         ...base,
+        mpVariant: content.variant === 'halves' ? 'halves' : 'pairs',
         mpPairs:
           pairs.length >= 2
             ? pairs

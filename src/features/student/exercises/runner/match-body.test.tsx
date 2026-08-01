@@ -296,3 +296,55 @@ describe('MatchBody — reveal / feedback (practice)', () => {
     });
   });
 });
+
+/* ── halves variant ──────────────────────────────────────────────── */
+
+const HALVES_CONTENT: MatchContent = {
+  variant: 'halves',
+  pairs: [
+    { id: 'h1', left: 'Really? Tell me more …', right: '… about it!' },
+    { id: 'h2', left: 'How long have you …', right: '… lived here?' },
+    { id: 'h3', left: 'Do you live …', right: '… near here?' },
+  ],
+};
+
+function renderHalves(links: Record<string, string> = {}) {
+  return render(
+    <NextIntlClientProvider locale="en" messages={messages}>
+      <MatchBody
+        content={HALVES_CONTENT}
+        links={links}
+        onLinksChange={vi.fn()}
+        onAnswerChange={vi.fn()}
+        phase="answering"
+        ok={null}
+        mode="practice"
+        accent={ACCENT}
+      />
+    </NextIntlClientProvider>,
+  );
+}
+
+describe('MatchBody — halves variant', () => {
+  it('numbers the left column and letters the right one', () => {
+    renderHalves();
+    const buttons = screen.getAllByRole('button');
+    const left = buttons.filter((b) => b.textContent?.includes('Tell me more'))[0]!;
+
+    expect(left.textContent).toMatch(/^1\./);
+    // Right cells are lettered regardless of which pair the shuffle put there.
+    const letters = buttons
+      .map((b) => b.textContent ?? '')
+      .filter((text) => /^[A-Z]\./.test(text));
+    expect(letters).toHaveLength(3);
+    expect(letters.map((t) => t[0]).sort()).toEqual(['A', 'B', 'C']);
+  });
+
+  it('leaves the plain pairs layout unnumbered', () => {
+    renderMatch();
+    const numbered = screen
+      .getAllByRole('button')
+      .filter((b) => /^\d\./.test(b.textContent ?? ''));
+    expect(numbered).toHaveLength(0);
+  });
+});

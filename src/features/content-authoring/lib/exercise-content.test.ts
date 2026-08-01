@@ -18,6 +18,7 @@ const base: ExerciseFormValues = {
   trSourceText: '',
   trSourceLanguage: '',
   trAcceptedTranslations: [{ text: '' }],
+  mpVariant: 'pairs',
   mpPairs: [
     { left: '', right: '' },
     { left: '', right: '' },
@@ -602,5 +603,40 @@ describe('text_order', () => {
       { text: 'Hi, I am Marina.', speaker: 'Marina' },
       { text: 'Nice to meet you.', speaker: 'Alex' },
     ]);
+  });
+});
+
+describe('match_pairs layout variant', () => {
+  const pairs = [
+    { left: 'Do you live …', right: '… near here?' },
+    { left: 'How long have you …', right: '… lived here?' },
+  ];
+
+  it('stores the halves layout and round-trips it', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'match_pairs',
+      mpVariant: 'halves',
+      mpPairs: pairs,
+    });
+
+    expect(content.variant).toBe('halves');
+    expect(parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant).toBe(
+      'halves',
+    );
+  });
+
+  it('omits the key for the default word-pairs layout', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'match_pairs',
+      mpVariant: 'pairs',
+      mpPairs: pairs,
+    });
+
+    expect('variant' in content).toBe(false);
+    expect(parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant).toBe(
+      'pairs',
+    );
   });
 });

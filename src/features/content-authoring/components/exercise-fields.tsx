@@ -21,6 +21,7 @@ import {
   DIFFICULTY_LEVELS,
   SENTENCE_SCHEMA_TYPES,
   TEXT_ORDER_KINDS,
+  MATCH_VARIANTS,
   RATIONALE_VERDICTS,
   countBlanks,
   type ExerciseFormValues,
@@ -704,9 +705,29 @@ function SentenceSchemaFields({ control, register, errors, isPending }: SubProps
 function MatchPairsFields({ control, register, errors, isPending }: SubProps) {
   const t = useTranslations('Authoring.exercises');
   const { fields, append, remove } = useFieldArray({ control, name: 'mpPairs' });
+  const variantCtrl = useController({ control, name: 'mpVariant' });
 
   return (
     <div className="rounded-md border border-border p-3 space-y-2">
+      <Field label={t('mpVariant')} htmlFor="ex-mp-variant" hint={t('mpVariantHint')}>
+        <Select
+          value={variantCtrl.field.value ?? 'pairs'}
+          onValueChange={(v) => variantCtrl.field.onChange(v as (typeof MATCH_VARIANTS)[number])}
+          disabled={isPending}
+        >
+          <SelectTrigger id="ex-mp-variant" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MATCH_VARIANTS.map((variant) => (
+              <SelectItem key={variant} value={variant}>
+                {t(`mpVariant_${variant}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+
       <p className="text-sm font-medium text-(--ssz-text-primary)">{t('mpPairs')}</p>
       {typeof errors.mpPairs?.message === 'string' && (
         <p className="text-xs text-destructive">{errors.mpPairs.message}</p>

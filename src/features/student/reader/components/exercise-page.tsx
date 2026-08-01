@@ -199,7 +199,11 @@ function MatchSolver({ display, phase, ok, onCheck }: SolverProps) {
     });
   }, [c.left_items, c.right_items, display.expectedAnswers.pairs]);
 
-  const content: MatchContent = { pairs, instruction: instr(display) };
+  const content: MatchContent = {
+    pairs,
+    variant: c.variant === 'halves' ? 'halves' : 'pairs',
+    instruction: instr(display),
+  };
   const allLinked = pairs.every((p) => links[p.id]);
 
   return (

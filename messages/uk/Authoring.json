@@ -296,7 +296,11 @@
     "toLinePlaceholder": "Привіт, я Марина. Що привело тебе сюди?",
     "toSpeakerPlaceholder": "Мовець",
     "toAddLine": "Додати рядок",
-    "toRemoveLine": "Видалити рядок"
+    "toRemoveLine": "Видалити рядок",
+    "mpVariant": "Вигляд",
+    "mpVariant_pairs": "Пари слів",
+    "mpVariant_halves": "Половини речень",
+    "mpVariantHint": "Половини речень нумерують ліву колонку 1, 2, 3 … і позначають праву A, B, C …"
   },
   "grammar": {
     "add": "Додати правило",

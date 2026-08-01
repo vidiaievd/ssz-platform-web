@@ -17,6 +17,8 @@ export const EXERCISE_TYPES = [
 ] as const;
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
 
+export const MATCH_VARIANTS = ['pairs', 'halves'] as const;
+
 export const TEXT_ORDER_KINDS = ['dialogue', 'sentences'] as const;
 
 export const SENTENCE_SCHEMA_TYPES = ['main', 'subordinate'] as const;
@@ -84,7 +86,9 @@ export const exerciseFormSchema = z
     trSourceLanguage: z.string().max(10).optional(),
     trAcceptedTranslations: z.array(z.object({ text: z.string().max(1000) })).optional(),
 
-    // match_pairs
+    // match_pairs — `mpVariant` only changes presentation (word pairs vs
+    // numbered/lettered sentence halves), never scoring.
+    mpVariant: z.enum(MATCH_VARIANTS).optional(),
     mpPairs: z
       .array(z.object({ left: z.string().max(500), right: z.string().max(500) }))
       .optional(),
