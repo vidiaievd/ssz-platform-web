@@ -237,11 +237,14 @@
       "showContents": "Vis innhold",
       "hideContents": "Skjul innhold",
       "unitLabel": "Enhet {n}",
+      "levelUnits": "{done}/{total}",
       "locked": "Låst",
       "durationMinutes": "{n} min",
       "otherItems": "Annet",
       "railLabel": "Verktøy for leksjonen",
-      "courseProgress": "Kursfremgang"
+      "courseProgress": "Kursfremgang",
+      "practiceTitle": "Alle oppgaver",
+      "practiceCount": "{n} oppgaver"
     },
     "topbar": {
       "courseLabel": "Kurs",
@@ -502,6 +505,10 @@
         "join": "Bli med i økten"
       },
       "note": "Denne livetimen skjer utenfor plattformen via videosamtale. Deltakelse spores ikke her."
+    },
+    "practice": {
+      "taskCount": "{n} oppgaver i dette settet",
+      "setProgress": "Sjekket {done} av {total}"
     }
   }
 }

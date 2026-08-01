@@ -398,11 +398,19 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   sentence_schema: SentenceSchemaSolver,
 };
 
-export interface ExercisePageProps {
+export interface ExerciseSolverProps {
   exerciseId: string;
+  /** 1-based position, shown when the exercise is one task of a practice set. */
+  index?: number;
+  /** Fired once, when the learner checks this exercise. */
+  onChecked?: (ok: Ok) => void;
 }
 
-export function ExercisePage({ exerciseId }: ExercisePageProps) {
+/**
+ * One exercise: load → dispatch by template → grade client-side → feedback.
+ * Used on its own (`ExercisePage`) and stacked by the practice page.
+ */
+export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverProps) {
   const t = useTranslations('ExerciseRunner');
   const { data, isLoading, isError, refetch } = useExerciseWithAnswers(exerciseId);
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
@@ -424,6 +432,11 @@ export function ExercisePage({ exerciseId }: ExercisePageProps) {
 
   return (
     <div>
+      {index != null && (
+        <div className="mb-2 text-[12px] font-bold text-(--ssz-text-muted)">
+          {t('taskNumber', { n: index })}
+        </div>
+      )}
       <Solver
         display={data}
         phase={phase}
@@ -431,9 +444,18 @@ export function ExercisePage({ exerciseId }: ExercisePageProps) {
         onCheck={(g) => {
           setGraded(g);
           setPhase('feedback');
+          onChecked?.(g.ok);
         }}
       />
       {phase === 'feedback' && graded && <FeedbackBanner graded={graded} />}
     </div>
   );
+}
+
+export interface ExercisePageProps {
+  exerciseId: string;
+}
+
+export function ExercisePage({ exerciseId }: ExercisePageProps) {
+  return <ExerciseSolver exerciseId={exerciseId} />;
 }

@@ -237,11 +237,14 @@
       "showContents": "Show contents",
       "hideContents": "Hide contents",
       "unitLabel": "Unit {n}",
+      "levelUnits": "{done}/{total}",
       "locked": "Locked",
       "durationMinutes": "{n} min",
       "otherItems": "Other",
       "railLabel": "Lesson tools",
-      "courseProgress": "Course progress"
+      "courseProgress": "Course progress",
+      "practiceTitle": "All exercises",
+      "practiceCount": "{n} tasks"
     },
     "topbar": {
       "courseLabel": "Course",
@@ -502,6 +505,10 @@
         "join": "Join session"
       },
       "note": "This live class happens outside the platform over video call. Joining and attendance aren't tracked here."
+    },
+    "practice": {
+      "taskCount": "{n} tasks in this set",
+      "setProgress": "Checked {done} of {total}"
     }
   }
 }

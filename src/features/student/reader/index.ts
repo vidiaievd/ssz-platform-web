@@ -27,8 +27,11 @@ export type { VocabularyPageProps } from './components/vocabulary-page';
 export { TextLessonPage } from './components/text-lesson-page';
 export type { TextLessonPageProps } from './components/text-lesson-page';
 
-export { ExercisePage } from './components/exercise-page';
-export type { ExercisePageProps } from './components/exercise-page';
+export { ExercisePage, ExerciseSolver } from './components/exercise-page';
+export type { ExercisePageProps, ExerciseSolverProps } from './components/exercise-page';
+
+export { PracticePage } from './components/practice-page';
+export type { PracticePageProps } from './components/practice-page';
 
 export { VideoLessonPage } from './components/video-lesson-page';
 export type { VideoLessonPageProps } from './components/video-lesson-page';
@@ -48,6 +51,7 @@ export type { VideoNotesPanelProps } from './components/video-notes-panel';
 export type {
   ReaderSidebarCourse,
   ReaderSidebarItem,
+  ReaderSidebarLevel,
   ReaderSidebarSection,
   ReaderSidebarUnit,
 } from './types';

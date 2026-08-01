@@ -237,11 +237,14 @@
       "showContents": "Показати зміст",
       "hideContents": "Приховати зміст",
       "unitLabel": "Розділ {n}",
+      "levelUnits": "{done}/{total}",
       "locked": "Заблоковано",
       "durationMinutes": "{n} хв",
       "otherItems": "Інше",
       "railLabel": "Інструменти уроку",
-      "courseProgress": "Прогрес курсу"
+      "courseProgress": "Прогрес курсу",
+      "practiceTitle": "Усі вправи",
+      "practiceCount": "{n} завдань"
     },
     "topbar": {
       "courseLabel": "Курс",
@@ -502,6 +505,10 @@
         "join": "Приєднатися до заняття"
       },
       "note": "Це живе заняття проходить поза платформою через відеозв'язок. Участь тут не відстежується."
+    },
+    "practice": {
+      "taskCount": "{n} завдань у цьому наборі",
+      "setProgress": "Перевірено {done} із {total}"
     }
   }
 }

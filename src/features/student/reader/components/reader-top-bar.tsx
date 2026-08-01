@@ -5,16 +5,38 @@ import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 
 import { Link } from '@/lib/i18n/navigation';
+import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 export interface ReaderTopBarProps {
   courseHref: string;
   unitPosition: number;
+  /** "Leksjon" the open sub-lesson belongs to; omitted for ungrouped courses. */
+  levelTitle?: string;
+  /** Open sub-lesson. Falls back to "Unit {position}" when absent. */
+  unitTitle?: string;
   itemKind: MaterialKind;
   itemTitle: string;
   avatarName?: string;
   avatarSrc?: string;
+}
+
+function Crumb({
+  children,
+  className,
+  hiddenOnNarrow,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  hiddenOnNarrow?: boolean;
+}) {
+  return (
+    <span className={cn('flex min-w-0 items-center gap-2', hiddenOnNarrow && 'hidden lg:flex')}>
+      <ChevronRight size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />
+      <span className={cn('truncate', className ?? 'max-w-44 font-semibold')}>{children}</span>
+    </span>
+  );
 }
 
 function ThemeToggle() {
@@ -37,6 +59,8 @@ function ThemeToggle() {
 export function ReaderTopBar({
   courseHref,
   unitPosition,
+  levelTitle,
+  unitTitle,
   itemKind,
   itemTitle,
   avatarName,
@@ -56,12 +80,13 @@ export function ReaderTopBar({
           <ChevronLeft size={15} />
           {t('courseLabel')}
         </Link>
-        <ChevronRight size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />
-        <span className="shrink-0 font-semibold">{tSidebar('unitLabel', { n: unitPosition })}</span>
-        <ChevronRight size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />
-        <span className="truncate font-bold text-foreground">
+        {/* The level crumb is the first to go on a narrow viewport — the
+            sub-lesson and the open material matter more for orientation. */}
+        {levelTitle && <Crumb hiddenOnNarrow>{levelTitle}</Crumb>}
+        <Crumb>{unitTitle ?? tSidebar('unitLabel', { n: unitPosition })}</Crumb>
+        <Crumb className="font-bold text-foreground">
           {tContent(itemKind)} · {itemTitle}
-        </span>
+        </Crumb>
       </div>
       <div className="flex shrink-0 items-center gap-2">
         <ThemeToggle />

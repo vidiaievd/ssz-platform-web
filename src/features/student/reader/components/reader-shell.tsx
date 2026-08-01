@@ -26,11 +26,14 @@ import { ListeningLessonPage } from './listening-lesson-page';
 import { GrammarLessonPage } from './grammar-lesson-page';
 import { LiveLessonPage } from './live-lesson-page';
 import { ExercisePage } from './exercise-page';
+import { PracticePage } from './practice-page';
 import {
   flattenSections,
+  mapCourseLevelsToSidebarLevels,
   mapCourseUnitsToSidebarUnits,
   mapContentItemKind,
   mapUnitContentsToSections,
+  practiceSectionIdOf,
 } from '../lib/map-reader-data';
 
 export interface ReaderShellProps {
@@ -95,21 +98,34 @@ export function ReaderShell({
     );
   }
 
-  const { courseInfo, units, progress } = courseHome.data;
+  const { courseInfo, units, levels, progress } = courseHome.data;
   const contents = unitContents.data;
 
   const formatMinutes = (minutes: number) => t('durationMinutes', { n: minutes });
-  const activeUnitSections = mapUnitContentsToSections(contents, courseId, formatMinutes, t('otherItems'));
+  const activeUnitSections = mapUnitContentsToSections(contents, courseId, formatMinutes, {
+    other: t('otherItems'),
+    practiceTitle: t('practiceTitle'),
+    practiceCount: (n: number) => t('practiceCount', { n }),
+  });
   const sidebarUnits = mapCourseUnitsToSidebarUnits(units, unitId, activeUnitSections);
+  const sidebarLevels = mapCourseLevelsToSidebarLevels(levels ?? [], unitId, activeUnitSections);
   const flatItems = flattenSections(activeUnitSections);
   const activeItem = flatItems.find((i) => i.id === itemId);
 
   const allContentItems = [...contents.sections.flatMap((s) => s.items), ...contents.ungroupedItems];
   const activeContentItem = allContentItems.find((i) => i.id === itemId);
-  const activeKind = activeContentItem
-    ? mapContentItemKind(activeContentItem.contentType, activeContentItem.lessonKind)
-    : 'text';
-  const activeTitle = activeContentItem?.title ?? activeItem?.title ?? '';
+  /* A collapsed exercise section is addressed by `practice-<sectionId>`, so it
+     has no content item of its own — the whole section is the page. */
+  const practiceSectionId = practiceSectionIdOf(itemId);
+  const practiceSection = practiceSectionId
+    ? contents.sections.find((s) => s.id === practiceSectionId)
+    : undefined;
+  const activeKind = practiceSection
+    ? 'exercise'
+    : activeContentItem
+      ? mapContentItemKind(activeContentItem.contentType, activeContentItem.lessonKind)
+      : 'text';
+  const activeTitle = practiceSection?.title ?? activeContentItem?.title ?? activeItem?.title ?? '';
 
   const activeUnit = units.find((u) => u.id === unitId);
   const moduleVocabularyListId = allContentItems.find((i) => i.contentType === 'VOCABULARY_LIST')?.contentId;
@@ -130,8 +146,28 @@ export function ReaderShell({
     onNextItem?.();
   }
 
+  /** Records completion for one task of a practice set as it is checked. */
+  function handleExerciseChecked(item: (typeof allContentItems)[number]) {
+    if (item.status === 'completed') return;
+    upsertProgress.mutate({
+      contentType: item.contentType,
+      contentId: item.contentId,
+      timeSpentSeconds: 0,
+      completed: true,
+    });
+  }
+
   let content: ReactNode = children;
-  if (activeKind === 'vocab' && activeContentItem) {
+  if (practiceSection) {
+    content = (
+      <PracticePage
+        key={practiceSection.id}
+        title={practiceSection.title}
+        items={practiceSection.items}
+        onExerciseChecked={handleExerciseChecked}
+      />
+    );
+  } else if (activeKind === 'vocab' && activeContentItem) {
     content = (
       <VocabularyPage
         vocabularyListId={activeContentItem.contentId}
@@ -198,13 +234,15 @@ export function ReaderShell({
   // and cards, where width is a design decision rather than a reading-comfort one.
   const effectiveMaxWidth =
     maxWidth ??
-    (activeKind === 'vocab'
-      ? 780
-      : activeKind === 'video'
-        ? 880
-        : activeKind === 'text'
-          ? TEXT_WIDTH_PX[textWidth]
-          : 680);
+    (practiceSection
+      ? 820
+      : activeKind === 'vocab'
+        ? 780
+        : activeKind === 'video'
+          ? 880
+          : activeKind === 'text'
+            ? TEXT_WIDTH_PX[textWidth]
+            : 680);
 
   return (
     /*
@@ -225,7 +263,9 @@ export function ReaderShell({
           itemsTotal: progress.totalLessons,
         }}
         units={sidebarUnits}
+        levels={sidebarLevels}
         activeItemId={itemId}
+        activeUnitId={unitId}
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed((c) => !c)}
       />
@@ -233,6 +273,8 @@ export function ReaderShell({
         <ReaderTopBar
           courseHref={`/student/courses/${courseId}`}
           unitPosition={activeUnit?.position ?? 0}
+          levelTitle={sidebarLevels.find((l) => l.active)?.title}
+          unitTitle={activeUnit?.title}
           itemKind={activeKind}
           itemTitle={activeTitle}
         />

@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import type { ReaderSidebarCourse, ReaderSidebarUnit } from '../types';
+import type { ReaderSidebarCourse, ReaderSidebarLevel, ReaderSidebarUnit } from '../types';
 
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
@@ -62,6 +62,17 @@ const units: ReaderSidebarUnit[] = [
   { id: 'u3', position: 3, title: 'Meninger og fortellinger', status: 'locked', sections: [] },
 ];
 
+const levels: ReaderSidebarLevel[] = [
+  { id: 'l1', position: 1, title: 'Leksjon 1 — Hverdagsliv', active: false, units: [units[0]!] },
+  {
+    id: 'l2',
+    position: 2,
+    title: 'Leksjon 2 — Arbeidsliv',
+    active: true,
+    units: [units[1]!, units[2]!],
+  },
+];
+
 function renderSidebar(props: Partial<React.ComponentProps<typeof ContentsSidebar>> = {}) {
   return render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
@@ -115,5 +126,55 @@ describe('ContentsSidebar', () => {
     expect(screen.getByText('Reinforce & read')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Arbeid og studier/ }));
     expect(screen.queryByText('Reinforce & read')).not.toBeInTheDocument();
+  });
+
+  describe('with Leksjon grouping', () => {
+    it('expands only the level holding the open unit', () => {
+      renderSidebar({ levels });
+
+      // Both level headers are listed…
+      expect(screen.getByRole('button', { name: /Leksjon 1/ })).toBeInTheDocument();
+      // …but only the active level's units are rendered.
+      expect(screen.getByText('Arbeid og studier')).toBeInTheDocument();
+      expect(screen.queryByText('Hverdagsliv')).not.toBeInTheDocument();
+    });
+
+    it('shows per-level unit completion', () => {
+      renderSidebar({ levels });
+
+      expect(screen.getByRole('button', { name: /Leksjon 1/ })).toHaveTextContent('1/1');
+      expect(screen.getByRole('button', { name: /Leksjon 2/ })).toHaveTextContent('0/2');
+    });
+
+    it('toggles a level open and closed on click', () => {
+      renderSidebar({ levels });
+
+      fireEvent.click(screen.getByRole('button', { name: /Leksjon 1/ }));
+      expect(screen.getByText('Hverdagsliv')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /Leksjon 2/ }));
+      expect(screen.queryByText('Arbeid og studier')).not.toBeInTheDocument();
+    });
+
+    it('marks only the open sub-lesson as current, not every "active" one', () => {
+      // Both u2 and u3 would read as unfinished under open gating; only the
+      // one the reader is inside may be highlighted.
+      renderSidebar({ levels, activeUnitId: 'u2' });
+
+      expect(screen.getByRole('button', { name: /Arbeid og studier/ })).toHaveAttribute(
+        'aria-current',
+        'true',
+      );
+      expect(
+        screen.getByRole('button', { name: /Meninger og fortellinger/ }),
+      ).not.toHaveAttribute('aria-current');
+    });
+
+    it('falls back to the flat unit list when no levels are given', () => {
+      renderSidebar({ levels: [] });
+
+      expect(screen.getByText('Hverdagsliv')).toBeInTheDocument();
+      expect(screen.getByText('Arbeid og studier')).toBeInTheDocument();
+    });
   });
 });

@@ -15,6 +15,8 @@ export const TextLesson: Story = {
   args: {
     courseHref: '/student/courses/course-1',
     unitPosition: 4,
+    levelTitle: 'Leksjon 1 — Arbeidsliv',
+    unitTitle: '1A — Bartek søker ny jobb',
     itemKind: 'text',
     itemTitle: 'En vanlig arbeidsdag',
     avatarName: 'Alex Rivera',

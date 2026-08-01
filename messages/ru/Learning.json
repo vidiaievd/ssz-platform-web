@@ -237,11 +237,14 @@
       "showContents": "Показать содержание",
       "hideContents": "Скрыть содержание",
       "unitLabel": "Раздел {n}",
+      "levelUnits": "{done}/{total}",
       "locked": "Заблокировано",
       "durationMinutes": "{n} мин",
       "otherItems": "Другое",
       "railLabel": "Инструменты урока",
-      "courseProgress": "Прогресс курса"
+      "courseProgress": "Прогресс курса",
+      "practiceTitle": "Все упражнения",
+      "practiceCount": "{n} заданий"
     },
     "topbar": {
       "courseLabel": "Курс",
@@ -502,6 +505,10 @@
         "join": "Присоединиться к занятию"
       },
       "note": "Это живое занятие проходит вне платформы по видеосвязи. Участие здесь не отслеживается."
+    },
+    "practice": {
+      "taskCount": "{n} заданий в этом наборе",
+      "setProgress": "Проверено {done} из {total}"
     }
   }
 }

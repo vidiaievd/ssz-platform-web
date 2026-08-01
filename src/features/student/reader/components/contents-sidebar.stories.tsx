@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { ContentsSidebar } from './contents-sidebar';
-import type { ReaderSidebarCourse, ReaderSidebarUnit } from '../types';
+import type { ReaderSidebarCourse, ReaderSidebarLevel, ReaderSidebarUnit } from '../types';
 
 const course: ReaderSidebarCourse = {
   title: 'Norsk B1',
@@ -78,6 +78,23 @@ const units: ReaderSidebarUnit[] = [
   { id: 'u4', position: 4, title: 'Meninger og fortellinger', subtitle: 'Opinions & narratives', status: 'locked', sections: [] },
 ];
 
+const levels: ReaderSidebarLevel[] = [
+  {
+    id: 'l1',
+    position: 1,
+    title: 'Leksjon 1 — Hverdagsliv',
+    active: false,
+    units: [units[0]!, units[1]!],
+  },
+  {
+    id: 'l2',
+    position: 2,
+    title: 'Leksjon 2 — Arbeidsliv',
+    active: true,
+    units: [units[2]!, units[3]!],
+  },
+];
+
 const meta = {
   title: 'Student/Reader/ContentsSidebar',
   component: ContentsSidebar,
@@ -92,6 +109,19 @@ export const Expanded: Story = {
     course,
     units,
     activeItemId: 'vocab-yrker',
+    collapsed: false,
+    onToggleCollapse: () => {},
+  },
+};
+
+/** Units grouped by "Leksjon"; the level holding the open unit starts expanded. */
+export const GroupedByLevel: Story = {
+  args: {
+    course,
+    units,
+    levels,
+    activeItemId: 'vocab-yrker',
+    activeUnitId: 'u3',
     collapsed: false,
     onToggleCollapse: () => {},
   },

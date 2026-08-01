@@ -1,19 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, ChevronDown, ChevronLeft, ChevronRight, List, Lock } from 'lucide-react';
+import { Check, ChevronDown, ChevronLeft, List, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Link } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import { ProgressBar } from '@/components/ui/progress';
-import type { ReaderSidebarCourse, ReaderSidebarSection, ReaderSidebarUnit } from '../types';
+import type {
+  ReaderSidebarCourse,
+  ReaderSidebarLevel,
+  ReaderSidebarSection,
+  ReaderSidebarUnit,
+} from '../types';
 
 export interface ContentsSidebarProps {
   course: ReaderSidebarCourse;
+  /** Flat unit list — the fallback for courses whose units aren't grouped. */
   units: ReaderSidebarUnit[];
+  /** Units grouped by "Leksjon"; when non-empty it replaces the flat list. */
+  levels?: ReaderSidebarLevel[];
   activeItemId: string;
+  /** Sub-lesson the reader is inside — the only one highlighted as current. */
+  activeUnitId?: string;
   collapsed: boolean;
   onToggleCollapse: () => void;
   className?: string;
@@ -56,8 +66,12 @@ function ItemRow({ item, active }: { item: ReaderSidebarSection['items'][number]
       <div className="min-w-0 flex-1">
         <div
           className={cn(
-            'truncate text-[12.5px] leading-tight',
-            active ? 'font-bold text-primary-700 dark:text-primary-300' : done ? 'font-medium text-secondary-foreground' : 'font-medium text-foreground',
+            'truncate text-[12px] leading-tight',
+            active
+              ? 'font-bold text-primary-700 dark:text-primary-300'
+              : done
+                ? 'text-secondary-foreground'
+                : 'text-foreground',
           )}
         >
           {item.title}
@@ -88,8 +102,8 @@ function ItemRow({ item, active }: { item: ReaderSidebarSection['items'][number]
 
 function SectionBlock({ section, activeItemId }: { section: ReaderSidebarSection; activeItemId: string }) {
   return (
-    <div className="mt-1.5">
-      <div className="px-2.5 pt-1.5 pb-0.5 text-[10px] font-bold tracking-wide text-muted-foreground uppercase">
+    <div className="mt-1">
+      <div className="px-2 pt-1 pb-0.5 text-[9.5px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
         {section.label}
       </div>
       <div className="flex flex-col gap-0.5">
@@ -101,90 +115,156 @@ function SectionBlock({ section, activeItemId }: { section: ReaderSidebarSection
   );
 }
 
-function UnitBlock({ unit, activeItemId }: { unit: ReaderSidebarUnit; activeItemId: string }) {
-  const t = useTranslations('Learning.reader.sidebar');
+/**
+ * A sub-lesson — the middle tier of Leksjon → sub-lesson → material.
+ * Deliberately flat: no pill, no number badge; weight and indentation carry the
+ * hierarchy. Only the sub-lesson the reader currently has open is tinted — under
+ * `gatingMode: open` every unfinished unit carries status `active`, so status
+ * alone would paint the whole panel.
+ */
+function UnitBlock({
+  unit,
+  activeItemId,
+  current,
+}: {
+  unit: ReaderSidebarUnit;
+  activeItemId: string;
+  current: boolean;
+}) {
   const [open, setOpen] = useState(unit.status === 'active');
   const done = unit.status === 'done';
-  const active = unit.status === 'active';
   const locked = unit.status === 'locked';
   const hasChildren = unit.sections.length > 0;
 
   return (
-    <div className="mb-1">
+    <div className="mb-px">
       <button
         type="button"
         onClick={() => hasChildren && setOpen((o) => !o)}
         aria-expanded={hasChildren ? open : undefined}
+        aria-current={current ? 'true' : undefined}
         disabled={!hasChildren}
         className={cn(
-          'flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors',
-          active ? 'bg-(--ssz-bg-brand-solid)' : 'bg-transparent',
+          'flex w-full items-center gap-1.5 rounded-md border-l-2 py-1.5 pr-1.5 pl-1.5 text-left transition-colors',
+          current
+            ? 'border-l-primary bg-primary-100/50 dark:border-l-primary-400 dark:bg-primary-900/25'
+            : 'border-l-transparent',
           locked && 'opacity-55',
-          hasChildren && !active && 'hover:bg-subtle',
+          hasChildren && !current && 'hover:bg-subtle',
         )}
       >
-        <span
-          className={cn(
-            'flex size-6.5 shrink-0 items-center justify-center rounded-lg',
-            active ? 'bg-white/20' : done ? 'bg-primary-100' : 'bg-subtle',
-          )}
-          aria-hidden="true"
-        >
-          {done ? (
-            <Check size={14} className="text-primary-700" />
-          ) : locked ? (
-            <Lock size={12} className="text-muted-foreground" />
-          ) : (
-            <span
-              className={cn(
-                'text-xs font-extrabold',
-                active ? 'text-(--ssz-text-on-brand)' : 'text-secondary-foreground',
-              )}
-            >
-              {unit.position}
-            </span>
-          )}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div
+        {hasChildren ? (
+          <ChevronDown
+            size={13}
             className={cn(
-              'truncate text-[13px] leading-tight font-bold',
-              active ? 'text-(--ssz-text-on-brand)' : 'text-foreground',
+              'shrink-0 transition-transform duration-150',
+              current ? 'text-primary-700 dark:text-primary-300' : 'text-muted-foreground',
+            )}
+            style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+            aria-hidden="true"
+          />
+        ) : (
+          <span className="w-3.25 shrink-0" aria-hidden="true" />
+        )}
+        <span className="min-w-0 flex-1">
+          <span
+            className={cn(
+              'block truncate text-[12.5px] leading-tight',
+              current
+                ? 'font-bold text-primary-700 dark:text-primary-300'
+                : done
+                  ? 'font-medium text-secondary-foreground'
+                  : 'font-semibold text-foreground',
             )}
           >
             {unit.title}
-          </div>
-          {/*
-            The active row keeps its subtitle at full opacity — white/80 on the
-            brand fill is 2.78:1. Size and weight carry the hierarchy instead.
-          */}
-          <div
-            className={cn(
-              'truncate text-[10.5px] leading-tight',
-              active ? 'text-(--ssz-text-on-brand)' : 'text-muted-foreground',
-            )}
-          >
-            {t('unitLabel', { n: unit.position })}
-            {unit.subtitle ? ` · ${unit.subtitle}` : ''}
-          </div>
-        </div>
-        {hasChildren &&
-          (open ? (
-            <ChevronDown
-              size={15}
-              className={active ? 'text-(--ssz-text-on-brand)' : 'text-muted-foreground'}
-            />
-          ) : (
-            <ChevronRight
-              size={15}
-              className={active ? 'text-(--ssz-text-on-brand)' : 'text-muted-foreground'}
-            />
-          ))}
+          </span>
+          {unit.subtitle && (
+            <span className="mt-0.5 block truncate text-[10px] leading-tight text-muted-foreground">
+              {unit.subtitle}
+            </span>
+          )}
+        </span>
+        {done ? (
+          <Check size={13} className="shrink-0 text-(--ssz-color-success-600)" aria-hidden="true" />
+        ) : locked ? (
+          <Lock size={11} className="shrink-0 text-muted-foreground" aria-hidden="true" />
+        ) : null}
       </button>
       {open && hasChildren && (
-        <div className="mt-0.5 ml-3 border-l-[1.5px] border-(--ssz-border-default) py-0.5 pr-1 pl-2">
+        <div className="mt-0.5 mb-1 ml-2.5 border-l-[1.5px] border-(--ssz-border-default) pr-0.5 pl-1.5">
           {unit.sections.map((section) => (
             <SectionBlock key={section.id} section={section} activeItemId={activeItemId} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LevelBlock({
+  level,
+  activeItemId,
+  activeUnitId,
+}: {
+  level: ReaderSidebarLevel;
+  activeItemId: string;
+  activeUnitId?: string;
+}) {
+  const t = useTranslations('Learning.reader.sidebar');
+  /*
+    Null until the reader touches the header: the level holding the open unit
+    expands on its own, and keeps following navigation across levels, but a
+    deliberate collapse/expand wins from then on.
+  */
+  const [override, setOverride] = useState<boolean | null>(null);
+  const open = override ?? level.active;
+  const done = level.units.filter((u) => u.status === 'done').length;
+  const total = level.units.length;
+  const complete = total > 0 && done === total;
+  const panelId = `reader-level-${level.id}`;
+
+  return (
+    <div className="mb-1.5">
+      <button
+        type="button"
+        onClick={() => setOverride(!open)}
+        aria-expanded={open}
+        aria-controls={panelId}
+        className="flex w-full items-center gap-1.5 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-subtle"
+      >
+        <ChevronDown
+          size={15}
+          className="shrink-0 text-muted-foreground transition-transform duration-150"
+          style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+          aria-hidden="true"
+        />
+        <span className="min-w-0 flex-1 truncate text-[13.5px] font-extrabold text-foreground">
+          {level.title}
+        </span>
+        <span
+          className={cn(
+            'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold',
+            complete
+              ? 'bg-(--ssz-color-success-100) text-(--ssz-color-success-700)'
+              : 'bg-subtle text-muted-foreground',
+          )}
+        >
+          {t('levelUnits', { done, total })}
+        </span>
+      </button>
+      {open && (
+        <div
+          id={panelId}
+          className="mt-0.5 mb-1 ml-2.5 border-l-[1.5px] border-(--ssz-border-default) pl-1.5"
+        >
+          {level.units.map((unit) => (
+            <UnitBlock
+              key={unit.id}
+              unit={unit}
+              activeItemId={activeItemId}
+              current={unit.id === activeUnitId}
+            />
           ))}
         </div>
       )}
@@ -195,7 +275,9 @@ function UnitBlock({ unit, activeItemId }: { unit: ReaderSidebarUnit; activeItem
 export function ContentsSidebar({
   course,
   units,
+  levels,
   activeItemId,
+  activeUnitId,
   collapsed,
   onToggleCollapse,
   className,
@@ -273,9 +355,23 @@ export function ContentsSidebar({
         <div className="px-2 pb-2.5 text-[10.5px] font-bold tracking-wide text-muted-foreground uppercase">
           {t('contentsHeading')}
         </div>
-        {units.map((unit) => (
-          <UnitBlock key={unit.id} unit={unit} activeItemId={activeItemId} />
-        ))}
+        {levels && levels.length > 0
+          ? levels.map((level) => (
+              <LevelBlock
+                key={level.id}
+                level={level}
+                activeItemId={activeItemId}
+                activeUnitId={activeUnitId}
+              />
+            ))
+          : units.map((unit) => (
+              <UnitBlock
+                key={unit.id}
+                unit={unit}
+                activeItemId={activeItemId}
+                current={unit.id === activeUnitId}
+              />
+            ))}
       </div>
     </aside>
   );

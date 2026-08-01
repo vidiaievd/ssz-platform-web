@@ -69,5 +69,6 @@
     "bankEmpty": "Усі слова розміщено",
     "fieldDropLabel": "Розмістити в {field}"
   },
-  "unsupported": "Цей тип вправи ({type}) поки не підтримується."
+  "unsupported": "Цей тип вправи ({type}) поки не підтримується.",
+  "taskNumber": "Завдання {n}"
 }

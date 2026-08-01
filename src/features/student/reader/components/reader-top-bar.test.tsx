@@ -41,7 +41,15 @@ function renderTopBar(props: Partial<React.ComponentProps<typeof ReaderTopBar>> 
 }
 
 describe('ReaderTopBar', () => {
-  it('renders the breadcrumb with unit and current item', () => {
+  it('renders the breadcrumb with the leksjon, sub-lesson and current item', () => {
+    renderTopBar({ levelTitle: 'Leksjon 1 — Arbeidsliv', unitTitle: '1A — Bartek søker ny jobb' });
+
+    expect(screen.getByText('Leksjon 1 — Arbeidsliv')).toBeInTheDocument();
+    expect(screen.getByText('1A — Bartek søker ny jobb')).toBeInTheDocument();
+    expect(screen.getByText('Reading · En vanlig arbeidsdag')).toBeInTheDocument();
+  });
+
+  it('falls back to the unit position when the course has no grouping', () => {
     renderTopBar();
 
     expect(screen.getByText('Unit 4')).toBeInTheDocument();

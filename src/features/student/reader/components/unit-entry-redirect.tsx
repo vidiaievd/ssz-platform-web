@@ -7,7 +7,7 @@ import { EmptyState, ErrorState, LearningSkeleton, useUnitContents } from '@/fea
 import type { UnitContentsItem } from '@/features/learning';
 import { Link, useRouter } from '@/lib/i18n/navigation';
 
-import { buildItemHref } from '../lib/map-reader-data';
+import { buildItemHref, resolveNavigableItemId } from '../lib/map-reader-data';
 
 export interface UnitEntryRedirectProps {
   courseId: string;
@@ -33,10 +33,12 @@ export function UnitEntryRedirect({ courseId, unitId }: UnitEntryRedirectProps) 
   const entryItem = pickEntryItem(items);
 
   useEffect(() => {
-    if (entryItem) {
-      router.replace(buildItemHref(courseId, unitId, entryItem.id));
+    if (data && entryItem) {
+      // Exercises inside a collapsed section are only reachable through their
+      // practice page — never link straight at one.
+      router.replace(buildItemHref(courseId, unitId, resolveNavigableItemId(data, entryItem.id)));
     }
-  }, [entryItem, courseId, unitId, router]);
+  }, [data, entryItem, courseId, unitId, router]);
 
   if (isError) {
     return (
