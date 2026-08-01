@@ -30,11 +30,43 @@ export type MarkdownBlock =
   | ({ kind: 'heading'; level: number } & MappedText)
   | ({ kind: 'paragraph' } & MappedText)
   | { kind: 'list'; items: MappedText[] }
-  | { kind: 'quote'; blocks: MarkdownBlock[] };
+  | { kind: 'quote'; blocks: MarkdownBlock[] }
+  /** GFM pipe table. `head` is the header row; `rows` the body, ragged rows kept as authored. */
+  | { kind: 'table'; head: MappedText[]; rows: MappedText[][] };
 
 const HEADING = /^(#{1,6})\s+(.*)$/;
 const BULLET = /^[-*+]\s+(.*)$/;
 const QUOTE = /^>\s?(.*)$/;
+/** The `|---|:--:|` line under a header row — what marks a pipe table as a table. */
+const TABLE_DELIMITER = /^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?$/;
+const HAS_PIPE = /\|/;
+
+/**
+ * Splits one pipe-table row into cells, keeping each cell's place in the chunk.
+ *
+ * The outer pipes of `| a | b |` delimit nothing, so the empty segments they
+ * produce are dropped; inner ones separate cells. Escaping (`\|`) is not
+ * supported — no authored explanation uses it, and a wrong guess would silently
+ * merge two cells.
+ */
+function splitTableRow(chunk: string, lineStart: number, line: string): MappedText[] {
+  const segments: { start: number; end: number }[] = [];
+  let cursor = 0;
+  for (let k = 0; k <= line.length; k += 1) {
+    if (k === line.length || line[k] === '|') {
+      segments.push({ start: cursor, end: k });
+      cursor = k + 1;
+    }
+  }
+
+  const trimmed = line.trim();
+  if (trimmed.startsWith('|')) segments.shift();
+  if (trimmed.endsWith('|')) segments.pop();
+
+  return segments.map((segment) =>
+    joinPieces([trimmedPiece(chunk, lineStart + segment.start, lineStart + segment.end)], ''),
+  );
+}
 
 /** A contiguous slice of the chunk, and where it starts in it. */
 interface SourcePiece {
@@ -97,6 +129,20 @@ function remapBlocks(blocks: MarkdownBlock[], outer: number[]): MarkdownBlock[] 
             sourceIndexOf: composeSourceMaps(outer, item.sourceIndexOf),
           })),
         };
+      case 'table':
+        return {
+          ...block,
+          head: block.head.map((cell) => ({
+            ...cell,
+            sourceIndexOf: composeSourceMaps(outer, cell.sourceIndexOf),
+          })),
+          rows: block.rows.map((row) =>
+            row.map((cell) => ({
+              ...cell,
+              sourceIndexOf: composeSourceMaps(outer, cell.sourceIndexOf),
+            })),
+          ),
+        };
       case 'quote':
         return { ...block, blocks: remapBlocks(block.blocks, outer) };
       default:
@@ -119,6 +165,8 @@ export function collectMappedTexts(blocks: MarkdownBlock[]): MappedText[] {
     switch (block.kind) {
       case 'list':
         return block.items;
+      case 'table':
+        return [...block.head, ...block.rows.flat()];
       case 'quote':
         return collectMappedTexts(block.blocks);
       default:
@@ -214,12 +262,37 @@ export function parseMarkdownBlocks(chunk: string): MarkdownBlock[] {
       continue;
     }
 
+    // A pipe table is announced by its delimiter row, not by the pipes: a
+    // sentence may well contain a `|`, and only the `|---|---|` line under a
+    // header row makes the block a table.
+    const next = lines[i + 1];
+    if (HAS_PIPE.test(line) && next !== undefined && TABLE_DELIMITER.test(next.trim())) {
+      const head = splitTableRow(chunk, lineStart[i]!, line);
+      i += 2;
+      const rows: MappedText[][] = [];
+      while (i < lines.length && lines[i]!.trim() && HAS_PIPE.test(lines[i]!)) {
+        rows.push(splitTableRow(chunk, lineStart[i]!, lines[i]!));
+        i += 1;
+      }
+      blocks.push({ kind: 'table', head, rows });
+      continue;
+    }
+
     const paragraph: SourcePiece[] = [];
     while (i < lines.length) {
       const current = lines[i]!;
       if (!current.trim()) break;
       const trimmed = current.trim();
       if (HEADING.test(trimmed) || BULLET.test(trimmed) || QUOTE.test(current.trimStart())) break;
+      // A header row belongs to the table below it, not to the paragraph above.
+      const following = lines[i + 1];
+      if (
+        HAS_PIPE.test(current) &&
+        following !== undefined &&
+        TABLE_DELIMITER.test(following.trim())
+      ) {
+        break;
+      }
       paragraph.push(trimmedPiece(chunk, lineStart[i]!, lineStart[i]! + current.length));
       i += 1;
     }

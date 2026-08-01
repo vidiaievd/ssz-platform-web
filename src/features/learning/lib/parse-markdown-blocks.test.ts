@@ -19,6 +19,12 @@ function structure(chunk: string): unknown[] {
           return { kind: 'quote', blocks: strip(block.blocks) };
         case 'heading':
           return { kind: 'heading', level: block.level, text: block.text };
+        case 'table':
+          return {
+            kind: 'table',
+            head: block.head.map((cell) => cell.text),
+            rows: block.rows.map((row) => row.map((cell) => cell.text)),
+          };
         default:
           return { kind: 'paragraph', text: block.text };
       }
@@ -115,6 +121,49 @@ describe('parseMarkdownBlocks', () => {
       { kind: 'paragraph', text: 'Andre.' },
     ]);
   });
+
+  // Authored grammar explanations lean on paradigm tables; printing their
+  // source would put `|---|` in front of the reader.
+  it('reads a pipe table as a table', () => {
+    const blocks = structure(
+      ['| Modalverb | Betydning |', '|---|---|', '| kan | ability |', '| må | necessity |'].join('\n'),
+    );
+    expect(blocks).toEqual([
+      {
+        kind: 'table',
+        head: ['Modalverb', 'Betydning'],
+        rows: [
+          ['kan', 'ability'],
+          ['må', 'necessity'],
+        ],
+      },
+    ]);
+  });
+
+  it('keeps the header row out of the paragraph above it', () => {
+    const blocks = structure(
+      ['Modalverbene bøyes slik:', '| Infinitiv | Presens |', '| --- | --- |', '| å kunne | kan |'].join(
+        '\n',
+      ),
+    );
+    expect(blocks).toEqual([
+      { kind: 'paragraph', text: 'Modalverbene bøyes slik:' },
+      { kind: 'table', head: ['Infinitiv', 'Presens'], rows: [['å kunne', 'kan']] },
+    ]);
+  });
+
+  it('leaves a pipe inside prose alone', () => {
+    // Only the delimiter row makes a table; a sentence may well contain a pipe.
+    expect(structure('Velg mellom kan | må | skal.')).toEqual([
+      { kind: 'paragraph', text: 'Velg mellom kan | må | skal.' },
+    ]);
+  });
+
+  it('reads a table written without outer pipes', () => {
+    expect(structure(['a | b', '--- | ---', '1 | 2'].join('\n'))).toEqual([
+      { kind: 'table', head: ['a', 'b'], rows: [['1', '2']] },
+    ]);
+  });
 });
 
 const JOB_AD = [
@@ -199,5 +248,18 @@ describe('parseMarkdownBlocks source map', () => {
     expect(JOB_AD.slice(first.sourceIndexOf[0]!, first.sourceIndexOf[first.text.length]!)).toBe(
       'har fagbrev som elektriker',
     );
+  });
+
+  it('maps a table cell back onto the chunk it came from', () => {
+    const chunk = ['| Infinitiv | Presens |', '|---|---|', '| å kunne | kan |'].join('\n');
+    const blocks = parseMarkdownBlocks(chunk);
+    for (const mapped of collectMappedTexts(blocks)) {
+      expectValidSourceMap(chunk, mapped);
+    }
+
+    const table = blocks[0];
+    if (table?.kind !== 'table') throw new Error('expected a table');
+    const cell = table.rows[0]![0]!;
+    expect(chunk.slice(cell.sourceIndexOf[0]!, cell.sourceIndexOf[cell.text.length]!)).toBe('å kunne');
   });
 });

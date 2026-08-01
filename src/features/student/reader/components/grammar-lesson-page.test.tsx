@@ -145,6 +145,27 @@ describe('GrammarLessonPage', () => {
     expect(screen.getByText(/The time expression is fronted/)).toBeInTheDocument();
   });
 
+  // Explanations are authored in markdown, with paradigm tables doing the real
+  // work; the page used to print their source.
+  it('renders the explanation body as markdown, tables included', () => {
+    mockHappyPath({
+      body: [
+        '## Bøying',
+        '',
+        '| Infinitiv | Presens |',
+        '|---|---|',
+        '| å kunne | kan |',
+      ].join('\n'),
+    });
+    const { container } = renderPage();
+
+    expect(container.textContent).not.toContain('##');
+    expect(container.textContent).not.toContain('|---|');
+    expect(screen.getByRole('heading', { name: 'Bøying' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Presens' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'å kunne' })).toBeInTheDocument();
+  });
+
   it('omits the anchor block when anchorText is absent', () => {
     mockHappyPath({ anchorText: null });
     renderPage();

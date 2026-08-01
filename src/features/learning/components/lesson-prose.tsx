@@ -87,6 +87,63 @@ function Blocks({
                 ))}
               </ul>
             );
+          case 'table':
+            return (
+              // Its own scroll container: a paradigm table is wider than the
+              // reading column on purpose, and a page that scrolls sideways as
+              // a whole is far worse than one table that does.
+              <div key={i} className="-mx-1 overflow-x-auto px-1">
+                <table className="w-full border-collapse text-left text-[15px]">
+                  {block.head.length > 0 && (
+                    <thead>
+                      <tr>
+                        {block.head.map((cell, j) => (
+                          <th
+                            key={j}
+                            scope="col"
+                            className="border-b border-(--ssz-border-default) px-2.5 py-1.5 font-semibold text-(--ssz-text-primary)"
+                          >
+                            <GlossaryText
+                              lang={lang}
+                              text={cell.text}
+                              glossary={glossary}
+                              cefrLevel={cefrLevel}
+                              spans={placed.get(cell)}
+                              authoredVocabulary={authoredVocabulary}
+                              spansHidden={spansHidden}
+                              explanationLanguage={explanationLanguage}
+                            />
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                  )}
+                  <tbody>
+                    {block.rows.map((row, j) => (
+                      <tr key={j}>
+                        {row.map((cell, k) => (
+                          <td
+                            key={k}
+                            className="border-b border-(--ssz-border-default) px-2.5 py-1.5 align-top text-(--ssz-text-secondary)"
+                          >
+                            <GlossaryText
+                              lang={lang}
+                              text={cell.text}
+                              glossary={glossary}
+                              cefrLevel={cefrLevel}
+                              spans={placed.get(cell)}
+                              authoredVocabulary={authoredVocabulary}
+                              spansHidden={spansHidden}
+                              explanationLanguage={explanationLanguage}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
           case 'quote':
             return (
               <blockquote

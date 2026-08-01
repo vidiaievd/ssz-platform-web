@@ -146,6 +146,26 @@ describe('LessonProse', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders a pipe table as a table, not as its source', () => {
+    const { container } = renderProse(
+      ['| Infinitiv | Presens |', '|---|---|', '| å kunne | kan |'].join('\n'),
+    );
+
+    expect(container.textContent).not.toContain('|');
+    const headers = within(container.querySelector('table')!).getAllByRole('columnheader');
+    expect(headers.map((th) => th.textContent)).toEqual(['Infinitiv', 'Presens']);
+    const cells = within(container.querySelector('tbody')!).getAllByRole('cell');
+    expect(cells.map((td) => td.textContent)).toEqual(['å kunne', 'kan']);
+  });
+
+  it('looks up a glossary word inside a table cell', () => {
+    renderProse(['| Ord | Forklaring |', '|---|---|', '| fagbrev | sertifikat |'].join('\n'), [
+      FAGBREV,
+    ]);
+
+    expect(lookups()).toHaveLength(1);
+  });
+
   it('renders a heading as a heading element', () => {
     renderProse('## Forstå teksten');
     expect(screen.getByRole('heading', { name: 'Forstå teksten' })).toBeInTheDocument();

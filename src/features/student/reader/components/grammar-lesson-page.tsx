@@ -4,7 +4,13 @@ import { useMemo, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { ErrorState, LearningSkeleton } from '@/features/learning';
+import {
+  buildGlossaryIndex,
+  ErrorState,
+  HighlightedSentence,
+  LearningSkeleton,
+  LessonProse,
+} from '@/features/learning';
 import { useGrammarRule, useBestGrammarExplanation } from '@/features/content';
 import { useMyStudentProfile } from '@/features/profile';
 import { cn } from '@/lib/utils';
@@ -18,34 +24,8 @@ export interface GrammarLessonPageProps {
 
 const GRAMMAR_HUE = '--ssz-type-grammar';
 
-/** Escapes regex special characters so highlight words can be matched literally. */
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/** Splits `sentence` on `highlights` substrings, wrapping matches in a tinted <span>. */
-function renderHighlighted(sentence: string, highlights: string[]) {
-  const words = highlights.filter(Boolean);
-  if (words.length === 0) return sentence;
-  const pattern = new RegExp(`(${words.map(escapeRegExp).join('|')})`, 'g');
-  return sentence.split(pattern).map((part, i) =>
-    words.includes(part) ? (
-      <span
-        key={i}
-        className="rounded font-bold"
-        style={{
-          background: `color-mix(in oklch, var(${GRAMMAR_HUE}) 25%, transparent)`,
-          color: `var(${GRAMMAR_HUE})`,
-          padding: '1px 5px',
-        }}
-      >
-        {part}
-      </span>
-    ) : (
-      <span key={i}>{part}</span>
-    ),
-  );
-}
+/** Module-level so the prose does not re-render on an identity change alone. */
+const EMPTY_GLOSSARY = buildGlossaryIndex([]);
 
 interface QuickCheckProps {
   question: string;
@@ -184,10 +164,13 @@ export function GrammarLessonPage({ ruleId, unitPosition, courseTitle, cefrLevel
   const anchorText = explanation.data?.anchorText;
   const anchorHighlights = explanation.data?.anchorHighlights;
 
-  const highlightedAnchor = useMemo(() => {
-    if (!anchorText) return null;
-    return renderHighlighted(anchorText, anchorHighlights ?? []);
-  }, [anchorText, anchorHighlights]);
+  const highlightedAnchor = useMemo(
+    () =>
+      anchorText ? (
+        <HighlightedSentence sentence={anchorText} highlights={anchorHighlights ?? []} />
+      ) : null,
+    [anchorText, anchorHighlights],
+  );
 
   const isLoading = rule.isLoading || profile.isLoading || (profileReady && explanation.isLoading);
   const isError = rule.isError || profile.isError || (profileReady && explanation.isError);
@@ -230,7 +213,18 @@ export function GrammarLessonPage({ ruleId, unitPosition, courseTitle, cefrLevel
         </h1>
       </div>
 
-      <p className="mb-5.5 max-w-150 text-base leading-[1.7] text-(--ssz-text-primary)">{data.body}</p>
+      {/*
+        Rendered as markdown, not as plain text: an explanation is authored with
+        headings and paradigm tables, and printing its source would put `|---|`
+        in front of the reader. No glossary here — a grammar lesson explains the
+        rule, and word lookups belong to the texts that use it.
+      */}
+      <LessonProse
+        text={data.body}
+        glossary={EMPTY_GLOSSARY}
+        lang={rule.data.targetLanguage}
+        className="mb-5.5 max-w-150 text-base leading-[1.7]"
+      />
 
       {data.anchorText && (
         <div
