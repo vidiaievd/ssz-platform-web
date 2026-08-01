@@ -21,7 +21,7 @@ import type { Container, LessonSpanKind, LessonTextSpan } from '@/features/conte
 import { deleteTextSpanAction, updateTextSpanAction } from '../actions/lesson-spans';
 import { useLessonTextSpans } from '../api/use-authoring-lessons';
 import { useAuthoringVocabularyLists, useAuthoringVocabularyItems } from '../api/use-authoring-vocabulary';
-import { useAuthoringGrammarRules } from '../api/use-authoring-grammar';
+import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 import { authoringKeys } from '../api/keys';
 
 const KIND_LABEL = {
@@ -34,6 +34,8 @@ interface TextSpanListProps {
   lessonId: string;
   variantId: string | undefined;
   container: Container;
+  /** Grammar rules of this module's Leksjon — what names a grammar span's referent here. */
+  grammarRules?: LevelGrammarRule[];
 }
 
 /**
@@ -45,7 +47,12 @@ interface TextSpanListProps {
  * only surviving record of what the author meant, which is also why nothing
  * here deletes a broken span on the author's behalf.
  */
-export function TextSpanList({ lessonId, variantId, container }: TextSpanListProps) {
+export function TextSpanList({
+  lessonId,
+  variantId,
+  container,
+  grammarRules = [],
+}: TextSpanListProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
@@ -57,7 +64,7 @@ export function TextSpanList({ lessonId, variantId, container }: TextSpanListPro
   const { data: lists } = useAuthoringVocabularyLists(container.id);
   const list = lists?.[0];
   const { data: itemsPage } = useAuthoringVocabularyItems(list?.id ?? '', 1, !!list);
-  const { data: rules } = useAuthoringGrammarRules(container.id);
+
 
   const all = spans ?? [];
   const intact = all.filter((s) => !s.broken);
@@ -68,7 +75,7 @@ export function TextSpanList({ lessonId, variantId, container }: TextSpanListPro
       return (itemsPage?.items ?? []).find((i) => i.id === span.refId)?.lemma ?? null;
     }
     if (span.kind === 'grammar') {
-      return (rules ?? []).find((r) => r.id === span.refId)?.title ?? null;
+      return grammarRules.find((r) => r.id === span.refId)?.title ?? null;
     }
     return span.note;
   }

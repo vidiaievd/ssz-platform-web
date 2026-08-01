@@ -15,6 +15,7 @@ import { useLesson, useUnitVocabularyItems } from '@/features/content';
 import type { Container } from '@/features/content/types';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
+import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 import { updateLessonAction } from '../actions/lesson';
 import { useLessonVariants, useLessonGlossaryMarks } from '../api/use-authoring-lessons';
@@ -43,6 +44,8 @@ interface TextEditorPaneProps {
   lessonTitle: string | null;
   state: 'draft' | 'published' | null;
   container: Container;
+  /** Grammar rules of this module's Leksjon — the pool a grammar annotation may point at. */
+  grammarRules?: LevelGrammarRule[];
   backHref: string;
   publishSlot: ReactNode;
 }
@@ -53,6 +56,7 @@ export function TextEditorPane({
   lessonTitle,
   state,
   container,
+  grammarRules = [],
   backHref,
   publishSlot,
 }: TextEditorPaneProps) {
@@ -191,6 +195,7 @@ export function TextEditorPane({
                   lessonId={lessonId}
                   variantId={defaultVariant?.id}
                   container={container}
+                  grammarRules={grammarRules}
                   body={bodyValue ?? ''}
                   textareaRef={bodyRef}
                 />
@@ -217,6 +222,7 @@ export function TextEditorPane({
               lessonId={lessonId}
               variantId={defaultVariant?.id}
               container={container}
+              grammarRules={grammarRules}
             />
             <GlossaryMarkedWords
               lessonId={lessonId}

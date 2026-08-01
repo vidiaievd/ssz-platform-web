@@ -16,7 +16,6 @@ vi.mock('../api/use-authoring-vocabulary', () => ({
   useAuthoringVocabularyLists: vi.fn(),
   useAuthoringVocabularyItems: vi.fn(),
 }));
-vi.mock('../api/use-authoring-grammar', () => ({ useAuthoringGrammarRules: vi.fn() }));
 
 const { TextSpanList } = await import('./text-span-list');
 const { deleteTextSpanAction, updateTextSpanAction } = await import('../actions/lesson-spans');
@@ -24,7 +23,6 @@ const { useLessonTextSpans } = await import('../api/use-authoring-lessons');
 const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } = await import(
   '../api/use-authoring-vocabulary'
 );
-const { useAuthoringGrammarRules } = await import('../api/use-authoring-grammar');
 
 const CONTAINER: Container = {
   id: 'module-1',
@@ -80,7 +78,6 @@ beforeEach(() => {
   vi.mocked(useAuthoringVocabularyItems).mockReturnValue({
     data: { items: ITEMS, total: 1, page: 1, limit: 20, totalPages: 1 },
   } as never);
-  vi.mocked(useAuthoringGrammarRules).mockReturnValue({ data: [] } as never);
 });
 
 describe('TextSpanList', () => {

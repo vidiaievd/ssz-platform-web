@@ -16,6 +16,7 @@ import { ExerciseEditorPane } from '@/features/content-authoring/components/exer
 import { PublishDialog } from '@/features/content-authoring/components/publish-dialog';
 import { getContainerPreflight } from '@/features/content-authoring/lib/get-container-preflight';
 import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
+import { collectLevelGrammarRules } from '@/features/content-authoring/lib/level-grammar-rules';
 import { getMaterialKind } from '@/features/content-authoring/lib/material-kind';
 import type { PreflightResult } from '@/features/content-authoring/types';
 
@@ -71,6 +72,9 @@ export default async function LessonEditorPage({
   }
 
   const kind = getMaterialKind(item);
+  // Annotating grammar in a text points at the rules of its own Leksjon; the
+  // tree above already holds them, so the editor needs no request of its own.
+  const levelGrammarRules = collectLevelGrammarRules(tree, moduleContainerId);
   const backHref = `/school/${schoolSlug}/content/${id}`;
   const publishSlot = <PublishDialog container={container} result={preflight} />;
 
@@ -96,6 +100,7 @@ export default async function LessonEditorPage({
           lessonTitle={item.title}
           state={item.state}
           container={moduleContainer}
+          grammarRules={levelGrammarRules}
           backHref={backHref}
           publishSlot={publishSlot}
         />

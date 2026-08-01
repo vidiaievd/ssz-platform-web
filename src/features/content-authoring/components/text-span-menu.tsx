@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useTransition, type RefObject } from 'react';
-import { TextSelect } from 'lucide-react';
+import { HelpCircle, TextSelect } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -17,13 +17,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useLessonTextSpans } from '@/features/content';
 import type { Container, LessonSpanKind } from '@/features/content/types';
 
 import { bodyRangeToSpan, type SpanSelectionError } from '../lib/span-coordinates';
 import { splitParagraphs } from '../lib/split-paragraphs';
 import { createTextSpanAction } from '../actions/lesson-spans';
+import { useLessonGlossaryMarks } from '../api/use-authoring-lessons';
 import { useAuthoringVocabularyLists, useAuthoringVocabularyItems } from '../api/use-authoring-vocabulary';
-import { useAuthoringGrammarRules } from '../api/use-authoring-grammar';
+import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 import { authoringKeys } from '../api/keys';
 
 const KINDS: LessonSpanKind[] = ['vocab', 'grammar', 'chunk'];
@@ -38,8 +40,14 @@ interface TextSpanMenuProps {
   lessonId: string;
   /** Undefined until the anchor text has been saved at least once (no variant yet). */
   variantId: string | undefined;
-  /** The module the lesson belongs to — vocabulary list and grammar rules come from it. */
+  /** The module the lesson belongs to — its vocabulary list is what lexis annotations point at. */
   container: Container;
+  /**
+   * Grammar rules of this module's Leksjon, resolved by the editor route from
+   * the curriculum tree. A course keeps its grammar in a module of its own, so
+   * the rule a text illustrates is a sibling's, not this module's.
+   */
+  grammarRules: LevelGrammarRule[];
   /** Current body markdown. Span offsets are into this, so it must be the live form value. */
   body: string;
   textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -99,6 +107,7 @@ export function TextSpanMenu({
   lessonId,
   variantId,
   container,
+  grammarRules,
   body,
   textareaRef,
 }: TextSpanMenuProps) {
@@ -111,6 +120,7 @@ export function TextSpanMenu({
   const [kind, setKind] = useState<LessonSpanKind>('vocab');
   const [refId, setRefId] = useState('');
   const [note, setNote] = useState('');
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const selection = useTextareaSelection(textareaRef, body);
   const coordinates = bodyRangeToSpan(body, selection.start, selection.end);
@@ -123,13 +133,27 @@ export function TextSpanMenu({
   const list = lists?.[0];
   const { data: itemsPage } = useAuthoringVocabularyItems(list?.id ?? '', 1, !!list);
   const items = itemsPage?.items ?? [];
-  const { data: rules } = useAuthoringGrammarRules(container.id, kind === 'grammar');
+
+  /*
+   * Spec 16 §5.3: one live vocab span makes spans the sole source of lexis
+   * highlighting for the whole text, and the tokenizer that underlines every
+   * word of the module glossary stops running. That rule is right — mixing the
+   * two per word makes the author's deliberate mark invisible among the
+   * automatic ones — but it is invisible at the moment it takes effect, which
+   * is how a text loses thirty underlines to one annotation.
+   */
+  const { data: existingSpans } = useLessonTextSpans(lessonId, variantId);
+  const { data: marks } = useLessonGlossaryMarks(lessonId, variantId);
+  const firstVocabSpan =
+    kind === 'vocab' && !(existingSpans ?? []).some((span) => span.kind === 'vocab' && !span.broken);
+  const markedWordCount = marks?.length ?? 0;
 
   function handleOpenChange(next: boolean) {
     setPinned(next ? coordinates : null);
     if (!next) {
       setRefId('');
       setNote('');
+      setHelpOpen(false);
     }
     setOpen(next);
   }
@@ -207,6 +231,45 @@ export function TextSpanMenu({
               {t('spans.selected', { text: selectedText(body, active.value) })}
             </p>
 
+            {/*
+              The one line an author needs before they have decided anything:
+              what the annotation does to the text a student reads. The detail —
+              which kind to reach for, and how an annotation can lose its
+              anchor — sits behind the help toggle, so it is available at the
+              moment of choosing without being in the way once it is known.
+            */}
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-xs text-muted-foreground">{t('spans.explainer')}</p>
+              <button
+                type="button"
+                onClick={() => setHelpOpen((v) => !v)}
+                aria-expanded={helpOpen}
+                aria-label={t('spans.helpToggle')}
+                title={t('spans.helpToggle')}
+                className="shrink-0 rounded-full p-0.5 text-(--ssz-text-muted) hover:text-(--ssz-text-accent) focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) focus-visible:outline-none"
+              >
+                <HelpCircle size={14} aria-hidden="true" />
+              </button>
+            </div>
+
+            {helpOpen && (
+              <div className="flex flex-col gap-1.5 rounded-xl border border-(--ssz-border-default) bg-(--ssz-bg-subtle) p-3 text-xs leading-relaxed text-(--ssz-text-secondary)">
+                <p>
+                  <span className="font-semibold text-(--ssz-text-primary)">{t('spans.kindVocab')}</span>{' '}
+                  {t('spans.helpVocab')}
+                </p>
+                <p>
+                  <span className="font-semibold text-(--ssz-text-primary)">{t('spans.kindGrammar')}</span>{' '}
+                  {t('spans.helpGrammar')}
+                </p>
+                <p>
+                  <span className="font-semibold text-(--ssz-text-primary)">{t('spans.kindChunk')}</span>{' '}
+                  {t('spans.helpChunk')}
+                </p>
+                <p className="border-t border-(--ssz-border-default) pt-1.5">{t('spans.helpAnchor')}</p>
+              </div>
+            )}
+
             <div
               role="radiogroup"
               aria-label={t('spans.kind')}
@@ -254,7 +317,7 @@ export function TextSpanMenu({
               ))}
 
             {kind === 'grammar' &&
-              ((rules ?? []).length === 0 ? (
+              (grammarRules.length === 0 ? (
                 <p className="text-sm text-muted-foreground">{t('spans.noRules')}</p>
               ) : (
                 <Select value={refId} onValueChange={setRefId}>
@@ -262,7 +325,7 @@ export function TextSpanMenu({
                     <SelectValue placeholder={t('spans.pickRule')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {(rules ?? []).map((rule) => (
+                    {grammarRules.map((rule) => (
                       <SelectItem key={rule.id} value={rule.id}>
                         {rule.title}
                       </SelectItem>
@@ -280,6 +343,12 @@ export function TextSpanMenu({
                 maxLength={500}
               />
             </Field>
+
+            {firstVocabSpan && markedWordCount > 0 && (
+              <p className="rounded-xl border border-(--ssz-border-strong) bg-(--ssz-bg-subtle) p-2.5 text-xs leading-relaxed text-(--ssz-text-secondary)">
+                {t('spans.firstVocabWarning', { count: markedWordCount })}
+              </p>
+            )}
 
             <Button
               type="button"
