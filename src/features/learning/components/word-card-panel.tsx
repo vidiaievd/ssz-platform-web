@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink, Volume2, X } from 'lucide-react';
+import { ExternalLink, Loader2, Volume2, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
@@ -46,7 +46,7 @@ function Card({
   const locale = useLocale();
   const { item, form, formLabel, contextSentence } = selected;
 
-  const { play, playing, source } = useWordAudio(item.lemma, item.audioMediaId, targetLanguage);
+  const { play, playing, pending } = useWordAudio(item.lemma, item.audioMediaId, targetLanguage);
   const href = dictionaryUrl(item.lemma, targetLanguage);
 
   const translation = item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
@@ -92,23 +92,27 @@ function Card({
           )}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          {/* Hidden outright when there is neither a recording nor a voice: a
-              dead play button is worse than no play button. */}
-          {source !== 'none' && (
-            <button
-              type="button"
-              onClick={play}
-              aria-label={t('listenWord')}
-              className={cn(
-                'flex size-8 items-center justify-center rounded-full border border-(--ssz-border-default)',
-                'text-(--ssz-text-secondary) hover:border-(--ssz-color-primary-500) hover:text-(--ssz-color-primary-600)',
-                'focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) focus-visible:outline-none',
-                playing && 'border-(--ssz-color-primary-500) text-(--ssz-color-primary-600)',
-              )}
-            >
+          {/* Always present: the clip comes from the platform's own synthesis
+              when no recording exists, so this no longer depends on the
+              visitor's OS having a Norwegian voice. */}
+          <button
+            type="button"
+            onClick={play}
+            aria-label={t('listenWord')}
+            aria-busy={pending}
+            className={cn(
+              'flex size-8 items-center justify-center rounded-full border border-(--ssz-border-default)',
+              'text-(--ssz-text-secondary) hover:border-(--ssz-border-focus) hover:text-(--ssz-text-accent)',
+              'focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) focus-visible:outline-none',
+              (playing || pending) && 'border-(--ssz-border-focus) text-(--ssz-text-accent)',
+            )}
+          >
+            {pending ? (
+              <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+            ) : (
               <Volume2 size={15} aria-hidden="true" />
-            </button>
-          )}
+            )}
+          </button>
           <button
             type="button"
             onClick={onClose}

@@ -7,6 +7,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useWordAudio } from './use-word-audio';
 
+/** Lets a single test hand the hook an authored recording. */
+const recording = vi.hoisted(() => ({ url: undefined as string | undefined }));
+vi.mock('@/features/media', () => ({
+  useMediaAsset: (id?: string) => ({ data: id && recording.url ? { url: recording.url } : undefined }),
+}));
+
 /** Minimal stand-in for the Web Speech API, with a controllable voice list. */
 function installSpeechSynthesis(voices: { lang: string; name: string }[]) {
   const listeners = new Set<EventListener>();
@@ -31,13 +37,37 @@ function installSpeechSynthesis(voices: { lang: string; name: string }[]) {
   return { synth, fireVoicesChanged: () => listeners.forEach((fn) => fn(new Event('voiceschanged'))) };
 }
 
+/** Stubs the pronunciation endpoint; `null` makes the request fail. */
+function mockPronunciationEndpoint(url: string | null) {
+  const fetchMock = vi.fn(() =>
+    url === null
+      ? Promise.resolve({ ok: false, status: 503, json: () => Promise.resolve({}) })
+      : Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ url, cached: false }) }),
+  );
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
+
+const play = vi.fn(() => Promise.resolve());
+const pause = vi.fn();
+
 function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('no media service in this test'))));
+  play.mockClear();
+  pause.mockClear();
+  vi.stubGlobal(
+    'Audio',
+    class {
+      onended: (() => void) | null = null;
+      constructor(public src: string) {}
+      play = play;
+      pause = pause;
+    },
+  );
 });
 
 afterEach(() => {
@@ -46,99 +76,107 @@ afterEach(() => {
 });
 
 describe('useWordAudio — picking a source', () => {
-  it('reports none when the browser has no voice for the language', () => {
-    installSpeechSynthesis([{ lang: 'en-US', name: 'English' }]);
+  it('reports the server as the source when the word has no recording', () => {
+    installSpeechSynthesis([]);
+    mockPronunciationEndpoint('http://minio/tts/bil.mp3');
     const { result } = renderHook(() => useWordAudio('bil'), { wrapper });
 
-    expect(result.current.source).toBe('none');
-  });
-
-  it('accepts a no-NO voice for a nb-NO word — Norwegian is tagged three ways', () => {
-    installSpeechSynthesis([{ lang: 'no-NO', name: 'Norsk' }]);
-    const { result } = renderHook(() => useWordAudio('bil'), { wrapper });
-
-    expect(result.current.source).toBe('synthesis');
-  });
-
-  it('accepts an exact nb match', () => {
-    installSpeechSynthesis([{ lang: 'nb', name: 'Bokmål' }]);
-    const { result } = renderHook(() => useWordAudio('bil'), { wrapper });
-
-    expect(result.current.source).toBe('synthesis');
-  });
-
-  it('picks up voices that only arrive with the voiceschanged event', async () => {
-    const voices: { lang: string; name: string }[] = [];
-    const { fireVoicesChanged } = installSpeechSynthesis(voices);
-
-    const { result } = renderHook(() => useWordAudio('bil'), { wrapper });
-    // Chrome's first getVoices() is empty — the button must not settle on 'none'.
-    expect(result.current.source).toBe('none');
-
-    voices.push({ lang: 'nb-NO', name: 'Norsk' });
-    act(() => fireVoicesChanged());
-
-    await waitFor(() => expect(result.current.source).toBe('synthesis'));
+    // No local voice, no recording — and still a usable control, because the
+    // clip comes from the platform.
+    expect(result.current.source).toBe('server');
   });
 
   it('survives a browser with no speech synthesis at all', () => {
     vi.stubGlobal('speechSynthesis', undefined);
+    mockPronunciationEndpoint('http://minio/tts/bil.mp3');
     const { result } = renderHook(() => useWordAudio('bil'), { wrapper });
 
-    expect(result.current.source).toBe('none');
+    expect(result.current.source).toBe('server');
     expect(() => result.current.play()).not.toThrow();
   });
 });
 
-describe('useWordAudio — speaking', () => {
-  it('cancels the queue before speaking, so repeated taps do not stack up', () => {
-    const { synth } = installSpeechSynthesis([{ lang: 'nb-NO', name: 'Norsk' }]);
-    const { result } = renderHook(() => useWordAudio('bil'), { wrapper });
+describe('useWordAudio — playing', () => {
+  it('fetches the server clip on first tap and plays it', async () => {
+    installSpeechSynthesis([]);
+    const fetchMock = mockPronunciationEndpoint('http://minio/tts/hus.mp3');
+    const { result } = renderHook(() => useWordAudio('hus', undefined, 'nb'), { wrapper });
 
-    act(() => result.current.play());
-    act(() => result.current.play());
+    await act(async () => {
+      result.current.play();
+    });
 
-    expect(synth.cancel).toHaveBeenCalledTimes(2);
-    expect(synth.speak).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/media/pronunciation',
+      expect.objectContaining({ method: 'POST', body: JSON.stringify({ text: 'hus', lang: 'nb' }) }),
+    );
+    await waitFor(() => expect(play).toHaveBeenCalled());
   });
 
-  it('speaks the word with the requested language', () => {
+  it('reuses the fetched clip on later taps instead of asking again', async () => {
+    installSpeechSynthesis([]);
+    const fetchMock = mockPronunciationEndpoint('http://minio/tts/gate.mp3');
+    const { result } = renderHook(() => useWordAudio('gate', undefined, 'nb'), { wrapper });
+
+    await act(async () => {
+      result.current.play();
+    });
+    await waitFor(() => expect(play).toHaveBeenCalledTimes(1));
+
+    await act(async () => {
+      result.current.play();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(play).toHaveBeenCalledTimes(2);
+  });
+
+  it('falls back to a local voice when the server cannot be reached', async () => {
     const { synth } = installSpeechSynthesis([{ lang: 'nb-NO', name: 'Norsk' }]);
-    const { result } = renderHook(() => useWordAudio('stillingsannonse'), { wrapper });
+    mockPronunciationEndpoint(null);
+    const { result } = renderHook(() => useWordAudio('stillingsannonse', undefined, 'nb-NO'), {
+      wrapper,
+    });
 
-    act(() => result.current.play());
+    await act(async () => {
+      result.current.play();
+    });
 
+    await waitFor(() => expect(synth.speak).toHaveBeenCalled());
     const utterance = synth.speak.mock.calls[0]?.[0] as { text: string; lang: string };
     expect(utterance.text).toBe('stillingsannonse');
     expect(utterance.lang).toBe('nb-NO');
   });
 
-  it('clears the playing flag when the utterance ends', () => {
-    const { synth } = installSpeechSynthesis([{ lang: 'nb-NO', name: 'Norsk' }]);
-    const { result } = renderHook(() => useWordAudio('bil'), { wrapper });
+  it('stays silent when the server is down and the browser has no voice', async () => {
+    const { synth } = installSpeechSynthesis([{ lang: 'en-US', name: 'English' }]);
+    mockPronunciationEndpoint(null);
+    const { result } = renderHook(() => useWordAudio('bil', undefined, 'nb'), { wrapper });
 
-    act(() => result.current.play());
-    expect(result.current.playing).toBe(true);
-
-    const utterance = synth.speak.mock.calls[0]?.[0] as { onend: (() => void) | null };
-    act(() => utterance.onend?.());
-
-    expect(result.current.playing).toBe(false);
-  });
-
-  it('stops speaking when the card moves to another word', () => {
-    const { synth } = installSpeechSynthesis([{ lang: 'nb-NO', name: 'Norsk' }]);
-    const { result, rerender } = renderHook(({ word }) => useWordAudio(word), {
-      wrapper,
-      initialProps: { word: 'bil' },
+    await act(async () => {
+      result.current.play();
     });
 
-    act(() => result.current.play());
-    synth.cancel.mockClear();
+    expect(synth.speak).not.toHaveBeenCalled();
+    expect(play).not.toHaveBeenCalled();
+    // The failed attempt must not leave the button spinning forever.
+    await waitFor(() => expect(result.current.pending).toBe(false));
+  });
 
-    rerender({ word: 'hus' });
+  it('plays an authored recording directly, without touching the endpoint', async () => {
+    installSpeechSynthesis([]);
+    const fetchMock = mockPronunciationEndpoint('http://minio/tts/unused.mp3');
+    recording.url = 'http://minio/recordings/veileder.mp3';
 
-    expect(synth.cancel).toHaveBeenCalled();
-    expect(result.current.playing).toBe(false);
+    const { result } = renderHook(() => useWordAudio('veileder', 'media-1', 'nb'), { wrapper });
+
+    expect(result.current.source).toBe('recording');
+    await act(async () => {
+      result.current.play();
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(play).toHaveBeenCalled();
+    recording.url = undefined;
   });
 });

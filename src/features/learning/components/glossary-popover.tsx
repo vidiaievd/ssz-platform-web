@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, ChevronRight, Volume2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Loader2, Volume2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
@@ -142,7 +142,7 @@ function MiniPreview({
   audioMediaId?: string;
 }) {
   const t = useTranslations('Learning.glossary');
-  const { play, playing, source } = useWordAudio(word, audioMediaId, lang);
+  const { play, playing, pending } = useWordAudio(word, audioMediaId, lang);
 
   return (
     <div className="flex items-center gap-2 px-2.5 py-2">
@@ -153,21 +153,24 @@ function MiniPreview({
         {pos}
       </span>
       <span className="min-w-0 text-[13px] font-semibold text-(--ssz-text-primary)">{translation}</span>
-      {source !== 'none' && (
-        <button
-          type="button"
-          onClick={play}
-          aria-label={t('listenWord')}
-          className={cn(
-            'flex size-6 shrink-0 items-center justify-center rounded-full',
-            'text-(--ssz-text-muted) hover:bg-subtle hover:text-(--ssz-color-primary-600)',
-            'focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) focus-visible:outline-none',
-            playing && 'text-(--ssz-color-primary-600)',
-          )}
-        >
+      <button
+        type="button"
+        onClick={play}
+        aria-label={t('listenWord')}
+        aria-busy={pending}
+        className={cn(
+          'flex size-6 shrink-0 items-center justify-center rounded-full',
+          'text-(--ssz-text-muted) hover:bg-subtle hover:text-(--ssz-text-accent)',
+          'focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) focus-visible:outline-none',
+          (playing || pending) && 'text-(--ssz-text-accent)',
+        )}
+      >
+        {pending ? (
+          <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+        ) : (
           <Volume2 size={13} aria-hidden="true" />
-        </button>
-      )}
+        )}
+      </button>
     </div>
   );
 }

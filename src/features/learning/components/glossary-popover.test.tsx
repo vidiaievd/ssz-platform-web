@@ -323,13 +323,15 @@ describe('GlossaryPopover — preview-only (a panel owns the full card)', () => 
     expect(screen.getByRole('button', { name: 'Listen' })).toBeInTheDocument();
   });
 
-  it('hides the play button when nothing can pronounce the word', () => {
+  it('offers the play button even when the browser has no voice for the word', () => {
+    // The clip is synthesized server-side, so the control no longer depends on
+    // the visitor's OS shipping a Norwegian voice.
     installVoice('en-US');
     renderPopover({ previewOnly: true, lang: 'nb-NO' });
 
     hoverIn();
     advance(400);
 
-    expect(screen.queryByRole('button', { name: 'Listen' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Listen' })).toBeInTheDocument();
   });
 });

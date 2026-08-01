@@ -1,6 +1,6 @@
 'use client';
 
-import { Repeat, Volume2 } from 'lucide-react';
+import { Loader2, Repeat, Volume2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -49,25 +49,28 @@ export function WordAudioButton({
   className?: string;
 }) {
   const t = useTranslations('Learning.reader.vocab');
-  const { play, playing, source } = useWordAudio(word, mediaId, lang);
-
-  if (source === 'none') return null;
+  const { play, playing, pending } = useWordAudio(word, mediaId, lang);
 
   return (
     <button
       type="button"
       aria-label={t('listenTo', { word })}
+      aria-busy={pending}
       onClick={(e) => {
         e.stopPropagation();
         play();
       }}
       className={cn(
         'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-(--ssz-border-default) bg-surface text-(--ssz-text-accent) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
-        playing && 'border-(--ssz-border-focus) bg-(--ssz-bg-accent)',
+        (playing || pending) && 'border-(--ssz-border-focus) bg-(--ssz-bg-accent)',
         className,
       )}
     >
-      <Volume2 size={15} aria-hidden="true" />
+      {pending ? (
+        <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+      ) : (
+        <Volume2 size={15} aria-hidden="true" />
+      )}
     </button>
   );
 }
