@@ -1,21 +1,29 @@
 'use client';
 
 import { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useBestGrammarExplanation, useGrammarRule } from '@/features/content';
+import { Link } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 import { parseInlineMarkdown } from '../lib/parse-inline-markdown';
+import { useGlossaryTarget } from './glossary-target-provider';
+import { useGrammarLink } from './grammar-link-provider';
+import { useSelectedAnnotationStore } from '../stores/selected-annotation-store';
 
 /** The two span kinds that carry an explanation rather than a dictionary entry. */
 export type AnnotationKind = 'grammar' | 'chunk';
 
-const HUE: Record<AnnotationKind, string> = {
+/** Exported so the rail's card is tinted by the same rule as the marker. */
+export const ANNOTATION_HUE: Record<AnnotationKind, string> = {
   grammar: 'var(--ssz-type-grammar)',
   chunk: 'var(--ssz-type-chunk)',
 };
+
+const HUE = ANNOTATION_HUE;
 
 /**
  * A grammar explanation is authored per language and per level and can run to
@@ -113,21 +121,34 @@ export function SpanAnnotation({
 }: SpanAnnotationProps) {
   const t = useTranslations('Learning.glossary');
   const [open, setOpen] = useState(false);
+  // Same split as a word lookup: where the layout has a rail, the card belongs
+  // there — off the sentence being read, and with room for more of the rule
+  // than a 256px floating box can hold.
+  const target = useGlossaryTarget();
+  const select = useSelectedAnnotationStore((s) => s.select);
+  const ruleHref = useGrammarLink(refId);
+
+  const marker = (
+    <button
+      type="button"
+      aria-label={kind === 'grammar' ? t('showRule') : t('showNote')}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (target === 'panel') select({ kind, surface, note, refId });
+      }}
+      className={cn(
+        'mx-0.5 inline-block h-1.75 w-1.75 shrink-0 cursor-pointer rounded-full align-super',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
+      )}
+      style={{ background: HUE[kind] }}
+    />
+  );
+
+  if (target === 'panel') return marker;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={kind === 'grammar' ? t('showRule') : t('showNote')}
-          onClick={(e) => e.stopPropagation()}
-          className={cn(
-            'mx-0.5 inline-block h-1.75 w-1.75 shrink-0 cursor-pointer rounded-full align-super',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
-          )}
-          style={{ background: HUE[kind] }}
-        />
-      </PopoverTrigger>
+      <PopoverTrigger asChild>{marker}</PopoverTrigger>
       <PopoverContent
         className="w-64 p-3"
         style={{ background: 'var(--ssz-bg-surface)', border: '1px solid var(--ssz-border-default)' }}
@@ -154,6 +175,18 @@ export function SpanAnnotation({
               explanationLanguage={explanationLanguage}
               cefrLevel={cefrLevel}
             />
+            {/* Only offered where the popover is the whole card — on a rail
+                layout the same link lives in the panel, which has the room to
+                put it under the explanation rather than beside it. */}
+            {ruleHref && (
+              <Link
+                href={ruleHref}
+                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-(--ssz-text-link) hover:underline"
+              >
+                {t('openRule')}
+                <ArrowRight size={11} aria-hidden="true" />
+              </Link>
+            )}
           </div>
         )}
       </PopoverContent>

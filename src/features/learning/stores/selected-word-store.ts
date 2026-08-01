@@ -4,6 +4,8 @@ import { create } from 'zustand';
 
 import type { VocabularyItem } from '@/features/content/types';
 
+import { useSelectedAnnotationStore } from './selected-annotation-store';
+
 export interface SelectedWord {
   item: VocabularyItem;
   /** The surface form met in the text — the paradigm cell to mark. */
@@ -30,6 +32,11 @@ interface SelectedWordState {
  */
 export const useSelectedWordStore = create<SelectedWordState>((set) => ({
   selected: null,
-  select: (selected) => set({ selected }),
+  // Clears the annotation card: the rail shows one card at a time, and the
+  // reader's last click is what it answers. See [useSelectedAnnotationStore].
+  select: (selected) => {
+    useSelectedAnnotationStore.getState().clear();
+    set({ selected });
+  },
   clear: () => set({ selected: null }),
 }));

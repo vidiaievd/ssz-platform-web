@@ -177,12 +177,22 @@ export type { WordParadigmTableProps } from './components/word-paradigm-table';
 export { WordCardPanel } from './components/word-card-panel';
 export type { WordCardPanelProps } from './components/word-card-panel';
 
+export { AnnotationCardPanel } from './components/annotation-card-panel';
+export { HighlightedSentence } from './components/highlighted-sentence';
+export type { HighlightedSentenceProps } from './components/highlighted-sentence';
+export type { AnnotationCardPanelProps } from './components/annotation-card-panel';
+
 export { GlossaryTargetProvider, useGlossaryTarget } from './components/glossary-target-provider';
 export type { GlossaryTarget } from './components/glossary-target-provider';
+
+export { GrammarLinkProvider, useGrammarLink } from './components/grammar-link-provider';
+export type { GrammarLinks } from './components/grammar-link-provider';
 
 export { KnowWordButton } from './components/know-word-button';
 export { useSelectedWordStore } from './stores/selected-word-store';
 export type { SelectedWord } from './stores/selected-word-store';
+export { useSelectedAnnotationStore } from './stores/selected-annotation-store';
+export type { SelectedAnnotation } from './stores/selected-annotation-store';
 export { dictionaryUrl, DICTIONARY_HOST } from './lib/dictionary-link';
 export { toGlossaryTag } from './lib/pos-tag';
 

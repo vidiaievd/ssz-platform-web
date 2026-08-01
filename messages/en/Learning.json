@@ -26,10 +26,12 @@
     "ruleUnavailable": "This rule is not available.",
     "inflection": "Inflection",
     "inContext": "In the text",
-    "closeCard": "Close the word card",
+    "closeCard": "Close the card",
     "lookUpIn": "Look it up in {source}",
     "wordCardTitle": "Word card",
-    "wordCardEmpty": "Tap an underlined word in the text and it will appear here."
+    "wordCardEmpty": "Tap an underlined word or a coloured marker in the text — the explanation appears here.",
+    "ruleCardTitle": "Rule",
+    "openRule": "Open the full rule"
   },
   "unitStepper": {
     "label": "Unit steps",

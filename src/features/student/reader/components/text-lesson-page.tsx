@@ -18,10 +18,12 @@ import {
 import { useTranslations } from 'next-intl';
 
 import {
+  AnnotationCardPanel,
   AudioPlayer,
   ErrorState,
   GlossIntensityProvider,
   GlossaryTargetProvider,
+  GrammarLinkProvider,
   LessonProse,
   LookupTelemetryProvider,
   LearningSkeleton,
@@ -29,6 +31,7 @@ import {
   resolveGlossIntensity,
   useSrsCardStates,
   usesAuthoredVocabulary,
+  useSelectedAnnotationStore,
   useSelectedWordStore,
   WordCardPanel,
   type GlossaryIndex,
@@ -51,6 +54,7 @@ import { useMediaAsset } from '@/features/media';
 import { findAudioNarration, findHeroImage, isMediaOnlyParagraph } from '@/lib/content/lesson-media-tokens';
 import { cn } from '@/lib/utils';
 
+import { useGrammarRuleLinks } from '../hooks/use-grammar-rule-links';
 import { useScrollRestoration } from '../hooks/use-scroll-restoration';
 import { useReadingModeStore, type ReadingMode, type TextWidth } from '../stores/reading-mode-store';
 import { ReaderRailSlot, useReaderRailVisible } from './reader-rail';
@@ -71,6 +75,13 @@ export interface TextLessonPageProps {
   cefrLevel: string;
   /** Reader-shell's `activeContentItem.status`. Drives the second-pass re-read offer below. */
   status?: UnitContentsItemStatus;
+  /**
+   * The course and unit this text is being read in. Only used to link an
+   * annotated grammar rule to its own page; absent outside the reader route,
+   * where the annotation card simply carries no link.
+   */
+  courseId?: string;
+  unitId?: string;
 }
 
 function formatMinutesSeconds(totalSeconds: number): string {
@@ -473,6 +484,8 @@ export function TextLessonPage({
   courseTitle,
   cefrLevel,
   status,
+  courseId,
+  unitId,
 }: TextLessonPageProps) {
   const t = useTranslations('Learning.reader.text.page');
   const tContent = useTranslations('Content');
@@ -500,6 +513,10 @@ export function TextLessonPage({
   // navigation would leave the rail describing a word from the previous lesson.
   const clearSelectedWord = useSelectedWordStore((s) => s.clear);
   useEffect(() => clearSelectedWord, [lessonId, clearSelectedWord]);
+  // Same for the annotation card, which quotes the annotated words themselves.
+  const selectedAnnotation = useSelectedAnnotationStore((s) => s.selected);
+  const clearSelectedAnnotation = useSelectedAnnotationStore((s) => s.clear);
+  useEffect(() => clearSelectedAnnotation, [lessonId, clearSelectedAnnotation]);
 
   const lesson = useLesson(lessonId);
   const profile = useMyStudentProfile();
@@ -627,6 +644,21 @@ export function TextLessonPage({
     return byIndex;
   }, [spansQuery.data]);
 
+  // Sorted, so the array identity survives a refetch that returns the same
+  // rules in another order — it is the resolver's dependency.
+  const annotatedRuleIds = useMemo(
+    () =>
+      [
+        ...new Set(
+          (spansQuery.data ?? [])
+            .filter((span) => span.kind === 'grammar' && span.refId)
+            .map((span) => span.refId as string),
+        ),
+      ].sort(),
+    [spansQuery.data],
+  );
+  const grammarLinks = useGrammarRuleLinks(courseId ?? '', unitId ?? '', annotatedRuleIds);
+
   /**
    * Anything the visibility toggle can act on. A text annotated only for
    * grammar or chunks has no vocabulary glossary, and gating the toggle on that
@@ -712,6 +744,9 @@ export function TextLessonPage({
     effectiveMode === 'bilingual' ? BilingualMode : effectiveMode === 'focus' ? FocusMode : ImmersiveMode;
 
   return (
+    // Wraps the rail slot as well as the prose: the slot is a portal, and React
+    // context follows the tree it is written in, not the DOM it lands in.
+    <GrammarLinkProvider links={grammarLinks}>
     <div ref={scrollAnchorRef}>
       {heroImage && (
         /*
@@ -866,7 +901,20 @@ export function TextLessonPage({
               )}
             </section>
           </div>
-          <WordCardPanel targetLanguage={lesson.data.targetLanguage} cefrLevel={cefrLevel} />
+          {/*
+            One card, not two stacked: the rail answers "what am I looking at
+            right now", and the reader's last click is what decides. The word
+            card is the resting state, so the column keeps its height whether or
+            not this text carries annotations.
+          */}
+          {selectedAnnotation ? (
+            <AnnotationCardPanel
+              explanationLanguage={variant.data.explanationLanguage}
+              cefrLevel={cefrLevel}
+            />
+          ) : (
+            <WordCardPanel targetLanguage={lesson.data.targetLanguage} cefrLevel={cefrLevel} />
+          )}
         </div>
       </ReaderRailSlot>
 
@@ -904,5 +952,6 @@ export function TextLessonPage({
 
       <TextComprehensionCheck gapFillItems={gapFillItems} compItems={compItems} />
     </div>
+    </GrammarLinkProvider>
   );
 }

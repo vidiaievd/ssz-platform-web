@@ -8,6 +8,7 @@ interface BackendExplanation {
   id: string;
   explanationLanguage: string;
   displayTitle: string;
+  displaySummary: string | null;
   bodyMarkdown: string;
   status: string;
   anchorText: string | null;
@@ -32,6 +33,7 @@ function toFeShape(e: BackendExplanation): GrammarExplanationDetail {
     id: e.id,
     languageCode: e.explanationLanguage,
     title: e.displayTitle,
+    summary: e.displaySummary,
     body: e.bodyMarkdown,
     examples: e.compareExamples.map((c) => c.sentence),
     isPublished: e.status === 'published',

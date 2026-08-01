@@ -188,6 +188,8 @@ export function ReaderShell({
         courseTitle={courseInfo.title}
         cefrLevel={courseInfo.cefrLevel}
         status={activeContentItem.status}
+        courseId={courseId}
+        unitId={unitId}
       />
     );
   } else if (activeKind === 'video' && activeContentItem) {

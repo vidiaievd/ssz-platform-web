@@ -26,10 +26,12 @@
     "ruleUnavailable": "Denne regelen er ikke tilgjengelig.",
     "inflection": "Bøyning",
     "inContext": "I teksten",
-    "closeCard": "Lukk ordkortet",
+    "closeCard": "Lukk kortet",
     "lookUpIn": "Slå opp i {source}",
     "wordCardTitle": "Ordkort",
-    "wordCardEmpty": "Trykk på et understreket ord i teksten, så dukker det opp her."
+    "wordCardEmpty": "Trykk på et understreket ord eller en farget markør i teksten — forklaringen vises her.",
+    "ruleCardTitle": "Regel",
+    "openRule": "Åpne hele regelen"
   },
   "unitStepper": {
     "label": "Enhetssteg",

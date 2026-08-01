@@ -335,6 +335,8 @@ export interface GrammarExplanation {
   id: string;
   languageCode: string;
   title: string;
+  /** One-sentence gist, authored alongside the body. What a card shows instead of the body. */
+  summary?: string | null;
   body: string;
   examples?: string[];
   isPublished: boolean;
