@@ -492,7 +492,8 @@ describe('ReaderShell', () => {
 
     expect(useVocabularyList).toHaveBeenCalledWith('list-1');
     expect(useUnitVocabularyItems).toHaveBeenCalledWith('list-1');
-    expect(screen.getByText('nurse')).toBeInTheDocument();
+    // The vocabulary flow opens on its sorting stage, showing the word itself.
+    expect(screen.getByText('sykepleier')).toBeInTheDocument();
     expect(screen.queryByText('lesson content')).not.toBeInTheDocument();
   });
 

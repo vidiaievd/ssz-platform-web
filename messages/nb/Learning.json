@@ -264,7 +264,6 @@
     },
     "vocab": {
       "grunnform": "grunnform",
-      "listen": "Lytt",
       "flipHint": "Trykk for å snu",
       "flipCardLabel": "Snu kort: {word}",
       "backLabelTranslation": "Oversettelse",
@@ -289,8 +288,6 @@
       "page": {
         "eyebrow": "Enhet {unit} · {course} · {type}",
         "newWords": "{count, plural, one {# nytt ord} other {# nye ord}}",
-        "howToTranslation": "Start med de nye ordene. Trykk på et kort for å snu det — du ser oversettelsen. Åpne Alle former for full bøyning.",
-        "howToDefinition": "Start med de nye ordene. Trykk på et kort for å snu det — du ser en forklaring. Åpne Alle former for full bøyning.",
         "levelBadgeTranslation": "A1–B1 · oversettelse",
         "levelBadgeDefinition": "B2+ · forklaring",
         "emptyTitle": "Ingen nye ord ennå",
@@ -299,6 +296,38 @@
         "reviewTitle": "Gjenta tidligere ord",
         "reviewBody": "{count, plural, one {# ord fra tidligere enheter er klart til repetisjon i dag} other {# ord fra tidligere enheter er klare til repetisjon i dag}}",
         "reviewCta": "Repeter"
+      },
+      "listenTo": "Hør {word}",
+      "flow": {
+        "viewLabel": "Hvordan vise ordene",
+        "viewFlow": "Øv",
+        "viewList": "Ordliste",
+        "stages": {
+          "label": "Ordforrådssteg",
+          "triage": "Sorter",
+          "learn": "Bli kjent"
+        },
+        "triage": {
+          "hint": "Ord du alt kan går rett til repetisjon — du møter bare resten.",
+          "know": "Dette kan jeg",
+          "new": "Nytt for meg",
+          "knowAll": "Jeg kan alle",
+          "skip": "Hopp over sorteringen",
+          "progress": "{current} av {total}",
+          "progressLabel": "Fremdrift i sorteringen"
+        },
+        "learn": {
+          "progress": "{current} av {total}",
+          "progressLabel": "Fremdrift gjennom de nye ordene",
+          "prev": "Tilbake",
+          "next": "Neste ord",
+          "finish": "Ferdig"
+        },
+        "done": {
+          "title": "Ordene er klare",
+          "summary": "Du kunne {known} og ble kjent med {learned} nye. De kommer tilbake til repetisjon.",
+          "restart": "Gå gjennom dem en gang til"
+        }
       }
     },
     "text": {

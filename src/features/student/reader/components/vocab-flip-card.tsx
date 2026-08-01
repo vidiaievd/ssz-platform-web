@@ -1,18 +1,17 @@
 'use client';
 
-import { Repeat } from 'lucide-react';
+import { Repeat, Volume2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { AudioPlayer } from '@/features/learning/components/audio-player';
 import { WordForms } from '@/features/learning/components/word-forms';
-import { useMediaAsset } from '@/features/media';
+import { useWordAudio } from '@/features/learning/hooks/use-word-audio';
 import type { VocabularyItem } from '@/features/content/types';
 import { cn } from '@/lib/utils';
 
 export type VocabCardMode = 'translation' | 'definition';
 
-const POS_META: Record<string, { bg: string; fg: string }> = {
+export const POS_META: Record<string, { bg: string; fg: string }> = {
   noun: { bg: 'var(--ssz-pos-noun-bg)', fg: 'var(--ssz-pos-noun-fg)' },
   verb: { bg: 'var(--ssz-pos-verb-bg)', fg: 'var(--ssz-pos-verb-fg)' },
   adjective: { bg: 'var(--ssz-pos-adj-bg)', fg: 'var(--ssz-pos-adj-fg)' },
@@ -29,8 +28,48 @@ const POS_META: Record<string, { bg: string; fg: string }> = {
 
 const OTHER_POS_META = POS_META.other as { bg: string; fg: string };
 
-function posMeta(partOfSpeech?: string) {
+export function posMeta(partOfSpeech?: string) {
   return (partOfSpeech && POS_META[partOfSpeech]) || OTHER_POS_META;
+}
+
+/**
+ * Plays a single word, wherever its sound comes from. Rendered as its own
+ * component so the audio hook is not re-run for every card in a list, and it
+ * swallows the click so tapping it never flips the card underneath.
+ */
+export function WordAudioButton({
+  word,
+  mediaId,
+  lang,
+  className,
+}: {
+  word: string;
+  mediaId?: string;
+  lang: string;
+  className?: string;
+}) {
+  const t = useTranslations('Learning.reader.vocab');
+  const { play, playing, source } = useWordAudio(word, mediaId, lang);
+
+  if (source === 'none') return null;
+
+  return (
+    <button
+      type="button"
+      aria-label={t('listenTo', { word })}
+      onClick={(e) => {
+        e.stopPropagation();
+        play();
+      }}
+      className={cn(
+        'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-(--ssz-border-default) bg-surface text-(--ssz-text-accent) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
+        playing && 'border-(--ssz-border-focus) bg-(--ssz-bg-accent)',
+        className,
+      )}
+    >
+      <Volume2 size={15} aria-hidden="true" />
+    </button>
+  );
 }
 
 const REDUCED_MOTION_STYLE =
@@ -39,14 +78,15 @@ const REDUCED_MOTION_STYLE =
 export interface VocabFlipCardProps {
   item: VocabularyItem;
   cardMode: VocabCardMode;
+  /** Language of the word, for the pronunciation voice. */
+  lang?: string;
   className?: string;
 }
 
-export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps) {
+export function VocabFlipCard({ item, cardMode, lang = 'nb', className }: VocabFlipCardProps) {
   const t = useTranslations('Learning.reader.vocab');
   const locale = useLocale();
   const [flipped, setFlipped] = useState(false);
-  const asset = useMediaAsset(item.audioMediaId);
 
   const translation =
     item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
@@ -105,14 +145,8 @@ export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps)
               </div>
             )}
             <div className="flex items-center gap-2.5">
-              <AudioPlayer
-                src={asset.data?.url}
-                label={t('listen')}
-                interactive={!!item.audioMediaId}
-                compact
-                className="shrink-0"
-              />
-              <span className="ml-auto inline-flex items-center gap-1 text-[11.5px] font-semibold text-(--ssz-color-primary-600)">
+              <WordAudioButton word={item.lemma} mediaId={item.audioMediaId} lang={lang} />
+              <span className="ml-auto inline-flex items-center gap-1 text-[11.5px] font-semibold text-(--ssz-text-accent)">
                 <Repeat size={13} aria-hidden="true" />
                 {t('flipHint')}
               </span>
@@ -124,7 +158,7 @@ export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps)
             className={cn(
               'absolute inset-0 flex flex-col rounded-2xl border-[1.5px] p-[18px_20px] shadow-(--ssz-shadow-sm) backface-hidden transform-[rotateY(180deg)]',
               cardMode === 'definition'
-                ? 'border-(--ssz-color-primary-300) bg-(--ssz-color-primary-50)'
+                ? 'border-(--ssz-border-default) bg-(--ssz-bg-accent)'
                 : 'border-(--ssz-border-strong) bg-surface',
             )}
             style={{ zIndex: flipped ? 2 : 1 }}

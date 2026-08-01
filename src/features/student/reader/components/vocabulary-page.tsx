@@ -1,17 +1,24 @@
 'use client';
 
-import { BookOpen, ChevronRight, Repeat } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { ErrorState, LearningSkeleton, getGlossaryMode } from '@/features/learning';
 import { useUnitVocabularyItems, useVocabularyList } from '@/features/content';
-import { Link } from '@/lib/i18n/navigation';
+import { cn } from '@/lib/utils';
 import type { DifficultyLevel } from '@/features/content/types';
 
-import { VocabFlipCard, type VocabCardMode } from './vocab-flip-card';
+import type { VocabCardMode } from './vocab-flip-card';
+import { VocabDoneStage } from './vocab-done-stage';
+import { VocabLearnStage } from './vocab-learn-stage';
+import { VocabStageTracker, type VocabStage } from './vocab-stage-tracker';
+import { VocabTriageStage } from './vocab-triage-stage';
+import { VocabWordList } from './vocab-word-list';
 import type { ReaderSidebarItem } from '../types';
 
 export const getVocabCardMode: (cefrLevel: string) => VocabCardMode = getGlossaryMode;
+
+type VocabView = 'flow' | 'list';
 
 function findReinforceItem(
   siblingItems: ReaderSidebarItem[],
@@ -33,6 +40,12 @@ export interface VocabularyPageProps {
   currentItemId: string;
 }
 
+/**
+ * A unit's new words, as a short activity rather than a wall of cards: sort the
+ * words the learner already knows out of the way, meet the rest one at a time,
+ * then hand them over to the text that uses them. The full list stays one click
+ * away for looking things up while reading.
+ */
 export function VocabularyPage({
   vocabularyListId,
   cefrLevel,
@@ -43,7 +56,12 @@ export function VocabularyPage({
   currentItemId,
 }: VocabularyPageProps) {
   const t = useTranslations('Learning.reader.vocab');
+  const tFlow = useTranslations('Learning.reader.vocab.flow');
   const tContent = useTranslations('Content');
+
+  const [view, setView] = useState<VocabView>('flow');
+  const [stage, setStage] = useState<VocabStage>('triage');
+  const [knownIds, setKnownIds] = useState<string[]>([]);
 
   const list = useVocabularyList(vocabularyListId);
   const items = useUnitVocabularyItems(vocabularyListId);
@@ -75,88 +93,101 @@ export function VocabularyPage({
     );
   }
 
+  const allItems = items.data;
   const cardMode = getVocabCardMode(cefrLevel);
+  const lang = list.data.targetLanguage || 'nb';
   const reinforceItem = findReinforceItem(siblingItems, currentItemId);
-  const showReviewCard = srsVocabDue > 0;
+  const unknownItems = allItems.filter((i) => !knownIds.includes(i.id));
+
+  function restart() {
+    setKnownIds([]);
+    setStage('triage');
+  }
+
+  function finishTriage(known: string[]) {
+    setKnownIds(known);
+    setStage(known.length === allItems.length ? 'done' : 'learn');
+  }
+
+  const views: Array<{ id: VocabView; label: string }> = [
+    { id: 'flow', label: tFlow('viewFlow') },
+    { id: 'list', label: tFlow('viewList') },
+  ];
 
   return (
     <div>
       <div className="mb-3.5">
-        <div className="mb-1.5 text-[11px] font-bold tracking-wider text-(--ssz-color-primary-600) uppercase">
+        <div className="mb-1.5 text-[11px] font-bold tracking-wider text-(--ssz-text-accent) uppercase">
           {t('page.eyebrow', { unit: unitPosition, course: courseTitle, type: tContent('materialType.vocab') })}
         </div>
         <h1 className="font-reading mb-1 text-[29px] leading-[1.15] font-semibold tracking-tight text-(--ssz-text-primary)">
           {list.data.title}
         </h1>
         <div className="text-sm text-(--ssz-text-muted) italic">
-          {t('page.newWords', { count: items.data.length })}
+          {t('page.newWords', { count: allItems.length })}
         </div>
       </div>
 
-      {/* how-to strip */}
-      <div className="mb-5 flex flex-wrap items-center gap-3.5 rounded-xl border-[1.5px] border-(--ssz-color-primary-200) bg-(--ssz-color-primary-50) px-4 py-3">
-        <Repeat size={18} className="shrink-0 text-(--ssz-color-primary-600)" aria-hidden="true" />
-        <div className="min-w-55 flex-1 text-[12.5px] leading-relaxed text-(--ssz-text-secondary)">
-          {cardMode === 'definition' ? t('page.howToDefinition') : t('page.howToTranslation')}
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <div
+          className="inline-flex rounded-full border-[1.5px] border-(--ssz-border-default) bg-surface p-0.5"
+          role="tablist"
+          aria-label={tFlow('viewLabel')}
+        >
+          {views.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              role="tab"
+              aria-selected={view === v.id}
+              onClick={() => setView(v.id)}
+              className={cn(
+                'rounded-full px-3.5 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
+                view === v.id
+                  ? 'bg-(--ssz-bg-brand-solid) text-(--ssz-text-on-brand)'
+                  : 'text-(--ssz-text-muted)',
+              )}
+            >
+              {v.label}
+            </button>
+          ))}
         </div>
-        <span className="inline-flex items-center gap-1 rounded-full border border-(--ssz-color-primary-300) bg-surface px-2.5 py-1 text-[11px] font-bold text-(--ssz-color-primary-600)">
+        <span className="inline-flex items-center gap-1 rounded-full border border-(--ssz-border-default) bg-(--ssz-bg-accent) px-2.5 py-1 text-[11px] font-bold text-(--ssz-text-accent)">
           {cardMode === 'definition' ? t('page.levelBadgeDefinition') : t('page.levelBadgeTranslation')}
         </span>
       </div>
 
-      {/* cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {items.data.map((item) => (
-          <VocabFlipCard key={item.id} item={item} cardMode={cardMode} />
-        ))}
-      </div>
-
-      {/* reinforce + review */}
-      {(reinforceItem || showReviewCard) && (
-        <div className="mt-6.5 border-t border-(--ssz-border-default) pt-5.5">
-          <div className="mb-3 text-[11px] font-bold tracking-wider text-(--ssz-text-muted) uppercase">
-            {t('page.nextHeading')}
-          </div>
-          <div className="flex flex-col gap-2.5">
-            {reinforceItem && (
-              <Link
-                href={reinforceItem.href}
-                className="flex items-center gap-3 rounded-xl border-[1.5px] border-(--ssz-border-default) bg-surface px-4 py-3.5 shadow-(--ssz-shadow-xs) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
-              >
-                <div className="flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-md bg-(--ssz-color-primary-100)">
-                  <BookOpen size={18} className="text-(--ssz-color-primary-600)" aria-hidden="true" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold text-(--ssz-text-primary)">{reinforceItem.title}</div>
-                  <div className="text-xs text-(--ssz-text-muted)">
-                    {tContent(`materialType.${reinforceItem.kind}`)}
-                  </div>
-                </div>
-                <ChevronRight size={18} className="text-(--ssz-text-muted)" aria-hidden="true" />
-              </Link>
-            )}
-            {showReviewCard && (
-              <div className="flex items-center gap-3 rounded-xl border-[1.5px] border-(--ssz-border-accent-warm) bg-(--ssz-bg-accent-warm) px-4 py-3.5">
-                <div className="flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-md border border-(--ssz-border-accent-warm) bg-surface">
-                  <Repeat size={18} className="text-(--ssz-icon-accent-warm)" aria-hidden="true" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold text-(--ssz-text-primary)">{t('page.reviewTitle')}</div>
-                  <div className="text-xs text-(--ssz-text-secondary)">
-                    {t('page.reviewBody', { count: srsVocabDue })}
-                  </div>
-                </div>
-                <Link
-                  href="/student/srs"
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border-[1.5px] border-(--ssz-border-accent-warm) bg-surface px-3.5 py-2 text-xs font-semibold text-(--ssz-text-accent-warm) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
-                >
-                  <Repeat size={13} aria-hidden="true" />
-                  {t('page.reviewCta')}
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
+      {view === 'list' ? (
+        <VocabWordList items={allItems} cardMode={cardMode} lang={lang} />
+      ) : (
+        <>
+          <VocabStageTracker stage={stage} />
+          {stage === 'triage' && (
+            <VocabTriageStage
+              vocabularyListId={vocabularyListId}
+              items={allItems}
+              lang={lang}
+              onFinish={finishTriage}
+            />
+          )}
+          {stage === 'learn' && (
+            <VocabLearnStage
+              items={unknownItems}
+              cardMode={cardMode}
+              lang={lang}
+              onFinish={() => setStage('done')}
+            />
+          )}
+          {stage === 'done' && (
+            <VocabDoneStage
+              knownCount={knownIds.length}
+              learnedCount={unknownItems.length}
+              reinforceItem={reinforceItem}
+              srsVocabDue={srsVocabDue}
+              onRestart={restart}
+            />
+          )}
+        </>
       )}
     </div>
   );

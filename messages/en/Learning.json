@@ -264,7 +264,6 @@
     },
     "vocab": {
       "grunnform": "base form",
-      "listen": "Listen",
       "flipHint": "Tap to flip",
       "flipCardLabel": "Flip card: {word}",
       "backLabelTranslation": "Translation",
@@ -289,8 +288,6 @@
       "page": {
         "eyebrow": "Unit {unit} · {course} · {type}",
         "newWords": "{count, plural, one {# new word} other {# new words}}",
-        "howToTranslation": "Start with the new words. Tap a card to flip it — you’ll see the translation. Open All forms for the full inflection.",
-        "howToDefinition": "Start with the new words. Tap a card to flip it — you’ll see an explanation. Open All forms for the full inflection.",
         "levelBadgeTranslation": "A1–B1 · translation",
         "levelBadgeDefinition": "B2+ · explanation",
         "emptyTitle": "No new words yet",
@@ -299,6 +296,38 @@
         "reviewTitle": "Repeat earlier words",
         "reviewBody": "{count, plural, one {# word from earlier units is ready for review today} other {# words from earlier units are ready for review today}}",
         "reviewCta": "Review"
+      },
+      "listenTo": "Listen to {word}",
+      "flow": {
+        "viewLabel": "How to view the words",
+        "viewFlow": "Practice",
+        "viewList": "Word list",
+        "stages": {
+          "label": "Vocabulary steps",
+          "triage": "Sort",
+          "learn": "Meet the words"
+        },
+        "triage": {
+          "hint": "Words you already know go straight to review — you’ll only meet the rest.",
+          "know": "I know it",
+          "new": "New to me",
+          "knowAll": "I know all of them",
+          "skip": "Skip sorting",
+          "progress": "{current} of {total}",
+          "progressLabel": "Sorting progress"
+        },
+        "learn": {
+          "progress": "{current} of {total}",
+          "progressLabel": "Progress through the new words",
+          "prev": "Back",
+          "next": "Next word",
+          "finish": "Done"
+        },
+        "done": {
+          "title": "The words are ready",
+          "summary": "You knew {known} and met {learned} new ones. They’ll come back in review.",
+          "restart": "Go through them again"
+        }
       }
     },
     "text": {
