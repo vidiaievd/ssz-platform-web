@@ -22,6 +22,11 @@ export interface ReaderSidebarUnit {
   title: string;
   subtitle?: string;
   status: UnitStatus;
+  /**
+   * Unit entry route — it resolves the unit's first material and redirects
+   * there, so the sidebar can link a unit whose contents it never fetched.
+   */
+  href: string;
   /** Populated only for the expanded unit; other units are collapsed summaries. */
   sections: ReaderSidebarSection[];
 }

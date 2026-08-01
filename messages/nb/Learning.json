@@ -246,7 +246,9 @@
       "railLabel": "Verktøy for leksjonen",
       "courseProgress": "Kursfremgang",
       "practiceTitle": "Alle oppgaver",
-      "practiceCount": "{n} oppgaver"
+      "practiceCount": "{n} oppgaver",
+      "collapseUnit": "Skjul delleksjon",
+      "expandUnit": "Vis delleksjon"
     },
     "topbar": {
       "courseLabel": "Kurs",
@@ -256,7 +258,8 @@
     "footerNav": {
       "previous": "Forrige",
       "next": "Neste · {type}",
-      "unlocksAfterThis": "Neste låses opp etter denne"
+      "unlocksAfterThis": "Neste låses opp etter denne",
+      "nextUnit": "Neste delleksjon"
     },
     "body": {
       "comingSoonTitle": "Denne leksjonssiden er på vei",

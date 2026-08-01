@@ -5,18 +5,29 @@ import { useTranslations } from 'next-intl';
 
 import { Link } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
-import type { ReaderSidebarItem } from '../types';
+import type { ReaderSidebarItem, ReaderSidebarUnit } from '../types';
 
 export interface LessonFooterNavProps {
   /** Flattened items of the active unit, in reading order. */
   items: ReaderSidebarItem[];
   activeItemId: string;
+  /**
+   * Sub-lesson following the open one. Used only on the unit's last item, where
+   * the reader would otherwise dead-end and have to go back to course home.
+   */
+  nextUnit?: ReaderSidebarUnit | null;
   /** Fired when the learner activates the "Next" link (e.g. to mark the current item complete). */
   onNext?: () => void;
   className?: string;
 }
 
-export function LessonFooterNav({ items, activeItemId, onNext, className }: LessonFooterNavProps) {
+export function LessonFooterNav({
+  items,
+  activeItemId,
+  nextUnit,
+  onNext,
+  className,
+}: LessonFooterNavProps) {
   const t = useTranslations('Learning.reader.footerNav');
   const tContent = useTranslations('Content.materialType');
 
@@ -24,6 +35,9 @@ export function LessonFooterNav({ items, activeItemId, onNext, className }: Less
   const prev = idx > 0 ? items[idx - 1] : null;
   const next = idx >= 0 && idx < items.length - 1 ? items[idx + 1] : null;
   const nextLocked = next?.status === 'locked';
+  /* Last item of the unit: hand over to the next sub-lesson instead of ending
+     the road. A locked one still shows the lock message below. */
+  const onward = !next && idx >= 0 ? nextUnit : null;
 
   return (
     <div
@@ -53,32 +67,69 @@ export function LessonFooterNav({ items, activeItemId, onNext, className }: Less
         <span aria-hidden="true" />
       )}
 
-      {next &&
-        (nextLocked ? (
-          <span className="flex items-center gap-2 text-[13px] font-semibold text-muted-foreground">
-            <Lock size={14} aria-hidden="true" />
-            {t('unlocksAfterThis')}
-          </span>
+      {next ? (
+        nextLocked ? (
+          <LockedNotice label={t('unlocksAfterThis')} />
         ) : (
-          <Link
+          <NextLink
             href={next.href}
+            eyebrow={t('next', { type: tContent(next.kind) })}
+            title={next.title}
             onClick={onNext}
-            className="flex max-w-[55%] items-center gap-2.5 rounded-xl bg-(--ssz-bg-brand-solid) px-5.5 py-2.75 text-[14.5px] font-bold text-(--ssz-text-on-brand) no-underline shadow-lg shadow-primary-500/30"
-          >
-            <span className="min-w-0 text-right">
-              {/*
-                Full opacity, not white/85: dimming a 10.5px label on the brand
-                fill drops it to 2.94:1. The size and letter-spacing already
-                separate it from the title below.
-              */}
-              <span className="block text-[10.5px] font-semibold tracking-wide uppercase">
-                {t('next', { type: tContent(next.kind) })}
-              </span>
-              <span className="block truncate">{next.title}</span>
-            </span>
-            <ChevronRight size={17} className="shrink-0" />
-          </Link>
-        ))}
+          />
+        )
+      ) : onward ? (
+        onward.status === 'locked' ? (
+          <LockedNotice label={t('unlocksAfterThis')} />
+        ) : (
+          <NextLink
+            href={onward.href}
+            eyebrow={t('nextUnit')}
+            title={onward.title}
+            onClick={onNext}
+          />
+        )
+      ) : null}
     </div>
+  );
+}
+
+function LockedNotice({ label }: { label: string }) {
+  return (
+    <span className="flex items-center gap-2 text-[13px] font-semibold text-muted-foreground">
+      <Lock size={14} aria-hidden="true" />
+      {label}
+    </span>
+  );
+}
+
+function NextLink({
+  href,
+  eyebrow,
+  title,
+  onClick,
+}: {
+  href: string;
+  eyebrow: string;
+  title: string;
+  onClick?: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className="flex max-w-[55%] items-center gap-2.5 rounded-xl bg-(--ssz-bg-brand-solid) px-5.5 py-2.75 text-[14.5px] font-bold text-(--ssz-text-on-brand) no-underline shadow-lg shadow-primary-500/30"
+    >
+      <span className="min-w-0 text-right">
+        {/*
+          Full opacity, not white/85: dimming a 10.5px label on the brand
+          fill drops it to 2.94:1. The size and letter-spacing already
+          separate it from the title below.
+        */}
+        <span className="block text-[10.5px] font-semibold tracking-wide uppercase">{eyebrow}</span>
+        <span className="block truncate">{title}</span>
+      </span>
+      <ChevronRight size={17} className="shrink-0" />
+    </Link>
   );
 }

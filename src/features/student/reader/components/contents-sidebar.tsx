@@ -121,6 +121,10 @@ function SectionBlock({ section, activeItemId }: { section: ReaderSidebarSection
  * hierarchy. Only the sub-lesson the reader currently has open is tinted — under
  * `gatingMode: open` every unfinished unit carries status `active`, so status
  * alone would paint the whole panel.
+ *
+ * The title is a link to the unit entry route: only the open unit carries
+ * sections, so without it every other sub-lesson would be inert text and the
+ * course would only be navigable from course home.
  */
 function UnitBlock({
   unit,
@@ -131,66 +135,83 @@ function UnitBlock({
   activeItemId: string;
   current: boolean;
 }) {
+  const t = useTranslations('Learning.reader.sidebar');
   const [open, setOpen] = useState(unit.status === 'active');
   const done = unit.status === 'done';
   const locked = unit.status === 'locked';
   const hasChildren = unit.sections.length > 0;
 
+  const label = (
+    <>
+      <span
+        className={cn(
+          'block truncate text-[12.5px] leading-tight',
+          current
+            ? 'font-bold text-primary-700 dark:text-primary-300'
+            : done
+              ? 'font-medium text-secondary-foreground'
+              : 'font-semibold text-foreground',
+        )}
+      >
+        {unit.title}
+      </span>
+      {unit.subtitle && (
+        <span className="mt-0.5 block truncate text-[10px] leading-tight text-muted-foreground">
+          {unit.subtitle}
+        </span>
+      )}
+    </>
+  );
+
   return (
     <div className="mb-px">
-      <button
-        type="button"
-        onClick={() => hasChildren && setOpen((o) => !o)}
-        aria-expanded={hasChildren ? open : undefined}
+      <div
         aria-current={current ? 'true' : undefined}
-        disabled={!hasChildren}
         className={cn(
           'flex w-full items-center gap-1.5 rounded-md border-l-2 py-1.5 pr-1.5 pl-1.5 text-left transition-colors',
           current
             ? 'border-l-primary bg-primary-100/50 dark:border-l-primary-400 dark:bg-primary-900/25'
             : 'border-l-transparent',
           locked && 'opacity-55',
-          hasChildren && !current && 'hover:bg-subtle',
+          !current && !locked && 'hover:bg-subtle',
         )}
       >
         {hasChildren ? (
-          <ChevronDown
-            size={13}
-            className={cn(
-              'shrink-0 transition-transform duration-150',
-              current ? 'text-primary-700 dark:text-primary-300' : 'text-muted-foreground',
-            )}
-            style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
-            aria-hidden="true"
-          />
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-label={open ? t('collapseUnit') : t('expandUnit')}
+            className="shrink-0 rounded"
+          >
+            <ChevronDown
+              size={13}
+              className={cn(
+                'transition-transform duration-150',
+                current ? 'text-primary-700 dark:text-primary-300' : 'text-muted-foreground',
+              )}
+              style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+              aria-hidden="true"
+            />
+          </button>
         ) : (
           <span className="w-3.25 shrink-0" aria-hidden="true" />
         )}
-        <span className="min-w-0 flex-1">
-          <span
-            className={cn(
-              'block truncate text-[12.5px] leading-tight',
-              current
-                ? 'font-bold text-primary-700 dark:text-primary-300'
-                : done
-                  ? 'font-medium text-secondary-foreground'
-                  : 'font-semibold text-foreground',
-            )}
-          >
-            {unit.title}
+        {locked ? (
+          <span className="min-w-0 flex-1" aria-disabled="true">
+            {label}
           </span>
-          {unit.subtitle && (
-            <span className="mt-0.5 block truncate text-[10px] leading-tight text-muted-foreground">
-              {unit.subtitle}
-            </span>
-          )}
-        </span>
+        ) : (
+          <Link href={unit.href} className="min-w-0 flex-1 no-underline">
+            {label}
+          </Link>
+        )}
         {done ? (
           <Check size={13} className="shrink-0 text-(--ssz-color-success-600)" aria-hidden="true" />
         ) : locked ? (
           <Lock size={11} className="shrink-0 text-muted-foreground" aria-hidden="true" />
         ) : null}
-      </button>
+      </div>
       {open && hasChildren && (
         <div className="mt-0.5 mb-1 ml-2.5 border-l-[1.5px] border-(--ssz-border-default) pr-0.5 pl-1.5">
           {unit.sections.map((section) => (

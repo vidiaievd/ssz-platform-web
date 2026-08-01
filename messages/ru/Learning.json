@@ -246,7 +246,9 @@
       "railLabel": "Инструменты урока",
       "courseProgress": "Прогресс курса",
       "practiceTitle": "Все упражнения",
-      "practiceCount": "{n} заданий"
+      "practiceCount": "{n} заданий",
+      "collapseUnit": "Свернуть подурок",
+      "expandUnit": "Развернуть подурок"
     },
     "topbar": {
       "courseLabel": "Курс",
@@ -256,7 +258,8 @@
     "footerNav": {
       "previous": "Предыдущий",
       "next": "Далее · {type}",
-      "unlocksAfterThis": "Следующий разблокируется после этого"
+      "unlocksAfterThis": "Следующий разблокируется после этого",
+      "nextUnit": "Следующий подурок"
     },
     "body": {
       "comingSoonTitle": "Эта страница урока скоро появится",

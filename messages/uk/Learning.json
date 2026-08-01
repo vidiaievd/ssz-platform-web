@@ -246,7 +246,9 @@
       "railLabel": "Інструменти уроку",
       "courseProgress": "Прогрес курсу",
       "practiceTitle": "Усі вправи",
-      "practiceCount": "{n} завдань"
+      "practiceCount": "{n} завдань",
+      "collapseUnit": "Згорнути підурок",
+      "expandUnit": "Розгорнути підурок"
     },
     "topbar": {
       "courseLabel": "Курс",
@@ -256,7 +258,8 @@
     "footerNav": {
       "previous": "Попередній",
       "next": "Далі · {type}",
-      "unlocksAfterThis": "Наступний розблокується після цього"
+      "unlocksAfterThis": "Наступний розблокується після цього",
+      "nextUnit": "Наступний підурок"
     },
     "body": {
       "comingSoonTitle": "Ця сторінка уроку скоро з'явиться",

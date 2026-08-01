@@ -8,6 +8,7 @@ import type {
 } from '@/features/learning';
 
 import {
+  findNextUnit,
   mapCourseLevelsToSidebarLevels,
   mapUnitContentsToSections,
   practiceItemId,
@@ -49,7 +50,7 @@ const activeSections: ReaderSidebarSection[] = [
 
 describe('mapCourseLevelsToSidebarLevels', () => {
   it('marks the level holding the active unit and attaches its sections there only', () => {
-    const mapped = mapCourseLevelsToSidebarLevels(levels, 'u2', activeSections);
+    const mapped = mapCourseLevelsToSidebarLevels(levels, 'course-1', 'u2', activeSections);
 
     expect(mapped.map((l) => l.active)).toEqual([true, false]);
     expect(mapped[0]!.units.map((u) => u.sections.length)).toEqual([0, 1]);
@@ -57,7 +58,7 @@ describe('mapCourseLevelsToSidebarLevels', () => {
   });
 
   it('keeps level identity and order', () => {
-    const mapped = mapCourseLevelsToSidebarLevels(levels, 'u3', activeSections);
+    const mapped = mapCourseLevelsToSidebarLevels(levels, 'course-1', 'u3', activeSections);
 
     expect(mapped.map((l) => [l.id, l.title, l.position])).toEqual([
       ['l1', 'Leksjon 1', 1],
@@ -65,8 +66,43 @@ describe('mapCourseLevelsToSidebarLevels', () => {
     ]);
   });
 
+  it('gives every unit its entry href, including the ones with no sections attached', () => {
+    const mapped = mapCourseLevelsToSidebarLevels(levels, 'course-1', 'u2', activeSections);
+
+    expect(mapped.flatMap((l) => l.units.map((u) => u.href))).toEqual([
+      '/student/courses/course-1/u1',
+      '/student/courses/course-1/u2',
+      '/student/courses/course-1/u3',
+    ]);
+  });
+
   it('returns an empty list for an ungrouped course', () => {
-    expect(mapCourseLevelsToSidebarLevels([], 'u1', activeSections)).toEqual([]);
+    expect(mapCourseLevelsToSidebarLevels([], 'course-1', 'u1', activeSections)).toEqual([]);
+  });
+});
+
+describe('findNextUnit', () => {
+  const sidebarLevels = mapCourseLevelsToSidebarLevels(levels, 'course-1', 'u1', []);
+  const flat = sidebarLevels.flatMap((l) => l.units);
+
+  it('returns the next unit inside the same level', () => {
+    expect(findNextUnit(sidebarLevels, [], 'u1')?.id).toBe('u2');
+  });
+
+  it('crosses into the first unit of the following level', () => {
+    expect(findNextUnit(sidebarLevels, [], 'u2')?.id).toBe('u3');
+  });
+
+  it('returns null on the last unit of the course', () => {
+    expect(findNextUnit(sidebarLevels, [], 'u3')).toBeNull();
+  });
+
+  it('falls back to the flat unit list for an ungrouped course', () => {
+    expect(findNextUnit([], flat, 'u1')?.id).toBe('u2');
+  });
+
+  it('returns null for a unit that is not in the course', () => {
+    expect(findNextUnit(sidebarLevels, [], 'nope')).toBeNull();
   });
 });
 

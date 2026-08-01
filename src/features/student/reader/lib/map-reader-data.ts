@@ -38,6 +38,15 @@ export function buildItemHref(courseId: string, unitId: string, itemId: string):
   return `/student/courses/${courseId}/${unitId}/${itemId}`;
 }
 
+/**
+ * Entry route of a sub-lesson. The page behind it redirects to the unit's first
+ * material, which is what lets the sidebar link units it holds no contents for
+ * (only the open unit's items are fetched).
+ */
+export function buildUnitHref(courseId: string, unitId: string): string {
+  return `/student/courses/${courseId}/${unitId}`;
+}
+
 function mapItem(
   item: UnitContentsItem,
   courseId: string,
@@ -131,6 +140,7 @@ export function mapUnitContentsToSections(
 /** Course-wide unit list with the active unit's sections attached; other units stay collapsed summaries. */
 export function mapCourseUnitsToSidebarUnits(
   units: UnitSummary[],
+  courseId: string,
   activeUnitId: string,
   activeUnitSections: ReaderSidebarSection[],
 ): ReaderSidebarUnit[] {
@@ -139,6 +149,7 @@ export function mapCourseUnitsToSidebarUnits(
     position: u.position,
     title: u.title,
     status: u.status,
+    href: buildUnitHref(courseId, u.id),
     sections: u.id === activeUnitId ? activeUnitSections : [],
   }));
 }
@@ -160,6 +171,7 @@ export function resolveNavigableItemId(contents: UnitContentsResult, itemId: str
  */
 export function mapCourseLevelsToSidebarLevels(
   levels: CourseLevelGroup[],
+  courseId: string,
   activeUnitId: string,
   activeUnitSections: ReaderSidebarSection[],
 ): ReaderSidebarLevel[] {
@@ -168,10 +180,29 @@ export function mapCourseLevelsToSidebarLevels(
     position: level.position,
     title: level.title,
     active: level.units.some((u) => u.id === activeUnitId),
-    units: mapCourseUnitsToSidebarUnits(level.units, activeUnitId, activeUnitSections),
+    units: mapCourseUnitsToSidebarUnits(level.units, courseId, activeUnitId, activeUnitSections),
   }));
 }
 
 export function flattenSections(sections: ReaderSidebarSection[]): ReaderSidebarItem[] {
   return sections.flatMap((s) => s.items);
+}
+
+/**
+ * The sub-lesson that follows the open one in course order — what "Next" points
+ * at once the reader runs out of items inside the current unit. Levels are
+ * already in course order, so flattening them also carries the reader across a
+ * Leksjon boundary into the first unit of the next one.
+ *
+ * Falls back to the flat unit list for courses whose units aren't grouped.
+ */
+export function findNextUnit(
+  levels: ReaderSidebarLevel[],
+  units: ReaderSidebarUnit[],
+  activeUnitId: string,
+): ReaderSidebarUnit | null {
+  const ordered = levels.length > 0 ? levels.flatMap((l) => l.units) : units;
+  const idx = ordered.findIndex((u) => u.id === activeUnitId);
+  if (idx < 0) return null;
+  return ordered[idx + 1] ?? null;
 }

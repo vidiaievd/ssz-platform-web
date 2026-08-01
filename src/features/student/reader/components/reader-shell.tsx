@@ -28,6 +28,7 @@ import { LiveLessonPage } from './live-lesson-page';
 import { ExercisePage } from './exercise-page';
 import { PracticePage } from './practice-page';
 import {
+  findNextUnit,
   flattenSections,
   mapCourseLevelsToSidebarLevels,
   mapCourseUnitsToSidebarUnits,
@@ -107,9 +108,15 @@ export function ReaderShell({
     practiceTitle: t('practiceTitle'),
     practiceCount: (n: number) => t('practiceCount', { n }),
   });
-  const sidebarUnits = mapCourseUnitsToSidebarUnits(units, unitId, activeUnitSections);
-  const sidebarLevels = mapCourseLevelsToSidebarLevels(levels ?? [], unitId, activeUnitSections);
+  const sidebarUnits = mapCourseUnitsToSidebarUnits(units, courseId, unitId, activeUnitSections);
+  const sidebarLevels = mapCourseLevelsToSidebarLevels(
+    levels ?? [],
+    courseId,
+    unitId,
+    activeUnitSections,
+  );
   const flatItems = flattenSections(activeUnitSections);
+  const nextUnit = findNextUnit(sidebarLevels, sidebarUnits, unitId);
   const activeItem = flatItems.find((i) => i.id === itemId);
 
   const allContentItems = [...contents.sections.flatMap((s) => s.items), ...contents.ungroupedItems];
@@ -296,7 +303,12 @@ export function ReaderShell({
                 </div>
               </div>
               {footer && (
-                <LessonFooterNav items={flatItems} activeItemId={itemId} onNext={handleNext} />
+                <LessonFooterNav
+                  items={flatItems}
+                  activeItemId={itemId}
+                  nextUnit={nextUnit}
+                  onNext={handleNext}
+                />
               )}
             </div>
             {/*

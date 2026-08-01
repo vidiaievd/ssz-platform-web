@@ -14,14 +14,15 @@ const course: ReaderSidebarCourse = {
 };
 
 const units: ReaderSidebarUnit[] = [
-  { id: 'u1', position: 1, title: 'Hverdagsliv', subtitle: 'Everyday life', status: 'done', sections: [] },
-  { id: 'u2', position: 2, title: 'Mat og helse', subtitle: 'Food & health', status: 'done', sections: [] },
+  { id: 'u1', position: 1, title: 'Hverdagsliv', subtitle: 'Everyday life', status: 'done', href: '/student/courses/course-1/u1', sections: [] },
+  { id: 'u2', position: 2, title: 'Mat og helse', subtitle: 'Food & health', status: 'done', href: '/student/courses/course-1/u2', sections: [] },
   {
     id: 'u3',
     position: 3,
     title: 'Arbeid og studier',
     subtitle: 'Work & study',
     status: 'active',
+    href: '/student/courses/course-1/u3',
     sections: [
       {
         id: 's-vocab',
@@ -75,7 +76,7 @@ const units: ReaderSidebarUnit[] = [
       },
     ],
   },
-  { id: 'u4', position: 4, title: 'Meninger og fortellinger', subtitle: 'Opinions & narratives', status: 'locked', sections: [] },
+  { id: 'u4', position: 4, title: 'Meninger og fortellinger', subtitle: 'Opinions & narratives', status: 'locked', href: '/student/courses/course-1/u4', sections: [] },
 ];
 
 const levels: ReaderSidebarLevel[] = [

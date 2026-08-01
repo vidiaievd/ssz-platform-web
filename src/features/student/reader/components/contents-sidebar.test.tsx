@@ -28,12 +28,20 @@ const course: ReaderSidebarCourse = {
 };
 
 const units: ReaderSidebarUnit[] = [
-  { id: 'u1', position: 1, title: 'Hverdagsliv', status: 'done', sections: [] },
+  {
+    id: 'u1',
+    position: 1,
+    title: 'Hverdagsliv',
+    status: 'done',
+    href: '/student/courses/course-1/u1',
+    sections: [],
+  },
   {
     id: 'u2',
     position: 2,
     title: 'Arbeid og studier',
     status: 'active',
+    href: '/student/courses/course-1/u2',
     sections: [
       {
         id: 's-read',
@@ -59,7 +67,14 @@ const units: ReaderSidebarUnit[] = [
       },
     ],
   },
-  { id: 'u3', position: 3, title: 'Meninger og fortellinger', status: 'locked', sections: [] },
+  {
+    id: 'u3',
+    position: 3,
+    title: 'Meninger og fortellinger',
+    status: 'locked',
+    href: '/student/courses/course-1/u3',
+    sections: [],
+  },
 ];
 
 const levels: ReaderSidebarLevel[] = [
@@ -124,8 +139,31 @@ describe('ContentsSidebar', () => {
     renderSidebar();
 
     expect(screen.getByText('Reinforce & read')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Arbeid og studier/ }));
+    fireEvent.click(screen.getByLabelText('Collapse sub-lesson'));
     expect(screen.queryByText('Reinforce & read')).not.toBeInTheDocument();
+  });
+
+  it('links every unlocked sub-lesson to its entry route, so units the reader has no contents for stay reachable', () => {
+    renderSidebar();
+
+    expect(screen.getByRole('link', { name: /Hverdagsliv/ })).toHaveAttribute(
+      'href',
+      '/student/courses/course-1/u1',
+    );
+    // The open unit links to itself as well — its own title stays clickable.
+    expect(screen.getByRole('link', { name: /Arbeid og studier/ })).toHaveAttribute(
+      'href',
+      '/student/courses/course-1/u2',
+    );
+  });
+
+  it('leaves a locked sub-lesson unlinked', () => {
+    renderSidebar();
+
+    expect(
+      screen.queryByRole('link', { name: /Meninger og fortellinger/ }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Meninger og fortellinger')).toBeInTheDocument();
   });
 
   describe('with Leksjon grouping', () => {
@@ -159,15 +197,11 @@ describe('ContentsSidebar', () => {
     it('marks only the open sub-lesson as current, not every "active" one', () => {
       // Both u2 and u3 would read as unfinished under open gating; only the
       // one the reader is inside may be highlighted.
-      renderSidebar({ levels, activeUnitId: 'u2' });
+      const { container } = renderSidebar({ levels, activeUnitId: 'u2' });
 
-      expect(screen.getByRole('button', { name: /Arbeid og studier/ })).toHaveAttribute(
-        'aria-current',
-        'true',
-      );
-      expect(
-        screen.getByRole('button', { name: /Meninger og fortellinger/ }),
-      ).not.toHaveAttribute('aria-current');
+      const current = container.querySelectorAll('[aria-current="true"]');
+      expect(current).toHaveLength(1);
+      expect(current[0]).toHaveTextContent('Arbeid og studier');
     });
 
     it('falls back to the flat unit list when no levels are given', () => {

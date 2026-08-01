@@ -246,7 +246,9 @@
       "railLabel": "Lesson tools",
       "courseProgress": "Course progress",
       "practiceTitle": "All exercises",
-      "practiceCount": "{n} tasks"
+      "practiceCount": "{n} tasks",
+      "collapseUnit": "Collapse sub-lesson",
+      "expandUnit": "Expand sub-lesson"
     },
     "topbar": {
       "courseLabel": "Course",
@@ -256,7 +258,8 @@
     "footerNav": {
       "previous": "Previous",
       "next": "Next · {type}",
-      "unlocksAfterThis": "Next unlocks after this"
+      "unlocksAfterThis": "Next unlocks after this",
+      "nextUnit": "Next sub-lesson"
     },
     "body": {
       "comingSoonTitle": "This lesson page is on its way",
