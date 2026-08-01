@@ -89,7 +89,8 @@
     "match_pairs": "Сопоставьте пары",
     "short_answer": "Краткий ответ",
     "writing_task": "Письменное задание",
-    "sentence_schema": "Схема предложения"
+    "sentence_schema": "Схема предложения",
+    "word_bank_fill": "Пропуски с банком слов"
   },
   "wordBank": "Банк слов",
   "matchColumnLeft": "Элементы",

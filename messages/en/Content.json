@@ -89,7 +89,8 @@
     "match_pairs": "Match pairs",
     "short_answer": "Short answer",
     "writing_task": "Writing task",
-    "sentence_schema": "Sentence schema"
+    "sentence_schema": "Sentence schema",
+    "word_bank_fill": "Word bank gap-fill"
   },
   "wordBank": "Word bank",
   "matchColumnLeft": "Items",

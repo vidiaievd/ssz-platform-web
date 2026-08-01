@@ -202,6 +202,41 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
+        {values.templateCode === 'word_bank_fill' &&
+          ((values.wbfSentences ?? []).some((s) => s.text.trim()) ? (
+            <div>
+              <div className="mb-3 flex flex-wrap gap-1.5 rounded-[11px] border border-(--ssz-border-default) px-3 py-2.5">
+                {values.wbfWordBank
+                  ?.split(',')
+                  .map((w) => w.trim())
+                  .filter(Boolean)
+                  .map((word, i) => (
+                    <span
+                      key={i}
+                      className="rounded-md bg-subtle px-2 py-0.5 text-[13px] text-secondary-foreground"
+                    >
+                      {word}
+                    </span>
+                  ))}
+              </div>
+              <ol className="flex flex-col gap-2">
+                {(values.wbfSentences ?? [])
+                  .filter((s) => s.text.trim())
+                  .map((sentence, i) => (
+                    <li
+                      key={i}
+                      className="font-reading text-[14.5px] leading-loose text-(--ssz-text-primary)"
+                    >
+                      {/* Blanks show as a dropdown-ish slot, matching the runner. */}
+                      {i + 1}. {sentence.text.replace(/___\d+___/g, '［ … ］')}
+                    </li>
+                  ))}
+              </ol>
+            </div>
+          ) : (
+            empty
+          ))}
+
         {values.instructions && (
           <p className="mt-3.5 text-xs text-muted-foreground">{values.instructions}</p>
         )}

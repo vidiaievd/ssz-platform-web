@@ -12,6 +12,7 @@ export const EXERCISE_TYPES = [
   'short_answer',
   'writing_task',
   'sentence_schema',
+  'word_bank_fill',
 ] as const;
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
 
@@ -21,6 +22,16 @@ export const SENTENCE_SCHEMA_TYPES = ['main', 'subordinate'] as const;
 // is grammatical but not chosen in this context, and one that simply fails.
 export const RATIONALE_VERDICTS = ['correct', 'acceptable', 'wrong'] as const;
 export type RationaleVerdict = (typeof RATIONALE_VERDICTS)[number];
+
+/** Comma-separated bank input → trimmed, non-empty words. */
+const splitBank = (value: string | undefined): string[] =>
+  (value ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+/** How many `___N___` markers a sentence carries. */
+export const countBlanks = (text: string): number => (text.match(/___\d+___/g) ?? []).length;
 
 export const DIFFICULTY_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 
@@ -96,6 +107,19 @@ export const exerciseFormSchema = z
     ssTokens: z
       .array(z.object({ text: z.string().max(200), fieldIndex: z.number().int() }))
       .optional(),
+
+    // word_bank_fill — several sentences sharing one comma-separated bank.
+    // `answers[j]` holds the accepted answers (comma-separated) for the j-th
+    // ___N___ marker of that sentence, so a sentence may carry several blanks.
+    wbfWordBank: z.string().max(2000).optional(),
+    wbfSentences: z
+      .array(
+        z.object({
+          text: z.string().max(1000),
+          answers: z.array(z.string().max(500)).optional(),
+        }),
+      )
+      .optional(),
   })
   .superRefine((data, ctx) => {
     switch (data.templateCode) {
@@ -166,6 +190,45 @@ export const exerciseFormSchema = z
         if (!data.wtPrompt?.trim()) {
           ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['wtPrompt'], message: 'Required' });
         }
+        break;
+      }
+      case 'word_bank_fill': {
+        if (splitBank(data.wbfWordBank).length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['wbfWordBank'],
+            message: 'At least 2 bank words required',
+          });
+        }
+        const sentences = (data.wbfSentences ?? []).filter((s) => s.text.trim());
+        if (sentences.length < 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['wbfSentences'],
+            message: 'At least 1 sentence required',
+          });
+        }
+        sentences.forEach((sentence) => {
+          const index = (data.wbfSentences ?? []).indexOf(sentence);
+          const markers = countBlanks(sentence.text);
+          if (markers === 0) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['wbfSentences', index, 'text'],
+              message: 'Add a ___1___ blank',
+            });
+            return;
+          }
+          for (let j = 0; j < markers; j++) {
+            if (!sentence.answers?.[j]?.trim()) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['wbfSentences', index, 'answers', j],
+                message: 'Required',
+              });
+            }
+          }
+        });
         break;
       }
       case 'sentence_schema': {

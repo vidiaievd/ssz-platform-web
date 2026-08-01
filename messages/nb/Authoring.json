@@ -180,7 +180,8 @@
       "match_pairs": "Koble par",
       "short_answer": "Kort svar",
       "writing_task": "Skriveoppgave",
-      "sentence_schema": "Setningsskjema"
+      "sentence_schema": "Setningsskjema",
+      "word_bank_fill": "Ordbank-lukeoppgave"
     },
     "difficultyLevel": "Vanskelighetsgrad",
     "difficultyLevelNone": "Alle nivåer",
@@ -276,7 +277,16 @@
       "acceptable": "Mulig, men ikke her",
       "wrong": "Galt"
     },
-    "fibRationaleAttached": "Forklaringsmatrise lagt til — vises etter sjekk"
+    "fibRationaleAttached": "Forklaringsmatrise lagt til — vises etter sjekk",
+    "wbfWordBank": "Ordbank",
+    "wbfWordBankHint": "Kommaseparert. Alle luker i alle setninger velges fra denne banken.",
+    "wbfWordBankPlaceholder": "skryte, bli kjent med, komme overens",
+    "wbfSentences": "Setninger",
+    "wbfSentencesHint": "Marker luker med ___1___, ___2___ … nummerert innenfor hver setning.",
+    "wbfSentencePlaceholder": "Jeg liker ikke når folk ___1___ hele tiden.",
+    "wbfAnswersPlaceholder": "Godkjente svar, kommaseparert",
+    "wbfAddSentence": "Legg til setning",
+    "wbfRemoveSentence": "Fjern setning"
   },
   "grammar": {
     "add": "Legg til regel",

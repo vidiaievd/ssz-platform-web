@@ -180,7 +180,8 @@
       "match_pairs": "Сопоставьте пары",
       "short_answer": "Краткий ответ",
       "writing_task": "Письменное задание",
-      "sentence_schema": "Схема предложения"
+      "sentence_schema": "Схема предложения",
+      "word_bank_fill": "Пропуски с банком слов"
     },
     "difficultyLevel": "Сложность",
     "difficultyLevelNone": "Любой уровень",
@@ -276,7 +277,16 @@
       "acceptable": "Возможно, но не здесь",
       "wrong": "Неверно"
     },
-    "fibRationaleAttached": "Добавлена матрица объяснений — показывается после проверки"
+    "fibRationaleAttached": "Добавлена матрица объяснений — показывается после проверки",
+    "wbfWordBank": "Банк слов",
+    "wbfWordBankHint": "Через запятую. Каждый пропуск в каждом предложении выбирается из этого банка.",
+    "wbfWordBankPlaceholder": "хвастаться, познакомиться, найти общий язык",
+    "wbfSentences": "Предложения",
+    "wbfSentencesHint": "Отмечайте пропуски как ___1___, ___2___ … нумерация внутри предложения.",
+    "wbfSentencePlaceholder": "Не люблю, когда люди ___1___ всё время.",
+    "wbfAnswersPlaceholder": "Допустимые ответы, через запятую",
+    "wbfAddSentence": "Добавить предложение",
+    "wbfRemoveSentence": "Удалить предложение"
   },
   "grammar": {
     "add": "Добавить правило",

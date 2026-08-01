@@ -22,6 +22,8 @@ const base: ExerciseFormValues = {
     { left: '', right: '' },
     { left: '', right: '' },
   ],
+  wbfWordBank: '',
+  wbfSentences: [{ text: '', answers: [''] }],
 };
 
 describe('buildExercisePayload', () => {
@@ -474,6 +476,65 @@ describe('sentence_schema', () => {
     expect(parsed.ssTokens).toEqual([
       { text: 'Lars', fieldIndex: 0 },
       { text: 'har', fieldIndex: 1 },
+    ]);
+  });
+});
+
+describe('word_bank_fill', () => {
+  const values: ExerciseFormValues = {
+    ...base,
+    templateCode: 'word_bank_fill',
+    wbfWordBank: 'show off, boast, clicked with',
+    wbfSentences: [
+      { text: 'I hate it when people ___1___ all the time.', answers: ['show off'] },
+      { text: 'They ___1___ and we ___2___ anyway.', answers: ['boast', 'clicked with, clicked'] },
+      { text: '   ', answers: [''] },
+    ],
+  };
+
+  it('builds the shared bank and one answer entry per marker', () => {
+    const { content, expectedAnswers } = buildExercisePayload(values);
+
+    expect(content).toEqual({
+      word_bank: ['show off', 'boast', 'clicked with'],
+      items: [
+        { id: '1', text_with_blanks: 'I hate it when people ___1___ all the time.' },
+        { id: '2', text_with_blanks: 'They ___1___ and we ___2___ anyway.' },
+      ],
+    });
+    expect(expectedAnswers).toEqual({
+      items: [
+        { id: '1', blanks: [{ blank_id: 1, accepted_answers: ['show off'] }] },
+        {
+          id: '2',
+          blanks: [
+            { blank_id: 1, accepted_answers: ['boast'] },
+            { blank_id: 2, accepted_answers: ['clicked with', 'clicked'] },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('takes blank ids from the markers, not from input order', () => {
+    const { expectedAnswers } = buildExercisePayload({
+      ...values,
+      wbfSentences: [{ text: 'Only ___2___ here.', answers: ['boast'] }],
+    });
+
+    expect(expectedAnswers).toEqual({
+      items: [{ id: '1', blanks: [{ blank_id: 2, accepted_answers: ['boast'] }] }],
+    });
+  });
+
+  it('round-trips through parseExerciseToForm', () => {
+    const { content, expectedAnswers } = buildExercisePayload(values);
+    const parsed = parseExerciseToForm({ templateCode: 'word_bank_fill', content, expectedAnswers });
+
+    expect(parsed.wbfWordBank).toBe('show off, boast, clicked with');
+    expect(parsed.wbfSentences).toEqual([
+      { text: 'I hate it when people ___1___ all the time.', answers: ['show off'] },
+      { text: 'They ___1___ and we ___2___ anyway.', answers: ['boast', 'clicked with, clicked'] },
     ]);
   });
 });

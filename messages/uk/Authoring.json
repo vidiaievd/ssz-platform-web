@@ -180,7 +180,8 @@
       "match_pairs": "З’єднайте пари",
       "short_answer": "Коротка відповідь",
       "writing_task": "Письмове завдання",
-      "sentence_schema": "Схема речення"
+      "sentence_schema": "Схема речення",
+      "word_bank_fill": "Пропуски з банком слів"
     },
     "difficultyLevel": "Складність",
     "difficultyLevelNone": "Будь-який рівень",
@@ -276,7 +277,16 @@
       "acceptable": "Можливо, але не тут",
       "wrong": "Неправильно"
     },
-    "fibRationaleAttached": "Додано матрицю пояснень — показується після перевірки"
+    "fibRationaleAttached": "Додано матрицю пояснень — показується після перевірки",
+    "wbfWordBank": "Банк слів",
+    "wbfWordBankHint": "Через кому. Кожен пропуск у кожному реченні обирається з цього банку.",
+    "wbfWordBankPlaceholder": "вихвалятися, познайомитися, порозумітися",
+    "wbfSentences": "Речення",
+    "wbfSentencesHint": "Позначайте пропуски як ___1___, ___2___ … нумерація в межах речення.",
+    "wbfSentencePlaceholder": "Не люблю, коли люди ___1___ увесь час.",
+    "wbfAnswersPlaceholder": "Прийнятні відповіді, через кому",
+    "wbfAddSentence": "Додати речення",
+    "wbfRemoveSentence": "Видалити речення"
   },
   "grammar": {
     "add": "Додати правило",

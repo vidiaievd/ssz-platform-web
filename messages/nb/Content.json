@@ -89,7 +89,8 @@
     "match_pairs": "Koble par",
     "short_answer": "Kort svar",
     "writing_task": "Skriveoppgave",
-    "sentence_schema": "Setningsskjema"
+    "sentence_schema": "Setningsskjema",
+    "word_bank_fill": "Ordbank-lukeoppgave"
   },
   "wordBank": "Ordbank",
   "matchColumnLeft": "Elementer",

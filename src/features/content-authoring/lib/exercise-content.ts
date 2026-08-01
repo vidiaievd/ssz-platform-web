@@ -53,6 +53,8 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
     { text: '', fieldIndex: 0 },
     { text: '', fieldIndex: 0 },
   ],
+  wbfWordBank: '',
+  wbfSentences: [{ text: '', answers: [''] }],
 };
 
 /** A minimal, valid multiple-choice draft — used to seed picker/starter exercises. */
@@ -65,6 +67,10 @@ export function minimalMcqValues(question: string): ExerciseFormValues {
     mcCorrectIndex: 0,
   };
 }
+
+/** Blank ids in reading order, e.g. "a ___1___ b ___3___" → [1, 3]. */
+const blankIds = (text: string): number[] =>
+  [...text.matchAll(/___(\d+)___/g)].map((m) => Number(m[1]));
 
 const splitCsv = (value: string | undefined): string[] =>
   (value ?? '')
@@ -183,6 +189,27 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
         },
       };
     }
+    case 'word_bank_fill': {
+      const wordBank = splitCsv(values.wbfWordBank);
+      const sentences = (values.wbfSentences ?? []).filter((s) => s.text.trim());
+      const items = sentences.map((s, i) => ({
+        id: `${i + 1}`,
+        text_with_blanks: s.text.trim(),
+      }));
+      // Blank ids come from the markers themselves, so ___2___ stays blank 2
+      // even if the author skipped ___1___ in that sentence.
+      const answerItems = sentences.map((s, i) => ({
+        id: `${i + 1}`,
+        blanks: blankIds(s.text).map((blankId, j) => ({
+          blank_id: blankId,
+          accepted_answers: splitCsv(s.answers?.[j]),
+        })),
+      }));
+      return {
+        content: { word_bank: wordBank, items },
+        expectedAnswers: { items: answerItems },
+      };
+    }
     case 'sentence_schema': {
       // Keep only labelled fields; remember original index -> stable field id so
       // token assignments (by original index) survive the filtering.
@@ -227,6 +254,16 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       };
     }
   }
+}
+
+interface WbfContentItem {
+  id?: unknown;
+  text_with_blanks?: unknown;
+}
+
+interface WbfAnswerItem {
+  id?: unknown;
+  blanks?: Array<{ blank_id?: unknown; accepted_answers?: unknown }>;
 }
 
 interface McqOption {
@@ -383,6 +420,42 @@ export function parseExerciseToForm(exercise: {
         wtMinWords: typeof content.min_words === 'number' ? String(content.min_words) : '',
         wtTopics: topics,
         wtRubric: typeof expectedAnswers.rubric === 'string' ? expectedAnswers.rubric : '',
+      };
+    }
+    case 'word_bank_fill': {
+      const bank = Array.isArray(content.word_bank)
+        ? (content.word_bank as unknown[]).filter((w): w is string => typeof w === 'string')
+        : [];
+      const rawItems = Array.isArray(content.items) ? (content.items as WbfContentItem[]) : [];
+      const rawAnswers = Array.isArray(expectedAnswers.items)
+        ? (expectedAnswers.items as WbfAnswerItem[])
+        : [];
+      const answersById = new Map(
+        rawAnswers.map((a) => [
+          String(a.id ?? ''),
+          Array.isArray(a.blanks) ? a.blanks : [],
+        ]),
+      );
+      const sentences = rawItems.map((item) => {
+        const text = typeof item.text_with_blanks === 'string' ? item.text_with_blanks : '';
+        const blanks = answersById.get(String(item.id ?? '')) ?? [];
+        const byBlankId = new Map(
+          blanks.map((b) => [
+            Number(b.blank_id),
+            (Array.isArray(b.accepted_answers) ? b.accepted_answers : [])
+              .filter((a): a is string => typeof a === 'string')
+              .join(', '),
+          ]),
+        );
+        return {
+          text,
+          answers: blankIds(text).map((id) => byBlankId.get(id) ?? ''),
+        };
+      });
+      return {
+        ...base,
+        wbfWordBank: bank.join(', '),
+        wbfSentences: sentences.length > 0 ? sentences : DEFAULT_EXERCISE_VALUES.wbfSentences,
       };
     }
     case 'sentence_schema': {

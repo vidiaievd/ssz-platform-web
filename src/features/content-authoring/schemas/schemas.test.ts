@@ -152,6 +152,52 @@ describe('exerciseFormSchema', () => {
     expect(paths).toContain('mcOptions');
   });
 
+  it('word_bank_fill: accepts a bank plus sentences with answered blanks', () => {
+    expect(
+      exerciseFormSchema.safeParse({
+        templateCode: 'word_bank_fill',
+        wbfWordBank: 'show off, boast',
+        wbfSentences: [
+          { text: 'They ___1___ all the time.', answers: ['show off'] },
+          { text: 'He ___1___ and she ___2___.', answers: ['boast', 'show off'] },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('word_bank_fill: rejects a bank with fewer than 2 words', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'word_bank_fill',
+      wbfWordBank: 'show off',
+      wbfSentences: [{ text: 'They ___1___.', answers: ['show off'] }],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('wbfWordBank');
+  });
+
+  it('word_bank_fill: rejects a sentence without a blank marker', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'word_bank_fill',
+      wbfWordBank: 'show off, boast',
+      wbfSentences: [{ text: 'No blank here.', answers: [''] }],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('wbfSentences.0.text');
+  });
+
+  it('word_bank_fill: rejects a blank left without an answer', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'word_bank_fill',
+      wbfWordBank: 'show off, boast',
+      wbfSentences: [{ text: 'He ___1___ and she ___2___.', answers: ['boast'] }],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('wbfSentences.0.answers.1');
+  });
+
   it('fill_in_blank: accepts a text with at least one blank', () => {
     expect(
       exerciseFormSchema.safeParse({

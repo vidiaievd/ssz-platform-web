@@ -21,6 +21,7 @@ import {
   DIFFICULTY_LEVELS,
   SENTENCE_SCHEMA_TYPES,
   RATIONALE_VERDICTS,
+  countBlanks,
   type ExerciseFormValues,
   type ExerciseType,
 } from '../schemas/exercise';
@@ -131,6 +132,9 @@ export function ExerciseFields({ control, register, errors, isPending, typeDisab
       )}
       {templateCode === 'sentence_schema' && (
         <SentenceSchemaFields control={control} register={register} errors={errors} isPending={isPending} />
+      )}
+      {templateCode === 'word_bank_fill' && (
+        <WordBankFillFields control={control} register={register} errors={errors} isPending={isPending} />
       )}
     </div>
   );
@@ -738,6 +742,109 @@ function MatchPairsFields({ control, register, errors, isPending }: SubProps) {
         <Plus className="mr-1.5 h-4 w-4" />
         {t('addPair')}
       </Button>
+    </div>
+  );
+}
+
+/**
+ * word_bank_fill — one shared bank plus a list of sentences. The number of
+ * answer inputs per sentence follows the ___N___ markers the author typed, so
+ * a sentence with two blanks grows a second input on its own.
+ */
+function WordBankFillFields({ control, register, errors, isPending }: SubProps) {
+  const t = useTranslations('Authoring.exercises');
+  const { fields, append, remove } = useFieldArray({ control, name: 'wbfSentences' });
+  const sentences = useWatch({ control, name: 'wbfSentences' });
+
+  return (
+    <div className="rounded-md border border-border p-3 space-y-4">
+      <Field
+        label={t('wbfWordBank')}
+        htmlFor="ex-wbf-bank"
+        error={errors.wbfWordBank?.message}
+        hint={t('wbfWordBankHint')}
+        required
+      >
+        <Textarea
+          id="ex-wbf-bank"
+          rows={2}
+          placeholder={t('wbfWordBankPlaceholder')}
+          disabled={isPending}
+          {...register('wbfWordBank')}
+        />
+      </Field>
+
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-(--ssz-text-primary)">{t('wbfSentences')}</p>
+        <p className="text-xs text-(--ssz-text-muted)">{t('wbfSentencesHint')}</p>
+        {typeof errors.wbfSentences?.message === 'string' && (
+          <p className="text-xs text-destructive">{errors.wbfSentences.message}</p>
+        )}
+
+        {fields.map((field, index) => {
+          const text = sentences?.[index]?.text ?? '';
+          const blanks = countBlanks(text);
+
+          return (
+            <div key={field.id} className="space-y-2 rounded-md bg-(--ssz-bg-muted) p-2.5">
+              <div className="flex items-start gap-2">
+                <span className="w-6 shrink-0 pt-2 text-xs font-mono text-(--ssz-text-muted)">
+                  {index + 1}.
+                </span>
+                <div className="flex-1">
+                  <Textarea
+                    rows={2}
+                    placeholder={t('wbfSentencePlaceholder')}
+                    className="font-mono text-sm"
+                    hasError={!!errors.wbfSentences?.[index]?.text}
+                    disabled={isPending}
+                    {...register(`wbfSentences.${index}.text`)}
+                  />
+                  {errors.wbfSentences?.[index]?.text?.message && (
+                    <p className="mt-1 text-xs text-destructive">
+                      {errors.wbfSentences[index].text.message}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => remove(index)}
+                  disabled={fields.length <= 1}
+                  aria-label={t('wbfRemoveSentence')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {Array.from({ length: blanks }, (_, j) => (
+                <div key={j} className="flex items-center gap-2 pl-8">
+                  <span className="w-16 shrink-0 text-xs font-mono text-(--ssz-text-muted)">
+                    {t('fibBlankLabel', { n: j + 1 })}
+                  </span>
+                  <Input
+                    placeholder={t('wbfAnswersPlaceholder')}
+                    hasError={!!errors.wbfSentences?.[index]?.answers?.[j]}
+                    disabled={isPending}
+                    {...register(`wbfSentences.${index}.answers.${j}`)}
+                  />
+                </div>
+              ))}
+            </div>
+          );
+        })}
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => append({ text: '', answers: [''] })}
+        >
+          <Plus className="mr-1.5 h-4 w-4" />
+          {t('wbfAddSentence')}
+        </Button>
+      </div>
     </div>
   );
 }

@@ -180,6 +180,37 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
             )}
           </div>
         )}
+        {code === 'word_bank_fill' && (
+          <div className="space-y-2">
+            {Array.isArray(content.word_bank) && content.word_bank.length > 0 && (
+              <div>
+                <p className="text-muted-foreground mb-1 text-xs font-medium">{t('wordBank')}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(content.word_bank as unknown[])
+                    .filter((w): w is string => typeof w === 'string')
+                    .map((word, i) => (
+                      <Badge key={i} variant="muted" className="text-xs">
+                        {word}
+                      </Badge>
+                    ))}
+                </div>
+              </div>
+            )}
+            <ol className="space-y-1.5">
+              {(Array.isArray(content.items) ? (content.items as LabeledItem[]) : []).map((item, i) => (
+                <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
+                  {i + 1}.{' '}
+                  {typeof (item as { text_with_blanks?: unknown }).text_with_blanks === 'string'
+                    ? (item as { text_with_blanks: string }).text_with_blanks.replace(
+                        /___\d+___/g,
+                        '\u005B … \u005D',
+                      )
+                    : ''}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </CardBody>
     </Card>
   );
@@ -194,4 +225,5 @@ const TYPE_LABEL_KEYS = {
   short_answer: true,
   writing_task: true,
   sentence_schema: true,
+  word_bank_fill: true,
 } as const;

@@ -183,7 +183,8 @@
       "match_pairs": "Match pairs",
       "short_answer": "Short answer",
       "writing_task": "Writing task",
-      "sentence_schema": "Sentence schema"
+      "sentence_schema": "Sentence schema",
+      "word_bank_fill": "Word bank gap-fill"
     },
     "difficultyLevel": "Difficulty",
     "difficultyLevelNone": "Any level",
@@ -279,7 +280,16 @@
       "acceptable": "Possible, but not here",
       "wrong": "Wrong"
     },
-    "fibRationaleAttached": "Explanation matrix attached — shown after checking"
+    "fibRationaleAttached": "Explanation matrix attached — shown after checking",
+    "wbfWordBank": "Word bank",
+    "wbfWordBankHint": "Comma-separated. Every blank of every sentence is chosen from this bank.",
+    "wbfWordBankPlaceholder": "show off, boast, clicked with, get to know",
+    "wbfSentences": "Sentences",
+    "wbfSentencesHint": "Mark blanks with ___1___, ___2___ … numbered within each sentence.",
+    "wbfSentencePlaceholder": "I hate it when people ___1___ all the time.",
+    "wbfAnswersPlaceholder": "Accepted answers, comma-separated",
+    "wbfAddSentence": "Add sentence",
+    "wbfRemoveSentence": "Remove sentence"
   },
   "grammar": {
     "add": "Add rule",
