@@ -3,6 +3,11 @@ import type { FillExpectedAnswers } from './fill-body';
 import type { MatchPair } from './match-body';
 import type { ShortAnswerExpectedAnswers } from './short-answer-body';
 import type { SentenceSchemaExpectedAnswers } from './sentence-schema-body';
+import type {
+  WordBankFillExpectedAnswers,
+  WordBankFillResults,
+  WordBankFillValue,
+} from './word-bank-fill-body';
 
 export interface TranslateExpectedAnswers {
   /** One or more acceptable translations, compared after normalization. */
@@ -95,4 +100,36 @@ export function gradeSentenceSchema(
       p.token_ids.every((id, i) => id === submitted[i])
     );
   });
+}
+
+/**
+ * Grade a shared-word-bank gap-fill. Mirrors the engine's WordBankFillValidator:
+ * every expected blank is compared, and one the learner left empty counts as
+ * wrong instead of dropping out of the total.
+ */
+export function checkWordBankFill(
+  expectedAnswers: WordBankFillExpectedAnswers,
+  value: WordBankFillValue,
+): { ok: boolean; results: WordBankFillResults; correct: number; total: number } {
+  const results: WordBankFillResults = {};
+  let correctCount = 0;
+  let total = 0;
+
+  for (const item of expectedAnswers.items) {
+    for (const blank of item.blanks) {
+      const submitted = value[item.id]?.[blank.blank_id] ?? '';
+      const correct =
+        submitted !== '' &&
+        blank.accepted_answers.some((a) => normAnswer(a) === normAnswer(submitted));
+
+      results[item.id] = {
+        ...(results[item.id] ?? {}),
+        [blank.blank_id]: { correct, expected: blank.accepted_answers[0] ?? '' },
+      };
+      total += 1;
+      if (correct) correctCount += 1;
+    }
+  }
+
+  return { ok: total > 0 && correctCount === total, results, correct: correctCount, total };
 }

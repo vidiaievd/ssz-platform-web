@@ -70,5 +70,12 @@
     "fieldDropLabel": "Разместить в {field}"
   },
   "unsupported": "Этот тип упражнения ({type}) пока не поддерживается.",
-  "taskNumber": "Задание {n}"
+  "taskNumber": "Задание {n}",
+  "wordBank": {
+    "bankLabel": "Банк слов",
+    "choosePlaceholder": "Выберите…",
+    "blankLabel": "Пропуск в предложении {n}",
+    "filledCount": "Заполнено {done} из {total} пропусков",
+    "partialScore": "Верно {correct} из {total} пропусков"
+  }
 }

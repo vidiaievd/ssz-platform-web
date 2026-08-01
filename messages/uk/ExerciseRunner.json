@@ -70,5 +70,12 @@
     "fieldDropLabel": "Розмістити в {field}"
   },
   "unsupported": "Цей тип вправи ({type}) поки не підтримується.",
-  "taskNumber": "Завдання {n}"
+  "taskNumber": "Завдання {n}",
+  "wordBank": {
+    "bankLabel": "Банк слів",
+    "choosePlaceholder": "Оберіть…",
+    "blankLabel": "Пропуск у реченні {n}",
+    "filledCount": "Заповнено {done} із {total} пропусків",
+    "partialScore": "Правильно {correct} із {total} пропусків"
+  }
 }

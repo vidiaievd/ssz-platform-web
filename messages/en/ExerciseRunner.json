@@ -70,5 +70,12 @@
     "fieldDropLabel": "Place in {field}"
   },
   "unsupported": "This exercise type ({type}) isn’t playable yet.",
-  "taskNumber": "Task {n}"
+  "taskNumber": "Task {n}",
+  "wordBank": {
+    "bankLabel": "Word bank",
+    "choosePlaceholder": "Choose…",
+    "blankLabel": "Blank in sentence {n}",
+    "filledCount": "{done} of {total} blanks filled",
+    "partialScore": "{correct} of {total} blanks correct"
+  }
 }

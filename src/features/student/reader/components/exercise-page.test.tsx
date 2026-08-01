@@ -89,6 +89,62 @@ describe('ExercisePage', () => {
     expect(screen.getByText('Correct')).toBeInTheDocument();
   });
 
+  describe('word_bank_fill', () => {
+    const wordBankExercise = {
+      templateCode: 'word_bank_fill',
+      content: {
+        word_bank: ['show off', 'boast'],
+        items: [
+          { id: '1', text_with_blanks: 'I hate it when people ___1___ all the time.' },
+          { id: '2', text_with_blanks: 'They ___1___ about their car.' },
+        ],
+      },
+      expectedAnswers: {
+        items: [
+          { id: '1', blanks: [{ blank_id: 1, accepted_answers: ['show off'] }] },
+          { id: '2', blanks: [{ blank_id: 1, accepted_answers: ['boast'] }] },
+        ],
+      },
+    };
+
+    it('checks only once every blank is filled', () => {
+      mockExercise(wordBankExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      const check = screen.getByRole('button', { name: 'Check' });
+      expect(check).toBeDisabled();
+
+      fireEvent.change(screen.getAllByRole('combobox')[0]!, { target: { value: 'show off' } });
+      expect(check).toBeDisabled();
+
+      fireEvent.change(screen.getAllByRole('combobox')[1]!, { target: { value: 'boast' } });
+      expect(check).toBeEnabled();
+    });
+
+    it('grades every sentence and reports the tally when some are wrong', () => {
+      mockExercise(wordBankExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      fireEvent.change(screen.getAllByRole('combobox')[0]!, { target: { value: 'show off' } });
+      fireEvent.change(screen.getAllByRole('combobox')[1]!, { target: { value: 'show off' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Check' }));
+
+      expect(screen.getByText('Not quite')).toBeInTheDocument();
+      expect(screen.getByText('1 of 2 blanks correct')).toBeInTheDocument();
+    });
+
+    it('is correct when every blank matches', () => {
+      mockExercise(wordBankExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      fireEvent.change(screen.getAllByRole('combobox')[0]!, { target: { value: 'show off' } });
+      fireEvent.change(screen.getAllByRole('combobox')[1]!, { target: { value: 'boast' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Check' }));
+
+      expect(screen.getByText('Correct')).toBeInTheDocument();
+    });
+  });
+
   it('shows an unsupported message for an unknown template', () => {
     mockExercise({ templateCode: 'mystery_type' });
     renderWithProviders(<ExercisePage exerciseId="e1" />);

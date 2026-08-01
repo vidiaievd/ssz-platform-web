@@ -70,5 +70,12 @@
     "fieldDropLabel": "Plasser i {field}"
   },
   "unsupported": "Denne oppgavetypen ({type}) kan ikke løses ennå.",
-  "taskNumber": "Oppgave {n}"
+  "taskNumber": "Oppgave {n}",
+  "wordBank": {
+    "bankLabel": "Ordbank",
+    "choosePlaceholder": "Velg …",
+    "blankLabel": "Luke i setning {n}",
+    "filledCount": "{done} av {total} luker fylt ut",
+    "partialScore": "{correct} av {total} luker riktige"
+  }
 }

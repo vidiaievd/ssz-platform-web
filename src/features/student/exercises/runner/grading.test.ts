@@ -9,6 +9,7 @@ import {
   gradeTranslate,
   gradeMatch,
   type TranslateExpectedAnswers,
+  checkWordBankFill,
 } from './grading';
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
@@ -228,5 +229,49 @@ describe('gradeSentenceSchema', () => {
 
   it('returns false when a field is missing tokens', () => {
     expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t2'] })).toBe(false);
+  });
+});
+
+describe('checkWordBankFill', () => {
+  const expected = {
+    items: [
+      { id: '1', blanks: [{ blank_id: 1, accepted_answers: ['show off'] }] },
+      {
+        id: '2',
+        blanks: [
+          { blank_id: 1, accepted_answers: ['clicked with', 'clicked'] },
+          { blank_id: 2, accepted_answers: ['get to know'] },
+        ],
+      },
+    ],
+  };
+
+  it('is ok only when every blank matches', () => {
+    const result = checkWordBankFill(expected, {
+      '1': { 1: 'show off' },
+      '2': { 1: 'clicked', 2: 'get to know' },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.correct).toBe(3);
+    expect(result.total).toBe(3);
+  });
+
+  it('counts an unanswered blank as wrong and keeps it in the total', () => {
+    const result = checkWordBankFill(expected, { '1': { 1: 'show off' } });
+
+    expect(result.ok).toBe(false);
+    expect(result.correct).toBe(1);
+    expect(result.total).toBe(3);
+    expect(result.results['2']![1]).toEqual({ correct: false, expected: 'clicked with' });
+  });
+
+  it('normalizes case and whitespace like the other graders', () => {
+    const result = checkWordBankFill(expected, {
+      '1': { 1: '  Show Off ' },
+      '2': { 1: 'CLICKED', 2: 'get to know' },
+    });
+
+    expect(result.ok).toBe(true);
   });
 });

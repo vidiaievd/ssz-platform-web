@@ -15,6 +15,8 @@ import {
   ShortAnswerBody,
   WritingBody,
   SentenceSchemaBody,
+  WordBankFillBody,
+  checkWordBankFill,
   gradeMcq,
   gradeMatch,
   gradeTranslate,
@@ -30,6 +32,10 @@ import {
   type SchemaToken,
   type SchemaPlacements,
   type WritingValue,
+  type WordBankFillExpectedAnswers,
+  type WordBankFillResults,
+  type WordBankFillValue,
+  type WordBankSentence,
 } from '@/features/student/exercises/runner';
 
 /* ── types ──────────────────────────────────────────────────────────────── */
@@ -346,6 +352,63 @@ function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
+function WordBankFillSolver({ display, phase, ok, onCheck }: SolverProps) {
+  const [value, setValue] = useState<WordBankFillValue>({});
+  const [results, setResults] = useState<WordBankFillResults>({});
+  const [canSubmit, setCanSubmit] = useState(false);
+  const t = useTranslations('ExerciseRunner');
+  const c = display.content;
+
+  const wordBank = strArr(c.word_bank);
+  const items: WordBankSentence[] = (Array.isArray(c.items) ? c.items : [])
+    .filter((it): it is { id: string; text_with_blanks: string } => typeof (it as { id?: unknown }).id === 'string')
+    .map((it) => ({ id: it.id, textWithBlanks: str(it.text_with_blanks) }));
+
+  const expected: WordBankFillExpectedAnswers = {
+    items: (Array.isArray(display.expectedAnswers.items) ? display.expectedAnswers.items : [])
+      .filter((it): it is { id: string; blanks: unknown } => typeof (it as { id?: unknown }).id === 'string')
+      .map((it) => ({
+        id: it.id,
+        blanks: (Array.isArray(it.blanks) ? it.blanks : [])
+          .filter((b): b is { blank_id: number; accepted_answers: unknown } =>
+            typeof (b as { blank_id?: unknown }).blank_id === 'number',
+          )
+          .map((b) => ({ blank_id: b.blank_id, accepted_answers: strArr(b.accepted_answers) })),
+      })),
+  };
+
+  return (
+    <>
+      <WordBankFillBody
+        content={{ wordBank, items, instruction: instr(display) }}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={setCanSubmit}
+        phase={phase}
+        ok={ok}
+        mode="practice"
+        accent={ACCENT}
+        results={results}
+      />
+      {phase === 'answering' && (
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() => {
+            const graded = checkWordBankFill(expected, value);
+            setResults(graded.results);
+            onCheck({
+              ok: graded.ok,
+              explanation: graded.ok
+                ? str(display.expectedAnswers.explanation) || undefined
+                : t('wordBank.partialScore', { correct: graded.correct, total: graded.total }),
+            });
+          }}
+        />
+      )}
+    </>
+  );
+}
+
 /* ── feedback banner ────────────────────────────────────────────────────── */
 
 function FeedbackBanner({ graded }: { graded: Graded }) {
@@ -396,6 +459,7 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   short_answer: ShortAnswerSolver,
   writing_task: WritingSolver,
   sentence_schema: SentenceSchemaSolver,
+  word_bank_fill: WordBankFillSolver,
 };
 
 export interface ExerciseSolverProps {

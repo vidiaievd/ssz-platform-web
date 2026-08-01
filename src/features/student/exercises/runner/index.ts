@@ -42,6 +42,16 @@ export type {
 export { WritingBody } from './writing-body';
 export type { WritingBodyProps, WritingContent, WritingValue, WritingTopic } from './writing-body';
 
+export { WordBankFillBody, parseSentence } from './word-bank-fill-body';
+export type {
+  WordBankFillBodyProps,
+  WordBankFillContent,
+  WordBankFillExpectedAnswers,
+  WordBankFillResults,
+  WordBankFillValue,
+  WordBankSentence,
+} from './word-bank-fill-body';
+
 export { SentenceSchemaBody } from './sentence-schema-body';
 export type {
   SentenceSchemaBodyProps,
@@ -60,6 +70,7 @@ export {
   gradeMatch,
   gradeShortAnswer,
   gradeSentenceSchema,
+  checkWordBankFill,
 } from './grading';
 export type { TranslateExpectedAnswers } from './grading';
 
