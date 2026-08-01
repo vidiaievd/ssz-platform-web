@@ -1,6 +1,20 @@
-import type { FinalizeUploadResponse, MediaPurpose, RequestUploadResponse } from '../types';
+import type {
+  AssetResponse,
+  FinalizeUploadResponse,
+  MediaPurpose,
+  RequestUploadBody,
+  RequestUploadResponse,
+} from '../types';
 
 export type UploadProgressCallback = (pct: number) => void;
+
+// Only 'profile_avatar' is special-cased by the media-service (public bucket);
+// everything else lands in the private bucket behind a pre-signed GET URL.
+const PURPOSE_TO_ENTITY_TYPE: Record<MediaPurpose, string> = {
+  avatar: 'profile_avatar',
+  lesson: 'lesson_asset',
+  exercise: 'exercise_asset',
+};
 
 /**
  * PUT the file directly to the presigned URL (MinIO / S3).
@@ -45,11 +59,11 @@ type UploadAvatarOptions = {
 };
 
 /**
- * Full two-step upload:
+ * Full upload flow:
  * 1. Request a presigned URL from the BFF.
  * 2. PUT the file directly to MinIO.
- * 3. Call finalize so the Media Service marks the asset as ready.
- * Returns the finalized asset.
+ * 3. Call finalize so the Media Service marks the asset as uploaded.
+ * 4. Fetch the finalized asset (finalize itself returns 204 No Content).
  */
 export async function uploadAsset({
   file,
@@ -57,15 +71,17 @@ export async function uploadAsset({
   onProgress,
 }: UploadAvatarOptions): Promise<FinalizeUploadResponse> {
   // Step 1 — request presigned URL
+  const body: RequestUploadBody = {
+    mimeType: file.type,
+    sizeBytes: file.size,
+    originalFilename: file.name,
+    entityType: PURPOSE_TO_ENTITY_TYPE[purpose],
+  };
+
   const requestRes = await fetch('/api/media/uploads/request', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      filename: file.name,
-      mimeType: file.type,
-      size: file.size,
-      purpose,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!requestRes.ok) {
@@ -77,7 +93,7 @@ export async function uploadAsset({
   // Step 2 — upload directly to MinIO (never touches our server again)
   await uploadToPresignedUrl(uploadUrl, file, onProgress);
 
-  // Step 3 — finalize
+  // Step 3 — finalize (204 No Content — the asset itself isn't in the body)
   const finalizeRes = await fetch(`/api/media/uploads/${assetId}/finalize`, {
     method: 'POST',
   });
@@ -86,5 +102,23 @@ export async function uploadAsset({
     throw new Error(`Failed to finalize upload (${finalizeRes.status})`);
   }
 
-  return finalizeRes.json() as Promise<FinalizeUploadResponse>;
+  // Step 4 — fetch the finalized asset (has its real, playable/displayable URL)
+  const assetRes = await fetch(`/api/media/assets/${assetId}`);
+
+  if (!assetRes.ok) {
+    throw new Error(`Failed to load uploaded asset (${assetRes.status})`);
+  }
+
+  const asset = (await assetRes.json()) as AssetResponse;
+
+  return {
+    asset: {
+      id: asset.id,
+      url: asset.url,
+      mimeType: asset.mimeType,
+      size: asset.sizeBytes,
+      filename: asset.originalFilename ?? file.name,
+      createdAt: asset.createdAt,
+    },
+  };
 }
