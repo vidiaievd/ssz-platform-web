@@ -13,6 +13,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
+    "format": "node scripts/format-changed.mjs",
+    "format:check": "node scripts/format-changed.mjs --check",
     "prepare": "husky",
     "api:generate": "orval",
     "i18n:check": "node scripts/check-i18n-parity.mjs",
