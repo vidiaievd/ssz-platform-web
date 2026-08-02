@@ -24,11 +24,11 @@ export function RunnerErrorBody({ onRetry, accent }: RunnerErrorBodyProps) {
           width: 64,
           height: 64,
           borderRadius: 18,
-          background: 'var(--ssz-color-error-50)',
-          border: '1.5px solid var(--ssz-color-error-300)',
+          background: 'var(--ssz-feedback-no-bg)',
+          border: '1.5px solid color-mix(in oklab, var(--ssz-feedback-no-line) 45%, transparent)',
         }}
       >
-        <XCircle size={32} style={{ color: 'var(--ssz-color-error-500)' }} aria-hidden="true" />
+        <XCircle size={32} style={{ color: 'var(--ssz-feedback-no-line)' }} aria-hidden="true" />
       </div>
 
       <h2
@@ -59,7 +59,7 @@ export function RunnerErrorBody({ onRetry, accent }: RunnerErrorBodyProps) {
             fontSize: 15,
             padding: '11px 24px',
             borderRadius: 12,
-            color: '#fff',
+            color: 'var(--ssz-text-on-brand)',
             background: accent,
           }}
         >

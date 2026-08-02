@@ -577,9 +577,9 @@ function FeedbackBanner({ graded }: { graded: Graded }) {
   const { ok, explanation, reference } = graded;
   const tone =
     ok === true
-      ? { bg: 'var(--ssz-color-success-50)', line: 'var(--ssz-color-success-500)', fg: 'var(--ssz-color-success-700)', label: t('feedback.correct') }
+      ? { bg: 'var(--ssz-feedback-ok-bg)', line: 'var(--ssz-feedback-ok-line)', fg: 'var(--ssz-feedback-ok-fg)', label: t('feedback.correct') }
       : ok === false
-        ? { bg: 'var(--ssz-color-error-50)', line: 'var(--ssz-color-error-500)', fg: 'var(--ssz-color-error-700)', label: t('feedback.incorrect') }
+        ? { bg: 'var(--ssz-feedback-no-bg)', line: 'var(--ssz-feedback-no-line)', fg: 'var(--ssz-feedback-no-fg)', label: t('feedback.incorrect') }
         : { bg: 'var(--ssz-color-secondary-100)', line: 'var(--ssz-color-secondary-600)', fg: 'var(--ssz-color-secondary-700)', label: t('feedback.submitted') };
 
   return (

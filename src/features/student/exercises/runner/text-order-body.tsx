@@ -61,10 +61,10 @@ export interface TextOrderBodyProps {
   results?: TextOrderResults;
 }
 
-const OK_LINE = 'var(--ssz-color-success-500)';
-const OK_BG = 'var(--ssz-color-success-50)';
-const NO_LINE = 'var(--ssz-color-error-500)';
-const NO_BG = 'var(--ssz-color-error-50)';
+const OK_LINE = 'var(--ssz-feedback-ok-line)';
+const OK_BG = 'var(--ssz-feedback-ok-bg)';
+const NO_LINE = 'var(--ssz-feedback-no-line)';
+const NO_BG = 'var(--ssz-feedback-no-bg)';
 const READING = 'var(--ssz-font-reading)';
 
 /**

@@ -16,13 +16,13 @@ interface FeedbackBarProps {
   onAdvance: () => void;
 }
 
-const OK_BG = 'var(--ssz-color-success-50)';
-const OK_LINE = 'var(--ssz-color-success-500)';
-const OK_FG = 'oklch(0.40 0.12 145)';
+const OK_BG = 'var(--ssz-feedback-ok-bg)';
+const OK_LINE = 'var(--ssz-feedback-ok-line)';
+const OK_FG = 'var(--ssz-feedback-ok-fg)';
 
-const NO_BG = 'var(--ssz-color-error-50)';
-const NO_LINE = 'var(--ssz-color-error-500)';
-const NO_FG = 'var(--ssz-color-error-700)';
+const NO_BG = 'var(--ssz-feedback-no-bg)';
+const NO_LINE = 'var(--ssz-feedback-no-line)';
+const NO_FG = 'var(--ssz-feedback-no-fg)';
 
 /** Sticky footer shown during the feedback phase — result + advance button. */
 export function FeedbackBar({
@@ -46,13 +46,13 @@ export function FeedbackBar({
     no: { bg: NO_BG, line: NO_LINE, fg: NO_FG, title: t('feedback.incorrect') },
     neutral: {
       bg: 'var(--ssz-bg-subtle)',
-      line: 'var(--ssz-color-secondary-600)',
-      fg: 'var(--ssz-color-secondary-700)',
+      line: 'var(--ssz-icon-accent-warm)',
+      fg: 'var(--ssz-text-accent-warm)',
       title: t('feedback.submitted'),
     },
   }[tone];
 
-  const advanceBg = isGraded ? 'var(--ssz-color-secondary-600)' : ok ? OK_LINE : accent;
+  const advanceBg = isGraded ? 'var(--ssz-runner-graded)' : ok ? OK_LINE : accent;
 
   return (
     <div
@@ -72,7 +72,7 @@ export function FeedbackBar({
             width: 36,
             height: 36,
             borderRadius: '50%',
-            background: `${cfg.line}22`,
+            background: `color-mix(in oklab, ${cfg.line} 14%, transparent)`,
           }}
           aria-hidden="true"
         >
@@ -128,7 +128,7 @@ export function FeedbackBar({
             fontSize: 15,
             padding: '11px 24px',
             borderRadius: 12,
-            color: '#fff',
+            color: 'var(--ssz-text-on-brand)',
             background: advanceBg,
           }}
         >

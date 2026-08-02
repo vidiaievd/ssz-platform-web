@@ -199,13 +199,13 @@ describe('FillBody — reveal states (word bank)', () => {
   it('correct chip gets success styling on ok=true', () => {
     renderFill({ phase: 'feedback', value: 'hjemme', ok: true });
     const correctChip = screen.getByRole('button', { name: 'hjemme' });
-    expect(correctChip.getAttribute('style')).toContain('success-500');
+    expect(correctChip.getAttribute('style')).toContain('feedback-ok-line');
   });
 
   it('wrong chip gets error styling on ok=false', () => {
     renderFill({ phase: 'feedback', value: 'jobben', ok: false });
     const wrongChip = screen.getByRole('button', { name: 'jobben' });
-    expect(wrongChip.getAttribute('style')).toContain('error-500');
+    expect(wrongChip.getAttribute('style')).toContain('feedback-no-line');
   });
 
   it('graded mode (ok=null) keeps selected chip in accent color', () => {

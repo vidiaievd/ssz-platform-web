@@ -66,23 +66,23 @@ function QuickCheck({ question, options, correctOptionIndex, explanation }: Quic
               )}
               style={{
                 borderColor: isRight
-                  ? 'var(--ssz-color-success-500)'
+                  ? 'var(--ssz-feedback-ok-line)'
                   : isWrong
-                    ? 'var(--ssz-color-error-500)'
+                    ? 'var(--ssz-feedback-no-line)'
                     : selected
                       ? `var(${GRAMMAR_HUE})`
                       : 'var(--ssz-border-default)',
                 background: isRight
-                  ? 'var(--ssz-color-success-100)'
+                  ? 'var(--ssz-feedback-ok-bg)'
                   : isWrong
-                    ? 'var(--ssz-color-error-100)'
+                    ? 'var(--ssz-feedback-no-bg)'
                     : selected
                       ? `color-mix(in oklch, var(${GRAMMAR_HUE}) 12%, transparent)`
                       : 'var(--ssz-bg-base)',
                 color: isRight
-                  ? 'var(--ssz-color-success-700)'
+                  ? 'var(--ssz-feedback-ok-fg)'
                   : isWrong
-                    ? 'var(--ssz-color-error-700)'
+                    ? 'var(--ssz-feedback-no-fg)'
                     : 'var(--ssz-text-primary)',
                 transitionDuration: 'var(--ssz-duration-fast)',
               }}
@@ -91,16 +91,16 @@ function QuickCheck({ question, options, correctOptionIndex, explanation }: Quic
                 className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-full border-[1.5px]"
                 style={{
                   borderColor: isRight
-                    ? 'var(--ssz-color-success-500)'
+                    ? 'var(--ssz-feedback-ok-line)'
                     : isWrong
-                      ? 'var(--ssz-color-error-500)'
+                      ? 'var(--ssz-feedback-no-line)'
                       : selected
                         ? `var(${GRAMMAR_HUE})`
                         : 'var(--ssz-border-strong)',
                   background: isRight
-                    ? 'var(--ssz-color-success-500)'
+                    ? 'var(--ssz-feedback-ok-line)'
                     : isWrong
-                      ? 'var(--ssz-color-error-500)'
+                      ? 'var(--ssz-feedback-no-line)'
                       : selected
                         ? `var(${GRAMMAR_HUE})`
                         : 'transparent',
@@ -136,7 +136,7 @@ function QuickCheck({ question, options, correctOptionIndex, explanation }: Quic
           <p className="text-[13.5px] leading-[1.6] text-(--ssz-text-secondary)">
             <strong
               style={{
-                color: isCorrectPick ? 'var(--ssz-color-success-500)' : 'var(--ssz-color-error-500)',
+                color: isCorrectPick ? 'var(--ssz-feedback-ok-line)' : 'var(--ssz-feedback-no-line)',
               }}
             >
               {isCorrectPick ? t('correct') : t('incorrect')}{' '}
@@ -259,22 +259,22 @@ export function GrammarLessonPage({ ruleId, unitPosition, courseTitle, cefrLevel
                 className="flex items-start gap-3 rounded-xl border-[1.5px] bg-surface px-4 py-3.25"
                 style={{
                   borderColor: ex.isCorrect
-                    ? 'color-mix(in oklch, var(--ssz-color-success-500) 40%, transparent)'
-                    : 'color-mix(in oklch, var(--ssz-color-error-500) 40%, transparent)',
+                    ? 'color-mix(in oklch, var(--ssz-feedback-ok-line) 40%, transparent)'
+                    : 'color-mix(in oklch, var(--ssz-feedback-no-line) 40%, transparent)',
                 }}
               >
                 <div
                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
                   style={{
                     background: ex.isCorrect
-                      ? 'color-mix(in oklch, var(--ssz-color-success-500) 18%, transparent)'
-                      : 'color-mix(in oklch, var(--ssz-color-error-500) 14%, transparent)',
+                      ? 'color-mix(in oklch, var(--ssz-feedback-ok-line) 18%, transparent)'
+                      : 'color-mix(in oklch, var(--ssz-feedback-no-line) 14%, transparent)',
                   }}
                 >
                   {ex.isCorrect ? (
-                    <Check size={14} style={{ color: 'var(--ssz-color-success-500)' }} aria-hidden="true" />
+                    <Check size={14} style={{ color: 'var(--ssz-feedback-ok-line)' }} aria-hidden="true" />
                   ) : (
-                    <X size={14} style={{ color: 'var(--ssz-color-error-500)' }} aria-hidden="true" />
+                    <X size={14} style={{ color: 'var(--ssz-feedback-no-line)' }} aria-hidden="true" />
                   )}
                 </div>
                 <div className="flex-1">

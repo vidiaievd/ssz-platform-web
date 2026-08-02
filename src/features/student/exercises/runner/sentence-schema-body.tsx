@@ -102,9 +102,9 @@ export function SentenceSchemaBody({
 
   const borderFor = (base: string) =>
     reveal && ok === true
-      ? 'var(--ssz-color-success-500)'
+      ? 'var(--ssz-feedback-ok-line)'
       : reveal && ok === false
-        ? 'var(--ssz-color-error-500)'
+        ? 'var(--ssz-feedback-no-line)'
         : base;
 
   return (

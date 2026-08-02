@@ -65,24 +65,24 @@ const READING = 'var(--ssz-font-reading)';
 
 const OUTCOME_TONE: Record<ChunkOutcome, { border: string; bg: string; fg: string }> = {
   fixed: {
-    border: 'var(--ssz-color-success-500)',
-    bg: 'var(--ssz-color-success-50)',
-    fg: 'oklch(0.40 0.12 145)',
+    border: 'var(--ssz-feedback-ok-line)',
+    bg: 'var(--ssz-feedback-ok-bg)',
+    fg: 'var(--ssz-feedback-ok-fg)',
   },
   wrong_fix: {
-    border: 'var(--ssz-color-error-500)',
-    bg: 'var(--ssz-color-error-50)',
-    fg: 'var(--ssz-color-error-700)',
+    border: 'var(--ssz-feedback-no-line)',
+    bg: 'var(--ssz-feedback-no-bg)',
+    fg: 'var(--ssz-feedback-no-fg)',
   },
   missed: {
-    border: 'var(--ssz-color-secondary-600)',
-    bg: 'var(--ssz-color-secondary-100)',
-    fg: 'var(--ssz-color-secondary-700)',
+    border: 'var(--ssz-border-accent-warm)',
+    bg: 'var(--ssz-bg-accent-warm)',
+    fg: 'var(--ssz-text-accent-warm)',
   },
   false_positive: {
-    border: 'var(--ssz-color-error-500)',
+    border: 'var(--ssz-feedback-no-line)',
     bg: 'var(--ssz-bg-surface)',
-    fg: 'var(--ssz-color-error-700)',
+    fg: 'var(--ssz-feedback-no-fg)',
   },
 };
 

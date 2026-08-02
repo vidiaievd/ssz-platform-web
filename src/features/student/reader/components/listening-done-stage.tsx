@@ -10,9 +10,9 @@ export function ListeningDoneStage() {
     <div className="flex flex-col items-center gap-4 py-10 text-center">
       <div
         className="flex h-18 w-18 items-center justify-center rounded-full border-2"
-        style={{ background: 'var(--ssz-color-success-50)', borderColor: 'var(--ssz-color-success-300)' }}
+        style={{ background: 'var(--ssz-feedback-ok-bg)', borderColor: 'color-mix(in oklab, var(--ssz-feedback-ok-line) 45%, transparent)' }}
       >
-        <CheckCircle2 size={36} style={{ color: 'var(--ssz-color-success-500)' }} aria-hidden="true" />
+        <CheckCircle2 size={36} style={{ color: 'var(--ssz-feedback-ok-line)' }} aria-hidden="true" />
       </div>
       <div>
         <h2 className="font-reading mb-2 text-[26px] font-semibold text-(--ssz-text-primary)">

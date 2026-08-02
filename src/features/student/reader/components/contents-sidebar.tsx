@@ -207,7 +207,7 @@ function UnitBlock({
           </Link>
         )}
         {done ? (
-          <Check size={13} className="shrink-0 text-(--ssz-color-success-600)" aria-hidden="true" />
+          <Check size={13} className="shrink-0 text-(--ssz-feedback-ok-line)" aria-hidden="true" />
         ) : locked ? (
           <Lock size={11} className="shrink-0 text-muted-foreground" aria-hidden="true" />
         ) : null}
@@ -267,7 +267,7 @@ function LevelBlock({
           className={cn(
             'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold',
             complete
-              ? 'bg-(--ssz-color-success-100) text-(--ssz-color-success-700)'
+              ? 'bg-(--ssz-feedback-ok-bg) text-(--ssz-feedback-ok-fg)'
               : 'bg-subtle text-muted-foreground',
           )}
         >

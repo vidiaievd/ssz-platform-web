@@ -60,9 +60,9 @@ export function ShortAnswerBody({
 
   const borderColor =
     reveal && ok === true
-      ? 'var(--ssz-color-success-500)'
+      ? 'var(--ssz-feedback-ok-line)'
       : reveal && ok === false
-        ? 'var(--ssz-color-error-500)'
+        ? 'var(--ssz-feedback-no-line)'
         : value.trim()
           ? accent
           : 'var(--ssz-border-default)';

@@ -42,7 +42,7 @@ export function PrimaryFooter({ mode, canSubmit, accent, onSubmit }: PrimaryFoot
             fontSize: 15,
             padding: '12px 30px',
             borderRadius: 12,
-            color: '#fff',
+            color: 'var(--ssz-text-on-brand)',
             background: accent,
             opacity: canSubmit ? 1 : 0.4,
             transition: 'opacity 160ms, background 160ms',

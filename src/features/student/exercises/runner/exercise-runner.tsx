@@ -126,14 +126,14 @@ export function ExerciseRunner({
                 className="mb-5.5 flex items-center gap-2.25 px-3.5 py-2.5"
                 style={{
                   borderRadius: 10,
-                  background: 'var(--ssz-color-secondary-100)',
-                  border: '1.5px solid oklch(0.57 0.105 82 / 0.25)',
+                  background: 'var(--ssz-bg-accent-warm)',
+                  border: '1.5px solid var(--ssz-border-accent-warm)',
                 }}
               >
-                <Lock size={15} style={{ color: 'var(--ssz-color-secondary-700)', flexShrink: 0 }} aria-hidden="true" />
+                <Lock size={15} style={{ color: 'var(--ssz-icon-accent-warm)', flexShrink: 0 }} aria-hidden="true" />
                 <span
                   className="text-[12.5px] font-semibold"
-                  style={{ color: 'var(--ssz-color-secondary-700)' }}
+                  style={{ color: 'var(--ssz-text-accent-warm)' }}
                 >
                   {t('gradedBanner')}
                 </span>

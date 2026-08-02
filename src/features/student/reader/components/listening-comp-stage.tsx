@@ -80,24 +80,24 @@ export function ListeningCompStage({
                       style={{
                         border: `1.5px solid ${
                           isRight
-                            ? 'var(--ssz-color-success-500)'
+                            ? 'var(--ssz-feedback-ok-line)'
                             : isWrong
-                              ? 'var(--ssz-color-error-500)'
+                              ? 'var(--ssz-feedback-no-line)'
                               : isSelected
                                 ? 'var(--ssz-color-primary-500)'
                                 : 'var(--ssz-border-default)'
                         }`,
                         background: isRight
-                          ? 'var(--ssz-color-success-50)'
+                          ? 'var(--ssz-feedback-ok-bg)'
                           : isWrong
-                            ? 'var(--ssz-color-error-50)'
+                            ? 'var(--ssz-feedback-no-bg)'
                             : isSelected
                               ? 'var(--ssz-color-primary-50)'
                               : 'var(--ssz-bg-base)',
                         color: isRight
-                          ? 'var(--ssz-color-success-700)'
+                          ? 'var(--ssz-feedback-ok-fg)'
                           : isWrong
-                            ? 'var(--ssz-color-error-700)'
+                            ? 'var(--ssz-feedback-no-fg)'
                             : 'var(--ssz-text-primary)',
                         cursor: checked ? 'default' : 'pointer',
                         transitionDuration: 'var(--ssz-duration-fast)',
@@ -109,17 +109,17 @@ export function ListeningCompStage({
                         style={{
                           border: `1.5px solid ${
                             isRight
-                              ? 'var(--ssz-color-success-500)'
+                              ? 'var(--ssz-feedback-ok-line)'
                               : isWrong
-                                ? 'var(--ssz-color-error-500)'
+                                ? 'var(--ssz-feedback-no-line)'
                                 : isSelected
                                   ? 'var(--ssz-color-primary-500)'
                                   : 'var(--ssz-border-strong)'
                           }`,
                           background: isRight
-                            ? 'var(--ssz-color-success-500)'
+                            ? 'var(--ssz-feedback-ok-line)'
                             : isWrong
-                              ? 'var(--ssz-color-error-500)'
+                              ? 'var(--ssz-feedback-no-line)'
                               : isSelected
                                 ? 'var(--ssz-color-primary-500)'
                                 : 'transparent',
@@ -147,7 +147,7 @@ export function ListeningCompStage({
           <span
             className="text-sm font-extrabold"
             style={{
-              color: score === items.length ? 'var(--ssz-color-success-500)' : 'var(--ssz-color-primary-700)',
+              color: score === items.length ? 'var(--ssz-feedback-ok-line)' : 'var(--ssz-color-primary-700)',
             }}
           >
             {t('score', { score, total: items.length })}

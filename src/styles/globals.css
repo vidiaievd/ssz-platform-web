@@ -424,6 +424,24 @@
     --ssz-pos-particle-bg:     oklch(0.93 0.03 340);
     --ssz-pos-particle-fg:     oklch(0.48 0.08 340);
 
+    /* Exercise feedback (correct / wrong) fills, outlines and labels.
+       Theme-aware: the scale tokens (success-50, error-50 …) are tuned for
+       light surfaces only, so runner bodies must use these aliases instead —
+       .dark below flips the fill dark and lifts the label light. */
+    --ssz-feedback-ok-bg:   oklch(0.96 0.04  145);
+    --ssz-feedback-ok-line: oklch(0.60 0.13  145);
+    --ssz-feedback-ok-fg:   oklch(0.40 0.12  145);
+    --ssz-feedback-no-bg:   oklch(0.97 0.025 15);
+    --ssz-feedback-no-line: oklch(0.55 0.125 15);
+    --ssz-feedback-no-fg:   oklch(0.44 0.105 15);
+
+    /* Exercise runner mode accents (practice = sage teal, graded = amber) and
+       their soft fills for a selected-but-not-yet-checked option. */
+    --ssz-runner-practice:      oklch(0.62 0.105 168);
+    --ssz-runner-practice-soft: oklch(0.62 0.105 168 / 0.07);
+    --ssz-runner-graded:        oklch(0.57 0.105 82);
+    --ssz-runner-graded-soft:   oklch(0.57 0.105 82 / 0.07);
+
     /* shadcn/ui compatibility aliases */
     --background: oklch(0.975 0.007 80);
     --foreground: oklch(0.18  0.010 80);
@@ -524,6 +542,22 @@
     --ssz-pos-numeral-fg:      oklch(0.86 0.08 260);
     --ssz-pos-particle-bg:     oklch(0.30 0.03 340);
     --ssz-pos-particle-fg:     oklch(0.86 0.08 340);
+
+    /* Feedback fills sit just above --ssz-bg-subtle in lightness so they read
+       as a tint of the surface, not as a light card punched into a dark page. */
+    --ssz-feedback-ok-bg:   oklch(0.29 0.055 145);
+    --ssz-feedback-ok-line: oklch(0.68 0.13  145);
+    --ssz-feedback-ok-fg:   oklch(0.91 0.10  145);
+    --ssz-feedback-no-bg:   oklch(0.29 0.045 15);
+    --ssz-feedback-no-line: oklch(0.65 0.14  15);
+    --ssz-feedback-no-fg:   oklch(0.91 0.075 15);
+
+    /* Accents lift on dark surfaces and their soft fills need more opacity to
+       stay visible against --ssz-bg-surface. */
+    --ssz-runner-practice:      oklch(0.79 0.09 168);
+    --ssz-runner-practice-soft: oklch(0.79 0.09 168 / 0.14);
+    --ssz-runner-graded:        oklch(0.83 0.09 82);
+    --ssz-runner-graded-soft:   oklch(0.83 0.09 82 / 0.14);
 
     --background: oklch(0.17 0.012 240);
     --foreground: oklch(0.93 0.008 80);

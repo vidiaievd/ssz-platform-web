@@ -63,12 +63,12 @@ export interface FillBodyProps {
 }
 
 /* ── color constants ─────────────────────────────────────────────── */
-const OK_BG   = 'var(--ssz-color-success-50)';
-const OK_LINE = 'var(--ssz-color-success-500)';
-const OK_FG   = 'oklch(0.40 0.12 145)';
-const NO_BG   = 'var(--ssz-color-error-50)';
-const NO_LINE = 'var(--ssz-color-error-500)';
-const NO_FG   = 'var(--ssz-color-error-700)';
+const OK_BG   = 'var(--ssz-feedback-ok-bg)';
+const OK_LINE = 'var(--ssz-feedback-ok-line)';
+const OK_FG   = 'var(--ssz-feedback-ok-fg)';
+const NO_BG   = 'var(--ssz-feedback-no-bg)';
+const NO_LINE = 'var(--ssz-feedback-no-line)';
+const NO_FG   = 'var(--ssz-feedback-no-fg)';
 const READING = "var(--ssz-font-reading)";
 
 /** Split `textWithBlanks` around the first `___N___` marker. */
@@ -102,12 +102,27 @@ function getChipStyle(
   return { bg: 'var(--ssz-bg-surface)', border: 'var(--ssz-border-default)', color: 'var(--ssz-text-primary)' };
 }
 
-/** Per-verdict colors for the rationale matrix rows. */
-function verdictStyle(verdict: RationaleVerdict): { mark: string; color: string; bg: string } {
-  if (verdict === 'correct') return { mark: '✔', color: OK_FG, bg: OK_BG };
+/**
+ * Per-verdict colors for the rationale matrix rows. `note` is the color of the
+ * explanatory column: on a tinted row the muted secondary tone loses too much
+ * contrast, so those rows fall back to the primary text color.
+ */
+function verdictStyle(verdict: RationaleVerdict): {
+  mark: string;
+  color: string;
+  bg: string;
+  note: string;
+} {
+  if (verdict === 'correct')
+    return { mark: '✔', color: OK_FG, bg: OK_BG, note: 'var(--ssz-text-primary)' };
   if (verdict === 'acceptable')
-    return { mark: '△', color: 'var(--ssz-text-secondary)', bg: 'var(--ssz-bg-surface)' };
-  return { mark: '✗', color: NO_FG, bg: NO_BG };
+    return {
+      mark: '△',
+      color: 'var(--ssz-text-secondary)',
+      bg: 'var(--ssz-bg-surface)',
+      note: 'var(--ssz-text-secondary)',
+    };
+  return { mark: '✗', color: NO_FG, bg: NO_BG, note: 'var(--ssz-text-primary)' };
 }
 
 /**
@@ -153,16 +168,21 @@ function RationaleMatrix({ rationale }: { rationale: FillRationale }) {
 
       {options.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-[14px]">
+          {/* border-separate + row spacing: each verdict row reads as its own
+              rounded, padded chip rather than a full-bleed table band. */}
+          <table
+            className="w-full border-separate text-left text-[14px]"
+            style={{ borderSpacing: '0 6px' }}
+          >
             <thead>
               <tr style={{ color: 'var(--ssz-text-muted)' }}>
-                <th scope="col" className="py-1 pr-3 font-medium">
+                <th scope="col" className="px-3 py-1 font-medium">
                   {t('fill.optionHeader')}
                 </th>
-                <th scope="col" className="py-1 pr-3 font-medium">
+                <th scope="col" className="px-3 py-1 font-medium">
                   {t('fill.verdictHeader')}
                 </th>
-                <th scope="col" className="py-1 font-medium">
+                <th scope="col" className="px-3 py-1 font-medium">
                   {t('fill.noteHeader')}
                 </th>
               </tr>
@@ -171,18 +191,33 @@ function RationaleMatrix({ rationale }: { rationale: FillRationale }) {
               {options.map((opt) => {
                 const s = verdictStyle(opt.verdict);
                 return (
-                  <tr key={opt.text} style={{ background: s.bg }}>
+                  <tr key={opt.text}>
                     <td
-                      className="py-2 pr-3 align-top font-semibold"
-                      style={{ fontFamily: READING, color: s.color }}
+                      className="px-3 py-2.5 align-top font-semibold"
+                      style={{
+                        fontFamily: READING,
+                        color: s.color,
+                        background: s.bg,
+                        borderRadius: '10px 0 0 10px',
+                      }}
                     >
                       {opt.text}
                     </td>
-                    <td className="py-2 pr-3 align-top whitespace-nowrap" style={{ color: s.color }}>
+                    <td
+                      className="px-3 py-2.5 align-top whitespace-nowrap"
+                      style={{ color: s.color, background: s.bg }}
+                    >
                       <span aria-hidden="true">{s.mark}</span>{' '}
                       <span className="text-[13px]">{verdictLabel[opt.verdict]}</span>
                     </td>
-                    <td className="py-2 align-top" style={{ color: 'var(--ssz-text-secondary)' }}>
+                    <td
+                      className="px-3 py-2.5 align-top"
+                      style={{
+                        color: s.note,
+                        background: s.bg,
+                        borderRadius: '0 10px 10px 0',
+                      }}
+                    >
                       {opt.note}
                     </td>
                   </tr>

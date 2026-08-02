@@ -290,8 +290,8 @@ describe('MatchBody — reveal / feedback (practice)', () => {
       // We verify there's no aria-hidden SVG that is a check or x icon by checking style
       if (svgInBtn) {
         const style = (svgInBtn as SVGElement).getAttribute('style') ?? '';
-        expect(style).not.toContain('success-500');
-        expect(style).not.toContain('error-500');
+        expect(style).not.toContain('feedback-ok-line');
+        expect(style).not.toContain('feedback-no-line');
       }
     });
   });

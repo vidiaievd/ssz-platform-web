@@ -59,10 +59,10 @@ export interface WordBankFillBodyProps {
   results?: WordBankFillResults;
 }
 
-const OK_LINE = 'var(--ssz-color-success-500)';
-const OK_FG = 'oklch(0.40 0.12 145)';
-const NO_LINE = 'var(--ssz-color-error-500)';
-const NO_FG = 'var(--ssz-color-error-700)';
+const OK_LINE = 'var(--ssz-feedback-ok-line)';
+const OK_FG = 'var(--ssz-feedback-ok-fg)';
+const NO_LINE = 'var(--ssz-feedback-no-line)';
+const NO_FG = 'var(--ssz-feedback-no-fg)';
 const READING = 'var(--ssz-font-reading)';
 
 type Segment = { kind: 'text'; text: string } | { kind: 'blank'; blankId: number };

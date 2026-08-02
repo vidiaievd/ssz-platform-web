@@ -61,7 +61,7 @@ export function TextComprehensionCheck({ gapFillItems, compItems }: TextComprehe
           <div className="flex items-center gap-3">
             <span
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-              style={{ background: 'var(--ssz-color-primary-50)' }}
+              style={{ background: 'var(--ssz-bg-accent)' }}
             >
               <Target size={17} className="text-(--ssz-color-primary-600)" aria-hidden="true" />
             </span>
@@ -114,7 +114,7 @@ export function TextComprehensionCheck({ gapFillItems, compItems }: TextComprehe
           <div className="flex items-center gap-3">
             <CheckCircle2
               size={22}
-              className="shrink-0 text-(--ssz-color-success-500)"
+              className="shrink-0 text-(--ssz-feedback-ok-line)"
               aria-hidden="true"
             />
             <div>
