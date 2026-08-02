@@ -144,7 +144,7 @@ describe('CurriculumInspector', () => {
     beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
     afterEach(() => vi.useRealTimers());
 
-    it('renames a level after the autosave debounce and reports the change', async () => {
+    it('renames a level when save is pressed and reports the change', async () => {
       vi.mocked(renameSectionAction).mockResolvedValue({ ok: true, value: undefined } as never);
       const onChanged = renderInspector({
         kind: 'level',
@@ -155,14 +155,14 @@ describe('CurriculumInspector', () => {
         target: { value: 'A1 — Nybegynner' },
       });
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(1500);
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
       });
 
       expect(renameSectionAction).toHaveBeenCalledWith('course-1', 'level-a1', 'A1 — Nybegynner');
       expect(onChanged).toHaveBeenCalled();
     });
 
-    it('renames a module after the autosave debounce and reports the change', async () => {
+    it('renames a module when save is pressed and reports the change', async () => {
       vi.mocked(renameContainerAction).mockResolvedValue({ ok: true, value: undefined } as never);
       const onChanged = renderInspector({
         kind: 'module',
@@ -184,7 +184,7 @@ describe('CurriculumInspector', () => {
         target: { value: 'Samfunn' },
       });
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(1500);
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
       });
 
       expect(renameContainerAction).toHaveBeenCalledWith('module-1', 'Samfunn');

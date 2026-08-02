@@ -103,16 +103,17 @@
     "tabPreview": "Перегляд",
     "bodyPlaceholder": "Напишіть вміст уроку у форматі Markdown…",
     "previewEmpty": "Нема чого відображати.",
-    "autosaving": "Зберігається…",
-    "autosaved": "Збережено",
-    "autosavedAgo": "Збережено {seconds}с тому",
-    "autosaveError": "Автозбереження не вдалося",
     "editAriaLabel": "Редагувати урок",
     "deleteAriaLabel": "Видалити урок",
     "deleteConfirmTitle": "Видалити урок?",
     "deleteConfirmDescription": "«{title}» буде видалено разом з усім вмістом. Це незворотно.",
     "deleteConfirm": "Видалити",
-    "deleteCancel": "Скасувати"
+    "deleteCancel": "Скасувати",
+    "unsavedChanges": "Незбережені зміни",
+    "saving": "Збереження…",
+    "saved": "Збережено",
+    "savedAgo": "Збережено {seconds} с тому",
+    "saveFailed": "Не вдалося зберегти"
   },
   "vocabulary": {
     "noList": "Списку слів ще немає.",
@@ -715,7 +716,10 @@
     "liveScheduleTitle": "Розклад",
     "liveOptionsTitle": "Параметри",
     "liveOptionRecording": "Опублікувати запис після заняття",
-    "liveOptionApproval": "Вимагати підтвердження вчителя для приєднання"
+    "liveOptionApproval": "Вимагати підтвердження вчителя для приєднання",
+    "saveCues": "Зберегти репліки",
+    "saveStages": "Зберегти етапи",
+    "saveTranslations": "Зберегти переклади"
   },
   "spans": {
     "markSelection": "Позначити виділене",

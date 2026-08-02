@@ -39,7 +39,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -48,9 +51,8 @@ vi.mock('@/lib/i18n/navigation', () => ({
 
 const { VideoEditorPane } = await import('./video-editor-pane');
 const { updateLessonAction } = await import('../actions/lesson');
-const { useLessonVariants, useLessonCues, useLessonGlossaryMarks } = await import(
-  '../api/use-authoring-lessons'
-);
+const { useLessonVariants, useLessonCues, useLessonGlossaryMarks } =
+  await import('../api/use-authoring-lessons');
 const { useAuthoringVocabularyLists } = await import('../api/use-authoring-vocabulary');
 const { useLesson, useUnitVocabularyItems } = await import('@/features/content');
 
@@ -106,7 +108,11 @@ beforeEach(() => {
     isLoading: false,
   } as never);
   vi.mocked(useLessonCues).mockReturnValue({ data: [], isLoading: false } as never);
-  vi.mocked(useLesson).mockReturnValue({ data: undefined, isLoading: false, isError: false } as never);
+  vi.mocked(useLesson).mockReturnValue({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+  } as never);
   vi.mocked(useAuthoringVocabularyLists).mockReturnValue({ data: [] } as never);
   vi.mocked(useUnitVocabularyItems).mockReturnValue({ data: [] } as never);
   vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: [] } as never);
@@ -124,7 +130,7 @@ describe('VideoEditorPane', () => {
     expect(screen.getByText('preview: En video om Bergen')).toBeInTheDocument();
   });
 
-  it('autosaves title edits after the debounce', async () => {
+  it('saves title edits when save is pressed', async () => {
     renderPane();
 
     fireEvent.change(screen.getByPlaceholderText('e.g. Introduction to grammar'), {
@@ -132,7 +138,7 @@ describe('VideoEditorPane', () => {
     });
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     });
 
     expect(updateLessonAction).toHaveBeenCalledWith('lesson-1', 'module-1', 'variant-1', 'A2', {

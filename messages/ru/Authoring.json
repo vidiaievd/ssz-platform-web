@@ -103,16 +103,17 @@
     "tabPreview": "Предпросмотр",
     "bodyPlaceholder": "Напишите содержание урока в формате Markdown…",
     "previewEmpty": "Нечего отображать.",
-    "autosaving": "Сохранение…",
-    "autosaved": "Сохранено",
-    "autosavedAgo": "Сохранено {seconds}с назад",
-    "autosaveError": "Автосохранение не удалось",
     "editAriaLabel": "Редактировать урок",
     "deleteAriaLabel": "Удалить урок",
     "deleteConfirmTitle": "Удалить урок?",
     "deleteConfirmDescription": "«{title}» будет удалён вместе со всем содержимым. Это необратимо.",
     "deleteConfirm": "Удалить",
-    "deleteCancel": "Отмена"
+    "deleteCancel": "Отмена",
+    "unsavedChanges": "Несохранённые изменения",
+    "saving": "Сохранение…",
+    "saved": "Сохранено",
+    "savedAgo": "Сохранено {seconds} с назад",
+    "saveFailed": "Не удалось сохранить"
   },
   "vocabulary": {
     "noList": "Списка слов ещё нет.",
@@ -715,7 +716,10 @@
     "liveScheduleTitle": "Расписание",
     "liveOptionsTitle": "Параметры",
     "liveOptionRecording": "Публиковать запись после занятия",
-    "liveOptionApproval": "Требовать подтверждение учителя для входа"
+    "liveOptionApproval": "Требовать подтверждение учителя для входа",
+    "saveCues": "Сохранить реплики",
+    "saveStages": "Сохранить этапы",
+    "saveTranslations": "Сохранить переводы"
   },
   "spans": {
     "markSelection": "Разметить выделенное",

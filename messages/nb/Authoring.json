@@ -103,16 +103,17 @@
     "tabPreview": "Forhåndsvisning",
     "bodyPlaceholder": "Skriv leksjonsinnhold i Markdown…",
     "previewEmpty": "Ingenting å vise.",
-    "autosaving": "Lagrer…",
-    "autosaved": "Lagret",
-    "autosavedAgo": "Lagret for {seconds}s siden",
-    "autosaveError": "Automatisk lagring mislyktes",
     "editAriaLabel": "Rediger leksjon",
     "deleteAriaLabel": "Slett leksjon",
     "deleteConfirmTitle": "Slette leksjon?",
     "deleteConfirmDescription": "«{title}» vil bli permanent slettet med alt innhold. Dette kan ikke angres.",
     "deleteConfirm": "Slett",
-    "deleteCancel": "Avbryt"
+    "deleteCancel": "Avbryt",
+    "unsavedChanges": "Ulagrede endringer",
+    "saving": "Lagrer…",
+    "saved": "Lagret",
+    "savedAgo": "Lagret for {seconds} s siden",
+    "saveFailed": "Kunne ikke lagre"
   },
   "vocabulary": {
     "noList": "Ingen vokabularliste ennå.",
@@ -715,7 +716,10 @@
     "liveScheduleTitle": "Timeplan",
     "liveOptionsTitle": "Alternativer",
     "liveOptionRecording": "Publiser opptak etter timen",
-    "liveOptionApproval": "Krev lærergodkjenning for å bli med"
+    "liveOptionApproval": "Krev lærergodkjenning for å bli med",
+    "saveCues": "Lagre replikker",
+    "saveStages": "Lagre steg",
+    "saveTranslations": "Lagre oversettelser"
   },
   "spans": {
     "markSelection": "Merk utvalg",

@@ -16,7 +16,7 @@ import type { Container } from '@/features/content/types';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { updateLiveLessonAction } from '../actions/lesson';
-import { useAutosave } from '../hooks/use-autosave';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
 import { EditorCard } from './editor-card';
 import { LiveLessonPreview } from './live-lesson-preview';
@@ -89,13 +89,21 @@ export function LiveEditorPane({
     getValues,
     formState: { errors },
   } = useForm<LiveFormValues>({
-    defaultValues: { title: lessonTitle ?? '', liveDate: '', liveTime: '', liveDurationMinutes: '', liveJoinUrl: '', liveCapacity: '' },
+    defaultValues: {
+      title: lessonTitle ?? '',
+      liveDate: '',
+      liveTime: '',
+      liveDurationMinutes: '',
+      liveJoinUrl: '',
+      liveCapacity: '',
+    },
     values: lesson
       ? {
           title: lesson.title,
           liveDate: splitIso(lesson.liveStartsAt).date,
           liveTime: splitIso(lesson.liveStartsAt).time,
-          liveDurationMinutes: lesson.liveDurationMinutes != null ? String(lesson.liveDurationMinutes) : '',
+          liveDurationMinutes:
+            lesson.liveDurationMinutes != null ? String(lesson.liveDurationMinutes) : '',
           liveJoinUrl: lesson.liveJoinUrl ?? '',
           liveCapacity: lesson.liveCapacity != null ? String(lesson.liveCapacity) : '',
         }
@@ -122,13 +130,7 @@ export function LiveEditorPane({
     return result;
   }
 
-  const autosave = useAutosave({
-    onSave: async () => {
-      const result = await saveLesson(getValues());
-      if (!result.ok) throw new Error(result.error.code);
-    },
-    debounceMs: 800,
-  });
+  const unsaved = useUnsavedChanges();
 
   return (
     <LessonEditorShell
@@ -136,8 +138,8 @@ export function LiveEditorPane({
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
       backHref={backHref}
-      autosaveStatus={autosave.status}
-      autosaveSavedAt={autosave.savedAt}
+      saveStatus={unsaved.status}
+      savedAt={unsaved.savedAt}
       publishSlot={publishSlot}
       preview={
         <LiveLessonPreview
@@ -156,12 +158,17 @@ export function LiveEditorPane({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <Field label={t('fields.title')} htmlFor="lesson-title" error={errors.title?.message} required>
+          <Field
+            label={t('fields.title')}
+            htmlFor="lesson-title"
+            error={errors.title?.message}
+            required
+          >
             <Input
               id="lesson-title"
               placeholder={t('lessons.titlePlaceholder')}
               hasError={!!errors.title}
-              {...register('title', { required: true, onChange: () => autosave.schedule() })}
+              {...register('title', { required: true, onChange: () => unsaved.markDirty() })}
             />
           </Field>
 
@@ -171,14 +178,14 @@ export function LiveEditorPane({
                 <Input
                   id="live-date"
                   type="date"
-                  {...register('liveDate', { onChange: () => autosave.schedule() })}
+                  {...register('liveDate', { onChange: () => unsaved.markDirty() })}
                 />
               </Field>
               <Field label={t('editor.liveTime')} htmlFor="live-time">
                 <Input
                   id="live-time"
                   type="time"
-                  {...register('liveTime', { onChange: () => autosave.schedule() })}
+                  {...register('liveTime', { onChange: () => unsaved.markDirty() })}
                 />
               </Field>
               <Field label={t('editor.liveDuration')} htmlFor="live-duration">
@@ -188,7 +195,7 @@ export function LiveEditorPane({
                   min={1}
                   max={480}
                   placeholder="60"
-                  {...register('liveDurationMinutes', { onChange: () => autosave.schedule() })}
+                  {...register('liveDurationMinutes', { onChange: () => unsaved.markDirty() })}
                 />
               </Field>
               <Field label={t('editor.liveCapacity')} htmlFor="live-capacity">
@@ -197,7 +204,7 @@ export function LiveEditorPane({
                   type="number"
                   min={1}
                   placeholder="12"
-                  {...register('liveCapacity', { onChange: () => autosave.schedule() })}
+                  {...register('liveCapacity', { onChange: () => unsaved.markDirty() })}
                 />
               </Field>
               <Field label={t('editor.liveJoinUrl')} htmlFor="live-join-url" className="col-span-2">
@@ -205,7 +212,7 @@ export function LiveEditorPane({
                   id="live-join-url"
                   type="url"
                   placeholder="https://meet.example.com/session"
-                  {...register('liveJoinUrl', { onChange: () => autosave.schedule() })}
+                  {...register('liveJoinUrl', { onChange: () => unsaved.markDirty() })}
                 />
               </Field>
             </div>
@@ -239,14 +246,13 @@ export function LiveEditorPane({
           <Button
             type="button"
             onClick={() => {
-              autosave.cancel();
               void (async () => {
                 const result = await saveLesson(getValues());
                 if (!result.ok) {
                   toast.error(tErrors(result.error.code));
                   return;
                 }
-                autosave.markSaved();
+                unsaved.markSaved();
                 toast.success(t('lessons.saveSuccess'));
               })();
             }}

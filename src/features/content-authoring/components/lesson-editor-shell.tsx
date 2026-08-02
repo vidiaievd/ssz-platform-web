@@ -9,17 +9,17 @@ import { Badge } from '@/components/ui/badge';
 import { getLessonTypeDefinition, type MaterialKind } from '@/lib/content/lesson-types';
 
 import { ContainerStateBadge } from './container-state-badge';
-import { AutosaveIndicator } from './autosave-indicator';
+import { SaveStatusIndicator } from './save-status-indicator';
 import { PhoneFrame } from './phone-frame';
-import type { AutosaveStatus } from '../hooks/use-autosave';
+import type { SaveStatus } from '../hooks/use-unsaved-changes';
 
 interface LessonEditorShellProps {
   kind: MaterialKind;
   title: string;
   state: 'draft' | 'published' | null;
   backHref: string;
-  autosaveStatus: AutosaveStatus;
-  autosaveSavedAt: Date | null;
+  saveStatus: SaveStatus;
+  savedAt: Date | null;
   /** Composed by the caller, e.g. `<PublishDialog container={container} result={preflight} />`. */
   publishSlot: ReactNode;
   preview: ReactNode;
@@ -30,8 +30,8 @@ export function LessonEditorShell({
   kind,
   title,
   state,
-  autosaveStatus,
-  autosaveSavedAt,
+  saveStatus,
+  savedAt,
   publishSlot,
   preview,
   children,
@@ -55,18 +55,16 @@ export function LessonEditorShell({
           <div>
             <h1 className="text-xl font-bold tracking-tight text-foreground">{title}</h1>
             <div className="mt-1 flex flex-wrap items-center gap-2">
-              <Badge variant="muted">{tContent(`materialType.${def.kind}` as 'materialType.text')}</Badge>
+              <Badge variant="muted">
+                {tContent(`materialType.${def.kind}` as 'materialType.text')}
+              </Badge>
               {state && <ContainerStateBadge state={state} />}
-              <AutosaveIndicator status={autosaveStatus} savedAt={autosaveSavedAt} />
+              <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2.5">
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={() => setShowPreview((p) => !p)}
-          >
+          <Button variant="ghost" type="button" onClick={() => setShowPreview((p) => !p)}>
             {showPreview ? (
               <>
                 <EyeOff aria-hidden /> {t('editor.hidePreview')}
@@ -81,7 +79,9 @@ export function LessonEditorShell({
         </div>
       </div>
 
-      <div className={`grid items-start gap-6 ${showPreview ? 'lg:grid-cols-[1fr_340px]' : 'grid-cols-1'}`}>
+      <div
+        className={`grid items-start gap-6 ${showPreview ? 'lg:grid-cols-[1fr_340px]' : 'grid-cols-1'}`}
+      >
         <div>{children}</div>
         {showPreview && (
           <div className="sticky top-4 flex flex-col items-center gap-3">

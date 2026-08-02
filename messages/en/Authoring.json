@@ -106,16 +106,17 @@
     "tabPreview": "Preview",
     "bodyPlaceholder": "Write lesson content in Markdown…",
     "previewEmpty": "Nothing to preview.",
-    "autosaving": "Saving…",
-    "autosaved": "Saved",
-    "autosavedAgo": "Saved {seconds}s ago",
-    "autosaveError": "Autosave failed",
     "editAriaLabel": "Edit lesson",
     "deleteAriaLabel": "Delete lesson",
     "deleteConfirmTitle": "Delete lesson?",
     "deleteConfirmDescription": "\"{title}\" will be permanently deleted along with all its content. This cannot be undone.",
     "deleteConfirm": "Delete",
-    "deleteCancel": "Cancel"
+    "deleteCancel": "Cancel",
+    "unsavedChanges": "Unsaved changes",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "savedAgo": "Saved {seconds}s ago",
+    "saveFailed": "Could not save"
   },
   "vocabulary": {
     "noList": "No vocabulary list yet.",
@@ -715,7 +716,10 @@
     "liveScheduleTitle": "Schedule",
     "liveOptionsTitle": "Options",
     "liveOptionRecording": "Publish recording after class",
-    "liveOptionApproval": "Require teacher approval to join"
+    "liveOptionApproval": "Require teacher approval to join",
+    "saveCues": "Save cues",
+    "saveStages": "Save stages",
+    "saveTranslations": "Save translations"
   },
   "spans": {
     "markSelection": "Annotate selection",

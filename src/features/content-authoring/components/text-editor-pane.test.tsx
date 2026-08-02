@@ -48,7 +48,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -57,9 +60,8 @@ vi.mock('@/lib/i18n/navigation', () => ({
 
 const { TextEditorPane } = await import('./text-editor-pane');
 const { updateLessonAction } = await import('../actions/lesson');
-const { useLessonVariants, useLessonGlossaryMarks, useListeningStages } = await import(
-  '../api/use-authoring-lessons',
-);
+const { useLessonVariants, useLessonGlossaryMarks, useListeningStages } =
+  await import('../api/use-authoring-lessons');
 const { useAuthoringExercises } = await import('../api/use-authoring-exercises');
 const { useAuthoringVocabularyLists } = await import('../api/use-authoring-vocabulary');
 const { useLesson, useUnitVocabularyItems } = await import('@/features/content');
@@ -115,7 +117,11 @@ beforeEach(() => {
     ],
     isLoading: false,
   } as never);
-  vi.mocked(useLesson).mockReturnValue({ data: undefined, isLoading: false, isError: false } as never);
+  vi.mocked(useLesson).mockReturnValue({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+  } as never);
   vi.mocked(useAuthoringVocabularyLists).mockReturnValue({ data: [] } as never);
   vi.mocked(useUnitVocabularyItems).mockReturnValue({ data: [] } as never);
   vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: [] } as never);
@@ -135,7 +141,24 @@ describe('TextEditorPane', () => {
     expect(screen.getByText('Marta begynner arbeidsdagen klokka sju.')).toBeInTheDocument();
   });
 
-  it('autosaves body edits after the debounce and reflects them in the preview', async () => {
+  it('keeps body edits local until save is pressed', async () => {
+    renderPane();
+
+    fireEvent.change(screen.getByPlaceholderText('Write lesson content in Markdown…'), {
+      target: { value: 'Et utkast studentene ikke skal se ennå.' },
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000);
+    });
+
+    // Content edits are live the moment they land, so nothing may leave the
+    // browser on a timer.
+    expect(updateLessonAction).not.toHaveBeenCalled();
+    expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
+  });
+
+  it('saves body edits when save is pressed, and previews them before that', async () => {
     renderPane();
 
     fireEvent.change(screen.getByPlaceholderText('Write lesson content in Markdown…'), {
@@ -145,16 +168,13 @@ describe('TextEditorPane', () => {
     expect(screen.getByText('Nytt avsnitt her.')).toBeInTheDocument();
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
+      fireEvent.click(screen.getByRole('button', { name: /^Save$/ }));
     });
 
-    expect(updateLessonAction).toHaveBeenCalledWith(
-      'lesson-1',
-      'module-1',
-      'variant-1',
-      'A2',
-      { title: 'En vanlig arbeidsdag', body: 'Nytt avsnitt her.' },
-    );
+    expect(updateLessonAction).toHaveBeenCalledWith('lesson-1', 'module-1', 'variant-1', 'A2', {
+      title: 'En vanlig arbeidsdag',
+      body: 'Nytt avsnitt her.',
+    });
   });
 
   it('offers the post-reading comprehension check under the editor', () => {

@@ -31,7 +31,10 @@ const PARAGRAPHS: LessonParagraph[] = [
 
 beforeEach(() => {
   vi.mocked(saveParagraphTranslationsAction).mockReset();
-  vi.mocked(saveParagraphTranslationsAction).mockResolvedValue({ ok: true, value: undefined } as never);
+  vi.mocked(saveParagraphTranslationsAction).mockResolvedValue({
+    ok: true,
+    value: undefined,
+  } as never);
   vi.mocked(useLessonParagraphs).mockReturnValue({ data: undefined, isLoading: false } as never);
   vi.useFakeTimers({ shouldAdvanceTime: true });
 });
@@ -65,7 +68,7 @@ describe('ParagraphTranslationsPanel', () => {
     ).toBeInTheDocument();
   });
 
-  it('autosaves edited translations as a full replace, dropping blank rows', async () => {
+  it('leaves edited translations local until save is pressed', async () => {
     vi.mocked(useLessonParagraphs).mockReturnValue({ data: PARAGRAPHS, isLoading: false } as never);
     renderPanel('variant-1');
 
@@ -74,7 +77,24 @@ describe('ParagraphTranslationsPanel', () => {
     });
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
+      await vi.advanceTimersByTimeAsync(5000);
+    });
+
+    expect(saveParagraphTranslationsAction).not.toHaveBeenCalled();
+    expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
+  });
+
+  it('saves edited translations as a full replace, dropping blank rows', async () => {
+    vi.mocked(useLessonParagraphs).mockReturnValue({ data: PARAGRAPHS, isLoading: false } as never);
+    renderPanel('variant-1');
+
+    fireEvent.change(screen.getByDisplayValue('Hi, how are you?'), {
+      target: { value: 'Hello, how are you doing?' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save translations' }));
+
+    await act(async () => {
+      await Promise.resolve();
     });
 
     expect(saveParagraphTranslationsAction).toHaveBeenCalledWith('lesson-1', 'variant-1', [

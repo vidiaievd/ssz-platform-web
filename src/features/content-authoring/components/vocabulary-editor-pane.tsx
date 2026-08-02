@@ -27,7 +27,10 @@ import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { vocabularyListFormSchema, type VocabularyListFormValues } from '../schemas/vocabulary';
 import { createVocabularyListAction, deleteVocabularyItemAction } from '../actions/vocabulary';
-import { useAuthoringVocabularyLists, useAuthoringVocabularyItems } from '../api/use-authoring-vocabulary';
+import {
+  useAuthoringVocabularyLists,
+  useAuthoringVocabularyItems,
+} from '../api/use-authoring-vocabulary';
 import { authoringKeys } from '../api/keys';
 import { LessonEditorShell } from './lesson-editor-shell';
 import { EditorCard } from './editor-card';
@@ -62,8 +65,8 @@ export function VocabularyEditorPane({
       title={lessonTitle || t('lessons.untitled')}
       state={state}
       backHref={backHref}
-      autosaveStatus="idle"
-      autosaveSavedAt={null}
+      saveStatus="idle"
+      savedAt={null}
       publishSlot={publishSlot}
       preview={<VocabularyLessonPreview title={lessonTitle ?? ''} listId={list?.id} />}
     >
@@ -73,7 +76,9 @@ export function VocabularyEditorPane({
           <Skeleton className="h-64 w-full rounded-2xl" />
         </div>
       ) : isError ? (
-        <p className="text-muted-foreground py-10 text-center text-sm">{t('vocabulary.loadError')}</p>
+        <p className="text-muted-foreground py-10 text-center text-sm">
+          {t('vocabulary.loadError')}
+        </p>
       ) : !list ? (
         <CreateListCard container={container} />
       ) : (
@@ -111,7 +116,9 @@ function CreateListCard({ container }: { container: Container }) {
         toast.error(tErrors(result.error.code));
         return;
       }
-      await queryClient.invalidateQueries({ queryKey: authoringKeys.vocabularyLists(container.id) });
+      await queryClient.invalidateQueries({
+        queryKey: authoringKeys.vocabularyLists(container.id),
+      });
     });
   }
 
@@ -197,7 +204,9 @@ function WordListCard({ container, listId }: { container: Container; listId: str
           ))}
         </div>
       ) : isError ? (
-        <p className="text-muted-foreground py-6 text-center text-sm">{t('vocabulary.loadError')}</p>
+        <p className="text-muted-foreground py-6 text-center text-sm">
+          {t('vocabulary.loadError')}
+        </p>
       ) : !items || items.length === 0 ? (
         <p className="text-muted-foreground py-6 text-center text-sm">{t('vocabulary.empty')}</p>
       ) : (
@@ -274,7 +283,10 @@ function WordListCard({ container, listId }: { container: Container; listId: str
         </div>
       )}
 
-      <Dialog open={editingItemId !== null} onOpenChange={(open) => !open && setEditingItemId(null)}>
+      <Dialog
+        open={editingItemId !== null}
+        onOpenChange={(open) => !open && setEditingItemId(null)}
+      >
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>
@@ -302,7 +314,9 @@ function WordListCard({ container, listId }: { container: Container; listId: str
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('lessons.deleteCancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>{t('lessons.deleteConfirm')}</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>
+              {t('lessons.deleteConfirm')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

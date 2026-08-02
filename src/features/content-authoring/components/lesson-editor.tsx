@@ -22,8 +22,8 @@ import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 import { updateLessonAction } from '../actions/lesson';
 import { useLessonVariants } from '../api/use-authoring-lessons';
 import { authoringKeys } from '../api/keys';
-import { useAutosave } from '../hooks/use-autosave';
-import { AutosaveIndicator } from './autosave-indicator';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveStatusIndicator } from './save-status-indicator';
 
 interface LessonEditorProps {
   lessonId: string;
@@ -47,7 +47,6 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
     register,
     handleSubmit,
     control,
-    getValues,
     formState: { errors },
   } = useForm<LessonFormValues>({
     resolver: zodResolver(lessonFormSchema),
@@ -64,21 +63,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
 
   const bodyValue = useWatch({ control, name: 'body' });
 
-  const autosave = useAutosave({
-    onSave: async () => {
-      const data = getValues();
-      const result = await updateLessonAction(
-        lessonId,
-        container.id,
-        defaultVariant?.id ?? null,
-        container.difficultyLevel,
-        data,
-      );
-      if (!result.ok) throw new Error(result.error.code);
-      await queryClient.invalidateQueries({ queryKey: authoringKeys.lessonVariants(lessonId) });
-    },
-    debounceMs: 800,
-  });
+  const unsaved = useUnsavedChanges();
 
   useEffect(() => {
     void (async () => {
@@ -103,7 +88,6 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
   }, [bodyValue, editorTab]);
 
   function onSubmit(data: LessonFormValues) {
-    autosave.cancel();
     startTransition(async () => {
       const result = await updateLessonAction(
         lessonId,
@@ -117,7 +101,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.lessonVariants(lessonId) });
-      autosave.markSaved();
+      unsaved.markSaved();
       toast.success(t('lessons.saveSuccess'));
     });
   }
@@ -136,7 +120,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-medium">{t('lessons.editingLabel')}</h3>
         <div className="flex items-center gap-3">
-          <AutosaveIndicator status={autosave.status} savedAt={autosave.savedAt} />
+          <SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />
           <Button variant="ghost" size="sm" onClick={onClose} type="button">
             {t('lessons.closeEditor')}
           </Button>
@@ -144,7 +128,12 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-        <Field label={t('fields.title')} htmlFor="lesson-title" error={errors.title?.message} required>
+        <Field
+          label={t('fields.title')}
+          htmlFor="lesson-title"
+          error={errors.title?.message}
+          required
+        >
           <Input
             id="lesson-title"
             placeholder={t('lessons.titlePlaceholder')}
@@ -171,7 +160,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
                 className="font-mono text-sm"
                 disabled={isPending}
                 {...register('body', {
-                  onChange: () => autosave.schedule(),
+                  onChange: () => unsaved.markDirty(),
                 })}
               />
             </TabsContent>

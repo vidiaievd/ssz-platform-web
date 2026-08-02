@@ -51,8 +51,8 @@ export function ExerciseEditorPane({
       title={lessonTitle || t('lessons.untitled')}
       state={state}
       backHref={backHref}
-      autosaveStatus="idle"
-      autosaveSavedAt={null}
+      saveStatus="idle"
+      savedAt={null}
       publishSlot={publishSlot}
       preview={<ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />}
     >

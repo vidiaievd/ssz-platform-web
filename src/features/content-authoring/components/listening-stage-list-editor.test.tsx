@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
@@ -112,7 +112,7 @@ describe('ListeningStageListEditor', () => {
       screen.getByRole('button', { name: 'Remove stage 1' }).click();
     });
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
+      fireEvent.click(screen.getByRole('button', { name: 'Save stages' }));
     });
 
     expect(saveListeningStagesAction).toHaveBeenCalledWith('lesson-1', 'variant-1', []);

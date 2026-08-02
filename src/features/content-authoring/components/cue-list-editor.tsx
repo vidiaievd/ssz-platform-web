@@ -10,8 +10,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { useLessonCues } from '../api/use-authoring-lessons';
 import { saveLessonCuesAction } from '../actions/lesson-cues';
-import { useAutosave } from '../hooks/use-autosave';
-import { AutosaveIndicator } from './autosave-indicator';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveStatusIndicator } from './save-status-indicator';
+import { PanelSaveButton } from './panel-save-button';
 import { EditorCard } from './editor-card';
 import { ReorderWithAnnouncer } from './lesson-reorder';
 
@@ -64,7 +65,7 @@ export function CueListEditor({ lessonId, variantId }: CueListEditorProps) {
     );
   }
 
-  const autosave = useAutosave({
+  const unsaved = useUnsavedChanges({
     onSave: async () => {
       if (!variantId) return;
       const entries = rows
@@ -78,27 +79,29 @@ export function CueListEditor({ lessonId, variantId }: CueListEditorProps) {
       const result = await saveLessonCuesAction(lessonId, variantId, entries);
       if (!result.ok) throw new Error(result.error.code);
     },
-    debounceMs: 800,
   });
 
   function updateRow(key: string, patch: Partial<CueRow>) {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
   function addRow() {
-    setRows((prev) => [...prev, { key: nextKey(), startSeconds: 0, targetLine: '', translationLine: '' }]);
-    autosave.schedule();
+    setRows((prev) => [
+      ...prev,
+      { key: nextKey(), startSeconds: 0, targetLine: '', translationLine: '' },
+    ]);
+    unsaved.markDirty();
   }
 
   function removeRow(key: string) {
     setRows((prev) => prev.filter((row) => row.key !== key));
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
   function handleReorder(reordered: CueRow[]) {
     setRows(reordered);
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
   if (!variantId) {
@@ -123,7 +126,7 @@ export function CueListEditor({ lessonId, variantId }: CueListEditorProps) {
   return (
     <EditorCard
       title={t('editor.cueList')}
-      right={<AutosaveIndicator status={autosave.status} savedAt={autosave.savedAt} />}
+      right={<SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />}
     >
       <div className="flex flex-col gap-3">
         {rows.length === 0 && (
@@ -144,7 +147,11 @@ export function CueListEditor({ lessonId, variantId }: CueListEditorProps) {
             return (
               <div className="flex flex-1 flex-col gap-2 rounded-lg border border-border bg-(--ssz-bg-base) p-3">
                 <div className="flex items-center gap-2">
-                  <Field label={t('editor.cueTimecode')} htmlFor={`cue-timecode-${row.key}`} className="w-28">
+                  <Field
+                    label={t('editor.cueTimecode')}
+                    htmlFor={`cue-timecode-${row.key}`}
+                    className="w-28"
+                  >
                     <Input
                       id={`cue-timecode-${row.key}`}
                       type="number"
@@ -188,9 +195,12 @@ export function CueListEditor({ lessonId, variantId }: CueListEditorProps) {
           }}
         </ReorderWithAnnouncer>
 
-        <Button type="button" variant="outline" size="sm" onClick={addRow} className="self-start">
-          <Plus className="mr-1.5 h-4 w-4" aria-hidden /> {t('editor.cueAdd')}
-        </Button>
+        <div className="flex items-center justify-between gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={addRow}>
+            <Plus className="mr-1.5 h-4 w-4" aria-hidden /> {t('editor.cueAdd')}
+          </Button>
+          <PanelSaveButton unsaved={unsaved} label={t('editor.saveCues')} />
+        </div>
       </div>
     </EditorCard>
   );

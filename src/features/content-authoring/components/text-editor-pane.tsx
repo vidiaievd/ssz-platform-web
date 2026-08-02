@@ -21,7 +21,7 @@ import { updateLessonAction } from '../actions/lesson';
 import { useLessonVariants, useLessonGlossaryMarks } from '../api/use-authoring-lessons';
 import { useAuthoringVocabularyLists } from '../api/use-authoring-vocabulary';
 import { authoringKeys } from '../api/keys';
-import { useAutosave } from '../hooks/use-autosave';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
 import { EditorCard } from './editor-card';
 import { TextLessonPreview } from './text-lesson-preview';
@@ -123,20 +123,14 @@ export function TextEditorPane({
     return result;
   }
 
-  const autosave = useAutosave({
-    onSave: async () => {
-      const result = await saveLesson(getValues());
-      if (!result.ok) throw new Error(result.error.code);
-    },
-    debounceMs: 800,
-  });
+  const unsaved = useUnsavedChanges();
 
   function handleBodyTokenChange(newBody: string) {
     setValue('body', newBody);
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
-  const bodyField = register('body', { onChange: () => autosave.schedule() });
+  const bodyField = register('body', { onChange: () => unsaved.markDirty() });
   const bodyRef = useRef<HTMLTextAreaElement | null>(null);
 
   function handleFormat(format: MarkdownFormat) {
@@ -144,7 +138,7 @@ export function TextEditorPane({
     if (!el) return;
     const next = applyMarkdownFormat(format, el.value, el.selectionStart, el.selectionEnd);
     setValue('body', next.value, { shouldDirty: true });
-    autosave.schedule();
+    unsaved.markDirty();
     // Restore focus and selection after React commits the new value.
     requestAnimationFrame(() => {
       el.focus();
@@ -158,8 +152,8 @@ export function TextEditorPane({
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
       backHref={backHref}
-      autosaveStatus={autosave.status}
-      autosaveSavedAt={autosave.savedAt}
+      saveStatus={unsaved.status}
+      savedAt={unsaved.savedAt}
       publishSlot={publishSlot}
       preview={
         <TextLessonPreview
@@ -177,12 +171,17 @@ export function TextEditorPane({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <Field label={t('fields.title')} htmlFor="lesson-title" error={errors.title?.message} required>
+          <Field
+            label={t('fields.title')}
+            htmlFor="lesson-title"
+            error={errors.title?.message}
+            required
+          >
             <Input
               id="lesson-title"
               placeholder={t('lessons.titlePlaceholder')}
               hasError={!!errors.title}
-              {...register('title', { onChange: () => autosave.schedule() })}
+              {...register('title', { onChange: () => unsaved.markDirty() })}
             />
           </Field>
 
@@ -242,14 +241,13 @@ export function TextEditorPane({
           <Button
             type="button"
             onClick={() => {
-              autosave.cancel();
               void (async () => {
                 const result = await saveLesson(getValues());
                 if (!result.ok) {
                   toast.error(tErrors(result.error.code));
                   return;
                 }
-                autosave.markSaved();
+                unsaved.markSaved();
                 toast.success(t('lessons.saveSuccess'));
               })();
             }}

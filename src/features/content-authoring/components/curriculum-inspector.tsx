@@ -13,11 +13,12 @@ import type { CurriculumTreeLevelNode, CurriculumTreeModuleNode } from '@/featur
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
-import { useAutosave } from '../hooks/use-autosave';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { renameContainerAction } from '../actions/container';
 import { renameSectionAction } from '../actions/section';
 import { ContainerStateBadge } from './container-state-badge';
-import { AutosaveIndicator } from './autosave-indicator';
+import { SaveStatusIndicator } from './save-status-indicator';
+import { PanelSaveButton } from './panel-save-button';
 import { ModulePublishBlock } from './module-publish-block';
 
 interface CurriculumInspectorProps {
@@ -48,20 +49,23 @@ function TitleField({
   ariaLabel: string;
 }) {
   const [title, setTitle] = useState(value);
-  const { status, savedAt, schedule } = useAutosave({ onSave: () => onSave(title) });
+  const unsaved = useUnsavedChanges({ onSave: () => onSave(title) });
 
   return (
     <div className="flex flex-1 flex-col gap-1">
-      <Input
-        value={title}
-        onChange={(e) => {
-          setTitle(e.target.value);
-          schedule();
-        }}
-        aria-label={ariaLabel}
-        className="h-8 text-[15px] font-bold"
-      />
-      <AutosaveIndicator status={status} savedAt={savedAt} />
+      <div className="flex items-center gap-1.5">
+        <Input
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            unsaved.markDirty();
+          }}
+          aria-label={ariaLabel}
+          className="h-8 text-[15px] font-bold"
+        />
+        <PanelSaveButton unsaved={unsaved} />
+      </div>
+      <SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />
     </div>
   );
 }

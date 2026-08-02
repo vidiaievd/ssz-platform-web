@@ -24,7 +24,10 @@ import { bodyRangeToSpan, type SpanSelectionError } from '../lib/span-coordinate
 import { splitParagraphs } from '../lib/split-paragraphs';
 import { createTextSpanAction } from '../actions/lesson-spans';
 import { useLessonGlossaryMarks } from '../api/use-authoring-lessons';
-import { useAuthoringVocabularyLists, useAuthoringVocabularyItems } from '../api/use-authoring-vocabulary';
+import {
+  useAuthoringVocabularyLists,
+  useAuthoringVocabularyItems,
+} from '../api/use-authoring-vocabulary';
 import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 import { authoringKeys } from '../api/keys';
 
@@ -60,10 +63,7 @@ interface TextSpanMenuProps {
  * change — drag, shift-arrow, double-click, select-all — and it fires on the
  * document rather than on the field, so it is filtered by target here.
  */
-function useTextareaSelection(
-  textareaRef: RefObject<HTMLTextAreaElement | null>,
-  body: string,
-) {
+function useTextareaSelection(textareaRef: RefObject<HTMLTextAreaElement | null>, body: string) {
   const [range, setRange] = useState<{ start: number; end: number }>({ start: 0, end: 0 });
   const [syncedBody, setSyncedBody] = useState(body);
 
@@ -145,7 +145,8 @@ export function TextSpanMenu({
   const { data: existingSpans } = useLessonTextSpans(lessonId, variantId);
   const { data: marks } = useLessonGlossaryMarks(lessonId, variantId);
   const firstVocabSpan =
-    kind === 'vocab' && !(existingSpans ?? []).some((span) => span.kind === 'vocab' && !span.broken);
+    kind === 'vocab' &&
+    !(existingSpans ?? []).some((span) => span.kind === 'vocab' && !span.broken);
   const markedWordCount = marks?.length ?? 0;
 
   function handleOpenChange(next: boolean) {
@@ -174,9 +175,7 @@ export function TextSpanMenu({
         // An overlap is the one rejection the author can act on directly, and
         // the generic "conflict" wording would not tell them what to do.
         toast.error(
-          result.error.code === 'conflict'
-            ? t('spans.overlapError')
-            : tErrors(result.error.code),
+          result.error.code === 'conflict' ? t('spans.overlapError') : tErrors(result.error.code),
         );
         return;
       }
@@ -201,7 +200,7 @@ export function TextSpanMenu({
       <PopoverTrigger asChild>
         {/*
           Disabled on the selection alone, not on the variant: an author who has
-          typed a body but whose first autosave has not landed yet still has a
+          typed a body but whose first save has not landed yet still has a
           usable selection, and needs to be told why it cannot be annotated
           rather than handed a dead button. Same shape as GlossaryMarkButton.
         */}
@@ -216,11 +215,7 @@ export function TextSpanMenu({
         author unable to see what they are annotating. The popover is still
         reachable by Tab and still closes on Esc.
       */}
-      <PopoverContent
-        align="end"
-        className="w-80"
-        onOpenAutoFocus={(e) => e.preventDefault()}
-      >
+      <PopoverContent align="end" className="w-80" onOpenAutoFocus={(e) => e.preventDefault()}>
         {!variantId ? (
           <p className="text-sm text-muted-foreground">{t('spans.needsBody')}</p>
         ) : !active.ok ? (
@@ -255,18 +250,26 @@ export function TextSpanMenu({
             {helpOpen && (
               <div className="flex flex-col gap-1.5 rounded-xl border border-(--ssz-border-default) bg-(--ssz-bg-subtle) p-3 text-xs leading-relaxed text-(--ssz-text-secondary)">
                 <p>
-                  <span className="font-semibold text-(--ssz-text-primary)">{t('spans.kindVocab')}</span>{' '}
+                  <span className="font-semibold text-(--ssz-text-primary)">
+                    {t('spans.kindVocab')}
+                  </span>{' '}
                   {t('spans.helpVocab')}
                 </p>
                 <p>
-                  <span className="font-semibold text-(--ssz-text-primary)">{t('spans.kindGrammar')}</span>{' '}
+                  <span className="font-semibold text-(--ssz-text-primary)">
+                    {t('spans.kindGrammar')}
+                  </span>{' '}
                   {t('spans.helpGrammar')}
                 </p>
                 <p>
-                  <span className="font-semibold text-(--ssz-text-primary)">{t('spans.kindChunk')}</span>{' '}
+                  <span className="font-semibold text-(--ssz-text-primary)">
+                    {t('spans.kindChunk')}
+                  </span>{' '}
                   {t('spans.helpChunk')}
                 </p>
-                <p className="border-t border-(--ssz-border-default) pt-1.5">{t('spans.helpAnchor')}</p>
+                <p className="border-t border-(--ssz-border-default) pt-1.5">
+                  {t('spans.helpAnchor')}
+                </p>
               </div>
             )}
 

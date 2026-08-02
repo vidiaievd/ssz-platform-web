@@ -19,8 +19,9 @@ import type { Container, ListeningStageType } from '@/features/content/types';
 import { useAuthoringExercises } from '../api/use-authoring-exercises';
 import { useListeningStages } from '../api/use-authoring-lessons';
 import { saveListeningStagesAction } from '../actions/listening-stages';
-import { useAutosave } from '../hooks/use-autosave';
-import { AutosaveIndicator } from './autosave-indicator';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveStatusIndicator } from './save-status-indicator';
+import { PanelSaveButton } from './panel-save-button';
 import { EditorCard } from './editor-card';
 import { ExerciseEditor } from './exercise-editor';
 import { ReorderWithAnnouncer } from './lesson-reorder';
@@ -107,7 +108,7 @@ export function ListeningStageListEditor({
     );
   }
 
-  const autosave = useAutosave({
+  const unsaved = useUnsavedChanges({
     onSave: async () => {
       if (!variantId) return;
       const entries = rows
@@ -120,12 +121,11 @@ export function ListeningStageListEditor({
       const result = await saveListeningStagesAction(lessonId, variantId, entries);
       if (!result.ok) throw new Error(result.error.code);
     },
-    debounceMs: 800,
   });
 
   function updateRow(key: string, patch: Partial<StageRow>) {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
   function addRow() {
@@ -137,12 +137,12 @@ export function ListeningStageListEditor({
 
   function removeRow(key: string) {
     setRows((prev) => prev.filter((row) => row.key !== key));
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
   function handleReorder(reordered: StageRow[]) {
     setRows(reordered);
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
   if (!variantId) {
@@ -167,17 +167,16 @@ export function ListeningStageListEditor({
   return (
     <EditorCard
       title={t(copy.title)}
-      right={<AutosaveIndicator status={autosave.status} savedAt={autosave.savedAt} />}
+      right={<SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />}
     >
       <div className="flex flex-col gap-3">
-        {rows.length === 0 && (
-          <p className="text-sm text-muted-foreground">{t(copy.empty)}</p>
-        )}
+        {rows.length === 0 && <p className="text-sm text-muted-foreground">{t(copy.empty)}</p>}
 
         <ReorderWithAnnouncer
           items={rows.map((row) => ({
             id: row.key,
-            title: exercises?.find((e) => e.itemId === row.exerciseId)?.title ?? t('exercises.untitled'),
+            title:
+              exercises?.find((e) => e.itemId === row.exerciseId)?.title ?? t('exercises.untitled'),
           }))}
           onReorder={(reorderedRefs) =>
             handleReorder(
@@ -191,10 +190,16 @@ export function ListeningStageListEditor({
             return (
               <div className="flex flex-1 flex-col gap-2 rounded-lg border border-border bg-(--ssz-bg-base) p-3">
                 <div className="flex items-center gap-2">
-                  <Field label={t('editor.stageType')} htmlFor={`stage-type-${row.key}`} className="w-40">
+                  <Field
+                    label={t('editor.stageType')}
+                    htmlFor={`stage-type-${row.key}`}
+                    className="w-40"
+                  >
                     <Select
                       value={row.stageType}
-                      onValueChange={(value) => updateRow(row.key, { stageType: value as ListeningStageType })}
+                      onValueChange={(value) =>
+                        updateRow(row.key, { stageType: value as ListeningStageType })
+                      }
                     >
                       <SelectTrigger id={`stage-type-${row.key}`}>
                         <SelectValue />
@@ -202,7 +207,9 @@ export function ListeningStageListEditor({
                       <SelectContent>
                         {STAGE_TYPES.map((type) => (
                           <SelectItem key={type} value={type}>
-                            {t(`editor.stageType${type === 'gap_fill' ? 'GapFill' : 'Comprehension'}`)}
+                            {t(
+                              `editor.stageType${type === 'gap_fill' ? 'GapFill' : 'Comprehension'}`,
+                            )}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -230,7 +237,10 @@ export function ListeningStageListEditor({
                       })
                     }
                   >
-                    <SelectTrigger className="w-full" aria-label={t('editor.stageExerciseAriaLabel')}>
+                    <SelectTrigger
+                      className="w-full"
+                      aria-label={t('editor.stageExerciseAriaLabel')}
+                    >
                       <SelectValue placeholder={t('editor.stageExerciseNone')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -248,7 +258,8 @@ export function ListeningStageListEditor({
                     size="sm"
                     onClick={() => updateRow(row.key, { creating: !row.creating })}
                   >
-                    <Plus className="mr-1.5 h-4 w-4" aria-hidden /> {t('editor.stageExerciseAddNew')}
+                    <Plus className="mr-1.5 h-4 w-4" aria-hidden />{' '}
+                    {t('editor.stageExerciseAddNew')}
                   </Button>
                 </div>
 
@@ -265,9 +276,12 @@ export function ListeningStageListEditor({
           }}
         </ReorderWithAnnouncer>
 
-        <Button type="button" variant="outline" size="sm" onClick={addRow} className="self-start">
-          <Plus className="mr-1.5 h-4 w-4" aria-hidden /> {t('editor.stageAdd')}
-        </Button>
+        <div className="flex items-center justify-between gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={addRow}>
+            <Plus className="mr-1.5 h-4 w-4" aria-hidden /> {t('editor.stageAdd')}
+          </Button>
+          <PanelSaveButton unsaved={unsaved} label={t('editor.saveStages')} />
+        </div>
       </div>
     </EditorCard>
   );
