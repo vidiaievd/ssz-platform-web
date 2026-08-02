@@ -22,6 +22,9 @@ export type {
   RationaleVerdict,
 } from './fill-body';
 
+export { RationaleMatrix } from './rationale-matrix';
+export type { Rationale, RationaleMatrixProps } from './rationale-matrix';
+
 
 export { McqBody } from './mcq-body';
 export type { McqBodyProps, McqContent, McqExpectedAnswers } from './mcq-body';

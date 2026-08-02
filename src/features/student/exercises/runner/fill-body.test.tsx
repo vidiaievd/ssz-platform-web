@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -18,6 +18,10 @@ const messages = {
       verdictCorrect: 'Correct',
       verdictAcceptable: 'Possible, but not here',
       verdictWrong: 'Wrong',
+      yourAnswer: 'Your answer',
+      chosenCorrectNote: 'This is the correct answer here.',
+      chosenAcceptableNote: 'Possible in general, but not in this sentence.',
+      chosenWrongNote: 'Doesn’t fit in this sentence.',
     },
   },
 };
@@ -247,6 +251,17 @@ describe('FillBody — reveal states (word bank)', () => {
       renderFill({ phase: 'feedback', value: 'jobben', ok: false, rationale: RATIONALE });
       expect(screen.getByRole('table')).toBeInTheDocument();
       expect(screen.getByText('Statement → at.')).toBeInTheDocument();
+    });
+
+    it('passes the learner’s pick through, so an unanalysed choice still gets a row', () => {
+      renderFill({ phase: 'feedback', value: 'jobben', ok: false, rationale: RATIONALE });
+
+      const row = screen.getByRole('cell', { name: /jobben/ }).closest('tr');
+      expect(row).not.toBeNull();
+      expect(within(row!).getByText('Your answer')).toBeInTheDocument();
+      expect(
+        within(row!).getByText('Doesn’t fit in this sentence.'),
+      ).toBeInTheDocument();
     });
 
     it('renders nothing extra when the exercise has no rationale', () => {

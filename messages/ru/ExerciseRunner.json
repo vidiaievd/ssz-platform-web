@@ -36,7 +36,9 @@
     "noteHeader": "Почему",
     "verdictCorrect": "Верно",
     "verdictAcceptable": "Возможно, но не здесь",
-    "verdictWrong": "Неверно"
+    "verdictWrong": "Неверно",
+    "yourAnswer": "Ваш ответ",
+    "chosenWrongNote": "Не подходит в этом предложении."
   },
   "translate": {
     "defaultInstruction": "Переведите предложение",

@@ -36,7 +36,9 @@
     "noteHeader": "Hvorfor",
     "verdictCorrect": "Riktig",
     "verdictAcceptable": "Mulig, men ikke her",
-    "verdictWrong": "Galt"
+    "verdictWrong": "Galt",
+    "yourAnswer": "Ditt svar",
+    "chosenWrongNote": "Passer ikke i denne setningen."
   },
   "translate": {
     "defaultInstruction": "Oversett setningen",

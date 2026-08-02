@@ -36,7 +36,9 @@
     "noteHeader": "Why",
     "verdictCorrect": "Correct",
     "verdictAcceptable": "Possible, but not here",
-    "verdictWrong": "Wrong"
+    "verdictWrong": "Wrong",
+    "yourAnswer": "Your answer",
+    "chosenWrongNote": "Doesn’t fit in this sentence."
   },
   "translate": {
     "defaultInstruction": "Translate the sentence",

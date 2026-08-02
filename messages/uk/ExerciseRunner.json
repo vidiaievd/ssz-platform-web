@@ -36,7 +36,9 @@
     "noteHeader": "Чому",
     "verdictCorrect": "Правильно",
     "verdictAcceptable": "Можливо, але не тут",
-    "verdictWrong": "Неправильно"
+    "verdictWrong": "Неправильно",
+    "yourAnswer": "Ваша відповідь",
+    "chosenWrongNote": "Не підходить у цьому реченні."
   },
   "translate": {
     "defaultInstruction": "Перекладіть речення",

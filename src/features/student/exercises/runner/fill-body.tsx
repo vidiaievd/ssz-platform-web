@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Instr } from './instr';
+import { RationaleMatrix, type Rationale } from './rationale-matrix';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
 /**
@@ -25,24 +26,10 @@ export interface FillExpectedAnswers {
   explanation?: string;
 }
 
-/** Verdict for one analysed option in the rationale matrix. */
-export type RationaleVerdict = 'correct' | 'acceptable' | 'wrong';
+export type { RationaleVerdict, RationaleOption } from './rationale-matrix';
 
-export interface RationaleOption {
-  text: string;
-  verdict: RationaleVerdict;
-  note?: string;
-}
-
-/**
- * Optional teaching aid shown as feedback AFTER checking: why the correct
- * choice fits and why typical wrong choices don't. Purely presentational —
- * it never takes part in grading.
- */
-export interface FillRationale {
-  explanation?: string;
-  options?: RationaleOption[];
-}
+/** The rationale shape is shared with the other blank-based templates. */
+export type FillRationale = Rationale;
 
 export interface FillBodyProps {
   content: FillContent;
@@ -100,135 +87,6 @@ function getChipStyle(
   if (isSel)
     return { bg: accentSoft, border: accent, color: accent };
   return { bg: 'var(--ssz-bg-surface)', border: 'var(--ssz-border-default)', color: 'var(--ssz-text-primary)' };
-}
-
-/**
- * Per-verdict colors for the rationale matrix rows. `note` is the color of the
- * explanatory column: on a tinted row the muted secondary tone loses too much
- * contrast, so those rows fall back to the primary text color.
- */
-function verdictStyle(verdict: RationaleVerdict): {
-  mark: string;
-  color: string;
-  bg: string;
-  note: string;
-} {
-  if (verdict === 'correct')
-    return { mark: '✔', color: OK_FG, bg: OK_BG, note: 'var(--ssz-text-primary)' };
-  if (verdict === 'acceptable')
-    return {
-      mark: '△',
-      color: 'var(--ssz-text-secondary)',
-      bg: 'var(--ssz-bg-surface)',
-      note: 'var(--ssz-text-secondary)',
-    };
-  return { mark: '✗', color: NO_FG, bg: NO_BG, note: 'var(--ssz-text-primary)' };
-}
-
-/**
- * Post-check teaching aid: a compact table of the candidate answers with a
- * verdict and a short note for each. Rendered under the sentence in the
- * feedback phase so the student learns the rule, not just the answer.
- */
-function RationaleMatrix({ rationale }: { rationale: FillRationale }) {
-  const t = useTranslations('ExerciseRunner');
-  const options = rationale.options ?? [];
-  if (options.length === 0 && !rationale.explanation) return null;
-
-  const verdictLabel: Record<RationaleVerdict, string> = {
-    correct: t('fill.verdictCorrect'),
-    acceptable: t('fill.verdictAcceptable'),
-    wrong: t('fill.verdictWrong'),
-  };
-
-  return (
-    <section
-      className="mt-7 rounded-xl border p-4"
-      style={{
-        borderColor: 'var(--ssz-border-default)',
-        background: 'var(--ssz-bg-subtle)',
-      }}
-      aria-label={t('fill.rationaleTitle')}
-    >
-      <h3
-        className="mb-3 text-[13px] font-semibold uppercase tracking-wide"
-        style={{ color: 'var(--ssz-text-secondary)', fontFamily: 'var(--ssz-font-ui)' }}
-      >
-        {t('fill.rationaleTitle')}
-      </h3>
-
-      {rationale.explanation && (
-        <p
-          className="mb-3 text-[15px] leading-relaxed"
-          style={{ color: 'var(--ssz-text-primary)', fontFamily: READING }}
-        >
-          {rationale.explanation}
-        </p>
-      )}
-
-      {options.length > 0 && (
-        <div className="overflow-x-auto">
-          {/* border-separate + row spacing: each verdict row reads as its own
-              rounded, padded chip rather than a full-bleed table band. */}
-          <table
-            className="w-full border-separate text-left text-[14px]"
-            style={{ borderSpacing: '0 6px' }}
-          >
-            <thead>
-              <tr style={{ color: 'var(--ssz-text-muted)' }}>
-                <th scope="col" className="px-3 py-1 font-medium">
-                  {t('fill.optionHeader')}
-                </th>
-                <th scope="col" className="px-3 py-1 font-medium">
-                  {t('fill.verdictHeader')}
-                </th>
-                <th scope="col" className="px-3 py-1 font-medium">
-                  {t('fill.noteHeader')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {options.map((opt) => {
-                const s = verdictStyle(opt.verdict);
-                return (
-                  <tr key={opt.text}>
-                    <td
-                      className="px-3 py-2.5 align-top font-semibold"
-                      style={{
-                        fontFamily: READING,
-                        color: s.color,
-                        background: s.bg,
-                        borderRadius: '10px 0 0 10px',
-                      }}
-                    >
-                      {opt.text}
-                    </td>
-                    <td
-                      className="px-3 py-2.5 align-top whitespace-nowrap"
-                      style={{ color: s.color, background: s.bg }}
-                    >
-                      <span aria-hidden="true">{s.mark}</span>{' '}
-                      <span className="text-[13px]">{verdictLabel[opt.verdict]}</span>
-                    </td>
-                    <td
-                      className="px-3 py-2.5 align-top"
-                      style={{
-                        color: s.note,
-                        background: s.bg,
-                        borderRadius: '0 10px 10px 0',
-                      }}
-                    >
-                      {opt.note}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  );
 }
 
 export function FillBody({
@@ -400,8 +258,12 @@ export function FillBody({
         </div>
       )}
 
-      {/* Explanation matrix — feedback phase only, and only when authored. */}
-      {reveal && rationale && <RationaleMatrix rationale={rationale} />}
+      {/* Explanation matrix — feedback phase only, and only when authored.
+          It gets the learner's pick so their own choice is always one of the
+          analysed rows, whether or not the author anticipated it. */}
+      {reveal && rationale && (
+        <RationaleMatrix rationale={rationale} chosen={value} chosenCorrect={ok === true} />
+      )}
     </>
   );
 }
