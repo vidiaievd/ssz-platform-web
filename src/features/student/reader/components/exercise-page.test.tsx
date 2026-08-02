@@ -107,6 +107,16 @@ describe('ExercisePage', () => {
       },
     };
 
+    /** Arms the nth blank, then taps a bank word into it. */
+    const fillBlank = (n: number, word: string) => {
+      fireEvent.click(screen.getAllByRole('button', { name: /Blank in sentence/ })[n]!);
+      fireEvent.click(
+        within(screen.getByRole('group', { name: 'Word bank' })).getByRole('button', {
+          name: new RegExp(word),
+        }),
+      );
+    };
+
     it('checks only once every blank is filled', () => {
       mockExercise(wordBankExercise);
       renderWithProviders(<ExercisePage exerciseId="e1" />);
@@ -114,10 +124,10 @@ describe('ExercisePage', () => {
       const check = screen.getByRole('button', { name: 'Check' });
       expect(check).toBeDisabled();
 
-      fireEvent.change(screen.getAllByRole('combobox')[0]!, { target: { value: 'show off' } });
+      fillBlank(0, 'show off');
       expect(check).toBeDisabled();
 
-      fireEvent.change(screen.getAllByRole('combobox')[1]!, { target: { value: 'boast' } });
+      fillBlank(1, 'boast');
       expect(check).toBeEnabled();
     });
 
@@ -125,8 +135,8 @@ describe('ExercisePage', () => {
       mockExercise(wordBankExercise);
       renderWithProviders(<ExercisePage exerciseId="e1" />);
 
-      fireEvent.change(screen.getAllByRole('combobox')[0]!, { target: { value: 'show off' } });
-      fireEvent.change(screen.getAllByRole('combobox')[1]!, { target: { value: 'show off' } });
+      fillBlank(0, 'show off');
+      fillBlank(1, 'show off');
       fireEvent.click(screen.getByRole('button', { name: 'Check' }));
 
       expect(screen.getByText('Not quite')).toBeInTheDocument();
@@ -137,8 +147,8 @@ describe('ExercisePage', () => {
       mockExercise(wordBankExercise);
       renderWithProviders(<ExercisePage exerciseId="e1" />);
 
-      fireEvent.change(screen.getAllByRole('combobox')[0]!, { target: { value: 'show off' } });
-      fireEvent.change(screen.getAllByRole('combobox')[1]!, { target: { value: 'boast' } });
+      fillBlank(0, 'show off');
+      fillBlank(1, 'boast');
       fireEvent.click(screen.getByRole('button', { name: 'Check' }));
 
       expect(screen.getByText('Correct')).toBeInTheDocument();

@@ -73,7 +73,9 @@
     "choosePlaceholder": "Оберіть…",
     "blankLabel": "Пропуск у реченні {n}",
     "filledCount": "Заповнено {done} із {total} пропусків",
-    "partialScore": "Правильно {correct} із {total} пропусків"
+    "partialScore": "Правильно {correct} із {total} пропусків",
+    "helperIdle": "Торкніться пропуску, потім оберіть слово.",
+    "helperArmed": "Тепер оберіть слово для виділеного пропуску."
   },
   "textOrder": {
     "moveUp": "Вище",

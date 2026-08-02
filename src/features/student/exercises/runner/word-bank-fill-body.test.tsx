@@ -21,6 +21,9 @@ const content: WordBankFillContent = {
   instruction: 'Complete the sentences.',
 };
 
+/** The shared word bank above the sentences. */
+const bank = () => screen.getByRole('group', { name: 'Word bank' });
+
 function renderBody(props: Partial<React.ComponentProps<typeof WordBankFillBody>> = {}) {
   return render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
@@ -55,21 +58,50 @@ describe('parseSentence', () => {
 });
 
 describe('WordBankFillBody', () => {
-  it('renders one select per blank, each offering the whole bank', () => {
+  it('renders a tappable blank per gap and one button per bank word', () => {
     renderBody();
 
-    const selects = screen.getAllByRole('combobox');
-    expect(selects).toHaveLength(3); // 1 + 2 blanks
-    expect(screen.getAllByRole('option', { name: 'boast' })).toHaveLength(3);
+    expect(screen.getAllByRole('button', { name: /Blank in sentence/ })).toHaveLength(3);
+    expect(within(bank()).getAllByRole('button')).toHaveLength(3);
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
 
-  it('reports the chosen word for the right sentence and blank', () => {
+  it('fills the blank the learner armed, not the first one', () => {
     const onValueChange = vi.fn();
     renderBody({ onValueChange });
 
-    fireEvent.change(screen.getAllByRole('combobox')[2]!, { target: { value: 'boast' } });
+    fireEvent.click(screen.getAllByRole('button', { name: /Blank in sentence/ })[2]!);
+    fireEvent.click(within(bank()).getByRole('button', { name: /boast/ }));
 
     expect(onValueChange).toHaveBeenCalledWith({ '2': { 2: 'boast' } });
+  });
+
+  it('falls back to the first empty blank when none was armed', () => {
+    const onValueChange = vi.fn();
+    renderBody({ onValueChange });
+
+    fireEvent.click(within(bank()).getByRole('button', { name: /boast/ }));
+
+    expect(onValueChange).toHaveBeenCalledWith({ '1': { 1: 'boast' } });
+  });
+
+  it('takes a word back out when it is clicked again in the armed blank', () => {
+    const onValueChange = vi.fn();
+    renderBody({ value: { '1': { 1: 'boast' } }, onValueChange });
+
+    fireEvent.click(screen.getAllByRole('button', { name: /Blank in sentence/ })[0]!);
+    fireEvent.click(within(bank()).getByRole('button', { name: /boast/ }));
+
+    expect(onValueChange).toHaveBeenCalledWith({ '1': { 1: '' } });
+  });
+
+  it('selects a bank word by its number key', () => {
+    const onValueChange = vi.fn();
+    renderBody({ onValueChange });
+
+    fireEvent.keyDown(document.body, { key: '2' });
+
+    expect(onValueChange).toHaveBeenCalledWith({ '1': { 1: 'boast' } });
   });
 
   it('enables submitting only once every blank is filled', () => {
@@ -78,7 +110,9 @@ describe('WordBankFillBody', () => {
     const { rerender } = renderBody({ value: partial, onAnswerChange });
 
     expect(onAnswerChange).toHaveBeenLastCalledWith(false);
-    expect(screen.getByText('1 of 3 blanks filled')).toBeInTheDocument();
+    // the helper line carries the prompt and the count together
+    expect(screen.getByText(/1 of 3 blanks filled/)).toBeInTheDocument();
+    expect(screen.getByText(/Tap a blank, then pick a word\./)).toBeInTheDocument();
 
     rerender(
       <NextIntlClientProvider locale="en" messages={enMessages}>
@@ -107,7 +141,7 @@ describe('WordBankFillBody', () => {
     });
 
     // The pick is no longer editable…
-    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Blank in sentence/ })).not.toBeInTheDocument();
     // …and it stands alone: handing over the answer here would end the
     // exercise before the learner gets a second go (the bank above lists both
     // words, hence scoping to the sentence list).

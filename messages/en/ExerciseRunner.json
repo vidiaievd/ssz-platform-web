@@ -73,7 +73,9 @@
     "choosePlaceholder": "Choose…",
     "blankLabel": "Blank in sentence {n}",
     "filledCount": "{done} of {total} blanks filled",
-    "partialScore": "{correct} of {total} blanks correct"
+    "partialScore": "{correct} of {total} blanks correct",
+    "helperIdle": "Tap a blank, then pick a word.",
+    "helperArmed": "Now pick a word for the highlighted blank."
   },
   "textOrder": {
     "moveUp": "Move up",

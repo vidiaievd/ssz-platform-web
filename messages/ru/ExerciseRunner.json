@@ -73,7 +73,9 @@
     "choosePlaceholder": "Выберите…",
     "blankLabel": "Пропуск в предложении {n}",
     "filledCount": "Заполнено {done} из {total} пропусков",
-    "partialScore": "Верно {correct} из {total} пропусков"
+    "partialScore": "Верно {correct} из {total} пропусков",
+    "helperIdle": "Нажмите на пропуск, затем выберите слово.",
+    "helperArmed": "Теперь выберите слово для выделенного пропуска."
   },
   "textOrder": {
     "moveUp": "Выше",
