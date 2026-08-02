@@ -208,6 +208,10 @@ export const SCHOOL_NAMESPACES = [
   'Invite',
   'Authoring',
   'Content',
+  // The lesson editor previews reuse the student reader's components
+  // (GlossaryParagraph, AudioPlayer, VideoPlayer), which translate against
+  // `Learning.glossary`, `Learning.audio` and `Learning.reader.video.player`.
+  'Learning',
   'Media',
   'Notifications',
   'Profile',
