@@ -271,6 +271,91 @@ describe('ExercisePage', () => {
     });
   });
 
+  describe('second attempt', () => {
+    const fillExercise: Partial<ExerciseWithAnswers> & Pick<ExerciseWithAnswers, 'templateCode'> = {
+      templateCode: 'fill_in_blank',
+      content: { text_with_blanks: 'Han sier ___1___ han er sliten.' },
+      expectedAnswers: {
+        blanks: [{ blank_id: 1, accepted_answers: ['at'] }],
+        explanation: 'Statements take «at».',
+      },
+      instructions: [
+        {
+          id: 'i1',
+          exerciseId: 'e1',
+          instructionLanguage: 'ru',
+          instructionText: 'Fill the gap.',
+          hintText: 'A statement, not a question.',
+        },
+      ],
+    };
+
+    const answer = (word: string) => {
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: word } });
+      fireEvent.click(screen.getByRole('button', { name: 'Check' }));
+    };
+
+    it('offers a retry with the hint instead of the answer on a first miss', () => {
+      mockExercise(fillExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+      answer('om');
+
+      expect(screen.getByText('Not quite')).toBeInTheDocument();
+      expect(screen.getByText('A statement, not a question.')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+      // neither the answer nor the rule that names it
+      expect(screen.queryByText(/Answer:/)).not.toBeInTheDocument();
+      expect(screen.queryByText('Statements take «at».')).not.toBeInTheDocument();
+    });
+
+    it('returns to answering with the previous input kept', () => {
+      mockExercise(fillExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+      answer('om');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+
+      const input = screen.getByRole('textbox');
+      expect(input).toBeEnabled();
+      expect(input).toHaveValue('om');
+      expect(screen.queryByText('Not quite')).not.toBeInTheDocument();
+    });
+
+    it('unlocks the answer on a second miss', () => {
+      mockExercise(fillExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+      answer('om');
+      fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+      answer('hvorfor');
+
+      expect(screen.getByText(/Answer:/)).toBeInTheDocument();
+      expect(screen.getByText('at')).toBeInTheDocument();
+      expect(screen.getByText('Statements take «at».')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+    });
+
+    it('unlocks the answer on request, without a second attempt', () => {
+      mockExercise(fillExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+      answer('om');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show answer' }));
+
+      expect(screen.getByText(/Answer:/)).toBeInTheDocument();
+      expect(screen.getByText('Statements take «at».')).toBeInTheDocument();
+    });
+
+    it('offers no retry once the answer is right', () => {
+      mockExercise(fillExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+      answer('at');
+
+      expect(screen.getByText('Correct')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+      expect(screen.getByText('Statements take «at».')).toBeInTheDocument();
+    });
+  });
+
   it('shows an unsupported message for an unknown template', () => {
     mockExercise({ templateCode: 'mystery_type' });
     renderWithProviders(<ExercisePage exerciseId="e1" />);

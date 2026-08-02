@@ -75,6 +75,8 @@ export interface WordBankFillBodyProps {
   mode: RunnerMode;
   accent: string;
   results?: WordBankFillResults;
+  /** Once set, a missed blank's note may name the answer and quote the rule. */
+  revealed?: boolean;
 }
 
 const OK_LINE = 'var(--ssz-feedback-ok-line)';
@@ -132,6 +134,7 @@ export function WordBankFillBody({
   mode,
   accent,
   results,
+  revealed = false,
 }: WordBankFillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const reveal = phase === 'feedback';
@@ -284,6 +287,7 @@ export function WordBankFillBody({
                         chosen,
                         correct: result.expected,
                         chosenCorrect: result.correct,
+                        revealed,
                       })
                     : null;
 

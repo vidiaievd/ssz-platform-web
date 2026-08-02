@@ -46,6 +46,11 @@ export interface BuildAnswerNoteInput {
   /** The accepted answer for this blank. */
   correct: string;
   chosenCorrect: boolean;
+  /**
+   * Set once the learner has spent their attempts (or asked to see it): the
+   * note may then name the answer and quote the rule.
+   */
+  revealed?: boolean;
 }
 
 /**
@@ -54,7 +59,8 @@ export interface BuildAnswerNoteInput {
  * A missed blank gets only the reason its own word doesn't work. The accepted
  * answer stays hidden — and so does the sentence explanation, which in practice
  * names that answer ("statements take «at»"). Handing it over on the first miss
- * ends the exercise; the learner should get another go at the rule instead.
+ * ends the exercise; the learner gets another go at the rule instead, and the
+ * full note only once `revealed`.
  *
  * Exercise-level `wordNotes` win over a per-blank option note: they are the
  * form authors are expected to fill in, and the older `options` list stays
@@ -66,6 +72,7 @@ export function buildAnswerNote({
   chosen,
   correct,
   chosenCorrect,
+  revealed = false,
 }: BuildAnswerNoteInput): AnswerNote | null {
   const noteFor = (word: string): string | undefined => {
     if (word === '') return undefined;
@@ -74,18 +81,23 @@ export function buildAnswerNote({
     return rationale?.options?.find((o) => norm(o.text) === norm(word))?.note;
   };
 
-  if (!chosenCorrect) {
-    const note = noteFor(chosen);
+  const missed = !chosenCorrect && chosen !== '';
+
+  if (!chosenCorrect && !revealed) {
+    const note = missed ? noteFor(chosen) : undefined;
     // Nothing written about this word — then there is nothing to reveal.
     return note === undefined ? null : { chosen: { text: chosen, note } };
   }
 
   const note: AnswerNote = {
     ...(rationale?.explanation ? { explanation: rationale.explanation } : {}),
+    ...(missed ? { chosen: { text: chosen, note: noteFor(chosen) } } : {}),
     ...(correct !== '' ? { correct: { text: correct, note: noteFor(correct) } } : {}),
   };
   const hasSomethingToSay =
-    note.explanation !== undefined || note.correct?.note !== undefined;
+    note.explanation !== undefined ||
+    note.chosen?.note !== undefined ||
+    note.correct?.note !== undefined;
   return hasSomethingToSay ? note : null;
 }
 

@@ -31,6 +31,22 @@ describe('buildAnswerNote', () => {
     expect(note?.correct).toEqual({ text: 'at', note: 'Statement → at.' });
   });
 
+  it('adds the rule and the answer to a miss once it is revealed', () => {
+    const note = buildAnswerNote({ ...base, revealed: true });
+
+    expect(note?.chosen).toEqual({ text: 'om', note: 'Only for yes/no questions.' });
+    expect(note?.explanation).toBe(RATIONALE.explanation);
+    expect(note?.correct).toEqual({ text: 'at', note: 'Statement → at.' });
+  });
+
+  it('speaks for an unanalysed pick once revealed, having stayed silent before', () => {
+    expect(buildAnswerNote({ ...base, chosen: 'hvordan' })).toBeNull();
+
+    const note = buildAnswerNote({ ...base, chosen: 'hvordan', revealed: true });
+    expect(note?.correct).toEqual({ text: 'at', note: 'Statement → at.' });
+    expect(note?.chosen).toEqual({ text: 'hvordan', note: undefined });
+  });
+
   it('stays silent about a pick the author never analysed', () => {
     expect(buildAnswerNote({ ...base, chosen: 'hvordan' })).toBeNull();
   });

@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useExerciseWithAnswers } from '@/features/content/api/use-exercise';
-import { primaryInstructionText } from '@/features/content/lib/instruction-text';
+import { primaryHintText, primaryInstructionText } from '@/features/content/lib/instruction-text';
 import type { ExerciseWithAnswers } from '@/features/content/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import {
@@ -57,9 +57,14 @@ type Ok = boolean | null;
 
 interface Graded {
   ok: Ok;
-  /** Explanation/summary revealed in the feedback banner. */
+  /**
+   * Shown as soon as the answer is checked — a tally or a status line, never
+   * anything that gives the answer away.
+   */
+  summary?: string;
+  /** The rule behind the answer; held back until the answer is unlocked. */
   explanation?: string;
-  /** A reference/sample answer to show when relevant. */
+  /** A reference/sample answer; held back until the answer is unlocked. */
   reference?: string;
 }
 
@@ -67,6 +72,8 @@ interface SolverProps {
   display: ExerciseWithAnswers;
   phase: 'answering' | 'feedback';
   ok: Ok;
+  /** True once the learner has used up their attempts or asked to see it. */
+  revealed: boolean;
   onCheck: (graded: Graded) => void;
 }
 
@@ -145,7 +152,7 @@ function McqSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function FillSolver({ display, phase, ok, onCheck }: SolverProps) {
+function FillSolver({ display, phase, ok, revealed, onCheck }: SolverProps) {
   const [value, setValue] = useState('');
   const c = display.content;
   const rawBlanks = Array.isArray(display.expectedAnswers.blanks) ? display.expectedAnswers.blanks : [];
@@ -172,18 +179,17 @@ function FillSolver({ display, phase, ok, onCheck }: SolverProps) {
         accent={ACCENT}
         rationale={firstBlank?.rationale}
         correctAnswer={firstAccepted[0] ?? ''}
+        revealed={revealed}
       />
       {phase === 'answering' && (
         <CheckFooter
           canSubmit={value.trim() !== ''}
           onCheck={() =>
-            onCheck(
-              firstAccepted.some((a) => normAnswer(a) === normAnswer(value))
-                ? { ok: true, explanation: str(display.expectedAnswers.explanation) || undefined }
-                : /* A miss reveals neither the answer nor the rule naming it —
-                     the marker beside the blank explains the wrong pick instead. */
-                  { ok: false },
-            )
+            onCheck({
+              ok: firstAccepted.some((a) => normAnswer(a) === normAnswer(value)),
+              reference: firstAccepted[0],
+              explanation: str(display.expectedAnswers.explanation) || undefined,
+            })
           }
         />
       )}
@@ -378,7 +384,7 @@ function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function WordBankFillSolver({ display, phase, ok, onCheck }: SolverProps) {
+function WordBankFillSolver({ display, phase, ok, revealed, onCheck }: SolverProps) {
   const [value, setValue] = useState<WordBankFillValue>({});
   const [results, setResults] = useState<WordBankFillResults>({});
   const [canSubmit, setCanSubmit] = useState(false);
@@ -425,6 +431,7 @@ function WordBankFillSolver({ display, phase, ok, onCheck }: SolverProps) {
         mode="practice"
         accent={ACCENT}
         results={results}
+        revealed={revealed}
       />
       {phase === 'answering' && (
         <CheckFooter
@@ -434,9 +441,10 @@ function WordBankFillSolver({ display, phase, ok, onCheck }: SolverProps) {
             setResults(graded.results);
             onCheck({
               ok: graded.ok,
-              explanation: graded.ok
-                ? str(display.expectedAnswers.explanation) || undefined
+              summary: graded.ok
+                ? undefined
                 : t('wordBank.partialScore', { correct: graded.correct, total: graded.total }),
+              explanation: str(display.expectedAnswers.explanation) || undefined,
             });
           }}
         />
@@ -500,9 +508,10 @@ function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
             setResults(graded.results);
             onCheck({
               ok: graded.ok,
-              explanation: graded.ok
-                ? str(display.expectedAnswers.explanation) || undefined
+              summary: graded.ok
+                ? undefined
                 : t('textOrder.partialScore', { correct: graded.correct, total: graded.total }),
+              explanation: str(display.expectedAnswers.explanation) || undefined,
             });
           }}
         />
@@ -578,11 +587,12 @@ function ErrorCorrectionSolver({ display, phase, ok, onCheck }: SolverProps) {
             });
             onCheck({
               ok: graded.ok,
-              explanation: graded.ok
-                ? str(display.expectedAnswers.explanation) || undefined
+              summary: graded.ok
+                ? undefined
                 : graded.falsePositives > 0
                   ? `${tally} · ${t('errorCorrection.falsePositives', { n: graded.falsePositives })}`
                   : tally,
+              explanation: str(display.expectedAnswers.explanation) || undefined,
             });
           }}
         />
@@ -593,9 +603,22 @@ function ErrorCorrectionSolver({ display, phase, ok, onCheck }: SolverProps) {
 
 /* ── feedback banner ────────────────────────────────────────────────────── */
 
-function FeedbackBanner({ graded }: { graded: Graded }) {
+interface FeedbackBannerProps {
+  graded: Graded;
+  /** Held-back material is shown only once this is true. */
+  revealed: boolean;
+  /** Authored hint, offered instead of the answer on a first miss. */
+  hint?: string;
+  onRetry: () => void;
+  onReveal: () => void;
+}
+
+function FeedbackBanner({ graded, revealed, hint, onRetry, onReveal }: FeedbackBannerProps) {
   const t = useTranslations('ExerciseRunner');
-  const { ok, explanation, reference } = graded;
+  const { ok, summary, explanation, reference } = graded;
+  /* A miss is worth a second go before the answer is handed over — except in
+     graded mode (ok === null), where the answer is already with the teacher. */
+  const canRetry = ok === false && !revealed;
   const tone =
     ok === true
       ? { bg: 'var(--ssz-feedback-ok-bg)', line: 'var(--ssz-feedback-ok-line)', fg: 'var(--ssz-feedback-ok-fg)', label: t('feedback.correct') }
@@ -616,15 +639,45 @@ function FeedbackBanner({ graded }: { graded: Graded }) {
           {t('feedback.gradedNote')}
         </p>
       )}
-      {explanation && (
+      {summary && (
+        <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ssz-text-secondary)' }}>
+          {summary}
+        </p>
+      )}
+      {canRetry && hint && (
+        <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ssz-text-secondary)' }}>
+          {hint}
+        </p>
+      )}
+      {revealed && explanation && (
         <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ssz-text-secondary)' }}>
           {explanation}
         </p>
       )}
-      {ok === false && reference && (
+      {revealed && ok === false && reference && (
         <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ssz-text-secondary)' }}>
           {t('feedback.answerLabel')} <span className="font-semibold">{reference}</span>
         </p>
+      )}
+      {canRetry && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onRetry}
+            className="rounded-lg px-4 py-2 text-[13.5px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            style={{ background: tone.line }}
+          >
+            {t('feedback.tryAgain')}
+          </button>
+          <button
+            type="button"
+            onClick={onReveal}
+            className="rounded-lg border px-4 py-2 text-[13.5px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            style={{ borderColor: tone.line, color: tone.fg }}
+          >
+            {t('feedback.showAnswer')}
+          </button>
+        </div>
       )}
     </div>
   );
@@ -663,6 +716,9 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
   const { data, isLoading, isError, refetch } = useExerciseWithAnswers(exerciseId);
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
   const [graded, setGraded] = useState<Graded | null>(null);
+  /* One retry: the second miss unlocks the answer, as does asking for it. */
+  const [attempts, setAttempts] = useState(0);
+  const [revealed, setRevealed] = useState(false);
 
   // Per-item state is reset by remounting: the reader passes key={exerciseId}.
 
@@ -689,13 +745,28 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
         display={data}
         phase={phase}
         ok={graded?.ok ?? null}
+        revealed={revealed}
         onCheck={(g) => {
           setGraded(g);
           setPhase('feedback');
-          onChecked?.(g.ok);
+          setAttempts((n) => n + 1);
+          if (g.ok !== false || attempts > 0) setRevealed(true);
+          // Progress follows the first attempt — that is the honest signal.
+          if (attempts === 0) onChecked?.(g.ok);
         }}
       />
-      {phase === 'feedback' && graded && <FeedbackBanner graded={graded} />}
+      {phase === 'feedback' && graded && (
+        <FeedbackBanner
+          graded={graded}
+          revealed={revealed}
+          hint={primaryHintText(data.instructions) ?? undefined}
+          onRetry={() => {
+            setPhase('answering');
+            setGraded(null);
+          }}
+          onReveal={() => setRevealed(true)}
+        />
+      )}
     </div>
   );
 }

@@ -52,6 +52,8 @@ export interface FillBodyProps {
   rationale?: FillRationale;
   /** The accepted answer, so the marker can say why it is the one. */
   correctAnswer?: string;
+  /** Once set, a missed blank's note may name the answer and quote the rule. */
+  revealed?: boolean;
 }
 
 /* ── color constants ─────────────────────────────────────────────── */
@@ -105,6 +107,7 @@ export function FillBody({
   accent,
   rationale,
   correctAnswer = '',
+  revealed = false,
 }: FillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const accentSoft = modeAccentSoft(mode);
@@ -122,6 +125,7 @@ export function FillBody({
     chosen: value,
     correct: correctAnswer,
     chosenCorrect: ok === true,
+    revealed,
   });
 
   /* blank underline / text color */

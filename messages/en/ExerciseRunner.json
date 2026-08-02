@@ -13,7 +13,9 @@
     "incorrect": "Not quite",
     "submitted": "Answer submitted",
     "gradedNote": "Saved for your teacher to grade. You’ll see results when it’s returned.",
-    "answerLabel": "Answer:"
+    "answerLabel": "Answer:",
+    "tryAgain": "Try again",
+    "showAnswer": "Show answer"
   },
   "loading": "Loading exercise…",
   "error": {

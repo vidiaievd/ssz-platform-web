@@ -10,3 +10,14 @@ export function primaryInstructionText(
 ): string | null {
   return instructions?.[0]?.instructionText ?? null;
 }
+
+/**
+ * The hint for an exercise, from the same primary instruction entry. Shown when
+ * a first attempt misses, so the learner has something to work with on the next
+ * try that is not the answer itself.
+ */
+export function primaryHintText(
+  instructions?: ExerciseInstruction[] | null,
+): string | null {
+  return instructions?.[0]?.hintText ?? null;
+}
