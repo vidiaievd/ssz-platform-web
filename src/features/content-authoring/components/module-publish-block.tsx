@@ -1,53 +1,27 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useQueryClient } from '@tanstack/react-query';
 
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import type { ContainerPublishState } from '@/features/content/types';
 
-import { useContainerVersions } from '../api/use-container-versions';
-import { useContainerPreflight } from '../api/use-container-preflight';
-import { authoringKeys } from '../api/keys';
-import { ContainerStateBadge } from './container-state-badge';
-import { PublishDialog } from './publish-dialog';
+import { PublishStateBadge } from './publish-state-badge';
 
 interface ModulePublishBlockProps {
-  /** The module's own container id (not the course's). */
-  containerId: string;
-  /** Called after a successful publish so the tree can refetch. */
-  onPublished?: () => void;
+  publishState: ContainerPublishState;
 }
 
 /**
- * Publish state and action for a single module.
+ * Publish state of a single module, as reported by the curriculum tree.
  *
  * A module is versioned in its own right: the student reader resolves a
  * module's `currentPublishedVersionId`, so anything added to its draft — a new
- * exercise, a lesson — stays invisible until the module itself is published.
- * Publishing the course does not cascade.
+ * exercise, a lesson — stays invisible until the module itself is published,
+ * and publishing the course does not cascade. The release happens in one place
+ * for the whole course ("Review & publish" in the header), so this block
+ * reports rather than acts.
  */
-export function ModulePublishBlock({ containerId, onPublished }: ModulePublishBlockProps) {
+export function ModulePublishBlock({ publishState }: ModulePublishBlockProps) {
   const t = useTranslations('Authoring.structure');
-  const queryClient = useQueryClient();
-  const { data: versions, isLoading } = useContainerVersions(containerId);
-
-  const draft = versions?.find((v) => v.status === 'draft');
-  const published = versions?.find((v) => v.status === 'published');
-
-  // Only worth running once we know there is a draft to publish.
-  const { data: preflight } = useContainerPreflight(containerId, !!draft);
-
-  if (isLoading) {
-    return (
-      <div className="space-y-2 border-t border-border pt-4">
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-8 w-28" />
-      </div>
-    );
-  }
-
-  if (!versions) return null;
 
   return (
     <div className="space-y-2.5 border-t border-border pt-4">
@@ -55,33 +29,16 @@ export function ModulePublishBlock({ containerId, onPublished }: ModulePublishBl
         <span className="text-xs font-bold tracking-wide text-muted-foreground">
           {t('modulePublishLabel')}
         </span>
-        <ContainerStateBadge state={published ? 'published' : 'draft'} />
+        <PublishStateBadge state={publishState} />
       </div>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        {draft
-          ? published
+        {publishState === 'draft'
+          ? t('modulePublishFirst')
+          : publishState === 'pending_changes'
             ? t('modulePublishPending')
-            : t('modulePublishFirst')
-          : t('modulePublishUpToDate')}
+            : t('modulePublishUpToDate')}
       </p>
-
-      {draft && (
-        <PublishDialog
-          container={{ id: containerId }}
-          result={preflight}
-          trigger={
-            <Button variant="primary" size="sm" type="button">
-              {t('modulePublishAction')}
-            </Button>
-          }
-          onPublished={() => {
-            void queryClient.invalidateQueries({ queryKey: authoringKeys.versions(containerId) });
-            void queryClient.invalidateQueries({ queryKey: authoringKeys.preflight(containerId) });
-            onPublished?.();
-          }}
-        />
-      )}
     </div>
   );
 }

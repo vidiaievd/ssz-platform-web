@@ -155,7 +155,7 @@ export function CurriculumInspector({
         {/* Students read a module's own published version, so material added
             here stays invisible until this module — not just the course — is
             published. */}
-        <ModulePublishBlock containerId={mod.containerId} onPublished={onChanged} />
+        <ModulePublishBlock publishState={mod.publishState} />
       </div>
     );
   }

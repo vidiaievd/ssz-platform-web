@@ -422,7 +422,8 @@
     "blockLabel": "Course",
     "blockNeverPublished": "This course has never been published, so students cannot open it yet.",
     "blockPending": "This course has unpublished changes. Students keep seeing the published version until you publish again.",
-    "blockUpToDate": "Everything in this course is published."
+    "blockUpToDate": "Everything in this course is published.",
+    "blockWhereToPublish": "Publish it from “Review & publish” in the course header — the course and its modules go live together there."
   },
   "discard": {
     "title": "Discard draft?",
@@ -846,5 +847,22 @@
     "published": "Published",
     "pendingChanges": "Unpublished changes",
     "ariaLabel": "Status: {label}"
+  },
+  "reviewPublish": {
+    "trigger": "Review & publish",
+    "title": "Review & publish",
+    "description": "Pick what to make live. The course and each module are published separately — modules go first, so the course never points at material students cannot open.",
+    "allPublished": "Everything is published. Nothing to release.",
+    "rowCourse": "Course",
+    "rowModule": "Module",
+    "rowBlockers": "{count, plural, one {# blocker must be fixed first} other {# blockers must be fixed first}}",
+    "rowWarnings": "{count, plural, one {# warning} other {# warnings}}",
+    "rowPublished": "Published",
+    "rowFailed": "Could not publish",
+    "confirm": "Publish {count, plural, one {# item} other {# items}}",
+    "publishing": "Publishing…",
+    "close": "Close",
+    "summaryAllPublished": "{count, plural, one {# item published} other {# items published}}.",
+    "summaryPartial": "Published {published} of {total} — check the rows that failed."
   }
 }

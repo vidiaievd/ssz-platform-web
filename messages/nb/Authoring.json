@@ -419,7 +419,8 @@
     "blockLabel": "Kurs",
     "blockNeverPublished": "Dette kurset er aldri publisert, så studentene kan ikke åpne det ennå.",
     "blockPending": "Dette kurset har upubliserte endringer. Studentene ser den publiserte versjonen til du publiserer på nytt.",
-    "blockUpToDate": "Alt i dette kurset er publisert."
+    "blockUpToDate": "Alt i dette kurset er publisert.",
+    "blockWhereToPublish": "Publiser det fra «Gjennomgå og publiser» i kursoverskriften — der går kurset og modulene live sammen."
   },
   "discard": {
     "title": "Forkaste utkast?",
@@ -846,5 +847,22 @@
     "published": "Publisert",
     "pendingChanges": "Upubliserte endringer",
     "ariaLabel": "Status: {label}"
+  },
+  "reviewPublish": {
+    "trigger": "Gjennomgå og publiser",
+    "title": "Gjennomgå og publiser",
+    "description": "Velg hva som skal bli synlig. Kurset og hver modul publiseres hver for seg — modulene først, slik at kurset aldri peker på materiale studentene ikke får åpnet.",
+    "allPublished": "Alt er publisert. Ingenting å slippe.",
+    "rowCourse": "Kurs",
+    "rowModule": "Modul",
+    "rowBlockers": "{count, plural, one {# blokkering må rettes først} other {# blokkeringer må rettes først}}",
+    "rowWarnings": "{count, plural, one {# advarsel} other {# advarsler}}",
+    "rowPublished": "Publisert",
+    "rowFailed": "Kunne ikke publisere",
+    "confirm": "Publiser {count, plural, one {# element} other {# elementer}}",
+    "publishing": "Publiserer…",
+    "close": "Lukk",
+    "summaryAllPublished": "{count, plural, one {# element publisert} other {# elementer publisert}}.",
+    "summaryPartial": "Publiserte {published} av {total} — se radene som feilet."
   }
 }

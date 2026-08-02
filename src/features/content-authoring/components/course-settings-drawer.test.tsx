@@ -92,14 +92,16 @@ describe('CourseSettingsDrawer', () => {
     expect(screen.queryByText('Course settings')).not.toBeInTheDocument();
   });
 
-  it('shows the overview form, preflight panel and publish dialog for a draft course', () => {
+  it('shows the overview form and pre-flight diagnostics for a draft course', () => {
     mockPublishState('draft');
     renderDrawer(DRAFT_CONTAINER);
     expect(screen.getByText('Course settings')).toBeInTheDocument();
     expect(screen.getByTestId('container-form')).toBeInTheDocument();
     expect(screen.getByTestId('preflight-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('publish-dialog')).toBeInTheDocument();
     expect(screen.getByTestId('danger-zone')).toBeInTheDocument();
+    // Releasing lives in one place — the course header, not here.
+    expect(screen.queryByTestId('publish-dialog')).not.toBeInTheDocument();
+    expect(screen.getByText(/Review & publish/)).toBeInTheDocument();
   });
 
   it('hides preflight and publish for a course that is published and up to date', () => {
@@ -111,20 +113,22 @@ describe('CourseSettingsDrawer', () => {
     expect(screen.getByTestId('danger-zone')).toBeInTheDocument();
   });
 
-  it('offers a re-publish for a published course whose draft is ahead', () => {
+  it('diagnoses a published course whose draft is ahead, and offers to discard it', () => {
     mockPublishState('pending_changes');
     renderDrawer(PUBLISHED_CONTAINER);
-    expect(screen.getByTestId('publish-dialog')).toBeInTheDocument();
+    expect(screen.getByText('Unpublished changes')).toBeInTheDocument();
     expect(screen.getByTestId('preflight-panel')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Discard draft' })).toBeInTheDocument();
+    expect(screen.queryByTestId('publish-dialog')).not.toBeInTheDocument();
   });
 
   it('falls back to the container pointer before the tree resolves', () => {
     mockPublishState(null);
     renderDrawer(PUBLISHED_CONTAINER);
     // "published with pending changes" is unknowable without the tree, so the
-    // block must not offer a publish it cannot justify.
-    expect(screen.queryByTestId('publish-dialog')).not.toBeInTheDocument();
+    // block must not claim anything is pending.
+    expect(screen.getByText('Everything in this course is published.')).toBeInTheDocument();
+    expect(screen.queryByTestId('preflight-panel')).not.toBeInTheDocument();
   });
 
   it('hides the danger zone for a teacher role', () => {

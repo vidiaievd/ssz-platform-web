@@ -13,7 +13,6 @@ import type { PreflightResult } from '../types';
 import { deriveContainerState } from './container-state-badge';
 import { DiscardDraftDialog } from './discard-draft-dialog';
 import { PreflightPanel } from './preflight-panel';
-import { PublishDialog } from './publish-dialog';
 import { PublishStateBadge } from './publish-state-badge';
 
 interface CoursePublishBlockProps {
@@ -81,18 +80,15 @@ export function CoursePublishBlock({
 
       {canPublish && (
         <>
-          <div className="flex items-center gap-2">
-            <PublishDialog
-              container={container}
-              result={preflightResult}
-              onPublished={invalidatePublishState}
-            />
-            {state === 'pending_changes' && (
-              <Button variant="ghost" size="sm" type="button" onClick={() => setDiscardOpen(true)}>
-                {t('discard.trigger')}
-              </Button>
-            )}
-          </div>
+          {/* Publishing itself lives in one place — the course header's
+              "Review & publish", which releases the course together with the
+              modules it depends on. Here we only report and diagnose. */}
+          <p className="text-xs text-muted-foreground">{t('publish.blockWhereToPublish')}</p>
+          {state === 'pending_changes' && (
+            <Button variant="ghost" size="sm" type="button" onClick={() => setDiscardOpen(true)}>
+              {t('discard.trigger')}
+            </Button>
+          )}
           <PreflightPanel containerId={container.id} result={preflightResult} />
         </>
       )}
