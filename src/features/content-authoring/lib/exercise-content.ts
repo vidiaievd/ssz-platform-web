@@ -29,6 +29,9 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   mcContext: '',
   mcOptions: [{ text: '' }, { text: '' }],
   mcCorrectIndex: 0,
+  mcgContext: '',
+  mcgSharedOptions: [{ text: '' }, { text: '' }],
+  mcgItems: [{ question: '', options: [], correctIndex: 0, explanation: '' }],
   fibText: '',
   fibBlanks: [{ answers: '', rationaleExplanation: '', rationaleOptions: [] }],
   fibWordBank: '',
@@ -66,15 +69,100 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   ],
 };
 
-/** A minimal, valid multiple-choice draft — used to seed picker/starter exercises. */
+/**
+ * A minimal draft for each template, valid enough to be created and then filled in.
+ *
+ * The picker creates an exercise before the author has written anything, and
+ * both `exerciseFormSchema` and the backend's `contentSchema` reject an empty
+ * one — so every template needs a structurally complete starting point. The
+ * placeholder wording is deliberately untranslated: it is course content in the
+ * target language, and the author overwrites it in the editor that opens next.
+ */
+export function minimalExerciseValues(
+  templateCode: ExerciseType,
+  prompt: string,
+): ExerciseFormValues {
+  const base = { ...DEFAULT_EXERCISE_VALUES, templateCode };
+
+  switch (templateCode) {
+    case 'multiple_choice':
+      return {
+        ...base,
+        mcQuestion: prompt,
+        mcOptions: [{ text: 'Option 1' }, { text: 'Option 2' }],
+        mcCorrectIndex: 0,
+      };
+    case 'multiple_choice_group':
+      return {
+        ...base,
+        mcgSharedOptions: [{ text: 'Option 1' }, { text: 'Option 2' }],
+        mcgItems: [{ question: prompt, options: [], correctIndex: 0, explanation: '' }],
+      };
+    case 'fill_in_blank':
+      return {
+        ...base,
+        fibText: 'Write a sentence with a ___1___ in it.',
+        fibBlanks: [{ answers: 'blank', rationaleExplanation: '', rationaleOptions: [] }],
+      };
+    case 'translate_to_target':
+    case 'translate_from_target':
+      return {
+        ...base,
+        trSourceText: prompt,
+        trAcceptedTranslations: [{ text: 'Translation' }],
+      };
+    case 'match_pairs':
+      return {
+        ...base,
+        mpPairs: [
+          { left: 'Left 1', right: 'Right 1' },
+          { left: 'Left 2', right: 'Right 2' },
+        ],
+      };
+    case 'short_answer':
+      return { ...base, saQuestion: prompt, saReferenceAnswer: 'Reference answer' };
+    case 'writing_task':
+      return { ...base, wtPrompt: prompt };
+    case 'sentence_schema':
+      return {
+        ...base,
+        ssSentence: 'Jeg leser boka.',
+        ssFields: [{ label: 'Field 1' }, { label: 'Field 2' }],
+        ssTokens: [
+          { text: 'Jeg', fieldIndex: 0 },
+          { text: 'leser', fieldIndex: 1 },
+        ],
+      };
+    case 'word_bank_fill':
+      return {
+        ...base,
+        wbfWordBank: 'first, second',
+        wbfSentences: [{ text: 'Write a sentence with a ___1___ in it.', answers: ['first'] }],
+      };
+    case 'text_order':
+      return {
+        ...base,
+        toLines: [
+          { text: 'First line', speaker: '' },
+          { text: 'Second line', speaker: '' },
+        ],
+      };
+    case 'error_correction':
+      return {
+        ...base,
+        ecSentences: [
+          {
+            chunks: 'First part | second part',
+            fixes: [{ chunkIndex: '2', accepted: 'corrected part', note: '' }],
+          },
+        ],
+      };
+  }
+}
+
+/** A minimal, valid multiple-choice draft — used to seed starter exercises. */
 export function minimalMcqValues(question: string): ExerciseFormValues {
-  return {
-    ...DEFAULT_EXERCISE_VALUES,
-    templateCode: 'multiple_choice',
-    mcQuestion: question,
-    mcOptions: [{ text: 'Option 1' }, { text: 'Option 2' }],
-    mcCorrectIndex: 0,
-  };
+  return minimalExerciseValues('multiple_choice', question);
 }
 
 /** Blank ids in reading order, e.g. "a ___1___ b ___3___" → [1, 3]. */
@@ -108,6 +196,45 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
         },
         expectedAnswers: {
           correct_option_ids: options[correctIndex] ? [options[correctIndex].id] : [],
+        },
+      };
+    }
+    case 'multiple_choice_group': {
+      // Option ids are scoped to the question they belong to — the engine
+      // resolves `correct_option_ids` inside one `items[]` entry — so the shared
+      // column and a question's own options can both start at `opt-0`.
+      const toOptions = (options: Array<{ text: string }> | undefined) =>
+        (options ?? [])
+          .filter((o) => o.text.trim())
+          .map((o, i) => ({ id: `opt-${i}`, text: o.text.trim() }));
+
+      const shared = toOptions(values.mcgSharedOptions);
+      const rows = (values.mcgItems ?? [])
+        .filter((it) => it.question.trim())
+        .map((it, i) => {
+          const own = toOptions(it.options);
+          return { row: it, id: `${i + 1}`, own, resolved: own.length > 0 ? own : shared };
+        });
+
+      return {
+        content: {
+          ...(shared.length > 0 && { options: shared }),
+          items: rows.map(({ row, id, own }) => ({
+            id,
+            question: row.question.trim(),
+            ...(own.length > 0 && { options: own }),
+          })),
+          ...(values.mcgContext?.trim() && { context: values.mcgContext.trim() }),
+        },
+        expectedAnswers: {
+          items: rows.map(({ row, id, resolved }) => {
+            const correct = resolved[row.correctIndex];
+            return {
+              id,
+              correct_option_ids: correct ? [correct.id] : [],
+              ...(row.explanation?.trim() && { explanation: row.explanation.trim() }),
+            };
+          }),
         },
       };
     }
@@ -350,7 +477,9 @@ export function parseExerciseToForm(exercise: {
   instructions?: ExerciseInstruction[] | null;
 }): ExerciseFormValues {
   const { templateCode, content, expectedAnswers = {}, instructions } = exercise;
-  const known = (EXERCISE_TYPES_SET.has(templateCode) ? templateCode : 'multiple_choice') as ExerciseType;
+  const known = (
+    EXERCISE_TYPES_SET.has(templateCode) ? templateCode : 'multiple_choice'
+  ) as ExerciseType;
   // Instructions are a per-language sub-resource; the editor edits the first entry.
   const primary = instructions?.[0];
   const base: ExerciseFormValues = {
@@ -379,8 +508,57 @@ export function parseExerciseToForm(exercise: {
         mcQuestion: typeof content.question === 'string' ? content.question : '',
         mcContext: typeof content.context === 'string' ? content.context : '',
         mcOptions:
-          options.length >= 2 ? options.map((o) => ({ text: o.text })) : [{ text: '' }, { text: '' }],
+          options.length >= 2
+            ? options.map((o) => ({ text: o.text }))
+            : [{ text: '' }, { text: '' }],
         mcCorrectIndex: correctIndex,
+      };
+    }
+    case 'multiple_choice_group': {
+      const readOptions = (value: unknown) =>
+        (Array.isArray(value) ? (value as McqOption[]) : []).map((o) => ({
+          id: typeof o.id === 'string' ? o.id : '',
+          text: typeof o.text === 'string' ? o.text : '',
+        }));
+
+      const shared = readOptions(content.options);
+      const rawItems = Array.isArray(content.items)
+        ? (content.items as Array<{ id?: unknown; question?: unknown; options?: unknown }>)
+        : [];
+      const rawAnswers = Array.isArray(expectedAnswers.items)
+        ? (expectedAnswers.items as Array<{
+            id?: unknown;
+            correct_option_ids?: unknown;
+            explanation?: unknown;
+          }>)
+        : [];
+      const answersById = new Map(rawAnswers.map((a) => [String(a.id ?? ''), a]));
+
+      const items = rawItems.map((item) => {
+        const own = readOptions(item.options);
+        const resolved = own.length > 0 ? own : shared;
+        const key = answersById.get(String(item.id ?? ''));
+        const correctIds = Array.isArray(key?.correct_option_ids)
+          ? (key.correct_option_ids as unknown[]).map(String)
+          : [];
+        return {
+          question: typeof item.question === 'string' ? item.question : '',
+          // An empty list is what marks the question as using the shared column.
+          options: own.map((o) => ({ text: o.text })),
+          correctIndex: Math.max(
+            resolved.findIndex((o) => correctIds.includes(o.id)),
+            0,
+          ),
+          explanation: typeof key?.explanation === 'string' ? key.explanation : '',
+        };
+      });
+
+      return {
+        ...base,
+        mcgContext: typeof content.context === 'string' ? content.context : '',
+        mcgSharedOptions:
+          shared.length > 0 ? shared.map((o) => ({ text: o.text })) : [{ text: '' }, { text: '' }],
+        mcgItems: items.length > 0 ? items : DEFAULT_EXERCISE_VALUES.mcgItems,
       };
     }
     case 'fill_in_blank': {
@@ -430,7 +608,8 @@ export function parseExerciseToForm(exercise: {
       return {
         ...base,
         trSourceText: typeof content.source_text === 'string' ? content.source_text : '',
-        trSourceLanguage: typeof content.source_language === 'string' ? content.source_language : '',
+        trSourceLanguage:
+          typeof content.source_language === 'string' ? content.source_language : '',
         trAcceptedTranslations: translations.length > 0 ? translations : [{ text: '' }],
       };
     }
@@ -447,7 +626,9 @@ export function parseExerciseToForm(exercise: {
       const answerPairs = Array.isArray(expectedAnswers.pairs)
         ? (expectedAnswers.pairs as Array<{ left_id?: unknown; right_id?: unknown }>)
         : [];
-      const rightByLeftId = new Map(answerPairs.map((p) => [String(p.left_id), String(p.right_id)]));
+      const rightByLeftId = new Map(
+        answerPairs.map((p) => [String(p.left_id), String(p.right_id)]),
+      );
       const pairs = leftItems.map((l) => {
         const rightId = rightByLeftId.get(String(l.id));
         return {
@@ -476,7 +657,9 @@ export function parseExerciseToForm(exercise: {
         saQuestion: typeof content.question === 'string' ? content.question : '',
         saContext: typeof content.context === 'string' ? content.context : '',
         saReferenceAnswer:
-          typeof expectedAnswers.reference_answer === 'string' ? expectedAnswers.reference_answer : '',
+          typeof expectedAnswers.reference_answer === 'string'
+            ? expectedAnswers.reference_answer
+            : '',
         saAccepted: accepted,
       };
     }
@@ -536,7 +719,8 @@ export function parseExerciseToForm(exercise: {
         ? (expectedAnswers.order as unknown[]).filter((id): id is string => typeof id === 'string')
         : [];
       // The authored order lives in expectedAnswers; content order is arbitrary.
-      const ordered = order.length > 0 ? order.map((id) => byId.get(id)).filter((it) => it != null) : rawItems;
+      const ordered =
+        order.length > 0 ? order.map((id) => byId.get(id)).filter((it) => it != null) : rawItems;
       const lines = ordered.map((it) => ({
         text: typeof it!.text === 'string' ? it!.text : '',
         speaker: typeof it!.speaker === 'string' ? it!.speaker : '',
@@ -556,10 +740,7 @@ export function parseExerciseToForm(exercise: {
         ? (expectedAnswers.items as WbfAnswerItem[])
         : [];
       const answersById = new Map(
-        rawAnswers.map((a) => [
-          String(a.id ?? ''),
-          Array.isArray(a.blanks) ? a.blanks : [],
-        ]),
+        rawAnswers.map((a) => [String(a.id ?? ''), Array.isArray(a.blanks) ? a.blanks : []]),
       );
       const sentences = rawItems.map((item) => {
         const text = typeof item.text_with_blanks === 'string' ? item.text_with_blanks : '';
@@ -590,9 +771,7 @@ export function parseExerciseToForm(exercise: {
       const fields = rawFields.map((f) => ({
         label: typeof f.label === 'string' ? f.label : '',
       }));
-      const fieldIndexById = new Map<string, number>(
-        rawFields.map((f, i) => [String(f.id), i]),
-      );
+      const fieldIndexById = new Map<string, number>(rawFields.map((f, i) => [String(f.id), i]));
 
       // Reconstruct each token's field from the placements.
       const placements = Array.isArray(expectedAnswers.placements)
@@ -619,7 +798,8 @@ export function parseExerciseToForm(exercise: {
       return {
         ...base,
         ssSentence: typeof content.sentence === 'string' ? content.sentence : '',
-        ssSourceSentence: typeof content.source_sentence === 'string' ? content.source_sentence : '',
+        ssSourceSentence:
+          typeof content.source_sentence === 'string' ? content.source_sentence : '',
         ssSchemaType: schemaType,
         ssFields: fields.length >= 2 ? fields : [{ label: '' }, { label: '' }],
         ssTokens:

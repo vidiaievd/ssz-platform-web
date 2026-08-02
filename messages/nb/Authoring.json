@@ -174,6 +174,7 @@
     "type": "Type",
     "types": {
       "multiple_choice": "Flervalg",
+      "multiple_choice_group": "Flervalgsblokk",
       "fill_in_blank": "Fyll inn i tomrommet",
       "translate_to_target": "Oversett til målspråket",
       "translate_from_target": "Oversett fra målspråket",
@@ -200,6 +201,23 @@
     "hintPlaceholder": "Valgfritt hint studenten kan vise",
     "mcContext": "Kontekst",
     "mcContextPlaceholder": "Valgfri setning eller kontekst",
+    "mcgContext": "Kontekst",
+    "mcgContextPlaceholder": "Valgfri linje som vises over spørsmålene",
+    "mcgSharedOptions": "Felles svaralternativer",
+    "mcgSharedOptionsHint": "Svarkolonnen alle spørsmålene bruker, f.eks. Riktig / Galt. Et spørsmål kan erstatte den med sine egne alternativer.",
+    "mcgOptionPlaceholder": "Alternativtekst",
+    "mcgOptionFallback": "Alternativ {n}",
+    "mcgQuestions": "Spørsmål",
+    "mcgQuestionsHint": "Alle spørsmålene besvares og sjekkes samlet som én blokk.",
+    "mcgQuestionPlaceholder": "Spørsmål eller påstand",
+    "mcgAddQuestion": "Legg til spørsmål",
+    "mcgRemoveQuestion": "Fjern spørsmål",
+    "mcgCorrect": "Riktig svar",
+    "mcgOwnOptions": "Egne alternativer",
+    "mcgUseSharedOptions": "Bruk felles alternativer",
+    "mcgNoSharedOptions": "Legg til felles alternativer over, eller gi dette spørsmålet egne.",
+    "mcgExplanation": "Forklaring",
+    "mcgExplanationPlaceholder": "Hvorfor dette svaret er riktig (vises etter sjekk)",
     "fibText": "Tekst med tomrom",
     "fibTextPlaceholder": "Bruk ___1___, ___2___ for tomrom, f.eks. Jeg ___1___ norsk.",
     "fibTextHint": "Nummerer hvert tomrom: ___1___, ___2___ …",
@@ -578,7 +596,12 @@
     "addModule": "Legg til modul",
     "newLevelTitle": "Nytt nivå",
     "newModuleTitle": "Ny modul",
-    "openLessonEditor": "Åpne leksjonsredigering"
+    "openLessonEditor": "Åpne leksjonsredigering",
+    "modulePublishLabel": "Modul",
+    "modulePublishAction": "Publiser modul",
+    "modulePublishFirst": "Denne modulen er aldri publisert, så studentene kan ikke åpne den ennå.",
+    "modulePublishPending": "Denne modulen har upubliserte endringer. Studentene ser den publiserte versjonen til du publiserer på nytt.",
+    "modulePublishUpToDate": "Alt i denne modulen er publisert."
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -588,7 +611,10 @@
   "addLesson": {
     "title": "Legg til en leksjon",
     "description": "Velg en materialtype som skal legges til i denne modulen.",
-    "defaultTitle": "Ny {type}"
+    "defaultTitle": "Ny {type}",
+    "exerciseTypeTitle": "Velg oppgavetype",
+    "exerciseTypeDescription": "Typen bestemmer hvordan oppgaven besvares og vurderes, og kan ikke endres etterpå.",
+    "back": "Tilbake"
   },
   "editor": {
     "backToCourse": "Tilbake til kurset",

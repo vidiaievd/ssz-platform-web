@@ -54,6 +54,55 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
+        {values.templateCode === 'multiple_choice_group' &&
+          ((values.mcgItems ?? []).some((it) => it.question.trim()) ? (
+            <div>
+              {values.mcgContext?.trim() && (
+                <p className="mb-3 text-xs text-muted-foreground">{values.mcgContext}</p>
+              )}
+              <ol className="flex flex-col gap-2.5">
+                {(values.mcgItems ?? [])
+                  .filter((it) => it.question.trim())
+                  .map((item, i) => {
+                    // A question falls back to the shared column, exactly as the
+                    // runner resolves it.
+                    const own = (item.options ?? []).filter((o) => o.text.trim());
+                    const options =
+                      own.length > 0
+                        ? own
+                        : (values.mcgSharedOptions ?? []).filter((o) => o.text.trim());
+                    return (
+                      <li
+                        key={i}
+                        className="rounded-[11px] border border-(--ssz-border-default) bg-surface px-3 py-2.5"
+                      >
+                        <p className="text-sm text-(--ssz-text-primary)">
+                          <span className="mr-1.5 text-xs text-muted-foreground">{i + 1}.</span>
+                          {item.question}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {options.map((option, j) => (
+                            <span
+                              key={j}
+                              className={
+                                j === item.correctIndex
+                                  ? 'rounded-md border border-success-500 bg-success-50 px-2 py-0.5 text-[13px] text-(--ssz-text-primary)'
+                                  : 'rounded-md border border-(--ssz-border-default) px-2 py-0.5 text-[13px] text-(--ssz-text-primary)'
+                              }
+                            >
+                              {option.text}
+                            </span>
+                          ))}
+                        </div>
+                      </li>
+                    );
+                  })}
+              </ol>
+            </div>
+          ) : (
+            empty
+          ))}
+
         {values.templateCode === 'fill_in_blank' &&
           (values.fibText ? (
             <div className="space-y-2">

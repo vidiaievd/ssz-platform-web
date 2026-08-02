@@ -174,6 +174,7 @@
     "type": "Тип",
     "types": {
       "multiple_choice": "Множинний вибір",
+      "multiple_choice_group": "Блок питань із вибором",
       "fill_in_blank": "Заповніть пропуск",
       "translate_to_target": "Переклад цільовою мовою",
       "translate_from_target": "Переклад з цільової мови",
@@ -200,6 +201,23 @@
     "hintPlaceholder": "Необов’язкова підказка, яку студент може відкрити",
     "mcContext": "Контекст",
     "mcContextPlaceholder": "Необов’язкове речення або контекст",
+    "mcgContext": "Контекст",
+    "mcgContextPlaceholder": "Необов’язковий рядок над питаннями",
+    "mcgSharedOptions": "Спільні варіанти",
+    "mcgSharedOptionsHint": "Колонка відповідей, яку використовують усі питання, напр. Riktig / Galt. Окреме питання може замінити її власними варіантами.",
+    "mcgOptionPlaceholder": "Текст варіанта",
+    "mcgOptionFallback": "Варіант {n}",
+    "mcgQuestions": "Питання",
+    "mcgQuestionsHint": "Усі питання виконуються й перевіряються разом як один блок.",
+    "mcgQuestionPlaceholder": "Питання або твердження",
+    "mcgAddQuestion": "Додати питання",
+    "mcgRemoveQuestion": "Видалити питання",
+    "mcgCorrect": "Правильна відповідь",
+    "mcgOwnOptions": "Власні варіанти",
+    "mcgUseSharedOptions": "Використати спільні варіанти",
+    "mcgNoSharedOptions": "Додайте спільні варіанти вище або задайте власні для цього питання.",
+    "mcgExplanation": "Пояснення",
+    "mcgExplanationPlaceholder": "Чому ця відповідь правильна (показується після перевірки)",
     "fibText": "Текст із пропусками",
     "fibTextPlaceholder": "Використовуйте ___1___, ___2___ для пропусків, напр. Jeg ___1___ norsk.",
     "fibTextHint": "Нумеруйте кожен пропуск: ___1___, ___2___ …",
@@ -578,7 +596,12 @@
     "addModule": "Додати модуль",
     "newLevelTitle": "Новий рівень",
     "newModuleTitle": "Новий модуль",
-    "openLessonEditor": "Відкрити редактор уроку"
+    "openLessonEditor": "Відкрити редактор уроку",
+    "modulePublishLabel": "Модуль",
+    "modulePublishAction": "Опублікувати модуль",
+    "modulePublishFirst": "Цей модуль ще жодного разу не публікувався, тож студенти не можуть його відкрити.",
+    "modulePublishPending": "У модулі є неопубліковані зміни. Студенти бачитимуть опубліковану версію, доки ви не опублікуєте знову.",
+    "modulePublishUpToDate": "Усе в цьому модулі опубліковано."
   },
   "settings": {
     "trigger": "Налаштування",
@@ -588,7 +611,10 @@
   "addLesson": {
     "title": "Додати урок",
     "description": "Оберіть тип матеріалу, який потрібно додати до цього модуля.",
-    "defaultTitle": "Новий матеріал: {type}"
+    "defaultTitle": "Новий матеріал: {type}",
+    "exerciseTypeTitle": "Оберіть тип вправи",
+    "exerciseTypeDescription": "Тип визначає, як вправа виконується та оцінюється, і його не можна змінити пізніше.",
+    "back": "Назад"
   },
   "editor": {
     "backToCourse": "Назад до курсу",

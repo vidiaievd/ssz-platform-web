@@ -30,11 +30,16 @@ export async function createVocabularyListAction(
   difficultyLevel: DifficultyLevel,
   visibility: Visibility,
   data: VocabularyListFormValues,
+  ownerSchoolId?: string | null,
 ) {
   return tryAction(async () => {
     const parsed = vocabularyListFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
     const { title, description } = parsed.data;
 
@@ -48,6 +53,8 @@ export async function createVocabularyListAction(
         targetLanguage,
         difficultyLevel,
         visibility,
+        // Required for `school_private` (content-service `getValidVisibilities`).
+        ...(ownerSchoolId && { ownerSchoolId }),
       },
     });
 
@@ -68,7 +75,11 @@ export async function saveVocabularyItemAction(
   return tryAction(async () => {
     const parsed = vocabularyItemFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
     const { lemma, ipa, partOfSpeech, translations, examples } = parsed.data;
 

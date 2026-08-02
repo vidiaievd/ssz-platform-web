@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildExercisePayload, parseExerciseToForm, minimalMcqValues } from './exercise-content';
-import type { ExerciseFormValues } from '../schemas/exercise';
+import {
+  buildExercisePayload,
+  parseExerciseToForm,
+  minimalMcqValues,
+  minimalExerciseValues,
+} from './exercise-content';
+import { EXERCISE_TYPES, exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
 
 const base: ExerciseFormValues = {
   templateCode: 'multiple_choice',
@@ -268,7 +273,11 @@ describe('build → parse round-trips', () => {
   for (const { name, values } of cases) {
     it(`${name} survives a build → parse round-trip`, () => {
       const { content, expectedAnswers } = buildExercisePayload(values);
-      const parsed = parseExerciseToForm({ templateCode: values.templateCode, content, expectedAnswers });
+      const parsed = parseExerciseToForm({
+        templateCode: values.templateCode,
+        content,
+        expectedAnswers,
+      });
       const rebuilt = buildExercisePayload(parsed);
       expect(rebuilt.content).toEqual(content);
       expect(rebuilt.expectedAnswers).toEqual(expectedAnswers);
@@ -314,6 +323,30 @@ describe('minimalMcqValues', () => {
     expect(content.question).toBe('Practice');
     expect((content.options as unknown[]).length).toBe(2);
     expect(expectedAnswers.correct_option_ids).toEqual(['opt-0']);
+  });
+});
+
+describe('minimalExerciseValues', () => {
+  // The picker creates the exercise before the author types anything, and
+  // `createExerciseAction` runs the form schema over it — a template whose
+  // scaffold does not validate is a template nobody can add to a course.
+  for (const code of EXERCISE_TYPES) {
+    it(`${code}: scaffolds a draft the form schema accepts`, () => {
+      const result = exerciseFormSchema.safeParse(minimalExerciseValues(code, 'New exercise'));
+      if (!result.success) {
+        throw new Error(
+          `${code}: ${result.error.issues.map((i) => `${i.path.join('.')} ${i.message}`).join('; ')}`,
+        );
+      }
+      expect(result.data.templateCode).toBe(code);
+    });
+  }
+
+  it('every scaffold builds a payload with a non-empty content object', () => {
+    for (const code of EXERCISE_TYPES) {
+      const { content } = buildExercisePayload(minimalExerciseValues(code, 'New exercise'));
+      expect(Object.keys(content).length, code).toBeGreaterThan(0);
+    }
   });
 });
 
@@ -497,7 +530,11 @@ describe('sentence_schema', () => {
       ],
     };
     const { content, expectedAnswers } = buildExercisePayload(values);
-    const parsed = parseExerciseToForm({ templateCode: 'sentence_schema', content, expectedAnswers });
+    const parsed = parseExerciseToForm({
+      templateCode: 'sentence_schema',
+      content,
+      expectedAnswers,
+    });
     expect(parsed.ssSentence).toBe('Lars har likt Lotte');
     expect(parsed.ssSchemaType).toBe('subordinate');
     expect(parsed.ssFields).toEqual([{ label: 'A' }, { label: 'B' }]);
@@ -557,7 +594,11 @@ describe('word_bank_fill', () => {
 
   it('round-trips through parseExerciseToForm', () => {
     const { content, expectedAnswers } = buildExercisePayload(values);
-    const parsed = parseExerciseToForm({ templateCode: 'word_bank_fill', content, expectedAnswers });
+    const parsed = parseExerciseToForm({
+      templateCode: 'word_bank_fill',
+      content,
+      expectedAnswers,
+    });
 
     expect(parsed.wbfWordBank).toBe('show off, boast, clicked with');
     expect(parsed.wbfSentences).toEqual([
@@ -643,9 +684,9 @@ describe('match_pairs layout variant', () => {
     });
 
     expect(content.variant).toBe('halves');
-    expect(parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant).toBe(
-      'halves',
-    );
+    expect(
+      parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant,
+    ).toBe('halves');
   });
 
   it('omits the key for the default word-pairs layout', () => {
@@ -657,9 +698,9 @@ describe('match_pairs layout variant', () => {
     });
 
     expect('variant' in content).toBe(false);
-    expect(parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant).toBe(
-      'pairs',
-    );
+    expect(
+      parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant,
+    ).toBe('pairs');
   });
 });
 
@@ -670,7 +711,13 @@ describe('error_correction', () => {
     ecSentences: [
       {
         chunks: 'I could see | that the more | she was warming up with me',
-        fixes: [{ chunkIndex: '3', accepted: 'she was warming to me, she warmed to me', note: 'warm to sb' }],
+        fixes: [
+          {
+            chunkIndex: '3',
+            accepted: 'she was warming to me, she warmed to me',
+            note: 'warm to sb',
+          },
+        ],
       },
       {
         chunks: 'They say | make your mind | about people',
@@ -725,7 +772,11 @@ describe('error_correction', () => {
       {
         chunks: 'I could see | that the more | she was warming up with me',
         fixes: [
-          { chunkIndex: '3', accepted: 'she was warming to me, she warmed to me', note: 'warm to sb' },
+          {
+            chunkIndex: '3',
+            accepted: 'she was warming to me, she warmed to me',
+            note: 'warm to sb',
+          },
         ],
       },
       {
@@ -733,5 +784,119 @@ describe('error_correction', () => {
         fixes: [{ chunkIndex: '2', accepted: 'make up your mind', note: '' }],
       },
     ]);
+  });
+});
+
+describe('multiple_choice_group', () => {
+  // A Riktig / Galt table: every statement answers from the same column.
+  const trueFalse: ExerciseFormValues = {
+    ...base,
+    templateCode: 'multiple_choice_group',
+    mcgContext: 'Tekst 1A — Bartek søker ny jobb.',
+    mcgSharedOptions: [{ text: 'Riktig' }, { text: 'Galt' }],
+    mcgItems: [
+      { question: 'Annonsen ber om fagbrev.', options: [], correctIndex: 0, explanation: '' },
+      {
+        question: 'Firmaet vil ha fem års erfaring.',
+        options: [],
+        correctIndex: 1,
+        explanation: 'Annonsen ber om minst tre år.',
+      },
+    ],
+  };
+
+  it('shares one option column across every question', () => {
+    const { content, expectedAnswers } = buildExercisePayload(trueFalse);
+
+    expect(content).toEqual({
+      options: [
+        { id: 'opt-0', text: 'Riktig' },
+        { id: 'opt-1', text: 'Galt' },
+      ],
+      items: [
+        { id: '1', question: 'Annonsen ber om fagbrev.' },
+        { id: '2', question: 'Firmaet vil ha fem års erfaring.' },
+      ],
+      context: 'Tekst 1A — Bartek søker ny jobb.',
+    });
+    expect(expectedAnswers).toEqual({
+      items: [
+        { id: '1', correct_option_ids: ['opt-0'] },
+        { id: '2', correct_option_ids: ['opt-1'], explanation: 'Annonsen ber om minst tre år.' },
+      ],
+    });
+  });
+
+  it('lets a question carry options of its own', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...base,
+      templateCode: 'multiple_choice_group',
+      mcgSharedOptions: [{ text: '' }, { text: '' }],
+      mcgItems: [
+        {
+          question: 'selvstendig',
+          options: [{ text: 'som trenger mye hjelp' }, { text: 'som kan jobbe alene' }],
+          correctIndex: 1,
+          explanation: '',
+        },
+      ],
+    });
+
+    // No shared column was authored, so `options` stays off the block itself.
+    expect(content).toEqual({
+      items: [
+        {
+          id: '1',
+          question: 'selvstendig',
+          options: [
+            { id: 'opt-0', text: 'som trenger mye hjelp' },
+            { id: 'opt-1', text: 'som kan jobbe alene' },
+          ],
+        },
+      ],
+    });
+    expect(expectedAnswers).toEqual({ items: [{ id: '1', correct_option_ids: ['opt-1'] }] });
+  });
+
+  it('drops questions with no text and renumbers the rest', () => {
+    const { content, expectedAnswers } = buildExercisePayload({
+      ...trueFalse,
+      mcgItems: [
+        { question: '', options: [], correctIndex: 0, explanation: '' },
+        { question: 'Anne leser søknaden.', options: [], correctIndex: 0, explanation: '' },
+      ],
+    });
+
+    expect(content.items).toEqual([{ id: '1', question: 'Anne leser søknaden.' }]);
+    expect(expectedAnswers).toEqual({ items: [{ id: '1', correct_option_ids: ['opt-0'] }] });
+  });
+
+  it('round-trips a mixed block through parseExerciseToForm', () => {
+    const values: ExerciseFormValues = {
+      ...trueFalse,
+      mcgItems: [
+        ...(trueFalse.mcgItems ?? []),
+        {
+          question: 'et fagbrev',
+          options: [{ text: 'et vanlig brev' }, { text: 'et bevis på fagutdanning' }],
+          correctIndex: 1,
+          explanation: '',
+        },
+      ],
+    };
+    const { content, expectedAnswers } = buildExercisePayload(values);
+    const parsed = parseExerciseToForm({
+      templateCode: 'multiple_choice_group',
+      content,
+      expectedAnswers,
+    });
+
+    expect(parsed.mcgContext).toBe('Tekst 1A — Bartek søker ny jobb.');
+    expect(parsed.mcgSharedOptions).toEqual([{ text: 'Riktig' }, { text: 'Galt' }]);
+    expect(parsed.mcgItems).toEqual(values.mcgItems);
+
+    const rebuilt = buildExercisePayload(parsed);
+    expect(rebuilt.content).toEqual(content);
+    expect(rebuilt.expectedAnswers).toEqual(expectedAnswers);
   });
 });

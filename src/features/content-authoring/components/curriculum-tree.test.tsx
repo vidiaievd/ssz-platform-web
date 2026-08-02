@@ -13,7 +13,10 @@ vi.mock('../actions/container-item', () => ({
 }));
 vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
 vi.mock('../actions/container', () => ({ createModuleAction: vi.fn() }));
-vi.mock('../actions/section', () => ({ createSectionAction: vi.fn(), reorderSectionsAction: vi.fn() }));
+vi.mock('../actions/section', () => ({
+  createSectionAction: vi.fn(),
+  reorderSectionsAction: vi.fn(),
+}));
 
 const { CurriculumTree } = await import('./curriculum-tree');
 const { createModuleAction } = await import('../actions/container');
@@ -78,6 +81,7 @@ function renderTree(onSelect = vi.fn(), onChanged = vi.fn()) {
         difficultyLevel="A2"
         visibility="public"
         accessTier="free_within_school"
+        ownerSchoolId="school-1"
       />
     </NextIntlClientProvider>,
   );
@@ -104,7 +108,10 @@ describe('CurriculumTree', () => {
     const { onSelect } = renderTree();
     fireEvent.click(screen.getByText('A1 — Beginner'));
     expect(onSelect).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: 'level', level: expect.objectContaining({ id: 'level-a1' }) }),
+      expect.objectContaining({
+        kind: 'level',
+        level: expect.objectContaining({ id: 'level-a1' }),
+      }),
     );
   });
 
@@ -112,7 +119,10 @@ describe('CurriculumTree', () => {
     const { onSelect } = renderTree();
     fireEvent.click(screen.getByText('Samfunn og kultur'));
     expect(onSelect).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: 'module', module: expect.objectContaining({ id: 'item-module-1' }) }),
+      expect.objectContaining({
+        kind: 'module',
+        module: expect.objectContaining({ id: 'item-module-1' }),
+      }),
     );
   });
 
@@ -200,6 +210,8 @@ describe('CurriculumTree', () => {
       'public',
       'free_within_school',
       'level-a1',
+      // Without the owning school the backend rejects `school_private` modules.
+      'school-1',
     );
   });
 

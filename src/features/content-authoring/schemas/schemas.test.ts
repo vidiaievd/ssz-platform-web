@@ -33,7 +33,9 @@ describe('containerFormSchema', () => {
   });
 
   it('rejects an invalid containerType', () => {
-    expect(containerFormSchema.safeParse({ ...valid, containerType: 'LESSON' }).success).toBe(false);
+    expect(containerFormSchema.safeParse({ ...valid, containerType: 'LESSON' }).success).toBe(
+      false,
+    );
   });
 
   it('rejects an invalid accessTier', () => {
@@ -53,7 +55,9 @@ describe('containerFormSchema', () => {
   });
 
   it('rejects an invalid levelSystem', () => {
-    expect(containerFormSchema.safeParse({ ...valid, levelSystem: 'advanced' }).success).toBe(false);
+    expect(containerFormSchema.safeParse({ ...valid, levelSystem: 'advanced' }).success).toBe(
+      false,
+    );
   });
 });
 
@@ -107,9 +111,9 @@ describe('grammarEditorFormSchema', () => {
   });
 
   it('rejects an example with an empty text', () => {
-    expect(
-      grammarEditorFormSchema.safeParse({ ...valid, examples: [{ text: '' }] }).success,
-    ).toBe(false);
+    expect(grammarEditorFormSchema.safeParse({ ...valid, examples: [{ text: '' }] }).success).toBe(
+      false,
+    );
   });
 });
 
@@ -150,6 +154,79 @@ describe('exerciseFormSchema', () => {
     if (result.success) return;
     const paths = result.error.issues.map((i) => i.path.join('.'));
     expect(paths).toContain('mcOptions');
+  });
+
+  it('multiple_choice_group: accepts questions answering from the shared column', () => {
+    expect(
+      exerciseFormSchema.safeParse({
+        templateCode: 'multiple_choice_group',
+        mcgSharedOptions: [{ text: 'Riktig' }, { text: 'Galt' }],
+        mcgItems: [
+          { question: 'Bartek søker jobb.', options: [], correctIndex: 0 },
+          { question: 'Anne er sjefen hans.', options: [], correctIndex: 1 },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('multiple_choice_group: accepts a question with options of its own and no shared column', () => {
+    expect(
+      exerciseFormSchema.safeParse({
+        templateCode: 'multiple_choice_group',
+        mcgSharedOptions: [{ text: '' }, { text: '' }],
+        mcgItems: [
+          {
+            question: 'selvstendig',
+            options: [{ text: 'som kan jobbe alene' }, { text: 'som trenger hjelp' }],
+            correctIndex: 0,
+          },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('multiple_choice_group: rejects a block with no question', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'multiple_choice_group',
+      mcgSharedOptions: [{ text: 'Riktig' }, { text: 'Galt' }],
+      mcgItems: [{ question: '   ', options: [], correctIndex: 0 }],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('mcgItems');
+  });
+
+  it('multiple_choice_group: rejects a shared column of fewer than 2 options', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'multiple_choice_group',
+      mcgSharedOptions: [{ text: 'Riktig' }],
+      mcgItems: [{ question: 'Bartek søker jobb.', options: [], correctIndex: 0 }],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('mcgSharedOptions');
+  });
+
+  it('multiple_choice_group: rejects a question left with a single option of its own', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'multiple_choice_group',
+      mcgSharedOptions: [{ text: 'Riktig' }, { text: 'Galt' }],
+      mcgItems: [{ question: 'selvstendig', options: [{ text: 'alene' }], correctIndex: 0 }],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('mcgItems.0.options');
+  });
+
+  it('multiple_choice_group: rejects a correct answer outside the resolved options', () => {
+    const result = exerciseFormSchema.safeParse({
+      templateCode: 'multiple_choice_group',
+      mcgSharedOptions: [{ text: 'Riktig' }, { text: 'Galt' }],
+      mcgItems: [{ question: 'Bartek søker jobb.', options: [], correctIndex: 2 }],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('mcgItems.0.correctIndex');
   });
 
   it('word_bank_fill: accepts a bank plus sentences with answered blanks', () => {
@@ -223,7 +300,10 @@ describe('exerciseFormSchema', () => {
       exerciseFormSchema.safeParse({
         templateCode: 'error_correction',
         ecSentences: [
-          { chunks: 'They say | make your mind | about people', fixes: [{ chunkIndex: '2', accepted: 'make up your mind' }] },
+          {
+            chunks: 'They say | make your mind | about people',
+            fixes: [{ chunkIndex: '2', accepted: 'make up your mind' }],
+          },
         ],
       }).success,
     ).toBe(true);
@@ -232,7 +312,12 @@ describe('exerciseFormSchema', () => {
   it('error_correction: rejects a sentence that was never split', () => {
     const result = exerciseFormSchema.safeParse({
       templateCode: 'error_correction',
-      ecSentences: [{ chunks: 'They say make your mind about people', fixes: [{ chunkIndex: '1', accepted: 'x' }] }],
+      ecSentences: [
+        {
+          chunks: 'They say make your mind about people',
+          fixes: [{ chunkIndex: '1', accepted: 'x' }],
+        },
+      ],
     });
     expect(result.success).toBe(false);
     if (result.success) return;
@@ -246,7 +331,9 @@ describe('exerciseFormSchema', () => {
     });
     expect(result.success).toBe(false);
     if (result.success) return;
-    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('ecSentences.0.fixes.0.chunkIndex');
+    expect(result.error.issues.map((i) => i.path.join('.'))).toContain(
+      'ecSentences.0.fixes.0.chunkIndex',
+    );
   });
 
   it('error_correction: rejects sentences with no mistake at all', () => {

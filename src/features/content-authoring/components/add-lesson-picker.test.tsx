@@ -22,6 +22,7 @@ const DEFAULT_PROPS = {
   targetLanguage: 'no',
   difficultyLevel: 'A2' as const,
   visibility: 'public' as const,
+  ownerSchoolId: 'school-1',
 };
 
 function renderPicker(onCreated = vi.fn()) {
@@ -43,13 +44,24 @@ beforeEach(() => {
 describe('AddLessonPicker', () => {
   it('renders a card for each of the 7 material types', () => {
     renderPicker();
-    for (const label of ['Vocabulary', 'Reading', 'Video', 'Listening', 'Grammar', 'Practice', 'Live class']) {
+    for (const label of [
+      'Vocabulary',
+      'Reading',
+      'Video',
+      'Listening',
+      'Grammar',
+      'Practice',
+      'Live class',
+    ]) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
   });
 
   it('creates a text lesson and reports the new item id', async () => {
-    vi.mocked(createLessonAction).mockResolvedValue({ ok: true, value: { itemId: 'item-1' } } as never);
+    vi.mocked(createLessonAction).mockResolvedValue({
+      ok: true,
+      value: { itemId: 'item-1' },
+    } as never);
     const { onCreated } = renderPicker();
 
     fireEvent.click(screen.getByText('Reading'));
@@ -62,11 +74,17 @@ describe('AddLessonPicker', () => {
       'public',
       { title: 'New Reading' },
       'text',
+      // The owning school travels with every created material — without it the
+      // backend rejects anything `school_private`.
+      'school-1',
     );
   });
 
   it('creates a video lesson with kind=video', async () => {
-    vi.mocked(createLessonAction).mockResolvedValue({ ok: true, value: { itemId: 'item-2' } } as never);
+    vi.mocked(createLessonAction).mockResolvedValue({
+      ok: true,
+      value: { itemId: 'item-2' },
+    } as never);
     renderPicker();
 
     fireEvent.click(screen.getByText('Video'));
@@ -79,6 +97,7 @@ describe('AddLessonPicker', () => {
       'public',
       { title: 'New Video' },
       'video',
+      'school-1',
     );
   });
 
@@ -94,7 +113,18 @@ describe('AddLessonPicker', () => {
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith('item-3'));
   });
 
-  it('scaffolds a placeholder multiple-choice exercise', async () => {
+  it('asks for the exercise type instead of creating straight away', () => {
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Practice'));
+
+    // The template is immutable once created, so it has to be picked up front.
+    expect(createExerciseAction).not.toHaveBeenCalled();
+    expect(screen.getByText('Multiple choice group')).toBeInTheDocument();
+    expect(screen.getByText('Word bank gap-fill')).toBeInTheDocument();
+  });
+
+  it('scaffolds a placeholder exercise on the picked template', async () => {
     vi.mocked(createExerciseAction).mockResolvedValue({
       ok: true,
       value: { exerciseId: 'ex-1', itemId: 'item-4' },
@@ -102,6 +132,7 @@ describe('AddLessonPicker', () => {
     const { onCreated } = renderPicker();
 
     fireEvent.click(screen.getByText('Practice'));
+    fireEvent.click(screen.getByText('Multiple choice group'));
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith('item-4'));
     expect(createExerciseAction).toHaveBeenCalledWith(
@@ -110,12 +141,22 @@ describe('AddLessonPicker', () => {
       'A2',
       'public',
       expect.objectContaining({
-        templateCode: 'multiple_choice',
-        mcQuestion: 'New Practice',
-        mcOptions: [{ text: 'Option 1' }, { text: 'Option 2' }],
-        mcCorrectIndex: 0,
+        templateCode: 'multiple_choice_group',
+        mcgSharedOptions: [{ text: 'Option 1' }, { text: 'Option 2' }],
+        mcgItems: [{ question: 'New Practice', options: [], correctIndex: 0, explanation: '' }],
       }),
+      'school-1',
     );
+  });
+
+  it('goes back from the exercise type step to the material list', () => {
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Practice'));
+    fireEvent.click(screen.getByText('Back'));
+
+    expect(screen.getByText('Vocabulary')).toBeInTheDocument();
+    expect(screen.queryByText('Multiple choice group')).not.toBeInTheDocument();
   });
 
   it('shows an error toast and does not close on failure', async () => {

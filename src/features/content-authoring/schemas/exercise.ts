@@ -5,6 +5,7 @@ import { z } from 'zod';
 // (UUID) and validates content/expectedAnswers against the template's schemas.
 export const EXERCISE_TYPES = [
   'multiple_choice',
+  'multiple_choice_group',
   'fill_in_blank',
   'translate_to_target',
   'translate_from_target',
@@ -65,6 +66,24 @@ export const exerciseFormSchema = z
     mcContext: z.string().max(1000).optional(),
     mcOptions: z.array(z.object({ text: z.string().max(500) })).optional(),
     mcCorrectIndex: z.number().int().min(0).optional(),
+
+    // multiple_choice_group — several questions checked as one block.
+    // `mcgSharedOptions` is the column every question answers with (Riktig /
+    // Galt); a question that needs its own wording carries `options` of its own,
+    // and an empty `options` array means "use the shared column". `correctIndex`
+    // points into whichever of the two applies.
+    mcgContext: z.string().max(1000).optional(),
+    mcgSharedOptions: z.array(z.object({ text: z.string().max(500) })).optional(),
+    mcgItems: z
+      .array(
+        z.object({
+          question: z.string().max(1000),
+          options: z.array(z.object({ text: z.string().max(500) })).optional(),
+          correctIndex: z.number().int().min(0),
+          explanation: z.string().max(1000).optional(),
+        }),
+      )
+      .optional(),
 
     // fill_in_blank — `fibText` uses ___1___, ___2___ markers; each blank has a
     // comma-separated list of accepted answers, plus an optional rationale
@@ -184,6 +203,48 @@ export const exerciseFormSchema = z
         }
         break;
       }
+      case 'multiple_choice_group': {
+        const shared = (data.mcgSharedOptions ?? []).filter((o) => o.text.trim());
+        const items = (data.mcgItems ?? []).filter((it) => it.question.trim());
+        if (items.length < 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['mcgItems'],
+            message: 'At least 1 question required',
+          });
+        }
+        // The shared column only has to hold up for the questions that lean on it.
+        const needsShared = items.some(
+          (it) => (it.options ?? []).filter((o) => o.text.trim()).length === 0,
+        );
+        if (needsShared && shared.length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['mcgSharedOptions'],
+            message: 'At least 2 shared options required',
+          });
+        }
+        items.forEach((item) => {
+          const index = (data.mcgItems ?? []).indexOf(item);
+          const own = (item.options ?? []).filter((o) => o.text.trim());
+          if (own.length === 1) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['mcgItems', index, 'options'],
+              message: 'At least 2 options required',
+            });
+          }
+          const resolved = own.length > 0 ? own : shared;
+          if (resolved.length >= 2 && item.correctIndex >= resolved.length) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['mcgItems', index, 'correctIndex'],
+              message: 'Choose the correct answer',
+            });
+          }
+        });
+        break;
+      }
       case 'fill_in_blank': {
         if (!data.fibText?.trim()) {
           ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['fibText'], message: 'Required' });
@@ -200,7 +261,11 @@ export const exerciseFormSchema = z
       case 'translate_to_target':
       case 'translate_from_target': {
         if (!data.trSourceText?.trim()) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['trSourceText'], message: 'Required' });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['trSourceText'],
+            message: 'Required',
+          });
         }
         if (!(data.trAcceptedTranslations ?? []).some((tr) => tr.text.trim())) {
           ctx.addIssue({

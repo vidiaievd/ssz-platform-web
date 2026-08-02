@@ -15,7 +15,11 @@ import { addItemToDraft } from '../lib/container-items';
 function parseOrThrow(data: ExerciseFormValues) {
   const parsed = exerciseFormSchema.safeParse(data);
   if (!parsed.success) {
-    throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+    throw new AppError(
+      'validation',
+      'Invalid input',
+      parsed.error.flatten((i) => i.message),
+    );
   }
   return parsed.data;
 }
@@ -52,6 +56,7 @@ export async function createExerciseAction(
   difficultyLevel: DifficultyLevel,
   visibility: Visibility,
   data: ExerciseFormValues,
+  ownerSchoolId?: string | null,
 ) {
   return tryAction(async () => {
     const parsed = parseOrThrow(data);
@@ -69,6 +74,10 @@ export async function createExerciseAction(
         content,
         expectedAnswers,
         visibility,
+        // Without the owning school, `school_private` is rejected as a
+        // visibility no ownerless material may have (content-service
+        // `getValidVisibilities`).
+        ...(ownerSchoolId && { ownerSchoolId }),
       },
     });
 

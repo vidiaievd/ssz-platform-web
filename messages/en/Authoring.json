@@ -177,6 +177,7 @@
     "type": "Type",
     "types": {
       "multiple_choice": "Multiple choice",
+      "multiple_choice_group": "Multiple choice group",
       "fill_in_blank": "Fill in the blank",
       "translate_to_target": "Translate to target",
       "translate_from_target": "Translate from target",
@@ -203,6 +204,23 @@
     "hintPlaceholder": "Optional hint the student can reveal",
     "mcContext": "Context",
     "mcContextPlaceholder": "Optional sentence or context",
+    "mcgContext": "Context",
+    "mcgContextPlaceholder": "Optional line shown above the questions",
+    "mcgSharedOptions": "Shared options",
+    "mcgSharedOptionsHint": "The answer column every question uses, e.g. Riktig / Galt. A question can replace it with options of its own.",
+    "mcgOptionPlaceholder": "Option text",
+    "mcgOptionFallback": "Option {n}",
+    "mcgQuestions": "Questions",
+    "mcgQuestionsHint": "All questions are answered and checked together as one block.",
+    "mcgQuestionPlaceholder": "Question or statement",
+    "mcgAddQuestion": "Add question",
+    "mcgRemoveQuestion": "Remove question",
+    "mcgCorrect": "Correct answer",
+    "mcgOwnOptions": "Own options",
+    "mcgUseSharedOptions": "Use shared options",
+    "mcgNoSharedOptions": "Add shared options above, or give this question its own.",
+    "mcgExplanation": "Explanation",
+    "mcgExplanationPlaceholder": "Why this answer is right (shown after checking)",
     "fibText": "Text with blanks",
     "fibTextPlaceholder": "Use ___1___, ___2___ for blanks, e.g. Jeg ___1___ norsk.",
     "fibTextHint": "Number each blank: ___1___, ___2___ …",
@@ -578,7 +596,12 @@
     "addModule": "Add module",
     "newLevelTitle": "New level",
     "newModuleTitle": "New module",
-    "openLessonEditor": "Open lesson editor"
+    "openLessonEditor": "Open lesson editor",
+    "modulePublishLabel": "Module",
+    "modulePublishAction": "Publish module",
+    "modulePublishFirst": "This module has never been published, so students cannot open it yet.",
+    "modulePublishPending": "This module has unpublished changes. Students keep seeing the published version until you publish again.",
+    "modulePublishUpToDate": "Everything in this module is published."
   },
   "settings": {
     "trigger": "Settings",
@@ -588,7 +611,10 @@
   "addLesson": {
     "title": "Add a lesson",
     "description": "Choose a material type to add to this module.",
-    "defaultTitle": "New {type}"
+    "defaultTitle": "New {type}",
+    "exerciseTypeTitle": "Choose an exercise type",
+    "exerciseTypeDescription": "The type decides how the exercise is answered and graded, and cannot be changed afterwards.",
+    "back": "Back"
   },
   "editor": {
     "backToCourse": "Back to course",

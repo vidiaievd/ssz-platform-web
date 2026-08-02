@@ -62,6 +62,7 @@ export function CourseEditorShell({
           difficultyLevel={container.difficultyLevel}
           visibility={container.visibility}
           accessTier={container.accessTier}
+          ownerSchoolId={container.ownerSchoolId}
         />
       ) : (
         <p className="text-muted-foreground py-10 text-center text-sm">

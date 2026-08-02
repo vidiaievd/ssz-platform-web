@@ -46,6 +46,8 @@ interface CurriculumTreeProps {
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
   accessTier: AccessTier;
+  /** The course's owning school — inherited by every node created from the tree. */
+  ownerSchoolId?: string | null;
 }
 
 interface TreeRowProps {
@@ -183,6 +185,7 @@ function ModuleNode({
   targetLanguage,
   difficultyLevel,
   visibility,
+  ownerSchoolId,
 }: {
   module: CurriculumTreeModuleNode;
   index: number;
@@ -195,6 +198,7 @@ function ModuleNode({
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
+  ownerSchoolId?: string | null;
 }) {
   const t = useTranslations('Authoring');
   const [expanded, setExpanded] = useState(true);
@@ -322,6 +326,7 @@ function ModuleNode({
             targetLanguage={targetLanguage}
             difficultyLevel={difficultyLevel}
             visibility={visibility}
+            ownerSchoolId={ownerSchoolId}
             onCreated={(itemId) => onChanged(itemId)}
           />
         </>
@@ -340,6 +345,7 @@ export function CurriculumTree({
   difficultyLevel,
   visibility,
   accessTier,
+  ownerSchoolId,
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
@@ -359,6 +365,7 @@ export function CurriculumTree({
         visibility,
         accessTier,
         levelSectionId,
+        ownerSchoolId,
       );
       setPendingLevelId(null);
       if (!result.ok) {
@@ -395,9 +402,7 @@ export function CurriculumTree({
               depth={0}
               expandable
               expanded={expanded}
-              onToggle={() =>
-                setExpandedLevels((prev) => ({ ...prev, [levelKey]: !expanded }))
-              }
+              onToggle={() => setExpandedLevels((prev) => ({ ...prev, [levelKey]: !expanded }))}
               icon={<Layers size={16} className="text-muted-foreground" />}
               label={level.title ?? ''}
               state={null}
@@ -430,6 +435,7 @@ export function CurriculumTree({
                     targetLanguage={targetLanguage}
                     difficultyLevel={difficultyLevel}
                     visibility={visibility}
+                    ownerSchoolId={ownerSchoolId}
                   />
                 ))}
                 <div className="pb-1.5 pt-1" style={{ paddingLeft: 8 + 1 * 20 + 22 }}>

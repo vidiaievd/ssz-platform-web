@@ -14,7 +14,13 @@ import { Plus, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { checkShortAnswer, type DiffToken } from '@/lib/exercises/short-answer-diff';
 import { cn } from '@/lib/utils';
 
@@ -43,7 +49,13 @@ interface ExerciseFieldsProps {
 }
 
 /** Shared type/difficulty/instructions header + per-template fields for the 5 exercise templates. */
-export function ExerciseFields({ control, register, errors, isPending, typeDisabled }: ExerciseFieldsProps) {
+export function ExerciseFields({
+  control,
+  register,
+  errors,
+  isPending,
+  typeDisabled,
+}: ExerciseFieldsProps) {
   const t = useTranslations('Authoring.exercises');
 
   const typeCtrl = useController({ control, name: 'templateCode' });
@@ -72,7 +84,11 @@ export function ExerciseFields({ control, register, errors, isPending, typeDisab
           </Select>
         </Field>
 
-        <Field label={t('difficultyLevel')} htmlFor="ex-difficulty" error={errors.difficultyLevel?.message}>
+        <Field
+          label={t('difficultyLevel')}
+          htmlFor="ex-difficulty"
+          error={errors.difficultyLevel?.message}
+        >
           <Select
             value={levelCtrl.field.value ?? NO_DIFFICULTY_LEVEL}
             onValueChange={(v) =>
@@ -108,14 +124,37 @@ export function ExerciseFields({ control, register, errors, isPending, typeDisab
       </Field>
 
       <Field label={t('hint')} htmlFor="ex-hint">
-        <Input id="ex-hint" placeholder={t('hintPlaceholder')} disabled={isPending} {...register('hint')} />
+        <Input
+          id="ex-hint"
+          placeholder={t('hintPlaceholder')}
+          disabled={isPending}
+          {...register('hint')}
+        />
       </Field>
 
       {templateCode === 'multiple_choice' && (
-        <MultipleChoiceFields control={control} register={register} errors={errors} isPending={isPending} />
+        <MultipleChoiceFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
+      )}
+      {templateCode === 'multiple_choice_group' && (
+        <MultipleChoiceGroupFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
       )}
       {templateCode === 'fill_in_blank' && (
-        <FillInBlankFields control={control} register={register} errors={errors} isPending={isPending} />
+        <FillInBlankFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
       )}
       {(templateCode === 'translate_to_target' || templateCode === 'translate_from_target') && (
         <TranslateFields
@@ -127,25 +166,60 @@ export function ExerciseFields({ control, register, errors, isPending, typeDisab
         />
       )}
       {templateCode === 'match_pairs' && (
-        <MatchPairsFields control={control} register={register} errors={errors} isPending={isPending} />
+        <MatchPairsFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
       )}
       {templateCode === 'short_answer' && (
-        <ShortAnswerFields control={control} register={register} errors={errors} isPending={isPending} />
+        <ShortAnswerFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
       )}
       {templateCode === 'writing_task' && (
-        <WritingTaskFields control={control} register={register} errors={errors} isPending={isPending} />
+        <WritingTaskFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
       )}
       {templateCode === 'sentence_schema' && (
-        <SentenceSchemaFields control={control} register={register} errors={errors} isPending={isPending} />
+        <SentenceSchemaFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
       )}
       {templateCode === 'word_bank_fill' && (
-        <WordBankFillFields control={control} register={register} errors={errors} isPending={isPending} />
+        <WordBankFillFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
       )}
       {templateCode === 'text_order' && (
-        <TextOrderFields control={control} register={register} errors={errors} isPending={isPending} />
+        <TextOrderFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
       )}
       {templateCode === 'error_correction' && (
-        <ErrorCorrectionFields control={control} register={register} errors={errors} isPending={isPending} />
+        <ErrorCorrectionFields
+          control={control}
+          register={register}
+          errors={errors}
+          isPending={isPending}
+        />
       )}
     </div>
   );
@@ -171,7 +245,12 @@ function MultipleChoiceFields({ control, register, errors, isPending }: SubProps
       </Field>
 
       <Field label={t('mcContext')} htmlFor="ex-mc-ctx">
-        <Input id="ex-mc-ctx" placeholder={t('mcContextPlaceholder')} disabled={isPending} {...register('mcContext')} />
+        <Input
+          id="ex-mc-ctx"
+          placeholder={t('mcContextPlaceholder')}
+          disabled={isPending}
+          {...register('mcContext')}
+        />
       </Field>
 
       <div className="space-y-2">
@@ -203,7 +282,10 @@ function MultipleChoiceFields({ control, register, errors, isPending }: SubProps
               onClick={() => {
                 remove(index);
                 if (correctIndexCtrl.field.value === index) correctIndexCtrl.field.onChange(0);
-                else if (correctIndexCtrl.field.value !== undefined && correctIndexCtrl.field.value > index)
+                else if (
+                  correctIndexCtrl.field.value !== undefined &&
+                  correctIndexCtrl.field.value > index
+                )
                   correctIndexCtrl.field.onChange(correctIndexCtrl.field.value - 1);
               }}
               disabled={fields.length <= 2}
@@ -217,6 +299,279 @@ function MultipleChoiceFields({ control, register, errors, isPending }: SubProps
           <Plus className="mr-1.5 h-4 w-4" />
           {t('addOption')}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * multiple_choice_group — a set of questions answered and checked as one block.
+ *
+ * Most blocks are a table: every question picks from the same column (Riktig /
+ * Galt), which is why the shared options are authored once at the top. A
+ * question that needs its own wording — "what does this word mean?" — opts out
+ * and carries options of its own; an empty own-options list is what says "use
+ * the shared column", matching the JSON contract exactly.
+ */
+function MultipleChoiceGroupFields({ control, register, errors, isPending }: SubProps) {
+  const t = useTranslations('Authoring.exercises');
+  const sharedArr = useFieldArray({ control, name: 'mcgSharedOptions' });
+  const itemsArr = useFieldArray({ control, name: 'mcgItems' });
+  // Watched so each question's correct-answer radios follow the shared column
+  // as the author types it.
+  const sharedOptions = useWatch({ control, name: 'mcgSharedOptions' }) ?? [];
+
+  return (
+    <div className="rounded-md border border-border p-3 space-y-4">
+      <Field label={t('mcgContext')} htmlFor="ex-mcg-ctx">
+        <Input
+          id="ex-mcg-ctx"
+          placeholder={t('mcgContextPlaceholder')}
+          disabled={isPending}
+          {...register('mcgContext')}
+        />
+      </Field>
+
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-(--ssz-text-primary)">{t('mcgSharedOptions')}</p>
+        <p className="text-xs text-(--ssz-text-muted)">{t('mcgSharedOptionsHint')}</p>
+        {typeof errors.mcgSharedOptions?.message === 'string' && (
+          <p className="text-xs text-destructive">{errors.mcgSharedOptions.message}</p>
+        )}
+        {sharedArr.fields.map((field, index) => (
+          <div key={field.id} className="flex items-center gap-2">
+            <div className="flex-1">
+              <Input
+                placeholder={t('mcgOptionPlaceholder')}
+                disabled={isPending}
+                {...register(`mcgSharedOptions.${index}.text`)}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => sharedArr.remove(index)}
+              disabled={sharedArr.fields.length <= 2}
+              aria-label={t('removeOption')}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => sharedArr.append({ text: '' })}
+        >
+          <Plus className="mr-1.5 h-4 w-4" />
+          {t('addOption')}
+        </Button>
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-(--ssz-text-primary)">{t('mcgQuestions')}</p>
+        <p className="text-xs text-(--ssz-text-muted)">{t('mcgQuestionsHint')}</p>
+        {typeof errors.mcgItems?.message === 'string' && (
+          <p className="text-xs text-destructive">{errors.mcgItems.message}</p>
+        )}
+
+        {itemsArr.fields.map((field, index) => (
+          <McgQuestion
+            key={field.id}
+            control={control}
+            register={register}
+            errors={errors}
+            isPending={isPending}
+            index={index}
+            sharedOptions={sharedOptions}
+            canRemove={itemsArr.fields.length > 1}
+            onRemove={() => itemsArr.remove(index)}
+          />
+        ))}
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() =>
+            itemsArr.append({ question: '', options: [], correctIndex: 0, explanation: '' })
+          }
+        >
+          <Plus className="mr-1.5 h-4 w-4" />
+          {t('mcgAddQuestion')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/** One question of a multiple_choice_group, with its own nested option array. */
+function McgQuestion({
+  control,
+  register,
+  errors,
+  isPending,
+  index,
+  sharedOptions,
+  canRemove,
+  onRemove,
+}: SubProps & {
+  index: number;
+  sharedOptions: Array<{ text: string }>;
+  canRemove: boolean;
+  onRemove: () => void;
+}) {
+  const t = useTranslations('Authoring.exercises');
+  const { fields, append, remove } = useFieldArray({ control, name: `mcgItems.${index}.options` });
+  const correctCtrl = useController({ control, name: `mcgItems.${index}.correctIndex` });
+  const ownOptions = useWatch({ control, name: `mcgItems.${index}.options` }) ?? [];
+  const itemErrors = errors.mcgItems?.[index];
+  const usesShared = fields.length === 0;
+  const correctIndex = correctCtrl.field.value ?? 0;
+
+  return (
+    <div className="space-y-2 rounded-md bg-(--ssz-bg-muted) p-2.5">
+      <div className="flex items-start gap-2">
+        <span className="w-6 shrink-0 pt-2 text-xs font-mono text-(--ssz-text-muted)">
+          {index + 1}.
+        </span>
+        <div className="flex-1">
+          <Textarea
+            rows={2}
+            placeholder={t('mcgQuestionPlaceholder')}
+            hasError={!!itemErrors?.question}
+            disabled={isPending}
+            {...register(`mcgItems.${index}.question`)}
+          />
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          disabled={!canRemove}
+          aria-label={t('mcgRemoveQuestion')}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="space-y-1.5 pl-8">
+        {typeof itemErrors?.options?.message === 'string' && (
+          <p className="text-xs text-destructive">{itemErrors.options.message}</p>
+        )}
+        {typeof itemErrors?.correctIndex?.message === 'string' && (
+          <p className="text-xs text-destructive">{itemErrors.correctIndex.message}</p>
+        )}
+
+        {usesShared ? (
+          <>
+            {sharedOptions.length === 0 ? (
+              <p className="text-xs text-(--ssz-text-muted)">{t('mcgNoSharedOptions')}</p>
+            ) : (
+              <div className="flex flex-wrap gap-3">
+                {sharedOptions.map((option, j) => (
+                  <label key={j} className="flex items-center gap-1.5 text-sm">
+                    <input
+                      type="radio"
+                      className="h-4 w-4 shrink-0 accent-primary"
+                      checked={correctIndex === j}
+                      onChange={() => correctCtrl.field.onChange(j)}
+                      disabled={isPending}
+                      aria-label={t('mcgCorrect')}
+                    />
+                    <span className="text-(--ssz-text-primary)">
+                      {option.text.trim() || t('mcgOptionFallback', { n: j + 1 })}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+              onClick={() => {
+                append([{ text: '' }, { text: '' }]);
+                correctCtrl.field.onChange(0);
+              }}
+            >
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              {t('mcgOwnOptions')}
+            </Button>
+          </>
+        ) : (
+          <>
+            {fields.map((field, j) => (
+              <div key={field.id} className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  className="h-4 w-4 shrink-0 accent-primary"
+                  checked={correctIndex === j}
+                  onChange={() => correctCtrl.field.onChange(j)}
+                  disabled={isPending}
+                  aria-label={t('mcgCorrect')}
+                />
+                <div className="flex-1">
+                  <Input
+                    placeholder={t('mcgOptionPlaceholder')}
+                    hasError={!!itemErrors?.options?.[j]?.text}
+                    disabled={isPending}
+                    {...register(`mcgItems.${index}.options.${j}.text`)}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    remove(j);
+                    if (correctIndex === j) correctCtrl.field.onChange(0);
+                    else if (correctIndex > j) correctCtrl.field.onChange(correctIndex - 1);
+                  }}
+                  disabled={ownOptions.length <= 2}
+                  aria-label={t('removeOption')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={() => append({ text: '' })}
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                {t('addOption')}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  remove();
+                  correctCtrl.field.onChange(0);
+                }}
+              >
+                {t('mcgUseSharedOptions')}
+              </Button>
+            </div>
+          </>
+        )}
+
+        <Input
+          placeholder={t('mcgExplanationPlaceholder')}
+          disabled={isPending}
+          aria-label={t('mcgExplanation')}
+          {...register(`mcgItems.${index}.explanation`)}
+        />
       </div>
     </div>
   );
@@ -332,7 +687,13 @@ function FillInBlankFields({ control, register, errors, isPending }: SubProps) {
 
   return (
     <div className="rounded-md border border-border p-3 space-y-4">
-      <Field label={t('fibText')} htmlFor="ex-fib-text" error={errors.fibText?.message} hint={t('fibTextHint')} required>
+      <Field
+        label={t('fibText')}
+        htmlFor="ex-fib-text"
+        error={errors.fibText?.message}
+        hint={t('fibTextHint')}
+        required
+      >
         <Textarea
           id="ex-fib-text"
           rows={3}
@@ -418,7 +779,12 @@ function TranslateFields({
 
   return (
     <div className="rounded-md border border-border p-3 space-y-4">
-      <Field label={t('trSourceText')} htmlFor="ex-tr-src" error={errors.trSourceText?.message} required>
+      <Field
+        label={t('trSourceText')}
+        htmlFor="ex-tr-src"
+        error={errors.trSourceText?.message}
+        required
+      >
         <Textarea
           id="ex-tr-src"
           rows={2}
@@ -441,7 +807,9 @@ function TranslateFields({
       )}
 
       <div className="space-y-2">
-        <p className="text-sm font-medium text-(--ssz-text-primary)">{t('trAcceptedTranslations')}</p>
+        <p className="text-sm font-medium text-(--ssz-text-primary)">
+          {t('trAcceptedTranslations')}
+        </p>
         {typeof errors.trAcceptedTranslations?.message === 'string' && (
           <p className="text-xs text-destructive">{errors.trAcceptedTranslations.message}</p>
         )}
@@ -500,7 +868,10 @@ function ShortAnswerKeyTrial({
   const referenceAnswer = useWatch({ control, name: 'saReferenceAnswer' }) ?? '';
 
   const result = trial.trim()
-    ? checkShortAnswer({ reference_answer: referenceAnswer, accepted_answers: splitChunks(accepted) }, trial)
+    ? checkShortAnswer(
+        { reference_answer: referenceAnswer, accepted_answers: splitChunks(accepted) },
+        trial,
+      )
     : null;
 
   return (
@@ -612,7 +983,12 @@ function ShortAnswerFields({ control, register, errors, isPending }: SubProps) {
       </Field>
 
       <Field label={t('saContext')} htmlFor="ex-sa-ctx">
-        <Input id="ex-sa-ctx" placeholder={t('saContextPlaceholder')} disabled={isPending} {...register('saContext')} />
+        <Input
+          id="ex-sa-ctx"
+          placeholder={t('saContextPlaceholder')}
+          disabled={isPending}
+          {...register('saContext')}
+        />
       </Field>
 
       <Field
@@ -647,7 +1023,9 @@ function ShortAnswerFields({ control, register, errors, isPending }: SubProps) {
         isPending={isPending}
         accepted={accepted}
         onAddPhrasing={(phrasing) =>
-          acceptedCtrl.field.onChange(accepted.trim() ? `${accepted.trim()} | ${phrasing}` : phrasing)
+          acceptedCtrl.field.onChange(
+            accepted.trim() ? `${accepted.trim()} | ${phrasing}` : phrasing,
+          )
         }
       />
     </div>
@@ -712,7 +1090,13 @@ function WritingTaskFields({ control, register, errors, isPending }: SubProps) {
       </div>
 
       <Field label={t('wtRubric')} htmlFor="ex-wt-rubric" hint={t('wtRubricHint')}>
-        <Textarea id="ex-wt-rubric" rows={2} placeholder={t('wtRubricPlaceholder')} disabled={isPending} {...register('wtRubric')} />
+        <Textarea
+          id="ex-wt-rubric"
+          rows={2}
+          placeholder={t('wtRubricPlaceholder')}
+          disabled={isPending}
+          {...register('wtRubric')}
+        />
       </Field>
     </div>
   );
@@ -728,7 +1112,12 @@ function SentenceSchemaFields({ control, register, errors, isPending }: SubProps
 
   return (
     <div className="rounded-md border border-border p-3 space-y-4">
-      <Field label={t('ssSentence')} htmlFor="ex-ss-sentence" error={errors.ssSentence?.message} required>
+      <Field
+        label={t('ssSentence')}
+        htmlFor="ex-ss-sentence"
+        error={errors.ssSentence?.message}
+        required
+      >
         <Input
           id="ex-ss-sentence"
           placeholder={t('ssSentencePlaceholder')}
@@ -754,7 +1143,9 @@ function SentenceSchemaFields({ control, register, errors, isPending }: SubProps
       <Field label={t('ssSchemaType')} htmlFor="ex-ss-type">
         <Select
           value={typeCtrl.field.value ?? 'main'}
-          onValueChange={(v) => typeCtrl.field.onChange(v as (typeof SENTENCE_SCHEMA_TYPES)[number])}
+          onValueChange={(v) =>
+            typeCtrl.field.onChange(v as (typeof SENTENCE_SCHEMA_TYPES)[number])
+          }
           disabled={isPending}
         >
           <SelectTrigger id="ex-ss-type" className="w-full">
@@ -778,7 +1169,9 @@ function SentenceSchemaFields({ control, register, errors, isPending }: SubProps
         )}
         {fieldsArr.fields.map((field, index) => (
           <div key={field.id} className="flex items-center gap-2">
-            <span className="w-6 shrink-0 text-xs font-mono text-(--ssz-text-muted)">{index + 1}</span>
+            <span className="w-6 shrink-0 text-xs font-mono text-(--ssz-text-muted)">
+              {index + 1}
+            </span>
             <div className="flex-1">
               <Input
                 placeholder={t('ssFieldPlaceholder')}
@@ -798,7 +1191,12 @@ function SentenceSchemaFields({ control, register, errors, isPending }: SubProps
             </Button>
           </div>
         ))}
-        <Button type="button" variant="ghost" size="sm" onClick={() => fieldsArr.append({ label: '' })}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => fieldsArr.append({ label: '' })}
+        >
           <Plus className="mr-1.5 h-4 w-4" />
           {t('addField')}
         </Button>
@@ -920,7 +1318,12 @@ function MatchPairsFields({ control, register, errors, isPending }: SubProps) {
           </Button>
         </div>
       ))}
-      <Button type="button" variant="ghost" size="sm" onClick={() => append({ left: '', right: '' })}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => append({ left: '', right: '' })}
+      >
         <Plus className="mr-1.5 h-4 w-4" />
         {t('addPair')}
       </Button>
