@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { AnswerNoteMarker, buildAnswerNote, type Rationale, type WordNotes } from './answer-note';
 import { Instr } from './instr';
-import { RationaleMatrix, type Rationale } from './rationale-matrix';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
 /**
@@ -18,6 +18,8 @@ export interface FillContent {
   gloss?: string;
   wordBank?: string[];
   instruction?: string;
+  /** Shared per-word notes, used by the feedback marker. */
+  wordNotes?: WordNotes;
 }
 
 export interface FillExpectedAnswers {
@@ -26,7 +28,7 @@ export interface FillExpectedAnswers {
   explanation?: string;
 }
 
-export type { RationaleVerdict, RationaleOption } from './rationale-matrix';
+export type { RationaleVerdict, RationaleOption } from './answer-note';
 
 /** The rationale shape is shared with the other blank-based templates. */
 export type FillRationale = Rationale;
@@ -43,10 +45,13 @@ export interface FillBodyProps {
   mode: RunnerMode;
   accent: string;
   /**
-   * Optional per-blank explanation matrix, rendered only in the feedback phase.
-   * Omitted for exercises authored without one — the body behaves exactly as before.
+   * Optional teaching aid, surfaced by a marker beside the blank in the
+   * feedback phase. Omitted for exercises authored without one — the body
+   * behaves exactly as before.
    */
   rationale?: FillRationale;
+  /** The accepted answer, so the marker can say why it is the one. */
+  correctAnswer?: string;
 }
 
 /* ── color constants ─────────────────────────────────────────────── */
@@ -99,6 +104,7 @@ export function FillBody({
   mode,
   accent,
   rationale,
+  correctAnswer = '',
 }: FillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const accentSoft = modeAccentSoft(mode);
@@ -107,6 +113,16 @@ export function FillBody({
   const hasWordBank = Array.isArray(content.wordBank) && content.wordBank.length > 0;
   const { before, after } = parseBlanks(content.textWithBlanks);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [noteOpen, setNoteOpen] = useState(false);
+
+  /* Feedback marker content — nothing authored means no marker at all. */
+  const answerNote = buildAnswerNote({
+    rationale,
+    wordNotes: content.wordNotes,
+    chosen: value,
+    correct: correctAnswer,
+    chosenCorrect: ok === true,
+  });
 
   /* blank underline / text color */
   const blankColor =
@@ -212,6 +228,16 @@ export function FillBody({
         )}
 
         <span>{after}</span>
+
+        {/* Marker revealing why this blank's answer is the answer. */}
+        {reveal && ok !== null && answerNote && (
+          <AnswerNoteMarker
+            note={answerNote}
+            correct={ok}
+            open={noteOpen}
+            onToggle={() => setNoteOpen((v) => !v)}
+          />
+        )}
       </div>
 
       {/* Word bank chips */}
@@ -258,12 +284,6 @@ export function FillBody({
         </div>
       )}
 
-      {/* Explanation matrix — feedback phase only, and only when authored.
-          It gets the learner's pick so their own choice is always one of the
-          analysed rows, whether or not the author anticipated it. */}
-      {reveal && rationale && (
-        <RationaleMatrix rationale={rationale} chosen={value} chosenCorrect={ok === true} />
-      )}
     </>
   );
 }

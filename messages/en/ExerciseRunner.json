@@ -31,14 +31,9 @@
     "inputLabel": "Your answer",
     "placeholder": "type…",
     "rationaleTitle": "Why this answer",
-    "optionHeader": "Option",
-    "verdictHeader": "Fits?",
-    "noteHeader": "Why",
     "verdictCorrect": "Correct",
-    "verdictAcceptable": "Possible, but not here",
     "verdictWrong": "Wrong",
-    "yourAnswer": "Your answer",
-    "chosenWrongNote": "Doesn’t fit in this sentence."
+    "yourAnswer": "Your answer"
   },
   "translate": {
     "defaultInstruction": "Translate the sentence",
@@ -78,9 +73,7 @@
     "choosePlaceholder": "Choose…",
     "blankLabel": "Blank in sentence {n}",
     "filledCount": "{done} of {total} blanks filled",
-    "partialScore": "{correct} of {total} blanks correct",
-    "rationaleItem": "Sentence {n}",
-    "rationaleItemBlank": "Sentence {n}, blank {b}"
+    "partialScore": "{correct} of {total} blanks correct"
   },
   "textOrder": {
     "moveUp": "Move up",

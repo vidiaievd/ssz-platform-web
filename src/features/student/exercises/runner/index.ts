@@ -22,8 +22,8 @@ export type {
   RationaleVerdict,
 } from './fill-body';
 
-export { RationaleMatrix } from './rationale-matrix';
-export type { Rationale, RationaleMatrixProps } from './rationale-matrix';
+export { AnswerNoteMarker, buildAnswerNote } from './answer-note';
+export type { AnswerNote, Rationale, WordNotes } from './answer-note';
 
 
 export { McqBody } from './mcq-body';
@@ -67,11 +67,7 @@ export type {
   OrderLine,
 } from './text-order-body';
 
-export {
-  WordBankFillBody,
-  parseSentence,
-  missedBlanksWithRationale,
-} from './word-bank-fill-body';
+export { WordBankFillBody, parseSentence } from './word-bank-fill-body';
 export type {
   WordBankFillBodyProps,
   WordBankFillContent,

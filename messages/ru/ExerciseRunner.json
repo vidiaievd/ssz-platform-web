@@ -31,14 +31,9 @@
     "inputLabel": "Ваш ответ",
     "placeholder": "введите…",
     "rationaleTitle": "Почему такой ответ",
-    "optionHeader": "Вариант",
-    "verdictHeader": "Подходит?",
-    "noteHeader": "Почему",
     "verdictCorrect": "Верно",
-    "verdictAcceptable": "Возможно, но не здесь",
     "verdictWrong": "Неверно",
-    "yourAnswer": "Ваш ответ",
-    "chosenWrongNote": "Не подходит в этом предложении."
+    "yourAnswer": "Ваш ответ"
   },
   "translate": {
     "defaultInstruction": "Переведите предложение",
@@ -78,9 +73,7 @@
     "choosePlaceholder": "Выберите…",
     "blankLabel": "Пропуск в предложении {n}",
     "filledCount": "Заполнено {done} из {total} пропусков",
-    "partialScore": "Верно {correct} из {total} пропусков",
-    "rationaleItem": "Предложение {n}",
-    "rationaleItemBlank": "Предложение {n}, пропуск {b}"
+    "partialScore": "Верно {correct} из {total} пропусков"
   },
   "textOrder": {
     "moveUp": "Выше",

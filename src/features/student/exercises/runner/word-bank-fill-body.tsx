@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { AnswerNoteMarker, buildAnswerNote, type Rationale, type WordNotes } from './answer-note';
 import { Instr } from './instr';
-import { RationaleMatrix, type Rationale } from './rationale-matrix';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
 export interface WordBankSentence {
@@ -25,6 +25,12 @@ export interface WordBankFillContent {
    * as already used.
    */
   reusableWords?: boolean;
+  /**
+   * Notes about the bank words, shared by every blank. In an at / om drill the
+   * reason a word does or doesn't fit is the same in all ten sentences, so it
+   * is authored once here rather than repeated per blank.
+   */
+  wordNotes?: WordNotes;
 }
 
 export interface WordBankFillExpectedBlank {
@@ -108,47 +114,6 @@ function allBlanks(items: WordBankSentence[]): Array<{ itemId: string; blankId: 
   );
 }
 
-interface MissedBlank {
-  itemId: string;
-  blankId: number;
-  /** 1-based position of the sentence, for the matrix label. */
-  itemNumber: number;
-  /** True when the sentence has more than one blank, so the label must say which. */
-  numbered: boolean;
-  chosen: string;
-  rationale: Rationale;
-}
-
-/**
- * The blanks worth explaining after a check: missed ones that carry an authored
- * rationale. Correct blanks are skipped on purpose — a ten-sentence drill would
- * otherwise answer with ten tables, and the learner needs the traps they fell
- * into, not the ones they avoided.
- */
-export function missedBlanksWithRationale(
-  items: WordBankSentence[],
-  value: WordBankFillValue,
-  results: WordBankFillResults,
-): MissedBlank[] {
-  return items.flatMap((item, i) => {
-    const ids = blankIdsOf(item);
-    return ids.flatMap((blankId) => {
-      const result = results[item.id]?.[blankId];
-      if (!result || result.correct || !result.rationale) return [];
-      return [
-        {
-          itemId: item.id,
-          blankId,
-          itemNumber: i + 1,
-          numbered: ids.length > 1,
-          chosen: value[item.id]?.[blankId] ?? '',
-          rationale: result.rationale,
-        },
-      ];
-    });
-  });
-}
-
 export function WordBankFillBody({
   content,
   value,
@@ -162,6 +127,8 @@ export function WordBankFillBody({
 }: WordBankFillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const reveal = phase === 'feedback';
+  /* Which blank's note is open — at most one, so opening a new one closes it. */
+  const [openNote, setOpenNote] = useState<string | null>(null);
   const blanks = useMemo(() => allBlanks(content.items), [content.items]);
 
   /* A bank word is "spent" once it is used — the textbook default is one word
@@ -228,20 +195,40 @@ export function WordBankFillBody({
                 const result = reveal && ok !== null ? results?.[item.id]?.[seg.blankId] : undefined;
 
                 if (reveal) {
+                  const note = result
+                    ? buildAnswerNote({
+                        rationale: result.rationale,
+                        wordNotes: content.wordNotes,
+                        chosen,
+                        correct: result.expected,
+                        chosenCorrect: result.correct,
+                      })
+                    : null;
+
+                  /* The marker is a sibling of the blank, not a child: its
+                     panel claims a full row of this wrapping flex line. */
                   return (
-                    <span key={idx} className="inline-flex items-baseline gap-1.5">
+                    <Fragment key={idx}>
                       <span
                         className="font-semibold"
                         style={{ color: tone.fg, borderBottom: `2px solid ${tone.line}` }}
                       >
                         {chosen || '—'}
                       </span>
-                      {result && !result.correct && (
-                        <span className="text-[13.5px] font-semibold" style={{ color: OK_FG }}>
-                          {result.expected}
-                        </span>
+                      {note && result && (
+                        <AnswerNoteMarker
+                          note={note}
+                          correct={result.correct}
+                          open={openNote === `${item.id}:${seg.blankId}`}
+                          onToggle={() =>
+                            setOpenNote((k) =>
+                              k === `${item.id}:${seg.blankId}` ? null : `${item.id}:${seg.blankId}`,
+                            )
+                          }
+                          label={t('wordBank.blankLabel', { n: i + 1 })}
+                        />
                       )}
-                    </span>
+                    </Fragment>
                   );
                 }
 
@@ -270,22 +257,6 @@ export function WordBankFillBody({
           </li>
         ))}
       </ol>
-
-      {/* One matrix per missed blank that has an authored rationale. */}
-      {reveal &&
-        ok !== null &&
-        missedBlanksWithRationale(content.items, value, results ?? {}).map((miss) => (
-          <RationaleMatrix
-            key={`${miss.itemId}-${miss.blankId}`}
-            rationale={miss.rationale}
-            chosen={miss.chosen}
-            label={
-              miss.numbered
-                ? t('wordBank.rationaleItemBlank', { n: miss.itemNumber, b: miss.blankId })
-                : t('wordBank.rationaleItem', { n: miss.itemNumber })
-            }
-          />
-        ))}
 
       {!reveal && (
         <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)">

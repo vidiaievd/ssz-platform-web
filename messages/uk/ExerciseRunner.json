@@ -31,14 +31,9 @@
     "inputLabel": "Ваша відповідь",
     "placeholder": "введіть…",
     "rationaleTitle": "Чому саме так",
-    "optionHeader": "Варіант",
-    "verdictHeader": "Підходить?",
-    "noteHeader": "Чому",
     "verdictCorrect": "Правильно",
-    "verdictAcceptable": "Можливо, але не тут",
     "verdictWrong": "Неправильно",
-    "yourAnswer": "Ваша відповідь",
-    "chosenWrongNote": "Не підходить у цьому реченні."
+    "yourAnswer": "Ваша відповідь"
   },
   "translate": {
     "defaultInstruction": "Перекладіть речення",
@@ -78,9 +73,7 @@
     "choosePlaceholder": "Оберіть…",
     "blankLabel": "Пропуск у реченні {n}",
     "filledCount": "Заповнено {done} із {total} пропусків",
-    "partialScore": "Правильно {correct} із {total} пропусків",
-    "rationaleItem": "Речення {n}",
-    "rationaleItemBlank": "Речення {n}, пропуск {b}"
+    "partialScore": "Правильно {correct} із {total} пропусків"
   },
   "textOrder": {
     "moveUp": "Вище",

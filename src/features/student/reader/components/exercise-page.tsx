@@ -47,6 +47,7 @@ import {
   type ErrorCorrectionResults,
   type ErrorCorrectionValue,
   type ErrorSentence,
+  type WordNotes,
 } from '@/features/student/exercises/runner';
 
 /* ── types ──────────────────────────────────────────────────────────────── */
@@ -78,6 +79,12 @@ const strArr = (v: unknown): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
 const instr = (d: ExerciseWithAnswers): string | undefined =>
   primaryInstructionText(d.instructions) ?? undefined;
+/** `content.word_notes` — a bank word → why it does or doesn't fit. */
+const wordNotes = (v: unknown): WordNotes | undefined => {
+  if (typeof v !== 'object' || v === null) return undefined;
+  const entries = Object.entries(v).filter((e): e is [string, string] => typeof e[1] === 'string');
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+};
 
 function CheckFooter({ canSubmit, onCheck }: { canSubmit: boolean; onCheck: () => void }) {
   const t = useTranslations('ExerciseRunner');
@@ -154,6 +161,7 @@ function FillSolver({ display, phase, ok, onCheck }: SolverProps) {
           textWithBlanks: str(c.text_with_blanks),
           wordBank: strArr(c.word_bank).length > 0 ? strArr(c.word_bank) : undefined,
           instruction: instr(display),
+          wordNotes: wordNotes(c.word_notes),
         }}
         value={value}
         onValueChange={setValue}
@@ -163,16 +171,19 @@ function FillSolver({ display, phase, ok, onCheck }: SolverProps) {
         mode="practice"
         accent={ACCENT}
         rationale={firstBlank?.rationale}
+        correctAnswer={firstAccepted[0] ?? ''}
       />
       {phase === 'answering' && (
         <CheckFooter
           canSubmit={value.trim() !== ''}
           onCheck={() =>
-            onCheck({
-              ok: firstAccepted.some((a) => normAnswer(a) === normAnswer(value)),
-              reference: firstAccepted[0],
-              explanation: str(display.expectedAnswers.explanation) || undefined,
-            })
+            onCheck(
+              firstAccepted.some((a) => normAnswer(a) === normAnswer(value))
+                ? { ok: true, explanation: str(display.expectedAnswers.explanation) || undefined }
+                : /* A miss reveals neither the answer nor the rule naming it —
+                     the marker beside the blank explains the wrong pick instead. */
+                  { ok: false },
+            )
           }
         />
       )}
@@ -404,6 +415,7 @@ function WordBankFillSolver({ display, phase, ok, onCheck }: SolverProps) {
           items,
           instruction: instr(display),
           reusableWords: c.reusable_words === true,
+          wordNotes: wordNotes(c.word_notes),
         }}
         value={value}
         onValueChange={setValue}

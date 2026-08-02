@@ -7,7 +7,6 @@ import { enMessages } from '@/lib/i18n/messages';
 import { PRACTICE_ACCENT } from './types';
 import {
   WordBankFillBody,
-  missedBlanksWithRationale,
   parseSentence,
   type WordBankFillContent,
   type WordBankFillValue,
@@ -99,7 +98,7 @@ describe('WordBankFillBody', () => {
     expect(onAnswerChange).toHaveBeenLastCalledWith(true);
   });
 
-  it('shows the expected answer next to a wrong pick in the feedback phase', () => {
+  it('keeps the accepted answer out of the sentence after a wrong pick', () => {
     renderBody({
       phase: 'feedback',
       ok: false,
@@ -109,11 +108,12 @@ describe('WordBankFillBody', () => {
 
     // The pick is no longer editable…
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
-    // …and the correction sits beside it inside the sentence (the bank above
-    // lists both words too, hence scoping to the sentence list).
+    // …and it stands alone: handing over the answer here would end the
+    // exercise before the learner gets a second go (the bank above lists both
+    // words, hence scoping to the sentence list).
     const sentence = screen.getByRole('list').textContent ?? '';
     expect(sentence).toContain('boast');
-    expect(sentence).toContain('show off');
+    expect(sentence).not.toContain('show off');
   });
 });
 
@@ -125,50 +125,11 @@ const RATIONALE = {
   ],
 };
 
-describe('missedBlanksWithRationale', () => {
-  it('returns only missed blanks that carry a rationale', () => {
-    const missed = missedBlanksWithRationale(
-      content.items,
-      { '1': { 1: 'boast' }, '2': { 1: 'show off', 2: 'boast' } },
-      {
-        '1': { 1: { correct: false, expected: 'show off', rationale: RATIONALE } },
-        '2': {
-          // correct → skipped even though a rationale is authored
-          1: { correct: true, expected: 'show off', rationale: RATIONALE },
-          // missed but nothing authored → nothing to show
-          2: { correct: false, expected: 'clicked with' },
-        },
-      },
-    );
+describe('WordBankFillBody — answer note markers', () => {
+  /** The marker button sitting next to a checked blank. */
+  const markers = () => screen.queryAllByRole('button', { name: /Why this answer/ });
 
-    expect(missed).toHaveLength(1);
-    expect(missed[0]).toMatchObject({ itemId: '1', blankId: 1, chosen: 'boast', itemNumber: 1 });
-  });
-
-  it('flags sentences with several blanks so the label can name which one', () => {
-    const missed = missedBlanksWithRationale(
-      content.items,
-      { '2': { 2: 'boast' } },
-      { '2': { 2: { correct: false, expected: 'clicked with', rationale: RATIONALE } } },
-    );
-
-    expect(missed).toHaveLength(1);
-    expect(missed[0]).toMatchObject({ itemNumber: 2, blankId: 2, numbered: true });
-  });
-
-  it('is empty when the exercise was answered correctly', () => {
-    expect(
-      missedBlanksWithRationale(
-        content.items,
-        { '1': { 1: 'show off' } },
-        { '1': { 1: { correct: true, expected: 'show off', rationale: RATIONALE } } },
-      ),
-    ).toEqual([]);
-  });
-});
-
-describe('WordBankFillBody — per-blank rationale', () => {
-  it('explains a missed blank and names its sentence', () => {
+  it('explains a missed blank without giving the answer away', () => {
     renderBody({
       phase: 'feedback',
       ok: false,
@@ -176,39 +137,105 @@ describe('WordBankFillBody — per-blank rationale', () => {
       results: { '1': { 1: { correct: false, expected: 'show off', rationale: RATIONALE } } },
     });
 
-    expect(screen.getByText('A statement is introduced by «at».')).toBeInTheDocument();
-    expect(screen.getByText(/Sentence 1/)).toBeInTheDocument();
-    expect(screen.getByText('Too formal here.')).toBeInTheDocument();
-    // the learner's pick is marked, as in the single-blank template
+    // The accepted answer is nowhere in the sentence list before opening…
+    expect(screen.getByRole('list').textContent).not.toContain('show off');
+
+    fireEvent.click(markers()[0]!);
+
+    expect(screen.getByText(/Too formal here\./)).toBeInTheDocument();
     expect(screen.getByText('Your answer')).toBeInTheDocument();
+    // …nor after: neither the answer nor the rule that names it
+    expect(screen.queryByText(/The set phrase\./)).not.toBeInTheDocument();
+    expect(screen.queryByText('A statement is introduced by «at».')).not.toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('names the blank too when the sentence holds more than one', () => {
+  it('closes the open note when another marker is opened', () => {
     renderBody({
       phase: 'feedback',
       ok: false,
-      value: { '2': { 2: 'boast' } },
-      results: { '2': { 2: { correct: false, expected: 'clicked with', rationale: RATIONALE } } },
+      value: { '1': { 1: 'boast' }, '2': { 1: 'boast', 2: 'boast' } },
+      results: {
+        '1': { 1: { correct: false, expected: 'show off', rationale: RATIONALE } },
+        '2': {
+          1: { correct: false, expected: 'clicked with', rationale: RATIONALE },
+          2: { correct: false, expected: 'show off', rationale: RATIONALE },
+        },
+      },
     });
 
-    expect(screen.getByText(/Sentence 2, blank 2/)).toBeInTheDocument();
+    const [first, second] = markers();
+    fireEvent.click(first!);
+    expect(first).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.click(second!);
+    expect(second).toHaveAttribute('aria-expanded', 'true');
+    expect(first).toHaveAttribute('aria-expanded', 'false');
+    // exactly one panel on screen at a time
+    expect(screen.getAllByText(/Too formal here\./)).toHaveLength(1);
   });
 
-  it('stays silent while answering and when every blank was right', () => {
-    const results = {
-      '1': { 1: { correct: false, expected: 'show off', rationale: RATIONALE } },
-    };
+  it('closes again on a second click', () => {
+    renderBody({
+      phase: 'feedback',
+      ok: false,
+      value: { '1': { 1: 'boast' } },
+      results: { '1': { 1: { correct: false, expected: 'show off', rationale: RATIONALE } } },
+    });
 
-    renderBody({ phase: 'answering', ok: null, value: { '1': { 1: 'boast' } }, results });
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    const marker = markers()[0]!;
+    expect(marker).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(marker);
+    expect(marker).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(marker);
+    expect(marker).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText(/Too formal here\./)).not.toBeInTheDocument();
+  });
 
+  it('explains a correct blank too, without calling it out as the learner’s answer', () => {
     renderBody({
       phase: 'feedback',
       ok: true,
       value: { '1': { 1: 'show off' } },
       results: { '1': { 1: { correct: true, expected: 'show off', rationale: RATIONALE } } },
     });
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+
+    fireEvent.click(markers()[0]!);
+    expect(screen.getByText('A statement is introduced by «at».')).toBeInTheDocument();
+    expect(screen.getByText(/The set phrase\./)).toBeInTheDocument();
+    expect(screen.queryByText('Your answer')).not.toBeInTheDocument();
+  });
+
+  it('prefers an exercise-level word note over the per-blank option note', () => {
+    renderBody({
+      content: { ...content, wordNotes: { boast: 'Bank-wide: too formal.' } },
+      phase: 'feedback',
+      ok: false,
+      value: { '1': { 1: 'boast' } },
+      results: { '1': { 1: { correct: false, expected: 'show off', rationale: RATIONALE } } },
+    });
+
+    fireEvent.click(markers()[0]!);
+    expect(screen.getByText(/Bank-wide: too formal\./)).toBeInTheDocument();
+    expect(screen.queryByText(/Too formal here\./)).not.toBeInTheDocument();
+  });
+
+  it('shows no marker while answering, nor for a blank with nothing authored', () => {
+    renderBody({
+      phase: 'answering',
+      ok: null,
+      value: { '1': { 1: 'boast' } },
+      results: { '1': { 1: { correct: false, expected: 'show off', rationale: RATIONALE } } },
+    });
+    expect(markers()).toHaveLength(0);
+
+    renderBody({
+      phase: 'feedback',
+      ok: false,
+      value: { '1': { 1: 'clicked with' } },
+      results: { '1': { 1: { correct: false, expected: 'show off', rationale: RATIONALE } } },
+    });
+    expect(markers()).toHaveLength(0);
   });
 });
 
