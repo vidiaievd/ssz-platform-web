@@ -31,6 +31,13 @@ export interface WordBankFillContent {
    * is authored once here rather than repeated per blank.
    */
   wordNotes?: WordNotes;
+  /**
+   * How a blank is answered. `chips` (default) is the textbook layout: one
+   * shared bank above the sentences, words tapped into the armed blank.
+   * `select` puts the whole bank in a dropdown inside each blank — better for
+   * short vocabulary drills, where hunting for the armed blank is busywork.
+   */
+  inputMode?: 'chips' | 'select';
 }
 
 export interface WordBankFillExpectedBlank {
@@ -159,6 +166,7 @@ export function WordBankFillBody({
   const t = useTranslations('ExerciseRunner');
   const reveal = phase === 'feedback';
   const isAnswering = phase === 'answering';
+  const asSelect = content.inputMode === 'select';
   /* Which blank's note is open — at most one, so opening a new one closes it. */
   const [openNote, setOpenNote] = useState<string | null>(null);
   const blanks = useMemo(() => allBlanks(content.items), [content.items]);
@@ -224,9 +232,10 @@ export function WordBankFillBody({
     return result?.correct ? { line: OK_LINE, fg: OK_FG } : { line: NO_LINE, fg: NO_FG };
   }
 
-  /* 1–9 select a bank word for the armed blank, matching FillBody's shortcuts. */
+  /* 1–9 select a bank word for the armed blank, matching FillBody's shortcuts.
+     Dropdowns bring their own keyboard handling, so they get no shortcuts. */
   useEffect(() => {
-    if (!isAnswering) return;
+    if (!isAnswering || asSelect) return;
     function onKeyDown(e: KeyboardEvent) {
       const tag = ((e.target as HTMLElement).tagName ?? '').toLowerCase();
       if (tag === 'input' || tag === 'textarea') return;
@@ -242,47 +251,51 @@ export function WordBankFillBody({
     <div>
       {content.instruction && <Instr>{content.instruction}</Instr>}
 
-      <div
-        className="mb-6 flex flex-wrap gap-2 rounded-xl border border-(--ssz-border-default) px-4 py-3.5"
-        role="group"
-        aria-label={t('wordBank.bankLabel')}
-      >
-        {content.wordBank.map((word, i) => {
-          const inTarget = targetKey !== null && wordAt(targetKey) === word;
-          return (
-            <button
-              key={word}
-              type="button"
-              disabled={!isAnswering}
-              onClick={() => pickWord(word)}
-              aria-pressed={inTarget}
-              className="rounded-lg px-2.5 py-1 text-[14px] transition-opacity focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
-              style={{
-                fontFamily: READING,
-                border: `1.5px solid ${inTarget ? accent : 'transparent'}`,
-                background: inTarget ? modeAccentSoft(mode) : 'var(--ssz-bg-muted)',
-                color: inTarget ? accent : 'var(--ssz-text-secondary)',
-                opacity: used.has(word) ? 0.4 : 1,
-                cursor: isAnswering ? 'pointer' : 'default',
-              }}
-            >
-              <span
-                aria-hidden="true"
+      {/* In select mode every dropdown carries the whole bank, so a strip of
+          the same words above the sentences would only repeat itself. */}
+      {!asSelect && (
+        <div
+          className="mb-6 flex flex-wrap gap-2 rounded-xl border border-(--ssz-border-default) px-4 py-3.5"
+          role="group"
+          aria-label={t('wordBank.bankLabel')}
+        >
+          {content.wordBank.map((word, i) => {
+            const inTarget = targetKey !== null && wordAt(targetKey) === word;
+            return (
+              <button
+                key={word}
+                type="button"
+                disabled={!isAnswering}
+                onClick={() => pickWord(word)}
+                aria-pressed={inTarget}
+                className="rounded-lg px-2.5 py-1 text-[14px] transition-opacity focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
                 style={{
-                  fontSize: 10,
-                  fontFamily: 'var(--ssz-font-ui)',
-                  fontWeight: 700,
-                  opacity: 0.5,
-                  marginRight: 6,
+                  fontFamily: READING,
+                  border: `1.5px solid ${inTarget ? accent : 'transparent'}`,
+                  background: inTarget ? modeAccentSoft(mode) : 'var(--ssz-bg-muted)',
+                  color: inTarget ? accent : 'var(--ssz-text-secondary)',
+                  opacity: used.has(word) ? 0.4 : 1,
+                  cursor: isAnswering ? 'pointer' : 'default',
                 }}
               >
-                {i + 1}
-              </span>
-              {word}
-            </button>
-          );
-        })}
-      </div>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    fontSize: 10,
+                    fontFamily: 'var(--ssz-font-ui)',
+                    fontWeight: 700,
+                    opacity: 0.5,
+                    marginRight: 6,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                {word}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <ol className="flex flex-col gap-3.5">
         {content.items.map((item, i) => (
@@ -361,6 +374,32 @@ export function WordBankFillBody({
                 const key = blankKey(item.id, seg.blankId);
                 const armed = targetKey === key;
 
+                if (asSelect) {
+                  return (
+                    <select
+                      key={idx}
+                      value={chosen}
+                      onChange={(e) => setBlank(item.id, seg.blankId, e.target.value)}
+                      aria-label={t('wordBank.blankLabel', { n: i + 1 })}
+                      className="rounded-lg px-2 py-1 text-[14px] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
+                      style={{
+                        fontFamily: READING,
+                        fontWeight: chosen ? 600 : 400,
+                        color: chosen ? accent : 'var(--ssz-text-muted)',
+                        background: 'var(--ssz-bg-muted)',
+                        border: `1.5px solid ${chosen ? accent : 'var(--ssz-border-default)'}`,
+                      }}
+                    >
+                      <option value="">{t('wordBank.choosePlaceholder')}</option>
+                      {content.wordBank.map((word) => (
+                        <option key={word} value={word}>
+                          {word}
+                        </option>
+                      ))}
+                    </select>
+                  );
+                }
+
                 return (
                   <button
                     key={idx}
@@ -390,7 +429,11 @@ export function WordBankFillBody({
 
       {!reveal && (
         <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)">
-          {activeKey === null ? t('wordBank.helperIdle') : t('wordBank.helperArmed')}{' '}
+          {asSelect
+            ? t('wordBank.helperSelect')
+            : activeKey === null
+              ? t('wordBank.helperIdle')
+              : t('wordBank.helperArmed')}{' '}
           {t('wordBank.filledCount', { done: filled.length, total: blanks.length })}
         </p>
       )}

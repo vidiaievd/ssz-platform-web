@@ -497,6 +497,7 @@ function WordBankFillSolver({
           instruction: instr(display),
           reusableWords: c.reusable_words === true,
           wordNotes: wordNotes(c.word_notes),
+          inputMode: c.input_mode === 'select' ? 'select' : 'chips',
         }}
         value={value}
         onValueChange={setValue}

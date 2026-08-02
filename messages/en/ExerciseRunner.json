@@ -93,7 +93,8 @@
     "filledCount": "{done} of {total} blanks filled",
     "partialScore": "{correct} of {total} blanks correct",
     "helperIdle": "Tap a blank, then pick a word.",
-    "helperArmed": "Now pick a word for the highlighted blank."
+    "helperArmed": "Now pick a word for the highlighted blank.",
+    "helperSelect": "Pick a word for each blank."
   },
   "textOrder": {
     "moveUp": "Move up",

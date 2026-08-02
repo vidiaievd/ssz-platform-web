@@ -152,6 +152,41 @@ describe('WordBankFillBody', () => {
   });
 });
 
+describe('WordBankFillBody — select input mode', () => {
+  const selectContent: WordBankFillContent = { ...content, inputMode: 'select' };
+
+  it('puts the whole bank in a dropdown per blank and drops the bank strip', () => {
+    renderBody({ content: selectContent });
+
+    const selects = screen.getAllByRole('combobox', { name: /Blank in sentence/ });
+    expect(selects).toHaveLength(3);
+    // Three bank words plus the "Choose…" placeholder.
+    expect(within(selects[0]!).getAllByRole('option')).toHaveLength(4);
+    expect(screen.queryByRole('group', { name: 'Word bank' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Pick a word for each blank\./)).toBeInTheDocument();
+  });
+
+  it('records the picked word against its own blank', () => {
+    const onValueChange = vi.fn();
+    renderBody({ content: selectContent, onValueChange });
+
+    fireEvent.change(screen.getAllByRole('combobox', { name: /Blank in sentence/ })[2]!, {
+      target: { value: 'boast' },
+    });
+
+    expect(onValueChange).toHaveBeenCalledWith({ '2': { 2: 'boast' } });
+  });
+
+  it('ignores the number-key shortcuts, which belong to the bank strip', () => {
+    const onValueChange = vi.fn();
+    renderBody({ content: selectContent, onValueChange });
+
+    fireEvent.keyDown(document.body, { key: '2' });
+
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+});
+
 const RATIONALE = {
   explanation: 'A statement is introduced by «at».',
   options: [
