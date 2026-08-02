@@ -67,7 +67,11 @@
     "defaultInstruction": "Plasser hvert ord i riktig felt",
     "bankLabel": "Ord",
     "bankEmpty": "Alle ord er plassert",
-    "fieldDropLabel": "Plasser i {field}"
+    "fieldDropLabel": "Plasser i {field}",
+    "multiWordHint": "Ett felt kan romme flere ord",
+    "answerLabel": "Riktig plassering",
+    "sourceLabel": "Utgangssetning",
+    "targetLabel": "Målsetning"
   },
   "unsupported": "Denne oppgavetypen ({type}) kan ikke løses ennå.",
   "taskNumber": "Oppgave {n}",

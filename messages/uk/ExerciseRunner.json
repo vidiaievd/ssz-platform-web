@@ -67,7 +67,11 @@
     "defaultInstruction": "Розмістіть кожне слово у правильному полі",
     "bankLabel": "Слова",
     "bankEmpty": "Усі слова розміщено",
-    "fieldDropLabel": "Розмістити в {field}"
+    "fieldDropLabel": "Розмістити в {field}",
+    "multiWordHint": "В одне поле може входити кілька слів",
+    "answerLabel": "Правильне розміщення",
+    "sourceLabel": "Вихідне речення",
+    "targetLabel": "Цільове речення"
   },
   "unsupported": "Цей тип вправи ({type}) поки не підтримується.",
   "taskNumber": "Завдання {n}",

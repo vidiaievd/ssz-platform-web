@@ -21,7 +21,14 @@ export interface SchemaToken {
  * The learner places each token into one of the ordered fields.
  */
 export interface SentenceSchemaContent {
+  /** The target sentence. Held back while `source_sentence` is set. */
   sentence: string;
+  /**
+   * The sentence the learner starts from — a main clause to subordinate, or a
+   * neutral order to front an adverbial in. When present the task is a
+   * transformation, so the target sentence only appears with the feedback.
+   */
+  source_sentence?: string;
   schema_type?: 'main' | 'subordinate';
   fields: SchemaField[];
   tokens: SchemaToken[];
@@ -45,6 +52,11 @@ export interface SentenceSchemaBodyProps {
   ok: boolean | null;
   mode: RunnerMode;
   accent: string;
+  /**
+   * The expected placement, rendered as a read-only row below the learner's
+   * own. Pass it only once the answer has been unlocked; `null` keeps it back.
+   */
+  revealPlacements?: SchemaPlacements | null;
 }
 
 const READING = 'var(--ssz-font-reading)';
@@ -73,6 +85,30 @@ interface DragState {
 interface DropTarget {
   fieldId: string;
   index: number;
+}
+
+/**
+ * Deterministic shuffle of the token bank. Handing the words out in sentence
+ * order turns the task into copying, and `Math.random` would break hydration,
+ * so the permutation is derived from the tokens themselves.
+ */
+function shuffledTokens(tokens: SchemaToken[]): SchemaToken[] {
+  let seed = 2166136261;
+  for (const tk of tokens) {
+    for (const s of [tk.id, tk.text]) {
+      for (let i = 0; i < s.length; i += 1) {
+        seed = Math.imul(seed ^ s.charCodeAt(i), 16777619);
+      }
+    }
+  }
+  const out = [...tokens];
+  let state = seed >>> 0;
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    const j = state % (i + 1);
+    [out[i], out[j]] = [out[j] as SchemaToken, out[i] as SchemaToken];
+  }
+  return out;
 }
 
 /** All token ids currently placed in any field. */
@@ -119,6 +155,7 @@ export function SentenceSchemaBody({
   ok,
   mode,
   accent,
+  revealPlacements = null,
 }: SentenceSchemaBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const isAnswering = phase === 'answering';
@@ -136,7 +173,8 @@ export function SentenceSchemaBody({
   const chipRefs = useRef(new Map<string, HTMLElement>());
 
   const placed = useMemo(() => placedIds(value), [value]);
-  const bank = content.tokens.filter((tk) => !placed.has(tk.id));
+  const bankOrder = useMemo(() => shuffledTokens(content.tokens), [content.tokens]);
+  const bank = bankOrder.filter((tk) => !placed.has(tk.id));
   const tokenById = useMemo(
     () => new Map(content.tokens.map((tk) => [tk.id, tk])),
     [content.tokens],
@@ -270,32 +308,72 @@ export function SentenceSchemaBody({
     fontFamily: READING,
     fontSize: 15,
     fontWeight: 600,
+    whiteSpace: 'nowrap',
     touchAction: 'none',
     cursor: isAnswering ? 'grab' : 'default',
   });
 
   const dragText = drag ? (tokenById.get(drag.tokenId)?.text ?? '') : '';
+  const source = content.source_sentence?.trim();
 
   return (
     <>
       <Instr>{content.instruction ?? t('sentenceSchema.defaultInstruction')}</Instr>
 
-      <p
-        className="mb-4 leading-[1.5]"
-        style={{ fontFamily: READING, fontSize: 20, fontWeight: 500, color: 'var(--ssz-text-primary)' }}
-      >
-        {content.sentence}
+      {/* A transformation task starts from `source_sentence`; the target one
+          would give the word order away, so it waits for the feedback. */}
+      {source && (
+        <>
+          <p
+            className="mb-1 text-[11px] font-bold uppercase tracking-wide"
+            style={{ color: 'var(--ssz-text-muted)' }}
+          >
+            {t('sentenceSchema.sourceLabel')}
+          </p>
+          <p
+            className="mb-4 leading-[1.5]"
+            style={{ fontFamily: READING, fontSize: 20, fontWeight: 500, color: 'var(--ssz-text-primary)' }}
+          >
+            {source}
+          </p>
+        </>
+      )}
+      {(!source || !isAnswering) && content.sentence && (
+        <>
+          {source && (
+            <p
+              className="mb-1 text-[11px] font-bold uppercase tracking-wide"
+              style={{ color: 'var(--ssz-text-muted)' }}
+            >
+              {t('sentenceSchema.targetLabel')}
+            </p>
+          )}
+          <p
+            className="mb-4 leading-[1.5]"
+            style={{ fontFamily: READING, fontSize: 20, fontWeight: 500, color: 'var(--ssz-text-primary)' }}
+          >
+            {content.sentence}
+          </p>
+        </>
+      )}
+
+      <p className="mb-2 text-[12px] italic" style={{ color: 'var(--ssz-text-muted)' }}>
+        {t('sentenceSchema.multiWordHint')}
       </p>
 
-      {/* Field columns */}
-      <div className="mb-4 overflow-x-auto">
-        <div className="flex min-w-max gap-2">
+      {/* Field columns — words stay on one line inside a field, the fields wrap instead. */}
+      <div className="mb-4">
+        <div className="flex flex-wrap gap-2">
           {content.fields.map((field) => {
             const tokenIds = value[field.id] ?? [];
             const isTarget = target?.fieldId === field.id;
             const active = isAnswering && (armed !== null || drag !== null);
             return (
-              <div key={field.id} className="flex min-w-28 flex-1 flex-col">
+              <div
+                key={field.id}
+                className="flex grow flex-col"
+                style={{ flexBasis: '7rem', minWidth: 'fit-content' }}
+              >
                 <p
                   className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wide"
                   style={{ color: 'var(--ssz-text-muted)' }}
@@ -326,9 +404,9 @@ export function SentenceSchemaBody({
                     padding: 6,
                     cursor: active ? 'pointer' : 'default',
                     display: 'flex',
-                    flexWrap: 'wrap',
+                    flexWrap: 'nowrap',
                     gap: 6,
-                    alignContent: 'flex-start',
+                    alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ssz-border-focus)]"
@@ -422,6 +500,62 @@ export function SentenceSchemaBody({
           );
         })}
       </div>
+
+      {/* The expected placement, once the learner has unlocked the answer. */}
+      {revealPlacements && (
+        <div className="mt-5">
+          <p
+            className="mb-1.5 text-[11px] font-bold uppercase tracking-wide"
+            style={{ color: 'var(--ssz-text-muted)' }}
+          >
+            {t('sentenceSchema.answerLabel')}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {content.fields.map((field) => (
+              <div
+                key={field.id}
+                className="flex grow flex-col"
+                style={{ flexBasis: '7rem', minWidth: 'fit-content' }}
+              >
+                <p
+                  className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wide"
+                  style={{ color: 'var(--ssz-text-muted)' }}
+                >
+                  {field.label}
+                </p>
+                <div
+                  style={{
+                    minHeight: 56,
+                    borderRadius: 10,
+                    border: '2px dashed var(--ssz-feedback-ok-line)',
+                    background: 'var(--ssz-feedback-ok-bg)',
+                    padding: 6,
+                    display: 'flex',
+                    flexWrap: 'nowrap',
+                    gap: 6,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {(revealPlacements[field.id] ?? []).map((id) => (
+                    <span
+                      key={id}
+                      style={{
+                        ...chipStyle(false),
+                        border: '2px solid var(--ssz-feedback-ok-line)',
+                        color: 'var(--ssz-feedback-ok-fg)',
+                        cursor: 'default',
+                      }}
+                    >
+                      {tokenById.get(id)?.text ?? ''}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Chip following the pointer while dragging. */}
       {drag &&

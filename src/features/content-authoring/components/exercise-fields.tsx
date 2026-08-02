@@ -598,6 +598,20 @@ function SentenceSchemaFields({ control, register, errors, isPending }: SubProps
         />
       </Field>
 
+      <Field
+        label={t('ssSourceSentence')}
+        htmlFor="ex-ss-source"
+        hint={t('ssSourceSentenceHelp')}
+        error={errors.ssSourceSentence?.message}
+      >
+        <Input
+          id="ex-ss-source"
+          placeholder={t('ssSourceSentencePlaceholder')}
+          disabled={isPending}
+          {...register('ssSourceSentence')}
+        />
+      </Field>
+
       <Field label={t('ssSchemaType')} htmlFor="ex-ss-type">
         <Select
           value={typeCtrl.field.value ?? 'main'}

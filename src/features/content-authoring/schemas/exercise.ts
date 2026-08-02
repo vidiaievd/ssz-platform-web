@@ -117,6 +117,9 @@ export const exerciseFormSchema = z
     // sentence_schema — the learner drops sentence tokens into ordered fields.
     // Each token records which field (by index) it belongs to; -1 = unassigned.
     ssSentence: z.string().max(2000).optional(),
+    // Optional starting point: when set the exercise becomes a transformation
+    // and `ssSentence` is held back from the learner until the answer is checked.
+    ssSourceSentence: z.string().max(2000).optional(),
     ssSchemaType: z.enum(SENTENCE_SCHEMA_TYPES).optional(),
     ssFields: z.array(z.object({ label: z.string().max(200) })).optional(),
     ssTokens: z

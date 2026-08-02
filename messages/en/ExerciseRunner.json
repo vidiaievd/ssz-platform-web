@@ -67,7 +67,11 @@
     "defaultInstruction": "Place each word in the right field",
     "bankLabel": "Words",
     "bankEmpty": "All words placed",
-    "fieldDropLabel": "Place in {field}"
+    "fieldDropLabel": "Place in {field}",
+    "multiWordHint": "A field can hold more than one word",
+    "answerLabel": "Correct placement",
+    "sourceLabel": "Original sentence",
+    "targetLabel": "Target sentence"
   },
   "unsupported": "This exercise type ({type}) isn’t playable yet.",
   "taskNumber": "Task {n}",

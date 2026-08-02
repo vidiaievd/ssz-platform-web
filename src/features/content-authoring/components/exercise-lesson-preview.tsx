@@ -168,8 +168,10 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
         {values.templateCode === 'sentence_schema' &&
           (values.ssSentence ? (
             <div>
+              {/* With a source sentence the target is held back from the learner,
+                  so the preview shows what they will actually start from. */}
               <p className="mb-2.5 text-[15px] font-semibold leading-normal text-(--ssz-text-primary)">
-                {values.ssSentence}
+                {values.ssSourceSentence?.trim() || values.ssSentence}
               </p>
               <div className="mb-3 overflow-x-auto">
                 <div className="flex min-w-max gap-1.5">

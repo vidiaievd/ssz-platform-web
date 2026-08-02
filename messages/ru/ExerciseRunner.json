@@ -67,7 +67,11 @@
     "defaultInstruction": "Разместите каждое слово в правильном поле",
     "bankLabel": "Слова",
     "bankEmpty": "Все слова размещены",
-    "fieldDropLabel": "Разместить в {field}"
+    "fieldDropLabel": "Разместить в {field}",
+    "multiWordHint": "В одно поле может входить несколько слов",
+    "answerLabel": "Правильное размещение",
+    "sourceLabel": "Исходное предложение",
+    "targetLabel": "Целевое предложение"
   },
   "unsupported": "Этот тип упражнения ({type}) пока не поддерживается.",
   "taskNumber": "Задание {n}",

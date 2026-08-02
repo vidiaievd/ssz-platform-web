@@ -360,7 +360,7 @@ function WritingSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
+function SentenceSchemaSolver({ display, phase, ok, revealed, onCheck }: SolverProps) {
   const [value, setValue] = useState<SchemaPlacements>({});
   const c = display.content;
   const fields: SchemaField[] = (Array.isArray(c.fields) ? c.fields : [])
@@ -379,6 +379,7 @@ function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
       <SentenceSchemaBody
         content={{
           sentence: str(c.sentence),
+          source_sentence: str(c.source_sentence) || undefined,
           schema_type: c.schema_type === 'subordinate' ? 'subordinate' : 'main',
           fields,
           tokens,
@@ -391,9 +392,22 @@ function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
         ok={ok}
         mode="practice"
         accent={ACCENT}
+        revealPlacements={
+          revealed
+            ? Object.fromEntries(placements.map((p) => [p.field_id, p.token_ids]))
+            : null
+        }
       />
       {phase === 'answering' && (
-        <CheckFooter canSubmit={canSubmit} onCheck={() => onCheck({ ok: gradeSentenceSchema({ placements }, value) })} />
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() =>
+            onCheck({
+              ok: gradeSentenceSchema({ placements }, value),
+              explanation: str(display.expectedAnswers.explanation) || undefined,
+            })
+          }
+        />
       )}
     </>
   );

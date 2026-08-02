@@ -49,6 +49,7 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   wtTopics: [],
   wtRubric: '',
   ssSentence: '',
+  ssSourceSentence: '',
   ssSchemaType: 'main',
   ssFields: [{ label: '' }, { label: '' }],
   ssTokens: [
@@ -293,6 +294,9 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       return {
         content: {
           sentence: values.ssSentence?.trim() ?? '',
+          ...(values.ssSourceSentence?.trim()
+            ? { source_sentence: values.ssSourceSentence.trim() }
+            : {}),
           schema_type: values.ssSchemaType ?? 'main',
           fields,
           tokens,
@@ -613,6 +617,7 @@ export function parseExerciseToForm(exercise: {
       return {
         ...base,
         ssSentence: typeof content.sentence === 'string' ? content.sentence : '',
+        ssSourceSentence: typeof content.source_sentence === 'string' ? content.source_sentence : '',
         ssSchemaType: schemaType,
         ssFields: fields.length >= 2 ? fields : [{ label: '' }, { label: '' }],
         ssTokens:

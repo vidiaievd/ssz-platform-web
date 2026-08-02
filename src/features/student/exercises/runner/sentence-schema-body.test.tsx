@@ -16,6 +16,10 @@ const messages = {
       bankLabel: 'Words',
       bankEmpty: 'All words placed',
       fieldDropLabel: 'Place in {field}',
+      multiWordHint: 'A field can hold more than one word',
+      answerLabel: 'Correct placement',
+      sourceLabel: 'Original sentence',
+      targetLabel: 'Target sentence',
     },
   },
 };
@@ -46,19 +50,30 @@ function stubRect(el: Element, r: { left: number; top: number; right: number; bo
   el.getBoundingClientRect = () => rect;
 }
 
-function Harness({ onAnswerChange }: { onAnswerChange?: (canSubmit: boolean) => void }) {
+function Harness({
+  onAnswerChange,
+  content = CONTENT,
+  phase = 'answering',
+  revealPlacements = null,
+}: {
+  onAnswerChange?: (canSubmit: boolean) => void;
+  content?: SentenceSchemaContent;
+  phase?: 'answering' | 'feedback';
+  revealPlacements?: SchemaPlacements | null;
+}) {
   const [value, setValue] = useState<SchemaPlacements>({});
   return (
     <NextIntlClientProvider locale="en" messages={messages}>
       <SentenceSchemaBody
-        content={CONTENT}
+        content={content}
         value={value}
         onValueChange={setValue}
         onAnswerChange={onAnswerChange ?? (() => {})}
-        phase="answering"
-        ok={null}
+        phase={phase}
+        ok={phase === 'feedback' ? false : null}
         mode="practice"
         accent={ACCENT}
+        revealPlacements={revealPlacements}
       />
     </NextIntlClientProvider>
   );
@@ -170,5 +185,61 @@ describe('SentenceSchemaBody', () => {
 
     expect(zone).not.toContainElement(screen.getByRole('button', { name: 'Lars' }));
     expect(onAnswerChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('hides the target sentence while a source sentence drives the task', () => {
+    const transform: SentenceSchemaContent = {
+      ...CONTENT,
+      sentence: '… at Lars har likt Lotte',
+      source_sentence: 'Lars har likt Lotte',
+    };
+    const { rerender } = render(<Harness content={transform} />);
+    expect(screen.getByText('Lars har likt Lotte')).toBeInTheDocument();
+    expect(screen.queryByText('… at Lars har likt Lotte')).not.toBeInTheDocument();
+
+    // The target only joins the feedback, once the answer is in.
+    rerender(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <SentenceSchemaBody
+          content={transform}
+          value={{}}
+          onValueChange={() => {}}
+          onAnswerChange={() => {}}
+          phase="feedback"
+          ok={false}
+          mode="practice"
+          accent={ACCENT}
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByText('… at Lars har likt Lotte')).toBeInTheDocument();
+  });
+
+  it('does not hand the bank out in sentence order', () => {
+    // Sentence order would let the learner copy the answer left to right.
+    const content: SentenceSchemaContent = {
+      ...CONTENT,
+      tokens: [
+        { id: 't1', text: 'Lars' },
+        { id: 't2', text: 'har' },
+        { id: 't3', text: 'aldri' },
+        { id: 't4', text: 'likt' },
+        { id: 't5', text: 'Lotte' },
+      ],
+    };
+    render(<Harness content={content} />);
+    const bank = screen.getByLabelText('Words');
+    const order = Array.from(bank.querySelectorAll('button')).map((b) => b.textContent);
+    expect(order).not.toEqual(['Lars', 'har', 'aldri', 'likt', 'Lotte']);
+    expect([...order].sort()).toEqual(['Lars', 'Lotte', 'aldri', 'har', 'likt']);
+  });
+
+  it('shows the expected placement once the answer is unlocked', () => {
+    render(
+      <Harness phase="feedback" revealPlacements={{ f1: ['t1'], f2: ['t2'] }} />,
+    );
+    expect(screen.getByText('Correct placement')).toBeInTheDocument();
+    // Both fields are labelled twice now — the learner's row and the answer row.
+    expect(screen.getAllByText('Forfelt')).toHaveLength(2);
   });
 });
