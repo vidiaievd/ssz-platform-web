@@ -7,6 +7,7 @@ import { findItemWithModule } from './find-tree-item';
 const TREE: CurriculumTree = {
   versionId: 'course-version-1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
   levels: [
     {
@@ -43,6 +44,7 @@ const TREE: CurriculumTree = {
               ],
             },
           ],
+          publishState: 'draft',
           ungroupedItems: [
             {
               id: 'item-2',

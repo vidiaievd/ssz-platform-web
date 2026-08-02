@@ -40,6 +40,7 @@ export const ModuleSelected: Story = {
         position: 0,
         isRequired: true,
         sections: [],
+        publishState: 'draft',
         ungroupedItems: [],
       },
     },

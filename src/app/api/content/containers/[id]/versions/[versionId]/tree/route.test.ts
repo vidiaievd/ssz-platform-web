@@ -15,6 +15,7 @@ const PARAMS = { params: Promise.resolve({ id: 'course-1', versionId: 'version-1
 const MOCK_TREE: CurriculumTree = {
   versionId: 'version-1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
   levels: [
     {
@@ -51,6 +52,7 @@ const MOCK_TREE: CurriculumTree = {
               ],
             },
           ],
+          publishState: 'draft',
           ungroupedItems: [],
         },
       ],
@@ -59,7 +61,9 @@ const MOCK_TREE: CurriculumTree = {
 };
 
 function makeRequest() {
-  return new NextRequest('http://localhost/api/content/containers/course-1/versions/version-1/tree');
+  return new NextRequest(
+    'http://localhost/api/content/containers/course-1/versions/version-1/tree',
+  );
 }
 
 beforeEach(() => vi.mocked(serverFetch).mockReset());
@@ -78,7 +82,9 @@ describe('GET /api/content/containers/[id]/versions/[versionId]/tree', () => {
   });
 
   it('returns 401 when unauthenticated', async () => {
-    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('unauthenticated', 'Not authenticated'));
+    vi.mocked(serverFetch).mockRejectedValueOnce(
+      new AppError('unauthenticated', 'Not authenticated'),
+    );
     const res = await GET(makeRequest(), PARAMS);
     expect(res.status).toBe(401);
   });

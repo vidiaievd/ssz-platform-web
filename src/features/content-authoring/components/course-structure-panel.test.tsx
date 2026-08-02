@@ -42,6 +42,7 @@ import { useCurriculumTree } from '../api/use-curriculum-tree';
 const EMPTY_TREE: CurriculumTreeData = {
   versionId: 'version-1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
   levels: [],
 };

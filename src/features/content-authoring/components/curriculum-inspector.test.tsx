@@ -88,6 +88,7 @@ describe('CurriculumInspector', () => {
         position: 0,
         isRequired: true,
         sections: [],
+        publishState: 'draft',
         ungroupedItems: [],
       },
     });
@@ -174,6 +175,7 @@ describe('CurriculumInspector', () => {
           position: 0,
           isRequired: true,
           sections: [],
+          publishState: 'draft',
           ungroupedItems: [],
         },
       });

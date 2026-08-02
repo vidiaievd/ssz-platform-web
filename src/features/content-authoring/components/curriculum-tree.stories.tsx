@@ -9,6 +9,7 @@ import { CurriculumTree } from './curriculum-tree';
 const TREE: CurriculumTreeData = {
   versionId: 'version-1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
   levels: [
     {
@@ -63,6 +64,7 @@ const TREE: CurriculumTreeData = {
               items: [],
             },
           ],
+          publishState: 'draft',
           ungroupedItems: [],
         },
         {
@@ -74,6 +76,7 @@ const TREE: CurriculumTreeData = {
           position: 1,
           isRequired: true,
           sections: [],
+          publishState: 'draft',
           ungroupedItems: [
             {
               id: 'item-3',
@@ -141,7 +144,13 @@ export const Default: Story = {
 };
 
 export const LessonSelected: Story = {
-  args: { tree: TREE, selectedId: 'item-1', onSelect: () => {}, onChanged: () => {}, ...commonArgs },
+  args: {
+    tree: TREE,
+    selectedId: 'item-1',
+    onSelect: () => {},
+    onChanged: () => {},
+    ...commonArgs,
+  },
 };
 
 export const Interactive: Story = {

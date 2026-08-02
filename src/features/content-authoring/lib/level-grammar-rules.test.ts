@@ -42,6 +42,7 @@ function moduleNode(
     position: 0,
     isRequired: true,
     sections: [{ id: `s-${containerId}`, title: 'Innhold', position: 0, items }],
+    publishState: 'draft',
     ungroupedItems: [],
   };
 }
@@ -50,6 +51,7 @@ function moduleNode(
 const TREE: CurriculumTree = {
   versionId: 'v1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
   levels: [
     {
@@ -57,7 +59,9 @@ const TREE: CurriculumTree = {
       title: 'Leksjon 1 — Arbeidsliv',
       position: 0,
       modules: [
-        moduleNode('mod-1a', '1A — Bartek søker ny jobb', [item('i1', 'lesson', 'lesson-1a', '1A')]),
+        moduleNode('mod-1a', '1A — Bartek søker ny jobb', [
+          item('i1', 'lesson', 'lesson-1a', '1A'),
+        ]),
         moduleNode('mod-1g', '1 — Grammatikk og øvelser', [
           item('i2', 'grammar_rule', 'rule-indirekte', 'Indirekte tale'),
           item('i3', 'exercise', 'ex-1', 'Øvelse 1'),

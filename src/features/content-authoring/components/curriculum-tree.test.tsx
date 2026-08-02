@@ -25,6 +25,7 @@ const { createSectionAction } = await import('../actions/section');
 const TREE: CurriculumTreeData = {
   versionId: 'version-1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
   levels: [
     {
@@ -61,6 +62,7 @@ const TREE: CurriculumTreeData = {
               ],
             },
           ],
+          publishState: 'draft',
           ungroupedItems: [],
         },
       ],
@@ -68,11 +70,11 @@ const TREE: CurriculumTreeData = {
   ],
 };
 
-function renderTree(onSelect = vi.fn(), onChanged = vi.fn()) {
+function renderTree(onSelect = vi.fn(), onChanged = vi.fn(), tree: CurriculumTreeData = TREE) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <CurriculumTree
-        tree={TREE}
+        tree={tree}
         selectedId={null}
         onSelect={onSelect}
         onChanged={onChanged}
@@ -135,6 +137,30 @@ describe('CurriculumTree', () => {
       expect(call.item.id).toBe('item-1');
       expect(call.sectionTitle).toBe('Reinforce & read');
     }
+  });
+
+  it('badges an unpublished module as a draft', () => {
+    renderTree();
+    expect(screen.getByText('Draft')).toBeInTheDocument();
+  });
+
+  it('badges a module whose draft is ahead of what students see', () => {
+    const [level] = TREE.levels;
+    const [module_] = level!.modules;
+    const pendingTree: CurriculumTreeData = {
+      ...TREE,
+      levels: [
+        {
+          ...level!,
+          modules: [{ ...module_!, publishState: 'pending_changes' }],
+        },
+      ],
+    };
+
+    renderTree(vi.fn(), vi.fn(), pendingTree);
+
+    expect(screen.getByText('Unpublished changes')).toBeInTheDocument();
+    expect(screen.queryByText('Draft')).not.toBeInTheDocument();
   });
 
   it('collapses a level so its modules are no longer rendered', () => {

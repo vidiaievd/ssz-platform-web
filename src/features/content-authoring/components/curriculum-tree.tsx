@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
   AccessTier,
+  ContainerPublishState,
   CurriculumTree as CurriculumTreeData,
   CurriculumTreeItemNode,
   CurriculumTreeLevelNode,
@@ -22,7 +23,7 @@ import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
 import { createModuleAction } from '../actions/container';
 import { createSectionAction } from '../actions/section';
-import { ContainerStateBadge } from './container-state-badge';
+import { PublishStateBadge } from './publish-state-badge';
 import {
   CurriculumSectionItems,
   MoveLevel,
@@ -61,7 +62,7 @@ interface TreeRowProps {
   expanded?: boolean;
   onToggle?: () => void;
   onSelect: () => void;
-  state?: 'draft' | 'published' | null;
+  state?: ContainerPublishState | null;
   right?: React.ReactNode;
 }
 
@@ -131,7 +132,7 @@ function TreeRow({
         </div>
       </div>
       {meta && <span className="font-mono text-[10.5px] text-muted-foreground">{meta}</span>}
-      {state && <ContainerStateBadge state={state} />}
+      {state && <PublishStateBadge state={state} />}
       {right}
     </div>
   );
@@ -222,7 +223,7 @@ function ModuleNode({
         label={mod.title ?? ''}
         sub={mod.titleEn}
         meta={t('structure.lessonCount', { count: lessonTotal })}
-        state={null}
+        state={mod.publishState}
         selected={selectedId === mod.id}
         onSelect={() => onSelect({ kind: 'module', module: mod })}
         right={

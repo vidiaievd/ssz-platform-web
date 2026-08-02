@@ -601,7 +601,12 @@
     "modulePublishAction": "Опублікувати модуль",
     "modulePublishFirst": "Цей модуль ще жодного разу не публікувався, тож студенти не можуть його відкрити.",
     "modulePublishPending": "У модулі є неопубліковані зміни. Студенти бачитимуть опубліковану версію, доки ви не опублікуєте знову.",
-    "modulePublishUpToDate": "Усе в цьому модулі опубліковано."
+    "modulePublishUpToDate": "Усе в цьому модулі опубліковано.",
+    "publishSummaryAllLive": "Усе, що бачать студенти, актуальне.",
+    "publishSummaryCourseDraft": "Курс не опубліковано — студенти не можуть його відкрити.",
+    "publishSummaryCoursePending": "Сам курс має неопубліковані зміни.",
+    "publishSummaryModulesPending": "{count, plural, one {# модуль має} few {# модулі мають} many {# модулів мають} other {# модуля мають}} неопубліковані зміни.",
+    "publishSummaryModulesDraft": "{count, plural, one {Ще не опубліковано # модуль} few {Ще не опубліковано # модулі} many {Ще не опубліковано # модулів} other {Ще не опубліковано # модуля}}."
   },
   "settings": {
     "trigger": "Налаштування",
@@ -844,5 +849,11 @@
       "error": "Не вдалося видалити курс."
     },
     "transferOwnership": "Передати право власності"
+  },
+  "publishState": {
+    "draft": "Чернетка",
+    "published": "Опубліковано",
+    "pendingChanges": "Неопубліковані зміни",
+    "ariaLabel": "Статус: {label}"
   }
 }

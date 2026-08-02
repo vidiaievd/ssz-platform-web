@@ -601,7 +601,12 @@
     "modulePublishAction": "Publish module",
     "modulePublishFirst": "This module has never been published, so students cannot open it yet.",
     "modulePublishPending": "This module has unpublished changes. Students keep seeing the published version until you publish again.",
-    "modulePublishUpToDate": "Everything in this module is published."
+    "modulePublishUpToDate": "Everything in this module is published.",
+    "publishSummaryAllLive": "Everything students see is up to date.",
+    "publishSummaryCourseDraft": "The course is not published — students cannot open it.",
+    "publishSummaryCoursePending": "The course itself has unpublished changes.",
+    "publishSummaryModulesPending": "{count, plural, one {# module has} other {# modules have}} unpublished changes.",
+    "publishSummaryModulesDraft": "{count, plural, one {# module is} other {# modules are}} not published yet."
   },
   "settings": {
     "trigger": "Settings",
@@ -844,5 +849,11 @@
       "error": "Failed to delete course."
     },
     "transferOwnership": "Transfer ownership"
+  },
+  "publishState": {
+    "draft": "Draft",
+    "published": "Published",
+    "pendingChanges": "Unpublished changes",
+    "ariaLabel": "Status: {label}"
   }
 }

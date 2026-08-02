@@ -601,7 +601,12 @@
     "modulePublishAction": "Publiser modul",
     "modulePublishFirst": "Denne modulen er aldri publisert, så studentene kan ikke åpne den ennå.",
     "modulePublishPending": "Denne modulen har upubliserte endringer. Studentene ser den publiserte versjonen til du publiserer på nytt.",
-    "modulePublishUpToDate": "Alt i denne modulen er publisert."
+    "modulePublishUpToDate": "Alt i denne modulen er publisert.",
+    "publishSummaryAllLive": "Alt studentene ser, er oppdatert.",
+    "publishSummaryCourseDraft": "Kurset er ikke publisert — studentene kan ikke åpne det.",
+    "publishSummaryCoursePending": "Selve kurset har upubliserte endringer.",
+    "publishSummaryModulesPending": "{count, plural, one {# modul har} other {# moduler har}} upubliserte endringer.",
+    "publishSummaryModulesDraft": "{count, plural, one {# modul er} other {# moduler er}} ikke publisert ennå."
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -844,5 +849,11 @@
       "error": "Kunne ikke slette kurset."
     },
     "transferOwnership": "Overfør eierskap"
+  },
+  "publishState": {
+    "draft": "Utkast",
+    "published": "Publisert",
+    "pendingChanges": "Upubliserte endringer",
+    "ariaLabel": "Status: {label}"
   }
 }

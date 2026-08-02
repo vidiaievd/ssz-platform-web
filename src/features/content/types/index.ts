@@ -81,6 +81,16 @@ export interface CurriculumTreeSectionNode {
   items: CurriculumTreeItemNode[];
 }
 
+/**
+ * Publish state of a container as content-service reports it.
+ *
+ * `pending_changes` means the container is live but its draft version holds a
+ * different set of items — those additions/removals/moves are invisible to
+ * students until it is published again. Edits to an item's own content are not
+ * tracked here: they rewrite a shared row and reach students immediately.
+ */
+export type ContainerPublishState = 'draft' | 'published' | 'pending_changes';
+
 export interface CurriculumTreeModuleNode {
   id: string;
   containerId: string;
@@ -89,6 +99,7 @@ export interface CurriculumTreeModuleNode {
   titleEn: string | null;
   position: number;
   isRequired: boolean;
+  publishState: ContainerPublishState;
   sections: CurriculumTreeSectionNode[];
   ungroupedItems: CurriculumTreeItemNode[];
 }
@@ -104,6 +115,7 @@ export interface CurriculumTree {
   versionId: string;
   containerId: string;
   levelSystem: 'cefr' | 'custom' | 'single';
+  publishState: ContainerPublishState;
   levels: CurriculumTreeLevelNode[];
 }
 

@@ -56,9 +56,15 @@ const MODULE: CurriculumTreeModuleNode = {
   position: 0,
   isRequired: true,
   sections: [
-    { id: 'section-a', title: 'Section A', position: 0, items: [item('a1'), item('a2'), item('a3')] },
+    {
+      id: 'section-a',
+      title: 'Section A',
+      position: 0,
+      items: [item('a1'), item('a2'), item('a3')],
+    },
     { id: 'section-b', title: 'Section B', position: 1, items: [item('b1'), item('b2')] },
   ],
+  publishState: 'draft',
   ungroupedItems: [item('u1')],
 };
 
@@ -112,7 +118,9 @@ describe('MoveToSectionSelect', () => {
     fireEvent.click(screen.getByRole('combobox'));
     fireEvent.click(await screen.findByText('Section B'));
 
-    await waitFor(() => expect(assignItemSectionAction).toHaveBeenCalledWith('module-1', 'a1', 'section-b'));
+    await waitFor(() =>
+      expect(assignItemSectionAction).toHaveBeenCalledWith('module-1', 'a1', 'section-b'),
+    );
     await waitFor(() => expect(onMoved).toHaveBeenCalled());
   });
 
@@ -153,6 +161,7 @@ function module_(id: string, position: number): CurriculumTreeModuleNode {
     position,
     isRequired: true,
     sections: [],
+    publishState: 'draft',
     ungroupedItems: [],
   };
 }
@@ -172,6 +181,7 @@ const LEVEL_A2: CurriculumTreeLevelNode = {
 const TREE: CurriculumTree = {
   versionId: 'version-1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
   levels: [LEVEL_A1, LEVEL_A2],
 };
@@ -192,7 +202,12 @@ describe('MoveLevel', () => {
     const onMoved = vi.fn();
     render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MoveLevel courseContainerId="course-1" levels={TREE.levels} level={LEVEL_A1} onMoved={onMoved} />
+        <MoveLevel
+          courseContainerId="course-1"
+          levels={TREE.levels}
+          level={LEVEL_A1}
+          onMoved={onMoved}
+        />
       </NextIntlClientProvider>,
     );
 
@@ -207,7 +222,12 @@ describe('MoveLevel', () => {
   it('disables "move up" for the first level and "move down" for the last', () => {
     render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <MoveLevel courseContainerId="course-1" levels={TREE.levels} level={LEVEL_A1} onMoved={vi.fn()} />
+        <MoveLevel
+          courseContainerId="course-1"
+          levels={TREE.levels}
+          level={LEVEL_A1}
+          onMoved={vi.fn()}
+        />
       </NextIntlClientProvider>,
     );
     expect(screen.getByRole('button', { name: 'Move Level up' })).toBeDisabled();
@@ -219,7 +239,10 @@ describe('MoveModule', () => {
   beforeEach(() => vi.mocked(reorderContainerItemsAction).mockReset());
 
   it('moves a module up within its level and submits the full course order', async () => {
-    vi.mocked(reorderContainerItemsAction).mockResolvedValue({ ok: true, value: undefined } as never);
+    vi.mocked(reorderContainerItemsAction).mockResolvedValue({
+      ok: true,
+      value: undefined,
+    } as never);
     const onMoved = vi.fn();
     render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
@@ -243,8 +266,18 @@ describe('MoveModule', () => {
 });
 
 describe('MoveSection', () => {
-  const sectionA: CurriculumTreeSectionNode = { id: 'section-a', title: 'Section A', position: 0, items: [] };
-  const sectionB: CurriculumTreeSectionNode = { id: 'section-b', title: 'Section B', position: 1, items: [] };
+  const sectionA: CurriculumTreeSectionNode = {
+    id: 'section-a',
+    title: 'Section A',
+    position: 0,
+    items: [],
+  };
+  const sectionB: CurriculumTreeSectionNode = {
+    id: 'section-b',
+    title: 'Section B',
+    position: 1,
+    items: [],
+  };
 
   beforeEach(() => vi.mocked(reorderSectionsAction).mockReset());
 

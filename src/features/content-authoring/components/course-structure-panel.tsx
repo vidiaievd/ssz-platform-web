@@ -15,6 +15,7 @@ import {
   resolveSelection,
 } from '../lib/find-tree-item';
 import { CurriculumTree } from './curriculum-tree';
+import { CurriculumPublishSummary } from './curriculum-publish-summary';
 import { CurriculumInspector } from './curriculum-inspector';
 
 interface CourseStructurePanelProps {
@@ -99,6 +100,7 @@ export function CourseStructurePanel({
           <h2 className="text-sm font-bold text-foreground">{t('structure.sectionTitle')}</h2>
           <span className="text-xs text-muted-foreground">{t('structure.sectionHint')}</span>
         </div>
+        <CurriculumPublishSummary tree={tree} className="mb-2.5" />
         <CurriculumTree
           tree={tree}
           selectedId={selectedId}
