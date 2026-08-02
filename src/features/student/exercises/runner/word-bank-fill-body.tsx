@@ -109,6 +109,26 @@ function blankIdsOf(item: WordBankSentence): number[] {
     .map((s) => s.blankId);
 }
 
+/**
+ * The learner's answers with every missed blank emptied, ready for a second
+ * attempt: re-entering the blanks they already got right teaches nothing and
+ * risks spoiling them, so only the misses come back as gaps.
+ */
+export function keepCorrectBlanks(
+  value: WordBankFillValue,
+  results: WordBankFillResults,
+): WordBankFillValue {
+  const kept: WordBankFillValue = {};
+  for (const [itemId, byBlank] of Object.entries(value)) {
+    for (const [blankId, word] of Object.entries(byBlank)) {
+      if (results[itemId]?.[Number(blankId)]?.correct) {
+        kept[itemId] = { ...(kept[itemId] ?? {}), [Number(blankId)]: word };
+      }
+    }
+  }
+  return kept;
+}
+
 /** Stable identity of one blank across the sentence list and the bank. */
 export const blankKey = (itemId: string, blankId: number): string => `${itemId}:${blankId}`;
 
@@ -280,6 +300,9 @@ export function WordBankFillBody({
                 const result = reveal && ok !== null ? results?.[item.id]?.[seg.blankId] : undefined;
 
                 if (reveal) {
+                  /* Once the answer is unlocked it stands in the sentence, with
+                     the learner's word struck out beside it for contrast. */
+                  const showAnswer = revealed && result !== undefined && !result.correct;
                   const note = result
                     ? buildAnswerNote({
                         rationale: result.rationale,
@@ -295,12 +318,29 @@ export function WordBankFillBody({
                      panel claims a full row of this wrapping flex line. */
                   return (
                     <Fragment key={idx}>
-                      <span
-                        className="font-semibold"
-                        style={{ color: tone.fg, borderBottom: `2px solid ${tone.line}` }}
-                      >
-                        {chosen || '—'}
-                      </span>
+                      {showAnswer ? (
+                        <span className="inline-flex items-baseline gap-1.5">
+                          <span
+                            className="font-semibold"
+                            style={{ color: OK_FG, borderBottom: `2px solid ${OK_LINE}` }}
+                          >
+                            {result.expected}
+                          </span>
+                          {chosen !== '' && (
+                            <span className="text-[13.5px]" style={{ color: NO_FG }}>
+                              <span className="sr-only">{t('fill.yourAnswer')}: </span>
+                              <s>{chosen}</s>
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span
+                          className="font-semibold"
+                          style={{ color: tone.fg, borderBottom: `2px solid ${tone.line}` }}
+                        >
+                          {chosen || '—'}
+                        </span>
+                      )}
                       {note && result && (
                         <AnswerNoteMarker
                           note={note}

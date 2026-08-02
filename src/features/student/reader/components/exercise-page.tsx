@@ -17,6 +17,7 @@ import {
   SentenceSchemaBody,
   WordBankFillBody,
   checkWordBankFill,
+  keepCorrectBlanks,
   TextOrderBody,
   checkTextOrder,
   shuffleOrder,
@@ -74,6 +75,12 @@ interface SolverProps {
   ok: Ok;
   /** True once the learner has used up their attempts or asked to see it. */
   revealed: boolean;
+  /**
+   * Bumped by every retry. Solvers that can hand back a partly-filled exercise
+   * watch it and drop just the wrong answers; the rest ignore it and keep what
+   * the learner had.
+   */
+  retryNonce: number;
   onCheck: (graded: Graded) => void;
 }
 
@@ -152,8 +159,16 @@ function McqSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function FillSolver({ display, phase, ok, revealed, onCheck }: SolverProps) {
+function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
   const [value, setValue] = useState('');
+  const [seenRetry, setSeenRetry] = useState(retryNonce);
+  if (retryNonce !== seenRetry) {
+    // Adjusting state during render — the sanctioned way to react to a prop
+    // change without an extra pass. Only the missed blank exists here, so it
+    // starts over empty.
+    setSeenRetry(retryNonce);
+    setValue('');
+  }
   const c = display.content;
   const rawBlanks = Array.isArray(display.expectedAnswers.blanks) ? display.expectedAnswers.blanks : [];
   const firstBlank = rawBlanks[0] as
@@ -384,10 +399,24 @@ function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function WordBankFillSolver({ display, phase, ok, revealed, onCheck }: SolverProps) {
+function WordBankFillSolver({
+  display,
+  phase,
+  ok,
+  revealed,
+  retryNonce,
+  onCheck,
+}: SolverProps) {
   const [value, setValue] = useState<WordBankFillValue>({});
   const [results, setResults] = useState<WordBankFillResults>({});
   const [canSubmit, setCanSubmit] = useState(false);
+  const [seenRetry, setSeenRetry] = useState(retryNonce);
+  if (retryNonce !== seenRetry) {
+    // The blanks already answered right stay filled; the misses come back empty.
+    setSeenRetry(retryNonce);
+    setValue(keepCorrectBlanks(value, results));
+    setResults({});
+  }
   const t = useTranslations('ExerciseRunner');
   const c = display.content;
 
@@ -610,15 +639,24 @@ interface FeedbackBannerProps {
   /** Authored hint, offered instead of the answer on a first miss. */
   hint?: string;
   onRetry: () => void;
-  onReveal: () => void;
+  onToggleReveal: () => void;
 }
 
-function FeedbackBanner({ graded, revealed, hint, onRetry, onReveal }: FeedbackBannerProps) {
+function FeedbackBanner({
+  graded,
+  revealed,
+  hint,
+  onRetry,
+  onToggleReveal,
+}: FeedbackBannerProps) {
   const t = useTranslations('ExerciseRunner');
   const { ok, summary, explanation, reference } = graded;
-  /* A miss is worth a second go before the answer is handed over — except in
-     graded mode (ok === null), where the answer is already with the teacher. */
-  const canRetry = ok === false && !revealed;
+  /* Every miss is worth another go, and the answers stay one click away for as
+     long as any blank is wrong — a learner on their third attempt needs that
+     way out as much as on their first. Showing them is a toggle, not a one-way
+     door. Both are off in graded mode (ok === null), where the answer is
+     already with the teacher. */
+  const canRetry = ok === false;
   const tone =
     ok === true
       ? { bg: 'var(--ssz-feedback-ok-bg)', line: 'var(--ssz-feedback-ok-line)', fg: 'var(--ssz-feedback-ok-fg)', label: t('feedback.correct') }
@@ -644,7 +682,7 @@ function FeedbackBanner({ graded, revealed, hint, onRetry, onReveal }: FeedbackB
           {summary}
         </p>
       )}
-      {canRetry && hint && (
+      {!revealed && hint && (
         <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ssz-text-secondary)' }}>
           {hint}
         </p>
@@ -671,11 +709,11 @@ function FeedbackBanner({ graded, revealed, hint, onRetry, onReveal }: FeedbackB
           </button>
           <button
             type="button"
-            onClick={onReveal}
+            onClick={onToggleReveal}
             className="rounded-lg border px-4 py-2 text-[13.5px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
             style={{ borderColor: tone.line, color: tone.fg }}
           >
-            {t('feedback.showAnswer')}
+            {revealed ? t('feedback.hideAnswer') : t('feedback.showAnswer')}
           </button>
         </div>
       )}
@@ -716,9 +754,10 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
   const { data, isLoading, isError, refetch } = useExerciseWithAnswers(exerciseId);
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
   const [graded, setGraded] = useState<Graded | null>(null);
-  /* One retry: the second miss unlocks the answer, as does asking for it. */
+  /* Attempts are unlimited; the answers appear only when asked for. */
   const [attempts, setAttempts] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   // Per-item state is reset by remounting: the reader passes key={exerciseId}.
 
@@ -746,11 +785,13 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
         phase={phase}
         ok={graded?.ok ?? null}
         revealed={revealed}
+        retryNonce={retryNonce}
         onCheck={(g) => {
           setGraded(g);
           setPhase('feedback');
           setAttempts((n) => n + 1);
-          if (g.ok !== false || attempts > 0) setRevealed(true);
+          // A right answer explains itself; a wrong one waits to be asked.
+          if (g.ok !== false) setRevealed(true);
           // Progress follows the first attempt — that is the honest signal.
           if (attempts === 0) onChecked?.(g.ok);
         }}
@@ -763,8 +804,10 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
           onRetry={() => {
             setPhase('answering');
             setGraded(null);
+            setRevealed(false);
+            setRetryNonce((n) => n + 1);
           }}
-          onReveal={() => setRevealed(true)}
+          onToggleReveal={() => setRevealed((v) => !v)}
         />
       )}
     </div>

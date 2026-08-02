@@ -15,7 +15,8 @@
     "gradedNote": "Lagret for læreren din å vurdere. Du ser resultatene når det er returnert.",
     "answerLabel": "Svar:",
     "tryAgain": "Prøv igjen",
-    "showAnswer": "Vis svaret"
+    "showAnswer": "Vis svaret",
+    "hideAnswer": "Skjul svarene"
   },
   "loading": "Laster øvelse…",
   "error": {

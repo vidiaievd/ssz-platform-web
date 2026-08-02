@@ -15,7 +15,8 @@
     "gradedNote": "Saved for your teacher to grade. You’ll see results when it’s returned.",
     "answerLabel": "Answer:",
     "tryAgain": "Try again",
-    "showAnswer": "Show answer"
+    "showAnswer": "Show answer",
+    "hideAnswer": "Hide answers"
   },
   "loading": "Loading exercise…",
   "error": {

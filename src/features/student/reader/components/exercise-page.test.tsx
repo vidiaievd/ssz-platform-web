@@ -143,6 +143,21 @@ describe('ExercisePage', () => {
       expect(screen.getByText('1 of 2 blanks correct')).toBeInTheDocument();
     });
 
+    it('keeps the right answers and empties only the misses on a retry', () => {
+      mockExercise(wordBankExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+      fillBlank(0, 'show off'); // right
+      fillBlank(1, 'show off'); // wrong, expects "boast"
+      fireEvent.click(screen.getByRole('button', { name: 'Check' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+
+      const blanks = screen.getAllByRole('button', { name: /Blank in sentence/ });
+      expect(blanks[0]).toHaveTextContent('show off');
+      expect(blanks[1]).toHaveTextContent('Choose…');
+      expect(screen.getByText(/1 of 2 blanks filled/)).toBeInTheDocument();
+    });
+
     it('is correct when every blank matches', () => {
       mockExercise(wordBankExercise);
       renderWithProviders(<ExercisePage exerciseId="e1" />);
@@ -308,7 +323,7 @@ describe('ExercisePage', () => {
       expect(screen.queryByText('Statements take «at».')).not.toBeInTheDocument();
     });
 
-    it('returns to answering with the previous input kept', () => {
+    it('hands back an empty blank to answer again', () => {
       mockExercise(fillExercise);
       renderWithProviders(<ExercisePage exerciseId="e1" />);
       answer('om');
@@ -317,32 +332,51 @@ describe('ExercisePage', () => {
 
       const input = screen.getByRole('textbox');
       expect(input).toBeEnabled();
-      expect(input).toHaveValue('om');
+      // The one blank here was the miss, so it starts over empty.
+      expect(input).toHaveValue('');
       expect(screen.queryByText('Not quite')).not.toBeInTheDocument();
     });
 
-    it('unlocks the answer on a second miss', () => {
+    it('keeps both offers standing on every further miss', () => {
       mockExercise(fillExercise);
       renderWithProviders(<ExercisePage exerciseId="e1" />);
-      answer('om');
-      fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
-      answer('hvorfor');
 
-      expect(screen.getByText(/Answer:/)).toBeInTheDocument();
-      expect(screen.getByText('at')).toBeInTheDocument();
-      expect(screen.getByText('Statements take «at».')).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+      for (const wrong of ['om', 'hvorfor', 'hva']) {
+        answer(wrong);
+        expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Show answer' })).toBeInTheDocument();
+        // no attempt count quietly spoils the answer
+        expect(screen.queryByText(/Answer:/)).not.toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+      }
     });
 
-    it('unlocks the answer on request, without a second attempt', () => {
+    it('shows the answer in the sentence on request and hides it again', () => {
       mockExercise(fillExercise);
       renderWithProviders(<ExercisePage exerciseId="e1" />);
       answer('om');
 
       fireEvent.click(screen.getByRole('button', { name: 'Show answer' }));
-
       expect(screen.getByText(/Answer:/)).toBeInTheDocument();
       expect(screen.getByText('Statements take «at».')).toBeInTheDocument();
+      expect(screen.getByText('om').tagName).toBe('S');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Hide answers' }));
+      expect(screen.queryByText(/Answer:/)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Show answer' })).toBeInTheDocument();
+    });
+
+    it('hides the answer again when a new attempt starts', () => {
+      mockExercise(fillExercise);
+      renderWithProviders(<ExercisePage exerciseId="e1" />);
+      answer('om');
+      fireEvent.click(screen.getByRole('button', { name: 'Show answer' }));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+      answer('hvorfor');
+
+      expect(screen.queryByText(/Answer:/)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Show answer' })).toBeInTheDocument();
     });
 
     it('offers no retry once the answer is right', () => {

@@ -128,6 +128,10 @@ export function FillBody({
     revealed,
   });
 
+  /* Once the answer is unlocked it takes the blank's place, with the learner's
+     word struck out beside it. */
+  const showAnswer = reveal && revealed && ok === false && correctAnswer !== '';
+
   /* blank underline / text color */
   const blankColor =
     reveal && ok === false
@@ -187,7 +191,26 @@ export function FillBody({
       >
         <span>{before}</span>
 
-        {hasWordBank ? (
+        {showAnswer ? (
+          <span className="inline-flex items-baseline gap-2">
+            <span
+              style={{
+                borderBottom: `3px solid ${OK_LINE}`,
+                color: OK_FG,
+                fontWeight: 700,
+                fontFamily: READING,
+              }}
+            >
+              {correctAnswer}
+            </span>
+            {value !== '' && (
+              <span style={{ color: NO_FG, fontSize: 15 }}>
+                <span className="sr-only">{t('fill.yourAnswer')}: </span>
+                <s>{value}</s>
+              </span>
+            )}
+          </span>
+        ) : hasWordBank ? (
           /* Word-bank mode: underlined slot showing chosen word */
           <span
             style={{

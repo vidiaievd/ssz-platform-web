@@ -67,7 +67,11 @@ export type {
   OrderLine,
 } from './text-order-body';
 
-export { WordBankFillBody, parseSentence } from './word-bank-fill-body';
+export {
+  WordBankFillBody,
+  parseSentence,
+  keepCorrectBlanks,
+} from './word-bank-fill-body';
 export type {
   WordBankFillBodyProps,
   WordBankFillContent,

@@ -7,6 +7,7 @@ import { enMessages } from '@/lib/i18n/messages';
 import { PRACTICE_ACCENT } from './types';
 import {
   WordBankFillBody,
+  keepCorrectBlanks,
   parseSentence,
   type WordBankFillContent,
   type WordBankFillValue,
@@ -158,6 +159,53 @@ const RATIONALE = {
     { text: 'boast', verdict: 'wrong' as const, note: 'Too formal here.' },
   ],
 };
+
+describe('keepCorrectBlanks', () => {
+  it('keeps the blanks answered right and drops the misses', () => {
+    const kept = keepCorrectBlanks(
+      { '1': { 1: 'show off' }, '2': { 1: 'boast', 2: 'clicked with' } },
+      {
+        '1': { 1: { correct: true, expected: 'show off' } },
+        '2': {
+          1: { correct: false, expected: 'clicked with' },
+          2: { correct: true, expected: 'clicked with' },
+        },
+      },
+    );
+
+    expect(kept).toEqual({ '1': { 1: 'show off' }, '2': { 2: 'clicked with' } });
+  });
+
+  it('drops a blank the grader never saw', () => {
+    expect(keepCorrectBlanks({ '1': { 1: 'boast' } }, {})).toEqual({});
+  });
+});
+
+describe('WordBankFillBody — revealed answers', () => {
+  const revealProps = {
+    phase: 'feedback' as const,
+    ok: false,
+    revealed: true,
+    value: { '1': { 1: 'boast' } },
+    results: { '1': { 1: { correct: false, expected: 'show off' } } },
+  };
+
+  it('puts the answer in the sentence with the miss struck out beside it', () => {
+    renderBody(revealProps);
+
+    const sentence = screen.getByRole('list');
+    expect(within(sentence).getByText('show off')).toBeInTheDocument();
+    expect(within(sentence).getByText('boast').tagName).toBe('S');
+  });
+
+  it('leaves the sentence alone while the answer is still withheld', () => {
+    renderBody({ ...revealProps, revealed: false });
+
+    const sentence = screen.getByRole('list');
+    expect(within(sentence).getByText('boast').tagName).not.toBe('S');
+    expect(sentence.textContent).not.toContain('show off');
+  });
+});
 
 describe('WordBankFillBody — answer note markers', () => {
   /** The marker button sitting next to a checked blank. */
