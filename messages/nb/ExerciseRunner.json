@@ -53,7 +53,18 @@
     "defaultInstruction": "Svar på spørsmålet",
     "inputLabel": "Svaret ditt",
     "placeholder": "Skriv svaret ditt…",
-    "referenceLabel": "Eksempelsvar"
+    "referenceLabel": "Eksempelsvar",
+    "diffLabel": "Svaret ditt, sjekket",
+    "diffForm": "Feil form av ordet",
+    "diffWrong": "Feil ord",
+    "diffExtra": "Overflødig ord",
+    "diffMissing": "Manglende ord",
+    "issues": {
+      "form": "feil form: {n}",
+      "wrong": "feil ord: {n}",
+      "extra": "overflødige ord: {n}",
+      "missing": "manglende ord: {n}"
+    }
   },
   "writing": {
     "defaultInstruction": "Skriv teksten din",

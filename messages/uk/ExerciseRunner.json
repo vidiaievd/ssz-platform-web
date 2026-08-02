@@ -53,7 +53,18 @@
     "defaultInstruction": "Дайте відповідь на запитання",
     "inputLabel": "Ваша відповідь",
     "placeholder": "Напишіть відповідь…",
-    "referenceLabel": "Зразок відповіді"
+    "referenceLabel": "Зразок відповіді",
+    "diffLabel": "Ваша відповідь із розбором",
+    "diffForm": "Неправильна форма слова",
+    "diffWrong": "Не те слово",
+    "diffExtra": "Зайве слово",
+    "diffMissing": "Пропущене слово",
+    "issues": {
+      "form": "неправильна форма: {n}",
+      "wrong": "не те слово: {n}",
+      "extra": "зайвих слів: {n}",
+      "missing": "пропущено слів: {n}"
+    }
   },
   "writing": {
     "defaultInstruction": "Напишіть свій текст",

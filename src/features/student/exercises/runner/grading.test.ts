@@ -4,7 +4,6 @@ import {
   normAnswer,
   gradeMcq,
   gradeFill,
-  gradeShortAnswer,
   gradeSentenceSchema,
   gradeTranslate,
   gradeMatch,
@@ -192,24 +191,6 @@ describe('gradeMatch', () => {
   it('returns false for a single-pair set linked wrongly', () => {
     const one: MatchPair[] = [{ id: 'a', left: 'hund', right: 'dog' }];
     expect(gradeMatch(one, { a: 'b' })).toBe(false);
-  });
-});
-
-describe('gradeShortAnswer', () => {
-  it('returns true on a normalized match of an accepted answer', () => {
-    expect(gradeShortAnswer({ reference_answer: 'x', accepted_answers: ['På radio'] }, 'på radio.')).toBe(true);
-  });
-
-  it('returns null when nothing matches (routes to review)', () => {
-    expect(gradeShortAnswer({ reference_answer: 'x', accepted_answers: ['på radio'] }, 'noe annet')).toBeNull();
-  });
-
-  it('returns null when there are no accepted_answers shortcuts', () => {
-    expect(gradeShortAnswer({ reference_answer: 'x' }, 'på radio')).toBeNull();
-  });
-
-  it('returns null for an empty answer', () => {
-    expect(gradeShortAnswer({ reference_answer: 'x', accepted_answers: ['a'] }, '   ')).toBeNull();
   });
 });
 

@@ -53,7 +53,18 @@
     "defaultInstruction": "Ответьте на вопрос",
     "inputLabel": "Ваш ответ",
     "placeholder": "Напишите ответ…",
-    "referenceLabel": "Образец ответа"
+    "referenceLabel": "Образец ответа",
+    "diffLabel": "Ваш ответ с разбором",
+    "diffForm": "Неверная форма слова",
+    "diffWrong": "Не то слово",
+    "diffExtra": "Лишнее слово",
+    "diffMissing": "Пропущенное слово",
+    "issues": {
+      "form": "неверная форма: {n}",
+      "wrong": "не то слово: {n}",
+      "extra": "лишних слов: {n}",
+      "missing": "пропущено слов: {n}"
+    }
   },
   "writing": {
     "defaultInstruction": "Напишите свой текст",

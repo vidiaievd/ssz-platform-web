@@ -26,7 +26,7 @@ import {
   gradeMcq,
   gradeMatch,
   gradeTranslate,
-  gradeShortAnswer,
+  checkShortAnswer,
   gradeSentenceSchema,
   normAnswer,
   PRACTICE_ACCENT,
@@ -49,6 +49,8 @@ import {
   type ErrorCorrectionValue,
   type ErrorSentence,
   type WordNotes,
+  type DiffToken,
+  type ShortAnswerDiff,
 } from '@/features/student/exercises/runner';
 
 /* ── types ──────────────────────────────────────────────────────────────── */
@@ -297,8 +299,16 @@ function TranslateSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function ShortAnswerSolver({ display, phase, ok, onCheck }: SolverProps) {
+function ShortAnswerSolver({ display, phase, ok, retryNonce, onCheck }: SolverProps) {
+  const t = useTranslations('ExerciseRunner');
   const [value, setValue] = useState('');
+  const [diff, setDiff] = useState<DiffToken[] | null>(null);
+  const [seenRetry, setSeenRetry] = useState(retryNonce);
+  if (retryNonce !== seenRetry) {
+    // A new go starts clean — last round's marks would sit under a fresh answer.
+    setSeenRetry(retryNonce);
+    setDiff(null);
+  }
   const c = display.content;
   const ea = display.expectedAnswers;
   const reference = str(ea.reference_answer);
@@ -315,20 +325,42 @@ function ShortAnswerSolver({ display, phase, ok, onCheck }: SolverProps) {
         mode="practice"
         accent={ACCENT}
         referenceAnswer={reference || undefined}
+        diff={diff ?? undefined}
       />
       {phase === 'answering' && (
         <CheckFooter
           canSubmit={value.trim() !== ''}
-          onCheck={() =>
+          onCheck={() => {
+            const checked = checkShortAnswer(
+              { reference_answer: reference, accepted_answers: strArr(ea.accepted_answers) },
+              value,
+            );
+            /* A near miss is worth marking up word by word. An answer that is
+               nowhere near still goes to a teacher — it may be a phrasing the
+               author never listed, and striking it through would be a lie. */
+            setDiff(checked.ok === null ? null : checked.tokens);
             onCheck({
-              ok: gradeShortAnswer({ reference_answer: reference, accepted_answers: strArr(ea.accepted_answers) }, value),
+              ok: checked.ok,
+              summary: checked.ok === false ? issueSummary(t, checked.counts) : undefined,
+              explanation: str(ea.explanation) || undefined,
               reference: reference || undefined,
-            })
-          }
+            });
+          }}
         />
       )}
     </>
   );
+}
+
+/** "wrong form: 1 · missing word: 1" — what to fix, without giving the words. */
+function issueSummary(
+  t: ReturnType<typeof useTranslations<'ExerciseRunner'>>,
+  counts: ShortAnswerDiff['counts'],
+): string | undefined {
+  const parts = (['form', 'wrong', 'missing', 'extra'] as const)
+    .filter((kind) => counts[kind] > 0)
+    .map((kind) => t(`shortAnswer.issues.${kind}`, { n: counts[kind] }));
+  return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
 function WritingSolver({ display, phase, ok, onCheck }: SolverProps) {

@@ -99,13 +99,15 @@ export {
   gradeFill,
   gradeTranslate,
   gradeMatch,
-  gradeShortAnswer,
   gradeSentenceSchema,
   checkWordBankFill,
   checkTextOrder,
   checkErrorCorrection,
 } from './grading';
 export type { TranslateExpectedAnswers } from './grading';
+
+export { checkShortAnswer } from './short-answer-diff';
+export type { DiffOutcome, DiffToken, ShortAnswerDiff } from './short-answer-diff';
 
 export {
   deriveVisualState,

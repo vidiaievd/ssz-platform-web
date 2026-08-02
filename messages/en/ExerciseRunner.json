@@ -53,7 +53,18 @@
     "defaultInstruction": "Answer the question",
     "inputLabel": "Your answer",
     "placeholder": "Write your answer…",
-    "referenceLabel": "Sample answer"
+    "referenceLabel": "Sample answer",
+    "diffLabel": "Your answer, checked",
+    "diffForm": "Wrong form of the word",
+    "diffWrong": "Wrong word",
+    "diffExtra": "Extra word",
+    "diffMissing": "Missing word",
+    "issues": {
+      "form": "wrong form: {n}",
+      "wrong": "wrong word: {n}",
+      "extra": "extra word: {n}",
+      "missing": "missing word: {n}"
+    }
   },
   "writing": {
     "defaultInstruction": "Write your text",

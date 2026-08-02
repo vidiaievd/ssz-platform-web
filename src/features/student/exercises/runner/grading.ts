@@ -1,7 +1,6 @@
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
 import type { MatchPair } from './match-body';
-import type { ShortAnswerExpectedAnswers } from './short-answer-body';
 import type { SentenceSchemaExpectedAnswers } from './sentence-schema-body';
 import type { TextOrderExpectedAnswers, TextOrderResults } from './text-order-body';
 import type {
@@ -74,22 +73,6 @@ export function gradeMatch(
   links: Record<string, string>,
 ): boolean {
   return pairs.every((p) => links[p.id] === p.id);
-}
-
-/**
- * Grade a short answer. Mirrors the engine: an exact (normalized) match of an
- * `accepted_answers` shortcut is correct; anything else needs human/LLM review,
- * so we return `null` rather than marking it wrong.
- */
-export function gradeShortAnswer(
-  expectedAnswers: ShortAnswerExpectedAnswers,
-  value: string,
-): boolean | null {
-  const accepted = expectedAnswers.accepted_answers ?? [];
-  if (accepted.length === 0) return null;
-  const norm = normAnswer(value);
-  if (norm === '') return null;
-  return accepted.some((a) => normAnswer(a) === norm) ? true : null;
 }
 
 /**
