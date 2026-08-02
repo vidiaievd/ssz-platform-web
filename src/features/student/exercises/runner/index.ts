@@ -29,6 +29,19 @@ export type { AnswerNote, Rationale, WordNotes } from './answer-note';
 export { McqBody } from './mcq-body';
 export type { McqBodyProps, McqContent, McqExpectedAnswers } from './mcq-body';
 
+export { McqGroupBody, keepCorrectPicks, optionsOf } from './mcq-group-body';
+export type {
+  McqGroupBodyProps,
+  McqGroupContent,
+  McqGroupExpectedAnswers,
+  McqGroupExpectedItem,
+  McqGroupItemResult,
+  McqGroupOption,
+  McqGroupQuestion,
+  McqGroupResults,
+  McqGroupValue,
+} from './mcq-group-body';
+
 export { TranslateBody } from './translate-body';
 export type { TranslateBodyProps, TranslateContent } from './translate-body';
 
@@ -96,6 +109,7 @@ export type {
 export {
   normAnswer,
   gradeMcq,
+  checkMcqGroup,
   gradeFill,
   gradeTranslate,
   gradeMatch,

@@ -83,6 +83,7 @@
   },
   "exerciseTypes": {
     "multiple_choice": "Множинний вибір",
+    "multiple_choice_group": "Блок питань із вибором",
     "fill_in_blank": "Заповніть пропуск",
     "translate_to_target": "Переклад цільовою мовою",
     "translate_from_target": "Переклад з цільової мови",

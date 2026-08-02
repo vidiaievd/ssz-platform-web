@@ -83,6 +83,7 @@
   },
   "exerciseTypes": {
     "multiple_choice": "Множественный выбор",
+    "multiple_choice_group": "Блок вопросов с выбором",
     "fill_in_blank": "Заполните пропуск",
     "translate_to_target": "Перевод на целевой язык",
     "translate_from_target": "Перевод с целевого языка",

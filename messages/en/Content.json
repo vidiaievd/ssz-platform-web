@@ -83,6 +83,7 @@
   },
   "exerciseTypes": {
     "multiple_choice": "Multiple choice",
+    "multiple_choice_group": "Multiple choice group",
     "fill_in_blank": "Fill in the blank",
     "translate_to_target": "Translate to target",
     "translate_from_target": "Translate from target",

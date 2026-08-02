@@ -83,6 +83,7 @@
   },
   "exerciseTypes": {
     "multiple_choice": "Flervalg",
+    "multiple_choice_group": "Flervalgsblokk",
     "fill_in_blank": "Fyll inn i tomrommet",
     "translate_to_target": "Oversett til målspråket",
     "translate_from_target": "Oversett fra målspråket",

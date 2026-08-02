@@ -63,6 +63,32 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
           </div>
         )}
 
+        {code === 'multiple_choice_group' && (
+          <ol className="space-y-2">
+            {(Array.isArray(content.items) ? (content.items as LabeledItem[]) : []).map(
+              (item, i) => {
+                const q = item as { question?: unknown; options?: unknown };
+                // Questions may carry their own options or lean on the group's.
+                const options = asItems(Array.isArray(q.options) ? q.options : content.options);
+                return (
+                  <li key={i} className="rounded-md border border-border px-3 py-2">
+                    <p className="text-sm font-medium">
+                      {i + 1}. {typeof q.question === 'string' ? q.question : ''}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {options.map((o, j) => (
+                        <Badge key={j} variant="muted" className="text-xs">
+                          {o.text}
+                        </Badge>
+                      ))}
+                    </div>
+                  </li>
+                );
+              },
+            )}
+          </ol>
+        )}
+
         {code === 'fill_in_blank' && (
           <div className="space-y-2">
             {typeof content.text_with_blanks === 'string' && (
@@ -253,6 +279,7 @@ interface EcPreviewItem {
 
 const TYPE_LABEL_KEYS = {
   multiple_choice: true,
+  multiple_choice_group: true,
   fill_in_blank: true,
   translate_to_target: true,
   translate_from_target: true,

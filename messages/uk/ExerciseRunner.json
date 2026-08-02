@@ -28,6 +28,11 @@
     "defaultInstruction": "Оберіть правильну відповідь",
     "optionsLabel": "Варіанти відповідей"
   },
+  "mcqGroup": {
+    "questionOptions": "Відповіді на питання {n}",
+    "answeredCount": "Відповіли на {done} із {total} питань",
+    "partialScore": "Правильно {correct} із {total} відповідей"
+  },
   "fill": {
     "defaultInstruction": "Доповніть речення",
     "blankLabel": "Пропуск",

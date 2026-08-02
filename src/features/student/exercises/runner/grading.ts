@@ -14,6 +14,7 @@ import type {
   WordBankFillResults,
   WordBankFillValue,
 } from './word-bank-fill-body';
+import type { McqGroupExpectedAnswers, McqGroupResults, McqGroupValue } from './mcq-group-body';
 
 export interface TranslateExpectedAnswers {
   /** One or more acceptable translations, compared after normalization. */
@@ -90,6 +91,38 @@ export function gradeSentenceSchema(
       p.token_ids.every((id, i) => id === submitted[i])
     );
   });
+}
+
+/**
+ * Grade a block of multiple-choice questions. Mirrors the engine's
+ * MultipleChoiceGroupValidator: a question is right only when the pick matches
+ * its key exactly, and one left unanswered counts as wrong rather than
+ * shrinking the total.
+ */
+export function checkMcqGroup(
+  expectedAnswers: McqGroupExpectedAnswers,
+  value: McqGroupValue,
+): { ok: boolean; results: McqGroupResults; correct: number; total: number } {
+  const results: McqGroupResults = {};
+  let correctCount = 0;
+
+  for (const item of expectedAnswers.items) {
+    const picked = value[item.id];
+    // The body offers one pick per question, so a key listing several options
+    // can never be satisfied here — same verdict the engine reaches, which
+    // compares the two sets whole.
+    const correct = item.correct_option_ids.length === 1 && picked === item.correct_option_ids[0];
+
+    results[item.id] = {
+      correct,
+      expected: item.correct_option_ids[0] ?? '',
+      ...(item.explanation ? { explanation: item.explanation } : {}),
+    };
+    if (correct) correctCount += 1;
+  }
+
+  const total = expectedAnswers.items.length;
+  return { ok: total > 0 && correctCount === total, results, correct: correctCount, total };
 }
 
 /**

@@ -9,6 +9,9 @@ import type { ExerciseWithAnswers } from '@/features/content/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import {
   McqBody,
+  McqGroupBody,
+  keepCorrectPicks,
+  checkMcqGroup,
   FillBody,
   MatchBody,
   TranslateBody,
@@ -31,6 +34,11 @@ import {
   normAnswer,
   PRACTICE_ACCENT,
   type McqContent,
+  type McqGroupExpectedAnswers,
+  type McqGroupOption,
+  type McqGroupQuestion,
+  type McqGroupResults,
+  type McqGroupValue,
   type FillRationale,
   type MatchContent,
   type MatchPair,
@@ -155,6 +163,85 @@ function McqSolver({ display, phase, ok, onCheck }: SolverProps) {
               explanation: str(display.expectedAnswers.explanation) || undefined,
             })
           }
+        />
+      )}
+    </>
+  );
+}
+
+function McqGroupSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
+  const [value, setValue] = useState<McqGroupValue>({});
+  const [results, setResults] = useState<McqGroupResults>({});
+  const [canSubmit, setCanSubmit] = useState(false);
+  const [seenRetry, setSeenRetry] = useState(retryNonce);
+  if (retryNonce !== seenRetry) {
+    // The questions answered right keep their pick; the misses come back blank.
+    setSeenRetry(retryNonce);
+    setValue(keepCorrectPicks(value, results));
+    setResults({});
+  }
+  const t = useTranslations('ExerciseRunner');
+  const c = display.content;
+
+  const options = (v: unknown): McqGroupOption[] =>
+    (Array.isArray(v) ? v : [])
+      .filter((o): o is { id: string; text: string } => typeof (o as { id?: unknown }).id === 'string')
+      .map((o) => ({ id: o.id, text: str(o.text) }));
+
+  const items: McqGroupQuestion[] = (Array.isArray(c.items) ? c.items : [])
+    .filter((it): it is { id: string; question: string; options?: unknown } =>
+      typeof (it as { id?: unknown }).id === 'string',
+    )
+    .map((it) => {
+      const own = options(it.options);
+      return { id: it.id, question: str(it.question), ...(own.length > 0 && { options: own }) };
+    });
+
+  const expected: McqGroupExpectedAnswers = {
+    items: (Array.isArray(display.expectedAnswers.items) ? display.expectedAnswers.items : [])
+      .filter((it): it is { id: string; correct_option_ids: unknown; explanation?: unknown } =>
+        typeof (it as { id?: unknown }).id === 'string',
+      )
+      .map((it) => ({
+        id: it.id,
+        correct_option_ids: strArr(it.correct_option_ids),
+        ...(str(it.explanation) && { explanation: str(it.explanation) }),
+      })),
+  };
+
+  return (
+    <>
+      <McqGroupBody
+        content={{
+          items,
+          options: options(c.options),
+          instruction: instr(display),
+          context: str(c.context) || undefined,
+        }}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={setCanSubmit}
+        phase={phase}
+        ok={ok}
+        mode="practice"
+        accent={ACCENT}
+        results={results}
+        revealed={revealed}
+      />
+      {phase === 'answering' && (
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() => {
+            const graded = checkMcqGroup(expected, value);
+            setResults(graded.results);
+            onCheck({
+              ok: graded.ok,
+              summary: graded.ok
+                ? undefined
+                : t('mcqGroup.partialScore', { correct: graded.correct, total: graded.total }),
+              explanation: str(display.expectedAnswers.explanation) || undefined,
+            });
+          }}
         />
       )}
     </>
@@ -772,6 +859,7 @@ function FeedbackBanner({
 
 const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   multiple_choice: McqSolver,
+  multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
   match_pairs: MatchSolver,
   translate_to_target: TranslateSolver,

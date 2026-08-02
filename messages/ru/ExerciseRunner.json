@@ -28,6 +28,11 @@
     "defaultInstruction": "Выберите правильный ответ",
     "optionsLabel": "Варианты ответов"
   },
+  "mcqGroup": {
+    "questionOptions": "Ответы на вопрос {n}",
+    "answeredCount": "Отвечено {done} из {total} вопросов",
+    "partialScore": "Верно {correct} из {total} ответов"
+  },
   "fill": {
     "defaultInstruction": "Дополните предложение",
     "blankLabel": "Пропуск",

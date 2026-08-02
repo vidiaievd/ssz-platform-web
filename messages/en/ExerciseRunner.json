@@ -28,6 +28,11 @@
     "defaultInstruction": "Choose the correct answer",
     "optionsLabel": "Answer options"
   },
+  "mcqGroup": {
+    "questionOptions": "Answers for question {n}",
+    "answeredCount": "{done} of {total} questions answered",
+    "partialScore": "{correct} of {total} answers correct"
+  },
   "fill": {
     "defaultInstruction": "Complete the sentence",
     "blankLabel": "Blank",

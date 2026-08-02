@@ -28,6 +28,11 @@
     "defaultInstruction": "Velg riktig svar",
     "optionsLabel": "Svaralternativer"
   },
+  "mcqGroup": {
+    "questionOptions": "Svar på spørsmål {n}",
+    "answeredCount": "{done} av {total} spørsmål besvart",
+    "partialScore": "{correct} av {total} svar riktige"
+  },
   "fill": {
     "defaultInstruction": "Fullfør setningen",
     "blankLabel": "Tom",
