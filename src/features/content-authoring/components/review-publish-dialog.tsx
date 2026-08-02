@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Container } from '@/features/content/types';
 
 import { collectPublishRows, type PublishRow } from '../lib/publish-rows';
-import { useContainerPreflight } from '../api/use-container-preflight';
+import { useContainersPreflight, type PreflightEntry } from '../api/use-containers-preflight';
 import { useCurriculumTree } from '../api/use-curriculum-tree';
 import { authoringKeys } from '../api/keys';
 import { publishContainerAction } from '../actions/publish-container';
@@ -26,38 +26,30 @@ type RowOutcome = 'idle' | 'publishing' | 'published' | 'failed';
 
 interface RowProps {
   row: PublishRow;
+  preflight: PreflightEntry | undefined;
   selected: boolean;
   onSelectedChange: (selected: boolean) => void;
   outcome: RowOutcome;
   errorCode?: string;
-  /** Reported upwards so the confirm button can refuse a doomed publish. */
-  onBlockedChange: (blocked: boolean) => void;
   disabled: boolean;
 }
 
 function ReviewRow({
   row,
+  preflight,
   selected,
   onSelectedChange,
   outcome,
   errorCode,
-  onBlockedChange,
   disabled,
 }: RowProps) {
   const t = useTranslations('Authoring.reviewPublish');
   const tErrors = useTranslations('Errors');
-  const { data: preflight, isLoading } = useContainerPreflight(row.containerId);
 
-  const blockerCount = preflight?.blockerCount ?? 0;
-  const warningCount = preflight?.warningCount ?? 0;
+  const isLoading = preflight?.isLoading ?? false;
+  const blockerCount = preflight?.result?.blockerCount ?? 0;
+  const warningCount = preflight?.result?.warningCount ?? 0;
   const blocked = blockerCount > 0;
-
-  // Keep the parent's blocked set in step with what pre-flight just said.
-  const [reported, setReported] = useState<boolean | null>(null);
-  if (!isLoading && reported !== blocked) {
-    setReported(blocked);
-    onBlockedChange(blocked);
-  }
 
   return (
     <div className="flex items-start gap-2.5 rounded-lg border border-border p-3">
@@ -129,13 +121,19 @@ export function ReviewPublishDialog({
   const { data: tree, isLoading } = useCurriculumTree(container.id, draftVersionId);
 
   const rows = collectPublishRows(tree, container.title);
+  // Pre-flight for every row, owned here so the confirm button can refuse a
+  // doomed publish without the rows reporting anything back up.
+  const preflights = useContainersPreflight(
+    rows.map((r) => r.containerId),
+    open,
+  );
 
   const [deselected, setDeselected] = useState<Set<string>>(new Set());
-  const [blocked, setBlocked] = useState<Set<string>>(new Set());
   const [outcomes, setOutcomes] = useState<Record<string, RowOutcome>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const isSelected = (id: string) => !deselected.has(id) && !blocked.has(id);
+  const isBlocked = (id: string) => (preflights.get(id)?.result?.blockerCount ?? 0) > 0;
+  const isSelected = (id: string) => !deselected.has(id) && !isBlocked(id);
   const selectedRows = rows.filter((r) => isSelected(r.containerId));
 
   function setSelected(id: string, selected: boolean) {
@@ -143,16 +141,6 @@ export function ReviewPublishDialog({
       const next = new Set(prev);
       if (selected) next.delete(id);
       else next.add(id);
-      return next;
-    });
-  }
-
-  function setRowBlocked(id: string, isBlocked: boolean) {
-    setBlocked((prev) => {
-      if (prev.has(id) === isBlocked) return prev;
-      const next = new Set(prev);
-      if (isBlocked) next.add(id);
-      else next.delete(id);
       return next;
     });
   }
@@ -222,11 +210,11 @@ export function ReviewPublishDialog({
                 <ReviewRow
                   key={row.containerId}
                   row={row}
+                  preflight={preflights.get(row.containerId)}
                   selected={isSelected(row.containerId)}
                   onSelectedChange={(v) => setSelected(row.containerId, v)}
                   outcome={outcomes[row.containerId] ?? 'idle'}
                   errorCode={errors[row.containerId]}
-                  onBlockedChange={(v) => setRowBlocked(row.containerId, v)}
                   disabled={isPending}
                 />
               ))}

@@ -14,13 +14,13 @@ import type { PreflightResult } from '../types';
 
 vi.mock('../actions/publish-container', () => ({ publishContainerAction: vi.fn() }));
 vi.mock('../api/use-curriculum-tree', () => ({ useCurriculumTree: vi.fn() }));
-vi.mock('../api/use-container-preflight', () => ({ useContainerPreflight: vi.fn() }));
+vi.mock('../api/use-containers-preflight', () => ({ useContainersPreflight: vi.fn() }));
 
 const { ReviewPublishDialog } = await import('./review-publish-dialog');
 const { collectPublishRows } = await import('../lib/publish-rows');
 const { publishContainerAction } = await import('../actions/publish-container');
 const { useCurriculumTree } = await import('../api/use-curriculum-tree');
-const { useContainerPreflight } = await import('../api/use-container-preflight');
+const { useContainersPreflight } = await import('../api/use-containers-preflight');
 
 const COURSE: Container = {
   id: 'course-1',
@@ -73,6 +73,13 @@ function preflight(blockerCount = 0, warningCount = 0): PreflightResult {
   return { blockerCount, warningCount, checks: [] } as unknown as PreflightResult;
 }
 
+/** Every row gets the same pre-flight verdict. */
+function mockPreflight(result: PreflightResult) {
+  vi.mocked(useContainersPreflight).mockImplementation(
+    (ids: string[]) => new Map(ids.map((id) => [id, { result, isLoading: false }])),
+  );
+}
+
 function renderDialog(tree: CurriculumTree | undefined) {
   vi.mocked(useCurriculumTree).mockReturnValue({ data: tree, isLoading: false } as never);
   render(
@@ -91,10 +98,7 @@ function renderDialog(tree: CurriculumTree | undefined) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(useContainerPreflight).mockReturnValue({
-    data: preflight(),
-    isLoading: false,
-  } as never);
+  mockPreflight(preflight());
   vi.mocked(publishContainerAction).mockResolvedValue({ ok: true, value: undefined } as never);
 });
 
@@ -166,10 +170,7 @@ describe('ReviewPublishDialog', () => {
   });
 
   it('refuses to publish a row whose pre-flight has blockers', () => {
-    vi.mocked(useContainerPreflight).mockReturnValue({
-      data: preflight(2),
-      isLoading: false,
-    } as never);
+    mockPreflight(preflight(2));
     renderDialog(makeTree('pending_changes', []));
 
     expect(screen.getByText('2 blockers must be fixed first')).toBeInTheDocument();
