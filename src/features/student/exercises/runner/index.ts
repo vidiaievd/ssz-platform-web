@@ -106,8 +106,10 @@ export {
 } from './grading';
 export type { TranslateExpectedAnswers } from './grading';
 
-export { checkShortAnswer } from './short-answer-diff';
-export type { DiffOutcome, DiffToken, ShortAnswerDiff } from './short-answer-diff';
+/* The short-answer checker is shared with the authoring side, so it lives in
+   lib/ — re-exported here so runner consumers keep one import path. */
+export { checkShortAnswer } from '@/lib/exercises/short-answer-diff';
+export type { DiffOutcome, DiffToken, ShortAnswerDiff } from '@/lib/exercises/short-answer-diff';
 
 export {
   deriveVisualState,

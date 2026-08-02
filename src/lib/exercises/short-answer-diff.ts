@@ -68,7 +68,10 @@ function tokenize(text: string): Token[] {
 function expandOptional(candidate: string): string[] {
   if (!candidate.includes('(')) return [candidate];
   const kept = candidate.replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
-  const dropped = candidate.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
+  const dropped = candidate
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   return dropped === kept ? [kept] : [kept, dropped];
 }
 
@@ -173,10 +176,7 @@ function nearMissBudget(expectedLength: number): number {
  * silently waiting on a teacher, and only a genuinely different sentence is
  * still routed for review — a valid paraphrase must not be marked wrong.
  */
-export function checkShortAnswer(
-  expectedAnswers: ShortAnswerKey,
-  value: string,
-): ShortAnswerDiff {
+export function checkShortAnswer(expectedAnswers: ShortAnswerKey, value: string): ShortAnswerDiff {
   const empty: ShortAnswerDiff = {
     ok: null,
     score: 0,

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { useState } from 'react';
 
 import { ShortAnswerBody, type ShortAnswerContent } from './short-answer-body';
-import type { DiffToken } from './short-answer-diff';
+import type { DiffToken } from '@/lib/exercises/short-answer-diff';
 
 const messages = {
   ExerciseRunner: {

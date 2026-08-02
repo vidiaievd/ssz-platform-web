@@ -318,14 +318,14 @@ describe('minimalMcqValues', () => {
 });
 
 describe('short_answer & writing_task', () => {
-  it('short_answer: builds question + reference + accepted_answers CSV', () => {
+  it('short_answer: builds question + reference + pipe-separated accepted_answers', () => {
     const { content, expectedAnswers } = buildExercisePayload({
       ...base,
       templateCode: 'short_answer',
       saQuestion: 'Når hørte Anne nyheten?',
       saContext: 'Tekst 19A',
       saReferenceAnswer: 'Hun hørte det på radio.',
-      saAccepted: 'på radio, på veien hjem',
+      saAccepted: 'på radio | på veien hjem',
     });
     expect(content.question).toBe('Når hørte Anne nyheten?');
     expect(content.context).toBe('Tekst 19A');
@@ -350,13 +350,34 @@ describe('short_answer & writing_task', () => {
       templateCode: 'short_answer' as const,
       saQuestion: 'Q?',
       saReferenceAnswer: 'A.',
-      saAccepted: 'a, b',
+      saAccepted: 'a | b',
     };
     const { content, expectedAnswers } = buildExercisePayload(values);
     const parsed = parseExerciseToForm({ templateCode: 'short_answer', content, expectedAnswers });
     expect(parsed.saQuestion).toBe('Q?');
     expect(parsed.saReferenceAnswer).toBe('A.');
-    expect(parsed.saAccepted).toBe('a, b');
+    expect(parsed.saAccepted).toBe('a | b');
+  });
+
+  it('short_answer: keeps a comma inside an accepted answer intact', () => {
+    // Transformation answers carry commas ("Hadde jeg tid, ville jeg hjulpet").
+    // Splitting on them used to file half a sentence as an answer of its own,
+    // which the word-by-word checker would then mark a fragment correct.
+    const values = {
+      ...base,
+      templateCode: 'short_answer' as const,
+      saQuestion: 'Slå sammen til én setning.',
+      saReferenceAnswer: 'Avisa (som) jeg leser, er seriøs.',
+      saAccepted: 'avisa som jeg leser, er seriøs | avisa jeg leser, er seriøs',
+    };
+    const { content, expectedAnswers } = buildExercisePayload(values);
+    expect(expectedAnswers.accepted_answers).toEqual([
+      'avisa som jeg leser, er seriøs',
+      'avisa jeg leser, er seriøs',
+    ]);
+
+    const parsed = parseExerciseToForm({ templateCode: 'short_answer', content, expectedAnswers });
+    expect(parsed.saAccepted).toBe('avisa som jeg leser, er seriøs | avisa jeg leser, er seriøs');
   });
 
   it('writing_task: builds prompt + topic options with ids + min_words', () => {

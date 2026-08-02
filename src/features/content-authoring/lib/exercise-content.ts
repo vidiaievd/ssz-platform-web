@@ -174,7 +174,9 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       };
     }
     case 'short_answer': {
-      const accepted = splitCsv(values.saAccepted);
+      // `|`, not a comma — these answers are whole sentences and often contain
+      // one. See the note on `saAccepted` in schemas/exercise.ts.
+      const accepted = splitChunks(values.saAccepted ?? '');
       return {
         content: {
           question: values.saQuestion?.trim() ?? '',
@@ -467,7 +469,7 @@ export function parseExerciseToForm(exercise: {
     }
     case 'short_answer': {
       const accepted = Array.isArray(expectedAnswers.accepted_answers)
-        ? (expectedAnswers.accepted_answers as unknown[]).map(String).join(', ')
+        ? (expectedAnswers.accepted_answers as unknown[]).map(String).join(' | ')
         : '';
       return {
         ...base,

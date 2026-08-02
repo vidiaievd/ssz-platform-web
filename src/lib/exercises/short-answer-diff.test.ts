@@ -5,10 +5,7 @@ import { checkShortAnswer } from './short-answer-diff';
 /** The seeded indirect-speech task from Norsk B1, leksjon 1. */
 const indirectSpeech = {
   reference_answer: 'Bartek sa at han skulle begynne 1. april.',
-  accepted_answers: [
-    'bartek sa at han skulle begynne 1. april',
-    'at han skulle begynne 1. april',
-  ],
+  accepted_answers: ['bartek sa at han skulle begynne 1. april', 'at han skulle begynne 1. april'],
 };
 
 describe('checkShortAnswer', () => {

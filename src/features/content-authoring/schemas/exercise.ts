@@ -101,8 +101,11 @@ export const exerciseFormSchema = z
       .array(z.object({ left: z.string().max(500), right: z.string().max(500) }))
       .optional(),
 
-    // short_answer — `saAccepted` is a comma-separated list of exact-match
-    // shortcuts; a non-matching answer is routed for review by the engine.
+    // short_answer — `saAccepted` lists every acceptable phrasing, separated by
+    // `|`. Not a comma: a transformation answer routinely contains one
+    // ("Hadde jeg tid, ville jeg hjulpet"), and splitting on it would file half
+    // a sentence as an answer of its own. The engine scores a submission
+    // against the closest of these; only something far off goes for review.
     saQuestion: z.string().max(2000).optional(),
     saContext: z.string().max(2000).optional(),
     saReferenceAnswer: z.string().max(2000).optional(),

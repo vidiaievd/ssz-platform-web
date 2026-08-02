@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Instr } from './instr';
-import type { DiffToken } from './short-answer-diff';
+import type { DiffToken } from '@/lib/exercises/short-answer-diff';
 import type { RunnerMode, RunnerPhase } from './types';
 
 /**

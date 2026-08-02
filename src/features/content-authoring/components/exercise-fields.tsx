@@ -15,6 +15,8 @@ import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { checkShortAnswer, type DiffToken } from '@/lib/exercises/short-answer-diff';
+import { cn } from '@/lib/utils';
 
 import {
   EXERCISE_TYPES,
@@ -474,8 +476,129 @@ function TranslateFields({
   );
 }
 
-function ShortAnswerFields({ register, errors, isPending }: SubProps) {
+/**
+ * Try the answer key the way a learner will meet it.
+ *
+ * The panel runs the very checker the runner and the engine use, so what the
+ * author sees here is what the class gets — the point being to catch a key that
+ * sends every near miss to manual review *before* the exercise is published.
+ * It owns nothing in the form: the trial answer is local state, and the only
+ * write is the explicit "add this phrasing" button.
+ */
+function ShortAnswerKeyTrial({
+  control,
+  isPending,
+  accepted,
+  onAddPhrasing,
+}: Pick<SubProps, 'control' | 'isPending'> & {
+  accepted: string;
+  onAddPhrasing: (phrasing: string) => void;
+}) {
   const t = useTranslations('Authoring.exercises');
+  const [trial, setTrial] = useState('');
+
+  const referenceAnswer = useWatch({ control, name: 'saReferenceAnswer' }) ?? '';
+
+  const result = trial.trim()
+    ? checkShortAnswer({ reference_answer: referenceAnswer, accepted_answers: splitChunks(accepted) }, trial)
+    : null;
+
+  return (
+    <div className="rounded-md border border-dashed border-border p-3 space-y-2">
+      <Field label={t('saTrial')} htmlFor="ex-sa-trial" hint={t('saTrialHint')}>
+        <Input
+          id="ex-sa-trial"
+          value={trial}
+          onChange={(e) => setTrial(e.target.value)}
+          placeholder={t('saTrialPlaceholder')}
+          disabled={isPending}
+        />
+      </Field>
+
+      {result && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium">
+            {result.ok === true
+              ? t('saTrialAccepted')
+              : result.ok === false
+                ? t('saTrialMarkedWrong', { score: result.score })
+                : t('saTrialReview')}
+          </p>
+
+          {result.ok === false && (
+            <p className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-sm">
+              {result.tokens.map((token, i) => (
+                <TrialWord key={`${i}-${token.submitted ?? token.expected ?? ''}`} token={token} />
+              ))}
+            </p>
+          )}
+
+          {result.ok !== true && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              onClick={() => onAddPhrasing(trial.trim())}
+            >
+              {t('saTrialAddPhrasing')}
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** The learner-facing markup, in the authoring surface's own type and tokens. */
+function TrialWord({ token }: { token: DiffToken }) {
+  const t = useTranslations('Authoring.exercises');
+
+  if (token.outcome === 'ok') return <span>{token.submitted}</span>;
+
+  if (token.outcome === 'missing') {
+    return (
+      <span
+        title={t('saTrialMissing')}
+        className="text-success-700 underline decoration-dashed underline-offset-2 dark:text-success-400"
+      >
+        {token.expected}
+      </span>
+    );
+  }
+
+  if (token.outcome === 'extra') {
+    return (
+      <span title={t('saTrialExtra')} className="text-error-700 line-through dark:text-error-400">
+        {token.submitted}
+      </span>
+    );
+  }
+
+  const isForm = token.outcome === 'form';
+  return (
+    <span title={isForm ? t('saTrialForm') : t('saTrialWrong')}>
+      <span
+        className={cn(
+          'text-error-700 underline-offset-2 dark:text-error-400',
+          isForm ? 'underline decoration-wavy' : 'line-through',
+        )}
+      >
+        {token.submitted}
+      </span>
+      <span className="text-(--ssz-text-muted)"> → </span>
+      <span className="font-semibold text-success-700 dark:text-success-400">{token.expected}</span>
+    </span>
+  );
+}
+
+function ShortAnswerFields({ control, register, errors, isPending }: SubProps) {
+  const t = useTranslations('Authoring.exercises');
+  /* Controlled rather than registered: the trial panel below appends to this
+     field, and an uncontrolled input would keep showing the stale text. */
+  const acceptedCtrl = useController({ control, name: 'saAccepted' });
+  const accepted = acceptedCtrl.field.value ?? '';
+
   return (
     <div className="rounded-md border border-border p-3 space-y-4">
       <Field label={t('saQuestion')} htmlFor="ex-sa-q" error={errors.saQuestion?.message} required>
@@ -509,8 +632,24 @@ function ShortAnswerFields({ register, errors, isPending }: SubProps) {
       </Field>
 
       <Field label={t('saAccepted')} htmlFor="ex-sa-acc" hint={t('saAcceptedHint')}>
-        <Input id="ex-sa-acc" placeholder={t('saAcceptedPlaceholder')} disabled={isPending} {...register('saAccepted')} />
+        <Input
+          id="ex-sa-acc"
+          value={accepted}
+          onChange={(e) => acceptedCtrl.field.onChange(e.target.value)}
+          onBlur={acceptedCtrl.field.onBlur}
+          placeholder={t('saAcceptedPlaceholder')}
+          disabled={isPending}
+        />
       </Field>
+
+      <ShortAnswerKeyTrial
+        control={control}
+        isPending={isPending}
+        accepted={accepted}
+        onAddPhrasing={(phrasing) =>
+          acceptedCtrl.field.onChange(accepted.trim() ? `${accepted.trim()} | ${phrasing}` : phrasing)
+        }
+      />
     </div>
   );
 }
