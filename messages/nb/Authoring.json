@@ -415,25 +415,11 @@
     "reload": "Last inn på nytt",
     "failure": "Kunne ikke publisere — sjekk problemene nedenfor og prøv igjen.",
     "stale": "En nyere versjon ble publisert — last inn på nytt for å fortsette.",
-    "allPassed": "Alle kontroller bestått"
-  },
-  "versions": {
-    "title": "Versjoner",
-    "draft": "Utkast",
-    "published": "Publisert",
-    "createDraftTitle": "Opprett et utkast",
-    "createDraftBody": "Start et nytt utkast for å begynne redigering.",
-    "createDraft": "Opprett utkast",
-    "readOnlyTitle": "Skrivebeskyttet",
-    "readOnlyBody": "Du har ikke redigeringstilgang til dette innholdet.",
-    "requestAccess": "Be om redigeringstilgang",
-    "viewPublished": "Se publisert",
-    "continueEditing": "Fortsett redigering",
-    "discardDraft": "Forkast utkast",
-    "publishedOn": "Publisert",
-    "editedOn": "Sist redigert",
-    "loadError": "Kunne ikke laste versjoner.",
-    "retry": "Prøv igjen"
+    "allPassed": "Alle kontroller bestått",
+    "blockLabel": "Kurs",
+    "blockNeverPublished": "Dette kurset er aldri publisert, så studentene kan ikke åpne det ennå.",
+    "blockPending": "Dette kurset har upubliserte endringer. Studentene ser den publiserte versjonen til du publiserer på nytt.",
+    "blockUpToDate": "Alt i dette kurset er publisert."
   },
   "discard": {
     "title": "Forkaste utkast?",
@@ -442,7 +428,8 @@
     "cancel": "Avbryt",
     "discarding": "Forkaster…",
     "success": "Utkast forkastet",
-    "error": "Kunne ikke forkaste utkastet. Prøv igjen."
+    "error": "Kunne ikke forkaste utkastet. Prøv igjen.",
+    "trigger": "Forkast utkast"
   },
   "checklist": {
     "blockers": "Blokkerende problemer",

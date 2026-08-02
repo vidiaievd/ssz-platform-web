@@ -14,6 +14,24 @@ export async function publishContainerAction(containerId: string) {
       path: `/containers/${containerId}/versions/${versionId}/publish`,
       method: 'POST',
     });
+
+    // Publishing consumes the draft, and every write path in the editor —
+    // adding a lesson, reordering, renaming — resolves the draft version first.
+    // Without opening the next one the author is left with a read-only editor
+    // and no way out of it, since nothing in the UI creates a draft.
+    // The endpoint returns the existing draft if one somehow survived.
+    try {
+      await serverFetch<{ versionId: string }>({
+        service: 'content',
+        path: `/containers/${containerId}/draft`,
+        method: 'POST',
+      });
+    } catch (err) {
+      // The publish itself succeeded; report that rather than failing the
+      // action, and let the author retry through the editor.
+      console.error('[publishContainerAction] next draft not created:', err);
+    }
+
     revalidatePath(`/school/content/${containerId}`);
     revalidatePath('/school/content');
   });

@@ -418,25 +418,11 @@
     "reload": "Reload",
     "failure": "Couldn't publish — please check the issues below and try again.",
     "stale": "A newer version was published — reload to continue.",
-    "allPassed": "All checks passed"
-  },
-  "versions": {
-    "title": "Versions",
-    "draft": "Draft",
-    "published": "Published",
-    "createDraftTitle": "Create a draft",
-    "createDraftBody": "Start a new draft to begin editing.",
-    "createDraft": "Create draft",
-    "readOnlyTitle": "Read-only",
-    "readOnlyBody": "You don't have edit access to this content.",
-    "requestAccess": "Request edit access",
-    "viewPublished": "View published",
-    "continueEditing": "Continue editing",
-    "discardDraft": "Discard draft",
-    "publishedOn": "Published",
-    "editedOn": "Last edited",
-    "loadError": "Couldn't load versions.",
-    "retry": "Retry"
+    "allPassed": "All checks passed",
+    "blockLabel": "Course",
+    "blockNeverPublished": "This course has never been published, so students cannot open it yet.",
+    "blockPending": "This course has unpublished changes. Students keep seeing the published version until you publish again.",
+    "blockUpToDate": "Everything in this course is published."
   },
   "discard": {
     "title": "Discard draft?",
@@ -445,7 +431,8 @@
     "cancel": "Cancel",
     "discarding": "Discarding…",
     "success": "Draft discarded",
-    "error": "Failed to discard draft. Please try again."
+    "error": "Failed to discard draft. Please try again.",
+    "trigger": "Discard draft"
   },
   "checklist": {
     "blockers": "Blocking issues",

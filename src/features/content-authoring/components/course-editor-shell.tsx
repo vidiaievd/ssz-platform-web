@@ -42,6 +42,7 @@ export function CourseEditorShell({
           container={container}
           schoolRole={schoolRole}
           preflightResult={preflightResult}
+          draftVersionId={draftVersionId}
           open={settingsOpen}
           onOpenChange={setSettingsOpen}
           trigger={

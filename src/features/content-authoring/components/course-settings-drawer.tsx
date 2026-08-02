@@ -17,9 +17,8 @@ import type { Container } from '@/features/content/types';
 import type { PreflightResult, SchoolRole } from '../types';
 import { deriveContainerState } from './container-state-badge';
 import { ContainerForm } from './container-form';
+import { CoursePublishBlock } from './course-publish-block';
 import { DangerZone } from './danger-zone';
-import { PreflightPanel } from './preflight-panel';
-import { PublishDialog } from './publish-dialog';
 import { SharingPanel } from './sharing-panel';
 import { TagInput } from './tag-input';
 
@@ -29,6 +28,8 @@ interface CourseSettingsDrawerProps {
   container: Container;
   schoolRole?: SchoolRole;
   preflightResult?: PreflightResult;
+  /** Draft version id, shared with the structure panel so both read one tree query. */
+  draftVersionId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Optional trigger element rendered via SheetTrigger (e.g. a "Settings" menu item). */
@@ -44,6 +45,7 @@ export function CourseSettingsDrawer({
   container,
   schoolRole = 'owner',
   preflightResult,
+  draftVersionId,
   open,
   onOpenChange,
   trigger,
@@ -74,18 +76,11 @@ export function CourseSettingsDrawer({
 
             <TabsContent value={'overview' satisfies SettingsTab} className="space-y-6">
               <ContainerForm mode="edit" container={container} />
-              {/* Draft-only by design (plan 24 F9.3): a published container
-                  re-publishes through the versions rail, not from here.
-                  `result` is required — without it the dialog has nothing to
-                  check and its confirm button stays disabled forever. */}
-              {state === 'draft' && (
-                <div className="border-t border-border pt-6">
-                  <PublishDialog container={container} result={preflightResult} />
-                </div>
-              )}
-              {state === 'draft' && (
-                <PreflightPanel containerId={container.id} result={preflightResult} />
-              )}
+              <CoursePublishBlock
+                container={container}
+                draftVersionId={draftVersionId}
+                preflightResult={preflightResult}
+              />
               {isOwnerOrAdmin && (
                 <DangerZone
                   containerId={container.id}
