@@ -8,12 +8,17 @@ import type { CurriculumTreeSelection } from '../types';
 
 vi.mock('../actions/container', () => ({ renameContainerAction: vi.fn() }));
 vi.mock('../actions/section', () => ({ renameSectionAction: vi.fn() }));
+// Pulls in the publish server action, which cannot be imported client-side.
+vi.mock('./module-publish-block', () => ({ ModulePublishBlock: () => null }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>

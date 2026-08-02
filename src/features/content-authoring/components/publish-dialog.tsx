@@ -8,15 +8,9 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/input';
-import type { Container } from '@/features/content/types';
 
 import { publishContainerAction } from '../actions/publish-container';
 import { authoringKeys } from '../api/keys';
@@ -48,7 +42,9 @@ function ReleaseNotesField({ value, onChange, disabled }: ReleaseNotesFieldProps
         className="resize-none"
         maxLength={NOTES_LIMIT + 50}
       />
-      <p className={`text-right font-mono text-[11px] ${over ? 'text-destructive' : 'text-muted-foreground'}`}>
+      <p
+        className={`text-right font-mono text-[11px] ${over ? 'text-destructive' : 'text-muted-foreground'}`}
+      >
         {value.length}/{NOTES_LIMIT}
       </p>
     </div>
@@ -168,13 +164,16 @@ function DialogBody({
 // ── Main component ────────────────────────────────────────────────────────────
 
 export interface PublishDialogProps {
-  container: Container;
+  /** Any container — a course or one of its modules; only the id is used. */
+  container: { id: string };
   /** Pre-fetched preflight result (e.g. from the preflight panel). */
   result?: PreflightResult;
   trigger?: React.ReactNode;
+  /** Called after the version is published, for callers that own extra state. */
+  onPublished?: () => void;
 }
 
-export function PublishDialog({ container, result, trigger }: PublishDialogProps) {
+export function PublishDialog({ container, result, trigger, onPublished }: PublishDialogProps) {
   const t = useTranslations('Authoring.publish');
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
@@ -189,11 +188,7 @@ export function PublishDialog({ container, result, trigger }: PublishDialogProps
   const notesOver = notes.length > NOTES_LIMIT;
 
   const canPublish =
-    !!result &&
-    !hasBlockers &&
-    !notesOver &&
-    (!warningsOnly || reviewChecked) &&
-    phase === 'form';
+    !!result && !hasBlockers && !notesOver && (!warningsOnly || reviewChecked) && phase === 'form';
 
   function handleOpen() {
     setPhase('form');
@@ -222,6 +217,7 @@ export function PublishDialog({ container, result, trigger }: PublishDialogProps
       await queryClient.invalidateQueries({ queryKey: authoringKeys.versions(container.id) });
       toast.success(t('success'));
       setOpen(false);
+      onPublished?.();
     });
   }
 
@@ -231,14 +227,17 @@ export function PublishDialog({ container, result, trigger }: PublishDialogProps
     </Button>
   );
 
-  const triggerEl = trigger
-    ? <span onClick={handleOpen}>{trigger}</span>
-    : defaultTrigger;
+  const triggerEl = trigger ? <span onClick={handleOpen}>{trigger}</span> : defaultTrigger;
 
   return (
     <>
       {triggerEl}
-      <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          if (!v) handleClose();
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <div className="flex items-center gap-2">
@@ -263,12 +262,7 @@ export function PublishDialog({ container, result, trigger }: PublishDialogProps
           </div>
 
           <div className="flex items-center justify-between pt-2">
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={handleClose}
-              disabled={isPending}
-            >
+            <Button variant="ghost" type="button" onClick={handleClose} disabled={isPending}>
               {t('cancel')}
             </Button>
             <div>
@@ -276,17 +270,16 @@ export function PublishDialog({ container, result, trigger }: PublishDialogProps
                 <Button
                   variant="primary"
                   type="button"
-                  onClick={() => { setOpen(false); window.location.reload(); }}
+                  onClick={() => {
+                    setOpen(false);
+                    window.location.reload();
+                  }}
                 >
                   {t('reload')}
                 </Button>
               )}
               {phase === 'failure' && (
-                <Button
-                  variant="primary"
-                  type="button"
-                  onClick={() => setPhase('form')}
-                >
+                <Button variant="primary" type="button" onClick={() => setPhase('form')}>
                   {t('retry')}
                 </Button>
               )}

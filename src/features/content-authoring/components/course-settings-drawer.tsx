@@ -69,16 +69,18 @@ export function CourseSettingsDrawer({
                 {t('tabs.overview')}
               </TabsTrigger>
               <TabsTrigger value={'tags' satisfies SettingsTab}>{t('tabs.tags')}</TabsTrigger>
-              <TabsTrigger value={'sharing' satisfies SettingsTab}>
-                {t('tabs.sharing')}
-              </TabsTrigger>
+              <TabsTrigger value={'sharing' satisfies SettingsTab}>{t('tabs.sharing')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value={'overview' satisfies SettingsTab} className="space-y-6">
               <ContainerForm mode="edit" container={container} />
+              {/* Draft-only by design (plan 24 F9.3): a published container
+                  re-publishes through the versions rail, not from here.
+                  `result` is required — without it the dialog has nothing to
+                  check and its confirm button stays disabled forever. */}
               {state === 'draft' && (
                 <div className="border-t border-border pt-6">
-                  <PublishDialog container={container} />
+                  <PublishDialog container={container} result={preflightResult} />
                 </div>
               )}
               {state === 'draft' && (

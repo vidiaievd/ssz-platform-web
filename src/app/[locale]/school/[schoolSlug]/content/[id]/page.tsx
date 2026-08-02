@@ -8,7 +8,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/i18n/navigation';
 import type { Container, ContainerVersion } from '@/features/content/types';
 import { CourseEditorShell } from '@/features/content-authoring/components/course-editor-shell';
-import { ContainerStateBadge, deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
+import {
+  ContainerStateBadge,
+  deriveContainerState,
+} from '@/features/content-authoring/components/container-state-badge';
 import { CourseStatusBanner } from '@/features/content-authoring/components/course-status-banner';
 import { getContainerPreflight } from '@/features/content-authoring/lib/get-container-preflight';
 import type { PreflightResult, SchoolRole } from '@/features/content-authoring/types';
@@ -35,9 +38,11 @@ export default async function ContainerDetailPage({
   ]);
 
   const schoolRole: SchoolRole =
-    orgRole === 'OWNER' ? 'owner'
-    : orgRole === 'ADMIN' || orgRole === 'MANAGER' || orgRole === 'CONTENT_ADMIN' ? 'admin'
-    : 'teacher';
+    orgRole === 'OWNER'
+      ? 'owner'
+      : orgRole === 'ADMIN' || orgRole === 'MANAGER' || orgRole === 'CONTENT_ADMIN'
+        ? 'admin'
+        : 'teacher';
 
   let container: Container;
   try {
@@ -65,12 +70,14 @@ export default async function ContainerDetailPage({
     const draftVersion = versionsResp.items.find((v) => v.status === 'draft');
     draftVersionId = draftVersion?.id ?? null;
 
-    if (state === 'draft') {
+    // Also for an already-published container: editing it opens a new draft
+    // version, and re-publishing needs the same pre-flight as the first release.
+    if (draftVersionId) {
       preflight = await getContainerPreflight(schoolSlug, id);
     }
   } catch (err) {
     console.error('[content/id] versions fetch failed:', err);
-    if (state === 'draft') preflightError = true;
+    preflightError = true;
   }
 
   return (

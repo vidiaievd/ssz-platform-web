@@ -11,6 +11,7 @@ vi.mock('../actions/container-item', () => ({
   assignItemSectionAction: vi.fn(),
 }));
 vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
+vi.mock('./module-publish-block', () => ({ ModulePublishBlock: () => null }));
 vi.mock('../actions/container', () => ({
   renameContainerAction: vi.fn(),
   createModuleAction: vi.fn(),
@@ -25,7 +26,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>

@@ -18,6 +18,7 @@ import { renameContainerAction } from '../actions/container';
 import { renameSectionAction } from '../actions/section';
 import { ContainerStateBadge } from './container-state-badge';
 import { AutosaveIndicator } from './autosave-indicator';
+import { ModulePublishBlock } from './module-publish-block';
 
 interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
@@ -147,6 +148,10 @@ export function CurriculumInspector({
         </div>
         {mod.titleEn && <InspectorField label={t('structure.titleEn')} value={mod.titleEn} />}
         <p className="text-xs leading-relaxed text-muted-foreground">{t('structure.moduleHelp')}</p>
+        {/* Students read a module's own published version, so material added
+            here stays invisible until this module — not just the course — is
+            published. */}
+        <ModulePublishBlock containerId={mod.containerId} onPublished={onChanged} />
       </div>
     );
   }

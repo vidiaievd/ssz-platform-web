@@ -5,7 +5,6 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/shared/breadcrumbs';
 import type { Container, ContainerVersion, CurriculumTree } from '@/features/content/types';
-import { deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
 import { TextEditorPane } from '@/features/content-authoring/components/text-editor-pane';
 import { VideoEditorPane } from '@/features/content-authoring/components/video-editor-pane';
 import { AudioEditorPane } from '@/features/content-authoring/components/audio-editor-pane';
@@ -38,8 +37,6 @@ export default async function LessonEditorPage({
     throw e;
   }
 
-  const state = deriveContainerState(container);
-
   const versionsResp = await serverFetch<{ items: ContainerVersion[] }>({
     service: 'content',
     path: `/containers/${id}/versions`,
@@ -66,10 +63,9 @@ export default async function LessonEditorPage({
     throw e;
   }
 
-  let preflight: PreflightResult | undefined;
-  if (state === 'draft') {
-    preflight = await getContainerPreflight(schoolSlug, id);
-  }
+  // Computed for a published container too — its pending edits live in the
+  // draft version above, and publishing them runs the same checks.
+  const preflight: PreflightResult | undefined = await getContainerPreflight(schoolSlug, id);
 
   const kind = getMaterialKind(item);
   // Annotating grammar in a text points at the rules of its own Leksjon; the
@@ -80,9 +76,7 @@ export default async function LessonEditorPage({
 
   const t = await getTranslations('Authoring');
   const sectionCrumb =
-    levelTitle && sectionTitle
-      ? `${levelTitle} · ${sectionTitle}`
-      : (levelTitle ?? sectionTitle);
+    levelTitle && sectionTitle ? `${levelTitle} · ${sectionTitle}` : (levelTitle ?? sectionTitle);
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: t('breadcrumb.courses'), href: `/school/${schoolSlug}/content` },
     { label: container.title, href: backHref },
