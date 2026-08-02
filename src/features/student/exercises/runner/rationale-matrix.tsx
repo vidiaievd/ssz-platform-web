@@ -27,6 +27,11 @@ export interface RationaleMatrixProps {
   chosen?: string;
   /** Whether that pick was graded correct — decides a synthesized row's verdict. */
   chosenCorrect?: boolean;
+  /**
+   * Which blank this matrix belongs to, e.g. "Sentence 3". Only needed when a
+   * single exercise shows several matrices at once and they must be told apart.
+   */
+  label?: string;
 }
 
 const OK_BG = 'var(--ssz-feedback-ok-bg)';
@@ -106,7 +111,12 @@ export function buildRationaleRows(
  * verdict and a short note for each. Rendered under the sentence in the
  * feedback phase so the student learns the rule, not just the answer.
  */
-export function RationaleMatrix({ rationale, chosen = '', chosenCorrect = false }: RationaleMatrixProps) {
+export function RationaleMatrix({
+  rationale,
+  chosen = '',
+  chosenCorrect = false,
+  label,
+}: RationaleMatrixProps) {
   const t = useTranslations('ExerciseRunner');
   const options = rationale.options ?? [];
   if (options.length === 0 && !rationale.explanation) return null;
@@ -129,13 +139,16 @@ export function RationaleMatrix({ rationale, chosen = '', chosenCorrect = false 
         borderColor: 'var(--ssz-border-default)',
         background: 'var(--ssz-bg-subtle)',
       }}
-      aria-label={t('fill.rationaleTitle')}
+      aria-label={label ? `${t('fill.rationaleTitle')} · ${label}` : t('fill.rationaleTitle')}
     >
       <h3
         className="mb-3 text-[13px] font-semibold uppercase tracking-wide"
         style={{ color: 'var(--ssz-text-secondary)', fontFamily: 'var(--ssz-font-ui)' }}
       >
         {t('fill.rationaleTitle')}
+        {label && (
+          <span style={{ color: 'var(--ssz-text-muted)' }}> · {label}</span>
+        )}
       </h3>
 
       {rationale.explanation && (

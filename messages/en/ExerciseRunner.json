@@ -78,7 +78,9 @@
     "choosePlaceholder": "Choose…",
     "blankLabel": "Blank in sentence {n}",
     "filledCount": "{done} of {total} blanks filled",
-    "partialScore": "{correct} of {total} blanks correct"
+    "partialScore": "{correct} of {total} blanks correct",
+    "rationaleItem": "Sentence {n}",
+    "rationaleItemBlank": "Sentence {n}, blank {b}"
   },
   "textOrder": {
     "moveUp": "Move up",

@@ -78,7 +78,9 @@
     "choosePlaceholder": "Выберите…",
     "blankLabel": "Пропуск в предложении {n}",
     "filledCount": "Заполнено {done} из {total} пропусков",
-    "partialScore": "Верно {correct} из {total} пропусков"
+    "partialScore": "Верно {correct} из {total} пропусков",
+    "rationaleItem": "Предложение {n}",
+    "rationaleItemBlank": "Предложение {n}, пропуск {b}"
   },
   "textOrder": {
     "moveUp": "Выше",

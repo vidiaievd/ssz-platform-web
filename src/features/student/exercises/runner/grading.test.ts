@@ -276,6 +276,21 @@ describe('checkWordBankFill', () => {
 
     expect(result.ok).toBe(true);
   });
+
+  it('carries an authored rationale into the result, as the engine does', () => {
+    const rationale = { options: [{ text: 'show off', verdict: 'correct' as const }] };
+    const result = checkWordBankFill(
+      { items: [{ id: '1', blanks: [{ blank_id: 1, accepted_answers: ['show off'], rationale }] }] },
+      { '1': { 1: 'boast' } },
+    );
+
+    expect(result.results['1']![1]).toEqual({ correct: false, expected: 'show off', rationale });
+  });
+
+  it('leaves the result free of a rationale key when none is authored', () => {
+    const result = checkWordBankFill(expected, { '1': { 1: 'boast' } });
+    expect(result.results['1']![1]).not.toHaveProperty('rationale');
+  });
 });
 
 describe('checkTextOrder', () => {

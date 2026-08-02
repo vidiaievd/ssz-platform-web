@@ -131,7 +131,11 @@ export function checkWordBankFill(
 
       results[item.id] = {
         ...(results[item.id] ?? {}),
-        [blank.blank_id]: { correct, expected: blank.accepted_answers[0] ?? '' },
+        [blank.blank_id]: {
+          correct,
+          expected: blank.accepted_answers[0] ?? '',
+          ...(blank.rationale ? { rationale: blank.rationale } : {}),
+        },
       };
       total += 1;
       if (correct) correctCount += 1;

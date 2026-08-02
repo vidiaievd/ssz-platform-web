@@ -385,17 +385,26 @@ function WordBankFillSolver({ display, phase, ok, onCheck }: SolverProps) {
       .map((it) => ({
         id: it.id,
         blanks: (Array.isArray(it.blanks) ? it.blanks : [])
-          .filter((b): b is { blank_id: number; accepted_answers: unknown } =>
+          .filter((b): b is { blank_id: number; accepted_answers: unknown; rationale?: FillRationale } =>
             typeof (b as { blank_id?: unknown }).blank_id === 'number',
           )
-          .map((b) => ({ blank_id: b.blank_id, accepted_answers: strArr(b.accepted_answers) })),
+          .map((b) => ({
+            blank_id: b.blank_id,
+            accepted_answers: strArr(b.accepted_answers),
+            ...(b.rationale ? { rationale: b.rationale } : {}),
+          })),
       })),
   };
 
   return (
     <>
       <WordBankFillBody
-        content={{ wordBank, items, instruction: instr(display) }}
+        content={{
+          wordBank,
+          items,
+          instruction: instr(display),
+          reusableWords: c.reusable_words === true,
+        }}
         value={value}
         onValueChange={setValue}
         onAnswerChange={setCanSubmit}

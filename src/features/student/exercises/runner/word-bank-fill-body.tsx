@@ -4,6 +4,7 @@ import { useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Instr } from './instr';
+import { RationaleMatrix, type Rationale } from './rationale-matrix';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
 export interface WordBankSentence {
@@ -17,11 +18,20 @@ export interface WordBankFillContent {
   wordBank: string[];
   items: WordBankSentence[];
   instruction?: string;
+  /**
+   * Set for drills where one bank word is the answer to several blanks — a
+   * grammar exercise on `at` / `om` reuses both many times over. It turns off
+   * the spent-word dimming, which would otherwise mislabel the right answer
+   * as already used.
+   */
+  reusableWords?: boolean;
 }
 
 export interface WordBankFillExpectedBlank {
   blank_id: number;
   accepted_answers: string[];
+  /** Optional per-blank teaching aid, shown only when this blank was missed. */
+  rationale?: Rationale;
 }
 
 export interface WordBankFillExpectedItem {
@@ -41,6 +51,8 @@ export interface WordBankBlankResult {
   correct: boolean;
   /** First accepted answer, shown when the learner was wrong. */
   expected: string;
+  /** Carried over from the expected answers so feedback can explain the miss. */
+  rationale?: Rationale;
 }
 
 /** itemId → blankId → outcome; only present in the feedback phase. */
@@ -82,13 +94,59 @@ export function parseSentence(text: string): Segment[] {
   return segments;
 }
 
+/** The blank ids of one sentence, in reading order. */
+function blankIdsOf(item: WordBankSentence): number[] {
+  return parseSentence(item.textWithBlanks)
+    .filter((s): s is { kind: 'blank'; blankId: number } => s.kind === 'blank')
+    .map((s) => s.blankId);
+}
+
 /** Every blank of the exercise, in reading order. */
 function allBlanks(items: WordBankSentence[]): Array<{ itemId: string; blankId: number }> {
   return items.flatMap((item) =>
-    parseSentence(item.textWithBlanks)
-      .filter((s): s is { kind: 'blank'; blankId: number } => s.kind === 'blank')
-      .map((s) => ({ itemId: item.id, blankId: s.blankId })),
+    blankIdsOf(item).map((blankId) => ({ itemId: item.id, blankId })),
   );
+}
+
+interface MissedBlank {
+  itemId: string;
+  blankId: number;
+  /** 1-based position of the sentence, for the matrix label. */
+  itemNumber: number;
+  /** True when the sentence has more than one blank, so the label must say which. */
+  numbered: boolean;
+  chosen: string;
+  rationale: Rationale;
+}
+
+/**
+ * The blanks worth explaining after a check: missed ones that carry an authored
+ * rationale. Correct blanks are skipped on purpose — a ten-sentence drill would
+ * otherwise answer with ten tables, and the learner needs the traps they fell
+ * into, not the ones they avoided.
+ */
+export function missedBlanksWithRationale(
+  items: WordBankSentence[],
+  value: WordBankFillValue,
+  results: WordBankFillResults,
+): MissedBlank[] {
+  return items.flatMap((item, i) => {
+    const ids = blankIdsOf(item);
+    return ids.flatMap((blankId) => {
+      const result = results[item.id]?.[blankId];
+      if (!result || result.correct || !result.rationale) return [];
+      return [
+        {
+          itemId: item.id,
+          blankId,
+          itemNumber: i + 1,
+          numbered: ids.length > 1,
+          chosen: value[item.id]?.[blankId] ?? '',
+          rationale: result.rationale,
+        },
+      ];
+    });
+  });
 }
 
 export function WordBankFillBody({
@@ -107,10 +165,11 @@ export function WordBankFillBody({
   const blanks = useMemo(() => allBlanks(content.items), [content.items]);
 
   /* A bank word is "spent" once it is used — the textbook default is one word
-     per blank. It stays selectable so a learner can move it, just dimmed. */
-  const used = new Set(
-    Object.values(value).flatMap((byBlank) => Object.values(byBlank).filter(Boolean)),
-  );
+     per blank. It stays selectable so a learner can move it, just dimmed.
+     Drills that reuse the same word across blanks opt out entirely. */
+  const used = content.reusableWords
+    ? new Set<string>()
+    : new Set(Object.values(value).flatMap((byBlank) => Object.values(byBlank).filter(Boolean)));
 
   const filled = blanks.filter(({ itemId, blankId }) => (value[itemId]?.[blankId] ?? '') !== '');
   const allFilled = blanks.length > 0 && filled.length === blanks.length;
@@ -211,6 +270,22 @@ export function WordBankFillBody({
           </li>
         ))}
       </ol>
+
+      {/* One matrix per missed blank that has an authored rationale. */}
+      {reveal &&
+        ok !== null &&
+        missedBlanksWithRationale(content.items, value, results ?? {}).map((miss) => (
+          <RationaleMatrix
+            key={`${miss.itemId}-${miss.blankId}`}
+            rationale={miss.rationale}
+            chosen={miss.chosen}
+            label={
+              miss.numbered
+                ? t('wordBank.rationaleItemBlank', { n: miss.itemNumber, b: miss.blankId })
+                : t('wordBank.rationaleItem', { n: miss.itemNumber })
+            }
+          />
+        ))}
 
       {!reveal && (
         <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)">

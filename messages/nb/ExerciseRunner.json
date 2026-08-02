@@ -78,7 +78,9 @@
     "choosePlaceholder": "Velg …",
     "blankLabel": "Luke i setning {n}",
     "filledCount": "{done} av {total} luker fylt ut",
-    "partialScore": "{correct} av {total} luker riktige"
+    "partialScore": "{correct} av {total} luker riktige",
+    "rationaleItem": "Setning {n}",
+    "rationaleItemBlank": "Setning {n}, tomrom {b}"
   },
   "textOrder": {
     "moveUp": "Flytt opp",
