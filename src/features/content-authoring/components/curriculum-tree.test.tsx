@@ -27,11 +27,14 @@ const TREE: CurriculumTreeData = {
   containerId: 'course-1',
   publishState: 'draft',
   levelSystem: 'cefr',
+  containerType: 'course' as const,
+  ungroupedItems: [],
   levels: [
     {
       id: 'level-a1',
       title: 'A1 — Beginner',
       position: 0,
+      items: [],
       modules: [
         {
           id: 'item-module-1',
@@ -149,9 +152,12 @@ describe('CurriculumTree', () => {
     const [module_] = level!.modules;
     const pendingTree: CurriculumTreeData = {
       ...TREE,
+      containerType: 'course' as const,
+      ungroupedItems: [],
       levels: [
         {
           ...level!,
+          items: [],
           modules: [{ ...module_!, publishState: 'pending_changes' }],
         },
       ],
@@ -161,6 +167,46 @@ describe('CurriculumTree', () => {
 
     expect(screen.getByText('Unpublished changes')).toBeInTheDocument();
     expect(screen.queryByText('Draft')).not.toBeInTheDocument();
+  });
+
+  it("renders the edited container's own material, not only its modules", () => {
+    // A module opened in this editor keeps its lessons and exercises at the
+    // level itself. Dropping them showed empty sections while pre-flight
+    // complained about items the author could not see.
+    const moduleTree: CurriculumTreeData = {
+      ...TREE,
+      containerType: 'module',
+      levels: [
+        {
+          id: 'section-nye-ord',
+          title: 'Nye ord',
+          position: 0,
+          modules: [],
+          items: [
+            {
+              id: 'own-item-1',
+              itemType: 'exercise',
+              refId: 'exercise-9',
+              title: 'Fyll inn ordet',
+              position: 0,
+              isRequired: true,
+              lessonKind: null,
+              state: null,
+              durationMinutes: 2,
+              xpReward: 5,
+            },
+          ],
+        },
+      ],
+    };
+
+    const { onSelect } = renderTree(vi.fn(), vi.fn(), moduleTree);
+
+    expect(screen.getByText('Fyll inn ordet')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Fyll inn ordet'));
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'item', sectionTitle: 'Nye ord' }),
+    );
   });
 
   it('collapses a level so its modules are no longer rendered', () => {
@@ -175,9 +221,12 @@ describe('CurriculumTree', () => {
     const [module_] = level!.modules;
     const emptyTree: CurriculumTreeData = {
       ...TREE,
+      containerType: 'course' as const,
+      ungroupedItems: [],
       levels: [
         {
           ...level!,
+          items: [],
           modules: [
             {
               ...module_!,

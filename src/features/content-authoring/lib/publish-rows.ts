@@ -30,17 +30,19 @@ export function collectPublishRows(
       publishState: m.publishState,
     }));
 
-  const course: PublishRow[] =
+  // The same editor opens a course and a module, so the root row must be named
+  // after what it actually is.
+  const root: PublishRow[] =
     tree.publishState === 'published'
       ? []
       : [
           {
             containerId: tree.containerId,
             title: courseTitle,
-            kind: 'course',
+            kind: tree.containerType === 'course' ? 'course' : 'module',
             publishState: tree.publishState,
           },
         ];
 
-  return [...modules, ...course];
+  return [...modules, ...root];
 }

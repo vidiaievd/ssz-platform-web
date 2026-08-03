@@ -47,13 +47,21 @@ export function findLevelOrModuleSelection(
 }
 
 /** Locates a freshly created (or any) item by id and builds its tree selection, for auto-select after creation. */
-export function findItemSelection(tree: CurriculumTree, itemId: string): CurriculumTreeSelection | null {
+export function findItemSelection(
+  tree: CurriculumTree,
+  itemId: string,
+): CurriculumTreeSelection | null {
   for (const level of tree.levels) {
     for (const mod of level.modules) {
       const found = findItemInModule(mod, itemId);
       if (found) return found;
     }
+    // The edited container's own material, which a module keeps here.
+    const own = level.items.find((i) => i.id === itemId);
+    if (own) return { kind: 'item', item: own, sectionTitle: level.title };
   }
+  const rootItem = tree.ungroupedItems.find((i) => i.id === itemId);
+  if (rootItem) return { kind: 'item', item: rootItem, sectionTitle: null };
   return null;
 }
 
@@ -85,10 +93,22 @@ export interface ItemWithModule {
  * module's full `Container` (FE2.1 lesson editor route).
  */
 export function findItemWithModule(tree: CurriculumTree, itemId: string): ItemWithModule | null {
+  // Container-item id first — that is what the tree links carry. Pre-flight
+  // deep links carry the *content* id instead (a lesson id, not the id of the
+  // row that places it), so refId is a deliberate second pass rather than a
+  // guess; matching it in one pass would let another module's copy of the same
+  // lesson win over the exact hit.
+  return findBy(tree, (i) => i.id === itemId) ?? findBy(tree, (i) => i.refId === itemId);
+}
+
+function findBy(
+  tree: CurriculumTree,
+  match: (item: CurriculumTreeItemNode) => boolean,
+): ItemWithModule | null {
   for (const level of tree.levels) {
     for (const mod of level.modules) {
       for (const section of mod.sections) {
-        const item = section.items.find((i) => i.id === itemId);
+        const item = section.items.find(match);
         if (item)
           return {
             item,
@@ -97,7 +117,7 @@ export function findItemWithModule(tree: CurriculumTree, itemId: string): ItemWi
             moduleContainerId: mod.containerId,
           };
       }
-      const ungrouped = mod.ungroupedItems.find((i) => i.id === itemId);
+      const ungrouped = mod.ungroupedItems.find(match);
       if (ungrouped) {
         return {
           item: ungrouped,
@@ -107,6 +127,29 @@ export function findItemWithModule(tree: CurriculumTree, itemId: string): ItemWi
         };
       }
     }
+
+    // Material attached to the edited container itself — a module holds its
+    // lessons here, and the editor for them is reached the same way.
+    const own = level.items.find(match);
+    if (own) {
+      return {
+        item: own,
+        sectionTitle: level.title,
+        levelTitle: null,
+        moduleContainerId: tree.containerId,
+      };
+    }
   }
+
+  const rootItem = tree.ungroupedItems.find(match);
+  if (rootItem) {
+    return {
+      item: rootItem,
+      sectionTitle: null,
+      levelTitle: null,
+      moduleContainerId: tree.containerId,
+    };
+  }
+
   return null;
 }

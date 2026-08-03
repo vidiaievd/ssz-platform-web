@@ -59,7 +59,7 @@ describe('CurriculumInspector', () => {
   it('shows level contextual help with an editable title', () => {
     renderInspector({
       kind: 'level',
-      level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [] },
+      level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [], items: [] },
     });
     expect(screen.getByDisplayValue('A1 — Beginner')).toBeInTheDocument();
     expect(
@@ -70,7 +70,7 @@ describe('CurriculumInspector', () => {
   it('shows a plain (non-editable) title for the single-level placeholder (no level id)', () => {
     renderInspector({
       kind: 'level',
-      level: { id: null, title: 'All content', position: 0, modules: [] },
+      level: { id: null, title: 'All content', position: 0, modules: [], items: [] },
     });
     expect(screen.getByText('All content')).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
@@ -148,7 +148,7 @@ describe('CurriculumInspector', () => {
       vi.mocked(renameSectionAction).mockResolvedValue({ ok: true, value: undefined } as never);
       const onChanged = renderInspector({
         kind: 'level',
-        level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [] },
+        level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [], items: [] },
       });
 
       fireEvent.change(screen.getByDisplayValue('A1 — Beginner'), {

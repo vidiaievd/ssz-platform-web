@@ -53,11 +53,14 @@ const TREE: CurriculumTree = {
   containerId: 'course-1',
   publishState: 'draft',
   levelSystem: 'cefr',
+  containerType: 'course' as const,
+  ungroupedItems: [],
   levels: [
     {
       id: 'lvl-1',
       title: 'Leksjon 1 — Arbeidsliv',
       position: 0,
+      items: [],
       modules: [
         moduleNode('mod-1a', '1A — Bartek søker ny jobb', [
           item('i1', 'lesson', 'lesson-1a', '1A'),
@@ -72,6 +75,7 @@ const TREE: CurriculumTree = {
       id: 'lvl-2',
       title: 'Leksjon 2 — Utdanning',
       position: 1,
+      items: [],
       modules: [
         moduleNode('mod-2g', '2 — Grammatikk og øvelser', [
           item('i4', 'grammar_rule', 'rule-modale', 'Modale verb'),
@@ -100,9 +104,12 @@ describe('collectLevelGrammarRules', () => {
   it('lists a rule once even when two modules of the Leksjon carry it', () => {
     const duplicated: CurriculumTree = {
       ...TREE,
+      containerType: 'course' as const,
+      ungroupedItems: [],
       levels: [
         {
           ...TREE.levels[0]!,
+          items: [],
           modules: [
             ...TREE.levels[0]!.modules,
             moduleNode('mod-1b', '1B — Jobbintervjuet', [

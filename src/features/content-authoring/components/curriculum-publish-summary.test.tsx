@@ -19,11 +19,14 @@ function makeTree(
     containerId: 'course-1',
     levelSystem: 'cefr',
     publishState: coursePublishState,
+    containerType: 'course' as const,
+    ungroupedItems: [],
     levels: [
       {
         id: 'level-a1',
         title: 'A1 — Beginner',
         position: 0,
+        items: [],
         modules: modulePublishStates.map((publishState, i) => ({
           id: `item-module-${i}`,
           containerId: `module-${i}`,

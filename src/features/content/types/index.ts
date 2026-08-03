@@ -109,14 +109,23 @@ export interface CurriculumTreeLevelNode {
   title: string | null;
   position: number;
   modules: CurriculumTreeModuleNode[];
+  /**
+   * Leaf items in this section of the container being edited. A course keeps
+   * modules here; a module keeps its own lessons, vocabulary and exercises —
+   * and both are edited through the same screen.
+   */
+  items: CurriculumTreeItemNode[];
 }
 
 export interface CurriculumTree {
   versionId: string;
   containerId: string;
+  containerType: ContainerType;
   levelSystem: 'cefr' | 'custom' | 'single';
   publishState: ContainerPublishState;
   levels: CurriculumTreeLevelNode[];
+  /** The edited container's own items that belong to no section. */
+  ungroupedItems: CurriculumTreeItemNode[];
 }
 
 export interface PageInfo {

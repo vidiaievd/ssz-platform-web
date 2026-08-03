@@ -174,6 +174,39 @@ function ItemRow({
   );
 }
 
+function OwnItemRow({
+  item,
+  sectionTitle,
+  selectedId,
+  onSelect,
+}: {
+  item: CurriculumTreeItemNode;
+  sectionTitle: string | null;
+  selectedId: string | null;
+  onSelect: (selection: CurriculumTreeSelection) => void;
+}) {
+  const def = getLessonTypeDefinition(getMaterialKind(item));
+  const Icon = def.icon;
+  return (
+    <TreeRow
+      depth={1}
+      icon={
+        <span
+          className="flex h-6.5 w-6.5 items-center justify-center rounded-md"
+          style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}
+        >
+          <Icon size={13} style={{ color: `var(${def.hueVar})` }} />
+        </span>
+      }
+      label={item.title ?? ''}
+      meta={item.durationMinutes ? `${item.durationMinutes} min` : null}
+      state={item.state}
+      selected={selectedId === item.id}
+      onSelect={() => onSelect({ kind: 'item', item, sectionTitle })}
+    />
+  );
+}
+
 function ModuleNode({
   module: mod,
   index,
@@ -439,6 +472,18 @@ export function CurriculumTree({
                     ownerSchoolId={ownerSchoolId}
                   />
                 ))}
+                {/* Material attached to the edited container itself. A module
+                    holds its lessons and exercises here, and the same screen
+                    edits modules and courses alike. */}
+                {level.items.map((item) => (
+                  <OwnItemRow
+                    key={item.id}
+                    item={item}
+                    sectionTitle={level.title}
+                    selectedId={selectedId}
+                    onSelect={onSelect}
+                  />
+                ))}
                 <div className="pb-1.5 pt-1" style={{ paddingLeft: 8 + 1 * 20 + 22 }}>
                   <button
                     type="button"
@@ -455,6 +500,15 @@ export function CurriculumTree({
           </div>
         );
       })}
+      {tree.ungroupedItems.map((item) => (
+        <OwnItemRow
+          key={item.id}
+          item={item}
+          sectionTitle={null}
+          selectedId={selectedId}
+          onSelect={onSelect}
+        />
+      ))}
       <div className="mt-1 pl-2">
         <Button variant="ghost" size="sm" disabled={isPending} onClick={handleAddLevel}>
           <Plus size={13} />

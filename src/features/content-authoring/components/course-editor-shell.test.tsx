@@ -68,11 +68,14 @@ function renderShell(draftVersionId: string | null, pendingModules = 0) {
       containerId: 'course-1',
       levelSystem: 'cefr',
       publishState: 'published',
+      containerType: 'course' as const,
+      ungroupedItems: [],
       levels: [
         {
           id: 'level-a1',
           title: 'A1',
           position: 0,
+          items: [],
           modules: Array.from({ length: pendingModules }, (_, i) => ({
             id: `item-mod-${i}`,
             containerId: `mod-${i}`,

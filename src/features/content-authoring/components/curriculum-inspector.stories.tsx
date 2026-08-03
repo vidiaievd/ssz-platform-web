@@ -21,7 +21,7 @@ export const LevelSelected: Story = {
   args: {
     selection: {
       kind: 'level',
-      level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [] },
+      level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [], items: [] },
     },
     ...commonArgs,
   },

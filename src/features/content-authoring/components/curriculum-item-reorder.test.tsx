@@ -170,12 +170,14 @@ const LEVEL_A1: CurriculumTreeLevelNode = {
   id: 'level-a1',
   title: 'A1',
   position: 0,
+  items: [],
   modules: [module_('m1', 0), module_('m2', 1)],
 };
 const LEVEL_A2: CurriculumTreeLevelNode = {
   id: 'level-a2',
   title: 'A2',
   position: 1,
+  items: [],
   modules: [module_('m3', 0)],
 };
 const TREE: CurriculumTree = {
@@ -183,6 +185,8 @@ const TREE: CurriculumTree = {
   containerId: 'course-1',
   publishState: 'draft',
   levelSystem: 'cefr',
+  containerType: 'course' as const,
+  ungroupedItems: [],
   levels: [LEVEL_A1, LEVEL_A2],
 };
 

@@ -11,11 +11,14 @@ const TREE: CurriculumTreeData = {
   containerId: 'course-1',
   publishState: 'draft',
   levelSystem: 'cefr',
+  containerType: 'course' as const,
+  ungroupedItems: [],
   levels: [
     {
       id: 'level-a1',
       title: 'A1 — Beginner',
       position: 0,
+      items: [],
       modules: [
         {
           id: 'item-module-1',

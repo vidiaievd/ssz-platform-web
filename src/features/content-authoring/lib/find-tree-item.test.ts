@@ -9,11 +9,14 @@ const TREE: CurriculumTree = {
   containerId: 'course-1',
   publishState: 'draft',
   levelSystem: 'cefr',
+  containerType: 'course' as const,
+  ungroupedItems: [],
   levels: [
     {
       id: 'level-a1',
       title: 'A1 — Beginner',
       position: 0,
+      items: [],
       modules: [
         {
           id: 'item-module-1',
@@ -84,5 +87,56 @@ describe('findItemWithModule', () => {
 
   it('returns null for an unknown item id', () => {
     expect(findItemWithModule(TREE, 'nope')).toBeNull();
+  });
+
+  it('finds material attached to the edited container itself', () => {
+    // How a module's own editor sees its lessons: no enclosing module node.
+    const moduleTree: CurriculumTree = {
+      ...TREE,
+      containerId: 'module-1',
+      containerType: 'module',
+      levels: [
+        {
+          id: 'section-nye-ord',
+          title: 'Nye ord',
+          position: 0,
+          modules: [],
+          items: [
+            {
+              id: 'own-item-1',
+              itemType: 'lesson',
+              refId: 'lesson-9',
+              title: 'Bartek søker ny jobb',
+              position: 0,
+              isRequired: true,
+              lessonKind: 'text',
+              state: 'published',
+              durationMinutes: 4,
+              xpReward: null,
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = findItemWithModule(moduleTree, 'own-item-1');
+
+    expect(result?.item.title).toBe('Bartek søker ny jobb');
+    expect(result?.sectionTitle).toBe('Nye ord');
+    expect(result?.moduleContainerId).toBe('module-1');
+  });
+
+  it('falls back to the content id, which is what pre-flight deep links carry', () => {
+    // `READ_NO_TITLE` names the lesson, not the container-item that places it,
+    // so matching only on container-item id sent the author to a 404.
+    const result = findItemWithModule(TREE, 'lesson-1');
+
+    expect(result?.item.id).toBe('item-1');
+    expect(result?.moduleContainerId).toBe('module-1');
+  });
+
+  it('prefers an exact container-item hit over a content-id match', () => {
+    const result = findItemWithModule(TREE, 'item-1');
+    expect(result?.item.id).toBe('item-1');
   });
 });
