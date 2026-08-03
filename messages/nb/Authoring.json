@@ -191,6 +191,7 @@
     "difficultyLevelNone": "Alle nivåer",
     "instructions": "Instruksjoner",
     "instructionsPlaceholder": "Valgfrie instruksjoner som vises til studenten",
+    "instructionsHint": "Påkrevd — en oppgave uten instruksjon kan ikke publiseres.",
     "mcQuestion": "Spørsmål",
     "mcQuestionPlaceholder": "Skriv inn spørsmålet",
     "mcOptions": "Alternativer",
@@ -506,7 +507,8 @@
       "vocabularyTitle": "Ord",
       "readingTitle": "Lesing",
       "listeningTitle": "Lytting",
-      "practiceTitle": "Øving"
+      "practiceTitle": "Øving",
+      "practiceInstructions": "Velg riktig svar."
     },
     "preview": {
       "label": "Live forhåndsvisning",
@@ -606,6 +608,7 @@
     "title": "Legg til en leksjon",
     "description": "Velg en materialtype som skal legges til i denne modulen.",
     "defaultTitle": "Ny {type}",
+    "defaultInstructions": "Løs oppgaven.",
     "exerciseTypeTitle": "Velg oppgavetype",
     "exerciseTypeDescription": "Typen bestemmer hvordan oppgaven besvares og vurderes, og kan ikke endres etterpå.",
     "back": "Tilbake"

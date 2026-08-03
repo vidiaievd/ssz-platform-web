@@ -191,6 +191,7 @@
     "difficultyLevelNone": "Любой уровень",
     "instructions": "Инструкции",
     "instructionsPlaceholder": "Необязательные инструкции для студента",
+    "instructionsHint": "Обязательно — упражнение без инструкции нельзя опубликовать.",
     "mcQuestion": "Вопрос",
     "mcQuestionPlaceholder": "Введите вопрос",
     "mcOptions": "Варианты",
@@ -506,7 +507,8 @@
       "vocabularyTitle": "Лексика",
       "readingTitle": "Чтение",
       "listeningTitle": "Аудирование",
-      "practiceTitle": "Практика"
+      "practiceTitle": "Практика",
+      "practiceInstructions": "Выберите правильный ответ."
     },
     "preview": {
       "label": "Живой предпросмотр",
@@ -606,6 +608,7 @@
     "title": "Добавить урок",
     "description": "Выберите тип материала, который нужно добавить в этот модуль.",
     "defaultTitle": "Новый материал: {type}",
+    "defaultInstructions": "Выполните упражнение.",
     "exerciseTypeTitle": "Выберите тип упражнения",
     "exerciseTypeDescription": "Тип определяет, как упражнение выполняется и оценивается, и его нельзя изменить позже.",
     "back": "Назад"

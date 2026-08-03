@@ -147,7 +147,7 @@ export function AddLessonPicker({
         targetLanguage,
         difficultyLevel,
         visibility,
-        minimalExerciseValues(templateCode, prompt),
+        minimalExerciseValues(templateCode, prompt, t('addLesson.defaultInstructions')),
         ownerSchoolId,
       );
 

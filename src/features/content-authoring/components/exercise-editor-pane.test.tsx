@@ -17,7 +17,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -80,7 +83,7 @@ beforeEach(() => {
         ],
       },
       expectedAnswers: { correct_option_ids: ['opt-0'] },
-      instructions: null,
+      instructions: [{ instructionLanguage: 'en', instructionText: 'Choose the correct answer.' }],
     },
     isLoading: false,
   } as never);
@@ -109,6 +112,21 @@ describe('ExerciseEditorPane', () => {
         expect.objectContaining({ templateCode: 'multiple_choice', mcQuestion: 'Hvor bor du?' }),
       );
     });
+  });
+
+  it('refuses to save an exercise whose instruction was cleared', async () => {
+    // An exercise with no instruction row is a publish blocker
+    // (`EXERCISE_INCOMPLETE`), discovered only on the review screen — so the
+    // editor refuses the save instead.
+    renderPane();
+
+    fireEvent.change(screen.getByDisplayValue('Choose the correct answer.'), {
+      target: { value: '' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(screen.getByText('Required')).toBeInTheDocument());
+    expect(updateExerciseAction).not.toHaveBeenCalled();
   });
 
   it('updates the live preview as the author edits the question', async () => {

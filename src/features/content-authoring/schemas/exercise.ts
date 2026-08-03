@@ -52,7 +52,11 @@ export const DIFFICULTY_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 export const exerciseFormSchema = z
   .object({
     templateCode: z.enum(EXERCISE_TYPES),
-    instructions: z.string().max(1000).optional(),
+    // Required, not merely encouraged: content-service pre-flight raises
+    // `EXERCISE_INCOMPLETE` as a *blocker* for an exercise with no
+    // instruction row, so an exercise saved without one cannot be published
+    // and the author only finds out on the review screen.
+    instructions: z.string().min(1, 'Required').max(1000),
     hint: z.string().max(1000).optional(),
     difficultyLevel: z.enum(DIFFICULTY_LEVELS).optional(),
 

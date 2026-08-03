@@ -194,6 +194,7 @@
     "difficultyLevelNone": "Any level",
     "instructions": "Instructions",
     "instructionsPlaceholder": "Optional instructions shown to the student",
+    "instructionsHint": "Required — an exercise without instructions cannot be published.",
     "mcQuestion": "Question",
     "mcQuestionPlaceholder": "Enter the question",
     "mcOptions": "Options",
@@ -509,7 +510,8 @@
       "vocabularyTitle": "Vocabulary",
       "readingTitle": "Reading",
       "listeningTitle": "Listening",
-      "practiceTitle": "Practice"
+      "practiceTitle": "Practice",
+      "practiceInstructions": "Choose the correct answer."
     },
     "preview": {
       "label": "Live preview",
@@ -606,6 +608,7 @@
     "title": "Add a lesson",
     "description": "Choose a material type to add to this module.",
     "defaultTitle": "New {type}",
+    "defaultInstructions": "Complete the exercise.",
     "exerciseTypeTitle": "Choose an exercise type",
     "exerciseTypeDescription": "The type decides how the exercise is answered and graded, and cannot be changed afterwards.",
     "back": "Back"

@@ -113,7 +113,13 @@ export function ExerciseFields({
         </Field>
       </div>
 
-      <Field label={t('instructions')} htmlFor="ex-instructions">
+      <Field
+        label={t('instructions')}
+        htmlFor="ex-instructions"
+        error={errors.instructions?.message}
+        hint={t('instructionsHint')}
+        required
+      >
         <Textarea
           id="ex-instructions"
           rows={2}

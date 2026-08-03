@@ -18,6 +18,7 @@ export interface CefrStarterTitles {
   reading: string;
   listening: string;
   practice: string;
+  practiceInstructions: string;
 }
 
 /** Re-throws a failed nested Result's error so the outer `tryAction` serializes it correctly. */
@@ -56,9 +57,15 @@ export async function applyCefrStarterScaffoldAction(
     );
 
     unwrap(
-      await createVocabularyListAction(moduleContainerId, targetLanguage, difficultyLevel, visibility, {
-        title: titles.vocabulary,
-      }),
+      await createVocabularyListAction(
+        moduleContainerId,
+        targetLanguage,
+        difficultyLevel,
+        visibility,
+        {
+          title: titles.vocabulary,
+        },
+      ),
     );
 
     unwrap(
@@ -89,7 +96,7 @@ export async function applyCefrStarterScaffoldAction(
         targetLanguage,
         difficultyLevel,
         visibility,
-        minimalMcqValues(titles.practice),
+        minimalMcqValues(titles.practice, titles.practiceInstructions),
       ),
     );
 

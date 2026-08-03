@@ -81,8 +81,12 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
 export function minimalExerciseValues(
   templateCode: ExerciseType,
   prompt: string,
+  instructions: string,
 ): ExerciseFormValues {
-  const base = { ...DEFAULT_EXERCISE_VALUES, templateCode };
+  // Not optional: an exercise with no instruction row is a publish blocker
+  // (`EXERCISE_INCOMPLETE`), and this path creates the exercise without ever
+  // showing the form — so the scaffold has to carry one.
+  const base = { ...DEFAULT_EXERCISE_VALUES, templateCode, instructions };
 
   switch (templateCode) {
     case 'multiple_choice':
@@ -161,8 +165,8 @@ export function minimalExerciseValues(
 }
 
 /** A minimal, valid multiple-choice draft — used to seed starter exercises. */
-export function minimalMcqValues(question: string): ExerciseFormValues {
-  return minimalExerciseValues('multiple_choice', question);
+export function minimalMcqValues(question: string, instructions: string): ExerciseFormValues {
+  return minimalExerciseValues('multiple_choice', question, instructions);
 }
 
 /** Blank ids in reading order, e.g. "a ___1___ b ___3___" → [1, 3]. */

@@ -318,7 +318,7 @@ describe('parseExerciseToForm', () => {
 
 describe('minimalMcqValues', () => {
   it('produces a valid two-option MCQ with the given question', () => {
-    const values = minimalMcqValues('Practice');
+    const values = minimalMcqValues('Practice', 'Choose the correct answer.');
     const { content, expectedAnswers } = buildExercisePayload(values);
     expect(content.question).toBe('Practice');
     expect((content.options as unknown[]).length).toBe(2);
@@ -332,7 +332,9 @@ describe('minimalExerciseValues', () => {
   // scaffold does not validate is a template nobody can add to a course.
   for (const code of EXERCISE_TYPES) {
     it(`${code}: scaffolds a draft the form schema accepts`, () => {
-      const result = exerciseFormSchema.safeParse(minimalExerciseValues(code, 'New exercise'));
+      const result = exerciseFormSchema.safeParse(
+        minimalExerciseValues(code, 'New exercise', 'Complete the exercise.'),
+      );
       if (!result.success) {
         throw new Error(
           `${code}: ${result.error.issues.map((i) => `${i.path.join('.')} ${i.message}`).join('; ')}`,
@@ -342,9 +344,22 @@ describe('minimalExerciseValues', () => {
     });
   }
 
+  it('every scaffold carries an instruction', () => {
+    // The picker creates the exercise without ever showing the form, and an
+    // exercise with no instruction row is a publish blocker.
+    for (const code of EXERCISE_TYPES) {
+      expect(
+        minimalExerciseValues(code, 'New exercise', 'Complete the exercise.').instructions,
+        code,
+      ).toBe('Complete the exercise.');
+    }
+  });
+
   it('every scaffold builds a payload with a non-empty content object', () => {
     for (const code of EXERCISE_TYPES) {
-      const { content } = buildExercisePayload(minimalExerciseValues(code, 'New exercise'));
+      const { content } = buildExercisePayload(
+        minimalExerciseValues(code, 'New exercise', 'Complete the exercise.'),
+      );
       expect(Object.keys(content).length, code).toBeGreaterThan(0);
     }
   });

@@ -83,9 +83,9 @@ export async function createExerciseAction(
 
     const item = await addItemToDraft(containerId, 'exercise', exerciseId);
 
-    if (parsed.instructions?.trim()) {
-      await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
-    }
+    // Unconditional: the schema requires instructions, because an exercise
+    // without an instruction row is a publish blocker (`EXERCISE_INCOMPLETE`).
+    await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
 
     revalidatePath(`/school/content/${containerId}`);
     return { exerciseId, itemId: item.id };
@@ -112,9 +112,9 @@ export async function updateExerciseAction(
       },
     });
 
-    if (parsed.instructions?.trim()) {
-      await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
-    }
+    // Unconditional: the schema requires instructions, because an exercise
+    // without an instruction row is a publish blocker (`EXERCISE_INCOMPLETE`).
+    await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
 
     revalidatePath(`/school/content/${containerId}`);
   });
