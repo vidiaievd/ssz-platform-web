@@ -60,6 +60,44 @@ describe('publishContainerAction', () => {
     expect(nextDraft).toHaveBeenCalledOnce();
   });
 
+  it('posts the release notes with the publish, trimmed', async () => {
+    mockDraftVersion('ctr-4', 'ver-4');
+    let body: unknown;
+    server.use(
+      http.post(
+        'http://content.test/api/v1/containers/ctr-4/versions/ver-4/publish',
+        async ({ request }) => {
+          body = await request.json();
+          return new HttpResponse(null, { status: 204 });
+        },
+      ),
+    );
+    mockNextDraft('ctr-4');
+
+    await publishContainerAction('ctr-4', '  Lagt til 5 nye øvinger.  ');
+
+    expect(body).toEqual({ changelog: 'Lagt til 5 nye øvinger.' });
+  });
+
+  it('sends no notes when the author left the field empty', async () => {
+    mockDraftVersion('ctr-5', 'ver-5');
+    let body: unknown;
+    server.use(
+      http.post(
+        'http://content.test/api/v1/containers/ctr-5/versions/ver-5/publish',
+        async ({ request }) => {
+          body = await request.json();
+          return new HttpResponse(null, { status: 204 });
+        },
+      ),
+    );
+    mockNextDraft('ctr-5');
+
+    await publishContainerAction('ctr-5', '   ');
+
+    expect(body).toEqual({});
+  });
+
   it('still reports success when the next draft cannot be opened', async () => {
     mockDraftVersion('ctr-3', 'ver-3');
     server.use(

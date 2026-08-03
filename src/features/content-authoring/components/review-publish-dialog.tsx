@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
@@ -26,6 +27,50 @@ import { groupChecksByRule } from '../lib/group-checks-by-rule';
 import { PublishStateBadge } from './publish-state-badge';
 
 type RowOutcome = 'idle' | 'publishing' | 'published' | 'failed';
+
+// ── Release notes ─────────────────────────────────────────────────────────────
+
+/** Kept well under the 1000 the backend accepts — this is a note, not a page. */
+const NOTES_LIMIT = 500;
+
+function ReleaseNotesField({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  disabled: boolean;
+}) {
+  const t = useTranslations('Authoring.reviewPublish');
+  const over = value.length > NOTES_LIMIT;
+
+  return (
+    <div className="space-y-1">
+      <Label htmlFor="release-notes" className="text-sm font-medium">
+        {t('releaseNotesLabel')}
+      </Label>
+      <Textarea
+        id="release-notes"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={t('releaseNotesPlaceholder')}
+        rows={3}
+        disabled={disabled}
+        className="resize-none"
+        maxLength={NOTES_LIMIT + 50}
+      />
+      <p
+        className={cn(
+          'text-right font-mono text-[11px]',
+          over ? 'text-destructive' : 'text-muted-foreground',
+        )}
+      >
+        {value.length}/{NOTES_LIMIT}
+      </p>
+    </div>
+  );
+}
 
 // ── One row ───────────────────────────────────────────────────────────────────
 
@@ -222,6 +267,7 @@ export function ReviewPublishDialog({
     open,
   );
 
+  const [notes, setNotes] = useState('');
   const [deselected, setDeselected] = useState<Set<string>>(new Set());
   const [outcomes, setOutcomes] = useState<Record<string, RowOutcome>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -239,15 +285,19 @@ export function ReviewPublishDialog({
     });
   }
 
+  const notesOver = notes.length > NOTES_LIMIT;
+
   function handlePublish() {
-    if (selectedRows.length === 0 || isPending) return;
+    if (selectedRows.length === 0 || isPending || notesOver) return;
     startTransition(async () => {
       let published = 0;
       // Sequential on purpose: each publish is its own transaction, and a
       // failure halfway must leave the rows before it visibly done.
       for (const row of selectedRows) {
         setOutcomes((prev) => ({ ...prev, [row.containerId]: 'publishing' }));
-        const result = await publishContainerAction(row.containerId);
+        // The same note on every container of the run: they go live together,
+        // so this is one release however many versions it writes.
+        const result = await publishContainerAction(row.containerId, notes);
         if (result.ok) {
           published += 1;
           setOutcomes((prev) => ({ ...prev, [row.containerId]: 'published' }));
@@ -313,6 +363,7 @@ export function ReviewPublishDialog({
                   onFixNavigate={() => onOpenChange(false)}
                 />
               ))}
+              <ReleaseNotesField value={notes} onChange={setNotes} disabled={isPending} />
             </>
           )}
         </div>
@@ -330,7 +381,7 @@ export function ReviewPublishDialog({
             <Button
               variant="primary"
               type="button"
-              disabled={selectedRows.length === 0 || isPending}
+              disabled={selectedRows.length === 0 || isPending || notesOver}
               loading={isPending}
               onClick={handlePublish}
             >

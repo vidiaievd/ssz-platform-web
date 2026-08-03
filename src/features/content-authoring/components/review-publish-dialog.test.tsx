@@ -179,6 +179,37 @@ describe('ReviewPublishDialog', () => {
     ]);
   });
 
+  it('carries the release notes into every container it publishes', async () => {
+    renderDialog(
+      makeTree('pending_changes', [makeModule('mod-2', 'Leksjon 2', 'pending_changes')]),
+    );
+
+    fireEvent.change(screen.getByLabelText('Release notes (optional)'), {
+      target: { value: 'Lagt til 5 nye øvinger.' },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Publish 2 items' }));
+    });
+
+    await waitFor(() => expect(publishContainerAction).toHaveBeenCalledTimes(2));
+    expect(vi.mocked(publishContainerAction).mock.calls).toEqual([
+      ['mod-2', 'Lagt til 5 nye øvinger.'],
+      ['course-1', 'Lagt til 5 nye øvinger.'],
+    ]);
+  });
+
+  it('refuses to publish notes longer than the backend accepts', () => {
+    renderDialog(
+      makeTree('pending_changes', [makeModule('mod-2', 'Leksjon 2', 'pending_changes')]),
+    );
+
+    fireEvent.change(screen.getByLabelText('Release notes (optional)'), {
+      target: { value: 'x'.repeat(501) },
+    });
+
+    expect(screen.getByRole('button', { name: 'Publish 2 items' })).toBeDisabled();
+  });
+
   it('leaves a deselected row alone', async () => {
     renderDialog(
       makeTree('pending_changes', [makeModule('mod-2', 'Leksjon 2', 'pending_changes')]),
@@ -190,7 +221,7 @@ describe('ReviewPublishDialog', () => {
     });
 
     await waitFor(() => expect(publishContainerAction).toHaveBeenCalledOnce());
-    expect(publishContainerAction).toHaveBeenCalledWith('course-1');
+    expect(publishContainerAction).toHaveBeenCalledWith('course-1', '');
   });
 
   it('refuses to publish a row whose pre-flight has blockers', () => {

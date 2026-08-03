@@ -6,13 +6,15 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { tryAction } from '@/lib/result';
 import { requireDraftVersionId } from '@/features/content-authoring/lib/container-items';
 
-export async function publishContainerAction(containerId: string) {
+export async function publishContainerAction(containerId: string, changelog?: string) {
   return tryAction(async () => {
     const versionId = await requireDraftVersionId(containerId);
-    await serverFetch({
+    const notes = changelog?.trim();
+    await serverFetch<unknown, { changelog?: string }>({
       service: 'content',
       path: `/containers/${containerId}/versions/${versionId}/publish`,
       method: 'POST',
+      body: notes ? { changelog: notes } : {},
     });
 
     // Publishing consumes the draft, and every write path in the editor —

@@ -7,7 +7,6 @@ export * from './quick-create-panel';
 export * from './container-form';
 export * from './exercise-editor';
 export * from './grammar-editor';
-export * from './publish-dialog';
 export * from './sharing-panel';
 export * from './tag-input';
 export * from './lesson-editor';

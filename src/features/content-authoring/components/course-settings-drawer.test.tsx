@@ -13,7 +13,6 @@ vi.mock('./danger-zone', () => ({ DangerZone: () => <div data-testid="danger-zon
 vi.mock('./preflight-panel', () => ({
   PreflightPanel: () => <div data-testid="preflight-panel" />,
 }));
-vi.mock('./publish-dialog', () => ({ PublishDialog: () => <div data-testid="publish-dialog" /> }));
 vi.mock('./sharing-panel', () => ({ SharingPanel: () => <div data-testid="sharing-panel" /> }));
 vi.mock('./tag-input', () => ({ TagInput: () => <div data-testid="tag-input" /> }));
 vi.mock('./discard-draft-dialog', () => ({ DiscardDraftDialog: () => null }));
@@ -100,7 +99,6 @@ describe('CourseSettingsDrawer', () => {
     expect(screen.getByTestId('preflight-panel')).toBeInTheDocument();
     expect(screen.getByTestId('danger-zone')).toBeInTheDocument();
     // Releasing lives in one place — the course header, not here.
-    expect(screen.queryByTestId('publish-dialog')).not.toBeInTheDocument();
     expect(screen.getByText(/Review & publish/)).toBeInTheDocument();
   });
 
@@ -108,7 +106,6 @@ describe('CourseSettingsDrawer', () => {
     mockPublishState('published');
     renderDrawer(PUBLISHED_CONTAINER);
     expect(screen.queryByTestId('preflight-panel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('publish-dialog')).not.toBeInTheDocument();
     expect(screen.getByText('Everything in this course is published.')).toBeInTheDocument();
     expect(screen.getByTestId('danger-zone')).toBeInTheDocument();
   });
@@ -119,7 +116,6 @@ describe('CourseSettingsDrawer', () => {
     expect(screen.getByText('Unpublished changes')).toBeInTheDocument();
     expect(screen.getByTestId('preflight-panel')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Discard draft' })).toBeInTheDocument();
-    expect(screen.queryByTestId('publish-dialog')).not.toBeInTheDocument();
   });
 
   it('falls back to the container pointer before the tree resolves', () => {
