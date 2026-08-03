@@ -849,7 +849,10 @@
     "draft": "Utkast",
     "published": "Publisert",
     "pendingChanges": "Upubliserte endringer",
-    "ariaLabel": "Status: {label}"
+    "ariaLabel": "Status: {label}",
+    "itemAwaiting": "Venter på publisering",
+    "itemAwaitingAriaLabel": "Ikke publisert ennå — publiser modulen for å frigi den",
+    "itemLive": "Studentene ser dette"
   },
   "reviewPublish": {
     "trigger": "Gjennomgå og publiser",

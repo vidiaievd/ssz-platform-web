@@ -23,6 +23,7 @@ function item(
     isRequired: true,
     lessonKind: itemType === 'lesson' ? 'text' : null,
     state: 'published',
+    isLive: true,
     durationMinutes: null,
     xpReward: null,
   };

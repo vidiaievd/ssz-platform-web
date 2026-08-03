@@ -849,7 +849,10 @@
     "draft": "Draft",
     "published": "Published",
     "pendingChanges": "Unpublished changes",
-    "ariaLabel": "Status: {label}"
+    "ariaLabel": "Status: {label}",
+    "itemAwaiting": "Awaiting publish",
+    "itemAwaitingAriaLabel": "Not published yet — publish the module to release it",
+    "itemLive": "Students see this"
   },
   "reviewPublish": {
     "trigger": "Review & publish",

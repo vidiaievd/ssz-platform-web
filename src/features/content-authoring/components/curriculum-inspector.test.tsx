@@ -109,6 +109,7 @@ describe('CurriculumInspector', () => {
         isRequired: true,
         lessonKind: 'text',
         state: 'published',
+        isLive: true,
         durationMinutes: 6,
         xpReward: 10,
       },
@@ -116,8 +117,32 @@ describe('CurriculumInspector', () => {
     expect(screen.getByText('En vanlig arbeidsdag')).toBeInTheDocument();
     expect(screen.getByText('6 min')).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();
-    expect(screen.getByText('Published')).toBeInTheDocument();
+    expect(screen.getByText('Students see this')).toBeInTheDocument();
     expect(screen.getByText(/Reading/)).toBeInTheDocument();
+  });
+
+  it('says an item is awaiting publish when the live version does not place it', () => {
+    renderInspector({
+      kind: 'item',
+      sectionTitle: 'Reinforce & read',
+      item: {
+        id: 'item-1',
+        itemType: 'lesson',
+        refId: 'lesson-1',
+        title: 'En vanlig arbeidsdag',
+        position: 0,
+        isRequired: true,
+        lessonKind: 'text',
+        // Variant published, item not live: exactly the case the old badge lied about.
+        state: 'published',
+        isLive: false,
+        durationMinutes: 6,
+        xpReward: 10,
+      },
+    });
+
+    expect(screen.getByText('Awaiting publish')).toBeInTheDocument();
+    expect(screen.queryByText('Students see this')).not.toBeInTheDocument();
   });
 
   it('shows a placeholder dash for missing duration/xp', () => {
@@ -133,6 +158,7 @@ describe('CurriculumInspector', () => {
         isRequired: true,
         lessonKind: null,
         state: null,
+        isLive: false,
         durationMinutes: null,
         xpReward: null,
       },

@@ -849,7 +849,10 @@
     "draft": "Чернетка",
     "published": "Опубліковано",
     "pendingChanges": "Неопубліковані зміни",
-    "ariaLabel": "Статус: {label}"
+    "ariaLabel": "Статус: {label}",
+    "itemAwaiting": "Очікує публікації",
+    "itemAwaitingAriaLabel": "Ще не опубліковано — опублікуйте модуль, щоб випустити",
+    "itemLive": "Студенти це бачать"
   },
   "reviewPublish": {
     "trigger": "Переглянути й опублікувати",

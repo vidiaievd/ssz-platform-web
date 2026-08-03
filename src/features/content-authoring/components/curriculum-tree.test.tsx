@@ -59,6 +59,7 @@ const TREE: CurriculumTreeData = {
                   isRequired: true,
                   lessonKind: 'text',
                   state: 'published',
+                  isLive: true,
                   durationMinutes: 6,
                   xpReward: 10,
                 },
@@ -169,6 +170,41 @@ describe('CurriculumTree', () => {
     expect(screen.queryByText('Draft')).not.toBeInTheDocument();
   });
 
+  it('marks material students cannot open yet', () => {
+    // The badge used to show the lesson *variant's* status, which a save sets
+    // to published straight away — so freshly added material claimed to be
+    // live while the row placing it sat in an unpublished draft.
+    const [level] = TREE.levels;
+    const [module_] = level!.modules;
+    const [section] = module_!.sections;
+    const [item] = section!.items;
+    const pendingTree: CurriculumTreeData = {
+      ...TREE,
+      levels: [
+        {
+          ...level!,
+          modules: [
+            {
+              ...module_!,
+              sections: [{ ...section!, items: [{ ...item!, isLive: false }] }],
+            },
+          ],
+        },
+      ],
+    };
+
+    renderTree(vi.fn(), vi.fn(), pendingTree);
+
+    expect(screen.getByText('Awaiting publish')).toBeInTheDocument();
+  });
+
+  it('stays quiet about material students already have', () => {
+    // A badge on all sixteen rows of a module would bury the one that matters.
+    renderTree();
+
+    expect(screen.queryByText('Awaiting publish')).not.toBeInTheDocument();
+  });
+
   it("renders the edited container's own material, not only its modules", () => {
     // A module opened in this editor keeps its lessons and exercises at the
     // level itself. Dropping them showed empty sections while pre-flight
@@ -192,6 +228,7 @@ describe('CurriculumTree', () => {
               isRequired: true,
               lessonKind: null,
               state: null,
+              isLive: false,
               durationMinutes: 2,
               xpReward: 5,
             },

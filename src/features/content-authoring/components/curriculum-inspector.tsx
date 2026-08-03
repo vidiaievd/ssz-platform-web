@@ -20,6 +20,7 @@ import { ContainerStateBadge } from './container-state-badge';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
 import { ModulePublishBlock } from './module-publish-block';
+import { ItemLiveBadge } from './item-live-badge';
 
 interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
@@ -190,9 +191,19 @@ export function CurriculumInspector({
         <InspectorField label={t('structure.xpReward')} value={item.xpReward ?? '—'} />
       </div>
 
+      {/* Liveness, not the lesson variant's own status: the question an author
+          asks of a row is whether students can open it. */}
       <InspectorField
         label={t('structure.state')}
-        value={item.state ? <ContainerStateBadge state={item.state} /> : '—'}
+        value={
+          item.isLive === null ? (
+            <ContainerStateBadge state="draft" />
+          ) : item.isLive ? (
+            t('publishState.itemLive')
+          ) : (
+            <ItemLiveBadge isLive={false} />
+          )
+        }
       />
 
       <Button asChild variant="outline" size="sm">

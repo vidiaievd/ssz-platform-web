@@ -24,6 +24,7 @@ import { getMaterialKind } from '../lib/material-kind';
 import { createModuleAction } from '../actions/container';
 import { createSectionAction } from '../actions/section';
 import { PublishStateBadge } from './publish-state-badge';
+import { ItemLiveBadge } from './item-live-badge';
 import {
   CurriculumSectionItems,
   MoveLevel,
@@ -63,6 +64,8 @@ interface TreeRowProps {
   onToggle?: () => void;
   onSelect: () => void;
   state?: ContainerPublishState | null;
+  /** Extra status next to `state` — item liveness, which is not a container state. */
+  badge?: React.ReactNode;
   right?: React.ReactNode;
 }
 
@@ -78,6 +81,7 @@ function TreeRow({
   onToggle,
   onSelect,
   state,
+  badge,
   right,
 }: TreeRowProps) {
   return (
@@ -133,6 +137,7 @@ function TreeRow({
       </div>
       {meta && <span className="font-mono text-[10.5px] text-muted-foreground">{meta}</span>}
       {state && <PublishStateBadge state={state} />}
+      {badge}
       {right}
     </div>
   );
@@ -166,7 +171,7 @@ function ItemRow({
       }
       label={item.title ?? ''}
       meta={item.durationMinutes ? `${item.durationMinutes} min` : null}
-      state={item.state}
+      badge={<ItemLiveBadge isLive={item.isLive} />}
       selected={selectedId === item.id}
       onSelect={() => onSelect({ kind: 'item', item, sectionTitle })}
       right={right}
@@ -200,7 +205,7 @@ function OwnItemRow({
       }
       label={item.title ?? ''}
       meta={item.durationMinutes ? `${item.durationMinutes} min` : null}
-      state={item.state}
+      badge={<ItemLiveBadge isLive={item.isLive} />}
       selected={selectedId === item.id}
       onSelect={() => onSelect({ kind: 'item', item, sectionTitle })}
     />

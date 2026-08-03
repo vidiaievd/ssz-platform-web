@@ -849,7 +849,10 @@
     "draft": "Черновик",
     "published": "Опубликовано",
     "pendingChanges": "Неопубликованные изменения",
-    "ariaLabel": "Статус: {label}"
+    "ariaLabel": "Статус: {label}",
+    "itemAwaiting": "Ждёт публикации",
+    "itemAwaitingAriaLabel": "Ещё не опубликовано — опубликуйте модуль, чтобы выпустить",
+    "itemLive": "Студенты это видят"
   },
   "reviewPublish": {
     "trigger": "Проверить и опубликовать",

@@ -14,6 +14,7 @@ function item(overrides: Partial<CurriculumTreeItemNode>): CurriculumTreeItemNod
     isRequired: true,
     lessonKind: null,
     state: null,
+    isLive: null,
     durationMinutes: null,
     xpReward: null,
     ...overrides,
@@ -33,9 +34,12 @@ describe('getMaterialKind', () => {
     expect(getMaterialKind(item({ itemType: 'exercise' }))).toBe('exercise');
   });
 
-  it.each(['text', 'video', 'audio', 'live'] as const)('maps lesson with lessonKind %s through', (kind) => {
-    expect(getMaterialKind(item({ itemType: 'lesson', lessonKind: kind }))).toBe(kind);
-  });
+  it.each(['text', 'video', 'audio', 'live'] as const)(
+    'maps lesson with lessonKind %s through',
+    (kind) => {
+      expect(getMaterialKind(item({ itemType: 'lesson', lessonKind: kind }))).toBe(kind);
+    },
+  );
 
   it('falls back to text when a lesson has no lessonKind', () => {
     expect(getMaterialKind(item({ itemType: 'lesson', lessonKind: null }))).toBe('text');

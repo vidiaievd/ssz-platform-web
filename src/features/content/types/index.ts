@@ -70,6 +70,16 @@ export interface CurriculumTreeItemNode {
   isRequired: boolean;
   lessonKind: 'text' | 'video' | 'audio' | 'live' | null;
   state: 'draft' | 'published' | null;
+  /**
+   * Whether the owning container's *currently published* version places this
+   * item — that is, whether a student can open it right now. `null` when that
+   * container has never been published, which its own badge already says.
+   *
+   * Not the same question as `state`: a lesson saved through the editor is
+   * variant-published immediately, while the row placing it lives in a draft
+   * version students cannot see.
+   */
+  isLive: boolean | null;
   durationMinutes: number | null;
   xpReward: number | null;
 }

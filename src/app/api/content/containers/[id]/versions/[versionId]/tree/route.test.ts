@@ -49,6 +49,7 @@ const MOCK_TREE: CurriculumTree = {
                   isRequired: true,
                   lessonKind: 'text',
                   state: 'published',
+                  isLive: true,
                   durationMinutes: 6,
                   xpReward: 10,
                 },
