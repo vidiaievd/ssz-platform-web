@@ -42,6 +42,8 @@ interface VocabularyEditorPaneProps {
   kind: MaterialKind;
   lessonTitle: string | null;
   state: 'draft' | 'published' | null;
+  /** Whether students can open this material right now — see `SaveScopeContext`. */
+  isLive: boolean | null;
   container: Container;
   backHref: string;
   publishSlot: ReactNode;
@@ -51,6 +53,7 @@ export function VocabularyEditorPane({
   kind,
   lessonTitle,
   state,
+  isLive,
   container,
   backHref,
   publishSlot,
@@ -64,6 +67,7 @@ export function VocabularyEditorPane({
       kind={kind}
       title={lessonTitle || t('lessons.untitled')}
       state={state}
+      isLive={isLive}
       backHref={backHref}
       saveStatus="idle"
       savedAt={null}

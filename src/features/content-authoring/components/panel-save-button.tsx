@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 
 import type { UseUnsavedChangesReturn } from '../hooks/use-unsaved-changes';
 
+import { useSaveScopeDescription } from './save-scope';
+
 interface PanelSaveButtonProps {
   unsaved: UseUnsavedChangesReturn;
   /**
@@ -32,6 +34,7 @@ export function PanelSaveButton({
   className,
 }: PanelSaveButtonProps) {
   const t = useTranslations('Authoring');
+  const saveScope = useSaveScopeDescription();
 
   return (
     <Button
@@ -43,7 +46,10 @@ export function PanelSaveButton({
       onClick={() => {
         void (async () => {
           const ok = await unsaved.save();
-          if (ok) toast.success(successMessage ?? t('lessons.saveSuccess'));
+          if (ok)
+            toast.success(successMessage ?? t('lessons.saveSuccess'), {
+              description: saveScope,
+            });
           else toast.error(t('lessons.saveFailed'));
         })();
       }}

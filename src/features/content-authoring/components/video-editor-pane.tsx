@@ -26,6 +26,7 @@ import { useAuthoringVocabularyLists } from '../api/use-authoring-vocabulary';
 import { authoringKeys } from '../api/keys';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
+import { useSaveScopeText } from './save-scope';
 import { VideoLessonPreview } from './video-lesson-preview';
 import { VideoSourceSlot } from './video-source-slot';
 import { CueListEditor } from './cue-list-editor';
@@ -36,6 +37,8 @@ interface VideoEditorPaneProps {
   lessonId: string;
   lessonTitle: string | null;
   state: 'draft' | 'published' | null;
+  /** Whether students can open this material right now — see `SaveScopeContext`. */
+  isLive: boolean | null;
   container: Container;
   backHref: string;
   publishSlot: ReactNode;
@@ -46,11 +49,13 @@ export function VideoEditorPane({
   lessonId,
   lessonTitle,
   state,
+  isLive,
   container,
   backHref,
   publishSlot,
 }: VideoEditorPaneProps) {
   const t = useTranslations('Authoring');
+  const saveScope = useSaveScopeText(isLive);
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
 
@@ -112,6 +117,7 @@ export function VideoEditorPane({
       kind={kind}
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
+      isLive={isLive}
       backHref={backHref}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
@@ -159,7 +165,7 @@ export function VideoEditorPane({
                   return;
                 }
                 unsaved.markSaved();
-                toast.success(t('lessons.saveSuccess'));
+                toast.success(t('lessons.saveSuccess'), { description: saveScope });
               })();
             }}
           >

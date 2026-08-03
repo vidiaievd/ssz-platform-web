@@ -23,6 +23,7 @@ import { useAuthoringVocabularyLists } from '../api/use-authoring-vocabulary';
 import { authoringKeys } from '../api/keys';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
+import { useSaveScopeText } from './save-scope';
 import { EditorCard } from './editor-card';
 import { TextLessonPreview } from './text-lesson-preview';
 import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
@@ -43,6 +44,8 @@ interface TextEditorPaneProps {
   lessonId: string;
   lessonTitle: string | null;
   state: 'draft' | 'published' | null;
+  /** Whether students can open this material right now — see `SaveScopeContext`. */
+  isLive: boolean | null;
   container: Container;
   /** Grammar rules of this module's Leksjon — the pool a grammar annotation may point at. */
   grammarRules?: LevelGrammarRule[];
@@ -55,12 +58,14 @@ export function TextEditorPane({
   lessonId,
   lessonTitle,
   state,
+  isLive,
   container,
   grammarRules = [],
   backHref,
   publishSlot,
 }: TextEditorPaneProps) {
   const t = useTranslations('Authoring');
+  const saveScope = useSaveScopeText(isLive);
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
 
@@ -151,6 +156,7 @@ export function TextEditorPane({
       kind={kind}
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
+      isLive={isLive}
       backHref={backHref}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
@@ -248,7 +254,7 @@ export function TextEditorPane({
                   return;
                 }
                 unsaved.markSaved();
-                toast.success(t('lessons.saveSuccess'));
+                toast.success(t('lessons.saveSuccess'), { description: saveScope });
               })();
             }}
           >

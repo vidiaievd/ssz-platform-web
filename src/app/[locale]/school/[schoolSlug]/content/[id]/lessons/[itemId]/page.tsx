@@ -95,6 +95,7 @@ export default async function LessonEditorPage({
           lessonId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           grammarRules={levelGrammarRules}
           backHref={backHref}
@@ -106,6 +107,7 @@ export default async function LessonEditorPage({
           lessonId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -116,6 +118,7 @@ export default async function LessonEditorPage({
           lessonId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -125,6 +128,7 @@ export default async function LessonEditorPage({
           kind={kind}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -135,6 +139,7 @@ export default async function LessonEditorPage({
           ruleId={item.refId}
           ruleTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -145,6 +150,7 @@ export default async function LessonEditorPage({
           exerciseId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -155,6 +161,7 @@ export default async function LessonEditorPage({
           lessonId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}

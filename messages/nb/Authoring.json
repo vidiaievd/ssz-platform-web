@@ -856,6 +856,12 @@
     "pendingModules": "{count, plural, =0 {Upubliserte endringer} one {# modul ikke publisert} other {# moduler ikke publisert}}",
     "pendingChangesAriaLabel": "Har endringer studentene ennå ikke ser"
   },
+  "saveScope": {
+    "liveHint": "Publisert — elevene ser hver lagring med én gang.",
+    "draftHint": "Ikke publisert ennå — elevene ser dette materialet når modulen publiseres.",
+    "liveToast": "Elevene ser denne endringen nå.",
+    "draftToast": "Lagret i utkastet — publiser modulen for å slippe det ut."
+  },
   "reviewPublish": {
     "trigger": "Gjennomgå og publiser",
     "title": "Gjennomgå og publiser",

@@ -90,6 +90,7 @@ function renderPane() {
           lessonId="lesson-1"
           lessonTitle="En vanlig arbeidsdag"
           state="draft"
+          isLive={false}
           container={CONTAINER}
           backHref="/school/my-school/content/course-1"
           publishSlot={null}

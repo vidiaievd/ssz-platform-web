@@ -12,6 +12,7 @@ vi.mock('../actions/exercise', () => ({
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
+vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,
@@ -30,6 +31,7 @@ vi.mock('@/lib/i18n/navigation', () => ({
 const { ExerciseEditorPane } = await import('./exercise-editor-pane');
 const { updateExerciseAction } = await import('../actions/exercise');
 const { useAuthoringExercise } = await import('../api/use-authoring-exercises');
+const { toast } = await import('sonner');
 
 const CONTAINER: Container = {
   id: 'module-1',
@@ -45,7 +47,7 @@ const CONTAINER: Container = {
   updatedAt: '',
 };
 
-function renderPane() {
+function renderPane(isLive: boolean | null = false) {
   const queryClient = new QueryClient();
   render(
     <QueryClientProvider client={queryClient}>
@@ -55,6 +57,7 @@ function renderPane() {
           exerciseId="exercise-1"
           lessonTitle="Blandet øving"
           state="draft"
+          isLive={isLive}
           container={CONTAINER}
           backHref="/school/my-school/content/course-1"
           publishSlot={null}
@@ -65,6 +68,7 @@ function renderPane() {
 }
 
 beforeEach(() => {
+  vi.mocked(toast.success).mockReset();
   vi.mocked(updateExerciseAction).mockReset();
   vi.mocked(updateExerciseAction).mockResolvedValue({ ok: true, value: undefined } as never);
   vi.mocked(useAuthoringExercise).mockReturnValue({
@@ -139,5 +143,46 @@ describe('ExerciseEditorPane', () => {
     await waitFor(() => {
       expect(screen.getByText('Hvor bor du?')).toBeInTheDocument();
     });
+  });
+  it('warns that saves on live material reach students at once', () => {
+    renderPane(true);
+    expect(screen.getByText('Live — students see every save immediately.')).toBeInTheDocument();
+  });
+
+  it('says a save on unreleased material stays in the draft', () => {
+    renderPane(false);
+    expect(
+      screen.getByText('Not live yet — students see this material once the module is published.'),
+    ).toBeInTheDocument();
+  });
+
+  it('confirms a save on live material as already visible to students', async () => {
+    renderPane(true);
+
+    fireEvent.change(screen.getByDisplayValue('Hva heter du?'), {
+      target: { value: 'Hvor bor du?' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('Exercise saved.', {
+        description: 'Students see this change now.',
+      }),
+    );
+  });
+
+  it('confirms a save on unreleased material as pending a publish', async () => {
+    renderPane(false);
+
+    fireEvent.change(screen.getByDisplayValue('Hva heter du?'), {
+      target: { value: 'Hvor bor du?' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('Exercise saved.', {
+        description: 'Saved to the draft — publish the module to release it.',
+      }),
+    );
   });
 });

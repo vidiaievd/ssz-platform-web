@@ -19,6 +19,7 @@ import { useLessonVariants, useListeningStages } from '../api/use-authoring-less
 import { authoringKeys } from '../api/keys';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
+import { useSaveScopeText } from './save-scope';
 import { EditorCard } from './editor-card';
 import { AudioSourceSlot } from './audio-source-slot';
 import { AudioLessonPreview } from './audio-lesson-preview';
@@ -29,6 +30,8 @@ interface AudioEditorPaneProps {
   lessonId: string;
   lessonTitle: string | null;
   state: 'draft' | 'published' | null;
+  /** Whether students can open this material right now — see `SaveScopeContext`. */
+  isLive: boolean | null;
   container: Container;
   backHref: string;
   publishSlot: ReactNode;
@@ -39,11 +42,13 @@ export function AudioEditorPane({
   lessonId,
   lessonTitle,
   state,
+  isLive,
   container,
   backHref,
   publishSlot,
 }: AudioEditorPaneProps) {
   const t = useTranslations('Authoring');
+  const saveScope = useSaveScopeText(isLive);
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
 
@@ -100,6 +105,7 @@ export function AudioEditorPane({
       kind={kind}
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
+      isLive={isLive}
       backHref={backHref}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
@@ -154,7 +160,7 @@ export function AudioEditorPane({
                   return;
                 }
                 unsaved.markSaved();
-                toast.success(t('lessons.saveSuccess'));
+                toast.success(t('lessons.saveSuccess'), { description: saveScope });
               })();
             }}
           >

@@ -10,6 +10,7 @@ import { getLessonTypeDefinition, type MaterialKind } from '@/lib/content/lesson
 
 import { ContainerStateBadge } from './container-state-badge';
 import { SaveStatusIndicator } from './save-status-indicator';
+import { SaveScopeHint, SaveScopeProvider } from './save-scope';
 import { PhoneFrame } from './phone-frame';
 import type { SaveStatus } from '../hooks/use-unsaved-changes';
 
@@ -17,6 +18,12 @@ interface LessonEditorShellProps {
   kind: MaterialKind;
   title: string;
   state: 'draft' | 'published' | null;
+  /**
+   * Whether students can open this material right now — see `SaveScopeContext`.
+   * Required, because a save whose reach is unstated is the problem this prop
+   * exists to fix.
+   */
+  isLive: boolean | null;
   backHref: string;
   saveStatus: SaveStatus;
   savedAt: Date | null;
@@ -30,6 +37,7 @@ export function LessonEditorShell({
   kind,
   title,
   state,
+  isLive,
   saveStatus,
   savedAt,
   publishSlot,
@@ -43,7 +51,7 @@ export function LessonEditorShell({
   const Icon = def.icon;
 
   return (
-    <div>
+    <SaveScopeProvider isLive={isLive}>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <span
@@ -61,6 +69,7 @@ export function LessonEditorShell({
               {state && <ContainerStateBadge state={state} />}
               <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
             </div>
+            <SaveScopeHint isLive={isLive} className="mt-1.5" />
           </div>
         </div>
         <div className="flex items-center gap-2.5">
@@ -98,6 +107,6 @@ export function LessonEditorShell({
           </div>
         )}
       </div>
-    </div>
+    </SaveScopeProvider>
   );
 }

@@ -856,6 +856,12 @@
     "pendingModules": "{count, plural, =0 {Unpublished changes} one {# module not released} other {# modules not released}}",
     "pendingChangesAriaLabel": "Has changes students cannot see yet"
   },
+  "saveScope": {
+    "liveHint": "Live — students see every save immediately.",
+    "draftHint": "Not live yet — students see this material once the module is published.",
+    "liveToast": "Students see this change now.",
+    "draftToast": "Saved to the draft — publish the module to release it."
+  },
   "reviewPublish": {
     "trigger": "Review & publish",
     "title": "Review & publish",
