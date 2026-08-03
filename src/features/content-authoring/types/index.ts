@@ -45,8 +45,20 @@ export type CheckSeverity = 'blocker' | 'warning' | 'ok';
 export interface PreflightCheck {
   id: string;
   severity: CheckSeverity;
-  title: string;
-  fixHint: string | null;
+  /**
+   * content-service rule code (`get-preflight.handler.ts`). The copy lives in
+   * `Authoring.preflightRules`, resolved by `preflightCheckText` — the check
+   * itself carries no user-facing English.
+   */
+  ruleCode: string;
+  /**
+   * Display name of the offending item, when the rule names one that the
+   * version places. "Exercise has no instructions" is not actionable in a
+   * module of sixteen items; the name is what makes it so.
+   */
+  itemTitle: string | null;
+  /** content-service's own wording — the fallback for a rule the UI has no copy for. */
+  detail: string;
   fixDeepLink: string | null;
 }
 

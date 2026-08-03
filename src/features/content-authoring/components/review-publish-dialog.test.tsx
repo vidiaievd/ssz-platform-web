@@ -15,6 +15,13 @@ import type { PreflightResult } from '../types';
 vi.mock('../actions/publish-container', () => ({ publishContainerAction: vi.fn() }));
 vi.mock('../api/use-curriculum-tree', () => ({ useCurriculumTree: vi.fn() }));
 vi.mock('../api/use-containers-preflight', () => ({ useContainersPreflight: vi.fn() }));
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({ href, children, ...props }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 const { ReviewPublishDialog } = await import('./review-publish-dialog');
 const { collectPublishRows } = await import('../lib/publish-rows');
@@ -63,14 +70,20 @@ function makeTree(
   return {
     versionId: 'course-draft',
     containerId: 'course-1',
+    containerType: 'course',
     levelSystem: 'cefr',
     publishState: coursePublishState,
-    levels: [{ id: 'level-a1', title: 'A1', position: 0, modules }],
+    levels: [{ id: 'level-a1', title: 'A1', position: 0, modules, items: [] }],
+    ungroupedItems: [],
   };
 }
 
-function preflight(blockerCount = 0, warningCount = 0): PreflightResult {
-  return { blockerCount, warningCount, checks: [] } as unknown as PreflightResult;
+function preflight(
+  blockerCount = 0,
+  warningCount = 0,
+  checks: PreflightResult['checks'] = [],
+): PreflightResult {
+  return { blockerCount, warningCount, checks } as unknown as PreflightResult;
 }
 
 /** Every row gets the same pre-flight verdict. */
@@ -129,6 +142,17 @@ describe('collectPublishRows', () => {
   it('returns nothing before the tree resolves', () => {
     expect(collectPublishRows(undefined, 'Norwegian A2')).toEqual([]);
   });
+
+  it('names the root row after what the container actually is', () => {
+    const moduleTree: CurriculumTree = {
+      ...makeTree('pending_changes', []),
+      containerType: 'module',
+    };
+
+    // The same editor opens a course and a module; calling a module "Course"
+    // is how the review screen ended up mislabelling it.
+    expect(collectPublishRows(moduleTree, '1A — Bartek søker ny jobb')[0]?.kind).toBe('module');
+  });
 });
 
 describe('ReviewPublishDialog', () => {
@@ -175,6 +199,33 @@ describe('ReviewPublishDialog', () => {
 
     expect(screen.getByText('2 blockers must be fixed first')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^Publish/ })).toBeDisabled();
+  });
+
+  it('names each blocker and links to where it can be fixed', () => {
+    mockPreflight(
+      preflight(1, 0, [
+        {
+          id: 'READ_NO_TITLE:lesson-9',
+          severity: 'blocker',
+          ruleCode: 'READ_NO_TITLE',
+          itemTitle: 'Bartek søker ny jobb',
+          detail: 'Lesson has no published variant',
+          fixDeepLink: '/school/nordick/content/course-1/lessons/item-9',
+        },
+      ]),
+    );
+    renderDialog(makeTree('pending_changes', []));
+
+    // A bare count is unactionable, and so is a rule name on its own when the
+    // module holds sixteen items — the author must see which one to fix.
+    expect(
+      screen.getByText('Lesson has no published content: Bartek søker ny jobb'),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Open the lesson and save its text/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Fix' })).toHaveAttribute(
+      'href',
+      '/school/nordick/content/course-1/lessons/item-9',
+    );
   });
 
   it('reports the rows that failed instead of claiming success', async () => {

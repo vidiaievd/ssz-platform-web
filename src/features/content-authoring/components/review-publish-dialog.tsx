@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Link } from '@/lib/i18n/navigation';
 import type { Container } from '@/features/content/types';
 
 import { collectPublishRows, type PublishRow } from '../lib/publish-rows';
@@ -18,6 +19,7 @@ import { useContainersPreflight, type PreflightEntry } from '../api/use-containe
 import { useCurriculumTree } from '../api/use-curriculum-tree';
 import { authoringKeys } from '../api/keys';
 import { publishContainerAction } from '../actions/publish-container';
+import { usePreflightCheckText } from '../lib/preflight-check-text';
 import { PublishStateBadge } from './publish-state-badge';
 
 type RowOutcome = 'idle' | 'publishing' | 'published' | 'failed';
@@ -32,6 +34,8 @@ interface RowProps {
   outcome: RowOutcome;
   errorCode?: string;
   disabled: boolean;
+  /** Following a fix link leaves this screen — close it rather than leaving it open behind. */
+  onFixNavigate: () => void;
 }
 
 function ReviewRow({
@@ -42,11 +46,14 @@ function ReviewRow({
   outcome,
   errorCode,
   disabled,
+  onFixNavigate,
 }: RowProps) {
   const t = useTranslations('Authoring.reviewPublish');
   const tErrors = useTranslations('Errors');
+  const checkText = usePreflightCheckText();
 
   const isLoading = preflight?.isLoading ?? false;
+  const blockers = (preflight?.result?.checks ?? []).filter((c) => c.severity === 'blocker');
   const blockerCount = preflight?.result?.blockerCount ?? 0;
   const warningCount = preflight?.result?.warningCount ?? 0;
   const blocked = blockerCount > 0;
@@ -75,10 +82,39 @@ function ReviewRow({
         {isLoading ? (
           <Skeleton className="h-3.5 w-28" />
         ) : blocked ? (
-          <p className="flex items-center gap-1.5 text-xs text-destructive">
-            <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            {t('rowBlockers', { count: blockerCount })}
-          </p>
+          <div className="space-y-1">
+            <p className="flex items-center gap-1.5 text-xs text-destructive">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              {t('rowBlockers', { count: blockerCount })}
+            </p>
+            {/* Naming the count without naming the checks is a dead end: the
+                author cannot act on "2 blockers", and "an exercise has no
+                instructions" is no better in a module of sixteen items — the
+                offender's own name is what makes the row actionable. */}
+            <ul className="space-y-1 pl-5">
+              {blockers.map((check) => {
+                const { title, fixHint } = checkText(check);
+                return (
+                  <li key={check.id} className="text-xs text-muted-foreground">
+                    <span className="text-foreground">{title}</span>
+                    {fixHint && <span> — {fixHint}</span>}
+                    {check.fixDeepLink && (
+                      <>
+                        {' '}
+                        <Link
+                          href={check.fixDeepLink}
+                          onClick={onFixNavigate}
+                          className="font-semibold text-primary-600 hover:underline"
+                        >
+                          {t('rowFix')}
+                        </Link>
+                      </>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         ) : warningCount > 0 ? (
           <p className="text-xs text-warning-700">{t('rowWarnings', { count: warningCount })}</p>
         ) : null}
@@ -216,6 +252,7 @@ export function ReviewPublishDialog({
                   outcome={outcomes[row.containerId] ?? 'idle'}
                   errorCode={errors[row.containerId]}
                   disabled={isPending}
+                  onFixNavigate={() => onOpenChange(false)}
                 />
               ))}
             </>

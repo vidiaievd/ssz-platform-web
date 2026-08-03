@@ -863,6 +863,78 @@
     "publishing": "Publiserer…",
     "close": "Lukk",
     "summaryAllPublished": "{count, plural, one {# element publisert} other {# elementer publisert}}.",
-    "summaryPartial": "Publiserte {published} av {total} — se radene som feilet."
+    "summaryPartial": "Publiserte {published} av {total} — se radene som feilet.",
+    "rowFix": "Rett"
+  },
+  "preflightRules": {
+    "withItem": "{rule}: {item}",
+    "EMPTY_VERSION": {
+      "title": "Utkastet har ikke noe innhold",
+      "fix": "Legg til minst én leksjon før du publiserer"
+    },
+    "VIDEO_NO_SOURCE": {
+      "title": "Videoleksjonen har ingen videokilde",
+      "fix": "Last opp en video i leksjonsredigeringen"
+    },
+    "AUDIO_NO_TRACK": {
+      "title": "Lydleksjonen har ikke noe lydspor",
+      "fix": "Last opp en lydfil i leksjonsredigeringen"
+    },
+    "AUDIO_NO_TRANSCRIPT": {
+      "title": "Lydleksjonen har ingen transkripsjon",
+      "fix": "Legg til en transkripsjon i leksjonsredigeringen"
+    },
+    "MODULE_EMPTY": {
+      "title": "Modulen har ingen leksjoner",
+      "fix": "Legg til minst én leksjon i denne modulen"
+    },
+    "SECTION_EMPTY": {
+      "title": "Seksjonen har ingen elementer",
+      "fix": "Legg til en leksjon i seksjonen, eller fjern den"
+    },
+    "DRAFT_ITEM": {
+      "title": "Grammatikkregelen har ingen publisert forklaring",
+      "fix": "Åpne regelen og lagre forklaringen"
+    },
+    "READ_NO_TITLE": {
+      "title": "Leksjonen har ikke noe publisert innhold",
+      "fix": "Åpne leksjonen og lagre teksten"
+    },
+    "MEDIA_NO_ALT": {
+      "title": "Bildet i leksjonen mangler alt-tekst",
+      "fix": "Legg til alt-tekst på alle bilder"
+    },
+    "LEVEL_NO_TEACHER": {
+      "title": "Nivået har ingen tildelt lærer",
+      "fix": "Tildel en lærer til dette nivået"
+    },
+    "LIVE_NO_SCHEDULE": {
+      "title": "Direkteleksjonen har ikke noe tidspunkt",
+      "fix": "Angi dato og tid for økten"
+    },
+    "VOCAB_NO_TRANSLATION": {
+      "title": "Ordet har ingen oversettelse",
+      "fix": "Legg til en oversettelse"
+    },
+    "VOCAB_NO_AUDIO": {
+      "title": "Ordet har ingen uttalelyd",
+      "fix": "Last opp uttalelyd"
+    },
+    "EXERCISE_INCOMPLETE": {
+      "title": "Oppgaven har ingen instruksjon",
+      "fix": "Åpne oppgaven og skriv hva studenten skal gjøre"
+    },
+    "NO_GRAMMAR": {
+      "title": "Kurset har ikke noe grammatikkinnhold",
+      "fix": "Legg til minst én grammatikkregel"
+    },
+    "EXERCISE_COUNT_LOW": {
+      "title": "Kurset har svært få oppgaver",
+      "fix": "Legg til flere øvingsoppgaver"
+    },
+    "LOCALE_INCOMPLETE": {
+      "title": "Mangler oversettelser for noen grensesnittspråk",
+      "fix": "Legg til de manglende oversettelsene"
+    }
   }
 }

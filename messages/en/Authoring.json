@@ -863,6 +863,78 @@
     "publishing": "Publishing…",
     "close": "Close",
     "summaryAllPublished": "{count, plural, one {# item published} other {# items published}}.",
-    "summaryPartial": "Published {published} of {total} — check the rows that failed."
+    "summaryPartial": "Published {published} of {total} — check the rows that failed.",
+    "rowFix": "Fix"
+  },
+  "preflightRules": {
+    "withItem": "{rule}: {item}",
+    "EMPTY_VERSION": {
+      "title": "This draft has no content",
+      "fix": "Add at least one lesson before publishing"
+    },
+    "VIDEO_NO_SOURCE": {
+      "title": "Video lesson has no video source",
+      "fix": "Upload a video in the lesson editor"
+    },
+    "AUDIO_NO_TRACK": {
+      "title": "Audio lesson has no audio track",
+      "fix": "Upload an audio file in the lesson editor"
+    },
+    "AUDIO_NO_TRANSCRIPT": {
+      "title": "Audio lesson has no transcript",
+      "fix": "Add a transcript in the lesson editor"
+    },
+    "MODULE_EMPTY": {
+      "title": "Module has no lessons",
+      "fix": "Add at least one lesson to this module"
+    },
+    "SECTION_EMPTY": {
+      "title": "Section has no items",
+      "fix": "Add a lesson to this section, or remove it"
+    },
+    "DRAFT_ITEM": {
+      "title": "Grammar rule has no published explanation",
+      "fix": "Open the rule and save its explanation"
+    },
+    "READ_NO_TITLE": {
+      "title": "Lesson has no published content",
+      "fix": "Open the lesson and save its text"
+    },
+    "MEDIA_NO_ALT": {
+      "title": "Lesson image is missing alt text",
+      "fix": "Add alt text to every image"
+    },
+    "LEVEL_NO_TEACHER": {
+      "title": "Level has no assigned teacher",
+      "fix": "Assign a teacher to this level"
+    },
+    "LIVE_NO_SCHEDULE": {
+      "title": "Live lesson has no scheduled time",
+      "fix": "Set a date and time for this session"
+    },
+    "VOCAB_NO_TRANSLATION": {
+      "title": "Vocabulary item has no translation",
+      "fix": "Add a translation"
+    },
+    "VOCAB_NO_AUDIO": {
+      "title": "Vocabulary item has no pronunciation audio",
+      "fix": "Upload pronunciation audio"
+    },
+    "EXERCISE_INCOMPLETE": {
+      "title": "Exercise has no instructions",
+      "fix": "Open the exercise and write what the student must do"
+    },
+    "NO_GRAMMAR": {
+      "title": "Course has no grammar content",
+      "fix": "Add at least one grammar rule"
+    },
+    "EXERCISE_COUNT_LOW": {
+      "title": "Course has very few exercises",
+      "fix": "Add more practice exercises"
+    },
+    "LOCALE_INCOMPLETE": {
+      "title": "Missing translations for some UI languages",
+      "fix": "Add the missing localizations"
+    }
   }
 }

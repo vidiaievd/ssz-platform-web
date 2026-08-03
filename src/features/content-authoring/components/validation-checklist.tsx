@@ -8,12 +8,15 @@ import { cn } from '@/lib/utils';
 import { Link } from '@/lib/i18n/navigation';
 
 import type { CheckSeverity, PreflightCheck } from '../types';
+import { usePreflightCheckText } from '../lib/preflight-check-text';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
 function SeverityIcon({ severity }: { severity: CheckSeverity }) {
-  if (severity === 'blocker') return <XCircle className="h-4 w-4 text-destructive shrink-0" aria-hidden />;
-  if (severity === 'warning') return <AlertTriangle className="h-4 w-4 text-warning-700 shrink-0" aria-hidden />;
+  if (severity === 'blocker')
+    return <XCircle className="h-4 w-4 text-destructive shrink-0" aria-hidden />;
+  if (severity === 'warning')
+    return <AlertTriangle className="h-4 w-4 text-warning-700 shrink-0" aria-hidden />;
   return <CheckCircle2 className="h-4 w-4 text-success-700 shrink-0" aria-hidden />;
 }
 
@@ -21,17 +24,21 @@ function SeverityIcon({ severity }: { severity: CheckSeverity }) {
 
 function CheckRow({ check }: { check: PreflightCheck }) {
   const t = useTranslations('Authoring.checklist');
-  const severityLabel = check.severity === 'blocker' ? 'Blocker' : check.severity === 'warning' ? 'Warning' : 'OK';
+  const checkText = usePreflightCheckText();
+  const { title, fixHint } = checkText(check);
+  const severityLabel =
+    check.severity === 'blocker' ? 'Blocker' : check.severity === 'warning' ? 'Warning' : 'OK';
   return (
-    <li
-      className="flex items-start gap-2 py-2"
-      aria-label={`${severityLabel}: ${check.title}`}
-    >
+    <li className="flex items-start gap-2 py-2" aria-label={`${severityLabel}: ${title}`}>
       <SeverityIcon severity={check.severity} />
       <div className="flex-1 min-w-0">
-        <p className={cn('text-sm leading-snug', check.severity === 'ok' && 'text-muted-foreground')}>{check.title}</p>
-        {check.fixHint && check.severity !== 'ok' && (
-          <p className="mt-0.5 font-mono text-xs text-muted-foreground">{check.fixHint}</p>
+        <p
+          className={cn('text-sm leading-snug', check.severity === 'ok' && 'text-muted-foreground')}
+        >
+          {title}
+        </p>
+        {fixHint && check.severity !== 'ok' && (
+          <p className="mt-0.5 font-mono text-xs text-muted-foreground">{fixHint}</p>
         )}
       </div>
       {check.fixDeepLink && check.severity !== 'ok' && (
@@ -52,7 +59,7 @@ function CheckRow({ check }: { check: PreflightCheck }) {
 const GROUP_CLASSES: Record<CheckSeverity, string> = {
   blocker: 'bg-destructive/5 text-destructive border-destructive/20',
   warning: 'bg-warning-50 text-warning-700 border-warning-200',
-  ok:      'bg-muted/50 text-muted-foreground border-transparent',
+  ok: 'bg-muted/50 text-muted-foreground border-transparent',
 };
 
 interface GroupHeaderProps {
@@ -110,17 +117,26 @@ export interface ValidationChecklistProps {
   defaultPassedOpen?: boolean;
 }
 
-export function ValidationChecklist({ checks, defaultPassedOpen = false }: ValidationChecklistProps) {
+export function ValidationChecklist({
+  checks,
+  defaultPassedOpen = false,
+}: ValidationChecklistProps) {
   const t = useTranslations('Authoring.checklist');
   const blockers = checks.filter((c) => c.severity === 'blocker');
   const warnings = checks.filter((c) => c.severity === 'warning');
-  const passed   = checks.filter((c) => c.severity === 'ok');
+  const passed = checks.filter((c) => c.severity === 'ok');
   const hasIssues = blockers.length > 0 || warnings.length > 0;
   const [passedOpen, setPassedOpen] = useState(defaultPassedOpen);
 
-  const groupedSections: Array<{ severity: CheckSeverity; label: string; items: PreflightCheck[] }> = [];
-  if (blockers.length > 0) groupedSections.push({ severity: 'blocker', label: t('blockers'), items: blockers });
-  if (warnings.length > 0) groupedSections.push({ severity: 'warning', label: t('warnings'), items: warnings });
+  const groupedSections: Array<{
+    severity: CheckSeverity;
+    label: string;
+    items: PreflightCheck[];
+  }> = [];
+  if (blockers.length > 0)
+    groupedSections.push({ severity: 'blocker', label: t('blockers'), items: blockers });
+  if (warnings.length > 0)
+    groupedSections.push({ severity: 'warning', label: t('warnings'), items: warnings });
 
   return (
     <div className="rounded-md border border-border overflow-hidden">
@@ -128,7 +144,9 @@ export function ValidationChecklist({ checks, defaultPassedOpen = false }: Valid
         <div key={severity} className="border-b border-border last:border-0">
           <GroupHeader severity={severity} label={label} count={items.length} />
           <ul className="divide-y divide-border px-3" role="list">
-            {items.map((c) => <CheckRow key={c.id} check={c} />)}
+            {items.map((c) => (
+              <CheckRow key={c.id} check={c} />
+            ))}
           </ul>
         </div>
       ))}
@@ -145,7 +163,9 @@ export function ValidationChecklist({ checks, defaultPassedOpen = false }: Valid
           />
           {(!hasIssues || passedOpen) && (
             <ul className="divide-y divide-border px-3" role="list">
-              {passed.map((c) => <CheckRow key={c.id} check={c} />)}
+              {passed.map((c) => (
+                <CheckRow key={c.id} check={c} />
+              ))}
             </ul>
           )}
         </div>
