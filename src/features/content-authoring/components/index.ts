@@ -17,3 +17,4 @@ export * from './readiness-chip';
 export * from './validation-checklist';
 export * from './my-containers-list';
 export * from './vocabulary-form';
+export * from './version-history-block';

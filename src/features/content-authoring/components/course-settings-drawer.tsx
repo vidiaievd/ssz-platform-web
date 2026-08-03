@@ -21,6 +21,7 @@ import { CoursePublishBlock } from './course-publish-block';
 import { DangerZone } from './danger-zone';
 import { SharingPanel } from './sharing-panel';
 import { TagInput } from './tag-input';
+import { VersionHistoryBlock } from './version-history-block';
 
 type SettingsTab = 'overview' | 'tags' | 'sharing';
 
@@ -81,6 +82,7 @@ export function CourseSettingsDrawer({
                 draftVersionId={draftVersionId}
                 preflightResult={preflightResult}
               />
+              <VersionHistoryBlock containerId={container.id} />
               {isOwnerOrAdmin && (
                 <DangerZone
                   containerId={container.id}

@@ -501,7 +501,11 @@ export interface ContentTag {
 export interface ContainerVersion {
   id: string;
   containerId: string;
+  versionNumber: number;
   status: 'draft' | 'published' | 'deprecated' | 'archived';
-  publishedAt?: string;
+  /** Release notes the author wrote when publishing this version. */
+  changelog: string | null;
+  publishedAt?: string | null;
+  deprecatedAt?: string | null;
   createdAt: string;
 }

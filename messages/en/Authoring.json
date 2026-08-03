@@ -403,6 +403,19 @@
     "blockUpToDate": "Everything in this course is published.",
     "blockWhereToPublish": "Publish it from “Review & publish” in the course header — the course and its modules go live together there."
   },
+  "history": {
+    "title": "Version history",
+    "versionNumber": "v{number}",
+    "empty": "No versions yet.",
+    "loadError": "Couldn't load the version history.",
+    "noNotes": "No release notes",
+    "status": {
+      "draft": "Draft",
+      "published": "Live",
+      "deprecated": "Replaced",
+      "archived": "Archived"
+    }
+  },
   "discard": {
     "title": "Discard draft?",
     "body": "All changes in this draft will be permanently lost. This cannot be undone.",

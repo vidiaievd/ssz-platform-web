@@ -400,6 +400,19 @@
     "blockUpToDate": "Alt i dette kurset er publisert.",
     "blockWhereToPublish": "Publiser det fra «Gjennomgå og publiser» i kursoverskriften — der går kurset og modulene live sammen."
   },
+  "history": {
+    "title": "Versjonshistorikk",
+    "versionNumber": "v{number}",
+    "empty": "Ingen versjoner ennå.",
+    "loadError": "Kunne ikke laste versjonshistorikken.",
+    "noNotes": "Ingen versjonsnotat",
+    "status": {
+      "draft": "Utkast",
+      "published": "Publisert",
+      "deprecated": "Erstattet",
+      "archived": "Arkivert"
+    }
+  },
   "discard": {
     "title": "Forkaste utkast?",
     "body": "Alle endringer i dette utkastet vil gå tapt permanent. Dette kan ikke angres.",
