@@ -14,6 +14,7 @@ import {
   type LiveScheduleFormValues,
 } from '../schemas/lesson';
 import { addItemToDraft, removeItemFromDraft, reorderDraftItems } from '../lib/container-items';
+import { ensureVariantPublished } from '../lib/ensure-published';
 
 export async function createLessonAction(
   containerId: string,
@@ -67,6 +68,7 @@ export async function createLessonAction(
         },
       });
       variantId = variant.variantId;
+      await ensureVariantPublished(lessonId, variantId);
     }
 
     const item = await addItemToDraft(containerId, 'lesson', lessonId);
@@ -114,6 +116,7 @@ export async function updateLessonAction(
             ...(transcript !== undefined && { transcript }),
           },
         });
+        await ensureVariantPublished(lessonId, variantId);
       } else if (body) {
         const variant = await serverFetch<{ variantId: string }>({
           service: 'content',
@@ -129,6 +132,7 @@ export async function updateLessonAction(
           },
         });
         newVariantId = variant.variantId;
+        await ensureVariantPublished(lessonId, newVariantId);
       }
     }
 

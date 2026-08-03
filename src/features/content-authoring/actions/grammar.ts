@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
+import { ensureExplanationPublished } from '../lib/ensure-published';
 import type { DifficultyLevel, Visibility } from '@/features/content/types';
 
 import {
@@ -140,6 +141,8 @@ export async function saveGrammarExplanationAction(
       });
       savedExplanationId = explanation.explanationId;
     }
+
+    await ensureExplanationPublished(ruleId, savedExplanationId);
 
     await serverFetch({
       service: 'content',
