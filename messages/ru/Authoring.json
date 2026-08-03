@@ -870,7 +870,8 @@
     "close": "Закрыть",
     "summaryAllPublished": "{count, plural, one {Опубликован # элемент} few {Опубликовано # элемента} many {Опубликовано # элементов} other {Опубликовано # элемента}}.",
     "summaryPartial": "Опубликовано {published} из {total} — проверьте строки с ошибками.",
-    "rowFix": "Исправить"
+    "rowFix": "Исправить",
+    "rowWarningCount": "{count, plural, one {# элемент} few {# элемента} many {# элементов} other {# элемента}}"
   },
   "preflightRules": {
     "withItem": "{rule}: {item}",

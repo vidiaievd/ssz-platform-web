@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { AlertCircle, Check, Upload, X } from 'lucide-react';
+import { AlertCircle, Check, ChevronRight, Upload, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -12,7 +12,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/i18n/navigation';
+import { cn } from '@/lib/utils';
 import type { Container } from '@/features/content/types';
+import type { PreflightCheck } from '../types';
 
 import { collectPublishRows, type PublishRow } from '../lib/publish-rows';
 import { useContainersPreflight, type PreflightEntry } from '../api/use-containers-preflight';
@@ -20,6 +22,7 @@ import { useCurriculumTree } from '../api/use-curriculum-tree';
 import { authoringKeys } from '../api/keys';
 import { publishContainerAction } from '../actions/publish-container';
 import { usePreflightCheckText } from '../lib/preflight-check-text';
+import { groupChecksByRule } from '../lib/group-checks-by-rule';
 import { PublishStateBadge } from './publish-state-badge';
 
 type RowOutcome = 'idle' | 'publishing' | 'published' | 'failed';
@@ -57,6 +60,10 @@ function ReviewRow({
   const blockerCount = preflight?.result?.blockerCount ?? 0;
   const warningCount = preflight?.result?.warningCount ?? 0;
   const blocked = blockerCount > 0;
+  const warningGroups = groupChecksByRule(
+    (preflight?.result?.checks ?? []).filter((c) => c.severity === 'warning'),
+  );
+  const [warningsOpen, setWarningsOpen] = useState(false);
 
   return (
     <div className="flex items-start gap-2.5 rounded-lg border border-border p-3">
@@ -116,7 +123,58 @@ function ReviewRow({
             </ul>
           </div>
         ) : warningCount > 0 ? (
-          <p className="text-xs text-warning-700">{t('rowWarnings', { count: warningCount })}</p>
+          <div className="space-y-1">
+            <button
+              type="button"
+              onClick={() => setWarningsOpen((v) => !v)}
+              aria-expanded={warningsOpen}
+              className="flex items-center gap-1 text-xs text-warning-700 hover:underline"
+            >
+              <ChevronRight
+                className={cn(
+                  'h-3.5 w-3.5 shrink-0 transition-transform',
+                  warningsOpen && 'rotate-90',
+                )}
+                aria-hidden
+              />
+              {t('rowWarnings', { count: warningCount })}
+            </button>
+            {/* Grouped by rule: a module's warnings are dominated by one rule
+                repeated per item, and listing 26 identical lines buries the
+                two that are about something else. */}
+            {warningsOpen && (
+              <ul className="space-y-1 pl-5">
+                {warningGroups.map((group) => {
+                  const check = group.only ?? (group.checks[0] as PreflightCheck);
+                  const { title, fixHint } = checkText(group.only ?? { ...check, itemTitle: null });
+                  return (
+                    <li key={group.ruleCode} className="text-xs text-muted-foreground">
+                      <span className="text-foreground">{title}</span>
+                      {group.only ? (
+                        <>
+                          {fixHint && <span> — {fixHint}</span>}
+                          {group.only.fixDeepLink && (
+                            <>
+                              {' '}
+                              <Link
+                                href={group.only.fixDeepLink}
+                                onClick={onFixNavigate}
+                                className="font-semibold text-primary-600 hover:underline"
+                              >
+                                {t('rowFix')}
+                              </Link>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <span> — {t('rowWarningCount', { count: group.checks.length })}</span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         ) : null}
 
         {outcome === 'published' && (

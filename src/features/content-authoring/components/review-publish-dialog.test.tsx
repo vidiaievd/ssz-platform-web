@@ -228,6 +228,55 @@ describe('ReviewPublishDialog', () => {
     );
   });
 
+  it('lists the warnings behind a disclosure, grouped by rule', async () => {
+    // "28 warnings" is not something an author can act on, and 26 identical
+    // lines about missing audio bury the two that are about something else.
+    mockPreflight(
+      preflight(0, 3, [
+        {
+          id: 'VOCAB_NO_AUDIO:word-1',
+          severity: 'warning',
+          ruleCode: 'VOCAB_NO_AUDIO',
+          itemTitle: null,
+          detail: 'Vocabulary item has no pronunciation audio',
+          fixDeepLink: null,
+        },
+        {
+          id: 'VOCAB_NO_AUDIO:word-2',
+          severity: 'warning',
+          ruleCode: 'VOCAB_NO_AUDIO',
+          itemTitle: null,
+          detail: 'Vocabulary item has no pronunciation audio',
+          fixDeepLink: null,
+        },
+        {
+          id: 'NO_GRAMMAR:course-1',
+          severity: 'warning',
+          ruleCode: 'NO_GRAMMAR',
+          itemTitle: null,
+          detail: 'Course has no grammar content',
+          fixDeepLink: null,
+        },
+      ]),
+    );
+    renderDialog(makeTree('pending_changes', []));
+
+    expect(screen.queryByText(/no pronunciation audio/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /3 warnings/ }));
+
+    expect(screen.getByText('Vocabulary item has no pronunciation audio')).toBeInTheDocument();
+    expect(screen.getByText(/2 items/)).toBeInTheDocument();
+    expect(screen.getByText('Course has no grammar content')).toBeInTheDocument();
+  });
+
+  it('leaves publishing available while only warnings stand', () => {
+    mockPreflight(preflight(0, 2));
+    renderDialog(makeTree('pending_changes', []));
+
+    expect(screen.getByRole('button', { name: /^Publish/ })).toBeEnabled();
+  });
+
   it('reports the rows that failed instead of claiming success', async () => {
     vi.mocked(publishContainerAction).mockResolvedValue({
       ok: false,

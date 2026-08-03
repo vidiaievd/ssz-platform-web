@@ -870,7 +870,8 @@
     "close": "Close",
     "summaryAllPublished": "{count, plural, one {# item published} other {# items published}}.",
     "summaryPartial": "Published {published} of {total} — check the rows that failed.",
-    "rowFix": "Fix"
+    "rowFix": "Fix",
+    "rowWarningCount": "{count, plural, one {# item} other {# items}}"
   },
   "preflightRules": {
     "withItem": "{rule}: {item}",

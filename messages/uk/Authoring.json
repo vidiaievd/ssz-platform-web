@@ -870,7 +870,8 @@
     "close": "Закрити",
     "summaryAllPublished": "{count, plural, one {Опубліковано # елемент} few {Опубліковано # елементи} many {Опубліковано # елементів} other {Опубліковано # елемента}}.",
     "summaryPartial": "Опубліковано {published} з {total} — перевірте рядки з помилками.",
-    "rowFix": "Виправити"
+    "rowFix": "Виправити",
+    "rowWarningCount": "{count, plural, one {# елемент} few {# елементи} many {# елементів} other {# елемента}}"
   },
   "preflightRules": {
     "withItem": "{rule}: {item}",

@@ -870,7 +870,8 @@
     "close": "Lukk",
     "summaryAllPublished": "{count, plural, one {# element publisert} other {# elementer publisert}}.",
     "summaryPartial": "Publiserte {published} av {total} — se radene som feilet.",
-    "rowFix": "Rett"
+    "rowFix": "Rett",
+    "rowWarningCount": "{count, plural, one {# element} other {# elementer}}"
   },
   "preflightRules": {
     "withItem": "{rule}: {item}",
