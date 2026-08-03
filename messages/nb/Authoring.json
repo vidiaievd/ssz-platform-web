@@ -852,7 +852,9 @@
     "ariaLabel": "Status: {label}",
     "itemAwaiting": "Venter på publisering",
     "itemAwaitingAriaLabel": "Ikke publisert ennå — publiser modulen for å frigi den",
-    "itemLive": "Studentene ser dette"
+    "itemLive": "Studentene ser dette",
+    "pendingModules": "{count, plural, =0 {Upubliserte endringer} one {# modul ikke publisert} other {# moduler ikke publisert}}",
+    "pendingChangesAriaLabel": "Har endringer studentene ennå ikke ser"
   },
   "reviewPublish": {
     "trigger": "Gjennomgå og publiser",

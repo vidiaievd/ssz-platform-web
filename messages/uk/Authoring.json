@@ -852,7 +852,9 @@
     "ariaLabel": "Статус: {label}",
     "itemAwaiting": "Очікує публікації",
     "itemAwaitingAriaLabel": "Ще не опубліковано — опублікуйте модуль, щоб випустити",
-    "itemLive": "Студенти це бачать"
+    "itemLive": "Студенти це бачать",
+    "pendingModules": "{count, plural, =0 {Неопубліковані зміни} one {# модуль не випущено} few {# модулі не випущено} many {# модулів не випущено} other {# модуля не випущено}}",
+    "pendingChangesAriaLabel": "Є зміни, яких студенти ще не бачать"
   },
   "reviewPublish": {
     "trigger": "Переглянути й опублікувати",

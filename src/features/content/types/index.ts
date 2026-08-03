@@ -24,6 +24,19 @@ export interface Container {
   /** Course-only: how sub-lessons unlock for students. Defaults to 'open'. */
   gatingMode?: 'open' | 'sequential';
   currentPublishedVersionId?: string | null;
+  /**
+   * Composition state of this container's draft against its live version.
+   * Present only where the BFF resolves it (the author's own container list);
+   * `currentPublishedVersionId` alone cannot express "live, with changes
+   * students cannot see yet".
+   */
+  publishState?: ContainerPublishState;
+  /**
+   * Modules inside this container that students cannot open — never published,
+   * or holding changes that are not live. Modules are versioned independently
+   * of their course, so an up-to-date course can still hold several.
+   */
+  pendingModuleCount?: number;
   ownerUserId: string;
   ownerSchoolId?: string | null;
   ownerName?: string;

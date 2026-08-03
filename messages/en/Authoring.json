@@ -852,7 +852,9 @@
     "ariaLabel": "Status: {label}",
     "itemAwaiting": "Awaiting publish",
     "itemAwaitingAriaLabel": "Not published yet — publish the module to release it",
-    "itemLive": "Students see this"
+    "itemLive": "Students see this",
+    "pendingModules": "{count, plural, =0 {Unpublished changes} one {# module not released} other {# modules not released}}",
+    "pendingChangesAriaLabel": "Has changes students cannot see yet"
   },
   "reviewPublish": {
     "trigger": "Review & publish",

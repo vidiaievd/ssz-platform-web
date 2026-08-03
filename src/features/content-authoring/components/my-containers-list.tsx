@@ -3,8 +3,22 @@
 import { useDeferredValue } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  Plus, Search, LayoutGrid, LayoutList, BookOpen, Clock, X, ChevronLeft, ChevronRight, Pencil,
-  MoreVertical, Eye, Copy, Archive, ArchiveRestore, Trash2,
+  Plus,
+  Search,
+  LayoutGrid,
+  LayoutList,
+  BookOpen,
+  Clock,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  MoreVertical,
+  Eye,
+  Copy,
+  Archive,
+  ArchiveRestore,
+  Trash2,
 } from 'lucide-react';
 import { z } from 'zod/v4';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -14,7 +28,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Segmented } from '@/components/ui/segmented';
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DataState } from '@/components/shared/data-state';
 import { Link } from '@/lib/i18n/navigation';
@@ -23,15 +41,16 @@ import type { Container } from '@/features/content/types';
 
 import type { ContainerState, SchoolRole } from '../types';
 import { ContainerStateBadge, deriveContainerState } from './container-state-badge';
+import { PendingChangesBadge } from './pending-changes-badge';
 import { useMyContainers } from '../api/use-my-containers';
 
 // ─── URL filter schema ────────────────────────────────────────────────────────
 
 const listFilterSchema = z.object({
   search: z.string().default(''),
-  state:  z.enum(['all', 'draft', 'published', 'archived']).default('all'),
-  view:   z.enum(['grid', 'list']).default('grid'),
-  page:   z.coerce.number().int().min(1).default(1),
+  state: z.enum(['all', 'draft', 'published', 'archived']).default('all'),
+  view: z.enum(['grid', 'list']).default('grid'),
+  page: z.coerce.number().int().min(1).default(1),
 });
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -42,10 +61,14 @@ const PAGE_SIZE = 25;
 
 function LanguageFlag({ code }: { code: string }) {
   // simple 2-letter code → emoji flag
-  const emoji = code.toUpperCase().replace(/./g, (c) =>
-    String.fromCodePoint(c.charCodeAt(0) + 127397),
+  const emoji = code
+    .toUpperCase()
+    .replace(/./g, (c) => String.fromCodePoint(c.charCodeAt(0) + 127397));
+  return (
+    <span aria-hidden className="text-base leading-none">
+      {emoji}
+    </span>
   );
-  return <span aria-hidden className="text-base leading-none">{emoji}</span>;
 }
 
 // ─── Row ─────────────────────────────────────────────────────────────────────
@@ -79,7 +102,10 @@ function ContainerTableRow({ container }: ContainerRowProps) {
         <CardMeta container={container} />
       </td>
       <td className="px-3 py-3">
-        <ContainerStateBadge state={state} />
+        <div className="flex flex-wrap items-center gap-1.5">
+          <ContainerStateBadge state={state} />
+          <PendingChangesBadge container={container} />
+        </div>
       </td>
       <td className="px-3 py-3 text-right">
         <ContainerOverflowMenu container={container} state={state} />
@@ -94,7 +120,10 @@ function CourseCover({ language }: { language: string }) {
       <div
         aria-hidden
         className="absolute inset-0 opacity-40"
-        style={{ backgroundImage: 'repeating-linear-gradient(135deg, var(--border) 0 10px, transparent 10px 20px)' }}
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(135deg, var(--border) 0 10px, transparent 10px 20px)',
+        }}
       />
       <span className="absolute right-2 top-2 font-mono text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
         {language}
@@ -207,7 +236,10 @@ function ContainerGridCard({ container }: { container: Container }) {
           >
             {container.title}
           </Link>
-          <ContainerStateBadge state={state} />
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+            <ContainerStateBadge state={state} />
+            <PendingChangesBadge container={container} />
+          </div>
         </div>
         <CardMeta container={container} />
         <div className="relative z-1 mt-auto flex items-center justify-between gap-2 pt-1">
@@ -242,9 +274,7 @@ function ListEmptyState() {
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href={`${newHref}?flow=quick`}>
-            {t('emptyTemplate')}
-          </Link>
+          <Link href={`${newHref}?flow=quick`}>{t('emptyTemplate')}</Link>
         </Button>
       </div>
     </div>
@@ -259,11 +289,12 @@ interface FilteredEmptyStateProps {
 
 function FilteredEmptyState({ search, filterLabel, onClear }: FilteredEmptyStateProps) {
   const t = useTranslations('Authoring.list');
-  const message = search && filterLabel
-    ? t('filteredEmpty', { query: search, filter: filterLabel.toLowerCase() })
-    : search
-      ? t('filteredEmptySearchOnly', { query: search })
-      : t('filteredEmptyStateOnly', { filter: (filterLabel ?? '').toLowerCase() });
+  const message =
+    search && filterLabel
+      ? t('filteredEmpty', { query: search, filter: filterLabel.toLowerCase() })
+      : search
+        ? t('filteredEmptySearchOnly', { query: search })
+        : t('filteredEmptyStateOnly', { filter: (filterLabel ?? '').toLowerCase() });
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
       <p className="text-sm text-muted-foreground">{message}</p>
@@ -304,9 +335,9 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
   const isOwnerOrAdmin = schoolRole === 'owner' || schoolRole === 'admin';
 
   const query = {
-    search:   deferredSearch || undefined,
-    state:    filters.state !== 'all' ? filters.state : undefined,
-    page:     filters.page,
+    search: deferredSearch || undefined,
+    state: filters.state !== 'all' ? filters.state : undefined,
+    page: filters.page,
     pageSize: PAGE_SIZE,
   };
 
@@ -340,7 +371,11 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
         <div>
           {isOwnerOrAdmin ? (
             <p className="text-sm text-muted-foreground">
-              {t('countsOwner', { all: counts.all, published: counts.published, draft: counts.draft })}
+              {t('countsOwner', {
+                all: counts.all,
+                published: counts.published,
+                draft: counts.draft,
+              })}
               {counts.archived > 0 && t('countsArchivedSuffix', { archived: counts.archived })}
             </p>
           ) : (
@@ -412,13 +447,17 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
           <FilteredEmptyState
             onClear={clearFilters}
             search={filters.search}
-            filterLabel={filters.state !== 'all'
-              ? statusFilterOptions.find((o) => o.value === filters.state)?.label
-              : undefined}
+            filterLabel={
+              filters.state !== 'all'
+                ? statusFilterOptions.find((o) => o.value === filters.state)?.label
+                : undefined
+            }
           />
         ) : filters.view === 'grid' ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {containers.map((c) => <ContainerGridCard key={c.id} container={c} />)}
+            {containers.map((c) => (
+              <ContainerGridCard key={c.id} container={c} />
+            ))}
             {/* "+ New" tile */}
             <Link
               href={newContainerHref}
@@ -433,10 +472,28 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
             <table className="w-full" role="table">
               <thead className="bg-muted/30">
                 <tr className="border-b border-border">
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">{t('colCourse')}</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">{t('colContent')}</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">{t('colState')}</th>
-                  <th className="w-12 px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground" scope="col">
+                  <th
+                    className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground"
+                    scope="col"
+                  >
+                    {t('colCourse')}
+                  </th>
+                  <th
+                    className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground"
+                    scope="col"
+                  >
+                    {t('colContent')}
+                  </th>
+                  <th
+                    className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground"
+                    scope="col"
+                  >
+                    {t('colState')}
+                  </th>
+                  <th
+                    className="w-12 px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground"
+                    scope="col"
+                  >
                     <span className="sr-only">{t('colActions')}</span>
                   </th>
                 </tr>
@@ -455,7 +512,8 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
       {total > PAGE_SIZE && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>
-            Showing {(filters.page - 1) * PAGE_SIZE + 1}–{Math.min(filters.page * PAGE_SIZE, total)} of {total}
+            Showing {(filters.page - 1) * PAGE_SIZE + 1}–{Math.min(filters.page * PAGE_SIZE, total)}{' '}
+            of {total}
           </span>
           <div className="flex gap-1">
             <Button

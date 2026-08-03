@@ -4,6 +4,7 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import type { Container } from '@/features/content/types';
+import { attachPublishStates } from '@/features/content-authoring/lib/attach-publish-states';
 
 interface UpstreamPaginatedContainers {
   items: Container[];
@@ -41,7 +42,9 @@ export async function GET(request: NextRequest) {
 
   // The "my containers" UI sends scope=owned — the backend has no such concept,
   // it filters by explicit ownerUserId instead.
-  if (query.scope === 'owned') {
+  const ownedScope = query.scope === 'owned';
+
+  if (ownedScope) {
     delete query.scope;
     const user = await getCurrentUser();
     if (!user?.userId) {
@@ -84,7 +87,13 @@ export async function GET(request: NextRequest) {
       query,
       anonymous: false,
     });
-    return NextResponse.json(withPageInfo(data));
+
+    // Only for the author's own list: whether something is waiting to be
+    // released is their concern, and it costs a second call the public
+    // catalogue has no use for.
+    const items = ownedScope ? await attachPublishStates(data.items) : data.items;
+
+    return NextResponse.json(withPageInfo({ ...data, items }));
   } catch (e) {
     if (e instanceof AppError && e.code === 'unauthenticated') {
       return NextResponse.json(EMPTY_RESPONSE);
