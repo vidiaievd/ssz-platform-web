@@ -58,13 +58,14 @@ function CheckRow({ check }: { check: PreflightCheck }) {
 // ─── Panel header ─────────────────────────────────────────────────────────────
 
 function PreflightHeader({ result }: { result: PreflightResult }) {
+  const t = useTranslations('Authoring.preflight');
   const { blockerCount, warningCount } = result;
 
   if (blockerCount === 0 && warningCount === 0) {
     return (
       <div className="flex items-center gap-2 text-success-700">
         <CheckCircle2 className="h-4 w-4" />
-        <span className="text-sm font-medium">All checks passed — ready to publish</span>
+        <span className="text-sm font-medium">{t('allPassed')}</span>
       </div>
     );
   }
@@ -76,19 +77,15 @@ function PreflightHeader({ result }: { result: PreflightResult }) {
       />
       <span className="text-sm font-medium">
         {blockerCount > 0 && (
-          <span className="text-error">
-            {blockerCount} blocker{blockerCount !== 1 ? 's' : ''}
-          </span>
+          <span className="text-error">{t('blockerCount', { count: blockerCount })}</span>
         )}
         {blockerCount > 0 && warningCount > 0 && <span className="text-muted-foreground"> · </span>}
         {warningCount > 0 && (
-          <span className="text-warning-600">
-            {warningCount} warning{warningCount !== 1 ? 's' : ''}
-          </span>
+          <span className="text-warning-600">{t('warningCount', { count: warningCount })}</span>
         )}
       </span>
       <span className="ml-auto text-xs text-muted-foreground">
-        {blockerCount > 0 ? 'cannot publish' : 'can publish with warnings'}
+        {blockerCount > 0 ? t('cannotPublish') : t('canPublishWithWarnings')}
       </span>
     </div>
   );
@@ -109,6 +106,7 @@ export function PreflightPanel({
   result: resultProp,
   onPublishAnyway,
 }: PreflightPanelProps) {
+  const t = useTranslations('Authoring.preflight');
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const { data, isLoading, error, refetch } = useQuery<PreflightResult>({
     queryKey: [...authoringKeys.preflight(containerId), schoolSlug],
@@ -139,10 +137,10 @@ export function PreflightPanel({
   if (error && !result) {
     return (
       <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
-        <p>Could not run pre-flight check.</p>
+        <p>{t('loadError')}</p>
         <Button variant="ghost" size="sm" className="mt-2" onClick={() => void refetch()}>
           <RefreshCw className="mr-1 h-3.5 w-3.5" />
-          Retry
+          {t('retry')}
         </Button>
       </div>
     );
@@ -166,7 +164,7 @@ export function PreflightPanel({
         <div className="border-t border-border px-4 py-3 flex justify-end gap-2">
           {result.canPublishAnyway && !result.canPublish && (
             <Button variant="outline" size="sm" onClick={onPublishAnyway}>
-              Publish anyway
+              {t('publishAnyway')}
             </Button>
           )}
         </div>

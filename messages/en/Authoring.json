@@ -436,10 +436,17 @@
     "trigger": "Discard draft"
   },
   "checklist": {
-    "blockers": "Blocking issues",
-    "warnings": "Warnings",
-    "passed": "Passed",
     "goToFix": "Fix →"
+  },
+  "preflight": {
+    "allPassed": "All checks passed — ready to publish",
+    "blockerCount": "{count, plural, one {# blocker} other {# blockers}}",
+    "warningCount": "{count, plural, one {# warning} other {# warnings}}",
+    "cannotPublish": "cannot publish",
+    "canPublishWithWarnings": "can publish with warnings",
+    "loadError": "Could not run the pre-flight check.",
+    "retry": "Retry",
+    "publishAnyway": "Publish anyway"
   },
   "tags": {
     "empty": "No tags yet.",
