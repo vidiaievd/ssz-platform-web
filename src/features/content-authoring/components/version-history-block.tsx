@@ -1,60 +1,121 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { History } from 'lucide-react';
+import { History, Undo2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate } from '@/lib/i18n/formatters';
 import type { Locale } from '@/lib/i18n/config';
 import type { ContainerVersion } from '@/features/content/types';
 
 import { useContainerVersions } from '../api/use-container-versions';
+import { rollbackContainerAction } from '../actions/rollback-container';
+import { authoringKeys } from '../api/keys';
 
 /** Newest first. The backend sorts by version number, but not every caller can rely on that. */
 function byVersionDesc(a: ContainerVersion, b: ContainerVersion) {
   return b.versionNumber - a.versionNumber;
 }
 
-function VersionRow({ version }: { version: ContainerVersion }) {
+function VersionRow({
+  version,
+  onRestore,
+  disabled,
+}: {
+  version: ContainerVersion;
+  onRestore: () => void;
+  disabled: boolean;
+}) {
   const t = useTranslations('Authoring.history');
   const locale = useLocale() as Locale;
 
   // A draft has no publish date, and a deprecated version's own `publishedAt`
   // is when *it* went live — the honest date for both.
   const date = version.publishedAt ?? version.createdAt;
+  // Only a superseded version can come back: a draft was never live, and the
+  // current one already is. The backend refuses the rest anyway.
+  const canRestore = version.status === 'deprecated';
 
   return (
-    <li className="border-l-2 border-border py-2 pl-3">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="font-mono text-xs font-semibold text-foreground">
-          {t('versionNumber', { number: version.versionNumber })}
-        </span>
-        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-          {t(`status.${version.status}` as 'status.published')}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {formatDate(new Date(date), locale, { dateStyle: 'medium', timeStyle: 'short' })}
-        </span>
+    <li className="flex items-start gap-2 border-l-2 border-border py-2 pl-3">
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="font-mono text-xs font-semibold text-foreground">
+            {t('versionNumber', { number: version.versionNumber })}
+          </span>
+          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            {t(`status.${version.status}` as 'status.published')}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {formatDate(new Date(date), locale, { dateStyle: 'medium', timeStyle: 'short' })}
+          </span>
+        </div>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+          {version.changelog?.trim() ? version.changelog : <em>{t('noNotes')}</em>}
+        </p>
       </div>
-      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-        {version.changelog?.trim() ? version.changelog : <em>{t('noNotes')}</em>}
-      </p>
+      {canRestore && (
+        <Button
+          variant="ghost"
+          size="sm"
+          type="button"
+          disabled={disabled}
+          onClick={onRestore}
+          aria-label={t('restoreAriaLabel', { number: version.versionNumber })}
+        >
+          <Undo2 aria-hidden /> {t('restore')}
+        </Button>
+      )}
     </li>
   );
 }
 
 /**
- * What was released, when, and what the author said about it.
+ * What was released, when, what the author said about it — and the way back.
  *
- * Read-only on purpose: rolling back means replacing the current draft's
- * composition with an old version's, which is destructive and has no backend
- * command yet (plan 33 step 5).
+ * Restoring is a publish, not a staging step: the old version goes live at
+ * once, which is the only useful shape for undoing a bad release. It restores
+ * composition, not item content — an exercise rewritten since stays rewritten
+ * (plan 33 §1) — so the confirmation says as much.
  */
 export function VersionHistoryBlock({ containerId }: { containerId: string }) {
   const t = useTranslations('Authoring.history');
+  const queryClient = useQueryClient();
   const { data: versions, isLoading, isError } = useContainerVersions(containerId);
+  const [restoring, setRestoring] = useState<ContainerVersion | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const rows = [...(versions ?? [])].sort(byVersionDesc);
+
+  function handleConfirm() {
+    const version = restoring;
+    if (!version || isPending) return;
+
+    startTransition(async () => {
+      const result = await rollbackContainerAction(containerId, version.id);
+      if (!result.ok) {
+        toast.error(t('restoreError'));
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: authoringKeys.versions(containerId) });
+      await queryClient.invalidateQueries({ queryKey: authoringKeys.containers() });
+      toast.success(t('restoreSuccess', { number: version.versionNumber }));
+      setRestoring(null);
+    });
+  }
 
   return (
     <div className="space-y-3 border-t border-border pt-6">
@@ -75,10 +136,48 @@ export function VersionHistoryBlock({ containerId }: { containerId: string }) {
       ) : (
         <ul className="space-y-1">
           {rows.map((version) => (
-            <VersionRow key={version.id} version={version} />
+            <VersionRow
+              key={version.id}
+              version={version}
+              disabled={isPending}
+              onRestore={() => setRestoring(version)}
+            />
           ))}
         </ul>
       )}
+
+      <AlertDialog
+        open={restoring !== null}
+        onOpenChange={(open) => {
+          if (!open && !isPending) setRestoring(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                <Undo2 className="h-4 w-4 text-primary" aria-hidden />
+              </span>
+              <AlertDialogTitle>
+                {t('restoreTitle', { number: restoring?.versionNumber ?? 0 })}
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>{t('restoreBody')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>{t('restoreCancel')}</AlertDialogCancel>
+            <Button
+              variant="primary"
+              type="button"
+              onClick={handleConfirm}
+              disabled={isPending}
+              loading={isPending}
+            >
+              {t('restoreConfirm')}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

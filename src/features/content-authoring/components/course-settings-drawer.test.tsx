@@ -16,6 +16,10 @@ vi.mock('./preflight-panel', () => ({
 vi.mock('./sharing-panel', () => ({ SharingPanel: () => <div data-testid="sharing-panel" /> }));
 vi.mock('./tag-input', () => ({ TagInput: () => <div data-testid="tag-input" /> }));
 vi.mock('./discard-draft-dialog', () => ({ DiscardDraftDialog: () => null }));
+// Pulls a server action through its restore button; it has its own suite.
+vi.mock('./version-history-block', () => ({
+  VersionHistoryBlock: () => <div data-testid="version-history" />,
+}));
 // The publish block is rendered for real — it is what decides whether a
 // published course can be published again — but its tree query is stubbed.
 vi.mock('../api/use-curriculum-tree', () => ({ useCurriculumTree: vi.fn() }));

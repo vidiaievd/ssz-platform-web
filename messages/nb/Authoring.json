@@ -411,7 +411,15 @@
       "published": "Publisert",
       "deprecated": "Erstattet",
       "archived": "Arkivert"
-    }
+    },
+    "restore": "Gjenopprett",
+    "restoreAriaLabel": "Gjenopprett versjon {number}",
+    "restoreTitle": "Publisere v{number} på nytt?",
+    "restoreBody": "Elevene ser denne versjonen med én gang. Utkastet ditt røres ikke. Merk at dette gjenoppretter hvilket materiale kurset inneholdt — tekst som er endret siden, blir stående som den er nå.",
+    "restoreConfirm": "Gjenopprett",
+    "restoreCancel": "Avbryt",
+    "restoreSuccess": "v{number} er publisert igjen.",
+    "restoreError": "Kunne ikke gjenopprette versjonen."
   },
   "discard": {
     "title": "Forkaste utkast?",

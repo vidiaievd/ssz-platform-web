@@ -414,7 +414,15 @@
       "published": "Live",
       "deprecated": "Replaced",
       "archived": "Archived"
-    }
+    },
+    "restore": "Restore",
+    "restoreAriaLabel": "Restore version {number}",
+    "restoreTitle": "Put v{number} back on air?",
+    "restoreBody": "Students see this version immediately. Your draft is left untouched. Note that this restores which materials the course held — text edited since stays as it is now.",
+    "restoreConfirm": "Restore",
+    "restoreCancel": "Cancel",
+    "restoreSuccess": "v{number} is live again.",
+    "restoreError": "Couldn't restore that version."
   },
   "discard": {
     "title": "Discard draft?",
