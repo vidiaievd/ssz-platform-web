@@ -410,7 +410,8 @@
       "draft": "Utkast",
       "published": "Publisert",
       "deprecated": "Erstattet",
-      "archived": "Arkivert"
+      "archived": "Arkivert",
+      "withdrawn": "Tatt av lufta"
     },
     "restore": "Gjenopprett",
     "restoreAriaLabel": "Gjenopprett versjon {number}",

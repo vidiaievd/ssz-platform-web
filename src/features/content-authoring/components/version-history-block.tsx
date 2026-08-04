@@ -45,6 +45,10 @@ function VersionRow({
   // A draft has no publish date, and a deprecated version's own `publishedAt`
   // is when *it* went live — the honest date for both.
   const date = version.publishedAt ?? version.createdAt;
+  // A deprecated version with no sunset date was taken off air by hand rather
+  // than replaced by a newer release — "Replaced" would name a successor that
+  // does not exist.
+  const withdrawn = version.status === 'deprecated' && !version.sunsetAt;
   // Only a superseded version can come back: a draft was never live, and the
   // current one already is. The backend refuses the rest anyway.
   const canRestore = version.status === 'deprecated';
@@ -57,7 +61,9 @@ function VersionRow({
             {t('versionNumber', { number: version.versionNumber })}
           </span>
           <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-            {t(`status.${version.status}` as 'status.published')}
+            {withdrawn
+              ? t('status.withdrawn')
+              : t(`status.${version.status}` as 'status.published')}
           </span>
           <span className="text-xs text-muted-foreground">
             {formatDate(new Date(date), locale, { dateStyle: 'medium', timeStyle: 'short' })}

@@ -25,6 +25,7 @@ function version(
     changelog: null,
     publishedAt: '2026-07-01T09:00:00Z',
     deprecatedAt: null,
+    sunsetAt: null,
     createdAt: '2026-06-01T09:00:00Z',
     ...overrides,
   };
@@ -151,5 +152,30 @@ describe('VersionHistoryBlock', () => {
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Couldn't restore that version."));
     expect(screen.getByText('Put v1 back on air?')).toBeInTheDocument();
+  });
+  it('distinguishes a version taken off air from one a release replaced', () => {
+    mockVersions({
+      data: [
+        // Superseded: a newer publish set it a sunset date.
+        version({
+          versionNumber: 1,
+          status: 'deprecated',
+          deprecatedAt: '2026-07-01T09:00:00Z',
+          sunsetAt: '2026-10-01T09:00:00Z',
+        }),
+        // Unpublished by hand: nothing replaced it, nothing is counting down.
+        version({
+          versionNumber: 2,
+          status: 'deprecated',
+          deprecatedAt: '2026-08-01T09:00:00Z',
+          sunsetAt: null,
+        }),
+      ],
+    });
+    renderBlock();
+
+    const entries = screen.getAllByRole('listitem');
+    expect(entries[0]).toHaveTextContent('Taken off air');
+    expect(entries[1]).toHaveTextContent('Replaced');
   });
 });

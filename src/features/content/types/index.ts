@@ -507,5 +507,10 @@ export interface ContainerVersion {
   changelog: string | null;
   publishedAt?: string | null;
   deprecatedAt?: string | null;
+  /**
+   * When a superseding version will retire this one. `null` on a version taken
+   * off air by hand — nothing replaced it, so nothing is counting down.
+   */
+  sunsetAt?: string | null;
   createdAt: string;
 }

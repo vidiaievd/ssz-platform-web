@@ -410,7 +410,8 @@
       "draft": "Черновик",
       "published": "Опубликовано",
       "deprecated": "Заменено",
-      "archived": "В архиве"
+      "archived": "В архиве",
+      "withdrawn": "Снято с публикации"
     },
     "restore": "Восстановить",
     "restoreAriaLabel": "Восстановить версию {number}",

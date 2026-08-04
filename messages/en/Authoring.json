@@ -413,7 +413,8 @@
       "draft": "Draft",
       "published": "Live",
       "deprecated": "Replaced",
-      "archived": "Archived"
+      "archived": "Archived",
+      "withdrawn": "Taken off air"
     },
     "restore": "Restore",
     "restoreAriaLabel": "Restore version {number}",

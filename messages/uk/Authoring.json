@@ -410,7 +410,8 @@
       "draft": "Чернетка",
       "published": "Опубліковано",
       "deprecated": "Замінено",
-      "archived": "Заархівовано"
+      "archived": "Заархівовано",
+      "withdrawn": "Знято з публікації"
     },
     "restore": "Відновити",
     "restoreAriaLabel": "Відновити версію {number}",
