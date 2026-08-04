@@ -172,8 +172,10 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
     startTransition(() => router.refresh());
   };
 
-  const handleUnpublish = () => void callLifecycle('unpublish', t('unpublish.success'), t('unpublish.error'));
-  const handleRestore = () => void callLifecycle('restore', t('restore.success'), t('restore.error'));
+  const handleUnpublish = () =>
+    void callLifecycle('unpublish', t('unpublish.success'), t('unpublish.error'));
+  const handleRestore = () =>
+    void callLifecycle('restore', t('restore.success'), t('restore.error'));
   const handleArchive = () =>
     void callLifecycle('archive', t('archive.success'), t('archive.error'), {
       action: { label: t('archive.undo'), onClick: handleRestore },
@@ -217,20 +219,35 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
           <>
             <ConfirmAction
               trigger={
-                <Button variant="outline" size="sm" className="w-full justify-start text-warning-700 border-warning-300">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start text-warning-700 border-warning-300"
+                >
                   <MinusCircle className="mr-2 h-3.5 w-3.5" />
                   {t('unpublish.trigger')}
                 </Button>
               }
               title={t('unpublish.title')}
               description={t('unpublish.description')}
+              extraContent={
+                enrollmentCount != null && enrollmentCount > 0 ? (
+                  <p className="text-sm text-warning-700">
+                    {t('unpublish.enrollmentWarning', { count: enrollmentCount })}
+                  </p>
+                ) : undefined
+              }
               confirmLabel={t('unpublish.confirm')}
               cancelLabel={t('cancel')}
               onConfirm={handleUnpublish}
             />
             <ConfirmAction
               trigger={
-                <Button variant="outline" size="sm" className="w-full justify-start text-warning-700 border-warning-300">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start text-warning-700 border-warning-300"
+                >
                   <Archive className="mr-2 h-3.5 w-3.5" />
                   {t('archive.trigger')}
                 </Button>
@@ -304,7 +321,12 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
 
         {/* Transfer ownership — owner only */}
         {isOwner && (
-          <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground" disabled>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground"
+            disabled
+          >
             <UserCheck className="mr-2 h-3.5 w-3.5" />
             {t('transferOwnership')}
           </Button>

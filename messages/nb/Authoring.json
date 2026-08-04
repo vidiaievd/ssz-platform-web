@@ -807,10 +807,11 @@
     "unpublish": {
       "trigger": "Avpubliser",
       "title": "Avpublisere dette kurset?",
-      "description": "Studenter vil se et \"Kurs satt på pause\"-banner. Ingen nye påmeldinger godtas. Du kan publisere på nytt når som helst.",
+      "description": "Elevene mister tilgang med én gang — også de som er midt i kurset. Bare du og skolens administratorer kan åpne kurset mens det er avpublisert. Publiser på nytt for å gi tilgang tilbake.",
       "confirm": "Avpubliser",
       "success": "Kurset er avpublisert.",
-      "error": "Kunne ikke avpublisere kurset."
+      "error": "Kunne ikke avpublisere kurset.",
+      "enrollmentWarning": "{count, plural, one {# påmeldt elev mister} other {# påmeldte elever mister}} tilgang i det du bekrefter."
     },
     "archive": {
       "trigger": "Arkiver",

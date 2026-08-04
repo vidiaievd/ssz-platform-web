@@ -807,10 +807,11 @@
     "unpublish": {
       "trigger": "Unpublish",
       "title": "Unpublish this course?",
-      "description": "Students will see a \"Course paused\" banner. No new enrolments will be accepted. You can re-publish at any time.",
+      "description": "Students lose access immediately — including anyone part-way through. Only you and your school's admins can open the course while it is unpublished. Publish again to give access back.",
       "confirm": "Unpublish",
       "success": "Course unpublished.",
-      "error": "Failed to unpublish course."
+      "error": "Failed to unpublish course.",
+      "enrollmentWarning": "{count, plural, one {# enrolled student loses} other {# enrolled students lose}} access the moment you confirm."
     },
     "archive": {
       "trigger": "Archive",
