@@ -391,6 +391,9 @@ export function CurriculumTree({
   const [expandedLevels, setExpandedLevels] = useState<Record<string, boolean>>({});
   const [isPending, startTransition] = useTransition();
   const [pendingLevelId, setPendingLevelId] = useState<string | null>(null);
+  /** Which of the edited module's own sections the picker is filing into. */
+  const [addOwnLessonIn, setAddOwnLessonIn] = useState<string | null>(null);
+  const editingModule = tree.containerType === 'module';
 
   function handleAddModule(levelSectionId: string | null) {
     if (isPending) return;
@@ -490,15 +493,30 @@ export function CurriculumTree({
                   />
                 ))}
                 <div className="pb-1.5 pt-1" style={{ paddingLeft: 8 + 1 * 20 + 22 }}>
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => handleAddModule(level.id)}
-                    className="flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm disabled:opacity-50"
-                  >
-                    <Plus size={13} />
-                    {pendingLevelId === (level.id ?? '') ? '…' : t('structure.addModule')}
-                  </button>
+                  {/* A course is built from modules; a module is built from
+                      material. The same screen edits both, and it used to offer
+                      "Add module" either way — leaving a module editable only
+                      from its parent course. */}
+                  {editingModule ? (
+                    <button
+                      type="button"
+                      onClick={() => setAddOwnLessonIn(level.id ?? '')}
+                      className="flex items-center gap-1.5 rounded-sm text-[13px] font-semibold text-primary-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Plus size={13} />
+                      {t('structure.addLesson')}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => handleAddModule(level.id)}
+                      className="flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm disabled:opacity-50"
+                    >
+                      <Plus size={13} />
+                      {pendingLevelId === (level.id ?? '') ? '…' : t('structure.addModule')}
+                    </button>
+                  )}
                 </div>
               </>
             )}
@@ -514,12 +532,47 @@ export function CurriculumTree({
           onSelect={onSelect}
         />
       ))}
+      {/* A module with no sections has no level row to hang the picker off,
+          and its material has to be reachable from somewhere. Once it has
+          sections, adding goes through them — a second, section-less entry
+          point would just scatter material. */}
+      {editingModule && tree.levels.length === 0 && (
+        <div className="pb-1.5 pt-1" style={{ paddingLeft: 8 + 22 }}>
+          <button
+            type="button"
+            onClick={() => setAddOwnLessonIn('')}
+            className="flex items-center gap-1.5 rounded-sm text-[13px] font-semibold text-primary-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Plus size={13} />
+            {t('structure.addLesson')}
+          </button>
+        </div>
+      )}
       <div className="mt-1 pl-2">
         <Button variant="ghost" size="sm" disabled={isPending} onClick={handleAddLevel}>
           <Plus size={13} />
           {t('structure.addLevel')}
         </Button>
       </div>
+
+      {editingModule && (
+        <AddLessonPicker
+          open={addOwnLessonIn !== null}
+          onOpenChange={(open) => {
+            if (!open) setAddOwnLessonIn(null);
+          }}
+          moduleContainerId={courseContainerId}
+          sectionId={addOwnLessonIn || null}
+          targetLanguage={targetLanguage}
+          difficultyLevel={difficultyLevel}
+          visibility={visibility}
+          ownerSchoolId={ownerSchoolId}
+          onCreated={(itemId) => {
+            setAddOwnLessonIn(null);
+            onChanged(itemId);
+          }}
+        />
+      )}
     </div>
   );
 }

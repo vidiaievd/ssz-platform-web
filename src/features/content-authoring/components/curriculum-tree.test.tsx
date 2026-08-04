@@ -11,7 +11,23 @@ vi.mock('../actions/container-item', () => ({
   reorderContainerItemsAction: vi.fn(),
   assignItemSectionAction: vi.fn(),
 }));
-vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
+// Stands in for the dialog, reporting where a new item would be filed.
+vi.mock('./add-lesson-picker', () => ({
+  AddLessonPicker: ({
+    open,
+    moduleContainerId,
+    sectionId,
+  }: {
+    open: boolean;
+    moduleContainerId: string;
+    sectionId?: string | null;
+  }) =>
+    open ? (
+      <div data-testid="add-lesson-picker" data-container={moduleContainerId}>
+        {sectionId ?? 'ungrouped'}
+      </div>
+    ) : null,
+}));
 vi.mock('../actions/container', () => ({ createModuleAction: vi.fn() }));
 vi.mock('../actions/section', () => ({
   createSectionAction: vi.fn(),
@@ -338,5 +354,56 @@ describe('CurriculumTree', () => {
 
     await waitFor(() => expect(createSectionAction).toHaveBeenCalled());
     expect(onChanged).not.toHaveBeenCalled();
+  });
+  it('offers a module its own material, not more modules', () => {
+    // The same screen edits courses and modules. Offering "Add module" in a
+    // module left its lessons addable only from the parent course editor.
+    const moduleTree: CurriculumTreeData = {
+      ...TREE,
+      containerType: 'module',
+      levels: [{ id: 'section-nye-ord', title: 'Nye ord', position: 0, modules: [], items: [] }],
+    };
+
+    renderTree(vi.fn(), vi.fn(), moduleTree);
+
+    expect(screen.getByRole('button', { name: 'Add lesson' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add module' })).not.toBeInTheDocument();
+  });
+
+  it('files what a module adds into the section it was added from', () => {
+    const moduleTree: CurriculumTreeData = {
+      ...TREE,
+      containerType: 'module',
+      levels: [{ id: 'section-nye-ord', title: 'Nye ord', position: 0, modules: [], items: [] }],
+    };
+
+    renderTree(vi.fn(), vi.fn(), moduleTree);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Add lesson' })[0]!);
+
+    const picker = screen.getByTestId('add-lesson-picker');
+    // The edited container itself, not one of its children.
+    expect(picker).toHaveAttribute('data-container', 'course-1');
+    expect(picker).toHaveTextContent('section-nye-ord');
+  });
+
+  it('lets a module with no sections add material anyway', () => {
+    const moduleTree: CurriculumTreeData = {
+      ...TREE,
+      containerType: 'module',
+      levels: [],
+      ungroupedItems: [],
+    };
+
+    renderTree(vi.fn(), vi.fn(), moduleTree);
+    fireEvent.click(screen.getByRole('button', { name: 'Add lesson' }));
+
+    expect(screen.getByTestId('add-lesson-picker')).toHaveTextContent('ungrouped');
+  });
+
+  it('still builds a course out of modules', () => {
+    renderTree();
+
+    expect(screen.getByRole('button', { name: 'Add module' })).toBeInTheDocument();
+    expect(screen.queryByTestId('add-lesson-picker')).not.toBeInTheDocument();
   });
 });

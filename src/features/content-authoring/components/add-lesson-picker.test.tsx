@@ -8,12 +8,14 @@ vi.mock('../actions/lesson', () => ({ createLessonAction: vi.fn() }));
 vi.mock('../actions/vocabulary', () => ({ createVocabularyListAction: vi.fn() }));
 vi.mock('../actions/grammar', () => ({ createGrammarRuleAction: vi.fn() }));
 vi.mock('../actions/exercise', () => ({ createExerciseAction: vi.fn() }));
+vi.mock('../actions/container-item', () => ({ assignItemSectionAction: vi.fn() }));
 
 const { AddLessonPicker } = await import('./add-lesson-picker');
 const { createLessonAction } = await import('../actions/lesson');
 const { createVocabularyListAction } = await import('../actions/vocabulary');
 const { createGrammarRuleAction } = await import('../actions/grammar');
 const { createExerciseAction } = await import('../actions/exercise');
+const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
   open: true,
@@ -25,10 +27,10 @@ const DEFAULT_PROPS = {
   ownerSchoolId: 'school-1',
 };
 
-function renderPicker(onCreated = vi.fn()) {
+function renderPicker(onCreated = vi.fn(), extraProps: { sectionId?: string | null } = {}) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <AddLessonPicker {...DEFAULT_PROPS} onCreated={onCreated} />
+      <AddLessonPicker {...DEFAULT_PROPS} {...extraProps} onCreated={onCreated} />
     </NextIntlClientProvider>,
   );
   return { onCreated };
@@ -39,6 +41,8 @@ beforeEach(() => {
   vi.mocked(createVocabularyListAction).mockReset();
   vi.mocked(createGrammarRuleAction).mockReset();
   vi.mocked(createExerciseAction).mockReset();
+  vi.mocked(assignItemSectionAction).mockReset();
+  vi.mocked(assignItemSectionAction).mockResolvedValue({ ok: true, value: undefined } as never);
 });
 
 describe('AddLessonPicker', () => {
@@ -175,5 +179,34 @@ describe('AddLessonPicker', () => {
 
     await waitFor(() => expect(createGrammarRuleAction).toHaveBeenCalled());
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
+  });
+  it('files the new item into the section it was opened from', async () => {
+    // Creating an item never assigns a section, so without this the material
+    // lands ungrouped even though the author added it inside "Nye ord".
+    vi.mocked(createLessonAction).mockResolvedValue({
+      ok: true,
+      value: { lessonId: 'lesson-1', itemId: 'item-1' },
+    } as never);
+    const { onCreated } = renderPicker(vi.fn(), { sectionId: 'section-nye-ord' });
+
+    fireEvent.click(screen.getByText('Reading'));
+
+    await waitFor(() =>
+      expect(assignItemSectionAction).toHaveBeenCalledWith('module-1', 'item-1', 'section-nye-ord'),
+    );
+    await waitFor(() => expect(onCreated).toHaveBeenCalledWith('item-1'));
+  });
+
+  it('leaves the item where it landed when no section was given', async () => {
+    vi.mocked(createLessonAction).mockResolvedValue({
+      ok: true,
+      value: { lessonId: 'lesson-1', itemId: 'item-1' },
+    } as never);
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Reading'));
+
+    await waitFor(() => expect(createLessonAction).toHaveBeenCalled());
+    expect(assignItemSectionAction).not.toHaveBeenCalled();
   });
 });

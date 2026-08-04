@@ -25,6 +25,7 @@ import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
 import { createGrammarRuleAction } from '../actions/grammar';
 import { createExerciseAction } from '../actions/exercise';
+import { assignItemSectionAction } from '../actions/container-item';
 import { minimalExerciseValues } from '../lib/exercise-content';
 import { EXERCISE_TYPES, type ExerciseType } from '../schemas/exercise';
 
@@ -33,6 +34,12 @@ interface AddLessonPickerProps {
   onOpenChange: (open: boolean) => void;
   /** The target module's own container id — items attach to its draft version. */
   moduleContainerId: string;
+  /**
+   * Section to file the new item under. Creating an item never assigns one, so
+   * without this everything lands ungrouped — fine when the picker is opened
+   * from a module row, wrong when it is opened from inside a named section.
+   */
+  sectionId?: string | null;
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
@@ -52,6 +59,7 @@ export function AddLessonPicker({
   open,
   onOpenChange,
   moduleContainerId,
+  sectionId,
   targetLanguage,
   difficultyLevel,
   visibility,
@@ -129,7 +137,7 @@ export function AddLessonPicker({
       })();
 
       setPendingKind(null);
-      finish(result);
+      await finish(result);
     });
   }
 
@@ -152,12 +160,12 @@ export function AddLessonPicker({
       );
 
       setPendingTemplate(null);
-      finish(result);
+      await finish(result);
     });
   }
 
   /** Shared tail of both steps: report, close, and hand the new item to the caller. */
-  function finish(result: Result<{ itemId?: string }>) {
+  async function finish(result: Result<{ itemId?: string }>) {
     if (!result.ok) {
       toast.error(tErrors(result.error.code));
       return;
@@ -165,6 +173,16 @@ export function AddLessonPicker({
     if (!result.value.itemId) {
       toast.error(tErrors('unknown'));
       return;
+    }
+    // The item exists either way; a failed filing is worth a toast, not a
+    // rollback — the author can move it with the section select.
+    if (sectionId) {
+      const assigned = await assignItemSectionAction(
+        moduleContainerId,
+        result.value.itemId,
+        sectionId,
+      );
+      if (!assigned.ok) toast.error(tErrors(assigned.error.code));
     }
     reset();
     onOpenChange(false);
