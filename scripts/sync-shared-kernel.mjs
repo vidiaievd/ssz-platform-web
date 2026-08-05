@@ -46,6 +46,19 @@ function header(relativePath) {
   ].join('\n');
 }
 
+/**
+ * Drop the `.js` extension from relative specifiers.
+ *
+ * The source carries it because the backend compiles under NodeNext, which requires the
+ * extension of the emitted file. TypeScript and Vitest both see through that here, but
+ * Turbopack resolves the string literally and fails the production build looking for
+ * `issues.js` next to `issues.ts`. The copy is generated, so it is rewritten on the way
+ * in rather than the backend being bent to suit this repository.
+ */
+function rewriteImports(source) {
+  return source.replace(/(from\s+'\.[^']*)\.js'/g, "$1'");
+}
+
 /** Relative paths of every `.ts` file under `dir`, sorted, POSIX separators. */
 async function collect(dir, prefix = '') {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -84,7 +97,8 @@ let written = 0;
 
 for (const relativePath of sourceFiles) {
   const expected =
-    header(relativePath) + (await readFile(path.join(sourceRoot, relativePath), 'utf8'));
+    header(relativePath) +
+    rewriteImports(await readFile(path.join(sourceRoot, relativePath), 'utf8'));
   const targetPath = path.join(targetRoot, relativePath);
   const actual = existsSync(targetPath) ? await readFile(targetPath, 'utf8') : null;
 

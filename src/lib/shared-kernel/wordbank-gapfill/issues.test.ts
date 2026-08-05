@@ -6,10 +6,10 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type { Issue, IssueCode } from './issues.js';
-import { blockers, isReady, issues, warnings } from './issues.js';
-import type { GapFeedback, PairFeedback, WordBankGapFill } from './model.js';
-import { DEFAULT_SETTINGS } from './model.js';
+import type { Issue, IssueCode } from './issues';
+import { blockers, isReady, issues, warnings } from './issues';
+import type { GapFeedback, PairFeedback, WordBankGapFill } from './model';
+import { DEFAULT_SETTINGS } from './model';
 
 // ── Fixture ─────────────────────────────────────────────────────────────────
 //

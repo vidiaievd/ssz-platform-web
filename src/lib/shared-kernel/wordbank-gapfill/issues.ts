@@ -15,8 +15,8 @@
 // in shared logic could not be rendered; SPEC_api_contract already sends codes over the
 // wire for exactly this reason. The renderer owns the words.
 
-import type { GapKey, WordBankGapFill } from './model.js';
-import { answers, bank, coverage, equals, feedbackFor, gaps, tokens } from './selectors.js';
+import type { GapKey, WordBankGapFill } from './model';
+import { answers, bank, coverage, equals, feedbackFor, gaps, tokens } from './selectors';
 
 export type IssueLevel = 'blocker' | 'warning';
 

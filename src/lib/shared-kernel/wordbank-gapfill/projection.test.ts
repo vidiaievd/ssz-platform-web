@@ -6,10 +6,10 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type { GapFillTask } from './model.js';
-import { DEFAULT_SETTINGS } from './model.js';
-import { toStudentProjection } from './projection.js';
-import { answers } from './selectors.js';
+import type { GapFillTask } from './model';
+import { DEFAULT_SETTINGS } from './model';
+import { toStudentProjection } from './projection';
+import { answers } from './selectors';
 
 function makeTask(overrides: Partial<GapFillTask> = {}): GapFillTask {
   return {

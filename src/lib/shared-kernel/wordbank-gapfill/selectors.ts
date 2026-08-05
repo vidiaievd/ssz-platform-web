@@ -22,7 +22,7 @@ import type {
   GapResult,
   Placement,
   WordBankGapFill,
-} from './model.js';
+} from './model';
 
 /** What a gap with no authored feedback looks like. Frozen: it is handed out, not owned. */
 export const EMPTY_FEEDBACK: GapFeedback = Object.freeze({

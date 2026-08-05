@@ -14,8 +14,8 @@
 // BEHAVIOR.md §2.3: "the bank must not disclose which word is correct", and grading and
 // explanation resolution happen server-side. This function is the cut.
 
-import type { GapFillTask, GapKey } from './model.js';
-import { bank, core, gaps, tokens } from './selectors.js';
+import type { GapFillTask, GapKey } from './model';
+import { bank, core, gaps, tokens } from './selectors';
 
 /** A word of the sentence that is not a gap. Carries no information about the answers. */
 export interface ProjectedTextToken {

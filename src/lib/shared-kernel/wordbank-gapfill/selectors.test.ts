@@ -6,8 +6,8 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type { GapFeedback, Sentence, WordBankGapFill } from './model.js';
-import { DEFAULT_SETTINGS } from './model.js';
+import type { GapFeedback, Sentence, WordBankGapFill } from './model';
+import { DEFAULT_SETTINGS } from './model';
 import {
   answers,
   bank,
@@ -20,7 +20,7 @@ import {
   pruneFeedback,
   tokens,
   withSentenceText,
-} from './selectors.js';
+} from './selectors';
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 

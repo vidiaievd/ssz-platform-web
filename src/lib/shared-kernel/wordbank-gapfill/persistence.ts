@@ -28,8 +28,8 @@ import type {
   Sentence,
   Settings,
   WordBankGapFill,
-} from './model.js';
-import { DEFAULT_SETTINGS } from './model.js';
+} from './model';
+import { DEFAULT_SETTINGS } from './model';
 
 export const TEMPLATE_CODE = 'word_bank_gap_fill';
 

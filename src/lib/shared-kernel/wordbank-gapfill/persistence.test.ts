@@ -6,11 +6,11 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type { DocumentEnvelope } from './persistence.js';
-import { fromPersisted, toContent, toExpectedAnswers } from './persistence.js';
-import type { WordBankGapFill } from './model.js';
-import { DEFAULT_SETTINGS } from './model.js';
-import { answers, gaps } from './selectors.js';
+import type { DocumentEnvelope } from './persistence';
+import { fromPersisted, toContent, toExpectedAnswers } from './persistence';
+import type { WordBankGapFill } from './model';
+import { DEFAULT_SETTINGS } from './model';
+import { answers, gaps } from './selectors';
 
 const envelope: DocumentEnvelope = {
   id: 'ex-wb-1',
