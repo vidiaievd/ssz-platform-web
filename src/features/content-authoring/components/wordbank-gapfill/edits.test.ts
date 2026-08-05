@@ -3,12 +3,20 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, gaps, type WordBankGapFill } from '@/lib/shared-kernel/wordbank-gapfill';
 
 import {
+  addDistractors,
+  alternativesText,
   applySentenceText,
+  distractorProblem,
   explanationCount,
   extractBrackets,
   moveSentence,
+  removeDistractor,
   removeSentence,
+  reusedAnswers,
   sentencesFromPaste,
+  setAlternatives,
+  setInputMode,
+  splitDistractors,
   toggleGap,
 } from './edits';
 
@@ -142,6 +150,69 @@ describe('sentencesFromPaste', () => {
     expect(made[0]).toMatchObject({ text: 'Jeg vil gjerne bestille en kaffe.', gaps: [3] });
     expect(made[1]).toMatchObject({ text: 'Kan jeg få regningen, takk?', gaps: [3] });
     expect(made[0]?.id).not.toBe(made[1]?.id);
+  });
+});
+
+describe('distractors', () => {
+  it('splits on commas, dropping blanks and repeats', () => {
+    expect(splitDistractors(' bestilt , , bestilling, bestilt ')).toEqual([
+      'bestilt',
+      'bestilling',
+    ]);
+  });
+
+  it('names why a word cannot be added', () => {
+    expect(distractorProblem(doc(), 'bestille')).toBe('answer');
+    expect(distractorProblem(doc(), 'bestilt')).toBe('duplicate');
+    expect(distractorProblem(doc(), 'kaffe')).toBeNull();
+  });
+
+  it('adds only the words that can be added', () => {
+    expect(addDistractors(doc(), 'kaffe, bestille, te').distractors).toEqual([
+      'bestilt',
+      'kaffe',
+      'te',
+    ]);
+  });
+
+  it('removing a distractor removes its pair explanations (AC-B11)', () => {
+    const next = removeDistractor(doc(), 'bestilt');
+
+    expect(next.distractors).toEqual([]);
+    expect(next.feedback['s1#3']?.pairs).toEqual({});
+    expect(next.feedback['s1#3']?.fallback).toBe('Verbet mangler.');
+  });
+});
+
+describe('free-type mode', () => {
+  it('keeps distractors and pairs when the mode changes', () => {
+    const next = setInputMode(doc(), 'free');
+
+    expect(next.settings.input).toBe('free');
+    expect(next.distractors).toEqual(['bestilt']);
+    expect(next.feedback['s1#3']?.pairs.bestilt?.text).toBe('Perfektum passer ikke her.');
+  });
+
+  it('reads and writes the accepted spellings of one gap', () => {
+    const next = setAlternatives(doc(), 's1#3', 'å bestille, bestiller');
+
+    expect(next.alternatives).toEqual({ 's1#3': ['å bestille', 'bestiller'] });
+    expect(alternativesText(next, 's1#3')).toBe('å bestille, bestiller');
+    expect(setAlternatives(next, 's1#3', '  ').alternatives).toEqual({});
+  });
+});
+
+describe('reusedAnswers', () => {
+  it('finds the words that answer more than one gap (AC-B13)', () => {
+    const ex = doc({
+      sentences: [
+        { id: 's1', text: 'Jeg vil gjerne bestille en kaffe.', gaps: [3] },
+        { id: 's2', text: 'Kan jeg bestille en til?', gaps: [2] },
+      ],
+    });
+
+    expect(reusedAnswers(ex)).toEqual(['bestille']);
+    expect(reusedAnswers(doc())).toEqual([]);
   });
 });
 

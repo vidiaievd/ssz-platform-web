@@ -10,13 +10,17 @@
 // any use for.
 
 import {
+  answers,
+  equals,
   gapKey,
   gaps,
   pruneFeedback,
   tokens,
   withSentenceText,
   type GapKey,
+  type InputMode,
   type Sentence,
+  type Settings,
   type WordBankGapFill,
 } from '@/lib/shared-kernel/wordbank-gapfill';
 
@@ -164,6 +168,101 @@ export function sentencesFromPaste(raw: string): Sentence[] {
       const { text, gaps: marked } = extractBrackets(line);
       return { id: newSentenceId(), text, gaps: marked };
     });
+}
+
+// ── Step 2 — the word bank ──────────────────────────────────────────────────
+
+/** "bestilt, bestilling" → two words, blanks and repeats dropped. */
+export function splitDistractors(raw: string): string[] {
+  const seen: string[] = [];
+  for (const part of raw.split(',')) {
+    const word = part.trim();
+    if (word !== '' && !seen.includes(word)) seen.push(word);
+  }
+  return seen;
+}
+
+/**
+ * Why a word cannot join the bank: it is already an answer (the `BANK_DUPLICATE`
+ * blocker, caught at the input before it is added — AC-B9), or it is already a
+ * distractor. `null` means it can.
+ */
+export function distractorProblem(
+  ex: WordBankGapFill,
+  word: string,
+): 'answer' | 'duplicate' | null {
+  const { caseSensitive } = ex.settings;
+  if (answers(ex).some((answer) => equals(answer, word, caseSensitive))) return 'answer';
+  if (ex.distractors.some((existing) => equals(existing, word, caseSensitive))) return 'duplicate';
+  return null;
+}
+
+/** Add every word that can be added; the caller has already reported the ones that cannot. */
+export function addDistractors(ex: WordBankGapFill, raw: string): WordBankGapFill {
+  const added = splitDistractors(raw).filter((word) => distractorProblem(ex, word) === null);
+  return added.length === 0 ? ex : { ...ex, distractors: [...ex.distractors, ...added] };
+}
+
+/**
+ * Drop a distractor, and with it the pair explanations written against it — the column
+ * leaves the matrix and the coverage total shrinks (AC-B11). The kernel's prune is what
+ * decides that, so removing a word here and removing it by renaming an answer in step 1
+ * cannot diverge.
+ */
+export function removeDistractor(ex: WordBankGapFill, word: string): WordBankGapFill {
+  return pruneFeedback({
+    ...ex,
+    distractors: ex.distractors.filter((existing) => existing !== word),
+  });
+}
+
+export function setSettings(ex: WordBankGapFill, patch: Partial<Settings>): WordBankGapFill {
+  return { ...ex, settings: { ...ex.settings, ...patch } };
+}
+
+/**
+ * Switch between choosing from a bank and typing.
+ *
+ * Nothing is deleted on the way to `free`: the distractors and the pair matrix stay, and
+ * are simply not shown to a student who types (plan step 4.2). A teacher who tries the
+ * other mode and comes back finds their work where they left it; the price is a warning
+ * — `FB_PAIRS_UNUSED` — that pairs written for a bank will not be seen.
+ */
+export function setInputMode(ex: WordBankGapFill, input: InputMode): WordBankGapFill {
+  return setSettings(ex, { input });
+}
+
+/**
+ * The extra spellings accepted for one gap in free-type mode (plan decision 3). Stored
+ * per gap key, so they follow the gap and are pruned with it.
+ */
+export function setAlternatives(ex: WordBankGapFill, key: GapKey, raw: string): WordBankGapFill {
+  const words = splitDistractors(raw);
+  const alternatives = { ...(ex.alternatives ?? {}) };
+
+  if (words.length === 0) delete alternatives[key];
+  else alternatives[key] = words;
+
+  return Object.keys(alternatives).length === 0 && ex.alternatives === undefined
+    ? ex
+    : { ...ex, alternatives };
+}
+
+/** One gap's accepted alternatives as the teacher typed them back into the field. */
+export function alternativesText(ex: WordBankGapFill, key: GapKey): string {
+  return (ex.alternatives?.[key] ?? []).join(', ');
+}
+
+/**
+ * Answers that fill more than one gap. With `allowReuse` off such a word is spent on the
+ * first gap and the rest cannot be solved at all, so the step says so (AC-B13).
+ */
+export function reusedAnswers(ex: WordBankGapFill): string[] {
+  const counts = new Map<string, number>();
+  for (const gap of gaps(ex)) {
+    counts.set(gap.answer, (counts.get(gap.answer) ?? 0) + 1);
+  }
+  return [...counts].filter(([, count]) => count > 1).map(([word]) => word);
 }
 
 /**
