@@ -7,6 +7,7 @@ import { AlertCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input, Textarea } from '@/components/ui/input';
 import { ProgressBar } from '@/components/ui/progress';
+import { Segmented } from '@/components/ui/segmented';
 import {
   bank,
   coverage,
@@ -17,8 +18,12 @@ import {
 } from '@/lib/shared-kernel/wordbank-gapfill';
 
 import { gapCoverage, setFallback, setPairText, setWhy } from './edits';
+import { FeedbackMatrix } from './feedback-matrix';
+import { SentenceWithAnswer } from './sentence-preview';
 
 const READING = 'var(--ssz-font-reading)';
+
+type GapFeedbackView = 'list' | 'matrix';
 
 export interface StepFeedbackProps {
   exercise: WordBankGapFill;
@@ -42,6 +47,12 @@ export function StepFeedback({ exercise, onChange, disabled = false }: StepFeedb
 
   /** AC-B18: hides written pair rows only — never the default or the why. */
   const [onlyMissing, setOnlyMissing] = useState(false);
+  /**
+   * Two views over the same data (BEHAVIOR §1.4). The list is where one gap's feedback
+   * is written carefully; the matrix is where a run of pairs is filled in. Neither is a
+   * mode — nothing is stored about which one the teacher last used.
+   */
+  const [view, setView] = useState<GapFeedbackView>('list');
 
   return (
     <div className="flex flex-col gap-5">
@@ -56,14 +67,28 @@ export function StepFeedback({ exercise, onChange, disabled = false }: StepFeedb
             {t('gapFill.step3.coverage', { written: totals.written, total: totals.total })}
           </p>
           {isBank && (
-            <label className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Checkbox
-                checked={onlyMissing}
-                disabled={disabled}
-                onCheckedChange={(checked) => setOnlyMissing(checked === true)}
+            <div className="flex items-center gap-3">
+              {view === 'list' && (
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Checkbox
+                    checked={onlyMissing}
+                    disabled={disabled}
+                    onCheckedChange={(checked) => setOnlyMissing(checked === true)}
+                  />
+                  {t('gapFill.step3.onlyMissing')}
+                </label>
+              )}
+              <Segmented
+                size="sm"
+                options={[
+                  { value: 'list', label: t('gapFill.step3.viewList') },
+                  { value: 'matrix', label: t('gapFill.step3.viewMatrix') },
+                ]}
+                value={view}
+                aria-label={t('gapFill.step3.viewLabel')}
+                onValueChange={setView}
               />
-              {t('gapFill.step3.onlyMissing')}
-            </label>
+            </div>
           )}
         </div>
 
@@ -79,6 +104,8 @@ export function StepFeedback({ exercise, onChange, disabled = false }: StepFeedb
 
       {allGaps.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t('gapFill.step3.empty')}</p>
+      ) : isBank && view === 'matrix' ? (
+        <FeedbackMatrix exercise={exercise} onChange={onChange} disabled={disabled} />
       ) : (
         <ul className="flex flex-col gap-3">
           {allGaps.map((gap) => (
@@ -131,7 +158,7 @@ function GapCard({ exercise, gap, onlyMissing, disabled, onChange }: GapCardProp
     >
       <div className="flex items-baseline gap-2 border-b border-border px-3 py-2">
         <span className="text-xs font-semibold">{gap.label}</span>
-        <SentenceWithAnswer gap={gap} />
+        <SentenceWithAnswer gap={gap} className="truncate" />
         <span className="flex-1" />
         {isBank && (
           <span className="shrink-0 text-xs text-muted-foreground">
@@ -223,20 +250,5 @@ function GapCard({ exercise, gap, onlyMissing, disabled, onChange }: GapCardProp
         )}
       </div>
     </div>
-  );
-}
-
-/** The sentence with its answer picked out, so the teacher writes about the right gap. */
-function SentenceWithAnswer({ gap }: { gap: Gap }) {
-  const words = gap.sentence.trim().split(/\s+/);
-
-  return (
-    <span className="truncate text-xs text-muted-foreground" style={{ fontFamily: READING }}>
-      {words.map((word, index) => (
-        <span key={index} className={index === gap.tokenIndex ? 'font-semibold text-primary' : ''}>
-          {word}{' '}
-        </span>
-      ))}
-    </span>
   );
 }

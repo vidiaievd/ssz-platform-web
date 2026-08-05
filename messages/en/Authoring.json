@@ -1107,7 +1107,26 @@
       "pairsTitle": "Explanations for a particular word",
       "pairsAllWritten": "Every wrong word here has its own explanation.",
       "pairFallsBack": "Falls back to: {fallback}",
-      "pairFallsBackEmpty": "Falls back to the default explanation above."
+      "pairFallsBackEmpty": "Falls back to the default explanation above.",
+      "viewLabel": "How to show the pairs",
+      "viewList": "By gap",
+      "viewMatrix": "Matrix"
+    },
+    "matrix": {
+      "caption": "Explanations for each gap and each word in the bank",
+      "gapColumn": "Gap",
+      "answerShort": "answer",
+      "answerCell": "{word} is the correct answer for {label}",
+      "writeCell": "Write an explanation for {label} × {word}",
+      "editCell": "Edit the explanation for {label} × {word}",
+      "legend": "A tick means the pair has its own explanation. A dot means the student gets the gap’s default instead — that is fine.",
+      "empty": "Nothing to fill in yet: the matrix needs a gap and a word bank.",
+      "editorTitle": "{label} × {word}",
+      "position": "{at} of {of}",
+      "previousCell": "Previous pair",
+      "nextCell": "Next pair",
+      "closeEditor": "Close the pair editor",
+      "shortcutHint": "Ctrl/Cmd + Enter moves to the next pair."
     }
   }
 }

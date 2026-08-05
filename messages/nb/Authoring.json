@@ -1107,7 +1107,26 @@
       "pairsTitle": "Forklaringer for et bestemt ord",
       "pairsAllWritten": "Alle gale ord her har sin egen forklaring.",
       "pairFallsBack": "Faller tilbake på: {fallback}",
-      "pairFallsBackEmpty": "Faller tilbake på standardforklaringen over."
+      "pairFallsBackEmpty": "Faller tilbake på standardforklaringen over.",
+      "viewLabel": "Hvordan parene vises",
+      "viewList": "Per luke",
+      "viewMatrix": "Matrise"
+    },
+    "matrix": {
+      "caption": "Forklaringer for hver luke og hvert ord i banken",
+      "gapColumn": "Luke",
+      "answerShort": "svar",
+      "answerCell": "{word} er det riktige svaret for {label}",
+      "writeCell": "Skriv en forklaring for {label} × {word}",
+      "editCell": "Rediger forklaringen for {label} × {word}",
+      "legend": "En hake betyr at paret har sin egen forklaring. En prikk betyr at eleven får lukens standardforklaring i stedet — det er helt greit.",
+      "empty": "Ingenting å fylle ut ennå: matrisen trenger en luke og en ordbank.",
+      "editorTitle": "{label} × {word}",
+      "position": "{at} av {of}",
+      "previousCell": "Forrige par",
+      "nextCell": "Neste par",
+      "closeEditor": "Lukk parredigeringen",
+      "shortcutHint": "Ctrl/Cmd + Enter går til neste par."
     }
   }
 }

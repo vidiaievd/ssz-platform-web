@@ -119,6 +119,23 @@ describe('StepFeedback', () => {
     expect(screen.getByText('0 of 2 word pairs written')).toBeInTheDocument();
   });
 
+  it('switches between the two views over the same pairs', async () => {
+    const { user } = renderStep(doc());
+
+    await user.click(screen.getByRole('radio', { name: 'Matrix' }));
+
+    expect(
+      screen.getByRole('button', { name: 'Write an explanation for G1 × bestilt' }),
+    ).toBeInTheDocument();
+    // The filter belongs to the list; in the matrix an empty cell is the point.
+    expect(
+      screen.queryByRole('checkbox', { name: 'Only words without an explanation' }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('radio', { name: 'By gap' }));
+    expect(screen.getByLabelText('bestilt')).toBeInTheDocument();
+  });
+
   it('hides the pair rows in free-type mode, where nobody chose a word', () => {
     renderStep(doc({ settings: { ...DEFAULT_SETTINGS, input: 'free' } }));
 
