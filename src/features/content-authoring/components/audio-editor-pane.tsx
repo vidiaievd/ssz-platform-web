@@ -17,8 +17,9 @@ import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 import { updateLessonAction } from '../actions/lesson';
 import { useLessonVariants, useListeningStages } from '../api/use-authoring-lessons';
 import { authoringKeys } from '../api/keys';
-import { useAutosave } from '../hooks/use-autosave';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
+import { useSaveScopeText } from './save-scope';
 import { EditorCard } from './editor-card';
 import { AudioSourceSlot } from './audio-source-slot';
 import { AudioLessonPreview } from './audio-lesson-preview';
@@ -29,6 +30,8 @@ interface AudioEditorPaneProps {
   lessonId: string;
   lessonTitle: string | null;
   state: 'draft' | 'published' | null;
+  /** Whether students can open this material right now — see `SaveScopeContext`. */
+  isLive: boolean | null;
   container: Container;
   backHref: string;
   publishSlot: ReactNode;
@@ -39,11 +42,13 @@ export function AudioEditorPane({
   lessonId,
   lessonTitle,
   state,
+  isLive,
   container,
   backHref,
   publishSlot,
 }: AudioEditorPaneProps) {
   const t = useTranslations('Authoring');
+  const saveScope = useSaveScopeText(isLive);
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
 
@@ -88,17 +93,11 @@ export function AudioEditorPane({
     return result;
   }
 
-  const autosave = useAutosave({
-    onSave: async () => {
-      const result = await saveLesson(getValues());
-      if (!result.ok) throw new Error(result.error.code);
-    },
-    debounceMs: 800,
-  });
+  const unsaved = useUnsavedChanges();
 
   function handleBodyTokenChange(newBody: string) {
     setValue('body', newBody);
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
   return (
@@ -106,9 +105,10 @@ export function AudioEditorPane({
       kind={kind}
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
+      isLive={isLive}
       backHref={backHref}
-      autosaveStatus={autosave.status}
-      autosaveSavedAt={autosave.savedAt}
+      saveStatus={unsaved.status}
+      savedAt={unsaved.savedAt}
       publishSlot={publishSlot}
       preview={
         <AudioLessonPreview
@@ -126,12 +126,17 @@ export function AudioEditorPane({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <Field label={t('fields.title')} htmlFor="lesson-title" error={errors.title?.message} required>
+          <Field
+            label={t('fields.title')}
+            htmlFor="lesson-title"
+            error={errors.title?.message}
+            required
+          >
             <Input
               id="lesson-title"
               placeholder={t('lessons.titlePlaceholder')}
               hasError={!!errors.title}
-              {...register('title', { onChange: () => autosave.schedule() })}
+              {...register('title', { onChange: () => unsaved.markDirty() })}
             />
           </Field>
 
@@ -141,22 +146,21 @@ export function AudioEditorPane({
             <Textarea
               rows={8}
               placeholder={t('editor.transcriptPlaceholder')}
-              {...register('transcript', { onChange: () => autosave.schedule() })}
+              {...register('transcript', { onChange: () => unsaved.markDirty() })}
             />
           </EditorCard>
 
           <Button
             type="button"
             onClick={() => {
-              autosave.cancel();
               void (async () => {
                 const result = await saveLesson(getValues());
                 if (!result.ok) {
                   toast.error(tErrors(result.error.code));
                   return;
                 }
-                autosave.markSaved();
-                toast.success(t('lessons.saveSuccess'));
+                unsaved.markSaved();
+                toast.success(t('lessons.saveSuccess'), { description: saveScope });
               })();
             }}
           >

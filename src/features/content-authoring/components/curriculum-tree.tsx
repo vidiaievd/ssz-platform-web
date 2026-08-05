@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
   AccessTier,
+  ContainerPublishState,
   CurriculumTree as CurriculumTreeData,
   CurriculumTreeItemNode,
   CurriculumTreeLevelNode,
@@ -22,7 +23,8 @@ import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
 import { createModuleAction } from '../actions/container';
 import { createSectionAction } from '../actions/section';
-import { ContainerStateBadge } from './container-state-badge';
+import { PublishStateBadge } from './publish-state-badge';
+import { ItemLiveBadge } from './item-live-badge';
 import {
   CurriculumSectionItems,
   MoveLevel,
@@ -46,6 +48,8 @@ interface CurriculumTreeProps {
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
   accessTier: AccessTier;
+  /** The course's owning school — inherited by every node created from the tree. */
+  ownerSchoolId?: string | null;
 }
 
 interface TreeRowProps {
@@ -59,7 +63,9 @@ interface TreeRowProps {
   expanded?: boolean;
   onToggle?: () => void;
   onSelect: () => void;
-  state?: 'draft' | 'published' | null;
+  state?: ContainerPublishState | null;
+  /** Extra status next to `state` — item liveness, which is not a container state. */
+  badge?: React.ReactNode;
   right?: React.ReactNode;
 }
 
@@ -75,6 +81,7 @@ function TreeRow({
   onToggle,
   onSelect,
   state,
+  badge,
   right,
 }: TreeRowProps) {
   return (
@@ -129,7 +136,8 @@ function TreeRow({
         </div>
       </div>
       {meta && <span className="font-mono text-[10.5px] text-muted-foreground">{meta}</span>}
-      {state && <ContainerStateBadge state={state} />}
+      {state && <PublishStateBadge state={state} />}
+      {badge}
       {right}
     </div>
   );
@@ -163,10 +171,43 @@ function ItemRow({
       }
       label={item.title ?? ''}
       meta={item.durationMinutes ? `${item.durationMinutes} min` : null}
-      state={item.state}
+      badge={<ItemLiveBadge isLive={item.isLive} />}
       selected={selectedId === item.id}
       onSelect={() => onSelect({ kind: 'item', item, sectionTitle })}
       right={right}
+    />
+  );
+}
+
+function OwnItemRow({
+  item,
+  sectionTitle,
+  selectedId,
+  onSelect,
+}: {
+  item: CurriculumTreeItemNode;
+  sectionTitle: string | null;
+  selectedId: string | null;
+  onSelect: (selection: CurriculumTreeSelection) => void;
+}) {
+  const def = getLessonTypeDefinition(getMaterialKind(item));
+  const Icon = def.icon;
+  return (
+    <TreeRow
+      depth={1}
+      icon={
+        <span
+          className="flex h-6.5 w-6.5 items-center justify-center rounded-md"
+          style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}
+        >
+          <Icon size={13} style={{ color: `var(${def.hueVar})` }} />
+        </span>
+      }
+      label={item.title ?? ''}
+      meta={item.durationMinutes ? `${item.durationMinutes} min` : null}
+      badge={<ItemLiveBadge isLive={item.isLive} />}
+      selected={selectedId === item.id}
+      onSelect={() => onSelect({ kind: 'item', item, sectionTitle })}
     />
   );
 }
@@ -183,6 +224,7 @@ function ModuleNode({
   targetLanguage,
   difficultyLevel,
   visibility,
+  ownerSchoolId,
 }: {
   module: CurriculumTreeModuleNode;
   index: number;
@@ -195,6 +237,7 @@ function ModuleNode({
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
+  ownerSchoolId?: string | null;
 }) {
   const t = useTranslations('Authoring');
   const [expanded, setExpanded] = useState(true);
@@ -218,7 +261,7 @@ function ModuleNode({
         label={mod.title ?? ''}
         sub={mod.titleEn}
         meta={t('structure.lessonCount', { count: lessonTotal })}
-        state={null}
+        state={mod.publishState}
         selected={selectedId === mod.id}
         onSelect={() => onSelect({ kind: 'module', module: mod })}
         right={
@@ -322,6 +365,7 @@ function ModuleNode({
             targetLanguage={targetLanguage}
             difficultyLevel={difficultyLevel}
             visibility={visibility}
+            ownerSchoolId={ownerSchoolId}
             onCreated={(itemId) => onChanged(itemId)}
           />
         </>
@@ -340,12 +384,16 @@ export function CurriculumTree({
   difficultyLevel,
   visibility,
   accessTier,
+  ownerSchoolId,
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
   const [expandedLevels, setExpandedLevels] = useState<Record<string, boolean>>({});
   const [isPending, startTransition] = useTransition();
   const [pendingLevelId, setPendingLevelId] = useState<string | null>(null);
+  /** Which of the edited module's own sections the picker is filing into. */
+  const [addOwnLessonIn, setAddOwnLessonIn] = useState<string | null>(null);
+  const editingModule = tree.containerType === 'module';
 
   function handleAddModule(levelSectionId: string | null) {
     if (isPending) return;
@@ -359,6 +407,7 @@ export function CurriculumTree({
         visibility,
         accessTier,
         levelSectionId,
+        ownerSchoolId,
       );
       setPendingLevelId(null);
       if (!result.ok) {
@@ -395,9 +444,7 @@ export function CurriculumTree({
               depth={0}
               expandable
               expanded={expanded}
-              onToggle={() =>
-                setExpandedLevels((prev) => ({ ...prev, [levelKey]: !expanded }))
-              }
+              onToggle={() => setExpandedLevels((prev) => ({ ...prev, [levelKey]: !expanded }))}
               icon={<Layers size={16} className="text-muted-foreground" />}
               label={level.title ?? ''}
               state={null}
@@ -430,30 +477,102 @@ export function CurriculumTree({
                     targetLanguage={targetLanguage}
                     difficultyLevel={difficultyLevel}
                     visibility={visibility}
+                    ownerSchoolId={ownerSchoolId}
+                  />
+                ))}
+                {/* Material attached to the edited container itself. A module
+                    holds its lessons and exercises here, and the same screen
+                    edits modules and courses alike. */}
+                {level.items.map((item) => (
+                  <OwnItemRow
+                    key={item.id}
+                    item={item}
+                    sectionTitle={level.title}
+                    selectedId={selectedId}
+                    onSelect={onSelect}
                   />
                 ))}
                 <div className="pb-1.5 pt-1" style={{ paddingLeft: 8 + 1 * 20 + 22 }}>
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => handleAddModule(level.id)}
-                    className="flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm disabled:opacity-50"
-                  >
-                    <Plus size={13} />
-                    {pendingLevelId === (level.id ?? '') ? '…' : t('structure.addModule')}
-                  </button>
+                  {/* A course is built from modules; a module is built from
+                      material. The same screen edits both, and it used to offer
+                      "Add module" either way — leaving a module editable only
+                      from its parent course. */}
+                  {editingModule ? (
+                    <button
+                      type="button"
+                      onClick={() => setAddOwnLessonIn(level.id ?? '')}
+                      className="flex items-center gap-1.5 rounded-sm text-[13px] font-semibold text-primary-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Plus size={13} />
+                      {t('structure.addLesson')}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => handleAddModule(level.id)}
+                      className="flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm disabled:opacity-50"
+                    >
+                      <Plus size={13} />
+                      {pendingLevelId === (level.id ?? '') ? '…' : t('structure.addModule')}
+                    </button>
+                  )}
                 </div>
               </>
             )}
           </div>
         );
       })}
+      {tree.ungroupedItems.map((item) => (
+        <OwnItemRow
+          key={item.id}
+          item={item}
+          sectionTitle={null}
+          selectedId={selectedId}
+          onSelect={onSelect}
+        />
+      ))}
+      {/* A module with no sections has no level row to hang the picker off,
+          and its material has to be reachable from somewhere. Once it has
+          sections, adding goes through them — a second, section-less entry
+          point would just scatter material. */}
+      {editingModule && tree.levels.length === 0 && (
+        <div className="pb-1.5 pt-1" style={{ paddingLeft: 8 + 22 }}>
+          <button
+            type="button"
+            onClick={() => setAddOwnLessonIn('')}
+            className="flex items-center gap-1.5 rounded-sm text-[13px] font-semibold text-primary-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Plus size={13} />
+            {t('structure.addLesson')}
+          </button>
+        </div>
+      )}
       <div className="mt-1 pl-2">
         <Button variant="ghost" size="sm" disabled={isPending} onClick={handleAddLevel}>
           <Plus size={13} />
           {t('structure.addLevel')}
         </Button>
       </div>
+
+      {editingModule && (
+        <AddLessonPicker
+          open={addOwnLessonIn !== null}
+          onOpenChange={(open) => {
+            if (!open) setAddOwnLessonIn(null);
+          }}
+          moduleContainerId={courseContainerId}
+          sectionId={addOwnLessonIn || null}
+          targetLanguage={targetLanguage}
+          difficultyLevel={difficultyLevel}
+          visibility={visibility}
+          ownerSchoolId={ownerSchoolId}
+          onCreated={(itemId) => {
+            setAddOwnLessonIn(null);
+            onChanged(itemId);
+          }}
+        />
+      )}
     </div>
   );
 }

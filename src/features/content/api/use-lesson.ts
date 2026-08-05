@@ -7,6 +7,7 @@ import type {
   Lesson,
   LessonListeningStage,
   LessonParagraph,
+  LessonTextSpan,
   LessonVariant,
   LessonVideoCue,
 } from '../types';
@@ -66,6 +67,33 @@ export function useLessonGlossaryMarks(lessonId: string, variantId: string | und
       const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/glossary-marks`);
       if (!res.ok) return [];
       return res.json() as Promise<GlossaryMark[]>;
+    },
+    staleTime: 120_000,
+    enabled: !!lessonId && !!variantId,
+  });
+}
+
+/**
+ * Positional lexis/grammar/chunk annotations for a TEXT lesson variant (spec 16).
+ *
+ * `includeBroken` is for authoring surfaces only: they need the spans whose
+ * anchor rotted in order to offer a repair. Reading surfaces leave it false and
+ * never see them.
+ */
+export function useLessonTextSpans(
+  lessonId: string,
+  variantId: string | undefined,
+  includeBroken = false,
+) {
+  return useQuery<LessonTextSpan[]>({
+    queryKey: contentKeys.lessonTextSpans(lessonId, variantId ?? '', includeBroken),
+    queryFn: async () => {
+      const query = includeBroken ? '?includeBroken=true' : '';
+      const res = await fetch(
+        `/api/content/lessons/${lessonId}/variants/${variantId}/spans${query}`,
+      );
+      if (!res.ok) return [];
+      return res.json() as Promise<LessonTextSpan[]>;
     },
     staleTime: 120_000,
     enabled: !!lessonId && !!variantId,

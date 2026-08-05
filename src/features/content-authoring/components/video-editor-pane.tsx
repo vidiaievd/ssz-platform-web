@@ -17,11 +17,16 @@ import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 import { updateLessonAction } from '../actions/lesson';
-import { useLessonVariants, useLessonCues, useLessonGlossaryMarks } from '../api/use-authoring-lessons';
+import {
+  useLessonVariants,
+  useLessonCues,
+  useLessonGlossaryMarks,
+} from '../api/use-authoring-lessons';
 import { useAuthoringVocabularyLists } from '../api/use-authoring-vocabulary';
 import { authoringKeys } from '../api/keys';
-import { useAutosave } from '../hooks/use-autosave';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
+import { useSaveScopeText } from './save-scope';
 import { VideoLessonPreview } from './video-lesson-preview';
 import { VideoSourceSlot } from './video-source-slot';
 import { CueListEditor } from './cue-list-editor';
@@ -32,6 +37,8 @@ interface VideoEditorPaneProps {
   lessonId: string;
   lessonTitle: string | null;
   state: 'draft' | 'published' | null;
+  /** Whether students can open this material right now — see `SaveScopeContext`. */
+  isLive: boolean | null;
   container: Container;
   backHref: string;
   publishSlot: ReactNode;
@@ -42,11 +49,13 @@ export function VideoEditorPane({
   lessonId,
   lessonTitle,
   state,
+  isLive,
   container,
   backHref,
   publishSlot,
 }: VideoEditorPaneProps) {
   const t = useTranslations('Authoring');
+  const saveScope = useSaveScopeText(isLive);
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
 
@@ -96,17 +105,11 @@ export function VideoEditorPane({
     return result;
   }
 
-  const autosave = useAutosave({
-    onSave: async () => {
-      const result = await saveLesson(getValues());
-      if (!result.ok) throw new Error(result.error.code);
-    },
-    debounceMs: 800,
-  });
+  const unsaved = useUnsavedChanges();
 
   function handleBodyTokenChange(newBody: string) {
     setValue('body', newBody);
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
   return (
@@ -114,9 +117,10 @@ export function VideoEditorPane({
       kind={kind}
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
+      isLive={isLive}
       backHref={backHref}
-      autosaveStatus={autosave.status}
-      autosaveSavedAt={autosave.savedAt}
+      saveStatus={unsaved.status}
+      savedAt={unsaved.savedAt}
       publishSlot={publishSlot}
       preview={
         <VideoLessonPreview
@@ -135,12 +139,17 @@ export function VideoEditorPane({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <Field label={t('fields.title')} htmlFor="lesson-title" error={errors.title?.message} required>
+          <Field
+            label={t('fields.title')}
+            htmlFor="lesson-title"
+            error={errors.title?.message}
+            required
+          >
             <Input
               id="lesson-title"
               placeholder={t('lessons.titlePlaceholder')}
               hasError={!!errors.title}
-              {...register('title', { onChange: () => autosave.schedule() })}
+              {...register('title', { onChange: () => unsaved.markDirty() })}
             />
           </Field>
 
@@ -149,15 +158,14 @@ export function VideoEditorPane({
           <Button
             type="button"
             onClick={() => {
-              autosave.cancel();
               void (async () => {
                 const result = await saveLesson(getValues());
                 if (!result.ok) {
                   toast.error(tErrors(result.error.code));
                   return;
                 }
-                autosave.markSaved();
-                toast.success(t('lessons.saveSuccess'));
+                unsaved.markSaved();
+                toast.success(t('lessons.saveSuccess'), { description: saveScope });
               })();
             }}
           >

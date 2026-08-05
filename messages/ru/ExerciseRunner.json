@@ -13,7 +13,10 @@
     "incorrect": "Не совсем",
     "submitted": "Ответ отправлен",
     "gradedNote": "Сохранёно для проверки учителем. Вы увидите результаты, когда они будут возвращены.",
-    "answerLabel": "Ответ:"
+    "answerLabel": "Ответ:",
+    "tryAgain": "Попробовать ещё раз",
+    "showAnswer": "Показать ответ",
+    "hideAnswer": "Скрыть ответы"
   },
   "loading": "Загрузка упражнения…",
   "error": {
@@ -25,18 +28,20 @@
     "defaultInstruction": "Выберите правильный ответ",
     "optionsLabel": "Варианты ответов"
   },
+  "mcqGroup": {
+    "questionOptions": "Ответы на вопрос {n}",
+    "answeredCount": "Отвечено {done} из {total} вопросов",
+    "partialScore": "Верно {correct} из {total} ответов"
+  },
   "fill": {
     "defaultInstruction": "Дополните предложение",
     "blankLabel": "Пропуск",
     "inputLabel": "Ваш ответ",
     "placeholder": "введите…",
     "rationaleTitle": "Почему такой ответ",
-    "optionHeader": "Вариант",
-    "verdictHeader": "Подходит?",
-    "noteHeader": "Почему",
     "verdictCorrect": "Верно",
-    "verdictAcceptable": "Возможно, но не здесь",
-    "verdictWrong": "Неверно"
+    "verdictWrong": "Неверно",
+    "yourAnswer": "Ваш ответ"
   },
   "translate": {
     "defaultInstruction": "Переведите предложение",
@@ -53,7 +58,18 @@
     "defaultInstruction": "Ответьте на вопрос",
     "inputLabel": "Ваш ответ",
     "placeholder": "Напишите ответ…",
-    "referenceLabel": "Образец ответа"
+    "referenceLabel": "Образец ответа",
+    "diffLabel": "Ваш ответ с разбором",
+    "diffForm": "Неверная форма слова",
+    "diffWrong": "Не то слово",
+    "diffExtra": "Лишнее слово",
+    "diffMissing": "Пропущенное слово",
+    "issues": {
+      "form": "неверная форма: {n}",
+      "wrong": "не то слово: {n}",
+      "extra": "лишних слов: {n}",
+      "missing": "пропущено слов: {n}"
+    }
   },
   "writing": {
     "defaultInstruction": "Напишите свой текст",
@@ -67,7 +83,35 @@
     "defaultInstruction": "Разместите каждое слово в правильном поле",
     "bankLabel": "Слова",
     "bankEmpty": "Все слова размещены",
-    "fieldDropLabel": "Разместить в {field}"
+    "fieldDropLabel": "Разместить в {field}",
+    "multiWordHint": "В одно поле может входить несколько слов",
+    "answerLabel": "Правильное размещение",
+    "sourceLabel": "Исходное предложение",
+    "targetLabel": "Целевое предложение"
   },
-  "unsupported": "Этот тип упражнения ({type}) пока не поддерживается."
+  "unsupported": "Этот тип упражнения ({type}) пока не поддерживается.",
+  "taskNumber": "Задание {n}",
+  "wordBank": {
+    "bankLabel": "Банк слов",
+    "choosePlaceholder": "Выберите…",
+    "blankLabel": "Пропуск в предложении {n}",
+    "filledCount": "Заполнено {done} из {total} пропусков",
+    "partialScore": "Верно {correct} из {total} пропусков",
+    "helperIdle": "Нажмите на пропуск, затем выберите слово.",
+    "helperArmed": "Теперь выберите слово для выделенного пропуска.",
+    "helperSelect": "Выберите слово для каждого пропуска."
+  },
+  "textOrder": {
+    "moveUp": "Выше",
+    "moveDown": "Ниже",
+    "dragHandle": "Перетащите, чтобы изменить порядок, позиция {n} из {total}",
+    "partialScore": "{correct} из {total} строк на своём месте"
+  },
+  "errorCorrection": {
+    "remaining": "Исправлений сделано: {found} из {total}",
+    "hint": "Нажмите на часть предложения, чтобы переписать её.",
+    "editLabel": "Переписать «{text}»",
+    "partialScore": "Исправлено {correct} из {total} ошибок",
+    "falsePositives": "Изменено верных частей: {n}"
+  }
 }

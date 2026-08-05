@@ -83,13 +83,17 @@
   },
   "exerciseTypes": {
     "multiple_choice": "Множинний вибір",
+    "multiple_choice_group": "Блок питань із вибором",
     "fill_in_blank": "Заповніть пропуск",
     "translate_to_target": "Переклад цільовою мовою",
     "translate_from_target": "Переклад з цільової мови",
     "match_pairs": "З’єднайте пари",
     "short_answer": "Коротка відповідь",
     "writing_task": "Письмове завдання",
-    "sentence_schema": "Схема речення"
+    "sentence_schema": "Схема речення",
+    "word_bank_fill": "Пропуски з банком слів",
+    "text_order": "Розставити по порядку",
+    "error_correction": "Знайти та виправити помилки"
   },
   "wordBank": "Банк слів",
   "matchColumnLeft": "Елементи",

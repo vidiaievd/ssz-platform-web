@@ -8,7 +8,8 @@ export async function GET() {
   try {
     const data = await serverFetch<SrsStats>({
       service: 'progress',
-      path: '/srs/stats',
+      // The server route is `/srs/stats/me`; plain `/srs/stats` is a 404.
+      path: '/srs/stats/me',
     });
     return NextResponse.json(data);
   } catch (e) {

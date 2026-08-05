@@ -18,8 +18,9 @@ import { grammarEditorFormSchema, type GrammarEditorFormValues } from '../schema
 import { updateGrammarRuleAction, saveGrammarExplanationAction } from '../actions/grammar';
 import { useAuthoringGrammarExplanations } from '../api/use-authoring-grammar';
 import { authoringKeys } from '../api/keys';
-import { useAutosave } from '../hooks/use-autosave';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
+import { useSaveScopeText } from './save-scope';
 import { EditorCard } from './editor-card';
 import { GrammarLessonPreview } from './grammar-lesson-preview';
 
@@ -28,6 +29,8 @@ interface GrammarEditorPaneProps {
   ruleId: string;
   ruleTitle: string | null;
   state: 'draft' | 'published' | null;
+  /** Whether students can open this material right now — see `SaveScopeContext`. */
+  isLive: boolean | null;
   container: Container;
   backHref: string;
   publishSlot: ReactNode;
@@ -38,11 +41,13 @@ export function GrammarEditorPane({
   ruleId,
   ruleTitle,
   state,
+  isLive,
   container,
   backHref,
   publishSlot,
 }: GrammarEditorPaneProps) {
   const t = useTranslations('Authoring');
+  const saveScope = useSaveScopeText(isLive);
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
@@ -111,22 +116,17 @@ export function GrammarEditorPane({
     return r2;
   }
 
-  const autosave = useAutosave({
-    onSave: async () => {
-      const result = await saveAll(getValues());
-      if (!result.ok) throw new Error(result.error.code);
-    },
-    debounceMs: 1500,
-  });
+  const unsaved = useUnsavedChanges();
 
   return (
     <LessonEditorShell
       kind={kind}
       title={ruleTitleValue || ruleTitle || t('lessons.untitled')}
       state={state}
+      isLive={isLive}
       backHref={backHref}
-      autosaveStatus={autosave.status}
-      autosaveSavedAt={autosave.savedAt}
+      saveStatus={unsaved.status}
+      savedAt={unsaved.savedAt}
       publishSlot={publishSlot}
       preview={
         <GrammarLessonPreview
@@ -154,7 +154,7 @@ export function GrammarEditorPane({
               placeholder={t('grammar.ruleTitlePlaceholder')}
               hasError={!!errors.ruleTitle}
               disabled={isPending}
-              {...register('ruleTitle', { onChange: () => autosave.schedule() })}
+              {...register('ruleTitle', { onChange: () => unsaved.markDirty() })}
             />
           </Field>
 
@@ -170,7 +170,7 @@ export function GrammarEditorPane({
                 placeholder="en"
                 hasError={!!errors.languageCode}
                 disabled={isPending}
-                {...register('languageCode', { onChange: () => autosave.schedule() })}
+                {...register('languageCode', { onChange: () => unsaved.markDirty() })}
               />
             </Field>
             <Field
@@ -184,7 +184,7 @@ export function GrammarEditorPane({
                 placeholder={t('grammar.explanationTitlePlaceholder')}
                 hasError={!!errors.explanationTitle}
                 disabled={isPending}
-                {...register('explanationTitle', { onChange: () => autosave.schedule() })}
+                {...register('explanationTitle', { onChange: () => unsaved.markDirty() })}
               />
             </Field>
           </div>
@@ -194,7 +194,7 @@ export function GrammarEditorPane({
               rows={6}
               placeholder={t('grammar.bodyPlaceholder')}
               disabled={isPending}
-              {...register('body', { onChange: () => autosave.schedule() })}
+              {...register('body', { onChange: () => unsaved.markDirty() })}
             />
           </EditorCard>
 
@@ -228,7 +228,9 @@ export function GrammarEditorPane({
                         placeholder={t('grammar.examplePlaceholder')}
                         hasError={!!errors.examples?.[index]?.text}
                         disabled={isPending}
-                        {...register(`examples.${index}.text`, { onChange: () => autosave.schedule() })}
+                        {...register(`examples.${index}.text`, {
+                          onChange: () => unsaved.markDirty(),
+                        })}
                       />
                     </div>
                     <Button
@@ -237,7 +239,7 @@ export function GrammarEditorPane({
                       size="icon"
                       onClick={() => {
                         removeExample(index);
-                        autosave.schedule();
+                        unsaved.markDirty();
                       }}
                       aria-label={t('grammar.removeExample')}
                     >
@@ -252,15 +254,14 @@ export function GrammarEditorPane({
           <Button
             type="button"
             onClick={() => {
-              autosave.cancel();
               startTransition(async () => {
                 const result = await saveAll(getValues());
                 if (!result.ok) {
                   toast.error(tErrors(result.error.code));
                   return;
                 }
-                autosave.markSaved();
-                toast.success(t('grammar.saveSuccess'));
+                unsaved.markSaved();
+                toast.success(t('grammar.saveSuccess'), { description: saveScope });
               });
             }}
             loading={isPending}

@@ -22,9 +22,25 @@ export type {
   RationaleVerdict,
 } from './fill-body';
 
+export { AnswerNoteMarker, buildAnswerNote } from './answer-note';
+export type { AnswerNote, Rationale, WordNotes } from './answer-note';
+
 
 export { McqBody } from './mcq-body';
 export type { McqBodyProps, McqContent, McqExpectedAnswers } from './mcq-body';
+
+export { McqGroupBody, keepCorrectPicks, optionsOf } from './mcq-group-body';
+export type {
+  McqGroupBodyProps,
+  McqGroupContent,
+  McqGroupExpectedAnswers,
+  McqGroupExpectedItem,
+  McqGroupItemResult,
+  McqGroupOption,
+  McqGroupQuestion,
+  McqGroupResults,
+  McqGroupValue,
+} from './mcq-group-body';
 
 export { TranslateBody } from './translate-body';
 export type { TranslateBodyProps, TranslateContent } from './translate-body';
@@ -42,6 +58,44 @@ export type {
 export { WritingBody } from './writing-body';
 export type { WritingBodyProps, WritingContent, WritingValue, WritingTopic } from './writing-body';
 
+export { ErrorCorrectionBody } from './error-correction-body';
+export type {
+  ErrorCorrectionBodyProps,
+  ErrorCorrectionContent,
+  ErrorCorrectionExpected,
+  ErrorCorrectionResults,
+  ErrorCorrectionValue,
+  ErrorChunk,
+  ErrorSentence,
+  ChunkOutcome,
+  ChunkResult,
+} from './error-correction-body';
+
+export { TextOrderBody, shuffleOrder } from './text-order-body';
+export type {
+  TextOrderBodyProps,
+  TextOrderContent,
+  TextOrderExpectedAnswers,
+  TextOrderResults,
+  OrderLine,
+} from './text-order-body';
+
+export {
+  WordBankFillBody,
+  parseSentence,
+  keepCorrectBlanks,
+} from './word-bank-fill-body';
+export type {
+  WordBankFillBodyProps,
+  WordBankFillContent,
+  WordBankFillExpectedAnswers,
+  WordBankFillExpectedBlank,
+  WordBankBlankResult,
+  WordBankFillResults,
+  WordBankFillValue,
+  WordBankSentence,
+} from './word-bank-fill-body';
+
 export { SentenceSchemaBody } from './sentence-schema-body';
 export type {
   SentenceSchemaBodyProps,
@@ -55,13 +109,21 @@ export type {
 export {
   normAnswer,
   gradeMcq,
+  checkMcqGroup,
   gradeFill,
   gradeTranslate,
   gradeMatch,
-  gradeShortAnswer,
   gradeSentenceSchema,
+  checkWordBankFill,
+  checkTextOrder,
+  checkErrorCorrection,
 } from './grading';
 export type { TranslateExpectedAnswers } from './grading';
+
+/* The short-answer checker is shared with the authoring side, so it lives in
+   lib/ — re-exported here so runner consumers keep one import path. */
+export { checkShortAnswer } from '@/lib/exercises/short-answer-diff';
+export type { DiffOutcome, DiffToken, ShortAnswerDiff } from '@/lib/exercises/short-answer-diff';
 
 export {
   deriveVisualState,

@@ -24,6 +24,19 @@ export interface Container {
   /** Course-only: how sub-lessons unlock for students. Defaults to 'open'. */
   gatingMode?: 'open' | 'sequential';
   currentPublishedVersionId?: string | null;
+  /**
+   * Composition state of this container's draft against its live version.
+   * Present only where the BFF resolves it (the author's own container list);
+   * `currentPublishedVersionId` alone cannot express "live, with changes
+   * students cannot see yet".
+   */
+  publishState?: ContainerPublishState;
+  /**
+   * Modules inside this container that students cannot open — never published,
+   * or holding changes that are not live. Modules are versioned independently
+   * of their course, so an up-to-date course can still hold several.
+   */
+  pendingModuleCount?: number;
   ownerUserId: string;
   ownerSchoolId?: string | null;
   ownerName?: string;
@@ -70,6 +83,16 @@ export interface CurriculumTreeItemNode {
   isRequired: boolean;
   lessonKind: 'text' | 'video' | 'audio' | 'live' | null;
   state: 'draft' | 'published' | null;
+  /**
+   * Whether the owning container's *currently published* version places this
+   * item — that is, whether a student can open it right now. `null` when that
+   * container has never been published, which its own badge already says.
+   *
+   * Not the same question as `state`: a lesson saved through the editor is
+   * variant-published immediately, while the row placing it lives in a draft
+   * version students cannot see.
+   */
+  isLive: boolean | null;
   durationMinutes: number | null;
   xpReward: number | null;
 }
@@ -81,6 +104,16 @@ export interface CurriculumTreeSectionNode {
   items: CurriculumTreeItemNode[];
 }
 
+/**
+ * Publish state of a container as content-service reports it.
+ *
+ * `pending_changes` means the container is live but its draft version holds a
+ * different set of items — those additions/removals/moves are invisible to
+ * students until it is published again. Edits to an item's own content are not
+ * tracked here: they rewrite a shared row and reach students immediately.
+ */
+export type ContainerPublishState = 'draft' | 'published' | 'pending_changes';
+
 export interface CurriculumTreeModuleNode {
   id: string;
   containerId: string;
@@ -89,6 +122,7 @@ export interface CurriculumTreeModuleNode {
   titleEn: string | null;
   position: number;
   isRequired: boolean;
+  publishState: ContainerPublishState;
   sections: CurriculumTreeSectionNode[];
   ungroupedItems: CurriculumTreeItemNode[];
 }
@@ -98,13 +132,23 @@ export interface CurriculumTreeLevelNode {
   title: string | null;
   position: number;
   modules: CurriculumTreeModuleNode[];
+  /**
+   * Leaf items in this section of the container being edited. A course keeps
+   * modules here; a module keeps its own lessons, vocabulary and exercises —
+   * and both are edited through the same screen.
+   */
+  items: CurriculumTreeItemNode[];
 }
 
 export interface CurriculumTree {
   versionId: string;
   containerId: string;
+  containerType: ContainerType;
   levelSystem: 'cefr' | 'custom' | 'single';
+  publishState: ContainerPublishState;
   levels: CurriculumTreeLevelNode[];
+  /** The edited container's own items that belong to no section. */
+  ungroupedItems: CurriculumTreeItemNode[];
 }
 
 export interface PageInfo {
@@ -154,18 +198,67 @@ export interface LessonVideoQuestion {
 
 export type ListeningStageType = 'gap_fill' | 'comprehension';
 
-/** Ordered gap-fill/comprehension activity staged after an AUDIO lesson variant's transcript (BE1.3). */
+/**
+ * Ordered gap-fill/comprehension activity staged after a lesson variant's primary
+ * content (BE1.3): an AUDIO transcript, or a TEXT body's post-reading check
+ * (spec 17). Named for the surface it was introduced on — see spec 17 §2.1.
+ */
 export interface LessonListeningStage {
   exerciseId: string;
   position: number;
   stageType: ListeningStageType;
 }
 
-/** Author-marked glossary word for a TEXT/VIDEO lesson variant (BE1.5). No unmark endpoint exists. */
+/**
+ * Author-marked glossary word for a TEXT/VIDEO lesson variant (BE1.5).
+ * Position-free — see `LessonTextSpan` for the positional model added in phase D.
+ */
 export interface GlossaryMark {
   id: string;
   vocabularyItemId: string;
   occurrenceCount: number;
+}
+
+export type LessonSpanKind = 'vocab' | 'grammar' | 'chunk';
+
+/** Why a span no longer holds: the body moved under it, or its referent is gone. */
+export type LessonSpanBrokenReason = 'offset' | 'ref';
+
+/** Where a broken span's snapshot text occurs in the current body (spec 16 §4.4). */
+export interface LessonSpanAnchorCandidate {
+  paragraphIndex: number;
+  charStart: number;
+  charEnd: number;
+}
+
+/**
+ * Positional author annotation over a TEXT lesson variant's body (spec 16).
+ *
+ * `charStart`/`charEnd` are a half-open UTF-16 range into the **raw markdown**
+ * of paragraph `paragraphIndex`, as split by the backend's blank-line paragraph
+ * splitter — the same numbering that keys `LessonParagraph`. They are *not*
+ * offsets into the rendered text; projecting them onto what the reader displays
+ * is the renderer's job.
+ *
+ * `broken` is computed by the server on every read and never stored. Broken
+ * spans reach authoring surfaces (`includeBroken=true`) so the author can
+ * re-anchor them, and are withheld from the reader entirely.
+ */
+export interface LessonTextSpan {
+  id: string;
+  paragraphIndex: number;
+  charStart: number;
+  charEnd: number;
+  kind: LessonSpanKind;
+  /** Vocabulary item id for `vocab`, grammar rule id for `grammar`, null for `chunk`. */
+  refId: string | null;
+  /** The text the author selected, as it read at that moment. */
+  textSnapshot: string;
+  note: string | null;
+  broken: boolean;
+  brokenReason: LessonSpanBrokenReason | null;
+  /** Always empty unless `broken`; a one-click repair is only safe when there is exactly one. */
+  reanchorCandidates: LessonSpanAnchorCandidate[];
 }
 
 export type LessonKind = 'text' | 'video' | 'audio' | 'live';
@@ -212,6 +305,52 @@ export interface VocabularyForm {
   value: string;
 }
 
+export type VocabularyGender = 'masculine' | 'feminine' | 'neuter' | 'common';
+
+/**
+ * The inflection paradigm as a *grid*, not a list: a noun's four cells, a verb's
+ * four tenses, an adjective's degrees. `forms` carries the same values as a flat
+ * label/value list — the two coexist because they answer different questions.
+ * `forms` is what the tokenizer matches surface forms against and what the
+ * "Alle former" drawer lists; `paradigm` is what a bøyning table can lay out in
+ * rows and columns, which a flat list cannot do without parsing its labels back.
+ *
+ * The first cell of every paradigm is the lemma itself, which is why each shape
+ * carries it under its own grammatical name rather than relying on the caller.
+ */
+export interface NounParadigm {
+  kind: 'noun';
+  gender?: VocabularyGender;
+  /** The lemma — "bil". The article (en/ei/et) is derived from `gender` at render time. */
+  indefiniteSingular: string;
+  definiteSingular?: string;
+  indefinitePlural?: string;
+  definitePlural?: string;
+}
+
+export interface VerbParadigm {
+  kind: 'verb';
+  verbClass?: string;
+  /** The lemma — "søke", without the "å" marker. */
+  infinitive: string;
+  present?: string;
+  past?: string;
+  /** Bare participle ("søkt"); the "har" auxiliary is a rendering concern. */
+  perfect?: string;
+}
+
+export interface AdjectiveParadigm {
+  kind: 'adjective';
+  /** The lemma — "erfaren". */
+  positive: string;
+  neuter?: string;
+  plural?: string;
+  comparative?: string;
+  superlative?: string;
+}
+
+export type VocabularyParadigm = NounParadigm | VerbParadigm | AdjectiveParadigm;
+
 export interface VocabularyItem {
   id: string;
   lemma: string;
@@ -220,6 +359,8 @@ export interface VocabularyItem {
   translations: VocabularyTranslation[];
   examples: VocabularyExample[];
   forms?: VocabularyForm[];
+  /** Grid-shaped view of `forms`, when the item's inflections fit a known paradigm. */
+  paradigm?: VocabularyParadigm;
   /** Media asset id for the pronunciation clip; resolve via `useMediaAsset` (FE5.1). */
   audioMediaId?: string;
 }
@@ -238,6 +379,8 @@ export interface GrammarExplanation {
   id: string;
   languageCode: string;
   title: string;
+  /** One-sentence gist, authored alongside the body. What a card shows instead of the body. */
+  summary?: string | null;
   body: string;
   examples?: string[];
   isPublished: boolean;
@@ -358,7 +501,16 @@ export interface ContentTag {
 export interface ContainerVersion {
   id: string;
   containerId: string;
+  versionNumber: number;
   status: 'draft' | 'published' | 'deprecated' | 'archived';
-  publishedAt?: string;
+  /** Release notes the author wrote when publishing this version. */
+  changelog: string | null;
+  publishedAt?: string | null;
+  deprecatedAt?: string | null;
+  /**
+   * When a superseding version will retire this one. `null` on a version taken
+   * off air by hand — nothing replaced it, so nothing is counting down.
+   */
+  sunsetAt?: string | null;
   createdAt: string;
 }

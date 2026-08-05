@@ -1,6 +1,5 @@
 import { http, HttpResponse } from 'msw';
 
-import { MOCK_STREAK } from '@/app/api/student/streak/route';
 import type { School, SchoolsResponse } from '@/features/discovery/types';
 import type { EnrollmentRequestsResponse } from '@/features/enrollment/types';
 import type { NotificationsResponse } from '@/features/notifications/types';
@@ -90,7 +89,6 @@ export const handlers = [
 
   // Upcoming lessons — real backend; default to empty in tests.
   http.get('/api/student/upcoming', () => HttpResponse.json([] as LessonPreview[])),
-  http.get('/api/student/streak', () => HttpResponse.json(MOCK_STREAK)),
 
   http.get('/api/notifications', () => {
     const response: NotificationsResponse = { items: [], unreadCount: 0 };

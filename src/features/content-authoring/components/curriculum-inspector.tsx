@@ -13,11 +13,14 @@ import type { CurriculumTreeLevelNode, CurriculumTreeModuleNode } from '@/featur
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
-import { useAutosave } from '../hooks/use-autosave';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { renameContainerAction } from '../actions/container';
 import { renameSectionAction } from '../actions/section';
 import { ContainerStateBadge } from './container-state-badge';
-import { AutosaveIndicator } from './autosave-indicator';
+import { SaveStatusIndicator } from './save-status-indicator';
+import { PanelSaveButton } from './panel-save-button';
+import { ModulePublishBlock } from './module-publish-block';
+import { ItemLiveBadge } from './item-live-badge';
 
 interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
@@ -47,20 +50,23 @@ function TitleField({
   ariaLabel: string;
 }) {
   const [title, setTitle] = useState(value);
-  const { status, savedAt, schedule } = useAutosave({ onSave: () => onSave(title) });
+  const unsaved = useUnsavedChanges({ onSave: () => onSave(title) });
 
   return (
     <div className="flex flex-1 flex-col gap-1">
-      <Input
-        value={title}
-        onChange={(e) => {
-          setTitle(e.target.value);
-          schedule();
-        }}
-        aria-label={ariaLabel}
-        className="h-8 text-[15px] font-bold"
-      />
-      <AutosaveIndicator status={status} savedAt={savedAt} />
+      <div className="flex items-center gap-1.5">
+        <Input
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            unsaved.markDirty();
+          }}
+          aria-label={ariaLabel}
+          className="h-8 text-[15px] font-bold"
+        />
+        <PanelSaveButton unsaved={unsaved} />
+      </div>
+      <SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />
     </div>
   );
 }
@@ -147,6 +153,10 @@ export function CurriculumInspector({
         </div>
         {mod.titleEn && <InspectorField label={t('structure.titleEn')} value={mod.titleEn} />}
         <p className="text-xs leading-relaxed text-muted-foreground">{t('structure.moduleHelp')}</p>
+        {/* Students read a module's own published version, so material added
+            here stays invisible until this module — not just the course — is
+            published. */}
+        <ModulePublishBlock publishState={mod.publishState} />
       </div>
     );
   }
@@ -181,9 +191,19 @@ export function CurriculumInspector({
         <InspectorField label={t('structure.xpReward')} value={item.xpReward ?? '—'} />
       </div>
 
+      {/* Liveness, not the lesson variant's own status: the question an author
+          asks of a row is whether students can open it. */}
       <InspectorField
         label={t('structure.state')}
-        value={item.state ? <ContainerStateBadge state={item.state} /> : '—'}
+        value={
+          item.isLive === null ? (
+            <ContainerStateBadge state="draft" />
+          ) : item.isLive ? (
+            t('publishState.itemLive')
+          ) : (
+            <ItemLiveBadge isLive={false} />
+          )
+        }
       />
 
       <Button asChild variant="outline" size="sm">

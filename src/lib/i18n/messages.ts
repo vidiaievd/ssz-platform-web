@@ -24,7 +24,6 @@ import Notifications from '../../../messages/en/Notifications.json';
 import Onboarding from '../../../messages/en/Onboarding.json';
 import Placement from '../../../messages/en/Placement.json';
 import Profile from '../../../messages/en/Profile.json';
-import Progress from '../../../messages/en/Progress.json';
 import PublicSchool from '../../../messages/en/PublicSchool.json';
 import RouteTitles from '../../../messages/en/RouteTitles.json';
 import Scheduling from '../../../messages/en/Scheduling.json';
@@ -68,7 +67,6 @@ export const enMessages = {
   Onboarding,
   Placement,
   Profile,
-  Progress,
   PublicSchool,
   RouteTitles,
   Scheduling,
@@ -115,7 +113,6 @@ export const NAMESPACES = [
   'Onboarding',
   'Placement',
   'Profile',
-  'Progress',
   'PublicSchool',
   'RouteTitles',
   'Scheduling',
@@ -190,7 +187,6 @@ export const STUDENT_NAMESPACES = [
   'Placement',
   'Catalog',
   'Assignments',
-  'Progress',
   'Content',
   'Enrollment',
   'EnrollmentRequired',
@@ -212,6 +208,10 @@ export const SCHOOL_NAMESPACES = [
   'Invite',
   'Authoring',
   'Content',
+  // The lesson editor previews reuse the student reader's components
+  // (GlossaryParagraph, AudioPlayer, VideoPlayer), which translate against
+  // `Learning.glossary`, `Learning.audio` and `Learning.reader.video.player`.
+  'Learning',
   'Media',
   'Notifications',
   'Profile',

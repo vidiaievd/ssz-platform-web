@@ -7,6 +7,7 @@ export {
   useBestLessonVariant,
   useLessonParagraphs,
   useLessonGlossaryMarks,
+  useLessonTextSpans,
   useLessonVideoCues,
   useLessonListeningStages,
 } from './use-lesson';
@@ -15,6 +16,7 @@ export {
   useVocabularyItems,
   useUnitVocabularyItems,
   useIntroduceCard,
+  useBulkIntroduceFromList,
 } from './use-vocabulary';
 export type { SrsSeedKind } from './use-vocabulary';
 export { useGrammarRule, useBestGrammarExplanation } from './use-grammar-rule';

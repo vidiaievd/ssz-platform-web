@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,13 +11,13 @@ import type { StudentProfile } from '@/features/profile';
 const useCourseHome = vi.fn();
 const useUnitContents = vi.fn();
 const useUpsertProgress = vi.fn();
-const useActivityStreak = vi.fn();
 const useVocabularyList = vi.fn();
 const useUnitVocabularyItems = vi.fn();
 const useLesson = vi.fn();
 const useBestLessonVariant = vi.fn();
 const useLessonParagraphs = vi.fn();
 const useLessonGlossaryMarks = vi.fn();
+const useLessonTextSpans = vi.fn(() => ({ data: [], isLoading: false }));
 const useLessonVideoCues = vi.fn();
 const useMyStudentProfile = vi.fn();
 const useMediaAsset = vi.fn((_id?: string) => ({ data: undefined }));
@@ -30,7 +31,6 @@ vi.mock('@/features/learning', async () => {
     useUpsertProgress: (...args: unknown[]) => useUpsertProgress(...args),
   };
 });
-vi.mock('@/features/student', () => ({ useActivityStreak: () => useActivityStreak() }));
 vi.mock('@/features/content', async () => {
   const actual = await vi.importActual<typeof import('@/features/content')>('@/features/content');
   return {
@@ -41,12 +41,17 @@ vi.mock('@/features/content', async () => {
     useBestLessonVariant: (...args: unknown[]) => useBestLessonVariant(...args),
     useLessonParagraphs: (...args: unknown[]) => useLessonParagraphs(...args),
     useLessonGlossaryMarks: (...args: unknown[]) => useLessonGlossaryMarks(...args),
+    useLessonTextSpans: () => useLessonTextSpans(),
     useLessonVideoCues: (...args: unknown[]) => useLessonVideoCues(...args),
+    // The text lesson's post-reading check: not what this suite is about, and a
+    // real query here would go to the network without a route handler.
+    useLessonListeningStages: () => ({ data: [], isLoading: false, isError: false }),
   };
 });
 // ExercisePage imports this deep hook directly (not via the @/features/content
 // barrel), so it must be mocked to avoid a real useQuery without a provider.
 vi.mock('@/features/content/api/use-exercise', () => ({
+  useExercisesWithAnswers: () => [],
   useExerciseWithAnswers: () => ({
     data: {
       id: 'exercise-1',
@@ -88,7 +93,6 @@ const COURSE_HOME: CourseHomePayload = {
   progress: { courseId: 'course-1', totalLessons: 50, completedLessons: 17, percentComplete: 34, modules: [], lessons: [] },
   mastery: { courseId: 'course-1', overallMastery: 0, bySkill: [] },
   srsDueCount: 0,
-  srsStreakDays: 0,
   srsReviewedToday: 0,
   srsVocabDue: 0,
   srsExerciseDue: 0,
@@ -301,16 +305,18 @@ const VOCAB_ITEMS: VocabularyItem[] = [
 function setup() {
   useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
   useUnitContents.mockReturnValue({ data: UNIT_CONTENTS, isLoading: false, isError: false, refetch: vi.fn() });
-  useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
 }
 
 function renderShell(props: Partial<React.ComponentProps<typeof ReaderShell>> = {}) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
-      <ReaderShell courseId="course-1" unitId="u2" itemId="item-1" {...props}>
-        <div>lesson content</div>
-      </ReaderShell>
-    </NextIntlClientProvider>,
+    <QueryClientProvider client={queryClient}>
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <ReaderShell courseId="course-1" unitId="u2" itemId="item-1" {...props}>
+          <div>lesson content</div>
+        </ReaderShell>
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
   );
 }
 
@@ -327,7 +333,36 @@ describe('ReaderShell', () => {
     // The exercise item renders ExercisePage in the content slot.
     expect(screen.getByText('Exercise question')).toBeInTheDocument();
     expect(screen.getByText('Practice · En vanlig arbeidsdag')).toBeInTheDocument();
-    expect(screen.getByText('7 days streak')).toBeInTheDocument();
+  });
+
+  /*
+    The shell is mounted inside AppShell's <main>, itself a scroll area already
+    sized to the viewport minus the topbar. Claiming a second viewport height
+    there overflows the container by exactly the topbar's height, and the outer
+    scrollbar that appears pushes the footer nav off screen — which no amount of
+    positioning on the footer itself can fix.
+  */
+  it('sizes itself to its container, not to the viewport', () => {
+    setup();
+    const { container } = renderShell();
+
+    const root = container.querySelector(':scope > div');
+    expect(root).toHaveClass('h-full');
+    expect(root).not.toHaveClass('h-screen');
+  });
+
+  it('keeps the footer nav outside the scrolling column', () => {
+    setup();
+    renderShell();
+
+    // A sibling of the scrollport rather than its last child: as a child it is
+    // reachable only after scrolling the whole lesson.
+    const footer = screen
+      .getByText('Next unlocks after this')
+      .closest<HTMLElement>('div[class*="border-t"]')!;
+    const scrollport = footer.parentElement!.querySelector('.overflow-auto');
+    expect(scrollport).toBeInTheDocument();
+    expect(scrollport).not.toContainElement(footer);
   });
 
   it('shows the locked-next guard in the footer when the next item is locked', () => {
@@ -361,7 +396,6 @@ describe('ReaderShell', () => {
       refetch: vi.fn(),
     });
     useUpsertProgress.mockReturnValue({ mutate });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
     useMyStudentProfile.mockReturnValue({
       isLoading: false,
@@ -400,7 +434,6 @@ describe('ReaderShell', () => {
     useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
     useUnitContents.mockReturnValue({ data: completedTextUnit, isLoading: false, isError: false, refetch: vi.fn() });
     useUpsertProgress.mockReturnValue({ mutate });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
     useMyStudentProfile.mockReturnValue({
       isLoading: false,
@@ -422,7 +455,6 @@ describe('ReaderShell', () => {
   it('shows a loading skeleton while queries are pending', () => {
     useCourseHome.mockReturnValue({ data: undefined, isLoading: true, isError: false, refetch: vi.fn() });
     useUnitContents.mockReturnValue({ data: undefined, isLoading: true, isError: false, refetch: vi.fn() });
-    useActivityStreak.mockReturnValue({ data: undefined });
     renderShell();
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
@@ -433,7 +465,6 @@ describe('ReaderShell', () => {
     const refetchUnit = vi.fn();
     useCourseHome.mockReturnValue({ data: undefined, isLoading: false, isError: true, refetch: refetchCourse });
     useUnitContents.mockReturnValue({ data: undefined, isLoading: false, isError: false, refetch: refetchUnit });
-    useActivityStreak.mockReturnValue({ data: undefined });
     renderShell();
 
     fireEvent.click(screen.getByRole('button', { name: /try again/i }));
@@ -449,7 +480,6 @@ describe('ReaderShell', () => {
       isError: false,
       refetch: vi.fn(),
     });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useVocabularyList.mockReturnValue({ data: VOCAB_LIST, isLoading: false, isError: false, refetch: vi.fn() });
     useUnitVocabularyItems.mockReturnValue({
       data: VOCAB_ITEMS,
@@ -462,7 +492,8 @@ describe('ReaderShell', () => {
 
     expect(useVocabularyList).toHaveBeenCalledWith('list-1');
     expect(useUnitVocabularyItems).toHaveBeenCalledWith('list-1');
-    expect(screen.getByText('nurse')).toBeInTheDocument();
+    // The vocabulary flow opens on its sorting stage, showing the word itself.
+    expect(screen.getByText('sykepleier')).toBeInTheDocument();
     expect(screen.queryByText('lesson content')).not.toBeInTheDocument();
   });
 
@@ -474,7 +505,6 @@ describe('ReaderShell', () => {
       isError: false,
       refetch: vi.fn(),
     });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
     useMyStudentProfile.mockReturnValue({
       isLoading: false,
@@ -497,7 +527,6 @@ describe('ReaderShell', () => {
   it('renders VideoLessonPage (not children) when the active item is a video lesson', () => {
     useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
     useUnitContents.mockReturnValue({ data: UNIT_CONTENTS, isLoading: false, isError: false, refetch: vi.fn() });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: VIDEO_LESSON, refetch: vi.fn() });
     useMyStudentProfile.mockReturnValue({
       isLoading: false,
@@ -525,7 +554,6 @@ describe('ReaderShell', () => {
       isError: false,
       refetch: vi.fn(),
     });
-    useActivityStreak.mockReturnValue({ data: { currentStreak: 7, longestStreak: 10, totalActiveDays: 20 } });
     useLesson.mockReturnValue({ isLoading: false, isError: false, data: LIVE_LESSON, refetch: vi.fn() });
 
     renderShell({ itemId: 'live-1' });

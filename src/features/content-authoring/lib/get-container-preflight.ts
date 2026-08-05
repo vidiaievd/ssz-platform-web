@@ -67,7 +67,13 @@ export async function getContainerPreflight(
     });
   }
 
-  const checks = violations.map((v) => mapPreflightViolation(v, { schoolSlug, containerId }));
+  // The items call already resolves a display title per referenced content
+  // row, so naming the offender costs nothing extra.
+  const itemTitles = new Map(items.map((i) => [i.itemId, i.title]));
+
+  const checks = violations.map((v) =>
+    mapPreflightViolation(v, { schoolSlug, containerId, itemTitles }),
+  );
   const blockerCount = checks.filter((c) => c.severity === 'blocker').length;
   const warningCount = checks.filter((c) => c.severity === 'warning').length;
 

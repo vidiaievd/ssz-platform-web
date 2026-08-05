@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { AnswerNoteMarker, buildAnswerNote, type Rationale, type WordNotes } from './answer-note';
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
@@ -17,6 +18,8 @@ export interface FillContent {
   gloss?: string;
   wordBank?: string[];
   instruction?: string;
+  /** Shared per-word notes, used by the feedback marker. */
+  wordNotes?: WordNotes;
 }
 
 export interface FillExpectedAnswers {
@@ -25,24 +28,10 @@ export interface FillExpectedAnswers {
   explanation?: string;
 }
 
-/** Verdict for one analysed option in the rationale matrix. */
-export type RationaleVerdict = 'correct' | 'acceptable' | 'wrong';
+export type { RationaleVerdict, RationaleOption } from './answer-note';
 
-export interface RationaleOption {
-  text: string;
-  verdict: RationaleVerdict;
-  note?: string;
-}
-
-/**
- * Optional teaching aid shown as feedback AFTER checking: why the correct
- * choice fits and why typical wrong choices don't. Purely presentational —
- * it never takes part in grading.
- */
-export interface FillRationale {
-  explanation?: string;
-  options?: RationaleOption[];
-}
+/** The rationale shape is shared with the other blank-based templates. */
+export type FillRationale = Rationale;
 
 export interface FillBodyProps {
   content: FillContent;
@@ -56,19 +45,24 @@ export interface FillBodyProps {
   mode: RunnerMode;
   accent: string;
   /**
-   * Optional per-blank explanation matrix, rendered only in the feedback phase.
-   * Omitted for exercises authored without one — the body behaves exactly as before.
+   * Optional teaching aid, surfaced by a marker beside the blank in the
+   * feedback phase. Omitted for exercises authored without one — the body
+   * behaves exactly as before.
    */
   rationale?: FillRationale;
+  /** The accepted answer, so the marker can say why it is the one. */
+  correctAnswer?: string;
+  /** Once set, a missed blank's note may name the answer and quote the rule. */
+  revealed?: boolean;
 }
 
 /* ── color constants ─────────────────────────────────────────────── */
-const OK_BG   = 'var(--ssz-color-success-50)';
-const OK_LINE = 'var(--ssz-color-success-500)';
-const OK_FG   = 'oklch(0.40 0.12 145)';
-const NO_BG   = 'var(--ssz-color-error-50)';
-const NO_LINE = 'var(--ssz-color-error-500)';
-const NO_FG   = 'var(--ssz-color-error-700)';
+const OK_BG   = 'var(--ssz-feedback-ok-bg)';
+const OK_LINE = 'var(--ssz-feedback-ok-line)';
+const OK_FG   = 'var(--ssz-feedback-ok-fg)';
+const NO_BG   = 'var(--ssz-feedback-no-bg)';
+const NO_LINE = 'var(--ssz-feedback-no-line)';
+const NO_FG   = 'var(--ssz-feedback-no-fg)';
 const READING = "var(--ssz-font-reading)";
 
 /** Split `textWithBlanks` around the first `___N___` marker. */
@@ -102,100 +96,6 @@ function getChipStyle(
   return { bg: 'var(--ssz-bg-surface)', border: 'var(--ssz-border-default)', color: 'var(--ssz-text-primary)' };
 }
 
-/** Per-verdict colors for the rationale matrix rows. */
-function verdictStyle(verdict: RationaleVerdict): { mark: string; color: string; bg: string } {
-  if (verdict === 'correct') return { mark: '✔', color: OK_FG, bg: OK_BG };
-  if (verdict === 'acceptable')
-    return { mark: '△', color: 'var(--ssz-text-secondary)', bg: 'var(--ssz-bg-surface)' };
-  return { mark: '✗', color: NO_FG, bg: NO_BG };
-}
-
-/**
- * Post-check teaching aid: a compact table of the candidate answers with a
- * verdict and a short note for each. Rendered under the sentence in the
- * feedback phase so the student learns the rule, not just the answer.
- */
-function RationaleMatrix({ rationale }: { rationale: FillRationale }) {
-  const t = useTranslations('ExerciseRunner');
-  const options = rationale.options ?? [];
-  if (options.length === 0 && !rationale.explanation) return null;
-
-  const verdictLabel: Record<RationaleVerdict, string> = {
-    correct: t('fill.verdictCorrect'),
-    acceptable: t('fill.verdictAcceptable'),
-    wrong: t('fill.verdictWrong'),
-  };
-
-  return (
-    <section
-      className="mt-7 rounded-xl border p-4"
-      style={{
-        borderColor: 'var(--ssz-border-default)',
-        background: 'var(--ssz-bg-subtle)',
-      }}
-      aria-label={t('fill.rationaleTitle')}
-    >
-      <h3
-        className="mb-3 text-[13px] font-semibold uppercase tracking-wide"
-        style={{ color: 'var(--ssz-text-secondary)', fontFamily: 'var(--ssz-font-ui)' }}
-      >
-        {t('fill.rationaleTitle')}
-      </h3>
-
-      {rationale.explanation && (
-        <p
-          className="mb-3 text-[15px] leading-relaxed"
-          style={{ color: 'var(--ssz-text-primary)', fontFamily: READING }}
-        >
-          {rationale.explanation}
-        </p>
-      )}
-
-      {options.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-[14px]">
-            <thead>
-              <tr style={{ color: 'var(--ssz-text-muted)' }}>
-                <th scope="col" className="py-1 pr-3 font-medium">
-                  {t('fill.optionHeader')}
-                </th>
-                <th scope="col" className="py-1 pr-3 font-medium">
-                  {t('fill.verdictHeader')}
-                </th>
-                <th scope="col" className="py-1 font-medium">
-                  {t('fill.noteHeader')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {options.map((opt) => {
-                const s = verdictStyle(opt.verdict);
-                return (
-                  <tr key={opt.text} style={{ background: s.bg }}>
-                    <td
-                      className="py-2 pr-3 align-top font-semibold"
-                      style={{ fontFamily: READING, color: s.color }}
-                    >
-                      {opt.text}
-                    </td>
-                    <td className="py-2 pr-3 align-top whitespace-nowrap" style={{ color: s.color }}>
-                      <span aria-hidden="true">{s.mark}</span>{' '}
-                      <span className="text-[13px]">{verdictLabel[opt.verdict]}</span>
-                    </td>
-                    <td className="py-2 align-top" style={{ color: 'var(--ssz-text-secondary)' }}>
-                      {opt.note}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  );
-}
-
 export function FillBody({
   content,
   value,
@@ -206,6 +106,8 @@ export function FillBody({
   mode,
   accent,
   rationale,
+  correctAnswer = '',
+  revealed = false,
 }: FillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const accentSoft = modeAccentSoft(mode);
@@ -214,6 +116,21 @@ export function FillBody({
   const hasWordBank = Array.isArray(content.wordBank) && content.wordBank.length > 0;
   const { before, after } = parseBlanks(content.textWithBlanks);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [noteOpen, setNoteOpen] = useState(false);
+
+  /* Feedback marker content — nothing authored means no marker at all. */
+  const answerNote = buildAnswerNote({
+    rationale,
+    wordNotes: content.wordNotes,
+    chosen: value,
+    correct: correctAnswer,
+    chosenCorrect: ok === true,
+    revealed,
+  });
+
+  /* Once the answer is unlocked it takes the blank's place, with the learner's
+     word struck out beside it. */
+  const showAnswer = reveal && revealed && ok === false && correctAnswer !== '';
 
   /* blank underline / text color */
   const blankColor =
@@ -274,7 +191,26 @@ export function FillBody({
       >
         <span>{before}</span>
 
-        {hasWordBank ? (
+        {showAnswer ? (
+          <span className="inline-flex items-baseline gap-2">
+            <span
+              style={{
+                borderBottom: `3px solid ${OK_LINE}`,
+                color: OK_FG,
+                fontWeight: 700,
+                fontFamily: READING,
+              }}
+            >
+              {correctAnswer}
+            </span>
+            {value !== '' && (
+              <span style={{ color: NO_FG, fontSize: 15 }}>
+                <span className="sr-only">{t('fill.yourAnswer')}: </span>
+                <s>{value}</s>
+              </span>
+            )}
+          </span>
+        ) : hasWordBank ? (
           /* Word-bank mode: underlined slot showing chosen word */
           <span
             style={{
@@ -319,6 +255,16 @@ export function FillBody({
         )}
 
         <span>{after}</span>
+
+        {/* Marker revealing why this blank's answer is the answer. */}
+        {reveal && ok !== null && answerNote && (
+          <AnswerNoteMarker
+            note={answerNote}
+            correct={ok}
+            open={noteOpen}
+            onToggle={() => setNoteOpen((v) => !v)}
+          />
+        )}
       </div>
 
       {/* Word bank chips */}
@@ -365,8 +311,6 @@ export function FillBody({
         </div>
       )}
 
-      {/* Explanation matrix — feedback phase only, and only when authored. */}
-      {reveal && rationale && <RationaleMatrix rationale={rationale} />}
     </>
   );
 }

@@ -135,7 +135,7 @@ export function WritingBody({
 
       <p
         className="mt-2 text-right text-[12px]"
-        style={{ color: meetsMin ? 'var(--ssz-text-muted)' : 'var(--ssz-color-error-700)' }}
+        style={{ color: meetsMin ? 'var(--ssz-text-muted)' : 'var(--ssz-feedback-no-fg)' }}
       >
         {content.minWords !== undefined
           ? t('writing.wordCountMin', { count: words, min: content.minWords })

@@ -11,9 +11,28 @@ vi.mock('../actions/container-item', () => ({
   reorderContainerItemsAction: vi.fn(),
   assignItemSectionAction: vi.fn(),
 }));
-vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
+// Stands in for the dialog, reporting where a new item would be filed.
+vi.mock('./add-lesson-picker', () => ({
+  AddLessonPicker: ({
+    open,
+    moduleContainerId,
+    sectionId,
+  }: {
+    open: boolean;
+    moduleContainerId: string;
+    sectionId?: string | null;
+  }) =>
+    open ? (
+      <div data-testid="add-lesson-picker" data-container={moduleContainerId}>
+        {sectionId ?? 'ungrouped'}
+      </div>
+    ) : null,
+}));
 vi.mock('../actions/container', () => ({ createModuleAction: vi.fn() }));
-vi.mock('../actions/section', () => ({ createSectionAction: vi.fn(), reorderSectionsAction: vi.fn() }));
+vi.mock('../actions/section', () => ({
+  createSectionAction: vi.fn(),
+  reorderSectionsAction: vi.fn(),
+}));
 
 const { CurriculumTree } = await import('./curriculum-tree');
 const { createModuleAction } = await import('../actions/container');
@@ -22,12 +41,16 @@ const { createSectionAction } = await import('../actions/section');
 const TREE: CurriculumTreeData = {
   versionId: 'version-1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
+  containerType: 'course' as const,
+  ungroupedItems: [],
   levels: [
     {
       id: 'level-a1',
       title: 'A1 — Beginner',
       position: 0,
+      items: [],
       modules: [
         {
           id: 'item-module-1',
@@ -52,12 +75,14 @@ const TREE: CurriculumTreeData = {
                   isRequired: true,
                   lessonKind: 'text',
                   state: 'published',
+                  isLive: true,
                   durationMinutes: 6,
                   xpReward: 10,
                 },
               ],
             },
           ],
+          publishState: 'draft',
           ungroupedItems: [],
         },
       ],
@@ -65,11 +90,11 @@ const TREE: CurriculumTreeData = {
   ],
 };
 
-function renderTree(onSelect = vi.fn(), onChanged = vi.fn()) {
+function renderTree(onSelect = vi.fn(), onChanged = vi.fn(), tree: CurriculumTreeData = TREE) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <CurriculumTree
-        tree={TREE}
+        tree={tree}
         selectedId={null}
         onSelect={onSelect}
         onChanged={onChanged}
@@ -78,6 +103,7 @@ function renderTree(onSelect = vi.fn(), onChanged = vi.fn()) {
         difficultyLevel="A2"
         visibility="public"
         accessTier="free_within_school"
+        ownerSchoolId="school-1"
       />
     </NextIntlClientProvider>,
   );
@@ -104,7 +130,10 @@ describe('CurriculumTree', () => {
     const { onSelect } = renderTree();
     fireEvent.click(screen.getByText('A1 — Beginner'));
     expect(onSelect).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: 'level', level: expect.objectContaining({ id: 'level-a1' }) }),
+      expect.objectContaining({
+        kind: 'level',
+        level: expect.objectContaining({ id: 'level-a1' }),
+      }),
     );
   });
 
@@ -112,7 +141,10 @@ describe('CurriculumTree', () => {
     const { onSelect } = renderTree();
     fireEvent.click(screen.getByText('Samfunn og kultur'));
     expect(onSelect).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: 'module', module: expect.objectContaining({ id: 'item-module-1' }) }),
+      expect.objectContaining({
+        kind: 'module',
+        module: expect.objectContaining({ id: 'item-module-1' }),
+      }),
     );
   });
 
@@ -127,6 +159,109 @@ describe('CurriculumTree', () => {
     }
   });
 
+  it('badges an unpublished module as a draft', () => {
+    renderTree();
+    expect(screen.getByText('Draft')).toBeInTheDocument();
+  });
+
+  it('badges a module whose draft is ahead of what students see', () => {
+    const [level] = TREE.levels;
+    const [module_] = level!.modules;
+    const pendingTree: CurriculumTreeData = {
+      ...TREE,
+      containerType: 'course' as const,
+      ungroupedItems: [],
+      levels: [
+        {
+          ...level!,
+          items: [],
+          modules: [{ ...module_!, publishState: 'pending_changes' }],
+        },
+      ],
+    };
+
+    renderTree(vi.fn(), vi.fn(), pendingTree);
+
+    expect(screen.getByText('Unpublished changes')).toBeInTheDocument();
+    expect(screen.queryByText('Draft')).not.toBeInTheDocument();
+  });
+
+  it('marks material students cannot open yet', () => {
+    // The badge used to show the lesson *variant's* status, which a save sets
+    // to published straight away — so freshly added material claimed to be
+    // live while the row placing it sat in an unpublished draft.
+    const [level] = TREE.levels;
+    const [module_] = level!.modules;
+    const [section] = module_!.sections;
+    const [item] = section!.items;
+    const pendingTree: CurriculumTreeData = {
+      ...TREE,
+      levels: [
+        {
+          ...level!,
+          modules: [
+            {
+              ...module_!,
+              sections: [{ ...section!, items: [{ ...item!, isLive: false }] }],
+            },
+          ],
+        },
+      ],
+    };
+
+    renderTree(vi.fn(), vi.fn(), pendingTree);
+
+    expect(screen.getByText('Awaiting publish')).toBeInTheDocument();
+  });
+
+  it('stays quiet about material students already have', () => {
+    // A badge on all sixteen rows of a module would bury the one that matters.
+    renderTree();
+
+    expect(screen.queryByText('Awaiting publish')).not.toBeInTheDocument();
+  });
+
+  it("renders the edited container's own material, not only its modules", () => {
+    // A module opened in this editor keeps its lessons and exercises at the
+    // level itself. Dropping them showed empty sections while pre-flight
+    // complained about items the author could not see.
+    const moduleTree: CurriculumTreeData = {
+      ...TREE,
+      containerType: 'module',
+      levels: [
+        {
+          id: 'section-nye-ord',
+          title: 'Nye ord',
+          position: 0,
+          modules: [],
+          items: [
+            {
+              id: 'own-item-1',
+              itemType: 'exercise',
+              refId: 'exercise-9',
+              title: 'Fyll inn ordet',
+              position: 0,
+              isRequired: true,
+              lessonKind: null,
+              state: null,
+              isLive: false,
+              durationMinutes: 2,
+              xpReward: 5,
+            },
+          ],
+        },
+      ],
+    };
+
+    const { onSelect } = renderTree(vi.fn(), vi.fn(), moduleTree);
+
+    expect(screen.getByText('Fyll inn ordet')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Fyll inn ordet'));
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'item', sectionTitle: 'Nye ord' }),
+    );
+  });
+
   it('collapses a level so its modules are no longer rendered', () => {
     renderTree();
     const [levelToggle] = screen.getAllByRole('button', { name: 'Collapse' });
@@ -139,9 +274,12 @@ describe('CurriculumTree', () => {
     const [module_] = level!.modules;
     const emptyTree: CurriculumTreeData = {
       ...TREE,
+      containerType: 'course' as const,
+      ungroupedItems: [],
       levels: [
         {
           ...level!,
+          items: [],
           modules: [
             {
               ...module_!,
@@ -200,6 +338,8 @@ describe('CurriculumTree', () => {
       'public',
       'free_within_school',
       'level-a1',
+      // Without the owning school the backend rejects `school_private` modules.
+      'school-1',
     );
   });
 
@@ -214,5 +354,56 @@ describe('CurriculumTree', () => {
 
     await waitFor(() => expect(createSectionAction).toHaveBeenCalled());
     expect(onChanged).not.toHaveBeenCalled();
+  });
+  it('offers a module its own material, not more modules', () => {
+    // The same screen edits courses and modules. Offering "Add module" in a
+    // module left its lessons addable only from the parent course editor.
+    const moduleTree: CurriculumTreeData = {
+      ...TREE,
+      containerType: 'module',
+      levels: [{ id: 'section-nye-ord', title: 'Nye ord', position: 0, modules: [], items: [] }],
+    };
+
+    renderTree(vi.fn(), vi.fn(), moduleTree);
+
+    expect(screen.getByRole('button', { name: 'Add lesson' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add module' })).not.toBeInTheDocument();
+  });
+
+  it('files what a module adds into the section it was added from', () => {
+    const moduleTree: CurriculumTreeData = {
+      ...TREE,
+      containerType: 'module',
+      levels: [{ id: 'section-nye-ord', title: 'Nye ord', position: 0, modules: [], items: [] }],
+    };
+
+    renderTree(vi.fn(), vi.fn(), moduleTree);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Add lesson' })[0]!);
+
+    const picker = screen.getByTestId('add-lesson-picker');
+    // The edited container itself, not one of its children.
+    expect(picker).toHaveAttribute('data-container', 'course-1');
+    expect(picker).toHaveTextContent('section-nye-ord');
+  });
+
+  it('lets a module with no sections add material anyway', () => {
+    const moduleTree: CurriculumTreeData = {
+      ...TREE,
+      containerType: 'module',
+      levels: [],
+      ungroupedItems: [],
+    };
+
+    renderTree(vi.fn(), vi.fn(), moduleTree);
+    fireEvent.click(screen.getByRole('button', { name: 'Add lesson' }));
+
+    expect(screen.getByTestId('add-lesson-picker')).toHaveTextContent('ungrouped');
+  });
+
+  it('still builds a course out of modules', () => {
+    renderTree();
+
+    expect(screen.getByRole('button', { name: 'Add module' })).toBeInTheDocument();
+    expect(screen.queryByTestId('add-lesson-picker')).not.toBeInTheDocument();
   });
 });

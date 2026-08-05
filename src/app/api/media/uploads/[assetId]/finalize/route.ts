@@ -10,12 +10,13 @@ export async function POST(
   const { assetId } = await params;
 
   try {
-    const data = await serverFetch({
+    // Upstream returns 204 No Content — there's no asset payload to relay.
+    await serverFetch({
       service: 'media',
       path: `/media/uploads/${assetId}/finalize`,
       method: 'POST',
     });
-    return NextResponse.json(data);
+    return new NextResponse(null, { status: 204 });
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') {
       return NextResponse.json({ error: 'Asset not found' }, { status: 404 });

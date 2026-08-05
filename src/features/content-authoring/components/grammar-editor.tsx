@@ -23,8 +23,8 @@ import { grammarEditorFormSchema, type GrammarEditorFormValues } from '../schema
 import { updateGrammarRuleAction, saveGrammarExplanationAction } from '../actions/grammar';
 import { useAuthoringGrammarExplanations } from '../api/use-authoring-grammar';
 import { authoringKeys } from '../api/keys';
-import { useAutosave } from '../hooks/use-autosave';
-import { AutosaveIndicator } from './autosave-indicator';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveStatusIndicator } from './save-status-indicator';
 
 interface GrammarEditorProps {
   ruleId: string;
@@ -50,7 +50,6 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
     register,
     handleSubmit,
     control,
-    getValues,
     formState: { errors },
   } = useForm<GrammarEditorFormValues>({
     resolver: zodResolver(grammarEditorFormSchema),
@@ -72,29 +71,18 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
       : undefined,
   });
 
-  const { fields: exampleFields, append: appendExample, remove: removeExample } = useFieldArray({
+  const {
+    fields: exampleFields,
+    append: appendExample,
+    remove: removeExample,
+  } = useFieldArray({
     control,
     name: 'examples',
   });
 
   const bodyValue = useWatch({ control, name: 'body' });
 
-  const autosave = useAutosave({
-    onSave: async () => {
-      const { languageCode, explanationTitle, body, examples } = getValues();
-      const result = await saveGrammarExplanationAction(
-        ruleId,
-        explanationId,
-        container.id,
-        container.difficultyLevel,
-        { languageCode, title: explanationTitle, body, examples },
-      );
-      if (!result.ok) throw new Error(result.error.code);
-      if (result.value?.explanationId) setLocalExplanationId(result.value.explanationId);
-      await queryClient.invalidateQueries({ queryKey: authoringKeys.grammarExplanations(ruleId) });
-    },
-    debounceMs: 1500,
-  });
+  const unsaved = useUnsavedChanges();
 
   useEffect(() => {
     void (async () => {
@@ -119,7 +107,6 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
   }, [bodyValue, editorTab]);
 
   function onSubmit(data: GrammarEditorFormValues) {
-    autosave.cancel();
     startTransition(async () => {
       const r1 = await updateGrammarRuleAction(ruleId, container.id, { title: data.ruleTitle });
       if (!r1.ok) {
@@ -149,7 +136,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
       await queryClient.invalidateQueries({
         queryKey: authoringKeys.grammarExplanations(ruleId),
       });
-      autosave.markSaved();
+      unsaved.markSaved();
       toast.success(t('grammar.saveSuccess'));
     });
   }
@@ -169,7 +156,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-medium">{t('grammar.editingLabel')}</h3>
         <div className="flex items-center gap-3">
-          <AutosaveIndicator status={autosave.status} savedAt={autosave.savedAt} />
+          <SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />
           <Button variant="ghost" size="sm" type="button" onClick={onClose}>
             {t('lessons.closeEditor')}
           </Button>
@@ -234,10 +221,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
             <label className="text-sm font-medium text-(--ssz-text-primary)">
               {t('lessons.body')}
             </label>
-            <Tabs
-              value={editorTab}
-              onValueChange={(v) => setEditorTab(v as 'write' | 'preview')}
-            >
+            <Tabs value={editorTab} onValueChange={(v) => setEditorTab(v as 'write' | 'preview')}>
               <TabsList>
                 <TabsTrigger value="write">{t('lessons.tabWrite')}</TabsTrigger>
                 <TabsTrigger value="preview">{t('lessons.tabPreview')}</TabsTrigger>
@@ -249,7 +233,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
                   className="font-mono text-sm"
                   disabled={isPending}
                   {...register('body', {
-                    onChange: () => autosave.schedule(),
+                    onChange: () => unsaved.markDirty(),
                   })}
                 />
               </TabsContent>
@@ -270,9 +254,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
 
           {/* Examples */}
           <div className="mt-4 space-y-2">
-            <p className="text-sm font-medium text-(--ssz-text-primary)">
-              {t('grammar.examples')}
-            </p>
+            <p className="text-sm font-medium text-(--ssz-text-primary)">{t('grammar.examples')}</p>
             {exampleFields.map((field, index) => (
               <div key={field.id} className="flex items-center gap-2">
                 <div className="flex-1">

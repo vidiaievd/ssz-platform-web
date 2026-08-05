@@ -1,0 +1,15 @@
+# Build output
+.next/
+out/
+build/
+coverage/
+storybook-static/
+
+# Test artefacts
+playwright-report/
+test-results/
+
+# Vendored / tool-generated files we never hand-edit
+public/mockServiceWorker.js
+package-lock.json
+openapi/spec.json

@@ -11,6 +11,7 @@ vi.mock('../actions/container-item', () => ({
   assignItemSectionAction: vi.fn(),
 }));
 vi.mock('./add-lesson-picker', () => ({ AddLessonPicker: () => null }));
+vi.mock('./module-publish-block', () => ({ ModulePublishBlock: () => null }));
 vi.mock('../actions/container', () => ({
   renameContainerAction: vi.fn(),
   createModuleAction: vi.fn(),
@@ -25,7 +26,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -38,13 +42,18 @@ import { useCurriculumTree } from '../api/use-curriculum-tree';
 const EMPTY_TREE: CurriculumTreeData = {
   versionId: 'version-1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
+  containerType: 'course' as const,
+  ungroupedItems: [],
   levels: [],
 };
 
 const ONE_LEVEL_TREE: CurriculumTreeData = {
   ...EMPTY_TREE,
-  levels: [{ id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [] }],
+  containerType: 'course' as const,
+  ungroupedItems: [],
+  levels: [{ id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [], items: [] }],
 };
 
 function renderPanel() {

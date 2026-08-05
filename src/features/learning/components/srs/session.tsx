@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { useSrsReview } from '../../api/use-srs-review';
 import { useSrsSessionStore } from '../../stores/srs-session-store';
 import type { ReviewRating } from '../../types';
-import { RatingBar } from './rating-bar';
+import { RatingBar, RATING_BY_SHORTCUT } from './rating-bar';
 import { RetryBar } from './retry-bar';
 import { ReviewCard } from './review-card';
 import { SessionProgress } from './session-progress';
@@ -22,7 +22,6 @@ export function SrsSession() {
     index,
     cardState,
     reviewedCount,
-    revealedAt,
     currentIdempotencyKey,
     ratingError,
     revealAnswer,
@@ -72,26 +71,23 @@ export function SrsSession() {
       if (!card || cardState !== 'revealed' || isPending) return;
 
       const idempotencyKey = currentIdempotencyKey ?? crypto.randomUUID();
-      const latencyMs = revealedAt ? Date.now() - revealedAt : 0;
+      // The answer is dated when it was given, not when it reached the server.
+      const reviewedAt = new Date().toISOString();
 
       // Show the advancing overlay immediately — no white flash.
       setCardState('advancing');
 
       // After the visual gate, advance optimistically from the local buffer.
       const advanceTimer = setTimeout(() => {
-        advanceAfterRating(rating, useSrsSessionStore.getState().streakDays);
+        advanceAfterRating(rating);
       }, ADVANCE_DELAY_MS);
 
       submitReview(
-        { rating, latencyMs, idempotencyKey },
+        { rating, reviewedAt, idempotencyKey },
         {
-          onSuccess: ({ streakDays, milestone }) => {
+          onSuccess: () => {
             clearTimeout(advanceTimer);
-            if (milestone) {
-              toast(t('toast.milestone', { days: milestone }));
-            }
-            // Advance with the real updated streak from the server.
-            advanceAfterRating(rating, streakDays);
+            advanceAfterRating(rating);
           },
           onError: (err) => {
             clearTimeout(advanceTimer);
@@ -114,7 +110,6 @@ export function SrsSession() {
       cardState,
       isPending,
       currentIdempotencyKey,
-      revealedAt,
       setCardState,
       advanceAfterRating,
       submitReview,
@@ -148,10 +143,8 @@ export function SrsSession() {
       }
       // Number keys 1-4 are no-ops until the card is revealed.
       if (cardState === 'revealed') {
-        const num = parseInt(e.key);
-        if (num >= 1 && num <= 4) {
-          handleRate(num as ReviewRating);
-        }
+        const rating = RATING_BY_SHORTCUT[parseInt(e.key)];
+        if (rating) handleRate(rating);
       }
     };
     window.addEventListener('keydown', onKey);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { Monitor, Moon, Sun, type LucideIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useLocale, useTranslations } from 'next-intl';
 
@@ -33,9 +33,18 @@ const THEME_OPTIONS = [
   { value: 'system', icon: Monitor },
 ] as const;
 
+export type UserMenuExtraItem = {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  badge?: number;
+};
+
 type UserMenuProps = {
   user: CurrentUser;
   activeContextKey?: string;
+  /** Extra links rendered above the sign-out action (e.g. student Notifications/Requests/Settings). */
+  extraItems?: UserMenuExtraItem[];
 };
 
 function getRoleLabel(t: ReturnType<typeof useTranslations<'UserMenu'>>, roles: string[]): string {
@@ -61,7 +70,7 @@ function getActiveSchoolRole(contexts: WorkspaceContext[], activeContextKey?: st
   return ctx?.type === 'school' ? ctx.role : null;
 }
 
-export function UserMenu({ user, activeContextKey }: UserMenuProps) {
+export function UserMenu({ user, activeContextKey, extraItems }: UserMenuProps) {
   const t = useTranslations('UserMenu');
   const tTheme = useTranslations('Theme');
   const roleLabel = getRoleLabel(t, user.roles);
@@ -124,6 +133,24 @@ export function UserMenu({ user, activeContextKey }: UserMenuProps) {
             {t('settings')}
           </Link>
         </DropdownMenuItem>
+        {extraItems && extraItems.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            {extraItems.map(({ href, icon: Icon, label, badge }) => (
+              <DropdownMenuItem key={href} asChild>
+                <Link href={href} className="flex items-center gap-2 cursor-pointer">
+                  <Icon className="size-4" aria-hidden />
+                  <span className="flex-1">{label}</span>
+                  {typeof badge === 'number' && badge > 0 && (
+                    <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-secondary-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+                      {badge}
+                    </span>
+                  )}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>{t('theme')}</DropdownMenuSubTrigger>

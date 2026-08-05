@@ -33,9 +33,9 @@ export function deriveVisualState(
 }
 
 /** CSS color string for the practice mode accent (sage teal). */
-export const PRACTICE_ACCENT = 'var(--ssz-color-primary-500)' as const;
+export const PRACTICE_ACCENT = 'var(--ssz-runner-practice)' as const;
 /** CSS color string for the graded mode accent (warm amber). */
-export const GRADED_ACCENT = 'var(--ssz-color-secondary-600)' as const;
+export const GRADED_ACCENT = 'var(--ssz-runner-graded)' as const;
 
 /** Returns the mode-driven accent CSS color string. */
 export function modeAccent(mode: RunnerMode): string {
@@ -43,11 +43,12 @@ export function modeAccent(mode: RunnerMode): string {
 }
 
 /**
- * Returns a very-light-tinted fill version of the mode accent (~7% opacity),
- * used for selected-but-not-revealed option backgrounds.
+ * Returns a tinted fill version of the mode accent, used for
+ * selected-but-not-revealed option backgrounds. Theme-aware: the token is
+ * ~7% on light surfaces and ~14% on dark ones so it stays visible.
  */
 export function modeAccentSoft(mode: RunnerMode): string {
   return mode === 'graded'
-    ? 'oklch(0.57 0.105 82 / 0.07)'
-    : 'oklch(0.62 0.105 168 / 0.07)';
+    ? 'var(--ssz-runner-graded-soft)'
+    : 'var(--ssz-runner-practice-soft)';
 }

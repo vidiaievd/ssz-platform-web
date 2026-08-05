@@ -71,12 +71,17 @@ export function UnitStepper({ phase, className }: UnitStepperProps) {
               />
             )}
             <div className="flex min-w-[64px] flex-col items-center gap-1.5">
+              {/*
+                Decorative: the step's name is real text in the span below, and
+                an aria-label on a role-less div is not exposed at all. The
+                state that label used to carry rides with that text instead.
+              */}
               <div
-                aria-label={`${t(step.labelKey)}${done ? ', completed' : active ? ', current' : ''}`}
+                aria-hidden="true"
                 className={cn(
                   'flex h-7 w-7 items-center justify-center rounded-full border-2 transition-all',
                   done
-                    ? 'border-[var(--ssz-color-primary-500)] bg-[var(--ssz-color-primary-500)]'
+                    ? 'border-(--ssz-bg-brand-solid) bg-(--ssz-bg-brand-solid)'
                     : active
                     ? 'border-[var(--ssz-color-primary-500)] bg-[var(--ssz-bg-surface)] shadow-[0_0_0_4px_oklch(0.95_0.03_168)]'
                     : 'border-[var(--ssz-border-strong)] bg-[var(--ssz-bg-subtle)]',
@@ -84,7 +89,7 @@ export function UnitStepper({ phase, className }: UnitStepperProps) {
                 style={{ transitionDuration: 'var(--ssz-duration-slow)', transitionTimingFunction: 'var(--ssz-ease-out)' }}
               >
                 {done ? (
-                  <Check size={12} className="text-white" aria-hidden="true" />
+                  <Check size={12} className="text-(--ssz-text-on-brand)" aria-hidden="true" />
                 ) : (
                   <Icon
                     size={12}
@@ -105,6 +110,9 @@ export function UnitStepper({ phase, className }: UnitStepperProps) {
                 )}
               >
                 {t(step.labelKey)}
+                {(done || active) && (
+                  <span className="sr-only">{t(done ? 'stepCompleted' : 'stepCurrent')}</span>
+                )}
               </span>
             </div>
           </div>

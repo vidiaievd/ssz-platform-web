@@ -20,14 +20,6 @@
     "in": "in {container}",
     "start": "Open"
   },
-  "streak": {
-    "title": "Activity streak",
-    "current": "Current streak",
-    "longest": "Longest streak",
-    "totalDays": "Total days",
-    "days": "{count, plural, one {# day} other {# days}}",
-    "noActivity": "Start a lesson to build your streak!"
-  },
   "voxordPromo": {
     "title": "Practice pronunciation on mobile",
     "description": "Download VoxOrd to practise speaking and get real-time feedback on your pronunciation.",
@@ -125,5 +117,183 @@
   "GroupAssignedBanner": {
     "message": "You're in {group} at {school}!",
     "dismiss": "Dismiss"
+  },
+  "homeCards": {
+    "sourceTag": {
+      "school": "School",
+      "self": "Self-study",
+      "free": "Free",
+      "paid": "Subscription"
+    },
+    "courseProgressCard": {
+      "lessonsProgress": "{done} / {total} lessons",
+      "wordsLearned": "{count} words learned",
+      "inProgress": "In progress",
+      "upNext": "Up next · {unit}",
+      "resume": "Resume",
+      "lastActive": "Last active {when}"
+    },
+    "trainingTile": {
+      "ready": "{count} ready"
+    },
+    "cadenceCard": {
+      "title": "Your study rhythm",
+      "advice": "Little and often beats long, rare sessions",
+      "reviewedToday": "{count, plural, =0 {No reviews yet today} one {# review today} other {# reviews today}}"
+    }
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "description": "This screen is being rebuilt as part of the Home redesign."
+  },
+  "home": {
+    "greeting": {
+      "title": "Good to see you",
+      "titleNamed": "Good to see you, {name}",
+      "classAndReviews": "You have a class today and {count, plural, one {# review} other {# reviews}} waiting.",
+      "classOnly": "You have a class today.",
+      "reviewsOnly": "{count, plural, one {# review is} other {# reviews are}} waiting for you.",
+      "nothingPending": "Nothing is due — a good moment to learn something new."
+    },
+    "resume": {
+      "overline": "Continue where you left off",
+      "cta": "Resume lesson",
+      "emptyTitle": "Nothing started yet",
+      "emptyDescription": "Pick a course and your next lesson will show up here.",
+      "emptyCta": "Browse the catalogue",
+      "overlineNew": "Ready when you are",
+      "ctaStart": "Start lesson"
+    },
+    "nextClass": {
+      "overline": "Next class",
+      "cta": "View class details",
+      "empty": "No class scheduled. Courses you study on your own have no fixed times."
+    },
+    "reviews": {
+      "overline": "Time to review",
+      "dueNow": "{count, plural, one {item due now} other {items due now}}",
+      "hint": "Spaced repetition brings each item back just before you would forget it.",
+      "cta": "Review {count, plural, one {# item} other {# items}}",
+      "empty": "Nothing to review right now. Items come back when they are due."
+    },
+    "training": {
+      "title": "Quick training",
+      "subtitle": "Jump straight into focused practice — or a mixed session.",
+      "allTraining": "All training",
+      "reviewLabel": "Review what's due",
+      "reviewDescription": "Work through the items your schedule has brought back today.",
+      "reviewMeta": "{count, plural, =0 {Nothing due} one {# item ready} other {# items ready}}",
+      "mixedLabel": "Mixed session",
+      "mixedDescription": "A varied set drawn across everything you are currently learning."
+    },
+    "myCourses": {
+      "title": "My courses",
+      "subtitle": "Everything you've started, in one place.",
+      "viewAll": "View all",
+      "lessonNumber": "Lesson {n}",
+      "courseComplete": "Course complete",
+      "emptyTitle": "No courses yet",
+      "emptyDescription": "Courses you start — on your own or through a school — appear here.",
+      "emptyCta": "Browse the catalogue",
+      "notStarted": "Not started yet"
+    },
+    "explore": {
+      "title": "Explore more courses",
+      "subtitle": "Free, subscription & from your schools"
+    },
+    "groupAccess": {
+      "message": "{school} placed you in {group} — your course materials are ready.",
+      "cta": "Open course"
+    }
+  },
+  "myCoursesPage": {
+    "eyebrow": "My learning",
+    "title": "My courses",
+    "subtitle": "Courses you're taking — from your schools, on your own, and from the free catalogue.",
+    "filters": {
+      "groupLabel": "Filter by source",
+      "all": "All",
+      "school": "From schools",
+      "self": "Self-study",
+      "free": "Free & public"
+    },
+    "empty": {
+      "all": "No courses yet",
+      "school": "No school courses yet",
+      "self": "No self-study courses yet",
+      "free": "No free courses yet",
+      "description": "Browse the catalogue to add a course.",
+      "cta": "Explore catalogue"
+    }
+  },
+  "reviewsPage": {
+    "eyebrow": "Stay sharp",
+    "title": "Reviews & reminders",
+    "subtitle": "The words and rules the platform thinks you're about to forget — brought back at the moment they stick best.",
+    "dueNow": "{count, plural, one {item due now} other {items due now}}",
+    "reviewAll": "Review all now",
+    "overdue": "{count, plural, one {# item has been} other {# items have been}} waiting since before today.",
+    "due": "due",
+    "openCourse": "Open course",
+    "kind": {
+      "exercise": "Exercises",
+      "vocabulary_word": "Words"
+    },
+    "unattributed": "{count, plural, one {# item is} other {# items are}} not tied to a course you currently have open.",
+    "methodNote": "We schedule each item for the moment just before you'd forget it. Reviewing then takes the least effort and builds the strongest memory — that's why the count changes daily.",
+    "comingUp": {
+      "title": "Coming up",
+      "empty": "The look-ahead schedule isn't available yet — today's queue is the full picture for now."
+    },
+    "mixed": {
+      "title": "Prefer a mixed session?",
+      "description": "Combine due reviews with fresh practice across everything you're learning.",
+      "cta": "Go to training"
+    },
+    "empty": {
+      "title": "Nothing to review right now",
+      "description": "Items come back when they're due. Until then, there's nothing to catch up on.",
+      "cta": "Open my courses"
+    }
+  },
+  "trainingPage": {
+    "eyebrow": "Practice",
+    "title": "Training",
+    "subtitle": "Short, focused sessions in a single skill — or a mixed set that adapts to what you need most. Not tied to any one course.",
+    "recommended": {
+      "overline": "Recommended right now",
+      "cta": "Start",
+      "exercise": "{count, plural, one {# exercise is} other {# exercises are}} ready — a short set keeps your grammar sharp.",
+      "vocabulary_word": "{count, plural, one {# new word is} other {# new words are}} ready — a short vocab set keeps them from fading."
+    },
+    "featured": {
+      "reviewLabel": "Review what's due",
+      "reviewDescription": "Work through the items your schedule has brought back today.",
+      "reviewMeta": "{count, plural, =0 {Nothing due} one {# item ready} other {# items ready}}",
+      "mixedLabel": "Complex session",
+      "mixedDescription": "A varied set drawn across everything you are currently learning."
+    },
+    "byType": {
+      "title": "Practice by type",
+      "subtitle": "Pick what to work on.",
+      "exercise": {
+        "label": "Exercises",
+        "description": "Grammar and skill drills from your courses."
+      },
+      "vocabulary_word": {
+        "label": "New words",
+        "description": "Vocabulary due for review, drawn from every course."
+      }
+    },
+    "methodNote": "Sessions use spaced repetition: items you find hard come back sooner, ones you know well come back later. Short, regular practice is far more effective than occasional long sessions."
+  },
+  "progressPage": {
+    "eyebrow": "Overview",
+    "title": "Progress",
+    "subtitle": "Where you stand in each course. Just the facts — how far you've come and what's left.",
+    "empty": {
+      "title": "No progress yet",
+      "body": "Start a course and your progress will show up here."
+    }
   }
 }

@@ -9,8 +9,13 @@ import type { AccessTier, DifficultyLevel, Visibility } from '@/features/content
 
 import { useCurriculumTree } from '../api/use-curriculum-tree';
 import type { CurriculumTreeSelection } from '../types';
-import { findItemSelection, findLevelOrModuleSelection, resolveSelection } from '../lib/find-tree-item';
+import {
+  findItemSelection,
+  findLevelOrModuleSelection,
+  resolveSelection,
+} from '../lib/find-tree-item';
 import { CurriculumTree } from './curriculum-tree';
+import { CurriculumPublishSummary } from './curriculum-publish-summary';
 import { CurriculumInspector } from './curriculum-inspector';
 
 interface CourseStructurePanelProps {
@@ -22,6 +27,8 @@ interface CourseStructurePanelProps {
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
   accessTier: AccessTier;
+  /** The course's owning school — new material inherits it, and `school_private` is invalid without it. */
+  ownerSchoolId?: string | null;
 }
 
 function StructureSkeleton() {
@@ -41,6 +48,7 @@ export function CourseStructurePanel({
   difficultyLevel,
   visibility,
   accessTier,
+  ownerSchoolId,
 }: CourseStructurePanelProps) {
   const t = useTranslations('Authoring');
   const [selection, setSelection] = useState<CurriculumTreeSelection | null>(null);
@@ -92,6 +100,7 @@ export function CourseStructurePanel({
           <h2 className="text-sm font-bold text-foreground">{t('structure.sectionTitle')}</h2>
           <span className="text-xs text-muted-foreground">{t('structure.sectionHint')}</span>
         </div>
+        <CurriculumPublishSummary tree={tree} className="mb-2.5" />
         <CurriculumTree
           tree={tree}
           selectedId={selectedId}
@@ -102,6 +111,7 @@ export function CourseStructurePanel({
           difficultyLevel={difficultyLevel}
           visibility={visibility}
           accessTier={accessTier}
+          ownerSchoolId={ownerSchoolId}
         />
       </div>
       <div className="ssz-surface sticky top-4 rounded-2xl border border-border p-4.5">

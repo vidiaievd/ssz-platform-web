@@ -4,25 +4,41 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useExerciseWithAnswers } from '@/features/content/api/use-exercise';
-import { primaryInstructionText } from '@/features/content/lib/instruction-text';
+import { primaryHintText, primaryInstructionText } from '@/features/content/lib/instruction-text';
 import type { ExerciseWithAnswers } from '@/features/content/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import {
   McqBody,
+  McqGroupBody,
+  keepCorrectPicks,
+  checkMcqGroup,
   FillBody,
   MatchBody,
   TranslateBody,
   ShortAnswerBody,
   WritingBody,
   SentenceSchemaBody,
+  WordBankFillBody,
+  checkWordBankFill,
+  keepCorrectBlanks,
+  TextOrderBody,
+  checkTextOrder,
+  shuffleOrder,
+  ErrorCorrectionBody,
+  checkErrorCorrection,
   gradeMcq,
   gradeMatch,
   gradeTranslate,
-  gradeShortAnswer,
+  checkShortAnswer,
   gradeSentenceSchema,
   normAnswer,
   PRACTICE_ACCENT,
   type McqContent,
+  type McqGroupExpectedAnswers,
+  type McqGroupOption,
+  type McqGroupQuestion,
+  type McqGroupResults,
+  type McqGroupValue,
   type FillRationale,
   type MatchContent,
   type MatchPair,
@@ -30,6 +46,19 @@ import {
   type SchemaToken,
   type SchemaPlacements,
   type WritingValue,
+  type WordBankFillExpectedAnswers,
+  type WordBankFillResults,
+  type WordBankFillValue,
+  type WordBankSentence,
+  type OrderLine,
+  type TextOrderResults,
+  type ErrorCorrectionExpected,
+  type ErrorCorrectionResults,
+  type ErrorCorrectionValue,
+  type ErrorSentence,
+  type WordNotes,
+  type DiffToken,
+  type ShortAnswerDiff,
 } from '@/features/student/exercises/runner';
 
 /* ── types ──────────────────────────────────────────────────────────────── */
@@ -39,9 +68,14 @@ type Ok = boolean | null;
 
 interface Graded {
   ok: Ok;
-  /** Explanation/summary revealed in the feedback banner. */
+  /**
+   * Shown as soon as the answer is checked — a tally or a status line, never
+   * anything that gives the answer away.
+   */
+  summary?: string;
+  /** The rule behind the answer; held back until the answer is unlocked. */
   explanation?: string;
-  /** A reference/sample answer to show when relevant. */
+  /** A reference/sample answer; held back until the answer is unlocked. */
   reference?: string;
 }
 
@@ -49,6 +83,14 @@ interface SolverProps {
   display: ExerciseWithAnswers;
   phase: 'answering' | 'feedback';
   ok: Ok;
+  /** True once the learner has used up their attempts or asked to see it. */
+  revealed: boolean;
+  /**
+   * Bumped by every retry. Solvers that can hand back a partly-filled exercise
+   * watch it and drop just the wrong answers; the rest ignore it and keep what
+   * the learner had.
+   */
+  retryNonce: number;
   onCheck: (graded: Graded) => void;
 }
 
@@ -61,6 +103,12 @@ const strArr = (v: unknown): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
 const instr = (d: ExerciseWithAnswers): string | undefined =>
   primaryInstructionText(d.instructions) ?? undefined;
+/** `content.word_notes` — a bank word → why it does or doesn't fit. */
+const wordNotes = (v: unknown): WordNotes | undefined => {
+  if (typeof v !== 'object' || v === null) return undefined;
+  const entries = Object.entries(v).filter((e): e is [string, string] => typeof e[1] === 'string');
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+};
 
 function CheckFooter({ canSubmit, onCheck }: { canSubmit: boolean; onCheck: () => void }) {
   const t = useTranslations('ExerciseRunner');
@@ -121,8 +169,95 @@ function McqSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function FillSolver({ display, phase, ok, onCheck }: SolverProps) {
+function McqGroupSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
+  const [value, setValue] = useState<McqGroupValue>({});
+  const [results, setResults] = useState<McqGroupResults>({});
+  const [canSubmit, setCanSubmit] = useState(false);
+  const [seenRetry, setSeenRetry] = useState(retryNonce);
+  if (retryNonce !== seenRetry) {
+    // The questions answered right keep their pick; the misses come back blank.
+    setSeenRetry(retryNonce);
+    setValue(keepCorrectPicks(value, results));
+    setResults({});
+  }
+  const t = useTranslations('ExerciseRunner');
+  const c = display.content;
+
+  const options = (v: unknown): McqGroupOption[] =>
+    (Array.isArray(v) ? v : [])
+      .filter((o): o is { id: string; text: string } => typeof (o as { id?: unknown }).id === 'string')
+      .map((o) => ({ id: o.id, text: str(o.text) }));
+
+  const items: McqGroupQuestion[] = (Array.isArray(c.items) ? c.items : [])
+    .filter((it): it is { id: string; question: string; options?: unknown } =>
+      typeof (it as { id?: unknown }).id === 'string',
+    )
+    .map((it) => {
+      const own = options(it.options);
+      return { id: it.id, question: str(it.question), ...(own.length > 0 && { options: own }) };
+    });
+
+  const expected: McqGroupExpectedAnswers = {
+    items: (Array.isArray(display.expectedAnswers.items) ? display.expectedAnswers.items : [])
+      .filter((it): it is { id: string; correct_option_ids: unknown; explanation?: unknown } =>
+        typeof (it as { id?: unknown }).id === 'string',
+      )
+      .map((it) => ({
+        id: it.id,
+        correct_option_ids: strArr(it.correct_option_ids),
+        ...(str(it.explanation) && { explanation: str(it.explanation) }),
+      })),
+  };
+
+  return (
+    <>
+      <McqGroupBody
+        content={{
+          items,
+          options: options(c.options),
+          instruction: instr(display),
+          context: str(c.context) || undefined,
+        }}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={setCanSubmit}
+        phase={phase}
+        ok={ok}
+        mode="practice"
+        accent={ACCENT}
+        results={results}
+        revealed={revealed}
+      />
+      {phase === 'answering' && (
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() => {
+            const graded = checkMcqGroup(expected, value);
+            setResults(graded.results);
+            onCheck({
+              ok: graded.ok,
+              summary: graded.ok
+                ? undefined
+                : t('mcqGroup.partialScore', { correct: graded.correct, total: graded.total }),
+              explanation: str(display.expectedAnswers.explanation) || undefined,
+            });
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
   const [value, setValue] = useState('');
+  const [seenRetry, setSeenRetry] = useState(retryNonce);
+  if (retryNonce !== seenRetry) {
+    // Adjusting state during render — the sanctioned way to react to a prop
+    // change without an extra pass. Only the missed blank exists here, so it
+    // starts over empty.
+    setSeenRetry(retryNonce);
+    setValue('');
+  }
   const c = display.content;
   const rawBlanks = Array.isArray(display.expectedAnswers.blanks) ? display.expectedAnswers.blanks : [];
   const firstBlank = rawBlanks[0] as
@@ -137,6 +272,7 @@ function FillSolver({ display, phase, ok, onCheck }: SolverProps) {
           textWithBlanks: str(c.text_with_blanks),
           wordBank: strArr(c.word_bank).length > 0 ? strArr(c.word_bank) : undefined,
           instruction: instr(display),
+          wordNotes: wordNotes(c.word_notes),
         }}
         value={value}
         onValueChange={setValue}
@@ -146,6 +282,8 @@ function FillSolver({ display, phase, ok, onCheck }: SolverProps) {
         mode="practice"
         accent={ACCENT}
         rationale={firstBlank?.rationale}
+        correctAnswer={firstAccepted[0] ?? ''}
+        revealed={revealed}
       />
       {phase === 'answering' && (
         <CheckFooter
@@ -188,7 +326,11 @@ function MatchSolver({ display, phase, ok, onCheck }: SolverProps) {
     });
   }, [c.left_items, c.right_items, display.expectedAnswers.pairs]);
 
-  const content: MatchContent = { pairs, instruction: instr(display) };
+  const content: MatchContent = {
+    pairs,
+    variant: c.variant === 'halves' ? 'halves' : 'pairs',
+    instruction: instr(display),
+  };
   const allLinked = pairs.every((p) => links[p.id]);
 
   return (
@@ -244,8 +386,16 @@ function TranslateSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function ShortAnswerSolver({ display, phase, ok, onCheck }: SolverProps) {
+function ShortAnswerSolver({ display, phase, ok, retryNonce, onCheck }: SolverProps) {
+  const t = useTranslations('ExerciseRunner');
   const [value, setValue] = useState('');
+  const [diff, setDiff] = useState<DiffToken[] | null>(null);
+  const [seenRetry, setSeenRetry] = useState(retryNonce);
+  if (retryNonce !== seenRetry) {
+    // A new go starts clean — last round's marks would sit under a fresh answer.
+    setSeenRetry(retryNonce);
+    setDiff(null);
+  }
   const c = display.content;
   const ea = display.expectedAnswers;
   const reference = str(ea.reference_answer);
@@ -262,20 +412,42 @@ function ShortAnswerSolver({ display, phase, ok, onCheck }: SolverProps) {
         mode="practice"
         accent={ACCENT}
         referenceAnswer={reference || undefined}
+        diff={diff ?? undefined}
       />
       {phase === 'answering' && (
         <CheckFooter
           canSubmit={value.trim() !== ''}
-          onCheck={() =>
+          onCheck={() => {
+            const checked = checkShortAnswer(
+              { reference_answer: reference, accepted_answers: strArr(ea.accepted_answers) },
+              value,
+            );
+            /* A near miss is worth marking up word by word. An answer that is
+               nowhere near still goes to a teacher — it may be a phrasing the
+               author never listed, and striking it through would be a lie. */
+            setDiff(checked.ok === null ? null : checked.tokens);
             onCheck({
-              ok: gradeShortAnswer({ reference_answer: reference, accepted_answers: strArr(ea.accepted_answers) }, value),
+              ok: checked.ok,
+              summary: checked.ok === false ? issueSummary(t, checked.counts) : undefined,
+              explanation: str(ea.explanation) || undefined,
               reference: reference || undefined,
-            })
-          }
+            });
+          }}
         />
       )}
     </>
   );
+}
+
+/** "wrong form: 1 · missing word: 1" — what to fix, without giving the words. */
+function issueSummary(
+  t: ReturnType<typeof useTranslations<'ExerciseRunner'>>,
+  counts: ShortAnswerDiff['counts'],
+): string | undefined {
+  const parts = (['form', 'wrong', 'missing', 'extra'] as const)
+    .filter((kind) => counts[kind] > 0)
+    .map((kind) => t(`shortAnswer.issues.${kind}`, { n: counts[kind] }));
+  return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
 function WritingSolver({ display, phase, ok, onCheck }: SolverProps) {
@@ -307,7 +479,7 @@ function WritingSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
+function SentenceSchemaSolver({ display, phase, ok, revealed, onCheck }: SolverProps) {
   const [value, setValue] = useState<SchemaPlacements>({});
   const c = display.content;
   const fields: SchemaField[] = (Array.isArray(c.fields) ? c.fields : [])
@@ -326,6 +498,7 @@ function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
       <SentenceSchemaBody
         content={{
           sentence: str(c.sentence),
+          source_sentence: str(c.source_sentence) || undefined,
           schema_type: c.schema_type === 'subordinate' ? 'subordinate' : 'main',
           fields,
           tokens,
@@ -338,9 +511,254 @@ function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
         ok={ok}
         mode="practice"
         accent={ACCENT}
+        revealPlacements={
+          revealed
+            ? Object.fromEntries(placements.map((p) => [p.field_id, p.token_ids]))
+            : null
+        }
       />
       {phase === 'answering' && (
-        <CheckFooter canSubmit={canSubmit} onCheck={() => onCheck({ ok: gradeSentenceSchema({ placements }, value) })} />
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() =>
+            onCheck({
+              ok: gradeSentenceSchema({ placements }, value),
+              explanation: str(display.expectedAnswers.explanation) || undefined,
+            })
+          }
+        />
+      )}
+    </>
+  );
+}
+
+function WordBankFillSolver({
+  display,
+  phase,
+  ok,
+  revealed,
+  retryNonce,
+  onCheck,
+}: SolverProps) {
+  const [value, setValue] = useState<WordBankFillValue>({});
+  const [results, setResults] = useState<WordBankFillResults>({});
+  const [canSubmit, setCanSubmit] = useState(false);
+  const [seenRetry, setSeenRetry] = useState(retryNonce);
+  if (retryNonce !== seenRetry) {
+    // The blanks already answered right stay filled; the misses come back empty.
+    setSeenRetry(retryNonce);
+    setValue(keepCorrectBlanks(value, results));
+    setResults({});
+  }
+  const t = useTranslations('ExerciseRunner');
+  const c = display.content;
+
+  const wordBank = strArr(c.word_bank);
+  const items: WordBankSentence[] = (Array.isArray(c.items) ? c.items : [])
+    .filter((it): it is { id: string; text_with_blanks: string } => typeof (it as { id?: unknown }).id === 'string')
+    .map((it) => ({ id: it.id, textWithBlanks: str(it.text_with_blanks) }));
+
+  const expected: WordBankFillExpectedAnswers = {
+    items: (Array.isArray(display.expectedAnswers.items) ? display.expectedAnswers.items : [])
+      .filter((it): it is { id: string; blanks: unknown } => typeof (it as { id?: unknown }).id === 'string')
+      .map((it) => ({
+        id: it.id,
+        blanks: (Array.isArray(it.blanks) ? it.blanks : [])
+          .filter((b): b is { blank_id: number; accepted_answers: unknown; rationale?: FillRationale } =>
+            typeof (b as { blank_id?: unknown }).blank_id === 'number',
+          )
+          .map((b) => ({
+            blank_id: b.blank_id,
+            accepted_answers: strArr(b.accepted_answers),
+            ...(b.rationale ? { rationale: b.rationale } : {}),
+          })),
+      })),
+  };
+
+  return (
+    <>
+      <WordBankFillBody
+        content={{
+          wordBank,
+          items,
+          instruction: instr(display),
+          reusableWords: c.reusable_words === true,
+          wordNotes: wordNotes(c.word_notes),
+          inputMode: c.input_mode === 'select' ? 'select' : 'chips',
+        }}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={setCanSubmit}
+        phase={phase}
+        ok={ok}
+        mode="practice"
+        accent={ACCENT}
+        results={results}
+        revealed={revealed}
+      />
+      {phase === 'answering' && (
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() => {
+            const graded = checkWordBankFill(expected, value);
+            setResults(graded.results);
+            onCheck({
+              ok: graded.ok,
+              summary: graded.ok
+                ? undefined
+                : t('wordBank.partialScore', { correct: graded.correct, total: graded.total }),
+              explanation: str(display.expectedAnswers.explanation) || undefined,
+            });
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
+  const t = useTranslations('ExerciseRunner');
+  const c = display.content;
+
+  const items: OrderLine[] = useMemo(
+    () =>
+      (Array.isArray(c.items) ? c.items : [])
+        .filter((it): it is { id: string; text: string; speaker?: string } =>
+          typeof (it as { id?: unknown }).id === 'string',
+        )
+        .map((it) => ({
+          id: it.id,
+          text: str(it.text),
+          ...(str(it.speaker) && { speaker: str(it.speaker) }),
+        })),
+    [c.items],
+  );
+
+  // Seeded by the exercise id: reloading the page re-poses the same puzzle.
+  const [value, setValue] = useState<string[]>(() =>
+    shuffleOrder(
+      items.map((i) => i.id),
+      display.id,
+    ),
+  );
+  const [results, setResults] = useState<TextOrderResults>({});
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  const expectedOrder = strArr(display.expectedAnswers.order);
+
+  return (
+    <>
+      <TextOrderBody
+        content={{
+          items,
+          kind: c.kind === 'sentences' ? 'sentences' : 'dialogue',
+          instruction: instr(display),
+        }}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={setCanSubmit}
+        phase={phase}
+        ok={ok}
+        mode="practice"
+        accent={ACCENT}
+        results={results}
+      />
+      {phase === 'answering' && (
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() => {
+            const graded = checkTextOrder({ order: expectedOrder }, value);
+            setResults(graded.results);
+            onCheck({
+              ok: graded.ok,
+              summary: graded.ok
+                ? undefined
+                : t('textOrder.partialScore', { correct: graded.correct, total: graded.total }),
+              explanation: str(display.expectedAnswers.explanation) || undefined,
+            });
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+
+function ErrorCorrectionSolver({ display, phase, ok, onCheck }: SolverProps) {
+  const t = useTranslations('ExerciseRunner');
+  const [value, setValue] = useState<ErrorCorrectionValue>({});
+  const [results, setResults] = useState<ErrorCorrectionResults>({});
+  const [canSubmit, setCanSubmit] = useState(false);
+  const c = display.content;
+
+  const items: ErrorSentence[] = useMemo(
+    () =>
+      (Array.isArray(c.items) ? c.items : [])
+        .filter((it): it is { id: string; chunks: unknown } => typeof (it as { id?: unknown }).id === 'string')
+        .map((it) => ({
+          id: it.id,
+          chunks: (Array.isArray(it.chunks) ? it.chunks : [])
+            .filter((ch): ch is { id: string; text: string } => typeof (ch as { id?: unknown }).id === 'string')
+            .map((ch) => ({ id: ch.id, text: str(ch.text) })),
+        })),
+    [c.items],
+  );
+
+  const expected: ErrorCorrectionExpected = {
+    corrections: (Array.isArray(display.expectedAnswers.corrections)
+      ? display.expectedAnswers.corrections
+      : []
+    )
+      .filter((cor): cor is { item_id: string; chunk_id: string; accepted: unknown; note?: string } =>
+        typeof (cor as { chunk_id?: unknown }).chunk_id === 'string',
+      )
+      .map((cor) => ({
+        item_id: str(cor.item_id),
+        chunk_id: cor.chunk_id,
+        accepted: strArr(cor.accepted),
+        ...(str(cor.note) && { note: str(cor.note) }),
+      })),
+  };
+
+  return (
+    <>
+      <ErrorCorrectionBody
+        content={{
+          items,
+          mistakeCount:
+            typeof c.mistake_count === 'number' ? c.mistake_count : expected.corrections.length,
+          instruction: instr(display),
+        }}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={setCanSubmit}
+        phase={phase}
+        ok={ok}
+        mode="practice"
+        accent={ACCENT}
+        results={results}
+      />
+      {phase === 'answering' && (
+        <CheckFooter
+          canSubmit={canSubmit}
+          onCheck={() => {
+            const graded = checkErrorCorrection(expected, value);
+            setResults(graded.results);
+            const tally = t('errorCorrection.partialScore', {
+              correct: graded.correct,
+              total: graded.total,
+            });
+            onCheck({
+              ok: graded.ok,
+              summary: graded.ok
+                ? undefined
+                : graded.falsePositives > 0
+                  ? `${tally} · ${t('errorCorrection.falsePositives', { n: graded.falsePositives })}`
+                  : tally,
+              explanation: str(display.expectedAnswers.explanation) || undefined,
+            });
+          }}
+        />
       )}
     </>
   );
@@ -348,14 +766,36 @@ function SentenceSchemaSolver({ display, phase, ok, onCheck }: SolverProps) {
 
 /* ── feedback banner ────────────────────────────────────────────────────── */
 
-function FeedbackBanner({ graded }: { graded: Graded }) {
+interface FeedbackBannerProps {
+  graded: Graded;
+  /** Held-back material is shown only once this is true. */
+  revealed: boolean;
+  /** Authored hint, offered instead of the answer on a first miss. */
+  hint?: string;
+  onRetry: () => void;
+  onToggleReveal: () => void;
+}
+
+function FeedbackBanner({
+  graded,
+  revealed,
+  hint,
+  onRetry,
+  onToggleReveal,
+}: FeedbackBannerProps) {
   const t = useTranslations('ExerciseRunner');
-  const { ok, explanation, reference } = graded;
+  const { ok, summary, explanation, reference } = graded;
+  /* Every miss is worth another go, and the answers stay one click away for as
+     long as any blank is wrong — a learner on their third attempt needs that
+     way out as much as on their first. Showing them is a toggle, not a one-way
+     door. Both are off in graded mode (ok === null), where the answer is
+     already with the teacher. */
+  const canRetry = ok === false;
   const tone =
     ok === true
-      ? { bg: 'var(--ssz-color-success-50)', line: 'var(--ssz-color-success-500)', fg: 'var(--ssz-color-success-700)', label: t('feedback.correct') }
+      ? { bg: 'var(--ssz-feedback-ok-bg)', line: 'var(--ssz-feedback-ok-line)', fg: 'var(--ssz-feedback-ok-fg)', label: t('feedback.correct') }
       : ok === false
-        ? { bg: 'var(--ssz-color-error-50)', line: 'var(--ssz-color-error-500)', fg: 'var(--ssz-color-error-700)', label: t('feedback.incorrect') }
+        ? { bg: 'var(--ssz-feedback-no-bg)', line: 'var(--ssz-feedback-no-line)', fg: 'var(--ssz-feedback-no-fg)', label: t('feedback.incorrect') }
         : { bg: 'var(--ssz-color-secondary-100)', line: 'var(--ssz-color-secondary-600)', fg: 'var(--ssz-color-secondary-700)', label: t('feedback.submitted') };
 
   return (
@@ -371,15 +811,45 @@ function FeedbackBanner({ graded }: { graded: Graded }) {
           {t('feedback.gradedNote')}
         </p>
       )}
-      {explanation && (
+      {summary && (
+        <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ssz-text-secondary)' }}>
+          {summary}
+        </p>
+      )}
+      {!revealed && hint && (
+        <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ssz-text-secondary)' }}>
+          {hint}
+        </p>
+      )}
+      {revealed && explanation && (
         <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ssz-text-secondary)' }}>
           {explanation}
         </p>
       )}
-      {ok === false && reference && (
+      {revealed && ok === false && reference && (
         <p className="mt-1.5 text-[13.5px]" style={{ color: 'var(--ssz-text-secondary)' }}>
           {t('feedback.answerLabel')} <span className="font-semibold">{reference}</span>
         </p>
+      )}
+      {canRetry && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onRetry}
+            className="rounded-lg px-4 py-2 text-[13.5px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            style={{ background: tone.line }}
+          >
+            {t('feedback.tryAgain')}
+          </button>
+          <button
+            type="button"
+            onClick={onToggleReveal}
+            className="rounded-lg border px-4 py-2 text-[13.5px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            style={{ borderColor: tone.line, color: tone.fg }}
+          >
+            {revealed ? t('feedback.hideAnswer') : t('feedback.showAnswer')}
+          </button>
+        </div>
       )}
     </div>
   );
@@ -389,6 +859,7 @@ function FeedbackBanner({ graded }: { graded: Graded }) {
 
 const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   multiple_choice: McqSolver,
+  multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
   match_pairs: MatchSolver,
   translate_to_target: TranslateSolver,
@@ -396,17 +867,32 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   short_answer: ShortAnswerSolver,
   writing_task: WritingSolver,
   sentence_schema: SentenceSchemaSolver,
+  word_bank_fill: WordBankFillSolver,
+  text_order: TextOrderSolver,
+  error_correction: ErrorCorrectionSolver,
 };
 
-export interface ExercisePageProps {
+export interface ExerciseSolverProps {
   exerciseId: string;
+  /** 1-based position, shown when the exercise is one task of a practice set. */
+  index?: number;
+  /** Fired once, when the learner checks this exercise. */
+  onChecked?: (ok: Ok) => void;
 }
 
-export function ExercisePage({ exerciseId }: ExercisePageProps) {
+/**
+ * One exercise: load → dispatch by template → grade client-side → feedback.
+ * Used on its own (`ExercisePage`) and stacked by the practice page.
+ */
+export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverProps) {
   const t = useTranslations('ExerciseRunner');
   const { data, isLoading, isError, refetch } = useExerciseWithAnswers(exerciseId);
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
   const [graded, setGraded] = useState<Graded | null>(null);
+  /* Attempts are unlimited; the answers appear only when asked for. */
+  const [attempts, setAttempts] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   // Per-item state is reset by remounting: the reader passes key={exerciseId}.
 
@@ -424,16 +910,49 @@ export function ExercisePage({ exerciseId }: ExercisePageProps) {
 
   return (
     <div>
+      {index != null && (
+        <div className="mb-2 text-[12px] font-bold text-(--ssz-text-muted)">
+          {t('taskNumber', { n: index })}
+        </div>
+      )}
       <Solver
         display={data}
         phase={phase}
         ok={graded?.ok ?? null}
+        revealed={revealed}
+        retryNonce={retryNonce}
         onCheck={(g) => {
           setGraded(g);
           setPhase('feedback');
+          setAttempts((n) => n + 1);
+          // A right answer explains itself; a wrong one waits to be asked.
+          if (g.ok !== false) setRevealed(true);
+          // Progress follows the first attempt — that is the honest signal.
+          if (attempts === 0) onChecked?.(g.ok);
         }}
       />
-      {phase === 'feedback' && graded && <FeedbackBanner graded={graded} />}
+      {phase === 'feedback' && graded && (
+        <FeedbackBanner
+          graded={graded}
+          revealed={revealed}
+          hint={primaryHintText(data.instructions) ?? undefined}
+          onRetry={() => {
+            setPhase('answering');
+            setGraded(null);
+            setRevealed(false);
+            setRetryNonce((n) => n + 1);
+          }}
+          onToggleReveal={() => setRevealed((v) => !v)}
+        />
+      )}
     </div>
   );
+}
+
+export interface ExercisePageProps {
+  exerciseId: string;
+}
+
+export function ExercisePage({ exerciseId }: ExercisePageProps) {
+  return <ExerciseSolver exerciseId={exerciseId} />;
 }

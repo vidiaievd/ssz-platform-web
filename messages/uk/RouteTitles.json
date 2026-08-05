@@ -5,5 +5,11 @@
   "lessons": "Уроки",
   "mySchools": "Мої школи",
   "settings": "Налаштування",
-  "enrolled": "Мої школи"
+  "enrolled": "Мої школи",
+  "home": "Головна",
+  "myCourses": "Мої курси",
+  "catalogue": "Каталог",
+  "training": "Тренування",
+  "reviews": "Повторення й нагадування",
+  "progress": "Прогрес"
 }

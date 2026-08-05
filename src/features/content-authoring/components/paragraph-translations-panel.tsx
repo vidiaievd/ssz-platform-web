@@ -8,8 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { useLessonParagraphs } from '../api/use-authoring-lessons';
 import { saveParagraphTranslationsAction } from '../actions/lesson-paragraphs';
-import { useAutosave } from '../hooks/use-autosave';
-import { AutosaveIndicator } from './autosave-indicator';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveStatusIndicator } from './save-status-indicator';
+import { PanelSaveButton } from './panel-save-button';
 import { EditorCard } from './editor-card';
 
 interface ParagraphTranslationsPanelProps {
@@ -22,7 +23,10 @@ interface ParagraphTranslationsPanelProps {
  * Per-paragraph bilingual translation entry (BE1.4). Full-replace on save, so
  * all rows share one autosave debounce rather than one per row.
  */
-export function ParagraphTranslationsPanel({ lessonId, variantId }: ParagraphTranslationsPanelProps) {
+export function ParagraphTranslationsPanel({
+  lessonId,
+  variantId,
+}: ParagraphTranslationsPanelProps) {
   const t = useTranslations('Authoring');
   const { data: paragraphs, isLoading } = useLessonParagraphs(lessonId, variantId);
   const [translations, setTranslations] = useState<string[]>([]);
@@ -36,7 +40,7 @@ export function ParagraphTranslationsPanel({ lessonId, variantId }: ParagraphTra
     setTranslations(paragraphs.map((p) => p.translation ?? ''));
   }
 
-  const autosave = useAutosave({
+  const unsaved = useUnsavedChanges({
     onSave: async () => {
       if (!variantId) return;
       const entries = translations
@@ -45,18 +49,19 @@ export function ParagraphTranslationsPanel({ lessonId, variantId }: ParagraphTra
       const result = await saveParagraphTranslationsAction(lessonId, variantId, entries);
       if (!result.ok) throw new Error(result.error.code);
     },
-    debounceMs: 800,
   });
 
   function handleChange(index: number, value: string) {
     setTranslations((prev) => prev.map((v, i) => (i === index ? value : v)));
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
   if (!variantId) {
     return (
       <EditorCard title={t('editor.paragraphTranslations')}>
-        <p className="text-sm text-muted-foreground">{t('editor.paragraphTranslationsNeedsBody')}</p>
+        <p className="text-sm text-muted-foreground">
+          {t('editor.paragraphTranslationsNeedsBody')}
+        </p>
       </EditorCard>
     );
   }
@@ -75,7 +80,7 @@ export function ParagraphTranslationsPanel({ lessonId, variantId }: ParagraphTra
   return (
     <EditorCard
       title={t('editor.paragraphTranslations')}
-      right={<AutosaveIndicator status={autosave.status} savedAt={autosave.savedAt} />}
+      right={<SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />}
     >
       {!paragraphs || paragraphs.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t('editor.paragraphTranslationsEmpty')}</p>
@@ -93,6 +98,11 @@ export function ParagraphTranslationsPanel({ lessonId, variantId }: ParagraphTra
               />
             </div>
           ))}
+          <PanelSaveButton
+            unsaved={unsaved}
+            label={t('editor.saveTranslations')}
+            className="self-end"
+          />
         </div>
       )}
     </EditorCard>

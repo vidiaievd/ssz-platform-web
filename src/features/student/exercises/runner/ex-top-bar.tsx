@@ -20,8 +20,8 @@ export function ExTopBar({ mode, idx, total, unitLabel, accent, onExit }: ExTopB
   const isGraded = mode === 'graded';
 
   const softColor = isGraded
-    ? 'var(--ssz-color-secondary-100)'
-    : 'var(--ssz-color-primary-50)';
+    ? 'var(--ssz-runner-graded-soft)'
+    : 'var(--ssz-runner-practice-soft)';
 
   const ModeIcon = isGraded ? Target : Zap;
 

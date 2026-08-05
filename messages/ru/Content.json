@@ -83,13 +83,17 @@
   },
   "exerciseTypes": {
     "multiple_choice": "Множественный выбор",
+    "multiple_choice_group": "Блок вопросов с выбором",
     "fill_in_blank": "Заполните пропуск",
     "translate_to_target": "Перевод на целевой язык",
     "translate_from_target": "Перевод с целевого языка",
     "match_pairs": "Сопоставьте пары",
     "short_answer": "Краткий ответ",
     "writing_task": "Письменное задание",
-    "sentence_schema": "Схема предложения"
+    "sentence_schema": "Схема предложения",
+    "word_bank_fill": "Пропуски с банком слов",
+    "text_order": "Расставить по порядку",
+    "error_correction": "Найти и исправить ошибки"
   },
   "wordBank": "Банк слов",
   "matchColumnLeft": "Элементы",

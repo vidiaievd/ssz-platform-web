@@ -15,14 +15,32 @@
   "glossary": {
     "seeInContext": "See in context",
     "listenWord": "Listen",
-    "lookUpWord": "Look up"
+    "lookUpWord": "Look up",
+    "clickForTranslation": "Click for translation",
+    "inText": "in the text: {form} · {label}",
+    "iKnowThis": "I know this word",
+    "grammarKind": "Grammar",
+    "chunkKind": "Phrase",
+    "showNote": "Show the note",
+    "showRule": "Show the grammar rule",
+    "ruleUnavailable": "This rule is not available.",
+    "inflection": "Inflection",
+    "inContext": "In the text",
+    "closeCard": "Close the card",
+    "lookUpIn": "Look it up in {source}",
+    "wordCardTitle": "Word card",
+    "wordCardEmpty": "Tap an underlined word or a coloured marker in the text — the explanation appears here.",
+    "ruleCardTitle": "Rule",
+    "openRule": "Open the full rule"
   },
   "unitStepper": {
     "label": "Unit steps",
     "readListen": "Read & Listen",
     "vocabulary": "Vocabulary",
     "grammar": "Grammar",
-    "practice": "Practice"
+    "practice": "Practice",
+    "stepCompleted": ", completed",
+    "stepCurrent": ", current step"
   },
   "errorState": {
     "default": "Something went wrong.",
@@ -161,7 +179,7 @@
       "overdueCta": "Finish & submit",
       "reviewLabel": "DAILY REVIEW",
       "reviewTitle": "{count} cards due for review",
-      "reviewMeta": "Keep your streak going — it only takes a few minutes.",
+      "reviewMeta": "It only takes a few minutes.",
       "reviewCta": "Start review",
       "resumeLabel": "CONTINUE LEARNING",
       "resumeTitle": "Continue where you left off",
@@ -221,21 +239,27 @@
       "showContents": "Show contents",
       "hideContents": "Hide contents",
       "unitLabel": "Unit {n}",
+      "levelUnits": "{done}/{total}",
       "locked": "Locked",
       "durationMinutes": "{n} min",
-      "otherItems": "Other"
+      "otherItems": "Other",
+      "railLabel": "Lesson tools",
+      "courseProgress": "Course progress",
+      "practiceTitle": "All exercises",
+      "practiceCount": "{n} tasks",
+      "collapseUnit": "Collapse sub-lesson",
+      "expandUnit": "Expand sub-lesson"
     },
     "topbar": {
       "courseLabel": "Course",
-      "streakDays": "{count, plural, one {# day streak} other {# days streak}}",
-      "xp": "{xp} XP",
       "toggleThemeToLight": "Switch to light theme",
       "toggleThemeToDark": "Switch to dark theme"
     },
     "footerNav": {
       "previous": "Previous",
       "next": "Next · {type}",
-      "unlocksAfterThis": "Next unlocks after this"
+      "unlocksAfterThis": "Next unlocks after this",
+      "nextUnit": "Next sub-lesson"
     },
     "body": {
       "comingSoonTitle": "This lesson page is on its way",
@@ -248,12 +272,13 @@
     },
     "vocab": {
       "grunnform": "base form",
-      "listen": "Listen",
       "flipHint": "Tap to flip",
       "flipCardLabel": "Flip card: {word}",
       "backLabelTranslation": "Translation",
       "backLabelDefinition": "Definition",
       "allForms": "All forms",
+      "inflection": "Inflection",
+      "inflectionOf": "Inflection of {word}",
       "pos": {
         "noun": "Noun",
         "verb": "Verb",
@@ -271,8 +296,6 @@
       "page": {
         "eyebrow": "Unit {unit} · {course} · {type}",
         "newWords": "{count, plural, one {# new word} other {# new words}}",
-        "howToTranslation": "Start with the new words. Tap a card to flip it — you’ll see the translation. Open All forms for the full inflection.",
-        "howToDefinition": "Start with the new words. Tap a card to flip it — you’ll see an explanation. Open All forms for the full inflection.",
         "levelBadgeTranslation": "A1–B1 · translation",
         "levelBadgeDefinition": "B2+ · explanation",
         "emptyTitle": "No new words yet",
@@ -281,6 +304,38 @@
         "reviewTitle": "Repeat earlier words",
         "reviewBody": "{count, plural, one {# word from earlier units is ready for review today} other {# words from earlier units are ready for review today}}",
         "reviewCta": "Review"
+      },
+      "listenTo": "Listen to {word}",
+      "flow": {
+        "viewLabel": "How to view the words",
+        "viewFlow": "Practice",
+        "viewList": "Word list",
+        "stages": {
+          "label": "Vocabulary steps",
+          "triage": "Sort",
+          "learn": "Meet the words"
+        },
+        "triage": {
+          "hint": "Words you already know go straight to review — you’ll only meet the rest.",
+          "know": "I know it",
+          "new": "New to me",
+          "knowAll": "I know all of them",
+          "skip": "Skip sorting",
+          "progress": "{current} of {total}",
+          "progressLabel": "Sorting progress"
+        },
+        "learn": {
+          "progress": "{current} of {total}",
+          "progressLabel": "Progress through the new words",
+          "prev": "Back",
+          "next": "Next word",
+          "finish": "Done"
+        },
+        "done": {
+          "title": "The words are ready",
+          "summary": "You knew {known} and met {learned} new ones. They’ll come back in review.",
+          "restart": "Go through them again"
+        }
       }
     },
     "text": {
@@ -296,13 +351,58 @@
         "nextParagraph": "Next paragraph",
         "noParagraphs": "This lesson has no text yet.",
         "emptyTitle": "This lesson isn't ready for you yet",
-        "emptyBody": "Add your native language and level in your profile to unlock this lesson."
+        "emptyBody": "Add your native language and level in your profile to unlock this lesson.",
+        "railAudio": "Listen",
+        "estimatedReadingMinutes": "{minutes, plural, one {# min read} other {# min read}}",
+        "secondPassOfferTitle": "Read it again?",
+        "secondPassOfferBody": "Try it once more without translations or highlights, and see how fast you read.",
+        "secondPassStart": "Start timed re-read",
+        "secondPassStats": "{time} · {wpm} wpm",
+        "railReading": "Reading"
       },
       "mode": {
         "label": "Reading mode",
         "immersive": "Immersive",
         "bilingual": "Bilingual",
         "focus": "Focus"
+      },
+      "gloss": {
+        "label": "Highlighting",
+        "all": "All words",
+        "unknown": "New only",
+        "off": "None",
+        "hint": "Which glossed words are underlined"
+      },
+      "check": {
+        "title": "Check your understanding",
+        "questions": "{count, plural, one {# question about this text} other {# questions about this text}}",
+        "start": "Start the check",
+        "gapfill": {
+          "heading": "Fill the gaps",
+          "body": "Look back at the text above if you need to.",
+          "checkAnswers": "Check answers",
+          "next": "Next — comprehension",
+          "correctCount": "{correct}/{total} correct",
+          "answerLabel": "Answer: {answer}"
+        },
+        "comp": {
+          "heading": "Comprehension",
+          "body": "Answer based on what you read.",
+          "checkAnswers": "Check answers",
+          "finish": "Finish the check",
+          "score": "Score {score}/{total}"
+        },
+        "done": {
+          "heading": "Check complete",
+          "body": "Anything you missed has been added to your review queue.",
+          "retry": "Try again"
+        }
+      },
+      "width": {
+        "label": "Text width",
+        "narrow": "Narrow",
+        "medium": "Medium",
+        "wide": "Wide"
       }
     },
     "video": {
@@ -410,6 +510,10 @@
         "join": "Join session"
       },
       "note": "This live class happens outside the platform over video call. Joining and attendance aren't tracked here."
+    },
+    "practice": {
+      "taskCount": "{n} tasks in this set",
+      "setProgress": "Checked {done} of {total}"
     }
   }
 }

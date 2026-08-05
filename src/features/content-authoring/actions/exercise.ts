@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
-import type { DifficultyLevel, Visibility } from '@/features/content/types';
+import type { DifficultyLevel, ExerciseWithAnswers, Visibility } from '@/features/content/types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
 import { buildExercisePayload } from '../lib/exercise-content';
@@ -15,7 +15,11 @@ import { addItemToDraft } from '../lib/container-items';
 function parseOrThrow(data: ExerciseFormValues) {
   const parsed = exerciseFormSchema.safeParse(data);
   if (!parsed.success) {
-    throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+    throw new AppError(
+      'validation',
+      'Invalid input',
+      parsed.error.flatten((i) => i.message),
+    );
   }
   return parsed.data;
 }
@@ -52,6 +56,7 @@ export async function createExerciseAction(
   difficultyLevel: DifficultyLevel,
   visibility: Visibility,
   data: ExerciseFormValues,
+  ownerSchoolId?: string | null,
 ) {
   return tryAction(async () => {
     const parsed = parseOrThrow(data);
@@ -69,14 +74,18 @@ export async function createExerciseAction(
         content,
         expectedAnswers,
         visibility,
+        // Without the owning school, `school_private` is rejected as a
+        // visibility no ownerless material may have (content-service
+        // `getValidVisibilities`).
+        ...(ownerSchoolId && { ownerSchoolId }),
       },
     });
 
     const item = await addItemToDraft(containerId, 'exercise', exerciseId);
 
-    if (parsed.instructions?.trim()) {
-      await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
-    }
+    // Unconditional: the schema requires instructions, because an exercise
+    // without an instruction row is a publish blocker (`EXERCISE_INCOMPLETE`).
+    await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
 
     revalidatePath(`/school/content/${containerId}`);
     return { exerciseId, itemId: item.id };
@@ -90,7 +99,16 @@ export async function updateExerciseAction(
 ) {
   return tryAction(async () => {
     const parsed = parseOrThrow(data);
-    const { content, expectedAnswers } = buildExercisePayload(parsed);
+
+    // Read before write: the form models only part of each template's schema,
+    // and `PATCH` replaces `content` / `expectedAnswers` wholesale. Merging over
+    // the stored exercise is what keeps the keys the form cannot reach — see
+    // `buildExercisePayload`.
+    const current = await serverFetch<ExerciseWithAnswers>({
+      service: 'content',
+      path: `/exercises/${exerciseId}/answers`,
+    });
+    const { content, expectedAnswers } = buildExercisePayload(parsed, current);
 
     await serverFetch({
       service: 'content',
@@ -103,9 +121,9 @@ export async function updateExerciseAction(
       },
     });
 
-    if (parsed.instructions?.trim()) {
-      await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
-    }
+    // Unconditional: the schema requires instructions, because an exercise
+    // without an instruction row is a publish blocker (`EXERCISE_INCOMPLETE`).
+    await upsertInstruction(exerciseId, parsed.instructions.trim(), parsed.hint);
 
     revalidatePath(`/school/content/${containerId}`);
   });

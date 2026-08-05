@@ -60,9 +60,9 @@ export function TranslateBody({
   /* textarea border color — follows ok state on reveal */
   const ringColor =
     reveal && ok === false
-      ? 'var(--ssz-color-error-500)'
+      ? 'var(--ssz-feedback-no-line)'
       : reveal && ok === true
-      ? 'var(--ssz-color-success-500)'
+      ? 'var(--ssz-feedback-ok-line)'
       : accent;
 
   /* textarea border only changes on reveal */
@@ -154,7 +154,7 @@ export function TranslateBody({
             padding: '12px 16px',
             borderRadius: 10,
             background: accentSoft,
-            border: '1.5px solid oklch(0.62 0.105 168 / 0.25)',
+            border: `1.5px solid color-mix(in oklab, ${accent} 30%, transparent)`,
           }}
           aria-live="polite"
         >

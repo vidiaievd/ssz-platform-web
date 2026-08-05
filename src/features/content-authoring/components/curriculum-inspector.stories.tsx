@@ -21,7 +21,7 @@ export const LevelSelected: Story = {
   args: {
     selection: {
       kind: 'level',
-      level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [] },
+      level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [], items: [] },
     },
     ...commonArgs,
   },
@@ -40,6 +40,7 @@ export const ModuleSelected: Story = {
         position: 0,
         isRequired: true,
         sections: [],
+        publishState: 'draft',
         ungroupedItems: [],
       },
     },
@@ -61,6 +62,7 @@ export const LessonSelected: Story = {
         isRequired: true,
         lessonKind: 'text',
         state: 'published',
+        isLive: true,
         durationMinutes: 6,
         xpReward: 10,
       },
@@ -83,6 +85,7 @@ export const DraftVocabularySelected: Story = {
         isRequired: true,
         lessonKind: null,
         state: 'draft',
+        isLive: false,
         durationMinutes: null,
         xpReward: null,
       },

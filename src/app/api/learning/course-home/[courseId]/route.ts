@@ -12,7 +12,6 @@ import type {
   CourseProgress,
   ModuleProgress,
   SkillMastery,
-  SrsCard,
   UnitStatus,
   UnitSummary,
 } from '@/features/learning/types';
@@ -53,11 +52,18 @@ interface RawCourseMastery {
   overall: number;
 }
 
+interface RawSrsCard {
+  contentType: 'EXERCISE' | 'VOCABULARY_WORD';
+}
+
 interface RawSrsDue {
-  cards: SrsCard[];
+  cards: RawSrsCard[];
   reviewedToday: number;
   dailyLimit: number;
-  streakDays: number;
+}
+
+interface RawSrsStats {
+  dueNowCount: number;
 }
 
 interface UnitRollup {
@@ -130,7 +136,7 @@ export async function GET(
 
   try {
     /* ── Phase 1: parallel upstream calls ─────────────────────────── */
-    const [rawProgress, rawMastery, rawSrsDue, container] = await Promise.all([
+    const [rawProgress, rawMastery, rawSrsDue, rawSrsStats, container] = await Promise.all([
       serverFetch<RawCourseProgress>({
         service: 'progress',
         path: `/progress/course/${courseId}`,
@@ -142,6 +148,10 @@ export async function GET(
       serverFetch<RawSrsDue>({
         service: 'progress',
         path: '/srs/due',
+      }),
+      serverFetch<RawSrsStats>({
+        service: 'progress',
+        path: '/srs/stats/me',
       }),
       serverFetch<Container>({
         service: 'content',
@@ -259,13 +269,14 @@ export async function GET(
       ],
     };
 
-    /* ── Derive SRS breakdown from card sample ────────────────────── */
-    // /srs/due no longer reports a total due count, only the fetched sample —
-    // treat the sample itself as the due count (matches the split logic below).
-    // Card shape no longer carries contentType; attribute all due to vocab.
-    const srsDueCount = rawSrsDue.cards.length;
-    const srsVocabDue = srsDueCount;
-    const srsExerciseDue = 0;
+    /* ── SRS due breakdown ─────────────────────────────────────────── */
+    // /srs/due only returns a bounded sample of cards, not the true total —
+    // the real count is /srs/stats/me's dueNowCount. There's no per-type due
+    // count endpoint, so the vocab/exercise split is estimated from the
+    // sample's contentType distribution.
+    const srsDueCount = rawSrsStats.dueNowCount;
+    const srsVocabDue = rawSrsDue.cards.filter((c) => c.contentType === 'VOCABULARY_WORD').length;
+    const srsExerciseDue = rawSrsDue.cards.filter((c) => c.contentType === 'EXERCISE').length;
 
     const courseInfo: CourseInfo = {
       id: container.id,
@@ -281,7 +292,6 @@ export async function GET(
       progress,
       mastery,
       srsDueCount,
-      srsStreakDays: rawSrsDue.streakDays,
       srsReviewedToday: rawSrsDue.reviewedToday,
       srsVocabDue,
       srsExerciseDue,

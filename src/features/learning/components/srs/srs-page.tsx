@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -10,7 +10,6 @@ import { useSrsDue } from '../../api/use-srs-due';
 import { useSrsSessionStore } from '../../stores/srs-session-store';
 import { SrsEntry } from './entry';
 import { SrsSession } from './session';
-import { SrsSettingsDialog } from './settings-dialog';
 import { SessionSummary } from './summary';
 
 /* ── Loading skeleton ───────────────────────────────────────────────── */
@@ -63,15 +62,16 @@ function SrsError({ onRetry }: SrsErrorProps) {
 export function SrsPage() {
   const { data, isLoading, isError, refetch } = useSrsDue();
   const { phase, seed, startSession } = useSrsSessionStore();
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   /* Seed the store once data arrives */
   useEffect(() => {
     if (!data) return;
     seed({
-      cards: data.cards,
+      // The due queue is the user's global one and mixes EXERCISE cards in
+      // (`/srs/due` has no content-type filter); only vocabulary cards whose
+      // content the server resolved can be rendered as a word card.
+      cards: data.cards.filter((c) => c.contentType === 'VOCABULARY_WORD' && !!c.front),
       dailyLimit: data.dailyLimit,
-      streakDays: data.streakDays,
     });
     // Only re-seed when the due data changes (window focus refetch)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,18 +92,14 @@ export function SrsPage() {
         {phase === 'entry' && (
           <SrsEntry
             dueCount={data.dueCount}
-            streakDays={data.streakDays}
             reviewedToday={data.reviewedToday}
             dailyLimit={data.dailyLimit}
             onStart={() => startSession()}
-            onSettings={() => setSettingsOpen(true)}
           />
         )}
 
         {phase === 'summary' && <SessionSummary />}
       </div>
-
-      <SrsSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

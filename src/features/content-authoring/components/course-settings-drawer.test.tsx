@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { Container } from '@/features/content/types';
@@ -12,11 +13,29 @@ vi.mock('./danger-zone', () => ({ DangerZone: () => <div data-testid="danger-zon
 vi.mock('./preflight-panel', () => ({
   PreflightPanel: () => <div data-testid="preflight-panel" />,
 }));
-vi.mock('./publish-dialog', () => ({ PublishDialog: () => <div data-testid="publish-dialog" /> }));
 vi.mock('./sharing-panel', () => ({ SharingPanel: () => <div data-testid="sharing-panel" /> }));
 vi.mock('./tag-input', () => ({ TagInput: () => <div data-testid="tag-input" /> }));
+vi.mock('./discard-draft-dialog', () => ({ DiscardDraftDialog: () => null }));
+// Pulls a server action through its restore button; it has its own suite.
+vi.mock('./version-history-block', () => ({
+  VersionHistoryBlock: () => <div data-testid="version-history" />,
+}));
+// The publish block is rendered for real — it is what decides whether a
+// published course can be published again — but its tree query is stubbed.
+vi.mock('../api/use-curriculum-tree', () => ({ useCurriculumTree: vi.fn() }));
 
 const { CourseSettingsDrawer } = await import('./course-settings-drawer');
+const { useCurriculumTree } = await import('../api/use-curriculum-tree');
+
+function mockPublishState(publishState: 'draft' | 'published' | 'pending_changes' | null) {
+  vi.mocked(useCurriculumTree).mockReturnValue({
+    data: publishState ? { publishState } : undefined,
+  } as never);
+}
+
+beforeEach(() => {
+  mockPublishState(null);
+});
 
 const BASE_CONTAINER: Container = {
   id: 'course-1',
@@ -40,41 +59,80 @@ const PUBLISHED_CONTAINER: Container = {
   currentPublishedVersionId: 'version-1',
 };
 
-function renderDrawer(container: Container, extra: Partial<Parameters<typeof CourseSettingsDrawer>[0]> = {}) {
+function renderDrawer(
+  container: Container,
+  extra: Partial<Parameters<typeof CourseSettingsDrawer>[0]> = {},
+) {
   render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CourseSettingsDrawer container={container} open onOpenChange={vi.fn()} {...extra} />
-    </NextIntlClientProvider>,
+    <QueryClientProvider client={new QueryClient()}>
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <CourseSettingsDrawer
+          container={container}
+          draftVersionId="version-draft"
+          open
+          onOpenChange={vi.fn()}
+          {...extra}
+        />
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
   );
 }
 
 describe('CourseSettingsDrawer', () => {
   it('renders nothing when closed', () => {
     render(
-      <NextIntlClientProvider locale="en" messages={enMessages}>
-        <CourseSettingsDrawer container={DRAFT_CONTAINER} open={false} onOpenChange={vi.fn()} />
-      </NextIntlClientProvider>,
+      <QueryClientProvider client={new QueryClient()}>
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <CourseSettingsDrawer
+            container={DRAFT_CONTAINER}
+            draftVersionId="version-draft"
+            open={false}
+            onOpenChange={vi.fn()}
+          />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
     );
     expect(screen.queryByText('Course settings')).not.toBeInTheDocument();
   });
 
-  it('shows the overview form, preflight panel and publish dialog for a draft course', () => {
+  it('shows the overview form and pre-flight diagnostics for a draft course', () => {
+    mockPublishState('draft');
     renderDrawer(DRAFT_CONTAINER);
     expect(screen.getByText('Course settings')).toBeInTheDocument();
     expect(screen.getByTestId('container-form')).toBeInTheDocument();
     expect(screen.getByTestId('preflight-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('publish-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('danger-zone')).toBeInTheDocument();
+    // Releasing lives in one place — the course header, not here.
+    expect(screen.getByText(/Review & publish/)).toBeInTheDocument();
+  });
+
+  it('hides preflight and publish for a course that is published and up to date', () => {
+    mockPublishState('published');
+    renderDrawer(PUBLISHED_CONTAINER);
+    expect(screen.queryByTestId('preflight-panel')).not.toBeInTheDocument();
+    expect(screen.getByText('Everything in this course is published.')).toBeInTheDocument();
     expect(screen.getByTestId('danger-zone')).toBeInTheDocument();
   });
 
-  it('hides preflight and publish for a published course', () => {
+  it('diagnoses a published course whose draft is ahead, and offers to discard it', () => {
+    mockPublishState('pending_changes');
     renderDrawer(PUBLISHED_CONTAINER);
+    expect(screen.getByText('Unpublished changes')).toBeInTheDocument();
+    expect(screen.getByTestId('preflight-panel')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Discard draft' })).toBeInTheDocument();
+  });
+
+  it('falls back to the container pointer before the tree resolves', () => {
+    mockPublishState(null);
+    renderDrawer(PUBLISHED_CONTAINER);
+    // "published with pending changes" is unknowable without the tree, so the
+    // block must not claim anything is pending.
+    expect(screen.getByText('Everything in this course is published.')).toBeInTheDocument();
     expect(screen.queryByTestId('preflight-panel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('publish-dialog')).not.toBeInTheDocument();
-    expect(screen.getByTestId('danger-zone')).toBeInTheDocument();
   });
 
   it('hides the danger zone for a teacher role', () => {
+    mockPublishState('draft');
     renderDrawer(DRAFT_CONTAINER, { schoolRole: 'teacher' });
     expect(screen.queryByTestId('danger-zone')).not.toBeInTheDocument();
   });

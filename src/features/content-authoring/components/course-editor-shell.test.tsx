@@ -21,8 +21,22 @@ vi.mock('./course-settings-drawer', () => ({
     </div>
   ),
 }));
+vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams() }));
+vi.mock('../api/use-curriculum-tree', () => ({ useCurriculumTree: vi.fn() }));
+// The real dialog pulls in the publish server action, which cannot load in a
+// client test environment.
+vi.mock('./review-publish-dialog', () => ({
+  ReviewPublishDialog: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="review-publish-open" /> : null,
+}));
 vi.mock('./course-structure-panel', () => ({
-  CourseStructurePanel: ({ containerId, versionId }: { containerId: string; versionId: string }) => (
+  CourseStructurePanel: ({
+    containerId,
+    versionId,
+  }: {
+    containerId: string;
+    versionId: string;
+  }) => (
     <div data-testid="course-structure-panel">
       {containerId}/{versionId}
     </div>
@@ -30,6 +44,7 @@ vi.mock('./course-structure-panel', () => ({
 }));
 
 const { CourseEditorShell } = await import('./course-editor-shell');
+const { useCurriculumTree } = await import('../api/use-curriculum-tree');
 
 const CONTAINER: Container = {
   id: 'course-1',
@@ -46,10 +61,46 @@ const CONTAINER: Container = {
   updatedAt: '2026-01-01T00:00:00Z',
 };
 
-function renderShell(draftVersionId: string | null) {
+function renderShell(draftVersionId: string | null, pendingModules = 0) {
+  vi.mocked(useCurriculumTree).mockReturnValue({
+    data: {
+      versionId: 'version-1',
+      containerId: 'course-1',
+      levelSystem: 'cefr',
+      publishState: 'published',
+      containerType: 'course' as const,
+      ungroupedItems: [],
+      levels: [
+        {
+          id: 'level-a1',
+          title: 'A1',
+          position: 0,
+          items: [],
+          modules: Array.from({ length: pendingModules }, (_, i) => ({
+            id: `item-mod-${i}`,
+            containerId: `mod-${i}`,
+            versionId: `mod-${i}-draft`,
+            title: `Leksjon ${i}`,
+            titleEn: null,
+            position: i,
+            isRequired: true,
+            publishState: 'pending_changes',
+            sections: [],
+            ungroupedItems: [],
+          })),
+        },
+      ],
+    },
+    isLoading: false,
+  } as never);
+
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CourseEditorShell container={CONTAINER} schoolSlug="my-school" draftVersionId={draftVersionId} />
+      <CourseEditorShell
+        container={CONTAINER}
+        schoolSlug="my-school"
+        draftVersionId={draftVersionId}
+      />
     </NextIntlClientProvider>,
   );
 }
@@ -64,6 +115,18 @@ describe('CourseEditorShell', () => {
     renderShell(null);
     expect(screen.queryByTestId('course-structure-panel')).not.toBeInTheDocument();
     expect(screen.getByText('Could not load the curriculum tree.')).toBeInTheDocument();
+  });
+
+  it('counts what is waiting to be published next to the review button', () => {
+    renderShell('version-1', 2);
+    expect(screen.getByRole('button', { name: /Review & publish/ })).toHaveTextContent('2');
+  });
+
+  it('opens the review dialog from the header button', () => {
+    renderShell('version-1', 1);
+    expect(screen.queryByTestId('review-publish-open')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Review & publish/ }));
+    expect(screen.getByTestId('review-publish-open')).toBeInTheDocument();
   });
 
   it('opens the settings drawer from the header button', () => {

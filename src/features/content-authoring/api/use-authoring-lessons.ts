@@ -7,6 +7,7 @@ import type {
   GlossaryMark,
   LessonListeningStage,
   LessonParagraph,
+  LessonTextSpan,
   LessonVariant,
   LessonVideoCue,
   LessonVideoQuestion,
@@ -61,6 +62,27 @@ export function useLessonGlossaryMarks(lessonId: string, variantId: string | und
       const res = await fetch(`/api/content/lessons/${lessonId}/variants/${variantId}/glossary-marks`);
       if (!res.ok) return [];
       return res.json() as Promise<GlossaryMark[]>;
+    },
+    enabled: !!lessonId && !!variantId,
+    staleTime: 30_000,
+  });
+}
+
+/**
+ * Text spans for the authoring editor. Always asks for broken ones: the editor
+ * is the only surface that can repair a rotted anchor, so hiding them there
+ * would make them unfixable. The reader's `useLessonTextSpans` in
+ * `features/content` leaves them out.
+ */
+export function useLessonTextSpans(lessonId: string, variantId: string | undefined) {
+  return useQuery<LessonTextSpan[]>({
+    queryKey: authoringKeys.lessonTextSpans(lessonId, variantId ?? ''),
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/content/lessons/${lessonId}/variants/${variantId}/spans?includeBroken=true`,
+      );
+      if (!res.ok) return [];
+      return res.json() as Promise<LessonTextSpan[]>;
     },
     enabled: !!lessonId && !!variantId,
     staleTime: 30_000,

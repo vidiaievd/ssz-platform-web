@@ -15,17 +15,21 @@ import { useLesson, useUnitVocabularyItems } from '@/features/content';
 import type { Container } from '@/features/content/types';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
+import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 import { lessonFormSchema, type LessonFormValues } from '../schemas/lesson';
 import { updateLessonAction } from '../actions/lesson';
 import { useLessonVariants, useLessonGlossaryMarks } from '../api/use-authoring-lessons';
 import { useAuthoringVocabularyLists } from '../api/use-authoring-vocabulary';
 import { authoringKeys } from '../api/keys';
-import { useAutosave } from '../hooks/use-autosave';
+import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
+import { useSaveScopeText } from './save-scope';
 import { EditorCard } from './editor-card';
 import { TextLessonPreview } from './text-lesson-preview';
 import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
 import { GlossaryMarkButton, GlossaryMarkedWords } from './glossary-mark-panel';
+import { TextSpanMenu } from './text-span-menu';
+import { TextSpanList } from './text-span-list';
 import {
   MarkdownFormatMenu,
   applyMarkdownFormat,
@@ -33,13 +37,18 @@ import {
 } from './markdown-format-menu';
 import { HeroImageSlot } from './hero-image-slot';
 import { AudioNarrationRow } from './audio-narration-row';
+import { ListeningStageListEditor } from './listening-stage-list-editor';
 
 interface TextEditorPaneProps {
   kind: MaterialKind;
   lessonId: string;
   lessonTitle: string | null;
   state: 'draft' | 'published' | null;
+  /** Whether students can open this material right now — see `SaveScopeContext`. */
+  isLive: boolean | null;
   container: Container;
+  /** Grammar rules of this module's Leksjon — the pool a grammar annotation may point at. */
+  grammarRules?: LevelGrammarRule[];
   backHref: string;
   publishSlot: ReactNode;
 }
@@ -49,11 +58,14 @@ export function TextEditorPane({
   lessonId,
   lessonTitle,
   state,
+  isLive,
   container,
+  grammarRules = [],
   backHref,
   publishSlot,
 }: TextEditorPaneProps) {
   const t = useTranslations('Authoring');
+  const saveScope = useSaveScopeText(isLive);
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
 
@@ -105,24 +117,25 @@ export function TextEditorPane({
       await queryClient.invalidateQueries({
         queryKey: authoringKeys.lessonParagraphs(lessonId, defaultVariant.id),
       });
+      // A span's brokenness is computed server-side against the body on every
+      // read, so a body edit can break or repair spans without touching a span
+      // row. Without this the lost-anchor panel only catches up after the
+      // query goes stale.
+      await queryClient.invalidateQueries({
+        queryKey: authoringKeys.lessonTextSpans(lessonId, defaultVariant.id),
+      });
     }
     return result;
   }
 
-  const autosave = useAutosave({
-    onSave: async () => {
-      const result = await saveLesson(getValues());
-      if (!result.ok) throw new Error(result.error.code);
-    },
-    debounceMs: 800,
-  });
+  const unsaved = useUnsavedChanges();
 
   function handleBodyTokenChange(newBody: string) {
     setValue('body', newBody);
-    autosave.schedule();
+    unsaved.markDirty();
   }
 
-  const bodyField = register('body', { onChange: () => autosave.schedule() });
+  const bodyField = register('body', { onChange: () => unsaved.markDirty() });
   const bodyRef = useRef<HTMLTextAreaElement | null>(null);
 
   function handleFormat(format: MarkdownFormat) {
@@ -130,7 +143,7 @@ export function TextEditorPane({
     if (!el) return;
     const next = applyMarkdownFormat(format, el.value, el.selectionStart, el.selectionEnd);
     setValue('body', next.value, { shouldDirty: true });
-    autosave.schedule();
+    unsaved.markDirty();
     // Restore focus and selection after React commits the new value.
     requestAnimationFrame(() => {
       el.focus();
@@ -143,9 +156,10 @@ export function TextEditorPane({
       kind={kind}
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
+      isLive={isLive}
       backHref={backHref}
-      autosaveStatus={autosave.status}
-      autosaveSavedAt={autosave.savedAt}
+      saveStatus={unsaved.status}
+      savedAt={unsaved.savedAt}
       publishSlot={publishSlot}
       preview={
         <TextLessonPreview
@@ -163,12 +177,17 @@ export function TextEditorPane({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <Field label={t('fields.title')} htmlFor="lesson-title" error={errors.title?.message} required>
+          <Field
+            label={t('fields.title')}
+            htmlFor="lesson-title"
+            error={errors.title?.message}
+            required
+          >
             <Input
               id="lesson-title"
               placeholder={t('lessons.titlePlaceholder')}
               hasError={!!errors.title}
-              {...register('title', { onChange: () => autosave.schedule() })}
+              {...register('title', { onChange: () => unsaved.markDirty() })}
             />
           </Field>
 
@@ -177,6 +196,14 @@ export function TextEditorPane({
             right={
               <div className="flex items-center gap-1.5">
                 <MarkdownFormatMenu onInsert={handleFormat} />
+                <TextSpanMenu
+                  lessonId={lessonId}
+                  variantId={defaultVariant?.id}
+                  container={container}
+                  grammarRules={grammarRules}
+                  body={bodyValue ?? ''}
+                  textareaRef={bodyRef}
+                />
                 <GlossaryMarkButton
                   lessonId={lessonId}
                   variantId={defaultVariant?.id}
@@ -196,6 +223,12 @@ export function TextEditorPane({
                 bodyRef.current = el;
               }}
             />
+            <TextSpanList
+              lessonId={lessonId}
+              variantId={defaultVariant?.id}
+              container={container}
+              grammarRules={grammarRules}
+            />
             <GlossaryMarkedWords
               lessonId={lessonId}
               variantId={defaultVariant?.id}
@@ -214,15 +247,14 @@ export function TextEditorPane({
           <Button
             type="button"
             onClick={() => {
-              autosave.cancel();
               void (async () => {
                 const result = await saveLesson(getValues());
                 if (!result.ok) {
                   toast.error(tErrors(result.error.code));
                   return;
                 }
-                autosave.markSaved();
-                toast.success(t('lessons.saveSuccess'));
+                unsaved.markSaved();
+                toast.success(t('lessons.saveSuccess'), { description: saveScope });
               })();
             }}
           >
@@ -230,6 +262,15 @@ export function TextEditorPane({
           </Button>
 
           <ParagraphTranslationsPanel lessonId={lessonId} variantId={defaultVariant?.id} />
+
+          {/* The check the reader meets after the text, on the same staging
+              model an AUDIO lesson uses after its transcript (spec 17). */}
+          <ListeningStageListEditor
+            lessonId={lessonId}
+            variantId={defaultVariant?.id}
+            container={container}
+            surface="text"
+          />
         </div>
       )}
     </LessonEditorShell>

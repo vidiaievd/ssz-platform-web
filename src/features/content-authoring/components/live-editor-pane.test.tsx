@@ -16,7 +16,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -51,6 +54,7 @@ function renderPane() {
           lessonId="lesson-1"
           lessonTitle="Samtalegruppe: på jobben"
           state="draft"
+          isLive={false}
           container={CONTAINER}
           backHref="/school/my-school/content/course-1"
           publishSlot={null}
@@ -96,16 +100,18 @@ describe('LiveEditorPane', () => {
     expect(screen.getByDisplayValue('60')).toBeInTheDocument();
     expect(screen.getByDisplayValue('12')).toBeInTheDocument();
     expect(screen.getByDisplayValue('https://meet.ssz.app/norsk-2b')).toBeInTheDocument();
-    expect(screen.getByText('https://meet.ssz.app/norsk-2b', { selector: 'span' })).toBeInTheDocument();
+    expect(
+      screen.getByText('https://meet.ssz.app/norsk-2b', { selector: 'span' }),
+    ).toBeInTheDocument();
   });
 
-  it('autosaves schedule edits after the debounce', async () => {
+  it('saves schedule edits when save is pressed', async () => {
     renderPane();
 
     fireEvent.change(screen.getByLabelText('Capacity'), { target: { value: '20' } });
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     });
 
     expect(updateLiveLessonAction).toHaveBeenCalledWith(

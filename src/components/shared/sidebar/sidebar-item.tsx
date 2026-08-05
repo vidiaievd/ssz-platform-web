@@ -24,11 +24,13 @@ export function SidebarItem({
   collapsed,
   disabled,
   lockReason,
+  badge,
 }: SidebarItemProps) {
   const t = useTranslations('Nav');
   const pathname = usePathname();
   const active = isActive(pathname, href, match);
   const label = t(labelKey as Parameters<typeof t>[0]);
+  const hasBadge = typeof badge === 'number' && badge > 0;
 
   if (disabled) {
     const content = (
@@ -78,8 +80,21 @@ export function SidebarItem({
         collapsed && 'justify-center px-2',
       )}
     >
-      <Icon className="size-5 shrink-0" aria-hidden="true" />
-      {!collapsed && <span className="truncate">{label}</span>}
+      <span className="relative shrink-0">
+        <Icon className="size-5" aria-hidden="true" />
+        {hasBadge && collapsed && (
+          <span
+            className="absolute -right-1 -top-1 size-2 rounded-full bg-secondary-500"
+            aria-hidden="true"
+          />
+        )}
+      </span>
+      {!collapsed && <span className="truncate flex-1">{label}</span>}
+      {!collapsed && hasBadge && (
+        <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-secondary-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+          {badge}
+        </span>
+      )}
     </Link>
   );
 

@@ -146,8 +146,13 @@ async function buildStudentSchool(school: School, myUserId: string): Promise<Stu
   if (!membership) return null;
 
   const base = baseStudentSchool(school, membership);
-  if (membership.status !== 'active') return base;
 
+  // Group placement — not the application record — is what actually grants
+  // access to a group's materials. A school can place a student in a group
+  // while their membership row still reads `onboarding`, and that student can
+  // study: gating group resolution on the application status hid their courses
+  // entirely. `status`/`pendingStage` stay untouched, so the schools band still
+  // shows the onboarding stepper rather than the summary card.
   const groupMemberships = await safeFetch<BackendStudentGroupMembership[]>(() =>
     serverFetch({ service: 'organization', path: `/schools/${school.id}/students/${myUserId}/memberships` }),
   );

@@ -19,6 +19,22 @@ if (typeof ResizeObserver === 'undefined') {
     disconnect() {}
   };
 }
+// `useMediaQuery` (reader rail, responsive layouts) calls this on mount; JSDOM
+// has no implementation at all. Defaults to "does not match", so a component
+// under test renders its narrow-viewport branch unless a test stubs otherwise.
+if (typeof window !== 'undefined' && typeof window.matchMedia === 'undefined') {
+  window.matchMedia = ((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    addListener: () => {},
+    removeListener: () => {},
+    dispatchEvent: () => false,
+  })) as typeof window.matchMedia;
+}
+
 import { afterAll, afterEach, beforeAll } from 'vitest';
 
 import { server } from './src/test/msw/server';

@@ -1,57 +1,41 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Flame, Moon, Sun, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 
 import { Link } from '@/lib/i18n/navigation';
+import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 export interface ReaderTopBarProps {
   courseHref: string;
   unitPosition: number;
+  /** "Leksjon" the open sub-lesson belongs to; omitted for ungrouped courses. */
+  levelTitle?: string;
+  /** Open sub-lesson. Falls back to "Unit {position}" when absent. */
+  unitTitle?: string;
   itemKind: MaterialKind;
   itemTitle: string;
-  streakDays: number;
-  xp: number;
   avatarName?: string;
   avatarSrc?: string;
 }
 
-function StreakBadge({ days }: { days: number }) {
-  const t = useTranslations('Learning.reader.topbar');
+function Crumb({
+  children,
+  className,
+  hiddenOnNarrow,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  hiddenOnNarrow?: boolean;
+}) {
   return (
-    <div
-      className="flex items-center gap-1.5 rounded-full border px-3 py-1.25"
-      style={{
-        background: 'var(--ssz-color-warning-100)',
-        borderColor: 'var(--ssz-color-warning-300)',
-      }}
-    >
-      <Flame size={14} style={{ color: 'var(--ssz-color-warning-700)' }} aria-hidden="true" />
-      <span className="text-[13px] font-bold" style={{ color: 'var(--ssz-color-warning-700)' }}>
-        {t('streakDays', { count: days })}
-      </span>
-    </div>
-  );
-}
-
-function XpBadge({ xp }: { xp: number }) {
-  const t = useTranslations('Learning.reader.topbar');
-  return (
-    <div
-      className="flex items-center gap-1.5 rounded-full border px-3 py-1.25"
-      style={{
-        background: 'var(--ssz-color-secondary-100)',
-        borderColor: 'var(--ssz-color-secondary-300)',
-      }}
-    >
-      <Zap size={13} style={{ color: 'var(--ssz-color-secondary-700)' }} aria-hidden="true" />
-      <span className="text-[13px] font-bold" style={{ color: 'var(--ssz-color-secondary-700)' }}>
-        {t('xp', { xp })}
-      </span>
-    </div>
+    <span className={cn('flex min-w-0 items-center gap-2', hiddenOnNarrow && 'hidden lg:flex')}>
+      <ChevronRight size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />
+      <span className={cn('truncate', className ?? 'max-w-44 font-semibold')}>{children}</span>
+    </span>
   );
 }
 
@@ -75,10 +59,10 @@ function ThemeToggle() {
 export function ReaderTopBar({
   courseHref,
   unitPosition,
+  levelTitle,
+  unitTitle,
   itemKind,
   itemTitle,
-  streakDays,
-  xp,
   avatarName,
   avatarSrc,
 }: ReaderTopBarProps) {
@@ -96,16 +80,15 @@ export function ReaderTopBar({
           <ChevronLeft size={15} />
           {t('courseLabel')}
         </Link>
-        <ChevronRight size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />
-        <span className="shrink-0 font-semibold">{tSidebar('unitLabel', { n: unitPosition })}</span>
-        <ChevronRight size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />
-        <span className="truncate font-bold text-foreground">
+        {/* The level crumb is the first to go on a narrow viewport — the
+            sub-lesson and the open material matter more for orientation. */}
+        {levelTitle && <Crumb hiddenOnNarrow>{levelTitle}</Crumb>}
+        <Crumb>{unitTitle ?? tSidebar('unitLabel', { n: unitPosition })}</Crumb>
+        <Crumb className="font-bold text-foreground">
           {tContent(itemKind)} · {itemTitle}
-        </span>
+        </Crumb>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <StreakBadge days={streakDays} />
-        <XpBadge xp={xp} />
         <ThemeToggle />
         <Avatar name={avatarName} src={avatarSrc} size="sm" />
       </div>

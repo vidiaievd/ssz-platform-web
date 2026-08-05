@@ -22,8 +22,27 @@ export interface ReaderSidebarUnit {
   title: string;
   subtitle?: string;
   status: UnitStatus;
+  /**
+   * Unit entry route — it resolves the unit's first material and redirects
+   * there, so the sidebar can link a unit whose contents it never fetched.
+   */
+  href: string;
   /** Populated only for the expanded unit; other units are collapsed summaries. */
   sections: ReaderSidebarSection[];
+}
+
+/**
+ * A "Leksjon" — the course-version section that groups sub-lesson units.
+ * Purely organisational: it never gates access (see the gatingMode work),
+ * so it carries no status of its own beyond its units' completion.
+ */
+export interface ReaderSidebarLevel {
+  id: string;
+  position: number;
+  title: string;
+  /** True for the level holding the unit currently open in the reader. */
+  active: boolean;
+  units: ReaderSidebarUnit[];
 }
 
 export interface ReaderSidebarCourse {

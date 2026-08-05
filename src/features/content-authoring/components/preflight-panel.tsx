@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { AlertTriangle, CheckCircle2, XCircle, ExternalLink, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from '@/lib/i18n/navigation';
@@ -10,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import type { CheckSeverity, PreflightCheck, PreflightResult } from '../types';
 import { authoringKeys } from '../api/keys';
+import { usePreflightCheckText } from '../lib/preflight-check-text';
 
 // ─── Icon per severity ────────────────────────────────────────────────────────
 
@@ -24,31 +26,29 @@ function CheckIcon({ severity }: { severity: CheckSeverity }) {
 // ─── Single check row ─────────────────────────────────────────────────────────
 
 function CheckRow({ check }: { check: PreflightCheck }) {
+  const t = useTranslations('Authoring.checklist');
+  const checkText = usePreflightCheckText();
+  const { title, fixHint } = checkText(check);
   return (
     <li
       className="flex items-start gap-2 py-1.5"
-      aria-label={`${check.severity === 'blocker' ? 'Blocker' : check.severity === 'warning' ? 'Warning' : 'OK'}: ${check.title}`}
+      aria-label={`${check.severity === 'blocker' ? 'Blocker' : check.severity === 'warning' ? 'Warning' : 'OK'}: ${title}`}
     >
       <CheckIcon severity={check.severity} />
       <div className="flex-1 min-w-0">
         <span
-          className={cn(
-            'text-sm',
-            check.severity === 'ok' && 'line-through text-muted-foreground',
-          )}
+          className={cn('text-sm', check.severity === 'ok' && 'line-through text-muted-foreground')}
         >
-          {check.title}
+          {title}
         </span>
-        {check.fixHint && (
-          <p className="text-xs text-muted-foreground mt-0.5">{check.fixHint}</p>
-        )}
+        {fixHint && <p className="text-xs text-muted-foreground mt-0.5">{fixHint}</p>}
       </div>
       {check.fixDeepLink && (
         <Link
           href={check.fixDeepLink as never}
           className="shrink-0 flex items-center gap-0.5 text-xs text-primary hover:underline"
         >
-          Fix <ExternalLink className="h-3 w-3" />
+          {t('goToFix')} <ExternalLink className="h-3 w-3" />
         </Link>
       )}
     </li>
@@ -58,27 +58,34 @@ function CheckRow({ check }: { check: PreflightCheck }) {
 // ─── Panel header ─────────────────────────────────────────────────────────────
 
 function PreflightHeader({ result }: { result: PreflightResult }) {
+  const t = useTranslations('Authoring.preflight');
   const { blockerCount, warningCount } = result;
 
   if (blockerCount === 0 && warningCount === 0) {
     return (
       <div className="flex items-center gap-2 text-success-700">
         <CheckCircle2 className="h-4 w-4" />
-        <span className="text-sm font-medium">All checks passed — ready to publish</span>
+        <span className="text-sm font-medium">{t('allPassed')}</span>
       </div>
     );
   }
 
   return (
     <div className="flex items-center gap-2">
-      <AlertTriangle className={cn('h-4 w-4', blockerCount > 0 ? 'text-error' : 'text-warning-600')} />
+      <AlertTriangle
+        className={cn('h-4 w-4', blockerCount > 0 ? 'text-error' : 'text-warning-600')}
+      />
       <span className="text-sm font-medium">
-        {blockerCount > 0 && <span className="text-error">{blockerCount} blocker{blockerCount !== 1 ? 's' : ''}</span>}
+        {blockerCount > 0 && (
+          <span className="text-error">{t('blockerCount', { count: blockerCount })}</span>
+        )}
         {blockerCount > 0 && warningCount > 0 && <span className="text-muted-foreground"> · </span>}
-        {warningCount > 0 && <span className="text-warning-600">{warningCount} warning{warningCount !== 1 ? 's' : ''}</span>}
+        {warningCount > 0 && (
+          <span className="text-warning-600">{t('warningCount', { count: warningCount })}</span>
+        )}
       </span>
       <span className="ml-auto text-xs text-muted-foreground">
-        {blockerCount > 0 ? 'cannot publish' : 'can publish with warnings'}
+        {blockerCount > 0 ? t('cannotPublish') : t('canPublishWithWarnings')}
       </span>
     </div>
   );
@@ -94,7 +101,12 @@ interface PreflightPanelProps {
   onPublishAnyway?: () => void;
 }
 
-export function PreflightPanel({ containerId, result: resultProp, onPublishAnyway }: PreflightPanelProps) {
+export function PreflightPanel({
+  containerId,
+  result: resultProp,
+  onPublishAnyway,
+}: PreflightPanelProps) {
+  const t = useTranslations('Authoring.preflight');
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const { data, isLoading, error, refetch } = useQuery<PreflightResult>({
     queryKey: [...authoringKeys.preflight(containerId), schoolSlug],
@@ -125,10 +137,10 @@ export function PreflightPanel({ containerId, result: resultProp, onPublishAnywa
   if (error && !result) {
     return (
       <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
-        <p>Could not run pre-flight check.</p>
+        <p>{t('loadError')}</p>
         <Button variant="ghost" size="sm" className="mt-2" onClick={() => void refetch()}>
           <RefreshCw className="mr-1 h-3.5 w-3.5" />
-          Retry
+          {t('retry')}
         </Button>
       </div>
     );
@@ -152,7 +164,7 @@ export function PreflightPanel({ containerId, result: resultProp, onPublishAnywa
         <div className="border-t border-border px-4 py-3 flex justify-end gap-2">
           {result.canPublishAnyway && !result.canPublish && (
             <Button variant="outline" size="sm" onClick={onPublishAnyway}>
-              Publish anyway
+              {t('publishAnyway')}
             </Button>
           )}
         </div>

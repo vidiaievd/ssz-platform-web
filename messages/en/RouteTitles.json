@@ -5,5 +5,11 @@
   "lessons": "Lessons",
   "mySchools": "My Schools",
   "settings": "Settings",
-  "enrolled": "My Schools"
+  "enrolled": "My Schools",
+  "home": "Home",
+  "myCourses": "My courses",
+  "catalogue": "Catalogue",
+  "training": "Training",
+  "reviews": "Reviews & reminders",
+  "progress": "Progress"
 }

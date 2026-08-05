@@ -13,7 +13,10 @@
     "incorrect": "Ikke helt",
     "submitted": "Svar sendt inn",
     "gradedNote": "Lagret for læreren din å vurdere. Du ser resultatene når det er returnert.",
-    "answerLabel": "Svar:"
+    "answerLabel": "Svar:",
+    "tryAgain": "Prøv igjen",
+    "showAnswer": "Vis svaret",
+    "hideAnswer": "Skjul svarene"
   },
   "loading": "Laster øvelse…",
   "error": {
@@ -25,18 +28,20 @@
     "defaultInstruction": "Velg riktig svar",
     "optionsLabel": "Svaralternativer"
   },
+  "mcqGroup": {
+    "questionOptions": "Svar på spørsmål {n}",
+    "answeredCount": "{done} av {total} spørsmål besvart",
+    "partialScore": "{correct} av {total} svar riktige"
+  },
   "fill": {
     "defaultInstruction": "Fullfør setningen",
     "blankLabel": "Tom",
     "inputLabel": "Ditt svar",
     "placeholder": "skriv…",
     "rationaleTitle": "Hvorfor dette svaret",
-    "optionHeader": "Alternativ",
-    "verdictHeader": "Passer?",
-    "noteHeader": "Hvorfor",
     "verdictCorrect": "Riktig",
-    "verdictAcceptable": "Mulig, men ikke her",
-    "verdictWrong": "Galt"
+    "verdictWrong": "Galt",
+    "yourAnswer": "Ditt svar"
   },
   "translate": {
     "defaultInstruction": "Oversett setningen",
@@ -53,7 +58,18 @@
     "defaultInstruction": "Svar på spørsmålet",
     "inputLabel": "Svaret ditt",
     "placeholder": "Skriv svaret ditt…",
-    "referenceLabel": "Eksempelsvar"
+    "referenceLabel": "Eksempelsvar",
+    "diffLabel": "Svaret ditt, sjekket",
+    "diffForm": "Feil form av ordet",
+    "diffWrong": "Feil ord",
+    "diffExtra": "Overflødig ord",
+    "diffMissing": "Manglende ord",
+    "issues": {
+      "form": "feil form: {n}",
+      "wrong": "feil ord: {n}",
+      "extra": "overflødige ord: {n}",
+      "missing": "manglende ord: {n}"
+    }
   },
   "writing": {
     "defaultInstruction": "Skriv teksten din",
@@ -67,7 +83,35 @@
     "defaultInstruction": "Plasser hvert ord i riktig felt",
     "bankLabel": "Ord",
     "bankEmpty": "Alle ord er plassert",
-    "fieldDropLabel": "Plasser i {field}"
+    "fieldDropLabel": "Plasser i {field}",
+    "multiWordHint": "Ett felt kan romme flere ord",
+    "answerLabel": "Riktig plassering",
+    "sourceLabel": "Utgangssetning",
+    "targetLabel": "Målsetning"
   },
-  "unsupported": "Denne oppgavetypen ({type}) kan ikke løses ennå."
+  "unsupported": "Denne oppgavetypen ({type}) kan ikke løses ennå.",
+  "taskNumber": "Oppgave {n}",
+  "wordBank": {
+    "bankLabel": "Ordbank",
+    "choosePlaceholder": "Velg …",
+    "blankLabel": "Luke i setning {n}",
+    "filledCount": "{done} av {total} luker fylt ut",
+    "partialScore": "{correct} av {total} luker riktige",
+    "helperIdle": "Trykk på et tomrom, og velg så et ord.",
+    "helperArmed": "Velg nå et ord til det markerte tomrommet.",
+    "helperSelect": "Velg et ord til hver luke."
+  },
+  "textOrder": {
+    "moveUp": "Flytt opp",
+    "moveDown": "Flytt ned",
+    "dragHandle": "Dra for å endre rekkefølge, plass {n} av {total}",
+    "partialScore": "{correct} av {total} linjer på riktig plass"
+  },
+  "errorCorrection": {
+    "remaining": "Rettelser gjort: {found} av {total}",
+    "hint": "Trykk på en del av setningen for å skrive den om.",
+    "editLabel": "Skriv om «{text}»",
+    "partialScore": "{correct} av {total} feil rettet",
+    "falsePositives": "{n} riktige deler ble endret"
+  }
 }

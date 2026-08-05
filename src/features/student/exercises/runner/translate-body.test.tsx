@@ -187,7 +187,7 @@ describe('TranslateBody — reveal / feedback', () => {
       mode: 'practice',
     });
     const textarea = screen.getByRole('textbox');
-    expect(textarea.getAttribute('style')).toContain('error-500');
+    expect(textarea.getAttribute('style')).toContain('feedback-no-line');
   });
 
   it('textarea has success border on correct answer (practice)', () => {
@@ -198,7 +198,7 @@ describe('TranslateBody — reveal / feedback', () => {
       mode: 'practice',
     });
     const textarea = screen.getByRole('textbox');
-    expect(textarea.getAttribute('style')).toContain('success-500');
+    expect(textarea.getAttribute('style')).toContain('feedback-ok-line');
   });
 
   it('textarea keeps default border in answering phase', () => {

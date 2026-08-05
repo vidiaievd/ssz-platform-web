@@ -4,11 +4,13 @@ import {
   normAnswer,
   gradeMcq,
   gradeFill,
-  gradeShortAnswer,
   gradeSentenceSchema,
   gradeTranslate,
   gradeMatch,
   type TranslateExpectedAnswers,
+  checkWordBankFill,
+  checkTextOrder,
+  checkErrorCorrection,
 } from './grading';
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
@@ -192,24 +194,6 @@ describe('gradeMatch', () => {
   });
 });
 
-describe('gradeShortAnswer', () => {
-  it('returns true on a normalized match of an accepted answer', () => {
-    expect(gradeShortAnswer({ reference_answer: 'x', accepted_answers: ['På radio'] }, 'på radio.')).toBe(true);
-  });
-
-  it('returns null when nothing matches (routes to review)', () => {
-    expect(gradeShortAnswer({ reference_answer: 'x', accepted_answers: ['på radio'] }, 'noe annet')).toBeNull();
-  });
-
-  it('returns null when there are no accepted_answers shortcuts', () => {
-    expect(gradeShortAnswer({ reference_answer: 'x' }, 'på radio')).toBeNull();
-  });
-
-  it('returns null for an empty answer', () => {
-    expect(gradeShortAnswer({ reference_answer: 'x', accepted_answers: ['a'] }, '   ')).toBeNull();
-  });
-});
-
 describe('gradeSentenceSchema', () => {
   const expected = {
     placements: [
@@ -228,5 +212,129 @@ describe('gradeSentenceSchema', () => {
 
   it('returns false when a field is missing tokens', () => {
     expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t2'] })).toBe(false);
+  });
+});
+
+describe('checkWordBankFill', () => {
+  const expected = {
+    items: [
+      { id: '1', blanks: [{ blank_id: 1, accepted_answers: ['show off'] }] },
+      {
+        id: '2',
+        blanks: [
+          { blank_id: 1, accepted_answers: ['clicked with', 'clicked'] },
+          { blank_id: 2, accepted_answers: ['get to know'] },
+        ],
+      },
+    ],
+  };
+
+  it('is ok only when every blank matches', () => {
+    const result = checkWordBankFill(expected, {
+      '1': { 1: 'show off' },
+      '2': { 1: 'clicked', 2: 'get to know' },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.correct).toBe(3);
+    expect(result.total).toBe(3);
+  });
+
+  it('counts an unanswered blank as wrong and keeps it in the total', () => {
+    const result = checkWordBankFill(expected, { '1': { 1: 'show off' } });
+
+    expect(result.ok).toBe(false);
+    expect(result.correct).toBe(1);
+    expect(result.total).toBe(3);
+    expect(result.results['2']![1]).toEqual({ correct: false, expected: 'clicked with' });
+  });
+
+  it('normalizes case and whitespace like the other graders', () => {
+    const result = checkWordBankFill(expected, {
+      '1': { 1: '  Show Off ' },
+      '2': { 1: 'CLICKED', 2: 'get to know' },
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it('carries an authored rationale into the result, as the engine does', () => {
+    const rationale = { options: [{ text: 'show off', verdict: 'correct' as const }] };
+    const result = checkWordBankFill(
+      { items: [{ id: '1', blanks: [{ blank_id: 1, accepted_answers: ['show off'], rationale }] }] },
+      { '1': { 1: 'boast' } },
+    );
+
+    expect(result.results['1']![1]).toEqual({ correct: false, expected: 'show off', rationale });
+  });
+
+  it('leaves the result free of a rationale key when none is authored', () => {
+    const result = checkWordBankFill(expected, { '1': { 1: 'boast' } });
+    expect(result.results['1']![1]).not.toHaveProperty('rationale');
+  });
+});
+
+describe('checkTextOrder', () => {
+  const expected = { order: ['a', 'b', 'c', 'd'] };
+
+  it('is ok only for the exact sequence', () => {
+    expect(checkTextOrder(expected, ['a', 'b', 'c', 'd']).ok).toBe(true);
+    expect(checkTextOrder(expected, ['a', 'c', 'b', 'd']).ok).toBe(false);
+  });
+
+  it('counts items sitting in their own slot', () => {
+    const result = checkTextOrder(expected, ['a', 'c', 'b', 'd']);
+
+    expect(result.correct).toBe(2);
+    expect(result.total).toBe(4);
+    expect(result.results).toEqual({ a: true, b: false, c: false, d: true });
+  });
+
+  it('is never ok when items are missing, even if the rest line up', () => {
+    const result = checkTextOrder(expected, ['a', 'b', 'c']);
+
+    expect(result.ok).toBe(false);
+    expect(result.correct).toBe(3);
+  });
+});
+
+describe('checkErrorCorrection', () => {
+  const expected = {
+    corrections: [
+      { item_id: 's-0', chunk_id: 'c-1', accepted: ['she was warming to me'], note: 'warm to sb' },
+      { item_id: 's-1', chunk_id: 'c-2', accepted: ['make up your mind'] },
+    ],
+  };
+
+  it('is ok when both mistakes are fixed and nothing else was touched', () => {
+    const result = checkErrorCorrection(expected, {
+      's-0': { 'c-1': 'She was warming to me' },
+      's-1': { 'c-2': 'make up your mind' },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.correct).toBe(2);
+    expect(result.results['s-0']!['c-1']!.outcome).toBe('fixed');
+  });
+
+  it('separates a missed mistake from a wrong rewrite', () => {
+    const result = checkErrorCorrection(expected, { 's-0': { 'c-1': 'she was warming with me' } });
+
+    expect(result.results['s-0']!['c-1']!.outcome).toBe('wrong_fix');
+    expect(result.results['s-1']!['c-2']!.outcome).toBe('missed');
+    expect(result.results['s-1']!['c-2']!.expected).toBe('make up your mind');
+    expect(result.ok).toBe(false);
+  });
+
+  it('counts a rewritten sound chunk against the score', () => {
+    const result = checkErrorCorrection(expected, {
+      's-0': { 'c-1': 'she was warming to me', 'c-0': 'I saw' },
+      's-1': { 'c-2': 'make up your mind' },
+    });
+
+    expect(result.falsePositives).toBe(1);
+    expect(result.correct).toBe(1);
+    expect(result.ok).toBe(false);
+    expect(result.results['s-0']!['c-0']!.outcome).toBe('false_positive');
   });
 });

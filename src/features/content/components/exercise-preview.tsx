@@ -63,6 +63,32 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
           </div>
         )}
 
+        {code === 'multiple_choice_group' && (
+          <ol className="space-y-2">
+            {(Array.isArray(content.items) ? (content.items as LabeledItem[]) : []).map(
+              (item, i) => {
+                const q = item as { question?: unknown; options?: unknown };
+                // Questions may carry their own options or lean on the group's.
+                const options = asItems(Array.isArray(q.options) ? q.options : content.options);
+                return (
+                  <li key={i} className="rounded-md border border-border px-3 py-2">
+                    <p className="text-sm font-medium">
+                      {i + 1}. {typeof q.question === 'string' ? q.question : ''}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {options.map((o, j) => (
+                        <Badge key={j} variant="muted" className="text-xs">
+                          {o.text}
+                        </Badge>
+                      ))}
+                    </div>
+                  </li>
+                );
+              },
+            )}
+          </ol>
+        )}
+
         {code === 'fill_in_blank' && (
           <div className="space-y-2">
             {typeof content.text_with_blanks === 'string' && (
@@ -180,13 +206,80 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
             )}
           </div>
         )}
+        {code === 'word_bank_fill' && (
+          <div className="space-y-2">
+            {Array.isArray(content.word_bank) && content.word_bank.length > 0 && (
+              <div>
+                <p className="text-muted-foreground mb-1 text-xs font-medium">{t('wordBank')}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(content.word_bank as unknown[])
+                    .filter((w): w is string => typeof w === 'string')
+                    .map((word, i) => (
+                      <Badge key={i} variant="muted" className="text-xs">
+                        {word}
+                      </Badge>
+                    ))}
+                </div>
+              </div>
+            )}
+            <ol className="space-y-1.5">
+              {(Array.isArray(content.items) ? (content.items as LabeledItem[]) : []).map((item, i) => (
+                <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
+                  {i + 1}.{' '}
+                  {typeof (item as { text_with_blanks?: unknown }).text_with_blanks === 'string'
+                    ? (item as { text_with_blanks: string }).text_with_blanks.replace(
+                        /___\d+___/g,
+                        '\u005B … \u005D',
+                      )
+                    : ''}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+        {code === 'text_order' && (
+          <ol className="space-y-1.5">
+            {(Array.isArray(content.items) ? (content.items as LabeledItem[]) : []).map((item, i) => (
+              <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
+                <span className="text-muted-foreground mr-1.5 text-xs">{i + 1}.</span>
+                {typeof (item as { speaker?: unknown }).speaker === 'string' && (
+                  <span className="mr-1.5 font-medium">{(item as { speaker: string }).speaker}:</span>
+                )}
+                {typeof (item as { text?: unknown }).text === 'string'
+                  ? (item as { text: string }).text
+                  : ''}
+              </li>
+            ))}
+          </ol>
+        )}
+        {code === 'error_correction' && (
+          <ol className="space-y-2">
+            {(Array.isArray(content.items) ? (content.items as EcPreviewItem[]) : []).map((item, i) => (
+              <li key={i} className="flex flex-wrap items-center gap-1">
+                <span className="text-muted-foreground mr-0.5 text-xs">{i + 1}.</span>
+                {(Array.isArray(item.chunks) ? item.chunks : []).map((chunk, j) => (
+                  <span key={j} className="rounded-md border border-border px-1.5 py-0.5 text-sm">
+                    {typeof (chunk as { text?: unknown }).text === 'string'
+                      ? (chunk as { text: string }).text
+                      : ''}
+                  </span>
+                ))}
+              </li>
+            ))}
+          </ol>
+        )}
       </CardBody>
     </Card>
   );
 }
 
+interface EcPreviewItem {
+  chunks?: unknown[];
+}
+
 const TYPE_LABEL_KEYS = {
   multiple_choice: true,
+  multiple_choice_group: true,
   fill_in_blank: true,
   translate_to_target: true,
   translate_from_target: true,
@@ -194,4 +287,7 @@ const TYPE_LABEL_KEYS = {
   short_answer: true,
   writing_task: true,
   sentence_schema: true,
+  word_bank_fill: true,
+  text_order: true,
+  error_correction: true,
 } as const;

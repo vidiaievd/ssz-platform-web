@@ -106,16 +106,17 @@
     "tabPreview": "Preview",
     "bodyPlaceholder": "Write lesson content in Markdown…",
     "previewEmpty": "Nothing to preview.",
-    "autosaving": "Saving…",
-    "autosaved": "Saved",
-    "autosavedAgo": "Saved {seconds}s ago",
-    "autosaveError": "Autosave failed",
     "editAriaLabel": "Edit lesson",
     "deleteAriaLabel": "Delete lesson",
     "deleteConfirmTitle": "Delete lesson?",
     "deleteConfirmDescription": "\"{title}\" will be permanently deleted along with all its content. This cannot be undone.",
     "deleteConfirm": "Delete",
-    "deleteCancel": "Cancel"
+    "deleteCancel": "Cancel",
+    "unsavedChanges": "Unsaved changes",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "savedAgo": "Saved {seconds}s ago",
+    "saveFailed": "Could not save"
   },
   "vocabulary": {
     "noList": "No vocabulary list yet.",
@@ -177,18 +178,23 @@
     "type": "Type",
     "types": {
       "multiple_choice": "Multiple choice",
+      "multiple_choice_group": "Multiple choice group",
       "fill_in_blank": "Fill in the blank",
       "translate_to_target": "Translate to target",
       "translate_from_target": "Translate from target",
       "match_pairs": "Match pairs",
       "short_answer": "Short answer",
       "writing_task": "Writing task",
-      "sentence_schema": "Sentence schema"
+      "sentence_schema": "Sentence schema",
+      "word_bank_fill": "Word bank gap-fill",
+      "text_order": "Put in order",
+      "error_correction": "Find and correct mistakes"
     },
     "difficultyLevel": "Difficulty",
     "difficultyLevelNone": "Any level",
     "instructions": "Instructions",
     "instructionsPlaceholder": "Optional instructions shown to the student",
+    "instructionsHint": "Required — an exercise without instructions cannot be published.",
     "mcQuestion": "Question",
     "mcQuestionPlaceholder": "Enter the question",
     "mcOptions": "Options",
@@ -200,6 +206,23 @@
     "hintPlaceholder": "Optional hint the student can reveal",
     "mcContext": "Context",
     "mcContextPlaceholder": "Optional sentence or context",
+    "mcgContext": "Context",
+    "mcgContextPlaceholder": "Optional line shown above the questions",
+    "mcgSharedOptions": "Shared options",
+    "mcgSharedOptionsHint": "The answer column every question uses, e.g. Riktig / Galt. A question can replace it with options of its own.",
+    "mcgOptionPlaceholder": "Option text",
+    "mcgOptionFallback": "Option {n}",
+    "mcgQuestions": "Questions",
+    "mcgQuestionsHint": "All questions are answered and checked together as one block.",
+    "mcgQuestionPlaceholder": "Question or statement",
+    "mcgAddQuestion": "Add question",
+    "mcgRemoveQuestion": "Remove question",
+    "mcgCorrect": "Correct answer",
+    "mcgOwnOptions": "Own options",
+    "mcgUseSharedOptions": "Use shared options",
+    "mcgNoSharedOptions": "Add shared options above, or give this question its own.",
+    "mcgExplanation": "Explanation",
+    "mcgExplanationPlaceholder": "Why this answer is right (shown after checking)",
     "fibText": "Text with blanks",
     "fibTextPlaceholder": "Use ___1___, ___2___ for blanks, e.g. Jeg ___1___ norsk.",
     "fibTextHint": "Number each blank: ___1___, ___2___ …",
@@ -228,11 +251,22 @@
     "saContext": "Context (optional)",
     "saContextPlaceholder": "A passage or hint shown with the question",
     "saReferenceAnswer": "Reference answer",
-    "saReferenceAnswerHint": "The model answer, used for review",
+    "saReferenceAnswerHint": "The model answer. Also graded against: an exact match passes automatically.",
     "saReferenceAnswerPlaceholder": "The expected answer",
-    "saAccepted": "Accepted answers (optional)",
-    "saAcceptedHint": "Comma-separated exact matches for instant grading",
-    "saAcceptedPlaceholder": "on the radio, on the way home",
+    "saAccepted": "Other accepted phrasings (optional)",
+    "saAcceptedHint": "Separated by |, not commas — these answers often contain a comma. Each one the learner may write; the closest is used to mark their answer.",
+    "saAcceptedPlaceholder": "at han jobbet som elektriker | han jobbet som elektriker",
+    "saTrial": "Try the answer key",
+    "saTrialHint": "Type an answer the way a learner would. You'll see exactly what they'd see.",
+    "saTrialPlaceholder": "An answer to test…",
+    "saTrialAccepted": "✓ Accepted automatically.",
+    "saTrialMarkedWrong": "Marked wrong ({score}%) with the mistake shown word by word:",
+    "saTrialReview": "Too far from the key — this goes to you for manual grading. Add it below if it should pass.",
+    "saTrialAddPhrasing": "Add this phrasing as accepted",
+    "saTrialForm": "Wrong form of the word",
+    "saTrialWrong": "Wrong word",
+    "saTrialExtra": "Extra word",
+    "saTrialMissing": "Missing word",
     "saAnswerPlaceholderPreview": "Answer…",
     "wtPrompt": "Prompt",
     "wtPromptPlaceholder": "e.g. Write a short reader letter about…",
@@ -248,6 +282,9 @@
     "wtRubricPlaceholder": "Structure, argument, grammar",
     "ssSentence": "Sentence",
     "ssSentencePlaceholder": "e.g. Lars har aldri likt Lotte.",
+    "ssSourceSentence": "Source sentence (optional)",
+    "ssSourceSentencePlaceholder": "e.g. Lars har likt Lotte.",
+    "ssSourceSentenceHelp": "When set, the learner sees this one and rebuilds the target sentence; the target stays hidden until the answer is checked.",
     "ssSchemaType": "Clause type",
     "ssSchemaType_main": "Main clause",
     "ssSchemaType_subordinate": "Subordinate clause",
@@ -279,7 +316,47 @@
       "acceptable": "Possible, but not here",
       "wrong": "Wrong"
     },
-    "fibRationaleAttached": "Explanation matrix attached — shown after checking"
+    "fibRationaleAttached": "Explanation matrix attached — shown after checking",
+    "wbfWordBank": "Word bank",
+    "wbfWordBankHint": "Comma-separated. Every blank of every sentence is chosen from this bank.",
+    "wbfWordBankPlaceholder": "show off, boast, clicked with, get to know",
+    "wbfSentences": "Sentences",
+    "wbfSentencesHint": "Mark blanks with ___1___, ___2___ … numbered within each sentence.",
+    "wbfSentencePlaceholder": "I hate it when people ___1___ all the time.",
+    "wbfAnswersPlaceholder": "Accepted answers, comma-separated",
+    "wbfAddSentence": "Add sentence",
+    "wbfWordNotes": "Word notes",
+    "wbfWordNotesHint": "Shown when the student picks that word, in any sentence. Use it when the reason a word fits is the same everywhere.",
+    "wbfWordNoteWord": "Bank word",
+    "wbfWordNoteWordPlaceholder": "Word",
+    "wbfWordNoteNote": "Note",
+    "wbfWordNoteNotePlaceholder": "What this word means, or when to use it",
+    "wbfAddWordNote": "Add word note",
+    "wbfRemoveWordNote": "Remove word note",
+    "wbfRemoveSentence": "Remove sentence",
+    "toKind": "Presentation",
+    "toKind_dialogue": "Dialogue",
+    "toKind_sentences": "Sentences",
+    "toLines": "Lines in the correct order",
+    "toLinesHint": "Type them in the right order — the learner sees them shuffled.",
+    "toLinePlaceholder": "Hi, I’m Marina. What brings you here?",
+    "toSpeakerPlaceholder": "Speaker",
+    "toAddLine": "Add line",
+    "toRemoveLine": "Remove line",
+    "mpVariant": "Layout",
+    "mpVariant_pairs": "Word pairs",
+    "mpVariant_halves": "Sentence halves",
+    "mpVariantHint": "Sentence halves number the left column 1, 2, 3 … and letter the right A, B, C …",
+    "ecSentences": "Sentences",
+    "ecSentencesHint": "Split each sentence into parts with | — the learner taps a part to rewrite it. Then name the faulty part by its number.",
+    "ecChunksPlaceholder": "I could see | that the more | I talked to Sue | she was warming up with me",
+    "ecChunkIndexPlaceholder": "Part #",
+    "ecAcceptedPlaceholder": "Correct wording (comma-separated variants)",
+    "ecNotePlaceholder": "Note (optional)",
+    "ecAddSentence": "Add sentence",
+    "ecRemoveSentence": "Remove sentence",
+    "ecAddFix": "Add mistake",
+    "ecRemoveFix": "Remove mistake"
   },
   "grammar": {
     "add": "Add rule",
@@ -328,47 +405,33 @@
     }
   },
   "publish": {
-    "trigger": "Publish",
-    "title": "Publish container",
-    "description": "Publishing is permanent and affects how this container is accessed. Please read the warnings below before confirming.",
-    "warningSlug": "A URL slug will be generated from the title and frozen after publishing.",
-    "warningDiscoverable": "The container becomes discoverable and accessible to students based on its access tier.",
-    "warningEvent": "A published event is emitted, which may trigger notifications.",
-    "confirmPrompt": "To confirm, type the title exactly as shown:",
-    "confirm": "Publish",
-    "cancel": "Cancel",
-    "success": "Published successfully.",
-    "dialogTitle": "Ready to publish?",
-    "replacing": "Publishing this will replace the current live version for all enrolled students.",
-    "reviewGate": "I have reviewed the changes and warnings",
-    "releaseNotesLabel": "Release notes (optional)",
-    "releaseNotesPlaceholder": "What changed in this version? Students won't see this.",
-    "visibilityLabel": "Visibility",
-    "visibilityNotice": "This version becomes live for all enrolled students immediately.",
-    "publishing": "Publishing…",
-    "retry": "Retry",
-    "reload": "Reload",
-    "failure": "Couldn't publish — please check the issues below and try again.",
-    "stale": "A newer version was published — reload to continue.",
-    "allPassed": "All checks passed"
+    "blockLabel": "Course",
+    "blockNeverPublished": "This course has never been published, so students cannot open it yet.",
+    "blockPending": "This course has unpublished changes. Students keep seeing the published version until you publish again.",
+    "blockUpToDate": "Everything in this course is published.",
+    "blockWhereToPublish": "Publish it from “Review & publish” in the course header — the course and its modules go live together there."
   },
-  "versions": {
-    "title": "Versions",
-    "draft": "Draft",
-    "published": "Published",
-    "createDraftTitle": "Create a draft",
-    "createDraftBody": "Start a new draft to begin editing.",
-    "createDraft": "Create draft",
-    "readOnlyTitle": "Read-only",
-    "readOnlyBody": "You don't have edit access to this content.",
-    "requestAccess": "Request edit access",
-    "viewPublished": "View published",
-    "continueEditing": "Continue editing",
-    "discardDraft": "Discard draft",
-    "publishedOn": "Published",
-    "editedOn": "Last edited",
-    "loadError": "Couldn't load versions.",
-    "retry": "Retry"
+  "history": {
+    "title": "Version history",
+    "versionNumber": "v{number}",
+    "empty": "No versions yet.",
+    "loadError": "Couldn't load the version history.",
+    "noNotes": "No release notes",
+    "status": {
+      "draft": "Draft",
+      "published": "Live",
+      "deprecated": "Replaced",
+      "archived": "Archived",
+      "withdrawn": "Taken off air"
+    },
+    "restore": "Restore",
+    "restoreAriaLabel": "Restore version {number}",
+    "restoreTitle": "Put v{number} back on air?",
+    "restoreBody": "Students see this version immediately. Your draft is left untouched. Note that this restores which materials the course held — text edited since stays as it is now.",
+    "restoreConfirm": "Restore",
+    "restoreCancel": "Cancel",
+    "restoreSuccess": "v{number} is live again.",
+    "restoreError": "Couldn't restore that version."
   },
   "discard": {
     "title": "Discard draft?",
@@ -377,13 +440,21 @@
     "cancel": "Cancel",
     "discarding": "Discarding…",
     "success": "Draft discarded",
-    "error": "Failed to discard draft. Please try again."
+    "error": "Failed to discard draft. Please try again.",
+    "trigger": "Discard draft"
   },
   "checklist": {
-    "blockers": "Blocking issues",
-    "warnings": "Warnings",
-    "passed": "Passed",
     "goToFix": "Fix →"
+  },
+  "preflight": {
+    "allPassed": "All checks passed — ready to publish",
+    "blockerCount": "{count, plural, one {# blocker} other {# blockers}}",
+    "warningCount": "{count, plural, one {# warning} other {# warnings}}",
+    "cannotPublish": "cannot publish",
+    "canPublishWithWarnings": "can publish with warnings",
+    "loadError": "Could not run the pre-flight check.",
+    "retry": "Retry",
+    "publishAnyway": "Publish anyway"
   },
   "tags": {
     "empty": "No tags yet.",
@@ -453,7 +524,8 @@
       "vocabularyTitle": "Vocabulary",
       "readingTitle": "Reading",
       "listeningTitle": "Listening",
-      "practiceTitle": "Practice"
+      "practiceTitle": "Practice",
+      "practiceInstructions": "Choose the correct answer."
     },
     "preview": {
       "label": "Live preview",
@@ -529,7 +601,17 @@
     "addModule": "Add module",
     "newLevelTitle": "New level",
     "newModuleTitle": "New module",
-    "openLessonEditor": "Open lesson editor"
+    "openLessonEditor": "Open lesson editor",
+    "modulePublishLabel": "Module",
+    "modulePublishAction": "Publish module",
+    "modulePublishFirst": "This module has never been published, so students cannot open it yet.",
+    "modulePublishPending": "This module has unpublished changes. Students keep seeing the published version until you publish again.",
+    "modulePublishUpToDate": "Everything in this module is published.",
+    "publishSummaryAllLive": "Everything students see is up to date.",
+    "publishSummaryCourseDraft": "The course is not published — students cannot open it.",
+    "publishSummaryCoursePending": "The course itself has unpublished changes.",
+    "publishSummaryModulesPending": "{count, plural, one {# module has} other {# modules have}} unpublished changes.",
+    "publishSummaryModulesDraft": "{count, plural, one {# module is} other {# modules are}} not published yet."
   },
   "settings": {
     "trigger": "Settings",
@@ -539,7 +621,11 @@
   "addLesson": {
     "title": "Add a lesson",
     "description": "Choose a material type to add to this module.",
-    "defaultTitle": "New {type}"
+    "defaultTitle": "New {type}",
+    "defaultInstructions": "Complete the exercise.",
+    "exerciseTypeTitle": "Choose an exercise type",
+    "exerciseTypeDescription": "The type decides how the exercise is answered and graded, and cannot be changed afterwards.",
+    "back": "Back"
   },
   "editor": {
     "backToCourse": "Back to course",
@@ -613,6 +699,9 @@
     "listeningStages": "Staged exercises",
     "listeningStagesNeedsSource": "Add an audio source before staging exercises.",
     "listeningStagesEmpty": "No staged exercises yet — add one to build the Listen → Gap-fill → Comprehension flow.",
+    "textStages": "Comprehension check",
+    "textStagesEmpty": "No questions yet — add one to check understanding after the reading.",
+    "textStagesNeedsSource": "Save the lesson text before adding comprehension questions.",
     "stageType": "Stage type",
     "stageTypeGapFill": "Gap-fill",
     "stageTypeComprehension": "Comprehension",
@@ -632,7 +721,57 @@
     "liveScheduleTitle": "Schedule",
     "liveOptionsTitle": "Options",
     "liveOptionRecording": "Publish recording after class",
-    "liveOptionApproval": "Require teacher approval to join"
+    "liveOptionApproval": "Require teacher approval to join",
+    "saveCues": "Save cues",
+    "saveStages": "Save stages",
+    "saveTranslations": "Save translations"
+  },
+  "spans": {
+    "markSelection": "Annotate selection",
+    "needsBody": "Save the anchor text first to annotate it.",
+    "selected": "Selected: “{text}”",
+    "kind": "Annotation type",
+    "kindVocab": "Lexis",
+    "kindGrammar": "Grammar",
+    "kindChunk": "Chunk",
+    "pickWord": "Pick a word…",
+    "pickRule": "Pick a grammar rule…",
+    "noList": "This module has no vocabulary list yet — add one to annotate lexis.",
+    "noRules": "This Leksjon has no grammar rules yet. Add a rule to its grammar lesson, then it can be annotated here.",
+    "firstVocabWarning": "This text still highlights {count, plural, one {# glossary word} other {# glossary words}} automatically. The first lexis annotation switches that off: from then on students see only the words you annotate here.",
+    "explainer": "The student sees the words highlighted, with a marker that opens the explanation.",
+    "helpToggle": "How annotations work",
+    "helpVocab": "— underlines the word and opens its dictionary card. The first lexis annotation switches off the automatic glossary highlighting in this text: from then on only annotated words are underlined.",
+    "helpGrammar": "— highlights the passage and points it at a rule from this Leksjon’s grammar lesson.",
+    "helpChunk": "— highlights a set expression and shows your note. No dictionary, no rule.",
+    "helpAnchor": "An annotation is anchored to this exact stretch of text. Edit the text under it and it can lose its anchor — the student stops seeing it, and it appears in the list below, where you can reattach it.",
+    "noteLabel": "Note (optional)",
+    "notePlaceholder": "A hint for the student",
+    "create": "Annotate",
+    "createSuccess": "Annotation added.",
+    "overlapError": "This selection overlaps an annotation of the same type. Adjust the selection, or remove the other one first.",
+    "errorEmpty": "Select some of the anchor text to annotate it.",
+    "errorCrossesParagraph": "An annotation has to stay inside one paragraph. Shorten the selection.",
+    "errorTooLong": "That selection is too long to annotate — 400 characters at most.",
+    "caption": "{count, plural, one {# annotation} other {# annotations}} in this text.",
+    "delete": "Remove the annotation on “{text}”",
+    "deleted": "Annotation removed.",
+    "brokenTitle": "{count, plural, one {# annotation lost its anchor} other {# annotations lost their anchor}}",
+    "brokenBody": "The text moved under them, so students no longer see them. Reattach or remove each one.",
+    "brokenRef": "Its word or rule was deleted.",
+    "reanchor": "Reattach",
+    "reanchored": "Annotation reattached.",
+    "reanchorGone": "This text is no longer in the body.",
+    "reanchorAmbiguous": "This text now occurs more than once — select it again to reattach.",
+    "unmark": "Remove “{lemma}” from the glossary",
+    "unmarkConfirmTitle": "Remove this word from the lesson glossary?",
+    "unmarkConfirmBody": "“{lemma}” stops being part of this lesson's glossary, and its annotations in this text go with it. The module keeps the word, so other lessons and the unit vocabulary list are unaffected.",
+    "unmarkConfirm": "Remove",
+    "unmarked": "Word removed from the lesson glossary.",
+    "editNote": "Edit the note on “{text}”",
+    "editNoteTitle": "Edit annotation note",
+    "noteSave": "Save note",
+    "noteSaved": "Note saved."
   },
   "list": {
     "countsOwner": "{all} courses · {published} published · {draft} draft",
@@ -684,10 +823,11 @@
     "unpublish": {
       "trigger": "Unpublish",
       "title": "Unpublish this course?",
-      "description": "Students will see a \"Course paused\" banner. No new enrolments will be accepted. You can re-publish at any time.",
+      "description": "Students lose access immediately — including anyone part-way through. Only you and your school's admins can open the course while it is unpublished. Publish again to give access back.",
       "confirm": "Unpublish",
       "success": "Course unpublished.",
-      "error": "Failed to unpublish course."
+      "error": "Failed to unpublish course.",
+      "enrollmentWarning": "{count, plural, one {# enrolled student loses} other {# enrolled students lose}} access the moment you confirm."
     },
     "archive": {
       "trigger": "Archive",
@@ -719,5 +859,114 @@
       "error": "Failed to delete course."
     },
     "transferOwnership": "Transfer ownership"
+  },
+  "publishState": {
+    "draft": "Draft",
+    "published": "Published",
+    "pendingChanges": "Unpublished changes",
+    "ariaLabel": "Status: {label}",
+    "itemAwaiting": "Awaiting publish",
+    "itemAwaitingAriaLabel": "Not published yet — publish the module to release it",
+    "itemLive": "Students see this",
+    "pendingModules": "{count, plural, =0 {Unpublished changes} one {# module not released} other {# modules not released}}",
+    "pendingChangesAriaLabel": "Has changes students cannot see yet"
+  },
+  "saveScope": {
+    "liveHint": "Live — students see every save immediately.",
+    "draftHint": "Not live yet — students see this material once the module is published.",
+    "liveToast": "Students see this change now.",
+    "draftToast": "Saved to the draft — publish the module to release it."
+  },
+  "reviewPublish": {
+    "trigger": "Review & publish",
+    "title": "Review & publish",
+    "description": "Pick what to make live. The course and each module are published separately — modules go first, so the course never points at material students cannot open.",
+    "allPublished": "Everything is published. Nothing to release.",
+    "rowCourse": "Course",
+    "rowModule": "Module",
+    "rowBlockers": "{count, plural, one {# blocker must be fixed first} other {# blockers must be fixed first}}",
+    "rowWarnings": "{count, plural, one {# warning} other {# warnings}}",
+    "rowPublished": "Published",
+    "rowFailed": "Could not publish",
+    "confirm": "Publish {count, plural, one {# item} other {# items}}",
+    "publishing": "Publishing…",
+    "close": "Close",
+    "summaryAllPublished": "{count, plural, one {# item published} other {# items published}}.",
+    "summaryPartial": "Published {published} of {total} — check the rows that failed.",
+    "rowFix": "Fix",
+    "rowWarningCount": "{count, plural, one {# item} other {# items}}",
+    "releaseNotesLabel": "Release notes (optional)",
+    "releaseNotesPlaceholder": "What changed in this release? Students won't see this."
+  },
+  "preflightRules": {
+    "withItem": "{rule}: {item}",
+    "EMPTY_VERSION": {
+      "title": "This draft has no content",
+      "fix": "Add at least one lesson before publishing"
+    },
+    "VIDEO_NO_SOURCE": {
+      "title": "Video lesson has no video source",
+      "fix": "Upload a video in the lesson editor"
+    },
+    "AUDIO_NO_TRACK": {
+      "title": "Audio lesson has no audio track",
+      "fix": "Upload an audio file in the lesson editor"
+    },
+    "AUDIO_NO_TRANSCRIPT": {
+      "title": "Audio lesson has no transcript",
+      "fix": "Add a transcript in the lesson editor"
+    },
+    "MODULE_EMPTY": {
+      "title": "Module has no lessons",
+      "fix": "Add at least one lesson to this module"
+    },
+    "SECTION_EMPTY": {
+      "title": "Section has no items",
+      "fix": "Add a lesson to this section, or remove it"
+    },
+    "DRAFT_ITEM": {
+      "title": "Grammar rule has no published explanation",
+      "fix": "Open the rule and save its explanation"
+    },
+    "READ_NO_TITLE": {
+      "title": "Lesson has no published content",
+      "fix": "Open the lesson and save its text"
+    },
+    "MEDIA_NO_ALT": {
+      "title": "Lesson image is missing alt text",
+      "fix": "Add alt text to every image"
+    },
+    "LEVEL_NO_TEACHER": {
+      "title": "Level has no assigned teacher",
+      "fix": "Assign a teacher to this level"
+    },
+    "LIVE_NO_SCHEDULE": {
+      "title": "Live lesson has no scheduled time",
+      "fix": "Set a date and time for this session"
+    },
+    "VOCAB_NO_TRANSLATION": {
+      "title": "Vocabulary item has no translation",
+      "fix": "Add a translation"
+    },
+    "VOCAB_NO_AUDIO": {
+      "title": "Vocabulary item has no pronunciation audio",
+      "fix": "Upload pronunciation audio"
+    },
+    "EXERCISE_INCOMPLETE": {
+      "title": "Exercise has no instructions",
+      "fix": "Open the exercise and write what the student must do"
+    },
+    "NO_GRAMMAR": {
+      "title": "Course has no grammar content",
+      "fix": "Add at least one grammar rule"
+    },
+    "EXERCISE_COUNT_LOW": {
+      "title": "Course has very few exercises",
+      "fix": "Add more practice exercises"
+    },
+    "LOCALE_INCOMPLETE": {
+      "title": "Missing translations for some UI languages",
+      "fix": "Add the missing localizations"
+    }
   }
 }

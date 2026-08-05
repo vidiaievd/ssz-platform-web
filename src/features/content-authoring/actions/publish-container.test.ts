@@ -28,18 +28,89 @@ function mockDraftVersion(containerId: string, versionId: string) {
   );
 }
 
+/** The next draft the action opens after a successful publish. */
+function mockNextDraft(containerId: string, onCall?: () => void) {
+  server.use(
+    http.post(`http://content.test/api/v1/containers/${containerId}/draft`, () => {
+      onCall?.();
+      return HttpResponse.json({ versionId: 'ver-next' }, { status: 201 });
+    }),
+  );
+}
+
 describe('publishContainerAction', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('returns ok when the service publishes the draft version', async () => {
+  it('publishes the draft version and opens the next one', async () => {
     mockDraftVersion('ctr-1', 'ver-1');
+    const nextDraft = vi.fn();
     server.use(
-      http.post('http://content.test/api/v1/containers/ctr-1/versions/ver-1/publish', () =>
-        new HttpResponse(null, { status: 204 }),
+      http.post(
+        'http://content.test/api/v1/containers/ctr-1/versions/ver-1/publish',
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+    );
+    mockNextDraft('ctr-1', nextDraft);
+
+    const result = await publishContainerAction('ctr-1');
+
+    expect(result.ok).toBe(true);
+    // Every editor write resolves the draft first, so the editor would be
+    // read-only until one exists again.
+    expect(nextDraft).toHaveBeenCalledOnce();
+  });
+
+  it('posts the release notes with the publish, trimmed', async () => {
+    mockDraftVersion('ctr-4', 'ver-4');
+    let body: unknown;
+    server.use(
+      http.post(
+        'http://content.test/api/v1/containers/ctr-4/versions/ver-4/publish',
+        async ({ request }) => {
+          body = await request.json();
+          return new HttpResponse(null, { status: 204 });
+        },
+      ),
+    );
+    mockNextDraft('ctr-4');
+
+    await publishContainerAction('ctr-4', '  Lagt til 5 nye øvinger.  ');
+
+    expect(body).toEqual({ changelog: 'Lagt til 5 nye øvinger.' });
+  });
+
+  it('sends no notes when the author left the field empty', async () => {
+    mockDraftVersion('ctr-5', 'ver-5');
+    let body: unknown;
+    server.use(
+      http.post(
+        'http://content.test/api/v1/containers/ctr-5/versions/ver-5/publish',
+        async ({ request }) => {
+          body = await request.json();
+          return new HttpResponse(null, { status: 204 });
+        },
+      ),
+    );
+    mockNextDraft('ctr-5');
+
+    await publishContainerAction('ctr-5', '   ');
+
+    expect(body).toEqual({});
+  });
+
+  it('still reports success when the next draft cannot be opened', async () => {
+    mockDraftVersion('ctr-3', 'ver-3');
+    server.use(
+      http.post(
+        'http://content.test/api/v1/containers/ctr-3/versions/ver-3/publish',
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+      http.post('http://content.test/api/v1/containers/ctr-3/draft', () =>
+        HttpResponse.json({ title: 'Boom' }, { status: 500 }),
       ),
     );
 
-    const result = await publishContainerAction('ctr-1');
+    const result = await publishContainerAction('ctr-3');
 
     expect(result.ok).toBe(true);
   });

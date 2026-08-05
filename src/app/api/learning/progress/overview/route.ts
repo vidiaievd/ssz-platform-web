@@ -13,7 +13,6 @@ import type {
   ProgressSkillMastery,
   ProgressSrsStats,
   ProgressStudentInfo,
-  SrsDueResponse,
   SrsStats,
 } from '@/features/learning/types';
 import { serverFetch } from '@/lib/api/server-fetcher';
@@ -60,9 +59,11 @@ export async function GET(request: NextRequest) {
 
   try {
     /* ── Parallel upstream fetch ────────────────────────────────── */
-    const [srsStats, srsDue, canDoRaw] = await Promise.all([
-      serverFetch<SrsStats>({ service: 'progress', path: '/srs/stats' }),
-      serverFetch<SrsDueResponse>({ service: 'progress', path: '/srs/due' }),
+    const [srsStats, canDoRaw] = await Promise.all([
+      // `/srs/stats/me` — plain `/srs/stats` is a 404 — and it already carries
+      // both the due backlog and today's count, so the due queue itself is not
+      // needed here.
+      serverFetch<SrsStats>({ service: 'progress', path: '/srs/stats/me' }),
       serverFetch<CanDoResponse>({
         service: 'progress',
         path: '/learning/can-do',
@@ -89,13 +90,15 @@ export async function GET(request: NextRequest) {
 
     /* ── Map SRS stats ──────────────────────────────────────────── */
     const srs: ProgressSrsStats = {
-      dueToday:      srsDue.dueCount,
-      reviewedToday: srsDue.reviewedToday,
-      retention:     Math.round(srsStats.retentionRate),
-      streak:        srsDue.streakDays,
-      bestStreak:    srsDue.streakDays, // backend may add bestStreak later
-      totalItems:    srsStats.matureCount + srsStats.youngCount,
-      maturedItems:  srsStats.matureCount,
+      dueToday:      srsStats.dueNowCount,
+      reviewedToday: srsStats.reviewedTodayCount,
+      totalCards:
+        srsStats.newCount +
+        srsStats.learningCount +
+        srsStats.reviewCount +
+        srsStats.relearningCount +
+        srsStats.suspendedCount,
+      cardsInReview: srsStats.reviewCount,
     };
 
     /* ── Map can-dos ────────────────────────────────────────────── */

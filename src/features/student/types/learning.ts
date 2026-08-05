@@ -58,6 +58,51 @@ export interface SchoolTeacherSummary {
   role: 'primary' | 'co-primary' | 'substitute';
 }
 
+/**
+ * The single next scheduled class across every school the student belongs to.
+ * Unlike `NextLesson` (derived from the weekly slot grid), this is a concrete
+ * scheduled lesson from scheduling-service, so it knows its teacher, room and
+ * status — and reflects one-off moves and cancellations.
+ */
+export interface NextClass {
+  lessonId: string;
+  date: ISODate;
+  startTime: HHMM;
+  endTime: HHMM;
+  room: string | null;
+  /** Lifecycle as reported by scheduling-service, e.g. 'scheduled' | 'cancelled'. */
+  status: string;
+  schoolId: string;
+  schoolSlug: string;
+  schoolName: string;
+  groupId: string;
+  groupName: string;
+  teacher: { userId: string; name: string; avatarUrl: string | null } | null;
+}
+
+/**
+ * A course the student has access to, whatever the route in: a school group's
+ * material or their own enrollment. Progress is an *overlay* here, not the
+ * source of the list — a course assigned but never opened is still a course
+ * the student has, and must appear with `started: false`.
+ */
+export interface StudentCourse {
+  containerId: string;
+  title: string;
+  targetLanguage: string;
+  level: string | null;
+  source: 'school' | 'self' | 'free';
+  /** Set only when `source` is 'school'. */
+  school: { id: string; slug: string; name: string; groupId: string; groupName: string } | null;
+  started: boolean;
+  progressPercent: number;
+  completedItems: number;
+  totalItems: number;
+  lastAccessedAt: string | null;
+  nextItemId: string | null;
+  nextItemTitle: string | null;
+}
+
 /** One material attached to a group — the main course (`isMain`) or an additional one. */
 export interface SchoolMaterial {
   id: string;

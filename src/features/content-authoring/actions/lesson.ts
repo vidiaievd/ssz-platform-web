@@ -7,8 +7,14 @@ import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
 import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content/types';
 
-import { lessonFormSchema, liveScheduleSchema, type LessonFormValues, type LiveScheduleFormValues } from '../schemas/lesson';
+import {
+  lessonFormSchema,
+  liveScheduleSchema,
+  type LessonFormValues,
+  type LiveScheduleFormValues,
+} from '../schemas/lesson';
 import { addItemToDraft, removeItemFromDraft, reorderDraftItems } from '../lib/container-items';
+import { ensureVariantPublished } from '../lib/ensure-published';
 
 export async function createLessonAction(
   containerId: string,
@@ -17,11 +23,16 @@ export async function createLessonAction(
   visibility: Visibility,
   input: LessonFormValues,
   kind: LessonKind = 'text',
+  ownerSchoolId?: string | null,
 ) {
   return tryAction(async () => {
     const parsed = lessonFormSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
     const { title, body, transcript } = parsed.data;
 
@@ -29,7 +40,16 @@ export async function createLessonAction(
       service: 'content',
       path: '/lessons',
       method: 'POST',
-      body: { title, targetLanguage, difficultyLevel, visibility, kind },
+      // `ownerSchoolId` is what makes `school_private` a legal visibility here
+      // (content-service `getValidVisibilities`).
+      body: {
+        title,
+        targetLanguage,
+        difficultyLevel,
+        visibility,
+        kind,
+        ...(ownerSchoolId && { ownerSchoolId }),
+      },
     });
 
     let variantId: string | undefined;
@@ -48,6 +68,7 @@ export async function createLessonAction(
         },
       });
       variantId = variant.variantId;
+      await ensureVariantPublished(lessonId, variantId);
     }
 
     const item = await addItemToDraft(containerId, 'lesson', lessonId);
@@ -67,7 +88,11 @@ export async function updateLessonAction(
   return tryAction(async () => {
     const parsed = lessonFormSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
     const { title, body, transcript } = parsed.data;
 
@@ -91,6 +116,7 @@ export async function updateLessonAction(
             ...(transcript !== undefined && { transcript }),
           },
         });
+        await ensureVariantPublished(lessonId, variantId);
       } else if (body) {
         const variant = await serverFetch<{ variantId: string }>({
           service: 'content',
@@ -106,6 +132,7 @@ export async function updateLessonAction(
           },
         });
         newVariantId = variant.variantId;
+        await ensureVariantPublished(lessonId, newVariantId);
       }
     }
 
@@ -123,7 +150,11 @@ export async function updateLiveLessonAction(
   return tryAction(async () => {
     const parsed = liveScheduleSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
     const { title, liveStartsAt, liveDurationMinutes, liveJoinUrl, liveCapacity } = parsed.data;
 

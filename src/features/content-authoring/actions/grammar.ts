@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
+import { ensureExplanationPublished } from '../lib/ensure-published';
 import type { DifficultyLevel, Visibility } from '@/features/content/types';
 
 import {
@@ -21,11 +22,16 @@ export async function createGrammarRuleAction(
   difficultyLevel: DifficultyLevel,
   visibility: Visibility,
   data: GrammarRuleFormValues,
+  ownerSchoolId?: string | null,
 ) {
   return tryAction(async () => {
     const parsed = grammarRuleFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
 
     const { ruleId } = await serverFetch<{ ruleId: string }>({
@@ -38,6 +44,8 @@ export async function createGrammarRuleAction(
         difficultyLevel,
         visibility,
         topic: 'other',
+        // Required for `school_private` (content-service `getValidVisibilities`).
+        ...(ownerSchoolId && { ownerSchoolId }),
       },
     });
 
@@ -56,7 +64,11 @@ export async function updateGrammarRuleAction(
   return tryAction(async () => {
     const parsed = grammarRuleFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
 
     await serverFetch({
@@ -96,7 +108,11 @@ export async function saveGrammarExplanationAction(
   return tryAction(async () => {
     const parsed = grammarExplanationFormSchema.safeParse(data);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
     const { languageCode, title, body, examples } = parsed.data;
     const bodyMarkdown = body ?? '';
@@ -125,6 +141,8 @@ export async function saveGrammarExplanationAction(
       });
       savedExplanationId = explanation.explanationId;
     }
+
+    await ensureExplanationPublished(ruleId, savedExplanationId);
 
     await serverFetch({
       service: 'content',

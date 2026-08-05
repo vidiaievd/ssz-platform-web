@@ -36,7 +36,7 @@ export function CourseDetailView({
   isEnrolled = false,
   progressPercent,
   gatedMode = 'preview',
-  backHref = '/student/courses',
+  backHref = '/student/catalogue',
 }: CourseDetailViewProps) {
   const t = useTranslations('Catalog');
   const [previewOpen, setPreviewOpen] = useState(false);

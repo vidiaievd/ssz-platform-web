@@ -12,5 +12,11 @@
   "invitations": "Приглашения",
   "scheduling": "Расписание",
   "courses": "Курсы",
-  "notifications": "Уведомления"
+  "notifications": "Уведомления",
+  "home": "Главная",
+  "myCourses": "Мои курсы",
+  "catalogue": "Каталог",
+  "training": "Тренировка",
+  "reviews": "Повторение",
+  "progress": "Прогресс"
 }

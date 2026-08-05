@@ -135,21 +135,20 @@ function mockFetch(sequence: Array<{ ok: boolean; status?: number; body?: object
 const tick = () => new Promise<void>((r) => setTimeout(r, 0));
 
 describe('uploadAsset', () => {
-  it('completes the three-step flow and returns the finalized asset', async () => {
+  it('completes the full flow and returns the finalized asset', async () => {
     mockFetch([
       { ok: true, status: 201, body: { assetId: ASSET_ID, uploadUrl: UPLOAD_URL } },
+      { ok: true, status: 204 },
       {
         ok: true,
         status: 200,
         body: {
-          asset: {
-            id: ASSET_ID,
-            url: ASSET_URL,
-            mimeType: 'image/jpeg',
-            size: 5,
-            filename: 'x.jpg',
-            createdAt: '2026-01-01T00:00:00Z',
-          },
+          id: ASSET_ID,
+          url: ASSET_URL,
+          mimeType: 'image/jpeg',
+          sizeBytes: 5,
+          originalFilename: 'x.jpg',
+          createdAt: '2026-01-01T00:00:00Z',
         },
       },
     ]);
@@ -208,5 +207,23 @@ describe('uploadAsset', () => {
     xhr._triggerLoad();
 
     await expect(promise).rejects.toThrow('502');
+  });
+
+  it('throws when fetching the finalized asset fails', async () => {
+    mockFetch([
+      { ok: true, status: 201, body: { assetId: ASSET_ID, uploadUrl: UPLOAD_URL } },
+      { ok: true, status: 204 },
+      { ok: false, status: 404 },
+    ]);
+
+    const file = new File(['x'], 'x.jpg', { type: 'image/jpeg' });
+    const promise = uploadAsset({ file });
+
+    await tick();
+    const xhr = FakeXHR.last;
+    xhr.status = 200;
+    xhr._triggerLoad();
+
+    await expect(promise).rejects.toThrow('404');
   });
 });

@@ -8,12 +8,17 @@ import type { CurriculumTreeSelection } from '../types';
 
 vi.mock('../actions/container', () => ({ renameContainerAction: vi.fn() }));
 vi.mock('../actions/section', () => ({ renameSectionAction: vi.fn() }));
+// Pulls in the publish server action, which cannot be imported client-side.
+vi.mock('./module-publish-block', () => ({ ModulePublishBlock: () => null }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -54,7 +59,7 @@ describe('CurriculumInspector', () => {
   it('shows level contextual help with an editable title', () => {
     renderInspector({
       kind: 'level',
-      level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [] },
+      level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [], items: [] },
     });
     expect(screen.getByDisplayValue('A1 — Beginner')).toBeInTheDocument();
     expect(
@@ -65,7 +70,7 @@ describe('CurriculumInspector', () => {
   it('shows a plain (non-editable) title for the single-level placeholder (no level id)', () => {
     renderInspector({
       kind: 'level',
-      level: { id: null, title: 'All content', position: 0, modules: [] },
+      level: { id: null, title: 'All content', position: 0, modules: [], items: [] },
     });
     expect(screen.getByText('All content')).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
@@ -83,6 +88,7 @@ describe('CurriculumInspector', () => {
         position: 0,
         isRequired: true,
         sections: [],
+        publishState: 'draft',
         ungroupedItems: [],
       },
     });
@@ -103,6 +109,7 @@ describe('CurriculumInspector', () => {
         isRequired: true,
         lessonKind: 'text',
         state: 'published',
+        isLive: true,
         durationMinutes: 6,
         xpReward: 10,
       },
@@ -110,8 +117,32 @@ describe('CurriculumInspector', () => {
     expect(screen.getByText('En vanlig arbeidsdag')).toBeInTheDocument();
     expect(screen.getByText('6 min')).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();
-    expect(screen.getByText('Published')).toBeInTheDocument();
+    expect(screen.getByText('Students see this')).toBeInTheDocument();
     expect(screen.getByText(/Reading/)).toBeInTheDocument();
+  });
+
+  it('says an item is awaiting publish when the live version does not place it', () => {
+    renderInspector({
+      kind: 'item',
+      sectionTitle: 'Reinforce & read',
+      item: {
+        id: 'item-1',
+        itemType: 'lesson',
+        refId: 'lesson-1',
+        title: 'En vanlig arbeidsdag',
+        position: 0,
+        isRequired: true,
+        lessonKind: 'text',
+        // Variant published, item not live: exactly the case the old badge lied about.
+        state: 'published',
+        isLive: false,
+        durationMinutes: 6,
+        xpReward: 10,
+      },
+    });
+
+    expect(screen.getByText('Awaiting publish')).toBeInTheDocument();
+    expect(screen.queryByText('Students see this')).not.toBeInTheDocument();
   });
 
   it('shows a placeholder dash for missing duration/xp', () => {
@@ -127,6 +158,7 @@ describe('CurriculumInspector', () => {
         isRequired: true,
         lessonKind: null,
         state: null,
+        isLive: false,
         durationMinutes: null,
         xpReward: null,
       },
@@ -138,25 +170,25 @@ describe('CurriculumInspector', () => {
     beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
     afterEach(() => vi.useRealTimers());
 
-    it('renames a level after the autosave debounce and reports the change', async () => {
+    it('renames a level when save is pressed and reports the change', async () => {
       vi.mocked(renameSectionAction).mockResolvedValue({ ok: true, value: undefined } as never);
       const onChanged = renderInspector({
         kind: 'level',
-        level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [] },
+        level: { id: 'level-a1', title: 'A1 — Beginner', position: 0, modules: [], items: [] },
       });
 
       fireEvent.change(screen.getByDisplayValue('A1 — Beginner'), {
         target: { value: 'A1 — Nybegynner' },
       });
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(1500);
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
       });
 
       expect(renameSectionAction).toHaveBeenCalledWith('course-1', 'level-a1', 'A1 — Nybegynner');
       expect(onChanged).toHaveBeenCalled();
     });
 
-    it('renames a module after the autosave debounce and reports the change', async () => {
+    it('renames a module when save is pressed and reports the change', async () => {
       vi.mocked(renameContainerAction).mockResolvedValue({ ok: true, value: undefined } as never);
       const onChanged = renderInspector({
         kind: 'module',
@@ -169,6 +201,7 @@ describe('CurriculumInspector', () => {
           position: 0,
           isRequired: true,
           sections: [],
+          publishState: 'draft',
           ungroupedItems: [],
         },
       });
@@ -177,7 +210,7 @@ describe('CurriculumInspector', () => {
         target: { value: 'Samfunn' },
       });
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(1500);
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
       });
 
       expect(renameContainerAction).toHaveBeenCalledWith('module-1', 'Samfunn');

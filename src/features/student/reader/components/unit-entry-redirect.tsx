@@ -7,7 +7,7 @@ import { EmptyState, ErrorState, LearningSkeleton, useUnitContents } from '@/fea
 import type { UnitContentsItem } from '@/features/learning';
 import { Link, useRouter } from '@/lib/i18n/navigation';
 
-import { buildItemHref } from '../lib/map-reader-data';
+import { buildItemHref, resolveNavigableItemId } from '../lib/map-reader-data';
 
 export interface UnitEntryRedirectProps {
   courseId: string;
@@ -33,14 +33,16 @@ export function UnitEntryRedirect({ courseId, unitId }: UnitEntryRedirectProps) 
   const entryItem = pickEntryItem(items);
 
   useEffect(() => {
-    if (entryItem) {
-      router.replace(buildItemHref(courseId, unitId, entryItem.id));
+    if (data && entryItem) {
+      // Exercises inside a collapsed section are only reachable through their
+      // practice page — never link straight at one.
+      router.replace(buildItemHref(courseId, unitId, resolveNavigableItemId(data, entryItem.id)));
     }
-  }, [entryItem, courseId, unitId, router]);
+  }, [data, entryItem, courseId, unitId, router]);
 
   if (isError) {
     return (
-      <div className="flex h-screen items-center justify-center bg-(--ssz-bg-base)">
+      <div className="flex h-full items-center justify-center bg-(--ssz-bg-base)">
         <ErrorState onRetry={() => void refetch()} />
       </div>
     );
@@ -48,7 +50,7 @@ export function UnitEntryRedirect({ courseId, unitId }: UnitEntryRedirectProps) 
 
   if (!isLoading && !entryItem) {
     return (
-      <div className="flex h-screen items-center justify-center bg-(--ssz-bg-base)">
+      <div className="flex h-full items-center justify-center bg-(--ssz-bg-base)">
         <EmptyState
           title={t('emptyTitle')}
           description={t('emptyBody')}
@@ -63,7 +65,7 @@ export function UnitEntryRedirect({ courseId, unitId }: UnitEntryRedirectProps) 
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-(--ssz-bg-base)">
+    <div className="flex h-full items-center justify-center bg-(--ssz-bg-base)">
       <LearningSkeleton variant="list" rows={5} className="w-80" />
     </div>
   );

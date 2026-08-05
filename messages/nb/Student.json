@@ -20,14 +20,6 @@
     "in": "i {container}",
     "start": "Åpne"
   },
-  "streak": {
-    "title": "Aktivitetsrekke",
-    "current": "Nåværende rekke",
-    "longest": "Lengste rekke",
-    "totalDays": "Totalt dager",
-    "days": "{count, plural, one {# dag} other {# dager}}",
-    "noActivity": "Start en leksjon for å bygge rekken din!"
-  },
   "voxordPromo": {
     "title": "Øv på uttale på mobil",
     "description": "Last ned VoxOrd for å øve på tale og få sanntidstilbakemelding på uttalen din.",
@@ -125,5 +117,183 @@
   "GroupAssignedBanner": {
     "message": "Du er i {group} hos {school}!",
     "dismiss": "Lukk"
+  },
+  "homeCards": {
+    "sourceTag": {
+      "school": "Skole",
+      "self": "Selvstudium",
+      "free": "Gratis",
+      "paid": "Abonnement"
+    },
+    "courseProgressCard": {
+      "lessonsProgress": "{done} / {total} leksjoner",
+      "wordsLearned": "{count} ord lært",
+      "inProgress": "Pågår",
+      "upNext": "Neste · {unit}",
+      "resume": "Fortsett",
+      "lastActive": "Sist aktiv {when}"
+    },
+    "trainingTile": {
+      "ready": "{count} klare"
+    },
+    "cadenceCard": {
+      "title": "Studierytmen din",
+      "advice": "Litt og ofte er bedre enn lange, sjeldne sesjoner",
+      "reviewedToday": "{count, plural, =0 {Ingen gjennomganger i dag ennå} one {# gjennomgang i dag} other {# gjennomganger i dag}}"
+    }
+  },
+  "comingSoon": {
+    "title": "Kommer snart",
+    "description": "Denne skjermen bygges om som en del av redesignet av startsiden."
+  },
+  "home": {
+    "greeting": {
+      "title": "Godt å se deg",
+      "titleNamed": "Godt å se deg, {name}",
+      "classAndReviews": "Du har time i dag og {count, plural, one {# repetisjon} other {# repetisjoner}} som venter.",
+      "classOnly": "Du har time i dag.",
+      "reviewsOnly": "{count, plural, one {# repetisjon venter} other {# repetisjoner venter}} på deg.",
+      "nothingPending": "Ingenting forfaller — et fint tidspunkt til å lære noe nytt."
+    },
+    "resume": {
+      "overline": "Fortsett der du slapp",
+      "cta": "Fortsett leksjonen",
+      "emptyTitle": "Ingenting startet ennå",
+      "emptyDescription": "Velg et kurs, så dukker neste leksjon opp her.",
+      "emptyCta": "Se katalogen",
+      "overlineNew": "Klar når du er",
+      "ctaStart": "Start leksjonen"
+    },
+    "nextClass": {
+      "overline": "Neste time",
+      "cta": "Se timedetaljer",
+      "empty": "Ingen time er planlagt. Kurs du tar på egen hånd har ingen faste tidspunkt."
+    },
+    "reviews": {
+      "overline": "Tid for repetisjon",
+      "dueNow": "{count, plural, one {element forfaller nå} other {elementer forfaller nå}}",
+      "hint": "Spaced repetition henter hvert element tilbake rett før du ville glemt det.",
+      "cta": "Repeter {count, plural, one {# element} other {# elementer}}",
+      "empty": "Ingenting å repetere nå. Elementene kommer tilbake når de forfaller."
+    },
+    "training": {
+      "title": "Rask trening",
+      "subtitle": "Hopp rett inn i målrettet øving — eller en blandet økt.",
+      "allTraining": "All trening",
+      "reviewLabel": "Repeter det som forfaller",
+      "reviewDescription": "Jobb deg gjennom elementene planen har hentet fram i dag.",
+      "reviewMeta": "{count, plural, =0 {Ingenting forfaller} one {# element klart} other {# elementer klare}}",
+      "mixedLabel": "Blandet økt",
+      "mixedDescription": "Et variert utvalg på tvers av alt du holder på med nå."
+    },
+    "myCourses": {
+      "title": "Mine kurs",
+      "subtitle": "Alt du har begynt på, samlet på ett sted.",
+      "viewAll": "Se alle",
+      "lessonNumber": "Leksjon {n}",
+      "courseComplete": "Kurset er fullført",
+      "emptyTitle": "Ingen kurs ennå",
+      "emptyDescription": "Kurs du starter — på egen hånd eller gjennom en skole — vises her.",
+      "emptyCta": "Se katalogen",
+      "notStarted": "Ikke startet ennå"
+    },
+    "explore": {
+      "title": "Utforsk flere kurs",
+      "subtitle": "Gratis, abonnement og fra skolene dine"
+    },
+    "groupAccess": {
+      "message": "{school} har plassert deg i {group} — kursmateriellet ditt er klart.",
+      "cta": "Åpne kurset"
+    }
+  },
+  "myCoursesPage": {
+    "eyebrow": "Min læring",
+    "title": "Mine kurs",
+    "subtitle": "Kurs du følger — fra skolene dine, på egen hånd, og fra den gratis katalogen.",
+    "filters": {
+      "groupLabel": "Filtrer etter kilde",
+      "all": "Alle",
+      "school": "Fra skoler",
+      "self": "Selvstudium",
+      "free": "Gratis og offentlig"
+    },
+    "empty": {
+      "all": "Ingen kurs ennå",
+      "school": "Ingen skolekurs ennå",
+      "self": "Ingen kurs for selvstudium ennå",
+      "free": "Ingen gratis kurs ennå",
+      "description": "Bla i katalogen for å legge til et kurs.",
+      "cta": "Se katalogen"
+    }
+  },
+  "reviewsPage": {
+    "eyebrow": "Hold det ved like",
+    "title": "Repetisjon og påminnelser",
+    "subtitle": "Ordene og reglene plattformen tror du er i ferd med å glemme — hentet fram i det øyeblikket de fester seg best.",
+    "dueNow": "{count, plural, one {element klart nå} other {elementer klare nå}}",
+    "reviewAll": "Repeter alt nå",
+    "overdue": "{count, plural, one {# element har} other {# elementer har}} ventet siden før i dag.",
+    "due": "klare",
+    "openCourse": "Åpne kurs",
+    "kind": {
+      "exercise": "Oppgaver",
+      "vocabulary_word": "Ord"
+    },
+    "unattributed": "{count, plural, one {# element er} other {# elementer er}} ikke knyttet til et kurs du har åpent nå.",
+    "methodNote": "Vi planlegger hvert element til øyeblikket rett før du ville glemt det. Da krever repetisjonen minst innsats og gir sterkest hukommelse — derfor endrer antallet seg fra dag til dag.",
+    "comingUp": {
+      "title": "Kommer snart",
+      "empty": "Oversikten over kommende repetisjoner er ikke tilgjengelig ennå — dagens kø er hele bildet foreløpig."
+    },
+    "mixed": {
+      "title": "Vil du ha en blandet økt?",
+      "description": "Kombiner repetisjoner med ny trening på tvers av alt du lærer.",
+      "cta": "Gå til trening"
+    },
+    "empty": {
+      "title": "Ingenting å repetere nå",
+      "description": "Elementene kommer tilbake når de er klare. Inntil da er det ingenting å ta igjen.",
+      "cta": "Åpne kursene mine"
+    }
+  },
+  "trainingPage": {
+    "eyebrow": "Øv",
+    "title": "Trening",
+    "subtitle": "Korte, fokuserte økter i én ferdighet — eller en blandet økt som tilpasser seg det du trenger mest. Ikke knyttet til ett bestemt kurs.",
+    "recommended": {
+      "overline": "Anbefalt akkurat nå",
+      "cta": "Start",
+      "exercise": "{count, plural, one {# oppgave er} other {# oppgaver er}} klare — en kort økt holder grammatikken skarp.",
+      "vocabulary_word": "{count, plural, one {# nytt ord er} other {# nye ord er}} klare — en kort ordøkt hindrer dem i å falme."
+    },
+    "featured": {
+      "reviewLabel": "Repeter det som er klart",
+      "reviewDescription": "Gå gjennom elementene planen har hentet fram i dag.",
+      "reviewMeta": "{count, plural, =0 {Ingenting klart} one {# element klart} other {# elementer klare}}",
+      "mixedLabel": "Sammensatt økt",
+      "mixedDescription": "Et variert utvalg hentet fra alt du holder på med nå."
+    },
+    "byType": {
+      "title": "Øv etter type",
+      "subtitle": "Velg hva du vil jobbe med.",
+      "exercise": {
+        "label": "Oppgaver",
+        "description": "Grammatikk- og ferdighetsoppgaver fra kursene dine."
+      },
+      "vocabulary_word": {
+        "label": "Nye ord",
+        "description": "Ord som er klare for repetisjon, hentet fra alle kursene."
+      }
+    },
+    "methodNote": "Øktene bruker spaced repetition: elementer du synes er vanskelige, kommer tilbake raskere, de du kan godt, kommer tilbake senere. Kort, jevnlig trening er langt mer effektivt enn sjeldne, lange økter."
+  },
+  "progressPage": {
+    "eyebrow": "Oversikt",
+    "title": "Fremgang",
+    "subtitle": "Hvor du står i hvert kurs. Bare fakta — hvor langt du har kommet og hva som gjenstår.",
+    "empty": {
+      "title": "Ingen fremgang ennå",
+      "body": "Start et kurs, så vises fremgangen din her."
+    }
   }
 }

@@ -20,9 +20,9 @@ interface SrsSessionState {
   cardState: CardState;
   /** Cards rated this session (regardless of rating). */
   reviewedCount: number;
-  /** IDs of cards rated 'Again' (rating === 1). */
+  /** IDs of cards rated AGAIN. */
   againIds: string[];
-  /** Count of cards rated Good (3) or Easy (4) — used for accuracy. */
+  /** Count of cards rated GOOD or EASY — used for accuracy. */
   correctCount: number;
   /** Session start timestamp (ms). */
   startedAt: number | null;
@@ -38,19 +38,18 @@ interface SrsSessionState {
   /** Set when a review POST fails with a non-429 error. Cleared on retry/advance. */
   ratingError: RatingError | null;
   dailyLimit: number;
-  streakDays: number;
   /** Set to true when the server returns 429. Terminal for the session. */
   limitHit: boolean;
 }
 
 interface SrsSessionActions {
   /** Seed the store from GET /due response. */
-  seed: (data: { cards: SrsCard[]; dailyLimit: number; streakDays: number }) => void;
+  seed: (data: { cards: SrsCard[]; dailyLimit: number }) => void;
   startSession: () => void;
   /** Show the answer side. Generates an idempotency key and starts the latency timer. */
   revealAnswer: () => void;
   /** Call after a successful review POST — advances to next card or summary. */
-  advanceAfterRating: (rating: ReviewRating, streakDays: number) => void;
+  advanceAfterRating: (rating: ReviewRating) => void;
   /** Re-queue only the "Again" cards for a second pass. */
   queueMisses: () => void;
   setPhase: (phase: SrsPhase) => void;
@@ -78,15 +77,14 @@ const initial: SrsSessionState = {
   currentIdempotencyKey: null,
   ratingError: null,
   dailyLimit: 20,
-  streakDays: 0,
   limitHit: false,
 };
 
 export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()((set, get) => ({
   ...initial,
 
-  seed: ({ cards, dailyLimit, streakDays }) =>
-    set({ queue: cards, dailyLimit, streakDays }),
+  seed: ({ cards, dailyLimit }) =>
+    set({ queue: cards, dailyLimit }),
 
   startSession: () =>
     set({ phase: 'session', index: 0, cardState: 'front', startedAt: Date.now() }),
@@ -99,11 +97,11 @@ export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()(
       ratingError: null,
     }),
 
-  advanceAfterRating: (rating, streakDays) => {
+  advanceAfterRating: (rating) => {
     const { queue, index, reviewedCount, againIds, correctCount } = get();
     const newReviewed = reviewedCount + 1;
-    const newAgain = rating === 1 ? [...againIds, queue[index]!.id] : againIds;
-    const newCorrect = rating >= 3 ? correctCount + 1 : correctCount;
+    const newAgain = rating === 'AGAIN' ? [...againIds, queue[index]!.id] : againIds;
+    const newCorrect = rating === 'GOOD' || rating === 'EASY' ? correctCount + 1 : correctCount;
     const nextIndex = index + 1;
     const isLast = nextIndex >= queue.length;
 
@@ -111,7 +109,6 @@ export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()(
       reviewedCount: newReviewed,
       againIds: newAgain,
       correctCount: newCorrect,
-      streakDays,
       revealedAt: null,
       currentIdempotencyKey: null,
       ratingError: null,

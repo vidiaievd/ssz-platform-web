@@ -14,7 +14,11 @@ export async function createContainerAction(input: ContainerFormValues) {
   return tryAction(async () => {
     const parsed = containerFormSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
 
     const data = parsed.data;
@@ -54,6 +58,7 @@ export async function createModuleAction(
   visibility: Visibility,
   accessTier: AccessTier,
   levelSectionId?: string | null,
+  ownerSchoolId?: string | null,
 ) {
   return tryAction(async () => {
     const trimmed = title.trim();
@@ -72,6 +77,9 @@ export async function createModuleAction(
         difficultyLevel,
         visibility,
         accessTier,
+        // A module inherits its course's school; without it `school_private`
+        // is rejected (content-service `getValidVisibilities`).
+        ...(ownerSchoolId && { ownerSchoolId }),
       },
     });
 
@@ -108,7 +116,11 @@ export async function updateContainerAction(id: string, input: ContainerFormValu
   return tryAction(async () => {
     const parsed = containerFormSchema.safeParse(input);
     if (!parsed.success) {
-      throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
+      throw new AppError(
+        'validation',
+        'Invalid input',
+        parsed.error.flatten((i) => i.message),
+      );
     }
 
     const data = parsed.data;

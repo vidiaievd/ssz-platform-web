@@ -3,13 +3,17 @@ import { withThemeByClassName } from '@storybook/addon-themes';
 import { NextIntlClientProvider } from 'next-intl';
 import React from 'react';
 
-import en from '../messages/en.json';
-import nb from '../messages/nb.json';
-import uk from '../messages/uk.json';
-import ru from '../messages/ru.json';
+import { loadMessages } from '../src/lib/i18n/messages';
 import '../src/styles/globals.css';
 
-const messagesByLocale = { en, nb, uk, ru };
+const LOCALES = ['en', 'nb', 'uk', 'ru'] as const;
+
+// Per-namespace message files (messages/{locale}/{Namespace}.json) replaced the
+// old flat messages/{locale}.json bundles; load through the same loader the
+// app uses so Storybook and the app never drift.
+const messagesByLocale = Object.fromEntries(
+  await Promise.all(LOCALES.map(async (locale) => [locale, await loadMessages(locale)] as const)),
+) as Record<(typeof LOCALES)[number], Awaited<ReturnType<typeof loadMessages>>>;
 
 const preview: Preview = {
   globalTypes: {

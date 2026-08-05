@@ -82,13 +82,22 @@ const RAW_MASTERY = {
 
 const RAW_SRS_DUE = {
   cards: [
-    { id: 'c1', status: 'due' as const, direction: 'forward' as const, front: { word: 'hund' }, back: { definition: 'dog', sentences: [] }, predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } } },
-    { id: 'c2', status: 'due' as const, direction: 'forward' as const, front: { word: 'katt' }, back: { definition: 'cat', sentences: [] }, predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } } },
-    { id: 'c3', status: 'due' as const, direction: 'forward' as const, front: { word: 'Ex 1' }, back: { definition: 'ans', sentences: [] }, predicted: { '1': { label: '5 min' }, '2': { label: '10 min' }, '3': { label: '1 day' }, '4': { label: '4 days' } } },
+    { contentType: 'VOCABULARY_WORD' as const },
+    { contentType: 'VOCABULARY_WORD' as const },
+    { contentType: 'EXERCISE' as const },
   ],
   reviewedToday: 3,
   dailyLimit: 20,
-  streakDays: 7,
+};
+
+const RAW_SRS_STATS = {
+  newCount: 0,
+  learningCount: 0,
+  reviewCount: 0,
+  relearningCount: 0,
+  suspendedCount: 0,
+  dueNowCount: 12,
+  reviewedTodayCount: 3,
 };
 
 const MOCK_CONTAINER: Partial<Container> = {
@@ -144,7 +153,7 @@ function mockAllSuccess() {
   mockUpstreams();
 }
 
-/** Wires the 6 upstream calls in the order route.ts issues them. */
+/** Wires the 7 upstream calls in the order route.ts issues them. */
 function mockUpstreams(
   opts: { progress?: unknown; container?: Partial<Container> } = {},
 ) {
@@ -152,6 +161,7 @@ function mockUpstreams(
     .mockResolvedValueOnce(opts.progress ?? RAW_PROGRESS)
     .mockResolvedValueOnce(RAW_MASTERY)
     .mockResolvedValueOnce(RAW_SRS_DUE)
+    .mockResolvedValueOnce(RAW_SRS_STATS)
     .mockResolvedValueOnce(opts.container ?? MOCK_CONTAINER)
     .mockResolvedValueOnce(MOCK_ITEMS)
     .mockResolvedValueOnce(MOCK_SECTIONS);
@@ -184,12 +194,12 @@ describe('GET /api/learning/course-home/[courseId]', () => {
       ]),
     );
 
-    expect(body.srsStreakDays).toBe(7);
     expect(body.srsReviewedToday).toBe(3);
-    // /srs/due no longer reports a total due count — the sample itself is treated as the count.
-    expect(body.srsDueCount).toBe(3);
-    expect(body.srsVocabDue).toBe(3);
-    expect(body.srsExerciseDue).toBe(0);
+    // Total due count comes from /srs/stats/me; vocab/exercise split is estimated
+    // from the /srs/due sample's contentType distribution.
+    expect(body.srsDueCount).toBe(12);
+    expect(body.srsVocabDue).toBe(2);
+    expect(body.srsExerciseDue).toBe(1);
 
     // No hydrated can-do endpoint yet — degrades to empty rather than fabricating data.
     expect(body.canDo).toEqual({ items: [] });
@@ -224,11 +234,11 @@ describe('GET /api/learning/course-home/[courseId]', () => {
     expect(body.levels[1].units.map((u: { id: string }) => u.id)).toEqual(['mod-2']);
   });
 
-  it('fires 4 parallel + 2 parallel (items/sections) calls (6 total)', async () => {
+  it('fires 5 parallel + 2 parallel (items/sections) calls (7 total)', async () => {
     mockAllSuccess();
 
     await GET(makeRequest(), PARAMS);
-    expect(vi.mocked(serverFetch)).toHaveBeenCalledTimes(6);
+    expect(vi.mocked(serverFetch)).toHaveBeenCalledTimes(7);
   });
 
   it('locks every unit but the first when gating is sequential and nothing is done', async () => {
@@ -295,6 +305,7 @@ describe('GET /api/learning/course-home/[courseId]', () => {
       .mockResolvedValueOnce(RAW_PROGRESS)
       .mockResolvedValueOnce(RAW_MASTERY)
       .mockResolvedValueOnce(RAW_SRS_DUE)
+      .mockResolvedValueOnce(RAW_SRS_STATS)
       .mockResolvedValueOnce(containerWithoutVersion);
 
     const res = await GET(makeRequest(), PARAMS);

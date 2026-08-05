@@ -1,12 +1,12 @@
 /* ─── API hooks ──────────────────────────────────────────────────── */
 export { learningKeys } from './api/keys';
 export { useSrsDue } from './api/use-srs-due';
+export { useSrsCardStates } from './api/use-srs-card-states';
 export { useSrsReview } from './api/use-srs-review';
 export { useSrsStats } from './api/use-srs-stats';
-export { useSrsSettings, usePatchSrsSettings } from './api/use-srs-settings';
+export { useReviewsSummary } from './api/use-reviews-summary';
 export { useCourseProgress } from './api/use-course-progress';
 export { useCourseMastery } from './api/use-course-mastery';
-export { useCanDo } from './api/use-can-do';
 export { useCourseHome } from './api/use-course-home';
 export { useUnitContents } from './api/use-unit-contents';
 export { useUpsertProgress } from './api/use-upsert-progress';
@@ -32,20 +32,24 @@ export type {
   LessonProgress,
   LessonProgressStatus,
   ModuleProgress,
+  ReviewCourseBreakdown,
+  ReviewKind,
   ReviewRating,
   ReviewRequest,
   ReviewResponse,
+  ReviewsSummary,
+  UpcomingReview,
   SkillMastery,
   SrsCard,
   SrsCardBack,
-  SrsCardDirection,
   SrsCardFront,
-  SrsCardPredicted,
-  SrsCardSentence,
-  SrsCardStatus,
+  SrsCardExample,
+  SrsPredictedInterval,
+  SrsContentType,
+  SrsCardState,
+  SrsCardStateEntry,
+  SrsCardStatesResponse,
   SrsDueResponse,
-  SrsHeatmapDay,
-  SrsSettings,
   SrsStats,
   UnitContentsItem,
   UnitContentsItemStatus,
@@ -95,15 +99,56 @@ export { ErrorState } from './components/error-state';
 export type { ErrorStateProps } from './components/error-state';
 
 export { GlossaryPopover } from './components/glossary-popover';
-export type { GlossaryPopoverProps, PartOfSpeech } from './components/glossary-popover';
+export type { GlossaryLevel, GlossaryPopoverProps, PartOfSpeech } from './components/glossary-popover';
 
 export { GlossaryParagraph } from './components/glossary-paragraph';
 export type { GlossaryParagraphProps } from './components/glossary-paragraph';
 
+export { GlossaryText } from './components/glossary-text';
+export type { GlossaryTextProps } from './components/glossary-text';
+
+export { SpanAnnotation } from './components/span-annotation';
+export type { AnnotationKind, SpanAnnotationProps } from './components/span-annotation';
+
+export { LessonProse } from './components/lesson-prose';
+export type { LessonProseProps } from './components/lesson-prose';
+
+export { parseInlineMarkdown, sliceMarks } from './lib/parse-inline-markdown';
+export type { InlineMark, InlineMarkKind, InlineMarkdown } from './lib/parse-inline-markdown';
+
+export {
+  collectMappedTexts,
+  composeSourceMaps,
+  parseMarkdownBlocks,
+} from './lib/parse-markdown-blocks';
+export type { MappedText, MarkdownBlock } from './lib/parse-markdown-blocks';
+
+export { projectRange, projectSpansOntoBlocks, usesAuthoredVocabulary } from './lib/project-span';
+export type { ProjectedSpan, SpanRange } from './lib/project-span';
+
 export { buildGlossaryIndex, tokenizeGlossary } from './lib/tokenize-glossary';
-export type { GlossaryIndex, GlossaryToken } from './lib/tokenize-glossary';
+export type { GlossaryEntry, GlossaryIndex, GlossaryToken } from './lib/tokenize-glossary';
+
+export { sentenceAt, splitSentences } from './lib/split-sentences';
+export type { Sentence } from './lib/split-sentences';
 
 export { formatTimecode } from './lib/format-timecode';
+
+export { getGlossaryMode } from './lib/glossary-mode';
+export type { GlossaryMode } from './lib/glossary-mode';
+
+export { MATURE_STABILITY_DAYS, getGlossIntensity, resolveGlossIntensity } from './lib/gloss-intensity';
+export type { GlossIntensity, GlossVisibility } from './lib/gloss-intensity';
+
+export { GlossIntensityProvider, useGlossIntensity } from './components/gloss-intensity-provider';
+export type { GlossIntensityProviderProps, GlossIntensityResolver } from './components/gloss-intensity-provider';
+
+export { LookupTelemetryProvider, useLookupReporter } from './components/lookup-telemetry-provider';
+export type {
+  LookupRecord,
+  LookupReporter,
+  LookupTelemetryProviderProps,
+} from './components/lookup-telemetry-provider';
 
 export { VideoPlayer } from './components/video-player';
 export type { VideoPlayerProps, VideoPlayerHandle } from './components/video-player';
@@ -123,19 +168,46 @@ export type { RefStripParagraph, RefStripProps } from './components/ref-strip';
 export { UnitStepper } from './components/unit-stepper';
 export type { UnitPhase, UnitStepperProps } from './components/unit-stepper';
 
+export { WordForms } from './components/word-forms';
+export type { WordFormsProps } from './components/word-forms';
+
+export { WordParadigmTable } from './components/word-paradigm-table';
+export type { WordParadigmTableProps } from './components/word-paradigm-table';
+
+export { WordCardPanel } from './components/word-card-panel';
+export type { WordCardPanelProps } from './components/word-card-panel';
+
+export { AnnotationCardPanel } from './components/annotation-card-panel';
+export { HighlightedSentence } from './components/highlighted-sentence';
+export type { HighlightedSentenceProps } from './components/highlighted-sentence';
+export type { AnnotationCardPanelProps } from './components/annotation-card-panel';
+
+export { GlossaryTargetProvider, useGlossaryTarget } from './components/glossary-target-provider';
+export type { GlossaryTarget } from './components/glossary-target-provider';
+
+export { GrammarLinkProvider, useGrammarLink } from './components/grammar-link-provider';
+export type { GrammarLinks } from './components/grammar-link-provider';
+
+export { KnowWordButton } from './components/know-word-button';
+export { useSelectedWordStore } from './stores/selected-word-store';
+export type { SelectedWord } from './stores/selected-word-store';
+export { useSelectedAnnotationStore } from './stores/selected-annotation-store';
+export type { SelectedAnnotation } from './stores/selected-annotation-store';
+export { dictionaryUrl, DICTIONARY_HOST } from './lib/dictionary-link';
+export { toGlossaryTag } from './lib/pos-tag';
+
+export { useWordAudio } from './hooks/use-word-audio';
+export type { UseWordAudioResult, WordAudioSource } from './hooks/use-word-audio';
+
 /* ─── SRS components ─────────────────────────────────────────────── */
 export { SrsPage } from './components/srs/srs-page';
 export { SrsEntry } from './components/srs/entry';
 export { SrsSession } from './components/srs/session';
 export { SessionSummary } from './components/srs/summary';
-export { StreakChip } from './components/srs/streak-chip';
 export { PosChip } from './components/srs/pos-chip';
-export { AudioButton } from './components/srs/audio-button';
 export { RatingBar } from './components/srs/rating-bar';
 export { ReviewCard } from './components/srs/review-card';
 export { LimitReachedBanner } from './components/srs/limit-banner';
 export { SessionProgress } from './components/srs/session-progress';
 export { RetryBar } from './components/srs/retry-bar';
-export { SrsSettingsDialog } from './components/srs/settings-dialog';
 export { SrsStatsPage } from './components/srs/srs-stats-page';
-export { Heatmap } from './components/srs/heatmap';

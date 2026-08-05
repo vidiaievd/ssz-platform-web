@@ -18,6 +18,12 @@ export interface MatchPair {
 
 export interface MatchContent {
   pairs: MatchPair[];
+  /**
+   * `pairs` (default) — word/translation cells.
+   * `halves` — sentence halves: the left column is numbered 1..n, the right
+   * lettered A..N, and both sides read as prose. Presentation only.
+   */
+  variant?: 'pairs' | 'halves';
   instruction?: string;
 }
 
@@ -42,12 +48,12 @@ const PAIR_HUES = [
   'oklch(0.55 0.12 145)', // green
 ];
 
-const OK_BG   = 'var(--ssz-color-success-50)';
-const OK_LINE = 'var(--ssz-color-success-500)';
-const OK_FG   = 'oklch(0.40 0.12 145)';
-const NO_BG   = 'var(--ssz-color-error-50)';
-const NO_LINE = 'var(--ssz-color-error-500)';
-const NO_FG   = 'var(--ssz-color-error-700)';
+const OK_BG   = 'var(--ssz-feedback-ok-bg)';
+const OK_LINE = 'var(--ssz-feedback-ok-line)';
+const OK_FG   = 'var(--ssz-feedback-ok-fg)';
+const NO_BG   = 'var(--ssz-feedback-no-bg)';
+const NO_LINE = 'var(--ssz-feedback-no-line)';
+const NO_FG   = 'var(--ssz-feedback-no-fg)';
 const READING = 'var(--ssz-font-reading)';
 
 /** oklch(L C H) → oklch(L C H / 0.08) for a very light fill. */
@@ -86,6 +92,36 @@ function getCellStyle(
   return { bg: 'var(--ssz-bg-surface)', border: 'var(--ssz-border-default)', color: 'var(--ssz-text-primary)' };
 }
 
+/** 0 → "A", 25 → "Z", 26 → "AA" — right-column labels in `halves` mode. */
+function letterLabel(index: number): string {
+  let label = '';
+  let n = index;
+  do {
+    label = String.fromCharCode(65 + (n % 26)) + label;
+    n = Math.floor(n / 26) - 1;
+  } while (n >= 0);
+  return label;
+}
+
+/** Fixed ordinal shown in front of a cell, e.g. "1." / "A.". */
+function Ordinal({ label }: { label: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        flexShrink: 0,
+        minWidth: 18,
+        fontFamily: 'var(--ssz-font-ui)',
+        fontSize: 12.5,
+        fontWeight: 700,
+        color: 'var(--ssz-text-muted)',
+      }}
+    >
+      {label}.
+    </span>
+  );
+}
+
 export function MatchBody({
   content,
   links,
@@ -97,6 +133,7 @@ export function MatchBody({
 }: MatchBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const { pairs } = content;
+  const halves = content.variant === 'halves';
   const isAnswering = phase === 'answering';
   const reveal = phase === 'feedback';
 
@@ -161,7 +198,18 @@ export function MatchBody({
                 : null
                 : null;
             const c = getCellStyle(isArmed, leftStatus, hue, accent);
-            const badgeNum = isLinked ? li + 1 : null;
+            // In `halves` the left cell keeps its own number as a fixed
+            // ordinal, so the badge carries the letter it was linked to.
+            const linkedRightIndex = isLinked
+              ? shuffledRights.findIndex((r) => r.id === links[pair.id])
+              : -1;
+            const badgeLabel = halves
+              ? linkedRightIndex >= 0
+                ? letterLabel(linkedRightIndex)
+                : null
+              : isLinked
+                ? String(li + 1)
+                : null;
 
             return (
               <button
@@ -178,18 +226,19 @@ export function MatchBody({
                   background: c.bg,
                   color: c.color,
                   fontFamily: READING,
-                  fontSize: 16,
-                  fontWeight: 600,
+                  fontSize: halves ? 15 : 16,
+                  fontWeight: halves ? 500 : 600,
                   transition: 'all 130ms var(--ssz-ease-out)',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: halves ? 'flex-start' : 'center',
                   gap: 10,
                   outline: isArmed ? `2px solid ${accent}` : 'none',
                   outlineOffset: 2,
                 }}
                 className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
               >
-                {badgeNum !== null && (
+                {halves && <Ordinal label={String(li + 1)} />}
+                {badgeLabel !== null && (
                   <span
                     aria-hidden="true"
                     style={{
@@ -197,7 +246,7 @@ export function MatchBody({
                       height: 20,
                       borderRadius: '50%',
                       background: hue ?? accent,
-                      color: '#fff',
+                      color: 'var(--ssz-text-on-brand)',
                       fontSize: 11,
                       fontWeight: 700,
                       display: 'flex',
@@ -207,7 +256,7 @@ export function MatchBody({
                       flexShrink: 0,
                     }}
                   >
-                    {badgeNum}
+                    {badgeLabel}
                   </span>
                 )}
                 <span className="flex-1">{pair.left}</span>
@@ -224,7 +273,7 @@ export function MatchBody({
 
         {/* Right column — native language (sans) */}
         <div className="flex flex-col gap-2.5">
-          {shuffledRights.map((pair) => {
+          {shuffledRights.map((pair, ri) => {
             const linkedLeftId = Object.keys(links).find((k) => links[k] === pair.id);
             const isLinked     = linkedLeftId !== undefined;
             const leftIndex    = isLinked
@@ -234,7 +283,7 @@ export function MatchBody({
               ? (PAIR_HUES[leftIndex % PAIR_HUES.length] ?? null)
               : null;
             const c = getCellStyle(false, null, hue, accent);
-            const badgeNum = isLinked && leftIndex >= 0 ? leftIndex + 1 : null;
+            const rightBadge = isLinked && leftIndex >= 0 ? String(leftIndex + 1) : null;
             // Dimmed when answering + no armed left cell + not yet linked
             const dimmed = isAnswering && armedId === null && !isLinked;
 
@@ -251,18 +300,19 @@ export function MatchBody({
                   border: `2px solid ${c.border}`,
                   background: c.bg,
                   color: c.color,
-                  fontFamily: 'inherit',
+                  fontFamily: halves ? READING : 'inherit',
                   fontSize: 15,
                   fontWeight: 500,
                   transition: 'all 130ms var(--ssz-ease-out)',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: halves ? 'flex-start' : 'center',
                   gap: 10,
                   opacity: dimmed ? 0.65 : 1,
                 }}
                 className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
               >
-                {badgeNum !== null && (
+                {halves && <Ordinal label={letterLabel(ri)} />}
+                {rightBadge !== null && (
                   <span
                     aria-hidden="true"
                     style={{
@@ -270,7 +320,7 @@ export function MatchBody({
                       height: 20,
                       borderRadius: '50%',
                       background: hue ?? accent,
-                      color: '#fff',
+                      color: 'var(--ssz-text-on-brand)',
                       fontSize: 11,
                       fontWeight: 700,
                       display: 'flex',
@@ -279,7 +329,7 @@ export function MatchBody({
                       flexShrink: 0,
                     }}
                   >
-                    {badgeNum}
+                    {rightBadge}
                   </span>
                 )}
                 <span className="flex-1">{pair.right}</span>

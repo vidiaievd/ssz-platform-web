@@ -13,7 +13,10 @@
     "incorrect": "Не зовсім",
     "submitted": "Відповідь надіслано",
     "gradedNote": "Збережено для перевірки вчителем. Ви побачите результати, коли їх повернуть.",
-    "answerLabel": "Відповідь:"
+    "answerLabel": "Відповідь:",
+    "tryAgain": "Спробувати ще раз",
+    "showAnswer": "Показати відповідь",
+    "hideAnswer": "Сховати відповіді"
   },
   "loading": "Завантаження вправи…",
   "error": {
@@ -25,18 +28,20 @@
     "defaultInstruction": "Оберіть правильну відповідь",
     "optionsLabel": "Варіанти відповідей"
   },
+  "mcqGroup": {
+    "questionOptions": "Відповіді на питання {n}",
+    "answeredCount": "Відповіли на {done} із {total} питань",
+    "partialScore": "Правильно {correct} із {total} відповідей"
+  },
   "fill": {
     "defaultInstruction": "Доповніть речення",
     "blankLabel": "Пропуск",
     "inputLabel": "Ваша відповідь",
     "placeholder": "введіть…",
     "rationaleTitle": "Чому саме так",
-    "optionHeader": "Варіант",
-    "verdictHeader": "Підходить?",
-    "noteHeader": "Чому",
     "verdictCorrect": "Правильно",
-    "verdictAcceptable": "Можливо, але не тут",
-    "verdictWrong": "Неправильно"
+    "verdictWrong": "Неправильно",
+    "yourAnswer": "Ваша відповідь"
   },
   "translate": {
     "defaultInstruction": "Перекладіть речення",
@@ -53,7 +58,18 @@
     "defaultInstruction": "Дайте відповідь на запитання",
     "inputLabel": "Ваша відповідь",
     "placeholder": "Напишіть відповідь…",
-    "referenceLabel": "Зразок відповіді"
+    "referenceLabel": "Зразок відповіді",
+    "diffLabel": "Ваша відповідь із розбором",
+    "diffForm": "Неправильна форма слова",
+    "diffWrong": "Не те слово",
+    "diffExtra": "Зайве слово",
+    "diffMissing": "Пропущене слово",
+    "issues": {
+      "form": "неправильна форма: {n}",
+      "wrong": "не те слово: {n}",
+      "extra": "зайвих слів: {n}",
+      "missing": "пропущено слів: {n}"
+    }
   },
   "writing": {
     "defaultInstruction": "Напишіть свій текст",
@@ -67,7 +83,35 @@
     "defaultInstruction": "Розмістіть кожне слово у правильному полі",
     "bankLabel": "Слова",
     "bankEmpty": "Усі слова розміщено",
-    "fieldDropLabel": "Розмістити в {field}"
+    "fieldDropLabel": "Розмістити в {field}",
+    "multiWordHint": "В одне поле може входити кілька слів",
+    "answerLabel": "Правильне розміщення",
+    "sourceLabel": "Вихідне речення",
+    "targetLabel": "Цільове речення"
   },
-  "unsupported": "Цей тип вправи ({type}) поки не підтримується."
+  "unsupported": "Цей тип вправи ({type}) поки не підтримується.",
+  "taskNumber": "Завдання {n}",
+  "wordBank": {
+    "bankLabel": "Банк слів",
+    "choosePlaceholder": "Оберіть…",
+    "blankLabel": "Пропуск у реченні {n}",
+    "filledCount": "Заповнено {done} із {total} пропусків",
+    "partialScore": "Правильно {correct} із {total} пропусків",
+    "helperIdle": "Торкніться пропуску, потім оберіть слово.",
+    "helperArmed": "Тепер оберіть слово для виділеного пропуску.",
+    "helperSelect": "Оберіть слово для кожного пропуску."
+  },
+  "textOrder": {
+    "moveUp": "Вище",
+    "moveDown": "Нижче",
+    "dragHandle": "Перетягніть, щоб змінити порядок, позиція {n} з {total}",
+    "partialScore": "{correct} із {total} рядків на своєму місці"
+  },
+  "errorCorrection": {
+    "remaining": "Виправлень зроблено: {found} із {total}",
+    "hint": "Торкніться частини речення, щоб переписати її.",
+    "editLabel": "Переписати «{text}»",
+    "partialScore": "Виправлено {correct} із {total} помилок",
+    "falsePositives": "Змінено правильних частин: {n}"
+  }
 }

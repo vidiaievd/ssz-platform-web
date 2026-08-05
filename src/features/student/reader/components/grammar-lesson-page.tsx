@@ -4,7 +4,13 @@ import { useMemo, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { ErrorState, LearningSkeleton } from '@/features/learning';
+import {
+  buildGlossaryIndex,
+  ErrorState,
+  HighlightedSentence,
+  LearningSkeleton,
+  LessonProse,
+} from '@/features/learning';
 import { useGrammarRule, useBestGrammarExplanation } from '@/features/content';
 import { useMyStudentProfile } from '@/features/profile';
 import { cn } from '@/lib/utils';
@@ -18,34 +24,8 @@ export interface GrammarLessonPageProps {
 
 const GRAMMAR_HUE = '--ssz-type-grammar';
 
-/** Escapes regex special characters so highlight words can be matched literally. */
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/** Splits `sentence` on `highlights` substrings, wrapping matches in a tinted <span>. */
-function renderHighlighted(sentence: string, highlights: string[]) {
-  const words = highlights.filter(Boolean);
-  if (words.length === 0) return sentence;
-  const pattern = new RegExp(`(${words.map(escapeRegExp).join('|')})`, 'g');
-  return sentence.split(pattern).map((part, i) =>
-    words.includes(part) ? (
-      <span
-        key={i}
-        className="rounded font-bold"
-        style={{
-          background: `color-mix(in oklch, var(${GRAMMAR_HUE}) 25%, transparent)`,
-          color: `var(${GRAMMAR_HUE})`,
-          padding: '1px 5px',
-        }}
-      >
-        {part}
-      </span>
-    ) : (
-      <span key={i}>{part}</span>
-    ),
-  );
-}
+/** Module-level so the prose does not re-render on an identity change alone. */
+const EMPTY_GLOSSARY = buildGlossaryIndex([]);
 
 interface QuickCheckProps {
   question: string;
@@ -86,23 +66,23 @@ function QuickCheck({ question, options, correctOptionIndex, explanation }: Quic
               )}
               style={{
                 borderColor: isRight
-                  ? 'var(--ssz-color-success-500)'
+                  ? 'var(--ssz-feedback-ok-line)'
                   : isWrong
-                    ? 'var(--ssz-color-error-500)'
+                    ? 'var(--ssz-feedback-no-line)'
                     : selected
                       ? `var(${GRAMMAR_HUE})`
                       : 'var(--ssz-border-default)',
                 background: isRight
-                  ? 'var(--ssz-color-success-100)'
+                  ? 'var(--ssz-feedback-ok-bg)'
                   : isWrong
-                    ? 'var(--ssz-color-error-100)'
+                    ? 'var(--ssz-feedback-no-bg)'
                     : selected
                       ? `color-mix(in oklch, var(${GRAMMAR_HUE}) 12%, transparent)`
                       : 'var(--ssz-bg-base)',
                 color: isRight
-                  ? 'var(--ssz-color-success-700)'
+                  ? 'var(--ssz-feedback-ok-fg)'
                   : isWrong
-                    ? 'var(--ssz-color-error-700)'
+                    ? 'var(--ssz-feedback-no-fg)'
                     : 'var(--ssz-text-primary)',
                 transitionDuration: 'var(--ssz-duration-fast)',
               }}
@@ -111,16 +91,16 @@ function QuickCheck({ question, options, correctOptionIndex, explanation }: Quic
                 className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-full border-[1.5px]"
                 style={{
                   borderColor: isRight
-                    ? 'var(--ssz-color-success-500)'
+                    ? 'var(--ssz-feedback-ok-line)'
                     : isWrong
-                      ? 'var(--ssz-color-error-500)'
+                      ? 'var(--ssz-feedback-no-line)'
                       : selected
                         ? `var(${GRAMMAR_HUE})`
                         : 'var(--ssz-border-strong)',
                   background: isRight
-                    ? 'var(--ssz-color-success-500)'
+                    ? 'var(--ssz-feedback-ok-line)'
                     : isWrong
-                      ? 'var(--ssz-color-error-500)'
+                      ? 'var(--ssz-feedback-no-line)'
                       : selected
                         ? `var(${GRAMMAR_HUE})`
                         : 'transparent',
@@ -156,7 +136,7 @@ function QuickCheck({ question, options, correctOptionIndex, explanation }: Quic
           <p className="text-[13.5px] leading-[1.6] text-(--ssz-text-secondary)">
             <strong
               style={{
-                color: isCorrectPick ? 'var(--ssz-color-success-500)' : 'var(--ssz-color-error-500)',
+                color: isCorrectPick ? 'var(--ssz-feedback-ok-line)' : 'var(--ssz-feedback-no-line)',
               }}
             >
               {isCorrectPick ? t('correct') : t('incorrect')}{' '}
@@ -184,10 +164,13 @@ export function GrammarLessonPage({ ruleId, unitPosition, courseTitle, cefrLevel
   const anchorText = explanation.data?.anchorText;
   const anchorHighlights = explanation.data?.anchorHighlights;
 
-  const highlightedAnchor = useMemo(() => {
-    if (!anchorText) return null;
-    return renderHighlighted(anchorText, anchorHighlights ?? []);
-  }, [anchorText, anchorHighlights]);
+  const highlightedAnchor = useMemo(
+    () =>
+      anchorText ? (
+        <HighlightedSentence sentence={anchorText} highlights={anchorHighlights ?? []} />
+      ) : null,
+    [anchorText, anchorHighlights],
+  );
 
   const isLoading = rule.isLoading || profile.isLoading || (profileReady && explanation.isLoading);
   const isError = rule.isError || profile.isError || (profileReady && explanation.isError);
@@ -230,7 +213,18 @@ export function GrammarLessonPage({ ruleId, unitPosition, courseTitle, cefrLevel
         </h1>
       </div>
 
-      <p className="mb-5.5 max-w-150 text-base leading-[1.7] text-(--ssz-text-primary)">{data.body}</p>
+      {/*
+        Rendered as markdown, not as plain text: an explanation is authored with
+        headings and paradigm tables, and printing its source would put `|---|`
+        in front of the reader. No glossary here — a grammar lesson explains the
+        rule, and word lookups belong to the texts that use it.
+      */}
+      <LessonProse
+        text={data.body}
+        glossary={EMPTY_GLOSSARY}
+        lang={rule.data.targetLanguage}
+        className="mb-5.5 max-w-150 text-base leading-[1.7]"
+      />
 
       {data.anchorText && (
         <div
@@ -265,22 +259,22 @@ export function GrammarLessonPage({ ruleId, unitPosition, courseTitle, cefrLevel
                 className="flex items-start gap-3 rounded-xl border-[1.5px] bg-surface px-4 py-3.25"
                 style={{
                   borderColor: ex.isCorrect
-                    ? 'color-mix(in oklch, var(--ssz-color-success-500) 40%, transparent)'
-                    : 'color-mix(in oklch, var(--ssz-color-error-500) 40%, transparent)',
+                    ? 'color-mix(in oklch, var(--ssz-feedback-ok-line) 40%, transparent)'
+                    : 'color-mix(in oklch, var(--ssz-feedback-no-line) 40%, transparent)',
                 }}
               >
                 <div
                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
                   style={{
                     background: ex.isCorrect
-                      ? 'color-mix(in oklch, var(--ssz-color-success-500) 18%, transparent)'
-                      : 'color-mix(in oklch, var(--ssz-color-error-500) 14%, transparent)',
+                      ? 'color-mix(in oklch, var(--ssz-feedback-ok-line) 18%, transparent)'
+                      : 'color-mix(in oklch, var(--ssz-feedback-no-line) 14%, transparent)',
                   }}
                 >
                   {ex.isCorrect ? (
-                    <Check size={14} style={{ color: 'var(--ssz-color-success-500)' }} aria-hidden="true" />
+                    <Check size={14} style={{ color: 'var(--ssz-feedback-ok-line)' }} aria-hidden="true" />
                   ) : (
-                    <X size={14} style={{ color: 'var(--ssz-color-error-500)' }} aria-hidden="true" />
+                    <X size={14} style={{ color: 'var(--ssz-feedback-no-line)' }} aria-hidden="true" />
                   )}
                 </div>
                 <div className="flex-1">

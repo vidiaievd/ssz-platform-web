@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
-import type { ReviewRequest, ReviewResponse } from '@/features/learning/types';
+import { REVIEW_RATINGS, type ReviewRequest, type ReviewResponse } from '@/features/learning/types';
 
 export async function POST(
   request: NextRequest,
@@ -17,17 +17,16 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { rating, latencyMs, idempotencyKey } = body as ReviewRequest;
+  const { rating, reviewedAt, idempotencyKey } = body as ReviewRequest;
 
-  if (!rating || !latencyMs || !idempotencyKey) {
+  // The server takes the FSRS grade as a string enum and rejects anything else
+  // (including the numeric 1..4 this route used to forward, and the `latencyMs`
+  // it used to require — learning-service validates with forbidNonWhitelisted).
+  if (!rating || !REVIEW_RATINGS.includes(rating)) {
     return NextResponse.json(
-      { error: '"rating", "latencyMs", and "idempotencyKey" are required' },
+      { error: `"rating" must be one of ${REVIEW_RATINGS.join(', ')}` },
       { status: 400 },
     );
-  }
-
-  if (![1, 2, 3, 4].includes(rating)) {
-    return NextResponse.json({ error: '"rating" must be 1, 2, 3, or 4' }, { status: 400 });
   }
 
   try {
@@ -35,7 +34,9 @@ export async function POST(
       service: 'progress',
       path: `/srs/cards/${id}/review`,
       method: 'POST',
-      body: { rating, latencyMs, idempotencyKey },
+      // idempotencyKey is optional upstream, but always sent from here so a
+      // retried submission cannot reschedule the same card twice.
+      body: { rating, reviewedAt, idempotencyKey },
     });
     return NextResponse.json(data);
   } catch (e) {

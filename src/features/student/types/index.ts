@@ -1,10 +1,12 @@
-export type { ContainerProgress, LessonPreview, ActivityStreak } from './student';
+export type { ContainerProgress, LessonPreview } from './student';
 export type { ExerciseType, AttemptVerdict, AttemptResult, SubmitAttemptInput } from './exercise';
 export type {
   PendingStage,
   ScheduleSlot,
   NextLesson,
   SchoolTeacherSummary,
+  NextClass,
+  StudentCourse,
   SchoolMaterial,
   SelfStudyCourse,
   SchoolCourse,

@@ -6,7 +6,9 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { enMessages } from '@/lib/i18n/messages';
 import type { Container, GlossaryMark, VocabularyItem, VocabularyList } from '@/features/content/types';
 
+vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 vi.mock('../actions/lesson-glossary', () => ({ markGlossaryWordAction: vi.fn() }));
+vi.mock('../actions/lesson-spans', () => ({ unmarkGlossaryWordAction: vi.fn() }));
 vi.mock('../api/use-authoring-vocabulary', () => ({
   useAuthoringVocabularyLists: vi.fn(),
   useAuthoringVocabularyItems: vi.fn(),
@@ -18,6 +20,7 @@ Element.prototype.scrollIntoView = vi.fn();
 
 const { GlossaryMarkButton, GlossaryMarkedWords } = await import('./glossary-mark-panel');
 const { markGlossaryWordAction } = await import('../actions/lesson-glossary');
+const { unmarkGlossaryWordAction } = await import('../actions/lesson-spans');
 const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } = await import(
   '../api/use-authoring-vocabulary'
 );
@@ -71,6 +74,8 @@ beforeEach(() => {
     data: { items: ITEMS, total: 2, page: 1, limit: 20, totalPages: 1 },
   } as never);
   vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: [] } as never);
+  vi.mocked(unmarkGlossaryWordAction).mockReset();
+  vi.mocked(unmarkGlossaryWordAction).mockResolvedValue({ ok: true, value: undefined } as never);
 });
 
 describe('GlossaryMarkButton', () => {
@@ -114,5 +119,37 @@ describe('GlossaryMarkedWords', () => {
     renderWith(<GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
     expect(screen.getByText('sykepleier ×2')).toBeInTheDocument();
     expect(screen.getByText('Marked words become the module glossary — 1 word marked.')).toBeInTheDocument();
+  });
+});
+
+describe('GlossaryMarkedWords — unmarking', () => {
+  const marks: GlossaryMark[] = [{ id: 'mark-1', vocabularyItemId: 'vocab-1', occurrenceCount: 2 }];
+
+  beforeEach(() => {
+    vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: marks } as never);
+  });
+
+  it('confirms before unmarking, because the removal cascades to this text’s annotations', async () => {
+    renderWith(<GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove “sykepleier” from the glossary' }));
+    expect(unmarkGlossaryWordAction).not.toHaveBeenCalled();
+    expect(screen.getByText('Remove this word from the lesson glossary?')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(unmarkGlossaryWordAction).toHaveBeenCalledWith('lesson-1', 'variant-1', 'vocab-1');
+  });
+
+  it('leaves the word marked when the confirmation is dismissed', () => {
+    renderWith(<GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove “sykepleier” from the glossary' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(unmarkGlossaryWordAction).not.toHaveBeenCalled();
   });
 });

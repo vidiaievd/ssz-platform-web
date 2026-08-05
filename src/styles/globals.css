@@ -247,6 +247,12 @@
     --ssz-type-grammar:  oklch(0.62 0.12  45);
     --ssz-type-exercise: oklch(0.66 0.13  75);
     --ssz-type-live:     oklch(0.58 0.12  15);
+
+    /* Author-marked chunk in running text (plan 31 phase D). Not a lesson type,
+       but it shares the family because it is the third hue in the reader's
+       gloss-kind vocabulary: text/vocab 168 underlines lexis, grammar 45 fills
+       grammar, and this backs multi-word chunks. Kept clear of both. */
+    --ssz-type-chunk:    oklch(0.62 0.10  285);
   }
 
   /* ═══ TYPOGRAPHY TOKENS ═══ */
@@ -341,6 +347,18 @@
     --ssz-bg-subtle:      oklch(0.95  0.010 80);
     --ssz-bg-muted:       oklch(0.90  0.010 80);
     --ssz-bg-overlay:     oklch(0.18  0.010 80 / 0.40);
+    /* Tinted surface marking a selected/relevant cell or row, brand hue. */
+    --ssz-bg-accent:      oklch(0.97  0.025 168);
+    /* The same idea in the secondary hue (Warm Amber Sand), for a card that
+       should read as a side offer rather than as part of the flow — due
+       reviews, an optional extra. Deliberately the brand's own amber and not
+       the warning scale: nothing here is a warning, and the status scales are
+       theme-invariant, so on a dark surface they turn into a light slab with
+       light text on it. */
+    --ssz-bg-accent-warm:     oklch(0.96 0.035 82);
+    --ssz-border-accent-warm: oklch(0.83 0.09  82);
+    --ssz-text-accent-warm:   oklch(0.46 0.09  82);
+    --ssz-icon-accent-warm:   oklch(0.57 0.105 82);
 
     --ssz-border-default: oklch(0.90  0.010 80);
     --ssz-border-strong:  oklch(0.83  0.010 80);
@@ -352,10 +370,22 @@
     --ssz-text-inverse:   oklch(1.00  0.005 80);
     --ssz-text-link:      oklch(0.52  0.10  168);
     --ssz-text-link-hover:oklch(0.44  0.09  168);
+    /* Emphasis in the brand hue for text that is not a link (an inflection
+       ending, a marked term). Darker than --ssz-text-link because it is used at
+       small bold sizes, where the link tier lands at 4.45:1 on a surface. */
+    --ssz-text-accent:    oklch(0.44  0.09  168);
 
     --ssz-interactive-primary:        var(--ssz-color-primary-500);
     --ssz-interactive-primary-hover:  var(--ssz-color-primary-600);
     --ssz-interactive-primary-active: var(--ssz-color-primary-700);
+
+    /* Solid brand fill that carries a label or an icon on top, with the colour
+       that label must use. A tier darker than --ssz-interactive-primary: the
+       500 lands at 3.46:1 against white, so anything written on it fails AA.
+       600 gives 4.80:1. Use the interactive tier for fills with nothing on
+       them — a progress bar, a rule — where 3:1 non-text contrast is enough. */
+    --ssz-bg-brand-solid: var(--ssz-color-primary-600);
+    --ssz-text-on-brand:  oklch(1.00 0.005 80);
 
     --ssz-shadow-xs: 0 1px 2px oklch(0.18 0.01 80 / 0.06);
     --ssz-shadow-sm: 0 1px 4px oklch(0.18 0.01 80 / 0.08), 0 1px 2px oklch(0.18 0.01 80 / 0.06);
@@ -363,6 +393,54 @@
     --ssz-shadow-lg: 0 8px 24px oklch(0.18 0.01 80 / 0.10), 0 4px 8px oklch(0.18 0.01 80 / 0.07);
     --ssz-shadow-xl: 0 16px 48px oklch(0.18 0.01 80 / 0.12), 0 8px 16px oklch(0.18 0.01 80 / 0.08);
     --ssz-focus-ring: 0 0 0 3px oklch(0.52 0.105 168 / 0.30);
+
+    /* Per-language accent tiers (see src/features/student/lib/lang-hue.ts).
+       Stored as "L C" pairs — callers append the hue to form oklch(var(--x) H). */
+    --ssz-lang-soft-lc: 0.93 0.05;
+    --ssz-lang-mid-lc:  0.79 0.09;
+    --ssz-lang-c-lc:    0.62 0.105;
+    --ssz-lang-deep-lc: 0.44 0.09;
+
+    /* Part-of-speech badge tints (glossary popover, vocab card). Each pair keeps
+       its own hue/chroma across themes — only lightness flips in .dark below. */
+    --ssz-pos-noun-bg:         oklch(0.93 0.05 235);
+    --ssz-pos-noun-fg:         oklch(0.44 0.10 235);
+    --ssz-pos-verb-bg:         oklch(0.93 0.05 145);
+    --ssz-pos-verb-fg:         oklch(0.40 0.12 145);
+    --ssz-pos-adj-bg:          oklch(0.93 0.05  75);
+    --ssz-pos-adj-fg:          oklch(0.50 0.10  75);
+    --ssz-pos-adv-bg:          oklch(0.93 0.05 280);
+    --ssz-pos-adv-fg:          oklch(0.44 0.10 280);
+    --ssz-pos-prep-bg:         oklch(0.93 0.03  15);
+    --ssz-pos-prep-fg:         oklch(0.50 0.08  15);
+    --ssz-pos-conj-bg:         oklch(0.93 0.03 320);
+    --ssz-pos-conj-fg:         oklch(0.50 0.08 320);
+    --ssz-pos-pronoun-bg:      oklch(0.93 0.04 200);
+    --ssz-pos-pronoun-fg:      oklch(0.46 0.09 200);
+    --ssz-pos-interjection-bg: oklch(0.93 0.05 105);
+    --ssz-pos-interjection-fg: oklch(0.48 0.10 105);
+    --ssz-pos-numeral-bg:      oklch(0.93 0.03 260);
+    --ssz-pos-numeral-fg:      oklch(0.48 0.08 260);
+    --ssz-pos-particle-bg:     oklch(0.93 0.03 340);
+    --ssz-pos-particle-fg:     oklch(0.48 0.08 340);
+
+    /* Exercise feedback (correct / wrong) fills, outlines and labels.
+       Theme-aware: the scale tokens (success-50, error-50 …) are tuned for
+       light surfaces only, so runner bodies must use these aliases instead —
+       .dark below flips the fill dark and lifts the label light. */
+    --ssz-feedback-ok-bg:   oklch(0.96 0.04  145);
+    --ssz-feedback-ok-line: oklch(0.60 0.13  145);
+    --ssz-feedback-ok-fg:   oklch(0.40 0.12  145);
+    --ssz-feedback-no-bg:   oklch(0.97 0.025 15);
+    --ssz-feedback-no-line: oklch(0.55 0.125 15);
+    --ssz-feedback-no-fg:   oklch(0.44 0.105 15);
+
+    /* Exercise runner mode accents (practice = sage teal, graded = amber) and
+       their soft fills for a selected-but-not-yet-checked option. */
+    --ssz-runner-practice:      oklch(0.62 0.105 168);
+    --ssz-runner-practice-soft: oklch(0.62 0.105 168 / 0.07);
+    --ssz-runner-graded:        oklch(0.57 0.105 82);
+    --ssz-runner-graded-soft:   oklch(0.57 0.105 82 / 0.07);
 
     /* shadcn/ui compatibility aliases */
     --background: oklch(0.975 0.007 80);
@@ -402,6 +480,11 @@
     --ssz-bg-subtle:      oklch(0.23 0.012 240);
     --ssz-bg-muted:       oklch(0.27 0.012 240);
     --ssz-bg-overlay:     oklch(0.10 0.012 240 / 0.60);
+    --ssz-bg-accent:      oklch(0.27 0.030 168);
+    --ssz-bg-accent-warm:     oklch(0.26 0.035 82);
+    --ssz-border-accent-warm: oklch(0.38 0.055 82);
+    --ssz-text-accent-warm:   oklch(0.84 0.085 82);
+    --ssz-icon-accent-warm:   oklch(0.78 0.10  82);
 
     --ssz-border-default: oklch(0.30 0.012 240);
     --ssz-border-strong:  oklch(0.38 0.012 240);
@@ -413,10 +496,16 @@
     --ssz-text-inverse:   oklch(0.18 0.010 80);
     --ssz-text-link:      oklch(0.79 0.09  168);
     --ssz-text-link-hover:oklch(0.87 0.075 168);
+    --ssz-text-accent:    oklch(0.84 0.085 168);
 
     --ssz-interactive-primary:        var(--ssz-color-primary-400);
     --ssz-interactive-primary-hover:  var(--ssz-color-primary-300);
     --ssz-interactive-primary-active: var(--ssz-color-primary-200);
+
+    /* Inverted here: on a dark surface the fill goes lighter, not darker, and
+       the label on it goes dark. Same tier as the interactive primary. */
+    --ssz-bg-brand-solid: var(--ssz-color-primary-400);
+    --ssz-text-on-brand:  oklch(0.18 0.010 80);
 
     --ssz-shadow-xs: 0 1px 2px rgba(0,0,0,0.20);
     --ssz-shadow-sm: 0 1px 4px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.18);
@@ -424,6 +513,51 @@
     --ssz-shadow-lg: 0 8px 24px rgba(0,0,0,0.32), 0 4px 8px rgba(0,0,0,0.22);
     --ssz-shadow-xl: 0 16px 48px rgba(0,0,0,0.38), 0 8px 16px rgba(0,0,0,0.26);
     --ssz-focus-ring: 0 0 0 3px oklch(0.70 0.09 168 / 0.40);
+
+    /* Per-language accent tiers, re-tuned for dark surfaces: soft/mid drop
+       lightness to sit on dark backgrounds; c/deep rise so text and fills
+       stay legible, mirroring the primary/secondary scale's own shift. */
+    --ssz-lang-soft-lc: 0.28 0.05;
+    --ssz-lang-mid-lc:  0.45 0.09;
+    --ssz-lang-c-lc:    0.72 0.105;
+    --ssz-lang-deep-lc: 0.80 0.09;
+
+    --ssz-pos-noun-bg:         oklch(0.30 0.05 235);
+    --ssz-pos-noun-fg:         oklch(0.86 0.10 235);
+    --ssz-pos-verb-bg:         oklch(0.30 0.05 145);
+    --ssz-pos-verb-fg:         oklch(0.86 0.12 145);
+    --ssz-pos-adj-bg:          oklch(0.30 0.05  75);
+    --ssz-pos-adj-fg:          oklch(0.86 0.10  75);
+    --ssz-pos-adv-bg:          oklch(0.30 0.05 280);
+    --ssz-pos-adv-fg:          oklch(0.86 0.10 280);
+    --ssz-pos-prep-bg:         oklch(0.30 0.03  15);
+    --ssz-pos-prep-fg:         oklch(0.86 0.08  15);
+    --ssz-pos-conj-bg:         oklch(0.30 0.03 320);
+    --ssz-pos-conj-fg:         oklch(0.86 0.08 320);
+    --ssz-pos-pronoun-bg:      oklch(0.30 0.04 200);
+    --ssz-pos-pronoun-fg:      oklch(0.86 0.09 200);
+    --ssz-pos-interjection-bg: oklch(0.30 0.05 105);
+    --ssz-pos-interjection-fg: oklch(0.86 0.10 105);
+    --ssz-pos-numeral-bg:      oklch(0.30 0.03 260);
+    --ssz-pos-numeral-fg:      oklch(0.86 0.08 260);
+    --ssz-pos-particle-bg:     oklch(0.30 0.03 340);
+    --ssz-pos-particle-fg:     oklch(0.86 0.08 340);
+
+    /* Feedback fills sit just above --ssz-bg-subtle in lightness so they read
+       as a tint of the surface, not as a light card punched into a dark page. */
+    --ssz-feedback-ok-bg:   oklch(0.29 0.055 145);
+    --ssz-feedback-ok-line: oklch(0.68 0.13  145);
+    --ssz-feedback-ok-fg:   oklch(0.91 0.10  145);
+    --ssz-feedback-no-bg:   oklch(0.29 0.045 15);
+    --ssz-feedback-no-line: oklch(0.65 0.14  15);
+    --ssz-feedback-no-fg:   oklch(0.91 0.075 15);
+
+    /* Accents lift on dark surfaces and their soft fills need more opacity to
+       stay visible against --ssz-bg-surface. */
+    --ssz-runner-practice:      oklch(0.79 0.09 168);
+    --ssz-runner-practice-soft: oklch(0.79 0.09 168 / 0.14);
+    --ssz-runner-graded:        oklch(0.83 0.09 82);
+    --ssz-runner-graded-soft:   oklch(0.83 0.09 82 / 0.14);
 
     --background: oklch(0.17 0.012 240);
     --foreground: oklch(0.93 0.008 80);

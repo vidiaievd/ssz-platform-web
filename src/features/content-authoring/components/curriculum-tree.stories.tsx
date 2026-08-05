@@ -9,12 +9,16 @@ import { CurriculumTree } from './curriculum-tree';
 const TREE: CurriculumTreeData = {
   versionId: 'version-1',
   containerId: 'course-1',
+  publishState: 'draft',
   levelSystem: 'cefr',
+  containerType: 'course' as const,
+  ungroupedItems: [],
   levels: [
     {
       id: 'level-a1',
       title: 'A1 — Beginner',
       position: 0,
+      items: [],
       modules: [
         {
           id: 'item-module-1',
@@ -39,6 +43,7 @@ const TREE: CurriculumTreeData = {
                   isRequired: true,
                   lessonKind: 'text',
                   state: 'published',
+                  isLive: true,
                   durationMinutes: 6,
                   xpReward: 10,
                 },
@@ -51,6 +56,7 @@ const TREE: CurriculumTreeData = {
                   isRequired: true,
                   lessonKind: null,
                   state: 'draft',
+                  isLive: false,
                   durationMinutes: null,
                   xpReward: null,
                 },
@@ -63,6 +69,7 @@ const TREE: CurriculumTreeData = {
               items: [],
             },
           ],
+          publishState: 'draft',
           ungroupedItems: [],
         },
         {
@@ -74,6 +81,7 @@ const TREE: CurriculumTreeData = {
           position: 1,
           isRequired: true,
           sections: [],
+          publishState: 'draft',
           ungroupedItems: [
             {
               id: 'item-3',
@@ -84,6 +92,7 @@ const TREE: CurriculumTreeData = {
               isRequired: true,
               lessonKind: null,
               state: 'published',
+              isLive: true,
               durationMinutes: 4,
               xpReward: 5,
             },
@@ -141,7 +150,13 @@ export const Default: Story = {
 };
 
 export const LessonSelected: Story = {
-  args: { tree: TREE, selectedId: 'item-1', onSelect: () => {}, onChanged: () => {}, ...commonArgs },
+  args: {
+    tree: TREE,
+    selectedId: 'item-1',
+    onSelect: () => {},
+    onChanged: () => {},
+    ...commonArgs,
+  },
 };
 
 export const Interactive: Story = {

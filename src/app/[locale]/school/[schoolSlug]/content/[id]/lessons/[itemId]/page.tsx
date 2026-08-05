@@ -4,8 +4,9 @@ import { getTranslations } from 'next-intl/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/shared/breadcrumbs';
+import { Button } from '@/components/ui/button';
+import { Link } from '@/lib/i18n/navigation';
 import type { Container, ContainerVersion, CurriculumTree } from '@/features/content/types';
-import { deriveContainerState } from '@/features/content-authoring/components/container-state-badge';
 import { TextEditorPane } from '@/features/content-authoring/components/text-editor-pane';
 import { VideoEditorPane } from '@/features/content-authoring/components/video-editor-pane';
 import { AudioEditorPane } from '@/features/content-authoring/components/audio-editor-pane';
@@ -13,11 +14,9 @@ import { LiveEditorPane } from '@/features/content-authoring/components/live-edi
 import { VocabularyEditorPane } from '@/features/content-authoring/components/vocabulary-editor-pane';
 import { GrammarEditorPane } from '@/features/content-authoring/components/grammar-editor-pane';
 import { ExerciseEditorPane } from '@/features/content-authoring/components/exercise-editor-pane';
-import { PublishDialog } from '@/features/content-authoring/components/publish-dialog';
-import { getContainerPreflight } from '@/features/content-authoring/lib/get-container-preflight';
 import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
+import { collectLevelGrammarRules } from '@/features/content-authoring/lib/level-grammar-rules';
 import { getMaterialKind } from '@/features/content-authoring/lib/material-kind';
-import type { PreflightResult } from '@/features/content-authoring/types';
 
 export default async function LessonEditorPage({
   params,
@@ -36,8 +35,6 @@ export default async function LessonEditorPage({
     if (e instanceof AppError && e.code === 'not_found') notFound();
     throw e;
   }
-
-  const state = deriveContainerState(container);
 
   const versionsResp = await serverFetch<{ items: ContainerVersion[] }>({
     service: 'content',
@@ -65,20 +62,23 @@ export default async function LessonEditorPage({
     throw e;
   }
 
-  let preflight: PreflightResult | undefined;
-  if (state === 'draft') {
-    preflight = await getContainerPreflight(schoolSlug, id);
-  }
-
   const kind = getMaterialKind(item);
+  // Annotating grammar in a text points at the rules of its own Leksjon; the
+  // tree above already holds them, so the editor needs no request of its own.
+  const levelGrammarRules = collectLevelGrammarRules(tree, moduleContainerId);
   const backHref = `/school/${schoolSlug}/content/${id}`;
-  const publishSlot = <PublishDialog container={container} result={preflight} />;
-
   const t = await getTranslations('Authoring');
+  // Deliberately not a publish button: students read the *module's* published
+  // version, so publishing the course from here changed nothing for this
+  // lesson. Releasing happens in one place, against the whole course.
+  const publishSlot = (
+    <Button asChild variant="outline" size="sm">
+      <Link href={`${backHref}?publish=1`}>{t('reviewPublish.trigger')}</Link>
+    </Button>
+  );
+
   const sectionCrumb =
-    levelTitle && sectionTitle
-      ? `${levelTitle} · ${sectionTitle}`
-      : (levelTitle ?? sectionTitle);
+    levelTitle && sectionTitle ? `${levelTitle} · ${sectionTitle}` : (levelTitle ?? sectionTitle);
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: t('breadcrumb.courses'), href: `/school/${schoolSlug}/content` },
     { label: container.title, href: backHref },
@@ -95,7 +95,9 @@ export default async function LessonEditorPage({
           lessonId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
+          grammarRules={levelGrammarRules}
           backHref={backHref}
           publishSlot={publishSlot}
         />
@@ -105,6 +107,7 @@ export default async function LessonEditorPage({
           lessonId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -115,6 +118,7 @@ export default async function LessonEditorPage({
           lessonId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -124,6 +128,7 @@ export default async function LessonEditorPage({
           kind={kind}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -134,6 +139,7 @@ export default async function LessonEditorPage({
           ruleId={item.refId}
           ruleTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -144,6 +150,7 @@ export default async function LessonEditorPage({
           exerciseId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}
@@ -154,6 +161,7 @@ export default async function LessonEditorPage({
           lessonId={item.refId}
           lessonTitle={item.title}
           state={item.state}
+          isLive={item.isLive}
           container={moduleContainer}
           backHref={backHref}
           publishSlot={publishSlot}

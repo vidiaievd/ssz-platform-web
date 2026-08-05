@@ -13,7 +13,10 @@
     "incorrect": "Not quite",
     "submitted": "Answer submitted",
     "gradedNote": "Saved for your teacher to grade. You’ll see results when it’s returned.",
-    "answerLabel": "Answer:"
+    "answerLabel": "Answer:",
+    "tryAgain": "Try again",
+    "showAnswer": "Show answer",
+    "hideAnswer": "Hide answers"
   },
   "loading": "Loading exercise…",
   "error": {
@@ -25,18 +28,20 @@
     "defaultInstruction": "Choose the correct answer",
     "optionsLabel": "Answer options"
   },
+  "mcqGroup": {
+    "questionOptions": "Answers for question {n}",
+    "answeredCount": "{done} of {total} questions answered",
+    "partialScore": "{correct} of {total} answers correct"
+  },
   "fill": {
     "defaultInstruction": "Complete the sentence",
     "blankLabel": "Blank",
     "inputLabel": "Your answer",
     "placeholder": "type…",
     "rationaleTitle": "Why this answer",
-    "optionHeader": "Option",
-    "verdictHeader": "Fits?",
-    "noteHeader": "Why",
     "verdictCorrect": "Correct",
-    "verdictAcceptable": "Possible, but not here",
-    "verdictWrong": "Wrong"
+    "verdictWrong": "Wrong",
+    "yourAnswer": "Your answer"
   },
   "translate": {
     "defaultInstruction": "Translate the sentence",
@@ -53,7 +58,18 @@
     "defaultInstruction": "Answer the question",
     "inputLabel": "Your answer",
     "placeholder": "Write your answer…",
-    "referenceLabel": "Sample answer"
+    "referenceLabel": "Sample answer",
+    "diffLabel": "Your answer, checked",
+    "diffForm": "Wrong form of the word",
+    "diffWrong": "Wrong word",
+    "diffExtra": "Extra word",
+    "diffMissing": "Missing word",
+    "issues": {
+      "form": "wrong form: {n}",
+      "wrong": "wrong word: {n}",
+      "extra": "extra word: {n}",
+      "missing": "missing word: {n}"
+    }
   },
   "writing": {
     "defaultInstruction": "Write your text",
@@ -67,7 +83,35 @@
     "defaultInstruction": "Place each word in the right field",
     "bankLabel": "Words",
     "bankEmpty": "All words placed",
-    "fieldDropLabel": "Place in {field}"
+    "fieldDropLabel": "Place in {field}",
+    "multiWordHint": "A field can hold more than one word",
+    "answerLabel": "Correct placement",
+    "sourceLabel": "Original sentence",
+    "targetLabel": "Target sentence"
   },
-  "unsupported": "This exercise type ({type}) isn’t playable yet."
+  "unsupported": "This exercise type ({type}) isn’t playable yet.",
+  "taskNumber": "Task {n}",
+  "wordBank": {
+    "bankLabel": "Word bank",
+    "choosePlaceholder": "Choose…",
+    "blankLabel": "Blank in sentence {n}",
+    "filledCount": "{done} of {total} blanks filled",
+    "partialScore": "{correct} of {total} blanks correct",
+    "helperIdle": "Tap a blank, then pick a word.",
+    "helperArmed": "Now pick a word for the highlighted blank.",
+    "helperSelect": "Pick a word for each blank."
+  },
+  "textOrder": {
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "dragHandle": "Drag to reorder, position {n} of {total}",
+    "partialScore": "{correct} of {total} lines in the right place"
+  },
+  "errorCorrection": {
+    "remaining": "Corrections made: {found} of {total}",
+    "hint": "Tap a part of the sentence to rewrite it.",
+    "editLabel": "Rewrite “{text}”",
+    "partialScore": "{correct} of {total} mistakes corrected",
+    "falsePositives": "{n} correct parts were changed"
+  }
 }

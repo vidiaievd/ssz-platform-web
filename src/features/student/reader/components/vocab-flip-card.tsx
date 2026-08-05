@@ -1,35 +1,78 @@
 'use client';
 
-import { ChevronDown, ChevronRight, Layers, Repeat } from 'lucide-react';
+import { Loader2, Repeat, Volume2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { AudioPlayer } from '@/features/learning/components/audio-player';
-import { useMediaAsset } from '@/features/media';
+import { WordForms } from '@/features/learning/components/word-forms';
+import { useWordAudio } from '@/features/learning/hooks/use-word-audio';
 import type { VocabularyItem } from '@/features/content/types';
 import { cn } from '@/lib/utils';
 
 export type VocabCardMode = 'translation' | 'definition';
 
-const POS_META: Record<string, { bg: string; fg: string }> = {
-  noun: { bg: 'oklch(0.93 0.05 235)', fg: 'oklch(0.44 0.10 235)' },
-  verb: { bg: 'oklch(0.93 0.05 145)', fg: 'oklch(0.40 0.12 145)' },
-  adjective: { bg: 'oklch(0.93 0.05 75)', fg: 'oklch(0.50 0.10 75)' },
-  adverb: { bg: 'oklch(0.93 0.05 280)', fg: 'oklch(0.44 0.10 280)' },
-  pronoun: { bg: 'oklch(0.93 0.04 200)', fg: 'oklch(0.46 0.09 200)' },
-  preposition: { bg: 'oklch(0.93 0.03 15)', fg: 'oklch(0.50 0.08 15)' },
-  conjunction: { bg: 'oklch(0.93 0.03 320)', fg: 'oklch(0.50 0.08 320)' },
-  interjection: { bg: 'oklch(0.93 0.05 105)', fg: 'oklch(0.48 0.10 105)' },
-  numeral: { bg: 'oklch(0.93 0.03 260)', fg: 'oklch(0.48 0.08 260)' },
-  particle: { bg: 'oklch(0.93 0.03 340)', fg: 'oklch(0.48 0.08 340)' },
+export const POS_META: Record<string, { bg: string; fg: string }> = {
+  noun: { bg: 'var(--ssz-pos-noun-bg)', fg: 'var(--ssz-pos-noun-fg)' },
+  verb: { bg: 'var(--ssz-pos-verb-bg)', fg: 'var(--ssz-pos-verb-fg)' },
+  adjective: { bg: 'var(--ssz-pos-adj-bg)', fg: 'var(--ssz-pos-adj-fg)' },
+  adverb: { bg: 'var(--ssz-pos-adv-bg)', fg: 'var(--ssz-pos-adv-fg)' },
+  pronoun: { bg: 'var(--ssz-pos-pronoun-bg)', fg: 'var(--ssz-pos-pronoun-fg)' },
+  preposition: { bg: 'var(--ssz-pos-prep-bg)', fg: 'var(--ssz-pos-prep-fg)' },
+  conjunction: { bg: 'var(--ssz-pos-conj-bg)', fg: 'var(--ssz-pos-conj-fg)' },
+  interjection: { bg: 'var(--ssz-pos-interjection-bg)', fg: 'var(--ssz-pos-interjection-fg)' },
+  numeral: { bg: 'var(--ssz-pos-numeral-bg)', fg: 'var(--ssz-pos-numeral-fg)' },
+  particle: { bg: 'var(--ssz-pos-particle-bg)', fg: 'var(--ssz-pos-particle-fg)' },
   phrase: { bg: 'var(--ssz-bg-subtle)', fg: 'var(--ssz-text-muted)' },
   other: { bg: 'var(--ssz-bg-subtle)', fg: 'var(--ssz-text-muted)' },
 };
 
 const OTHER_POS_META = POS_META.other as { bg: string; fg: string };
 
-function posMeta(partOfSpeech?: string) {
+export function posMeta(partOfSpeech?: string) {
   return (partOfSpeech && POS_META[partOfSpeech]) || OTHER_POS_META;
+}
+
+/**
+ * Plays a single word, wherever its sound comes from. Rendered as its own
+ * component so the audio hook is not re-run for every card in a list, and it
+ * swallows the click so tapping it never flips the card underneath.
+ */
+export function WordAudioButton({
+  word,
+  mediaId,
+  lang,
+  className,
+}: {
+  word: string;
+  mediaId?: string;
+  lang: string;
+  className?: string;
+}) {
+  const t = useTranslations('Learning.reader.vocab');
+  const { play, playing, pending } = useWordAudio(word, mediaId, lang);
+
+  return (
+    <button
+      type="button"
+      aria-label={t('listenTo', { word })}
+      aria-busy={pending}
+      onClick={(e) => {
+        e.stopPropagation();
+        play();
+      }}
+      className={cn(
+        'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-(--ssz-border-default) bg-surface text-(--ssz-text-accent) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)',
+        (playing || pending) && 'border-(--ssz-border-focus) bg-(--ssz-bg-accent)',
+        className,
+      )}
+    >
+      {pending ? (
+        <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+      ) : (
+        <Volume2 size={15} aria-hidden="true" />
+      )}
+    </button>
+  );
 }
 
 const REDUCED_MOTION_STYLE =
@@ -38,15 +81,15 @@ const REDUCED_MOTION_STYLE =
 export interface VocabFlipCardProps {
   item: VocabularyItem;
   cardMode: VocabCardMode;
+  /** Language of the word, for the pronunciation voice. */
+  lang?: string;
   className?: string;
 }
 
-export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps) {
+export function VocabFlipCard({ item, cardMode, lang = 'nb', className }: VocabFlipCardProps) {
   const t = useTranslations('Learning.reader.vocab');
   const locale = useLocale();
   const [flipped, setFlipped] = useState(false);
-  const [formsOpen, setFormsOpen] = useState(false);
-  const asset = useMediaAsset(item.audioMediaId);
 
   const translation =
     item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
@@ -105,14 +148,8 @@ export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps)
               </div>
             )}
             <div className="flex items-center gap-2.5">
-              <AudioPlayer
-                src={asset.data?.url}
-                label={t('listen')}
-                interactive={!!item.audioMediaId}
-                compact
-                className="shrink-0"
-              />
-              <span className="ml-auto inline-flex items-center gap-1 text-[11.5px] font-semibold text-(--ssz-color-primary-600)">
+              <WordAudioButton word={item.lemma} mediaId={item.audioMediaId} lang={lang} />
+              <span className="ml-auto inline-flex items-center gap-1 text-[11.5px] font-semibold text-(--ssz-text-accent)">
                 <Repeat size={13} aria-hidden="true" />
                 {t('flipHint')}
               </span>
@@ -124,7 +161,7 @@ export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps)
             className={cn(
               'absolute inset-0 flex flex-col rounded-2xl border-[1.5px] p-[18px_20px] shadow-(--ssz-shadow-sm) backface-hidden transform-[rotateY(180deg)]',
               cardMode === 'definition'
-                ? 'border-(--ssz-color-primary-300) bg-(--ssz-color-primary-50)'
+                ? 'border-(--ssz-border-default) bg-(--ssz-bg-accent)'
                 : 'border-(--ssz-border-strong) bg-surface',
             )}
             style={{ zIndex: flipped ? 2 : 1 }}
@@ -150,51 +187,7 @@ export function VocabFlipCard({ item, cardMode, className }: VocabFlipCardProps)
         </div>
       </div>
 
-      {/* Alle former drawer */}
-      {item.forms && item.forms.length > 0 && (
-        <div className="mt-2">
-          <button
-            type="button"
-            onClick={() => setFormsOpen((f) => !f)}
-            aria-expanded={formsOpen}
-            className={cn(
-              'flex w-full items-center gap-1.5 rounded-md border-[1.5px] border-(--ssz-border-default) px-3 py-2',
-              'text-xs font-semibold text-(--ssz-text-secondary)',
-              formsOpen ? 'bg-subtle' : 'bg-transparent',
-            )}
-          >
-            <Layers size={14} className="text-(--ssz-color-primary-600)" aria-hidden="true" />
-            {t('allForms')}
-            <span className="ml-auto flex">
-              {formsOpen ? (
-                <ChevronDown size={14} className="text-(--ssz-text-muted)" aria-hidden="true" />
-              ) : (
-                <ChevronRight size={14} className="text-(--ssz-text-muted)" aria-hidden="true" />
-              )}
-            </span>
-          </button>
-          {formsOpen && (
-            <div className="mt-1.5 overflow-hidden rounded-md border border-(--ssz-border-default)">
-              {item.forms.map((form, i) => (
-                <div
-                  key={form.label}
-                  className={cn(
-                    'flex items-baseline gap-2.5 px-3.5 py-2',
-                    i % 2 ? 'bg-(--ssz-bg-base)' : 'bg-surface',
-                  )}
-                >
-                  <span className="min-w-30 shrink-0 text-[11px] font-semibold text-(--ssz-text-muted)">
-                    {form.label}
-                  </span>
-                  <span className="font-reading text-[15px] font-medium text-(--ssz-text-primary)">
-                    {form.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <WordForms forms={item.forms ?? []} paradigm={item.paradigm} />
     </div>
   );
 }

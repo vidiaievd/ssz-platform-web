@@ -6,17 +6,28 @@ import { useTranslations } from 'next-intl';
 import { AudioPlayer } from '@/features/learning';
 import { normAnswer } from '@/features/student/exercises/runner';
 
-import type { ListeningGapFillItem } from '../lib/parse-listening-exercise';
+import type { ListeningGapFillItem, StageSurface } from '../lib/parse-listening-exercise';
 
 export interface ListeningGapFillStageProps {
   items: ListeningGapFillItem[];
   audioSrc?: string;
-  audioLabel: string;
+  /** Omitted on the text surface, where there is no clip to replay — the player is then not rendered at all. */
+  audioLabel?: string;
+  /** Selects the copy set; the questions themselves are the same. Defaults to the listening flow. */
+  surface?: StageSurface;
   onNext: (missedExerciseIds: string[]) => void;
 }
 
-export function ListeningGapFillStage({ items, audioSrc, audioLabel, onNext }: ListeningGapFillStageProps) {
-  const t = useTranslations('Learning.reader.listening.gapfill');
+export function ListeningGapFillStage({
+  items,
+  audioSrc,
+  audioLabel,
+  surface = 'audio',
+  onNext,
+}: ListeningGapFillStageProps) {
+  const t = useTranslations(
+    surface === 'text' ? 'Learning.reader.text.check.gapfill' : 'Learning.reader.listening.gapfill',
+  );
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [checked, setChecked] = useState(false);
 
@@ -45,9 +56,11 @@ export function ListeningGapFillStage({ items, audioSrc, audioLabel, onNext }: L
         {t('heading')}
       </h2>
       <p className="mb-5.5 text-[13.5px] text-(--ssz-text-secondary)">{t('body')}</p>
-      <div className="mb-5.5">
-        <AudioPlayer src={audioSrc} label={audioLabel} compact />
-      </div>
+      {audioLabel !== undefined && (
+        <div className="mb-5.5">
+          <AudioPlayer src={audioSrc} label={audioLabel} compact />
+        </div>
+      )}
 
       <div className="flex flex-col gap-5">
         {items.map((g, i) => {
@@ -61,9 +74,9 @@ export function ListeningGapFillStage({ items, audioSrc, audioLabel, onNext }: L
                 background: 'var(--ssz-bg-surface)',
                 borderColor:
                   result === true
-                    ? 'var(--ssz-color-success-500)'
+                    ? 'var(--ssz-feedback-ok-line)'
                     : result === false
-                      ? 'var(--ssz-color-error-500)'
+                      ? 'var(--ssz-feedback-no-line)'
                       : 'var(--ssz-border-default)',
                 boxShadow: 'var(--ssz-shadow-xs)',
               }}
@@ -77,23 +90,23 @@ export function ListeningGapFillStage({ items, audioSrc, audioLabel, onNext }: L
                     background: chosen
                       ? checked
                         ? result
-                          ? 'var(--ssz-color-success-100)'
-                          : 'var(--ssz-color-error-100)'
-                        : 'var(--ssz-color-primary-50)'
+                          ? 'var(--ssz-feedback-ok-bg)'
+                          : 'var(--ssz-feedback-no-bg)'
+                        : 'var(--ssz-bg-accent)'
                       : 'var(--ssz-bg-subtle)',
                     color: chosen
                       ? checked
                         ? result
-                          ? 'var(--ssz-color-success-700)'
-                          : 'var(--ssz-color-error-700)'
+                          ? 'var(--ssz-feedback-ok-fg)'
+                          : 'var(--ssz-feedback-no-fg)'
                         : 'var(--ssz-color-primary-700)'
                       : 'var(--ssz-text-muted)',
                     border: `1.5px ${chosen ? 'solid' : 'dashed'} ${
                       chosen
                         ? checked
                           ? result
-                            ? 'var(--ssz-color-success-500)'
-                            : 'var(--ssz-color-error-500)'
+                            ? 'var(--ssz-feedback-ok-line)'
+                            : 'var(--ssz-feedback-no-line)'
                           : 'var(--ssz-color-primary-500)'
                         : 'var(--ssz-border-strong)'
                     }`,
@@ -116,7 +129,7 @@ export function ListeningGapFillStage({ items, audioSrc, audioLabel, onNext }: L
                       className="rounded-full px-4 py-1.5 text-[13.5px] font-semibold transition-colors disabled:cursor-default"
                       style={{
                         border: `1.5px solid ${selected ? 'var(--ssz-color-primary-500)' : 'var(--ssz-border-default)'}`,
-                        background: selected ? 'var(--ssz-color-primary-50)' : 'var(--ssz-bg-base)',
+                        background: selected ? 'var(--ssz-bg-accent)' : 'var(--ssz-bg-base)',
                         color: selected ? 'var(--ssz-color-primary-700)' : 'var(--ssz-text-secondary)',
                         cursor: checked ? 'default' : 'pointer',
                         transitionDuration: 'var(--ssz-duration-fast)',
@@ -128,7 +141,7 @@ export function ListeningGapFillStage({ items, audioSrc, audioLabel, onNext }: L
                 })}
               </div>
               {result === false && (
-                <div className="mt-2.5 text-[12.5px]" style={{ color: 'var(--ssz-color-error-700)' }}>
+                <div className="mt-2.5 text-[12.5px]" style={{ color: 'var(--ssz-feedback-no-fg)' }}>
                   {t('answerLabel', { answer: g.answer })}
                 </div>
               )}
@@ -145,7 +158,7 @@ export function ListeningGapFillStage({ items, audioSrc, audioLabel, onNext }: L
               style={{
                 color:
                   correctCount === items.length
-                    ? 'var(--ssz-color-success-500)'
+                    ? 'var(--ssz-feedback-ok-line)'
                     : 'var(--ssz-color-primary-700)',
               }}
             >

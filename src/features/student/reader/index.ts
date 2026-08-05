@@ -10,6 +10,11 @@ export type { LessonFooterNavProps } from './components/lesson-footer-nav';
 export { ReaderShell } from './components/reader-shell';
 export type { ReaderShellProps } from './components/reader-shell';
 
+export { ReaderRailSlot, useReaderRailVisible, RAIL_QUERY } from './components/reader-rail';
+
+export { TEXT_WIDTH_PX, useReadingModeStore } from './stores/reading-mode-store';
+export type { ReadingMode, TextWidth } from './stores/reading-mode-store';
+
 export { UnitEntryRedirect } from './components/unit-entry-redirect';
 export type { UnitEntryRedirectProps } from './components/unit-entry-redirect';
 
@@ -22,8 +27,11 @@ export type { VocabularyPageProps } from './components/vocabulary-page';
 export { TextLessonPage } from './components/text-lesson-page';
 export type { TextLessonPageProps } from './components/text-lesson-page';
 
-export { ExercisePage } from './components/exercise-page';
-export type { ExercisePageProps } from './components/exercise-page';
+export { ExercisePage, ExerciseSolver } from './components/exercise-page';
+export type { ExercisePageProps, ExerciseSolverProps } from './components/exercise-page';
+
+export { PracticePage } from './components/practice-page';
+export type { PracticePageProps } from './components/practice-page';
 
 export { VideoLessonPage } from './components/video-lesson-page';
 export type { VideoLessonPageProps } from './components/video-lesson-page';
@@ -43,6 +51,7 @@ export type { VideoNotesPanelProps } from './components/video-notes-panel';
 export type {
   ReaderSidebarCourse,
   ReaderSidebarItem,
+  ReaderSidebarLevel,
   ReaderSidebarSection,
   ReaderSidebarUnit,
 } from './types';

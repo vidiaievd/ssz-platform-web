@@ -27,9 +27,12 @@ const TITLES = {
   reading: 'Reading',
   listening: 'Listening',
   practice: 'Practice',
+  practiceInstructions: 'Choose the correct answer.',
 };
 
-const DRAFT_VERSION = { items: [{ id: 'v-draft', status: 'draft', containerId: 'x', createdAt: '2025-01-01T00:00:00Z' }] };
+const DRAFT_VERSION = {
+  items: [{ id: 'v-draft', status: 'draft', containerId: 'x', createdAt: '2025-01-01T00:00:00Z' }],
+};
 // The real backend's POST .../items responds with { itemId, position } —
 // `itemId` here means "id of the newly created container-item", not "id of
 // the referenced content" as it does in the GET list response.
@@ -55,7 +58,9 @@ function mockHappyPath() {
         { status: 201 },
       ),
     ),
-    http.get('http://content.test/api/v1/containers/:id/versions', () => HttpResponse.json(DRAFT_VERSION)),
+    http.get('http://content.test/api/v1/containers/:id/versions', () =>
+      HttpResponse.json(DRAFT_VERSION),
+    ),
     http.post('http://content.test/api/v1/containers/:id/versions/:versionId/items', () =>
       HttpResponse.json(ADD_ITEM_RESPONSE, { status: 201 }),
     ),
@@ -67,11 +72,23 @@ function mockHappyPath() {
     ),
     http.get('http://content.test/api/v1/exercise-templates', () =>
       HttpResponse.json([
-        { id: 'tpl-mcq', code: 'multiple_choice', name: 'Multiple Choice', contentSchema: {}, answerSchema: {}, isActive: true },
+        {
+          id: 'tpl-mcq',
+          code: 'multiple_choice',
+          name: 'Multiple Choice',
+          contentSchema: {},
+          answerSchema: {},
+          isActive: true,
+        },
       ]),
     ),
     http.post('http://content.test/api/v1/exercises', () =>
       HttpResponse.json({ exerciseId: 'exc-1' }, { status: 201 }),
+    ),
+    // The starter exercise gets an instruction of its own — without one it
+    // would be a publish blocker the moment the course is created.
+    http.post('http://content.test/api/v1/exercises/:id/instructions', () =>
+      HttpResponse.json({}, { status: 201 }),
     ),
   );
 }

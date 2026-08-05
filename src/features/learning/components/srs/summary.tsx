@@ -8,7 +8,6 @@ import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { useSrsSessionStore } from "../../stores/srs-session-store";
 import { LimitReachedBanner } from "./limit-banner";
-import { StreakChip } from "./streak-chip";
 
 function formatTime(ms: number): string {
   const totalSec = Math.round(ms / 1000);
@@ -47,7 +46,6 @@ export function SessionSummary() {
     againIds,
     startedAt,
     endedAt,
-    streakDays,
     limitHit,
     queueMisses,
   } = useSrsSessionStore();
@@ -78,7 +76,6 @@ export function SessionSummary() {
           <h1 className="text-[28px] font-bold text-[var(--ssz-text-primary)]">
             {limitHit ? t("limit.title") : t("summary.title")}
           </h1>
-          {streakDays > 0 && <StreakChip days={streakDays} />}
         </div>
       </div>
 
@@ -90,10 +87,6 @@ export function SessionSummary() {
         />
         <StatTile value={`${accuracy}%`} label={t("summary.accuracy")} />
         <StatTile value={formatTime(elapsed)} label={t("summary.timeSpent")} />
-        <StatTile
-          value={`🔥 ${streakDays}`}
-          label={t("summary.streakStatus")}
-        />
       </div>
 
       {/* CTAs */}

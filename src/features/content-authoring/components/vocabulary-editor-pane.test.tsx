@@ -21,7 +21,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -29,10 +32,8 @@ vi.mock('@/lib/i18n/navigation', () => ({
 }));
 
 const { VocabularyEditorPane } = await import('./vocabulary-editor-pane');
-const {
-  useAuthoringVocabularyLists,
-  useAuthoringVocabularyItems,
-} = await import('../api/use-authoring-vocabulary');
+const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } =
+  await import('../api/use-authoring-vocabulary');
 
 const CONTAINER: Container = {
   id: 'module-1',
@@ -57,6 +58,7 @@ function renderPane() {
           kind="vocab"
           lessonTitle="Yrker og oppgaver"
           state="draft"
+          isLive={false}
           container={CONTAINER}
           backHref="/school/my-school/content/course-1"
           publishSlot={null}

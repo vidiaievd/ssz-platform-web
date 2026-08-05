@@ -14,6 +14,10 @@ export const contentKeys = keyFactory('content', {
     ['lesson', lessonId, 'variant', variantId, 'paragraphs'] as const,
   lessonGlossaryMarks: (lessonId: string, variantId: string) =>
     ['lesson', lessonId, 'variant', variantId, 'glossary-marks'] as const,
+  // Authoring reads with includeBroken=true and the reader without, and the two
+  // get different rows back — so the flag has to be part of the key.
+  lessonTextSpans: (lessonId: string, variantId: string, includeBroken = false) =>
+    ['lesson', lessonId, 'variant', variantId, 'spans', { includeBroken }] as const,
   lessonVideoCues: (lessonId: string, variantId: string) =>
     ['lesson', lessonId, 'variant', variantId, 'cues'] as const,
   lessonListeningStages: (lessonId: string, variantId: string) =>

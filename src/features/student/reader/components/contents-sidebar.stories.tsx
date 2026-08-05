@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { ContentsSidebar } from './contents-sidebar';
-import type { ReaderSidebarCourse, ReaderSidebarUnit } from '../types';
+import type { ReaderSidebarCourse, ReaderSidebarLevel, ReaderSidebarUnit } from '../types';
 
 const course: ReaderSidebarCourse = {
   title: 'Norsk B1',
@@ -14,14 +14,15 @@ const course: ReaderSidebarCourse = {
 };
 
 const units: ReaderSidebarUnit[] = [
-  { id: 'u1', position: 1, title: 'Hverdagsliv', subtitle: 'Everyday life', status: 'done', sections: [] },
-  { id: 'u2', position: 2, title: 'Mat og helse', subtitle: 'Food & health', status: 'done', sections: [] },
+  { id: 'u1', position: 1, title: 'Hverdagsliv', subtitle: 'Everyday life', status: 'done', href: '/student/courses/course-1/u1', sections: [] },
+  { id: 'u2', position: 2, title: 'Mat og helse', subtitle: 'Food & health', status: 'done', href: '/student/courses/course-1/u2', sections: [] },
   {
     id: 'u3',
     position: 3,
     title: 'Arbeid og studier',
     subtitle: 'Work & study',
     status: 'active',
+    href: '/student/courses/course-1/u3',
     sections: [
       {
         id: 's-vocab',
@@ -75,7 +76,24 @@ const units: ReaderSidebarUnit[] = [
       },
     ],
   },
-  { id: 'u4', position: 4, title: 'Meninger og fortellinger', subtitle: 'Opinions & narratives', status: 'locked', sections: [] },
+  { id: 'u4', position: 4, title: 'Meninger og fortellinger', subtitle: 'Opinions & narratives', status: 'locked', href: '/student/courses/course-1/u4', sections: [] },
+];
+
+const levels: ReaderSidebarLevel[] = [
+  {
+    id: 'l1',
+    position: 1,
+    title: 'Leksjon 1 — Hverdagsliv',
+    active: false,
+    units: [units[0]!, units[1]!],
+  },
+  {
+    id: 'l2',
+    position: 2,
+    title: 'Leksjon 2 — Arbeidsliv',
+    active: true,
+    units: [units[2]!, units[3]!],
+  },
 ];
 
 const meta = {
@@ -92,6 +110,19 @@ export const Expanded: Story = {
     course,
     units,
     activeItemId: 'vocab-yrker',
+    collapsed: false,
+    onToggleCollapse: () => {},
+  },
+};
+
+/** Units grouped by "Leksjon"; the level holding the open unit starts expanded. */
+export const GroupedByLevel: Story = {
+  args: {
+    course,
+    units,
+    levels,
+    activeItemId: 'vocab-yrker',
+    activeUnitId: 'u3',
     collapsed: false,
     onToggleCollapse: () => {},
   },

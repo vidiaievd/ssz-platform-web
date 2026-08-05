@@ -1,13 +1,11 @@
 'use client';
 
-import { ExternalLink } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { SrsCard } from '../../types';
 import type { CardState } from '../../stores/srs-session-store';
-import { AudioButton } from './audio-button';
 import { PosChip } from './pos-chip';
 import { SampleSentence } from './sample-sentence';
 
@@ -23,8 +21,12 @@ export function ReviewCard({ card, cardState, onReveal, showAnswerRef }: ReviewC
   const t = useTranslations('Srs');
   const isRevealed = cardState === 'revealed' || cardState === 'advancing';
   const isAdvancing = cardState === 'advancing';
-  const directionKey =
-    card.direction === 'reverse' ? 'card.directionReverse' : 'card.directionForward';
+  // Content is resolved server-side and only for vocabulary cards; a card
+  // without it is filtered out before the queue reaches this component.
+  const front = card.front;
+  const back = card.back;
+
+  if (!front) return null;
 
   return (
     <div
@@ -45,28 +47,19 @@ export function ReviewCard({ card, cardState, onReveal, showAnswerRef }: ReviewC
 
       {/* Front */}
       <div className="space-y-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--ssz-text-muted)]">
-          {t(directionKey)}
-        </p>
-
         <div className="flex flex-wrap items-center gap-2">
-          {card.front.pos && <PosChip pos={card.front.pos} />}
-          {card.front.audioUrl && <AudioButton src={card.front.audioUrl} />}
+          {front.partOfSpeech && <PosChip pos={front.partOfSpeech} />}
+          {front.ipaTranscription && (
+            <span className="text-sm text-[var(--ssz-text-muted)]">{front.ipaTranscription}</span>
+          )}
         </div>
 
         <h2
           className="font-[var(--ssz-font-reading)] text-3xl font-semibold leading-[var(--ssz-leading-snug)] text-[var(--ssz-text-primary)] md:text-4xl"
           lang="und"
         >
-          {card.front.word}
+          {front.word}
         </h2>
-
-        {card.front.listName && (
-          <p className="flex items-center gap-1 text-sm text-[var(--ssz-text-muted)]">
-            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-            {t('card.fromList', { list: card.front.listName })}
-          </p>
-        )}
 
         {!isRevealed && (
           <Button
@@ -84,40 +77,52 @@ export function ReviewCard({ card, cardState, onReveal, showAnswerRef }: ReviewC
       </div>
 
       {/* Back — animates in below front on reveal */}
-      {isRevealed && (
+      {isRevealed && back && (
         <div className="mt-8 space-y-5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-top-1 motion-safe:duration-[var(--ssz-duration-base,200ms)] motion-safe:ease-[var(--ssz-ease-out)]">
           <div className="border-t border-[var(--ssz-border-default)] pt-5">
             <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--ssz-text-muted)]">
               {t('card.definitionLabel')}
             </p>
-            <p className="text-lg font-semibold text-[var(--ssz-text-primary)]">
-              {card.back.definition}
-            </p>
+            {back.translation ? (
+              <p className="text-lg font-semibold text-[var(--ssz-text-primary)]">
+                {back.translation}
+              </p>
+            ) : (
+              <p className="text-sm italic text-[var(--ssz-text-muted)]">
+                {t('card.noTranslation')}
+              </p>
+            )}
+
+            {back.alternativeTranslations.length > 0 && (
+              <p className="mt-1 text-sm text-[var(--ssz-text-secondary)]">
+                {back.alternativeTranslations.join(', ')}
+              </p>
+            )}
+
+            {back.definition && (
+              <p className="mt-2 text-sm text-[var(--ssz-text-secondary)]">{back.definition}</p>
+            )}
+
+            {/* The requested language had no translation — say which one is shown. */}
+            {back.fallbackUsed && back.translationLanguage && (
+              <p className="mt-2 text-xs text-[var(--ssz-text-muted)]">
+                {t('card.fallbackLanguage', { language: back.translationLanguage })}
+              </p>
+            )}
           </div>
 
-          {card.back.sentences.length > 0 && (
+          {back.usageNotes && (
+            <p className="text-sm text-[var(--ssz-text-secondary)]">{back.usageNotes}</p>
+          )}
+
+          {back.examples.length > 0 && (
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ssz-text-muted)]">
                 {t('card.examplesLabel')}
               </p>
-              {card.back.sentences.map((s, i) => (
-                <SampleSentence key={i} sentence={s} />
+              {back.examples.map((example, i) => (
+                <SampleSentence key={i} sentence={example} />
               ))}
-            </div>
-          )}
-
-          {card.back.imageUrl && (
-            <div className="aspect-video w-full overflow-hidden rounded-[var(--ssz-radius-md)] bg-[var(--ssz-bg-subtle)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={card.back.imageUrl}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover"
-                onError={(e) => {
-                  (e.currentTarget.parentElement as HTMLElement).style.display = 'none';
-                }}
-              />
             </div>
           )}
         </div>

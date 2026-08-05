@@ -36,7 +36,14 @@ function getInitials(name?: string): string {
 const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   ({ className, name, src, alt, size = "md", color, ...props }, ref) => {
     const { outer, text } = sizeMap[size];
-    const bg = color ?? "oklch(0.62 0.105 168)";
+    /* The brand-hue emphasis tier, not the 500: initials are small bold text on
+       a near-white tint, where the 500 lands at 3.45:1. This one is also
+       theme-aware, which the literal it replaced was not. */
+    const bg = color ?? "var(--ssz-text-accent)";
+    /* color-mix, not a hex alpha suffix: `${bg}22` silently produces an invalid
+       value for every caller that passes an oklch() string — which is all of
+       them — so the tint and the border never rendered at all. */
+    const tint = (pct: number) => `color-mix(in oklch, ${bg} ${pct}%, transparent)`;
 
     return (
       <div
@@ -50,9 +57,9 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           className
         )}
         style={{
-          background: src ? "transparent" : `${bg}22`,
+          background: src ? "transparent" : tint(13),
           color: bg,
-          borderColor: `${bg}44`,
+          borderColor: tint(27),
         }}
         aria-label={alt ?? name}
         role="img"

@@ -16,6 +16,7 @@ import { vocabularyItemFormSchema, type VocabularyItemFormValues } from '../sche
 import { saveVocabularyItemAction } from '../actions/vocabulary';
 import { useAuthoringVocabularyItem } from '../api/use-authoring-vocabulary';
 import { authoringKeys } from '../api/keys';
+import { useSaveScopeDescription } from './save-scope';
 
 interface VocabularyFormProps {
   listId: string;
@@ -27,6 +28,7 @@ interface VocabularyFormProps {
 export function VocabularyForm({ listId, containerId, itemId, onDone }: VocabularyFormProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
+  const saveScope = useSaveScopeDescription();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [removedTranslationLangs, setRemovedTranslationLangs] = useState<string[]>([]);
@@ -98,19 +100,16 @@ export function VocabularyForm({ listId, containerId, itemId, onDone }: Vocabula
 
   function onSubmit(data: VocabularyItemFormValues) {
     startTransition(async () => {
-      const result = await saveVocabularyItemAction(
-        listId,
-        itemId ?? null,
-        containerId,
-        data,
-        { translationLangs: removedTranslationLangs, exampleIds: removedExampleIds },
-      );
+      const result = await saveVocabularyItemAction(listId, itemId ?? null, containerId, data, {
+        translationLangs: removedTranslationLangs,
+        exampleIds: removedExampleIds,
+      });
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.vocabularyItemsAll(listId) });
-      toast.success(t('vocabulary.saveSuccess'));
+      toast.success(t('vocabulary.saveSuccess'), { description: saveScope });
       onDone();
     });
   }

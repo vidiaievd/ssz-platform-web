@@ -1,7 +1,7 @@
-import type { SrsCardSentence } from '../../types';
+import type { SrsCardExample } from '../../types';
 
 interface SampleSentenceProps {
-  sentence: SrsCardSentence;
+  sentence: SrsCardExample;
 }
 
 export function SampleSentence({ sentence }: SampleSentenceProps) {
@@ -11,9 +11,11 @@ export function SampleSentence({ sentence }: SampleSentenceProps) {
         className="font-[var(--ssz-font-reading)] text-base text-[var(--ssz-text-primary)]"
         lang="und"
       >
-        {sentence.target}
+        {sentence.text}
       </p>
-      <p className="text-sm text-[var(--ssz-text-secondary)]">{sentence.translation}</p>
+      {sentence.translation && (
+        <p className="text-sm text-[var(--ssz-text-secondary)]">{sentence.translation}</p>
+      )}
     </div>
   );
 }

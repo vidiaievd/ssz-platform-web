@@ -80,6 +80,7 @@ export function useCreateCourseFlow() {
             reading: t('starter.readingTitle'),
             listening: t('starter.listeningTitle'),
             practice: t('starter.practiceTitle'),
+            practiceInstructions: t('starter.practiceInstructions'),
           },
         );
         // Non-fatal: the course itself was created successfully, so the

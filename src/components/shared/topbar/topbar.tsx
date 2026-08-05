@@ -3,7 +3,7 @@
 import { Menu } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { UserMenu } from './user-menu';
+import { UserMenu, type UserMenuExtraItem } from './user-menu';
 import type { CurrentUser } from '@/features/auth/types/current-user';
 
 type TopbarProps = {
@@ -16,9 +16,19 @@ type TopbarProps = {
   /** Right cluster: trial pill, scheduling alerts, notification bell */
   actions?: React.ReactNode;
   activeContextKey?: string;
+  /** Extra links rendered in the user menu dropdown (e.g. student Notifications/Requests/Settings). */
+  userMenuExtraItems?: UserMenuExtraItem[];
 };
 
-export function Topbar({ user, onMenuOpen, leading, search, actions, activeContextKey }: TopbarProps) {
+export function Topbar({
+  user,
+  onMenuOpen,
+  leading,
+  search,
+  actions,
+  activeContextKey,
+  userMenuExtraItems,
+}: TopbarProps) {
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-card px-4">
       {/* Mobile hamburger */}
@@ -43,7 +53,7 @@ export function Topbar({ user, onMenuOpen, leading, search, actions, activeConte
       {/* Right: utility cluster */}
       <div className="flex items-center gap-2 shrink-0">
         {actions}
-        <UserMenu user={user} activeContextKey={activeContextKey} />
+        <UserMenu user={user} activeContextKey={activeContextKey} extraItems={userMenuExtraItems} />
       </div>
     </header>
   );

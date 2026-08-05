@@ -24,6 +24,13 @@ function renderEditor(variantId: string | undefined) {
   );
 }
 
+async function clickSave() {
+  fireEvent.click(screen.getByRole('button', { name: 'Save cues' }));
+  await act(async () => {
+    await Promise.resolve();
+  });
+}
+
 const CUES: LessonVideoCue[] = [
   { position: 0, startSeconds: 0, targetLine: 'Hei!', translationLine: 'Hi!' },
   { position: 1, startSeconds: 3.5, targetLine: 'Hvordan har du det?', translationLine: null },
@@ -63,15 +70,25 @@ describe('CueListEditor', () => {
     ).toBeInTheDocument();
   });
 
-  it('autosaves an edited cue as a full replace', async () => {
+  it('does not reach the server until save is pressed', async () => {
     vi.mocked(useLessonCues).mockReturnValue({ data: CUES, isLoading: false } as never);
     renderEditor('variant-1');
 
     fireEvent.change(screen.getByDisplayValue('Hei!'), { target: { value: 'Hallo!' } });
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
+      await vi.advanceTimersByTimeAsync(5000);
     });
+
+    expect(saveLessonCuesAction).not.toHaveBeenCalled();
+  });
+
+  it('saves an edited cue as a full replace', async () => {
+    vi.mocked(useLessonCues).mockReturnValue({ data: CUES, isLoading: false } as never);
+    renderEditor('variant-1');
+
+    fireEvent.change(screen.getByDisplayValue('Hei!'), { target: { value: 'Hallo!' } });
+    await clickSave();
 
     expect(saveLessonCuesAction).toHaveBeenCalledWith('lesson-1', 'variant-1', [
       { position: 0, startSeconds: 0, targetLine: 'Hallo!', translationLine: 'Hi!' },
@@ -84,31 +101,27 @@ describe('CueListEditor', () => {
     ]);
   });
 
-  it('adds a new cue row and autosaves once filled in', async () => {
+  it('adds a new cue row and saves it once filled in', async () => {
     vi.mocked(useLessonCues).mockReturnValue({ data: [], isLoading: false } as never);
     renderEditor('variant-1');
 
     fireEvent.click(screen.getByRole('button', { name: 'Add cue' }));
     fireEvent.change(screen.getByLabelText('Target line'), { target: { value: 'Ha det!' } });
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
-    });
+    await clickSave();
 
     expect(saveLessonCuesAction).toHaveBeenCalledWith('lesson-1', 'variant-1', [
       { position: 0, startSeconds: 0, targetLine: 'Ha det!', translationLine: undefined },
     ]);
   });
 
-  it('removes a cue row and autosaves the remaining ones, dropping blank rows', async () => {
+  it('removes a cue row and saves the remaining ones, dropping blank rows', async () => {
     vi.mocked(useLessonCues).mockReturnValue({ data: CUES, isLoading: false } as never);
     renderEditor('variant-1');
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove cue 1' }));
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
-    });
+    await clickSave();
 
     expect(saveLessonCuesAction).toHaveBeenCalledWith('lesson-1', 'variant-1', [
       {

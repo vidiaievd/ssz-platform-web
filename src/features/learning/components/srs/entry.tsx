@@ -1,19 +1,14 @@
 'use client';
 
-import { CheckCircle2, BarChart2, Settings } from 'lucide-react';
+import { CheckCircle2, BarChart2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Link } from '@/lib/i18n/navigation';
-import { StreakChip } from './streak-chip';
 
 /* ── Caught-up (0 due) ─────────────────────────────────────────────── */
 
-interface CaughtUpStateProps {
-  streakDays: number;
-}
-
-function CaughtUpState({ streakDays }: CaughtUpStateProps) {
+function CaughtUpState() {
   const t = useTranslations('Srs');
 
   return (
@@ -28,7 +23,6 @@ function CaughtUpState({ streakDays }: CaughtUpStateProps) {
         </h1>
         <p className="text-[var(--ssz-text-secondary)]">{t('entry.caughtUp.subtitle')}</p>
       </div>
-      {streakDays > 0 && <StreakChip days={streakDays} />}
       <div className="flex flex-col gap-2 w-full">
         <Button asChild>
           <Link href="/student/enrolled/vocabulary">{t('entry.caughtUp.studyNew')}</Link>
@@ -48,33 +42,27 @@ function CaughtUpState({ streakDays }: CaughtUpStateProps) {
 
 interface SrsEntryProps {
   dueCount: number;
-  streakDays: number;
   reviewedToday: number;
   dailyLimit: number;
   onStart: () => void;
-  onSettings: () => void;
 }
 
 export function SrsEntry({
   dueCount,
-  streakDays,
   reviewedToday,
   dailyLimit,
   onStart,
-  onSettings,
 }: SrsEntryProps) {
   const t = useTranslations('Srs');
 
   if (dueCount === 0) {
-    return <CaughtUpState streakDays={streakDays} />;
+    return <CaughtUpState />;
   }
 
   const limitReached = reviewedToday >= dailyLimit;
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <StreakChip days={streakDays} />
-
       <div className="space-y-1">
         <p
           className="text-[clamp(40px,9vw,56px)] font-bold tracking-[var(--ssz-tracking-tight)] text-[var(--ssz-text-primary)]"
@@ -100,22 +88,12 @@ export function SrsEntry({
         >
           {t('entry.start')}
         </Button>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={onSettings}
-            className="flex-1"
-          >
-            <Settings className="mr-2 h-4 w-4" aria-hidden />
-            {t('entry.settings')}
-          </Button>
-          <Button asChild variant="ghost" className="flex-1">
-            <Link href="/student/srs/stats">
-              <BarChart2 className="mr-2 h-4 w-4" aria-hidden />
-              {t('entry.stats')}
-            </Link>
-          </Button>
-        </div>
+        <Button asChild variant="ghost" className="w-full">
+          <Link href="/student/srs/stats">
+            <BarChart2 className="mr-2 h-4 w-4" aria-hidden />
+            {t('entry.stats')}
+          </Link>
+        </Button>
       </div>
     </div>
   );

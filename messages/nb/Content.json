@@ -83,13 +83,17 @@
   },
   "exerciseTypes": {
     "multiple_choice": "Flervalg",
+    "multiple_choice_group": "Flervalgsblokk",
     "fill_in_blank": "Fyll inn i tomrommet",
     "translate_to_target": "Oversett til målspråket",
     "translate_from_target": "Oversett fra målspråket",
     "match_pairs": "Koble par",
     "short_answer": "Kort svar",
     "writing_task": "Skriveoppgave",
-    "sentence_schema": "Setningsskjema"
+    "sentence_schema": "Setningsskjema",
+    "word_bank_fill": "Ordbank-lukeoppgave",
+    "text_order": "Sett i rekkefølge",
+    "error_correction": "Finn og rett feil"
   },
   "wordBank": "Ordbank",
   "matchColumnLeft": "Elementer",

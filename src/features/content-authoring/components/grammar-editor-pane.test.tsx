@@ -18,7 +18,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -26,7 +29,8 @@ vi.mock('@/lib/i18n/navigation', () => ({
 }));
 
 const { GrammarEditorPane } = await import('./grammar-editor-pane');
-const { updateGrammarRuleAction, saveGrammarExplanationAction } = await import('../actions/grammar');
+const { updateGrammarRuleAction, saveGrammarExplanationAction } =
+  await import('../actions/grammar');
 const { useAuthoringGrammarExplanations } = await import('../api/use-authoring-grammar');
 
 const CONTAINER: Container = {
@@ -53,6 +57,7 @@ function renderPane() {
           ruleId="rule-1"
           ruleTitle="Present tense"
           state="draft"
+          isLive={false}
           container={CONTAINER}
           backHref="/school/my-school/content/course-1"
           publishSlot={null}
@@ -97,7 +102,7 @@ describe('GrammarEditorPane', () => {
     expect(screen.getByText('Jeg spiser et eple.')).toBeInTheDocument();
   });
 
-  it('autosaves body edits after the debounce', async () => {
+  it('saves body edits when save is pressed', async () => {
     renderPane();
 
     fireEvent.change(screen.getByPlaceholderText('Write explanation in Markdown…'), {
@@ -105,21 +110,15 @@ describe('GrammarEditorPane', () => {
     });
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(1500);
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     });
 
-    expect(saveGrammarExplanationAction).toHaveBeenCalledWith(
-      'rule-1',
-      'exp-1',
-      'module-1',
-      'A2',
-      {
-        languageCode: 'en',
-        title: 'How to form the present tense',
-        body: 'New explanation text.',
-        examples: [{ text: 'Jeg spiser et eple.' }],
-      },
-    );
+    expect(saveGrammarExplanationAction).toHaveBeenCalledWith('rule-1', 'exp-1', 'module-1', 'A2', {
+      languageCode: 'en',
+      title: 'How to form the present tense',
+      body: 'New explanation text.',
+      examples: [{ text: 'Jeg spiser et eple.' }],
+    });
     expect(updateGrammarRuleAction).toHaveBeenCalledWith('rule-1', 'module-1', {
       title: 'Present tense',
     });
