@@ -11,12 +11,14 @@
 
 import {
   answers,
+  bank,
   equals,
   gapKey,
   gaps,
   pruneFeedback,
   tokens,
   withSentenceText,
+  type GapFeedback,
   type GapKey,
   type InputMode,
   type Sentence,
@@ -263,6 +265,77 @@ export function reusedAnswers(ex: WordBankGapFill): string[] {
     counts.set(gap.answer, (counts.get(gap.answer) ?? 0) + 1);
   }
   return [...counts].filter(([, count]) => count > 1).map(([word]) => word);
+}
+
+// ── Step 3 — the explanations ───────────────────────────────────────────────
+
+function withFeedback(
+  ex: WordBankGapFill,
+  key: GapKey,
+  update: (current: GapFeedback) => GapFeedback,
+): WordBankGapFill {
+  const current = ex.feedback[key] ?? { fallback: '', why: '', pairs: {} };
+  return { ...ex, feedback: { ...ex.feedback, [key]: update(current) } };
+}
+
+/** The explanation any wrong word gets when nothing more specific was written. Required. */
+export function setFallback(ex: WordBankGapFill, key: GapKey, fallback: string): WordBankGapFill {
+  return withFeedback(ex, key, (current) => ({ ...current, fallback }));
+}
+
+/** Why the answer is right — shown on a correct gap and on reveal. */
+export function setWhy(ex: WordBankGapFill, key: GapKey, why: string): WordBankGapFill {
+  return withFeedback(ex, key, (current) => ({ ...current, why }));
+}
+
+/**
+ * Why choosing exactly this word here is wrong.
+ *
+ * Blank text removes the pair rather than storing an empty one: an empty cell means "use
+ * the gap's default", and a stored blank would look written to `coverage` while showing
+ * the student nothing. Writing over an AI draft makes it the teacher's own — accepting a
+ * draft is editing it.
+ */
+export function setPairText(
+  ex: WordBankGapFill,
+  key: GapKey,
+  word: string,
+  text: string,
+): WordBankGapFill {
+  return withFeedback(ex, key, (current) => {
+    const pairs = { ...current.pairs };
+    if (text.trim() === '') delete pairs[word];
+    else pairs[word] = { text, origin: 'author' };
+    return { ...current, pairs };
+  });
+}
+
+export interface GapCoverage {
+  /** Wrong words in the bank — the whole row of the matrix. Zero in free-type mode. */
+  total: number;
+  /** Of those, the ones with authored text. */
+  written: number;
+}
+
+/**
+ * One gap's share of the coverage meter (AC-B15). Empty cells are legitimate by design,
+ * so this is a progress reading, not a requirement — only the default explanation is.
+ */
+export function gapCoverage(ex: WordBankGapFill, key: GapKey, answer: string): GapCoverage {
+  if (ex.settings.input !== 'bank') return { total: 0, written: 0 };
+
+  const words = bank(ex)
+    .map(({ word }) => word)
+    .filter((word) => word !== answer);
+  const pairs = ex.feedback[key]?.pairs ?? {};
+
+  return {
+    total: words.length,
+    written: words.filter((word) => {
+      const pair = pairs[word];
+      return pair !== undefined && pair.origin === 'author' && pair.text.trim() !== '';
+    }).length,
+  };
 }
 
 /**

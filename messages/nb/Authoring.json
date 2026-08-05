@@ -1087,6 +1087,27 @@
       "alternativesFor": "{label} — {answer}",
       "alternativesPlaceholder": "en annen godtatt skrivemåte",
       "pairsUnused": "{count, plural, one {# ordspesifikk forklaring} other {# ordspesifikke forklaringer}} blir ikke vist: de forklarer et ord som ble valgt, og her skriver elevene."
+    },
+    "step3": {
+      "title": "Tilbakemelding",
+      "lede": "Det eleven får vite etter en sjekk. Hver luke trenger én standardforklaring; det du skriver for et bestemt galt ord vises i stedet, når eleven velger nettopp det ordet.",
+      "coverage": "{written} av {total} ordpar skrevet",
+      "coverageBar": "Skrevne parforklaringer",
+      "onlyMissing": "Bare ord uten forklaring",
+      "missingFallbacks": "{count, plural, one {# luke mangler fortsatt standardforklaring} other {# luker mangler fortsatt standardforklaring}}.",
+      "empty": "Ingen luker ennå. Merk et ord i steg 1, så dukker det opp her.",
+      "gapCoverage": "{written}/{total}",
+      "fallbackLabel": "Standardforklaring",
+      "fallbackPlaceholder": "Hvorfor et galt ord ikke passer her …",
+      "fallbackHelp": "Vises for alle gale ord du ikke har skrevet noe eget om.",
+      "fallbackRequired": "Påkrevd — oppgaven kan ikke tildeles uten den.",
+      "whyLabel": "Hvorfor svaret er riktig (valgfritt)",
+      "whyPlaceholder": "Hva gjør dette til ordet som passer …",
+      "whyHelp": "Vises på en riktig luke, og når eleven ber om å se svarene.",
+      "pairsTitle": "Forklaringer for et bestemt ord",
+      "pairsAllWritten": "Alle gale ord her har sin egen forklaring.",
+      "pairFallsBack": "Faller tilbake på: {fallback}",
+      "pairFallsBackEmpty": "Faller tilbake på standardforklaringen over."
     }
   }
 }

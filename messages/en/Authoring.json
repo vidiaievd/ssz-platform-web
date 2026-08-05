@@ -1087,6 +1087,27 @@
       "alternativesFor": "{label} — {answer}",
       "alternativesPlaceholder": "another accepted spelling",
       "pairsUnused": "{count, plural, one {# word-specific explanation} other {# word-specific explanations}} will not be shown: they explain a word that was chosen, and here students type."
+    },
+    "step3": {
+      "title": "Feedback",
+      "lede": "What a student is told after checking. Each gap needs one default explanation; anything you write for a particular wrong word is shown instead of it, when they choose exactly that word.",
+      "coverage": "{written} of {total} word pairs written",
+      "coverageBar": "Pair explanations written",
+      "onlyMissing": "Only words without an explanation",
+      "missingFallbacks": "{count, plural, one {# gap still has no default explanation} other {# gaps still have no default explanation}}.",
+      "empty": "No gaps yet. Mark a word in step 1 and it appears here.",
+      "gapCoverage": "{written}/{total}",
+      "fallbackLabel": "Default explanation",
+      "fallbackPlaceholder": "Why any wrong word does not fit here…",
+      "fallbackHelp": "Shown for any wrong word you have not written about specifically.",
+      "fallbackRequired": "Required — the exercise cannot be assigned without it.",
+      "whyLabel": "Why the answer is right (optional)",
+      "whyPlaceholder": "What makes this the word that fits…",
+      "whyHelp": "Shown on a correct gap, and when a student asks to see the answers.",
+      "pairsTitle": "Explanations for a particular word",
+      "pairsAllWritten": "Every wrong word here has its own explanation.",
+      "pairFallsBack": "Falls back to: {fallback}",
+      "pairFallsBackEmpty": "Falls back to the default explanation above."
     }
   }
 }
