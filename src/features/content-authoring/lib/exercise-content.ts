@@ -60,7 +60,8 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
     { text: '', fieldIndex: 0 },
   ],
   wbfWordBank: '',
-  wbfSentences: [{ text: '', answers: [''] }],
+  wbfSentences: [{ text: '', answers: [''], rationales: [] }],
+  wbfWordNotes: [],
   ecSentences: [{ chunks: '', fixes: [{ chunkIndex: '', accepted: '', note: '' }] }],
   toKind: 'dialogue',
   toLines: [
@@ -173,6 +174,50 @@ export function minimalMcqValues(question: string, instructions: string): Exerci
 const blankIds = (text: string): number[] =>
   [...text.matchAll(/___(\d+)___/g)].map((m) => Number(m[1]));
 
+interface RationaleValues {
+  explanation?: string;
+  options?: Array<{ text: string; verdict: RationaleVerdict; note?: string }>;
+}
+
+/**
+ * The post-check teaching aid, shared by `fill_in_blank` and `word_bank_fill` —
+ * both answer schemas define the same `rationale` object. Returns `undefined`
+ * for an empty one so the key is dropped rather than stored as `{}`.
+ */
+function buildRationale(values: RationaleValues) {
+  // Only options with a text carry meaning; a half-filled row is dropped rather
+  // than persisted as an empty matrix entry.
+  const options = (values.options ?? [])
+    .filter((o) => o.text.trim())
+    .map((o) => ({
+      text: o.text.trim(),
+      verdict: o.verdict,
+      note: o.note?.trim() || undefined,
+    }));
+  const explanation = values.explanation?.trim();
+  if (!explanation && options.length === 0) return undefined;
+  return {
+    explanation: explanation || undefined,
+    options: options.length > 0 ? options : undefined,
+  };
+}
+
+/** Stored `rationale` → the form's editable shape. */
+function parseRationale(value: unknown): RationaleValues {
+  const rationale = isPlainObject(value) ? value : {};
+  const rawOptions = Array.isArray(rationale.options) ? rationale.options : [];
+  return {
+    explanation: typeof rationale.explanation === 'string' ? rationale.explanation : '',
+    options: (rawOptions as unknown[]).filter(isPlainObject).map((o) => ({
+      text: typeof o.text === 'string' ? o.text : '',
+      verdict: (RATIONALE_VERDICTS as readonly string[]).includes(String(o.verdict))
+        ? (o.verdict as RationaleVerdict)
+        : ('wrong' as RationaleVerdict),
+      note: typeof o.note === 'string' ? o.note : '',
+    })),
+  };
+}
+
 const splitCsv = (value: string | undefined): string[] =>
   (value ?? '')
     .split(',')
@@ -184,8 +229,15 @@ export interface ExercisePayload {
   expectedAnswers: Record<string, unknown>;
 }
 
-/** Form model → `{ content, expectedAnswers }` conforming to the template schemas. */
-export function buildExercisePayload(values: ExerciseFormValues): ExercisePayload {
+/**
+ * Form model → `{ content, expectedAnswers }` conforming to the template schemas.
+ *
+ * Every key the form owns is always present, even when the author left it
+ * empty — an explicit `undefined` is how this function says "the form models
+ * this key and it should not be there", which is what lets the merge below tell
+ * a cleared field apart from a field the form never knew about.
+ */
+function rawExercisePayload(values: ExerciseFormValues): ExercisePayload {
   switch (values.templateCode) {
     case 'multiple_choice': {
       const options = (values.mcOptions ?? [])
@@ -196,7 +248,7 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
         content: {
           question: values.mcQuestion?.trim() ?? '',
           options,
-          ...(values.mcContext?.trim() && { context: values.mcContext.trim() }),
+          context: values.mcContext?.trim() || undefined,
         },
         expectedAnswers: {
           correct_option_ids: options[correctIndex] ? [options[correctIndex].id] : [],
@@ -222,13 +274,13 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
 
       return {
         content: {
-          ...(shared.length > 0 && { options: shared }),
+          options: shared.length > 0 ? shared : undefined,
           items: rows.map(({ row, id, own }) => ({
             id,
             question: row.question.trim(),
-            ...(own.length > 0 && { options: own }),
+            options: own.length > 0 ? own : undefined,
           })),
-          ...(values.mcgContext?.trim() && { context: values.mcgContext.trim() }),
+          context: values.mcgContext?.trim() || undefined,
         },
         expectedAnswers: {
           items: rows.map(({ row, id, resolved }) => {
@@ -236,7 +288,7 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
             return {
               id,
               correct_option_ids: correct ? [correct.id] : [],
-              ...(row.explanation?.trim() && { explanation: row.explanation.trim() }),
+              explanation: row.explanation?.trim() || undefined,
             };
           }),
         },
@@ -244,33 +296,20 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
     }
     case 'fill_in_blank': {
       const blanks = (values.fibBlanks ?? [])
-        .map((b, i) => {
-          // Only options with a text carry meaning; a half-filled row is dropped
-          // rather than persisted as an empty matrix entry.
-          const options = (b.rationaleOptions ?? [])
-            .filter((o) => o.text.trim())
-            .map((o) => ({
-              text: o.text.trim(),
-              verdict: o.verdict,
-              ...(o.note?.trim() && { note: o.note.trim() }),
-            }));
-          const explanation = b.rationaleExplanation?.trim();
-          const rationale =
-            explanation || options.length > 0
-              ? { ...(explanation && { explanation }), ...(options.length > 0 && { options }) }
-              : undefined;
-          return {
-            blank_id: i + 1,
-            accepted_answers: splitCsv(b.answers),
-            ...(rationale && { rationale }),
-          };
-        })
+        .map((b, i) => ({
+          blank_id: i + 1,
+          accepted_answers: splitCsv(b.answers),
+          rationale: buildRationale({
+            explanation: b.rationaleExplanation,
+            options: b.rationaleOptions,
+          }),
+        }))
         .filter((b) => b.accepted_answers.length > 0);
       const wordBank = splitCsv(values.fibWordBank);
       return {
         content: {
           text_with_blanks: values.fibText?.trim() ?? '',
-          ...(wordBank.length > 0 && { word_bank: wordBank }),
+          word_bank: wordBank.length > 0 ? wordBank : undefined,
         },
         expectedAnswers: { blanks },
       };
@@ -283,8 +322,10 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       return {
         content: {
           source_text: values.trSourceText?.trim() ?? '',
-          ...(values.templateCode === 'translate_to_target' &&
-            values.trSourceLanguage?.trim() && { source_language: values.trSourceLanguage.trim() }),
+          source_language:
+            values.templateCode === 'translate_to_target'
+              ? values.trSourceLanguage?.trim() || undefined
+              : undefined,
         },
         expectedAnswers: { accepted_translations: translations },
       };
@@ -297,7 +338,7 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
         content: {
           left_items: leftItems,
           right_items: rightItems,
-          ...(values.mpVariant === 'halves' && { variant: 'halves' }),
+          variant: values.mpVariant === 'halves' ? 'halves' : undefined,
         },
         expectedAnswers: {
           pairs: pairs.map((_, i) => ({ left_id: `l-${i}`, right_id: `r-${i}` })),
@@ -311,11 +352,11 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       return {
         content: {
           question: values.saQuestion?.trim() ?? '',
-          ...(values.saContext?.trim() && { context: values.saContext.trim() }),
+          context: values.saContext?.trim() || undefined,
         },
         expectedAnswers: {
           reference_answer: values.saReferenceAnswer?.trim() ?? '',
-          ...(accepted.length > 0 && { accepted_answers: accepted }),
+          accepted_answers: accepted.length > 0 ? accepted : undefined,
         },
       };
     }
@@ -327,11 +368,11 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       return {
         content: {
           prompt: values.wtPrompt?.trim() ?? '',
-          ...(topics.length > 0 && { options: topics }),
-          ...(Number.isFinite(minWords) && minWords > 0 && { min_words: minWords }),
+          options: topics.length > 0 ? topics : undefined,
+          min_words: Number.isFinite(minWords) && minWords > 0 ? minWords : undefined,
         },
         expectedAnswers: {
-          ...(values.wtRubric?.trim() && { rubric: values.wtRubric.trim() }),
+          rubric: values.wtRubric?.trim() || undefined,
         },
       };
     }
@@ -349,10 +390,20 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
         blanks: blankIds(s.text).map((blankId, j) => ({
           blank_id: blankId,
           accepted_answers: splitCsv(s.answers?.[j]),
+          rationale: buildRationale(s.rationales?.[j] ?? {}),
         })),
       }));
+      const wordNotes = Object.fromEntries(
+        (values.wbfWordNotes ?? [])
+          .filter((entry) => entry.word.trim() && entry.note.trim())
+          .map((entry) => [entry.word.trim(), entry.note.trim()]),
+      );
       return {
-        content: { word_bank: wordBank, items },
+        content: {
+          word_bank: wordBank,
+          items,
+          word_notes: Object.keys(wordNotes).length > 0 ? wordNotes : undefined,
+        },
         expectedAnswers: { items: answerItems },
       };
     }
@@ -361,7 +412,7 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       const items = lines.map((l, i) => ({
         id: `line-${i}`,
         text: l.text.trim(),
-        ...(l.speaker?.trim() && { speaker: l.speaker.trim() }),
+        speaker: l.speaker?.trim() || undefined,
       }));
       return {
         content: { items, kind: values.toKind ?? 'dialogue' },
@@ -383,7 +434,7 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
             // Authors count parts from 1; ids are 0-based.
             chunk_id: `c-${Number(fix.chunkIndex) - 1}`,
             accepted: splitCsv(fix.accepted),
-            ...(fix.note?.trim() && { note: fix.note.trim() }),
+            note: fix.note?.trim() || undefined,
           })),
       );
       return {
@@ -427,9 +478,7 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       return {
         content: {
           sentence: values.ssSentence?.trim() ?? '',
-          ...(values.ssSourceSentence?.trim()
-            ? { source_sentence: values.ssSourceSentence.trim() }
-            : {}),
+          source_sentence: values.ssSourceSentence?.trim() || undefined,
           schema_type: values.ssSchemaType ?? 'main',
           fields,
           tokens,
@@ -438,6 +487,100 @@ export function buildExercisePayload(values: ExerciseFormValues): ExercisePayloa
       };
     }
   }
+}
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Identity of an array element, used to line a rebuilt array up with the stored
+ * one. Covers the three id shapes the template schemas use: `id`, the
+ * `blank_id` of a fill blank, and the `item_id` + `chunk_id` pair of an
+ * `error_correction` correction. Anything else (plain strings, `pairs`,
+ * `placements`) has no handle and is replaced wholesale.
+ *
+ * Caveat: most of these ids are positional (`opt-0`, `s-1`, `"2"`), because
+ * that is all the builder can mint. Reordering questions therefore hands a
+ * question the unmodelled keys of whoever previously held its position. Adding
+ * or deleting one has the same effect. Stable ids would fix it; until then the
+ * merge is only safe for edits in place.
+ */
+function elementKey(value: unknown): string | null {
+  if (!isPlainObject(value)) return null;
+  const { id, blank_id: blankId, item_id: itemId, chunk_id: chunkId } = value;
+  if (typeof id === 'string' || typeof id === 'number') return `id:${id}`;
+  if (typeof blankId === 'string' || typeof blankId === 'number') return `blank:${blankId}`;
+  if (itemId !== undefined && chunkId !== undefined) {
+    return `correction:${String(itemId)}:${String(chunkId)}`;
+  }
+  return null;
+}
+
+/** Drops keys the builder marked as "form-owned and empty". */
+function stripUndefined(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripUndefined);
+  if (!isPlainObject(value)) return value;
+  const out: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (entry !== undefined) out[key] = stripUndefined(entry);
+  }
+  return out;
+}
+
+function mergeArray(previous: unknown[], next: unknown[]): unknown[] {
+  const byKey = new Map<string, unknown>();
+  for (const element of previous) {
+    const key = elementKey(element);
+    if (key !== null) byKey.set(key, element);
+  }
+  return next.map((element) => {
+    const key = elementKey(element);
+    const match = key !== null ? byKey.get(key) : undefined;
+    return match !== undefined ? mergeValue(match, element) : stripUndefined(element);
+  });
+}
+
+function mergeValue(previous: unknown, next: unknown): unknown {
+  if (Array.isArray(next)) {
+    return Array.isArray(previous) ? mergeArray(previous, next) : stripUndefined(next);
+  }
+  if (isPlainObject(next) && isPlainObject(previous)) {
+    const out: Record<string, unknown> = { ...previous };
+    for (const [key, entry] of Object.entries(next)) {
+      if (entry === undefined) delete out[key];
+      else out[key] = mergeValue(previous[key], entry);
+    }
+    return out;
+  }
+  return stripUndefined(next);
+}
+
+/**
+ * Form model → `{ content, expectedAnswers }`, merged over what is already stored.
+ *
+ * The form models only a subset of each template's schema — `word_bank_fill`
+ * alone carries `input_mode`, `reusable_words`, `word_notes` and per-blank
+ * `rationale` that no field reaches. Rebuilding from the form alone would
+ * delete all of it on the first save, so `previous` (the exercise as the
+ * backend has it) is merged under the rebuilt payload.
+ *
+ * The consequence, accepted for now: a key the form does not model can never be
+ * removed through the UI, because the merge has no way to hear "delete this"
+ * from a form that never mentions it. Clearing a field the form *does* model
+ * works — the builder emits an explicit `undefined` for those.
+ */
+export function buildExercisePayload(
+  values: ExerciseFormValues,
+  previous?: Partial<ExercisePayload> | null,
+): ExercisePayload {
+  const raw = rawExercisePayload(values);
+  return {
+    content: mergeValue(previous?.content ?? {}, raw.content) as Record<string, unknown>,
+    expectedAnswers: mergeValue(previous?.expectedAnswers ?? {}, raw.expectedAnswers) as Record<
+      string,
+      unknown
+    >,
+  };
 }
 
 interface EcContentItem {
@@ -465,7 +608,7 @@ interface WbfContentItem {
 
 interface WbfAnswerItem {
   id?: unknown;
-  blanks?: Array<{ blank_id?: unknown; accepted_answers?: unknown }>;
+  blanks?: Array<{ blank_id?: unknown; accepted_answers?: unknown; rationale?: unknown }>;
 }
 
 interface McqOption {
@@ -573,22 +716,13 @@ export function parseExerciseToForm(exercise: {
         .slice()
         .sort((a, b) => Number(a.blank_id ?? 0) - Number(b.blank_id ?? 0))
         .map((b) => {
-          const rationale = (b as { rationale?: Record<string, unknown> }).rationale;
-          const rawOptions = Array.isArray(rationale?.options) ? rationale.options : [];
-          const options = (rawOptions as Record<string, unknown>[]).map((o) => ({
-            text: typeof o.text === 'string' ? o.text : '',
-            verdict: (RATIONALE_VERDICTS as readonly string[]).includes(String(o.verdict))
-              ? (o.verdict as RationaleVerdict)
-              : ('wrong' as RationaleVerdict),
-            note: typeof o.note === 'string' ? o.note : '',
-          }));
+          const rationale = parseRationale((b as { rationale?: unknown }).rationale);
           return {
             answers: Array.isArray(b.accepted_answers)
               ? (b.accepted_answers as unknown[]).map(String).join(', ')
               : '',
-            rationaleExplanation:
-              typeof rationale?.explanation === 'string' ? rationale.explanation : '',
-            rationaleOptions: options,
+            rationaleExplanation: rationale.explanation ?? '',
+            rationaleOptions: rationale.options ?? [],
           };
         });
       const wordBank = Array.isArray(content.word_bank)
@@ -749,23 +883,29 @@ export function parseExerciseToForm(exercise: {
       const sentences = rawItems.map((item) => {
         const text = typeof item.text_with_blanks === 'string' ? item.text_with_blanks : '';
         const blanks = answersById.get(String(item.id ?? '')) ?? [];
-        const byBlankId = new Map(
-          blanks.map((b) => [
-            Number(b.blank_id),
-            (Array.isArray(b.accepted_answers) ? b.accepted_answers : [])
-              .filter((a): a is string => typeof a === 'string')
-              .join(', '),
-          ]),
-        );
+        const byBlankId = new Map(blanks.map((b) => [Number(b.blank_id), b]));
+        const ids = blankIds(text);
         return {
           text,
-          answers: blankIds(text).map((id) => byBlankId.get(id) ?? ''),
+          answers: ids.map((id) =>
+            (Array.isArray(byBlankId.get(id)?.accepted_answers)
+              ? (byBlankId.get(id)!.accepted_answers as unknown[])
+              : []
+            )
+              .filter((a): a is string => typeof a === 'string')
+              .join(', '),
+          ),
+          rationales: ids.map((id) => parseRationale(byBlankId.get(id)?.rationale)),
         };
       });
+      const wordNotes = isPlainObject(content.word_notes) ? content.word_notes : {};
       return {
         ...base,
         wbfWordBank: bank.join(', '),
         wbfSentences: sentences.length > 0 ? sentences : DEFAULT_EXERCISE_VALUES.wbfSentences,
+        wbfWordNotes: Object.entries(wordNotes)
+          .filter(([, note]) => typeof note === 'string')
+          .map(([word, note]) => ({ word, note: note as string })),
       };
     }
     case 'sentence_schema': {

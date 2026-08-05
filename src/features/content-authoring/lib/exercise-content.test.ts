@@ -285,6 +285,104 @@ describe('build → parse round-trips', () => {
   }
 });
 
+describe('merging over the stored exercise', () => {
+  // Shaped after the seeded word_bank_fill exercises. `input_mode` and
+  // `reusable_words` have no field in the form, so a rebuild-from-scratch would
+  // drop them on save; the rest the form now models and round-trips.
+  const stored = {
+    content: {
+      word_bank: ['show off', 'boast'],
+      input_mode: 'select',
+      reusable_words: true,
+      word_notes: { 'show off': 'skryte' },
+      items: [
+        { id: '1', text_with_blanks: 'People ___1___ all the time.' },
+        { id: '2', text_with_blanks: 'They ___1___ anyway.' },
+      ],
+    },
+    expectedAnswers: {
+      items: [
+        {
+          id: '1',
+          blanks: [
+            {
+              blank_id: 1,
+              accepted_answers: ['show off'],
+              rationale: { explanation: 'phrasal verb, no object' },
+            },
+          ],
+        },
+        { id: '2', blanks: [{ blank_id: 1, accepted_answers: ['boast'] }] },
+      ],
+    },
+  };
+
+  const reopened = (): ExerciseFormValues =>
+    parseExerciseToForm({ templateCode: 'word_bank_fill', ...stored });
+
+  it('keeps the keys the form does not model through open → save', () => {
+    const saved = buildExercisePayload(reopened(), stored);
+
+    expect(saved.content).toEqual(stored.content);
+    expect(saved.expectedAnswers).toEqual(stored.expectedAnswers);
+  });
+
+  it('still applies the edit the author made', () => {
+    const values = reopened();
+    const saved = buildExercisePayload(
+      {
+        ...values,
+        wbfSentences: [
+          { ...values.wbfSentences![0]!, answers: ['show off, showing off'] },
+          values.wbfSentences![1]!,
+        ],
+      },
+      stored,
+    );
+
+    expect(saved.expectedAnswers).toEqual({
+      items: [
+        {
+          id: '1',
+          blanks: [
+            {
+              blank_id: 1,
+              accepted_answers: ['show off', 'showing off'],
+              rationale: { explanation: 'phrasal verb, no object' },
+            },
+          ],
+        },
+        { id: '2', blanks: [{ blank_id: 1, accepted_answers: ['boast'] }] },
+      ],
+    });
+  });
+
+  it('drops the stored entry for a question the author deleted', () => {
+    const values = reopened();
+    const saved = buildExercisePayload(
+      { ...values, wbfSentences: [values.wbfSentences![0]!] },
+      stored,
+    );
+
+    expect(saved.content.items).toHaveLength(1);
+    expect(saved.expectedAnswers.items).toHaveLength(1);
+  });
+
+  it('clears a field the form does model', () => {
+    const withContext = { content: { question: 'Hva?', options: [], context: 'gammel' } };
+    const values = parseExerciseToForm({ templateCode: 'multiple_choice', ...withContext });
+    const saved = buildExercisePayload({ ...values, mcContext: '' }, withContext);
+
+    expect(saved.content).not.toHaveProperty('context');
+  });
+
+  it('leaves the payload untouched when there is nothing stored yet', () => {
+    expect(buildExercisePayload(reopened())).toEqual(
+      buildExercisePayload(reopened(), { content: {}, expectedAnswers: {} }),
+    );
+  });
+});
+
 describe('parseExerciseToForm', () => {
   it('falls back to multiple_choice for an unknown template code', () => {
     const parsed = parseExerciseToForm({ templateCode: 'mystery', content: {} });
@@ -617,8 +715,131 @@ describe('word_bank_fill', () => {
 
     expect(parsed.wbfWordBank).toBe('show off, boast, clicked with');
     expect(parsed.wbfSentences).toEqual([
-      { text: 'I hate it when people ___1___ all the time.', answers: ['show off'] },
-      { text: 'They ___1___ and we ___2___ anyway.', answers: ['boast', 'clicked with, clicked'] },
+      {
+        text: 'I hate it when people ___1___ all the time.',
+        answers: ['show off'],
+        rationales: [{ explanation: '', options: [] }],
+      },
+      {
+        text: 'They ___1___ and we ___2___ anyway.',
+        answers: ['boast', 'clicked with, clicked'],
+        rationales: [
+          { explanation: '', options: [] },
+          { explanation: '', options: [] },
+        ],
+      },
+    ]);
+  });
+
+  it('carries a per-blank rationale matrix, indexed like the answers', () => {
+    const { expectedAnswers } = buildExercisePayload({
+      ...values,
+      wbfSentences: [
+        {
+          text: 'They ___1___ and we ___2___ anyway.',
+          answers: ['boast', 'clicked with'],
+          rationales: [
+            {
+              explanation: 'skryte — å snakke stort om seg selv',
+              options: [
+                { text: 'boast', verdict: 'correct', note: 'the neutral verb' },
+                { text: 'show off', verdict: 'acceptable', note: 'more about behaviour' },
+              ],
+            },
+            // Second blank deliberately left without one: a sentence may explain
+            // some of its blanks and not others.
+            {},
+          ],
+        },
+      ],
+    });
+
+    expect(expectedAnswers).toEqual({
+      items: [
+        {
+          id: '1',
+          blanks: [
+            {
+              blank_id: 1,
+              accepted_answers: ['boast'],
+              rationale: {
+                explanation: 'skryte — å snakke stort om seg selv',
+                options: [
+                  { text: 'boast', verdict: 'correct', note: 'the neutral verb' },
+                  { text: 'show off', verdict: 'acceptable', note: 'more about behaviour' },
+                ],
+              },
+            },
+            { blank_id: 2, accepted_answers: ['clicked with'] },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('round-trips the rationale matrix', () => {
+    const authored: ExerciseFormValues = {
+      ...values,
+      wbfSentences: [
+        {
+          text: 'They ___1___ anyway.',
+          answers: ['boast'],
+          rationales: [
+            {
+              explanation: 'why boast',
+              options: [{ text: 'show off', verdict: 'wrong', note: 'too colloquial' }],
+            },
+          ],
+        },
+      ],
+    };
+    const { content, expectedAnswers } = buildExercisePayload(authored);
+    const parsed = parseExerciseToForm({
+      templateCode: 'word_bank_fill',
+      content,
+      expectedAnswers,
+    });
+
+    expect(parsed.wbfSentences?.[0]?.rationales).toEqual([
+      {
+        explanation: 'why boast',
+        options: [{ text: 'show off', verdict: 'wrong', note: 'too colloquial' }],
+      },
+    ]);
+    expect(buildExercisePayload(parsed).expectedAnswers).toEqual(expectedAnswers);
+  });
+
+  it('keeps word notes as an object keyed by the bank word', () => {
+    const { content } = buildExercisePayload({
+      ...values,
+      wbfWordNotes: [
+        { word: 'boast', note: 'skryte' },
+        { word: 'show off', note: 'vise seg fram' },
+        // Half-filled rows are dropped rather than stored as empty strings.
+        { word: 'clicked with', note: '  ' },
+        { word: '', note: 'orphan' },
+      ],
+    });
+
+    expect(content.word_notes).toEqual({ boast: 'skryte', 'show off': 'vise seg fram' });
+  });
+
+  it('round-trips word notes back into editable rows', () => {
+    const parsed = parseExerciseToForm({
+      templateCode: 'word_bank_fill',
+      content: {
+        word_bank: ['at', 'om'],
+        items: [{ id: '1', text_with_blanks: 'Han sier ___1___ han er sliten.' }],
+        word_notes: { at: 'utterance', om: 'yes/no question' },
+      },
+      expectedAnswers: {
+        items: [{ id: '1', blanks: [{ blank_id: 1, accepted_answers: ['at'] }] }],
+      },
+    });
+
+    expect(parsed.wbfWordNotes).toEqual([
+      { word: 'at', note: 'utterance' },
+      { word: 'om', note: 'yes/no question' },
     ]);
   });
 });

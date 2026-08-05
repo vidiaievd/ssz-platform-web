@@ -583,6 +583,18 @@ function McgQuestion({
   );
 }
 
+// The matrix is authored identically for `fill_in_blank` and `word_bank_fill`,
+// but the two store it at different paths — these are the two shapes the editor
+// below accepts. Both resolve to the same element type, so one `useFieldArray`
+// serves both.
+type RationaleExplanationPath =
+  | `fibBlanks.${number}.rationaleExplanation`
+  | `wbfSentences.${number}.rationales.${number}.explanation`;
+
+type RationaleOptionsPath =
+  | `fibBlanks.${number}.rationaleOptions`
+  | `wbfSentences.${number}.rationales.${number}.options`;
+
 /**
  * Optional per-blank explanation matrix. Collapsed by default so simple drills
  * stay simple — it only expands when the author asks for it or one already
@@ -593,14 +605,17 @@ function BlankRationaleEditor({
   control,
   register,
   isPending,
-  blankIndex,
-}: Pick<SubProps, 'control' | 'register' | 'isPending'> & { blankIndex: number }) {
+  domId,
+  explanationName,
+  optionsName,
+}: Pick<SubProps, 'control' | 'register' | 'isPending'> & {
+  domId: string;
+  explanationName: RationaleExplanationPath;
+  optionsName: RationaleOptionsPath;
+}) {
   const t = useTranslations('Authoring.exercises');
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: `fibBlanks.${blankIndex}.rationaleOptions`,
-  });
-  const explanation = useWatch({ control, name: `fibBlanks.${blankIndex}.rationaleExplanation` });
+  const { fields, append, remove } = useFieldArray({ control, name: optionsName });
+  const explanation = useWatch({ control, name: explanationName });
   const hasContent = fields.length > 0 || Boolean(explanation);
   const [open, setOpen] = useState(hasContent);
 
@@ -624,13 +639,13 @@ function BlankRationaleEditor({
       <p className="text-xs font-medium text-(--ssz-text-primary)">{t('fibRationale')}</p>
       <p className="text-xs text-(--ssz-text-muted)">{t('fibRationaleHint')}</p>
 
-      <Field label={t('fibRationaleExplanation')} htmlFor={`ex-fib-rat-${blankIndex}`}>
+      <Field label={t('fibRationaleExplanation')} htmlFor={domId}>
         <Textarea
-          id={`ex-fib-rat-${blankIndex}`}
+          id={domId}
           rows={2}
           placeholder={t('fibRationaleExplanationPlaceholder')}
           disabled={isPending}
-          {...register(`fibBlanks.${blankIndex}.rationaleExplanation`)}
+          {...register(explanationName)}
         />
       </Field>
 
@@ -641,13 +656,13 @@ function BlankRationaleEditor({
             placeholder={t('fibRationaleOptionPlaceholder')}
             disabled={isPending}
             aria-label={t('fibRationaleOption')}
-            {...register(`fibBlanks.${blankIndex}.rationaleOptions.${optionIndex}.text`)}
+            {...register(`${optionsName}.${optionIndex}.text`)}
           />
           <select
             className="h-9 shrink-0 rounded-md border border-border bg-transparent px-2 text-sm"
             disabled={isPending}
             aria-label={t('fibRationaleVerdict')}
-            {...register(`fibBlanks.${blankIndex}.rationaleOptions.${optionIndex}.verdict`)}
+            {...register(`${optionsName}.${optionIndex}.verdict`)}
           >
             {RATIONALE_VERDICTS.map((verdict) => (
               <option key={verdict} value={verdict}>
@@ -659,7 +674,7 @@ function BlankRationaleEditor({
             placeholder={t('fibRationaleNotePlaceholder')}
             disabled={isPending}
             aria-label={t('fibRationaleNote')}
-            {...register(`fibBlanks.${blankIndex}.rationaleOptions.${optionIndex}.note`)}
+            {...register(`${optionsName}.${optionIndex}.note`)}
           />
           <Button
             type="button"
@@ -745,7 +760,9 @@ function FillInBlankFields({ control, register, errors, isPending }: SubProps) {
                 control={control}
                 register={register}
                 isPending={isPending}
-                blankIndex={index}
+                domId={`ex-fib-rat-${index}`}
+                explanationName={`fibBlanks.${index}.rationaleExplanation`}
+                optionsName={`fibBlanks.${index}.rationaleOptions`}
               />
             </div>
           </div>
@@ -1410,16 +1427,28 @@ function WordBankFillFields({ control, register, errors, isPending }: SubProps) 
               </div>
 
               {Array.from({ length: blanks }, (_, j) => (
-                <div key={j} className="flex items-center gap-2 pl-8">
-                  <span className="w-16 shrink-0 text-xs font-mono text-(--ssz-text-muted)">
-                    {t('fibBlankLabel', { n: j + 1 })}
-                  </span>
-                  <Input
-                    placeholder={t('wbfAnswersPlaceholder')}
-                    hasError={!!errors.wbfSentences?.[index]?.answers?.[j]}
-                    disabled={isPending}
-                    {...register(`wbfSentences.${index}.answers.${j}`)}
-                  />
+                <div key={j} className="space-y-2 pl-8">
+                  <div className="flex items-center gap-2">
+                    <span className="w-16 shrink-0 text-xs font-mono text-(--ssz-text-muted)">
+                      {t('fibBlankLabel', { n: j + 1 })}
+                    </span>
+                    <Input
+                      placeholder={t('wbfAnswersPlaceholder')}
+                      hasError={!!errors.wbfSentences?.[index]?.answers?.[j]}
+                      disabled={isPending}
+                      {...register(`wbfSentences.${index}.answers.${j}`)}
+                    />
+                  </div>
+                  <div className="pl-18">
+                    <BlankRationaleEditor
+                      control={control}
+                      register={register}
+                      isPending={isPending}
+                      domId={`ex-wbf-rat-${index}-${j}`}
+                      explanationName={`wbfSentences.${index}.rationales.${j}.explanation`}
+                      optionsName={`wbfSentences.${index}.rationales.${j}.options`}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -1430,12 +1459,97 @@ function WordBankFillFields({ control, register, errors, isPending }: SubProps) 
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => append({ text: '', answers: [''] })}
+          onClick={() => append({ text: '', answers: [''], rationales: [] })}
         >
           <Plus className="mr-1.5 h-4 w-4" />
           {t('wbfAddSentence')}
         </Button>
       </div>
+
+      <WordNotesEditor
+        control={control}
+        register={register}
+        errors={errors}
+        isPending={isPending}
+      />
+    </div>
+  );
+}
+
+/**
+ * Notes on the bank words themselves — shown as feedback when the learner picks
+ * that word, in any sentence. Separate from the per-blank matrix above: in a
+ * drill on at / om the reason a word fits does not change from sentence to
+ * sentence, so it is authored once here.
+ */
+function WordNotesEditor({ control, register, errors, isPending }: SubProps) {
+  const t = useTranslations('Authoring.exercises');
+  const { fields, append, remove } = useFieldArray({ control, name: 'wbfWordNotes' });
+
+  if (fields.length === 0) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="text-xs"
+        onClick={() => append({ word: '', note: '' })}
+      >
+        <Plus className="mr-1.5 h-3.5 w-3.5" />
+        {t('wbfAddWordNote')}
+      </Button>
+    );
+  }
+
+  return (
+    <div className="rounded-md border border-dashed border-border p-3 space-y-3">
+      <p className="text-xs font-medium text-(--ssz-text-primary)">{t('wbfWordNotes')}</p>
+      <p className="text-xs text-(--ssz-text-muted)">{t('wbfWordNotesHint')}</p>
+
+      {fields.map((field, index) => (
+        <div key={field.id} className="flex items-start gap-2">
+          <div className="w-32 shrink-0">
+            <Input
+              placeholder={t('wbfWordNoteWordPlaceholder')}
+              hasError={!!errors.wbfWordNotes?.[index]?.word}
+              disabled={isPending}
+              aria-label={t('wbfWordNoteWord')}
+              {...register(`wbfWordNotes.${index}.word`)}
+            />
+            {errors.wbfWordNotes?.[index]?.word?.message && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.wbfWordNotes[index].word.message}
+              </p>
+            )}
+          </div>
+          <Input
+            placeholder={t('wbfWordNoteNotePlaceholder')}
+            disabled={isPending}
+            aria-label={t('wbfWordNoteNote')}
+            {...register(`wbfWordNotes.${index}.note`)}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => remove(index)}
+            aria-label={t('wbfRemoveWordNote')}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="text-xs"
+        onClick={() => append({ word: '', note: '' })}
+      >
+        <Plus className="mr-1.5 h-3.5 w-3.5" />
+        {t('wbfAddWordNote')}
+      </Button>
     </div>
   );
 }

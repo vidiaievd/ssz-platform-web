@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
-import type { DifficultyLevel, Visibility } from '@/features/content/types';
+import type { DifficultyLevel, ExerciseWithAnswers, Visibility } from '@/features/content/types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
 import { buildExercisePayload } from '../lib/exercise-content';
@@ -99,7 +99,16 @@ export async function updateExerciseAction(
 ) {
   return tryAction(async () => {
     const parsed = parseOrThrow(data);
-    const { content, expectedAnswers } = buildExercisePayload(parsed);
+
+    // Read before write: the form models only part of each template's schema,
+    // and `PATCH` replaces `content` / `expectedAnswers` wholesale. Merging over
+    // the stored exercise is what keeps the keys the form cannot reach — see
+    // `buildExercisePayload`.
+    const current = await serverFetch<ExerciseWithAnswers>({
+      service: 'content',
+      path: `/exercises/${exerciseId}/answers`,
+    });
+    const { content, expectedAnswers } = buildExercisePayload(parsed, current);
 
     await serverFetch({
       service: 'content',
