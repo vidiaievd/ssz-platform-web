@@ -9,6 +9,9 @@ import type { Container } from '@/features/content/types';
 vi.mock('../actions/exercise', () => ({
   updateExerciseAction: vi.fn(),
 }));
+// The pane now reaches the gap-fill builder, which imports its autosave server action.
+// Server modules are stripped from the client bundle for real; here they would run.
+vi.mock('../actions/gap-fill', () => ({ saveGapFillAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));

@@ -455,6 +455,11 @@ export interface ExerciseDisplay {
   difficultyLevel?: DifficultyLevel;
   content: Record<string, unknown>;
   instructions?: ExerciseInstruction[] | null;
+  /**
+   * ISO. The concurrency token an autosaving editor sends back as `expectedUpdatedAt`,
+   * so a second author cannot overwrite the first unseen — see the gap-fill builder.
+   */
+  updatedAt?: string;
 }
 
 /** Exercise as returned by `GET /exercises/:id/answers` — adds `expectedAnswers` for authoring. */

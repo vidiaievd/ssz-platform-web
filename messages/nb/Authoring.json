@@ -1127,6 +1127,44 @@
       "nextCell": "Neste par",
       "closeEditor": "Lukk parredigeringen",
       "shortcutHint": "Ctrl/Cmd + Enter går til neste par."
+    },
+    "shell": {
+      "done": "Ferdig",
+      "stepsLabel": "Steg i oppgavebyggeren",
+      "step1": "Setninger og luker",
+      "step2": "Ordbank",
+      "step3": "Tilbakemelding",
+      "stepOk": "klar",
+      "blockerCount": "{count, plural, one {# problem} other {# problemer}}",
+      "warningCount": "{count, plural, one {# å se på} other {# å se på}}",
+      "instructionsLabel": "Instruksjon",
+      "instructionsPlaceholder": "Fyll inn de manglende ordene.",
+      "instructionsHelp": "Kort, på språket elevene lærer. Påkrevd — en oppgave uten instruksjon kan ikke publiseres.",
+      "hintLabel": "Hint for hele oppgaven (valgfritt)",
+      "hintPlaceholder": "Vises sammen med instruksjonen, før de svarer.",
+      "saving": "Lagrer …",
+      "saved": "Lagret {time}",
+      "saveFailed": "Lagring feilet — endringene dine er fortsatt her.",
+      "saveConflict": "Noen andre lagret denne oppgaven. Endringene dine er fortsatt her.",
+      "saveRetry": "Prøv igjen",
+      "gateTitle": "Før du tildeler denne",
+      "gateClear": "Ingenting i veien — oppgaven er klar til å tildeles.",
+      "gateGoToStep": "Gå til steg {step}",
+      "gateBlocked": "{count, plural, one {Fiks # problem først} other {Fiks # problemer først}}",
+      "gateDone": "Ser bra ut"
+    },
+    "issues": {
+      "EX_NO_TITLE": "Oppgaven har ingen tittel.",
+      "EX_NO_SENTENCES": "Det er ingen setninger ennå.",
+      "SENT_EMPTY": "Setning {index} er tom.",
+      "SENT_NO_GAP": "Setning {index} har ingen luke.",
+      "BANK_DUPLICATE": "«{word}» er både et riktig svar og et galt ord.",
+      "BANK_TOO_FEW": "Banken har {bankSize, plural, one {# ord} other {# ord}} — for få til å være et valg.",
+      "BANK_TOO_SMALL": "{bankSize} ord til {gapCount, plural, one {# luke} other {# luker}}: de siste løser seg selv ved eliminasjon.",
+      "FB_PAIRS_UNUSED": "{count, plural, one {# ordspesifikk forklaring} other {# ordspesifikke forklaringer}} blir ikke vist, siden elevene skriver her.",
+      "FB_NO_FALLBACK": "{label} mangler standardforklaring.",
+      "FB_NO_WHY": "{label} mangler notat om hvorfor svaret er riktig.",
+      "FB_PARTIAL_COVERAGE": "{written} av {total} ordpar er skrevet; resten faller tilbake på standardforklaringen."
     }
   }
 }

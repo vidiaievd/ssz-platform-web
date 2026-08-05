@@ -9,7 +9,8 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Container } from '@/features/content/types';
+import type { Container, ExerciseInstruction, ExerciseWithAnswers } from '@/features/content/types';
+import { fromPersisted, TEMPLATE_CODE } from '@/lib/shared-kernel/wordbank-gapfill';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -20,6 +21,7 @@ import { authoringKeys } from '../api/keys';
 import { LessonEditorShell } from './lesson-editor-shell';
 import { useSaveScopeDescription } from './save-scope';
 import { ExerciseFields } from './exercise-fields';
+import { GapFillBuilder } from './wordbank-gapfill/builder';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 
 interface ExerciseEditorPaneProps {
@@ -66,6 +68,18 @@ export function ExerciseEditorPane({
           <Skeleton className="h-9 w-full" />
           <Skeleton className="h-40 w-full rounded-2xl" />
         </div>
+      ) : exercise?.templateCode === TEMPLATE_CODE ? (
+        // Gap-fill has its own three-step builder rather than a slice of the generic
+        // exercise form: its answers live inside the sentences, so authoring them means
+        // editing the document the kernel defines, not a set of fields.
+        <GapFillBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          initialExercise={gapFillDocumentFrom(exercise, container.id)}
+          initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
+          initialHint={firstInstruction(exercise)?.hintText ?? ''}
+        />
       ) : (
         <ExerciseForm
           // Remounts with fresh `defaultValues` when the loaded exercise changes.
@@ -77,6 +91,31 @@ export function ExerciseEditorPane({
         />
       )}
     </LessonEditorShell>
+  );
+}
+
+/** The instruction row the builder edits — one language, as everywhere else in authoring. */
+function firstInstruction(exercise: ExerciseWithAnswers): ExerciseInstruction | undefined {
+  return exercise.instructions?.[0];
+}
+
+/**
+ * The stored columns as the kernel's document. `updatedAt` doubles as the autosave
+ * concurrency token, and an exercise served without one would make every save
+ * unconditional — so its absence is an empty token, which the server refuses.
+ */
+function gapFillDocumentFrom(exercise: ExerciseWithAnswers, containerId: string) {
+  return fromPersisted(
+    {
+      id: exercise.id,
+      moduleId: containerId,
+      // The platform has no title on an exercise; instructions carry that job.
+      title: '',
+      instructions: firstInstruction(exercise)?.instructionText ?? '',
+      updatedAt: exercise.updatedAt ?? '',
+    },
+    exercise.content,
+    exercise.expectedAnswers,
   );
 }
 

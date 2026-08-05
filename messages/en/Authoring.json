@@ -1127,6 +1127,44 @@
       "nextCell": "Next pair",
       "closeEditor": "Close the pair editor",
       "shortcutHint": "Ctrl/Cmd + Enter moves to the next pair."
+    },
+    "shell": {
+      "done": "Done",
+      "stepsLabel": "Builder steps",
+      "step1": "Sentences & gaps",
+      "step2": "Word bank",
+      "step3": "Feedback",
+      "stepOk": "ready",
+      "blockerCount": "{count, plural, one {# problem} other {# problems}}",
+      "warningCount": "{count, plural, one {# to check} other {# to check}}",
+      "instructionsLabel": "Instructions",
+      "instructionsPlaceholder": "Fyll inn de manglende ordene.",
+      "instructionsHelp": "Short, in the language students are learning. Required — an exercise without instructions cannot be published.",
+      "hintLabel": "Hint for the whole exercise (optional)",
+      "hintPlaceholder": "Shown with the instructions, before they answer.",
+      "saving": "Saving…",
+      "saved": "Saved at {time}",
+      "saveFailed": "Save failed — your edits are still here.",
+      "saveConflict": "Someone else saved this exercise. Your edits are still here.",
+      "saveRetry": "Try again",
+      "gateTitle": "Before you assign this",
+      "gateClear": "Nothing standing in the way — this exercise is ready to assign.",
+      "gateGoToStep": "Go to step {step}",
+      "gateBlocked": "{count, plural, one {Fix # problem first} other {Fix # problems first}}",
+      "gateDone": "Looks good"
+    },
+    "issues": {
+      "EX_NO_TITLE": "The exercise has no title.",
+      "EX_NO_SENTENCES": "There are no sentences yet.",
+      "SENT_EMPTY": "Sentence {index} is empty.",
+      "SENT_NO_GAP": "Sentence {index} has no gap marked.",
+      "BANK_DUPLICATE": "“{word}” is both a correct answer and a wrong word.",
+      "BANK_TOO_FEW": "The bank has {bankSize, plural, one {# word} other {# words}} — too few to be a choice.",
+      "BANK_TOO_SMALL": "{bankSize} words for {gapCount, plural, one {# gap} other {# gaps}}: the last ones solve themselves by elimination.",
+      "FB_PAIRS_UNUSED": "{count, plural, one {# word-specific explanation} other {# word-specific explanations}} will not be shown, because students type here.",
+      "FB_NO_FALLBACK": "{label} has no default explanation.",
+      "FB_NO_WHY": "{label} has no note on why the answer is right.",
+      "FB_PARTIAL_COVERAGE": "{written} of {total} word pairs are written; the rest fall back to the default."
     }
   }
 }
