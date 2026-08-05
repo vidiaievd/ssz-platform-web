@@ -967,6 +967,46 @@
     "LOCALE_INCOMPLETE": {
       "title": "Missing translations for some UI languages",
       "fix": "Add the missing localizations"
+    },
+    "GAPFILL_EX_NO_SENTENCES": {
+      "title": "Gap-fill has no sentences",
+      "fix": "Add at least one sentence in step 1"
+    },
+    "GAPFILL_SENT_EMPTY": {
+      "title": "Gap-fill has an empty sentence",
+      "fix": "Write the sentence or delete the card in step 1"
+    },
+    "GAPFILL_SENT_NO_GAP": {
+      "title": "Gap-fill sentence has no gap",
+      "fix": "Click a word in step 1 to turn it into a gap"
+    },
+    "GAPFILL_BANK_DUPLICATE": {
+      "title": "A distractor repeats a correct answer",
+      "fix": "Remove it in step 2 — answers are added to the bank automatically"
+    },
+    "GAPFILL_BANK_TOO_FEW": {
+      "title": "The word bank offers no choice",
+      "fix": "Add distractors in step 2"
+    },
+    "GAPFILL_BANK_TOO_SMALL": {
+      "title": "The word bank is solvable by elimination",
+      "fix": "Add a few spare words in step 2"
+    },
+    "GAPFILL_FB_PAIRS_UNUSED": {
+      "title": "Word-specific explanations will never be shown",
+      "fix": "This exercise is typed, not chosen — switch back to the word bank in step 2, or ignore this"
+    },
+    "GAPFILL_FB_NO_FALLBACK": {
+      "title": "A gap has no default explanation",
+      "fix": "Write one in step 3 — without it a wrong answer says only «wrong»"
+    },
+    "GAPFILL_FB_NO_WHY": {
+      "title": "A gap has no note on why the answer is right",
+      "fix": "Add one in step 3; it is shown on a correct answer and on reveal"
+    },
+    "GAPFILL_FB_PARTIAL_COVERAGE": {
+      "title": "Some word pairs fall back to the default explanation",
+      "fix": "Fill in the matrix in step 3 as you go — empty cells are fine"
     }
   }
 }

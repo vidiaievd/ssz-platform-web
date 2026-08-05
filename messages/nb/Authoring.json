@@ -967,6 +967,46 @@
     "LOCALE_INCOMPLETE": {
       "title": "Mangler oversettelser for noen grensesnittspråk",
       "fix": "Legg til de manglende oversettelsene"
+    },
+    "GAPFILL_EX_NO_SENTENCES": {
+      "title": "Luketeksten har ingen setninger",
+      "fix": "Legg til minst én setning i steg 1"
+    },
+    "GAPFILL_SENT_EMPTY": {
+      "title": "Luketeksten har en tom setning",
+      "fix": "Skriv setningen eller slett kortet i steg 1"
+    },
+    "GAPFILL_SENT_NO_GAP": {
+      "title": "Setningen har ingen luke",
+      "fix": "Klikk på et ord i steg 1 for å gjøre det til en luke"
+    },
+    "GAPFILL_BANK_DUPLICATE": {
+      "title": "Et avledningsord gjentar et riktig svar",
+      "fix": "Fjern det i steg 2 — svarene legges i ordbanken automatisk"
+    },
+    "GAPFILL_BANK_TOO_FEW": {
+      "title": "Ordbanken gir ingen valgmulighet",
+      "fix": "Legg til avledningsord i steg 2"
+    },
+    "GAPFILL_BANK_TOO_SMALL": {
+      "title": "Ordbanken kan løses ved eliminering",
+      "fix": "Legg til noen ekstra ord i steg 2"
+    },
+    "GAPFILL_FB_PAIRS_UNUSED": {
+      "title": "Ordspesifikke forklaringer blir aldri vist",
+      "fix": "Denne oppgaven skrives, ikke velges — bytt tilbake til ordbank i steg 2, eller se bort fra dette"
+    },
+    "GAPFILL_FB_NO_FALLBACK": {
+      "title": "En luke mangler standardforklaring",
+      "fix": "Skriv en i steg 3 — uten den får eleven bare «feil»"
+    },
+    "GAPFILL_FB_NO_WHY": {
+      "title": "En luke mangler notat om hvorfor svaret er riktig",
+      "fix": "Legg til et i steg 3; det vises ved riktig svar og ved fasit"
+    },
+    "GAPFILL_FB_PARTIAL_COVERAGE": {
+      "title": "Noen ordpar faller tilbake på standardforklaringen",
+      "fix": "Fyll ut matrisen i steg 3 etter hvert — tomme celler er greit"
     }
   }
 }
