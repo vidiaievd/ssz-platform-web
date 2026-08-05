@@ -122,6 +122,11 @@
     "wrongGap": "{label}: {word}, wrong",
     "revealedGap": "{label}: the answer is {word}",
     "right": "Correct",
-    "wrong": "Not this one"
+    "wrong": "Not this one",
+    "check": "Check",
+    "checking": "Checking…",
+    "fillEveryGap": "Fill in every gap",
+    "checkFailed": "Could not check that — try again",
+    "attemptCount": "Attempt {n}"
   }
 }

@@ -122,6 +122,11 @@
     "wrongGap": "{label}: {word}, неверно",
     "revealedGap": "{label}: ответ — {word}",
     "right": "Верно",
-    "wrong": "Не это слово"
+    "wrong": "Не это слово",
+    "check": "Проверить",
+    "checking": "Проверяем…",
+    "fillEveryGap": "Заполните все пропуски",
+    "checkFailed": "Не удалось проверить — попробуйте ещё раз",
+    "attemptCount": "Попытка {n}"
   }
 }

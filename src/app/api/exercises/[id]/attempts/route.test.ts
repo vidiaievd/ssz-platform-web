@@ -70,16 +70,47 @@ describe('POST /api/exercises/[id]/attempts', () => {
     expect(res.status).toBe(400);
   });
 
-  it('passes a conflict through, because resuming is the right answer to it', async () => {
-    vi.mocked(serverFetch).mockRejectedValueOnce(
-      new AppError('conflict', 'Attempt already in progress: att-9'),
-    );
+  it('clears an attempt left running and starts a fresh one', async () => {
+    // Re-opening the exercise is the common case: the engine keeps an attempt
+    // IN_PROGRESS until something is submitted, so a learner coming back conflicts
+    // with themselves. Nothing is lost — the placements only ever lived in the browser.
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(
+        new AppError('conflict', 'Upstream 409', {
+          message: 'Attempt already in progress',
+          attemptId: 'att-9',
+        }),
+      )
+      .mockResolvedValueOnce(undefined) // DELETE the stale attempt
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2' });
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toMatchObject({ attemptId: 'att-2' });
+    expect(serverFetch).toHaveBeenNthCalledWith(2, {
+      service: 'exercises',
+      path: '/exercises/ex-1/attempts/att-9',
+      method: 'DELETE',
+    });
+  });
+
+  it('reports the conflict when the stale attempt cannot be cleared', async () => {
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockRejectedValueOnce(new Error('still there'));
 
     const res = await POST(makeRequest({ language: 'no' }), { params });
 
     expect(res.status).toBe(409);
-    // The running attempt's id has to survive, or the caller cannot resume.
-    await expect(res.json()).resolves.toEqual({ error: 'Attempt already in progress: att-9' });
+    await expect(res.json()).resolves.toEqual({ error: 'An attempt is already in progress' });
+  });
+
+  it('reports the conflict when the engine names no attempt to clear', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', null));
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+    expect(res.status).toBe(409);
   });
 
   it('maps the errors the caller can act on', async () => {

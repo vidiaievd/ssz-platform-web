@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { useExerciseWithAnswers } from '@/features/content/api/use-exercise';
 import { primaryHintText, primaryInstructionText } from '@/features/content/lib/instruction-text';
+import { GapFillSolver } from './gap-fill-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import {
@@ -134,7 +135,9 @@ function McqSolver({ display, phase, ok, onCheck }: SolverProps) {
   const options = useMemo(
     () =>
       (Array.isArray(c.options) ? c.options : [])
-        .filter((o): o is { id: string; text: string } => typeof (o as { id?: unknown }).id === 'string')
+        .filter(
+          (o): o is { id: string; text: string } => typeof (o as { id?: unknown }).id === 'string',
+        )
         .map((o) => ({ id: o.id, text: str(o.text) })),
     [c.options],
   );
@@ -185,12 +188,15 @@ function McqGroupSolver({ display, phase, ok, revealed, retryNonce, onCheck }: S
 
   const options = (v: unknown): McqGroupOption[] =>
     (Array.isArray(v) ? v : [])
-      .filter((o): o is { id: string; text: string } => typeof (o as { id?: unknown }).id === 'string')
+      .filter(
+        (o): o is { id: string; text: string } => typeof (o as { id?: unknown }).id === 'string',
+      )
       .map((o) => ({ id: o.id, text: str(o.text) }));
 
   const items: McqGroupQuestion[] = (Array.isArray(c.items) ? c.items : [])
-    .filter((it): it is { id: string; question: string; options?: unknown } =>
-      typeof (it as { id?: unknown }).id === 'string',
+    .filter(
+      (it): it is { id: string; question: string; options?: unknown } =>
+        typeof (it as { id?: unknown }).id === 'string',
     )
     .map((it) => {
       const own = options(it.options);
@@ -199,8 +205,9 @@ function McqGroupSolver({ display, phase, ok, revealed, retryNonce, onCheck }: S
 
   const expected: McqGroupExpectedAnswers = {
     items: (Array.isArray(display.expectedAnswers.items) ? display.expectedAnswers.items : [])
-      .filter((it): it is { id: string; correct_option_ids: unknown; explanation?: unknown } =>
-        typeof (it as { id?: unknown }).id === 'string',
+      .filter(
+        (it): it is { id: string; correct_option_ids: unknown; explanation?: unknown } =>
+          typeof (it as { id?: unknown }).id === 'string',
       )
       .map((it) => ({
         id: it.id,
@@ -259,7 +266,9 @@ function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: Solve
     setValue('');
   }
   const c = display.content;
-  const rawBlanks = Array.isArray(display.expectedAnswers.blanks) ? display.expectedAnswers.blanks : [];
+  const rawBlanks = Array.isArray(display.expectedAnswers.blanks)
+    ? display.expectedAnswers.blanks
+    : [];
   const firstBlank = rawBlanks[0] as
     | { accepted_answers?: unknown; rationale?: FillRationale }
     | undefined;
@@ -318,7 +327,9 @@ function MatchSolver({ display, phase, ok, onCheck }: SolverProps) {
         str((r as { text?: unknown }).text),
       ]),
     );
-    const answerPairs = Array.isArray(display.expectedAnswers.pairs) ? display.expectedAnswers.pairs : [];
+    const answerPairs = Array.isArray(display.expectedAnswers.pairs)
+      ? display.expectedAnswers.pairs
+      : [];
     return answerPairs.map((p) => {
       const leftId = str((p as { left_id?: unknown }).left_id);
       const rightId = str((p as { right_id?: unknown }).right_id);
@@ -346,7 +357,10 @@ function MatchSolver({ display, phase, ok, onCheck }: SolverProps) {
         accent={ACCENT}
       />
       {phase === 'answering' && (
-        <CheckFooter canSubmit={allLinked} onCheck={() => onCheck({ ok: gradeMatch(pairs, links) })} />
+        <CheckFooter
+          canSubmit={allLinked}
+          onCheck={() => onCheck({ ok: gradeMatch(pairs, links) })}
+        />
       )}
     </>
   );
@@ -379,7 +393,12 @@ function TranslateSolver({ display, phase, ok, onCheck }: SolverProps) {
       {phase === 'answering' && (
         <CheckFooter
           canSubmit={value.trim() !== ''}
-          onCheck={() => onCheck({ ok: gradeTranslate({ accepted_answers: accepted }, value), reference: accepted[0] })}
+          onCheck={() =>
+            onCheck({
+              ok: gradeTranslate({ accepted_answers: accepted }, value),
+              reference: accepted[0],
+            })
+          }
         />
       )}
     </>
@@ -403,7 +422,11 @@ function ShortAnswerSolver({ display, phase, ok, retryNonce, onCheck }: SolverPr
   return (
     <>
       <ShortAnswerBody
-        content={{ question: str(c.question), context: str(c.context) || undefined, instruction: instr(display) }}
+        content={{
+          question: str(c.question),
+          context: str(c.context) || undefined,
+          instruction: instr(display),
+        }}
         value={value}
         onValueChange={setValue}
         onAnswerChange={() => {}}
@@ -454,7 +477,9 @@ function WritingSolver({ display, phase, ok, onCheck }: SolverProps) {
   const [value, setValue] = useState<WritingValue>({ text: '', topicId: null });
   const c = display.content;
   const topics = (Array.isArray(c.options) ? c.options : [])
-    .filter((o): o is { id: string; title: string } => typeof (o as { id?: unknown }).id === 'string')
+    .filter(
+      (o): o is { id: string; title: string } => typeof (o as { id?: unknown }).id === 'string',
+    )
     .map((o) => ({ id: o.id, title: str(o.title) }));
   const minWords = typeof c.min_words === 'number' ? c.min_words : undefined;
   const [canSubmit, setCanSubmit] = useState(false);
@@ -462,7 +487,12 @@ function WritingSolver({ display, phase, ok, onCheck }: SolverProps) {
   return (
     <>
       <WritingBody
-        content={{ prompt: str(c.prompt), topics: topics.length > 0 ? topics : undefined, minWords, instruction: instr(display) }}
+        content={{
+          prompt: str(c.prompt),
+          topics: topics.length > 0 ? topics : undefined,
+          minWords,
+          instruction: instr(display),
+        }}
         value={value}
         onValueChange={setValue}
         onAnswerChange={setCanSubmit}
@@ -483,14 +513,21 @@ function SentenceSchemaSolver({ display, phase, ok, revealed, onCheck }: SolverP
   const [value, setValue] = useState<SchemaPlacements>({});
   const c = display.content;
   const fields: SchemaField[] = (Array.isArray(c.fields) ? c.fields : [])
-    .filter((f): f is { id: string; label: string } => typeof (f as { id?: unknown }).id === 'string')
+    .filter(
+      (f): f is { id: string; label: string } => typeof (f as { id?: unknown }).id === 'string',
+    )
     .map((f) => ({ id: f.id, label: str(f.label) }));
   const tokens: SchemaToken[] = (Array.isArray(c.tokens) ? c.tokens : [])
-    .filter((tk): tk is { id: string; text: string } => typeof (tk as { id?: unknown }).id === 'string')
+    .filter(
+      (tk): tk is { id: string; text: string } => typeof (tk as { id?: unknown }).id === 'string',
+    )
     .map((tk) => ({ id: tk.id, text: str(tk.text) }));
-  const placements = (Array.isArray(display.expectedAnswers.placements) ? display.expectedAnswers.placements : []).map(
-    (p) => ({ field_id: str((p as { field_id?: unknown }).field_id), token_ids: strArr((p as { token_ids?: unknown }).token_ids) }),
-  );
+  const placements = (
+    Array.isArray(display.expectedAnswers.placements) ? display.expectedAnswers.placements : []
+  ).map((p) => ({
+    field_id: str((p as { field_id?: unknown }).field_id),
+    token_ids: strArr((p as { token_ids?: unknown }).token_ids),
+  }));
   const [canSubmit, setCanSubmit] = useState(false);
 
   return (
@@ -512,9 +549,7 @@ function SentenceSchemaSolver({ display, phase, ok, revealed, onCheck }: SolverP
         mode="practice"
         accent={ACCENT}
         revealPlacements={
-          revealed
-            ? Object.fromEntries(placements.map((p) => [p.field_id, p.token_ids]))
-            : null
+          revealed ? Object.fromEntries(placements.map((p) => [p.field_id, p.token_ids])) : null
         }
       />
       {phase === 'answering' && (
@@ -532,14 +567,7 @@ function SentenceSchemaSolver({ display, phase, ok, revealed, onCheck }: SolverP
   );
 }
 
-function WordBankFillSolver({
-  display,
-  phase,
-  ok,
-  revealed,
-  retryNonce,
-  onCheck,
-}: SolverProps) {
+function WordBankFillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
   const [value, setValue] = useState<WordBankFillValue>({});
   const [results, setResults] = useState<WordBankFillResults>({});
   const [canSubmit, setCanSubmit] = useState(false);
@@ -555,17 +583,24 @@ function WordBankFillSolver({
 
   const wordBank = strArr(c.word_bank);
   const items: WordBankSentence[] = (Array.isArray(c.items) ? c.items : [])
-    .filter((it): it is { id: string; text_with_blanks: string } => typeof (it as { id?: unknown }).id === 'string')
+    .filter(
+      (it): it is { id: string; text_with_blanks: string } =>
+        typeof (it as { id?: unknown }).id === 'string',
+    )
     .map((it) => ({ id: it.id, textWithBlanks: str(it.text_with_blanks) }));
 
   const expected: WordBankFillExpectedAnswers = {
     items: (Array.isArray(display.expectedAnswers.items) ? display.expectedAnswers.items : [])
-      .filter((it): it is { id: string; blanks: unknown } => typeof (it as { id?: unknown }).id === 'string')
+      .filter(
+        (it): it is { id: string; blanks: unknown } =>
+          typeof (it as { id?: unknown }).id === 'string',
+      )
       .map((it) => ({
         id: it.id,
         blanks: (Array.isArray(it.blanks) ? it.blanks : [])
-          .filter((b): b is { blank_id: number; accepted_answers: unknown; rationale?: FillRationale } =>
-            typeof (b as { blank_id?: unknown }).blank_id === 'number',
+          .filter(
+            (b): b is { blank_id: number; accepted_answers: unknown; rationale?: FillRationale } =>
+              typeof (b as { blank_id?: unknown }).blank_id === 'number',
           )
           .map((b) => ({
             blank_id: b.blank_id,
@@ -623,8 +658,9 @@ function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
   const items: OrderLine[] = useMemo(
     () =>
       (Array.isArray(c.items) ? c.items : [])
-        .filter((it): it is { id: string; text: string; speaker?: string } =>
-          typeof (it as { id?: unknown }).id === 'string',
+        .filter(
+          (it): it is { id: string; text: string; speaker?: string } =>
+            typeof (it as { id?: unknown }).id === 'string',
         )
         .map((it) => ({
           id: it.id,
@@ -683,7 +719,6 @@ function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-
 function ErrorCorrectionSolver({ display, phase, ok, onCheck }: SolverProps) {
   const t = useTranslations('ExerciseRunner');
   const [value, setValue] = useState<ErrorCorrectionValue>({});
@@ -694,11 +729,17 @@ function ErrorCorrectionSolver({ display, phase, ok, onCheck }: SolverProps) {
   const items: ErrorSentence[] = useMemo(
     () =>
       (Array.isArray(c.items) ? c.items : [])
-        .filter((it): it is { id: string; chunks: unknown } => typeof (it as { id?: unknown }).id === 'string')
+        .filter(
+          (it): it is { id: string; chunks: unknown } =>
+            typeof (it as { id?: unknown }).id === 'string',
+        )
         .map((it) => ({
           id: it.id,
           chunks: (Array.isArray(it.chunks) ? it.chunks : [])
-            .filter((ch): ch is { id: string; text: string } => typeof (ch as { id?: unknown }).id === 'string')
+            .filter(
+              (ch): ch is { id: string; text: string } =>
+                typeof (ch as { id?: unknown }).id === 'string',
+            )
             .map((ch) => ({ id: ch.id, text: str(ch.text) })),
         })),
     [c.items],
@@ -709,8 +750,9 @@ function ErrorCorrectionSolver({ display, phase, ok, onCheck }: SolverProps) {
       ? display.expectedAnswers.corrections
       : []
     )
-      .filter((cor): cor is { item_id: string; chunk_id: string; accepted: unknown; note?: string } =>
-        typeof (cor as { chunk_id?: unknown }).chunk_id === 'string',
+      .filter(
+        (cor): cor is { item_id: string; chunk_id: string; accepted: unknown; note?: string } =>
+          typeof (cor as { chunk_id?: unknown }).chunk_id === 'string',
       )
       .map((cor) => ({
         item_id: str(cor.item_id),
@@ -776,13 +818,7 @@ interface FeedbackBannerProps {
   onToggleReveal: () => void;
 }
 
-function FeedbackBanner({
-  graded,
-  revealed,
-  hint,
-  onRetry,
-  onToggleReveal,
-}: FeedbackBannerProps) {
+function FeedbackBanner({ graded, revealed, hint, onRetry, onToggleReveal }: FeedbackBannerProps) {
   const t = useTranslations('ExerciseRunner');
   const { ok, summary, explanation, reference } = graded;
   /* Every miss is worth another go, and the answers stay one click away for as
@@ -793,10 +829,25 @@ function FeedbackBanner({
   const canRetry = ok === false;
   const tone =
     ok === true
-      ? { bg: 'var(--ssz-feedback-ok-bg)', line: 'var(--ssz-feedback-ok-line)', fg: 'var(--ssz-feedback-ok-fg)', label: t('feedback.correct') }
+      ? {
+          bg: 'var(--ssz-feedback-ok-bg)',
+          line: 'var(--ssz-feedback-ok-line)',
+          fg: 'var(--ssz-feedback-ok-fg)',
+          label: t('feedback.correct'),
+        }
       : ok === false
-        ? { bg: 'var(--ssz-feedback-no-bg)', line: 'var(--ssz-feedback-no-line)', fg: 'var(--ssz-feedback-no-fg)', label: t('feedback.incorrect') }
-        : { bg: 'var(--ssz-color-secondary-100)', line: 'var(--ssz-color-secondary-600)', fg: 'var(--ssz-color-secondary-700)', label: t('feedback.submitted') };
+        ? {
+            bg: 'var(--ssz-feedback-no-bg)',
+            line: 'var(--ssz-feedback-no-line)',
+            fg: 'var(--ssz-feedback-no-fg)',
+            label: t('feedback.incorrect'),
+          }
+        : {
+            bg: 'var(--ssz-color-secondary-100)',
+            line: 'var(--ssz-color-secondary-600)',
+            fg: 'var(--ssz-color-secondary-700)',
+            label: t('feedback.submitted'),
+          };
 
   return (
     <div
@@ -899,11 +950,34 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
   if (isLoading) return <LearningSkeleton variant="list" rows={4} />;
   if (isError || !data) return <ErrorState onRetry={() => refetch()} />;
 
+  // Server-graded, and therefore not a `SolverProps` solver at all: it never has
+  // the answers to pass down. Branching here keeps the other twelve untouched —
+  // moving them to server-side grading is separate work with a shape of its own.
+  if (data.templateCode === 'word_bank_gap_fill') {
+    return (
+      <div>
+        {index != null && (
+          <div className="mb-2 text-[12px] font-bold text-(--ssz-text-muted)">
+            {t('taskNumber', { n: index })}
+          </div>
+        )}
+        <GapFillSolver
+          exerciseId={exerciseId}
+          language={data.targetLanguage}
+          {...(instr(data) === undefined ? {} : { instruction: instr(data) })}
+          {...(onChecked === undefined ? {} : { onChecked })}
+        />
+      </div>
+    );
+  }
+
   const Solver = SOLVERS[data.templateCode];
   if (!Solver) {
     return (
       <div className="rounded-2xl border border-(--ssz-border-default) bg-surface px-6 py-12 text-center">
-        <p className="text-sm text-(--ssz-text-muted)">{t('unsupported', { type: data.templateCode })}</p>
+        <p className="text-sm text-(--ssz-text-muted)">
+          {t('unsupported', { type: data.templateCode })}
+        </p>
       </div>
     );
   }

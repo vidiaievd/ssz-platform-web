@@ -122,6 +122,11 @@
     "wrongGap": "{label}: {word}, feil",
     "revealedGap": "{label}: svaret er {word}",
     "right": "Riktig",
-    "wrong": "Ikke dette"
+    "wrong": "Ikke dette",
+    "check": "Sjekk",
+    "checking": "Sjekker…",
+    "fillEveryGap": "Fyll inn alle lukene",
+    "checkFailed": "Kunne ikke sjekke — prøv igjen",
+    "attemptCount": "Forsøk {n}"
   }
 }
