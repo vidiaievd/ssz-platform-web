@@ -113,5 +113,10 @@
     "editLabel": "Rewrite “{text}”",
     "partialScore": "{correct} of {total} mistakes corrected",
     "falsePositives": "{n} correct parts were changed"
+  },
+  "gapFill": {
+    "remaining": "{count} left",
+    "emptyGap": "{label}: empty gap",
+    "filledGap": "{label}: {word}"
   }
 }

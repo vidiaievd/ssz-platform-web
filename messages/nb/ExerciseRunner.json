@@ -113,5 +113,10 @@
     "editLabel": "Skriv om «{text}»",
     "partialScore": "{correct} av {total} feil rettet",
     "falsePositives": "{n} riktige deler ble endret"
+  },
+  "gapFill": {
+    "remaining": "{count} igjen",
+    "emptyGap": "{label}: tom luke",
+    "filledGap": "{label}: {word}"
   }
 }

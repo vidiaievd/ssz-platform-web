@@ -113,5 +113,10 @@
     "editLabel": "Переписать «{text}»",
     "partialScore": "Исправлено {correct} из {total} ошибок",
     "falsePositives": "Изменено верных частей: {n}"
+  },
+  "gapFill": {
+    "remaining": "осталось {count}",
+    "emptyGap": "{label}: пустой пропуск",
+    "filledGap": "{label}: {word}"
   }
 }
