@@ -117,6 +117,11 @@
   "gapFill": {
     "remaining": "осталось {count}",
     "emptyGap": "{label}: пустой пропуск",
-    "filledGap": "{label}: {word}"
+    "filledGap": "{label}: {word}",
+    "correctGap": "{label}: {word}, верно",
+    "wrongGap": "{label}: {word}, неверно",
+    "revealedGap": "{label}: ответ — {word}",
+    "right": "Верно",
+    "wrong": "Не это слово"
   }
 }

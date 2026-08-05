@@ -15,6 +15,17 @@ import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 /** gapKey → the word the learner put there. A missing key is an empty gap. */
 export type GapFillValue = Record<GapKey, string>;
 
+/**
+ * One gap's outcome, as the server decided it. The explanation is already resolved
+ * there — the pair text for exactly the word chosen, else the gap's default, else the
+ * note on why the answer is right. The client neither knows the rule nor needs to: it
+ * has no answers to apply it to.
+ */
+export interface GapVerdict {
+  correct: boolean;
+  explanation: string | null;
+}
+
 export interface WordBankGapFillBodyProps {
   /**
    * The masked exercise as it left the server. It has no answers in it — the
@@ -29,9 +40,21 @@ export interface WordBankGapFillBodyProps {
   phase: RunnerPhase;
   mode: RunnerMode;
   accent: string;
+  /** Per-gap outcomes, present once the exercise has been checked at least once. */
+  results?: Record<GapKey, GapVerdict>;
+  /**
+   * The answers, and only after the learner asks for them. A separate action rather
+   * than a consequence of being wrong: attempts are unlimited, and a right answer
+   * shown unbidden ends the exercise for them (BEHAVIOR §2.2).
+   */
+  revealed?: Record<GapKey, string>;
 }
 
 const READING = 'var(--ssz-font-reading)';
+const OK_LINE = 'var(--ssz-feedback-ok-line)';
+const OK_FG = 'var(--ssz-feedback-ok-fg)';
+const NO_LINE = 'var(--ssz-feedback-no-line)';
+const NO_FG = 'var(--ssz-feedback-no-fg)';
 /** BEHAVIOR §3: a word chip is a real button, comfortably tappable. */
 const CHIP_MIN_HEIGHT = 36;
 
@@ -57,6 +80,8 @@ export function WordBankGapFillBody({
   phase,
   mode,
   accent,
+  results,
+  revealed,
 }: WordBankGapFillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const isAnswering = phase === 'answering';
@@ -85,8 +110,17 @@ export function WordBankGapFillBody({
     ? new Set<string>()
     : new Set(Object.values(value).filter(Boolean));
 
+  const isRevealed = revealed !== undefined;
+
+  /**
+   * A gap the learner got right is finished with. It stays locked through the next
+   * attempt too (AC-S10): re-entering words already known to be right teaches nothing
+   * and risks talking them out of a correct answer.
+   */
+  const isLocked = (key: GapKey): boolean => isRevealed || results?.[key]?.correct === true;
+
   const firstEmptyKey = (): GapKey | null =>
-    gaps.find((gap) => (value[gap.gapKey] ?? '') === '')?.gapKey ?? null;
+    gaps.find((gap) => (value[gap.gapKey] ?? '') === '' && !isLocked(gap.gapKey))?.gapKey ?? null;
 
   /** Where a word tap goes: the armed gap, or the first empty one (BEHAVIOR §2.1). */
   const targetKey = armedKey ?? firstEmptyKey();
@@ -95,7 +129,10 @@ export function WordBankGapFillBody({
   function nextEmptyAfter(key: GapKey): GapKey | null {
     const at = gaps.findIndex((gap) => gap.gapKey === key);
     const ordered = [...gaps.slice(at + 1), ...gaps.slice(0, Math.max(at, 0))];
-    return ordered.find((gap) => (value[gap.gapKey] ?? '') === '')?.gapKey ?? null;
+    return (
+      ordered.find((gap) => (value[gap.gapKey] ?? '') === '' && !isLocked(gap.gapKey))?.gapKey ??
+      null
+    );
   }
 
   function place(key: GapKey, word: string) {
@@ -109,7 +146,7 @@ export function WordBankGapFillBody({
   }
 
   function pickWord(word: string) {
-    if (!isAnswering || targetKey === null) return;
+    if (!isAnswering || targetKey === null || isLocked(targetKey)) return;
 
     // Tapping the word already in the armed gap takes it back out, which is the
     // only way to empty a gap without first arming another one.
@@ -135,7 +172,7 @@ export function WordBankGapFillBody({
   }
 
   function tapGap(key: GapKey) {
-    if (!isAnswering) return;
+    if (!isAnswering || isLocked(key)) return;
     // A filled gap gives its word back rather than arming: taking a word out is
     // the commoner intent, and arming a full gap does nothing visible.
     if ((value[key] ?? '') !== '') {
@@ -146,13 +183,56 @@ export function WordBankGapFillBody({
     setArmedKey((current) => (current === key ? null : key));
   }
 
+  /**
+   * Green when right, red when wrong, accent while the gap is armed, plain otherwise.
+   * Never colour alone: the verdict is also in the gap's accessible name and spelled
+   * out in the feedback block beneath the sentence (AC-X7).
+   */
+  function gapTone(key: GapKey): { line: string; fg: string } {
+    const verdict = results?.[key];
+    if (isRevealed) return { line: OK_LINE, fg: OK_FG };
+    if (verdict === undefined) {
+      return {
+        line: armedKey === key ? accent : 'var(--ssz-border-default)',
+        fg: 'var(--ssz-text-primary)',
+      };
+    }
+    return verdict.correct ? { line: OK_LINE, fg: OK_FG } : { line: NO_LINE, fg: NO_FG };
+  }
+
+  function gapLabel(key: GapKey, label: string): string {
+    const answer = revealed?.[key];
+    if (answer !== undefined) return t('gapFill.revealedGap', { label, word: answer });
+
+    const word = value[key] ?? '';
+    if (word === '') return t('gapFill.emptyGap', { label });
+
+    const verdict = results?.[key];
+    if (verdict === undefined) return t('gapFill.filledGap', { label, word });
+    return verdict.correct
+      ? t('gapFill.correctGap', { label, word })
+      : t('gapFill.wrongGap', { label, word });
+  }
+
+  /**
+   * Focus moves to the first thing the learner has to read after a check. Without it a
+   * screen-reader user is left at the bottom of the page with a verdict they were never
+   * told about (BEHAVIOR §2.2).
+   */
+  const firstFeedbackRef = useRef<HTMLDivElement | null>(null);
+  const hasResults = results !== undefined;
+  useEffect(() => {
+    if (hasResults) firstFeedbackRef.current?.focus();
+  }, [hasResults, revealed]);
+
   const remaining = projection.bank === null ? 0 : projection.bank.length - spent.size;
 
   return (
     <div>
       {instruction && <Instr>{instruction}</Instr>}
 
-      {projection.bank !== null && (
+      {/* The reveal ends the attempt, so the bank has nothing left to offer. */}
+      {projection.bank !== null && !isRevealed && (
         <div className="mb-6">
           {projection.settings.showBankCount && (
             <div
@@ -220,13 +300,13 @@ export function WordBankGapFillBody({
                       ref={(el) => {
                         gapRefs.current.set(token.gapKey, el);
                       }}
-                      disabled={!isAnswering}
+                      disabled={!isAnswering || isLocked(token.gapKey)}
                       onClick={() => tapGap(token.gapKey)}
                       onDragOver={(e) => {
                         if (isAnswering) e.preventDefault();
                       }}
                       onDrop={(e) => {
-                        if (!isAnswering) return;
+                        if (!isAnswering || isLocked(token.gapKey)) return;
                         e.preventDefault();
                         const word = e.dataTransfer.getData('text/plain');
                         if (word) {
@@ -234,26 +314,21 @@ export function WordBankGapFillBody({
                           setArmedKey(null);
                         }
                       }}
-                      aria-label={
-                        (value[token.gapKey] ?? '') === ''
-                          ? t('gapFill.emptyGap', { label: token.label })
-                          : t('gapFill.filledGap', {
-                              label: token.label,
-                              word: value[token.gapKey] ?? '',
-                            })
-                      }
+                      aria-label={gapLabel(token.gapKey, token.label)}
                       className="mx-0.5 rounded-md px-2 align-baseline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
                       style={{
                         fontFamily: READING,
                         minWidth: 72,
-                        borderBottom: `2px solid ${armedKey === token.gapKey ? accent : 'var(--ssz-border-default)'}`,
+                        borderBottom: `2px solid ${gapTone(token.gapKey).line}`,
                         background:
-                          armedKey === token.gapKey ? modeAccentSoft(mode) : 'transparent',
-                        color: 'var(--ssz-text-primary)',
-                        cursor: isAnswering ? 'pointer' : 'default',
+                          armedKey === token.gapKey && results?.[token.gapKey] === undefined
+                            ? modeAccentSoft(mode)
+                            : 'transparent',
+                        color: gapTone(token.gapKey).fg,
+                        cursor: isAnswering && !isLocked(token.gapKey) ? 'pointer' : 'default',
                       }}
                     >
-                      {value[token.gapKey] ?? ' '}
+                      {revealed?.[token.gapKey] ?? value[token.gapKey] ?? ' '}
                     </button>
                     {token.after}{' '}
                   </span>
@@ -261,9 +336,50 @@ export function WordBankGapFillBody({
               )}
             </p>
 
-            {sentence.hint && (
+            {/* The hint is help before the fact; once there is a verdict it is noise. */}
+            {sentence.hint && !hasResults && (
               <p className="mt-1 text-[12.5px] text-(--ssz-text-muted)">{sentence.hint}</p>
             )}
+
+            {hasResults &&
+              sentence.tokens
+                .filter((token): token is ProjectedGapToken => token.kind === 'gap')
+                .map((token) => {
+                  const verdict = results[token.gapKey];
+                  if (verdict === undefined) return null;
+                  const tone = verdict.correct
+                    ? { line: OK_LINE, fg: OK_FG }
+                    : { line: NO_LINE, fg: NO_FG };
+                  const answer = revealed?.[token.gapKey];
+
+                  return (
+                    <div
+                      key={token.gapKey}
+                      ref={(el) => {
+                        if (firstFeedbackRef.current === null && el !== null) {
+                          firstFeedbackRef.current = el;
+                        }
+                      }}
+                      tabIndex={-1}
+                      role={verdict.correct ? undefined : 'alert'}
+                      className="mt-2 rounded-lg border-l-2 px-3 py-2 text-[13.5px]"
+                      style={{ borderColor: tone.line, background: 'var(--ssz-bg-muted)' }}
+                    >
+                      <span className="font-semibold" style={{ color: tone.fg }}>
+                        {token.label}
+                        {answer === undefined
+                          ? ` — ${verdict.correct ? t('gapFill.right') : t('gapFill.wrong')}`
+                          : ` — ${answer}`}
+                      </span>
+                      {verdict.explanation && (
+                        <span style={{ color: 'var(--ssz-text-secondary)' }}>
+                          {' '}
+                          {verdict.explanation}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
           </div>
         ))}
       </div>

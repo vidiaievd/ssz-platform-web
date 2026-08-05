@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { enMessages } from '@/lib/i18n/messages';
 import type { StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
 
-import { WordBankGapFillBody, type GapFillValue } from './wordbank-gapfill-body';
+import { WordBankGapFillBody, type GapFillValue, type GapVerdict } from './wordbank-gapfill-body';
 
 // The projection is what the server sends: gapped tokens already cut out, the bank
 // already shuffled. Nothing here knows which word is correct — that is the point.
@@ -236,5 +236,148 @@ describe('WordBankGapFillBody — what the learner is told', () => {
     await user.click(chip('regningen'));
 
     expect(gap('G2')).toHaveAccessibleName('G2: regningen');
+  });
+});
+
+/* ── check, feedback and reveal (step 3.2) ─────────────────────────────── */
+
+function FeedbackHarness({
+  results,
+  revealed,
+  value = { 's1#3': 'bestilt', 's2#3': 'regningen' },
+}: {
+  results?: Record<string, GapVerdict>;
+  revealed?: Record<string, string>;
+  value?: GapFillValue;
+}) {
+  const [current, setCurrent] = useState<GapFillValue>(value);
+  return (
+    <NextIntlClientProvider locale="en" messages={enMessages}>
+      <WordBankGapFillBody
+        projection={makeProjection()}
+        value={current}
+        onValueChange={setCurrent}
+        onAnswerChange={vi.fn()}
+        phase="answering"
+        mode="practice"
+        accent="var(--ssz-runner-practice)"
+        results={results}
+        revealed={revealed}
+      />
+    </NextIntlClientProvider>
+  );
+}
+
+const CHECKED = {
+  's1#3': { correct: false, explanation: '«bestilt» is the past participle and needs «har».' },
+  's2#3': { correct: true, explanation: 'Your own bill is a specific thing.' },
+};
+
+describe('WordBankGapFillBody — after a check', () => {
+  it('AC-S7 / AC-S8: shows the explanation the server resolved for the wrong word', () => {
+    render(<FeedbackHarness results={CHECKED} />);
+    expect(
+      screen.getByText(/past participle and needs «har»/, { exact: false }),
+    ).toBeInTheDocument();
+  });
+
+  it('AC-S9: shows why the right answer is right', () => {
+    render(<FeedbackHarness results={CHECKED} />);
+    expect(screen.getByText(/Your own bill is a specific thing/)).toBeInTheDocument();
+  });
+
+  it('never shows an empty feedback block when the teacher wrote nothing', () => {
+    render(
+      <FeedbackHarness
+        results={{ 's1#3': { correct: false, explanation: null }, ...{} }}
+        value={{ 's1#3': 'bestilt' }}
+      />,
+    );
+    // A verdict with no explanation still says which gap and that it is wrong,
+    // rather than rendering a bare dash.
+    expect(screen.getByText(/G1 — Not this one/)).toBeInTheDocument();
+  });
+
+  it('announces a wrong gap to assistive tech, and does not shout about a right one', () => {
+    render(<FeedbackHarness results={CHECKED} />);
+    const alerts = screen.getAllByRole('alert');
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0]).toHaveTextContent('G1');
+  });
+
+  it('AC-S7 / AC-S10: a correct gap locks, a wrong one stays editable', async () => {
+    const user = userEvent.setup();
+    render(<FeedbackHarness results={CHECKED} />);
+
+    expect(gap('G2')).toBeDisabled();
+    expect(gap('G1')).toBeEnabled();
+
+    await user.click(gap('G1'));
+    expect(gap('G1')).toHaveAccessibleName('G1: empty gap');
+  });
+
+  it('puts the verdict in the accessible name, not only in the colour', () => {
+    render(<FeedbackHarness results={CHECKED} />);
+    expect(gap('G1')).toHaveAccessibleName('G1: bestilt, wrong');
+    expect(gap('G2')).toHaveAccessibleName('G2: regningen, correct');
+  });
+
+  it('drops the hint once there is a verdict to read instead', () => {
+    render(<FeedbackHarness results={CHECKED} />);
+    expect(screen.queryByText('Du skal betale nå.')).not.toBeInTheDocument();
+  });
+
+  it('AC-S12: shows no answer until the reveal is asked for', () => {
+    render(<FeedbackHarness results={CHECKED} />);
+
+    // The bank still holds every word, correct ones included — that is what a bank
+    // is, and the learner needs it to fix the gap. What must not appear is the
+    // answer *in the gap* or named in the explanation.
+    expect(gap('G1')).toHaveAccessibleName('G1: bestilt, wrong');
+    expect(screen.queryByText(/the answer is/)).not.toBeInTheDocument();
+    expect(screen.getByText(/G1 — Not this one/).textContent).not.toContain('bestille');
+  });
+});
+
+describe('WordBankGapFillBody — after a reveal', () => {
+  const revealed = { 's1#3': 'bestille', 's2#3': 'regningen' };
+
+  it('AC-S12: fills every gap with its answer and hides the bank', () => {
+    render(<FeedbackHarness results={CHECKED} revealed={revealed} />);
+
+    expect(gap('G1')).toHaveAccessibleName('G1: the answer is bestille');
+    expect(screen.queryByRole('group', { name: 'Word bank' })).not.toBeInTheDocument();
+  });
+
+  it('ends the attempt: nothing is editable any more', () => {
+    render(<FeedbackHarness results={CHECKED} revealed={revealed} />);
+    expect(gap('G1')).toBeDisabled();
+    expect(gap('G2')).toBeDisabled();
+  });
+
+  it('reads "answer — why" in the feedback block', () => {
+    render(<FeedbackHarness results={CHECKED} revealed={revealed} />);
+    expect(screen.getByText(/G1 — bestille/)).toBeInTheDocument();
+  });
+
+  // The accessible name and the visible text are two renderings of the same fact and
+  // drifted apart once already: the label said "the answer is bestille" while the gap
+  // still showed the learner's «bestilt». Sighted learners saw the wrong word.
+  it('puts the answer in the gap itself, not only in its accessible name', () => {
+    render(<FeedbackHarness results={CHECKED} revealed={revealed} />);
+    expect(gap('G1')).toHaveTextContent('bestille');
+  });
+});
+
+describe('WordBankGapFillBody — verdict styling', () => {
+  it('tones the gap itself, so the verdict is visible where the mistake is', () => {
+    render(<FeedbackHarness results={CHECKED} />);
+    expect(gap('G1')).toHaveStyle({ color: 'var(--ssz-feedback-no-fg)' });
+    expect(gap('G2')).toHaveStyle({ color: 'var(--ssz-feedback-ok-fg)' });
+  });
+
+  it('leaves an unchecked gap in the neutral tone', () => {
+    render(<FeedbackHarness value={{}} />);
+    expect(gap('G1')).toHaveStyle({ color: 'var(--ssz-text-primary)' });
   });
 });
