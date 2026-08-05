@@ -1008,5 +1008,47 @@
       "title": "Some word pairs fall back to the default explanation",
       "fix": "Fill in the matrix in step 3 as you go — empty cells are fine"
     }
+  },
+  "gapFill": {
+    "step1": {
+      "title": "Sentences & gaps",
+      "lede": "Write each sentence the way it reads when it is solved, then click the word that becomes the gap. The words you gap fill the word bank by themselves — you never type an answer twice.",
+      "tipTitle": "Two ways to make a gap.",
+      "tipBody": "Click a word in the strip under a sentence — or put square brackets around it while you write:",
+      "tipExample": "Jeg vil gjerne [bestille] en kaffe.",
+      "sentencesLabel": "Sentences",
+      "summary": "{sentences, plural, one {# sentence} other {# sentences}} · {gaps, plural, one {# gap} other {# gaps}}",
+      "pasteSeveral": "Paste several",
+      "emptyTitle": "No sentences yet",
+      "emptyBody": "Add the first sentence, or paste a whole set at once and mark the gaps afterwards.",
+      "addSentence": "Add sentence",
+      "noGapYet": "no gap yet",
+      "gapSummary": "{count, plural, one {# gap} other {# gaps}} · {labels}",
+      "moveUp": "Move sentence up",
+      "moveDown": "Move sentence down",
+      "deleteSentence": "Delete sentence",
+      "sentenceLabel": "Sentence {index}",
+      "sentencePlaceholder": "Write the full sentence, with the correct word in place…",
+      "tokensLabel": "Click a word to turn it into a gap",
+      "tokenMakeGap": "Click to make this a gap",
+      "tokenUnGap": "Click to remove this gap",
+      "tokensHelpMark": "Click the word students should fill in.",
+      "tokensHelpRemove": "Click a highlighted word to remove the gap.",
+      "errorEmpty": "Write the sentence, or delete this card.",
+      "errorNoGap": "Mark at least one word as a gap.",
+      "addHint": "Add a hint",
+      "hintLabel": "Hint for students (optional)",
+      "hintPlaceholder": "e.g. Du skal betale nå.",
+      "hintHelp": "Shown under the sentence before they answer. Use it for context, not for the answer.",
+      "pasteTitle": "Paste several sentences",
+      "pasteHelp": "One sentence per line. Square brackets around a word mark it as a gap.",
+      "pastePlaceholder": "Jeg vil gjerne [bestille] en kaffe.\nKan jeg få [regningen], takk?",
+      "pasteAdd": "{count, plural, =0 {Add sentences} one {Add # sentence} other {Add # sentences}}",
+      "cancel": "Cancel",
+      "removeGapTitle": "Remove this gap?",
+      "removeSentenceTitle": "Delete this sentence?",
+      "removeExplanations": "{count, plural, one {# explanation will be deleted} other {# explanations will be deleted}} and cannot be recovered.",
+      "removeConfirm": "Delete anyway"
+    }
   }
 }

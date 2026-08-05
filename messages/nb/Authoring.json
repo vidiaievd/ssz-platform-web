@@ -1008,5 +1008,47 @@
       "title": "Noen ordpar faller tilbake på standardforklaringen",
       "fix": "Fyll ut matrisen i steg 3 etter hvert — tomme celler er greit"
     }
+  },
+  "gapFill": {
+    "step1": {
+      "title": "Setninger og luker",
+      "lede": "Skriv hver setning slik den lyder når den er løst, og klikk så på ordet som skal bli luken. Ordene du lager luker av fyller ordbanken av seg selv — du skriver aldri et svar to ganger.",
+      "tipTitle": "To måter å lage en luke på.",
+      "tipBody": "Klikk på et ord i stripen under setningen — eller sett hakeparenteser rundt det mens du skriver:",
+      "tipExample": "Jeg vil gjerne [bestille] en kaffe.",
+      "sentencesLabel": "Setninger",
+      "summary": "{sentences, plural, one {# setning} other {# setninger}} · {gaps, plural, one {# luke} other {# luker}}",
+      "pasteSeveral": "Lim inn flere",
+      "emptyTitle": "Ingen setninger ennå",
+      "emptyBody": "Legg til den første setningen, eller lim inn hele settet med én gang og merk lukene etterpå.",
+      "addSentence": "Legg til setning",
+      "noGapYet": "ingen luke ennå",
+      "gapSummary": "{count, plural, one {# luke} other {# luker}} · {labels}",
+      "moveUp": "Flytt setningen opp",
+      "moveDown": "Flytt setningen ned",
+      "deleteSentence": "Slett setningen",
+      "sentenceLabel": "Setning {index}",
+      "sentencePlaceholder": "Skriv hele setningen, med det riktige ordet på plass …",
+      "tokensLabel": "Klikk på et ord for å gjøre det til en luke",
+      "tokenMakeGap": "Klikk for å lage en luke her",
+      "tokenUnGap": "Klikk for å fjerne luken",
+      "tokensHelpMark": "Klikk på ordet elevene skal fylle inn.",
+      "tokensHelpRemove": "Klikk på et markert ord for å fjerne luken.",
+      "errorEmpty": "Skriv setningen, eller slett dette kortet.",
+      "errorNoGap": "Merk minst ett ord som luke.",
+      "addHint": "Legg til et hint",
+      "hintLabel": "Hint til elevene (valgfritt)",
+      "hintPlaceholder": "f.eks. Du skal betale nå.",
+      "hintHelp": "Vises under setningen før de svarer. Bruk det til sammenheng, ikke til svaret.",
+      "pasteTitle": "Lim inn flere setninger",
+      "pasteHelp": "Én setning per linje. Hakeparenteser rundt et ord gjør det til en luke.",
+      "pastePlaceholder": "Jeg vil gjerne [bestille] en kaffe.\nKan jeg få [regningen], takk?",
+      "pasteAdd": "{count, plural, =0 {Legg til setninger} one {Legg til # setning} other {Legg til # setninger}}",
+      "cancel": "Avbryt",
+      "removeGapTitle": "Fjerne denne luken?",
+      "removeSentenceTitle": "Slette denne setningen?",
+      "removeExplanations": "{count, plural, one {# forklaring blir slettet} other {# forklaringer blir slettet}}, og kan ikke hentes tilbake.",
+      "removeConfirm": "Slett likevel"
+    }
   }
 }
