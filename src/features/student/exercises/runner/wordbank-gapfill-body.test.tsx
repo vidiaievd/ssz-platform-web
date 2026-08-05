@@ -381,3 +381,102 @@ describe('WordBankGapFillBody — verdict styling', () => {
     expect(gap('G1')).toHaveStyle({ color: 'var(--ssz-text-primary)' });
   });
 });
+
+/* ── free-input mode (step 3.3) ────────────────────────────────────────── */
+
+function TypedHarness({
+  results,
+  revealed,
+  onAnswerChange = vi.fn(),
+}: {
+  results?: Record<string, GapVerdict>;
+  revealed?: Record<string, string>;
+  onAnswerChange?: (allFilled: boolean) => void;
+}) {
+  const [value, setValue] = useState<GapFillValue>({});
+  return (
+    <NextIntlClientProvider locale="en" messages={enMessages}>
+      <WordBankGapFillBody
+        projection={makeProjection({
+          bank: null,
+          settings: { allowReuse: false, showBankCount: true, input: 'free' },
+        })}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={onAnswerChange}
+        phase="answering"
+        mode="practice"
+        accent="var(--ssz-runner-practice)"
+        results={results}
+        revealed={revealed}
+      />
+    </NextIntlClientProvider>
+  );
+}
+
+const field = (label: string) => screen.getByRole('textbox', { name: new RegExp(`^${label}:`) });
+
+describe('WordBankGapFillBody — typed instead of chosen', () => {
+  it('gives every gap a text field and no bank', () => {
+    render(<TypedHarness />);
+    expect(screen.getAllByRole('textbox')).toHaveLength(2);
+    expect(screen.queryByRole('group', { name: 'Word bank' })).not.toBeInTheDocument();
+  });
+
+  it('keeps what the learner typed, æ ø å included', async () => {
+    const user = userEvent.setup();
+    render(<TypedHarness />);
+
+    await user.type(field('G1'), 'blåbær');
+    expect(field('G1')).toHaveValue('blåbær');
+  });
+
+  it('reports readiness once every field has something in it', async () => {
+    const user = userEvent.setup();
+    const onAnswerChange = vi.fn();
+    render(<TypedHarness onAnswerChange={onAnswerChange} />);
+
+    await user.type(field('G1'), 'bestille');
+    expect(onAnswerChange).toHaveBeenLastCalledWith(false);
+    await user.type(field('G2'), 'regningen');
+    expect(onAnswerChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it('turns off the keyboard aids that would answer for the learner', () => {
+    render(<TypedHarness />);
+    // A phone "correcting" a Norwegian inflection marks the learner wrong for the
+    // device's opinion, which is not what is being tested.
+    expect(field('G1')).toHaveAttribute('autocorrect', 'off');
+    expect(field('G1')).toHaveAttribute('spellcheck', 'false');
+  });
+
+  it('gives every gap the same width, so the answer length is not a hint', () => {
+    render(<TypedHarness />);
+    const widths = screen.getAllByRole('textbox').map((el) => el.style.width);
+    expect(new Set(widths).size).toBe(1);
+  });
+
+  it('locks a field the learner got right and leaves the wrong one editable', () => {
+    render(
+      <TypedHarness
+        results={{
+          's1#3': { correct: false, explanation: 'Not that form.' },
+          's2#3': { correct: true, explanation: null },
+        }}
+      />,
+    );
+    expect(field('G2')).toBeDisabled();
+    expect(field('G1')).toBeEnabled();
+  });
+
+  it('shows the answer in the field once it is revealed', () => {
+    render(
+      <TypedHarness
+        results={{ 's1#3': { correct: false, explanation: null } }}
+        revealed={{ 's1#3': 'bestille', 's2#3': 'regningen' }}
+      />,
+    );
+    expect(field('G1')).toHaveValue('bestille');
+    expect(field('G1')).toBeDisabled();
+  });
+});

@@ -57,6 +57,12 @@ const NO_LINE = 'var(--ssz-feedback-no-line)';
 const NO_FG = 'var(--ssz-feedback-no-fg)';
 /** BEHAVIOR §3: a word chip is a real button, comfortably tappable. */
 const CHIP_MIN_HEIGHT = 36;
+/**
+ * Every typed gap is the same width, in characters. Sizing one to its answer would
+ * disclose the answer's length, which is a real hint in a language whose inflections
+ * differ by a letter or two — «bil», «bilen», «bilene».
+ */
+const TYPED_GAP_WIDTH = 12;
 
 const gapTokensOf = (projection: StudentProjection): ProjectedGapToken[] =>
   projection.sentences.flatMap((sentence) =>
@@ -85,6 +91,11 @@ export function WordBankGapFillBody({
 }: WordBankGapFillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const isAnswering = phase === 'answering';
+  /**
+   * The learner types instead of choosing (plan decision 4). This is what absorbs the
+   * old `fill_in_blank`: the grammar drills that never had a bank to choose from.
+   */
+  const isTyped = projection.settings.input === 'free';
   const gaps = useMemo(() => gapTokensOf(projection), [projection]);
 
   /**
@@ -295,41 +306,66 @@ export function WordBankGapFillBody({
                 ) : (
                   <span key={i}>
                     {token.before}
-                    <button
-                      type="button"
-                      ref={(el) => {
-                        gapRefs.current.set(token.gapKey, el);
-                      }}
-                      disabled={!isAnswering || isLocked(token.gapKey)}
-                      onClick={() => tapGap(token.gapKey)}
-                      onDragOver={(e) => {
-                        if (isAnswering) e.preventDefault();
-                      }}
-                      onDrop={(e) => {
-                        if (!isAnswering || isLocked(token.gapKey)) return;
-                        e.preventDefault();
-                        const word = e.dataTransfer.getData('text/plain');
-                        if (word) {
-                          place(token.gapKey, word);
-                          setArmedKey(null);
-                        }
-                      }}
-                      aria-label={gapLabel(token.gapKey, token.label)}
-                      className="mx-0.5 rounded-md px-2 align-baseline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
-                      style={{
-                        fontFamily: READING,
-                        minWidth: 72,
-                        borderBottom: `2px solid ${gapTone(token.gapKey).line}`,
-                        background:
-                          armedKey === token.gapKey && results?.[token.gapKey] === undefined
-                            ? modeAccentSoft(mode)
-                            : 'transparent',
-                        color: gapTone(token.gapKey).fg,
-                        cursor: isAnswering && !isLocked(token.gapKey) ? 'pointer' : 'default',
-                      }}
-                    >
-                      {revealed?.[token.gapKey] ?? value[token.gapKey] ?? ' '}
-                    </button>
+                    {isTyped ? (
+                      <input
+                        type="text"
+                        value={revealed?.[token.gapKey] ?? value[token.gapKey] ?? ''}
+                        onChange={(e) => place(token.gapKey, e.target.value)}
+                        disabled={!isAnswering || isLocked(token.gapKey)}
+                        aria-label={gapLabel(token.gapKey, token.label)}
+                        // No autocorrect anywhere near this: a phone keyboard
+                        // "fixing" a Norwegian inflection is the learner being
+                        // marked wrong for the device's opinion.
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck={false}
+                        className="mx-0.5 rounded-md px-2 align-baseline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
+                        style={{
+                          fontFamily: READING,
+                          fontSize: 'inherit',
+                          width: `${TYPED_GAP_WIDTH}ch`,
+                          borderBottom: `2px solid ${gapTone(token.gapKey).line}`,
+                          background: 'transparent',
+                          color: gapTone(token.gapKey).fg,
+                        }}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        ref={(el) => {
+                          gapRefs.current.set(token.gapKey, el);
+                        }}
+                        disabled={!isAnswering || isLocked(token.gapKey)}
+                        onClick={() => tapGap(token.gapKey)}
+                        onDragOver={(e) => {
+                          if (isAnswering) e.preventDefault();
+                        }}
+                        onDrop={(e) => {
+                          if (!isAnswering || isLocked(token.gapKey)) return;
+                          e.preventDefault();
+                          const word = e.dataTransfer.getData('text/plain');
+                          if (word) {
+                            place(token.gapKey, word);
+                            setArmedKey(null);
+                          }
+                        }}
+                        aria-label={gapLabel(token.gapKey, token.label)}
+                        className="mx-0.5 rounded-md px-2 align-baseline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
+                        style={{
+                          fontFamily: READING,
+                          minWidth: 72,
+                          borderBottom: `2px solid ${gapTone(token.gapKey).line}`,
+                          background:
+                            armedKey === token.gapKey && results?.[token.gapKey] === undefined
+                              ? modeAccentSoft(mode)
+                              : 'transparent',
+                          color: gapTone(token.gapKey).fg,
+                          cursor: isAnswering && !isLocked(token.gapKey) ? 'pointer' : 'default',
+                        }}
+                      >
+                        {revealed?.[token.gapKey] ?? value[token.gapKey] ?? ' '}
+                      </button>
+                    )}
                     {token.after}{' '}
                   </span>
                 ),
