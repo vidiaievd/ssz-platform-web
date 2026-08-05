@@ -1165,6 +1165,10 @@
       "FB_NO_FALLBACK": "{label} mangler standardforklaring.",
       "FB_NO_WHY": "{label} mangler notat om hvorfor svaret er riktig.",
       "FB_PARTIAL_COVERAGE": "{written} av {total} ordpar er skrevet; resten faller tilbake på standardforklaringen."
+    },
+    "preview": {
+      "empty": "Legg til en setning og merk en luke — elevens visning dukker opp her.",
+      "noCheck": "Du kan plassere ord her. Sjekken skjer for elevene, på serveren."
     }
   }
 }

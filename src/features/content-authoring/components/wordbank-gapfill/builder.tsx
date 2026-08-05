@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle, Check, CircleAlert, RefreshCw } from 'lucide-react';
 
@@ -37,8 +37,11 @@ export interface GapFillBuilderProps {
   initialHint: string;
   /** Module vocabulary offered as distractors in step 2. */
   suggestions?: string[];
-  /** Renders the live student preview beside the editor (step 4.6). */
-  previewSlot?: (exercise: WordBankGapFill) => React.ReactNode;
+  /**
+   * Reports every edit so the shell's preview column can render the student's view of
+   * the document being written. Mirrors how the generic exercise form feeds its preview.
+   */
+  onDocumentChange?: (exercise: WordBankGapFill, instructions: string) => void;
 }
 
 /**
@@ -61,7 +64,7 @@ export function GapFillBuilder({
   initialInstructions,
   initialHint,
   suggestions = [],
-  previewSlot,
+  onDocumentChange,
 }: GapFillBuilderProps) {
   const t = useTranslations('Authoring');
 
@@ -85,6 +88,14 @@ export function GapFillBuilder({
     onSaved: (updatedAt) => setExercise((current) => ({ ...current, updatedAt })),
   });
 
+  const reportRef = useRef(onDocumentChange);
+  useEffect(() => {
+    reportRef.current = onDocumentChange;
+  });
+  useEffect(() => {
+    reportRef.current?.(exercise, instructions);
+  }, [exercise, instructions]);
+
   const problems = useMemo(
     () => issues(exercise).filter((issue) => issue.code !== 'EX_NO_TITLE'),
     [exercise],
@@ -103,8 +114,8 @@ export function GapFillBuilder({
         </div>
       </div>
 
-      <div className="flex flex-col gap-6 xl:flex-row">
-        <div className="min-w-0 flex-1">
+      <div className="min-w-0">
+        <div>
           {step === 1 && (
             <div className="flex flex-col gap-5">
               <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
@@ -153,8 +164,6 @@ export function GapFillBuilder({
 
           {step === 3 && <StepFeedback exercise={exercise} onChange={setExercise} />}
         </div>
-
-        {previewSlot && <div className="xl:w-[430px] xl:shrink-0">{previewSlot(exercise)}</div>}
       </div>
 
       <GateDialog

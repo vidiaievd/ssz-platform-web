@@ -1165,6 +1165,10 @@
       "FB_NO_FALLBACK": "{label} has no default explanation.",
       "FB_NO_WHY": "{label} has no note on why the answer is right.",
       "FB_PARTIAL_COVERAGE": "{written} of {total} word pairs are written; the rest fall back to the default."
+    },
+    "preview": {
+      "empty": "Add a sentence and mark a gap — the student's view appears here.",
+      "noCheck": "Placement works here. Checking happens for students, on the server."
     }
   }
 }

@@ -10,7 +10,11 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Container, ExerciseInstruction, ExerciseWithAnswers } from '@/features/content/types';
-import { fromPersisted, TEMPLATE_CODE } from '@/lib/shared-kernel/wordbank-gapfill';
+import {
+  fromPersisted,
+  TEMPLATE_CODE,
+  type WordBankGapFill,
+} from '@/lib/shared-kernel/wordbank-gapfill';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -22,6 +26,7 @@ import { LessonEditorShell } from './lesson-editor-shell';
 import { useSaveScopeDescription } from './save-scope';
 import { ExerciseFields } from './exercise-fields';
 import { GapFillBuilder } from './wordbank-gapfill/builder';
+import { GapFillPreview } from './wordbank-gapfill/gap-fill-preview';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 
 interface ExerciseEditorPaneProps {
@@ -50,6 +55,13 @@ export function ExerciseEditorPane({
   const { data: exercise, isLoading } = useAuthoringExercise(exerciseId);
   const initialValues = exercise ? parseExerciseToForm(exercise) : DEFAULT_EXERCISE_VALUES;
   const [previewValues, setPreviewValues] = useState<ExerciseFormValues>(initialValues);
+  /** The gap-fill document as the builder currently has it, for the preview column. */
+  const [gapFill, setGapFill] = useState<{
+    exercise: WordBankGapFill;
+    instructions: string;
+  } | null>(null);
+
+  const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
 
   return (
     <LessonEditorShell
@@ -61,14 +73,20 @@ export function ExerciseEditorPane({
       saveStatus="idle"
       savedAt={null}
       publishSlot={publishSlot}
-      preview={<ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />}
+      preview={
+        isGapFill && gapFill !== null ? (
+          <GapFillPreview exercise={gapFill.exercise} instructions={gapFill.instructions} />
+        ) : (
+          <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
+        )
+      }
     >
       {isLoading ? (
         <div className="space-y-3">
           <Skeleton className="h-9 w-full" />
           <Skeleton className="h-40 w-full rounded-2xl" />
         </div>
-      ) : exercise?.templateCode === TEMPLATE_CODE ? (
+      ) : isGapFill ? (
         // Gap-fill has its own three-step builder rather than a slice of the generic
         // exercise form: its answers live inside the sentences, so authoring them means
         // editing the document the kernel defines, not a set of fields.
@@ -79,6 +97,9 @@ export function ExerciseEditorPane({
           initialExercise={gapFillDocumentFrom(exercise, container.id)}
           initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
           initialHint={firstInstruction(exercise)?.hintText ?? ''}
+          onDocumentChange={(document, instructions) =>
+            setGapFill({ exercise: document, instructions })
+          }
         />
       ) : (
         <ExerciseForm

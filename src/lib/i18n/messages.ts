@@ -136,9 +136,7 @@ export async function loadMessages(locale: string): Promise<Messages> {
   const results = await Promise.all(
     NAMESPACES.map((ns) => import(`../../../messages/${locale}/${ns}.json`)),
   );
-  return Object.fromEntries(
-    NAMESPACES.map((ns, i) => [ns, results[i].default]),
-  ) as Messages;
+  return Object.fromEntries(NAMESPACES.map((ns, i) => [ns, results[i].default])) as Messages;
 }
 
 // ---------------------------------------------------------------------------
@@ -212,6 +210,9 @@ export const SCHOOL_NAMESPACES = [
   // (GlossaryParagraph, AudioPlayer, VideoPlayer), which translate against
   // `Learning.glossary`, `Learning.audio` and `Learning.reader.video.player`.
   'Learning',
+  // The gap-fill builder previews the real runner body, which translates against
+  // `ExerciseRunner` — the preview is the student's component, not a copy of it.
+  'ExerciseRunner',
   'Media',
   'Notifications',
   'Profile',
