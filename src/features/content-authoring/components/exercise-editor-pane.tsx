@@ -25,7 +25,6 @@ import { updateExerciseAction } from '../actions/exercise';
 import { useAuthoringExercise } from '../api/use-authoring-exercises';
 import { authoringKeys } from '../api/keys';
 import { LessonEditorShell } from './lesson-editor-shell';
-import { useSaveScopeDescription } from './save-scope';
 import { ExerciseFields } from './exercise-fields';
 import { GapFillBuilder } from './wordbank-gapfill/builder';
 import type { SavedDocument } from './wordbank-gapfill/use-gap-fill-autosave';
@@ -73,6 +72,8 @@ export function ExerciseEditorPane({
       title={lessonTitle || t('lessons.untitled')}
       state={state}
       isLive={isLive}
+      // An exercise document waits in its draft whatever its placement says.
+      savesHeldForPublish
       backHref={backHref}
       saveStatus="idle"
       savedAt={null}
@@ -191,7 +192,8 @@ interface ExerciseFormProps {
 function ExerciseForm({ exerciseId, initialValues, container, onValuesChange }: ExerciseFormProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
-  const saveScope = useSaveScopeDescription();
+  // Not `useSaveScopeDescription`: that answers the placement question, and an
+  // exercise document is held for publish either way.
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
@@ -219,7 +221,9 @@ function ExerciseForm({ exerciseId, initialValues, container, onValuesChange }: 
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.exercise(exerciseId) });
       await queryClient.invalidateQueries({ queryKey: authoringKeys.exercises(container.id) });
-      toast.success(t('exercises.saveSuccess'), { description: saveScope });
+      toast.success(t('exercises.saveSuccess'), {
+        description: t('saveScope.exerciseDraftToast'),
+      });
     });
   }
 

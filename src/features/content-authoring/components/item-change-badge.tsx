@@ -32,6 +32,12 @@ export function ItemChangeBadge({ item, className }: ItemChangeBadgeProps) {
           {t('itemMoved')}
         </Badge>
       );
+    case 'content_changed':
+      return (
+        <Badge variant="warning" className={className} aria-label={t('itemEditedAriaLabel')}>
+          {t('itemEdited')}
+        </Badge>
+      );
     case 'flags_changed':
       return (
         <Badge variant="info" className={className} aria-label={t('itemFlagsChangedAriaLabel')}>

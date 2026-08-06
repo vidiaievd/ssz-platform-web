@@ -147,19 +147,19 @@ describe('ExerciseEditorPane', () => {
       expect(screen.getByText('Hvor bor du?')).toBeInTheDocument();
     });
   });
-  it('warns that saves on live material reach students at once', () => {
+  it('promises a publish before students see the edit, even on live material', () => {
+    // The exercise document waits in its draft whatever the placement says, so the
+    // old "students see every save immediately" would now be a false promise.
     renderPane(true);
-    expect(screen.getByText('Live — students see every save immediately.')).toBeInTheDocument();
+    expect(screen.getByText('Saves are held until you publish the module.')).toBeInTheDocument();
   });
 
-  it('says a save on unreleased material stays in the draft', () => {
+  it('says the same for material students cannot open yet', () => {
     renderPane(false);
-    expect(
-      screen.getByText('Not live yet — students see this material once the module is published.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Saves are held until you publish the module.')).toBeInTheDocument();
   });
 
-  it('confirms a save on live material as already visible to students', async () => {
+  it('confirms a save as pending a publish, on live material too', async () => {
     renderPane(true);
 
     fireEvent.change(screen.getByDisplayValue('Hva heter du?'), {
@@ -169,22 +169,7 @@ describe('ExerciseEditorPane', () => {
 
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith('Exercise saved.', {
-        description: 'Students see this change now.',
-      }),
-    );
-  });
-
-  it('confirms a save on unreleased material as pending a publish', async () => {
-    renderPane(false);
-
-    fireEvent.change(screen.getByDisplayValue('Hva heter du?'), {
-      target: { value: 'Hvor bor du?' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-
-    await waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith('Exercise saved.', {
-        description: 'Saved to the draft — publish the module to release it.',
+        description: 'Saved. Students keep seeing the published version until you publish.',
       }),
     );
   });
