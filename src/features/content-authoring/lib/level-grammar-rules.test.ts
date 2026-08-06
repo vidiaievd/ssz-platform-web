@@ -24,6 +24,7 @@ function item(
     lessonKind: itemType === 'lesson' ? 'text' : null,
     state: 'published',
     isLive: true,
+    pendingChange: null,
     durationMinutes: null,
     xpReward: null,
   };

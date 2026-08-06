@@ -15,6 +15,7 @@ function item(overrides: Partial<CurriculumTreeItemNode>): CurriculumTreeItemNod
     lessonKind: null,
     state: null,
     isLive: null,
+    pendingChange: null,
     durationMinutes: null,
     xpReward: null,
     ...overrides,

@@ -593,6 +593,7 @@
     "duration": "Duration",
     "xpReward": "XP reward",
     "state": "State",
+    "pendingChange": "Pending change",
     "loadError": "Could not load the curriculum tree.",
     "retry": "Try again",
     "empty": "This course has no levels yet.",
@@ -868,6 +869,10 @@
     "ariaLabel": "Status: {label}",
     "itemAwaiting": "Awaiting publish",
     "itemAwaitingAriaLabel": "Not published yet — publish the module to release it",
+    "itemMoved": "Moved",
+    "itemMovedAriaLabel": "Placed elsewhere than in the published version — publish the module to release the move",
+    "itemFlagsChanged": "Requirement changed",
+    "itemFlagsChangedAriaLabel": "Required or optional differently than in the published version",
     "itemLive": "Students see this",
     "pendingModules": "{count, plural, =0 {Unpublished changes} one {# module not released} other {# modules not released}}",
     "pendingChangesAriaLabel": "Has changes students cannot see yet"

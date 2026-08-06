@@ -93,9 +93,21 @@ export interface CurriculumTreeItemNode {
    * version students cannot see.
    */
   isLive: boolean | null;
+  /**
+   * How publishing would change this placement: the draft added it, moved it to
+   * another section or another order, or flipped whether it is required. `null`
+   * when the placement is identical to the live one, when nothing is pending, or
+   * when the owning container has never been published.
+   *
+   * Composition only, like `publishState` — an edit to the exercise or lesson
+   * behind this row is already live and deliberately does not show up here.
+   */
+  pendingChange: ItemPendingChange | null;
   durationMinutes: number | null;
   xpReward: number | null;
 }
+
+export type ItemPendingChange = 'added' | 'moved' | 'flags_changed';
 
 export interface CurriculumTreeSectionNode {
   id: string;

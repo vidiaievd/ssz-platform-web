@@ -24,7 +24,7 @@ import { getMaterialKind } from '../lib/material-kind';
 import { createModuleAction } from '../actions/container';
 import { createSectionAction } from '../actions/section';
 import { PublishStateBadge } from './publish-state-badge';
-import { ItemLiveBadge } from './item-live-badge';
+import { ItemChangeBadge } from './item-change-badge';
 import {
   CurriculumSectionItems,
   MoveLevel,
@@ -171,7 +171,7 @@ function ItemRow({
       }
       label={item.title ?? ''}
       meta={item.durationMinutes ? `${item.durationMinutes} min` : null}
-      badge={<ItemLiveBadge isLive={item.isLive} />}
+      badge={<ItemChangeBadge item={item} />}
       selected={selectedId === item.id}
       onSelect={() => onSelect({ kind: 'item', item, sectionTitle })}
       right={right}
@@ -205,7 +205,7 @@ function OwnItemRow({
       }
       label={item.title ?? ''}
       meta={item.durationMinutes ? `${item.durationMinutes} min` : null}
-      badge={<ItemLiveBadge isLive={item.isLive} />}
+      badge={<ItemChangeBadge item={item} />}
       selected={selectedId === item.id}
       onSelect={() => onSelect({ kind: 'item', item, sectionTitle })}
     />
