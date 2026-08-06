@@ -1131,6 +1131,8 @@
     },
     "shell": {
       "done": "Ferdig",
+      "navBack": "Tilbake",
+      "navNext": "Neste: {step}",
       "stepsLabel": "Steg i oppgavebyggeren",
       "step1": "Setninger og luker",
       "step2": "Ordbank",

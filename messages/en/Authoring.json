@@ -1131,6 +1131,8 @@
     },
     "shell": {
       "done": "Done",
+      "navBack": "Back",
+      "navNext": "Next: {step}",
       "stepsLabel": "Builder steps",
       "step1": "Sentences & gaps",
       "step2": "Word bank",

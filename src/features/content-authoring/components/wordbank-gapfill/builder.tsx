@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { AlertTriangle, Check, CircleAlert, RefreshCw } from 'lucide-react';
+import {
+  AlertTriangle,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  CircleAlert,
+  RefreshCw,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
@@ -164,6 +171,8 @@ export function GapFillBuilder({
 
           {step === 3 && <StepFeedback exercise={exercise} onChange={setExercise} />}
         </div>
+
+        <StepNav current={step} onSelect={setStep} onDone={() => setGateOpen(true)} />
       </div>
 
       <GateDialog
@@ -230,6 +239,51 @@ function StepRail({ current, problems, onSelect }: StepRailProps) {
           </button>
         );
       })}
+    </div>
+  );
+}
+
+interface StepNavProps {
+  current: IssueStep;
+  onSelect: (step: IssueStep) => void;
+  onDone: () => void;
+}
+
+/**
+ * The way forward at the bottom of a step. The rail above stays the map — this is the
+ * default path through it, so a teacher who has just finished the last sentence does not
+ * have to travel back up to the header to carry on. Nothing here validates: steps are
+ * reachable in any order, and the gate is the only place that reports problems.
+ */
+function StepNav({ current, onSelect, onDone }: StepNavProps) {
+  const t = useTranslations('Authoring');
+  const previous = (current - 1) as IssueStep;
+  const next = (current + 1) as IssueStep;
+
+  return (
+    <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4">
+      <Button
+        type="button"
+        variant="ghost"
+        disabled={current === 1}
+        onClick={() => onSelect(previous)}
+      >
+        <ChevronLeft className="size-4" aria-hidden />
+        {t('gapFill.shell.navBack')}
+      </Button>
+
+      {current === 3 ? (
+        <Button type="button" onClick={onDone}>
+          {t('gapFill.shell.done')}
+        </Button>
+      ) : (
+        <Button type="button" onClick={() => onSelect(next)}>
+          {t('gapFill.shell.navNext', {
+            step: t(`gapFill.shell.step${next}` as 'gapFill.shell.step1'),
+          })}
+          <ChevronRight className="size-4" aria-hidden />
+        </Button>
+      )}
     </div>
   );
 }

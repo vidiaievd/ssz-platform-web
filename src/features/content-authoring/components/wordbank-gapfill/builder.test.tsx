@@ -164,6 +164,23 @@ describe('GapFillBuilder', () => {
     expect(screen.getByLabelText('Default explanation')).toBeInTheDocument();
   });
 
+  it('walks forward and back through the steps from the footer', async () => {
+    const { user } = renderBuilder();
+
+    expect(screen.getByRole('button', { name: /^Back/ })).toBeDisabled();
+
+    await user.click(screen.getByRole('button', { name: /Next: Word bank/ }));
+    expect(screen.getByRole('tab', { name: /Word bank/ })).toHaveAttribute('aria-selected', 'true');
+
+    await user.click(screen.getByRole('button', { name: /Next: Feedback/ }));
+    expect(screen.getByLabelText('Default explanation')).toBeInTheDocument();
+    // The last step ends in the gate, not in another step.
+    expect(screen.queryByRole('button', { name: /^Next:/ })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /^Back/ }));
+    expect(screen.getByRole('tab', { name: /Word bank/ })).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('says so when nothing is in the way', async () => {
     // Typed input: no bank to be thin, and no pair matrix to be half-written, so this
     // is the shortest document with genuinely nothing outstanding.
