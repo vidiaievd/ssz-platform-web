@@ -16,6 +16,8 @@ import {
 } from '@/lib/shared-kernel/wordbank-gapfill';
 
 import { setPairText } from './edits';
+import { acceptDraft, draftFor, rejectDraft } from './ai-draft';
+import { DraftAction, DraftPanel } from './draft-panel';
 import { SentenceWithAnswer } from './sentence-preview';
 
 const READING = 'var(--ssz-font-reading)';
@@ -274,6 +276,16 @@ function CellEditor({
 
       <SentenceWithAnswer gap={cell.gap} />
 
+      <DraftPanel
+        draft={draftFor(exercise, cell.gap.key, cell.word)}
+        disabled={disabled}
+        onAccept={() => onChange(acceptDraft(exercise, cell.gap.key, cell.word))}
+        // Rewriting is accepting and then editing: the text lands in the field, and
+        // what the teacher leaves there is theirs.
+        onRewrite={() => onChange(acceptDraft(exercise, cell.gap.key, cell.word))}
+        onReject={() => onChange(rejectDraft(exercise, cell.gap.key, cell.word))}
+      />
+
       <Textarea
         ref={field}
         rows={3}
@@ -295,7 +307,11 @@ function CellEditor({
         }}
       />
 
-      <p className="text-xs text-muted-foreground">{t('gapFill.matrix.shortcutHint')}</p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">{t('gapFill.matrix.shortcutHint')}</p>
+        {/* Where generation attaches for a single pair (plan 35 step 7.2). */}
+        <DraftAction disabled={disabled} onDraft={() => undefined} />
+      </div>
     </div>
   );
 }

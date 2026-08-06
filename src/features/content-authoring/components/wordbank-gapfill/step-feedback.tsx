@@ -18,6 +18,7 @@ import {
 } from '@/lib/shared-kernel/wordbank-gapfill';
 
 import { gapCoverage, setFallback, setPairText, setWhy } from './edits';
+import { DraftAction } from './draft-panel';
 import { FeedbackMatrix } from './feedback-matrix';
 import { SentenceWithAnswer } from './sentence-preview';
 
@@ -169,9 +170,13 @@ function GapCard({ exercise, gap, onlyMissing, disabled, onChange }: GapCardProp
 
       <div className="flex flex-col gap-3 p-3">
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium" htmlFor={`fallback-${gap.key}`}>
-            {t('gapFill.step3.fallbackLabel')}
-          </label>
+          <div className="flex items-center justify-between gap-2">
+            <label className="text-xs font-medium" htmlFor={`fallback-${gap.key}`}>
+              {t('gapFill.step3.fallbackLabel')}
+            </label>
+            {/* Where generation attaches for a gap's default (plan 35 step 7.2). */}
+            <DraftAction disabled={disabled} onDraft={() => undefined} />
+          </div>
           <Textarea
             id={`fallback-${gap.key}`}
             rows={2}

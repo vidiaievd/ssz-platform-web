@@ -1170,6 +1170,13 @@
     "preview": {
       "empty": "Add a sentence and mark a gap — the student's view appears here.",
       "noCheck": "Placement works here. Checking happens for students, on the server."
+    },
+    "draft": {
+      "label": "Suggested draft — not shown to students yet",
+      "accept": "Use this",
+      "rewrite": "Edit it",
+      "reject": "Discard",
+      "action": "Draft with AI"
     }
   }
 }

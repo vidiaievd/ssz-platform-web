@@ -1170,6 +1170,13 @@
     "preview": {
       "empty": "Legg til en setning og merk en luke — elevens visning dukker opp her.",
       "noCheck": "Du kan plassere ord her. Sjekken skjer for elevene, på serveren."
+    },
+    "draft": {
+      "label": "Foreslått utkast — vises ikke til elevene ennå",
+      "accept": "Bruk dette",
+      "rewrite": "Rediger",
+      "reject": "Forkast",
+      "action": "Lag utkast med KI"
     }
   }
 }
