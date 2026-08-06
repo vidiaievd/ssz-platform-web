@@ -9,6 +9,8 @@ import type {
   StudentProjection,
 } from '@/lib/shared-kernel/wordbank-gapfill';
 
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
@@ -42,6 +44,20 @@ export interface WordBankGapFillBodyProps {
   accent: string;
   /** Per-gap outcomes, present once the exercise has been checked at least once. */
   results?: Record<GapKey, GapVerdict>;
+  /**
+   * Whether the verdicts are being read or worked from. They outlive the feedback that
+   * explained them: a correct gap keeps its verdict for as long as it keeps its lock,
+   * which is the rest of the exercise, while its explanation is spent as soon as the
+   * learner has gone back to filling gaps. False leaves the locks and the colours and
+   * takes the blocks away.
+   */
+  showFeedback?: boolean;
+  /**
+   * Set while the runner is pointing out that gaps are still empty — the learner
+   * pressed the primary action too early. Which gaps those are is only known here;
+   * the runner owns how long the pointing lasts, because it owns the press.
+   */
+  pointOut?: boolean;
   /**
    * The answers, and only after the learner asks for them. A separate action rather
    * than a consequence of being wrong: attempts are unlimited, and a right answer
@@ -88,6 +104,8 @@ export function WordBankGapFillBody({
   accent,
   results,
   revealed,
+  showFeedback = true,
+  pointOut = false,
 }: WordBankGapFillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const isAnswering = phase === 'answering';
@@ -135,6 +153,39 @@ export function WordBankGapFillBody({
 
   /** Where a word tap goes: the armed gap, or the first empty one (BEHAVIOR §2.1). */
   const targetKey = armedKey ?? firstEmptyKey();
+
+  const emptyKeys = gaps
+    .filter((gap) => (value[gap.gapKey] ?? '') === '' && !isLocked(gap.gapKey))
+    .map((gap) => gap.gapKey);
+  const firstEmpty = emptyKeys[0] ?? null;
+
+  /**
+   * The first gap still empty takes focus when the runner asks for the empty ones to
+   * be pointed out. The answer to "which ones?" is then where the cursor already is,
+   * rather than something to hunt for across four sentences. No arming needed: an
+   * unarmed word tap goes to the first empty gap anyway.
+   */
+  useEffect(() => {
+    if (pointOut && firstEmpty !== null) gapRefs.current.get(firstEmpty)?.focus();
+    // Only when the pointing starts — moving focus again as gaps get filled would
+    // take the cursor away from the learner mid-answer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pointOut]);
+
+  /**
+   * The note on why an answer is the answer, once the answers are out.
+   *
+   * On request rather than on screen: printed under every gap it is a wall of text
+   * repeating words the learner can already read in the sentence. Two ways in, because
+   * hover is not available to everyone — pointing at the marker opens it, and clicking
+   * or pressing it pins it open, which is the only route on a touch screen or from the
+   * keyboard. A pin survives the pointer leaving; the hover does not.
+   */
+  const [pinnedNote, setPinnedNote] = useState<GapKey | null>(null);
+  const [hoveredNote, setHoveredNote] = useState<GapKey | null>(null);
+  const openNote = pinnedNote ?? hoveredNote;
+  const noteOf = (key: GapKey): string | null =>
+    isRevealed ? (results?.[key]?.explanation ?? null) : null;
 
   /** Keeps the flow going after a placement: arm the next gap still empty. */
   function nextEmptyAfter(key: GapKey): GapKey | null {
@@ -194,6 +245,9 @@ export function WordBankGapFillBody({
     setArmedKey((current) => (current === key ? null : key));
   }
 
+  /** An empty gap, for as long as the nudge is being shown. */
+  const isPointedOut = (key: GapKey): boolean => pointOut && emptyKeys.includes(key);
+
   /**
    * Green when right, red when wrong, accent while the gap is armed, plain otherwise.
    * Never colour alone: the verdict is also in the gap's accessible name and spelled
@@ -204,7 +258,7 @@ export function WordBankGapFillBody({
     if (isRevealed) return { line: OK_LINE, fg: OK_FG };
     if (verdict === undefined) {
       return {
-        line: armedKey === key ? accent : 'var(--ssz-border-default)',
+        line: isPointedOut(key) || armedKey === key ? accent : 'var(--ssz-border-default)',
         fg: 'var(--ssz-text-primary)',
       };
     }
@@ -231,9 +285,11 @@ export function WordBankGapFillBody({
    * told about (BEHAVIOR §2.2).
    */
   const firstFeedbackRef = useRef<HTMLDivElement | null>(null);
-  const hasResults = results !== undefined;
+  const hasResults = results !== undefined && showFeedback;
   useEffect(() => {
     if (hasResults) firstFeedbackRef.current?.focus();
+    // Nothing is focused when the blocks go away — the retry put focus on a gap.
+    else firstFeedbackRef.current = null;
   }, [hasResults, revealed]);
 
   const remaining = projection.bank === null ? 0 : projection.bank.length - spent.size;
@@ -271,13 +327,16 @@ export function WordBankGapFillBody({
                   onDragStart={(e) => e.dataTransfer.setData('text/plain', word)}
                   onClick={() => pickWord(word)}
                   aria-pressed={inTarget}
-                  className="rounded-lg px-3 py-1 text-[14px] transition-opacity focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
+                  // A chip is the thing you are meant to pick up, so it is styled like
+                  // one: raised off the bank's own surface, edged, and in body text.
+                  // Muted fill on muted text read as "already used" at a glance.
+                  className="rounded-lg px-3 py-1 text-[14px] shadow-(--ssz-shadow-xs) transition hover:-translate-y-px hover:shadow-(--ssz-shadow-sm) active:translate-y-0 disabled:hover:translate-y-0 disabled:hover:shadow-(--ssz-shadow-xs) focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
                   style={{
                     fontFamily: READING,
                     minHeight: CHIP_MIN_HEIGHT,
-                    border: `1.5px solid ${inTarget ? accent : 'transparent'}`,
-                    background: inTarget ? modeAccentSoft(mode) : 'var(--ssz-bg-muted)',
-                    color: inTarget ? accent : 'var(--ssz-text-secondary)',
+                    border: `1.5px solid ${inTarget ? accent : 'var(--ssz-border-strong)'}`,
+                    background: inTarget ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)',
+                    color: inTarget ? accent : 'var(--ssz-text-primary)',
                     // Struck through as well as dimmed: colour alone would carry
                     // the whole message, which AC-X7 forbids.
                     opacity: isSpent ? 0.35 : 1,
@@ -306,7 +365,10 @@ export function WordBankGapFillBody({
                 ) : (
                   <span key={i}>
                     {token.before}
-                    {isTyped ? (
+                    {/* A typed gap is a field until the answers are out; after that
+                        there is nothing to type and it is the same word as anywhere
+                        else, note and all. */}
+                    {isTyped && !isRevealed ? (
                       <input
                         type="text"
                         value={revealed?.[token.gapKey] ?? value[token.gapKey] ?? ''}
@@ -319,52 +381,118 @@ export function WordBankGapFillBody({
                         autoCorrect="off"
                         autoCapitalize="off"
                         spellCheck={false}
-                        className="mx-0.5 rounded-md px-2 align-baseline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
+                        className={`mx-0.5 rounded-md px-2 align-baseline transition-colors focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus) ${
+                          isPointedOut(token.gapKey) ? 'motion-safe:animate-pulse' : ''
+                        }`}
                         style={{
                           fontFamily: READING,
                           fontSize: 'inherit',
                           width: `${TYPED_GAP_WIDTH}ch`,
                           borderBottom: `2px solid ${gapTone(token.gapKey).line}`,
-                          background: 'transparent',
+                          background: isPointedOut(token.gapKey)
+                            ? modeAccentSoft(mode)
+                            : 'transparent',
                           color: gapTone(token.gapKey).fg,
                         }}
                       />
                     ) : (
-                      <button
-                        type="button"
-                        ref={(el) => {
-                          gapRefs.current.set(token.gapKey, el);
-                        }}
-                        disabled={!isAnswering || isLocked(token.gapKey)}
-                        onClick={() => tapGap(token.gapKey)}
-                        onDragOver={(e) => {
-                          if (isAnswering) e.preventDefault();
-                        }}
-                        onDrop={(e) => {
-                          if (!isAnswering || isLocked(token.gapKey)) return;
-                          e.preventDefault();
-                          const word = e.dataTransfer.getData('text/plain');
-                          if (word) {
-                            place(token.gapKey, word);
-                            setArmedKey(null);
-                          }
-                        }}
-                        aria-label={gapLabel(token.gapKey, token.label)}
-                        className="mx-0.5 rounded-md px-2 align-baseline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus)"
-                        style={{
-                          fontFamily: READING,
-                          minWidth: 72,
-                          borderBottom: `2px solid ${gapTone(token.gapKey).line}`,
-                          background:
-                            armedKey === token.gapKey && results?.[token.gapKey] === undefined
-                              ? modeAccentSoft(mode)
-                              : 'transparent',
-                          color: gapTone(token.gapKey).fg,
-                          cursor: isAnswering && !isLocked(token.gapKey) ? 'pointer' : 'default',
-                        }}
+                      <Popover
+                        open={openNote === token.gapKey}
+                        onOpenChange={(next) => setPinnedNote(next ? token.gapKey : null)}
                       >
-                        {revealed?.[token.gapKey] ?? value[token.gapKey] ?? ' '}
-                      </button>
+                        <PopoverTrigger asChild>
+                          <button
+                            type="button"
+                            ref={(el) => {
+                              gapRefs.current.set(token.gapKey, el);
+                            }}
+                            onMouseEnter={() => setHoveredNote(token.gapKey)}
+                            onMouseLeave={() =>
+                              setHoveredNote((current) =>
+                                current === token.gapKey ? null : current,
+                              )
+                            }
+                            // There is deliberately no focus handler beside these two.
+                            // Closing the note returns focus to this button, and
+                            // reopening on that focus would make it undismissable; from
+                            // the keyboard it opens on Enter and closes on Esc instead.
+
+                            // After a reveal this button's job changes: it no longer
+                            // takes words, it offers the note. A disabled control cannot
+                            // be hovered or tapped, so it may not stay disabled.
+                            disabled={
+                              isRevealed
+                                ? noteOf(token.gapKey) === null
+                                : !isAnswering || isLocked(token.gapKey)
+                            }
+                            onClick={() => tapGap(token.gapKey)}
+                            onDragOver={(e) => {
+                              if (isAnswering) e.preventDefault();
+                            }}
+                            onDrop={(e) => {
+                              if (!isAnswering || isLocked(token.gapKey)) return;
+                              e.preventDefault();
+                              const word = e.dataTransfer.getData('text/plain');
+                              if (word) {
+                                place(token.gapKey, word);
+                                setArmedKey(null);
+                              }
+                            }}
+                            aria-label={gapLabel(token.gapKey, token.label)}
+                            className={`mx-0.5 rounded-md px-2 align-baseline transition-colors focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-(--ssz-border-focus) ${
+                              isPointedOut(token.gapKey) ? 'motion-safe:animate-pulse' : ''
+                            }`}
+                            style={{
+                              fontFamily: READING,
+                              minWidth: 72,
+                              // Dotted where there is a note to read: the underline is
+                              // already under every answer, and its texture is what says
+                              // this one has more behind it.
+                              borderBottom: `2px ${
+                                noteOf(token.gapKey) === null ? 'solid' : 'dotted'
+                              } ${gapTone(token.gapKey).line}`,
+                              background:
+                                isPointedOut(token.gapKey) ||
+                                openNote === token.gapKey ||
+                                (armedKey === token.gapKey && results?.[token.gapKey] === undefined)
+                                  ? modeAccentSoft(mode)
+                                  : 'transparent',
+                              color: gapTone(token.gapKey).fg,
+                              cursor:
+                                noteOf(token.gapKey) !== null ||
+                                (isAnswering && !isLocked(token.gapKey))
+                                  ? 'pointer'
+                                  : 'default',
+                            }}
+                          >
+                            {revealed?.[token.gapKey] ?? value[token.gapKey] ?? ' '}
+                          </button>
+                        </PopoverTrigger>
+                        {noteOf(token.gapKey) !== null && (
+                          <PopoverContent
+                            side="top"
+                            // Hover opens it, so it must not take the focus with it —
+                            // the learner is pointing, not navigating.
+                            onOpenAutoFocus={(e) => e.preventDefault()}
+                            // Reading a note means moving the pointer onto it, which
+                            // would otherwise be a mouseleave and close the thing.
+                            onMouseEnter={() => setHoveredNote(token.gapKey)}
+                            onMouseLeave={() =>
+                              setHoveredNote((current) =>
+                                current === token.gapKey ? null : current,
+                              )
+                            }
+                            className="gap-1 text-[13.5px]"
+                          >
+                            <span className="font-semibold" style={{ color: OK_FG }}>
+                              {token.label} — {revealed?.[token.gapKey]}
+                            </span>
+                            <span style={{ color: 'var(--ssz-text-secondary)' }}>
+                              {noteOf(token.gapKey)}
+                            </span>
+                          </PopoverContent>
+                        )}
+                      </Popover>
                     )}
                     {token.after}{' '}
                   </span>
@@ -372,8 +500,9 @@ export function WordBankGapFillBody({
               )}
             </p>
 
-            {/* The hint is help before the fact; once there is a verdict it is noise. */}
-            {sentence.hint && !hasResults && (
+            {/* The hint is help before the fact; once there is a verdict — or the
+                answer itself — it is noise. */}
+            {sentence.hint && !hasResults && !isRevealed && (
               <p className="mt-1 text-[12.5px] text-(--ssz-text-muted)">{sentence.hint}</p>
             )}
 
@@ -386,7 +515,6 @@ export function WordBankGapFillBody({
                   const tone = verdict.correct
                     ? { line: OK_LINE, fg: OK_FG }
                     : { line: NO_LINE, fg: NO_FG };
-                  const answer = revealed?.[token.gapKey];
 
                   return (
                     <div
@@ -402,10 +530,7 @@ export function WordBankGapFillBody({
                       style={{ borderColor: tone.line, background: 'var(--ssz-bg-muted)' }}
                     >
                       <span className="font-semibold" style={{ color: tone.fg }}>
-                        {token.label}
-                        {answer === undefined
-                          ? ` — ${verdict.correct ? t('gapFill.right') : t('gapFill.wrong')}`
-                          : ` — ${answer}`}
+                        {token.label} — {verdict.correct ? t('gapFill.right') : t('gapFill.wrong')}
                       </span>
                       {verdict.explanation && (
                         <span style={{ color: 'var(--ssz-text-secondary)' }}>
@@ -420,8 +545,22 @@ export function WordBankGapFillBody({
         ))}
       </div>
 
-      <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)" aria-live="polite">
-        {armedKey === null ? t('wordBank.helperIdle') : t('wordBank.helperArmed')}
+      {/* The marking is a colour and a pulse, so it is said in words too (AC-X7) —
+          and this line is already live, which is how a screen-reader user hears it. */}
+      <p
+        className="mt-4 text-[12.5px]"
+        aria-live="polite"
+        style={{ color: pointOut ? accent : 'var(--ssz-text-muted)' }}
+      >
+        {isRevealed
+          ? // With the blocks gone, this live line is the only thing that says a
+            // reveal happened at all to someone who cannot see the sentences change.
+            t('wordBank.helperRevealed')
+          : pointOut
+            ? t('wordBank.helperUnfilled', { count: emptyKeys.length })
+            : armedKey === null
+              ? t('wordBank.helperIdle')
+              : t('wordBank.helperArmed')}
       </p>
     </div>
   );

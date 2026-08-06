@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { useState } from 'react';
@@ -245,10 +245,12 @@ function FeedbackHarness({
   results,
   revealed,
   value = { 's1#3': 'bestilt', 's2#3': 'regningen' },
+  showFeedback = true,
 }: {
   results?: Record<string, GapVerdict>;
   revealed?: Record<string, string>;
   value?: GapFillValue;
+  showFeedback?: boolean;
 }) {
   const [current, setCurrent] = useState<GapFillValue>(value);
   return (
@@ -263,6 +265,7 @@ function FeedbackHarness({
         accent="var(--ssz-runner-practice)"
         results={results}
         revealed={revealed}
+        showFeedback={showFeedback}
       />
     </NextIntlClientProvider>
   );
@@ -349,15 +352,49 @@ describe('WordBankGapFillBody — after a reveal', () => {
     expect(screen.queryByRole('group', { name: 'Word bank' })).not.toBeInTheDocument();
   });
 
-  it('ends the attempt: nothing is editable any more', () => {
-    render(<FeedbackHarness results={CHECKED} revealed={revealed} />);
-    expect(gap('G1')).toBeDisabled();
+  // After a reveal the verdicts carry the answer's own note, and a gap the teacher
+  // wrote nothing for carries null.
+  const NOTES = {
+    's1#3': { correct: false, explanation: 'Infinitive after «vil gjerne».' },
+    's2#3': { correct: true, explanation: null },
+  };
+
+  it('ends the attempt: no gap takes a word any more', async () => {
+    const user = userEvent.setup();
+    render(<FeedbackHarness results={NOTES} revealed={revealed} showFeedback={false} />);
+
+    // The gap with nothing to read stays inert; the one with a note becomes its
+    // trigger — and pressing that must still not put a word anywhere.
     expect(gap('G2')).toBeDisabled();
+    await user.click(gap('G1'));
+    expect(gap('G1')).toHaveAccessibleName('G1: the answer is bestille');
   });
 
-  it('reads "answer — why" in the feedback block', () => {
-    render(<FeedbackHarness results={CHECKED} revealed={revealed} />);
-    expect(screen.getByText(/G1 — bestille/)).toBeInTheDocument();
+  it('offers the note on the answer itself, on hover as well as on press', async () => {
+    const user = userEvent.setup();
+    render(<FeedbackHarness results={NOTES} revealed={revealed} showFeedback={false} />);
+
+    expect(screen.queryByText(/Infinitive after/)).not.toBeInTheDocument();
+
+    await user.hover(gap('G1'));
+    expect(await screen.findByText(/Infinitive after/)).toBeInTheDocument();
+
+    await user.unhover(gap('G1'));
+    await waitFor(() => expect(screen.queryByText(/Infinitive after/)).not.toBeInTheDocument());
+
+    // A tap has to work too — a touch screen never hovers.
+    await user.click(gap('G1'));
+    expect(await screen.findByText(/Infinitive after/)).toBeInTheDocument();
+  });
+
+  it('says a reveal happened on the live line, since nothing else announces it', () => {
+    render(<FeedbackHarness results={CHECKED} revealed={revealed} showFeedback={false} />);
+    expect(screen.getByText(/The answers are filled in above/)).toBeInTheDocument();
+  });
+
+  it('drops the hint: the answer is on screen, so help before the fact is noise', () => {
+    render(<FeedbackHarness results={CHECKED} revealed={revealed} showFeedback={false} />);
+    expect(screen.queryByText('Du skal betale nå.')).not.toBeInTheDocument();
   });
 
   // The accessible name and the visible text are two renderings of the same fact and
@@ -476,7 +513,9 @@ describe('WordBankGapFillBody — typed instead of chosen', () => {
         revealed={{ 's1#3': 'bestille', 's2#3': 'regningen' }}
       />,
     );
-    expect(field('G1')).toHaveValue('bestille');
-    expect(field('G1')).toBeDisabled();
+    // The field is gone once there is nothing left to type: the answer reads as a
+    // word in the sentence, the same as in a chosen-word exercise.
+    expect(screen.queryByRole('textbox', { name: /^G1:/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^G1:/ })).toHaveTextContent('bestille');
   });
 });
