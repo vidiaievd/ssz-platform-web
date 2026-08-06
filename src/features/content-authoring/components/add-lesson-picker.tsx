@@ -20,14 +20,16 @@ import {
 } from '@/lib/content/lesson-types';
 import type { Result } from '@/lib/result';
 import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content/types';
+import { TEMPLATE_CODE } from '@/lib/shared-kernel/wordbank-gapfill';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
 import { createGrammarRuleAction } from '../actions/grammar';
 import { createExerciseAction } from '../actions/exercise';
+import { createGapFillAction } from '../actions/gap-fill';
 import { assignItemSectionAction } from '../actions/container-item';
 import { minimalExerciseValues } from '../lib/exercise-content';
-import { EXERCISE_TYPES, type ExerciseType } from '../schemas/exercise';
+import { CREATABLE_EXERCISE_TYPES, type CreatableExerciseType } from '../schemas/exercise';
 
 interface AddLessonPickerProps {
   open: boolean;
@@ -75,7 +77,7 @@ export function AddLessonPicker({
   /* An exercise can't be created from a title alone: its shape depends on the
      template, and the template is immutable once the backend has bound it. So
      picking "exercise" opens a second step rather than creating anything. */
-  const [pendingTemplate, setPendingTemplate] = useState<ExerciseType | null>(null);
+  const [pendingTemplate, setPendingTemplate] = useState<CreatableExerciseType | null>(null);
   const [choosingTemplate, setChoosingTemplate] = useState(false);
 
   function reset() {
@@ -142,22 +144,35 @@ export function AddLessonPicker({
   }
 
   /** Second step: create the exercise on the template the author picked. */
-  function handlePickTemplate(templateCode: ExerciseType) {
+  function handlePickTemplate(templateCode: CreatableExerciseType) {
     if (isPending) return;
     setPendingTemplate(templateCode);
     const prompt = t('addLesson.defaultTitle', {
       type: tContent(`materialType.exercise` as 'materialType.text'),
     });
+    const instructions = t('addLesson.defaultInstructions');
 
     startTransition(async () => {
-      const result = await createExerciseAction(
-        moduleContainerId,
-        targetLanguage,
-        difficultyLevel,
-        visibility,
-        minimalExerciseValues(templateCode, prompt, t('addLesson.defaultInstructions')),
-        ownerSchoolId,
-      );
+      // Gap-fill is not a shape of the generic exercise form — it has its own builder
+      // and its own document — so it is created from its own scaffold.
+      const result =
+        templateCode === TEMPLATE_CODE
+          ? await createGapFillAction(
+              moduleContainerId,
+              targetLanguage,
+              difficultyLevel,
+              visibility,
+              instructions,
+              ownerSchoolId,
+            )
+          : await createExerciseAction(
+              moduleContainerId,
+              targetLanguage,
+              difficultyLevel,
+              visibility,
+              minimalExerciseValues(templateCode, prompt, instructions),
+              ownerSchoolId,
+            );
 
       setPendingTemplate(null);
       await finish(result);
@@ -202,7 +217,7 @@ export function AddLessonPicker({
           </DialogHeader>
 
           <div className="grid max-h-[60vh] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
-            {EXERCISE_TYPES.map((code) => (
+            {CREATABLE_EXERCISE_TYPES.map((code) => (
               <button
                 key={code}
                 type="button"

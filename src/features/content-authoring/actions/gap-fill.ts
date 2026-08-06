@@ -4,8 +4,17 @@ import { revalidatePath } from 'next/cache';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
-import { err, ok, type Result } from '@/lib/result';
-import type { PersistedAnswers, PersistedContent } from '@/lib/shared-kernel/wordbank-gapfill';
+import { err, ok, tryAction, type Result } from '@/lib/result';
+import {
+  DEFAULT_SETTINGS,
+  TEMPLATE_CODE,
+  type PersistedAnswers,
+  type PersistedContent,
+} from '@/lib/shared-kernel/wordbank-gapfill';
+import type { DifficultyLevel, Visibility } from '@/features/content/types';
+
+import { resolveExerciseTemplateId } from '../lib/exercise-templates';
+import { addItemToDraft } from '../lib/container-items';
 
 /** Instructions are authored in the explanation language, as elsewhere in authoring. */
 const INSTRUCTION_LANGUAGE = 'en';
@@ -80,4 +89,63 @@ function readCurrentUpdatedAt(details: unknown): string | null {
   if (typeof details !== 'object' || details === null) return null;
   const value = (details as Record<string, unknown>)['currentUpdatedAt'];
   return typeof value === 'string' ? value : null;
+}
+
+/**
+ * The document a brand-new gap-fill starts as.
+ *
+ * Not empty: the picker creates the exercise before the author has written anything,
+ * and the template's `contentSchema` requires at least one sentence. So it starts as one
+ * sentence with one gap already marked — structurally valid, and a working example of
+ * what the author is about to replace. The wording is deliberately untranslated, like
+ * every other template's scaffold: it is course content in the language being taught.
+ */
+function scaffoldContent(): PersistedContent {
+  return {
+    sentences: [{ id: 's1', text: 'Skriv en setning med et ord som skal fylles inn.', gaps: [5] }],
+    distractors: [],
+    settings: { ...DEFAULT_SETTINGS },
+  };
+}
+
+export async function createGapFillAction(
+  containerId: string,
+  targetLanguage: string,
+  difficultyLevel: DifficultyLevel,
+  visibility: Visibility,
+  instructions: string,
+  ownerSchoolId?: string | null,
+) {
+  return tryAction(async () => {
+    const exerciseTemplateId = await resolveExerciseTemplateId(TEMPLATE_CODE);
+
+    const { exerciseId } = await serverFetch<{ exerciseId: string }>({
+      service: 'content',
+      path: '/exercises',
+      method: 'POST',
+      body: {
+        exerciseTemplateId,
+        targetLanguage,
+        difficultyLevel,
+        content: scaffoldContent(),
+        // A gap with no explanation yet: `FB_NO_FALLBACK` is exactly the blocker step 3
+        // exists to clear, and starting green would hide the work still to do.
+        expectedAnswers: { feedback: {} } satisfies PersistedAnswers,
+        visibility,
+        ...(ownerSchoolId && { ownerSchoolId }),
+      },
+    });
+
+    const item = await addItemToDraft(containerId, 'exercise', exerciseId);
+    // Required: an exercise without an instruction row cannot be published.
+    await serverFetch({
+      service: 'content',
+      path: `/exercises/${exerciseId}/instructions`,
+      method: 'POST',
+      body: { instructionLanguage: INSTRUCTION_LANGUAGE, instructionText: instructions },
+    });
+
+    revalidatePath(`/school/content/${containerId}`);
+    return { exerciseId, itemId: item.id };
+  });
 }

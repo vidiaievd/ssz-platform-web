@@ -8,6 +8,7 @@ vi.mock('../actions/lesson', () => ({ createLessonAction: vi.fn() }));
 vi.mock('../actions/vocabulary', () => ({ createVocabularyListAction: vi.fn() }));
 vi.mock('../actions/grammar', () => ({ createGrammarRuleAction: vi.fn() }));
 vi.mock('../actions/exercise', () => ({ createExerciseAction: vi.fn() }));
+vi.mock('../actions/gap-fill', () => ({ createGapFillAction: vi.fn() }));
 vi.mock('../actions/container-item', () => ({ assignItemSectionAction: vi.fn() }));
 
 const { AddLessonPicker } = await import('./add-lesson-picker');
@@ -15,6 +16,7 @@ const { createLessonAction } = await import('../actions/lesson');
 const { createVocabularyListAction } = await import('../actions/vocabulary');
 const { createGrammarRuleAction } = await import('../actions/grammar');
 const { createExerciseAction } = await import('../actions/exercise');
+const { createGapFillAction } = await import('../actions/gap-fill');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -41,6 +43,7 @@ beforeEach(() => {
   vi.mocked(createVocabularyListAction).mockReset();
   vi.mocked(createGrammarRuleAction).mockReset();
   vi.mocked(createExerciseAction).mockReset();
+  vi.mocked(createGapFillAction).mockReset();
   vi.mocked(assignItemSectionAction).mockReset();
   vi.mocked(assignItemSectionAction).mockResolvedValue({ ok: true, value: undefined } as never);
 });
@@ -125,7 +128,31 @@ describe('AddLessonPicker', () => {
     // The template is immutable once created, so it has to be picked up front.
     expect(createExerciseAction).not.toHaveBeenCalled();
     expect(screen.getByText('Multiple choice group')).toBeInTheDocument();
-    expect(screen.getByText('Word bank gap-fill')).toBeInTheDocument();
+    expect(screen.getByText('Gap-fill')).toBeInTheDocument();
+  });
+
+  it('no longer offers the two templates gap-fill replaced', () => {
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Practice'));
+
+    // Retired from creation only. Both still open and play: ~135 exercises use them.
+    expect(screen.queryByText('Word bank gap-fill')).not.toBeInTheDocument();
+    expect(screen.queryByText('Fill in the blank')).not.toBeInTheDocument();
+  });
+
+  it('creates a gap-fill from its own scaffold, not from the generic form', async () => {
+    vi.mocked(createGapFillAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-9', itemId: 'item-9' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Practice'));
+    fireEvent.click(screen.getByText('Gap-fill'));
+
+    await waitFor(() => expect(createGapFillAction).toHaveBeenCalled());
+    expect(createExerciseAction).not.toHaveBeenCalled();
   });
 
   it('scaffolds a placeholder exercise on the picked template', async () => {

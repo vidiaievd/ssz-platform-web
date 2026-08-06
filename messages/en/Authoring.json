@@ -188,7 +188,8 @@
       "sentence_schema": "Sentence schema",
       "word_bank_fill": "Word bank gap-fill",
       "text_order": "Put in order",
-      "error_correction": "Find and correct mistakes"
+      "error_correction": "Find and correct mistakes",
+      "word_bank_gap_fill": "Gap-fill"
     },
     "difficultyLevel": "Difficulty",
     "difficultyLevelNone": "Any level",

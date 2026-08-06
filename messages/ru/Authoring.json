@@ -185,7 +185,8 @@
       "sentence_schema": "Схема предложения",
       "word_bank_fill": "Пропуски с банком слов",
       "text_order": "Расставить по порядку",
-      "error_correction": "Найти и исправить ошибки"
+      "error_correction": "Найти и исправить ошибки",
+      "word_bank_gap_fill": "Заполнение пропусков"
     },
     "difficultyLevel": "Сложность",
     "difficultyLevelNone": "Любой уровень",

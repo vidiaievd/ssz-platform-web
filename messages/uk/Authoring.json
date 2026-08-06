@@ -185,7 +185,8 @@
       "sentence_schema": "Схема речення",
       "word_bank_fill": "Пропуски з банком слів",
       "text_order": "Розставити по порядку",
-      "error_correction": "Знайти та виправити помилки"
+      "error_correction": "Знайти та виправити помилки",
+      "word_bank_gap_fill": "Заповнення пропусків"
     },
     "difficultyLevel": "Складність",
     "difficultyLevelNone": "Будь-який рівень",
