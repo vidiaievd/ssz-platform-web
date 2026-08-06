@@ -30,7 +30,7 @@ import {
 import { StepSentences } from './step-sentences';
 import { StepWordBank } from './step-word-bank';
 import { StepFeedback } from './step-feedback';
-import { useGapFillAutosave } from './use-gap-fill-autosave';
+import { useGapFillAutosave, type SavedDocument } from './use-gap-fill-autosave';
 import { useIssueCopy } from './issue-copy';
 
 const STEPS: IssueStep[] = [1, 2, 3];
@@ -49,6 +49,12 @@ export interface GapFillBuilderProps {
    * the document being written. Mirrors how the generic exercise form feeds its preview.
    */
   onDocumentChange?: (exercise: WordBankGapFill, instructions: string) => void;
+  /**
+   * Every successful save, with the token the row now carries. The shell uses it to keep
+   * its cached copy of the exercise current: a cache holding a superseded token is a
+   * conflict the next time this builder mounts from it.
+   */
+  onSavedRemote?: (updatedAt: string, saved: SavedDocument) => void;
 }
 
 /**
@@ -72,6 +78,7 @@ export function GapFillBuilder({
   initialHint,
   suggestions = [],
   onDocumentChange,
+  onSavedRemote,
 }: GapFillBuilderProps) {
   const t = useTranslations('Authoring');
 
@@ -81,18 +88,17 @@ export function GapFillBuilder({
   const [step, setStep] = useState<IssueStep>(1);
   const [gateOpen, setGateOpen] = useState(false);
 
-  const dirty =
-    exercise !== initialExercise || instructions !== initialInstructions || hint !== initialHint;
-
   const autosave = useGapFillAutosave({
     exerciseId,
     containerId,
     exercise,
     instructions,
     hint,
-    dirty,
     // The token moves on with every save; the next write is compared against this one.
-    onSaved: (updatedAt) => setExercise((current) => ({ ...current, updatedAt })),
+    onSaved: (updatedAt, saved) => {
+      setExercise((current) => ({ ...current, updatedAt }));
+      onSavedRemote?.(updatedAt, saved);
+    },
   });
 
   const reportRef = useRef(onDocumentChange);
@@ -114,7 +120,13 @@ export function GapFillBuilder({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <StepRail current={step} problems={problems} onSelect={setStep} />
         <div className="flex items-center gap-3">
-          <SaveHint status={autosave.status} savedAt={autosave.savedAt} onRetry={autosave.retry} />
+          <SaveHint
+            status={autosave.status}
+            savedAt={autosave.savedAt}
+            canOverwrite={autosave.canOverwrite}
+            onRetry={autosave.retry}
+            onOverwrite={autosave.overwrite}
+          />
           <Button type="button" onClick={() => setGateOpen(true)}>
             {t('gapFill.shell.done')}
           </Button>
@@ -291,11 +303,18 @@ function StepNav({ current, onSelect, onDone }: StepNavProps) {
 interface SaveHintProps {
   status: ReturnType<typeof useGapFillAutosave>['status'];
   savedAt: Date | null;
+  canOverwrite: boolean;
   onRetry: () => void;
+  onOverwrite: () => void;
 }
 
-/** `Saving…` → `Saved`, and a way back when it fails. Announced, never colour alone. */
-function SaveHint({ status, savedAt, onRetry }: SaveHintProps) {
+/**
+ * `Saving…` → `Saved`, and a way back when it fails. Announced, never colour alone.
+ *
+ * A conflict gets its own way out. Autosave stops there by design, so without one the
+ * teacher is left with a screen full of work and nothing that will write it.
+ */
+function SaveHint({ status, savedAt, canOverwrite, onRetry, onOverwrite }: SaveHintProps) {
   const t = useTranslations('Authoring');
 
   if (status === 'conflict' || status === 'failed') {
@@ -303,10 +322,17 @@ function SaveHint({ status, savedAt, onRetry }: SaveHintProps) {
       <span className="flex items-center gap-2 text-xs text-error" role="status">
         <CircleAlert className="size-3.5" aria-hidden />
         {status === 'conflict' ? t('gapFill.shell.saveConflict') : t('gapFill.shell.saveFailed')}
-        <Button type="button" variant="link" size="sm" onClick={onRetry}>
-          <RefreshCw className="size-3.5" aria-hidden />
-          {t('gapFill.shell.saveRetry')}
-        </Button>
+        {status === 'conflict' && canOverwrite ? (
+          <Button type="button" variant="link" size="sm" onClick={onOverwrite}>
+            <RefreshCw className="size-3.5" aria-hidden />
+            {t('gapFill.shell.saveOverwrite')}
+          </Button>
+        ) : (
+          <Button type="button" variant="link" size="sm" onClick={onRetry}>
+            <RefreshCw className="size-3.5" aria-hidden />
+            {t('gapFill.shell.saveRetry')}
+          </Button>
+        )}
       </span>
     );
   }

@@ -1150,6 +1150,7 @@
       "saveFailed": "Save failed — your edits are still here.",
       "saveConflict": "Someone else saved this exercise. Your edits are still here.",
       "saveRetry": "Try again",
+      "saveOverwrite": "Save mine anyway",
       "gateTitle": "Before you assign this",
       "gateClear": "Nothing standing in the way — this exercise is ready to assign.",
       "gateGoToStep": "Go to step {step}",

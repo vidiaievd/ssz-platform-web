@@ -13,6 +13,8 @@ import type { Container, ExerciseInstruction, ExerciseWithAnswers } from '@/feat
 import {
   fromPersisted,
   TEMPLATE_CODE,
+  toContent,
+  toExpectedAnswers,
   type WordBankGapFill,
 } from '@/lib/shared-kernel/wordbank-gapfill';
 import type { MaterialKind } from '@/lib/content/lesson-types';
@@ -26,6 +28,7 @@ import { LessonEditorShell } from './lesson-editor-shell';
 import { useSaveScopeDescription } from './save-scope';
 import { ExerciseFields } from './exercise-fields';
 import { GapFillBuilder } from './wordbank-gapfill/builder';
+import type { SavedDocument } from './wordbank-gapfill/use-gap-fill-autosave';
 import { GapFillPreview } from './wordbank-gapfill/gap-fill-preview';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 
@@ -52,6 +55,7 @@ export function ExerciseEditorPane({
   publishSlot,
 }: ExerciseEditorPaneProps) {
   const t = useTranslations('Authoring');
+  const queryClient = useQueryClient();
   const { data: exercise, isLoading } = useAuthoringExercise(exerciseId);
   const initialValues = exercise ? parseExerciseToForm(exercise) : DEFAULT_EXERCISE_VALUES;
   const [previewValues, setPreviewValues] = useState<ExerciseFormValues>(initialValues);
@@ -100,6 +104,15 @@ export function ExerciseEditorPane({
           onDocumentChange={(document, instructions) =>
             setGapFill({ exercise: document, instructions })
           }
+          onSavedRemote={(updatedAt, saved) =>
+            // The cached exercise is what the builder mounts from next time. Left as it
+            // was fetched, that mount opens on a superseded version, and its first save
+            // is refused as somebody else's edit — with no one else in the building.
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedGapFill(cached, updatedAt, saved) : cached),
+            )
+          }
         />
       ) : (
         <ExerciseForm
@@ -138,6 +151,34 @@ function gapFillDocumentFrom(exercise: ExerciseWithAnswers, containerId: string)
     exercise.content,
     exercise.expectedAnswers,
   );
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ */
+function applySavedGapFill(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedDocument,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...toContent(saved.exercise) },
+    expectedAnswers: { ...toExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        {
+          ...instruction,
+          instructionText: saved.instructions.trim(),
+          hintText: saved.hint.trim() || instruction.hintText,
+        },
+        ...rest,
+      ],
+    }),
+  };
 }
 
 interface ExerciseFormProps {

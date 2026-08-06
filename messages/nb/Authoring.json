@@ -1150,6 +1150,7 @@
       "saveFailed": "Lagring feilet — endringene dine er fortsatt her.",
       "saveConflict": "Noen andre lagret denne oppgaven. Endringene dine er fortsatt her.",
       "saveRetry": "Prøv igjen",
+      "saveOverwrite": "Lagre mitt likevel",
       "gateTitle": "Før du tildeler denne",
       "gateClear": "Ingenting i veien — oppgaven er klar til å tildeles.",
       "gateGoToStep": "Gå til steg {step}",

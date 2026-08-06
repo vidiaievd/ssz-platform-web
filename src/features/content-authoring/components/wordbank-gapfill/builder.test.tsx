@@ -138,6 +138,44 @@ describe('GapFillBuilder', () => {
     expect(saveGapFillAction).toHaveBeenCalledTimes(1);
   });
 
+  it('writes nothing until the document is edited, and stops once it is saved', async () => {
+    // The two ways an autosave writes work nobody did: on mount, and again after every
+    // save because the token it just received counted as a change. Both cost a teacher
+    // their editor when the write lands on a version the page no longer holds.
+    const { user } = renderBuilder();
+
+    await new Promise((resolve) => setTimeout(resolve, 1_500));
+    expect(saveGapFillAction).not.toHaveBeenCalled();
+
+    await user.type(screen.getByLabelText('Instructions'), '!');
+    await waitFor(() => expect(saveGapFillAction).toHaveBeenCalledTimes(1), DEBOUNCED);
+
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+    expect(saveGapFillAction).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers a way out of a conflict, writing over the version that won', async () => {
+    vi.mocked(saveGapFillAction).mockResolvedValueOnce({
+      ok: true,
+      value: { status: 'conflict', currentUpdatedAt: '2026-08-05T11:00:00.000Z' },
+    });
+    const { user } = renderBuilder();
+
+    await user.type(screen.getByLabelText('Instructions'), '!');
+    await waitFor(
+      () => expect(screen.getByRole('button', { name: /Save mine anyway/ })).toBeInTheDocument(),
+      DEBOUNCED,
+    );
+
+    await user.click(screen.getByRole('button', { name: /Save mine anyway/ }));
+
+    await waitFor(() => expect(screen.getByText(/^Saved at/)).toBeInTheDocument(), DEBOUNCED);
+    const [, , second] = vi.mocked(saveGapFillAction).mock.calls[1]!;
+    // The token the server reported, not the one that was refused.
+    expect(second.expectedUpdatedAt).toBe('2026-08-05T11:00:00.000Z');
+    expect(second.instructions).toBe('Fyll inn ordene.!');
+  });
+
   it('counts the problems per step on the rail (AC-B26)', async () => {
     const { user } = renderBuilder(doc({ feedback: {}, distractors: ['bestilt'] }));
 
