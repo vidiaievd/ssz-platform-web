@@ -99,7 +99,9 @@
     "partialScore": "{correct} av {total} luker riktige",
     "helperIdle": "Trykk på et tomrom, og velg så et ord.",
     "helperArmed": "Velg nå et ord til det markerte tomrommet.",
-    "helperSelect": "Velg et ord til hver luke."
+    "helperSelect": "Velg et ord til hver luke.",
+    "helperUnfilled": "{count} luker er fortsatt tomme — fyll dem inn før du sjekker.",
+    "helperRevealed": "Svarene står i setningene over — pek på et stiplet ord for å se hvorfor."
   },
   "textOrder": {
     "moveUp": "Flytt opp",
@@ -113,5 +115,23 @@
     "editLabel": "Skriv om «{text}»",
     "partialScore": "{correct} av {total} feil rettet",
     "falsePositives": "{n} riktige deler ble endret"
+  },
+  "gapFill": {
+    "remaining": "{count} igjen",
+    "emptyGap": "{label}: tom luke",
+    "filledGap": "{label}: {word}",
+    "correctGap": "{label}: {word}, riktig",
+    "wrongGap": "{label}: {word}, feil",
+    "revealedGap": "{label}: svaret er {word}",
+    "right": "Riktig",
+    "wrong": "Ikke dette",
+    "check": "Sjekk",
+    "checking": "Sjekker…",
+    "fillEveryGap": "Fyll inn alle lukene",
+    "checkFailed": "Kunne ikke sjekke — prøv igjen",
+    "attemptCount": "Forsøk {n}",
+    "restart": "Prøv på nytt",
+    "revealFailed": "Kunne ikke vise svarene — prøv igjen",
+    "retryAttempt": "Prøv igjen · forsøk {n}"
   }
 }

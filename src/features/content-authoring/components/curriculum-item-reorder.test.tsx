@@ -42,6 +42,7 @@ function item(id: string, overrides: Partial<CurriculumTreeItemNode> = {}): Curr
     lessonKind: 'text',
     state: 'published',
     isLive: true,
+    pendingChange: null,
     durationMinutes: null,
     xpReward: null,
     ...overrides,

@@ -99,7 +99,9 @@
     "partialScore": "Правильно {correct} із {total} пропусків",
     "helperIdle": "Торкніться пропуску, потім оберіть слово.",
     "helperArmed": "Тепер оберіть слово для виділеного пропуску.",
-    "helperSelect": "Оберіть слово для кожного пропуску."
+    "helperSelect": "Оберіть слово для кожного пропуску.",
+    "helperUnfilled": "Ще {count} пропусків порожні — заповніть їх, потім перевіряйте.",
+    "helperRevealed": "Відповіді підставлені вище — наведіть на підкреслене пунктиром слово, щоб побачити чому."
   },
   "textOrder": {
     "moveUp": "Вище",
@@ -113,5 +115,23 @@
     "editLabel": "Переписати «{text}»",
     "partialScore": "Виправлено {correct} із {total} помилок",
     "falsePositives": "Змінено правильних частин: {n}"
+  },
+  "gapFill": {
+    "remaining": "залишилось {count}",
+    "emptyGap": "{label}: порожній пропуск",
+    "filledGap": "{label}: {word}",
+    "correctGap": "{label}: {word}, правильно",
+    "wrongGap": "{label}: {word}, неправильно",
+    "revealedGap": "{label}: відповідь — {word}",
+    "right": "Правильно",
+    "wrong": "Не це слово",
+    "check": "Перевірити",
+    "checking": "Перевіряємо…",
+    "fillEveryGap": "Заповніть усі пропуски",
+    "checkFailed": "Не вдалося перевірити — спробуйте ще раз",
+    "attemptCount": "Спроба {n}",
+    "restart": "Почати заново",
+    "revealFailed": "Не вдалося показати відповіді — спробуйте ще раз",
+    "retryAttempt": "Спробувати ще · спроба {n}"
   }
 }

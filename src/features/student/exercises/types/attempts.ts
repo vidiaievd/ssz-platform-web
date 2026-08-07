@@ -1,0 +1,73 @@
+import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
+
+/**
+ * The exercise-engine attempt API, as this client uses it.
+ *
+ * Until now the reader never spoke to the engine at all: it fetched the exercise with
+ * its answers and graded in the browser. That is workable while the answers sit in a
+ * separate key the reader can simply not render — but `word_bank_gap_fill` keeps its
+ * answers inside the sentences, so for this template the grading has to happen where
+ * the answers are.
+ */
+
+export type CheckMode = 'PRACTICE' | 'GRADED';
+
+export interface StartAttemptRequest {
+  /** Language of the instructions, not of the answer. */
+  language: string;
+  mode?: CheckMode;
+}
+
+export interface StartAttemptResponse {
+  attemptId: string;
+  templateCode: string;
+  targetLanguage: string;
+  difficultyLevel: string;
+  checkMode: CheckMode;
+  /**
+   * Shape depends on `templateCode`. For `word_bank_gap_fill` this is the masked
+   * projection — the gapped words are already gone — and never the stored content.
+   */
+  exerciseContent: unknown;
+  /** `null` for templates that withhold them, which is all of them in GRADED mode. */
+  expectedAnswers: unknown;
+  answerSchema: unknown;
+  checkSettings: Record<string, unknown>;
+}
+
+/** `exerciseContent` when `templateCode` is `word_bank_gap_fill`. */
+export type GapFillAttemptContent = StudentProjection;
+
+export interface GapFillPlacement {
+  gapKey: GapKey;
+  word: string;
+}
+
+export interface SubmitAnswerRequest {
+  submittedAnswer: unknown;
+  timeSpentSeconds: number;
+  locale?: string;
+}
+
+export interface SubmitAnswerResponse {
+  attemptId: string;
+  correct: boolean;
+  score: number | null;
+  requiresReview: boolean;
+  feedback: { summary: string; hints?: string[]; correctAnswer?: unknown };
+  /** Validator output. For gap-fill, a verdict and an explanation per gap. */
+  details?: unknown;
+}
+
+/** `details` when the template is `word_bank_gap_fill`. */
+export interface GapFillSubmitDetails {
+  totalGaps: number;
+  correctGaps: number;
+  gaps: Array<{ gapKey: GapKey; correct: boolean; explanation: string | null }>;
+}
+
+export interface RevealAnswersResponse {
+  attemptId: string;
+  answers: Array<{ gapKey: GapKey; label: string; word: string; why: string | null }>;
+  attemptClosed: boolean;
+}

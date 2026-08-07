@@ -19,6 +19,33 @@ export const EXERCISE_TYPES = [
 ] as const;
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
 
+/**
+ * What an author may create today.
+ *
+ * `EXERCISE_TYPES` above is a different question — it is what the generic exercise form
+ * can *edit*, and the two retired gap-fill templates stay in it precisely because ~135
+ * existing exercises still use them and must keep opening. Removing them from there
+ * would make the form fall back to `multiple_choice` and rewrite their content on the
+ * next save.
+ *
+ * `word_bank_gap_fill` is here but not there: it has its own builder, and the generic
+ * form has no fields for it.
+ */
+export const CREATABLE_EXERCISE_TYPES = [
+  'multiple_choice',
+  'multiple_choice_group',
+  'word_bank_gap_fill',
+  'translate_to_target',
+  'translate_from_target',
+  'match_pairs',
+  'short_answer',
+  'writing_task',
+  'sentence_schema',
+  'text_order',
+  'error_correction',
+] as const;
+export type CreatableExerciseType = (typeof CREATABLE_EXERCISE_TYPES)[number];
+
 export const MATCH_VARIANTS = ['pairs', 'halves'] as const;
 
 export const TEXT_ORDER_KINDS = ['dialogue', 'sentences'] as const;

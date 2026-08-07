@@ -9,7 +9,14 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Container } from '@/features/content/types';
+import type { Container, ExerciseInstruction, ExerciseWithAnswers } from '@/features/content/types';
+import {
+  fromPersisted,
+  TEMPLATE_CODE,
+  toContent,
+  toExpectedAnswers,
+  type WordBankGapFill,
+} from '@/lib/shared-kernel/wordbank-gapfill';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -18,8 +25,10 @@ import { updateExerciseAction } from '../actions/exercise';
 import { useAuthoringExercise } from '../api/use-authoring-exercises';
 import { authoringKeys } from '../api/keys';
 import { LessonEditorShell } from './lesson-editor-shell';
-import { useSaveScopeDescription } from './save-scope';
 import { ExerciseFields } from './exercise-fields';
+import { GapFillBuilder } from './wordbank-gapfill/builder';
+import type { SavedDocument } from './wordbank-gapfill/use-gap-fill-autosave';
+import { GapFillPreview } from './wordbank-gapfill/gap-fill-preview';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 
 interface ExerciseEditorPaneProps {
@@ -45,9 +54,17 @@ export function ExerciseEditorPane({
   publishSlot,
 }: ExerciseEditorPaneProps) {
   const t = useTranslations('Authoring');
+  const queryClient = useQueryClient();
   const { data: exercise, isLoading } = useAuthoringExercise(exerciseId);
   const initialValues = exercise ? parseExerciseToForm(exercise) : DEFAULT_EXERCISE_VALUES;
   const [previewValues, setPreviewValues] = useState<ExerciseFormValues>(initialValues);
+  /** The gap-fill document as the builder currently has it, for the preview column. */
+  const [gapFill, setGapFill] = useState<{
+    exercise: WordBankGapFill;
+    instructions: string;
+  } | null>(null);
+
+  const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
 
   return (
     <LessonEditorShell
@@ -55,17 +72,49 @@ export function ExerciseEditorPane({
       title={lessonTitle || t('lessons.untitled')}
       state={state}
       isLive={isLive}
+      // An exercise document waits in its draft whatever its placement says.
+      savesHeldForPublish
       backHref={backHref}
       saveStatus="idle"
       savedAt={null}
       publishSlot={publishSlot}
-      preview={<ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />}
+      preview={
+        isGapFill && gapFill !== null ? (
+          <GapFillPreview exercise={gapFill.exercise} instructions={gapFill.instructions} />
+        ) : (
+          <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
+        )
+      }
     >
       {isLoading ? (
         <div className="space-y-3">
           <Skeleton className="h-9 w-full" />
           <Skeleton className="h-40 w-full rounded-2xl" />
         </div>
+      ) : isGapFill ? (
+        // Gap-fill has its own three-step builder rather than a slice of the generic
+        // exercise form: its answers live inside the sentences, so authoring them means
+        // editing the document the kernel defines, not a set of fields.
+        <GapFillBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          initialExercise={gapFillDocumentFrom(exercise, container.id)}
+          initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
+          initialHint={firstInstruction(exercise)?.hintText ?? ''}
+          onDocumentChange={(document, instructions) =>
+            setGapFill({ exercise: document, instructions })
+          }
+          onSavedRemote={(updatedAt, saved) =>
+            // The cached exercise is what the builder mounts from next time. Left as it
+            // was fetched, that mount opens on a superseded version, and its first save
+            // is refused as somebody else's edit — with no one else in the building.
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedGapFill(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
       ) : (
         <ExerciseForm
           // Remounts with fresh `defaultValues` when the loaded exercise changes.
@@ -80,6 +129,59 @@ export function ExerciseEditorPane({
   );
 }
 
+/** The instruction row the builder edits — one language, as everywhere else in authoring. */
+function firstInstruction(exercise: ExerciseWithAnswers): ExerciseInstruction | undefined {
+  return exercise.instructions?.[0];
+}
+
+/**
+ * The stored columns as the kernel's document. `updatedAt` doubles as the autosave
+ * concurrency token, and an exercise served without one would make every save
+ * unconditional — so its absence is an empty token, which the server refuses.
+ */
+function gapFillDocumentFrom(exercise: ExerciseWithAnswers, containerId: string) {
+  return fromPersisted(
+    {
+      id: exercise.id,
+      moduleId: containerId,
+      // The platform has no title on an exercise; instructions carry that job.
+      title: '',
+      instructions: firstInstruction(exercise)?.instructionText ?? '',
+      updatedAt: exercise.updatedAt ?? '',
+    },
+    exercise.content,
+    exercise.expectedAnswers,
+  );
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ */
+function applySavedGapFill(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedDocument,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...toContent(saved.exercise) },
+    expectedAnswers: { ...toExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        {
+          ...instruction,
+          instructionText: saved.instructions.trim(),
+          hintText: saved.hint.trim() || instruction.hintText,
+        },
+        ...rest,
+      ],
+    }),
+  };
+}
+
 interface ExerciseFormProps {
   exerciseId: string;
   initialValues: ExerciseFormValues;
@@ -90,7 +192,8 @@ interface ExerciseFormProps {
 function ExerciseForm({ exerciseId, initialValues, container, onValuesChange }: ExerciseFormProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
-  const saveScope = useSaveScopeDescription();
+  // Not `useSaveScopeDescription`: that answers the placement question, and an
+  // exercise document is held for publish either way.
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
@@ -118,7 +221,9 @@ function ExerciseForm({ exerciseId, initialValues, container, onValuesChange }: 
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.exercise(exerciseId) });
       await queryClient.invalidateQueries({ queryKey: authoringKeys.exercises(container.id) });
-      toast.success(t('exercises.saveSuccess'), { description: saveScope });
+      toast.success(t('exercises.saveSuccess'), {
+        description: t('saveScope.exerciseDraftToast'),
+      });
     });
   }
 

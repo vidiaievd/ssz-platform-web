@@ -32,7 +32,8 @@
     "grammar": "Grammar",
     "exercises": "Exercises",
     "tags": "Tags",
-    "sharing": "Sharing"
+    "sharing": "Sharing",
+    "activity": "Activity"
   },
   "actions": {
     "newContainer": "New container",
@@ -188,7 +189,8 @@
       "sentence_schema": "Sentence schema",
       "word_bank_fill": "Word bank gap-fill",
       "text_order": "Put in order",
-      "error_correction": "Find and correct mistakes"
+      "error_correction": "Find and correct mistakes",
+      "word_bank_gap_fill": "Gap-fill"
     },
     "difficultyLevel": "Difficulty",
     "difficultyLevelNone": "Any level",
@@ -592,6 +594,7 @@
     "duration": "Duration",
     "xpReward": "XP reward",
     "state": "State",
+    "pendingChange": "Pending change",
     "loadError": "Could not load the curriculum tree.",
     "retry": "Try again",
     "empty": "This course has no levels yet.",
@@ -867,6 +870,12 @@
     "ariaLabel": "Status: {label}",
     "itemAwaiting": "Awaiting publish",
     "itemAwaitingAriaLabel": "Not published yet — publish the module to release it",
+    "itemMoved": "Moved",
+    "itemMovedAriaLabel": "Placed elsewhere than in the published version — publish the module to release the move",
+    "itemFlagsChanged": "Requirement changed",
+    "itemFlagsChangedAriaLabel": "Required or optional differently than in the published version",
+    "itemEdited": "Edited, not published",
+    "itemEditedAriaLabel": "Holds an edit students cannot see yet — publish the module to release it",
     "itemLive": "Students see this",
     "pendingModules": "{count, plural, =0 {Unpublished changes} one {# module not released} other {# modules not released}}",
     "pendingChangesAriaLabel": "Has changes students cannot see yet"
@@ -875,7 +884,9 @@
     "liveHint": "Live — students see every save immediately.",
     "draftHint": "Not live yet — students see this material once the module is published.",
     "liveToast": "Students see this change now.",
-    "draftToast": "Saved to the draft — publish the module to release it."
+    "draftToast": "Saved to the draft — publish the module to release it.",
+    "exerciseDraftHint": "Saves are held until you publish the module.",
+    "exerciseDraftToast": "Saved. Students keep seeing the published version until you publish."
   },
   "reviewPublish": {
     "trigger": "Review & publish",
@@ -967,6 +978,249 @@
     "LOCALE_INCOMPLETE": {
       "title": "Missing translations for some UI languages",
       "fix": "Add the missing localizations"
+    },
+    "GAPFILL_EX_NO_SENTENCES": {
+      "title": "Gap-fill has no sentences",
+      "fix": "Add at least one sentence in step 1"
+    },
+    "GAPFILL_SENT_EMPTY": {
+      "title": "Gap-fill has an empty sentence",
+      "fix": "Write the sentence or delete the card in step 1"
+    },
+    "GAPFILL_SENT_NO_GAP": {
+      "title": "Gap-fill sentence has no gap",
+      "fix": "Click a word in step 1 to turn it into a gap"
+    },
+    "GAPFILL_BANK_DUPLICATE": {
+      "title": "A distractor repeats a correct answer",
+      "fix": "Remove it in step 2 — answers are added to the bank automatically"
+    },
+    "GAPFILL_BANK_TOO_FEW": {
+      "title": "The word bank offers no choice",
+      "fix": "Add distractors in step 2"
+    },
+    "GAPFILL_BANK_TOO_SMALL": {
+      "title": "The word bank is solvable by elimination",
+      "fix": "Add a few spare words in step 2"
+    },
+    "GAPFILL_FB_PAIRS_UNUSED": {
+      "title": "Word-specific explanations will never be shown",
+      "fix": "This exercise is typed, not chosen — switch back to the word bank in step 2, or ignore this"
+    },
+    "GAPFILL_FB_NO_FALLBACK": {
+      "title": "A gap has no default explanation",
+      "fix": "Write one in step 3 — without it a wrong answer says only «wrong»"
+    },
+    "GAPFILL_FB_NO_WHY": {
+      "title": "A gap has no note on why the answer is right",
+      "fix": "Add one in step 3; it is shown on a correct answer and on reveal"
+    },
+    "GAPFILL_FB_PARTIAL_COVERAGE": {
+      "title": "Some word pairs fall back to the default explanation",
+      "fix": "Fill in the matrix in step 3 as you go — empty cells are fine"
+    }
+  },
+  "gapFill": {
+    "step1": {
+      "title": "Sentences & gaps",
+      "lede": "Write each sentence the way it reads when it is solved, then click the word that becomes the gap. The words you gap fill the word bank by themselves — you never type an answer twice.",
+      "tipTitle": "Two ways to make a gap.",
+      "tipBody": "Click a word in the strip under a sentence — or put square brackets around it while you write:",
+      "tipExample": "Jeg vil gjerne [bestille] en kaffe.",
+      "sentencesLabel": "Sentences",
+      "summary": "{sentences, plural, one {# sentence} other {# sentences}} · {gaps, plural, one {# gap} other {# gaps}}",
+      "pasteSeveral": "Paste several",
+      "emptyTitle": "No sentences yet",
+      "emptyBody": "Add the first sentence, or paste a whole set at once and mark the gaps afterwards.",
+      "addSentence": "Add sentence",
+      "noGapYet": "no gap yet",
+      "gapSummary": "{count, plural, one {# gap} other {# gaps}} · {labels}",
+      "moveUp": "Move sentence up",
+      "moveDown": "Move sentence down",
+      "deleteSentence": "Delete sentence",
+      "sentenceLabel": "Sentence {index}",
+      "sentencePlaceholder": "Write the full sentence, with the correct word in place…",
+      "tokensLabel": "Click a word to turn it into a gap",
+      "tokenMakeGap": "Click to make this a gap",
+      "tokenUnGap": "Click to remove this gap",
+      "tokensHelpMark": "Click the word students should fill in.",
+      "tokensHelpRemove": "Click a highlighted word to remove the gap.",
+      "errorEmpty": "Write the sentence, or delete this card.",
+      "errorNoGap": "Mark at least one word as a gap.",
+      "addHint": "Add a hint",
+      "hintLabel": "Hint for students (optional)",
+      "hintPlaceholder": "e.g. Du skal betale nå.",
+      "hintHelp": "Shown under the sentence before they answer. Use it for context, not for the answer.",
+      "pasteTitle": "Paste several sentences",
+      "pasteHelp": "One sentence per line. Square brackets around a word mark it as a gap.",
+      "pastePlaceholder": "Jeg vil gjerne [bestille] en kaffe.\nKan jeg få [regningen], takk?",
+      "pasteAdd": "{count, plural, =0 {Add sentences} one {Add # sentence} other {Add # sentences}}",
+      "cancel": "Cancel",
+      "removeGapTitle": "Remove this gap?",
+      "removeSentenceTitle": "Delete this sentence?",
+      "removeExplanations": "{count, plural, one {# explanation will be deleted} other {# explanations will be deleted}} and cannot be recovered.",
+      "removeConfirm": "Delete anyway"
+    },
+    "step2": {
+      "title": "Word bank",
+      "lede": "Decide how students supply the word: pick it from a shared bank, or type it. With a bank, the correct answers come from your sentences — you only add the wrong words.",
+      "modeLabel": "How students answer",
+      "modeBank": "Pick from a bank",
+      "modeFree": "Type the word",
+      "modeBankHelp": "One strip of words serves every sentence. Words you add here are the wrong ones.",
+      "modeFreeHelp": "No bank is shown. Students type into the gap, so the only thing to decide is which spellings you accept.",
+      "answersTitle": "Correct answers",
+      "answersHelp": "Taken from the words you gapped in step 1. Change them there — never here.",
+      "answersEmpty": "No gaps yet. Mark a word in step 1 and it appears here.",
+      "editGaps": "Edit gaps",
+      "reuseHint": "{words} answers more than one gap. Turn on “A word can fill several gaps”, or those gaps cannot all be solved.",
+      "distractorsTitle": "Wrong words",
+      "distractorsHelp": "Shown in the bank beside the answers. Enter adds one; separate several with commas.",
+      "distractorPlaceholder": "bestilt, bestilling",
+      "addDistractor": "Add",
+      "distractorIsAnswer": "“{word}” is already a correct answer.",
+      "distractorExists": "“{word}” is already in the bank.",
+      "removeDistractor": "Remove {word}",
+      "suggestionsTitle": "From this module’s vocabulary",
+      "bankOk": "{bankSize} words for {gapCount, plural, one {# gap} other {# gaps}} — enough that the last gaps are still a choice.",
+      "bankTooSmall": "{bankSize} words for {gapCount, plural, one {# gap} other {# gaps}}: the last gaps solve themselves by elimination. Add a couple of wrong words.",
+      "behaviourTitle": "How the exercise behaves",
+      "shuffle": "Shuffle the bank",
+      "shuffleHelp": "A different order for every student and every attempt.",
+      "allowReuse": "A word can fill several gaps",
+      "allowReuseHelp": "Off, a word is spent once it is placed — which is half of what the exercise teaches.",
+      "showBankCount": "Show how many words are left",
+      "showBankCountHelp": "A count above the bank while they work.",
+      "checkingLocked": "One check for the whole exercise",
+      "checkingLockedHelp": "Not a setting: students check everything at once, as often as they like.",
+      "alternativesTitle": "Accepted spellings",
+      "alternativesHelp": "The word in the sentence is always accepted. Add other forms you would also mark right, separated by commas.",
+      "alternativesFor": "{label} — {answer}",
+      "alternativesPlaceholder": "another accepted spelling",
+      "pairsUnused": "{count, plural, one {# word-specific explanation} other {# word-specific explanations}} will not be shown: they explain a word that was chosen, and here students type."
+    },
+    "step3": {
+      "title": "Feedback",
+      "lede": "What a student is told after checking. Each gap needs one default explanation; anything you write for a particular wrong word is shown instead of it, when they choose exactly that word.",
+      "coverage": "{written} of {total} word pairs written",
+      "coverageBar": "Pair explanations written",
+      "onlyMissing": "Only words without an explanation",
+      "missingFallbacks": "{count, plural, one {# gap still has no default explanation} other {# gaps still have no default explanation}}.",
+      "empty": "No gaps yet. Mark a word in step 1 and it appears here.",
+      "gapCoverage": "{written}/{total}",
+      "fallbackLabel": "Default explanation",
+      "fallbackPlaceholder": "Why any wrong word does not fit here…",
+      "fallbackHelp": "Shown for any wrong word you have not written about specifically.",
+      "fallbackRequired": "Required — the exercise cannot be assigned without it.",
+      "whyLabel": "Why the answer is right (optional)",
+      "whyPlaceholder": "What makes this the word that fits…",
+      "whyHelp": "Shown on a correct gap, and when a student asks to see the answers.",
+      "pairsTitle": "Explanations for a particular word",
+      "pairsAllWritten": "Every wrong word here has its own explanation.",
+      "pairFallsBack": "Falls back to: {fallback}",
+      "pairFallsBackEmpty": "Falls back to the default explanation above.",
+      "viewLabel": "How to show the pairs",
+      "viewList": "By gap",
+      "viewMatrix": "Matrix"
+    },
+    "matrix": {
+      "caption": "Explanations for each gap and each word in the bank",
+      "gapColumn": "Gap",
+      "answerShort": "answer",
+      "answerCell": "{word} is the correct answer for {label}",
+      "writeCell": "Write an explanation for {label} × {word}",
+      "editCell": "Edit the explanation for {label} × {word}",
+      "legend": "A tick means the pair has its own explanation. A dot means the student gets the gap’s default instead — that is fine.",
+      "empty": "Nothing to fill in yet: the matrix needs a gap and a word bank.",
+      "editorTitle": "{label} × {word}",
+      "position": "{at} of {of}",
+      "previousCell": "Previous pair",
+      "nextCell": "Next pair",
+      "closeEditor": "Close the pair editor",
+      "shortcutHint": "Ctrl/Cmd + Enter moves to the next pair."
+    },
+    "shell": {
+      "done": "Done",
+      "navBack": "Back",
+      "navNext": "Next: {step}",
+      "stepsLabel": "Builder steps",
+      "step1": "Sentences & gaps",
+      "step2": "Word bank",
+      "step3": "Feedback",
+      "stepOk": "ready",
+      "blockerCount": "{count, plural, one {# problem} other {# problems}}",
+      "warningCount": "{count, plural, one {# to check} other {# to check}}",
+      "instructionsLabel": "Instructions",
+      "instructionsPlaceholder": "Fyll inn de manglende ordene.",
+      "instructionsHelp": "Short, in the language students are learning. Required — an exercise without instructions cannot be published.",
+      "hintLabel": "Hint for the whole exercise (optional)",
+      "hintPlaceholder": "Shown with the instructions, before they answer.",
+      "saving": "Saving…",
+      "saved": "Saved at {time}",
+      "saveFailed": "Save failed — your edits are still here.",
+      "saveConflict": "Someone else saved this exercise. Your edits are still here.",
+      "saveRetry": "Try again",
+      "saveOverwrite": "Save mine anyway",
+      "gateTitle": "Before you assign this",
+      "gateClear": "Nothing standing in the way — this exercise is ready to assign.",
+      "gateGoToStep": "Go to step {step}",
+      "gateBlocked": "{count, plural, one {Fix # problem first} other {Fix # problems first}}",
+      "gateDone": "Looks good"
+    },
+    "issues": {
+      "EX_NO_TITLE": "The exercise has no title.",
+      "EX_NO_SENTENCES": "There are no sentences yet.",
+      "SENT_EMPTY": "Sentence {index} is empty.",
+      "SENT_NO_GAP": "Sentence {index} has no gap marked.",
+      "BANK_DUPLICATE": "“{word}” is both a correct answer and a wrong word.",
+      "BANK_TOO_FEW": "The bank has {bankSize, plural, one {# word} other {# words}} — too few to be a choice.",
+      "BANK_TOO_SMALL": "{bankSize} words for {gapCount, plural, one {# gap} other {# gaps}}: the last ones solve themselves by elimination.",
+      "FB_PAIRS_UNUSED": "{count, plural, one {# word-specific explanation} other {# word-specific explanations}} will not be shown, because students type here.",
+      "FB_NO_FALLBACK": "{label} has no default explanation.",
+      "FB_NO_WHY": "{label} has no note on why the answer is right.",
+      "FB_PARTIAL_COVERAGE": "{written} of {total} word pairs are written; the rest fall back to the default."
+    },
+    "preview": {
+      "empty": "Add a sentence and mark a gap — the student's view appears here.",
+      "noCheck": "Placement works here. Checking happens for students, on the server."
+    },
+    "draft": {
+      "label": "Suggested draft — not shown to students yet",
+      "accept": "Use this",
+      "rewrite": "Edit it",
+      "reject": "Discard",
+      "action": "Draft with AI"
+    }
+  },
+  "activity": {
+    "title": "Activity",
+    "empty": "Nothing has been changed here yet.",
+    "loadError": "Could not load the history.",
+    "truncated": "Only the most recent changes are shown.",
+    "unknownActor": "Someone",
+    "action": {
+      "created": "Created",
+      "updated": "Edited",
+      "deleted": "Deleted",
+      "published": "Published",
+      "unpublished": "Unpublished",
+      "archived": "Archived",
+      "restored": "Restored",
+      "instructions_updated": "Wording changed"
+    },
+    "field": {
+      "title": "title",
+      "description": "description",
+      "difficultyLevel": "level",
+      "coverImageMediaId": "cover",
+      "visibility": "visibility",
+      "accessTier": "access",
+      "levelSystem": "level system",
+      "gatingMode": "unlocking",
+      "content": "content",
+      "expectedAnswers": "answers",
+      "answerCheckSettings": "checking",
+      "estimatedDurationSeconds": "duration"
     }
   }
 }

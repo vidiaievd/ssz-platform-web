@@ -57,20 +57,29 @@ export function useSaveScopeDescription(): string | undefined {
  */
 export function SaveScopeHint({
   isLive,
+  heldForPublish = false,
   className,
 }: {
   isLive: boolean | null;
+  /**
+   * True where a save cannot reach a student whatever `isLive` says — exercises,
+   * whose document waits in a draft until the module is published. The live/draft
+   * distinction above is about *placement*, and for these it no longer decides
+   * anything: promising "this is public the moment you save it" would be false.
+   */
+  heldForPublish?: boolean;
   className?: string;
 }) {
   const t = useTranslations('Authoring.saveScope');
-  const Icon = isLive ? Radio : TriangleAlert;
+  const live = isLive && !heldForPublish;
+  const Icon = live ? Radio : TriangleAlert;
 
   return (
     <p
-      className={`flex items-center gap-1.5 text-xs ${isLive ? 'text-primary' : 'text-muted-foreground'} ${className ?? ''}`}
+      className={`flex items-center gap-1.5 text-xs ${live ? 'text-primary' : 'text-muted-foreground'} ${className ?? ''}`}
     >
       <Icon size={13} aria-hidden />
-      {isLive ? t('liveHint') : t('draftHint')}
+      {heldForPublish ? t('exerciseDraftHint') : live ? t('liveHint') : t('draftHint')}
     </p>
   );
 }

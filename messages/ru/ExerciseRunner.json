@@ -99,7 +99,9 @@
     "partialScore": "Верно {correct} из {total} пропусков",
     "helperIdle": "Нажмите на пропуск, затем выберите слово.",
     "helperArmed": "Теперь выберите слово для выделенного пропуска.",
-    "helperSelect": "Выберите слово для каждого пропуска."
+    "helperSelect": "Выберите слово для каждого пропуска.",
+    "helperUnfilled": "Ещё {count} пропусков пустые — заполните их, потом проверяйте.",
+    "helperRevealed": "Ответы подставлены выше — наведите на слово с пунктиром, чтобы увидеть почему."
   },
   "textOrder": {
     "moveUp": "Выше",
@@ -113,5 +115,23 @@
     "editLabel": "Переписать «{text}»",
     "partialScore": "Исправлено {correct} из {total} ошибок",
     "falsePositives": "Изменено верных частей: {n}"
+  },
+  "gapFill": {
+    "remaining": "осталось {count}",
+    "emptyGap": "{label}: пустой пропуск",
+    "filledGap": "{label}: {word}",
+    "correctGap": "{label}: {word}, верно",
+    "wrongGap": "{label}: {word}, неверно",
+    "revealedGap": "{label}: ответ — {word}",
+    "right": "Верно",
+    "wrong": "Не это слово",
+    "check": "Проверить",
+    "checking": "Проверяем…",
+    "fillEveryGap": "Заполните все пропуски",
+    "checkFailed": "Не удалось проверить — попробуйте ещё раз",
+    "attemptCount": "Попытка {n}",
+    "restart": "Начать заново",
+    "revealFailed": "Не удалось показать ответы — попробуйте ещё раз",
+    "retryAttempt": "Попробовать снова · попытка {n}"
   }
 }

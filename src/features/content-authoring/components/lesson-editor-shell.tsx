@@ -24,6 +24,8 @@ interface LessonEditorShellProps {
    * exists to fix.
    */
   isLive: boolean | null;
+  /** Editors whose saves cannot reach a student before a publish — see `SaveScopeHint`. */
+  savesHeldForPublish?: boolean;
   backHref: string;
   saveStatus: SaveStatus;
   savedAt: Date | null;
@@ -38,6 +40,7 @@ export function LessonEditorShell({
   title,
   state,
   isLive,
+  savesHeldForPublish,
   saveStatus,
   savedAt,
   publishSlot,
@@ -69,7 +72,11 @@ export function LessonEditorShell({
               {state && <ContainerStateBadge state={state} />}
               <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
             </div>
-            <SaveScopeHint isLive={isLive} className="mt-1.5" />
+            <SaveScopeHint
+              isLive={isLive}
+              heldForPublish={savesHeldForPublish}
+              className="mt-1.5"
+            />
           </div>
         </div>
         <div className="flex items-center gap-2.5">

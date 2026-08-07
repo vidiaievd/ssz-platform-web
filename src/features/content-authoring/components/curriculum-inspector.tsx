@@ -20,6 +20,7 @@ import { ContainerStateBadge } from './container-state-badge';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
 import { ModulePublishBlock } from './module-publish-block';
+import { ItemChangeBadge } from './item-change-badge';
 import { ItemLiveBadge } from './item-live-badge';
 
 interface CurriculumInspectorProps {
@@ -205,6 +206,15 @@ export function CurriculumInspector({
           )
         }
       />
+
+      {/* Only what publishing would change about this row. A live row can still
+          carry one — it was reordered or made optional since the last release. */}
+      {item.pendingChange && item.pendingChange !== 'added' && (
+        <InspectorField
+          label={t('structure.pendingChange')}
+          value={<ItemChangeBadge item={item} />}
+        />
+      )}
 
       <Button asChild variant="outline" size="sm">
         <Link href={`/school/${schoolSlug}/content/${courseContainerId}/lessons/${item.id}`}>

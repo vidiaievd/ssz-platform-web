@@ -93,9 +93,18 @@ export interface CurriculumTreeItemNode {
    * version students cannot see.
    */
   isLive: boolean | null;
+  /**
+   * What publishing would change about this row: the draft added it, moved it,
+   * flipped whether it is required, or — `content_changed` — the exercise itself
+   * holds an edit students have not been shown yet. `null` when nothing about
+   * the row is waiting, or when the owning container has never been published.
+   */
+  pendingChange: ItemPendingChange | null;
   durationMinutes: number | null;
   xpReward: number | null;
 }
+
+export type ItemPendingChange = 'added' | 'moved' | 'flags_changed' | 'content_changed';
 
 export interface CurriculumTreeSectionNode {
   id: string;
@@ -455,6 +464,11 @@ export interface ExerciseDisplay {
   difficultyLevel?: DifficultyLevel;
   content: Record<string, unknown>;
   instructions?: ExerciseInstruction[] | null;
+  /**
+   * ISO. The concurrency token an autosaving editor sends back as `expectedUpdatedAt`,
+   * so a second author cannot overwrite the first unseen — see the gap-fill builder.
+   */
+  updatedAt?: string;
 }
 
 /** Exercise as returned by `GET /exercises/:id/answers` — adds `expectedAnswers` for authoring. */

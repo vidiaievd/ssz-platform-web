@@ -99,7 +99,9 @@
     "partialScore": "{correct} of {total} blanks correct",
     "helperIdle": "Tap a blank, then pick a word.",
     "helperArmed": "Now pick a word for the highlighted blank.",
-    "helperSelect": "Pick a word for each blank."
+    "helperSelect": "Pick a word for each blank.",
+    "helperUnfilled": "{count} gaps are still empty — fill them in, then check.",
+    "helperRevealed": "The answers are filled in above — point at a dotted word to see why."
   },
   "textOrder": {
     "moveUp": "Move up",
@@ -113,5 +115,23 @@
     "editLabel": "Rewrite “{text}”",
     "partialScore": "{correct} of {total} mistakes corrected",
     "falsePositives": "{n} correct parts were changed"
+  },
+  "gapFill": {
+    "remaining": "{count} left",
+    "emptyGap": "{label}: empty gap",
+    "filledGap": "{label}: {word}",
+    "correctGap": "{label}: {word}, correct",
+    "wrongGap": "{label}: {word}, wrong",
+    "revealedGap": "{label}: the answer is {word}",
+    "right": "Correct",
+    "wrong": "Not this one",
+    "check": "Check",
+    "checking": "Checking…",
+    "fillEveryGap": "Fill in every gap",
+    "checkFailed": "Could not check that — try again",
+    "attemptCount": "Attempt {n}",
+    "restart": "Start over",
+    "revealFailed": "Could not show the answers — try again",
+    "retryAttempt": "Try again · attempt {n}"
   }
 }

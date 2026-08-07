@@ -110,6 +110,7 @@ describe('CurriculumInspector', () => {
         lessonKind: 'text',
         state: 'published',
         isLive: true,
+        pendingChange: null,
         durationMinutes: 6,
         xpReward: 10,
       },
@@ -136,6 +137,7 @@ describe('CurriculumInspector', () => {
         // Variant published, item not live: exactly the case the old badge lied about.
         state: 'published',
         isLive: false,
+        pendingChange: null,
         durationMinutes: 6,
         xpReward: 10,
       },
@@ -159,6 +161,7 @@ describe('CurriculumInspector', () => {
         lessonKind: null,
         state: null,
         isLive: false,
+        pendingChange: null,
         durationMinutes: null,
         xpReward: null,
       },

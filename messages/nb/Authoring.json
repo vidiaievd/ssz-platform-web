@@ -29,7 +29,8 @@
     "grammar": "Grammatikk",
     "exercises": "Øvelser",
     "tags": "Tagger",
-    "sharing": "Deling"
+    "sharing": "Deling",
+    "activity": "Aktivitet"
   },
   "actions": {
     "newContainer": "Ny beholder",
@@ -185,7 +186,8 @@
       "sentence_schema": "Setningsskjema",
       "word_bank_fill": "Ordbank-lukeoppgave",
       "text_order": "Sett i rekkefølge",
-      "error_correction": "Finn og rett feil"
+      "error_correction": "Finn og rett feil",
+      "word_bank_gap_fill": "Fyll inn ordene"
     },
     "difficultyLevel": "Vanskelighetsgrad",
     "difficultyLevelNone": "Alle nivåer",
@@ -592,6 +594,7 @@
     "duration": "Varighet",
     "xpReward": "XP-belønning",
     "state": "Status",
+    "pendingChange": "Endring i vente",
     "loadError": "Kunne ikke laste pensumtreet.",
     "retry": "Prøv igjen",
     "empty": "Dette kurset har ingen nivåer ennå.",
@@ -867,6 +870,12 @@
     "ariaLabel": "Status: {label}",
     "itemAwaiting": "Venter på publisering",
     "itemAwaitingAriaLabel": "Ikke publisert ennå — publiser modulen for å frigi den",
+    "itemMoved": "Flyttet",
+    "itemMovedAriaLabel": "Plassert et annet sted enn i den publiserte versjonen — publiser modulen for å frigi flyttingen",
+    "itemFlagsChanged": "Krav endret",
+    "itemFlagsChangedAriaLabel": "Obligatorisk eller valgfri på en annen måte enn i den publiserte versjonen",
+    "itemEdited": "Endret, ikke publisert",
+    "itemEditedAriaLabel": "Har en endring studentene ennå ikke ser — publiser modulen for å frigi den",
     "itemLive": "Studentene ser dette",
     "pendingModules": "{count, plural, =0 {Upubliserte endringer} one {# modul ikke publisert} other {# moduler ikke publisert}}",
     "pendingChangesAriaLabel": "Har endringer studentene ennå ikke ser"
@@ -875,7 +884,9 @@
     "liveHint": "Publisert — elevene ser hver lagring med én gang.",
     "draftHint": "Ikke publisert ennå — elevene ser dette materialet når modulen publiseres.",
     "liveToast": "Elevene ser denne endringen nå.",
-    "draftToast": "Lagret i utkastet — publiser modulen for å slippe det ut."
+    "draftToast": "Lagret i utkastet — publiser modulen for å slippe det ut.",
+    "exerciseDraftHint": "Lagringer holdes tilbake til du publiserer modulen.",
+    "exerciseDraftToast": "Lagret. Studentene ser den publiserte versjonen til du publiserer."
   },
   "reviewPublish": {
     "trigger": "Gjennomgå og publiser",
@@ -967,6 +978,249 @@
     "LOCALE_INCOMPLETE": {
       "title": "Mangler oversettelser for noen grensesnittspråk",
       "fix": "Legg til de manglende oversettelsene"
+    },
+    "GAPFILL_EX_NO_SENTENCES": {
+      "title": "Luketeksten har ingen setninger",
+      "fix": "Legg til minst én setning i steg 1"
+    },
+    "GAPFILL_SENT_EMPTY": {
+      "title": "Luketeksten har en tom setning",
+      "fix": "Skriv setningen eller slett kortet i steg 1"
+    },
+    "GAPFILL_SENT_NO_GAP": {
+      "title": "Setningen har ingen luke",
+      "fix": "Klikk på et ord i steg 1 for å gjøre det til en luke"
+    },
+    "GAPFILL_BANK_DUPLICATE": {
+      "title": "Et avledningsord gjentar et riktig svar",
+      "fix": "Fjern det i steg 2 — svarene legges i ordbanken automatisk"
+    },
+    "GAPFILL_BANK_TOO_FEW": {
+      "title": "Ordbanken gir ingen valgmulighet",
+      "fix": "Legg til avledningsord i steg 2"
+    },
+    "GAPFILL_BANK_TOO_SMALL": {
+      "title": "Ordbanken kan løses ved eliminering",
+      "fix": "Legg til noen ekstra ord i steg 2"
+    },
+    "GAPFILL_FB_PAIRS_UNUSED": {
+      "title": "Ordspesifikke forklaringer blir aldri vist",
+      "fix": "Denne oppgaven skrives, ikke velges — bytt tilbake til ordbank i steg 2, eller se bort fra dette"
+    },
+    "GAPFILL_FB_NO_FALLBACK": {
+      "title": "En luke mangler standardforklaring",
+      "fix": "Skriv en i steg 3 — uten den får eleven bare «feil»"
+    },
+    "GAPFILL_FB_NO_WHY": {
+      "title": "En luke mangler notat om hvorfor svaret er riktig",
+      "fix": "Legg til et i steg 3; det vises ved riktig svar og ved fasit"
+    },
+    "GAPFILL_FB_PARTIAL_COVERAGE": {
+      "title": "Noen ordpar faller tilbake på standardforklaringen",
+      "fix": "Fyll ut matrisen i steg 3 etter hvert — tomme celler er greit"
+    }
+  },
+  "gapFill": {
+    "step1": {
+      "title": "Setninger og luker",
+      "lede": "Skriv hver setning slik den lyder når den er løst, og klikk så på ordet som skal bli luken. Ordene du lager luker av fyller ordbanken av seg selv — du skriver aldri et svar to ganger.",
+      "tipTitle": "To måter å lage en luke på.",
+      "tipBody": "Klikk på et ord i stripen under setningen — eller sett hakeparenteser rundt det mens du skriver:",
+      "tipExample": "Jeg vil gjerne [bestille] en kaffe.",
+      "sentencesLabel": "Setninger",
+      "summary": "{sentences, plural, one {# setning} other {# setninger}} · {gaps, plural, one {# luke} other {# luker}}",
+      "pasteSeveral": "Lim inn flere",
+      "emptyTitle": "Ingen setninger ennå",
+      "emptyBody": "Legg til den første setningen, eller lim inn hele settet med én gang og merk lukene etterpå.",
+      "addSentence": "Legg til setning",
+      "noGapYet": "ingen luke ennå",
+      "gapSummary": "{count, plural, one {# luke} other {# luker}} · {labels}",
+      "moveUp": "Flytt setningen opp",
+      "moveDown": "Flytt setningen ned",
+      "deleteSentence": "Slett setningen",
+      "sentenceLabel": "Setning {index}",
+      "sentencePlaceholder": "Skriv hele setningen, med det riktige ordet på plass …",
+      "tokensLabel": "Klikk på et ord for å gjøre det til en luke",
+      "tokenMakeGap": "Klikk for å lage en luke her",
+      "tokenUnGap": "Klikk for å fjerne luken",
+      "tokensHelpMark": "Klikk på ordet elevene skal fylle inn.",
+      "tokensHelpRemove": "Klikk på et markert ord for å fjerne luken.",
+      "errorEmpty": "Skriv setningen, eller slett dette kortet.",
+      "errorNoGap": "Merk minst ett ord som luke.",
+      "addHint": "Legg til et hint",
+      "hintLabel": "Hint til elevene (valgfritt)",
+      "hintPlaceholder": "f.eks. Du skal betale nå.",
+      "hintHelp": "Vises under setningen før de svarer. Bruk det til sammenheng, ikke til svaret.",
+      "pasteTitle": "Lim inn flere setninger",
+      "pasteHelp": "Én setning per linje. Hakeparenteser rundt et ord gjør det til en luke.",
+      "pastePlaceholder": "Jeg vil gjerne [bestille] en kaffe.\nKan jeg få [regningen], takk?",
+      "pasteAdd": "{count, plural, =0 {Legg til setninger} one {Legg til # setning} other {Legg til # setninger}}",
+      "cancel": "Avbryt",
+      "removeGapTitle": "Fjerne denne luken?",
+      "removeSentenceTitle": "Slette denne setningen?",
+      "removeExplanations": "{count, plural, one {# forklaring blir slettet} other {# forklaringer blir slettet}}, og kan ikke hentes tilbake.",
+      "removeConfirm": "Slett likevel"
+    },
+    "step2": {
+      "title": "Ordbank",
+      "lede": "Bestem hvordan elevene svarer: velger ordet fra en felles bank, eller skriver det. Med bank kommer de riktige svarene fra setningene dine — du legger bare til de gale ordene.",
+      "modeLabel": "Hvordan elevene svarer",
+      "modeBank": "Velg fra bank",
+      "modeFree": "Skriv ordet",
+      "modeBankHelp": "Én ordstripe gjelder alle setningene. Ordene du legger til her er de gale.",
+      "modeFreeHelp": "Ingen bank vises. Elevene skriver i luken, så det eneste å bestemme er hvilke skrivemåter du godtar.",
+      "answersTitle": "Riktige svar",
+      "answersHelp": "Hentet fra ordene du gjorde til luker i steg 1. Endre dem der, aldri her.",
+      "answersEmpty": "Ingen luker ennå. Merk et ord i steg 1, så dukker det opp her.",
+      "editGaps": "Rediger luker",
+      "reuseHint": "{words} svarer på mer enn én luke. Slå på «Et ord kan fylle flere luker», ellers kan ikke alle lukene løses.",
+      "distractorsTitle": "Gale ord",
+      "distractorsHelp": "Vises i banken ved siden av svarene. Enter legger til ett; skill flere med komma.",
+      "distractorPlaceholder": "bestilt, bestilling",
+      "addDistractor": "Legg til",
+      "distractorIsAnswer": "«{word}» er allerede et riktig svar.",
+      "distractorExists": "«{word}» ligger allerede i banken.",
+      "removeDistractor": "Fjern {word}",
+      "suggestionsTitle": "Fra ordforrådet i denne modulen",
+      "bankOk": "{bankSize} ord til {gapCount, plural, one {# luke} other {# luker}} — nok til at de siste lukene fortsatt er et valg.",
+      "bankTooSmall": "{bankSize} ord til {gapCount, plural, one {# luke} other {# luker}}: de siste lukene løser seg selv ved eliminasjon. Legg til et par gale ord.",
+      "behaviourTitle": "Hvordan oppgaven oppfører seg",
+      "shuffle": "Stokk om ordbanken",
+      "shuffleHelp": "Ny rekkefølge for hver elev og hvert forsøk.",
+      "allowReuse": "Et ord kan fylle flere luker",
+      "allowReuseHelp": "Av er ordet brukt opp når det er plassert — og det er halve poenget med oppgaven.",
+      "showBankCount": "Vis hvor mange ord som er igjen",
+      "showBankCountHelp": "En teller over banken mens de jobber.",
+      "checkingLocked": "Én sjekk for hele oppgaven",
+      "checkingLockedHelp": "Ikke en innstilling: elevene sjekker alt samtidig, så ofte de vil.",
+      "alternativesTitle": "Godtatte skrivemåter",
+      "alternativesHelp": "Ordet i setningen godtas alltid. Legg til andre former du også ville godkjent, skilt med komma.",
+      "alternativesFor": "{label} — {answer}",
+      "alternativesPlaceholder": "en annen godtatt skrivemåte",
+      "pairsUnused": "{count, plural, one {# ordspesifikk forklaring} other {# ordspesifikke forklaringer}} blir ikke vist: de forklarer et ord som ble valgt, og her skriver elevene."
+    },
+    "step3": {
+      "title": "Tilbakemelding",
+      "lede": "Det eleven får vite etter en sjekk. Hver luke trenger én standardforklaring; det du skriver for et bestemt galt ord vises i stedet, når eleven velger nettopp det ordet.",
+      "coverage": "{written} av {total} ordpar skrevet",
+      "coverageBar": "Skrevne parforklaringer",
+      "onlyMissing": "Bare ord uten forklaring",
+      "missingFallbacks": "{count, plural, one {# luke mangler fortsatt standardforklaring} other {# luker mangler fortsatt standardforklaring}}.",
+      "empty": "Ingen luker ennå. Merk et ord i steg 1, så dukker det opp her.",
+      "gapCoverage": "{written}/{total}",
+      "fallbackLabel": "Standardforklaring",
+      "fallbackPlaceholder": "Hvorfor et galt ord ikke passer her …",
+      "fallbackHelp": "Vises for alle gale ord du ikke har skrevet noe eget om.",
+      "fallbackRequired": "Påkrevd — oppgaven kan ikke tildeles uten den.",
+      "whyLabel": "Hvorfor svaret er riktig (valgfritt)",
+      "whyPlaceholder": "Hva gjør dette til ordet som passer …",
+      "whyHelp": "Vises på en riktig luke, og når eleven ber om å se svarene.",
+      "pairsTitle": "Forklaringer for et bestemt ord",
+      "pairsAllWritten": "Alle gale ord her har sin egen forklaring.",
+      "pairFallsBack": "Faller tilbake på: {fallback}",
+      "pairFallsBackEmpty": "Faller tilbake på standardforklaringen over.",
+      "viewLabel": "Hvordan parene vises",
+      "viewList": "Per luke",
+      "viewMatrix": "Matrise"
+    },
+    "matrix": {
+      "caption": "Forklaringer for hver luke og hvert ord i banken",
+      "gapColumn": "Luke",
+      "answerShort": "svar",
+      "answerCell": "{word} er det riktige svaret for {label}",
+      "writeCell": "Skriv en forklaring for {label} × {word}",
+      "editCell": "Rediger forklaringen for {label} × {word}",
+      "legend": "En hake betyr at paret har sin egen forklaring. En prikk betyr at eleven får lukens standardforklaring i stedet — det er helt greit.",
+      "empty": "Ingenting å fylle ut ennå: matrisen trenger en luke og en ordbank.",
+      "editorTitle": "{label} × {word}",
+      "position": "{at} av {of}",
+      "previousCell": "Forrige par",
+      "nextCell": "Neste par",
+      "closeEditor": "Lukk parredigeringen",
+      "shortcutHint": "Ctrl/Cmd + Enter går til neste par."
+    },
+    "shell": {
+      "done": "Ferdig",
+      "navBack": "Tilbake",
+      "navNext": "Neste: {step}",
+      "stepsLabel": "Steg i oppgavebyggeren",
+      "step1": "Setninger og luker",
+      "step2": "Ordbank",
+      "step3": "Tilbakemelding",
+      "stepOk": "klar",
+      "blockerCount": "{count, plural, one {# problem} other {# problemer}}",
+      "warningCount": "{count, plural, one {# å se på} other {# å se på}}",
+      "instructionsLabel": "Instruksjon",
+      "instructionsPlaceholder": "Fyll inn de manglende ordene.",
+      "instructionsHelp": "Kort, på språket elevene lærer. Påkrevd — en oppgave uten instruksjon kan ikke publiseres.",
+      "hintLabel": "Hint for hele oppgaven (valgfritt)",
+      "hintPlaceholder": "Vises sammen med instruksjonen, før de svarer.",
+      "saving": "Lagrer …",
+      "saved": "Lagret {time}",
+      "saveFailed": "Lagring feilet — endringene dine er fortsatt her.",
+      "saveConflict": "Noen andre lagret denne oppgaven. Endringene dine er fortsatt her.",
+      "saveRetry": "Prøv igjen",
+      "saveOverwrite": "Lagre mitt likevel",
+      "gateTitle": "Før du tildeler denne",
+      "gateClear": "Ingenting i veien — oppgaven er klar til å tildeles.",
+      "gateGoToStep": "Gå til steg {step}",
+      "gateBlocked": "{count, plural, one {Fiks # problem først} other {Fiks # problemer først}}",
+      "gateDone": "Ser bra ut"
+    },
+    "issues": {
+      "EX_NO_TITLE": "Oppgaven har ingen tittel.",
+      "EX_NO_SENTENCES": "Det er ingen setninger ennå.",
+      "SENT_EMPTY": "Setning {index} er tom.",
+      "SENT_NO_GAP": "Setning {index} har ingen luke.",
+      "BANK_DUPLICATE": "«{word}» er både et riktig svar og et galt ord.",
+      "BANK_TOO_FEW": "Banken har {bankSize, plural, one {# ord} other {# ord}} — for få til å være et valg.",
+      "BANK_TOO_SMALL": "{bankSize} ord til {gapCount, plural, one {# luke} other {# luker}}: de siste løser seg selv ved eliminasjon.",
+      "FB_PAIRS_UNUSED": "{count, plural, one {# ordspesifikk forklaring} other {# ordspesifikke forklaringer}} blir ikke vist, siden elevene skriver her.",
+      "FB_NO_FALLBACK": "{label} mangler standardforklaring.",
+      "FB_NO_WHY": "{label} mangler notat om hvorfor svaret er riktig.",
+      "FB_PARTIAL_COVERAGE": "{written} av {total} ordpar er skrevet; resten faller tilbake på standardforklaringen."
+    },
+    "preview": {
+      "empty": "Legg til en setning og merk en luke — elevens visning dukker opp her.",
+      "noCheck": "Du kan plassere ord her. Sjekken skjer for elevene, på serveren."
+    },
+    "draft": {
+      "label": "Foreslått utkast — vises ikke til elevene ennå",
+      "accept": "Bruk dette",
+      "rewrite": "Rediger",
+      "reject": "Forkast",
+      "action": "Lag utkast med KI"
+    }
+  },
+  "activity": {
+    "title": "Aktivitet",
+    "empty": "Ingenting er endret her ennå.",
+    "loadError": "Kunne ikke laste historikken.",
+    "truncated": "Bare de siste endringene vises.",
+    "unknownActor": "Noen",
+    "action": {
+      "created": "Opprettet",
+      "updated": "Endret",
+      "deleted": "Slettet",
+      "published": "Publisert",
+      "unpublished": "Avpublisert",
+      "archived": "Arkivert",
+      "restored": "Gjenopprettet",
+      "instructions_updated": "Ordlyd endret"
+    },
+    "field": {
+      "title": "tittel",
+      "description": "beskrivelse",
+      "difficultyLevel": "nivå",
+      "coverImageMediaId": "omslag",
+      "visibility": "synlighet",
+      "accessTier": "tilgang",
+      "levelSystem": "nivåsystem",
+      "gatingMode": "opplåsing",
+      "content": "innhold",
+      "expectedAnswers": "svar",
+      "answerCheckSettings": "sjekking",
+      "estimatedDurationSeconds": "varighet"
     }
   }
 }

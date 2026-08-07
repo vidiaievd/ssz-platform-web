@@ -13,3 +13,7 @@ test-results/
 public/mockServiceWorker.js
 package-lock.json
 openapi/spec.json
+
+# Synced verbatim from ssz-platform/packages/shared-kernel — formatting it here would
+# make `npm run kernel:check` fail on every format run. Format the source instead.
+src/lib/shared-kernel/

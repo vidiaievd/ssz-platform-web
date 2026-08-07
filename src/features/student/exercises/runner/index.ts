@@ -25,7 +25,6 @@ export type {
 export { AnswerNoteMarker, buildAnswerNote } from './answer-note';
 export type { AnswerNote, Rationale, WordNotes } from './answer-note';
 
-
 export { McqBody } from './mcq-body';
 export type { McqBodyProps, McqContent, McqExpectedAnswers } from './mcq-body';
 
@@ -80,11 +79,7 @@ export type {
   OrderLine,
 } from './text-order-body';
 
-export {
-  WordBankFillBody,
-  parseSentence,
-  keepCorrectBlanks,
-} from './word-bank-fill-body';
+export { WordBankFillBody, parseSentence, keepCorrectBlanks } from './word-bank-fill-body';
 export type {
   WordBankFillBodyProps,
   WordBankFillContent,
@@ -132,9 +127,11 @@ export {
   PRACTICE_ACCENT,
   GRADED_ACCENT,
 } from './types';
-export type {
-  RunnerMode,
-  RunnerPhase,
-  FeedbackDensity,
-  RunnerVisualState,
-} from './types';
+export type { RunnerMode, RunnerPhase, FeedbackDensity, RunnerVisualState } from './types';
+
+export {
+  WordBankGapFillBody,
+  type GapFillValue,
+  type GapVerdict,
+  type WordBankGapFillBodyProps,
+} from './wordbank-gapfill-body';

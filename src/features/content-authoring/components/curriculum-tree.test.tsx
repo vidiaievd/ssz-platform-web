@@ -76,6 +76,7 @@ const TREE: CurriculumTreeData = {
                   lessonKind: 'text',
                   state: 'published',
                   isLive: true,
+                  pendingChange: null,
                   durationMinutes: 6,
                   xpReward: 10,
                 },
@@ -221,6 +222,36 @@ describe('CurriculumTree', () => {
     expect(screen.queryByText('Awaiting publish')).not.toBeInTheDocument();
   });
 
+  it('names the row a reorder is waiting on', () => {
+    // "Unpublished changes" on the module says a release is due; without this
+    // the author has to diff sixteen rows by memory to find which one it is.
+    const [level] = TREE.levels;
+    const [module_] = level!.modules;
+    const [section] = module_!.sections;
+    const [item] = section!.items;
+    const movedTree: CurriculumTreeData = {
+      ...TREE,
+      levels: [
+        {
+          ...level!,
+          modules: [
+            {
+              ...module_!,
+              publishState: 'pending_changes',
+              sections: [{ ...section!, items: [{ ...item!, pendingChange: 'moved' }] }],
+            },
+          ],
+        },
+      ],
+    };
+
+    renderTree(vi.fn(), vi.fn(), movedTree);
+
+    // Still live for students — the move is what is unpublished, not the lesson.
+    expect(screen.getByText('Moved')).toBeInTheDocument();
+    expect(screen.queryByText('Awaiting publish')).not.toBeInTheDocument();
+  });
+
   it("renders the edited container's own material, not only its modules", () => {
     // A module opened in this editor keeps its lessons and exercises at the
     // level itself. Dropping them showed empty sections while pre-flight
@@ -245,6 +276,7 @@ describe('CurriculumTree', () => {
               lessonKind: null,
               state: null,
               isLive: false,
+              pendingChange: null,
               durationMinutes: 2,
               xpReward: 5,
             },

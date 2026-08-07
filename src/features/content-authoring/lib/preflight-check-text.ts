@@ -30,6 +30,19 @@ export const KNOWN_RULE_CODES = new Set([
   'NO_GRAMMAR',
   'EXERCISE_COUNT_LOW',
   'LOCALE_INCOMPLETE',
+  // word_bank_gap_fill carries its own editorial rules, run by the same engine
+  // the builder shows the author (plan 35, step 2.3). One code per exercise, not
+  // per gap — the version report is not the place to list sixty missing notes.
+  'GAPFILL_EX_NO_SENTENCES',
+  'GAPFILL_SENT_EMPTY',
+  'GAPFILL_SENT_NO_GAP',
+  'GAPFILL_BANK_DUPLICATE',
+  'GAPFILL_BANK_TOO_FEW',
+  'GAPFILL_BANK_TOO_SMALL',
+  'GAPFILL_FB_PAIRS_UNUSED',
+  'GAPFILL_FB_NO_FALLBACK',
+  'GAPFILL_FB_NO_WHY',
+  'GAPFILL_FB_PARTIAL_COVERAGE',
 ]);
 
 export interface CheckText {

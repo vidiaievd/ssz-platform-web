@@ -50,6 +50,7 @@ const MOCK_TREE: CurriculumTree = {
                   lessonKind: 'text',
                   state: 'published',
                   isLive: true,
+                  pendingChange: null,
                   durationMinutes: 6,
                   xpReward: 10,
                 },
