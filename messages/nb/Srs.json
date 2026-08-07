@@ -3,7 +3,11 @@
     "start": "Start øvelse",
     "stats": "Statistikk",
     "dueToday": "{count, plural, one {# kort til i dag} other {# kort til i dag}}",
-    "limitReachedToday": "Du har nådd dagens grense – kom tilbake i morgen.",
+    "quotaMet": {
+      "body": "Det er dagens mengde. Det som står igjen, venter til i morgen.",
+      "finish": "Avslutt for i dag",
+      "carryOn": "Fortsett å øve"
+    },
     "caughtUp": {
       "title": "Du er à jour",
       "subtitle": "Kom tilbake i morgen.",

@@ -17,7 +17,7 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { rating, reviewedAt, idempotencyKey } = body as ReviewRequest;
+  const { rating, reviewedAt, idempotencyKey, carryOnPastLimit } = body as ReviewRequest;
 
   // The server takes the FSRS grade as a string enum and rejects anything else
   // (including the numeric 1..4 this route used to forward, and the `latencyMs`
@@ -36,7 +36,15 @@ export async function POST(
       method: 'POST',
       // idempotencyKey is optional upstream, but always sent from here so a
       // retried submission cannot reschedule the same card twice.
-      body: { rating, reviewedAt, idempotencyKey },
+      // carryOnPastLimit is forwarded only when the client actually set it: the
+      // upstream reads it as "the learner was asked and said yes", so a default
+      // `false` on every request would blur what is meant to be a deliberate answer.
+      body: {
+        rating,
+        reviewedAt,
+        idempotencyKey,
+        ...(carryOnPastLimit === true ? { carryOnPastLimit: true } : {}),
+      },
     });
     return NextResponse.json(data);
   } catch (e) {

@@ -94,7 +94,7 @@ export function SrsPage() {
             dueCount={data.dueCount}
             reviewedToday={data.reviewedToday}
             dailyLimit={data.dailyLimit}
-            onStart={() => startSession()}
+            onStart={(options) => startSession(options)}
           />
         )}
 
