@@ -21,9 +21,10 @@ import { CoursePublishBlock } from './course-publish-block';
 import { DangerZone } from './danger-zone';
 import { SharingPanel } from './sharing-panel';
 import { TagInput } from './tag-input';
+import { ActivityBlock } from './activity-block';
 import { VersionHistoryBlock } from './version-history-block';
 
-type SettingsTab = 'overview' | 'tags' | 'sharing';
+type SettingsTab = 'overview' | 'activity' | 'tags' | 'sharing';
 
 interface CourseSettingsDrawerProps {
   container: Container;
@@ -71,6 +72,9 @@ export function CourseSettingsDrawer({
               <TabsTrigger value={'overview' satisfies SettingsTab}>
                 {t('tabs.overview')}
               </TabsTrigger>
+              <TabsTrigger value={'activity' satisfies SettingsTab}>
+                {t('tabs.activity')}
+              </TabsTrigger>
               <TabsTrigger value={'tags' satisfies SettingsTab}>{t('tabs.tags')}</TabsTrigger>
               <TabsTrigger value={'sharing' satisfies SettingsTab}>{t('tabs.sharing')}</TabsTrigger>
             </TabsList>
@@ -91,6 +95,13 @@ export function CourseSettingsDrawer({
                   role={schoolRole}
                 />
               )}
+            </TabsContent>
+
+            <TabsContent value={'activity' satisfies SettingsTab}>
+              {/* Mounted only while the tab is open: the drawer is opened to edit
+                  settings far more often than to read history, and the feed is a
+                  request nobody asked for the rest of the time. */}
+              {tab === 'activity' && <ActivityBlock containerId={container.id} />}
             </TabsContent>
 
             <TabsContent value={'tags' satisfies SettingsTab}>

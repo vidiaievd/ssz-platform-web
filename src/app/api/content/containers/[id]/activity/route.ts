@@ -1,21 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
-import type { ContainerActivity } from '@/features/content-authoring/types';
+import type { ActivityEntry, ContainerActivity } from '@/features/content-authoring/types';
+
+interface ProfileSummary {
+  userId: string;
+  displayName: string;
+  avatarUrl?: string;
+}
+
+/** What content-service returns: entries with actor ids and no names. */
+type RawActivity = Omit<ContainerActivity, 'entries'> & {
+  entries: Omit<ActivityEntry, 'actor'>[];
+};
 
 /**
  * Who changed this course and the material it places.
  *
- * Actor ids come back unresolved: content-service holds no user directory, so
- * names are a separate join the caller makes.
+ * The join happens here rather than in content-service, which holds no user
+ * directory and should not grow one: names belong to profiles, and a service
+ * that copied them would be serving a stale name the day someone marries.
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const limit = request.nextUrl.searchParams.get('limit');
   const before = request.nextUrl.searchParams.get('before');
 
+  let activity: RawActivity;
   try {
-    const activity = await serverFetch<ContainerActivity>({
+    activity = await serverFetch<RawActivity>({
       service: 'content',
       path: `/containers/${id}/activity`,
       query: {
@@ -23,8 +36,42 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         ...(before ? { before } : {}),
       },
     });
-    return NextResponse.json(activity);
   } catch {
     return NextResponse.json({ error: 'Failed to fetch activity' }, { status: 502 });
+  }
+
+  const profiles = await resolveActors(activity.entries.map((entry) => entry.actorUserId));
+
+  return NextResponse.json({
+    entries: activity.entries.map((entry) => ({
+      ...entry,
+      // A name we could not resolve is left null rather than filled with the id:
+      // the panel says "someone" far more usefully than it says a UUID.
+      actor: profiles.get(entry.actorUserId) ?? null,
+    })),
+    hasMore: activity.hasMore,
+  } satisfies ContainerActivity);
+}
+
+/**
+ * One lookup for the whole page, keyed by user id.
+ *
+ * A failure here is not a failure of the feed: the history is the answer the
+ * author came for, and losing it because the directory blinked would be a worse
+ * trade than showing entries without names.
+ */
+async function resolveActors(actorIds: string[]): Promise<Map<string, ProfileSummary>> {
+  const ids = [...new Set(actorIds)];
+  if (ids.length === 0) return new Map();
+
+  try {
+    const profiles = await serverFetch<ProfileSummary[]>({
+      service: 'profile',
+      path: '/profiles',
+      query: { userIds: ids.join(',') },
+    });
+    return new Map(profiles.map((profile) => [profile.userId, profile]));
+  } catch {
+    return new Map();
   }
 }

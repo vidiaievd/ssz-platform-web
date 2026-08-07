@@ -32,7 +32,8 @@
     "grammar": "Grammar",
     "exercises": "Exercises",
     "tags": "Tags",
-    "sharing": "Sharing"
+    "sharing": "Sharing",
+    "activity": "Activity"
   },
   "actions": {
     "newContainer": "New container",
@@ -1189,6 +1190,37 @@
       "rewrite": "Edit it",
       "reject": "Discard",
       "action": "Draft with AI"
+    }
+  },
+  "activity": {
+    "title": "Activity",
+    "empty": "Nothing has been changed here yet.",
+    "loadError": "Could not load the history.",
+    "truncated": "Only the most recent changes are shown.",
+    "unknownActor": "Someone",
+    "action": {
+      "created": "Created",
+      "updated": "Edited",
+      "deleted": "Deleted",
+      "published": "Published",
+      "unpublished": "Unpublished",
+      "archived": "Archived",
+      "restored": "Restored",
+      "instructions_updated": "Wording changed"
+    },
+    "field": {
+      "title": "title",
+      "description": "description",
+      "difficultyLevel": "level",
+      "coverImageMediaId": "cover",
+      "visibility": "visibility",
+      "accessTier": "access",
+      "levelSystem": "level system",
+      "gatingMode": "unlocking",
+      "content": "content",
+      "expectedAnswers": "answers",
+      "answerCheckSettings": "checking",
+      "estimatedDurationSeconds": "duration"
     }
   }
 }

@@ -102,8 +102,13 @@ export interface ActivityEntry {
   /** Resolved by the service at read time; null once the entity is gone. */
   entityTitle: string | null;
   action: AuditAction;
-  /** Unresolved — content-service holds no user directory. */
   actorUserId: string;
+  /**
+   * Resolved by the BFF from the profile service. Null when the directory did
+   * not answer or has no profile for the id — the entry still stands, and the
+   * panel says so rather than showing a UUID.
+   */
+  actor: { userId: string; displayName: string; avatarUrl?: string } | null;
   changedFields: string[];
   /** ISO 8601. Also the cursor: pass the oldest one back as `before`. */
   occurredAt: string;

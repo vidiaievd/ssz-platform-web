@@ -29,7 +29,8 @@
     "grammar": "Грамматика",
     "exercises": "Упражнения",
     "tags": "Теги",
-    "sharing": "Доступ"
+    "sharing": "Доступ",
+    "activity": "Активность"
   },
   "actions": {
     "newContainer": "Новый контейнер",
@@ -1189,6 +1190,37 @@
       "rewrite": "Отредактировать",
       "reject": "Отклонить",
       "action": "Черновик с ИИ"
+    }
+  },
+  "activity": {
+    "title": "Активность",
+    "empty": "Здесь пока ничего не меняли.",
+    "loadError": "Не удалось загрузить историю.",
+    "truncated": "Показаны только последние изменения.",
+    "unknownActor": "Кто-то",
+    "action": {
+      "created": "Создано",
+      "updated": "Изменено",
+      "deleted": "Удалено",
+      "published": "Опубликовано",
+      "unpublished": "Снято с публикации",
+      "archived": "Архивировано",
+      "restored": "Восстановлено",
+      "instructions_updated": "Изменена формулировка"
+    },
+    "field": {
+      "title": "название",
+      "description": "описание",
+      "difficultyLevel": "уровень",
+      "coverImageMediaId": "обложка",
+      "visibility": "видимость",
+      "accessTier": "доступ",
+      "levelSystem": "система уровней",
+      "gatingMode": "открытие",
+      "content": "содержимое",
+      "expectedAnswers": "ответы",
+      "answerCheckSettings": "проверка",
+      "estimatedDurationSeconds": "длительность"
     }
   }
 }

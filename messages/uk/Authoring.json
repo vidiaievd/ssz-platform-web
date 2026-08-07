@@ -29,7 +29,8 @@
     "grammar": "Граматика",
     "exercises": "Вправи",
     "tags": "Теги",
-    "sharing": "Доступ"
+    "sharing": "Доступ",
+    "activity": "Активність"
   },
   "actions": {
     "newContainer": "Новий контейнер",
@@ -1189,6 +1190,37 @@
       "rewrite": "Редагувати",
       "reject": "Відхилити",
       "action": "Чернетка з ШІ"
+    }
+  },
+  "activity": {
+    "title": "Активність",
+    "empty": "Тут ще нічого не змінювали.",
+    "loadError": "Не вдалося завантажити історію.",
+    "truncated": "Показано лише останні зміни.",
+    "unknownActor": "Хтось",
+    "action": {
+      "created": "Створено",
+      "updated": "Змінено",
+      "deleted": "Видалено",
+      "published": "Опубліковано",
+      "unpublished": "Знято з публікації",
+      "archived": "Архівовано",
+      "restored": "Відновлено",
+      "instructions_updated": "Змінено формулювання"
+    },
+    "field": {
+      "title": "назва",
+      "description": "опис",
+      "difficultyLevel": "рівень",
+      "coverImageMediaId": "обкладинка",
+      "visibility": "видимість",
+      "accessTier": "доступ",
+      "levelSystem": "система рівнів",
+      "gatingMode": "відкриття",
+      "content": "вміст",
+      "expectedAnswers": "відповіді",
+      "answerCheckSettings": "перевірка",
+      "estimatedDurationSeconds": "тривалість"
     }
   }
 }

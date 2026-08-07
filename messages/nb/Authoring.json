@@ -29,7 +29,8 @@
     "grammar": "Grammatikk",
     "exercises": "Øvelser",
     "tags": "Tagger",
-    "sharing": "Deling"
+    "sharing": "Deling",
+    "activity": "Aktivitet"
   },
   "actions": {
     "newContainer": "Ny beholder",
@@ -1189,6 +1190,37 @@
       "rewrite": "Rediger",
       "reject": "Forkast",
       "action": "Lag utkast med KI"
+    }
+  },
+  "activity": {
+    "title": "Aktivitet",
+    "empty": "Ingenting er endret her ennå.",
+    "loadError": "Kunne ikke laste historikken.",
+    "truncated": "Bare de siste endringene vises.",
+    "unknownActor": "Noen",
+    "action": {
+      "created": "Opprettet",
+      "updated": "Endret",
+      "deleted": "Slettet",
+      "published": "Publisert",
+      "unpublished": "Avpublisert",
+      "archived": "Arkivert",
+      "restored": "Gjenopprettet",
+      "instructions_updated": "Ordlyd endret"
+    },
+    "field": {
+      "title": "tittel",
+      "description": "beskrivelse",
+      "difficultyLevel": "nivå",
+      "coverImageMediaId": "omslag",
+      "visibility": "synlighet",
+      "accessTier": "tilgang",
+      "levelSystem": "nivåsystem",
+      "gatingMode": "opplåsing",
+      "content": "innhold",
+      "expectedAnswers": "svar",
+      "answerCheckSettings": "sjekking",
+      "estimatedDurationSeconds": "varighet"
     }
   }
 }
