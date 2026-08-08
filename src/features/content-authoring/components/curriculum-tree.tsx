@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { ChevronDown, Plus } from 'lucide-react';
+import { ChevronDown, Copy, Pencil, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
+import { Link } from '@/lib/i18n/navigation';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
   AccessTier,
@@ -39,6 +40,7 @@ import {
   MoveToSectionSelect,
 } from './curriculum-item-reorder';
 import { AddLessonPicker } from './add-lesson-picker';
+import { StubIconButton } from './stub-controls';
 
 type ChangeKind = 'level' | 'module' | 'item';
 
@@ -56,6 +58,8 @@ interface CurriculumTreeProps {
   accessTier: AccessTier;
   /** The course's owning school — inherited by every node created from the tree. */
   ownerSchoolId?: string | null;
+  /** Needed to link a block row straight to its editor. */
+  schoolSlug: string;
   /**
    * Collapse keys (see `lib/structure-nodes`) of the nodes currently folded.
    * Owned by the shell so the topbar's Expand/Collapse all can drive it; a key
@@ -118,6 +122,24 @@ function SectionLabel({ title, right }: { title: string; right?: React.ReactNode
   );
 }
 
+/**
+ * Per-row actions. Hidden at rest and revealed on hover or selection: at four
+ * tools per row and a hundred rows in a course, showing them always is what
+ * made the old screen unreadable.
+ */
+function RowTools({ visible, children }: { visible: boolean; children: React.ReactNode }) {
+  return (
+    <span
+      className={cn(
+        'flex shrink-0 items-center gap-0.5 transition-opacity',
+        visible ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
 /** Bare ＋ on a section label, where a dashed pill would outweigh the label itself. */
 function AddIconButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
@@ -134,6 +156,9 @@ function AddIconButton({ label, onClick }: { label: string; onClick: () => void 
     </button>
   );
 }
+
+const TOOL_BUTTON =
+  'flex size-6 shrink-0 items-center justify-center rounded-xs text-muted-foreground transition-colors hover:bg-subtle hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
 /** Dashed "＋ …" affordance used everywhere something can be added inline. */
 function AddButton({
@@ -168,14 +193,19 @@ function BlockRow({
   sectionTitle,
   selectedId,
   onSelect,
+  schoolSlug,
+  courseContainerId,
   right,
 }: {
   item: CurriculumTreeItemNode;
   sectionTitle: string | null;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
+  schoolSlug: string;
+  courseContainerId: string;
   right?: React.ReactNode;
 }) {
+  const t = useTranslations('Authoring');
   const tContent = useTranslations('Content');
   const def = getLessonTypeDefinition(getMaterialKind(item));
   const Icon = def.icon;
@@ -194,7 +224,7 @@ function BlockRow({
         }
       }}
       className={cn(
-        'mb-0.75 flex cursor-pointer items-center gap-2 rounded-sm border px-2 py-1.25 transition-colors',
+        'group mb-0.75 flex cursor-pointer items-center gap-2 rounded-sm border px-2 py-1.25 transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         selected
           ? 'border-primary-200 bg-primary-50 dark:bg-primary-900/30'
@@ -216,6 +246,17 @@ function BlockRow({
       <ItemChangeBadge item={item} />
       <span className="flex-1" />
       {right}
+      <RowTools visible={selected}>
+        <Link
+          href={`/school/${schoolSlug}/content/${courseContainerId}/lessons/${item.id}`}
+          aria-label={t('structure.openLessonEditor')}
+          onClick={(e) => e.stopPropagation()}
+          className={TOOL_BUTTON}
+        >
+          <Pencil size={13} />
+        </Link>
+        <StubIconButton icon={<Copy size={13} />} label={t('structure.duplicate')} />
+      </RowTools>
     </div>
   );
 }
@@ -235,11 +276,13 @@ function ModuleCard({
   difficultyLevel,
   visibility,
   ownerSchoolId,
+  schoolSlug,
   expanded,
   onToggleExpanded,
 }: {
   module: CurriculumTreeModuleNode;
   code: string;
+  schoolSlug: string;
   expanded: boolean;
   onToggleExpanded: () => void;
   selectedId: string | null;
@@ -278,6 +321,8 @@ function ModuleCard({
             sectionTitle={section?.title ?? null}
             selectedId={selectedId}
             onSelect={onSelect}
+            schoolSlug={schoolSlug}
+            courseContainerId={mod.containerId}
             right={
               sectionOptions.length > 0 ? (
                 <MoveToSectionSelect
@@ -310,7 +355,7 @@ function ModuleCard({
           }
         }}
         className={cn(
-          'flex cursor-pointer items-center gap-2 p-2 transition-colors',
+          'group flex cursor-pointer items-center gap-2 p-2 transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
           selected
             ? 'bg-primary-50 shadow-[inset_3px_0_0_var(--ssz-color-primary-500)] dark:bg-primary-900/30'
@@ -340,6 +385,20 @@ function ModuleCard({
           module={mod}
           onMoved={onChanged}
         />
+        <RowTools visible={selected}>
+          <button
+            type="button"
+            aria-label={t('structure.addLessonTo', { name: mod.title ?? '' })}
+            onClick={(e) => {
+              e.stopPropagation();
+              setAddLessonIn(null);
+            }}
+            className={TOOL_BUTTON}
+          >
+            <Plus size={13} />
+          </button>
+          <StubIconButton icon={<Copy size={13} />} label={t('structure.duplicate')} />
+        </RowTools>
       </header>
 
       {expanded && (
@@ -369,8 +428,12 @@ function ModuleCard({
             </div>
           ))}
 
-          {mod.ungroupedItems.length > 0 && (
-            <div className="mt-2">{renderItems(null)}</div>
+          {mod.ungroupedItems.length > 0 && <div className="mt-2">{renderItems(null)}</div>}
+
+          {mod.sections.length === 0 && mod.ungroupedItems.length === 0 && (
+            <p className="mt-2 rounded-sm border border-dashed border-(--ssz-border-strong) p-5 text-center text-xs text-muted-foreground">
+              {t('structure.noLessonsYet')}
+            </p>
           )}
 
           <div className="mt-2">
@@ -412,6 +475,7 @@ export function CurriculumTree({
   visibility,
   accessTier,
   ownerSchoolId,
+  schoolSlug,
   collapsed,
   onToggleCollapse,
 }: CurriculumTreeProps) {
@@ -483,7 +547,7 @@ export function CurriculumTree({
                 }
               }}
               className={cn(
-                'flex cursor-pointer items-center gap-2 p-3 transition-colors',
+                'group flex cursor-pointer items-center gap-2 p-3 transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 selected
                   ? 'bg-primary-50 shadow-[inset_3px_0_0_var(--ssz-color-primary-500)] dark:bg-primary-900/30'
@@ -513,6 +577,25 @@ export function CurriculumTree({
                   onMoved={onChanged}
                 />
               )}
+              <RowTools visible={selected}>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  aria-label={
+                    editingModule
+                      ? t('structure.addLessonTo', { name: level.title ?? '' })
+                      : t('structure.addModuleTo', { name: level.title ?? '' })
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (editingModule) setAddOwnLessonIn(level.id ?? '');
+                    else handleAddModule(level.id);
+                  }}
+                  className={TOOL_BUTTON}
+                >
+                  <Plus size={13} />
+                </button>
+              </RowTools>
             </header>
 
             {expanded && (
@@ -538,6 +621,7 @@ export function CurriculumTree({
                     difficultyLevel={difficultyLevel}
                     visibility={visibility}
                     ownerSchoolId={ownerSchoolId}
+                    schoolSlug={schoolSlug}
                     expanded={!collapsed.has(moduleCollapseKey(mod))}
                     onToggleExpanded={() => onToggleCollapse(moduleCollapseKey(mod))}
                   />
@@ -555,6 +639,8 @@ export function CurriculumTree({
                         sectionTitle={level.title}
                         selectedId={selectedId}
                         onSelect={onSelect}
+                        schoolSlug={schoolSlug}
+                        courseContainerId={courseContainerId}
                       />
                     ))}
                   </div>
@@ -594,6 +680,8 @@ export function CurriculumTree({
           sectionTitle={null}
           selectedId={selectedId}
           onSelect={onSelect}
+          schoolSlug={schoolSlug}
+          courseContainerId={courseContainerId}
         />
       ))}
 

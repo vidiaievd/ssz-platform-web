@@ -623,7 +623,10 @@
     "moduleCount": "{count, plural, one {# modul} other {# moduler}}",
     "minutes": "{count} min",
     "noModulesYet": "Ingen moduler ennå — legg til den første.",
-    "addLessonToSection": "Legg til i {section}"
+    "addLessonToSection": "Legg til i {section}",
+    "duplicate": "Dupliser",
+    "addModuleTo": "Legg til modul i {name}",
+    "addLessonTo": "Legg til leksjon i {name}"
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -1253,5 +1256,8 @@
     "title": "Oversikt",
     "empty": "Ingen nivåer ennå.",
     "hasUnpublished": "Har upubliserte endringer"
+  },
+  "stub": {
+    "notAvailable": "ikke tilgjengelig ennå"
   }
 }

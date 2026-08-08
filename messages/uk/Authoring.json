@@ -623,7 +623,10 @@
     "moduleCount": "{count, plural, one {# модуль} few {# модулі} many {# модулів} other {# модуля}}",
     "minutes": "{count} хв",
     "noModulesYet": "Модулів ще немає — додайте перший.",
-    "addLessonToSection": "Додати до «{section}»"
+    "addLessonToSection": "Додати до «{section}»",
+    "duplicate": "Дублювати",
+    "addModuleTo": "Додати модуль до «{name}»",
+    "addLessonTo": "Додати урок до «{name}»"
   },
   "settings": {
     "trigger": "Налаштування",
@@ -1253,5 +1256,8 @@
     "title": "Структура",
     "empty": "Рівнів ще немає.",
     "hasUnpublished": "Є неопубліковані зміни"
+  },
+  "stub": {
+    "notAvailable": "ще недоступно"
   }
 }

@@ -59,7 +59,7 @@ export function OutlineRail({
   return (
     <nav
       aria-label={t('outline.title')}
-      className="ssz-surface sticky top-[var(--structure-sticky-top,1rem)] flex max-h-[calc(100vh-var(--structure-sticky-top,1rem)-2rem)] flex-col gap-2 rounded-2xl border border-border p-3"
+      className="ssz-surface sticky top-[var(--structure-sticky-top,1rem)] flex max-h-[calc(100vh-var(--structure-sticky-top,1rem)-2rem)] flex-col gap-2 rounded-2xl border border-border p-3 shadow-[var(--ssz-shadow-xs)]"
     >
       <h2 className="px-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
         {t('outline.title')}

@@ -30,6 +30,17 @@ vi.mock('./add-lesson-picker', () => ({
     ) : null,
 }));
 vi.mock('../actions/container', () => ({ createModuleAction: vi.fn() }));
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 vi.mock('../actions/section', () => ({
   createSectionAction: vi.fn(),
   reorderSectionsAction: vi.fn(),
@@ -109,6 +120,7 @@ function CollapsibleTree(props: {
       onSelect={props.onSelect}
       onChanged={props.onChanged}
       courseContainerId="course-1"
+      schoolSlug="my-school"
       targetLanguage="no"
       difficultyLevel="A2"
       visibility="public"
@@ -334,6 +346,25 @@ describe('CurriculumTree', () => {
     expect(screen.queryByText('Samfunn og kultur')).not.toBeInTheDocument();
   });
 
+  it('links a block row straight to its editor', () => {
+    renderTree();
+    const row = screen.getByText('En vanlig arbeidsdag').closest<HTMLElement>('[role="treeitem"]')!;
+    expect(within(row).getByRole('link', { name: 'Open lesson editor' })).toHaveAttribute(
+      'href',
+      '/school/my-school/content/module-1/lessons/item-1',
+    );
+  });
+
+  // Duplicate has no backend (plan 38 §3 B1). It is rendered where the design
+  // puts it, but announced as unavailable rather than silently doing nothing.
+  it('offers duplicate as a control that says it is not connected yet', () => {
+    renderTree();
+    const row = screen.getByText('En vanlig arbeidsdag').closest<HTMLElement>('[role="treeitem"]')!;
+    const duplicate = within(row).getByRole('button', { name: /Duplicate/ });
+    expect(duplicate).toHaveAttribute('aria-disabled', 'true');
+    expect(duplicate).toHaveAccessibleName('Duplicate — not available yet');
+  });
+
   it('shows the "no lessons yet" placeholder for an empty section', () => {
     const [level] = TREE.levels;
     const [module_] = level!.modules;
@@ -362,6 +393,7 @@ describe('CurriculumTree', () => {
           onSelect={vi.fn()}
           onChanged={vi.fn()}
           courseContainerId="course-1"
+          schoolSlug="my-school"
           targetLanguage="no"
           difficultyLevel="A2"
           visibility="public"

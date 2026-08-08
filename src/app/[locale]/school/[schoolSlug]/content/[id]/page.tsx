@@ -77,7 +77,7 @@ export default async function ContainerDetailPage({
   }
 
   return (
-    <main className="mx-auto max-w-[1600px] px-6 py-6">
+    <main className="mx-auto w-full max-w-[1560px] px-8 pb-30 pt-6">
       <Suspense fallback={<TabsSkeleton />}>
         <CourseEditorShell
           container={container}

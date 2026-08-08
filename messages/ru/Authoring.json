@@ -623,7 +623,10 @@
     "moduleCount": "{count, plural, one {# модуль} few {# модуля} many {# модулей} other {# модуля}}",
     "minutes": "{count} мин",
     "noModulesYet": "Модулей пока нет — добавьте первый.",
-    "addLessonToSection": "Добавить в «{section}»"
+    "addLessonToSection": "Добавить в «{section}»",
+    "duplicate": "Дублировать",
+    "addModuleTo": "Добавить модуль в «{name}»",
+    "addLessonTo": "Добавить урок в «{name}»"
   },
   "settings": {
     "trigger": "Настройки",
@@ -1253,5 +1256,8 @@
     "title": "Структура",
     "empty": "Уровней пока нет.",
     "hasUnpublished": "Есть неопубликованные изменения"
+  },
+  "stub": {
+    "notAvailable": "пока недоступно"
   }
 }

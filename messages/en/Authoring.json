@@ -623,7 +623,10 @@
     "moduleCount": "{count, plural, one {# module} other {# modules}}",
     "minutes": "{count} min",
     "noModulesYet": "No modules yet — add the first one.",
-    "addLessonToSection": "Add to {section}"
+    "addLessonToSection": "Add to {section}",
+    "duplicate": "Duplicate",
+    "addModuleTo": "Add module to {name}",
+    "addLessonTo": "Add lesson to {name}"
   },
   "settings": {
     "trigger": "Settings",
@@ -1253,5 +1256,8 @@
     "title": "Outline",
     "empty": "No levels yet.",
     "hasUnpublished": "Has unpublished changes"
+  },
+  "stub": {
+    "notAvailable": "not available yet"
   }
 }

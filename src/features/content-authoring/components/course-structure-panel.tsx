@@ -41,7 +41,7 @@ interface CourseStructurePanelProps {
 
 function StructureSkeleton() {
   return (
-    <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(180px,210px)_minmax(0,1fr)_minmax(300px,330px)]">
+    <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[236px_minmax(0,1fr)_348px]">
       <Skeleton className="hidden h-64 w-full rounded-2xl xl:block" />
       <Skeleton className="h-96 w-full rounded-2xl" />
       <Skeleton className="h-64 w-full rounded-2xl" />
@@ -117,7 +117,7 @@ export function CourseStructurePanel({
     // No `items-start`: the side columns must stretch to the row's full height,
     // or their sticky children have no room to travel and scroll away with the
     // tree. The tree card gets `self-start` back so it still hugs its content.
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(180px,210px)_minmax(0,1fr)_minmax(300px,330px)]">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[236px_minmax(0,1fr)_348px]">
       <div className="hidden xl:block">
         <OutlineRail
           tree={tree}
@@ -132,7 +132,7 @@ export function CourseStructurePanel({
         />
       </div>
 
-      <div className="ssz-surface self-start rounded-2xl border border-border p-3.5">
+      <div className="ssz-surface self-start rounded-2xl border border-border p-3.5 shadow-[var(--ssz-shadow-xs)]">
         <UnpublishedBanner tree={tree} onReview={onReview} />
         <div className="mt-2.5">
           <CurriculumTree
@@ -141,6 +141,7 @@ export function CourseStructurePanel({
             onSelect={setSelection}
             onChanged={handleChanged}
             courseContainerId={containerId}
+            schoolSlug={schoolSlug}
             targetLanguage={targetLanguage}
             difficultyLevel={difficultyLevel}
             visibility={visibility}
@@ -153,7 +154,7 @@ export function CourseStructurePanel({
       </div>
 
       <div>
-        <div className="ssz-surface sticky top-[var(--structure-sticky-top,1rem)] rounded-2xl border border-border p-4.5">
+        <div className="ssz-surface sticky top-[var(--structure-sticky-top,1rem)] rounded-2xl border border-border p-4.5 shadow-[var(--ssz-shadow-xs)]">
           <h2 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
             {t('structure.inspectorTitle')}
           </h2>

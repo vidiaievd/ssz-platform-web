@@ -123,6 +123,7 @@ function InteractiveTree() {
       onSelect={setSelection}
       onChanged={() => {}}
       courseContainerId="course-1"
+      schoolSlug="my-school"
       targetLanguage="no"
       difficultyLevel="A2"
       visibility="public"
@@ -144,6 +145,7 @@ type Story = StoryObj<typeof meta>;
 
 const commonArgs = {
   courseContainerId: 'course-1',
+  schoolSlug: 'my-school',
   targetLanguage: 'no',
   difficultyLevel: 'A2',
   visibility: 'public',
