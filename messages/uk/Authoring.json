@@ -1259,5 +1259,19 @@
   },
   "stub": {
     "notAvailable": "ще недоступно"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Пошук уроків, блоків, вправ…",
+    "allTypes": "Усі типи блоків",
+    "typeVocab": "Лексика",
+    "typeText": "Текст і аудіювання",
+    "typeGrammar": "Граматика",
+    "typeExercises": "Вправи",
+    "anyState": "Будь-який стан",
+    "statePublished": "Опубліковано",
+    "stateEdited": "Змінено",
+    "stateDraft": "Чернетка",
+    "clear": "Очистити",
+    "noMatchesInModule": "Тут немає нічого, що відповідає фільтрам."
   }
 }

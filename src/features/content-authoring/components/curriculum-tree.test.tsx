@@ -7,6 +7,7 @@ import { enMessages } from '@/lib/i18n/messages';
 import type { CurriculumTree as CurriculumTreeData } from '@/features/content/types';
 
 import type { CurriculumTreeSelection } from '../types';
+import { EMPTY_FILTERS, type StructureFilters } from '../lib/structure-filters';
 
 vi.mock('../actions/container-item', () => ({
   reorderContainerItemsAction: vi.fn(),
@@ -111,6 +112,7 @@ function CollapsibleTree(props: {
   tree: CurriculumTreeData;
   onSelect: (selection: CurriculumTreeSelection) => void;
   onChanged: () => void;
+  filters?: StructureFilters;
 }) {
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   return (
@@ -121,6 +123,7 @@ function CollapsibleTree(props: {
       onChanged={props.onChanged}
       courseContainerId="course-1"
       schoolSlug="my-school"
+      filters={props.filters ?? EMPTY_FILTERS}
       targetLanguage="no"
       difficultyLevel="A2"
       visibility="public"
@@ -138,10 +141,15 @@ function CollapsibleTree(props: {
   );
 }
 
-function renderTree(onSelect = vi.fn(), onChanged = vi.fn(), tree: CurriculumTreeData = TREE) {
+function renderTree(
+  onSelect = vi.fn(),
+  onChanged = vi.fn(),
+  tree: CurriculumTreeData = TREE,
+  filters?: StructureFilters,
+) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CollapsibleTree tree={tree} onSelect={onSelect} onChanged={onChanged} />
+      <CollapsibleTree tree={tree} onSelect={onSelect} onChanged={onChanged} filters={filters} />
     </NextIntlClientProvider>,
   );
   return { onSelect, onChanged };
@@ -365,6 +373,104 @@ describe('CurriculumTree', () => {
     expect(duplicate).toHaveAccessibleName('Duplicate — not available yet');
   });
 
+  describe('under filters', () => {
+    // The UX rule: a search is a question about the whole course, so the tree
+    // opens what holds an answer and folds away what does not — including nodes
+    // the author had left open.
+    it('folds a level whose blocks none match, keeping its header in place', () => {
+      renderTree(vi.fn(), vi.fn(), TREE, { ...EMPTY_FILTERS, query: 'zzz' });
+
+      expect(screen.getByText('A1 — Beginner')).toBeInTheDocument();
+      expect(screen.queryByText('Samfunn og kultur')).not.toBeInTheDocument();
+      expect(screen.queryByText('En vanlig arbeidsdag')).not.toBeInTheDocument();
+    });
+
+    it('opens the level and the module holding a match', () => {
+      renderTree(vi.fn(), vi.fn(), TREE, { ...EMPTY_FILTERS, query: 'arbeidsdag' });
+
+      expect(screen.getByText('A1 — Beginner')).toBeInTheDocument();
+      expect(screen.getByText('Samfunn og kultur')).toBeInTheDocument();
+      expect(screen.getByText('En vanlig arbeidsdag')).toBeInTheDocument();
+    });
+
+    it('hides a section that has no matches instead of calling it empty', () => {
+      const [level] = TREE.levels;
+      const [module_] = level!.modules;
+      const [section] = module_!.sections;
+      const twoSections: CurriculumTreeData = {
+        ...TREE,
+        levels: [
+          {
+            ...level!,
+            modules: [
+              {
+                ...module_!,
+                sections: [
+                  section!,
+                  { id: 'section-2', title: 'Øvelser', position: 1, items: [] },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      renderTree(vi.fn(), vi.fn(), twoSections, { ...EMPTY_FILTERS, query: 'arbeidsdag' });
+
+      expect(screen.getAllByText('Reinforce & read').length).toBeGreaterThanOrEqual(1);
+      expect(screen.queryByText('Øvelser')).not.toBeInTheDocument();
+      expect(screen.queryByText('No lessons yet')).not.toBeInTheDocument();
+    });
+
+    it('filters by block type', () => {
+      const { unmount } = render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <CollapsibleTree
+            tree={TREE}
+            onSelect={vi.fn()}
+            onChanged={vi.fn()}
+            filters={{ ...EMPTY_FILTERS, type: 'exercises' }}
+          />
+        </NextIntlClientProvider>,
+      );
+      expect(screen.queryByText('En vanlig arbeidsdag')).not.toBeInTheDocument();
+      unmount();
+
+      renderTree(vi.fn(), vi.fn(), TREE, { ...EMPTY_FILTERS, type: 'text' });
+      expect(screen.getByText('En vanlig arbeidsdag')).toBeInTheDocument();
+    });
+
+    // The author's own collapse state is only masked, never overwritten.
+    it('restores what the author had collapsed once the filters are cleared', () => {
+      const { rerender } = render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <CollapsibleTree tree={TREE} onSelect={vi.fn()} onChanged={vi.fn()} />
+        </NextIntlClientProvider>,
+      );
+
+      const [levelToggle] = screen.getAllByRole('button', { name: 'Collapse' });
+      fireEvent.click(levelToggle!);
+      expect(screen.queryByText('Samfunn og kultur')).not.toBeInTheDocument();
+
+      const withFilter = (filters?: StructureFilters) => (
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <CollapsibleTree
+            tree={TREE}
+            onSelect={vi.fn()}
+            onChanged={vi.fn()}
+            filters={filters}
+          />
+        </NextIntlClientProvider>
+      );
+
+      rerender(withFilter({ ...EMPTY_FILTERS, query: 'arbeidsdag' }));
+      expect(screen.getByText('Samfunn og kultur')).toBeInTheDocument();
+
+      rerender(withFilter());
+      expect(screen.queryByText('Samfunn og kultur')).not.toBeInTheDocument();
+    });
+  });
+
   it('shows the "no lessons yet" placeholder for an empty section', () => {
     const [level] = TREE.levels;
     const [module_] = level!.modules;
@@ -394,6 +500,7 @@ describe('CurriculumTree', () => {
           onChanged={vi.fn()}
           courseContainerId="course-1"
           schoolSlug="my-school"
+          filters={EMPTY_FILTERS}
           targetLanguage="no"
           difficultyLevel="A2"
           visibility="public"

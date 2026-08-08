@@ -23,6 +23,12 @@ import type {
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
 import {
+  isFiltering,
+  matchesFilters,
+  moduleItems,
+  type StructureFilters,
+} from '../lib/structure-filters';
+import {
   levelCollapseKey,
   levelDomId,
   moduleCode,
@@ -43,6 +49,8 @@ import { AddLessonPicker } from './add-lesson-picker';
 import { StubIconButton } from './stub-controls';
 
 type ChangeKind = 'level' | 'module' | 'item';
+
+const EMPTY_KEYS: ReadonlySet<string> = new Set();
 
 interface CurriculumTreeProps {
   tree: CurriculumTreeData;
@@ -67,6 +75,21 @@ interface CurriculumTreeProps {
    */
   collapsed: ReadonlySet<string>;
   onToggleCollapse: (key: string) => void;
+  /** Narrows which blocks are shown. Levels and modules are never hidden by it. */
+  filters: StructureFilters;
+}
+
+/**
+ * The localised name of a block's material kind. Needed in two places — the row
+ * shows it, and the search matches against it — so it is resolved once here
+ * rather than duplicating the registry lookup.
+ */
+function useMaterialLabel() {
+  const tContent = useTranslations('Content');
+  return (item: CurriculumTreeItemNode) =>
+    tContent(
+      `materialType.${getLessonTypeDefinition(getMaterialKind(item)).kind}` as 'materialType.text',
+    );
 }
 
 // ── shared pieces ────────────────────────────────────────────────────────────
@@ -206,7 +229,7 @@ function BlockRow({
   right?: React.ReactNode;
 }) {
   const t = useTranslations('Authoring');
-  const tContent = useTranslations('Content');
+  const materialLabel = useMaterialLabel();
   const def = getLessonTypeDefinition(getMaterialKind(item));
   const Icon = def.icon;
   const selected = selectedId === item.id;
@@ -236,7 +259,7 @@ function BlockRow({
       </Glyph>
       <span className="truncate text-sm text-foreground">{item.title}</span>
       <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
-        {tContent(`materialType.${def.kind}` as 'materialType.text')}
+        {materialLabel(item)}
       </span>
       {item.durationMinutes != null && (
         <span className="shrink-0 text-[11px] text-muted-foreground">
@@ -277,12 +300,17 @@ function ModuleCard({
   visibility,
   ownerSchoolId,
   schoolSlug,
+  filters,
+  matches,
   expanded,
   onToggleExpanded,
 }: {
   module: CurriculumTreeModuleNode;
   code: string;
   schoolSlug: string;
+  filters: StructureFilters;
+  /** Shared with the tree so a module's rows and its own expansion agree on what matches. */
+  matches: (item: CurriculumTreeItemNode) => boolean;
   expanded: boolean;
   onToggleExpanded: () => void;
   selectedId: string | null;
@@ -299,13 +327,15 @@ function ModuleCard({
   const t = useTranslations('Authoring');
   const [addLessonIn, setAddLessonIn] = useState<string | null | undefined>(undefined);
   const selected = selectedId === mod.id;
+  const filtering = isFiltering(filters);
+  const visible = (items: CurriculumTreeItemNode[]) => items.filter(matches);
 
   const allItems = [...mod.sections.flatMap((s) => s.items), ...mod.ungroupedItems];
   const minutes = allItems.reduce((sum, i) => sum + (i.durationMinutes ?? 0), 0);
   const sectionOptions = mod.sections.map((s) => ({ id: s.id, title: s.title }));
 
   function renderItems(section: CurriculumTreeSectionNode | null) {
-    const items = section ? section.items : mod.ungroupedItems;
+    const items = visible(section ? section.items : mod.ungroupedItems);
     if (items.length === 0) {
       return (
         <p className="px-2 py-1 text-xs italic text-muted-foreground">
@@ -403,7 +433,12 @@ function ModuleCard({
 
       {expanded && (
         <div className="border-t border-dashed border-border bg-(--ssz-bg-base) px-2 pb-3 pl-3 pt-1">
-          {mod.sections.map((section) => (
+          {mod.sections.map((section) => {
+            // While filtering, a section with no matches disappears; unfiltered
+            // it stays and says it is empty, because an empty section is a fact
+            // about the course and a filtered-out one is not.
+            if (filtering && visible(section.items).length === 0) return null;
+            return (
             <div key={section.id}>
               <SectionLabel
                 title={section.title}
@@ -426,13 +461,22 @@ function ModuleCard({
               />
               {renderItems(section)}
             </div>
-          ))}
+            );
+          })}
 
-          {mod.ungroupedItems.length > 0 && <div className="mt-2">{renderItems(null)}</div>}
+          {visible(mod.ungroupedItems).length > 0 && (
+            <div className="mt-2">{renderItems(null)}</div>
+          )}
 
           {mod.sections.length === 0 && mod.ungroupedItems.length === 0 && (
             <p className="mt-2 rounded-sm border border-dashed border-(--ssz-border-strong) p-5 text-center text-xs text-muted-foreground">
               {t('structure.noLessonsYet')}
+            </p>
+          )}
+
+          {filtering && allItems.length > 0 && visible(allItems).length === 0 && (
+            <p className="mt-2 rounded-sm border border-dashed border-(--ssz-border-strong) p-5 text-center text-xs text-muted-foreground">
+              {t('toolbar.noMatchesInModule')}
             </p>
           )}
 
@@ -478,6 +522,7 @@ export function CurriculumTree({
   schoolSlug,
   collapsed,
   onToggleCollapse,
+  filters,
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
@@ -486,6 +531,46 @@ export function CurriculumTree({
   /** Which of the edited module's own sections the picker is filing into. */
   const [addOwnLessonIn, setAddOwnLessonIn] = useState<string | null>(null);
   const editingModule = tree.containerType === 'module';
+
+  const materialLabel = useMaterialLabel();
+  const filtering = isFiltering(filters);
+  const matches = (item: CurriculumTreeItemNode) =>
+    matchesFilters(item, filters, materialLabel(item));
+  const moduleMatches = (mod: CurriculumTreeModuleNode) => moduleItems(mod).some(matches);
+  const levelMatches = (level: CurriculumTreeLevelNode) =>
+    level.modules.some(moduleMatches) || level.items.some(matches);
+
+  /**
+   * A search is a question about the whole course, so the tree answers it by
+   * opening what holds an answer and folding away what does not — including
+   * nodes the author had left open. Their own collapse state is untouched
+   * underneath and comes back the moment the filters are cleared.
+   */
+  const filterSignature = `${filters.query}|${filters.type}|${filters.state}`;
+  const [overrides, setOverrides] = useState<{ signature: string; keys: ReadonlySet<string> }>({
+    signature: filterSignature,
+    keys: new Set(),
+  });
+  // Overrides belong to the query that produced them. Comparing signatures
+  // discards stale ones on the next render, with no effect to reset them.
+  const filterOverrides = overrides.signature === filterSignature ? overrides.keys : EMPTY_KEYS;
+
+  function isExpanded(key: string, hasMatches: boolean) {
+    if (!filtering) return !collapsed.has(key);
+    // A caret must still work while filtering, so a manual toggle flips the
+    // derived answer for that node until the query changes again.
+    return filterOverrides.has(key) ? !hasMatches : hasMatches;
+  }
+
+  function toggleExpanded(key: string) {
+    if (!filtering) {
+      onToggleCollapse(key);
+      return;
+    }
+    const next = new Set(filterOverrides);
+    if (!next.delete(key)) next.add(key);
+    setOverrides({ signature: filterSignature, keys: next });
+  }
 
   function handleAddModule(levelSectionId: string | null) {
     if (isPending) return;
@@ -518,7 +603,7 @@ export function CurriculumTree({
 
       {tree.levels.map((level, levelIndex) => {
         const levelKey = levelCollapseKey(level);
-        const expanded = !collapsed.has(levelKey);
+        const expanded = isExpanded(levelKey, levelMatches(level));
         const selected = selectedId === level.id;
         const rolledUp: ContainerPublishState | null = rollUpLevelPublishState(level);
         const blockCount = level.modules.reduce(
@@ -556,7 +641,7 @@ export function CurriculumTree({
             >
               <Caret
                 expanded={expanded}
-                onToggle={() => onToggleCollapse(levelKey)}
+                onToggle={() => toggleExpanded(levelKey)}
                 label={expanded ? 'Collapse' : 'Expand'}
               />
               <Glyph className="bg-primary-100 text-primary-700">{levelIndex + 1}</Glyph>
@@ -622,8 +707,10 @@ export function CurriculumTree({
                     visibility={visibility}
                     ownerSchoolId={ownerSchoolId}
                     schoolSlug={schoolSlug}
-                    expanded={!collapsed.has(moduleCollapseKey(mod))}
-                    onToggleExpanded={() => onToggleCollapse(moduleCollapseKey(mod))}
+                    filters={filters}
+                    matches={matches}
+                    expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
+                    onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
                   />
                 ))}
 

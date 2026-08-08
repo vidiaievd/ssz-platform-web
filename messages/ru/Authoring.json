@@ -1259,5 +1259,19 @@
   },
   "stub": {
     "notAvailable": "пока недоступно"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Поиск уроков, блоков, упражнений…",
+    "allTypes": "Все типы блоков",
+    "typeVocab": "Лексика",
+    "typeText": "Текст и аудирование",
+    "typeGrammar": "Грамматика",
+    "typeExercises": "Упражнения",
+    "anyState": "Любое состояние",
+    "statePublished": "Опубликовано",
+    "stateEdited": "Изменено",
+    "stateDraft": "Черновик",
+    "clear": "Сбросить",
+    "noMatchesInModule": "Здесь нет ничего, что подходит под фильтры."
   }
 }

@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import type { CurriculumTree as CurriculumTreeData } from '@/features/content/types';
 
 import type { CurriculumTreeSelection } from '../types';
+import { EMPTY_FILTERS } from '../lib/structure-filters';
 import { CurriculumTree } from './curriculum-tree';
 
 const TREE: CurriculumTreeData = {
@@ -124,6 +125,7 @@ function InteractiveTree() {
       onChanged={() => {}}
       courseContainerId="course-1"
       schoolSlug="my-school"
+      filters={EMPTY_FILTERS}
       targetLanguage="no"
       difficultyLevel="A2"
       visibility="public"
@@ -146,6 +148,7 @@ type Story = StoryObj<typeof meta>;
 const commonArgs = {
   courseContainerId: 'course-1',
   schoolSlug: 'my-school',
+  filters: EMPTY_FILTERS,
   targetLanguage: 'no',
   difficultyLevel: 'A2',
   visibility: 'public',

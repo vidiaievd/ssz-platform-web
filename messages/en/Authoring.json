@@ -1259,5 +1259,19 @@
   },
   "stub": {
     "notAvailable": "not available yet"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search lessons, blocks, exercises…",
+    "allTypes": "All block types",
+    "typeVocab": "Vocabulary",
+    "typeText": "Text & listening",
+    "typeGrammar": "Grammar",
+    "typeExercises": "Exercises",
+    "anyState": "Any state",
+    "statePublished": "Published",
+    "stateEdited": "Edited",
+    "stateDraft": "Draft",
+    "clear": "Clear",
+    "noMatchesInModule": "Nothing here matches the filters."
   }
 }

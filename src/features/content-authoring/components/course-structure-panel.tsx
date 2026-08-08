@@ -14,9 +14,11 @@ import {
   findLevelOrModuleSelection,
   resolveSelection,
 } from '../lib/find-tree-item';
+import { EMPTY_FILTERS, type StructureFilters } from '../lib/structure-filters';
 import { CurriculumTree } from './curriculum-tree';
 import { CurriculumInspector } from './curriculum-inspector';
 import { OutlineRail } from './outline-rail';
+import { StructureToolbar } from './structure-toolbar';
 import { UnpublishedBanner } from './unpublished-banner';
 
 interface CourseStructurePanelProps {
@@ -72,6 +74,7 @@ export function CourseStructurePanel({
 }: CourseStructurePanelProps) {
   const t = useTranslations('Authoring');
   const [selection, setSelection] = useState<CurriculumTreeSelection | null>(null);
+  const [filters, setFilters] = useState<StructureFilters>(EMPTY_FILTERS);
   const { data: tree, isLoading, isError, refetch } = useCurriculumTree(containerId, versionId);
 
   async function handleChanged(selectId?: string, kind: 'level' | 'module' | 'item' = 'item') {
@@ -133,7 +136,10 @@ export function CourseStructurePanel({
       </div>
 
       <div className="ssz-surface self-start rounded-2xl border border-border p-3.5 shadow-[var(--ssz-shadow-xs)]">
-        <UnpublishedBanner tree={tree} onReview={onReview} />
+        <StructureToolbar filters={filters} onChange={setFilters} />
+        <div className="mt-2.5">
+          <UnpublishedBanner tree={tree} onReview={onReview} />
+        </div>
         <div className="mt-2.5">
           <CurriculumTree
             tree={tree}
@@ -149,6 +155,7 @@ export function CourseStructurePanel({
             ownerSchoolId={ownerSchoolId}
             collapsed={collapsed}
             onToggleCollapse={onToggleCollapse}
+            filters={filters}
           />
         </div>
       </div>

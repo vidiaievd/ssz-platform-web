@@ -1259,5 +1259,19 @@
   },
   "stub": {
     "notAvailable": "ikke tilgjengelig ennå"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Søk i leksjoner, blokker, øvelser…",
+    "allTypes": "Alle blokktyper",
+    "typeVocab": "Ordforråd",
+    "typeText": "Tekst og lytting",
+    "typeGrammar": "Grammatikk",
+    "typeExercises": "Øvelser",
+    "anyState": "Alle tilstander",
+    "statePublished": "Publisert",
+    "stateEdited": "Endret",
+    "stateDraft": "Utkast",
+    "clear": "Nullstill",
+    "noMatchesInModule": "Ingenting her passer med filtrene."
   }
 }
