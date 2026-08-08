@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -54,6 +54,19 @@ export function CourseEditorShell({
   const [publishOpen, setPublishOpen] = useState(searchParams.get('publish') === '1');
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
 
+  // The topbar is sticky and its height changes with the viewport (the action
+  // row wraps), so the sticky side panes cannot park below it on a fixed
+  // offset without either overlapping or leaving a gap.
+  const topbarRef = useRef<HTMLElement>(null);
+  const [topbarHeight, setTopbarHeight] = useState(0);
+  useEffect(() => {
+    const el = topbarRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => setTopbarHeight(el.offsetHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const { data: tree } = useCurriculumTree(container.id, draftVersionId);
   const pendingCount = collectPublishRows(tree, container.title).length;
 
@@ -75,8 +88,12 @@ export function CourseEditorShell({
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div
+      className="space-y-4"
+      style={{ '--structure-sticky-top': `${topbarHeight + 16}px` } as React.CSSProperties}
+    >
       <StructureTopbar
+        ref={topbarRef}
         title={container.title}
         coursesHref={`/school/${schoolSlug}/content`}
         state={deriveContainerState(container)}

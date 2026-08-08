@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import type { CurriculumTree } from '@/features/content/types';
 
 import { createSectionAction } from '../actions/section';
-import { levelCollapseKey, levelDomId } from '../lib/structure-nodes';
+import { levelCollapseKey, levelDomId, stripLevelPrefix } from '../lib/structure-nodes';
 
 interface OutlineRailProps {
   tree: CurriculumTree;
@@ -59,7 +59,7 @@ export function OutlineRail({
   return (
     <nav
       aria-label={t('outline.title')}
-      className="ssz-surface sticky top-4 flex flex-col gap-2 rounded-2xl border border-border p-3"
+      className="ssz-surface sticky top-[var(--structure-sticky-top,1rem)] flex max-h-[calc(100vh-var(--structure-sticky-top,1rem)-2rem)] flex-col gap-2 rounded-2xl border border-border p-3"
     >
       <h2 className="px-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
         {t('outline.title')}
@@ -68,7 +68,7 @@ export function OutlineRail({
       {tree.levels.length === 0 ? (
         <p className="px-1 pb-1 text-xs text-muted-foreground">{t('outline.empty')}</p>
       ) : (
-        <ul className="flex flex-col gap-0.5">
+        <ul className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
           {tree.levels.map((level, index) => {
             const hasUnpublished = level.modules.some((m) => m.publishState !== 'published');
             return (
@@ -94,7 +94,7 @@ export function OutlineRail({
                     {index + 1}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
-                    {level.title}
+                    {stripLevelPrefix(level.title)}
                   </span>
                   {hasUnpublished && (
                     <span

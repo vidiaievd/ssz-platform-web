@@ -29,6 +29,8 @@ interface StructureTopbarProps {
   settingsTrigger: React.ReactNode;
   /** The metric strip; a slot because it needs the tree, which the shell already holds. */
   metrics: React.ReactNode;
+  /** The shell measures the rendered header to park the sticky side panes below it. */
+  ref?: React.Ref<HTMLElement>;
 }
 
 /**
@@ -49,12 +51,16 @@ export function StructureTopbar({
   onReview,
   settingsTrigger,
   metrics,
+  ref,
 }: StructureTopbarProps) {
   const t = useTranslations('Authoring');
   const format = useFormatter();
 
   return (
-    <header className="ssz-surface sticky top-0 z-30 -mx-8 -mt-8 mb-4.5 border-b border-border px-8 pb-3.5 pt-5">
+    <header
+      ref={ref}
+      className="ssz-surface sticky top-0 z-30 -mx-8 -mt-8 mb-4.5 border-b border-border px-8 pb-3.5 pt-5"
+    >
       <nav className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground">
         <Link href={coursesHref} className="transition-colors hover:text-foreground">
           {t('breadcrumb.courses')}

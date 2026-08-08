@@ -75,6 +75,14 @@ describe('OutlineRail', () => {
     expect(screen.getByText('Utdanning')).toBeInTheDocument();
   });
 
+  // The badge already carries the number, so repeating "Leksjon 1 —" in the
+  // label spends the width the topic itself needs.
+  it('labels a level by its topic, without the numbered prefix', () => {
+    renderRail(makeTree([{ id: 'level-1', title: 'Leksjon 1 — Arbeidsliv', modules: [] }]));
+    expect(screen.getByText('Arbeidsliv')).toBeInTheDocument();
+    expect(screen.queryByText(/Leksjon 1/)).not.toBeInTheDocument();
+  });
+
   // The dot has to agree with the metric strip and the publish dialog, so it is
   // derived from module publish states rather than from anything rail-local.
   it('dots only the levels holding a module students cannot see', () => {
