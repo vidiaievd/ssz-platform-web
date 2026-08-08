@@ -41,7 +41,7 @@ interface CourseStructurePanelProps {
 
 function StructureSkeleton() {
   return (
-    <div className="grid grid-cols-1 items-start gap-4.5 xl:grid-cols-[minmax(190px,220px)_minmax(0,1fr)_minmax(280px,340px)]">
+    <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(180px,210px)_minmax(0,1fr)_minmax(300px,330px)]">
       <Skeleton className="hidden h-64 w-full rounded-2xl xl:block" />
       <Skeleton className="h-96 w-full rounded-2xl" />
       <Skeleton className="h-64 w-full rounded-2xl" />
@@ -117,7 +117,7 @@ export function CourseStructurePanel({
     // No `items-start`: the side columns must stretch to the row's full height,
     // or their sticky children have no room to travel and scroll away with the
     // tree. The tree card gets `self-start` back so it still hugs its content.
-    <div className="grid grid-cols-1 gap-4.5 xl:grid-cols-[minmax(190px,220px)_minmax(0,1fr)_minmax(280px,340px)]">
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(180px,210px)_minmax(0,1fr)_minmax(300px,330px)]">
       <div className="hidden xl:block">
         <OutlineRail
           tree={tree}

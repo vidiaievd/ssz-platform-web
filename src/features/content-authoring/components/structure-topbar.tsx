@@ -59,7 +59,7 @@ export function StructureTopbar({
   return (
     <header
       ref={ref}
-      className="ssz-surface sticky top-0 z-30 -mx-8 -mt-8 mb-4.5 border-b border-border px-8 pb-3.5 pt-5"
+      className="ssz-surface sticky top-0 z-30 -mt-6 mb-4.5 border-b border-border px-4 pb-3.5 pt-6"
     >
       <nav className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground">
         <Link href={coursesHref} className="transition-colors hover:text-foreground">
