@@ -619,7 +619,11 @@
     "preflightUnavailable": "Не вдалося завантажити перевірки готовності. Лічильники можуть бути недоступні.",
     "unpublishedBannerCount": "{count, plural, one {# елемент має} few {# елементи мають} many {# елементів мають} other {# елемента мають}} неопубліковані зміни.",
     "unpublishedBannerHint": "Студенти досі бачать останню опубліковану версію.",
-    "unpublishedBannerAction": "Переглянути"
+    "unpublishedBannerAction": "Переглянути",
+    "moduleCount": "{count, plural, one {# модуль} few {# модулі} many {# модулів} other {# модуля}}",
+    "minutes": "{count} хв",
+    "noModulesYet": "Модулів ще немає — додайте перший.",
+    "addLessonToSection": "Додати до «{section}»"
   },
   "settings": {
     "trigger": "Налаштування",

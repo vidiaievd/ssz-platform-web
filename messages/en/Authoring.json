@@ -619,7 +619,11 @@
     "preflightUnavailable": "Could not load readiness checks. Counts may be unavailable.",
     "unpublishedBannerCount": "{count, plural, one {# item has} other {# items have}} unpublished changes.",
     "unpublishedBannerHint": "Students still see the last published version.",
-    "unpublishedBannerAction": "Review"
+    "unpublishedBannerAction": "Review",
+    "moduleCount": "{count, plural, one {# module} other {# modules}}",
+    "minutes": "{count} min",
+    "noModulesYet": "No modules yet — add the first one.",
+    "addLessonToSection": "Add to {section}"
   },
   "settings": {
     "trigger": "Settings",

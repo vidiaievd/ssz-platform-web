@@ -48,6 +48,35 @@ export function stripLevelPrefix(title: string | null): string {
   return stripped || title;
 }
 
+/**
+ * Positional code shown on a module's badge — "1A", "2C", the way an author
+ * refers to a sub-lesson out loud.
+ *
+ * Derived, not stored: nothing in the domain carries a code, and deriving one
+ * means it always matches where the module actually sits. Past the 26th module
+ * in a level it falls back to a plain number rather than inventing "1AA".
+ */
+export function moduleCode(levelIndex: number, moduleIndex: number): string {
+  const suffix =
+    moduleIndex < 26 ? String.fromCharCode(65 + moduleIndex) : String(moduleIndex + 1);
+  return `${levelIndex + 1}${suffix}`;
+}
+
+/**
+ * The publish state to badge a level with. Levels are sections, not containers,
+ * so they have no state of their own — what an author means by "this Leksjon is
+ * not published" is that something inside it is not.
+ *
+ * `null` when everything under it is live, or when it holds no modules at all.
+ */
+export function rollUpLevelPublishState(
+  level: CurriculumTreeLevelNode,
+): 'draft' | 'pending_changes' | null {
+  if (level.modules.some((m) => m.publishState === 'pending_changes')) return 'pending_changes';
+  if (level.modules.some((m) => m.publishState === 'draft')) return 'draft';
+  return null;
+}
+
 /** Every node in the tree that can be collapsed — what "Collapse all" expands to. */
 export function allCollapseKeys(tree: CurriculumTree | undefined): string[] {
   if (!tree) return [];

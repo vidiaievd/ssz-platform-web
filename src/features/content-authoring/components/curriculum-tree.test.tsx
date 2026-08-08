@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
@@ -186,7 +186,15 @@ describe('CurriculumTree', () => {
 
   it('badges an unpublished module as a draft', () => {
     renderTree();
-    expect(screen.getByText('Draft')).toBeInTheDocument();
+    expect(within(screen.getByRole('article')).getByText('Draft')).toBeInTheDocument();
+  });
+
+  // A level is a section, not a container, so it has no state of its own. The
+  // badge an author expects on "Leksjon 1" is a roll-up of what is inside it.
+  it('rolls a module\u2019s state up onto its level', () => {
+    renderTree();
+    const levelHeader = screen.getByText('A1 — Beginner').closest('header')!;
+    expect(within(levelHeader).getByText('Draft')).toBeInTheDocument();
   });
 
   it('badges a module whose draft is ahead of what students see', () => {
@@ -207,8 +215,9 @@ describe('CurriculumTree', () => {
 
     renderTree(vi.fn(), vi.fn(), pendingTree);
 
-    expect(screen.getByText('Unpublished changes')).toBeInTheDocument();
-    expect(screen.queryByText('Draft')).not.toBeInTheDocument();
+    const moduleCard = within(screen.getByRole('article'));
+    expect(moduleCard.getByText('Unpublished changes')).toBeInTheDocument();
+    expect(moduleCard.queryByText('Draft')).not.toBeInTheDocument();
   });
 
   it('marks material students cannot open yet', () => {

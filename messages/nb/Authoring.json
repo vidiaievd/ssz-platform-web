@@ -619,7 +619,11 @@
     "preflightUnavailable": "Kunne ikke laste klargjøringssjekkene. Tallene kan mangle.",
     "unpublishedBannerCount": "{count, plural, one {# element har} other {# elementer har}} upubliserte endringer.",
     "unpublishedBannerHint": "Elevene ser fortsatt den sist publiserte versjonen.",
-    "unpublishedBannerAction": "Se gjennom"
+    "unpublishedBannerAction": "Se gjennom",
+    "moduleCount": "{count, plural, one {# modul} other {# moduler}}",
+    "minutes": "{count} min",
+    "noModulesYet": "Ingen moduler ennå — legg til den første.",
+    "addLessonToSection": "Legg til i {section}"
   },
   "settings": {
     "trigger": "Innstillinger",

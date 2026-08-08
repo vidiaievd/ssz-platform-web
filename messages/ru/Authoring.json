@@ -619,7 +619,11 @@
     "preflightUnavailable": "Не удалось загрузить проверки готовности. Счётчики могут быть недоступны.",
     "unpublishedBannerCount": "{count, plural, one {# элемент имеет} few {# элемента имеют} many {# элементов имеют} other {# элемента имеют}} неопубликованные изменения.",
     "unpublishedBannerHint": "Студенты по-прежнему видят последнюю опубликованную версию.",
-    "unpublishedBannerAction": "Просмотреть"
+    "unpublishedBannerAction": "Просмотреть",
+    "moduleCount": "{count, plural, one {# модуль} few {# модуля} many {# модулей} other {# модуля}}",
+    "minutes": "{count} мин",
+    "noModulesYet": "Модулей пока нет — добавьте первый.",
+    "addLessonToSection": "Добавить в «{section}»"
   },
   "settings": {
     "trigger": "Настройки",

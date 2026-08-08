@@ -113,7 +113,7 @@ export function OutlineRail({
         type="button"
         disabled={isPending}
         onClick={handleAddLevel}
-        className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-border-strong px-2 py-1.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+        className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-(--ssz-border-strong) px-2 py-1.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
         <Plus size={13} />
         {t('structure.addLevel')}
