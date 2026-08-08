@@ -20,6 +20,11 @@ export function moduleCollapseKey(module: CurriculumTreeModuleNode): string {
   return `module:${module.id}`;
 }
 
+/** DOM id of a level's row in the tree — the rail's jump target. */
+export function levelDomId(level: CurriculumTreeLevelNode): string {
+  return `structure-${levelCollapseKey(level)}`;
+}
+
 /** Every node in the tree that can be collapsed — what "Collapse all" expands to. */
 export function allCollapseKeys(tree: CurriculumTree | undefined): string[] {
   if (!tree) return [];

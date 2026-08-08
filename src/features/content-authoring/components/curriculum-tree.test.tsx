@@ -365,19 +365,6 @@ describe('CurriculumTree', () => {
     expect(screen.getByText('No lessons yet')).toBeInTheDocument();
   });
 
-  it('creates a new level and reports it for selection', async () => {
-    vi.mocked(createSectionAction).mockResolvedValue({
-      ok: true,
-      value: { sectionId: 'level-b1', position: 1 },
-    } as never);
-    const { onChanged } = renderTree();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Add level' }));
-
-    await waitFor(() => expect(onChanged).toHaveBeenCalledWith('level-b1', 'level'));
-    expect(createSectionAction).toHaveBeenCalledWith('course-1', 'New level');
-  });
-
   it('creates a new module under a level and reports it for selection', async () => {
     vi.mocked(createModuleAction).mockResolvedValue({
       ok: true,
@@ -401,18 +388,6 @@ describe('CurriculumTree', () => {
     );
   });
 
-  it('shows an error toast and does not report a change on creation failure', async () => {
-    vi.mocked(createSectionAction).mockResolvedValue({
-      ok: false,
-      error: { code: 'validation' },
-    } as never);
-    const { onChanged } = renderTree();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Add level' }));
-
-    await waitFor(() => expect(createSectionAction).toHaveBeenCalled());
-    expect(onChanged).not.toHaveBeenCalled();
-  });
   it('offers a module its own material, not more modules', () => {
     // The same screen edits courses and modules. Offering "Add module" in a
     // module left its lessons addable only from the parent course editor.

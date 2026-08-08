@@ -616,7 +616,10 @@
     "publishSummaryCoursePending": "В самом курсе есть неопубликованные изменения.",
     "publishSummaryModulesPending": "{count, plural, one {# модуль содержит} few {# модуля содержат} many {# модулей содержат} other {# модуля содержат}} неопубликованные изменения.",
     "publishSummaryModulesDraft": "{count, plural, one {Ещё не опубликован # модуль} few {Ещё не опубликованы # модуля} many {Ещё не опубликовано # модулей} other {Ещё не опубликовано # модуля}}.",
-    "preflightUnavailable": "Не удалось загрузить проверки готовности. Счётчики могут быть недоступны."
+    "preflightUnavailable": "Не удалось загрузить проверки готовности. Счётчики могут быть недоступны.",
+    "unpublishedBannerCount": "{count, plural, one {# элемент имеет} few {# элемента имеют} many {# элементов имеют} other {# элемента имеют}} неопубликованные изменения.",
+    "unpublishedBannerHint": "Студенты по-прежнему видят последнюю опубликованную версию.",
+    "unpublishedBannerAction": "Просмотреть"
   },
   "settings": {
     "trigger": "Настройки",
@@ -1241,5 +1244,10 @@
     "unpublished": "Не опубликовано",
     "hours": "{value} ч",
     "minutes": "{value} мин"
+  },
+  "outline": {
+    "title": "Структура",
+    "empty": "Уровней пока нет.",
+    "hasUnpublished": "Есть неопубликованные изменения"
   }
 }

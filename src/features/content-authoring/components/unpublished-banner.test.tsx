@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type {
@@ -8,7 +8,7 @@ import type {
   CurriculumTree as CurriculumTreeData,
 } from '@/features/content/types';
 
-import { CurriculumPublishSummary } from './curriculum-publish-summary';
+import { UnpublishedBanner } from './unpublished-banner';
 
 function makeTree(
   coursePublishState: ContainerPublishState,
@@ -44,52 +44,66 @@ function makeTree(
   };
 }
 
-function renderSummary(tree: CurriculumTreeData) {
+function renderBanner(tree: CurriculumTreeData, onReview = vi.fn()) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CurriculumPublishSummary tree={tree} />
+      <UnpublishedBanner tree={tree} onReview={onReview} />
     </NextIntlClientProvider>,
   );
+  return { onReview };
 }
 
-describe('CurriculumPublishSummary', () => {
+describe('UnpublishedBanner', () => {
   it('reports that everything is live when the course and its modules are published', () => {
-    renderSummary(makeTree('published', ['published', 'published']));
+    renderBanner(makeTree('published', ['published', 'published']));
 
     expect(screen.getByText('Everything students see is up to date.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Review' })).not.toBeInTheDocument();
   });
 
-  it('counts only the modules whose draft differs from the published version', () => {
-    renderSummary(makeTree('published', ['published', 'pending_changes', 'pending_changes']));
+  // The headline must match the metric strip and the publish dialog exactly, so
+  // it counts the same rows they do (BEHAVIOR.md §5.2).
+  it('counts every row the publish dialog would list', () => {
+    renderBanner(makeTree('pending_changes', ['published', 'pending_changes', 'draft']));
 
-    expect(screen.getByText('2 modules have unpublished changes.')).toBeInTheDocument();
-    expect(screen.queryByText(/up to date/)).not.toBeInTheDocument();
+    expect(screen.getByText('3 items have unpublished changes.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Students still see the last published version.'),
+    ).toBeInTheDocument();
   });
 
-  it('uses the singular form for one stale module', () => {
-    renderSummary(makeTree('published', ['pending_changes', 'published']));
+  it('uses the singular form for a single pending row', () => {
+    renderBanner(makeTree('published', ['pending_changes', 'published']));
 
-    expect(screen.getByText('1 module has unpublished changes.')).toBeInTheDocument();
+    expect(screen.getByText('1 item has unpublished changes.')).toBeInTheDocument();
   });
 
   it('separates never-published modules from stale ones', () => {
-    renderSummary(makeTree('published', ['draft', 'draft', 'pending_changes']));
+    renderBanner(makeTree('published', ['draft', 'draft', 'pending_changes']));
 
     expect(screen.getByText('1 module has unpublished changes.')).toBeInTheDocument();
     expect(screen.getByText('2 modules are not published yet.')).toBeInTheDocument();
   });
 
   it('calls out the course itself, separately from its modules', () => {
-    renderSummary(makeTree('pending_changes', ['published']));
+    renderBanner(makeTree('pending_changes', ['published']));
 
     expect(screen.getByText('The course itself has unpublished changes.')).toBeInTheDocument();
   });
 
   it('says students cannot open a course that was never published', () => {
-    renderSummary(makeTree('draft', ['published']));
+    renderBanner(makeTree('draft', ['published']));
 
     expect(
       screen.getByText('The course is not published — students cannot open it.'),
     ).toBeInTheDocument();
+  });
+
+  it('opens the publish review from the banner', () => {
+    const { onReview } = renderBanner(makeTree('published', ['draft']));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Review' }));
+
+    expect(onReview).toHaveBeenCalled();
   });
 });

@@ -15,8 +15,9 @@ import {
   resolveSelection,
 } from '../lib/find-tree-item';
 import { CurriculumTree } from './curriculum-tree';
-import { CurriculumPublishSummary } from './curriculum-publish-summary';
 import { CurriculumInspector } from './curriculum-inspector';
+import { OutlineRail } from './outline-rail';
+import { UnpublishedBanner } from './unpublished-banner';
 
 interface CourseStructurePanelProps {
   containerId: string;
@@ -32,17 +33,29 @@ interface CourseStructurePanelProps {
   /** Collapse keys of folded nodes; owned by the shell, which also drives Expand/Collapse all. */
   collapsed: ReadonlySet<string>;
   onToggleCollapse: (key: string) => void;
+  /** Unfolds one node — the rail needs this to jump into a collapsed level. */
+  onExpand: (key: string) => void;
+  /** Opens the publish dialog, which the shell owns. */
+  onReview: () => void;
 }
 
 function StructureSkeleton() {
   return (
-    <div className="grid grid-cols-1 items-start gap-4.5 lg:grid-cols-[1.5fr_1fr]">
+    <div className="grid grid-cols-1 items-start gap-4.5 xl:grid-cols-[minmax(190px,220px)_minmax(0,1fr)_minmax(280px,340px)]">
+      <Skeleton className="hidden h-64 w-full rounded-2xl xl:block" />
       <Skeleton className="h-96 w-full rounded-2xl" />
       <Skeleton className="h-64 w-full rounded-2xl" />
     </div>
   );
 }
 
+/**
+ * The three-pane workspace: outline rail · structure tree · inspector.
+ *
+ * The rail and the inspector are both sticky — an author works in the tree and
+ * needs the jump list and the fields of whatever is selected to stay put while
+ * it scrolls.
+ */
 export function CourseStructurePanel({
   containerId,
   versionId,
@@ -54,6 +67,8 @@ export function CourseStructurePanel({
   ownerSchoolId,
   collapsed,
   onToggleCollapse,
+  onExpand,
+  onReview,
 }: CourseStructurePanelProps) {
   const t = useTranslations('Authoring');
   const [selection, setSelection] = useState<CurriculumTreeSelection | null>(null);
@@ -99,30 +114,45 @@ export function CourseStructurePanel({
           : null;
 
   return (
-    <div className="grid grid-cols-1 items-start gap-4.5 lg:grid-cols-[1.5fr_1fr]">
-      <div className="ssz-surface rounded-2xl border border-border p-3.5">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-foreground">{t('structure.sectionTitle')}</h2>
-          <span className="text-xs text-muted-foreground">{t('structure.sectionHint')}</span>
-        </div>
-        <CurriculumPublishSummary tree={tree} className="mb-2.5" />
-        <CurriculumTree
+    <div className="grid grid-cols-1 items-start gap-4.5 xl:grid-cols-[minmax(190px,220px)_minmax(0,1fr)_minmax(280px,340px)]">
+      <div className="hidden xl:block">
+        <OutlineRail
           tree={tree}
-          selectedId={selectedId}
-          onSelect={setSelection}
-          onChanged={handleChanged}
           courseContainerId={containerId}
-          targetLanguage={targetLanguage}
-          difficultyLevel={difficultyLevel}
-          visibility={visibility}
-          accessTier={accessTier}
-          ownerSchoolId={ownerSchoolId}
-          collapsed={collapsed}
-          onToggleCollapse={onToggleCollapse}
+          selectedId={selectedId}
+          onExpand={onExpand}
+          onSelectLevel={(levelId) => {
+            const level = tree.levels.find((l) => l.id === levelId);
+            if (level) setSelection({ kind: 'level', level });
+          }}
+          onChanged={handleChanged}
         />
       </div>
+
+      <div className="ssz-surface rounded-2xl border border-border p-3.5">
+        <UnpublishedBanner tree={tree} onReview={onReview} />
+        <div className="mt-2.5">
+          <CurriculumTree
+            tree={tree}
+            selectedId={selectedId}
+            onSelect={setSelection}
+            onChanged={handleChanged}
+            courseContainerId={containerId}
+            targetLanguage={targetLanguage}
+            difficultyLevel={difficultyLevel}
+            visibility={visibility}
+            accessTier={accessTier}
+            ownerSchoolId={ownerSchoolId}
+            collapsed={collapsed}
+            onToggleCollapse={onToggleCollapse}
+          />
+        </div>
+      </div>
+
       <div className="ssz-surface sticky top-4 rounded-2xl border border-border p-4.5">
-        <h2 className="mb-3 text-sm font-bold text-foreground">{t('structure.inspectorTitle')}</h2>
+        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          {t('structure.inspectorTitle')}
+        </h2>
         <CurriculumInspector
           selection={selection}
           courseContainerId={containerId}

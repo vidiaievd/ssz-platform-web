@@ -616,7 +616,10 @@
     "publishSummaryCoursePending": "Сам курс має неопубліковані зміни.",
     "publishSummaryModulesPending": "{count, plural, one {# модуль має} few {# модулі мають} many {# модулів мають} other {# модуля мають}} неопубліковані зміни.",
     "publishSummaryModulesDraft": "{count, plural, one {Ще не опубліковано # модуль} few {Ще не опубліковано # модулі} many {Ще не опубліковано # модулів} other {Ще не опубліковано # модуля}}.",
-    "preflightUnavailable": "Не вдалося завантажити перевірки готовності. Лічильники можуть бути недоступні."
+    "preflightUnavailable": "Не вдалося завантажити перевірки готовності. Лічильники можуть бути недоступні.",
+    "unpublishedBannerCount": "{count, plural, one {# елемент має} few {# елементи мають} many {# елементів мають} other {# елемента мають}} неопубліковані зміни.",
+    "unpublishedBannerHint": "Студенти досі бачать останню опубліковану версію.",
+    "unpublishedBannerAction": "Переглянути"
   },
   "settings": {
     "trigger": "Налаштування",
@@ -1241,5 +1244,10 @@
     "unpublished": "Неопубліковано",
     "hours": "{value} год",
     "minutes": "{value} хв"
+  },
+  "outline": {
+    "title": "Структура",
+    "empty": "Рівнів ще немає.",
+    "hasUnpublished": "Є неопубліковані зміни"
   }
 }

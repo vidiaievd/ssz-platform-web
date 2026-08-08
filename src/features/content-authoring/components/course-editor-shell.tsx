@@ -12,7 +12,6 @@ import type { PreflightResult, SchoolRole } from '../types';
 import { useCurriculumTree } from '../api/use-curriculum-tree';
 import { allCollapseKeys } from '../lib/structure-nodes';
 import { CourseSettingsDrawer } from './course-settings-drawer';
-import { CourseStatusBanner } from './course-status-banner';
 import { CourseStructurePanel } from './course-structure-panel';
 import { collectPublishRows } from '../lib/publish-rows';
 import { deriveContainerState } from './container-state-badge';
@@ -58,6 +57,15 @@ export function CourseEditorShell({
   const { data: tree } = useCurriculumTree(container.id, draftVersionId);
   const pendingCount = collectPublishRows(tree, container.title).length;
 
+  const handleExpand = useCallback((key: string) => {
+    setCollapsed((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+  }, []);
+
   const handleToggleCollapse = useCallback((key: string) => {
     setCollapsed((prev) => {
       const next = new Set(prev);
@@ -90,12 +98,6 @@ export function CourseEditorShell({
         metrics={<StructureMetrics tree={tree} unpublished={pendingCount} />}
       />
 
-      <CourseStatusBanner
-        container={container}
-        blockerCount={preflightResult?.blockerCount}
-        warningCount={preflightResult?.warningCount}
-      />
-
       <ReviewPublishDialog
         container={container}
         draftVersionId={draftVersionId}
@@ -123,6 +125,8 @@ export function CourseEditorShell({
           ownerSchoolId={container.ownerSchoolId}
           collapsed={collapsed}
           onToggleCollapse={handleToggleCollapse}
+          onExpand={handleExpand}
+          onReview={() => setPublishOpen(true)}
         />
       ) : (
         <p className="text-muted-foreground py-10 text-center text-sm">

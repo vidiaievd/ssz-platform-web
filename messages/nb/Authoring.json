@@ -616,7 +616,10 @@
     "publishSummaryCoursePending": "Selve kurset har upubliserte endringer.",
     "publishSummaryModulesPending": "{count, plural, one {# modul har} other {# moduler har}} upubliserte endringer.",
     "publishSummaryModulesDraft": "{count, plural, one {# modul er} other {# moduler er}} ikke publisert ennå.",
-    "preflightUnavailable": "Kunne ikke laste klargjøringssjekkene. Tallene kan mangle."
+    "preflightUnavailable": "Kunne ikke laste klargjøringssjekkene. Tallene kan mangle.",
+    "unpublishedBannerCount": "{count, plural, one {# element har} other {# elementer har}} upubliserte endringer.",
+    "unpublishedBannerHint": "Elevene ser fortsatt den sist publiserte versjonen.",
+    "unpublishedBannerAction": "Se gjennom"
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -1241,5 +1244,10 @@
     "unpublished": "Upublisert",
     "hours": "{value} t",
     "minutes": "{value} min"
+  },
+  "outline": {
+    "title": "Oversikt",
+    "empty": "Ingen nivåer ennå.",
+    "hasUnpublished": "Har upubliserte endringer"
   }
 }

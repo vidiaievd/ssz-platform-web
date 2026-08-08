@@ -616,7 +616,10 @@
     "publishSummaryCoursePending": "The course itself has unpublished changes.",
     "publishSummaryModulesPending": "{count, plural, one {# module has} other {# modules have}} unpublished changes.",
     "publishSummaryModulesDraft": "{count, plural, one {# module is} other {# modules are}} not published yet.",
-    "preflightUnavailable": "Could not load readiness checks. Counts may be unavailable."
+    "preflightUnavailable": "Could not load readiness checks. Counts may be unavailable.",
+    "unpublishedBannerCount": "{count, plural, one {# item has} other {# items have}} unpublished changes.",
+    "unpublishedBannerHint": "Students still see the last published version.",
+    "unpublishedBannerAction": "Review"
   },
   "settings": {
     "trigger": "Settings",
@@ -1241,5 +1244,10 @@
     "unpublished": "Unpublished",
     "hours": "{value} h",
     "minutes": "{value} min"
+  },
+  "outline": {
+    "title": "Outline",
+    "empty": "No levels yet.",
+    "hasUnpublished": "Has unpublished changes"
   }
 }

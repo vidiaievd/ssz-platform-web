@@ -5,7 +5,6 @@ import { ChevronDown, ChevronRight, Layers, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
@@ -21,9 +20,8 @@ import type {
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
-import { levelCollapseKey, moduleCollapseKey } from '../lib/structure-nodes';
+import { levelCollapseKey, levelDomId, moduleCollapseKey } from '../lib/structure-nodes';
 import { createModuleAction } from '../actions/container';
-import { createSectionAction } from '../actions/section';
 import { PublishStateBadge } from './publish-state-badge';
 import { ItemChangeBadge } from './item-change-badge';
 import {
@@ -430,18 +428,6 @@ export function CurriculumTree({
     });
   }
 
-  function handleAddLevel() {
-    if (isPending) return;
-    startTransition(async () => {
-      const result = await createSectionAction(courseContainerId, t('structure.newLevelTitle'));
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      onChanged(result.value.sectionId, 'level');
-    });
-  }
-
   return (
     <div role="tree" className="flex flex-col gap-px">
       {tree.levels.length === 0 && (
@@ -451,7 +437,9 @@ export function CurriculumTree({
         const levelKey = levelCollapseKey(level);
         const expanded = !collapsed.has(levelKey);
         return (
-          <div key={levelKey}>
+          // The rail scrolls here by id; the anchor sits on the wrapper so the
+          // level's modules come into view with it.
+          <div key={levelKey} id={levelDomId(level)} className="scroll-mt-4">
             <TreeRow
               depth={0}
               expandable
@@ -562,13 +550,6 @@ export function CurriculumTree({
           </button>
         </div>
       )}
-      <div className="mt-1 pl-2">
-        <Button variant="ghost" size="sm" disabled={isPending} onClick={handleAddLevel}>
-          <Plus size={13} />
-          {t('structure.addLevel')}
-        </Button>
-      </div>
-
       {editingModule && (
         <AddLessonPicker
           open={addOwnLessonIn !== null}
