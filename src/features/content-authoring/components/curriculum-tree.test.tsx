@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
@@ -91,21 +92,44 @@ const TREE: CurriculumTreeData = {
   ],
 };
 
+/**
+ * Collapse is controlled by the shell in production, so the harness has to hold
+ * it — otherwise clicking a caret here would toggle nothing.
+ */
+function CollapsibleTree(props: {
+  tree: CurriculumTreeData;
+  onSelect: (selection: CurriculumTreeSelection) => void;
+  onChanged: () => void;
+}) {
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  return (
+    <CurriculumTree
+      tree={props.tree}
+      selectedId={null}
+      onSelect={props.onSelect}
+      onChanged={props.onChanged}
+      courseContainerId="course-1"
+      targetLanguage="no"
+      difficultyLevel="A2"
+      visibility="public"
+      accessTier="free_within_school"
+      ownerSchoolId="school-1"
+      collapsed={collapsed}
+      onToggleCollapse={(key) =>
+        setCollapsed((prev) => {
+          const next = new Set(prev);
+          if (!next.delete(key)) next.add(key);
+          return next;
+        })
+      }
+    />
+  );
+}
+
 function renderTree(onSelect = vi.fn(), onChanged = vi.fn(), tree: CurriculumTreeData = TREE) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CurriculumTree
-        tree={tree}
-        selectedId={null}
-        onSelect={onSelect}
-        onChanged={onChanged}
-        courseContainerId="course-1"
-        targetLanguage="no"
-        difficultyLevel="A2"
-        visibility="public"
-        accessTier="free_within_school"
-        ownerSchoolId="school-1"
-      />
+      <CollapsibleTree tree={tree} onSelect={onSelect} onChanged={onChanged} />
     </NextIntlClientProvider>,
   );
   return { onSelect, onChanged };
@@ -333,6 +357,8 @@ describe('CurriculumTree', () => {
           difficultyLevel="A2"
           visibility="public"
           accessTier="free_within_school"
+          collapsed={new Set()}
+          onToggleCollapse={vi.fn()}
         />
       </NextIntlClientProvider>,
     );

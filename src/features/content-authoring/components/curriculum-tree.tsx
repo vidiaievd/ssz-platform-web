@@ -21,6 +21,7 @@ import type {
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
+import { levelCollapseKey, moduleCollapseKey } from '../lib/structure-nodes';
 import { createModuleAction } from '../actions/container';
 import { createSectionAction } from '../actions/section';
 import { PublishStateBadge } from './publish-state-badge';
@@ -50,6 +51,13 @@ interface CurriculumTreeProps {
   accessTier: AccessTier;
   /** The course's owning school — inherited by every node created from the tree. */
   ownerSchoolId?: string | null;
+  /**
+   * Collapse keys (see `lib/structure-nodes`) of the nodes currently folded.
+   * Owned by the shell so the topbar's Expand/Collapse all can drive it; a key
+   * absent from the set means expanded, which is the default for a new node.
+   */
+  collapsed: ReadonlySet<string>;
+  onToggleCollapse: (key: string) => void;
 }
 
 interface TreeRowProps {
@@ -225,9 +233,13 @@ function ModuleNode({
   difficultyLevel,
   visibility,
   ownerSchoolId,
+  expanded,
+  onToggleExpanded,
 }: {
   module: CurriculumTreeModuleNode;
   index: number;
+  expanded: boolean;
+  onToggleExpanded: () => void;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
   onChanged: (selectId?: string, kind?: ChangeKind) => void;
@@ -240,7 +252,6 @@ function ModuleNode({
   ownerSchoolId?: string | null;
 }) {
   const t = useTranslations('Authoring');
-  const [expanded, setExpanded] = useState(true);
   const [addLessonOpen, setAddLessonOpen] = useState(false);
   const lessonTotal =
     mod.sections.reduce((sum, s) => sum + s.items.length, 0) + mod.ungroupedItems.length;
@@ -252,7 +263,7 @@ function ModuleNode({
         depth={1}
         expandable
         expanded={expanded}
-        onToggle={() => setExpanded((v) => !v)}
+        onToggle={onToggleExpanded}
         icon={
           <span className="flex h-5.5 w-5.5 items-center justify-center rounded-md bg-muted text-[11px] font-extrabold text-muted-foreground">
             {index + 1}
@@ -385,10 +396,11 @@ export function CurriculumTree({
   visibility,
   accessTier,
   ownerSchoolId,
+  collapsed,
+  onToggleCollapse,
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
-  const [expandedLevels, setExpandedLevels] = useState<Record<string, boolean>>({});
   const [isPending, startTransition] = useTransition();
   const [pendingLevelId, setPendingLevelId] = useState<string | null>(null);
   /** Which of the edited module's own sections the picker is filing into. */
@@ -435,16 +447,16 @@ export function CurriculumTree({
       {tree.levels.length === 0 && (
         <p className="py-6 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
       )}
-      {tree.levels.map((level, li) => {
-        const levelKey = level.id ?? `level-${li}`;
-        const expanded = expandedLevels[levelKey] ?? true;
+      {tree.levels.map((level) => {
+        const levelKey = levelCollapseKey(level);
+        const expanded = !collapsed.has(levelKey);
         return (
           <div key={levelKey}>
             <TreeRow
               depth={0}
               expandable
               expanded={expanded}
-              onToggle={() => setExpandedLevels((prev) => ({ ...prev, [levelKey]: !expanded }))}
+              onToggle={() => onToggleCollapse(levelKey)}
               icon={<Layers size={16} className="text-muted-foreground" />}
               label={level.title ?? ''}
               state={null}
@@ -478,6 +490,8 @@ export function CurriculumTree({
                     difficultyLevel={difficultyLevel}
                     visibility={visibility}
                     ownerSchoolId={ownerSchoolId}
+                    expanded={!collapsed.has(moduleCollapseKey(mod))}
+                    onToggleExpanded={() => onToggleCollapse(moduleCollapseKey(mod))}
                   />
                 ))}
                 {/* Material attached to the edited container itself. A module

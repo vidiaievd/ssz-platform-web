@@ -127,6 +127,8 @@ function InteractiveTree() {
       difficultyLevel="A2"
       visibility="public"
       accessTier="free_within_school"
+      collapsed={new Set()}
+      onToggleCollapse={() => {}}
     />
   );
 }
@@ -146,6 +148,8 @@ const commonArgs = {
   difficultyLevel: 'A2',
   visibility: 'public',
   accessTier: 'free_within_school',
+  collapsed: new Set<string>(),
+  onToggleCollapse: () => {},
 } as const;
 
 export const Default: Story = {

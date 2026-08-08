@@ -5,14 +5,8 @@ import { getTranslations } from 'next-intl/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Link } from '@/lib/i18n/navigation';
 import type { Container, ContainerVersion } from '@/features/content/types';
 import { CourseEditorShell } from '@/features/content-authoring/components/course-editor-shell';
-import {
-  ContainerStateBadge,
-  deriveContainerState,
-} from '@/features/content-authoring/components/container-state-badge';
-import { CourseStatusBanner } from '@/features/content-authoring/components/course-status-banner';
 import { getContainerPreflight } from '@/features/content-authoring/lib/get-container-preflight';
 import type { PreflightResult, SchoolRole } from '@/features/content-authoring/types';
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
@@ -55,11 +49,10 @@ export default async function ContainerDetailPage({
     throw e;
   }
 
-  const state = deriveContainerState(container);
-
   // Every container keeps exactly one draft version — resolve it once for both
   // the preflight banner (draft state only) and the curriculum structure tab.
   let draftVersionId: string | null = null;
+  let publishedVersionNumber: number | null = null;
   let preflight: PreflightResult | undefined;
   let preflightError = false;
   try {
@@ -69,6 +62,9 @@ export default async function ContainerDetailPage({
     });
     const draftVersion = versionsResp.items.find((v) => v.status === 'draft');
     draftVersionId = draftVersion?.id ?? null;
+    publishedVersionNumber =
+      versionsResp.items.find((v) => v.id === container.currentPublishedVersionId)?.versionNumber ??
+      null;
 
     // Also for an already-published container: editing it opens a new draft
     // version, and re-publishing needs the same pre-flight as the first release.
@@ -82,41 +78,6 @@ export default async function ContainerDetailPage({
 
   return (
     <main className="p-8 max-w-7xl mx-auto">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-5">
-        <Link
-          href={`/school/${schoolSlug}/content`}
-          className="hover:text-foreground transition-colors"
-        >
-          {t('breadcrumb.courses')}
-        </Link>
-        <span aria-hidden>/</span>
-        <span className="text-foreground font-medium truncate max-w-xs">{container.title}</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex flex-wrap items-start gap-2 mb-4">
-        <h1 className="text-2xl font-semibold">{container.title}</h1>
-        <ContainerStateBadge state={state} className="mt-1" />
-      </div>
-      {container.description && (
-        <p className="text-muted-foreground mb-4 text-sm">{container.description}</p>
-      )}
-
-      {/* Status banner */}
-      <div className="mb-6">
-        <CourseStatusBanner
-          container={container}
-          blockerCount={preflight?.blockerCount}
-          warningCount={preflight?.warningCount}
-        />
-        {preflightError && (
-          <p className="mt-2 text-xs text-destructive">
-            Could not load readiness checks. Counts may be unavailable.
-          </p>
-        )}
-      </div>
-
       <Suspense fallback={<TabsSkeleton />}>
         <CourseEditorShell
           container={container}
@@ -124,8 +85,12 @@ export default async function ContainerDetailPage({
           schoolRole={schoolRole}
           preflightResult={preflight}
           draftVersionId={draftVersionId}
+          publishedVersionNumber={publishedVersionNumber}
         />
       </Suspense>
+      {preflightError && (
+        <p className="mt-2 text-xs text-destructive">{t('structure.preflightUnavailable')}</p>
+      )}
     </main>
   );
 }

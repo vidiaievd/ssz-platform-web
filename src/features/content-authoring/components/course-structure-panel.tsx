@@ -29,6 +29,9 @@ interface CourseStructurePanelProps {
   accessTier: AccessTier;
   /** The course's owning school — new material inherits it, and `school_private` is invalid without it. */
   ownerSchoolId?: string | null;
+  /** Collapse keys of folded nodes; owned by the shell, which also drives Expand/Collapse all. */
+  collapsed: ReadonlySet<string>;
+  onToggleCollapse: (key: string) => void;
 }
 
 function StructureSkeleton() {
@@ -49,6 +52,8 @@ export function CourseStructurePanel({
   visibility,
   accessTier,
   ownerSchoolId,
+  collapsed,
+  onToggleCollapse,
 }: CourseStructurePanelProps) {
   const t = useTranslations('Authoring');
   const [selection, setSelection] = useState<CurriculumTreeSelection | null>(null);
@@ -112,6 +117,8 @@ export function CourseStructurePanel({
           visibility={visibility}
           accessTier={accessTier}
           ownerSchoolId={ownerSchoolId}
+          collapsed={collapsed}
+          onToggleCollapse={onToggleCollapse}
         />
       </div>
       <div className="ssz-surface sticky top-4 rounded-2xl border border-border p-4.5">

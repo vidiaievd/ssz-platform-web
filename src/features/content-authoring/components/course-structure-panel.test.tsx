@@ -67,6 +67,8 @@ function renderPanel() {
         difficultyLevel="A2"
         visibility="public"
         accessTier="free_within_school"
+        collapsed={new Set()}
+        onToggleCollapse={vi.fn()}
       />
     </NextIntlClientProvider>,
   );

@@ -578,7 +578,8 @@
     "note": "Обновляется при редактировании"
   },
   "breadcrumb": {
-    "courses": "Курсы"
+    "courses": "Курсы",
+    "structure": "Структура"
   },
   "structure": {
     "sectionTitle": "Учебный план",
@@ -614,7 +615,8 @@
     "publishSummaryCourseDraft": "Курс не опубликован — студенты не могут его открыть.",
     "publishSummaryCoursePending": "В самом курсе есть неопубликованные изменения.",
     "publishSummaryModulesPending": "{count, plural, one {# модуль содержит} few {# модуля содержат} many {# модулей содержат} other {# модуля содержат}} неопубликованные изменения.",
-    "publishSummaryModulesDraft": "{count, plural, one {Ещё не опубликован # модуль} few {Ещё не опубликованы # модуля} many {Ещё не опубликовано # модулей} other {Ещё не опубликовано # модуля}}."
+    "publishSummaryModulesDraft": "{count, plural, one {Ещё не опубликован # модуль} few {Ещё не опубликованы # модуля} many {Ещё не опубликовано # модулей} other {Ещё не опубликовано # модуля}}.",
+    "preflightUnavailable": "Не удалось загрузить проверки готовности. Счётчики могут быть недоступны."
   },
   "settings": {
     "trigger": "Настройки",
@@ -1222,5 +1224,22 @@
       "answerCheckSettings": "проверка",
       "estimatedDurationSeconds": "длительность"
     }
+  },
+  "topbar": {
+    "version": "v{number}",
+    "lastEdited": "Последнее изменение {date}",
+    "expandAll": "Развернуть всё",
+    "collapseAll": "Свернуть всё",
+    "previewAsStudent": "Посмотреть как студент"
+  },
+  "metrics": {
+    "levels": "Уровни",
+    "modules": "Модули",
+    "lessons": "Уроки",
+    "exercises": "Упражнения",
+    "estTime": "Прибл. время",
+    "unpublished": "Не опубликовано",
+    "hours": "{value} ч",
+    "minutes": "{value} мин"
   }
 }

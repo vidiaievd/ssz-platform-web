@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Settings, Upload } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,15 @@ import type { Container } from '@/features/content/types';
 
 import type { PreflightResult, SchoolRole } from '../types';
 import { useCurriculumTree } from '../api/use-curriculum-tree';
+import { allCollapseKeys } from '../lib/structure-nodes';
 import { CourseSettingsDrawer } from './course-settings-drawer';
+import { CourseStatusBanner } from './course-status-banner';
 import { CourseStructurePanel } from './course-structure-panel';
 import { collectPublishRows } from '../lib/publish-rows';
+import { deriveContainerState } from './container-state-badge';
 import { ReviewPublishDialog } from './review-publish-dialog';
+import { StructureMetrics } from './structure-metrics';
+import { StructureTopbar } from './structure-topbar';
 
 interface CourseEditorShellProps {
   container: Container;
@@ -22,12 +27,17 @@ interface CourseEditorShellProps {
   preflightResult?: PreflightResult;
   /** Draft version id (always present — containers keep one draft version). Null only on fetch failure. */
   draftVersionId: string | null;
+  /** Version number students currently see; null while the container has never been published. */
+  publishedVersionNumber: number | null;
 }
 
 /**
- * Primary authoring surface for a course: the curriculum tree + inspector,
- * with the Overview/Tags/Sharing/Danger-zone panels relocated into a
- * settings drawer (opened from the header). Replaces `AuthoringContainerTabs`.
+ * Primary authoring surface for a course: the topbar, the curriculum tree and
+ * the inspector, with the Overview/Tags/Sharing/Danger-zone panels relocated
+ * into a settings drawer. Replaces `AuthoringContainerTabs`.
+ *
+ * Collapse state lives here rather than in the tree because "Expand all" and
+ * "Collapse all" sit in the topbar, above the tree.
  */
 export function CourseEditorShell({
   container,
@@ -35,6 +45,7 @@ export function CourseEditorShell({
   schoolRole = 'owner',
   preflightResult,
   draftVersionId,
+  publishedVersionNumber,
 }: CourseEditorShellProps) {
   const t = useTranslations('Authoring');
   const searchParams = useSearchParams();
@@ -42,43 +53,63 @@ export function CourseEditorShell({
   // Opened straight from a lesson editor, which has no tree of its own to
   // review against and so links back here instead of publishing on its own.
   const [publishOpen, setPublishOpen] = useState(searchParams.get('publish') === '1');
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
 
   const { data: tree } = useCurriculumTree(container.id, draftVersionId);
   const pendingCount = collectPublishRows(tree, container.title).length;
 
+  const handleToggleCollapse = useCallback((key: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(key)) next.add(key);
+      return next;
+    });
+  }, []);
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end gap-1.5">
-        <Button variant="outline" size="sm" onClick={() => setPublishOpen(true)}>
-          <Upload className="size-4" />
-          {t('reviewPublish.trigger')}
-          {pendingCount > 0 && (
-            <span className="ml-1 rounded-full bg-warning-100 px-1.5 text-[11px] font-bold text-warning-700">
-              {pendingCount}
-            </span>
-          )}
-        </Button>
-        <ReviewPublishDialog
-          container={container}
-          draftVersionId={draftVersionId}
-          open={publishOpen}
-          onOpenChange={setPublishOpen}
-        />
-        <CourseSettingsDrawer
-          container={container}
-          schoolRole={schoolRole}
-          preflightResult={preflightResult}
-          draftVersionId={draftVersionId}
-          open={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          trigger={
-            <Button variant="ghost" size="sm">
-              <Settings className="size-4" />
-              {t('settings.trigger')}
-            </Button>
-          }
-        />
-      </div>
+      <StructureTopbar
+        title={container.title}
+        coursesHref={`/school/${schoolSlug}/content`}
+        state={deriveContainerState(container)}
+        versionNumber={publishedVersionNumber}
+        updatedAt={container.updatedAt}
+        pendingCount={pendingCount}
+        previewHref={
+          container.containerType === 'course' ? `/student/courses/${container.id}` : null
+        }
+        onExpandAll={() => setCollapsed(new Set())}
+        onCollapseAll={() => setCollapsed(new Set(allCollapseKeys(tree)))}
+        onReview={() => setPublishOpen(true)}
+        settingsTrigger={
+          <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
+            <Settings className="size-4" />
+            {t('settings.trigger')}
+          </Button>
+        }
+        metrics={<StructureMetrics tree={tree} unpublished={pendingCount} />}
+      />
+
+      <CourseStatusBanner
+        container={container}
+        blockerCount={preflightResult?.blockerCount}
+        warningCount={preflightResult?.warningCount}
+      />
+
+      <ReviewPublishDialog
+        container={container}
+        draftVersionId={draftVersionId}
+        open={publishOpen}
+        onOpenChange={setPublishOpen}
+      />
+      <CourseSettingsDrawer
+        container={container}
+        schoolRole={schoolRole}
+        preflightResult={preflightResult}
+        draftVersionId={draftVersionId}
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+      />
 
       {draftVersionId ? (
         <CourseStructurePanel
@@ -90,6 +121,8 @@ export function CourseEditorShell({
           visibility={container.visibility}
           accessTier={container.accessTier}
           ownerSchoolId={container.ownerSchoolId}
+          collapsed={collapsed}
+          onToggleCollapse={handleToggleCollapse}
         />
       ) : (
         <p className="text-muted-foreground py-10 text-center text-sm">

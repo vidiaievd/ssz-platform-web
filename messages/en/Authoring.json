@@ -13,7 +13,8 @@
     "archived": "Archived"
   },
   "breadcrumb": {
-    "courses": "Courses"
+    "courses": "Courses",
+    "structure": "Structure"
   },
   "sections": {
     "noSection": "No section",
@@ -614,7 +615,8 @@
     "publishSummaryCourseDraft": "The course is not published — students cannot open it.",
     "publishSummaryCoursePending": "The course itself has unpublished changes.",
     "publishSummaryModulesPending": "{count, plural, one {# module has} other {# modules have}} unpublished changes.",
-    "publishSummaryModulesDraft": "{count, plural, one {# module is} other {# modules are}} not published yet."
+    "publishSummaryModulesDraft": "{count, plural, one {# module is} other {# modules are}} not published yet.",
+    "preflightUnavailable": "Could not load readiness checks. Counts may be unavailable."
   },
   "settings": {
     "trigger": "Settings",
@@ -1222,5 +1224,22 @@
       "answerCheckSettings": "checking",
       "estimatedDurationSeconds": "duration"
     }
+  },
+  "topbar": {
+    "version": "v{number}",
+    "lastEdited": "Last edited {date}",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "previewAsStudent": "Preview as student"
+  },
+  "metrics": {
+    "levels": "Levels",
+    "modules": "Modules",
+    "lessons": "Lessons",
+    "exercises": "Exercises",
+    "estTime": "Est. time",
+    "unpublished": "Unpublished",
+    "hours": "{value} h",
+    "minutes": "{value} min"
   }
 }

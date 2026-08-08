@@ -578,7 +578,8 @@
     "note": "Оновлюється під час редагування"
   },
   "breadcrumb": {
-    "courses": "Курси"
+    "courses": "Курси",
+    "structure": "Структура"
   },
   "structure": {
     "sectionTitle": "Навчальний план",
@@ -614,7 +615,8 @@
     "publishSummaryCourseDraft": "Курс не опубліковано — студенти не можуть його відкрити.",
     "publishSummaryCoursePending": "Сам курс має неопубліковані зміни.",
     "publishSummaryModulesPending": "{count, plural, one {# модуль має} few {# модулі мають} many {# модулів мають} other {# модуля мають}} неопубліковані зміни.",
-    "publishSummaryModulesDraft": "{count, plural, one {Ще не опубліковано # модуль} few {Ще не опубліковано # модулі} many {Ще не опубліковано # модулів} other {Ще не опубліковано # модуля}}."
+    "publishSummaryModulesDraft": "{count, plural, one {Ще не опубліковано # модуль} few {Ще не опубліковано # модулі} many {Ще не опубліковано # модулів} other {Ще не опубліковано # модуля}}.",
+    "preflightUnavailable": "Не вдалося завантажити перевірки готовності. Лічильники можуть бути недоступні."
   },
   "settings": {
     "trigger": "Налаштування",
@@ -1222,5 +1224,22 @@
       "answerCheckSettings": "перевірка",
       "estimatedDurationSeconds": "тривалість"
     }
+  },
+  "topbar": {
+    "version": "v{number}",
+    "lastEdited": "Востаннє змінено {date}",
+    "expandAll": "Розгорнути все",
+    "collapseAll": "Згорнути все",
+    "previewAsStudent": "Переглянути як студент"
+  },
+  "metrics": {
+    "levels": "Рівні",
+    "modules": "Модулі",
+    "lessons": "Уроки",
+    "exercises": "Вправи",
+    "estTime": "Прибл. час",
+    "unpublished": "Неопубліковано",
+    "hours": "{value} год",
+    "minutes": "{value} хв"
   }
 }

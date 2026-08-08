@@ -578,7 +578,8 @@
     "note": "Oppdateres mens du redigerer"
   },
   "breadcrumb": {
-    "courses": "Kurs"
+    "courses": "Kurs",
+    "structure": "Struktur"
   },
   "structure": {
     "sectionTitle": "Pensum",
@@ -614,7 +615,8 @@
     "publishSummaryCourseDraft": "Kurset er ikke publisert — studentene kan ikke åpne det.",
     "publishSummaryCoursePending": "Selve kurset har upubliserte endringer.",
     "publishSummaryModulesPending": "{count, plural, one {# modul har} other {# moduler har}} upubliserte endringer.",
-    "publishSummaryModulesDraft": "{count, plural, one {# modul er} other {# moduler er}} ikke publisert ennå."
+    "publishSummaryModulesDraft": "{count, plural, one {# modul er} other {# moduler er}} ikke publisert ennå.",
+    "preflightUnavailable": "Kunne ikke laste klargjøringssjekkene. Tallene kan mangle."
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -1222,5 +1224,22 @@
       "answerCheckSettings": "sjekking",
       "estimatedDurationSeconds": "varighet"
     }
+  },
+  "topbar": {
+    "version": "v{number}",
+    "lastEdited": "Sist endret {date}",
+    "expandAll": "Utvid alle",
+    "collapseAll": "Slå sammen alle",
+    "previewAsStudent": "Forhåndsvis som elev"
+  },
+  "metrics": {
+    "levels": "Nivåer",
+    "modules": "Moduler",
+    "lessons": "Leksjoner",
+    "exercises": "Øvelser",
+    "estTime": "Est. tid",
+    "unpublished": "Upublisert",
+    "hours": "{value} t",
+    "minutes": "{value} min"
   }
 }
