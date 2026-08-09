@@ -82,6 +82,7 @@ import { DeleteNodeDialog, type DeleteNodeTarget } from './delete-node-dialog';
 import { useNodeDeletion } from '../hooks/use-node-deletion';
 import { useStructureUndo } from '../hooks/use-structure-undo';
 import { entryOrderUndo, sectionOrderUndo } from '../lib/structure-order-undo';
+import { describeRemoval, rowRemovalUndo } from '../lib/structure-restore';
 import { StubIconButton } from './stub-controls';
 import { BulkBar } from './bulk-bar';
 import { checkedBlocks } from '../lib/block-selection';
@@ -1086,6 +1087,11 @@ export function CurriculumTree({
    * left and the shortest path to retrying them.
    */
   async function deleteCheckedBlocks() {
+    // Described while the rows are still there — see `describeRemoval`.
+    const removals = new Map(
+      selectedBlocks.map((block) => [block.id, describeRemoval(tree, courseContainerId, block.id)]),
+    );
+
     const failedIds: string[] = [];
     for (const block of selectedBlocks) {
       const result = await removeContainerItemAction(block.containerId, block.id);
@@ -1094,6 +1100,16 @@ export function CurriculumTree({
     setCheckedIds(new Set(failedIds));
     if (failedIds.length > 0) {
       toast.error(t('bulk.deleteFailed', { count: failedIds.length }));
+    }
+
+    // Only what actually went: offering to restore a row that is still there
+    // would place it a second time.
+    const removed = selectedBlocks
+      .filter((block) => !failedIds.includes(block.id))
+      .map((block) => removals.get(block.id))
+      .filter((removal) => removal !== undefined && removal !== null);
+    if (removed.length > 0) {
+      recordUndo(rowRemovalUndo(t('undo.removedBlocks', { count: removed.length }), removed));
     }
   }
 

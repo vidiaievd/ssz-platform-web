@@ -9,7 +9,15 @@ import type { CurriculumTree } from '@/features/content/types';
 import { deleteSectionAction } from '../actions/section';
 import { removeContainerItemAction } from '../actions/container-item';
 import { moduleItems } from '../lib/structure-filters';
+import {
+  describeLevelRemoval,
+  describeRemoval,
+  levelRemovalUndo,
+  rowRemovalUndo,
+} from '../lib/structure-restore';
 import type { DeleteNodeTarget } from '../components/delete-node-dialog';
+
+import { useStructureUndo } from './use-structure-undo';
 
 export interface NodeDeletion {
   /** The node awaiting confirmation, or null when the dialog is closed. */
@@ -52,6 +60,8 @@ export function useNodeDeletion({
   onBulkDelete,
 }: UseNodeDeletionOptions): NodeDeletion {
   const tErrors = useTranslations('Errors');
+  const t = useTranslations('Authoring');
+  const { record } = useStructureUndo();
   const [target, setTarget] = useState<DeleteNodeTarget | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -64,6 +74,14 @@ export function useNodeDeletion({
         onChanged();
         return;
       }
+
+      // What it would take to put this back, read while the tree still holds
+      // it: after the request there is nothing left to describe.
+      const undoEntry =
+        tree &&
+        (node.kind === 'level'
+          ? levelUndoFor(tree, courseContainerId, node.id, t('undo.removed', { name: node.title }))
+          : rowUndoFor(tree, courseContainerId, node.id, t('undo.removed', { name: node.title })));
 
       // A block is unplaced from whichever container holds it — the module it
       // sits in, or the course itself for material kept outside a module.
@@ -85,6 +103,7 @@ export function useNodeDeletion({
         return;
       }
       setTarget(null);
+      if (undoEntry) record(undoEntry);
       onChanged();
     } finally {
       setPending(false);
@@ -98,4 +117,25 @@ export function useNodeDeletion({
     dismiss: () => setTarget(null),
     confirm: (node) => void run(node),
   };
+}
+
+function rowUndoFor(
+  tree: CurriculumTree,
+  courseContainerId: string,
+  itemId: string,
+  label: string,
+) {
+  const removal = describeRemoval(tree, courseContainerId, itemId);
+  return removal ? rowRemovalUndo(label, [removal]) : null;
+}
+
+function levelUndoFor(
+  tree: CurriculumTree,
+  courseContainerId: string,
+  levelId: string,
+  label: string,
+) {
+  const level = tree.levels.find((candidate) => candidate.id === levelId);
+  const removal = level ? describeLevelRemoval(tree, level) : null;
+  return removal ? levelRemovalUndo(label, courseContainerId, removal) : null;
 }

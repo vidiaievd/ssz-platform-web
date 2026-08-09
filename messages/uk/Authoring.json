@@ -1363,6 +1363,8 @@
     "nothing": "Немає чого скасовувати.",
     "renamed": "Перейменовано на «{name}».",
     "moved": "Переміщено «{name}».",
-    "movedToSection": "«{name}» переміщено в іншу секцію."
+    "movedToSection": "«{name}» переміщено в іншу секцію.",
+    "removed": "Вилучено «{name}».",
+    "removedBlocks": "{count, plural, one {Вилучено # блок.} few {Вилучено # блоки.} many {Вилучено # блоків.} other {Вилучено # блока.}}"
   }
 }

@@ -1363,6 +1363,8 @@
     "nothing": "Ingenting å angre.",
     "renamed": "Nytt navn: «{name}».",
     "moved": "Flyttet «{name}».",
-    "movedToSection": "Flyttet «{name}» til en annen seksjon."
+    "movedToSection": "Flyttet «{name}» til en annen seksjon.",
+    "removed": "Fjernet «{name}».",
+    "removedBlocks": "{count, plural, one {Fjernet # blokk.} other {Fjernet # blokker.}}"
   }
 }

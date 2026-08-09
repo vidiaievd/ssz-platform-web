@@ -1363,6 +1363,8 @@
     "nothing": "Nothing to undo.",
     "renamed": "Renamed to “{name}”.",
     "moved": "Moved “{name}”.",
-    "movedToSection": "Moved “{name}” to another section."
+    "movedToSection": "Moved “{name}” to another section.",
+    "removed": "Removed “{name}”.",
+    "removedBlocks": "{count, plural, one {Removed # block.} other {Removed # blocks.}}"
   }
 }

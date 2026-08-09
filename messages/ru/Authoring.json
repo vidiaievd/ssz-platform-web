@@ -1363,6 +1363,8 @@
     "nothing": "Отменять нечего.",
     "renamed": "Переименовано в «{name}».",
     "moved": "Перемещено «{name}».",
-    "movedToSection": "«{name}» перемещено в другую секцию."
+    "movedToSection": "«{name}» перемещено в другую секцию.",
+    "removed": "Удалено «{name}».",
+    "removedBlocks": "{count, plural, one {Удалён # блок.} few {Удалено # блока.} many {Удалено # блоков.} other {Удалено # блока.}}"
   }
 }
