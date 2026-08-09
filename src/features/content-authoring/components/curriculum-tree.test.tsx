@@ -36,12 +36,18 @@ vi.mock('../actions/container', () => ({
   createModuleAction: vi.fn(),
   renameContainerAction: vi.fn(),
 }));
+const routerPush = vi.fn();
+
 vi.mock('@/lib/i18n/navigation', () => ({
+  useRouter: () => ({ push: routerPush }),
   Link: ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -126,12 +132,13 @@ function CollapsibleTree(props: {
   onSelect: (selection: CurriculumTreeSelection) => void;
   onChanged: () => void;
   filters?: StructureFilters;
+  selectedId?: string | null;
 }) {
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   return (
     <CurriculumTree
       tree={props.tree}
-      selectedId={null}
+      selectedId={props.selectedId ?? null}
       onSelect={props.onSelect}
       onChanged={props.onChanged}
       courseContainerId="course-1"
@@ -159,10 +166,17 @@ function renderTree(
   onChanged = vi.fn(),
   tree: CurriculumTreeData = TREE,
   filters?: StructureFilters,
+  selectedId?: string,
 ) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <CollapsibleTree tree={tree} onSelect={onSelect} onChanged={onChanged} filters={filters} />
+      <CollapsibleTree
+        tree={tree}
+        onSelect={onSelect}
+        onChanged={onChanged}
+        filters={filters}
+        selectedId={selectedId}
+      />
     </NextIntlClientProvider>,
   );
   return { onSelect, onChanged };
@@ -177,6 +191,7 @@ beforeEach(() => {
   vi.mocked(assignItemSectionAction).mockReset();
   vi.mocked(removeContainerItemAction).mockReset();
   vi.mocked(deleteSectionAction).mockReset();
+  routerPush.mockReset();
 });
 
 describe('CurriculumTree', () => {
@@ -415,10 +430,9 @@ describe('CurriculumTree', () => {
       renderTree();
       const menu = await openItemMenu();
 
-      expect(within(menu).getByRole('menuitem', { name: 'Open lesson editor' })).toHaveAttribute(
-        'href',
-        '/school/my-school/content/module-1/lessons/item-1',
-      );
+      expect(
+        within(menu).getByRole('menuitem', { name: new RegExp('Open lesson editor') }),
+      ).toHaveAttribute('href', '/school/my-school/content/module-1/lessons/item-1');
     });
 
     // Duplicate and per-block publishing have no backend (plan 38 §3), so the
@@ -441,11 +455,11 @@ describe('CurriculumTree', () => {
       renderTree();
       const menu = await openItemMenu();
 
-      expect(within(menu).getByRole('menuitem', { name: 'Move up' })).toHaveAttribute(
+      expect(within(menu).getByRole('menuitem', { name: new RegExp('Move up') })).toHaveAttribute(
         'aria-disabled',
         'true',
       );
-      expect(within(menu).getByRole('menuitem', { name: 'Move down' })).toHaveAttribute(
+      expect(within(menu).getByRole('menuitem', { name: new RegExp('Move down') })).toHaveAttribute(
         'aria-disabled',
         'true',
       );
@@ -482,13 +496,10 @@ describe('CurriculumTree', () => {
 
       renderTree(vi.fn(), vi.fn(), twoItems);
       const menu = await openMenu('Andre tekst');
-      await userEvent.click(within(menu).getByRole('menuitem', { name: 'Move up' }));
+      await userEvent.click(within(menu).getByRole('menuitem', { name: new RegExp('Move up') }));
 
       await waitFor(() =>
-        expect(reorderContainerItemsAction).toHaveBeenCalledWith('module-1', [
-          'item-2',
-          'item-1',
-        ]),
+        expect(reorderContainerItemsAction).toHaveBeenCalledWith('module-1', ['item-2', 'item-1']),
       );
     });
 
@@ -519,7 +530,9 @@ describe('CurriculumTree', () => {
         screen.getByRole('button', { name: 'More actions for En vanlig arbeidsdag' }),
       );
       await userEvent.click(
-        within(await screen.findByRole('menu')).getByRole('menuitem', { name: 'Remove…' }),
+        within(await screen.findByRole('menu')).getByRole('menuitem', {
+          name: new RegExp('Remove…'),
+        }),
       );
 
       const dialog = await screen.findByRole('alertdialog');
@@ -543,7 +556,9 @@ describe('CurriculumTree', () => {
         screen.getByRole('button', { name: 'More actions for Samfunn og kultur' }),
       );
       await userEvent.click(
-        within(await screen.findByRole('menu')).getByRole('menuitem', { name: 'Remove…' }),
+        within(await screen.findByRole('menu')).getByRole('menuitem', {
+          name: new RegExp('Remove…'),
+        }),
       );
 
       const dialog = await screen.findByRole('alertdialog');
@@ -557,7 +572,9 @@ describe('CurriculumTree', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'More actions for A1 — Beginner' }));
       await userEvent.click(
-        within(await screen.findByRole('menu')).getByRole('menuitem', { name: 'Delete…' }),
+        within(await screen.findByRole('menu')).getByRole('menuitem', {
+          name: new RegExp('Delete…'),
+        }),
       );
 
       const dialog = await screen.findByRole('alertdialog');
@@ -565,9 +582,7 @@ describe('CurriculumTree', () => {
 
       await userEvent.click(within(dialog).getByRole('button', { name: 'Delete level' }));
 
-      await waitFor(() =>
-        expect(deleteSectionAction).toHaveBeenCalledWith('course-1', 'level-a1'),
-      );
+      await waitFor(() => expect(deleteSectionAction).toHaveBeenCalledWith('course-1', 'level-a1'));
     });
 
     it('keeps the node when the dialog is cancelled', async () => {
@@ -577,7 +592,9 @@ describe('CurriculumTree', () => {
         screen.getByRole('button', { name: 'More actions for En vanlig arbeidsdag' }),
       );
       await userEvent.click(
-        within(await screen.findByRole('menu')).getByRole('menuitem', { name: 'Remove…' }),
+        within(await screen.findByRole('menu')).getByRole('menuitem', {
+          name: new RegExp('Remove…'),
+        }),
       );
       await userEvent.click(
         within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Cancel' }),
@@ -629,9 +646,7 @@ describe('CurriculumTree', () => {
       };
       renderTree(vi.fn(), vi.fn(), treeWithOwnItem);
 
-      expect(
-        screen.getByRole('button', { name: 'Drag to move Kursintro' }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Drag to move Kursintro' })).toBeInTheDocument();
     });
   });
 
@@ -770,7 +785,9 @@ describe('CurriculumTree', () => {
       fireEvent.change(input, { target: { value: 'Arbeidsliv' } });
       fireEvent.keyDown(input, { key: 'Enter' });
 
-      await waitFor(() => expect(renameContainerAction).toHaveBeenCalledWith('module-1', 'Arbeidsliv'));
+      await waitFor(() =>
+        expect(renameContainerAction).toHaveBeenCalledWith('module-1', 'Arbeidsliv'),
+      );
       await waitFor(() => expect(onChanged).toHaveBeenCalled());
     });
 
@@ -878,10 +895,7 @@ describe('CurriculumTree', () => {
             modules: [
               {
                 ...module_!,
-                sections: [
-                  section!,
-                  { id: 'section-2', title: 'Øvelser', position: 1, items: [] },
-                ],
+                sections: [section!, { id: 'section-2', title: 'Øvelser', position: 1, items: [] }],
               },
             ],
           },
@@ -927,12 +941,7 @@ describe('CurriculumTree', () => {
 
       const withFilter = (filters?: StructureFilters) => (
         <NextIntlClientProvider locale="en" messages={enMessages}>
-          <CollapsibleTree
-            tree={TREE}
-            onSelect={vi.fn()}
-            onChanged={vi.fn()}
-            filters={filters}
-          />
+          <CollapsibleTree tree={TREE} onSelect={vi.fn()} onChanged={vi.fn()} filters={filters} />
         </NextIntlClientProvider>
       );
 
@@ -1059,5 +1068,93 @@ describe('CurriculumTree', () => {
 
     expect(screen.getByRole('button', { name: 'Add module' })).toBeInTheDocument();
     expect(screen.queryByTestId('add-lesson-picker')).not.toBeInTheDocument();
+  });
+  describe('the keyboard model', () => {
+    /** The fixture with a second block, so there is somewhere to move. */
+    const TWO_BLOCKS: CurriculumTreeData = {
+      ...TREE,
+      levels: [
+        {
+          ...TREE.levels[0]!,
+          modules: [
+            {
+              ...TREE.levels[0]!.modules[0]!,
+              sections: [
+                {
+                  ...TREE.levels[0]!.modules[0]!.sections[0]!,
+                  items: [
+                    TREE.levels[0]!.modules[0]!.sections[0]!.items[0]!,
+                    {
+                      ...TREE.levels[0]!.modules[0]!.sections[0]!.items[0]!,
+                      id: 'item-2',
+                      refId: 'lesson-2',
+                      title: 'Hva gjør du?',
+                      position: 1,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    it('moves the selected block with ⌥↓, planned the way a drag would be', async () => {
+      vi.mocked(reorderContainerItemsAction).mockResolvedValue({
+        ok: true,
+        value: undefined,
+      } as never);
+      renderTree(vi.fn(), vi.fn(), TWO_BLOCKS, undefined, 'item-1');
+
+      fireEvent.keyDown(document, { key: 'ArrowDown', altKey: true });
+
+      await waitFor(() =>
+        expect(reorderContainerItemsAction).toHaveBeenCalledWith('module-1', ['item-2', 'item-1']),
+      );
+    });
+
+    it('does nothing at the end of a list', async () => {
+      renderTree(vi.fn(), vi.fn(), TWO_BLOCKS, undefined, 'item-2');
+
+      fireEvent.keyDown(document, { key: 'ArrowDown', altKey: true });
+
+      await waitFor(() => expect(reorderContainerItemsAction).not.toHaveBeenCalled());
+    });
+
+    it('opens the inline rename on F2', () => {
+      renderTree(vi.fn(), vi.fn(), TREE, undefined, 'item-module-1');
+
+      fireEvent.keyDown(document, { key: 'F2' });
+
+      expect(screen.getByDisplayValue('Samfunn og kultur')).toBeInTheDocument();
+    });
+
+    it('asks before removing the selection on ⌫, counting what it holds', async () => {
+      renderTree(vi.fn(), vi.fn(), TREE, undefined, 'item-module-1');
+
+      fireEvent.keyDown(document, { key: 'Backspace' });
+
+      expect(
+        await screen.findByText('Remove “Samfunn og kultur” from this course?'),
+      ).toBeInTheDocument();
+    });
+
+    it('leaves the keys to the field being typed in', () => {
+      renderTree(vi.fn(), vi.fn(), TREE, undefined, 'item-module-1');
+      fireEvent.keyDown(document, { key: 'F2' });
+
+      fireEvent.keyDown(screen.getByDisplayValue('Samfunn og kultur'), { key: 'Backspace' });
+
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+
+    it('opens the selected block’s editor on Enter', () => {
+      renderTree(vi.fn(), vi.fn(), TREE, undefined, 'item-1');
+
+      fireEvent.keyDown(document, { key: 'Enter' });
+
+      expect(routerPush).toHaveBeenCalledWith('/school/my-school/content/module-1/lessons/item-1');
+    });
   });
 });

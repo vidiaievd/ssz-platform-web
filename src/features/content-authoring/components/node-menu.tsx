@@ -46,9 +46,9 @@ export interface NodeMenuProps {
  * marked, so the menu stays a truthful map of what this row can do — see
  * plan 38 §3.
  *
- * Keyboard hints are deliberately absent until the shortcuts themselves land
- * (phase H): a hint for a key that does nothing is the same broken promise as
- * a switch that does not save.
+ * Keyboard hints name the shortcuts the tree actually binds (phase H). The
+ * disabled items get none: a hint for a key that does nothing would be the
+ * same broken promise as a switch that does not save.
  */
 export function NodeMenu({
   kind,
@@ -79,6 +79,7 @@ export function NodeMenu({
 
   const groupLabel = t(`structure.${kind}` as 'structure.level');
   const notYet = <DropdownMenuShortcut>{tStub('short')}</DropdownMenuShortcut>;
+  const kbd = (keys: string) => <DropdownMenuShortcut>{keys}</DropdownMenuShortcut>;
 
   return (
     <DropdownMenu>
@@ -111,12 +112,15 @@ export function NodeMenu({
           }}
         >
           {t('structure.rename')}
-          {!onRename && notYet}
+          {onRename ? kbd('F2') : notYet}
         </DropdownMenuItem>
 
         {kind === 'item' && editorHref && (
           <DropdownMenuItem asChild>
-            <Link href={editorHref}>{t('structure.openLessonEditor')}</Link>
+            <Link href={editorHref}>
+              {t('structure.openLessonEditor')}
+              {kbd('↵')}
+            </Link>
           </DropdownMenuItem>
         )}
 
@@ -127,9 +131,11 @@ export function NodeMenu({
 
         <DropdownMenuItem disabled={!canMoveUp} onSelect={() => onMoveUp?.()}>
           {t('structure.moveUp')}
+          {kbd('⌥↑')}
         </DropdownMenuItem>
         <DropdownMenuItem disabled={!canMoveDown} onSelect={() => onMoveDown?.()}>
           {t('structure.moveDown')}
+          {kbd('⌥↓')}
         </DropdownMenuItem>
 
         {kind === 'item' && sections && onMoveToSection && (
@@ -174,6 +180,7 @@ export function NodeMenu({
             {/* A level is genuinely deleted; a module or block is only unplaced
                 here, and saying "delete" would overstate what happens. */}
             {kind === 'level' ? t('structure.delete') : t('structure.remove')}
+            {kbd('⌫')}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

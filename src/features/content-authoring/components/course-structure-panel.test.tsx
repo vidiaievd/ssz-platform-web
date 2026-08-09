@@ -22,7 +22,10 @@ vi.mock('../actions/section', () => ({
   createSectionAction: vi.fn(),
   reorderSectionsAction: vi.fn(),
 }));
+const routerPush = vi.fn();
+
 vi.mock('@/lib/i18n/navigation', () => ({
+  useRouter: () => ({ push: routerPush }),
   Link: ({
     href,
     children,

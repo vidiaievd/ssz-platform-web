@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { ChevronDown, Copy, GripVertical, Pencil, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -30,7 +30,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Link } from '@/lib/i18n/navigation';
+import { Link, useRouter } from '@/lib/i18n/navigation';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
   AccessTier,
@@ -68,13 +68,10 @@ import {
 } from '../actions/container-item';
 import { renameItemAction } from '../actions/rename-item';
 import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
+import { findItemWithModule } from '../lib/find-tree-item';
 import { PublishStateBadge } from './publish-state-badge';
 import { ItemChangeBadge } from './item-change-badge';
-import {
-  MoveSection,
-  computeReorderedItemIds,
-  moveInArray,
-} from './curriculum-item-reorder';
+import { MoveSection } from './curriculum-item-reorder';
 import { AddLessonPicker } from './add-lesson-picker';
 import { InlineRename } from './inline-rename';
 import { NodeMenu } from './node-menu';
@@ -613,9 +610,7 @@ function ModuleCard({
   selectedId,
   onSelect,
   onChanged,
-  tree,
   level,
-  courseContainerId,
   targetLanguage,
   difficultyLevel,
   visibility,
@@ -626,6 +621,7 @@ function ModuleCard({
   rename,
   check,
   onRequestDelete,
+  onNudge,
   expanded,
   onToggleExpanded,
 }: {
@@ -641,14 +637,14 @@ function ModuleCard({
   check: CheckControls;
   /** Opens the confirmation dialog, which the tree owns. */
   onRequestDelete: (target: DeleteNodeTarget) => void;
+  /** Moves a row of this module — or the module itself — one slot. Owned by the tree, which plans every move. */
+  onNudge: (id: string, direction: -1 | 1) => void;
   expanded: boolean;
   onToggleExpanded: () => void;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
   onChanged: (selectId?: string, kind?: ChangeKind) => void;
-  tree: CurriculumTreeData;
   level: CurriculumTreeLevelNode;
-  courseContainerId: string;
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
@@ -671,66 +667,6 @@ function ModuleCard({
   const allItems = [...mod.sections.flatMap((s) => s.items), ...mod.ungroupedItems];
   const minutes = allItems.reduce((sum, i) => sum + (i.durationMinutes ?? 0), 0);
   const sectionOptions = mod.sections.map((s) => ({ id: s.id, title: s.title }));
-
-  /** Reorder and section-move for one block, submitted as the module's full item order. */
-  function moveItem(siblings: CurriculumTreeItemNode[], index: number, direction: -1 | 1) {
-    const moved = siblings[index];
-    const before = flattenEntries(mod);
-    const reordered = moveInArray(siblings, index, direction);
-    reorderContainerItemsAction(mod.containerId, computeReorderedItemIds(mod, reordered)).then(
-      (result) => {
-        if (!result.ok) {
-          toast.error(tErrors(result.error.code));
-          return;
-        }
-        if (moved) {
-          recordUndo(
-            entryOrderUndo({
-              label: t('undo.moved', { name: moved.title ?? '' }),
-              containerId: mod.containerId,
-              itemId: moved.id,
-              entries: before,
-            }),
-          );
-        }
-        onChanged();
-      },
-    );
-  }
-
-  /**
-   * Move up/down is the keyboard's version of dragging onto the neighbour, so it
-   * asks the same planner for the answer. It used to build the order from the
-   * modules alone, which left out any material placed on the course itself — a
-   * partial order, which the reorder endpoint rejects outright.
-   */
-  function moveModule(direction: -1 | 1) {
-    const neighbour = level.modules[moduleIndex + direction];
-    if (!neighbour) return;
-    const plan = planCourseEntryDrop(
-      tree,
-      { type: 'courseEntry', itemId: mod.id },
-      { type: 'courseEntry', itemId: neighbour.id },
-    );
-    if (plan.kind !== 'reorder' && plan.kind !== 'move') return;
-
-    const before = flattenCourseEntries(tree);
-    reorderContainerItemsAction(courseContainerId, plan.orderedItemIds).then((result) => {
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      recordUndo(
-        entryOrderUndo({
-          label: t('undo.moved', { name: mod.title ?? '' }),
-          containerId: courseContainerId,
-          itemId: mod.id,
-          entries: before,
-        }),
-      );
-      onChanged();
-    });
-  }
 
   function moveItemToSection(itemId: string, sectionId: string | null) {
     const before = flattenEntries(mod);
@@ -791,8 +727,8 @@ function ModuleCard({
                     editorHref={`/school/${schoolSlug}/content/${mod.containerId}/lessons/${item.id}`}
                     canMoveUp={index > 0}
                     canMoveDown={index < siblings.length - 1}
-                    onMoveUp={() => moveItem(siblings, index, -1)}
-                    onMoveDown={() => moveItem(siblings, index, 1)}
+                    onMoveUp={() => onNudge(item.id, -1)}
+                    onMoveDown={() => onNudge(item.id, 1)}
                     sections={sectionOptions}
                     currentSectionId={section?.id ?? null}
                     onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
@@ -905,8 +841,8 @@ function ModuleCard({
             onRename={() => rename.begin(mod.id)}
             canMoveUp={moduleIndex > 0}
             canMoveDown={moduleIndex < level.modules.length - 1}
-            onMoveUp={() => moveModule(-1)}
-            onMoveDown={() => moveModule(1)}
+            onMoveUp={() => onNudge(mod.id, -1)}
+            onMoveDown={() => onNudge(mod.id, 1)}
             onDelete={() =>
               onRequestDelete({
                 kind: 'module',
@@ -1016,7 +952,9 @@ export function CurriculumTree({
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
+  const tStub = useTranslations('Authoring.stub');
   const { record: recordUndo } = useStructureUndo();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [pendingLevelId, setPendingLevelId] = useState<string | null>(null);
   /** Which of the edited module's own sections the picker is filing into. */
@@ -1417,6 +1355,180 @@ export function CurriculumTree({
     void applyLevelOrder(plan.orderedSectionIds, level.title ?? '');
   }
 
+  /**
+   * Moves whatever is selected one slot, whichever of the three lists it is in.
+   *
+   * The same planners the drags use answer it — a keyboard move *is* a drop
+   * onto the neighbour — so ⌥↑/↓ and dragging can never disagree about where a
+   * row lands (BEHAVIOR.md §5.3). No-op at either end of a list, and a block
+   * only moves within the group it is drawn in.
+   */
+  function nudge(id: string, direction: -1 | 1) {
+    const levelIndex = tree.levels.findIndex((level) => level.id === id);
+    if (levelIndex >= 0) {
+      moveLevel(levelIndex, direction);
+      return;
+    }
+
+    for (const level of tree.levels) {
+      const rows = [...level.modules.map((m) => m.id), ...level.items.map((i) => i.id)];
+      const rowIndex = rows.indexOf(id);
+      if (rowIndex >= 0) {
+        const neighbour = rows[rowIndex + direction];
+        if (!neighbour) return;
+        const plan = planCourseEntryDrop(
+          tree,
+          { type: 'courseEntry', itemId: id },
+          { type: 'courseEntry', itemId: neighbour },
+        );
+        if (plan.kind !== 'reorder' && plan.kind !== 'move') return;
+        void applyDropPlan(courseContainerId, id, plan, flattenCourseEntries(tree));
+        return;
+      }
+
+      for (const mod of level.modules) {
+        for (const group of [...mod.sections.map((s) => s.items), mod.ungroupedItems]) {
+          const index = group.findIndex((item) => item.id === id);
+          if (index < 0) continue;
+          const neighbour = group[index + direction];
+          if (!neighbour) return;
+          const plan = planBlockDrop(
+            mod,
+            { type: 'block', itemId: id, moduleContainerId: mod.containerId },
+            { type: 'block', itemId: neighbour.id, moduleContainerId: mod.containerId },
+          );
+          if (plan.kind !== 'reorder' && plan.kind !== 'move') return;
+          void applyDropPlan(mod.containerId, id, plan, flattenEntries(mod));
+          return;
+        }
+      }
+    }
+  }
+
+  /**
+   * What the delete dialog needs to say about a node, from its id alone — the
+   * keyboard has nothing else to go on.
+   */
+  function deleteTargetFor(id: string): DeleteNodeTarget | null {
+    const level = tree.levels.find((candidate) => candidate.id === id);
+    if (level?.id) {
+      return {
+        kind: 'level',
+        id: level.id,
+        title: level.title ?? '',
+        moduleCount: level.modules.length,
+        blockCount:
+          level.items.length +
+          level.modules.reduce((sum, mod) => sum + moduleItems(mod).length, 0),
+      };
+    }
+
+    const mod = tree.levels.flatMap((l) => l.modules).find((candidate) => candidate.id === id);
+    if (mod) {
+      return {
+        kind: 'module',
+        id: mod.id,
+        title: mod.title ?? '',
+        blockCount: moduleItems(mod).length,
+      };
+    }
+
+    const found = findItemWithModule(tree, id);
+    return found ? { kind: 'item', id, title: found.item.title ?? '' } : null;
+  }
+
+  /** Whether F2 has anything to open on this node — an exercise has no title of its own (B8). */
+  function canRename(id: string): boolean {
+    if (tree.levels.some((level) => level.id === id)) return true;
+    if (tree.levels.flatMap((l) => l.modules).some((mod) => mod.id === id)) return true;
+    const found = findItemWithModule(tree, id);
+    return found ? isRenamableItem(found.item) : false;
+  }
+
+  /**
+   * The keyboard model of the design: ⌥↑/↓ move · F2 rename · ⌫ delete ·
+   * ⌘D duplicate · Enter opens a block's editor (BEHAVIOR.md §3).
+   *
+   * Bound to the document rather than to the tree, because the selection is
+   * shared with the inspector: an author working in the fields on the right
+   * still expects ⌫ to act on the row they can see is selected. What is typed
+   * into a field is left alone.
+   */
+  function handleShortcut(event: KeyboardEvent) {
+    const target = event.target as HTMLElement | null;
+    if (
+      target?.isContentEditable ||
+      target?.tagName === 'INPUT' ||
+      target?.tagName === 'TEXTAREA'
+    ) {
+      return;
+    }
+
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd') {
+      event.preventDefault();
+      // Duplicating needs an endpoint content-service does not have (§3 B1).
+      toast(`${t('structure.duplicate')} — ${tStub('notAvailable')}`);
+      return;
+    }
+
+    // Removing acts on the ticked rows when there are any — the bulk bar is
+    // what the author is looking at — and on the selection otherwise.
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      if (selectedBlocks.length > 0) {
+        event.preventDefault();
+        deletion.request({
+          kind: 'blocks',
+          id: '',
+          title: '',
+          blockCount: selectedBlocks.length,
+        });
+        return;
+      }
+      if (!selectedId) return;
+      const nodeTarget = deleteTargetFor(selectedId);
+      if (!nodeTarget) return;
+      event.preventDefault();
+      deletion.request(nodeTarget);
+      return;
+    }
+
+    if (!selectedId) return;
+
+    if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      event.preventDefault();
+      nudge(selectedId, event.key === 'ArrowUp' ? -1 : 1);
+      return;
+    }
+
+    if (event.key === 'F2') {
+      if (!canRename(selectedId)) return;
+      event.preventDefault();
+      rename.begin(selectedId);
+      return;
+    }
+
+    if (event.key === 'Enter' && target?.tagName !== 'BUTTON' && target?.tagName !== 'A') {
+      const found = findItemWithModule(tree, selectedId);
+      if (!found) return;
+      event.preventDefault();
+      router.push(
+        `/school/${schoolSlug}/content/${found.moduleContainerId}/lessons/${found.item.id}`,
+      );
+    }
+  }
+
+  // Bound once, reaching the current handler through a ref: it closes over the
+  // tree and the selection, both of which change on every edit.
+  const shortcutRef = useRef(handleShortcut);
+  useEffect(() => {
+    shortcutRef.current = handleShortcut;
+  });
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => shortcutRef.current(event);
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   /** The current title of any node, for labelling an undo and for reverting a rename. */
   function titleOf(id: string): string | null {
     const level = tree.levels.find((l) => l.id === id);
@@ -1684,9 +1796,7 @@ export function CurriculumTree({
                       selectedId={selectedId}
                       onSelect={onSelect}
                       onChanged={onChanged}
-                      tree={tree}
                       level={level}
-                      courseContainerId={courseContainerId}
                       targetLanguage={targetLanguage}
                       difficultyLevel={difficultyLevel}
                       visibility={visibility}
@@ -1697,6 +1807,7 @@ export function CurriculumTree({
                       rename={rename}
                       check={check}
                       onRequestDelete={deletion.request}
+                      onNudge={nudge}
                       expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
                       onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
                     />
