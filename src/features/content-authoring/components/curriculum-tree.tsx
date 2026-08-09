@@ -620,6 +620,7 @@ function ModuleCard({
         }}
         moduleContainerId={mod.containerId}
         sectionId={addLessonIn ?? null}
+        sectionTitle={mod.sections.find((sec) => sec.id === addLessonIn)?.title ?? null}
         targetLanguage={targetLanguage}
         difficultyLevel={difficultyLevel}
         visibility={visibility}

@@ -2,10 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -45,6 +43,8 @@ interface AddLessonPickerProps {
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
+  /** Names the section in the dialog, so a section-scoped ＋ says where its material will land. */
+  sectionTitle?: string | null;
   /** The course's owning school — required for `school_private` material. */
   ownerSchoolId?: string | null;
   /** Called after the draft item is created, so the caller can refetch the tree and select it. */
@@ -57,11 +57,21 @@ function isLessonKind(kind: MaterialKind): kind is LessonKind {
   return (LESSON_KINDS as readonly MaterialKind[]).includes(kind);
 }
 
+/**
+ * Reading material, in the order an author builds a sub-lesson: new words, then
+ * the text and its recordings, then the grammar behind it. `exercise` is absent
+ * because exercises are offered by template in their own group — picking
+ * "exercise" and then a template was a step that asked a question the author
+ * had already answered.
+ */
+const MATERIAL_GROUP: readonly MaterialKind[] = MATERIAL_KINDS.filter((k) => k !== 'exercise');
+
 export function AddLessonPicker({
   open,
   onOpenChange,
   moduleContainerId,
   sectionId,
+  sectionTitle,
   targetLanguage,
   difficultyLevel,
   visibility,
@@ -78,10 +88,7 @@ export function AddLessonPicker({
      template, and the template is immutable once the backend has bound it. So
      picking "exercise" opens a second step rather than creating anything. */
   const [pendingTemplate, setPendingTemplate] = useState<CreatableExerciseType | null>(null);
-  const [choosingTemplate, setChoosingTemplate] = useState(false);
-
   function reset() {
-    setChoosingTemplate(false);
     setPendingKind(null);
     setPendingTemplate(null);
   }
@@ -93,10 +100,6 @@ export function AddLessonPicker({
 
   function handlePick(kind: MaterialKind) {
     if (isPending) return;
-    if (kind === 'exercise') {
-      setChoosingTemplate(true);
-      return;
-    }
     setPendingKind(kind);
     const title = t('addLesson.defaultTitle', {
       type: tContent(`materialType.${kind}` as 'materialType.text'),
@@ -204,99 +207,99 @@ export function AddLessonPicker({
     onCreated(result.value.itemId);
   }
 
-  if (choosingTemplate) {
-    const exerciseDef = getLessonTypeDefinition('exercise');
-    const ExerciseIcon = exerciseDef.icon;
-
-    return (
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t('addLesson.exerciseTypeTitle')}</DialogTitle>
-            <DialogDescription>{t('addLesson.exerciseTypeDescription')}</DialogDescription>
-          </DialogHeader>
-
-          <div className="grid max-h-[60vh] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
-            {CREATABLE_EXERCISE_TYPES.map((code) => (
-              <button
-                key={code}
-                type="button"
-                disabled={isPending}
-                onClick={() => handlePickTemplate(code)}
-                className="flex items-center gap-3 rounded-lg border border-border p-3 text-left transition-colors hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md"
-                  style={{
-                    background: `color-mix(in oklch, var(${exerciseDef.hueVar}) 16%, transparent)`,
-                  }}
-                >
-                  <ExerciseIcon size={16} style={{ color: `var(${exerciseDef.hueVar})` }} />
-                </span>
-                <span className="text-sm font-semibold text-foreground">
-                  {tExercises(`types.${code}`)}
-                </span>
-                {isPending && pendingTemplate === code && (
-                  <span className="ml-auto text-xs text-muted-foreground">…</span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          <div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={isPending}
-              onClick={() => setChoosingTemplate(false)}
-            >
-              <ChevronLeft className="mr-1.5 h-4 w-4" />
-              {t('addLesson.back')}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  const exerciseDef = getLessonTypeDefinition('exercise');
+  const ExerciseIcon = exerciseDef.icon;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{t('addLesson.title')}</DialogTitle>
-          <DialogDescription>{t('addLesson.description')}</DialogDescription>
+          <DialogDescription>
+            {sectionTitle
+              ? t('addLesson.intoSection', { section: sectionTitle })
+              : t('addLesson.description')}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-2.5">
-          {MATERIAL_KINDS.map((kind) => {
-            const def = getLessonTypeDefinition(kind);
-            const Icon = def.icon;
-            return (
-              <button
-                key={kind}
-                type="button"
-                disabled={isPending}
-                onClick={() => handlePick(kind)}
-                className="flex items-center gap-3 rounded-lg border border-border p-3 text-left transition-colors hover:bg-subtle disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md"
-                  style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}
-                >
-                  <Icon size={16} style={{ color: `var(${def.hueVar})` }} />
-                </span>
-                <span className="text-sm font-semibold text-foreground">
-                  {tContent(`materialType.${kind}` as 'materialType.text')}
-                </span>
-                {isPending && pendingKind === kind && (
-                  <span className="ml-auto text-xs text-muted-foreground">…</span>
-                )}
-              </button>
-            );
-          })}
+        <div className="max-h-[60vh] space-y-4 overflow-y-auto">
+          <section>
+            <h3 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              {t('addLesson.groupMaterial')}
+            </h3>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {MATERIAL_GROUP.map((kind) => {
+                const def = getLessonTypeDefinition(kind);
+                const Icon = def.icon;
+                return (
+                  <PickerCard
+                    key={kind}
+                    label={tContent(`materialType.${kind}` as 'materialType.text')}
+                    hueVar={def.hueVar}
+                    icon={<Icon size={16} style={{ color: `var(${def.hueVar})` }} />}
+                    disabled={isPending}
+                    busy={pendingKind === kind}
+                    onClick={() => handlePick(kind)}
+                  />
+                );
+              })}
+            </div>
+          </section>
+
+          <section>
+            <h3 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              {t('addLesson.groupExercises')}
+            </h3>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {CREATABLE_EXERCISE_TYPES.map((code) => (
+                <PickerCard
+                  key={code}
+                  label={tExercises(`types.${code}`)}
+                  hueVar={exerciseDef.hueVar}
+                  icon={<ExerciseIcon size={16} style={{ color: `var(${exerciseDef.hueVar})` }} />}
+                  disabled={isPending}
+                  busy={pendingTemplate === code}
+                  onClick={() => handlePickTemplate(code)}
+                />
+              ))}
+            </div>
+          </section>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PickerCard({
+  label,
+  hueVar,
+  icon,
+  disabled,
+  busy,
+  onClick,
+}: {
+  label: string;
+  hueVar: string;
+  icon: React.ReactNode;
+  disabled: boolean;
+  busy: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="flex items-center gap-3 rounded-lg border border-border p-3 text-left transition-colors hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <span
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md"
+        style={{ background: `color-mix(in oklch, var(${hueVar}) 16%, transparent)` }}
+      >
+        {icon}
+      </span>
+      <span className="text-sm font-semibold text-foreground">{label}</span>
+      {busy && <span className="ml-auto text-xs text-muted-foreground">…</span>}
+    </button>
   );
 }

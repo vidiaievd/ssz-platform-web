@@ -648,9 +648,9 @@
     "description": "Choose a material type to add to this module.",
     "defaultTitle": "New {type}",
     "defaultInstructions": "Complete the exercise.",
-    "exerciseTypeTitle": "Choose an exercise type",
-    "exerciseTypeDescription": "The type decides how the exercise is answered and graded, and cannot be changed afterwards.",
-    "back": "Back"
+    "groupMaterial": "Reading & vocabulary",
+    "groupExercises": "Exercises",
+    "intoSection": "The new material goes into “{section}”."
   },
   "editor": {
     "backToCourse": "Back to course",

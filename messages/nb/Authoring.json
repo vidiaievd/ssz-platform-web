@@ -648,9 +648,9 @@
     "description": "Velg en materialtype som skal legges til i denne modulen.",
     "defaultTitle": "Ny {type}",
     "defaultInstructions": "Løs oppgaven.",
-    "exerciseTypeTitle": "Velg oppgavetype",
-    "exerciseTypeDescription": "Typen bestemmer hvordan oppgaven besvares og vurderes, og kan ikke endres etterpå.",
-    "back": "Tilbake"
+    "groupMaterial": "Lesing og ordforråd",
+    "groupExercises": "Øvelser",
+    "intoSection": "Det nye materialet havner i «{section}»."
   },
   "editor": {
     "backToCourse": "Tilbake til kurset",

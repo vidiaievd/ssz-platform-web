@@ -648,9 +648,9 @@
     "description": "Оберіть тип матеріалу, який потрібно додати до цього модуля.",
     "defaultTitle": "Новий матеріал: {type}",
     "defaultInstructions": "Виконайте вправу.",
-    "exerciseTypeTitle": "Оберіть тип вправи",
-    "exerciseTypeDescription": "Тип визначає, як вправа виконується та оцінюється, і його не можна змінити пізніше.",
-    "back": "Назад"
+    "groupMaterial": "Читання і лексика",
+    "groupExercises": "Вправи",
+    "intoSection": "Новий матеріал потрапить до «{section}»."
   },
   "editor": {
     "backToCourse": "Назад до курсу",
