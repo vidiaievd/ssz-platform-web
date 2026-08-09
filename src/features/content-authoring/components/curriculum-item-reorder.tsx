@@ -7,7 +7,6 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import type {
-  CurriculumTree,
   CurriculumTreeItemNode,
   CurriculumTreeModuleNode,
   CurriculumTreeSectionNode,
@@ -23,24 +22,6 @@ export function moveInArray<T>(items: readonly T[], index: number, direction: -1
   const [moved] = copy.splice(index, 1);
   copy.splice(newIndex, 0, moved as T);
   return copy;
-}
-
-/** Every module id across the whole course, in submission order — mirrors `flattenModuleItemIds` below but one level up (course → levels → modules). */
-function flattenModuleIds(tree: CurriculumTree): string[] {
-  return tree.levels.flatMap((l) => l.modules.map((m) => m.id));
-}
-
-/** Recomputes the full course-version module order after one level's modules were reordered in isolation (same splice-in-place approach as `computeReorderedItemIds`). */
-export function computeReorderedModuleIds(
-  tree: CurriculumTree,
-  reorderedLevelModules: CurriculumTreeModuleNode[],
-): string[] {
-  const flattened = flattenModuleIds(tree);
-  const reorderedIds = new Set(reorderedLevelModules.map((m) => m.id));
-  const insertAt = flattened.findIndex((id) => reorderedIds.has(id));
-  const withoutLevel = flattened.filter((id) => !reorderedIds.has(id));
-  withoutLevel.splice(insertAt, 0, ...reorderedLevelModules.map((m) => m.id));
-  return withoutLevel;
 }
 
 interface MoveUpDownProps {

@@ -595,9 +595,16 @@ describe('CurriculumTree', () => {
       ).toBeInTheDocument();
     });
 
-    // Material placed on the edited container itself has no module item list to
-    // be ordered within — the handle would promise a move that cannot happen.
-    it('leaves the container\u2019s own material without one', () => {
+    it('gives a module a drag handle of its own', () => {
+      renderTree();
+      expect(
+        screen.getByRole('button', { name: 'Drag to move module Samfunn og kultur' }),
+      ).toBeInTheDocument();
+    });
+
+    // Modules and the material placed on the course itself share one item list,
+    // so both are draggable and both must be in the order that gets submitted.
+    it("gives the container's own material a handle too", () => {
       const treeWithOwnItem: CurriculumTreeData = {
         ...TREE,
         levels: [
@@ -615,8 +622,9 @@ describe('CurriculumTree', () => {
       };
       renderTree(vi.fn(), vi.fn(), treeWithOwnItem);
 
-      expect(screen.getByText('Kursintro')).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Drag to move Kursintro' })).toBeNull();
+      expect(
+        screen.getByRole('button', { name: 'Drag to move Kursintro' }),
+      ).toBeInTheDocument();
     });
   });
 

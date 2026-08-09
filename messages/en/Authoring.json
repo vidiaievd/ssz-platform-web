@@ -638,7 +638,8 @@
     "remove": "Remove…",
     "delete": "Delete…",
     "dragBlock": "Drag to move {name}",
-    "dragCrossModule": "Moving a block to another module is not available yet."
+    "dragCrossModule": "Moving a block to another module is not available yet.",
+    "dragModule": "Drag to move module {name}"
   },
   "settings": {
     "trigger": "Settings",

@@ -638,7 +638,8 @@
     "remove": "Fjern…",
     "delete": "Slett…",
     "dragBlock": "Dra for å flytte {name}",
-    "dragCrossModule": "Å flytte en blokk til en annen modul er ikke tilgjengelig ennå."
+    "dragCrossModule": "Å flytte en blokk til en annen modul er ikke tilgjengelig ennå.",
+    "dragModule": "Dra for å flytte modulen {name}"
   },
   "settings": {
     "trigger": "Innstillinger",

@@ -75,7 +75,6 @@ import { ItemChangeBadge } from './item-change-badge';
 import {
   MoveSection,
   computeReorderedItemIds,
-  computeReorderedModuleIds,
   moveInArray,
 } from './curriculum-item-reorder';
 import { AddLessonPicker } from './add-lesson-picker';
@@ -87,9 +86,13 @@ import { BulkBar } from './bulk-bar';
 import { checkedBlocks } from '../lib/block-selection';
 import {
   applyBlockPreview,
+  applyCourseEntryPreview,
   planBlockDrop,
+  planCourseEntryDrop,
   type BlockDragData,
   type BlockDropPlan,
+  type CourseEntryDragData,
+  type LevelDropData,
   type StructureDragData,
 } from '../lib/structure-dnd';
 
@@ -326,6 +329,55 @@ function BlockDragCard({ item }: { item: CurriculumTreeItemNode }) {
   );
 }
 
+/**
+ * A level as a place modules go. Wraps its body in both a droppable — so an
+ * empty level can still be aimed at — and the sortable list of its rows.
+ */
+function LevelDropZone({
+  levelId,
+  rowIds,
+  className,
+  children,
+}: {
+  levelId: string | null;
+  rowIds: string[];
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const { active, isOver, setNodeRef } = useDroppable({
+    id: `level:${levelId ?? 'ungrouped'}`,
+    data: { type: 'level', levelId } satisfies LevelDropData,
+  });
+  // A block passing overhead is on its way somewhere inside a module; lighting
+  // the level up would promise it a home it cannot take.
+  const receiving = (active?.data.current as StructureDragData | undefined)?.type === 'courseEntry';
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(className, isOver && receiving && 'bg-primary-50/40 dark:bg-primary-900/10')}
+    >
+      <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
+        {children}
+      </SortableContext>
+    </div>
+  );
+}
+
+/** The same, for a module card — a whole lesson travelling between levels. */
+function ModuleDragCard({ module: mod }: { module: CurriculumTreeModuleNode }) {
+  return (
+    <div className="flex w-fit max-w-120 cursor-grabbing items-center gap-2 rounded-sm border border-primary-200 bg-surface px-2 py-2 shadow-[var(--ssz-shadow-lg)]">
+      <GripVertical size={13} className="shrink-0 text-muted-foreground" />
+      <span className="truncate text-sm font-semibold text-foreground">{mod.title}</span>
+      {mod.titleEn && (
+        <span className="truncate text-xs text-muted-foreground">{mod.titleEn}</span>
+      )}
+      <PublishStateBadge state={mod.publishState} />
+    </div>
+  );
+}
+
 // ── block row ────────────────────────────────────────────────────────────────
 
 function BlockRow({
@@ -348,8 +400,12 @@ function BlockRow({
   courseContainerId: string;
   rename: RenameControls;
   check: CheckControls;
-  /** What this row carries while dragged. `null` on rows that are not sortable. */
-  drag: BlockDragData | null;
+  /**
+   * What this row carries while dragged: a block belongs to its module's item
+   * list, a piece of the course's own material to the course's. `null` on rows
+   * that are not sortable.
+   */
+  drag: BlockDragData | CourseEntryDragData | null;
   menu?: React.ReactNode;
 }) {
   const t = useTranslations('Authoring');
@@ -519,6 +575,12 @@ function ModuleCard({
   const tErrors = useTranslations('Errors');
   const [addLessonIn, setAddLessonIn] = useState<string | null | undefined>(undefined);
   const selected = selectedId === mod.id;
+  // A module is a row of the course's own item list, which is what makes it
+  // draggable between levels — same list, different group.
+  const { attributes, isDragging, listeners, setNodeRef, transform, transition } = useSortable({
+    id: mod.id,
+    data: { type: 'courseEntry', itemId: mod.id } satisfies CourseEntryDragData,
+  });
   const filtering = isFiltering(filters);
   const visible = (items: CurriculumTreeItemNode[]) => items.filter(matches);
 
@@ -540,12 +602,23 @@ function ModuleCard({
     );
   }
 
+  /**
+   * Move up/down is the keyboard's version of dragging onto the neighbour, so it
+   * asks the same planner for the answer. It used to build the order from the
+   * modules alone, which left out any material placed on the course itself — a
+   * partial order, which the reorder endpoint rejects outright.
+   */
   function moveModule(direction: -1 | 1) {
-    const reordered = moveInArray(level.modules, moduleIndex, direction);
-    reorderContainerItemsAction(
-      courseContainerId,
-      computeReorderedModuleIds(tree, reordered),
-    ).then((result) => {
+    const neighbour = level.modules[moduleIndex + direction];
+    if (!neighbour) return;
+    const plan = planCourseEntryDrop(
+      tree,
+      { type: 'courseEntry', itemId: mod.id },
+      { type: 'courseEntry', itemId: neighbour.id },
+    );
+    if (plan.kind !== 'reorder' && plan.kind !== 'move') return;
+
+    reorderContainerItemsAction(courseContainerId, plan.orderedItemIds).then((result) => {
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;
@@ -622,7 +695,14 @@ function ModuleCard({
   }
 
   return (
-    <article className="mt-2 overflow-hidden rounded-sm border border-border">
+    <article
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className={cn(
+        'mt-2 overflow-hidden rounded-sm border border-border',
+        isDragging && 'opacity-30',
+      )}
+    >
       <header
         role="treeitem"
         aria-selected={selected}
@@ -643,6 +723,22 @@ function ModuleCard({
             : 'bg-surface hover:bg-subtle',
         )}
       >
+        <button
+          type="button"
+          aria-label={t('structure.dragModule', { name: mod.title ?? '' })}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            'shrink-0 cursor-grab touch-none text-muted-foreground transition-opacity',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            selected
+              ? 'opacity-100'
+              : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
+          )}
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical size={13} />
+        </button>
         <Caret
           expanded={expanded}
           onToggle={onToggleExpanded}
@@ -935,52 +1031,129 @@ export function CurriculumTree({
 
   /**
    * What the pointer is carrying, and where the tree is currently pretending it
-   * would land. The preview is the plan already applied to the module, so the
-   * rows part around the pointer instead of standing still behind a marker.
+   * would land. The preview is the plan already applied, so the rows part around
+   * the pointer instead of standing still behind a marker.
+   *
+   * Two scopes, because two lists are in play: blocks belong to a module's item
+   * list, while modules and the course's own material belong to the course's.
    */
-  const [draggingBlock, setDraggingBlock] = useState<CurriculumTreeItemNode | null>(null);
-  const [preview, setPreview] = useState<{
-    moduleContainerId: string;
-    itemId: string;
-    plan: BlockDropPlan;
-  } | null>(null);
+  const [dragging, setDragging] = useState<
+    | { kind: 'block'; item: CurriculumTreeItemNode }
+    | { kind: 'module'; module: CurriculumTreeModuleNode }
+    | null
+  >(null);
+  const [preview, setPreview] = useState<
+    | { scope: 'block'; moduleContainerId: string; itemId: string; plan: BlockDropPlan }
+    | { scope: 'course'; itemId: string; plan: BlockDropPlan }
+    | null
+  >(null);
 
   const findModule = (containerId: string) =>
     tree.levels.flatMap((level) => level.modules).find((m) => m.containerId === containerId);
+  const findCourseRow = (itemId: string) => {
+    const mod = tree.levels.flatMap((l) => l.modules).find((m) => m.id === itemId);
+    if (mod) return { kind: 'module' as const, module: mod };
+    const item = [...tree.levels.flatMap((l) => l.items), ...tree.ungroupedItems].find(
+      (i) => i.id === itemId,
+    );
+    return item ? { kind: 'block' as const, item } : null;
+  };
 
-  /** The module as the drag would leave it — what gets rendered mid-flight. */
+  /** The tree and the module as the drag would leave them — what gets rendered mid-flight. */
+  const viewTree =
+    preview?.scope === 'course' ? applyCourseEntryPreview(tree, preview.itemId, preview.plan) : tree;
   function withPreview(mod: CurriculumTreeModuleNode) {
-    if (!preview || preview.moduleContainerId !== mod.containerId) return mod;
+    if (preview?.scope !== 'block' || preview.moduleContainerId !== mod.containerId) return mod;
     return applyBlockPreview(mod, preview.itemId, preview.plan);
+  }
+
+  /**
+   * The two lists are drawn inside one another, so the pointer is often over a
+   * row of the wrong one — a module dragged across an open lesson is nearest to
+   * that lesson's blocks. Rather than answering "nothing", each drag reads the
+   * target as the row of *its own* list that contains it.
+   */
+  function resolveOver(active: StructureDragData, over: StructureDragData | null) {
+    if (!over) return null;
+    if (active.type === 'courseEntry') {
+      if (over.type === 'courseEntry' || over.type === 'level') return over;
+      // Inside some module: aim at that module's own row.
+      const mod = findModule(over.moduleContainerId);
+      return mod ? ({ type: 'courseEntry', itemId: mod.id } satisfies CourseEntryDragData) : null;
+    }
+    if (active.type === 'block') {
+      if (over.type === 'block' || over.type === 'section') return over;
+      // Over a module header or a level: that is a cross-module drop, which the
+      // planner is told about in the only way it understands — a section of
+      // another container (plan 38 §3 B3).
+      if (over.type === 'courseEntry') {
+        const mod = tree.levels.flatMap((l) => l.modules).find((m) => m.id === over.itemId);
+        if (mod) {
+          return { type: 'section', moduleContainerId: mod.containerId, sectionId: null } as const;
+        }
+      }
+      return null;
+    }
+    return null;
+  }
+
+  /** The plan a drag would carry out, whichever of the two lists it is in. */
+  function planFor(active: StructureDragData, over: StructureDragData | null) {
+    const target = resolveOver(active, over);
+    if (active.type === 'block') {
+      const mod = findModule(active.moduleContainerId);
+      if (!mod) return null;
+      return {
+        containerId: mod.containerId,
+        itemId: active.itemId,
+        preview: {
+          scope: 'block' as const,
+          moduleContainerId: mod.containerId,
+          itemId: active.itemId,
+        },
+        plan: planBlockDrop(mod, active, target),
+      };
+    }
+    if (active.type === 'courseEntry') {
+      return {
+        containerId: courseContainerId,
+        itemId: active.itemId,
+        preview: { scope: 'course' as const, itemId: active.itemId },
+        plan: planCourseEntryDrop(tree, active, target),
+      };
+    }
+    return null;
   }
 
   function handleDragStart(event: DragStartEvent) {
     const active = event.active.data.current as StructureDragData | undefined;
-    if (active?.type !== 'block') return;
-    const mod = findModule(active.moduleContainerId);
-    setDraggingBlock(mod ? (moduleItems(mod).find((i) => i.id === active.itemId) ?? null) : null);
+    if (active?.type === 'block') {
+      const mod = findModule(active.moduleContainerId);
+      const item = mod ? moduleItems(mod).find((i) => i.id === active.itemId) : undefined;
+      setDragging(item ? { kind: 'block', item } : null);
+      return;
+    }
+    if (active?.type === 'courseEntry') setDragging(findCourseRow(active.itemId));
   }
 
   function handleDragOver(event: DragOverEvent) {
     const active = event.active.data.current as StructureDragData | undefined;
-    if (active?.type !== 'block') return;
-    const mod = findModule(active.moduleContainerId);
-    if (!mod) return;
+    if (!active) return;
+    const resolved = planFor(active, (event.over?.data.current ?? null) as StructureDragData | null);
+    if (!resolved) return;
 
-    const over = (event.over?.data.current ?? null) as StructureDragData | null;
-    const plan = planBlockDrop(mod, active, over);
-    if (plan.kind === 'reorder' || plan.kind === 'move') {
-      setPreview({ moduleContainerId: mod.containerId, itemId: active.itemId, plan });
+    if (resolved.plan.kind === 'reorder' || resolved.plan.kind === 'move') {
+      setPreview({ ...resolved.preview, plan: resolved.plan });
       return;
     }
-    // A block hovering over its own previewed position answers "nothing to do",
+    // A row hovering over its own previewed position answers "nothing to do",
     // and acting on that would snap it back to where it started — out from under
     // the pointer. Only a target it cannot land on clears the preview.
-    if (plan.kind === 'cross-module') setPreview(null);
+    if (resolved.plan.kind === 'cross-module') setPreview(null);
   }
 
   function endDrag() {
-    setDraggingBlock(null);
+    setDragging(null);
     setPreview(null);
   }
 
@@ -988,34 +1161,29 @@ export function CurriculumTree({
     // The overlay goes at once; the preview stays until the saved order comes
     // back, or the row would drop into its old place and hop to the new one a
     // moment later.
-    setDraggingBlock(null);
+    setDragging(null);
 
     const active = event.active.data.current as StructureDragData | undefined;
-    const mod =
-      active?.type === 'block' ? findModule(active.moduleContainerId) : undefined;
-    if (!active || active.type !== 'block' || !mod) {
+    const resolved = active
+      ? planFor(active, (event.over?.data.current ?? null) as StructureDragData | null)
+      : null;
+    if (!resolved || resolved.plan.kind === 'none' || resolved.plan.kind === 'cross-module') {
       setPreview(null);
+      if (resolved?.plan.kind === 'cross-module') toast(t('structure.dragCrossModule'));
       return;
     }
 
-    const over = (event.over?.data.current ?? null) as StructureDragData | null;
-    const plan = planBlockDrop(mod, active, over);
-    if (plan.kind === 'none' || plan.kind === 'cross-module') {
-      setPreview(null);
-      if (plan.kind === 'cross-module') toast(t('structure.dragCrossModule'));
-      return;
-    }
-    setPreview({ moduleContainerId: mod.containerId, itemId: active.itemId, plan });
-    void applyBlockDrop(mod.containerId, active.itemId, plan);
+    setPreview({ ...resolved.preview, plan: resolved.plan });
+    void applyDropPlan(resolved.containerId, resolved.itemId, resolved.plan);
   }
 
   /**
    * Re-filing and ordering are two requests: the API can change an item's
    * section or the container's item order, not both at once. Order goes last,
-   * so a failed re-file leaves the block where it was rather than resorted
-   * inside a section it never reached.
+   * so a failed re-file leaves the row where it was rather than resorted inside
+   * a group it never reached.
    */
-  async function applyBlockDrop(
+  async function applyDropPlan(
     containerId: string,
     itemId: string,
     plan: Extract<BlockDropPlan, { kind: 'reorder' | 'move' }>,
@@ -1143,11 +1311,11 @@ export function CurriculumTree({
       onDragCancel={endDrag}
     >
       <div role="tree">
-        {tree.levels.length === 0 && (
+        {viewTree.levels.length === 0 && (
           <p className="py-6 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
         )}
 
-        {tree.levels.map((level, levelIndex) => {
+        {viewTree.levels.map((level, levelIndex) => {
           const levelKey = levelCollapseKey(level);
           const expanded = isExpanded(levelKey, levelMatches(level));
           const selected = selectedId === level.id;
@@ -1259,7 +1427,11 @@ export function CurriculumTree({
               </header>
 
               {expanded && (
-                <div className="px-3 pb-3 pl-4 pt-2">
+                <LevelDropZone
+                  levelId={level.id ?? null}
+                  rowIds={[...level.modules.map((m) => m.id), ...level.items.map((i) => i.id)]}
+                  className="px-3 pb-3 pl-4 pt-2"
+                >
                   {level.modules.length === 0 && level.items.length === 0 && !editingModule && (
                     <p className="rounded-md border border-dashed border-(--ssz-border-strong) p-6 text-center text-sm text-muted-foreground">
                       {t('structure.noModulesYet')}
@@ -1309,10 +1481,7 @@ export function CurriculumTree({
                           courseContainerId={courseContainerId}
                           rename={rename}
                           check={check}
-                          /* Material attached to the container itself is not in
-                             a module's item list, so there is nothing to drag it
-                             within — that ordering comes with F2. */
-                          drag={null}
+                          drag={{ type: 'courseEntry', itemId: item.id }}
                         />
                       ))}
                     </div>
@@ -1339,7 +1508,7 @@ export function CurriculumTree({
                       <span className="ml-2 text-xs text-muted-foreground">…</span>
                     )}
                   </div>
-                </div>
+                </LevelDropZone>
               )}
             </section>
           );
@@ -1385,7 +1554,10 @@ export function CurriculumTree({
           }
         />
 
-        <DragOverlay>{draggingBlock && <BlockDragCard item={draggingBlock} />}</DragOverlay>
+        <DragOverlay>
+          {dragging?.kind === 'block' && <BlockDragCard item={dragging.item} />}
+          {dragging?.kind === 'module' && <ModuleDragCard module={dragging.module} />}
+        </DragOverlay>
 
         <DeleteNodeDialog
           target={deleteTarget}

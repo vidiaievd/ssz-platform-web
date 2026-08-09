@@ -1,4 +1,8 @@
-import type { CurriculumTreeItemNode, CurriculumTreeModuleNode } from '@/features/content/types';
+import type {
+  CurriculumTree,
+  CurriculumTreeItemNode,
+  CurriculumTreeModuleNode,
+} from '@/features/content/types';
 
 /**
  * What a draggable row carries: enough to find it again, and to tell a drop in
@@ -15,6 +19,22 @@ export interface BlockDragData {
   moduleContainerId: string;
 }
 
+/**
+ * A row of the course itself: a module card, or a piece of material placed
+ * straight on the container. Both are items of the same version and share one
+ * ordered list, so they drag by the same rules.
+ */
+export interface CourseEntryDragData {
+  type: 'courseEntry';
+  itemId: string;
+}
+
+/** A level, as something to drop a module into. */
+export interface LevelDropData {
+  type: 'level';
+  levelId: string | null;
+}
+
 /** A section's own drop zone, so an empty section is still a target. */
 export interface SectionDropData {
   type: 'section';
@@ -22,7 +42,11 @@ export interface SectionDropData {
   sectionId: string | null;
 }
 
-export type StructureDragData = BlockDragData | SectionDropData;
+export type StructureDragData =
+  | BlockDragData
+  | SectionDropData
+  | CourseEntryDragData
+  | LevelDropData;
 
 /**
  * What a drop should do.
@@ -65,36 +89,41 @@ function flattenEntries(mod: CurriculumTreeModuleNode): Entry[] {
  * target's place. Coming from above it settles after the row it was dropped on
  * (that row has moved up to fill the gap); coming from below, before it.
  */
-export function planBlockDrop(
-  mod: CurriculumTreeModuleNode,
-  active: BlockDragData,
-  over: StructureDragData | null,
-): BlockDropPlan {
-  if (!over) return { kind: 'none' };
-  if (over.type === 'block' && over.itemId === active.itemId) return { kind: 'none' };
-  if (over.moduleContainerId !== active.moduleContainerId) return { kind: 'cross-module' };
+/** What the pointer is over: another row of the same list, or a group as a whole. */
+type DropTarget = { onRow: string } | { onGroup: string | null };
 
-  const entries = flattenEntries(mod);
-  const from = entries.find((entry) => entry.id === active.itemId);
+/**
+ * The move itself, over one flat ordered list whose rows are grouped.
+ *
+ * Blocks inside a module and rows of the course are the same problem twice —
+ * one ordered list per version, split into groups the UI draws separately — so
+ * the rule lives here once and both callers hand it their own flattening.
+ */
+function planEntryDrop(
+  entries: Entry[],
+  activeId: string,
+  target: DropTarget,
+): Exclude<BlockDropPlan, { kind: 'cross-module' }> {
+  const from = entries.find((entry) => entry.id === activeId);
   if (!from) return { kind: 'none' };
-  const remaining = entries.filter((entry) => entry.id !== active.itemId);
+  const remaining = entries.filter((entry) => entry.id !== activeId);
 
-  // Where the block is heading. A row names its section only by sitting in it,
-  // and the section it sits in is a fact about the module, not about the drag.
+  // Where the row is heading. A row names its group only by sitting in it, and
+  // that is a fact about the list, not about the drag.
   const targetSectionId =
-    over.type === 'block'
-      ? (entries.find((entry) => entry.id === over.itemId)?.sectionId ?? null)
-      : over.sectionId;
+    'onRow' in target
+      ? (entries.find((entry) => entry.id === target.onRow)?.sectionId ?? null)
+      : target.onGroup;
 
   let index: number;
-  if (over.type === 'block') {
-    // The target's index *before* the block was lifted out — that is what makes
-    // a downward drag land past it rather than in front of it.
-    index = entries.findIndex((entry) => entry.id === over.itemId);
+  if ('onRow' in target) {
+    // The target's index *before* the row was lifted out — that is what makes a
+    // downward drag land past it rather than in front of it.
+    index = entries.findIndex((entry) => entry.id === target.onRow);
     if (index < 0) return { kind: 'none' };
     index = Math.min(index, remaining.length);
   } else {
-    // Dropped on a section rather than on a row: the end of that section.
+    // Dropped on a group rather than on a row: the end of that group.
     const last = remaining.reduce(
       (found, entry, at) => (entry.sectionId === targetSectionId ? at : found),
       -1,
@@ -103,12 +132,79 @@ export function planBlockDrop(
   }
 
   const next = [...remaining];
-  next.splice(index, 0, { id: active.itemId, sectionId: targetSectionId });
+  next.splice(index, 0, { id: activeId, sectionId: targetSectionId });
   const orderedItemIds = next.map((entry) => entry.id);
 
   return targetSectionId === from.sectionId
     ? { kind: 'reorder', orderedItemIds }
     : { kind: 'move', orderedItemIds, sectionId: targetSectionId };
+}
+
+export function planBlockDrop(
+  mod: CurriculumTreeModuleNode,
+  active: BlockDragData,
+  over: StructureDragData | null,
+): BlockDropPlan {
+  if (!over) return { kind: 'none' };
+  if (over.type === 'block' && over.itemId === active.itemId) return { kind: 'none' };
+  if (over.type !== 'block' && over.type !== 'section') return { kind: 'none' };
+  if (over.moduleContainerId !== active.moduleContainerId) return { kind: 'cross-module' };
+
+  return planEntryDrop(
+    flattenEntries(mod),
+    active.itemId,
+    over.type === 'block' ? { onRow: over.itemId } : { onGroup: over.sectionId },
+  );
+}
+
+/**
+ * Every row the course version holds, grouped by level and ordered as stored.
+ *
+ * Modules and the container's own material live in one list in the database and
+ * the reorder endpoint wants all of it, however separately the tree draws them.
+ * Leaving the leaf material out — as the old module reorder did — sends a
+ * partial order, which the backend rejects.
+ */
+export function flattenCourseEntries(tree: CurriculumTree): Entry[] {
+  const groups = new Map<string | null, { id: string; position: number }[]>();
+  const push = (sectionId: string | null, row: { id: string; position: number }) => {
+    const rows = groups.get(sectionId);
+    if (rows) rows.push(row);
+    else groups.set(sectionId, [row]);
+  };
+
+  for (const level of tree.levels) {
+    const sectionId = level.id ?? null;
+    if (!groups.has(sectionId)) groups.set(sectionId, []);
+    // Both kinds share one position sequence within their section.
+    for (const mod of level.modules) push(sectionId, { id: mod.id, position: mod.position });
+    for (const item of level.items) push(sectionId, { id: item.id, position: item.position });
+  }
+  for (const item of tree.ungroupedItems) push(null, { id: item.id, position: item.position });
+
+  return [...groups.entries()].flatMap(([sectionId, rows]) =>
+    rows.sort((a, b) => a.position - b.position).map((row) => ({ id: row.id, sectionId })),
+  );
+}
+
+/**
+ * Where a module — or a piece of the course's own material — lands. Levels are
+ * its groups, and a drop on a level files the row at the end of it.
+ */
+export function planCourseEntryDrop(
+  tree: CurriculumTree,
+  active: CourseEntryDragData,
+  over: StructureDragData | null,
+): BlockDropPlan {
+  if (!over) return { kind: 'none' };
+  if (over.type === 'courseEntry' && over.itemId === active.itemId) return { kind: 'none' };
+  if (over.type !== 'courseEntry' && over.type !== 'level') return { kind: 'none' };
+
+  return planEntryDrop(
+    flattenCourseEntries(tree),
+    active.itemId,
+    over.type === 'courseEntry' ? { onRow: over.itemId } : { onGroup: over.levelId },
+  );
 }
 
 /**
@@ -146,4 +242,53 @@ export function applyBlockPreview(
     sections: mod.sections.map((section) => ({ ...section, items: inSection(section.id) })),
     ungroupedItems: inSection(null),
   };
+}
+
+/**
+ * The tree as the drag would leave it — the module (or piece of material) drawn
+ * in the level it is heading for, in the place it would take.
+ *
+ * Only the dragged row changes level; everything else is re-sorted by the order
+ * the plan produced. Modules and leaf material stay in their own lists because
+ * that is how the tree draws a level, whatever their positions interleave to.
+ */
+export function applyCourseEntryPreview(
+  tree: CurriculumTree,
+  movedId: string,
+  plan: BlockDropPlan,
+): CurriculumTree {
+  if (plan.kind !== 'reorder' && plan.kind !== 'move') return tree;
+
+  const rank = new Map(plan.orderedItemIds.map((id, index) => [id, index]));
+  const byRank = <T extends { id: string }>(rows: T[]) =>
+    [...rows].sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
+
+  const movedModule = tree.levels.flatMap((l) => l.modules).find((m) => m.id === movedId);
+  const movedItem = [...tree.levels.flatMap((l) => l.items), ...tree.ungroupedItems].find(
+    (i) => i.id === movedId,
+  );
+  const moving = plan.kind === 'move';
+  // Where a row filed into no level goes: the trailing level that holds the
+  // ungrouped modules, if the tree has one, and the root bucket otherwise.
+  const hasNullLevel = tree.levels.some((level) => level.id === null);
+
+  const levels = tree.levels.map((level) => {
+    const sectionId = level.id ?? null;
+    const lands = moving && plan.sectionId === sectionId;
+    const modules = moving ? level.modules.filter((m) => m.id !== movedId) : level.modules;
+    const items = moving ? level.items.filter((i) => i.id !== movedId) : level.items;
+
+    return {
+      ...level,
+      modules: byRank(lands && movedModule ? [...modules, movedModule] : modules),
+      items: byRank(lands && movedItem ? [...items, movedItem] : items),
+    };
+  });
+
+  const ungrouped =
+    moving && !hasNullLevel && plan.sectionId === null && movedItem
+      ? byRank([...tree.ungroupedItems.filter((i) => i.id !== movedId), movedItem])
+      : byRank(moving ? tree.ungroupedItems.filter((i) => i.id !== movedId) : tree.ungroupedItems);
+
+  return { ...tree, levels, ungroupedItems: ungrouped };
 }

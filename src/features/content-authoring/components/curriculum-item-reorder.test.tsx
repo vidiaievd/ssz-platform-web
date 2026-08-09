@@ -4,9 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type {
-  CurriculumTree,
   CurriculumTreeItemNode,
-  CurriculumTreeLevelNode,
   CurriculumTreeModuleNode,
   CurriculumTreeSectionNode,
 } from '@/features/content/types';
@@ -20,9 +18,7 @@ vi.mock('../actions/section', () => ({ reorderSectionsAction: vi.fn() }));
 // jsdom doesn't implement scrollIntoView; Radix Select calls it when opening.
 Element.prototype.scrollIntoView = vi.fn();
 
-const { computeReorderedItemIds, computeReorderedModuleIds, MoveSection } = await import(
-  './curriculum-item-reorder'
-);
+const { computeReorderedItemIds, MoveSection } = await import('./curriculum-item-reorder');
 import { reorderSectionsAction } from '../actions/section';
 
 function item(id: string, overrides: Partial<CurriculumTreeItemNode> = {}): CurriculumTreeItemNode {
@@ -83,55 +79,6 @@ describe('computeReorderedItemIds', () => {
     const [a1, a2, a3] = MODULE.sections[0]!.items;
     const result = computeReorderedItemIds(MODULE, [a2!, a3!, a1!]);
     expect(result.sort()).toEqual(['a1', 'a2', 'a3', 'b1', 'b2', 'u1'].sort());
-  });
-});
-
-function module_(id: string, position: number): CurriculumTreeModuleNode {
-  return {
-    id,
-    containerId: `container-${id}`,
-    versionId: `version-${id}`,
-    title: id,
-    titleEn: null,
-    position,
-    isRequired: true,
-    sections: [],
-    publishState: 'draft',
-    ungroupedItems: [],
-  };
-}
-
-const LEVEL_A1: CurriculumTreeLevelNode = {
-  id: 'level-a1',
-  title: 'A1',
-  position: 0,
-  items: [],
-  modules: [module_('m1', 0), module_('m2', 1)],
-};
-
-const LEVEL_A2: CurriculumTreeLevelNode = {
-  id: 'level-a2',
-  title: 'A2',
-  position: 1,
-  items: [],
-  modules: [module_('m3', 0)],
-};
-
-const TREE: CurriculumTree = {
-  versionId: 'version-1',
-  containerId: 'course-1',
-  publishState: 'draft',
-  levelSystem: 'cefr',
-  containerType: 'course' as const,
-  ungroupedItems: [],
-  levels: [LEVEL_A1, LEVEL_A2],
-};
-
-describe('computeReorderedModuleIds', () => {
-  it('keeps other levels untouched when reordering modules within one level', () => {
-    const [m1, m2] = LEVEL_A1.modules;
-    const reordered = [m2!, m1!];
-    expect(computeReorderedModuleIds(TREE, reordered)).toEqual(['m2', 'm1', 'm3']);
   });
 });
 
