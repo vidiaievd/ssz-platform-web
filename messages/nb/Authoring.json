@@ -634,7 +634,9 @@
     "moveToAnotherModule": "En annen modul",
     "unpublish": "Avpubliser",
     "moreActions": "Flere handlinger for {name}",
-    "item": "Element"
+    "item": "Element",
+    "remove": "Fjern…",
+    "delete": "Slett…"
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -1282,5 +1284,23 @@
     "stateDraft": "Utkast",
     "clear": "Nullstill",
     "noMatchesInModule": "Ingenting her passer med filtrene."
+  },
+  "deleteNode": {
+    "cancel": "Avbryt",
+    "level": {
+      "title": "Slette nivået «{name}»?",
+      "body": "Selve nivået slettes. {modules, plural, one {# modul} other {# moduler}} og {blocks, plural, one {# blokk} other {# blokker}} blir liggende i kurset, men uten et nivå som grupperer dem.",
+      "confirm": "Slett nivå"
+    },
+    "module": {
+      "title": "Fjerne «{name}» fra dette kurset?",
+      "body": "Modulen og dens {blocks, plural, one {# blokk} other {# blokker}} blir liggende i biblioteket og kan legges til et kurs igjen. Elevfremgang beholdes.",
+      "confirm": "Fjern modul"
+    },
+    "item": {
+      "title": "Fjerne «{name}» fra denne modulen?",
+      "body": "Selve materialet blir liggende i biblioteket og kan plasseres på nytt. Elevfremgang beholdes.",
+      "confirm": "Fjern blokk"
+    }
   }
 }

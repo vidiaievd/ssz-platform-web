@@ -634,7 +634,9 @@
     "moveToAnotherModule": "Another module",
     "unpublish": "Unpublish",
     "moreActions": "More actions for {name}",
-    "item": "Item"
+    "item": "Item",
+    "remove": "Remove…",
+    "delete": "Delete…"
   },
   "settings": {
     "trigger": "Settings",
@@ -1282,5 +1284,23 @@
     "stateDraft": "Draft",
     "clear": "Clear",
     "noMatchesInModule": "Nothing here matches the filters."
+  },
+  "deleteNode": {
+    "cancel": "Cancel",
+    "level": {
+      "title": "Delete level “{name}”?",
+      "body": "The level itself is deleted. Its {modules, plural, one {# module} other {# modules}} and {blocks, plural, one {# block} other {# blocks}} stay in the course, but without a level to group them.",
+      "confirm": "Delete level"
+    },
+    "module": {
+      "title": "Remove “{name}” from this course?",
+      "body": "The module and its {blocks, plural, one {# block} other {# blocks}} stay in your library and can be added to a course again. Student progress is kept.",
+      "confirm": "Remove module"
+    },
+    "item": {
+      "title": "Remove “{name}” from this module?",
+      "body": "The material itself stays in your library and can be placed again. Student progress is kept.",
+      "confirm": "Remove block"
+    }
   }
 }

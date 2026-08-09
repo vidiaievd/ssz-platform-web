@@ -34,6 +34,7 @@ export interface NodeMenuProps {
   sections?: { id: string; title: string }[];
   currentSectionId?: string | null;
   onMoveToSection?: (sectionId: string | null) => void;
+  onDelete?: () => void;
   className?: string;
 }
 
@@ -61,6 +62,7 @@ export function NodeMenu({
   sections,
   currentSectionId,
   onMoveToSection,
+  onDelete,
   className,
 }: NodeMenuProps) {
   const t = useTranslations('Authoring');
@@ -166,6 +168,14 @@ export function NodeMenu({
           {t('structure.unpublish')}
           {notYet}
         </DropdownMenuItem>
+
+        {onDelete && (
+          <DropdownMenuItem variant="destructive" onSelect={() => onDelete()}>
+            {/* A level is genuinely deleted; a module or block is only unplaced
+                here, and saying "delete" would overstate what happens. */}
+            {kind === 'level' ? t('structure.delete') : t('structure.remove')}
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

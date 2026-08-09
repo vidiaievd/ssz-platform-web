@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { tryAction } from '@/lib/result';
 
-import { assignItemSection, reorderDraftItems } from '../lib/container-items';
+import { assignItemSection, removeItemFromDraft, reorderDraftItems } from '../lib/container-items';
 
 export async function reorderContainerItemsAction(containerId: string, orderedItemIds: string[]) {
   return tryAction(async () => {
@@ -20,6 +20,20 @@ export async function assignItemSectionAction(
 ) {
   return tryAction(async () => {
     await assignItemSection(containerId, containerItemId, sectionId);
+    revalidatePath(`/school/content/${containerId}`);
+  });
+}
+
+/**
+ * Takes a row out of the draft version without touching what it points at.
+ *
+ * Deliberately not a delete of the underlying lesson, exercise or module: that
+ * material can be placed in more than one course, and an author removing a
+ * block from one syllabus does not mean to destroy it everywhere.
+ */
+export async function removeContainerItemAction(containerId: string, containerItemId: string) {
+  return tryAction(async () => {
+    await removeItemFromDraft(containerId, containerItemId);
     revalidatePath(`/school/content/${containerId}`);
   });
 }

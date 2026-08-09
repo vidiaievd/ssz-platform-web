@@ -13,6 +13,7 @@ import { EMPTY_FILTERS, type StructureFilters } from '../lib/structure-filters';
 vi.mock('../actions/container-item', () => ({
   reorderContainerItemsAction: vi.fn(),
   assignItemSectionAction: vi.fn(),
+  removeContainerItemAction: vi.fn(),
 }));
 // Stands in for the dialog, reporting where a new item would be filed.
 vi.mock('./add-lesson-picker', () => ({
@@ -51,6 +52,7 @@ vi.mock('../actions/section', () => ({
   createSectionAction: vi.fn(),
   renameSectionAction: vi.fn(),
   reorderSectionsAction: vi.fn(),
+  deleteSectionAction: vi.fn(),
 }));
 
 const { CurriculumTree } = await import('./curriculum-tree');
@@ -58,9 +60,9 @@ const { createModuleAction } = await import('../actions/container');
 const { createSectionAction } = await import('../actions/section');
 const { renameContainerAction } = await import('../actions/container');
 const { renameItemAction } = await import('../actions/rename-item');
-const { assignItemSectionAction, reorderContainerItemsAction } = await import(
-  '../actions/container-item',
-);
+const { assignItemSectionAction, reorderContainerItemsAction, removeContainerItemAction } =
+  await import('../actions/container-item');
+const { deleteSectionAction } = await import('../actions/section');
 
 const TREE: CurriculumTreeData = {
   versionId: 'version-1',
@@ -173,6 +175,8 @@ beforeEach(() => {
   vi.mocked(renameItemAction).mockReset();
   vi.mocked(reorderContainerItemsAction).mockReset();
   vi.mocked(assignItemSectionAction).mockReset();
+  vi.mocked(removeContainerItemAction).mockReset();
+  vi.mocked(deleteSectionAction).mockReset();
 });
 
 describe('CurriculumTree', () => {
@@ -500,6 +504,86 @@ describe('CurriculumTree', () => {
       await waitFor(() =>
         expect(assignItemSectionAction).toHaveBeenCalledWith('module-1', 'item-1', null),
       );
+    });
+  });
+
+  describe('deletion', () => {
+    it('unplaces a block rather than destroying the material behind it', async () => {
+      vi.mocked(removeContainerItemAction).mockResolvedValue({
+        ok: true,
+        value: undefined,
+      } as never);
+      const { onChanged } = renderTree();
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'More actions for En vanlig arbeidsdag' }),
+      );
+      await userEvent.click(
+        within(await screen.findByRole('menu')).getByRole('menuitem', { name: 'Remove…' }),
+      );
+
+      const dialog = await screen.findByRole('alertdialog');
+      expect(
+        within(dialog).getByText(/stays in your library and can be placed again/),
+      ).toBeInTheDocument();
+
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Remove block' }));
+
+      // The row's own module owns it, not the course.
+      await waitFor(() =>
+        expect(removeContainerItemAction).toHaveBeenCalledWith('module-1', 'item-1'),
+      );
+      await waitFor(() => expect(onChanged).toHaveBeenCalled());
+    });
+
+    it('counts what a module holds before removing it', async () => {
+      renderTree();
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'More actions for Samfunn og kultur' }),
+      );
+      await userEvent.click(
+        within(await screen.findByRole('menu')).getByRole('menuitem', { name: 'Remove…' }),
+      );
+
+      const dialog = await screen.findByRole('alertdialog');
+      expect(within(dialog).getByText(/1 block/)).toBeInTheDocument();
+    });
+
+    // A level is the one kind genuinely deleted — and its modules survive it.
+    it('warns that deleting a level leaves its modules ungrouped', async () => {
+      vi.mocked(deleteSectionAction).mockResolvedValue({ ok: true, value: undefined } as never);
+      renderTree();
+
+      await userEvent.click(screen.getByRole('button', { name: 'More actions for A1 — Beginner' }));
+      await userEvent.click(
+        within(await screen.findByRole('menu')).getByRole('menuitem', { name: 'Delete…' }),
+      );
+
+      const dialog = await screen.findByRole('alertdialog');
+      expect(within(dialog).getByText(/without a level to group them/)).toBeInTheDocument();
+
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Delete level' }));
+
+      await waitFor(() =>
+        expect(deleteSectionAction).toHaveBeenCalledWith('course-1', 'level-a1'),
+      );
+    });
+
+    it('keeps the node when the dialog is cancelled', async () => {
+      renderTree();
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'More actions for En vanlig arbeidsdag' }),
+      );
+      await userEvent.click(
+        within(await screen.findByRole('menu')).getByRole('menuitem', { name: 'Remove…' }),
+      );
+      await userEvent.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Cancel' }),
+      );
+
+      expect(removeContainerItemAction).not.toHaveBeenCalled();
     });
   });
 

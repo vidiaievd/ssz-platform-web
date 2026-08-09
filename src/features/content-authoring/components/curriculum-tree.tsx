@@ -36,8 +36,16 @@ import {
   rollUpLevelPublishState,
 } from '../lib/structure-nodes';
 import { createModuleAction, renameContainerAction } from '../actions/container';
-import { renameSectionAction, reorderSectionsAction } from '../actions/section';
-import { assignItemSectionAction, reorderContainerItemsAction } from '../actions/container-item';
+import {
+  deleteSectionAction,
+  renameSectionAction,
+  reorderSectionsAction,
+} from '../actions/section';
+import {
+  assignItemSectionAction,
+  removeContainerItemAction,
+  reorderContainerItemsAction,
+} from '../actions/container-item';
 import { renameItemAction } from '../actions/rename-item';
 import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
 import { PublishStateBadge } from './publish-state-badge';
@@ -52,6 +60,7 @@ import {
 import { AddLessonPicker } from './add-lesson-picker';
 import { InlineRename } from './inline-rename';
 import { NodeMenu } from './node-menu';
+import { DeleteNodeDialog, type DeleteNodeTarget } from './delete-node-dialog';
 import { StubIconButton } from './stub-controls';
 
 type ChangeKind = 'level' | 'module' | 'item';
@@ -336,6 +345,7 @@ function ModuleCard({
   filters,
   matches,
   rename,
+  onRequestDelete,
   expanded,
   onToggleExpanded,
 }: {
@@ -348,6 +358,8 @@ function ModuleCard({
   /** Shared with the tree so a module's rows and its own expansion agree on what matches. */
   matches: (item: CurriculumTreeItemNode) => boolean;
   rename: RenameControls;
+  /** Opens the confirmation dialog, which the tree owns. */
+  onRequestDelete: (target: DeleteNodeTarget) => void;
   expanded: boolean;
   onToggleExpanded: () => void;
   selectedId: string | null;
@@ -446,6 +458,9 @@ function ModuleCard({
                   sections={sectionOptions}
                   currentSectionId={section?.id ?? null}
                   onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
+                  onDelete={() =>
+                    onRequestDelete({ kind: 'item', id: item.id, title: item.title ?? '' })
+                  }
                   className={TOOL_BUTTON}
                 />
               }
@@ -530,6 +545,14 @@ function ModuleCard({
             canMoveDown={moduleIndex < level.modules.length - 1}
             onMoveUp={() => moveModule(-1)}
             onMoveDown={() => moveModule(1)}
+            onDelete={() =>
+              onRequestDelete({
+                kind: 'module',
+                id: mod.id,
+                title: mod.title ?? '',
+                blockCount: allItems.length,
+              })
+            }
             className={TOOL_BUTTON}
           />
         </RowTools>
@@ -664,6 +687,41 @@ export function CurriculumTree({
       });
     },
   };
+
+  /**
+   * Deletion, confirmed in one dialog for all three kinds. What it runs differs:
+   * a level is a section on the course and is genuinely deleted (its modules
+   * survive, ungrouped), while a module or a block is only unplaced from the
+   * container that holds it.
+   */
+  const [deleteTarget, setDeleteTarget] = useState<DeleteNodeTarget | null>(null);
+  const [deletePending, setDeletePending] = useState(false);
+
+  function confirmDelete(target: DeleteNodeTarget) {
+    setDeletePending(true);
+    const owningContainerId =
+      target.kind === 'item'
+        ? (tree.levels
+            .flatMap((l) => l.modules)
+            .find((m) => moduleItems(m).some((i) => i.id === target.id))?.containerId ??
+          courseContainerId)
+        : courseContainerId;
+
+    const request =
+      target.kind === 'level'
+        ? deleteSectionAction(courseContainerId, target.id)
+        : removeContainerItemAction(owningContainerId, target.id);
+
+    request.then((result) => {
+      setDeletePending(false);
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      setDeleteTarget(null);
+      onChanged();
+    });
+  }
 
   function moveLevel(index: number, direction: -1 | 1) {
     const reordered = moveInArray(tree.levels, index, direction);
@@ -859,6 +917,18 @@ export function CurriculumTree({
                   canMoveDown={level.id != null && levelIndex < tree.levels.length - 1}
                   onMoveUp={() => moveLevel(levelIndex, -1)}
                   onMoveDown={() => moveLevel(levelIndex, 1)}
+                  onDelete={
+                    level.id
+                      ? () =>
+                          setDeleteTarget({
+                            kind: 'level',
+                            id: level.id!,
+                            title: level.title ?? '',
+                            moduleCount: level.modules.length,
+                            blockCount,
+                          })
+                      : undefined
+                  }
                   className={TOOL_BUTTON}
                 />
               </RowTools>
@@ -892,6 +962,7 @@ export function CurriculumTree({
                     filters={filters}
                     matches={matches}
                     rename={rename}
+                    onRequestDelete={setDeleteTarget}
                     expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
                     onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
                   />
@@ -966,6 +1037,15 @@ export function CurriculumTree({
           <AddButton label={t('structure.addLesson')} onClick={() => setAddOwnLessonIn('')} />
         </div>
       )}
+
+      <DeleteNodeDialog
+        target={deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        onConfirm={confirmDelete}
+        pending={deletePending}
+      />
 
       {editingModule && (
         <AddLessonPicker
