@@ -1,16 +1,18 @@
-import type { CurriculumTreeModuleNode } from '@/features/content/types';
+import type { CurriculumTreeItemNode, CurriculumTreeModuleNode } from '@/features/content/types';
 
 /**
- * What a draggable row carries, so a drop can be judged without reaching back
- * into the tree: which module owns it and which section it currently sits in.
+ * What a draggable row carries: enough to find it again, and to tell a drop in
+ * its own module from one in somebody else's.
+ *
+ * Deliberately not its section or its position — those are read from the module
+ * when a drop is judged. While a drag is in flight the tree renders a preview in
+ * which the block has already moved, and data captured at drag start would be
+ * describing a row that is no longer where it says it is.
  */
 export interface BlockDragData {
   type: 'block';
   itemId: string;
   moduleContainerId: string;
-  sectionId: string | null;
-  /** Position among *all* of the module's blocks — decides which side of a row the line goes. */
-  flatIndex: number;
 }
 
 /** A section's own drop zone, so an empty section is still a target. */
@@ -56,18 +58,12 @@ function flattenEntries(mod: CurriculumTreeModuleNode): Entry[] {
   ];
 }
 
-/** Index of a module's block among all of the module's blocks. */
-export function blockFlatIndex(mod: CurriculumTreeModuleNode, itemId: string): number {
-  return flattenEntries(mod).findIndex((entry) => entry.id === itemId);
-}
-
 /**
  * Where a dragged block lands.
  *
- * The rule is the one every sortable list uses, and the one the drop line has
- * to agree with: the dragged block takes the target's place. Coming from above
- * it settles after the row it was dropped on (that row has moved up to fill the
- * gap); coming from below, before it.
+ * The rule is the one every sortable list uses: the dragged block takes the
+ * target's place. Coming from above it settles after the row it was dropped on
+ * (that row has moved up to fill the gap); coming from below, before it.
  */
 export function planBlockDrop(
   mod: CurriculumTreeModuleNode,
@@ -79,8 +75,16 @@ export function planBlockDrop(
   if (over.moduleContainerId !== active.moduleContainerId) return { kind: 'cross-module' };
 
   const entries = flattenEntries(mod);
+  const from = entries.find((entry) => entry.id === active.itemId);
+  if (!from) return { kind: 'none' };
   const remaining = entries.filter((entry) => entry.id !== active.itemId);
-  if (remaining.length === entries.length) return { kind: 'none' };
+
+  // Where the block is heading. A row names its section only by sitting in it,
+  // and the section it sits in is a fact about the module, not about the drag.
+  const targetSectionId =
+    over.type === 'block'
+      ? (entries.find((entry) => entry.id === over.itemId)?.sectionId ?? null)
+      : over.sectionId;
 
   let index: number;
   if (over.type === 'block') {
@@ -92,30 +96,54 @@ export function planBlockDrop(
   } else {
     // Dropped on a section rather than on a row: the end of that section.
     const last = remaining.reduce(
-      (found, entry, at) => (entry.sectionId === over.sectionId ? at : found),
+      (found, entry, at) => (entry.sectionId === targetSectionId ? at : found),
       -1,
     );
     index = last < 0 ? remaining.length : last + 1;
   }
 
   const next = [...remaining];
-  next.splice(index, 0, { id: active.itemId, sectionId: over.sectionId });
+  next.splice(index, 0, { id: active.itemId, sectionId: targetSectionId });
   const orderedItemIds = next.map((entry) => entry.id);
 
-  return over.sectionId === active.sectionId
+  return targetSectionId === from.sectionId
     ? { kind: 'reorder', orderedItemIds }
-    : { kind: 'move', orderedItemIds, sectionId: over.sectionId };
+    : { kind: 'move', orderedItemIds, sectionId: targetSectionId };
 }
 
 /**
- * Which edge of the hovered row the insertion line belongs on. `null` means no
- * line at all — the block came from another module and cannot land here.
+ * The module as it would look if the drag ended here — what the tree renders
+ * while a block is in the air, so the rows around the pointer part to show
+ * where it is going.
+ *
+ * Built from the same plan that will be submitted, so what an author sees
+ * mid-drag and what gets saved cannot come apart.
  */
-export function dropLineSide(
-  active: BlockDragData,
-  overFlatIndex: number,
-  overModuleContainerId: string,
-): 'before' | 'after' | null {
-  if (active.moduleContainerId !== overModuleContainerId) return null;
-  return active.flatIndex < overFlatIndex ? 'after' : 'before';
+export function applyBlockPreview(
+  mod: CurriculumTreeModuleNode,
+  movedItemId: string,
+  plan: BlockDropPlan,
+): CurriculumTreeModuleNode {
+  if (plan.kind !== 'reorder' && plan.kind !== 'move') return mod;
+
+  const itemsById = new Map<string, CurriculumTreeItemNode>(
+    [...mod.sections.flatMap((s) => s.items), ...mod.ungroupedItems].map((item) => [
+      item.id,
+      item,
+    ]),
+  );
+  const sectionByItemId = new Map(flattenEntries(mod).map((e) => [e.id, e.sectionId]));
+  if (plan.kind === 'move') sectionByItemId.set(movedItemId, plan.sectionId);
+
+  const ordered = plan.orderedItemIds
+    .map((id) => itemsById.get(id))
+    .filter((item): item is CurriculumTreeItemNode => item !== undefined);
+  const inSection = (sectionId: string | null) =>
+    ordered.filter((item) => sectionByItemId.get(item.id) === sectionId);
+
+  return {
+    ...mod,
+    sections: mod.sections.map((section) => ({ ...section, items: inSection(section.id) })),
+    ungroupedItems: inSection(null),
+  };
 }

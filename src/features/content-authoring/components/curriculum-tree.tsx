@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   closestCenter,
@@ -14,13 +15,16 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
 } from '@dnd-kit/core';
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
-  type SortingStrategy,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -82,8 +86,7 @@ import { StubIconButton } from './stub-controls';
 import { BulkBar } from './bulk-bar';
 import { checkedBlocks } from '../lib/block-selection';
 import {
-  blockFlatIndex,
-  dropLineSide,
+  applyBlockPreview,
   planBlockDrop,
   type BlockDragData,
   type BlockDropPlan,
@@ -98,8 +101,13 @@ interface CurriculumTreeProps {
   tree: CurriculumTreeData;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
-  /** Called after a reorder, section move, or node creation persists, so the caller can refetch the tree (and select the new node, if any). */
-  onChanged: (selectId?: string, kind?: ChangeKind) => void;
+  /**
+   * Called after a reorder, section move, or node creation persists, so the
+   * caller can refetch the tree (and select the new node, if any). Awaited
+   * where the tree is showing something optimistically, so the optimism can be
+   * dropped exactly when the real data replaces it.
+   */
+  onChanged: (selectId?: string, kind?: ChangeKind) => void | Promise<void>;
   /** The course's own container id — levels are sections on it; modules attach to it as `container`-type items. */
   courseContainerId: string;
   targetLanguage: string;
@@ -266,14 +274,6 @@ function AddButton({
 }
 
 /**
- * Rows stay where they are while a block is dragged over them. The design marks
- * the landing place with a line rather than by opening a gap, and doing both
- * says the same thing twice — in two places at once, which is worse than not
- * saying it at all.
- */
-const NO_SHIFT: SortingStrategy = () => null;
-
-/**
  * A section as a drop target, so a block can be filed into one that is empty —
  * the case with no row to aim at, and the one an author hits when a section was
  * just created.
@@ -298,6 +298,30 @@ function SectionDropZone({
       className={cn('rounded-sm', isOver && 'ring-1 ring-primary-400 ring-inset')}
     >
       {children}
+    </div>
+  );
+}
+
+/**
+ * The card that follows the pointer. A copy rather than the row itself: the row
+ * stays in the list as the gap, and the overlay is free of the list's layout, so
+ * it can travel across sections without being clipped by them.
+ */
+function BlockDragCard({ item }: { item: CurriculumTreeItemNode }) {
+  const materialLabel = useMaterialLabel();
+  const def = getLessonTypeDefinition(getMaterialKind(item));
+  const Icon = def.icon;
+
+  return (
+    <div className="flex w-fit max-w-100 cursor-grabbing items-center gap-2 rounded-sm border border-primary-200 bg-surface px-2 py-1.25 shadow-[var(--ssz-shadow-lg)]">
+      <GripVertical size={13} className="shrink-0 text-muted-foreground" />
+      <Glyph style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}>
+        <Icon size={12} style={{ color: `var(${def.hueVar})` }} />
+      </Glyph>
+      <span className="truncate text-sm text-foreground">{item.title}</span>
+      <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
+        {materialLabel(item)}
+      </span>
     </div>
   );
 }
@@ -335,24 +359,18 @@ function BlockRow({
   const selected = selectedId === item.id;
   const checked = check.isChecked(item.id);
 
-  const { active, attributes, isDragging, isOver, listeners, setNodeRef } = useSortable({
+  const { attributes, isDragging, listeners, setNodeRef, transform, transition } = useSortable({
     id: item.id,
     data: drag ?? undefined,
     disabled: drag === null,
   });
 
-  // The line goes on the edge the block would settle against, and only when it
-  // can settle here at all — a block from another module gets no line, and a
-  // toast on drop instead (plan 38 §3 B3).
-  const activeBlock = active?.data.current as BlockDragData | undefined;
-  const side =
-    isOver && drag && activeBlock?.type === 'block' && activeBlock.itemId !== item.id
-      ? dropLineSide(activeBlock, drag.flatIndex, drag.moduleContainerId)
-      : null;
-
   return (
     <div
       ref={setNodeRef}
+      // The row the pointer is carrying is drawn by the overlay instead; this
+      // one stays in the list as the gap the others slide around.
+      style={{ transform: CSS.Translate.toString(transform), transition }}
       role="treeitem"
       aria-selected={selected}
       tabIndex={0}
@@ -371,9 +389,7 @@ function BlockRow({
           : checked
             ? 'border-transparent bg-info-50 dark:bg-info-700/25'
             : 'border-transparent bg-surface hover:border-border',
-        isDragging && 'opacity-40',
-        side === 'before' && 'shadow-[0_-2px_0_var(--ssz-color-primary-500)]',
-        side === 'after' && 'shadow-[0_2px_0_var(--ssz-color-primary-500)]',
+        isDragging && 'opacity-30',
       )}
     >
       {drag && (
@@ -563,7 +579,7 @@ function ModuleCard({
     }
     return (
       <SectionDropZone moduleContainerId={mod.containerId} sectionId={sectionId}>
-        <SortableContext items={items.map((i) => i.id)} strategy={NO_SHIFT}>
+        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
           {items.map((item) => {
             const index = siblings.findIndex((i) => i.id === item.id);
             return (
@@ -577,13 +593,7 @@ function ModuleCard({
                 courseContainerId={mod.containerId}
                 rename={rename}
                 check={check}
-                drag={{
-                  type: 'block',
-                  itemId: item.id,
-                  moduleContainerId: mod.containerId,
-                  sectionId,
-                  flatIndex: blockFlatIndex(mod, item.id),
-                }}
+                drag={{ type: 'block', itemId: item.id, moduleContainerId: mod.containerId }}
                 menu={
                   <NodeMenu
                     kind="item"
@@ -923,22 +933,79 @@ export function CurriculumTree({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  function handleDragEnd(event: DragEndEvent) {
+  /**
+   * What the pointer is carrying, and where the tree is currently pretending it
+   * would land. The preview is the plan already applied to the module, so the
+   * rows part around the pointer instead of standing still behind a marker.
+   */
+  const [draggingBlock, setDraggingBlock] = useState<CurriculumTreeItemNode | null>(null);
+  const [preview, setPreview] = useState<{
+    moduleContainerId: string;
+    itemId: string;
+    plan: BlockDropPlan;
+  } | null>(null);
+
+  const findModule = (containerId: string) =>
+    tree.levels.flatMap((level) => level.modules).find((m) => m.containerId === containerId);
+
+  /** The module as the drag would leave it — what gets rendered mid-flight. */
+  function withPreview(mod: CurriculumTreeModuleNode) {
+    if (!preview || preview.moduleContainerId !== mod.containerId) return mod;
+    return applyBlockPreview(mod, preview.itemId, preview.plan);
+  }
+
+  function handleDragStart(event: DragStartEvent) {
     const active = event.active.data.current as StructureDragData | undefined;
     if (active?.type !== 'block') return;
-    const over = (event.over?.data.current ?? null) as StructureDragData | null;
+    const mod = findModule(active.moduleContainerId);
+    setDraggingBlock(mod ? (moduleItems(mod).find((i) => i.id === active.itemId) ?? null) : null);
+  }
 
-    const mod = tree.levels
-      .flatMap((level) => level.modules)
-      .find((m) => m.containerId === active.moduleContainerId);
+  function handleDragOver(event: DragOverEvent) {
+    const active = event.active.data.current as StructureDragData | undefined;
+    if (active?.type !== 'block') return;
+    const mod = findModule(active.moduleContainerId);
     if (!mod) return;
 
+    const over = (event.over?.data.current ?? null) as StructureDragData | null;
     const plan = planBlockDrop(mod, active, over);
-    if (plan.kind === 'none') return;
-    if (plan.kind === 'cross-module') {
-      toast(t('structure.dragCrossModule'));
+    if (plan.kind === 'reorder' || plan.kind === 'move') {
+      setPreview({ moduleContainerId: mod.containerId, itemId: active.itemId, plan });
       return;
     }
+    // A block hovering over its own previewed position answers "nothing to do",
+    // and acting on that would snap it back to where it started — out from under
+    // the pointer. Only a target it cannot land on clears the preview.
+    if (plan.kind === 'cross-module') setPreview(null);
+  }
+
+  function endDrag() {
+    setDraggingBlock(null);
+    setPreview(null);
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    // The overlay goes at once; the preview stays until the saved order comes
+    // back, or the row would drop into its old place and hop to the new one a
+    // moment later.
+    setDraggingBlock(null);
+
+    const active = event.active.data.current as StructureDragData | undefined;
+    const mod =
+      active?.type === 'block' ? findModule(active.moduleContainerId) : undefined;
+    if (!active || active.type !== 'block' || !mod) {
+      setPreview(null);
+      return;
+    }
+
+    const over = (event.over?.data.current ?? null) as StructureDragData | null;
+    const plan = planBlockDrop(mod, active, over);
+    if (plan.kind === 'none' || plan.kind === 'cross-module') {
+      setPreview(null);
+      if (plan.kind === 'cross-module') toast(t('structure.dragCrossModule'));
+      return;
+    }
+    setPreview({ moduleContainerId: mod.containerId, itemId: active.itemId, plan });
     void applyBlockDrop(mod.containerId, active.itemId, plan);
   }
 
@@ -957,15 +1024,18 @@ export function CurriculumTree({
       const filed = await assignItemSectionAction(containerId, itemId, plan.sectionId);
       if (!filed.ok) {
         toast.error(tErrors(filed.error.code));
+        setPreview(null);
         return;
       }
     }
     const ordered = await reorderContainerItemsAction(containerId, plan.orderedItemIds);
     if (!ordered.ok) {
       toast.error(tErrors(ordered.error.code));
+      setPreview(null);
       return;
     }
-    onChanged();
+    await onChanged();
+    setPreview(null);
   }
 
   function moveLevel(index: number, direction: -1 | 1) {
@@ -1064,7 +1134,14 @@ export function CurriculumTree({
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+      onDragCancel={endDrag}
+    >
       <div role="tree">
         {tree.levels.length === 0 && (
           <p className="py-6 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
@@ -1192,7 +1269,7 @@ export function CurriculumTree({
                   {level.modules.map((mod, mi) => (
                     <ModuleCard
                       key={mod.id}
-                      module={mod}
+                      module={withPreview(mod)}
                       code={moduleCode(levelIndex, mi)}
                       moduleIndex={mi}
                       selectedId={selectedId}
@@ -1307,6 +1384,8 @@ export function CurriculumTree({
             })
           }
         />
+
+        <DragOverlay>{draggingBlock && <BlockDragCard item={draggingBlock} />}</DragOverlay>
 
         <DeleteNodeDialog
           target={deleteTarget}
