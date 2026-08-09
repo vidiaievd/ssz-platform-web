@@ -4,9 +4,14 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 
+import type { CurriculumTreeItemNode, CurriculumTreeModuleNode } from '@/features/content/types';
+
 import type { CurriculumTreeSelection } from '../types';
 
-vi.mock('../actions/container', () => ({ renameContainerAction: vi.fn() }));
+vi.mock('../actions/container', () => ({
+  renameContainerAction: vi.fn(),
+  setContainerTitleEnAction: vi.fn(),
+}));
 vi.mock('../actions/section', () => ({ renameSectionAction: vi.fn() }));
 // Pulls in the publish server action, which cannot be imported client-side.
 vi.mock('./module-publish-block', () => ({ ModulePublishBlock: () => null }));
@@ -26,10 +31,14 @@ vi.mock('@/lib/i18n/navigation', () => ({
 }));
 
 const { CurriculumInspector } = await import('./curriculum-inspector');
-const { renameContainerAction } = await import('../actions/container');
+const { renameContainerAction, setContainerTitleEnAction } = await import('../actions/container');
 const { renameSectionAction } = await import('../actions/section');
 
-function renderInspector(selection: CurriculumTreeSelection | null, onChanged = vi.fn()) {
+function renderInspector(
+  selection: CurriculumTreeSelection | null,
+  onChanged = vi.fn(),
+  onDelete = vi.fn(),
+) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <CurriculumInspector
@@ -37,15 +46,51 @@ function renderInspector(selection: CurriculumTreeSelection | null, onChanged = 
         courseContainerId="course-1"
         schoolSlug="my-school"
         onChanged={onChanged}
+        onDelete={onDelete}
       />
     </NextIntlClientProvider>,
   );
   return onChanged;
 }
 
+function moduleNode(overrides: Partial<CurriculumTreeModuleNode> = {}): CurriculumTreeModuleNode {
+  return {
+    id: 'item-module-1',
+    containerId: 'module-1',
+    versionId: 'module-version-1',
+    title: 'Samfunn og kultur',
+    titleEn: null,
+    position: 0,
+    isRequired: true,
+    sections: [],
+    publishState: 'draft',
+    ungroupedItems: [],
+    ...overrides,
+  };
+}
+
+function itemNode(overrides: Partial<CurriculumTreeItemNode> = {}): CurriculumTreeItemNode {
+  return {
+    id: 'item-1',
+    itemType: 'lesson',
+    refId: 'lesson-1',
+    title: 'En vanlig arbeidsdag',
+    position: 0,
+    isRequired: true,
+    lessonKind: 'text',
+    state: 'published',
+    isLive: true,
+    pendingChange: null,
+    durationMinutes: null,
+    xpReward: null,
+    ...overrides,
+  };
+}
+
 beforeEach(() => {
   vi.mocked(renameContainerAction).mockReset();
   vi.mocked(renameSectionAction).mockReset();
+  vi.mocked(setContainerTitleEnAction).mockReset();
 });
 
 describe('CurriculumInspector', () => {
@@ -76,24 +121,61 @@ describe('CurriculumInspector', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
-  it('shows module title (English) when present, with an editable title', () => {
+  it('shows module title and its editable English subtitle', () => {
+    renderInspector({ kind: 'module', module: moduleNode({ titleEn: 'Society and culture' }) });
+    expect(screen.getByDisplayValue('Samfunn og kultur')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Society and culture')).toBeInTheDocument();
+  });
+
+  it("sums a module's blocks into an estimated duration, and counts them", () => {
     renderInspector({
       kind: 'module',
-      module: {
-        id: 'item-module-1',
-        containerId: 'module-1',
-        versionId: 'module-version-1',
-        title: 'Samfunn og kultur',
-        titleEn: 'Society and culture',
-        position: 0,
-        isRequired: true,
-        sections: [],
-        publishState: 'draft',
-        ungroupedItems: [],
-      },
+      module: moduleNode({
+        sections: [
+          {
+            id: 'section-1',
+            title: 'Read',
+            position: 0,
+            items: [itemNode({ id: 'i-1', durationMinutes: 6 })],
+          },
+        ],
+        ungroupedItems: [itemNode({ id: 'i-2', durationMinutes: 4 })],
+      }),
     });
-    expect(screen.getByDisplayValue('Samfunn og kultur')).toBeInTheDocument();
-    expect(screen.getByText('Society and culture')).toBeInTheDocument();
+
+    expect(screen.getByText('10 min')).toBeInTheDocument();
+    // Two blocks across one section plus the ungrouped bucket.
+    expect(screen.getByText('Blocks').parentElement).toHaveTextContent('2');
+  });
+
+  it('offers the fields the backend cannot store yet without letting them be edited', () => {
+    renderInspector({ kind: 'module', module: moduleNode() });
+
+    const goals = screen.getByLabelText('Learning goals — not available yet');
+    expect(goals).toHaveAttribute('aria-disabled', 'true');
+    expect(goals.tagName).not.toBe('INPUT');
+    expect(screen.getByLabelText('Homework by default — not available yet')).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+  });
+
+  it("deletes the selected module through the panel's confirmation", () => {
+    const onDelete = vi.fn();
+    renderInspector(
+      { kind: 'module', module: moduleNode({ ungroupedItems: [itemNode({ id: 'i-1' })] }) },
+      vi.fn(),
+      onDelete,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+
+    expect(onDelete).toHaveBeenCalledWith({
+      kind: 'module',
+      id: 'item-module-1',
+      title: 'Samfunn og kultur',
+      blockCount: 1,
+    });
   });
 
   it('shows lesson metadata: type label, duration, xp and state', () => {
@@ -193,21 +275,7 @@ describe('CurriculumInspector', () => {
 
     it('renames a module when save is pressed and reports the change', async () => {
       vi.mocked(renameContainerAction).mockResolvedValue({ ok: true, value: undefined } as never);
-      const onChanged = renderInspector({
-        kind: 'module',
-        module: {
-          id: 'item-module-1',
-          containerId: 'module-1',
-          versionId: 'module-version-1',
-          title: 'Samfunn og kultur',
-          titleEn: null,
-          position: 0,
-          isRequired: true,
-          sections: [],
-          publishState: 'draft',
-          ungroupedItems: [],
-        },
-      });
+      const onChanged = renderInspector({ kind: 'module', module: moduleNode() });
 
       fireEvent.change(screen.getByDisplayValue('Samfunn og kultur'), {
         target: { value: 'Samfunn' },
@@ -218,6 +286,29 @@ describe('CurriculumInspector', () => {
 
       expect(renameContainerAction).toHaveBeenCalledWith('module-1', 'Samfunn');
       expect(onChanged).toHaveBeenCalled();
+    });
+
+    it('creates the English subtitle when the module has none', async () => {
+      vi.mocked(setContainerTitleEnAction).mockResolvedValue({
+        ok: true,
+        value: undefined,
+      } as never);
+      renderInspector({ kind: 'module', module: moduleNode({ titleEn: null }) });
+
+      fireEvent.change(screen.getByLabelText('Title (English)'), {
+        target: { value: 'Society and culture' },
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Save subtitle' }));
+      });
+
+      // `false` is the create-vs-update decision: the tree reports null when no
+      // localization row exists for the module.
+      expect(setContainerTitleEnAction).toHaveBeenCalledWith(
+        'module-1',
+        'Society and culture',
+        false,
+      );
     });
   });
 });

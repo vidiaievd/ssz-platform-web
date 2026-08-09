@@ -112,6 +112,49 @@ export async function renameContainerAction(id: string, title: string) {
   });
 }
 
+/**
+ * Sets the English subtitle the curriculum tree reports as `titleEn` — a
+ * container *localization* row (`languageCode: 'en'`,
+ * `get-curriculum-tree.handler.ts`), not a field on the container itself.
+ *
+ * Which request to send depends on whether that row already exists, and the
+ * tree already answers that: `titleEn === null` means there is none. Clearing
+ * the field deletes the row rather than storing an empty title — a blank
+ * localization would still be a localization, and would keep claiming the
+ * module has an English name.
+ */
+export async function setContainerTitleEnAction(id: string, titleEn: string, hasExisting: boolean) {
+  return tryAction(async () => {
+    const trimmed = titleEn.trim();
+
+    if (!trimmed) {
+      if (hasExisting) {
+        await serverFetch({
+          service: 'content',
+          path: `/containers/${id}/localizations/en`,
+          method: 'DELETE',
+        });
+      }
+    } else if (hasExisting) {
+      await serverFetch({
+        service: 'content',
+        path: `/containers/${id}/localizations/en`,
+        method: 'PATCH',
+        body: { title: trimmed },
+      });
+    } else {
+      await serverFetch({
+        service: 'content',
+        path: `/containers/${id}/localizations`,
+        method: 'POST',
+        body: { languageCode: 'en', title: trimmed },
+      });
+    }
+
+    revalidatePath(`/school/content/${id}`);
+  });
+}
+
 export async function updateContainerAction(id: string, input: ContainerFormValues) {
   return tryAction(async () => {
     const parsed = containerFormSchema.safeParse(input);

@@ -15,7 +15,9 @@ import {
   resolveSelection,
 } from '../lib/find-tree-item';
 import { EMPTY_FILTERS, type StructureFilters } from '../lib/structure-filters';
+import { useNodeDeletion } from '../hooks/use-node-deletion';
 import { CurriculumTree } from './curriculum-tree';
+import { DeleteNodeDialog } from './delete-node-dialog';
 import { CurriculumInspector } from './curriculum-inspector';
 import { OutlineRail } from './outline-rail';
 import { StructureToolbar } from './structure-toolbar';
@@ -76,6 +78,17 @@ export function CourseStructurePanel({
   const [selection, setSelection] = useState<CurriculumTreeSelection | null>(null);
   const [filters, setFilters] = useState<StructureFilters>(EMPTY_FILTERS);
   const { data: tree, isLoading, isError, refetch } = useCurriculumTree(containerId, versionId);
+
+  /**
+   * Deleting from the inspector's footer, confirmed in the same dialog the row
+   * menus use. Called above the early returns because it is a hook — it simply
+   * has nothing to act on until the tree arrives.
+   */
+  const deletion = useNodeDeletion({
+    tree,
+    courseContainerId: containerId,
+    onChanged: () => void handleChanged(),
+  });
 
   async function handleChanged(selectId?: string, kind: 'level' | 'module' | 'item' = 'item') {
     const { data: freshTree } = await refetch();
@@ -170,9 +183,22 @@ export function CourseStructurePanel({
             courseContainerId={containerId}
             schoolSlug={schoolSlug}
             onChanged={() => handleChanged()}
+            onDelete={deletion.request}
           />
         </div>
       </div>
+
+      {/* The inspector's footer deletes through the same confirmation the row
+          menus use; the deleted node drops out of the selection by itself, as
+          `handleChanged` re-resolves it against the reloaded tree. */}
+      <DeleteNodeDialog
+        target={deletion.target}
+        onOpenChange={(open) => {
+          if (!open) deletion.dismiss();
+        }}
+        onConfirm={deletion.confirm}
+        pending={deletion.pending}
+      />
     </div>
   );
 }

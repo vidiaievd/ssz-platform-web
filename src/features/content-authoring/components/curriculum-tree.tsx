@@ -60,11 +60,7 @@ import {
   rollUpLevelPublishState,
 } from '../lib/structure-nodes';
 import { createModuleAction, renameContainerAction } from '../actions/container';
-import {
-  deleteSectionAction,
-  renameSectionAction,
-  reorderSectionsAction,
-} from '../actions/section';
+import { renameSectionAction, reorderSectionsAction } from '../actions/section';
 import {
   assignItemSectionAction,
   removeContainerItemAction,
@@ -83,6 +79,7 @@ import { AddLessonPicker } from './add-lesson-picker';
 import { InlineRename } from './inline-rename';
 import { NodeMenu } from './node-menu';
 import { DeleteNodeDialog, type DeleteNodeTarget } from './delete-node-dialog';
+import { useNodeDeletion } from '../hooks/use-node-deletion';
 import { StubIconButton } from './stub-controls';
 import { BulkBar } from './bulk-bar';
 import { checkedBlocks } from '../lib/block-selection';
@@ -1019,15 +1016,6 @@ export function CurriculumTree({
   const selectedBlocks = checkedBlocks(tree, courseContainerId, checkedIds);
 
   /**
-   * Deletion, confirmed in one dialog for all three kinds. What it runs differs:
-   * a level is a section on the course and is genuinely deleted (its modules
-   * survive, ungrouped), while a module or a block is only unplaced from the
-   * container that holds it.
-   */
-  const [deleteTarget, setDeleteTarget] = useState<DeleteNodeTarget | null>(null);
-  const [deletePending, setDeletePending] = useState(false);
-
-  /**
    * Bulk removal. One request per block, run in order rather than at once: the
    * API unplaces a single item and rewrites the positions of its siblings, so
    * two concurrent calls against the same module would race each other.
@@ -1035,51 +1023,25 @@ export function CurriculumTree({
    * Blocks that failed stay ticked, which is both the honest report of what is
    * left and the shortest path to retrying them.
    */
-  async function confirmBulkDelete() {
-    setDeletePending(true);
+  async function deleteCheckedBlocks() {
     const failedIds: string[] = [];
     for (const block of selectedBlocks) {
       const result = await removeContainerItemAction(block.containerId, block.id);
       if (!result.ok) failedIds.push(block.id);
     }
-    setDeletePending(false);
-    setDeleteTarget(null);
     setCheckedIds(new Set(failedIds));
     if (failedIds.length > 0) {
       toast.error(t('bulk.deleteFailed', { count: failedIds.length }));
     }
-    onChanged();
   }
 
-  function confirmDelete(target: DeleteNodeTarget) {
-    if (target.kind === 'blocks') {
-      void confirmBulkDelete();
-      return;
-    }
-    setDeletePending(true);
-    const owningContainerId =
-      target.kind === 'item'
-        ? (tree.levels
-            .flatMap((l) => l.modules)
-            .find((m) => moduleItems(m).some((i) => i.id === target.id))?.containerId ??
-          courseContainerId)
-        : courseContainerId;
-
-    const request =
-      target.kind === 'level'
-        ? deleteSectionAction(courseContainerId, target.id)
-        : removeContainerItemAction(owningContainerId, target.id);
-
-    request.then((result) => {
-      setDeletePending(false);
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      setDeleteTarget(null);
-      onChanged();
-    });
-  }
+  /** The single-node cases, shared with the inspector's footer. */
+  const deletion = useNodeDeletion({
+    tree,
+    courseContainerId,
+    onChanged: () => onChanged(),
+    onBulkDelete: deleteCheckedBlocks,
+  });
 
   /**
    * Dragging blocks. One `DndContext` spans the whole tree rather than one per
@@ -1566,7 +1528,7 @@ export function CurriculumTree({
                     onDelete={
                       level.id
                         ? () =>
-                            setDeleteTarget({
+                            deletion.request({
                               kind: 'level',
                               id: level.id!,
                               title: level.title ?? '',
@@ -1613,7 +1575,7 @@ export function CurriculumTree({
                       matches={matches}
                       rename={rename}
                       check={check}
-                      onRequestDelete={setDeleteTarget}
+                      onRequestDelete={deletion.request}
                       expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
                       onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
                     />
@@ -1708,11 +1670,11 @@ export function CurriculumTree({
 
         <BulkBar
           count={selectedBlocks.length}
-          pending={deletePending}
-          escapeClears={deleteTarget === null}
+          pending={deletion.pending}
+          escapeClears={deletion.target === null}
           onClear={clearChecked}
           onDelete={() =>
-            setDeleteTarget({
+            deletion.request({
               kind: 'blocks',
               id: '',
               title: '',
@@ -1728,12 +1690,12 @@ export function CurriculumTree({
         </DragOverlay>
 
         <DeleteNodeDialog
-          target={deleteTarget}
+          target={deletion.target}
           onOpenChange={(open) => {
-            if (!open) setDeleteTarget(null);
+            if (!open) deletion.dismiss();
           }}
-          onConfirm={confirmDelete}
-          pending={deletePending}
+          onConfirm={deletion.confirm}
+          pending={deletion.pending}
         />
 
         {editingModule && (
