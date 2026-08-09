@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useCallback, useState, useTransition } from 'react';
 import { ChevronDown, Copy, Pencil, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from '@/lib/i18n/navigation';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
@@ -62,6 +63,8 @@ import { InlineRename } from './inline-rename';
 import { NodeMenu } from './node-menu';
 import { DeleteNodeDialog, type DeleteNodeTarget } from './delete-node-dialog';
 import { StubIconButton } from './stub-controls';
+import { BulkBar } from './bulk-bar';
+import { checkedBlocks } from '../lib/block-selection';
 
 type ChangeKind = 'level' | 'module' | 'item';
 
@@ -100,6 +103,12 @@ interface RenameControls {
   begin: (id: string) => void;
   cancel: () => void;
   commit: (id: string, title: string) => void;
+}
+
+/** Multi-select, which the design puts on block rows only. */
+interface CheckControls {
+  isChecked: (id: string) => boolean;
+  toggle: (id: string) => void;
 }
 
 /**
@@ -242,6 +251,7 @@ function BlockRow({
   schoolSlug,
   courseContainerId,
   rename,
+  check,
   menu,
 }: {
   item: CurriculumTreeItemNode;
@@ -251,6 +261,7 @@ function BlockRow({
   schoolSlug: string;
   courseContainerId: string;
   rename: RenameControls;
+  check: CheckControls;
   menu?: React.ReactNode;
 }) {
   const t = useTranslations('Authoring');
@@ -258,6 +269,7 @@ function BlockRow({
   const def = getLessonTypeDefinition(getMaterialKind(item));
   const Icon = def.icon;
   const selected = selectedId === item.id;
+  const checked = check.isChecked(item.id);
 
   return (
     <div
@@ -276,9 +288,20 @@ function BlockRow({
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         selected
           ? 'border-primary-200 bg-primary-50 dark:bg-primary-900/30'
-          : 'border-transparent bg-surface hover:border-border',
+          : checked
+            ? 'border-transparent bg-info-50 dark:bg-info-700/25'
+            : 'border-transparent bg-surface hover:border-border',
       )}
     >
+      {/* Ticking a row must not also select it: the two answer different
+          questions — "act on these" versus "show me this one". */}
+      <Checkbox
+        checked={checked}
+        onCheckedChange={() => check.toggle(item.id)}
+        onClick={(e) => e.stopPropagation()}
+        aria-label={t('bulk.selectBlock', { name: item.title ?? '' })}
+        className="size-3.75 rounded-xs"
+      />
       <Glyph style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}>
         <Icon size={12} style={{ color: `var(${def.hueVar})` }} />
       </Glyph>
@@ -345,6 +368,7 @@ function ModuleCard({
   filters,
   matches,
   rename,
+  check,
   onRequestDelete,
   expanded,
   onToggleExpanded,
@@ -358,6 +382,7 @@ function ModuleCard({
   /** Shared with the tree so a module's rows and its own expansion agree on what matches. */
   matches: (item: CurriculumTreeItemNode) => boolean;
   rename: RenameControls;
+  check: CheckControls;
   /** Opens the confirmation dialog, which the tree owns. */
   onRequestDelete: (target: DeleteNodeTarget) => void;
   expanded: boolean;
@@ -445,6 +470,7 @@ function ModuleCard({
               schoolSlug={schoolSlug}
               courseContainerId={mod.containerId}
               rename={rename}
+              check={check}
               menu={
                 <NodeMenu
                   kind="item"
@@ -690,6 +716,24 @@ export function CurriculumTree({
   };
 
   /**
+   * Multi-select. Only ids are held here; what they point at is resolved
+   * against the current tree by `checkedBlocks`, so a row that disappears
+   * under the selection cannot be acted on afterwards.
+   */
+  const [checkedIds, setCheckedIds] = useState<ReadonlySet<string>>(EMPTY_KEYS);
+  const check: CheckControls = {
+    isChecked: (id) => checkedIds.has(id),
+    toggle: (id) =>
+      setCheckedIds((prev) => {
+        const next = new Set(prev);
+        if (!next.delete(id)) next.add(id);
+        return next;
+      }),
+  };
+  const clearChecked = useCallback(() => setCheckedIds(EMPTY_KEYS), []);
+  const selectedBlocks = checkedBlocks(tree, courseContainerId, checkedIds);
+
+  /**
    * Deletion, confirmed in one dialog for all three kinds. What it runs differs:
    * a level is a section on the course and is genuinely deleted (its modules
    * survive, ungrouped), while a module or a block is only unplaced from the
@@ -698,7 +742,35 @@ export function CurriculumTree({
   const [deleteTarget, setDeleteTarget] = useState<DeleteNodeTarget | null>(null);
   const [deletePending, setDeletePending] = useState(false);
 
+  /**
+   * Bulk removal. One request per block, run in order rather than at once: the
+   * API unplaces a single item and rewrites the positions of its siblings, so
+   * two concurrent calls against the same module would race each other.
+   *
+   * Blocks that failed stay ticked, which is both the honest report of what is
+   * left and the shortest path to retrying them.
+   */
+  async function confirmBulkDelete() {
+    setDeletePending(true);
+    const failedIds: string[] = [];
+    for (const block of selectedBlocks) {
+      const result = await removeContainerItemAction(block.containerId, block.id);
+      if (!result.ok) failedIds.push(block.id);
+    }
+    setDeletePending(false);
+    setDeleteTarget(null);
+    setCheckedIds(new Set(failedIds));
+    if (failedIds.length > 0) {
+      toast.error(t('bulk.deleteFailed', { count: failedIds.length }));
+    }
+    onChanged();
+  }
+
   function confirmDelete(target: DeleteNodeTarget) {
+    if (target.kind === 'blocks') {
+      void confirmBulkDelete();
+      return;
+    }
     setDeletePending(true);
     const owningContainerId =
       target.kind === 'item'
@@ -963,6 +1035,7 @@ export function CurriculumTree({
                     filters={filters}
                     matches={matches}
                     rename={rename}
+                    check={check}
                     onRequestDelete={setDeleteTarget}
                     expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
                     onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
@@ -984,6 +1057,7 @@ export function CurriculumTree({
                         schoolSlug={schoolSlug}
                         courseContainerId={courseContainerId}
                         rename={rename}
+                        check={check}
                       />
                     ))}
                   </div>
@@ -1026,6 +1100,7 @@ export function CurriculumTree({
           schoolSlug={schoolSlug}
           courseContainerId={courseContainerId}
           rename={rename}
+          check={check}
         />
       ))}
 
@@ -1038,6 +1113,21 @@ export function CurriculumTree({
           <AddButton label={t('structure.addLesson')} onClick={() => setAddOwnLessonIn('')} />
         </div>
       )}
+
+      <BulkBar
+        count={selectedBlocks.length}
+        pending={deletePending}
+        escapeClears={deleteTarget === null}
+        onClear={clearChecked}
+        onDelete={() =>
+          setDeleteTarget({
+            kind: 'blocks',
+            id: '',
+            title: '',
+            blockCount: selectedBlocks.length,
+          })
+        }
+      />
 
       <DeleteNodeDialog
         target={deleteTarget}

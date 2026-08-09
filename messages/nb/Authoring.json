@@ -1285,6 +1285,17 @@
     "clear": "Nullstill",
     "noMatchesInModule": "Ingenting her passer med filtrene."
   },
+  "bulk": {
+    "label": "Masshandlinger for de valgte blokkene",
+    "selected": "{count, plural, one {# valgt} other {# valgt}}",
+    "selectBlock": "Velg {name}",
+    "duplicate": "Dupliser",
+    "publish": "Publiser",
+    "unpublish": "Avpubliser",
+    "delete": "Fjern",
+    "clear": "Nullstill",
+    "deleteFailed": "{count, plural, one {# blokk kunne ikke fjernes} other {# blokker kunne ikke fjernes}}. De er fortsatt valgt."
+  },
   "deleteNode": {
     "cancel": "Avbryt",
     "level": {
@@ -1301,6 +1312,11 @@
       "title": "Fjerne «{name}» fra denne modulen?",
       "body": "Selve materialet blir liggende i biblioteket og kan plasseres på nytt. Elevfremgang beholdes.",
       "confirm": "Fjern blokk"
+    },
+    "blocks": {
+      "title": "Fjerne {blocks, plural, one {# blokk} other {# blokker}} fra dette kurset?",
+      "body": "Selve materialet blir liggende i biblioteket og kan plasseres på nytt. Elevfremgang beholdes.",
+      "confirm": "Fjern blokker"
     }
   }
 }

@@ -587,6 +587,131 @@ describe('CurriculumTree', () => {
     });
   });
 
+  describe('multi-select', () => {
+    /** Two blocks in two different modules — the case a bulk action must not flatten. */
+    const LEVEL = TREE.levels[0]!;
+    const MODULE_ONE = LEVEL.modules[0]!;
+    const ITEM_ONE = MODULE_ONE.sections[0]!.items[0]!;
+    const TREE_TWO_MODULES: CurriculumTreeData = {
+      ...TREE,
+      levels: [
+        {
+          ...LEVEL,
+          modules: [
+            MODULE_ONE,
+            {
+              ...MODULE_ONE,
+              id: 'item-module-2',
+              containerId: 'module-2',
+              title: 'Helse',
+              sections: [
+                {
+                  id: 'section-2',
+                  title: 'Øvelser',
+                  position: 0,
+                  items: [
+                    {
+                      ...ITEM_ONE,
+                      id: 'item-2',
+                      refId: 'lesson-2',
+                      title: 'Hos legen',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    async function tick(name: string) {
+      await userEvent.click(screen.getByRole('checkbox', { name: `Select ${name}` }));
+    }
+
+    it('counts ticked blocks without moving the inspector to them', async () => {
+      const { onSelect } = renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
+
+      await tick('En vanlig arbeidsdag');
+      await tick('Hos legen');
+
+      expect(screen.getByText('2 selected')).toBeInTheDocument();
+      // Ticking says "act on these", not "show me this one".
+      expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    it('clears the selection on Escape', async () => {
+      renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
+
+      await tick('En vanlig arbeidsdag');
+      expect(screen.getByText('1 selected')).toBeInTheDocument();
+
+      await userEvent.keyboard('{Escape}');
+
+      expect(screen.queryByText('1 selected')).not.toBeInTheDocument();
+    });
+
+    it('offers the actions with no backend as unavailable', async () => {
+      renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
+      await tick('Hos legen');
+
+      // Scoped to the bar: rows carry a stub Duplicate of their own.
+      const bar = screen.getByRole('toolbar', { name: /Bulk actions/ });
+      for (const label of ['Duplicate', 'Publish', 'Unpublish']) {
+        expect(
+          within(bar).getByRole('button', { name: `${label} — not available yet` }),
+        ).toHaveAttribute('aria-disabled', 'true');
+      }
+    });
+
+    it('removes every ticked block from the container that holds it', async () => {
+      vi.mocked(removeContainerItemAction).mockResolvedValue({
+        ok: true,
+        value: undefined,
+      } as never);
+      const { onChanged } = renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
+
+      await tick('En vanlig arbeidsdag');
+      await tick('Hos legen');
+      await userEvent.click(screen.getByRole('button', { name: 'Remove' }));
+
+      const dialog = await screen.findByRole('alertdialog');
+      // Named by count, not by one of the two titles it is about to remove.
+      expect(within(dialog).getByText(/2 blocks/)).toBeInTheDocument();
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Remove blocks' }));
+
+      await waitFor(() =>
+        expect(removeContainerItemAction).toHaveBeenCalledWith('module-1', 'item-1'),
+      );
+      expect(removeContainerItemAction).toHaveBeenCalledWith('module-2', 'item-2');
+      await waitFor(() => expect(onChanged).toHaveBeenCalled());
+      // The bar goes once the blocks it acted on are gone.
+      await waitFor(() => expect(screen.queryByText('2 selected')).not.toBeInTheDocument());
+    });
+
+    it('keeps a block that could not be removed ticked', async () => {
+      vi.mocked(removeContainerItemAction).mockImplementation(
+        async (containerId: string) =>
+          (containerId === 'module-1'
+            ? { ok: true, value: undefined }
+            : { ok: false, error: { code: 'unknown' } }) as never,
+      );
+      renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
+
+      await tick('En vanlig arbeidsdag');
+      await tick('Hos legen');
+      await userEvent.click(screen.getByRole('button', { name: 'Remove' }));
+      await userEvent.click(
+        within(await screen.findByRole('alertdialog')).getByRole('button', {
+          name: 'Remove blocks',
+        }),
+      );
+
+      await waitFor(() => expect(screen.getByText('1 selected')).toBeInTheDocument());
+      expect(screen.getByRole('checkbox', { name: 'Select Hos legen' })).toBeChecked();
+    });
+  });
+
   describe('inline rename', () => {
     it('renames a module through its container endpoint', async () => {
       vi.mocked(renameContainerAction).mockResolvedValue({ ok: true, value: undefined } as never);

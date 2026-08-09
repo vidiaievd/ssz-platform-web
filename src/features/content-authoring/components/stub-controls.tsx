@@ -25,6 +25,38 @@ function useStubLabel(label: string) {
   return `${label} — ${t('notAvailable')}`;
 }
 
+/**
+ * The same contract as `StubIconButton` where the design shows a labelled
+ * button — the bulk bar's Duplicate / Publish / Unpublish, which need the words
+ * to say what the selection would do once the backend can do it.
+ */
+export function StubButton({ label, className }: { label: string; className?: string }) {
+  const title = useStubLabel(label);
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span
+            role="button"
+            aria-disabled="true"
+            aria-label={title}
+            tabIndex={0}
+            className={cn(
+              'inline-flex h-7 cursor-not-allowed items-center rounded-full px-2.5 text-xs opacity-40',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              className,
+            )}
+          >
+            {label}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>{title}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 export function StubIconButton({
   icon,
   label,

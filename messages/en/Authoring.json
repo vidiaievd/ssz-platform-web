@@ -1285,6 +1285,17 @@
     "clear": "Clear",
     "noMatchesInModule": "Nothing here matches the filters."
   },
+  "bulk": {
+    "label": "Bulk actions for the selected blocks",
+    "selected": "{count, plural, one {# selected} other {# selected}}",
+    "selectBlock": "Select {name}",
+    "duplicate": "Duplicate",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "delete": "Remove",
+    "clear": "Clear",
+    "deleteFailed": "{count, plural, one {# block could not be removed} other {# blocks could not be removed}}. They are still selected."
+  },
   "deleteNode": {
     "cancel": "Cancel",
     "level": {
@@ -1301,6 +1312,11 @@
       "title": "Remove “{name}” from this module?",
       "body": "The material itself stays in your library and can be placed again. Student progress is kept.",
       "confirm": "Remove block"
+    },
+    "blocks": {
+      "title": "Remove {blocks, plural, one {# block} other {# blocks}} from this course?",
+      "body": "The material itself stays in your library and can be placed again. Student progress is kept.",
+      "confirm": "Remove blocks"
     }
   }
 }
