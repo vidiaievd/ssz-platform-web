@@ -16,6 +16,7 @@ vi.mock('../actions/container', () => ({
   renameContainerAction: vi.fn(),
   createModuleAction: vi.fn(),
 }));
+vi.mock('../actions/rename-item', () => ({ renameItemAction: vi.fn() }));
 vi.mock('../actions/section', () => ({
   renameSectionAction: vi.fn(),
   createSectionAction: vi.fn(),

@@ -626,7 +626,15 @@
     "addLessonToSection": "Add to {section}",
     "duplicate": "Duplicate",
     "addModuleTo": "Add module to {name}",
-    "addLessonTo": "Add lesson to {name}"
+    "addLessonTo": "Add lesson to {name}",
+    "rename": "Rename",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "moveTo": "Move to…",
+    "moveToAnotherModule": "Another module",
+    "unpublish": "Unpublish",
+    "moreActions": "More actions for {name}",
+    "item": "Item"
   },
   "settings": {
     "trigger": "Settings",
@@ -1258,7 +1266,8 @@
     "hasUnpublished": "Has unpublished changes"
   },
   "stub": {
-    "notAvailable": "not available yet"
+    "notAvailable": "not available yet",
+    "short": "not yet"
   },
   "toolbar": {
     "searchPlaceholder": "Search lessons, blocks, exercises…",

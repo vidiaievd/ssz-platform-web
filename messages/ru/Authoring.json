@@ -626,7 +626,15 @@
     "addLessonToSection": "Добавить в «{section}»",
     "duplicate": "Дублировать",
     "addModuleTo": "Добавить модуль в «{name}»",
-    "addLessonTo": "Добавить урок в «{name}»"
+    "addLessonTo": "Добавить урок в «{name}»",
+    "rename": "Переименовать",
+    "moveUp": "Вверх",
+    "moveDown": "Вниз",
+    "moveTo": "Переместить в…",
+    "moveToAnotherModule": "Другой модуль",
+    "unpublish": "Снять с публикации",
+    "moreActions": "Другие действия для «{name}»",
+    "item": "Элемент"
   },
   "settings": {
     "trigger": "Настройки",
@@ -1258,7 +1266,8 @@
     "hasUnpublished": "Есть неопубликованные изменения"
   },
   "stub": {
-    "notAvailable": "пока недоступно"
+    "notAvailable": "пока недоступно",
+    "short": "пока нет"
   },
   "toolbar": {
     "searchPlaceholder": "Поиск уроков, блоков, упражнений…",

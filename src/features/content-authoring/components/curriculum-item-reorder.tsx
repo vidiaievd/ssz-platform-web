@@ -1,35 +1,24 @@
 'use client';
 
-import { useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import type {
   CurriculumTree,
   CurriculumTreeItemNode,
-  CurriculumTreeLevelNode,
   CurriculumTreeModuleNode,
   CurriculumTreeSectionNode,
 } from '@/features/content/types';
 
-import { assignItemSectionAction, reorderContainerItemsAction } from '../actions/container-item';
+import { reorderContainerItemsAction } from '../actions/container-item';
 import { reorderSectionsAction } from '../actions/section';
 import { ReorderWithAnnouncer } from './lesson-reorder';
 
-const NO_SECTION = '__none__';
-
 /** Moves the element at `index` one slot toward `direction`; no-op past either end. */
-function moveInArray<T>(items: readonly T[], index: number, direction: -1 | 1): T[] {
+export function moveInArray<T>(items: readonly T[], index: number, direction: -1 | 1): T[] {
   const newIndex = index + direction;
   if (newIndex < 0 || newIndex >= items.length) return [...items];
   const copy = [...items];
@@ -96,79 +85,6 @@ export function MoveUpDown({ ariaLabel, disabledUp, disabledDown, onMoveUp, onMo
   );
 }
 
-interface MoveLevelProps {
-  courseContainerId: string;
-  levels: CurriculumTreeLevelNode[];
-  level: CurriculumTreeLevelNode;
-  onMoved: () => void;
-}
-
-/** Move-up/down for a level (a section on the course container) among its siblings. */
-export function MoveLevel({ courseContainerId, levels, level, onMoved }: MoveLevelProps) {
-  const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
-  const index = levels.findIndex((l) => l.id === level.id);
-
-  function handleMove(direction: -1 | 1) {
-    const reordered = moveInArray(levels, index, direction);
-    const orderedIds = reordered.map((l) => l.id).filter((id): id is string => id != null);
-    reorderSectionsAction(courseContainerId, orderedIds).then((result) => {
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      onMoved();
-    });
-  }
-
-  return (
-    <MoveUpDown
-      ariaLabel={t('structure.level')}
-      disabledUp={index <= 0}
-      disabledDown={index >= levels.length - 1}
-      onMoveUp={() => handleMove(-1)}
-      onMoveDown={() => handleMove(1)}
-    />
-  );
-}
-
-interface MoveModuleProps {
-  courseContainerId: string;
-  tree: CurriculumTree;
-  level: CurriculumTreeLevelNode;
-  module: CurriculumTreeModuleNode;
-  onMoved: () => void;
-}
-
-/** Move-up/down for a module among its siblings within the same level. */
-export function MoveModule({ courseContainerId, tree, level, module: mod, onMoved }: MoveModuleProps) {
-  const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
-  const index = level.modules.findIndex((m) => m.id === mod.id);
-
-  function handleMove(direction: -1 | 1) {
-    const reordered = moveInArray(level.modules, index, direction);
-    const fullOrder = computeReorderedModuleIds(tree, reordered);
-    reorderContainerItemsAction(courseContainerId, fullOrder).then((result) => {
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      onMoved();
-    });
-  }
-
-  return (
-    <MoveUpDown
-      ariaLabel={t('structure.module')}
-      disabledUp={index <= 0}
-      disabledDown={index >= level.modules.length - 1}
-      onMoveUp={() => handleMove(-1)}
-      onMoveDown={() => handleMove(1)}
-    />
-  );
-}
-
 interface MoveSectionProps {
   moduleContainerId: string;
   sections: CurriculumTreeSectionNode[];
@@ -231,55 +147,6 @@ export function computeReorderedItemIds(
   const withoutSection = flattened.filter((id) => !reorderedIds.has(id));
   withoutSection.splice(insertAt, 0, ...reorderedSectionItems.map((i) => i.id));
   return withoutSection;
-}
-
-interface MoveToSectionSelectProps {
-  moduleContainerId: string;
-  item: CurriculumTreeItemNode;
-  currentSectionId: string | null;
-  sections: { id: string; title: string }[];
-  onMoved: () => void;
-}
-
-export function MoveToSectionSelect({
-  moduleContainerId,
-  item,
-  currentSectionId,
-  sections,
-  onMoved,
-}: MoveToSectionSelectProps) {
-  const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
-  const [isPending, startTransition] = useTransition();
-
-  function handleChange(value: string) {
-    const nextSectionId = value === NO_SECTION ? null : value;
-    if (nextSectionId === currentSectionId) return;
-    startTransition(async () => {
-      const result = await assignItemSectionAction(moduleContainerId, item.id, nextSectionId);
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      onMoved();
-    });
-  }
-
-  return (
-    <Select value={currentSectionId ?? NO_SECTION} onValueChange={handleChange} disabled={isPending}>
-      <SelectTrigger size="sm" className="h-7 w-32 text-xs" aria-label={t('sections.assignAriaLabel')}>
-        <SelectValue placeholder={t('sections.noSection')} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={NO_SECTION}>{t('sections.noSection')}</SelectItem>
-        {sections.map((section) => (
-          <SelectItem key={section.id} value={section.id}>
-            {section.title}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
 }
 
 interface CurriculumSectionItemsProps {

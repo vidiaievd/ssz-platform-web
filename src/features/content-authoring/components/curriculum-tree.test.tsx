@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
@@ -30,7 +31,10 @@ vi.mock('./add-lesson-picker', () => ({
       </div>
     ) : null,
 }));
-vi.mock('../actions/container', () => ({ createModuleAction: vi.fn() }));
+vi.mock('../actions/container', () => ({
+  createModuleAction: vi.fn(),
+  renameContainerAction: vi.fn(),
+}));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,
@@ -42,14 +46,21 @@ vi.mock('@/lib/i18n/navigation', () => ({
     </a>
   ),
 }));
+vi.mock('../actions/rename-item', () => ({ renameItemAction: vi.fn() }));
 vi.mock('../actions/section', () => ({
   createSectionAction: vi.fn(),
+  renameSectionAction: vi.fn(),
   reorderSectionsAction: vi.fn(),
 }));
 
 const { CurriculumTree } = await import('./curriculum-tree');
 const { createModuleAction } = await import('../actions/container');
 const { createSectionAction } = await import('../actions/section');
+const { renameContainerAction } = await import('../actions/container');
+const { renameItemAction } = await import('../actions/rename-item');
+const { assignItemSectionAction, reorderContainerItemsAction } = await import(
+  '../actions/container-item',
+);
 
 const TREE: CurriculumTreeData = {
   versionId: 'version-1',
@@ -158,6 +169,10 @@ function renderTree(
 beforeEach(() => {
   vi.mocked(createModuleAction).mockReset();
   vi.mocked(createSectionAction).mockReset();
+  vi.mocked(renameContainerAction).mockReset();
+  vi.mocked(renameItemAction).mockReset();
+  vi.mocked(reorderContainerItemsAction).mockReset();
+  vi.mocked(assignItemSectionAction).mockReset();
 });
 
 describe('CurriculumTree', () => {
@@ -371,6 +386,207 @@ describe('CurriculumTree', () => {
     const duplicate = within(row).getByRole('button', { name: /Duplicate/ });
     expect(duplicate).toHaveAttribute('aria-disabled', 'true');
     expect(duplicate).toHaveAccessibleName('Duplicate — not available yet');
+  });
+
+  describe('the row menu', () => {
+    // Radix opens on pointer events, so these go through user-event rather
+    // than fireEvent.click.
+    async function openMenu(name: string) {
+      await userEvent.click(screen.getByRole('button', { name: `More actions for ${name}` }));
+      return screen.findByRole('menu');
+    }
+
+    const openItemMenu = () => openMenu('En vanlig arbeidsdag');
+
+    it('starts a rename from the menu', async () => {
+      renderTree();
+      const menu = await openItemMenu();
+
+      await userEvent.click(within(menu).getByText('Rename'));
+
+      expect(await screen.findByDisplayValue('En vanlig arbeidsdag')).toBeInTheDocument();
+    });
+
+    it('links to the editor from the menu', async () => {
+      renderTree();
+      const menu = await openItemMenu();
+
+      expect(within(menu).getByRole('menuitem', { name: 'Open lesson editor' })).toHaveAttribute(
+        'href',
+        '/school/my-school/content/module-1/lessons/item-1',
+      );
+    });
+
+    // Duplicate and per-block publishing have no backend (plan 38 §3), so the
+    // menu lists them but cannot run them.
+    it('marks the actions that have no backend as unavailable', async () => {
+      renderTree();
+      const menu = await openItemMenu();
+
+      expect(within(menu).getByRole('menuitem', { name: /Duplicate/ })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
+      expect(within(menu).getByRole('menuitem', { name: /Unpublish/ })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
+    });
+
+    it('disables moving a block that is alone in its section', async () => {
+      renderTree();
+      const menu = await openItemMenu();
+
+      expect(within(menu).getByRole('menuitem', { name: 'Move up' })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
+      expect(within(menu).getByRole('menuitem', { name: 'Move down' })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
+    });
+
+    it('reorders a block by submitting the module\u2019s full item order', async () => {
+      const [level] = TREE.levels;
+      const [module_] = level!.modules;
+      const [section] = module_!.sections;
+      const [first] = section!.items;
+      const twoItems: CurriculumTreeData = {
+        ...TREE,
+        levels: [
+          {
+            ...level!,
+            modules: [
+              {
+                ...module_!,
+                sections: [
+                  {
+                    ...section!,
+                    items: [first!, { ...first!, id: 'item-2', title: 'Andre tekst' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      vi.mocked(reorderContainerItemsAction).mockResolvedValue({
+        ok: true,
+        value: undefined,
+      } as never);
+
+      renderTree(vi.fn(), vi.fn(), twoItems);
+      const menu = await openMenu('Andre tekst');
+      await userEvent.click(within(menu).getByRole('menuitem', { name: 'Move up' }));
+
+      await waitFor(() =>
+        expect(reorderContainerItemsAction).toHaveBeenCalledWith('module-1', [
+          'item-2',
+          'item-1',
+        ]),
+      );
+    });
+
+    it('files a block into another section from the menu', async () => {
+      vi.mocked(assignItemSectionAction).mockResolvedValue({ ok: true, value: undefined } as never);
+      renderTree();
+      const menu = await openItemMenu();
+
+      await userEvent.click(within(menu).getByRole('menuitem', { name: 'Move to…' }));
+      const submenu = await screen.findByRole('menu', { name: 'Move to…' });
+      await userEvent.click(within(submenu).getByRole('menuitem', { name: 'No section' }));
+
+      await waitFor(() =>
+        expect(assignItemSectionAction).toHaveBeenCalledWith('module-1', 'item-1', null),
+      );
+    });
+  });
+
+  describe('inline rename', () => {
+    it('renames a module through its container endpoint', async () => {
+      vi.mocked(renameContainerAction).mockResolvedValue({ ok: true, value: undefined } as never);
+      const { onChanged } = renderTree();
+
+      fireEvent.doubleClick(screen.getByText('Samfunn og kultur'));
+      const input = screen.getByDisplayValue('Samfunn og kultur');
+      fireEvent.change(input, { target: { value: 'Arbeidsliv' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      await waitFor(() => expect(renameContainerAction).toHaveBeenCalledWith('module-1', 'Arbeidsliv'));
+      await waitFor(() => expect(onChanged).toHaveBeenCalled());
+    });
+
+    it('renames a block through the entity its row points at', async () => {
+      vi.mocked(renameItemAction).mockResolvedValue({ ok: true, value: undefined } as never);
+      renderTree();
+
+      fireEvent.doubleClick(screen.getByText('En vanlig arbeidsdag'));
+      const input = screen.getByDisplayValue('En vanlig arbeidsdag');
+      fireEvent.change(input, { target: { value: 'En travel dag' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      await waitFor(() =>
+        expect(renameItemAction).toHaveBeenCalledWith(
+          'lesson',
+          'lesson-1',
+          'course-1',
+          'En travel dag',
+        ),
+      );
+    });
+
+    it('discards the edit on Escape', async () => {
+      renderTree();
+
+      fireEvent.doubleClick(screen.getByText('Samfunn og kultur'));
+      const input = screen.getByDisplayValue('Samfunn og kultur');
+      fireEvent.change(input, { target: { value: 'Something else' } });
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      expect(renameContainerAction).not.toHaveBeenCalled();
+      expect(screen.getByText('Samfunn og kultur')).toBeInTheDocument();
+    });
+
+    // An exercise row is labelled by its template's name; there is no
+    // per-exercise title field to write to.
+    it('does not offer rename on an exercise row', () => {
+      const [level] = TREE.levels;
+      const [module_] = level!.modules;
+      const [section] = module_!.sections;
+      const [item] = section!.items;
+      const exerciseTree: CurriculumTreeData = {
+        ...TREE,
+        levels: [
+          {
+            ...level!,
+            modules: [
+              {
+                ...module_!,
+                sections: [
+                  {
+                    ...section!,
+                    items: [
+                      {
+                        ...item!,
+                        itemType: 'exercise',
+                        lessonKind: null,
+                        title: 'Gap-Fill',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      renderTree(vi.fn(), vi.fn(), exerciseTree);
+      fireEvent.doubleClick(screen.getByText('Gap-Fill'));
+
+      expect(screen.queryByDisplayValue('Gap-Fill')).not.toBeInTheDocument();
+    });
   });
 
   describe('under filters', () => {

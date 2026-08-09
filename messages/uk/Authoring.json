@@ -626,7 +626,15 @@
     "addLessonToSection": "Додати до «{section}»",
     "duplicate": "Дублювати",
     "addModuleTo": "Додати модуль до «{name}»",
-    "addLessonTo": "Додати урок до «{name}»"
+    "addLessonTo": "Додати урок до «{name}»",
+    "rename": "Перейменувати",
+    "moveUp": "Вгору",
+    "moveDown": "Вниз",
+    "moveTo": "Перемістити до…",
+    "moveToAnotherModule": "Інший модуль",
+    "unpublish": "Зняти з публікації",
+    "moreActions": "Інші дії для «{name}»",
+    "item": "Елемент"
   },
   "settings": {
     "trigger": "Налаштування",
@@ -1258,7 +1266,8 @@
     "hasUnpublished": "Є неопубліковані зміни"
   },
   "stub": {
-    "notAvailable": "ще недоступно"
+    "notAvailable": "ще недоступно",
+    "short": "ще ні"
   },
   "toolbar": {
     "searchPlaceholder": "Пошук уроків, блоків, вправ…",

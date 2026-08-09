@@ -626,7 +626,15 @@
     "addLessonToSection": "Legg til i {section}",
     "duplicate": "Dupliser",
     "addModuleTo": "Legg til modul i {name}",
-    "addLessonTo": "Legg til leksjon i {name}"
+    "addLessonTo": "Legg til leksjon i {name}",
+    "rename": "Gi nytt navn",
+    "moveUp": "Flytt opp",
+    "moveDown": "Flytt ned",
+    "moveTo": "Flytt til…",
+    "moveToAnotherModule": "En annen modul",
+    "unpublish": "Avpubliser",
+    "moreActions": "Flere handlinger for {name}",
+    "item": "Element"
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -1258,7 +1266,8 @@
     "hasUnpublished": "Har upubliserte endringer"
   },
   "stub": {
-    "notAvailable": "ikke tilgjengelig ennå"
+    "notAvailable": "ikke tilgjengelig ennå",
+    "short": "ikke ennå"
   },
   "toolbar": {
     "searchPlaceholder": "Søk i leksjoner, blokker, øvelser…",

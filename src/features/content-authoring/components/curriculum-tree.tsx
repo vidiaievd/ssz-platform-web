@@ -35,17 +35,23 @@ import {
   moduleCollapseKey,
   rollUpLevelPublishState,
 } from '../lib/structure-nodes';
-import { createModuleAction } from '../actions/container';
+import { createModuleAction, renameContainerAction } from '../actions/container';
+import { renameSectionAction, reorderSectionsAction } from '../actions/section';
+import { assignItemSectionAction, reorderContainerItemsAction } from '../actions/container-item';
+import { renameItemAction } from '../actions/rename-item';
+import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
 import { PublishStateBadge } from './publish-state-badge';
 import { ItemChangeBadge } from './item-change-badge';
 import {
   CurriculumSectionItems,
-  MoveLevel,
-  MoveModule,
   MoveSection,
-  MoveToSectionSelect,
+  computeReorderedItemIds,
+  computeReorderedModuleIds,
+  moveInArray,
 } from './curriculum-item-reorder';
 import { AddLessonPicker } from './add-lesson-picker';
+import { InlineRename } from './inline-rename';
+import { NodeMenu } from './node-menu';
 import { StubIconButton } from './stub-controls';
 
 type ChangeKind = 'level' | 'module' | 'item';
@@ -77,6 +83,14 @@ interface CurriculumTreeProps {
   onToggleCollapse: (key: string) => void;
   /** Narrows which blocks are shown. Levels and modules are never hidden by it. */
   filters: StructureFilters;
+}
+
+/** Which node is being renamed in place, and how to save it. */
+interface RenameControls {
+  activeId: string | null;
+  begin: (id: string) => void;
+  cancel: () => void;
+  commit: (id: string, title: string) => void;
 }
 
 /**
@@ -218,7 +232,8 @@ function BlockRow({
   onSelect,
   schoolSlug,
   courseContainerId,
-  right,
+  rename,
+  menu,
 }: {
   item: CurriculumTreeItemNode;
   sectionTitle: string | null;
@@ -226,7 +241,8 @@ function BlockRow({
   onSelect: (selection: CurriculumTreeSelection) => void;
   schoolSlug: string;
   courseContainerId: string;
-  right?: React.ReactNode;
+  rename: RenameControls;
+  menu?: React.ReactNode;
 }) {
   const t = useTranslations('Authoring');
   const materialLabel = useMaterialLabel();
@@ -257,7 +273,23 @@ function BlockRow({
       <Glyph style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}>
         <Icon size={12} style={{ color: `var(${def.hueVar})` }} />
       </Glyph>
-      <span className="truncate text-sm text-foreground">{item.title}</span>
+      <InlineRename
+        value={item.title ?? ''}
+        editing={rename.activeId === item.id}
+        onCommit={(title) => rename.commit(item.id, title)}
+        onCancel={rename.cancel}
+      >
+        <span
+          className="truncate text-sm text-foreground"
+          onDoubleClick={(e) => {
+            if (!isRenamableItem(item)) return;
+            e.stopPropagation();
+            rename.begin(item.id);
+          }}
+        >
+          {item.title}
+        </span>
+      </InlineRename>
       <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
         {materialLabel(item)}
       </span>
@@ -268,7 +300,6 @@ function BlockRow({
       )}
       <ItemChangeBadge item={item} />
       <span className="flex-1" />
-      {right}
       <RowTools visible={selected}>
         <Link
           href={`/school/${schoolSlug}/content/${courseContainerId}/lessons/${item.id}`}
@@ -279,6 +310,7 @@ function BlockRow({
           <Pencil size={13} />
         </Link>
         <StubIconButton icon={<Copy size={13} />} label={t('structure.duplicate')} />
+        {menu}
       </RowTools>
     </div>
   );
@@ -289,6 +321,7 @@ function BlockRow({
 function ModuleCard({
   module: mod,
   code,
+  moduleIndex,
   selectedId,
   onSelect,
   onChanged,
@@ -302,15 +335,19 @@ function ModuleCard({
   schoolSlug,
   filters,
   matches,
+  rename,
   expanded,
   onToggleExpanded,
 }: {
   module: CurriculumTreeModuleNode;
   code: string;
+  /** Position among its level's modules — drives Move up/down. */
+  moduleIndex: number;
   schoolSlug: string;
   filters: StructureFilters;
   /** Shared with the tree so a module's rows and its own expansion agree on what matches. */
   matches: (item: CurriculumTreeItemNode) => boolean;
+  rename: RenameControls;
   expanded: boolean;
   onToggleExpanded: () => void;
   selectedId: string | null;
@@ -325,6 +362,7 @@ function ModuleCard({
   ownerSchoolId?: string | null;
 }) {
   const t = useTranslations('Authoring');
+  const tErrors = useTranslations('Errors');
   const [addLessonIn, setAddLessonIn] = useState<string | null | undefined>(undefined);
   const selected = selectedId === mod.id;
   const filtering = isFiltering(filters);
@@ -334,8 +372,47 @@ function ModuleCard({
   const minutes = allItems.reduce((sum, i) => sum + (i.durationMinutes ?? 0), 0);
   const sectionOptions = mod.sections.map((s) => ({ id: s.id, title: s.title }));
 
+  /** Reorder and section-move for one block, submitted as the module's full item order. */
+  function moveItem(siblings: CurriculumTreeItemNode[], index: number, direction: -1 | 1) {
+    const reordered = moveInArray(siblings, index, direction);
+    reorderContainerItemsAction(mod.containerId, computeReorderedItemIds(mod, reordered)).then(
+      (result) => {
+        if (!result.ok) {
+          toast.error(tErrors(result.error.code));
+          return;
+        }
+        onChanged();
+      },
+    );
+  }
+
+  function moveModule(direction: -1 | 1) {
+    const reordered = moveInArray(level.modules, moduleIndex, direction);
+    reorderContainerItemsAction(
+      courseContainerId,
+      computeReorderedModuleIds(tree, reordered),
+    ).then((result) => {
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      onChanged();
+    });
+  }
+
+  function moveItemToSection(itemId: string, sectionId: string | null) {
+    assignItemSectionAction(mod.containerId, itemId, sectionId).then((result) => {
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      onChanged();
+    });
+  }
+
   function renderItems(section: CurriculumTreeSectionNode | null) {
-    const items = visible(section ? section.items : mod.ungroupedItems);
+    const siblings = section ? section.items : mod.ungroupedItems;
+    const items = visible(siblings);
     if (items.length === 0) {
       return (
         <p className="px-2 py-1 text-xs italic text-muted-foreground">
@@ -345,27 +422,36 @@ function ModuleCard({
     }
     return (
       <CurriculumSectionItems module={mod} items={items} onReordered={onChanged}>
-        {(item) => (
-          <BlockRow
-            item={item}
-            sectionTitle={section?.title ?? null}
-            selectedId={selectedId}
-            onSelect={onSelect}
-            schoolSlug={schoolSlug}
-            courseContainerId={mod.containerId}
-            right={
-              sectionOptions.length > 0 ? (
-                <MoveToSectionSelect
-                  moduleContainerId={mod.containerId}
-                  item={item}
-                  currentSectionId={section?.id ?? null}
+        {(item) => {
+          const index = siblings.findIndex((i) => i.id === item.id);
+          return (
+            <BlockRow
+              item={item}
+              sectionTitle={section?.title ?? null}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              schoolSlug={schoolSlug}
+              courseContainerId={mod.containerId}
+              rename={rename}
+              menu={
+                <NodeMenu
+                  kind="item"
+                  nodeTitle={item.title ?? ''}
+                  onRename={isRenamableItem(item) ? () => rename.begin(item.id) : undefined}
+                  editorHref={`/school/${schoolSlug}/content/${mod.containerId}/lessons/${item.id}`}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < siblings.length - 1}
+                  onMoveUp={() => moveItem(siblings, index, -1)}
+                  onMoveDown={() => moveItem(siblings, index, 1)}
                   sections={sectionOptions}
-                  onMoved={onChanged}
+                  currentSectionId={section?.id ?? null}
+                  onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
+                  className={TOOL_BUTTON}
                 />
-              ) : undefined
-            }
-          />
-        )}
+              }
+            />
+          );
+        }}
       </CurriculumSectionItems>
     );
   }
@@ -398,7 +484,22 @@ function ModuleCard({
           label={expanded ? 'Collapse' : 'Expand'}
         />
         <Glyph className="bg-muted text-muted-foreground">{code}</Glyph>
-        <span className="truncate text-sm font-semibold text-foreground">{mod.title}</span>
+        <InlineRename
+          value={mod.title ?? ''}
+          editing={rename.activeId === mod.id}
+          onCommit={(title) => rename.commit(mod.id, title)}
+          onCancel={rename.cancel}
+        >
+          <span
+            className="truncate text-sm font-semibold text-foreground"
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rename.begin(mod.id);
+            }}
+          >
+            {mod.title}
+          </span>
+        </InlineRename>
         {mod.titleEn && (
           <span className="truncate text-xs text-muted-foreground">{mod.titleEn}</span>
         )}
@@ -408,13 +509,6 @@ function ModuleCard({
           {minutes > 0 && ` · ${t('structure.minutes', { count: minutes })}`}
         </span>
         <PublishStateBadge state={mod.publishState} />
-        <MoveModule
-          courseContainerId={courseContainerId}
-          tree={tree}
-          level={level}
-          module={mod}
-          onMoved={onChanged}
-        />
         <RowTools visible={selected}>
           <button
             type="button"
@@ -428,6 +522,16 @@ function ModuleCard({
             <Plus size={13} />
           </button>
           <StubIconButton icon={<Copy size={13} />} label={t('structure.duplicate')} />
+          <NodeMenu
+            kind="module"
+            nodeTitle={mod.title ?? ''}
+            onRename={() => rename.begin(mod.id)}
+            canMoveUp={moduleIndex > 0}
+            canMoveDown={moduleIndex < level.modules.length - 1}
+            onMoveUp={() => moveModule(-1)}
+            onMoveDown={() => moveModule(1)}
+            className={TOOL_BUTTON}
+          />
         </RowTools>
       </header>
 
@@ -536,6 +640,67 @@ export function CurriculumTree({
   const filtering = isFiltering(filters);
   const matches = (item: CurriculumTreeItemNode) =>
     matchesFilters(item, filters, materialLabel(item));
+
+  /**
+   * Inline rename. One node at a time, resolved by id against the tree so each
+   * kind reaches its own endpoint: a level is a section on the course, a module
+   * is a container, and a block renames the entity it points at.
+   */
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const rename: RenameControls = {
+    activeId: renamingId,
+    begin: setRenamingId,
+    cancel: () => setRenamingId(null),
+    commit: (id, title) => {
+      setRenamingId(null);
+      const save = resolveRename(id, title);
+      if (!save) return;
+      save.then((result) => {
+        if (!result.ok) {
+          toast.error(tErrors(result.error.code));
+          return;
+        }
+        onChanged();
+      });
+    },
+  };
+
+  function moveLevel(index: number, direction: -1 | 1) {
+    const reordered = moveInArray(tree.levels, index, direction);
+    const orderedIds = reordered.map((l) => l.id).filter((id): id is string => id != null);
+    reorderSectionsAction(courseContainerId, orderedIds).then((result) => {
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      onChanged();
+    });
+  }
+
+  function resolveRename(id: string, title: string) {
+    const level = tree.levels.find((l) => l.id === id);
+    if (level?.id) return renameSectionAction(courseContainerId, level.id, title);
+
+    const mod = tree.levels.flatMap((l) => l.modules).find((m) => m.id === id);
+    if (mod) return renameContainerAction(mod.containerId, title);
+
+    const item = [
+      ...tree.ungroupedItems,
+      ...tree.levels.flatMap((l) => [
+        ...l.items,
+        ...l.modules.flatMap((m) => moduleItems(m)),
+      ]),
+    ].find((i) => i.id === id);
+    if (item && isRenamableItem(item)) {
+      return renameItemAction(
+        item.itemType as RenamableItemType,
+        item.refId,
+        courseContainerId,
+        title,
+      );
+    }
+    return null;
+  }
   const moduleMatches = (mod: CurriculumTreeModuleNode) => moduleItems(mod).some(matches);
   const levelMatches = (level: CurriculumTreeLevelNode) =>
     level.modules.some(moduleMatches) || level.items.some(matches);
@@ -645,23 +810,29 @@ export function CurriculumTree({
                 label={expanded ? 'Collapse' : 'Expand'}
               />
               <Glyph className="bg-primary-100 text-primary-700">{levelIndex + 1}</Glyph>
-              <span className="truncate text-sm font-bold tracking-tight text-foreground">
-                {level.title}
-              </span>
+              <InlineRename
+                value={level.title ?? ''}
+                editing={rename.activeId === level.id}
+                onCommit={(title) => level.id && rename.commit(level.id, title)}
+                onCancel={rename.cancel}
+              >
+                <span
+                  className="truncate text-sm font-bold tracking-tight text-foreground"
+                  onDoubleClick={(e) => {
+                    if (!level.id) return;
+                    e.stopPropagation();
+                    rename.begin(level.id);
+                  }}
+                >
+                  {level.title}
+                </span>
+              </InlineRename>
               {rolledUp && <PublishStateBadge state={rolledUp} />}
               <span className="flex-1" />
               <span className="shrink-0 text-[11px] text-muted-foreground">
                 {t('structure.moduleCount', { count: level.modules.length })}
                 {` · ${t('structure.lessonCount', { count: blockCount })}`}
               </span>
-              {level.id != null && tree.levels.length > 1 && (
-                <MoveLevel
-                  courseContainerId={courseContainerId}
-                  levels={tree.levels}
-                  level={level}
-                  onMoved={onChanged}
-                />
-              )}
               <RowTools visible={selected}>
                 <button
                   type="button"
@@ -680,6 +851,16 @@ export function CurriculumTree({
                 >
                   <Plus size={13} />
                 </button>
+                <NodeMenu
+                  kind="level"
+                  nodeTitle={level.title ?? ''}
+                  onRename={level.id ? () => rename.begin(level.id!) : undefined}
+                  canMoveUp={level.id != null && levelIndex > 0}
+                  canMoveDown={level.id != null && levelIndex < tree.levels.length - 1}
+                  onMoveUp={() => moveLevel(levelIndex, -1)}
+                  onMoveDown={() => moveLevel(levelIndex, 1)}
+                  className={TOOL_BUTTON}
+                />
               </RowTools>
             </header>
 
@@ -696,6 +877,7 @@ export function CurriculumTree({
                     key={mod.id}
                     module={mod}
                     code={moduleCode(levelIndex, mi)}
+                    moduleIndex={mi}
                     selectedId={selectedId}
                     onSelect={onSelect}
                     onChanged={onChanged}
@@ -709,6 +891,7 @@ export function CurriculumTree({
                     schoolSlug={schoolSlug}
                     filters={filters}
                     matches={matches}
+                    rename={rename}
                     expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
                     onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
                   />
@@ -728,6 +911,7 @@ export function CurriculumTree({
                         onSelect={onSelect}
                         schoolSlug={schoolSlug}
                         courseContainerId={courseContainerId}
+                        rename={rename}
                       />
                     ))}
                   </div>
@@ -769,6 +953,7 @@ export function CurriculumTree({
           onSelect={onSelect}
           schoolSlug={schoolSlug}
           courseContainerId={courseContainerId}
+          rename={rename}
         />
       ))}
 
