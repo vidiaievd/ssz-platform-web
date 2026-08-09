@@ -636,7 +636,9 @@
     "moreActions": "Flere handlinger for {name}",
     "item": "Element",
     "remove": "Fjern…",
-    "delete": "Slett…"
+    "delete": "Slett…",
+    "dragBlock": "Dra for å flytte {name}",
+    "dragCrossModule": "Å flytte en blokk til en annen modul er ikke tilgjengelig ennå."
   },
   "settings": {
     "trigger": "Innstillinger",

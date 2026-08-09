@@ -13,9 +13,7 @@ import type {
   CurriculumTreeSectionNode,
 } from '@/features/content/types';
 
-import { reorderContainerItemsAction } from '../actions/container-item';
 import { reorderSectionsAction } from '../actions/section';
-import { ReorderWithAnnouncer } from './lesson-reorder';
 
 /** Moves the element at `index` one slot toward `direction`; no-op past either end. */
 export function moveInArray<T>(items: readonly T[], index: number, direction: -1 | 1): T[] {
@@ -147,45 +145,4 @@ export function computeReorderedItemIds(
   const withoutSection = flattened.filter((id) => !reorderedIds.has(id));
   withoutSection.splice(insertAt, 0, ...reorderedSectionItems.map((i) => i.id));
   return withoutSection;
-}
-
-interface CurriculumSectionItemsProps {
-  module: CurriculumTreeModuleNode;
-  /** The items being rendered — one section's items, or the module's ungroupedItems. */
-  items: CurriculumTreeItemNode[];
-  onReordered: () => void;
-  children: (item: CurriculumTreeItemNode, position: number) => React.ReactNode;
-}
-
-/**
- * Drag/keyboard-reorders one section's items within a module. The backend
- * requires the full ordered item-id list for the module's version (a partial
- * list is rejected), so the submission re-flattens all of the module's
- * sections + ungrouped items, splicing in just this section's new order.
- */
-export function CurriculumSectionItems({
-  module: mod,
-  items,
-  onReordered,
-  children,
-}: CurriculumSectionItemsProps) {
-  const tErrors = useTranslations('Errors');
-
-  function handleReorder(reordered: CurriculumTreeItemNode[]) {
-    const fullOrder = computeReorderedItemIds(mod, reordered);
-
-    reorderContainerItemsAction(mod.containerId, fullOrder).then((result) => {
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      onReordered();
-    });
-  }
-
-  return (
-    <ReorderWithAnnouncer items={items} onReorder={handleReorder}>
-      {children}
-    </ReorderWithAnnouncer>
-  );
 }

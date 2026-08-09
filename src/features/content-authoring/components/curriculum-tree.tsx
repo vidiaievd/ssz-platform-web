@@ -1,9 +1,26 @@
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
-import { ChevronDown, Copy, Pencil, Plus } from 'lucide-react';
+import { ChevronDown, Copy, GripVertical, Pencil, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  type SortingStrategy,
+} from '@dnd-kit/sortable';
 
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -52,7 +69,6 @@ import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
 import { PublishStateBadge } from './publish-state-badge';
 import { ItemChangeBadge } from './item-change-badge';
 import {
-  CurriculumSectionItems,
   MoveSection,
   computeReorderedItemIds,
   computeReorderedModuleIds,
@@ -65,6 +81,14 @@ import { DeleteNodeDialog, type DeleteNodeTarget } from './delete-node-dialog';
 import { StubIconButton } from './stub-controls';
 import { BulkBar } from './bulk-bar';
 import { checkedBlocks } from '../lib/block-selection';
+import {
+  blockFlatIndex,
+  dropLineSide,
+  planBlockDrop,
+  type BlockDragData,
+  type BlockDropPlan,
+  type StructureDragData,
+} from '../lib/structure-dnd';
 
 type ChangeKind = 'level' | 'module' | 'item';
 
@@ -241,6 +265,43 @@ function AddButton({
   );
 }
 
+/**
+ * Rows stay where they are while a block is dragged over them. The design marks
+ * the landing place with a line rather than by opening a gap, and doing both
+ * says the same thing twice — in two places at once, which is worse than not
+ * saying it at all.
+ */
+const NO_SHIFT: SortingStrategy = () => null;
+
+/**
+ * A section as a drop target, so a block can be filed into one that is empty —
+ * the case with no row to aim at, and the one an author hits when a section was
+ * just created.
+ */
+function SectionDropZone({
+  moduleContainerId,
+  sectionId,
+  children,
+}: {
+  moduleContainerId: string;
+  sectionId: string | null;
+  children: React.ReactNode;
+}) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: `section:${moduleContainerId}:${sectionId ?? 'ungrouped'}`,
+    data: { type: 'section', moduleContainerId, sectionId },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn('rounded-sm', isOver && 'ring-1 ring-primary-400 ring-inset')}
+    >
+      {children}
+    </div>
+  );
+}
+
 // ── block row ────────────────────────────────────────────────────────────────
 
 function BlockRow({
@@ -252,6 +313,7 @@ function BlockRow({
   courseContainerId,
   rename,
   check,
+  drag,
   menu,
 }: {
   item: CurriculumTreeItemNode;
@@ -262,6 +324,8 @@ function BlockRow({
   courseContainerId: string;
   rename: RenameControls;
   check: CheckControls;
+  /** What this row carries while dragged. `null` on rows that are not sortable. */
+  drag: BlockDragData | null;
   menu?: React.ReactNode;
 }) {
   const t = useTranslations('Authoring');
@@ -271,8 +335,24 @@ function BlockRow({
   const selected = selectedId === item.id;
   const checked = check.isChecked(item.id);
 
+  const { active, attributes, isDragging, isOver, listeners, setNodeRef } = useSortable({
+    id: item.id,
+    data: drag ?? undefined,
+    disabled: drag === null,
+  });
+
+  // The line goes on the edge the block would settle against, and only when it
+  // can settle here at all — a block from another module gets no line, and a
+  // toast on drop instead (plan 38 §3 B3).
+  const activeBlock = active?.data.current as BlockDragData | undefined;
+  const side =
+    isOver && drag && activeBlock?.type === 'block' && activeBlock.itemId !== item.id
+      ? dropLineSide(activeBlock, drag.flatIndex, drag.moduleContainerId)
+      : null;
+
   return (
     <div
+      ref={setNodeRef}
       role="treeitem"
       aria-selected={selected}
       tabIndex={0}
@@ -291,8 +371,29 @@ function BlockRow({
           : checked
             ? 'border-transparent bg-info-50 dark:bg-info-700/25'
             : 'border-transparent bg-surface hover:border-border',
+        isDragging && 'opacity-40',
+        side === 'before' && 'shadow-[0_-2px_0_var(--ssz-color-primary-500)]',
+        side === 'after' && 'shadow-[0_2px_0_var(--ssz-color-primary-500)]',
       )}
     >
+      {drag && (
+        <button
+          type="button"
+          aria-label={t('structure.dragBlock', { name: item.title ?? '' })}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            'shrink-0 cursor-grab touch-none text-muted-foreground transition-opacity',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            selected
+              ? 'opacity-100'
+              : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
+          )}
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical size={13} />
+        </button>
+      )}
       {/* Ticking a row must not also select it: the two answer different
           questions — "act on these" versus "show me this one". */}
       <Checkbox
@@ -450,50 +551,63 @@ function ModuleCard({
   function renderItems(section: CurriculumTreeSectionNode | null) {
     const siblings = section ? section.items : mod.ungroupedItems;
     const items = visible(siblings);
+    const sectionId = section?.id ?? null;
     if (items.length === 0) {
       return (
-        <p className="px-2 py-1 text-xs italic text-muted-foreground">
-          {t('structure.noLessonsYet')}
-        </p>
+        <SectionDropZone moduleContainerId={mod.containerId} sectionId={sectionId}>
+          <p className="px-2 py-1 text-xs italic text-muted-foreground">
+            {t('structure.noLessonsYet')}
+          </p>
+        </SectionDropZone>
       );
     }
     return (
-      <CurriculumSectionItems module={mod} items={items} onReordered={onChanged}>
-        {(item) => {
-          const index = siblings.findIndex((i) => i.id === item.id);
-          return (
-            <BlockRow
-              item={item}
-              sectionTitle={section?.title ?? null}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              schoolSlug={schoolSlug}
-              courseContainerId={mod.containerId}
-              rename={rename}
-              check={check}
-              menu={
-                <NodeMenu
-                  kind="item"
-                  nodeTitle={item.title ?? ''}
-                  onRename={isRenamableItem(item) ? () => rename.begin(item.id) : undefined}
-                  editorHref={`/school/${schoolSlug}/content/${mod.containerId}/lessons/${item.id}`}
-                  canMoveUp={index > 0}
-                  canMoveDown={index < siblings.length - 1}
-                  onMoveUp={() => moveItem(siblings, index, -1)}
-                  onMoveDown={() => moveItem(siblings, index, 1)}
-                  sections={sectionOptions}
-                  currentSectionId={section?.id ?? null}
-                  onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
-                  onDelete={() =>
-                    onRequestDelete({ kind: 'item', id: item.id, title: item.title ?? '' })
-                  }
-                  className={TOOL_BUTTON}
-                />
-              }
-            />
-          );
-        }}
-      </CurriculumSectionItems>
+      <SectionDropZone moduleContainerId={mod.containerId} sectionId={sectionId}>
+        <SortableContext items={items.map((i) => i.id)} strategy={NO_SHIFT}>
+          {items.map((item) => {
+            const index = siblings.findIndex((i) => i.id === item.id);
+            return (
+              <BlockRow
+                key={item.id}
+                item={item}
+                sectionTitle={section?.title ?? null}
+                selectedId={selectedId}
+                onSelect={onSelect}
+                schoolSlug={schoolSlug}
+                courseContainerId={mod.containerId}
+                rename={rename}
+                check={check}
+                drag={{
+                  type: 'block',
+                  itemId: item.id,
+                  moduleContainerId: mod.containerId,
+                  sectionId,
+                  flatIndex: blockFlatIndex(mod, item.id),
+                }}
+                menu={
+                  <NodeMenu
+                    kind="item"
+                    nodeTitle={item.title ?? ''}
+                    onRename={isRenamableItem(item) ? () => rename.begin(item.id) : undefined}
+                    editorHref={`/school/${schoolSlug}/content/${mod.containerId}/lessons/${item.id}`}
+                    canMoveUp={index > 0}
+                    canMoveDown={index < siblings.length - 1}
+                    onMoveUp={() => moveItem(siblings, index, -1)}
+                    onMoveDown={() => moveItem(siblings, index, 1)}
+                    sections={sectionOptions}
+                    currentSectionId={section?.id ?? null}
+                    onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
+                    onDelete={() =>
+                      onRequestDelete({ kind: 'item', id: item.id, title: item.title ?? '' })
+                    }
+                    className={TOOL_BUTTON}
+                  />
+                }
+              />
+            );
+          })}
+        </SortableContext>
+      </SectionDropZone>
     );
   }
 
@@ -796,6 +910,64 @@ export function CurriculumTree({
     });
   }
 
+  /**
+   * Dragging blocks. One `DndContext` spans the whole tree rather than one per
+   * section, because the interesting answers are the ones that cross a
+   * boundary: another section of the same module is a real move, another module
+   * is not possible yet, and only a context that sees both can tell them apart.
+   */
+  const sensors = useSensors(
+    // A short threshold: the grip sits inside a row that is itself clickable,
+    // and a click that travels two pixels must stay a click.
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const active = event.active.data.current as StructureDragData | undefined;
+    if (active?.type !== 'block') return;
+    const over = (event.over?.data.current ?? null) as StructureDragData | null;
+
+    const mod = tree.levels
+      .flatMap((level) => level.modules)
+      .find((m) => m.containerId === active.moduleContainerId);
+    if (!mod) return;
+
+    const plan = planBlockDrop(mod, active, over);
+    if (plan.kind === 'none') return;
+    if (plan.kind === 'cross-module') {
+      toast(t('structure.dragCrossModule'));
+      return;
+    }
+    void applyBlockDrop(mod.containerId, active.itemId, plan);
+  }
+
+  /**
+   * Re-filing and ordering are two requests: the API can change an item's
+   * section or the container's item order, not both at once. Order goes last,
+   * so a failed re-file leaves the block where it was rather than resorted
+   * inside a section it never reached.
+   */
+  async function applyBlockDrop(
+    containerId: string,
+    itemId: string,
+    plan: Extract<BlockDropPlan, { kind: 'reorder' | 'move' }>,
+  ) {
+    if (plan.kind === 'move') {
+      const filed = await assignItemSectionAction(containerId, itemId, plan.sectionId);
+      if (!filed.ok) {
+        toast.error(tErrors(filed.error.code));
+        return;
+      }
+    }
+    const ordered = await reorderContainerItemsAction(containerId, plan.orderedItemIds);
+    if (!ordered.ok) {
+      toast.error(tErrors(ordered.error.code));
+      return;
+    }
+    onChanged();
+  }
+
   function moveLevel(index: number, direction: -1 | 1) {
     const reordered = moveInArray(tree.levels, index, direction);
     const orderedIds = reordered.map((l) => l.id).filter((id): id is string => id != null);
@@ -892,270 +1064,278 @@ export function CurriculumTree({
   }
 
   return (
-    <div role="tree">
-      {tree.levels.length === 0 && (
-        <p className="py-6 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
-      )}
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <div role="tree">
+        {tree.levels.length === 0 && (
+          <p className="py-6 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
+        )}
 
-      {tree.levels.map((level, levelIndex) => {
-        const levelKey = levelCollapseKey(level);
-        const expanded = isExpanded(levelKey, levelMatches(level));
-        const selected = selectedId === level.id;
-        const rolledUp: ContainerPublishState | null = rollUpLevelPublishState(level);
-        const blockCount = level.modules.reduce(
-          (sum, m) => sum + m.sections.reduce((n, s) => n + s.items.length, 0) + m.ungroupedItems.length,
-          0,
-        );
+        {tree.levels.map((level, levelIndex) => {
+          const levelKey = levelCollapseKey(level);
+          const expanded = isExpanded(levelKey, levelMatches(level));
+          const selected = selectedId === level.id;
+          const rolledUp: ContainerPublishState | null = rollUpLevelPublishState(level);
+          const blockCount = level.modules.reduce(
+            (sum, m) =>
+              sum + m.sections.reduce((n, s) => n + s.items.length, 0) + m.ungroupedItems.length,
+            0,
+          );
 
-        return (
-          // The rail scrolls here by id; the anchor sits on the wrapper so the
-          // level's modules come into view with it.
-          <section
-            key={levelKey}
-            id={levelDomId(level)}
-            className="mb-3 scroll-mt-4 overflow-hidden rounded-md border border-border bg-surface"
-          >
-            <header
-              role="treeitem"
-              aria-selected={selected}
-              aria-expanded={expanded}
-              tabIndex={0}
-              onClick={() => onSelect({ kind: 'level', level })}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onSelect({ kind: 'level', level });
-                }
-              }}
-              className={cn(
-                'group flex cursor-pointer items-center gap-2 p-3 transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                selected
-                  ? 'bg-primary-50 shadow-[inset_3px_0_0_var(--ssz-color-primary-500)] dark:bg-primary-900/30'
-                  : 'bg-subtle hover:bg-muted',
-              )}
+          return (
+            // The rail scrolls here by id; the anchor sits on the wrapper so the
+            // level's modules come into view with it.
+            <section
+              key={levelKey}
+              id={levelDomId(level)}
+              className="mb-3 scroll-mt-4 overflow-hidden rounded-md border border-border bg-surface"
             >
-              <Caret
-                expanded={expanded}
-                onToggle={() => toggleExpanded(levelKey)}
-                label={expanded ? 'Collapse' : 'Expand'}
-              />
-              <Glyph className="bg-primary-100 text-primary-700">{levelIndex + 1}</Glyph>
-              <InlineRename
-                value={level.title ?? ''}
-                editing={rename.activeId === level.id}
-                onCommit={(title) => level.id && rename.commit(level.id, title)}
-                onCancel={rename.cancel}
-              >
-                <span
-                  className="truncate text-sm font-bold tracking-tight text-foreground"
-                  onDoubleClick={(e) => {
-                    if (!level.id) return;
-                    e.stopPropagation();
-                    rename.begin(level.id);
-                  }}
-                >
-                  {level.title}
-                </span>
-              </InlineRename>
-              {rolledUp && <PublishStateBadge state={rolledUp} />}
-              <span className="flex-1" />
-              <span className="shrink-0 text-[11px] text-muted-foreground">
-                {t('structure.moduleCount', { count: level.modules.length })}
-                {` · ${t('structure.lessonCount', { count: blockCount })}`}
-              </span>
-              <RowTools visible={selected}>
-                <button
-                  type="button"
-                  disabled={isPending}
-                  aria-label={
-                    editingModule
-                      ? t('structure.addLessonTo', { name: level.title ?? '' })
-                      : t('structure.addModuleTo', { name: level.title ?? '' })
+              <header
+                role="treeitem"
+                aria-selected={selected}
+                aria-expanded={expanded}
+                tabIndex={0}
+                onClick={() => onSelect({ kind: 'level', level })}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelect({ kind: 'level', level });
                   }
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (editingModule) setAddOwnLessonIn(level.id ?? '');
-                    else handleAddModule(level.id);
-                  }}
-                  className={TOOL_BUTTON}
-                >
-                  <Plus size={13} />
-                </button>
-                <NodeMenu
-                  kind="level"
-                  nodeTitle={level.title ?? ''}
-                  onRename={level.id ? () => rename.begin(level.id!) : undefined}
-                  canMoveUp={level.id != null && levelIndex > 0}
-                  canMoveDown={level.id != null && levelIndex < tree.levels.length - 1}
-                  onMoveUp={() => moveLevel(levelIndex, -1)}
-                  onMoveDown={() => moveLevel(levelIndex, 1)}
-                  onDelete={
-                    level.id
-                      ? () =>
-                          setDeleteTarget({
-                            kind: 'level',
-                            id: level.id!,
-                            title: level.title ?? '',
-                            moduleCount: level.modules.length,
-                            blockCount,
-                          })
-                      : undefined
-                  }
-                  className={TOOL_BUTTON}
-                />
-              </RowTools>
-            </header>
-
-            {expanded && (
-              <div className="px-3 pb-3 pl-4 pt-2">
-                {level.modules.length === 0 && level.items.length === 0 && !editingModule && (
-                  <p className="rounded-md border border-dashed border-(--ssz-border-strong) p-6 text-center text-sm text-muted-foreground">
-                    {t('structure.noModulesYet')}
-                  </p>
+                }}
+                className={cn(
+                  'group flex cursor-pointer items-center gap-2 p-3 transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  selected
+                    ? 'bg-primary-50 shadow-[inset_3px_0_0_var(--ssz-color-primary-500)] dark:bg-primary-900/30'
+                    : 'bg-subtle hover:bg-muted',
                 )}
-
-                {level.modules.map((mod, mi) => (
-                  <ModuleCard
-                    key={mod.id}
-                    module={mod}
-                    code={moduleCode(levelIndex, mi)}
-                    moduleIndex={mi}
-                    selectedId={selectedId}
-                    onSelect={onSelect}
-                    onChanged={onChanged}
-                    tree={tree}
-                    level={level}
-                    courseContainerId={courseContainerId}
-                    targetLanguage={targetLanguage}
-                    difficultyLevel={difficultyLevel}
-                    visibility={visibility}
-                    ownerSchoolId={ownerSchoolId}
-                    schoolSlug={schoolSlug}
-                    filters={filters}
-                    matches={matches}
-                    rename={rename}
-                    check={check}
-                    onRequestDelete={setDeleteTarget}
-                    expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
-                    onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
+              >
+                <Caret
+                  expanded={expanded}
+                  onToggle={() => toggleExpanded(levelKey)}
+                  label={expanded ? 'Collapse' : 'Expand'}
+                />
+                <Glyph className="bg-primary-100 text-primary-700">{levelIndex + 1}</Glyph>
+                <InlineRename
+                  value={level.title ?? ''}
+                  editing={rename.activeId === level.id}
+                  onCommit={(title) => level.id && rename.commit(level.id, title)}
+                  onCancel={rename.cancel}
+                >
+                  <span
+                    className="truncate text-sm font-bold tracking-tight text-foreground"
+                    onDoubleClick={(e) => {
+                      if (!level.id) return;
+                      e.stopPropagation();
+                      rename.begin(level.id);
+                    }}
+                  >
+                    {level.title}
+                  </span>
+                </InlineRename>
+                {rolledUp && <PublishStateBadge state={rolledUp} />}
+                <span className="flex-1" />
+                <span className="shrink-0 text-[11px] text-muted-foreground">
+                  {t('structure.moduleCount', { count: level.modules.length })}
+                  {` · ${t('structure.lessonCount', { count: blockCount })}`}
+                </span>
+                <RowTools visible={selected}>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    aria-label={
+                      editingModule
+                        ? t('structure.addLessonTo', { name: level.title ?? '' })
+                        : t('structure.addModuleTo', { name: level.title ?? '' })
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (editingModule) setAddOwnLessonIn(level.id ?? '');
+                      else handleAddModule(level.id);
+                    }}
+                    className={TOOL_BUTTON}
+                  >
+                    <Plus size={13} />
+                  </button>
+                  <NodeMenu
+                    kind="level"
+                    nodeTitle={level.title ?? ''}
+                    onRename={level.id ? () => rename.begin(level.id!) : undefined}
+                    canMoveUp={level.id != null && levelIndex > 0}
+                    canMoveDown={level.id != null && levelIndex < tree.levels.length - 1}
+                    onMoveUp={() => moveLevel(levelIndex, -1)}
+                    onMoveDown={() => moveLevel(levelIndex, 1)}
+                    onDelete={
+                      level.id
+                        ? () =>
+                            setDeleteTarget({
+                              kind: 'level',
+                              id: level.id!,
+                              title: level.title ?? '',
+                              moduleCount: level.modules.length,
+                              blockCount,
+                            })
+                        : undefined
+                    }
+                    className={TOOL_BUTTON}
                   />
-                ))}
+                </RowTools>
+              </header>
 
-                {/* Material attached to the edited container itself. A module
+              {expanded && (
+                <div className="px-3 pb-3 pl-4 pt-2">
+                  {level.modules.length === 0 && level.items.length === 0 && !editingModule && (
+                    <p className="rounded-md border border-dashed border-(--ssz-border-strong) p-6 text-center text-sm text-muted-foreground">
+                      {t('structure.noModulesYet')}
+                    </p>
+                  )}
+
+                  {level.modules.map((mod, mi) => (
+                    <ModuleCard
+                      key={mod.id}
+                      module={mod}
+                      code={moduleCode(levelIndex, mi)}
+                      moduleIndex={mi}
+                      selectedId={selectedId}
+                      onSelect={onSelect}
+                      onChanged={onChanged}
+                      tree={tree}
+                      level={level}
+                      courseContainerId={courseContainerId}
+                      targetLanguage={targetLanguage}
+                      difficultyLevel={difficultyLevel}
+                      visibility={visibility}
+                      ownerSchoolId={ownerSchoolId}
+                      schoolSlug={schoolSlug}
+                      filters={filters}
+                      matches={matches}
+                      rename={rename}
+                      check={check}
+                      onRequestDelete={setDeleteTarget}
+                      expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
+                      onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
+                    />
+                  ))}
+
+                  {/* Material attached to the edited container itself. A module
                     holds its lessons and exercises here, and the same screen
                     edits modules and courses alike. */}
-                {level.items.length > 0 && (
-                  <div className="mt-2">
-                    {level.items.map((item) => (
-                      <BlockRow
-                        key={item.id}
-                        item={item}
-                        sectionTitle={level.title}
-                        selectedId={selectedId}
-                        onSelect={onSelect}
-                        schoolSlug={schoolSlug}
-                        courseContainerId={courseContainerId}
-                        rename={rename}
-                        check={check}
-                      />
-                    ))}
-                  </div>
-                )}
+                  {level.items.length > 0 && (
+                    <div className="mt-2">
+                      {level.items.map((item) => (
+                        <BlockRow
+                          key={item.id}
+                          item={item}
+                          sectionTitle={level.title}
+                          selectedId={selectedId}
+                          onSelect={onSelect}
+                          schoolSlug={schoolSlug}
+                          courseContainerId={courseContainerId}
+                          rename={rename}
+                          check={check}
+                          /* Material attached to the container itself is not in
+                             a module's item list, so there is nothing to drag it
+                             within — that ordering comes with F2. */
+                          drag={null}
+                        />
+                      ))}
+                    </div>
+                  )}
 
-                <div className="mt-2">
-                  {/* A course is built from modules; a module is built from
+                  <div className="mt-2">
+                    {/* A course is built from modules; a module is built from
                       material. The same screen edits both, and it used to offer
                       "Add module" either way — leaving a module editable only
                       from its parent course. */}
-                  {editingModule ? (
-                    <AddButton
-                      label={t('structure.addLesson')}
-                      onClick={() => setAddOwnLessonIn(level.id ?? '')}
-                    />
-                  ) : (
-                    <AddButton
-                      label={t('structure.addModule')}
-                      disabled={isPending}
-                      onClick={() => handleAddModule(level.id)}
-                    />
-                  )}
-                  {pendingLevelId === (level.id ?? '') && (
-                    <span className="ml-2 text-xs text-muted-foreground">…</span>
-                  )}
+                    {editingModule ? (
+                      <AddButton
+                        label={t('structure.addLesson')}
+                        onClick={() => setAddOwnLessonIn(level.id ?? '')}
+                      />
+                    ) : (
+                      <AddButton
+                        label={t('structure.addModule')}
+                        disabled={isPending}
+                        onClick={() => handleAddModule(level.id)}
+                      />
+                    )}
+                    {pendingLevelId === (level.id ?? '') && (
+                      <span className="ml-2 text-xs text-muted-foreground">…</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </section>
-        );
-      })}
+              )}
+            </section>
+          );
+        })}
 
-      {tree.ungroupedItems.map((item) => (
-        <BlockRow
-          key={item.id}
-          item={item}
-          sectionTitle={null}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          schoolSlug={schoolSlug}
-          courseContainerId={courseContainerId}
-          rename={rename}
-          check={check}
-        />
-      ))}
+        {tree.ungroupedItems.map((item) => (
+          <BlockRow
+            key={item.id}
+            item={item}
+            sectionTitle={null}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            schoolSlug={schoolSlug}
+            courseContainerId={courseContainerId}
+            rename={rename}
+            check={check}
+            drag={null}
+          />
+        ))}
 
-      {/* A module with no sections has no level row to hang the picker off,
+        {/* A module with no sections has no level row to hang the picker off,
           and its material has to be reachable from somewhere. Once it has
           sections, adding goes through them — a second, section-less entry
           point would just scatter material. */}
-      {editingModule && tree.levels.length === 0 && (
-        <div className="pt-1">
-          <AddButton label={t('structure.addLesson')} onClick={() => setAddOwnLessonIn('')} />
-        </div>
-      )}
+        {editingModule && tree.levels.length === 0 && (
+          <div className="pt-1">
+            <AddButton label={t('structure.addLesson')} onClick={() => setAddOwnLessonIn('')} />
+          </div>
+        )}
 
-      <BulkBar
-        count={selectedBlocks.length}
-        pending={deletePending}
-        escapeClears={deleteTarget === null}
-        onClear={clearChecked}
-        onDelete={() =>
-          setDeleteTarget({
-            kind: 'blocks',
-            id: '',
-            title: '',
-            blockCount: selectedBlocks.length,
-          })
-        }
-      />
-
-      <DeleteNodeDialog
-        target={deleteTarget}
-        onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
-        }}
-        onConfirm={confirmDelete}
-        pending={deletePending}
-      />
-
-      {editingModule && (
-        <AddLessonPicker
-          open={addOwnLessonIn !== null}
-          onOpenChange={(open) => {
-            if (!open) setAddOwnLessonIn(null);
-          }}
-          moduleContainerId={courseContainerId}
-          sectionId={addOwnLessonIn || null}
-          targetLanguage={targetLanguage}
-          difficultyLevel={difficultyLevel}
-          visibility={visibility}
-          ownerSchoolId={ownerSchoolId}
-          onCreated={(itemId) => {
-            setAddOwnLessonIn(null);
-            onChanged(itemId);
-          }}
+        <BulkBar
+          count={selectedBlocks.length}
+          pending={deletePending}
+          escapeClears={deleteTarget === null}
+          onClear={clearChecked}
+          onDelete={() =>
+            setDeleteTarget({
+              kind: 'blocks',
+              id: '',
+              title: '',
+              blockCount: selectedBlocks.length,
+            })
+          }
         />
-      )}
-    </div>
+
+        <DeleteNodeDialog
+          target={deleteTarget}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null);
+          }}
+          onConfirm={confirmDelete}
+          pending={deletePending}
+        />
+
+        {editingModule && (
+          <AddLessonPicker
+            open={addOwnLessonIn !== null}
+            onOpenChange={(open) => {
+              if (!open) setAddOwnLessonIn(null);
+            }}
+            moduleContainerId={courseContainerId}
+            sectionId={addOwnLessonIn || null}
+            targetLanguage={targetLanguage}
+            difficultyLevel={difficultyLevel}
+            visibility={visibility}
+            ownerSchoolId={ownerSchoolId}
+            onCreated={(itemId) => {
+              setAddOwnLessonIn(null);
+              onChanged(itemId);
+            }}
+          />
+        )}
+      </div>
+    </DndContext>
   );
 }

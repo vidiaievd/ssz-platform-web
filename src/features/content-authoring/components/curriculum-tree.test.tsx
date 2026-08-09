@@ -587,6 +587,39 @@ describe('CurriculumTree', () => {
     });
   });
 
+  describe('drag and drop', () => {
+    it('gives a block in a module a drag handle', () => {
+      renderTree();
+      expect(
+        screen.getByRole('button', { name: 'Drag to move En vanlig arbeidsdag' }),
+      ).toBeInTheDocument();
+    });
+
+    // Material placed on the edited container itself has no module item list to
+    // be ordered within — the handle would promise a move that cannot happen.
+    it('leaves the container\u2019s own material without one', () => {
+      const treeWithOwnItem: CurriculumTreeData = {
+        ...TREE,
+        levels: [
+          {
+            ...TREE.levels[0]!,
+            items: [
+              {
+                ...TREE.levels[0]!.modules[0]!.sections[0]!.items[0]!,
+                id: 'own-item',
+                title: 'Kursintro',
+              },
+            ],
+          },
+        ],
+      };
+      renderTree(vi.fn(), vi.fn(), treeWithOwnItem);
+
+      expect(screen.getByText('Kursintro')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Drag to move Kursintro' })).toBeNull();
+    });
+  });
+
   describe('multi-select', () => {
     /** Two blocks in two different modules — the case a bulk action must not flatten. */
     const LEVEL = TREE.levels[0]!;

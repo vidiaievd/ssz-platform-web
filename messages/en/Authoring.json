@@ -636,7 +636,9 @@
     "moreActions": "More actions for {name}",
     "item": "Item",
     "remove": "Remove…",
-    "delete": "Delete…"
+    "delete": "Delete…",
+    "dragBlock": "Drag to move {name}",
+    "dragCrossModule": "Moving a block to another module is not available yet."
   },
   "settings": {
     "trigger": "Settings",
