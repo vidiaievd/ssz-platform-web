@@ -64,7 +64,7 @@ export type BlockDropPlan =
   /** Another section of the same module — re-file, then reorder. */
   | { kind: 'move'; orderedItemIds: string[]; sectionId: string | null };
 
-interface Entry {
+export interface Entry {
   id: string;
   sectionId: string | null;
 }
@@ -73,7 +73,7 @@ interface Entry {
  * The module's blocks in submission order, each tagged with its section.
  * Sections first, in their own order, then whatever belongs to none.
  */
-function flattenEntries(mod: CurriculumTreeModuleNode): Entry[] {
+export function flattenEntries(mod: CurriculumTreeModuleNode): Entry[] {
   return [
     ...mod.sections.flatMap((section) =>
       section.items.map((item) => ({ id: item.id, sectionId: section.id })),
@@ -223,10 +223,7 @@ export function applyBlockPreview(
   if (plan.kind !== 'reorder' && plan.kind !== 'move') return mod;
 
   const itemsById = new Map<string, CurriculumTreeItemNode>(
-    [...mod.sections.flatMap((s) => s.items), ...mod.ungroupedItems].map((item) => [
-      item.id,
-      item,
-    ]),
+    [...mod.sections.flatMap((s) => s.items), ...mod.ungroupedItems].map((item) => [item.id, item]),
   );
   const sectionByItemId = new Map(flattenEntries(mod).map((e) => [e.id, e.sectionId]));
   if (plan.kind === 'move') sectionByItemId.set(movedItemId, plan.sectionId);

@@ -1355,5 +1355,14 @@
       "body": "Selve materialet blir liggende i biblioteket og kan plasseres på nytt. Elevfremgang beholdes.",
       "confirm": "Fjern blokker"
     }
+  },
+  "undo": {
+    "action": "Angre",
+    "done": "Endringen er angret.",
+    "failed": "Kunne ikke angre det.",
+    "nothing": "Ingenting å angre.",
+    "renamed": "Nytt navn: «{name}».",
+    "moved": "Flyttet «{name}».",
+    "movedToSection": "Flyttet «{name}» til en annen seksjon."
   }
 }

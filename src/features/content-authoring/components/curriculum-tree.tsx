@@ -80,6 +80,8 @@ import { InlineRename } from './inline-rename';
 import { NodeMenu } from './node-menu';
 import { DeleteNodeDialog, type DeleteNodeTarget } from './delete-node-dialog';
 import { useNodeDeletion } from '../hooks/use-node-deletion';
+import { useStructureUndo } from '../hooks/use-structure-undo';
+import { entryOrderUndo, sectionOrderUndo } from '../lib/structure-order-undo';
 import { StubIconButton } from './stub-controls';
 import { BulkBar } from './bulk-bar';
 import { checkedBlocks } from '../lib/block-selection';
@@ -90,8 +92,11 @@ import {
   planBlockDrop,
   planCourseEntryDrop,
   planLevelDrop,
+  flattenCourseEntries,
+  flattenEntries,
   type BlockDragData,
   type BlockDropPlan,
+  type Entry,
   type CourseEntryDragData,
   type LevelDropData,
   type StructureDragData,
@@ -650,6 +655,7 @@ function ModuleCard({
 }) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
+  const { record: recordUndo } = useStructureUndo();
   const [addLessonIn, setAddLessonIn] = useState<string | null | undefined>(undefined);
   const selected = selectedId === mod.id;
   // A module is a row of the course's own item list, which is what makes it
@@ -667,12 +673,24 @@ function ModuleCard({
 
   /** Reorder and section-move for one block, submitted as the module's full item order. */
   function moveItem(siblings: CurriculumTreeItemNode[], index: number, direction: -1 | 1) {
+    const moved = siblings[index];
+    const before = flattenEntries(mod);
     const reordered = moveInArray(siblings, index, direction);
     reorderContainerItemsAction(mod.containerId, computeReorderedItemIds(mod, reordered)).then(
       (result) => {
         if (!result.ok) {
           toast.error(tErrors(result.error.code));
           return;
+        }
+        if (moved) {
+          recordUndo(
+            entryOrderUndo({
+              label: t('undo.moved', { name: moved.title ?? '' }),
+              containerId: mod.containerId,
+              itemId: moved.id,
+              entries: before,
+            }),
+          );
         }
         onChanged();
       },
@@ -695,21 +713,40 @@ function ModuleCard({
     );
     if (plan.kind !== 'reorder' && plan.kind !== 'move') return;
 
+    const before = flattenCourseEntries(tree);
     reorderContainerItemsAction(courseContainerId, plan.orderedItemIds).then((result) => {
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;
       }
+      recordUndo(
+        entryOrderUndo({
+          label: t('undo.moved', { name: mod.title ?? '' }),
+          containerId: courseContainerId,
+          itemId: mod.id,
+          entries: before,
+        }),
+      );
       onChanged();
     });
   }
 
   function moveItemToSection(itemId: string, sectionId: string | null) {
+    const before = flattenEntries(mod);
+    const moved = moduleItems(mod).find((item) => item.id === itemId);
     assignItemSectionAction(mod.containerId, itemId, sectionId).then((result) => {
       if (!result.ok) {
         toast.error(tErrors(result.error.code));
         return;
       }
+      recordUndo(
+        entryOrderUndo({
+          label: t('undo.movedToSection', { name: moved?.title ?? '' }),
+          containerId: mod.containerId,
+          itemId,
+          entries: before,
+        }),
+      );
       onChanged();
     });
   }
@@ -978,6 +1015,7 @@ export function CurriculumTree({
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
+  const { record: recordUndo } = useStructureUndo();
   const [isPending, startTransition] = useTransition();
   const [pendingLevelId, setPendingLevelId] = useState<string | null>(null);
   /** Which of the edited module's own sections the picker is filing into. */
@@ -1003,11 +1041,19 @@ export function CurriculumTree({
       setRenamingId(null);
       const save = resolveRename(id, title);
       if (!save) return;
+      const previousTitle = titleOf(id);
       save.then((result) => {
         if (!result.ok) {
           toast.error(tErrors(result.error.code));
           return;
         }
+        recordUndo({
+          label: t('undo.renamed', { name: title }),
+          revert: async () => {
+            const back = resolveRename(id, previousTitle ?? '');
+            return back ? (await back).ok : false;
+          },
+        });
         onChanged();
       });
     },
@@ -1261,7 +1307,12 @@ export function CurriculumTree({
         return;
       }
       setPreview({ scope: 'level', orderedSectionIds: levelPlan.orderedSectionIds });
-      void applyLevelOrder(levelPlan.orderedSectionIds);
+      // `dragging` still holds what was picked up: this render was rendered
+      // before the state was cleared above.
+      void applyLevelOrder(
+        levelPlan.orderedSectionIds,
+        dragging?.kind === 'level' ? (dragging.level.title ?? '') : '',
+      );
       return;
     }
 
@@ -1273,7 +1324,11 @@ export function CurriculumTree({
     }
 
     setPreview({ ...resolved.preview, plan: resolved.plan });
-    void applyDropPlan(resolved.containerId, resolved.itemId, resolved.plan);
+    // The list as it stands is what undo will resubmit, so it is read before
+    // the requests go out rather than from the reloaded tree.
+    const draggedModule = active?.type === 'block' ? findModule(resolved.containerId) : undefined;
+    const before = draggedModule ? flattenEntries(draggedModule) : flattenCourseEntries(tree);
+    void applyDropPlan(resolved.containerId, resolved.itemId, resolved.plan, before);
   }
 
   /**
@@ -1286,6 +1341,7 @@ export function CurriculumTree({
     containerId: string,
     itemId: string,
     plan: Extract<BlockDropPlan, { kind: 'reorder' | 'move' }>,
+    before: readonly Entry[],
   ) {
     if (plan.kind === 'move') {
       const filed = await assignItemSectionAction(containerId, itemId, plan.sectionId);
@@ -1301,17 +1357,35 @@ export function CurriculumTree({
       setPreview(null);
       return;
     }
+    recordUndo(
+      entryOrderUndo({
+        label: t(plan.kind === 'move' ? 'undo.movedToSection' : 'undo.moved', {
+          name: titleOf(itemId) ?? '',
+        }),
+        containerId,
+        itemId,
+        entries: before,
+      }),
+    );
     await onChanged();
     setPreview(null);
   }
 
-  async function applyLevelOrder(orderedSectionIds: string[]) {
+  async function applyLevelOrder(orderedSectionIds: string[], label: string) {
+    const before = tree.levels.map((level) => level.id).filter((id): id is string => id !== null);
     const result = await reorderSectionsAction(courseContainerId, orderedSectionIds);
     if (!result.ok) {
       toast.error(tErrors(result.error.code));
       setPreview(null);
       return;
     }
+    recordUndo(
+      sectionOrderUndo({
+        label: t('undo.moved', { name: label }),
+        containerId: courseContainerId,
+        orderedSectionIds: before,
+      }),
+    );
     await onChanged();
     setPreview(null);
   }
@@ -1324,7 +1398,22 @@ export function CurriculumTree({
 
     const plan = planLevelDrop(tree, level.id, neighbour.id);
     if (plan.kind !== 'reorder') return;
-    void applyLevelOrder(plan.orderedSectionIds);
+    void applyLevelOrder(plan.orderedSectionIds, level.title ?? '');
+  }
+
+  /** The current title of any node, for labelling an undo and for reverting a rename. */
+  function titleOf(id: string): string | null {
+    const level = tree.levels.find((l) => l.id === id);
+    if (level) return level.title;
+
+    const mod = tree.levels.flatMap((l) => l.modules).find((m) => m.id === id);
+    if (mod) return mod.title;
+
+    const item = [
+      ...tree.ungroupedItems,
+      ...tree.levels.flatMap((l) => [...l.items, ...l.modules.flatMap((m) => moduleItems(m))]),
+    ].find((i) => i.id === id);
+    return item?.title ?? null;
   }
 
   function resolveRename(id: string, title: string) {

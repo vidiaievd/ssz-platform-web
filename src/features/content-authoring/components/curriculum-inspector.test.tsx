@@ -14,6 +14,7 @@ vi.mock('../actions/container', () => ({
 }));
 vi.mock('../actions/section', () => ({ renameSectionAction: vi.fn() }));
 vi.mock('../actions/rename-item', () => ({ renameItemAction: vi.fn() }));
+vi.mock('../actions/container-item', () => ({ assignItemSectionAction: vi.fn() }));
 // Fetches the container's sections through react-query; the inspector's job is
 // only to hand it the container and section the row belongs to.
 vi.mock('./section-assign-select', () => ({

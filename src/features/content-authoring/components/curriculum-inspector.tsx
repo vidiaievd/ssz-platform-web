@@ -22,9 +22,11 @@ import { moduleItems } from '../lib/structure-filters';
 import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
 import { rollUpLevelPublishState } from '../lib/structure-nodes';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { useStructureUndo } from '../hooks/use-structure-undo';
 import { renameContainerAction, setContainerTitleEnAction } from '../actions/container';
 import { renameSectionAction } from '../actions/section';
 import { renameItemAction } from '../actions/rename-item';
+import { assignItemSectionAction } from '../actions/container-item';
 import { ContainerStateBadge } from './container-state-badge';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
@@ -234,6 +236,7 @@ export function CurriculumInspector({
   const t = useTranslations('Authoring');
   const tContent = useTranslations('Content');
   const tErrors = useTranslations('Errors');
+  const undo = useStructureUndo();
 
   const publishOptions = [
     { value: 'draft', label: t('publishState.draft') },
@@ -266,11 +269,17 @@ export function CurriculumInspector({
               value={level.title ?? ''}
               ariaLabel={t('structure.level')}
               onSave={async (title) => {
+                const previous = level.title ?? '';
                 const result = await renameSectionAction(courseContainerId, level.id!, title);
                 if (!result.ok) {
                   toast.error(tErrors(result.error.code));
                   throw new Error(result.error.code);
                 }
+                undo.record({
+                  label: t('undo.renamed', { name: title }),
+                  revert: async () =>
+                    (await renameSectionAction(courseContainerId, level.id!, previous)).ok,
+                });
                 onChanged();
               }}
             />
@@ -335,11 +344,16 @@ export function CurriculumInspector({
             value={mod.title ?? ''}
             ariaLabel={t('structure.module')}
             onSave={async (title) => {
+              const previous = mod.title ?? '';
               const result = await renameContainerAction(mod.containerId, title);
               if (!result.ok) {
                 toast.error(tErrors(result.error.code));
                 throw new Error(result.error.code);
               }
+              undo.record({
+                label: t('undo.renamed', { name: title }),
+                revert: async () => (await renameContainerAction(mod.containerId, previous)).ok,
+              });
               onChanged();
             }}
           />
@@ -361,15 +375,30 @@ export function CurriculumInspector({
           savedMessage={t('structure.titleEnSaved')}
           value={mod.titleEn ?? ''}
           onSave={async (next) => {
+            const previous = mod.titleEn;
             const result = await setContainerTitleEnAction(
               mod.containerId,
               next,
-              mod.titleEn !== null,
+              previous !== null,
             );
             if (!result.ok) {
               toast.error(tErrors(result.error.code));
               throw new Error(result.error.code);
             }
+            undo.record({
+              label: t('undo.renamed', { name: next }),
+              // Whether the localization row exists now is what the save just
+              // decided: a non-empty subtitle created or kept it, an empty one
+              // deleted it.
+              revert: async () =>
+                (
+                  await setContainerTitleEnAction(
+                    mod.containerId,
+                    previous ?? '',
+                    next.trim() !== '',
+                  )
+                ).ok,
+            });
             onChanged();
           }}
         />
@@ -450,16 +479,18 @@ export function CurriculumInspector({
           savedMessage={t('structure.titleSaved')}
           value={item.title ?? ''}
           onSave={async (next) => {
-            const result = await renameItemAction(
-              item.itemType as RenamableItemType,
-              item.refId,
-              containerId,
-              next,
-            );
+            const previous = item.title ?? '';
+            const itemType = item.itemType as RenamableItemType;
+            const result = await renameItemAction(itemType, item.refId, containerId, next);
             if (!result.ok) {
               toast.error(tErrors(result.error.code));
               throw new Error(result.error.code);
             }
+            undo.record({
+              label: t('undo.renamed', { name: next }),
+              revert: async () =>
+                (await renameItemAction(itemType, item.refId, containerId, previous)).ok,
+            });
             onChanged();
           }}
         />
@@ -491,7 +522,14 @@ export function CurriculumInspector({
             containerId={containerId}
             containerItemId={item.id}
             sectionId={sectionId}
-            onChanged={onChanged}
+            onChanged={() => {
+              undo.record({
+                label: t('undo.movedToSection', { name: item.title ?? '' }),
+                revert: async () =>
+                  (await assignItemSectionAction(containerId, item.id, sectionId)).ok,
+              });
+              onChanged();
+            }}
           />
         </div>
       </div>

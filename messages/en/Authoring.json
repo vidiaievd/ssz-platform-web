@@ -1355,5 +1355,14 @@
       "body": "The material itself stays in your library and can be placed again. Student progress is kept.",
       "confirm": "Remove blocks"
     }
+  },
+  "undo": {
+    "action": "Undo",
+    "done": "Change undone.",
+    "failed": "Could not undo that.",
+    "nothing": "Nothing to undo.",
+    "renamed": "Renamed to “{name}”.",
+    "moved": "Moved “{name}”.",
+    "movedToSection": "Moved “{name}” to another section."
   }
 }
