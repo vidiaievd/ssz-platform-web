@@ -659,7 +659,21 @@
     "includeInSrs": "Ta med i SRS",
     "includeInSrsHint": "Nye ord havner i repetisjonskøen",
     "saveTitleEn": "Lagre undertittel",
-    "titleEnSaved": "Undertittelen er lagret."
+    "titleEnSaved": "Undertittelen er lagret.",
+    "titleField": "Tittel",
+    "titleSaved": "Tittelen er lagret.",
+    "blockType": "Blokktype",
+    "sectionField": "Seksjon",
+    "points": "Poeng",
+    "attempts": "Forsøk",
+    "attemptsUnlimited": "Ubegrenset",
+    "autoGrade": "Automatisk retting",
+    "autoGradeHint": "Gis poeng uten at læreren ser over",
+    "showHints": "Vis hint",
+    "showHintsHint": "Vises etter første feilsvar",
+    "visibleToStudents": "Synlig for elevene",
+    "visibleToStudentsHint": "Skjulte blokker blir stående i oversikten",
+    "blockId": "Blokk-id"
   },
   "settings": {
     "trigger": "Innstillinger",

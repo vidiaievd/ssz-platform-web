@@ -445,6 +445,7 @@ function LevelDragCard({ level }: { level: CurriculumTreeLevelNode }) {
 function BlockRow({
   item,
   sectionTitle,
+  sectionId,
   selectedId,
   onSelect,
   schoolSlug,
@@ -456,6 +457,7 @@ function BlockRow({
 }: {
   item: CurriculumTreeItemNode;
   sectionTitle: string | null;
+  sectionId: string | null;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
   schoolSlug: string;
@@ -483,6 +485,19 @@ function BlockRow({
     disabled: drag === null,
   });
 
+  /**
+   * `courseContainerId` here is whichever container places the row — its module,
+   * or the course for material kept outside one. The inspector needs that and
+   * the section to act on the row, so the selection carries both.
+   */
+  const select = (): CurriculumTreeSelection => ({
+    kind: 'item',
+    item,
+    sectionTitle,
+    sectionId,
+    containerId: courseContainerId,
+  });
+
   return (
     <div
       ref={setNodeRef}
@@ -492,11 +507,11 @@ function BlockRow({
       role="treeitem"
       aria-selected={selected}
       tabIndex={0}
-      onClick={() => onSelect({ kind: 'item', item, sectionTitle })}
+      onClick={() => onSelect(select())}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onSelect({ kind: 'item', item, sectionTitle });
+          onSelect(select());
         }
       }}
       className={cn(
@@ -722,6 +737,7 @@ function ModuleCard({
                 key={item.id}
                 item={item}
                 sectionTitle={section?.title ?? null}
+                sectionId={section?.id ?? null}
                 selectedId={selectedId}
                 onSelect={onSelect}
                 schoolSlug={schoolSlug}
@@ -1591,6 +1607,7 @@ export function CurriculumTree({
                           key={item.id}
                           item={item}
                           sectionTitle={level.title}
+                          sectionId={level.id}
                           selectedId={selectedId}
                           onSelect={onSelect}
                           schoolSlug={schoolSlug}
@@ -1646,6 +1663,7 @@ export function CurriculumTree({
                 key={item.id}
                 item={item}
                 sectionTitle={null}
+                sectionId={null}
                 selectedId={selectedId}
                 onSelect={onSelect}
                 schoolSlug={schoolSlug}

@@ -58,6 +58,8 @@ export const LessonSelected: Story = {
     selection: {
       kind: 'item',
       sectionTitle: 'Reinforce & read',
+      sectionId: 'section-1',
+      containerId: 'module-1',
       item: {
         id: 'item-1',
         itemType: 'lesson',
@@ -82,6 +84,8 @@ export const DraftVocabularySelected: Story = {
     selection: {
       kind: 'item',
       sectionTitle: null,
+      sectionId: null,
+      containerId: 'module-1',
       item: {
         id: 'item-2',
         itemType: 'vocabulary_list',

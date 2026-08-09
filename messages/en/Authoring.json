@@ -659,7 +659,21 @@
     "includeInSrs": "Include in SRS",
     "includeInSrsHint": "New words feed the review queue",
     "saveTitleEn": "Save subtitle",
-    "titleEnSaved": "Subtitle saved."
+    "titleEnSaved": "Subtitle saved.",
+    "titleField": "Title",
+    "titleSaved": "Title saved.",
+    "blockType": "Block type",
+    "sectionField": "Section",
+    "points": "Points",
+    "attempts": "Attempts",
+    "attemptsUnlimited": "Unlimited",
+    "autoGrade": "Auto-grade",
+    "autoGradeHint": "Score without teacher review",
+    "showHints": "Show hints",
+    "showHintsHint": "Reveal after the first wrong answer",
+    "visibleToStudents": "Visible to students",
+    "visibleToStudentsHint": "Hidden blocks stay in the outline",
+    "blockId": "Block id"
   },
   "settings": {
     "trigger": "Settings",

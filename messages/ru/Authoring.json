@@ -659,7 +659,21 @@
     "includeInSrs": "Включать в SRS",
     "includeInSrsHint": "Новые слова попадают в очередь повторений",
     "saveTitleEn": "Сохранить подзаголовок",
-    "titleEnSaved": "Подзаголовок сохранён."
+    "titleEnSaved": "Подзаголовок сохранён.",
+    "titleField": "Название",
+    "titleSaved": "Название сохранено.",
+    "blockType": "Тип блока",
+    "sectionField": "Секция",
+    "points": "Баллы",
+    "attempts": "Попытки",
+    "attemptsUnlimited": "Без ограничений",
+    "autoGrade": "Автопроверка",
+    "autoGradeHint": "Оценивать без проверки преподавателем",
+    "showHints": "Показывать подсказки",
+    "showHintsHint": "Появляются после первой ошибки",
+    "visibleToStudents": "Видно ученикам",
+    "visibleToStudentsHint": "Скрытые блоки остаются в структуре",
+    "blockId": "ID блока"
   },
   "settings": {
     "trigger": "Настройки",

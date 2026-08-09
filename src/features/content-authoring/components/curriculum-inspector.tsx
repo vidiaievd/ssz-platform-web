@@ -11,6 +11,7 @@ import { Link } from '@/lib/i18n/navigation';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
   ContainerPublishState,
+  CurriculumTreeItemNode,
   CurriculumTreeLevelNode,
   CurriculumTreeModuleNode,
 } from '@/features/content/types';
@@ -18,21 +19,25 @@ import type {
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
 import { moduleItems } from '../lib/structure-filters';
+import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
 import { rollUpLevelPublishState } from '../lib/structure-nodes';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { renameContainerAction, setContainerTitleEnAction } from '../actions/container';
 import { renameSectionAction } from '../actions/section';
+import { renameItemAction } from '../actions/rename-item';
 import { ContainerStateBadge } from './container-state-badge';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
 import { ModulePublishBlock } from './module-publish-block';
 import { ItemChangeBadge } from './item-change-badge';
 import { ItemLiveBadge } from './item-live-badge';
+import { SectionAssignSelect } from './section-assign-select';
 import type { DeleteNodeTarget } from './delete-node-dialog';
 import {
   STUB_PLACEHOLDERS,
   StubField,
   StubSegmentedField,
+  StubSelectField,
   StubSwitchRow,
   StubTextareaField,
 } from './stub-controls';
@@ -207,6 +212,16 @@ function levelPublishSegment(level: CurriculumTreeLevelNode): string | null {
   const rolled: ContainerPublishState | null = rollUpLevelPublishState(level);
   if (rolled === null) return 'published';
   return rolled === 'pending_changes' ? 'edited' : rolled;
+}
+
+/**
+ * Where a block sits in the design's three-way segment. Read from liveness
+ * rather than from the lesson variant's own status: a variant is published the
+ * moment it is saved, while the row placing it can still be invisible.
+ */
+function itemPublishSegment(item: CurriculumTreeItemNode): string {
+  if (!item.isLive) return 'draft';
+  return item.pendingChange ? 'edited' : 'published';
 }
 
 export function CurriculumInspector({
@@ -401,12 +416,14 @@ export function CurriculumInspector({
     );
   }
 
-  const { item, sectionTitle } = selection;
+  const { item, sectionTitle, sectionId, containerId } = selection;
   const def = getLessonTypeDefinition(getMaterialKind(item));
   const Icon = def.icon;
+  const materialLabel = tContent(`materialType.${def.kind}` as 'materialType.text');
+  const isExercise = item.itemType === 'exercise';
 
   return (
-    <div className="flex flex-col gap-4">
+    <div key={item.id} className="flex flex-col gap-4">
       <div className="flex items-center gap-2.5">
         <span
           className="flex h-8.5 w-8.5 items-center justify-center rounded-lg"
@@ -416,47 +433,119 @@ export function CurriculumInspector({
         </span>
         <div className="min-w-0 flex-1">
           <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-            {tContent(`materialType.${def.kind}` as 'materialType.text')}
+            {materialLabel}
             {sectionTitle ? ` · ${sectionTitle}` : ''}
           </div>
           <div className="truncate text-[15px] font-bold text-foreground">{item.title}</div>
         </div>
       </div>
 
+      {/* An exercise row is labelled by its template's name and has no title of
+          its own to write to (B8) — which is also why two exercises in a row
+          read the same. */}
+      {isRenamableItem(item) ? (
+        <EditableField
+          label={t('structure.titleField')}
+          saveLabel={t('form.save')}
+          savedMessage={t('structure.titleSaved')}
+          value={item.title ?? ''}
+          onSave={async (next) => {
+            const result = await renameItemAction(
+              item.itemType as RenamableItemType,
+              item.refId,
+              containerId,
+              next,
+            );
+            if (!result.ok) {
+              toast.error(tErrors(result.error.code));
+              throw new Error(result.error.code);
+            }
+            onChanged();
+          }}
+        />
+      ) : (
+        <StubField label={t('structure.titleField')} value={item.title ?? ''} />
+      )}
+
       <div className="grid grid-cols-2 gap-3">
+        {/* A row's type is fixed by the material it points at: changing it would
+            mean replacing the material, not editing the row. */}
+        <StubSelectField label={t('structure.blockType')} value={materialLabel} />
         <InspectorField
           label={t('structure.duration')}
-          value={item.durationMinutes != null ? `${item.durationMinutes} min` : '—'}
+          value={
+            item.durationMinutes != null
+              ? t('structure.minutes', { count: item.durationMinutes })
+              : '—'
+          }
         />
-        <InspectorField label={t('structure.xpReward')} value={item.xpReward ?? '—'} />
       </div>
 
-      {/* Liveness, not the lesson variant's own status: the question an author
-          asks of a row is whether students can open it. */}
-      <InspectorField
-        label={t('structure.state')}
-        value={
-          item.isLive === null ? (
+      <div className="grid grid-cols-2 gap-3">
+        <InspectorField label={t('structure.xpReward')} value={item.xpReward ?? '—'} />
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            {t('structure.sectionField')}
+          </span>
+          <SectionAssignSelect
+            containerId={containerId}
+            containerItemId={item.id}
+            sectionId={sectionId}
+            onChanged={onChanged}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <StubSegmentedField
+          label={t('structure.publishStateLabel')}
+          options={publishOptions}
+          activeValue={itemPublishSegment(item)}
+        />
+        {/* The segment cannot say whether a student can open the row *now* —
+            that is the question an author actually asks of it. */}
+        <div className="flex flex-wrap items-center gap-2 text-sm text-foreground">
+          {item.isLive === null ? (
             <ContainerStateBadge state="draft" />
           ) : item.isLive ? (
-            t('publishState.itemLive')
+            <span className="text-xs text-muted-foreground">{t('publishState.itemLive')}</span>
           ) : (
             <ItemLiveBadge isLive={false} />
-          )
-        }
-      />
+          )}
+          {/* Only what publishing would change about this row. A live row can
+              still carry one — it was reordered or made optional since the last
+              release. */}
+          {item.pendingChange && item.pendingChange !== 'added' && <ItemChangeBadge item={item} />}
+        </div>
+      </div>
 
-      {/* Only what publishing would change about this row. A live row can still
-          carry one — it was reordered or made optional since the last release. */}
-      {item.pendingChange && item.pendingChange !== 'added' && (
-        <InspectorField
-          label={t('structure.pendingChange')}
-          value={<ItemChangeBadge item={item} />}
+      {isExercise ? (
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            <StubField label={t('structure.points')} value={STUB_PLACEHOLDERS.points} />
+            <StubSelectField
+              label={t('structure.attempts')}
+              value={t('structure.attemptsUnlimited')}
+            />
+          </div>
+          <StubSwitchRow label={t('structure.autoGrade')} hint={t('structure.autoGradeHint')} on />
+          <StubSwitchRow label={t('structure.showHints')} hint={t('structure.showHintsHint')} />
+        </>
+      ) : (
+        <StubSwitchRow
+          label={t('structure.visibleToStudents')}
+          hint={t('structure.visibleToStudentsHint')}
+          on
         />
       )}
 
+      <div className="flex items-center justify-between gap-3 py-0.5 text-xs text-muted-foreground">
+        <span>{t('structure.blockId')}</span>
+        <b className="truncate font-mono text-[11px] font-semibold text-foreground">{item.id}</b>
+      </div>
+
       <InspectorFooter
-        editorHref={`/school/${schoolSlug}/content/${courseContainerId}/lessons/${item.id}`}
+        editorHref={`/school/${schoolSlug}/content/${containerId}/lessons/${item.id}`}
         onDelete={() => onDelete({ kind: 'item', id: item.id, title: item.title ?? '' })}
       />
     </div>

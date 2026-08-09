@@ -1,7 +1,6 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -19,22 +18,29 @@ import { assignItemSectionAction } from '../actions/container-item';
 const NO_SECTION = '__none__';
 
 interface SectionAssignSelectProps {
+  /** The container that places the row — its module, or the course for its own material. */
   containerId: string;
   containerItemId: string;
   sectionId?: string | null;
-  /** Query key(s) to invalidate after a successful reassignment, e.g. authoringKeys.lessons(containerId). */
-  invalidateKeys: readonly (readonly unknown[])[];
+  /** Called once the move persists, so the caller can reload the tree. */
+  onChanged: () => void;
 }
 
+/**
+ * Moves a block to another section of the container it already belongs to.
+ *
+ * The section list is fetched rather than passed in: the inspector holds one
+ * selected row, not the module around it, and the row itself only knows which
+ * section it sits in.
+ */
 export function SectionAssignSelect({
   containerId,
   containerItemId,
   sectionId,
-  invalidateKeys,
+  onChanged,
 }: SectionAssignSelectProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
-  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const { data: sections } = useAuthoringSections(containerId);
 
@@ -46,15 +52,13 @@ export function SectionAssignSelect({
         toast.error(tErrors(result.error.code));
         return;
       }
-      await Promise.all(
-        invalidateKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })),
-      );
+      onChanged();
     });
   }
 
   return (
     <Select value={sectionId ?? NO_SECTION} onValueChange={handleChange} disabled={isPending}>
-      <SelectTrigger size="sm" className="w-40" aria-label={t('sections.assignAriaLabel')}>
+      <SelectTrigger size="sm" className="w-full" aria-label={t('sections.assignAriaLabel')}>
         <SelectValue placeholder={t('sections.noSection')} />
       </SelectTrigger>
       <SelectContent>
