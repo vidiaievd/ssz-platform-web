@@ -10,8 +10,10 @@ import {
   applyBlockPreview,
   applyCourseEntryPreview,
   flattenCourseEntries,
+  applyLevelPreview,
   planBlockDrop,
   planCourseEntryDrop,
+  planLevelDrop,
   type BlockDragData,
 } from './structure-dnd';
 
@@ -265,5 +267,44 @@ describe('applyCourseEntryPreview', () => {
 
     expect(preview.levels[0]!.items).toEqual([]);
     expect(preview.levels[1]!.items.map((i) => i.id)).toEqual(['intro']);
+  });
+});
+
+describe('planLevelDrop', () => {
+  it('moves a level down onto the one it was dropped on', () => {
+    expect(planLevelDrop(COURSE, 'level-1', 'level-2')).toEqual({
+      kind: 'reorder',
+      orderedSectionIds: ['level-2', 'level-1'],
+    });
+  });
+
+  it('moves a level up in front of it', () => {
+    expect(planLevelDrop(COURSE, 'level-2', 'level-1')).toEqual({
+      kind: 'reorder',
+      orderedSectionIds: ['level-2', 'level-1'],
+    });
+  });
+
+  it('does nothing on itself, on nothing, or on the idless bucket', () => {
+    expect(planLevelDrop(COURSE, 'level-1', 'level-1')).toEqual({ kind: 'none' });
+    expect(planLevelDrop(COURSE, 'level-1', null)).toEqual({ kind: 'none' });
+    expect(planLevelDrop(COURSE, 'level-1', 'level-nowhere')).toEqual({ kind: 'none' });
+  });
+});
+
+describe('applyLevelPreview', () => {
+  it('shows the levels in the order the drop would leave them', () => {
+    const preview = applyLevelPreview(COURSE, ['level-2', 'level-1']);
+    expect(preview.levels.map((l) => l.id)).toEqual(['level-2', 'level-1']);
+  });
+
+  it('keeps the idless bucket at the end', () => {
+    const withBucket: CurriculumTree = {
+      ...COURSE,
+      levels: [...COURSE.levels, { id: null, title: null, position: 2, items: [], modules: [] }],
+    };
+    const preview = applyLevelPreview(withBucket, ['level-2', 'level-1']);
+
+    expect(preview.levels.map((l) => l.id)).toEqual(['level-2', 'level-1', null]);
   });
 });

@@ -18,6 +18,8 @@ import {
   type DragOverEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
+import type { DraggableAttributes } from '@dnd-kit/core';
+import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -87,8 +89,10 @@ import { checkedBlocks } from '../lib/block-selection';
 import {
   applyBlockPreview,
   applyCourseEntryPreview,
+  applyLevelPreview,
   planBlockDrop,
   planCourseEntryDrop,
+  planLevelDrop,
   type BlockDragData,
   type BlockDropPlan,
   type CourseEntryDragData,
@@ -330,6 +334,50 @@ function BlockDragCard({ item }: { item: CurriculumTreeItemNode }) {
 }
 
 /**
+ * A level, as a thing that can itself be picked up and put somewhere else.
+ *
+ * The idless bucket the tree invents for section-less modules is not a row in
+ * the database, so it gets no handle: there is nothing to reorder it against.
+ */
+function LevelCard({
+  levelId,
+  domId,
+  sortId,
+  children,
+}: {
+  levelId: string | null;
+  domId: string;
+  sortId: string;
+  /** Given the drag props, so the header can put the grip where it belongs. */
+  children: (drag: {
+    attributes: DraggableAttributes;
+    listeners?: SyntheticListenerMap;
+  }) => React.ReactNode;
+}) {
+  const { attributes, isDragging, listeners, setNodeRef, transform, transition } = useSortable({
+    id: sortId,
+    data: { type: 'level', levelId } satisfies LevelDropData,
+    disabled: levelId === null,
+  });
+
+  return (
+    // The rail scrolls here by id; the anchor sits on the wrapper so the
+    // level's modules come into view with it.
+    <section
+      ref={setNodeRef}
+      id={domId}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className={cn(
+        'mb-3 scroll-mt-4 overflow-hidden rounded-md border border-border bg-surface',
+        isDragging && 'opacity-30',
+      )}
+    >
+      {children({ attributes, listeners })}
+    </section>
+  );
+}
+
+/**
  * A level as a place modules go. Wraps its body in both a droppable — so an
  * empty level can still be aimed at — and the sortable list of its rows.
  */
@@ -374,6 +422,23 @@ function ModuleDragCard({ module: mod }: { module: CurriculumTreeModuleNode }) {
         <span className="truncate text-xs text-muted-foreground">{mod.titleEn}</span>
       )}
       <PublishStateBadge state={mod.publishState} />
+    </div>
+  );
+}
+
+/** And for a level, which carries its modules with it. */
+function LevelDragCard({ level }: { level: CurriculumTreeLevelNode }) {
+  const t = useTranslations('Authoring');
+
+  return (
+    <div className="flex w-fit max-w-120 cursor-grabbing items-center gap-2 rounded-md border border-primary-200 bg-surface px-3 py-2 shadow-[var(--ssz-shadow-lg)]">
+      <GripVertical size={13} className="shrink-0 text-muted-foreground" />
+      <span className="truncate text-sm font-bold tracking-tight text-foreground">
+        {level.title}
+      </span>
+      <span className="shrink-0 text-[11px] text-muted-foreground">
+        {t('structure.moduleCount', { count: level.modules.length })}
+      </span>
     </div>
   );
 }
@@ -1040,11 +1105,13 @@ export function CurriculumTree({
   const [dragging, setDragging] = useState<
     | { kind: 'block'; item: CurriculumTreeItemNode }
     | { kind: 'module'; module: CurriculumTreeModuleNode }
+    | { kind: 'level'; level: CurriculumTreeLevelNode }
     | null
   >(null);
   const [preview, setPreview] = useState<
     | { scope: 'block'; moduleContainerId: string; itemId: string; plan: BlockDropPlan }
     | { scope: 'course'; itemId: string; plan: BlockDropPlan }
+    | { scope: 'level'; orderedSectionIds: string[] }
     | null
   >(null);
 
@@ -1061,7 +1128,11 @@ export function CurriculumTree({
 
   /** The tree and the module as the drag would leave them — what gets rendered mid-flight. */
   const viewTree =
-    preview?.scope === 'course' ? applyCourseEntryPreview(tree, preview.itemId, preview.plan) : tree;
+    preview?.scope === 'course'
+      ? applyCourseEntryPreview(tree, preview.itemId, preview.plan)
+      : preview?.scope === 'level'
+        ? applyLevelPreview(tree, preview.orderedSectionIds)
+        : tree;
   function withPreview(mod: CurriculumTreeModuleNode) {
     if (preview?.scope !== 'block' || preview.moduleContainerId !== mod.containerId) return mod;
     return applyBlockPreview(mod, preview.itemId, preview.plan);
@@ -1075,6 +1146,7 @@ export function CurriculumTree({
    */
   function resolveOver(active: StructureDragData, over: StructureDragData | null) {
     if (!over) return null;
+    if (active.type === 'level') return over;
     if (active.type === 'courseEntry') {
       if (over.type === 'courseEntry' || over.type === 'level') return over;
       // Inside some module: aim at that module's own row.
@@ -1125,6 +1197,27 @@ export function CurriculumTree({
     return null;
   }
 
+  /**
+   * Levels answer separately: they are sections, reordered through their own
+   * endpoint, and they have no group to move between.
+   */
+  function planLevelFor(active: StructureDragData, over: StructureDragData | null) {
+    if (active.type !== 'level' || !active.levelId) return null;
+    const target = resolveOver(active, over);
+    const overLevelId =
+      target?.type === 'level'
+        ? target.levelId
+        : target?.type === 'courseEntry'
+          ? (tree.levels.find((l) => l.modules.some((m) => m.id === target.itemId) || l.items.some((i) => i.id === target.itemId))?.id ?? null)
+          : target?.type === 'block' || target?.type === 'section'
+            ? (tree.levels.find((l) =>
+                l.modules.some((m) => m.containerId === target.moduleContainerId),
+              )?.id ?? null)
+            : null;
+
+    return planLevelDrop(tree, active.levelId, overLevelId);
+  }
+
   function handleDragStart(event: DragStartEvent) {
     const active = event.active.data.current as StructureDragData | undefined;
     if (active?.type === 'block') {
@@ -1133,13 +1226,30 @@ export function CurriculumTree({
       setDragging(item ? { kind: 'block', item } : null);
       return;
     }
-    if (active?.type === 'courseEntry') setDragging(findCourseRow(active.itemId));
+    if (active?.type === 'courseEntry') {
+      setDragging(findCourseRow(active.itemId));
+      return;
+    }
+    if (active?.type === 'level') {
+      const level = tree.levels.find((l) => l.id === active.levelId);
+      setDragging(level ? { kind: 'level', level } : null);
+    }
   }
 
   function handleDragOver(event: DragOverEvent) {
     const active = event.active.data.current as StructureDragData | undefined;
     if (!active) return;
-    const resolved = planFor(active, (event.over?.data.current ?? null) as StructureDragData | null);
+    const over = (event.over?.data.current ?? null) as StructureDragData | null;
+
+    const levelPlan = planLevelFor(active, over);
+    if (levelPlan) {
+      if (levelPlan.kind === 'reorder') {
+        setPreview({ scope: 'level', orderedSectionIds: levelPlan.orderedSectionIds });
+      }
+      return;
+    }
+
+    const resolved = planFor(active, over);
     if (!resolved) return;
 
     if (resolved.plan.kind === 'reorder' || resolved.plan.kind === 'move') {
@@ -1164,9 +1274,20 @@ export function CurriculumTree({
     setDragging(null);
 
     const active = event.active.data.current as StructureDragData | undefined;
-    const resolved = active
-      ? planFor(active, (event.over?.data.current ?? null) as StructureDragData | null)
-      : null;
+    const over = (event.over?.data.current ?? null) as StructureDragData | null;
+
+    const levelPlan = active ? planLevelFor(active, over) : null;
+    if (levelPlan) {
+      if (levelPlan.kind !== 'reorder') {
+        setPreview(null);
+        return;
+      }
+      setPreview({ scope: 'level', orderedSectionIds: levelPlan.orderedSectionIds });
+      void applyLevelOrder(levelPlan.orderedSectionIds);
+      return;
+    }
+
+    const resolved = active ? planFor(active, over) : null;
     if (!resolved || resolved.plan.kind === 'none' || resolved.plan.kind === 'cross-module') {
       setPreview(null);
       if (resolved?.plan.kind === 'cross-module') toast(t('structure.dragCrossModule'));
@@ -1206,16 +1327,26 @@ export function CurriculumTree({
     setPreview(null);
   }
 
+  async function applyLevelOrder(orderedSectionIds: string[]) {
+    const result = await reorderSectionsAction(courseContainerId, orderedSectionIds);
+    if (!result.ok) {
+      toast.error(tErrors(result.error.code));
+      setPreview(null);
+      return;
+    }
+    await onChanged();
+    setPreview(null);
+  }
+
+  /** The menu's version of dragging a level onto its neighbour — same planner. */
   function moveLevel(index: number, direction: -1 | 1) {
-    const reordered = moveInArray(tree.levels, index, direction);
-    const orderedIds = reordered.map((l) => l.id).filter((id): id is string => id != null);
-    reorderSectionsAction(courseContainerId, orderedIds).then((result) => {
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      onChanged();
-    });
+    const level = tree.levels[index];
+    const neighbour = tree.levels[index + direction];
+    if (!level?.id || !neighbour?.id) return;
+
+    const plan = planLevelDrop(tree, level.id, neighbour.id);
+    if (plan.kind !== 'reorder') return;
+    void applyLevelOrder(plan.orderedSectionIds);
   }
 
   function resolveRename(id: string, title: string) {
@@ -1315,6 +1446,10 @@ export function CurriculumTree({
           <p className="py-6 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
         )}
 
+        <SortableContext
+          items={viewTree.levels.map(levelCollapseKey)}
+          strategy={verticalListSortingStrategy}
+        >
         {viewTree.levels.map((level, levelIndex) => {
           const levelKey = levelCollapseKey(level);
           const expanded = isExpanded(levelKey, levelMatches(level));
@@ -1327,13 +1462,14 @@ export function CurriculumTree({
           );
 
           return (
-            // The rail scrolls here by id; the anchor sits on the wrapper so the
-            // level's modules come into view with it.
-            <section
+            <LevelCard
               key={levelKey}
-              id={levelDomId(level)}
-              className="mb-3 scroll-mt-4 overflow-hidden rounded-md border border-border bg-surface"
+              sortId={levelKey}
+              levelId={level.id ?? null}
+              domId={levelDomId(level)}
             >
+              {(levelDrag) => (
+              <>
               <header
                 role="treeitem"
                 aria-selected={selected}
@@ -1354,6 +1490,24 @@ export function CurriculumTree({
                     : 'bg-subtle hover:bg-muted',
                 )}
               >
+                {level.id && (
+                  <button
+                    type="button"
+                    aria-label={t('structure.dragLevel', { name: level.title ?? '' })}
+                    onClick={(e) => e.stopPropagation()}
+                    className={cn(
+                      'shrink-0 cursor-grab touch-none text-muted-foreground transition-opacity',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      selected
+                        ? 'opacity-100'
+                        : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
+                    )}
+                    {...levelDrag.attributes}
+                    {...levelDrag.listeners}
+                  >
+                    <GripVertical size={13} />
+                  </button>
+                )}
                 <Caret
                   expanded={expanded}
                   onToggle={() => toggleExpanded(levelKey)}
@@ -1510,24 +1664,37 @@ export function CurriculumTree({
                   </div>
                 </LevelDropZone>
               )}
-            </section>
+              </>
+              )}
+            </LevelCard>
           );
         })}
+        </SortableContext>
 
-        {tree.ungroupedItems.map((item) => (
-          <BlockRow
-            key={item.id}
-            item={item}
-            sectionTitle={null}
-            selectedId={selectedId}
-            onSelect={onSelect}
-            schoolSlug={schoolSlug}
-            courseContainerId={courseContainerId}
-            rename={rename}
-            check={check}
-            drag={null}
-          />
-        ))}
+        {viewTree.ungroupedItems.length > 0 && (
+          // Material on the container that belongs to no level. It is still a
+          // row of the same item list, so it drags by the same rules — and a
+          // level can be dropped out of, back down to here.
+          <LevelDropZone
+            levelId={null}
+            rowIds={viewTree.ungroupedItems.map((item) => item.id)}
+          >
+            {viewTree.ungroupedItems.map((item) => (
+              <BlockRow
+                key={item.id}
+                item={item}
+                sectionTitle={null}
+                selectedId={selectedId}
+                onSelect={onSelect}
+                schoolSlug={schoolSlug}
+                courseContainerId={courseContainerId}
+                rename={rename}
+                check={check}
+                drag={{ type: 'courseEntry', itemId: item.id }}
+              />
+            ))}
+          </LevelDropZone>
+        )}
 
         {/* A module with no sections has no level row to hang the picker off,
           and its material has to be reachable from somewhere. Once it has
@@ -1557,6 +1724,7 @@ export function CurriculumTree({
         <DragOverlay>
           {dragging?.kind === 'block' && <BlockDragCard item={dragging.item} />}
           {dragging?.kind === 'module' && <ModuleDragCard module={dragging.module} />}
+          {dragging?.kind === 'level' && <LevelDragCard level={dragging.level} />}
         </DragOverlay>
 
         <DeleteNodeDialog

@@ -595,6 +595,13 @@ describe('CurriculumTree', () => {
       ).toBeInTheDocument();
     });
 
+    it('gives a level a drag handle of its own', () => {
+      renderTree();
+      expect(
+        screen.getByRole('button', { name: 'Drag to move level A1 — Beginner' }),
+      ).toBeInTheDocument();
+    });
+
     it('gives a module a drag handle of its own', () => {
       renderTree();
       expect(

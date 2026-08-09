@@ -292,3 +292,48 @@ export function applyCourseEntryPreview(
 
   return { ...tree, levels, ungroupedItems: ungrouped };
 }
+
+/**
+ * Levels are sections of the course, not items, so they reorder through their
+ * own endpoint and get their own plan shape.
+ */
+export type LevelDropPlan = { kind: 'none' } | { kind: 'reorder'; orderedSectionIds: string[] };
+
+/**
+ * Where a dragged level lands, by the same rule as everything else: it takes
+ * the target's place.
+ *
+ * A level with no id is the trailing bucket the tree invents for modules that
+ * belong to no section. It is not a row in the database, so it can neither
+ * travel nor be displaced.
+ */
+export function planLevelDrop(
+  tree: CurriculumTree,
+  activeLevelId: string,
+  overLevelId: string | null,
+): LevelDropPlan {
+  if (!overLevelId || overLevelId === activeLevelId) return { kind: 'none' };
+
+  const ids = tree.levels.map((level) => level.id).filter((id): id is string => id !== null);
+  const fromIndex = ids.indexOf(activeLevelId);
+  const toIndex = ids.indexOf(overLevelId);
+  if (fromIndex < 0 || toIndex < 0) return { kind: 'none' };
+
+  const next = ids.filter((id) => id !== activeLevelId);
+  next.splice(toIndex, 0, activeLevelId);
+  return { kind: 'reorder', orderedSectionIds: next };
+}
+
+/** The tree with its levels in the order the drag would leave them. */
+export function applyLevelPreview(
+  tree: CurriculumTree,
+  orderedSectionIds: string[],
+): CurriculumTree {
+  const rank = new Map(orderedSectionIds.map((id, index) => [id, index]));
+  // The idless bucket has no place in the order and stays where it always is,
+  // at the end; sorting is stable, so equal ranks keep their relative order.
+  const rankOf = (id: string | null) =>
+    id === null ? Number.MAX_SAFE_INTEGER : (rank.get(id) ?? Number.MAX_SAFE_INTEGER);
+
+  return { ...tree, levels: [...tree.levels].sort((a, b) => rankOf(a.id) - rankOf(b.id)) };
+}
