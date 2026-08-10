@@ -132,6 +132,9 @@
     "attemptCount": "Спроба {n}",
     "restart": "Почати заново",
     "revealFailed": "Не вдалося показати відповіді — спробуйте ще раз",
-    "retryAttempt": "Спробувати ще · спроба {n}"
+    "retryAttempt": "Спробувати ще · спроба {n}",
+    "restored": "Твоя минула відповідь, збережено {date}",
+    "restoredScored": "{correct} із {total} пропусків правильно",
+    "startOver": "Відповісти знову"
   }
 }

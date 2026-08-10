@@ -3,7 +3,9 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
 import type {
+  AttemptRecord,
   CheckMode,
+  LastAttemptResponse,
   StartAttemptRequest,
   StartAttemptResponse,
 } from '@/features/student/exercises/types/attempts';
@@ -98,5 +100,45 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }
     }
     return NextResponse.json({ error: 'Failed to start attempt' }, { status: 502 });
+  }
+}
+
+/**
+ * The learner's last finished attempt at this exercise, or `null`.
+ *
+ * A list endpoint would be the obvious proxy, but the client has one question — "what
+ * did I answer last time?" — and answering it from a page of attempts would put the
+ * choice of *which* attempt counts in a component. It belongs here: an attempt is
+ * finished once it has been scored or routed to a teacher, and IN_PROGRESS rows are
+ * skipped because POST above abandons them on sight, so one is at most an artefact of
+ * a page left open.
+ */
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  try {
+    const page = await serverFetch<{ items: AttemptRecord[] }>({
+      service: 'exercises',
+      path: `/exercises/${id}/attempts`,
+      method: 'GET',
+      // Newest first upstream, so the first finished row in a short page is the one.
+      query: { limit: 10 },
+    });
+
+    const last =
+      page.items.find((a) => a.status === 'SCORED' || a.status === 'ROUTED_FOR_REVIEW') ?? null;
+
+    return NextResponse.json({ attempt: last } satisfies LastAttemptResponse);
+  } catch (e) {
+    if (isAppError(e)) {
+      if (e.code === 'unauthenticated') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      // No exercise, no history — an empty past is not an error the runner should show.
+      if (e.code === 'not_found') {
+        return NextResponse.json({ attempt: null } satisfies LastAttemptResponse);
+      }
+    }
+    return NextResponse.json({ error: 'Failed to load attempts' }, { status: 502 });
   }
 }

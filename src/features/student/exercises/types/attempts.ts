@@ -66,6 +66,40 @@ export interface GapFillSubmitDetails {
   gaps: Array<{ gapKey: GapKey; correct: boolean; explanation: string | null }>;
 }
 
+export type AttemptStatus =
+  | 'IN_PROGRESS'
+  | 'SUBMITTED'
+  | 'SCORED'
+  | 'ROUTED_FOR_REVIEW'
+  | 'ABANDONED';
+
+/** An attempt read back after the fact — the record, not the session. */
+export interface AttemptRecord {
+  id: string;
+  exerciseId: string;
+  templateCode: string;
+  status: AttemptStatus;
+  checkMode: CheckMode;
+  score: number | null;
+  passed: boolean | null;
+  answersRevealed: boolean;
+  /** What the learner sent. Shape follows `templateCode`. */
+  submittedAnswer: unknown;
+  /** Validator output. `null` on GRADED attempts — the engine withholds it there. */
+  validationDetails: unknown;
+  submittedAt: string | null;
+  scoredAt: string | null;
+}
+
+/** `submittedAnswer` when the template is `word_bank_gap_fill`. */
+export interface GapFillSubmittedAnswer {
+  placements: GapFillPlacement[];
+}
+
+export interface LastAttemptResponse {
+  attempt: AttemptRecord | null;
+}
+
 export interface RevealAnswersResponse {
   attemptId: string;
   answers: Array<{ gapKey: GapKey; label: string; word: string; why: string | null }>;

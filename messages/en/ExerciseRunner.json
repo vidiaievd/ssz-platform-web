@@ -132,6 +132,9 @@
     "attemptCount": "Attempt {n}",
     "restart": "Start over",
     "revealFailed": "Could not show the answers — try again",
-    "retryAttempt": "Try again · attempt {n}"
+    "retryAttempt": "Try again · attempt {n}",
+    "restored": "Your last answer, saved {date}",
+    "restoredScored": "{correct} of {total} gaps correct",
+    "startOver": "Answer again"
   }
 }

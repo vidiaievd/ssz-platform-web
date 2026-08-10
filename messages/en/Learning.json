@@ -513,7 +513,8 @@
     },
     "practice": {
       "taskCount": "{n} tasks in this set",
-      "setProgress": "Checked {done} of {total}"
+      "setProgress": "Checked {done} of {total}",
+      "taskDone": "Done"
     }
   }
 }

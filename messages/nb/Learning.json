@@ -513,7 +513,8 @@
     },
     "practice": {
       "taskCount": "{n} oppgaver i dette settet",
-      "setProgress": "Sjekket {done} av {total}"
+      "setProgress": "Sjekket {done} av {total}",
+      "taskDone": "Fullført"
     }
   }
 }

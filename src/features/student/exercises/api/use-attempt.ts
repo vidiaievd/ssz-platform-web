@@ -3,6 +3,8 @@
 import { useMutation } from '@tanstack/react-query';
 
 import type {
+  AttemptRecord,
+  LastAttemptResponse,
   RevealAnswersResponse,
   StartAttemptRequest,
   StartAttemptResponse,
@@ -29,6 +31,26 @@ async function post<TResponse>(url: string, body?: unknown): Promise<TResponse> 
     throw new Error(problem?.error ?? `Request failed with ${res.status}`);
   }
   return res.json() as Promise<TResponse>;
+}
+
+/**
+ * The last finished attempt at this exercise, or `null` if there is none.
+ *
+ * A plain function rather than a hook, because the runner asks for it at one moment —
+ * just after the attempt opens, when there are finally gaps for a saved answer to go
+ * into — and not as state to be watched. It never rejects: a history lookup that fails
+ * leaves the learner where they would have been anyway, at an exercise with nothing
+ * restored, and that is not worth an error screen over a working exercise.
+ */
+export async function fetchLastAttempt(exerciseId: string): Promise<AttemptRecord | null> {
+  try {
+    const res = await fetch(`/api/exercises/${exerciseId}/attempts`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as LastAttemptResponse;
+    return data.attempt ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export function useStartAttempt(exerciseId: string) {

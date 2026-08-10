@@ -79,15 +79,46 @@ const REVEALED = {
   attemptClosed: true,
 };
 
+/** A finished attempt as the history endpoint reports it. */
+const LAST_ATTEMPT = {
+  attempt: {
+    id: 'att-0',
+    exerciseId: 'ex-1',
+    templateCode: 'word_bank_gap_fill',
+    status: 'SCORED',
+    checkMode: 'PRACTICE',
+    score: 100,
+    passed: true,
+    answersRevealed: false,
+    submittedAnswer: { placements: [{ gapKey: 's1#3', word: 'bestille' }] },
+    validationDetails: {
+      totalGaps: 1,
+      correctGaps: 1,
+      gaps: [{ gapKey: 's1#3', correct: true, explanation: null }],
+    },
+    submittedAt: '2026-08-08T10:00:00.000Z',
+    scoredAt: '2026-08-08T10:00:01.000Z',
+  },
+};
+
 /** Routes each POST by path, so a test only declares what it cares about. */
 function mockApi(responses: {
   submit?: unknown;
   reveal?: unknown;
   startFails?: boolean;
   started?: unknown;
+  /** The history lookup, which is the only GET the solver makes. */
+  last?: unknown;
 }) {
-  return vi.fn(async (url: RequestInfo | URL, _init?: RequestInit) => {
+  return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
+
+    if (init?.method === undefined) {
+      return new Response(JSON.stringify(responses.last ?? { attempt: null }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
     const body = path.endsWith('/reveal')
       ? responses.reveal
       : path.endsWith('/submit')
@@ -387,6 +418,46 @@ describe('GapFillSolver', () => {
     await waitFor(() =>
       expect(screen.getByRole('button', { name: /try again|retry/i })).toBeInTheDocument(),
     );
+  });
+
+  it('puts the last saved answer back in the gaps', async () => {
+    renderSolver(mockApi({ last: LAST_ATTEMPT }));
+
+    // The word the learner placed last time, marked with the verdict it earned —
+    // not an empty exercise pretending the work was never done.
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /G1: bestille, correct/ })).toBeInTheDocument(),
+    );
+    expect(screen.getByText(/Your last answer, saved/)).toBeInTheDocument();
+    expect(screen.getByText(/1 of 1 gaps correct/)).toBeInTheDocument();
+  });
+
+  it('clears the restored answer when the learner wants to answer again', async () => {
+    const user = userEvent.setup();
+    renderSolver(mockApi({ last: LAST_ATTEMPT }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /G1: bestille, correct/ })).toBeInTheDocument(),
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Answer again' }));
+
+    expect(screen.getByRole('button', { name: /G1: empty gap/ })).toBeInTheDocument();
+    expect(screen.queryByText(/Your last answer, saved/)).not.toBeInTheDocument();
+  });
+
+  it('shows an unanswered exercise when the history lookup fails', async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === undefined) return new Response('nope', { status: 502 });
+      return new Response(JSON.stringify(STARTED), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+    renderSolver(fetchMock as unknown as ReturnType<typeof mockApi>);
+
+    await waitFor(() => expect(gap()).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: /G1: empty gap/ })).toBeInTheDocument();
+    expect(screen.queryByText(/Your last answer, saved/)).not.toBeInTheDocument();
   });
 
   it('renders the exercise when the retry succeeds', async () => {

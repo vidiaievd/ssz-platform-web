@@ -132,6 +132,9 @@
     "attemptCount": "Forsøk {n}",
     "restart": "Prøv på nytt",
     "revealFailed": "Kunne ikke vise svarene — prøv igjen",
-    "retryAttempt": "Prøv igjen · forsøk {n}"
+    "retryAttempt": "Prøv igjen · forsøk {n}",
+    "restored": "Ditt forrige svar, lagret {date}",
+    "restoredScored": "{correct} av {total} luker riktig",
+    "startOver": "Svar på nytt"
   }
 }

@@ -85,4 +85,26 @@ describe('PracticePage', () => {
     // The other tasks stay answerable — grading is per exercise.
     expect(screen.getAllByRole('button', { name: 'Check' })).toHaveLength(2);
   });
+
+  it('counts the tasks the server already records as done', () => {
+    mockMcq();
+    const seen = [{ ...items[0]!, status: 'completed' as const }, items[1]!, items[2]!];
+    renderWithProviders(<PracticePage title="Øvelser" items={seen} />);
+
+    // Progress the learner earned on an earlier visit, not a set that starts at zero
+    // every time the page is opened.
+    expect(screen.getByText('1/3')).toBeInTheDocument();
+    expect(screen.getAllByText('Done')).toHaveLength(1);
+  });
+
+  it('does not double-count a done task that is checked again', () => {
+    mockMcq();
+    const seen = [{ ...items[0]!, status: 'completed' as const }, items[1]!, items[2]!];
+    renderWithProviders(<PracticePage title="Øvelser" items={seen} />);
+
+    fireEvent.click(screen.getAllByText('hei')[0]!);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Check' })[0]!);
+
+    expect(screen.getByText('1/3')).toBeInTheDocument();
+  });
 });

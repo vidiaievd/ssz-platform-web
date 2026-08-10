@@ -132,6 +132,9 @@
     "attemptCount": "Попытка {n}",
     "restart": "Начать заново",
     "revealFailed": "Не удалось показать ответы — попробуйте ещё раз",
-    "retryAttempt": "Попробовать снова · попытка {n}"
+    "retryAttempt": "Попробовать снова · попытка {n}",
+    "restored": "Твой прошлый ответ, сохранён {date}",
+    "restoredScored": "{correct} из {total} пропусков верно",
+    "startOver": "Ответить заново"
   }
 }

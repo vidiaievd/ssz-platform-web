@@ -513,7 +513,8 @@
     },
     "practice": {
       "taskCount": "{n} завдань у цьому наборі",
-      "setProgress": "Перевірено {done} із {total}"
+      "setProgress": "Перевірено {done} із {total}",
+      "taskDone": "Пройдено"
     }
   }
 }
