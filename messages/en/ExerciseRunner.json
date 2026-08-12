@@ -110,11 +110,35 @@
     "partialScore": "{correct} of {total} lines in the right place"
   },
   "errorCorrection": {
-    "remaining": "Corrections made: {found} of {total}",
-    "hint": "Tap a part of the sentence to rewrite it.",
+    "toFind": "{count, plural, one {# mistake to find} other {# mistakes to find}}",
+    "inThis": "{count, plural, one {# mistake here} other {# mistakes here}}",
+    "progress": "{touched} of {total} sentences worked on",
+    "howTo": "Tap a word to rewrite it, or between two words to insert one. Leave a word empty to strike it out.",
     "editLabel": "Rewrite “{text}”",
-    "partialScore": "{correct} of {total} mistakes corrected",
-    "falsePositives": "{n} correct parts were changed"
+    "wordLabel": "Word: {text}",
+    "insertLabel": "Insert a word at position {position}",
+    "insertedLabel": "Inserted word: {text}",
+    "showHint": "Hint",
+    "reset": "Start this sentence over",
+    "changes": "{count, plural, =0 {no changes} one {# change} other {# changes}}",
+    "types": "Type: {types}",
+    "passageLabel": "Text",
+    "send": "Hand in",
+    "sending": "Sending…",
+    "sendFailed": "Could not send that — try again",
+    "untouched": "{count, plural, one {# sentence is still untouched} other {# sentences are still untouched}}",
+    "approved": "Everything correct — approved automatically",
+    "withTeacher": "Handed in. Your teacher will look at it.",
+    "withTeacherWhen": "Usually within 48 hours.",
+    "again": "Try again",
+    "type": {
+      "form": "word form",
+      "order": "word order",
+      "extra": "superfluous word",
+      "missing": "missing word",
+      "spelling": "spelling",
+      "function": "preposition or article"
+    }
   },
   "gapFill": {
     "remaining": "{count} left",

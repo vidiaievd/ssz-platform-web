@@ -1,207 +1,515 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import type {
+  ProjectedItem,
+  StudentEdits,
+  StudentProjection,
+} from '@/lib/shared-kernel/error-correction';
+
 import { Instr } from './instr';
-import { type RunnerMode, type RunnerPhase } from './types';
+import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
-export interface ErrorChunk {
-  id: string;
-  text: string;
-}
-
-export interface ErrorSentence {
-  id: string;
-  chunks: ErrorChunk[];
-}
-
-export interface ErrorCorrectionContent {
-  items: ErrorSentence[];
-  /** How many chunks are faulty — tells the learner when to stop looking. */
-  mistakeCount?: number;
-  instruction?: string;
-}
-
-export interface ErrorCorrectionExpected {
-  corrections: Array<{
-    item_id: string;
-    chunk_id: string;
-    accepted: string[];
-    note?: string;
-  }>;
-  explanation?: string;
-}
-
-/** itemId → chunkId → the learner's rewrite (only chunks they actually changed). */
-export type ErrorCorrectionValue = Record<string, Record<string, string>>;
-
-export type ChunkOutcome = 'fixed' | 'wrong_fix' | 'missed' | 'false_positive';
-
-export interface ChunkResult {
-  outcome: ChunkOutcome;
-  /** The accepted rewrite, shown when the learner missed it or got it wrong. */
-  expected?: string;
-  note?: string;
-}
-
-/** itemId → chunkId → outcome; only present in the feedback phase. */
-export type ErrorCorrectionResults = Record<string, Record<string, ChunkResult>>;
+/** itemId → the edits the learner made to that sentence. */
+export type ErrorCorrectionValue = Record<string, StudentEdits>;
 
 export interface ErrorCorrectionBodyProps {
-  content: ErrorCorrectionContent;
+  /**
+   * The masked exercise as it left the server: the faulty sentences, tokenised, and how
+   * many mistakes each holds. It carries no corrected text — the mistakes are derived
+   * from that, so a browser holding it would hold the exercise's answer.
+   */
+  projection: StudentProjection;
+  instruction?: string;
   value: ErrorCorrectionValue;
   onValueChange: (value: ErrorCorrectionValue) => void;
+  /** Reports whether every sentence has been touched, which is what allows submitting. */
   onAnswerChange: (canSubmit: boolean) => void;
   phase: RunnerPhase;
-  /** null in graded mode — the body never reveals correctness there. */
-  ok: boolean | null;
   mode: RunnerMode;
   accent: string;
-  results?: ErrorCorrectionResults;
+  /**
+   * Set while the runner is pointing out that sentences are still untouched — the
+   * learner pressed the primary action too early.
+   */
+  pointOut?: boolean;
 }
 
 const READING = 'var(--ssz-font-reading)';
+/** BEHAVIOR §B: every hit area is comfortably tappable, on a phone included. */
+const HIT_MIN_HEIGHT = 30;
 
-const OUTCOME_TONE: Record<ChunkOutcome, { border: string; bg: string; fg: string }> = {
-  fixed: {
-    border: 'var(--ssz-feedback-ok-line)',
-    bg: 'var(--ssz-feedback-ok-bg)',
-    fg: 'var(--ssz-feedback-ok-fg)',
-  },
-  wrong_fix: {
-    border: 'var(--ssz-feedback-no-line)',
-    bg: 'var(--ssz-feedback-no-bg)',
-    fg: 'var(--ssz-feedback-no-fg)',
-  },
-  missed: {
-    border: 'var(--ssz-border-accent-warm)',
-    bg: 'var(--ssz-bg-accent-warm)',
-    fg: 'var(--ssz-text-accent-warm)',
-  },
-  false_positive: {
-    border: 'var(--ssz-feedback-no-line)',
-    bg: 'var(--ssz-bg-surface)',
-    fg: 'var(--ssz-feedback-no-fg)',
-  },
-};
+const EMPTY: StudentEdits = { marked: {}, fix: {}, ins: {} };
+
+const editsOf = (value: ErrorCorrectionValue, itemId: string): StudentEdits =>
+  value[itemId] ?? EMPTY;
+
+/** How many changes the learner has made to one sentence. */
+function changeCount(edits: StudentEdits): number {
+  const marked = Object.values(edits.marked).filter(Boolean).length;
+  const inserted = Object.values(edits.ins).filter((word) => word.trim() !== '').length;
+  return marked + inserted;
+}
+
+const isTouched = (edits: StudentEdits): boolean => changeCount(edits) > 0;
+
+/**
+ * What one word looks like before anything has been checked.
+ *
+ * These are the only colours in this component, and they say what the *learner* did —
+ * never whether it was right. Which words are wrong is not known here and must not be:
+ * the server withholds it until the work is submitted (BEHAVIOR §C.1).
+ */
+type WordState = 'plain' | 'kept' | 'edited' | 'removed';
+
+function wordState(edits: StudentEdits, index: number, word: string): WordState {
+  if (edits.marked[index] !== true) return 'plain';
+  const fix = edits.fix[index];
+  if (fix === undefined) return 'kept';
+  if (fix.trim() === '') return 'removed';
+  return fix.trim() === word ? 'kept' : 'edited';
+}
 
 export function ErrorCorrectionBody({
-  content,
+  projection,
+  instruction,
   value,
   onValueChange,
   onAnswerChange,
   phase,
-  ok,
+  mode,
   accent,
-  results,
+  pointOut = false,
 }: ErrorCorrectionBodyProps) {
   const t = useTranslations('ExerciseRunner');
-  const reveal = phase === 'feedback';
-  const [editing, setEditing] = useState<string | null>(null);
+  const interactive = phase === 'answering';
 
-  const editCount = Object.values(value).reduce((n, byChunk) => n + Object.keys(byChunk).length, 0);
+  const touchedCount = useMemo(
+    () => projection.items.filter((item) => isTouched(editsOf(value, item.id))).length,
+    [projection.items, value],
+  );
 
   useEffect(() => {
-    onAnswerChange(editCount > 0);
-  }, [editCount, onAnswerChange]);
+    onAnswerChange(projection.items.length > 0 && touchedCount === projection.items.length);
+  }, [onAnswerChange, projection.items.length, touchedCount]);
 
-  /** An edit equal to the original text is no edit at all, so it is dropped. */
-  function setChunk(itemId: string, chunk: ErrorChunk, text: string) {
-    const byChunk = { ...(value[itemId] ?? {}) };
-    if (text.trim() === '' || text.trim() === chunk.text.trim()) {
-      delete byChunk[chunk.id];
-    } else {
-      byChunk[chunk.id] = text;
-    }
-    const next = { ...value, [itemId]: byChunk };
-    if (Object.keys(byChunk).length === 0) delete next[itemId];
-    onValueChange(next);
+  function update(itemId: string, change: (edits: StudentEdits) => StudentEdits) {
+    const current = editsOf(value, itemId);
+    onValueChange({
+      ...value,
+      [itemId]: change({
+        marked: { ...current.marked },
+        fix: { ...current.fix },
+        ins: { ...current.ins },
+      }),
+    });
   }
 
   return (
     <div>
-      {content.instruction && <Instr>{content.instruction}</Instr>}
+      {instruction !== undefined && instruction !== '' && <Instr>{instruction}</Instr>}
 
-      {content.mistakeCount != null && !reveal && (
-        <p className="mb-4 text-[13px] text-(--ssz-text-secondary)">
-          {t('errorCorrection.remaining', { found: editCount, total: content.mistakeCount })}
+      {projection.note !== '' && (
+        <p className="mb-3 text-[13px] text-(--ssz-text-secondary)">{projection.note}</p>
+      )}
+
+      {projection.totalErrors !== undefined && (
+        <p className="mb-4 text-[13px] font-semibold text-(--ssz-text-secondary)">
+          {t('errorCorrection.toFind', { count: projection.totalErrors })}
+        </p>
+      )}
+
+      {projection.items.length > 1 && (
+        <p className="mb-3 text-[12.5px] text-(--ssz-text-muted)">
+          {t('errorCorrection.progress', {
+            touched: touchedCount,
+            total: projection.items.length,
+          })}
         </p>
       )}
 
       <ol className="flex flex-col gap-4">
-        {content.items.map((item, i) => (
-          <li key={item.id} className="flex gap-2.5">
-            <span className="pt-1.5 text-[13px] font-semibold text-(--ssz-text-muted)">{i + 1}.</span>
-            <p className="flex flex-wrap items-center gap-1.5">
-              {item.chunks.map((chunk) => {
-                const edited = value[item.id]?.[chunk.id];
-                const result = reveal && ok !== null ? results?.[item.id]?.[chunk.id] : undefined;
-                const tone = result ? OUTCOME_TONE[result.outcome] : null;
-                const isEditing = editing === `${item.id} ${chunk.id}`;
+        {projection.items.map((item, index) => {
+          const edits = editsOf(value, item.id);
+          const untouched = pointOut && !isTouched(edits);
 
-                if (isEditing && !reveal) {
-                  return (
-                    <input
-                      key={chunk.id}
-                      autoFocus
-                      defaultValue={edited ?? chunk.text}
-                      aria-label={t('errorCorrection.editLabel', { text: chunk.text })}
-                      onBlur={(e) => {
-                        setChunk(item.id, chunk, e.target.value);
-                        setEditing(null);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') e.currentTarget.blur();
-                        if (e.key === 'Escape') setEditing(null);
-                      }}
-                      size={Math.max(8, (edited ?? chunk.text).length)}
-                      className="rounded-lg border-2 px-2 py-1 text-[15px] focus-visible:outline-none"
-                      style={{ fontFamily: READING, borderColor: accent }}
-                    />
-                  );
-                }
-
-                return (
-                  <span key={chunk.id} className="inline-flex items-baseline gap-1.5">
-                    <button
-                      type="button"
-                      disabled={reveal}
-                      onClick={() => setEditing(`${item.id} ${chunk.id}`)}
-                      className="rounded-lg border px-2 py-1 text-[15px] transition-colors disabled:cursor-default"
-                      style={{
-                        fontFamily: READING,
-                        borderColor: tone?.border ?? (edited ? accent : 'var(--ssz-border-default)'),
-                        background: tone?.bg ?? 'var(--ssz-bg-surface)',
-                        color: tone?.fg ?? 'var(--ssz-text-primary)',
-                        fontWeight: edited || tone ? 600 : 400,
-                        textDecoration: result?.outcome === 'false_positive' ? 'line-through' : undefined,
-                      }}
-                    >
-                      {edited ?? chunk.text}
-                    </button>
-                    {/* The answer key's wording, shown where the learner missed
-                        the mistake or rewrote it into something else. */}
-                    {result?.expected &&
-                      (result.outcome === 'missed' || result.outcome === 'wrong_fix') && (
-                        <span
-                          className="text-[13.5px] font-semibold"
-                          style={{ color: OUTCOME_TONE.fixed.fg }}
-                        >
-                          {result.expected}
-                        </span>
-                      )}
+          return (
+            <li
+              key={item.id}
+              className="rounded-2xl border px-4 py-3 transition-colors"
+              style={{
+                borderColor: untouched ? accent : 'var(--ssz-border-default)',
+                background: untouched ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)',
+              }}
+            >
+              <div className="mb-1.5 flex items-center justify-between gap-3">
+                <span className="text-[12px] font-bold text-(--ssz-text-muted)">
+                  {projection.mode === 'passage'
+                    ? t('errorCorrection.passageLabel')
+                    : t('taskNumber', { n: index + 1 })}
+                </span>
+                {item.errorCount !== undefined && (
+                  <span className="text-[12px] text-(--ssz-text-muted)">
+                    {t('errorCorrection.inThis', { count: item.errorCount })}
                   </span>
-                );
-              })}
-            </p>
-          </li>
-        ))}
+                )}
+              </div>
+
+              <EcSentence
+                item={item}
+                edits={edits}
+                passage={projection.mode === 'passage'}
+                interactive={interactive}
+                accent={accent}
+                onChange={(change) => update(item.id, change)}
+              />
+
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                {item.hint !== undefined && item.hint !== '' && <HintDisclosure hint={item.hint} />}
+                {item.errorTypes !== undefined && item.errorTypes.length > 0 && (
+                  <span className="text-[12px] text-(--ssz-text-muted)">
+                    {t('errorCorrection.types', {
+                      types: item.errorTypes
+                        .map((type) => t(`errorCorrection.type.${type}`))
+                        .join(', '),
+                    })}
+                  </span>
+                )}
+                <span className="text-[12px] text-(--ssz-text-muted)">
+                  {t('errorCorrection.changes', { count: changeCount(edits) })}
+                </span>
+                {interactive && changeCount(edits) > 0 && (
+                  <button
+                    type="button"
+                    className="text-[12px] font-semibold underline underline-offset-2"
+                    style={{ color: 'var(--ssz-text-secondary)' }}
+                    onClick={() => update(item.id, () => ({ marked: {}, fix: {}, ins: {} }))}
+                  >
+                    {t('errorCorrection.reset')}
+                  </button>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ol>
 
-      {!reveal && (
-        <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)">{t('errorCorrection.hint')}</p>
+      {interactive && (
+        <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)">{t('errorCorrection.howTo')}</p>
       )}
     </div>
+  );
+}
+
+interface EcSentenceProps {
+  item: ProjectedItem;
+  edits: StudentEdits;
+  passage: boolean;
+  interactive: boolean;
+  accent: string;
+  onChange: (change: (edits: StudentEdits) => StudentEdits) => void;
+}
+
+/**
+ * The word editor — the one interaction this template has.
+ *
+ * Tap a word to rewrite it, tap between two words to insert one. Rewriting the whole
+ * sentence in a textarea would be easier to build and would throw away the only thing
+ * that makes this template gradable: with edits, "which mistake did they find?" is a
+ * fact; with a rewritten sentence it is a guess.
+ */
+function EcSentence({ item, edits, passage, interactive, accent, onChange }: EcSentenceProps) {
+  const t = useTranslations('ExerciseRunner');
+  /** `w:3` while rewriting word 3, `s:2` while inserting at slot 2. */
+  const [editing, setEditing] = useState<string | null>(null);
+
+  const commitWord = (index: number, word: string, text: string) => {
+    onChange((current) => {
+      const trimmed = text.trim();
+      // Unchanged text is not an edit: leaving the word marked would claim a
+      // correction the learner did not make, and the count they are shown is a count
+      // of corrections.
+      if (trimmed === word) {
+        delete current.marked[index];
+        delete current.fix[index];
+        return current;
+      }
+      current.marked[index] = true;
+      current.fix[index] = trimmed;
+      return current;
+    });
+    setEditing(null);
+  };
+
+  const commitInsert = (slot: number, text: string) => {
+    onChange((current) => {
+      const trimmed = text.trim();
+      if (trimmed === '') delete current.ins[slot];
+      else current.ins[slot] = trimmed;
+      return current;
+    });
+    setEditing(null);
+  };
+
+  const unmark = (index: number) => {
+    onChange((current) => {
+      delete current.marked[index];
+      delete current.fix[index];
+      return current;
+    });
+  };
+
+  return (
+    <p
+      className={passage ? 'flex flex-wrap items-center gap-y-1' : 'flex flex-wrap items-center'}
+      style={{
+        fontFamily: READING,
+        fontSize: passage ? 16 : 17,
+        lineHeight: passage ? 1.9 : 1.7,
+      }}
+      data-passage={passage ? 'true' : undefined}
+    >
+      {item.words.map((word, index) => (
+        <span key={`${item.id}-${index}`} className="inline-flex items-center">
+          <Slot
+            slot={index}
+            inserted={edits.ins[index]}
+            editing={editing === `s:${index}`}
+            interactive={interactive}
+            accent={accent}
+            onOpen={() => setEditing(`s:${index}`)}
+            onCommit={(text) => commitInsert(index, text)}
+            onCancel={() => setEditing(null)}
+          />
+          {editing === `w:${index}` && interactive ? (
+            <InlineField
+              defaultValue={edits.fix[index] ?? word}
+              label={t('errorCorrection.editLabel', { text: word })}
+              accent={accent}
+              onCommit={(text) => commitWord(index, word, text)}
+              onCancel={() => setEditing(null)}
+            />
+          ) : (
+            <Word
+              word={word}
+              display={edits.fix[index]}
+              state={wordState(edits, index, word)}
+              interactive={interactive}
+              accent={accent}
+              onOpen={() => setEditing(`w:${index}`)}
+              onUnmark={() => unmark(index)}
+            />
+          )}
+        </span>
+      ))}
+      <Slot
+        slot={item.words.length}
+        inserted={edits.ins[item.words.length]}
+        editing={editing === `s:${item.words.length}`}
+        interactive={interactive}
+        accent={accent}
+        onOpen={() => setEditing(`s:${item.words.length}`)}
+        onCommit={(text) => commitInsert(item.words.length, text)}
+        onCancel={() => setEditing(null)}
+      />
+    </p>
+  );
+}
+
+interface WordProps {
+  word: string;
+  display: string | undefined;
+  state: WordState;
+  interactive: boolean;
+  accent: string;
+  onOpen: () => void;
+  onUnmark: () => void;
+}
+
+function Word({ word, display, state, interactive, accent, onOpen, onUnmark }: WordProps) {
+  const t = useTranslations('ExerciseRunner');
+  const shown = state === 'edited' && display !== undefined ? display : word;
+
+  return (
+    <button
+      type="button"
+      disabled={!interactive}
+      data-state={state}
+      title={interactive ? t('errorCorrection.editLabel', { text: word }) : undefined}
+      aria-label={t('errorCorrection.wordLabel', { text: shown })}
+      onClick={onOpen}
+      onContextMenu={(event) => {
+        // Right-click undoes the marking. A marked word the learner changed their mind
+        // about otherwise has no way back except retyping it exactly.
+        if (state === 'plain') return;
+        event.preventDefault();
+        onUnmark();
+      }}
+      className="rounded-md px-1 disabled:cursor-default"
+      style={{
+        minHeight: HIT_MIN_HEIGHT,
+        color: state === 'removed' ? 'var(--ssz-feedback-no-fg)' : 'var(--ssz-text-primary)',
+        fontWeight: state === 'edited' ? 600 : 400,
+        textDecoration:
+          state === 'removed'
+            ? 'line-through'
+            : state === 'edited'
+              ? `underline 2px ${accent}`
+              : state === 'kept'
+                ? 'underline 2px var(--ssz-border-strong)'
+                : undefined,
+        textUnderlineOffset: 4,
+      }}
+    >
+      {shown}
+    </button>
+  );
+}
+
+interface SlotProps {
+  slot: number;
+  inserted: string | undefined;
+  editing: boolean;
+  interactive: boolean;
+  accent: string;
+  onOpen: () => void;
+  onCommit: (text: string) => void;
+  onCancel: () => void;
+}
+
+/** The insertion point between two words — a thin strip that widens on hover or focus. */
+function Slot({
+  slot,
+  inserted,
+  editing,
+  interactive,
+  accent,
+  onOpen,
+  onCommit,
+  onCancel,
+}: SlotProps) {
+  const t = useTranslations('ExerciseRunner');
+
+  if (editing && interactive) {
+    return (
+      <InlineField
+        defaultValue={inserted ?? ''}
+        label={t('errorCorrection.insertLabel', { position: slot + 1 })}
+        accent={accent}
+        onCommit={onCommit}
+        onCancel={onCancel}
+      />
+    );
+  }
+
+  if (inserted !== undefined && inserted.trim() !== '') {
+    return (
+      <button
+        type="button"
+        disabled={!interactive}
+        onClick={onOpen}
+        aria-label={t('errorCorrection.insertedLabel', { text: inserted })}
+        className="mx-0.5 rounded-md px-1 font-semibold disabled:cursor-default"
+        style={{
+          minHeight: HIT_MIN_HEIGHT,
+          color: accent,
+          textDecoration: `underline 2px ${accent}`,
+          textUnderlineOffset: 4,
+        }}
+      >
+        {inserted}
+      </button>
+    );
+  }
+
+  if (!interactive) return <span className="inline-block w-1" />;
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={t('errorCorrection.insertLabel', { position: slot + 1 })}
+      className="group mx-px inline-flex items-center justify-center rounded-sm"
+      style={{ minHeight: HIT_MIN_HEIGHT, width: 10 }}
+    >
+      <span
+        aria-hidden
+        className="block h-4 w-0.5 rounded-full opacity-0 transition-opacity group-hover:opacity-60 group-focus-visible:opacity-100"
+        style={{ background: accent }}
+      />
+    </button>
+  );
+}
+
+interface InlineFieldProps {
+  defaultValue: string;
+  label: string;
+  accent: string;
+  onCommit: (text: string) => void;
+  onCancel: () => void;
+}
+
+/**
+ * The field a word turns into. Committed on Enter or blur, abandoned on Escape.
+ *
+ * The text starts selected so that the commonest edit — replace this word — is one
+ * keystroke, while the second commonest — change its ending — is one arrow key away.
+ */
+function InlineField({ defaultValue, label, accent, onCommit, onCancel }: InlineFieldProps) {
+  const [text, setText] = useState(defaultValue);
+  const cancelled = useRef(false);
+
+  return (
+    <input
+      autoFocus
+      value={text}
+      aria-label={label}
+      size={Math.max(4, text.length + 1)}
+      onFocus={(event) => event.currentTarget.select()}
+      onChange={(event) => setText(event.target.value)}
+      onBlur={() => {
+        if (cancelled.current) return;
+        onCommit(text);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          onCommit(text);
+        }
+        if (event.key === 'Escape') {
+          cancelled.current = true;
+          onCancel();
+        }
+      }}
+      className="mx-0.5 rounded-lg border-2 px-1.5 py-0.5 focus-visible:outline-none"
+      style={{
+        minHeight: HIT_MIN_HEIGHT,
+        fontFamily: READING,
+        fontSize: 16,
+        borderColor: accent,
+        background: 'var(--ssz-bg-surface)',
+        color: 'var(--ssz-text-primary)',
+      }}
+    />
+  );
+}
+
+function HintDisclosure({ hint }: { hint: string }) {
+  const t = useTranslations('ExerciseRunner');
+  const [open, setOpen] = useState(false);
+
+  if (open) return <span className="text-[12.5px] text-(--ssz-text-secondary)">{hint}</span>;
+
+  return (
+    <button
+      type="button"
+      onClick={() => setOpen(true)}
+      className="text-[12px] font-semibold underline underline-offset-2"
+      style={{ color: 'var(--ssz-text-secondary)' }}
+    >
+      {t('errorCorrection.showHint')}
+    </button>
   );
 }

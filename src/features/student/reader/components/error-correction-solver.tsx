@@ -1,0 +1,236 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
+
+import {
+  fetchLastAttempt,
+  useStartAttempt,
+  useSubmitAnswer,
+} from '@/features/student/exercises/api/use-attempt';
+import type { StudentProjection } from '@/lib/shared-kernel/error-correction';
+import {
+  ErrorCorrectionBody,
+  PRACTICE_ACCENT,
+  type ErrorCorrectionValue,
+} from '@/features/student/exercises/runner';
+import { ErrorState, LearningSkeleton } from '@/features/learning';
+
+export interface ErrorCorrectionSolverProps {
+  exerciseId: string;
+  /** Instruction text in the learner's language, from the exercise's instructions. */
+  instruction?: string;
+  /** Language of the instructions, sent when the attempt starts. */
+  language: string;
+  /** Fired once, on the first submission. `null`: submitted, not yet judged. */
+  onChecked?: (ok: boolean | null) => void;
+}
+
+/** What the learner sent last, as the engine kept it. */
+interface SubmittedEdits {
+  items?: ErrorCorrectionValue;
+}
+
+/**
+ * `error_correction` played against the server.
+ *
+ * Server-graded for the same reason `word_bank_gap_fill` is, one step removed: the
+ * answer key is a separate field here, but the mistakes the learner is hunting are
+ * derived from it, so a browser holding the key holds the exercise.
+ *
+ * The flow it drives is the handoff's, and it is shorter than every other template's:
+ * work → sent. There is no feedback phase, because the auto-check may only approve —
+ * anything else is routed to a teacher, and inventing a verdict here while the answer
+ * sits in their queue would be this screen contradicting the one they will use.
+ */
+export function ErrorCorrectionSolver({
+  exerciseId,
+  instruction,
+  language,
+  onChecked,
+}: ErrorCorrectionSolverProps) {
+  const t = useTranslations('ExerciseRunner');
+
+  const start = useStartAttempt(exerciseId);
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [projection, setProjection] = useState<StudentProjection | null>(null);
+
+  const submit = useSubmitAnswer(exerciseId, attemptId);
+
+  const [value, setValue] = useState<ErrorCorrectionValue>({});
+  const [allTouched, setAllTouched] = useState(false);
+  /** How the submission ended: approved outright, or handed to a teacher. */
+  const [sent, setSent] = useState<'passed' | 'review' | null>(null);
+  const [submissions, setSubmissions] = useState(0);
+
+  /** Wall-clock since the attempt opened; the engine records it per submission. */
+  const openedAt = useRef(0);
+  /** The saved answer gets one chance to appear, when the sentences arrive. */
+  const restoreConsidered = useRef(false);
+
+  const startMutate = start.mutate;
+  const begin = useCallback(() => {
+    startMutate(
+      { language },
+      {
+        onSuccess: async (data) => {
+          setAttemptId(data.attemptId);
+          setProjection(data.exerciseContent as StudentProjection);
+          openedAt.current = Date.now();
+
+          if (restoreConsidered.current) return;
+          restoreConsidered.current = true;
+
+          const saved = await fetchLastAttempt(exerciseId);
+          const items = (saved?.submittedAnswer as SubmittedEdits | null)?.items;
+          if (saved === null || items === undefined || Object.keys(items).length === 0) return;
+
+          setValue(items);
+          // What the teacher decided is not this screen's to say, but that the work was
+          // handed over is — otherwise a learner who comes back sees their own edits and
+          // no sign they ever sent them.
+          setSent(saved.status === 'ROUTED_FOR_REVIEW' ? 'review' : 'passed');
+        },
+      },
+    );
+  }, [startMutate, language, exerciseId]);
+
+  useEffect(() => {
+    begin();
+  }, [begin]);
+
+  /**
+   * Pointing out the sentences still untouched, after the learner presses submit too
+   * early. It runs out on its own: an untouched sentence is work not done yet, not a
+   * mistake, and a marking that stayed would say otherwise for the rest of the exercise.
+   */
+  const [pointOut, setPointOut] = useState(false);
+  const pointOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (pointOutTimer.current !== null) clearTimeout(pointOutTimer.current);
+    },
+    [],
+  );
+
+  if (start.isPending || (start.isSuccess && projection === null)) {
+    return <LearningSkeleton variant="list" rows={4} />;
+  }
+  if (start.isError || projection === null || attemptId === null) {
+    return <ErrorState onRetry={begin} />;
+  }
+
+  const untouchedCount = projection.items.filter((item) => {
+    const edits = value[item.id];
+    if (edits === undefined) return true;
+    const changes =
+      Object.values(edits.marked).filter(Boolean).length +
+      Object.values(edits.ins).filter((word) => word.trim() !== '').length;
+    return changes === 0;
+  }).length;
+
+  function showUntouched() {
+    if (pointOutTimer.current !== null) clearTimeout(pointOutTimer.current);
+    setPointOut(true);
+    pointOutTimer.current = setTimeout(() => setPointOut(false), 2000);
+  }
+
+  function send() {
+    submit.mutate(
+      {
+        submittedAnswer: { items: value },
+        timeSpentSeconds: Math.max(0, Math.round((Date.now() - openedAt.current) / 1000)),
+      },
+      {
+        onSuccess: (data) => {
+          setSent(data.requiresReview ? 'review' : 'passed');
+          // `null` on a routed answer: it has been done, and whether it was right is
+          // the teacher's to say. The reader counts it as attempted either way.
+          if (submissions === 0) onChecked?.(data.requiresReview ? null : data.correct);
+          setSubmissions((n) => n + 1);
+        },
+      },
+    );
+  }
+
+  function again() {
+    setValue({});
+    setSent(null);
+    setSubmissions(0);
+    begin();
+  }
+
+  return (
+    <div>
+      <ErrorCorrectionBody
+        projection={projection}
+        {...(instruction === undefined ? {} : { instruction })}
+        value={value}
+        onValueChange={setValue}
+        onAnswerChange={setAllTouched}
+        phase={sent === null ? 'answering' : 'feedback'}
+        mode="practice"
+        accent={PRACTICE_ACCENT}
+        pointOut={pointOut}
+      />
+
+      {sent === null ? (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={submit.isPending}
+            onClick={allTouched ? send : showUntouched}
+            className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
+            style={{ background: PRACTICE_ACCENT }}
+          >
+            {submit.isPending ? t('errorCorrection.sending') : t('errorCorrection.send')}
+          </button>
+          {!allTouched && (
+            <span className="text-[12.5px] text-(--ssz-text-muted)">
+              {t('errorCorrection.untouched', { count: untouchedCount })}
+            </span>
+          )}
+          {submit.isError && (
+            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+              {t('errorCorrection.sendFailed')}
+            </span>
+          )}
+        </div>
+      ) : (
+        <div
+          className="mt-4 rounded-2xl border px-4 py-3"
+          style={{
+            borderColor:
+              sent === 'passed' ? 'var(--ssz-feedback-ok-line)' : 'var(--ssz-border-default)',
+            background:
+              sent === 'passed' ? 'var(--ssz-feedback-ok-bg)' : 'var(--ssz-bg-surface-subtle)',
+          }}
+        >
+          <p
+            className="text-[14px] font-semibold"
+            style={{
+              color: sent === 'passed' ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-primary)',
+            }}
+          >
+            {sent === 'passed' ? t('errorCorrection.approved') : t('errorCorrection.withTeacher')}
+          </p>
+          {sent === 'review' && (
+            <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+              {t('errorCorrection.withTeacherWhen')}
+            </p>
+          )}
+          {projection.flow.attempts === 'free' && (
+            <button
+              type="button"
+              onClick={again}
+              className="mt-2 text-[12.5px] font-semibold underline underline-offset-2"
+              style={{ color: 'var(--ssz-text-secondary)' }}
+            >
+              {t('errorCorrection.again')}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
