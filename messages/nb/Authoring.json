@@ -1251,6 +1251,82 @@
       "action": "Lag utkast med KI"
     }
   },
+  "errorCorrection": {
+    "shell": {
+      "done": "Ferdig",
+      "navBack": "Tilbake",
+      "navNext": "Neste: {step}",
+      "stepsLabel": "Trinn i byggeren",
+      "step1": "Format",
+      "step2": "Feilene",
+      "step3": "Hint og sjekk",
+      "step4": "Flyt",
+      "stepOk": "klart",
+      "stepCheck": "sjekk",
+      "stepEmpty": "tomt",
+      "blockerCount": "{count, plural, one {# problem} other {# problemer}}",
+      "saving": "Lagrer…",
+      "saved": "Lagret {time}",
+      "saveFailed": "Lagringen feilet — endringene dine ligger her fortsatt.",
+      "saveConflict": "Noen andre lagret denne oppgaven. Endringene dine ligger her fortsatt.",
+      "saveRetry": "Prøv igjen",
+      "saveOverwrite": "Lagre mine likevel",
+      "gateTitle": "Før du deler ut denne",
+      "gateClear": "Ingenting i veien — oppgaven er klar til å deles ut.",
+      "gateGoToStep": "Gå til trinn {step}",
+      "gateBlocked": "{count, plural, one {Fiks # problem først} other {Fiks # problemer først}}",
+      "gateDone": "Ser bra ut",
+      "gateClose": "Lukk"
+    },
+    "step1": {
+      "title": "Hva slags feilretting er dette?",
+      "lede": "Du skriver aldri feilene inn som en liste. Du skriver setningen slik studenten møter den, og setningen slik den skal være — byggeren regner ut hva som skiller dem, og det blir feilene studenten skal finne.",
+      "modeLabel": "Format",
+      "mode": {
+        "sentences": "Enkeltsetninger",
+        "passage": "Sammenhengende tekst"
+      },
+      "modeHelp": {
+        "sentences": "Én feil per setning er normalen.",
+        "passage": "Tre til fem feil i ett avsnitt."
+      },
+      "sentencesNote": "Hver setning står for seg. Studenten kan rette dem i vilkårlig rekkefølge.",
+      "passageNote": "Hele avsnittet er én innlevering. Studenten ser ikke hvilken setning feilen ligger i.",
+      "passageManyItems": "{count, plural, one {# tekstblokk her} other {# tekstblokker her}} — en sammenhengende tekst er som regel én.",
+      "instructionsLabel": "Oppgavetekst",
+      "instructionsPlaceholder": "Finn feilen i hver setning og skriv den riktig.",
+      "instructionsHelp": "Én linje, på språket studentene lærer. Påkrevd — uten den kan ikke oppgaven publiseres.",
+      "noteLabel": "Kontekst (valgfritt)",
+      "notePlaceholder": "Hvor setningene kommer fra, eller hva studenten skal se etter.",
+      "noteHelp": "Vises under oppgaveteksten, før studenten begynner.",
+      "tip": "Lag feilene av setninger studentene faktisk har skrevet. Konstruerte feil blir ofte for lette å se, eller så gale at ingen kjenner dem igjen."
+    },
+    "preview": {
+      "empty": "Skriv en setning med feil for å se studentens visning.",
+      "noCheck": "Forhåndsvisning — svar sjekkes ikke her."
+    },
+    "issues": {
+      "EX_NO_INSTRUCTION": "Ingen oppgavetekst ennå — studenten åpner oppgaven uten å få vite hva hen skal gjøre.",
+      "PASSAGE_MANY_ITEMS": "{count, plural, one {# tekstblokk} other {# tekstblokker}} i en sammenhengende tekst — studenten leverer alt som én.",
+      "EX_NO_ITEMS": "Ingenting å rette ennå. Skriv en setning med feil og fasiten til den.",
+      "ITEM_NO_REF": "Setning {index}: ingen fasit, og da finnes det ingen feil å finne.",
+      "ITEM_IDENTICAL": "Setning {index}: de to linjene er like — studenten ville ikke hatt noe å rette.",
+      "ITEM_ALL_SOFT": "Setning {index}: alle forskjellene er godtatt som alternativ, så ingenting teller som feil.",
+      "ITEM_MANY_ERRORS": "Setning {index} har {count, plural, one {# feil} other {# feil}} — tungt for én oppgave.",
+      "ITEM_TOO_LONG": "Setning {index} er på {count, plural, one {# ord} other {# ord}}. Da blir det å finne feilen til lesing.",
+      "SPAN_ORDER_TOO_WIDE": "Setning {index}: en leddstillingsfeil over {count, plural, one {# ord} other {# ord}} gjør det uklart hvor den begynner.",
+      "ITEM_ALT_EQUALS_WRONG": "Setning {index}: en av de godtakbare rettingene er selve setningen med feil.",
+      "ITEM_COUNT_HIDDEN": "Setning {index} har {count, plural, one {# feil} other {# feil}}, og antallet er skjult — da blir det gjetting.",
+      "CHECK_IGNORE_PUNCT": "Tegnsetting ignoreres, så komma eller punktum kan ikke være en av feilene.",
+      "CHECK_CASE_INSENSITIVE": "Store bokstaver ignoreres, så stor forbokstav kan ikke være en av feilene.",
+      "CHECK_STRAY_IGNORED": "Endringer utenfor feilene ignoreres — en omskrevet, men korrekt setning kan bli godkjent.",
+      "CHECK_NEAR_TOO_LOW": "«Delvis rettet» starter på {percent} % likhet, lavt nok til å smigre et feil svar.",
+      "HINT_TYPE_WITHOUT_COUNT": "Feiltypen vises, men ikke hvor mange feil det er.",
+      "AI_WITHOUT_CHECK": "AI-trinnet er på mens autosjekken er av.",
+      "AI_UNLIMITED_BEFORE_SUBMIT": "Studenten ser AI-kommentaren før innlevering, uten grense på egensjekk.",
+      "REFS_AFTER_SUBMIT_WITH_RETRIES": "Fasiten vises rett etter innlevering, og da er et nytt forsøk lite verdt."
+    }
+  },
   "activity": {
     "title": "Aktivitet",
     "empty": "Ingenting er endret her ennå.",

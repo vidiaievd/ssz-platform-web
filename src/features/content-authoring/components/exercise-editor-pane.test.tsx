@@ -12,6 +12,7 @@ vi.mock('../actions/exercise', () => ({
 // The pane now reaches the gap-fill builder, which imports its autosave server action.
 // Server modules are stripped from the client bundle for real; here they would run.
 vi.mock('../actions/gap-fill', () => ({ saveGapFillAction: vi.fn() }));
+vi.mock('../actions/error-correction', () => ({ saveErrorCorrectionAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -157,6 +158,34 @@ describe('ExerciseEditorPane', () => {
   it('says the same for material students cannot open yet', () => {
     renderPane(false);
     expect(screen.getByText('Saves are held until you publish the module.')).toBeInTheDocument();
+  });
+
+  it('opens the error-correction builder on its own document, answer key and all', () => {
+    // The two columns are stored apart — `wrong` is what a student may see, `ref` is the
+    // answer — and the builder is the one place they are a single document again.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-ec',
+        templateCode: 'error_correction',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: { mode: 'sentences', items: [{ id: 'i1', wrong: 'I går jeg gikk på kino.' }] },
+        expectedAnswers: { items: { i1: { ref: 'I går gikk jeg på kino.' } } },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Finn feilen.' }],
+        updatedAt: '2026-08-12T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Format/ })).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Finn feilen.')).toBeInTheDocument();
+    // The preview column runs the document through the student projection, so the faulty
+    // sentence is there word by word and the answer key is not.
+    expect(screen.getAllByText('kino.').length).toBeGreaterThan(0);
+    expect(screen.queryByText('gikk jeg')).not.toBeInTheDocument();
   });
 
   it('confirms a save as pending a publish, on live material too', async () => {

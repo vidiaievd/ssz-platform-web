@@ -19,12 +19,14 @@ import {
 import type { Result } from '@/lib/result';
 import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content/types';
 import { TEMPLATE_CODE } from '@/lib/shared-kernel/wordbank-gapfill';
+import { TEMPLATE_CODE as ERROR_CORRECTION_TEMPLATE_CODE } from '@/lib/shared-kernel/error-correction';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
 import { createGrammarRuleAction } from '../actions/grammar';
 import { createExerciseAction } from '../actions/exercise';
 import { createGapFillAction } from '../actions/gap-fill';
+import { createErrorCorrectionAction } from '../actions/error-correction';
 import { assignItemSectionAction } from '../actions/container-item';
 import { minimalExerciseValues } from '../lib/exercise-content';
 import { CREATABLE_EXERCISE_TYPES, type CreatableExerciseType } from '../schemas/exercise';
@@ -49,6 +51,22 @@ interface AddLessonPickerProps {
   ownerSchoolId?: string | null;
   /** Called after the draft item is created, so the caller can refetch the tree and select it. */
   onCreated: (itemId: string) => void;
+}
+
+/**
+ * Templates whose exercise is a document of their own rather than a filled-in generic
+ * form. They share a creation signature because they need the same thing: a scaffold
+ * their own builder can open, valid against the template's schema from the first save.
+ */
+type OwnBuilderTemplate = typeof TEMPLATE_CODE | typeof ERROR_CORRECTION_TEMPLATE_CODE;
+
+const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
+  [TEMPLATE_CODE]: createGapFillAction,
+  [ERROR_CORRECTION_TEMPLATE_CODE]: createErrorCorrectionAction,
+};
+
+function hasOwnBuilder(code: CreatableExerciseType): code is OwnBuilderTemplate {
+  return code in OWN_BUILDER_SCAFFOLDS;
 }
 
 const LESSON_KINDS: readonly LessonKind[] = ['text', 'video', 'audio', 'live'];
@@ -156,26 +174,25 @@ export function AddLessonPicker({
     const instructions = t('addLesson.defaultInstructions');
 
     startTransition(async () => {
-      // Gap-fill is not a shape of the generic exercise form — it has its own builder
-      // and its own document — so it is created from its own scaffold.
-      const result =
-        templateCode === TEMPLATE_CODE
-          ? await createGapFillAction(
-              moduleContainerId,
-              targetLanguage,
-              difficultyLevel,
-              visibility,
-              instructions,
-              ownerSchoolId,
-            )
-          : await createExerciseAction(
-              moduleContainerId,
-              targetLanguage,
-              difficultyLevel,
-              visibility,
-              minimalExerciseValues(templateCode, prompt, instructions),
-              ownerSchoolId,
-            );
+      // Templates with their own builder are not shapes of the generic exercise form —
+      // they own a whole document — so they are created from their own scaffold.
+      const result = hasOwnBuilder(templateCode)
+        ? await OWN_BUILDER_SCAFFOLDS[templateCode](
+            moduleContainerId,
+            targetLanguage,
+            difficultyLevel,
+            visibility,
+            instructions,
+            ownerSchoolId,
+          )
+        : await createExerciseAction(
+            moduleContainerId,
+            targetLanguage,
+            difficultyLevel,
+            visibility,
+            minimalExerciseValues(templateCode, prompt, instructions),
+            ownerSchoolId,
+          );
 
       setPendingTemplate(null);
       await finish(result);

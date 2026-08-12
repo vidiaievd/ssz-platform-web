@@ -1251,6 +1251,82 @@
       "action": "Draft with AI"
     }
   },
+  "errorCorrection": {
+    "shell": {
+      "done": "Done",
+      "navBack": "Back",
+      "navNext": "Next: {step}",
+      "stepsLabel": "Builder steps",
+      "step1": "Format",
+      "step2": "The mistakes",
+      "step3": "Hints & check",
+      "step4": "Flow",
+      "stepOk": "ready",
+      "stepCheck": "to check",
+      "stepEmpty": "empty",
+      "blockerCount": "{count, plural, one {# problem} other {# problems}}",
+      "saving": "Saving…",
+      "saved": "Saved at {time}",
+      "saveFailed": "Save failed — your edits are still here.",
+      "saveConflict": "Someone else saved this exercise. Your edits are still here.",
+      "saveRetry": "Try again",
+      "saveOverwrite": "Save mine anyway",
+      "gateTitle": "Before you assign this",
+      "gateClear": "Nothing standing in the way — this exercise is ready to assign.",
+      "gateGoToStep": "Go to step {step}",
+      "gateBlocked": "{count, plural, one {Fix # problem first} other {Fix # problems first}}",
+      "gateDone": "Looks good",
+      "gateClose": "Close"
+    },
+    "step1": {
+      "title": "What kind of correction is this?",
+      "lede": "You never type the mistakes in as a list. You write the sentence the way the student meets it, and the sentence the way it should be — the builder works out what separates them, and that becomes the mistakes to find.",
+      "modeLabel": "Format",
+      "mode": {
+        "sentences": "Separate sentences",
+        "passage": "One continuous text"
+      },
+      "modeHelp": {
+        "sentences": "One mistake per sentence is the norm.",
+        "passage": "Three to five mistakes in one paragraph."
+      },
+      "sentencesNote": "Each sentence stands on its own. Students can correct them in any order.",
+      "passageNote": "The whole paragraph is one submission. Students are not told which sentence holds the mistake.",
+      "passageManyItems": "{count, plural, one {# text block here} other {# text blocks here}} — a continuous text is usually one.",
+      "instructionsLabel": "Task line",
+      "instructionsPlaceholder": "Finn feilen i hver setning og skriv den riktig.",
+      "instructionsHelp": "One line, in the language students are learning. Required — an exercise without it cannot be published.",
+      "noteLabel": "Context (optional)",
+      "notePlaceholder": "Where the sentences come from, or what to look out for.",
+      "noteHelp": "Shown under the task line, before students start.",
+      "tip": "Build the mistakes out of sentences your students have actually written. Invented mistakes tend to be either too easy to spot, or so wrong that nobody recognises them."
+    },
+    "preview": {
+      "empty": "Write a sentence with a mistake to see the student's view.",
+      "noCheck": "Preview — answers are not checked here."
+    },
+    "issues": {
+      "EX_NO_INSTRUCTION": "No task line yet — students open the exercise without being told what to do.",
+      "PASSAGE_MANY_ITEMS": "{count, plural, one {# text block} other {# text blocks}} in a continuous text — students submit all of them as one.",
+      "EX_NO_ITEMS": "Nothing to correct yet. Write a sentence with a mistake and its answer key.",
+      "ITEM_NO_REF": "Sentence {index}: no answer key, so there is no mistake to find.",
+      "ITEM_IDENTICAL": "Sentence {index}: the two lines are identical — the student would have nothing to correct.",
+      "ITEM_ALL_SOFT": "Sentence {index}: every difference is accepted as an alternative, so nothing counts as a mistake.",
+      "ITEM_MANY_ERRORS": "Sentence {index} holds {count, plural, one {# mistake} other {# mistakes}} — heavy for one task.",
+      "ITEM_TOO_LONG": "Sentence {index} is {count, plural, one {# word} other {# words}} long. Finding a mistake turns into reading.",
+      "SPAN_ORDER_TOO_WIDE": "Sentence {index}: a word-order mistake spanning {count, plural, one {# word} other {# words}} leaves the student unsure where it starts.",
+      "ITEM_ALT_EQUALS_WRONG": "Sentence {index}: one of the accepted alternatives is the faulty sentence itself.",
+      "ITEM_COUNT_HIDDEN": "Sentence {index} holds {count, plural, one {# mistake} other {# mistakes}}, and the number is hidden — that makes it guesswork.",
+      "CHECK_IGNORE_PUNCT": "Punctuation is ignored, so a comma or a full stop cannot be one of the mistakes.",
+      "CHECK_CASE_INSENSITIVE": "Capital letters are ignored, so a capital cannot be one of the mistakes.",
+      "CHECK_STRAY_IGNORED": "Changes outside the mistakes are ignored — a rewritten but correct sentence can pass.",
+      "CHECK_NEAR_TOO_LOW": "“Partly corrected” starts at {percent}% similarity, which is low enough to flatter a wrong answer.",
+      "HINT_TYPE_WITHOUT_COUNT": "The type of each mistake is shown, but not how many there are.",
+      "AI_WITHOUT_CHECK": "The AI stage is on while the automatic check is off.",
+      "AI_UNLIMITED_BEFORE_SUBMIT": "Students see the AI comment before submitting, with no limit on self-checks.",
+      "REFS_AFTER_SUBMIT_WITH_RETRIES": "The answer key is shown right after submitting, which makes another attempt worth little."
+    }
+  },
   "activity": {
     "title": "Activity",
     "empty": "Nothing has been changed here yet.",
