@@ -1389,7 +1389,7 @@
     },
     "preview": {
       "empty": "Write a sentence with a mistake to see the student's view.",
-      "noCheck": "Preview — answers are not checked here."
+      "noCheck": "Preview only — nothing you correct here is checked. For a verdict, use “Try it as a student” at the foot of step 2."
     },
     "issues": {
       "EX_NO_INSTRUCTION": "No task line yet — students open the exercise without being told what to do.",

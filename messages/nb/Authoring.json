@@ -1389,7 +1389,7 @@
     },
     "preview": {
       "empty": "Skriv en setning med feil for å se studentens visning.",
-      "noCheck": "Forhåndsvisning — svar sjekkes ikke her."
+      "noCheck": "Kun forhåndsvisning — ingenting du retter her blir sjekket. Vil du se dommen, bruk «Prøv som student» nederst i trinn 2."
     },
     "issues": {
       "EX_NO_INSTRUCTION": "Ingen oppgavetekst ennå — studenten åpner oppgaven uten å få vite hva hen skal gjøre.",
