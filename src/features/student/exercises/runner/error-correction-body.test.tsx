@@ -95,6 +95,39 @@ describe('ErrorCorrectionBody', () => {
     expect(screen.getByText('1 mistake to find')).toBeInTheDocument();
   });
 
+  it('never says how many mistakes one sentence of several holds', () => {
+    // The total is a hint about the task; a per-sentence count is a hint about *where*,
+    // and it would let the learner skip whole sentences unread (BEHAVIOR §B).
+    renderBody({
+      projection: makeProjection({
+        items: [
+          {
+            id: 'i1',
+            wrong: 'I går jeg gikk på kino.',
+            words: ['I', 'går', 'jeg', 'gikk', 'på', 'kino.'],
+            errorCount: 1,
+          },
+          {
+            id: 'i2',
+            wrong: 'Hun har kjøp en bil.',
+            words: ['Hun', 'har', 'kjøp', 'en', 'bil.'],
+            errorCount: 1,
+          },
+        ],
+        totalErrors: 2,
+      }),
+    });
+
+    expect(screen.getByText('2 mistakes to find')).toBeInTheDocument();
+    expect(screen.queryByText(/mistake here/)).not.toBeInTheDocument();
+  });
+
+  it('does say how many a passage holds — there the card is the whole task', () => {
+    renderBody({ projection: makeProjection({ mode: 'passage' }) });
+
+    expect(screen.getByText('1 mistake here')).toBeInTheDocument();
+  });
+
   it('says nothing about the count when the author hid it', () => {
     const projection = makeProjection();
     const { totalErrors: _dropped, ...rest } = projection;

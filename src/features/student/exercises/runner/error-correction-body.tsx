@@ -150,7 +150,15 @@ export function ErrorCorrectionBody({
                     ? t('errorCorrection.passageLabel')
                     : t('taskNumber', { n: index + 1 })}
                 </span>
-                {item.errorCount !== undefined && (
+                {/*
+                  How many mistakes *this* card holds, and only in `passage` — where the
+                  card is the whole text, so it says no more than the total already does.
+                  Across separate sentences it would say which ones are clean, and that is
+                  a different and much larger hint than "there are three mistakes here
+                  somewhere": the learner could stop reading four of five sentences. The
+                  handoff draws the line in the same place (BEHAVIOR §B, ec/preview.jsx).
+                */}
+                {projection.mode === 'passage' && item.errorCount !== undefined && (
                   <span className="text-[12px] text-(--ssz-text-muted)">
                     {t('errorCorrection.inThis', { count: item.errorCount })}
                   </span>
