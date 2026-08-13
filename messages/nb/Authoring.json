@@ -1390,6 +1390,44 @@
       "nearHelp": "Et svar som ikke har rettet noen feil kalles likevel delvis rettet fra {percent} % likhet med fasiten.",
       "offWarning": "Uten autosjekk går hvert eneste svar urørt i lærerkøen — også de som er helt riktige."
     },
+    "step4": {
+      "title": "Veien fra innlevering til karakter",
+      "lede": "Autosjekken kan bare godkjenne. Alt den ikke tar stilling til, og alt den er i tvil om, ender hos deg.",
+      "stageStudent": "Studenten retter",
+      "stageStudentChecks": "{count, plural, one {# egensjekk før innlevering} other {# egensjekker før innlevering}}",
+      "stageStudentBlind": "Ingen egensjekk — hen leverer blindt",
+      "stageCheck": "Autosjekk",
+      "stageCheckOn": "Sammenligner mot fasiten ord for ord",
+      "stageCheckOff": "Av",
+      "stageTeacher": "Lærer",
+      "stageTeacherDetail": "Ser alt som ikke ble godkjent automatisk",
+      "selfCheckLabel": "Egensjekk før innlevering",
+      "selfCheckNone": "Ingen",
+      "selfCheckTimes": "{count}",
+      "selfCheckOn": "Studenten ser hvor mange feil som er rettet, ikke hvilke ord som er igjen.",
+      "selfCheckOff": "Studenten leverer blindt.",
+      "showSpanCountLabel": "Vis antall rettede feil i egensjekken",
+      "showSpanCountHelp": "«2 av 3 rettet» med prikker. Uten dette får studenten bare en generell melding.",
+      "noSelfCheck": "Det finnes ingen egensjekk å vise det i — tillat minst én over.",
+      "keyboardLabel": "Tastatur med æ ø å",
+      "keyboardHelp": "Egne knapper i redigeringsfeltet.",
+      "attemptsLabel": "Nye forsøk",
+      "attempts": {
+        "free": "Kan levere på nytt",
+        "once": "Ett forsøk"
+      },
+      "showRefsLabel": "Når vises fasiten?",
+      "showRefs": {
+        "afterGraded": "Etter vurdering",
+        "afterSubmit": "Rett etter innlevering",
+        "never": "Aldri"
+      },
+      "showRefsHelp": {
+        "afterGraded": "Fasiten kommer sammen med lærerens tilbakemelding.",
+        "afterSubmit": "Studenten ser fasiten med én gang — gjør nye forsøk lite verdt.",
+        "never": "Studenten ser aldri fasiten, bare om rettingen var riktig."
+      }
+    },
     "spanType": {
       "form": "ordform",
       "order": "leddstilling",

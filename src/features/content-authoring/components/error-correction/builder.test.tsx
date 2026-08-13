@@ -148,6 +148,20 @@ describe('ErrorCorrectionBuilder', () => {
     );
   });
 
+  it('reaches every step of the rail, each with its own screen', async () => {
+    const { user } = renderBuilder();
+
+    for (const [step, heading] of [
+      ['The mistakes', 'The sentences and the answer key'],
+      ['Hints & check', 'What does the student know, and what does the machine accept?'],
+      ['Flow', 'The road from handing in to a mark'],
+      ['Format', 'What kind of correction is this?'],
+    ] as const) {
+      await user.click(screen.getByRole('tab', { name: new RegExp(step) }));
+      expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
+    }
+  });
+
   it('says nothing about the AI stage, which has no controls yet', async () => {
     // `AI_UNLIMITED_BEFORE_SUBMIT`: the AI comment is shown before submitting and there
     // are no self-checks. A true remark — and unactionable until the block is built.

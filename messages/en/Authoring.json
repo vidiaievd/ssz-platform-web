@@ -1390,6 +1390,44 @@
       "nearHelp": "An answer that fixed no mistake is still called partly corrected from {percent}% similarity to the answer key.",
       "offWarning": "With no automatic check every single answer lands in the teacher's queue untouched — the correct ones included."
     },
+    "step4": {
+      "title": "The road from handing in to a mark",
+      "lede": "The automatic check can only approve. Everything it does not settle, and everything it is unsure about, ends up with you.",
+      "stageStudent": "The student corrects",
+      "stageStudentChecks": "{count, plural, one {# self-check before handing in} other {# self-checks before handing in}}",
+      "stageStudentBlind": "No self-check — they hand in blind",
+      "stageCheck": "Automatic check",
+      "stageCheckOn": "Compares against the answer key, word by word",
+      "stageCheckOff": "Off",
+      "stageTeacher": "Teacher",
+      "stageTeacherDetail": "Sees everything that was not approved automatically",
+      "selfCheckLabel": "Self-checks before handing in",
+      "selfCheckNone": "None",
+      "selfCheckTimes": "{count}",
+      "selfCheckOn": "The student learns how many mistakes are corrected — never which words are left.",
+      "selfCheckOff": "The student hands in blind.",
+      "showSpanCountLabel": "Show how many are corrected in the self-check",
+      "showSpanCountHelp": "“2 of 3 corrected”, with a dot per mistake. Without it the student gets a general message only.",
+      "noSelfCheck": "There is no self-check to show it in — allow at least one above.",
+      "keyboardLabel": "Keyboard with æ ø å",
+      "keyboardHelp": "Extra keys in the editing field.",
+      "attemptsLabel": "Further attempts",
+      "attempts": {
+        "free": "Can hand in again",
+        "once": "One attempt"
+      },
+      "showRefsLabel": "When is the answer key shown?",
+      "showRefs": {
+        "afterGraded": "After grading",
+        "afterSubmit": "Right after handing in",
+        "never": "Never"
+      },
+      "showRefsHelp": {
+        "afterGraded": "The answer key comes with the teacher's feedback.",
+        "afterSubmit": "The student sees it at once — which makes another attempt worth little.",
+        "never": "The student never sees the answer key, only whether the correction was right."
+      }
+    },
     "spanType": {
       "form": "word form",
       "order": "word order",
