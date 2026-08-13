@@ -61,6 +61,14 @@ export { ErrorCorrectionBody } from './error-correction-body';
 export type { ErrorCorrectionBodyProps, ErrorCorrectionValue } from './error-correction-body';
 export { readStudentProjection } from './error-correction-projection';
 
+export { TranslateRunnerBody } from './translate-runner-body';
+export type {
+  TranslateRunnerBodyProps,
+  TranslateRouting,
+  TranslateValue,
+} from './translate-runner-body';
+export { readTranslateProjection } from './translate-projection';
+
 export { TextOrderBody, shuffleOrder } from './text-order-body';
 export type {
   TextOrderBodyProps,

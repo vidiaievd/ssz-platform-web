@@ -104,6 +104,40 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 }
 
 /**
+ * The stored validation details, for the templates whose details the learner may read.
+ *
+ * The engine strips these on the way out of a submission, but the attempt *record* keeps
+ * them whole — the teacher queue reads the same row. `translate_*` details carry the
+ * accepted translation of every sentence, so forwarding the record as it stands would
+ * hand the answer key to anyone who reloaded the page after handing in. Only
+ * `word_bank_gap_fill` details are learner-facing in full; translate keeps its routing,
+ * which is what the runner draws its badges from; everything else is dropped.
+ */
+function learnerFacingDetails(templateCode: string, details: unknown): unknown {
+  if (templateCode === 'word_bank_gap_fill') return details;
+  if (templateCode !== 'translate_to_target' && templateCode !== 'translate_from_target') {
+    return null;
+  }
+
+  if (typeof details !== 'object' || details === null) return null;
+  const { items, totalItems, passedItems } = details as {
+    items?: unknown;
+    totalItems?: unknown;
+    passedItems?: unknown;
+  };
+  if (!Array.isArray(items)) return null;
+
+  return {
+    totalItems,
+    passedItems,
+    items: items.map((item) => {
+      const { itemId, routing } = item as { itemId: unknown; routing: unknown };
+      return { itemId, routing };
+    }),
+  };
+}
+
+/**
  * The learner's last finished attempt at this exercise, or `null`.
  *
  * A list endpoint would be the obvious proxy, but the client has one question — "what
@@ -125,8 +159,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       query: { limit: 10 },
     });
 
-    const last =
+    const found =
       page.items.find((a) => a.status === 'SCORED' || a.status === 'ROUTED_FOR_REVIEW') ?? null;
+    const last =
+      found === null
+        ? null
+        : {
+            ...found,
+            validationDetails: learnerFacingDetails(found.templateCode, found.validationDetails),
+          };
 
     return NextResponse.json({ attempt: last } satisfies LastAttemptResponse);
   } catch (e) {

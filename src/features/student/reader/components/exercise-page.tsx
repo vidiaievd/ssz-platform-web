@@ -7,6 +7,7 @@ import { useExerciseWithAnswers } from '@/features/content/api/use-exercise';
 import { primaryHintText, primaryInstructionText } from '@/features/content/lib/instruction-text';
 import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
+import { TranslateSolver } from './translate-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import {
@@ -16,7 +17,6 @@ import {
   checkMcqGroup,
   FillBody,
   MatchBody,
-  TranslateBody,
   ShortAnswerBody,
   WritingBody,
   SentenceSchemaBody,
@@ -28,7 +28,6 @@ import {
   shuffleOrder,
   gradeMcq,
   gradeMatch,
-  gradeTranslate,
   checkShortAnswer,
   gradeSentenceSchema,
   normAnswer,
@@ -355,45 +354,6 @@ function MatchSolver({ display, phase, ok, onCheck }: SolverProps) {
         <CheckFooter
           canSubmit={allLinked}
           onCheck={() => onCheck({ ok: gradeMatch(pairs, links) })}
-        />
-      )}
-    </>
-  );
-}
-
-function TranslateSolver({ display, phase, ok, onCheck }: SolverProps) {
-  const [value, setValue] = useState('');
-  const c = display.content;
-  const accepted = strArr(display.expectedAnswers.accepted_translations);
-
-  return (
-    <>
-      <TranslateBody
-        content={{
-          direction: display.templateCode === 'translate_from_target' ? 'from' : 'to',
-          fromLabel: str(c.from_label),
-          toLabel: str(c.to_label),
-          sourceText: str(c.source_text),
-          sampleAnswer: accepted[0] ?? '',
-          instruction: instr(display),
-        }}
-        value={value}
-        onValueChange={setValue}
-        onAnswerChange={() => {}}
-        phase={phase}
-        ok={ok}
-        mode="practice"
-        accent={ACCENT}
-      />
-      {phase === 'answering' && (
-        <CheckFooter
-          canSubmit={value.trim() !== ''}
-          onCheck={() =>
-            onCheck({
-              ok: gradeTranslate({ accepted_answers: accepted }, value),
-              reference: accepted[0],
-            })
-          }
         />
       )}
     </>
@@ -821,13 +781,32 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
   match_pairs: MatchSolver,
-  translate_to_target: TranslateSolver,
-  translate_from_target: TranslateSolver,
   short_answer: ShortAnswerSolver,
   writing_task: WritingSolver,
   sentence_schema: SentenceSchemaSolver,
   word_bank_fill: WordBankFillSolver,
   text_order: TextOrderSolver,
+};
+
+/**
+ * The templates graded on the server, which are therefore not `SolverProps` solvers at
+ * all: they are never handed the answers, because for these three the answers are the
+ * exercise — the words missing from the sentences, the mistakes to be found, the
+ * accepted translations. Each drives its own attempt against the engine.
+ */
+const SERVER_SOLVERS: Record<
+  string,
+  (props: {
+    exerciseId: string;
+    language: string;
+    instruction?: string;
+    onChecked?: (ok: Ok) => void;
+  }) => React.ReactElement
+> = {
+  word_bank_gap_fill: GapFillSolver,
+  error_correction: ErrorCorrectionSolver,
+  translate_to_target: TranslateSolver,
+  translate_from_target: TranslateSolver,
 };
 
 export interface ExerciseSolverProps {
@@ -860,10 +839,8 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
   // Server-graded, and therefore not a `SolverProps` solver at all: it never has
   // the answers to pass down. Branching here keeps the other twelve untouched —
   // moving them to server-side grading is separate work with a shape of its own.
-  if (data.templateCode === 'word_bank_gap_fill' || data.templateCode === 'error_correction') {
-    const ServerSolver =
-      data.templateCode === 'word_bank_gap_fill' ? GapFillSolver : ErrorCorrectionSolver;
-
+  const ServerSolver = SERVER_SOLVERS[data.templateCode];
+  if (ServerSolver !== undefined) {
     return (
       <div>
         {index != null && (

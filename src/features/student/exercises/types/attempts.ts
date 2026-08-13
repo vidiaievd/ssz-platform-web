@@ -67,6 +67,21 @@ export interface GapFillSubmitDetails {
   gaps: Array<{ gapKey: GapKey; correct: boolean; explanation: string | null }>;
 }
 
+/**
+ * `details` when the template is `translate_*` — where each sentence ended up.
+ *
+ * Deliberately thin. The validator writes a great deal more per sentence (the variant
+ * compared against, the diff, the rules tripped), all of it for the teacher queue and
+ * all of it a way to read the answer key; the engine strips it before answering the
+ * browser. Routing is what the learner is owed: this sentence matched and is done, that
+ * one is with a teacher.
+ */
+export interface TranslateSubmitDetails {
+  totalItems: number;
+  passedItems: number;
+  items: Array<{ itemId: string; routing: 'pass' | 'teacher' }>;
+}
+
 export type AttemptStatus =
   | 'IN_PROGRESS'
   | 'SUBMITTED'
