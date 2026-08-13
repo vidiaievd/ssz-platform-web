@@ -131,6 +131,21 @@
     "withTeacher": "Handed in. Your teacher will look at it.",
     "withTeacherWhen": "Usually within 48 hours.",
     "again": "Try again",
+    "selfCheck": {
+      "button": "Check my corrections ({left} left)",
+      "spent": "No checks left",
+      "checking": "Checking…",
+      "failed": "Could not check that — try again",
+      "summary": "{fixed} of {total} mistakes corrected",
+      "tally": "{fixed}/{total}",
+      "itemClean": "Nothing to correct here.",
+      "itemAll": "Every mistake here is corrected.",
+      "itemNone": "None of the mistakes here are corrected yet.",
+      "itemSome": "{fixed} of {total} corrected here.",
+      "remaining": "{count, plural, one {# mistake is still left} other {# mistakes are still left}}",
+      "remainingWithTypes": "{count, plural, one {# mistake is still left} other {# mistakes are still left}} — {types}",
+      "stray": "{count, plural, one {You also changed # word where there was no mistake} other {You also changed # words where there was no mistake}}"
+    },
     "type": {
       "form": "word form",
       "order": "word order",

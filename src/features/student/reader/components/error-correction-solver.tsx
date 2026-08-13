@@ -4,11 +4,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import {
+  AttemptRequestError,
   fetchLastAttempt,
+  useSelfCheck,
   useStartAttempt,
   useSubmitAnswer,
 } from '@/features/student/exercises/api/use-attempt';
-import type { StudentProjection } from '@/lib/shared-kernel/error-correction';
+import type { SelfCheckFeedback, StudentProjection } from '@/lib/shared-kernel/error-correction';
 import {
   ErrorCorrectionBody,
   PRACTICE_ACCENT,
@@ -56,8 +58,12 @@ export function ErrorCorrectionSolver({
   const [projection, setProjection] = useState<StudentProjection | null>(null);
 
   const submit = useSubmitAnswer(exerciseId, attemptId);
+  const selfCheck = useSelfCheck(exerciseId, attemptId);
 
   const [value, setValue] = useState<ErrorCorrectionValue>({});
+  /** The last self-check the server answered, cleared the moment the work changes. */
+  const [feedback, setFeedback] = useState<SelfCheckFeedback | null>(null);
+  const [checksLeft, setChecksLeft] = useState<number | null>(null);
   const [allTouched, setAllTouched] = useState(false);
   /** How the submission ended: approved outright, or handed to a teacher. */
   const [sent, setSent] = useState<'passed' | 'review' | null>(null);
@@ -128,6 +134,9 @@ export function ErrorCorrectionSolver({
       Object.values(edits.ins).filter((word) => word.trim() !== '').length;
     return changes === 0;
   }).length;
+  const totalItems = projection.items.length;
+  /** The author's budget until the engine says otherwise, and its word after that. */
+  const checksAvailable = checksLeft ?? projection.flow.selfCheck;
 
   function showUntouched() {
     if (pointOutTimer.current !== null) clearTimeout(pointOutTimer.current);
@@ -153,8 +162,43 @@ export function ErrorCorrectionSolver({
     );
   }
 
+  /**
+   * Any edit retires the last self-check.
+   *
+   * Its counts were about the work as it stood, and the server cannot recount without
+   * being asked — a panel left standing after the next change would be saying something
+   * that is no longer true about a sentence the learner is still working on.
+   */
+  function changeValue(next: ErrorCorrectionValue) {
+    setValue(next);
+    setFeedback(null);
+  }
+
+  function askSelfCheck() {
+    selfCheck.mutate(
+      { draftAnswer: { items: value } },
+      {
+        onSuccess: (data) => {
+          setFeedback({
+            items: data.items,
+            fixedCount: data.fixedCount,
+            spanCount: data.spanCount,
+          });
+          setChecksLeft(data.checksLeft);
+        },
+        onError: (error) => {
+          // 422 is the budget, not a fault: the engine counts the spending, and it has
+          // the last word over whatever this screen thinks is left.
+          if (error instanceof AttemptRequestError && error.status === 422) setChecksLeft(0);
+        },
+      },
+    );
+  }
+
   function again() {
     setValue({});
+    setFeedback(null);
+    setChecksLeft(null);
     setSent(null);
     setSubmissions(0);
     begin();
@@ -166,7 +210,8 @@ export function ErrorCorrectionSolver({
         projection={projection}
         {...(instruction === undefined ? {} : { instruction })}
         value={value}
-        onValueChange={setValue}
+        onValueChange={changeValue}
+        selfCheck={feedback}
         onAnswerChange={setAllTouched}
         phase={sent === null ? 'answering' : 'feedback'}
         mode="practice"
@@ -176,6 +221,41 @@ export function ErrorCorrectionSolver({
 
       {sent === null ? (
         <div className="mt-4 flex flex-wrap items-center gap-3">
+          {/*
+            The self-check, when the author granted any. It is rationed on the server —
+            unlimited asking would turn the exercise into a search, one word at a time —
+            so the count shown here is the engine's answer, not this screen's tally.
+          */}
+          {projection.flow.selfCheck > 0 && (
+            <button
+              type="button"
+              disabled={
+                selfCheck.isPending || checksAvailable === 0 || untouchedCount === totalItems
+              }
+              onClick={askSelfCheck}
+              className="rounded-xl border px-4 py-2.5 text-[13px] font-semibold disabled:opacity-60"
+              style={{ borderColor: 'var(--ssz-border-strong)', color: 'var(--ssz-text-primary)' }}
+            >
+              {selfCheck.isPending
+                ? t('errorCorrection.selfCheck.checking')
+                : checksAvailable === 0
+                  ? t('errorCorrection.selfCheck.spent')
+                  : t('errorCorrection.selfCheck.button', { left: checksAvailable })}
+            </button>
+          )}
+          {feedback !== null && (
+            <span className="text-[12.5px] text-(--ssz-text-secondary)">
+              {t('errorCorrection.selfCheck.summary', {
+                fixed: feedback.fixedCount,
+                total: feedback.spanCount,
+              })}
+            </span>
+          )}
+          {selfCheck.isError && checksAvailable > 0 && (
+            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+              {t('errorCorrection.selfCheck.failed')}
+            </span>
+          )}
           <button
             type="button"
             disabled={submit.isPending}

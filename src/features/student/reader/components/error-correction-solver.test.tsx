@@ -89,9 +89,35 @@ const LAST_ATTEMPT = {
   },
 };
 
-function mockApi(responses: { submit?: unknown; startFails?: boolean; last?: unknown } = {}) {
+/** Counts and nothing else — the only thing a self-check is allowed to answer. */
+const SELF_CHECK = {
+  attemptId: 'att-1',
+  checksUsed: 1,
+  checksLeft: 1,
+  fixedCount: 0,
+  spanCount: 1,
+  items: [{ itemId: 'i1', fixedCount: 0, spanCount: 1, fixedSpans: [false], strayEdits: 1 }],
+};
+
+function mockApi(
+  responses: {
+    submit?: unknown;
+    startFails?: boolean;
+    last?: unknown;
+    selfCheck?: unknown;
+    selfCheckStatus?: number;
+  } = {},
+) {
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
+
+    if (path.endsWith('/self-check')) {
+      const status = responses.selfCheckStatus ?? 200;
+      return new Response(
+        JSON.stringify(status === 200 ? (responses.selfCheck ?? SELF_CHECK) : { error: 'spent' }),
+        { status, headers: { 'content-type': 'application/json' } },
+      );
+    }
 
     if (init?.method === undefined) {
       return new Response(JSON.stringify(responses.last ?? { attempt: null }), {
@@ -233,6 +259,58 @@ describe('ErrorCorrectionSolver', () => {
     // The learner's own correction is back on screen, alongside the word it replaced.
     expect(await screen.findAllByRole('button', { name: 'Word: gikk' })).toHaveLength(2);
     expect(screen.queryByRole('button', { name: 'Word: jeg' })).not.toBeInTheDocument();
+  });
+
+  it('asks the server how the work is going, and sends the draft to ask', async () => {
+    const fetchMock = mockApi();
+    renderSolver(fetchMock);
+
+    await correctIt();
+    await userEvent.click(screen.getByRole('button', { name: 'Check my corrections (2 left)' }));
+
+    const call = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/self-check'));
+    expect(call).toBeDefined();
+    expect(JSON.parse(String((call![1] as RequestInit).body))).toEqual({
+      draftAnswer: { items: { i1: { marked: { 2: true }, fix: { 2: 'gikk' }, ins: {} } } },
+    });
+    // Counts and the note about editing where there was no mistake — never a word.
+    expect(await screen.findByText('0 of 1 mistakes corrected')).toBeInTheDocument();
+    expect(
+      screen.getByText('You also changed 1 word where there was no mistake'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Check my corrections (1 left)' })).toBeEnabled();
+  });
+
+  it('drops the self-check the moment the work changes under it', async () => {
+    renderSolver(mockApi());
+
+    await correctIt();
+    await userEvent.click(screen.getByRole('button', { name: 'Check my corrections (2 left)' }));
+    expect(await screen.findByText('0 of 1 mistakes corrected')).toBeInTheDocument();
+
+    fireEvent.click(await word('kino.'));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'teater.' } });
+    fireEvent.blur(screen.getByRole('textbox'));
+
+    expect(screen.queryByText('0 of 1 mistakes corrected')).not.toBeInTheDocument();
+  });
+
+  it('puts the button away when the engine says the budget is spent', async () => {
+    renderSolver(mockApi({ selfCheckStatus: 422 }));
+
+    await correctIt();
+    await userEvent.click(screen.getByRole('button', { name: 'Check my corrections (2 left)' }));
+
+    expect(await screen.findByRole('button', { name: 'No checks left' })).toBeDisabled();
+    expect(screen.queryByText('Could not check that — try again')).not.toBeInTheDocument();
+  });
+
+  it('offers nothing to check before a single word has been touched', async () => {
+    renderSolver(mockApi());
+
+    expect(
+      await screen.findByRole('button', { name: 'Check my corrections (2 left)' }),
+    ).toBeDisabled();
   });
 
   it('lets the learner start again when the author allows retries', async () => {

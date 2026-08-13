@@ -5,7 +5,11 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import { DEFAULT_HINTS, type StudentProjection } from '@/lib/shared-kernel/error-correction';
+import {
+  DEFAULT_HINTS,
+  type SelfCheckItem,
+  type StudentProjection,
+} from '@/lib/shared-kernel/error-correction';
 
 import { PRACTICE_ACCENT } from './types';
 import { ErrorCorrectionBody, type ErrorCorrectionValue } from './error-correction-body';
@@ -255,6 +259,66 @@ describe('ErrorCorrectionBody', () => {
     );
 
     expect(onAnswerChange).toHaveBeenLastCalledWith(true);
+  });
+
+  describe('the self-check the learner asked for', () => {
+    const feedback = (item: Partial<SelfCheckItem> = {}) => ({
+      fixedCount: 1,
+      spanCount: 3,
+      items: [
+        {
+          itemId: 'i1',
+          fixedCount: 1,
+          spanCount: 3,
+          fixedSpans: [true, false, false],
+          strayEdits: 0,
+          ...item,
+        },
+      ],
+    });
+
+    it('reports how many mistakes are corrected, and never which words are wrong', () => {
+      renderBody({ selfCheck: feedback() });
+
+      expect(screen.getByText('1 of 3 corrected here.')).toBeInTheDocument();
+      expect(screen.getByText('2 mistakes are still left')).toBeInTheDocument();
+    });
+
+    it('names the types of the mistakes left only when the author allowed it', () => {
+      renderBody({
+        selfCheck: feedback({ remainingTypes: ['order', 'form'] }),
+      });
+
+      expect(
+        screen.getByText('2 mistakes are still left — word order, word form'),
+      ).toBeInTheDocument();
+    });
+
+    it('says out loud that a change landed where there was no mistake', () => {
+      renderBody({ selfCheck: feedback({ strayEdits: 2 }) });
+
+      expect(
+        screen.getByText('You also changed 2 words where there was no mistake'),
+      ).toBeInTheDocument();
+    });
+
+    it('keeps the pips to itself when the author switched the count off', () => {
+      const projection = makeProjection();
+      renderBody({
+        projection: { ...projection, flow: { ...projection.flow, showSpanCount: false } },
+        selfCheck: feedback(),
+      });
+
+      expect(screen.queryByText('1/3')).not.toBeInTheDocument();
+      // The headline still stands: the setting governs the pips, not the count itself.
+      expect(screen.getByText('1 of 3 corrected here.')).toBeInTheDocument();
+    });
+
+    it('shows nothing at all before the learner has asked', () => {
+      renderBody();
+
+      expect(screen.queryByText(/corrected here/)).not.toBeInTheDocument();
+    });
   });
 
   it('stops accepting edits once the work has been handed in', () => {

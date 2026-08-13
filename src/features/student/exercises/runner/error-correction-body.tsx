@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 
 import type {
   ProjectedItem,
+  SelfCheckFeedback,
+  SelfCheckItem,
   StudentEdits,
   StudentProjection,
 } from '@/lib/shared-kernel/error-correction';
@@ -35,6 +37,13 @@ export interface ErrorCorrectionBodyProps {
    * learner pressed the primary action too early.
    */
   pointOut?: boolean;
+  /**
+   * The last self-check the server answered, if the learner has asked for one. Counts
+   * only: how many mistakes are corrected per sentence, and how many edits landed where
+   * there was no mistake. Which words are wrong is not in here and must not be — that
+   * stays withheld until the work is graded (BEHAVIOR §C.1).
+   */
+  selfCheck?: SelfCheckFeedback | null;
 }
 
 const READING = 'var(--ssz-font-reading)';
@@ -82,9 +91,16 @@ export function ErrorCorrectionBody({
   mode,
   accent,
   pointOut = false,
+  selfCheck = null,
 }: ErrorCorrectionBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const interactive = phase === 'answering';
+
+  const selfCheckByItem = useMemo(() => {
+    const byItem = new Map<string, SelfCheckItem>();
+    for (const item of selfCheck?.items ?? []) byItem.set(item.itemId, item);
+    return byItem;
+  }, [selfCheck]);
 
   const touchedCount = useMemo(
     () => projection.items.filter((item) => isTouched(editsOf(value, item.id))).length,
@@ -199,6 +215,13 @@ export function ErrorCorrectionBody({
                   </button>
                 )}
               </div>
+
+              {selfCheckByItem.has(item.id) && (
+                <SelfCheckNote
+                  feedback={selfCheckByItem.get(item.id)!}
+                  showSpanCount={projection.flow.showSpanCount}
+                />
+              )}
             </li>
           );
         })}
@@ -206,6 +229,85 @@ export function ErrorCorrectionBody({
 
       {interactive && (
         <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)">{t('errorCorrection.howTo')}</p>
+      )}
+    </div>
+  );
+}
+
+interface SelfCheckNoteProps {
+  feedback: SelfCheckItem;
+  showSpanCount: boolean;
+}
+
+/**
+ * What one sentence's self-check is allowed to say.
+ *
+ * Every line here is a number or a mistake type. There is deliberately no verdict: the
+ * auto-check of this template only ever approves, and a "not good enough" said here,
+ * before the work is even handed in, would be a rejection the template does not make.
+ * There is also no pointing — "one mistake is still left" never becomes "*this* word".
+ */
+function SelfCheckNote({ feedback, showSpanCount }: SelfCheckNoteProps) {
+  const t = useTranslations('ExerciseRunner');
+  const { fixedCount, spanCount, remainingTypes, strayEdits } = feedback;
+  const left = spanCount - fixedCount;
+
+  const headline =
+    spanCount === 0
+      ? t('errorCorrection.selfCheck.itemClean')
+      : left === 0
+        ? t('errorCorrection.selfCheck.itemAll')
+        : fixedCount === 0
+          ? t('errorCorrection.selfCheck.itemNone')
+          : t('errorCorrection.selfCheck.itemSome', { fixed: fixedCount, total: spanCount });
+
+  return (
+    <div
+      className="mt-2 rounded-xl border px-3 py-2"
+      style={{
+        borderColor: 'var(--ssz-border-default)',
+        background: 'var(--ssz-bg-surface-subtle)',
+      }}
+    >
+      <p className="text-[12.5px] font-semibold text-(--ssz-text-primary)">{headline}</p>
+
+      {/* Pips repeat the count in a form that can be taken in at a glance; with a single
+          mistake they would say nothing the headline has not, so they start at two. */}
+      {showSpanCount && spanCount > 1 && (
+        <span className="mt-1 flex items-center gap-1">
+          {feedback.fixedSpans.map((fixed, index) => (
+            <i
+              key={index}
+              aria-hidden
+              className="block h-2 w-2 rounded-full"
+              style={{
+                background: fixed ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-border-strong)',
+              }}
+            />
+          ))}
+          <span className="ml-1 text-[12px] text-(--ssz-text-muted)">
+            {t('errorCorrection.selfCheck.tally', { fixed: fixedCount, total: spanCount })}
+          </span>
+        </span>
+      )}
+
+      {left > 0 && (
+        <p className="mt-1 text-[12px] text-(--ssz-text-secondary)">
+          {remainingTypes !== undefined && remainingTypes.length > 0
+            ? t('errorCorrection.selfCheck.remainingWithTypes', {
+                count: left,
+                types: remainingTypes.map((type) => t(`errorCorrection.type.${type}`)).join(', '),
+              })
+            : t('errorCorrection.selfCheck.remaining', { count: left })}
+        </p>
+      )}
+
+      {/* Said out loud because it is otherwise the commonest silent reason for an answer
+          to come back rejected: everything was corrected, and something else was too. */}
+      {strayEdits > 0 && (
+        <p className="mt-1 text-[12px] text-(--ssz-text-secondary)">
+          {t('errorCorrection.selfCheck.stray', { count: strayEdits })}
+        </p>
       )}
     </div>
   );

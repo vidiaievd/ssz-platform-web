@@ -131,6 +131,21 @@
     "withTeacher": "Levert. Læreren ser på det.",
     "withTeacherWhen": "Vanligvis innen 48 timer.",
     "again": "Prøv på nytt",
+    "selfCheck": {
+      "button": "Sjekk rettingene ({left} igjen)",
+      "spent": "Ingen egensjekker igjen",
+      "checking": "Sjekker …",
+      "failed": "Fikk ikke sjekket — prøv igjen",
+      "summary": "{fixed} av {total} feil rettet",
+      "tally": "{fixed}/{total}",
+      "itemClean": "Her er det ingenting å rette.",
+      "itemAll": "Alle feilene her er rettet.",
+      "itemNone": "Ingen av feilene her er rettet ennå.",
+      "itemSome": "{fixed} av {total} rettet her.",
+      "remaining": "{count, plural, one {# feil står fortsatt igjen} other {# feil står fortsatt igjen}}",
+      "remainingWithTypes": "{count, plural, one {# feil står fortsatt igjen} other {# feil står fortsatt igjen}} — {types}",
+      "stray": "{count, plural, one {Du har også endret # ord der det ikke var noen feil} other {Du har også endret # ord der det ikke var noen feil}}"
+    },
     "type": {
       "form": "ordform",
       "order": "ordstilling",
