@@ -59,6 +59,7 @@ export type { WritingBodyProps, WritingContent, WritingValue, WritingTopic } fro
 
 export { ErrorCorrectionBody } from './error-correction-body';
 export type { ErrorCorrectionBodyProps, ErrorCorrectionValue } from './error-correction-body';
+export { readStudentProjection } from './error-correction-projection';
 
 export { TextOrderBody, shuffleOrder } from './text-order-body';
 export type {

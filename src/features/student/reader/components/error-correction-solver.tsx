@@ -14,6 +14,7 @@ import type { SelfCheckFeedback, StudentProjection } from '@/lib/shared-kernel/e
 import {
   ErrorCorrectionBody,
   PRACTICE_ACCENT,
+  readStudentProjection,
   type ErrorCorrectionValue,
 } from '@/features/student/exercises/runner';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
@@ -56,6 +57,8 @@ export function ErrorCorrectionSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<StudentProjection | null>(null);
+  /** Set when the exercise arrived in a shape this runner must not play. */
+  const [unusable, setUnusable] = useState(false);
 
   const submit = useSubmitAnswer(exerciseId, attemptId);
   const selfCheck = useSelfCheck(exerciseId, attemptId);
@@ -80,8 +83,17 @@ export function ErrorCorrectionSolver({
       { language },
       {
         onSuccess: async (data) => {
+          const projected = readStudentProjection(data.exerciseContent);
+          if (projected === null) {
+            // The server did not mask this exercise — which also means it sent the
+            // answer key along. Refuse it rather than play an exercise whose answers
+            // are in the page.
+            setUnusable(true);
+            return;
+          }
+
           setAttemptId(data.attemptId);
-          setProjection(data.exerciseContent as StudentProjection);
+          setProjection(projected);
           openedAt.current = Date.now();
 
           if (restoreConsidered.current) return;
@@ -105,6 +117,11 @@ export function ErrorCorrectionSolver({
     begin();
   }, [begin]);
 
+  const retry = useCallback(() => {
+    setUnusable(false);
+    begin();
+  }, [begin]);
+
   /**
    * Pointing out the sentences still untouched, after the learner presses submit too
    * early. It runs out on its own: an untouched sentence is work not done yet, not a
@@ -119,11 +136,11 @@ export function ErrorCorrectionSolver({
     [],
   );
 
-  if (start.isPending || (start.isSuccess && projection === null)) {
+  if (!unusable && (start.isPending || (start.isSuccess && projection === null))) {
     return <LearningSkeleton variant="list" rows={4} />;
   }
-  if (start.isError || projection === null || attemptId === null) {
-    return <ErrorState onRetry={begin} />;
+  if (unusable || start.isError || projection === null || attemptId === null) {
+    return <ErrorState onRetry={retry} />;
   }
 
   const untouchedCount = projection.items.filter((item) => {

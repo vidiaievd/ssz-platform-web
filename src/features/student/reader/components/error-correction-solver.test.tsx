@@ -261,6 +261,42 @@ describe('ErrorCorrectionSolver', () => {
     expect(screen.queryByRole('button', { name: 'Word: jeg' })).not.toBeInTheDocument();
   });
 
+  // An exercise-engine older than the masking ships the stored document instead of the
+  // projection — and with it the answer key. The runner refuses rather than plays it.
+  it('will not play an exercise the server never masked', async () => {
+    const unmasked = {
+      ...STARTED,
+      exerciseContent: {
+        mode: 'sentences',
+        note: '',
+        items: [{ id: 'i1', wrong: 'I går jeg gikk på kino.' }],
+        hints: PROJECTION.hints,
+        flow: PROJECTION.flow,
+      },
+      expectedAnswers: { items: { i1: { ref: 'I går gikk jeg på kino.' } } },
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) =>
+        init?.method === undefined
+          ? new Response(JSON.stringify({ attempt: null }), { status: 200 })
+          : new Response(JSON.stringify(unmasked), { status: 200 }),
+      ),
+    );
+    const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <ErrorCorrectionSolver exerciseId="ex-1" language="no" />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Hand in' })).not.toBeInTheDocument();
+    expect(screen.queryByText('I går jeg gikk på kino.')).not.toBeInTheDocument();
+  });
+
   it('asks the server how the work is going, and sends the draft to ask', async () => {
     const fetchMock = mockApi();
     renderSolver(fetchMock);
