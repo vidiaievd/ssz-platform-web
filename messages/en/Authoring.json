@@ -1343,6 +1343,51 @@
       "addSentence": "Add sentence",
       "itemCount": "{count, plural, one {# sentence in the set} other {# sentences in the set}}"
     },
+    "step3": {
+      "title": "What does the student know, and what does the machine accept?",
+      "lede": "Error correction is easy to make impossible. The number of mistakes is the one piece of information that decides whether this is an exercise or a guessing game — the rest is tuning how strictly the text is read.",
+      "toldGroup": "What the student is told",
+      "countLabel": "Show how many mistakes there are",
+      "countHelp": "“{count} mistakes to find” stands at the top. Without it the student does not know when they are done.",
+      "markLabel": "Mark the sentences that hold a mistake",
+      "markHelp": "The student sees which sentences are affected, but not which word.",
+      "hintTextLabel": "Hints can be opened",
+      "hintTextHelp": "The hint you wrote in step 2 sits behind a button; the student chooses.",
+      "showTypeLabel": "Show the kind of mistake",
+      "showTypeHelp": "“Word form” stands beside it. Makes the task markedly easier — usually A2 only.",
+      "checkGroup": "The automatic check",
+      "onLabel": "Check answers automatically",
+      "onHelp": "Compares the student's sentence with your answer key, word by word.",
+      "exactPassLabel": "A hit on the answer key is approved without a teacher",
+      "exactPassHelp": "Every mistake corrected and nothing else changed. Everything else joins the queue.",
+      "requireAllSpansLabel": "Require every mistake to have been touched",
+      "requireAllSpansHelp": "One untouched mistake stops automatic approval, even if the rest is right.",
+      "typoLabel": "Accept one letter's slip",
+      "typoHelp": "“leiligheten” against “leilgheten” counts as a hit in long words.",
+      "caseLabel": "Ignore capital letters",
+      "caseHelp": "Only turn this on if a capital is never the point here.",
+      "punctLabel": "Ignore punctuation",
+      "punctHelp": "Cannot be on if a comma or a full stop is one of the mistakes.",
+      "strayLabel": "Changes outside the mistakes",
+      "stray": {
+        "ignore": "Ignore",
+        "flag": "Flag for the teacher",
+        "block": "Block approval"
+      },
+      "strayHelp": {
+        "ignore": "Only the answer key counts. A rewritten but correct sentence can be approved.",
+        "flag": "The answer can still be approved, but the teacher sees what else was touched.",
+        "block": "Touch anything outside the mistakes and the answer always goes to the teacher."
+      },
+      "nearLabel": "Threshold for “partly corrected”",
+      "near": {
+        "loose": "Loose",
+        "normal": "Normal",
+        "strict": "Strict"
+      },
+      "nearHelp": "An answer that fixed no mistake is still called partly corrected from {percent}% similarity to the answer key.",
+      "offWarning": "With no automatic check every single answer lands in the teacher's queue untouched — the correct ones included."
+    },
     "spanType": {
       "form": "word form",
       "order": "word order",

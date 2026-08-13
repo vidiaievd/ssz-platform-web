@@ -29,6 +29,7 @@ import {
 
 import { StepFormat } from './step-format';
 import { StepMistakes } from './step-mistakes';
+import { StepCheck } from './step-check';
 import { useErrorCorrectionAutosave } from './use-error-correction-autosave';
 import { useIssueCopy } from './issue-copy';
 
@@ -133,8 +134,10 @@ export function ErrorCorrectionBuilder({
           <StepFormat exercise={exercise} onChange={setExercise} />
         ) : step === 2 ? (
           <StepMistakes exercise={exercise} onChange={setExercise} />
+        ) : step === 3 ? (
+          <StepCheck exercise={exercise} onChange={setExercise} />
         ) : (
-          // Steps 3–4 arrive in the commits after this one; the rail already reports
+          // Step 4 arrives in the commit after this one; the rail already reports
           // what they hold, because the kernel judges the whole document either way.
           <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
             {t('comingSoon')}

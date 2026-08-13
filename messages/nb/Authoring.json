@@ -1343,6 +1343,51 @@
       "addSentence": "Legg til setning",
       "itemCount": "{count, plural, one {# setning i settet} other {# setninger i settet}}"
     },
+    "step3": {
+      "title": "Hva vet studenten, og hva godtar maskinen?",
+      "lede": "Feilretting er lett å gjøre umulig. Antall feil er den ene opplysningen som avgjør om oppgaven er en øvelse eller en gjettelek — resten er finjustering av hvor strengt teksten leses.",
+      "toldGroup": "Det studenten får vite",
+      "countLabel": "Vis antall feil",
+      "countHelp": "«{count} feil å finne» står øverst. Uten dette vet ikke studenten når hen er ferdig.",
+      "markLabel": "Marker setninger som har feil",
+      "markHelp": "Studenten ser hvilke setninger som er berørt, men ikke hvilket ord.",
+      "hintTextLabel": "Hint kan åpnes",
+      "hintTextHelp": "Hintet du skrev i trinn 2 ligger bak en knapp, studenten velger selv.",
+      "showTypeLabel": "Vis feiltypen",
+      "showTypeHelp": "«Feil ordform» står ved siden av. Gjør oppgaven merkbart lettere — vanligvis bare på A2.",
+      "checkGroup": "Autosjekk",
+      "onLabel": "Sjekk svarene automatisk",
+      "onHelp": "Sammenligner studentens setning med fasiten din, ord for ord.",
+      "exactPassLabel": "Treff på fasiten godkjennes uten lærer",
+      "exactPassHelp": "Alle feil rettet, ingenting annet endret. Alt annet går i køen.",
+      "requireAllSpansLabel": "Krev at alle feilene er rørt",
+      "requireAllSpansHelp": "Én urørt feil hindrer automatisk godkjenning, selv om resten stemmer.",
+      "typoLabel": "Godta én bokstavfeil",
+      "typoHelp": "«leiligheten» mot «leilgheten» teller som treff i lange ord.",
+      "caseLabel": "Ignorer store og små bokstaver",
+      "caseHelp": "Slå på bare hvis stor forbokstav aldri er poenget her.",
+      "punctLabel": "Ignorer tegnsetting",
+      "punctHelp": "Kan ikke stå på hvis komma eller punktum er en av feilene.",
+      "strayLabel": "Endringer utenfor feilene",
+      "stray": {
+        "ignore": "Ignorer",
+        "flag": "Marker for læreren",
+        "block": "Blokker godkjenning"
+      },
+      "strayHelp": {
+        "ignore": "Bare fasiten teller. En omskrevet, men korrekt setning kan bli godkjent.",
+        "flag": "Svaret kan fortsatt godkjennes, men læreren ser hva mer som ble rørt.",
+        "block": "Rører studenten noe utenfor feilene, går svaret alltid til læreren."
+      },
+      "nearLabel": "Terskel for «delvis rettet»",
+      "near": {
+        "loose": "Løs",
+        "normal": "Vanlig",
+        "strict": "Streng"
+      },
+      "nearHelp": "Et svar som ikke har rettet noen feil kalles likevel delvis rettet fra {percent} % likhet med fasiten.",
+      "offWarning": "Uten autosjekk går hvert eneste svar urørt i lærerkøen — også de som er helt riktige."
+    },
     "spanType": {
       "form": "ordform",
       "order": "leddstilling",
