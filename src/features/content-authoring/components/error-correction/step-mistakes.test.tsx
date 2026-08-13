@@ -14,7 +14,11 @@ import {
   type Item,
 } from '@/lib/shared-kernel/error-correction';
 
-import { StepMistakes } from './step-mistakes';
+// The author's tester renders the student's runner over the same sentences, so it
+// answers to the same text as the cards do. It has its own tests; here it is in the way.
+vi.mock('./ec-tester', () => ({ EcTester: () => null }));
+
+const { StepMistakes } = await import('./step-mistakes');
 
 const item = (id: string, wrong: string, ref: string): Item => ({
   id,

@@ -1359,6 +1359,34 @@
       "spelling": "The right word, misspelt.",
       "function": "A small word carrying grammar: a preposition, an article, a conjunction."
     },
+    "verdict": {
+      "exact": "All correct",
+      "typo": "Right, one spelling slip",
+      "partial": "Partly corrected",
+      "stray": "Corrected, but more was changed",
+      "off": "The mistakes are still there",
+      "empty": "Untouched",
+      "noref": "No answer key"
+    },
+    "tester": {
+      "title": "Try it as a student",
+      "pick": "Which sentence to try",
+      "howTo": "Correct it here and you will see the verdict a student would get, and whether it would reach you at all.",
+      "routePass": "approved without a teacher",
+      "routeTeacher": "goes to the teacher",
+      "fixed": "{fixed} of {total} mistakes corrected",
+      "built": "The student's sentence",
+      "diffLabel": "The sentence against the answer key",
+      "legendExtra": "struck through = superfluous",
+      "legendMissing": "green = missing",
+      "legendTypo": "amber = spelling",
+      "stray": "Changed outside the mistakes: {words} — {policy}",
+      "strayPolicy": {
+        "ignore": "ignored, the answer can still be approved",
+        "flag": "the teacher is shown what else was touched",
+        "block": "this alone sends the answer to the teacher"
+      }
+    },
     "preview": {
       "empty": "Write a sentence with a mistake to see the student's view.",
       "noCheck": "Preview — answers are not checked here."

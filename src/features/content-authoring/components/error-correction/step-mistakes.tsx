@@ -25,6 +25,7 @@ import {
   type Span,
 } from '@/lib/shared-kernel/error-correction';
 
+import { EcTester } from './ec-tester';
 import {
   addItem,
   duplicateItem,
@@ -161,6 +162,8 @@ export function StepMistakes({ exercise, onChange }: StepMistakesProps) {
           </span>
         </div>
       )}
+
+      <EcTester exercise={exercise} />
     </div>
   );
 }

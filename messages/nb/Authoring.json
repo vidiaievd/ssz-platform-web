@@ -1359,6 +1359,34 @@
       "spelling": "Riktig ord, stavet feil.",
       "function": "Et lite ord som bærer grammatikk: preposisjon, artikkel, konjunksjon."
     },
+    "verdict": {
+      "exact": "Alt riktig",
+      "typo": "Riktig, én skrivefeil",
+      "partial": "Delvis rettet",
+      "stray": "Rettet, men mer er endret",
+      "off": "Feilene står igjen",
+      "empty": "Ikke rørt",
+      "noref": "Ingen fasit"
+    },
+    "tester": {
+      "title": "Prøv som student",
+      "pick": "Hvilken setning du vil prøve",
+      "howTo": "Rett den her, så ser du dommen studenten ville fått — og om svaret i det hele tatt havner hos deg.",
+      "routePass": "godkjent uten lærer",
+      "routeTeacher": "går til læreren",
+      "fixed": "{fixed}/{total} feil rettet",
+      "built": "Studentens setning",
+      "diffLabel": "Setningen mot fasiten",
+      "legendExtra": "gjennomstreket = overflødig",
+      "legendMissing": "grønn = manglende",
+      "legendTypo": "gul = skrivefeil",
+      "stray": "Endret utenfor feilene: {words} — {policy}",
+      "strayPolicy": {
+        "ignore": "ignoreres, svaret kan fortsatt godkjennes",
+        "flag": "læreren ser hva mer som ble rørt",
+        "block": "dette alene sender svaret til læreren"
+      }
+    },
     "preview": {
       "empty": "Skriv en setning med feil for å se studentens visning.",
       "noCheck": "Forhåndsvisning — svar sjekkes ikke her."
