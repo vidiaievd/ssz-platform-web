@@ -58,17 +58,8 @@ export { WritingBody } from './writing-body';
 export type { WritingBodyProps, WritingContent, WritingValue, WritingTopic } from './writing-body';
 
 export { ErrorCorrectionBody } from './error-correction-body';
-export type {
-  ErrorCorrectionBodyProps,
-  ErrorCorrectionContent,
-  ErrorCorrectionExpected,
-  ErrorCorrectionResults,
-  ErrorCorrectionValue,
-  ErrorChunk,
-  ErrorSentence,
-  ChunkOutcome,
-  ChunkResult,
-} from './error-correction-body';
+export type { ErrorCorrectionBodyProps, ErrorCorrectionValue } from './error-correction-body';
+export { readStudentProjection } from './error-correction-projection';
 
 export { TextOrderBody, shuffleOrder } from './text-order-body';
 export type {
@@ -111,7 +102,6 @@ export {
   gradeSentenceSchema,
   checkWordBankFill,
   checkTextOrder,
-  checkErrorCorrection,
 } from './grading';
 export type { TranslateExpectedAnswers } from './grading';
 

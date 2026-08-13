@@ -6,8 +6,15 @@ export type ContainerItemType = 'lesson' | 'vocabulary_list' | 'grammar_rule' | 
 
 /**
  * Resolves the draft version of a container — the version that newly
- * created/edited content attaches to. Containers always have exactly one
- * draft version at a time (created automatically alongside the container).
+ * created/edited content attaches to.
+ *
+ * A container is supposed to have exactly one draft at a time, but an
+ * interrupted publish can leave two behind (the version being published keeps
+ * its draft status while the next draft is already created). When that happens
+ * the newest one is the live edit surface, and picking it *deterministically*
+ * is what matters most: the curriculum tree resolves the same version by the
+ * same rule, and if the two disagree every reorder or move is sent against ids
+ * the other version has never heard of.
  */
 export async function getDraftVersionId(containerId: string): Promise<string | null> {
   try {
@@ -15,7 +22,9 @@ export async function getDraftVersionId(containerId: string): Promise<string | n
       service: 'content',
       path: `/containers/${containerId}/versions`,
     });
-    return versions.items.find((v) => v.status === 'draft')?.id ?? null;
+    const drafts = versions.items.filter((v) => v.status === 'draft');
+    if (drafts.length === 0) return null;
+    return drafts.reduce((newest, v) => (v.versionNumber > newest.versionNumber ? v : newest)).id;
   } catch {
     return null;
   }

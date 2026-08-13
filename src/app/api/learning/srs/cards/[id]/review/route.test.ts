@@ -74,6 +74,27 @@ describe('POST /api/learning/srs/cards/[id]/review', () => {
     );
   });
 
+  it('forwards carryOnPastLimit when the learner chose to keep going', async () => {
+    vi.mocked(serverFetch).mockResolvedValue(MOCK_REVIEW);
+
+    await POST(makeRequest({ ...VALID_BODY, carryOnPastLimit: true }), PARAMS);
+
+    expect(serverFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ carryOnPastLimit: true }),
+      }),
+    );
+  });
+
+  it('omits carryOnPastLimit entirely when it was not chosen', async () => {
+    vi.mocked(serverFetch).mockResolvedValue(MOCK_REVIEW);
+
+    await POST(makeRequest({ ...VALID_BODY, carryOnPastLimit: false }), PARAMS);
+
+    const { body } = vi.mocked(serverFetch).mock.calls[0]![0] as { body: object };
+    expect(body).not.toHaveProperty('carryOnPastLimit');
+  });
+
   it('returns 400 when rating is missing', async () => {
     const res = await POST(makeRequest({ idempotencyKey: 'k' }), PARAMS);
     expect(res.status).toBe(400);

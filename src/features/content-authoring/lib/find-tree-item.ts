@@ -58,10 +58,24 @@ export function findItemSelection(
     }
     // The edited container's own material, which a module keeps here.
     const own = level.items.find((i) => i.id === itemId);
-    if (own) return { kind: 'item', item: own, sectionTitle: level.title };
+    if (own)
+      return {
+        kind: 'item',
+        item: own,
+        sectionTitle: level.title,
+        sectionId: level.id,
+        containerId: tree.containerId,
+      };
   }
   const rootItem = tree.ungroupedItems.find((i) => i.id === itemId);
-  if (rootItem) return { kind: 'item', item: rootItem, sectionTitle: null };
+  if (rootItem)
+    return {
+      kind: 'item',
+      item: rootItem,
+      sectionTitle: null,
+      sectionId: null,
+      containerId: tree.containerId,
+    };
   return null;
 }
 
@@ -71,10 +85,24 @@ function findItemInModule(
 ): CurriculumTreeSelection | null {
   for (const section of mod.sections) {
     const item = section.items.find((i) => i.id === itemId);
-    if (item) return { kind: 'item', item, sectionTitle: section.title };
+    if (item)
+      return {
+        kind: 'item',
+        item,
+        sectionTitle: section.title,
+        sectionId: section.id,
+        containerId: mod.containerId,
+      };
   }
   const ungrouped = mod.ungroupedItems.find((i) => i.id === itemId);
-  if (ungrouped) return { kind: 'item', item: ungrouped, sectionTitle: null };
+  if (ungrouped)
+    return {
+      kind: 'item',
+      item: ungrouped,
+      sectionTitle: null,
+      sectionId: null,
+      containerId: mod.containerId,
+    };
   return null;
 }
 

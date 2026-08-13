@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
@@ -16,12 +16,16 @@ vi.mock('../actions/container', () => ({
   renameContainerAction: vi.fn(),
   createModuleAction: vi.fn(),
 }));
+vi.mock('../actions/rename-item', () => ({ renameItemAction: vi.fn() }));
 vi.mock('../actions/section', () => ({
   renameSectionAction: vi.fn(),
   createSectionAction: vi.fn(),
   reorderSectionsAction: vi.fn(),
 }));
+const routerPush = vi.fn();
+
 vi.mock('@/lib/i18n/navigation', () => ({
+  useRouter: () => ({ push: routerPush }),
   Link: ({
     href,
     children,
@@ -67,6 +71,10 @@ function renderPanel() {
         difficultyLevel="A2"
         visibility="public"
         accessTier="free_within_school"
+        collapsed={new Set()}
+        onToggleCollapse={vi.fn()}
+        onExpand={vi.fn()}
+        onReview={vi.fn()}
       />
     </NextIntlClientProvider>,
   );
@@ -111,6 +119,8 @@ describe('CourseStructurePanel', () => {
     expect(screen.getByText('This course has no levels yet.')).toBeInTheDocument();
   });
 
+  // The level title now appears twice — once in the outline rail, once in the
+  // tree — so the click has to name which one it means.
   it('renders the tree and inspector, and loads the inspector on selection', () => {
     vi.mocked(useCurriculumTree).mockReturnValue({
       data: ONE_LEVEL_TREE,
@@ -123,7 +133,7 @@ describe('CourseStructurePanel', () => {
       screen.getByText('Select an item to inspect and edit its settings.'),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('A1 — Beginner'));
+    fireEvent.click(within(screen.getByRole('tree')).getByText('A1 — Beginner'));
     expect(
       screen.queryByText('Select an item to inspect and edit its settings.'),
     ).not.toBeInTheDocument();

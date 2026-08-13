@@ -334,7 +334,15 @@
         "done": {
           "title": "The words are ready",
           "summary": "You knew {known} and met {learned} new ones. They’ll come back in review.",
-          "restart": "Go through them again"
+          "restart": "Go through them again",
+          "addHeading": "Study set",
+          "addTitle": "{count} words are not in your study set yet",
+          "addTitleUnknown": "Add these words to your study set",
+          "addBody": "Added words come back for review on a schedule until you know them.",
+          "addCta": "Add to study set",
+          "adding": "Adding…",
+          "addDone": "Added to your study set",
+          "addAllIn": "Every word here is already in your study set."
         }
       }
     },
@@ -513,7 +521,8 @@
     },
     "practice": {
       "taskCount": "{n} tasks in this set",
-      "setProgress": "Checked {done} of {total}"
+      "setProgress": "Checked {done} of {total}",
+      "taskDone": "Done"
     }
   }
 }

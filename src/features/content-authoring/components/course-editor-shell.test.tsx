@@ -6,22 +6,15 @@ import { enMessages } from '@/lib/i18n/messages';
 import type { Container } from '@/features/content/types';
 
 vi.mock('./course-settings-drawer', () => ({
-  CourseSettingsDrawer: ({
-    open,
-    onOpenChange,
-    trigger,
-  }: {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    trigger: React.ReactNode;
-  }) => (
-    <div onClick={() => onOpenChange(true)}>
-      {trigger}
-      {open && <div data-testid="settings-drawer-open" />}
-    </div>
-  ),
+  CourseSettingsDrawer: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="settings-drawer-open" /> : null,
 }));
 vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams() }));
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <a href={href}>{children}</a>
+  ),
+}));
 vi.mock('../api/use-curriculum-tree', () => ({ useCurriculumTree: vi.fn() }));
 // The real dialog pulls in the publish server action, which cannot load in a
 // client test environment.
@@ -33,11 +26,13 @@ vi.mock('./course-structure-panel', () => ({
   CourseStructurePanel: ({
     containerId,
     versionId,
+    collapsed,
   }: {
     containerId: string;
     versionId: string;
+    collapsed: ReadonlySet<string>;
   }) => (
-    <div data-testid="course-structure-panel">
+    <div data-testid="course-structure-panel" data-collapsed={[...collapsed].join(',')}>
       {containerId}/{versionId}
     </div>
   ),
@@ -100,6 +95,7 @@ function renderShell(draftVersionId: string | null, pendingModules = 0) {
         container={CONTAINER}
         schoolSlug="my-school"
         draftVersionId={draftVersionId}
+        publishedVersionNumber={2}
       />
     </NextIntlClientProvider>,
   );
@@ -134,5 +130,37 @@ describe('CourseEditorShell', () => {
     expect(screen.queryByTestId('settings-drawer-open')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Settings/ }));
     expect(screen.getByTestId('settings-drawer-open')).toBeInTheDocument();
+  });
+
+  // BEHAVIOR.md §5.2: the strip, the review badge and the dialog must never
+  // disagree about how much is waiting, so they read the same number.
+  it('shows the same unpublished count in the metric strip and on the review button', () => {
+    renderShell('version-1', 2);
+    const unpublished = screen.getByText('Unpublished').closest('div');
+    expect(unpublished).toHaveTextContent('2');
+    expect(screen.getByRole('button', { name: /Review & publish/ })).toHaveTextContent('2');
+  });
+
+  it('sizes the course in the metric strip', () => {
+    renderShell('version-1', 2);
+    expect(screen.getByText('Levels').closest('div')).toHaveTextContent('1');
+    expect(screen.getByText('Modules').closest('div')).toHaveTextContent('2');
+  });
+
+  // Collapse state lives in the shell precisely so these two buttons, which sit
+  // above the tree, can drive every node at once.
+  it('folds and unfolds every level and module from the topbar', () => {
+    renderShell('version-1', 2);
+    const panel = () => screen.getByTestId('course-structure-panel');
+    expect(panel()).toHaveAttribute('data-collapsed', '');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse all' }));
+    expect(panel()).toHaveAttribute(
+      'data-collapsed',
+      'level:level-a1,module:item-mod-0,module:item-mod-1',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Expand all' }));
+    expect(panel()).toHaveAttribute('data-collapsed', '');
   });
 });

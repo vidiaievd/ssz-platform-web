@@ -334,7 +334,15 @@
         "done": {
           "title": "Ordene er klare",
           "summary": "Du kunne {known} og ble kjent med {learned} nye. De kommer tilbake til repetisjon.",
-          "restart": "Gå gjennom dem en gang til"
+          "restart": "Gå gjennom dem en gang til",
+          "addHeading": "Studiesett",
+          "addTitle": "{count} ord er ikke i studiesettet ditt ennå",
+          "addTitleUnknown": "Legg disse ordene i studiesettet ditt",
+          "addBody": "Ord du legger til, kommer tilbake til repetisjon etter en plan til du kan dem.",
+          "addCta": "Legg i studiesettet",
+          "adding": "Legger til …",
+          "addDone": "Lagt i studiesettet",
+          "addAllIn": "Alle ordene her ligger allerede i studiesettet ditt."
         }
       }
     },
@@ -513,7 +521,8 @@
     },
     "practice": {
       "taskCount": "{n} oppgaver i dette settet",
-      "setProgress": "Sjekket {done} av {total}"
+      "setProgress": "Sjekket {done} av {total}",
+      "taskDone": "Fullført"
     }
   }
 }

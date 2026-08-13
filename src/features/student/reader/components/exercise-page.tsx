@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { useExerciseWithAnswers } from '@/features/content/api/use-exercise';
 import { primaryHintText, primaryInstructionText } from '@/features/content/lib/instruction-text';
+import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
@@ -25,8 +26,6 @@ import {
   TextOrderBody,
   checkTextOrder,
   shuffleOrder,
-  ErrorCorrectionBody,
-  checkErrorCorrection,
   gradeMcq,
   gradeMatch,
   gradeTranslate,
@@ -53,10 +52,6 @@ import {
   type WordBankSentence,
   type OrderLine,
   type TextOrderResults,
-  type ErrorCorrectionExpected,
-  type ErrorCorrectionResults,
-  type ErrorCorrectionValue,
-  type ErrorSentence,
   type WordNotes,
   type DiffToken,
   type ShortAnswerDiff,
@@ -719,93 +714,6 @@ function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
   );
 }
 
-function ErrorCorrectionSolver({ display, phase, ok, onCheck }: SolverProps) {
-  const t = useTranslations('ExerciseRunner');
-  const [value, setValue] = useState<ErrorCorrectionValue>({});
-  const [results, setResults] = useState<ErrorCorrectionResults>({});
-  const [canSubmit, setCanSubmit] = useState(false);
-  const c = display.content;
-
-  const items: ErrorSentence[] = useMemo(
-    () =>
-      (Array.isArray(c.items) ? c.items : [])
-        .filter(
-          (it): it is { id: string; chunks: unknown } =>
-            typeof (it as { id?: unknown }).id === 'string',
-        )
-        .map((it) => ({
-          id: it.id,
-          chunks: (Array.isArray(it.chunks) ? it.chunks : [])
-            .filter(
-              (ch): ch is { id: string; text: string } =>
-                typeof (ch as { id?: unknown }).id === 'string',
-            )
-            .map((ch) => ({ id: ch.id, text: str(ch.text) })),
-        })),
-    [c.items],
-  );
-
-  const expected: ErrorCorrectionExpected = {
-    corrections: (Array.isArray(display.expectedAnswers.corrections)
-      ? display.expectedAnswers.corrections
-      : []
-    )
-      .filter(
-        (cor): cor is { item_id: string; chunk_id: string; accepted: unknown; note?: string } =>
-          typeof (cor as { chunk_id?: unknown }).chunk_id === 'string',
-      )
-      .map((cor) => ({
-        item_id: str(cor.item_id),
-        chunk_id: cor.chunk_id,
-        accepted: strArr(cor.accepted),
-        ...(str(cor.note) && { note: str(cor.note) }),
-      })),
-  };
-
-  return (
-    <>
-      <ErrorCorrectionBody
-        content={{
-          items,
-          mistakeCount:
-            typeof c.mistake_count === 'number' ? c.mistake_count : expected.corrections.length,
-          instruction: instr(display),
-        }}
-        value={value}
-        onValueChange={setValue}
-        onAnswerChange={setCanSubmit}
-        phase={phase}
-        ok={ok}
-        mode="practice"
-        accent={ACCENT}
-        results={results}
-      />
-      {phase === 'answering' && (
-        <CheckFooter
-          canSubmit={canSubmit}
-          onCheck={() => {
-            const graded = checkErrorCorrection(expected, value);
-            setResults(graded.results);
-            const tally = t('errorCorrection.partialScore', {
-              correct: graded.correct,
-              total: graded.total,
-            });
-            onCheck({
-              ok: graded.ok,
-              summary: graded.ok
-                ? undefined
-                : graded.falsePositives > 0
-                  ? `${tally} · ${t('errorCorrection.falsePositives', { n: graded.falsePositives })}`
-                  : tally,
-              explanation: str(display.expectedAnswers.explanation) || undefined,
-            });
-          }}
-        />
-      )}
-    </>
-  );
-}
-
 /* ── feedback banner ────────────────────────────────────────────────────── */
 
 interface FeedbackBannerProps {
@@ -920,7 +828,6 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   sentence_schema: SentenceSchemaSolver,
   word_bank_fill: WordBankFillSolver,
   text_order: TextOrderSolver,
-  error_correction: ErrorCorrectionSolver,
 };
 
 export interface ExerciseSolverProps {
@@ -953,7 +860,10 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
   // Server-graded, and therefore not a `SolverProps` solver at all: it never has
   // the answers to pass down. Branching here keeps the other twelve untouched —
   // moving them to server-side grading is separate work with a shape of its own.
-  if (data.templateCode === 'word_bank_gap_fill') {
+  if (data.templateCode === 'word_bank_gap_fill' || data.templateCode === 'error_correction') {
+    const ServerSolver =
+      data.templateCode === 'word_bank_gap_fill' ? GapFillSolver : ErrorCorrectionSolver;
+
     return (
       <div>
         {index != null && (
@@ -961,7 +871,7 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
             {t('taskNumber', { n: index })}
           </div>
         )}
-        <GapFillSolver
+        <ServerSolver
           exerciseId={exerciseId}
           language={data.targetLanguage}
           {...(instr(data) === undefined ? {} : { instruction: instr(data) })}

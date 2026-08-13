@@ -2,6 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card';
+import { readContent as readErrorCorrectionContent } from '@/lib/shared-kernel/error-correction';
 import type { ExerciseDisplay } from '../types';
 
 interface ExercisePreviewProps {
@@ -252,29 +253,44 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
             ))}
           </ol>
         )}
-        {code === 'error_correction' && (
-          <ol className="space-y-2">
-            {(Array.isArray(content.items) ? (content.items as EcPreviewItem[]) : []).map((item, i) => (
-              <li key={i} className="flex flex-wrap items-center gap-1">
-                <span className="text-muted-foreground mr-0.5 text-xs">{i + 1}.</span>
-                {(Array.isArray(item.chunks) ? item.chunks : []).map((chunk, j) => (
-                  <span key={j} className="rounded-md border border-border px-1.5 py-0.5 text-sm">
-                    {typeof (chunk as { text?: unknown }).text === 'string'
-                      ? (chunk as { text: string }).text
-                      : ''}
-                  </span>
-                ))}
-              </li>
-            ))}
-          </ol>
-        )}
+        {code === 'error_correction' && <ErrorCorrectionContent content={content} />}
       </CardBody>
     </Card>
   );
 }
 
-interface EcPreviewItem {
-  chunks?: unknown[];
+/**
+ * The faulty sentences, exactly as the student meets them. No corrections are shown
+ * because there are none to show: `content` carries no answer key, and the mistakes are
+ * the difference between it and the `ref` kept in `expected_answers`.
+ */
+function ErrorCorrectionContent({ content }: { content: Record<string, unknown> }) {
+  const { mode, items, note } = readErrorCorrectionContent(content);
+
+  return (
+    <div className="space-y-2">
+      {note !== '' && <p className="text-muted-foreground text-xs">{note}</p>}
+      {mode === 'passage' ? (
+        // One stretch of text rather than a numbered set — the same split the runner makes.
+        <div className="space-y-2">
+          {items.map((item) => (
+            <p key={item.id} className="text-sm leading-relaxed">
+              {item.wrong}
+            </p>
+          ))}
+        </div>
+      ) : (
+        <ol className="space-y-1.5">
+          {items.map((item, i) => (
+            <li key={item.id} className="rounded-md border border-border px-3 py-2 text-sm">
+              <span className="text-muted-foreground mr-1.5 text-xs">{i + 1}.</span>
+              {item.wrong}
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
 }
 
 const TYPE_LABEL_KEYS = {

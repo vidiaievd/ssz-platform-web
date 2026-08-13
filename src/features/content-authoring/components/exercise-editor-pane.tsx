@@ -17,6 +17,13 @@ import {
   toExpectedAnswers,
   type WordBankGapFill,
 } from '@/lib/shared-kernel/wordbank-gapfill';
+import {
+  fromPersisted as errorCorrectionFromPersisted,
+  TEMPLATE_CODE as ERROR_CORRECTION_TEMPLATE_CODE,
+  toContent as errorCorrectionToContent,
+  toExpectedAnswers as errorCorrectionToExpectedAnswers,
+  type ErrorCorrection,
+} from '@/lib/shared-kernel/error-correction';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -29,6 +36,8 @@ import { ExerciseFields } from './exercise-fields';
 import { GapFillBuilder } from './wordbank-gapfill/builder';
 import type { SavedDocument } from './wordbank-gapfill/use-gap-fill-autosave';
 import { GapFillPreview } from './wordbank-gapfill/gap-fill-preview';
+import { ErrorCorrectionBuilder } from './error-correction/builder';
+import { ErrorCorrectionPreview } from './error-correction/error-correction-preview';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 
 interface ExerciseEditorPaneProps {
@@ -63,8 +72,11 @@ export function ExerciseEditorPane({
     exercise: WordBankGapFill;
     instructions: string;
   } | null>(null);
+  /** The error-correction document as its builder currently has it, for the preview column. */
+  const [errorCorrection, setErrorCorrection] = useState<ErrorCorrection | null>(null);
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
+  const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
 
   return (
     <LessonEditorShell
@@ -81,6 +93,8 @@ export function ExerciseEditorPane({
       preview={
         isGapFill && gapFill !== null ? (
           <GapFillPreview exercise={gapFill.exercise} instructions={gapFill.instructions} />
+        ) : isErrorCorrection && errorCorrection !== null ? (
+          <ErrorCorrectionPreview exercise={errorCorrection} />
         ) : (
           <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
         )
@@ -112,6 +126,23 @@ export function ExerciseEditorPane({
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
               (cached) => (cached ? applySavedGapFill(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
+      ) : isErrorCorrection ? (
+        // Error correction owns a document too, and for a sharper reason than gap-fill:
+        // the mistakes are never written down, they are the difference between the two
+        // sentences the author types. There is no set of form fields that could hold that.
+        <ErrorCorrectionBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          initialExercise={errorCorrectionDocumentFrom(exercise, container.id)}
+          onDocumentChange={setErrorCorrection}
+          onSavedRemote={(updatedAt, saved) =>
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedErrorCorrection(cached, updatedAt, saved) : cached),
             )
           }
         />
@@ -178,6 +209,45 @@ function applySavedGapFill(
         },
         ...rest,
       ],
+    }),
+  };
+}
+
+/** The stored columns as the kernel's error-correction document. See above for the token. */
+function errorCorrectionDocumentFrom(
+  exercise: ExerciseWithAnswers,
+  containerId: string,
+): ErrorCorrection {
+  return errorCorrectionFromPersisted(
+    {
+      id: exercise.id,
+      moduleId: containerId,
+      title: '',
+      instructions: firstInstruction(exercise)?.instructionText ?? '',
+      updatedAt: exercise.updatedAt ?? '',
+    },
+    exercise.content,
+    exercise.expectedAnswers,
+  );
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ */
+function applySavedErrorCorrection(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: ErrorCorrection,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...errorCorrectionToContent(saved) },
+    expectedAnswers: { ...errorCorrectionToExpectedAnswers(saved) },
+    ...(instruction && {
+      instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],
     }),
   };
 }

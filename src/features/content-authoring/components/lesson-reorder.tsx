@@ -63,7 +63,9 @@ export function SortableItem<T extends ReorderableItem>({
       >
         <GripVertical className="h-4 w-4" />
       </button>
-      {children}
+      {/* The row itself must fill the track; without this it is a flex item
+          sized to its content and stops short of the panel edge. */}
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import {
+  fetchLastAttempt,
   useRevealAnswers,
   useStartAttempt,
   useSubmitAnswer,
@@ -11,6 +12,7 @@ import {
 import type {
   GapFillAttemptContent,
   GapFillSubmitDetails,
+  GapFillSubmittedAnswer,
 } from '@/features/student/exercises/types/attempts';
 import {
   PRACTICE_ACCENT,
@@ -61,6 +63,33 @@ export function GapFillSolver({
   const [attempts, setAttempts] = useState(0);
 
   /**
+   * The server's verdict on the whole exercise, not a conclusion drawn from the
+   * verdicts still on screen. Those are a working set: the retry drops the wrong ones
+   * and keeps the correct ones to hold their locks, and reading "every verdict here is
+   * correct" off that would declare the exercise solved the moment the wrong gaps were
+   * emptied — with the gaps then frozen and no way to answer them.
+   */
+  const [solved, setSolved] = useState(false);
+
+  /**
+   * The answer from last time, once it has been put back in the gaps — carrying when it
+   * was saved, which is the only part of it not already on screen.
+   *
+   * The engine has kept every submission all along; nothing ever read them back, so
+   * returning to a solved exercise showed empty gaps and the work looked undone.
+   */
+  const [restored, setRestored] = useState<{ at: string | null } | null>(null);
+
+  /**
+   * Whether the saved answer has had its one chance to appear. It is restored as part
+   * of opening the attempt — the sentences arrive with the attempt, and until they do
+   * there is nowhere to put it — and never again after that: the screen then belongs to
+   * the learner, and painting an old answer over what they are typing, or back over the
+   * clean start they just asked for, would be the opposite of restoring it.
+   */
+  const restoreConsidered = useRef(false);
+
+  /**
    * Wall-clock since the attempt opened; the engine records it per submission. Set
    * when the attempt starts rather than at first render — reading the clock during
    * render is impure, and the two moments differ by however long the request took.
@@ -78,27 +107,36 @@ export function GapFillSolver({
     startMutate(
       { language },
       {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
           setAttemptId(data.attemptId);
           setProjection(data.exerciseContent as GapFillAttemptContent);
           openedAt.current = Date.now();
+
+          if (restoreConsidered.current) return;
+          restoreConsidered.current = true;
+
+          const saved = await fetchLastAttempt(exerciseId);
+          const placements = (saved?.submittedAnswer as GapFillSubmittedAnswer | null)?.placements;
+          if (saved === null || !Array.isArray(placements) || placements.length === 0) return;
+
+          const details = saved.validationDetails as GapFillSubmitDetails | null;
+          const byGap: Record<string, GapVerdict> = {};
+          for (const gap of details?.gaps ?? []) {
+            byGap[gap.gapKey] = { correct: gap.correct, explanation: gap.explanation };
+          }
+
+          setValue(Object.fromEntries(placements.map((p) => [p.gapKey, p.word])));
+          if (Object.keys(byGap).length > 0) setResults(byGap);
+          setSolved(saved.score === 100);
+          setRestored({ at: saved.submittedAt ?? saved.scoredAt });
         },
       },
     );
-  }, [startMutate, language]);
+  }, [startMutate, language, exerciseId]);
 
   useEffect(() => {
     begin();
   }, [begin]);
-
-  /**
-   * The server's verdict on the whole exercise, not a conclusion drawn from the
-   * verdicts still on screen. Those are a working set: the retry drops the wrong ones
-   * and keeps the correct ones to hold their locks, and reading "every verdict here is
-   * correct" off that would declare the exercise solved the moment the wrong gaps were
-   * emptied — with the gaps then frozen and no way to answer them.
-   */
-  const [solved, setSolved] = useState(false);
 
   /**
    * Whether the learner is reading a check or answering again. The feedback belongs to
@@ -200,6 +238,20 @@ export function GapFillSolver({
     setValue(nextValue);
     setResults(Object.keys(kept).length > 0 ? kept : undefined);
     setReading(false);
+    setRestored(null);
+  }
+
+  /**
+   * Clearing a restored answer to write a new one. No new attempt is needed: the one
+   * opened on mount was never submitted — the old answer was only ever painted onto it —
+   * so this drops the paint and leaves the attempt to be used as normal.
+   */
+  function answerAgain() {
+    setValue({});
+    setResults(undefined);
+    setSolved(false);
+    setReading(false);
+    setRestored(null);
   }
 
   /**
@@ -213,6 +265,7 @@ export function GapFillSolver({
     setRevealed(undefined);
     setSolved(false);
     setReading(false);
+    setRestored(null);
     setAttempts(0);
     setAttemptId(null);
     setProjection(null);
@@ -229,8 +282,44 @@ export function GapFillSolver({
     results !== undefined && Object.values(results).some((verdict) => !verdict.correct);
   const canCheck = allFilled && !submit.isPending && !isRevealed && !solved;
 
+  const restoredCounts =
+    restored === null || results === undefined
+      ? null
+      : {
+          correct: Object.values(results).filter((verdict) => verdict.correct).length,
+          total: Object.keys(results).length,
+        };
+
   return (
     <div>
+      {restored !== null && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-subtle px-4 py-3">
+          <div className="text-[13px] text-(--ssz-text-secondary)">
+            <span className="font-semibold text-(--ssz-text-primary)">
+              {t('gapFill.restored', {
+                date:
+                  restored.at === null
+                    ? ''
+                    : new Intl.DateTimeFormat(undefined, {
+                        dateStyle: 'medium',
+                      }).format(new Date(restored.at)),
+              })}
+            </span>
+            {restoredCounts !== null && (
+              <span className="ml-2">{t('gapFill.restoredScored', restoredCounts)}</span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={answerAgain}
+            className="rounded-lg border px-3 py-1.5 text-[12.5px] font-semibold"
+            style={{ borderColor: PRACTICE_ACCENT, color: PRACTICE_ACCENT }}
+          >
+            {t('gapFill.startOver')}
+          </button>
+        </div>
+      )}
+
       <WordBankGapFillBody
         projection={projection}
         {...(instruction === undefined ? {} : { instruction })}

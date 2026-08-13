@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { ErrorState, LearningSkeleton, getGlossaryMode } from '@/features/learning';
+import {
+  ErrorState,
+  LearningSkeleton,
+  getGlossaryMode,
+  useSrsCardStates,
+} from '@/features/learning';
 import { useUnitVocabularyItems, useVocabularyList } from '@/features/content';
 import { cn } from '@/lib/utils';
 import type { DifficultyLevel } from '@/features/content/types';
@@ -66,6 +71,13 @@ export function VocabularyPage({
   const list = useVocabularyList(vocabularyListId);
   const items = useUnitVocabularyItems(vocabularyListId);
 
+  /**
+   * Which of these words the scheduler already holds — what tells apart "read but not
+   * taken on" from "already being drilled". A word with no card is simply absent from
+   * the response, so the missing ones are the ones still to be offered.
+   */
+  const cardStates = useSrsCardStates((items.data ?? []).map((i) => i.id));
+
   const isLoading = list.isLoading || items.isLoading;
   const isError = list.isError || items.isError;
 
@@ -99,6 +111,16 @@ export function VocabularyPage({
   const reinforceItem = findReinforceItem(siblingItems, currentItemId);
   const unknownItems = allItems.filter((i) => !knownIds.includes(i.id));
 
+  /**
+   * `null` while the card states are unknown — loading, or a lookup that failed. The
+   * offer to add the words still stands in that case; what cannot be stated honestly is
+   * how many are missing, and claiming "all of them are in" would be worse than saying
+   * nothing.
+   */
+  const inSrs =
+    cardStates.data === undefined ? null : new Set(cardStates.data.states.map((s) => s.contentId));
+  const pendingCount = inSrs === null ? null : allItems.filter((i) => !inSrs.has(i.id)).length;
+
   function restart() {
     setKnownIds([]);
     setStage('triage');
@@ -118,7 +140,11 @@ export function VocabularyPage({
     <div>
       <div className="mb-3.5">
         <div className="mb-1.5 text-[11px] font-bold tracking-wider text-(--ssz-text-accent) uppercase">
-          {t('page.eyebrow', { unit: unitPosition, course: courseTitle, type: tContent('materialType.vocab') })}
+          {t('page.eyebrow', {
+            unit: unitPosition,
+            course: courseTitle,
+            type: tContent('materialType.vocab'),
+          })}
         </div>
         <h1 className="font-reading mb-1 text-[29px] leading-[1.15] font-semibold tracking-tight text-(--ssz-text-primary)">
           {list.data.title}
@@ -153,7 +179,9 @@ export function VocabularyPage({
           ))}
         </div>
         <span className="inline-flex items-center gap-1 rounded-full border border-(--ssz-border-default) bg-(--ssz-bg-accent) px-2.5 py-1 text-[11px] font-bold text-(--ssz-text-accent)">
-          {cardMode === 'definition' ? t('page.levelBadgeDefinition') : t('page.levelBadgeTranslation')}
+          {cardMode === 'definition'
+            ? t('page.levelBadgeDefinition')
+            : t('page.levelBadgeTranslation')}
         </span>
       </div>
 
@@ -185,6 +213,9 @@ export function VocabularyPage({
               reinforceItem={reinforceItem}
               srsVocabDue={srsVocabDue}
               onRestart={restart}
+              vocabularyListId={vocabularyListId}
+              pendingCount={pendingCount}
+              onAdded={() => void cardStates.refetch()}
             />
           )}
         </>

@@ -26,7 +26,10 @@ vi.mock('@/lib/i18n/navigation', () => ({
     href,
     children,
     ...props
-  }: { href: string; children: React.ReactNode } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -60,8 +63,22 @@ const ITEMS: VocabularyItem[] = [
 ];
 
 const SIBLING_ITEMS: ReaderSidebarItem[] = [
-  { id: 'vocab-1', kind: 'vocab', title: 'Yrker og oppgaver', durationLabel: '', status: 'available', href: '/x' },
-  { id: 'text-1', kind: 'text', title: 'En vanlig arbeidsdag', durationLabel: '5 min', status: 'available', href: '/student/courses/c1/u1/text-1' },
+  {
+    id: 'vocab-1',
+    kind: 'vocab',
+    title: 'Yrker og oppgaver',
+    durationLabel: '',
+    status: 'available',
+    href: '/x',
+  },
+  {
+    id: 'text-1',
+    kind: 'text',
+    title: 'En vanlig arbeidsdag',
+    durationLabel: '5 min',
+    status: 'available',
+    href: '/student/courses/c1/u1/text-1',
+  },
 ];
 
 function renderPage(overrides: Partial<React.ComponentProps<typeof VocabularyPage>> = {}) {
@@ -80,8 +97,18 @@ function renderPage(overrides: Partial<React.ComponentProps<typeof VocabularyPag
 }
 
 function mockLoaded(items: VocabularyItem[] = ITEMS) {
-  useVocabularyList.mockReturnValue({ isLoading: false, isError: false, data: LIST, refetch: vi.fn() });
-  useUnitVocabularyItems.mockReturnValue({ isLoading: false, isError: false, data: items, refetch: vi.fn() });
+  useVocabularyList.mockReturnValue({
+    isLoading: false,
+    isError: false,
+    data: LIST,
+    refetch: vi.fn(),
+  });
+  useUnitVocabularyItems.mockReturnValue({
+    isLoading: false,
+    isError: false,
+    data: items,
+    refetch: vi.fn(),
+  });
 }
 
 describe('VocabularyPage', () => {
@@ -91,8 +118,18 @@ describe('VocabularyPage', () => {
   });
 
   it('shows a loading skeleton while fetching', () => {
-    useVocabularyList.mockReturnValue({ isLoading: true, isError: false, data: undefined, refetch: vi.fn() });
-    useUnitVocabularyItems.mockReturnValue({ isLoading: true, isError: false, data: undefined, refetch: vi.fn() });
+    useVocabularyList.mockReturnValue({
+      isLoading: true,
+      isError: false,
+      data: undefined,
+      refetch: vi.fn(),
+    });
+    useUnitVocabularyItems.mockReturnValue({
+      isLoading: true,
+      isError: false,
+      data: undefined,
+      refetch: vi.fn(),
+    });
     renderPage();
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
   });
@@ -100,8 +137,18 @@ describe('VocabularyPage', () => {
   it('shows an error state with retry on failure', () => {
     const refetchList = vi.fn();
     const refetchItems = vi.fn();
-    useVocabularyList.mockReturnValue({ isLoading: false, isError: true, data: undefined, refetch: refetchList });
-    useUnitVocabularyItems.mockReturnValue({ isLoading: false, isError: false, data: undefined, refetch: refetchItems });
+    useVocabularyList.mockReturnValue({
+      isLoading: false,
+      isError: true,
+      data: undefined,
+      refetch: refetchList,
+    });
+    useUnitVocabularyItems.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: undefined,
+      refetch: refetchItems,
+    });
     renderPage();
     fireEvent.click(screen.getByRole('button', { name: /try again/i }));
     expect(refetchList).toHaveBeenCalled();
@@ -109,8 +156,18 @@ describe('VocabularyPage', () => {
   });
 
   it('shows an empty state when the list has no items', () => {
-    useVocabularyList.mockReturnValue({ isLoading: false, isError: false, data: LIST, refetch: vi.fn() });
-    useUnitVocabularyItems.mockReturnValue({ isLoading: false, isError: false, data: [], refetch: vi.fn() });
+    useVocabularyList.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: LIST,
+      refetch: vi.fn(),
+    });
+    useUnitVocabularyItems.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: [],
+      refetch: vi.fn(),
+    });
     renderPage();
     expect(screen.getByText('No new words yet')).toBeInTheDocument();
   });
@@ -155,7 +212,9 @@ describe('VocabularyPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /done/i }));
     expect(screen.getByText('The words are ready')).toBeInTheDocument();
-    expect(screen.getByText('You knew 0 and met 2 new ones. They’ll come back in review.')).toBeInTheDocument();
+    expect(
+      screen.getByText('You knew 0 and met 2 new ones. They’ll come back in review.'),
+    ).toBeInTheDocument();
   });
 
   it('skips straight to the summary when every word is claimed at once', () => {
@@ -168,7 +227,9 @@ describe('VocabularyPage', () => {
       { vocabularyListId: 'list-1', seedKind: 'CLAIMED_KNOWN' },
       expect.anything(),
     );
-    expect(screen.getByText('You knew 2 and met 0 new ones. They’ll come back in review.')).toBeInTheDocument();
+    expect(
+      screen.getByText('You knew 2 and met 0 new ones. They’ll come back in review.'),
+    ).toBeInTheDocument();
   });
 
   it('shows the reinforce link and review card once the flow is done', () => {
@@ -192,6 +253,28 @@ describe('VocabularyPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'I know all of them' }));
 
     expect(screen.queryByText('Repeat earlier words')).not.toBeInTheDocument();
+  });
+
+  it('counts the words still missing from the study set', async () => {
+    mockLoaded();
+    bulkMutate.mockImplementation((_input, opts) => opts.onSuccess?.());
+    // `v1` already has a card; a word with none is simply absent from the response.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json({
+          states: [
+            { contentId: 'v1', state: 'REVIEW', stability: 4, dueAt: '2026-08-20T00:00:00Z' },
+          ],
+        }),
+      ),
+    );
+
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: 'I know all of them' }));
+
+    expect(await screen.findByText('1 words are not in your study set yet')).toBeInTheDocument();
+    vi.unstubAllGlobals();
   });
 
   it('lists every word with its meaning in the list view', () => {

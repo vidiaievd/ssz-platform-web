@@ -40,12 +40,17 @@ interface SrsSessionState {
   dailyLimit: number;
   /** Set to true when the server returns 429. Terminal for the session. */
   limitHit: boolean;
+  /**
+   * The learner was told the day's quota was met and chose to keep going. Sent with
+   * every review of this session so the server lifts the cap it would otherwise hit.
+   */
+  carryOnPastLimit: boolean;
 }
 
 interface SrsSessionActions {
   /** Seed the store from GET /due response. */
   seed: (data: { cards: SrsCard[]; dailyLimit: number }) => void;
-  startSession: () => void;
+  startSession: (options?: { carryOnPastLimit: boolean }) => void;
   /** Show the answer side. Generates an idempotency key and starts the latency timer. */
   revealAnswer: () => void;
   /** Call after a successful review POST — advances to next card or summary. */
@@ -78,6 +83,7 @@ const initial: SrsSessionState = {
   ratingError: null,
   dailyLimit: 20,
   limitHit: false,
+  carryOnPastLimit: false,
 };
 
 export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()((set, get) => ({
@@ -86,8 +92,14 @@ export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()(
   seed: ({ cards, dailyLimit }) =>
     set({ queue: cards, dailyLimit }),
 
-  startSession: () =>
-    set({ phase: 'session', index: 0, cardState: 'front', startedAt: Date.now() }),
+  startSession: (options) =>
+    set({
+      phase: 'session',
+      index: 0,
+      cardState: 'front',
+      startedAt: Date.now(),
+      carryOnPastLimit: options?.carryOnPastLimit ?? false,
+    }),
 
   revealAnswer: () =>
     set({
@@ -121,6 +133,8 @@ export const useSrsSessionStore = create<SrsSessionState & SrsSessionActions>()(
     }
   },
 
+  // A second pass over the misses is still the same sitting, so `carryOnPastLimit`
+  // is deliberately left standing: asking again would be asking the same question.
   queueMisses: () => {
     const { queue, againIds } = get();
     const misses = queue.filter((c) => againIds.includes(c.id));

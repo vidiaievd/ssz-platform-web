@@ -11,7 +11,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const commonArgs = { courseContainerId: 'course-1', schoolSlug: 'my-school', onChanged: () => {} };
+const commonArgs = {
+  courseContainerId: 'course-1',
+  schoolSlug: 'my-school',
+  onChanged: () => {},
+  onDelete: () => {},
+};
 
 export const EmptySelection: Story = {
   args: { selection: null, ...commonArgs },
@@ -53,6 +58,8 @@ export const LessonSelected: Story = {
     selection: {
       kind: 'item',
       sectionTitle: 'Reinforce & read',
+      sectionId: 'section-1',
+      containerId: 'module-1',
       item: {
         id: 'item-1',
         itemType: 'lesson',
@@ -77,6 +84,8 @@ export const DraftVocabularySelected: Story = {
     selection: {
       kind: 'item',
       sectionTitle: null,
+      sectionId: null,
+      containerId: 'module-1',
       item: {
         id: 'item-2',
         itemType: 'vocabulary_list',

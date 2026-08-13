@@ -9,6 +9,7 @@ vi.mock('../actions/vocabulary', () => ({ createVocabularyListAction: vi.fn() })
 vi.mock('../actions/grammar', () => ({ createGrammarRuleAction: vi.fn() }));
 vi.mock('../actions/exercise', () => ({ createExerciseAction: vi.fn() }));
 vi.mock('../actions/gap-fill', () => ({ createGapFillAction: vi.fn() }));
+vi.mock('../actions/error-correction', () => ({ createErrorCorrectionAction: vi.fn() }));
 vi.mock('../actions/container-item', () => ({ assignItemSectionAction: vi.fn() }));
 
 const { AddLessonPicker } = await import('./add-lesson-picker');
@@ -49,19 +50,21 @@ beforeEach(() => {
 });
 
 describe('AddLessonPicker', () => {
-  it('renders a card for each of the 7 material types', () => {
+  // "Practice" is gone from the material list on purpose: exercises are offered
+  // by template in their own group, so picking "an exercise" and then its type
+  // asked a question the author had already answered.
+  it('groups reading material and exercise templates in one step', () => {
     renderPicker();
-    for (const label of [
-      'Vocabulary',
-      'Reading',
-      'Video',
-      'Listening',
-      'Grammar',
-      'Practice',
-      'Live class',
-    ]) {
+
+    expect(screen.getByText('Reading & vocabulary')).toBeInTheDocument();
+    for (const label of ['Vocabulary', 'Reading', 'Video', 'Listening', 'Grammar', 'Live class']) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
+    expect(screen.queryByText('Practice')).not.toBeInTheDocument();
+
+    expect(screen.getByText('Exercises')).toBeInTheDocument();
+    expect(screen.getByText('Multiple choice group')).toBeInTheDocument();
+    expect(screen.getByText('Gap-fill')).toBeInTheDocument();
   });
 
   it('creates a text lesson and reports the new item id', async () => {
@@ -120,21 +123,8 @@ describe('AddLessonPicker', () => {
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith('item-3'));
   });
 
-  it('asks for the exercise type instead of creating straight away', () => {
-    renderPicker();
-
-    fireEvent.click(screen.getByText('Practice'));
-
-    // The template is immutable once created, so it has to be picked up front.
-    expect(createExerciseAction).not.toHaveBeenCalled();
-    expect(screen.getByText('Multiple choice group')).toBeInTheDocument();
-    expect(screen.getByText('Gap-fill')).toBeInTheDocument();
-  });
-
   it('no longer offers the two templates gap-fill replaced', () => {
     renderPicker();
-
-    fireEvent.click(screen.getByText('Practice'));
 
     // Retired from creation only. Both still open and play: ~135 exercises use them.
     expect(screen.queryByText('Word bank gap-fill')).not.toBeInTheDocument();
@@ -148,7 +138,6 @@ describe('AddLessonPicker', () => {
     });
     renderPicker();
 
-    fireEvent.click(screen.getByText('Practice'));
     fireEvent.click(screen.getByText('Gap-fill'));
 
     await waitFor(() => expect(createGapFillAction).toHaveBeenCalled());
@@ -162,7 +151,6 @@ describe('AddLessonPicker', () => {
     } as never);
     const { onCreated } = renderPicker();
 
-    fireEvent.click(screen.getByText('Practice'));
     fireEvent.click(screen.getByText('Multiple choice group'));
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith('item-4'));
@@ -178,16 +166,6 @@ describe('AddLessonPicker', () => {
       }),
       'school-1',
     );
-  });
-
-  it('goes back from the exercise type step to the material list', () => {
-    renderPicker();
-
-    fireEvent.click(screen.getByText('Practice'));
-    fireEvent.click(screen.getByText('Back'));
-
-    expect(screen.getByText('Vocabulary')).toBeInTheDocument();
-    expect(screen.queryByText('Multiple choice group')).not.toBeInTheDocument();
   });
 
   it('shows an error toast and does not close on failure', async () => {
@@ -207,6 +185,27 @@ describe('AddLessonPicker', () => {
     await waitFor(() => expect(createGrammarRuleAction).toHaveBeenCalled());
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
   });
+  it('says which section the new material will land in', () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <AddLessonPicker
+          open
+          onOpenChange={vi.fn()}
+          moduleContainerId="module-1"
+          sectionId="section-1"
+          sectionTitle="Nye ord"
+          targetLanguage="no"
+          difficultyLevel="A2"
+          visibility="public"
+          ownerSchoolId="school-1"
+          onCreated={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+
+    expect(screen.getByText('The new material goes into “Nye ord”.')).toBeInTheDocument();
+  });
+
   it('files the new item into the section it was opened from', async () => {
     // Creating an item never assigns a section, so without this the material
     // lands ungrouped even though the author added it inside "Nye ord".

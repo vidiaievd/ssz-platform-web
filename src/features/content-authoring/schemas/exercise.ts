@@ -15,7 +15,6 @@ export const EXERCISE_TYPES = [
   'sentence_schema',
   'word_bank_fill',
   'text_order',
-  'error_correction',
 ] as const;
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
 
@@ -28,8 +27,8 @@ export type ExerciseType = (typeof EXERCISE_TYPES)[number];
  * would make the form fall back to `multiple_choice` and rewrite their content on the
  * next save.
  *
- * `word_bank_gap_fill` is here but not there: it has its own builder, and the generic
- * form has no fields for it.
+ * `word_bank_gap_fill` and `error_correction` are here but not there: each has its own
+ * builder, and the generic form has no fields for either.
  */
 export const CREATABLE_EXERCISE_TYPES = [
   'multiple_choice',
@@ -214,26 +213,6 @@ export const exerciseFormSchema = z
     toLines: z
       .array(z.object({ text: z.string().max(1000), speaker: z.string().max(100).optional() }))
       .optional(),
-
-    // error_correction — each sentence is written as chunks separated by `|`,
-    // and the faulty chunk is named by its 1-based position with the rewrite
-    // that replaces it.
-    ecSentences: z
-      .array(
-        z.object({
-          chunks: z.string().max(2000),
-          fixes: z
-            .array(
-              z.object({
-                chunkIndex: z.string().max(4),
-                accepted: z.string().max(500),
-                note: z.string().max(500).optional(),
-              }),
-            )
-            .optional(),
-        }),
-      )
-      .optional(),
   })
   .superRefine((data, ctx) => {
     switch (data.templateCode) {
@@ -410,55 +389,6 @@ export const exerciseFormSchema = z
             code: z.ZodIssueCode.custom,
             path: ['toLines'],
             message: 'At least 2 lines required',
-          });
-        }
-        break;
-      }
-      case 'error_correction': {
-        const sentences = (data.ecSentences ?? []).filter((s) => s.chunks.trim());
-        if (sentences.length < 1) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['ecSentences'],
-            message: 'At least 1 sentence required',
-          });
-        }
-        let fixCount = 0;
-        sentences.forEach((sentence) => {
-          const index = (data.ecSentences ?? []).indexOf(sentence);
-          const chunkCount = splitChunks(sentence.chunks).length;
-          if (chunkCount < 2) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ['ecSentences', index, 'chunks'],
-              message: 'Split the sentence into at least 2 parts with |',
-            });
-          }
-          (sentence.fixes ?? []).forEach((fix, j) => {
-            if (!fix.accepted.trim() && !fix.chunkIndex.trim()) return;
-            fixCount += 1;
-            const position = Number(fix.chunkIndex);
-            if (!Number.isInteger(position) || position < 1 || position > chunkCount) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['ecSentences', index, 'fixes', j, 'chunkIndex'],
-                message: `Part number between 1 and ${chunkCount}`,
-              });
-            }
-            if (!fix.accepted.trim()) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['ecSentences', index, 'fixes', j, 'accepted'],
-                message: 'Required',
-              });
-            }
-          });
-        });
-        if (sentences.length > 0 && fixCount === 0) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['ecSentences'],
-            message: 'At least 1 mistake required',
           });
         }
         break;

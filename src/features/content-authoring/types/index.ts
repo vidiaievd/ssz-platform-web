@@ -129,4 +129,13 @@ export type CurriculumTreeSelection =
       kind: 'item';
       item: import('@/features/content/types').CurriculumTreeItemNode;
       sectionTitle: string | null;
+      /** The section holding the row — a level, for material the course keeps itself. */
+      sectionId: string | null;
+      /**
+       * The container whose draft version places this row: the module it sits
+       * in, or the course itself. Everything acting on the row — the editor
+       * link, reassigning its section — addresses that container, not the
+       * course the tree was opened on.
+       */
+      containerId: string;
     };

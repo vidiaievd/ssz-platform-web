@@ -13,7 +13,8 @@
     "archived": "Archived"
   },
   "breadcrumb": {
-    "courses": "Courses"
+    "courses": "Courses",
+    "structure": "Structure"
   },
   "sections": {
     "noSection": "No section",
@@ -348,17 +349,7 @@
     "mpVariant": "Layout",
     "mpVariant_pairs": "Word pairs",
     "mpVariant_halves": "Sentence halves",
-    "mpVariantHint": "Sentence halves number the left column 1, 2, 3 … and letter the right A, B, C …",
-    "ecSentences": "Sentences",
-    "ecSentencesHint": "Split each sentence into parts with | — the learner taps a part to rewrite it. Then name the faulty part by its number.",
-    "ecChunksPlaceholder": "I could see | that the more | I talked to Sue | she was warming up with me",
-    "ecChunkIndexPlaceholder": "Part #",
-    "ecAcceptedPlaceholder": "Correct wording (comma-separated variants)",
-    "ecNotePlaceholder": "Note (optional)",
-    "ecAddSentence": "Add sentence",
-    "ecRemoveSentence": "Remove sentence",
-    "ecAddFix": "Add mistake",
-    "ecRemoveFix": "Remove mistake"
+    "mpVariantHint": "Sentence halves number the left column 1, 2, 3 … and letter the right A, B, C …"
   },
   "grammar": {
     "add": "Add rule",
@@ -614,7 +605,65 @@
     "publishSummaryCourseDraft": "The course is not published — students cannot open it.",
     "publishSummaryCoursePending": "The course itself has unpublished changes.",
     "publishSummaryModulesPending": "{count, plural, one {# module has} other {# modules have}} unpublished changes.",
-    "publishSummaryModulesDraft": "{count, plural, one {# module is} other {# modules are}} not published yet."
+    "publishSummaryModulesDraft": "{count, plural, one {# module is} other {# modules are}} not published yet.",
+    "preflightUnavailable": "Could not load readiness checks. Counts may be unavailable.",
+    "unpublishedBannerCount": "{count, plural, one {# item has} other {# items have}} unpublished changes.",
+    "unpublishedBannerHint": "Students still see the last published version.",
+    "unpublishedBannerAction": "Review",
+    "moduleCount": "{count, plural, one {# module} other {# modules}}",
+    "minutes": "{count} min",
+    "noModulesYet": "No modules yet — add the first one.",
+    "addLessonToSection": "Add to {section}",
+    "duplicate": "Duplicate",
+    "addModuleTo": "Add module to {name}",
+    "addLessonTo": "Add lesson to {name}",
+    "rename": "Rename",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "moveTo": "Move to…",
+    "moveToAnotherModule": "Another module",
+    "unpublish": "Unpublish",
+    "moreActions": "More actions for {name}",
+    "item": "Item",
+    "remove": "Remove…",
+    "delete": "Delete…",
+    "dragBlock": "Drag to move {name}",
+    "dragCrossModule": "Moving a block to another module is not available yet.",
+    "dragModule": "Drag to move module {name}",
+    "dragLevel": "Drag to move level {name}",
+    "openEditor": "Open editor",
+    "deleteAction": "Delete",
+    "subtitle": "Subtitle",
+    "publishStateLabel": "Publish state",
+    "publishEdited": "Edited",
+    "blocks": "Blocks",
+    "sections": "Sections",
+    "sequentialUnlock": "Sequential unlock",
+    "sequentialUnlockHint": "The next module opens once the previous one is done",
+    "code": "Code",
+    "estMinutes": "Est. minutes",
+    "learningGoals": "Learning goals",
+    "learningGoalsPlaceholder": "One goal per line…",
+    "homeworkByDefault": "Homework by default",
+    "homeworkByDefaultHint": "Assign to groups automatically",
+    "includeInSrs": "Include in SRS",
+    "includeInSrsHint": "New words feed the review queue",
+    "saveTitleEn": "Save subtitle",
+    "titleEnSaved": "Subtitle saved.",
+    "titleField": "Title",
+    "titleSaved": "Title saved.",
+    "blockType": "Block type",
+    "sectionField": "Section",
+    "points": "Points",
+    "attempts": "Attempts",
+    "attemptsUnlimited": "Unlimited",
+    "autoGrade": "Auto-grade",
+    "autoGradeHint": "Score without teacher review",
+    "showHints": "Show hints",
+    "showHintsHint": "Reveal after the first wrong answer",
+    "visibleToStudents": "Visible to students",
+    "visibleToStudentsHint": "Hidden blocks stay in the outline",
+    "blockId": "Block id"
   },
   "settings": {
     "trigger": "Settings",
@@ -626,9 +675,9 @@
     "description": "Choose a material type to add to this module.",
     "defaultTitle": "New {type}",
     "defaultInstructions": "Complete the exercise.",
-    "exerciseTypeTitle": "Choose an exercise type",
-    "exerciseTypeDescription": "The type decides how the exercise is answered and graded, and cannot be changed afterwards.",
-    "back": "Back"
+    "groupMaterial": "Reading & vocabulary",
+    "groupExercises": "Exercises",
+    "intoSection": "The new material goes into “{section}”."
   },
   "editor": {
     "backToCourse": "Back to course",
@@ -1192,6 +1241,253 @@
       "action": "Draft with AI"
     }
   },
+  "errorCorrection": {
+    "shell": {
+      "done": "Done",
+      "navBack": "Back",
+      "navNext": "Next: {step}",
+      "stepsLabel": "Builder steps",
+      "step1": "Format",
+      "step2": "The mistakes",
+      "step3": "Hints & check",
+      "step4": "Flow",
+      "stepOk": "ready",
+      "stepCheck": "to check",
+      "stepEmpty": "empty",
+      "blockerCount": "{count, plural, one {# problem} other {# problems}}",
+      "saving": "Saving…",
+      "saved": "Saved at {time}",
+      "saveFailed": "Save failed — your edits are still here.",
+      "saveConflict": "Someone else saved this exercise. Your edits are still here.",
+      "saveRetry": "Try again",
+      "saveOverwrite": "Save mine anyway",
+      "gateTitle": "Before you assign this",
+      "gateClear": "Nothing standing in the way — this exercise is ready to assign.",
+      "gateGoToStep": "Go to step {step}",
+      "gateBlocked": "{count, plural, one {Fix # problem first} other {Fix # problems first}}",
+      "gateDone": "Looks good",
+      "gateClose": "Close"
+    },
+    "step1": {
+      "title": "What kind of correction is this?",
+      "lede": "You never type the mistakes in as a list. You write the sentence the way the student meets it, and the sentence the way it should be — the builder works out what separates them, and that becomes the mistakes to find.",
+      "modeLabel": "Format",
+      "mode": {
+        "sentences": "Separate sentences",
+        "passage": "One continuous text"
+      },
+      "modeHelp": {
+        "sentences": "One mistake per sentence is the norm.",
+        "passage": "Three to five mistakes in one paragraph."
+      },
+      "sentencesNote": "Each sentence stands on its own. Students can correct them in any order.",
+      "passageNote": "The whole paragraph is one submission. Students are not told which sentence holds the mistake.",
+      "passageManyItems": "{count, plural, one {# text block here} other {# text blocks here}} — a continuous text is usually one.",
+      "instructionsLabel": "Task line",
+      "instructionsPlaceholder": "Finn feilen i hver setning og skriv den riktig.",
+      "instructionsHelp": "One line, in the language students are learning. Required — an exercise without it cannot be published.",
+      "noteLabel": "Context (optional)",
+      "notePlaceholder": "Where the sentences come from, or what to look out for.",
+      "noteHelp": "Shown under the task line, before students start.",
+      "tip": "Build the mistakes out of sentences your students have actually written. Invented mistakes tend to be either too easy to spot, or so wrong that nobody recognises them."
+    },
+    "step2": {
+      "title": "The sentences and the answer key",
+      "titlePassage": "The text and the answer key",
+      "lede": "Two lines per task. The builder compares them word by word and shows you what it has turned into a mistake — check that the list matches what you actually want to test.",
+      "statErrors": "mistakes in total",
+      "statSentences": "sentences",
+      "statTexts": "texts",
+      "statExplained": "explained",
+      "statMultiVariant": "with alternatives",
+      "sentenceLabel": "Sentence {index}",
+      "textLabel": "Text",
+      "wrongLabel": "{label}, with the mistake",
+      "refLabel": "How it should be",
+      "refRequired": "Without an answer key there are no mistakes.",
+      "errorsHere": "{count, plural, one {# mistake to find} other {# mistakes to find}}",
+      "badgeNoRef": "no answer key",
+      "badgeIdentical": "no difference",
+      "badgeAllSoft": "nothing counts as a mistake",
+      "identical": "The two lines are the same. The student would have nothing to correct.",
+      "foundLabel": "The mistakes the builder found",
+      "nothingThere": "(nothing)",
+      "struckOut": "(struck out)",
+      "typeLabel": "Kind of mistake",
+      "acceptBoth": "Accept both",
+      "acceptBothOn": "Counts as a mistake",
+      "acceptBothHelp": "Accept both forms — then this is not a mistake the student has to find.",
+      "spanNoteLabel": "Why “{wrong}” is wrong",
+      "spanNotePlaceholder": "Why is this wrong? Shown to the student after grading.",
+      "duplicate": "Duplicate",
+      "remove": "Delete",
+      "more": "Show more",
+      "altsLabel": "Other acceptable corrections",
+      "altsHelp": "One whole sentence per line. Write (liker|elsker) for variants inside a line.",
+      "hintLabel": "Hint",
+      "hintPlaceholder": "What happens to the verb when the sentence starts with a time expression?",
+      "hintHelp": "The student chooses whether to open it.",
+      "teacherNoteLabel": "Note to the teacher",
+      "teacherNotePlaceholder": "The V2 rule — came up on the last test.",
+      "teacherNoteHelp": "Shown in the grading queue, never to the student.",
+      "addSentence": "Add sentence",
+      "itemCount": "{count, plural, one {# sentence in the set} other {# sentences in the set}}"
+    },
+    "step3": {
+      "title": "What does the student know, and what does the machine accept?",
+      "lede": "Error correction is easy to make impossible. The number of mistakes is the one piece of information that decides whether this is an exercise or a guessing game — the rest is tuning how strictly the text is read.",
+      "toldGroup": "What the student is told",
+      "countLabel": "Show how many mistakes there are",
+      "countHelp": "“{count} mistakes to find” stands at the top. Without it the student does not know when they are done.",
+      "markLabel": "Mark the sentences that hold a mistake",
+      "markHelp": "The student sees which sentences are affected, but not which word.",
+      "hintTextLabel": "Hints can be opened",
+      "hintTextHelp": "The hint you wrote in step 2 sits behind a button; the student chooses.",
+      "noHintsWritten": "No hints written yet — add one to a sentence in step 2 and this can be switched on.",
+      "showTypeLabel": "Show the kind of mistake",
+      "showTypeHelp": "“Word form” stands beside it. Makes the task markedly easier — usually A2 only.",
+      "checkGroup": "The automatic check",
+      "onLabel": "Check answers automatically",
+      "onHelp": "Compares the student's sentence with your answer key, word by word.",
+      "exactPassLabel": "A hit on the answer key is approved without a teacher",
+      "exactPassHelp": "Every mistake corrected and nothing else changed. Everything else joins the queue.",
+      "requireAllSpansLabel": "Require every mistake to have been touched",
+      "requireAllSpansHelp": "One untouched mistake stops automatic approval, even if the rest is right.",
+      "nothingApproved": "Nothing is approved automatically while a hit on the answer key still goes to the teacher.",
+      "typoLabel": "Accept one letter's slip",
+      "typoHelp": "“leiligheten” against “leilgheten” counts as a hit in long words.",
+      "caseLabel": "Ignore capital letters",
+      "caseHelp": "Only turn this on if a capital is never the point here.",
+      "punctLabel": "Ignore punctuation",
+      "punctHelp": "Cannot be on if a comma or a full stop is one of the mistakes.",
+      "strayLabel": "Changes outside the mistakes",
+      "stray": {
+        "ignore": "Ignore",
+        "flag": "Flag for the teacher",
+        "block": "Block approval"
+      },
+      "strayHelp": {
+        "ignore": "Only the answer key counts. A rewritten but correct sentence can be approved.",
+        "flag": "The answer can still be approved, but the teacher sees what else was touched.",
+        "block": "Touch anything outside the mistakes and the answer always goes to the teacher."
+      },
+      "nearLabel": "Threshold for “partly corrected”",
+      "near": {
+        "loose": "Loose",
+        "normal": "Normal",
+        "strict": "Strict"
+      },
+      "nearHelp": "An answer that fixed no mistake is still called partly corrected from {percent}% similarity to the answer key.",
+      "offWarning": "With no automatic check every single answer lands in the teacher's queue untouched — the correct ones included."
+    },
+    "step4": {
+      "title": "The road from handing in to a mark",
+      "lede": "The automatic check can only approve. Everything it does not settle, and everything it is unsure about, ends up with you.",
+      "stageStudent": "The student corrects",
+      "stageStudentChecks": "{count, plural, one {# self-check before handing in} other {# self-checks before handing in}}",
+      "stageStudentBlind": "No self-check — they hand in blind",
+      "stageCheck": "Automatic check",
+      "stageCheckOn": "Compares against the answer key, word by word",
+      "stageCheckOff": "Off",
+      "stageTeacher": "Teacher",
+      "stageTeacherDetail": "Sees everything that was not approved automatically",
+      "selfCheckLabel": "Self-checks before handing in",
+      "selfCheckNone": "None",
+      "selfCheckTimes": "{count}",
+      "selfCheckOn": "The student learns how many mistakes are corrected — never which words are left.",
+      "selfCheckOff": "The student hands in blind.",
+      "showSpanCountLabel": "Show how many are corrected in the self-check",
+      "showSpanCountHelp": "“2 of 3 corrected”, with a dot per mistake. Without it the student gets a general message only.",
+      "noSelfCheck": "There is no self-check to show it in — allow at least one above.",
+      "keyboardLabel": "Keyboard with æ ø å",
+      "keyboardHelp": "Extra keys in the editing field.",
+      "attemptsLabel": "Further attempts",
+      "attempts": {
+        "free": "Can hand in again",
+        "once": "One attempt"
+      },
+      "showRefsLabel": "When is the answer key shown?",
+      "showRefs": {
+        "afterGraded": "After grading",
+        "afterSubmit": "Right after handing in",
+        "never": "Never"
+      },
+      "showRefsHelp": {
+        "afterGraded": "The answer key comes with the teacher's feedback.",
+        "afterSubmit": "The student sees it at once — which makes another attempt worth little.",
+        "never": "The student never sees the answer key, only whether the correction was right."
+      }
+    },
+    "spanType": {
+      "form": "word form",
+      "order": "word order",
+      "extra": "superfluous word",
+      "missing": "missing word",
+      "spelling": "spelling",
+      "function": "preposition or article"
+    },
+    "spanTypeHelp": {
+      "form": "The right word, inflected wrongly — tense, definiteness, number.",
+      "order": "The right words in the wrong order.",
+      "extra": "A word that should not be there at all.",
+      "missing": "A word the sentence needs and does not have.",
+      "spelling": "The right word, misspelt.",
+      "function": "A small word carrying grammar: a preposition, an article, a conjunction."
+    },
+    "verdict": {
+      "exact": "All correct",
+      "typo": "Right, one spelling slip",
+      "partial": "Partly corrected",
+      "stray": "Corrected, but more was changed",
+      "off": "The mistakes are still there",
+      "empty": "Untouched",
+      "noref": "No answer key"
+    },
+    "tester": {
+      "title": "Try it as a student",
+      "pick": "Which sentence to try",
+      "howTo": "Correct it here and you will see the verdict a student would get, and whether it would reach you at all.",
+      "routePass": "approved without a teacher",
+      "routeTeacher": "goes to the teacher",
+      "fixed": "{fixed} of {total} mistakes corrected",
+      "built": "The student's sentence",
+      "diffLabel": "The sentence against the answer key",
+      "legendExtra": "struck through = superfluous",
+      "legendMissing": "green = missing",
+      "legendTypo": "amber = spelling",
+      "stray": "Changed outside the mistakes: {words} — {policy}",
+      "strayPolicy": {
+        "ignore": "ignored, the answer can still be approved",
+        "flag": "the teacher is shown what else was touched",
+        "block": "this alone sends the answer to the teacher"
+      }
+    },
+    "preview": {
+      "empty": "Write a sentence with a mistake to see the student's view.",
+      "noCheck": "Preview only — nothing you correct here is checked. For a verdict, use “Try it as a student” at the foot of step 2."
+    },
+    "issues": {
+      "EX_NO_INSTRUCTION": "No task line yet — students open the exercise without being told what to do.",
+      "PASSAGE_MANY_ITEMS": "{count, plural, one {# text block} other {# text blocks}} in a continuous text — students submit all of them as one.",
+      "EX_NO_ITEMS": "Nothing to correct yet. Write a sentence with a mistake and its answer key.",
+      "ITEM_NO_REF": "Sentence {index}: no answer key, so there is no mistake to find.",
+      "ITEM_IDENTICAL": "Sentence {index}: the two lines are identical — the student would have nothing to correct.",
+      "ITEM_ALL_SOFT": "Sentence {index}: every difference is accepted as an alternative, so nothing counts as a mistake.",
+      "ITEM_MANY_ERRORS": "Sentence {index} holds {count, plural, one {# mistake} other {# mistakes}} — heavy for one task.",
+      "ITEM_TOO_LONG": "Sentence {index} is {count, plural, one {# word} other {# words}} long. Finding a mistake turns into reading.",
+      "SPAN_ORDER_TOO_WIDE": "Sentence {index}: a word-order mistake spanning {count, plural, one {# word} other {# words}} leaves the student unsure where it starts.",
+      "ITEM_ALT_EQUALS_WRONG": "Sentence {index}: one of the accepted alternatives is the faulty sentence itself.",
+      "ITEM_COUNT_HIDDEN": "Sentence {index} holds {count, plural, one {# mistake} other {# mistakes}}, and the number is hidden — that makes it guesswork.",
+      "CHECK_IGNORE_PUNCT": "Punctuation is ignored, so a comma or a full stop cannot be one of the mistakes.",
+      "CHECK_CASE_INSENSITIVE": "Capital letters are ignored, so a capital cannot be one of the mistakes.",
+      "CHECK_STRAY_IGNORED": "Changes outside the mistakes are ignored — a rewritten but correct sentence can pass.",
+      "CHECK_NEAR_TOO_LOW": "“Partly corrected” starts at {percent}% similarity, which is low enough to flatter a wrong answer.",
+      "HINT_TYPE_WITHOUT_COUNT": "The type of each mistake is shown, but not how many there are.",
+      "AI_WITHOUT_CHECK": "The AI stage is on while the automatic check is off.",
+      "AI_UNLIMITED_BEFORE_SUBMIT": "Students see the AI comment before submitting, with no limit on self-checks.",
+      "REFS_AFTER_SUBMIT_WITH_RETRIES": "The answer key is shown right after submitting, which makes another attempt worth little."
+    }
+  },
   "activity": {
     "title": "Activity",
     "empty": "Nothing has been changed here yet.",
@@ -1222,5 +1518,90 @@
       "answerCheckSettings": "checking",
       "estimatedDurationSeconds": "duration"
     }
+  },
+  "topbar": {
+    "version": "v{number}",
+    "lastEdited": "Last edited {date}",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "previewAsStudent": "Preview as student"
+  },
+  "metrics": {
+    "levels": "Levels",
+    "modules": "Modules",
+    "lessons": "Lessons",
+    "exercises": "Exercises",
+    "estTime": "Est. time",
+    "unpublished": "Unpublished",
+    "hours": "{value} h",
+    "minutes": "{value} min"
+  },
+  "outline": {
+    "title": "Outline",
+    "empty": "No levels yet.",
+    "hasUnpublished": "Has unpublished changes"
+  },
+  "stub": {
+    "notAvailable": "not available yet",
+    "short": "not yet"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search lessons, blocks, exercises…",
+    "allTypes": "All block types",
+    "typeVocab": "Vocabulary",
+    "typeText": "Text & listening",
+    "typeGrammar": "Grammar",
+    "typeExercises": "Exercises",
+    "anyState": "Any state",
+    "statePublished": "Published",
+    "stateEdited": "Edited",
+    "stateDraft": "Draft",
+    "clear": "Clear",
+    "noMatchesInModule": "Nothing here matches the filters."
+  },
+  "bulk": {
+    "label": "Bulk actions for the selected blocks",
+    "selected": "{count, plural, one {# selected} other {# selected}}",
+    "selectBlock": "Select {name}",
+    "duplicate": "Duplicate",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "delete": "Remove",
+    "clear": "Clear",
+    "deleteFailed": "{count, plural, one {# block could not be removed} other {# blocks could not be removed}}. They are still selected."
+  },
+  "deleteNode": {
+    "cancel": "Cancel",
+    "level": {
+      "title": "Delete level “{name}”?",
+      "body": "The level itself is deleted. Its {modules, plural, one {# module} other {# modules}} and {blocks, plural, one {# block} other {# blocks}} stay in the course, but without a level to group them.",
+      "confirm": "Delete level"
+    },
+    "module": {
+      "title": "Remove “{name}” from this course?",
+      "body": "The module and its {blocks, plural, one {# block} other {# blocks}} stay in your library and can be added to a course again. Student progress is kept.",
+      "confirm": "Remove module"
+    },
+    "item": {
+      "title": "Remove “{name}” from this module?",
+      "body": "The material itself stays in your library and can be placed again. Student progress is kept.",
+      "confirm": "Remove block"
+    },
+    "blocks": {
+      "title": "Remove {blocks, plural, one {# block} other {# blocks}} from this course?",
+      "body": "The material itself stays in your library and can be placed again. Student progress is kept.",
+      "confirm": "Remove blocks"
+    }
+  },
+  "undo": {
+    "action": "Undo",
+    "done": "Change undone.",
+    "failed": "Could not undo that.",
+    "nothing": "Nothing to undo.",
+    "renamed": "Renamed to “{name}”.",
+    "moved": "Moved “{name}”.",
+    "movedToSection": "Moved “{name}” to another section.",
+    "removed": "Removed “{name}”.",
+    "removedBlocks": "{count, plural, one {Removed # block.} other {Removed # blocks.}}"
   }
 }

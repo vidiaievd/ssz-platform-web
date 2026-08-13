@@ -108,6 +108,12 @@ export interface ReviewRequest {
   reviewedAt?: string;
   /** Makes a replayed submission a no-op; remembered server-side for 7 days. */
   idempotencyKey?: string;
+  /**
+   * The learner was shown that today's quota is met and chose to keep going, which
+   * lifts the daily review cap for this submission. Send it only in answer to that
+   * choice. It has no bearing on the new-card cap, which is not the learner's call.
+   */
+  carryOnPastLimit?: boolean;
 }
 
 /** The review endpoint returns the rescheduled card itself. */

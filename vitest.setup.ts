@@ -19,6 +19,16 @@ if (typeof ResizeObserver === 'undefined') {
     disconnect() {}
   };
 }
+// Radix menus and selects drive themselves from Pointer Events and pointer
+// capture, neither of which JSDOM implements. Without these, a DropdownMenu
+// trigger simply never opens under test.
+if (typeof Element !== 'undefined') {
+  Element.prototype.hasPointerCapture ??= () => false;
+  Element.prototype.setPointerCapture ??= () => {};
+  Element.prototype.releasePointerCapture ??= () => {};
+  Element.prototype.scrollIntoView ??= () => {};
+}
+
 // `useMediaQuery` (reader rail, responsive layouts) calls this on mount; JSDOM
 // has no implementation at all. Defaults to "does not match", so a component
 // under test renders its narrow-viewport branch unless a test stubs otherwise.

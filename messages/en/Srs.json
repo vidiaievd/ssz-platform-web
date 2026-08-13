@@ -3,7 +3,11 @@
     "start": "Start review",
     "stats": "Stats",
     "dueToday": "{count, plural, one {# card due today} other {# cards due today}}",
-    "limitReachedToday": "You've hit today's limit — come back tomorrow.",
+    "quotaMet": {
+      "body": "That's today's quota. Whatever is left will still be here tomorrow.",
+      "finish": "Finish for today",
+      "carryOn": "Keep reviewing"
+    },
     "caughtUp": {
       "title": "You're all caught up",
       "subtitle": "Come back tomorrow.",

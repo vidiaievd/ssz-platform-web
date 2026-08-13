@@ -345,17 +345,7 @@
     "mpVariant": "Oppsett",
     "mpVariant_pairs": "Ordpar",
     "mpVariant_halves": "Setningshalvdeler",
-    "mpVariantHint": "Setningshalvdeler nummererer venstre kolonne 1, 2, 3 … og bokstaverer høyre A, B, C …",
-    "ecSentences": "Setninger",
-    "ecSentencesHint": "Del hver setning i deler med | — eleven trykker på en del for å skrive den om. Oppgi så hvilken del som er feil, med nummer.",
-    "ecChunksPlaceholder": "Jeg så | at jo mer | jeg snakket med Sue | jo mer varmet hun opp med meg",
-    "ecChunkIndexPlaceholder": "Del nr.",
-    "ecAcceptedPlaceholder": "Riktig formulering (varianter med komma)",
-    "ecNotePlaceholder": "Merknad (valgfritt)",
-    "ecAddSentence": "Legg til setning",
-    "ecRemoveSentence": "Fjern setning",
-    "ecAddFix": "Legg til feil",
-    "ecRemoveFix": "Fjern feil"
+    "mpVariantHint": "Setningshalvdeler nummererer venstre kolonne 1, 2, 3 … og bokstaverer høyre A, B, C …"
   },
   "grammar": {
     "add": "Legg til regel",
@@ -578,7 +568,8 @@
     "note": "Oppdateres mens du redigerer"
   },
   "breadcrumb": {
-    "courses": "Kurs"
+    "courses": "Kurs",
+    "structure": "Struktur"
   },
   "structure": {
     "sectionTitle": "Pensum",
@@ -614,7 +605,65 @@
     "publishSummaryCourseDraft": "Kurset er ikke publisert — studentene kan ikke åpne det.",
     "publishSummaryCoursePending": "Selve kurset har upubliserte endringer.",
     "publishSummaryModulesPending": "{count, plural, one {# modul har} other {# moduler har}} upubliserte endringer.",
-    "publishSummaryModulesDraft": "{count, plural, one {# modul er} other {# moduler er}} ikke publisert ennå."
+    "publishSummaryModulesDraft": "{count, plural, one {# modul er} other {# moduler er}} ikke publisert ennå.",
+    "preflightUnavailable": "Kunne ikke laste klargjøringssjekkene. Tallene kan mangle.",
+    "unpublishedBannerCount": "{count, plural, one {# element har} other {# elementer har}} upubliserte endringer.",
+    "unpublishedBannerHint": "Elevene ser fortsatt den sist publiserte versjonen.",
+    "unpublishedBannerAction": "Se gjennom",
+    "moduleCount": "{count, plural, one {# modul} other {# moduler}}",
+    "minutes": "{count} min",
+    "noModulesYet": "Ingen moduler ennå — legg til den første.",
+    "addLessonToSection": "Legg til i {section}",
+    "duplicate": "Dupliser",
+    "addModuleTo": "Legg til modul i {name}",
+    "addLessonTo": "Legg til leksjon i {name}",
+    "rename": "Gi nytt navn",
+    "moveUp": "Flytt opp",
+    "moveDown": "Flytt ned",
+    "moveTo": "Flytt til…",
+    "moveToAnotherModule": "En annen modul",
+    "unpublish": "Avpubliser",
+    "moreActions": "Flere handlinger for {name}",
+    "item": "Element",
+    "remove": "Fjern…",
+    "delete": "Slett…",
+    "dragBlock": "Dra for å flytte {name}",
+    "dragCrossModule": "Å flytte en blokk til en annen modul er ikke tilgjengelig ennå.",
+    "dragModule": "Dra for å flytte modulen {name}",
+    "dragLevel": "Dra for å flytte nivået {name}",
+    "openEditor": "Åpne redigering",
+    "deleteAction": "Slett",
+    "subtitle": "Undertittel",
+    "publishStateLabel": "Publiseringsstatus",
+    "publishEdited": "Endret",
+    "blocks": "Blokker",
+    "sections": "Seksjoner",
+    "sequentialUnlock": "Sekvensiell åpning",
+    "sequentialUnlockHint": "Neste modul åpnes når den forrige er fullført",
+    "code": "Kode",
+    "estMinutes": "Est. minutter",
+    "learningGoals": "Læringsmål",
+    "learningGoalsPlaceholder": "Ett mål per linje …",
+    "homeworkByDefault": "Lekse som standard",
+    "homeworkByDefaultHint": "Tildeles gruppene automatisk",
+    "includeInSrs": "Ta med i SRS",
+    "includeInSrsHint": "Nye ord havner i repetisjonskøen",
+    "saveTitleEn": "Lagre undertittel",
+    "titleEnSaved": "Undertittelen er lagret.",
+    "titleField": "Tittel",
+    "titleSaved": "Tittelen er lagret.",
+    "blockType": "Blokktype",
+    "sectionField": "Seksjon",
+    "points": "Poeng",
+    "attempts": "Forsøk",
+    "attemptsUnlimited": "Ubegrenset",
+    "autoGrade": "Automatisk retting",
+    "autoGradeHint": "Gis poeng uten at læreren ser over",
+    "showHints": "Vis hint",
+    "showHintsHint": "Vises etter første feilsvar",
+    "visibleToStudents": "Synlig for elevene",
+    "visibleToStudentsHint": "Skjulte blokker blir stående i oversikten",
+    "blockId": "Blokk-id"
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -626,9 +675,9 @@
     "description": "Velg en materialtype som skal legges til i denne modulen.",
     "defaultTitle": "Ny {type}",
     "defaultInstructions": "Løs oppgaven.",
-    "exerciseTypeTitle": "Velg oppgavetype",
-    "exerciseTypeDescription": "Typen bestemmer hvordan oppgaven besvares og vurderes, og kan ikke endres etterpå.",
-    "back": "Tilbake"
+    "groupMaterial": "Lesing og ordforråd",
+    "groupExercises": "Øvelser",
+    "intoSection": "Det nye materialet havner i «{section}»."
   },
   "editor": {
     "backToCourse": "Tilbake til kurset",
@@ -1192,6 +1241,253 @@
       "action": "Lag utkast med KI"
     }
   },
+  "errorCorrection": {
+    "shell": {
+      "done": "Ferdig",
+      "navBack": "Tilbake",
+      "navNext": "Neste: {step}",
+      "stepsLabel": "Trinn i byggeren",
+      "step1": "Format",
+      "step2": "Feilene",
+      "step3": "Hint og sjekk",
+      "step4": "Flyt",
+      "stepOk": "klart",
+      "stepCheck": "sjekk",
+      "stepEmpty": "tomt",
+      "blockerCount": "{count, plural, one {# problem} other {# problemer}}",
+      "saving": "Lagrer…",
+      "saved": "Lagret {time}",
+      "saveFailed": "Lagringen feilet — endringene dine ligger her fortsatt.",
+      "saveConflict": "Noen andre lagret denne oppgaven. Endringene dine ligger her fortsatt.",
+      "saveRetry": "Prøv igjen",
+      "saveOverwrite": "Lagre mine likevel",
+      "gateTitle": "Før du deler ut denne",
+      "gateClear": "Ingenting i veien — oppgaven er klar til å deles ut.",
+      "gateGoToStep": "Gå til trinn {step}",
+      "gateBlocked": "{count, plural, one {Fiks # problem først} other {Fiks # problemer først}}",
+      "gateDone": "Ser bra ut",
+      "gateClose": "Lukk"
+    },
+    "step1": {
+      "title": "Hva slags feilretting er dette?",
+      "lede": "Du skriver aldri feilene inn som en liste. Du skriver setningen slik studenten møter den, og setningen slik den skal være — byggeren regner ut hva som skiller dem, og det blir feilene studenten skal finne.",
+      "modeLabel": "Format",
+      "mode": {
+        "sentences": "Enkeltsetninger",
+        "passage": "Sammenhengende tekst"
+      },
+      "modeHelp": {
+        "sentences": "Én feil per setning er normalen.",
+        "passage": "Tre til fem feil i ett avsnitt."
+      },
+      "sentencesNote": "Hver setning står for seg. Studenten kan rette dem i vilkårlig rekkefølge.",
+      "passageNote": "Hele avsnittet er én innlevering. Studenten ser ikke hvilken setning feilen ligger i.",
+      "passageManyItems": "{count, plural, one {# tekstblokk her} other {# tekstblokker her}} — en sammenhengende tekst er som regel én.",
+      "instructionsLabel": "Oppgavetekst",
+      "instructionsPlaceholder": "Finn feilen i hver setning og skriv den riktig.",
+      "instructionsHelp": "Én linje, på språket studentene lærer. Påkrevd — uten den kan ikke oppgaven publiseres.",
+      "noteLabel": "Kontekst (valgfritt)",
+      "notePlaceholder": "Hvor setningene kommer fra, eller hva studenten skal se etter.",
+      "noteHelp": "Vises under oppgaveteksten, før studenten begynner.",
+      "tip": "Lag feilene av setninger studentene faktisk har skrevet. Konstruerte feil blir ofte for lette å se, eller så gale at ingen kjenner dem igjen."
+    },
+    "step2": {
+      "title": "Setningene og fasiten",
+      "titlePassage": "Teksten og fasiten",
+      "lede": "To linjer per oppgave. Byggeren sammenligner dem ord for ord og viser deg hva den har gjort til feil — sjekk at listen stemmer med det du faktisk vil teste.",
+      "statErrors": "feil totalt",
+      "statSentences": "setninger",
+      "statTexts": "tekster",
+      "statExplained": "med forklaring",
+      "statMultiVariant": "med alternativ",
+      "sentenceLabel": "Setning {index}",
+      "textLabel": "Tekst",
+      "wrongLabel": "{label} med feil",
+      "refLabel": "Slik skal det være",
+      "refRequired": "Uten fasit finnes det ingen feil.",
+      "errorsHere": "{count, plural, one {# feil å finne} other {# feil å finne}}",
+      "badgeNoRef": "mangler fasit",
+      "badgeIdentical": "ingen forskjell",
+      "badgeAllSoft": "ingenting teller som feil",
+      "identical": "De to linjene er like. Studenten ville ikke hatt noe å rette.",
+      "foundLabel": "Feilene byggeren fant",
+      "nothingThere": "(ingenting)",
+      "struckOut": "(strykes)",
+      "typeLabel": "Type feil",
+      "acceptBoth": "Godta begge",
+      "acceptBothOn": "Er en feil",
+      "acceptBothHelp": "Godta begge formene — da teller ikke dette som en feil studenten må finne.",
+      "spanNoteLabel": "Hvorfor «{wrong}» er feil",
+      "spanNotePlaceholder": "Hvorfor er dette feil? Vises for studenten etter vurdering.",
+      "duplicate": "Dupliser",
+      "remove": "Slett",
+      "more": "Vis mer",
+      "altsLabel": "Andre godtakbare rettinger",
+      "altsHelp": "Én hel setning per linje. Skriv (liker|elsker) for varianter inne i en linje.",
+      "hintLabel": "Hint",
+      "hintPlaceholder": "Hva skjer med verbet når setningen starter med et tidsuttrykk?",
+      "hintHelp": "Studenten velger selv om hen åpner det.",
+      "teacherNoteLabel": "Merknad til læreren",
+      "teacherNotePlaceholder": "V2-regelen — gikk igjen på forrige prøve.",
+      "teacherNoteHelp": "Vises i vurderingskøen, aldri for studenten.",
+      "addSentence": "Legg til setning",
+      "itemCount": "{count, plural, one {# setning i settet} other {# setninger i settet}}"
+    },
+    "step3": {
+      "title": "Hva vet studenten, og hva godtar maskinen?",
+      "lede": "Feilretting er lett å gjøre umulig. Antall feil er den ene opplysningen som avgjør om oppgaven er en øvelse eller en gjettelek — resten er finjustering av hvor strengt teksten leses.",
+      "toldGroup": "Det studenten får vite",
+      "countLabel": "Vis antall feil",
+      "countHelp": "«{count} feil å finne» står øverst. Uten dette vet ikke studenten når hen er ferdig.",
+      "markLabel": "Marker setninger som har feil",
+      "markHelp": "Studenten ser hvilke setninger som er berørt, men ikke hvilket ord.",
+      "hintTextLabel": "Hint kan åpnes",
+      "hintTextHelp": "Hintet du skrev i trinn 2 ligger bak en knapp, studenten velger selv.",
+      "noHintsWritten": "Ingen hint skrevet ennå — skriv et på en setning i trinn 2, så kan dette slås på.",
+      "showTypeLabel": "Vis feiltypen",
+      "showTypeHelp": "«Feil ordform» står ved siden av. Gjør oppgaven merkbart lettere — vanligvis bare på A2.",
+      "checkGroup": "Autosjekk",
+      "onLabel": "Sjekk svarene automatisk",
+      "onHelp": "Sammenligner studentens setning med fasiten din, ord for ord.",
+      "exactPassLabel": "Treff på fasiten godkjennes uten lærer",
+      "exactPassHelp": "Alle feil rettet, ingenting annet endret. Alt annet går i køen.",
+      "requireAllSpansLabel": "Krev at alle feilene er rørt",
+      "requireAllSpansHelp": "Én urørt feil hindrer automatisk godkjenning, selv om resten stemmer.",
+      "nothingApproved": "Ingenting godkjennes automatisk så lenge treff på fasiten også går til læreren.",
+      "typoLabel": "Godta én bokstavfeil",
+      "typoHelp": "«leiligheten» mot «leilgheten» teller som treff i lange ord.",
+      "caseLabel": "Ignorer store og små bokstaver",
+      "caseHelp": "Slå på bare hvis stor forbokstav aldri er poenget her.",
+      "punctLabel": "Ignorer tegnsetting",
+      "punctHelp": "Kan ikke stå på hvis komma eller punktum er en av feilene.",
+      "strayLabel": "Endringer utenfor feilene",
+      "stray": {
+        "ignore": "Ignorer",
+        "flag": "Marker for læreren",
+        "block": "Blokker godkjenning"
+      },
+      "strayHelp": {
+        "ignore": "Bare fasiten teller. En omskrevet, men korrekt setning kan bli godkjent.",
+        "flag": "Svaret kan fortsatt godkjennes, men læreren ser hva mer som ble rørt.",
+        "block": "Rører studenten noe utenfor feilene, går svaret alltid til læreren."
+      },
+      "nearLabel": "Terskel for «delvis rettet»",
+      "near": {
+        "loose": "Løs",
+        "normal": "Vanlig",
+        "strict": "Streng"
+      },
+      "nearHelp": "Et svar som ikke har rettet noen feil kalles likevel delvis rettet fra {percent} % likhet med fasiten.",
+      "offWarning": "Uten autosjekk går hvert eneste svar urørt i lærerkøen — også de som er helt riktige."
+    },
+    "step4": {
+      "title": "Veien fra innlevering til karakter",
+      "lede": "Autosjekken kan bare godkjenne. Alt den ikke tar stilling til, og alt den er i tvil om, ender hos deg.",
+      "stageStudent": "Studenten retter",
+      "stageStudentChecks": "{count, plural, one {# egensjekk før innlevering} other {# egensjekker før innlevering}}",
+      "stageStudentBlind": "Ingen egensjekk — hen leverer blindt",
+      "stageCheck": "Autosjekk",
+      "stageCheckOn": "Sammenligner mot fasiten ord for ord",
+      "stageCheckOff": "Av",
+      "stageTeacher": "Lærer",
+      "stageTeacherDetail": "Ser alt som ikke ble godkjent automatisk",
+      "selfCheckLabel": "Egensjekk før innlevering",
+      "selfCheckNone": "Ingen",
+      "selfCheckTimes": "{count}",
+      "selfCheckOn": "Studenten ser hvor mange feil som er rettet, ikke hvilke ord som er igjen.",
+      "selfCheckOff": "Studenten leverer blindt.",
+      "showSpanCountLabel": "Vis antall rettede feil i egensjekken",
+      "showSpanCountHelp": "«2 av 3 rettet» med prikker. Uten dette får studenten bare en generell melding.",
+      "noSelfCheck": "Det finnes ingen egensjekk å vise det i — tillat minst én over.",
+      "keyboardLabel": "Tastatur med æ ø å",
+      "keyboardHelp": "Egne knapper i redigeringsfeltet.",
+      "attemptsLabel": "Nye forsøk",
+      "attempts": {
+        "free": "Kan levere på nytt",
+        "once": "Ett forsøk"
+      },
+      "showRefsLabel": "Når vises fasiten?",
+      "showRefs": {
+        "afterGraded": "Etter vurdering",
+        "afterSubmit": "Rett etter innlevering",
+        "never": "Aldri"
+      },
+      "showRefsHelp": {
+        "afterGraded": "Fasiten kommer sammen med lærerens tilbakemelding.",
+        "afterSubmit": "Studenten ser fasiten med én gang — gjør nye forsøk lite verdt.",
+        "never": "Studenten ser aldri fasiten, bare om rettingen var riktig."
+      }
+    },
+    "spanType": {
+      "form": "ordform",
+      "order": "leddstilling",
+      "extra": "overflødig ord",
+      "missing": "manglende ord",
+      "spelling": "skrivefeil",
+      "function": "preposisjon eller artikkel"
+    },
+    "spanTypeHelp": {
+      "form": "Riktig ord, feil bøying — tid, bestemthet, tall.",
+      "order": "Riktige ord i feil rekkefølge.",
+      "extra": "Et ord som ikke skal være der i det hele tatt.",
+      "missing": "Et ord setningen trenger, men ikke har.",
+      "spelling": "Riktig ord, stavet feil.",
+      "function": "Et lite ord som bærer grammatikk: preposisjon, artikkel, konjunksjon."
+    },
+    "verdict": {
+      "exact": "Alt riktig",
+      "typo": "Riktig, én skrivefeil",
+      "partial": "Delvis rettet",
+      "stray": "Rettet, men mer er endret",
+      "off": "Feilene står igjen",
+      "empty": "Ikke rørt",
+      "noref": "Ingen fasit"
+    },
+    "tester": {
+      "title": "Prøv som student",
+      "pick": "Hvilken setning du vil prøve",
+      "howTo": "Rett den her, så ser du dommen studenten ville fått — og om svaret i det hele tatt havner hos deg.",
+      "routePass": "godkjent uten lærer",
+      "routeTeacher": "går til læreren",
+      "fixed": "{fixed}/{total} feil rettet",
+      "built": "Studentens setning",
+      "diffLabel": "Setningen mot fasiten",
+      "legendExtra": "gjennomstreket = overflødig",
+      "legendMissing": "grønn = manglende",
+      "legendTypo": "gul = skrivefeil",
+      "stray": "Endret utenfor feilene: {words} — {policy}",
+      "strayPolicy": {
+        "ignore": "ignoreres, svaret kan fortsatt godkjennes",
+        "flag": "læreren ser hva mer som ble rørt",
+        "block": "dette alene sender svaret til læreren"
+      }
+    },
+    "preview": {
+      "empty": "Skriv en setning med feil for å se studentens visning.",
+      "noCheck": "Kun forhåndsvisning — ingenting du retter her blir sjekket. Vil du se dommen, bruk «Prøv som student» nederst i trinn 2."
+    },
+    "issues": {
+      "EX_NO_INSTRUCTION": "Ingen oppgavetekst ennå — studenten åpner oppgaven uten å få vite hva hen skal gjøre.",
+      "PASSAGE_MANY_ITEMS": "{count, plural, one {# tekstblokk} other {# tekstblokker}} i en sammenhengende tekst — studenten leverer alt som én.",
+      "EX_NO_ITEMS": "Ingenting å rette ennå. Skriv en setning med feil og fasiten til den.",
+      "ITEM_NO_REF": "Setning {index}: ingen fasit, og da finnes det ingen feil å finne.",
+      "ITEM_IDENTICAL": "Setning {index}: de to linjene er like — studenten ville ikke hatt noe å rette.",
+      "ITEM_ALL_SOFT": "Setning {index}: alle forskjellene er godtatt som alternativ, så ingenting teller som feil.",
+      "ITEM_MANY_ERRORS": "Setning {index} har {count, plural, one {# feil} other {# feil}} — tungt for én oppgave.",
+      "ITEM_TOO_LONG": "Setning {index} er på {count, plural, one {# ord} other {# ord}}. Da blir det å finne feilen til lesing.",
+      "SPAN_ORDER_TOO_WIDE": "Setning {index}: en leddstillingsfeil over {count, plural, one {# ord} other {# ord}} gjør det uklart hvor den begynner.",
+      "ITEM_ALT_EQUALS_WRONG": "Setning {index}: en av de godtakbare rettingene er selve setningen med feil.",
+      "ITEM_COUNT_HIDDEN": "Setning {index} har {count, plural, one {# feil} other {# feil}}, og antallet er skjult — da blir det gjetting.",
+      "CHECK_IGNORE_PUNCT": "Tegnsetting ignoreres, så komma eller punktum kan ikke være en av feilene.",
+      "CHECK_CASE_INSENSITIVE": "Store bokstaver ignoreres, så stor forbokstav kan ikke være en av feilene.",
+      "CHECK_STRAY_IGNORED": "Endringer utenfor feilene ignoreres — en omskrevet, men korrekt setning kan bli godkjent.",
+      "CHECK_NEAR_TOO_LOW": "«Delvis rettet» starter på {percent} % likhet, lavt nok til å smigre et feil svar.",
+      "HINT_TYPE_WITHOUT_COUNT": "Feiltypen vises, men ikke hvor mange feil det er.",
+      "AI_WITHOUT_CHECK": "AI-trinnet er på mens autosjekken er av.",
+      "AI_UNLIMITED_BEFORE_SUBMIT": "Studenten ser AI-kommentaren før innlevering, uten grense på egensjekk.",
+      "REFS_AFTER_SUBMIT_WITH_RETRIES": "Fasiten vises rett etter innlevering, og da er et nytt forsøk lite verdt."
+    }
+  },
   "activity": {
     "title": "Aktivitet",
     "empty": "Ingenting er endret her ennå.",
@@ -1222,5 +1518,90 @@
       "answerCheckSettings": "sjekking",
       "estimatedDurationSeconds": "varighet"
     }
+  },
+  "topbar": {
+    "version": "v{number}",
+    "lastEdited": "Sist endret {date}",
+    "expandAll": "Utvid alle",
+    "collapseAll": "Slå sammen alle",
+    "previewAsStudent": "Forhåndsvis som elev"
+  },
+  "metrics": {
+    "levels": "Nivåer",
+    "modules": "Moduler",
+    "lessons": "Leksjoner",
+    "exercises": "Øvelser",
+    "estTime": "Est. tid",
+    "unpublished": "Upublisert",
+    "hours": "{value} t",
+    "minutes": "{value} min"
+  },
+  "outline": {
+    "title": "Oversikt",
+    "empty": "Ingen nivåer ennå.",
+    "hasUnpublished": "Har upubliserte endringer"
+  },
+  "stub": {
+    "notAvailable": "ikke tilgjengelig ennå",
+    "short": "ikke ennå"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Søk i leksjoner, blokker, øvelser…",
+    "allTypes": "Alle blokktyper",
+    "typeVocab": "Ordforråd",
+    "typeText": "Tekst og lytting",
+    "typeGrammar": "Grammatikk",
+    "typeExercises": "Øvelser",
+    "anyState": "Alle tilstander",
+    "statePublished": "Publisert",
+    "stateEdited": "Endret",
+    "stateDraft": "Utkast",
+    "clear": "Nullstill",
+    "noMatchesInModule": "Ingenting her passer med filtrene."
+  },
+  "bulk": {
+    "label": "Masshandlinger for de valgte blokkene",
+    "selected": "{count, plural, one {# valgt} other {# valgt}}",
+    "selectBlock": "Velg {name}",
+    "duplicate": "Dupliser",
+    "publish": "Publiser",
+    "unpublish": "Avpubliser",
+    "delete": "Fjern",
+    "clear": "Nullstill",
+    "deleteFailed": "{count, plural, one {# blokk kunne ikke fjernes} other {# blokker kunne ikke fjernes}}. De er fortsatt valgt."
+  },
+  "deleteNode": {
+    "cancel": "Avbryt",
+    "level": {
+      "title": "Slette nivået «{name}»?",
+      "body": "Selve nivået slettes. {modules, plural, one {# modul} other {# moduler}} og {blocks, plural, one {# blokk} other {# blokker}} blir liggende i kurset, men uten et nivå som grupperer dem.",
+      "confirm": "Slett nivå"
+    },
+    "module": {
+      "title": "Fjerne «{name}» fra dette kurset?",
+      "body": "Modulen og dens {blocks, plural, one {# blokk} other {# blokker}} blir liggende i biblioteket og kan legges til et kurs igjen. Elevfremgang beholdes.",
+      "confirm": "Fjern modul"
+    },
+    "item": {
+      "title": "Fjerne «{name}» fra denne modulen?",
+      "body": "Selve materialet blir liggende i biblioteket og kan plasseres på nytt. Elevfremgang beholdes.",
+      "confirm": "Fjern blokk"
+    },
+    "blocks": {
+      "title": "Fjerne {blocks, plural, one {# blokk} other {# blokker}} fra dette kurset?",
+      "body": "Selve materialet blir liggende i biblioteket og kan plasseres på nytt. Elevfremgang beholdes.",
+      "confirm": "Fjern blokker"
+    }
+  },
+  "undo": {
+    "action": "Angre",
+    "done": "Endringen er angret.",
+    "failed": "Kunne ikke angre det.",
+    "nothing": "Ingenting å angre.",
+    "renamed": "Nytt navn: «{name}».",
+    "moved": "Flyttet «{name}».",
+    "movedToSection": "Flyttet «{name}» til en annen seksjon.",
+    "removed": "Fjernet «{name}».",
+    "removedBlocks": "{count, plural, one {Fjernet # blokk.} other {Fjernet # blokker.}}"
   }
 }

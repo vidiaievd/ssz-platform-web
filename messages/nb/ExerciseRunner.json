@@ -110,11 +110,51 @@
     "partialScore": "{correct} av {total} linjer på riktig plass"
   },
   "errorCorrection": {
-    "remaining": "Rettelser gjort: {found} av {total}",
-    "hint": "Trykk på en del av setningen for å skrive den om.",
+    "toFind": "{count, plural, one {# feil å finne} other {# feil å finne}}",
+    "inThis": "{count, plural, one {# feil her} other {# feil her}}",
+    "progress": "{touched} av {total} setninger er rørt",
+    "howTo": "Trykk på et ord for å rette det, eller mellom to ord for å sette inn et. Tomt felt stryker ordet.",
     "editLabel": "Skriv om «{text}»",
-    "partialScore": "{correct} av {total} feil rettet",
-    "falsePositives": "{n} riktige deler ble endret"
+    "wordLabel": "Ord: {text}",
+    "insertLabel": "Sett inn et ord på plass {position}",
+    "insertedLabel": "Innsatt ord: {text}",
+    "showHint": "Hint",
+    "reset": "Nullstill setningen",
+    "changes": "{count, plural, =0 {ingen endringer} one {# endring} other {# endringer}}",
+    "types": "Type: {types}",
+    "passageLabel": "Tekst",
+    "send": "Lever",
+    "sending": "Sender…",
+    "sendFailed": "Kunne ikke sende — prøv igjen",
+    "untouched": "{count, plural, one {# setning er ikke rørt} other {# setninger er ikke rørt}}",
+    "approved": "Alt riktig — godkjent automatisk",
+    "withTeacher": "Levert. Læreren ser på det.",
+    "withTeacherWhen": "Vanligvis innen 48 timer.",
+    "again": "Prøv på nytt",
+    "charPad": "Norske bokstaver",
+    "selfCheck": {
+      "button": "Sjekk rettingene ({left} igjen)",
+      "spent": "Ingen egensjekker igjen",
+      "checking": "Sjekker …",
+      "failed": "Fikk ikke sjekket — prøv igjen",
+      "summary": "{fixed} av {total} feil rettet",
+      "tally": "{fixed}/{total}",
+      "itemClean": "Her er det ingenting å rette.",
+      "itemAll": "Alle feilene her er rettet.",
+      "itemNone": "Ingen av feilene her er rettet ennå.",
+      "itemSome": "{fixed} av {total} rettet her.",
+      "remaining": "{count, plural, one {# feil står fortsatt igjen} other {# feil står fortsatt igjen}}",
+      "remainingWithTypes": "{count, plural, one {# feil står fortsatt igjen} other {# feil står fortsatt igjen}} — {types}",
+      "stray": "{count, plural, one {Du har også endret # ord der det ikke var noen feil} other {Du har også endret # ord der det ikke var noen feil}}"
+    },
+    "type": {
+      "form": "ordform",
+      "order": "ordstilling",
+      "extra": "overflødig ord",
+      "missing": "manglende ord",
+      "spelling": "staving",
+      "function": "preposisjon eller artikkel"
+    }
   },
   "gapFill": {
     "remaining": "{count} igjen",
@@ -132,6 +172,9 @@
     "attemptCount": "Forsøk {n}",
     "restart": "Prøv på nytt",
     "revealFailed": "Kunne ikke vise svarene — prøv igjen",
-    "retryAttempt": "Prøv igjen · forsøk {n}"
+    "retryAttempt": "Prøv igjen · forsøk {n}",
+    "restored": "Ditt forrige svar, lagret {date}",
+    "restoredScored": "{correct} av {total} luker riktig",
+    "startOver": "Svar på nytt"
   }
 }

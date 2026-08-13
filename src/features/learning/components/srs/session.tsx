@@ -24,6 +24,7 @@ export function SrsSession() {
     reviewedCount,
     currentIdempotencyKey,
     ratingError,
+    carryOnPastLimit,
     revealAnswer,
     advanceAfterRating,
     setCardState,
@@ -83,7 +84,9 @@ export function SrsSession() {
       }, ADVANCE_DELAY_MS);
 
       submitReview(
-        { rating, reviewedAt, idempotencyKey },
+        // Carried on every review of a session the learner chose to continue — the
+        // cap is checked per submission, so sending it once would not be enough.
+        { rating, reviewedAt, idempotencyKey, ...(carryOnPastLimit ? { carryOnPastLimit } : {}) },
         {
           onSuccess: () => {
             clearTimeout(advanceTimer);
@@ -110,6 +113,7 @@ export function SrsSession() {
       cardState,
       isPending,
       currentIdempotencyKey,
+      carryOnPastLimit,
       setCardState,
       advanceAfterRating,
       submitReview,

@@ -44,7 +44,11 @@ interface SrsEntryProps {
   dueCount: number;
   reviewedToday: number;
   dailyLimit: number;
-  onStart: () => void;
+  /**
+   * `carryOnPastLimit` is set only when the learner picked "keep going" from the
+   * quota-met state, and travels with every review of that session.
+   */
+  onStart: (options?: { carryOnPastLimit: boolean }) => void;
 }
 
 export function SrsEntry({
@@ -75,19 +79,39 @@ export function SrsEntry({
 
       {limitReached && (
         <p className="rounded-[var(--ssz-radius-lg)] bg-[var(--ssz-bg-subtle)] border border-[var(--ssz-border-default)] px-4 py-2 text-sm text-[var(--ssz-text-secondary)]">
-          {t('entry.limitReachedToday')}
+          {t('entry.quotaMet.body')}
         </p>
       )}
 
+      {/*
+        Past the quota the screen stops refusing and starts offering. The material is
+        already due: not doing it today only moves it to tomorrow, and the one real
+        cost — tiredness — can only be judged by the person feeling it.
+
+        Finishing is the primary action, carrying on the secondary one. That order is
+        the whole recommendation; there is deliberately no streak, no over-quota
+        counter and no praise for going on, because in spaced repetition the extra
+        work is paid for later.
+      */}
       <div className="flex flex-col gap-2 w-full">
-        <Button
-          onClick={onStart}
-          disabled={limitReached}
-          autoFocus
-          className="w-full"
-        >
-          {t('entry.start')}
-        </Button>
+        {limitReached ? (
+          <>
+            <Button asChild autoFocus className="w-full">
+              <Link href="/student/enrolled">{t('entry.quotaMet.finish')}</Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => onStart({ carryOnPastLimit: true })}
+            >
+              {t('entry.quotaMet.carryOn')}
+            </Button>
+          </>
+        ) : (
+          <Button onClick={() => onStart()} autoFocus className="w-full">
+            {t('entry.start')}
+          </Button>
+        )}
         <Button asChild variant="ghost" className="w-full">
           <Link href="/student/srs/stats">
             <BarChart2 className="mr-2 h-4 w-4" aria-hidden />
