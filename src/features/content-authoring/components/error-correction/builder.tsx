@@ -28,6 +28,7 @@ import {
 } from '@/lib/shared-kernel/error-correction';
 
 import { StepFormat } from './step-format';
+import { StepMistakes } from './step-mistakes';
 import { useErrorCorrectionAutosave } from './use-error-correction-autosave';
 import { useIssueCopy } from './issue-copy';
 
@@ -130,8 +131,10 @@ export function ErrorCorrectionBuilder({
       <div className="min-w-0">
         {step === 1 ? (
           <StepFormat exercise={exercise} onChange={setExercise} />
+        ) : step === 2 ? (
+          <StepMistakes exercise={exercise} onChange={setExercise} />
         ) : (
-          // Steps 2–4 arrive in the commits after this one; the rail already reports
+          // Steps 3–4 arrive in the commits after this one; the rail already reports
           // what they hold, because the kernel judges the whole document either way.
           <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
             {t('comingSoon')}
