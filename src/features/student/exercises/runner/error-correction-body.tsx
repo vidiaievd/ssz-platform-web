@@ -11,6 +11,8 @@ import type {
   StudentProjection,
 } from '@/lib/shared-kernel/error-correction';
 
+import { CharPad } from '@/components/shared/char-pad';
+
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
@@ -51,6 +53,9 @@ const READING = 'var(--ssz-font-reading)';
 const HIT_MIN_HEIGHT = 30;
 
 const EMPTY: StudentEdits = { marked: {}, fix: {}, ins: {} };
+
+/** The letters an English or a US layout does not have — `flow.keyboard`. */
+const NORWEGIAN_CHARS = ['æ', 'ø', 'å'] as const;
 
 const editsOf = (value: ErrorCorrectionValue, itemId: string): StudentEdits =>
   value[itemId] ?? EMPTY;
@@ -149,80 +154,28 @@ export function ErrorCorrectionBody({
       <ol className="flex flex-col gap-4">
         {projection.items.map((item, index) => {
           const edits = editsOf(value, item.id);
-          const untouched = pointOut && !isTouched(edits);
+          const feedback = selfCheckByItem.get(item.id);
 
           return (
-            <li
+            <EcCard
               key={item.id}
-              className="rounded-2xl border px-4 py-3 transition-colors"
-              style={{
-                borderColor: untouched ? accent : 'var(--ssz-border-default)',
-                background: untouched ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)',
-              }}
-            >
-              <div className="mb-1.5 flex items-center justify-between gap-3">
-                <span className="text-[12px] font-bold text-(--ssz-text-muted)">
-                  {projection.mode === 'passage'
-                    ? t('errorCorrection.passageLabel')
-                    : t('taskNumber', { n: index + 1 })}
-                </span>
-                {/*
-                  How many mistakes *this* card holds, and only in `passage` — where the
-                  card is the whole text, so it says no more than the total already does.
-                  Across separate sentences it would say which ones are clean, and that is
-                  a different and much larger hint than "there are three mistakes here
-                  somewhere": the learner could stop reading four of five sentences. The
-                  handoff draws the line in the same place (BEHAVIOR §B, ec/preview.jsx).
-                */}
-                {projection.mode === 'passage' && item.errorCount !== undefined && (
-                  <span className="text-[12px] text-(--ssz-text-muted)">
-                    {t('errorCorrection.inThis', { count: item.errorCount })}
-                  </span>
-                )}
-              </div>
-
-              <EcSentence
-                item={item}
-                edits={edits}
-                passage={projection.mode === 'passage'}
-                interactive={interactive}
-                accent={accent}
-                onChange={(change) => update(item.id, change)}
-              />
-
-              <div className="mt-2 flex flex-wrap items-center gap-3">
-                {item.hint !== undefined && item.hint !== '' && <HintDisclosure hint={item.hint} />}
-                {item.errorTypes !== undefined && item.errorTypes.length > 0 && (
-                  <span className="text-[12px] text-(--ssz-text-muted)">
-                    {t('errorCorrection.types', {
-                      types: item.errorTypes
-                        .map((type) => t(`errorCorrection.type.${type}`))
-                        .join(', '),
-                    })}
-                  </span>
-                )}
-                <span className="text-[12px] text-(--ssz-text-muted)">
-                  {t('errorCorrection.changes', { count: changeCount(edits) })}
-                </span>
-                {interactive && changeCount(edits) > 0 && (
-                  <button
-                    type="button"
-                    className="text-[12px] font-semibold underline underline-offset-2"
-                    style={{ color: 'var(--ssz-text-secondary)' }}
-                    onClick={() => update(item.id, () => ({ marked: {}, fix: {}, ins: {} }))}
-                  >
-                    {t('errorCorrection.reset')}
-                  </button>
-                )}
-              </div>
-
-              {selfCheckByItem.has(item.id) && (
-                <SelfCheckNote
-                  feedback={selfCheckByItem.get(item.id)!}
-                  showSpanCount={projection.flow.showSpanCount}
-                />
-              )}
-            </li>
+              item={item}
+              label={
+                projection.mode === 'passage'
+                  ? t('errorCorrection.passageLabel')
+                  : t('taskNumber', { n: index + 1 })
+              }
+              passage={projection.mode === 'passage'}
+              keyboard={projection.flow.keyboard}
+              showSpanCount={projection.flow.showSpanCount}
+              edits={edits}
+              interactive={interactive}
+              accent={accent}
+              mode={mode}
+              untouched={pointOut && !isTouched(edits)}
+              {...(feedback === undefined ? {} : { feedback })}
+              onChange={(change) => update(item.id, change)}
+            />
           );
         })}
       </ol>
@@ -231,6 +184,121 @@ export function ErrorCorrectionBody({
         <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)">{t('errorCorrection.howTo')}</p>
       )}
     </div>
+  );
+}
+
+interface EcCardProps {
+  item: ProjectedItem;
+  label: string;
+  passage: boolean;
+  keyboard: boolean;
+  showSpanCount: boolean;
+  edits: StudentEdits;
+  interactive: boolean;
+  accent: string;
+  mode: RunnerMode;
+  untouched: boolean;
+  feedback?: SelfCheckItem;
+  onChange: (change: (edits: StudentEdits) => StudentEdits) => void;
+}
+
+/**
+ * One sentence with everything that belongs to it: the editor, its tools, and whatever
+ * the last self-check said about it.
+ *
+ * The card owns which word is open for editing, rather than the editor doing it, because
+ * the æøå pad below the sentence needs to know whether there is a field to write into at
+ * all — a pad that looks live and does nothing is worse than one that is plainly off.
+ */
+function EcCard({
+  item,
+  label,
+  passage,
+  keyboard,
+  showSpanCount,
+  edits,
+  interactive,
+  accent,
+  mode,
+  untouched,
+  feedback,
+  onChange,
+}: EcCardProps) {
+  const t = useTranslations('ExerciseRunner');
+  /** `w:3` while rewriting word 3, `s:2` while inserting at slot 2. */
+  const [editing, setEditing] = useState<string | null>(null);
+
+  return (
+    <li
+      className="rounded-2xl border px-4 py-3 transition-colors"
+      style={{
+        borderColor: untouched ? accent : 'var(--ssz-border-default)',
+        background: untouched ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)',
+      }}
+    >
+      <div className="mb-1.5 flex items-center justify-between gap-3">
+        <span className="text-[12px] font-bold text-(--ssz-text-muted)">{label}</span>
+        {/*
+          How many mistakes *this* card holds, and only in `passage` — where the card is
+          the whole text, so it says no more than the total already does. Across separate
+          sentences it would say which ones are clean, and that is a different and much
+          larger hint than "there are three mistakes here somewhere": the learner could
+          stop reading four of five sentences. The handoff draws the line in the same
+          place (BEHAVIOR §B, ec/preview.jsx).
+        */}
+        {passage && item.errorCount !== undefined && (
+          <span className="text-[12px] text-(--ssz-text-muted)">
+            {t('errorCorrection.inThis', { count: item.errorCount })}
+          </span>
+        )}
+      </div>
+
+      <EcSentence
+        item={item}
+        edits={edits}
+        passage={passage}
+        interactive={interactive}
+        accent={accent}
+        editing={editing}
+        onEditingChange={setEditing}
+        onChange={onChange}
+      />
+
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        {keyboard && interactive && (
+          <CharPad
+            chars={NORWEGIAN_CHARS}
+            disabled={editing === null}
+            label={t('errorCorrection.charPad')}
+          />
+        )}
+        {item.hint !== undefined && item.hint !== '' && <HintDisclosure hint={item.hint} />}
+        {item.errorTypes !== undefined && item.errorTypes.length > 0 && (
+          <span className="text-[12px] text-(--ssz-text-muted)">
+            {t('errorCorrection.types', {
+              types: item.errorTypes.map((type) => t(`errorCorrection.type.${type}`)).join(', '),
+            })}
+          </span>
+        )}
+        <span className="text-[12px] text-(--ssz-text-muted)">
+          {t('errorCorrection.changes', { count: changeCount(edits) })}
+        </span>
+        {interactive && changeCount(edits) > 0 && (
+          <button
+            type="button"
+            className="text-[12px] font-semibold underline underline-offset-2"
+            style={{ color: 'var(--ssz-text-secondary)' }}
+            onClick={() => onChange(() => ({ marked: {}, fix: {}, ins: {} }))}
+          >
+            {t('errorCorrection.reset')}
+          </button>
+        )}
+      </div>
+
+      {feedback !== undefined && (
+        <SelfCheckNote feedback={feedback} showSpanCount={showSpanCount} />
+      )}
+    </li>
   );
 }
 
@@ -319,6 +387,9 @@ interface EcSentenceProps {
   passage: boolean;
   interactive: boolean;
   accent: string;
+  /** `w:3` while rewriting word 3, `s:2` while inserting at slot 2; `null` when idle. */
+  editing: string | null;
+  onEditingChange: (editing: string | null) => void;
   onChange: (change: (edits: StudentEdits) => StudentEdits) => void;
 }
 
@@ -330,10 +401,17 @@ interface EcSentenceProps {
  * that makes this template gradable: with edits, "which mistake did they find?" is a
  * fact; with a rewritten sentence it is a guess.
  */
-function EcSentence({ item, edits, passage, interactive, accent, onChange }: EcSentenceProps) {
+function EcSentence({
+  item,
+  edits,
+  passage,
+  interactive,
+  accent,
+  editing,
+  onEditingChange: setEditing,
+  onChange,
+}: EcSentenceProps) {
   const t = useTranslations('ExerciseRunner');
-  /** `w:3` while rewriting word 3, `s:2` while inserting at slot 2. */
-  const [editing, setEditing] = useState<string | null>(null);
 
   const commitWord = (index: number, word: string, text: string) => {
     onChange((current) => {

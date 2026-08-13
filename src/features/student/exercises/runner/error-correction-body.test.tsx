@@ -261,6 +261,43 @@ describe('ErrorCorrectionBody', () => {
     expect(onAnswerChange).toHaveBeenLastCalledWith(true);
   });
 
+  describe('the æøå pad', () => {
+    it('stays off until there is a field to write into', () => {
+      render(<Harness />);
+
+      expect(screen.getAllByRole('button', { name: 'å' })[0]).toBeDisabled();
+
+      fireEvent.click(word('jeg'));
+
+      expect(screen.getAllByRole('button', { name: 'å' })[0]).toBeEnabled();
+    });
+
+    it('writes the letter into the open word, and the edit sticks', () => {
+      const onValueChange = vi.fn();
+      render(<Harness onValueChange={onValueChange} />);
+
+      fireEvent.click(word('kino.'));
+      const field = screen.getByRole('textbox') as HTMLInputElement;
+      fireEvent.change(field, { target: { value: 'f' } });
+      field.setSelectionRange(1, 1);
+      fireEvent.click(screen.getAllByRole('button', { name: 'å' })[0]!);
+      fireEvent.blur(field);
+
+      expect(onValueChange).toHaveBeenLastCalledWith({
+        i1: { marked: { 5: true }, fix: { 5: 'få' }, ins: {} },
+      });
+    });
+
+    it('is not offered when the author switched the keyboard off', () => {
+      const projection = makeProjection();
+      renderBody({
+        projection: { ...projection, flow: { ...projection.flow, keyboard: false } },
+      });
+
+      expect(screen.queryByRole('button', { name: 'å' })).not.toBeInTheDocument();
+    });
+  });
+
   describe('the self-check the learner asked for', () => {
     const feedback = (item: Partial<SelfCheckItem> = {}) => ({
       fixedCount: 1,

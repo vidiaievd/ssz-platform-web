@@ -131,6 +131,7 @@
     "withTeacher": "Handed in. Your teacher will look at it.",
     "withTeacherWhen": "Usually within 48 hours.",
     "again": "Try again",
+    "charPad": "Norwegian letters",
     "selfCheck": {
       "button": "Check my corrections ({left} left)",
       "spent": "No checks left",
