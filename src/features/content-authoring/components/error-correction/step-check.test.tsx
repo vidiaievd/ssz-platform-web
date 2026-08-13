@@ -122,6 +122,38 @@ describe('StepCheck', () => {
     );
   });
 
+  it('makes a switch inert when it could not change anything, and says why', async () => {
+    const { onChange, user } = renderStep(doc({ check: { ...DEFAULT_CHECK, exactPass: false } }));
+
+    const requireAll = screen.getByRole('switch', { name: /Require every mistake/ });
+    expect(requireAll).toBeDisabled();
+    expect(screen.getByText(/Nothing is approved automatically/)).toBeInTheDocument();
+
+    await user.click(requireAll);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('will not offer to unlock a hint nobody has written', () => {
+    renderStep();
+    expect(screen.getByRole('switch', { name: /Hints can be opened/ })).toBeDisabled();
+    expect(screen.getByText(/No hints written yet/)).toBeInTheDocument();
+  });
+
+  it('offers it as soon as one sentence carries a hint', () => {
+    renderStep(
+      doc({
+        items: [
+          {
+            ...item('i1', 'I går jeg gikk på kino.', 'I går gikk jeg på kino.'),
+            hint: 'Hva skjer med verbet?',
+          },
+        ],
+      }),
+    );
+
+    expect(screen.getByRole('switch', { name: /Hints can be opened/ })).toBeEnabled();
+  });
+
   it('sets the threshold, and reports the one the document carries', async () => {
     const { onChange, user } = renderStep();
 

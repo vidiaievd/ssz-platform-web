@@ -56,6 +56,16 @@ export function StepCheck({ exercise, onChange }: StepCheckProps) {
    * one, and older documents may — so the control shows where that number sits rather
    * than silently showing nothing selected.
    */
+  /**
+   * Two settings can be on screen while meaning nothing at all, and a switch that does
+   * nothing is worse than a missing one — the author sets it and believes it took.
+   *
+   * `requireAllSpans` is read only when the check decides to approve (`route`), so with
+   * nothing ever approved it cannot change an outcome. `hintText` unlocks a hint that has
+   * to have been written in step 2 first.
+   */
+  const hintsWritten = exercise.items.some((item) => (item.hint ?? '').trim() !== '');
+
   const nearStep = NEAR_STEPS.reduce((closest, step) =>
     Math.abs(step.value - check.near) < Math.abs(closest.value - check.near) ? step : closest,
   );
@@ -88,6 +98,7 @@ export function StepCheck({ exercise, onChange }: StepCheckProps) {
             label={t('errorCorrection.step3.hintTextLabel')}
             help={t('errorCorrection.step3.hintTextHelp')}
             checked={hints.hintText}
+            disabledReason={hintsWritten ? undefined : t('errorCorrection.step3.noHintsWritten')}
             onChange={(value) => setHints({ hintText: value })}
           />
           <ToggleRow
@@ -120,6 +131,9 @@ export function StepCheck({ exercise, onChange }: StepCheckProps) {
                 label={t('errorCorrection.step3.requireAllSpansLabel')}
                 help={t('errorCorrection.step3.requireAllSpansHelp')}
                 checked={check.requireAllSpans}
+                disabledReason={
+                  check.exactPass ? undefined : t('errorCorrection.step3.nothingApproved')
+                }
                 onChange={(value) => setCheck({ requireAllSpans: value })}
               />
               <ToggleRow
@@ -210,17 +224,34 @@ interface ToggleRowProps {
   label: string;
   help: string;
   checked: boolean;
+  /** Why this setting cannot be used right now. Present means the row is inert. */
+  disabledReason?: string;
   onChange: (checked: boolean) => void;
 }
 
-function ToggleRow({ label, help, checked, onChange }: ToggleRowProps) {
+/**
+ * One setting.
+ *
+ * When it is inert the reason replaces the help line rather than hiding in a tooltip: a
+ * disabled switch takes no focus, so a tooltip would be reachable by mouse only, and the
+ * author most in need of the explanation is the one who cannot hover. The `title` is
+ * there as well, for the pointer that goes looking.
+ */
+function ToggleRow({ label, help, checked, disabledReason, onChange }: ToggleRowProps) {
+  const inert = disabledReason !== undefined;
+
   return (
-    <label className="flex items-start justify-between gap-4">
+    <label
+      className={`flex items-start justify-between gap-4 ${inert ? 'opacity-60' : ''}`}
+      title={disabledReason}
+    >
       <span>
         <span className="block text-sm">{label}</span>
-        <span className="block text-xs text-muted-foreground">{help}</span>
+        <span className={`block text-xs ${inert ? 'text-warning-700' : 'text-muted-foreground'}`}>
+          {disabledReason ?? help}
+        </span>
       </span>
-      <Switch checked={checked} onCheckedChange={onChange} />
+      <Switch checked={checked} disabled={inert} onCheckedChange={onChange} />
     </label>
   );
 }
