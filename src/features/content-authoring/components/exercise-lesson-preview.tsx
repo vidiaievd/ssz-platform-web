@@ -310,33 +310,6 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
-        {values.templateCode === 'error_correction' &&
-          ((values.ecSentences ?? []).some((s) => s.chunks.trim()) ? (
-            <ol className="flex flex-col gap-2.5">
-              {(values.ecSentences ?? [])
-                .filter((s) => s.chunks.trim())
-                .map((sentence, i) => (
-                  <li key={i} className="flex flex-wrap items-center gap-1">
-                    <span className="mr-0.5 text-xs text-muted-foreground">{i + 1}.</span>
-                    {sentence.chunks
-                      .split('|')
-                      .map((chunk) => chunk.trim())
-                      .filter(Boolean)
-                      .map((chunk, j) => (
-                        <span
-                          key={j}
-                          className="rounded-md border border-(--ssz-border-default) bg-surface px-1.5 py-0.5 text-[13px] text-(--ssz-text-primary)"
-                        >
-                          {chunk}
-                        </span>
-                      ))}
-                  </li>
-                ))}
-            </ol>
-          ) : (
-            empty
-          ))}
-
         {values.instructions && (
           <p className="mt-3.5 text-xs text-muted-foreground">{values.instructions}</p>
         )}

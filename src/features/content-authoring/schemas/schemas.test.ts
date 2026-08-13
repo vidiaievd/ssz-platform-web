@@ -316,57 +316,6 @@ describe('exerciseFormSchema', () => {
     expect(result.error.issues.map((i) => i.path.join('.'))).toContain('toLines');
   });
 
-  it('error_correction: accepts split sentences with a numbered fix', () => {
-    expect(
-      parseExercise({
-        templateCode: 'error_correction',
-        ecSentences: [
-          {
-            chunks: 'They say | make your mind | about people',
-            fixes: [{ chunkIndex: '2', accepted: 'make up your mind' }],
-          },
-        ],
-      }).success,
-    ).toBe(true);
-  });
-
-  it('error_correction: rejects a sentence that was never split', () => {
-    const result = parseExercise({
-      templateCode: 'error_correction',
-      ecSentences: [
-        {
-          chunks: 'They say make your mind about people',
-          fixes: [{ chunkIndex: '1', accepted: 'x' }],
-        },
-      ],
-    });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('ecSentences.0.chunks');
-  });
-
-  it('error_correction: rejects a part number outside the sentence', () => {
-    const result = parseExercise({
-      templateCode: 'error_correction',
-      ecSentences: [{ chunks: 'a | b', fixes: [{ chunkIndex: '5', accepted: 'x' }] }],
-    });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    expect(result.error.issues.map((i) => i.path.join('.'))).toContain(
-      'ecSentences.0.fixes.0.chunkIndex',
-    );
-  });
-
-  it('error_correction: rejects sentences with no mistake at all', () => {
-    const result = parseExercise({
-      templateCode: 'error_correction',
-      ecSentences: [{ chunks: 'a | b', fixes: [{ chunkIndex: '', accepted: '' }] }],
-    });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('ecSentences');
-  });
-
   it('fill_in_blank: accepts a text with at least one blank', () => {
     expect(
       parseExercise({

@@ -30,7 +30,6 @@ const base: ExerciseFormValues = {
   ],
   wbfWordBank: '',
   wbfSentences: [{ text: '', answers: [''] }],
-  ecSentences: [{ chunks: '', fixes: [{ chunkIndex: '', accepted: '', note: '' }] }],
   toKind: 'dialogue',
   toLines: [
     { text: '', speaker: '' },
@@ -937,89 +936,6 @@ describe('match_pairs layout variant', () => {
     expect(
       parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant,
     ).toBe('pairs');
-  });
-});
-
-describe('error_correction', () => {
-  const values: ExerciseFormValues = {
-    ...base,
-    templateCode: 'error_correction',
-    ecSentences: [
-      {
-        chunks: 'I could see | that the more | she was warming up with me',
-        fixes: [
-          {
-            chunkIndex: '3',
-            accepted: 'she was warming to me, she warmed to me',
-            note: 'warm to sb',
-          },
-        ],
-      },
-      {
-        chunks: 'They say | make your mind | about people',
-        fixes: [{ chunkIndex: '2', accepted: 'make up your mind', note: '' }],
-      },
-    ],
-  };
-
-  it('splits chunks on | and points each fix at the numbered part', () => {
-    const { content, expectedAnswers } = buildExercisePayload(values);
-
-    expect(content.items).toEqual([
-      {
-        id: 's-0',
-        chunks: [
-          { id: 'c-0', text: 'I could see' },
-          { id: 'c-1', text: 'that the more' },
-          { id: 'c-2', text: 'she was warming up with me' },
-        ],
-      },
-      {
-        id: 's-1',
-        chunks: [
-          { id: 'c-0', text: 'They say' },
-          { id: 'c-1', text: 'make your mind' },
-          { id: 'c-2', text: 'about people' },
-        ],
-      },
-    ]);
-    // Authors count parts from 1; ids are 0-based.
-    expect(expectedAnswers.corrections).toEqual([
-      {
-        item_id: 's-0',
-        chunk_id: 'c-2',
-        accepted: ['she was warming to me', 'she warmed to me'],
-        note: 'warm to sb',
-      },
-      { item_id: 's-1', chunk_id: 'c-1', accepted: ['make up your mind'] },
-    ]);
-    expect(content.mistake_count).toBe(2);
-  });
-
-  it('round-trips through parseExerciseToForm', () => {
-    const { content, expectedAnswers } = buildExercisePayload(values);
-    const parsed = parseExerciseToForm({
-      templateCode: 'error_correction',
-      content,
-      expectedAnswers,
-    });
-
-    expect(parsed.ecSentences).toEqual([
-      {
-        chunks: 'I could see | that the more | she was warming up with me',
-        fixes: [
-          {
-            chunkIndex: '3',
-            accepted: 'she was warming to me, she warmed to me',
-            note: 'warm to sb',
-          },
-        ],
-      },
-      {
-        chunks: 'They say | make your mind | about people',
-        fixes: [{ chunkIndex: '2', accepted: 'make up your mind', note: '' }],
-      },
-    ]);
   });
 });
 

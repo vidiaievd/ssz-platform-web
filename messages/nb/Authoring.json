@@ -345,17 +345,7 @@
     "mpVariant": "Oppsett",
     "mpVariant_pairs": "Ordpar",
     "mpVariant_halves": "Setningshalvdeler",
-    "mpVariantHint": "Setningshalvdeler nummererer venstre kolonne 1, 2, 3 … og bokstaverer høyre A, B, C …",
-    "ecSentences": "Setninger",
-    "ecSentencesHint": "Del hver setning i deler med | — eleven trykker på en del for å skrive den om. Oppgi så hvilken del som er feil, med nummer.",
-    "ecChunksPlaceholder": "Jeg så | at jo mer | jeg snakket med Sue | jo mer varmet hun opp med meg",
-    "ecChunkIndexPlaceholder": "Del nr.",
-    "ecAcceptedPlaceholder": "Riktig formulering (varianter med komma)",
-    "ecNotePlaceholder": "Merknad (valgfritt)",
-    "ecAddSentence": "Legg til setning",
-    "ecRemoveSentence": "Fjern setning",
-    "ecAddFix": "Legg til feil",
-    "ecRemoveFix": "Fjern feil"
+    "mpVariantHint": "Setningshalvdeler nummererer venstre kolonne 1, 2, 3 … og bokstaverer høyre A, B, C …"
   },
   "grammar": {
     "add": "Legg til regel",

@@ -62,7 +62,6 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   wbfWordBank: '',
   wbfSentences: [{ text: '', answers: [''], rationales: [] }],
   wbfWordNotes: [],
-  ecSentences: [{ chunks: '', fixes: [{ chunkIndex: '', accepted: '', note: '' }] }],
   toKind: 'dialogue',
   toLines: [
     { text: '', speaker: '' },
@@ -150,16 +149,6 @@ export function minimalExerciseValues(
         toLines: [
           { text: 'First line', speaker: '' },
           { text: 'Second line', speaker: '' },
-        ],
-      };
-    case 'error_correction':
-      return {
-        ...base,
-        ecSentences: [
-          {
-            chunks: 'First part | second part',
-            fixes: [{ chunkIndex: '2', accepted: 'corrected part', note: '' }],
-          },
         ],
       };
   }
@@ -420,28 +409,6 @@ function rawExercisePayload(values: ExerciseFormValues): ExercisePayload {
         expectedAnswers: { order: items.map((i) => i.id) },
       };
     }
-    case 'error_correction': {
-      const sentences = (values.ecSentences ?? []).filter((s) => s.chunks.trim());
-      const items = sentences.map((sentence, i) => ({
-        id: `s-${i}`,
-        chunks: splitChunks(sentence.chunks).map((text, j) => ({ id: `c-${j}`, text })),
-      }));
-      const corrections = sentences.flatMap((sentence, i) =>
-        (sentence.fixes ?? [])
-          .filter((fix) => fix.accepted.trim() && fix.chunkIndex.trim())
-          .map((fix) => ({
-            item_id: `s-${i}`,
-            // Authors count parts from 1; ids are 0-based.
-            chunk_id: `c-${Number(fix.chunkIndex) - 1}`,
-            accepted: splitCsv(fix.accepted),
-            note: fix.note?.trim() || undefined,
-          })),
-      );
-      return {
-        content: { items, mistake_count: corrections.length },
-        expectedAnswers: { corrections },
-      };
-    }
     case 'sentence_schema': {
       // Keep only labelled fields; remember original index -> stable field id so
       // token assignments (by original index) survive the filtering.
@@ -494,9 +461,8 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
 
 /**
  * Identity of an array element, used to line a rebuilt array up with the stored
- * one. Covers the three id shapes the template schemas use: `id`, the
- * `blank_id` of a fill blank, and the `item_id` + `chunk_id` pair of an
- * `error_correction` correction. Anything else (plain strings, `pairs`,
+ * one. Covers the two id shapes the template schemas use: `id` and the
+ * `blank_id` of a fill blank. Anything else (plain strings, `pairs`,
  * `placements`) has no handle and is replaced wholesale.
  *
  * Caveat: most of these ids are positional (`opt-0`, `s-1`, `"2"`), because
@@ -507,12 +473,9 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
  */
 function elementKey(value: unknown): string | null {
   if (!isPlainObject(value)) return null;
-  const { id, blank_id: blankId, item_id: itemId, chunk_id: chunkId } = value;
+  const { id, blank_id: blankId } = value;
   if (typeof id === 'string' || typeof id === 'number') return `id:${id}`;
   if (typeof blankId === 'string' || typeof blankId === 'number') return `blank:${blankId}`;
-  if (itemId !== undefined && chunkId !== undefined) {
-    return `correction:${String(itemId)}:${String(chunkId)}`;
-  }
   return null;
 }
 
@@ -581,18 +544,6 @@ export function buildExercisePayload(
       unknown
     >,
   };
-}
-
-interface EcContentItem {
-  id?: unknown;
-  chunks?: unknown[];
-}
-
-interface EcCorrection {
-  item_id?: unknown;
-  chunk_id?: unknown;
-  accepted?: unknown;
-  note?: unknown;
 }
 
 interface TextOrderItem {
@@ -813,41 +764,6 @@ export function parseExerciseToForm(exercise: {
         wtMinWords: typeof content.min_words === 'number' ? String(content.min_words) : '',
         wtTopics: topics,
         wtRubric: typeof expectedAnswers.rubric === 'string' ? expectedAnswers.rubric : '',
-      };
-    }
-    case 'error_correction': {
-      const rawItems = Array.isArray(content.items) ? (content.items as EcContentItem[]) : [];
-      const rawCorrections = Array.isArray(expectedAnswers.corrections)
-        ? (expectedAnswers.corrections as EcCorrection[])
-        : [];
-      const sentences = rawItems.map((item) => {
-        const chunks = Array.isArray(item.chunks) ? item.chunks : [];
-        const indexById = new Map(
-          chunks.map((chunk, i) => [String((chunk as { id?: unknown }).id ?? ''), i + 1]),
-        );
-        const fixes = rawCorrections
-          .filter((cor) => String(cor.item_id ?? '') === String(item.id ?? ''))
-          .map((cor) => ({
-            chunkIndex: String(indexById.get(String(cor.chunk_id ?? '')) ?? ''),
-            accepted: (Array.isArray(cor.accepted) ? cor.accepted : [])
-              .filter((a): a is string => typeof a === 'string')
-              .join(', '),
-            note: typeof cor.note === 'string' ? cor.note : '',
-          }));
-        return {
-          chunks: chunks
-            .map((chunk) =>
-              typeof (chunk as { text?: unknown }).text === 'string'
-                ? (chunk as { text: string }).text
-                : '',
-            )
-            .join(' | '),
-          fixes: fixes.length > 0 ? fixes : [{ chunkIndex: '', accepted: '', note: '' }],
-        };
-      });
-      return {
-        ...base,
-        ecSentences: sentences.length > 0 ? sentences : DEFAULT_EXERCISE_VALUES.ecSentences,
       };
     }
     case 'text_order': {
