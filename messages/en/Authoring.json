@@ -1842,6 +1842,24 @@
         "never": "The key stays between you and the other teachers."
       }
     },
+    "pool": {
+      "title": "What does this practise",
+      "lede": "Attach the exercise to a grammar rule and it comes back on its own through spaced repetition, for as long as the rule is being learnt. Unattached, it is asked once — where it sits in the lesson.",
+      "loading": "Looking…",
+      "loadFailed": "Could not load the rules this exercise is attached to.",
+      "none": "Not attached to a rule yet — this exercise is asked once, in its lesson.",
+      "noRules": "This Leksjon has no grammar rules to attach to yet.",
+      "noMatches": "No rule of this Leksjon matches — and the ones already attached are listed above.",
+      "searchLabel": "Find a rule of this Leksjon",
+      "searchPlaceholder": "Search the rules of this Leksjon…",
+      "weightLabel": "How often «{rule}» should pick this exercise",
+      "weight": {
+        "rare": "Rarely",
+        "normal": "Normally",
+        "often": "Often"
+      },
+      "detach": "Detach from «{rule}»"
+    },
     "queue": {
       "title": "The marking queue",
       "lede": "How a handed-in set will look on your side. Write the answers you expect and the same engine the server runs will place them.",

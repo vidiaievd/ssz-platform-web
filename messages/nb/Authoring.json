@@ -1842,6 +1842,24 @@
         "never": "Fasiten blir mellom deg og de andre lærerne."
       }
     },
+    "pool": {
+      "title": "Hva øver dette på",
+      "lede": "Knytt oppgaven til en grammatikkregel, så kommer den tilbake av seg selv gjennom repetisjon så lenge regelen læres. Uknyttet blir den spurt én gang — der den står i leksjonen.",
+      "loading": "Ser etter…",
+      "loadFailed": "Fikk ikke hentet reglene oppgaven er knyttet til.",
+      "none": "Ikke knyttet til en regel ennå — oppgaven spørres én gang, i leksjonen sin.",
+      "noRules": "Denne leksjonen har ingen grammatikkregler å knytte til ennå.",
+      "noMatches": "Ingen regel i denne leksjonen passer — de som alt er knyttet til, står over.",
+      "searchLabel": "Finn en regel i denne leksjonen",
+      "searchPlaceholder": "Søk i reglene i denne leksjonen…",
+      "weightLabel": "Hvor ofte «{rule}» skal velge denne oppgaven",
+      "weight": {
+        "rare": "Sjelden",
+        "normal": "Vanlig",
+        "often": "Ofte"
+      },
+      "detach": "Løsne fra «{rule}»"
+    },
     "queue": {
       "title": "Vurderingskø",
       "lede": "Slik ser en innlevering ut hos deg. Skriv svarene du venter deg, så plasserer den samme motoren som serveren kjører dem.",

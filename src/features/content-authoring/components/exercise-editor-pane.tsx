@@ -49,6 +49,7 @@ import { ErrorCorrectionPreview } from './error-correction/error-correction-prev
 import { TranslateBuilder } from './translate/builder';
 import { TranslatePreview } from './translate/translate-preview';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
+import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 
 interface ExerciseEditorPaneProps {
   kind: MaterialKind;
@@ -58,6 +59,8 @@ interface ExerciseEditorPaneProps {
   /** Whether students can open this material right now — see `SaveScopeContext`. */
   isLive: boolean | null;
   container: Container;
+  /** The grammar rules of this Leksjon; only the translate builder uses them so far. */
+  grammarRules?: LevelGrammarRule[];
   backHref: string;
   publishSlot: ReactNode;
 }
@@ -68,6 +71,7 @@ export function ExerciseEditorPane({
   lessonTitle,
   state,
   isLive,
+  grammarRules,
   container,
   backHref,
   publishSlot,
@@ -153,6 +157,7 @@ export function ExerciseEditorPane({
           exerciseId={exerciseId}
           containerId={container.id}
           initialExercise={translateDocumentFrom(exercise, container.id)}
+          grammarRules={grammarRules}
           onDocumentChange={setTranslate}
           onSavedRemote={(updatedAt, saved) =>
             queryClient.setQueryData<ExerciseWithAnswers | null>(

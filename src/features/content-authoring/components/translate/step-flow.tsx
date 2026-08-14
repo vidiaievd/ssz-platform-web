@@ -14,7 +14,10 @@ import {
   type Translate,
 } from '@/lib/shared-kernel/translate';
 
+import type { LevelGrammarRule } from '@/features/content-authoring/lib/level-grammar-rules';
+
 import { QueuePreview } from './queue-preview';
+import { RulePoolPanel } from './rule-pool-panel';
 import { ToggleRow } from '../toggle-row';
 
 /** Self-checks the student may spend before handing in — `flow.selfCheck` is 0–5. */
@@ -29,6 +32,12 @@ const AI_CHECKS: (keyof Ai['checks'])[] = ['grammar', 'order', 'lexis', 'registe
 export interface StepFlowProps {
   exercise: Translate;
   onChange: (next: Translate) => void;
+  /**
+   * The rules of this Leksjon, for the pool panel. Absent where the builder is mounted
+   * without a curriculum around it — the panel is then left out rather than shown empty,
+   * because an empty search is indistinguishable from a course with no grammar in it.
+   */
+  grammarRules?: LevelGrammarRule[];
 }
 
 /**
@@ -42,7 +51,7 @@ export interface StepFlowProps {
  * eventually draft the comment they send. The switches write to `ai`, which the document
  * has carried since its first save; nothing calls a model, and every AI surface says so.
  */
-export function StepFlow({ exercise, onChange }: StepFlowProps) {
+export function StepFlow({ exercise, onChange, grammarRules }: StepFlowProps) {
   const t = useTranslations('Authoring');
   const { flow, ai, check } = exercise;
 
@@ -232,6 +241,10 @@ export function StepFlow({ exercise, onChange }: StepFlowProps) {
           )}
         </Explain>
       </section>
+
+      {grammarRules !== undefined && (
+        <RulePoolPanel exerciseId={exercise.id} rules={grammarRules} />
+      )}
 
       <QueuePreview exercise={exercise} />
     </div>

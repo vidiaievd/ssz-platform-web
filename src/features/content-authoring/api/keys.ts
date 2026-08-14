@@ -31,6 +31,7 @@ export const authoringKeys = keyFactory('authoring', {
   grammarRule: (id: string) => ['grammar-rule', id] as const,
   grammarExplanations: (ruleId: string) => ['grammar-explanations', ruleId] as const,
   exercises: (containerId: string) => ['exercises', containerId] as const,
+  exerciseRuleLinks: (exerciseId: string) => ['exercise-rule-links', exerciseId] as const,
   exercise: (id: string) => ['exercise', id] as const,
   sections: (containerId: string) => ['sections', containerId] as const,
   versions: (containerId: string) => ['versions', containerId] as const,

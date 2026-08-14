@@ -434,6 +434,21 @@ export interface GrammarRule {
   sectionId?: string | null;
 }
 
+/**
+ * One grammar rule whose exercise pool holds a given exercise — the pool read from the
+ * exercise's side, which is the direction an author works in.
+ */
+export interface ExerciseRuleLink {
+  ruleId: string;
+  title: string;
+  topic: string;
+  subtopic: string | null;
+  difficultyLevel: string;
+  /** How often the review queue picks this exercise for the rule. */
+  weight: number;
+  position: number;
+}
+
 /** One template code from content-service's seeded exercise templates. */
 export type ExerciseTemplateCode =
   | 'multiple_choice'

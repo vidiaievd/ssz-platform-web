@@ -26,6 +26,7 @@ import {
   type IssueStep,
   type Translate,
 } from '@/lib/shared-kernel/translate';
+import type { LevelGrammarRule } from '@/features/content-authoring/lib/level-grammar-rules';
 
 import { StepCheck } from './step-check';
 import { StepDirection } from './step-direction';
@@ -40,6 +41,8 @@ const BUILT_STEPS: IssueStep[] = [1, 2, 3, 4];
 export interface TranslateBuilderProps {
   exerciseId: string;
   containerId: string;
+  /** The grammar rules of this Leksjon, for step 4's "what does this practise" panel. */
+  grammarRules?: LevelGrammarRule[];
   /** The document as loaded from `/exercises/:id/answers`, envelope included. */
   initialExercise: Translate;
   /**
@@ -70,6 +73,7 @@ export interface TranslateBuilderProps {
 export function TranslateBuilder({
   exerciseId,
   containerId,
+  grammarRules,
   initialExercise,
   onDocumentChange,
   onSavedRemote,
@@ -126,7 +130,7 @@ export function TranslateBuilder({
         ) : step === 3 ? (
           <StepCheck exercise={exercise} onChange={setExercise} />
         ) : step === 4 ? (
-          <StepFlow exercise={exercise} onChange={setExercise} />
+          <StepFlow exercise={exercise} onChange={setExercise} grammarRules={grammarRules} />
         ) : (
           <StepDirection exercise={exercise} onChange={setExercise} />
         )}
