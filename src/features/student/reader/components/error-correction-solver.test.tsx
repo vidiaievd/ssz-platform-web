@@ -92,6 +92,7 @@ const LAST_ATTEMPT = {
 /** Counts and nothing else — the only thing a self-check is allowed to answer. */
 const SELF_CHECK = {
   attemptId: 'att-1',
+  templateCode: 'error_correction',
   checksUsed: 1,
   checksLeft: 1,
   fixedCount: 0,

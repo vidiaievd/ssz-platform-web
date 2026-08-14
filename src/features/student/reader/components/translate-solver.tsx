@@ -4,13 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import {
+  AttemptRequestError,
   fetchLastAttempt,
+  useSelfCheck,
   useStartAttempt,
   useSubmitAnswer,
 } from '@/features/student/exercises/api/use-attempt';
 import type { TranslateSubmitDetails } from '@/features/student/exercises/types/attempts';
 import { readSubmission, toSubmission } from '@/lib/shared-kernel/translate';
-import type { StudentProjection } from '@/lib/shared-kernel/translate';
+import type { SelfCheckFeedback, StudentProjection } from '@/lib/shared-kernel/translate';
 import {
   PRACTICE_ACCENT,
   readTranslateProjection,
@@ -57,8 +59,12 @@ export function TranslateSolver({
   const [unusable, setUnusable] = useState(false);
 
   const submit = useSubmitAnswer(exerciseId, attemptId);
+  const selfCheck = useSelfCheck(exerciseId, attemptId);
 
   const [value, setValue] = useState<TranslateValue>({});
+  /** The last self-check the server answered, cleared the moment the work changes. */
+  const [feedback, setFeedback] = useState<SelfCheckFeedback | null>(null);
+  const [checksLeft, setChecksLeft] = useState<number | null>(null);
   const [allWritten, setAllWritten] = useState(false);
   /** How the submission ended: approved outright, or handed to a teacher. */
   const [sent, setSent] = useState<'passed' | 'review' | null>(null);
@@ -143,6 +149,8 @@ export function TranslateSolver({
   const emptyCount = items.filter((item) => (value[item.id] ?? '').trim() === '').length;
   const approved =
     routing === null ? null : items.filter((item) => routing[item.id] === 'pass').length;
+  /** The author's budget until the engine says otherwise, and its word after that. */
+  const checksAvailable = checksLeft ?? projection.flow.selfCheck;
 
   function showEmpty() {
     if (pointOutTimer.current !== null) clearTimeout(pointOutTimer.current);
@@ -169,8 +177,42 @@ export function TranslateSolver({
     );
   }
 
+  /**
+   * Any edit retires the last self-check.
+   *
+   * It judged the sentences as they stood, and the server cannot re-judge them without
+   * being asked — a panel left standing after the next keystroke would be saying
+   * something that is no longer true about the sentence being rewritten.
+   */
+  function changeValue(next: TranslateValue) {
+    setValue(next);
+    setFeedback(null);
+  }
+
+  function askSelfCheck() {
+    selfCheck.mutate(
+      { draftAnswer: { answers: toSubmission(items, value) } },
+      {
+        onSuccess: (data) => {
+          // The endpoint serves the other self-checkable template too, and its payload
+          // shares nothing with this one but the word `items`.
+          if (data.templateCode === 'error_correction') return;
+          setFeedback({ items: data.items, passing: data.passing });
+          setChecksLeft(data.checksLeft);
+        },
+        onError: (error) => {
+          // 422 is the budget, not a fault: the engine counts the spending, and it has
+          // the last word over whatever this screen thinks is left.
+          if (error instanceof AttemptRequestError && error.status === 422) setChecksLeft(0);
+        },
+      },
+    );
+  }
+
   function again() {
     setValue({});
+    setFeedback(null);
+    setChecksLeft(null);
     setSent(null);
     setRouting(null);
     setSubmissions(0);
@@ -183,8 +225,9 @@ export function TranslateSolver({
         projection={projection}
         {...(instruction === undefined ? {} : { instruction })}
         value={value}
-        onValueChange={setValue}
+        onValueChange={changeValue}
         onAnswerChange={setAllWritten}
+        selfCheck={feedback}
         phase={sent === null ? 'answering' : 'feedback'}
         mode="practice"
         accent={PRACTICE_ACCENT}
@@ -194,6 +237,45 @@ export function TranslateSolver({
 
       {sent === null ? (
         <div className="mt-4 flex flex-wrap items-center gap-3">
+          {/*
+            The self-check, when the author granted any. It is rationed on the server —
+            the diff would otherwise hand over the key one word per call, which is also
+            why the key's words come back masked — so the count shown here is the
+            engine's answer, not this screen's tally.
+          */}
+          {projection.flow.selfCheck > 0 && (
+            <button
+              type="button"
+              disabled={selfCheck.isPending || checksAvailable === 0 || emptyCount === items.length}
+              onClick={askSelfCheck}
+              className="rounded-xl border px-4 py-2.5 text-[13px] font-semibold disabled:opacity-60"
+              style={{ borderColor: 'var(--ssz-border-strong)', color: 'var(--ssz-text-primary)' }}
+            >
+              {selfCheck.isPending
+                ? t('translate.selfCheck.checking')
+                : checksAvailable === 0
+                  ? t('translate.selfCheck.spent')
+                  : t('translate.selfCheck.button', { left: checksAvailable })}
+            </button>
+          )}
+          {/*
+            What the check found, as a count of sentences that would close by themselves.
+            It is the only summing-up this template can make before a teacher reads the
+            work: everything else it knows is a distance, not a verdict.
+          */}
+          {feedback !== null && projection.exactPasses && (
+            <span className="text-[12.5px] text-(--ssz-text-secondary)">
+              {t('translate.selfCheck.summary', {
+                passing: feedback.passing,
+                total: items.length,
+              })}
+            </span>
+          )}
+          {selfCheck.isError && checksAvailable > 0 && (
+            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+              {t('translate.selfCheck.failed')}
+            </span>
+          )}
           <button
             type="button"
             disabled={submit.isPending}

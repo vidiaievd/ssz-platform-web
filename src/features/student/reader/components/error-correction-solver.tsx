@@ -196,6 +196,9 @@ export function ErrorCorrectionSolver({
       { draftAnswer: { items: value } },
       {
         onSuccess: (data) => {
+          // The endpoint serves two templates now; a payload for the other one is not a
+          // thing to render half of.
+          if (data.templateCode !== 'error_correction') return;
           setFeedback({
             items: data.items,
             fixedCount: data.fixedCount,

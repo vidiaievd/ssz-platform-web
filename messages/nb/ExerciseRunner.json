@@ -70,7 +70,26 @@
     "withTeacher": "Levert. Læreren ser på svaret ditt.",
     "withTeacherWhen": "Vanligvis innen 48 timer.",
     "withTeacherSplit": "{approved} av {total} setninger ble godkjent automatisk. Læreren gir tilbakemelding på resten, vanligvis innen 48 timer.",
-    "again": "Rett opp og lever på nytt"
+    "again": "Rett opp og lever på nytt",
+    "selfCheck": {
+      "button": "Sjekk svarene ({left} igjen)",
+      "spent": "Ingen egensjekker igjen",
+      "checking": "Sjekker …",
+      "failed": "Fikk ikke sjekket — prøv igjen",
+      "summary": "{passing} av {total} setninger blir godkjent slik de står",
+      "exact": "Slik står det i fasiten.",
+      "typo": "Riktig, men se over skrivemåten.",
+      "near": "Nesten — noe skiller fra fasiten.",
+      "off": "Dette er et stykke fra fasiten.",
+      "noKey": "Denne setningen har ingen fasit — læreren leser den.",
+      "diverging": "{count, plural, one {# ord skiller fra fasiten} other {# ord skiller fra fasiten}}. Les setningen på nytt.",
+      "divergingWithHint": "{count, plural, one {# ord skiller fra fasiten} other {# ord skiller fra fasiten}}. Les setningen på nytt og se hintet.",
+      "requires": "Oppgaven ber om «{text}»",
+      "avoid": "Unngå «{text}» her.",
+      "legendExtra": "overflødig",
+      "legendMissing": "mangler fra fasiten",
+      "legendTypo": "skrivefeil"
+    }
   },
   "match": {
     "defaultInstruction": "Koble hvert ord til oversettelsen",

@@ -1,9 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import type { ProjectedItem, StudentProjection } from '@/lib/shared-kernel/translate';
+import type {
+  DiffToken,
+  ProjectedItem,
+  SelfCheckFeedback,
+  SelfCheckItem,
+  StudentProjection,
+} from '@/lib/shared-kernel/translate';
 
 import { CharPad } from '@/components/shared/char-pad';
 
@@ -41,6 +47,14 @@ export interface TranslateRunnerBodyProps {
    * a teacher. The server decides it — the browser has nothing to decide it with.
    */
   routing?: TranslateRouting | null;
+  /**
+   * The last self-check the server answered, if the learner asked for one. It carries a
+   * verdict and a word-level diff per sentence — with every word of the key the learner
+   * has not written already replaced by `•••` on the server, unless the key is about to
+   * be shown anyway (BEHAVIOR.md, "Само-проверка"). The browser masks nothing itself,
+   * because a browser that could would have been sent the key to mask.
+   */
+  selfCheck?: SelfCheckFeedback | null;
 }
 
 const READING = 'var(--ssz-font-reading)';
@@ -73,10 +87,23 @@ export function TranslateRunnerBody({
   accent,
   pointOut = false,
   routing = null,
+  selfCheck = null,
 }: TranslateRunnerBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const interactive = phase === 'answering';
   const { items, flow } = projection;
+
+  const selfCheckByItem = useMemo(() => {
+    const byItem = new Map<string, SelfCheckItem>();
+    for (const item of selfCheck?.items ?? []) byItem.set(item.itemId, item);
+    return byItem;
+  }, [selfCheck]);
+
+  /** The legend belongs to the diff, so it appears only when a diff is on screen. */
+  const anyDiff = useMemo(
+    () => (selfCheck?.items ?? []).some((item) => (item.tokens?.length ?? 0) > 0),
+    [selfCheck],
+  );
 
   const writtenCount = useMemo(
     () => items.filter((item) => isWritten(answerOf(value, item.id))).length,
@@ -126,6 +153,8 @@ export function TranslateRunnerBody({
         </div>
       )}
 
+      {interactive && anyDiff && <TrDiffLegend />}
+
       <ol className="flex flex-col gap-4">
         {items.map((item, index) => (
           <TrCard
@@ -142,6 +171,7 @@ export function TranslateRunnerBody({
             mode={mode}
             empty={pointOut && !isWritten(answerOf(value, item.id))}
             outcome={routing?.[item.id] ?? null}
+            feedback={selfCheckByItem.get(item.id) ?? null}
             onAnswerChange={(text) => onValueChange({ ...value, [item.id]: text })}
           />
         ))}
@@ -164,6 +194,8 @@ interface TrCardProps {
   mode: RunnerMode;
   empty: boolean;
   outcome: 'pass' | 'teacher' | null;
+  /** This sentence in the last self-check, if one was asked for. */
+  feedback: SelfCheckItem | null;
   onAnswerChange: (text: string) => void;
 }
 
@@ -181,6 +213,7 @@ function TrCard({
   mode,
   empty,
   outcome,
+  feedback,
   onAnswerChange,
 }: TrCardProps) {
   const t = useTranslations('ExerciseRunner');
@@ -301,6 +334,13 @@ function TrCard({
         <p className="mt-2 text-[12.5px] text-(--ssz-text-secondary)">{item.hint}</p>
       )}
 
+      {interactive && feedback !== null && (
+        <TrSelfCheckNote
+          feedback={feedback}
+          hasHint={item.hint !== undefined && item.hint !== ''}
+        />
+      )}
+
       {outcome === 'pass' && (
         <p className="mt-2 text-[12.5px] text-(--ssz-feedback-ok-fg)">
           {t('translate.itemApprovedWhy')}
@@ -312,5 +352,149 @@ function TrCard({
         </p>
       )}
     </li>
+  );
+}
+
+interface TrSelfCheckNoteProps {
+  feedback: SelfCheckItem;
+  /** Whether this sentence has a hint to send the learner back to. */
+  hasHint: boolean;
+}
+
+/**
+ * What one sentence's self-check is allowed to say, before anything is handed in.
+ *
+ * The four wordings follow the verdict and stop where the engine stops: `exact` is the
+ * only one that reports a result, and the other three report a *distance from the key* —
+ * not a judgement. A translation this template calls `off` is very often a second good
+ * translation the author never wrote down, so nothing here says "wrong".
+ *
+ * The one thing it may say is wrong is a guard: `require` and `forbid` are statements
+ * about the task ("this exercise practises «har bodd»"), not about the key, and the
+ * author's own note travels with each of them.
+ */
+function TrSelfCheckNote({ feedback, hasHint }: TrSelfCheckNoteProps) {
+  const t = useTranslations('ExerciseRunner');
+  const { verdict, tokens, divergingWords, missing, banned } = feedback;
+
+  // Nothing written yet: the learner knows, and a panel saying so is one more thing to
+  // read on a card they have not started.
+  if (verdict === 'empty') return null;
+
+  const ok = verdict === 'exact';
+  const headline =
+    verdict === 'exact'
+      ? t('translate.selfCheck.exact')
+      : verdict === 'typo'
+        ? t('translate.selfCheck.typo')
+        : verdict === 'near'
+          ? t('translate.selfCheck.near')
+          : verdict === 'off'
+            ? t('translate.selfCheck.off')
+            : // `noref`: the author left this sentence without an accepted translation, so
+              // there is nothing to be close to. Neither the distance nor the blame is
+              // the learner's to hear about.
+              t('translate.selfCheck.noKey');
+
+  return (
+    <div
+      className="mt-2 rounded-xl border px-3 py-2"
+      style={{
+        borderColor: ok ? 'var(--ssz-feedback-ok-line)' : 'var(--ssz-border-default)',
+        background: ok ? 'var(--ssz-feedback-ok-bg)' : 'var(--ssz-bg-surface-subtle)',
+      }}
+    >
+      <p
+        className="text-[12.5px] font-semibold"
+        style={{ color: ok ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-primary)' }}
+      >
+        {headline}
+      </p>
+
+      {tokens !== undefined && tokens.length > 0 && <TrDiffLine tokens={tokens} />}
+
+      {/* `off` gets a count instead of a diff: at that distance the diff is mostly the
+          key's own words, and a wall of `•••` teaches nothing. */}
+      {divergingWords !== undefined && (
+        <p className="mt-1 text-[12px] text-(--ssz-text-secondary)">
+          {hasHint
+            ? t('translate.selfCheck.divergingWithHint', { count: divergingWords })
+            : t('translate.selfCheck.diverging', { count: divergingWords })}
+        </p>
+      )}
+
+      {missing.map((guard, index) => (
+        <p key={`m${index}`} className="mt-1 text-[12px] text-(--ssz-text-secondary)">
+          {t('translate.selfCheck.requires', { text: guard.text })}
+          {guard.note !== undefined && guard.note !== '' && ` — ${guard.note}`}
+        </p>
+      ))}
+      {banned.map((guard, index) => (
+        <p key={`b${index}`} className="mt-1 text-[12px] text-(--ssz-text-secondary)">
+          {t('translate.selfCheck.avoid', { text: guard.text })}
+          {guard.note !== undefined && guard.note !== '' && ` — ${guard.note}`}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The word-level diff against the closest accepted translation.
+ *
+ * Words of the key the learner has not written arrive already masked — the server does
+ * it, and this component never sees the words behind the mask. Colour is doubled by
+ * shape throughout (struck through for a surplus word, underlined for one from the key,
+ * dotted for a spelling slip), so the diff is readable without seeing colour.
+ */
+function TrDiffLine({ tokens }: { tokens: DiffToken[] }) {
+  return (
+    <p className="mt-1.5 flex flex-wrap gap-x-1.5 gap-y-1" style={{ fontFamily: READING }}>
+      {tokens.map((token, index) => (
+        <span key={index} className="text-[14.5px]" style={diffStyle(token)}>
+          {token.w}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+/** How one diff word is drawn. `eq` with a `typo` is a hit reached by one letter's grace. */
+function diffStyle(token: DiffToken): CSSProperties {
+  if (token.t === 'extra') {
+    return { color: 'var(--ssz-feedback-no-fg)', textDecoration: 'line-through' };
+  }
+  if (token.t === 'missing') {
+    return {
+      color: 'var(--ssz-feedback-ok-fg)',
+      textDecoration: 'underline',
+      textUnderlineOffset: 3,
+    };
+  }
+  if (token.typo !== null) {
+    return {
+      color: 'var(--ssz-text-primary)',
+      textDecoration: 'underline dotted',
+      textUnderlineOffset: 3,
+    };
+  }
+  return { color: 'var(--ssz-text-secondary)' };
+}
+
+/** What the three markings of the diff mean, drawn in the markings themselves. */
+function TrDiffLegend() {
+  const t = useTranslations('ExerciseRunner');
+  return (
+    <p className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-(--ssz-text-muted)">
+      <span style={diffStyle({ t: 'extra', w: '', typo: null })}>
+        {t('translate.selfCheck.legendExtra')}
+      </span>
+      <span style={diffStyle({ t: 'missing', w: '', typo: null })}>
+        {t('translate.selfCheck.legendMissing')}
+      </span>
+      <span style={diffStyle({ t: 'eq', w: '', typo: 'x' })}>
+        {t('translate.selfCheck.legendTypo')}
+      </span>
+    </p>
   );
 }

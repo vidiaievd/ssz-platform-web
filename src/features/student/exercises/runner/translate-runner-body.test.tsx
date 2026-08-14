@@ -170,6 +170,91 @@ describe('TranslateRunnerBody', () => {
     expect(screen.queryByText('Waiting for a teacher')).not.toBeInTheDocument();
   });
 
+  it('reports a self-check per sentence, in the wording its verdict allows', () => {
+    renderBody({
+      value: { i1: 'Jeg bor i Tromsø i tre år.', i2: 'Katter.' },
+      selfCheck: {
+        passing: 0,
+        items: [
+          {
+            itemId: 'i1',
+            verdict: 'near',
+            sim: 0.8,
+            tokens: [
+              { t: 'eq', w: 'Jeg', typo: null },
+              { t: 'extra', w: 'bor', typo: null },
+              { t: 'missing', w: '•••', typo: null },
+            ],
+            missing: [],
+            banned: [],
+          },
+          {
+            itemId: 'i2',
+            verdict: 'off',
+            sim: 0.2,
+            divergingWords: 4,
+            missing: [],
+            banned: [],
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByText('Close — something differs from the key.')).toBeInTheDocument();
+    expect(screen.getByText('This is some way from the key.')).toBeInTheDocument();
+    // `off` gets a count rather than a diff — at that distance the diff is mostly mask.
+    expect(
+      screen.getByText('4 words differ from the key. Read the sentence again.'),
+    ).toBeInTheDocument();
+    // The legend belongs to the diff, and one sentence has one.
+    expect(screen.getByText('missing from the key')).toBeInTheDocument();
+  });
+
+  // The rule the whole panel is built around: repeated checks must not spell out the key.
+  it('shows the key’s own words only as the mask the server sent', () => {
+    renderBody({
+      value: { i1: 'Jeg bor her.' },
+      selfCheck: {
+        passing: 0,
+        items: [
+          {
+            itemId: 'i1',
+            verdict: 'typo',
+            sim: 0.9,
+            tokens: [
+              { t: 'eq', w: 'Jeg', typo: null },
+              { t: 'missing', w: '•••', typo: null },
+              { t: 'eq', w: 'her.', typo: 'her.' },
+            ],
+            missing: [],
+            banned: [],
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByText('Right — check the spelling.')).toBeInTheDocument();
+    expect(screen.getByText('•••')).toBeInTheDocument();
+    expect(screen.queryByText('bodd')).not.toBeInTheDocument();
+  });
+
+  it('keeps the self-check off the screen once the work is handed in', () => {
+    renderBody({
+      phase: 'feedback',
+      value: { i1: 'Jeg bor i Tromsø i tre år.' },
+      routing: { i1: 'teacher' },
+      selfCheck: {
+        passing: 0,
+        items: [
+          { itemId: 'i1', verdict: 'off', sim: 0.2, divergingWords: 4, missing: [], banned: [] },
+        ],
+      },
+    });
+
+    expect(screen.queryByText('This is some way from the key.')).not.toBeInTheDocument();
+    expect(screen.getByText('Waiting for a teacher')).toBeInTheDocument();
+  });
+
   it('locks the fields once the work is with the teacher', () => {
     renderBody({ phase: 'feedback', value: { i1: 'Jeg har bodd her.', i2: 'Jeg liker katter.' } });
 

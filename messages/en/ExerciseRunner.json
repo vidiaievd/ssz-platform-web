@@ -70,7 +70,26 @@
     "withTeacher": "Handed in. Your teacher will look at it.",
     "withTeacherWhen": "Usually within 48 hours.",
     "withTeacherSplit": "{approved} of {total} sentences were approved automatically. Your teacher reads the rest, usually within 48 hours.",
-    "again": "Correct it and hand in again"
+    "again": "Correct it and hand in again",
+    "selfCheck": {
+      "button": "Check my answers ({left} left)",
+      "spent": "No checks left",
+      "checking": "Checking…",
+      "failed": "Could not check that — try again",
+      "summary": "{passing} of {total} sentences would be approved as they stand",
+      "exact": "That is exactly how the key puts it.",
+      "typo": "Right — check the spelling.",
+      "near": "Close — something differs from the key.",
+      "off": "This is some way from the key.",
+      "noKey": "There is no key for this sentence — your teacher reads it.",
+      "diverging": "{count, plural, one {# word differs from the key} other {# words differ from the key}}. Read the sentence again.",
+      "divergingWithHint": "{count, plural, one {# word differs from the key} other {# words differ from the key}}. Read the sentence again and open the hint.",
+      "requires": "The task asks for «{text}»",
+      "avoid": "Avoid «{text}» here.",
+      "legendExtra": "extra",
+      "legendMissing": "missing from the key",
+      "legendTypo": "spelling"
+    }
   },
   "match": {
     "defaultInstruction": "Match each word to its translation",

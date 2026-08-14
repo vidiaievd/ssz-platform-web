@@ -88,11 +88,53 @@ const LAST_ATTEMPT = {
   },
 };
 
+/**
+ * A self-check as the engine answers one: a verdict, a diff whose key words are already
+ * masked, and the rules of the task the answer misses. No accepted translation anywhere.
+ */
+const SELF_CHECK = {
+  attemptId: 'att-1',
+  templateCode: 'translate_to_target',
+  checksUsed: 1,
+  checksLeft: 1,
+  passing: 0,
+  items: [
+    {
+      itemId: 'i1',
+      verdict: 'near',
+      sim: 0.8,
+      tokens: [
+        { t: 'eq', w: 'Jeg', typo: null },
+        { t: 'extra', w: 'bor', typo: null },
+        { t: 'missing', w: '•••', typo: null },
+        { t: 'eq', w: 'Tromsø', typo: null },
+      ],
+      missing: [{ text: 'har bodd', note: 'The exercise practises the perfect tense.' }],
+      banned: [{ text: 'bor' }],
+    },
+  ],
+};
+
 function mockApi(
-  responses: { submit?: unknown; startFails?: boolean; last?: unknown; started?: unknown } = {},
+  responses: {
+    submit?: unknown;
+    startFails?: boolean;
+    last?: unknown;
+    started?: unknown;
+    selfCheck?: unknown;
+    selfCheckStatus?: number;
+  } = {},
 ) {
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
+
+    if (path.endsWith('/self-check')) {
+      const status = responses.selfCheckStatus ?? 200;
+      return new Response(
+        JSON.stringify(status === 200 ? (responses.selfCheck ?? SELF_CHECK) : { error: 'spent' }),
+        { status, headers: { 'content-type': 'application/json' } },
+      );
+    }
 
     if (init?.method === undefined) {
       return new Response(JSON.stringify(responses.last ?? { attempt: null }), {
@@ -234,6 +276,74 @@ describe('TranslateSolver', () => {
 
     await screen.findByText('Handed in. Your teacher will look at it.');
     expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
+  });
+
+  it('asks the server how the translation is going, and sends the draft to ask', async () => {
+    const fetchMock = mockApi();
+    renderSolver(fetchMock);
+
+    await answer('Jeg bor i Tromsø i tre år.');
+    await userEvent.click(screen.getByRole('button', { name: 'Check my answers (2 left)' }));
+
+    const call = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/self-check'));
+    expect(call).toBeDefined();
+    expect(JSON.parse(String((call![1] as RequestInit).body))).toEqual({
+      draftAnswer: { answers: [{ itemId: 'i1', text: 'Jeg bor i Tromsø i tre år.' }] },
+    });
+
+    expect(await screen.findByText('Close — something differs from the key.')).toBeInTheDocument();
+    // The rules of the task, with the author's reason — and the key's own word masked.
+    expect(
+      screen.getByText('The task asks for «har bodd» — The exercise practises the perfect tense.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Avoid «bor» here.')).toBeInTheDocument();
+    expect(screen.getByText('•••')).toBeInTheDocument();
+    expect(
+      screen.getByText('0 of 1 sentences would be approved as they stand'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Check my answers (1 left)' })).toBeEnabled();
+  });
+
+  it('drops the self-check the moment the translation changes under it', async () => {
+    renderSolver(mockApi());
+
+    await answer('Jeg bor i Tromsø i tre år.');
+    await userEvent.click(screen.getByRole('button', { name: 'Check my answers (2 left)' }));
+    expect(await screen.findByText('Close — something differs from the key.')).toBeInTheDocument();
+
+    await answer(' Nei.');
+
+    expect(screen.queryByText('Close — something differs from the key.')).not.toBeInTheDocument();
+  });
+
+  it('puts the button away when the engine says the budget is spent', async () => {
+    renderSolver(mockApi({ selfCheckStatus: 422 }));
+
+    await answer('Jeg bor i Tromsø i tre år.');
+    await userEvent.click(screen.getByRole('button', { name: 'Check my answers (2 left)' }));
+
+    expect(await screen.findByRole('button', { name: 'No checks left' })).toBeDisabled();
+    expect(screen.queryByText('Could not check that — try again')).not.toBeInTheDocument();
+  });
+
+  it('offers nothing to check before a single sentence is written', async () => {
+    renderSolver(mockApi());
+
+    expect(await screen.findByRole('button', { name: 'Check my answers (2 left)' })).toBeDisabled();
+  });
+
+  it('takes the self-check off the screen once the work is with the teacher', async () => {
+    renderSolver(mockApi({ submit: ROUTED }));
+
+    await answer('Jeg bor i Tromsø i tre år.');
+    await userEvent.click(screen.getByRole('button', { name: 'Check my answers (2 left)' }));
+    expect(await screen.findByText('Close — something differs from the key.')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+
+    await screen.findByText('Handed in. Your teacher will look at it.');
+    expect(screen.queryByText('Close — something differs from the key.')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Check my answers/ })).not.toBeInTheDocument();
   });
 
   it('puts a previous submission back, and says it was handed in', async () => {

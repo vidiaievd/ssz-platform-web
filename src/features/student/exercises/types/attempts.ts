@@ -1,4 +1,5 @@
 import type { SelfCheckFeedback } from '@/lib/shared-kernel/error-correction';
+import type { SelfCheckFeedback as TranslateSelfCheckFeedback } from '@/lib/shared-kernel/translate';
 import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
 
 /**
@@ -117,23 +118,43 @@ export interface LastAttemptResponse {
 }
 
 /**
- * "How am I doing?", asked mid-attempt by `error_correction` and nothing else.
+ * "How am I doing?", asked mid-attempt by the two templates that offer it.
  *
  * A server round-trip for the same reason grading is: the answer is derived from the
  * key, and the key never reaches the browser. What comes back is counts and mistake
- * types — never which words are wrong.
+ * types for `error_correction`, and — for `translate_*` — a verdict per sentence with
+ * the key's own words masked out of the diff.
  */
 export interface SelfCheckRequest {
-  /** The work so far, in the shape a submission carries: `{ items: { <id>: edits } }`. */
+  /**
+   * The work so far, in the shape a submission carries: `{ items: { <id>: edits } }`
+   * for `error_correction`, `{ answers: [{ itemId, text }] }` for `translate_*`.
+   */
   draftAnswer: unknown;
 }
 
-export interface SelfCheckResponse extends SelfCheckFeedback {
+/** Whose attempt it was, and what asking cost — the same for either template. */
+export interface SelfCheckEnvelope {
   attemptId: string;
   /** Including the one just spent. */
   checksUsed: number;
   checksLeft: number;
 }
+
+export interface ErrorCorrectionSelfCheckResponse extends SelfCheckEnvelope, SelfCheckFeedback {
+  templateCode: 'error_correction';
+}
+
+export interface TranslateSelfCheckResponse extends SelfCheckEnvelope, TranslateSelfCheckFeedback {
+  templateCode: 'translate_to_target' | 'translate_from_target';
+}
+
+/**
+ * Discriminated by `templateCode`, because the two payloads share nothing but their
+ * `items` key and mean entirely different things by it. A runner that reads the wrong
+ * half is a bug this union turns into a compile error.
+ */
+export type SelfCheckResponse = ErrorCorrectionSelfCheckResponse | TranslateSelfCheckResponse;
 
 export interface RevealAnswersResponse {
   attemptId: string;
