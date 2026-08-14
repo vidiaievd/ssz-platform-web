@@ -89,7 +89,8 @@
       "legendExtra": "лишнее",
       "legendMissing": "нет в вашем ответе",
       "legendTypo": "опечатка"
-    }
+    },
+    "audioLabel": "Предложение, озвученное"
   },
   "match": {
     "defaultInstruction": "Сопоставьте каждое слово с переводом",

@@ -1710,7 +1710,14 @@
       "explanationHelp": "Shown with the answer key. The check can never say why a translation is wrong — this is where that comes from.",
       "teacherNoteLabel": "Note for the teacher",
       "teacherNotePlaceholder": "Watch the word order here.",
-      "teacherNoteHelp": "Only ever shown in the review queue. The student never sees it."
+      "teacherNoteHelp": "Only ever shown in the review queue. The student never sees it.",
+      "audioLabel": "Audio of the sentence",
+      "audioAttach": "Attach audio",
+      "audioReplace": "Replace audio",
+      "audioRemove": "Remove",
+      "audioNotForDirection": "The sentence is read in {lang} — there is nothing here worth voicing. Turn the direction round to build a listening task.",
+      "audioInvalidType": "That file is not an audio format the platform accepts.",
+      "audioTooLarge": "The recording is larger than 100 MB."
     },
     "step3": {
       "title": "What the check accepts",

@@ -2,13 +2,26 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import { DEFAULT_FLOW, type StudentProjection } from '@/lib/shared-kernel/translate';
 
 import { PRACTICE_ACCENT } from './types';
-import { TranslateRunnerBody, type TranslateValue } from './translate-runner-body';
+
+const useMediaAsset = vi.fn((_id?: string): { data: { id: string; url: string } | undefined } => ({
+  data: undefined,
+}));
+
+vi.mock('@/features/media', () => ({ useMediaAsset: (id?: string) => useMediaAsset(id) }));
+
+beforeEach(() => {
+  useMediaAsset.mockClear();
+  useMediaAsset.mockReturnValue({ data: undefined });
+});
+
+const { TranslateRunnerBody } = await import('./translate-runner-body');
+type TranslateValue = import('./translate-runner-body').TranslateValue;
 
 /**
  * The exercise as the server sends it. There is no accepted translation anywhere in
@@ -261,5 +274,60 @@ describe('TranslateRunnerBody', () => {
     for (const field of screen.getAllByRole('textbox')) {
       expect(field).toHaveAttribute('readonly');
     }
+  });
+
+  /**
+   * The listening half of this template: the source is spoken, and the answer is a
+   * translation of what was heard. Replaying is free — the exercise is not a memory test.
+   */
+  it('plays the recording of a sentence that has one, while the work is open', () => {
+    useMediaAsset.mockReturnValue({ data: { id: 'media-9', url: 'https://cdn.test/a.mp3' } });
+    renderBody({
+      projection: makeProjection({
+        dir: 'from_target',
+        items: [
+          {
+            id: 'i1',
+            dir: 'from_target',
+            source: 'Jeg har bodd i Tromsø i tre år.',
+            sourceLang: 'Norsk',
+            answerLang: 'Russisk',
+            gloss: [],
+            mediaId: 'media-9',
+          },
+        ],
+      }),
+    });
+
+    const player = screen.getByLabelText('The sentence, spoken');
+    expect(player).toHaveAttribute('src', 'https://cdn.test/a.mp3');
+  });
+
+  it('takes the player away once the work has been handed in', () => {
+    useMediaAsset.mockReturnValue({ data: { id: 'media-9', url: 'https://cdn.test/a.mp3' } });
+    renderBody({
+      phase: 'feedback',
+      projection: makeProjection({
+        items: [
+          {
+            id: 'i1',
+            dir: 'from_target',
+            source: 'Jeg har bodd i Tromsø i tre år.',
+            sourceLang: 'Norsk',
+            answerLang: 'Russisk',
+            gloss: [],
+            mediaId: 'media-9',
+          },
+        ],
+      }),
+    });
+
+    expect(screen.queryByLabelText('The sentence, spoken')).not.toBeInTheDocument();
+  });
+
+  it('asks media-service for nothing when no sentence carries audio', () => {
+    renderBody();
+
+    expect(useMediaAsset).not.toHaveBeenCalled();
   });
 });

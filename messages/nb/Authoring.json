@@ -1710,7 +1710,14 @@
       "explanationHelp": "Vises sammen med fasiten. Sjekken kan aldri si hvorfor en oversettelse er feil — dette er derfra det kommer.",
       "teacherNoteLabel": "Merknad til læreren",
       "teacherNotePlaceholder": "Se på ordstillingen her.",
-      "teacherNoteHelp": "Vises bare i rettekøen. Studenten ser den aldri."
+      "teacherNoteHelp": "Vises bare i rettekøen. Studenten ser den aldri.",
+      "audioLabel": "Lyd til setningen",
+      "audioAttach": "Legg ved lyd",
+      "audioReplace": "Bytt lyd",
+      "audioRemove": "Fjern",
+      "audioNotForDirection": "Setningen leses på {lang} — det er ingenting her verdt å lese inn. Snu retningen for å lage en lytteoppgave.",
+      "audioInvalidType": "Filen er ikke et lydformat plattformen godtar.",
+      "audioTooLarge": "Opptaket er større enn 100 MB."
     },
     "step3": {
       "title": "Hva autosjekken godtar",

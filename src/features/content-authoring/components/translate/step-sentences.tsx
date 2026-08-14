@@ -27,6 +27,7 @@ import {
   type Translate,
 } from '@/lib/shared-kernel/translate';
 
+import { ItemAudioSlot } from './item-audio-slot';
 import { TrTester } from './tr-tester';
 import {
   addGloss,
@@ -303,6 +304,17 @@ function ItemCard({
           style={{ fontFamily: READING }}
           placeholder={t('translate.step2.sourcePlaceholder')}
           onChange={(event) => onChange(setItem(exercise, item.id, { source: event.target.value }))}
+        />
+        {/* Audio belongs to the sentence being read, so it lives with it rather than in
+            the extras — and only when that sentence is in the language being learnt. */}
+        <ItemAudioSlot
+          mediaId={item.mediaId}
+          disabledReason={
+            dir === 'to_target'
+              ? t('translate.step2.audioNotForDirection', { lang: exercise.langs.explain })
+              : undefined
+          }
+          onChange={(mediaId) => onChange(setItem(exercise, item.id, { mediaId }))}
         />
       </div>
 

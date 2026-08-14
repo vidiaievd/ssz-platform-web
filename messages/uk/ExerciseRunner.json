@@ -89,7 +89,8 @@
       "legendExtra": "зайве",
       "legendMissing": "немає у вашій відповіді",
       "legendTypo": "друкарська помилка"
-    }
+    },
+    "audioLabel": "Речення, озвучене"
   },
   "match": {
     "defaultInstruction": "Поєднайте кожне слово з перекладом",

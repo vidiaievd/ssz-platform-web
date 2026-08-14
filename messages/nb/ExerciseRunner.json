@@ -89,7 +89,8 @@
       "legendExtra": "overflødig",
       "legendMissing": "mangler fra fasiten",
       "legendTypo": "skrivefeil"
-    }
+    },
+    "audioLabel": "Setningen, lest inn"
   },
   "match": {
     "defaultInstruction": "Koble hvert ord til oversettelsen",

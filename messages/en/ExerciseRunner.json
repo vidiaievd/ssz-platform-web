@@ -89,7 +89,8 @@
       "legendExtra": "extra",
       "legendMissing": "missing from the key",
       "legendTypo": "spelling"
-    }
+    },
+    "audioLabel": "The sentence, spoken"
   },
   "match": {
     "defaultInstruction": "Match each word to its translation",

@@ -12,6 +12,7 @@ import type {
 } from '@/lib/shared-kernel/translate';
 
 import { CharPad } from '@/components/shared/char-pad';
+import { useMediaAsset } from '@/features/media';
 
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
@@ -280,6 +281,10 @@ function TrCard({
         </p>
       )}
 
+      {/* The recording of the sentence above, while the work is still open. It is mounted
+          only when there is one, so a set without audio asks media-service nothing. */}
+      {item.mediaId !== undefined && interactive && <SourceAudio mediaId={item.mediaId} />}
+
       <textarea
         ref={field}
         rows={2}
@@ -352,6 +357,30 @@ function TrCard({
         </p>
       )}
     </li>
+  );
+}
+
+/**
+ * The sentence, spoken. Replaying is free: a translation exercise does not test whether
+ * the learner remembers a recording, and `flow.replayLimit` — which the projection does
+ * carry — would be a limit a page reload lifts anyway (plan 42, "Слот медиа").
+ *
+ * Its own component so that the media lookup happens only for a sentence that has audio.
+ */
+function SourceAudio({ mediaId }: { mediaId: string }) {
+  const t = useTranslations('ExerciseRunner');
+  const { data: asset } = useMediaAsset(mediaId);
+
+  if (asset?.url === undefined || asset.url === null) return null;
+
+  return (
+    <audio
+      controls
+      preload="none"
+      src={asset.url}
+      aria-label={t('translate.audioLabel')}
+      className="mb-2 w-full"
+    />
   );
 }
 
