@@ -1627,7 +1627,9 @@
       "gateGoToStep": "Go to step {step}",
       "gateBlocked": "{count, plural, one {Fix # problem first} other {Fix # problems first}}",
       "gateDone": "Looks good",
-      "gateClose": "Close"
+      "gateClose": "Close",
+      "step3": "The check",
+      "step4": "Flow"
     },
     "step1": {
       "title": "Which way round?",
@@ -1709,6 +1711,149 @@
       "teacherNoteLabel": "Note for the teacher",
       "teacherNotePlaceholder": "Watch the word order here.",
       "teacherNoteHelp": "Only ever shown in the review queue. The student never sees it."
+    },
+    "step3": {
+      "title": "What the check accepts",
+      "lede": "The check compares an answer with your accepted translations, word by word. It can approve a hit — it cannot decide that a different wording is also right, so everything else goes to you with a diff.",
+      "onLabel": "Check on",
+      "onHelp": "Off means every answer reaches you untouched.",
+      "offWarning": "With the check off nothing is approved automatically — every sentence of every submission waits for you.",
+      "exactPassLabel": "A hit on the key closes without a teacher",
+      "exactPassHelp": "Saves you the answers there is nothing to judge in. Turn it off if everything should pass your desk.",
+      "routingTitle": "Where each verdict goes",
+      "route": {
+        "exact": "Identical to an accepted translation",
+        "typo": "One letter off, in one word",
+        "near": "Similar enough to be close",
+        "off": "Below the threshold"
+      },
+      "routeHelp": {
+        "exact": "After normalisation: the same words in the same order.",
+        "typo": "The student sees which word; you decide whether it counts.",
+        "near": "This is what sorts your queue — nearly-right answers go quickly.",
+        "off": "May well be a different, perfectly good translation. Only a person can tell."
+      },
+      "normGroup": "Normalisation",
+      "normLede": "What should not count as a mistake before the answer is compared.",
+      "caseLabel": "Ignore upper and lower case",
+      "caseHelp": "«jeg har bodd» = «Jeg har bodd».",
+      "punctLabel": "Ignore punctuation",
+      "punctHelp": "Full stops, commas and quotation marks are dropped.",
+      "typoLabel": "Allow one letter's slip per word",
+      "typoHelp": "«Tromso» against «Tromsø» becomes a spelling slip, not a different word. Words shorter than four letters are never forgiven this way.",
+      "foldLabel": "æ, ø, å count as a, o, a",
+      "foldHelp": "For students without a Norwegian keyboard.",
+      "foldWarning": "This hides real spelling mistakes: «bla» now passes for «blå».",
+      "nearLabel": "Threshold for «close»",
+      "near": {
+        "loose": "Loose",
+        "normal": "Normal",
+        "strict": "Strict"
+      },
+      "nearHelp": "{percent}% of the words shared with the closest accepted translation. Above it, the answer sorts to the front of your queue.",
+      "guardsTitle": "Per-sentence requirements",
+      "guardsLede": "When the task trains one thing — the perfect tense, word order — you can require or forbid a form. A guard that fires is the only thing the check may call wrong outright, so write down why it is wrong.",
+      "guardsNoItems": "Write the sentences in step 2 first — requirements are attached to them.",
+      "guardsExplained": "{explained} of {total} requirements have an explanation for the student.",
+      "requireLabel": "Must contain",
+      "forbidLabel": "Must not contain",
+      "requireText": "Required wording",
+      "forbidText": "Forbidden wording",
+      "requirePlaceholder": "har bodd",
+      "forbidPlaceholder": "bor",
+      "guardNote": "Why, for the student",
+      "guardNotePlaceholder": "The task asks for the perfect tense.",
+      "addRequire": "Add a requirement",
+      "addForbid": "Add a forbidden wording",
+      "removeGuard": "Remove",
+      "coverageCallout": "The check only knows your key. {multi} of {total} sentences accept more than one wording — the rest will often flag a correct answer as «close». Write down the variants you know of, and let the rest come to you."
+    },
+    "step4": {
+      "title": "The road to a mark",
+      "lede": "Three stages before you, and you at the end. Only the first and the last exist today.",
+      "stageCheck": "Auto-check",
+      "stageCheckOn": "Diffs against your key. Approves a clean hit, sorts the rest.",
+      "stageCheckNoPass": "Diffs against your key and sorts the rest — approving nothing, by your setting.",
+      "stageCheckOff": "Off — nothing is judged before you see it.",
+      "stageAi": "AI pre-check",
+      "stageAiDetail": "Would weigh whether a different wording is also right, and draft a comment.",
+      "aiInert": "not connected",
+      "stageTeacher": "Teacher",
+      "stageTeacherDetail": "Sets the verdict. Can approve, comment or send back.",
+      "aiLabel": "AI pre-check on",
+      "aiHelp": "Reserves its place in the queue and the fields it will fill. The model itself comes later.",
+      "aiChecksLabel": "What the AI should look at",
+      "ai": {
+        "grammar": "Grammar",
+        "order": "Word order",
+        "lexis": "Word choice",
+        "register": "Register"
+      },
+      "aiHelpFor": {
+        "grammar": "Tense, agreement, definiteness.",
+        "order": "Inversion and subordinate clauses — what translations trip on most.",
+        "lexis": "Whether another word than the key's also carries the meaning.",
+        "register": "Formal against spoken."
+      },
+      "aiVisibilityLabel": "Who sees the AI feedback",
+      "aiVisibility": {
+        "teacher": "Only the teacher",
+        "studentBefore": "The student, before handing in",
+        "studentAfter": "The student, after handing in"
+      },
+      "aiVisibilityHelp": "The student never sees a mark from the AI, only remarks.",
+      "studentGroup": "The student's screen",
+      "keyboardLabel": "æ ø å buttons",
+      "keyboardHelp": "For keyboards without the Norwegian letters.",
+      "glossLabel": "Show the word explanations",
+      "glossHelp": "The glosses you wrote in step 2.",
+      "noGlossWritten": "No glosses written yet — add them to a sentence in step 2.",
+      "charCountLabel": "Character count",
+      "charCountHelp": "Rarely useful for single sentences.",
+      "selfCheckLabel": "Self-checks before handing in",
+      "selfCheckNone": "off",
+      "selfCheckOn": "Each self-check shows the diff against the key with the missing words hidden behind •••.",
+      "selfCheckOff": "The student hands in without ever seeing how close they are.",
+      "attemptsLabel": "Attempts",
+      "attempts": {
+        "free": "Free until handed in",
+        "once": "One submission"
+      },
+      "attemptsHelp": {
+        "free": "The student may correct and hand in again, feedback included.",
+        "once": "Locked after handing in — only a teacher can reopen it."
+      },
+      "showRefsLabel": "When the key is shown",
+      "showRefs": {
+        "afterSubmit": "After handing in",
+        "afterGraded": "After marking",
+        "never": "Never"
+      },
+      "showRefsHelp": {
+        "afterSubmit": "The student sees the key while the answer waits in your queue.",
+        "afterGraded": "The key arrives together with your verdict.",
+        "never": "The key stays between you and the other teachers."
+      }
+    },
+    "queue": {
+      "title": "The marking queue",
+      "lede": "How a handed-in set will look on your side. Write the answers you expect and the same engine the server runs will place them.",
+      "noItems": "Write the sentences in step 2 to see a submission.",
+      "answerPlaceholder": "An answer in {lang}…",
+      "howTo": "Write at least one answer above to see the submission.",
+      "submissionTitle": "One submission",
+      "summary": "{auto} approved automatically · {manual} for you",
+      "summaryNoCheck": "{count, plural, one {# answer} other {# answers}}, all for you",
+      "approve": "Approve",
+      "comment": "Comment",
+      "sendBack": "Send back",
+      "actionsSoon": "The queue itself is not built yet — these actions show what it will offer.",
+      "aiNote": "The AI pre-check would draft a comment here, from the diff and your requirements.",
+      "explanation": "Explanation of the key: {text}"
+    },
+    "preview": {
+      "empty": "Write a sentence to see the student's screen.",
+      "noCheck": "The student's screen, exactly as the server sends it — no accepted translation among it. Nothing is marked here: try an answer in step 2 or 3 to see a verdict."
     },
     "tester": {
       "title": "Try an answer",

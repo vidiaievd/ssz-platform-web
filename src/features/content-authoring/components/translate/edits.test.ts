@@ -11,13 +11,16 @@ import {
 
 import {
   addGloss,
+  addGuard,
   addItem,
   addRef,
   duplicateItem,
   emptyItem,
   removeGloss,
+  removeGuard,
   removeItem,
   removeRef,
+  setGuard,
   setDirection,
   setGloss,
   setItem,
@@ -146,5 +149,34 @@ describe('translate builder edits', () => {
 
     expect(next.items[1]!.hint).toBe('Perfektum.');
     expect(next.items[0]).toBe(two.items[0]);
+  });
+
+  /**
+   * A guard is a pair — the wording, and why it is wrong — so the row exists before either
+   * half is typed. The kernel ignores a guard with no text, which is what makes an empty
+   * row safe to autosave.
+   */
+  it('opens an empty guard row and fills its halves independently', () => {
+    const opened = addGuard(doc(), 'i1', 'require');
+    expect(opened.items[0]!.require).toEqual([{ text: '' }]);
+
+    const named = setGuard(opened, 'i1', 'require', 0, { text: 'har bodd' });
+    const explained = setGuard(named, 'i1', 'require', 0, { note: 'Perfektum.' });
+    expect(explained.items[0]!.require).toEqual([{ text: 'har bodd', note: 'Perfektum.' }]);
+  });
+
+  it('removes one guard and leaves the other list alone', () => {
+    const two = doc({
+      items: [
+        item({
+          require: [{ text: 'har bodd' }, { text: 'i tre år' }],
+          forbid: [{ text: 'bor' }],
+        }),
+      ],
+    });
+
+    const next = removeGuard(two, 'i1', 'require', 0);
+    expect(next.items[0]!.require).toEqual([{ text: 'i tre år' }]);
+    expect(next.items[0]!.forbid).toEqual([{ text: 'bor' }]);
   });
 });

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Ban, Check, CircleAlert, Target, User } from 'lucide-react';
+import { Ban, CircleAlert, Target } from 'lucide-react';
 
 import { Textarea } from '@/components/ui/input';
 import {
@@ -10,24 +10,14 @@ import {
   runItems,
   sourceLang,
   answerLang,
-  type DiffToken,
   type Judgement,
   type Translate,
-  type Verdict,
 } from '@/lib/shared-kernel/translate';
 import { route } from '@/lib/shared-kernel/translate';
 
-const READING = 'var(--ssz-font-reading)';
+import { DiffLegend, DiffLine, RouteChip, VerdictChip } from './tr-marks';
 
-/** How each verdict reads. Only `exact` is ever a pass — everything else is for a human. */
-const VERDICT_TONE: Record<Verdict, 'ok' | 'warn' | 'bad' | 'muted'> = {
-  exact: 'ok',
-  typo: 'warn',
-  near: 'warn',
-  off: 'bad',
-  empty: 'muted',
-  noref: 'muted',
-};
+const READING = 'var(--ssz-font-reading)';
 
 export interface TrTesterProps {
   exercise: Translate;
@@ -88,7 +78,11 @@ export function TrTester({ exercise }: TrTesterProps) {
         remount key, so editing either drops the verdict rather than leaving one standing
         over words that have since changed.
       */}
-      <Trial key={`${item.id}|${item.source}|${item.refs.join('|')}`} exercise={exercise} at={position} />
+      <Trial
+        key={`${item.id}|${item.source}|${item.refs.join('|')}`}
+        exercise={exercise}
+        at={position}
+      />
     </section>
   );
 }
@@ -150,43 +144,12 @@ interface OutcomeProps {
  */
 function Outcome({ judgement, routing }: OutcomeProps) {
   const t = useTranslations('Authoring');
-  const tone = VERDICT_TONE[judgement.verdict];
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        <span
-          className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-            tone === 'ok'
-              ? 'bg-success-50 text-success-700'
-              : tone === 'warn'
-                ? 'bg-warning-100 text-warning-700'
-                : tone === 'bad'
-                  ? 'bg-error/10 text-error'
-                  : 'bg-[var(--ssz-bg-subtle)] text-muted-foreground'
-          }`}
-        >
-          {tone === 'ok' ? (
-            <Check className="size-3" aria-hidden />
-          ) : (
-            <CircleAlert className="size-3" aria-hidden />
-          )}
-          {t(`translate.verdict.${judgement.verdict}` as 'translate.verdict.exact')}
-        </span>
-        <span
-          className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${
-            routing === 'pass'
-              ? 'border-success-500/50 text-success-700'
-              : 'border-border text-[var(--ssz-text-secondary)]'
-          }`}
-        >
-          {routing === 'pass' ? (
-            <Check className="size-3" aria-hidden />
-          ) : (
-            <User className="size-3" aria-hidden />
-          )}
-          {routing === 'pass' ? t('translate.tester.routePass') : t('translate.tester.routeTeacher')}
-        </span>
+        <VerdictChip verdict={judgement.verdict} />
+        <RouteChip routing={routing} />
         <span className="flex-1" />
         <span className="text-xs text-muted-foreground">
           {t('translate.tester.sim', { percent: Math.round(judgement.sim * 100) })}
@@ -206,12 +169,8 @@ function Outcome({ judgement, routing }: OutcomeProps) {
 
       {judgement.verdict !== 'exact' && judgement.verdict !== 'noref' && (
         <>
-          <Diff tokens={judgement.tokens} />
-          <ul className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
-            <li>{t('translate.tester.legendExtra')}</li>
-            <li>{t('translate.tester.legendMissing')}</li>
-            <li>{t('translate.tester.legendTypo')}</li>
-          </ul>
+          <DiffLine tokens={judgement.tokens} />
+          <DiffLegend />
         </>
       )}
 
@@ -236,35 +195,5 @@ function Outcome({ judgement, routing }: OutcomeProps) {
         </p>
       ))}
     </div>
-  );
-}
-
-/** The trial answer against the closest accepted translation, word by word. */
-function Diff({ tokens }: { tokens: DiffToken[] }) {
-  const t = useTranslations('Authoring');
-
-  return (
-    <p
-      className="flex flex-wrap gap-1 rounded-md border border-border bg-surface p-2 text-sm"
-      style={{ fontFamily: READING }}
-      aria-label={t('translate.tester.diffLabel')}
-    >
-      {tokens.map((token, position) => (
-        <span
-          key={position}
-          className={
-            token.t === 'extra'
-              ? 'rounded bg-error/10 px-1 text-error line-through'
-              : token.t === 'missing'
-                ? 'rounded bg-success-50 px-1 text-success-700'
-                : token.typo !== null
-                  ? 'rounded bg-warning-100 px-1 text-warning-700'
-                  : undefined
-          }
-        >
-          {token.typo ?? token.w}
-        </span>
-      ))}
-    </p>
   );
 }

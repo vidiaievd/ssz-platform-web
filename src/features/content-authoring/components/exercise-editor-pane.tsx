@@ -47,6 +47,7 @@ import { GapFillPreview } from './wordbank-gapfill/gap-fill-preview';
 import { ErrorCorrectionBuilder } from './error-correction/builder';
 import { ErrorCorrectionPreview } from './error-correction/error-correction-preview';
 import { TranslateBuilder } from './translate/builder';
+import { TranslatePreview } from './translate/translate-preview';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 
 interface ExerciseEditorPaneProps {
@@ -83,6 +84,8 @@ export function ExerciseEditorPane({
   } | null>(null);
   /** The error-correction document as its builder currently has it, for the preview column. */
   const [errorCorrection, setErrorCorrection] = useState<ErrorCorrection | null>(null);
+  /** The translate document as its builder currently has it, for the preview column. */
+  const [translate, setTranslate] = useState<Translate | null>(null);
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
@@ -105,6 +108,8 @@ export function ExerciseEditorPane({
           <GapFillPreview exercise={gapFill.exercise} instructions={gapFill.instructions} />
         ) : isErrorCorrection && errorCorrection !== null ? (
           <ErrorCorrectionPreview exercise={errorCorrection} />
+        ) : isTranslate && translate !== null ? (
+          <TranslatePreview exercise={translate} />
         ) : (
           <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
         )
@@ -142,13 +147,13 @@ export function ExerciseEditorPane({
       ) : isTranslate && exercise !== undefined ? (
         // Translate owns a document for the plainest reason of the three: the accepted
         // translations *are* the answer, and authoring them is writing a set of sentences
-        // with a key each, not filling in a form field. No preview column yet — the
-        // student view of this template arrives with the rest of the builder.
+        // with a key each, not filling in a form field.
         <TranslateBuilder
           key={exerciseId}
           exerciseId={exerciseId}
           containerId={container.id}
           initialExercise={translateDocumentFrom(exercise, container.id)}
+          onDocumentChange={setTranslate}
           onSavedRemote={(updatedAt, saved) =>
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),

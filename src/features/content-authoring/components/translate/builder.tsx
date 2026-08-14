@@ -19,25 +19,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { issues, stepState, type Issue, type IssueStep, type Translate } from '@/lib/shared-kernel/translate';
+import {
+  issues,
+  stepState,
+  type Issue,
+  type IssueStep,
+  type Translate,
+} from '@/lib/shared-kernel/translate';
 
+import { StepCheck } from './step-check';
 import { StepDirection } from './step-direction';
+import { StepFlow } from './step-flow';
 import { StepSentences } from './step-sentences';
 import { useTranslateAutosave } from './use-translate-autosave';
 import { useIssueCopy } from './issue-copy';
 
-/**
- * The steps that have controls today. Steps 3 (the check) and 4 (flow, AI, the queue
- * preview) are plan 42's phase 6 — until they exist the rail does not offer them, and the
- * gate lists their problems without a link, because a link would arrive at nothing.
- *
- * The settings themselves are not missing: the document carries `check`, `flow` and `ai`
- * from the first save, at the kernel's defaults, and the runner and the server already
- * honour them.
- */
-const BUILT_STEPS: IssueStep[] = [1, 2];
-
-const isBuilt = (step: IssueStep): boolean => BUILT_STEPS.includes(step);
+/** The four steps of the rail, in authoring order. */
+const BUILT_STEPS: IssueStep[] = [1, 2, 3, 4];
 
 export interface TranslateBuilderProps {
   exerciseId: string;
@@ -125,6 +123,10 @@ export function TranslateBuilder({
       <div className="min-w-0">
         {step === 2 ? (
           <StepSentences exercise={exercise} onChange={setExercise} />
+        ) : step === 3 ? (
+          <StepCheck exercise={exercise} onChange={setExercise} />
+        ) : step === 4 ? (
+          <StepFlow exercise={exercise} onChange={setExercise} />
         ) : (
           <StepDirection exercise={exercise} onChange={setExercise} />
         )}
@@ -308,8 +310,7 @@ interface GateDialogProps {
  * state change — readiness is decided by container pre-flight from the same rules — but
  * the button stays disabled while a blocker is listed.
  *
- * Problems belonging to a step that has no controls yet are listed without a link. Hiding
- * them would be worse: a blocker the author cannot see is a blocker they cannot ask about.
+ * Every problem carries the step that owns the fix, so every row is a way there.
  */
 function GateDialog({ open, problems, blockerCount, onOpenChange, onGoToStep }: GateDialogProps) {
   const t = useTranslations('Authoring');
@@ -349,26 +350,19 @@ function GateDialog({ open, problems, blockerCount, onOpenChange, onGoToStep }: 
 
               return (
                 <li key={`${issue.code}-${index}`}>
-                  {isBuilt(issue.step) ? (
-                    <button
-                      type="button"
-                      onClick={() => onGoToStep(issue.step)}
-                      className="flex w-full items-start gap-2 rounded-md border border-border px-3 py-2 text-left text-sm hover:bg-[var(--ssz-bg-subtle)]"
-                    >
-                      {icon}
-                      <span>
-                        <span className="block">{describeIssue(issue)}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {t('translate.shell.gateGoToStep', { step: issue.step })}
-                        </span>
+                  <button
+                    type="button"
+                    onClick={() => onGoToStep(issue.step)}
+                    className="flex w-full items-start gap-2 rounded-md border border-border px-3 py-2 text-left text-sm hover:bg-[var(--ssz-bg-subtle)]"
+                  >
+                    {icon}
+                    <span>
+                      <span className="block">{describeIssue(issue)}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {t('translate.shell.gateGoToStep', { step: issue.step })}
                       </span>
-                    </button>
-                  ) : (
-                    <p className="flex w-full items-start gap-2 rounded-md border border-border px-3 py-2 text-left text-sm">
-                      {icon}
-                      <span>{describeIssue(issue)}</span>
-                    </p>
-                  )}
+                    </span>
+                  </button>
                 </li>
               );
             })}

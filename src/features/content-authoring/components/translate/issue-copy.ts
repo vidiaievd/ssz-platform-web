@@ -60,9 +60,6 @@ export function useIssueCopy(): (issue: Issue) => string {
         return t('translate.issues.CHECK_NEAR_TOO_LOW', {
           percent: Math.round(issue.near * 100),
         });
-      // Step 4's codes are filtered out before they reach here while its controls are
-      // unbuilt (see `builder.tsx`). Handled anyway, so that building the step is a
-      // compile error away from reporting them.
       case 'AI_WITHOUT_CHECK':
         return t('translate.issues.AI_WITHOUT_CHECK');
       case 'AI_UNLIMITED_BEFORE_SUBMIT':

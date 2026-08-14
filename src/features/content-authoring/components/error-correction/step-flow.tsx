@@ -11,7 +11,7 @@ import type {
   ShowRefsPolicy,
 } from '@/lib/shared-kernel/error-correction';
 
-import { ToggleRow } from './toggle-row';
+import { ToggleRow } from '../toggle-row';
 
 /** Self-checks the student may spend before handing in. */
 const SELF_CHECKS = [0, 1, 2, 3] as const;

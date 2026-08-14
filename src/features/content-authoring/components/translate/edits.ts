@@ -124,6 +124,51 @@ export function setGuards(
   return mapItem(exercise, itemId, (item) => ({ ...item, [kind]: guards }));
 }
 
+export type GuardKind = 'require' | 'forbid';
+
+/**
+ * A new guard starts empty, both halves of it.
+ *
+ * The kernel ignores a guard whose text is blank, so an empty row costs nothing while the
+ * author is still typing — and the row has to exist before there is anywhere to type.
+ */
+export function addGuard(exercise: Translate, itemId: string, kind: GuardKind): Translate {
+  return mapItem(exercise, itemId, (item) => ({
+    ...item,
+    [kind]: [...guardsOf(item, kind), { text: '' }],
+  }));
+}
+
+export function setGuard(
+  exercise: Translate,
+  itemId: string,
+  kind: GuardKind,
+  index: number,
+  patch: Partial<Guard>,
+): Translate {
+  return mapItem(exercise, itemId, (item) => ({
+    ...item,
+    [kind]: guardsOf(item, kind).map((guard, at) =>
+      at === index ? { ...guard, ...patch } : guard,
+    ),
+  }));
+}
+
+export function removeGuard(
+  exercise: Translate,
+  itemId: string,
+  kind: GuardKind,
+  index: number,
+): Translate {
+  return mapItem(exercise, itemId, (item) => ({
+    ...item,
+    [kind]: guardsOf(item, kind).filter((_, at) => at !== index),
+  }));
+}
+
+/** Documents written before guards existed carry neither list. */
+const guardsOf = (item: Item, kind: GuardKind): Guard[] => item[kind] ?? [];
+
 /**
  * Swap the two language labels.
  *

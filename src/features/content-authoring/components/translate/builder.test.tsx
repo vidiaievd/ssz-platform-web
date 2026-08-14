@@ -102,9 +102,7 @@ describe('TranslateBuilder', () => {
     await user.click(screen.getAllByRole('button', { name: 'Done' })[0]!);
 
     const dialog = screen.getByRole('dialog');
-    expect(
-      within(dialog).getByText('Sentence 1 has no accepted translation.'),
-    ).toBeInTheDocument();
+    expect(within(dialog).getByText('Sentence 1 has no accepted translation.')).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: /Fix 1 problem first/ })).toBeDisabled();
 
     await user.click(within(dialog).getByRole('button', { name: /no accepted translation/ }));
@@ -114,12 +112,8 @@ describe('TranslateBuilder', () => {
     );
   });
 
-  /**
-   * Steps 3 and 4 have no controls yet. Their problems are still reported — a blocker the
-   * author cannot see is one they cannot ask about — but without a link to a screen that
-   * does not exist.
-   */
-  it('reports a problem from an unbuilt step without offering to travel to it', async () => {
+  /** A guard that its own key trips is a blocker owned by step 3, and reachable there. */
+  it('travels from the gate to the step that owns a check problem', async () => {
     const { user } = renderBuilder(
       makeDoc({ items: [makeItem({ forbid: [{ text: 'har bodd' }] })] }),
     );
@@ -132,15 +126,19 @@ describe('TranslateBuilder', () => {
         'Sentence 1: «har bodd» is forbidden, but your own key contains it.',
       ),
     ).toBeInTheDocument();
-    expect(within(dialog).queryByRole('button', { name: /is forbidden/ })).not.toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: /Fix 1 problem first/ })).toBeDisabled();
+
+    await user.click(within(dialog).getByRole('button', { name: /is forbidden/ }));
+    expect(screen.getByRole('tab', { name: /The check/ })).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('reaches both built steps of the rail, each with its own screen', async () => {
+  it('reaches every step of the rail, each with its own screen', async () => {
     const { user } = renderBuilder();
 
     for (const [step, heading] of [
       ['The sentences', 'The sentences and their translations'],
+      ['The check', 'What the check accepts'],
+      ['Flow', 'The road to a mark'],
       ['Direction', 'Which way round?'],
     ] as const) {
       await user.click(screen.getByRole('tab', { name: new RegExp(step) }));
