@@ -24,6 +24,14 @@ import {
   toExpectedAnswers as errorCorrectionToExpectedAnswers,
   type ErrorCorrection,
 } from '@/lib/shared-kernel/error-correction';
+import {
+  fromPersisted as translateFromPersisted,
+  isTranslateCode,
+  toContent as translateToContent,
+  toExpectedAnswers as translateToExpectedAnswers,
+  type Translate,
+  type TranslateType,
+} from '@/lib/shared-kernel/translate';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -38,6 +46,7 @@ import type { SavedDocument } from './wordbank-gapfill/use-gap-fill-autosave';
 import { GapFillPreview } from './wordbank-gapfill/gap-fill-preview';
 import { ErrorCorrectionBuilder } from './error-correction/builder';
 import { ErrorCorrectionPreview } from './error-correction/error-correction-preview';
+import { TranslateBuilder } from './translate/builder';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 
 interface ExerciseEditorPaneProps {
@@ -77,6 +86,7 @@ export function ExerciseEditorPane({
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
+  const isTranslate = isTranslateCode(exercise?.templateCode);
 
   return (
     <LessonEditorShell
@@ -126,6 +136,23 @@ export function ExerciseEditorPane({
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
               (cached) => (cached ? applySavedGapFill(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
+      ) : isTranslate && exercise !== undefined ? (
+        // Translate owns a document for the plainest reason of the three: the accepted
+        // translations *are* the answer, and authoring them is writing a set of sentences
+        // with a key each, not filling in a form field. No preview column yet — the
+        // student view of this template arrives with the rest of the builder.
+        <TranslateBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          initialExercise={translateDocumentFrom(exercise, container.id)}
+          onSavedRemote={(updatedAt, saved) =>
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedTranslate(cached, updatedAt, saved) : cached),
             )
           }
         />
@@ -246,6 +273,43 @@ function applySavedErrorCorrection(
     updatedAt,
     content: { ...errorCorrectionToContent(saved) },
     expectedAnswers: { ...errorCorrectionToExpectedAnswers(saved) },
+    ...(instruction && {
+      instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],
+    }),
+  };
+}
+
+/** The stored columns as the kernel's translate document. See above for the token. */
+function translateDocumentFrom(exercise: ExerciseWithAnswers, containerId: string): Translate {
+  return translateFromPersisted(
+    {
+      id: exercise.id,
+      moduleId: containerId,
+      title: '',
+      instructions: firstInstruction(exercise)?.instructionText ?? '',
+      updatedAt: exercise.updatedAt ?? '',
+    },
+    exercise.templateCode as TranslateType,
+    exercise.content,
+    exercise.expectedAnswers,
+  );
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ */
+function applySavedTranslate(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: Translate,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...translateToContent(saved) },
+    expectedAnswers: { ...translateToExpectedAnswers(saved) },
     ...(instruction && {
       instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],
     }),
