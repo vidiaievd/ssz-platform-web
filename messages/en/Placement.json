@@ -30,7 +30,13 @@
     "dontKnow": "I don't know this",
     "continue": "Continue",
     "seeMyLevel": "See my level",
-    "skipForNow": "Skip for now"
+    "skipForNow": "Skip for now",
+    "freeText": {
+      "defaultInstruction": "Translate the sentence",
+      "textareaLabel": "Your translation",
+      "placeholder": "Write in {lang}…",
+      "sampleAnswer": "Sample answer"
+    }
   },
   "result": {
     "eyebrow": "You're ready for",

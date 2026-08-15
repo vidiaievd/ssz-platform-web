@@ -44,10 +44,7 @@
     "yourAnswer": "Ваша відповідь"
   },
   "translate": {
-    "defaultInstruction": "Перекладіть речення",
-    "textareaLabel": "Ваш переклад",
     "placeholder": "Пишіть {lang}…",
-    "sampleAnswer": "Зразок відповіді",
     "bothWays": "В обидва боки",
     "direction": "{from} → {to}",
     "numberedLang": "{n}. {lang}",

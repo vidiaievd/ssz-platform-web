@@ -162,15 +162,6 @@ export function ExerciseFields({
           isPending={isPending}
         />
       )}
-      {(templateCode === 'translate_to_target' || templateCode === 'translate_from_target') && (
-        <TranslateFields
-          control={control}
-          register={register}
-          errors={errors}
-          isPending={isPending}
-          showSourceLanguage={templateCode === 'translate_to_target'}
-        />
-      )}
       {templateCode === 'match_pairs' && (
         <MatchPairsFields
           control={control}
@@ -782,92 +773,6 @@ function FillInBlankFields({ control, register, errors, isPending }: SubProps) {
   );
 }
 
-function TranslateFields({
-  control,
-  register,
-  errors,
-  isPending,
-  showSourceLanguage,
-}: SubProps & { showSourceLanguage: boolean }) {
-  const t = useTranslations('Authoring.exercises');
-  const { fields, append, remove } = useFieldArray({ control, name: 'trAcceptedTranslations' });
-
-  return (
-    <div className="rounded-md border border-border p-3 space-y-4">
-      <Field
-        label={t('trSourceText')}
-        htmlFor="ex-tr-src"
-        error={errors.trSourceText?.message}
-        required
-      >
-        <Textarea
-          id="ex-tr-src"
-          rows={2}
-          placeholder={t('trSourceTextPlaceholder')}
-          disabled={isPending}
-          {...register('trSourceText')}
-        />
-      </Field>
-
-      {showSourceLanguage && (
-        <Field label={t('trSourceLanguage')} htmlFor="ex-tr-lang">
-          <Input
-            id="ex-tr-lang"
-            placeholder={t('trSourceLanguagePlaceholder')}
-            className="max-w-32 font-mono"
-            disabled={isPending}
-            {...register('trSourceLanguage')}
-          />
-        </Field>
-      )}
-
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-(--ssz-text-primary)">
-          {t('trAcceptedTranslations')}
-        </p>
-        {typeof errors.trAcceptedTranslations?.message === 'string' && (
-          <p className="text-xs text-destructive">{errors.trAcceptedTranslations.message}</p>
-        )}
-        {fields.map((field, index) => (
-          <div key={field.id} className="flex items-center gap-2">
-            <div className="flex-1">
-              <Input
-                placeholder={t('trTranslationPlaceholder')}
-                hasError={!!errors.trAcceptedTranslations?.[index]?.text}
-                disabled={isPending}
-                {...register(`trAcceptedTranslations.${index}.text`)}
-              />
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => remove(index)}
-              disabled={fields.length <= 1}
-              aria-label={t('removeTranslation')}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
-        <Button type="button" variant="ghost" size="sm" onClick={() => append({ text: '' })}>
-          <Plus className="mr-1.5 h-4 w-4" />
-          {t('addTranslation')}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Try the answer key the way a learner will meet it.
- *
- * The panel runs the very checker the runner and the engine use, so what the
- * author sees here is what the class gets — the point being to catch a key that
- * sends every near miss to manual review *before* the exercise is published.
- * It owns nothing in the form: the trial answer is local state, and the only
- * write is the explicit "add this phrasing" button.
- */
 function ShortAnswerKeyTrial({
   control,
   isPending,

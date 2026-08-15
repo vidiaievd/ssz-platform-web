@@ -6,14 +6,10 @@ import { useTranslations } from 'next-intl';
 
 import type { ExerciseDisplay } from '@/features/content/types';
 import { primaryInstructionText } from '@/features/content/lib/instruction-text';
-import {
-  McqBody,
-  TranslateBody,
-  gradeMcq,
-  gradeTranslate,
-} from '@/features/student/exercises/runner';
-import type { McqContent, McqExpectedAnswers, TranslateContent } from '@/features/student/exercises/runner';
-import type { TranslateExpectedAnswers } from '@/features/student/exercises/runner';
+import { McqBody, gradeMcq, gradeFreeText } from '@/features/student/exercises/runner';
+import type { McqContent, McqExpectedAnswers } from '@/features/student/exercises/runner';
+import type { FreeTextExpectedAnswers } from '@/features/student/exercises/runner';
+import { FreeTextBody, type FreeTextContent } from './free-text-body';
 import { PLACEMENT_QUESTION_COUNT } from '../adaptive';
 import { usePlacementStore } from '../stores/placement-store';
 import { PlacementProgressRow } from './placement-progress-row';
@@ -55,12 +51,12 @@ function parseMcq(display: ExerciseDisplay): ParsedMcq | null {
   };
 }
 
-interface ParsedTranslate {
-  content: TranslateContent;
-  expected: TranslateExpectedAnswers;
+interface ParsedFreeText {
+  content: FreeTextContent;
+  expected: FreeTextExpectedAnswers;
 }
 
-function parseTranslate(display: ExerciseDisplay): ParsedTranslate | null {
+function parseFreeText(display: ExerciseDisplay): ParsedFreeText | null {
   const c = display.content;
   const sourceText = typeof c.source_text === 'string' ? c.source_text : null;
   if (!sourceText) return null;
@@ -168,9 +164,9 @@ function PlacementMcqQuestion({
   );
 }
 
-/* ── Translate body wrapper for placement ───────────────────────────────────── */
+/* ── Free-text body wrapper for placement ───────────────────────────────────── */
 
-interface PlacementTranslateProps {
+interface PlacementFreeTextProps {
   display: ExerciseDisplay;
   value: string;
   onValueChange: (v: string) => void;
@@ -179,16 +175,16 @@ interface PlacementTranslateProps {
   isLast: boolean;
 }
 
-function PlacementTranslateQuestion({
+function PlacementFreeTextQuestion({
   display,
   value,
   onValueChange,
   onGrade,
   onDontKnow,
   isLast,
-}: PlacementTranslateProps) {
+}: PlacementFreeTextProps) {
   const t = useTranslations('Placement');
-  const parsed = parseTranslate(display);
+  const parsed = parseFreeText(display);
   const noop = useCallback(() => {}, []);
 
   if (!parsed) return null;
@@ -197,7 +193,7 @@ function PlacementTranslateQuestion({
 
   function handleContinue() {
     if (!canSubmit) return;
-    onGrade(gradeTranslate(parsed!.expected, value));
+    onGrade(gradeFreeText(parsed!.expected, value));
   }
 
   return (
@@ -235,7 +231,7 @@ function PlacementTranslateQuestion({
       </div>
 
       {/* Answer textarea — always in answering phase */}
-      <TranslateBody
+      <FreeTextBody
         content={parsed.content}
         value={value}
         onValueChange={onValueChange}
@@ -366,7 +362,7 @@ export function PlacementQuestionRunner({ onSkipForNow }: PlacementQuestionRunne
             isLast={isLast}
           />
         ) : (
-          <PlacementTranslateQuestion
+          <PlacementFreeTextQuestion
             display={currentQuestion}
             value={translationText}
             onValueChange={setTranslation}

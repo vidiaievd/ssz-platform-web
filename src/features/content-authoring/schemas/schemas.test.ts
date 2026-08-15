@@ -337,26 +337,13 @@ describe('exerciseFormSchema', () => {
     expect(paths).toContain('fibText');
   });
 
-  it('translate_to_target: accepts source text + at least one translation', () => {
-    expect(
-      parseExercise({
-        templateCode: 'translate_to_target',
-        trSourceText: 'I speak Norwegian',
-        trAcceptedTranslations: [{ text: 'Jeg snakker norsk' }],
-      }).success,
-    ).toBe(true);
-  });
-
-  it('translate_from_target: rejects when no accepted translation provided', () => {
-    const result = parseExercise({
-      templateCode: 'translate_from_target',
-      trSourceText: 'Jeg snakker norsk',
-      trAcceptedTranslations: [{ text: ' ' }],
-    });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    const paths = result.error.issues.map((i) => i.path.join('.'));
-    expect(paths).toContain('trAcceptedTranslations');
+  // The translate pair is no longer a slice of this form (plan 42 §9): its content is a
+  // set of sentences with an answer key each, authored in `TranslateBuilder`. The form
+  // must not accept either code, or the picker would offer a shape nothing can edit.
+  it('the translate pair is not a form-editable type', () => {
+    for (const code of ['translate_to_target', 'translate_from_target']) {
+      expect(parseExercise({ templateCode: code }).success, code).toBe(false);
+    }
   });
 
   it('match_pairs: accepts 2+ pairs', () => {

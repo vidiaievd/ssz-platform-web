@@ -41,9 +41,6 @@ export type {
   McqGroupValue,
 } from './mcq-group-body';
 
-export { TranslateBody } from './translate-body';
-export type { TranslateBodyProps, TranslateContent } from './translate-body';
-
 export { MatchBody } from './match-body';
 export type { MatchBodyProps, MatchContent, MatchPair } from './match-body';
 
@@ -107,13 +104,13 @@ export {
   gradeMcq,
   checkMcqGroup,
   gradeFill,
-  gradeTranslate,
+  gradeFreeText,
   gradeMatch,
   gradeSentenceSchema,
   checkWordBankFill,
   checkTextOrder,
 } from './grading';
-export type { TranslateExpectedAnswers } from './grading';
+export type { FreeTextExpectedAnswers } from './grading';
 
 /* The short-answer checker is shared with the authoring side, so it lives in
    lib/ — re-exported here so runner consumers keep one import path. */

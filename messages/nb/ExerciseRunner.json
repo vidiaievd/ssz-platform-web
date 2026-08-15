@@ -44,10 +44,7 @@
     "yourAnswer": "Ditt svar"
   },
   "translate": {
-    "defaultInstruction": "Oversett setningen",
-    "textareaLabel": "Din oversettelse",
     "placeholder": "Skriv på {lang}…",
-    "sampleAnswer": "Eksempelsvar",
     "bothWays": "Begge veier",
     "direction": "{from} → {to}",
     "numberedLang": "{n}. {lang}",

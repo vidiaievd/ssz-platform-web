@@ -4,16 +4,28 @@ import { ArrowRight } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Instr } from './instr';
-import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
+import {
+  Instr,
+  modeAccentSoft,
+  type RunnerMode,
+  type RunnerPhase,
+} from '@/features/student/exercises/runner';
 
 /**
- * Content schema for translate exercises.
+ * Content schema for a free-text placement question: a sentence to render and a box to
+ * write the answer in.
+ *
+ * This is the placement test's own body, not an exercise runner one. The `translate_*`
+ * templates outgrew it in plan 42 — they are a set of sentences with an answer key each,
+ * played by `TranslateRunnerBody` against a server that grades them. Placement questions
+ * are single, sampled by `free_text` template code, and graded in the browser against
+ * `accepted_answers`, which is why the sample answer may be sent here at all.
+ *
  * `direction`:
  *   'to'   = source is in the learner's UI language, target is the learning language.
  *   'from' = source is in the learning language, target is the learner's UI language.
  */
-export interface TranslateContent {
+export interface FreeTextContent {
   direction: 'to' | 'from';
   /** Label for the source language, e.g. "English". */
   fromLabel: string;
@@ -28,8 +40,8 @@ export interface TranslateContent {
   instruction?: string;
 }
 
-export interface TranslateBodyProps {
-  content: TranslateContent;
+export interface FreeTextBodyProps {
+  content: FreeTextContent;
   value: string;
   onValueChange: (val: string) => void;
   onAnswerChange: (canSubmit: boolean) => void;
@@ -42,7 +54,7 @@ export interface TranslateBodyProps {
 
 const READING = 'var(--ssz-font-reading)';
 
-export function TranslateBody({
+export function FreeTextBody({
   content,
   value,
   onValueChange,
@@ -51,8 +63,8 @@ export function TranslateBody({
   ok,
   mode,
   accent,
-}: TranslateBodyProps) {
-  const t = useTranslations('ExerciseRunner');
+}: FreeTextBodyProps) {
+  const t = useTranslations('Placement.runner.freeText');
   const accentSoft = modeAccentSoft(mode);
   const reveal = phase === 'feedback';
   const isAnswering = phase === 'answering';
@@ -73,7 +85,7 @@ export function TranslateBody({
     onAnswerChange(value.trim() !== '');
   }, [value, onAnswerChange]);
 
-  const instruction = content.instruction ?? t('translate.defaultInstruction');
+  const instruction = content.instruction ?? t('defaultInstruction');
 
   return (
     <>
@@ -125,9 +137,9 @@ export function TranslateBody({
         value={value}
         disabled={!isAnswering}
         rows={2}
-        aria-label={t('translate.textareaLabel')}
+        aria-label={t('textareaLabel')}
         onChange={(e) => onValueChange(e.target.value)}
-        placeholder={t('translate.placeholder', { lang: content.toLabel })}
+        placeholder={t('placeholder', { lang: content.toLabel })}
         style={{
           width: '100%',
           fontFamily: READING,
@@ -162,7 +174,7 @@ export function TranslateBody({
             className="mb-1 text-[11px] font-bold uppercase"
             style={{ letterSpacing: '0.05em', color: 'var(--ssz-text-muted)' }}
           >
-            {t('translate.sampleAnswer')}
+            {t('sampleAnswer')}
           </div>
           <div
             className="font-semibold"

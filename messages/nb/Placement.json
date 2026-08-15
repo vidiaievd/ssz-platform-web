@@ -30,7 +30,13 @@
     "dontKnow": "Jeg vet ikke dette",
     "continue": "Fortsett",
     "seeMyLevel": "Se mitt nivå",
-    "skipForNow": "Hopp over nå"
+    "skipForNow": "Hopp over nå",
+    "freeText": {
+      "defaultInstruction": "Oversett setningen",
+      "textareaLabel": "Din oversettelse",
+      "placeholder": "Skriv på {lang}…",
+      "sampleAnswer": "Eksempelsvar"
+    }
   },
   "result": {
     "eyebrow": "Du er klar for",

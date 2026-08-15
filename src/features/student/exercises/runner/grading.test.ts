@@ -5,9 +5,9 @@ import {
   gradeMcq,
   gradeFill,
   gradeSentenceSchema,
-  gradeTranslate,
+  gradeFreeText,
   gradeMatch,
-  type TranslateExpectedAnswers,
+  type FreeTextExpectedAnswers,
   checkWordBankFill,
   checkTextOrder,
 } from './grading';
@@ -126,35 +126,35 @@ describe('gradeFill', () => {
   });
 });
 
-/* ── gradeTranslate ──────────────────────────────────────────────── */
+/* ── gradeFreeText ──────────────────────────────────────────────── */
 
-describe('gradeTranslate', () => {
-  const ea: TranslateExpectedAnswers = {
+describe('gradeFreeText', () => {
+  const ea: FreeTextExpectedAnswers = {
     accepted_answers: ['Det er et travelt yrke.', "It's a busy job"],
   };
 
   it('returns true when value matches first accepted answer (after norm)', () => {
-    expect(gradeTranslate(ea, 'Det er et travelt yrke.')).toBe(true);
+    expect(gradeFreeText(ea, 'Det er et travelt yrke.')).toBe(true);
   });
 
   it('returns true when value matches second accepted answer', () => {
-    expect(gradeTranslate(ea, "it's a busy job")).toBe(true);
+    expect(gradeFreeText(ea, "it's a busy job")).toBe(true);
   });
 
   it('is case-insensitive', () => {
-    expect(gradeTranslate(ea, 'DET ER ET TRAVELT YRKE')).toBe(true);
+    expect(gradeFreeText(ea, 'DET ER ET TRAVELT YRKE')).toBe(true);
   });
 
   it('tolerates leading/trailing whitespace', () => {
-    expect(gradeTranslate(ea, '  det er et travelt yrke  ')).toBe(true);
+    expect(gradeFreeText(ea, '  det er et travelt yrke  ')).toBe(true);
   });
 
   it('returns false when no accepted answer matches', () => {
-    expect(gradeTranslate(ea, 'something completely different')).toBe(false);
+    expect(gradeFreeText(ea, 'something completely different')).toBe(false);
   });
 
   it('returns false for empty value', () => {
-    expect(gradeTranslate(ea, '')).toBe(false);
+    expect(gradeFreeText(ea, '')).toBe(false);
   });
 });
 

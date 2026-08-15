@@ -44,10 +44,7 @@
     "yourAnswer": "Your answer"
   },
   "translate": {
-    "defaultInstruction": "Translate the sentence",
-    "textareaLabel": "Your translation",
     "placeholder": "Write in {lang}…",
-    "sampleAnswer": "Sample answer",
     "bothWays": "Both directions",
     "direction": "{from} → {to}",
     "numberedLang": "{n}. {lang}",
