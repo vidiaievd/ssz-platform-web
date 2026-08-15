@@ -54,15 +54,20 @@ function request(query = ''): NextRequest {
   return new NextRequest(`http://localhost/api/content/containers/course-1/review-queue${query}`);
 }
 
-/** Versions, then the draft's tree, then the engine's queue — the handler's own order. */
+/**
+ * Versions, the draft's tree, the engine's queue, then the directory — the handler's own
+ * order.
+ */
 function upstream(
   tree: unknown = TREE,
   queue: unknown = { items: [ENTRY], total: 1, limit: 20, offset: 0 },
+  profiles: unknown = [{ userId: 'user-1', displayName: 'Kari Nordmann' }],
 ) {
   vi.mocked(serverFetch)
     .mockResolvedValueOnce({ items: [{ id: 'v1', status: 'draft' }] })
     .mockResolvedValueOnce(tree)
-    .mockResolvedValueOnce(queue);
+    .mockResolvedValueOnce(queue)
+    .mockResolvedValueOnce(profiles);
 }
 
 function engineCall() {
@@ -94,6 +99,24 @@ describe('GET /api/content/containers/[id]/review-queue', () => {
       itemId: 'row-1',
       title: 'Oversett setningene',
     });
+    // Neither service holds a name: without this join the teacher reads eight
+    // characters of UUID where a pupil's name belongs.
+    expect(body.learners['user-1'].displayName).toBe('Kari Nordmann');
+  });
+
+  it('serves the queue even when nobody can be named', async () => {
+    vi.mocked(serverFetch)
+      .mockResolvedValueOnce({ items: [{ id: 'v1', status: 'draft' }] })
+      .mockResolvedValueOnce(TREE)
+      .mockResolvedValueOnce({ items: [ENTRY], total: 1, limit: 20, offset: 0 })
+      .mockRejectedValueOnce(new Error('directory down'));
+
+    const response = await GET(request(), PARAMS);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.items).toHaveLength(1);
+    expect(body.learners).toEqual({});
   });
 
   it('refuses before reading anything when the teacher may not edit the course', async () => {
@@ -118,7 +141,14 @@ describe('GET /api/content/containers/[id]/review-queue', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toEqual({ items: [], total: 0, limit: 0, offset: 0, exercises: [] });
+    expect(body).toEqual({
+      items: [],
+      total: 0,
+      limit: 0,
+      offset: 0,
+      exercises: [],
+      learners: {},
+    });
     expect(engineCall()).toBeUndefined();
   });
 

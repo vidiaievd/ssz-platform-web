@@ -11,6 +11,7 @@ import type { Verdict as EcVerdict } from '@/lib/shared-kernel/error-correction'
 import type {
   ErrorCorrectionItemDetail,
   ErrorCorrectionSpanDetail,
+  LearnerSummary,
   ReviewDecision,
   ReviewItemDetail,
   ReviewQueueEntry,
@@ -66,9 +67,8 @@ export interface AuthoredItem {
  *  still renders whichever reading its details carry. */
 const isTranslateDetail = (detail: ReviewItemDetail): detail is TranslateItemDetail =>
   'tokens' in detail;
-const isErrorCorrectionDetail = (
-  detail: ReviewItemDetail,
-): detail is ErrorCorrectionItemDetail => 'spans' in detail;
+const isErrorCorrectionDetail = (detail: ReviewItemDetail): detail is ErrorCorrectionItemDetail =>
+  'spans' in detail;
 
 /** What a sentence closed by the check reads as, in the collapsed line. */
 const closedLine = (detail: ReviewItemDetail): string =>
@@ -79,6 +79,12 @@ export interface SubmissionCardProps {
   entry: ReviewQueueEntry;
   /** The sentences as their author wrote them, by id. Empty for templates not yet read. */
   itemsById: Map<string, AuthoredItem>;
+  /**
+   * Who handed this in, when the directory could say. Absent falls back to the shortened
+   * id: a teacher marking their own class should read a name, but a name the directory
+   * could not give is no reason to withhold the work.
+   */
+  learner?: LearnerSummary;
 }
 
 /**
@@ -94,7 +100,7 @@ export interface SubmissionCardProps {
  * follows from those decisions on the server. `Send tilbake` needs none of them — it is
  * the teacher saying "look at this again", and it carries a comment instead of a mark.
  */
-export function SubmissionCard({ exerciseId, entry, itemsById }: SubmissionCardProps) {
+export function SubmissionCard({ exerciseId, entry, itemsById, learner }: SubmissionCardProps) {
   const t = useTranslations('Authoring');
   const review = useReviewAttempt(exerciseId);
 
@@ -125,7 +131,7 @@ export function SubmissionCard({ exerciseId, entry, itemsById }: SubmissionCardP
         </span>
         <span>
           <span className="block text-sm font-medium">
-            {t('review.learner', { id: entry.userId.slice(0, 8) })}
+            {learner?.displayName ?? t('review.learner', { id: entry.userId.slice(0, 8) })}
           </span>
           <span className="block text-xs text-muted-foreground">
             {entry.submittedAt === null

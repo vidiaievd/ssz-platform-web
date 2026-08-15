@@ -35,6 +35,7 @@ const QUEUE: ReviewQueueResponse = {
   total: 1,
   limit: 20,
   offset: 0,
+  learners: { 'learner-9abcdef0': { userId: 'learner-9abcdef0', displayName: 'Kari Nordmann' } },
   items: [
     {
       attemptId: 'att-1',
@@ -239,7 +240,7 @@ describe('ReviewQueue', () => {
   });
 
   it('says plainly when there is nothing to mark', async () => {
-    renderQueue({ items: [], total: 0, limit: 20, offset: 0 });
+    renderQueue({ items: [], total: 0, limit: 20, offset: 0, learners: {} });
 
     expect(
       await screen.findByText(
@@ -278,6 +279,7 @@ describe('ReviewQueue — error_correction', () => {
     total: 1,
     limit: 20,
     offset: 0,
+    learners: {},
     items: [
       {
         attemptId: 'att-2',

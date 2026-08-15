@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { fetchProfileSummaries } from '@/lib/api/profile-directory';
 import { env } from '@/lib/env';
 import { mayEditContainer } from '@/features/content-authoring/lib/may-edit';
 import { collectCourseExercises } from '@/features/content-authoring/lib/collect-course-exercises';
@@ -60,11 +61,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       limit: 0,
       offset: 0,
       exercises: [],
+      learners: {},
     } satisfies CourseReviewQueueResponse);
   }
 
   try {
-    const queue = await serverFetch<ReviewQueueResponse>({
+    // The engine deals in ids: names are joined in below, not upstream.
+    const queue = await serverFetch<Omit<ReviewQueueResponse, 'learners'>>({
       service: 'exercises',
       path: '/internal/attempts/review/search',
       method: 'POST',
@@ -78,7 +81,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
     });
 
-    return NextResponse.json({ ...queue, exercises } satisfies CourseReviewQueueResponse);
+    const learners = await fetchProfileSummaries(queue.items.map((entry) => entry.userId));
+
+    return NextResponse.json({ ...queue, exercises, learners } satisfies CourseReviewQueueResponse);
   } catch {
     return NextResponse.json({ error: 'Failed to fetch the review queue' }, { status: 502 });
   }

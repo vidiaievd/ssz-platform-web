@@ -100,6 +100,19 @@ export interface ReviewQueueResponse {
   total: number;
   limit: number;
   offset: number;
+  /**
+   * Who the submissions are from, keyed by user id and joined in by the BFF — neither
+   * exercise-engine nor content-service holds a name. An id missing from here is one the
+   * directory could not answer for, which the card shows as the shortened id it always
+   * did: a queue is worth opening without names, and worth nothing unopened.
+   */
+  learners: Record<string, LearnerSummary>;
+}
+
+export interface LearnerSummary {
+  userId: string;
+  displayName: string;
+  avatarUrl?: string;
 }
 
 /**

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { fetchProfileSummaries } from '@/lib/api/profile-directory';
 import { env } from '@/lib/env';
 import { mayEditExercise } from '@/features/content-authoring/lib/may-edit';
 import type { ReviewQueueResponse } from '@/features/content-authoring/types/review';
@@ -23,7 +24,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (allowed !== true) return allowed;
 
   try {
-    const data = await serverFetch<ReviewQueueResponse>({
+    // The engine deals in ids: names are joined in below, not upstream.
+    const data = await serverFetch<Omit<ReviewQueueResponse, 'learners'>>({
       service: 'exercises',
       path: '/internal/attempts/review',
       directBaseUrl: env.EXERCISE_SERVICE_INTERNAL_URL,
@@ -35,7 +37,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         offset: searchParams.get('offset') ?? 0,
       },
     });
-    return NextResponse.json(data);
+    // Who wrote them. The engine has ids only, and a queue of eight-character ids is a
+    // queue a teacher cannot recognise their own class in.
+    const learners = await fetchProfileSummaries(data.items.map((entry) => entry.userId));
+
+    return NextResponse.json({ ...data, learners } satisfies ReviewQueueResponse);
   } catch {
     return NextResponse.json({ error: 'Failed to fetch the review queue' }, { status: 502 });
   }

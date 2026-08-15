@@ -107,7 +107,12 @@ export function ReviewQueue({ exerciseId }: ReviewQueueProps) {
       <ul className="flex flex-col gap-4">
         {items.map((entry) => (
           <li key={entry.attemptId}>
-            <SubmissionCard exerciseId={exerciseId} entry={entry} itemsById={itemsById} />
+            <SubmissionCard
+              exerciseId={exerciseId}
+              entry={entry}
+              itemsById={itemsById}
+              learner={queue?.learners[entry.userId]}
+            />
           </li>
         ))}
       </ul>
