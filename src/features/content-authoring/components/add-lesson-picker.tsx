@@ -20,6 +20,7 @@ import type { Result } from '@/lib/result';
 import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content/types';
 import { TEMPLATE_CODE } from '@/lib/shared-kernel/wordbank-gapfill';
 import { TEMPLATE_CODE as ERROR_CORRECTION_TEMPLATE_CODE } from '@/lib/shared-kernel/error-correction';
+import { TRANSLATE_TYPES } from '@/lib/shared-kernel/translate';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -27,6 +28,10 @@ import { createGrammarRuleAction } from '../actions/grammar';
 import { createExerciseAction } from '../actions/exercise';
 import { createGapFillAction } from '../actions/gap-fill';
 import { createErrorCorrectionAction } from '../actions/error-correction';
+import {
+  createTranslateFromTargetAction,
+  createTranslateToTargetAction,
+} from '../actions/translate';
 import { assignItemSectionAction } from '../actions/container-item';
 import { minimalExerciseValues } from '../lib/exercise-content';
 import { CREATABLE_EXERCISE_TYPES, type CreatableExerciseType } from '../schemas/exercise';
@@ -58,11 +63,18 @@ interface AddLessonPickerProps {
  * form. They share a creation signature because they need the same thing: a scaffold
  * their own builder can open, valid against the template's schema from the first save.
  */
-type OwnBuilderTemplate = typeof TEMPLATE_CODE | typeof ERROR_CORRECTION_TEMPLATE_CODE;
+type OwnBuilderTemplate =
+  | typeof TEMPLATE_CODE
+  | typeof ERROR_CORRECTION_TEMPLATE_CODE
+  | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
   [TEMPLATE_CODE]: createGapFillAction,
   [ERROR_CORRECTION_TEMPLATE_CODE]: createErrorCorrectionAction,
+  // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
+  // way its direction says (plan 42, decision 3).
+  translate_to_target: createTranslateToTargetAction,
+  translate_from_target: createTranslateFromTargetAction,
 };
 
 function hasOwnBuilder(code: CreatableExerciseType): code is OwnBuilderTemplate {

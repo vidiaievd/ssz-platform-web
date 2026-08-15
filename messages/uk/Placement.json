@@ -30,7 +30,13 @@
     "dontKnow": "Я не знаю цього",
     "continue": "Далі",
     "seeMyLevel": "Побачити мій рівень",
-    "skipForNow": "Пропустити зараз"
+    "skipForNow": "Пропустити зараз",
+    "freeText": {
+      "defaultInstruction": "Перекладіть речення",
+      "textareaLabel": "Ваш переклад",
+      "placeholder": "Пишіть {lang}…",
+      "sampleAnswer": "Зразок відповіді"
+    }
   },
   "result": {
     "eyebrow": "Ви готові до",

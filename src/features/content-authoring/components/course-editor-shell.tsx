@@ -103,6 +103,7 @@ export function CourseEditorShell({
         previewHref={
           container.containerType === 'course' ? `/student/courses/${container.id}` : null
         }
+        reviewInboxHref={`/school/${schoolSlug}/content/${container.id}/review`}
         onExpandAll={() => setCollapsed(new Set())}
         onCollapseAll={() => setCollapsed(new Set(allCollapseKeys(tree)))}
         onReview={() => setPublishOpen(true)}

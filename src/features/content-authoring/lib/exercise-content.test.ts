@@ -20,9 +20,6 @@ const base: ExerciseFormValues = {
   fibText: '',
   fibBlanks: [{ answers: '' }],
   fibWordBank: '',
-  trSourceText: '',
-  trSourceLanguage: '',
-  trAcceptedTranslations: [{ text: '' }],
   mpVariant: 'pairs',
   mpPairs: [
     { left: '', right: '' },
@@ -174,27 +171,6 @@ describe('buildExercisePayload', () => {
     expect(parsed.fibBlanks?.[0]?.rationaleOptions?.[0]?.verdict).toBe('wrong');
   });
 
-  it('translate_to_target: includes source_language; translate_from_target omits it', () => {
-    const to = buildExercisePayload({
-      ...base,
-      templateCode: 'translate_to_target',
-      trSourceText: 'I speak Norwegian',
-      trSourceLanguage: 'en',
-      trAcceptedTranslations: [{ text: 'Jeg snakker norsk' }],
-    });
-    expect(to.content).toEqual({ source_text: 'I speak Norwegian', source_language: 'en' });
-    expect(to.expectedAnswers).toEqual({ accepted_translations: ['Jeg snakker norsk'] });
-
-    const from = buildExercisePayload({
-      ...base,
-      templateCode: 'translate_from_target',
-      trSourceText: 'Jeg snakker norsk',
-      trSourceLanguage: 'en',
-      trAcceptedTranslations: [{ text: 'I speak Norwegian' }],
-    });
-    expect(from.content).toEqual({ source_text: 'Jeg snakker norsk' });
-  });
-
   it('match_pairs: emits left/right items with ids and pairs mapping', () => {
     const { content, expectedAnswers } = buildExercisePayload({
       ...base,
@@ -244,16 +220,6 @@ describe('build → parse round-trips', () => {
         fibText: 'Jeg ___1___ her.',
         fibBlanks: [{ answers: 'bor, er' }],
         fibWordBank: 'bor, er, går',
-      },
-    },
-    {
-      name: 'translate_to_target',
-      values: {
-        ...base,
-        templateCode: 'translate_to_target',
-        trSourceText: 'hello',
-        trSourceLanguage: 'en',
-        trAcceptedTranslations: [{ text: 'hei' }, { text: 'hallo' }],
       },
     },
     {

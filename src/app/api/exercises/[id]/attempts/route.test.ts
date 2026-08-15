@@ -189,6 +189,64 @@ describe('GET /api/exercises/[id]/attempts', () => {
     await expect(res.json()).resolves.toEqual({ attempt: null });
   });
 
+  /**
+   * The stored record is the teacher's copy: for `translate_*` its details carry the
+   * accepted translation of every sentence. Only the routing may cross into the browser.
+   */
+  it('strips the answer key out of a translate attempt, keeping the routing', async () => {
+    vi.mocked(serverFetch).mockResolvedValue({
+      items: [
+        {
+          ...scored,
+          templateCode: 'translate_to_target',
+          status: 'ROUTED_FOR_REVIEW',
+          submittedAnswer: { answers: [{ itemId: 'i1', text: 'Jeg bor her i tre år.' }] },
+          validationDetails: {
+            totalItems: 1,
+            routedItems: 1,
+            passedItems: 0,
+            items: [
+              {
+                itemId: 'i1',
+                verdict: 'near',
+                ref: 'Jeg har bodd her i tre år.',
+                tokens: [{ t: 'missing', w: 'har', typo: null }],
+                routing: 'teacher',
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    const res = await GET(makeGetRequest(), { params });
+    const body = (await res.json()) as { attempt: { validationDetails: unknown } };
+
+    expect(body.attempt.validationDetails).toEqual({
+      totalItems: 1,
+      passedItems: 0,
+      items: [{ itemId: 'i1', routing: 'teacher' }],
+    });
+    expect(JSON.stringify(body)).not.toContain('har bodd');
+  });
+
+  it('drops the details of the templates whose details are diagnostics', async () => {
+    vi.mocked(serverFetch).mockResolvedValue({
+      items: [
+        {
+          ...scored,
+          templateCode: 'short_answer',
+          validationDetails: { target: 'Det er et travelt yrke.' },
+        },
+      ],
+    });
+
+    const res = await GET(makeGetRequest(), { params });
+    const body = (await res.json()) as { attempt: { validationDetails: unknown } };
+
+    expect(body.attempt.validationDetails).toBeNull();
+  });
+
   it('401 when the session is gone', async () => {
     vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('unauthenticated', 'nope'));
 

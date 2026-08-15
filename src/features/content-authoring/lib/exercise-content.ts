@@ -35,9 +35,6 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   fibText: '',
   fibBlanks: [{ answers: '', rationaleExplanation: '', rationaleOptions: [] }],
   fibWordBank: '',
-  trSourceText: '',
-  trSourceLanguage: '',
-  trAcceptedTranslations: [{ text: '' }],
   mpVariant: 'pairs',
   mpPairs: [
     { left: '', right: '' },
@@ -107,13 +104,6 @@ export function minimalExerciseValues(
         ...base,
         fibText: 'Write a sentence with a ___1___ in it.',
         fibBlanks: [{ answers: 'blank', rationaleExplanation: '', rationaleOptions: [] }],
-      };
-    case 'translate_to_target':
-    case 'translate_from_target':
-      return {
-        ...base,
-        trSourceText: prompt,
-        trAcceptedTranslations: [{ text: 'Translation' }],
       };
     case 'match_pairs':
       return {
@@ -301,22 +291,6 @@ function rawExercisePayload(values: ExerciseFormValues): ExercisePayload {
           word_bank: wordBank.length > 0 ? wordBank : undefined,
         },
         expectedAnswers: { blanks },
-      };
-    }
-    case 'translate_to_target':
-    case 'translate_from_target': {
-      const translations = (values.trAcceptedTranslations ?? [])
-        .map((t) => t.text.trim())
-        .filter(Boolean);
-      return {
-        content: {
-          source_text: values.trSourceText?.trim() ?? '',
-          source_language:
-            values.templateCode === 'translate_to_target'
-              ? values.trSourceLanguage?.trim() || undefined
-              : undefined,
-        },
-        expectedAnswers: { accepted_translations: translations },
       };
     }
     case 'match_pairs': {
@@ -687,19 +661,6 @@ export function parseExerciseToForm(exercise: {
             ? blanks
             : [{ answers: '', rationaleExplanation: '', rationaleOptions: [] }],
         fibWordBank: wordBank,
-      };
-    }
-    case 'translate_to_target':
-    case 'translate_from_target': {
-      const translations = Array.isArray(expectedAnswers.accepted_translations)
-        ? (expectedAnswers.accepted_translations as unknown[]).map((t) => ({ text: String(t) }))
-        : [];
-      return {
-        ...base,
-        trSourceText: typeof content.source_text === 'string' ? content.source_text : '',
-        trSourceLanguage:
-          typeof content.source_language === 'string' ? content.source_language : '',
-        trAcceptedTranslations: translations.length > 0 ? translations : [{ text: '' }],
       };
     }
     case 'match_pairs': {

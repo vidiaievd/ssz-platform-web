@@ -10,8 +10,9 @@ import type {
 } from './word-bank-fill-body';
 import type { McqGroupExpectedAnswers, McqGroupResults, McqGroupValue } from './mcq-group-body';
 
-export interface TranslateExpectedAnswers {
-  /** One or more acceptable translations, compared after normalization. */
+/** The answer key of a free-text placement question. */
+export interface FreeTextExpectedAnswers {
+  /** One or more acceptable answers, compared after normalization. */
   accepted_answers: string[];
 }
 
@@ -47,8 +48,13 @@ export function gradeFill(
   return normAnswer(value) === normAnswer(expected);
 }
 
-/** Grade a translation against an accept-list; any normalized match is correct. */
-export function gradeTranslate(expectedAnswers: TranslateExpectedAnswers, value: string): boolean {
+/**
+ * Grade a free-text answer against an accept-list; any normalized match is correct.
+ *
+ * Only the placement test grades this way. The `translate_*` templates are graded on the
+ * server against the kernel's check engine, which the browser never sees (plan 42).
+ */
+export function gradeFreeText(expectedAnswers: FreeTextExpectedAnswers, value: string): boolean {
   const norm = normAnswer(value);
   return expectedAnswers.accepted_answers.some((a) => normAnswer(a) === norm);
 }

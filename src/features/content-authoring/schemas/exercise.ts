@@ -7,8 +7,6 @@ export const EXERCISE_TYPES = [
   'multiple_choice',
   'multiple_choice_group',
   'fill_in_blank',
-  'translate_to_target',
-  'translate_from_target',
   'match_pairs',
   'short_answer',
   'writing_task',
@@ -27,8 +25,11 @@ export type ExerciseType = (typeof EXERCISE_TYPES)[number];
  * would make the form fall back to `multiple_choice` and rewrite their content on the
  * next save.
  *
- * `word_bank_gap_fill` and `error_correction` are here but not there: each has its own
- * builder, and the generic form has no fields for either.
+ * `word_bank_gap_fill`, `error_correction` and the translate pair are here but not there:
+ * each has its own builder, and the generic form has no fields for any of them. Translate
+ * left `EXERCISE_TYPES` in plan 42 §9 — its content is a set of sentences with an answer
+ * key each, which no slice of this form can hold; the editor pane routes both codes to
+ * `TranslateBuilder` before the generic form is ever reached.
  */
 export const CREATABLE_EXERCISE_TYPES = [
   'multiple_choice',
@@ -143,11 +144,6 @@ export const exerciseFormSchema = z
       )
       .optional(),
     fibWordBank: z.string().max(1000).optional(),
-
-    // translate_to_target / translate_from_target
-    trSourceText: z.string().max(2000).optional(),
-    trSourceLanguage: z.string().max(10).optional(),
-    trAcceptedTranslations: z.array(z.object({ text: z.string().max(1000) })).optional(),
 
     // match_pairs — `mpVariant` only changes presentation (word pairs vs
     // numbered/lettered sentence halves), never scoring.
@@ -280,24 +276,6 @@ export const exerciseFormSchema = z
             code: z.ZodIssueCode.custom,
             path: ['fibBlanks'],
             message: 'At least 1 blank required',
-          });
-        }
-        break;
-      }
-      case 'translate_to_target':
-      case 'translate_from_target': {
-        if (!data.trSourceText?.trim()) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['trSourceText'],
-            message: 'Required',
-          });
-        }
-        if (!(data.trAcceptedTranslations ?? []).some((tr) => tr.text.trim())) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['trAcceptedTranslations'],
-            message: 'At least 1 accepted translation required',
           });
         }
         break;

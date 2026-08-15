@@ -152,7 +152,9 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
+          grammarRules={levelGrammarRules}
           backHref={backHref}
+          reviewHref={`${backHref}/lessons/${itemId}/review`}
           publishSlot={publishSlot}
         />
       ) : (

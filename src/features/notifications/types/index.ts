@@ -17,9 +17,10 @@ export type NotificationType =
   | 'ENROLLMENT_APPROVED'
   | 'ENROLLMENT_REJECTED'
   | 'PLACEMENT_REVIEW_READY'
-  | 'GROUP_ASSIGNED';
+  | 'GROUP_ASSIGNED'
+  | 'ATTEMPT_REVIEWED';
 
-export type NotificationCategory = 'Enrollment' | 'Staff' | 'System';
+export type NotificationCategory = 'Enrollment' | 'Staff' | 'Learning' | 'System';
 
 export type NotificationFilter = 'all' | 'unread' | 'archived';
 
@@ -70,12 +71,33 @@ export interface PlacementReviewReadyData {
   occurredAt: string;
 }
 
+/**
+ * A teacher has marked a submission — plan 42.
+ *
+ * `score` and `comment` are both nullable and mean different things when absent: no score
+ * is work sent back rather than marked, and no comment is a teacher who had nothing to
+ * add. Neither is a reason to withhold the notification — silence after handing work in
+ * is what the marking queue exists to end.
+ */
+export interface AttemptReviewedData {
+  attemptId: string;
+  exerciseId: string;
+  templateCode: string;
+  outcome: 'approved' | 'returned';
+  score: number | null;
+  comment: string | null;
+  approvedItems: number;
+  totalItems: number;
+  occurredAt: string;
+}
+
 export type NotificationTemplateData =
   | EnrollmentRequestData
   | TeacherProfileChangedData
   | EnrollmentApprovedData
   | GroupAssignedData
   | PlacementReviewReadyData
+  | AttemptReviewedData
   | Record<string, unknown>;
 
 export interface Notification {

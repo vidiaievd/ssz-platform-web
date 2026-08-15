@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { Link } from '@/lib/i18n/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Container, ExerciseInstruction, ExerciseWithAnswers } from '@/features/content/types';
 import {
@@ -24,6 +25,14 @@ import {
   toExpectedAnswers as errorCorrectionToExpectedAnswers,
   type ErrorCorrection,
 } from '@/lib/shared-kernel/error-correction';
+import {
+  fromPersisted as translateFromPersisted,
+  isTranslateCode,
+  toContent as translateToContent,
+  toExpectedAnswers as translateToExpectedAnswers,
+  type Translate,
+  type TranslateType,
+} from '@/lib/shared-kernel/translate';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -38,7 +47,10 @@ import type { SavedDocument } from './wordbank-gapfill/use-gap-fill-autosave';
 import { GapFillPreview } from './wordbank-gapfill/gap-fill-preview';
 import { ErrorCorrectionBuilder } from './error-correction/builder';
 import { ErrorCorrectionPreview } from './error-correction/error-correction-preview';
+import { TranslateBuilder } from './translate/builder';
+import { TranslatePreview } from './translate/translate-preview';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
+import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 
 interface ExerciseEditorPaneProps {
   kind: MaterialKind;
@@ -48,7 +60,11 @@ interface ExerciseEditorPaneProps {
   /** Whether students can open this material right now — see `SaveScopeContext`. */
   isLive: boolean | null;
   container: Container;
+  /** The grammar rules of this Leksjon; only the translate builder uses them so far. */
+  grammarRules?: LevelGrammarRule[];
   backHref: string;
+  /** Where this exercise's marking queue lives. Offered only where one can fill up. */
+  reviewHref?: string;
   publishSlot: ReactNode;
 }
 
@@ -58,8 +74,10 @@ export function ExerciseEditorPane({
   lessonTitle,
   state,
   isLive,
+  grammarRules,
   container,
   backHref,
+  reviewHref,
   publishSlot,
 }: ExerciseEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -74,9 +92,12 @@ export function ExerciseEditorPane({
   } | null>(null);
   /** The error-correction document as its builder currently has it, for the preview column. */
   const [errorCorrection, setErrorCorrection] = useState<ErrorCorrection | null>(null);
+  /** The translate document as its builder currently has it, for the preview column. */
+  const [translate, setTranslate] = useState<Translate | null>(null);
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
+  const isTranslate = isTranslateCode(exercise?.templateCode);
 
   return (
     <LessonEditorShell
@@ -89,12 +110,28 @@ export function ExerciseEditorPane({
       backHref={backHref}
       saveStatus="idle"
       savedAt={null}
-      publishSlot={publishSlot}
+      publishSlot={
+        <>
+          {/*
+            Only for the templates whose attempts can reach a queue. Closed-form exercises
+            are scored the moment they are handed in, so a link to their marking queue
+            would lead to a page that is empty by construction.
+          */}
+          {reviewHref !== undefined && (isTranslate || isErrorCorrection) && (
+            <Button asChild variant="outline" size="sm">
+              <Link href={reviewHref}>{t('review.openQueue')}</Link>
+            </Button>
+          )}
+          {publishSlot}
+        </>
+      }
       preview={
         isGapFill && gapFill !== null ? (
           <GapFillPreview exercise={gapFill.exercise} instructions={gapFill.instructions} />
         ) : isErrorCorrection && errorCorrection !== null ? (
           <ErrorCorrectionPreview exercise={errorCorrection} />
+        ) : isTranslate && translate !== null ? (
+          <TranslatePreview exercise={translate} />
         ) : (
           <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
         )
@@ -126,6 +163,24 @@ export function ExerciseEditorPane({
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
               (cached) => (cached ? applySavedGapFill(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
+      ) : isTranslate && exercise !== undefined ? (
+        // Translate owns a document for the plainest reason of the three: the accepted
+        // translations *are* the answer, and authoring them is writing a set of sentences
+        // with a key each, not filling in a form field.
+        <TranslateBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          initialExercise={translateDocumentFrom(exercise, container.id)}
+          grammarRules={grammarRules}
+          onDocumentChange={setTranslate}
+          onSavedRemote={(updatedAt, saved) =>
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedTranslate(cached, updatedAt, saved) : cached),
             )
           }
         />
@@ -246,6 +301,43 @@ function applySavedErrorCorrection(
     updatedAt,
     content: { ...errorCorrectionToContent(saved) },
     expectedAnswers: { ...errorCorrectionToExpectedAnswers(saved) },
+    ...(instruction && {
+      instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],
+    }),
+  };
+}
+
+/** The stored columns as the kernel's translate document. See above for the token. */
+function translateDocumentFrom(exercise: ExerciseWithAnswers, containerId: string): Translate {
+  return translateFromPersisted(
+    {
+      id: exercise.id,
+      moduleId: containerId,
+      title: '',
+      instructions: firstInstruction(exercise)?.instructionText ?? '',
+      updatedAt: exercise.updatedAt ?? '',
+    },
+    exercise.templateCode as TranslateType,
+    exercise.content,
+    exercise.expectedAnswers,
+  );
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ */
+function applySavedTranslate(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: Translate,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...translateToContent(saved) },
+    expectedAnswers: { ...translateToExpectedAnswers(saved) },
     ...(instruction && {
       instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],
     }),

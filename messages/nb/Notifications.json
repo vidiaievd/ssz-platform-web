@@ -14,7 +14,8 @@
   "categories": {
     "Enrollment": "Påmelding",
     "Staff": "Ansatte",
-    "System": "System"
+    "System": "System",
+    "Learning": "Læring"
   },
   "tabs": {
     "all": "Alle",
@@ -154,6 +155,15 @@
       "body": "Du har blitt tildelt {group} hos {school}. Sjekk timeplanen din.",
       "titleFallback": "Gruppe tildelt",
       "bodyFallback": "Du har blitt tildelt en gruppe."
+    },
+    "ATTEMPT_REVIEWED": {
+      "title": "Læreren har rettet arbeidet ditt",
+      "titleReturned": "Læreren sendte arbeidet tilbake",
+      "body": "{approved} av {total} setninger ble godkjent.",
+      "bodyWithComment": "Læreren skrev: {comment}",
+      "bodyReturned": "Se på det en gang til og lever på nytt.",
+      "bodyReturnedWithComment": "Læreren skrev: {comment}",
+      "bodyFallback": "Åpne oppgaven for å se hva læreren sa."
     }
   }
 }

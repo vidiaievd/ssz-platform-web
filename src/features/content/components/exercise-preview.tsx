@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card';
 import { readContent as readErrorCorrectionContent } from '@/lib/shared-kernel/error-correction';
+import { readContent as readTranslateContent } from '@/lib/shared-kernel/translate';
 import type { ExerciseDisplay } from '../types';
 
 interface ExercisePreviewProps {
@@ -111,10 +112,7 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
         )}
 
         {(code === 'translate_to_target' || code === 'translate_from_target') && (
-          <div>
-            <p className="text-muted-foreground mb-1 text-xs font-medium">{t('translatePrompt')}</p>
-            {typeof content.source_text === 'string' && <p className="text-sm">{content.source_text}</p>}
-          </div>
+          <TranslateContent content={content} code={code} />
         )}
 
         {code === 'match_pairs' && (
@@ -289,6 +287,46 @@ function ErrorCorrectionContent({ content }: { content: Record<string, unknown> 
           ))}
         </ol>
       )}
+    </div>
+  );
+}
+
+/**
+ * The sentences to translate, and nothing else: the accepted translations are the answer
+ * key and live in `expected_answers`, which `/display` does not serve. Read through the
+ * kernel rather than off the raw record — the direction of a sentence may differ from the
+ * exercise's own when `dir` is `both`.
+ */
+function TranslateContent({
+  content,
+  code,
+}: {
+  content: Record<string, unknown>;
+  code: 'translate_to_target' | 'translate_from_target';
+}) {
+  const t = useTranslations('Content');
+  const { langs, note, items } = readTranslateContent(content, code);
+
+  const label = (itemDir: 'to_target' | 'from_target') =>
+    itemDir === 'to_target'
+      ? `${langs.explain.toUpperCase()} → ${langs.target.toUpperCase()}`
+      : `${langs.target.toUpperCase()} → ${langs.explain.toUpperCase()}`;
+
+  return (
+    <div className="space-y-2">
+      <p className="text-muted-foreground text-xs font-medium">{t('translatePrompt')}</p>
+      {note !== '' && <p className="text-muted-foreground text-xs">{note}</p>}
+      <ol className="space-y-1.5">
+        {items.map((item, i) => (
+          <li key={item.id} className="rounded-md border border-border px-3 py-2 text-sm">
+            <span className="text-muted-foreground mr-1.5 text-xs">{i + 1}.</span>
+            <span className="text-muted-foreground mr-1.5 text-[11px] uppercase">
+              {label(item.dir)}
+            </span>
+            {item.source}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

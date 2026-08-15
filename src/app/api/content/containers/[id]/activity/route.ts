@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { fetchProfileSummaries } from '@/lib/api/profile-directory';
 import type { ActivityEntry, ContainerActivity } from '@/features/content-authoring/types';
-
-interface ProfileSummary {
-  userId: string;
-  displayName: string;
-  avatarUrl?: string;
-}
 
 /** What content-service returns: entries with actor ids and no names. */
 type RawActivity = Omit<ContainerActivity, 'entries'> & {
@@ -40,38 +35,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Failed to fetch activity' }, { status: 502 });
   }
 
-  const profiles = await resolveActors(activity.entries.map((entry) => entry.actorUserId));
+  const profiles = await fetchProfileSummaries(activity.entries.map((entry) => entry.actorUserId));
 
   return NextResponse.json({
     entries: activity.entries.map((entry) => ({
       ...entry,
       // A name we could not resolve is left null rather than filled with the id:
       // the panel says "someone" far more usefully than it says a UUID.
-      actor: profiles.get(entry.actorUserId) ?? null,
+      actor: profiles[entry.actorUserId] ?? null,
     })),
     hasMore: activity.hasMore,
   } satisfies ContainerActivity);
-}
-
-/**
- * One lookup for the whole page, keyed by user id.
- *
- * A failure here is not a failure of the feed: the history is the answer the
- * author came for, and losing it because the directory blinked would be a worse
- * trade than showing entries without names.
- */
-async function resolveActors(actorIds: string[]): Promise<Map<string, ProfileSummary>> {
-  const ids = [...new Set(actorIds)];
-  if (ids.length === 0) return new Map();
-
-  try {
-    const profiles = await serverFetch<ProfileSummary[]>({
-      service: 'profile',
-      path: '/profiles',
-      query: { userIds: ids.join(',') },
-    });
-    return new Map(profiles.map((profile) => [profile.userId, profile]));
-  } catch {
-    return new Map();
-  }
 }

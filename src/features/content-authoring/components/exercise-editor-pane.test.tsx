@@ -13,6 +13,7 @@ vi.mock('../actions/exercise', () => ({
 // Server modules are stripped from the client bundle for real; here they would run.
 vi.mock('../actions/gap-fill', () => ({ saveGapFillAction: vi.fn() }));
 vi.mock('../actions/error-correction', () => ({ saveErrorCorrectionAction: vi.fn() }));
+vi.mock('../actions/translate', () => ({ saveTranslateAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));

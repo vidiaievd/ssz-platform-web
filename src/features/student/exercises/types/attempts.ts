@@ -1,4 +1,5 @@
 import type { SelfCheckFeedback } from '@/lib/shared-kernel/error-correction';
+import type { SelfCheckFeedback as TranslateSelfCheckFeedback } from '@/lib/shared-kernel/translate';
 import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
 
 /**
@@ -67,12 +68,37 @@ export interface GapFillSubmitDetails {
   gaps: Array<{ gapKey: GapKey; correct: boolean; explanation: string | null }>;
 }
 
+/**
+ * `details` when the template is `translate_*` — where each sentence ended up.
+ *
+ * Deliberately thin. The validator writes a great deal more per sentence (the variant
+ * compared against, the diff, the rules tripped), all of it for the teacher queue and
+ * all of it a way to read the answer key; the engine strips it before answering the
+ * browser. Routing is what the learner is owed: this sentence matched and is done, that
+ * one is with a teacher.
+ */
+export interface TranslateSubmitDetails {
+  totalItems: number;
+  passedItems: number;
+  items: Array<{ itemId: string; routing: 'pass' | 'teacher' }>;
+}
+
 export type AttemptStatus =
   | 'IN_PROGRESS'
   | 'SUBMITTED'
   | 'SCORED'
   | 'ROUTED_FOR_REVIEW'
+  /** A teacher read the submission and sent it back rather than scoring it. */
+  | 'RETURNED'
   | 'ABANDONED';
+
+/** What a teacher decided about one sentence, in the learner's copy of the verdict. */
+export interface ReviewDecisionRecord {
+  itemId: string;
+  approved: boolean;
+  /** Only when the teacher wrote one. */
+  comment?: string;
+}
 
 /** An attempt read back after the fact — the record, not the session. */
 export interface AttemptRecord {
@@ -90,6 +116,15 @@ export interface AttemptRecord {
   validationDetails: unknown;
   submittedAt: string | null;
   scoredAt: string | null;
+  /**
+   * The teacher's word on the submission as a whole, once one has read it. For this
+   * template it is the only place a wrong answer can be explained — the machine may not
+   * invent a reason (plan 42, "Разбор ошибки").
+   */
+  reviewComment: string | null;
+  /** Their verdict per sentence. Carries no answer key, only decisions and words. */
+  reviewDecisions: ReviewDecisionRecord[] | null;
+  reviewedAt: string | null;
 }
 
 /** `submittedAnswer` when the template is `word_bank_gap_fill`. */
@@ -102,23 +137,43 @@ export interface LastAttemptResponse {
 }
 
 /**
- * "How am I doing?", asked mid-attempt by `error_correction` and nothing else.
+ * "How am I doing?", asked mid-attempt by the two templates that offer it.
  *
  * A server round-trip for the same reason grading is: the answer is derived from the
  * key, and the key never reaches the browser. What comes back is counts and mistake
- * types — never which words are wrong.
+ * types for `error_correction`, and — for `translate_*` — a verdict per sentence with
+ * the key's own words masked out of the diff.
  */
 export interface SelfCheckRequest {
-  /** The work so far, in the shape a submission carries: `{ items: { <id>: edits } }`. */
+  /**
+   * The work so far, in the shape a submission carries: `{ items: { <id>: edits } }`
+   * for `error_correction`, `{ answers: [{ itemId, text }] }` for `translate_*`.
+   */
   draftAnswer: unknown;
 }
 
-export interface SelfCheckResponse extends SelfCheckFeedback {
+/** Whose attempt it was, and what asking cost — the same for either template. */
+export interface SelfCheckEnvelope {
   attemptId: string;
   /** Including the one just spent. */
   checksUsed: number;
   checksLeft: number;
 }
+
+export interface ErrorCorrectionSelfCheckResponse extends SelfCheckEnvelope, SelfCheckFeedback {
+  templateCode: 'error_correction';
+}
+
+export interface TranslateSelfCheckResponse extends SelfCheckEnvelope, TranslateSelfCheckFeedback {
+  templateCode: 'translate_to_target' | 'translate_from_target';
+}
+
+/**
+ * Discriminated by `templateCode`, because the two payloads share nothing but their
+ * `items` key and mean entirely different things by it. A runner that reads the wrong
+ * half is a bug this union turns into a compile error.
+ */
+export type SelfCheckResponse = ErrorCorrectionSelfCheckResponse | TranslateSelfCheckResponse;
 
 export interface RevealAnswersResponse {
   attemptId: string;

@@ -30,7 +30,13 @@
     "dontKnow": "Я не знаю этого",
     "continue": "Продолжить",
     "seeMyLevel": "Узнать мой уровень",
-    "skipForNow": "Пропустить сейчас"
+    "skipForNow": "Пропустить сейчас",
+    "freeText": {
+      "defaultInstruction": "Переведите предложение",
+      "textareaLabel": "Ваш перевод",
+      "placeholder": "Пишите на {lang}…",
+      "sampleAnswer": "Пример ответа"
+    }
   },
   "result": {
     "eyebrow": "Вы готовы к",

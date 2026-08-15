@@ -125,21 +125,6 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
-        {(values.templateCode === 'translate_to_target' ||
-          values.templateCode === 'translate_from_target') &&
-          (values.trSourceText ? (
-            <div>
-              <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">
-                {t(`exercises.types.${values.templateCode}`)}
-              </p>
-              <p className="font-reading text-[16px] leading-normal text-(--ssz-text-primary)">
-                {values.trSourceText}
-              </p>
-            </div>
-          ) : (
-            empty
-          ))}
-
         {values.templateCode === 'match_pairs' &&
           ((values.mpPairs ?? []).some((p) => p.left.trim() || p.right.trim()) ? (
             <div className="grid grid-cols-2 gap-2">

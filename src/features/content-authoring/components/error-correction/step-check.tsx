@@ -13,7 +13,7 @@ import {
 } from '@/lib/shared-kernel/error-correction';
 
 import { EcTester } from './ec-tester';
-import { ToggleRow } from './toggle-row';
+import { ToggleRow } from '../toggle-row';
 
 /**
  * The thresholds the segmented control offers, loosest first. Named rather than keyed by
