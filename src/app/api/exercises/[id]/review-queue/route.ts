@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { env } from '@/lib/env';
-import { mayEditExercise } from '@/features/content-authoring/lib/may-edit-exercise';
+import { mayEditExercise } from '@/features/content-authoring/lib/may-edit';
 import type { ReviewQueueResponse } from '@/features/content-authoring/types/review';
 
 /**

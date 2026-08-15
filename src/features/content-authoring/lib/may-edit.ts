@@ -17,11 +17,25 @@ import { AppError } from '@/lib/errors';
  * passing its status through keeps "you may not" apart from "it is not there".
  */
 export async function mayEditExercise(exerciseId: string): Promise<true | NextResponse> {
+  return mayEdit(`/exercises/${exerciseId}/edit-access`);
+}
+
+/**
+ * Whether the caller may edit this course, as content-service sees it.
+ *
+ * The same gate one level up, for screens scoped to a course rather than to a single
+ * exercise: the inbox asks once, here, and then opens the queues of every exercise the
+ * course places. Checking each of those exercises separately would be the same answer
+ * asked a hundred times — they are the course's own material, and whoever may edit the
+ * course may edit them.
+ */
+export async function mayEditContainer(containerId: string): Promise<true | NextResponse> {
+  return mayEdit(`/containers/${containerId}/edit-access`);
+}
+
+async function mayEdit(path: string): Promise<true | NextResponse> {
   try {
-    await serverFetch<{ canEdit: true }>({
-      service: 'content',
-      path: `/exercises/${exerciseId}/edit-access`,
-    });
+    await serverFetch<{ canEdit: true }>({ service: 'content', path });
     return true;
   } catch (e) {
     if (e instanceof AppError && e.code === 'unauthenticated') {

@@ -7,6 +7,8 @@ import type {
 } from '@/lib/shared-kernel/error-correction';
 import type { DiffToken, GuardHit, Routing, Verdict } from '@/lib/shared-kernel/translate';
 
+import type { CourseExerciseRef } from '../lib/collect-course-exercises';
+
 /**
  * The teacher's side of a submission — plan 42, phase 8.
  *
@@ -77,6 +79,8 @@ export interface ReviewDetails<TItem extends ReviewItemDetail = ReviewItemDetail
 export interface ReviewQueueEntry {
   attemptId: string;
   userId: string;
+  /** Which exercise this submission belongs to — the only grouping a course inbox has. */
+  exerciseId: string;
   templateCode: string;
   submittedAnswer: unknown;
   submittedAt: string | null;
@@ -96,6 +100,17 @@ export interface ReviewQueueResponse {
   total: number;
   limit: number;
   offset: number;
+}
+
+/**
+ * The same queue across a whole course, plus the names the submissions hang under.
+ *
+ * The exercises travel with the queue because they are what the course tree knows and the
+ * engine does not: an entry comes back keyed by `exerciseId`, and only the tree can say
+ * which lesson that is, or what it is called.
+ */
+export interface CourseReviewQueueResponse extends ReviewQueueResponse {
+  exercises: CourseExerciseRef[];
 }
 
 export interface ReviewDecision {

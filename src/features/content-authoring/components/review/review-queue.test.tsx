@@ -39,6 +39,7 @@ const QUEUE: ReviewQueueResponse = {
     {
       attemptId: 'att-1',
       userId: 'learner-9abcdef0',
+      exerciseId: 'ex-1',
       templateCode: 'translate_to_target',
       submittedAnswer: [],
       submittedAt: '2026-08-15T09:00:00.000Z',
@@ -281,6 +282,7 @@ describe('ReviewQueue — error_correction', () => {
       {
         attemptId: 'att-2',
         userId: 'learner-12345678',
+        exerciseId: 'ex-2',
         templateCode: 'error_correction',
         submittedAnswer: {},
         submittedAt: '2026-08-15T09:00:00.000Z',

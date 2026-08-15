@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { env } from '@/lib/env';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
-import { mayEditExercise } from '@/features/content-authoring/lib/may-edit-exercise';
+import { mayEditExercise } from '@/features/content-authoring/lib/may-edit';
 import type {
   ReviewAttemptRequest,
   ReviewAttemptResult,
