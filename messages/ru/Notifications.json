@@ -14,7 +14,8 @@
   "categories": {
     "Enrollment": "Зачисление",
     "Staff": "Персонал",
-    "System": "Система"
+    "System": "Система",
+    "Learning": "Обучение"
   },
   "tabs": {
     "all": "Все",
@@ -154,6 +155,15 @@
       "body": "Вы были назначены в {group} в {school}. Проверьте расписание.",
       "titleFallback": "Назначена группа",
       "bodyFallback": "Вы были назначены в группу."
+    },
+    "ATTEMPT_REVIEWED": {
+      "title": "Преподаватель проверил вашу работу",
+      "titleReturned": "Преподаватель вернул работу",
+      "body": "Засчитано {approved} из {total} предложений.",
+      "bodyWithComment": "Преподаватель написал: {comment}",
+      "bodyReturned": "Посмотрите ещё раз и сдайте снова.",
+      "bodyReturnedWithComment": "Преподаватель написал: {comment}",
+      "bodyFallback": "Откройте упражнение, чтобы увидеть ответ преподавателя."
     }
   }
 }

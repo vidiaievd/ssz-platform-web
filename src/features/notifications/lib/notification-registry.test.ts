@@ -2,7 +2,7 @@ import { createTranslator } from 'next-intl';
 import { describe, expect, it } from 'vitest';
 
 import { enMessages as en } from '@/lib/i18n/messages';
-import type { EnrollmentRequestData } from '../types';
+import type { AttemptReviewedData, EnrollmentRequestData } from '../types';
 import { getNotificationEntry } from './notification-registry';
 
 const t = createTranslator({ locale: 'en', messages: en, namespace: 'Notifications' });
@@ -78,5 +78,56 @@ describe('notification-registry', () => {
       '/school/greenwood/enrollment/placement',
     );
     expect(entry.getLink(undefined, { workspaceKind: 'student' })).toBeUndefined();
+  });
+
+  /**
+   * Plan 42: the three answers a learner can get from a teacher read differently, and the
+   * quiet one is the one that must not be dropped — an approval nobody wrote on is still
+   * the end of the wait.
+   */
+  describe('ATTEMPT_REVIEWED', () => {
+    const reviewed = (overrides: Partial<AttemptReviewedData> = {}): AttemptReviewedData => ({
+      attemptId: 'att-1',
+      exerciseId: 'ex-1',
+      templateCode: 'translate_to_target',
+      outcome: 'approved',
+      score: 80,
+      comment: null,
+      approvedItems: 4,
+      totalItems: 5,
+      occurredAt: new Date().toISOString(),
+      ...overrides,
+    });
+
+    it('says how much counted when the teacher wrote nothing', () => {
+      const entry = getNotificationEntry('ATTEMPT_REVIEWED');
+
+      expect(entry.resolveTitle(reviewed(), t)).toBe(t('types.ATTEMPT_REVIEWED.title'));
+      expect(entry.resolveBody(reviewed(), t)).toBe('4 of 5 sentences counted.');
+    });
+
+    it('puts the teacher’s own words first when there are any', () => {
+      const entry = getNotificationEntry('ATTEMPT_REVIEWED');
+
+      expect(entry.resolveBody(reviewed({ comment: 'Fin bruk av perfektum.' }), t)).toContain(
+        'Fin bruk av perfektum.',
+      );
+    });
+
+    it('reads as a request for work when the submission was sent back', () => {
+      const entry = getNotificationEntry('ATTEMPT_REVIEWED');
+      const data = reviewed({ outcome: 'returned', score: null, comment: null });
+
+      expect(entry.resolveTitle(data, t)).toBe(t('types.ATTEMPT_REVIEWED.titleReturned'));
+      expect(entry.resolveBody(data, t)).toBe(t('types.ATTEMPT_REVIEWED.bodyReturned'));
+    });
+
+    // The attempt knows its exercise but not the course and unit the learner reaches it
+    // through, so there is no honest destination to send them to yet.
+    it('carries no link rather than a guessed one', () => {
+      const entry = getNotificationEntry('ATTEMPT_REVIEWED');
+
+      expect(entry.getLink(reviewed(), { workspaceKind: 'student' })).toBeUndefined();
+    });
   });
 });

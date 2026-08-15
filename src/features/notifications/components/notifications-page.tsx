@@ -56,6 +56,7 @@ const CATEGORY_TYPES: Record<NotificationCategory, NotificationType[]> = {
     'SCHOOL_INVITATION',
     'TEACHER_PROFILE_CHANGED',
   ],
+  Learning: ['ATTEMPT_REVIEWED'],
   System: ['GENERAL', 'WELCOME_EMAIL', 'EMAIL_VERIFICATION', 'PASSWORD_RESET', 'PASSWORD_CHANGED', 'STUDY_REMINDER'],
 };
 

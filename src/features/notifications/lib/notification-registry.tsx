@@ -19,6 +19,7 @@ import {
 import type { useTranslations } from 'next-intl';
 
 import type {
+  AttemptReviewedData,
   EnrollmentApprovedData,
   EnrollmentRequestData,
   GroupAssignedData,
@@ -67,6 +68,10 @@ function isGroupAssignedData(data: unknown): data is GroupAssignedData {
 
 function isPlacementReviewReadyData(data: unknown): data is PlacementReviewReadyData {
   return !!data && typeof data === 'object' && 'schoolId' in data && 'studentId' in data;
+}
+
+function isAttemptReviewedData(data: unknown): data is AttemptReviewedData {
+  return !!data && typeof data === 'object' && 'attemptId' in data && 'outcome' in data;
 }
 
 const noLink: NotificationRegistryEntry['getLink'] = () => undefined;
@@ -272,6 +277,46 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
       ctx.workspaceKind === 'student' && isGroupAssignedData(data)
         ? `/student/dashboard#school-${data.schoolId}`
         : undefined,
+  },
+  /**
+   * The one notification a learner is owed rather than informed of — plan 42.
+   *
+   * Both outcomes and both kinds of approval land here, and the wording separates them:
+   * being sent back asks for work, being marked with a comment asks for reading, being
+   * marked in silence asks for nothing but still has to arrive.
+   *
+   * No link yet: the attempt carries a user and an exercise, and the learner's route to
+   * an exercise runs through its course and unit, neither of which the attempt knows.
+   * The same missing snapshot blocks the course-wide marking inbox, and both get a link
+   * the day it exists — a wrong destination would be worse than none.
+   */
+  ATTEMPT_REVIEWED: {
+    icon: ClipboardCheck,
+    category: 'Learning',
+    priority: 'normal',
+    actionable: false,
+    resolveTitle: (data, t) =>
+      isAttemptReviewedData(data) && data.outcome === 'returned'
+        ? t('types.ATTEMPT_REVIEWED.titleReturned')
+        : t('types.ATTEMPT_REVIEWED.title'),
+    resolveBody: (data, t) => {
+      if (!isAttemptReviewedData(data)) return t('types.ATTEMPT_REVIEWED.bodyFallback');
+      if (data.outcome === 'returned') {
+        return data.comment !== null && data.comment.trim() !== ''
+          ? t('types.ATTEMPT_REVIEWED.bodyReturnedWithComment', { comment: data.comment })
+          : t('types.ATTEMPT_REVIEWED.bodyReturned');
+      }
+      if (data.comment !== null && data.comment.trim() !== '') {
+        return t('types.ATTEMPT_REVIEWED.bodyWithComment', { comment: data.comment });
+      }
+      // Nothing written, so the numbers are the whole answer — and they are the answer
+      // the learner was waiting for.
+      return t('types.ATTEMPT_REVIEWED.body', {
+        approved: data.approvedItems,
+        total: data.totalItems,
+      });
+    },
+    getLink: noLink,
   },
 };
 

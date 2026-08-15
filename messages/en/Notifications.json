@@ -14,7 +14,8 @@
   "categories": {
     "Enrollment": "Enrollment",
     "Staff": "Staff",
-    "System": "System"
+    "System": "System",
+    "Learning": "Learning"
   },
   "tabs": {
     "all": "All",
@@ -154,6 +155,15 @@
       "body": "You've been assigned to {group} at {school}. Check your schedule.",
       "titleFallback": "Group assigned",
       "bodyFallback": "You've been assigned to a group."
+    },
+    "ATTEMPT_REVIEWED": {
+      "title": "Your teacher has marked your work",
+      "titleReturned": "Your teacher sent your work back",
+      "body": "{approved} of {total} sentences counted.",
+      "bodyWithComment": "Your teacher wrote: {comment}",
+      "bodyReturned": "Have another look and hand it in again.",
+      "bodyReturnedWithComment": "Your teacher wrote: {comment}",
+      "bodyFallback": "Open the exercise to see what your teacher said."
     }
   }
 }

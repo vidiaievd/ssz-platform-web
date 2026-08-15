@@ -14,7 +14,8 @@
   "categories": {
     "Enrollment": "Зарахування",
     "Staff": "Персонал",
-    "System": "Система"
+    "System": "Система",
+    "Learning": "Навчання"
   },
   "tabs": {
     "all": "Усі",
@@ -154,6 +155,15 @@
       "body": "Вас призначено до {group} у {school}. Перевірте розклад.",
       "titleFallback": "Призначено групу",
       "bodyFallback": "Вас призначено до групи."
+    },
+    "ATTEMPT_REVIEWED": {
+      "title": "Викладач перевірив вашу роботу",
+      "titleReturned": "Викладач повернув роботу",
+      "body": "Зараховано {approved} із {total} речень.",
+      "bodyWithComment": "Викладач написав: {comment}",
+      "bodyReturned": "Перегляньте ще раз і здайте знову.",
+      "bodyReturnedWithComment": "Викладач написав: {comment}",
+      "bodyFallback": "Відкрийте вправу, щоб побачити відповідь викладача."
     }
   }
 }
