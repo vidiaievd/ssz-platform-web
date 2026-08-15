@@ -90,7 +90,15 @@
       "legendMissing": "mangler fra fasiten",
       "legendTypo": "skrivefeil"
     },
-    "audioLabel": "Setningen, lest inn"
+    "audioLabel": "Setningen, lest inn",
+    "itemCounted": "teller",
+    "itemNotCounted": "teller ikke",
+    "itemNotCountedPlain": "Læreren din godtok ikke denne.",
+    "review": {
+      "marked": "Læreren din har vurdert dette",
+      "sentBack": "Læreren din sendte dette tilbake",
+      "score": "{score} av 100 på dette forsøket."
+    }
   },
   "match": {
     "defaultInstruction": "Koble hvert ord til oversettelsen",

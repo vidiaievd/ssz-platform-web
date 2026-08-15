@@ -88,7 +88,17 @@ export type AttemptStatus =
   | 'SUBMITTED'
   | 'SCORED'
   | 'ROUTED_FOR_REVIEW'
+  /** A teacher read the submission and sent it back rather than scoring it. */
+  | 'RETURNED'
   | 'ABANDONED';
+
+/** What a teacher decided about one sentence, in the learner's copy of the verdict. */
+export interface ReviewDecisionRecord {
+  itemId: string;
+  approved: boolean;
+  /** Only when the teacher wrote one. */
+  comment?: string;
+}
 
 /** An attempt read back after the fact — the record, not the session. */
 export interface AttemptRecord {
@@ -106,6 +116,15 @@ export interface AttemptRecord {
   validationDetails: unknown;
   submittedAt: string | null;
   scoredAt: string | null;
+  /**
+   * The teacher's word on the submission as a whole, once one has read it. For this
+   * template it is the only place a wrong answer can be explained — the machine may not
+   * invent a reason (plan 42, "Разбор ошибки").
+   */
+  reviewComment: string | null;
+  /** Their verdict per sentence. Carries no answer key, only decisions and words. */
+  reviewDecisions: ReviewDecisionRecord[] | null;
+  reviewedAt: string | null;
 }
 
 /** `submittedAnswer` when the template is `word_bank_gap_fill`. */

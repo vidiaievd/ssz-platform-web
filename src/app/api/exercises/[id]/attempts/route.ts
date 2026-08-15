@@ -160,7 +160,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     });
 
     const found =
-      page.items.find((a) => a.status === 'SCORED' || a.status === 'ROUTED_FOR_REVIEW') ?? null;
+      page.items.find(
+        (a) => a.status === 'SCORED' || a.status === 'ROUTED_FOR_REVIEW' || a.status === 'RETURNED',
+      ) ?? null;
     const last =
       found === null
         ? null

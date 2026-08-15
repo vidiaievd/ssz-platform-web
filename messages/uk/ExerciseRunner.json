@@ -90,7 +90,15 @@
       "legendMissing": "немає у вашій відповіді",
       "legendTypo": "друкарська помилка"
     },
-    "audioLabel": "Речення, озвучене"
+    "audioLabel": "Речення, озвучене",
+    "itemCounted": "зараховано",
+    "itemNotCounted": "не зараховано",
+    "itemNotCountedPlain": "Учитель не зарахував це речення.",
+    "review": {
+      "marked": "Учитель перевірив роботу",
+      "sentBack": "Учитель повернув роботу",
+      "score": "{score} зі 100 за цю спробу."
+    }
   },
   "match": {
     "defaultInstruction": "Поєднайте кожне слово з перекладом",

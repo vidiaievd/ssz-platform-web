@@ -10,7 +10,10 @@ import {
   useStartAttempt,
   useSubmitAnswer,
 } from '@/features/student/exercises/api/use-attempt';
-import type { TranslateSubmitDetails } from '@/features/student/exercises/types/attempts';
+import type {
+  AttemptRecord,
+  TranslateSubmitDetails,
+} from '@/features/student/exercises/types/attempts';
 import { readSubmission, toSubmission } from '@/lib/shared-kernel/translate';
 import type { SelfCheckFeedback, StudentProjection } from '@/lib/shared-kernel/translate';
 import {
@@ -19,6 +22,7 @@ import {
   TranslateRunnerBody,
   type TranslateRouting,
   type TranslateValue,
+  type TranslateVerdicts,
 } from '@/features/student/exercises/runner';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
@@ -70,6 +74,12 @@ export function TranslateSolver({
   const [sent, setSent] = useState<'passed' | 'review' | null>(null);
   /** Per sentence, as the server decided it. Absent when a restored attempt kept none. */
   const [routing, setRouting] = useState<TranslateRouting | null>(null);
+  /**
+   * The teacher's verdict, once one has read the submission. It is the only feedback this
+   * template can give beyond "it matched the key", and it arrives with the attempt rather
+   * than through this screen — nothing here asks for it.
+   */
+  const [review, setReview] = useState<AttemptReview | null>(null);
   const [submissions, setSubmissions] = useState(0);
 
   /** Wall-clock since the attempt opened; the engine records it per submission. */
@@ -110,6 +120,9 @@ export function TranslateSolver({
           // and no sign they ever sent them.
           setSent(saved.status === 'ROUTED_FOR_REVIEW' ? 'review' : 'passed');
           setRouting(readRouting(saved.validationDetails));
+          // A string, not merely "not null": an attempt read back from an engine that
+          // predates review carries no such field at all.
+          if (typeof saved.reviewedAt === 'string') setReview(readReview(saved));
         },
       },
     );
@@ -215,6 +228,7 @@ export function TranslateSolver({
     setChecksLeft(null);
     setSent(null);
     setRouting(null);
+    setReview(null);
     setSubmissions(0);
     begin();
   }
@@ -233,6 +247,7 @@ export function TranslateSolver({
         accent={PRACTICE_ACCENT}
         pointOut={pointOut}
         routing={routing}
+        verdicts={review?.verdicts ?? null}
       />
 
       {sent === null ? (
@@ -313,20 +328,51 @@ export function TranslateSolver({
               sent === 'passed' ? 'var(--ssz-feedback-ok-bg)' : 'var(--ssz-bg-surface-subtle)',
           }}
         >
-          <p
-            className="text-[14px] font-semibold"
-            style={{
-              color: sent === 'passed' ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-primary)',
-            }}
-          >
-            {sent === 'passed' ? t('translate.approved') : t('translate.withTeacher')}
-          </p>
-          {sent === 'review' && (
-            <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
-              {approved !== null && approved > 0
-                ? t('translate.withTeacherSplit', { approved, total: items.length })
-                : t('translate.withTeacherWhen')}
-            </p>
+          {review !== null ? (
+            <>
+              <p
+                className="text-[14px] font-semibold"
+                style={{
+                  color:
+                    review.status === 'RETURNED'
+                      ? 'var(--ssz-text-primary)'
+                      : 'var(--ssz-feedback-ok-fg)',
+                }}
+              >
+                {review.status === 'RETURNED'
+                  ? t('translate.review.sentBack')
+                  : t('translate.review.marked')}
+              </p>
+              {review.status !== 'RETURNED' && review.score !== null && (
+                <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+                  {t('translate.review.score', { score: review.score })}
+                </p>
+              )}
+              {/* The teacher's own words, where they wrote any. Nothing is put here in
+                  their place: a made-up explanation is worse than none. */}
+              {review.comment !== null && (
+                <p className="mt-2 text-[13px] text-(--ssz-text-primary)">{review.comment}</p>
+              )}
+            </>
+          ) : (
+            <>
+              <p
+                className="text-[14px] font-semibold"
+                style={{
+                  color:
+                    sent === 'passed' ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-primary)',
+                }}
+              >
+                {sent === 'passed' ? t('translate.approved') : t('translate.withTeacher')}
+              </p>
+              {sent === 'review' && (
+                <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+                  {approved !== null && approved > 0
+                    ? t('translate.withTeacherSplit', { approved, total: items.length })
+                    : t('translate.withTeacherWhen')}
+                </p>
+              )}
+            </>
           )}
           {projection.flow.attempts === 'free' && (
             <button
@@ -342,6 +388,43 @@ export function TranslateSolver({
       )}
     </div>
   );
+}
+
+/** The teacher's verdict as this screen holds it. */
+interface AttemptReview {
+  status: AttemptRecord['status'];
+  score: number | null;
+  comment: string | null;
+  verdicts: TranslateVerdicts;
+}
+
+/**
+ * The teacher's verdict, out of the attempt record.
+ *
+ * Read rather than trusted wholesale: the decisions are a JSON column upstream, and a
+ * shape this screen cannot read is one it should show nothing for rather than crash on.
+ */
+function readReview(attempt: AttemptRecord): AttemptReview {
+  const verdicts: TranslateVerdicts = {};
+  for (const decision of attempt.reviewDecisions ?? []) {
+    if (typeof decision?.itemId !== 'string') continue;
+    verdicts[decision.itemId] = {
+      approved: decision.approved === true,
+      ...(typeof decision.comment === 'string' && decision.comment.trim() !== ''
+        ? { comment: decision.comment }
+        : {}),
+    };
+  }
+
+  return {
+    status: attempt.status,
+    score: attempt.score,
+    comment:
+      typeof attempt.reviewComment === 'string' && attempt.reviewComment.trim() !== ''
+        ? attempt.reviewComment
+        : null,
+    verdicts,
+  };
 }
 
 /**

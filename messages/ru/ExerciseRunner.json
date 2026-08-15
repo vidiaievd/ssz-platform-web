@@ -90,7 +90,15 @@
       "legendMissing": "нет в вашем ответе",
       "legendTypo": "опечатка"
     },
-    "audioLabel": "Предложение, озвученное"
+    "audioLabel": "Предложение, озвученное",
+    "itemCounted": "засчитано",
+    "itemNotCounted": "не засчитано",
+    "itemNotCountedPlain": "Учитель не засчитал это предложение.",
+    "review": {
+      "marked": "Учитель проверил работу",
+      "sentBack": "Учитель вернул работу",
+      "score": "{score} из 100 за эту попытку."
+    }
   },
   "match": {
     "defaultInstruction": "Сопоставьте каждое слово с переводом",

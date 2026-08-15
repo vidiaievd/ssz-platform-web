@@ -66,6 +66,8 @@ export type {
   TranslateRunnerBodyProps,
   TranslateRouting,
   TranslateValue,
+  TranslateItemVerdict,
+  TranslateVerdicts,
 } from './translate-runner-body';
 export { readTranslateProjection } from './translate-projection';
 

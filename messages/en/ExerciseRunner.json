@@ -90,7 +90,15 @@
       "legendMissing": "missing from the key",
       "legendTypo": "spelling"
     },
-    "audioLabel": "The sentence, spoken"
+    "audioLabel": "The sentence, spoken",
+    "itemCounted": "counted",
+    "itemNotCounted": "not counted",
+    "itemNotCountedPlain": "Your teacher did not count this one.",
+    "review": {
+      "marked": "Your teacher has marked this",
+      "sentBack": "Your teacher sent this back",
+      "score": "{score} out of 100 for this attempt."
+    }
   },
   "match": {
     "defaultInstruction": "Match each word to its translation",

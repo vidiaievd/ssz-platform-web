@@ -352,4 +352,72 @@ describe('TranslateSolver', () => {
     expect(await screen.findByText('Handed in. Your teacher will look at it.')).toBeInTheDocument();
     expect(await screen.findByRole('textbox')).toHaveValue('Jeg bor i Tromsø i tre år.');
   });
+
+  /**
+   * The verdict phase. For this template it is the only place an answer is ever called
+   * wrong — the machine may not say it, so the words on screen are the teacher's or there
+   * are none.
+   */
+  it("shows the teacher's verdict once one has read the submission", async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'SCORED',
+            score: 50,
+            reviewedAt: '2026-08-14T12:00:00.000Z',
+            reviewComment: 'Bra jobbet, men se på perfektum.',
+            reviewDecisions: [{ itemId: 'i1', approved: false, comment: '«bor» er presens.' }],
+          },
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Your teacher has marked this')).toBeInTheDocument();
+    expect(screen.getByText('50 out of 100 for this attempt.')).toBeInTheDocument();
+    expect(screen.getByText('Bra jobbet, men se på perfektum.')).toBeInTheDocument();
+    // The teacher's word about one sentence sits with that sentence.
+    expect(screen.getByText('not counted')).toBeInTheDocument();
+    expect(screen.getByText('«bor» er presens.')).toBeInTheDocument();
+  });
+
+  it('says a sentence was not counted without inventing a reason for it', async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'SCORED',
+            score: 0,
+            reviewedAt: '2026-08-14T12:00:00.000Z',
+            reviewComment: null,
+            reviewDecisions: [{ itemId: 'i1', approved: false }],
+          },
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Your teacher did not count this one.')).toBeInTheDocument();
+  });
+
+  it('says when the work was sent back rather than marked', async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'RETURNED',
+            reviewedAt: '2026-08-14T12:00:00.000Z',
+            reviewComment: 'Prøv igjen med perfektum.',
+            reviewDecisions: [],
+          },
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Your teacher sent this back')).toBeInTheDocument();
+    expect(screen.getByText('Prøv igjen med perfektum.')).toBeInTheDocument();
+    expect(screen.queryByText(/out of 100/)).not.toBeInTheDocument();
+  });
 });

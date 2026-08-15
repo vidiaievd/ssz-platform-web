@@ -23,6 +23,15 @@ export type TranslateValue = Record<string, string>;
 /** Where each sentence ended up, once the work has been handed in. */
 export type TranslateRouting = Record<string, 'pass' | 'teacher'>;
 
+/** What a teacher decided about one sentence, once one has read the submission. */
+export interface TranslateItemVerdict {
+  approved: boolean;
+  comment?: string;
+}
+
+/** The teacher's decisions, by sentence. */
+export type TranslateVerdicts = Record<string, TranslateItemVerdict>;
+
 export interface TranslateRunnerBodyProps {
   /**
    * The exercise as it left the server: the sentences to translate, the languages they
@@ -56,6 +65,15 @@ export interface TranslateRunnerBodyProps {
    * because a browser that could would have been sent the key to mask.
    */
   selfCheck?: SelfCheckFeedback | null;
+  /**
+   * What a teacher decided, per sentence, once one has read the submission.
+   *
+   * This is the only place this template ever says that an answer was wrong. The engine
+   * may not: a translation that misses the key is very often a second good one, so the
+   * words here are a person's, and where they wrote none the card says only that the
+   * sentence was not counted.
+   */
+  verdicts?: TranslateVerdicts | null;
 }
 
 const READING = 'var(--ssz-font-reading)';
@@ -89,6 +107,7 @@ export function TranslateRunnerBody({
   pointOut = false,
   routing = null,
   selfCheck = null,
+  verdicts = null,
 }: TranslateRunnerBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const interactive = phase === 'answering';
@@ -172,6 +191,7 @@ export function TranslateRunnerBody({
             mode={mode}
             empty={pointOut && !isWritten(answerOf(value, item.id))}
             outcome={routing?.[item.id] ?? null}
+            verdict={verdicts?.[item.id] ?? null}
             feedback={selfCheckByItem.get(item.id) ?? null}
             onAnswerChange={(text) => onValueChange({ ...value, [item.id]: text })}
           />
@@ -195,6 +215,8 @@ interface TrCardProps {
   mode: RunnerMode;
   empty: boolean;
   outcome: 'pass' | 'teacher' | null;
+  /** What the teacher decided about this sentence, once one has. */
+  verdict: TranslateItemVerdict | null;
   /** This sentence in the last self-check, if one was asked for. */
   feedback: SelfCheckItem | null;
   onAnswerChange: (text: string) => void;
@@ -214,6 +236,7 @@ function TrCard({
   mode,
   empty,
   outcome,
+  verdict,
   feedback,
   onAnswerChange,
 }: TrCardProps) {
@@ -250,15 +273,29 @@ function TrCard({
                 })
               : t('translate.numberedLang', { n: number, lang: item.sourceLang })}
         </span>
-        {outcome !== null && (
+        {/* A teacher's word outranks the machine's: once one has read the sentence, what
+            the auto-check made of it is no longer the news. */}
+        {verdict !== null ? (
           <span
             className="text-[12px] font-semibold"
             style={{
-              color: outcome === 'pass' ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-secondary)',
+              color: verdict.approved ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-feedback-no-fg)',
             }}
           >
-            {outcome === 'pass' ? t('translate.itemApproved') : t('translate.itemWithTeacher')}
+            {verdict.approved ? t('translate.itemCounted') : t('translate.itemNotCounted')}
           </span>
+        ) : (
+          outcome !== null && (
+            <span
+              className="text-[12px] font-semibold"
+              style={{
+                color:
+                  outcome === 'pass' ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-secondary)',
+              }}
+            >
+              {outcome === 'pass' ? t('translate.itemApproved') : t('translate.itemWithTeacher')}
+            </span>
+          )
         )}
       </div>
 
@@ -346,15 +383,34 @@ function TrCard({
         />
       )}
 
-      {outcome === 'pass' && (
-        <p className="mt-2 text-[12.5px] text-(--ssz-feedback-ok-fg)">
-          {t('translate.itemApprovedWhy')}
-        </p>
-      )}
-      {outcome === 'teacher' && (
-        <p className="mt-2 text-[12.5px] text-(--ssz-text-secondary)">
-          {t('translate.itemWithTeacherWhen')}
-        </p>
+      {/*
+        Once a teacher has read it, their words replace the line about waiting for them —
+        and where they wrote none, the card says only that the sentence was not counted.
+        Inventing a reason here is the one thing this template must never do.
+      */}
+      {verdict !== null ? (
+        verdict.comment !== undefined && verdict.comment.trim() !== '' ? (
+          <p className="mt-2 text-[12.5px] text-(--ssz-text-secondary)">{verdict.comment}</p>
+        ) : (
+          !verdict.approved && (
+            <p className="mt-2 text-[12.5px] text-(--ssz-text-muted)">
+              {t('translate.itemNotCountedPlain')}
+            </p>
+          )
+        )
+      ) : (
+        <>
+          {outcome === 'pass' && (
+            <p className="mt-2 text-[12.5px] text-(--ssz-feedback-ok-fg)">
+              {t('translate.itemApprovedWhy')}
+            </p>
+          )}
+          {outcome === 'teacher' && (
+            <p className="mt-2 text-[12.5px] text-(--ssz-text-secondary)">
+              {t('translate.itemWithTeacherWhen')}
+            </p>
+          )}
+        </>
       )}
     </li>
   );
