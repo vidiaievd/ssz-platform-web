@@ -1945,6 +1945,11 @@
     "ecFixed": "{fixed} av {total} feil rettet",
     "ecStray": "Endret også der det ikke var feil: {words}",
     "ecSpanUntouched": "Rørt ikke.",
-    "ecSpanSubmitted": "De skrev: {text}"
+    "ecSpanSubmitted": "De skrev: {text}",
+    "inboxTrigger": "Innboks",
+    "courseTitle": "Innboks for retting",
+    "courseSubtitle": "Alt elevene dine har levert i dette kurset.",
+    "courseEmpty": "Ingenting venter — alt som er levert i dette kurset er ferdig behandlet.",
+    "backToCourse": "Tilbake til kurset"
   }
 }

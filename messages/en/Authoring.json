@@ -1945,6 +1945,11 @@
     "ecFixed": "{fixed} of {total} mistakes corrected",
     "ecStray": "Also changed where there was no mistake: {words}",
     "ecSpanUntouched": "Left as it was.",
-    "ecSpanSubmitted": "They wrote: {text}"
+    "ecSpanSubmitted": "They wrote: {text}",
+    "inboxTrigger": "Marking inbox",
+    "courseTitle": "Marking inbox",
+    "courseSubtitle": "Everything your students have handed in across this course.",
+    "courseEmpty": "Nothing waiting — every submission in this course has been dealt with.",
+    "backToCourse": "Back to the course"
   }
 }

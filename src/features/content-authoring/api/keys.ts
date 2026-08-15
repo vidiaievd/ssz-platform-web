@@ -3,7 +3,8 @@ import { keyFactory } from '@/lib/query/keys';
 import type { AuthoringFilters, ContainerListQuery } from '../types';
 
 export const authoringKeys = keyFactory('authoring', {
-  containers: (filters?: AuthoringFilters | ContainerListQuery) => ['containers', filters ?? {}] as const,
+  containers: (filters?: AuthoringFilters | ContainerListQuery) =>
+    ['containers', filters ?? {}] as const,
   container: (id: string) => ['container', id] as const,
   preflight: (id: string) => ['preflight', id] as const,
   activity: (id: string) => ['activity', id] as const,
@@ -16,7 +17,8 @@ export const authoringKeys = keyFactory('authoring', {
     ['lesson-glossary-marks', lessonId, variantId] as const,
   lessonTextSpans: (lessonId: string, variantId: string) =>
     ['lesson-text-spans', lessonId, variantId] as const,
-  lessonCues: (lessonId: string, variantId: string) => ['lesson-cues', lessonId, variantId] as const,
+  lessonCues: (lessonId: string, variantId: string) =>
+    ['lesson-cues', lessonId, variantId] as const,
   lessonListeningStages: (lessonId: string, variantId: string) =>
     ['lesson-listening-stages', lessonId, variantId] as const,
   lessonVideoQuestion: (lessonId: string, variantId: string) =>
@@ -33,6 +35,9 @@ export const authoringKeys = keyFactory('authoring', {
   exercises: (containerId: string) => ['exercises', containerId] as const,
   exerciseRuleLinks: (exerciseId: string) => ['exercise-rule-links', exerciseId] as const,
   reviewQueue: (exerciseId: string) => ['review-queue', exerciseId] as const,
+  /** Every course inbox, as one prefix: marking a submission changes whichever holds it. */
+  courseReviewQueues: () => ['course-review-queue'] as const,
+  courseReviewQueue: (containerId: string) => ['course-review-queue', containerId] as const,
   exercise: (id: string) => ['exercise', id] as const,
   sections: (containerId: string) => ['sections', containerId] as const,
   versions: (containerId: string) => ['versions', containerId] as const,

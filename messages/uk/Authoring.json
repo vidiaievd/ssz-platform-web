@@ -1945,6 +1945,11 @@
     "ecFixed": "Виправлено {fixed} із {total} помилок",
     "ecStray": "Змінено й там, де помилки не було: {words}",
     "ecSpanUntouched": "Залишено як було.",
-    "ecSpanSubmitted": "Написано: {text}"
+    "ecSpanSubmitted": "Написано: {text}",
+    "inboxTrigger": "Вхідні",
+    "courseTitle": "Вхідні на перевірку",
+    "courseSubtitle": "Усе, що учні здали в межах цього курсу.",
+    "courseEmpty": "Нічого не чекає — усі здані роботи цього курсу перевірено.",
+    "backToCourse": "Назад до курсу"
   }
 }

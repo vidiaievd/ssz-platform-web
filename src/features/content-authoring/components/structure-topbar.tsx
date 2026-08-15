@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronsDownUp, ChevronsUpDown, ExternalLink, Upload } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown, ExternalLink, Inbox, Upload } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,8 @@ interface StructureTopbarProps {
   pendingCount: number;
   /** Student-facing route for this course, or `null` when it is a module (students open those through their course). */
   previewHref: string | null;
+  /** The course's marking inbox. `null` for containers whose material nobody hands in. */
+  reviewInboxHref: string | null;
   onExpandAll: () => void;
   onCollapseAll: () => void;
   onReview: () => void;
@@ -46,6 +48,7 @@ export function StructureTopbar({
   updatedAt,
   pendingCount,
   previewHref,
+  reviewInboxHref,
   onExpandAll,
   onCollapseAll,
   onReview,
@@ -94,6 +97,14 @@ export function StructureTopbar({
             <ChevronsDownUp className="size-4" />
             {t('topbar.collapseAll')}
           </Button>
+          {reviewInboxHref && (
+            <Button asChild variant="outline" size="sm">
+              <Link href={reviewInboxHref}>
+                <Inbox className="size-4" />
+                {t('review.inboxTrigger')}
+              </Link>
+            </Button>
+          )}
           {previewHref && (
             <Button asChild variant="outline" size="sm">
               <a href={previewHref} target="_blank" rel="noreferrer">
