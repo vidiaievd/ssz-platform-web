@@ -1,14 +1,16 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Check, CircleAlert, User } from 'lucide-react';
+import { Check, User } from 'lucide-react';
 
 import type { DiffToken, Routing, Verdict } from '@/lib/shared-kernel/translate';
+
+import { VerdictPill, type VerdictTone } from '../verdict-pill';
 
 const READING = 'var(--ssz-font-reading)';
 
 /** How each verdict reads. Only `exact` is ever a pass — everything else is for a human. */
-const VERDICT_TONE: Record<Verdict, 'ok' | 'warn' | 'bad' | 'muted'> = {
+const VERDICT_TONE: Record<Verdict, VerdictTone> = {
   exact: 'ok',
   typo: 'warn',
   near: 'warn',
@@ -28,27 +30,11 @@ const VERDICT_TONE: Record<Verdict, 'ok' | 'warn' | 'bad' | 'muted'> = {
  */
 export function VerdictChip({ verdict }: { verdict: Verdict }) {
   const t = useTranslations('Authoring');
-  const tone = VERDICT_TONE[verdict];
 
   return (
-    <span
-      className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-        tone === 'ok'
-          ? 'bg-success-50 text-success-700'
-          : tone === 'warn'
-            ? 'bg-warning-100 text-warning-700'
-            : tone === 'bad'
-              ? 'bg-error/10 text-error'
-              : 'bg-[var(--ssz-bg-subtle)] text-muted-foreground'
-      }`}
-    >
-      {tone === 'ok' ? (
-        <Check className="size-3" aria-hidden />
-      ) : (
-        <CircleAlert className="size-3" aria-hidden />
-      )}
+    <VerdictPill tone={VERDICT_TONE[verdict]}>
       {t(`translate.verdict.${verdict}` as 'translate.verdict.exact')}
-    </span>
+    </VerdictPill>
   );
 }
 

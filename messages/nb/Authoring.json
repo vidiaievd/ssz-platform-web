@@ -1941,6 +1941,10 @@
     "nothingOpen": "Ingenting igjen å avgjøre her.",
     "failed": "Innleveringen kunne ikke vurderes — noen kan ha rukket den før deg. Last køen på nytt.",
     "openQueue": "Vurderingskø",
-    "backToEditor": "Tilbake til oppgaven"
+    "backToEditor": "Tilbake til oppgaven",
+    "ecFixed": "{fixed} av {total} feil rettet",
+    "ecStray": "Endret også der det ikke var feil: {words}",
+    "ecSpanUntouched": "Rørt ikke.",
+    "ecSpanSubmitted": "De skrev: {text}"
   }
 }

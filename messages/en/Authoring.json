@@ -1941,6 +1941,10 @@
     "nothingOpen": "Nothing left to decide here.",
     "failed": "This submission could not be marked — someone may have got to it first. Reload the queue.",
     "openQueue": "Marking queue",
-    "backToEditor": "Back to the exercise"
+    "backToEditor": "Back to the exercise",
+    "ecFixed": "{fixed} of {total} mistakes corrected",
+    "ecStray": "Also changed where there was no mistake: {words}",
+    "ecSpanUntouched": "Left as it was.",
+    "ecSpanSubmitted": "They wrote: {text}"
   }
 }

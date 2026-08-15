@@ -84,13 +84,13 @@ const QUEUE: ReviewQueueResponse = {
 
 const fetchMock = vi.fn();
 
-function renderQueue(queue: ReviewQueueResponse = QUEUE) {
+function renderQueue(queue: ReviewQueueResponse = QUEUE, exercise: unknown = EXERCISE) {
   fetchMock.mockImplementation((url: string, init?: RequestInit) => {
     if (url.includes('/review-queue')) {
       return Promise.resolve(new Response(JSON.stringify(queue), { status: 200 }));
     }
     if (url.includes('/answers')) {
-      return Promise.resolve(new Response(JSON.stringify(EXERCISE), { status: 200 }));
+      return Promise.resolve(new Response(JSON.stringify(exercise), { status: 200 }));
     }
     if ((init?.method ?? 'GET') === 'POST') {
       return Promise.resolve(
@@ -245,5 +245,131 @@ describe('ReviewQueue', () => {
         'Nothing waiting — every submission on this exercise has been dealt with.',
       ),
     ).toBeInTheDocument();
+  });
+});
+
+/**
+ * The same queue, the other template. `error_correction` reaches this screen through the
+ * same route for the same reason — its check may only ever approve — so what is asserted
+ * here is that the screen reads *its* details rather than translate's: mistakes one by
+ * one instead of a diff, and a sentence the check closed credited without a teacher.
+ */
+describe('ReviewQueue — error_correction', () => {
+  const EC_EXERCISE = {
+    id: 'ex-2',
+    templateCode: 'error_correction',
+    content: {
+      mode: 'sentences',
+      items: [
+        { id: 'i1', wrong: 'I går jeg gikk på kino.' },
+        { id: 'i2', wrong: 'Hun har bodde i Bergen.' },
+      ],
+    },
+    expectedAnswers: {
+      items: {
+        i1: { ref: 'I går gikk jeg på kino.', teacherNote: 'Ask about V2 next time.' },
+        i2: { ref: 'Hun har bodd i Bergen.' },
+      },
+    },
+  };
+
+  const EC_QUEUE: ReviewQueueResponse = {
+    total: 1,
+    limit: 20,
+    offset: 0,
+    items: [
+      {
+        attemptId: 'att-2',
+        userId: 'learner-12345678',
+        templateCode: 'error_correction',
+        submittedAnswer: {},
+        submittedAt: '2026-08-15T09:00:00.000Z',
+        timeSpentSeconds: 120,
+        selfChecksUsed: 0,
+        answersRevealed: false,
+        details: {
+          totalItems: 2,
+          routedItems: 1,
+          passedItems: 1,
+          items: [
+            {
+              itemId: 'i2',
+              verdict: 'exact',
+              similarity: 1,
+              routing: 'pass',
+              built: 'Hun har bodd i Bergen.',
+              fixedSpans: 1,
+              totalSpans: 1,
+              spans: [],
+              stray: [],
+              edits: null,
+            },
+            {
+              itemId: 'i1',
+              verdict: 'partial',
+              similarity: 0.78,
+              routing: 'teacher',
+              built: 'I går gikk jeg på kinoen.',
+              fixedSpans: 1,
+              totalSpans: 2,
+              spans: [
+                {
+                  key: 's1',
+                  type: 'order',
+                  state: 'fixed',
+                  wrong: 'jeg gikk',
+                  fix: 'gikk jeg',
+                  submitted: 'gikk jeg',
+                  note: 'The verb comes second.',
+                },
+                {
+                  key: 's2',
+                  type: 'form',
+                  state: 'missed',
+                  wrong: 'kino.',
+                  fix: 'kino.',
+                  submitted: '',
+                  note: '',
+                },
+              ],
+              stray: [{ kind: 'edit', index: 4, word: 'kinoen.' }],
+              edits: null,
+            },
+          ],
+        },
+      },
+    ],
+  };
+
+  it('collapses the sentence its own check closed, and opens only the other one', async () => {
+    renderQueue(EC_QUEUE, EC_EXERCISE);
+
+    expect(await screen.findByText('1 submission waiting')).toBeInTheDocument();
+    expect(screen.getByText('1 closed automatically · 1 to read')).toBeInTheDocument();
+    // Collapsed: the sentence the learner's edits produced, with no decision attached.
+    expect(screen.getByText('Hun har bodd i Bergen.')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Counts' })).toHaveLength(1);
+  });
+
+  it('shows the mistakes one by one rather than a diff', async () => {
+    renderQueue(EC_QUEUE, EC_EXERCISE);
+
+    // The faulty sentence the learner was given, and what their edits produced.
+    expect(await screen.findByText('I går jeg gikk på kino.')).toBeInTheDocument();
+    expect(screen.getByText('I går gikk jeg på kinoen.')).toBeInTheDocument();
+    expect(screen.getByText('1 of 2 mistakes corrected')).toBeInTheDocument();
+
+    // Each planted mistake, what the learner put there, and the author's own note.
+    expect(screen.getByText('They wrote: gikk jeg')).toBeInTheDocument();
+    expect(screen.getByText('Left as it was.')).toBeInTheDocument();
+    expect(screen.getByText('The verb comes second.')).toBeInTheDocument();
+
+    // Changed where nothing was wrong, and the note only the teacher sees.
+    expect(
+      screen.getByText('Also changed where there was no mistake: «kinoen.»'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Ask about V2 next time.')).toBeInTheDocument();
+    // Its own vocabulary, not translate's.
+    expect(screen.getByText('Partly corrected')).toBeInTheDocument();
   });
 });
