@@ -1924,5 +1924,31 @@
       "AI_UNLIMITED_BEFORE_SUBMIT": "AI-kommentaren vises før levering, uten egensjekker som begrenser den.",
       "REFS_AFTER_SUBMIT": "Fasiten vises rett etter levering, så et treff ser den med en gang."
     }
+  },
+  "review": {
+    "title": "Vurderingskø",
+    "waiting": "{count, plural, one {# innlevering venter} other {# innleveringer venter}}",
+    "empty": "Ingenting venter — alle innleveringer på denne oppgaven er tatt hånd om.",
+    "loadFailed": "Fikk ikke hentet køen.",
+    "learner": "Student {id}",
+    "notSubmitted": "ikke levert",
+    "unreadable": "Oppgaven kunne ikke leses — vurder denne for hånd.",
+    "summary": "{auto} lukket automatisk · {manual} å lese",
+    "similarity": "{percent} % lik fasiten",
+    "against": "Sammenlignet med: {ref}",
+    "blankAnswer": "(ingenting skrevet)",
+    "itemApprove": "Teller",
+    "itemReject": "Teller ikke",
+    "itemCommentLabel": "En kommentar til denne setningen",
+    "itemCommentPlaceholder": "Hvorfor den ikke teller…",
+    "commentLabel": "En kommentar til hele innleveringen",
+    "commentPlaceholder": "Hva studenten bør se på neste gang…",
+    "finish": "Godkjenn",
+    "sendBack": "Send tilbake",
+    "decided": "{decided} av {total} setninger er avgjort — resten teller ikke.",
+    "nothingOpen": "Ingenting igjen å avgjøre her.",
+    "failed": "Innleveringen kunne ikke vurderes — noen kan ha rukket den før deg. Last køen på nytt.",
+    "openQueue": "Vurderingskø",
+    "backToEditor": "Tilbake til oppgaven"
   }
 }

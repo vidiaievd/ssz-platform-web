@@ -1924,5 +1924,31 @@
       "AI_UNLIMITED_BEFORE_SUBMIT": "The AI comment is shown before submitting, with no self-check budget to limit it.",
       "REFS_AFTER_SUBMIT": "The key is shown right after submitting, so a matching answer sees it immediately."
     }
+  },
+  "review": {
+    "title": "Marking queue",
+    "waiting": "{count, plural, one {# submission waiting} other {# submissions waiting}}",
+    "empty": "Nothing waiting — every submission on this exercise has been dealt with.",
+    "loadFailed": "Could not load the queue.",
+    "learner": "Learner {id}",
+    "notSubmitted": "not handed in",
+    "unreadable": "The exercise could not be read — mark this one by hand.",
+    "summary": "{auto} closed automatically · {manual} to read",
+    "similarity": "{percent}% like the key",
+    "against": "Compared with: {ref}",
+    "blankAnswer": "(nothing written)",
+    "itemApprove": "Counts",
+    "itemReject": "Does not count",
+    "itemCommentLabel": "A word about this sentence",
+    "itemCommentPlaceholder": "Why it does not count…",
+    "commentLabel": "A word about the whole submission",
+    "commentPlaceholder": "What to look at next time…",
+    "finish": "Approve",
+    "sendBack": "Send back",
+    "decided": "{decided} of {total} sentences decided — the rest will not count.",
+    "nothingOpen": "Nothing left to decide here.",
+    "failed": "This submission could not be marked — someone may have got to it first. Reload the queue.",
+    "openQueue": "Marking queue",
+    "backToEditor": "Back to the exercise"
   }
 }

@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { Link } from '@/lib/i18n/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Container, ExerciseInstruction, ExerciseWithAnswers } from '@/features/content/types';
 import {
@@ -62,6 +63,8 @@ interface ExerciseEditorPaneProps {
   /** The grammar rules of this Leksjon; only the translate builder uses them so far. */
   grammarRules?: LevelGrammarRule[];
   backHref: string;
+  /** Where this exercise's marking queue lives. Offered only where one can fill up. */
+  reviewHref?: string;
   publishSlot: ReactNode;
 }
 
@@ -74,6 +77,7 @@ export function ExerciseEditorPane({
   grammarRules,
   container,
   backHref,
+  reviewHref,
   publishSlot,
 }: ExerciseEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -106,7 +110,21 @@ export function ExerciseEditorPane({
       backHref={backHref}
       saveStatus="idle"
       savedAt={null}
-      publishSlot={publishSlot}
+      publishSlot={
+        <>
+          {/*
+            Only for the templates whose attempts can reach a queue. Closed-form exercises
+            are scored the moment they are handed in, so a link to their marking queue
+            would lead to a page that is empty by construction.
+          */}
+          {reviewHref !== undefined && (isTranslate || isErrorCorrection) && (
+            <Button asChild variant="outline" size="sm">
+              <Link href={reviewHref}>{t('review.openQueue')}</Link>
+            </Button>
+          )}
+          {publishSlot}
+        </>
+      }
       preview={
         isGapFill && gapFill !== null ? (
           <GapFillPreview exercise={gapFill.exercise} instructions={gapFill.instructions} />
