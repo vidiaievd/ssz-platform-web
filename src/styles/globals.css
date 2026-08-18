@@ -658,4 +658,16 @@
   .ssz-surface-hover:hover {
     box-shadow: var(--ssz-shadow-md);
   }
+
+  /* Review urgency, as text.
+     The age scale's tone is built for a rail — a filled shape, judged at 3:1 — and the
+     same value fails 4.5:1 at 12px. The component publishes the readable rendering of
+     that hue as two custom properties and this picks the one the surface can carry;
+     `light-dark()` would follow the OS instead of the app's own theme class. */
+  .ssz-age-text {
+    color: var(--age-text-light);
+  }
+  .dark .ssz-age-text {
+    color: var(--age-text-dark);
+  }
 }

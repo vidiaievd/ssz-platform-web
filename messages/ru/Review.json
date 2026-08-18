@@ -1,0 +1,17 @@
+{
+  "age": {
+    "justNow": "только что",
+    "hours": "{n, plural, one {# час} few {# часа} many {# часов} other {# часа}}",
+    "days": "{n, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
+    "overdueBy": {
+      "hours": "просрочено на {n, plural, one {# час} few {# часа} many {# часов} other {# часа}}",
+      "days": "просрочено на {n, plural, one {# день} few {# дня} many {# дней} other {# дня}}"
+    },
+    "scale": {
+      "fresh": "свежие",
+      "atSla": "у срока ({n} ч)",
+      "double": "вдвое дольше срока"
+    },
+    "spread": "{n, plural, one {# работа} few {# работы} many {# работ} other {# работы}}, самая старая {oldest}"
+  }
+}

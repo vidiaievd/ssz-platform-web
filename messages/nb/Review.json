@@ -1,0 +1,17 @@
+{
+  "age": {
+    "justNow": "akkurat nå",
+    "hours": "{n, plural, one {# time} other {# timer}}",
+    "days": "{n, plural, one {# dag} other {# dager}}",
+    "overdueBy": {
+      "hours": "{n, plural, one {# time over} other {# timer over}}",
+      "days": "{n, plural, one {# dag over} other {# dager over}}"
+    },
+    "scale": {
+      "fresh": "fersk",
+      "atSla": "ved fristen ({n} t)",
+      "double": "dobbelt så lenge"
+    },
+    "spread": "{n, plural, one {# innlevering} other {# innleveringer}}, eldste {oldest}"
+  }
+}

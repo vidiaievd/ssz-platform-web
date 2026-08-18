@@ -1,0 +1,17 @@
+{
+  "age": {
+    "justNow": "just now",
+    "hours": "{n, plural, one {# hour} other {# hours}}",
+    "days": "{n, plural, one {# day} other {# days}}",
+    "overdueBy": {
+      "hours": "{n, plural, one {# hour past} other {# hours past}}",
+      "days": "{n, plural, one {# day past} other {# days past}}"
+    },
+    "scale": {
+      "fresh": "fresh",
+      "atSla": "at the promise ({n} h)",
+      "double": "twice the promise"
+    },
+    "spread": "{n, plural, one {# submission} other {# submissions}}, oldest {oldest}"
+  }
+}

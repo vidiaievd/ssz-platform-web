@@ -1,0 +1,17 @@
+{
+  "age": {
+    "justNow": "щойно",
+    "hours": "{n, plural, one {# година} few {# години} many {# годин} other {# години}}",
+    "days": "{n, plural, one {# день} few {# дні} many {# днів} other {# дня}}",
+    "overdueBy": {
+      "hours": "прострочено на {n, plural, one {# годину} few {# години} many {# годин} other {# години}}",
+      "days": "прострочено на {n, plural, one {# день} few {# дні} many {# днів} other {# дня}}"
+    },
+    "scale": {
+      "fresh": "свіжі",
+      "atSla": "біля терміну ({n} год)",
+      "double": "удвічі довше терміну"
+    },
+    "spread": "{n, plural, one {# робота} few {# роботи} many {# робіт} other {# роботи}}, найстаріша {oldest}"
+  }
+}
