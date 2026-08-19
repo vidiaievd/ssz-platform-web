@@ -68,5 +68,45 @@
       "double": "dobbelt så lenge"
     },
     "spread": "{n, plural, one {# innlevering} other {# innleveringer}}, eldste {oldest}"
+  },
+  "submission": {
+    "failed": {
+      "title": "Denne innleveringen kunne ikke åpnes",
+      "body": "Den kan være vurdert allerede, eller forbindelsen falt ut. Prøv igjen fra køen."
+    },
+    "conflict": {
+      "title": "{name} har nettopp vurdert denne",
+      "someone": "En kollega",
+      "approved": "Godkjent {time}. Utkastet ditt er beholdt nedenfor.",
+      "returned": "Sendt til retting {time}. Utkastet ditt er beholdt nedenfor."
+    },
+    "windowExpired": {
+      "title": "Du kan ikke lenger vurdere denne",
+      "body": "Tilknytningen din til gruppen tok slutt etter at arbeidet ble levert. Du kan lese det; vurderingen tilhører den som har gruppen nå."
+    },
+    "lockExpired": {
+      "title": "Merket ditt på denne innleveringen gikk ut",
+      "body": "De femten minuttene er over. Ingen andre har tatt den — fortsett, så merkes den for deg igjen mens du jobber."
+    },
+    "heldBy": {
+      "title": "{name} ser på denne nå",
+      "body": "Du er ikke blokkert. Den blir ledig om lag femten minutter, og den som vurderer først, er den som svarer."
+    },
+    "exerciseGone": {
+      "title": "Oppgaven finnes ikke lenger",
+      "body": "Forfatteren slettet eller flyttet den etter innleveringen. Stien over er den eleven så, og vurderingen er fortsatt din å gi."
+    },
+    "noDetails": {
+      "title": "Analysen kunne ikke bygges",
+      "body": "Svaret vises slik det ble levert. Les og vurder som vanlig — maskinen hadde rett og slett ingenting å sammenligne med."
+    },
+    "previous": {
+      "title": "Sendt til retting",
+      "by": "{name} · {date}",
+      "someone": "en kollega",
+      "noComment": "Ingen kommentar ble lagt igjen.",
+      "explain": "Dette er et eget forsøk. Svaret nedenfor er det nye."
+    },
+    "back": "Tilbake til køen"
   }
 }

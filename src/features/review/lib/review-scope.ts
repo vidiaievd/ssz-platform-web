@@ -6,12 +6,19 @@ import { NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import { getMySchools } from '@/features/school/api/get-my-schools';
+import type { SchoolRole } from '@/features/school/types';
 import { env } from '@/lib/env';
 
 /** What one teacher may be shown: their groups in this school, and the courses behind them. */
 export interface ReviewScope {
   schoolId: string;
   teacherId: string;
+  /**
+   * The caller's standing in this school. Administrators hold no queue of their own but
+   * see everything in it (`DATA_MODEL.md` §3), so one submission's authorisation turns on
+   * this where the queue's turns on group assignments.
+   */
+  role: SchoolRole | null;
   /** The groups this teacher is active on right now. Empty is a real, valid answer. */
   groupIds: string[];
   /** The courses those groups run. Not an authorisation — see `queueScopeFor`. */
@@ -49,25 +56,50 @@ export async function resolveReviewScope(
   }
 
   try {
-    const scope = await serverFetch<{ groupIds: string[]; containerIds: string[] }>({
-      service: 'organization',
-      path: '/internal/review/scope',
-      directBaseUrl: env.ORGANIZATION_SERVICE_INTERNAL_URL,
-      headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
-      anonymous: true,
-      query: { schoolId: school.id, teacherId: user.userId, at: new Date().toISOString() },
-    });
+    const scope = await reviewScopeAt(school.id, user.userId, new Date().toISOString());
 
     return {
       schoolId: school.id,
       teacherId: user.userId,
-      groupIds: scope.groupIds ?? [],
-      containerIds: scope.containerIds ?? [],
+      role: school.myRole ?? null,
+      groupIds: scope.groupIds,
+      containerIds: scope.containerIds,
     };
   } catch {
     return NextResponse.json({ error: 'Failed to read the review scope' }, { status: 502 });
   }
 }
+
+/**
+ * `reviewers(sub)` from the other side: which groups this teacher held at a given moment.
+ *
+ * A moment, not "now", because that is what the rule says — a reviewer is a teacher of the
+ * learner's group *as of the submission* (`DATA_MODEL.md` §3). A substitution that ran for
+ * a fortnight in June still owns what was handed in during it, and a teacher who joined
+ * the group yesterday does not.
+ *
+ * Cached on the instant it is asked about, so a route that checks the same window twice —
+ * once to read, once to write — pays for one round trip.
+ */
+export const reviewScopeAt = cache(async function (
+  schoolId: string,
+  teacherId: string,
+  /** ISO-8601. A string rather than a `Date` so two asks about the same instant share
+   *  the request cache — `cache()` keys on argument identity, and every `new Date()` is
+   *  a fresh object. */
+  at: string,
+): Promise<{ groupIds: string[]; containerIds: string[] }> {
+  const scope = await serverFetch<{ groupIds?: string[]; containerIds?: string[] }>({
+    service: 'organization',
+    path: '/internal/review/scope',
+    directBaseUrl: env.ORGANIZATION_SERVICE_INTERNAL_URL,
+    headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
+    anonymous: true,
+    query: { schoolId, teacherId, at },
+  });
+
+  return { groupIds: scope.groupIds ?? [], containerIds: scope.containerIds ?? [] };
+});
 
 /**
  * The scope as exercise-engine takes it, narrowed by the screen's filters.

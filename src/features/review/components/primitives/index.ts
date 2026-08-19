@@ -7,6 +7,8 @@
  * to `components/ui`; nothing has yet.
  */
 export { Chip } from './chip';
+export { Note } from './note';
+export type { NoteProps, NoteTone } from './note';
 export { ALL, Sel } from './sel';
 export type { SelOption } from './sel';
 export { Segment } from './segment';

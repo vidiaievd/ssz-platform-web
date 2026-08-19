@@ -15,4 +15,6 @@ export const reviewKeys = keyFactory('review', {
   queues: () => ['queue'] as const,
   count: (school: string) => ['count', school] as const,
   counts: () => ['count'] as const,
+  submission: (school: string, id: string) => ['submission', school, id] as const,
+  submissions: () => ['submission'] as const,
 });

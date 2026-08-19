@@ -8,6 +8,11 @@
  * is its output contract (`API_CONTRACT.md` §1–2).
  */
 
+// Deep import rather than the feature barrel: `content-authoring/index.ts` re-exports its
+// components, so a route handler importing a type from it would pull client code into a
+// server bundle — and both features happen to name a type `ReviewQueueResponse`.
+import type { ReviewDetails } from '@/features/content-authoring/types/review';
+
 /** The five templates whose check may refuse to close, and so reach a person. */
 export const REVIEWABLE_EXERCISE_TYPES = [
   'short_answer',
@@ -117,4 +122,79 @@ export interface ReviewQueueResponse {
 export interface ReviewQueueCount {
   pending: number;
   hasOverdue: boolean;
+}
+
+/**
+ * A verdict that has already been delivered — on the try before this one, or on this one
+ * by a colleague who got here first.
+ */
+export interface ReviewVerdictRecord {
+  attemptId: string;
+  outcome: 'approved' | 'returned';
+  at: string;
+  reviewerId: string;
+  /** Null when the directory could not answer; the banner then names the outcome only. */
+  reviewerName: string | null;
+  comment: string | null;
+}
+
+/** The exercise a submission belongs to, as the reviewer's screen needs to read it. */
+export interface ReviewSubmissionExercise {
+  id: string;
+  /** The snapshot's title — it outlives the exercise itself (criterion 21). */
+  title: string | null;
+  /** The template code: `short_answer`, `writing_task`, … */
+  type: string;
+  path: { course: string | null; lesson: string | null };
+  /** False when the author deleted or moved it after the submission was made. */
+  available: boolean;
+  /** What the work is written in — the language the æøå pad is there for. */
+  contentLang: string;
+}
+
+/**
+ * One submission, with everything the reviewer's screen is drawn from.
+ *
+ * Composed here and nowhere else: the engine holds the answer and recomputes the
+ * breakdown, organization-service holds the promise and the group, the directory holds
+ * the names. A screen that fetched the three itself would authorise none of them.
+ */
+export interface ReviewSubmission {
+  id: string;
+  /** The engine's own status. `pending` is the only one that is still open. */
+  status: string;
+  student: ReviewLearner;
+  exercise: ReviewSubmissionExercise;
+  submittedAt: string | null;
+  /** Hours waited, computed at response time — one formula, one source (45.1). */
+  ageHours: number;
+  slaHours: number | null;
+  overdue: boolean;
+  attemptNo: number;
+  /** The verdict that sent the learner back here. Null on a first try. */
+  previous: ReviewVerdictRecord | null;
+  /** Already decided — the screen is read-only and says who got here first. */
+  decision: ReviewVerdictRecord | null;
+  lock: ReviewQueueLock | null;
+  /**
+   * The machine's reading of the work, recomputed on every read. `null` is a valid
+   * answer, not an error: the screen says so and the verdict stays open (criterion 20).
+   *
+   * Typed by the shape `submission-card` already speaks — 45.6 moves that card here, and
+   * inventing a second vocabulary for the same breakdown would mean translating between
+   * them forever.
+   */
+  details: ReviewDetails | null;
+  /** `writing_task` only: the essay itself. */
+  text: string | null;
+  submittedAnswer: unknown;
+  /** Whether this caller may still decide it — an expired substitution may only read. */
+  canDecide: boolean;
+}
+
+/** What a lock call answers: who holds the submission now, and until when. */
+export interface ReviewLockState {
+  lock: ReviewQueueLock | null;
+  /** True when the holder is the caller — the screen's own marker, freshly extended. */
+  mine: boolean;
 }

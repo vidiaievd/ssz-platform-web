@@ -68,5 +68,45 @@
       "double": "twice the promise"
     },
     "spread": "{n, plural, one {# submission} other {# submissions}}, oldest {oldest}"
+  },
+  "submission": {
+    "failed": {
+      "title": "This submission could not be opened",
+      "body": "It may have been decided, or the connection dropped. Try again from the queue."
+    },
+    "conflict": {
+      "title": "{name} has just reviewed this",
+      "someone": "A colleague",
+      "approved": "Passed at {time}. Your draft is kept below.",
+      "returned": "Returned for revision at {time}. Your draft is kept below."
+    },
+    "windowExpired": {
+      "title": "You can no longer decide this one",
+      "body": "Your assignment to this group ended after the work was handed in. You can read it; the verdict belongs to whoever teaches the group now."
+    },
+    "lockExpired": {
+      "title": "Your marker on this submission ran out",
+      "body": "The fifteen minutes are up. Nobody else has taken it — carry on, and it will be marked for you again as you work."
+    },
+    "heldBy": {
+      "title": "{name} is looking at this one",
+      "body": "You are not blocked. It frees up in about fifteen minutes, and whoever decides first is the one who answers."
+    },
+    "exerciseGone": {
+      "title": "The exercise is no longer there",
+      "body": "Its author deleted or moved it after this was handed in. The path above is the one the learner saw, and the verdict is still yours to give."
+    },
+    "noDetails": {
+      "title": "The breakdown could not be built",
+      "body": "The answer is shown as it was handed in. Read it and decide as usual — the machine simply had nothing to compare it against."
+    },
+    "previous": {
+      "title": "Returned for revision",
+      "by": "{name} · {date}",
+      "someone": "a colleague",
+      "noComment": "No comment was left.",
+      "explain": "This is a separate try. The answer below is the new one."
+    },
+    "back": "Back to the queue"
   }
 }

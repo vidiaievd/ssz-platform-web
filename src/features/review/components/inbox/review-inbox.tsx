@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { CheckCircle2, Filter } from 'lucide-react';
 
@@ -18,6 +18,8 @@ import {
 import { useReviewViewStore } from '../../stores/review-view-store';
 import type { ReviewGroupBy, ReviewQueueFilters, ReviewQueueGroup } from '../../types';
 import { useAgeWords } from '../age-mark';
+
+import { SubmissionPanel } from '../submission/submission-panel';
 
 import { GroupHead } from './group-head';
 import { QueueFiltersBar } from './queue-filters-bar';
@@ -44,6 +46,7 @@ export interface ReviewInboxProps {
 export function ReviewInbox({ school }: ReviewInboxProps) {
   const t = useTranslations('Review');
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const filters = parseQueueFilters(searchParams);
@@ -74,11 +77,22 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
   // Opening a submission is a `replace`, like every other view change here: twenty
   // verdicts in a marking pass would otherwise leave twenty history entries between the
   // teacher and wherever they came from.
+  //
+  // Except where the panel does not exist. Below 1024px the second column is not rendered
+  // at all, so writing the id into the address bar there would answer a tap with nothing
+  // visible happening; the submission is a page of its own instead, and a `push`, because
+  // on that layout "back" is how you return to the queue.
   const selectSubmission = useCallback(
     (id: string) => {
-      router.replace(queueFiltersToQuery(filters, id), { scroll: false });
+      const wide =
+        typeof window === 'undefined' || window.matchMedia('(min-width: 1024px)').matches;
+      if (wide) {
+        router.replace(queueFiltersToQuery(filters, id), { scroll: false });
+        return;
+      }
+      router.push(`${pathname}/${id}`);
     },
-    [filters, router],
+    [filters, pathname, router],
   );
 
   return (
@@ -129,12 +143,22 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
         </div>
       </div>
 
-      {/* The submission column. Empty until 45.5 gives it a panel to hold. */}
+      {/* Hidden below 1024px, where the submission becomes its own page instead: two real
+          columns do not fit, and a panel squeezed beside the queue would be neither. */}
       <div className="hidden min-h-0 flex-1 lg:flex">
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
-          <p className="text-base font-semibold">{t('inbox.selectPrompt')}</p>
-          <p className="max-w-sm text-sm text-muted-foreground">{t('inbox.selectBody')}</p>
-        </div>
+        {selected === null ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
+            <p className="text-base font-semibold">{t('inbox.selectPrompt')}</p>
+            <p className="max-w-sm text-sm text-muted-foreground">{t('inbox.selectBody')}</p>
+          </div>
+        ) : (
+          <SubmissionPanel
+            key={selected}
+            school={school}
+            id={selected}
+            position={positionOf(data, selected)}
+          />
+        )}
       </div>
     </div>
   );
@@ -206,6 +230,24 @@ function EmptyQueue({ filtered, onClear }: { filtered: boolean; onClear: () => v
       ) : null}
     </div>
   );
+}
+
+/**
+ * "3 of 27" — where the open submission sits in the queue as it is currently arranged.
+ *
+ * Counted over what is on screen rather than over the whole scope, because that is what
+ * the number means to a teacher mid-pass: how far through *this* list they are. A position
+ * against a total they have filtered away would be a different, useless number.
+ */
+function positionOf(
+  data: { groups: ReviewQueueGroup[] } | undefined,
+  selected: string,
+): { index: number; total: number } | null {
+  if (data === undefined) return null;
+
+  const ids = data.groups.flatMap((group) => group.items.map((item) => item.id));
+  const index = ids.indexOf(selected);
+  return index === -1 ? null : { index: index + 1, total: ids.length };
 }
 
 /**

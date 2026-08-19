@@ -11,10 +11,23 @@ import { useReviewViewStore } from '@/features/review/stores/review-view-store';
 const replace = vi.fn();
 let search = '';
 
+const push = vi.fn();
+
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ replace, push: vi.fn() }),
+  useRouter: () => ({ replace, push }),
+  usePathname: () => '/en/school/oslo-skole/review',
   useSearchParams: () => new URLSearchParams(search),
 }));
+
+/** jsdom has no layout, so the panel's breakpoint has to be stated per test. */
+function viewport(wide: boolean) {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: wide,
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+}
 
 const { ReviewInbox } = await import('./review-inbox');
 
@@ -75,14 +88,45 @@ const EMPTY: ReviewQueueResponse = {
   nextCursor: null,
 };
 
+/** The panel opens beside the queue, so the stub has to answer for both endpoints. */
+const SUBMISSION = {
+  id: 'att-2',
+  status: 'pending',
+  student: { id: 's2', name: 'Peter Svensson', groupName: 'A2 kveld' },
+  exercise: {
+    id: 'ex-1',
+    title: 'Perfektum',
+    type: 'short_answer',
+    path: { course: 'Ny i Norge A2', lesson: 'Leksjon 7' },
+    available: true,
+    contentLang: 'nb',
+  },
+  submittedAt: hoursAgo(30),
+  ageHours: 30,
+  slaHours: 24,
+  overdue: true,
+  attemptNo: 2,
+  previous: null,
+  decision: null,
+  lock: null,
+  details: null,
+  text: null,
+  submittedAnswer: {},
+  canDecide: true,
+};
+
 function answer(body: ReviewQueueResponse | 'error') {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () =>
-      body === 'error'
+    vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/submissions/')) {
+        return new Response(JSON.stringify(SUBMISSION), { status: 200 });
+      }
+      return body === 'error'
         ? new Response('{}', { status: 502 })
-        : new Response(JSON.stringify(body), { status: 200 }),
-    ),
+        : new Response(JSON.stringify(body), { status: 200 });
+    }),
   );
 }
 
@@ -100,6 +144,8 @@ function renderInbox() {
 beforeEach(() => {
   search = '';
   replace.mockClear();
+  push.mockClear();
+  viewport(true);
   // Folding is module-global client state; a group left shut by one test would make the
   // next one assert against an empty list for reasons nothing in it explains.
   useReviewViewStore.getState().expandAll();
@@ -279,6 +325,27 @@ describe('the queue list', () => {
 
     await userEvent.click(screen.getByRole('button', { expanded: true }));
     expect(screen.queryByText('Anna Kowalska')).not.toBeInTheDocument();
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('opens the submission beside the queue on a wide screen', async () => {
+    search = 'submission=att-2';
+    answer(QUEUE);
+    renderInbox();
+
+    // The panel's own heading is the learner, and the position is counted over the list
+    // as it is filtered right now.
+    expect(await screen.findByRole('heading', { name: 'Peter Svensson' })).toBeInTheDocument();
+    expect(screen.getByText('2 of 2')).toBeInTheDocument();
+  });
+
+  it('sends a narrow screen to the submission page instead of a hidden column', async () => {
+    viewport(false);
+    answer(QUEUE);
+    renderInbox();
+
+    await userEvent.click(await screen.findByRole('button', { name: /Anna Kowalska/ }));
+    expect(push).toHaveBeenCalledWith('/en/school/oslo-skole/review/att-1');
     expect(replace).not.toHaveBeenCalled();
   });
 });
