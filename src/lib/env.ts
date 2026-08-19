@@ -29,6 +29,9 @@ export const env = createEnv({
     // Direct (non-gateway) URL to exercise-engine, for its `/internal/*` routes — the
     // teacher-side review queue, which the gateway deliberately does not expose.
     EXERCISE_SERVICE_INTERNAL_URL: z.string().url().optional(),
+    // Direct (non-gateway) URL to organization-service, for its `/internal/*` routes —
+    // who may review whose work, which the gateway deliberately does not expose.
+    ORGANIZATION_SERVICE_INTERNAL_URL: z.string().url().optional(),
     // Shared secret expected by InternalAuthGuard on the services' `/internal/*` routes.
     INTERNAL_SERVICE_TOKEN: z.string().optional(),
 
@@ -69,6 +72,7 @@ export const env = createEnv({
     AUTH_COOKIE_SECRET: process.env.AUTH_COOKIE_SECRET,
     CONTENT_SERVICE_INTERNAL_URL: process.env.CONTENT_SERVICE_INTERNAL_URL,
     EXERCISE_SERVICE_INTERNAL_URL: process.env.EXERCISE_SERVICE_INTERNAL_URL,
+    ORGANIZATION_SERVICE_INTERNAL_URL: process.env.ORGANIZATION_SERVICE_INTERNAL_URL,
     INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
     UPSTREAM_TIMEOUT_MS: process.env.UPSTREAM_TIMEOUT_MS,
     UPSTREAM_API_PREFIX: process.env.UPSTREAM_API_PREFIX,
