@@ -241,6 +241,30 @@
       "unnamedGroup": "Group",
       "assign": "Assign",
       "reviewIt": "Review it yourself"
+    },
+    "journal": {
+      "title": "Decision journal",
+      "sub": "Over {n} days · who, when, and what came of it",
+      "empty": "Nobody has answered anything in this period.",
+      "export": "Export CSV",
+      "more": "Show more",
+      "failed": "The journal could not be read.",
+      "unnamedStudent": "Learner",
+      "unnamedExercise": "Exercise",
+      "took": "answered in {age}",
+      "verdict": {
+        "approved": "passed",
+        "returned": "sent back"
+      },
+      "csv": {
+        "reviewedAt": "Answered at",
+        "reviewer": "Reviewer",
+        "student": "Learner",
+        "course": "Course",
+        "exercise": "Exercise",
+        "verdict": "Outcome",
+        "hours": "Hours waited"
+      }
     }
   }
 }

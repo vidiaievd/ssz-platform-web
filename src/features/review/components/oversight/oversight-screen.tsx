@@ -14,6 +14,7 @@ import { useRemindReviewer } from '../../api/use-remind-reviewer';
 import { Panel, Segment } from '../primitives';
 import { OVERSIGHT_PERIODS, type OversightPeriod } from '../../types/oversight';
 
+import { DecisionLog } from './decision-log';
 import { GroupLoadPanel, CourseLoadPanel } from './load-panels';
 import { StuckList } from './stuck-list';
 import { SchoolSummary } from './school-summary';
@@ -161,6 +162,8 @@ export function OversightScreen({ school }: OversightScreenProps) {
             reviewHref={(id) => `/school/${school}/review?submission=${encodeURIComponent(id)}`}
             onAssign={() => undefined}
           />
+
+          <DecisionLog school={school} period={period} />
         </>
       )}
     </div>

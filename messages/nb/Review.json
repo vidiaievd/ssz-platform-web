@@ -241,6 +241,30 @@
       "unnamedGroup": "Gruppe",
       "assign": "Tildel",
       "reviewIt": "Rett den selv"
+    },
+    "journal": {
+      "title": "Beslutningslogg",
+      "sub": "Siste {n} dager · hvem, når og hva det ble til",
+      "empty": "Ingen har besvart noe i denne perioden.",
+      "export": "Eksporter CSV",
+      "more": "Vis mer",
+      "failed": "Loggen kunne ikke leses.",
+      "unnamedStudent": "Elev",
+      "unnamedExercise": "Oppgave",
+      "took": "besvart på {age}",
+      "verdict": {
+        "approved": "godkjent",
+        "returned": "sendt tilbake"
+      },
+      "csv": {
+        "reviewedAt": "Besvart",
+        "reviewer": "Retter",
+        "student": "Elev",
+        "course": "Kurs",
+        "exercise": "Oppgave",
+        "verdict": "Utfall",
+        "hours": "Timer ventet"
+      }
     }
   }
 }
