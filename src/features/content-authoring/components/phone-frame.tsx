@@ -22,7 +22,16 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
       >
         <div className="h-1.25 w-17.5 rounded-full" style={{ background: 'oklch(0.42 0.01 240)' }} />
       </div>
-      <div className="h-124.5 overflow-auto" style={{ background: 'var(--ssz-bg-base)' }}>
+      {/*
+        Focusable because it scrolls. A pane a mouse can scroll and a keyboard cannot is
+        a preview only half the room can read — and the preview is the whole point of the
+        frame (axe `scrollable-region-focusable`).
+      */}
+      <div
+        tabIndex={0}
+        className="h-124.5 overflow-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-(--ssz-border-strong)"
+        style={{ background: 'var(--ssz-bg-base)' }}
+      >
         {children}
       </div>
     </div>
