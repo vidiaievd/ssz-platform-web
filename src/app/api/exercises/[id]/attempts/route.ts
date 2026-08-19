@@ -96,7 +96,18 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           const restarted = await restart(id, stale, language, mode);
           if (restarted !== null) return NextResponse.json(restarted);
         }
-        return NextResponse.json({ error: 'An attempt is already in progress' }, { status: 409 });
+        // The running attempt survived the recovery above — the abandon failed, or the
+        // fresh start did. That is not the end of the road for the caller: an attempt
+        // already open is one they can submit into, which is what "carry on with the one
+        // you started" means. So its id travels with the 409 rather than being spent
+        // here, and a caller that has an answer in hand can finish the job (47.3).
+        return NextResponse.json(
+          {
+            error: 'An attempt is already in progress',
+            ...(stale === null ? {} : { attemptId: stale }),
+          },
+          { status: 409 },
+        );
       }
     }
     return NextResponse.json({ error: 'Failed to start attempt' }, { status: 502 });

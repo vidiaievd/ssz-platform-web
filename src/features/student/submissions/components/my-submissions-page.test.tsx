@@ -15,6 +15,23 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => search,
 }));
 
+// A returned card carries a link into the runner, and the localised `Link` behind it
+// wants the app's routing context. This screen's tests are about the list, not the href.
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 import { MySubmissionsPage } from './my-submissions-page';
 import type { MySubmission } from '../types';
 
@@ -25,6 +42,8 @@ function submission(overrides: Partial<MySubmission> = {}): MySubmission {
   return {
     id: 'att-1',
     exerciseId: 'ex-1',
+    exerciseType: 'translate_to_target',
+    targetLanguage: 'no',
     exerciseTitle: 'Familien',
     course: 'Ny i Norge — A2',
     lesson: 'Leksjon 19',

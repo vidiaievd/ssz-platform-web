@@ -103,7 +103,13 @@ describe('POST /api/exercises/[id]/attempts', () => {
     const res = await POST(makeRequest({ language: 'no' }), { params });
 
     expect(res.status).toBe(409);
-    await expect(res.json()).resolves.toEqual({ error: 'An attempt is already in progress' });
+    // The running attempt's id travels with the refusal: a caller holding an answer can
+    // submit it into the attempt that is already open rather than being told to wait for
+    // a state it cannot see or change (47.3).
+    await expect(res.json()).resolves.toEqual({
+      error: 'An attempt is already in progress',
+      attemptId: 'att-9',
+    });
   });
 
   it('reports the conflict when the engine names no attempt to clear', async () => {
@@ -111,6 +117,9 @@ describe('POST /api/exercises/[id]/attempts', () => {
 
     const res = await POST(makeRequest({ language: 'no' }), { params });
     expect(res.status).toBe(409);
+    // Nothing to carry on with: the attempt exists but this route cannot name it, and a
+    // submit aimed at a guess would be worse than the refusal.
+    await expect(res.json()).resolves.toEqual({ error: 'An attempt is already in progress' });
   });
 
   it('maps the errors the caller can act on', async () => {

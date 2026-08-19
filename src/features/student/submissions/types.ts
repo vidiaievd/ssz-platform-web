@@ -7,6 +7,8 @@
  * (invariant 1).
  */
 
+import type { AttemptStatus } from '@/features/student/exercises/types/attempts';
+
 export type MySubmissionStatus = 'pending' | 'returned' | 'approved';
 
 /** Which slice of the list the screen is asking for. */
@@ -25,6 +27,17 @@ export interface MySubmissionDecision {
 export interface MySubmission {
   id: string;
   exerciseId: string;
+  /**
+   * The template the work was done in, as the engine snapshotted it on the attempt.
+   *
+   * The card forks on it (47.3): an essay is written again in place, everything else is
+   * handed back to the runner it was typed in. Kept as a plain string rather than a union
+   * because a template this screen has never heard of must fall somewhere sensible rather
+   * than fail to type-check a list.
+   */
+  exerciseType: string;
+  /** The language the work was answered in — what a second attempt is started under. */
+  targetLanguage: string;
   /** Course · lesson · exercise as they read when the work was started (44.4). */
   exerciseTitle: string | null;
   course: string | null;
@@ -64,4 +77,21 @@ export interface MySubmissionsResponse {
   summary: MySubmissionsSummary | null;
   items: MySubmission[];
   nextCursor: string | null;
+}
+
+/**
+ * The verdict a second attempt is being made against, read back in the runner (47.3).
+ *
+ * Deliberately thinner than {@link MySubmission}: the banner over an exercise needs the
+ * teacher's words and their name, and nothing that would put the learner's previous answer
+ * — or anything derived from the key — on a screen they are about to answer on.
+ */
+export interface ReturnedVerdict {
+  attemptId: string;
+  exerciseId: string;
+  /** The attempt's own state. Only `RETURNED` means "you are here to redo this". */
+  status: AttemptStatus;
+  comment: string | null;
+  teacherName: string | null;
+  at: string | null;
 }

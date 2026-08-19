@@ -382,7 +382,8 @@
       "noComment": "Marked as correct, with nothing to add."
     },
     "returned": {
-      "hint": "Another go is a new attempt — this comment stays here beside it."
+      "hint": "Another go is a new attempt — this comment stays here beside it.",
+      "superseded": "You have already had another go at this one — the newest attempt is the one that counts."
     },
     "group": {
       "count": "{count, plural, one {# exercise} other {# exercises}} handed in"
@@ -395,6 +396,26 @@
     },
     "failed": "Could not load your work",
     "retry": "Try again",
-    "more": "Show more"
+    "more": "Show more",
+    "redo": {
+      "again": "Do it again",
+      "back": "Back to my work",
+      "banner": "{teacher} sent this back for another go",
+      "bannerUnsigned": "This came back for another go"
+    },
+    "resubmit": {
+      "label": "Your second go",
+      "placeholder": "Write it again, with the comment above in mind.",
+      "charPad": "Norwegian letters",
+      "submit": "Hand in again",
+      "sending": "Sending…",
+      "sent": "Sent. It is with your teacher again.",
+      "alreadyThere": "It was already with your teacher — nothing was sent twice.",
+      "failed": {
+        "not-sent": "That did not go through. Your text is still here — try again.",
+        "delivered": "It reached your teacher after all. Nothing more to do.",
+        "unconfirmed": "Could not confirm whether it went through. Your text is kept — check \"My work\" before sending again."
+      }
+    }
   }
 }

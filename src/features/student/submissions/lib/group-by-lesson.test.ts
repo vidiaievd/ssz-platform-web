@@ -9,6 +9,8 @@ function submission(overrides: Partial<MySubmission> = {}): MySubmission {
   return {
     id: 'att-1',
     exerciseId: 'ex-1',
+    exerciseType: 'translate_to_target',
+    targetLanguage: 'no',
     exerciseTitle: 'Familien',
     course: 'Ny i Norge — A2',
     lesson: 'Leksjon 19',

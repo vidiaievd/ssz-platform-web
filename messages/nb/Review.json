@@ -382,7 +382,8 @@
       "noComment": "Rettet, uten merknader."
     },
     "returned": {
-      "hint": "En ny runde er et nytt forsøk — kommentaren blir stående her ved siden av."
+      "hint": "En ny runde er et nytt forsøk — kommentaren blir stående her ved siden av.",
+      "superseded": "Du har allerede tatt en ny runde på denne — det er det nyeste forsøket som gjelder."
     },
     "group": {
       "count": "{count, plural, one {# oppgave} other {# oppgaver}} levert"
@@ -395,6 +396,26 @@
     },
     "failed": "Kunne ikke laste arbeidet ditt",
     "retry": "Prøv igjen",
-    "more": "Vis mer"
+    "more": "Vis mer",
+    "redo": {
+      "again": "Prøv på nytt",
+      "back": "Tilbake til arbeidet mitt",
+      "banner": "{teacher} sendte denne tilbake til en ny runde",
+      "bannerUnsigned": "Denne kom tilbake til en ny runde"
+    },
+    "resubmit": {
+      "label": "Den nye runden din",
+      "placeholder": "Skriv den om igjen, med kommentaren over i tankene.",
+      "charPad": "Norske bokstaver",
+      "submit": "Lever på nytt",
+      "sending": "Sender …",
+      "sent": "Sendt. Den ligger hos læreren din igjen.",
+      "alreadyThere": "Den lå allerede hos læreren din — ingenting ble sendt to ganger.",
+      "failed": {
+        "not-sent": "Det gikk ikke gjennom. Teksten din står her fortsatt — prøv igjen.",
+        "delivered": "Den nådde læreren din likevel. Ingenting mer å gjøre.",
+        "unconfirmed": "Kunne ikke bekrefte om den gikk gjennom. Teksten er tatt vare på — sjekk «Arbeidet mitt» før du sender på nytt."
+      }
+    }
   }
 }

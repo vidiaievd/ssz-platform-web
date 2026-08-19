@@ -16,6 +16,8 @@ import type {
 interface EngineSubmission {
   attemptId: string;
   exerciseId: string;
+  templateCode: string;
+  targetLanguage: string;
   exercisePath: { course?: string | null; module?: string | null; exercise?: string | null } | null;
   containerId: string | null;
   schoolId: string | null;
@@ -103,6 +105,8 @@ export async function GET(request: NextRequest) {
   const items: MySubmission[] = list.items.map((item) => ({
     id: item.attemptId,
     exerciseId: item.exerciseId,
+    exerciseType: item.templateCode,
+    targetLanguage: item.targetLanguage,
     exerciseTitle: item.exercisePath?.exercise ?? null,
     course: item.exercisePath?.course ?? null,
     // The engine's snapshot calls it `module`, which is the shape of the catalogue; the

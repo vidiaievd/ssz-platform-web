@@ -4,11 +4,16 @@ import { useId } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Check, ChevronRight, Clock, Undo2 } from 'lucide-react';
 
+import { Link } from '@/lib/i18n/navigation';
+
 import { useAgeWords } from '@/features/review/components/age-mark';
 import { hoursSince } from '@/features/review/lib/age-scale';
 import { cn } from '@/lib/utils';
 
+import { resubmitModeFor, runnerHref } from '../lib/resubmit-route';
 import type { MySubmission, MySubmissionStatus } from '../types';
+
+import { ResubmitPanel } from './resubmit-panel';
 
 /**
  * The three states a learner's submission can be in, and the colour each carries.
@@ -171,9 +176,38 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
             <p className="text-[13px] text-(--ssz-text-secondary)">{t('approved.noComment')}</p>
           )}
 
-          {returned && (
-            <p className="text-[12.5px] text-(--ssz-text-secondary)">{t('returned.hint')}</p>
-          )}
+          {/*
+            The way back into the work, beside the words that sent it back (criterion 39).
+
+            Which way that is depends on the exercise, not on the layout: an essay is one
+            block of text and is rewritten right here, under the comment; anything with
+            items, a self-check or a keyboard pad of its own belongs in the runner it was
+            typed in, and goes there with the comment carried above the task.
+
+            `canResubmit` is the engine's answer to "would another go resume *this* row" —
+            an older returned attempt that a later one already superseded gets the note
+            instead of the button, because the button would quietly resume the newer one.
+          */}
+          {returned &&
+            (submission.canResubmit ? (
+              resubmitModeFor(submission.exerciseType) === 'in-place' ? (
+                <ResubmitPanel submission={submission} />
+              ) : (
+                <div className="flex flex-col gap-1.5">
+                  <Link
+                    href={runnerHref(submission)}
+                    className="inline-flex items-center self-start rounded-[10px] bg-(--ssz-color-primary-500) px-4 py-2 text-[13px] font-bold text-white transition-colors hover:bg-(--ssz-color-primary-600) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+                  >
+                    {t('redo.again')}
+                  </Link>
+                  <p className="text-[12.5px] text-(--ssz-text-secondary)">{t('returned.hint')}</p>
+                </div>
+              )
+            ) : (
+              <p className="text-[12.5px] text-(--ssz-text-secondary)">
+                {t('returned.superseded')}
+              </p>
+            ))}
         </div>
       )}
     </div>
