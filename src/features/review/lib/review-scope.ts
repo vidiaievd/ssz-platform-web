@@ -70,6 +70,54 @@ export async function resolveReviewScope(
   }
 }
 
+/** Who may look at a whole school's review load, rather than at their own queue. */
+export interface OversightAccess {
+  schoolId: string;
+  userId: string;
+  role: SchoolRole;
+}
+
+/**
+ * The roles that run a school's review, as opposed to doing it.
+ *
+ * A CONTENT_ADMIN writes material and a TEACHER holds a queue; neither is being kept out
+ * of anything they need. What this screen shows is every teacher's load by name, and that
+ * belongs to the people who can act on it — by reassigning work, by asking someone to
+ * catch up, or by picking up a submission themselves (`BEHAVIOR.md` §C).
+ */
+const OVERSIGHT_ROLES: readonly SchoolRole[] = ['OWNER', 'ADMIN', 'MANAGER'];
+
+/**
+ * Resolve the caller's right to oversee this school, or the response to send instead.
+ *
+ * Deliberately not `resolveReviewScope`: that answers "which groups are yours", which is
+ * the wrong question here — an administrator holds no groups and sees everything, and a
+ * teacher holds groups and must not see their colleagues' load broken down by name. So
+ * the check is on standing in the school alone, and an ordinary teacher is refused with
+ * the same 403 as a stranger.
+ */
+export async function resolveOversightAccess(
+  schoolSlugOrId: string,
+): Promise<OversightAccess | NextResponse> {
+  const user = await getCurrentUser();
+  if (!user?.userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const schools = await getMySchools();
+  const school = schools.find((s) => s.slug === schoolSlugOrId || s.id === schoolSlugOrId);
+  const role = school?.myRole ?? null;
+
+  // One answer for "no such school", "not a member" and "not your job": a 404 here would
+  // tell a curious teacher which schools exist, and a distinct message would tell them
+  // which of the three it was.
+  if (!school || role === null || !OVERSIGHT_ROLES.includes(role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  return { schoolId: school.id, userId: user.userId, role };
+}
+
 /**
  * `reviewers(sub)` from the other side: which groups this teacher held at a given moment.
  *
