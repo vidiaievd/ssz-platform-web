@@ -126,5 +126,20 @@
       "sentenceLabel": "Comment on this sentence",
       "sentencePlaceholder": "What should the learner look at here?"
     }
+  },
+  "decision": {
+    "commentLabel": "Comment on the whole submission",
+    "commentPlaceholder": "A comment on the work as a whole. Write it in Norwegian — the æøå pad is below. Your draft is kept as you type.",
+    "approve": "Pass",
+    "approveWithComment": "Pass with a comment",
+    "return": "Send back for revision",
+    "returnRequiresComment": "Say what should be changed — the work goes back to the learner together with your comment.",
+    "failed": "The verdict could not be recorded. Try again.",
+    "scoreIsServerSide": "Sending back needs a comment: the learner gets the work together with it. The score is worked out by the system from what was passed — no mark is entered by hand.",
+    "next": "Next submission",
+    "sent": {
+      "approved": "Passed",
+      "returned": "Sent back for revision"
+    }
   }
 }

@@ -52,6 +52,7 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
   const filters = parseQueueFilters(searchParams);
   const selected = searchParams.get('submission');
   const { data, isPending, isError, refetch } = useReviewQueue(school, filters);
+  const place = selected === null ? null : placeOf(data, selected);
 
   // The view lives in the address bar (criterion 6), so every control writes there and
   // reads back — no second copy of the filters to fall out of step with the URL.
@@ -156,7 +157,10 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
             key={selected}
             school={school}
             id={selected}
-            position={positionOf(data, selected)}
+            filters={filters}
+            position={place?.position ?? null}
+            nextInQueue={place?.nextId ?? null}
+            onAdvance={selectSubmission}
           />
         )}
       </div>
@@ -233,21 +237,32 @@ function EmptyQueue({ filtered, onClear }: { filtered: boolean; onClear: () => v
 }
 
 /**
- * "3 of 27" — where the open submission sits in the queue as it is currently arranged.
+ * "3 of 27", and what comes after it — where the open submission sits in the queue as it
+ * is currently arranged.
  *
  * Counted over what is on screen rather than over the whole scope, because that is what
  * the number means to a teacher mid-pass: how far through *this* list they are. A position
  * against a total they have filtered away would be a different, useless number.
+ *
+ * The neighbour is only ever needed when a verdict could not be given — a colleague got
+ * there first, or the assignment ran out. A verdict that lands brings its own successor
+ * back from the server, computed against the queue as it is *after* the verdict, which
+ * this list is not.
  */
-function positionOf(
+function placeOf(
   data: { groups: ReviewQueueGroup[] } | undefined,
   selected: string,
-): { index: number; total: number } | null {
-  if (data === undefined) return null;
+): { position: { index: number; total: number } | null; nextId: string | null } {
+  if (data === undefined) return { position: null, nextId: null };
 
   const ids = data.groups.flatMap((group) => group.items.map((item) => item.id));
   const index = ids.indexOf(selected);
-  return index === -1 ? null : { index: index + 1, total: ids.length };
+  if (index === -1) return { position: null, nextId: null };
+
+  return {
+    position: { index: index + 1, total: ids.length },
+    nextId: ids[index + 1] ?? null,
+  };
 }
 
 /**

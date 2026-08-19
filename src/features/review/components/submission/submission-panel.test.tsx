@@ -6,6 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { enMessages } from '@/lib/i18n/messages';
 import type { ReviewSubmission } from '@/features/review/types';
 
+// The panel's own fallback way onward, for the page that renders it without one.
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  usePathname: () => '/en/school/oslo-skole/review/att-1',
+}));
+
 const { SubmissionPanel } = await import('./submission-panel');
 
 const IN_15_MIN = () => new Date(Date.now() + 15 * 60_000).toISOString();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId, useState, type RefObject } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,9 @@ import { cn } from '@/lib/utils';
 /** The letters a keyboard bought outside Norway does not have. */
 const NORWEGIAN_CHARS = ['æ', 'ø', 'å'] as const;
 
+/** What the engine accepts against one sentence (`review-attempt.dto.ts`). */
+const SENTENCE_COMMENT_MAX = 2000;
+
 export interface CommentBoxProps {
   label: string;
   placeholder?: string;
@@ -18,6 +21,17 @@ export interface CommentBoxProps {
   onChange: (value: string) => void;
   rows?: number;
   className?: string;
+  /** The upstream ceiling, enforced where it can still be typed under rather than hit. */
+  maxLength?: number;
+  /** So a refusal can put the cursor where the fix goes (criterion 18). */
+  inputRef?: RefObject<HTMLTextAreaElement | null>;
+  /** What is wrong with what is written, said beside the field it is about. */
+  error?: string | null;
+  /**
+   * The verdict has been given — by this reviewer or, in a conflict, by a colleague. The
+   * text stays legible and selectable, because copying it out is the point (criterion 24).
+   */
+  readOnly?: boolean;
   /** Present on the per-sentence form, absent on the one attached to the whole work. */
   onSave?: () => void;
   onCancel?: () => void;
@@ -43,6 +57,10 @@ export function CommentBox({
   onChange,
   rows = 3,
   className,
+  maxLength,
+  inputRef,
+  error = null,
+  readOnly = false,
   onSave,
   onCancel,
   saveLabel,
@@ -57,15 +75,26 @@ export function CommentBox({
       </label>
       <Textarea
         id={id}
+        ref={inputRef}
         rows={rows}
         value={value}
         placeholder={placeholder}
+        readOnly={readOnly}
+        maxLength={maxLength}
+        hasError={error !== null}
+        aria-invalid={error !== null}
+        aria-errormessage={error === null ? undefined : `${id}-error`}
         onChange={(event) => onChange(event.target.value)}
         className="rounded-[11px] leading-relaxed"
         style={{ fontFamily: 'var(--ssz-font-reading)', fontSize: 14.5 }}
       />
+      {error === null ? null : (
+        <p id={`${id}-error`} role="alert" className="text-[12.5px] font-semibold text-error">
+          {error}
+        </p>
+      )}
       <div className="flex items-center gap-2">
-        <CharPad chars={NORWEGIAN_CHARS} label={t('charPad')} />
+        {readOnly ? null : <CharPad chars={NORWEGIAN_CHARS} label={t('charPad')} />}
         {onSave === undefined ? null : (
           <>
             <span className="flex-1" />
@@ -138,6 +167,7 @@ export function SentenceComment({
         placeholder={t('sentencePlaceholder')}
         value={draft}
         rows={2}
+        maxLength={SENTENCE_COMMENT_MAX}
         onChange={setDraft}
         onCancel={() => setDraft(null)}
         onSave={() => {

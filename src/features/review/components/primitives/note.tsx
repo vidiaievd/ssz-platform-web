@@ -43,6 +43,13 @@ export interface NoteProps {
   children?: ReactNode;
   action?: ReactNode;
   className?: string;
+  /**
+   * `status` for the ones already on screen when it loads, `alert` for the one that
+   * arrives in answer to something the reviewer just did — a colleague's verdict landing
+   * on the submission they were deciding has to interrupt, because it changes what the
+   * buttons under it now do.
+   */
+  role?: 'status' | 'alert';
 }
 
 /**
@@ -53,16 +60,25 @@ export interface NoteProps {
  * the work, and a modal that had to be dismissed before the submission could be read would
  * make the ordinary case — two teachers on one group — feel like a failure.
  *
- * `role="status"` and not `alert`: these appear as the screen loads, and a live region
- * that interrupted the reader on arrival would announce them ahead of the work itself.
+ * `role="status"` by default and not `alert`: these appear as the screen loads, and a
+ * live region that interrupted the reader on arrival would announce them ahead of the
+ * work itself. The one that arrives mid-decision asks for `alert` explicitly.
  */
-export function Note({ tone = 'info', icon, title, children, action, className }: NoteProps) {
+export function Note({
+  tone = 'info',
+  icon,
+  title,
+  children,
+  action,
+  className,
+  role = 'status',
+}: NoteProps) {
   const style = TONE[tone];
   const Icon = icon ?? style.fallback;
 
   return (
     <div
-      role="status"
+      role={role}
       className={cn(
         'flex items-start gap-[11px] rounded-[11px] border-[1.5px] px-3.5 py-3',
         style.wrap,
