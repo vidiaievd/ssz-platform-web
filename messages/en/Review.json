@@ -266,5 +266,51 @@
         "hours": "Hours waited"
       }
     }
+  },
+  "settings": {
+    "eyebrow": "School settings",
+    "title": "Response times",
+    "lede": "One number sets the whole urgency scale: the colour of the queue, what counts as stuck in oversight, and the date a learner is given while they wait.",
+    "sub": "The promise everything else is measured against",
+    "hours": "hours",
+    "respond": {
+      "label": "Answer within",
+      "hint": "Work older than this is coloured as waiting too long.",
+      "bounds": "Between {min} and {max} hours."
+    },
+    "escalate": {
+      "label": "Escalate after",
+      "hint": "When to tell someone else that there is still no answer.",
+      "beforeRespond": "Escalation cannot come before the promise itself."
+    },
+    "escalateTo": {
+      "label": "Escalate to",
+      "hint": "Receives a summary of what is stuck, not a letter per submission.",
+      "school_admins": "School administrators",
+      "owner": "Owner",
+      "primary_teacher": "The group's lead teacher"
+    },
+    "preview": "This is how the age scale reads at {n} h.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saved": "The response time is saved.",
+    "saveFailed": "The response time could not be saved.",
+    "failed": "The response time could not be read.",
+    "readOnly": "Only the owner and administrators can change this.",
+    "course": {
+      "title": "Response time",
+      "lede": "How long this course promises a learner will wait for a verdict.",
+      "ownTime": "Its own response time for this course",
+      "hours": "hours",
+      "inheritedIs": "Inherited value — {n} h. Clear the box to go back to it.",
+      "inheritedFrom": "Inherited from the school: {n} h.",
+      "noSchoolPromise": "The school has not set a response time yet.",
+      "bounds": "Between {min} and {max} hours.",
+      "save": "Save",
+      "saved": "The response time is saved.",
+      "saveFailed": "The response time could not be saved.",
+      "failed": "The response time could not be read.",
+      "fieldLabel": "Response time in hours"
+    }
   }
 }

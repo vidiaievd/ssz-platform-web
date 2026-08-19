@@ -142,3 +142,23 @@ export interface ReviewDecisionsResponse {
   items: ReviewDecisionEntry[];
   nextCursor: string | null;
 }
+
+/** What a school promises, and who hears about it when the promise passes (§7). */
+export interface SchoolReviewSettings {
+  respondWithinHours: number;
+  escalateAfterHours: number;
+  escalateTo: 'school_admins' | 'owner' | 'primary_teacher';
+}
+
+/**
+ * A course's promise, always alongside the one it would inherit.
+ *
+ * Both numbers travel together so the field in the settings drawer is never empty: an
+ * override that is switched off shows the school's figure, greyed, rather than a blank
+ * box that reads as "nothing is promised" (criterion 35).
+ */
+export interface CourseReviewSettings {
+  respondWithinHours: number | null;
+  inheritedHours: number | null;
+  overridden: boolean;
+}

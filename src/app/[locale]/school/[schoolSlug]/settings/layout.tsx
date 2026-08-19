@@ -23,6 +23,7 @@ export default async function SchoolSettingsLayout({ children, params }: Props) 
     { href: `/school/${schoolSlug}/settings/profile`, label: t('nav.profile') },
     { href: `/school/${schoolSlug}/settings/account`, label: t('nav.account') },
     { href: `/school/${schoolSlug}/settings/notifications`, label: t('nav.notifications') },
+    { href: `/school/${schoolSlug}/settings/review`, label: t('nav.review') },
   ];
 
   return <SettingsLayout nav={nav}>{children}</SettingsLayout>;

@@ -23,6 +23,7 @@ import { SharingPanel } from './sharing-panel';
 import { TagInput } from './tag-input';
 import { ActivityBlock } from './activity-block';
 import { VersionHistoryBlock } from './version-history-block';
+import { CourseSlaField } from '@/features/review/components/settings/course-sla-field';
 
 type SettingsTab = 'overview' | 'activity' | 'tags' | 'sharing';
 
@@ -87,6 +88,11 @@ export function CourseSettingsDrawer({
                 preflightResult={preflightResult}
               />
               <VersionHistoryBlock containerId={container.id} />
+              {/* The response time this course promises. It lives beside publishing rather
+                  than in the school's settings because it is a property of the material:
+                  a fortnight's essay and a five-minute drill are answered on different
+                  clocks (plan 46 §46.6). */}
+              <CourseSlaField containerId={container.id} />
               {isOwnerOrAdmin && (
                 <DangerZone
                   containerId={container.id}

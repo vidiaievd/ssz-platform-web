@@ -266,5 +266,51 @@
         "hours": "Timer ventet"
       }
     }
+  },
+  "settings": {
+    "eyebrow": "Skoleinnstillinger",
+    "title": "Svartider",
+    "lede": "Ett tall setter hele hastegradsskalaen: fargen i køen, hva som teller som fastlåst i oversikten, og datoen eleven får mens de venter.",
+    "sub": "Løftet alt annet måles mot",
+    "hours": "timer",
+    "respond": {
+      "label": "Svar innen",
+      "hint": "Arbeid eldre enn dette farges som noe som har ventet for lenge.",
+      "bounds": "Mellom {min} og {max} timer."
+    },
+    "escalate": {
+      "label": "Eskaler etter",
+      "hint": "Når noen andre skal få beskjed om at svaret fortsatt mangler.",
+      "beforeRespond": "Eskaleringen kan ikke komme før selve løftet."
+    },
+    "escalateTo": {
+      "label": "Eskaler til",
+      "hint": "Får en oversikt over det som står stille, ikke ett brev per innlevering.",
+      "school_admins": "Skoleadministratorer",
+      "owner": "Eier",
+      "primary_teacher": "Gruppens hovedlærer"
+    },
+    "preview": "Slik leses aldersskalaen ved {n} t.",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "saved": "Svartiden er lagret.",
+    "saveFailed": "Svartiden kunne ikke lagres.",
+    "failed": "Svartiden kunne ikke leses.",
+    "readOnly": "Bare eieren og administratorer kan endre dette.",
+    "course": {
+      "title": "Svartid",
+      "lede": "Hvor lenge dette kurset lover at en elev venter på et svar.",
+      "ownTime": "Egen svartid for dette kurset",
+      "hours": "timer",
+      "inheritedIs": "Arvet verdi — {n} t. Fjern haken for å gå tilbake til den.",
+      "inheritedFrom": "Arves fra skolen: {n} t.",
+      "noSchoolPromise": "Skolen har ikke satt noen svartid ennå.",
+      "bounds": "Mellom {min} og {max} timer.",
+      "save": "Lagre",
+      "saved": "Svartiden er lagret.",
+      "saveFailed": "Svartiden kunne ikke lagres.",
+      "failed": "Svartiden kunne ikke leses.",
+      "fieldLabel": "Svartid i timer"
+    }
   }
 }
