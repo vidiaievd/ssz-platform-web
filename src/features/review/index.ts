@@ -6,6 +6,8 @@
  * imported anything at all from this barrel.
  */
 export { AgeMark, useAgeWords } from './components/age-mark';
+export { Chip, Segment, Sel } from './components/primitives';
+export type { SegmentOption, SelOption } from './components/primitives';
 export { AgeSpread } from './components/age-spread';
 export { ageRail, ageTextTone, ageTone, hoursSince, isOverdue, ratio } from './lib/age-scale';
 export * from './types';

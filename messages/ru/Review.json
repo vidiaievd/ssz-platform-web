@@ -24,13 +24,16 @@
     "group": {
       "count": "{count}",
       "expand": "Показать работы этой группы",
-      "collapse": "Скрыть работы этой группы"
+      "collapse": "Скрыть работы этой группы",
+      "batch": "Засчитать {count} чистых"
     },
     "row": {
       "lockedBy": "{name}",
       "autoClean": "машина закрыла",
       "attempt": "заход {n}",
-      "label": "{student} · {exercise} · ждёт {age}"
+      "label": "{student} · {exercise} · ждёт {age}",
+      "exerciseGone": "упражнение удалено",
+      "lockedByLabel": "проверяет {name}"
     },
     "empty": {
       "title": "Всё проверено",

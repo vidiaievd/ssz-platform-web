@@ -24,13 +24,16 @@
     "group": {
       "count": "{count}",
       "expand": "Show the submissions in this group",
-      "collapse": "Hide the submissions in this group"
+      "collapse": "Hide the submissions in this group",
+      "batch": "Pass {count} clean"
     },
     "row": {
       "lockedBy": "{name}",
       "autoClean": "machine closed it",
       "attempt": "try {n}",
-      "label": "{student} · {exercise} · waiting {age}"
+      "label": "{student} · {exercise} · waiting {age}",
+      "exerciseGone": "exercise removed",
+      "lockedByLabel": "being reviewed by {name}"
     },
     "empty": {
       "title": "All reviewed",

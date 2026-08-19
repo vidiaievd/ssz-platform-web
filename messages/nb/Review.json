@@ -24,13 +24,16 @@
     "group": {
       "count": "{count}",
       "expand": "Vis innleveringene i denne gruppen",
-      "collapse": "Skjul innleveringene i denne gruppen"
+      "collapse": "Skjul innleveringene i denne gruppen",
+      "batch": "Godkjenn {count} rene"
     },
     "row": {
       "lockedBy": "{name}",
       "autoClean": "maskinen lukket den",
       "attempt": "forsøk {n}",
-      "label": "{student} · {exercise} · har ventet {age}"
+      "label": "{student} · {exercise} · har ventet {age}",
+      "exerciseGone": "oppgaven er slettet",
+      "lockedByLabel": "vurderes av {name}"
     },
     "empty": {
       "title": "Alt er rettet",

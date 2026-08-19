@@ -5,7 +5,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import type { ReviewQueueResponse } from '@/features/review/types';
+import type { ReviewQueueItem, ReviewQueueResponse } from '@/features/review/types';
+import { useReviewViewStore } from '@/features/review/stores/review-view-store';
 
 const replace = vi.fn();
 let search = '';
@@ -99,6 +100,9 @@ function renderInbox() {
 beforeEach(() => {
   search = '';
   replace.mockClear();
+  // Folding is module-global client state; a group left shut by one test would make the
+  // next one assert against an empty list for reasons nothing in it explains.
+  useReviewViewStore.getState().expandAll();
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -184,5 +188,97 @@ describe('ReviewInbox', () => {
         'true',
       ),
     );
+  });
+});
+
+const [FRESH, LATE] = QUEUE.groups[0]!.items as [ReviewQueueItem, ReviewQueueItem];
+
+/** The same queue, with the two rows carrying whatever this test is about. */
+function queueWith(
+  items: ReviewQueueItem[],
+  group: Partial<ReviewQueueResponse['groups'][0]> = {},
+) {
+  return {
+    ...QUEUE,
+    groups: [
+      {
+        ...QUEUE.groups[0]!,
+        count: items.length,
+        ages: items.map((item) => item.ageHours),
+        items,
+        ...group,
+      },
+    ],
+  } satisfies ReviewQueueResponse;
+}
+
+describe('the queue list', () => {
+  it('keeps an overdue submission in the same list as a fresh one', async () => {
+    answer(QUEUE);
+    renderInbox();
+
+    // One list, one group heading, no second place for late work to be filed under.
+    const rows = await screen.findAllByRole('button', { name: /waiting/ });
+    expect(rows).toHaveLength(2);
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+  });
+
+  it('names the colleague holding a submission and still opens it', async () => {
+    answer(
+      queueWith([
+        FRESH,
+        {
+          ...LATE,
+          lock: {
+            teacherId: 't9',
+            teacherName: 'Marius Berg',
+            expiresAt: new Date(Date.now() + 600_000).toISOString(),
+          },
+        },
+      ]),
+    );
+    renderInbox();
+
+    const row = await screen.findByRole('button', { name: /being reviewed by Marius Berg/ });
+    expect(screen.getByText('Marius')).toBeInTheDocument();
+
+    await userEvent.click(row);
+    expect(replace).toHaveBeenCalledWith('?submission=att-2', { scroll: false });
+  });
+
+  it('offers the batch verdict only once two submissions are machine-clean', async () => {
+    answer(queueWith([{ ...FRESH, autoClean: true }, LATE]));
+    const { unmount } = renderInbox();
+    await screen.findByText('Anna Kowalska');
+    expect(screen.queryByRole('button', { name: /Pass/ })).not.toBeInTheDocument();
+    unmount();
+
+    answer(
+      queueWith([
+        { ...FRESH, autoClean: true },
+        { ...LATE, autoClean: true },
+      ]),
+    );
+    renderInbox();
+    expect(await screen.findByRole('button', { name: 'Pass 2 clean' })).toBeInTheDocument();
+  });
+
+  it('leads a row with the exercise when the pass is through one learner', async () => {
+    search = 'groupBy=student';
+    answer(queueWith([FRESH, LATE], { kind: 'student', title: 'Anna Kowalska' }));
+    renderInbox();
+
+    // The learner is the heading; every row under it names the exercise instead.
+    expect(await screen.findAllByText('Perfektum')).toHaveLength(2);
+  });
+
+  it('folds a group away without touching the address bar', async () => {
+    answer(QUEUE);
+    renderInbox();
+    await screen.findByText('Anna Kowalska');
+
+    await userEvent.click(screen.getByRole('button', { expanded: true }));
+    expect(screen.queryByText('Anna Kowalska')).not.toBeInTheDocument();
+    expect(replace).not.toHaveBeenCalled();
   });
 });

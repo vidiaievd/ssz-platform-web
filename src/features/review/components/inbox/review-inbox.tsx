@@ -15,11 +15,13 @@ import {
   parseQueueFilters,
   queueFiltersToQuery,
 } from '../../lib/queue-filters';
-import type { ReviewQueueFilters } from '../../types';
-import { AgeMark, useAgeWords } from '../age-mark';
-import { AgeSpread } from '../age-spread';
+import { useReviewViewStore } from '../../stores/review-view-store';
+import type { ReviewGroupBy, ReviewQueueFilters, ReviewQueueGroup } from '../../types';
+import { useAgeWords } from '../age-mark';
 
+import { GroupHead } from './group-head';
 import { QueueFiltersBar } from './queue-filters-bar';
+import { QueueRow } from './queue-row';
 
 export interface ReviewInboxProps {
   /** The school as the address bar spells it — the BFF takes a slug or an id. */
@@ -69,6 +71,16 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
     );
   }, [filters.groupBy, router, selected]);
 
+  // Opening a submission is a `replace`, like every other view change here: twenty
+  // verdicts in a marking pass would otherwise leave twenty history entries between the
+  // teacher and wherever they came from.
+  const selectSubmission = useCallback(
+    (id: string) => {
+      router.replace(queueFiltersToQuery(filters, id), { scroll: false });
+    },
+    [filters, router],
+  );
+
   return (
     <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
       <div className="flex min-h-0 w-full flex-col border-border lg:w-[352px] lg:shrink-0 lg:border-r">
@@ -102,9 +114,15 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
           ) : data.groups.length === 0 ? (
             <EmptyQueue filtered={hasActiveFilters(filters)} onClear={clearFilters} />
           ) : (
-            <ul className="flex flex-col gap-4 pt-2">
+            <ul className="flex flex-col pt-0.5">
               {data.groups.map((group) => (
-                <QueueGroupStub key={group.key} group={group} selected={selected} />
+                <QueueGroup
+                  key={group.key}
+                  group={group}
+                  groupBy={filters.groupBy}
+                  selected={selected}
+                  onSelect={selectSubmission}
+                />
               ))}
             </ul>
           )}
@@ -191,57 +209,52 @@ function EmptyQueue({ filtered, onClear }: { filtered: boolean; onClear: () => v
 }
 
 /**
- * A group and its rows in their plainest honest form.
+ * One group of the queue: its heading, and its rows while it is open.
  *
- * Step 45.4 replaces this with the designed heading and row — sticky headers, urgency
- * rails, avatars, the batch action. What it will not change is what is on screen: a group
- * with its shape and a count, and rows carrying a name and an age in words. Building the
- * shell around a placeholder that showed nothing would have made the empty states the only
- * testable part of it.
+ * The order is the server's, top to bottom, and this component does not touch it. Two
+ * teachers looking at the same queue must see the same first submission, and a client-side
+ * sort would quietly disagree with the cursor the next page is fetched against.
  */
-function QueueGroupStub({
+function QueueGroup({
   group,
+  groupBy,
   selected,
+  onSelect,
 }: {
-  group: import('../../types').ReviewQueueGroup;
+  group: ReviewQueueGroup;
+  groupBy: ReviewGroupBy;
   selected: string | null;
+  onSelect: (id: string) => void;
 }) {
-  const t = useTranslations('Review');
+  const collapsed = useReviewViewStore((state) => state.collapsed[group.key] === true);
+  const toggleGroup = useReviewViewStore((state) => state.toggleGroup);
+
+  // A submission a colleague holds is excluded from the batch: passing it in bulk is
+  // exactly the collision the marker exists to prevent, and the verdict would 409 anyway.
+  const cleanCount = group.items.filter((item) => item.autoClean && item.lock === null).length;
 
   return (
     <li>
-      <div className="flex items-center gap-2 px-2.5 py-1.5">
-        <span className="min-w-0 flex-1 truncate text-[12.5px] font-bold">{group.title}</span>
-        <span className="rounded-full bg-muted px-2 text-[11px] font-bold text-muted-foreground">
-          {group.count}
-        </span>
-      </div>
-      {group.slaHours === null ? null : (
-        <div className="px-2.5 pb-2 pl-[34px]">
-          <AgeSpread hours={group.ages} slaHours={group.slaHours} height={7} />
-        </div>
+      <GroupHead
+        group={group}
+        open={!collapsed}
+        onToggle={() => toggleGroup(group.key)}
+        cleanCount={groupBy === 'exercise' ? cleanCount : 0}
+      />
+      {collapsed ? null : (
+        <ul className="flex flex-col gap-0.5 pb-1.5">
+          {group.items.map((item) => (
+            <QueueRow
+              key={item.id}
+              item={item}
+              slaHours={group.slaHours}
+              groupBy={groupBy}
+              selected={item.id === selected}
+              onSelect={onSelect}
+            />
+          ))}
+        </ul>
       )}
-      <ul className="flex flex-col">
-        {group.items.map((item) => (
-          <li
-            key={item.id}
-            data-selected={item.id === selected}
-            className="flex items-center gap-2.5 rounded-[11px] px-2.5 py-2 data-[selected=true]:bg-accent/10"
-          >
-            <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold">
-              {item.student.name ?? item.student.id}
-            </span>
-            {item.attemptNo > 1 ? (
-              <span className="shrink-0 text-[11px] font-semibold text-muted-foreground">
-                {t('inbox.row.attempt', { n: item.attemptNo })}
-              </span>
-            ) : null}
-            {group.slaHours === null ? null : (
-              <AgeMark hours={item.ageHours} slaHours={group.slaHours} showOverdue={false} />
-            )}
-          </li>
-        ))}
-      </ul>
     </li>
   );
 }
