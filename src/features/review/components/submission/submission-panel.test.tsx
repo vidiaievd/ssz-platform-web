@@ -31,6 +31,7 @@ const BASE: ReviewSubmission = {
   decision: null,
   lock: null,
   details: null,
+  prompts: {},
   text: null,
   submittedAnswer: {},
   canDecide: true,

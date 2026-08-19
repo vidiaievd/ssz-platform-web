@@ -107,6 +107,24 @@
       "noComment": "No comment was left.",
       "explain": "This is a separate try. The answer below is the new one."
     },
-    "back": "Back to the queue"
+    "back": "Back to the queue",
+    "closedVerbatim": "{closed} of {total} closed by the machine, word for word",
+    "essay": "The work · {words, plural, one {# word} other {# words}}",
+    "sentence": {
+      "autoPassed": "closed by the machine",
+      "collapse": "collapse",
+      "blank": "nothing was written",
+      "against": "closest accepted answer: {ref}"
+    },
+    "comment": {
+      "charPad": "Norwegian letters",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "remove": "Remove",
+      "addToSentence": "Comment on this sentence",
+      "sentenceLabel": "Comment on this sentence",
+      "sentencePlaceholder": "What should the learner look at here?"
+    }
   }
 }

@@ -107,6 +107,24 @@
       "noComment": "Ingen kommentar ble lagt igjen.",
       "explain": "Dette er et eget forsøk. Svaret nedenfor er det nye."
     },
-    "back": "Tilbake til køen"
+    "back": "Tilbake til køen",
+    "closedVerbatim": "{closed} av {total} lukket av maskinen, ord for ord",
+    "essay": "Teksten · {words, plural, one {# ord} other {# ord}}",
+    "sentence": {
+      "autoPassed": "lukket av maskinen",
+      "collapse": "lukk",
+      "blank": "ingenting er skrevet",
+      "against": "nærmeste godtatte svar: {ref}"
+    },
+    "comment": {
+      "charPad": "Norske bokstaver",
+      "save": "Lagre",
+      "cancel": "Avbryt",
+      "edit": "Endre",
+      "remove": "Fjern",
+      "addToSentence": "Kommenter denne setningen",
+      "sentenceLabel": "Kommentar til denne setningen",
+      "sentencePlaceholder": "Hva bør eleven se på her?"
+    }
   }
 }

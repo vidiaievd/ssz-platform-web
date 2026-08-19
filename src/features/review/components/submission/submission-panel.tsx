@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { CircleSlash, Clock, FileQuestion, Lock, ShieldAlert, UserCheck } from 'lucide-react';
 
@@ -10,6 +11,7 @@ import type { ReviewSubmission } from '../../types';
 import { Note } from '../primitives';
 
 import { PreviousAttempt } from './previous-attempt';
+import { SentenceList } from './sentence-list';
 import { SubmissionHeader } from './submission-header';
 
 export interface SubmissionPanelProps {
@@ -37,12 +39,25 @@ export interface SubmissionPanelProps {
  */
 export function SubmissionPanel({ school, id, position = null }: SubmissionPanelProps) {
   const t = useTranslations('Review');
+  // Held here rather than inside the list: the verdict carries them (45.7), and a comment
+  // that lived in the row that shows it would be lost the moment that row collapsed.
+  const [comments, setComments] = useState<Record<string, string>>({});
   const { data, isPending, isError } = useSubmission(school, id);
   // Nothing is claimed on a submission somebody has already decided: the marker's whole
   // purpose is to keep two teachers off one open piece of work.
   const lock = useReviewLock(school, id, {
     enabled: data !== undefined && data.decision === null && data.canDecide,
   });
+
+  const onComment = useCallback((itemId: string, value: string | undefined) => {
+    setComments((current) => {
+      if (value === undefined) {
+        const { [itemId]: _removed, ...rest } = current;
+        return rest;
+      }
+      return { ...current, [itemId]: value };
+    });
+  }, []);
 
   if (isPending) {
     return (
@@ -71,6 +86,7 @@ export function SubmissionPanel({ school, id, position = null }: SubmissionPanel
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5 py-4">
         <SubmissionNotes submission={data} lock={lock} />
         {data.previous === null ? null : <PreviousAttempt verdict={data.previous} />}
+        <SentenceList submission={data} comments={comments} onComment={onComment} />
       </div>
     </article>
   );

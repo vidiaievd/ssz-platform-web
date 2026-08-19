@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Check, User } from 'lucide-react';
 
-import type { DiffToken, Routing, Verdict } from '@/lib/shared-kernel/translate';
+import type { DiffToken as DiffTokenShape, Routing, Verdict } from '@/lib/shared-kernel/translate';
 
 import { VerdictPill, type VerdictTone } from '../verdict-pill';
 
@@ -67,33 +67,64 @@ export function RouteChip({ routing }: { routing: Routing }) {
  * screen. The student's own diff is masked on the server and rendered by the runner, which
  * is a different component for exactly that reason.
  */
-export function DiffLine({ tokens }: { tokens: DiffToken[] }) {
+export function DiffLine({ tokens }: { tokens: DiffTokenShape[] }) {
   const t = useTranslations('Authoring');
 
   return (
+    // A group rather than a labelled paragraph: `aria-label` on a text container replaces
+    // everything inside it, which would have silenced the per-word marks below.
     <p
+      role="group"
+      aria-label={t('translate.tester.diffLabel')}
       className="flex flex-wrap gap-1 rounded-md border border-border bg-surface p-2 text-sm"
       style={{ fontFamily: READING }}
-      aria-label={t('translate.tester.diffLabel')}
     >
       {tokens.map((token, position) => (
-        <span
-          key={position}
-          className={
-            token.t === 'extra'
-              ? 'rounded bg-error/10 px-1 text-error line-through'
-              : token.t === 'missing'
-                ? 'rounded bg-success-50 px-1 text-success-700'
-                : token.typo !== null
-                  ? 'rounded bg-warning-100 px-1 text-warning-700'
-                  : undefined
-          }
-        >
-          {token.typo ?? token.w}
-        </span>
+        <DiffToken key={position} token={token} />
       ))}
     </p>
   );
+}
+
+/**
+ * One word of the diff, marked twice over.
+ *
+ * Colour alone would say nothing to a reader who cannot see it, and nothing at all in
+ * print: a word the key has and the answer misses is therefore also **bold**, a word the
+ * answer has and the key does not is struck through, and a near-miss is italic. The name
+ * of the mark travels with it for screen readers, since "bold" is not a meaning.
+ */
+function DiffToken({ token }: { token: DiffTokenShape }) {
+  const t = useTranslations('Authoring');
+
+  if (token.t === 'extra') {
+    return (
+      <span className="rounded bg-error/10 px-1 text-error line-through">
+        <span className="sr-only">{t('translate.tester.legendExtra')}: </span>
+        {token.typo ?? token.w}
+      </span>
+    );
+  }
+
+  if (token.t === 'missing') {
+    return (
+      <span className="rounded bg-success-50 px-1 font-bold text-success-700">
+        <span className="sr-only">{t('translate.tester.legendMissing')}: </span>
+        {token.typo ?? token.w}
+      </span>
+    );
+  }
+
+  if (token.typo !== null && token.typo !== undefined) {
+    return (
+      <span className="rounded bg-warning-100 px-1 italic text-warning-700">
+        <span className="sr-only">{t('translate.tester.legendTypo')}: </span>
+        {token.typo}
+      </span>
+    );
+  }
+
+  return <span>{token.w}</span>;
 }
 
 /** Colour is never the only signal in the diff: this says what each one means. */
