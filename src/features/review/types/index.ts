@@ -122,6 +122,16 @@ export interface ReviewQueueResponse {
 export interface ReviewQueueCount {
   pending: number;
   hasOverdue: boolean;
+  /**
+   * Whether this person has anything to review at all — any group, in any window.
+   *
+   * Separate from `pending: 0`, and the sidebar turns on the difference: a teacher who has
+   * marked everything should see the item with no number, and a school's accountant should
+   * not see it at all. The count is the only thing the shell asks, so it has to carry the
+   * answer; deriving it from the role instead would be wrong in both directions, because
+   * what makes a queue is being assigned to a group, not holding a job title.
+   */
+  hasScope: boolean;
 }
 
 /**

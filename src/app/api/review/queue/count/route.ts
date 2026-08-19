@@ -7,7 +7,7 @@ import { buildSlaMap } from '@/features/review/lib/sla-map';
 import { queueScopeFor, resolveReviewScope } from '@/features/review/lib/review-scope';
 import type { ReviewQueueCount } from '@/features/review/types';
 
-const EMPTY: ReviewQueueCount = { pending: 0, hasOverdue: false };
+const NO_SCOPE: ReviewQueueCount = { pending: 0, hasOverdue: false, hasScope: false };
 
 /**
  * The sidebar badge: how many are waiting, and whether a dot belongs beside the number.
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
   if (scope instanceof NextResponse) return scope;
 
   const engineScope = queueScopeFor(scope, {});
-  if (engineScope === null) return NextResponse.json(EMPTY);
+  if (engineScope === null) return NextResponse.json(NO_SCOPE);
 
   let summary: { pending: number; oldestSubmittedAt: string | null };
   try {
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (summary.pending === 0 || summary.oldestSubmittedAt === null) {
-    return NextResponse.json({ pending: summary.pending, hasOverdue: false });
+    return NextResponse.json({ pending: summary.pending, hasOverdue: false, hasScope: true });
   }
 
   // The school's promise and the overrides of the courses this teacher's groups run —
@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
 
   const body: ReviewQueueCount = {
     pending: summary.pending,
+    hasScope: true,
     hasOverdue:
       promises.length > 0 && hoursSince(summary.oldestSubmittedAt) > Math.min(...promises),
   };

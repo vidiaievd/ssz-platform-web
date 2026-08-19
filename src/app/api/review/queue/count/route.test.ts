@@ -60,13 +60,15 @@ describe('GET /api/review/queue/count', () => {
   it('counts nothing for a teacher with no groups', async () => {
     upstream({ scope: { groupIds: [], containerIds: [] } });
     const body = await (await GET(request())).json();
-    expect(body).toEqual({ pending: 0, hasOverdue: false });
+    // `hasScope: false` is what hides the nav item: this person has no queue at all,
+    // which is a different statement from an empty one.
+    expect(body).toEqual({ pending: 0, hasOverdue: false, hasScope: false });
   });
 
   it('reports the count without a dot while the oldest is inside every promise', async () => {
     upstream({ count: { pending: 3, oldestSubmittedAt: hoursAgo(10) }, schoolSla: 48 });
     const body = await (await GET(request())).json();
-    expect(body).toEqual({ pending: 3, hasOverdue: false });
+    expect(body).toEqual({ pending: 3, hasOverdue: false, hasScope: true });
   });
 
   it('raises the dot once the oldest is past the shortest promise in play', async () => {
@@ -76,20 +78,21 @@ describe('GET /api/review/queue/count', () => {
       courseSla: { 'course-1': { respondWithinHours: 24, overridden: true } },
     });
     const body = await (await GET(request())).json();
-    expect(body).toEqual({ pending: 3, hasOverdue: true });
+    expect(body).toEqual({ pending: 3, hasOverdue: true, hasScope: true });
   });
 
   it('never claims lateness against a promise nobody made', async () => {
     upstream({ count: { pending: 2, oldestSubmittedAt: hoursAgo(500) }, schoolSla: null });
     const body = await (await GET(request())).json();
-    expect(body).toEqual({ pending: 2, hasOverdue: false });
+    expect(body).toEqual({ pending: 2, hasOverdue: false, hasScope: true });
   });
 
   it('skips the promise lookups entirely when nothing is waiting', async () => {
     upstream({ count: { pending: 0, oldestSubmittedAt: null } });
     const body = await (await GET(request())).json();
 
-    expect(body).toEqual({ pending: 0, hasOverdue: false });
+    // Nothing waiting, but the item still belongs in the nav: this teacher has groups.
+    expect(body).toEqual({ pending: 0, hasOverdue: false, hasScope: true });
     expect(vi.mocked(serverFetch).mock.calls.map(([o]) => o.path)).toEqual([
       '/internal/review/scope',
       '/internal/attempts/review/queue/count',

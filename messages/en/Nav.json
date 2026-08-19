@@ -1,5 +1,6 @@
 {
   "dashboard": "Dashboard",
+  "review": "Review",
   "content": "Content",
   "groups": "Groups",
   "students": "Students",
@@ -18,5 +19,7 @@
   "catalogue": "Catalogue",
   "training": "Training",
   "reviews": "Reviews",
-  "progress": "Progress"
+  "progress": "Progress",
+  "badgeCount": "{count} waiting",
+  "badgeCountOverdue": "{count} waiting, some past the promised time"
 }

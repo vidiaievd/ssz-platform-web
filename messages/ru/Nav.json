@@ -1,5 +1,6 @@
 {
   "dashboard": "Обзор",
+  "review": "Проверка",
   "content": "Контент",
   "groups": "Группы",
   "students": "Ученики",
@@ -18,5 +19,7 @@
   "catalogue": "Каталог",
   "training": "Тренировка",
   "reviews": "Повторение",
-  "progress": "Прогресс"
+  "progress": "Прогресс",
+  "badgeCount": "{count} ждёт",
+  "badgeCountOverdue": "{count} ждёт, часть дольше обещанного срока"
 }

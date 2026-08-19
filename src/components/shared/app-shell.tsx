@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   MailCheck,
   Search,
+  SquareCheckBig,
   Send,
   Settings,
   Users,
@@ -27,6 +28,7 @@ import { navGating } from "@/features/dashboard/lib/roles";
 import { NotificationBell } from "@/features/notifications";
 import type { NotificationLinkContext } from "@/features/notifications";
 import { useReviewsSummary } from "@/features/learning/api/use-reviews-summary";
+import { useReviewQueueCount } from "@/features/review/api/use-review-queue";
 import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
 import { AlertBadge } from "./topbar/alert-badge";
 import { GlobalSearchTrigger } from "./topbar/global-search-trigger";
@@ -49,7 +51,14 @@ export type SchoolContext = {
 
 const SCHEDULING_SCHOOL_ROLES = new Set<SchoolRole>(['OWNER', 'ADMIN', 'MANAGER', 'SCHEDULER']);
 
-function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSection[] {
+/** What the marking inbox contributes to the nav; absent for anyone without a queue. */
+type ReviewNav = { pending: number; hasOverdue: boolean } | null;
+
+function buildSchoolNav(
+  schoolSlug: string,
+  schoolCtx?: SchoolContext,
+  review: ReviewNav = null,
+): NavSection[] {
   const gating = schoolCtx ? navGating(schoolCtx.role) : null;
 
   function disabled(navId: 'dashboard' | 'courses' | 'groups' | 'students' | 'teachers' | 'scheduling' | 'invitations' | 'settings'): boolean {
@@ -68,6 +77,15 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
       disabled: disabled('dashboard'),
       lockReason: "Nav.locked.ownerOnly",
     },
+    ...(review
+      ? [{
+          href: `/school/${schoolSlug}/review`,
+          icon: SquareCheckBig,
+          labelKey: "review",
+          badge: review.pending,
+          badgeAlert: review.hasOverdue,
+        }]
+      : []),
     {
       href: `/school/${schoolSlug}/content`,
       icon: BookOpen,
@@ -188,11 +206,24 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
 
   const { data: reviewsSummary } = useReviewsSummary({ enabled: variant === "student" });
 
+  // The badge, not the queue: one count for the whole school, refetched on focus and
+  // invalidated by every verdict. The item appears only once the answer says this person
+  // has something to mark — until then the shell cannot know, so it shows nothing rather
+  // than an item that might turn out not to be theirs.
+  const { data: reviewCount } = useReviewQueueCount(
+    variant === "school" ? (params.schoolSlug ?? "") : "",
+    variant === "school",
+  );
+
   const resolvedTutorId = tutorUserId ?? params.userId ?? user.userId ?? "";
 
   const sections: NavSection[] =
     variant === "school"
-      ? buildSchoolNav(params.schoolSlug ?? "", schoolContext)
+      ? buildSchoolNav(
+          params.schoolSlug ?? "",
+          schoolContext,
+          reviewCount?.hasScope ? reviewCount : null,
+        )
       : variant === "tutor"
         ? buildTutorNav(resolvedTutorId)
         : buildStudentNav(reviewsSummary?.totalDue ?? 0);
