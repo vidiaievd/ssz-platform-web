@@ -97,8 +97,18 @@ export interface ReviewQueueSummary {
   oldestHours: number | null;
 }
 
+/**
+ * What the filter row may offer — the teacher's whole scope, not what survived the
+ * filters. Options derived from the rows on screen would leave no way back.
+ */
+export interface ReviewQueueFacets {
+  groups: { id: string; name: string }[];
+  courses: { id: string; name: string }[];
+}
+
 export interface ReviewQueueResponse {
   summary: ReviewQueueSummary;
+  facets: ReviewQueueFacets;
   groups: ReviewQueueGroup[];
   nextCursor: string | null;
 }

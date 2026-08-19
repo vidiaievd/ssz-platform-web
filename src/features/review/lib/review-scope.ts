@@ -129,3 +129,52 @@ export const fetchGroupNames = cache(async function (
     return {};
   }
 });
+
+/** One option in the queue's filter row: something that actually has a queue behind it. */
+export interface ReviewFacet {
+  id: string;
+  name: string;
+}
+
+/**
+ * What the filter dropdowns may offer.
+ *
+ * Built from the teacher's *scope*, never from the page on screen. Deriving the options
+ * from the rows would make the filters eat themselves: pick one course, and the only
+ * option left would be that course, with no way back to the others except the browser's
+ * back button.
+ *
+ * Course titles cost one read each. A teacher holds a handful of courses, the reads are
+ * request-cached, and a title that cannot be fetched drops the course from the list rather
+ * than offering an unlabelled one.
+ */
+export async function fetchQueueFacets(
+  scope: ReviewScope,
+): Promise<{ groups: ReviewFacet[]; courses: ReviewFacet[] }> {
+  const [names, courses] = await Promise.all([
+    fetchGroupNames(scope.schoolId),
+    Promise.all(scope.containerIds.map(fetchCourseTitle)),
+  ]);
+
+  return {
+    groups: scope.groupIds
+      .map((id) => ({ id, name: names[id] ?? '' }))
+      .filter((facet) => facet.name !== '')
+      .sort((a, b) => a.name.localeCompare(b.name)),
+    courses: courses
+      .filter((facet): facet is ReviewFacet => facet !== null)
+      .sort((a, b) => a.name.localeCompare(b.name)),
+  };
+}
+
+const fetchCourseTitle = cache(async function (id: string): Promise<ReviewFacet | null> {
+  try {
+    const container = await serverFetch<{ title: string }>({
+      service: 'content',
+      path: `/containers/${id}`,
+    });
+    return container.title ? { id, name: container.title } : null;
+  } catch {
+    return null;
+  }
+});

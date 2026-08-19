@@ -1,4 +1,56 @@
 {
+  "inbox": {
+    "eyebrow": "Перевірка",
+    "title": "Чекає на вас",
+    "subtitle": "{count, plural, one {# робота} few {# роботи} many {# робіт} other {# роботи}}",
+    "subtitleOverdue": "{count, plural, one {# довше терміну} few {# довше терміну} many {# довше терміну} other {# довше терміну}}",
+    "subtitleOverduePartial": "{count}+ довше терміну",
+    "subtitleOldest": "найстаріша {age}",
+    "groupBy": {
+      "label": "Групувати чергу",
+      "exercise": "За вправою",
+      "student": "За учнем"
+    },
+    "filter": {
+      "group": "Група",
+      "course": "Курс",
+      "type": "Тип",
+      "overdue": "Довше терміну",
+      "clear": "Зняти фільтри",
+      "allGroups": "Усі групи",
+      "allCourses": "Усі курси",
+      "allTypes": "Усі типи"
+    },
+    "group": {
+      "count": "{count}",
+      "expand": "Показати роботи цієї групи",
+      "collapse": "Сховати роботи цієї групи"
+    },
+    "row": {
+      "lockedBy": "{name}",
+      "autoClean": "машина закрила",
+      "attempt": "спроба {n}",
+      "label": "{student} · {exercise} · чекає {age}"
+    },
+    "empty": {
+      "title": "Усе перевірено",
+      "body": "У ваших групах не лишилося робіт, що чекають на відповідь. Нові з’являться тут одразу після здачі.",
+      "filteredTitle": "За цими фільтрами нічого немає",
+      "filteredBody": "Зніміть їх, щоб побачити решту черги."
+    },
+    "failed": "Не вдалося завантажити чергу.",
+    "retry": "Повторити",
+    "position": "{i} з {n}",
+    "selectPrompt": "Виберіть роботу",
+    "selectBody": "Виберіть роботу ліворуч — вона відкриється тут."
+  },
+  "type": {
+    "short_answer": "Коротка відповідь",
+    "writing_task": "Вільна робота",
+    "translate_to_target": "Переклад норвезькою",
+    "translate_from_target": "Переклад з норвезької",
+    "error_correction": "Виправлення помилок"
+  },
   "age": {
     "justNow": "щойно",
     "hours": "{n, plural, one {# година} few {# години} many {# годин} other {# години}}",

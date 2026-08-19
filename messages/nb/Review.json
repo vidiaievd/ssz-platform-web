@@ -1,4 +1,56 @@
 {
+  "inbox": {
+    "eyebrow": "Retting",
+    "title": "Venter på deg",
+    "subtitle": "{count, plural, one {# innlevering} other {# innleveringer}}",
+    "subtitleOverdue": "{count, plural, one {# over fristen} other {# over fristen}}",
+    "subtitleOverduePartial": "{count}+ over fristen",
+    "subtitleOldest": "eldste {age}",
+    "groupBy": {
+      "label": "Grupper køen etter",
+      "exercise": "Etter oppgave",
+      "student": "Etter elev"
+    },
+    "filter": {
+      "group": "Gruppe",
+      "course": "Kurs",
+      "type": "Type",
+      "overdue": "Over fristen",
+      "clear": "Fjern filtre",
+      "allGroups": "Alle grupper",
+      "allCourses": "Alle kurs",
+      "allTypes": "Alle typer"
+    },
+    "group": {
+      "count": "{count}",
+      "expand": "Vis innleveringene i denne gruppen",
+      "collapse": "Skjul innleveringene i denne gruppen"
+    },
+    "row": {
+      "lockedBy": "{name}",
+      "autoClean": "maskinen lukket den",
+      "attempt": "forsøk {n}",
+      "label": "{student} · {exercise} · har ventet {age}"
+    },
+    "empty": {
+      "title": "Alt er rettet",
+      "body": "Ingenting i gruppene dine venter på svar. Nytt arbeid dukker opp her så snart det leveres.",
+      "filteredTitle": "Ingenting med disse filtrene",
+      "filteredBody": "Fjern dem for å se resten av køen."
+    },
+    "failed": "Køen kunne ikke lastes.",
+    "retry": "Prøv igjen",
+    "position": "{i} av {n}",
+    "selectPrompt": "Velg en innlevering",
+    "selectBody": "Velg en til venstre, så åpnes den her."
+  },
+  "type": {
+    "short_answer": "Kort svar",
+    "writing_task": "Skriving",
+    "translate_to_target": "Oversettelse til norsk",
+    "translate_from_target": "Oversettelse fra norsk",
+    "error_correction": "Feilretting"
+  },
   "age": {
     "justNow": "akkurat nå",
     "hours": "{n, plural, one {# time} other {# timer}}",

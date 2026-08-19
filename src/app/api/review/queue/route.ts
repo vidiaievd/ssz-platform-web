@@ -7,6 +7,7 @@ import { hoursSince, isOverdue } from '@/features/review/lib/age-scale';
 import { buildSlaMap } from '@/features/review/lib/sla-map';
 import {
   fetchGroupNames,
+  fetchQueueFacets,
   queueScopeFor,
   resolveReviewScope,
 } from '@/features/review/lib/review-scope';
@@ -58,11 +59,12 @@ interface EngineQueue {
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
 
-const EMPTY: ReviewQueueResponse = {
-  summary: { pending: 0, overdue: 0, overduePartial: false, oldestHours: null },
-  groups: [],
-  nextCursor: null,
-};
+const EMPTY_SUMMARY = {
+  pending: 0,
+  overdue: 0,
+  overduePartial: false,
+  oldestHours: null,
+} as const;
 
 /**
  * Everything waiting on this teacher, across every group and course they hold.
@@ -103,8 +105,17 @@ export async function GET(request: NextRequest) {
   });
 
   // A teacher between assignments, or a filter naming a group they do not teach. Both are
-  // an empty inbox and neither is a refusal (`resolveReviewScope` explains why).
-  if (engineScope === null) return NextResponse.json(EMPTY);
+  // an empty inbox and neither is a refusal (`resolveReviewScope` explains why). The
+  // filter options still travel, or a filter that emptied the queue could not be undone.
+  if (engineScope === null) {
+    const facets: ReviewQueueResponse = {
+      summary: { ...EMPTY_SUMMARY },
+      facets: await fetchQueueFacets(scope),
+      groups: [],
+      nextCursor: null,
+    };
+    return NextResponse.json(facets);
+  }
 
   const limit = Math.min(Number(searchParams.get('limit')) || DEFAULT_LIMIT, MAX_LIMIT);
   const cursor = searchParams.get('cursor');
@@ -127,7 +138,7 @@ export async function GET(request: NextRequest) {
   const now = new Date();
   const items = queue.groups.flatMap((group) => group.items);
 
-  const [sla, people, groupNames] = await Promise.all([
+  const [sla, people, groupNames, facets] = await Promise.all([
     buildSlaMap(
       scope.schoolId,
       queue.groups.flatMap((group) => [
@@ -142,6 +153,7 @@ export async function GET(request: NextRequest) {
       ...items.map((item) => item.lock?.teacherId).filter((id): id is string => Boolean(id)),
     ]),
     fetchGroupNames(scope.schoolId),
+    fetchQueueFacets(scope),
   ]);
 
   let overdueSeen = 0;
@@ -225,6 +237,7 @@ export async function GET(request: NextRequest) {
       overduePartial: queue.nextCursor !== null,
       oldestHours: oldest === null ? null : hoursSince(oldest, now),
     },
+    facets,
     groups,
     nextCursor: queue.nextCursor,
   };

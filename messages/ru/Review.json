@@ -1,4 +1,56 @@
 {
+  "inbox": {
+    "eyebrow": "Проверка",
+    "title": "Ждёт вас",
+    "subtitle": "{count, plural, one {# работа} few {# работы} many {# работ} other {# работы}}",
+    "subtitleOverdue": "{count, plural, one {# дольше срока} few {# дольше срока} many {# дольше срока} other {# дольше срока}}",
+    "subtitleOverduePartial": "{count}+ дольше срока",
+    "subtitleOldest": "самая старая {age}",
+    "groupBy": {
+      "label": "Группировать очередь",
+      "exercise": "По упражнению",
+      "student": "По ученику"
+    },
+    "filter": {
+      "group": "Группа",
+      "course": "Курс",
+      "type": "Тип",
+      "overdue": "Дольше срока",
+      "clear": "Снять фильтры",
+      "allGroups": "Все группы",
+      "allCourses": "Все курсы",
+      "allTypes": "Все типы"
+    },
+    "group": {
+      "count": "{count}",
+      "expand": "Показать работы этой группы",
+      "collapse": "Скрыть работы этой группы"
+    },
+    "row": {
+      "lockedBy": "{name}",
+      "autoClean": "машина закрыла",
+      "attempt": "заход {n}",
+      "label": "{student} · {exercise} · ждёт {age}"
+    },
+    "empty": {
+      "title": "Всё проверено",
+      "body": "В ваших группах не осталось работ, ждущих ответа. Новые появятся здесь сразу после сдачи.",
+      "filteredTitle": "По этим фильтрам ничего нет",
+      "filteredBody": "Снимите их, чтобы увидеть остальную очередь."
+    },
+    "failed": "Не удалось загрузить очередь.",
+    "retry": "Повторить",
+    "position": "{i} из {n}",
+    "selectPrompt": "Выберите работу",
+    "selectBody": "Выберите работу слева — она откроется здесь."
+  },
+  "type": {
+    "short_answer": "Короткий ответ",
+    "writing_task": "Свободная работа",
+    "translate_to_target": "Перевод на норвежский",
+    "translate_from_target": "Перевод с норвежского",
+    "error_correction": "Исправление ошибок"
+  },
   "age": {
     "justNow": "только что",
     "hours": "{n, plural, one {# час} few {# часа} many {# часов} other {# часа}}",

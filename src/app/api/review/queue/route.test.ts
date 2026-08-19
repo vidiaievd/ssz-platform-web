@@ -80,6 +80,7 @@ function upstream(
     if (opts.path.endsWith('/groups')) {
       return overrides.groups ?? [{ id: 'group-1', name: 'A2 kveld · tirsdag' }];
     }
+    if (/^\/containers\/[^/]+$/.test(opts.path)) return { title: 'Ny i Norge A2' };
     throw new Error(`unexpected upstream call: ${opts.path}`);
   });
 }
@@ -120,10 +121,11 @@ describe('GET /api/review/queue', () => {
     expect(response.status).toBe(200);
     expect(body.groups).toEqual([]);
     expect(body.summary.pending).toBe(0);
-    // The engine is never troubled about an empty scope.
-    expect(vi.mocked(serverFetch).mock.calls.map(([o]) => o.path)).toEqual([
-      '/internal/review/scope',
-    ]);
+    // The engine is never troubled about an empty scope — only the filter options are
+    // still fetched, so the screen can say what it could have shown.
+    expect(vi.mocked(serverFetch).mock.calls.map(([o]) => o.path)).not.toContain(
+      '/internal/attempts/review/queue',
+    );
   });
 
   it("sends only the teacher's groups as scope, never their courses", async () => {
@@ -207,6 +209,22 @@ describe('GET /api/review/queue', () => {
 
     expect(body.summary.overduePartial).toBe(true);
     expect(body.nextCursor).toBe('next-page');
+  });
+
+  it('offers the whole scope as filter options, not what survived the filters', async () => {
+    upstream({ scope: { groupIds: ['group-1'], containerIds: ['course-1'] } });
+    const body = await (await GET(request(`?school=${SCHOOL_ID}&course=course-1`))).json();
+
+    expect(body.facets.groups).toEqual([{ id: 'group-1', name: 'A2 kveld · tirsdag' }]);
+    expect(body.facets.courses).toEqual([{ id: 'course-1', name: 'Ny i Norge A2' }]);
+  });
+
+  it('still offers the options when a filter has emptied the queue', async () => {
+    upstream();
+    const body = await (await GET(request(`?school=${SCHOOL_ID}&group=not-mine`))).json();
+
+    expect(body.groups).toEqual([]);
+    expect(body.facets.groups).toHaveLength(1);
   });
 
   it('answers 400 without a school rather than guessing one', async () => {

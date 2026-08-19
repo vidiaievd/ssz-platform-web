@@ -1,4 +1,56 @@
 {
+  "inbox": {
+    "eyebrow": "Review",
+    "title": "Waiting for you",
+    "subtitle": "{count, plural, one {# submission} other {# submissions}}",
+    "subtitleOverdue": "{count, plural, one {# longer than promised} other {# longer than promised}}",
+    "subtitleOverduePartial": "{count}+ longer than promised",
+    "subtitleOldest": "oldest {age}",
+    "groupBy": {
+      "label": "Group the queue by",
+      "exercise": "By exercise",
+      "student": "By learner"
+    },
+    "filter": {
+      "group": "Group",
+      "course": "Course",
+      "type": "Type",
+      "overdue": "Longer than promised",
+      "clear": "Clear filters",
+      "allGroups": "All groups",
+      "allCourses": "All courses",
+      "allTypes": "All types"
+    },
+    "group": {
+      "count": "{count}",
+      "expand": "Show the submissions in this group",
+      "collapse": "Hide the submissions in this group"
+    },
+    "row": {
+      "lockedBy": "{name}",
+      "autoClean": "machine closed it",
+      "attempt": "try {n}",
+      "label": "{student} · {exercise} · waiting {age}"
+    },
+    "empty": {
+      "title": "All reviewed",
+      "body": "Nothing in your groups is waiting for an answer. New work appears here the moment it is handed in.",
+      "filteredTitle": "Nothing under these filters",
+      "filteredBody": "Clear them to see the rest of the queue."
+    },
+    "failed": "The queue could not be loaded.",
+    "retry": "Try again",
+    "position": "{i} of {n}",
+    "selectPrompt": "Pick a submission",
+    "selectBody": "Choose one on the left and it opens here."
+  },
+  "type": {
+    "short_answer": "Short answer",
+    "writing_task": "Writing",
+    "translate_to_target": "Translation into Norwegian",
+    "translate_from_target": "Translation from Norwegian",
+    "error_correction": "Error correction"
+  },
   "age": {
     "justNow": "just now",
     "hours": "{n, plural, one {# hour} other {# hours}}",
