@@ -55,7 +55,6 @@ function upstream(
     submission?: (Partial<Omit<EngineSubmission, 'details'>> & { details?: unknown }) | 'missing';
     scopeNow?: string[];
     scopeThen?: string[];
-    exerciseGone?: boolean;
   } = {},
 ) {
   const now = overrides.scopeNow ?? ['group-1'];
@@ -77,22 +76,6 @@ function upstream(
       return { respondWithinHours: 24, overridden: true };
     }
     if (opts.path.endsWith('/groups')) return [{ id: 'group-1', name: 'A2 kveld' }];
-    if (opts.path === '/internal/exercises/ex-1') {
-      if (overrides.exerciseGone) throw new Error('404');
-      return {
-        exercise: {
-          id: 'ex-1',
-          templateCode: 'translate_to_target',
-          content: {
-            dir: 'to_target',
-            format: 'single',
-            langs: { target: 'Norsk', explain: 'Russisk' },
-            items: [{ id: 's1', dir: 'to_target', source: 'Поэтому им нужно много еды.' }],
-          },
-          expectedAnswers: { items: { s1: { refs: ['Derfor trenger de mye mat.'] } } },
-        },
-      };
-    }
     throw new Error(`unexpected upstream call: ${opts.path}`);
   });
 }
@@ -173,23 +156,30 @@ describe('GET /api/review/submissions/[id]', () => {
 
     expect(body.exercise.available).toBe(false);
     expect(body.exercise.title).toBe('Perfektum');
-    // Nothing to read the questions out of, and the analysis stands without them.
-    expect(body.prompts).toEqual({});
   });
 
-  it('joins in what each sentence asked, so the diff is read against a question', async () => {
-    upstream();
+  it('passes the breakdown through as the engine composed it, questions included', async () => {
+    upstream({
+      submission: {
+        details: {
+          totalItems: 1,
+          routedItems: 1,
+          passedItems: 0,
+          items: [{ itemId: 's1', prompt: 'Поэтому им нужно много еды.', note: 'Inversjon' }],
+        },
+      },
+    });
     const body = await (await call()).json();
 
-    expect(body.prompts.s1.prompt).toBe('Поэтому им нужно много еды.');
-  });
-
-  it('costs the questions, never the submission, when the exercise cannot be read', async () => {
-    upstream({ exerciseGone: true });
-    const response = await call();
-
-    expect(response.status).toBe(200);
-    expect((await response.json()).prompts).toEqual({});
+    // The question travels inside the breakdown; nothing here fetches the exercise again.
+    expect(body.details.items[0].prompt).toBe('Поэтому им нужно много еды.');
+    expect(
+      vi
+        .mocked(serverFetch)
+        .mock.calls.some(([opts]) =>
+          (opts as { path: string }).path.startsWith('/internal/exercises/'),
+        ),
+    ).toBe(false);
   });
 
   it('does not reveal whether an attempt of another school exists', async () => {

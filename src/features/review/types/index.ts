@@ -185,23 +185,11 @@ export interface ReviewSubmission {
    * them forever.
    */
   details: ReviewDetails | null;
-  /**
-   * What each sentence asked, and the note its author left for whoever marks it — by item
-   * id. Empty when the exercise is gone: the analysis then stands on its own.
-   */
-  prompts: Record<string, ReviewSentencePrompt>;
   /** `writing_task` only: the essay itself. */
   text: string | null;
   submittedAnswer: unknown;
   /** Whether this caller may still decide it — an expired substitution may only read. */
   canDecide: boolean;
-}
-
-/** One sentence as its author wrote it — the question, and their aside to the teacher. */
-export interface ReviewSentencePrompt {
-  prompt: string;
-  /** Never reaches the learner, on any screen (criterion 13). */
-  teacherNote?: string;
 }
 
 /** What a lock call answers: who holds the submission now, and until when. */

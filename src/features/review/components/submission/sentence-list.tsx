@@ -65,8 +65,8 @@ export function SentenceList({ submission, comments, onComment }: SentenceListPr
             key={item.itemId}
             detail={item}
             index={position + 1}
-            prompt={submission.prompts[item.itemId]?.prompt}
-            teacherNote={submission.prompts[item.itemId]?.teacherNote}
+            prompt={item.prompt ?? undefined}
+            teacherNote={item.note ?? undefined}
             comment={comments[item.itemId]}
             onComment={(value) => onComment(item.itemId, value)}
           />

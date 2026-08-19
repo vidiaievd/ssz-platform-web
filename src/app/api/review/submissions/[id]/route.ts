@@ -7,13 +7,8 @@ import { hoursSince, isOverdue } from '@/features/review/lib/age-scale';
 import { buildSlaMap } from '@/features/review/lib/sla-map';
 import { fetchGroupNames, resolveReviewScope } from '@/features/review/lib/review-scope';
 import { authorizeSubmission, refuseSubmission } from '@/features/review/lib/submission-access';
-import { readAuthoredItems } from '@/features/content-authoring/lib/authored-items';
 import type { ReviewDetails } from '@/features/content-authoring/types/review';
-import type {
-  ReviewSentencePrompt,
-  ReviewSubmission,
-  ReviewVerdictRecord,
-} from '@/features/review/types';
+import type { ReviewSubmission, ReviewVerdictRecord } from '@/features/review/types';
 
 /** A verdict as the engine records it — a reviewer id, and no name to go with it. */
 interface EngineVerdict {
@@ -104,10 +99,9 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     ].filter((value): value is string => Boolean(value)),
   );
 
-  const [sla, groupNames, prompts] = await Promise.all([
+  const [sla, groupNames] = await Promise.all([
     buildSlaMap(scope.schoolId, submission.containerId ? [submission.containerId] : []),
     fetchGroupNames(scope.schoolId),
-    fetchPrompts(submission),
   ]);
 
   const slaHours = sla.slaFor(submission.containerId);
@@ -153,49 +147,10 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         }
       : null,
     details: submission.details,
-    prompts,
     text: submission.text,
     submittedAnswer: submission.submittedAnswer,
     canDecide: access.write,
   };
 
   return NextResponse.json(body);
-}
-
-/**
- * What each sentence asked, read out of the exercise its author wrote.
- *
- * The engine's breakdown says what came back and how it compares; it does not carry the
- * question, because the question belongs to content-service and copying it into every
- * attempt would freeze a sentence its author may since have fixed. A diff without the
- * source above it is a teacher guessing what was being asked.
- *
- * Read through the internal route with the service token rather than the reviewer's: the
- * right to mark a submission is not the right to edit its course, and the authoring
- * endpoint would refuse most of the teachers this screen exists for.
- *
- * A failure costs the prompts and never the submission — the analysis stands without them.
- */
-async function fetchPrompts(
-  submission: EngineSubmission,
-): Promise<Record<string, ReviewSentencePrompt>> {
-  if (!submission.exerciseAvailable) return {};
-
-  try {
-    const envelope = await serverFetch<{
-      exercise: { id: string; templateCode: string; content: unknown; expectedAnswers: unknown };
-    }>({
-      service: 'content',
-      path: `/internal/exercises/${submission.exerciseId}`,
-      directBaseUrl: env.CONTENT_SERVICE_INTERNAL_URL,
-      headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
-      anonymous: true,
-      query: { language: submission.targetLanguage, mode: 'PRACTICE' },
-      expectedErrorStatuses: [404],
-    });
-
-    return Object.fromEntries(readAuthoredItems(envelope.exercise));
-  } catch {
-    return {};
-  }
 }

@@ -60,7 +60,11 @@ const SUBMISSION = (over: Partial<ReviewSubmission> = {}): ReviewSubmission =>
           submitted: 'Jeg er her.',
           ref: 'Jeg er her.',
         }),
-        sentence({ itemId: 'open' }),
+        sentence({
+          itemId: 'open',
+          prompt: 'Поэтому им нужно много еды.',
+          note: 'Inversjon etter Derfor',
+        }),
       ],
     },
     prompts: {

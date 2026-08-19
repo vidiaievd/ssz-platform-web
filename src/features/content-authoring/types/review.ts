@@ -22,6 +22,18 @@ export interface ReviewItemCommon {
   itemId: string;
   similarity: number;
   routing: Routing;
+  /**
+   * The sentence the learner was given — to translate, or to repair.
+   *
+   * It comes down with the breakdown rather than being fetched beside it: the engine
+   * already has the exercise open to recompute the judgement, and a reviewer reading a
+   * diff without the question above it is guessing at the task. Null on a submission
+   * graded before the engine sent it (August 2026) — the breakdown is recomputed on every
+   * read, so that window closes by itself.
+   */
+  prompt?: string | null;
+  /** The author's aside to whoever marks this. Never reaches a learner (criterion 13). */
+  note?: string | null;
 }
 
 /** One sentence of a translate submission, as its validator reads it. */
