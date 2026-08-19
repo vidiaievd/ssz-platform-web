@@ -94,6 +94,8 @@ export interface OversightStuck {
 }
 
 export interface ReviewOversightResponse {
+  /** The school's id — what the assignment dialog posts to. */
+  schoolId: string;
   /**
    * The school's data horizon: the first submission that carries a school at all. Printed
    * under the heading, because statistics from a partial history presented as a whole one

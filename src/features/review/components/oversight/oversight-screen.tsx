@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Bell } from 'lucide-react';
+import { Bell, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,6 +14,7 @@ import { useRemindReviewer } from '../../api/use-remind-reviewer';
 import { Panel, Segment } from '../primitives';
 import { OVERSIGHT_PERIODS, type OversightPeriod } from '../../types/oversight';
 
+import { AssignReviewerDialog, type AssignTarget } from './assign-reviewer-dialog';
 import { DecisionLog } from './decision-log';
 import { GroupLoadPanel, CourseLoadPanel } from './load-panels';
 import { StuckList } from './stuck-list';
@@ -51,6 +52,10 @@ export function OversightScreen({ school }: OversightScreenProps) {
   const period = parsePeriod(searchParams.get('period'));
   const { data, isPending, isError, refetch } = useOversight(school, period);
   const remind = useRemindReviewer(school);
+
+  // What the assignment dialog is about: a late submission, or a colleague whose row
+  // prompted it. Either way the record it writes is the same one.
+  const [assigning, setAssigning] = useState<AssignTarget | null>(null);
 
   // One toast for all three outcomes, because from the administrator's side they are one
   // answer to one press: it went, it went nowhere because it went yesterday, or it failed.
@@ -145,6 +150,14 @@ export function OversightScreen({ school }: OversightScreenProps) {
                         <Bell aria-hidden className="size-3.5" />
                         {t('teachers.remind')}
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setAssigning({ kind: 'teacher', teacherName: teacher.name })}
+                      >
+                        <UserPlus aria-hidden className="size-3.5" />
+                        {t('teachers.addReviewer')}
+                      </Button>
                     </>
                   }
                 />
@@ -160,10 +173,28 @@ export function OversightScreen({ school }: OversightScreenProps) {
           <StuckList
             items={data.stuck}
             reviewHref={(id) => `/school/${school}/review?submission=${encodeURIComponent(id)}`}
-            onAssign={() => undefined}
+            onAssign={(item) =>
+              setAssigning({
+                kind: 'submission',
+                groupId: item.groupId,
+                studentName: item.studentName,
+                exerciseTitle: item.exerciseTitle,
+                unassigned: item.unassigned,
+              })
+            }
           />
 
           <DecisionLog school={school} period={period} />
+
+          <AssignReviewerDialog
+            schoolId={data.schoolId}
+            target={assigning}
+            groups={data.groups.map((group) => ({
+              id: group.id,
+              name: group.name ?? group.id,
+            }))}
+            onClose={() => setAssigning(null)}
+          />
         </>
       )}
     </div>

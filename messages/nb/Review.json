@@ -265,6 +265,36 @@
         "verdict": "Utfall",
         "hours": "Timer ventet"
       }
+    },
+    "assign": {
+      "title": "Legg til en retter",
+      "for": "{student} · {exercise}",
+      "someone": "Denne eleven",
+      "someExercise": "denne oppgaven",
+      "banner": {
+        "title": "Dette legger personen til i gruppens stab",
+        "body": "Det finnes ingen egen «retter»-rolle: den som underviser elevens gruppe, kan svare på arbeidet deres. Den du legger til, ser hele køen til denne gruppen i innboksen med en gang."
+      },
+      "noGroup": {
+        "title": "Eleven er ikke i noen gruppe",
+        "body": "Så lenge eleven ikke tilhører en gruppe, kan ingen gjøres ansvarlig for arbeidet — regelen går gjennom gruppen, ikke gjennom innleveringen. Legg eleven i en gruppe fra elevsiden, så havner arbeidet i den gruppens kø."
+      },
+      "group": "Gruppe",
+      "teacher": "Lærer",
+      "chooseTeacher": "Velg en lærer…",
+      "role": "Rolle i gruppen",
+      "roleCoPrimary": "Medlærer",
+      "roleSubstitute": "Vikar",
+      "from": "Fra",
+      "to": "Til",
+      "reason": "Grunn",
+      "reasonRequired": "En vikariat trenger en grunn.",
+      "cancel": "Avbryt",
+      "submit": "Legg til",
+      "submitting": "Legger til…",
+      "failed": "Retteren kunne ikke legges til.",
+      "assigned": "Lagt til — gruppens kø er nå deres også.",
+      "forTeacher": "Sammen med {name}"
     }
   },
   "settings": {

@@ -265,6 +265,36 @@
         "verdict": "Outcome",
         "hours": "Hours waited"
       }
+    },
+    "assign": {
+      "title": "Add a reviewer",
+      "for": "{student} · {exercise}",
+      "someone": "This learner",
+      "someExercise": "this exercise",
+      "banner": {
+        "title": "This adds the person to the group's staff",
+        "body": "There is no separate «reviewer» role: whoever teaches the learner's group may answer their work. The person you add sees this group's whole queue in their inbox straight away."
+      },
+      "noGroup": {
+        "title": "This learner is in no group",
+        "body": "Nobody can be made responsible for this work until the learner belongs to a group — the rule runs through the group, not through the submission. Add them to one from the learners page, and their work joins that group's queue."
+      },
+      "group": "Group",
+      "teacher": "Teacher",
+      "chooseTeacher": "Choose a teacher…",
+      "role": "Role in the group",
+      "roleCoPrimary": "Co-teacher",
+      "roleSubstitute": "Substitute",
+      "from": "From",
+      "to": "Until",
+      "reason": "Reason",
+      "reasonRequired": "A substitution needs a reason.",
+      "cancel": "Cancel",
+      "submit": "Add",
+      "submitting": "Adding…",
+      "failed": "The reviewer could not be added.",
+      "assigned": "Added — the group's queue is now theirs as well.",
+      "forTeacher": "Alongside {name}"
     }
   },
   "settings": {

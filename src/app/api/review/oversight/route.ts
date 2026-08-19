@@ -241,6 +241,10 @@ export async function GET(request: NextRequest) {
     .sort((a, b) => b.pending - a.pending);
 
   const body: ReviewOversightResponse = {
+    // The id, not the slug the caller asked with: the screen's assignment dialog posts to
+    // routes that take ids, and resolving it a second time in the browser would be a round
+    // trip for something this answer already knows.
+    schoolId: access.schoolId,
     since: aggregate.since,
     periodDays,
     schoolSlaHours: sla.schoolHours,

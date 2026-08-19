@@ -66,3 +66,12 @@ export { useGroupCreateWizardStore } from './stores/create-wizard-store';
 export { TeacherTimetable } from './components/teacher-timetable';
 export { TimetableGrid } from './components/timetable-grid';
 export { TeacherSelector } from './components/teacher-selector';
+
+// The one form behind `POST /schools/:id/groups/:groupId/teachers` — review's
+// oversight screen assigns a reviewer through it (plan 46 §46.7).
+export { AssignTeacherForm } from './components/assign-teacher-form';
+export type {
+  AssignTeacherFormProps,
+  AssignTeacherGroup,
+  AssignTeacherOption,
+} from './components/assign-teacher-form';
