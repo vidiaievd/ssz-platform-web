@@ -7,6 +7,7 @@ import {
   ErrorState,
   LearningSkeleton,
   useCourseHome,
+  useFlushProgressOutbox,
   useUnitContents,
   useUpsertProgress,
 } from '@/features/learning';
@@ -69,11 +70,31 @@ export function ReaderShell({
   const courseHome = useCourseHome(courseId);
   const unitContents = useUnitContents(unitId);
   const upsertProgress = useUpsertProgress(courseId, unitId);
+  const flushProgressOutbox = useFlushProgressOutbox(courseId, unitId);
 
   const startedAtRef = useRef<number>(undefined);
   useEffect(() => {
     startedAtRef.current = Date.now();
   }, [itemId]);
+
+  // 47.0: a progress ping that fails is queued (`use-upsert-progress.ts`), not
+  // surfaced — the learner has no decision to make over a checkbox they didn't
+  // write. This is where the queue gets its other chances to leave silently.
+  useEffect(() => {
+    void flushProgressOutbox();
+    const onFocusRegained = () => void flushProgressOutbox();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void flushProgressOutbox();
+    };
+    window.addEventListener('online', onFocusRegained);
+    window.addEventListener('focus', onFocusRegained);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('online', onFocusRegained);
+      window.removeEventListener('focus', onFocusRegained);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [flushProgressOutbox]);
 
   const isLoading = courseHome.isLoading || unitContents.isLoading;
   const isError = courseHome.isError || unitContents.isError;
