@@ -36,9 +36,11 @@ export default async function SchoolReviewPage({ params }: Props) {
   if (!school) notFound();
 
   return (
-    // The split fills what the shell leaves it: this screen scrolls in its columns, not
-    // as a page, or the queue's sticky group headings would have nothing to stick to.
-    <main className="flex min-h-0 flex-1 flex-col">
+    // `h-full`, not `flex-1`: the shell renders its pages inside a plain block with a
+    // definite height, where a flex child's grow factor means nothing — and a page that
+    // sized itself to its content would scroll as a whole, taking the queue's sticky
+    // headings and the panel's header off the top of the screen with it.
+    <main className="flex h-full min-h-0 flex-col">
       <Suspense>
         <ReviewInbox school={school.slug ?? school.id} />
       </Suspense>

@@ -36,7 +36,7 @@ export default async function SubmissionPage({ params }: Props) {
   const t = await getTranslations('Review');
 
   return (
-    <main className="flex min-h-0 flex-1 flex-col">
+    <main className="flex h-full min-h-0 flex-col">
       <Link
         href={`/${locale}/school/${schoolSlug}/review`}
         className="flex items-center gap-1.5 px-5 pt-4 text-[13px] font-semibold text-muted-foreground hover:text-foreground"
