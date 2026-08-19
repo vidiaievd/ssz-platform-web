@@ -4,6 +4,8 @@ import { useMutation } from '@tanstack/react-query';
 
 import type {
   AttemptRecord,
+  AttemptStatus,
+  AttemptStatusResponse,
   LastAttemptResponse,
   RevealAnswersResponse,
   SelfCheckRequest,
@@ -72,6 +74,43 @@ export async function fetchLastAttempt(exerciseId: string): Promise<AttemptRecor
     return data.attempt ?? null;
   } catch {
     return null;
+  }
+}
+
+/**
+ * How a failed `submit` actually left things (47.0.B).
+ *
+ * A failed check does not mean a failed submission: the engine has already accepted the
+ * work by the time it is scored or routed, so a request that reaches that far and then
+ * loses its response on the way back must not be treated the same as one that never
+ * arrived. `'delivered'` — the attempt moved on without this screen's help, and the
+ * right thing is to say so, calmly, with no button. `'not-delivered'` — nothing
+ * happened; the work is still in hand and worth another try. `'unconfirmed'` — even the
+ * question could not be answered, so neither "sent" nor "lost" would be honest; only
+ * "couldn't tell" is.
+ */
+export type SubmitFailureResolution = 'delivered' | 'not-delivered' | 'unconfirmed';
+
+function resolveByStatus(status: AttemptStatus): SubmitFailureResolution {
+  return status === 'ROUTED_FOR_REVIEW' || status === 'SCORED' ? 'delivered' : 'not-delivered';
+}
+
+/**
+ * Asks the engine what became of an attempt after its `submit` call failed. Never
+ * rejects: a check that itself fails to answer is exactly the case this exists to
+ * report, not a reason to throw past the caller.
+ */
+export async function resolveSubmitFailure(
+  exerciseId: string,
+  attemptId: string,
+): Promise<SubmitFailureResolution> {
+  try {
+    const res = await fetch(`/api/exercises/${exerciseId}/attempts/${attemptId}`);
+    if (!res.ok) return 'unconfirmed';
+    const data = (await res.json()) as AttemptStatusResponse;
+    return resolveByStatus(data.status);
+  } catch {
+    return 'unconfirmed';
   }
 }
 

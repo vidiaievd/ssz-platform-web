@@ -137,6 +137,17 @@ export interface LastAttemptResponse {
 }
 
 /**
+ * The status of one attempt by id — 47.0.B. Asked after a `submit` call fails, to tell
+ * whether the request was lost (nothing to show for it — `IN_PROGRESS`) from whether
+ * only the response was (the work is already `ROUTED_FOR_REVIEW` or `SCORED`). Nothing
+ * else about the attempt travels here: a second look at the answer or the validator's
+ * output is not this check's business.
+ */
+export interface AttemptStatusResponse {
+  status: AttemptStatus;
+}
+
+/**
  * "How am I doing?", asked mid-attempt by the two templates that offer it.
  *
  * A server round-trip for the same reason grading is: the answer is derived from the

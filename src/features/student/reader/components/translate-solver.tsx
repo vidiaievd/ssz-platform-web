@@ -6,9 +6,11 @@ import { useTranslations } from 'next-intl';
 import {
   AttemptRequestError,
   fetchLastAttempt,
+  resolveSubmitFailure,
   useSelfCheck,
   useStartAttempt,
   useSubmitAnswer,
+  type SubmitFailureResolution,
 } from '@/features/student/exercises/api/use-attempt';
 import type {
   AttemptRecord,
@@ -81,6 +83,13 @@ export function TranslateSolver({
    */
   const [review, setReview] = useState<AttemptReview | null>(null);
   const [submissions, setSubmissions] = useState(0);
+  /**
+   * How a failed `submit` actually left things (47.0.B) — `null` while nothing has
+   * failed, or once the check above resolved it as delivered, in which case `sent`
+   * already carries the news and this has nothing further to say.
+   */
+  const [sendFailure, setSendFailure] = useState<SubmitFailureResolution | null>(null);
+  const [confirmingDelivery, setConfirmingDelivery] = useState(false);
 
   /** Wall-clock since the attempt opened; the engine records it per submission. */
   const openedAt = useRef(0);
@@ -172,6 +181,7 @@ export function TranslateSolver({
   }
 
   function send() {
+    setSendFailure(null);
     submit.mutate(
       {
         submittedAnswer: { answers: toSubmission(items, value) },
@@ -185,6 +195,21 @@ export function TranslateSolver({
           // teacher's to say. The reader counts it as attempted either way.
           if (submissions === 0) onChecked?.(data.requiresReview ? null : data.correct);
           setSubmissions((n) => n + 1);
+        },
+        onError: async () => {
+          if (attemptId === null) return;
+          setConfirmingDelivery(true);
+          const resolution = await resolveSubmitFailure(exerciseId, attemptId);
+          setConfirmingDelivery(false);
+          if (resolution === 'delivered') {
+            // It reached the engine; only the response was lost. Saying so calmly is
+            // owed here — a second "send" would try to hand in what is already there.
+            setSent('review');
+            if (submissions === 0) onChecked?.(null);
+            setSubmissions((n) => n + 1);
+          } else {
+            setSendFailure(resolution);
+          }
         },
       },
     );
@@ -230,6 +255,7 @@ export function TranslateSolver({
     setRouting(null);
     setReview(null);
     setSubmissions(0);
+    setSendFailure(null);
     begin();
   }
 
@@ -293,12 +319,12 @@ export function TranslateSolver({
           )}
           <button
             type="button"
-            disabled={submit.isPending}
+            disabled={submit.isPending || confirmingDelivery}
             onClick={allWritten ? send : showEmpty}
             className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
             style={{ background: PRACTICE_ACCENT }}
           >
-            {submit.isPending ? t('translate.sending') : t('translate.send')}
+            {submit.isPending || confirmingDelivery ? t('translate.sending') : t('translate.send')}
           </button>
           {/*
             Why the button is off, or — once it is on — what handing in will do. The
@@ -312,9 +338,21 @@ export function TranslateSolver({
                 ? t('translate.exactPasses')
                 : t('translate.allRead')}
           </span>
-          {submit.isError && (
+          {/*
+            47.0.B: a failed `submit` is resolved against the server before this shows
+            anything — "not-delivered" (nothing arrived, try again) reads differently
+            from "unconfirmed" (the check itself failed, so neither "sent" nor "lost"
+            would be true). A `resolveSubmitFailure` call that found the work already
+            delivered skips this entirely and moves `sent` on instead.
+          */}
+          {sendFailure === 'not-delivered' && (
             <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('translate.sendFailed')}
+              {t('translate.sendFailedRetry')}
+            </span>
+          )}
+          {sendFailure === 'unconfirmed' && (
+            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+              {t('translate.sendUnconfirmed')}
             </span>
           )}
         </div>

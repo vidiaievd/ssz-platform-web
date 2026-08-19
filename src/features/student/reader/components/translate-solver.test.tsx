@@ -118,11 +118,15 @@ const SELF_CHECK = {
 function mockApi(
   responses: {
     submit?: unknown;
+    submitFails?: boolean;
     startFails?: boolean;
     last?: unknown;
     started?: unknown;
     selfCheck?: unknown;
     selfCheckStatus?: number;
+    /** What `GET .../attempts/:attemptId` answers when a failed `submit` checks in (47.0.B). */
+    attemptStatus?: unknown;
+    attemptStatusFails?: boolean;
   } = {},
 ) {
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -137,12 +141,26 @@ function mockApi(
     }
 
     if (init?.method === undefined) {
+      // `GET .../attempts/<attemptId>` (47.0.B's status check) vs.
+      // `GET .../attempts` (the last-finished-attempt lookup) — same verb, different path.
+      if (/\/attempts\/[^/]+$/.test(path)) {
+        if (responses.attemptStatusFails) {
+          return new Response(JSON.stringify({ error: 'nope' }), { status: 502 });
+        }
+        return new Response(
+          JSON.stringify(responses.attemptStatus ?? { status: 'IN_PROGRESS' }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }
       return new Response(JSON.stringify(responses.last ?? { attempt: null }), {
         status: 200,
         headers: { 'content-type': 'application/json' },
       });
     }
     if (responses.startFails && !path.endsWith('/submit')) {
+      return new Response(JSON.stringify({ error: 'nope' }), { status: 502 });
+    }
+    if (path.endsWith('/submit') && responses.submitFails) {
       return new Response(JSON.stringify({ error: 'nope' }), { status: 502 });
     }
     return new Response(
@@ -419,5 +437,52 @@ describe('TranslateSolver', () => {
     expect(await screen.findByText('Your teacher sent this back')).toBeInTheDocument();
     expect(screen.getByText('Prøv igjen med perfektum.')).toBeInTheDocument();
     expect(screen.queryByText(/out of 100/)).not.toBeInTheDocument();
+  });
+
+  /**
+   * 47.0.B: a failed `submit` is not a verdict on its own — the work may already have
+   * reached the teacher, only the response got lost on the way back.
+   */
+  describe('when submit fails', () => {
+    it('shows "handed in" — not an error — when the attempt already reached the teacher', async () => {
+      renderSolver(
+        mockApi({ submitFails: true, attemptStatus: { status: 'ROUTED_FOR_REVIEW' } }),
+      );
+
+      await answer('Jeg har bodd i Tromsø i tre år.');
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+
+      expect(
+        await screen.findByText('Handed in. Your teacher will look at it.'),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/try again/i)).not.toBeInTheDocument();
+    });
+
+    it('offers a resend, and says the last attempt did not go through, when nothing arrived', async () => {
+      renderSolver(mockApi({ submitFails: true, attemptStatus: { status: 'IN_PROGRESS' } }));
+
+      await answer('Jeg har bodd i Tromsø i tre år.');
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+
+      expect(
+        await screen.findByText(
+          "That attempt didn't go through — your answer is still here, try again.",
+        ),
+      ).toBeInTheDocument();
+      expect(await screen.findByRole('textbox')).toHaveValue('Jeg har bodd i Tromsø i tre år.');
+      expect(screen.getByRole('button', { name: 'Hand in to the teacher' })).toBeEnabled();
+    });
+
+    it('says it could not confirm delivery, not that the work was lost, when the check itself fails', async () => {
+      renderSolver(mockApi({ submitFails: true, attemptStatusFails: true }));
+
+      await answer('Jeg har bodd i Tromsø i tre år.');
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+
+      expect(
+        await screen.findByText("Couldn't confirm that reached your teacher — try again."),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/didn't go through/i)).not.toBeInTheDocument();
+    });
   });
 });

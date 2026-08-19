@@ -6,9 +6,11 @@ import { useTranslations } from 'next-intl';
 import {
   AttemptRequestError,
   fetchLastAttempt,
+  resolveSubmitFailure,
   useSelfCheck,
   useStartAttempt,
   useSubmitAnswer,
+  type SubmitFailureResolution,
 } from '@/features/student/exercises/api/use-attempt';
 import type { SelfCheckFeedback, StudentProjection } from '@/lib/shared-kernel/error-correction';
 import {
@@ -71,6 +73,13 @@ export function ErrorCorrectionSolver({
   /** How the submission ended: approved outright, or handed to a teacher. */
   const [sent, setSent] = useState<'passed' | 'review' | null>(null);
   const [submissions, setSubmissions] = useState(0);
+  /**
+   * How a failed `submit` actually left things (47.0.B) — `null` while nothing has
+   * failed, or once resolved as delivered, in which case `sent` already carries the
+   * news and this has nothing further to say.
+   */
+  const [sendFailure, setSendFailure] = useState<SubmitFailureResolution | null>(null);
+  const [confirmingDelivery, setConfirmingDelivery] = useState(false);
 
   /** Wall-clock since the attempt opened; the engine records it per submission. */
   const openedAt = useRef(0);
@@ -162,6 +171,7 @@ export function ErrorCorrectionSolver({
   }
 
   function send() {
+    setSendFailure(null);
     submit.mutate(
       {
         submittedAnswer: { items: value },
@@ -174,6 +184,21 @@ export function ErrorCorrectionSolver({
           // the teacher's to say. The reader counts it as attempted either way.
           if (submissions === 0) onChecked?.(data.requiresReview ? null : data.correct);
           setSubmissions((n) => n + 1);
+        },
+        onError: async () => {
+          if (attemptId === null) return;
+          setConfirmingDelivery(true);
+          const resolution = await resolveSubmitFailure(exerciseId, attemptId);
+          setConfirmingDelivery(false);
+          if (resolution === 'delivered') {
+            // It reached the engine; only the response was lost. Saying so calmly is
+            // owed here — a second "send" would try to hand in what is already there.
+            setSent('review');
+            if (submissions === 0) onChecked?.(null);
+            setSubmissions((n) => n + 1);
+          } else {
+            setSendFailure(resolution);
+          }
         },
       },
     );
@@ -221,6 +246,7 @@ export function ErrorCorrectionSolver({
     setChecksLeft(null);
     setSent(null);
     setSubmissions(0);
+    setSendFailure(null);
     begin();
   }
 
@@ -278,21 +304,33 @@ export function ErrorCorrectionSolver({
           )}
           <button
             type="button"
-            disabled={submit.isPending}
+            disabled={submit.isPending || confirmingDelivery}
             onClick={allTouched ? send : showUntouched}
             className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
             style={{ background: PRACTICE_ACCENT }}
           >
-            {submit.isPending ? t('errorCorrection.sending') : t('errorCorrection.send')}
+            {submit.isPending || confirmingDelivery
+              ? t('errorCorrection.sending')
+              : t('errorCorrection.send')}
           </button>
           {!allTouched && (
             <span className="text-[12.5px] text-(--ssz-text-muted)">
               {t('errorCorrection.untouched', { count: untouchedCount })}
             </span>
           )}
-          {submit.isError && (
+          {/*
+            47.0.B: resolved against the server before showing anything — see
+            translate-solver.tsx for why "not-delivered" and "unconfirmed" are kept
+            apart, and why a delivered attempt skips this and moves `sent` on instead.
+          */}
+          {sendFailure === 'not-delivered' && (
             <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('errorCorrection.sendFailed')}
+              {t('errorCorrection.sendFailedRetry')}
+            </span>
+          )}
+          {sendFailure === 'unconfirmed' && (
+            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+              {t('errorCorrection.sendUnconfirmed')}
             </span>
           )}
         </div>
