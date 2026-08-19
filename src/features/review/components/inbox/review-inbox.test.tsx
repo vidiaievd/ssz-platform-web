@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -12,6 +12,9 @@ const replace = vi.fn();
 let search = '';
 
 const push = vi.fn();
+
+const toastSuccess = vi.fn();
+vi.mock('sonner', () => ({ toast: { success: toastSuccess, error: vi.fn() } }));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace, push }),
@@ -115,11 +118,20 @@ const SUBMISSION = {
   canDecide: true,
 };
 
-function answer(body: ReviewQueueResponse | 'error') {
+function answer(
+  body: ReviewQueueResponse | 'error',
+  batch: { approved: number; skipped: { id: string; reason: string }[] } = {
+    approved: 0,
+    skipped: [],
+  },
+) {
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
+      if (url.includes('/batch-approve')) {
+        return new Response(JSON.stringify(batch), { status: 200 });
+      }
       if (url.includes('/submissions/')) {
         return new Response(JSON.stringify(SUBMISSION), { status: 200 });
       }
@@ -128,6 +140,29 @@ function answer(body: ReviewQueueResponse | 'error') {
         : new Response(JSON.stringify(body), { status: 200 });
     }),
   );
+}
+
+/** The same queue, with both submissions closed outright by the machine. */
+function cleanQueue(): ReviewQueueResponse {
+  const group = QUEUE.groups[0]!;
+  return {
+    ...QUEUE,
+    groups: [
+      {
+        ...group,
+        autoCleanIds: ['att-1', 'att-2'],
+        items: group.items.map((item) => ({ ...item, autoClean: true })),
+      },
+    ],
+  };
+}
+
+/** What the batch call actually carried. */
+function batchBody(): { attemptIds: string[] } {
+  const call = vi
+    .mocked(fetch)
+    .mock.calls.find(([input]) => String(input).includes('/batch-approve'));
+  return JSON.parse(String(call?.[1]?.body)) as { attemptIds: string[] };
 }
 
 function renderInbox() {
@@ -149,6 +184,7 @@ beforeEach(() => {
   // Folding is module-global client state; a group left shut by one test would make the
   // next one assert against an empty list for reasons nothing in it explains.
   useReviewViewStore.getState().expandAll();
+  toastSuccess.mockClear();
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -347,5 +383,73 @@ describe('the queue list', () => {
     await userEvent.click(await screen.findByRole('button', { name: /Anna Kowalska/ }));
     expect(push).toHaveBeenCalledWith('/en/school/oslo-skole/review/att-1');
     expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('names every learner before it offers the button that passes them (criterion 8)', async () => {
+    const user = userEvent.setup();
+    answer(cleanQueue());
+    renderInbox();
+
+    await user.click(await screen.findByRole('button', { name: 'Pass 2 clean' }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('Anna Kowalska')).toBeInTheDocument();
+    expect(within(dialog).getByText('Peter Svensson')).toBeInTheDocument();
+    expect(within(dialog).getByText(/no undo/i)).toBeInTheDocument();
+    // Nothing has been sent by opening it.
+    expect(vi.mocked(fetch).mock.calls.some(([u]) => String(u).includes('/batch-approve'))).toBe(
+      false,
+    );
+  });
+
+  it('carries out the list it showed, by id', async () => {
+    const user = userEvent.setup();
+    answer(cleanQueue(), { approved: 2, skipped: [] });
+    renderInbox();
+
+    await user.click(await screen.findByRole('button', { name: 'Pass 2 clean' }));
+    await user.click(await screen.findByRole('button', { name: 'Pass 2' }));
+
+    await waitFor(() => expect(batchBody().attemptIds).toEqual(['att-1', 'att-2']));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('leaves out a submission a colleague already has open', async () => {
+    const queue = cleanQueue();
+    const group = queue.groups[0]!;
+    group.items[1] = {
+      ...group.items[1]!,
+      lock: { teacherId: 't9', teacherName: 'Marius Berg', expiresAt: hoursAgo(-1) },
+    };
+    answer(queue);
+    renderInbox();
+
+    // One clean submission left, and the batch is offered from two upwards.
+    expect(await screen.findByRole('button', { name: /Anna Kowalska/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Pass \d+ clean/ })).not.toBeInTheDocument();
+  });
+
+  it('does not offer the batch when the pass is by learner', async () => {
+    search = 'groupBy=student';
+    answer(cleanQueue());
+    renderInbox();
+
+    expect(await screen.findByRole('button', { name: /Anna Kowalska/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /clean/ })).not.toBeInTheDocument();
+  });
+
+  it('says what it could not do, beside what it did', async () => {
+    const user = userEvent.setup();
+    answer(cleanQueue(), { approved: 1, skipped: [{ id: 'att-2', reason: 'already_reviewed' }] });
+    renderInbox();
+
+    await user.click(await screen.findByRole('button', { name: 'Pass 2 clean' }));
+    await user.click(await screen.findByRole('button', { name: 'Pass 2' }));
+
+    await waitFor(() => expect(toastSuccess).toHaveBeenCalled());
+    expect(toastSuccess.mock.calls[0]?.[0]).toBe('1 submission passed');
+    expect(toastSuccess.mock.calls[0]?.[1]).toMatchObject({
+      description: '1 already answered by a colleague',
+    });
   });
 });

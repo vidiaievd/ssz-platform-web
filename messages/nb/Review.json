@@ -147,5 +147,24 @@
       "return": "send tilbake",
       "next": "neste"
     }
+  },
+  "batch": {
+    "dialog": {
+      "title": "Godkjenne {count} besvarelser maskinen lukket?",
+      "body": "Disse elevene svarte på «{exercise}» nøyaktig som fasiten, og ingenting ble liggende igjen til et menneske.",
+      "thisExercise": "denne oppgaven",
+      "irreversible": "Dette kan ikke angres. Hver elev får beskjed om at arbeidet er godkjent, og avgjørelsen føres i ditt navn.",
+      "cancel": "Avbryt",
+      "confirm": "Godkjenn {count}"
+    },
+    "done": "{count, plural, one {# besvarelse godkjent} other {# besvarelser godkjent}}",
+    "skipped": {
+      "already_reviewed": "{count} er allerede besvart av en kollega",
+      "not_clean": "{count} må leses likevel — fasiten er endret",
+      "not_found": "{count} venter ikke lenger",
+      "not_pending": "{count} venter ikke lenger",
+      "unavailable": "{count} kunne ikke sjekkes"
+    },
+    "failed": "Ingenting ble godkjent — bunken kunne ikke sendes."
   }
 }

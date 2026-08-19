@@ -147,5 +147,24 @@
       "return": "send back",
       "next": "next"
     }
+  },
+  "batch": {
+    "dialog": {
+      "title": "Pass {count} submissions the machine closed?",
+      "body": "These learners answered «{exercise}» exactly as the answer key has it, and nothing was left for a person to read.",
+      "thisExercise": "this exercise",
+      "irreversible": "There is no undo. Each learner is told their work was passed, and the verdict is recorded in your name.",
+      "cancel": "Cancel",
+      "confirm": "Pass {count}"
+    },
+    "done": "{count, plural, one {# submission passed} other {# submissions passed}}",
+    "skipped": {
+      "already_reviewed": "{count} already answered by a colleague",
+      "not_clean": "{count} needs reading after all — the answer key has changed",
+      "not_found": "{count} no longer waiting",
+      "not_pending": "{count} no longer waiting",
+      "unavailable": "{count} could not be checked"
+    },
+    "failed": "Nothing was passed — the batch could not be sent."
   }
 }

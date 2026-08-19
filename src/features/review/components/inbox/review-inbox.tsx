@@ -1,13 +1,15 @@
 'use client';
 
-import { useCallback, useId } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { CheckCircle2, Filter } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
+import { useBatchApprove } from '../../api/use-batch-approve';
 import { useReviewQueue } from '../../api/use-review-queue';
 import {
   DEFAULT_FILTERS,
@@ -16,11 +18,18 @@ import {
   queueFiltersToQuery,
 } from '../../lib/queue-filters';
 import { useReviewViewStore } from '../../stores/review-view-store';
-import type { ReviewGroupBy, ReviewQueueFilters, ReviewQueueGroup } from '../../types';
+import type {
+  ReviewBatchResult,
+  ReviewGroupBy,
+  ReviewQueueFilters,
+  ReviewQueueGroup,
+  ReviewQueueItem,
+} from '../../types';
 import { useAgeWords } from '../age-mark';
 
 import { SubmissionPanel } from '../submission/submission-panel';
 
+import { BatchApproveDialog } from './batch-approve-dialog';
 import { GroupHead } from './group-head';
 import { QueueFiltersBar } from './queue-filters-bar';
 import { QueueRow } from './queue-row';
@@ -53,6 +62,29 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
   const selected = searchParams.get('submission');
   const { data, isPending, isError, refetch } = useReviewQueue(school, filters);
   const place = selected === null ? null : placeOf(data, selected);
+
+  // The batch is resolved to a list of learners the moment it is started, and the dialog
+  // confirms that list. Re-reading the group when the button is pressed would confirm one
+  // set of names and carry out another.
+  const [batch, setBatch] = useState<{ group: ReviewQueueGroup; items: ReviewQueueItem[] } | null>(
+    null,
+  );
+  const batchApprove = useBatchApprove(school);
+
+  const confirmBatch = useCallback(
+    (attemptIds: string[]) => {
+      batchApprove.mutate(attemptIds, {
+        onSuccess: (result) => {
+          setBatch(null);
+          toast.success(t('batch.done', { count: result.approved }), {
+            description: skippedSummary(result, t),
+          });
+        },
+        onError: () => toast.error(t('batch.failed')),
+      });
+    },
+    [batchApprove, t],
+  );
 
   // The view lives in the address bar (criterion 6), so every control writes there and
   // reads back — no second copy of the filters to fall out of step with the URL.
@@ -137,12 +169,21 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
                   groupBy={filters.groupBy}
                   selected={selected}
                   onSelect={selectSubmission}
+                  onBatch={setBatch}
                 />
               ))}
             </ul>
           )}
         </div>
       </div>
+
+      <BatchApproveDialog
+        group={batch?.group ?? null}
+        items={batch?.items ?? []}
+        pending={batchApprove.isPending}
+        onConfirm={confirmBatch}
+        onCancel={() => setBatch(null)}
+      />
 
       {/* Hidden below 1024px, where the submission becomes its own page instead: two real
           columns do not fit, and a panel squeezed beside the queue would be neither. */}
@@ -167,6 +208,29 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
       </div>
     </div>
   );
+}
+
+/**
+ * What the batch could not do, in one line under the count.
+ *
+ * Grouped by reason rather than listed by name: the answer to "why is it 5 and not 6" is
+ * the reason, and a teacher who wants the name will find the submission still sitting in
+ * their queue.
+ */
+function skippedSummary(
+  result: ReviewBatchResult,
+  t: ReturnType<typeof useTranslations<'Review'>>,
+): string | undefined {
+  if (result.skipped.length === 0) return undefined;
+
+  const byReason = new Map<string, number>();
+  for (const entry of result.skipped) {
+    byReason.set(entry.reason, (byReason.get(entry.reason) ?? 0) + 1);
+  }
+
+  return [...byReason.entries()]
+    .map(([reason, count]) => t(`batch.skipped.${reason as 'already_reviewed'}`, { count }))
+    .join(' · ');
 }
 
 /** «27 работ · 9 дольше срока · самая старая 4 дня» — the queue in one line. */
@@ -284,11 +348,13 @@ function QueueGroup({
   groupBy,
   selected,
   onSelect,
+  onBatch,
 }: {
   group: ReviewQueueGroup;
   groupBy: ReviewGroupBy;
   selected: string | null;
   onSelect: (id: string) => void;
+  onBatch: (batch: { group: ReviewQueueGroup; items: ReviewQueueItem[] }) => void;
 }) {
   const collapsed = useReviewViewStore((state) => state.collapsed[group.key] === true);
   const toggleGroup = useReviewViewStore((state) => state.toggleGroup);
@@ -296,7 +362,11 @@ function QueueGroup({
 
   // A submission a colleague holds is excluded from the batch: passing it in bulk is
   // exactly the collision the marker exists to prevent, and the verdict would 409 anyway.
-  const cleanCount = group.items.filter((item) => item.autoClean && item.lock === null).length;
+  const clean = group.items.filter((item) => item.autoClean && item.lock === null);
+  // Not offered when the pass is by learner: "pass everything clean of this learner's"
+  // spans exercises and courses, which is a different and much larger claim than the one
+  // the button makes (plan 45, open question 2).
+  const batchable = groupBy === 'exercise' ? clean : [];
 
   return (
     <li>
@@ -304,8 +374,9 @@ function QueueGroup({
         group={group}
         open={!collapsed}
         onToggle={() => toggleGroup(group.key)}
-        cleanCount={groupBy === 'exercise' ? cleanCount : 0}
+        cleanCount={batchable.length}
         controls={listId}
+        onBatch={() => onBatch({ group, items: batchable })}
       />
       {collapsed ? null : (
         <ul id={listId} className="flex flex-col gap-0.5 pb-1.5">

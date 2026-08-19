@@ -20,7 +20,7 @@ export interface GroupHeadProps {
   cleanCount: number;
   /** The id of the list this heading folds, so the button can point a reader at it. */
   controls?: string;
-  /** Absent until 45.9 gives the batch verdict its confirmation. */
+  /** Opens the confirmation. The heading never approves anything by itself. */
   onBatch?: (group: ReviewQueueGroup) => void;
 }
 
@@ -103,9 +103,6 @@ export function GroupHead({
           {cleanCount >= 2 ? (
             <button
               type="button"
-              // Until 45.9 there is nothing to confirm the batch with, and a button that
-              // passed six submissions on a single click without one would be the exact
-              // irreversible action criterion 8 exists to prevent.
               disabled={onBatch === undefined}
               onClick={(event) => {
                 event.stopPropagation();

@@ -198,3 +198,20 @@ export interface ReviewLockState {
   /** True when the holder is the caller — the screen's own marker, freshly extended. */
   mine: boolean;
 }
+
+/** Why one submission of a batch was left alone (plan 44 §44.10, plus the BFF's own). */
+export type ReviewBatchSkipReason =
+  | 'not_found'
+  | 'already_reviewed'
+  | 'not_pending'
+  | 'not_clean'
+  | 'unavailable';
+
+/**
+ * What a batch approval did. Partial success is the normal outcome, not an error: the
+ * screen reports a count and says how many names it had to leave alone, and why.
+ */
+export interface ReviewBatchResult {
+  approved: number;
+  skipped: { id: string; reason: ReviewBatchSkipReason }[];
+}
