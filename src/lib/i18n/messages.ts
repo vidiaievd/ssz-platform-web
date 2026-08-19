@@ -181,6 +181,9 @@ export const INVITE_NAMESPACES = [
 
 export const STUDENT_NAMESPACES = [
   'Student',
+  // The learner's half of the review system (plan 47): "Мои работы" reads the same
+  // namespace the teacher's inbox does, because it is one subsystem saying one thing.
+  'Review',
   'Learning',
   'Srs',
   'Exercise',

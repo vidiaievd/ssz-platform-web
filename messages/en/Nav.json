@@ -22,5 +22,6 @@
   "reviews": "Reviews",
   "progress": "Progress",
   "badgeCount": "{count} waiting",
-  "badgeCountOverdue": "{count} waiting, some past the promised time"
+  "badgeCountOverdue": "{count} waiting, some past the promised time",
+  "submissions": "My work"
 }

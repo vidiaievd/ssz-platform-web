@@ -22,5 +22,6 @@
   "reviews": "Повторення",
   "progress": "Прогрес",
   "badgeCount": "{count} очікує",
-  "badgeCountOverdue": "{count} очікує, дещо довше обіцяного строку"
+  "badgeCountOverdue": "{count} очікує, дещо довше обіцяного строку",
+  "submissions": "Мої роботи"
 }

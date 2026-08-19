@@ -342,5 +342,59 @@
       "failed": "Svartiden kunne ikke leses.",
       "fieldLabel": "Svartid i timer"
     }
+  },
+  "student": {
+    "eyebrow": "Mitt arbeid",
+    "title": "Levert til retting",
+    "subtitle": "{pending, plural, =0 {Ingenting venter på læreren} one {# arbeid venter på læreren} other {# arbeider venter på læreren}}, {returned, plural, =0 {ingenting kom tilbake} one {# kom tilbake til ny runde} other {# kom tilbake til ny runde}}.",
+    "subtitlePartial": "Talt over det som er lastet så langt — det er mer lenger ned.",
+    "tabs": {
+      "all": "Alle",
+      "pending": "Venter",
+      "returned": "Ny runde",
+      "approved": "Rettet"
+    },
+    "status": {
+      "pending": "Venter på retting",
+      "returned": "Tilbake til ny runde",
+      "approved": "Rettet"
+    },
+    "row": {
+      "attempt": "Forsøk {n}",
+      "signed": "{teacher} · {when}",
+      "unsigned": "Rettet {when}",
+      "open": "Åpne innleveringen",
+      "close": "Lukk innleveringen"
+    },
+    "due": {
+      "expected": "Svar ventes {when}",
+      "unknown": "Ingen svarfrist er satt for dette kurset",
+      "note": "Det er tiden skolen vanligvis bruker, ikke et løfte om svar i minuttet."
+    },
+    "pending": {
+      "body": "Levert for {age} siden, ligger i køen til læreren."
+    },
+    "comment": {
+      "label": "Kommentar · {teacher}",
+      "unsigned": "Kommentar"
+    },
+    "approved": {
+      "noComment": "Rettet, uten merknader."
+    },
+    "returned": {
+      "hint": "En ny runde er et nytt forsøk — kommentaren blir stående her ved siden av."
+    },
+    "group": {
+      "count": "{count, plural, one {# oppgave} other {# oppgaver}} levert"
+    },
+    "empty": {
+      "title": "Ingenting levert ennå",
+      "body": "Arbeid som læreren leser dukker opp her — sammen med det de sa om det.",
+      "filteredTitle": "Ingenting her",
+      "filteredBody": "Du har ingenting i denne tilstanden nå."
+    },
+    "failed": "Kunne ikke laste arbeidet ditt",
+    "retry": "Prøv igjen",
+    "more": "Vis mer"
   }
 }

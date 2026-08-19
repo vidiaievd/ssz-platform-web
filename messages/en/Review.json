@@ -342,5 +342,59 @@
       "failed": "The response time could not be read.",
       "fieldLabel": "Response time in hours"
     }
+  },
+  "student": {
+    "eyebrow": "My work",
+    "title": "Handed in for marking",
+    "subtitle": "{pending, plural, =0 {Nothing is waiting on a teacher} one {# piece of work is waiting on a teacher} other {# pieces of work are waiting on a teacher}}, {returned, plural, =0 {nothing came back} one {# came back for another go} other {# came back for another go}}.",
+    "subtitlePartial": "Counted over what is loaded so far — scroll on for the rest.",
+    "tabs": {
+      "all": "All",
+      "pending": "Waiting",
+      "returned": "Another go",
+      "approved": "Marked"
+    },
+    "status": {
+      "pending": "Waiting to be marked",
+      "returned": "Back for another go",
+      "approved": "Marked"
+    },
+    "row": {
+      "attempt": "Attempt {n}",
+      "signed": "{teacher} · {when}",
+      "unsigned": "Marked {when}",
+      "open": "Open this submission",
+      "close": "Close this submission"
+    },
+    "due": {
+      "expected": "Answer expected {when}",
+      "unknown": "No response time set for this course",
+      "note": "That is the usual time this school takes, not a promise for the minute."
+    },
+    "pending": {
+      "body": "Handed in {age} ago, waiting in your teacher's queue."
+    },
+    "comment": {
+      "label": "Comment · {teacher}",
+      "unsigned": "Comment"
+    },
+    "approved": {
+      "noComment": "Marked as correct, with nothing to add."
+    },
+    "returned": {
+      "hint": "Another go is a new attempt — this comment stays here beside it."
+    },
+    "group": {
+      "count": "{count, plural, one {# exercise} other {# exercises}} handed in"
+    },
+    "empty": {
+      "title": "Nothing handed in yet",
+      "body": "Work your teacher reads shows up here — with what they said about it.",
+      "filteredTitle": "Nothing here",
+      "filteredBody": "Nothing of yours is in this state right now."
+    },
+    "failed": "Could not load your work",
+    "retry": "Try again",
+    "more": "Show more"
   }
 }

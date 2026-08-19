@@ -22,5 +22,6 @@
   "reviews": "Повторение",
   "progress": "Прогресс",
   "badgeCount": "{count} ждёт",
-  "badgeCountOverdue": "{count} ждёт, часть дольше обещанного срока"
+  "badgeCountOverdue": "{count} ждёт, часть дольше обещанного срока",
+  "submissions": "Мои работы"
 }

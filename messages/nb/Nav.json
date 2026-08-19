@@ -22,5 +22,6 @@
   "reviews": "Repetisjon",
   "progress": "Fremgang",
   "badgeCount": "{count} venter",
-  "badgeCountOverdue": "{count} venter, noe er over fristen"
+  "badgeCountOverdue": "{count} venter, noe er over fristen",
+  "submissions": "Mitt arbeid"
 }
