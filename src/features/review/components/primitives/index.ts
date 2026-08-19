@@ -7,6 +7,10 @@
  * to `components/ui`; nothing has yet.
  */
 export { Chip } from './chip';
+export { Panel } from './panel';
+export type { PanelProps } from './panel';
+export { Stat } from './stat';
+export type { StatProps } from './stat';
 export { Note } from './note';
 export type { NoteProps, NoteTone } from './note';
 export { ALL, Sel } from './sel';

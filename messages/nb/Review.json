@@ -166,5 +166,35 @@
       "unavailable": "{count} kunne ikke sjekkes"
     },
     "failed": "Ingenting ble godkjent — bunken kunne ikke sendes."
+  },
+  "oversight": {
+    "eyebrow": "Skoleoversikt",
+    "title": "Retting",
+    "subtitle": "Hvor arbeidet har hopet seg opp, og hvem som trenger en hånd. Forsinkelse er et tegn på arbeidsmengde.",
+    "period": {
+      "label": "Perioden svarene telles over",
+      "days": "{n} dager"
+    },
+    "summary": {
+      "title": "Skolen",
+      "since": "Telles fra {date} — før det bar ikke innleveringene noen skole.",
+      "sinceUnknown": "Ingenting er levert inn til retting ennå.",
+      "pending": "Venter",
+      "pendingSub": "på tvers av alle grupper",
+      "overdue": "Lenger enn lovet",
+      "promise": "skolen lover {n} t",
+      "noPromise": "ingen svartid er satt ennå",
+      "oldest": "Eldste",
+      "oldestSub": "har ventet lengst",
+      "median": "Median svartid",
+      "medianSub": "siste {n} dager",
+      "medianNone": "ingenting ble besvart i denne perioden",
+      "truncated": "Skolen har mer som venter enn denne skjermen teller. Formen stemmer; totalene stopper ved taket."
+    },
+    "spread": {
+      "title": "Hele køen etter alder"
+    },
+    "failed": "Kunne ikke lese arbeidsmengden.",
+    "retry": "Prøv igjen"
   }
 }

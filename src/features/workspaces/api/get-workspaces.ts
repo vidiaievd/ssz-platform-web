@@ -10,11 +10,7 @@ import type { School } from '@/features/school/types';
 import type { WorkspaceContext, WorkspacesResponse } from '../types';
 import { STAFF_ROLES } from '../types';
 
-type SchoolsPayload =
-  | School[]
-  | { items: School[] }
-  | { schools: School[] }
-  | { data: School[] };
+type SchoolsPayload = School[] | { items: School[] } | { schools: School[] } | { data: School[] };
 
 function extractSchools(payload: SchoolsPayload): School[] {
   if (Array.isArray(payload)) return payload;
@@ -34,7 +30,13 @@ export const getWorkspaces = cache(async function (): Promise<WorkspacesResponse
       (v) => ({ status: 'fulfilled' as const, value: v }),
       () => ({ status: 'rejected' as const }),
     ),
-    serverFetch<{ id: string; name: string } | null>({ service: 'organization', path: '/tutoring/group' }).then(
+    serverFetch<{ id: string; name: string } | null>({
+      service: 'organization',
+      path: '/tutoring/group',
+      // Probed for every user: 404 when a tutor has no group yet, 403 when the
+      // account has no 'tutor' role at all. Both are normal, not failures.
+      expectedErrorStatuses: [403, 404],
+    }).then(
       (v) => ({ status: 'fulfilled' as const, value: v }),
       () => ({ status: 'rejected' as const }),
     ),

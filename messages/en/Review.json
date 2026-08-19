@@ -166,5 +166,35 @@
       "unavailable": "{count} could not be checked"
     },
     "failed": "Nothing was passed — the batch could not be sent."
+  },
+  "oversight": {
+    "eyebrow": "School oversight",
+    "title": "Review",
+    "subtitle": "Where work has piled up, and who could use a hand. A delay here is a sign of load.",
+    "period": {
+      "label": "Period the replies are counted over",
+      "days": "{n} days"
+    },
+    "summary": {
+      "title": "The school",
+      "since": "Counted from {date} — before that, submissions carried no school.",
+      "sinceUnknown": "Nothing has been handed in for review yet.",
+      "pending": "Waiting",
+      "pendingSub": "across every group",
+      "overdue": "Longer than promised",
+      "promise": "the school promises {n} h",
+      "noPromise": "no response time set yet",
+      "oldest": "Oldest",
+      "oldestSub": "the longest anyone has waited",
+      "median": "Median reply",
+      "medianSub": "over the last {n} days",
+      "medianNone": "nothing was answered in this period",
+      "truncated": "The school has more waiting than this screen counts. The shape is right; the totals stop at the ceiling."
+    },
+    "spread": {
+      "title": "The whole queue by age"
+    },
+    "failed": "The load could not be read.",
+    "retry": "Try again"
   }
 }
