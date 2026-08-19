@@ -390,7 +390,7 @@ describe('CurriculumTree', () => {
 
   it('links a block row straight to its editor', () => {
     renderTree();
-    const row = screen.getByText('En vanlig arbeidsdag').closest<HTMLElement>('[role="treeitem"]')!;
+    const row = screen.getByRole('group', { name: 'En vanlig arbeidsdag' });
     expect(within(row).getByRole('link', { name: 'Open lesson editor' })).toHaveAttribute(
       'href',
       '/school/my-school/content/module-1/lessons/item-1',
@@ -401,7 +401,7 @@ describe('CurriculumTree', () => {
   // puts it, but announced as unavailable rather than silently doing nothing.
   it('offers duplicate as a control that says it is not connected yet', () => {
     renderTree();
-    const row = screen.getByText('En vanlig arbeidsdag').closest<HTMLElement>('[role="treeitem"]')!;
+    const row = screen.getByRole('group', { name: 'En vanlig arbeidsdag' });
     const duplicate = within(row).getByRole('button', { name: /Duplicate/ });
     expect(duplicate).toHaveAttribute('aria-disabled', 'true');
     expect(duplicate).toHaveAccessibleName('Duplicate — not available yet');
