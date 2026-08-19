@@ -195,6 +195,35 @@
       "title": "Hele køen etter alder"
     },
     "failed": "Kunne ikke lese arbeidsmengden.",
-    "retry": "Prøv igjen"
+    "retry": "Prøv igjen",
+    "teachers": {
+      "title": "Lærere",
+      "sub": "Hvem som har det tungt, vises i lengden på halen — ikke i ett tall.",
+      "empty": "Ingenting venter på noen nå.",
+      "unnamed": "Navn utilgjengelig",
+      "noGroups": "ingen grupper nå",
+      "pending": "venter",
+      "overdue": "lenger enn lovet",
+      "median": "median svartid {age} · køen etter alder",
+      "noMedian": "besvarte ingenting i denne perioden",
+      "shared": "deler køen med en kollega"
+    },
+    "groups": {
+      "title": "Grupper",
+      "sub": "venter · lenger enn lovet",
+      "empty": "Ingen gruppe har noe som venter.",
+      "unnamed": "Gruppe"
+    },
+    "courses": {
+      "title": "Kurs",
+      "sub": "Et kurs kan love en annen svartid",
+      "empty": "Ingen kurs har noe som venter.",
+      "unnamed": "Kurs",
+      "promise": "svarer innen {n} t",
+      "noPromise": "ingen svartid satt",
+      "overridden": "satt på kurset",
+      "pending": "{n} venter",
+      "legend": "venter · lenger enn lovet"
+    }
   }
 }

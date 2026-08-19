@@ -8,10 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useOversight } from '../../api/use-oversight';
-import { Segment } from '../primitives';
+import { Panel, Segment } from '../primitives';
 import { OVERSIGHT_PERIODS, type OversightPeriod } from '../../types/oversight';
 
+import { GroupLoadPanel, CourseLoadPanel } from './load-panels';
 import { SchoolSummary } from './school-summary';
+import { TeacherLoadRow } from './teacher-load-row';
 
 export interface OversightScreenProps {
   /** The school as the address bar spells it — the BFF takes a slug or an id. */
@@ -90,10 +92,30 @@ export function OversightScreen({ school }: OversightScreenProps) {
 
       {data === undefined ? (
         isPending ? (
-          <Skeleton className="h-[220px] rounded-[14px]" />
+          <>
+            <Skeleton className="h-[220px] rounded-[14px]" />
+            <Skeleton className="h-[240px] rounded-[14px]" />
+          </>
         ) : null
       ) : (
-        <SchoolSummary data={data} />
+        <>
+          <SchoolSummary data={data} />
+
+          <Panel title={t('teachers.title')} sub={t('teachers.sub')} bodyClassName="px-2 pb-3 pt-2">
+            {data.teachers.length === 0 ? (
+              <p className="px-3 py-2 text-[12.5px] text-muted-foreground">{t('teachers.empty')}</p>
+            ) : (
+              data.teachers.map((teacher) => (
+                <TeacherLoadRow key={teacher.id} teacher={teacher} slaHours={data.schoolSlaHours} />
+              ))
+            )}
+          </Panel>
+
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-4">
+            <GroupLoadPanel groups={data.groups} slaHours={data.schoolSlaHours} />
+            <CourseLoadPanel courses={data.courses} />
+          </div>
+        </>
       )}
     </div>
   );

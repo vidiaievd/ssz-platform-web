@@ -195,6 +195,35 @@
       "title": "The whole queue by age"
     },
     "failed": "The load could not be read.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "teachers": {
+      "title": "Teachers",
+      "sub": "Who is under pressure shows in the length of the tail, not in one number.",
+      "empty": "Nothing is waiting on anyone right now.",
+      "unnamed": "Name unavailable",
+      "noGroups": "no groups right now",
+      "pending": "waiting",
+      "overdue": "longer than promised",
+      "median": "median reply {age} · queue by age",
+      "noMedian": "nothing answered in this period",
+      "shared": "shared with a colleague"
+    },
+    "groups": {
+      "title": "Groups",
+      "sub": "waiting · longer than promised",
+      "empty": "No group has anything waiting.",
+      "unnamed": "Group"
+    },
+    "courses": {
+      "title": "Courses",
+      "sub": "A course may promise a different response time",
+      "empty": "No course has anything waiting.",
+      "unnamed": "Course",
+      "promise": "responds within {n} h",
+      "noPromise": "no response time set",
+      "overridden": "set on the course",
+      "pending": "{n} waiting",
+      "legend": "waiting · longer than promised"
+    }
   }
 }
