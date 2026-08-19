@@ -1864,7 +1864,7 @@
       "approve": "Approve",
       "comment": "Comment",
       "sendBack": "Send back",
-      "actionsSoon": "The queue itself is not built yet — these actions show what it will offer.",
+      "actionsInInbox": "The verdict is given in Review, on the whole submission at once — these three are what waits there.",
       "aiNote": "The AI pre-check would draft a comment here, from the diff and your requirements.",
       "explanation": "Explanation of the key: {text}"
     },

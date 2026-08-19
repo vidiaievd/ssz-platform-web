@@ -1864,7 +1864,7 @@
       "approve": "Godkjenn",
       "comment": "Kommenter",
       "sendBack": "Send tilbake",
-      "actionsSoon": "Selve køen er ikke bygd ennå — knappene viser hva den vil tilby.",
+      "actionsInInbox": "Selve avgjørelsen tas i Retting, på hele innleveringen under ett — disse tre er det som venter der.",
       "aiNote": "AI-forsjekken vil skrive et forslag til kommentar her, basert på diffen og kravene dine.",
       "explanation": "Forklaring til fasiten: {text}"
     },

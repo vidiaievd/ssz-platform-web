@@ -37,24 +37,43 @@ describe('QueuePreview', () => {
     await user.type(screen.getByLabelText(/Sentence 1/), KEY);
 
     expect(screen.getByText('1 approved automatically · 0 for you')).toBeInTheDocument();
-    expect(screen.getByText('Matches the key')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+    expect(screen.getByText('closed by the machine')).toBeInTheDocument();
+    // Collapsed, so neither the diff nor the comment field is in the way.
+    expect(
+      screen.queryByLabelText('The answer against the key, word by word'),
+    ).not.toBeInTheDocument();
   });
 
-  it('opens up an answer that missed the key, with its diff and the actions to come', async () => {
+  it('opens up an answer that missed the key, with its diff and the key it was read against', async () => {
     const { user } = renderPreview();
 
     await user.type(screen.getByLabelText(/Sentence 1/), 'Jeg bor i Tromsø i tre år.');
 
     expect(screen.getByText('0 approved automatically · 1 for you')).toBeInTheDocument();
     expect(screen.getByLabelText('The answer against the key, word by word')).toBeInTheDocument();
-    // Drawn, and inert: the queue screen itself is plan 42's phase 8.
+    expect(screen.getByText(`closest accepted answer: ${KEY}`)).toBeInTheDocument();
+    // Drawn, and inert: this submission is the author's own, with nobody to send it back to.
     expect(screen.getByRole('button', { name: 'Approve' })).toBeDisabled();
     expect(
       screen.getByText(
-        'The queue itself is not built yet — these actions show what it will offer.',
+        'The verdict is given in Review, on the whole submission at once — these three are what waits there.',
       ),
     ).toBeInTheDocument();
+  });
+
+  /**
+   * The card is the marking screen's own `SentenceRow`, so what the author is shown is
+   * what the teacher will get — including where they will write about one sentence.
+   */
+  it('offers the per-sentence comment the teacher will have', async () => {
+    const { user } = renderPreview();
+
+    await user.type(screen.getByLabelText(/Sentence 1/), 'Jeg bor i Tromsø i tre år.');
+
+    await user.click(screen.getByRole('button', { name: 'Comment on this sentence' }));
+    await user.type(screen.getByRole('textbox', { name: 'Comment on this sentence' }), 'Tense.');
+
+    expect(screen.getByDisplayValue('Tense.')).toBeInTheDocument();
   });
 
   /**

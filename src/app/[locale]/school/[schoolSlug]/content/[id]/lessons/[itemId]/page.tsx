@@ -154,7 +154,7 @@ export default async function LessonEditorPage({
           container={moduleContainer}
           grammarRules={levelGrammarRules}
           backHref={backHref}
-          reviewHref={`${backHref}/lessons/${itemId}/review`}
+          reviewHref={`/school/${schoolSlug}/review?course=${id}`}
           publishSlot={publishSlot}
         />
       ) : (

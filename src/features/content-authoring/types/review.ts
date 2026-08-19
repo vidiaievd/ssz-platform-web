@@ -7,16 +7,19 @@ import type {
 } from '@/lib/shared-kernel/error-correction';
 import type { DiffToken, GuardHit, Routing, Verdict } from '@/lib/shared-kernel/translate';
 
-import type { CourseExerciseRef } from '../lib/collect-course-exercises';
-
 /**
- * The teacher's side of a submission — plan 42, phase 8.
+ * How one submission reads, item by item — the machine's half of a review.
  *
- * The queue is written over attempts in `ROUTED_FOR_REVIEW` whatever template produced
- * them, so what is shared sits in `ReviewItemCommon` and each template adds its own
- * reading of one item below it. Both vocabularies agree on the two things the screen and
- * the server turn on: a per-item `routing`, whose `pass` the server credits without
- * asking anyone, and a `verdict` to sort by.
+ * Written over attempts in `ROUTED_FOR_REVIEW` whatever template produced them, so what
+ * is shared sits in `ReviewItemCommon` and each template adds its own reading of one item
+ * below it. Both vocabularies agree on the two things the screen and the server turn on:
+ * a per-item `routing`, whose `pass` the server credits without asking anyone, and a
+ * `verdict` to sort by.
+ *
+ * These types stayed behind in `content-authoring` when the inbox moved to
+ * `features/review` (step 45.10): they are the vocabulary of the *templates*, which is
+ * what this feature owns, and both the review screen and the authoring previews read
+ * them. Everything about the queue itself lives in `features/review/types`.
  */
 export interface ReviewItemCommon {
   itemId: string;
@@ -86,74 +89,4 @@ export interface ReviewDetails<TItem extends ReviewItemDetail = ReviewItemDetail
   routedItems: number;
   passedItems: number;
   items: TItem[];
-}
-
-export interface ReviewQueueEntry {
-  attemptId: string;
-  userId: string;
-  /** Which exercise this submission belongs to — the only grouping a course inbox has. */
-  exerciseId: string;
-  templateCode: string;
-  submittedAnswer: unknown;
-  submittedAt: string | null;
-  timeSpentSeconds: number;
-  selfChecksUsed: number;
-  answersRevealed: boolean;
-  /**
-   * The machine's reading of this submission, recomputed when the queue was opened.
-   * `null` when the exercise could not be read — the submission is still reviewable, just
-   * without a diff to lean on. Which member of the union it is follows `templateCode`.
-   */
-  details: ReviewDetails | null;
-}
-
-export interface ReviewQueueResponse {
-  items: ReviewQueueEntry[];
-  total: number;
-  limit: number;
-  offset: number;
-  /**
-   * Who the submissions are from, keyed by user id and joined in by the BFF — neither
-   * exercise-engine nor content-service holds a name. An id missing from here is one the
-   * directory could not answer for, which the card shows as the shortened id it always
-   * did: a queue is worth opening without names, and worth nothing unopened.
-   */
-  learners: Record<string, LearnerSummary>;
-}
-
-export interface LearnerSummary {
-  userId: string;
-  displayName: string;
-  avatarUrl?: string;
-}
-
-/**
- * The same queue across a whole course, plus the names the submissions hang under.
- *
- * The exercises travel with the queue because they are what the course tree knows and the
- * engine does not: an entry comes back keyed by `exerciseId`, and only the tree can say
- * which lesson that is, or what it is called.
- */
-export interface CourseReviewQueueResponse extends ReviewQueueResponse {
-  exercises: CourseExerciseRef[];
-}
-
-export interface ReviewDecision {
-  itemId: string;
-  approved: boolean;
-  comment?: string;
-}
-
-export interface ReviewAttemptRequest {
-  outcome: 'approved' | 'returned';
-  decisions?: ReviewDecision[];
-  comment?: string;
-}
-
-export interface ReviewAttemptResult {
-  attemptId: string;
-  status: 'SCORED' | 'RETURNED';
-  score: number | null;
-  approvedItems: number;
-  totalItems: number;
 }
