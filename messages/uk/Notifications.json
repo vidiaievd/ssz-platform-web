@@ -163,7 +163,10 @@
       "bodyWithComment": "Викладач написав: {comment}",
       "bodyReturned": "Перегляньте ще раз і здайте знову.",
       "bodyReturnedWithComment": "Викладач написав: {comment}",
-      "bodyFallback": "Відкрийте вправу, щоб побачити відповідь викладача."
+      "bodyFallback": "Відкрийте вправу, щоб побачити відповідь викладача.",
+      "titleNamed": "Учитель перевірив «{exercise}»",
+      "titleReturnedNamed": "Учитель повернув «{exercise}» на доопрацювання",
+      "bodyApprovedWithNote": "Зараховано, але до одного з речень є зауваження."
     }
   }
 }

@@ -86,8 +86,20 @@ export interface AttemptReviewedData {
   outcome: 'approved' | 'returned';
   score: number | null;
   comment: string | null;
+  /**
+   * A person wrote something, anywhere — overall or on a single sentence (47.4).
+   *
+   * Not the same question as `comment !== null`, and the difference is what separates
+   * "marked, nothing to add" from "marked, go and look". Optional because messages
+   * written before the field existed are still in learners' lists.
+   */
+  hasComment?: boolean;
   approvedItems: number;
   totalItems: number;
+  /** The course the work belongs to, as snapshotted on the attempt. */
+  containerId?: string | null;
+  /** Course · lesson · exercise as they read when the work was started. */
+  exercisePath?: { course: string; module: string | null; exercise: string | null } | null;
   occurredAt: string;
 }
 

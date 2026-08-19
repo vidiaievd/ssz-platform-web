@@ -163,7 +163,10 @@
       "bodyWithComment": "Læreren skrev: {comment}",
       "bodyReturned": "Se på det en gang til og lever på nytt.",
       "bodyReturnedWithComment": "Læreren skrev: {comment}",
-      "bodyFallback": "Åpne oppgaven for å se hva læreren sa."
+      "bodyFallback": "Åpne oppgaven for å se hva læreren sa.",
+      "titleNamed": "Læreren din har rettet «{exercise}»",
+      "titleReturnedNamed": "Læreren din sendte «{exercise}» tilbake",
+      "bodyApprovedWithNote": "Godkjent, med en merknad til én av setningene."
     }
   }
 }

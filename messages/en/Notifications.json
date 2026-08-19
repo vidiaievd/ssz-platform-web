@@ -163,7 +163,10 @@
       "bodyWithComment": "Your teacher wrote: {comment}",
       "bodyReturned": "Have another look and hand it in again.",
       "bodyReturnedWithComment": "Your teacher wrote: {comment}",
-      "bodyFallback": "Open the exercise to see what your teacher said."
+      "bodyFallback": "Open the exercise to see what your teacher said.",
+      "titleNamed": "Your teacher has marked “{exercise}”",
+      "titleReturnedNamed": "Your teacher sent “{exercise}” back",
+      "bodyApprovedWithNote": "Marked as correct, with a note on one of the sentences."
     }
   }
 }

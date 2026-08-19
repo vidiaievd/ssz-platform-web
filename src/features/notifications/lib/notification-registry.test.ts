@@ -48,7 +48,12 @@ describe('notification-registry', () => {
 
   it('deep-links ENROLLMENT_APPROVED to the school card on the student home page', () => {
     const entry = getNotificationEntry('ENROLLMENT_APPROVED');
-    const data = { membershipId: 'm1', schoolId: 's1', schoolName: 'Greenwood School', occurredAt: new Date().toISOString() };
+    const data = {
+      membershipId: 'm1',
+      schoolId: 's1',
+      schoolName: 'Greenwood School',
+      occurredAt: new Date().toISOString(),
+    };
 
     expect(entry.resolveBody(data, t)).toContain('Greenwood School');
     expect(entry.getLink(data, { workspaceKind: 'student' })).toBe('/student/dashboard#school-s1');
@@ -122,12 +127,50 @@ describe('notification-registry', () => {
       expect(entry.resolveBody(data, t)).toBe(t('types.ATTEMPT_REVIEWED.bodyReturned'));
     });
 
-    // The attempt knows its exercise but not the course and unit the learner reaches it
-    // through, so there is no honest destination to send them to yet.
-    it('carries no link rather than a guessed one', () => {
+    /**
+     * 47.4: the verdict now leads back to the card that holds it — comment, teacher and
+     * the way into a second attempt — rather than leaving the learner to go and find it.
+     */
+    it('leads to the card this verdict lives in, for the learner and nobody else', () => {
       const entry = getNotificationEntry('ATTEMPT_REVIEWED');
 
-      expect(entry.getLink(reviewed(), { workspaceKind: 'student' })).toBeUndefined();
+      expect(entry.getLink(reviewed(), { workspaceKind: 'student' })).toBe(
+        '/student/submissions?submission=att-1',
+      );
+      expect(entry.getLink(reviewed(), { workspaceKind: 'school' })).toBeUndefined();
+    });
+
+    it('names the exercise when the attempt carried one', () => {
+      const entry = getNotificationEntry('ATTEMPT_REVIEWED');
+      const path = { course: 'Ny i Norge — A2', module: 'Leksjon 19', exercise: 'Familien' };
+
+      expect(entry.resolveTitle(reviewed({ exercisePath: path }), t)).toBe(
+        'Your teacher has marked “Familien”',
+      );
+      expect(entry.resolveTitle(reviewed({ exercisePath: path, outcome: 'returned' }), t)).toBe(
+        'Your teacher sent “Familien” back',
+      );
+    });
+
+    /**
+     * A note on one sentence with nothing said overall: there is something to read, and
+     * the tally alone would close a matter that is still open.
+     */
+    it('sends the learner to read a note left on a single sentence', () => {
+      const entry = getNotificationEntry('ATTEMPT_REVIEWED');
+
+      expect(entry.resolveBody(reviewed({ comment: null, hasComment: true }), t)).toBe(
+        t('types.ATTEMPT_REVIEWED.bodyApprovedWithNote'),
+      );
+    });
+
+    /** Criterion 42: the silent approval is still a message, and still says what counted. */
+    it('keeps saying how much counted when nobody wrote anything anywhere', () => {
+      const entry = getNotificationEntry('ATTEMPT_REVIEWED');
+
+      expect(entry.resolveBody(reviewed({ comment: null, hasComment: false }), t)).toBe(
+        '4 of 5 sentences counted.',
+      );
     });
   });
 });

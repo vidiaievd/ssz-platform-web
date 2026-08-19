@@ -260,7 +260,9 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         ? t('types.PLACEMENT_REVIEW_READY.body', { school: data.schoolName })
         : t('types.PLACEMENT_REVIEW_READY.bodyFallback'),
     getLink: (_data, ctx) =>
-      ctx.workspaceKind === 'school' && ctx.schoolSlug ? `/school/${ctx.schoolSlug}/enrollment/placement` : undefined,
+      ctx.workspaceKind === 'school' && ctx.schoolSlug
+        ? `/school/${ctx.schoolSlug}/enrollment/placement`
+        : undefined,
   },
   GROUP_ASSIGNED: {
     icon: Users,
@@ -268,7 +270,9 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     priority: 'normal',
     actionable: false,
     resolveTitle: (data, t) =>
-      isGroupAssignedData(data) ? t('types.GROUP_ASSIGNED.title', { group: data.groupName }) : t('types.GROUP_ASSIGNED.titleFallback'),
+      isGroupAssignedData(data)
+        ? t('types.GROUP_ASSIGNED.title', { group: data.groupName })
+        : t('types.GROUP_ASSIGNED.titleFallback'),
     resolveBody: (data, t) =>
       isGroupAssignedData(data)
         ? t('types.GROUP_ASSIGNED.body', { group: data.groupName, school: data.schoolName })
@@ -279,26 +283,37 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         : undefined,
   },
   /**
-   * The one notification a learner is owed rather than informed of — plan 42.
+   * The one notification a learner is owed rather than informed of — plan 42, enriched
+   * by 47.4.
    *
    * Both outcomes and both kinds of approval land here, and the wording separates them:
    * being sent back asks for work, being marked with a comment asks for reading, being
-   * marked in silence asks for nothing but still has to arrive.
+   * marked in silence asks for nothing but still has to arrive (criterion 42).
    *
-   * No link yet: the attempt carries a user and an exercise, and the learner's route to
-   * an exercise runs through its course and unit, neither of which the attempt knows.
-   * The same missing snapshot blocks the course-wide marking inbox, and both get a link
-   * the day it exists — a wrong destination would be worse than none.
+   * It now names the work and leads to it. The link goes to "Мои работы" rather than to
+   * the exercise: that screen has the verdict, the comment and the way into a second
+   * attempt all in one card, and it is addressable by the attempt alone — the exercise's
+   * own place in a course is something the notification still does not know.
    */
   ATTEMPT_REVIEWED: {
     icon: ClipboardCheck,
     category: 'Learning',
     priority: 'normal',
     actionable: false,
-    resolveTitle: (data, t) =>
-      isAttemptReviewedData(data) && data.outcome === 'returned'
-        ? t('types.ATTEMPT_REVIEWED.titleReturned')
-        : t('types.ATTEMPT_REVIEWED.title'),
+    resolveTitle: (data, t) => {
+      if (!isAttemptReviewedData(data)) return t('types.ATTEMPT_REVIEWED.title');
+      // The exercise by name, because a learner who handed in a lesson's worth at one
+      // sitting gets a column of these and "your work" tells them apart from nothing.
+      const exercise = data.exercisePath?.exercise ?? null;
+      if (data.outcome === 'returned') {
+        return exercise === null
+          ? t('types.ATTEMPT_REVIEWED.titleReturned')
+          : t('types.ATTEMPT_REVIEWED.titleReturnedNamed', { exercise });
+      }
+      return exercise === null
+        ? t('types.ATTEMPT_REVIEWED.title')
+        : t('types.ATTEMPT_REVIEWED.titleNamed', { exercise });
+    },
     resolveBody: (data, t) => {
       if (!isAttemptReviewedData(data)) return t('types.ATTEMPT_REVIEWED.bodyFallback');
       if (data.outcome === 'returned') {
@@ -309,14 +324,26 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
       if (data.comment !== null && data.comment.trim() !== '') {
         return t('types.ATTEMPT_REVIEWED.bodyWithComment', { comment: data.comment });
       }
-      // Nothing written, so the numbers are the whole answer — and they are the answer
-      // the learner was waiting for.
+      // Approved with nothing said overall, but a note left on one sentence: there is
+      // something to read, and the message must say so rather than close the matter.
+      if (data.hasComment === true) {
+        return t('types.ATTEMPT_REVIEWED.bodyApprovedWithNote');
+      }
+      // Nothing written anywhere, so the numbers are the whole answer — and criterion 42
+      // says that answer still gets sent.
       return t('types.ATTEMPT_REVIEWED.body', {
         approved: data.approvedItems,
         total: data.totalItems,
       });
     },
-    getLink: noLink,
+    /**
+     * Straight to the card this verdict lives in. Learner workspace only: a teacher who
+     * happens to receive one has no "Мои работы" to be sent to.
+     */
+    getLink: (data, ctx) =>
+      ctx.workspaceKind === 'student' && isAttemptReviewedData(data)
+        ? `/student/submissions?submission=${data.attemptId}`
+        : undefined,
   },
 };
 
