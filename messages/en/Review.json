@@ -206,7 +206,12 @@
       "overdue": "longer than promised",
       "median": "median reply {age} · queue by age",
       "noMedian": "nothing answered in this period",
-      "shared": "shared with a colleague"
+      "shared": "shared with a colleague",
+      "remind": "Remind",
+      "addReviewer": "Add a reviewer",
+      "reminded": "Reminded {name} — {n, plural, one {# submission} other {# submissions}} waiting",
+      "remindedAlready": "Already reminded today. The next one can go in about {hours, plural, one {# hour} other {# hours}}.",
+      "remindFailed": "The reminder could not be sent."
     },
     "groups": {
       "title": "Groups",
@@ -224,6 +229,18 @@
       "overridden": "set on the course",
       "pending": "{n} waiting",
       "legend": "waiting · longer than promised"
+    },
+    "stuck": {
+      "title": "Not moving",
+      "sub": "{n, plural, one {# submission has} other {# submissions have}} been waiting longer than promised",
+      "emptySub": "nothing is past its promised time",
+      "empty": "Everything waiting is still inside the time the school promised.",
+      "noReviewer": "learner is in no group — there is no reviewer",
+      "unnamedStudent": "Learner",
+      "unnamedExercise": "Exercise",
+      "unnamedGroup": "Group",
+      "assign": "Assign",
+      "reviewIt": "Review it yourself"
     }
   }
 }

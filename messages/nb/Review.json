@@ -206,7 +206,12 @@
       "overdue": "lenger enn lovet",
       "median": "median svartid {age} · køen etter alder",
       "noMedian": "besvarte ingenting i denne perioden",
-      "shared": "deler køen med en kollega"
+      "shared": "deler køen med en kollega",
+      "remind": "Minn på",
+      "addReviewer": "Legg til en retter",
+      "reminded": "Minnet {name} på — {n, plural, one {# innlevering} other {# innleveringer}} venter",
+      "remindedAlready": "Allerede minnet på i dag. Neste kan gå om omtrent {hours, plural, one {# time} other {# timer}}.",
+      "remindFailed": "Påminnelsen kunne ikke sendes."
     },
     "groups": {
       "title": "Grupper",
@@ -224,6 +229,18 @@
       "overridden": "satt på kurset",
       "pending": "{n} venter",
       "legend": "venter · lenger enn lovet"
+    },
+    "stuck": {
+      "title": "Står stille",
+      "sub": "{n, plural, one {# innlevering har} other {# innleveringer har}} ventet lenger enn lovet",
+      "emptySub": "ingenting er forbi den lovede tiden",
+      "empty": "Alt som venter, er fortsatt innenfor tiden skolen lovet.",
+      "noReviewer": "eleven er ikke i noen gruppe — det finnes ingen retter",
+      "unnamedStudent": "Elev",
+      "unnamedExercise": "Oppgave",
+      "unnamedGroup": "Gruppe",
+      "assign": "Tildel",
+      "reviewIt": "Rett den selv"
     }
   }
 }

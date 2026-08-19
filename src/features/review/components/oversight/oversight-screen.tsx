@@ -3,15 +3,19 @@
 import { useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { Bell } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useOversight } from '../../api/use-oversight';
+import { useRemindReviewer } from '../../api/use-remind-reviewer';
 import { Panel, Segment } from '../primitives';
 import { OVERSIGHT_PERIODS, type OversightPeriod } from '../../types/oversight';
 
 import { GroupLoadPanel, CourseLoadPanel } from './load-panels';
+import { StuckList } from './stuck-list';
 import { SchoolSummary } from './school-summary';
 import { TeacherLoadRow } from './teacher-load-row';
 
@@ -45,6 +49,25 @@ export function OversightScreen({ school }: OversightScreenProps) {
 
   const period = parsePeriod(searchParams.get('period'));
   const { data, isPending, isError, refetch } = useOversight(school, period);
+  const remind = useRemindReviewer(school);
+
+  // One toast for all three outcomes, because from the administrator's side they are one
+  // answer to one press: it went, it went nowhere because it went yesterday, or it failed.
+  const sendReminder = useCallback(
+    (teacherId: string, name: string | null) => {
+      remind.mutate(teacherId, {
+        onSuccess: (result) => {
+          if (result.sent) {
+            toast.success(t('teachers.reminded', { name: name ?? '', n: result.pending }));
+          } else {
+            toast.info(t('teachers.remindedAlready', { hours: result.retryAfterHours ?? 24 }));
+          }
+        },
+        onError: () => toast.error(t('teachers.remindFailed')),
+      });
+    },
+    [remind, t],
+  );
 
   const setPeriod = useCallback(
     (next: string) => {
@@ -106,7 +129,24 @@ export function OversightScreen({ school }: OversightScreenProps) {
               <p className="px-3 py-2 text-[12.5px] text-muted-foreground">{t('teachers.empty')}</p>
             ) : (
               data.teachers.map((teacher) => (
-                <TeacherLoadRow key={teacher.id} teacher={teacher} slaHours={data.schoolSlaHours} />
+                <TeacherLoadRow
+                  key={teacher.id}
+                  teacher={teacher}
+                  slaHours={data.schoolSlaHours}
+                  actions={
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={remind.isPending}
+                        onClick={() => sendReminder(teacher.id, teacher.name)}
+                      >
+                        <Bell aria-hidden className="size-3.5" />
+                        {t('teachers.remind')}
+                      </Button>
+                    </>
+                  }
+                />
               ))
             )}
           </Panel>
@@ -115,6 +155,12 @@ export function OversightScreen({ school }: OversightScreenProps) {
             <GroupLoadPanel groups={data.groups} slaHours={data.schoolSlaHours} />
             <CourseLoadPanel courses={data.courses} />
           </div>
+
+          <StuckList
+            items={data.stuck}
+            reviewHref={(id) => `/school/${school}/review?submission=${encodeURIComponent(id)}`}
+            onAssign={() => undefined}
+          />
         </>
       )}
     </div>
