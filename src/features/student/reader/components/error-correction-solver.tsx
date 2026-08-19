@@ -12,6 +12,11 @@ import {
   useSubmitAnswer,
   type SubmitFailureResolution,
 } from '@/features/student/exercises/api/use-attempt';
+import {
+  clearAnswerDraft,
+  readAnswerDraft,
+  saveAnswerDraft,
+} from '@/features/student/exercises/lib/answer-draft';
 import type { SelfCheckFeedback, StudentProjection } from '@/lib/shared-kernel/error-correction';
 import {
   ErrorCorrectionBody,
@@ -34,6 +39,32 @@ export interface ErrorCorrectionSolverProps {
 /** What the learner sent last, as the engine kept it. */
 interface SubmittedEdits {
   items?: ErrorCorrectionValue;
+}
+
+/**
+ * A stored draft as this template can use it, or `null`.
+ *
+ * Read rather than trusted: storage may hold whatever an older build of this runner put
+ * there, and an entry missing the maps the body indexes into would fail inside a render
+ * rather than here. A sentence whose edits do not read is dropped whole.
+ */
+function readEditsDraft(raw: unknown): ErrorCorrectionValue | null {
+  if (typeof raw !== 'object' || raw === null) return null;
+
+  const value: ErrorCorrectionValue = {};
+  for (const [itemId, edits] of Object.entries(raw)) {
+    if (typeof edits !== 'object' || edits === null) continue;
+    const { marked, fix, ins } = edits as Record<string, unknown>;
+    if (typeof marked !== 'object' || marked === null) continue;
+    if (typeof fix !== 'object' || fix === null) continue;
+    if (typeof ins !== 'object' || ins === null) continue;
+    value[itemId] = {
+      marked: marked as Record<string, boolean>,
+      fix: fix as Record<string, string>,
+      ins: ins as Record<string, string>,
+    };
+  }
+  return Object.keys(value).length === 0 ? null : value;
 }
 
 /**
@@ -110,8 +141,16 @@ export function ErrorCorrectionSolver({
 
           const saved = await fetchLastAttempt(exerciseId);
           const items = (saved?.submittedAnswer as SubmittedEdits | null)?.items;
-          if (saved === null || items === undefined || Object.keys(items).length === 0) return;
+          if (saved === null || items === undefined || Object.keys(items).length === 0) {
+            // Nothing was ever handed in, so the edits are only in the browser — and
+            // reopening the exercise abandoned the attempt that held them (47.0.C).
+            const draft = readEditsDraft(readAnswerDraft(exerciseId));
+            if (draft !== null) setValue(draft);
+            return;
+          }
 
+          // Handed-in work wins over the draft that produced it.
+          clearAnswerDraft(exerciseId);
           setValue(items);
           // What the teacher decided is not this screen's to say, but that the work was
           // handed over is — otherwise a learner who comes back sees their own edits and
@@ -179,6 +218,7 @@ export function ErrorCorrectionSolver({
       },
       {
         onSuccess: (data) => {
+          clearAnswerDraft(exerciseId);
           setSent(data.requiresReview ? 'review' : 'passed');
           // `null` on a routed answer: it has been done, and whether it was right is
           // the teacher's to say. The reader counts it as attempted either way.
@@ -193,6 +233,7 @@ export function ErrorCorrectionSolver({
           if (resolution === 'delivered') {
             // It reached the engine; only the response was lost. Saying so calmly is
             // owed here — a second "send" would try to hand in what is already there.
+            clearAnswerDraft(exerciseId);
             setSent('review');
             if (submissions === 0) onChecked?.(null);
             setSubmissions((n) => n + 1);
@@ -214,6 +255,9 @@ export function ErrorCorrectionSolver({
   function changeValue(next: ErrorCorrectionValue) {
     setValue(next);
     setFeedback(null);
+    // Kept for a reload the learner did not plan, not for sending on their behalf
+    // (47.0.C).
+    saveAnswerDraft(exerciseId, next);
   }
 
   function askSelfCheck() {
@@ -241,6 +285,7 @@ export function ErrorCorrectionSolver({
   }
 
   function again() {
+    clearAnswerDraft(exerciseId);
     setValue({});
     setFeedback(null);
     setChecksLeft(null);

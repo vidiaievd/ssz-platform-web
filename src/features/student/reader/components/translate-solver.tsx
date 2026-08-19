@@ -16,6 +16,11 @@ import type {
   AttemptRecord,
   TranslateSubmitDetails,
 } from '@/features/student/exercises/types/attempts';
+import {
+  clearAnswerDraft,
+  readAnswerDraft,
+  saveAnswerDraft,
+} from '@/features/student/exercises/lib/answer-draft';
 import { readSubmission, toSubmission } from '@/lib/shared-kernel/translate';
 import type { SelfCheckFeedback, StudentProjection } from '@/lib/shared-kernel/translate';
 import {
@@ -119,10 +124,19 @@ export function TranslateSolver({
           restoreConsidered.current = true;
 
           const saved = await fetchLastAttempt(exerciseId);
-          if (saved === null) return;
-          const answers = readSubmission(saved.submittedAnswer);
-          if (Object.keys(answers).length === 0) return;
+          const answers = saved === null ? {} : readSubmission(saved.submittedAnswer);
+          if (saved === null || Object.keys(answers).length === 0) {
+            // Nothing was ever handed in, so anything the learner had written is only in
+            // the browser — and reopening the exercise abandoned the attempt that held
+            // it (47.0.C). The draft is the only copy there is.
+            const draft = readTranslateDraft(readAnswerDraft(exerciseId));
+            if (draft !== null) setValue(draft);
+            return;
+          }
 
+          // Handed-in work wins over the draft that produced it: what reached the engine
+          // is the answer of record, and the draft is now history.
+          clearAnswerDraft(exerciseId);
           setValue(answers);
           // What the teacher decided is not this screen's to say, but that the work was
           // handed over is — otherwise a learner who comes back sees their own sentences
@@ -189,6 +203,7 @@ export function TranslateSolver({
       },
       {
         onSuccess: (data) => {
+          clearAnswerDraft(exerciseId);
           setSent(data.requiresReview ? 'review' : 'passed');
           setRouting(readRouting(data.details));
           // `null` on a routed answer: it has been done, and whether it was right is the
@@ -204,6 +219,7 @@ export function TranslateSolver({
           if (resolution === 'delivered') {
             // It reached the engine; only the response was lost. Saying so calmly is
             // owed here — a second "send" would try to hand in what is already there.
+            clearAnswerDraft(exerciseId);
             setSent('review');
             if (submissions === 0) onChecked?.(null);
             setSubmissions((n) => n + 1);
@@ -225,6 +241,10 @@ export function TranslateSolver({
   function changeValue(next: TranslateValue) {
     setValue(next);
     setFeedback(null);
+    // Kept for a reload the learner did not plan, not for sending on their behalf
+    // (47.0.C) — a failed hand-in leaves the sentences here, and this is what leaves
+    // them here across a refresh too.
+    saveAnswerDraft(exerciseId, next);
   }
 
   function askSelfCheck() {
@@ -248,6 +268,7 @@ export function TranslateSolver({
   }
 
   function again() {
+    clearAnswerDraft(exerciseId);
     setValue({});
     setFeedback(null);
     setChecksLeft(null);
@@ -426,6 +447,23 @@ export function TranslateSolver({
       )}
     </div>
   );
+}
+
+/**
+ * A stored draft as this template can use it, or `null`.
+ *
+ * Read rather than trusted: what comes back is whatever was in storage under this key,
+ * possibly written by an older build of this runner. A sentence that is not a string is
+ * dropped, and nothing that fails here reaches the field.
+ */
+function readTranslateDraft(raw: unknown): TranslateValue | null {
+  if (typeof raw !== 'object' || raw === null) return null;
+
+  const value: TranslateValue = {};
+  for (const [itemId, text] of Object.entries(raw)) {
+    if (typeof text === 'string') value[itemId] = text;
+  }
+  return Object.keys(value).length === 0 ? null : value;
 }
 
 /** The teacher's verdict as this screen holds it. */

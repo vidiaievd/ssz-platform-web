@@ -184,6 +184,7 @@ async function correctIt() {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  window.localStorage.clear();
 });
 
 describe('ErrorCorrectionSolver', () => {
@@ -418,6 +419,44 @@ describe('ErrorCorrectionSolver', () => {
         await screen.findByText("Couldn't confirm that reached your teacher — try again."),
       ).toBeInTheDocument();
       expect(screen.queryByText(/didn't go through/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('the unsent draft (47.0.C)', () => {
+    /**
+     * Reopening the exercise abandons the attempt the edits lived in, so without a draft
+     * in the browser a reload is where the correction actually disappears — including the
+     * reload that follows a failed hand-in.
+     */
+    it('keeps the correction across a reload, before anything is handed in', async () => {
+      const { unmount } = renderSolver(mockApi());
+      await correctIt();
+      unmount();
+
+      renderSolver(mockApi({ submit: ROUTED }));
+
+      // Proof that the edits came back, not merely that the screen looks calm: an
+      // untouched sentence refuses to be handed in at all.
+      await userEvent.click(await screen.findByRole('button', { name: 'Hand in' }));
+      expect(
+        await screen.findByText('Handed in. Your teacher will look at it.'),
+      ).toBeInTheDocument();
+      expect(screen.queryByText('1 sentence is still untouched')).not.toBeInTheDocument();
+    });
+
+    it('forgets the draft once the work has reached the engine', async () => {
+      const { unmount } = renderSolver(mockApi({ submit: ROUTED }));
+      await correctIt();
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in' }));
+      await screen.findByText('Handed in. Your teacher will look at it.');
+      unmount();
+
+      // A fresh visit with nothing on record: the sentence is untouched again, because
+      // nothing should have come back out of storage.
+      renderSolver(mockApi());
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Hand in' }));
+      expect(screen.getByText('1 sentence is still untouched')).toBeInTheDocument();
     });
   });
 });

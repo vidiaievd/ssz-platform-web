@@ -196,6 +196,7 @@ async function answer(text: string) {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  window.localStorage.clear();
 });
 
 describe('TranslateSolver', () => {
@@ -473,6 +474,26 @@ describe('TranslateSolver', () => {
       expect(screen.getByRole('button', { name: 'Hand in to the teacher' })).toBeEnabled();
     });
 
+    /**
+     * 47.0.C. The failed hand-in leaves the answer in the field — but reopening the
+     * exercise abandons the attempt that held it, so without a draft in the browser a
+     * reload after the failure is where the work actually disappears.
+     */
+    it('still has the answer after a reload that followed a failed hand-in', async () => {
+      const { unmount } = renderSolver(
+        mockApi({ submitFails: true, attemptStatus: { status: 'IN_PROGRESS' } }),
+      );
+
+      await answer('Jeg har bodd i Tromsø i tre år.');
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+      await screen.findByText(/didn't go through/i);
+      unmount();
+
+      renderSolver(mockApi());
+
+      expect(await screen.findByRole('textbox')).toHaveValue('Jeg har bodd i Tromsø i tre år.');
+    });
+
     it('says it could not confirm delivery, not that the work was lost, when the check itself fails', async () => {
       renderSolver(mockApi({ submitFails: true, attemptStatusFails: true }));
 
@@ -483,6 +504,46 @@ describe('TranslateSolver', () => {
         await screen.findByText("Couldn't confirm that reached your teacher — try again."),
       ).toBeInTheDocument();
       expect(screen.queryByText(/didn't go through/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('the unsent draft (47.0.C)', () => {
+    it('keeps what was typed across a reload, before anything is handed in', async () => {
+      const { unmount } = renderSolver(mockApi());
+      await answer('Jeg har bodd i Tromsø i tre år.');
+      unmount();
+
+      renderSolver(mockApi());
+
+      expect(await screen.findByRole('textbox')).toHaveValue('Jeg har bodd i Tromsø i tre år.');
+    });
+
+    it('forgets the draft once the work has reached the engine', async () => {
+      const { unmount } = renderSolver(mockApi({ submit: ROUTED }));
+      await answer('Jeg har bodd i Tromsø i tre år.');
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+      await screen.findByText('Handed in. Your teacher will look at it.');
+      unmount();
+
+      // A fresh visit with nothing on record: whatever is shown now came from storage,
+      // and nothing should have.
+      renderSolver(mockApi());
+
+      await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue(''));
+    });
+
+    /**
+     * What reached the engine is the answer of record. A draft written before it must
+     * not paint over the submission the learner is being shown.
+     */
+    it('shows the handed-in answer rather than an older draft of it', async () => {
+      const { unmount } = renderSolver(mockApi());
+      await answer('Jeg bor i Tromsø.');
+      unmount();
+
+      renderSolver(mockApi({ last: LAST_ATTEMPT }));
+
+      expect(await screen.findByRole('textbox')).toHaveValue('Jeg bor i Tromsø i tre år.');
     });
   });
 });
