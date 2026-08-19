@@ -140,6 +140,12 @@
     "sent": {
       "approved": "Passed",
       "returned": "Sent back for revision"
+    },
+    "keys": {
+      "approve": "pass",
+      "withComment": "with a comment",
+      "return": "send back",
+      "next": "next"
     }
   }
 }

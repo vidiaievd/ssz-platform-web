@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useId } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { CheckCircle2, Filter } from 'lucide-react';
@@ -160,6 +160,7 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
             filters={filters}
             position={place?.position ?? null}
             nextInQueue={place?.nextId ?? null}
+            previousInQueue={place?.previousId ?? null}
             onAdvance={selectSubmission}
           />
         )}
@@ -244,24 +245,30 @@ function EmptyQueue({ filtered, onClear }: { filtered: boolean; onClear: () => v
  * the number means to a teacher mid-pass: how far through *this* list they are. A position
  * against a total they have filtered away would be a different, useless number.
  *
- * The neighbour is only ever needed when a verdict could not be given — a colleague got
- * there first, or the assignment ran out. A verdict that lands brings its own successor
- * back from the server, computed against the queue as it is *after* the verdict, which
- * this list is not.
+ * The neighbours drive `J` and `K`, and `next` additionally stands in when a verdict
+ * could not be given at all — a colleague got there first, or the assignment ran out. A
+ * verdict that does land brings its own successor back from the server, computed against
+ * the queue as it is *after* the verdict, which this list is not.
  */
 function placeOf(
   data: { groups: ReviewQueueGroup[] } | undefined,
   selected: string,
-): { position: { index: number; total: number } | null; nextId: string | null } {
-  if (data === undefined) return { position: null, nextId: null };
+): {
+  position: { index: number; total: number } | null;
+  nextId: string | null;
+  previousId: string | null;
+} {
+  const nowhere = { position: null, nextId: null, previousId: null };
+  if (data === undefined) return nowhere;
 
   const ids = data.groups.flatMap((group) => group.items.map((item) => item.id));
   const index = ids.indexOf(selected);
-  if (index === -1) return { position: null, nextId: null };
+  if (index === -1) return nowhere;
 
   return {
     position: { index: index + 1, total: ids.length },
     nextId: ids[index + 1] ?? null,
+    previousId: index === 0 ? null : (ids[index - 1] ?? null),
   };
 }
 
@@ -285,6 +292,7 @@ function QueueGroup({
 }) {
   const collapsed = useReviewViewStore((state) => state.collapsed[group.key] === true);
   const toggleGroup = useReviewViewStore((state) => state.toggleGroup);
+  const listId = useId();
 
   // A submission a colleague holds is excluded from the batch: passing it in bulk is
   // exactly the collision the marker exists to prevent, and the verdict would 409 anyway.
@@ -297,9 +305,10 @@ function QueueGroup({
         open={!collapsed}
         onToggle={() => toggleGroup(group.key)}
         cleanCount={groupBy === 'exercise' ? cleanCount : 0}
+        controls={listId}
       />
       {collapsed ? null : (
-        <ul className="flex flex-col gap-0.5 pb-1.5">
+        <ul id={listId} className="flex flex-col gap-0.5 pb-1.5">
           {group.items.map((item) => (
             <QueueRow
               key={item.id}

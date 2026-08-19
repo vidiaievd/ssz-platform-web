@@ -17,8 +17,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { useReviewDecision, type ReviewConflict, type ReviewVerdict } from '../../api/use-decision';
 import { useReviewLock, useSubmission, type ReviewLockLifecycle } from '../../api/use-submission';
+import { useReviewShortcuts } from '../../hooks/use-review-shortcuts';
 import { DEFAULT_FILTERS } from '../../lib/queue-filters';
 import { selectDraft, useReviewDraftsStore } from '../../stores/review-drafts';
+import { useReviewViewStore } from '../../stores/review-view-store';
 import type { ReviewQueueFilters, ReviewSubmission } from '../../types';
 import { Note } from '../primitives';
 
@@ -47,10 +49,12 @@ export interface SubmissionPanelProps {
    */
   filters?: ReviewQueueFilters;
   /**
-   * The row after this one in the queue on screen. Only used when there is no verdict to
-   * ask the server for a successor with — a conflict, or an assignment that has run out.
+   * The rows either side of this one in the queue on screen. `next` is used when there is
+   * no verdict to ask the server for a successor with — a conflict, or an assignment that
+   * has run out — and both drive `J` and `K`.
    */
   nextInQueue?: string | null;
+  previousInQueue?: string | null;
   /**
    * Where to go once a verdict has landed. The inbox rewrites its address bar; on the
    * submission's own page the default below swaps the last path segment.
@@ -82,6 +86,7 @@ export function SubmissionPanel({
   position = null,
   filters = DEFAULT_FILTERS,
   nextInQueue = null,
+  previousInQueue = null,
   onAdvance,
 }: SubmissionPanelProps) {
   const t = useTranslations('Review');
@@ -89,6 +94,11 @@ export function SubmissionPanel({
   const pathname = usePathname();
 
   const draft = useReviewDraftsStore(selectDraft(id));
+  // Set by whoever sent the reviewer here, consumed once: focus belongs on this heading
+  // only when the screen changed underneath them rather than because they clicked.
+  const arrived = useReviewViewStore((state) => state.arrivedAt === id);
+  const announceArrival = useReviewViewStore((state) => state.announceArrival);
+  const clearArrival = useReviewViewStore((state) => state.clearArrival);
   const setComment = useReviewDraftsStore((state) => state.setComment);
   const setSentenceComment = useReviewDraftsStore((state) => state.setSentenceComment);
   const clearDraft = useReviewDraftsStore((state) => state.clear);
@@ -128,6 +138,7 @@ export function SubmissionPanel({
 
   const advance = useCallback(
     (nextId: string) => {
+      announceArrival(nextId);
       if (onAdvance) {
         onAdvance(nextId);
         return;
@@ -136,7 +147,7 @@ export function SubmissionPanel({
       // does not bury the way back under twenty history entries.
       router.replace(`${pathname.replace(/[^/]+$/, '')}${nextId}`, { scroll: false });
     },
-    [onAdvance, pathname, router],
+    [announceArrival, onAdvance, pathname, router],
   );
 
   const decide = useCallback(
@@ -167,6 +178,28 @@ export function SubmissionPanel({
   useEffect(() => {
     if (decision.error?.code === 'RETURN_REQUIRES_COMMENT') commentRef.current?.focus();
   }, [decision.error]);
+
+  // What the keys do is what the buttons do, disabled states included: a binding left out
+  // is a verdict the screen is currently refusing, and the key is inert rather than
+  // firing something the button would not.
+  const stillOpen =
+    data !== undefined && data.decision === null && data.canDecide && sent === null;
+  const decidable = stillOpen && !decision.isPending;
+  const written = draft.comment.trim() !== '';
+  const withComment = written || Object.keys(draft.sentences).length > 0;
+
+  useReviewShortcuts({
+    approve: decidable ? () => decide('approved') : undefined,
+    approveWithComment: decidable && withComment ? () => decide('approved_comment') : undefined,
+    return: decidable && written ? () => decide('returned') : undefined,
+    submit: decidable
+      ? () => decide(withComment ? 'approved_comment' : 'approved')
+      : nextInQueue !== null
+        ? () => advance(nextInQueue)
+        : undefined,
+    next: nextInQueue === null ? undefined : () => advance(nextInQueue),
+    previous: previousInQueue === null ? undefined : () => advance(previousInQueue),
+  });
 
   if (isPending) {
     return (
@@ -208,7 +241,12 @@ export function SubmissionPanel({
 
   return (
     <article className="flex min-h-0 flex-1 flex-col">
-      <SubmissionHeader submission={data} position={position} />
+      <SubmissionHeader
+        submission={data}
+        position={position}
+        takeFocus={arrived}
+        onFocused={clearArrival}
+      />
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5 py-4">
         <SubmissionNotes submission={data} lock={lock} conflict={conflict} />

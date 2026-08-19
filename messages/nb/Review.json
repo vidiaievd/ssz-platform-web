@@ -140,6 +140,12 @@
     "sent": {
       "approved": "Godkjent",
       "returned": "Sendt til retting"
+    },
+    "keys": {
+      "approve": "godkjenn",
+      "withComment": "med kommentar",
+      "return": "send tilbake",
+      "next": "neste"
     }
   }
 }

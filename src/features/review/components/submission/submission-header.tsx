@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Avatar } from '@/components/ui/avatar';
@@ -11,6 +12,13 @@ export interface SubmissionHeaderProps {
   submission: ReviewSubmission;
   /** Where this one sits in the queue as it is currently grouped and filtered. */
   position: { index: number; total: number } | null;
+  /**
+   * The reviewer was sent here by a verdict rather than by clicking. Focus follows, so
+   * that the work being read aloud is the work now on screen.
+   */
+  takeFocus?: boolean;
+  /** Called once focus has actually landed, so the flag that asked for it can be dropped. */
+  onFocused?: () => void;
 }
 
 /**
@@ -25,8 +33,20 @@ export interface SubmissionHeaderProps {
  * the author has deleted the exercise (criterion 21); it is text and not a link for the
  * same reason.
  */
-export function SubmissionHeader({ submission, position }: SubmissionHeaderProps) {
+export function SubmissionHeader({
+  submission,
+  position,
+  takeFocus = false,
+  onFocused,
+}: SubmissionHeaderProps) {
   const t = useTranslations('Review');
+  const heading = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!takeFocus) return;
+    heading.current?.focus();
+    onFocused?.();
+  }, [onFocused, takeFocus]);
 
   const path = [submission.exercise.path.course, submission.exercise.path.lesson]
     .filter(Boolean)
@@ -54,7 +74,14 @@ export function SubmissionHeader({ submission, position }: SubmissionHeaderProps
       <div className="flex items-center gap-3">
         <Avatar name={submission.student.name ?? '?'} size="lg" className="size-10" aria-hidden />
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[17px] font-bold tracking-tight">
+          {/* `tabIndex={-1}`: not in the tab order, but a legitimate focus target for the
+              step after a verdict — the heading names the learner and the exercise, which
+              is exactly what a reader needs to hear on arrival. */}
+          <h1
+            ref={heading}
+            tabIndex={-1}
+            className="truncate text-[17px] font-bold tracking-tight outline-none"
+          >
             {submission.student.name ?? submission.student.id}
           </h1>
           <p className="truncate text-[12.5px] text-muted-foreground">{facts.join(' · ')}</p>

@@ -13,6 +13,40 @@ import { CommentBox } from './comment-box';
 /** What the engine accepts on the work as a whole (`review-attempt.dto.ts`). */
 const COMMENT_MAX = 4000;
 
+/**
+ * The shortcuts, stated where they are used rather than in a help screen nobody opens.
+ *
+ * Permanently visible on purpose: a teacher who has just learned that `1` passes will use
+ * it forty times today, and the line costs one row of small text. When there is no verdict
+ * left to give only the movement keys are named — offering `1` on a submission a colleague
+ * has already answered would be advertising a key that does nothing.
+ */
+function KeyHints({ readOnly }: { readOnly: boolean }) {
+  const t = useTranslations('Review.decision.keys');
+
+  const hints = readOnly
+    ? ([['J', t('next')]] as const)
+    : ([
+        ['1', t('approve')],
+        ['2', t('withComment')],
+        ['3', t('return')],
+        ['J', t('next')],
+      ] as const);
+
+  return (
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-muted-foreground">
+      {hints.map(([key, label]) => (
+        <span key={key} className="flex items-center gap-1">
+          <kbd className="rounded-[5px] border-[1.5px] border-border bg-(--ssz-bg-subtle) px-[5px] py-px font-mono text-[10.5px] font-bold text-foreground">
+            {key}
+          </kbd>
+          {label}
+        </span>
+      ))}
+    </p>
+  );
+}
+
 export interface DecisionPanelProps {
   comment: string;
   onCommentChange: (value: string) => void;
@@ -118,7 +152,12 @@ export function DecisionPanel({
           ) : null
         ) : (
           <>
-            <Button type="button" loading={pending} onClick={() => onDecide('approved')}>
+            <Button
+              type="button"
+              loading={pending}
+              aria-busy={pending}
+              onClick={() => onDecide('approved')}
+            >
               <Check aria-hidden className="mr-1.5 h-4 w-4" />
               {t('approve')}
             </Button>
@@ -126,6 +165,7 @@ export function DecisionPanel({
               type="button"
               variant="secondary"
               loading={pending}
+              aria-busy={pending}
               disabled={!written && !hasSentenceComments}
               onClick={() => onDecide('approved_comment')}
             >
@@ -136,6 +176,7 @@ export function DecisionPanel({
               type="button"
               variant="ghost"
               loading={pending}
+              aria-busy={pending}
               disabled={!written}
               onClick={() => onDecide('returned')}
             >
@@ -144,6 +185,8 @@ export function DecisionPanel({
             </Button>
           </>
         )}
+        <span className="flex-1" />
+        <KeyHints readOnly={readOnly} />
       </div>
 
       <p className="text-[11.5px] leading-relaxed text-muted-foreground">

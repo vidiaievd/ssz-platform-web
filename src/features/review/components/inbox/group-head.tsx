@@ -18,6 +18,8 @@ export interface GroupHeadProps {
   onToggle: () => void;
   /** How many of this group's submissions the machine closed and nobody else holds. */
   cleanCount: number;
+  /** The id of the list this heading folds, so the button can point a reader at it. */
+  controls?: string;
   /** Absent until 45.9 gives the batch verdict its confirmation. */
   onBatch?: (group: ReviewQueueGroup) => void;
 }
@@ -35,7 +37,14 @@ export interface GroupHeadProps {
  * outright. It stops the click from reaching the header — pressing "pass 6 clean" should
  * never also fold the group away underneath the dialog it opens.
  */
-export function GroupHead({ group, open, onToggle, cleanCount, onBatch }: GroupHeadProps) {
+export function GroupHead({
+  group,
+  open,
+  onToggle,
+  cleanCount,
+  controls,
+  onBatch,
+}: GroupHeadProps) {
   const t = useTranslations('Review');
   // The snapshot may name a type this build does not know — it is shown as it came
   // rather than dropped, since a stale label still tells a teacher where they are.
@@ -52,6 +61,7 @@ export function GroupHead({ group, open, onToggle, cleanCount, onBatch }: GroupH
         type="button"
         onClick={onToggle}
         aria-expanded={open}
+        aria-controls={controls}
         className={cn(
           'flex w-full items-center gap-[9px] rounded-[9px] px-2.5 py-[7px] text-left outline-none',
           'hover:bg-(--ssz-bg-subtle) focus-visible:ring-2 focus-visible:ring-ring',
