@@ -43,3 +43,21 @@ export function enqueueProgress(entry: UpsertProgressRequest): void {
 export function dequeueProgress(contentId: string): void {
   writeRaw(readRaw().filter((e) => e.contentId !== contentId));
 }
+
+/**
+ * Empties the queue outright — on sign-out.
+ *
+ * The queue is keyed by content, not by person, and the server reads the person from the
+ * session cookie: a ping left behind by whoever was signed in before would be delivered
+ * under whoever signs in next. On a shared machine that writes one learner's progress
+ * onto another's record, silently. Losing an undelivered checkbox is the cheaper half of
+ * that trade.
+ */
+export function clearProgressOutbox(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(KEY);
+  } catch {
+    // Same as a failed write: nothing here is worth surfacing over a checkbox.
+  }
+}

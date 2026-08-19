@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { LogOut } from 'lucide-react';
 
 import { useRouter } from '@/lib/i18n/navigation';
+import { clearProgressOutbox } from '@/features/learning';
 import { Button, type ButtonProps } from '@/components/ui/button';
 
 import { logoutAction } from '../actions/logout';
@@ -21,6 +22,10 @@ export function LogoutButton({ children, onClick, ...props }: LogoutButtonProps)
     startTransition(async () => {
       await logoutAction();
       queryClient.clear();
+      // Anything still queued belongs to the session that just ended: the server reads
+      // the learner from the cookie, so a leftover ping would land on whoever signs in
+      // next on this machine (47.0.A).
+      clearProgressOutbox();
       router.push('/');
       router.refresh();
     });

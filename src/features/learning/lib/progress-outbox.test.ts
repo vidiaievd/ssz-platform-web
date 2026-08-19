@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { dequeueProgress, enqueueProgress, readProgressOutbox } from './progress-outbox';
+import {
+  clearProgressOutbox,
+  dequeueProgress,
+  enqueueProgress,
+  readProgressOutbox,
+} from './progress-outbox';
 
 const PING = {
   contentType: 'LESSON',
@@ -38,6 +43,15 @@ describe('progress outbox', () => {
   it('drops an entry once it has been delivered', () => {
     enqueueProgress(PING);
     dequeueProgress(PING.contentId);
+    expect(readProgressOutbox()).toEqual([]);
+  });
+
+  it('is emptied outright on sign-out, so the next person on this machine does not inherit it', () => {
+    enqueueProgress(PING);
+    enqueueProgress({ ...PING, contentId: 'content-2' });
+
+    clearProgressOutbox();
+
     expect(readProgressOutbox()).toEqual([]);
   });
 

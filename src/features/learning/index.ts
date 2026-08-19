@@ -10,6 +10,7 @@ export { useCourseMastery } from './api/use-course-mastery';
 export { useCourseHome } from './api/use-course-home';
 export { useUnitContents } from './api/use-unit-contents';
 export { useUpsertProgress, useFlushProgressOutbox } from './api/use-upsert-progress';
+export { clearProgressOutbox } from './lib/progress-outbox';
 export { useProgressOverview } from './api/use-progress-overview';
 export { useAssignments, useAssignment, useAssignmentQuestions, useSubmitGradedAssignment, useSubmitWrittenAssignment, useSaveWrittenDraft } from './api/use-assignments';
 

@@ -24,11 +24,28 @@ function invalidateProgress(queryClient: QueryClient, courseId: string, unitId: 
 }
 
 /**
+ * The flush in flight, if any. `online`, `focus` and `visibilitychange` routinely fire
+ * together when a tab comes back, and each one entering the loop separately would read
+ * the same entries, post them twice, and race the read-modify-write that dequeues them —
+ * a dequeue can be undone by a concurrent one holding a staler copy of the queue.
+ * Joining the flush already running is the whole fix.
+ */
+let inFlight: Promise<void> | null = null;
+
+/**
  * Resends whatever pings are still sitting in the outbox (47.0). Best-effort:
  * an entry that fails again is simply left for the next trigger — mount,
  * `online`, a regained tab focus, or the next successful mutation.
  */
-async function flushOutbox(queryClient: QueryClient, courseId: string, unitId: string): Promise<void> {
+function flushOutbox(queryClient: QueryClient, courseId: string, unitId: string): Promise<void> {
+  if (inFlight) return inFlight;
+  inFlight = runFlush(queryClient, courseId, unitId).finally(() => {
+    inFlight = null;
+  });
+  return inFlight;
+}
+
+async function runFlush(queryClient: QueryClient, courseId: string, unitId: string): Promise<void> {
   const entries = readProgressOutbox();
   if (entries.length === 0) return;
   let flushedAny = false;
