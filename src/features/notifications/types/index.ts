@@ -18,7 +18,9 @@ export type NotificationType =
   | 'ENROLLMENT_REJECTED'
   | 'PLACEMENT_REVIEW_READY'
   | 'GROUP_ASSIGNED'
-  | 'ATTEMPT_REVIEWED';
+  | 'ATTEMPT_REVIEWED'
+  | 'REVIEW_DIGEST'
+  | 'REVIEW_ESCALATION';
 
 export type NotificationCategory = 'Enrollment' | 'Staff' | 'Learning' | 'System';
 
@@ -103,6 +105,29 @@ export interface AttemptReviewedData {
   occurredAt: string;
 }
 
+/**
+ * The teacher's side of the marking queue, on a timer (plan 47.5).
+ *
+ * One message per run rather than one per submission: a learner who hands in a lesson's
+ * worth of exercises at one sitting must not produce twelve (criterion 41). `groups`
+ * carries ids and counts — the names live on the inbox this links to, and copying them
+ * into a message would be one more thing to go stale.
+ */
+export interface ReviewDigestData {
+  schoolId: string;
+  pending: number;
+  groups: { groupId: string; pending: number }[];
+  oldestSubmittedAt: string;
+}
+
+/** The same queue, past what the school itself promised (44.12). */
+export interface ReviewEscalationData {
+  schoolId: string;
+  overdue: number;
+  oldestSubmittedAt: string;
+  escalateAfterHours: number;
+}
+
 export type NotificationTemplateData =
   | EnrollmentRequestData
   | TeacherProfileChangedData
@@ -110,6 +135,8 @@ export type NotificationTemplateData =
   | GroupAssignedData
   | PlacementReviewReadyData
   | AttemptReviewedData
+  | ReviewDigestData
+  | ReviewEscalationData
   | Record<string, unknown>;
 
 export interface Notification {

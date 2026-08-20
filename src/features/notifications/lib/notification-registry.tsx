@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import type { useTranslations } from 'next-intl';
 
+import { hoursSince } from '@/features/review/lib/age-scale';
+
 import type {
   AttemptReviewedData,
   EnrollmentApprovedData,
@@ -27,6 +29,8 @@ import type {
   NotificationTemplateData,
   NotificationType,
   PlacementReviewReadyData,
+  ReviewDigestData,
+  ReviewEscalationData,
   TeacherProfileChangedData,
 } from '../types';
 
@@ -68,6 +72,14 @@ function isGroupAssignedData(data: unknown): data is GroupAssignedData {
 
 function isPlacementReviewReadyData(data: unknown): data is PlacementReviewReadyData {
   return !!data && typeof data === 'object' && 'schoolId' in data && 'studentId' in data;
+}
+
+function isReviewDigestData(data: unknown): data is ReviewDigestData {
+  return !!data && typeof data === 'object' && 'pending' in data && 'groups' in data;
+}
+
+function isReviewEscalationData(data: unknown): data is ReviewEscalationData {
+  return !!data && typeof data === 'object' && 'overdue' in data;
 }
 
 function isAttemptReviewedData(data: unknown): data is AttemptReviewedData {
@@ -343,6 +355,63 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     getLink: (data, ctx) =>
       ctx.workspaceKind === 'student' && isAttemptReviewedData(data)
         ? `/student/submissions?submission=${data.attemptId}`
+        : undefined,
+  },
+  /**
+   * The teacher's half of the marking queue, on a timer (plan 47.5).
+   *
+   * One message a run, never one a submission: a class that hands in a lesson's worth of
+   * exercises would otherwise fill an inbox with twelve identical lines and teach its
+   * reader to ignore all of them (criterion 41).
+   *
+   * The breakdown is by count, not by group name: the message carries ids, and the names
+   * live on the inbox it links to — copying them here would be a second copy to go stale
+   * the day a group is renamed.
+   */
+  REVIEW_DIGEST: {
+    icon: ClipboardCheck,
+    category: 'Learning',
+    priority: 'normal',
+    actionable: true,
+    resolveTitle: (data, t) =>
+      isReviewDigestData(data)
+        ? t('types.REVIEW_DIGEST.title', { count: data.pending })
+        : t('types.REVIEW_DIGEST.titleFallback'),
+    resolveBody: (data, t) => {
+      if (!isReviewDigestData(data)) return t('types.REVIEW_DIGEST.bodyFallback');
+      return t('types.REVIEW_DIGEST.body', {
+        groups: data.groups.length,
+        hours: Math.max(0, Math.round(hoursSince(data.oldestSubmittedAt))),
+      });
+    },
+    getLink: (_data, ctx) =>
+      ctx.workspaceKind === 'school' && ctx.schoolSlug
+        ? `/school/${ctx.schoolSlug}/review`
+        : undefined,
+  },
+  /**
+   * The same queue, past what the school itself promised (44.12) — a different message
+   * because it asks something different. At most one a day, decided by the job.
+   */
+  REVIEW_ESCALATION: {
+    icon: AlertTriangle,
+    category: 'Learning',
+    priority: 'high',
+    actionable: true,
+    resolveTitle: (data, t) =>
+      isReviewEscalationData(data)
+        ? t('types.REVIEW_ESCALATION.title', { count: data.overdue })
+        : t('types.REVIEW_ESCALATION.titleFallback'),
+    resolveBody: (data, t) =>
+      isReviewEscalationData(data)
+        ? t('types.REVIEW_ESCALATION.body', {
+            hours: Math.max(0, Math.round(hoursSince(data.oldestSubmittedAt))),
+            promised: data.escalateAfterHours,
+          })
+        : t('types.REVIEW_ESCALATION.bodyFallback'),
+    getLink: (_data, ctx) =>
+      ctx.workspaceKind === 'school' && ctx.schoolSlug
+        ? `/school/${ctx.schoolSlug}/review`
         : undefined,
   },
 };

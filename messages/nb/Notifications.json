@@ -167,6 +167,18 @@
       "titleNamed": "Læreren din har rettet «{exercise}»",
       "titleReturnedNamed": "Læreren din sendte «{exercise}» tilbake",
       "bodyApprovedWithNote": "Godkjent, med en merknad til én av setningene."
+    },
+    "REVIEW_DIGEST": {
+      "title": "{count, plural, one {# innlevering venter på deg} other {# innleveringer venter på deg}}",
+      "titleFallback": "Arbeid venter på retting",
+      "body": "{groups, plural, one {I # gruppe} other {Fordelt på # grupper}} · den eldste har ventet i {hours, plural, one {# time} other {# timer}}.",
+      "bodyFallback": "Åpne rettekøen din for å se hva som venter."
+    },
+    "REVIEW_ESCALATION": {
+      "title": "{count, plural, one {# innlevering har ventet for lenge} other {# innleveringer har ventet for lenge}}",
+      "titleFallback": "Arbeid har ventet for lenge",
+      "body": "Den eldste har ventet {hours, plural, one {# time} other {# timer}} — lenger enn de {promised} skolen din tillater. Vurder å be om en ekstra retter.",
+      "bodyFallback": "Åpne rettekøen — noe har ventet lenger enn skolen din tillater."
     }
   }
 }

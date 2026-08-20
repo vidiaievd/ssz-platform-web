@@ -86,6 +86,63 @@ describe('notification-registry', () => {
   });
 
   /**
+   * Plan 47.5: the teacher's half of the same subsystem — one message a run about a
+   * whole queue, and a louder one when the queue has gone past what the school allows.
+   */
+  describe('REVIEW_DIGEST and REVIEW_ESCALATION', () => {
+    const digest = {
+      schoolId: 's1',
+      pending: 12,
+      groups: [
+        { groupId: 'g1', pending: 8 },
+        { groupId: 'g2', pending: 4 },
+      ],
+      oldestSubmittedAt: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString(),
+    };
+
+    it('counts a whole sitting into one line rather than twelve notifications', () => {
+      const entry = getNotificationEntry('REVIEW_DIGEST');
+
+      expect(entry.resolveTitle(digest, t)).toBe('12 submissions are waiting for you');
+      expect(entry.resolveBody(digest, t)).toContain('Across 2 groups');
+      expect(entry.resolveBody(digest, t)).toContain('30 hours');
+    });
+
+    it('sends a teacher to their own marking queue, and a learner nowhere', () => {
+      const entry = getNotificationEntry('REVIEW_DIGEST');
+
+      expect(entry.getLink(digest, { workspaceKind: 'school', schoolSlug: 'greenwood' })).toBe(
+        '/school/greenwood/review',
+      );
+      expect(entry.getLink(digest, { workspaceKind: 'student' })).toBeUndefined();
+    });
+
+    it('reads as urgent when the queue is past what the school allows', () => {
+      const entry = getNotificationEntry('REVIEW_ESCALATION');
+      const data = {
+        schoolId: 's1',
+        overdue: 3,
+        oldestSubmittedAt: new Date(Date.now() - 70 * 60 * 60 * 1000).toISOString(),
+        escalateAfterHours: 48,
+      };
+
+      expect(entry.priority).toBe('high');
+      expect(entry.resolveTitle(data, t)).toBe('3 submissions have been waiting too long');
+      expect(entry.resolveBody(data, t)).toContain('70 hours');
+      expect(entry.resolveBody(data, t)).toContain('48');
+    });
+
+    it('still says something useful when the message carries no numbers', () => {
+      expect(getNotificationEntry('REVIEW_DIGEST').resolveTitle(undefined, t)).toBe(
+        t('types.REVIEW_DIGEST.titleFallback'),
+      );
+      expect(getNotificationEntry('REVIEW_ESCALATION').resolveBody(undefined, t)).toBe(
+        t('types.REVIEW_ESCALATION.bodyFallback'),
+      );
+    });
+  });
+
+  /**
    * Plan 42: the three answers a learner can get from a teacher read differently, and the
    * quiet one is the one that must not be dropped — an approval nobody wrote on is still
    * the end of the wait.
