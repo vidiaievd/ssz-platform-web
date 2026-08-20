@@ -60,7 +60,8 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
 
   const filters = parseQueueFilters(searchParams);
   const selected = searchParams.get('submission');
-  const { data, isPending, isError, refetch } = useReviewQueue(school, filters);
+  const { data, isPending, isError, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useReviewQueue(school, filters);
   const place = selected === null ? null : placeOf(data, selected);
 
   // The batch is resolved to a list of learners the moment it is started, and the dialog
@@ -161,18 +162,36 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
           ) : data.groups.length === 0 ? (
             <EmptyQueue filtered={hasActiveFilters(filters)} onClear={clearFilters} />
           ) : (
-            <ul className="flex flex-col pt-0.5">
-              {data.groups.map((group) => (
-                <QueueGroup
-                  key={group.key}
-                  group={group}
-                  groupBy={filters.groupBy}
-                  selected={selected}
-                  onSelect={selectSubmission}
-                  onBatch={setBatch}
-                />
-              ))}
-            </ul>
+            <>
+              <ul className="flex flex-col pt-0.5">
+                {data.groups.map((group) => (
+                  <QueueGroup
+                    key={group.key}
+                    group={group}
+                    groupBy={filters.groupBy}
+                    selected={selected}
+                    onSelect={selectSubmission}
+                    onBatch={setBatch}
+                  />
+                ))}
+              </ul>
+              {/* The queue is longer than one page. Not an infinite scroll: the pass down
+                  this list is deliberate work, and a list that grew whenever it was
+                  scrolled past would keep moving the end a teacher is trying to reach. */}
+              {hasNextPage ? (
+                <div className="px-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={isFetchingNextPage}
+                    onClick={() => void fetchNextPage()}
+                  >
+                    {isFetchingNextPage ? t('inbox.moreLoading') : t('inbox.more')}
+                  </Button>
+                </div>
+              ) : null}
+            </>
           )}
         </div>
       </div>

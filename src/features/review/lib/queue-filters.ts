@@ -87,13 +87,24 @@ export function queueFiltersToQuery(
   return query === '' ? '' : `?${query}`;
 }
 
-/** The same filters as the BFF takes them, for the query key and the fetch. */
-export function queueFiltersToApiQuery(school: string, filters: ReviewQueueFilters): string {
+/**
+ * The same filters as the BFF takes them, for the query key and the fetch.
+ *
+ * The cursor rides along rather than living in the filters: it is a position in one
+ * answer, not part of the view, and putting it in the filters would key every page of the
+ * queue as a different query.
+ */
+export function queueFiltersToApiQuery(
+  school: string,
+  filters: ReviewQueueFilters,
+  cursor?: string | null,
+): string {
   const params = new URLSearchParams({ school });
   params.set('groupBy', filters.groupBy);
   if (filters.group) params.set('group', filters.group);
   if (filters.course) params.set('course', filters.course);
   if (filters.type) params.set('type', filters.type);
   if (filters.overdueOnly) params.set('overdue', 'true');
+  if (cursor) params.set('cursor', cursor);
   return params.toString();
 }

@@ -43,6 +43,8 @@
     },
     "failed": "Køen kunne ikke lastes.",
     "retry": "Prøv igjen",
+    "more": "Vis flere",
+    "moreLoading": "Laster …",
     "position": "{i} av {n}",
     "selectPrompt": "Velg en innlevering",
     "selectBody": "Velg en til venstre, så åpnes den her."

@@ -1,8 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 import { queueFiltersToApiQuery } from '../lib/queue-filters';
+import { mergeQueuePages } from '../lib/queue-pages';
 import type { ReviewQueueCount, ReviewQueueFilters, ReviewQueueResponse } from '../types';
 
 import { reviewKeys } from './keys';
@@ -15,15 +16,25 @@ import { reviewKeys } from './keys';
  * a submission exists precisely because that collision is normal, not exceptional. It also
  * refetches when the window comes back into focus, since the common shape of this screen
  * is a tab left open all morning.
+ *
+ * Infinite rather than paged, and read through `mergeQueuePages` so the caller still sees
+ * one list: page numbers over a queue that is emptied from the top by whoever marks first
+ * would shift under the reader between one submission and the next. A refetch re-reads
+ * every page that has been loaded, so a teacher who has fetched three pages does not lose
+ * two of them when the window regains focus.
  */
 export function useReviewQueue(school: string, filters: ReviewQueueFilters) {
-  return useQuery<ReviewQueueResponse>({
+  return useInfiniteQuery({
     queryKey: reviewKeys.queue(school, filters),
-    queryFn: async () => {
-      const response = await fetch(`/api/review/queue?${queueFiltersToApiQuery(school, filters)}`);
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }) => {
+      const query = queueFiltersToApiQuery(school, filters, pageParam);
+      const response = await fetch(`/api/review/queue?${query}`);
       if (!response.ok) throw new Error('Failed to fetch the review queue');
       return response.json() as Promise<ReviewQueueResponse>;
     },
+    getNextPageParam: (last: ReviewQueueResponse) => last.nextCursor,
+    select: (data: { pages: ReviewQueueResponse[] }) => mergeQueuePages(data.pages),
     enabled: school !== '',
     staleTime: 10_000,
     refetchOnWindowFocus: true,

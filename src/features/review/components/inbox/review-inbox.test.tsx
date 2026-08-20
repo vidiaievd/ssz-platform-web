@@ -157,6 +157,19 @@ function cleanQueue(): ReviewQueueResponse {
   };
 }
 
+/** The same queue over two pages, answered by the cursor the hook sends. */
+function answerPages(pages: ReviewQueueResponse[]) {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (input: RequestInfo | URL) => {
+      const url = new URL(String(input), 'http://localhost');
+      const cursor = url.searchParams.get('cursor');
+      const index = cursor === null ? 0 : pages.findIndex((page) => page.nextCursor === cursor) + 1;
+      return new Response(JSON.stringify(pages[index]), { status: 200 });
+    }),
+  );
+}
+
 /** What the batch call actually carried. */
 function batchBody(): { attemptIds: string[] } {
   const call = vi
@@ -203,6 +216,64 @@ describe('ReviewInbox', () => {
     renderInbox();
 
     expect(await screen.findByText(/1\+ longer than promised/)).toBeInTheDocument();
+  });
+
+  it('reaches the rest of the queue a page at a time, into the groups already open', async () => {
+    const first = QUEUE.groups[0]!;
+    answerPages([
+      { ...QUEUE, nextCursor: 'page-2' },
+      {
+        ...QUEUE,
+        summary: { ...QUEUE.summary, overdue: 0 },
+        groups: [
+          {
+            ...first,
+            count: 1,
+            ages: [5],
+            overdue: 0,
+            items: [
+              {
+                ...first.items[0]!,
+                id: 'att-3',
+                student: { id: 's3', name: 'Ola Nordmann', groupName: 'A2 kveld' },
+                ageHours: 5,
+                overdue: false,
+              },
+            ],
+          },
+        ],
+        nextCursor: null,
+      },
+    ]);
+    const user = userEvent.setup();
+    renderInbox();
+
+    await user.click(await screen.findByRole('button', { name: 'Show more' }));
+
+    // One heading, three rows under it — the group did not arrive on screen twice.
+    expect(await screen.findByText('Ola Nordmann')).toBeInTheDocument();
+    expect(screen.getAllByText('Perfektum')).toHaveLength(1);
+    expect(screen.getByText('Anna Kowalska')).toBeInTheDocument();
+  });
+
+  it('stops offering more once the last page is in', async () => {
+    answerPages([{ ...QUEUE, nextCursor: 'page-2' }, { ...QUEUE, nextCursor: null }]);
+    const user = userEvent.setup();
+    renderInbox();
+
+    await user.click(await screen.findByRole('button', { name: 'Show more' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Show more' })).not.toBeInTheDocument(),
+    );
+  });
+
+  it('offers nothing more when the queue fits in one page', async () => {
+    answer(QUEUE);
+    renderInbox();
+
+    expect(await screen.findByText('Anna Kowalska')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Show more' })).not.toBeInTheDocument();
   });
 
   it('carries the age in words on every row, never colour alone', async () => {

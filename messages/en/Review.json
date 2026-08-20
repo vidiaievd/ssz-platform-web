@@ -43,6 +43,8 @@
     },
     "failed": "The queue could not be loaded.",
     "retry": "Try again",
+    "more": "Show more",
+    "moreLoading": "Loading…",
     "position": "{i} of {n}",
     "selectPrompt": "Pick a submission",
     "selectBody": "Choose one on the left and it opens here."
