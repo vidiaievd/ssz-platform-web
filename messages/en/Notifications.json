@@ -178,7 +178,15 @@
       "title": "{count, plural, one {# submission has been waiting too long} other {# submissions have been waiting too long}}",
       "titleFallback": "Work has been waiting too long",
       "body": "The oldest has waited {hours, plural, one {# hour} other {# hours}} — past the {promised} your school allows. Consider asking a second marker.",
-      "bodyFallback": "Open your marking queue — something has been waiting past what your school allows."
+      "bodyFallback": "Open your marking queue — something has been waiting past what your school allows.",
+      "bodySchool": "The oldest has waited {hours, plural, one {# hour} other {# hours}} and nobody has picked it up. Someone may need a second marker."
+    },
+    "REVIEW_SCHOOL_SUMMARY": {
+      "title": "{count, plural, one {# submission is waiting across your school} other {# submissions are waiting across your school}}",
+      "titleFallback": "This week’s marking across your school",
+      "body": "{overdue, plural, one {# is past your response time} other {# are past your response time}} · the oldest has waited {days, plural, =0 {less than a day} one {# day} other {# days}}.",
+      "bodyOnTime": "All of it is within your response time · the oldest has waited {days, plural, =0 {less than a day} one {# day} other {# days}}.",
+      "bodyFallback": "Open the marking overview to see how your school is keeping up."
     }
   }
 }

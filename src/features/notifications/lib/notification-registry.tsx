@@ -31,6 +31,7 @@ import type {
   PlacementReviewReadyData,
   ReviewDigestData,
   ReviewEscalationData,
+  ReviewSchoolSummaryData,
   TeacherProfileChangedData,
 } from '../types';
 
@@ -80,6 +81,10 @@ function isReviewDigestData(data: unknown): data is ReviewDigestData {
 
 function isReviewEscalationData(data: unknown): data is ReviewEscalationData {
   return !!data && typeof data === 'object' && 'overdue' in data;
+}
+
+function isReviewSchoolSummaryData(data: unknown): data is ReviewSchoolSummaryData {
+  return !!data && typeof data === 'object' && 'pending' in data && 'oldestAgeHours' in data;
 }
 
 function isAttemptReviewedData(data: unknown): data is AttemptReviewedData {
@@ -402,16 +407,52 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
       isReviewEscalationData(data)
         ? t('types.REVIEW_ESCALATION.title', { count: data.overdue })
         : t('types.REVIEW_ESCALATION.titleFallback'),
-    resolveBody: (data, t) =>
-      isReviewEscalationData(data)
-        ? t('types.REVIEW_ESCALATION.body', {
-            hours: Math.max(0, Math.round(hoursSince(data.oldestSubmittedAt))),
-            promised: data.escalateAfterHours,
-          })
-        : t('types.REVIEW_ESCALATION.bodyFallback'),
+    resolveBody: (data, t) => {
+      if (!isReviewEscalationData(data)) return t('types.REVIEW_ESCALATION.bodyFallback');
+      const hours = Math.max(0, Math.round(hoursSince(data.oldestSubmittedAt)));
+      // The copy sent to a school's admins asks something different from the one sent to
+      // the teacher: find someone to help, rather than sit down and mark.
+      return data.scope === 'school'
+        ? t('types.REVIEW_ESCALATION.bodySchool', { hours })
+        : t('types.REVIEW_ESCALATION.body', { hours, promised: data.escalateAfterHours });
+    },
     getLink: (_data, ctx) =>
       ctx.workspaceKind === 'school' && ctx.schoolSlug
         ? `/school/${ctx.schoolSlug}/review`
+        : undefined,
+  },
+  /**
+   * The school's week (plan 47.6), to whoever `escalateTo` names.
+   *
+   * Its link is the oversight screen rather than a marking queue: the reader is being
+   * asked whether the school is keeping up, which is a staffing question, and half of
+   * them cannot mark anything themselves.
+   */
+  REVIEW_SCHOOL_SUMMARY: {
+    icon: ClipboardCheck,
+    category: 'Learning',
+    priority: 'normal',
+    actionable: false,
+    resolveTitle: (data, t) =>
+      isReviewSchoolSummaryData(data)
+        ? t('types.REVIEW_SCHOOL_SUMMARY.title', { count: data.pending })
+        : t('types.REVIEW_SCHOOL_SUMMARY.titleFallback'),
+    resolveBody: (data, t) => {
+      if (!isReviewSchoolSummaryData(data)) return t('types.REVIEW_SCHOOL_SUMMARY.bodyFallback');
+      // A week with nothing late is worth saying plainly — the summary exists to be read
+      // in one glance, and "0 overdue" buried in a sentence is not that.
+      return data.overdue === 0
+        ? t('types.REVIEW_SCHOOL_SUMMARY.bodyOnTime', {
+            days: Math.floor(data.oldestAgeHours / 24),
+          })
+        : t('types.REVIEW_SCHOOL_SUMMARY.body', {
+            overdue: data.overdue,
+            days: Math.floor(data.oldestAgeHours / 24),
+          });
+    },
+    getLink: (_data, ctx) =>
+      ctx.workspaceKind === 'school' && ctx.schoolSlug
+        ? `/school/${ctx.schoolSlug}/review/oversight`
         : undefined,
   },
 };

@@ -178,7 +178,15 @@
       "title": "{count, plural, one {# innlevering har ventet for lenge} other {# innleveringer har ventet for lenge}}",
       "titleFallback": "Arbeid har ventet for lenge",
       "body": "Den eldste har ventet {hours, plural, one {# time} other {# timer}} — lenger enn de {promised} skolen din tillater. Vurder å be om en ekstra retter.",
-      "bodyFallback": "Åpne rettekøen — noe har ventet lenger enn skolen din tillater."
+      "bodyFallback": "Åpne rettekøen — noe har ventet lenger enn skolen din tillater.",
+      "bodySchool": "Den eldste har ventet {hours, plural, one {# time} other {# timer}} uten at noen har tatt den. Kanskje trengs det en ekstra retter."
+    },
+    "REVIEW_SCHOOL_SUMMARY": {
+      "title": "{count, plural, one {# innlevering venter i skolen din} other {# innleveringer venter i skolen din}}",
+      "titleFallback": "Rettingen i skolen din denne uka",
+      "body": "{overdue, plural, one {# er over svarfristen} other {# er over svarfristen}} · den eldste har ventet {days, plural, =0 {mindre enn ett døgn} one {# dag} other {# dager}}.",
+      "bodyOnTime": "Alt ligger innenfor svarfristen · den eldste har ventet {days, plural, =0 {mindre enn ett døgn} one {# dag} other {# dager}}.",
+      "bodyFallback": "Åpne retteoversikten for å se hvordan skolen ligger an."
     }
   }
 }

@@ -20,7 +20,8 @@ export type NotificationType =
   | 'GROUP_ASSIGNED'
   | 'ATTEMPT_REVIEWED'
   | 'REVIEW_DIGEST'
-  | 'REVIEW_ESCALATION';
+  | 'REVIEW_ESCALATION'
+  | 'REVIEW_SCHOOL_SUMMARY';
 
 export type NotificationCategory = 'Enrollment' | 'Staff' | 'Learning' | 'System';
 
@@ -126,6 +127,28 @@ export interface ReviewEscalationData {
   overdue: number;
   oldestSubmittedAt: string;
   escalateAfterHours: number;
+  /**
+   * `'school'` on the copy sent to whoever the school named in `escalateTo` — the same
+   * lateness, but somebody else's problem to solve: theirs is to find a second marker,
+   * not to mark. Absent on a teacher's own escalation (plan 47.5).
+   */
+  scope?: 'school';
+  target?: string;
+}
+
+/**
+ * The school's marking, once a week, to whoever it named (plan 47.6).
+ *
+ * A different question from the digest: not "what should I mark today" but "is our
+ * marking keeping up" — so it is sent even when nothing is late, and never when nothing
+ * is waiting at all.
+ */
+export interface ReviewSchoolSummaryData {
+  schoolId: string;
+  pending: number;
+  overdue: number;
+  oldestAgeHours: number;
+  oldestSubmittedAt: string;
 }
 
 export type NotificationTemplateData =
@@ -137,6 +160,7 @@ export type NotificationTemplateData =
   | AttemptReviewedData
   | ReviewDigestData
   | ReviewEscalationData
+  | ReviewSchoolSummaryData
   | Record<string, unknown>;
 
 export interface Notification {

@@ -132,6 +132,57 @@ describe('notification-registry', () => {
       expect(entry.resolveBody(data, t)).toContain('48');
     });
 
+    /**
+     * The same lateness reaches two people with two different asks: the teacher is asked
+     * to mark, the school is asked to find someone who can.
+     */
+    it('asks a school for help rather than telling it to mark', () => {
+      const entry = getNotificationEntry('REVIEW_ESCALATION');
+      const data = {
+        schoolId: 's1',
+        overdue: 3,
+        oldestSubmittedAt: new Date(Date.now() - 70 * 60 * 60 * 1000).toISOString(),
+        escalateAfterHours: 48,
+        scope: 'school' as const,
+        target: 'school_admins',
+      };
+
+      expect(entry.resolveBody(data, t)).toContain('second marker');
+    });
+
+    it('summarises the school’s week and points at the overview, not a queue', () => {
+      const entry = getNotificationEntry('REVIEW_SCHOOL_SUMMARY');
+      const data = {
+        schoolId: 's1',
+        pending: 24,
+        overdue: 5,
+        oldestAgeHours: 76,
+        oldestSubmittedAt: new Date(Date.now() - 76 * 60 * 60 * 1000).toISOString(),
+      };
+
+      expect(entry.resolveTitle(data, t)).toBe('24 submissions are waiting across your school');
+      expect(entry.resolveBody(data, t)).toContain('5 are past your response time');
+      expect(entry.resolveBody(data, t)).toContain('3 days');
+      expect(entry.getLink(data, { workspaceKind: 'school', schoolSlug: 'greenwood' })).toBe(
+        '/school/greenwood/review/oversight',
+      );
+    });
+
+    /** A week with nothing late is worth saying plainly, not burying in a zero. */
+    it('says a school is keeping up in its own words', () => {
+      const entry = getNotificationEntry('REVIEW_SCHOOL_SUMMARY');
+      const data = {
+        schoolId: 's1',
+        pending: 6,
+        overdue: 0,
+        oldestAgeHours: 10,
+        oldestSubmittedAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
+      };
+
+      expect(entry.resolveBody(data, t)).toContain('within your response time');
+      expect(entry.resolveBody(data, t)).toContain('less than a day');
+    });
+
     it('still says something useful when the message carries no numbers', () => {
       expect(getNotificationEntry('REVIEW_DIGEST').resolveTitle(undefined, t)).toBe(
         t('types.REVIEW_DIGEST.titleFallback'),
