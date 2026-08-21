@@ -28,6 +28,7 @@ import {
 } from '@/lib/shared-kernel/translate';
 import type { LevelGrammarRule } from '@/features/content-authoring/lib/level-grammar-rules';
 
+import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepCheck } from './step-check';
 import { StepDirection } from './step-direction';
 import { StepFlow } from './step-flow';
@@ -108,21 +109,23 @@ export function TranslateBuilder({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <StepRail current={step} exercise={exercise} onSelect={setStep} />
-        <div className="flex items-center gap-3">
-          <SaveHint
-            status={autosave.status}
-            savedAt={autosave.savedAt}
-            canOverwrite={autosave.canOverwrite}
-            onRetry={autosave.retry}
-            onOverwrite={autosave.overwrite}
-          />
-          <Button type="button" onClick={() => setGateOpen(true)}>
-            {t('translate.shell.done')}
-          </Button>
+      <EditorToolbarPortal>
+        <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
+          <StepRail current={step} exercise={exercise} onSelect={setStep} />
+          <div className="flex items-center gap-3">
+            <SaveHint
+              status={autosave.status}
+              savedAt={autosave.savedAt}
+              canOverwrite={autosave.canOverwrite}
+              onRetry={autosave.retry}
+              onOverwrite={autosave.overwrite}
+            />
+            <Button type="button" onClick={() => setGateOpen(true)}>
+              {t('translate.shell.done')}
+            </Button>
+          </div>
         </div>
-      </div>
+      </EditorToolbarPortal>
 
       <div className="min-w-0">
         {step === 2 ? (

@@ -39,6 +39,7 @@ import { Sidebar } from './sidebar/sidebar';
 import { MobileSidebar } from './sidebar/mobile-sidebar';
 import { BottomTabBar } from './sidebar/bottom-tab-bar';
 import { Topbar } from './topbar/topbar';
+import { TopbarSlot, TopbarSlotProvider } from './topbar/topbar-slot';
 import type { NavSection } from './sidebar/types';
 import type { UserMenuExtraItem } from './topbar/user-menu';
 
@@ -312,42 +313,47 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-(--ssz-bg-base)">
-      <Sidebar
-        sections={sections}
-        schoolType={variant === 'school' ? (schoolContext?.schoolType ?? 'online') : undefined}
-        header={workspaceHeader}
-      />
-      <MobileSidebar
-        sections={sections}
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        header={workspaceHeader}
-      />
-
-      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-        <Topbar
-          user={user}
-          onMenuOpen={() => setMobileOpen(true)}
-          activeContextKey={activeContextKey}
-          search={variant === 'school' ? <GlobalSearchTrigger /> : undefined}
-          userMenuExtraItems={userMenuExtraItems}
-          actions={
-            <div className="flex items-center gap-2">
-              {variant === 'school' && <TrialPill />}
-              {canSeeSchedulingAlerts && <AlertBadge schoolId={schoolContext?.schoolId} />}
-              <NotificationBell
-                linkContext={notificationsLinkContext}
-                notificationsHref={notificationsHref}
-              />
-            </div>
-          }
+    <TopbarSlotProvider>
+      <div className="flex h-screen overflow-hidden bg-(--ssz-bg-base)">
+        <Sidebar
+          sections={sections}
+          schoolType={variant === 'school' ? (schoolContext?.schoolType ?? 'online') : undefined}
+          header={workspaceHeader}
         />
-        <main className={cn('flex-1 overflow-auto', variant === 'student' && 'pb-16 md:pb-0')}>
-          {children}
-        </main>
+        <MobileSidebar
+          sections={sections}
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          header={workspaceHeader}
+        />
+
+        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+          <Topbar
+            user={user}
+            onMenuOpen={() => setMobileOpen(true)}
+            activeContextKey={activeContextKey}
+            // The bar's middle is a slot a page can fill — the lesson editor puts its
+            // breadcrumb there, the way the builder specs draw it. Nothing claims it on
+            // most pages, and the search stub stays.
+            search={<TopbarSlot fallback={variant === 'school' ? <GlobalSearchTrigger /> : null} />}
+            userMenuExtraItems={userMenuExtraItems}
+            actions={
+              <div className="flex items-center gap-2">
+                {variant === 'school' && <TrialPill />}
+                {canSeeSchedulingAlerts && <AlertBadge schoolId={schoolContext?.schoolId} />}
+                <NotificationBell
+                  linkContext={notificationsLinkContext}
+                  notificationsHref={notificationsHref}
+                />
+              </div>
+            }
+          />
+          <main className={cn('flex-1 overflow-auto', variant === 'student' && 'pb-16 md:pb-0')}>
+            {children}
+          </main>
+        </div>
+        {variant === 'student' && <BottomTabBar items={buildStudentMobileNav(sections)} />}
       </div>
-      {variant === 'student' && <BottomTabBar items={buildStudentMobileNav(sections)} />}
-    </div>
+    </TopbarSlotProvider>
   );
 }

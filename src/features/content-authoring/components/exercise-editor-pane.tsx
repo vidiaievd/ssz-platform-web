@@ -74,8 +74,6 @@ interface ExerciseEditorPaneProps {
   /** The grammar rules of this Leksjon; only the translate builder uses them so far. */
   grammarRules?: LevelGrammarRule[];
   backHref: string;
-  /** The page's breadcrumb, shown in the editor's top bar. */
-  breadcrumb?: ReactNode;
   /** Where this exercise's marking queue lives. Offered only where one can fill up. */
   reviewHref?: string;
   publishSlot: ReactNode;
@@ -90,7 +88,6 @@ export function ExerciseEditorPane({
   grammarRules,
   container,
   backHref,
-  breadcrumb,
   reviewHref,
   publishSlot,
 }: ExerciseEditorPaneProps) {
@@ -128,7 +125,6 @@ export function ExerciseEditorPane({
       // An exercise document waits in its draft whatever its placement says.
       savesHeldForPublish
       backHref={backHref}
-      breadcrumb={breadcrumb}
       saveStatus="idle"
       savedAt={null}
       publishSlot={

@@ -28,6 +28,7 @@ import {
   type Variant,
 } from '@/lib/shared-kernel/match-pairs';
 
+import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepPairs } from './step-pairs';
 import { StepRightColumn } from './step-right-column';
 import { StepFeedback } from './step-feedback';
@@ -114,26 +115,28 @@ export function MatchPairsBuilder({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <StepRail
-          current={step}
-          problems={problems}
-          variantChosen={variantChosen}
-          onSelect={setStep}
-        />
-        <div className="flex items-center gap-3">
-          <SaveHint
-            status={autosave.status}
-            savedAt={autosave.savedAt}
-            canOverwrite={autosave.canOverwrite}
-            onRetry={autosave.retry}
-            onOverwrite={autosave.overwrite}
+      <EditorToolbarPortal>
+        <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
+          <StepRail
+            current={step}
+            problems={problems}
+            variantChosen={variantChosen}
+            onSelect={setStep}
           />
-          <Button type="button" onClick={() => setGateOpen(true)}>
-            {t('matchPairs.shell.done')}
-          </Button>
+          <div className="flex items-center gap-3">
+            <SaveHint
+              status={autosave.status}
+              savedAt={autosave.savedAt}
+              canOverwrite={autosave.canOverwrite}
+              onRetry={autosave.retry}
+              onOverwrite={autosave.overwrite}
+            />
+            <Button type="button" onClick={() => setGateOpen(true)}>
+              {t('matchPairs.shell.done')}
+            </Button>
+          </div>
         </div>
-      </div>
+      </EditorToolbarPortal>
 
       <div className="min-w-0">
         {step === 1 && (

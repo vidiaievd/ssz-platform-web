@@ -14,6 +14,7 @@ import { getLessonTypeDefinition, type MaterialKind } from '@/lib/content/lesson
 import { ContainerStateBadge } from './container-state-badge';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { SaveScopeHint, SaveScopeProvider } from './save-scope';
+import { EditorToolbarProvider, useEditorToolbarTarget } from './editor-toolbar';
 import { PhoneFrame } from './phone-frame';
 import { DesktopFrame } from './desktop-frame';
 import type { SaveStatus } from '../hooks/use-unsaved-changes';
@@ -31,13 +32,6 @@ interface LessonEditorShellProps {
   /** Editors whose saves cannot reach a student before a publish — see `SaveScopeHint`. */
   savesHeldForPublish?: boolean;
   backHref: string;
-  /**
-   * The page's breadcrumb, rendered inside the editor's own top bar rather than above
-   * it. Its last crumb is the material's name, which is why there is no separate
-   * title block: two lines saying the same thing is what made the top of this screen
-   * read as three unrelated strips.
-   */
-  breadcrumb?: ReactNode;
   saveStatus: SaveStatus;
   savedAt: Date | null;
   /** Composed by the caller, e.g. `<PublishDialog container={container} result={preflight} />`. */
@@ -53,7 +47,6 @@ export function LessonEditorShell({
   isLive,
   savesHeldForPublish,
   backHref,
-  breadcrumb,
   saveStatus,
   savedAt,
   publishSlot,
@@ -77,6 +70,7 @@ export function LessonEditorShell({
    */
   const mounted = useMounted();
   const previewAddress = mounted ? window.location.host : undefined;
+  const [toolbarElement, setToolbarElement] = useEditorToolbarTarget();
   const def = getLessonTypeDefinition(kind);
 
   /**
@@ -109,30 +103,26 @@ export function LessonEditorShell({
       */}
       <div className="flex min-h-0 flex-1 flex-col">
         {/*
-          One bar across the top, the way the builder specs draw it: where you are,
-          what this is, whether it is saved, and what you can do with it. It used to be
-          three strips — a breadcrumb line, a title block, a row of buttons — none of
-          which lined up with the columns underneath.
+          The workspace's own bar, under the app's — where the specs put the builder's
+          steps. Where you are is in the top bar's breadcrumb now, so this one carries
+          what is being edited and what can be done to it, and nothing repeats.
         */}
-        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border bg-surface px-4 py-2.5">
+        <h1 className="sr-only">{title}</h1>
+        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border bg-surface px-4 py-2">
           <Button asChild variant="ghost" size="icon-sm" aria-label={t('backToContent')}>
             <Link href={backHref}>
               <ChevronLeft size={16} aria-hidden />
             </Link>
           </Button>
 
-          <div className="min-w-0">
-            {breadcrumb ?? (
-              <span className="truncate text-sm font-medium text-foreground">{title}</span>
-            )}
-          </div>
-
           <Badge variant="muted">
             {tContent(`materialType.${def.kind}` as 'materialType.text')}
           </Badge>
           {state && <ContainerStateBadge state={state} />}
 
-          <span className="flex-1" />
+          {/* Filled by the builder inside `children` — its steps, its save hint, its
+              Done button. Empty for material that is not built in steps. */}
+          <div ref={setToolbarElement} className="flex min-w-0 flex-1 items-center gap-3" />
 
           {/* The reach of a save, which the bar has room to spell out on a wide screen
               and the state badge stands in for on a narrow one. */}
@@ -182,7 +172,9 @@ export function LessonEditorShell({
           <div className={`min-w-0 px-8 pt-6 pb-10 ${split.editor}`}>
             {/* Capped rather than stretched: form fields three thousand pixels wide are
               no easier to fill in than the screen they are on. */}
-            <div className="mx-auto max-w-5xl">{children}</div>
+            <div className="mx-auto max-w-5xl">
+              <EditorToolbarProvider element={toolbarElement}>{children}</EditorToolbarProvider>
+            </div>
           </div>
 
           {/*

@@ -23,6 +23,7 @@ vi.mock('@/lib/i18n/navigation', () => ({
 }));
 
 const { LessonEditorShell } = await import('./lesson-editor-shell');
+const { EditorToolbarPortal } = await import('./editor-toolbar');
 
 function renderShell() {
   render(
@@ -33,12 +34,16 @@ function renderShell() {
         state="draft"
         isLive={false}
         backHref="/school/x/content/1"
-        breadcrumb={<nav aria-label="Breadcrumb">Courses / 1A / Match Pairs</nav>}
         saveStatus="idle"
         savedAt={null}
         publishSlot={null}
         preview={<p>the student view</p>}
       >
+        <EditorToolbarPortal>
+          <div role="tablist" aria-label="Steps">
+            <button role="tab">1 Pairs</button>
+          </div>
+        </EditorToolbarPortal>
         <p>the fields</p>
       </LessonEditorShell>
     </NextIntlClientProvider>,
@@ -80,13 +85,13 @@ describe('LessonEditorShell — preview device', () => {
 });
 
 describe('LessonEditorShell — top bar', () => {
-  it('carries the page’s breadcrumb rather than repeating the title under it', () => {
+  it('names the material for a screen reader without printing it twice', () => {
     renderShell();
 
-    expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
-    // The last crumb is the material's name; a heading saying it again is what made
-    // the top of the screen three strips deep.
-    expect(screen.queryByRole('heading', { name: 'Match Pairs' })).not.toBeInTheDocument();
+    // The visible name is the breadcrumb in the app's bar; a page still needs a
+    // heading, and a second copy of the title in the workspace bar is what made the
+    // top of this screen three strips deep.
+    expect(screen.getByRole('heading', { name: 'Match Pairs' })).toHaveClass('sr-only');
   });
 
   it('leads back to where the material is placed', () => {
@@ -96,5 +101,16 @@ describe('LessonEditorShell — top bar', () => {
       'href',
       '/school/x/content/1',
     );
+  });
+});
+
+describe('LessonEditorShell — the builder’s toolbar', () => {
+  it('takes the builder’s steps into the workspace bar, out of the scrolling column', () => {
+    renderShell();
+
+    const steps = screen.getByRole('tablist', { name: 'Steps' });
+    // Beside the material's badges rather than inside the editor column: the bar is
+    // what lines up with the preview panel next to it.
+    expect(screen.getByText('Practice').closest('div')).toContainElement(steps);
   });
 });

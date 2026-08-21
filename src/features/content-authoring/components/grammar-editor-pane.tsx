@@ -33,8 +33,6 @@ interface GrammarEditorPaneProps {
   isLive: boolean | null;
   container: Container;
   backHref: string;
-  /** The page's breadcrumb, shown in the editor's top bar. */
-  breadcrumb?: ReactNode;
   publishSlot: ReactNode;
 }
 
@@ -46,7 +44,6 @@ export function GrammarEditorPane({
   isLive,
   container,
   backHref,
-  breadcrumb,
   publishSlot,
 }: GrammarEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -128,7 +125,6 @@ export function GrammarEditorPane({
       state={state}
       isLive={isLive}
       backHref={backHref}
-      breadcrumb={breadcrumb}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
       publishSlot={publishSlot}

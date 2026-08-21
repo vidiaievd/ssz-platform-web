@@ -27,6 +27,7 @@ import {
   type WordBankGapFill,
 } from '@/lib/shared-kernel/wordbank-gapfill';
 
+import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepSentences } from './step-sentences';
 import { StepWordBank } from './step-word-bank';
 import { StepFeedback } from './step-feedback';
@@ -117,21 +118,23 @@ export function GapFillBuilder({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <StepRail current={step} problems={problems} onSelect={setStep} />
-        <div className="flex items-center gap-3">
-          <SaveHint
-            status={autosave.status}
-            savedAt={autosave.savedAt}
-            canOverwrite={autosave.canOverwrite}
-            onRetry={autosave.retry}
-            onOverwrite={autosave.overwrite}
-          />
-          <Button type="button" onClick={() => setGateOpen(true)}>
-            {t('gapFill.shell.done')}
-          </Button>
+      <EditorToolbarPortal>
+        <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
+          <StepRail current={step} problems={problems} onSelect={setStep} />
+          <div className="flex items-center gap-3">
+            <SaveHint
+              status={autosave.status}
+              savedAt={autosave.savedAt}
+              canOverwrite={autosave.canOverwrite}
+              onRetry={autosave.retry}
+              onOverwrite={autosave.overwrite}
+            />
+            <Button type="button" onClick={() => setGateOpen(true)}>
+              {t('gapFill.shell.done')}
+            </Button>
+          </div>
         </div>
-      </div>
+      </EditorToolbarPortal>
 
       <div className="min-w-0">
         <div>

@@ -34,8 +34,6 @@ interface AudioEditorPaneProps {
   isLive: boolean | null;
   container: Container;
   backHref: string;
-  /** The page's breadcrumb, shown in the editor's top bar. */
-  breadcrumb?: ReactNode;
   publishSlot: ReactNode;
 }
 
@@ -47,7 +45,6 @@ export function AudioEditorPane({
   isLive,
   container,
   backHref,
-  breadcrumb,
   publishSlot,
 }: AudioEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -110,7 +107,6 @@ export function AudioEditorPane({
       state={state}
       isLive={isLive}
       backHref={backHref}
-      breadcrumb={breadcrumb}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
       publishSlot={publishSlot}
