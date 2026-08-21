@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { DEFAULT_SETTINGS, type MatchPairs, type Variant } from '@/lib/shared-kernel/match-pairs';
 
+import { StepFeedback } from './step-feedback';
 import { StepPairs } from './step-pairs';
 import { StepRightColumn } from './step-right-column';
 
@@ -78,6 +79,16 @@ function Step2({ initial }: { initial: MatchPairs }) {
   );
 }
 
+function Step3({ initial }: { initial: MatchPairs }) {
+  const [exercise, setExercise] = useState(initial);
+
+  return (
+    <div className="mx-auto max-w-[760px] p-6">
+      <StepFeedback exercise={exercise} onChange={setExercise} />
+    </div>
+  );
+}
+
 const meta = {
   title: 'Authoring/Match pairs',
   parameters: { layout: 'fullscreen' },
@@ -120,6 +131,30 @@ export const RightColumnWordPairs: Story = {
         ],
         distractors: [{ id: 'h6', text: 'хотя' }],
         feedback: {},
+      }}
+    />
+  ),
+};
+
+/** Step 3, by-pair view: two defaults written, thirty-five cells still empty. */
+export const FeedbackStep: Story = {
+  render: () => <Step3 initial={SAMPLE} />,
+};
+
+/** The same data as a matrix — the view that makes a pool this size authorable. */
+export const FeedbackMatrixStep: Story = {
+  render: () => (
+    <Step3
+      initial={{
+        ...SAMPLE,
+        feedback: {
+          ...SAMPLE.feedback,
+          p1: {
+            def: 'Etter en leddsetning i front kommer verbet før subjektet.',
+            why: 'Inversjon.',
+            ov: { h6: { text: 'Riktige ord, feil ordstilling.', origin: 'author' } },
+          },
+        },
       }}
     />
   ),

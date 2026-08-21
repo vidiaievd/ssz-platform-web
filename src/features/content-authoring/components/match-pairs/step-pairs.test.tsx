@@ -90,11 +90,13 @@ describe('StepPairs', () => {
   it('writes both halves of one pair and counts it as complete (AC-B1)', async () => {
     const { user } = renderStep(doc({ pairs: [{ id: 'p1', rightId: 'h1', left: '', right: '' }] }));
 
-    await user.type(leftOf(0), 'Hvis det regner i morgen,');
-    await user.type(rightOf(0), 'blir vi hjemme.');
+    // Short strings on purpose: `type` is per-keystroke, and a long one here made the
+    // case slow enough to flake under the full suite.
+    await user.type(leftOf(0), 'Hun sa at');
+    await user.type(rightOf(0), 'hun kom.');
 
-    expect(leftOf(0)).toHaveValue('Hvis det regner i morgen,');
-    expect(rightOf(0)).toHaveValue('blir vi hjemme.');
+    expect(leftOf(0)).toHaveValue('Hun sa at');
+    expect(rightOf(0)).toHaveValue('hun kom.');
     expect(screen.getByText('1 complete pair')).toBeInTheDocument();
   });
 

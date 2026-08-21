@@ -11,6 +11,7 @@ import {
   EMPTY_FEEDBACK,
   norm,
   pruneFeedback,
+  wrongItems,
   type MatchPairs,
   type Pair,
   type PairFeedback,
@@ -218,4 +219,70 @@ export function removeDistractor(ex: MatchPairs, id: RightId): MatchPairs {
 
 export function setSettings(ex: MatchPairs, patch: Partial<Settings>): MatchPairs {
   return { ...ex, settings: { ...ex.settings, ...patch } };
+}
+
+// ── Step 3 — the explanations ───────────────────────────────────────────────
+
+function withFeedback(
+  ex: MatchPairs,
+  pairId: PairId,
+  update: (current: PairFeedback) => PairFeedback,
+): MatchPairs {
+  const current = ex.feedback[pairId] ?? EMPTY_FEEDBACK;
+  return {
+    ...ex,
+    feedback: { ...ex.feedback, [pairId]: update({ ...current, ov: { ...current.ov } }) },
+  };
+}
+
+/**
+ * The explanation any wrong half gets when nothing more specific was written. Required to
+ * publish a `halves` set, and the thing most students will actually read.
+ */
+export function setDefault(ex: MatchPairs, pairId: PairId, def: string): MatchPairs {
+  return withFeedback(ex, pairId, (current) => ({ ...current, def }));
+}
+
+/**
+ * Why attaching exactly this half to this left half is wrong.
+ *
+ * Blank text removes the cell rather than storing an empty one: an empty cell means "use
+ * the pair's default", and a stored blank would count as written towards coverage while
+ * showing the student nothing. Writing over an AI draft makes the text the teacher's own
+ * — accepting a draft is editing it.
+ */
+export function setOverride(
+  ex: MatchPairs,
+  pairId: PairId,
+  rightId: RightId,
+  text: string,
+): MatchPairs {
+  return withFeedback(ex, pairId, (current) => {
+    const ov = { ...current.ov };
+    if (text.trim() === '') delete ov[rightId];
+    else ov[rightId] = { text, origin: 'author' };
+    return { ...current, ov };
+  });
+}
+
+/** Authored override text for one cell — an unaccepted AI draft is not text yet. */
+export function overrideText(ex: MatchPairs, pairId: PairId, rightId: RightId): string {
+  const override = ex.feedback[pairId]?.ov[rightId];
+  return override?.origin === 'author' ? override.text : '';
+}
+
+export interface PairCoverage {
+  /** Pool halves other than this pair's own — the whole row of the matrix. */
+  total: number;
+  /** Of those, the ones with authored text. */
+  written: number;
+}
+
+/** One pair's share of the coverage meter (AC-B16). Empty cells are legitimate by design. */
+export function pairCoverage(ex: MatchPairs, pairId: PairId): PairCoverage {
+  const cells = wrongItems(ex, pairId);
+  return {
+    total: cells.length,
+    written: cells.filter((item) => overrideText(ex, pairId, item.id).trim() !== '').length,
+  };
 }
