@@ -27,6 +27,7 @@ import {
   type WordBankGapFill,
 } from '@/lib/shared-kernel/wordbank-gapfill';
 
+import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepSentences } from './step-sentences';
 import { StepWordBank } from './step-word-bank';
@@ -119,9 +120,9 @@ export function GapFillBuilder({
   return (
     <div className="flex flex-col gap-5">
       <EditorToolbarPortal>
-        <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
-          <StepRail current={step} problems={problems} onSelect={setStep} />
-          <div className="flex items-center gap-3">
+        <div className="flex flex-1 items-stretch justify-between gap-3">
+          <GapFillSteps current={step} problems={problems} onSelect={setStep} />
+          <div className="flex shrink-0 items-center gap-3 py-2">
             <SaveHint
               status={autosave.status}
               savedAt={autosave.savedAt}
@@ -204,57 +205,49 @@ export function GapFillBuilder({
   );
 }
 
-interface StepRailProps {
+/** Where the problems are, per step, in the rail every builder shares. */
+function GapFillSteps({
+  current,
+  problems,
+  onSelect,
+}: {
   current: IssueStep;
   problems: Issue[];
   onSelect: (step: IssueStep) => void;
-}
-
-/**
- * Where the problems are, per step. A rail rather than a wizard: any step is reachable,
- * and the badge is a count in words as well as a colour (AC-B26, AC-X7).
- */
-function StepRail({ current, problems, onSelect }: StepRailProps) {
+}) {
   const t = useTranslations('Authoring');
 
-  return (
-    <div role="tablist" aria-label={t('gapFill.shell.stepsLabel')} className="flex gap-1">
-      {STEPS.map((step) => {
-        const own = problems.filter((issue) => issue.step === step);
-        const blockers = own.filter((issue) => issue.level === 'blocker').length;
-        const warnings = own.length - blockers;
-        const isActive = step === current;
+  const steps: BuilderStep[] = STEPS.map((step) => {
+    const own = problems.filter((issue) => issue.step === step);
+    const blockers = own.filter((issue) => issue.level === 'blocker').length;
+    const warnings = own.length - blockers;
 
-        return (
-          <button
-            key={step}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onSelect(step)}
-            className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
-              isActive
-                ? 'border-primary bg-primary-50 text-primary'
-                : 'border-border text-[var(--ssz-text-secondary)] hover:bg-[var(--ssz-bg-subtle)]'
-            }`}
-          >
-            <span className="font-semibold">{step}</span>
-            <span>{t(`gapFill.shell.step${step}` as 'gapFill.shell.step1')}</span>
-            {blockers > 0 ? (
-              <span className="rounded-full bg-error px-1.5 text-[11px] font-semibold text-white">
-                {t('gapFill.shell.blockerCount', { count: blockers })}
-              </span>
-            ) : warnings > 0 ? (
-              <span className="rounded-full bg-warning-100 px-1.5 text-[11px] font-semibold text-warning-700">
-                {t('gapFill.shell.warningCount', { count: warnings })}
-              </span>
-            ) : (
-              <span className="text-[11px] text-success-700">{t('gapFill.shell.stepOk')}</span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+    return {
+      n: step,
+      label: t(`gapFill.shell.step${step}` as 'gapFill.shell.step1'),
+      sub: t(`gapFill.shell.stepSub${step}` as 'gapFill.shell.stepSub1'),
+      ...(blockers > 0
+        ? {
+            status: 'blockers' as const,
+            blockers,
+            statusLabel: t('gapFill.shell.blockerCount', { count: blockers }),
+          }
+        : warnings > 0
+          ? {
+              status: 'warn' as const,
+              statusLabel: t('gapFill.shell.warningCount', { count: warnings }),
+            }
+          : { status: 'ok' as const, statusLabel: t('gapFill.shell.stepOk') }),
+    };
+  });
+
+  return (
+    <BuilderStepRail
+      steps={steps}
+      current={current}
+      onSelect={(step) => onSelect(step as IssueStep)}
+      label={t('gapFill.shell.stepsLabel')}
+    />
   );
 }
 

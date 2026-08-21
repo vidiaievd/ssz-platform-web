@@ -1202,7 +1202,10 @@
       "gateClear": "Nothing standing in the way — this exercise is ready to assign.",
       "gateGoToStep": "Go to step {step}",
       "gateBlocked": "{count, plural, one {Fix # problem first} other {Fix # problems first}}",
-      "gateDone": "Looks good"
+      "gateDone": "Looks good",
+      "stepSub1": "text and blanks",
+      "stepSub2": "the words offered",
+      "stepSub3": "answers to wrong words"
     },
     "issues": {
       "EX_NO_TITLE": "The exercise has no title.",
@@ -1254,7 +1257,11 @@
       "gateGoToStep": "Go to step {step}",
       "gateBlocked": "{count, plural, one {Fix # problem first} other {Fix # problems first}}",
       "gateDone": "Looks good",
-      "gateClose": "Close"
+      "gateClose": "Close",
+      "stepSub1": "type and text",
+      "stepSub2": "sentence and answer",
+      "stepSub3": "what is accepted",
+      "stepSub4": "AI, teacher, attempts"
     },
     "step1": {
       "title": "What kind of correction is this?",
@@ -1617,7 +1624,11 @@
       "gateDone": "Looks good",
       "gateClose": "Close",
       "step3": "The check",
-      "step4": "Flow"
+      "step4": "Flow",
+      "stepSub1": "language and mode",
+      "stepSub2": "source and answers",
+      "stepSub3": "what is accepted",
+      "stepSub4": "AI, teacher, attempts"
     },
     "step1": {
       "title": "Which way round?",
@@ -2087,7 +2098,10 @@
       "gateGoToStep": "Fix it in step {step}",
       "gateVariant": "Choose what kind of pairs this is — the two are graded by different rules.",
       "gateBlocked": "{count, plural, one {Fix # blocker first} other {Fix # blockers first}}",
-      "gateDone": "Done"
+      "gateDone": "Done",
+      "stepSub1": "halves and answers",
+      "stepSub2": "pool and distractors",
+      "stepSub3": "why a half is wrong"
     },
     "preview": {
       "empty": "Nothing to preview yet — write a pair in step 1.",

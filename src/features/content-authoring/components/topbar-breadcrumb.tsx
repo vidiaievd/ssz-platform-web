@@ -15,7 +15,7 @@ import { TopbarPortal } from '@/components/shared/topbar/topbar-slot';
 export function TopbarBreadcrumb({ items }: { items: BreadcrumbItem[] }) {
   return (
     <TopbarPortal>
-      <Breadcrumbs items={items} className="hidden min-w-0 md:flex" />
+      <Breadcrumbs items={items} variant="bar" className="hidden min-w-0 md:flex" />
     </TopbarPortal>
   );
 }

@@ -28,6 +28,7 @@ import {
 } from '@/lib/shared-kernel/translate';
 import type { LevelGrammarRule } from '@/features/content-authoring/lib/level-grammar-rules';
 
+import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepCheck } from './step-check';
 import { StepDirection } from './step-direction';
@@ -110,9 +111,9 @@ export function TranslateBuilder({
   return (
     <div className="flex flex-col gap-5">
       <EditorToolbarPortal>
-        <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
-          <StepRail current={step} exercise={exercise} onSelect={setStep} />
-          <div className="flex items-center gap-3">
+        <div className="flex flex-1 items-stretch justify-between gap-3">
+          <TranslateSteps current={step} exercise={exercise} onSelect={setStep} />
+          <div className="flex shrink-0 items-center gap-3 py-2">
             <SaveHint
               status={autosave.status}
               savedAt={autosave.savedAt}
@@ -155,63 +156,51 @@ export function TranslateBuilder({
   );
 }
 
-interface StepRailProps {
+/**
+ * Where the problems are, per step, in the rail every builder shares. The state comes
+ * from the kernel's `stepState`, so the rail, the gate and the server cannot disagree
+ * about what is wrong — and `info` issues deliberately leave it green, because a dot
+ * that turns amber for a remark teaches the author to stop reading it.
+ */
+function TranslateSteps({
+  current,
+  exercise,
+  onSelect,
+}: {
   current: IssueStep;
   exercise: Translate;
   onSelect: (step: IssueStep) => void;
-}
-
-/**
- * Where the problems are, per step. The dot comes from the kernel's `stepState`, so the
- * rail, the gate and the server cannot disagree about what is wrong — and `info` issues
- * deliberately leave it green, because a dot that turns amber for a remark teaches the
- * author to stop reading it.
- *
- * Colour is never the only signal: each state also says what it is, in words.
- */
-function StepRail({ current, exercise, onSelect }: StepRailProps) {
+}) {
   const t = useTranslations('Authoring');
 
-  return (
-    <div role="tablist" aria-label={t('translate.shell.stepsLabel')} className="flex gap-1">
-      {BUILT_STEPS.map((step) => {
-        const { state, blockers } = stepState(exercise, step);
-        const isActive = step === current;
+  const steps: BuilderStep[] = BUILT_STEPS.map((step) => {
+    const { state, blockers } = stepState(exercise, step);
 
-        return (
-          <button
-            key={step}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onSelect(step)}
-            className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
-              isActive
-                ? 'border-primary bg-primary-50 text-primary'
-                : 'border-border text-[var(--ssz-text-secondary)] hover:bg-[var(--ssz-bg-subtle)]'
-            }`}
-          >
-            <span className="font-semibold">{step}</span>
-            <span>{t(`translate.shell.step${step}` as 'translate.shell.step1')}</span>
-            {state === 'err' ? (
-              <span className="rounded-full bg-error px-1.5 text-[11px] font-semibold text-white">
-                {t('translate.shell.blockerCount', { count: blockers })}
-              </span>
-            ) : state === 'warn' ? (
-              <span className="rounded-full bg-warning-100 px-1.5 text-[11px] font-semibold text-warning-700">
-                {t('translate.shell.stepCheck')}
-              </span>
-            ) : state === 'empty' ? (
-              <span className="text-[11px] text-muted-foreground">
-                {t('translate.shell.stepEmpty')}
-              </span>
-            ) : (
-              <span className="text-[11px] text-success-700">{t('translate.shell.stepOk')}</span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+    return {
+      n: step,
+      label: t(`translate.shell.step${step}` as 'translate.shell.step1'),
+      sub: t(`translate.shell.stepSub${step}` as 'translate.shell.stepSub1'),
+      ...(state === 'err'
+        ? {
+            status: 'blockers' as const,
+            blockers,
+            statusLabel: t('translate.shell.blockerCount', { count: blockers }),
+          }
+        : state === 'warn'
+          ? { status: 'warn' as const, statusLabel: t('translate.shell.stepCheck') }
+          : state === 'empty'
+            ? { status: 'empty' as const, statusLabel: t('translate.shell.stepEmpty') }
+            : { status: 'ok' as const, statusLabel: t('translate.shell.stepOk') }),
+    };
+  });
+
+  return (
+    <BuilderStepRail
+      steps={steps}
+      current={current}
+      onSelect={(step) => onSelect(step as IssueStep)}
+      label={t('translate.shell.stepsLabel')}
+    />
   );
 }
 

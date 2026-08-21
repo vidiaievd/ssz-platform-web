@@ -108,43 +108,56 @@ export function LessonEditorShell({
           what is being edited and what can be done to it, and nothing repeats.
         */}
         <h1 className="sr-only">{title}</h1>
-        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border bg-surface px-4 py-2">
-          <Button asChild variant="ghost" size="icon-sm" aria-label={t('backToContent')}>
-            <Link href={backHref}>
-              <ChevronLeft size={16} aria-hidden />
-            </Link>
-          </Button>
+        <div className="flex shrink-0 items-stretch gap-3 border-b border-border bg-surface px-4">
+          <div className="flex shrink-0 items-center gap-2 py-2">
+            <Button asChild variant="ghost" size="icon-sm" aria-label={t('backToContent')}>
+              <Link href={backHref}>
+                <ChevronLeft size={16} aria-hidden />
+              </Link>
+            </Button>
 
-          <Badge variant="muted">
-            {tContent(`materialType.${def.kind}` as 'materialType.text')}
-          </Badge>
-          {state && <ContainerStateBadge state={state} />}
+            <Badge variant="muted">
+              {tContent(`materialType.${def.kind}` as 'materialType.text')}
+            </Badge>
+            {state && <ContainerStateBadge state={state} />}
+          </div>
 
-          {/* Filled by the builder inside `children` — its steps, its save hint, its
-              Done button. Empty for material that is not built in steps. */}
-          <div ref={setToolbarElement} className="flex min-w-0 flex-1 items-center gap-3" />
+          {/*
+            Filled by the builder inside `children` — its steps, its save hint, its Done
+            button. `items-stretch` so a step rail reaches the bottom of the bar and its
+            underline lands on the bar's own border, the way a tab does. Empty for
+            material that is not built in steps.
+          */}
+          <div ref={setToolbarElement} className="flex min-w-0 flex-1 items-stretch" />
 
-          {/* The reach of a save, which the bar has room to spell out on a wide screen
-              and the state badge stands in for on a narrow one. */}
-          <SaveScopeHint
-            isLive={isLive}
-            heldForPublish={savesHeldForPublish}
-            className="hidden min-[1180px]:flex"
-          />
-          <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
+          <div className="flex shrink-0 items-center gap-2 py-2">
+            {/* The reach of a save, which the bar has room to spell out on a wide screen
+                and the state badge stands in for on a narrow one. */}
+            <SaveScopeHint
+              isLive={isLive}
+              heldForPublish={savesHeldForPublish}
+              className="hidden min-[1180px]:flex"
+            />
+            <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
 
-          <Button variant="ghost" size="sm" type="button" onClick={() => setShowPreview((p) => !p)}>
-            {showPreview ? (
-              <>
-                <EyeOff aria-hidden /> {t('editor.hidePreview')}
-              </>
-            ) : (
-              <>
-                <Eye aria-hidden /> {t('editor.showPreview')}
-              </>
-            )}
-          </Button>
-          {publishSlot}
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
+              onClick={() => setShowPreview((p) => !p)}
+            >
+              {showPreview ? (
+                <>
+                  <EyeOff aria-hidden /> {t('editor.hidePreview')}
+                </>
+              ) : (
+                <>
+                  <Eye aria-hidden /> {t('editor.showPreview')}
+                </>
+              )}
+            </Button>
+            {publishSlot}
+          </div>
         </div>
 
         {/*

@@ -28,6 +28,7 @@ import {
   type Variant,
 } from '@/lib/shared-kernel/match-pairs';
 
+import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepPairs } from './step-pairs';
 import { StepRightColumn } from './step-right-column';
@@ -116,14 +117,14 @@ export function MatchPairsBuilder({
   return (
     <div className="flex flex-col gap-5">
       <EditorToolbarPortal>
-        <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
-          <StepRail
+        <div className="flex flex-1 items-stretch justify-between gap-3">
+          <MatchPairsSteps
             current={step}
             problems={problems}
             variantChosen={variantChosen}
             onSelect={setStep}
           />
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3 py-2">
             <SaveHint
               status={autosave.status}
               savedAt={autosave.savedAt}
@@ -198,60 +199,57 @@ export function MatchPairsBuilder({
   );
 }
 
-interface StepRailProps {
+/**
+ * Where the problems are, per step, in the rail every builder shares. `variantChosen`
+ * is the one blocker the kernel cannot report — `Variant` has no "unchosen" value, so
+ * "the author never chose" exists only here (plan 49, phase 4).
+ */
+function MatchPairsSteps({
+  current,
+  problems,
+  variantChosen,
+  onSelect,
+}: {
   current: IssueStep;
   problems: Issue[];
   variantChosen: boolean;
   onSelect: (step: IssueStep) => void;
-}
-
-/**
- * Where the problems are, per step. A rail rather than a wizard: any step is reachable,
- * and the badge is a count in words as well as a colour (AC-B27, AC-X7).
- */
-function StepRail({ current, problems, variantChosen, onSelect }: StepRailProps) {
+}) {
   const t = useTranslations('Authoring');
 
-  return (
-    <div role="tablist" aria-label={t('matchPairs.shell.stepsLabel')} className="flex gap-1">
-      {STEPS.map((step) => {
-        const own = problems.filter((issue) => issue.step === step);
-        const blockers =
-          own.filter((issue) => issue.level === 'blocker').length +
-          (step === 1 && !variantChosen ? 1 : 0);
-        const warnings = own.length - own.filter((issue) => issue.level === 'blocker').length;
-        const isActive = step === current;
+  const steps: BuilderStep[] = STEPS.map((step) => {
+    const own = problems.filter((issue) => issue.step === step);
+    const blockers =
+      own.filter((issue) => issue.level === 'blocker').length +
+      (step === 1 && !variantChosen ? 1 : 0);
+    const warnings = own.length - own.filter((issue) => issue.level === 'blocker').length;
 
-        return (
-          <button
-            key={step}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onSelect(step)}
-            className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
-              isActive
-                ? 'border-primary bg-primary-50 text-primary'
-                : 'border-border text-[var(--ssz-text-secondary)] hover:bg-[var(--ssz-bg-subtle)]'
-            }`}
-          >
-            <span className="font-semibold">{step}</span>
-            <span>{t(`matchPairs.shell.step${step}` as 'matchPairs.shell.step1')}</span>
-            {blockers > 0 ? (
-              <span className="rounded-full bg-error px-1.5 text-[11px] font-semibold text-white">
-                {t('matchPairs.shell.blockerCount', { count: blockers })}
-              </span>
-            ) : warnings > 0 ? (
-              <span className="rounded-full bg-warning-100 px-1.5 text-[11px] font-semibold text-warning-700">
-                {t('matchPairs.shell.warningCount', { count: warnings })}
-              </span>
-            ) : (
-              <span className="text-[11px] text-success-700">{t('matchPairs.shell.stepOk')}</span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+    return {
+      n: step,
+      label: t(`matchPairs.shell.step${step}` as 'matchPairs.shell.step1'),
+      sub: t(`matchPairs.shell.stepSub${step}` as 'matchPairs.shell.stepSub1'),
+      ...(blockers > 0
+        ? {
+            status: 'blockers' as const,
+            blockers,
+            statusLabel: t('matchPairs.shell.blockerCount', { count: blockers }),
+          }
+        : warnings > 0
+          ? {
+              status: 'warn' as const,
+              statusLabel: t('matchPairs.shell.warningCount', { count: warnings }),
+            }
+          : { status: 'ok' as const, statusLabel: t('matchPairs.shell.stepOk') }),
+    };
+  });
+
+  return (
+    <BuilderStepRail
+      steps={steps}
+      current={current}
+      onSelect={(step) => onSelect(step as IssueStep)}
+      label={t('matchPairs.shell.stepsLabel')}
+    />
   );
 }
 

@@ -27,6 +27,7 @@ import {
   type IssueStep,
 } from '@/lib/shared-kernel/error-correction';
 
+import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepFormat } from './step-format';
 import { StepMistakes } from './step-mistakes';
@@ -116,9 +117,9 @@ export function ErrorCorrectionBuilder({
   return (
     <div className="flex flex-col gap-5">
       <EditorToolbarPortal>
-        <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
-          <StepRail current={step} exercise={exercise} onSelect={setStep} />
-          <div className="flex items-center gap-3">
+        <div className="flex flex-1 items-stretch justify-between gap-3">
+          <ErrorCorrectionSteps current={step} exercise={exercise} onSelect={setStep} />
+          <div className="flex shrink-0 items-center gap-3 py-2">
             <SaveHint
               status={autosave.status}
               savedAt={autosave.savedAt}
@@ -161,65 +162,51 @@ export function ErrorCorrectionBuilder({
   );
 }
 
-interface StepRailProps {
+/**
+ * Where the problems are, per step, in the rail every builder shares. The state comes
+ * from the kernel's `stepState`, so the rail, the gate and the server cannot disagree
+ * about what is wrong — and `info` issues deliberately leave it green, because a dot
+ * that turns amber for a remark teaches the author to stop reading it.
+ */
+function ErrorCorrectionSteps({
+  current,
+  exercise,
+  onSelect,
+}: {
   current: IssueStep;
   exercise: ErrorCorrection;
   onSelect: (step: IssueStep) => void;
-}
-
-/**
- * Where the problems are, per step. The dot comes from the kernel's `stepState`, so the
- * rail, the gate and the server cannot disagree about what is wrong — and `info` issues
- * deliberately leave it green, because a dot that turns amber for a remark teaches the
- * author to stop reading it.
- *
- * Colour is never the only signal: each state also says what it is, in words.
- */
-function StepRail({ current, exercise, onSelect }: StepRailProps) {
+}) {
   const t = useTranslations('Authoring');
 
-  return (
-    <div role="tablist" aria-label={t('errorCorrection.shell.stepsLabel')} className="flex gap-1">
-      {STEPS.map((step) => {
-        const { state, blockers } = stepState(exercise, step);
-        const isActive = step === current;
+  const steps: BuilderStep[] = STEPS.map((step) => {
+    const { state, blockers } = stepState(exercise, step);
 
-        return (
-          <button
-            key={step}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onSelect(step)}
-            className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
-              isActive
-                ? 'border-primary bg-primary-50 text-primary'
-                : 'border-border text-[var(--ssz-text-secondary)] hover:bg-[var(--ssz-bg-subtle)]'
-            }`}
-          >
-            <span className="font-semibold">{step}</span>
-            <span>{t(`errorCorrection.shell.step${step}` as 'errorCorrection.shell.step1')}</span>
-            {state === 'err' ? (
-              <span className="rounded-full bg-error px-1.5 text-[11px] font-semibold text-white">
-                {t('errorCorrection.shell.blockerCount', { count: blockers })}
-              </span>
-            ) : state === 'warn' ? (
-              <span className="rounded-full bg-warning-100 px-1.5 text-[11px] font-semibold text-warning-700">
-                {t('errorCorrection.shell.stepCheck')}
-              </span>
-            ) : state === 'empty' ? (
-              <span className="text-[11px] text-muted-foreground">
-                {t('errorCorrection.shell.stepEmpty')}
-              </span>
-            ) : (
-              <span className="text-[11px] text-success-700">
-                {t('errorCorrection.shell.stepOk')}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+    return {
+      n: step,
+      label: t(`errorCorrection.shell.step${step}` as 'errorCorrection.shell.step1'),
+      sub: t(`errorCorrection.shell.stepSub${step}` as 'errorCorrection.shell.stepSub1'),
+      ...(state === 'err'
+        ? {
+            status: 'blockers' as const,
+            blockers,
+            statusLabel: t('errorCorrection.shell.blockerCount', { count: blockers }),
+          }
+        : state === 'warn'
+          ? { status: 'warn' as const, statusLabel: t('errorCorrection.shell.stepCheck') }
+          : state === 'empty'
+            ? { status: 'empty' as const, statusLabel: t('errorCorrection.shell.stepEmpty') }
+            : { status: 'ok' as const, statusLabel: t('errorCorrection.shell.stepOk') }),
+    };
+  });
+
+  return (
+    <BuilderStepRail
+      steps={steps}
+      current={current}
+      onSelect={(step) => onSelect(step as IssueStep)}
+      label={t('errorCorrection.shell.stepsLabel')}
+    />
   );
 }
 

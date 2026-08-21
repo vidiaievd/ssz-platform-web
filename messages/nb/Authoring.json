@@ -1202,7 +1202,10 @@
       "gateClear": "Ingenting i veien — oppgaven er klar til å tildeles.",
       "gateGoToStep": "Gå til steg {step}",
       "gateBlocked": "{count, plural, one {Fiks # problem først} other {Fiks # problemer først}}",
-      "gateDone": "Ser bra ut"
+      "gateDone": "Ser bra ut",
+      "stepSub1": "tekst og luker",
+      "stepSub2": "ordene som tilbys",
+      "stepSub3": "svar på feil ord"
     },
     "issues": {
       "EX_NO_TITLE": "Oppgaven har ingen tittel.",
@@ -1254,7 +1257,11 @@
       "gateGoToStep": "Gå til trinn {step}",
       "gateBlocked": "{count, plural, one {Fiks # problem først} other {Fiks # problemer først}}",
       "gateDone": "Ser bra ut",
-      "gateClose": "Lukk"
+      "gateClose": "Lukk",
+      "stepSub1": "type og tekst",
+      "stepSub2": "setning og fasit",
+      "stepSub3": "hva som godtas",
+      "stepSub4": "AI, lærer, forsøk"
     },
     "step1": {
       "title": "Hva slags feilretting er dette?",
@@ -1617,7 +1624,11 @@
       "gateDone": "Ser bra ut",
       "gateClose": "Lukk",
       "step3": "Autosjekk",
-      "step4": "Flyt"
+      "step4": "Flyt",
+      "stepSub1": "språk og modus",
+      "stepSub2": "kilde og fasit",
+      "stepSub3": "hva som godtas",
+      "stepSub4": "AI, lærer, forsøk"
     },
     "step1": {
       "title": "Hvilken vei?",
@@ -2087,7 +2098,10 @@
       "gateGoToStep": "Rett det i steg {step}",
       "gateVariant": "Velg hva slags par dette er — de to vurderes etter ulike regler.",
       "gateBlocked": "{count, plural, one {Rett # blokkering først} other {Rett # blokkeringer først}}",
-      "gateDone": "Ferdig"
+      "gateDone": "Ferdig",
+      "stepSub1": "halvdeler og fasit",
+      "stepSub2": "pulje og avledere",
+      "stepSub3": "hvorfor en halvdel er feil"
     },
     "preview": {
       "empty": "Ingenting å forhåndsvise ennå — skriv et par i steg 1.",

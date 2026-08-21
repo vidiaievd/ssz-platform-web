@@ -109,8 +109,10 @@ describe('LessonEditorShell — the builder’s toolbar', () => {
     renderShell();
 
     const steps = screen.getByRole('tablist', { name: 'Steps' });
-    // Beside the material's badges rather than inside the editor column: the bar is
-    // what lines up with the preview panel next to it.
-    expect(screen.getByText('Practice').closest('div')).toContainElement(steps);
+    // In the bar beside the material's badges rather than inside the editor column:
+    // the bar is what lines up with the preview panel next to it.
+    const bar = screen.getByText('Practice').closest('div')?.parentElement;
+    expect(bar).toContainElement(steps);
+    expect(bar).toContainElement(screen.getByRole('button', { name: 'Hide preview' }));
   });
 });
