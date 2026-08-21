@@ -346,27 +346,11 @@ describe('exerciseFormSchema', () => {
     }
   });
 
-  it('match_pairs: accepts 2+ pairs', () => {
-    expect(
-      parseExercise({
-        templateCode: 'match_pairs',
-        mpPairs: [
-          { left: 'hei', right: 'hello' },
-          { left: 'takk', right: 'thanks' },
-        ],
-      }).success,
-    ).toBe(true);
-  });
-
-  it('match_pairs: rejects fewer than 2 pairs', () => {
-    const result = parseExercise({
-      templateCode: 'match_pairs',
-      mpPairs: [{ left: 'hei', right: 'hello' }],
-    });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    const paths = result.error.issues.map((i) => i.path.join('.'));
-    expect(paths).toContain('mpPairs');
+  // Same for match_pairs (plan 49 §8): a pair owns its answer, its own pool id and a
+  // grid of explanations, none of which this form can hold. It is authored in
+  // `MatchPairsBuilder`.
+  it('match_pairs is not a form-editable type', () => {
+    expect(parseExercise({ templateCode: 'match_pairs' }).success).toBe(false);
   });
 
   it('short_answer: accepts a question with a reference answer', () => {

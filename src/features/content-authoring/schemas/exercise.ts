@@ -7,7 +7,6 @@ export const EXERCISE_TYPES = [
   'multiple_choice',
   'multiple_choice_group',
   'fill_in_blank',
-  'match_pairs',
   'short_answer',
   'writing_task',
   'sentence_schema',
@@ -25,11 +24,13 @@ export type ExerciseType = (typeof EXERCISE_TYPES)[number];
  * would make the form fall back to `multiple_choice` and rewrite their content on the
  * next save.
  *
- * `word_bank_gap_fill`, `error_correction` and the translate pair are here but not there:
- * each has its own builder, and the generic form has no fields for any of them. Translate
- * left `EXERCISE_TYPES` in plan 42 §9 — its content is a set of sentences with an answer
- * key each, which no slice of this form can hold; the editor pane routes both codes to
- * `TranslateBuilder` before the generic form is ever reached.
+ * `word_bank_gap_fill`, `error_correction`, `match_pairs` and the translate pair are here
+ * but not there: each has its own builder, and the generic form has no fields for any of
+ * them. Translate left `EXERCISE_TYPES` in plan 42 §9 — its content is a set of sentences
+ * with an answer key each, which no slice of this form can hold; the editor pane routes
+ * both codes to `TranslateBuilder` before the generic form is ever reached. `match_pairs`
+ * left it in plan 49 §8 for the same reason: a pair now owns its answer, its own pool id
+ * and a grid of explanations, and the editor pane routes it to `MatchPairsBuilder`.
  */
 export const CREATABLE_EXERCISE_TYPES = [
   'multiple_choice',
@@ -45,8 +46,6 @@ export const CREATABLE_EXERCISE_TYPES = [
   'error_correction',
 ] as const;
 export type CreatableExerciseType = (typeof CREATABLE_EXERCISE_TYPES)[number];
-
-export const MATCH_VARIANTS = ['pairs', 'halves'] as const;
 
 export const TEXT_ORDER_KINDS = ['dialogue', 'sentences'] as const;
 
@@ -144,13 +143,6 @@ export const exerciseFormSchema = z
       )
       .optional(),
     fibWordBank: z.string().max(1000).optional(),
-
-    // match_pairs — `mpVariant` only changes presentation (word pairs vs
-    // numbered/lettered sentence halves), never scoring.
-    mpVariant: z.enum(MATCH_VARIANTS).optional(),
-    mpPairs: z
-      .array(z.object({ left: z.string().max(500), right: z.string().max(500) }))
-      .optional(),
 
     // short_answer — `saAccepted` lists every acceptable phrasing, separated by
     // `|`. Not a comma: a transformation answer routinely contains one
@@ -276,16 +268,6 @@ export const exerciseFormSchema = z
             code: z.ZodIssueCode.custom,
             path: ['fibBlanks'],
             message: 'At least 1 blank required',
-          });
-        }
-        break;
-      }
-      case 'match_pairs': {
-        if ((data.mpPairs ?? []).filter((p) => p.left.trim() && p.right.trim()).length < 2) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['mpPairs'],
-            message: 'At least 2 complete pairs required',
           });
         }
         break;

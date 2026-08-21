@@ -232,11 +232,6 @@
     "removeBlank": "Видалити пропуск",
     "fibWordBank": "Банк слів",
     "fibWordBankPlaceholder": "Необов’язкові слова, через кому",
-    "mpPairs": "Пари",
-    "mpLeftPlaceholder": "Лівий елемент",
-    "mpRightPlaceholder": "Відповідний елемент",
-    "addPair": "Додати пару",
-    "removePair": "Видалити пару",
     "saQuestion": "Запитання",
     "saQuestionPlaceholder": "напр. Коли Анне почула новину?",
     "saContext": "Контекст (необовʼязково)",
@@ -333,11 +328,7 @@
     "toLinePlaceholder": "Привіт, я Марина. Що привело тебе сюди?",
     "toSpeakerPlaceholder": "Мовець",
     "toAddLine": "Додати рядок",
-    "toRemoveLine": "Видалити рядок",
-    "mpVariant": "Вигляд",
-    "mpVariant_pairs": "Пари слів",
-    "mpVariant_halves": "Половини речень",
-    "mpVariantHint": "Половини речень нумерують ліву колонку 1, 2, 3 … і позначають праву A, B, C …"
+    "toRemoveLine": "Видалити рядок"
   },
   "grammar": {
     "add": "Додати правило",

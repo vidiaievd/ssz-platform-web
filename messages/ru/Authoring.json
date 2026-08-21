@@ -232,11 +232,6 @@
     "removeBlank": "Удалить пропуск",
     "fibWordBank": "Банк слов",
     "fibWordBankPlaceholder": "Необязательные слова, через запятую",
-    "mpPairs": "Пары",
-    "mpLeftPlaceholder": "Левый элемент",
-    "mpRightPlaceholder": "Соответствующий элемент",
-    "addPair": "Добавить пару",
-    "removePair": "Удалить пару",
     "saQuestion": "Вопрос",
     "saQuestionPlaceholder": "напр. Когда Анне услышала новость?",
     "saContext": "Контекст (необязательно)",
@@ -333,11 +328,7 @@
     "toLinePlaceholder": "Привет, я Марина. Что тебя сюда привело?",
     "toSpeakerPlaceholder": "Говорящий",
     "toAddLine": "Добавить строку",
-    "toRemoveLine": "Удалить строку",
-    "mpVariant": "Вид",
-    "mpVariant_pairs": "Пары слов",
-    "mpVariant_halves": "Половины предложений",
-    "mpVariantHint": "Половины предложений нумеруют левую колонку 1, 2, 3 … и обозначают правую A, B, C …"
+    "toRemoveLine": "Удалить строку"
   },
   "grammar": {
     "add": "Добавить правило",

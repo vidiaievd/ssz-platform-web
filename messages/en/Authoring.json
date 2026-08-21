@@ -236,11 +236,6 @@
     "removeBlank": "Remove blank",
     "fibWordBank": "Word bank",
     "fibWordBankPlaceholder": "Optional words, comma-separated",
-    "mpPairs": "Pairs",
-    "mpLeftPlaceholder": "Left item",
-    "mpRightPlaceholder": "Matching item",
-    "addPair": "Add pair",
-    "removePair": "Remove pair",
     "saQuestion": "Question",
     "saQuestionPlaceholder": "e.g. When did Anne hear the news?",
     "saContext": "Context (optional)",
@@ -337,11 +332,7 @@
     "toLinePlaceholder": "Hi, I’m Marina. What brings you here?",
     "toSpeakerPlaceholder": "Speaker",
     "toAddLine": "Add line",
-    "toRemoveLine": "Remove line",
-    "mpVariant": "Layout",
-    "mpVariant_pairs": "Word pairs",
-    "mpVariant_halves": "Sentence halves",
-    "mpVariantHint": "Sentence halves number the left column 1, 2, 3 … and letter the right A, B, C …"
+    "toRemoveLine": "Remove line"
   },
   "grammar": {
     "add": "Add rule",

@@ -125,38 +125,6 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
-        {values.templateCode === 'match_pairs' &&
-          ((values.mpPairs ?? []).some((p) => p.left.trim() || p.right.trim()) ? (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex flex-col gap-2">
-                {(values.mpPairs ?? [])
-                  .filter((p) => p.left.trim())
-                  .map((p, i) => (
-                    <div
-                      key={i}
-                      className="rounded-[11px] border border-(--ssz-border-default) bg-surface px-3 py-2.5 text-sm text-(--ssz-text-primary)"
-                    >
-                      {p.left}
-                    </div>
-                  ))}
-              </div>
-              <div className="flex flex-col gap-2">
-                {(values.mpPairs ?? [])
-                  .filter((p) => p.right.trim())
-                  .map((p, i) => (
-                    <div
-                      key={i}
-                      className="rounded-[11px] border border-dashed border-(--ssz-border-default) bg-subtle px-3 py-2.5 text-sm text-(--ssz-text-primary)"
-                    >
-                      {p.right}
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ) : (
-            empty
-          ))}
-
         {values.templateCode === 'short_answer' &&
           (values.saQuestion ? (
             <div>

@@ -107,4 +107,33 @@ describe('ExercisePreview — new exercise types', () => {
     expect(container.querySelector('ol')).toBeNull();
     expect(screen.getByText('I går jeg gikk på jobb.')).toBeInTheDocument();
   });
+
+  // Plan 49 §8: the old branch read `content.left_items` / `right_items`, which
+  // `/display` has not served since the projection landed. Both columns come from the
+  // projection now, and the pool holds distractors the author never paired.
+  it('renders match_pairs from the student projection, distractors included', () => {
+    const exercise: ExerciseDisplay = {
+      ...base,
+      templateCode: 'match_pairs',
+      content: {
+        variant: 'halves',
+        slots: [
+          { slotId: 'p1', left: 'Kari tar imot Bartek' },
+          { slotId: 'p2', left: 'Han vil bytte jobb fordi' },
+        ],
+        pool: [
+          { itemId: 'r1', text: 'med et fast håndtrykk.' },
+          { itemId: 'r2', text: 'han vil ta mer ansvar.' },
+          { itemId: 'r3', text: 'på en byggeplass i Oslo.' },
+        ],
+        settings: { showRemaining: true },
+      },
+    };
+    renderWithProviders(<ExercisePreview exercise={exercise} />);
+
+    expect(screen.getByText('Kari tar imot Bartek')).toBeInTheDocument();
+    expect(screen.getByText('Han vil bytte jobb fordi')).toBeInTheDocument();
+    expect(screen.getByText('med et fast håndtrykk.')).toBeInTheDocument();
+    expect(screen.getByText('på en byggeplass i Oslo.')).toBeInTheDocument();
+  });
 });

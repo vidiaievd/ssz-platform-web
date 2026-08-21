@@ -29,7 +29,6 @@ import {
   DIFFICULTY_LEVELS,
   SENTENCE_SCHEMA_TYPES,
   TEXT_ORDER_KINDS,
-  MATCH_VARIANTS,
   RATIONALE_VERDICTS,
   countBlanks,
   splitChunks,
@@ -156,14 +155,6 @@ export function ExerciseFields({
       )}
       {templateCode === 'fill_in_blank' && (
         <FillInBlankFields
-          control={control}
-          register={register}
-          errors={errors}
-          isPending={isPending}
-        />
-      )}
-      {templateCode === 'match_pairs' && (
-        <MatchPairsFields
           control={control}
           register={register}
           errors={errors}
@@ -1173,80 +1164,6 @@ function SentenceSchemaFields({ control, register, errors, isPending }: SubProps
           {t('addToken')}
         </Button>
       </div>
-    </div>
-  );
-}
-
-function MatchPairsFields({ control, register, errors, isPending }: SubProps) {
-  const t = useTranslations('Authoring.exercises');
-  const { fields, append, remove } = useFieldArray({ control, name: 'mpPairs' });
-  const variantCtrl = useController({ control, name: 'mpVariant' });
-
-  return (
-    <div className="rounded-md border border-border p-3 space-y-2">
-      <Field label={t('mpVariant')} htmlFor="ex-mp-variant" hint={t('mpVariantHint')}>
-        <Select
-          value={variantCtrl.field.value ?? 'pairs'}
-          onValueChange={(v) => variantCtrl.field.onChange(v as (typeof MATCH_VARIANTS)[number])}
-          disabled={isPending}
-        >
-          <SelectTrigger id="ex-mp-variant" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {MATCH_VARIANTS.map((variant) => (
-              <SelectItem key={variant} value={variant}>
-                {t(`mpVariant_${variant}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Field>
-
-      <p className="text-sm font-medium text-(--ssz-text-primary)">{t('mpPairs')}</p>
-      {typeof errors.mpPairs?.message === 'string' && (
-        <p className="text-xs text-destructive">{errors.mpPairs.message}</p>
-      )}
-      {fields.map((field, index) => (
-        <div key={field.id} className="flex items-center gap-2">
-          <div className="flex-1">
-            <Input
-              placeholder={t('mpLeftPlaceholder')}
-              hasError={!!errors.mpPairs?.[index]?.left}
-              disabled={isPending}
-              {...register(`mpPairs.${index}.left`)}
-            />
-          </div>
-          <span className="text-(--ssz-text-muted)">↔</span>
-          <div className="flex-1">
-            <Input
-              placeholder={t('mpRightPlaceholder')}
-              hasError={!!errors.mpPairs?.[index]?.right}
-              disabled={isPending}
-              {...register(`mpPairs.${index}.right`)}
-            />
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => remove(index)}
-            disabled={fields.length <= 2}
-            aria-label={t('removePair')}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      ))}
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => append({ left: '', right: '' })}
-      >
-        <Plus className="mr-1.5 h-4 w-4" />
-        {t('addPair')}
-      </Button>
     </div>
   );
 }

@@ -35,11 +35,6 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   fibText: '',
   fibBlanks: [{ answers: '', rationaleExplanation: '', rationaleOptions: [] }],
   fibWordBank: '',
-  mpVariant: 'pairs',
-  mpPairs: [
-    { left: '', right: '' },
-    { left: '', right: '' },
-  ],
   saQuestion: '',
   saContext: '',
   saReferenceAnswer: '',
@@ -104,14 +99,6 @@ export function minimalExerciseValues(
         ...base,
         fibText: 'Write a sentence with a ___1___ in it.',
         fibBlanks: [{ answers: 'blank', rationaleExplanation: '', rationaleOptions: [] }],
-      };
-    case 'match_pairs':
-      return {
-        ...base,
-        mpPairs: [
-          { left: 'Left 1', right: 'Right 1' },
-          { left: 'Left 2', right: 'Right 2' },
-        ],
       };
     case 'short_answer':
       return { ...base, saQuestion: prompt, saReferenceAnswer: 'Reference answer' };
@@ -291,21 +278,6 @@ function rawExercisePayload(values: ExerciseFormValues): ExercisePayload {
           word_bank: wordBank.length > 0 ? wordBank : undefined,
         },
         expectedAnswers: { blanks },
-      };
-    }
-    case 'match_pairs': {
-      const pairs = (values.mpPairs ?? []).filter((p) => p.left.trim() && p.right.trim());
-      const leftItems = pairs.map((p, i) => ({ id: `l-${i}`, text: p.left.trim() }));
-      const rightItems = pairs.map((p, i) => ({ id: `r-${i}`, text: p.right.trim() }));
-      return {
-        content: {
-          left_items: leftItems,
-          right_items: rightItems,
-          variant: values.mpVariant === 'halves' ? 'halves' : undefined,
-        },
-        expectedAnswers: {
-          pairs: pairs.map((_, i) => ({ left_id: `l-${i}`, right_id: `r-${i}` })),
-        },
       };
     }
     case 'short_answer': {
@@ -661,41 +633,6 @@ export function parseExerciseToForm(exercise: {
             ? blanks
             : [{ answers: '', rationaleExplanation: '', rationaleOptions: [] }],
         fibWordBank: wordBank,
-      };
-    }
-    case 'match_pairs': {
-      const leftItems = Array.isArray(content.left_items)
-        ? (content.left_items as McqOption[])
-        : [];
-      const rightItems = Array.isArray(content.right_items)
-        ? (content.right_items as McqOption[])
-        : [];
-      const rightById = new Map(
-        rightItems.map((r) => [String(r.id), typeof r.text === 'string' ? r.text : '']),
-      );
-      const answerPairs = Array.isArray(expectedAnswers.pairs)
-        ? (expectedAnswers.pairs as Array<{ left_id?: unknown; right_id?: unknown }>)
-        : [];
-      const rightByLeftId = new Map(
-        answerPairs.map((p) => [String(p.left_id), String(p.right_id)]),
-      );
-      const pairs = leftItems.map((l) => {
-        const rightId = rightByLeftId.get(String(l.id));
-        return {
-          left: typeof l.text === 'string' ? l.text : '',
-          right: rightId ? (rightById.get(rightId) ?? '') : '',
-        };
-      });
-      return {
-        ...base,
-        mpVariant: content.variant === 'halves' ? 'halves' : 'pairs',
-        mpPairs:
-          pairs.length >= 2
-            ? pairs
-            : [
-                { left: '', right: '' },
-                { left: '', right: '' },
-              ],
       };
     }
     case 'short_answer': {

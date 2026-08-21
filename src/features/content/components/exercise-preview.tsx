@@ -115,30 +115,7 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
           <TranslateContent content={content} code={code} />
         )}
 
-        {code === 'match_pairs' && (
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-muted-foreground mb-1 text-xs font-medium">{t('matchColumnLeft')}</p>
-              <ul className="space-y-1.5">
-                {asItems(content.left_items).map((o, i) => (
-                  <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
-                    {o.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="text-muted-foreground mb-1 text-xs font-medium">{t('matchColumnRight')}</p>
-              <ul className="space-y-1.5">
-                {asItems(content.right_items).map((o, i) => (
-                  <li key={i} className="rounded-md border border-dashed border-border px-3 py-2 text-sm">
-                    {o.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
+        {code === 'match_pairs' && <MatchPairsContent content={content} />}
 
         {code === 'short_answer' && (
           <div className="space-y-2">
@@ -287,6 +264,57 @@ function ErrorCorrectionContent({ content }: { content: Record<string, unknown> 
           ))}
         </ol>
       )}
+    </div>
+  );
+}
+
+/**
+ * match_pairs — read-only, and read through the projection.
+ *
+ * `/display` serves this template as a student projection (plan 49): left halves as
+ * `slots`, every right half — answers and distractors alike — as one shuffled `pool`.
+ * That is the same thing the learner sees, and it is the only shape available here: the
+ * pairing never leaves the server, so this preview cannot show which half answers which
+ * slot, and must not pretend to.
+ *
+ * Pre-plan-49 documents reach `/display` through the same projection, so the legacy
+ * `left_items` / `right_items` shape is handled upstream and never arrives here.
+ */
+function MatchPairsContent({ content }: { content: Record<string, unknown> }) {
+  const t = useTranslations('Content');
+  const slots = Array.isArray(content.slots)
+    ? (content.slots as { left?: unknown }[]).map((slot) =>
+        typeof slot.left === 'string' ? slot.left : '',
+      )
+    : [];
+  const pool = Array.isArray(content.pool)
+    ? (content.pool as { text?: unknown }[]).map((item) =>
+        typeof item.text === 'string' ? item.text : '',
+      )
+    : [];
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <div>
+        <p className="text-muted-foreground mb-1 text-xs font-medium">{t('matchColumnLeft')}</p>
+        <ul className="space-y-1.5">
+          {slots.map((left, i) => (
+            <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
+              {left}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <p className="text-muted-foreground mb-1 text-xs font-medium">{t('matchColumnRight')}</p>
+        <ul className="space-y-1.5">
+          {pool.map((text, i) => (
+            <li key={i} className="rounded-md border border-dashed border-border px-3 py-2 text-sm">
+              {text}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

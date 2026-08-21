@@ -20,11 +20,6 @@ const base: ExerciseFormValues = {
   fibText: '',
   fibBlanks: [{ answers: '' }],
   fibWordBank: '',
-  mpVariant: 'pairs',
-  mpPairs: [
-    { left: '', right: '' },
-    { left: '', right: '' },
-  ],
   wbfWordBank: '',
   wbfSentences: [{ text: '', answers: [''] }],
   toKind: 'dialogue',
@@ -170,33 +165,6 @@ describe('buildExercisePayload', () => {
 
     expect(parsed.fibBlanks?.[0]?.rationaleOptions?.[0]?.verdict).toBe('wrong');
   });
-
-  it('match_pairs: emits left/right items with ids and pairs mapping', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'match_pairs',
-      mpPairs: [
-        { left: 'hei', right: 'hello' },
-        { left: 'takk', right: 'thanks' },
-      ],
-    });
-    expect(content).toEqual({
-      left_items: [
-        { id: 'l-0', text: 'hei' },
-        { id: 'l-1', text: 'takk' },
-      ],
-      right_items: [
-        { id: 'r-0', text: 'hello' },
-        { id: 'r-1', text: 'thanks' },
-      ],
-    });
-    expect(expectedAnswers).toEqual({
-      pairs: [
-        { left_id: 'l-0', right_id: 'r-0' },
-        { left_id: 'l-1', right_id: 'r-1' },
-      ],
-    });
-  });
 });
 
 describe('build → parse round-trips', () => {
@@ -220,17 +188,6 @@ describe('build → parse round-trips', () => {
         fibText: 'Jeg ___1___ her.',
         fibBlanks: [{ answers: 'bor, er' }],
         fibWordBank: 'bor, er, går',
-      },
-    },
-    {
-      name: 'match_pairs',
-      values: {
-        ...base,
-        templateCode: 'match_pairs',
-        mpPairs: [
-          { left: 'hei', right: 'hello' },
-          { left: 'takk', right: 'thanks' },
-        ],
       },
     },
   ];
@@ -867,41 +824,6 @@ describe('text_order', () => {
       { text: 'Hi, I am Marina.', speaker: 'Marina' },
       { text: 'Nice to meet you.', speaker: 'Alex' },
     ]);
-  });
-});
-
-describe('match_pairs layout variant', () => {
-  const pairs = [
-    { left: 'Do you live …', right: '… near here?' },
-    { left: 'How long have you …', right: '… lived here?' },
-  ];
-
-  it('stores the halves layout and round-trips it', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'match_pairs',
-      mpVariant: 'halves',
-      mpPairs: pairs,
-    });
-
-    expect(content.variant).toBe('halves');
-    expect(
-      parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant,
-    ).toBe('halves');
-  });
-
-  it('omits the key for the default word-pairs layout', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'match_pairs',
-      mpVariant: 'pairs',
-      mpPairs: pairs,
-    });
-
-    expect('variant' in content).toBe(false);
-    expect(
-      parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant,
-    ).toBe('pairs');
   });
 });
 
