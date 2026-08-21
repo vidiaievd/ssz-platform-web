@@ -88,9 +88,16 @@ function letterLabel(index: number): string {
 /**
  * `match_pairs`, as the learner plays it — BEHAVIOR §2, one component, two layouts.
  *
- * Two columns from `md` up: slot rows on the left, the pool as a vertical stack of
- * full-width chips on the right. Below that, one scrolling column with the pool stuck
- * to the bottom of the viewport, so the halves stay reachable while the slots scroll.
+ * Two columns once there is room: slot rows on the left, the pool as a vertical stack
+ * of full-width chips on the right. Narrower than that, one scrolling column with the
+ * pool stuck to the bottom, so the halves stay reachable while the slots scroll.
+ *
+ * "Room" is this component's **own** width (`@container`), not the viewport's. The
+ * teacher's preview is a 284px phone frame on a desktop screen: asked about the
+ * window, the layout took the two-column branch inside it, and the slots column —
+ * whatever is left beside a 20rem pool — collapsed to one word per line. A body that
+ * asks the window how wide it is cannot be embedded, and being embedded is exactly
+ * what the preview does to it.
  *
  * Note what the two columns are and are not. They are *slots* and *pool*, which is why
  * distractors do not disturb them — the pool column is simply taller. The layout this
@@ -251,10 +258,10 @@ export function MatchPairsBody({
   }
 
   return (
-    <div>
+    <div className="@container">
       {instruction !== undefined && <Instr>{instruction}</Instr>}
 
-      <div className="md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] md:items-start md:gap-6">
+      <div className="@2xl:grid @2xl:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] @2xl:items-start @2xl:gap-6">
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {slots.map((slot, index) => {
             const itemId = value[slot.slotId];
@@ -453,7 +460,7 @@ export function MatchPairsBody({
           // No negative margin to bleed to the viewport edge: this body does not own
           // the page's padding and guessing it is how a sticky bar ends up causing a
           // horizontal scrollbar on somebody else's layout.
-          className="sticky bottom-0 z-10 mt-4 border-t pt-3 pb-3 md:static md:z-auto md:mt-0 md:border-t-0 md:pt-0 md:pb-0"
+          className="sticky bottom-0 z-10 mt-4 border-t pt-3 pb-3 @2xl:static @2xl:z-auto @2xl:mt-0 @2xl:border-t-0 @2xl:pt-0 @2xl:pb-0"
           style={{
             background: 'var(--ssz-bg-surface)',
             borderColor: 'var(--ssz-border-default)',
@@ -473,7 +480,7 @@ export function MatchPairsBody({
             </p>
           )}
 
-          <div className="flex flex-wrap gap-2 md:flex-col md:flex-nowrap">
+          <div className="flex flex-wrap gap-2 @2xl:flex-col @2xl:flex-nowrap">
             {pool.map((item) => {
               const used = itemToSlot[item.itemId] !== undefined;
               const armed = armedItem === item.itemId;
@@ -489,7 +496,7 @@ export function MatchPairsBody({
                   onClick={() => onItemPress(item.itemId)}
                   aria-disabled={!isAnswering || used}
                   aria-pressed={armed}
-                  className="rounded-lg border px-3 py-2 text-left text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) md:w-full"
+                  className="rounded-lg border px-3 py-2 text-left text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) @2xl:w-full"
                   style={{
                     minHeight: TAP_MIN,
                     fontFamily: variant === 'halves' ? READING : undefined,
