@@ -87,8 +87,14 @@ export default async function LessonEditorPage({
   ];
 
   return (
-    <main className="mx-auto max-w-7xl p-8">
-      <Breadcrumbs items={breadcrumbItems} className="mb-5" />
+    // Full height and full width: the editor is a workspace, not an article. The
+    // padding lives on the columns inside `LessonEditorShell`, because its preview
+    // panel has to reach the right edge of the window — a container that pads both
+    // sides would spend that width on nothing.
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 px-8 pt-6">
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
       {kind === 'text' ? (
         <TextEditorPane
           kind={kind}
@@ -169,6 +175,6 @@ export default async function LessonEditorPage({
           publishSlot={publishSlot}
         />
       )}
-    </main>
+    </div>
   );
 }

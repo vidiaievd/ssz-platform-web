@@ -70,49 +70,76 @@ export function LessonEditorShell({
   const def = getLessonTypeDefinition(kind);
   const Icon = def.icon;
 
+  /**
+   * Where the editor and the preview stand side by side, each column scrolls on its
+   * own and the split fills the window. Below that width they are stacked, and a
+   * stacked pair has to scroll as one — two boxes each scrolling inside a screenful
+   * would put the second one somewhere no thumb can reach.
+   */
+  const split = !showPreview
+    ? { grid: 'grid-cols-1 overflow-auto', editor: '', panel: '' }
+    : device === 'phone'
+      ? {
+          grid: 'overflow-auto min-[1180px]:grid-cols-[minmax(0,1fr)_430px] min-[1180px]:overflow-hidden',
+          editor: 'min-[1180px]:overflow-auto',
+          panel: 'min-[1180px]:min-h-0',
+        }
+      : {
+          grid: 'overflow-auto min-[1380px]:grid-cols-[minmax(0,1fr)_760px] min-[1380px]:overflow-hidden',
+          editor: 'min-[1380px]:overflow-auto',
+          panel: 'min-[1380px]:min-h-0',
+        };
+
   return (
     <SaveScopeProvider isLive={isLive}>
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-            style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}
-          >
-            <Icon size={20} style={{ color: `var(${def.hueVar})` }} />
-          </span>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">{title}</h1>
-            <div className="mt-1 flex flex-wrap items-center gap-2">
-              <Badge variant="muted">
-                {tContent(`materialType.${def.kind}` as 'materialType.text')}
-              </Badge>
-              {state && <ContainerStateBadge state={state} />}
-              <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
+      {/*
+        A workspace, not an article: the header band spans the width, and under it the
+        two columns scroll on their own. The page around this contributes no padding —
+        the preview panel has to reach the right edge of the window, which it cannot do
+        from inside a padded, centred container (the specs' `.wb-body`).
+      */}
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex shrink-0 flex-wrap items-start justify-between gap-4 px-8 py-5">
+          <div className="flex items-center gap-3">
+            <span
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+              style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}
+            >
+              <Icon size={20} style={{ color: `var(${def.hueVar})` }} />
+            </span>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-foreground">{title}</h1>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <Badge variant="muted">
+                  {tContent(`materialType.${def.kind}` as 'materialType.text')}
+                </Badge>
+                {state && <ContainerStateBadge state={state} />}
+                <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
+              </div>
+              <SaveScopeHint
+                isLive={isLive}
+                heldForPublish={savesHeldForPublish}
+                className="mt-1.5"
+              />
             </div>
-            <SaveScopeHint
-              isLive={isLive}
-              heldForPublish={savesHeldForPublish}
-              className="mt-1.5"
-            />
+          </div>
+          <div className="flex items-center gap-2.5">
+            <Button variant="ghost" type="button" onClick={() => setShowPreview((p) => !p)}>
+              {showPreview ? (
+                <>
+                  <EyeOff aria-hidden /> {t('editor.hidePreview')}
+                </>
+              ) : (
+                <>
+                  <Eye aria-hidden /> {t('editor.showPreview')}
+                </>
+              )}
+            </Button>
+            {publishSlot}
           </div>
         </div>
-        <div className="flex items-center gap-2.5">
-          <Button variant="ghost" type="button" onClick={() => setShowPreview((p) => !p)}>
-            {showPreview ? (
-              <>
-                <EyeOff aria-hidden /> {t('editor.hidePreview')}
-              </>
-            ) : (
-              <>
-                <Eye aria-hidden /> {t('editor.showPreview')}
-              </>
-            )}
-          </Button>
-          {publishSlot}
-        </div>
-      </div>
 
-      {/*
+        {/*
         The preview keeps its column in both devices — it is the thing being watched
         while the fields are edited, and a preview you have to scroll away to see is
         one you stop looking at. Switching to desktop widens that column rather than
@@ -126,66 +153,65 @@ export function LessonEditorShell({
         breakpoint there is no honest way to stand the two side by side, so the
         preview drops under the editor.
       */}
-      <div
-        className={`grid items-start gap-6 ${
-          !showPreview
-            ? 'grid-cols-1'
-            : device === 'phone'
-              ? 'min-[1180px]:grid-cols-[minmax(0,1fr)_430px]'
-              : 'min-[1380px]:grid-cols-[minmax(0,1fr)_760px]'
-        }`}
-      >
-        {/*
+        <div className={`grid min-h-0 flex-1 ${split.grid}`}>
+          {/*
           `min-w-0`: a grid item is `min-width: auto` by default, so anything wide
           inside it — the feedback matrix, a long code block — grows the `1fr` track
           instead of scrolling within its own pane, and the whole page ends up with a
           horizontal scrollbar. With this, the editor column is free to be narrower
           than its content and the content does its own scrolling.
         */}
-        <div className="min-w-0">{children}</div>
+          <div className={`min-w-0 px-8 pb-10 ${split.editor}`}>
+            {/* Capped rather than stretched: form fields three thousand pixels wide are
+              no easier to fill in than the screen they are on. */}
+            <div className="mx-auto max-w-5xl">{children}</div>
+          </div>
 
-        {/*
+          {/*
           A panel, not a frame floating on the page: its own tinted surface, its own
           header, its own scroll, pinned while the editor scrolls past it
           (`.wb-preview`). The device inside it is the only thing the switch changes.
         */}
-        {showPreview && (
-          <aside className="sticky top-4 flex max-h-[calc(100vh-2rem)] min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-(--ssz-bg-subtle)">
-            <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-2.5">
-              <Eye size={15} className="shrink-0 text-muted-foreground" aria-hidden />
-              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                {t('editor.previewLabel')}
-              </span>
-              <span className="flex-1" />
-              <Segmented
-                size="sm"
-                iconOnly
-                aria-label={t('editor.deviceLabel')}
-                value={device}
-                onValueChange={setDevice}
-                options={[
-                  { value: 'phone', label: t('editor.devicePhone'), icon: Smartphone },
-                  { value: 'desktop', label: t('editor.deviceDesktop'), icon: Monitor },
-                ]}
-              />
-              <Badge variant="primary">{t('editor.previewLive')}</Badge>
-            </div>
+          {showPreview && (
+            <aside
+              className={`flex min-w-0 flex-col overflow-hidden border-l border-border bg-(--ssz-bg-subtle) ${split.panel}`}
+            >
+              <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-2.5">
+                <Eye size={15} className="shrink-0 text-muted-foreground" aria-hidden />
+                <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  {t('editor.previewLabel')}
+                </span>
+                <span className="flex-1" />
+                <Segmented
+                  size="sm"
+                  iconOnly
+                  aria-label={t('editor.deviceLabel')}
+                  value={device}
+                  onValueChange={setDevice}
+                  options={[
+                    { value: 'phone', label: t('editor.devicePhone'), icon: Smartphone },
+                    { value: 'desktop', label: t('editor.deviceDesktop'), icon: Monitor },
+                  ]}
+                />
+                <Badge variant="primary">{t('editor.previewLive')}</Badge>
+              </div>
 
-            <div className="grid flex-1 justify-items-center overflow-auto p-4">
-              {device === 'phone' ? (
-                <PhoneFrame label={t('editor.previewOnPhone')}>{preview}</PhoneFrame>
-              ) : (
-                <DesktopFrame label={t('editor.previewOnDesktop')} address={previewAddress}>
-                  {preview}
-                </DesktopFrame>
-              )}
-            </div>
+              <div className="grid flex-1 justify-items-center overflow-auto p-4">
+                {device === 'phone' ? (
+                  <PhoneFrame label={t('editor.previewOnPhone')}>{preview}</PhoneFrame>
+                ) : (
+                  <DesktopFrame label={t('editor.previewOnDesktop')} address={previewAddress}>
+                    {preview}
+                  </DesktopFrame>
+                )}
+              </div>
 
-            <p className="border-t border-border bg-surface px-4 py-2 text-center text-xs leading-relaxed text-muted-foreground">
-              {t('editor.previewCaption')}
-            </p>
-          </aside>
-        )}
+              <p className="border-t border-border bg-surface px-4 py-2 text-center text-xs leading-relaxed text-muted-foreground">
+                {t('editor.previewCaption')}
+              </p>
+            </aside>
+          )}
+        </div>
       </div>
     </SaveScopeProvider>
   );
