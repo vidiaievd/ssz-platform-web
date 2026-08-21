@@ -40,7 +40,6 @@ interface VideoEditorPaneProps {
   /** Whether students can open this material right now — see `SaveScopeContext`. */
   isLive: boolean | null;
   container: Container;
-  backHref: string;
   publishSlot: ReactNode;
 }
 
@@ -51,7 +50,6 @@ export function VideoEditorPane({
   state,
   isLive,
   container,
-  backHref,
   publishSlot,
 }: VideoEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -118,7 +116,6 @@ export function VideoEditorPane({
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
       isLive={isLive}
-      backHref={backHref}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
       publishSlot={publishSlot}

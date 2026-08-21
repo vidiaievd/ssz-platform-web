@@ -104,7 +104,6 @@ export default async function LessonEditorPage({
           isLive={item.isLive}
           container={moduleContainer}
           grammarRules={levelGrammarRules}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'video' ? (
@@ -115,7 +114,6 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'audio' ? (
@@ -126,7 +124,6 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'vocab' ? (
@@ -136,7 +133,6 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'grammar' ? (
@@ -147,7 +143,6 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'exercise' ? (
@@ -159,7 +154,6 @@ export default async function LessonEditorPage({
           isLive={item.isLive}
           container={moduleContainer}
           grammarRules={levelGrammarRules}
-          backHref={backHref}
           reviewHref={`/school/${schoolSlug}/review?course=${id}`}
           publishSlot={publishSlot}
         />
@@ -171,7 +165,6 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       )}

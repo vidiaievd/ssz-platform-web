@@ -49,7 +49,6 @@ interface TextEditorPaneProps {
   container: Container;
   /** Grammar rules of this module's Leksjon — the pool a grammar annotation may point at. */
   grammarRules?: LevelGrammarRule[];
-  backHref: string;
   publishSlot: ReactNode;
 }
 
@@ -61,7 +60,6 @@ export function TextEditorPane({
   isLive,
   container,
   grammarRules = [],
-  backHref,
   publishSlot,
 }: TextEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -157,7 +155,6 @@ export function TextEditorPane({
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
       isLive={isLive}
-      backHref={backHref}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
       publishSlot={publishSlot}

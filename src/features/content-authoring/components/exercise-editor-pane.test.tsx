@@ -65,7 +65,6 @@ function renderPane(isLive: boolean | null = false) {
           state="draft"
           isLive={isLive}
           container={CONTAINER}
-          backHref="/school/my-school/content/course-1"
           publishSlot={null}
         />
       </NextIntlClientProvider>

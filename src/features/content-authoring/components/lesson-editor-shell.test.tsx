@@ -33,7 +33,6 @@ function renderShell() {
         title="Match Pairs"
         state="draft"
         isLive={false}
-        backHref="/school/x/content/1"
         saveStatus="idle"
         savedAt={null}
         publishSlot={null}
@@ -85,22 +84,13 @@ describe('LessonEditorShell — preview device', () => {
 });
 
 describe('LessonEditorShell — top bar', () => {
-  it('names the material for a screen reader without printing it twice', () => {
+  it('names the material and its kind for a screen reader, and prints neither', () => {
     renderShell();
 
-    // The visible name is the breadcrumb in the app's bar; a page still needs a
-    // heading, and a second copy of the title in the workspace bar is what made the
-    // top of this screen three strips deep.
-    expect(screen.getByRole('heading', { name: 'Match Pairs' })).toHaveClass('sr-only');
-  });
-
-  it('leads back to where the material is placed', () => {
-    renderShell();
-
-    expect(screen.getByRole('link', { name: 'Back to content' })).toHaveAttribute(
-      'href',
-      '/school/x/content/1',
-    );
+    // The visible name is the breadcrumb in the app's bar, and the kind badge went
+    // with the back button — both were the bar above, said twice.
+    expect(screen.getByRole('heading', { name: 'Match Pairs — Practice' })).toHaveClass('sr-only');
+    expect(screen.queryByRole('link', { name: 'Back to content' })).not.toBeInTheDocument();
   });
 });
 
@@ -109,10 +99,9 @@ describe('LessonEditorShell — the builder’s toolbar', () => {
     renderShell();
 
     const steps = screen.getByRole('tablist', { name: 'Steps' });
-    // In the bar beside the material's badges rather than inside the editor column:
-    // the bar is what lines up with the preview panel next to it.
-    const bar = screen.getByText('Practice').closest('div')?.parentElement;
+    // In the bar rather than inside the editor column: the bar is what lines up with
+    // the preview panel next to it.
+    const bar = screen.getByRole('button', { name: 'Hide preview' }).closest('div')?.parentElement;
     expect(bar).toContainElement(steps);
-    expect(bar).toContainElement(screen.getByRole('button', { name: 'Hide preview' }));
   });
 });

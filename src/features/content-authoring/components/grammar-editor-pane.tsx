@@ -32,7 +32,6 @@ interface GrammarEditorPaneProps {
   /** Whether students can open this material right now — see `SaveScopeContext`. */
   isLive: boolean | null;
   container: Container;
-  backHref: string;
   publishSlot: ReactNode;
 }
 
@@ -43,7 +42,6 @@ export function GrammarEditorPane({
   state,
   isLive,
   container,
-  backHref,
   publishSlot,
 }: GrammarEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -124,7 +122,6 @@ export function GrammarEditorPane({
       title={ruleTitleValue || ruleTitle || t('lessons.untitled')}
       state={state}
       isLive={isLive}
-      backHref={backHref}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
       publishSlot={publishSlot}

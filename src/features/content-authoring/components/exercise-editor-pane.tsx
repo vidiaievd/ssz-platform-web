@@ -73,7 +73,6 @@ interface ExerciseEditorPaneProps {
   container: Container;
   /** The grammar rules of this Leksjon; only the translate builder uses them so far. */
   grammarRules?: LevelGrammarRule[];
-  backHref: string;
   /** Where this exercise's marking queue lives. Offered only where one can fill up. */
   reviewHref?: string;
   publishSlot: ReactNode;
@@ -87,7 +86,6 @@ export function ExerciseEditorPane({
   isLive,
   grammarRules,
   container,
-  backHref,
   reviewHref,
   publishSlot,
 }: ExerciseEditorPaneProps) {
@@ -124,7 +122,6 @@ export function ExerciseEditorPane({
       isLive={isLive}
       // An exercise document waits in its draft whatever its placement says.
       savesHeldForPublish
-      backHref={backHref}
       saveStatus="idle"
       savedAt={null}
       publishSlot={

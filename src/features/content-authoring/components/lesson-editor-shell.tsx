@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { ChevronLeft, Eye, EyeOff, Monitor, Smartphone } from 'lucide-react';
+import { Eye, EyeOff, Monitor, Smartphone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Segmented } from '@/components/ui/segmented';
-import { Link } from '@/lib/i18n/navigation';
 import { useMounted } from '@/hooks';
 import { getLessonTypeDefinition, type MaterialKind } from '@/lib/content/lesson-types';
 
@@ -31,7 +30,6 @@ interface LessonEditorShellProps {
   isLive: boolean | null;
   /** Editors whose saves cannot reach a student before a publish — see `SaveScopeHint`. */
   savesHeldForPublish?: boolean;
-  backHref: string;
   saveStatus: SaveStatus;
   savedAt: Date | null;
   /** Composed by the caller, e.g. `<PublishDialog container={container} result={preflight} />`. */
@@ -46,7 +44,6 @@ export function LessonEditorShell({
   state,
   isLive,
   savesHeldForPublish,
-  backHref,
   saveStatus,
   savedAt,
   publishSlot,
@@ -103,24 +100,25 @@ export function LessonEditorShell({
       */}
       <div className="flex min-h-0 flex-1 flex-col">
         {/*
-          The workspace's own bar, under the app's — where the specs put the builder's
-          steps. Where you are is in the top bar's breadcrumb now, so this one carries
-          what is being edited and what can be done to it, and nothing repeats.
+          The name and the kind, for a screen reader only. Both are in the app's top
+          bar — the name as the last crumb, the kind by the section it sits in — and a
+          page still needs a heading to navigate by.
         */}
-        <h1 className="sr-only">{title}</h1>
-        <div className="flex shrink-0 items-stretch gap-3 border-b border-border bg-surface px-4">
-          <div className="flex shrink-0 items-center gap-2 py-2">
-            <Button asChild variant="ghost" size="icon-sm" aria-label={t('backToContent')}>
-              <Link href={backHref}>
-                <ChevronLeft size={16} aria-hidden />
-              </Link>
-            </Button>
+        <h1 className="sr-only">
+          {title} — {tContent(`materialType.${def.kind}` as 'materialType.text')}
+        </h1>
 
-            <Badge variant="muted">
-              {tContent(`materialType.${def.kind}` as 'materialType.text')}
-            </Badge>
-            {state && <ContainerStateBadge state={state} />}
-          </div>
+        {/*
+          The workspace's own bar, under the app's: the builder's steps, and what can be
+          done with the material. Nothing that the bar above already says — the back
+          button and the type badge both went that way.
+        */}
+        <div className="flex shrink-0 items-stretch gap-3 border-b border-border bg-surface px-4">
+          {state !== null && (
+            <div className="flex shrink-0 items-center py-2">
+              <ContainerStateBadge state={state} />
+            </div>
+          )}
 
           {/*
             Filled by the builder inside `children` — its steps, its save hint, its Done

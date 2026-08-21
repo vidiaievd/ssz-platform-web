@@ -37,14 +37,18 @@ export function DesktopFrame({ children, label, address }: DesktopFrameProps) {
       <div
         tabIndex={0}
         aria-label={label}
-        className="overflow-auto p-6 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-(--ssz-border-strong)"
+        className="overflow-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-(--ssz-border-strong)"
         style={{ background: 'var(--ssz-bg-base)' }}
       >
         {/*
-          Never narrower than the width at which a layout stops being the desktop one
-          (`POOL_COLUMN_AT` and its like). A "desktop preview" quietly showing the
-          phone layout would be a lie; a scrollbar is the honest version of not having
-          the room, and at the panel's normal width it never appears.
+          No padding of its own — what is previewed brings the reader's, exactly as it
+          does inside the phone. Two sets of padding here cost 48px, which was enough
+          to push the content under the width that makes a desktop layout one.
+
+          And never narrower than that width (672px, `POOL_COLUMN_AT` and its like): a
+          "desktop preview" quietly showing the phone layout would be a lie, and a
+          scrollbar is the honest version of not having the room. At the panel's normal
+          width it never appears — 760px of panel leaves 694.
         */}
         <div className="min-w-[672px]">{children}</div>
       </div>
