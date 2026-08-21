@@ -4,6 +4,7 @@ import { CheckCircle, X, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { useContainerWidth } from '@/hooks';
 import type { PairId, RightId, StudentProjection } from '@/lib/shared-kernel/match-pairs';
 
 import { Instr } from './instr';
@@ -73,6 +74,11 @@ const NO_LINE = 'var(--ssz-feedback-no-line)';
 const NO_FG = 'var(--ssz-feedback-no-fg)';
 /** BEHAVIOR §3: every target is comfortably tappable. */
 const TAP_MIN = 44;
+/**
+ * The width, in px, at which the pool earns a column of its own: 20rem for the
+ * pool plus enough left for a sentence to read as a sentence.
+ */
+const POOL_COLUMN_AT = 672;
 
 /** 0 → "A", 25 → "Z", 26 → "AA" — the pool's labels in `halves`. */
 function letterLabel(index: number): string {
@@ -88,16 +94,22 @@ function letterLabel(index: number): string {
 /**
  * `match_pairs`, as the learner plays it — BEHAVIOR §2, one component, two layouts.
  *
- * Two columns once there is room: slot rows on the left, the pool as a vertical stack
- * of full-width chips on the right. Narrower than that, one scrolling column with the
- * pool stuck to the bottom, so the halves stay reachable while the slots scroll.
+ * **Wide**: two columns, slot rows on the left and the whole pool as a stack of chips
+ * on the right, all of it visible at once. That is what this exercise wants — the
+ * halves are compared against each other, and distractors only work if you can see
+ * what you are ruling out.
  *
- * "Room" is this component's **own** width (`@container`), not the viewport's. The
- * teacher's preview is a 284px phone frame on a desktop screen: asked about the
- * window, the layout took the two-column branch inside it, and the slots column —
- * whatever is left beside a 20rem pool — collapsed to one word per line. A body that
- * asks the window how wide it is cannot be embedded, and being embedded is exactly
- * what the preview does to it.
+ * **Narrow**: the pool has nowhere to live. Eight halves, each a clause long, is four
+ * hundred pixels of chips; parked at the bottom of a phone they left the sentences a
+ * sliver to share and the exercise could not be done at all. So on a phone the pool is
+ * not parked anywhere — tapping a sentence opens the halves directly underneath it,
+ * and choosing one closes them again. One decision on screen at a time, with the other
+ * sentences still a scroll away, which keeps elimination possible.
+ *
+ * "Room" is this component's **own** width, not the window's (`useContainerWidth`).
+ * The teacher's preview is a 284px phone frame on a desktop screen, and a body that
+ * asks the window how wide it is cannot be embedded — which is exactly what the
+ * preview does to it.
  *
  * Note what the two columns are and are not. They are *slots* and *pool*, which is why
  * distractors do not disturb them — the pool column is simply taller. The layout this
@@ -139,6 +151,9 @@ export function MatchPairsBody({
   const [armedItem, setArmedItem] = useState<RightId | null>(null);
   const [dragOverSlot, setDragOverSlot] = useState<PairId | null>(null);
   const firstAlert = useRef<HTMLParagraphElement | null>(null);
+  const [root, width] = useContainerWidth();
+  const poolHasColumn = width >= POOL_COLUMN_AT;
+  const openPicker = useRef<HTMLDivElement | null>(null);
 
   const itemToSlot = useMemo(() => {
     const out: Record<RightId, PairId> = {};
@@ -180,6 +195,16 @@ export function MatchPairsBody({
   useEffect(() => {
     if (firstAlertSlot !== null) firstAlert.current?.focus();
   }, [firstAlertSlot]);
+
+  /**
+   * The halves a phone opens under the last sentence are otherwise below the fold.
+   * On opening only — scrolling on every render would fight the reader's own thumb.
+   */
+  useEffect(() => {
+    if (armedSlot !== null && !poolHasColumn) {
+      openPicker.current?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [armedSlot, poolHasColumn]);
 
   /** A slot whose verdict is `correct` is settled and stops accepting halves (AC-S8). */
   const isLocked = (slotId: PairId): boolean => isRevealed || results?.[slotId]?.correct === true;
@@ -257,11 +282,83 @@ export function MatchPairsBody({
     );
   }
 
+  /**
+   * The halves, as buttons. The same list in both layouts: a column beside the
+   * sentences where there is room, and the picker under one sentence where there is
+   * not. Used halves stay in place rather than vanishing — a pool that reflows on
+   * every placement makes the one you wanted hard to find again, and the count of
+   * what is left is the real signal anyway.
+   */
+  function renderPool(as: 'column' | 'picker') {
+    return (
+      <div className={as === 'column' ? 'flex flex-col gap-2' : 'flex flex-col gap-1.5'}>
+        {pool.map((item) => {
+          const used = itemToSlot[item.itemId] !== undefined;
+          const armed = armedItem === item.itemId;
+          return (
+            <button
+              key={item.itemId}
+              type="button"
+              draggable={as === 'column' && isAnswering && !used}
+              onDragStart={(event) => {
+                event.dataTransfer.setData('text/plain', item.itemId);
+                event.dataTransfer.effectAllowed = 'move';
+              }}
+              onClick={() => onItemPress(item.itemId)}
+              aria-disabled={!isAnswering || used}
+              aria-pressed={armed}
+              className="w-full rounded-lg border px-3 py-2 text-left text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+              style={{
+                minHeight: TAP_MIN,
+                fontFamily: variant === 'halves' ? READING : undefined,
+                background: armed ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)',
+                borderColor: armed ? accent : 'var(--ssz-border-default)',
+                color: 'var(--ssz-text-primary)',
+                opacity: used ? 0.32 : 1,
+                cursor: isAnswering && !used ? 'pointer' : 'default',
+              }}
+            >
+              {variant === 'halves' && (
+                <span
+                  aria-hidden="true"
+                  className="mr-1.5 text-[12.5px] font-bold"
+                  style={{ color: 'var(--ssz-text-muted)' }}
+                >
+                  {poolLabel.get(item.itemId)}.
+                </span>
+              )}
+              {item.text}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  const remaining = isAnswering && projection.settings.showRemaining && (
+    <p className="mb-1.5 text-[12.5px] font-semibold" style={{ color: 'var(--ssz-text-muted)' }}>
+      {t('matchPairs.remaining', { count: slots.length - filledCount })}
+    </p>
+  );
+
   return (
-    <div className="@container">
+    <div ref={root}>
       {instruction !== undefined && <Instr>{instruction}</Instr>}
 
-      <div className="@2xl:grid @2xl:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] @2xl:items-start @2xl:gap-6">
+      {/* On a phone the count belongs with the sentences; beside a pool column it
+          belongs with the pool, which is what it counts down. */}
+      {!poolHasColumn && remaining}
+      {isAnswering && (
+        <p aria-live="polite" className="sr-only">
+          {helper}
+        </p>
+      )}
+
+      <div
+        className={
+          poolHasColumn ? 'grid grid-cols-[minmax(0,1fr)_minmax(0,20rem)] items-start gap-6' : ''
+        }
+      >
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {slots.map((slot, index) => {
             const itemId = value[slot.slotId];
@@ -317,6 +414,10 @@ export function MatchPairsBody({
                   tabIndex={isAnswering && !locked ? 0 : -1}
                   onClick={() => onSlotPress(slot.slotId)}
                   onKeyDown={(event) => {
+                    if (event.key === 'Escape' && armed) {
+                      setArmedSlot(null);
+                      return;
+                    }
                     if (event.key !== 'Enter' && event.key !== ' ') return;
                     event.preventDefault();
                     onSlotPress(slot.slotId);
@@ -336,6 +437,11 @@ export function MatchPairsBody({
                   }}
                   aria-disabled={!isAnswering || locked}
                   aria-label={label}
+                  // Only where tapping a sentence opens something: with a pool
+                  // column there is nothing to expand.
+                  {...(poolHasColumn || !isAnswering || locked
+                    ? {}
+                    : { 'aria-expanded': armed, 'aria-controls': `picker-${slot.slotId}` })}
                   className="flex w-full items-start gap-2 rounded-xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
                   style={{
                     minHeight: TAP_MIN,
@@ -427,6 +533,23 @@ export function MatchPairsBody({
                   )}
                 </div>
 
+                {/* The halves, where there is no room for a column of them: under the
+                    sentence being answered, and only that one. Two things stay on
+                    screen together — the sentence and its candidates — which is the
+                    comparison this exercise is made of. */}
+                {!poolHasColumn && armed && isAnswering && !locked && (
+                  <div
+                    id={`picker-${slot.slotId}`}
+                    role="group"
+                    aria-label={t('matchPairs.pickerLabel', { left: slot.left })}
+                    ref={openPicker}
+                    className="mt-1.5 rounded-xl border border-dashed p-2"
+                    style={{ borderColor: 'var(--ssz-border-default)' }}
+                  >
+                    {renderPool('picker')}
+                  </div>
+                )}
+
                 {/* The teacher's note on the half actually attached — never the half
                     that should have been. Being wrong explains; it does not hand over. */}
                 {verdict !== undefined && !verdict.correct && verdict.explanation !== null && (
@@ -454,77 +577,14 @@ export function MatchPairsBody({
           })}
         </ul>
 
-        {/* Phone: stuck to the bottom of the viewport, so the halves stay reachable
-            while the slots scroll past (AC-S17). Desktop: a column of its own. */}
-        <div
-          // No negative margin to bleed to the viewport edge: this body does not own
-          // the page's padding and guessing it is how a sticky bar ends up causing a
-          // horizontal scrollbar on somebody else's layout.
-          className="sticky bottom-0 z-10 mt-4 border-t pt-3 pb-3 @2xl:static @2xl:z-auto @2xl:mt-0 @2xl:border-t-0 @2xl:pt-0 @2xl:pb-0"
-          style={{
-            background: 'var(--ssz-bg-surface)',
-            borderColor: 'var(--ssz-border-default)',
-          }}
-        >
-          {isAnswering && projection.settings.showRemaining && (
-            <p
-              className="mb-1.5 text-[12.5px] font-semibold"
-              style={{ color: 'var(--ssz-text-muted)' }}
-            >
-              {t('matchPairs.remaining', { count: slots.length - filledCount })}
-            </p>
-          )}
-          {isAnswering && (
-            <p aria-live="polite" className="sr-only">
-              {helper}
-            </p>
-          )}
-
-          <div className="flex flex-wrap gap-2 @2xl:flex-col @2xl:flex-nowrap">
-            {pool.map((item) => {
-              const used = itemToSlot[item.itemId] !== undefined;
-              const armed = armedItem === item.itemId;
-              return (
-                <button
-                  key={item.itemId}
-                  type="button"
-                  draggable={isAnswering && !used}
-                  onDragStart={(event) => {
-                    event.dataTransfer.setData('text/plain', item.itemId);
-                    event.dataTransfer.effectAllowed = 'move';
-                  }}
-                  onClick={() => onItemPress(item.itemId)}
-                  aria-disabled={!isAnswering || used}
-                  aria-pressed={armed}
-                  className="rounded-lg border px-3 py-2 text-left text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) @2xl:w-full"
-                  style={{
-                    minHeight: TAP_MIN,
-                    fontFamily: variant === 'halves' ? READING : undefined,
-                    background: armed ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)',
-                    borderColor: armed ? accent : 'var(--ssz-border-default)',
-                    color: 'var(--ssz-text-primary)',
-                    // Used halves stay in place rather than vanishing: a pool that
-                    // reflows on every placement makes the one you wanted hard to find
-                    // again, and the count of what is left is the real signal anyway.
-                    opacity: used ? 0.32 : 1,
-                    cursor: isAnswering && !used ? 'pointer' : 'default',
-                  }}
-                >
-                  {variant === 'halves' && (
-                    <span
-                      aria-hidden="true"
-                      className="mr-1.5 text-[12.5px] font-bold"
-                      style={{ color: 'var(--ssz-text-muted)' }}
-                    >
-                      {poolLabel.get(item.itemId)}.
-                    </span>
-                  )}
-                  {item.text}
-                </button>
-              );
-            })}
+        {/* The pool gets a column only where one fits. On a phone it is rendered
+            inside the sentence being answered — see `renderPool` above. */}
+        {poolHasColumn && (
+          <div>
+            {remaining}
+            {renderPool('column')}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

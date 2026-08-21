@@ -231,7 +231,7 @@
     "helperIdle": "Нажмите на строку, затем на половину, которая её завершает",
     "helperSlotArmed": "Теперь нажмите на половину, которая её завершает.",
     "helperItemArmed": "Теперь нажмите на строку, которую она завершает.",
-    "tapAHalf": "Выберите половину ниже",
+    "tapAHalf": "Нажмите, чтобы выбрать половину",
     "emptySlot": "{left} — половина не выбрана",
     "filledSlot": "{left} — {half}",
     "revealedSlot": "{left} — правильный ответ: {half}",
@@ -254,6 +254,7 @@
     "removeHalf": "Убрать «{half}»",
     "noPairs": "В этом упражнении пока нет пар.",
     "checkCount": "Проверить ({n}/{m})",
-    "attemptFootnote": "Попытка {n} · {correct} из {total} верно"
+    "attemptFootnote": "Попытка {n} · {correct} из {total} верно",
+    "pickerLabel": "Половины, которые могут завершить: {left}"
   }
 }

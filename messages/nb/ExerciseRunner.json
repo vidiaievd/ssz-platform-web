@@ -231,7 +231,7 @@
     "helperIdle": "Trykk på en linje, og så på halvdelen som fullfører den",
     "helperSlotArmed": "Trykk nå på halvdelen som fullfører den.",
     "helperItemArmed": "Trykk nå på linjen den fullfører.",
-    "tapAHalf": "Velg en halvdel under",
+    "tapAHalf": "Trykk for å velge en halvdel",
     "emptySlot": "{left} — ingen halvdel valgt",
     "filledSlot": "{left} — {half}",
     "revealedSlot": "{left} — svaret er {half}",
@@ -254,6 +254,7 @@
     "removeHalf": "Fjern {half}",
     "noPairs": "Denne oppgaven har ingen par ennå.",
     "checkCount": "Sjekk ({n}/{m})",
-    "attemptFootnote": "Forsøk {n} · {correct} av {total} riktige"
+    "attemptFootnote": "Forsøk {n} · {correct} av {total} riktige",
+    "pickerLabel": "Halvdeler som kan fullføre: {left}"
   }
 }

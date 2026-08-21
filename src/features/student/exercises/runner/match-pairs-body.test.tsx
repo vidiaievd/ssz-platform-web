@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
-import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { useState, type ReactElement } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { StudentProjection } from '@/lib/shared-kernel/match-pairs';
@@ -83,6 +83,29 @@ function Harness({
 const slot = (left: string) => screen.getByRole('button', { name: new RegExp(`^${left}`) });
 const half = (text: string) => screen.getByRole('button', { name: text });
 
+/**
+ * The desktop layout, where the pool has a column of its own and is on screen
+ * throughout. JSDOM measures every element at 0, which is the phone branch — so the
+ * two layouts are told apart here the same way the component tells them apart: by how
+ * much room it is given.
+ */
+function renderWide(ui: ReactElement) {
+  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
+    width: 900,
+    height: 600,
+    top: 0,
+    left: 0,
+    right: 900,
+    bottom: 600,
+    x: 0,
+    y: 0,
+    toJSON: () => ({}),
+  });
+  return render(ui);
+}
+
+afterEach(() => vi.restoreAllMocks());
+
 describe('MatchPairsBody — placing halves', () => {
   it('slot first, then the half that completes it', async () => {
     const user = userEvent.setup();
@@ -98,7 +121,7 @@ describe('MatchPairsBody — placing halves', () => {
 
   it('half first, then the slot it completes — the same placement from the other end', async () => {
     const user = userEvent.setup();
-    render(<Harness />);
+    renderWide(<Harness />);
 
     await user.click(half('blir vi hjemme.'));
     await user.click(slot('Hvis det regner i morgen,'));
@@ -149,7 +172,7 @@ describe('MatchPairsBody — placing halves', () => {
 
   it('AC-S2: tapping a filled slot arms it, so the next half replaces what is there', async () => {
     const user = userEvent.setup();
-    render(<Harness />);
+    renderWide(<Harness />);
 
     await user.click(slot('Kari tar imot Bartek'));
     await user.click(half('med et fast håndtrykk.'));
@@ -263,7 +286,7 @@ describe('MatchPairsBody — feedback', () => {
 
   it('AC-S9: a slot the server called correct stops accepting halves', async () => {
     const user = userEvent.setup();
-    render(<Harness results={results} />);
+    renderWide(<Harness results={results} />);
 
     await user.click(slot('Kari tar imot Bartek'));
     await user.click(half('etter en uke.'));
@@ -297,5 +320,64 @@ describe('MatchPairsBody — feedback', () => {
       'Han vil bytte jobb fordi — the answer is han vil ta mer ansvar.',
     );
     expect(screen.getByText('Leddsetning: subjekt før verb.')).toBeInTheDocument();
+  });
+});
+
+describe('MatchPairsBody — on a phone', () => {
+  /**
+   * The pool has nowhere to live at this width: eight clause-long halves parked at the
+   * bottom leave the sentences a sliver to share. So it is not parked — it opens under
+   * the sentence being answered, and closes again when one is chosen.
+   */
+  it('keeps the halves out of the way until a sentence asks for them', () => {
+    render(<Harness />);
+
+    expect(screen.queryByRole('button', { name: 'blir vi hjemme.' })).not.toBeInTheDocument();
+    expect(slot('Hvis det regner i morgen,')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('opens the halves under the sentence that was tapped, and closes them on a choice', async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    await user.click(slot('Hvis det regner i morgen,'));
+    expect(slot('Hvis det regner i morgen,')).toHaveAttribute('aria-expanded', 'true');
+    // Named after the sentence, so the group says which decision it belongs to.
+    expect(
+      screen.getByRole('group', {
+        name: 'Halves that could complete: Hvis det regner i morgen,',
+      }),
+    ).toBeInTheDocument();
+
+    await user.click(half('blir vi hjemme.'));
+
+    expect(slot('Hvis det regner i morgen,')).toHaveAccessibleName(
+      'Hvis det regner i morgen, — blir vi hjemme.',
+    );
+    expect(screen.queryByRole('group')).not.toBeInTheDocument();
+  });
+
+  it('tapping the same sentence again puts the halves away', async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    await user.click(slot('Kari tar imot Bartek'));
+    await user.click(slot('Kari tar imot Bartek'));
+
+    expect(screen.queryByRole('group')).not.toBeInTheDocument();
+  });
+
+  it('a locked slot opens nothing — there is no choice left to make there', async () => {
+    const user = userEvent.setup();
+    render(
+      <Harness
+        results={{ p1: { correct: true, explanation: null } }}
+        initialValue={{ p1: 'r1' }}
+      />,
+    );
+
+    await user.click(slot('Kari tar imot Bartek'));
+
+    expect(screen.queryByRole('group')).not.toBeInTheDocument();
   });
 });

@@ -231,7 +231,7 @@
     "helperIdle": "Tap a line, then tap the half that completes it",
     "helperSlotArmed": "Now tap the half that completes it.",
     "helperItemArmed": "Now tap the line it completes.",
-    "tapAHalf": "Tap a half below",
+    "tapAHalf": "Tap to choose a half",
     "emptySlot": "{left} — no half chosen",
     "filledSlot": "{left} — {half}",
     "revealedSlot": "{left} — the answer is {half}",
@@ -254,6 +254,7 @@
     "removeHalf": "Remove {half}",
     "noPairs": "This exercise has no pairs yet.",
     "checkCount": "Check ({n}/{m})",
-    "attemptFootnote": "Attempt {n} · {correct} of {total} correct"
+    "attemptFootnote": "Attempt {n} · {correct} of {total} correct",
+    "pickerLabel": "Halves that could complete: {left}"
   }
 }
