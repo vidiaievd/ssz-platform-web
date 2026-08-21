@@ -98,7 +98,14 @@ export function LessonEditorShell({
       <div
         className={`grid items-start gap-6 ${showPreview ? 'lg:grid-cols-[1fr_340px]' : 'grid-cols-1'}`}
       >
-        <div>{children}</div>
+        {/*
+          `min-w-0`: a grid item is `min-width: auto` by default, so anything wide
+          inside it — the feedback matrix, a long code block — grows the `1fr` track
+          instead of scrolling within its own pane, and the whole page ends up with a
+          horizontal scrollbar. With this, the editor column is free to be narrower
+          than its content and the content does its own scrolling.
+        */}
+        <div className="min-w-0">{children}</div>
         {showPreview && (
           <div className="sticky top-4 flex flex-col items-center gap-3">
             <div className="flex w-75 items-center justify-between">

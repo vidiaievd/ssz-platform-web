@@ -143,7 +143,7 @@ export function FeedbackMatrix({
             <tr>
               <th
                 scope="col"
-                className="sticky left-0 z-10 bg-surface px-3 py-2 text-left text-xs font-medium text-muted-foreground"
+                className="sticky left-0 z-20 border-r border-border bg-surface px-3 py-2 text-left text-xs font-medium text-muted-foreground"
               >
                 {copy.rowColumn}
               </th>
@@ -154,7 +154,13 @@ export function FeedbackMatrix({
                   className="min-w-24 px-3 py-2 text-left text-xs font-medium"
                   style={{ fontFamily: columnFont }}
                 >
-                  {column.label}
+                  {/* Truncated with the full text on hover: a pool of eight halves,
+                      each a clause long, makes a table wider than any screen, and the
+                      column only has to be *identifiable* — the open cell's editor
+                      names both halves in full. */}
+                  <span className="block max-w-36 truncate" title={column.label}>
+                    {column.label}
+                  </span>
                 </th>
               ))}
             </tr>
@@ -164,7 +170,7 @@ export function FeedbackMatrix({
               <tr key={row.id} className="border-t border-border">
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 bg-surface px-3 py-2 text-left align-top"
+                  className="sticky left-0 z-10 border-r border-border bg-surface px-3 py-2 text-left align-top"
                 >
                   {row.header}
                 </th>
