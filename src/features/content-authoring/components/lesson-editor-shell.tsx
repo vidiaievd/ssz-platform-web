@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Segmented } from '@/components/ui/segmented';
+import { useMounted } from '@/hooks';
 import { getLessonTypeDefinition, type MaterialKind } from '@/lib/content/lesson-types';
 
 import { ContainerStateBadge } from './container-state-badge';
@@ -58,6 +59,14 @@ export function LessonEditorShell({
    * one is the one an author is least able to check for themselves.
    */
   const [device, setDevice] = useState<'phone' | 'desktop'>('phone');
+  /**
+   * The window's location bar says where the preview is served from — the real host,
+   * read after mount so the server and the client agree. The specs draw a full path
+   * here; this shell does not know the reader's route for the material being edited,
+   * and a plausible invented one would be the one thing in the preview that lies.
+   */
+  const mounted = useMounted();
+  const previewAddress = mounted ? window.location.host : undefined;
   const def = getLessonTypeDefinition(kind);
   const Icon = def.icon;
 
@@ -106,17 +115,24 @@ export function LessonEditorShell({
       {/*
         The preview keeps its column in both devices — it is the thing being watched
         while the fields are edited, and a preview you have to scroll away to see is
-        one you stop looking at. Switching to desktop widens that column instead of
-        moving it: the editor track has a floor of its own, so on a narrow laptop the
-        preview gives width back rather than squeezing the work out of the screen.
+        one you stop looking at. Switching to desktop widens that column rather than
+        moving it.
+
+        The widths and the two breakpoints are the builder specs' (`.wb-body`): the
+        panel needs 430px to hold a phone with room around it. The desktop one is
+        760px here rather than the spec's 660: subtract the panel's padding, the
+        window's border and its inner padding and what is left has to still be wide
+        enough for a desktop layout to *be* one (672px, `POOL_COLUMN_AT`). Below each
+        breakpoint there is no honest way to stand the two side by side, so the
+        preview drops under the editor.
       */}
       <div
         className={`grid items-start gap-6 ${
           !showPreview
             ? 'grid-cols-1'
             : device === 'phone'
-              ? 'lg:grid-cols-[1fr_340px]'
-              : 'lg:grid-cols-[minmax(420px,1fr)_minmax(0,720px)]'
+              ? 'min-[1180px]:grid-cols-[minmax(0,1fr)_430px]'
+              : 'min-[1380px]:grid-cols-[minmax(0,1fr)_760px]'
         }`}
       >
         {/*
@@ -128,46 +144,47 @@ export function LessonEditorShell({
         */}
         <div className="min-w-0">{children}</div>
 
+        {/*
+          A panel, not a frame floating on the page: its own tinted surface, its own
+          header, its own scroll, pinned while the editor scrolls past it
+          (`.wb-preview`). The device inside it is the only thing the switch changes.
+        */}
         {showPreview && (
-          <div className="sticky top-4 flex min-w-0 flex-col items-center gap-3">
-            <div
-              className={`flex items-center justify-between gap-2 ${
-                device === 'phone' ? 'w-75' : 'w-full'
-              }`}
-            >
-              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <aside className="sticky top-4 flex max-h-[calc(100vh-2rem)] min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-(--ssz-bg-subtle)">
+            <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-2.5">
+              <Eye size={15} className="shrink-0 text-muted-foreground" aria-hidden />
+              <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 {t('editor.previewLabel')}
               </span>
-              <div className="flex items-center gap-2">
-                <Segmented
-                  size="sm"
-                  iconOnly
-                  aria-label={t('editor.deviceLabel')}
-                  value={device}
-                  onValueChange={setDevice}
-                  options={[
-                    { value: 'phone', label: t('editor.devicePhone'), icon: Smartphone },
-                    { value: 'desktop', label: t('editor.deviceDesktop'), icon: Monitor },
-                  ]}
-                />
-                <Badge variant="primary">{t('editor.previewLive')}</Badge>
-              </div>
+              <span className="flex-1" />
+              <Segmented
+                size="sm"
+                iconOnly
+                aria-label={t('editor.deviceLabel')}
+                value={device}
+                onValueChange={setDevice}
+                options={[
+                  { value: 'phone', label: t('editor.devicePhone'), icon: Smartphone },
+                  { value: 'desktop', label: t('editor.deviceDesktop'), icon: Monitor },
+                ]}
+              />
+              <Badge variant="primary">{t('editor.previewLive')}</Badge>
             </div>
 
-            {device === 'phone' ? (
-              <PhoneFrame label={t('editor.previewOnPhone')}>{preview}</PhoneFrame>
-            ) : (
-              <DesktopFrame label={t('editor.previewOnDesktop')}>{preview}</DesktopFrame>
-            )}
+            <div className="grid flex-1 justify-items-center overflow-auto p-4">
+              {device === 'phone' ? (
+                <PhoneFrame label={t('editor.previewOnPhone')}>{preview}</PhoneFrame>
+              ) : (
+                <DesktopFrame label={t('editor.previewOnDesktop')} address={previewAddress}>
+                  {preview}
+                </DesktopFrame>
+              )}
+            </div>
 
-            <p
-              className={`text-center text-xs leading-relaxed text-muted-foreground ${
-                device === 'phone' ? 'max-w-75' : 'w-full'
-              }`}
-            >
+            <p className="border-t border-border bg-surface px-4 py-2 text-center text-xs leading-relaxed text-muted-foreground">
               {t('editor.previewCaption')}
             </p>
-          </div>
+          </aside>
         )}
       </div>
     </SaveScopeProvider>
