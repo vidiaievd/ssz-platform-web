@@ -7,9 +7,10 @@ import type { RevealAnswersResponse } from '@/features/student/exercises/types/a
 /**
  * Show the answers, because the learner asked.
  *
- * The only route in this client that returns answer text for a gap-fill. It takes no
- * body: there is nothing to say beyond "show me", and the engine records that the
- * asking happened.
+ * The only route in this client that returns answer text — for the two templates that
+ * withhold it, `word_bank_gap_fill` and `match_pairs`. The payload is discriminated by
+ * `templateCode` and passed through as it comes. It takes no body: there is nothing to
+ * say beyond "show me", and the engine records that the asking happened.
  */
 export async function POST(
   _request: NextRequest,

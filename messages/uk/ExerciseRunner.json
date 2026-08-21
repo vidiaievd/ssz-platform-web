@@ -226,5 +226,26 @@
     "restored": "Твоя минула відповідь, збережено {date}",
     "restoredScored": "{correct} із {total} пропусків правильно",
     "startOver": "Відповісти знову"
+  },
+  "matchPairs": {
+    "helperIdle": "Натисніть на рядок, потім на половину, яка його завершує",
+    "helperSlotArmed": "Тепер натисніть на половину, яка його завершує.",
+    "helperItemArmed": "Тепер натисніть на рядок, який вона завершує.",
+    "tapAHalf": "Оберіть половину нижче",
+    "emptySlot": "{left} — половину не обрано",
+    "filledSlot": "{left} — {half}",
+    "revealedSlot": "{left} — правильна відповідь: {half}",
+    "remaining": "залишилось: {count}",
+    "check": "Перевірити",
+    "checking": "Перевіряємо…",
+    "matchOneToCheck": "З’єднайте хоча б одну пару",
+    "checkFailed": "Не вдалося перевірити — спробуйте ще раз",
+    "retryAttempt": "Виправити відповіді · спроба {n}",
+    "attemptCount": "Спроба {n}",
+    "restart": "Почати спочатку",
+    "revealFailed": "Не вдалося показати відповіді — спробуйте ще раз",
+    "restored": "Ваша попередня відповідь, збережена {date}",
+    "restoredScored": "{correct} з {total} пар правильні",
+    "startOver": "Відповісти знову"
   }
 }

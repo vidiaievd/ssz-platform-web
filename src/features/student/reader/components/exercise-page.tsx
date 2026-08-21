@@ -7,6 +7,7 @@ import { useExerciseWithAnswers } from '@/features/content/api/use-exercise';
 import { primaryHintText, primaryInstructionText } from '@/features/content/lib/instruction-text';
 import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
+import { MatchPairsSolver } from './match-pairs-solver';
 import { TranslateSolver } from './translate-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
@@ -16,7 +17,6 @@ import {
   keepCorrectPicks,
   checkMcqGroup,
   FillBody,
-  MatchBody,
   ShortAnswerBody,
   WritingBody,
   SentenceSchemaBody,
@@ -27,7 +27,6 @@ import {
   checkTextOrder,
   shuffleOrder,
   gradeMcq,
-  gradeMatch,
   checkShortAnswer,
   gradeSentenceSchema,
   normAnswer,
@@ -39,8 +38,6 @@ import {
   type McqGroupResults,
   type McqGroupValue,
   type FillRationale,
-  type MatchContent,
-  type MatchPair,
   type SchemaField,
   type SchemaToken,
   type SchemaPlacements,
@@ -298,62 +295,6 @@ function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: Solve
               explanation: str(display.expectedAnswers.explanation) || undefined,
             })
           }
-        />
-      )}
-    </>
-  );
-}
-
-function MatchSolver({ display, phase, ok, onCheck }: SolverProps) {
-  const [links, setLinks] = useState<Record<string, string>>({});
-  const c = display.content;
-
-  const pairs: MatchPair[] = useMemo(() => {
-    const leftById = new Map(
-      (Array.isArray(c.left_items) ? c.left_items : []).map((l) => [
-        str((l as { id?: unknown }).id),
-        str((l as { text?: unknown }).text),
-      ]),
-    );
-    const rightById = new Map(
-      (Array.isArray(c.right_items) ? c.right_items : []).map((r) => [
-        str((r as { id?: unknown }).id),
-        str((r as { text?: unknown }).text),
-      ]),
-    );
-    const answerPairs = Array.isArray(display.expectedAnswers.pairs)
-      ? display.expectedAnswers.pairs
-      : [];
-    return answerPairs.map((p) => {
-      const leftId = str((p as { left_id?: unknown }).left_id);
-      const rightId = str((p as { right_id?: unknown }).right_id);
-      return { id: leftId, left: leftById.get(leftId) ?? '', right: rightById.get(rightId) ?? '' };
-    });
-  }, [c.left_items, c.right_items, display.expectedAnswers.pairs]);
-
-  const content: MatchContent = {
-    pairs,
-    variant: c.variant === 'halves' ? 'halves' : 'pairs',
-    instruction: instr(display),
-  };
-  const allLinked = pairs.every((p) => links[p.id]);
-
-  return (
-    <>
-      <MatchBody
-        content={content}
-        links={links}
-        onLinksChange={setLinks}
-        onAnswerChange={() => {}}
-        phase={phase}
-        ok={ok}
-        mode="practice"
-        accent={ACCENT}
-      />
-      {phase === 'answering' && (
-        <CheckFooter
-          canSubmit={allLinked}
-          onCheck={() => onCheck({ ok: gradeMatch(pairs, links) })}
         />
       )}
     </>
@@ -780,7 +721,6 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   multiple_choice: McqSolver,
   multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
-  match_pairs: MatchSolver,
   short_answer: ShortAnswerSolver,
   writing_task: WritingSolver,
   sentence_schema: SentenceSchemaSolver,
@@ -790,9 +730,10 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
 
 /**
  * The templates graded on the server, which are therefore not `SolverProps` solvers at
- * all: they are never handed the answers, because for these three the answers are the
- * exercise — the words missing from the sentences, the mistakes to be found, the
- * accepted translations. Each drives its own attempt against the engine.
+ * all: they are never handed the answers, because for these the answers are the
+ * exercise — the words missing from the sentences, the half that completes each line,
+ * the mistakes to be found, the accepted translations. Each drives its own attempt
+ * against the engine.
  */
 const SERVER_SOLVERS: Record<
   string,
@@ -804,6 +745,7 @@ const SERVER_SOLVERS: Record<
   }) => React.ReactElement
 > = {
   word_bank_gap_fill: GapFillSolver,
+  match_pairs: MatchPairsSolver,
   error_correction: ErrorCorrectionSolver,
   translate_to_target: TranslateSolver,
   translate_from_target: TranslateSolver,

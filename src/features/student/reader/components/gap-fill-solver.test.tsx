@@ -73,8 +73,11 @@ const RIGHT = {
   },
 };
 
+// The reveal payload is discriminated by template — `match_pairs` reveals slots
+// rather than gaps — so the code narrows on `templateCode` before reading `gapKey`.
 const REVEALED = {
   attemptId: 'att-1',
+  templateCode: 'word_bank_gap_fill',
   answers: [{ gapKey: 's1#3', label: 'G1', word: 'bestille', why: 'Infinitive.' }],
   attemptClosed: true,
 };

@@ -226,5 +226,26 @@
     "restored": "Ditt forrige svar, lagret {date}",
     "restoredScored": "{correct} av {total} luker riktig",
     "startOver": "Svar på nytt"
+  },
+  "matchPairs": {
+    "helperIdle": "Trykk på en linje, og så på halvdelen som fullfører den",
+    "helperSlotArmed": "Trykk nå på halvdelen som fullfører den.",
+    "helperItemArmed": "Trykk nå på linjen den fullfører.",
+    "tapAHalf": "Velg en halvdel under",
+    "emptySlot": "{left} — ingen halvdel valgt",
+    "filledSlot": "{left} — {half}",
+    "revealedSlot": "{left} — svaret er {half}",
+    "remaining": "{count} igjen",
+    "check": "Sjekk",
+    "checking": "Sjekker…",
+    "matchOneToCheck": "Koble minst én",
+    "checkFailed": "Kunne ikke sjekke — prøv igjen",
+    "retryAttempt": "Rett opp svarene · forsøk {n}",
+    "attemptCount": "Forsøk {n}",
+    "restart": "Start på nytt",
+    "revealFailed": "Kunne ikke vise svarene — prøv igjen",
+    "restored": "Ditt forrige svar, lagret {date}",
+    "restoredScored": "{correct} av {total} par riktige",
+    "startOver": "Svar på nytt"
   }
 }

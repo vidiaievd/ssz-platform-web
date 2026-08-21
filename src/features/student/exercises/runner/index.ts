@@ -41,6 +41,13 @@ export type {
   McqGroupValue,
 } from './mcq-group-body';
 
+export { MatchPairsBody } from './match-pairs-body';
+export type {
+  MatchPairsBodyProps,
+  MatchPairsValue,
+  RevealedSlot,
+  SlotVerdict,
+} from './match-pairs-body';
 export { MatchBody } from './match-body';
 export type { MatchBodyProps, MatchContent, MatchPair } from './match-body';
 

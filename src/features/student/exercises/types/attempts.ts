@@ -1,5 +1,10 @@
 import type { SelfCheckFeedback } from '@/lib/shared-kernel/error-correction';
 import type { SelfCheckFeedback as TranslateSelfCheckFeedback } from '@/lib/shared-kernel/translate';
+import type {
+  PairId,
+  RightId,
+  StudentProjection as MatchPairsProjection,
+} from '@/lib/shared-kernel/match-pairs';
 import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
 
 /**
@@ -45,6 +50,22 @@ export interface GapFillPlacement {
   word: string;
 }
 
+/**
+ * `exerciseContent` when `templateCode` is `match_pairs`.
+ *
+ * The second template whose content cannot travel as stored: a pair is written whole,
+ * so `content.pairs[].right` is the answer to `content.pairs[].left`. What arrives is
+ * the projection — left halves as slots, a flat pool of right halves in which answers
+ * and distractors are indistinguishable, shuffled per attempt server-side.
+ */
+export type MatchPairsAttemptContent = MatchPairsProjection;
+
+/** One right half attached to one slot. */
+export interface MatchPairsPlacement {
+  pairId: PairId;
+  rightId: RightId;
+}
+
 export interface SubmitAnswerRequest {
   submittedAnswer: unknown;
   timeSpentSeconds: number;
@@ -66,6 +87,24 @@ export interface GapFillSubmitDetails {
   totalGaps: number;
   correctGaps: number;
   gaps: Array<{ gapKey: GapKey; correct: boolean; explanation: string | null }>;
+}
+
+/**
+ * `details` when the template is `match_pairs` — one entry per *filled* slot.
+ *
+ * A slot the learner left empty is absent rather than reported wrong: it is work not
+ * done, which is not the same as work done badly. The explanation is already resolved
+ * server-side for the half actually attached; the correct half is not in here, and
+ * asking for it is the reveal endpoint's separate, recorded business.
+ */
+export interface MatchPairsSubmitDetails {
+  totalPairs: number;
+  correctPairs: number;
+  pairs: Array<{ pairId: PairId; correct: boolean; explanation: string | null }>;
+}
+
+export interface MatchPairsSubmittedAnswer {
+  placements: MatchPairsPlacement[];
 }
 
 /**
@@ -186,8 +225,40 @@ export interface TranslateSelfCheckResponse extends SelfCheckEnvelope, Translate
  */
 export type SelfCheckResponse = ErrorCorrectionSelfCheckResponse | TranslateSelfCheckResponse;
 
-export interface RevealAnswersResponse {
-  attemptId: string;
-  answers: Array<{ gapKey: GapKey; label: string; word: string; why: string | null }>;
-  attemptClosed: boolean;
+/**
+ * The answers, once the learner has asked for them.
+ *
+ * Discriminated by `templateCode`, as the engine sends it: "the answer" is a different
+ * shape per template, and a flat union of optional fields would leave every caller
+ * guessing which ones are populated. `templateCode` was additive on the server — the
+ * gap-fill payload is unchanged down to the field names — so narrowing on it here costs
+ * the gap-fill runner nothing.
+ */
+export interface RevealedGapAnswer {
+  gapKey: GapKey;
+  label: string;
+  word: string;
+  why: string | null;
 }
+
+export interface RevealedSlotAnswer {
+  pairId: PairId;
+  /** Which pool chip belonged in this slot, so it can be shown in place. */
+  rightId: RightId;
+  text: string;
+  why: string | null;
+}
+
+export type RevealAnswersResponse =
+  | {
+      attemptId: string;
+      templateCode: 'word_bank_gap_fill';
+      answers: RevealedGapAnswer[];
+      attemptClosed: boolean;
+    }
+  | {
+      attemptId: string;
+      templateCode: 'match_pairs';
+      answers: RevealedSlotAnswer[];
+      attemptClosed: boolean;
+    };
