@@ -246,6 +246,14 @@
     "revealFailed": "Не вдалося показати відповіді — спробуйте ще раз",
     "restored": "Ваша попередня відповідь, збережена {date}",
     "restoredScored": "{correct} з {total} пар правильні",
-    "startOver": "Відповісти знову"
+    "startOver": "Відповісти знову",
+    "stateCorrect": "Правильно",
+    "stateWrong": "Неправильно",
+    "filledSlotCorrect": "{left} — {half}, правильно",
+    "filledSlotWrong": "{left} — {half}, неправильно",
+    "removeHalf": "Прибрати «{half}»",
+    "noPairs": "У цій вправі ще немає пар.",
+    "checkCount": "Перевірити ({n}/{m})",
+    "attemptFootnote": "Спроба {n} · {correct} з {total} правильні"
   }
 }

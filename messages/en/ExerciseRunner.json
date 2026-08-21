@@ -246,6 +246,14 @@
     "revealFailed": "Could not show the answers — try again",
     "restored": "Your last answer, saved {date}",
     "restoredScored": "{correct} of {total} pairs correct",
-    "startOver": "Answer again"
+    "startOver": "Answer again",
+    "stateCorrect": "Correct",
+    "stateWrong": "Not right",
+    "filledSlotCorrect": "{left} — {half}, correct",
+    "filledSlotWrong": "{left} — {half}, not right",
+    "removeHalf": "Remove {half}",
+    "noPairs": "This exercise has no pairs yet.",
+    "checkCount": "Check ({n}/{m})",
+    "attemptFootnote": "Attempt {n} · {correct} of {total} correct"
   }
 }

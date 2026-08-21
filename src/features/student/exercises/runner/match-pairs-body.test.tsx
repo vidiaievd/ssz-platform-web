@@ -44,19 +44,23 @@ function makeProjection(overrides: Partial<StudentProjection> = {}): StudentProj
 function Harness({
   projection = makeProjection(),
   onAnswerChange = vi.fn(),
+  onClearMark,
   phase = 'answering' as const,
   results,
   revealed,
   showFeedback = true,
+  initialValue = {},
 }: {
   projection?: StudentProjection;
   onAnswerChange?: (canCheck: boolean) => void;
+  onClearMark?: (slotId: string) => void;
   phase?: 'answering' | 'feedback';
   results?: Record<string, SlotVerdict>;
   revealed?: Record<string, RevealedSlot>;
   showFeedback?: boolean;
+  initialValue?: MatchPairsValue;
 }) {
-  const [value, setValue] = useState<MatchPairsValue>({});
+  const [value, setValue] = useState<MatchPairsValue>(initialValue);
   return (
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <MatchPairsBody
@@ -64,6 +68,7 @@ function Harness({
         value={value}
         onValueChange={setValue}
         onAnswerChange={onAnswerChange}
+        {...(onClearMark === undefined ? {} : { onClearMark })}
         phase={phase}
         mode="practice"
         accent="var(--ssz-runner-practice)"
@@ -103,35 +108,60 @@ describe('MatchPairsBody — placing halves', () => {
     );
   });
 
-  it('a half lives in exactly one slot: moving it empties the slot it came from', async () => {
+  it('AC-S6: a half already in a slot is spent and does not respond', async () => {
     const user = userEvent.setup();
     render(<Harness />);
 
     await user.click(slot('Kari tar imot Bartek'));
     await user.click(half('blir vi hjemme.'));
-    // Now take the same half to another slot.
+
+    // Trying to take it to another slot does nothing: it has to be given back first.
+    await user.click(slot('Hvis det regner i morgen,'));
+    await user.click(half('blir vi hjemme.'));
+
+    expect(slot('Kari tar imot Bartek')).toHaveAccessibleName(
+      'Kari tar imot Bartek — blir vi hjemme.',
+    );
+    expect(slot('Hvis det regner i morgen,')).toHaveAccessibleName(
+      'Hvis det regner i morgen, — no half chosen',
+    );
+  });
+
+  it('AC-S5: the × returns the half to the pool, and it can then go elsewhere', async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    await user.click(slot('Kari tar imot Bartek'));
+    await user.click(half('blir vi hjemme.'));
+    await user.click(screen.getByRole('button', { name: 'Remove blir vi hjemme.' }));
+
+    expect(slot('Kari tar imot Bartek')).toHaveAccessibleName(
+      'Kari tar imot Bartek — no half chosen',
+    );
+
     await user.click(slot('Hvis det regner i morgen,'));
     await user.click(half('blir vi hjemme.'));
 
     expect(slot('Hvis det regner i morgen,')).toHaveAccessibleName(
       'Hvis det regner i morgen, — blir vi hjemme.',
     );
-    expect(slot('Kari tar imot Bartek')).toHaveAccessibleName(
-      'Kari tar imot Bartek — no half chosen',
-    );
   });
 
-  it('tapping a filled slot gives the half back', async () => {
+  it('AC-S2: tapping a filled slot arms it, so the next half replaces what is there', async () => {
     const user = userEvent.setup();
     render(<Harness />);
 
     await user.click(slot('Kari tar imot Bartek'));
     await user.click(half('med et fast håndtrykk.'));
+
     await user.click(slot('Kari tar imot Bartek'));
+    await user.click(half('etter en uke.'));
 
     expect(slot('Kari tar imot Bartek')).toHaveAccessibleName(
-      'Kari tar imot Bartek — no half chosen',
+      'Kari tar imot Bartek — etter en uke.',
     );
+    // The half it replaced is back in the pool and usable again.
+    expect(half('med et fast håndtrykk.')).toHaveAttribute('aria-disabled', 'false');
   });
 
   it('AC-S7: one filled slot is enough to check', async () => {
@@ -153,6 +183,67 @@ describe('MatchPairsBody — placing halves', () => {
     // learner who matched everything would still be told there are two to go.
     render(<Harness />);
     expect(screen.getByText('3 left')).toBeInTheDocument();
+  });
+});
+
+describe('MatchPairsBody — states are never colour alone', () => {
+  const results: Record<string, SlotVerdict> = {
+    p1: { correct: true, explanation: null },
+    p2: { correct: false, explanation: 'Etter «fordi» står verbet etter subjektet.' },
+  };
+
+  it('AC-X7: a correct slot says so in words, not only in green', () => {
+    render(<Harness results={results} initialValue={{ p1: 'r1', p2: 'r7' }} />);
+
+    // The one state with no explanation to carry it — green border alone would be
+    // the whole signal, which is exactly what AC-X7 forbids.
+    expect(screen.getByText('Correct')).toBeInTheDocument();
+    expect(screen.getByText('Not right')).toBeInTheDocument();
+  });
+
+  it('AC-X7: the verdict is in the slot’s accessible name too', () => {
+    render(<Harness results={results} initialValue={{ p1: 'r1', p2: 'r7' }} />);
+
+    expect(slot('Kari tar imot Bartek')).toHaveAccessibleName(/correct$/);
+    expect(slot('Han vil bytte jobb fordi')).toHaveAccessibleName(/not right$/);
+  });
+
+  it('announces the explanation as an alert and puts focus on the first one', () => {
+    render(<Harness results={results} initialValue={{ p1: 'r1', p2: 'r7' }} />);
+
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('Etter «fordi» står verbet etter subjektet.');
+    expect(alert).toHaveFocus();
+  });
+});
+
+describe('MatchPairsBody — editing after a check', () => {
+  it('AC-S11: editing a slot clears that slot’s mark and no other', async () => {
+    const user = userEvent.setup();
+    const cleared: string[] = [];
+    render(
+      <Harness
+        results={{
+          p1: { correct: true, explanation: null },
+          p2: { correct: false, explanation: 'Etter «fordi» står verbet etter subjektet.' },
+        }}
+        onClearMark={(slotId) => cleared.push(slotId)}
+        initialValue={{ p2: 'r7' }}
+      />,
+    );
+
+    // p2 is wrong, so it is still editable: give its half back.
+    await user.click(screen.getByRole('button', { name: /^Remove / }));
+
+    expect(cleared).toEqual(['p2']);
+  });
+});
+
+describe('MatchPairsBody — empty exercise', () => {
+  it('AC-S18: says there are no pairs rather than rendering an empty frame', () => {
+    render(<Harness projection={makeProjection({ slots: [], pool: [] })} />);
+
+    expect(screen.getByText('This exercise has no pairs yet.')).toBeInTheDocument();
   });
 });
 

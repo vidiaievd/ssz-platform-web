@@ -66,6 +66,8 @@ export function MatchPairsSolver({
   const [results, setResults] = useState<Record<string, SlotVerdict> | undefined>();
   const [revealed, setRevealed] = useState<Record<string, RevealedSlot> | undefined>();
   const [attempts, setAttempts] = useState(0);
+  /** The last check's tally, for the footnote `Attempt N · X of M correct`. */
+  const [tally, setTally] = useState<{ correct: number; total: number } | null>(null);
 
   /**
    * The server's verdict on the whole exercise, not a conclusion drawn from the
@@ -117,6 +119,20 @@ export function MatchPairsSolver({
   useEffect(() => {
     begin();
   }, [begin]);
+
+  /**
+   * One slot's mark, dropped because the learner just edited that slot (AC-S11). Only
+   * that one: the other marks belong to slots that have not been touched since the
+   * check, and clearing them would throw away the locks holding the correct ones.
+   */
+  const clearMark = useCallback((slotId: string) => {
+    setResults((current) => {
+      if (current === undefined || current[slotId] === undefined) return current;
+      const next = { ...current };
+      delete next[slotId];
+      return Object.keys(next).length > 0 ? next : undefined;
+    });
+  }, []);
 
   /** Whether the learner is reading a check or matching again. */
   const [reading, setReading] = useState(false);
@@ -170,6 +186,9 @@ export function MatchPairsSolver({
             bySlot[pair.pairId] = { correct: pair.correct, explanation: pair.explanation };
           }
           setResults(bySlot);
+          if (details !== undefined) {
+            setTally({ correct: details.correctPairs, total: details.totalPairs });
+          }
           setSolved(data.correct);
           setReading(true);
           // Progress follows the first attempt; later ones are practice.
@@ -227,6 +246,7 @@ export function MatchPairsSolver({
   function answerAgain() {
     setValue({});
     setResults(undefined);
+    setTally(null);
     setSolved(false);
     setReading(false);
     setRestored(null);
@@ -240,6 +260,7 @@ export function MatchPairsSolver({
     setValue({});
     setResults(undefined);
     setRevealed(undefined);
+    setTally(null);
     setSolved(false);
     setReading(false);
     setRestored(null);
@@ -302,6 +323,7 @@ export function MatchPairsSolver({
         value={value}
         onValueChange={setValue}
         onAnswerChange={setCanCheck}
+        onClearMark={clearMark}
         phase={isRevealed || solved ? 'feedback' : 'answering'}
         mode="practice"
         accent={PRACTICE_ACCENT}
@@ -337,7 +359,12 @@ export function MatchPairsSolver({
             {submit.isPending
               ? t('matchPairs.checking')
               : canCheck
-                ? t('matchPairs.check')
+                ? // AC-S7: the button says how much of the exercise it is about to
+                  // check, because partial checking means that is a real choice.
+                  t('matchPairs.checkCount', {
+                    n: Object.keys(value).length,
+                    m: projection.slots.length,
+                  })
                 : t('matchPairs.matchOneToCheck')}
           </button>
         )}
@@ -395,9 +422,18 @@ export function MatchPairsSolver({
           </p>
         )}
 
-        {attempts > 0 && !isRevealed && !hasWrong && !solved && (
+        {/* BEHAVIOR §2.3's footnote: which attempt this is, and how the last one
+            went. While the learner is still correcting, the number they care about is
+            on the button that starts the next attempt. */}
+        {attempts > 0 && !isRevealed && !solved && (
           <span className="text-[12.5px] text-(--ssz-text-muted)">
-            {t('matchPairs.attemptCount', { n: attempts + 1 })}
+            {tally === null
+              ? t('matchPairs.attemptCount', { n: attempts + 1 })
+              : t('matchPairs.attemptFootnote', {
+                  n: attempts,
+                  correct: tally.correct,
+                  total: tally.total,
+                })}
           </span>
         )}
       </div>

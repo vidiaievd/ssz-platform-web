@@ -1,5 +1,6 @@
 'use client';
 
+import { CheckCircle, X, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -39,6 +40,13 @@ export interface MatchPairsBodyProps {
   onValueChange: (value: MatchPairsValue) => void;
   /** Reports whether at least one slot is filled, which is what enables the check. */
   onAnswerChange: (canCheck: boolean) => void;
+  /**
+   * Drops one slot's mark, when the learner edits that slot after a check (AC-S11).
+   * The body cannot do it itself — the verdicts belong to the check that produced
+   * them, and the runner owns those — but it is the only thing that knows an edit
+   * happened.
+   */
+  onClearMark?: (slotId: PairId) => void;
   phase: RunnerPhase;
   mode: RunnerMode;
   accent: string;
@@ -78,23 +86,22 @@ function letterLabel(index: number): string {
 }
 
 /**
- * `match_pairs`, as the learner plays it — slots stacked above a pool of right halves.
+ * `match_pairs`, as the learner plays it — BEHAVIOR §2, one component, two layouts.
  *
- * **Not two columns.** The old body put left and right items side by side, which works
- * only while the two sides are the same length and the same shape. Neither survives
- * this template's new form: the pool carries distractors, so it is strictly longer than
- * the list of slots, and in `halves` each side is a clause rather than a word. Rows the
- * full width of the column, with the pool wrapping underneath, takes both — and the
- * pool being visibly longer is the point, since it is what stops the last slot from
- * solving itself by elimination.
+ * Two columns from `md` up: slot rows on the left, the pool as a vertical stack of
+ * full-width chips on the right. Below that, one scrolling column with the pool stuck
+ * to the bottom of the viewport, so the halves stay reachable while the slots scroll.
+ *
+ * Note what the two columns are and are not. They are *slots* and *pool*, which is why
+ * distractors do not disturb them — the pool column is simply taller. The layout this
+ * replaced put left items against right items as matched rows, which only worked while
+ * the two sides were the same length; that is the arrangement distractors break, not
+ * this one.
  *
  * Presentational and controlled, like the gap-fill body: handed a projection and a set
  * of placements, hands back placements. It never knows an answer and never decides
  * whether one is right, which is what makes it safe to render before the server has
  * been asked anything.
- *
- * Three ways in, all of which end in the same placement (BEHAVIOR §2.1):
- * slot-then-half, half-then-slot, and dragging a half onto a slot on a pointer device.
  */
 export function MatchPairsBody({
   projection,
@@ -102,6 +109,7 @@ export function MatchPairsBody({
   value,
   onValueChange,
   onAnswerChange,
+  onClearMark,
   phase,
   mode,
   accent,
@@ -122,21 +130,33 @@ export function MatchPairsBody({
    */
   const [armedSlot, setArmedSlot] = useState<PairId | null>(null);
   const [armedItem, setArmedItem] = useState<RightId | null>(null);
-  const slotRefs = useRef(new Map<PairId, HTMLButtonElement | null>());
+  const [dragOverSlot, setDragOverSlot] = useState<PairId | null>(null);
+  const firstAlert = useRef<HTMLParagraphElement | null>(null);
 
   const itemToSlot = useMemo(() => {
     const out: Record<RightId, PairId> = {};
     for (const [slotId, itemId] of Object.entries(value)) out[itemId] = slotId;
     return out;
   }, [value]);
-  const poolText = useMemo(
-    () => new Map(pool.map((item) => [item.itemId, item.text])),
-    [pool],
-  );
+  const poolText = useMemo(() => new Map(pool.map((item) => [item.itemId, item.text])), [pool]);
   const poolLabel = useMemo(
     () => new Map(pool.map((item, i) => [item.itemId, letterLabel(i)])),
     [pool],
   );
+
+  /**
+   * The slot whose explanation takes focus after a check — derived rather than
+   * tracked while rendering, so it is the same answer on every pass. First in slot
+   * order, which is reading order.
+   */
+  const firstAlertSlot = useMemo(() => {
+    if (!showFeedback || results === undefined) return null;
+    const found = slots.find((slot) => {
+      const verdict = results[slot.slotId];
+      return verdict !== undefined && !verdict.correct && verdict.explanation !== null;
+    });
+    return found?.slotId ?? null;
+  }, [showFeedback, results, slots]);
 
   const filledCount = slots.filter((slot) => value[slot.slotId] !== undefined).length;
   const canCheck = filledCount > 0;
@@ -145,9 +165,17 @@ export function MatchPairsBody({
     onAnswerChange(canCheck);
   }, [canCheck, onAnswerChange]);
 
-  /** A slot whose verdict is `correct` is settled and stops accepting halves (AC-S9). */
-  const isLocked = (slotId: PairId): boolean =>
-    isRevealed || results?.[slotId]?.correct === true;
+  /**
+   * BEHAVIOR §3: focus moves to the first explanation after a check. Without it the
+   * verdict is announced nowhere — the marks are visual, and a screen reader user
+   * would be left on the button they just pressed with the page silently rearranged.
+   */
+  useEffect(() => {
+    if (firstAlertSlot !== null) firstAlert.current?.focus();
+  }, [firstAlertSlot]);
+
+  /** A slot whose verdict is `correct` is settled and stops accepting halves (AC-S8). */
+  const isLocked = (slotId: PairId): boolean => isRevealed || results?.[slotId]?.correct === true;
 
   /**
    * Placing `itemId` into `slotId`. The half leaves whatever slot held it before —
@@ -163,6 +191,10 @@ export function MatchPairsBody({
     // Re-placing the half already in this slot takes it back out.
     if (value[slotId] !== itemId) next[slotId] = itemId;
     onValueChange(next);
+    // The slot the half came from is being edited too, so its mark goes as well.
+    const vacated = itemToSlot[itemId];
+    if (vacated !== undefined && vacated !== slotId) onClearMark?.(vacated);
+    onClearMark?.(slotId);
     setArmedSlot(null);
     setArmedItem(null);
   }
@@ -171,6 +203,8 @@ export function MatchPairsBody({
     const next = { ...value };
     delete next[slotId];
     onValueChange(next);
+    // AC-S11: editing a slot clears that slot's mark, and only that one.
+    onClearMark?.(slotId);
   }
 
   function onSlotPress(slotId: PairId) {
@@ -179,31 +213,18 @@ export function MatchPairsBody({
       place(slotId, armedItem);
       return;
     }
-    // A filled slot gives its half back rather than arming: emptying it is the only
-    // other thing there is to do here, and it takes one tap either way.
-    if (value[slotId] !== undefined) {
-      clearSlot(slotId);
-      setArmedSlot(null);
-      return;
-    }
     setArmedSlot((current) => (current === slotId ? null : slotId));
   }
 
   function onItemPress(itemId: RightId) {
     if (!isAnswering) return;
+    // AC-S6: a half already in a slot is spent — it does not respond until the slot
+    // holding it gives it back.
+    if (itemToSlot[itemId] !== undefined) return;
     if (armedSlot !== null) {
       place(armedSlot, itemId);
       return;
     }
-    // A half that is already placed re-arms with its slot in hand, so the next tap
-    // moves it rather than doing nothing.
-    const owner = itemToSlot[itemId];
-    if (owner !== undefined && !isLocked(owner)) {
-      setArmedItem(itemId);
-      setArmedSlot(null);
-      return;
-    }
-    if (owner !== undefined) return;
     setArmedItem((current) => (current === itemId ? null : itemId));
   }
 
@@ -214,190 +235,289 @@ export function MatchPairsBody({
         ? t('matchPairs.helperItemArmed')
         : t('matchPairs.helperIdle');
 
+  // AC-S18: an exercise with no pairs is a thing to say, not an empty frame to render.
+  if (slots.length === 0) {
+    return (
+      <div>
+        {instruction !== undefined && <Instr>{instruction}</Instr>}
+        <p
+          className="rounded-xl border border-dashed px-4 py-8 text-center text-[14px]"
+          style={{ borderColor: 'var(--ssz-border-default)', color: 'var(--ssz-text-muted)' }}
+        >
+          {t('matchPairs.noPairs')}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div>
       {instruction !== undefined && <Instr>{instruction}</Instr>}
 
-      <ul className="m-0 flex list-none flex-col gap-2 p-0">
-        {slots.map((slot, index) => {
-          const itemId = value[slot.slotId];
-          const verdict = showFeedback ? results?.[slot.slotId] : undefined;
-          const reveal = revealed?.[slot.slotId];
-          const locked = isLocked(slot.slotId);
-          const armed = armedSlot === slot.slotId;
-          const empty = itemId === undefined && reveal === undefined;
+      <div className="md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] md:items-start md:gap-6">
+        <ul className="m-0 flex list-none flex-col gap-2 p-0">
+          {slots.map((slot, index) => {
+            const itemId = value[slot.slotId];
+            const verdict = showFeedback ? results?.[slot.slotId] : undefined;
+            const reveal = revealed?.[slot.slotId];
+            const locked = isLocked(slot.slotId);
+            const armed = armedSlot === slot.slotId;
+            const dragOver = dragOverSlot === slot.slotId;
+            const empty = itemId === undefined && reveal === undefined;
+            const showClear = isAnswering && itemId !== undefined && !locked;
 
-          const tone =
-            verdict === undefined
-              ? null
-              : verdict.correct
-                ? { bg: OK_BG, line: OK_LINE, fg: OK_FG }
-                : { bg: NO_BG, line: NO_LINE, fg: NO_FG };
+            const tone =
+              verdict === undefined
+                ? null
+                : verdict.correct
+                  ? { bg: OK_BG, line: OK_LINE, fg: OK_FG }
+                  : { bg: NO_BG, line: NO_LINE, fg: NO_FG };
 
-          return (
-            <li key={slot.slotId}>
-              <button
-                type="button"
-                ref={(node) => {
-                  slotRefs.current.set(slot.slotId, node);
-                }}
-                onClick={() => onSlotPress(slot.slotId)}
-                onDragOver={(event) => {
-                  if (!isAnswering || locked) return;
-                  event.preventDefault();
-                }}
-                onDrop={(event) => {
-                  if (!isAnswering || locked) return;
-                  event.preventDefault();
-                  const dropped = event.dataTransfer.getData('text/plain');
-                  if (dropped !== '') place(slot.slotId, dropped);
-                }}
-                aria-disabled={!isAnswering || locked}
-                aria-label={
-                  // What the slot announces is what it shows. After a reveal that is
-                  // the answer, not the empty slot underneath it — a screen reader
-                  // told "no half chosen" while the answer sits on the line is being
-                  // told the wrong thing about the same button.
-                  reveal !== undefined
-                    ? t('matchPairs.revealedSlot', { left: slot.left, half: reveal.text })
-                    : itemId === undefined
-                      ? t('matchPairs.emptySlot', { left: slot.left })
-                      : t('matchPairs.filledSlot', {
-                          left: slot.left,
-                          half: poolText.get(itemId) ?? '',
-                        })
-                }
-                className="flex w-full flex-col items-start gap-1 rounded-xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
-                style={{
-                  minHeight: TAP_MIN,
-                  background: tone?.bg ?? (armed ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)'),
-                  borderColor:
-                    tone?.line ??
-                    (armed
-                      ? accent
-                      : pointOut && !canCheck
-                        ? 'var(--ssz-feedback-no-line)'
-                        : 'var(--ssz-border-default)'),
-                  cursor: isAnswering && !locked ? 'pointer' : 'default',
-                }}
-              >
-                <span className="flex w-full items-baseline gap-2">
-                  {variant === 'halves' && (
-                    <span
-                      aria-hidden="true"
-                      className="shrink-0 text-[12.5px] font-bold"
-                      style={{ color: 'var(--ssz-text-muted)' }}
-                    >
-                      {index + 1}.
-                    </span>
-                  )}
-                  <span
-                    className="text-[15px] leading-[1.45]"
-                    style={{
-                      fontFamily: variant === 'halves' ? READING : undefined,
-                      color: 'var(--ssz-text-primary)',
-                    }}
-                  >
-                    {slot.left}
-                  </span>
-                </span>
+            // AC-X7: the mark is never colour alone — an icon and a word ride with it.
+            const stateWord =
+              verdict === undefined
+                ? null
+                : verdict.correct
+                  ? t('matchPairs.stateCorrect')
+                  : t('matchPairs.stateWrong');
 
-                <span
-                  className="text-[14.5px] leading-[1.45]"
+            const label =
+              reveal !== undefined
+                ? t('matchPairs.revealedSlot', { left: slot.left, half: reveal.text })
+                : itemId === undefined
+                  ? t('matchPairs.emptySlot', { left: slot.left })
+                  : verdict === undefined
+                    ? t('matchPairs.filledSlot', {
+                        left: slot.left,
+                        half: poolText.get(itemId) ?? '',
+                      })
+                    : t(
+                        verdict.correct
+                          ? 'matchPairs.filledSlotCorrect'
+                          : 'matchPairs.filledSlotWrong',
+                        { left: slot.left, half: poolText.get(itemId) ?? '' },
+                      );
+
+            const isFirstAlert = slot.slotId === firstAlertSlot;
+
+            return (
+              <li key={slot.slotId}>
+                {/* A div rather than a button: the clear control is a real button and
+                    HTML forbids nesting one inside another. BEHAVIOR §3 asks for
+                    role="button" with Enter/Space here for exactly this reason. */}
+                <div
+                  role="button"
+                  tabIndex={isAnswering && !locked ? 0 : -1}
+                  onClick={() => onSlotPress(slot.slotId)}
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    event.preventDefault();
+                    onSlotPress(slot.slotId);
+                  }}
+                  onDragOver={(event) => {
+                    if (!isAnswering || locked) return;
+                    event.preventDefault();
+                    setDragOverSlot(slot.slotId);
+                  }}
+                  onDragLeave={() => setDragOverSlot(null)}
+                  onDrop={(event) => {
+                    setDragOverSlot(null);
+                    if (!isAnswering || locked) return;
+                    event.preventDefault();
+                    const dropped = event.dataTransfer.getData('text/plain');
+                    if (dropped !== '') place(slot.slotId, dropped);
+                  }}
+                  aria-disabled={!isAnswering || locked}
+                  aria-label={label}
+                  className="flex w-full items-start gap-2 rounded-xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
                   style={{
-                    fontFamily: variant === 'halves' ? READING : undefined,
-                    color: empty ? 'var(--ssz-text-muted)' : (tone?.fg ?? 'var(--ssz-text-primary)'),
-                    fontStyle: empty ? 'italic' : undefined,
+                    minHeight: TAP_MIN,
+                    background:
+                      tone?.bg ?? (armed || dragOver ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)'),
+                    borderColor:
+                      tone?.line ??
+                      (armed || dragOver
+                        ? accent
+                        : pointOut && !canCheck
+                          ? NO_LINE
+                          : 'var(--ssz-border-default)'),
+                    borderStyle: empty && !armed && !dragOver ? 'dashed' : 'solid',
+                    cursor: isAnswering && !locked ? 'pointer' : 'default',
                   }}
                 >
-                  {reveal !== undefined
-                    ? reveal.text
-                    : itemId !== undefined
-                      ? (poolText.get(itemId) ?? '')
-                      : t('matchPairs.tapAHalf')}
-                </span>
-              </button>
+                  <span className="flex min-w-0 flex-1 flex-col gap-1">
+                    <span className="flex w-full items-baseline gap-2">
+                      {variant === 'halves' && (
+                        <span
+                          aria-hidden="true"
+                          className="shrink-0 text-[12.5px] font-bold"
+                          style={{ color: 'var(--ssz-text-muted)' }}
+                        >
+                          {index + 1}.
+                        </span>
+                      )}
+                      <span
+                        className="text-[15px] leading-[1.45]"
+                        style={{
+                          fontFamily: variant === 'halves' ? READING : undefined,
+                          color: 'var(--ssz-text-primary)',
+                        }}
+                      >
+                        {slot.left}
+                      </span>
+                    </span>
 
-              {/* The teacher's note on the half actually attached — never the half that
-                  should have been. Being wrong explains; it does not hand over. */}
-              {verdict !== undefined && !verdict.correct && verdict.explanation !== null && (
-                <p className="mt-1 px-4 text-[13px] leading-[1.5]" style={{ color: NO_FG }}>
-                  {verdict.explanation}
-                </p>
-              )}
+                    <span className="flex items-center gap-1.5">
+                      {verdict !== undefined &&
+                        (verdict.correct ? (
+                          <CheckCircle aria-hidden="true" size={15} style={{ color: OK_FG }} />
+                        ) : (
+                          <XCircle aria-hidden="true" size={15} style={{ color: NO_FG }} />
+                        ))}
+                      <span
+                        className="text-[14.5px] leading-[1.45]"
+                        style={{
+                          fontFamily: variant === 'halves' ? READING : undefined,
+                          color: empty
+                            ? 'var(--ssz-text-muted)'
+                            : (tone?.fg ?? 'var(--ssz-text-primary)'),
+                          fontStyle: empty ? 'italic' : undefined,
+                        }}
+                      >
+                        {reveal !== undefined
+                          ? reveal.text
+                          : itemId !== undefined
+                            ? (poolText.get(itemId) ?? '')
+                            : t('matchPairs.tapAHalf')}
+                      </span>
+                      {stateWord !== null && (
+                        <span
+                          className="text-[12px] font-bold uppercase tracking-[0.05em]"
+                          style={{ color: tone?.fg }}
+                        >
+                          {stateWord}
+                        </span>
+                      )}
+                    </span>
+                  </span>
 
-              {reveal?.why != null && reveal.why !== '' && (
-                <p
-                  className="mt-1 px-4 text-[13px] leading-[1.5]"
-                  style={{ color: 'var(--ssz-text-secondary)' }}
-                >
-                  {reveal.why}
-                </p>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+                  {/* AC-S5. A filled, unchecked slot gives its half back from here. */}
+                  {showClear && (
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        clearSlot(slot.slotId);
+                      }}
+                      aria-label={t('matchPairs.removeHalf', {
+                        half: poolText.get(itemId) ?? '',
+                      })}
+                      className="shrink-0 rounded-md p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+                      style={{ color: 'var(--ssz-text-muted)' }}
+                    >
+                      <X aria-hidden="true" size={16} />
+                    </button>
+                  )}
+                </div>
 
-      {isAnswering && (
-        <>
-          {projection.settings.showRemaining && (
-            <p className="mt-4 mb-1 text-[12.5px] font-semibold" style={{ color: 'var(--ssz-text-muted)' }}>
+                {/* The teacher's note on the half actually attached — never the half
+                    that should have been. Being wrong explains; it does not hand over. */}
+                {verdict !== undefined && !verdict.correct && verdict.explanation !== null && (
+                  <p
+                    role="alert"
+                    tabIndex={-1}
+                    ref={isFirstAlert ? firstAlert : undefined}
+                    className="mt-1 px-4 text-[13px] leading-[1.5] focus-visible:outline-none"
+                    style={{ color: NO_FG }}
+                  >
+                    {verdict.explanation}
+                  </p>
+                )}
+
+                {reveal?.why != null && reveal.why !== '' && (
+                  <p
+                    className="mt-1 px-4 text-[13px] leading-[1.5]"
+                    style={{ color: 'var(--ssz-text-secondary)' }}
+                  >
+                    {reveal.why}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Phone: stuck to the bottom of the viewport, so the halves stay reachable
+            while the slots scroll past (AC-S17). Desktop: a column of its own. */}
+        <div
+          // No negative margin to bleed to the viewport edge: this body does not own
+          // the page's padding and guessing it is how a sticky bar ends up causing a
+          // horizontal scrollbar on somebody else's layout.
+          className="sticky bottom-0 z-10 mt-4 border-t pt-3 pb-3 md:static md:z-auto md:mt-0 md:border-t-0 md:pt-0 md:pb-0"
+          style={{
+            background: 'var(--ssz-bg-surface)',
+            borderColor: 'var(--ssz-border-default)',
+          }}
+        >
+          {isAnswering && projection.settings.showRemaining && (
+            <p
+              className="mb-1.5 text-[12.5px] font-semibold"
+              style={{ color: 'var(--ssz-text-muted)' }}
+            >
               {t('matchPairs.remaining', { count: slots.length - filledCount })}
             </p>
           )}
-          <p aria-live="polite" className="sr-only">
-            {helper}
-          </p>
-        </>
-      )}
+          {isAnswering && (
+            <p aria-live="polite" className="sr-only">
+              {helper}
+            </p>
+          )}
 
-      {/* The pool stays on screen through the feedback phase so a wrong slot can be
-          corrected without the halves disappearing out from under the explanation. */}
-      <div className="mt-3 flex flex-wrap gap-2">
-        {pool.map((item) => {
-          const owner = itemToSlot[item.itemId];
-          const used = owner !== undefined;
-          const armed = armedItem === item.itemId;
-          return (
-            <button
-              key={item.itemId}
-              type="button"
-              draggable={isAnswering && !used}
-              onDragStart={(event) => {
-                event.dataTransfer.setData('text/plain', item.itemId);
-                event.dataTransfer.effectAllowed = 'move';
-              }}
-              onClick={() => onItemPress(item.itemId)}
-              aria-disabled={!isAnswering}
-              aria-pressed={armed}
-              className="rounded-lg border px-3 py-2 text-left text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
-              style={{
-                minHeight: TAP_MIN,
-                fontFamily: variant === 'halves' ? READING : undefined,
-                background: armed ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)',
-                borderColor: armed ? accent : 'var(--ssz-border-default)',
-                color: 'var(--ssz-text-primary)',
-                // Used halves stay in place rather than vanishing: a pool that
-                // reflows on every placement makes the one you wanted hard to find
-                // again, and the count of what is left is the real signal anyway.
-                opacity: used ? 0.35 : 1,
-                cursor: isAnswering ? 'pointer' : 'default',
-              }}
-            >
-              {variant === 'halves' && (
-                <span
-                  aria-hidden="true"
-                  className="mr-1.5 text-[12.5px] font-bold"
-                  style={{ color: 'var(--ssz-text-muted)' }}
+          <div className="flex flex-wrap gap-2 md:flex-col md:flex-nowrap">
+            {pool.map((item) => {
+              const used = itemToSlot[item.itemId] !== undefined;
+              const armed = armedItem === item.itemId;
+              return (
+                <button
+                  key={item.itemId}
+                  type="button"
+                  draggable={isAnswering && !used}
+                  onDragStart={(event) => {
+                    event.dataTransfer.setData('text/plain', item.itemId);
+                    event.dataTransfer.effectAllowed = 'move';
+                  }}
+                  onClick={() => onItemPress(item.itemId)}
+                  aria-disabled={!isAnswering || used}
+                  aria-pressed={armed}
+                  className="rounded-lg border px-3 py-2 text-left text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) md:w-full"
+                  style={{
+                    minHeight: TAP_MIN,
+                    fontFamily: variant === 'halves' ? READING : undefined,
+                    background: armed ? modeAccentSoft(mode) : 'var(--ssz-bg-surface)',
+                    borderColor: armed ? accent : 'var(--ssz-border-default)',
+                    color: 'var(--ssz-text-primary)',
+                    // Used halves stay in place rather than vanishing: a pool that
+                    // reflows on every placement makes the one you wanted hard to find
+                    // again, and the count of what is left is the real signal anyway.
+                    opacity: used ? 0.32 : 1,
+                    cursor: isAnswering && !used ? 'pointer' : 'default',
+                  }}
                 >
-                  {poolLabel.get(item.itemId)}.
-                </span>
-              )}
-              {item.text}
-            </button>
-          );
-        })}
+                  {variant === 'halves' && (
+                    <span
+                      aria-hidden="true"
+                      className="mr-1.5 text-[12.5px] font-bold"
+                      style={{ color: 'var(--ssz-text-muted)' }}
+                    >
+                      {poolLabel.get(item.itemId)}.
+                    </span>
+                  )}
+                  {item.text}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

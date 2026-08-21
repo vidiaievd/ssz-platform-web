@@ -246,6 +246,14 @@
     "revealFailed": "Kunne ikke vise svarene — prøv igjen",
     "restored": "Ditt forrige svar, lagret {date}",
     "restoredScored": "{correct} av {total} par riktige",
-    "startOver": "Svar på nytt"
+    "startOver": "Svar på nytt",
+    "stateCorrect": "Riktig",
+    "stateWrong": "Ikke riktig",
+    "filledSlotCorrect": "{left} — {half}, riktig",
+    "filledSlotWrong": "{left} — {half}, ikke riktig",
+    "removeHalf": "Fjern {half}",
+    "noPairs": "Denne oppgaven har ingen par ennå.",
+    "checkCount": "Sjekk ({n}/{m})",
+    "attemptFootnote": "Forsøk {n} · {correct} av {total} riktige"
   }
 }

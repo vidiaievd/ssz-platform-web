@@ -246,6 +246,14 @@
     "revealFailed": "Не удалось показать ответы — попробуйте ещё раз",
     "restored": "Ваш прошлый ответ, сохранён {date}",
     "restoredScored": "{correct} из {total} пар верны",
-    "startOver": "Ответить заново"
+    "startOver": "Ответить заново",
+    "stateCorrect": "Верно",
+    "stateWrong": "Неверно",
+    "filledSlotCorrect": "{left} — {half}, верно",
+    "filledSlotWrong": "{left} — {half}, неверно",
+    "removeHalf": "Убрать «{half}»",
+    "noPairs": "В этом упражнении пока нет пар.",
+    "checkCount": "Проверить ({n}/{m})",
+    "attemptFootnote": "Попытка {n} · {correct} из {total} верно"
   }
 }
