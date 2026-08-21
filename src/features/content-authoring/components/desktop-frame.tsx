@@ -19,7 +19,7 @@ interface DesktopFrameProps {
 export function DesktopFrame({ children, label }: DesktopFrameProps) {
   return (
     <div
-      className="overflow-hidden rounded-2xl border-4 shadow-(--ssz-shadow-lg)"
+      className="w-full overflow-hidden rounded-2xl border-4 shadow-(--ssz-shadow-lg)"
       style={{ borderColor: 'oklch(0.28 0.01 240)', background: 'var(--ssz-bg-base)' }}
     >
       <div
@@ -40,8 +40,14 @@ export function DesktopFrame({ children, label }: DesktopFrameProps) {
         className="max-h-[70vh] overflow-auto focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-(--ssz-border-strong)"
         style={{ background: 'var(--ssz-bg-base)' }}
       >
-        {/* The reader's own column, centred the way the reader centres it. */}
-        <div className="mx-auto w-full max-w-[820px]">{children}</div>
+        {/*
+          The reader's own column, centred the way the reader centres it — and never
+          narrower than the width at which a layout stops being the desktop one. On a
+          small laptop, where the panel cannot be that wide, the frame scrolls
+          sideways: a "desktop preview" showing the phone layout would be a lie, and
+          the scrollbar is the honest version of not having the room.
+        */}
+        <div className="mx-auto w-full max-w-[820px] min-w-[720px]">{children}</div>
       </div>
     </div>
   );

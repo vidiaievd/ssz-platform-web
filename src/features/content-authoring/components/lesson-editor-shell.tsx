@@ -103,9 +103,20 @@ export function LessonEditorShell({
         </div>
       </div>
 
+      {/*
+        The preview keeps its column in both devices — it is the thing being watched
+        while the fields are edited, and a preview you have to scroll away to see is
+        one you stop looking at. Switching to desktop widens that column instead of
+        moving it: the editor track has a floor of its own, so on a narrow laptop the
+        preview gives width back rather than squeezing the work out of the screen.
+      */}
       <div
         className={`grid items-start gap-6 ${
-          showPreview && device === 'phone' ? 'lg:grid-cols-[1fr_340px]' : 'grid-cols-1'
+          !showPreview
+            ? 'grid-cols-1'
+            : device === 'phone'
+              ? 'lg:grid-cols-[1fr_340px]'
+              : 'lg:grid-cols-[minmax(420px,1fr)_minmax(0,720px)]'
         }`}
       >
         {/*
@@ -117,23 +128,11 @@ export function LessonEditorShell({
         */}
         <div className="min-w-0">{children}</div>
 
-        {/*
-          The phone stands beside the editor, where it fits and can stay in view. The
-          desktop preview cannot: at the width that makes it a desktop preview it
-          would leave the editor — where the work happens — a strip. So it goes below,
-          full width, and the column collapses.
-        */}
         {showPreview && (
-          <div
-            className={
-              device === 'phone'
-                ? 'sticky top-4 flex flex-col items-center gap-3'
-                : 'flex min-w-0 flex-col gap-3'
-            }
-          >
+          <div className="sticky top-4 flex min-w-0 flex-col items-center gap-3">
             <div
               className={`flex items-center justify-between gap-2 ${
-                device === 'phone' ? 'w-75' : 'mx-auto w-full max-w-[820px]'
+                device === 'phone' ? 'w-75' : 'w-full'
               }`}
             >
               <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -163,7 +162,7 @@ export function LessonEditorShell({
 
             <p
               className={`text-center text-xs leading-relaxed text-muted-foreground ${
-                device === 'phone' ? 'max-w-75' : 'mx-auto max-w-[820px]'
+                device === 'phone' ? 'max-w-75' : 'w-full'
               }`}
             >
               {t('editor.previewCaption')}
