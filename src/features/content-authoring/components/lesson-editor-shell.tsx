@@ -1,17 +1,19 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Monitor, Smartphone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Segmented } from '@/components/ui/segmented';
 import { getLessonTypeDefinition, type MaterialKind } from '@/lib/content/lesson-types';
 
 import { ContainerStateBadge } from './container-state-badge';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { SaveScopeHint, SaveScopeProvider } from './save-scope';
 import { PhoneFrame } from './phone-frame';
+import { DesktopFrame } from './desktop-frame';
 import type { SaveStatus } from '../hooks/use-unsaved-changes';
 
 interface LessonEditorShellProps {
@@ -50,6 +52,12 @@ export function LessonEditorShell({
   const t = useTranslations('Authoring');
   const tContent = useTranslations('Content');
   const [showPreview, setShowPreview] = useState(true);
+  /**
+   * Which screen the preview stands for. Two devices rather than a width slider
+   * because the layouts a learner can get are two, not a continuum — and the phone
+   * one is the one an author is least able to check for themselves.
+   */
+  const [device, setDevice] = useState<'phone' | 'desktop'>('phone');
   const def = getLessonTypeDefinition(kind);
   const Icon = def.icon;
 
@@ -96,7 +104,9 @@ export function LessonEditorShell({
       </div>
 
       <div
-        className={`grid items-start gap-6 ${showPreview ? 'lg:grid-cols-[1fr_340px]' : 'grid-cols-1'}`}
+        className={`grid items-start gap-6 ${
+          showPreview && device === 'phone' ? 'lg:grid-cols-[1fr_340px]' : 'grid-cols-1'
+        }`}
       >
         {/*
           `min-w-0`: a grid item is `min-width: auto` by default, so anything wide
@@ -106,16 +116,56 @@ export function LessonEditorShell({
           than its content and the content does its own scrolling.
         */}
         <div className="min-w-0">{children}</div>
+
+        {/*
+          The phone stands beside the editor, where it fits and can stay in view. The
+          desktop preview cannot: at the width that makes it a desktop preview it
+          would leave the editor — where the work happens — a strip. So it goes below,
+          full width, and the column collapses.
+        */}
         {showPreview && (
-          <div className="sticky top-4 flex flex-col items-center gap-3">
-            <div className="flex w-75 items-center justify-between">
+          <div
+            className={
+              device === 'phone'
+                ? 'sticky top-4 flex flex-col items-center gap-3'
+                : 'flex min-w-0 flex-col gap-3'
+            }
+          >
+            <div
+              className={`flex items-center justify-between gap-2 ${
+                device === 'phone' ? 'w-75' : 'mx-auto w-full max-w-[820px]'
+              }`}
+            >
               <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 {t('editor.previewLabel')}
               </span>
-              <Badge variant="primary">{t('editor.previewLive')}</Badge>
+              <div className="flex items-center gap-2">
+                <Segmented
+                  size="sm"
+                  iconOnly
+                  aria-label={t('editor.deviceLabel')}
+                  value={device}
+                  onValueChange={setDevice}
+                  options={[
+                    { value: 'phone', label: t('editor.devicePhone'), icon: Smartphone },
+                    { value: 'desktop', label: t('editor.deviceDesktop'), icon: Monitor },
+                  ]}
+                />
+                <Badge variant="primary">{t('editor.previewLive')}</Badge>
+              </div>
             </div>
-            <PhoneFrame>{preview}</PhoneFrame>
-            <p className="max-w-75 text-center text-xs leading-relaxed text-muted-foreground">
+
+            {device === 'phone' ? (
+              <PhoneFrame label={t('editor.previewOnPhone')}>{preview}</PhoneFrame>
+            ) : (
+              <DesktopFrame label={t('editor.previewOnDesktop')}>{preview}</DesktopFrame>
+            )}
+
+            <p
+              className={`text-center text-xs leading-relaxed text-muted-foreground ${
+                device === 'phone' ? 'max-w-75' : 'mx-auto max-w-[820px]'
+              }`}
+            >
               {t('editor.previewCaption')}
             </p>
           </div>

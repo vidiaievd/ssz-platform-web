@@ -759,7 +759,12 @@
     "liveOptionApproval": "Требовать подтверждение учителя для входа",
     "saveCues": "Сохранить реплики",
     "saveStages": "Сохранить этапы",
-    "saveTranslations": "Сохранить переводы"
+    "saveTranslations": "Сохранить переводы",
+    "deviceLabel": "Устройство превью",
+    "devicePhone": "Телефон",
+    "deviceDesktop": "Компьютер",
+    "previewOnPhone": "Превью ученика, телефон",
+    "previewOnDesktop": "Превью ученика, компьютер"
   },
   "spans": {
     "markSelection": "Разметить выделенное",

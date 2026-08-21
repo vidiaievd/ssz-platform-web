@@ -759,7 +759,12 @@
     "liveOptionApproval": "Krev lærergodkjenning for å bli med",
     "saveCues": "Lagre replikker",
     "saveStages": "Lagre steg",
-    "saveTranslations": "Lagre oversettelser"
+    "saveTranslations": "Lagre oversettelser",
+    "deviceLabel": "Forhåndsvis som",
+    "devicePhone": "Telefon",
+    "deviceDesktop": "Datamaskin",
+    "previewOnPhone": "Elevvisning, telefon",
+    "previewOnDesktop": "Elevvisning, datamaskin"
   },
   "spans": {
     "markSelection": "Merk utvalg",

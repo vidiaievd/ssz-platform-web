@@ -759,7 +759,12 @@
     "liveOptionApproval": "Require teacher approval to join",
     "saveCues": "Save cues",
     "saveStages": "Save stages",
-    "saveTranslations": "Save translations"
+    "saveTranslations": "Save translations",
+    "deviceLabel": "Preview device",
+    "devicePhone": "Phone",
+    "deviceDesktop": "Desktop",
+    "previewOnPhone": "Student preview, phone",
+    "previewOnDesktop": "Student preview, desktop"
   },
   "spans": {
     "markSelection": "Annotate selection",

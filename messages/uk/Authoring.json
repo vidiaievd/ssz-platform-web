@@ -759,7 +759,12 @@
     "liveOptionApproval": "Вимагати підтвердження вчителя для приєднання",
     "saveCues": "Зберегти репліки",
     "saveStages": "Зберегти етапи",
-    "saveTranslations": "Зберегти переклади"
+    "saveTranslations": "Зберегти переклади",
+    "deviceLabel": "Пристрій для перегляду",
+    "devicePhone": "Телефон",
+    "deviceDesktop": "Комп’ютер",
+    "previewOnPhone": "Перегляд учня, телефон",
+    "previewOnDesktop": "Перегляд учня, комп’ютер"
   },
   "spans": {
     "markSelection": "Позначити виділене",

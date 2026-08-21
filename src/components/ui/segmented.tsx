@@ -17,6 +17,12 @@ interface SegmentedProps<T extends string> {
   value: T;
   onValueChange: (value: T) => void;
   size?: 'sm' | 'md';
+  /**
+   * Show the icons alone. The labels stay as the accessible names, so the control
+   * still reads the same to a screen reader — the words are only dropped where the
+   * icons carry the whole meaning and the row is too tight to spell it out.
+   */
+  iconOnly?: boolean;
   'aria-label': string;
   className?: string;
 }
@@ -26,6 +32,7 @@ export function Segmented<T extends string>({
   value,
   onValueChange,
   size = 'md',
+  iconOnly = false,
   className,
   ...aria
 }: SegmentedProps<T>) {
@@ -50,14 +57,20 @@ export function Segmented<T extends string>({
             className={cn(
               'inline-flex items-center gap-1.5 rounded-md font-medium transition-colors outline-none',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
-              size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3 py-1.5 text-sm',
+              iconOnly
+                ? size === 'sm'
+                  ? 'px-1.5 py-1'
+                  : 'px-2 py-1.5'
+                : size === 'sm'
+                  ? 'px-2.5 py-1 text-xs'
+                  : 'px-3 py-1.5 text-sm',
               isActive
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {Icon && <Icon className={size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4'} />}
-            {option.label}
+            {!iconOnly && option.label}
           </RadioGroupPrimitive.Item>
         );
       })}
