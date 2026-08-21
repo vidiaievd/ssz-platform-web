@@ -48,8 +48,6 @@ export type {
   RevealedSlot,
   SlotVerdict,
 } from './match-pairs-body';
-export { MatchBody } from './match-body';
-export type { MatchBodyProps, MatchContent, MatchPair } from './match-body';
 
 export { ShortAnswerBody } from './short-answer-body';
 export type {
@@ -112,7 +110,6 @@ export {
   checkMcqGroup,
   gradeFill,
   gradeFreeText,
-  gradeMatch,
   gradeSentenceSchema,
   checkWordBankFill,
   checkTextOrder,

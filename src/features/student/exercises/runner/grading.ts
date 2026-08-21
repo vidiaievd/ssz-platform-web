@@ -1,6 +1,5 @@
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
-import type { MatchPair } from './match-body';
 import type { SentenceSchemaExpectedAnswers } from './sentence-schema-body';
 import type { TextOrderExpectedAnswers, TextOrderResults } from './text-order-body';
 import type {
@@ -57,14 +56,6 @@ export function gradeFill(
 export function gradeFreeText(expectedAnswers: FreeTextExpectedAnswers, value: string): boolean {
   const norm = normAnswer(value);
   return expectedAnswers.accepted_answers.some((a) => normAnswer(a) === norm);
-}
-
-/**
- * Grade a match exercise — all pairs must be linked to their own ID.
- * Returns false if any pair is missing or crossed.
- */
-export function gradeMatch(pairs: MatchPair[], links: Record<string, string>): boolean {
-  return pairs.every((p) => links[p.id] === p.id);
 }
 
 /**

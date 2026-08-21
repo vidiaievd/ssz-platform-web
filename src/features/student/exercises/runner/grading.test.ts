@@ -6,14 +6,12 @@ import {
   gradeFill,
   gradeSentenceSchema,
   gradeFreeText,
-  gradeMatch,
   type FreeTextExpectedAnswers,
   checkWordBankFill,
   checkTextOrder,
 } from './grading';
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
-import type { MatchPair } from './match-body';
 
 /* ── normAnswer ──────────────────────────────────────────────────── */
 
@@ -155,41 +153,6 @@ describe('gradeFreeText', () => {
 
   it('returns false for empty value', () => {
     expect(gradeFreeText(ea, '')).toBe(false);
-  });
-});
-
-/* ── gradeMatch ──────────────────────────────────────────────────── */
-
-describe('gradeMatch', () => {
-  const pairs: MatchPair[] = [
-    { id: 'p1', left: 'hus', right: 'house' },
-    { id: 'p2', left: 'bil', right: 'car' },
-  ];
-
-  it('returns true when all pairs are linked to their own id', () => {
-    expect(gradeMatch(pairs, { p1: 'p1', p2: 'p2' })).toBe(true);
-  });
-
-  it('returns false when one pair is wrong (crossed links)', () => {
-    expect(gradeMatch(pairs, { p1: 'p2', p2: 'p1' })).toBe(false);
-  });
-
-  it('returns false when a pair is missing from links', () => {
-    expect(gradeMatch(pairs, { p1: 'p1' })).toBe(false);
-  });
-
-  it('returns false for empty links', () => {
-    expect(gradeMatch(pairs, {})).toBe(false);
-  });
-
-  it('returns true for a single-pair set linked correctly', () => {
-    const one: MatchPair[] = [{ id: 'a', left: 'hund', right: 'dog' }];
-    expect(gradeMatch(one, { a: 'a' })).toBe(true);
-  });
-
-  it('returns false for a single-pair set linked wrongly', () => {
-    const one: MatchPair[] = [{ id: 'a', left: 'hund', right: 'dog' }];
-    expect(gradeMatch(one, { a: 'b' })).toBe(false);
   });
 });
 
