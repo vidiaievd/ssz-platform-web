@@ -19,9 +19,8 @@ vi.mock('../api/use-authoring-exercises', () => ({ useAuthoringExercises: vi.fn(
 vi.mock('./exercise-editor', () => ({ ExerciseEditor: () => <div>exercise editor</div> }));
 
 const { ComprehensionQuestionRow } = await import('./comprehension-question-row');
-const { setVideoQuestionAction, clearVideoQuestionAction } = await import(
-  '../actions/lesson-video-question'
-);
+const { setVideoQuestionAction, clearVideoQuestionAction } =
+  await import('../actions/lesson-video-question');
 const { useLessonVideoQuestion } = await import('../api/use-authoring-lessons');
 const { useAuthoringExercises } = await import('../api/use-authoring-exercises');
 

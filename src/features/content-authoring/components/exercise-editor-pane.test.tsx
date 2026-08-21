@@ -14,6 +14,7 @@ vi.mock('../actions/exercise', () => ({
 vi.mock('../actions/gap-fill', () => ({ saveGapFillAction: vi.fn() }));
 vi.mock('../actions/error-correction', () => ({ saveErrorCorrectionAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({ saveTranslateAction: vi.fn() }));
+vi.mock('../actions/match-pairs', () => ({ saveMatchPairsAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));

@@ -2065,6 +2065,48 @@
       "closeEditor": "Lukk celleredigeringen",
       "shortcutHint": "⌘/Ctrl + Enter går til neste celle.",
       "empty": "Skriv parene og potten først — matrisen har ingenting å vise ennå."
+    },
+    "shell": {
+      "stepsLabel": "Steg i byggeren",
+      "step1": "Par",
+      "step2": "Høyre kolonne",
+      "step3": "Tilbakemelding",
+      "stepOk": "ok",
+      "blockerCount": "{count, plural, one {# problem} other {# problemer}}",
+      "warningCount": "{count, plural, one {# advarsel} other {# advarsler}}",
+      "instructionsLabel": "Instruksjonen eleven ser",
+      "instructionsPlaceholder": "f.eks. Sett sammen halvdelene.",
+      "instructionsHelp": "Påkrevd — en oppgave uten instruksjon kan ikke publiseres. Hold den på målspråket.",
+      "saving": "Lagrer…",
+      "saved": "Lagret {time}",
+      "saveFailed": "Lagring mislyktes",
+      "saveRetry": "Prøv igjen",
+      "saveConflict": "Noen andre har lagret denne oppgaven",
+      "saveOverwrite": "Behold min versjon",
+      "done": "Se gjennom og fullfør",
+      "navBack": "Tilbake",
+      "navNext": "Neste: {step}",
+      "gateTitle": "Før dette når en elev",
+      "gateClear": "Ingenting står i veien.",
+      "gateGoToStep": "Rett det i steg {step}",
+      "gateVariant": "Velg hva slags par dette er — de to vurderes etter ulike regler.",
+      "gateBlocked": "{count, plural, one {Rett # blokkering først} other {Rett # blokkeringer først}}",
+      "gateDone": "Ferdig"
+    },
+    "preview": {
+      "empty": "Ingenting å forhåndsvise ennå — skriv et par i steg 1.",
+      "noCheck": "Å legge halvdeler er live. Sjekking skjer på serveren, så forhåndsvisningen kan ikke markere dem."
+    },
+    "issues": {
+      "EX_NO_TITLE": "Oppgaven har ingen tittel",
+      "PAIR_HALF_EMPTY": "Par {index} har bare én halvdel skrevet",
+      "EX_TOO_FEW_PAIRS": "Bare {count} ferdige par — minst {required} trengs",
+      "PAIR_LEFT_DUPLICATE": "Par {index} begynner med de samme ordene som et tidligere",
+      "PAIR_RIGHT_LONG": "Høyre halvdel i par {index} er på {count} ord — det leses dårlig på mobil",
+      "POOL_DUPLICATE": "To høyre halvdeler leses likt: «{text}»",
+      "POOL_NO_DISTRACTORS": "Ekstra halvdeler er på, men ingen er skrevet, så den siste koblingen er gratis",
+      "POOL_TOO_SMALL": "Ekstra er av og det er bare {count} par — de siste løser seg selv",
+      "FB_NO_DEFAULT": "Par {index} mangler standardforklaring"
     }
   }
 }

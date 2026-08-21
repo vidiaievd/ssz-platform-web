@@ -18,15 +18,13 @@ vi.mock('../api/use-authoring-vocabulary', () => ({
 vi.mock('../api/use-authoring-lessons', () => ({ useLessonGlossaryMarks: vi.fn() }));
 vi.mock('@/features/content', () => ({ useLessonTextSpans: vi.fn() }));
 
-
 // jsdom doesn't implement scrollIntoView; Radix Select calls it when opening.
 Element.prototype.scrollIntoView = vi.fn();
 
 const { TextSpanMenu } = await import('./text-span-menu');
 const { createTextSpanAction } = await import('../actions/lesson-spans');
-const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } = await import(
-  '../api/use-authoring-vocabulary'
-);
+const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } =
+  await import('../api/use-authoring-vocabulary');
 const { useLessonGlossaryMarks } = await import('../api/use-authoring-lessons');
 const { useLessonTextSpans } = await import('@/features/content');
 
@@ -44,7 +42,12 @@ const CONTAINER: Container = {
   updatedAt: '',
 };
 
-const LIST: VocabularyList = { id: 'list-1', title: 'Arbeidsliv', targetLanguage: 'no', createdAt: '' };
+const LIST: VocabularyList = {
+  id: 'list-1',
+  title: 'Arbeidsliv',
+  targetLanguage: 'no',
+  createdAt: '',
+};
 
 const ITEMS: VocabularyItem[] = [
   { id: 'vocab-1', lemma: 'sykepleier', translations: [], examples: [] },
@@ -125,7 +128,9 @@ beforeEach(() => {
   } as never);
   // A seeded text: words underlined by the tokenizer, no annotations yet.
   vi.mocked(useLessonTextSpans).mockReturnValue({ data: [] } as never);
-  vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: [{ id: 'm1' }, { id: 'm2' }] } as never);
+  vi.mocked(useLessonGlossaryMarks).mockReturnValue({
+    data: [{ id: 'm1' }, { id: 'm2' }],
+  } as never);
 });
 
 const trigger = () => screen.getByRole('button', { name: 'Annotate selection' });
@@ -261,13 +266,19 @@ describe('TextSpanMenu', () => {
 
     // The one-liner is always there; the detail is behind the toggle.
     expect(
-      screen.getByText('The student sees the words highlighted, with a marker that opens the explanation.'),
+      screen.getByText(
+        'The student sees the words highlighted, with a marker that opens the explanation.',
+      ),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/switches off the automatic glossary highlighting/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/switches off the automatic glossary highlighting/),
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'How annotations work' }));
 
-    expect(screen.getByText(/switches off the automatic glossary highlighting/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/switches off the automatic glossary highlighting/),
+    ).toBeInTheDocument();
     expect(screen.getByText(/can lose its anchor/)).toBeInTheDocument();
   });
 

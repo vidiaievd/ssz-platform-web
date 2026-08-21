@@ -21,6 +21,7 @@ import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content
 import { TEMPLATE_CODE } from '@/lib/shared-kernel/wordbank-gapfill';
 import { TEMPLATE_CODE as ERROR_CORRECTION_TEMPLATE_CODE } from '@/lib/shared-kernel/error-correction';
 import { TRANSLATE_TYPES } from '@/lib/shared-kernel/translate';
+import { TEMPLATE_CODE as MATCH_PAIRS_TEMPLATE_CODE } from '@/lib/shared-kernel/match-pairs';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -28,6 +29,7 @@ import { createGrammarRuleAction } from '../actions/grammar';
 import { createExerciseAction } from '../actions/exercise';
 import { createGapFillAction } from '../actions/gap-fill';
 import { createErrorCorrectionAction } from '../actions/error-correction';
+import { createMatchPairsAction } from '../actions/match-pairs';
 import {
   createTranslateFromTargetAction,
   createTranslateToTargetAction,
@@ -66,11 +68,15 @@ interface AddLessonPickerProps {
 type OwnBuilderTemplate =
   | typeof TEMPLATE_CODE
   | typeof ERROR_CORRECTION_TEMPLATE_CODE
+  | typeof MATCH_PAIRS_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
   [TEMPLATE_CODE]: createGapFillAction,
   [ERROR_CORRECTION_TEMPLATE_CODE]: createErrorCorrectionAction,
+  // Without a scaffold this template's content schema refuses the exercise outright:
+  // it requires a pair, and the generic form has no way to write one.
+  [MATCH_PAIRS_TEMPLATE_CODE]: createMatchPairsAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,

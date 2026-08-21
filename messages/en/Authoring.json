@@ -2065,6 +2065,48 @@
       "closeEditor": "Close the cell editor",
       "shortcutHint": "⌘/Ctrl + Enter moves to the next cell.",
       "empty": "Write the pairs and the pool first — the matrix has nothing to show yet."
+    },
+    "shell": {
+      "stepsLabel": "Builder steps",
+      "step1": "Pairs",
+      "step2": "Right column",
+      "step3": "Feedback",
+      "stepOk": "ok",
+      "blockerCount": "{count, plural, one {# problem} other {# problems}}",
+      "warningCount": "{count, plural, one {# warning} other {# warnings}}",
+      "instructionsLabel": "Instruction the student sees",
+      "instructionsPlaceholder": "e.g. Sett sammen halvdelene.",
+      "instructionsHelp": "Required — an exercise without instructions cannot be published. Keep it in the target language.",
+      "saving": "Saving…",
+      "saved": "Saved at {time}",
+      "saveFailed": "Save failed",
+      "saveRetry": "Try again",
+      "saveConflict": "Someone else saved this exercise",
+      "saveOverwrite": "Keep my version",
+      "done": "Review & finish",
+      "navBack": "Back",
+      "navNext": "Next: {step}",
+      "gateTitle": "Before this reaches a student",
+      "gateClear": "Nothing is standing in the way.",
+      "gateGoToStep": "Fix it in step {step}",
+      "gateVariant": "Choose what kind of pairs this is — the two are graded by different rules.",
+      "gateBlocked": "{count, plural, one {Fix # blocker first} other {Fix # blockers first}}",
+      "gateDone": "Done"
+    },
+    "preview": {
+      "empty": "Nothing to preview yet — write a pair in step 1.",
+      "noCheck": "Placing halves is live. Checking happens on the server, so the preview cannot mark them."
+    },
+    "issues": {
+      "EX_NO_TITLE": "The exercise has no title",
+      "PAIR_HALF_EMPTY": "Pair {index} has only one half written",
+      "EX_TOO_FEW_PAIRS": "Only {count} complete pairs — at least {required} are needed",
+      "PAIR_LEFT_DUPLICATE": "Pair {index} starts with the same words as an earlier one",
+      "PAIR_RIGHT_LONG": "The right half of pair {index} is {count} words — it reads badly on a phone",
+      "POOL_DUPLICATE": "Two right halves read the same: “{text}”",
+      "POOL_NO_DISTRACTORS": "Extra halves are switched on but none are written, so the last match is free",
+      "POOL_TOO_SMALL": "Extras are off and there are only {count} pairs — the last ones solve themselves",
+      "FB_NO_DEFAULT": "Pair {index} has no default explanation"
     }
   }
 }

@@ -92,9 +92,7 @@ describe('AudioNarrationRow', () => {
       fireEvent.change(input, { target: { files: [file] } });
     });
 
-    await waitFor(() =>
-      expect(onChange).toHaveBeenCalledWith('Some text.\n\n[audio:media-3]'),
-    );
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith('Some text.\n\n[audio:media-3]'));
   });
 
   it('rejects an unsupported file type before uploading', async () => {

@@ -33,6 +33,13 @@ import {
   type Translate,
   type TranslateType,
 } from '@/lib/shared-kernel/translate';
+import {
+  fromPersisted as matchPairsFromPersisted,
+  TEMPLATE_CODE as MATCH_PAIRS_TEMPLATE_CODE,
+  toContent as matchPairsToContent,
+  toExpectedAnswers as matchPairsToExpectedAnswers,
+  type MatchPairs,
+} from '@/lib/shared-kernel/match-pairs';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -49,6 +56,10 @@ import { ErrorCorrectionBuilder } from './error-correction/builder';
 import { ErrorCorrectionPreview } from './error-correction/error-correction-preview';
 import { TranslateBuilder } from './translate/builder';
 import { TranslatePreview } from './translate/translate-preview';
+import { MatchPairsBuilder } from './match-pairs/builder';
+import { MatchPairsPreview } from './match-pairs/match-pairs-preview';
+import { hasExplicitVariant } from './match-pairs/edits';
+import type { SavedDocument as SavedMatchPairs } from './match-pairs/use-match-pairs-autosave';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 
@@ -94,10 +105,16 @@ export function ExerciseEditorPane({
   const [errorCorrection, setErrorCorrection] = useState<ErrorCorrection | null>(null);
   /** The translate document as its builder currently has it, for the preview column. */
   const [translate, setTranslate] = useState<Translate | null>(null);
+  /** The match-pairs document as its builder currently has it, for the preview column. */
+  const [matchPairs, setMatchPairs] = useState<{
+    exercise: MatchPairs;
+    instructions: string;
+  } | null>(null);
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
   const isTranslate = isTranslateCode(exercise?.templateCode);
+  const isMatchPairs = exercise?.templateCode === MATCH_PAIRS_TEMPLATE_CODE;
 
   return (
     <LessonEditorShell
@@ -132,6 +149,11 @@ export function ExerciseEditorPane({
           <ErrorCorrectionPreview exercise={errorCorrection} />
         ) : isTranslate && translate !== null ? (
           <TranslatePreview exercise={translate} />
+        ) : isMatchPairs && matchPairs !== null ? (
+          <MatchPairsPreview
+            exercise={matchPairs.exercise}
+            instructions={matchPairs.instructions}
+          />
         ) : (
           <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
         )
@@ -198,6 +220,29 @@ export function ExerciseEditorPane({
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
               (cached) => (cached ? applySavedErrorCorrection(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
+      ) : isMatchPairs && exercise !== undefined ? (
+        // Match pairs owns a document for the sharpest reason of the four: the pairing
+        // *is* the content — a pair's right half is the answer to its left — so there is
+        // no set of form fields that could hold it without writing the answer twice.
+        <MatchPairsBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          initialExercise={matchPairsDocumentFrom(exercise, container.id)}
+          initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
+          // An absent `variant` parses as `pairs`, which carries the weaker publication
+          // rule. Only the raw column can still say whether anyone chose it.
+          initialVariantChosen={hasExplicitVariant(exercise.content)}
+          onDocumentChange={(document, instructions) =>
+            setMatchPairs({ exercise: document, instructions })
+          }
+          onSavedRemote={(updatedAt, saved) =>
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedMatchPairs(cached, updatedAt, saved) : cached),
             )
           }
         />
@@ -301,6 +346,42 @@ function applySavedErrorCorrection(
     updatedAt,
     content: { ...errorCorrectionToContent(saved) },
     expectedAnswers: { ...errorCorrectionToExpectedAnswers(saved) },
+    ...(instruction && {
+      instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],
+    }),
+  };
+}
+
+/** The stored columns as the kernel's match-pairs document. See above for the token. */
+function matchPairsDocumentFrom(exercise: ExerciseWithAnswers, containerId: string): MatchPairs {
+  return matchPairsFromPersisted(
+    {
+      id: exercise.id,
+      moduleId: containerId,
+      title: '',
+      instructions: firstInstruction(exercise)?.instructionText ?? '',
+      updatedAt: exercise.updatedAt ?? '',
+    },
+    exercise.content,
+    exercise.expectedAnswers,
+  );
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ */
+function applySavedMatchPairs(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedMatchPairs,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...matchPairsToContent(saved.exercise) },
+    expectedAnswers: { ...matchPairsToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],
     }),
