@@ -1,11 +1,28 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 
-import { LessonEditorShell } from './lesson-editor-shell';
+// The top bar's back link. `next-intl`'s navigation helpers reach for the Next
+// router, which a component test has no business booting.
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
+const { LessonEditorShell } = await import('./lesson-editor-shell');
 
 function renderShell() {
   render(
@@ -16,6 +33,7 @@ function renderShell() {
         state="draft"
         isLive={false}
         backHref="/school/x/content/1"
+        breadcrumb={<nav aria-label="Breadcrumb">Courses / 1A / Match Pairs</nav>}
         saveStatus="idle"
         savedAt={null}
         publishSlot={null}
@@ -58,5 +76,25 @@ describe('LessonEditorShell — preview device', () => {
     expect(screen.queryByLabelText('Student preview, phone')).not.toBeInTheDocument();
     expect(screen.queryByRole('radio', { name: 'Desktop' })).not.toBeInTheDocument();
     expect(screen.getByText('the fields')).toBeInTheDocument();
+  });
+});
+
+describe('LessonEditorShell — top bar', () => {
+  it('carries the page’s breadcrumb rather than repeating the title under it', () => {
+    renderShell();
+
+    expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
+    // The last crumb is the material's name; a heading saying it again is what made
+    // the top of the screen three strips deep.
+    expect(screen.queryByRole('heading', { name: 'Match Pairs' })).not.toBeInTheDocument();
+  });
+
+  it('leads back to where the material is placed', () => {
+    renderShell();
+
+    expect(screen.getByRole('link', { name: 'Back to content' })).toHaveAttribute(
+      'href',
+      '/school/x/content/1',
+    );
   });
 });

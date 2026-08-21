@@ -46,6 +46,8 @@ interface VocabularyEditorPaneProps {
   isLive: boolean | null;
   container: Container;
   backHref: string;
+  /** The page's breadcrumb, shown in the editor's top bar. */
+  breadcrumb?: ReactNode;
   publishSlot: ReactNode;
 }
 
@@ -56,6 +58,7 @@ export function VocabularyEditorPane({
   isLive,
   container,
   backHref,
+  breadcrumb,
   publishSlot,
 }: VocabularyEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -69,6 +72,7 @@ export function VocabularyEditorPane({
       state={state}
       isLive={isLive}
       backHref={backHref}
+      breadcrumb={breadcrumb}
       saveStatus="idle"
       savedAt={null}
       publishSlot={publishSlot}

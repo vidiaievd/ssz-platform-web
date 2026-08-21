@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { Eye, EyeOff, Monitor, Smartphone } from 'lucide-react';
+import { ChevronLeft, Eye, EyeOff, Monitor, Smartphone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Segmented } from '@/components/ui/segmented';
+import { Link } from '@/lib/i18n/navigation';
 import { useMounted } from '@/hooks';
 import { getLessonTypeDefinition, type MaterialKind } from '@/lib/content/lesson-types';
 
@@ -30,6 +31,13 @@ interface LessonEditorShellProps {
   /** Editors whose saves cannot reach a student before a publish — see `SaveScopeHint`. */
   savesHeldForPublish?: boolean;
   backHref: string;
+  /**
+   * The page's breadcrumb, rendered inside the editor's own top bar rather than above
+   * it. Its last crumb is the material's name, which is why there is no separate
+   * title block: two lines saying the same thing is what made the top of this screen
+   * read as three unrelated strips.
+   */
+  breadcrumb?: ReactNode;
   saveStatus: SaveStatus;
   savedAt: Date | null;
   /** Composed by the caller, e.g. `<PublishDialog container={container} result={preflight} />`. */
@@ -44,6 +52,8 @@ export function LessonEditorShell({
   state,
   isLive,
   savesHeldForPublish,
+  backHref,
+  breadcrumb,
   saveStatus,
   savedAt,
   publishSlot,
@@ -68,7 +78,6 @@ export function LessonEditorShell({
   const mounted = useMounted();
   const previewAddress = mounted ? window.location.host : undefined;
   const def = getLessonTypeDefinition(kind);
-  const Icon = def.icon;
 
   /**
    * Where the editor and the preview stand side by side, each column scrolls on its
@@ -99,44 +108,53 @@ export function LessonEditorShell({
         from inside a padded, centred container (the specs' `.wb-body`).
       */}
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex shrink-0 flex-wrap items-start justify-between gap-4 px-8 py-5">
-          <div className="flex items-center gap-3">
-            <span
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-              style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}
-            >
-              <Icon size={20} style={{ color: `var(${def.hueVar})` }} />
-            </span>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground">{title}</h1>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <Badge variant="muted">
-                  {tContent(`materialType.${def.kind}` as 'materialType.text')}
-                </Badge>
-                {state && <ContainerStateBadge state={state} />}
-                <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
-              </div>
-              <SaveScopeHint
-                isLive={isLive}
-                heldForPublish={savesHeldForPublish}
-                className="mt-1.5"
-              />
-            </div>
+        {/*
+          One bar across the top, the way the builder specs draw it: where you are,
+          what this is, whether it is saved, and what you can do with it. It used to be
+          three strips — a breadcrumb line, a title block, a row of buttons — none of
+          which lined up with the columns underneath.
+        */}
+        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border bg-surface px-4 py-2.5">
+          <Button asChild variant="ghost" size="icon-sm" aria-label={t('backToContent')}>
+            <Link href={backHref}>
+              <ChevronLeft size={16} aria-hidden />
+            </Link>
+          </Button>
+
+          <div className="min-w-0">
+            {breadcrumb ?? (
+              <span className="truncate text-sm font-medium text-foreground">{title}</span>
+            )}
           </div>
-          <div className="flex items-center gap-2.5">
-            <Button variant="ghost" type="button" onClick={() => setShowPreview((p) => !p)}>
-              {showPreview ? (
-                <>
-                  <EyeOff aria-hidden /> {t('editor.hidePreview')}
-                </>
-              ) : (
-                <>
-                  <Eye aria-hidden /> {t('editor.showPreview')}
-                </>
-              )}
-            </Button>
-            {publishSlot}
-          </div>
+
+          <Badge variant="muted">
+            {tContent(`materialType.${def.kind}` as 'materialType.text')}
+          </Badge>
+          {state && <ContainerStateBadge state={state} />}
+
+          <span className="flex-1" />
+
+          {/* The reach of a save, which the bar has room to spell out on a wide screen
+              and the state badge stands in for on a narrow one. */}
+          <SaveScopeHint
+            isLive={isLive}
+            heldForPublish={savesHeldForPublish}
+            className="hidden min-[1180px]:flex"
+          />
+          <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
+
+          <Button variant="ghost" size="sm" type="button" onClick={() => setShowPreview((p) => !p)}>
+            {showPreview ? (
+              <>
+                <EyeOff aria-hidden /> {t('editor.hidePreview')}
+              </>
+            ) : (
+              <>
+                <Eye aria-hidden /> {t('editor.showPreview')}
+              </>
+            )}
+          </Button>
+          {publishSlot}
         </div>
 
         {/*
@@ -161,7 +179,7 @@ export function LessonEditorShell({
           horizontal scrollbar. With this, the editor column is free to be narrower
           than its content and the content does its own scrolling.
         */}
-          <div className={`min-w-0 px-8 pb-10 ${split.editor}`}>
+          <div className={`min-w-0 px-8 pt-6 pb-10 ${split.editor}`}>
             {/* Capped rather than stretched: form fields three thousand pixels wide are
               no easier to fill in than the screen they are on. */}
             <div className="mx-auto max-w-5xl">{children}</div>

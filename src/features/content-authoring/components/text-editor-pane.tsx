@@ -50,6 +50,8 @@ interface TextEditorPaneProps {
   /** Grammar rules of this module's Leksjon — the pool a grammar annotation may point at. */
   grammarRules?: LevelGrammarRule[];
   backHref: string;
+  /** The page's breadcrumb, shown in the editor's top bar. */
+  breadcrumb?: ReactNode;
   publishSlot: ReactNode;
 }
 
@@ -62,6 +64,7 @@ export function TextEditorPane({
   container,
   grammarRules = [],
   backHref,
+  breadcrumb,
   publishSlot,
 }: TextEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -158,6 +161,7 @@ export function TextEditorPane({
       state={state}
       isLive={isLive}
       backHref={backHref}
+      breadcrumb={breadcrumb}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
       publishSlot={publishSlot}
