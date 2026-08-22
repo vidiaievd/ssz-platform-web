@@ -8,6 +8,23 @@ import { emptyContent, type WritingTask } from '@/lib/shared-kernel/writing-task
 
 vi.mock('../../actions/writing-task', () => ({ saveWritingTaskAction: vi.fn() }));
 
+// Step 4 links into the marking queue, which needs the school route around it.
+vi.mock('next/navigation', () => ({ useParams: () => ({ schoolSlug: 'demo-school' }) }));
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 const { WritingTaskBuilder } = await import('./builder');
 const { saveWritingTaskAction } = await import('../../actions/writing-task');
 
@@ -120,6 +137,48 @@ describe('WritingTaskBuilder', () => {
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).queryByText(/pre-filled rubric/)).not.toBeInTheDocument();
     expect(within(dialog).getByText(/ready to assign/)).toBeInTheDocument();
+  });
+
+  it('summarises what the exercise will do, not only what is wrong with it', async () => {
+    const { user } = renderBuilder();
+
+    await user.click(screen.getAllByRole('button', { name: /Review & finish/ })[0]!);
+
+    const dialog = screen.getByRole('dialog');
+    expect(
+      within(dialog).getByText('1 point to cover, 4 criteria to mark against.'),
+    ).toBeInTheDocument();
+    expect(within(dialog).getByText('A pass is 8 of 15 points.')).toBeInTheDocument();
+    expect(within(dialog).getByText('120–200 words.')).toBeInTheDocument();
+    expect(within(dialog).getByText('No time limit.')).toBeInTheDocument();
+    // The one line no switch on any step can take back.
+    expect(within(dialog).getByText('Every answer is read by a teacher.')).toBeInTheDocument();
+  });
+
+  it('reports what the example answer covers, which is the cheapest test of the keywords', async () => {
+    const points = [
+      { id: 'p1', text: 'Hvor du bor', keywords: ['flyttet til'], required: true },
+      { id: 'p2', text: 'Hva du jobber med', keywords: ['jobber som'], required: true },
+    ];
+    const { user } = renderBuilder(doc({ points }));
+
+    await user.click(screen.getAllByRole('button', { name: /Review & finish/ })[0]!);
+
+    expect(
+      within(screen.getByRole('dialog')).getByText(
+        'The example answer covers 1 of 2 points — check the keywords for the rest.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('spells out that a single submission cannot be sent back', async () => {
+    const { user } = renderBuilder(doc({ settings: { ...doc().settings, revision: 'once' } }));
+
+    await user.click(screen.getAllByRole('button', { name: /Review & finish/ })[0]!);
+
+    expect(
+      within(screen.getByRole('dialog')).getByText(/a weak text cannot be sent back/),
+    ).toBeInTheDocument();
   });
 
   it('walks the rail from the foot of a step, ending in the gate', async () => {

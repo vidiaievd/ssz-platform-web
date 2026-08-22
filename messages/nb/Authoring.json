@@ -2296,6 +2296,93 @@
       "testerFacts": "{words} ord · {paragraphs} avsnitt · {hit}/{needed} punkter",
       "testerNote": "Forslaget er regnet ut av de målbare delene — punktdekning, lengde, avsnitt, ordvariasjon. Språkkriteriet er en plassholder til modellen kobles på."
     },
+    "step4": {
+      "title": "Flyt og retting",
+      "lede": "Fritekst går alltid til et menneske. AI-trinnet ligger foran læreren og er ikke koblet på ennå — slår du det på, ser du hvor kommentarene lander, både hos studenten og i køen din.",
+      "pipeline": "Hva som skjer med teksten",
+      "stageJoin": ", ",
+      "stageWriting": "Skriving",
+      "stageWritingWhen": "nå",
+      "stageWritingDraft": "Utkast",
+      "stageWritingLength": "lengdekrav",
+      "stageWritingTimer": "tid",
+      "stageWritingPaste": "innliming av",
+      "stageAi": "AI-forsjekk",
+      "stageAiWhen": "trinn 2",
+      "stageAiBody": "{count} av 5 sjekker på · {audience}.",
+      "stageTeacher": "Lærer",
+      "stageTeacherWhen": "alltid",
+      "stageTeacherBody": "Fyller rubrikken og gir den endelige vurderingen. Kan ikke slås av for fritekst.",
+      "tagPreview": "forhåndsvisning",
+      "tagOff": "av",
+      "audience": {
+        "teacher": "bare læreren ser den",
+        "studentBefore": "studenten kan kjøre den selv",
+        "studentAfter": "studenten ser den etter levering"
+      },
+      "audienceShort": {
+        "teacher": "Bare læreren",
+        "studentBefore": "Studenten, før",
+        "studentAfter": "Studenten, etter"
+      },
+      "aiStageLabel": "AI-forsjekk",
+      "aiStageHelp": "Ikke live ennå. På viser den hvordan kommentarene vil se ut — ingenting kaller en modell i denne versjonen.",
+      "draftWithoutStage": "Utfylt rubrikk er huket av, men trinnet er av, så ingenting fylles ut på forhånd. Ufarlig — det trer i kraft hvis du slår trinnet på.",
+      "checksLabel": "Hva AI-en ser på",
+      "checks": {
+        "task": {
+          "label": "Oppgaveløsning",
+          "help": "Sjekker punktene fra trinn 1 mot teksten."
+        },
+        "grammar": {
+          "label": "Grammatikk og rettskriving",
+          "help": "Feilmarkeringer med forslag, ikke retting."
+        },
+        "structure": {
+          "label": "Struktur og sammenheng",
+          "help": "Avsnitt, innledning, avslutning, bindeord."
+        },
+        "lexis": {
+          "label": "Omfang og ordforråd",
+          "help": "Lengde og variasjon målt mot nivået."
+        },
+        "draft": {
+          "label": "Utfylt rubrikk",
+          "help": "Foreslår poeng per kriterium. Læreren bekrefter eller endrer."
+        }
+      },
+      "visibilityLabel": "Hvem ser resultatet",
+      "visibilityHelp": "Før levering blir AI-en et skriveverktøy; etter levering blir den en forklaring.",
+      "selfLimitLabel": "Antall egensjekker",
+      "selfLimitHelp": "Uten grense blir oppgaven en samtale med modellen i stedet for en skriveøvelse.",
+      "selfLimitNone": "Ingen",
+      "revisionLabel": "Etter lærerens vurdering",
+      "revisionHelp": "Omskriving er det eneste stedet studenten faktisk lærer av rettingen.",
+      "revisions": {
+        "once": "Én innlevering",
+        "return": "Kan sendes tilbake",
+        "drafts": "Flere utkast"
+      },
+      "queueLabel": "Hvor besvarelsene havner",
+      "queueHelp": "Det finnes én rettekø for hele skolen. Denne lenken åpner den filtrert på skriveoppgaver i dette kurset, gruppert per oppgave.",
+      "queueLink": "Åpne rettekøen"
+    },
+    "gate": {
+      "points": "{points, plural, one {# punkt} other {# punkter}} å dekke, {criteria, plural, one {# kriterium} other {# kriterier}} å vurdere etter.",
+      "pass": "Bestått er {passScore} av {max} poeng.",
+      "modelNone": "Ingen eksempelsvar — ingenting å prøve oppgaven mot.",
+      "modelCovers": "Eksempelsvaret dekker alle {total} punktene.",
+      "modelMisses": "Eksempelsvaret dekker {covered} av {total} punkter — se over nøkkelordene for resten.",
+      "range": "{min}–{max} ord.",
+      "rangeOpen": "Minst {min} ord, ingen øvre grense.",
+      "timer": "{timer} minutter, fra første tastetrykk.",
+      "timerOff": "Ingen tidsgrense.",
+      "teacher": "Hver besvarelse leses av en lærer.",
+      "ai": "AI-forsjekk på som forhåndsvisning — {audience}.",
+      "aiOff": "AI-forsjekk av.",
+      "revisionOnce": "Én innlevering — en svak tekst kan ikke sendes tilbake.",
+      "revisionAllowed": "En svak tekst kan sendes tilbake til omskriving."
+    },
     "preview": {
       "empty": "Skriv oppgaven i steg 1, så dukker studentens skjerm opp her.",
       "noCheck": "Levende forhåndsvisning. En skriveoppgave vurderes av et menneske, så det er ingenting å levere her."

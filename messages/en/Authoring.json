@@ -2296,6 +2296,93 @@
       "testerFacts": "{words} words · {paragraphs} paragraphs · {hit}/{needed} points",
       "testerNote": "The suggestion is worked out from the measurable parts — point coverage, length, paragraphs, word variety. The language criterion is a placeholder until a model is connected."
     },
+    "step4": {
+      "title": "Flow and marking",
+      "lede": "A free text always goes to a person. The AI stage sits in front of the teacher and is not connected yet — turning it on shows where its comments would land, both for the student and in your queue.",
+      "pipeline": "What happens to the text",
+      "stageJoin": ", ",
+      "stageWriting": "Writing",
+      "stageWritingWhen": "now",
+      "stageWritingDraft": "Draft",
+      "stageWritingLength": "length requirement",
+      "stageWritingTimer": "time",
+      "stageWritingPaste": "pasting blocked",
+      "stageAi": "AI pre-check",
+      "stageAiWhen": "stage 2",
+      "stageAiBody": "{count} of 5 checks on · {audience}.",
+      "stageTeacher": "Teacher",
+      "stageTeacherWhen": "always",
+      "stageTeacherBody": "Fills in the rubric and gives the final verdict. Cannot be switched off for free text.",
+      "tagPreview": "preview",
+      "tagOff": "off",
+      "audience": {
+        "teacher": "only the teacher sees it",
+        "studentBefore": "the student can run it themselves",
+        "studentAfter": "the student sees it after handing in"
+      },
+      "audienceShort": {
+        "teacher": "Teacher only",
+        "studentBefore": "Student, before",
+        "studentAfter": "Student, after"
+      },
+      "aiStageLabel": "AI pre-check",
+      "aiStageHelp": "Not live yet. On, it shows how the comments would look — nothing calls a model in this build.",
+      "draftWithoutStage": "The filled-in rubric is ticked but the stage is off, so nothing pre-fills anything. Harmless — it takes effect if you turn the stage on.",
+      "checksLabel": "What the AI looks at",
+      "checks": {
+        "task": {
+          "label": "Task coverage",
+          "help": "Checks the points from step 1 against the text."
+        },
+        "grammar": {
+          "label": "Grammar and spelling",
+          "help": "Marks errors with suggestions, does not correct them."
+        },
+        "structure": {
+          "label": "Structure and cohesion",
+          "help": "Paragraphs, opening, closing, linking words."
+        },
+        "lexis": {
+          "label": "Range and vocabulary",
+          "help": "Length and variety measured against the level."
+        },
+        "draft": {
+          "label": "Filled-in rubric",
+          "help": "Suggests points per criterion. The teacher confirms or changes them."
+        }
+      },
+      "visibilityLabel": "Who sees the result",
+      "visibilityHelp": "Before handing in, the AI is a writing tool; after handing in, it is an explanation.",
+      "selfLimitLabel": "Self-checks allowed",
+      "selfLimitHelp": "Without a limit the task becomes a conversation with the model instead of a writing exercise.",
+      "selfLimitNone": "None",
+      "revisionLabel": "After the teacher's verdict",
+      "revisionHelp": "Rewriting is the only place a student actually learns from the marking.",
+      "revisions": {
+        "once": "One submission",
+        "return": "Can be sent back",
+        "drafts": "Several drafts"
+      },
+      "queueLabel": "Where the answers land",
+      "queueHelp": "There is one marking queue for the whole school. This link opens it filtered to written tasks in this course, grouped by exercise.",
+      "queueLink": "Open the marking queue"
+    },
+    "gate": {
+      "points": "{points, plural, one {# point} other {# points}} to cover, {criteria, plural, one {# criterion} other {# criteria}} to mark against.",
+      "pass": "A pass is {passScore} of {max} points.",
+      "modelNone": "No example answer — nothing to check the task against.",
+      "modelCovers": "The example answer covers all {total} points.",
+      "modelMisses": "The example answer covers {covered} of {total} points — check the keywords for the rest.",
+      "range": "{min}–{max} words.",
+      "rangeOpen": "At least {min} words, no ceiling.",
+      "timer": "{timer} minutes, counted from the first keystroke.",
+      "timerOff": "No time limit.",
+      "teacher": "Every answer is read by a teacher.",
+      "ai": "AI pre-check on as a preview — {audience}.",
+      "aiOff": "AI pre-check off.",
+      "revisionOnce": "One submission — a weak text cannot be sent back.",
+      "revisionAllowed": "A weak text can be sent back to be rewritten."
+    },
     "preview": {
       "empty": "Write the task in step 1 and the student's screen appears here.",
       "noCheck": "Live preview. A writing task is marked by a person, so there is nothing here to hand in."

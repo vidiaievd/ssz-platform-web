@@ -5,8 +5,11 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import {
+  analyse,
   issues,
+  rubricMax,
   stepState,
+  usablePoints,
   type Issue,
   type IssueStep,
   type WritingTask,
@@ -16,6 +19,7 @@ import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { BuilderGateDialog, BuilderSaveHint, BuilderStepNav, type GateRow } from '../builder-frame';
 import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepFrame } from './step-frame';
+import { StepFlow } from './step-flow';
 import { StepMarking } from './step-marking';
 import { StepTask } from './step-task';
 import { useWritingTaskAutosave, type SavedDocument } from './use-writing-task-autosave';
@@ -111,12 +115,8 @@ export function WritingTaskBuilder({
         {step === 1 && <StepTask exercise={exercise} onChange={setExercise} />}
         {step === 2 && <StepFrame exercise={exercise} onChange={setExercise} />}
         {step === 3 && <StepMarking exercise={exercise} onChange={setExercise} />}
-
-        {/* Step 4 arrives in its own commit; the rail is navigable meanwhile. */}
-        {step > 3 && (
-          <p className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
-            {t(`writingTask.shell.step${step}` as 'writingTask.shell.step1')}
-          </p>
+        {step === 4 && (
+          <StepFlow exercise={exercise} containerId={containerId} onChange={setExercise} />
         )}
 
         <BuilderStepNav
@@ -239,8 +239,55 @@ function GateDialog({
     <BuilderGateDialog
       open={open}
       rows={rows}
+      passes={usePasses(exercise)}
       onOpenChange={onOpenChange}
       onGoToStep={onGoToStep}
     />
   );
+}
+
+/**
+ * What this exercise is about to do to a student, in the author's own numbers.
+ *
+ * Everything here is restated from settings the author already chose, which is the point:
+ * they chose them one step at a time, and this is the only place they are read together.
+ * The line that is not a setting — that a person reads every answer — is the one worth
+ * stating most, because it is the only promise this template makes that no switch on any
+ * step can take back.
+ *
+ * The example-answer line reports coverage rather than presence. An example that misses a
+ * point is the cheapest available evidence that the keywords for that point do not match
+ * how anyone writes it, and the gate is where an author is still willing to look.
+ */
+function usePasses(exercise: WritingTask): string[] {
+  const t = useTranslations('Authoring');
+  const s = exercise.settings;
+  const points = usablePoints(exercise);
+  const analysis = analyse(exercise, exercise.model);
+  const covered = analysis.cover.filter((point) => point.hit).length;
+
+  return [
+    t('writingTask.gate.points', { points: points.length, criteria: exercise.rubric.length }),
+    t('writingTask.gate.pass', { passScore: s.passScore, max: rubricMax(exercise) }),
+    exercise.model.trim() === ''
+      ? t('writingTask.gate.modelNone')
+      : covered === points.length
+        ? t('writingTask.gate.modelCovers', { total: points.length })
+        : t('writingTask.gate.modelMisses', { covered, total: points.length }),
+    s.maxWords > 0
+      ? t('writingTask.gate.range', { min: s.minWords, max: s.maxWords })
+      : t('writingTask.gate.rangeOpen', { min: s.minWords }),
+    s.timer > 0 ? t('writingTask.gate.timer', { timer: s.timer }) : t('writingTask.gate.timerOff'),
+    t('writingTask.gate.teacher'),
+    s.aiStage
+      ? t('writingTask.gate.ai', {
+          audience: t(
+            `writingTask.step4.audience.${s.aiVisibility}` as 'writingTask.step4.audience.teacher',
+          ),
+        })
+      : t('writingTask.gate.aiOff'),
+    s.revision === 'once'
+      ? t('writingTask.gate.revisionOnce')
+      : t('writingTask.gate.revisionAllowed'),
+  ];
 }

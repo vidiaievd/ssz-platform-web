@@ -155,6 +155,11 @@ export interface BuilderGateDialogProps {
   open: boolean;
   /** Blockers first, then warnings — the caller decides what belongs on the list. */
   rows: GateRow[];
+  /**
+   * What the document already says, in the author's own settings — the counts, the range,
+   * who marks it. Optional: a builder with nothing worth restating passes nothing.
+   */
+  passes?: string[];
   onOpenChange: (open: boolean) => void;
   onGoToStep: (step: number) => void;
 }
@@ -167,10 +172,16 @@ export interface BuilderGateDialogProps {
  * same rules, so there is nothing here to flip. The blocker count is derived from `rows`
  * rather than taken as a prop, so the number on the button cannot disagree with the list
  * above it.
+ *
+ * The green summary underneath answers the question the red and amber lists cannot: what
+ * is this exercise, as configured, about to do to a student. An author who fixed the last
+ * blocker is one click from assigning, and this is the only moment where the word range,
+ * the pass mark and "a person reads every answer" are stated together.
  */
 export function BuilderGateDialog({
   open,
   rows,
+  passes = [],
   onOpenChange,
   onGoToStep,
 }: BuilderGateDialogProps) {
@@ -213,6 +224,17 @@ export function BuilderGateDialog({
                     </span>
                   </span>
                 </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {passes.length > 0 && (
+          <ul className="flex flex-col gap-1 border-t border-border pt-3">
+            {passes.map((pass) => (
+              <li key={pass} className="flex items-start gap-2 text-xs text-muted-foreground">
+                <Check className="mt-0.5 size-3.5 shrink-0 text-success-700" aria-hidden />
+                <span>{pass}</span>
               </li>
             ))}
           </ul>
