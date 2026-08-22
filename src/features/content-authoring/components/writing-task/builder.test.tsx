@@ -72,6 +72,18 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+/**
+ * The gate, from where an author reaches it: the last step's own way forward.
+ *
+ * There is no longer a `Review & finish` in the top bar — it read as a second
+ * `Review & publish` — so a test that wants the gate walks to step 4 the way a person
+ * does.
+ */
+async function openGate(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('tab', { name: /Flow/ }));
+  await user.click(screen.getByRole('button', { name: /Review & finish/ }));
+}
+
 describe('WritingTaskBuilder', () => {
   it('opens on a clean rail when the document has nothing left to fix', () => {
     renderBuilder();
@@ -95,17 +107,23 @@ describe('WritingTaskBuilder', () => {
     expect(marking).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('counts the blockers on the finish button', () => {
+  it('counts the blockers on the steps that hold them, wherever the author is', () => {
+    // The total used to sit on a button in the top bar. The rail says the same thing and
+    // says it better — a count of two is a number, and two marked steps is a direction.
     renderBuilder(doc({ prompt: '', settings: { ...doc().settings, passScore: 99 } }));
 
-    const finish = screen.getAllByRole('button', { name: /Review & finish/ })[0]!;
-    expect(within(finish).getByText('2')).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('tab', { name: /The task/ })).getByText('1 problem'),
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('tab', { name: /Marking/ })).getByText('1 problem'),
+    ).toBeInTheDocument();
   });
 
   it('blocks the gate while a blocker stands, and links to the step that owns it', async () => {
     const { user } = renderBuilder(doc({ prompt: '' }));
 
-    await user.click(screen.getAllByRole('button', { name: /Review & finish/ })[0]!);
+    await openGate(user);
 
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText(/Write the task itself/)).toBeInTheDocument();
@@ -121,7 +139,7 @@ describe('WritingTaskBuilder', () => {
     );
     const { user } = renderBuilder(doc({ rubric }));
 
-    await user.click(screen.getAllByRole('button', { name: /Review & finish/ })[0]!);
+    await openGate(user);
 
     expect(
       within(screen.getByRole('dialog')).getByText(/Criterion 2 is missing a level descriptor/),
@@ -132,7 +150,7 @@ describe('WritingTaskBuilder', () => {
     // `AI_STAGE_OFF_DRAFT_ON`: true, and it changes no answer to "may this be assigned".
     const { user } = renderBuilder(doc({ settings: { ...doc().settings, aiStage: false } }));
 
-    await user.click(screen.getAllByRole('button', { name: /Review & finish/ })[0]!);
+    await openGate(user);
 
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).queryByText(/pre-filled rubric/)).not.toBeInTheDocument();
@@ -142,7 +160,7 @@ describe('WritingTaskBuilder', () => {
   it('summarises what the exercise will do, not only what is wrong with it', async () => {
     const { user } = renderBuilder();
 
-    await user.click(screen.getAllByRole('button', { name: /Review & finish/ })[0]!);
+    await openGate(user);
 
     const dialog = screen.getByRole('dialog');
     expect(
@@ -162,7 +180,7 @@ describe('WritingTaskBuilder', () => {
     ];
     const { user } = renderBuilder(doc({ points }));
 
-    await user.click(screen.getAllByRole('button', { name: /Review & finish/ })[0]!);
+    await openGate(user);
 
     expect(
       within(screen.getByRole('dialog')).getByText(
@@ -174,7 +192,7 @@ describe('WritingTaskBuilder', () => {
   it('spells out that a single submission cannot be sent back', async () => {
     const { user } = renderBuilder(doc({ settings: { ...doc().settings, revision: 'once' } }));
 
-    await user.click(screen.getAllByRole('button', { name: /Review & finish/ })[0]!);
+    await openGate(user);
 
     expect(
       within(screen.getByRole('dialog')).getByText(/a weak text cannot be sent back/),
@@ -191,7 +209,7 @@ describe('WritingTaskBuilder', () => {
     await user.click(screen.getByRole('button', { name: 'Next: Flow' }));
     expect(screen.queryByRole('button', { name: /Next:/ })).not.toBeInTheDocument();
 
-    await user.click(screen.getAllByRole('button', { name: /Review & finish/ }).at(-1)!);
+    await user.click(screen.getByRole('button', { name: /Review & finish/ }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

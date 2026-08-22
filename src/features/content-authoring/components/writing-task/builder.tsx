@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
 import {
   analyse,
   issues,
@@ -84,12 +83,18 @@ export function WritingTaskBuilder({
   }, [exercise]);
 
   const problems = useMemo(() => issues(exercise), [exercise]);
-  const blockerCount = problems.filter((issue) => issue.level === 'blocker').length;
 
   return (
     <div className="flex flex-col gap-5">
       <EditorToolbarPortal>
         {/*
+          The bar carries the rail and the save hint, and no button of its own. It used to
+          end in `Review & finish`, which sat two inches from the shell's `Review &
+          publish` and read as the same offer twice — the author cannot see from there
+          that one opens a checklist and the other publishes the module. The gate is the
+          way out of the last step (`BuilderStepNav`), which is where the author arrives
+          having answered the four steps.
+
           `min-w-0` on both the row and the rail's own wrapper: without it the rail keeps
           its full width, the row overflows the bar's slot and the buttons beside it are
           painted over. It shows up the moment the save hint grows — a refusal is the
@@ -106,14 +111,6 @@ export function WritingTaskBuilder({
               onRetry={autosave.retry}
               onOverwrite={autosave.overwrite}
             />
-            <Button type="button" onClick={() => setGateOpen(true)}>
-              {t('builder.done')}
-              {blockerCount > 0 && (
-                <span className="ml-1 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-error px-1.5 text-[11px] font-bold text-white">
-                  {blockerCount}
-                </span>
-              )}
-            </Button>
           </div>
         </div>
       </EditorToolbarPortal>
