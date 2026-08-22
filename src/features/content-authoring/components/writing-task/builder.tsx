@@ -16,6 +16,7 @@ import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { BuilderGateDialog, BuilderSaveHint, BuilderStepNav, type GateRow } from '../builder-frame';
 import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepFrame } from './step-frame';
+import { StepMarking } from './step-marking';
 import { StepTask } from './step-task';
 import { useWritingTaskAutosave, type SavedDocument } from './use-writing-task-autosave';
 import { useIssueCopy } from './issue-copy';
@@ -109,9 +110,10 @@ export function WritingTaskBuilder({
       <div className="min-w-0">
         {step === 1 && <StepTask exercise={exercise} onChange={setExercise} />}
         {step === 2 && <StepFrame exercise={exercise} onChange={setExercise} />}
+        {step === 3 && <StepMarking exercise={exercise} onChange={setExercise} />}
 
-        {/* Steps 3-4 arrive one commit at a time; the rail is navigable meanwhile. */}
-        {step > 2 && (
+        {/* Step 4 arrives in its own commit; the rail is navigable meanwhile. */}
+        {step > 3 && (
           <p className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
             {t(`writingTask.shell.step${step}` as 'writingTask.shell.step1')}
           </p>
