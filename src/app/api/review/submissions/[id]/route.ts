@@ -8,6 +8,7 @@ import { buildSlaMap } from '@/features/review/lib/sla-map';
 import { fetchGroupNames, resolveReviewScope } from '@/features/review/lib/review-scope';
 import { authorizeSubmission, refuseSubmission } from '@/features/review/lib/submission-access';
 import type { ReviewDetails } from '@/features/content-authoring/types/review';
+import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 import type { ReviewSubmission, ReviewVerdictRecord } from '@/features/review/types';
 
 /** A verdict as the engine records it — a reviewer id, and no name to go with it. */
@@ -39,6 +40,8 @@ interface EngineSubmission {
   lock: { teacherId: string; expiresAt: string } | null;
   details: ReviewDetails | null;
   text: string | null;
+  rubricSnapshot: RubricSnapshot | null;
+  rubricMarks: Record<string, number> | null;
   submittedAnswer: unknown;
 }
 
@@ -148,6 +151,11 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       : null,
     details: submission.details,
     text: submission.text,
+    // Passed through as the engine froze it. Unlike `details`, which is recomputed from
+    // the exercise as it stands today, the rubric is the copy taken when the work was
+    // queued — the marks a teacher sets have to mean what the criteria said then.
+    rubric: submission.rubricSnapshot ?? null,
+    rubricMarks: submission.rubricMarks ?? null,
     submittedAnswer: submission.submittedAnswer,
     canDecide: access.write,
   };

@@ -40,6 +40,8 @@ const BASE: ReviewSubmission = {
   lock: null,
   details: null,
   text: 'Jeg har bodd i Norge i tre år.',
+  rubric: null,
+  rubricMarks: null,
   submittedAnswer: {},
   canDecide: true,
 };

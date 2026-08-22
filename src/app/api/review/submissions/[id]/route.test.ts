@@ -39,6 +39,8 @@ const ENGINE_SUBMISSION = {
   lock: null,
   details: { totalItems: 3, routedItems: 1, passedItems: 2, items: [] },
   text: null,
+  rubricSnapshot: null,
+  rubricMarks: null,
   submittedAnswer: { items: [] },
 };
 
@@ -52,7 +54,14 @@ function upstream(
   overrides: {
     // `Partial` alone keeps the fixture's own literal types, and a case that hands back
     // `details: null` is exactly what this route exists to survive.
-    submission?: (Partial<Omit<EngineSubmission, 'details'>> & { details?: unknown }) | 'missing';
+    submission?:
+      | (Partial<Omit<EngineSubmission, 'details' | 'text' | 'rubricSnapshot' | 'rubricMarks'>> & {
+          details?: unknown;
+          text?: string | null;
+          rubricSnapshot?: unknown;
+          rubricMarks?: unknown;
+        })
+      | 'missing';
     scopeNow?: string[];
     scopeThen?: string[];
   } = {},
@@ -180,6 +189,43 @@ describe('GET /api/review/submissions/[id]', () => {
           (opts as { path: string }).path.startsWith('/internal/exercises/'),
         ),
     ).toBe(false);
+  });
+
+  it('hands the screen the rubric frozen on the submission, and the marks with it', async () => {
+    upstream({
+      submission: {
+        templateCode: 'writing_task',
+        text: 'Hei Kari, ...',
+        rubricSnapshot: {
+          criteria: [
+            {
+              id: 'c1',
+              name: 'Innhold',
+              desc: 'Alle punktene er med',
+              weight: 2,
+              levels: ['Mangler', 'Delvis', 'Bra', 'Utmerket'],
+            },
+          ],
+          passScore: 4,
+        },
+        rubricMarks: { c1: 3 },
+      },
+    });
+    const body = await (await call()).json();
+
+    // Under its screen-facing name, and whole: the descriptors are what the queue draws
+    // its four segments from, and the threshold is what the button's label switches on.
+    expect(body.rubric.passScore).toBe(4);
+    expect(body.rubric.criteria[0].levels).toHaveLength(4);
+    expect(body.rubricMarks).toEqual({ c1: 3 });
+  });
+
+  it('leaves the rubric null for a submission graded out of items', async () => {
+    upstream();
+    const body = await (await call()).json();
+
+    expect(body.rubric).toBeNull();
+    expect(body.rubricMarks).toBeNull();
   });
 
   it('does not reveal whether an attempt of another school exists', async () => {

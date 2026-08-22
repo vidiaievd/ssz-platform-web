@@ -12,6 +12,7 @@
 // components, so a route handler importing a type from it would pull client code into a
 // server bundle — and both features happen to name a type `ReviewQueueResponse`.
 import type { ReviewDetails } from '@/features/content-authoring/types/review';
+import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 
 /** The five templates whose check may refuse to close, and so reach a person. */
 export const REVIEWABLE_EXERCISE_TYPES = [
@@ -197,6 +198,21 @@ export interface ReviewSubmission {
   details: ReviewDetails | null;
   /** `writing_task` only: the essay itself. */
   text: string | null;
+  /**
+   * The rubric this submission is measured against, frozen when it reached the queue —
+   * not the exercise's rubric as it reads today. An author who reworded a criterion or
+   * moved the threshold afterwards must not change what an already-written text is
+   * judged by, and it stays readable after the exercise itself is deleted (plan 50
+   * §3.2). Null for every submission graded out of items, which is the screen's cue to
+   * keep the plain approve/return buttons.
+   */
+  rubric: RubricSnapshot | null;
+  /**
+   * The marks behind a verdict already delivered, keyed by criterion id — what the
+   * read-only screen shows. Null while the submission is still waiting: marks start
+   * unset and are never pre-filled.
+   */
+  rubricMarks: Record<string, number> | null;
   submittedAnswer: unknown;
   /** Whether this caller may still decide it — an expired substitution may only read. */
   canDecide: boolean;

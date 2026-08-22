@@ -38,6 +38,8 @@ const BASE: ReviewSubmission = {
   lock: null,
   details: null,
   text: null,
+  rubric: null,
+  rubricMarks: null,
   submittedAnswer: {},
   canDecide: true,
 };
