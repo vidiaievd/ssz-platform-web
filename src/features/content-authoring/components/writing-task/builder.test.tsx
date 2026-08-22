@@ -230,10 +230,6 @@ describe('WritingTaskBuilder autosave', () => {
     await user.type(screen.getByLabelText('The task itself'), '!');
     await waitFor(() => expect(saveWritingTaskAction).toHaveBeenCalledTimes(1));
 
-    expect(
-      await screen.findByText(/INVALID_EXERCISE_ANSWERS: \/rubric must be string/),
-    ).toBeInTheDocument();
-
     // Well past the first backoff step (1s) and the debounce.
     await new Promise((resolve) => setTimeout(resolve, 1_500));
     expect(saveWritingTaskAction).toHaveBeenCalledTimes(1);

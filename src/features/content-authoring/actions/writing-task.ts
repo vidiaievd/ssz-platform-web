@@ -81,9 +81,24 @@ export async function saveWritingTaskAction(
     if (isAppError(error) && error.code === 'conflict') {
       return ok({ status: 'conflict', currentUpdatedAt: readCurrentUpdatedAt(error.details) });
     }
-    if (isAppError(error)) return err(error.toJSON());
+    if (isAppError(error)) {
+      // The upstream's own sentence, when it sent one. `AppError.message` at this point
+      // is the BFF's wrapper — "Upstream 422 on content/exercises/<uuid>" — which tells
+      // the author which request failed and nothing about why. The service says why
+      // ("INVALID_EXERCISE_ANSWERS: /rubric must be string"), and that is the half worth
+      // showing: it is the difference between a dead end and a thing to go and fix.
+      const upstream = readUpstreamMessage(error.details);
+      return err({ ...error.toJSON(), ...(upstream === null ? {} : { message: upstream }) });
+    }
     throw error;
   }
+}
+
+/** The `message` of the service's error body, if it sent one. */
+function readUpstreamMessage(details: unknown): string | null {
+  if (typeof details !== 'object' || details === null) return null;
+  const value = (details as Record<string, unknown>)['message'];
+  return typeof value === 'string' && value.trim() !== '' ? value : null;
 }
 
 /** `{ message, currentUpdatedAt }` from content-service, defended against any other shape. */

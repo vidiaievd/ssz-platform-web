@@ -16,6 +16,7 @@ import {
 
 import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { BuilderGateDialog, BuilderSaveHint, BuilderStepNav, type GateRow } from '../builder-frame';
+import { BuilderConflictDialog, useBuilderSaveNotices } from '../builder-save-notices';
 import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepFrame } from './step-frame';
 import { StepFlow } from './step-flow';
@@ -84,11 +85,22 @@ export function WritingTaskBuilder({
 
   const problems = useMemo(() => issues(exercise), [exercise]);
 
+  useBuilderSaveNotices({
+    status: autosave.status,
+    rejection: autosave.rejection,
+    failures: autosave.failures,
+    onRetry: autosave.retry,
+  });
+
   return (
     <div className="flex flex-col gap-5">
       <EditorToolbarPortal>
         {/*
-          The bar carries the rail and the save hint, and no button of its own. It used to
+          The bar carries the rail and the save hint — `Saving… / Saved`, and nothing
+          about a save that did not work: those are raised as a toast or a dialog, where
+          there is room to say what happened (`builder-save-notices.tsx`).
+
+          It also carries no button of its own. It used to
           end in `Review & finish`, which sat two inches from the shell's `Review &
           publish` and read as the same offer twice — the author cannot see from there
           that one opens a checklist and the other publishes the module. The gate is the
@@ -103,14 +115,7 @@ export function WritingTaskBuilder({
         <div className="flex min-w-0 flex-1 items-stretch justify-between gap-3">
           <WritingTaskSteps current={step} exercise={exercise} onSelect={setStep} />
           <div className="flex shrink-0 items-center gap-3 py-2">
-            <BuilderSaveHint
-              status={autosave.status}
-              savedAt={autosave.savedAt}
-              canOverwrite={autosave.canOverwrite}
-              rejection={autosave.rejection}
-              onRetry={autosave.retry}
-              onOverwrite={autosave.overwrite}
-            />
+            <BuilderSaveHint status={autosave.status} savedAt={autosave.savedAt} />
           </div>
         </div>
       </EditorToolbarPortal>
@@ -141,6 +146,17 @@ export function WritingTaskBuilder({
           setStep(target as IssueStep);
           setGateOpen(false);
         }}
+      />
+
+      {/*
+        The one save state that is a question rather than a report. Reading the other
+        version means leaving this one, so it is a reload and not a silent swap: the
+        author's unsaved work is on screen, and nothing may take it away without saying so.
+      */}
+      <BuilderConflictDialog
+        open={autosave.status === 'conflict'}
+        onOverwrite={autosave.overwrite}
+        onDiscard={() => window.location.reload()}
       />
     </div>
   );

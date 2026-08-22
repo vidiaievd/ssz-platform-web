@@ -39,6 +39,14 @@ export interface WritingTaskAutosave {
   savedAt: Date | null;
   /** What the server said when it refused the document. Only set while `rejected`. */
   rejection: string | null;
+  /**
+   * How many transient failures have followed each other without a save in between.
+   *
+   * The notice a failure deserves depends on this number and on nothing else: the first
+   * one is a blink that the backoff will very likely ride out, and telling the author
+   * about it teaches them to ignore the next. The second in a row is a real problem.
+   */
+  failures: number;
   /** Save now rather than waiting out the backoff — the retry a failure offers. */
   retry: () => void;
   /**
@@ -106,6 +114,8 @@ export function useWritingTaskAutosave({
   const [conflictToken, setConflictToken] = useState<string | null>(null);
   /** The message behind a `rejected`, so the author is told what to fix. */
   const [rejection, setRejection] = useState<string | null>(null);
+  /** Transient failures since the last save — what decides whether one is worth saying. */
+  const [failures, setFailures] = useState(0);
 
   /** What was last written or loaded. Anything else on screen is unsaved work. */
   const [baseline, setBaseline] = useState<SavedDocument>({ exercise });
@@ -166,6 +176,7 @@ export function useWritingTaskAutosave({
         // Keep the edit on screen and try again later: an editor that discarded what was
         // typed because the network blinked would be worse than no autosave at all.
         attempt.current += 1;
+        setFailures(attempt.current);
         setStatus('failed');
         schedule(BACKOFF_MS[Math.min(attempt.current - 1, BACKOFF_MS.length - 1)] ?? 30_000);
         return;
@@ -184,6 +195,7 @@ export function useWritingTaskAutosave({
       }
 
       attempt.current = 0;
+      setFailures(0);
       // Saved: this is now the version everything is compared against, so an untouched
       // document is not written a second time.
       const saved: SavedDocument = { exercise: document };
@@ -230,5 +242,13 @@ export function useWritingTaskAutosave({
     void flush({ expectedUpdatedAt: conflictToken });
   }, [conflictToken, flush]);
 
-  return { status, savedAt, rejection, retry, overwrite, canOverwrite: conflictToken !== null };
+  return {
+    status,
+    savedAt,
+    rejection,
+    failures,
+    retry,
+    overwrite,
+    canOverwrite: conflictToken !== null,
+  };
 }

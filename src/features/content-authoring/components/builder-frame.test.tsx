@@ -17,116 +17,33 @@ function wrap(ui: React.ReactElement) {
 
 describe('BuilderSaveHint', () => {
   it('says nothing before the first save', () => {
-    const { container } = wrap(
-      <BuilderSaveHint
-        status="idle"
-        savedAt={null}
-        canOverwrite={false}
-        onRetry={vi.fn()}
-        onOverwrite={vi.fn()}
-      />,
-    );
+    const { container } = wrap(<BuilderSaveHint status="idle" savedAt={null} />);
 
     expect(container.textContent).toBe('');
   });
 
   it('announces saving and saved politely', () => {
-    const { rerender } = wrap(
-      <BuilderSaveHint
-        status="saving"
-        savedAt={null}
-        canOverwrite={false}
-        onRetry={vi.fn()}
-        onOverwrite={vi.fn()}
-      />,
-    );
+    const { rerender } = wrap(<BuilderSaveHint status="saving" savedAt={null} />);
 
     expect(screen.getByText('Saving…')).toHaveAttribute('aria-live', 'polite');
 
     rerender(
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <BuilderSaveHint
-          status="saved"
-          savedAt={new Date('2026-08-22T10:00:00Z')}
-          canOverwrite={false}
-          onRetry={vi.fn()}
-          onOverwrite={vi.fn()}
-        />
+        <BuilderSaveHint status="saved" savedAt={new Date('2026-08-22T10:00:00Z')} />
       </NextIntlClientProvider>,
     );
 
     expect(screen.getByText(/Saved at/)).toBeInTheDocument();
   });
 
-  it('offers a retry when the save failed', async () => {
-    const onRetry = vi.fn();
-    wrap(
-      <BuilderSaveHint
-        status="failed"
-        savedAt={null}
-        canOverwrite={false}
-        onRetry={onRetry}
-        onOverwrite={vi.fn()}
-      />,
-    );
-
-    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
-
-    expect(onRetry).toHaveBeenCalled();
-  });
-
-  it('says what the server refused, and still offers a retry', async () => {
-    // The difference from `failed` is the whole point: a refusal is not a blip, so the
-    // author is told the reason instead of watching a retry loop call it a hiccup.
-    const onRetry = vi.fn();
-    wrap(
-      <BuilderSaveHint
-        status="rejected"
-        savedAt={null}
-        canOverwrite={false}
-        rejection="INVALID_EXERCISE_ANSWERS: /rubric must be string"
-        onRetry={onRetry}
-        onOverwrite={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'INVALID_EXERCISE_ANSWERS: /rubric must be string',
-    );
-    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
-    expect(onRetry).toHaveBeenCalled();
-  });
-
-  it('falls back to its own words when the refusal came without a reason', () => {
-    wrap(
-      <BuilderSaveHint
-        status="rejected"
-        savedAt={null}
-        canOverwrite={false}
-        onRetry={vi.fn()}
-        onOverwrite={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByRole('status')).toHaveTextContent('would not accept this exercise');
-  });
-
-  it('offers to overwrite the version that won the race, not a retry', async () => {
-    const onOverwrite = vi.fn();
-    wrap(
-      <BuilderSaveHint
-        status="conflict"
-        savedAt={null}
-        canOverwrite
-        onRetry={vi.fn()}
-        onOverwrite={onOverwrite}
-      />,
-    );
-
-    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Save mine anyway' }));
-
-    expect(onOverwrite).toHaveBeenCalled();
+  it('stays silent about a save that did not work', () => {
+    // The bar shares its line with a step rail, so a sentence here is a sentence that
+    // squeezes the rail off the screen. Failures are raised as a toast or a dialog.
+    for (const status of ['failed', 'rejected', 'conflict'] as const) {
+      const { container, unmount } = wrap(<BuilderSaveHint status={status} savedAt={null} />);
+      expect(container.textContent).toBe('');
+      unmount();
+    }
   });
 });
 

@@ -1,14 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import {
-  AlertTriangle,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  CircleAlert,
-  RefreshCw,
-} from 'lucide-react';
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, CircleAlert } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -44,61 +37,17 @@ export type BuilderSaveStatus = 'idle' | 'saving' | 'saved' | 'failed' | 'reject
 export interface BuilderSaveHintProps {
   status: BuilderSaveStatus;
   savedAt: Date | null;
-  /** Whether a conflict is being reported and there is a newer version to write over. */
-  canOverwrite: boolean;
-  /**
-   * What the server said when it refused the document, for `rejected`.
-   *
-   * Shown as it arrived rather than translated into a friendlier sentence: a refusal the
-   * frame cannot phrase is one the author cannot act on, and the server's own words are
-   * what makes the difference between "something went wrong" and a cause.
-   */
-  rejection?: string | null;
-  onRetry: () => void;
-  onOverwrite: () => void;
 }
 
 /**
- * `Saving…` → `Saved`, and a way back when it fails. Announced, never colour alone.
+ * `Saving…` → `Saved`, announced politely, and nothing else.
  *
- * A conflict gets its own way out. Autosave stops there by design, so without one the
- * teacher is left with a screen full of work and nothing that will write it.
+ * What a failed save needs is said elsewhere (`builder-save-notices.tsx`): this line
+ * shares one strip with a step rail, so it has room for a status and none for an
+ * explanation — a sentence here is a sentence that squeezes the rail off the screen.
  */
-export function BuilderSaveHint({
-  status,
-  savedAt,
-  canOverwrite,
-  rejection = null,
-  onRetry,
-  onOverwrite,
-}: BuilderSaveHintProps) {
+export function BuilderSaveHint({ status, savedAt }: BuilderSaveHintProps) {
   const t = useTranslations('Authoring.builder');
-
-  if (status === 'conflict' || status === 'failed' || status === 'rejected') {
-    return (
-      <span className="flex min-w-0 items-center gap-2 text-xs text-error" role="status">
-        <CircleAlert className="size-3.5 shrink-0" aria-hidden />
-        <span className="min-w-0 truncate">
-          {status === 'conflict'
-            ? t('saveConflict')
-            : status === 'rejected'
-              ? t('saveRejected', { reason: rejection ?? t('saveRejectedNoReason') })
-              : t('saveFailed')}
-        </span>
-        {status === 'conflict' && canOverwrite ? (
-          <Button type="button" variant="link" size="sm" onClick={onOverwrite}>
-            <RefreshCw className="size-3.5" aria-hidden />
-            {t('saveOverwrite')}
-          </Button>
-        ) : (
-          <Button type="button" variant="link" size="sm" onClick={onRetry}>
-            <RefreshCw className="size-3.5" aria-hidden />
-            {t('saveRetry')}
-          </Button>
-        )}
-      </span>
-    );
-  }
 
   return (
     <span className="text-xs text-muted-foreground" aria-live="polite">
