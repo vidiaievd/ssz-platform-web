@@ -40,6 +40,13 @@ import {
   toExpectedAnswers as matchPairsToExpectedAnswers,
   type MatchPairs,
 } from '@/lib/shared-kernel/match-pairs';
+import {
+  fromPersisted as writingTaskFromPersisted,
+  TEMPLATE_CODE as WRITING_TASK_TEMPLATE_CODE,
+  toContent as writingTaskToContent,
+  toExpectedAnswers as writingTaskToExpectedAnswers,
+  type WritingTask,
+} from '@/lib/shared-kernel/writing-task';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -59,6 +66,9 @@ import { TranslatePreview } from './translate/translate-preview';
 import { MatchPairsBuilder } from './match-pairs/builder';
 import { MatchPairsPreview } from './match-pairs/match-pairs-preview';
 import { hasExplicitVariant } from './match-pairs/edits';
+import { WritingTaskBuilder } from './writing-task/builder';
+import { WritingTaskPreview } from './writing-task/writing-task-preview';
+import type { SavedDocument as SavedWritingTask } from './writing-task/use-writing-task-autosave';
 import type { SavedDocument as SavedMatchPairs } from './match-pairs/use-match-pairs-autosave';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 import type { LevelGrammarRule } from '../lib/level-grammar-rules';
@@ -109,10 +119,14 @@ export function ExerciseEditorPane({
     instructions: string;
   } | null>(null);
 
+  /** The writing-task document as its builder currently has it, for the preview column. */
+  const [writingTask, setWritingTask] = useState<WritingTask | null>(null);
+
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
   const isTranslate = isTranslateCode(exercise?.templateCode);
   const isMatchPairs = exercise?.templateCode === MATCH_PAIRS_TEMPLATE_CODE;
+  const isWritingTask = exercise?.templateCode === WRITING_TASK_TEMPLATE_CODE;
 
   return (
     <LessonEditorShell
@@ -131,7 +145,7 @@ export function ExerciseEditorPane({
             are scored the moment they are handed in, so a link to their marking queue
             would lead to a page that is empty by construction.
           */}
-          {reviewHref !== undefined && (isTranslate || isErrorCorrection) && (
+          {reviewHref !== undefined && (isTranslate || isErrorCorrection || isWritingTask) && (
             <Button asChild variant="outline" size="sm">
               <Link href={reviewHref}>{t('review.openQueue')}</Link>
             </Button>
@@ -151,6 +165,8 @@ export function ExerciseEditorPane({
             exercise={matchPairs.exercise}
             instructions={matchPairs.instructions}
           />
+        ) : isWritingTask && writingTask !== null ? (
+          <WritingTaskPreview exercise={writingTask} />
         ) : (
           <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
         )
@@ -240,6 +256,24 @@ export function ExerciseEditorPane({
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
               (cached) => (cached ? applySavedMatchPairs(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
+      ) : isWritingTask && exercise !== undefined ? (
+        // A writing task owns a document because there is no answer to hold: the exercise
+        // *is* the task, the rubric a person marks against, and the settings that decide
+        // what the student may see while writing. The generic form has a prompt field and
+        // a word count, which is the shape this template left behind in plan 50.
+        <WritingTaskBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          initialExercise={writingTaskDocumentFrom(exercise, container.id)}
+          onDocumentChange={setWritingTask}
+          onSavedRemote={(updatedAt, saved) =>
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedWritingTask(cached, updatedAt, saved) : cached),
             )
           }
         />
@@ -381,6 +415,47 @@ function applySavedMatchPairs(
     expectedAnswers: { ...matchPairsToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],
+    }),
+  };
+}
+
+/** The stored columns as the kernel's writing-task document. See above for the token. */
+function writingTaskDocumentFrom(exercise: ExerciseWithAnswers, containerId: string): WritingTask {
+  return writingTaskFromPersisted(
+    {
+      id: exercise.id,
+      moduleId: containerId,
+      title: '',
+      updatedAt: exercise.updatedAt ?? '',
+    },
+    exercise.content,
+    exercise.expectedAnswers,
+  );
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ *
+ * The instruction row follows the document's own `instruction` rather than a field of its
+ * own — one line, written to both places (see `use-writing-task-autosave.ts`).
+ */
+function applySavedWritingTask(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedWritingTask,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...writingTaskToContent(saved.exercise) },
+    expectedAnswers: { ...writingTaskToExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        { ...instruction, instructionText: saved.exercise.instruction.trim() },
+        ...rest,
+      ],
     }),
   };
 }

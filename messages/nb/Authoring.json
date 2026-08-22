@@ -2134,9 +2134,28 @@
     "gateGoToStep": "Gå til steg {step}",
     "gateBlocked": "{count, plural, one {Rett # feil først} other {Rett # feil først}}",
     "gateDone": "Ser bra ut",
-    "gateClose": "Lukk"
+    "gateClose": "Lukk",
+    "stepOk": "klart",
+    "stepEmpty": "tomt",
+    "warningCount": "å se på",
+    "blockerCount": "{count, plural, one {# feil} other {# feil}}"
   },
   "writingTask": {
+    "shell": {
+      "stepsLabel": "Steg i oppgavebyggeren",
+      "step1": "Oppgaven",
+      "step2": "Rammene",
+      "step3": "Vurdering",
+      "step4": "Flyt og retting",
+      "stepSub1": "oppgavetekst, punkter, eksempel",
+      "stepSub2": "lengde, tid, hva som vises",
+      "stepSub3": "kriterier og grense for bestått",
+      "stepSub4": "AI, lærer, omskriving"
+    },
+    "preview": {
+      "empty": "Skriv oppgaven i steg 1, så dukker studentens skjerm opp her.",
+      "noCheck": "Levende forhåndsvisning. En skriveoppgave vurderes av et menneske, så det er ingenting å levere her."
+    },
     "issues": {
       "EX_NO_PROMPT": "Skriv selve oppgaven — situasjonen studenten skriver om.",
       "MODE_NO_SOURCE": "En gjenfortelling trenger teksten som skal gjenfortelles.",

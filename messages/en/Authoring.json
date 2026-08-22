@@ -2134,9 +2134,28 @@
     "gateGoToStep": "Go to step {step}",
     "gateBlocked": "{count, plural, one {Fix # problem first} other {Fix # problems first}}",
     "gateDone": "Looks good",
-    "gateClose": "Close"
+    "gateClose": "Close",
+    "stepOk": "ready",
+    "stepEmpty": "empty",
+    "warningCount": "to check",
+    "blockerCount": "{count, plural, one {# problem} other {# problems}}"
   },
   "writingTask": {
+    "shell": {
+      "stepsLabel": "Builder steps",
+      "step1": "The task",
+      "step2": "The frame",
+      "step3": "Marking",
+      "step4": "Flow",
+      "stepSub1": "prompt, points, example",
+      "stepSub2": "length, time, what is shown",
+      "stepSub3": "rubric and pass mark",
+      "stepSub4": "AI, teacher, rewrites"
+    },
+    "preview": {
+      "empty": "Write the task in step 1 and the student's screen appears here.",
+      "noCheck": "Live preview. A writing task is marked by a person, so there is nothing here to hand in."
+    },
     "issues": {
       "EX_NO_PROMPT": "Write the task itself — the situation the student is writing about.",
       "MODE_NO_SOURCE": "A retelling needs the text being retold.",

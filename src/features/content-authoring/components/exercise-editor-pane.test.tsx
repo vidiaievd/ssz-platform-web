@@ -15,6 +15,7 @@ vi.mock('../actions/gap-fill', () => ({ saveGapFillAction: vi.fn() }));
 vi.mock('../actions/error-correction', () => ({ saveErrorCorrectionAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({ saveTranslateAction: vi.fn() }));
 vi.mock('../actions/match-pairs', () => ({ saveMatchPairsAction: vi.fn() }));
+vi.mock('../actions/writing-task', () => ({ saveWritingTaskAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -187,6 +188,47 @@ describe('ExerciseEditorPane', () => {
     // sentence is there word by word and the answer key is not.
     expect(screen.getAllByText('kino.').length).toBeGreaterThan(0);
     expect(screen.queryByText('gikk jeg')).not.toBeInTheDocument();
+  });
+
+  it('opens the writing-task builder, and its preview keeps the answer key back', () => {
+    // The stored shape is the one plan 50 phase 2 rewrote: the checklist point's text is
+    // in `content`, the phrasings that would satisfy it and the model answer are not.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-wt',
+        templateCode: 'writing_task',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: {
+          mode: 'letter',
+          instruction: 'Skriv et brev.',
+          prompt: 'Du har nettopp flyttet til en ny by.',
+          letter: { register: 'informal', recipient: 'En venn' },
+          points: [{ id: 'p1', text: 'Fortell hvor du bor nå', required: true }],
+          rubric: [{ id: 'c1', name: 'Oppgaveløsning', weight: 2, metric: 'points' }],
+          settings: { minWords: 120, maxWords: 200, passScore: 4 },
+        },
+        expectedAnswers: {
+          points: { p1: { keywords: ['flyttet til Bergen'] } },
+          rubric: { c1: { levels: ['a', 'b', 'c', 'Alle punktene er dekket'] } },
+          model: 'Hei Anna! Jeg har flyttet til Bergen.',
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Skriv et brev.' }],
+        updatedAt: '2026-08-22T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /The task/ })).toBeInTheDocument();
+    expect(screen.getByText('Du har nettopp flyttet til en ny by.')).toBeInTheDocument();
+    expect(screen.getByText('Fortell hvor du bor nå')).toBeInTheDocument();
+    // `showRubric` defaults to `afterGraded`, so neither the descriptors, the keywords
+    // nor the model answer belong on the student's screen yet.
+    expect(screen.queryByText(/flyttet til Bergen/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Alle punktene er dekket/)).not.toBeInTheDocument();
   });
 
   it('confirms a save as pending a publish, on live material too', async () => {
