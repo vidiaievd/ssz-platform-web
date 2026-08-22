@@ -117,6 +117,38 @@ describe('the mode picker', () => {
   });
 });
 
+describe('the blockers the rail marks', () => {
+  it('says on the step why it is marked, not only in the gate', async () => {
+    // A red dot on step 1 and nothing red on step 1 is a marker pointing at itself.
+    const { user } = renderStep(doc({ points: [{ id: 'p1', text: '', keywords: [], required: true }] }));
+
+    expect(screen.getByText('Add at least one thing the text must cover.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Point 1')).toHaveAttribute('aria-invalid', 'true');
+
+    await user.type(screen.getByLabelText('Point 1'), 'Fortell hvor du bor');
+
+    expect(
+      screen.queryByText('Add at least one thing the text must cover.'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('explains a missing source text where the field is', async () => {
+    const { user } = renderStep(doc({ source: '' }));
+
+    await user.click(screen.getByRole('radio', { name: /Retelling/ }));
+
+    expect(screen.getByText('A retelling needs the text being retold.')).toBeInTheDocument();
+  });
+
+  it('explains a missing picture under the slot', async () => {
+    const { user } = renderStep();
+
+    await user.click(screen.getByRole('radio', { name: /Picture/ }));
+
+    expect(screen.getByText('A picture description needs a picture.')).toBeInTheDocument();
+  });
+});
+
 describe('the prompt', () => {
   it('says it is required, and marks itself invalid, while it is empty', () => {
     renderStep(doc({ prompt: '' }));

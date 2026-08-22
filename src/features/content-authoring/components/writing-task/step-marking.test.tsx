@@ -52,6 +52,18 @@ function renderStep(initial: WritingTask = doc(), onChange?: (next: WritingTask)
 /** The default rubric is 4 criteria, one of weight 2 — 15 points. */
 const MAX = rubricMax(emptyContent());
 
+describe('an empty rubric', () => {
+  it('says so where the criteria would be', () => {
+    // Nothing else on the step can carry this one: with no criteria there is no card to
+    // mark red, and the author is left with a red dot over a screen that looks fine.
+    renderStep(doc({ rubric: [] }));
+
+    expect(
+      screen.getByText('The rubric is empty — there is nothing for a teacher to mark against.'),
+    ).toBeInTheDocument();
+  });
+});
+
 describe('the pass mark', () => {
   it('states the threshold against the ceiling the rubric actually awards', () => {
     renderStep();

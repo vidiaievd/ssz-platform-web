@@ -86,6 +86,13 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
   const points = exercise.points;
   const promptEmpty = exercise.prompt.trim() === '';
 
+  /** The two other step-1 blockers that belong to a field on this screen. */
+  const noSource = needs === 'source' && exercise.source.trim() === '';
+  const noImage = needs === 'image' && (exercise.image.assetId ?? '') === '';
+
+  /** No point carries any text yet — the blocker the step-1 dot reports. */
+  const noPoints = usablePoints(exercise).length === 0;
+
   /** The range the last mode switch replaced, while it is still the one on screen. */
   const [replaced, setReplaced] = useState<{ min: number; max: number } | null>(null);
 
@@ -249,7 +256,14 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
       )}
 
       {needs === 'image' && (
-        <ImageSlot image={exercise.image} onChange={(image) => onChange({ ...exercise, image })} />
+        <div className="flex flex-col gap-1">
+          <ImageSlot image={exercise.image} onChange={(image) => onChange({ ...exercise, image })} />
+          {noImage && (
+            <p className="text-xs text-error" role="status">
+              {t('writingTask.issues.MODE_NO_IMAGE')}
+            </p>
+          )}
+        </div>
       )}
 
       {needs === 'source' && (
@@ -262,19 +276,35 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
             aria-describedby="wt-source-help"
             value={exercise.source}
             rows={6}
-            hasError={exercise.source.trim() === ''}
-            aria-invalid={exercise.source.trim() === ''}
+            hasError={noSource}
+            aria-invalid={noSource}
             placeholder={t('writingTask.step1.sourcePlaceholder')}
             onChange={(event) => onChange({ ...exercise, source: event.target.value })}
           />
-          <p id="wt-source-help" className="text-xs text-muted-foreground">
-            {t('writingTask.step1.sourceHelp')}
+          <p
+            id="wt-source-help"
+            className={`text-xs ${noSource ? 'text-error' : 'text-muted-foreground'}`}
+          >
+            {noSource ? t('writingTask.issues.MODE_NO_SOURCE') : t('writingTask.step1.sourceHelp')}
           </p>
         </div>
       )}
 
       <section className="flex flex-col gap-2">
         <h3 className="text-xs font-medium">{t('writingTask.step1.pointsLabel')}</h3>
+
+        {/*
+          The step's dot goes red for this, and until now the reason lived only inside the
+          gate dialog — a marker on a step with nothing marked on the step itself. An empty
+          row counts as no point at all (`usablePoints`), which is why the sentence says
+          "written" rather than "added": an author looking at one blank row and a red dot
+          otherwise has no way to connect the two.
+        */}
+        {noPoints && (
+          <p className="text-xs text-error" role="status">
+            {t('writingTask.issues.EX_NO_POINTS')}
+          </p>
+        )}
 
         <ul className="flex flex-col gap-2">
           {points.map((point, index) => (
@@ -293,6 +323,11 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
                   value={point.text}
                   aria-label={t('writingTask.step1.pointText', { index: index + 1 })}
                   placeholder={t('writingTask.step1.pointPlaceholder')}
+                  // Red only while there is no usable point at all. A blank row next to
+                  // three written ones is a row the author is about to fill in, not a
+                  // fault — the exercise is fine either way.
+                  hasError={noPoints}
+                  aria-invalid={noPoints}
                   onChange={(event) =>
                     onChange(setPoint(exercise, point.id, { text: event.target.value }))
                   }

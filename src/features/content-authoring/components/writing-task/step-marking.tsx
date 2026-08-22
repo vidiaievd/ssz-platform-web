@@ -123,6 +123,19 @@ export function StepMarking({ exercise, onChange }: StepMarkingProps) {
 
       <section className="flex flex-col gap-3">
         <h3 className="text-xs font-medium">{t('writingTask.step3.criteriaLabel')}</h3>
+
+        {/*
+          With no criteria there is no card to carry the blocker, so the step's red dot
+          would point at a screen with nothing wrong on it. The pass-mark bar above says
+          the same thing in numbers (a threshold out of zero); this says it in words, next
+          to the button that fixes it.
+        */}
+        {exercise.rubric.length === 0 && (
+          <p className="text-xs text-error" role="status">
+            {t('writingTask.issues.RUBRIC_EMPTY')}
+          </p>
+        )}
+
         {exercise.rubric.map((criterion, index) => (
           <CriterionCard
             key={criterion.id}
