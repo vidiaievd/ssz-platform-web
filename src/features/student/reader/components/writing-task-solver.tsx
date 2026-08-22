@@ -18,6 +18,7 @@ import {
   readWritingTaskProjection,
   submitGate,
   WritingTaskBody,
+  WritingTaskGraded,
   type DraftSaveState,
   type WritingTaskPhase,
   type WritingTaskValue,
@@ -320,59 +321,17 @@ export function WritingTaskSolver({
           </p>
         </div>
       ) : (
-        <GradedNote verdict={verdict} attemptNo={attemptNo} onRewrite={rewrite} />
-      )}
-    </div>
-  );
-}
-
-/**
- * What the teacher said, as much of it as this build can show.
- *
- * The score and the comment are on the attempt record already. The rubric behind the
- * score — which criterion earned what — is not yet: it lives on the attempt in the
- * engine and has so far travelled only to the teacher's queue. Until it reaches the
- * learner's copy, this says what it knows and does not dress it up.
- */
-function GradedNote({
-  verdict,
-  attemptNo,
-  onRewrite,
-}: {
-  verdict: AttemptRecord | null;
-  attemptNo: number;
-  onRewrite: () => void;
-}) {
-  const t = useTranslations('ExerciseRunner');
-  const passed = verdict?.passed === true;
-
-  return (
-    <div
-      className="mt-4 rounded-2xl border px-4 py-3"
-      role="status"
-      style={{
-        borderColor: passed ? 'var(--ssz-feedback-ok-line)' : 'var(--ssz-border-default)',
-        background: passed ? 'var(--ssz-feedback-ok-bg)' : 'var(--ssz-bg-surface-subtle)',
-      }}
-    >
-      <p
-        className="text-[14px] font-semibold"
-        style={{ color: passed ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-primary)' }}
-      >
-        {passed ? t('writingTask.passed') : t('writingTask.rewriteNeeded')}
-      </p>
-      {verdict?.reviewComment != null && verdict.reviewComment !== '' && (
-        <p className="mt-2 text-[13px] text-(--ssz-text-primary)">{verdict.reviewComment}</p>
-      )}
-      {!passed && (
-        <button
-          type="button"
-          onClick={onRewrite}
-          className="mt-2 text-[12.5px] font-semibold underline underline-offset-2"
-          style={{ color: 'var(--ssz-text-secondary)' }}
-        >
-          {t('writingTask.rewrite', { n: attemptNo + 1 })}
-        </button>
+        <WritingTaskGraded
+          passed={verdict?.passed ?? null}
+          revision={projection.settings.revision}
+          showRubric={projection.settings.showRubric}
+          snapshot={verdict?.rubricSnapshot ?? null}
+          marks={verdict?.rubricMarks ?? null}
+          score={verdict?.score ?? null}
+          comment={verdict?.reviewComment ?? null}
+          onRewrite={rewrite}
+          nextAttemptNo={attemptNo + 1}
+        />
       )}
     </div>
   );

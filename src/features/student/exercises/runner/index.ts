@@ -70,6 +70,8 @@ export type {
 } from './writing-task-body';
 
 export { readWritingTaskProjection } from './writing-task-projection';
+export { outcomeOf, WritingTaskGraded } from './writing-task-graded';
+export type { WritingTaskGradedProps, WritingTaskOutcome } from './writing-task-graded';
 
 export { ErrorCorrectionBody } from './error-correction-body';
 export type { ErrorCorrectionBodyProps, ErrorCorrectionValue } from './error-correction-body';

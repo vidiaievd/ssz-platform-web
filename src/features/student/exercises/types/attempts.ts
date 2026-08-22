@@ -6,6 +6,7 @@ import type {
   StudentProjection as MatchPairsProjection,
 } from '@/lib/shared-kernel/match-pairs';
 import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
+import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 
 /**
  * The exercise-engine attempt API, as this client uses it.
@@ -164,6 +165,15 @@ export interface AttemptRecord {
   /** Their verdict per sentence. Carries no answer key, only decisions and words. */
   reviewDecisions: ReviewDecisionRecord[] | null;
   reviewedAt: string | null;
+  /**
+   * The rubric behind the mark, for the templates a person grades out of criteria.
+   *
+   * Both arrive together and only once a verdict has been delivered: the criteria are
+   * frozen onto the attempt when the work is queued, and their level descriptors are
+   * part of the answer key until there is a mark for them to explain (plan 50 §4).
+   */
+  rubricMarks?: Record<string, number> | null;
+  rubricSnapshot?: RubricSnapshot | null;
 }
 
 /** `submittedAnswer` when the template is `word_bank_gap_fill`. */

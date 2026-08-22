@@ -335,6 +335,36 @@ describe('WritingTaskSolver', () => {
     expect(screen.queryByRole('button', { name: /Rewrite/ })).not.toBeInTheDocument();
   });
 
+  it('draws the rubric the teacher marked, not a percentage', async () => {
+    const { fetchMock } = mockApi({
+      last: attemptRecord({
+        status: 'SCORED',
+        score: 89,
+        passed: true,
+        reviewComment: 'Bra jobbet!',
+        rubricSnapshot: {
+          criteria: [
+            {
+              id: 'c1',
+              name: 'Innhold',
+              desc: 'Alle punktene er med',
+              weight: 2,
+              levels: ['Mangler', 'Delvis', 'Nesten alt', 'Alle punktene er dekket'],
+            },
+          ],
+          passScore: 4,
+        },
+        rubricMarks: { c1: 3 },
+      }),
+    });
+    renderSolver(fetchMock);
+
+    expect(await screen.findByText('Passed')).toBeInTheDocument();
+    expect(screen.getByText('6 / 6 points')).toBeInTheDocument();
+    // The descriptor for the mark given — the sentence the author wrote for that level.
+    expect(screen.getByText('Alle punktene er dekket')).toBeInTheDocument();
+  });
+
   it('offers a rewrite after a returned verdict, and opens a fresh attempt for it', async () => {
     const { fetchMock } = mockApi({
       last: attemptRecord({
