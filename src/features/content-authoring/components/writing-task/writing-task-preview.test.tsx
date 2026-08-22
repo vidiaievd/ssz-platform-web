@@ -1,9 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import { emptyContent, type WritingTask } from '@/lib/shared-kernel/writing-task';
+
+vi.mock('@/features/media', () => ({ useMediaAsset: () => ({ data: undefined }) }));
 
 import { WritingTaskPreview } from './writing-task-preview';
 

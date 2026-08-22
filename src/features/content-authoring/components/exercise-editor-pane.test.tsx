@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
@@ -223,12 +223,19 @@ describe('ExerciseEditorPane', () => {
     renderPane();
 
     expect(screen.getByRole('tab', { name: /The task/ })).toBeInTheDocument();
-    expect(screen.getByText('Du har nettopp flyttet til en ny by.')).toBeInTheDocument();
-    expect(screen.getByText('Fortell hvor du bor nå')).toBeInTheDocument();
-    // `showRubric` defaults to `afterGraded`, so neither the descriptors, the keywords
-    // nor the model answer belong on the student's screen yet.
-    expect(screen.queryByText(/flyttet til Bergen/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Alle punktene er dekket/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText('The task itself')).toHaveValue(
+      'Du har nettopp flyttet til en ny by.',
+    );
+
+    // The answer key belongs on the author's screen and nowhere else. Scoped to the
+    // preview column, because the keywords and the model answer are step-1 fields — it
+    // is the student's side that must not carry them.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('Du har nettopp flyttet til en ny by.')).toBeInTheDocument();
+    expect(preview.getByText('Fortell hvor du bor nå')).toBeInTheDocument();
+    expect(preview.queryByText(/flyttet til Bergen/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Alle punktene er dekket/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Hei Anna/)).not.toBeInTheDocument();
   });
 
   it('confirms a save as pending a publish, on live material too', async () => {

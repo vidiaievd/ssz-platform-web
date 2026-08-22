@@ -11,11 +11,10 @@ import {
 } from '@/lib/shared-kernel/writing-task';
 import { WritingTaskBody, type WritingTaskValue } from '@/features/student/exercises/runner';
 import { PRACTICE_ACCENT } from '@/features/student/exercises/runner/types';
+import { useMediaAsset } from '@/features/media';
 
 export interface WritingTaskPreviewProps {
   exercise: WritingTask;
-  /** The picture for `mode: 'picture'`, already resolved to a URL by the caller. */
-  imageUrl?: string | null;
 }
 
 /**
@@ -35,9 +34,16 @@ export interface WritingTaskPreviewProps {
  * task's grade is a person reading it — so the surface is live, and the verdict is the
  * one thing a preview cannot show.
  */
-export function WritingTaskPreview({ exercise, imageUrl }: WritingTaskPreviewProps) {
+export function WritingTaskPreview({ exercise }: WritingTaskPreviewProps) {
   const t = useTranslations('Authoring');
   const [value, setValue] = useState<WritingTaskValue>({ text: '', ticked: [] });
+  /**
+   * The document carries `image.assetId`; the runner body takes an address. Resolving it
+   * here rather than in the body is phase 4's decision left standing — a presentational
+   * body that fetched would draw an empty frame on every screen that has the address
+   * already. `useMediaAsset` sits out entirely while there is no id.
+   */
+  const { data: asset } = useMediaAsset(exercise.image.assetId);
 
   const projection = useMemo(
     () => toStudentProjection(toContent(exercise), toExpectedAnswers(exercise)),
@@ -60,7 +66,7 @@ export function WritingTaskPreview({ exercise, imageUrl }: WritingTaskPreviewPro
         onValueChange={setValue}
         phase="draft"
         interactive
-        imageUrl={imageUrl ?? null}
+        imageUrl={asset?.url ?? null}
         mode="practice"
         accent={PRACTICE_ACCENT}
       />
