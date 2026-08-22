@@ -101,6 +101,7 @@ export function SubmissionPanel({
   const clearArrival = useReviewViewStore((state) => state.clearArrival);
   const setComment = useReviewDraftsStore((state) => state.setComment);
   const setSentenceComment = useReviewDraftsStore((state) => state.setSentenceComment);
+  const setMark = useReviewDraftsStore((state) => state.setMark);
   const clearDraft = useReviewDraftsStore((state) => state.clear);
 
   // What this reviewer's own verdict was, until the screen moves on. Held rather than
@@ -134,6 +135,11 @@ export function SubmissionPanel({
   const onComment = useCallback(
     (itemId: string, value: string | undefined) => setSentenceComment(id, itemId, value),
     [id, setSentenceComment],
+  );
+
+  const onMark = useCallback(
+    (criterionId: string, mark: number) => setMark(id, criterionId, mark),
+    [id, setMark],
   );
 
   const advance = useCallback(
@@ -182,8 +188,7 @@ export function SubmissionPanel({
   // What the keys do is what the buttons do, disabled states included: a binding left out
   // is a verdict the screen is currently refusing, and the key is inert rather than
   // firing something the button would not.
-  const stillOpen =
-    data !== undefined && data.decision === null && data.canDecide && sent === null;
+  const stillOpen = data !== undefined && data.decision === null && data.canDecide && sent === null;
   const decidable = stillOpen && !decision.isPending;
   const written = draft.comment.trim() !== '';
   const withComment = written || Object.keys(draft.sentences).length > 0;
@@ -251,7 +256,14 @@ export function SubmissionPanel({
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5 py-4">
         <SubmissionNotes submission={data} lock={lock} conflict={conflict} />
         {data.previous === null ? null : <PreviousAttempt verdict={data.previous} />}
-        <SentenceList submission={data} comments={draft.sentences} onComment={onComment} />
+        <SentenceList
+          submission={data}
+          comments={draft.sentences}
+          onComment={onComment}
+          marks={draft.marks}
+          onMark={onMark}
+          editable={stillOpen}
+        />
       </div>
 
       <DecisionPanel

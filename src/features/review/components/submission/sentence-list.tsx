@@ -5,8 +5,10 @@ import { useTranslations } from 'next-intl';
 import { DiffLegend } from '@/features/content-authoring/components/translate/tr-marks';
 import type { ReviewDetails } from '@/features/content-authoring/types/review';
 
+import { readWritingTaskDetails } from '../../lib/writing-task-details';
 import type { ReviewSubmission } from '../../types';
 
+import { RubricMarks } from './rubric-marks';
 import { isTranslateDetail, SentenceRow } from './sentence-row';
 
 const READING = 'var(--ssz-font-reading)';
@@ -16,6 +18,11 @@ export interface SentenceListProps {
   /** Comments on single sentences, by item id — owned by the panel, saved with the verdict. */
   comments: Record<string, string>;
   onComment: (itemId: string, value: string | undefined) => void;
+  /** Rubric marks so far, by criterion id — `writing_task` only. Owned by the panel. */
+  marks: Record<string, number>;
+  onMark: (criterionId: string, mark: number) => void;
+  /** False once a verdict stands: the rubric becomes a record of what was decided. */
+  editable: boolean;
 }
 
 /**
@@ -31,11 +38,36 @@ export interface SentenceListProps {
  * many sentences matched the key word for word. It is stated before the list rather than
  * discovered by scrolling it.
  */
-export function SentenceList({ submission, comments, onComment }: SentenceListProps) {
+export function SentenceList({
+  submission,
+  comments,
+  onComment,
+  marks,
+  onMark,
+  editable,
+}: SentenceListProps) {
   const t = useTranslations('Review.submission');
 
   if (submission.exercise.type === 'writing_task') {
-    return <EssayBody text={submission.text} />;
+    return (
+      <div className="flex flex-col gap-4">
+        <EssayBody text={submission.text} />
+        {/* No rubric is not a broken screen. A submission queued before the rubric
+            existed, or one whose author left it empty, is marked the old way with the
+            verdict buttons — and the panel below is already that screen. Tested for
+            truthiness rather than against `null`: this arrives over the wire, and an
+            older BFF that omits the field would otherwise crash the row. */}
+        {!submission.rubric ? null : (
+          <RubricMarks
+            snapshot={submission.rubric}
+            marks={submission.rubricMarks ?? marks}
+            details={readWritingTaskDetails(submission.details)}
+            editable={editable}
+            onMark={onMark}
+          />
+        )}
+      </div>
+    );
   }
 
   // Everything below reads a per-item breakdown, which the branch above is the only

@@ -129,6 +129,24 @@
       "sentencePlaceholder": "What should the learner look at here?"
     }
   },
+  "rubric": {
+    "facts": "{words, plural, one {# word} other {# words}} · {paragraphs, plural, one {# paragraph} other {# paragraphs}} · {hit}/{needed} points phrased",
+    "tooShort": "under the length asked for",
+    "tooLong": "over the length asked for",
+    "tickedShort": "ticked",
+    "tickedNotHit": "The learner ticked this off but none of its keywords appear. They may have phrased it another way — read the text.",
+    "unnamedPoint": "Unnamed point",
+    "unnamed": "Unnamed criterion",
+    "unmarked": "Not marked yet.",
+    "weight": "×2",
+    "markOf": "Mark for {name}",
+    "score": "{points} of {max} points",
+    "threshold": "a pass is {passScore}",
+    "remaining": "{count, plural, one {# criterion left} other {# criteria left}}",
+    "incomplete": "Mark every criterion before deciding — a blank one is not a zero.",
+    "approve": "Pass · {points}/{max}",
+    "return": "Send back · {points}/{max}"
+  },
   "decision": {
     "commentLabel": "Comment on the whole submission",
     "commentPlaceholder": "A comment on the work as a whole. Write it in Norwegian — the æøå pad is below. Your draft is kept as you type.",

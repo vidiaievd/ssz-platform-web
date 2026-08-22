@@ -129,6 +129,24 @@
       "sentencePlaceholder": "Hva bør eleven se på her?"
     }
   },
+  "rubric": {
+    "facts": "{words, plural, one {# ord} other {# ord}} · {paragraphs, plural, one {# avsnitt} other {# avsnitt}} · {hit}/{needed} punkter nevnt",
+    "tooShort": "kortere enn oppgaven ber om",
+    "tooLong": "lengre enn oppgaven ber om",
+    "tickedShort": "huket av",
+    "tickedNotHit": "Studenten har huket av for dette, men ingen av nøkkelordene står i teksten. De kan ha formulert det annerledes — les teksten.",
+    "unnamedPoint": "Punkt uten navn",
+    "unnamed": "Kriterium uten navn",
+    "unmarked": "Ikke vurdert ennå.",
+    "weight": "×2",
+    "markOf": "Nivå for {name}",
+    "score": "{points} av {max} poeng",
+    "threshold": "bestått fra {passScore}",
+    "remaining": "{count, plural, one {# kriterium igjen} other {# kriterier igjen}}",
+    "incomplete": "Sett et nivå på alle kriteriene før du vurderer — et blankt kriterium teller ikke som null.",
+    "approve": "Godkjenn · {points}/{max}",
+    "return": "Send tilbake · {points}/{max}"
+  },
   "decision": {
     "commentLabel": "Kommentar til hele besvarelsen",
     "commentPlaceholder": "Kommentar til hele arbeidet. Skriv på norsk — æøå-panelet står under. Utkastet lagres mens du skriver.",

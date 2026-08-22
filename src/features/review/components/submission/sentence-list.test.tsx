@@ -71,6 +71,8 @@ const SUBMISSION = (over: Partial<ReviewSubmission> = {}): ReviewSubmission =>
       open: { prompt: 'Поэтому им нужно много еды.', teacherNote: 'Inversjon etter Derfor' },
     },
     text: null,
+    rubric: null,
+    rubricMarks: null,
     submittedAnswer: {},
     canDecide: true,
     ...over,
@@ -79,10 +81,14 @@ const SUBMISSION = (over: Partial<ReviewSubmission> = {}): ReviewSubmission =>
 /** The panel owns the comments; this stands in for it. */
 function Harness({ submission }: { submission: ReviewSubmission }) {
   const [comments, setComments] = useState<Record<string, string>>({});
+  const [marks, setMarks] = useState<Record<string, number>>({});
   return (
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <SentenceList
         submission={submission}
+        marks={marks}
+        onMark={(criterionId, mark) => setMarks((current) => ({ ...current, [criterionId]: mark }))}
+        editable
         comments={comments}
         onComment={(itemId, value) =>
           setComments((current) => {
