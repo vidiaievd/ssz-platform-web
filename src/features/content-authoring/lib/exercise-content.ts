@@ -39,10 +39,6 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   saContext: '',
   saReferenceAnswer: '',
   saAccepted: '',
-  wtPrompt: '',
-  wtMinWords: '',
-  wtTopics: [],
-  wtRubric: '',
   ssSentence: '',
   ssSourceSentence: '',
   ssSchemaType: 'main',
@@ -102,8 +98,6 @@ export function minimalExerciseValues(
       };
     case 'short_answer':
       return { ...base, saQuestion: prompt, saReferenceAnswer: 'Reference answer' };
-    case 'writing_task':
-      return { ...base, wtPrompt: prompt };
     case 'sentence_schema':
       return {
         ...base,
@@ -292,22 +286,6 @@ function rawExercisePayload(values: ExerciseFormValues): ExercisePayload {
         expectedAnswers: {
           reference_answer: values.saReferenceAnswer?.trim() ?? '',
           accepted_answers: accepted.length > 0 ? accepted : undefined,
-        },
-      };
-    }
-    case 'writing_task': {
-      const topics = (values.wtTopics ?? [])
-        .filter((tp) => tp.title.trim())
-        .map((tp, i) => ({ id: `topic-${i}`, title: tp.title.trim() }));
-      const minWords = Number.parseInt(values.wtMinWords ?? '', 10);
-      return {
-        content: {
-          prompt: values.wtPrompt?.trim() ?? '',
-          options: topics.length > 0 ? topics : undefined,
-          min_words: Number.isFinite(minWords) && minWords > 0 ? minWords : undefined,
-        },
-        expectedAnswers: {
-          rubric: values.wtRubric?.trim() || undefined,
         },
       };
     }
@@ -648,20 +626,6 @@ export function parseExerciseToForm(exercise: {
             ? expectedAnswers.reference_answer
             : '',
         saAccepted: accepted,
-      };
-    }
-    case 'writing_task': {
-      const topics = Array.isArray(content.options)
-        ? (content.options as Array<{ title?: unknown }>).map((o) => ({
-            title: typeof o.title === 'string' ? o.title : '',
-          }))
-        : [];
-      return {
-        ...base,
-        wtPrompt: typeof content.prompt === 'string' ? content.prompt : '',
-        wtMinWords: typeof content.min_words === 'number' ? String(content.min_words) : '',
-        wtTopics: topics,
-        wtRubric: typeof expectedAnswers.rubric === 'string' ? expectedAnswers.rubric : '',
       };
     }
     case 'text_order': {

@@ -27,23 +27,46 @@ describe('ExercisePreview — new exercise types', () => {
     expect(screen.getByText('Answer')).toBeInTheDocument();
   });
 
-  it('renders a writing_task prompt and its topic titles', () => {
+  it('renders a writing_task task: mode, length, prompt and checklist', () => {
     const exercise: ExerciseDisplay = {
       ...base,
       templateCode: 'writing_task',
       content: {
-        prompt: 'Skriv et kort leserinnlegg.',
-        options: [
-          { id: 'a', title: 'Gratis norskkurs til alle', body: '...' },
-          { id: 'b', title: 'Tog skal bli billigere' },
+        mode: 'letter',
+        instruction: 'Skriv et brev.',
+        prompt: 'Du vil klage på en vare du har kjøpt.',
+        letter: { register: 'formal', recipient: 'Kundeservice' },
+        points: [
+          { id: 'p1', text: 'Fortell hva du kjøpte', required: true },
+          { id: 'p2', text: 'Foreslå en løsning', required: false },
         ],
+        phrases: ['Jeg skriver fordi'],
+        settings: { minWords: 120, maxWords: 200 },
       },
     };
     renderWithProviders(<ExercisePreview exercise={exercise} />);
 
-    expect(screen.getByText('Skriv et kort leserinnlegg.')).toBeInTheDocument();
-    expect(screen.getByText('Gratis norskkurs til alle')).toBeInTheDocument();
-    expect(screen.getByText('Tog skal bli billigere')).toBeInTheDocument();
+    expect(screen.getByText('Letter')).toBeInTheDocument();
+    expect(screen.getByText('120–200 words')).toBeInTheDocument();
+    expect(screen.getByText('Du vil klage på en vare du har kjøpt.')).toBeInTheDocument();
+    expect(screen.getByText('Fortell hva du kjøpte')).toBeInTheDocument();
+    expect(screen.getByText('optional')).toBeInTheDocument();
+    expect(screen.getByText('Jeg skriver fordi')).toBeInTheDocument();
+  });
+
+  // A pre-plan-50 document coerces to an empty task rather than throwing: the old
+  // `prompt`/`options` pair is not the shape `readContent` reads, and nothing renders
+  // from it except the mode default.
+  it('renders a pre-plan-50 writing_task without throwing', () => {
+    const exercise: ExerciseDisplay = {
+      ...base,
+      templateCode: 'writing_task',
+      content: { prompt: 'Skriv et kort leserinnlegg.', options: [{ id: 'a', title: 'Tog' }] },
+    };
+    renderWithProviders(<ExercisePreview exercise={exercise} />);
+
+    expect(screen.getByText('Letter')).toBeInTheDocument();
+    expect(screen.queryByText('Tog')).not.toBeInTheDocument();
   });
 
   it('renders a sentence_schema sentence, field labels and token chips', () => {

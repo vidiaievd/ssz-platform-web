@@ -100,5 +100,6 @@
   "matchColumnRight": "Соответствия",
   "translatePrompt": "Переведите:",
   "shortAnswerAnswer": "Ответ",
-  "writingTopics": "Темы"
+  "writingWords": "слов",
+  "writingPointOptional": "необязательно"
 }

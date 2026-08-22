@@ -447,35 +447,6 @@ describe('short_answer & writing_task', () => {
     const parsed = parseExerciseToForm({ templateCode: 'short_answer', content, expectedAnswers });
     expect(parsed.saAccepted).toBe('avisa som jeg leser, er seriøs | avisa jeg leser, er seriøs');
   });
-
-  it('writing_task: builds prompt + topic options with ids + min_words', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'writing_task',
-      wtPrompt: 'Skriv et leserinnlegg.',
-      wtMinWords: '60',
-      wtTopics: [{ title: 'Gratis norskkurs' }, { title: '' }, { title: 'Tog billigere' }],
-      wtRubric: 'Struktur, argument',
-    });
-    expect(content.prompt).toBe('Skriv et leserinnlegg.');
-    expect(content.min_words).toBe(60);
-    expect(content.options).toEqual([
-      { id: 'topic-0', title: 'Gratis norskkurs' },
-      { id: 'topic-1', title: 'Tog billigere' },
-    ]);
-    expect(expectedAnswers.rubric).toBe('Struktur, argument');
-  });
-
-  it('writing_task: omits options/min_words/rubric when empty', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'writing_task',
-      wtPrompt: 'Skriv.',
-    });
-    expect('options' in content).toBe(false);
-    expect('min_words' in content).toBe(false);
-    expect('rubric' in expectedAnswers).toBe(false);
-  });
 });
 
 describe('sentence_schema', () => {

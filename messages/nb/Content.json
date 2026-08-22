@@ -100,5 +100,6 @@
   "matchColumnRight": "Treff",
   "translatePrompt": "Oversett:",
   "shortAnswerAnswer": "Svar",
-  "writingTopics": "Temaer"
+  "writingWords": "ord",
+  "writingPointOptional": "valgfritt"
 }

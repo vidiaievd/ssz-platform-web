@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card';
 import { readContent as readErrorCorrectionContent } from '@/lib/shared-kernel/error-correction';
 import { readContent as readTranslateContent } from '@/lib/shared-kernel/translate';
+import { readContent as readWritingTaskContent } from '@/lib/shared-kernel/writing-task';
 import type { ExerciseDisplay } from '../types';
 
 interface ExercisePreviewProps {
@@ -129,25 +130,7 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
           </div>
         )}
 
-        {code === 'writing_task' && (
-          <div className="space-y-2">
-            {typeof content.prompt === 'string' && <p className="text-sm font-medium">{content.prompt}</p>}
-            {Array.isArray(content.options) && content.options.length > 0 && (
-              <div>
-                <p className="text-muted-foreground mb-1 text-xs font-medium">{t('writingTopics')}</p>
-                <ul className="space-y-1.5">
-                  {(content.options as LabeledItem[]).map((o, i) => (
-                    <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
-                      {typeof (o as { title?: unknown }).title === 'string'
-                        ? (o as { title: string }).title
-                        : ''}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
+        {code === 'writing_task' && <WritingTaskPrompt content={content} />}
 
         {code === 'sentence_schema' && (
           <div className="space-y-2">
@@ -263,6 +246,91 @@ function ErrorCorrectionContent({ content }: { content: Record<string, unknown> 
             </li>
           ))}
         </ol>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The task as the student meets it, and nothing else.
+ *
+ * `content` is the answer-free half of the document by construction (plan 50): the
+ * example answer, the level descriptors and the point keywords live in
+ * `expected_answers`, which never reaches this component. So the checklist can be shown
+ * whole — there is no key in it to hide — while the rubric cannot be shown at all, since
+ * its descriptors are the half that stayed behind.
+ *
+ * Pre-plan-50 documents (`prompt` / `options` / `min_words`) coerce to an empty task
+ * rather than throwing: `readContent` fills defaults, and what is missing simply does not
+ * render.
+ */
+function WritingTaskPrompt({ content }: { content: Record<string, unknown> }) {
+  const t = useTranslations('Content');
+  const tw = useTranslations('ExerciseRunner.writingTask');
+  const { mode, instruction, prompt, source, letter, points, phrases, settings } =
+    readWritingTaskContent(content);
+  const { minWords, maxWords } = settings;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant="muted" className="text-xs">
+          {tw(`modes.${mode}`)}
+        </Badge>
+        {minWords > 0 && (
+          <span className="text-muted-foreground text-xs">
+            {maxWords > 0 ? `${minWords}–${maxWords}` : `${minWords}+`} {t('writingWords')}
+          </span>
+        )}
+      </div>
+
+      {instruction !== '' && <p className="text-muted-foreground text-xs">{instruction}</p>}
+      {prompt !== '' && <p className="text-sm font-medium">{prompt}</p>}
+
+      {mode === 'letter' && letter.recipient !== '' && (
+        <p className="text-muted-foreground text-xs">
+          {tw('letterLine', {
+            recipient: letter.recipient,
+            register: tw(`register.${letter.register}`),
+          })}
+        </p>
+      )}
+
+      {mode === 'retell' && source !== '' && (
+        <p className="rounded-md border border-border px-3 py-2 text-sm leading-relaxed">
+          {source}
+        </p>
+      )}
+
+      {points.length > 0 && (
+        <div>
+          <p className="text-muted-foreground mb-1 text-xs font-medium">{tw('checklistTitle')}</p>
+          <ul className="space-y-1.5">
+            {points.map((point) => (
+              <li key={point.id} className="rounded-md border border-border px-3 py-2 text-sm">
+                {point.text}
+                {!point.required && (
+                  <span className="text-muted-foreground ml-1.5 text-xs">
+                    {t('writingPointOptional')}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {phrases.length > 0 && (
+        <div>
+          <p className="text-muted-foreground mb-1 text-xs font-medium">{tw('phrasesTitle')}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {phrases.map((phrase, i) => (
+              <Badge key={i} variant="muted" className="text-xs">
+                {phrase}
+              </Badge>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

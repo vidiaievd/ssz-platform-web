@@ -142,31 +142,6 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
-        {values.templateCode === 'writing_task' &&
-          (values.wtPrompt ? (
-            <div>
-              <p className="mb-2.5 text-[15px] font-semibold leading-normal text-(--ssz-text-primary)">
-                {values.wtPrompt}
-              </p>
-              {(values.wtTopics ?? []).some((tp) => tp.title.trim()) && (
-                <div className="flex flex-col gap-2">
-                  {(values.wtTopics ?? [])
-                    .filter((tp) => tp.title.trim())
-                    .map((tp, i) => (
-                      <div
-                        key={i}
-                        className="rounded-[11px] border border-(--ssz-border-default) bg-surface px-3.5 py-3 text-sm font-medium text-(--ssz-text-primary)"
-                      >
-                        {tp.title}
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            empty
-          ))}
-
         {values.templateCode === 'sentence_schema' &&
           (values.ssSentence ? (
             <div>

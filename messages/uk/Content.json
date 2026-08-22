@@ -100,5 +100,6 @@
   "matchColumnRight": "Відповідники",
   "translatePrompt": "Перекладіть:",
   "shortAnswerAnswer": "Відповідь",
-  "writingTopics": "Теми"
+  "writingWords": "слів",
+  "writingPointOptional": "необовʼязково"
 }

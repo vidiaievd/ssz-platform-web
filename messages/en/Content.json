@@ -100,5 +100,6 @@
   "matchColumnRight": "Matches",
   "translatePrompt": "Translate:",
   "shortAnswerAnswer": "Answer",
-  "writingTopics": "Topics"
+  "writingWords": "words",
+  "writingPointOptional": "optional"
 }

@@ -8,7 +8,6 @@ export const EXERCISE_TYPES = [
   'multiple_choice_group',
   'fill_in_blank',
   'short_answer',
-  'writing_task',
   'sentence_schema',
   'word_bank_fill',
   'text_order',
@@ -24,13 +23,18 @@ export type ExerciseType = (typeof EXERCISE_TYPES)[number];
  * would make the form fall back to `multiple_choice` and rewrite their content on the
  * next save.
  *
- * `word_bank_gap_fill`, `error_correction`, `match_pairs` and the translate pair are here
- * but not there: each has its own builder, and the generic form has no fields for any of
- * them. Translate left `EXERCISE_TYPES` in plan 42 §9 — its content is a set of sentences
- * with an answer key each, which no slice of this form can hold; the editor pane routes
- * both codes to `TranslateBuilder` before the generic form is ever reached. `match_pairs`
- * left it in plan 49 §8 for the same reason: a pair now owns its answer, its own pool id
- * and a grid of explanations, and the editor pane routes it to `MatchPairsBuilder`.
+ * `word_bank_gap_fill`, `error_correction`, `match_pairs`, `writing_task` and the
+ * translate pair are here but not there: each has its own builder, and the generic form
+ * has no fields for any of them. Translate left `EXERCISE_TYPES` in plan 42 §9 — its
+ * content is a set of sentences with an answer key each, which no slice of this form can
+ * hold; the editor pane routes both codes to `TranslateBuilder` before the generic form is
+ * ever reached. `match_pairs` left it in plan 49 §8 for the same reason: a pair now owns
+ * its answer, its own pool id and a grid of explanations, and the editor pane routes it to
+ * `MatchPairsBuilder`. `writing_task` left it in plan 50 §7: the document carries a mode,
+ * a checklist with keywords, a weighted rubric with level descriptors and a settings
+ * block, split across both JSON columns — the four `wt*` fields this form used to hold
+ * described a shape the template no longer accepts, and the editor pane routes the code
+ * to `WritingTaskBuilder`.
  */
 export const CREATABLE_EXERCISE_TYPES = [
   'multiple_choice',
@@ -154,12 +158,6 @@ export const exerciseFormSchema = z
     saReferenceAnswer: z.string().max(2000).optional(),
     saAccepted: z.string().max(2000).optional(),
 
-    // writing_task — `wtTopics` are optional "choose one" prompts.
-    wtPrompt: z.string().max(2000).optional(),
-    wtMinWords: z.string().max(6).optional(),
-    wtTopics: z.array(z.object({ title: z.string().max(500) })).optional(),
-    wtRubric: z.string().max(2000).optional(),
-
     // sentence_schema — the learner drops sentence tokens into ordered fields.
     // Each token records which field (by index) it belongs to; -1 = unassigned.
     ssSentence: z.string().max(2000).optional(),
@@ -282,12 +280,6 @@ export const exerciseFormSchema = z
             path: ['saReferenceAnswer'],
             message: 'Required',
           });
-        }
-        break;
-      }
-      case 'writing_task': {
-        if (!data.wtPrompt?.trim()) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['wtPrompt'], message: 'Required' });
         }
         break;
       }

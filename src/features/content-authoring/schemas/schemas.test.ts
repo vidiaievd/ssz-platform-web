@@ -373,19 +373,6 @@ describe('exerciseFormSchema', () => {
     expect(result.error.issues.map((i) => i.path.join('.'))).toContain('saReferenceAnswer');
   });
 
-  it('writing_task: accepts a prompt', () => {
-    expect(
-      parseExercise({ templateCode: 'writing_task', wtPrompt: 'Write a letter.' }).success,
-    ).toBe(true);
-  });
-
-  it('writing_task: rejects when the prompt is missing', () => {
-    const result = parseExercise({ templateCode: 'writing_task' });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('wtPrompt');
-  });
-
   it('sentence_schema: accepts a sentence with 2+ fields and assigned tokens', () => {
     expect(
       parseExercise({
