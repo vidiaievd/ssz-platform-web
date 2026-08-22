@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { AppErrorCode } from '@/lib/errors';
 import { toContent, toExpectedAnswers, type WritingTask } from '@/lib/shared-kernel/writing-task';
 
 import { saveWritingTaskAction, type SaveWritingTaskOutcome } from '../../actions/writing-task';
@@ -11,12 +12,33 @@ const DEBOUNCE_MS = 800;
 /** SPEC_api_contract: 1s, 3s, 9s, capped — enough to ride out a blip, not to hammer. */
 const BACKOFF_MS = [1_000, 3_000, 9_000, 27_000, 30_000];
 
-export type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed' | 'conflict';
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed' | 'rejected' | 'conflict';
+
+/**
+ * Refusals no amount of retrying will turn into a save.
+ *
+ * A blip on the wire and a document the server will not accept look identical to a
+ * caller — both arrive as a failed action — but they need opposite treatment. Backoff is
+ * right for the blip and wrong for the refusal: the same request re-sent every thirty
+ * seconds cannot start succeeding, and while it loops the author is told "your edits are
+ * still here" over and over, which reads as a network problem that will pass. It will
+ * not. So a refusal stops the loop and says what the server said, with `Try again` left
+ * in place for the author who has fixed the cause from another window.
+ */
+const PERMANENT: ReadonlySet<AppErrorCode> = new Set<AppErrorCode>([
+  'validation',
+  'forbidden',
+  'not_found',
+  'gone',
+  'unauthenticated',
+]);
 
 export interface WritingTaskAutosave {
   status: SaveStatus;
   /** When the last successful save landed, for the "Saved" hint. */
   savedAt: Date | null;
+  /** What the server said when it refused the document. Only set while `rejected`. */
+  rejection: string | null;
   /** Save now rather than waiting out the backoff — the retry a failure offers. */
   retry: () => void;
   /**
@@ -82,6 +104,8 @@ export function useWritingTaskAutosave({
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   /** The `updatedAt` the row actually carries, learnt from a refused write. */
   const [conflictToken, setConflictToken] = useState<string | null>(null);
+  /** The message behind a `rejected`, so the author is told what to fix. */
+  const [rejection, setRejection] = useState<string | null>(null);
 
   /** What was last written or loaded. Anything else on screen is unsaved work. */
   const [baseline, setBaseline] = useState<SavedDocument>({ exercise });
@@ -130,6 +154,15 @@ export function useWritingTaskAutosave({
       inFlight.current = false;
 
       if (!result.ok) {
+        if (PERMANENT.has(result.error.code)) {
+          // Nothing is scheduled. The edit stays on screen — that part never changes —
+          // but the author is told this document was refused rather than watching a
+          // retry loop describe it as a hiccup.
+          attempt.current = 0;
+          setRejection(result.error.message);
+          setStatus('rejected');
+          return;
+        }
         // Keep the edit on screen and try again later: an editor that discarded what was
         // typed because the network blinked would be worse than no autosave at all.
         attempt.current += 1;
@@ -144,6 +177,7 @@ export function useWritingTaskAutosave({
         // silently against the newer row would overwrite a document the teacher has never
         // seen. This one is theirs to resolve — `overwrite` is how they resolve it.
         attempt.current = 0;
+        setRejection(null);
         setConflictToken(outcome.currentUpdatedAt);
         setStatus('conflict');
         return;
@@ -155,6 +189,7 @@ export function useWritingTaskAutosave({
       const saved: SavedDocument = { exercise: document };
       setBaseline(saved);
       setConflictToken(null);
+      setRejection(null);
       setStatus('saved');
       setSavedAt(new Date());
       onSavedRef.current(outcome.updatedAt, saved);
@@ -172,6 +207,8 @@ export function useWritingTaskAutosave({
   });
 
   useEffect(() => {
+    // A rejected document reschedules on the next edit and not before: the edit is the
+    // only thing that can change the server's answer.
     if (!dirty || status === 'conflict') return;
     schedule(DEBOUNCE_MS);
     return () => {
@@ -193,5 +230,5 @@ export function useWritingTaskAutosave({
     void flush({ expectedUpdatedAt: conflictToken });
   }, [conflictToken, flush]);
 
-  return { status, savedAt, retry, overwrite, canOverwrite: conflictToken !== null };
+  return { status, savedAt, rejection, retry, overwrite, canOverwrite: conflictToken !== null };
 }

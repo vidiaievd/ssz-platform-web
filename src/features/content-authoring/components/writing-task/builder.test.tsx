@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -197,6 +197,30 @@ describe('WritingTaskBuilder', () => {
 });
 
 describe('WritingTaskBuilder autosave', () => {
+  it('stops writing once the server refuses the document', async () => {
+    // The refusal that prompted this: an exercise whose template row still carried the
+    // pre-plan-50 answer schema returned 422 on every save, and the backoff kept sending
+    // the identical request every thirty seconds — for as long as the tab stayed open,
+    // under a banner that read like a passing network problem.
+    vi.mocked(saveWritingTaskAction).mockResolvedValue({
+      ok: false,
+      error: { code: 'validation', message: 'INVALID_EXERCISE_ANSWERS: /rubric must be string' },
+    });
+    const { user } = renderBuilder();
+
+    await user.click(screen.getByRole('tab', { name: /The task/ }));
+    await user.type(screen.getByLabelText('The task itself'), '!');
+    await waitFor(() => expect(saveWritingTaskAction).toHaveBeenCalledTimes(1));
+
+    expect(
+      await screen.findByText(/INVALID_EXERCISE_ANSWERS: \/rubric must be string/),
+    ).toBeInTheDocument();
+
+    // Well past the first backoff step (1s) and the debounce.
+    await new Promise((resolve) => setTimeout(resolve, 1_500));
+    expect(saveWritingTaskAction).toHaveBeenCalledTimes(1);
+  });
+
   it('writes nothing while nobody has edited the document', async () => {
     // Mounting is not an edit, and neither is walking the rail. A builder that saved on
     // mount would take the token it loaded with and hand every second author a conflict

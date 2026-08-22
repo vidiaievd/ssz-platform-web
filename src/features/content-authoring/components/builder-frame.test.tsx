@@ -75,6 +75,42 @@ describe('BuilderSaveHint', () => {
     expect(onRetry).toHaveBeenCalled();
   });
 
+  it('says what the server refused, and still offers a retry', async () => {
+    // The difference from `failed` is the whole point: a refusal is not a blip, so the
+    // author is told the reason instead of watching a retry loop call it a hiccup.
+    const onRetry = vi.fn();
+    wrap(
+      <BuilderSaveHint
+        status="rejected"
+        savedAt={null}
+        canOverwrite={false}
+        rejection="INVALID_EXERCISE_ANSWERS: /rubric must be string"
+        onRetry={onRetry}
+        onOverwrite={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'INVALID_EXERCISE_ANSWERS: /rubric must be string',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(onRetry).toHaveBeenCalled();
+  });
+
+  it('falls back to its own words when the refusal came without a reason', () => {
+    wrap(
+      <BuilderSaveHint
+        status="rejected"
+        savedAt={null}
+        canOverwrite={false}
+        onRetry={vi.fn()}
+        onOverwrite={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('status')).toHaveTextContent('would not accept this exercise');
+  });
+
   it('offers to overwrite the version that won the race, not a retry', async () => {
     const onOverwrite = vi.fn();
     wrap(

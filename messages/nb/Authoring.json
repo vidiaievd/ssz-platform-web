@@ -2124,6 +2124,8 @@
     "saved": "Lagret {time}",
     "saveFailed": "Lagringen mislyktes — endringene dine er fortsatt her.",
     "saveConflict": "Noen andre lagret denne oppgaven. Endringene dine er fortsatt her.",
+    "saveRejected": "Lagring avvist — {reason}. Endringene dine er fortsatt her.",
+    "saveRejectedNoReason": "serveren godtok ikke denne oppgaven",
     "saveRetry": "Prøv igjen",
     "saveOverwrite": "Lagre min versjon likevel",
     "navBack": "Tilbake",

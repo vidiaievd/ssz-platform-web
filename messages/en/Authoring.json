@@ -2124,6 +2124,8 @@
     "saved": "Saved at {time}",
     "saveFailed": "Save failed — your edits are still here.",
     "saveConflict": "Someone else saved this exercise. Your edits are still here.",
+    "saveRejected": "Save refused — {reason}. Your edits are still here.",
+    "saveRejectedNoReason": "the server would not accept this exercise",
     "saveRetry": "Try again",
     "saveOverwrite": "Save mine anyway",
     "navBack": "Back",

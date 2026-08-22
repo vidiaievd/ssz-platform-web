@@ -89,13 +89,20 @@ export function WritingTaskBuilder({
   return (
     <div className="flex flex-col gap-5">
       <EditorToolbarPortal>
-        <div className="flex flex-1 items-stretch justify-between gap-3">
+        {/*
+          `min-w-0` on both the row and the rail's own wrapper: without it the rail keeps
+          its full width, the row overflows the bar's slot and the buttons beside it are
+          painted over. It shows up the moment the save hint grows — a refusal is the
+          longest thing this row ever holds.
+        */}
+        <div className="flex min-w-0 flex-1 items-stretch justify-between gap-3">
           <WritingTaskSteps current={step} exercise={exercise} onSelect={setStep} />
           <div className="flex shrink-0 items-center gap-3 py-2">
             <BuilderSaveHint
               status={autosave.status}
               savedAt={autosave.savedAt}
               canOverwrite={autosave.canOverwrite}
+              rejection={autosave.rejection}
               onRetry={autosave.retry}
               onOverwrite={autosave.overwrite}
             />
