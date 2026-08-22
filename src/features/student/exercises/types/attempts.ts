@@ -176,6 +176,29 @@ export interface LastAttemptResponse {
 }
 
 /**
+ * The unfinished work, saved on the attempt itself rather than in the browser.
+ *
+ * `writing_task` is the template this exists for: every other one loses a few placements
+ * when a tab closes, and this one loses an evening. `draftAnswer` carries the same shape
+ * a submission would (`{ text, ticked, elapsedSeconds }`), stored exactly as sent and
+ * never validated — a save refused for a half-typed sentence is the failure the endpoint
+ * exists to prevent.
+ */
+export interface SaveDraftRequest {
+  draftAnswer: unknown;
+}
+
+export interface SaveDraftResponse {
+  /** When the server took it. The runner shows it as «Utkast lagret». */
+  savedAt: string;
+}
+
+export interface DraftResponse {
+  draftAnswer: unknown;
+  draftSavedAt: string | null;
+}
+
+/**
  * The status of one attempt by id — 47.0.B. Asked after a `submit` call fails, to tell
  * whether the request was lost (nothing to show for it — `IN_PROGRESS`) from whether
  * only the response was (the work is already `ROUTED_FOR_REVIEW` or `SCORED`). Nothing

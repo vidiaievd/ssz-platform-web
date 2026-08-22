@@ -4,10 +4,13 @@ import { useMutation } from '@tanstack/react-query';
 
 import type {
   AttemptRecord,
+  DraftResponse,
   AttemptStatus,
   AttemptStatusResponse,
   LastAttemptResponse,
   RevealAnswersResponse,
+  SaveDraftRequest,
+  SaveDraftResponse,
   SelfCheckRequest,
   SelfCheckResponse,
   StartAttemptRequest,
@@ -42,8 +45,20 @@ export class AttemptRequestError extends Error {
 }
 
 async function post<TResponse>(url: string, body?: unknown): Promise<TResponse> {
+  return send('POST', url, body);
+}
+
+async function put<TResponse>(url: string, body?: unknown): Promise<TResponse> {
+  return send('PUT', url, body);
+}
+
+async function send<TResponse>(
+  method: 'POST' | 'PUT',
+  url: string,
+  body?: unknown,
+): Promise<TResponse> {
   const res = await fetch(url, {
-    method: 'POST',
+    method,
     headers: { 'content-type': 'application/json' },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
@@ -143,6 +158,43 @@ export function useSelfCheck(exerciseId: string, attemptId: string | null) {
       return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/self-check`, body);
     },
   });
+}
+
+/**
+ * Autosave, for the one template whose unfinished work is worth keeping.
+ *
+ * A mutation rather than anything automatic: what is saved and when is the runner's
+ * decision — it debounces, and it stops the moment the draft phase ends. The response
+ * carries the server's own timestamp, which is what the runner shows; a client clock is
+ * not evidence that anything was stored.
+ */
+export function useSaveDraft(exerciseId: string, attemptId: string | null) {
+  return useMutation<SaveDraftResponse, Error, SaveDraftRequest>({
+    mutationFn: (body) => {
+      if (attemptId === null) throw new Error('No attempt in progress');
+      return put(`/api/exercises/${exerciseId}/attempts/${attemptId}/draft`, body);
+    },
+  });
+}
+
+/**
+ * The draft already on this attempt, for a learner coming back to unfinished writing.
+ *
+ * Never rejects, like `fetchLastAttempt`: a restore that cannot be answered leaves the
+ * learner at an empty field, which is where they would have been without it, and that is
+ * not worth an error screen over an exercise that works.
+ */
+export async function fetchDraft(
+  exerciseId: string,
+  attemptId: string,
+): Promise<DraftResponse | null> {
+  try {
+    const res = await fetch(`/api/exercises/${exerciseId}/attempts/${attemptId}/draft`);
+    if (!res.ok) return null;
+    return (await res.json()) as DraftResponse;
+  } catch {
+    return null;
+  }
 }
 
 export function useRevealAnswers(exerciseId: string, attemptId: string | null) {

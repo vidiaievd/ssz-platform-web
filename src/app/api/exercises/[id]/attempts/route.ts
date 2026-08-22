@@ -20,6 +20,13 @@ function attemptIdOf(details: unknown): string | null {
 /**
  * Abandon the stale attempt and start again. Returns `null` if either step fails, so
  * the caller reports the conflict rather than a half-recovered state.
+ *
+ * The draft travels across. Abandoning an attempt is safe for every template whose
+ * unfinished work only ever lived in the browser — but an attempt can now hold a
+ * server-side draft, and for `writing_task` that draft is the learner's text. Dropping
+ * the row it sits on would make re-opening the page the one reliable way to lose an
+ * evening's writing, which is exactly what saving it server-side was for. So the draft
+ * is read before the abandon and written onto the fresh attempt after it.
  */
 async function restart(
   exerciseId: string,
@@ -27,20 +34,64 @@ async function restart(
   language: string,
   mode: CheckMode | undefined,
 ): Promise<StartAttemptResponse | null> {
+  const carried = await draftOf(exerciseId, staleAttemptId);
+
   try {
     await serverFetch({
       service: 'exercises',
       path: `/exercises/${exerciseId}/attempts/${staleAttemptId}`,
       method: 'DELETE',
     });
-    return await serverFetch<StartAttemptResponse>({
+    const started = await serverFetch<StartAttemptResponse>({
       service: 'exercises',
       path: `/exercises/${exerciseId}/attempts`,
       method: 'POST',
       body: { language, ...(mode === undefined ? {} : { mode }) },
     });
+
+    if (carried !== null) await carryDraft(exerciseId, started.attemptId, carried);
+    return started;
   } catch {
     return null;
+  }
+}
+
+/** The stale attempt's unfinished work, or `null` — including when asking fails. */
+async function draftOf(exerciseId: string, attemptId: string): Promise<unknown | null> {
+  try {
+    const attempt = await serverFetch<{ draftAnswer?: unknown }>({
+      service: 'exercises',
+      path: `/exercises/${exerciseId}/attempts/${attemptId}`,
+      method: 'GET',
+    });
+    return attempt.draftAnswer ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Put the carried draft on the new attempt.
+ *
+ * Failure is swallowed on purpose: the fresh attempt is already started and usable, and
+ * refusing to hand it over because the text could not be copied would turn a lost draft
+ * into a lost exercise. The text is not destroyed either way — it stays on the abandoned
+ * row, where support can still find it.
+ */
+async function carryDraft(
+  exerciseId: string,
+  attemptId: string,
+  draftAnswer: unknown,
+): Promise<void> {
+  try {
+    await serverFetch({
+      service: 'exercises',
+      path: `/exercises/${exerciseId}/attempts/${attemptId}/draft`,
+      method: 'PUT',
+      body: { draftAnswer },
+    });
+  } catch {
+    /* the attempt stands; see above */
   }
 }
 

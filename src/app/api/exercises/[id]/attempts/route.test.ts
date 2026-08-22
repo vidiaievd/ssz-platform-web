@@ -81,6 +81,7 @@ describe('POST /api/exercises/[id]/attempts', () => {
           attemptId: 'att-9',
         }),
       )
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS' }) // GET the stale attempt: any draft?
       .mockResolvedValueOnce(undefined) // DELETE the stale attempt
       .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2' });
 
@@ -88,16 +89,71 @@ describe('POST /api/exercises/[id]/attempts', () => {
 
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toMatchObject({ attemptId: 'att-2' });
-    expect(serverFetch).toHaveBeenNthCalledWith(2, {
+    expect(serverFetch).toHaveBeenNthCalledWith(3, {
       service: 'exercises',
       path: '/exercises/ex-1/attempts/att-9',
       method: 'DELETE',
     });
+    // Nothing was written: an attempt with no draft leaves the fresh one empty rather
+    // than saving `null` over it.
+    expect(serverFetch).toHaveBeenCalledTimes(4);
+  });
+
+  it('carries a saved draft onto the fresh attempt', async () => {
+    // The reason this route may not simply throw the stale attempt away any more: it can
+    // hold a `writing_task` draft, and that draft is the learner's text. Losing it on
+    // re-opening the page would make the reload the one reliable way to lose an evening.
+    const draft = { text: 'Hei Kari, jeg skriver fordi…', ticked: ['p1'] };
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS', draftAnswer: draft })
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2', templateCode: 'writing_task' })
+      .mockResolvedValueOnce({ savedAt: '2026-08-22T09:00:00.000Z' });
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
+    expect(serverFetch).toHaveBeenNthCalledWith(5, {
+      service: 'exercises',
+      path: '/exercises/ex-1/attempts/att-2/draft',
+      method: 'PUT',
+      body: { draftAnswer: draft },
+    });
+  });
+
+  it('still hands over the fresh attempt when the draft could not be carried', async () => {
+    // A lost draft is bad; an exercise that refuses to open because of it is worse, and
+    // the text is still on the abandoned row either way.
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS', draftAnswer: { text: 'noe' } })
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2' })
+      .mockRejectedValueOnce(new Error('draft save failed'));
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toMatchObject({ attemptId: 'att-2' });
+  });
+
+  it('starts the fresh attempt even when the stale one cannot be read', async () => {
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockRejectedValueOnce(new Error('read failed'))
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2' });
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
   });
 
   it('reports the conflict when the stale attempt cannot be cleared', async () => {
     vi.mocked(serverFetch)
       .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS' })
       .mockRejectedValueOnce(new Error('still there'));
 
     const res = await POST(makeRequest({ language: 'no' }), { params });
