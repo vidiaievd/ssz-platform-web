@@ -51,3 +51,49 @@ describe('review drafts', () => {
     expect(Object.keys(store().drafts)).toHaveLength(40);
   });
 });
+
+describe('rubric marks', () => {
+  it('holds one mark per criterion and changes it in place', () => {
+    store().setMark('att-1', 'c-task', 2);
+    store().setMark('att-1', 'c-lang', 1);
+    store().setMark('att-1', 'c-task', 3);
+
+    expect(store().drafts['att-1']?.marks).toEqual({ 'c-task': 3, 'c-lang': 1 });
+  });
+
+  // The reason marks live here rather than in the panel: a filled rubric is four
+  // judgements made while reading a text once, and a conflict must not cost the reading.
+  it('is kept by everything except the reviewer’s own verdict', () => {
+    store().setMark('att-1', 'c-task', 2);
+
+    expect(localStorage.getItem('ssz:review:drafts:v1')).toContain('c-task');
+
+    store().clear('att-1');
+    expect(store().drafts['att-1']).toBeUndefined();
+  });
+
+  it('keeps a draft that holds only marks — no comment is not no work', () => {
+    store().setMark('att-1', 'c-task', 0);
+
+    expect(store().drafts['att-1']).toBeDefined();
+  });
+
+  it('gives a draft stored before marks existed an empty set rather than dropping it', async () => {
+    localStorage.setItem(
+      'ssz:review:drafts:v1',
+      JSON.stringify({
+        version: 1,
+        state: { drafts: { 'att-9': { comment: 'Bra.', sentences: {}, touchedAt: 5 } } },
+      }),
+    );
+
+    await useReviewDraftsStore.persist.rehydrate();
+
+    expect(store().drafts['att-9']).toEqual({
+      comment: 'Bra.',
+      sentences: {},
+      marks: {},
+      touchedAt: 5,
+    });
+  });
+});

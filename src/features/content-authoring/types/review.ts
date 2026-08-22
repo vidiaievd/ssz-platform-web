@@ -90,3 +90,44 @@ export interface ReviewDetails<TItem extends ReviewItemDetail = ReviewItemDetail
   passedItems: number;
   items: TItem[];
 }
+
+/**
+ * One must-cover point of a `writing_task`, as the engine reads it against the text.
+ *
+ * Both facts are kept because they disagree usefully. `hit` comes from the point's
+ * keywords, which are the author's guess at how the point would be phrased; `ticked` is
+ * the student saying they covered it. A point ticked but not hit is either a student who
+ * phrased it another way or keywords that never matched anyone — and which of the two it
+ * is, is exactly what the teacher is reading the text to find out.
+ */
+export interface WritingTaskPointDetail {
+  id: string;
+  text: string;
+  required: boolean;
+  /** A keyword for this point was phrased somewhere in the text. Teacher-only. */
+  hit: boolean;
+  /** The student ticked it off their own checklist. Never affects a verdict. */
+  ticked: boolean;
+}
+
+/**
+ * What the machine can say about a free text — which is facts, and no judgement.
+ *
+ * Deliberately not a `ReviewDetails`: there are no items, because a text is not marked
+ * sentence by sentence, and a shape with an empty `items` array would draw the empty
+ * slots of a diff this template never produces (criterion 22). Every number here is
+ * measured rather than graded — `writing-task.validator.ts` refuses to suggest a mark,
+ * and the rubric on the screen starts blank.
+ */
+export interface WritingTaskDetails {
+  totalItems: number;
+  passedItems: number;
+  wordCount: number;
+  paragraphs: number;
+  uniqueWords: number;
+  /** Against the author's range: `short`, `ok`, `long` — recorded, never enforced. */
+  length: 'empty' | 'short' | 'ok' | 'long';
+  hitCount: number;
+  neededCount: number;
+  points: WritingTaskPointDetail[];
+}

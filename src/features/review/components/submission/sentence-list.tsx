@@ -38,7 +38,9 @@ export function SentenceList({ submission, comments, onComment }: SentenceListPr
     return <EssayBody text={submission.text} />;
   }
 
-  const details: ReviewDetails | null = submission.details;
+  // Everything below reads a per-item breakdown, which the branch above is the only
+  // template without — so by here the union has one member left.
+  const details = submission.details as ReviewDetails | null;
   if (details === null) {
     // The banner above has already said why there is no analysis; what is owed here is the
     // answer as it was handed in, so the verdict can still be given on something.

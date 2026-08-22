@@ -11,7 +11,7 @@
 // Deep import rather than the feature barrel: `content-authoring/index.ts` re-exports its
 // components, so a route handler importing a type from it would pull client code into a
 // server bundle — and both features happen to name a type `ReviewQueueResponse`.
-import type { ReviewDetails } from '@/features/content-authoring/types/review';
+import type { ReviewDetails, WritingTaskDetails } from '@/features/content-authoring/types/review';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 
 /** The five templates whose check may refuse to close, and so reach a person. */
@@ -194,8 +194,14 @@ export interface ReviewSubmission {
    * Typed by the shape `submission-card` already speaks — 45.6 moves that card here, and
    * inventing a second vocabulary for the same breakdown would mean translating between
    * them forever.
+   *
+   * A free text is the one template with no items in it, so it brings its own shape:
+   * words, paragraphs and point coverage instead of a per-sentence breakdown. Narrow on
+   * `exercise.type` before reading either, and read the writing-task half through
+   * `readWritingTaskDetails` — the breakdown is recomputed against the exercise as it
+   * stands today, which for an old submission is not the shape this union promises.
    */
-  details: ReviewDetails | null;
+  details: ReviewDetails | WritingTaskDetails | null;
   /** `writing_task` only: the essay itself. */
   text: string | null;
   /**

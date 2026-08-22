@@ -9,6 +9,15 @@ export interface ReviewDraft {
   comment: string;
   /** Comments against single sentences, by item id. */
   sentences: Record<string, string>;
+  /**
+   * Rubric marks 0-3, by criterion id — `writing_task` and anything else graded that way.
+   *
+   * Kept beside the comment for the same reason and with more at stake: a filled rubric
+   * is four or six judgements made while reading a text once, and a colleague answering
+   * first must not cost the reviewer the reading. Never pre-filled — an absent key is a
+   * criterion nobody has marked, which is what keeps the action disabled.
+   */
+  marks: Record<string, number>;
   /** When it was last written to. Only used to decide what to forget first. */
   touchedAt: number;
 }
@@ -18,11 +27,13 @@ interface ReviewDraftsState {
   setComment: (attemptId: string, comment: string) => void;
   /** `undefined` removes the comment — taking one off is as ordinary as adding one. */
   setSentenceComment: (attemptId: string, itemId: string, comment: string | undefined) => void;
+  /** One rubric mark. There is no way to unset one: a teacher changes a mark, never blanks it. */
+  setMark: (attemptId: string, criterionId: string, mark: number) => void;
   /** The reviewer's own verdict landed. The only thing that empties a draft. */
   clear: (attemptId: string) => void;
 }
 
-export const EMPTY_DRAFT: ReviewDraft = { comment: '', sentences: {}, touchedAt: 0 };
+export const EMPTY_DRAFT: ReviewDraft = { comment: '', sentences: {}, marks: {}, touchedAt: 0 };
 
 /**
  * How many submissions' drafts are kept before the oldest are forgotten.
@@ -33,6 +44,9 @@ export const EMPTY_DRAFT: ReviewDraft = { comment: '', sentences: {}, touchedAt:
  * what falls off the end is by definition the thing nobody came back to.
  */
 const MAX_DRAFTS = 40;
+
+/** Bumped when the draft shape gains a field an existing entry would come back without. */
+const DRAFTS_VERSION = 2;
 
 /**
  * What the teacher has written and not yet sent, kept where it survives everything.
@@ -67,15 +81,52 @@ export const useReviewDraftsStore = create<ReviewDraftsState>()(
           }),
         ),
 
+      setMark: (attemptId, criterionId, mark) =>
+        set((state) =>
+          write(state, attemptId, (draft) => ({
+            ...draft,
+            marks: { ...draft.marks, [criterionId]: mark },
+          })),
+        ),
+
       clear: (attemptId) =>
         set((state) => {
           const { [attemptId]: _sent, ...rest } = state.drafts;
           return { drafts: rest };
         }),
     }),
-    { name: 'ssz:review:drafts:v1' },
+    {
+      name: 'ssz:review:drafts:v1',
+      version: DRAFTS_VERSION,
+      migrate: fillMarks,
+    },
   ),
 );
+
+/**
+ * Give every stored draft the `marks` key it was written before.
+ *
+ * Done once on rehydrate rather than in `selectDraft`, which is a Zustand selector: one
+ * that patched the object would return a new reference on every render and put the panel
+ * in a re-render loop. A missing `marks` is only ever an old entry, so this is the right
+ * place — and dropping the drafts instead would throw away comments to add an empty
+ * object.
+ */
+function fillMarks(persisted: unknown): { drafts: Record<string, ReviewDraft> } {
+  const state = (persisted ?? {}) as { drafts?: Record<string, Partial<ReviewDraft>> };
+  const drafts: Record<string, ReviewDraft> = {};
+
+  for (const [id, draft] of Object.entries(state.drafts ?? {})) {
+    drafts[id] = {
+      comment: draft.comment ?? '',
+      sentences: draft.sentences ?? {},
+      marks: draft.marks ?? {},
+      touchedAt: draft.touchedAt ?? 0,
+    };
+  }
+
+  return { drafts };
+}
 
 /** One draft rewritten, stamped, and the oldest dropped if there are now too many. */
 function write(
@@ -89,7 +140,11 @@ function write(
   // An empty draft is not a draft. Otherwise clearing a comment character by character
   // would leave a permanent entry behind for a submission with nothing written on it.
   const drafts = { ...state.drafts };
-  if (next.comment === '' && Object.keys(next.sentences).length === 0) {
+  if (
+    next.comment === '' &&
+    Object.keys(next.sentences).length === 0 &&
+    Object.keys(next.marks).length === 0
+  ) {
     delete drafts[attemptId];
     return { drafts };
   }
