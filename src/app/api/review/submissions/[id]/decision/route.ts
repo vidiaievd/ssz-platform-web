@@ -27,6 +27,15 @@ interface DecisionRequest {
   comment?: string | null;
   sentenceComments?: Record<string, string>;
   /**
+   * Rubric marks 0-3 by criterion id, for a submission graded that way.
+   *
+   * Forwarded unread. The engine grades them against the rubric it froze on the attempt
+   * and derives the verdict from the threshold — this route has neither the rubric nor
+   * the weights, and a copy of the arithmetic here would be a second opinion about the
+   * same marks. Criterion 19 is untouched: judgements travel, a score never does.
+   */
+  rubricMarks?: Record<string, number>;
+  /**
    * The queue as the reviewer currently has it arranged. Sent rather than assumed,
    * because what "the next one" means is exactly the list on their screen.
    */
@@ -111,6 +120,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         outcome: verdict,
         comment: body.comment ?? null,
         sentenceComments: body.sentenceComments ?? {},
+        ...(body.rubricMarks === undefined ? {} : { rubricMarks: body.rubricMarks }),
       },
       // Both are outcomes the screen has a shape for, not faults worth logging as such.
       expectedErrorStatuses: [409, 422],
@@ -142,6 +152,7 @@ async function refuseVerdict(error: unknown): Promise<NextResponse> {
     by?: string;
     verdict?: 'approved' | 'returned';
     at?: string;
+    missing?: string[];
   };
 
   if (error.code === 'conflict' && details.by) {
@@ -160,6 +171,16 @@ async function refuseVerdict(error: unknown): Promise<NextResponse> {
 
   if (details.code === 'RETURN_REQUIRES_COMMENT') {
     return NextResponse.json({ code: 'RETURN_REQUIRES_COMMENT' }, { status: 422 });
+  }
+
+  // Which criteria are still blank, so the screen can point at them rather than report a
+  // verdict that failed for reasons of its own. The screen keeps the action disabled
+  // until the rubric is whole, so reaching this means two tabs or a stale one.
+  if (details.code === 'RUBRIC_INCOMPLETE') {
+    return NextResponse.json(
+      { code: 'RUBRIC_INCOMPLETE', missing: details.missing ?? [] },
+      { status: 422 },
+    );
   }
 
   return NextResponse.json({ error: 'Failed to record the verdict' }, { status: 502 });

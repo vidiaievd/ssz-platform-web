@@ -156,6 +156,7 @@
     "returnRequiresComment": "Say what should be changed — the work goes back to the learner together with your comment.",
     "failed": "The verdict could not be recorded. Try again.",
     "scoreIsServerSide": "Sending back needs a comment: the learner gets the work together with it. The score is worked out by the system from what was passed — no mark is entered by hand.",
+    "scoreIsRubric": "The verdict follows from the rubric: a total at or above the pass mark is a pass, below it goes back. The score is worked out by the system from the marks — no percentage is entered by hand.",
     "next": "Next submission",
     "sent": {
       "approved": "Passed",
@@ -165,7 +166,8 @@
       "approve": "pass",
       "withComment": "with a comment",
       "return": "send back",
-      "next": "next"
+      "next": "next",
+      "send": "send"
     }
   },
   "batch": {

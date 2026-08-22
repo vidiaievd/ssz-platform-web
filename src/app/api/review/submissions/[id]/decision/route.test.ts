@@ -116,6 +116,52 @@ describe('POST /api/review/submissions/[id]/decision', () => {
     expect(JSON.stringify(sent?.body)).not.toContain('score');
   });
 
+  it('forwards rubric marks unread — the engine holds the weights and the threshold', async () => {
+    upstream();
+    const response = await POST(
+      request({ verdict: 'approved', rubricMarks: { 'c-task': 3, 'c-lang': 2 } }),
+      context,
+    );
+
+    expect(response.status).toBe(200);
+    const sent = vi
+      .mocked(serverFetch)
+      .mock.calls.find(([opts]) => opts.method === 'POST' && opts.path.endsWith(`/review`))?.[0];
+    expect(sent?.body).toMatchObject({ rubricMarks: { 'c-task': 3, 'c-lang': 2 } });
+    // Judgements travel; a score never does, on this template or any other.
+    expect(JSON.stringify(sent?.body)).not.toContain('score');
+  });
+
+  it('sends no rubric field at all when the screen had no rubric', async () => {
+    upstream();
+    await POST(approve(), context);
+
+    const sent = vi
+      .mocked(serverFetch)
+      .mock.calls.find(([opts]) => opts.method === 'POST' && opts.path.endsWith(`/review`))?.[0];
+    expect(sent?.body).not.toHaveProperty('rubricMarks');
+  });
+
+  // The screen keeps the action disabled until the rubric is whole, so this is two tabs
+  // or a stale one — and it has to name which criteria are blank rather than say the
+  // verdict failed for reasons of its own.
+  it('passes an incomplete rubric back with the criteria that are still blank', async () => {
+    upstream({
+      verdictFails: new AppError('validation', 'Upstream 422', {
+        code: 'RUBRIC_INCOMPLETE',
+        missing: ['c-lang'],
+      }),
+    });
+
+    const response = await POST(
+      request({ verdict: 'approved', rubricMarks: { 'c-task': 3 } }),
+      context,
+    );
+
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({ code: 'RUBRIC_INCOMPLETE', missing: ['c-lang'] });
+  });
+
   it('hands back the next submission in the queue, not the top of it', async () => {
     upstream();
     // att-1 is older than the one just decided; att-3 is the one that follows it.

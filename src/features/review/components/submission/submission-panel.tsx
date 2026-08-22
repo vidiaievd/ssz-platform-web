@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { scoreRubric } from '@/lib/shared-kernel/writing-task';
 
 import { useReviewDecision, type ReviewConflict, type ReviewVerdict } from '../../api/use-decision';
 import { useReviewLock, useSubmission, type ReviewLockLifecycle } from '../../api/use-submission';
@@ -24,7 +25,7 @@ import { useReviewViewStore } from '../../stores/review-view-store';
 import type { ReviewQueueFilters, ReviewSubmission } from '../../types';
 import { Note } from '../primitives';
 
-import { DecisionPanel } from './decision-panel';
+import { DecisionPanel, type RubricDecision } from './decision-panel';
 import { PreviousAttempt } from './previous-attempt';
 import { SentenceList } from './sentence-list';
 import { SubmissionHeader } from './submission-header';
@@ -160,7 +161,14 @@ export function SubmissionPanel({
     (verdict: ReviewVerdict) => {
       setConflict(null);
       decision.mutate(
-        { verdict, comment: draft.comment.trim(), sentenceComments: draft.sentences },
+        {
+          verdict,
+          comment: draft.comment.trim(),
+          sentenceComments: draft.sentences,
+          // Sent only where there is a rubric to grade against: on every other template
+          // an empty object would be marks the engine has no snapshot to score.
+          ...(data?.rubric ? { rubricMarks: draft.marks } : {}),
+        },
         {
           onSuccess: (result) => {
             // The reviewer's own verdict — the one thing that empties their draft.
@@ -177,7 +185,7 @@ export function SubmissionPanel({
         },
       );
     },
-    [advance, clearDraft, decision, draft.comment, draft.sentences, id],
+    [advance, clearDraft, data?.rubric, decision, draft.comment, draft.marks, draft.sentences, id],
   );
 
   // A refusal about the comment belongs in the comment field, cursor included.
@@ -193,15 +201,45 @@ export function SubmissionPanel({
   const written = draft.comment.trim() !== '';
   const withComment = written || Object.keys(draft.sentences).length > 0;
 
+  /**
+   * What the marks come to, for a submission graded by rubric.
+   *
+   * Read from the snapshot on the submission rather than from the exercise: the marks
+   * mean what the criteria said when the work was queued, and the engine scores them the
+   * same way against the same copy. This is the screen agreeing with the server, not a
+   * second opinion — the verdict it shows is the one the server will derive.
+   */
+  const outcome = data?.rubric ? scoreRubric(data.rubric, draft.marks) : null;
+  const rubric: RubricDecision | null =
+    outcome === null
+      ? null
+      : {
+          points: outcome.points,
+          max: outcome.max,
+          complete: outcome.complete,
+          missing: outcome.missing.length,
+          passed: outcome.passed,
+        };
+
+  // With a rubric the verdict is not a choice, so the three digits are not bound: what
+  // they would offer is a verdict the marks do not support and the server would refuse.
+  // The rubric's own action needs the same comment a plain return needs.
+  const rubricReady = rubric !== null && rubric.complete && (rubric.passed || written);
+
   useReviewShortcuts({
-    approve: decidable ? () => decide('approved') : undefined,
-    approveWithComment: decidable && withComment ? () => decide('approved_comment') : undefined,
-    return: decidable && written ? () => decide('returned') : undefined,
-    submit: decidable
-      ? () => decide(withComment ? 'approved_comment' : 'approved')
-      : nextInQueue !== null
+    approve: decidable && rubric === null ? () => decide('approved') : undefined,
+    approveWithComment:
+      decidable && rubric === null && withComment ? () => decide('approved_comment') : undefined,
+    return: decidable && rubric === null && written ? () => decide('returned') : undefined,
+    submit: !decidable
+      ? nextInQueue !== null
         ? () => advance(nextInQueue)
-        : undefined,
+        : undefined
+      : rubric !== null
+        ? rubricReady
+          ? () => decide(rubric.passed ? 'approved' : 'returned')
+          : undefined
+        : () => decide(withComment ? 'approved_comment' : 'approved'),
     next: nextInQueue === null ? undefined : () => advance(nextInQueue),
     previous: previousInQueue === null ? undefined : () => advance(previousInQueue),
   });
@@ -285,6 +323,7 @@ export function SubmissionPanel({
           if (nextInQueue !== null) advance(nextInQueue);
         }}
         hasNext={nextInQueue !== null}
+        rubric={rubric}
         inputRef={commentRef}
       />
     </article>

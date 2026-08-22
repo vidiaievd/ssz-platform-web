@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -49,6 +49,7 @@ const BASE: ReviewSubmission = {
 /** The submission read, the marker, and whatever the verdict is to answer with. */
 function upstream(
   decision: { status: number; body: unknown } = { status: 200, body: { nextId: 'att-2' } },
+  submission: ReviewSubmission = BASE,
 ) {
   vi.stubGlobal(
     'fetch',
@@ -62,9 +63,41 @@ function upstream(
           status: 200,
         });
       }
-      return new Response(JSON.stringify(BASE), { status: 200 });
+      return new Response(JSON.stringify(submission), { status: 200 });
     }),
   );
+}
+
+/** A `writing_task` carrying the rubric it was queued against. */
+const WITH_RUBRIC: ReviewSubmission = {
+  ...BASE,
+  rubric: {
+    passScore: 5,
+    criteria: [
+      {
+        id: 'c-task',
+        name: 'Oppgaveløsning',
+        desc: 'Er punktene dekket?',
+        weight: 2,
+        levels: ['Nei', 'Ett punkt', 'De fleste', 'Alle'],
+      },
+      {
+        id: 'c-lang',
+        name: 'Språk',
+        desc: 'Setningsbygning.',
+        weight: 1,
+        levels: ['Uforståelig', 'Mange feil', 'Noen feil', 'Få feil'],
+      },
+    ],
+  },
+};
+
+/** Set every mark on the rubric above, to the values given. */
+async function mark(user: ReturnType<typeof userEvent.setup>, task: string, lang: string) {
+  const marks = await screen.findByRole('radiogroup', { name: 'Mark for Oppgaveløsning' });
+  await user.click(within(marks).getByRole('radio', { name: task }));
+  const language = screen.getByRole('radiogroup', { name: 'Mark for Språk' });
+  await user.click(within(language).getByRole('radio', { name: lang }));
 }
 
 function renderPanel(
@@ -315,5 +348,95 @@ describe('the keyboard', () => {
     expect(await screen.findByRole('heading', { name: 'Anna Kowalska' })).toHaveFocus();
     // The flag is spent, so returning to this submission by hand does not steal focus.
     expect(useReviewViewStore.getState().arrivedAt).toBeNull();
+  });
+});
+
+describe('a submission graded by rubric', () => {
+  it('replaces the three verdicts with the one the marks come to', async () => {
+    upstream(undefined, WITH_RUBRIC);
+    renderPanel();
+
+    expect(await screen.findByRole('radiogroup', { name: 'Mark for Språk' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Pass$/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Pass with a comment/ })).not.toBeInTheDocument();
+  });
+
+  // The rule the whole screen exists to keep: a blank criterion is not a zero, and the
+  // engine refuses an incomplete rubric anyway.
+  it('is undecidable until every criterion carries a mark', async () => {
+    const user = userEvent.setup();
+    upstream(undefined, WITH_RUBRIC);
+    renderPanel();
+
+    const marks = await screen.findByRole('radiogroup', { name: 'Mark for Oppgaveløsning' });
+    await user.click(within(marks).getByRole('radio', { name: '3' }));
+
+    expect(screen.getByRole('button', { name: /Pass · 6\/9/ })).toBeDisabled();
+    expect(screen.getByText(/a blank one is not a zero/)).toBeInTheDocument();
+  });
+
+  it('switches the action on the threshold, in rubric points', async () => {
+    const user = userEvent.setup();
+    upstream(undefined, WITH_RUBRIC);
+    renderPanel();
+
+    // 1 × 2 + 2 × 1 = 4, one under a pass mark of 5.
+    await mark(user, '1', '2');
+    expect(screen.getByRole('button', { name: /Send back · 4\/9/ })).toBeInTheDocument();
+
+    // 2 × 2 + 1 × 1 = 5 — exactly the threshold, which is a pass.
+    await mark(user, '2', '1');
+    expect(screen.getByRole('button', { name: /Pass · 5\/9/ })).toBeInTheDocument();
+  });
+
+  it('needs a comment to send a failing text back, exactly as a plain return does', async () => {
+    const user = userEvent.setup();
+    upstream(undefined, WITH_RUBRIC);
+    renderPanel();
+
+    await mark(user, '0', '1');
+    const send = screen.getByRole('button', { name: /Send back · 1\/9/ });
+    expect(send).toBeDisabled();
+
+    await user.type(screen.getByRole('textbox'), 'Les oppgaven en gang til.');
+    expect(send).toBeEnabled();
+  });
+
+  it('sends the marks as judgements and no score at all (criterion 19)', async () => {
+    const user = userEvent.setup();
+    upstream(undefined, WITH_RUBRIC);
+    renderPanel();
+
+    await mark(user, '3', '2');
+    await user.click(screen.getByRole('button', { name: /Pass · 8\/9/ }));
+
+    await waitFor(() => expect(decisionBody()).toBeDefined());
+    const body = decisionBody();
+    expect(body.rubricMarks).toEqual({ 'c-task': 3, 'c-lang': 2 });
+    expect(body).not.toHaveProperty('score');
+  });
+
+  it('sends no marks on a template that has no rubric to score them against', async () => {
+    const user = userEvent.setup();
+    upstream();
+    renderPanel();
+
+    await user.click(await screen.findByRole('button', { name: /^Pass$/ }));
+
+    await waitFor(() => expect(decisionBody()).toBeDefined());
+    expect(decisionBody()).not.toHaveProperty('rubricMarks');
+  });
+
+  // The digits mean "choose a verdict", and with a rubric there is none to choose.
+  it('leaves the verdict digits unbound', async () => {
+    const user = userEvent.setup();
+    upstream(undefined, WITH_RUBRIC);
+    renderPanel();
+
+    await screen.findByRole('radiogroup', { name: 'Mark for Språk' });
+    await user.keyboard('1');
+
+    expect(vi.mocked(fetch).mock.calls.some(([i]) => String(i).includes('/decision'))).toBe(false);
+    expect(screen.queryByText('pass')).not.toBeInTheDocument();
   });
 });

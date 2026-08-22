@@ -21,17 +21,24 @@ const COMMENT_MAX = 4000;
  * left to give only the movement keys are named — offering `1` on a submission a colleague
  * has already answered would be advertising a key that does nothing.
  */
-function KeyHints({ readOnly }: { readOnly: boolean }) {
+function KeyHints({ readOnly, byRubric }: { readOnly: boolean; byRubric: boolean }) {
   const t = useTranslations('Review.decision.keys');
 
+  // With a rubric there is no verdict to choose: the marks decide it, so the digits are
+  // not bound and naming them would advertise keys that do nothing.
   const hints = readOnly
     ? ([['J', t('next')]] as const)
-    : ([
-        ['1', t('approve')],
-        ['2', t('withComment')],
-        ['3', t('return')],
-        ['J', t('next')],
-      ] as const);
+    : byRubric
+      ? ([
+          ['⌘⏎', t('send')],
+          ['J', t('next')],
+        ] as const)
+      : ([
+          ['1', t('approve')],
+          ['2', t('withComment')],
+          ['3', t('return')],
+          ['J', t('next')],
+        ] as const);
 
   return (
     <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-muted-foreground">
@@ -66,7 +73,24 @@ export interface DecisionPanelProps {
   onNext: () => void;
   /** True while there is somewhere to go — false empties the "next" action. */
   hasNext: boolean;
+  /**
+   * The rubric's running answer, for a submission graded that way. Present means the
+   * three buttons are replaced by the one verdict the marks come to.
+   */
+  rubric?: RubricDecision | null;
   inputRef?: RefObject<HTMLTextAreaElement | null>;
+}
+
+/** What the marks currently come to, as the footer needs to read it. */
+export interface RubricDecision {
+  points: number;
+  max: number;
+  /** Every criterion carries a mark. Until then there is no verdict to give. */
+  complete: boolean;
+  /** How many are still blank — what the disabled button explains itself with. */
+  missing: number;
+  /** `points >= passScore`, compared in rubric points. */
+  passed: boolean;
 }
 
 /**
@@ -100,9 +124,11 @@ export function DecisionPanel({
   canDecide,
   onNext,
   hasNext,
+  rubric = null,
   inputRef,
 }: DecisionPanelProps) {
   const t = useTranslations('Review.decision');
+  const tRubric = useTranslations('Review.rubric');
 
   const written = comment.trim() !== '';
   const readOnly = settled !== null || !canDecide;
@@ -152,45 +178,83 @@ export function DecisionPanel({
           ) : null
         ) : (
           <>
-            <Button
-              type="button"
-              loading={pending}
-              aria-busy={pending}
-              onClick={() => onDecide('approved')}
-            >
-              <Check aria-hidden className="mr-1.5 h-4 w-4" />
-              {t('approve')}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              loading={pending}
-              aria-busy={pending}
-              disabled={!written && !hasSentenceComments}
-              onClick={() => onDecide('approved_comment')}
-            >
-              <Send aria-hidden className="mr-1.5 h-4 w-4" />
-              {t('approveWithComment')}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              loading={pending}
-              aria-busy={pending}
-              disabled={!written}
-              onClick={() => onDecide('returned')}
-            >
-              <Undo2 aria-hidden className="mr-1.5 h-4 w-4" />
-              {t('return')}
-            </Button>
+            {/* One action, not three: with a rubric the verdict is not a choice. It
+                follows from the marks against the threshold, and the server derives it
+                again from the frozen rubric — a screen offering "pass" beside a failing
+                score would be offering a verdict it cannot deliver. */}
+            {rubric === null ? (
+              <>
+                <Button
+                  type="button"
+                  loading={pending}
+                  aria-busy={pending}
+                  onClick={() => onDecide('approved')}
+                >
+                  <Check aria-hidden className="mr-1.5 h-4 w-4" />
+                  {t('approve')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  loading={pending}
+                  aria-busy={pending}
+                  disabled={!written && !hasSentenceComments}
+                  onClick={() => onDecide('approved_comment')}
+                >
+                  <Send aria-hidden className="mr-1.5 h-4 w-4" />
+                  {t('approveWithComment')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  loading={pending}
+                  aria-busy={pending}
+                  disabled={!written}
+                  onClick={() => onDecide('returned')}
+                >
+                  <Undo2 aria-hidden className="mr-1.5 h-4 w-4" />
+                  {t('return')}
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                variant={rubric.passed ? 'primary' : 'secondary'}
+                loading={pending}
+                aria-busy={pending}
+                // A failing score sends the work back, and the work goes back with the
+                // comment attached: the same rule as the plain return, arrived at by
+                // arithmetic instead of by a button.
+                disabled={!rubric.complete || (!rubric.passed && !written)}
+                onClick={() => onDecide(rubric.passed ? 'approved' : 'returned')}
+              >
+                {rubric.passed ? (
+                  <Check aria-hidden className="mr-1.5 h-4 w-4" />
+                ) : (
+                  <Undo2 aria-hidden className="mr-1.5 h-4 w-4" />
+                )}
+                {tRubric(rubric.passed ? 'approve' : 'return', {
+                  points: rubric.points,
+                  max: rubric.max,
+                })}
+              </Button>
+            )}
           </>
         )}
         <span className="flex-1" />
-        <KeyHints readOnly={readOnly} />
+        <KeyHints readOnly={readOnly} byRubric={rubric !== null} />
       </div>
 
+      {/* Why the button is off, said where it is looked at. The rubric answers first:
+          an unmarked criterion is what has to change before the comment matters. */}
+      {rubric !== null && !readOnly && !rubric.complete && (
+        <p className="text-[11.5px] text-warning-700" role="status">
+          {tRubric('incomplete')}
+        </p>
+      )}
+
       <p className="text-[11.5px] leading-relaxed text-muted-foreground">
-        {t('scoreIsServerSide')}
+        {t(rubric === null ? 'scoreIsServerSide' : 'scoreIsRubric')}
       </p>
     </footer>
   );

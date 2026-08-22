@@ -156,6 +156,7 @@
     "returnRequiresComment": "Skriv hva som bør endres — eleven får arbeidet tilbake sammen med kommentaren din.",
     "failed": "Avgjørelsen ble ikke lagret. Prøv igjen.",
     "scoreIsServerSide": "Retur krever en kommentar: eleven får arbeidet sammen med den. Poengsummen regnes ut av systemet ut fra det som ble godkjent — ingen karakter settes for hånd.",
+    "scoreIsRubric": "Vurderingen følger av rubrikken: en sum på eller over grensen er bestått, under går tilbake. Poengsummen regnes ut av systemet fra nivåene — ingen prosent tastes inn for hånd.",
     "next": "Neste besvarelse",
     "sent": {
       "approved": "Godkjent",
@@ -165,7 +166,8 @@
       "approve": "godkjenn",
       "withComment": "med kommentar",
       "return": "send tilbake",
-      "next": "neste"
+      "next": "neste",
+      "send": "send"
     }
   },
   "batch": {

@@ -13,6 +13,15 @@ export interface ReviewDecisionInput {
   verdict: ReviewVerdict;
   comment: string;
   sentenceComments: Record<string, string>;
+  /**
+   * Rubric marks 0-3 by criterion id, for a submission graded that way.
+   *
+   * Judgements, not a score, and `verdict` above is ignored for these: the engine derives
+   * the outcome from `Σ mark × weight` against the rubric frozen on the attempt, so a
+   * screen whose settings had gone stale cannot deliver a verdict the marks do not
+   * support. The invariant "no score is entered by hand" holds exactly as before.
+   */
+  rubricMarks?: Record<string, number>;
 }
 
 /** A colleague answered first — everything the banner has to name (criterion 24). */
