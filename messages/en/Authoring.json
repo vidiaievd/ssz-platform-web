@@ -2175,6 +2175,8 @@
       "title": "The task",
       "lede": "What the student is asked to write, and what their text has to cover.",
       "modeLabel": "Kind of text",
+      "rangeReset": "Length set to {min}–{max} words for {mode}.",
+      "rangeResetUndo": "Keep {min}–{max}",
       "instructionLabel": "Instruction the student sees",
       "instructionPlaceholder": "Skriv en sammenhengende tekst. Du har 40 minutter.",
       "instructionHelp": "One line, in the language they are learning. It is also the exercise's instruction everywhere else in the platform.",

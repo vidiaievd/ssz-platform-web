@@ -2175,6 +2175,8 @@
       "title": "Oppgaven",
       "lede": "Hva studenten skal skrive, og hva teksten må dekke.",
       "modeLabel": "Type tekst",
+      "rangeReset": "Lengden er satt til {min}–{max} ord for {mode}.",
+      "rangeResetUndo": "Behold {min}–{max}",
       "instructionLabel": "Instruksjonen studenten ser",
       "instructionPlaceholder": "Skriv en sammenhengende tekst. Du har 40 minutter.",
       "instructionHelp": "Én linje, på språket de lærer. Den er også oppgavens instruksjon ellers i plattformen.",

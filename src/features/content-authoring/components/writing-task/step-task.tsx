@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   BookOpen,
@@ -30,12 +31,14 @@ import {
   addKeyword,
   addPhrase,
   addPoint,
+  isDefaultRange,
   MAX_POINTS,
   removeKeyword,
   removePhrase,
   removePoint,
   setMode,
   setPoint,
+  setSettings,
 } from './edits';
 import { ChipEditor } from './chip-editor';
 import { ImageSlot } from './image-slot';
@@ -67,6 +70,13 @@ export interface StepTaskProps {
  * not lose the prompt — and resets the word range, which is a number nobody chose. That
  * rule lives in `edits.ts`, not here.
  *
+ * Except when the author *did* choose it. A range they typed is work, and a switch that
+ * replaced it silently would be the one thing this step takes away without saying so —
+ * so it says so, in a line under the picker, with the old numbers one click away. A
+ * confirmation before the switch was the other option and it asks the wrong question:
+ * nothing is lost yet at that point, and a modal in front of every correction of the
+ * task type would charge the common case for the rare one.
+ *
  * There is no title field, as in the four builders before it: the platform has no title
  * on an exercise.
  */
@@ -75,6 +85,32 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
   const needs = modeConfig(exercise.mode).needs;
   const points = exercise.points;
   const promptEmpty = exercise.prompt.trim() === '';
+
+  /** The range the last mode switch replaced, while it is still the one on screen. */
+  const [replaced, setReplaced] = useState<{ min: number; max: number } | null>(null);
+
+  const chooseMode = (mode: Mode) => {
+    if (mode === exercise.mode) return;
+    // Only the author's own numbers are worth a line. A range still sitting at the old
+    // mode's default was nobody's decision, and reporting its replacement would be noise
+    // in the ordinary case of picking the right kind of text on the first try.
+    setReplaced(
+      isDefaultRange(exercise)
+        ? null
+        : { min: exercise.settings.minWords, max: exercise.settings.maxWords },
+    );
+    onChange(setMode(exercise, mode));
+  };
+
+  const undoRange = () => {
+    if (replaced === null) return;
+    onChange(setSettings(exercise, { minWords: replaced.min, maxWords: replaced.max }));
+    setReplaced(null);
+  };
+
+  // The line answers for the range as it stands now. Once the author has set it themselves
+  // on step 2 — or undone it here — there is nothing left to report.
+  const rangeReplaced = replaced !== null && isDefaultRange(exercise);
 
   return (
     <div className="flex flex-col gap-5">
@@ -100,7 +136,7 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
                 type="button"
                 role="radio"
                 aria-checked={selected}
-                onClick={() => onChange(setMode(exercise, config.id))}
+                onClick={() => chooseMode(config.id)}
                 className={`flex items-start gap-2.5 rounded-lg border-2 p-3 text-left transition-colors ${
                   selected
                     ? 'border-(--ssz-color-primary-600) bg-(--ssz-color-primary-50) dark:bg-(--ssz-color-primary-950)'
@@ -120,6 +156,20 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
             );
           })}
         </div>
+
+        {rangeReplaced && (
+          <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+            <Info className="size-3.5 shrink-0" aria-hidden />
+            {t('writingTask.step1.rangeReset', {
+              min: exercise.settings.minWords,
+              max: exercise.settings.maxWords,
+              mode: t(`writingTask.modes.${exercise.mode}` as 'writingTask.modes.letter'),
+            })}
+            <Button type="button" variant="link" size="sm" onClick={undoRange}>
+              {t('writingTask.step1.rangeResetUndo', { min: replaced.min, max: replaced.max })}
+            </Button>
+          </p>
+        )}
       </section>
 
       <div className="flex flex-col gap-1">

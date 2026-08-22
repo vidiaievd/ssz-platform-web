@@ -88,6 +88,33 @@ describe('the mode picker', () => {
     const next = onChange.mock.calls.at(-1)![0] as WritingTask;
     expect([next.settings.minWords, next.settings.maxWords]).toEqual([...LEN_DEFAULTS.essay]);
   });
+
+  it('says nothing when the range it replaced was nobody\'s choice', async () => {
+    // Straight off the letter default: the numbers changed, but no decision was undone,
+    // and a line about it would be noise on the ordinary first pick of the right type.
+    const { user } = renderStep();
+
+    await user.click(screen.getByRole('radio', { name: /Essay/ }));
+
+    expect(screen.queryByText(/Length set to/)).not.toBeInTheDocument();
+  });
+
+  it('reports replacing a range the author set, and offers the old one back', async () => {
+    const onChange = vi.fn();
+    const chosen = doc({ settings: { ...doc().settings, minWords: 90, maxWords: 150 } });
+    const { user } = renderStep(chosen, onChange);
+
+    await user.click(screen.getByRole('radio', { name: /Essay/ }));
+    expect(screen.getByText('Length set to 200–350 words for Essay.')).toBeInTheDocument();
+
+    // The range itself is edited on step 2; this only puts the author's numbers back.
+    await user.click(screen.getByRole('button', { name: 'Keep 90–150' }));
+
+    const next = onChange.mock.calls.at(-1)![0] as WritingTask;
+    expect([next.settings.minWords, next.settings.maxWords]).toEqual([90, 150]);
+    expect(next.mode).toBe('essay');
+    expect(screen.queryByText(/Length set to/)).not.toBeInTheDocument();
+  });
 });
 
 describe('the prompt', () => {

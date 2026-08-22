@@ -2175,6 +2175,8 @@
       "title": "Задание",
       "lede": "Что ученик должен написать и что его текст обязан раскрыть.",
       "modeLabel": "Тип текста",
+      "rangeReset": "Объём установлен {min}–{max} слов для режима «{mode}».",
+      "rangeResetUndo": "Оставить {min}–{max}",
       "instructionLabel": "Инструкция, которую видит ученик",
       "instructionPlaceholder": "Skriv en sammenhengende tekst. Du har 40 minutter.",
       "instructionHelp": "Одна строка на изучаемом языке. Она же — инструкция упражнения во всей остальной платформе.",

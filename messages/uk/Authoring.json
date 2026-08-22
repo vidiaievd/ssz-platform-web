@@ -2175,6 +2175,8 @@
       "title": "Завдання",
       "lede": "Що учень має написати і що його текст зобов'язаний розкрити.",
       "modeLabel": "Тип тексту",
+      "rangeReset": "Обсяг встановлено {min}–{max} слів для режиму «{mode}».",
+      "rangeResetUndo": "Залишити {min}–{max}",
       "instructionLabel": "Інструкція, яку бачить учень",
       "instructionPlaceholder": "Skriv en sammenhengende tekst. Du har 40 minutter.",
       "instructionHelp": "Один рядок мовою, яку вивчають. Вона ж — інструкція вправи в усій решті платформи.",
