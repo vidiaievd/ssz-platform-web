@@ -9,6 +9,7 @@ import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
 import { MatchPairsSolver } from './match-pairs-solver';
 import { TranslateSolver } from './translate-solver';
+import { WritingTaskSolver } from './writing-task-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import {
@@ -18,7 +19,6 @@ import {
   checkMcqGroup,
   FillBody,
   ShortAnswerBody,
-  WritingBody,
   SentenceSchemaBody,
   WordBankFillBody,
   checkWordBankFill,
@@ -41,7 +41,6 @@ import {
   type SchemaField,
   type SchemaToken,
   type SchemaPlacements,
-  type WritingValue,
   type WordBankFillExpectedAnswers,
   type WordBankFillResults,
   type WordBankFillValue,
@@ -369,42 +368,6 @@ function issueSummary(
   return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
-function WritingSolver({ display, phase, ok, onCheck }: SolverProps) {
-  const [value, setValue] = useState<WritingValue>({ text: '', topicId: null });
-  const c = display.content;
-  const topics = (Array.isArray(c.options) ? c.options : [])
-    .filter(
-      (o): o is { id: string; title: string } => typeof (o as { id?: unknown }).id === 'string',
-    )
-    .map((o) => ({ id: o.id, title: str(o.title) }));
-  const minWords = typeof c.min_words === 'number' ? c.min_words : undefined;
-  const [canSubmit, setCanSubmit] = useState(false);
-
-  return (
-    <>
-      <WritingBody
-        content={{
-          prompt: str(c.prompt),
-          topics: topics.length > 0 ? topics : undefined,
-          minWords,
-          instruction: instr(display),
-        }}
-        value={value}
-        onValueChange={setValue}
-        onAnswerChange={setCanSubmit}
-        phase={phase}
-        ok={ok}
-        mode="practice"
-        accent={ACCENT}
-      />
-      {phase === 'answering' && (
-        // Writing is always routed for review — no client-side correctness.
-        <CheckFooter canSubmit={canSubmit} onCheck={() => onCheck({ ok: null })} />
-      )}
-    </>
-  );
-}
-
 function SentenceSchemaSolver({ display, phase, ok, revealed, onCheck }: SolverProps) {
   const [value, setValue] = useState<SchemaPlacements>({});
   const c = display.content;
@@ -722,7 +685,6 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
   short_answer: ShortAnswerSolver,
-  writing_task: WritingSolver,
   sentence_schema: SentenceSchemaSolver,
   word_bank_fill: WordBankFillSolver,
   text_order: TextOrderSolver,
@@ -749,6 +711,10 @@ const SERVER_SOLVERS: Record<
   error_correction: ErrorCorrectionSolver,
   translate_to_target: TranslateSolver,
   translate_from_target: TranslateSolver,
+  // Not because its answers are secret — a written text has no answers — but because
+  // the task's own answer key is: the model answer and the point keywords never leave
+  // the server, and the attempt is where the draft and the teacher's verdict live.
+  writing_task: WritingTaskSolver,
 };
 
 export interface ExerciseSolverProps {

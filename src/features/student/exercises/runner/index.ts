@@ -69,6 +69,8 @@ export type {
   WritingTaskValue,
 } from './writing-task-body';
 
+export { readWritingTaskProjection } from './writing-task-projection';
+
 export { ErrorCorrectionBody } from './error-correction-body';
 export type { ErrorCorrectionBodyProps, ErrorCorrectionValue } from './error-correction-body';
 export { readStudentProjection } from './error-correction-projection';
