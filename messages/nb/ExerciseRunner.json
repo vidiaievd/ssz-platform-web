@@ -128,6 +128,38 @@
     "wordCount": "{count} ord",
     "wordCountMin": "{count} / {min} ord"
   },
+  "writingTask": {
+    "defaultInstruction": "Skriv teksten din",
+    "inputLabel": "Teksten din",
+    "placeholder": "Skriv teksten din her…",
+    "attemptNo": "innlevering {n}",
+    "checklistTitle": "Dette må være med",
+    "phrasesTitle": "Nyttige uttrykk",
+    "letterLine": "Til: {recipient} · {register}",
+    "imageAlt": "Oppgavebilde",
+    "imageMissing": "bildet fra oppgaven",
+    "wordRange": "{count} / {min}–{max} ord",
+    "wordRangeOpen": "{count} / {min}+ ord",
+    "pasteOff": "innliming av",
+    "pasteBlocked": "Innliming er slått av i denne oppgaven — skriv teksten selv.",
+    "saving": "Lagrer…",
+    "saved": "Utkast lagret",
+    "timeLeft": "{minutes} minutter igjen",
+    "rubricTitle": "Slik vurderes teksten",
+    "passLine": "{pass} av {max} poeng for å bestå",
+    "topLevel": "3 — {descriptor}",
+    "modes": {
+      "letter": "Brev",
+      "essay": "Tekst",
+      "picture": "Bildebeskrivelse",
+      "retell": "Gjenfortelling",
+      "free": "Fritekst"
+    },
+    "register": {
+      "formal": "formelt språk",
+      "informal": "uformelt språk"
+    }
+  },
   "sentenceSchema": {
     "defaultInstruction": "Plasser hvert ord i riktig felt",
     "bankLabel": "Ord",

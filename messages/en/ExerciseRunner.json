@@ -128,6 +128,38 @@
     "wordCount": "{count} words",
     "wordCountMin": "{count} / {min} words"
   },
+  "writingTask": {
+    "defaultInstruction": "Write your text",
+    "inputLabel": "Your text",
+    "placeholder": "Write your text here…",
+    "attemptNo": "submission {n}",
+    "checklistTitle": "This must be included",
+    "phrasesTitle": "Useful phrases",
+    "letterLine": "To: {recipient} · {register}",
+    "imageAlt": "Task picture",
+    "imageMissing": "the picture from the task",
+    "wordRange": "{count} / {min}–{max} words",
+    "wordRangeOpen": "{count} / {min}+ words",
+    "pasteOff": "pasting off",
+    "pasteBlocked": "Pasting is turned off for this task — write the text yourself.",
+    "saving": "Saving…",
+    "saved": "Draft saved",
+    "timeLeft": "{minutes} minutes left",
+    "rubricTitle": "How the text is graded",
+    "passLine": "{pass} of {max} points to pass",
+    "topLevel": "3 — {descriptor}",
+    "modes": {
+      "letter": "Letter",
+      "essay": "Essay",
+      "picture": "Picture description",
+      "retell": "Retelling",
+      "free": "Free writing"
+    },
+    "register": {
+      "formal": "formal language",
+      "informal": "informal language"
+    }
+  },
   "sentenceSchema": {
     "defaultInstruction": "Place each word in the right field",
     "bankLabel": "Words",

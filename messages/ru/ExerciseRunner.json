@@ -128,6 +128,38 @@
     "wordCount": "{count} слов",
     "wordCountMin": "{count} / {min} слов"
   },
+  "writingTask": {
+    "defaultInstruction": "Напишите свой текст",
+    "inputLabel": "Ваш текст",
+    "placeholder": "Пишите свой текст здесь…",
+    "attemptNo": "сдача {n}",
+    "checklistTitle": "Это должно быть в тексте",
+    "phrasesTitle": "Полезные выражения",
+    "letterLine": "Кому: {recipient} · {register}",
+    "imageAlt": "Изображение к заданию",
+    "imageMissing": "изображение из задания",
+    "wordRange": "{count} / {min}–{max} слов",
+    "wordRangeOpen": "{count} / {min}+ слов",
+    "pasteOff": "вставка выключена",
+    "pasteBlocked": "В этом задании вставка выключена — напишите текст сами.",
+    "saving": "Сохраняем…",
+    "saved": "Черновик сохранён",
+    "timeLeft": "осталось {minutes} мин",
+    "rubricTitle": "Как оценивается текст",
+    "passLine": "{pass} из {max} баллов для зачёта",
+    "topLevel": "3 — {descriptor}",
+    "modes": {
+      "letter": "Письмо",
+      "essay": "Текст",
+      "picture": "Описание изображения",
+      "retell": "Пересказ",
+      "free": "Свободный текст"
+    },
+    "register": {
+      "formal": "официальный язык",
+      "informal": "неофициальный язык"
+    }
+  },
   "sentenceSchema": {
     "defaultInstruction": "Разместите каждое слово в правильном поле",
     "bankLabel": "Слова",

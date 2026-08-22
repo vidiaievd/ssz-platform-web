@@ -128,6 +128,38 @@
     "wordCount": "{count} слів",
     "wordCountMin": "{count} / {min} слів"
   },
+  "writingTask": {
+    "defaultInstruction": "Напишіть свій текст",
+    "inputLabel": "Ваш текст",
+    "placeholder": "Пишіть свій текст тут…",
+    "attemptNo": "здача {n}",
+    "checklistTitle": "Це має бути в тексті",
+    "phrasesTitle": "Корисні вирази",
+    "letterLine": "Кому: {recipient} · {register}",
+    "imageAlt": "Зображення до завдання",
+    "imageMissing": "зображення із завдання",
+    "wordRange": "{count} / {min}–{max} слів",
+    "wordRangeOpen": "{count} / {min}+ слів",
+    "pasteOff": "вставлення вимкнено",
+    "pasteBlocked": "У цьому завданні вставлення вимкнено — напишіть текст самі.",
+    "saving": "Зберігаємо…",
+    "saved": "Чернетку збережено",
+    "timeLeft": "залишилося {minutes} хв",
+    "rubricTitle": "Як оцінюється текст",
+    "passLine": "{pass} з {max} балів для заліку",
+    "topLevel": "3 — {descriptor}",
+    "modes": {
+      "letter": "Лист",
+      "essay": "Текст",
+      "picture": "Опис зображення",
+      "retell": "Переказ",
+      "free": "Вільний текст"
+    },
+    "register": {
+      "formal": "офіційна мова",
+      "informal": "неофіційна мова"
+    }
+  },
   "sentenceSchema": {
     "defaultInstruction": "Розмістіть кожне слово у правильному полі",
     "bankLabel": "Слова",

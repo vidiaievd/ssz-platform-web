@@ -59,6 +59,16 @@ export type {
 export { WritingBody } from './writing-body';
 export type { WritingBodyProps, WritingContent, WritingValue, WritingTopic } from './writing-body';
 
+export { measure, submitGate, WritingTaskBody } from './writing-task-body';
+export type {
+  DraftSaveState,
+  SubmitBlock,
+  SubmitGate,
+  WritingTaskBodyProps,
+  WritingTaskPhase,
+  WritingTaskValue,
+} from './writing-task-body';
+
 export { ErrorCorrectionBody } from './error-correction-body';
 export type { ErrorCorrectionBodyProps, ErrorCorrectionValue } from './error-correction-body';
 export { readStudentProjection } from './error-correction-projection';
