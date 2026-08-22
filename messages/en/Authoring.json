@@ -2118,5 +2118,45 @@
       "POOL_TOO_SMALL": "Extras are off and there are only {count} pairs — the last ones solve themselves",
       "FB_NO_DEFAULT": "Pair {index} has no default explanation"
     }
+  },
+  "builder": {
+    "saving": "Saving…",
+    "saved": "Saved at {time}",
+    "saveFailed": "Save failed — your edits are still here.",
+    "saveConflict": "Someone else saved this exercise. Your edits are still here.",
+    "saveRetry": "Try again",
+    "saveOverwrite": "Save mine anyway",
+    "navBack": "Back",
+    "navNext": "Next: {step}",
+    "done": "Review & finish",
+    "gateTitle": "Before you assign this",
+    "gateClear": "Nothing standing in the way — this exercise is ready to assign.",
+    "gateGoToStep": "Go to step {step}",
+    "gateBlocked": "{count, plural, one {Fix # problem first} other {Fix # problems first}}",
+    "gateDone": "Looks good",
+    "gateClose": "Close"
+  },
+  "writingTask": {
+    "issues": {
+      "EX_NO_PROMPT": "Write the task itself — the situation the student is writing about.",
+      "MODE_NO_SOURCE": "A retelling needs the text being retold.",
+      "MODE_NO_RECIPIENT": "Say who the letter is to — the register makes no sense without it.",
+      "MODE_NO_IMAGE": "A picture description needs a picture.",
+      "EX_NO_POINTS": "Add at least one thing the text must cover.",
+      "POINTS_TOO_MANY": "{count} must-cover points — beyond five the task becomes a checklist.",
+      "POINT_NO_KEYWORDS": "Point {index} has no keywords, so the AI pre-check cannot tell whether it was covered.",
+      "POINT_NO_KEYWORDS_ANY": "A must-cover point has no keywords, so the AI pre-check cannot tell whether it was covered.",
+      "EX_NO_MODEL": "No example answer. A free text has no key to test the task against — yours is the only one.",
+      "LEN_MAX_LTE_MIN": "The maximum has to be above the minimum.",
+      "TIMER_TOO_SHORT": "{timer} minutes for at least {count} words is not enough time to write and reread.",
+      "CRIT_NO_NAME": "Criterion {index} has no name.",
+      "CRIT_NO_NAME_ANY": "A criterion has no name.",
+      "RUBRIC_EMPTY": "The rubric is empty — there is nothing for a teacher to mark against.",
+      "PASS_SCORE_TOO_HIGH": "The pass mark is {passScore} but the rubric is worth {max}. Nobody could pass.",
+      "CRIT_LEVEL_EMPTY": "Criterion {index} is missing a level descriptor — two teachers will grade it differently.",
+      "CRIT_LEVEL_EMPTY_ANY": "A criterion is missing a level descriptor — two teachers will grade it differently.",
+      "AI_NO_SELF_LIMIT": "Students can see the AI check before handing in, but they get no checks — set a limit above zero.",
+      "AI_STAGE_OFF_DRAFT_ON": "The AI stage is off, so the teacher gets no pre-filled rubric from it."
+    }
   }
 }

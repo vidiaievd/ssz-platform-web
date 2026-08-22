@@ -2118,5 +2118,45 @@
       "POOL_TOO_SMALL": "Ekstra er av og det er bare {count} par — de siste løser seg selv",
       "FB_NO_DEFAULT": "Par {index} mangler standardforklaring"
     }
+  },
+  "builder": {
+    "saving": "Lagrer…",
+    "saved": "Lagret {time}",
+    "saveFailed": "Lagringen mislyktes — endringene dine er fortsatt her.",
+    "saveConflict": "Noen andre lagret denne oppgaven. Endringene dine er fortsatt her.",
+    "saveRetry": "Prøv igjen",
+    "saveOverwrite": "Lagre min versjon likevel",
+    "navBack": "Tilbake",
+    "navNext": "Neste: {step}",
+    "done": "Se gjennom og fullfør",
+    "gateTitle": "Før du tildeler denne",
+    "gateClear": "Ingenting står i veien — oppgaven er klar til å tildeles.",
+    "gateGoToStep": "Gå til steg {step}",
+    "gateBlocked": "{count, plural, one {Rett # feil først} other {Rett # feil først}}",
+    "gateDone": "Ser bra ut",
+    "gateClose": "Lukk"
+  },
+  "writingTask": {
+    "issues": {
+      "EX_NO_PROMPT": "Skriv selve oppgaven — situasjonen studenten skriver om.",
+      "MODE_NO_SOURCE": "En gjenfortelling trenger teksten som skal gjenfortelles.",
+      "MODE_NO_RECIPIENT": "Si hvem brevet er til — registeret gir ikke mening uten.",
+      "MODE_NO_IMAGE": "En bildebeskrivelse trenger et bilde.",
+      "EX_NO_POINTS": "Legg til minst ett punkt teksten må dekke.",
+      "POINTS_TOO_MANY": "{count} punkter som må dekkes — over fem blir oppgaven en sjekkliste.",
+      "POINT_NO_KEYWORDS": "Punkt {index} har ingen nøkkelord, så AI-forsjekken kan ikke se om det er dekket.",
+      "POINT_NO_KEYWORDS_ANY": "Et punkt har ingen nøkkelord, så AI-forsjekken kan ikke se om det er dekket.",
+      "EX_NO_MODEL": "Ingen eksempelsvar. En fritekst har ingen fasit å teste oppgaven mot — ditt er den eneste.",
+      "LEN_MAX_LTE_MIN": "Maksimum må være høyere enn minimum.",
+      "TIMER_TOO_SHORT": "{timer} minutter på minst {count} ord er ikke nok tid til å skrive og lese gjennom.",
+      "CRIT_NO_NAME": "Kriterium {index} mangler navn.",
+      "CRIT_NO_NAME_ANY": "Et kriterium mangler navn.",
+      "RUBRIC_EMPTY": "Vurderingsskjemaet er tomt — læreren har ingenting å vurdere mot.",
+      "PASS_SCORE_TOO_HIGH": "Grensen for bestått er {passScore}, men skjemaet gir maks {max}. Ingen kan bestå.",
+      "CRIT_LEVEL_EMPTY": "Kriterium {index} mangler en nivåbeskrivelse — to lærere vil vurdere ulikt.",
+      "CRIT_LEVEL_EMPTY_ANY": "Et kriterium mangler en nivåbeskrivelse — to lærere vil vurdere ulikt.",
+      "AI_NO_SELF_LIMIT": "Studentene ser AI-sjekken før levering, men får ingen sjekker — sett en grense over null.",
+      "AI_STAGE_OFF_DRAFT_ON": "AI-trinnet er av, så læreren får ikke noe forhåndsutfylt skjema derfra."
+    }
   }
 }
