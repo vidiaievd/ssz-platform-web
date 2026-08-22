@@ -2,6 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Undo2 } from 'lucide-react';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 import {
   analyse,
@@ -22,7 +35,11 @@ import { StepFrame } from './step-frame';
 import { StepFlow } from './step-flow';
 import { StepMarking } from './step-marking';
 import { StepTask } from './step-task';
-import { useWritingTaskAutosave, type SavedDocument } from './use-writing-task-autosave';
+import {
+  sameDocument,
+  useWritingTaskAutosave,
+  type SavedDocument,
+} from './use-writing-task-autosave';
 import { useIssueCopy } from './issue-copy';
 
 const STEPS: IssueStep[] = [1, 2, 3, 4];
@@ -64,6 +81,19 @@ export function WritingTaskBuilder({
   const [exercise, setExercise] = useState(initialExercise);
   const [step, setStep] = useState<IssueStep>(1);
   const [gateOpen, setGateOpen] = useState(false);
+  const [revertOpen, setRevertOpen] = useState(false);
+
+  /**
+   * The document as this page found it.
+   *
+   * A save the author never presses is the right default — the four builders before this
+   * one work the same way, and an exercise waits in its draft until the module is
+   * published, so nothing typed here reaches a student either way. What that costs is the
+   * oldest undo there is: reloading the page no longer brings back what was there before,
+   * because autosave has already written it. This is what gives that back — state that is
+   * set once and never again, so it stays put while the document moves under it.
+   */
+  const [opened] = useState(initialExercise);
 
   const autosave = useWritingTaskAutosave({
     exerciseId,
@@ -84,6 +114,15 @@ export function WritingTaskBuilder({
   }, [exercise]);
 
   const problems = useMemo(() => issues(exercise), [exercise]);
+
+  const changedSinceOpen = !sameDocument(exercise, opened);
+
+  const revert = () => {
+    // The token of the row as it stands, on the document as it was: the write has to land
+    // on the version autosave last wrote, or it would be refused as somebody else's.
+    setExercise({ ...opened, updatedAt: exercise.updatedAt });
+    setRevertOpen(false);
+  };
 
   useBuilderSaveNotices({
     status: autosave.status,
@@ -153,6 +192,40 @@ export function WritingTaskBuilder({
         version means leaving this one, so it is a reload and not a silent swap: the
         author's unsaved work is on screen, and nothing may take it away without saying so.
       */}
+      {/*
+        Rare, and it throws away everything typed since the page opened — so it is a plain
+        link rather than a button competing with the way forward, and it asks first.
+        Hidden while there is nothing to undo: an offer to revert a document nobody has
+        touched is an offer to do nothing.
+      */}
+      {changedSinceOpen && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            className="text-muted-foreground"
+            onClick={() => setRevertOpen(true)}
+          >
+            <Undo2 className="size-3.5" aria-hidden />
+            {t('builder.revert')}
+          </Button>
+        </div>
+      )}
+
+      <AlertDialog open={revertOpen} onOpenChange={setRevertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('builder.revertTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('builder.revertBody')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('builder.revertCancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={revert}>{t('builder.revertConfirm')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <BuilderConflictDialog
         open={autosave.status === 'conflict'}
         onOverwrite={autosave.overwrite}

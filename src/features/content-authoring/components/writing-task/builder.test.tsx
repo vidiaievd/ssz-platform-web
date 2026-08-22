@@ -214,6 +214,40 @@ describe('WritingTaskBuilder', () => {
   });
 });
 
+describe('WritingTaskBuilder revert', () => {
+  it('is not offered until something has changed', () => {
+    renderBuilder();
+
+    expect(
+      screen.queryByRole('button', { name: /Undo everything since I opened this/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('puts the document back to what the page opened with, and asks first', async () => {
+    // What reloading the page used to do before autosave started writing every edit.
+    const { user } = renderBuilder();
+
+    await user.type(screen.getByLabelText('The task itself'), ' Endret.');
+    await user.click(screen.getByRole('button', { name: /Undo everything since I opened this/ }));
+
+    // Cancelling leaves the edit alone — this throws work away and says so.
+    await user.click(screen.getByRole('button', { name: 'Keep editing' }));
+    expect(screen.getByLabelText('The task itself')).toHaveValue(
+      'Du har nettopp flyttet til en ny by. Skriv et brev til en venn. Endret.',
+    );
+
+    await user.click(screen.getByRole('button', { name: /Undo everything since I opened this/ }));
+    await user.click(screen.getByRole('button', { name: 'Put it back' }));
+
+    expect(screen.getByLabelText('The task itself')).toHaveValue(
+      'Du har nettopp flyttet til en ny by. Skriv et brev til en venn.',
+    );
+    expect(
+      screen.queryByRole('button', { name: /Undo everything since I opened this/ }),
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe('WritingTaskBuilder autosave', () => {
   it('stops writing once the server refuses the document', async () => {
     // The refusal that prompted this: an exercise whose template row still carried the

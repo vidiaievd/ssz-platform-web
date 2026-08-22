@@ -78,7 +78,7 @@ export interface SavedDocument {
  * which is a save loop, not an autosave. Every edit in `edits.ts` replaces the branch it
  * touches, so reference equality per key is an accurate answer to "did anything change".
  */
-function sameDocument(a: WritingTask, b: WritingTask): boolean {
+export function sameDocument(a: WritingTask, b: WritingTask): boolean {
   if (a === b) return true;
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]) as Set<keyof WritingTask>;
   for (const key of keys) {
