@@ -118,6 +118,40 @@
       "wrong": "wrong word: {n}",
       "extra": "extra word: {n}",
       "missing": "missing word: {n}"
+    },
+    "position": "{n}/{total}",
+    "submit": "Hand in answer",
+    "sending": "Handing in…",
+    "next": "Next question",
+    "finish": "Finish",
+    "irreversible": "An answer cannot be changed once handed in",
+    "covered": "{covered} of {total} points covered",
+    "tooShort": "The answer is too short to be checked automatically.",
+    "aiNote": "AI comment — language and content are assessed here.",
+    "aiNoteGrammar": "AI comment — language and content are assessed here, grammar included.",
+    "aiSoon": "coming",
+    "modelLabel": "Sample answer:",
+    "routing": "Sent to the teacher for review",
+    "routingAi": "Checked by AI · passed on to the teacher",
+    "routingIfUnclear": "{line} if anything is unclear",
+    "sendFailed": "The answer was not handed in. Please try again.",
+    "handedInAlready": "This answer has already been handed in.",
+    "closeFailed": "We could not confirm the exercise was handed in. Check “My work” before trying again.",
+    "verdict": {
+      "pass": "Passed",
+      "partial": "Partly",
+      "fail": "Not passed",
+      "wait": "Awaiting review"
+    },
+    "done": {
+      "title": "Handed in",
+      "tally": "{pass} passed · {partial} partly · {fail} not passed",
+      "teacher": "Your teacher is looking through your answers.",
+      "again": "Do it again"
+    },
+    "empty": {
+      "title": "Nothing to answer yet",
+      "body": "This exercise has no finished questions."
     }
   },
   "writing": {

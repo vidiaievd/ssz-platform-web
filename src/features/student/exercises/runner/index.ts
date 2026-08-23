@@ -52,9 +52,19 @@ export type {
 export { ShortAnswerBody } from './short-answer-body';
 export type {
   ShortAnswerBodyProps,
-  ShortAnswerContent,
-  ShortAnswerExpectedAnswers,
+  ShortAnswerPhase,
+  ShortAnswerTally,
 } from './short-answer-body';
+export { readShortAnswerProjection } from './short-answer-projection';
+
+/* The single-question form, still live under 144 seeded exercises (plan 51 §8 Q1).
+   Dispatched to by document shape, not by template code. */
+export { ShortAnswerLegacyBody } from './short-answer-legacy-body';
+export type {
+  ShortAnswerLegacyBodyProps,
+  ShortAnswerLegacyContent,
+  ShortAnswerLegacyExpectedAnswers,
+} from './short-answer-legacy-body';
 
 export { WritingBody } from './writing-body';
 export type { WritingBodyProps, WritingContent, WritingValue, WritingTopic } from './writing-body';

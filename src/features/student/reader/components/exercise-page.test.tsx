@@ -10,6 +10,12 @@ vi.mock('@/features/content/api/use-exercise', () => ({
   useExerciseWithAnswers: (id: string) => useExerciseWithAnswers(id),
 }));
 
+// The new-form runner drives its own attempt against the engine; this page's business
+// is only which of the two runners a short_answer document is sent to.
+vi.mock('./short-answer-solver', () => ({
+  ShortAnswerSolver: () => <div>server-graded short answer</div>,
+}));
+
 // Stub the learning barrel — its transitive imports pull in next/navigation,
 // which isn't resolvable in the unit test environment.
 vi.mock('@/features/learning', () => ({
@@ -88,6 +94,24 @@ describe('ExercisePage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Check' }));
     // ok === null → "Answer submitted" (review) banner.
     expect(screen.getByText('Answer submitted')).toBeInTheDocument();
+  });
+
+  it('sends a short_answer of the new form to the server-graded runner', () => {
+    mockExercise({
+      templateCode: 'short_answer',
+      // `questions` is what the two live forms are told apart by — the old one has a
+      // single `question` and could never grow the field (plan 51 §8 Q1).
+      content: {
+        instruction: 'Svar med egne ord.',
+        questions: [{ id: 'sa1', kind: 'reading', prompt: 'Hvor lenge?' }],
+        settings: {},
+      },
+      expectedAnswers: {},
+    });
+    renderWithProviders(<ExercisePage exerciseId="e1" />);
+
+    expect(screen.getByText('server-graded short answer')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Your answer')).not.toBeInTheDocument();
   });
 
   it('auto-grades a short_answer that matches an accepted answer', () => {

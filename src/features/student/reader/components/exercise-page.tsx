@@ -8,9 +8,11 @@ import { primaryHintText, primaryInstructionText } from '@/features/content/lib/
 import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
 import { MatchPairsSolver } from './match-pairs-solver';
+import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
 import { WritingTaskSolver } from './writing-task-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
+import { isShortAnswerDocument } from '@/lib/shared-kernel/short-answer';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import {
   McqBody,
@@ -18,7 +20,7 @@ import {
   keepCorrectPicks,
   checkMcqGroup,
   FillBody,
-  ShortAnswerBody,
+  ShortAnswerLegacyBody,
   SentenceSchemaBody,
   WordBankFillBody,
   checkWordBankFill,
@@ -300,7 +302,15 @@ function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: Solve
   );
 }
 
-function ShortAnswerSolver({ display, phase, ok, retryNonce, onCheck }: SolverProps) {
+/**
+ * The single-question form, graded in the browser against a list of accepted strings.
+ *
+ * Still the shape of 144 seeded exercises (plan 51 §8 Q1), and untouched by this plan:
+ * those documents carry no semantic key, so there is nothing for the server grader to
+ * read. Which runner a learner gets is decided by the shape of the document, in
+ * `gradedOnServer` below — never by the template code, which is the same for both.
+ */
+function ShortAnswerLegacySolver({ display, phase, ok, retryNonce, onCheck }: SolverProps) {
   const t = useTranslations('ExerciseRunner');
   const [value, setValue] = useState('');
   const [diff, setDiff] = useState<DiffToken[] | null>(null);
@@ -316,7 +326,7 @@ function ShortAnswerSolver({ display, phase, ok, retryNonce, onCheck }: SolverPr
 
   return (
     <>
-      <ShortAnswerBody
+      <ShortAnswerLegacyBody
         content={{
           question: str(c.question),
           context: str(c.context) || undefined,
@@ -684,7 +694,7 @@ const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
   multiple_choice: McqSolver,
   multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
-  short_answer: ShortAnswerSolver,
+  short_answer: ShortAnswerLegacySolver,
   sentence_schema: SentenceSchemaSolver,
   word_bank_fill: WordBankFillSolver,
   text_order: TextOrderSolver,
@@ -715,7 +725,27 @@ const SERVER_SOLVERS: Record<
   // the task's own answer key is: the model answer and the point keywords never leave
   // the server, and the attempt is where the draft and the teacher's verdict live.
   writing_task: WritingTaskSolver,
+  // Its key is a set of anchor phrases — the answer written in the words the student is
+  // being asked to find — and the set is handed in a question at a time, each answer
+  // graded and recorded where the key is (plan 51 §3.2). Only documents of the new form
+  // arrive here; see `gradedOnServer`.
+  short_answer: ShortAnswerSolver,
 };
+
+/**
+ * Which runner this exercise gets, when the template alone does not decide.
+ *
+ * `short_answer` has two live document shapes and one template code: the new set of open
+ * questions, graded on the server, and the 144 single-question exercises still written
+ * in the old form, graded in the browser against accepted strings (plan 51 §8 Q1). The
+ * document says which is which — `content.questions` exists in one and cannot exist in
+ * the other — and the same test decides it in the validator and in the projections.
+ */
+function gradedOnServer(data: ExerciseWithAnswers): boolean {
+  if (SERVER_SOLVERS[data.templateCode] === undefined) return false;
+  if (data.templateCode === 'short_answer') return isShortAnswerDocument(data.content);
+  return true;
+}
 
 export interface ExerciseSolverProps {
   exerciseId: string;
@@ -748,7 +778,7 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
   // the answers to pass down. Branching here keeps the other twelve untouched —
   // moving them to server-side grading is separate work with a shape of its own.
   const ServerSolver = SERVER_SOLVERS[data.templateCode];
-  if (ServerSolver !== undefined) {
+  if (ServerSolver !== undefined && gradedOnServer(data)) {
     return (
       <div>
         {index != null && (

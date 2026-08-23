@@ -6,6 +6,7 @@ import type {
   StudentProjection as MatchPairsProjection,
 } from '@/lib/shared-kernel/match-pairs';
 import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
+import type { StudentResult as ShortAnswerResult } from '@/lib/shared-kernel/short-answer';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 
 /**
@@ -121,6 +122,37 @@ export interface TranslateSubmitDetails {
   totalItems: number;
   passedItems: number;
   items: Array<{ itemId: string; routing: 'pass' | 'teacher' }>;
+}
+
+/**
+ * One question of a `short_answer` set, handed in on its own.
+ *
+ * The attempt stays one attempt — progress, spaced repetition, the review queue and the
+ * locks are all built on "one attempt, one submission" — and the answers arrive onto it
+ * one at a time (plan 51 §3.3). Each is final: the same question is refused the second
+ * time, by the domain rather than by the button.
+ */
+export interface AnswerQuestionRequest {
+  questionId: string;
+  text: string;
+}
+
+/**
+ * What comes back with the verdict.
+ *
+ * Graded on the server and projected there too: the element labels arrive with a hit
+ * flag and never the anchor phrase that matched, and the model answer only when
+ * `showModel` allows it. The runner renders this; it computes nothing.
+ */
+export interface AnswerQuestionResponse {
+  attemptId: string;
+  /** Questions handed in so far, including this one. */
+  answered: number;
+  /** Answerable questions in the set. */
+  total: number;
+  result: ShortAnswerResult;
+  /** Whether this answer is on its way to a teacher, for the routing line. */
+  routedForReview: boolean;
 }
 
 export type AttemptStatus =

@@ -118,6 +118,40 @@
       "wrong": "feil ord: {n}",
       "extra": "overflødige ord: {n}",
       "missing": "manglende ord: {n}"
+    },
+    "position": "{n}/{total}",
+    "submit": "Lever svaret",
+    "sending": "Leverer…",
+    "next": "Neste spørsmål",
+    "finish": "Ferdig",
+    "irreversible": "Svaret kan ikke endres etter levering",
+    "covered": "{covered} av {total} punkter dekket",
+    "tooShort": "Svaret er for kort til å vurderes automatisk.",
+    "aiNote": "AI-kommentar — språk og innhold vurderes her.",
+    "aiNoteGrammar": "AI-kommentar — språk og innhold vurderes her, inkludert grammatikk.",
+    "aiSoon": "kommer",
+    "modelLabel": "Eksempelsvar:",
+    "routing": "Sendt til læreren for vurdering",
+    "routingAi": "Sjekket av AI · sendt videre til læreren",
+    "routingIfUnclear": "{line} hvis noe er uklart",
+    "sendFailed": "Svaret ble ikke levert. Prøv en gang til.",
+    "handedInAlready": "Dette svaret er allerede levert.",
+    "closeFailed": "Vi fikk ikke bekreftet at oppgaven ble levert. Sjekk «Arbeidene mine» før du prøver igjen.",
+    "verdict": {
+      "pass": "Godkjent",
+      "partial": "Delvis",
+      "fail": "Ikke godkjent",
+      "wait": "Til vurdering"
+    },
+    "done": {
+      "title": "Levert",
+      "tally": "{pass} godkjent · {partial} delvis · {fail} ikke godkjent",
+      "teacher": "Læreren ser over svarene dine.",
+      "again": "Gjør på nytt"
+    },
+    "empty": {
+      "title": "Ingenting å svare på ennå",
+      "body": "Oppgaven har ingen ferdige spørsmål."
     }
   },
   "writing": {

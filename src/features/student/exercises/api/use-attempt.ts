@@ -3,6 +3,8 @@
 import { useMutation } from '@tanstack/react-query';
 
 import type {
+  AnswerQuestionRequest,
+  AnswerQuestionResponse,
   AttemptRecord,
   DraftResponse,
   AttemptStatus,
@@ -156,6 +158,24 @@ export function useSelfCheck(exerciseId: string, attemptId: string | null) {
     mutationFn: (body) => {
       if (attemptId === null) throw new Error('No attempt in progress');
       return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/self-check`, body);
+    },
+  });
+}
+
+/**
+ * Hand in one question of a `short_answer` set.
+ *
+ * A mutation, and the plainest one here: it is final. The attempt stays in progress and
+ * gains one answered question, graded on the server — the phrases the answer is matched
+ * against are the answer, so there is nothing to check in the browser and nothing here
+ * to check it with. A repeat of the same question is refused upstream, which is where
+ * "irreversible" has to live: a button is not a rule.
+ */
+export function useAnswerQuestion(exerciseId: string, attemptId: string | null) {
+  return useMutation<AnswerQuestionResponse, Error, AnswerQuestionRequest>({
+    mutationFn: (body) => {
+      if (attemptId === null) throw new Error('No attempt in progress');
+      return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/answers`, body);
     },
   });
 }
