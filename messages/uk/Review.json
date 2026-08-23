@@ -111,6 +111,8 @@
     },
     "back": "Назад до черги",
     "closedVerbatim": "{closed} з {total} машина зарахувала дослівно",
+    "closedQuestions": "Машина закрила {closed} із {total} питань",
+    "elementsCovered": "Розкрито {covered} із {total} пунктів у всьому наборі",
     "essay": "Текст роботи · {words, plural, one {# слово} few {# слова} many {# слів} other {# слова}}",
     "sentence": {
       "autoPassed": "машина зарахувала",

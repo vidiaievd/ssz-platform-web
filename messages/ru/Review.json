@@ -111,6 +111,8 @@
     },
     "back": "Назад к очереди",
     "closedVerbatim": "{closed} из {total} машина зачла дословно",
+    "closedQuestions": "Машина закрыла {closed} из {total} вопросов",
+    "elementsCovered": "Раскрыто {covered} из {total} пунктов по всему набору",
     "essay": "Текст работы · {words, plural, one {# слово} few {# слова} many {# слов} other {# слова}}",
     "sentence": {
       "autoPassed": "машина зачла",

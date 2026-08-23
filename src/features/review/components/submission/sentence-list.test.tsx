@@ -6,7 +6,10 @@ import { describe, expect, it } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { ReviewSubmission } from '@/features/review/types';
-import type { TranslateItemDetail } from '@/features/content-authoring/types/review';
+import type {
+  ShortAnswerItemDetail,
+  TranslateItemDetail,
+} from '@/features/content-authoring/types/review';
 
 import { SentenceList } from './sentence-list';
 
@@ -77,6 +80,38 @@ const SUBMISSION = (over: Partial<ReviewSubmission> = {}): ReviewSubmission =>
     canDecide: true,
     ...over,
   }) as ReviewSubmission;
+
+const question = (over: Partial<ShortAnswerItemDetail> = {}): ShortAnswerItemDetail => ({
+  itemId: 'q1',
+  routing: 'teacher',
+  prompt: 'Hva må alle syklister ha?',
+  verdict: 'partial',
+  submitted: 'De må ha lys.',
+  covered: 1,
+  total: 2,
+  tooShort: false,
+  words: 4,
+  elements: [
+    { id: 'e1', label: 'lys foran og bak', required: true, hit: true, anchor: 'ha lys' },
+    { id: 'e2', label: 'når det er mørkt', required: true, hit: false, anchor: null },
+  ],
+  model: 'Alle må ha lys foran og bak når det er mørkt.',
+  ...over,
+});
+
+/** A whole set, as `readShortAnswerDetails` expects to find it. */
+const SHORT_ANSWER = (items: ShortAnswerItemDetail[] = [question()]) =>
+  SUBMISSION({
+    exercise: { ...SUBMISSION().exercise, type: 'short_answer' },
+    details: {
+      totalItems: items.length,
+      routedItems: items.filter((item) => item.routing === 'teacher').length,
+      passedItems: items.filter((item) => item.routing === 'pass').length,
+      coveredElements: 1,
+      totalElements: 2,
+      items,
+    },
+  });
 
 /** The panel owns the comments; this stands in for it. */
 function Harness({ submission }: { submission: ReviewSubmission }) {
@@ -170,5 +205,93 @@ describe('SentenceList', () => {
       SUBMISSION({ details: null, submittedAnswer: { items: { s1: 'Derfor de trenger.' } } }),
     );
     expect(screen.getByText('Derfor de trenger.')).toBeInTheDocument();
+  });
+
+  describe('short_answer', () => {
+    it('counts the questions the machine closed, and the points covered across the set', () => {
+      renderList(SHORT_ANSWER());
+
+      // Not "word for word": an open question is closed on saying the things the answer
+      // had to say, in whatever words the student found.
+      expect(screen.getByText(/0 of 1 questions closed by the machine/)).toBeInTheDocument();
+      expect(screen.getByText(/1 of 2 points covered across the set/)).toBeInTheDocument();
+    });
+
+    it('shows each point with the phrase that matched it, and the ones that missed', () => {
+      renderList(SHORT_ANSWER());
+
+      expect(screen.getByText('lys foran og bak · «ha lys»')).toBeInTheDocument();
+      expect(screen.getByText('når det er mørkt')).toBeInTheDocument();
+      expect(screen.getByText('1 of 2 points covered')).toBeInTheDocument();
+      expect(screen.getByText('Partly')).toBeInTheDocument();
+    });
+
+    it('gives the teacher the model answer to mark against', () => {
+      renderList(SHORT_ANSWER());
+      expect(
+        screen.getByText('Model answer: Alle må ha lys foran og bak når det er mørkt.'),
+      ).toBeInTheDocument();
+    });
+
+    it('flags an answer under the minimum without failing it on that alone', () => {
+      renderList(SHORT_ANSWER([question({ tooShort: true, words: 2, submitted: 'Ha lys.' })]));
+      expect(screen.getByText(/too short · 2 words/)).toBeInTheDocument();
+    });
+
+    it('claims nothing about a question the author has since deleted', () => {
+      renderList(
+        SHORT_ANSWER([
+          question({
+            verdict: null,
+            prompt: null,
+            covered: 0,
+            total: 0,
+            elements: [],
+            model: null,
+            submitted: 'Et helt fornuftig svar.',
+          }),
+        ]),
+      );
+
+      // The answer is read, the verdict says it was not judged, and no invented tally
+      // stands over it.
+      expect(screen.getByText('Et helt fornuftig svar.')).toBeInTheDocument();
+      expect(screen.getByText('not judged')).toBeInTheDocument();
+      expect(screen.queryByText(/points covered$/)).toBeNull();
+      expect(screen.getByText(/deleted after the student answered/)).toBeInTheDocument();
+    });
+
+    it('folds a question the machine closed by itself', async () => {
+      renderList(
+        SHORT_ANSWER([
+          question({ itemId: 'closed', routing: 'pass', verdict: 'pass', submitted: 'Lys, ja.' }),
+        ]),
+      );
+
+      expect(
+        screen.queryByText('Model answer: Alle må ha lys foran og bak når det er mørkt.'),
+      ).toBeNull();
+      await userEvent.click(screen.getByRole('button', { name: /Lys, ja/ }));
+      expect(
+        screen.getByText('Model answer: Alle må ha lys foran og bak når det er mørkt.'),
+      ).toBeInTheDocument();
+    });
+
+    // Two templates answer to the code `short_answer`, and 144 exercises are still the
+    // old one. Its breakdown has no items, and reading it leniently would print
+    // "0 of 3 points covered" over an answer nobody had graded (plan 51 §6.7).
+    it('refuses a breakdown from the old single-question form and shows the answer instead', () => {
+      renderList(
+        SUBMISSION({
+          exercise: { ...SUBMISSION().exercise, type: 'short_answer' },
+          details: { matched: null, target: 'Han sa at han var trøtt.', distance: 2 } as never,
+          submittedAnswer: { text: 'Han sa han var trøtt.' },
+        }),
+      );
+
+      expect(screen.getByText('Han sa han var trøtt.')).toBeInTheDocument();
+      expect(screen.queryByText(/points covered/)).toBeNull();
+      expect(screen.queryByText(/closed by the machine/)).toBeNull();
+    });
   });
 });

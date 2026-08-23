@@ -10,6 +10,7 @@ export type {
   PassRule,
   Question,
   QuestionKind,
+  Routing,
   Settings,
   ShortAnswerContent,
   ShowModelPolicy,

@@ -111,6 +111,8 @@
     },
     "back": "Back to the queue",
     "closedVerbatim": "{closed} of {total} closed by the machine, word for word",
+    "closedQuestions": "{closed} of {total} questions closed by the machine",
+    "elementsCovered": "{covered} of {total} points covered across the set",
     "essay": "The work · {words, plural, one {# word} other {# words}}",
     "sentence": {
       "autoPassed": "closed by the machine",

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { DiffLegend } from '@/features/content-authoring/components/translate/tr-marks';
 import type { ReviewDetails } from '@/features/content-authoring/types/review';
 
+import { readShortAnswerDetails } from '../../lib/short-answer-details';
 import { readWritingTaskDetails } from '../../lib/writing-task-details';
 import type { ReviewSubmission } from '../../types';
 
@@ -72,7 +73,21 @@ export function SentenceList({
 
   // Everything below reads a per-item breakdown, which the branch above is the only
   // template without — so by here the union has one member left.
-  const details = submission.details as ReviewDetails | null;
+  //
+  // `short_answer` is the one that has to be parsed rather than cast, and for a reason
+  // the other two do not share: two different templates answer to that code. 144 seeded
+  // exercises are still the old single question with a list of accepted strings, and
+  // their breakdown has no items in it at all (plan 51 §8 Q1). `readShortAnswerDetails`
+  // refuses those whole, which lands them in `RawAnswer` below — the answer as it was
+  // handed in, with nothing claimed about it. Reading them leniently would print a row
+  // saying `0 av 3 punkter` over a perfectly good answer, and a teacher has no way to
+  // tell that from a real one (plan 51 §6.7).
+  const shortAnswer =
+    submission.exercise.type === 'short_answer' ? readShortAnswerDetails(submission.details) : null;
+  const details: ReviewDetails | null =
+    submission.exercise.type === 'short_answer'
+      ? shortAnswer
+      : (submission.details as ReviewDetails | null);
   if (details === null) {
     // The banner above has already said why there is no analysis; what is owed here is the
     // answer as it was handed in, so the verdict can still be given on something.
@@ -88,7 +103,25 @@ export function SentenceList({
     <section className="flex flex-col gap-2.5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-[12.5px] text-muted-foreground">
-          {t('closedVerbatim', { closed, total: items.length })}
+          {/* "Word for word" is what the other templates close on, and it would be a
+              wrong description here: an open question is closed on covering the things
+              the answer had to say, in whatever words the student found. */}
+          {shortAnswer === null
+            ? t('closedVerbatim', { closed, total: items.length })
+            : t('closedQuestions', { closed, total: items.length })}
+          {/* Only `short_answer` reports coverage over elements, and the tally is stated
+              here rather than left to be added up by scrolling the list: a set that
+              half-covered every question does not read the same as one that aced two
+              and missed the third. */}
+          {shortAnswer === null ? null : (
+            <>
+              {' · '}
+              {t('elementsCovered', {
+                covered: shortAnswer.coveredElements,
+                total: shortAnswer.totalElements,
+              })}
+            </>
+          )}
         </p>
         {items.some(isTranslateDetail) ? <DiffLegend /> : null}
       </div>

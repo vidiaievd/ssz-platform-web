@@ -111,6 +111,8 @@
     },
     "back": "Tilbake til køen",
     "closedVerbatim": "{closed} av {total} lukket av maskinen, ord for ord",
+    "closedQuestions": "{closed} av {total} spørsmål lukket av maskinen",
+    "elementsCovered": "{covered} av {total} punkter dekket i hele settet",
     "essay": "Teksten · {words, plural, one {# ord} other {# ord}}",
     "sentence": {
       "autoPassed": "lukket av maskinen",

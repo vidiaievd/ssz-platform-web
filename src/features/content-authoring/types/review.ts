@@ -5,6 +5,7 @@ import type {
   StudentEdits,
   Verdict as ErrorCorrectionVerdict,
 } from '@/lib/shared-kernel/error-correction';
+import type { Verdict as ShortAnswerVerdict } from '@/lib/shared-kernel/short-answer';
 import type { DiffToken, GuardHit, Routing, Verdict } from '@/lib/shared-kernel/translate';
 
 /**
@@ -23,7 +24,14 @@ import type { DiffToken, GuardHit, Routing, Verdict } from '@/lib/shared-kernel/
  */
 export interface ReviewItemCommon {
   itemId: string;
-  similarity: number;
+  /**
+   * How close the answer came to the key, 0–1. Optional because it is not a universal
+   * question: `short_answer` grades by which of the things the answer had to say were
+   * said, and a single percentage over that is a number nothing on the screen could act
+   * on — the breakdown is the judgement (plan 51 §3.4). No renderer reads this field; it
+   * is a sort key the templates that have one still report.
+   */
+  similarity?: number;
   routing: Routing;
   /**
    * The sentence the learner was given — to translate, or to repair.
@@ -82,13 +90,73 @@ export interface ErrorCorrectionItemDetail extends ReviewItemCommon {
   edits: StudentEdits | null;
 }
 
-export type ReviewItemDetail = TranslateItemDetail | ErrorCorrectionItemDetail;
+/** One thing a `short_answer` had to say, and whether the student said it. */
+export interface ShortAnswerElementDetail {
+  id: string;
+  /** What the answer must say, in the author's words. */
+  label: string;
+  /** Optional elements are reported but never block a pass. */
+  required: boolean;
+  hit: boolean;
+  /**
+   * The phrasing that matched, unmasked — teacher-only, and the reason this row earns
+   * its place. A teacher looking at a `partial` needs to see that the student wrote
+   * "når det er mørkt" while the key was listening for "i mørket", because the fix is
+   * more often the key than the mark. Null when nothing matched.
+   */
+  anchor: string | null;
+}
+
+/**
+ * One question of a `short_answer` set, as its validator reads it.
+ *
+ * The verdict is `null` in exactly one case: the author deleted the question after the
+ * student answered it. The row is still shown — an answer missing from the queue is an
+ * answer nobody reads — but nothing is claimed about it, and the renderer must not
+ * quietly draw it as `0 av 0 punkter`.
+ */
+export interface ShortAnswerItemDetail extends ReviewItemCommon {
+  verdict: ShortAnswerVerdict | null;
+  submitted: string;
+  /** Required elements covered, out of the required elements there are. */
+  covered: number;
+  total: number;
+  /** Under the author's minimum. Caps a pass at `partial`; never fails on its own. */
+  tooShort: boolean;
+  words: number;
+  elements: ShortAnswerElementDetail[];
+  /** The author's own answer, for the teacher to mark against. Never sent to a learner. */
+  model: string | null;
+}
+
+export type ReviewItemDetail =
+  | TranslateItemDetail
+  | ErrorCorrectionItemDetail
+  | ShortAnswerItemDetail;
 
 export interface ReviewDetails<TItem extends ReviewItemDetail = ReviewItemDetail> {
   totalItems: number;
   routedItems: number;
   passedItems: number;
   items: TItem[];
+}
+
+/**
+ * A whole `short_answer` submission, question by question.
+ *
+ * The two extra tallies are over *elements* rather than over questions, and that is the
+ * one number the screen states outright: a three-question attempt that half-covered every
+ * question does not read the same as one that aced two and missed one (plan 51 §3.4).
+ *
+ * Read it through `readShortAnswerDetails` rather than casting. The breakdown is
+ * recomputed against the exercise as it stands today, so a submission made under the old
+ * single-question template — 144 of them are still live — comes back in a shape this one
+ * does not describe.
+ */
+export interface ShortAnswerDetails extends ReviewDetails<ShortAnswerItemDetail> {
+  /** Required elements covered across every answered question. */
+  coveredElements: number;
+  totalElements: number;
 }
 
 /**

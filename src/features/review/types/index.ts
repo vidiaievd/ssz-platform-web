@@ -11,7 +11,11 @@
 // Deep import rather than the feature barrel: `content-authoring/index.ts` re-exports its
 // components, so a route handler importing a type from it would pull client code into a
 // server bundle — and both features happen to name a type `ReviewQueueResponse`.
-import type { ReviewDetails, WritingTaskDetails } from '@/features/content-authoring/types/review';
+import type {
+  ReviewDetails,
+  ShortAnswerDetails,
+  WritingTaskDetails,
+} from '@/features/content-authoring/types/review';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 
 /** The five templates whose check may refuse to close, and so reach a person. */
@@ -200,8 +204,13 @@ export interface ReviewSubmission {
    * `exercise.type` before reading either, and read the writing-task half through
    * `readWritingTaskDetails` — the breakdown is recomputed against the exercise as it
    * stands today, which for an old submission is not the shape this union promises.
+   *
+   * `short_answer` carries a third member, and needs the same care for a second reason:
+   * two templates answer to that code, and the older one — still live in 144 exercises —
+   * reports no items at all. `readShortAnswerDetails` is what tells them apart, and it
+   * refuses whole rather than filling in zeros (plan 51 §6.7).
    */
-  details: ReviewDetails | WritingTaskDetails | null;
+  details: ReviewDetails | ShortAnswerDetails | WritingTaskDetails | null;
   /** `writing_task` only: the essay itself. */
   text: string | null;
   /**
