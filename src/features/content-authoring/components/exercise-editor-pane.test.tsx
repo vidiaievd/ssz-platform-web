@@ -16,6 +16,7 @@ vi.mock('../actions/error-correction', () => ({ saveErrorCorrectionAction: vi.fn
 vi.mock('../actions/translate', () => ({ saveTranslateAction: vi.fn() }));
 vi.mock('../actions/match-pairs', () => ({ saveMatchPairsAction: vi.fn() }));
 vi.mock('../actions/writing-task', () => ({ saveWritingTaskAction: vi.fn() }));
+vi.mock('../actions/short-answer', () => ({ saveShortAnswerAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -236,6 +237,91 @@ describe('ExerciseEditorPane', () => {
     expect(preview.queryByText(/flyttet til Bergen/)).not.toBeInTheDocument();
     expect(preview.queryByText(/Alle punktene er dekket/)).not.toBeInTheDocument();
     expect(preview.queryByText(/Hei Anna/)).not.toBeInTheDocument();
+  });
+
+  it('opens the short-answer builder on a document of the new form, key held back', () => {
+    // The dispatch is on the shape of the document, not on the template code — plan 51
+    // §8 Q1. `questions` is what says this one is of the new form.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-sa',
+        templateCode: 'short_answer',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: {
+          title: '',
+          instruction: 'Svar med én til tre setninger.',
+          questions: [
+            {
+              id: 'q1',
+              kind: 'reading',
+              passage: 'Fra 1. januar må alle syklister ha lys foran og bak.',
+              prompt: 'Hva er nytt fra 1. januar?',
+            },
+          ],
+          settings: {
+            passRule: 'all',
+            minWords: 3,
+            showModel: 'onClose',
+            teacherReview: 'flagged',
+          },
+        },
+        expectedAnswers: {
+          questions: {
+            q1: {
+              elements: [{ id: 'e1', label: 'kravet', anchors: ['lys foran'], required: true }],
+              model: 'Alle syklister må ha lys foran og bak.',
+              why: 'Teksten sier hva regelen krever.',
+            },
+          },
+        },
+        instructions: [
+          { instructionLanguage: 'en', instructionText: 'Svar med én til tre setninger.' },
+        ],
+        updatedAt: '2026-08-23T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Answer key/ })).toBeInTheDocument();
+
+    // The anchor phrases and the model answer are the answer written in the words the
+    // student is being asked to find; the projection keeps both off their screen.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('Hva er nytt fra 1. januar?')).toBeInTheDocument();
+    expect(preview.queryByText(/Alle syklister må ha lys/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Teksten sier hva regelen krever/)).not.toBeInTheDocument();
+    expect(preview.queryByText('kravet')).not.toBeInTheDocument();
+  });
+
+  it('leaves a short-answer document of the old form to the generic form', () => {
+    // 144 of these are still live, and the builder cannot edit one: there are no
+    // questions, no elements and no model answer to open it on.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-sa',
+        templateCode: 'short_answer',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: { question: 'Hvorfor trenger de egenkapital?', context: 'Tekst 3A.' },
+        expectedAnswers: {
+          reference_answer: 'Fordi banken krever det.',
+          accepted_answers: ['Fordi banken krever det.'],
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Svar kort.' }],
+        updatedAt: '2026-08-23T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.queryByRole('tab', { name: /Answer key/ })).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue('Hvorfor trenger de egenkapital?')).toBeInTheDocument();
   });
 
   it('confirms a save as pending a publish, on live material too', async () => {

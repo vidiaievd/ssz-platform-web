@@ -40,7 +40,7 @@ import {
   setPoint,
   setSettings,
 } from './edits';
-import { ChipEditor } from './chip-editor';
+import { ChipEditor } from '../chip-editor';
 import { ImageSlot } from './image-slot';
 
 const MODE_ICONS: Record<Mode, typeof Mail> = {

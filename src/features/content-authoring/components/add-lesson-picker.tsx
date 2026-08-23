@@ -23,6 +23,7 @@ import { TEMPLATE_CODE as ERROR_CORRECTION_TEMPLATE_CODE } from '@/lib/shared-ke
 import { TRANSLATE_TYPES } from '@/lib/shared-kernel/translate';
 import { TEMPLATE_CODE as MATCH_PAIRS_TEMPLATE_CODE } from '@/lib/shared-kernel/match-pairs';
 import { TEMPLATE_CODE as WRITING_TASK_TEMPLATE_CODE } from '@/lib/shared-kernel/writing-task';
+import { TEMPLATE_CODE as SHORT_ANSWER_TEMPLATE_CODE } from '@/lib/shared-kernel/short-answer';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -32,6 +33,7 @@ import { createGapFillAction } from '../actions/gap-fill';
 import { createErrorCorrectionAction } from '../actions/error-correction';
 import { createMatchPairsAction } from '../actions/match-pairs';
 import { createWritingTaskAction } from '../actions/writing-task';
+import { createShortAnswerAction } from '../actions/short-answer';
 import {
   createTranslateFromTargetAction,
   createTranslateToTargetAction,
@@ -72,6 +74,7 @@ type OwnBuilderTemplate =
   | typeof ERROR_CORRECTION_TEMPLATE_CODE
   | typeof MATCH_PAIRS_TEMPLATE_CODE
   | typeof WRITING_TASK_TEMPLATE_CODE
+  | typeof SHORT_ANSWER_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
@@ -84,6 +87,11 @@ const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillActi
   // in plan 50. Without a scaffold a new exercise would be created in the old shape and
   // refused by the template's schema — and the builder would open on nothing.
   [WRITING_TASK_TEMPLATE_CODE]: createWritingTaskAction,
+  // The generic form still edits the 144 `short_answer` documents of the old form, but
+  // nothing new is written that way (plan 51 §8 Q1). Without a scaffold a new exercise
+  // would be created single-question, and the builder — which dispatches on the shape of
+  // the document — would never open for it.
+  [SHORT_ANSWER_TEMPLATE_CODE]: createShortAnswerAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,

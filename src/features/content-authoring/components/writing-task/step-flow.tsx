@@ -18,6 +18,7 @@ import {
 
 import { setAi, setSettings } from './edits';
 import { ToggleRow } from '../toggle-row';
+import { PipelineStage } from '../pipeline-stage';
 
 /** The order the checks are listed in, which is the order they run in a marking pass. */
 const AI_CHECKS: (keyof Ai)[] = ['task', 'grammar', 'structure', 'lexis', 'draft'];
@@ -63,7 +64,7 @@ export function StepFlow({ exercise, containerId, onChange }: StepFlowProps) {
       </div>
 
       <section className="grid gap-3 sm:grid-cols-3" aria-label={t('writingTask.step4.pipeline')}>
-        <Stage
+        <PipelineStage
           icon={PenLine}
           when={t('writingTask.step4.stageWritingWhen')}
           title={t('writingTask.step4.stageWriting')}
@@ -76,7 +77,7 @@ export function StepFlow({ exercise, containerId, onChange }: StepFlowProps) {
             .filter((part) => part !== null)
             .join(t('writingTask.step4.stageJoin'))}
         />
-        <Stage
+        <PipelineStage
           icon={Bot}
           off={!s.aiStage}
           when={t('writingTask.step4.stageAiWhen')}
@@ -89,7 +90,7 @@ export function StepFlow({ exercise, containerId, onChange }: StepFlowProps) {
           })}
           tag={s.aiStage ? t('writingTask.step4.tagPreview') : t('writingTask.step4.tagOff')}
         />
-        <Stage
+        <PipelineStage
           icon={User}
           when={t('writingTask.step4.stageTeacherWhen')}
           title={t('writingTask.step4.stageTeacher')}
@@ -217,43 +218,6 @@ export function StepFlow({ exercise, containerId, onChange }: StepFlowProps) {
       </section>
 
       <QueueLink containerId={containerId} />
-    </div>
-  );
-}
-
-/** One box in the pipeline. `off` dims it; nothing here is interactive. */
-function Stage({
-  icon: Icon,
-  when,
-  title,
-  body,
-  tag,
-  off = false,
-}: {
-  icon: typeof Bot;
-  when: string;
-  title: string;
-  body: string;
-  tag?: string;
-  off?: boolean;
-}) {
-  return (
-    <div
-      className={`flex flex-col gap-1 rounded-lg border border-border p-3 ${
-        off ? 'opacity-55' : ''
-      }`}
-    >
-      <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        <Icon className="size-3" aria-hidden />
-        {when}
-      </span>
-      <strong className="text-sm">{title}</strong>
-      <p className="text-xs text-muted-foreground">{body}</p>
-      {tag !== undefined && (
-        <span className="mt-1 w-fit rounded-full bg-(--ssz-bg-subtle) px-2 py-0.5 text-[11px] text-muted-foreground">
-          {tag}
-        </span>
-      )}
     </div>
   );
 }

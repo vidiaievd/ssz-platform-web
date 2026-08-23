@@ -47,6 +47,12 @@ import {
   toExpectedAnswers as writingTaskToExpectedAnswers,
   type WritingTask,
 } from '@/lib/shared-kernel/writing-task';
+import {
+  fromPersisted as shortAnswerFromPersisted,
+  isShortAnswerDocument,
+  toContent as shortAnswerToContent,
+  toExpectedAnswers as shortAnswerToExpectedAnswers,
+} from '@/lib/shared-kernel/short-answer';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -66,6 +72,10 @@ import { TranslatePreview } from './translate/translate-preview';
 import { MatchPairsBuilder } from './match-pairs/builder';
 import { MatchPairsPreview } from './match-pairs/match-pairs-preview';
 import { hasExplicitVariant } from './match-pairs/edits';
+import { ShortAnswerBuilder } from './short-answer/builder';
+import { ShortAnswerPreview } from './short-answer/short-answer-preview';
+import type { ShortAnswerDocument } from './short-answer/edits';
+import type { SavedDocument as SavedShortAnswer } from './short-answer/use-short-answer-autosave';
 import { WritingTaskBuilder } from './writing-task/builder';
 import { WritingTaskPreview } from './writing-task/writing-task-preview';
 import type { SavedDocument as SavedWritingTask } from './writing-task/use-writing-task-autosave';
@@ -122,11 +132,22 @@ export function ExerciseEditorPane({
   /** The writing-task document as its builder currently has it, for the preview column. */
   const [writingTask, setWritingTask] = useState<WritingTask | null>(null);
 
+  /** The short-answer document as its builder currently has it, for the preview column. */
+  const [shortAnswer, setShortAnswer] = useState<ShortAnswerDocument | null>(null);
+
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
   const isTranslate = isTranslateCode(exercise?.templateCode);
   const isMatchPairs = exercise?.templateCode === MATCH_PAIRS_TEMPLATE_CODE;
   const isWritingTask = exercise?.templateCode === WRITING_TASK_TEMPLATE_CODE;
+  /*
+    By the shape of the document, not by the template code — plan 51 §8 Q1. The 144
+    exercises written in the old single-question form keep opening in the generic form,
+    which is still the only thing that can edit them; everything created since phase 2 is
+    of the new form and belongs to the builder. A dispatch on `templateCode` would send
+    both to the same place and one of them would be wrong.
+  */
+  const isShortAnswer = exercise != null && isShortAnswerDocument(exercise.content);
 
   return (
     <LessonEditorShell
@@ -145,11 +166,12 @@ export function ExerciseEditorPane({
             are scored the moment they are handed in, so a link to their marking queue
             would lead to a page that is empty by construction.
           */}
-          {reviewHref !== undefined && (isTranslate || isErrorCorrection || isWritingTask) && (
-            <Button asChild variant="outline" size="sm">
-              <Link href={reviewHref}>{t('review.openQueue')}</Link>
-            </Button>
-          )}
+          {reviewHref !== undefined &&
+            (isTranslate || isErrorCorrection || isWritingTask || isShortAnswer) && (
+              <Button asChild variant="outline" size="sm">
+                <Link href={reviewHref}>{t('review.openQueue')}</Link>
+              </Button>
+            )}
           {publishSlot}
         </>
       }
@@ -167,6 +189,8 @@ export function ExerciseEditorPane({
           />
         ) : isWritingTask && writingTask !== null ? (
           <WritingTaskPreview exercise={writingTask} />
+        ) : isShortAnswer && shortAnswer !== null ? (
+          <ShortAnswerPreview exercise={shortAnswer} />
         ) : (
           <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
         )
@@ -274,6 +298,26 @@ export function ExerciseEditorPane({
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
               (cached) => (cached ? applySavedWritingTask(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
+      ) : isShortAnswer && exercise != null ? (
+        // Short answer owns a document because its key is not a list of accepted strings
+        // but a set of semantic elements, each carrying the phrasings a student might use
+        // — and those phrasings are the answer, written in the words the student is being
+        // asked to find. The generic form has one question field and a comma-separated
+        // list of accepted answers, which is the shape this template left behind in the
+        // plan; documents still in that shape never reach here.
+        <ShortAnswerBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          initialExercise={shortAnswerDocumentFrom(exercise)}
+          onDocumentChange={setShortAnswer}
+          onSavedRemote={(updatedAt, saved) =>
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedShortAnswer(cached, updatedAt, saved) : cached),
             )
           }
         />
@@ -451,6 +495,49 @@ function applySavedWritingTask(
     updatedAt,
     content: { ...writingTaskToContent(saved.exercise) },
     expectedAnswers: { ...writingTaskToExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        { ...instruction, instructionText: saved.exercise.instruction.trim() },
+        ...rest,
+      ],
+    }),
+  };
+}
+
+/**
+ * The stored columns as the kernel's short-answer document, plus the row's token.
+ *
+ * No `id`/`moduleId`/`title` envelope here, unlike the five before it: this kernel's
+ * document is the content and nothing else (plan 51 §4), and the builder's envelope adds
+ * only what it actually uses — `updatedAt`, which is the autosave concurrency token. An
+ * exercise served without one would make every save unconditional, so its absence is an
+ * empty token, which the server refuses.
+ */
+function shortAnswerDocumentFrom(exercise: ExerciseWithAnswers): ShortAnswerDocument {
+  return {
+    ...shortAnswerFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+  };
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ *
+ * The instruction row follows the document's own `instruction` rather than a field of its
+ * own — one line, written to both places (see `use-short-answer-autosave.ts`).
+ */
+function applySavedShortAnswer(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedShortAnswer,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...shortAnswerToContent(saved.exercise) },
+    expectedAnswers: { ...shortAnswerToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
         { ...instruction, instructionText: saved.exercise.instruction.trim() },

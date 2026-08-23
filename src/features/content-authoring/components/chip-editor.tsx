@@ -17,8 +17,12 @@ export interface ChipEditorProps {
 }
 
 /**
- * A list of short strings the author builds one at a time — point keywords, useful
- * phrases.
+ * A list of short strings the author builds one at a time — a writing task's point
+ * keywords and useful phrases, a short answer's anchor phrases.
+ *
+ * Shared rather than owned by one builder, and moved here when the second one needed it:
+ * the behaviour below is a rule from the handoffs, identical in both, and a second copy
+ * would be a second place for the blur rule to be forgotten.
  *
  * It commits on Enter **and** on blur, which is the rule the handoff spells out and the
  * one that matters: an author who types a phrase and then clicks the next field has

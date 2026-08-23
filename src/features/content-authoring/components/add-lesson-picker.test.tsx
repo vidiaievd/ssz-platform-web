@@ -12,6 +12,7 @@ vi.mock('../actions/gap-fill', () => ({ createGapFillAction: vi.fn() }));
 vi.mock('../actions/error-correction', () => ({ createErrorCorrectionAction: vi.fn() }));
 vi.mock('../actions/match-pairs', () => ({ createMatchPairsAction: vi.fn() }));
 vi.mock('../actions/writing-task', () => ({ createWritingTaskAction: vi.fn() }));
+vi.mock('../actions/short-answer', () => ({ createShortAnswerAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
