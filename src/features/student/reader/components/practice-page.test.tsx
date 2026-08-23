@@ -6,9 +6,9 @@ import type { UnitContentsItem } from '@/features/learning';
 
 import { PracticePage } from './practice-page';
 
-const useExerciseWithAnswers = vi.fn();
+const useExerciseForRunner = vi.fn();
 vi.mock('@/features/content/api/use-exercise', () => ({
-  useExerciseWithAnswers: (id: string) => useExerciseWithAnswers(id),
+  useExerciseForRunner: (id: string) => useExerciseForRunner(id),
 }));
 
 // See exercise-page.test.tsx: the learning barrel pulls in next/navigation.
@@ -19,7 +19,7 @@ vi.mock('@/features/learning', () => ({
 
 /** Every exercise resolves to the same one-option MCQ — enough to click Check. */
 function mockMcq() {
-  useExerciseWithAnswers.mockImplementation((id: string) => ({
+  useExerciseForRunner.mockImplementation((id: string) => ({
     data: {
       id,
       templateCode: 'multiple_choice',
@@ -53,7 +53,7 @@ const item = (id: string): UnitContentsItem => ({
 
 const items = [item('e1'), item('e2'), item('e3')];
 
-beforeEach(() => useExerciseWithAnswers.mockReset());
+beforeEach(() => useExerciseForRunner.mockReset());
 
 describe('PracticePage', () => {
   it('stacks every task of the section on one page, numbered', () => {

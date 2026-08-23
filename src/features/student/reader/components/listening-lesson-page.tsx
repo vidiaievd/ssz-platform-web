@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import {
   useBestLessonVariant,
-  useExercisesWithAnswers,
+  useExercisesForRunner,
   useIntroduceCard,
   useLesson,
   useLessonListeningStages,
@@ -63,8 +63,8 @@ export function ListeningLessonPage({
     [stagesQuery.data],
   );
 
-  const gapFillExercises = useExercisesWithAnswers(gapFillStages.map((s) => s.exerciseId));
-  const compExercises = useExercisesWithAnswers(compStages.map((s) => s.exerciseId));
+  const gapFillExercises = useExercisesForRunner(gapFillStages.map((s) => s.exerciseId));
+  const compExercises = useExercisesForRunner(compStages.map((s) => s.exerciseId));
 
   const gapFillItems: ListeningGapFillItem[] = useMemo(
     () =>

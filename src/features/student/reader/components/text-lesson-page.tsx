@@ -41,7 +41,7 @@ import {
 import {
   useLesson,
   useBestLessonVariant,
-  useExercisesWithAnswers,
+  useExercisesForRunner,
   useLessonParagraphs,
   useLessonGlossaryMarks,
   useLessonListeningStages,
@@ -586,8 +586,8 @@ export function TextLessonPage({
         .sort((a, b) => a.position - b.position),
     [stagesQuery.data],
   );
-  const gapFillExercises = useExercisesWithAnswers(gapFillStages.map((s) => s.exerciseId));
-  const compExercises = useExercisesWithAnswers(compStages.map((s) => s.exerciseId));
+  const gapFillExercises = useExercisesForRunner(gapFillStages.map((s) => s.exerciseId));
+  const compExercises = useExercisesForRunner(compStages.map((s) => s.exerciseId));
 
   // An exercise whose content does not fit the template shape is dropped rather
   // than rendered half-parsed, exactly as the listening flow drops it.

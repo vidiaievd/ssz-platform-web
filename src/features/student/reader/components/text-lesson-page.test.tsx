@@ -23,7 +23,7 @@ const useLessonGlossaryMarks = vi.fn();
 const useLessonTextSpans = vi.fn();
 const useUnitVocabularyItems = vi.fn();
 const useLessonListeningStages = vi.fn();
-const useExercisesWithAnswers = vi.fn();
+const useExercisesForRunner = vi.fn();
 const introduceCard = vi.fn();
 const useMyStudentProfile = vi.fn();
 const useMediaAsset = vi.fn(
@@ -41,7 +41,7 @@ vi.mock('@/features/content', async () => {
     useLessonTextSpans: (...args: unknown[]) => useLessonTextSpans(...args),
     useUnitVocabularyItems: (...args: unknown[]) => useUnitVocabularyItems(...args),
     useLessonListeningStages: (...args: unknown[]) => useLessonListeningStages(...args),
-    useExercisesWithAnswers: (...args: unknown[]) => useExercisesWithAnswers(...args),
+    useExercisesForRunner: (...args: unknown[]) => useExercisesForRunner(...args),
     useIntroduceCard: () => ({ mutate: introduceCard, isPending: false }),
   };
 });
@@ -157,7 +157,7 @@ beforeEach(() => {
   useLessonTextSpans.mockReturnValue({ data: [], isLoading: false });
   // Most cases have no post-reading check either.
   useLessonListeningStages.mockReturnValue({ data: [], isLoading: false, isError: false });
-  useExercisesWithAnswers.mockReturnValue([]);
+  useExercisesForRunner.mockReturnValue([]);
   introduceCard.mockReset();
 });
 
@@ -566,7 +566,7 @@ describe('TextLessonPage', () => {
         isLoading: false,
         isError: false,
       });
-      useExercisesWithAnswers.mockImplementation((ids: string[]) =>
+      useExercisesForRunner.mockImplementation((ids: string[]) =>
         ids.map((id) => ({ data: id === 'ex-comp' ? COMP_EXERCISE : undefined })),
       );
     }

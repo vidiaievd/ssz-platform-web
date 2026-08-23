@@ -5,9 +5,9 @@ import { renderWithProviders } from '@/test/render';
 import type { ExerciseWithAnswers } from '@/features/content/types';
 import { ExercisePage } from './exercise-page';
 
-const useExerciseWithAnswers = vi.fn();
+const useExerciseForRunner = vi.fn();
 vi.mock('@/features/content/api/use-exercise', () => ({
-  useExerciseWithAnswers: (id: string) => useExerciseWithAnswers(id),
+  useExerciseForRunner: (id: string) => useExerciseForRunner(id),
 }));
 
 // The new-form runner drives its own attempt against the engine; this page's business
@@ -26,7 +26,7 @@ vi.mock('@/features/learning', () => ({
 function mockExercise(
   exercise: Partial<ExerciseWithAnswers> & Pick<ExerciseWithAnswers, 'templateCode'>,
 ) {
-  useExerciseWithAnswers.mockReturnValue({
+  useExerciseForRunner.mockReturnValue({
     data: {
       id: 'e1',
       targetLanguage: 'nb',
@@ -41,7 +41,7 @@ function mockExercise(
   });
 }
 
-beforeEach(() => useExerciseWithAnswers.mockReset());
+beforeEach(() => useExerciseForRunner.mockReset());
 
 describe('ExercisePage', () => {
   it('grades a correct multiple_choice answer', () => {

@@ -51,8 +51,8 @@ vi.mock('@/features/content', async () => {
 // ExercisePage imports this deep hook directly (not via the @/features/content
 // barrel), so it must be mocked to avoid a real useQuery without a provider.
 vi.mock('@/features/content/api/use-exercise', () => ({
-  useExercisesWithAnswers: () => [],
-  useExerciseWithAnswers: () => ({
+  useExercisesForRunner: () => [],
+  useExerciseForRunner: () => ({
     data: {
       id: 'exercise-1',
       templateCode: 'short_answer',

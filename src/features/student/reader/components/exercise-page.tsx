@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { useExerciseWithAnswers } from '@/features/content/api/use-exercise';
+import { useExerciseForRunner } from '@/features/content/api/use-exercise';
 import { primaryHintText, primaryInstructionText } from '@/features/content/lib/instruction-text';
 import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
@@ -12,7 +12,10 @@ import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
 import { WritingTaskSolver } from './writing-task-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
-import { isShortAnswerDocument } from '@/lib/shared-kernel/short-answer';
+import {
+  gradedInBrowser,
+  type ClientGradedTemplate,
+} from '@/features/student/exercises/lib/grading-side';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import {
   McqBody,
@@ -690,7 +693,16 @@ function FeedbackBanner({ graded, revealed, hint, onRetry, onToggleReveal }: Fee
 
 /* ── public component ───────────────────────────────────────────────────── */
 
-const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
+/**
+ * The templates checked in the browser, and the runners that check them.
+ *
+ * Typed by `ClientGradedTemplate` rather than by `string`, so this map and the list the
+ * BFF withholds answer keys by cannot drift: a solver added here without its code in
+ * `CLIENT_GRADED_TEMPLATES` does not compile, and a code listed there without a solver
+ * here does not either. The two used to be the same fact stated once and read nowhere —
+ * the reader asked for every key and sorted it out afterwards.
+ */
+const SOLVERS: Record<ClientGradedTemplate, (props: SolverProps) => React.ReactElement> = {
   multiple_choice: McqSolver,
   multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
@@ -743,8 +755,9 @@ const SERVER_SOLVERS: Record<
  */
 function gradedOnServer(data: ExerciseWithAnswers): boolean {
   if (SERVER_SOLVERS[data.templateCode] === undefined) return false;
-  if (data.templateCode === 'short_answer') return isShortAnswerDocument(data.content);
-  return true;
+  // The same predicate the BFF withholds keys by, read the other way round: a document
+  // the browser does not grade is one the server does.
+  return !gradedInBrowser(data.templateCode, data.content);
 }
 
 export interface ExerciseSolverProps {
@@ -761,7 +774,7 @@ export interface ExerciseSolverProps {
  */
 export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverProps) {
   const t = useTranslations('ExerciseRunner');
-  const { data, isLoading, isError, refetch } = useExerciseWithAnswers(exerciseId);
+  const { data, isLoading, isError, refetch } = useExerciseForRunner(exerciseId);
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
   const [graded, setGraded] = useState<Graded | null>(null);
   /* Attempts are unlimited; the answers appear only when asked for. */
@@ -796,7 +809,11 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
     );
   }
 
-  const Solver = SOLVERS[data.templateCode];
+  // The cast is the lookup, not the map: `templateCode` is whatever the server sent, and
+  // a code with no runner is the empty state below rather than a crash.
+  const Solver = (
+    SOLVERS as Record<string, ((props: SolverProps) => React.ReactElement) | undefined>
+  )[data.templateCode];
   if (!Solver) {
     return (
       <div className="rounded-2xl border border-(--ssz-border-default) bg-surface px-6 py-12 text-center">
