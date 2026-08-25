@@ -13,6 +13,42 @@ const base = {
 };
 
 describe('ExercisePreview — new exercise types', () => {
+  it('renders a short_answer set: what it is, every question, and no key', () => {
+    const exercise: ExerciseDisplay = {
+      ...base,
+      templateCode: 'short_answer',
+      content: {
+        title: 'Spørsmål til Tekst 1A',
+        instruction: 'Svar med egne ord.',
+        questions: [
+          {
+            id: 'q1',
+            kind: 'reading',
+            passage: 'Bartek har jobbet som elektriker i tre år.',
+            prompt: 'Hvor lenge har Bartek jobbet der?',
+          },
+          {
+            id: 'q2',
+            kind: 'listening',
+            passage: 'Programlederen sier …',
+            prompt: 'Hva sier hun?',
+          },
+        ],
+      },
+    };
+    renderWithProviders(<ExercisePreview exercise={exercise} />);
+
+    expect(screen.getByText('Question set')).toBeInTheDocument();
+    expect(screen.getByText('2 questions')).toBeInTheDocument();
+    expect(screen.getByText('Spørsmål til Tekst 1A')).toBeInTheDocument();
+    expect(screen.getByText('Hvor lenge har Bartek jobbet der?')).toBeInTheDocument();
+    expect(screen.getByText(/Bartek har jobbet som elektriker/)).toBeInTheDocument();
+    // A listening passage is the author's transcript, and the preview says so — the
+    // student is never shown it.
+    expect(screen.getByText('Transcript — the student does not see it')).toBeInTheDocument();
+    expect(screen.getAllByText('Answer')).toHaveLength(2);
+  });
+
   it('renders a short_answer question and an answer placeholder', () => {
     const exercise: ExerciseDisplay = {
       ...base,

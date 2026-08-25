@@ -100,6 +100,7 @@
   "matchColumnRight": "Відповідники",
   "translatePrompt": "Перекладіть:",
   "shortAnswerAnswer": "Відповідь",
+  "shortAnswerTranscript": "Транскрипт — учень його не бачить",
   "writingWords": "слів",
   "writingPointOptional": "необовʼязково"
 }

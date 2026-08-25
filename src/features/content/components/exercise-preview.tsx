@@ -3,6 +3,10 @@ import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card';
 import { readContent as readErrorCorrectionContent } from '@/lib/shared-kernel/error-correction';
+import {
+  isShortAnswerDocument,
+  readContent as readShortAnswerContent,
+} from '@/lib/shared-kernel/short-answer';
 import { readContent as readTranslateContent } from '@/lib/shared-kernel/translate';
 import { readContent as readWritingTaskContent } from '@/lib/shared-kernel/writing-task';
 import type { ExerciseDisplay } from '../types';
@@ -118,17 +122,7 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
 
         {code === 'match_pairs' && <MatchPairsContent content={content} />}
 
-        {code === 'short_answer' && (
-          <div className="space-y-2">
-            {typeof content.question === 'string' && <p className="text-sm font-medium">{content.question}</p>}
-            {typeof content.context === 'string' && content.context && (
-              <p className="text-muted-foreground text-xs">{content.context}</p>
-            )}
-            <div className="rounded-md border border-dashed border-border px-3 py-2">
-              <p className="text-muted-foreground text-xs">{t('shortAnswerAnswer')}</p>
-            </div>
-          </div>
-        )}
+        {code === 'short_answer' && <ShortAnswerContent content={content} />}
 
         {code === 'writing_task' && <WritingTaskPrompt content={content} />}
 
@@ -332,6 +326,81 @@ function WritingTaskPrompt({ content }: { content: Record<string, unknown> }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * short_answer — one template code over two live document shapes (plan 51 §8 Q1).
+ *
+ * The new form is a set of open questions; the old one is a single question with a
+ * context line, and 144 exercises are still written in it. The document says which is
+ * which — `questions` is an array in one and absent from the other — and this is the
+ * same test the validator, the runners and the BFF dispatch on.
+ *
+ * Neither branch can show an answer. For the old form the accepted strings live in
+ * `expected_answers`; for the new one so do the semantic elements, their anchor phrases
+ * and the model answer — and those are the answer written in the words the student is
+ * asked to find. `/display` serves neither column, so the preview shows the questions
+ * and marks where the answer would go.
+ */
+function ShortAnswerContent({ content }: { content: Record<string, unknown> }) {
+  const t = useTranslations('Content');
+  const ts = useTranslations('ExerciseRunner.set');
+
+  if (!isShortAnswerDocument(content)) {
+    return (
+      <div className="space-y-2">
+        {typeof content.question === 'string' && (
+          <p className="text-sm font-medium">{content.question}</p>
+        )}
+        {typeof content.context === 'string' && content.context && (
+          <p className="text-muted-foreground text-xs">{content.context}</p>
+        )}
+        <div className="rounded-md border border-dashed border-border px-3 py-2">
+          <p className="text-muted-foreground text-xs">{t('shortAnswerAnswer')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { title, instruction, questions } = readShortAnswerContent(content);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant="muted" className="text-xs">
+          {ts('badge')}
+        </Badge>
+        <span className="text-muted-foreground text-xs">
+          {ts('count', { n: questions.length })}
+        </span>
+      </div>
+
+      {title !== '' && <p className="text-sm font-medium">{title}</p>}
+      {instruction !== '' && <p className="text-muted-foreground text-xs">{instruction}</p>}
+
+      <ol className="space-y-2">
+        {questions.map((question, i) => (
+          <li key={question.id} className="space-y-1.5 rounded-md border border-border px-3 py-2">
+            <p className="text-sm font-medium">
+              <span className="text-muted-foreground mr-1.5 text-xs">{i + 1}.</span>
+              {question.prompt}
+            </p>
+            {question.passage !== '' && (
+              <p className="text-muted-foreground border-l-2 border-border pl-2 text-xs leading-relaxed whitespace-pre-wrap">
+                {question.kind === 'listening' && (
+                  <span className="mr-1.5 font-medium">{t('shortAnswerTranscript')}</span>
+                )}
+                {question.passage}
+              </p>
+            )}
+            <div className="rounded-md border border-dashed border-border px-3 py-1.5">
+              <p className="text-muted-foreground text-xs">{t('shortAnswerAnswer')}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
