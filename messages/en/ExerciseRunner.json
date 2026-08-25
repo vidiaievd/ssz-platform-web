@@ -103,6 +103,11 @@
     "helperIdle": "Tap a word on the left…",
     "helperArmed": "Now tap its match on the right."
   },
+  "set": {
+    "badge": "Question set",
+    "count": "{n, plural, one {# question} other {# questions}}",
+    "start": "Start · {n, plural, one {# question} other {# questions}}"
+  },
   "shortAnswer": {
     "defaultInstruction": "Answer the question",
     "inputLabel": "Your answer",

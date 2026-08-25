@@ -83,6 +83,7 @@ export function PracticePage({ title, items, onExerciseChecked }: PracticePagePr
             <ExerciseSolver
               exerciseId={item.contentId}
               index={i + 1}
+              stacked
               onChecked={() => handleChecked(item)}
             />
           </li>

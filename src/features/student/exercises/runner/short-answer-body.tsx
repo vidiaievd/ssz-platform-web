@@ -58,6 +58,14 @@ export interface ShortAnswerBodyProps {
   error?: string | null;
   /** False in a preview: everything renders, nothing accepts input. */
   interactive?: boolean;
+  /**
+   * Whether the set draws its own progress bar. False where something outside it already
+   * draws one — the practice stack counts tasks of the section, and two bars measuring
+   * different things sat one above the other. The `n/total` counter stays either way:
+   * it says where the learner is *inside* the set, which nothing else on that screen
+   * says. Ignored when the author turned progress off (`settings.progress`).
+   */
+  showProgressBar?: boolean;
   onSubmit: () => void;
   onNext: () => void;
   /** Start the set over. Absent where a fresh attempt cannot be had. */
@@ -166,6 +174,7 @@ export function ShortAnswerBody({
   sending = false,
   error = null,
   interactive = true,
+  showProgressBar = true,
   onSubmit,
   onNext,
   onRestart,
@@ -247,16 +256,22 @@ export function ShortAnswerBody({
     <>
       {s.progress && (
         <div className="mb-3 flex items-center gap-3">
-          <div
-            className="h-1 flex-1 overflow-hidden rounded-full"
-            style={{ background: 'var(--ssz-bg-muted)' }}
+          {showProgressBar && (
+            <div
+              className="h-1 flex-1 overflow-hidden rounded-full"
+              style={{ background: 'var(--ssz-bg-muted)' }}
+            >
+              <i
+                className="block h-full transition-[width] duration-500"
+                style={{ width: `${progress}%`, background: accent }}
+              />
+            </div>
+          )}
+          <span
+            className={`text-[12px] font-semibold tabular-nums text-(--ssz-text-muted) ${
+              showProgressBar ? 'shrink-0' : 'ml-auto'
+            }`}
           >
-            <i
-              className="block h-full transition-[width] duration-500"
-              style={{ width: `${progress}%`, background: accent }}
-            />
-          </div>
-          <span className="shrink-0 text-[12px] font-semibold tabular-nums text-(--ssz-text-muted)">
             {t('shortAnswer.position', { n: index + 1, total })}
           </span>
         </div>

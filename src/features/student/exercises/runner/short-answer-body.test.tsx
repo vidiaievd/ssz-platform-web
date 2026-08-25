@@ -77,6 +77,7 @@ interface HarnessProps {
   onRestart?: () => void;
   error?: string | null;
   sending?: boolean;
+  showProgressBar?: boolean;
 }
 
 /** The body owns nothing but the text; the harness plays the solver around it. */
@@ -90,6 +91,7 @@ function Harness({
   onRestart,
   error = null,
   sending = false,
+  showProgressBar = true,
 }: HarnessProps) {
   const [value, setValue] = useState('');
   return (
@@ -106,6 +108,7 @@ function Harness({
       onSubmit={onSubmit}
       onNext={onNext}
       {...(onRestart === undefined ? {} : { onRestart })}
+      showProgressBar={showProgressBar}
       accent="var(--ssz-runner-practice)"
     />
   );
@@ -238,6 +241,21 @@ describe('ShortAnswerBody', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /do it again/i }));
     expect(onRestart).toHaveBeenCalledOnce();
+  });
+
+  it('drops its own progress bar inside a stack, and keeps saying which question is open', () => {
+    const { container } = render(wrap(<Harness showProgressBar={false} />));
+
+    // The bar is the only transitioning element in the header; the counter is text.
+    expect(container.querySelector('.transition-\\[width\\]')).toBeNull();
+    expect(screen.getByText('1/2')).toBeInTheDocument();
+  });
+
+  it('draws its own progress bar when it owns the screen', () => {
+    const { container } = render(wrap(<Harness />));
+
+    expect(container.querySelector('.transition-\\[width\\]')).not.toBeNull();
+    expect(screen.getByText('1/2')).toBeInTheDocument();
   });
 
   it('has nothing to show when the set holds no answerable question', () => {

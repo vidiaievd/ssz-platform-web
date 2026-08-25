@@ -103,6 +103,11 @@
     "helperIdle": "Нажмите на слово слева…",
     "helperArmed": "Теперь нажмите на соответствие справа."
   },
+  "set": {
+    "badge": "Набор вопросов",
+    "count": "{n, plural, one {# вопрос} few {# вопроса} many {# вопросов} other {# вопроса}}",
+    "start": "Начать · {n, plural, one {# вопрос} few {# вопроса} many {# вопросов} other {# вопроса}}"
+  },
   "shortAnswer": {
     "defaultInstruction": "Ответьте на вопрос",
     "inputLabel": "Ваш ответ",

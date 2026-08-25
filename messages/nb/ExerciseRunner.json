@@ -103,6 +103,11 @@
     "helperIdle": "Trykk på et ord til venstre…",
     "helperArmed": "Trykk nå på samsvarende ord til høyre."
   },
+  "set": {
+    "badge": "Spørsmålssett",
+    "count": "{n, plural, one {# spørsmål} other {# spørsmål}}",
+    "start": "Start · {n, plural, one {# spørsmål} other {# spørsmål}}"
+  },
   "shortAnswer": {
     "defaultInstruction": "Svar på spørsmålet",
     "inputLabel": "Svaret ditt",

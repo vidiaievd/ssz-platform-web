@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { ListChecks } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { useExerciseForRunner } from '@/features/content/api/use-exercise';
@@ -12,6 +13,7 @@ import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
 import { WritingTaskSolver } from './writing-task-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
+import { isShortAnswerDocument, readContent } from '@/lib/shared-kernel/short-answer';
 import {
   gradedInBrowser,
   type ClientGradedTemplate,
@@ -726,6 +728,8 @@ const SERVER_SOLVERS: Record<
     language: string;
     instruction?: string;
     onChecked?: (ok: Ok) => void;
+    /** True when this runner is one card in a stack of tasks; see `ExerciseSolverProps`. */
+    stacked?: boolean;
   }) => React.ReactElement
 > = {
   word_bank_gap_fill: GapFillSolver,
@@ -760,19 +764,51 @@ function gradedOnServer(data: ExerciseWithAnswers): boolean {
   return !gradedInBrowser(data.templateCode, data.content);
 }
 
+/**
+ * How many questions this exercise is a set of, or `null` when it is a single task.
+ *
+ * Only `short_answer` in its new form is a set today: one card holding several questions
+ * handed in one at a time. The practice stack is built on "one task, one Check", so a
+ * set has to announce itself there rather than unfold into a player nobody asked to
+ * start (plan 51 phase 4 follow-up).
+ */
+function setSize(data: ExerciseWithAnswers): number | null {
+  if (data.templateCode !== 'short_answer') return null;
+  if (!isShortAnswerDocument(data.content)) return null;
+  return readContent(data.content).questions.length;
+}
+
+/**
+ * The single line a folded set shows above its start button: the instruction in the
+ * learner's language when the author wrote one, otherwise the set's own title. Never
+ * both — the folded card is a promise of what is inside, not a preview of it.
+ */
+function foldedLine(data: ExerciseWithAnswers): string {
+  const instruction = instr(data);
+  if (instruction !== undefined && instruction.trim() !== '') return instruction;
+  return isShortAnswerDocument(data.content) ? readContent(data.content).title.trim() : '';
+}
+
 export interface ExerciseSolverProps {
   exerciseId: string;
   /** 1-based position, shown when the exercise is one task of a practice set. */
   index?: number;
   /** Fired once, when the learner checks this exercise. */
   onChecked?: (ok: Ok) => void;
+  /**
+   * True when this is one card in a stack of tasks rather than the whole screen. A set
+   * then stays folded until the learner starts it — which also keeps the stack from
+   * opening an attempt on every set the moment the section loads — and drops the chrome
+   * the page around it already provides.
+   */
+  stacked?: boolean;
 }
 
 /**
  * One exercise: load → dispatch by template → grade client-side → feedback.
  * Used on its own (`ExercisePage`) and stacked by the practice page.
  */
-export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverProps) {
+export function ExerciseSolver({ exerciseId, index, onChecked, stacked }: ExerciseSolverProps) {
   const t = useTranslations('ExerciseRunner');
   const { data, isLoading, isError, refetch } = useExerciseForRunner(exerciseId);
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
@@ -781,6 +817,8 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
   const [attempts, setAttempts] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [retryNonce, setRetryNonce] = useState(0);
+  /** A set in a stack opens on request; everywhere else it is open from the start. */
+  const [opened, setOpened] = useState(false);
 
   // Per-item state is reset by remounting: the reader passes key={exerciseId}.
 
@@ -792,6 +830,10 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
   // moving them to server-side grading is separate work with a shape of its own.
   const ServerSolver = SERVER_SOLVERS[data.templateCode];
   if (ServerSolver !== undefined && gradedOnServer(data)) {
+    const questions = setSize(data);
+    // A set inside the stack: it says what it is, and waits to be started.
+    const folded = stacked === true && questions !== null && !opened;
+
     return (
       <div>
         {index != null && (
@@ -799,12 +841,45 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
             {t('taskNumber', { n: index })}
           </div>
         )}
-        <ServerSolver
-          exerciseId={exerciseId}
-          language={data.targetLanguage}
-          {...(instr(data) === undefined ? {} : { instruction: instr(data) })}
-          {...(onChecked === undefined ? {} : { onChecked })}
-        />
+        {questions !== null && stacked === true && (
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold"
+              style={{ background: 'var(--ssz-bg-subtle)', color: 'var(--ssz-text-secondary)' }}
+            >
+              <ListChecks size={12} aria-hidden="true" />
+              {t('set.badge')}
+            </span>
+            <span className="text-[12px] text-(--ssz-text-muted)">
+              {t('set.count', { n: questions })}
+            </span>
+          </div>
+        )}
+        {folded ? (
+          <>
+            {foldedLine(data) !== '' && (
+              <p className="mb-4 text-[14px] leading-relaxed text-(--ssz-text-secondary)">
+                {foldedLine(data)}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => setOpened(true)}
+              className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+              style={{ background: PRACTICE_ACCENT }}
+            >
+              {t('set.start', { n: questions })}
+            </button>
+          </>
+        ) : (
+          <ServerSolver
+            exerciseId={exerciseId}
+            language={data.targetLanguage}
+            {...(instr(data) === undefined ? {} : { instruction: instr(data) })}
+            {...(onChecked === undefined ? {} : { onChecked })}
+            {...(stacked === true ? { stacked: true } : {})}
+          />
+        )}
       </div>
     );
   }

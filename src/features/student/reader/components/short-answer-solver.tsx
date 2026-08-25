@@ -28,6 +28,12 @@ export interface ShortAnswerSolverProps {
   language: string;
   /** Fired once, when the set is closed. `null` when a teacher has it. */
   onChecked?: (ok: boolean | null) => void;
+  /**
+   * True when the set is one card in a stack of tasks rather than the whole screen.
+   * The stack draws its own progress over the section, so the set drops its own bar and
+   * keeps only the counter that says which question is open.
+   */
+  stacked?: boolean;
 }
 
 const EMPTY_TALLY: ShortAnswerTally = { pass: 0, partial: 0, fail: 0 };
@@ -59,6 +65,7 @@ export function ShortAnswerSolver({
   instruction,
   language,
   onChecked,
+  stacked = false,
 }: ShortAnswerSolverProps) {
   const t = useTranslations('ExerciseRunner');
 
@@ -237,6 +244,7 @@ export function ShortAnswerSolver({
         onSubmit={hand}
         onNext={next}
         onRestart={restart}
+        showProgressBar={!stacked}
         accent={PRACTICE_ACCENT}
       />
     </div>
