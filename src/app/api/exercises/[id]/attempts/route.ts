@@ -109,6 +109,11 @@ async function carryDraft(
  * browser — so it is abandoned, which is the truth of what happened, and a fresh one is
  * started. Doing it here rather than in the client keeps a three-step recovery out of a
  * component's render path.
+ *
+ * One attempt is never abandoned, and this route never sees it: a `short_answer` set
+ * that already holds handed-in answers comes back from the engine as a resumed attempt
+ * rather than a conflict (plan 51 §8 Q6). Its answers were graded and written down on
+ * the server, so there is nothing here to recover and nothing to throw away.
  */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -206,8 +211,8 @@ function learnerFacingDetails(templateCode: string, details: unknown): unknown {
  * did I answer last time?" — and answering it from a page of attempts would put the
  * choice of *which* attempt counts in a component. It belongs here: an attempt is
  * finished once it has been scored or routed to a teacher, and IN_PROGRESS rows are
- * skipped because POST above abandons them on sight, so one is at most an artefact of
- * a page left open.
+ * skipped: POST above abandons an empty one on sight, and a resumed `short_answer` set
+ * is still being answered — either way it is not a past answer to show.
  */
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

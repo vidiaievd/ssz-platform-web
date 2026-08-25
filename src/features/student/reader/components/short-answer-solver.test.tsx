@@ -90,6 +90,8 @@ interface ApiOptions {
   submit?: unknown;
   submitFails?: boolean;
   attemptStatus?: unknown;
+  /** What the engine says is already handed in on the attempt it hands back. */
+  answeredQuestions?: Array<{ questionId: string; text: string; verdict: string }>;
 }
 
 function mockApi(options: ApiOptions = {}) {
@@ -125,9 +127,13 @@ function mockApi(options: ApiOptions = {}) {
     }
 
     if (options.startFails) return json({ error: 'nope' }, 502);
-    return json(
-      options.content === undefined ? STARTED : { ...STARTED, exerciseContent: options.content },
-    );
+    return json({
+      ...STARTED,
+      ...(options.content === undefined ? {} : { exerciseContent: options.content }),
+      ...(options.answeredQuestions === undefined
+        ? {}
+        : { answeredQuestions: options.answeredQuestions }),
+    });
   });
 }
 
@@ -218,6 +224,71 @@ describe('ShortAnswerSolver', () => {
       ],
     });
     expect(screen.getByRole('status')).toHaveTextContent('1 passed · 1 partly · 0 not passed');
+  });
+
+  // Plan 51 §8 Q6: a reload continues the set instead of replaying it.
+  it('resumes at the first unanswered question, carrying what is already in', async () => {
+    const onChecked = vi.fn();
+    const fetchMock = mockApi({
+      answeredQuestions: [
+        { questionId: 'sa1', text: 'Han har jobbet der i tre år.', verdict: 'pass' },
+      ],
+    });
+    renderSolver(fetchMock, onChecked);
+
+    // The first question is closed and is not offered again.
+    expect(
+      await screen.findByRole('heading', { name: /Hva vil Bartek gjerne ha/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('2/2')).toBeInTheDocument();
+
+    await handIn('Mer ansvar.');
+    await userEvent.click(await screen.findByRole('button', { name: /finish/i }));
+
+    await waitFor(() => expect(onChecked).toHaveBeenCalledWith(null));
+
+    // The answer handed in before the reload is in the aggregate — leaving it out would
+    // hand in a set missing the question the student already answered.
+    const submit = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/submit'));
+    expect(JSON.parse(String(submit?.[1]?.body)).submittedAnswer).toEqual({
+      answers: [
+        { questionId: 'sa1', text: 'Han har jobbet der i tre år.' },
+        { questionId: 'sa2', text: 'Mer ansvar.' },
+      ],
+    });
+    // The tally counts the resumed verdict, not only the one earned in this sitting.
+    expect(screen.getByRole('status')).toHaveTextContent('2 passed · 0 partly · 0 not passed');
+  });
+
+  it('closes a resumed set that has every answer in and was never handed in', async () => {
+    const onChecked = vi.fn();
+    const fetchMock = mockApi({
+      answeredQuestions: [
+        { questionId: 'sa1', text: 'Han har jobbet der i tre år.', verdict: 'pass' },
+        { questionId: 'sa2', text: 'Mer ansvar.', verdict: 'partial' },
+      ],
+    });
+    renderSolver(fetchMock, onChecked);
+
+    await waitFor(() => expect(onChecked).toHaveBeenCalledWith(null));
+    // Closed once, not once per render.
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/submit'))).toHaveLength(1);
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      '1 passed · 1 partly · 0 not passed',
+    );
+  });
+
+  it('ignores a resumed answer to a question the set no longer holds', async () => {
+    const fetchMock = mockApi({
+      answeredQuestions: [{ questionId: 'gone', text: 'noe', verdict: 'pass' }],
+    });
+    renderSolver(fetchMock);
+
+    // The set starts from the top rather than from a question that cannot be found.
+    expect(
+      await screen.findByRole('heading', { name: /Hvor lenge har Bartek jobbet/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('1/2')).toBeInTheDocument();
   });
 
   it('refuses to run at all when the set arrives with its answer key attached', async () => {

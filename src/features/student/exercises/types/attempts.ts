@@ -42,6 +42,22 @@ export interface StartAttemptResponse {
   expectedAnswers: unknown;
   answerSchema: unknown;
   checkSettings: Record<string, unknown>;
+  /**
+   * What has already been handed in on this attempt, oldest first.
+   *
+   * Empty for a fresh attempt, and for every template but `short_answer` — it is the
+   * only one that takes answers before the attempt closes, so it is the only one whose
+   * open attempt is resumed rather than abandoned (plan 51 §8 Q6). Absent from an engine
+   * older than that change, which is why it is optional here.
+   */
+  answeredQuestions?: ResumedAnswer[];
+}
+
+/** One question of a `short_answer` set already handed in on the resumed attempt. */
+export interface ResumedAnswer {
+  questionId: string;
+  text: string;
+  verdict: 'pass' | 'partial' | 'fail';
 }
 
 /** `exerciseContent` when `templateCode` is `word_bank_gap_fill`. */
