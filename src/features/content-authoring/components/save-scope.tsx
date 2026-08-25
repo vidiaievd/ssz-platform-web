@@ -54,6 +54,14 @@ export function useSaveScopeDescription(): string | undefined {
  * Standing notice in the editor header. Unlike the toast it is there *before*
  * the author types — the point is to warn that a typo fix on live material is
  * public the second it is saved, not to explain it afterwards.
+ *
+ * Two or three words on screen, the whole sentence underneath them. The header is
+ * a working bar over two scrolling columns, not a page title: the sentence cost
+ * the step rail some 250px, which is why it used to be dropped below 1180px —
+ * and a warning that disappears exactly where space is tightest is a warning the
+ * narrow screen never gets. The chip fits at any width, so it is shown at every
+ * width; the sentence stays reachable as the element's title and is what a screen
+ * reader reads, since it is the part that actually explains anything.
  */
 export function SaveScopeHint({
   isLive,
@@ -73,13 +81,17 @@ export function SaveScopeHint({
   const t = useTranslations('Authoring.saveScope');
   const live = isLive && !heldForPublish;
   const Icon = live ? Radio : TriangleAlert;
+  const sentence = heldForPublish ? t('exerciseDraftHint') : live ? t('liveHint') : t('draftHint');
+  const chip = heldForPublish ? t('exerciseDraftChip') : live ? t('liveChip') : t('draftChip');
 
   return (
     <p
+      title={sentence}
       className={`flex items-center gap-1.5 text-xs ${live ? 'text-primary' : 'text-muted-foreground'} ${className ?? ''}`}
     >
       <Icon size={13} aria-hidden />
-      {heldForPublish ? t('exerciseDraftHint') : live ? t('liveHint') : t('draftHint')}
+      <span aria-hidden>{chip}</span>
+      <span className="sr-only">{sentence}</span>
     </p>
   );
 }

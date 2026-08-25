@@ -907,10 +907,13 @@
   },
   "saveScope": {
     "liveHint": "Publisert — elevene ser hver lagring med én gang.",
+    "liveChip": "Publisert",
     "draftHint": "Ikke publisert ennå — elevene ser dette materialet når modulen publiseres.",
+    "draftChip": "Ikke publisert",
     "liveToast": "Elevene ser denne endringen nå.",
     "draftToast": "Lagret i utkastet — publiser modulen for å slippe det ut.",
     "exerciseDraftHint": "Lagringer holdes tilbake til du publiserer modulen.",
+    "exerciseDraftChip": "Venter på publisering",
     "exerciseDraftToast": "Lagret. Studentene ser den publiserte versjonen til du publiserer."
   },
   "reviewPublish": {

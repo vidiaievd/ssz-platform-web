@@ -129,13 +129,11 @@ export function LessonEditorShell({
           <div ref={setToolbarElement} className="flex min-w-0 flex-1 items-stretch" />
 
           <div className="flex shrink-0 items-center gap-2 py-2">
-            {/* The reach of a save, which the bar has room to spell out on a wide screen
-                and the state badge stands in for on a narrow one. */}
-            <SaveScopeHint
-              isLive={isLive}
-              heldForPublish={savesHeldForPublish}
-              className="hidden min-[1180px]:flex"
-            />
+            {/* The reach of a save, in two or three words. It used to be a sentence the
+                bar could only afford above 1180px, which meant the screens with the
+                least room lost the warning entirely; the chip fits everywhere and keeps
+                its sentence in the title and for screen readers. */}
+            <SaveScopeHint isLive={isLive} heldForPublish={savesHeldForPublish} />
             <SaveStatusIndicator status={saveStatus} savedAt={savedAt} />
 
             <Button

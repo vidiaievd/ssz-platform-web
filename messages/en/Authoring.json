@@ -907,10 +907,13 @@
   },
   "saveScope": {
     "liveHint": "Live — students see every save immediately.",
+    "liveChip": "Published",
     "draftHint": "Not live yet — students see this material once the module is published.",
+    "draftChip": "Not published",
     "liveToast": "Students see this change now.",
     "draftToast": "Saved to the draft — publish the module to release it.",
     "exerciseDraftHint": "Saves are held until you publish the module.",
+    "exerciseDraftChip": "Held for publish",
     "exerciseDraftToast": "Saved. Students keep seeing the published version until you publish."
   },
   "reviewPublish": {
