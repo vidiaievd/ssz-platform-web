@@ -19,6 +19,7 @@ import {
   type ClientGradedTemplate,
 } from '@/features/student/exercises/lib/grading-side';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { SentenceSchemaSolver } from './sentence-schema-solver';
 import {
   McqBody,
   McqGroupBody,
@@ -26,7 +27,6 @@ import {
   checkMcqGroup,
   FillBody,
   ShortAnswerLegacyBody,
-  SentenceSchemaBody,
   WordBankFillBody,
   checkWordBankFill,
   keepCorrectBlanks,
@@ -35,8 +35,8 @@ import {
   shuffleOrder,
   gradeMcq,
   checkShortAnswer,
-  gradeSentenceSchema,
   normAnswer,
+  readSentenceSchemaProjection,
   PRACTICE_ACCENT,
   type McqContent,
   type McqGroupExpectedAnswers,
@@ -45,9 +45,6 @@ import {
   type McqGroupResults,
   type McqGroupValue,
   type FillRationale,
-  type SchemaField,
-  type SchemaToken,
-  type SchemaPlacements,
   type WordBankFillExpectedAnswers,
   type WordBankFillResults,
   type WordBankFillValue,
@@ -383,64 +380,6 @@ function issueSummary(
   return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
-function SentenceSchemaSolver({ display, phase, ok, revealed, onCheck }: SolverProps) {
-  const [value, setValue] = useState<SchemaPlacements>({});
-  const c = display.content;
-  const fields: SchemaField[] = (Array.isArray(c.fields) ? c.fields : [])
-    .filter(
-      (f): f is { id: string; label: string } => typeof (f as { id?: unknown }).id === 'string',
-    )
-    .map((f) => ({ id: f.id, label: str(f.label) }));
-  const tokens: SchemaToken[] = (Array.isArray(c.tokens) ? c.tokens : [])
-    .filter(
-      (tk): tk is { id: string; text: string } => typeof (tk as { id?: unknown }).id === 'string',
-    )
-    .map((tk) => ({ id: tk.id, text: str(tk.text) }));
-  const placements = (
-    Array.isArray(display.expectedAnswers.placements) ? display.expectedAnswers.placements : []
-  ).map((p) => ({
-    field_id: str((p as { field_id?: unknown }).field_id),
-    token_ids: strArr((p as { token_ids?: unknown }).token_ids),
-  }));
-  const [canSubmit, setCanSubmit] = useState(false);
-
-  return (
-    <>
-      <SentenceSchemaBody
-        content={{
-          sentence: str(c.sentence),
-          source_sentence: str(c.source_sentence) || undefined,
-          schema_type: c.schema_type === 'subordinate' ? 'subordinate' : 'main',
-          fields,
-          tokens,
-          instruction: instr(display),
-        }}
-        value={value}
-        onValueChange={setValue}
-        onAnswerChange={setCanSubmit}
-        phase={phase}
-        ok={ok}
-        mode="practice"
-        accent={ACCENT}
-        revealPlacements={
-          revealed ? Object.fromEntries(placements.map((p) => [p.field_id, p.token_ids])) : null
-        }
-      />
-      {phase === 'answering' && (
-        <CheckFooter
-          canSubmit={canSubmit}
-          onCheck={() =>
-            onCheck({
-              ok: gradeSentenceSchema({ placements }, value),
-              explanation: str(display.expectedAnswers.explanation) || undefined,
-            })
-          }
-        />
-      )}
-    </>
-  );
-}
-
 function WordBankFillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
   const [value, setValue] = useState<WordBankFillValue>({});
   const [results, setResults] = useState<WordBankFillResults>({});
@@ -709,7 +648,6 @@ const SOLVERS: Record<ClientGradedTemplate, (props: SolverProps) => React.ReactE
   multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
   short_answer: ShortAnswerLegacySolver,
-  sentence_schema: SentenceSchemaSolver,
   word_bank_fill: WordBankFillSolver,
   text_order: TextOrderSolver,
 };
@@ -746,6 +684,10 @@ const SERVER_SOLVERS: Record<
   // graded and recorded where the key is (plan 51 §3.2). Only documents of the new form
   // arrive here; see `gradedOnServer`.
   short_answer: ShortAnswerSolver,
+  // Its key is which field each piece belongs in, and the note under the board is
+  // resolved from the author's own per-chunk notes — so the marks come from the engine,
+  // one sentence at a time, with unlimited retries per sentence (plan 52 §3.2).
+  sentence_schema: SentenceSchemaSolver,
 };
 
 /**
@@ -767,12 +709,17 @@ function gradedOnServer(data: ExerciseWithAnswers): boolean {
 /**
  * How many questions this exercise is a set of, or `null` when it is a single task.
  *
- * Only `short_answer` in its new form is a set today: one card holding several questions
- * handed in one at a time. The practice stack is built on "one task, one Check", so a
+ * Two templates are sets: `short_answer`, one card holding several questions handed in
+ * one at a time, and `sentence_schema`, one card holding several sentences checked one at
+ * a time. The practice stack is built on "one task, one Check", so a
  * set has to announce itself there rather than unfold into a player nobody asked to
  * start (plan 51 phase 4 follow-up).
  */
 function setSize(data: ExerciseWithAnswers): number | null {
+  if (data.templateCode === 'sentence_schema') {
+    const set = readSentenceSchemaProjection(data.content);
+    return set === null ? null : set.rows.length;
+  }
   if (data.templateCode !== 'short_answer') return null;
   if (!isShortAnswerDocument(data.content)) return null;
   return readContent(data.content).questions.length;

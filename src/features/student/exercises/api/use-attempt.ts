@@ -6,6 +6,8 @@ import type {
   AnswerQuestionRequest,
   AnswerQuestionResponse,
   AttemptRecord,
+  CheckRowRequest,
+  CheckRowResponse,
   DraftResponse,
   AttemptStatus,
   AttemptStatusResponse,
@@ -176,6 +178,26 @@ export function useAnswerQuestion(exerciseId: string, attemptId: string | null) 
     mutationFn: (body) => {
       if (attemptId === null) throw new Error('No attempt in progress');
       return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/answers`, body);
+    },
+  });
+}
+
+/**
+ * Check one sentence of a `sentence_schema` set, or ask to be shown it.
+ *
+ * The board goes up rather than the verdict coming down, for the reason the type was
+ * rewritten: which field a piece belongs in is the answer, and it never reaches the
+ * browser (plan 52 §3.2). Unlimited — being wrong here is a step in solving, not a
+ * verdict — until the sentence closes by being solved or shown.
+ *
+ * The attempt stays in progress. It is closed by `POST /submit` with every board in one
+ * aggregate, which regrades all of them.
+ */
+export function useCheckRow(exerciseId: string, attemptId: string | null) {
+  return useMutation<CheckRowResponse, Error, CheckRowRequest>({
+    mutationFn: (body) => {
+      if (attemptId === null) throw new Error('No attempt in progress');
+      return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/rows`, body);
     },
   });
 }

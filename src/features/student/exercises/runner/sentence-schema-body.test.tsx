@@ -1,245 +1,349 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
+import { useState, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { useState } from 'react';
 
+import { enMessages } from '@/lib/i18n/messages';
 import {
-  SentenceSchemaBody,
-  type SentenceSchemaContent,
-  type SchemaPlacements,
-} from './sentence-schema-body';
+  DEFAULT_SETTINGS,
+  type Placement,
+  type ProjectedRow,
+  type Settings,
+  type StudentResult,
+} from '@/lib/shared-kernel/sentence-schema';
 
-const messages = {
-  ExerciseRunner: {
-    sentenceSchema: {
-      defaultInstruction: 'Place each word in the right field',
-      bankLabel: 'Words',
-      bankEmpty: 'All words placed',
-      fieldDropLabel: 'Place in {field}',
-      multiWordHint: 'A field can hold more than one word',
-      answerLabel: 'Correct placement',
-      sourceLabel: 'Original sentence',
-      targetLabel: 'Target sentence',
-    },
-  },
-};
+import { SentenceSchemaBody, type SentenceSchemaPhase } from './sentence-schema-body';
 
-const CONTENT: SentenceSchemaContent = {
-  sentence: 'Lars har likt Lotte',
-  fields: [
-    { id: 'f1', label: 'Forfelt' },
-    { id: 'f2', label: 'Verbal' },
-  ],
-  tokens: [
-    { id: 't1', text: 'Lars' },
-    { id: 't2', text: 'har' },
-  ],
-};
-const ACCENT = 'var(--ssz-color-primary-500)';
+/**
+ * One sentence as the server projects it: fields, a shuffled bank, and the sentence to
+ * rewrite. Nothing here says where a piece goes — that is the point of the type.
+ *
+ * `f-adv` is optional and `f-slutt` is not, which is what the two empty-cell rules are
+ * about: an optional empty field draws `—`, a required one draws nothing, so its
+ * emptiness cannot be read as a clue.
+ */
+function makeRow(overrides: Partial<ProjectedRow> = {}): ProjectedRow {
+  return {
+    id: 'r1',
+    clause: 'sub',
+    fields: [
+      {
+        id: 'f-sub',
+        short: 'sub',
+        label: 'Subjunksjon',
+        hint: 'at, om eller spørreordet',
+        optional: false,
+      },
+      { id: 'f-adv', short: 'a', label: 'Adverbial', hint: '', optional: true },
+      { id: 'f-v', short: 'v', label: 'Verbal', hint: '', optional: false },
+      { id: 'f-slutt', short: 'N', label: 'Sluttfelt', hint: '', optional: false },
+    ],
+    bank: [
+      { id: 'c1', text: 'at' },
+      { id: 'c2', text: 'ikke' },
+      { id: 'c3', text: 'kommer' },
+      { id: 'x1', text: 'har' },
+    ],
+    source: '«Jeg kommer ikke», sa han.',
+    counts: null,
+    start: {},
+    ...overrides,
+  };
+}
 
-/** jsdom has no layout, so drop hit-testing needs hand-fed geometry. */
-function stubRect(el: Element, r: { left: number; top: number; right: number; bottom: number }) {
-  const rect = {
-    ...r,
-    width: r.right - r.left,
-    height: r.bottom - r.top,
-    x: r.left,
-    y: r.top,
-    toJSON: () => r,
-  } as DOMRect;
-  el.getBoundingClientRect = () => rect;
+function makeResult(overrides: Partial<StudentResult> = {}): StudentResult {
+  return {
+    rowId: 'r1',
+    attempt: 1,
+    byItem: { c1: 'ok', c2: 'field' },
+    byField: { 'f-sub': 'ok', 'f-adv': 'bad', 'f-v': 'empty', 'f-slutt': 'empty' },
+    wrong: 1,
+    solved: false,
+    score: 25,
+    why: null,
+    text: null,
+    solution: null,
+    banner: { source: 'override', text: 'Her står ikke foran verbet.', code: null, hint: '' },
+    ...overrides,
+  };
 }
 
 function Harness({
-  onAnswerChange,
-  content = CONTENT,
-  phase = 'answering',
-  revealPlacements = null,
+  row = makeRow(),
+  settings = DEFAULT_SETTINGS,
+  phase = 'placing' as SentenceSchemaPhase,
+  result = null,
+  attempt = 1,
+  initial = {},
+  onCheck = vi.fn(),
+  onRetry = vi.fn(),
+  onReveal = vi.fn(),
+  onNext = vi.fn(),
+  onRestart = vi.fn(),
 }: {
-  onAnswerChange?: (canSubmit: boolean) => void;
-  content?: SentenceSchemaContent;
-  phase?: 'answering' | 'feedback';
-  revealPlacements?: SchemaPlacements | null;
-}) {
-  const [value, setValue] = useState<SchemaPlacements>({});
+  row?: ProjectedRow;
+  settings?: Settings;
+  phase?: SentenceSchemaPhase;
+  result?: StudentResult | null;
+  attempt?: number;
+  initial?: Placement;
+  onCheck?: () => void;
+  onRetry?: () => void;
+  onReveal?: () => void;
+  onNext?: () => void;
+  onRestart?: () => void;
+}): ReactElement {
+  const [placement, setPlacement] = useState<Placement>(initial);
+
   return (
-    <NextIntlClientProvider locale="en" messages={messages}>
+    <NextIntlClientProvider locale="en" messages={enMessages}>
       <SentenceSchemaBody
-        content={content}
-        value={value}
-        onValueChange={setValue}
-        onAnswerChange={onAnswerChange ?? (() => {})}
+        row={row}
+        settings={settings}
+        index={0}
+        total={2}
+        placement={placement}
+        onPlacementChange={setPlacement}
         phase={phase}
-        ok={phase === 'feedback' ? false : null}
-        mode="practice"
-        accent={ACCENT}
-        revealPlacements={revealPlacements}
+        attempt={attempt}
+        result={result}
+        tally={{ solved: 1, revealed: 0 }}
+        onCheck={onCheck}
+        onRetry={onRetry}
+        onReveal={onReveal}
+        onNext={onNext}
+        onRestart={onRestart}
+        accent="var(--ssz-runner-practice)"
       />
     </NextIntlClientProvider>
   );
 }
 
+const field = (name: string) => screen.getByRole('button', { name: `Place in ${name}` });
+const piece = (text: string) => screen.getByRole('button', { name: text });
+
 describe('SentenceSchemaBody', () => {
-  it('renders the sentence, field labels and token bank', () => {
+  it('places a piece by tapping the piece and then the field', async () => {
+    const user = userEvent.setup();
     render(<Harness />);
-    expect(screen.getByText('Lars har likt Lotte')).toBeInTheDocument();
-    expect(screen.getByText('Forfelt')).toBeInTheDocument();
-    expect(screen.getByText('Verbal')).toBeInTheDocument();
-    // Tokens start in the bank.
-    expect(screen.getByRole('button', { name: 'Lars' })).toBeInTheDocument();
+
+    await user.click(piece('at'));
+    await user.click(field('Subjunksjon'));
+
+    expect(field('Subjunksjon')).toHaveTextContent('at');
   });
 
-  it('places an armed token into a field on tap and reports progress', () => {
-    const onAnswerChange = vi.fn();
-    render(<Harness onAnswerChange={onAnswerChange} />);
-    expect(onAnswerChange).toHaveBeenLastCalledWith(false);
-
-    // Arm "Lars" then tap the Forfelt drop zone.
-    fireEvent.click(screen.getByRole('button', { name: 'Lars' }));
-    fireEvent.click(screen.getByLabelText('Place in Forfelt'));
-    // Arm "har" then tap the Verbal drop zone → all tokens placed.
-    fireEvent.click(screen.getByRole('button', { name: 'har' }));
-    fireEvent.click(screen.getByLabelText('Place in Verbal'));
-
-    expect(onAnswerChange).toHaveBeenLastCalledWith(true);
-    expect(screen.getByText('All words placed')).toBeInTheDocument();
-  });
-
-  it('returns a placed token to the bank when tapped', () => {
-    const onAnswerChange = vi.fn();
-    render(<Harness onAnswerChange={onAnswerChange} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Lars' }));
-    fireEvent.click(screen.getByLabelText('Place in Forfelt'));
-    // "Lars" is now placed (a chip inside the field). Tap to remove.
-    const placed = screen.getByRole('button', { name: 'Lars' });
-    fireEvent.click(placed);
-    // Back in the bank, still selectable; not all placed.
-    expect(onAnswerChange).toHaveBeenLastCalledWith(false);
-  });
-
-  it('keeps placed tokens interactive while no token is armed', () => {
-    // Regression: the drop zone used to be a <button disabled> whenever nothing
-    // was armed, and browsers swallow events for descendants of a disabled
-    // button — a misplaced word could never be taken back out.
+  it('places a piece by tapping the field first — the same path in reverse', async () => {
+    // BEHAVIOR, "Student · placing": both directions, and no mode switch between them.
+    const user = userEvent.setup();
     render(<Harness />);
-    fireEvent.click(screen.getByRole('button', { name: 'Lars' }));
-    fireEvent.click(screen.getByLabelText('Place in Forfelt'));
 
-    const placed = screen.getByRole('button', { name: 'Lars' });
-    expect(placed).toBeEnabled();
-    for (let el = placed.parentElement; el; el = el.parentElement) {
-      expect(el.tagName === 'BUTTON' && el.hasAttribute('disabled')).toBe(false);
-    }
+    await user.click(field('Verbal'));
+    await user.click(piece('kommer'));
+
+    expect(field('Verbal')).toHaveTextContent('kommer');
   });
 
-  it('drags a token from the bank into a field', () => {
+  it('answers Enter and Space on a field, so the board is solvable without a pointer', async () => {
+    const user = userEvent.setup();
     render(<Harness />);
-    const zone = screen.getByLabelText('Place in Verbal');
-    stubRect(zone, { left: 200, top: 0, right: 320, bottom: 60 });
 
-    const chip = screen.getByRole('button', { name: 'har' });
-    stubRect(chip, { left: 0, top: 100, right: 60, bottom: 130 });
+    await user.click(piece('at'));
+    field('Subjunksjon').focus();
+    await user.keyboard('{Enter}');
 
-    fireEvent.pointerDown(chip, { pointerId: 1, clientX: 10, clientY: 110, pointerType: 'mouse', button: 0 });
-    fireEvent.pointerMove(chip, { pointerId: 1, clientX: 240, clientY: 30 });
-    fireEvent.pointerUp(chip, { pointerId: 1, clientX: 240, clientY: 30 });
-
-    // The chip now lives inside the Verbal zone instead of the bank.
-    expect(zone).toContainElement(screen.getByRole('button', { name: 'har' }));
+    expect(field('Subjunksjon')).toHaveTextContent('at');
   });
 
-  it('drops a token before an existing one to fix the order inside a field', () => {
+  it('takes a placed piece back when its own × is pressed', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={{ 'f-sub': ['c1'] }} />);
+
+    await user.click(screen.getByRole('button', { name: 'Take «at» back' }));
+
+    expect(field('Subjunksjon')).not.toHaveTextContent('at');
+  });
+
+  it('takes a placed piece back when it is tapped in the bank, where it still sits', async () => {
+    // A used piece stays in the bank at low opacity rather than leaving it: a bank that
+    // reflows on every placement destroys the learner's spatial memory mid-sentence.
+    const user = userEvent.setup();
+    render(<Harness initial={{ 'f-sub': ['c1'] }} />);
+
+    expect(piece('at')).toBeInTheDocument();
+    await user.click(piece('at'));
+
+    expect(field('Subjunksjon')).not.toHaveTextContent('at');
+  });
+
+  it('moves a piece from one field to another without leaving a copy behind', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={{ 'f-sub': ['c1'] }} />);
+
+    await user.click(piece('at'));
+    await user.click(piece('at'));
+    await user.click(field('Verbal'));
+
+    expect(field('Subjunksjon')).not.toHaveTextContent('at');
+    expect(field('Verbal')).toHaveTextContent('at');
+  });
+
+  it('shows the sentence to rewrite and never the sentence being built', () => {
     render(<Harness />);
-    const zone = screen.getByLabelText('Place in Verbal');
-    stubRect(zone, { left: 200, top: 0, right: 320, bottom: 60 });
 
-    // Place "Lars" first, so the field reads [Lars].
-    fireEvent.click(screen.getByRole('button', { name: 'Lars' }));
-    fireEvent.click(zone);
-    stubRect(screen.getByRole('button', { name: 'Lars' }), { left: 250, top: 10, right: 310, bottom: 40 });
-
-    // Drag "har" onto the left half of "Lars" → it must land in front of it.
-    const har = screen.getByRole('button', { name: 'har' });
-    stubRect(har, { left: 0, top: 100, right: 60, bottom: 130 });
-    fireEvent.pointerDown(har, { pointerId: 2, clientX: 10, clientY: 110, pointerType: 'mouse', button: 0 });
-    fireEvent.pointerMove(har, { pointerId: 2, clientX: 260, clientY: 25 });
-    fireEvent.pointerUp(har, { pointerId: 2, clientX: 260, clientY: 25 });
-
-    const texts = Array.from(zone.querySelectorAll('button')).map((b) => b.textContent);
-    expect(texts).toEqual(['har', 'Lars']);
+    expect(screen.getByText('«Jeg kommer ikke», sa han.')).toBeInTheDocument();
+    expect(screen.queryByText(/at han ikke kommer/)).not.toBeInTheDocument();
   });
 
-  it('drags a placed token back to the bank when dropped outside every field', () => {
-    const onAnswerChange = vi.fn();
-    render(<Harness onAnswerChange={onAnswerChange} />);
-    const zone = screen.getByLabelText('Place in Forfelt');
-    stubRect(zone, { left: 0, top: 0, right: 120, bottom: 60 });
-    fireEvent.click(screen.getByRole('button', { name: 'Lars' }));
-    fireEvent.click(zone);
+  it('counts what is placed on the Check button, and refuses an empty board', async () => {
+    const user = userEvent.setup();
+    const onCheck = vi.fn();
+    render(<Harness onCheck={onCheck} />);
 
-    const placed = screen.getByRole('button', { name: 'Lars' });
-    stubRect(placed, { left: 20, top: 10, right: 80, bottom: 40 });
-    fireEvent.pointerDown(placed, { pointerId: 3, clientX: 30, clientY: 20, pointerType: 'mouse', button: 0 });
-    fireEvent.pointerMove(placed, { pointerId: 3, clientX: 30, clientY: 400 });
-    fireEvent.pointerUp(placed, { pointerId: 3, clientX: 30, clientY: 400 });
+    expect(screen.getByRole('button', { name: 'Check (0/4)' })).toBeDisabled();
 
-    expect(zone).not.toContainElement(screen.getByRole('button', { name: 'Lars' }));
-    expect(onAnswerChange).toHaveBeenLastCalledWith(false);
+    await user.click(piece('at'));
+    await user.click(field('Subjunksjon'));
+    await user.click(screen.getByRole('button', { name: 'Check (1/4)' }));
+
+    expect(onCheck).toHaveBeenCalled();
   });
 
-  it('hides the target sentence while a source sentence drives the task', () => {
-    const transform: SentenceSchemaContent = {
-      ...CONTENT,
-      sentence: '… at Lars har likt Lotte',
-      source_sentence: 'Lars har likt Lotte',
-    };
-    const { rerender } = render(<Harness content={transform} />);
-    expect(screen.getByText('Lars har likt Lotte')).toBeInTheDocument();
-    expect(screen.queryByText('… at Lars har likt Lotte')).not.toBeInTheDocument();
+  it('shows the author’s own note for the piece that went wrong', () => {
+    // The chain runs over the answer key, so the note arrives resolved from the server.
+    render(<Harness phase="checked" result={makeResult()} initial={{ 'f-adv': ['c2'] }} />);
 
-    // The target only joins the feedback, once the answer is in.
-    rerender(
-      <NextIntlClientProvider locale="en" messages={messages}>
-        <SentenceSchemaBody
-          content={transform}
-          value={{}}
-          onValueChange={() => {}}
-          onAnswerChange={() => {}}
-          phase="feedback"
-          ok={false}
-          mode="practice"
-          accent={ACCENT}
-        />
-      </NextIntlClientProvider>,
-    );
-    expect(screen.getByText('… at Lars har likt Lotte')).toBeInTheDocument();
+    expect(screen.getByText('Her står ikke foran verbet.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Fix (1)' })).toBeInTheDocument();
   });
 
-  it('does not hand the bank out in sentence order', () => {
-    // Sentence order would let the learner copy the answer left to right.
-    const content: SentenceSchemaContent = {
-      ...CONTENT,
-      tokens: [
-        { id: 't1', text: 'Lars' },
-        { id: 't2', text: 'har' },
-        { id: 't3', text: 'aldri' },
-        { id: 't4', text: 'likt' },
-        { id: 't5', text: 'Lotte' },
-      ],
-    };
-    render(<Harness content={content} />);
-    const bank = screen.getByLabelText('Words');
-    const order = Array.from(bank.querySelectorAll('button')).map((b) => b.textContent);
-    expect(order).not.toEqual(['Lars', 'har', 'aldri', 'likt', 'Lotte']);
-    expect([...order].sort()).toEqual(['Lars', 'Lotte', 'aldri', 'har', 'likt']);
-  });
-
-  it('shows the expected placement once the answer is unlocked', () => {
+  it('renders a default note as copy rather than as the code it arrived as', () => {
     render(
-      <Harness phase="feedback" revealPlacements={{ f1: ['t1'], f2: ['t2'] }} />,
+      <Harness
+        phase="checked"
+        result={makeResult({
+          banner: { source: 'default', text: '', code: 'order', hint: '' },
+        })}
+      />,
     );
-    expect(screen.getByText('Correct placement')).toBeInTheDocument();
-    // Both fields are labelled twice now — the learner's row and the answer row.
-    expect(screen.getAllByText('Forfelt')).toHaveLength(2);
+
+    expect(screen.getByText('Right field, wrong order inside it.')).toBeInTheDocument();
+  });
+
+  it('repeats the rule under the note from the second attempt on', () => {
+    render(
+      <Harness
+        attempt={2}
+        phase="checked"
+        result={makeResult({
+          attempt: 2,
+          banner: {
+            source: 'override',
+            text: 'Her står ikke foran verbet.',
+            code: null,
+            hint: 'I en leddsetning står ikke foran verbet.',
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByText('Attempt 2')).toBeInTheDocument();
+    expect(screen.getByText('I en leddsetning står ikke foran verbet.')).toBeInTheDocument();
+  });
+
+  it('drops the marks as soon as the board is edited again', async () => {
+    // Transient by design: a marked board that is then edited is a board whose marks are
+    // about something else. The body reports the edit; the runner clears the phase.
+    const user = userEvent.setup();
+    const marked = makeResult();
+    render(<Harness phase="checked" result={marked} initial={{ 'f-adv': ['c2'] }} />);
+
+    expect(screen.getByText('Her står ikke foran verbet.')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Take «ikke» back' }));
+
+    // Still `checked` here — only the solver can change the phase — but the piece is off
+    // the board, which is the edit the runner acts on.
+    expect(field('Adverbial')).not.toHaveTextContent('ikke');
+  });
+
+  it('locks the board and hides the bank once the sentence is closed', () => {
+    render(
+      <Harness
+        phase="closed"
+        result={makeResult({
+          solved: true,
+          byItem: { c1: 'ok', c2: 'ok', c3: 'ok' },
+          wrong: 0,
+          score: 100,
+          why: 'I en leddsetning står ikke foran verbet.',
+          text: 'at han ikke kommer',
+          banner: {
+            source: 'why',
+            text: 'I en leddsetning står ikke foran verbet.',
+            code: null,
+            hint: '',
+          },
+        })}
+        initial={{ 'f-sub': ['c1'], 'f-adv': ['c2'], 'f-v': ['c3'] }}
+      />,
+    );
+
+    // The sentence itself arrives with the verdict, and only then.
+    expect(screen.getByText('at han ikke kommer')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Check (3/4)' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Next sentence' })).toBeInTheDocument();
+    // A locked board is a picture, not a control being refused: the cells stop being
+    // drop targets and the bank is gone, so there is nothing left to press.
+    expect(screen.queryByRole('button', { name: 'Place in Subjunksjon' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'at' })).not.toBeInTheDocument();
+  });
+
+  it('offers to show the schema while the sentence is open, and not after', () => {
+    render(<Harness />);
+    expect(screen.getByRole('button', { name: 'Show the correct schema' })).toBeInTheDocument();
+  });
+
+  it('marks an optional empty field with a dash and a required one with nothing', () => {
+    render(<Harness />);
+
+    // `f-adv` is optional, `f-slutt` is not. The second is deliberately silent: an empty
+    // required field must not hint that something belongs there.
+    expect(field('Adverbial')).toHaveTextContent('—');
+    expect(field('Sluttfelt')).toHaveTextContent('');
+  });
+
+  it('hides where the mistake is when the author turned per-field marking off, and keeps the verdict', () => {
+    render(
+      <Harness
+        settings={{ ...DEFAULT_SETTINGS, perField: false }}
+        phase="checked"
+        result={makeResult()}
+        initial={{ 'f-adv': ['c2'] }}
+      />,
+    );
+
+    // The note still appears — §6.8: hiding where the mistake is must not hide that
+    // there is one.
+    expect(screen.getByText('Her står ikke foran verbet.')).toBeInTheDocument();
+  });
+
+  it('shows the field hints only when the author turned them on', () => {
+    const { unmount } = render(<Harness />);
+    expect(screen.queryByText('at, om eller spørreordet')).not.toBeInTheDocument();
+    unmount();
+
+    render(<Harness settings={{ ...DEFAULT_SETTINGS, hints: true }} />);
+    expect(screen.getByText('at, om eller spørreordet')).toBeInTheDocument();
+  });
+
+  it('shows the completion card with a replay, and no navigation of its own', () => {
+    render(<Harness phase="done" />);
+
+    expect(screen.getByText('All 2 sentences done')).toBeInTheDocument();
+    expect(screen.getByText('1 solved · 0 shown')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Do it again' })).toBeInTheDocument();
+    // Plan 52 §5: the player owns navigation, so the card offers no "next exercise".
+    expect(screen.queryByRole('button', { name: /next exercise/i })).not.toBeInTheDocument();
   });
 });

@@ -119,14 +119,12 @@ export type {
 } from './word-bank-fill-body';
 
 export { SentenceSchemaBody } from './sentence-schema-body';
-export type {
-  SentenceSchemaBodyProps,
-  SentenceSchemaContent,
-  SentenceSchemaExpectedAnswers,
-  SchemaField,
-  SchemaToken,
-  SchemaPlacements,
-} from './sentence-schema-body';
+export type { SentenceSchemaBodyProps, SentenceSchemaPhase } from './sentence-schema-body';
+export { SchemaBoard } from './schema-board';
+export type { BoardLayout, SchemaBoardProps } from './schema-board';
+export { WordBank } from './word-bank';
+export type { WordBankProps } from './word-bank';
+export { readSentenceSchemaProjection } from './sentence-schema-projection';
 
 export {
   normAnswer,
@@ -134,7 +132,6 @@ export {
   checkMcqGroup,
   gradeFill,
   gradeFreeText,
-  gradeSentenceSchema,
   checkWordBankFill,
   checkTextOrder,
 } from './grading';

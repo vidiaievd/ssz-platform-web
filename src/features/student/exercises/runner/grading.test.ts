@@ -4,7 +4,6 @@ import {
   normAnswer,
   gradeMcq,
   gradeFill,
-  gradeSentenceSchema,
   gradeFreeText,
   type FreeTextExpectedAnswers,
   checkWordBankFill,
@@ -156,26 +155,6 @@ describe('gradeFreeText', () => {
   });
 });
 
-describe('gradeSentenceSchema', () => {
-  const expected = {
-    placements: [
-      { field_id: 'f1', token_ids: ['t1'] },
-      { field_id: 'f2', token_ids: ['t2', 't3'] },
-    ],
-  };
-
-  it('returns true when every field matches exactly', () => {
-    expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t2', 't3'] })).toBe(true);
-  });
-
-  it('is order-sensitive within a field', () => {
-    expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t3', 't2'] })).toBe(false);
-  });
-
-  it('returns false when a field is missing tokens', () => {
-    expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t2'] })).toBe(false);
-  });
-});
 
 describe('checkWordBankFill', () => {
   const expected = {

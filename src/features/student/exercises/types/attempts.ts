@@ -7,6 +7,7 @@ import type {
 } from '@/lib/shared-kernel/match-pairs';
 import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
 import type { StudentResult as ShortAnswerResult } from '@/lib/shared-kernel/short-answer';
+import type { StudentResult as SentenceSchemaResult } from '@/lib/shared-kernel/sentence-schema';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 
 /**
@@ -51,6 +52,7 @@ export interface StartAttemptResponse {
    * older than that change, which is why it is optional here.
    */
   answeredQuestions?: ResumedAnswer[];
+  checkedRows?: ResumedRow[];
 }
 
 /** One question of a `short_answer` set already handed in on the resumed attempt. */
@@ -58,6 +60,21 @@ export interface ResumedAnswer {
   questionId: string;
   text: string;
   verdict: 'pass' | 'partial' | 'fail';
+}
+
+/**
+ * One sentence of a `sentence_schema` set already worked on in the resumed attempt.
+ *
+ * `revealed` is the one that must survive a reload: the learner was shown that sentence,
+ * so it is closed and scores nothing. Reopening it would make a reload the cheapest way
+ * to a full mark (plan 52 §3.3).
+ */
+export interface ResumedRow {
+  rowId: string;
+  attempts: number;
+  placement: Record<string, string[]>;
+  solved: boolean;
+  revealed: boolean;
 }
 
 /** `exerciseContent` when `templateCode` is `word_bank_gap_fill`. */
@@ -169,6 +186,32 @@ export interface AnswerQuestionResponse {
   result: ShortAnswerResult;
   /** Whether this answer is on its way to a teacher, for the routing line. */
   routedForReview: boolean;
+}
+
+/** Check one sentence of a `sentence_schema` set, or ask to be shown it. */
+export interface CheckRowRequest {
+  rowId: string;
+  /** `fieldId → the ids stacked in it`, in the order they were placed. */
+  placement: Record<string, string[]>;
+  /** `Vis riktig skjema`: the sentence closes with the answer shown, and scores nothing. */
+  reveal?: boolean;
+}
+
+/**
+ * What comes back from a check.
+ *
+ * Graded on the server and projected there too: the marks arrive, and the sentence, the
+ * rule and the full board only once the sentence is closed. The note under the board is
+ * resolved there as well — its chain runs over the answer key, which no browser holds
+ * (plan 52 §3.2).
+ */
+export interface CheckRowResponse {
+  attemptId: string;
+  /** Sentences closed — solved or revealed — including this one. */
+  closed: number;
+  /** Sentences in the set. */
+  total: number;
+  result: SentenceSchemaResult;
 }
 
 export type AttemptStatus =

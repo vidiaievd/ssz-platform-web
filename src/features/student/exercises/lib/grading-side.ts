@@ -19,7 +19,6 @@ export const CLIENT_GRADED_TEMPLATES = [
   'multiple_choice_group',
   'fill_in_blank',
   'short_answer',
-  'sentence_schema',
   'word_bank_fill',
   'text_order',
 ] as const;

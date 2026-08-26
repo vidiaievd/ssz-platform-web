@@ -1,588 +1,402 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { CheckCircle, Eye, Info, RotateCcw, XCircle } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Instr } from './instr';
-import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
+import { useContainerWidth } from '@/hooks';
+import type {
+  Feedback,
+  Placement,
+  ProjectedRow,
+  Settings,
+  StudentResult,
+} from '@/lib/shared-kernel/sentence-schema';
 
-export interface SchemaField {
-  id: string;
-  label: string;
-}
-export interface SchemaToken {
-  id: string;
-  text: string;
-}
+import { Instr } from './instr';
+import { SchemaBoard } from './schema-board';
+import { WordBank } from './word-bank';
 
 /**
- * Content schema for sentence-schema (setningsskjema) exercises.
- * The learner places each token into one of the ordered fields.
+ * Where the runner is in one sentence.
+ *
+ * `placing` and `checked` alternate for as long as the learner likes — being wrong is a
+ * step, not a verdict. `closed` is the sentence solved or revealed, and the board locks.
+ * `done` belongs to the set.
+ *
+ * Not `RunnerPhase`: the shared `answering | feedback` pair describes an exercise checked
+ * once, and this one is checked as often as it takes.
  */
-export interface SentenceSchemaContent {
-  /** The target sentence. Held back while `source_sentence` is set. */
-  sentence: string;
-  /**
-   * The sentence the learner starts from — a main clause to subordinate, or a
-   * neutral order to front an adverbial in. When present the task is a
-   * transformation, so the target sentence only appears with the feedback.
-   */
-  source_sentence?: string;
-  schema_type?: 'main' | 'subordinate';
-  fields: SchemaField[];
-  tokens: SchemaToken[];
-  instruction?: string;
-}
-
-export interface SentenceSchemaExpectedAnswers {
-  placements: Array<{ field_id: string; token_ids: string[] }>;
-  explanation?: string;
-}
-
-/** Placement map: field id → ordered token ids currently in that field. */
-export type SchemaPlacements = Record<string, string[]>;
+export type SentenceSchemaPhase = 'placing' | 'checked' | 'closed' | 'done';
 
 export interface SentenceSchemaBodyProps {
-  content: SentenceSchemaContent;
-  value: SchemaPlacements;
-  onValueChange: (val: SchemaPlacements) => void;
-  onAnswerChange: (canSubmit: boolean) => void;
-  phase: RunnerPhase;
-  ok: boolean | null;
-  mode: RunnerMode;
-  accent: string;
+  /** The sentence as the server projected it — fields, the shuffled bank, the prompt. */
+  row: ProjectedRow;
+  /** The switches the author set. Nothing here decides them. */
+  settings: Settings;
+  /** Which sentence of the set is on screen, 0-based, and how many there are. */
+  index: number;
+  total: number;
+  /** Instruction in the learner's language; the projection's own is the fallback. */
+  instruction?: string;
+  placement: Placement;
+  onPlacementChange: (placement: Placement) => void;
+  phase: SentenceSchemaPhase;
+  /** Which check this is, 1-based — the `Forsøk N` counter. */
+  attempt: number;
   /**
-   * The expected placement, rendered as a read-only row below the learner's
-   * own. Pass it only once the answer has been unlocked; `null` keeps it back.
+   * The server's marks for the last check.
+   *
+   * Nothing here grades. Which field a piece belongs in is the answer key, and the note
+   * under the board is resolved from the key too — the author's own words for the piece
+   * that went wrong, or a code to render when they wrote none (plan 52 §3.2).
    */
-  revealPlacements?: SchemaPlacements | null;
+  result: StudentResult | null;
+  /** How the set came out: sentences solved, and sentences shown. */
+  tally: { solved: number; revealed: number };
+  sending?: boolean;
+  error?: string | null;
+  /** False in a preview: everything renders, nothing accepts input. */
+  interactive?: boolean;
+  onCheck: () => void;
+  onRetry: () => void;
+  onReveal: () => void;
+  onNext: () => void;
+  /** Play the set again. Absent where a fresh attempt cannot be had. */
+  onRestart?: () => void;
+  accent: string;
 }
 
 const READING = 'var(--ssz-font-reading)';
-/** Pointer travel (px) before a press turns into a drag instead of a tap. */
-const DRAG_THRESHOLD = 5;
-
-/** Where a token currently lives: a field id, or `null` for the bank. */
-type TokenHome = string | null;
-
-interface DragState {
-  tokenId: string;
-  pointerId: number;
-  from: TokenHome;
-  /** Index the token had inside `from`, or -1 when it came from the bank. */
-  fromIndex: number;
-  /** Current pointer position and the grab offset inside the chip. */
-  x: number;
-  y: number;
-  offsetX: number;
-  offsetY: number;
-  width: number;
-  height: number;
-}
-
-/** Drop target under the pointer: a field and the insertion slot inside it. */
-interface DropTarget {
-  fieldId: string;
-  index: number;
-}
+/** Below this the fields cannot be columns — a word would not fit in one. */
+const COLUMNS_AT = 560;
 
 /**
- * Deterministic shuffle of the token bank. Handing the words out in sentence
- * order turns the task into copying, and `Math.random` would break hydration,
- * so the permutation is derived from the tokens themselves.
+ * `sentence_schema`, as the learner plays it: one sentence at a time onto the field board.
+ *
+ * Three ways in, and no switch between them (BEHAVIOR, "Student · placing"): tap a piece
+ * then a field, tap a field then a piece, or drag — including from one field to another.
+ * A piece already placed goes back to the bank by its own ×, or by tapping it in the bank
+ * where it still sits.
+ *
+ * The marks are transient. Any placement after a check drops them, because a marked board
+ * that is then edited is a board whose marks are about something else — the same rule as
+ * `word_bank_gap_fill`.
+ *
+ * What the learner may do about being wrong is the whole design of this type: `Rett opp`
+ * keeps every piece that was right, clears the rest and counts the attempt up. Unlimited.
+ * `Vis riktig skjema` ends the sentence instead — the board fills in, locks, and the
+ * sentence is not credited, because it was shown rather than solved.
+ *
+ * Presentational and controlled, like the other pool-to-slot bodies: handed a projection,
+ * a placement and a verdict, it draws them and reports intent. Every hook runs before the
+ * empty state returns — a set with nothing deliverable in it must render, not crash
+ * (IMPLEMENTATION.md warns about exactly this, which means someone has been bitten).
  */
-function shuffledTokens(tokens: SchemaToken[]): SchemaToken[] {
-  let seed = 2166136261;
-  for (const tk of tokens) {
-    for (const s of [tk.id, tk.text]) {
-      for (let i = 0; i < s.length; i += 1) {
-        seed = Math.imul(seed ^ s.charCodeAt(i), 16777619);
-      }
-    }
-  }
-  const out = [...tokens];
-  let state = seed >>> 0;
-  for (let i = out.length - 1; i > 0; i -= 1) {
-    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
-    const j = state % (i + 1);
-    [out[i], out[j]] = [out[j] as SchemaToken, out[i] as SchemaToken];
-  }
-  return out;
-}
-
-/** All token ids currently placed in any field. */
-function placedIds(value: SchemaPlacements): Set<string> {
-  const ids = new Set<string>();
-  for (const list of Object.values(value)) for (const id of list) ids.add(id);
-  return ids;
-}
-
-function removeEverywhere(value: SchemaPlacements, tokenId: string): SchemaPlacements {
-  const out: SchemaPlacements = {};
-  for (const [fieldId, list] of Object.entries(value)) out[fieldId] = list.filter((id) => id !== tokenId);
-  return out;
-}
-
-/**
- * Move a token to `fieldId` at `index` (or back to the bank when `fieldId` is
- * null). When the token only moves inside its own field the index is corrected
- * for the slot it vacates.
- */
-function moveToken(
-  value: SchemaPlacements,
-  tokenId: string,
-  fieldId: TokenHome,
-  index: number,
-  from: TokenHome,
-  fromIndex: number,
-): SchemaPlacements {
-  const cleared = removeEverywhere(value, tokenId);
-  if (fieldId === null) return cleared;
-  const list = [...(cleared[fieldId] ?? [])];
-  let at = index;
-  if (from === fieldId && fromIndex > -1 && fromIndex < index) at -= 1;
-  list.splice(Math.max(0, Math.min(at, list.length)), 0, tokenId);
-  return { ...cleared, [fieldId]: list };
-}
-
 export function SentenceSchemaBody({
-  content,
-  value,
-  onValueChange,
-  onAnswerChange,
+  row,
+  settings,
+  index,
+  total,
+  instruction,
+  placement,
+  onPlacementChange,
   phase,
-  ok,
-  mode,
+  attempt,
+  result,
+  tally,
+  sending = false,
+  error = null,
+  interactive = true,
+  onCheck,
+  onRetry,
+  onReveal,
+  onNext,
+  onRestart,
   accent,
-  revealPlacements = null,
 }: SentenceSchemaBodyProps) {
   const t = useTranslations('ExerciseRunner');
-  const isAnswering = phase === 'answering';
-  const reveal = phase === 'feedback';
-  const accentSoft = modeAccentSoft(mode);
-  const [armed, setArmed] = useState<string | null>(null);
-  const [drag, setDrag] = useState<DragState | null>(null);
-  const [target, setTarget] = useState<DropTarget | null>(null);
+  const [root, width] = useContainerWidth();
+  const [armedItem, setArmedItem] = useState<string | null>(null);
+  const [armedField, setArmedField] = useState<string | null>(null);
 
-  // A press that has not yet travelled far enough to count as a drag.
-  const pendingRef = useRef<{ tokenId: string; pointerId: number; x: number; y: number } | null>(null);
-  // Set while a drag is in flight so the trailing click does not also fire.
-  const draggedRef = useRef(false);
-  const fieldRefs = useRef(new Map<string, HTMLDivElement>());
-  const chipRefs = useRef(new Map<string, HTMLElement>());
+  const locked = phase === 'closed' || phase === 'done' || !interactive;
+  const used = Object.values(placement).flat();
+  const textOf = (itemId: string) => row.bank.find((item) => item.id === itemId)?.text ?? '';
+  const placedChunks = used.length;
 
-  const placed = useMemo(() => placedIds(value), [value]);
-  const bankOrder = useMemo(() => shuffledTokens(content.tokens), [content.tokens]);
-  const bank = bankOrder.filter((tk) => !placed.has(tk.id));
-  const tokenById = useMemo(
-    () => new Map(content.tokens.map((tk) => [tk.id, tk])),
-    [content.tokens],
-  );
+  if (phase === 'done') {
+    return (
+      <div ref={root}>
+        <div
+          className="flex flex-col items-start gap-3 rounded-2xl border p-5"
+          style={{ background: 'var(--ssz-bg-surface)', borderColor: 'var(--ssz-border-default)' }}
+        >
+          <CheckCircle size={22} aria-hidden="true" style={{ color: accent }} />
+          <p className="m-0 text-[15px] font-semibold" style={{ color: 'var(--ssz-text-primary)' }}>
+            {t('sentenceSchema.setDone', { count: total })}
+          </p>
+          <p className="m-0 text-[13.5px]" style={{ color: 'var(--ssz-text-muted)' }}>
+            {t('sentenceSchema.setTally', { solved: tally.solved, revealed: tally.revealed })}
+          </p>
+          {onRestart !== undefined && (
+            <button
+              type="button"
+              onClick={onRestart}
+              className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-[13.5px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+              style={{ borderColor: 'var(--ssz-border-default)', color: 'var(--ssz-text-primary)' }}
+            >
+              <RotateCcw size={14} aria-hidden="true" />
+              {t('sentenceSchema.again')}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    onAnswerChange(placed.size === content.tokens.length && content.tokens.length > 0);
-  }, [placed, content.tokens.length, onAnswerChange]);
-
-  const homeOf = (tokenId: string): { from: TokenHome; fromIndex: number } => {
-    for (const [fieldId, list] of Object.entries(value)) {
-      const i = list.indexOf(tokenId);
-      if (i > -1) return { from: fieldId, fromIndex: i };
+  /** Move a piece into a field, from the bank or from another field. */
+  function place(itemId: string, fieldId: string) {
+    if (locked) return;
+    const next: Placement = {};
+    for (const [id, items] of Object.entries(placement)) {
+      const kept = items.filter((item) => item !== itemId);
+      if (kept.length > 0) next[id] = kept;
     }
-    return { from: null, fromIndex: -1 };
-  };
+    next[fieldId] = [...(next[fieldId] ?? []), itemId];
+    onPlacementChange(next);
+    setArmedItem(null);
+    setArmedField(null);
+  }
 
-  /** Hit-test the pointer against the field zones and their chips. */
-  const targetAt = (clientX: number, clientY: number): DropTarget | null => {
-    for (const [fieldId, el] of fieldRefs.current) {
-      const rect = el.getBoundingClientRect();
-      if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) continue;
-      const ids = value[fieldId] ?? [];
-      let index = ids.length;
-      for (let i = 0; i < ids.length; i += 1) {
-        const id = ids[i];
-        const chip = id ? chipRefs.current.get(id) : undefined;
-        if (!chip) continue;
-        const c = chip.getBoundingClientRect();
-        // Chips wrap, so a row below the pointer always sorts after it.
-        if (clientY < c.top || (clientY <= c.bottom && clientX < c.left + c.width / 2)) {
-          index = i;
-          break;
-        }
-      }
-      return { fieldId, index };
+  function take(itemId: string) {
+    if (locked) return;
+    const next: Placement = {};
+    for (const [id, items] of Object.entries(placement)) {
+      const kept = items.filter((item) => item !== itemId);
+      if (kept.length > 0) next[id] = kept;
     }
-    return null;
-  };
+    onPlacementChange(next);
+  }
 
-  const startPress = (e: React.PointerEvent, tokenId: string) => {
-    if (!isAnswering) return;
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    draggedRef.current = false;
-    pendingRef.current = { tokenId, pointerId: e.pointerId, x: e.clientX, y: e.clientY };
-    // Keep receiving moves once the pointer leaves the chip. Not implemented in jsdom.
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-  };
-
-  const movePress = (e: React.PointerEvent) => {
-    const pending = pendingRef.current;
-    if (drag) {
-      if (e.pointerId !== drag.pointerId) return;
-      setDrag({ ...drag, x: e.clientX, y: e.clientY });
-      setTarget(targetAt(e.clientX, e.clientY));
+  function pressItem(itemId: string) {
+    if (locked) return;
+    // The piece is on the board: tapping it in the bank is how it comes back.
+    if (used.includes(itemId)) {
+      take(itemId);
       return;
     }
-    if (!pending || e.pointerId !== pending.pointerId) return;
-    if (Math.hypot(e.clientX - pending.x, e.clientY - pending.y) < DRAG_THRESHOLD) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const { from, fromIndex } = homeOf(pending.tokenId);
-    draggedRef.current = true;
-    pendingRef.current = null;
-    setArmed(null);
-    setDrag({
-      tokenId: pending.tokenId,
-      pointerId: pending.pointerId,
-      from,
-      fromIndex,
-      x: e.clientX,
-      y: e.clientY,
-      offsetX: pending.x - rect.left,
-      offsetY: pending.y - rect.top,
-      width: rect.width,
-      height: rect.height,
-    });
-    setTarget(targetAt(e.clientX, e.clientY));
-  };
-
-  const endPress = (e: React.PointerEvent) => {
-    if (drag && e.pointerId === drag.pointerId) {
-      const drop = targetAt(e.clientX, e.clientY);
-      onValueChange(
-        moveToken(value, drag.tokenId, drop?.fieldId ?? null, drop?.index ?? 0, drag.from, drag.fromIndex),
-      );
-      setDrag(null);
-      setTarget(null);
+    if (armedField !== null) {
+      place(itemId, armedField);
       return;
     }
-    pendingRef.current = null;
-  };
+    setArmedItem(armedItem === itemId ? null : itemId);
+  }
 
-  const cancelPress = () => {
-    pendingRef.current = null;
-    setDrag(null);
-    setTarget(null);
-  };
+  function pressField(fieldId: string) {
+    if (locked) return;
+    if (armedItem !== null) {
+      place(armedItem, fieldId);
+      return;
+    }
+    setArmedField(armedField === fieldId ? null : fieldId);
+  }
 
-  /** Tap path (also the keyboard path): arm a token, then activate a field. */
-  const toggleArmed = (tokenId: string) => {
-    if (!isAnswering || draggedRef.current) return;
-    setArmed((cur) => (cur === tokenId ? null : tokenId));
-  };
+  const marks =
+    phase === 'checked' && result !== null
+      ? { byItem: result.byItem, byField: settings.perField ? result.byField : null }
+      : phase === 'closed' && result !== null && result.solved
+        ? { byItem: result.byItem, byField: settings.perField ? result.byField : null }
+        : null;
 
-  const placeInField = (fieldId: string) => {
-    if (!isAnswering || armed === null || draggedRef.current) return;
-    const { from, fromIndex } = homeOf(armed);
-    onValueChange(moveToken(value, armed, fieldId, (value[fieldId] ?? []).length, from, fromIndex));
-    setArmed(null);
-  };
-
-  const unplaceToken = (tokenId: string) => {
-    if (!isAnswering || draggedRef.current) return;
-    setArmed(null);
-    onValueChange(removeEverywhere(value, tokenId));
-  };
-
-  const borderFor = (base: string) =>
-    reveal && ok === true
-      ? 'var(--ssz-feedback-ok-line)'
-      : reveal && ok === false
-        ? 'var(--ssz-feedback-no-line)'
-        : base;
-
-  const chipStyle = (highlighted: boolean): React.CSSProperties => ({
-    padding: '6px 12px',
-    borderRadius: 8,
-    border: `2px solid ${highlighted ? accent : 'var(--ssz-border-default)'}`,
-    background: highlighted ? accentSoft : 'var(--ssz-bg-surface)',
-    color: 'var(--ssz-text-primary)',
-    fontFamily: READING,
-    fontSize: 15,
-    fontWeight: 600,
-    whiteSpace: 'nowrap',
-    touchAction: 'none',
-    cursor: isAnswering ? 'grab' : 'default',
-  });
-
-  const dragText = drag ? (tokenById.get(drag.tokenId)?.text ?? '') : '';
-  const source = content.source_sentence?.trim();
+  const banner = phase === 'placing' ? null : (result?.banner ?? null);
+  const solved = result?.solved === true;
+  const revealed = phase === 'closed' && !solved;
 
   return (
-    <>
-      <Instr>{content.instruction ?? t('sentenceSchema.defaultInstruction')}</Instr>
-
-      {/* A transformation task starts from `source_sentence`; the target one
-          would give the word order away, so it waits for the feedback. */}
-      {source && (
-        <>
-          <p
-            className="mb-1 text-[11px] font-bold uppercase tracking-wide"
-            style={{ color: 'var(--ssz-text-muted)' }}
-          >
-            {t('sentenceSchema.sourceLabel')}
-          </p>
-          <p
-            className="mb-4 leading-[1.5]"
-            style={{ fontFamily: READING, fontSize: 20, fontWeight: 500, color: 'var(--ssz-text-primary)' }}
-          >
-            {source}
-          </p>
-        </>
-      )}
-      {(!source || !isAnswering) && content.sentence && (
-        <>
-          {source && (
-            <p
-              className="mb-1 text-[11px] font-bold uppercase tracking-wide"
-              style={{ color: 'var(--ssz-text-muted)' }}
-            >
-              {t('sentenceSchema.targetLabel')}
-            </p>
-          )}
-          <p
-            className="mb-4 leading-[1.5]"
-            style={{ fontFamily: READING, fontSize: 20, fontWeight: 500, color: 'var(--ssz-text-primary)' }}
-          >
-            {content.sentence}
-          </p>
-        </>
+    <div ref={root}>
+      {instruction !== undefined && instruction !== '' ? (
+        <Instr>{instruction}</Instr>
+      ) : (
+        row.source === '' && <Instr>{t('sentenceSchema.defaultInstruction')}</Instr>
       )}
 
-      <p className="mb-2 text-[12px] italic" style={{ color: 'var(--ssz-text-muted)' }}>
-        {t('sentenceSchema.multiWordHint')}
-      </p>
-
-      {/* Field columns — words stay on one line inside a field, the fields wrap instead. */}
-      <div className="mb-4">
-        <div className="flex flex-wrap gap-2">
-          {content.fields.map((field) => {
-            const tokenIds = value[field.id] ?? [];
-            const isTarget = target?.fieldId === field.id;
-            const active = isAnswering && (armed !== null || drag !== null);
-            return (
-              <div
-                key={field.id}
-                className="flex grow flex-col"
-                style={{ flexBasis: '7rem', minWidth: 'fit-content' }}
-              >
-                <p
-                  className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wide"
-                  style={{ color: 'var(--ssz-text-muted)' }}
-                >
-                  {field.label}
-                </p>
-                <div
-                  ref={(el) => {
-                    if (el) fieldRefs.current.set(field.id, el);
-                    else fieldRefs.current.delete(field.id);
-                  }}
-                  role="button"
-                  tabIndex={isAnswering ? 0 : -1}
-                  aria-disabled={!isAnswering || armed === null}
-                  aria-label={t('sentenceSchema.fieldDropLabel', { field: field.label })}
-                  onClick={() => placeInField(field.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      placeInField(field.id);
-                    }
-                  }}
-                  style={{
-                    minHeight: 56,
-                    borderRadius: 10,
-                    border: `2px dashed ${borderFor(isTarget ? accent : 'var(--ssz-border-default)')}`,
-                    background: isTarget ? accentSoft : active ? accentSoft : 'var(--ssz-bg-subtle)',
-                    padding: 6,
-                    cursor: active ? 'pointer' : 'default',
-                    display: 'flex',
-                    flexWrap: 'nowrap',
-                    gap: 6,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                  className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ssz-border-focus)]"
-                >
-                  {tokenIds.map((id, i) => (
-                    <span key={id} className="contents">
-                      {isTarget && target.index === i && (
-                        <span
-                          aria-hidden
-                          style={{ width: 3, borderRadius: 2, background: accent, alignSelf: 'stretch', minHeight: 32 }}
-                        />
-                      )}
-                      <button
-                        type="button"
-                        ref={(el) => {
-                          if (el) chipRefs.current.set(id, el);
-                          else chipRefs.current.delete(id);
-                        }}
-                        disabled={!isAnswering}
-                        onPointerDown={(e) => {
-                          e.stopPropagation();
-                          startPress(e, id);
-                        }}
-                        onPointerMove={movePress}
-                        onPointerUp={(e) => {
-                          e.stopPropagation();
-                          endPress(e);
-                        }}
-                        onPointerCancel={cancelPress}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          unplaceToken(id);
-                        }}
-                        style={{
-                          ...chipStyle(true),
-                          opacity: drag?.tokenId === id ? 0.35 : 1,
-                        }}
-                      >
-                        {tokenById.get(id)?.text ?? ''}
-                      </button>
-                    </span>
-                  ))}
-                  {isTarget && target.index >= tokenIds.length && (
-                    <span
-                      aria-hidden
-                      style={{ width: 3, borderRadius: 2, background: accent, alignSelf: 'stretch', minHeight: 32 }}
-                    />
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Token bank */}
-      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide" style={{ color: 'var(--ssz-text-muted)' }}>
-        {t('sentenceSchema.bankLabel')}
-      </p>
-      <div className="flex flex-wrap gap-2" aria-label={t('sentenceSchema.bankLabel')}>
-        {bank.length === 0 && (
-          <span className="text-[13px] italic" style={{ color: 'var(--ssz-text-muted)' }}>
-            {t('sentenceSchema.bankEmpty')}
-          </span>
+      <p className="mb-1 text-[12px] font-semibold" style={{ color: 'var(--ssz-text-muted)' }}>
+        {t('sentenceSchema.position', { index: index + 1, total })}
+        {attempt > 1 && phase !== 'closed' && (
+          <span className="ml-2">{t('sentenceSchema.attemptNo', { count: attempt })}</span>
         )}
-        {bank.map((tk) => {
-          const isArmed = armed === tk.id;
-          return (
-            <button
-              key={tk.id}
-              type="button"
-              disabled={!isAnswering}
-              aria-pressed={isArmed}
-              onPointerDown={(e) => startPress(e, tk.id)}
-              onPointerMove={movePress}
-              onPointerUp={endPress}
-              onPointerCancel={cancelPress}
-              onClick={() => toggleArmed(tk.id)}
-              style={{
-                ...chipStyle(isArmed),
-                padding: '9px 16px',
-                borderRadius: 10,
-                fontSize: 16,
-                color: isArmed ? accent : 'var(--ssz-text-primary)',
-                opacity: drag?.tokenId === tk.id ? 0.35 : 1,
-              }}
-              className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ssz-border-focus)]"
-            >
-              {tk.text}
-            </button>
-          );
-        })}
-      </div>
+      </p>
 
-      {/* The expected placement, once the learner has unlocked the answer. */}
-      {revealPlacements && (
-        <div className="mt-5">
+      {/* The sentence to rewrite. A prompt and only a prompt: nothing is derived from it,
+          and the sentence the learner is building is not shown until it is closed. */}
+      {row.source !== '' && (
+        <div
+          className="mb-3 rounded-xl border px-3 py-2"
+          style={{ background: 'var(--ssz-bg-elevated)', borderColor: 'var(--ssz-border-subtle)' }}
+        >
+          <span className="text-[11.5px] font-semibold" style={{ color: 'var(--ssz-text-muted)' }}>
+            {t('sentenceSchema.sourceLabel')}
+          </span>
           <p
-            className="mb-1.5 text-[11px] font-bold uppercase tracking-wide"
-            style={{ color: 'var(--ssz-text-muted)' }}
+            className="m-0 text-[15px]"
+            style={{ fontFamily: READING, color: 'var(--ssz-text-primary)' }}
           >
-            {t('sentenceSchema.answerLabel')}
+            {row.source}
           </p>
-          <div className="flex flex-wrap gap-2">
-            {content.fields.map((field) => (
-              <div
-                key={field.id}
-                className="flex grow flex-col"
-                style={{ flexBasis: '7rem', minWidth: 'fit-content' }}
-              >
-                <p
-                  className="mb-1.5 text-center text-[11px] font-bold uppercase tracking-wide"
-                  style={{ color: 'var(--ssz-text-muted)' }}
-                >
-                  {field.label}
-                </p>
-                <div
-                  style={{
-                    minHeight: 56,
-                    borderRadius: 10,
-                    border: '2px dashed var(--ssz-feedback-ok-line)',
-                    background: 'var(--ssz-feedback-ok-bg)',
-                    padding: 6,
-                    display: 'flex',
-                    flexWrap: 'nowrap',
-                    gap: 6,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {(revealPlacements[field.id] ?? []).map((id) => (
-                    <span
-                      key={id}
-                      style={{
-                        ...chipStyle(false),
-                        border: '2px solid var(--ssz-feedback-ok-line)',
-                        color: 'var(--ssz-feedback-ok-fg)',
-                        cursor: 'default',
-                      }}
-                    >
-                      {tokenById.get(id)?.text ?? ''}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
-      {/* Chip following the pointer while dragging. */}
-      {drag &&
-        typeof document !== 'undefined' &&
-        createPortal(
+      <SchemaBoard
+        fields={row.fields}
+        placement={placement}
+        textOf={textOf}
+        layout={width >= COLUMNS_AT ? 'cols' : 'rows'}
+        labels={settings.labels}
+        hints={settings.hints}
+        counts={row.counts}
+        marks={marks}
+        selectedField={armedField}
+        onFieldPress={pressField}
+        onRemove={take}
+        onDropItem={place}
+        readOnly={locked}
+        accent={accent}
+      />
+
+      {/* The bank goes away once the sentence is closed: there is nothing left to place,
+          and leaving it invites input the board no longer takes. */}
+      {!locked && (
+        <div className="mt-3">
+          <WordBank
+            items={row.bank}
+            used={used}
+            selected={armedItem}
+            onPress={pressItem}
+            interactive={!locked}
+            accent={accent}
+          />
+        </div>
+      )}
+
+      <div aria-live="polite" className="mt-3">
+        {banner !== null && (
           <div
-            aria-hidden
+            className="flex items-start gap-2 rounded-xl border px-3 py-2"
             style={{
-              ...chipStyle(true),
-              position: 'fixed',
-              left: drag.x - drag.offsetX,
-              top: drag.y - drag.offsetY,
-              minWidth: drag.width,
-              height: drag.height,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              pointerEvents: 'none',
-              zIndex: 70,
-              cursor: 'grabbing',
-              boxShadow: '0 8px 20px rgb(0 0 0 / 0.25)',
+              background: solved ? 'var(--ssz-feedback-ok-bg)' : 'var(--ssz-feedback-no-bg)',
+              borderColor: solved ? 'var(--ssz-feedback-ok-line)' : 'var(--ssz-feedback-no-line)',
             }}
           >
-            {dragText}
-          </div>,
-          document.body,
+            {solved ? (
+              <CheckCircle
+                size={16}
+                aria-hidden="true"
+                style={{ color: 'var(--ssz-feedback-ok-fg)' }}
+              />
+            ) : revealed ? (
+              <Info size={16} aria-hidden="true" style={{ color: 'var(--ssz-text-muted)' }} />
+            ) : (
+              <XCircle
+                size={16}
+                aria-hidden="true"
+                style={{ color: 'var(--ssz-feedback-no-fg)' }}
+              />
+            )}
+            <span className="flex min-w-0 flex-col gap-1">
+              <span className="text-[13.5px]" style={{ color: 'var(--ssz-text-primary)' }}>
+                {bannerText(banner, t)}
+              </span>
+              {/* The rule, repeated under the note from the second attempt on. */}
+              {banner.hint !== '' && (
+                <span className="text-[12.5px]" style={{ color: 'var(--ssz-text-muted)' }}>
+                  {banner.hint}
+                </span>
+              )}
+              {/* The sentence itself, once it is no longer the answer to anything. */}
+              {phase === 'closed' && result?.text !== null && result?.text !== undefined && (
+                <span
+                  className="text-[13.5px]"
+                  style={{ fontFamily: READING, color: 'var(--ssz-text-primary)' }}
+                >
+                  {result.text}
+                </span>
+              )}
+            </span>
+          </div>
         )}
-    </>
+        {error !== null && (
+          <p className="m-0 mt-2 text-[13px]" style={{ color: 'var(--ssz-feedback-no-fg)' }}>
+            {error}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {phase === 'placing' && (
+          <button
+            type="button"
+            onClick={onCheck}
+            disabled={!interactive || sending || placedChunks === 0}
+            className="rounded-lg px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            style={{ background: accent }}
+          >
+            {t('sentenceSchema.check', { placed: placedChunks, total: row.bank.length })}
+          </button>
+        )}
+        {phase === 'checked' && (
+          <button
+            type="button"
+            onClick={onRetry}
+            disabled={!interactive}
+            className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[14px] font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            style={{ background: accent }}
+          >
+            <RotateCcw size={14} aria-hidden="true" />
+            {t('sentenceSchema.fix', { count: result?.wrong ?? 0 })}
+          </button>
+        )}
+        {phase === 'closed' && (
+          <button
+            type="button"
+            onClick={onNext}
+            className="rounded-lg px-4 py-2 text-[14px] font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            style={{ background: accent }}
+          >
+            {index + 1 < total ? t('sentenceSchema.nextSentence') : t('finish')}
+          </button>
+        )}
+        {phase !== 'closed' && (
+          <button
+            type="button"
+            onClick={onReveal}
+            disabled={!interactive || sending}
+            className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-[13.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            style={{ borderColor: 'var(--ssz-border-default)', color: 'var(--ssz-text-muted)' }}
+          >
+            <Eye size={14} aria-hidden="true" />
+            {t('sentenceSchema.reveal')}
+          </button>
+        )}
+      </div>
+    </div>
   );
+}
+
+/**
+ * The note under the board, in the learner's language.
+ *
+ * The author's own words travel as text and are shown as written. `default` is a code
+ * instead — the handoff writes those defaults as English prose, and this platform renders
+ * student copy in four languages, so what crosses the wire is which default, not its
+ * wording (plan 52 §5).
+ */
+function bannerText(
+  banner: Feedback,
+  t: ReturnType<typeof useTranslations<'ExerciseRunner'>>,
+): string {
+  if (banner.source !== 'default') return banner.text;
+  return banner.code === 'order'
+    ? t('sentenceSchema.wrongOrder')
+    : t('sentenceSchema.notInSentence');
 }
