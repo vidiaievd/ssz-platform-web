@@ -48,18 +48,26 @@ export function WordBank({
   const left = items.length - used.length;
 
   return (
-    <div className="flex flex-col gap-1.5">
+    // `.ss-bank[data-inline="true"]`: a dashed rule above it and nothing else — the bank
+    // is separated from the board rather than boxed off from it.
+    <div
+      className="flex flex-col gap-[9px] border-t border-dashed pt-3"
+      style={{ borderColor: 'var(--ssz-border-default)' }}
+    >
       {showHead && (
         <div className="flex items-baseline justify-between">
-          <strong className="text-[12.5px]" style={{ color: 'var(--ssz-text-muted)' }}>
+          <strong
+            className="text-[11px] font-bold tracking-[0.12em] uppercase"
+            style={{ color: 'var(--ssz-text-muted)' }}
+          >
             {t('sentenceSchema.bankLabel')}
           </strong>
-          <span className="text-[12px]" style={{ color: 'var(--ssz-text-muted)' }}>
+          <span className="text-[12px] tabular-nums" style={{ color: 'var(--ssz-text-muted)' }}>
             {t('sentenceSchema.remaining', { count: left })}
           </span>
         </div>
       )}
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2">
         {items.map((item) => {
           const isUsed = used.includes(item.id);
           const armed = selected === item.id;
@@ -77,13 +85,17 @@ export function WordBank({
               // pieces are the exercise.
               aria-disabled={!interactive}
               aria-pressed={armed}
-              className="rounded-lg border px-3 py-2 text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+              // `.ss-word`: a fully rounded pill on a raised surface. Selected, it fills
+              // with the accent rather than tinting — one piece is armed at a time, and
+              // it has to be unmistakable at a glance across a bank of seven.
+              className="rounded-full border px-3 py-[7px] text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
               style={{
                 minHeight: TAP_MIN,
                 fontFamily: READING,
-                background: armed ? 'var(--ssz-runner-practice-soft)' : 'var(--ssz-bg-surface)',
-                borderColor: armed ? accent : 'var(--ssz-border-default)',
-                color: 'var(--ssz-text-primary)',
+                background: armed ? accent : 'var(--ssz-bg-surface)',
+                borderColor: armed ? accent : 'var(--ssz-border-strong)',
+                color: armed ? 'var(--ssz-text-inverse)' : 'var(--ssz-text-primary)',
+                boxShadow: isUsed ? 'none' : 'var(--ssz-shadow-xs)',
                 opacity: isUsed ? 0.3 : 1,
                 cursor: interactive ? 'pointer' : 'default',
               }}

@@ -262,10 +262,17 @@ export function ReaderShell({
   }
   // Only prose is reader-adjustable: the other kinds are laid out around media
   // and cards, where width is a design decision rather than a reading-comfort one.
+  //
+  // Practice is the widest of them, and the reason is `sentence_schema`: its board is a
+  // chart of seven named fields side by side, and a chart that has to be scrolled to be
+  // read is not a chart. Seven columns need 764px at the handoff's own floor, and by the
+  // time the page padding and the task card have taken their share, 820px left 716 — so
+  // the board fell back to the phone layout on a desktop. The handoff draws it at ~950px;
+  // this is that width, plus what the two paddings take.
   const effectiveMaxWidth =
     maxWidth ??
     (practiceSection
-      ? 820
+      ? 1040
       : activeKind === 'vocab'
         ? 780
         : activeKind === 'video'

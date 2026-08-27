@@ -38,6 +38,23 @@ export interface SchemaBoardProps {
 }
 
 const TAP_MIN = 44;
+/** The floor a field column may not shrink past (`.ss-field{min-width:104px}`). */
+const MIN_COLUMN = 104;
+const COLUMN_GAP = 6;
+
+/**
+ * Whether this many fields can be drawn as columns in this much width.
+ *
+ * The layout is a question of arithmetic, not of screen size, and asking it the other way
+ * round is what makes a board irritating: a fixed breakpoint says "wide enough for
+ * columns" about a container that then has to scroll sideways, because a seven-field
+ * schema needs 728px and a four-field one needs 416px. Below the fit, the rows layout is
+ * not a fallback — it is the better drawing, one field per line with nothing cut off.
+ */
+export function fitsAsColumns(width: number, fieldCount: number): boolean {
+  if (fieldCount === 0) return true;
+  return width >= fieldCount * MIN_COLUMN + (fieldCount - 1) * COLUMN_GAP;
+}
 const READING = 'var(--ssz-font-reading)';
 const OK_BG = 'var(--ssz-feedback-ok-bg)';
 const OK_LINE = 'var(--ssz-feedback-ok-line)';
@@ -93,7 +110,11 @@ export function SchemaBoard({
   const cols = layout === 'cols';
 
   return (
-    <div className={cols ? 'flex snap-x gap-2 overflow-x-auto pb-1' : 'flex flex-col gap-1.5'}>
+    <div
+      className={
+        cols ? 'flex items-stretch gap-1.5 overflow-x-auto p-0.5' : 'flex flex-col gap-1.5 p-0.5'
+      }
+    >
       {fields.map((field) => {
         const ids = placement[field.id] ?? [];
         const fieldMark = marks?.byField?.[field.id];
@@ -106,38 +127,60 @@ export function SchemaBoard({
         const armed = selectedField === field.id;
         const dragOver = over === field.id;
 
+        /*
+          Key and name share one baseline as columns and stack as rows (`.ss-fhead` and
+          its `data-layout="rows"` override). The name truncates rather than wraps, and
+          that is load-bearing rather than cosmetic: a column is `flex: 1 1 0`, so text
+          allowed to set its own width would push every other field along and turn the
+          board into a horizontal scroller — which is exactly what a chart must not be.
+        */
         const head = (
-          <div className={cols ? 'mb-1 flex flex-col gap-0.5' : 'flex shrink-0 flex-col'}>
-            <span className="flex items-baseline gap-1">
-              <span
-                className="font-mono text-[12.5px] font-bold"
-                style={{ color: 'var(--ssz-text-muted)' }}
-              >
-                {field.short}
-              </span>
-              {counts?.[field.id] !== undefined && (
-                <em className="text-[11px] not-italic" style={{ color: 'var(--ssz-text-muted)' }}>
-                  {counts[field.id]}
-                </em>
-              )}
+          <div
+            className={
+              cols ? 'flex min-w-0 items-baseline gap-1.5' : 'flex min-w-0 shrink-0 flex-col gap-px'
+            }
+          >
+            <span
+              className="shrink-0 font-mono text-[11px] font-bold"
+              style={{ color: 'var(--ssz-color-primary-600)' }}
+            >
+              {field.short}
             </span>
             {labels && field.label !== '' && (
               <span
-                className="text-[11.5px] leading-tight"
-                style={{ color: 'var(--ssz-text-muted)' }}
+                className={`text-[11px] leading-tight ${cols ? 'min-w-0 truncate' : ''}`}
+                style={{ color: 'var(--ssz-text-secondary)' }}
+                title={cols ? field.label : undefined}
               >
                 {field.label}
               </span>
             )}
-            {hints && field.hint !== '' && (
-              <span
-                className="text-[11px] leading-tight"
-                style={{ color: 'var(--ssz-text-subtle)' }}
+            {counts?.[field.id] !== undefined && (
+              <em
+                className={`not-italic font-mono text-[10px] ${cols ? 'ml-auto shrink-0' : ''}`}
+                style={{ color: 'var(--ssz-text-muted)' }}
               >
-                {field.hint}
-              </span>
+                {counts[field.id]}
+              </em>
             )}
           </div>
+        );
+
+        /*
+          The author's one-line explanation, and the piece the two layouts disagree about.
+          As columns it is a line of its own between the head and the cell (`.ss-fhint`).
+          As rows it cannot go in the 96px label column — a sentence wrapped into three
+          lines there is what makes every field on a phone twice as tall as the box the
+          learner is aiming at — so it spans the whole field underneath instead.
+
+          The handoff has no answer here: its own default is `hints: false`, and its rows
+          grid is written for exactly two children. An author who turns hints on is not
+          asking for a broken board, so this is the missing case rather than a departure.
+        */
+        const hint = hints && field.hint !== '' && (
+          <p className="m-0 text-[10px] leading-[1.35]" style={{ color: 'var(--ssz-text-muted)' }}>
+            {field.hint}
+          </p>
         );
 
         const cell = (
@@ -174,14 +217,20 @@ export function SchemaBoard({
               const dropped = event.dataTransfer.getData('text/plain');
               if (dropped !== '') onDropItem?.(dropped, field.id);
             }}
-            className="flex flex-1 flex-wrap content-start items-start gap-1 rounded-lg border px-2 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            className="flex flex-1 flex-wrap content-start items-center gap-1.5 rounded-md p-[7px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
             style={{
               minHeight: TAP_MIN,
+              // Dashed until the sentence is marked, filled or not (`.ss-fcell`, and
+              // `.ss-field[data-mark] .ss-fcell{border-style:solid}`). The dashed edge is
+              // what says "this is a slot"; turning it solid the moment a word lands makes
+              // seven quiet outlines into seven boxes, which is the whole difference
+              // between reading a chart and reading a form.
+              borderWidth: 1.5,
+              borderStyle: tone === null ? 'dashed' : 'solid',
+              borderColor: tone?.line ?? (armed || dragOver ? accent : 'var(--ssz-border-strong)'),
               background:
                 tone?.bg ??
-                (armed || dragOver ? 'var(--ssz-runner-practice-soft)' : 'var(--ssz-bg-surface)'),
-              borderColor: tone?.line ?? (armed || dragOver ? accent : 'var(--ssz-border-default)'),
-              borderStyle: ids.length === 0 && !armed && !dragOver ? 'dashed' : 'solid',
+                (armed || dragOver ? 'var(--ssz-runner-practice-soft)' : 'var(--ssz-bg-base)'),
               cursor: readOnly ? 'default' : 'pointer',
             }}
           >
@@ -189,7 +238,11 @@ export function SchemaBoard({
               ? // Only an optional field says it is meant to be empty. A required one
                 // stays blank, so its emptiness cannot be read as a clue.
                 field.optional && (
-                  <span aria-hidden="true" style={{ color: 'var(--ssz-text-subtle)' }}>
+                  <span
+                    aria-hidden="true"
+                    className="mx-auto self-center text-[13px]"
+                    style={{ color: 'var(--ssz-text-muted)' }}
+                  >
                     —
                   </span>
                 )
@@ -205,15 +258,25 @@ export function SchemaBoard({
                         event.dataTransfer.setData('text/plain', itemId);
                         event.dataTransfer.effectAllowed = 'move';
                       }}
-                      className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[14px]"
+                      className="inline-flex max-w-full items-center gap-1 rounded-md px-[9px] py-[5px] text-[14px]"
                       style={{
                         fontFamily: READING,
-                        minHeight: readOnly ? undefined : 32,
-                        background: wrong ? NO_BG : 'var(--ssz-bg-elevated)',
-                        // Never colour alone: a wrong piece is boxed as well as tinted.
-                        borderColor: wrong ? NO_LINE : 'var(--ssz-border-default)',
-                        borderWidth: wrong ? 2 : 1,
-                        color: 'var(--ssz-text-primary)',
+                        // `.ss-tok`: a filled chip, no border. The border was doing the
+                        // work the fill is meant to do, and paying for it twice — a
+                        // rectangle inside a rectangle, seven times over.
+                        background: wrong
+                          ? NO_BG
+                          : itemMark === 'ok'
+                            ? OK_BG
+                            : 'var(--ssz-color-primary-100)',
+                        color: wrong
+                          ? 'var(--ssz-color-error-700)'
+                          : itemMark === 'ok'
+                            ? 'var(--ssz-color-success-700)'
+                            : 'var(--ssz-color-primary-800)',
+                        // Never colour alone: a wrong piece is boxed as well as tinted,
+                        // and the box is an inset ring so it costs no layout.
+                        boxShadow: wrong ? `inset 0 0 0 1px ${NO_LINE}` : undefined,
                       }}
                     >
                       {textOf(itemId)}
@@ -225,8 +288,8 @@ export function SchemaBoard({
                             event.stopPropagation();
                             onRemove(itemId);
                           }}
-                          className="rounded-sm p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
-                          style={{ color: 'var(--ssz-text-muted)' }}
+                          className="grid size-[15px] shrink-0 place-items-center rounded-full opacity-50 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+                          style={{ color: 'inherit' }}
                         >
                           <X size={11} aria-hidden="true" />
                         </button>
@@ -238,18 +301,24 @@ export function SchemaBoard({
         );
 
         return cols ? (
-          <div
-            key={field.id}
-            className="flex shrink-0 snap-start flex-col"
-            style={{ minWidth: 104 }}
-          >
+          // `flex-1 basis-0` with a floor of 104px, straight from `.ss-field`: the fields
+          // share the width they have instead of each claiming what its text wants.
+          <div key={field.id} className="flex min-w-[104px] flex-1 basis-0 flex-col gap-1.5">
             {head}
+            {hint}
             {cell}
           </div>
         ) : (
-          <div key={field.id} className="flex items-stretch gap-2">
-            <div className="flex w-24 shrink-0 items-start pt-1.5">{head}</div>
+          // `96px | minmax(0,1fr)`, vertically centred — the head reads as a label beside
+          // the box rather than as a heading above it. The hint, when there is one, takes
+          // the line below across both columns.
+          <div
+            key={field.id}
+            className="grid grid-cols-[96px_minmax(0,1fr)] items-center gap-x-2 gap-y-1"
+          >
+            {head}
             {cell}
+            {hint !== false && <div className="col-span-2">{hint}</div>}
           </div>
         );
       })}
