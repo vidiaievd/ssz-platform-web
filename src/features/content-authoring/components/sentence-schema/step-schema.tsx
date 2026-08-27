@@ -22,6 +22,7 @@ import {
   CLAUSE_IDS,
   PRESETS,
   issues,
+  packsFor,
   preset,
   type ClauseId,
 } from '@/lib/shared-kernel/sentence-schema';
@@ -36,12 +37,15 @@ import {
   moveField,
   removeField,
   setField,
+  setSettings,
   toggleClause,
   type SentenceSchemaDocument,
 } from './edits';
 
 export interface StepSchemaProps {
   exercise: SentenceSchemaDocument;
+  /** The course's language, as an ISO 639-1 code. Decides which packs are offered. */
+  targetLanguage: string;
   onChange: (next: SentenceSchemaDocument) => void;
 }
 
@@ -64,10 +68,11 @@ export interface StepSchemaProps {
  * to amber are the whole of the report. That is on purpose: it is also the check that the
  * validation engine is single, because a dot that stayed green would prove otherwise.
  */
-export function StepSchema({ exercise, onChange }: StepSchemaProps) {
+export function StepSchema({ exercise, targetLanguage, onChange }: StepSchemaProps) {
   const t = useTranslations('Authoring');
   const describeIssue = useIssueCopy(exercise);
   const [editing, setEditing] = useState<ClauseId>(exercise.clauses[0] ?? 'main');
+  const [allPacks, setAllPacks] = useState(false);
   const [board, boardWidth] = useContainerWidth();
 
   const problems = issues(exercise).filter((issue) => issue.step === 1);
@@ -75,25 +80,30 @@ export function StepSchema({ exercise, onChange }: StepSchemaProps) {
   const clause = exercise.clauses.includes(editing) ? editing : (exercise.clauses[0] ?? editing);
   const fields = exercise.schema[clause] ?? [];
 
+  /*
+    Packs are offered by the language of the course, not all four at once (plan 52, Q8).
+    The exercise's own pack is always among them, however foreign — an author whose
+    selection had been filtered out of the grid would be looking at an unselected
+    radiogroup and no explanation. `onlyBlank` is the honest case: a course in a language
+    the platform has no field chart for, which is why the notice points at the other mode
+    rather than apologising.
+  */
+  const packs = packsFor(targetLanguage, exercise.presetId);
+  const onlyBlank = packs.length === 1;
+  const shown = allPacks ? PRESETS : packs;
+  const orderOnly = exercise.settings.orderOnly;
+
   const clauseName = (id: ClauseId) =>
     t(`sentenceSchema.clause.${id}` as 'sentenceSchema.clause.main');
 
-  return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <h2 className="text-base font-semibold">{t('sentenceSchema.step1.title')}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t('sentenceSchema.step1.lede')}</p>
-      </div>
-
-      {/* Kept editable rather than hidden: the schema is what the exercise goes back to
-          when the mode is switched off, and an author needs to see what that is. */}
-      {exercise.settings.orderOnly && (
-        <p className="flex items-start gap-1.5 rounded-lg border border-border bg-subtle p-3 text-xs text-muted-foreground">
-          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          {t('sentenceSchema.step1.orderOnlyNotice')}
-        </p>
-      )}
-
+  /*
+    Everything about the field chart, in one piece so that sequence-only can fold it away
+    behind one disclosure instead of five conditionals. It stays *reachable*, not deleted:
+    the schema is what the exercise goes back to when the mode is switched off, and an
+    author needs to be able to see and edit what that is.
+  */
+  const schemaSections = (
+    <>
       <section className="flex flex-col gap-3">
         <div>
           <p className="text-sm font-medium">{t('sentenceSchema.step1.packsLabel')}</p>
@@ -107,12 +117,19 @@ export function StepSchema({ exercise, onChange }: StepSchemaProps) {
           </p>
         )}
 
+        {onlyBlank && !allPacks && (
+          <p className="flex items-start gap-1.5 rounded-lg border border-border bg-subtle p-3 text-xs text-muted-foreground">
+            <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            {t('sentenceSchema.step1.noPackForLanguage')}
+          </p>
+        )}
+
         <div
           role="radiogroup"
           aria-label={t('sentenceSchema.step1.packsLabel')}
           className="grid gap-2 sm:grid-cols-2"
         >
-          {PRESETS.map((pack) => {
+          {shown.map((pack) => {
             const chosen = exercise.presetId === pack.id;
             return (
               <button
@@ -142,6 +159,14 @@ export function StepSchema({ exercise, onChange }: StepSchemaProps) {
             );
           })}
         </div>
+
+        {!allPacks && packs.length < PRESETS.length && (
+          <div>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setAllPacks(true)}>
+              {t('sentenceSchema.step1.showAllPacks')}
+            </Button>
+          </div>
+        )}
       </section>
 
       <section className="flex flex-col gap-3">
@@ -334,6 +359,85 @@ export function StepSchema({ exercise, onChange }: StepSchemaProps) {
           </div>
         </section>
       )}
+    </>
+  );
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div>
+        <h2 className="text-base font-semibold">{t('sentenceSchema.step1.title')}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t('sentenceSchema.step1.lede')}</p>
+      </div>
+
+      <section className="flex flex-col gap-3">
+        <div>
+          <p className="text-sm font-medium">{t('sentenceSchema.step1.modeLabel')}</p>
+          <p className="text-xs text-muted-foreground">{t('sentenceSchema.step1.modeHelp')}</p>
+        </div>
+        <div
+          role="radiogroup"
+          aria-label={t('sentenceSchema.step1.modeLabel')}
+          className="grid gap-2 sm:grid-cols-2"
+        >
+          <ModeCard
+            chosen={!orderOnly}
+            name={t('sentenceSchema.step1.modeFieldsName')}
+            desc={t('sentenceSchema.step1.modeFieldsDesc')}
+            onClick={() => onChange(setSettings(exercise, { orderOnly: false }))}
+          />
+          <ModeCard
+            chosen={orderOnly}
+            name={t('sentenceSchema.step1.modeOrderName')}
+            desc={t('sentenceSchema.step1.modeOrderDesc')}
+            onClick={() => onChange(setSettings(exercise, { orderOnly: true }))}
+          />
+        </div>
+      </section>
+
+      {orderOnly ? (
+        <details className="rounded-lg border border-border bg-surface p-3">
+          <summary className="cursor-pointer text-sm font-medium">
+            {t('sentenceSchema.step1.schemaKept')}
+          </summary>
+          <p className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground">
+            <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            {t('sentenceSchema.step1.orderOnlyNotice')}
+          </p>
+          <div className="mt-4 flex flex-col gap-5">{schemaSections}</div>
+        </details>
+      ) : (
+        schemaSections
+      )}
     </div>
+  );
+}
+
+/** One of the two exercise modes, drawn like a language pack — it is the same kind of choice. */
+function ModeCard({
+  chosen,
+  name,
+  desc,
+  onClick,
+}: {
+  chosen: boolean;
+  name: string;
+  desc: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={chosen}
+      onClick={onClick}
+      className={`flex flex-col items-start gap-1 rounded-lg border-2 p-3 text-left ${
+        chosen
+          ? 'border-(--ssz-color-primary-600) bg-(--ssz-color-primary-50) dark:bg-(--ssz-color-primary-950)'
+          : 'border-border bg-surface hover:bg-subtle'
+      }`}
+    >
+      <span className="text-sm font-semibold">{name}</span>
+      <span className="text-xs text-muted-foreground">{desc}</span>
+    </button>
   );
 }

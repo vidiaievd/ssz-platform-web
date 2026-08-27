@@ -45,6 +45,8 @@ const LAST_STEP = 4;
 export interface SentenceSchemaBuilderProps {
   exerciseId: string;
   containerId: string;
+  /** The course's language, as an ISO 639-1 code. Decides which packs step 1 offers. */
+  targetLanguage: string;
   /** The document as loaded from `/exercises/:id/answers`, both columns joined. */
   initialExercise: SentenceSchemaDocument;
   onDocumentChange?: (exercise: SentenceSchemaDocument) => void;
@@ -69,6 +71,7 @@ export interface SentenceSchemaBuilderProps {
 export function SentenceSchemaBuilder({
   exerciseId,
   containerId,
+  targetLanguage,
   initialExercise,
   onDocumentChange,
   onSavedRemote,
@@ -147,7 +150,9 @@ export function SentenceSchemaBuilder({
       </EditorToolbarPortal>
 
       <div className="min-w-0">
-        {step === 1 && <StepSchema exercise={exercise} onChange={setExercise} />}
+        {step === 1 && (
+          <StepSchema exercise={exercise} targetLanguage={targetLanguage} onChange={setExercise} />
+        )}
         {step === 2 && (
           <StepSentences
             exercise={exercise}

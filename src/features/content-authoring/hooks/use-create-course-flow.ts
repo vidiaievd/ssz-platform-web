@@ -41,7 +41,8 @@ export function useCreateCourseFlow() {
         title: store.basics.title.trim(),
         description: store.basics.description.trim() || undefined,
         containerType: 'course',
-        targetLanguage: store.basics.targetLanguage || 'nb',
+        targetLanguage: (store.basics.targetLanguage ||
+          'nb') as ContainerFormValues['targetLanguage'],
         difficultyLevel: 'A1',
         visibility: DEFAULT_VISIBILITY,
         accessTier: DEFAULT_ACCESS_TIER,

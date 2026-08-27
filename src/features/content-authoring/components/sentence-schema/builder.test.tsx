@@ -36,7 +36,12 @@ function doc(overrides: Partial<SentenceSchemaContent> = {}): SentenceSchemaDocu
 function renderBuilder(exercise: SentenceSchemaDocument = doc()) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <SentenceSchemaBuilder exerciseId="ex-1" containerId="module-1" initialExercise={exercise} />
+      <SentenceSchemaBuilder
+        exerciseId="ex-1"
+        containerId="module-1"
+        targetLanguage="nb"
+        initialExercise={exercise}
+      />
     </NextIntlClientProvider>,
   );
   return { user: userEvent.setup() };

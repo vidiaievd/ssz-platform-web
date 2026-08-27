@@ -15,6 +15,12 @@ function doc(overrides: Partial<SentenceSchemaContent> = {}): SentenceSchemaDocu
   return { updatedAt: '2026-08-26T10:00:00.000Z', ...content(overrides) };
 }
 
+/** The document as step 1 leaves it when the author picks the sequence-only mode. */
+function seqDoc(overrides: Partial<SentenceSchemaContent> = {}): SentenceSchemaDocument {
+  const base = doc(overrides);
+  return { ...base, settings: { ...base.settings, orderOnly: true } };
+}
+
 function Harness({
   initial,
   onChange,
@@ -47,13 +53,11 @@ describe('StepDifficulty', () => {
   it('lists the nine switches from the strongest support to the strictest', () => {
     renderStep();
 
-    // Ten now: the mode that decides what the other nine are about comes first.
-    expect(screen.getAllByRole('switch')).toHaveLength(10);
+    // Nine, not ten: the mode moved to step 1, where it decides whether this screen's
+    // field switches apply at all (plan 52, Q8).
+    expect(screen.getAllByRole('switch')).toHaveLength(9);
     expect(
-      screen
-        .getAllByRole('switch')
-        .slice(1)
-        .map((el) => el.closest('label')!.textContent!.split('Off')[0]),
+      screen.getAllByRole('switch').map((el) => el.closest('label')!.textContent!.split('Off')[0]),
     ).toEqual([
       expect.stringContaining('Show field names'),
       expect.stringContaining('Show field hints'),
@@ -65,6 +69,12 @@ describe('StepDifficulty', () => {
       expect.stringContaining('Show the rule after the second mistake'),
       expect.stringContaining('Order inside a field counts'),
     ]);
+  });
+
+  it('no longer carries the mode switch — it belongs to step 1 now', () => {
+    renderStep();
+
+    expect(screen.queryByRole('switch', { name: /Word order only/ })).not.toBeInTheDocument();
   });
 
   it('has no switch for markEmpty — the model carries it, the runner does not', () => {
@@ -116,26 +126,38 @@ describe('StepDifficulty', () => {
 });
 
 describe('StepDifficulty · word order only', () => {
-  it('draws the field switches inert, with the reason where their help line was', async () => {
-    const { user } = renderStep();
+  it('hides the five field switches and says they are coming back', () => {
+    renderStep(seqDoc());
 
-    await user.click(screen.getByRole('switch', { name: /Word order only/ }));
-
-    // Inert rather than hidden: a switch that vanishes takes its setting's existence with
-    // it, and the author would find the exercise quietly changed on switching back.
-    expect(screen.getByRole('switch', { name: /Show field names/ })).toBeDisabled();
-    expect(screen.getByRole('switch', { name: /Order inside a field counts/ })).toBeDisabled();
-    expect(screen.getAllByText('Not used while word order only is on.').length).toBeGreaterThan(0);
+    /*
+      Hidden, not inert — reversing the earlier decision (plan 52, Q8). The cause is now
+      visible on step 1, and the worry the old comment named is answered by the line
+      below: the values are kept, and the author is told so.
+    */
+    expect(screen.queryByRole('switch', { name: /Show field names/ })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('switch', { name: /Order inside a field counts/ }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/five field settings are hidden/i)).toBeInTheDocument();
   });
 
-  it('leaves the switches that still mean something alone', async () => {
-    const { user } = renderStep();
-
-    await user.click(screen.getByRole('switch', { name: /Word order only/ }));
+  it('leaves the switches that still mean something alone', () => {
+    renderStep(seqDoc());
 
     // The bank is still a bank: distractors, shuffling and the escalating hint all apply.
     expect(screen.getByRole('switch', { name: /Extra pieces in the bank/ })).toBeEnabled();
     expect(screen.getByRole('switch', { name: /Shuffle the bank/ })).toBeEnabled();
     expect(screen.getByRole('switch', { name: /Show the rule after/ })).toBeEnabled();
+  });
+
+  it('keeps the hidden values in the document, so switching back restores them', async () => {
+    const { user, onChange } = renderStep(seqDoc());
+
+    await user.click(screen.getByRole('switch', { name: /Shuffle the bank/ }));
+
+    const next = onChange.mock.lastCall![0] as SentenceSchemaDocument;
+    expect(next.settings.labels).toBe(DEFAULT_SETTINGS.labels);
+    expect(next.settings.perField).toBe(DEFAULT_SETTINGS.perField);
+    expect(next.settings.order).toBe(DEFAULT_SETTINGS.order);
   });
 });

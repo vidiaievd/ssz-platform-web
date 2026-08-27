@@ -2630,7 +2630,16 @@
       "addField": "Legg til felt",
       "newFieldName": "Nytt felt",
       "noFields": "Denne setningstypen har ingen felt ennå — legg til ett, eller slå typen av.",
-      "orderOnlyNotice": "Denne oppgaven vurderes bare på ordstilling og bruker ingen felt. Skjemaet under blir stående til du slår det av i steg 3."
+      "orderOnlyNotice": "Denne oppgaven vurderes bare på ordstilling og bruker ingen felt. Skjemaet blir stående her til du bytter modus tilbake.",
+      "modeLabel": "Hva gjør studenten?",
+      "modeHelp": "Begge modusene bruker de samme setningene. Du kan bytte når som helst.",
+      "modeFieldsName": "Plasser setningen i felt",
+      "modeFieldsDesc": "Studenten legger hver bit i feltet den hører hjemme i — forfelt, verbal, objekt…",
+      "modeOrderName": "Bare ordstilling",
+      "modeOrderDesc": "Én rute for hele setningen. Studenten blir aldri spurt hvilket ledd en bit er.",
+      "schemaKept": "Feltskjema — beholdt, ikke i bruk i denne modusen",
+      "noPackForLanguage": "Det finnes ennå ikke noe setningsskjema for språket i dette kurset. Navngi feltene selv i det tomme skjemaet, eller bruk bare ordstilling, som ikke trenger noe skjema.",
+      "showAllPacks": "Vis pakker for andre språk"
     },
     "step2": {
       "title": "Skriv setningene og plasser hvert ord",
@@ -2702,9 +2711,7 @@
       "orderLabel": "Rekkefølgen inne i et felt teller",
       "orderHelp": "Av godtar enhver rekkefølge blant biter som deler felt.",
       "tip": "En god rekkefølge: kjør den først med navn, hint og antall på; andre gang med bare navn; tredje gang med bare kortnøkler og stokket bank.",
-      "orderOnlyLabel": "Bare ordstilling, ingen felt",
-      "orderOnlyHelp": "Én rute for hele setningen. Studenten setter ordene i rekkefølge og blir aldri spurt hvilket ledd et ord er — skjemaet blir stående ubrukt til du slår dette av igjen.",
-      "orderOnlyOff": "Ikke i bruk mens bare ordstilling er på."
+      "fieldsHidden": "De fem feltinnstillingene er skjult i modusen «bare ordstilling». Verdiene beholdes og kommer tilbake når du bytter modus i steg 1."
     },
     "step4": {
       "title": "Si hvorfor, ikke bare feil",

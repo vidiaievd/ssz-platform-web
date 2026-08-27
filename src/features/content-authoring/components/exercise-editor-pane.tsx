@@ -353,6 +353,7 @@ export function ExerciseEditorPane({
           key={exerciseId}
           exerciseId={exerciseId}
           containerId={container.id}
+          targetLanguage={container.targetLanguage}
           initialExercise={sentenceSchemaDocumentFrom(exercise)}
           onDocumentChange={setSentenceSchema}
           onSavedRemote={(updatedAt, saved) =>

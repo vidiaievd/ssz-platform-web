@@ -23,7 +23,7 @@ const { createContainerAction, updateContainerAction } = await import('./contain
 const VALID_INPUT = {
   title: 'Norwegian A1',
   containerType: 'course' as const,
-  targetLanguage: 'nb',
+  targetLanguage: 'nb' as const,
   difficultyLevel: 'A1' as const,
   visibility: 'public' as const,
   accessTier: 'public_free' as const,

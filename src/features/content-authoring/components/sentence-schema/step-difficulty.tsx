@@ -35,13 +35,18 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
 
   const extrasWithoutAny = issues(exercise).find((issue) => issue.code === 'EXTRAS_ON_BUT_NONE');
   /*
-    Five of the nine switches are about fields, and sequence-only has none. They are drawn
-    inert with the reason in place of their help line rather than hidden: a switch that
-    disappears takes its setting's existence with it, and an author who turns the mode off
-    again would find the exercise had quietly changed in ways nothing told them about.
+    Five of the nine switches are about fields, and sequence-only has none — so in that
+    mode they are not drawn at all.
+    
+    This reverses an earlier decision to draw them inert (plan 52, Q8). The worry then was
+    sound — a switch that disappears takes its setting's existence with it — but it was
+    written when the mode was one toggle among nine on this very screen, where five
+    neighbours vanishing had no visible cause. The mode is now a card at the top of step 1,
+    so the cause is on screen; and the worry is answered directly instead: the values are
+    untouched in the document, and the line left in place of the section says they are
+    coming back.
   */
   const seq = s.orderOnly;
-  const inert = seq ? t('sentenceSchema.step3.orderOnlyOff') : undefined;
 
   return (
     <div className="flex flex-col gap-5">
@@ -51,36 +56,30 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
       </div>
 
       <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
-        <ToggleRow
-          label={t('sentenceSchema.step3.orderOnlyLabel')}
-          help={t('sentenceSchema.step3.orderOnlyHelp')}
-          checked={s.orderOnly}
-          onChange={(orderOnly) => onChange(setSettings(exercise, { orderOnly }))}
-        />
-      </section>
-
-      <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
-        <ToggleRow
-          label={t('sentenceSchema.step3.labelsLabel')}
-          help={t('sentenceSchema.step3.labelsHelp')}
-          disabledReason={inert}
-          checked={s.labels}
-          onChange={(labels) => onChange(setSettings(exercise, { labels }))}
-        />
-        <ToggleRow
-          label={t('sentenceSchema.step3.hintsLabel')}
-          help={t('sentenceSchema.step3.hintsHelp')}
-          disabledReason={inert}
-          checked={s.hints}
-          onChange={(hints) => onChange(setSettings(exercise, { hints }))}
-        />
-        <ToggleRow
-          label={t('sentenceSchema.step3.countsLabel')}
-          help={t('sentenceSchema.step3.countsHelp')}
-          disabledReason={inert}
-          checked={s.counts}
-          onChange={(counts) => onChange(setSettings(exercise, { counts }))}
-        />
+        {!seq && (
+          <ToggleRow
+            label={t('sentenceSchema.step3.labelsLabel')}
+            help={t('sentenceSchema.step3.labelsHelp')}
+            checked={s.labels}
+            onChange={(labels) => onChange(setSettings(exercise, { labels }))}
+          />
+        )}
+        {!seq && (
+          <ToggleRow
+            label={t('sentenceSchema.step3.hintsLabel')}
+            help={t('sentenceSchema.step3.hintsHelp')}
+            checked={s.hints}
+            onChange={(hints) => onChange(setSettings(exercise, { hints }))}
+          />
+        )}
+        {!seq && (
+          <ToggleRow
+            label={t('sentenceSchema.step3.countsLabel')}
+            help={t('sentenceSchema.step3.countsHelp')}
+            checked={s.counts}
+            onChange={(counts) => onChange(setSettings(exercise, { counts }))}
+          />
+        )}
         <ToggleRow
           label={t('sentenceSchema.step3.prefillLabel')}
           help={t('sentenceSchema.step3.prefillHelp')}
@@ -99,28 +98,34 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
           checked={s.shuffle}
           onChange={(shuffle) => onChange(setSettings(exercise, { shuffle }))}
         />
-        <ToggleRow
-          label={t('sentenceSchema.step3.perFieldLabel')}
-          help={t('sentenceSchema.step3.perFieldHelp')}
-          disabledReason={inert}
-          checked={s.perField}
-          onChange={(perField) => onChange(setSettings(exercise, { perField }))}
-        />
+        {!seq && (
+          <ToggleRow
+            label={t('sentenceSchema.step3.perFieldLabel')}
+            help={t('sentenceSchema.step3.perFieldHelp')}
+            checked={s.perField}
+            onChange={(perField) => onChange(setSettings(exercise, { perField }))}
+          />
+        )}
         <ToggleRow
           label={t('sentenceSchema.step3.hintAfterMistakeLabel')}
           help={t('sentenceSchema.step3.hintAfterMistakeHelp')}
           checked={s.hintAfterMistake}
           onChange={(hintAfterMistake) => onChange(setSettings(exercise, { hintAfterMistake }))}
         />
-        <ToggleRow
-          label={t('sentenceSchema.step3.orderLabel')}
-          help={t('sentenceSchema.step3.orderHelp')}
-          // Sequence-only grades order and nothing else, so `loose` would be an off
-          // switch for the exercise rather than a difficulty setting.
-          disabledReason={inert}
-          checked={s.order === 'strict'}
-          onChange={(on) => onChange(setSettings(exercise, { order: on ? 'strict' : 'loose' }))}
-        />
+        {!seq && (
+          <ToggleRow
+            label={t('sentenceSchema.step3.orderLabel')}
+            help={t('sentenceSchema.step3.orderHelp')}
+            // Sequence-only grades order and nothing else, so `loose` would be an off
+            // switch for the exercise rather than a difficulty setting.
+            checked={s.order === 'strict'}
+            onChange={(on) => onChange(setSettings(exercise, { order: on ? 'strict' : 'loose' }))}
+          />
+        )}
+
+        {seq && (
+          <p className="text-xs text-muted-foreground">{t('sentenceSchema.step3.fieldsHidden')}</p>
+        )}
       </section>
 
       {/* Beside the switch that causes it: the gate is too late to learn this about a

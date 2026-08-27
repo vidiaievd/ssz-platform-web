@@ -5,13 +5,14 @@ import { Globe } from 'lucide-react';
 
 import { ContainerStateBadge } from '../container-state-badge';
 import { useCreateCourseStore } from '../../stores/create-course';
-import { CREATE_COURSE_LANGUAGES } from './step-basics';
+import { useLanguageOptions } from '../../hooks/use-language-options';
 
 /** Sticky "what you're about to create" preview shown alongside the guided wizard. */
 export function CourseLivePreview() {
   const t = useTranslations('Authoring.createCourse');
   const { basics, levelSystem } = useCreateCourseStore();
-  const langLabel = CREATE_COURSE_LANGUAGES.find((l) => l.code === basics.targetLanguage)?.label;
+  const languageOptions = useLanguageOptions();
+  const langLabel = languageOptions.find((l) => l.code === basics.targetLanguage)?.name;
   const levelsLabel = t(`levels.${levelSystem}` as Parameters<typeof t>[0]);
 
   return (

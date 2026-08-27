@@ -2630,7 +2630,16 @@
       "addField": "Add field",
       "newFieldName": "New field",
       "noFields": "This clause type has no fields yet — add one, or switch the type off.",
-      "orderOnlyNotice": "This exercise is graded on word order alone, so it uses no fields. The schema below is kept for when you switch that off on step 3."
+      "orderOnlyNotice": "This exercise is graded on word order alone, so it uses no fields. The schema is kept here for when you switch the mode back.",
+      "modeLabel": "What does the student do?",
+      "modeHelp": "Both modes use the same sentences. You can switch between them at any time.",
+      "modeFieldsName": "Lay the sentence out by field",
+      "modeFieldsDesc": "The student drops each piece into the field it belongs to — Forfelt, verb, object…",
+      "modeOrderName": "Word order only",
+      "modeOrderDesc": "One slot for the whole sentence. The student is never asked which constituent a piece is.",
+      "schemaKept": "Field schema — kept, unused in this mode",
+      "noPackForLanguage": "There is no field chart for this course’s language yet. Name the fields yourself in the blank pack, or use word order only, which needs no chart.",
+      "showAllPacks": "Show packs for other languages"
     },
     "step2": {
       "title": "Write the sentences and place every word",
@@ -2702,9 +2711,7 @@
       "orderLabel": "Order inside a field counts",
       "orderHelp": "Off accepts any order among chunks that share a field.",
       "tip": "A good sequence: run it once with names, hints and counts on; a second time with names only; a third with the bare keys and a shuffled bank.",
-      "orderOnlyLabel": "Word order only, no fields",
-      "orderOnlyHelp": "One slot for the whole sentence. The student puts the words in order and is never asked which constituent a word is — the schema stays here, unused, until you switch this back off.",
-      "orderOnlyOff": "Not used while word order only is on."
+      "fieldsHidden": "The five field settings are hidden in word-order-only mode. Their values are kept and come back when you switch the mode on step 1."
     },
     "step4": {
       "title": "Say why, not just wrong",

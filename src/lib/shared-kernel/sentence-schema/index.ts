@@ -32,7 +32,7 @@ export {
 } from './model';
 
 export type { Preset } from './presets';
-export { emptySchema, preset, PRESETS } from './presets';
+export { emptySchema, packsFor, preset, PRESETS } from './presets';
 
 export { chunksToText, join, retokenize, split, tokenize } from './tokenize';
 
