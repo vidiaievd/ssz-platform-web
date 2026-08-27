@@ -13,6 +13,7 @@ vi.mock('../actions/error-correction', () => ({ createErrorCorrectionAction: vi.
 vi.mock('../actions/match-pairs', () => ({ createMatchPairsAction: vi.fn() }));
 vi.mock('../actions/writing-task', () => ({ createWritingTaskAction: vi.fn() }));
 vi.mock('../actions/short-answer', () => ({ createShortAnswerAction: vi.fn() }));
+vi.mock('../actions/sentence-schema', () => ({ createSentenceSchemaAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),

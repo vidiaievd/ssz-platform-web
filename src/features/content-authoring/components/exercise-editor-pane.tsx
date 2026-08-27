@@ -53,6 +53,12 @@ import {
   toContent as shortAnswerToContent,
   toExpectedAnswers as shortAnswerToExpectedAnswers,
 } from '@/lib/shared-kernel/short-answer';
+import {
+  fromPersisted as sentenceSchemaFromPersisted,
+  TEMPLATE_CODE as SENTENCE_SCHEMA_TEMPLATE_CODE,
+  toContent as sentenceSchemaToContent,
+  toExpectedAnswers as sentenceSchemaToExpectedAnswers,
+} from '@/lib/shared-kernel/sentence-schema';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -76,6 +82,10 @@ import { ShortAnswerBuilder } from './short-answer/builder';
 import { ShortAnswerPreview } from './short-answer/short-answer-preview';
 import type { ShortAnswerDocument } from './short-answer/edits';
 import type { SavedDocument as SavedShortAnswer } from './short-answer/use-short-answer-autosave';
+import { SentenceSchemaBuilder } from './sentence-schema/builder';
+import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
+import type { SentenceSchemaDocument } from './sentence-schema/edits';
+import type { SavedDocument as SavedSentenceSchema } from './sentence-schema/use-sentence-schema-autosave';
 import { WritingTaskBuilder } from './writing-task/builder';
 import { WritingTaskPreview } from './writing-task/writing-task-preview';
 import type { SavedDocument as SavedWritingTask } from './writing-task/use-writing-task-autosave';
@@ -135,6 +145,9 @@ export function ExerciseEditorPane({
   /** The short-answer document as its builder currently has it, for the preview column. */
   const [shortAnswer, setShortAnswer] = useState<ShortAnswerDocument | null>(null);
 
+  /** The sentence-schema document as its builder currently has it, for the preview column. */
+  const [sentenceSchema, setSentenceSchema] = useState<SentenceSchemaDocument | null>(null);
+
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
   const isTranslate = isTranslateCode(exercise?.templateCode);
@@ -148,6 +161,14 @@ export function ExerciseEditorPane({
     both to the same place and one of them would be wrong.
   */
   const isShortAnswer = exercise != null && isShortAnswerDocument(exercise.content);
+  /*
+    By the template code, unlike `short_answer` — plan 52 §8 Q7. The old form of this type
+    was removed from the catalogue rather than kept alive beside the new one, so there is
+    no second shape to dispatch on: every `sentence_schema` exercise belongs to the
+    builder, and a document that is not of the new form is refused by the runner and the
+    server alike rather than opened in a form that could not edit it anyway.
+  */
+  const isSentenceSchema = exercise?.templateCode === SENTENCE_SCHEMA_TEMPLATE_CODE;
 
   return (
     <LessonEditorShell
@@ -191,6 +212,8 @@ export function ExerciseEditorPane({
           <WritingTaskPreview exercise={writingTask} />
         ) : isShortAnswer && shortAnswer !== null ? (
           <ShortAnswerPreview exercise={shortAnswer} />
+        ) : isSentenceSchema && sentenceSchema !== null ? (
+          <SentenceSchemaPreview exercise={sentenceSchema} />
         ) : (
           <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
         )
@@ -318,6 +341,24 @@ export function ExerciseEditorPane({
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
               (cached) => (cached ? applySavedShortAnswer(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
+      ) : isSentenceSchema && exercise != null ? (
+        // Sentence schema owns a document because the answer is not written anywhere: it
+        // *is* where each chunk sits on the board, and that same placement is the word
+        // bank the student is handed. The generic form had a list of fields and a list of
+        // tokens, which is the shape this template left behind in plan 52.
+        <SentenceSchemaBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          initialExercise={sentenceSchemaDocumentFrom(exercise)}
+          onDocumentChange={setSentenceSchema}
+          onSavedRemote={(updatedAt, saved) =>
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedSentenceSchema(cached, updatedAt, saved) : cached),
             )
           }
         />
@@ -538,6 +579,48 @@ function applySavedShortAnswer(
     updatedAt,
     content: { ...shortAnswerToContent(saved.exercise) },
     expectedAnswers: { ...shortAnswerToExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        { ...instruction, instructionText: saved.exercise.instruction.trim() },
+        ...rest,
+      ],
+    }),
+  };
+}
+
+/**
+ * The stored columns as the kernel's sentence-schema document, plus the row's token.
+ *
+ * No `id`/`moduleId`/`title` envelope, as with `short_answer`: this kernel's document is
+ * the content and nothing else, and the builder's envelope adds only what it uses —
+ * `updatedAt`, the autosave concurrency token. An exercise served without one would make
+ * every save unconditional, so its absence is an empty token, which the server refuses.
+ */
+function sentenceSchemaDocumentFrom(exercise: ExerciseWithAnswers): SentenceSchemaDocument {
+  return {
+    ...sentenceSchemaFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+  };
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ *
+ * The instruction row follows the document's own `instruction` rather than a field of its
+ * own — one line, written to both places (see `use-sentence-schema-autosave.ts`).
+ */
+function applySavedSentenceSchema(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedSentenceSchema,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...sentenceSchemaToContent(saved.exercise) },
+    expectedAnswers: { ...sentenceSchemaToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
         { ...instruction, instructionText: saved.exercise.instruction.trim() },

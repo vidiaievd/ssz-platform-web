@@ -17,6 +17,7 @@ vi.mock('../actions/translate', () => ({ saveTranslateAction: vi.fn() }));
 vi.mock('../actions/match-pairs', () => ({ saveMatchPairsAction: vi.fn() }));
 vi.mock('../actions/writing-task', () => ({ saveWritingTaskAction: vi.fn() }));
 vi.mock('../actions/short-answer', () => ({ saveShortAnswerAction: vi.fn() }));
+vi.mock('../actions/sentence-schema', () => ({ saveSentenceSchemaAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
