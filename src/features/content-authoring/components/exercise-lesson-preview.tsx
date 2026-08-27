@@ -142,45 +142,6 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
-        {values.templateCode === 'sentence_schema' &&
-          (values.ssSentence ? (
-            <div>
-              {/* With a source sentence the target is held back from the learner,
-                  so the preview shows what they will actually start from. */}
-              <p className="mb-2.5 text-[15px] font-semibold leading-normal text-(--ssz-text-primary)">
-                {values.ssSourceSentence?.trim() || values.ssSentence}
-              </p>
-              <div className="mb-3 overflow-x-auto">
-                <div className="flex min-w-max gap-1.5">
-                  {(values.ssFields ?? [])
-                    .filter((f) => f.label.trim())
-                    .map((f, i) => (
-                      <div
-                        key={i}
-                        className="min-w-20 flex-1 rounded-md border border-dashed border-(--ssz-border-default) bg-subtle px-2 py-2 text-center"
-                      >
-                        <p className="text-[11px] font-medium text-muted-foreground">{f.label}</p>
-                      </div>
-                    ))}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {(values.ssTokens ?? [])
-                  .filter((tk) => tk.text.trim())
-                  .map((tk, i) => (
-                    <span
-                      key={i}
-                      className="rounded-full border border-(--ssz-border-default) bg-surface px-3 py-1 text-sm text-(--ssz-text-primary)"
-                    >
-                      {tk.text}
-                    </span>
-                  ))}
-              </div>
-            </div>
-          ) : (
-            empty
-          ))}
-
         {values.templateCode === 'word_bank_fill' &&
           ((values.wbfSentences ?? []).some((s) => s.text.trim()) ? (
             <div>

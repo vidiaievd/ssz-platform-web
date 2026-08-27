@@ -105,30 +105,55 @@ describe('ExercisePreview — new exercise types', () => {
     expect(screen.queryByText('Tog')).not.toBeInTheDocument();
   });
 
-  it('renders a sentence_schema sentence, field labels and token chips', () => {
+  it('renders a sentence_schema set through the projection: fields and the shuffled bank', () => {
+    const exercise: ExerciseDisplay = {
+      ...base,
+      templateCode: 'sentence_schema',
+      content: {
+        instruction: 'Sett ordene på riktig plass.',
+        rows: [
+          {
+            id: 'r1',
+            clause: 'main',
+            source: 'Lars har aldri likt Lotte.',
+            fields: [
+              { id: 'forfelt', short: 'F', label: 'Forfelt' },
+              { id: 'verbal', short: 'v', label: 'Verbal' },
+            ],
+            bank: [
+              { id: 'c2', text: 'har' },
+              { id: 'c1', text: 'Lars' },
+            ],
+          },
+        ],
+        settings: { labels: true },
+      },
+    };
+    renderWithProviders(<ExercisePreview exercise={exercise} />);
+
+    // The prompt is what the learner starts from; the sentence they build is the answer
+    // and never reaches `/display` at all.
+    expect(screen.getByText('Lars har aldri likt Lotte.')).toBeInTheDocument();
+    expect(screen.getByText('Forfelt')).toBeInTheDocument();
+    expect(screen.getByText('Verbal')).toBeInTheDocument();
+    expect(screen.getByText('har')).toBeInTheDocument();
+    expect(screen.getByText('Lars')).toBeInTheDocument();
+  });
+
+  it('says a pre-plan-52 sentence_schema document needs rewriting instead of drawing it', () => {
     const exercise: ExerciseDisplay = {
       ...base,
       templateCode: 'sentence_schema',
       content: {
         sentence: 'Lars har aldri likt Lotte.',
-        fields: [
-          { id: 'forfelt', label: 'Forfelt' },
-          { id: 'verbal1', label: 'Verbal' },
-        ],
-        tokens: [
-          { id: 't1', text: 'Lars' },
-          { id: 't2', text: 'har' },
-        ],
+        fields: [{ id: 'forfelt', label: 'Forfelt' }],
+        tokens: [{ id: 't1', text: 'Lars' }],
       },
     };
     renderWithProviders(<ExercisePreview exercise={exercise} />);
 
-    expect(screen.getByText('Lars har aldri likt Lotte.')).toBeInTheDocument();
-    expect(screen.getByText('Forfelt')).toBeInTheDocument();
-    expect(screen.getByText('Verbal')).toBeInTheDocument();
-    // Tokens rendered as chips.
-    expect(screen.getByText('Lars')).toBeInTheDocument();
-    expect(screen.getByText('har')).toBeInTheDocument();
+    expect(screen.queryByText('Forfelt')).not.toBeInTheDocument();
+    expect(screen.getByText(/old shape/i)).toBeInTheDocument();
   });
 
   it('renders error_correction sentences as the student meets them, without the answers', () => {

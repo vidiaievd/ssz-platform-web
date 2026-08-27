@@ -126,39 +126,8 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
 
         {code === 'writing_task' && <WritingTaskPrompt content={content} />}
 
-        {code === 'sentence_schema' && (
-          <div className="space-y-2">
-            {typeof content.sentence === 'string' && <p className="text-sm font-medium">{content.sentence}</p>}
-            <div className="overflow-x-auto">
-              <div className="flex min-w-max gap-1.5">
-                {(Array.isArray(content.fields) ? (content.fields as LabeledItem[]) : []).map((f, i) => (
-                  <div
-                    key={i}
-                    className="min-w-20 flex-1 rounded-md border border-dashed border-border px-2 py-2 text-center"
-                  >
-                    <p className="text-muted-foreground text-[11px] font-medium">
-                      {typeof (f as { label?: unknown }).label === 'string'
-                        ? (f as { label: string }).label
-                        : ''}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {Array.isArray(content.tokens) && content.tokens.length > 0 && (
-              <div>
-                <p className="text-muted-foreground mb-1 text-xs font-medium">{t('wordBank')}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {asItems(content.tokens).map((tok, i) => (
-                    <Badge key={i} variant="muted" className="text-xs">
-                      {tok.text}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {code === 'sentence_schema' && <SentenceSchemaContent content={content} />}
+
         {code === 'word_bank_fill' && (
           <div className="space-y-2">
             {Array.isArray(content.word_bank) && content.word_bank.length > 0 && (
@@ -491,6 +460,100 @@ function TranslateContent({
             {item.source}
           </li>
         ))}
+      </ol>
+    </div>
+  );
+}
+
+/**
+ * sentence_schema — read-only, and read through the projection.
+ *
+ * `/display` serves this template as a student projection (plan 52 §3.2): the fields of
+ * each sentence, the bank the server shuffled, and the prompt where there is one. Which
+ * field a chunk belongs in never leaves the server, so this preview cannot show the
+ * finished board and must not pretend to — what a teacher sees here is what the learner
+ * starts from.
+ *
+ * A document that is not a set says so instead of drawing an empty board. All seven
+ * seeded exercises were rewritten (§8 Q7), so one arriving in the pre-plan-52 shape is a
+ * leftover that needs rewriting rather than an exercise with nothing in it — and that is
+ * the same answer the validator, the runners and the projection give it.
+ */
+function SentenceSchemaContent({ content }: { content: Record<string, unknown> }) {
+  const t = useTranslations('Content');
+  const ts = useTranslations('ExerciseRunner.set');
+
+  const rows = Array.isArray(content.rows) ? (content.rows as Record<string, unknown>[]) : null;
+  if (rows === null) {
+    return <p className="text-muted-foreground text-sm">{t('sentenceSchemaNotASet')}</p>;
+  }
+
+  const instruction = typeof content.instruction === 'string' ? content.instruction : '';
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant="muted" className="text-xs">
+          {ts('badge')}
+        </Badge>
+        <span className="text-muted-foreground text-xs">
+          {t('sentenceSchemaCount', { n: rows.length })}
+        </span>
+      </div>
+
+      {instruction !== '' && <p className="text-muted-foreground text-xs">{instruction}</p>}
+
+      <ol className="space-y-2">
+        {rows.map((row, i) => {
+          const fields = Array.isArray(row.fields)
+            ? (row.fields as { short?: unknown; label?: unknown }[])
+            : [];
+          const bank = asItems(row.bank);
+          const source = typeof row.source === 'string' ? row.source : '';
+
+          return (
+            <li key={i} className="space-y-2 rounded-md border border-border px-3 py-2">
+              {/* The sentence to rewrite, where there is one. The sentence being built is
+                  the answer, and it is not in this payload at all. */}
+              {source !== '' && (
+                <p className="text-sm font-medium">
+                  <span className="text-muted-foreground mr-1.5 text-xs">{i + 1}.</span>
+                  {source}
+                </p>
+              )}
+              <div className="overflow-x-auto">
+                <div className="flex min-w-max gap-1.5">
+                  {fields.map((field, j) => (
+                    <div
+                      key={j}
+                      className="min-w-20 flex-1 rounded-md border border-dashed border-border px-2 py-2 text-center"
+                    >
+                      <p className="text-muted-foreground text-[11px] font-medium">
+                        {typeof field.label === 'string' && field.label !== ''
+                          ? field.label
+                          : typeof field.short === 'string'
+                            ? field.short
+                            : ''}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {bank.length > 0 && (
+                <div>
+                  <p className="text-muted-foreground mb-1 text-xs font-medium">{t('wordBank')}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {bank.map((item, j) => (
+                      <Badge key={j} variant="muted" className="text-xs">
+                        {item.text}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ol>
     </div>
   );

@@ -102,5 +102,7 @@
   "shortAnswerAnswer": "Відповідь",
   "shortAnswerTranscript": "Транскрипт — учень його не бачить",
   "writingWords": "слів",
-  "writingPointOptional": "необовʼязково"
+  "writingPointOptional": "необовʼязково",
+  "sentenceSchemaCount": "{n, plural, one {# речення} few {# речення} many {# речень} other {# речення}}",
+  "sentenceSchemaNotASet": "Цю вправу написано в старій формі, і її не можна показати. Відкрийте її в редакторі, щоб переписати як набір речень."
 }

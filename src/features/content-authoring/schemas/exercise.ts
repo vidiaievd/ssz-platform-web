@@ -8,7 +8,6 @@ export const EXERCISE_TYPES = [
   'multiple_choice_group',
   'fill_in_blank',
   'short_answer',
-  'sentence_schema',
   'word_bank_fill',
   'text_order',
 ] as const;
@@ -34,7 +33,11 @@ export type ExerciseType = (typeof EXERCISE_TYPES)[number];
  * a checklist with keywords, a weighted rubric with level descriptors and a settings
  * block, split across both JSON columns — the four `wt*` fields this form used to hold
  * described a shape the template no longer accepts, and the editor pane routes the code
- * to `WritingTaskBuilder`.
+ * to `WritingTaskBuilder`. `sentence_schema` left it in plan 52 §7: a document is now a
+ * set of sentences over one field schema, where the key is which field each chunk belongs
+ * in — five `ss*` fields could describe one sentence with one placement each, and the
+ * template no longer accepts that shape at all (§8 Q7 rewrote all seven exercises). The
+ * editor pane routes the code to `SentenceSchemaBuilder`.
  */
 export const CREATABLE_EXERCISE_TYPES = [
   'multiple_choice',
@@ -52,8 +55,6 @@ export const CREATABLE_EXERCISE_TYPES = [
 export type CreatableExerciseType = (typeof CREATABLE_EXERCISE_TYPES)[number];
 
 export const TEXT_ORDER_KINDS = ['dialogue', 'sentences'] as const;
-
-export const SENTENCE_SCHEMA_TYPES = ['main', 'subordinate'] as const;
 
 // Verdicts for a rationale option: the accepted answer, one that is grammatical
 // but not chosen in this context, and one that simply fails.
@@ -157,18 +158,6 @@ export const exerciseFormSchema = z
     saContext: z.string().max(2000).optional(),
     saReferenceAnswer: z.string().max(2000).optional(),
     saAccepted: z.string().max(2000).optional(),
-
-    // sentence_schema — the learner drops sentence tokens into ordered fields.
-    // Each token records which field (by index) it belongs to; -1 = unassigned.
-    ssSentence: z.string().max(2000).optional(),
-    // Optional starting point: when set the exercise becomes a transformation
-    // and `ssSentence` is held back from the learner until the answer is checked.
-    ssSourceSentence: z.string().max(2000).optional(),
-    ssSchemaType: z.enum(SENTENCE_SCHEMA_TYPES).optional(),
-    ssFields: z.array(z.object({ label: z.string().max(200) })).optional(),
-    ssTokens: z
-      .array(z.object({ text: z.string().max(200), fieldIndex: z.number().int() }))
-      .optional(),
 
     // word_bank_fill — several sentences sharing one comma-separated bank.
     // `answers[j]` holds the accepted answers (comma-separated) for the j-th
@@ -341,43 +330,6 @@ export const exerciseFormSchema = z
             code: z.ZodIssueCode.custom,
             path: ['toLines'],
             message: 'At least 2 lines required',
-          });
-        }
-        break;
-      }
-      case 'sentence_schema': {
-        if (!data.ssSentence?.trim()) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['ssSentence'], message: 'Required' });
-        }
-        const labelledFields = (data.ssFields ?? []).filter((f) => f.label.trim());
-        if (labelledFields.length < 2) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['ssFields'],
-            message: 'At least 2 fields required',
-          });
-        }
-        const filledTokens = (data.ssTokens ?? []).filter((tk) => tk.text.trim());
-        if (filledTokens.length < 2) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['ssTokens'],
-            message: 'At least 2 tokens required',
-          });
-        }
-        // Every filled token must be assigned to a field with a non-empty label.
-        const fieldCount = (data.ssFields ?? []).length;
-        const hasUnassigned = filledTokens.some(
-          (tk) =>
-            tk.fieldIndex < 0 ||
-            tk.fieldIndex >= fieldCount ||
-            !(data.ssFields ?? [])[tk.fieldIndex]?.label.trim(),
-        );
-        if (hasUnassigned) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['ssTokens'],
-            message: 'Every word must be assigned to a field',
           });
         }
         break;

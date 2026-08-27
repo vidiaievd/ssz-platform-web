@@ -372,34 +372,4 @@ describe('exerciseFormSchema', () => {
     if (result.success) return;
     expect(result.error.issues.map((i) => i.path.join('.'))).toContain('saReferenceAnswer');
   });
-
-  it('sentence_schema: accepts a sentence with 2+ fields and assigned tokens', () => {
-    expect(
-      parseExercise({
-        templateCode: 'sentence_schema',
-        ssSentence: 'Lars har likt Lotte',
-        ssSchemaType: 'main',
-        ssFields: [{ label: 'Forfelt' }, { label: 'Verbal' }],
-        ssTokens: [
-          { text: 'Lars', fieldIndex: 0 },
-          { text: 'har', fieldIndex: 1 },
-        ],
-      }).success,
-    ).toBe(true);
-  });
-
-  it('sentence_schema: rejects a token assigned to an empty field', () => {
-    const result = parseExercise({
-      templateCode: 'sentence_schema',
-      ssSentence: 'S',
-      ssFields: [{ label: 'A' }, { label: '' }],
-      ssTokens: [
-        { text: 'x', fieldIndex: 0 },
-        { text: 'y', fieldIndex: 1 }, // field 1 has an empty label
-      ],
-    });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('ssTokens');
-  });
 });
