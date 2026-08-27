@@ -22,18 +22,16 @@ function renderPreview(exercise: SentenceSchemaContent = doc()) {
   return { user: userEvent.setup(), ...view };
 }
 
-/** Play the whole sentence correctly, the way a student would: word, then field. */
+/**
+ * Play the whole sentence correctly, the way a student would: tap the words in order.
+ *
+ * No aiming — an unaimed tap goes to the first empty field and points at the next, so a
+ * bank in sentence order fills the board in board order. That is the gesture this fixture
+ * is built to exercise, and the one `word_bank_gap_fill` established.
+ */
 async function solve(user: ReturnType<typeof userEvent.setup>) {
-  for (const [word, field] of [
-    ['I morgen', 'Forfelt'],
-    ['skal', 'Finitt verbal'],
-    ['jeg', 'Subjekt'],
-    ['ikke', 'Setningsadverbial'],
-    ['lese', 'Infinitt verbal'],
-    ['boka', 'Objekt'],
-  ] as const) {
+  for (const word of ['I morgen', 'skal', 'jeg', 'ikke', 'lese', 'boka'] as const) {
     await user.click(screen.getByRole('button', { name: word }));
-    await user.click(screen.getByRole('button', { name: `Place in ${field}` }));
   }
 }
 

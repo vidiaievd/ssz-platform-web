@@ -200,6 +200,11 @@ export function SentenceSchemaBody({
     onPlacementChange(next);
   }
 
+  /** The first field with nothing in it, in board order. */
+  function firstEmptyField(board: Placement): string | null {
+    return row.fields.find((field) => (board[field.id] ?? []).length === 0)?.id ?? null;
+  }
+
   function pressItem(itemId: string) {
     if (locked) return;
     // The piece is on the board: tapping it in the bank is how it comes back.
@@ -211,7 +216,36 @@ export function SentenceSchemaBody({
       place(itemId, armedField);
       return;
     }
-    setArmedItem(armedItem === itemId ? null : itemId);
+
+    /*
+      An unaimed tap places rather than selects, which is how `word_bank_gap_fill` has
+      worked since plan 35: a word goes to the armed slot, or to the first empty one.
+      The handoff's table says a bare tap only selects — but a learner who has to aim
+      twice for every piece is aiming at what the board makes obvious anyway, and this
+      platform already taught them the shorter gesture on another type.
+      Precision is not lost: tapping a field first still arms it, and that path is
+      unchanged.
+    */
+    const single = row.fields.length === 1;
+    const target = single ? (row.fields[0]?.id ?? null) : firstEmptyField(placement);
+    if (target === null) {
+      // Every field has something in it, so there is no obvious destination left.
+      // Falling back to selecting is what lets a piece be added beside another.
+      setArmedItem(armedItem === itemId ? null : itemId);
+      return;
+    }
+
+    const next: Placement = {};
+    for (const [id, items] of Object.entries(placement)) {
+      const kept = items.filter((item) => item !== itemId);
+      if (kept.length > 0) next[id] = kept;
+    }
+    next[target] = [...(next[target] ?? []), itemId];
+    onPlacementChange(next);
+    setArmedItem(null);
+    // Point at where the next tap will land, so a run of taps fills the board in order.
+    // One slot needs no pointing: there is nowhere else a piece could go.
+    setArmedField(single ? null : firstEmptyField(next));
   }
 
   function pressField(fieldId: string) {

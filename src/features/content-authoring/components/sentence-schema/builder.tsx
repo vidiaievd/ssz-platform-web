@@ -148,7 +148,13 @@ export function SentenceSchemaBuilder({
 
       <div className="min-w-0">
         {step === 1 && <StepSchema exercise={exercise} onChange={setExercise} />}
-        {step === 2 && <StepSentences exercise={exercise} onChange={setExercise} />}
+        {step === 2 && (
+          <StepSentences
+            exercise={exercise}
+            onChange={setExercise}
+            onGoToStep={(target) => setStep(target as IssueStep)}
+          />
+        )}
         {step === 3 && <StepDifficulty exercise={exercise} onChange={setExercise} />}
         {step === 4 && <StepFeedback exercise={exercise} onChange={setExercise} />}
 

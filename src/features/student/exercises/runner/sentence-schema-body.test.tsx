@@ -178,15 +178,61 @@ describe('SentenceSchemaBody', () => {
   });
 
   it('moves a piece from one field to another without leaving a copy behind', async () => {
+    // Aim first, then tap: the precise path, unchanged by the shortcut below.
     const user = userEvent.setup();
     render(<Harness initial={{ 'f-sub': ['c1'] }} />);
 
     await user.click(piece('at'));
-    await user.click(piece('at'));
     await user.click(field('Verbal'));
+    await user.click(piece('at'));
 
     expect(field('Subjunksjon')).not.toHaveTextContent('at');
     expect(field('Verbal')).toHaveTextContent('at');
+  });
+
+  it('puts an unaimed tap straight into the first empty field', async () => {
+    // The gesture `word_bank_gap_fill` has used since plan 35: a word goes to the armed
+    // slot, or to the first empty one. Aiming twice for every piece is aiming at what the
+    // board already makes obvious.
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    await user.click(piece('at'));
+
+    expect(field('Subjunksjon')).toHaveTextContent('at');
+  });
+
+  it('points at where the next tap will land, so a run of taps fills the board in order', async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    await user.click(piece('at'));
+    await user.click(piece('ikke'));
+    await user.click(piece('kommer'));
+
+    // Board order is sub · a · v · N, and three taps filled the first three of them.
+    expect(field('Subjunksjon')).toHaveTextContent('at');
+    expect(field('Adverbial')).toHaveTextContent('ikke');
+    expect(field('Verbal')).toHaveTextContent('kommer');
+  });
+
+  it('falls back to selecting once every field holds something', async () => {
+    // Nothing is obviously next, so the piece waits for the learner to name a field —
+    // which is what lets two pieces share one.
+    const user = userEvent.setup();
+    // Two fields, three pieces — the normal shape of a real sentence, where the bank
+    // outlasts the board. With both fields holding something, a free piece has nowhere
+    // obvious to go, so the tap selects and the learner names the field.
+    const narrow = {
+      ...makeRow(),
+      fields: makeRow().fields.slice(0, 2),
+    };
+    render(<Harness row={narrow} initial={{ 'f-sub': ['c1'], 'f-adv': ['c2'] }} />);
+
+    await user.click(piece('kommer'));
+    await user.click(field('Adverbial'));
+
+    expect(field('Adverbial')).toHaveTextContent('kommer');
   });
 
   it('shows the sentence to rewrite and never the sentence being built', () => {

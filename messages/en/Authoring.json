@@ -2694,7 +2694,10 @@
       "emptyTitle": "No sentences yet",
       "emptyBody": "One sentence per card. Write it, join what belongs together, and put every chunk in a field.",
       "selectChunk": "Select «{word}»",
-      "orderOnlyNotice": "No fields to place into — writing the sentence is the whole of it. Join the words that must travel together, and add distractors if you want them."
+      "orderOnlyNotice": "No fields to place into — writing the sentence is the whole of it. Join the words that must travel together, and add distractors if you want them.",
+      "modeSchema": "Full schema — every word goes into a named field.",
+      "modeOrder": "Word order only — one slot, no field names.",
+      "modeChange": "Change on step 3"
     },
     "step3": {
       "title": "How much scaffolding does the student get?",

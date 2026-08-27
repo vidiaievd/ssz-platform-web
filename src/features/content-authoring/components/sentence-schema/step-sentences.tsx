@@ -2,7 +2,14 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { AlertCircle, AlertTriangle, ClipboardPaste, Plus } from 'lucide-react';
+import {
+  AlertCircle,
+  AlertTriangle,
+  ClipboardPaste,
+  Columns3,
+  ListOrdered,
+  Plus,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +30,8 @@ import {
 export interface StepSentencesProps {
   exercise: SentenceSchemaDocument;
   onChange: (next: SentenceSchemaDocument) => void;
+  /** Where the mode is switched. Absent in a test or a preview that has no rail. */
+  onGoToStep?: (step: number) => void;
 }
 
 /**
@@ -37,7 +46,7 @@ export interface StepSentencesProps {
  * rule plan 50 set and every builder since has followed. Each one names its sentence, so
  * a reorder cannot make it point somewhere else.
  */
-export function StepSentences({ exercise, onChange }: StepSentencesProps) {
+export function StepSentences({ exercise, onChange, onGoToStep }: StepSentencesProps) {
   const t = useTranslations('Authoring');
   const describeIssue = useIssueCopy(exercise);
   const [bulkOpen, setBulkOpen] = useState(false);
@@ -56,6 +65,43 @@ export function StepSentences({ exercise, onChange }: StepSentencesProps) {
         <h2 className="text-base font-semibold">{t('sentenceSchema.step2.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('sentenceSchema.step2.lede')}</p>
       </div>
+
+      {/*
+        Which of the two exercises this is, said on the step the builder opens on.
+
+        It was on step 3 and nowhere else, which made the mode invisible: an author looking
+        at a set of sentence cards had no way to learn that a second mode existed, let
+        alone that this document was in one. A setting whose effect is this large is not
+        only a setting — it is a fact about the document, and it belongs where the document
+        is being written.
+      */}
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-subtle px-3 py-2">
+        {exercise.settings.orderOnly ? (
+          <ListOrdered className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        ) : (
+          <Columns3 className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        )}
+        <span className="text-xs">
+          {exercise.settings.orderOnly
+            ? t('sentenceSchema.step2.modeOrder')
+            : t('sentenceSchema.step2.modeSchema')}
+        </span>
+        {onGoToStep !== undefined && (
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            className="h-auto p-0 text-xs"
+            onClick={() => onGoToStep(3)}
+          >
+            {t('sentenceSchema.step2.modeChange')}
+          </Button>
+        )}
+      </div>
+
+      {exercise.settings.orderOnly && (
+        <p className="text-xs text-muted-foreground">{t('sentenceSchema.step2.orderOnlyNotice')}</p>
+      )}
 
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
         <label className="flex flex-col gap-1">

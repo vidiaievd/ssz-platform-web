@@ -2694,7 +2694,10 @@
       "emptyTitle": "Ingen setninger ennå",
       "emptyBody": "Én setning per kort. Skriv den, slå sammen det som hører sammen, og legg hver bit i et felt.",
       "selectChunk": "Velg «{word}»",
-      "orderOnlyNotice": "Ingen felt å legge i — å skrive setningen er hele jobben. Slå sammen ordene som hører sammen, og legg til ekstra biter om du vil."
+      "orderOnlyNotice": "Ingen felt å legge i — å skrive setningen er hele jobben. Slå sammen ordene som hører sammen, og legg til ekstra biter om du vil.",
+      "modeSchema": "Fullt skjema — hvert ord legges i et navngitt felt.",
+      "modeOrder": "Bare ordstilling — én rute, ingen feltnavn.",
+      "modeChange": "Endre i steg 3"
     },
     "step3": {
       "title": "Hvor mye støtte får studenten?",
