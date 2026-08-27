@@ -47,9 +47,13 @@ describe('StepDifficulty', () => {
   it('lists the nine switches from the strongest support to the strictest', () => {
     renderStep();
 
-    expect(screen.getAllByRole('switch')).toHaveLength(9);
+    // Ten now: the mode that decides what the other nine are about comes first.
+    expect(screen.getAllByRole('switch')).toHaveLength(10);
     expect(
-      screen.getAllByRole('switch').map((el) => el.closest('label')!.textContent!.split('Off')[0]),
+      screen
+        .getAllByRole('switch')
+        .slice(1)
+        .map((el) => el.closest('label')!.textContent!.split('Off')[0]),
     ).toEqual([
       expect.stringContaining('Show field names'),
       expect.stringContaining('Show field hints'),
@@ -108,5 +112,30 @@ describe('StepDifficulty', () => {
     renderStep(doc({ rows: [row({ extras: [{ id: 'x1', text: 'boken' }] })] }));
 
     expect(screen.queryByText(/Extra pieces are switched on/)).not.toBeInTheDocument();
+  });
+});
+
+describe('StepDifficulty · word order only', () => {
+  it('draws the field switches inert, with the reason where their help line was', async () => {
+    const { user } = renderStep();
+
+    await user.click(screen.getByRole('switch', { name: /Word order only/ }));
+
+    // Inert rather than hidden: a switch that vanishes takes its setting's existence with
+    // it, and the author would find the exercise quietly changed on switching back.
+    expect(screen.getByRole('switch', { name: /Show field names/ })).toBeDisabled();
+    expect(screen.getByRole('switch', { name: /Order inside a field counts/ })).toBeDisabled();
+    expect(screen.getAllByText('Not used while word order only is on.').length).toBeGreaterThan(0);
+  });
+
+  it('leaves the switches that still mean something alone', async () => {
+    const { user } = renderStep();
+
+    await user.click(screen.getByRole('switch', { name: /Word order only/ }));
+
+    // The bank is still a bank: distractors, shuffling and the escalating hint all apply.
+    expect(screen.getByRole('switch', { name: /Extra pieces in the bank/ })).toBeEnabled();
+    expect(screen.getByRole('switch', { name: /Shuffle the bank/ })).toBeEnabled();
+    expect(screen.getByRole('switch', { name: /Show the rule after/ })).toBeEnabled();
   });
 });

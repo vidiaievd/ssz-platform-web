@@ -34,6 +34,14 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
   const s = exercise.settings;
 
   const extrasWithoutAny = issues(exercise).find((issue) => issue.code === 'EXTRAS_ON_BUT_NONE');
+  /*
+    Five of the nine switches are about fields, and sequence-only has none. They are drawn
+    inert with the reason in place of their help line rather than hidden: a switch that
+    disappears takes its setting's existence with it, and an author who turns the mode off
+    again would find the exercise had quietly changed in ways nothing told them about.
+  */
+  const seq = s.orderOnly;
+  const inert = seq ? t('sentenceSchema.step3.orderOnlyOff') : undefined;
 
   return (
     <div className="flex flex-col gap-5">
@@ -44,20 +52,32 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
 
       <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
         <ToggleRow
+          label={t('sentenceSchema.step3.orderOnlyLabel')}
+          help={t('sentenceSchema.step3.orderOnlyHelp')}
+          checked={s.orderOnly}
+          onChange={(orderOnly) => onChange(setSettings(exercise, { orderOnly }))}
+        />
+      </section>
+
+      <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
+        <ToggleRow
           label={t('sentenceSchema.step3.labelsLabel')}
           help={t('sentenceSchema.step3.labelsHelp')}
+          disabledReason={inert}
           checked={s.labels}
           onChange={(labels) => onChange(setSettings(exercise, { labels }))}
         />
         <ToggleRow
           label={t('sentenceSchema.step3.hintsLabel')}
           help={t('sentenceSchema.step3.hintsHelp')}
+          disabledReason={inert}
           checked={s.hints}
           onChange={(hints) => onChange(setSettings(exercise, { hints }))}
         />
         <ToggleRow
           label={t('sentenceSchema.step3.countsLabel')}
           help={t('sentenceSchema.step3.countsHelp')}
+          disabledReason={inert}
           checked={s.counts}
           onChange={(counts) => onChange(setSettings(exercise, { counts }))}
         />
@@ -82,6 +102,7 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
         <ToggleRow
           label={t('sentenceSchema.step3.perFieldLabel')}
           help={t('sentenceSchema.step3.perFieldHelp')}
+          disabledReason={inert}
           checked={s.perField}
           onChange={(perField) => onChange(setSettings(exercise, { perField }))}
         />
@@ -94,6 +115,9 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
         <ToggleRow
           label={t('sentenceSchema.step3.orderLabel')}
           help={t('sentenceSchema.step3.orderHelp')}
+          // Sequence-only grades order and nothing else, so `loose` would be an off
+          // switch for the exercise rather than a difficulty setting.
+          disabledReason={inert}
           checked={s.order === 'strict'}
           onChange={(on) => onChange(setSettings(exercise, { order: on ? 'strict' : 'loose' }))}
         />

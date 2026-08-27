@@ -2648,7 +2648,8 @@
       "removeFieldHelp": "Every word placed in this field goes back to the bank.",
       "addField": "Add field",
       "newFieldName": "New field",
-      "noFields": "This clause type has no fields yet — add one, or switch the type off."
+      "noFields": "This clause type has no fields yet — add one, or switch the type off.",
+      "orderOnlyNotice": "This exercise is graded on word order alone, so it uses no fields. The schema below is kept for when you switch that off on step 3."
     },
     "step2": {
       "title": "Write the sentences and place every word",
@@ -2692,7 +2693,8 @@
       "bulkNote": "Sentences you have left blank are dropped when the paste lands.",
       "emptyTitle": "No sentences yet",
       "emptyBody": "One sentence per card. Write it, join what belongs together, and put every chunk in a field.",
-      "selectChunk": "Select «{word}»"
+      "selectChunk": "Select «{word}»",
+      "orderOnlyNotice": "No fields to place into — writing the sentence is the whole of it. Join the words that must travel together, and add distractors if you want them."
     },
     "step3": {
       "title": "How much scaffolding does the student get?",
@@ -2715,7 +2717,10 @@
       "hintAfterMistakeHelp": "The explanation from step 4 appears under the feedback.",
       "orderLabel": "Order inside a field counts",
       "orderHelp": "Off accepts any order among chunks that share a field.",
-      "tip": "A good sequence: run it once with names, hints and counts on; a second time with names only; a third with the bare keys and a shuffled bank."
+      "tip": "A good sequence: run it once with names, hints and counts on; a second time with names only; a third with the bare keys and a shuffled bank.",
+      "orderOnlyLabel": "Word order only, no fields",
+      "orderOnlyHelp": "One slot for the whole sentence. The student puts the words in order and is never asked which constituent a word is — the schema stays here, unused, until you switch this back off.",
+      "orderOnlyOff": "Not used while word order only is on."
     },
     "step4": {
       "title": "Say why, not just wrong",

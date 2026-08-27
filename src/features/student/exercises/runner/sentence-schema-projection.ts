@@ -168,6 +168,9 @@ function readSettings(raw: unknown): Settings {
       ? prefill
       : DEFAULT_SETTINGS.prefill) as PrefillMode,
     markEmpty: bool(s['markEmpty'], DEFAULT_SETTINGS.markEmpty),
+    // The runner needs it: it decides whether the board is a chart or one slot, and the
+    // server has already applied it to the fields it sent.
+    orderOnly: bool(s['orderOnly'], DEFAULT_SETTINGS.orderOnly),
     perField: bool(s['perField'], DEFAULT_SETTINGS.perField),
     hintAfterMistake: bool(s['hintAfterMistake'], DEFAULT_SETTINGS.hintAfterMistake),
     shuffle: bool(s['shuffle'], DEFAULT_SETTINGS.shuffle),

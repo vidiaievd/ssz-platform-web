@@ -134,7 +134,14 @@ export function SchemaBoard({
           allowed to set its own width would push every other field along and turn the
           board into a horizontal scroller — which is exactly what a chart must not be.
         */
-        const head = (
+        /*
+          A nameless field draws no head at all. That is the sequence-only slot
+          (`ORDER_FIELD`): asked for word order, a learner must not be reading a field
+          name, and an empty head would leave a gap where the name used to be.
+        */
+        const named = field.short !== '' || (labels && field.label !== '');
+
+        const head = !named ? null : (
           <div
             className={
               cols ? 'flex min-w-0 items-baseline gap-1.5' : 'flex min-w-0 shrink-0 flex-col gap-px'
@@ -177,7 +184,7 @@ export function SchemaBoard({
           grid is written for exactly two children. An author who turns hints on is not
           asking for a broken board, so this is the missing case rather than a departure.
         */
-        const hint = hints && field.hint !== '' && (
+        const hint = named && hints && field.hint !== '' && (
           <p className="m-0 text-[10px] leading-[1.35]" style={{ color: 'var(--ssz-text-muted)' }}>
             {field.hint}
           </p>

@@ -83,10 +83,11 @@ export function SentenceCard({
   const [selected, setSelected] = useState<string | null>(null);
   const [extraDraft, setExtraDraft] = useState('');
 
+  const seq = exercise.settings.orderOnly;
   const fields = fieldsFor(exercise, row);
   const placement = solution(row);
   const unplaced = row.chunks.filter((chunk) => chunk.field === null);
-  const complete = isDeliverable(row);
+  const complete = isDeliverable(row, seq);
   const written = row.text.trim() !== '';
   const selectedChunk = row.chunks.find((chunk) => chunk.id === selected) ?? null;
   const placedSomething = row.chunks.some((chunk) => chunk.field !== null);
@@ -111,21 +112,24 @@ export function SentenceCard({
           {index + 1}
         </span>
 
-        <Select
-          value={row.clause}
-          onValueChange={(clause) => onChange(setRowClause(exercise, row.id, clause as ClauseId))}
-        >
-          <SelectTrigger className="h-8 w-44" aria-label={t('sentenceSchema.step2.clauseLabel')}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {exercise.clauses.map((clause) => (
-              <SelectItem key={clause} value={clause}>
-                {t(`sentenceSchema.clause.${clause}` as 'sentenceSchema.clause.main')}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* The clause type picks a field list, and sequence-only has none to pick. */}
+        {!seq && (
+          <Select
+            value={row.clause}
+            onValueChange={(clause) => onChange(setRowClause(exercise, row.id, clause as ClauseId))}
+          >
+            <SelectTrigger className="h-8 w-44" aria-label={t('sentenceSchema.step2.clauseLabel')}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {exercise.clauses.map((clause) => (
+                <SelectItem key={clause} value={clause}>
+                  {t(`sentenceSchema.clause.${clause}` as 'sentenceSchema.clause.main')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <span className="grow" />
 
@@ -135,7 +139,8 @@ export function SentenceCard({
             {t('sentenceSchema.step2.complete')}
           </span>
         ) : (
-          written && (
+          written &&
+          !seq && (
             <span className="text-xs text-warning-700">
               {t('sentenceSchema.step2.wordsLeft', { count: unplaced.length })}
             </span>
@@ -159,7 +164,7 @@ export function SentenceCard({
         the clause type clears every placement in this sentence and there is no undo for it
         (plan 52 §6.1, BEHAVIOR "a warning callout is visible before the click").
       */}
-      {placedSomething && exercise.clauses.length > 1 && (
+      {!seq && placedSomething && exercise.clauses.length > 1 && (
         <p className="flex items-start gap-1.5 text-xs text-warning-700">
           <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
           {t('sentenceSchema.step2.clauseWarning')}
@@ -250,7 +255,7 @@ export function SentenceCard({
         </div>
       )}
 
-      {row.chunks.length > 0 && (
+      {row.chunks.length > 0 && !seq && (
         <div ref={board} className="flex flex-col gap-2">
           <span className="text-xs font-medium">{t('sentenceSchema.step2.boardLabel')}</span>
 

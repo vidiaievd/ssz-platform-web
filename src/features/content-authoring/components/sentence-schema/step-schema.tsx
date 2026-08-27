@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Info,
   Plus,
   Trash2,
 } from 'lucide-react';
@@ -83,6 +84,15 @@ export function StepSchema({ exercise, onChange }: StepSchemaProps) {
         <h2 className="text-base font-semibold">{t('sentenceSchema.step1.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('sentenceSchema.step1.lede')}</p>
       </div>
+
+      {/* Kept editable rather than hidden: the schema is what the exercise goes back to
+          when the mode is switched off, and an author needs to see what that is. */}
+      {exercise.settings.orderOnly && (
+        <p className="flex items-start gap-1.5 rounded-lg border border-border bg-subtle p-3 text-xs text-muted-foreground">
+          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+          {t('sentenceSchema.step1.orderOnlyNotice')}
+        </p>
+      )}
 
       <section className="flex flex-col gap-3">
         <div>

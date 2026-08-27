@@ -2648,7 +2648,8 @@
       "removeFieldHelp": "Hvert ord som er lagt i dette feltet går tilbake til ordbanken.",
       "addField": "Legg til felt",
       "newFieldName": "Nytt felt",
-      "noFields": "Denne setningstypen har ingen felt ennå — legg til ett, eller slå typen av."
+      "noFields": "Denne setningstypen har ingen felt ennå — legg til ett, eller slå typen av.",
+      "orderOnlyNotice": "Denne oppgaven vurderes bare på ordstilling og bruker ingen felt. Skjemaet under blir stående til du slår det av i steg 3."
     },
     "step2": {
       "title": "Skriv setningene og plasser hvert ord",
@@ -2692,7 +2693,8 @@
       "bulkNote": "Setninger du har latt stå tomme forsvinner når innlimingen brukes.",
       "emptyTitle": "Ingen setninger ennå",
       "emptyBody": "Én setning per kort. Skriv den, slå sammen det som hører sammen, og legg hver bit i et felt.",
-      "selectChunk": "Velg «{word}»"
+      "selectChunk": "Velg «{word}»",
+      "orderOnlyNotice": "Ingen felt å legge i — å skrive setningen er hele jobben. Slå sammen ordene som hører sammen, og legg til ekstra biter om du vil."
     },
     "step3": {
       "title": "Hvor mye støtte får studenten?",
@@ -2715,7 +2717,10 @@
       "hintAfterMistakeHelp": "Forklaringen fra steg 4 dukker opp under tilbakemeldingen.",
       "orderLabel": "Rekkefølgen inne i et felt teller",
       "orderHelp": "Av godtar enhver rekkefølge blant biter som deler felt.",
-      "tip": "En god rekkefølge: kjør den først med navn, hint og antall på; andre gang med bare navn; tredje gang med bare kortnøkler og stokket bank."
+      "tip": "En god rekkefølge: kjør den først med navn, hint og antall på; andre gang med bare navn; tredje gang med bare kortnøkler og stokket bank.",
+      "orderOnlyLabel": "Bare ordstilling, ingen felt",
+      "orderOnlyHelp": "Én rute for hele setningen. Studenten setter ordene i rekkefølge og blir aldri spurt hvilket ledd et ord er — skjemaet blir stående ubrukt til du slår dette av igjen.",
+      "orderOnlyOff": "Ikke i bruk mens bare ordstilling er på."
     },
     "step4": {
       "title": "Si hvorfor, ikke bare feil",
