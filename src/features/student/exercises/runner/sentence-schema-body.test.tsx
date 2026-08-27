@@ -108,7 +108,7 @@ function Harness({
         phase={phase}
         attempt={attempt}
         result={result}
-        tally={{ solved: 1, revealed: 0 }}
+        tally={{ solved: 1, revealed: 0, skipped: 0 }}
         onCheck={onCheck}
         onRetry={onRetry}
         onReveal={onReveal}

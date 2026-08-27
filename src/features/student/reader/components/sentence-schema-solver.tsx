@@ -16,6 +16,11 @@ import {
   SentenceSchemaBody,
   type SentenceSchemaPhase,
 } from '@/features/student/exercises/runner';
+import {
+  deferPosition,
+  nextPosition,
+  type SetStep,
+} from '@/features/student/exercises/runner/sentence-set-order';
 import type { ResumedRow } from '@/features/student/exercises/types/attempts';
 import type {
   Placement,
@@ -86,6 +91,17 @@ export function SentenceSchemaSolver({
 
   const [index, setIndex] = useState(0);
   const [rows, setRows] = useState<Record<string, RowState>>({});
+  /**
+   * Sentences put aside, oldest first, and the memory of every one ever put aside.
+   *
+   * Both are of this sitting only: the engine records what was checked, and a sentence
+   * nobody answered is not a fact it has an opinion about. A reload therefore offers the
+   * set in its plain order again — which is the honest reading of "come back to it later",
+   * not a state that has to survive the network.
+   */
+  const [deferred, setDeferred] = useState<string[]>([]);
+  /** State rather than a ref: it decides what the sentence says about itself on screen. */
+  const [everDeferred, setEverDeferred] = useState<string[]>([]);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -115,6 +131,8 @@ export function SentenceSchemaSolver({
     }
     setRows(state);
     setError(null);
+    setDeferred([]);
+    setEverDeferred([]);
 
     const open = set.rows.findIndex((row) => state[row.id]?.phase !== 'closed');
     setIndex(open === -1 ? Math.max(0, set.rows.length - 1) : open);
@@ -224,6 +242,10 @@ export function SentenceSchemaSolver({
     revealed: set.rows.filter(
       (r) => rows[r.id]?.phase === 'closed' && rows[r.id]?.result?.solved !== true,
     ).length,
+    // Never closed and never answered: the ones walked away from. Counted from the set
+    // rather than from the queue, which is empty by the time the set ends.
+    skipped: set.rows.filter((r) => rows[r.id]?.phase !== 'closed' && everDeferred.includes(r.id))
+      .length,
   };
 
   function update(rowId: string, patch: Partial<RowState>) {
@@ -280,16 +302,40 @@ export function SentenceSchemaSolver({
     update(row.id, { placement: kept, result: null, phase: 'placing' });
   }
 
-  function next() {
-    if (index + 1 < set.rows.length) {
-      setIndex(index + 1);
+  /** Where the set goes from here — forward, then back to what was put aside, then done. */
+  function move(step: SetStep) {
+    setDeferred(step.deferred);
+    if (step.index === null) {
+      closeSet(rows, set);
       return;
     }
-    closeSet(rows, set);
+    setIndex(step.index);
+  }
+
+  const position = {
+    ids: set.rows.map((r) => r.id),
+    index,
+    isClosed: (rowId: string) => rows[rowId]?.phase === 'closed',
+    deferred,
+  };
+
+  function next() {
+    move(nextPosition(position));
+  }
+
+  /** Put this one aside. Nothing is sent: an unanswered sentence has nothing to report. */
+  function skip() {
+    // The memory is read as it was *before* this refusal, and written after. Passing the
+    // updated list would have the sentence tell `deferPosition` it had already been round
+    // once — so the first skip would be treated as the second and queue nothing.
+    move(deferPosition(position, everDeferred));
+    if (!everDeferred.includes(row.id)) setEverDeferred([...everDeferred, row.id]);
   }
 
   function restart() {
     setRows({});
+    setDeferred([]);
+    setEverDeferred([]);
     setIndex(0);
     setDone(false);
     setError(null);
@@ -319,6 +365,9 @@ export function SentenceSchemaSolver({
         onRetry={fix}
         onReveal={() => send(true)}
         onNext={next}
+        onSkip={set.rows.length > 1 ? skip : undefined}
+        lastSentence={nextPosition(position).index === null}
+        deferred={everDeferred.includes(row.id)}
         onRestart={stacked ? undefined : restart}
         accent={PRACTICE_ACCENT}
       />

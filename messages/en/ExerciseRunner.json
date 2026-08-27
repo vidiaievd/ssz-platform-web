@@ -238,7 +238,17 @@
     "nothingToSolve": "Nothing to solve here yet — no sentence in this exercise is finished.",
     "checkFailed": "The sentence could not be checked. Try again.",
     "closedAlready": "This sentence is already finished.",
-    "closeFailed": "The set could not be handed in. Try again."
+    "closeFailed": "The set could not be handed in. Try again.",
+    "clause": {
+      "main": "Main clause",
+      "sub": "Subordinate clause",
+      "yesno": "Yes/no question",
+      "hv": "Question word",
+      "imp": "Imperative"
+    },
+    "skip": "Skip for now",
+    "skippedEarlier": "You put this one aside earlier",
+    "setTallySkipped": "{solved} solved · {revealed} shown · {skipped} skipped"
   },
   "unsupported": "This exercise type ({type}) isn’t playable yet.",
   "taskNumber": "Task {n}",

@@ -225,7 +225,7 @@ describe('SentenceSchemaSolver', () => {
     renderSolver(mockApi());
 
     expect(await screen.findByText('«Jeg kommer», sa han.')).toBeInTheDocument();
-    expect(screen.getByText('Sentence 1 of 2')).toBeInTheDocument();
+    expect(screen.getByLabelText('Sentence 1 of 2')).toBeInTheDocument();
     // In the order the server shuffled them into — nothing here reorders the bank.
     expect(
       screen.getAllByRole('button', { name: /^(kommer|at)$/ }).map((b) => b.textContent),
@@ -287,6 +287,44 @@ describe('SentenceSchemaSolver', () => {
     expect(screen.getByText('«Leser du?», spurte hun.')).toBeInTheDocument();
   });
 
+  it('puts a sentence aside without sending anything, and offers it again at the end', async () => {
+    const fetchMock = mockApi({ checks: [solved('r2')] });
+    renderSolver(fetchMock);
+    await screen.findByText('«Jeg kommer», sa han.');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Skip for now' }));
+
+    // Straight to the second sentence, and nothing was reported about the first: an
+    // unanswered sentence is not a verdict the server has an opinion about.
+    expect(screen.getByText('«Leser du?», spurte hun.')).toBeInTheDocument();
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/rows'))).toHaveLength(0);
+
+    await userEvent.click(screen.getByRole('button', { name: 'om' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Place in Subjunksjon' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Check (1/2)' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Next sentence' }));
+
+    // Back to the one that was put aside, and told why the set went backwards.
+    expect(screen.getByText('«Jeg kommer», sa han.')).toBeInTheDocument();
+    expect(screen.getByText('You put this one aside earlier')).toBeInTheDocument();
+  });
+
+  it('ends the set when a sentence is refused a second time, and counts it as skipped', async () => {
+    renderSolver(mockApi({ checks: [solved('r2')] }));
+    await screen.findByText('«Jeg kommer», sa han.');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Skip for now' }));
+    await userEvent.click(screen.getByRole('button', { name: 'om' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Place in Subjunksjon' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Check (1/2)' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Next sentence' }));
+
+    // Second refusal is final — the set ends rather than offering it a third time.
+    await userEvent.click(screen.getByRole('button', { name: 'Skip for now' }));
+
+    expect(await screen.findByText('1 solved · 0 shown · 1 skipped')).toBeInTheDocument();
+  });
+
   it('shows the schema on request, fills the board from the server and closes the sentence', async () => {
     const fetchMock = mockApi({ checks: [revealed] });
     renderSolver(fetchMock);
@@ -346,7 +384,7 @@ describe('SentenceSchemaSolver', () => {
 
     // Straight to the second sentence: the first is closed.
     expect(await screen.findByText('«Leser du?», spurte hun.')).toBeInTheDocument();
-    expect(screen.getByText('Sentence 2 of 2')).toBeInTheDocument();
+    expect(screen.getByLabelText('Sentence 2 of 2')).toBeInTheDocument();
   });
 
   it('refuses a set that arrived with its answer key on it', async () => {

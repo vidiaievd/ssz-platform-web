@@ -238,7 +238,17 @@
     "nothingToSolve": "Ingenting å løse her ennå — ingen setning i oppgaven er ferdig.",
     "checkFailed": "Setningen kunne ikke sjekkes. Prøv igjen.",
     "closedAlready": "Denne setningen er allerede ferdig.",
-    "closeFailed": "Oppgaven kunne ikke leveres. Prøv igjen."
+    "closeFailed": "Oppgaven kunne ikke leveres. Prøv igjen.",
+    "clause": {
+      "main": "Helsetning",
+      "sub": "Leddsetning",
+      "yesno": "Ja/nei-spørsmål",
+      "hv": "Spørreord",
+      "imp": "Imperativ"
+    },
+    "skip": "Hopp over",
+    "skippedEarlier": "Denne la du til side tidligere",
+    "setTallySkipped": "{solved} løst · {revealed} vist · {skipped} hoppet over"
   },
   "unsupported": "Denne oppgavetypen ({type}) kan ikke løses ennå.",
   "taskNumber": "Oppgave {n}",

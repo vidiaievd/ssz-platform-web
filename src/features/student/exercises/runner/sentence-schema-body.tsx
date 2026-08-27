@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, Eye, Info, RotateCcw, XCircle } from 'lucide-react';
+import { BookOpen, CheckCircle, Eye, Info, RotateCcw, SkipForward, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -13,8 +13,7 @@ import type {
   StudentResult,
 } from '@/lib/shared-kernel/sentence-schema';
 
-import { Instr } from './instr';
-import { SchemaBoard } from './schema-board';
+import { fitsAsColumns, SchemaBoard } from './schema-board';
 import { WordBank } from './word-bank';
 
 /**
@@ -52,8 +51,18 @@ export interface SentenceSchemaBodyProps {
    * that went wrong, or a code to render when they wrote none (plan 52 §3.2).
    */
   result: StudentResult | null;
-  /** How the set came out: sentences solved, and sentences shown. */
-  tally: { solved: number; revealed: number };
+  /** How the set came out: solved, shown, and put aside without an answer. */
+  tally: { solved: number; revealed: number; skipped: number };
+  /** This sentence has come back around after being put aside. */
+  deferred?: boolean;
+  /**
+   * Nothing follows this sentence — so the way on says `Finish` rather than `Next`.
+   *
+   * Decided by the caller, not by `index + 1 === total`: once a sentence can be put aside
+   * and offered again, position in the list stops being the same question as "is this the
+   * end", and the arithmetic answer is wrong exactly when a deferred one is still owed.
+   */
+  lastSentence?: boolean;
   sending?: boolean;
   error?: string | null;
   /** False in a preview: everything renders, nothing accepts input. */
@@ -62,14 +71,14 @@ export interface SentenceSchemaBodyProps {
   onRetry: () => void;
   onReveal: () => void;
   onNext: () => void;
+  /** Put this sentence aside and carry on. Absent where the set cannot be re-ordered. */
+  onSkip?: () => void;
   /** Play the set again. Absent where a fresh attempt cannot be had. */
   onRestart?: () => void;
   accent: string;
 }
 
 const READING = 'var(--ssz-font-reading)';
-/** Below this the fields cannot be columns — a word would not fit in one. */
-const COLUMNS_AT = 560;
 
 /**
  * `sentence_schema`, as the learner plays it: one sentence at a time onto the field board.
@@ -112,8 +121,11 @@ export function SentenceSchemaBody({
   onRetry,
   onReveal,
   onNext,
+  onSkip,
   onRestart,
   accent,
+  deferred = false,
+  lastSentence,
 }: SentenceSchemaBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const [root, width] = useContainerWidth();
@@ -137,7 +149,16 @@ export function SentenceSchemaBody({
             {t('sentenceSchema.setDone', { count: total })}
           </p>
           <p className="m-0 text-[13.5px]" style={{ color: 'var(--ssz-text-muted)' }}>
-            {t('sentenceSchema.setTally', { solved: tally.solved, revealed: tally.revealed })}
+            {tally.skipped > 0
+              ? t('sentenceSchema.setTallySkipped', {
+                  solved: tally.solved,
+                  revealed: tally.revealed,
+                  skipped: tally.skipped,
+                })
+              : t('sentenceSchema.setTally', {
+                  solved: tally.solved,
+                  revealed: tally.revealed,
+                })}
           </p>
           {onRestart !== undefined && (
             <button
@@ -215,25 +236,80 @@ export function SentenceSchemaBody({
 
   return (
     <div ref={root}>
-      {instruction !== undefined && instruction !== '' ? (
-        <Instr>{instruction}</Instr>
-      ) : (
-        row.source === '' && <Instr>{t('sentenceSchema.defaultInstruction')}</Instr>
-      )}
-
-      <p className="mb-1 text-[12px] font-semibold" style={{ color: 'var(--ssz-text-muted)' }}>
-        {t('sentenceSchema.position', { index: index + 1, total })}
+      {/* `.wb-run-top`: where the learner is, as a rule and a number. It was a sentence
+          of bold text, which reads as a heading over the exercise rather than as its
+          margin — and the design puts the emphasis on the board, not on the counter. */}
+      <div className="mb-2.5 flex items-center gap-2.5">
+        {/* `1/5` is what the design shows and all a sighted learner needs beside a bar
+            they can see. The sentence it stands for is still said in full, on the bar
+            itself — the number alone would be a fraction with no unit read aloud. */}
+        <div
+          role="img"
+          aria-label={t('sentenceSchema.position', { index: index + 1, total })}
+          className="h-1 flex-1 overflow-hidden rounded-full"
+          style={{ background: 'var(--ssz-bg-muted)' }}
+        >
+          <span
+            className="block h-full rounded-full transition-[width] duration-500"
+            style={{ width: `${(index / total) * 100}%`, background: accent }}
+          />
+        </div>
+        <span
+          className="shrink-0 text-[12px] tabular-nums"
+          style={{ color: 'var(--ssz-text-muted)' }}
+        >
+          {index + 1}/{total}
+        </span>
         {attempt > 1 && phase !== 'closed' && (
-          <span className="ml-2">{t('sentenceSchema.attemptNo', { count: attempt })}</span>
+          <span className="shrink-0 text-[12px]" style={{ color: 'var(--ssz-text-muted)' }}>
+            {t('sentenceSchema.attemptNo', { count: attempt })}
+          </span>
         )}
-      </p>
+      </div>
+
+      {/* One plain line (`.wb-run-instr`). The shared `Instr` sets it in bold uppercase,
+          which is right where an instruction has to compete with a wall of text and wrong
+          here, where it sits above a board that is already the loudest thing on screen. */}
+      {(instruction !== undefined && instruction !== '') || row.source === '' ? (
+        <p className="m-0 mb-2 text-[14px]" style={{ color: 'var(--ssz-text-secondary)' }}>
+          {instruction !== undefined && instruction !== ''
+            ? instruction
+            : t('sentenceSchema.defaultInstruction')}
+        </p>
+      ) : null}
+
+      {/* Which clause type this sentence is (`.ss-clausetag`) — the one piece of the
+          design's header we never drew, and the only thing on screen that says why the
+          fields are these fields. */}
+      <span
+        className="mb-2.5 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[11px]"
+        style={{
+          background: 'var(--ssz-bg-subtle)',
+          borderColor: 'var(--ssz-border-default)',
+          color: 'var(--ssz-text-secondary)',
+        }}
+      >
+        <BookOpen size={12} aria-hidden="true" />
+        {t(`sentenceSchema.clause.${row.clause}` as 'sentenceSchema.clause.main')}
+      </span>
+
+      {/* Why the set jumped backwards. Without it the order looks broken rather than
+          kept: this is the sentence they asked to see again. */}
+      {deferred && (
+        <p className="m-0 mb-2 text-[12px]" style={{ color: 'var(--ssz-text-muted)' }}>
+          {t('sentenceSchema.skippedEarlier')}
+        </p>
+      )}
 
       {/* The sentence to rewrite. A prompt and only a prompt: nothing is derived from it,
           and the sentence the learner is building is not shown until it is closed. */}
       {row.source !== '' && (
         <div
-          className="mb-3 rounded-xl border px-3 py-2"
-          style={{ background: 'var(--ssz-bg-elevated)', borderColor: 'var(--ssz-border-subtle)' }}
+          className="mb-3 rounded-lg border px-3 py-2"
+          style={{
+            background: 'var(--ssz-bg-subtle)',
+            borderColor: 'var(--ssz-border-default)',
+          }}
         >
           <span className="text-[11.5px] font-semibold" style={{ color: 'var(--ssz-text-muted)' }}>
             {t('sentenceSchema.sourceLabel')}
@@ -251,7 +327,7 @@ export function SentenceSchemaBody({
         fields={row.fields}
         placement={placement}
         textOf={textOf}
-        layout={width >= COLUMNS_AT ? 'cols' : 'rows'}
+        layout={fitsAsColumns(width, row.fields.length) ? 'cols' : 'rows'}
         labels={settings.labels}
         hints={settings.hints}
         counts={row.counts}
@@ -282,43 +358,36 @@ export function SentenceSchemaBody({
       <div aria-live="polite" className="mt-3">
         {banner !== null && (
           <div
-            className="flex items-start gap-2 rounded-xl border px-3 py-2"
+            className="flex items-start gap-2 rounded-md px-3 py-2.5"
             style={{
-              background: solved ? 'var(--ssz-feedback-ok-bg)' : 'var(--ssz-feedback-no-bg)',
-              borderColor: solved ? 'var(--ssz-feedback-ok-line)' : 'var(--ssz-feedback-no-line)',
+              background: solved
+                ? 'var(--ssz-feedback-ok-bg)'
+                : revealed
+                  ? 'var(--ssz-color-primary-50)'
+                  : 'var(--ssz-feedback-no-bg)',
+              color: solved
+                ? 'var(--ssz-color-success-700)'
+                : revealed
+                  ? 'var(--ssz-color-primary-700)'
+                  : 'var(--ssz-color-error-700)',
             }}
           >
             {solved ? (
-              <CheckCircle
-                size={16}
-                aria-hidden="true"
-                style={{ color: 'var(--ssz-feedback-ok-fg)' }}
-              />
+              <CheckCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
             ) : revealed ? (
-              <Info size={16} aria-hidden="true" style={{ color: 'var(--ssz-text-muted)' }} />
+              <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
             ) : (
-              <XCircle
-                size={16}
-                aria-hidden="true"
-                style={{ color: 'var(--ssz-feedback-no-fg)' }}
-              />
+              <XCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
             )}
             <span className="flex min-w-0 flex-col gap-1">
-              <span className="text-[13.5px]" style={{ color: 'var(--ssz-text-primary)' }}>
-                {bannerText(banner, t)}
-              </span>
+              <span className="text-[13.5px]">{bannerText(banner, t)}</span>
               {/* The rule, repeated under the note from the second attempt on. */}
               {banner.hint !== '' && (
-                <span className="text-[12.5px]" style={{ color: 'var(--ssz-text-muted)' }}>
-                  {banner.hint}
-                </span>
+                <span className="text-[12.5px] opacity-85">{banner.hint}</span>
               )}
               {/* The sentence itself, once it is no longer the answer to anything. */}
               {phase === 'closed' && result?.text !== null && result?.text !== undefined && (
-                <span
-                  className="text-[13.5px]"
-                  style={{ fontFamily: READING, color: 'var(--ssz-text-primary)' }}
-                >
+                <span className="text-[13.5px] font-semibold" style={{ fontFamily: READING }}>
                   {result.text}
                 </span>
               )}
@@ -363,7 +432,19 @@ export function SentenceSchemaBody({
             className="rounded-lg px-4 py-2 text-[14px] font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
             style={{ background: accent }}
           >
-            {index + 1 < total ? t('sentenceSchema.nextSentence') : t('finish')}
+            {(lastSentence ?? index + 1 >= total) ? t('finish') : t('sentenceSchema.nextSentence')}
+          </button>
+        )}
+        {phase !== 'closed' && onSkip !== undefined && (
+          <button
+            type="button"
+            onClick={onSkip}
+            disabled={!interactive || sending}
+            className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-[13.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+            style={{ borderColor: 'var(--ssz-border-default)', color: 'var(--ssz-text-muted)' }}
+          >
+            <SkipForward size={14} aria-hidden="true" />
+            {t('sentenceSchema.skip')}
           </button>
         )}
         {phase !== 'closed' && (
