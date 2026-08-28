@@ -165,16 +165,21 @@ export function useSelfCheck(exerciseId: string, attemptId: string | null) {
 }
 
 /**
- * Hand in one question of a `short_answer` set.
+ * Hand in one question of a set — `short_answer` writes, `multiple_choice` picks.
  *
- * A mutation, and the plainest one here: it is final. The attempt stays in progress and
- * gains one answered question, graded on the server — the phrases the answer is matched
- * against are the answer, so there is nothing to check in the browser and nothing here
- * to check it with. A repeat of the same question is refused upstream, which is where
- * "irreversible" has to live: a button is not a rule.
+ * A mutation, and the plainest one here. The attempt stays in progress and gains one
+ * answered question, graded on the server — for `short_answer` because the phrases the
+ * answer is matched against *are* the answer, for `multiple_choice` because the retry
+ * and the 50/50 mean nothing once the browser knows the key (plan 53 §3.2). Whether a
+ * second try is allowed is the attempt's business and is refused upstream, which is
+ * where "irreversible" has to live: a button is not a rule.
+ *
+ * Generic in the verdict rather than returning the union: the two templates hand back
+ * different shapes, and a caller that has to narrow what it asked for would narrow it
+ * wrongly on the first refactor. `templateCode` on the response says which arrived.
  */
-export function useAnswerQuestion(exerciseId: string, attemptId: string | null) {
-  return useMutation<AnswerQuestionResponse, Error, AnswerQuestionRequest>({
+export function useAnswerQuestion<Result>(exerciseId: string, attemptId: string | null) {
+  return useMutation<AnswerQuestionResponse<Result>, Error, AnswerQuestionRequest>({
     mutationFn: (body) => {
       if (attemptId === null) throw new Error('No attempt in progress');
       return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/answers`, body);

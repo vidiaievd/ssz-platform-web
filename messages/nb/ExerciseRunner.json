@@ -28,6 +28,31 @@
     "defaultInstruction": "Velg riktig svar",
     "optionsLabel": "Svaralternativer"
   },
+  "multipleChoice": {
+    "position": "{n}/{total}",
+    "check": "Sjekk",
+    "checking": "Sjekker…",
+    "tapAnswer": "Trykk på et svar",
+    "tryAgain": "Prøv igjen",
+    "showAnswer": "Vis svaret",
+    "next": "Neste spørsmål",
+    "finish": "Ferdig",
+    "attempt": "Forsøk {n}",
+    "right": "Riktig.",
+    "generic": "Ikke riktig. Se på setningen en gang til.",
+    "sendFailed": "Svaret kunne ikke sendes. Prøv igjen.",
+    "closedAlready": "Dette spørsmålet er allerede ferdig.",
+    "closeFailed": "Settet ble kanskje ikke levert. Prøv igjen.",
+    "empty": {
+      "title": "Ingenting å svare på ennå",
+      "body": "Et spørsmål trenger tekst, minst to alternativer og ett av dem merket som riktig."
+    },
+    "done": {
+      "title": "Ferdig",
+      "score": "{score} av {total} riktig på første forsøk.",
+      "again": "Gjør på nytt"
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Svar på spørsmål {n}",
     "answeredCount": "{done} av {total} spørsmål besvart",

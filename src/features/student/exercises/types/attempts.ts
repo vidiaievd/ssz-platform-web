@@ -53,6 +53,7 @@ export interface StartAttemptResponse {
    */
   answeredQuestions?: ResumedAnswer[];
   checkedRows?: ResumedRow[];
+  pickedOptions?: ResumedPick[];
 }
 
 /** One question of a `short_answer` set already handed in on the resumed attempt. */
@@ -74,6 +75,24 @@ export interface ResumedRow {
   attempts: number;
   placement: Record<string, string[]>;
   solved: boolean;
+  revealed: boolean;
+}
+
+/**
+ * One question of a `multiple_choice` set already picked at on the resumed attempt.
+ *
+ * `picks` is every option tried, in order, so the runner knows which try the question is
+ * on — and that is the score, since only a hit on the first counts. `eliminated` and
+ * `revealed` must survive a reload for the same reason `sentence_schema`'s reveal does:
+ * a question shown its answer scores nothing, and a 50/50 already spent is not one to
+ * hand out again (plan 53 §3.3).
+ */
+export interface ResumedPick {
+  questionId: string;
+  picks: string[];
+  eliminated: string[];
+  correct: boolean;
+  closed: boolean;
   revealed: boolean;
 }
 
@@ -165,9 +184,26 @@ export interface TranslateSubmitDetails {
  * one at a time (plan 51 §3.3). Each is final: the same question is refused the second
  * time, by the domain rather than by the button.
  */
-export interface AnswerQuestionRequest {
+export type AnswerQuestionRequest = AnswerTextRequest | AnswerOptionRequest;
+
+/** `short_answer`: what the student wrote. */
+export interface AnswerTextRequest {
   questionId: string;
   text: string;
+}
+
+/**
+ * `multiple_choice`: the option the student picked, or the request to be shown the key.
+ *
+ * `reveal` is «Vis svaret» — it closes the question, returns the key and spends no
+ * attempt, which is why `optionId` may be null with it. Everything the pick is judged
+ * against stays on the server: this request carries an id, and what comes back is
+ * dosed by how the question stands (plan 53 §3.2).
+ */
+export interface AnswerOptionRequest {
+  questionId: string;
+  optionId: string | null;
+  reveal?: boolean;
 }
 
 /**
@@ -177,15 +213,40 @@ export interface AnswerQuestionRequest {
  * flag and never the anchor phrase that matched, and the model answer only when
  * `showModel` allows it. The runner renders this; it computes nothing.
  */
-export interface AnswerQuestionResponse {
+export interface AnswerQuestionResponse<Result = ShortAnswerResult | MultipleChoiceResult> {
   attemptId: string;
+  /** Which shape `result` came back in — the two templates hand back different verdicts. */
+  templateCode?: string;
   /** Questions handed in so far, including this one. */
   answered: number;
   /** Answerable questions in the set. */
   total: number;
-  result: ShortAnswerResult;
+  result: Result;
   /** Whether this answer is on its way to a teacher, for the routing line. */
   routedForReview: boolean;
+}
+
+/**
+ * What one pick of a `multiple_choice` set comes back with — plan 53 §3.3, point 3.
+ *
+ * The optional fields are the whole contract, and the runner must not fill them in for
+ * itself. `keyOptionId` and `why` arrive **only once the question is closed** — right,
+ * revealed, or out of tries — because a retry and a 50/50 offered next to the answer are
+ * theatre. `eliminated` is cumulative and arrives only on a wrong pick with a try left.
+ */
+export interface MultipleChoiceResult {
+  questionId: string;
+  /** The option that was judged. Empty when the question was revealed rather than picked. */
+  optionId: string;
+  correct: boolean;
+  /** 1-based. Only a hit on attempt 1 scores. */
+  attempt: number;
+  attemptsLeft: number;
+  closed: boolean;
+  keyOptionId?: string;
+  why?: string;
+  optionWhy?: string;
+  eliminated?: string[];
 }
 
 /** Check one sentence of a `sentence_schema` set, or ask to be shown it. */

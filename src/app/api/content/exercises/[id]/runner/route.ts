@@ -19,8 +19,9 @@ import type { ExerciseDisplay, ExerciseWithAnswers } from '@/features/content/ty
  *
  * So the order is inverted. The projection comes first — it is what every learner is
  * entitled to and it is safe by construction — and the key is fetched second, only for
- * a document the browser has to check. `gradedInBrowser` decides, from the template and,
- * for `short_answer`, from the shape of the document (plan 51 §8 Q1).
+ * a document the browser has to check. `gradedInBrowser` decides, from the template and —
+ * for `short_answer` and `multiple_choice`, which each cover two live document shapes —
+ * from the shape of the document (plan 51 §8 Q1, plan 53 §3.9).
  *
  * `expectedAnswers` is `{}` rather than absent when nothing is owed, so a caller reads
  * the same shape either way and cannot mistake "withheld" for "not loaded yet".

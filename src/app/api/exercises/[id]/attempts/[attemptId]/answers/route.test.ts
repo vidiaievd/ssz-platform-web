@@ -97,4 +97,64 @@ describe('POST /api/exercises/[id]/attempts/[attemptId]/answers', () => {
 
     expect(res.status).toBe(502);
   });
+
+  /**
+   * The second payload this route carries — `multiple_choice` picks an option rather than
+   * writing an answer (plan 53 §3.3). Which shape it is, is decided by the payload rather
+   * than by a mode flag, which is what lets the route stay ignorant of the exercise.
+   */
+  describe('a multiple_choice pick', () => {
+    const PICKED = {
+      attemptId: 'att-1',
+      templateCode: 'multiple_choice',
+      answered: 1,
+      total: 5,
+      result: {
+        questionId: 'q1',
+        optionId: 'a',
+        correct: false,
+        attempt: 1,
+        attemptsLeft: 1,
+        closed: false,
+        optionWhy: '«er» er presens.',
+      },
+      routedForReview: false,
+    };
+
+    it('passes the option up and hands the verdict back', async () => {
+      vi.mocked(serverFetch).mockResolvedValue(PICKED);
+
+      const res = await POST(request({ questionId: 'q1', optionId: 'a' }), { params });
+
+      expect(res.status).toBe(200);
+      await expect(res.json()).resolves.toEqual(PICKED);
+      expect(serverFetch).toHaveBeenCalledWith({
+        service: 'exercises',
+        path: '/exercises/ex-1/attempts/att-1/answers',
+        method: 'POST',
+        body: { questionId: 'q1', optionId: 'a' },
+      });
+    });
+
+    it('carries «Vis svaret» as a reveal with no option', async () => {
+      vi.mocked(serverFetch).mockResolvedValue(PICKED);
+
+      const res = await POST(request({ questionId: 'q1', optionId: null, reveal: true }), {
+        params,
+      });
+
+      expect(res.status).toBe(200);
+      expect(serverFetch).toHaveBeenCalledWith(
+        expect.objectContaining({ body: { questionId: 'q1', reveal: true } }),
+      );
+    });
+
+    it('refuses a pick of nothing that is not a reveal', async () => {
+      // A pick with no option is only meaningful as «Vis svaret», which says so.
+      const res = await POST(request({ questionId: 'q1', optionId: null }), { params });
+
+      expect(res.status).toBe(400);
+      expect(serverFetch).not.toHaveBeenCalled();
+    });
+  });
 });

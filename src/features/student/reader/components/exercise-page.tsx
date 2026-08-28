@@ -9,10 +9,12 @@ import { primaryHintText, primaryInstructionText } from '@/features/content/lib/
 import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
 import { MatchPairsSolver } from './match-pairs-solver';
+import { MultipleChoiceSolver } from './multiple-choice-solver';
 import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
 import { WritingTaskSolver } from './writing-task-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
+import { isMultipleChoiceDocument } from '@/lib/shared-kernel/multiple-choice';
 import { isShortAnswerDocument, readContent } from '@/lib/shared-kernel/short-answer';
 import {
   gradedInBrowser,
@@ -37,6 +39,7 @@ import {
   checkShortAnswer,
   normAnswer,
   readSentenceSchemaProjection,
+  readMultipleChoiceProjection,
   PRACTICE_ACCENT,
   type McqContent,
   type McqGroupExpectedAnswers,
@@ -123,7 +126,15 @@ function CheckFooter({ canSubmit, onCheck }: { canSubmit: boolean; onCheck: () =
 
 /* ── per-type solvers ───────────────────────────────────────────────────── */
 
-function McqSolver({ display, phase, ok, onCheck }: SolverProps) {
+/**
+ * The single-question form, still live under 121 seeded exercises (plan 53 §8 Q2).
+ *
+ * Untouched by the rewrite and dispatched to by document shape rather than by template
+ * code — a set of questions goes to `MultipleChoiceSolver` and is graded on the server.
+ * This one keeps the key in the browser, as it always has: its whole check is a
+ * comparison of option ids, and there is no second try to dose.
+ */
+function McqLegacySolver({ display, phase, ok, onCheck }: SolverProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const c = display.content;
   const options = useMemo(
@@ -644,7 +655,7 @@ function FeedbackBanner({ graded, revealed, hint, onRetry, onToggleReveal }: Fee
  * the reader asked for every key and sorted it out afterwards.
  */
 const SOLVERS: Record<ClientGradedTemplate, (props: SolverProps) => React.ReactElement> = {
-  multiple_choice: McqSolver,
+  multiple_choice: McqLegacySolver,
   multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
   short_answer: ShortAnswerLegacySolver,
@@ -688,6 +699,12 @@ const SERVER_SOLVERS: Record<
   // resolved from the author's own per-chunk notes — so the marks come from the engine,
   // one sentence at a time, with unlimited retries per sentence (plan 52 §3.2).
   sentence_schema: SentenceSchemaSolver,
+  // The only one here whose key is not the exercise — an option id gives nothing away by
+  // itself. It is on the server because the *dosing* is: a second try and a 50/50 offered
+  // by a browser that already knows the right option are decoration, and the order the
+  // options arrive in is dealt per attempt for the same reason (plan 53 §3.2, §3.4).
+  // Only documents of the new form arrive here; see `gradedOnServer`.
+  multiple_choice: MultipleChoiceSolver,
 };
 
 /**
@@ -709,9 +726,10 @@ function gradedOnServer(data: ExerciseWithAnswers): boolean {
 /**
  * How many questions this exercise is a set of, or `null` when it is a single task.
  *
- * Two templates are sets: `short_answer`, one card holding several questions handed in
- * one at a time, and `sentence_schema`, one card holding several sentences checked one at
- * a time. The practice stack is built on "one task, one Check", so a
+ * Three templates are sets: `short_answer`, one card holding several questions handed in
+ * one at a time; `sentence_schema`, one card holding several sentences checked one at a
+ * time; and `multiple_choice`, one card holding several questions each with its own
+ * budget of tries. The practice stack is built on "one task, one Check", so a
  * set has to announce itself there rather than unfold into a player nobody asked to
  * start (plan 51 phase 4 follow-up).
  */
@@ -720,6 +738,11 @@ function setSize(data: ExerciseWithAnswers): number | null {
     const set = readSentenceSchemaProjection(data.content);
     return set === null ? null : set.rows.length;
   }
+  if (data.templateCode === 'multiple_choice') {
+    if (!isMultipleChoiceDocument(data.content)) return null;
+    const set = readMultipleChoiceProjection(data.content);
+    return set === null ? null : set.questions.length;
+  }
   if (data.templateCode !== 'short_answer') return null;
   if (!isShortAnswerDocument(data.content)) return null;
   return readContent(data.content).questions.length;
@@ -727,13 +750,20 @@ function setSize(data: ExerciseWithAnswers): number | null {
 
 /**
  * The single line a folded set shows above its start button: the instruction in the
- * learner's language when the author wrote one, otherwise the set's own title. Never
- * both — the folded card is a promise of what is inside, not a preview of it.
+ * learner's language when the author wrote one, otherwise the set's own words — its title
+ * where it has one, its own instruction where it does not. Never both: the folded card is
+ * a promise of what is inside, not a preview of it.
  */
 function foldedLine(data: ExerciseWithAnswers): string {
   const instruction = instr(data);
   if (instruction !== undefined && instruction.trim() !== '') return instruction;
-  return isShortAnswerDocument(data.content) ? readContent(data.content).title.trim() : '';
+  if (isShortAnswerDocument(data.content)) return readContent(data.content).title.trim();
+  // `multiple_choice` has no title in its projection — the set's own instruction, in the
+  // language being learned, is the closest thing to a promise of what is inside.
+  if (data.templateCode === 'multiple_choice') {
+    return readMultipleChoiceProjection(data.content)?.instruction.trim() ?? '';
+  }
+  return '';
 }
 
 export interface ExerciseSolverProps {

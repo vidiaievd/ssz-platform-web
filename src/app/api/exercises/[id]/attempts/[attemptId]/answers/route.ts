@@ -3,18 +3,23 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
 import type {
-  AnswerQuestionRequest,
+  AnswerOptionRequest,
   AnswerQuestionResponse,
+  AnswerTextRequest,
 } from '@/features/student/exercises/types/attempts';
 
 /**
- * Hand in one question of a `short_answer` set — the set is answered a question at a
- * time, and each answer is final.
+ * Hand in one question of a set — two templates are answered a question at a time.
  *
- * The text goes up rather than the verdict coming down, for the reason this template
- * exists: its key is a set of anchor phrases, which is the answer written in the words
- * the student is being asked to find. Nothing in the browser could grade this, and
- * nothing in the browser is given the chance to.
+ * `short_answer` sends what the student wrote; `multiple_choice` sends the option they
+ * picked, or `reveal` for «Vis svaret». In both the payload goes up rather than the
+ * verdict coming down, and for the same reason: the key is the exercise. For
+ * `short_answer` it is a set of anchor phrases — the answer in the words the student is
+ * asked to find. For `multiple_choice` it is which option is right, and the whole
+ * mechanic of a second try and a 50/50 rests on the browser not knowing it (plan 53 §3.2).
+ *
+ * The two are told apart by the payload, and the attempt's own template decides upstream
+ * which one it will read. Neither is graded here.
  *
  * The attempt stays in progress. It is closed by `POST /submit` with every answer in one
  * aggregate, which regrades all of them from scratch.
@@ -32,14 +37,41 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { questionId, text } = body as AnswerQuestionRequest;
+  const raw = body as Partial<AnswerTextRequest & AnswerOptionRequest>;
+  const { questionId } = raw;
   if (typeof questionId !== 'string' || questionId.trim() === '') {
     return NextResponse.json({ error: '"questionId" is required' }, { status: 400 });
   }
-  // Refused here as well as upstream: an empty answer handed in is a `fail` the learner
-  // can never revisit, and the cheapest place to stop it is before it is written down.
-  if (typeof text !== 'string' || text.trim() === '') {
-    return NextResponse.json({ error: '"text" is required' }, { status: 400 });
+
+  // Which shape this is, decided by the payload rather than by a mode flag — the same
+  // test the engine's handler makes. `optionId` present at all, even as null, means a
+  // pick; `reveal` alone is «Vis svaret», which is a pick of nothing.
+  const picking = 'optionId' in raw || raw.reveal === true;
+
+  let forwarded: Record<string, unknown>;
+  if (picking) {
+    const { optionId, reveal } = raw;
+    if (optionId !== null && typeof optionId !== 'string') {
+      return NextResponse.json({ error: '"optionId" must be a string or null' }, { status: 400 });
+    }
+    // A pick of nothing is only meaningful as «Vis svaret», which says so. Without it
+    // the engine would have to guess whether the learner meant to close the question.
+    if (reveal !== true && (optionId === null || optionId === '')) {
+      return NextResponse.json({ error: '"optionId" is required' }, { status: 400 });
+    }
+    forwarded = {
+      questionId,
+      ...(typeof optionId === 'string' && optionId !== '' ? { optionId } : {}),
+      ...(reveal === true ? { reveal: true } : {}),
+    };
+  } else {
+    // Refused here as well as upstream: an empty answer handed in is a `fail` the learner
+    // can never revisit, and the cheapest place to stop it is before it is written down.
+    const { text } = raw;
+    if (typeof text !== 'string' || text.trim() === '') {
+      return NextResponse.json({ error: '"text" is required' }, { status: 400 });
+    }
+    forwarded = { questionId, text };
   }
 
   try {
@@ -47,7 +79,7 @@ export async function POST(
       service: 'exercises',
       path: `/exercises/${id}/attempts/${attemptId}/answers`,
       method: 'POST',
-      body: { questionId, text },
+      body: forwarded,
     });
     return NextResponse.json(data);
   } catch (e) {

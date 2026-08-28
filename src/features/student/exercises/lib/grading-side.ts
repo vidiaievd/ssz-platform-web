@@ -1,3 +1,4 @@
+import { isMultipleChoiceDocument } from '@/lib/shared-kernel/multiple-choice';
 import { isShortAnswerDocument } from '@/lib/shared-kernel/short-answer';
 
 /**
@@ -28,15 +29,23 @@ export type ClientGradedTemplate = (typeof CLIENT_GRADED_TEMPLATES)[number];
 /**
  * Whether this particular document is graded in the browser.
  *
- * The template code alone answers it for twelve of the thirteen. `short_answer` is the
- * exception and has to be: one code covers two live document shapes (plan 51 §8 Q1),
- * and they are graded on opposite sides. The old single-question form is checked here
- * against a list of accepted strings and needs them; the new set of open questions is
- * graded on the server, and its key is a set of phrasings of the answer itself — the
- * one key that must never reach a browser.
+ * The template code alone answers it for eleven of the thirteen. Two are exceptions and
+ * have to be: one code covers two live document shapes, and the shapes are graded on
+ * opposite sides.
+ *
+ * `short_answer` (plan 51 §8 Q1): the old single-question form is checked here against a
+ * list of accepted strings and needs them; the new set of open questions is graded on the
+ * server, and its key is a set of phrasings of the answer itself.
+ *
+ * `multiple_choice` (plan 53 §3.2): the old single-question form has always been checked
+ * in the browser against a list of option ids, and 121 seeded exercises are still written
+ * that way. The new set is graded on the server — not because an option id is a secret,
+ * but because the second try and the 50/50 are dosing, and a browser holding the key has
+ * nothing left to dose.
  */
 export function gradedInBrowser(templateCode: string, content: unknown): boolean {
   if (!(CLIENT_GRADED_TEMPLATES as readonly string[]).includes(templateCode)) return false;
   if (templateCode === 'short_answer') return !isShortAnswerDocument(content);
+  if (templateCode === 'multiple_choice') return !isMultipleChoiceDocument(content);
   return true;
 }

@@ -78,7 +78,7 @@ export function ShortAnswerSolver({
   /** Set when the set arrived with its answer key still on it — see the projection reader. */
   const [unusable, setUnusable] = useState(false);
 
-  const answer = useAnswerQuestion(exerciseId, attemptId);
+  const answer = useAnswerQuestion<StudentResult>(exerciseId, attemptId);
   const submit = useSubmitAnswer(exerciseId, attemptId);
 
   const [index, setIndex] = useState(0);

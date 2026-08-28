@@ -28,6 +28,31 @@
     "defaultInstruction": "Choose the correct answer",
     "optionsLabel": "Answer options"
   },
+  "multipleChoice": {
+    "position": "{n}/{total}",
+    "check": "Check",
+    "checking": "Checking…",
+    "tapAnswer": "Tap an answer",
+    "tryAgain": "Try again",
+    "showAnswer": "Show the answer",
+    "next": "Next question",
+    "finish": "Finish",
+    "attempt": "Attempt {n}",
+    "right": "Correct.",
+    "generic": "Not right. Look at the sentence again.",
+    "sendFailed": "The answer could not be sent. Try again.",
+    "closedAlready": "This question is already finished.",
+    "closeFailed": "The set may not have been handed in. Try again.",
+    "empty": {
+      "title": "Nothing to answer yet",
+      "body": "A question needs text, at least two options and one of them marked correct."
+    },
+    "done": {
+      "title": "Finished",
+      "score": "{score} of {total} right on the first attempt.",
+      "again": "Start over"
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Answers for question {n}",
     "answeredCount": "{done} of {total} questions answered",
