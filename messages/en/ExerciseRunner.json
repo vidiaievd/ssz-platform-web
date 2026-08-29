@@ -53,6 +53,35 @@
       "again": "Start over"
     }
   },
+  "multipleChoiceGroup": {
+    "statement": "Statement",
+    "result": "Result",
+    "answered": "{n}/{total} answered",
+    "check": "Check the answers",
+    "checking": "Checking…",
+    "remaining": "{n} left",
+    "retryWrong": "Try the wrong ones again",
+    "showKey": "Show the answers",
+    "finish": "Finish",
+    "attempt": "Attempt {n}",
+    "allRight": "All correct",
+    "wrongCount": "{n, plural, one {# statement is wrong} other {# statements are wrong}}",
+    "lookAgain": "Look at them once more.",
+    "passed": "Passed",
+    "notPassed": "Not passed",
+    "scoreLine": "{pct}% right — {threshold}% is required.",
+    "sendFailed": "The answers could not be sent. Try again.",
+    "closedAlready": "This table is already finished.",
+    "empty": {
+      "title": "Nothing to answer yet",
+      "body": "A statement needs text and one column marked. Two finished statements make a table."
+    },
+    "done": {
+      "title": "Finished",
+      "score": "{score} of {total} right.",
+      "again": "Start over"
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Answers for question {n}",
     "answeredCount": "{done} of {total} questions answered",

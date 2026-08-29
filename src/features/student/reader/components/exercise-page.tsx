@@ -9,6 +9,7 @@ import { primaryHintText, primaryInstructionText } from '@/features/content/lib/
 import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
 import { MatchPairsSolver } from './match-pairs-solver';
+import { MultipleChoiceGroupSolver } from './multiple-choice-group-solver';
 import { MultipleChoiceSolver } from './multiple-choice-solver';
 import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
@@ -705,6 +706,12 @@ const SERVER_SOLVERS: Record<
   // options arrive in is dealt per attempt for the same reason (plan 53 §3.2, §3.4).
   // Only documents of the new form arrive here; see `gradedOnServer`.
   multiple_choice: MultipleChoiceSolver,
+  // Its key is which shared column each statement belongs in, and it is on the server for
+  // the dosing rather than the secrecy: the retry budget, the freeze on rows that came out
+  // right and the moment the key becomes visible are all decisions a browser holding the
+  // answers could not make honestly (plan 54 §3.2, §3.3). Only documents of the new form
+  // arrive here; see `gradedOnServer`.
+  multiple_choice_group: MultipleChoiceGroupSolver,
 };
 
 /**
@@ -715,6 +722,9 @@ const SERVER_SOLVERS: Record<
  * in the old form, graded in the browser against accepted strings (plan 51 §8 Q1). The
  * document says which is which — `content.questions` exists in one and cannot exist in
  * the other — and the same test decides it in the validator and in the projections.
+ *
+ * `multiple_choice` and `multiple_choice_group` are the same arrangement, for the two
+ * shapes each of them has live (plan 53 §3.9, plan 54 §3.2).
  */
 function gradedOnServer(data: ExerciseWithAnswers): boolean {
   if (SERVER_SOLVERS[data.templateCode] === undefined) return false;

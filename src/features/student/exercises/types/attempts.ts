@@ -6,6 +6,7 @@ import type {
   StudentProjection as MatchPairsProjection,
 } from '@/lib/shared-kernel/match-pairs';
 import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
+import type { StudentProjection as MultipleChoiceGroupProjection } from '@/lib/shared-kernel/multiple-choice-group';
 import type { StudentResult as ShortAnswerResult } from '@/lib/shared-kernel/short-answer';
 import type { StudentResult as SentenceSchemaResult } from '@/lib/shared-kernel/sentence-schema';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
@@ -247,6 +248,77 @@ export interface MultipleChoiceResult {
   why?: string;
   optionWhy?: string;
   eliminated?: string[];
+}
+
+/**
+ * `exerciseContent` when `templateCode` is `multiple_choice_group`.
+ *
+ * The table as the server decided the student may see it: the statements, the shared
+ * columns, the passage where the author attached one — and the row order already settled.
+ * Which column each statement belongs in, the author's line and the quote that proves it
+ * are in the other column and arrive, if at all, with a check (plan 54 §3.2, §3.5).
+ */
+export type MultipleChoiceGroupAttemptContent = MultipleChoiceGroupProjection;
+
+/**
+ * What one check of the table carries up — plan 54 §3.3.
+ *
+ * `answers` is the whole table every time, because the unit of work is the table: a
+ * check is a submission of all of it, and a re-check is another submission onto the same
+ * attempt. `reveal` is «Vis fasit», the student giving up on the retry.
+ *
+ * Nothing else is sent. Which check this is, which rows are frozen and what was picked
+ * the first time round are facts about the attempt, and the engine writes its own over
+ * anything a client puts in their place — a client that stated its own attempt number
+ * would be buying itself another go.
+ */
+export interface MultipleChoiceGroupSubmittedAnswer {
+  /** `rowId → columnId`. A row left unanswered is simply absent. */
+  answers: Record<string, string>;
+  reveal?: boolean;
+}
+
+/**
+ * One statement's outcome in a check.
+ *
+ * The optional fields are the contract, and the runner must not fill them in for itself.
+ * `keyColumnId` arrives **only once the table is closed** — every row right, revealed, or
+ * out of attempts — and only when the author left the key visible; a right column shown
+ * beside a row that still has a retry left would make the retry theatre. `why` and
+ * `quote` follow `showWhy`, and a row the author wrote neither for sends neither, which
+ * is what makes "render no explanation block at all" the runner's easiest case.
+ */
+export interface MultipleChoiceGroupItemResult {
+  itemId: string;
+  /** The column picked; `null` when the statement was left unanswered. */
+  submitted: string | null;
+  correct: boolean;
+  /** What was picked on the *first* check of this table, carried forward by the engine. */
+  firstAnswer: string | null;
+  keyColumnId?: string;
+  why?: string;
+  quote?: string;
+}
+
+/**
+ * `details` when the template is `multiple_choice_group` — the state of the table after
+ * a check, which is all the runner draws from.
+ *
+ * `closed` and `locked` are the two the runner may not second-guess. `closed` says no
+ * further check is possible, and the engine refuses one whatever the budget says — so a
+ * runner that offered «Prøv de feile igjen» after it would be offering a refusal.
+ * `locked` is the cumulative set of rows the server froze under `lockCorrect`; it
+ * survives a retry, which is why the runner holds it apart from the verdict.
+ */
+export interface MultipleChoiceGroupSubmitDetails {
+  totalItems: number;
+  passedItems: number;
+  /** 1-based: which check of the table this was. */
+  attempt: number;
+  attemptsLeft: number;
+  closed: boolean;
+  locked: string[];
+  items: MultipleChoiceGroupItemResult[];
 }
 
 /** Check one sentence of a `sentence_schema` set, or ask to be shown it. */

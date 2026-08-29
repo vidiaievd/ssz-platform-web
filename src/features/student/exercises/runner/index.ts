@@ -61,6 +61,13 @@ export { MultipleChoiceBody } from './multiple-choice-body';
 export type { MultipleChoiceBodyProps, MultipleChoicePhase } from './multiple-choice-body';
 export { readMultipleChoiceProjection } from './multiple-choice-projection';
 
+export { MultipleChoiceGroupBody } from './multiple-choice-group-body';
+export type {
+  MultipleChoiceGroupBodyProps,
+  MultipleChoiceGroupPhase,
+} from './multiple-choice-group-body';
+export { readMultipleChoiceGroupProjection } from './multiple-choice-group-projection';
+
 /* The single-question form, still live under 144 seeded exercises (plan 51 §8 Q1).
    Dispatched to by document shape, not by template code. */
 export { ShortAnswerLegacyBody } from './short-answer-legacy-body';

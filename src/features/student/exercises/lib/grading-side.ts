@@ -1,4 +1,5 @@
 import { isMultipleChoiceDocument } from '@/lib/shared-kernel/multiple-choice';
+import { isMultipleChoiceGroupDocument } from '@/lib/shared-kernel/multiple-choice-group';
 import { isShortAnswerDocument } from '@/lib/shared-kernel/short-answer';
 
 /**
@@ -29,7 +30,7 @@ export type ClientGradedTemplate = (typeof CLIENT_GRADED_TEMPLATES)[number];
 /**
  * Whether this particular document is graded in the browser.
  *
- * The template code alone answers it for eleven of the thirteen. Two are exceptions and
+ * The template code alone answers it for ten of the thirteen. Three are exceptions and
  * have to be: one code covers two live document shapes, and the shapes are graded on
  * opposite sides.
  *
@@ -42,10 +43,16 @@ export type ClientGradedTemplate = (typeof CLIENT_GRADED_TEMPLATES)[number];
  * that way. The new set is graded on the server — not because an option id is a secret,
  * but because the second try and the 50/50 are dosing, and a browser holding the key has
  * nothing left to dose.
+ *
+ * `multiple_choice_group` (plan 54 §3.2): the old form of a question list keeps its key in
+ * `expected_answers` and is checked here; the new table is graded on the server, where the
+ * retry budget, the freeze on correct rows and the moment the key becomes visible all live.
+ * Every one of those is dosing, and a browser holding the key doses nothing.
  */
 export function gradedInBrowser(templateCode: string, content: unknown): boolean {
   if (!(CLIENT_GRADED_TEMPLATES as readonly string[]).includes(templateCode)) return false;
   if (templateCode === 'short_answer') return !isShortAnswerDocument(content);
   if (templateCode === 'multiple_choice') return !isMultipleChoiceDocument(content);
+  if (templateCode === 'multiple_choice_group') return !isMultipleChoiceGroupDocument(content);
   return true;
 }

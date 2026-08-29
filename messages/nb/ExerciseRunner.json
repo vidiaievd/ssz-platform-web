@@ -53,6 +53,35 @@
       "again": "Gjør på nytt"
     }
   },
+  "multipleChoiceGroup": {
+    "statement": "Påstand",
+    "result": "Resultat",
+    "answered": "{n}/{total} svart",
+    "check": "Sjekk svarene",
+    "checking": "Sjekker…",
+    "remaining": "{n} igjen",
+    "retryWrong": "Prøv de feile igjen",
+    "showKey": "Vis fasit",
+    "finish": "Fullfør",
+    "attempt": "Forsøk {n}",
+    "allRight": "Alt riktig",
+    "wrongCount": "{n, plural, one {# påstand er feil} other {# påstander er feil}}",
+    "lookAgain": "Se på dem en gang til.",
+    "passed": "Bestått",
+    "notPassed": "Ikke bestått",
+    "scoreLine": "{pct}% riktig — kravet er {threshold}%.",
+    "sendFailed": "Svarene kunne ikke sendes. Prøv igjen.",
+    "closedAlready": "Denne tabellen er allerede ferdig.",
+    "empty": {
+      "title": "Ingenting å svare på ennå",
+      "body": "En påstand trenger tekst og én merket kolonne. To ferdige påstander blir en tabell."
+    },
+    "done": {
+      "title": "Ferdig",
+      "score": "{score} av {total} riktig.",
+      "again": "Gjør på nytt"
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Svar på spørsmål {n}",
     "answeredCount": "{done} av {total} spørsmål besvart",
