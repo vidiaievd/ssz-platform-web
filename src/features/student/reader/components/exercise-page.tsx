@@ -757,7 +757,12 @@ function setSize(data: ExerciseWithAnswers): number | null {
 function foldedLine(data: ExerciseWithAnswers): string {
   const instruction = instr(data);
   if (instruction !== undefined && instruction.trim() !== '') return instruction;
-  if (isShortAnswerDocument(data.content)) return readContent(data.content).title.trim();
+  // The code as well as the shape: `isShortAnswerDocument` only asks whether `questions`
+  // is an array, and since plan 53 a `multiple_choice` set answers yes to that too — which
+  // sent it down this branch and folded it under its teacher-facing title.
+  if (data.templateCode === 'short_answer' && isShortAnswerDocument(data.content)) {
+    return readContent(data.content).title.trim();
+  }
   // `multiple_choice` has no title in its projection — the set's own instruction, in the
   // language being learned, is the closest thing to a promise of what is inside.
   if (data.templateCode === 'multiple_choice') {

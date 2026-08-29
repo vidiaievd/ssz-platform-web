@@ -18,6 +18,7 @@ vi.mock('../actions/match-pairs', () => ({ saveMatchPairsAction: vi.fn() }));
 vi.mock('../actions/writing-task', () => ({ saveWritingTaskAction: vi.fn() }));
 vi.mock('../actions/short-answer', () => ({ saveShortAnswerAction: vi.fn() }));
 vi.mock('../actions/sentence-schema', () => ({ saveSentenceSchemaAction: vi.fn() }));
+vi.mock('../actions/multiple-choice', () => ({ saveMultipleChoiceAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -296,6 +297,72 @@ describe('ExerciseEditorPane', () => {
     expect(preview.queryByText(/Alle syklister må ha lys/)).not.toBeInTheDocument();
     expect(preview.queryByText(/Teksten sier hva regelen krever/)).not.toBeInTheDocument();
     expect(preview.queryByText('kravet')).not.toBeInTheDocument();
+  });
+
+  it('opens the multiple-choice builder on a set, key held back', () => {
+    // Dispatch on the template code *and* the shape of the document — plan 53 §3.9. 121
+    // of this type's 131 seeded exercises are still single questions; `questions` is what
+    // says this one is a set.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-mc',
+        templateCode: 'multiple_choice',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: {
+          title: 'Indirekte tale',
+          instruction: 'Velg det riktige svaret.',
+          questions: [
+            {
+              id: 'q1',
+              kind: 'grammar',
+              context: '',
+              stem: 'Han sa at han ___ syk.',
+              options: [
+                { id: 'a', text: 'er', fixed: false },
+                { id: 'b', text: 'var', fixed: false },
+              ],
+            },
+          ],
+          settings: { letters: true, layout: 'list', shuffle: false, retry: 'one' },
+        },
+        expectedAnswers: {
+          questions: {
+            q1: {
+              correctOptionId: 'b',
+              why: 'Presens blir preteritum etter «sa».',
+              options: { a: 'Presens holder ikke her.' },
+            },
+          },
+        },
+        instructions: [
+          { instructionLanguage: 'en', instructionText: 'Velg det riktige svaret.' },
+        ],
+        updatedAt: '2026-08-28T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Distractors/ })).toBeInTheDocument();
+
+    // The rule and the rebuttals are the answer: the projection keeps all three off the
+    // student's screen until a pick closes the question.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('Han sa at han ___ syk.')).toBeInTheDocument();
+    expect(preview.queryByText(/Presens blir preteritum/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Presens holder ikke her/)).not.toBeInTheDocument();
+  });
+
+  it('leaves a multiple-choice document of the old form to the generic form', () => {
+    // The default fixture of this suite is one of the 121. Asserted explicitly so the
+    // dispatch cannot start claiming them by template code alone.
+    renderPane();
+
+    expect(screen.queryByRole('tab', { name: /Distractors/ })).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue('Hva heter du?')).toBeInTheDocument();
   });
 
   it('leaves a short-answer document of the old form to the generic form', () => {

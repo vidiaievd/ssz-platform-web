@@ -25,6 +25,7 @@ import { TEMPLATE_CODE as MATCH_PAIRS_TEMPLATE_CODE } from '@/lib/shared-kernel/
 import { TEMPLATE_CODE as WRITING_TASK_TEMPLATE_CODE } from '@/lib/shared-kernel/writing-task';
 import { TEMPLATE_CODE as SHORT_ANSWER_TEMPLATE_CODE } from '@/lib/shared-kernel/short-answer';
 import { TEMPLATE_CODE as SENTENCE_SCHEMA_TEMPLATE_CODE } from '@/lib/shared-kernel/sentence-schema';
+import { TEMPLATE_CODE as MULTIPLE_CHOICE_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -36,6 +37,7 @@ import { createMatchPairsAction } from '../actions/match-pairs';
 import { createWritingTaskAction } from '../actions/writing-task';
 import { createShortAnswerAction } from '../actions/short-answer';
 import { createSentenceSchemaAction } from '../actions/sentence-schema';
+import { createMultipleChoiceAction } from '../actions/multiple-choice';
 import {
   createTranslateFromTargetAction,
   createTranslateToTargetAction,
@@ -78,6 +80,7 @@ type OwnBuilderTemplate =
   | typeof WRITING_TASK_TEMPLATE_CODE
   | typeof SHORT_ANSWER_TEMPLATE_CODE
   | typeof SENTENCE_SCHEMA_TEMPLATE_CODE
+  | typeof MULTIPLE_CHOICE_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
@@ -100,6 +103,12 @@ const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillActi
   // one the template's content schema refuses the exercise outright — it wants `rows`,
   // and the generic form has no way to write one.
   [SENTENCE_SCHEMA_TEMPLATE_CODE]: createSentenceSchemaAction,
+  // The eighth entry and the last of the thirteen templates to get one. This type was the
+  // platform's default — `DEFAULT_EXERCISE_VALUES.templateCode` — which is exactly why it
+  // was still being created in the generic form long after every other type had its own
+  // builder (plan 53 §8 Q5). Without a scaffold the builder opens on a document that has
+  // no questions array at all, and the template's schema refuses it.
+  [MULTIPLE_CHOICE_TEMPLATE_CODE]: createMultipleChoiceAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,

@@ -50,9 +50,17 @@ import {
 import {
   fromPersisted as shortAnswerFromPersisted,
   isShortAnswerDocument,
+  TEMPLATE_CODE as SHORT_ANSWER_TEMPLATE_CODE,
   toContent as shortAnswerToContent,
   toExpectedAnswers as shortAnswerToExpectedAnswers,
 } from '@/lib/shared-kernel/short-answer';
+import {
+  fromPersisted as multipleChoiceFromPersisted,
+  isMultipleChoiceDocument,
+  TEMPLATE_CODE as MULTIPLE_CHOICE_TEMPLATE_CODE,
+  toContent as multipleChoiceToContent,
+  toExpectedAnswers as multipleChoiceToExpectedAnswers,
+} from '@/lib/shared-kernel/multiple-choice';
 import {
   fromPersisted as sentenceSchemaFromPersisted,
   TEMPLATE_CODE as SENTENCE_SCHEMA_TEMPLATE_CODE,
@@ -82,6 +90,10 @@ import { ShortAnswerBuilder } from './short-answer/builder';
 import { ShortAnswerPreview } from './short-answer/short-answer-preview';
 import type { ShortAnswerDocument } from './short-answer/edits';
 import type { SavedDocument as SavedShortAnswer } from './short-answer/use-short-answer-autosave';
+import { MultipleChoiceBuilder } from './multiple-choice/builder';
+import { MultipleChoicePreview } from './multiple-choice/multiple-choice-preview';
+import type { MultipleChoiceDocument } from './multiple-choice/edits';
+import type { SavedDocument as SavedMultipleChoice } from './multiple-choice/use-multiple-choice-autosave';
 import { SentenceSchemaBuilder } from './sentence-schema/builder';
 import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
 import type { SentenceSchemaDocument } from './sentence-schema/edits';
@@ -148,19 +160,30 @@ export function ExerciseEditorPane({
   /** The sentence-schema document as its builder currently has it, for the preview column. */
   const [sentenceSchema, setSentenceSchema] = useState<SentenceSchemaDocument | null>(null);
 
+  /** The multiple-choice document as its builder currently has it, for the preview column. */
+  const [multipleChoice, setMultipleChoice] = useState<MultipleChoiceDocument | null>(null);
+
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
   const isTranslate = isTranslateCode(exercise?.templateCode);
   const isMatchPairs = exercise?.templateCode === MATCH_PAIRS_TEMPLATE_CODE;
   const isWritingTask = exercise?.templateCode === WRITING_TASK_TEMPLATE_CODE;
   /*
-    By the shape of the document, not by the template code — plan 51 §8 Q1. The 144
+    By the shape of the document as well as the template code — plan 51 §8 Q1. The 144
     exercises written in the old single-question form keep opening in the generic form,
     which is still the only thing that can edit them; everything created since phase 2 is
-    of the new form and belongs to the builder. A dispatch on `templateCode` would send
-    both to the same place and one of them would be wrong.
+    of the new form and belongs to the builder. A dispatch on `templateCode` alone would
+    send both to the same place and one of them would be wrong.
+
+    The code half was not here until plan 53. `isShortAnswerDocument` asks whether
+    `questions` is an array and nothing else, which was an unambiguous question for as long
+    as this was the only template with a set in its content column — and `multiple_choice`
+    is now the second. Without the code, a multiple-choice set opens in the short-answer
+    builder, which reads it as five questions with no model answer.
   */
-  const isShortAnswer = exercise != null && isShortAnswerDocument(exercise.content);
+  const isShortAnswer =
+    exercise?.templateCode === SHORT_ANSWER_TEMPLATE_CODE &&
+    isShortAnswerDocument(exercise.content);
   /*
     By the template code, unlike `short_answer` — plan 52 §8 Q7. The old form of this type
     was removed from the catalogue rather than kept alive beside the new one, so there is
@@ -169,6 +192,17 @@ export function ExerciseEditorPane({
     server alike rather than opened in a form that could not edit it anyway.
   */
   const isSentenceSchema = exercise?.templateCode === SENTENCE_SCHEMA_TEMPLATE_CODE;
+  /*
+    By the shape of the document as well as the template code — plan 53 §3.9. This type has
+    the largest tail of any: 121 of its 131 seeded exercises are still written in the old
+    single-question form, and those keep opening in the generic form, which is the only
+    thing that can edit them. Everything created since phase 5 is a set and belongs to the
+    builder. The code alone would send both to the same place and one of them would be
+    wrong; the shape alone would claim every set-shaped document for this builder.
+  */
+  const isMultipleChoice =
+    exercise?.templateCode === MULTIPLE_CHOICE_TEMPLATE_CODE &&
+    isMultipleChoiceDocument(exercise.content);
 
   return (
     <LessonEditorShell
@@ -214,6 +248,8 @@ export function ExerciseEditorPane({
           <ShortAnswerPreview exercise={shortAnswer} />
         ) : isSentenceSchema && sentenceSchema !== null ? (
           <SentenceSchemaPreview exercise={sentenceSchema} />
+        ) : isMultipleChoice && multipleChoice !== null ? (
+          <MultipleChoicePreview exercise={multipleChoice} />
         ) : (
           <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
         )
@@ -360,6 +396,26 @@ export function ExerciseEditorPane({
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
               (cached) => (cached ? applySavedSentenceSchema(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
+      ) : isMultipleChoice && exercise != null ? (
+        // Multiple choice owns a document because the answer is not a field of it: which
+        // option is right lives only in the key column, and every wrong option carries its
+        // own rebuttal beside the rule behind the right one. The generic form had a
+        // question, a flat option list and a single explanation — the shape this template
+        // left behind in plan 53, and the shape the other 121 documents are still in.
+        <MultipleChoiceBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          targetLanguage={container.targetLanguage}
+          initialExercise={multipleChoiceDocumentFrom(exercise)}
+          onDocumentChange={setMultipleChoice}
+          onSavedRemote={(updatedAt, saved) =>
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) => (cached ? applySavedMultipleChoice(cached, updatedAt, saved) : cached),
             )
           }
         />
@@ -622,6 +678,46 @@ function applySavedSentenceSchema(
     updatedAt,
     content: { ...sentenceSchemaToContent(saved.exercise) },
     expectedAnswers: { ...sentenceSchemaToExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        { ...instruction, instructionText: saved.exercise.instruction.trim() },
+        ...rest,
+      ],
+    }),
+  };
+}
+
+/**
+ * The stored columns as the kernel's multiple-choice document, plus the row's token.
+ *
+ * The two columns are joined here and nowhere else: `content` holds the questions and the
+ * options as text, `expectedAnswers` which option is right, the rule and every rebuttal.
+ * `fromPersisted` is what puts them back together, and it is deliberately total — a
+ * document written before a field existed comes back with that field empty rather than
+ * throwing, and `issues` reports what is actually missing.
+ */
+function multipleChoiceDocumentFrom(exercise: ExerciseWithAnswers): MultipleChoiceDocument {
+  return {
+    ...multipleChoiceFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+  };
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ */
+function applySavedMultipleChoice(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedMultipleChoice,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...multipleChoiceToContent(saved.exercise) },
+    expectedAnswers: { ...multipleChoiceToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
         { ...instruction, instructionText: saved.exercise.instruction.trim() },

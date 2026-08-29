@@ -14,6 +14,7 @@ vi.mock('../actions/match-pairs', () => ({ createMatchPairsAction: vi.fn() }));
 vi.mock('../actions/writing-task', () => ({ createWritingTaskAction: vi.fn() }));
 vi.mock('../actions/short-answer', () => ({ createShortAnswerAction: vi.fn() }));
 vi.mock('../actions/sentence-schema', () => ({ createSentenceSchemaAction: vi.fn() }));
+vi.mock('../actions/multiple-choice', () => ({ createMultipleChoiceAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
@@ -26,6 +27,7 @@ const { createVocabularyListAction } = await import('../actions/vocabulary');
 const { createGrammarRuleAction } = await import('../actions/grammar');
 const { createExerciseAction } = await import('../actions/exercise');
 const { createGapFillAction } = await import('../actions/gap-fill');
+const { createMultipleChoiceAction } = await import('../actions/multiple-choice');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -149,6 +151,22 @@ describe('AddLessonPicker', () => {
     fireEvent.click(screen.getByText('Gap-fill'));
 
     await waitFor(() => expect(createGapFillAction).toHaveBeenCalled());
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it('creates a multiple choice from its own scaffold, not from the generic form', async () => {
+    // The last of the thirteen templates to stop being created generically (plan 53 §8
+    // Q5). Without the scaffold, "Add exercise → Multiple choice" writes the old
+    // single-question shape, and the builder — which needs a set — never opens for it.
+    vi.mocked(createMultipleChoiceAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-13', itemId: 'item-13' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Multiple choice'));
+
+    await waitFor(() => expect(createMultipleChoiceAction).toHaveBeenCalled());
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 
