@@ -36,6 +36,11 @@
       "textareaLabel": "Din oversettelse",
       "placeholder": "Skriv på {lang}…",
       "sampleAnswer": "Eksempelsvar"
+    },
+    "unplayable": {
+      "title": "Dette spørsmålet kan ikke vises",
+      "body": "Det er skrevet i et format nivåtesten ennå ikke spiller. Vi stiller et annet i stedet — dette teller ikke mot deg.",
+      "skip": "Still et annet spørsmål"
     }
   },
   "result": {

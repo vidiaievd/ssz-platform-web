@@ -20,8 +20,19 @@ const EXERCISE_TYPES_SET = new Set<string>(EXERCISE_TYPES);
  * functions are the single place that knows those shapes.
  */
 
+/**
+ * The blank form.
+ *
+ * `templateCode` was `multiple_choice` from the first day of authoring, and that made this
+ * constant the platform's default exercise type — the reason that type was still being
+ * written in the generic single-question form long after the others had their own builder.
+ * Since plan 53 §8 Q5 it is not a way to create one: `multiple_choice` is created from its
+ * own scaffold, and the generic form only opens the 121 documents already written that
+ * way. The default names `multiple_choice_group` instead — the one template this form
+ * still both creates and edits.
+ */
 export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
-  templateCode: 'multiple_choice',
+  templateCode: 'multiple_choice_group',
   instructions: '',
   hint: '',
   difficultyLevel: undefined,
@@ -69,6 +80,10 @@ export function minimalExerciseValues(
   const base = { ...DEFAULT_EXERCISE_VALUES, templateCode, instructions };
 
   switch (templateCode) {
+    // Reachable only through this function's own type: the picker sends `multiple_choice`
+    // to `createMultipleChoiceAction` instead (plan 53 §8 Q5), so nothing creates the old
+    // single-question shape any more. Kept because the switch is exhaustive over
+    // `ExerciseType`, which still has to cover what the generic form can *edit*.
     case 'multiple_choice':
       return {
         ...base,
@@ -105,11 +120,6 @@ export function minimalExerciseValues(
         ],
       };
   }
-}
-
-/** A minimal, valid multiple-choice draft — used to seed starter exercises. */
-export function minimalMcqValues(question: string, instructions: string): ExerciseFormValues {
-  return minimalExerciseValues('multiple_choice', question, instructions);
 }
 
 /** Blank ids in reading order, e.g. "a ___1___ b ___3___" → [1, 3]. */

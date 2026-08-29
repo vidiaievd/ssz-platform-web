@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   buildExercisePayload,
   parseExerciseToForm,
-  minimalMcqValues,
   minimalExerciseValues,
 } from './exercise-content';
 import { EXERCISE_TYPES, exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -333,16 +332,6 @@ describe('parseExerciseToForm', () => {
     const parsed = parseExerciseToForm({ templateCode: 'multiple_choice', content: {} });
     expect(parsed.instructions).toBe('');
     expect(parsed.hint).toBe('');
-  });
-});
-
-describe('minimalMcqValues', () => {
-  it('produces a valid two-option MCQ with the given question', () => {
-    const values = minimalMcqValues('Practice', 'Choose the correct answer.');
-    const { content, expectedAnswers } = buildExercisePayload(values);
-    expect(content.question).toBe('Practice');
-    expect((content.options as unknown[]).length).toBe(2);
-    expect(expectedAnswers.correct_option_ids).toEqual(['opt-0']);
   });
 });
 

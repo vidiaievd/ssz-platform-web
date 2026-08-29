@@ -80,7 +80,6 @@ export function useCreateCourseFlow() {
             vocabulary: t('starter.vocabularyTitle'),
             reading: t('starter.readingTitle'),
             listening: t('starter.listeningTitle'),
-            practice: t('starter.practiceTitle'),
             practiceInstructions: t('starter.practiceInstructions'),
           },
         );

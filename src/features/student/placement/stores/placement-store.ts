@@ -39,6 +39,14 @@ interface PlacementActions {
   setError: () => void;
   /** Retry: error → loading (re-triggers an external fetch). */
   retryLoad: () => void;
+  /**
+   * Drop the current question without answering it and ask for another.
+   *
+   * Not an answer: the level does not move and the question count does not advance. The
+   * id is remembered anyway, because `askedQuestionIds` is what keeps the next fetch from
+   * handing back the very document that could not be played (plan 53, phase 6).
+   */
+  skipQuestion: () => void;
 
   /** Record an MCQ selection while in-progress. */
   selectOption: (id: string) => void;
@@ -122,6 +130,19 @@ export const usePlacementStore = create<PlacementStore>()((set, get) => ({
 
   retryLoad() {
     set({ flowState: 'loading' });
+  },
+
+  skipQuestion() {
+    const { currentQuestion, askedQuestionIds } = get();
+    set({
+      flowState: 'loading',
+      askedQuestionIds: currentQuestion
+        ? [...askedQuestionIds, currentQuestion.id]
+        : askedQuestionIds,
+      currentQuestion: null,
+      selectedOption: null,
+      translationText: '',
+    });
   },
 
   selectOption(id) {

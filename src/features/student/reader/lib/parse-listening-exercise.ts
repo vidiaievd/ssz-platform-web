@@ -1,4 +1,5 @@
 import type { ExerciseWithAnswers, LessonListeningStage } from '@/features/content/types';
+import { isMultipleChoiceDocument } from '@/lib/shared-kernel/multiple-choice';
 
 /**
  * content-service's `fill_in_blank`/`multiple_choice` template shapes are
@@ -15,6 +16,20 @@ import type { ExerciseWithAnswers, LessonListeningStage } from '@/features/conte
  * to replay.
  */
 export type StageSurface = 'audio' | 'text';
+
+/**
+ * A staged exercise these parsers were never taught to read.
+ *
+ * `multiple_choice` covers two live document shapes since plan 53: the single question
+ * these stages are built around, and a set answered one question at a time against an
+ * attempt. A stage pointing at a set parses to `null`, and a `null` used to mean one thing
+ * only — the stage quietly vanished from the lesson, taking its question with it and
+ * leaving no trace that anything was there. The pages ask this instead, so they can say
+ * what happened rather than showing a shorter lesson.
+ */
+export function isUnsupportedStageDocument(display: ExerciseWithAnswers): boolean {
+  return display.templateCode === 'multiple_choice' && isMultipleChoiceDocument(display.content);
+}
 
 export interface ListeningGapFillItem {
   exerciseId: string;

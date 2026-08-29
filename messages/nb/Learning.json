@@ -523,6 +523,10 @@
       "taskCount": "{n} oppgaver i dette settet",
       "setProgress": "Sjekket {done} av {total}",
       "taskDone": "Fullført"
+    },
+    "unsupportedStages": {
+      "title": "{count, plural, one {Ett spørsmål vises ikke her} other {# spørsmål vises ikke her}}",
+      "body": "De er skrevet i et format denne leksjonen ennå ikke spiller. Resten av leksjonen fungerer som vanlig."
     }
   }
 }

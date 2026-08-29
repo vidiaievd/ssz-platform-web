@@ -20,7 +20,9 @@ import { ListeningListenStage } from './listening-listen-stage';
 import { ListeningGapFillStage } from './listening-gapfill-stage';
 import { ListeningCompStage } from './listening-comp-stage';
 import { ListeningDoneStage } from './listening-done-stage';
+import { UnsupportedStagesNotice } from './unsupported-stages-notice';
 import {
+  isUnsupportedStageDocument,
   parseComprehensionExercise,
   parseGapFillExercise,
   type ListeningComprehensionItem,
@@ -86,6 +88,12 @@ export function ListeningLessonPage({
         .filter((item): item is ListeningComprehensionItem => item !== null),
     [compStages, compExercises],
   );
+
+  // Stages whose exercise this reader cannot draw — counted rather than dropped in silence.
+  const unsupportedStageCount = useMemo(() => {
+    const displays = [...gapFillExercises, ...compExercises].map((q) => q.data);
+    return displays.filter((d) => d !== undefined && isUnsupportedStageDocument(d)).length;
+  }, [gapFillExercises, compExercises]);
 
   const narration = useMemo(() => findAudioNarration(variant.data?.bodyMarkdown ?? ''), [variant.data?.bodyMarkdown]);
   const audioAsset = useMediaAsset(narration?.mediaId);
@@ -154,6 +162,8 @@ export function ListeningLessonPage({
           {audioLabel}
         </h1>
       </div>
+
+      <UnsupportedStagesNotice count={unsupportedStageCount} />
 
       <ListeningStageTracker stage={stage} />
 

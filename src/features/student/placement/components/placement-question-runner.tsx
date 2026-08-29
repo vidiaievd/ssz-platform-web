@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, HelpCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import type { ExerciseDisplay } from '@/features/content/types';
@@ -81,6 +81,56 @@ function parseFreeText(display: ExerciseDisplay): ParsedFreeText | null {
   };
 }
 
+/* ── refusal ───────────────────────────────────────────────────────────────── */
+
+/**
+ * A question the placement cannot play.
+ *
+ * The sample route filters these out (plan 53, phase 6), so reaching here means the
+ * catalogue holds a shape this runner was never taught — a reseeded `multiple_choice`
+ * set, most likely, arriving from a server or a seed newer than this screen. The parse
+ * used to return `null` and the student was left looking at a progress bar with nothing
+ * under it. Say so instead, and offer the way out: another question, not a wrong answer.
+ */
+function PlacementUnplayableQuestion({ onSkip }: { onSkip: () => void }) {
+  const t = useTranslations('Placement.runner.unplayable');
+
+  return (
+    <div
+      role="alert"
+      className="flex flex-col items-start gap-[14px] rounded-2xl p-[22px]"
+      style={{
+        background: 'var(--ssz-bg-surface)',
+        border: '1.5px solid var(--ssz-border-default)',
+      }}
+    >
+      <div className="flex items-center gap-[9px]">
+        <HelpCircle size={19} aria-hidden="true" style={{ color: 'var(--ssz-text-muted)' }} />
+        <h2
+          className="font-bold"
+          style={{ fontSize: 17, color: 'var(--ssz-text-primary)' }}
+        >
+          {t('title')}
+        </h2>
+      </div>
+
+      <p className="text-[14.5px] leading-[1.65]" style={{ color: 'var(--ssz-text-secondary)' }}>
+        {t('body')}
+      </p>
+
+      <button
+        type="button"
+        onClick={onSkip}
+        className="inline-flex items-center gap-[6px] rounded-xl px-5 py-[10px] text-[14.5px] font-bold text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ssz-border-focus)]"
+        style={{ background: PRIMARY, boxShadow: 'var(--ssz-shadow-sm)' }}
+      >
+        {t('skip')}
+        <ArrowRight size={15} aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+
 /* ── MCQ body wrapper for placement ────────────────────────────────────────── */
 
 interface PlacementMcqProps {
@@ -89,6 +139,7 @@ interface PlacementMcqProps {
   onSelect: (id: string) => void;
   onGrade: (correct: boolean) => void;
   onDontKnow: () => void;
+  onSkipQuestion: () => void;
   isLast: boolean;
 }
 
@@ -98,13 +149,14 @@ function PlacementMcqQuestion({
   onSelect,
   onGrade,
   onDontKnow,
+  onSkipQuestion,
   isLast,
 }: PlacementMcqProps) {
   const t = useTranslations('Placement');
   const mcq = parseMcq(display);
   const noop = useCallback(() => {}, []);
 
-  if (!mcq) return null;
+  if (!mcq) return <PlacementUnplayableQuestion onSkip={onSkipQuestion} />;
 
   const canSubmit = selectedOption !== null;
 
@@ -172,6 +224,7 @@ interface PlacementFreeTextProps {
   onValueChange: (v: string) => void;
   onGrade: (correct: boolean) => void;
   onDontKnow: () => void;
+  onSkipQuestion: () => void;
   isLast: boolean;
 }
 
@@ -181,13 +234,14 @@ function PlacementFreeTextQuestion({
   onValueChange,
   onGrade,
   onDontKnow,
+  onSkipQuestion,
   isLast,
 }: PlacementFreeTextProps) {
   const t = useTranslations('Placement');
   const parsed = parseFreeText(display);
   const noop = useCallback(() => {}, []);
 
-  if (!parsed) return null;
+  if (!parsed) return <PlacementUnplayableQuestion onSkip={onSkipQuestion} />;
 
   const canSubmit = value.trim() !== '';
 
@@ -312,6 +366,7 @@ export function PlacementQuestionRunner({ onSkipForNow }: PlacementQuestionRunne
   const selectOption    = usePlacementStore((s) => s.selectOption);
   const setTranslation  = usePlacementStore((s) => s.setTranslationText);
   const submitAnswer    = usePlacementStore((s) => s.submitAnswer);
+  const skipQuestion    = usePlacementStore((s) => s.skipQuestion);
   const skipTest        = usePlacementStore((s) => s.skipTest);
 
   if (!currentQuestion) return null;
@@ -359,6 +414,7 @@ export function PlacementQuestionRunner({ onSkipForNow }: PlacementQuestionRunne
             onSelect={selectOption}
             onGrade={handleGrade}
             onDontKnow={handleDontKnow}
+            onSkipQuestion={skipQuestion}
             isLast={isLast}
           />
         ) : (
@@ -368,6 +424,7 @@ export function PlacementQuestionRunner({ onSkipForNow }: PlacementQuestionRunne
             onValueChange={setTranslation}
             onGrade={handleGrade}
             onDontKnow={handleDontKnow}
+            onSkipQuestion={skipQuestion}
             isLast={isLast}
           />
         )}
