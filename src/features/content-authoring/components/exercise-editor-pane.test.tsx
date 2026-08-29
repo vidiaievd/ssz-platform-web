@@ -19,6 +19,7 @@ vi.mock('../actions/writing-task', () => ({ saveWritingTaskAction: vi.fn() }));
 vi.mock('../actions/short-answer', () => ({ saveShortAnswerAction: vi.fn() }));
 vi.mock('../actions/sentence-schema', () => ({ saveSentenceSchemaAction: vi.fn() }));
 vi.mock('../actions/multiple-choice', () => ({ saveMultipleChoiceAction: vi.fn() }));
+vi.mock('../actions/multiple-choice-group', () => ({ saveMultipleChoiceGroupAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -336,9 +337,7 @@ describe('ExerciseEditorPane', () => {
             },
           },
         },
-        instructions: [
-          { instructionLanguage: 'en', instructionText: 'Velg det riktige svaret.' },
-        ],
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Velg det riktige svaret.' }],
         updatedAt: '2026-08-28T10:00:00.000Z',
       },
       isLoading: false,
@@ -354,6 +353,65 @@ describe('ExerciseEditorPane', () => {
     expect(preview.getByText('Han sa at han ___ syk.')).toBeInTheDocument();
     expect(preview.queryByText(/Presens blir preteritum/)).not.toBeInTheDocument();
     expect(preview.queryByText(/Presens holder ikke her/)).not.toBeInTheDocument();
+  });
+
+  it('opens the statement-table builder on a table, key held back', () => {
+    // Dispatch on the template code *and* the shape of the document — plan 54 §1.2. The
+    // two documents of the old form keep `items`; `rows` is what says this one is a table.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-mcg',
+        templateCode: 'multiple_choice_group',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: {
+          title: 'Riktig eller galt',
+          instruction: 'Les teksten.',
+          source: { mode: 'inline', label: 'Tekst 1A', text: 'Bartek søker ny jobb.' },
+          columns: [
+            { id: 'c1', label: 'Riktig', short: 'R' },
+            { id: 'c2', label: 'Galt', short: 'G' },
+          ],
+          rows: [
+            { id: 'r1', text: 'Bartek leter etter arbeid.' },
+            { id: 'r2', text: 'Bartek har sluttet å søke.' },
+          ],
+          settings: {
+            numbering: true,
+            shuffleRows: false,
+            layout: 'auto',
+            showText: true,
+            retry: 'one',
+            lockCorrect: true,
+            showWhy: 'wrong',
+            revealKey: true,
+            passThreshold: 70,
+            progress: true,
+          },
+        },
+        expectedAnswers: {
+          rows: {
+            r1: { answer: 'c1', why: 'Teksten sier at han søker.', quote: 'søker ny jobb' },
+            r2: { answer: 'c2', why: 'Det motsatte står i teksten.', quote: '' },
+          },
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Les teksten.' }],
+        updatedAt: '2026-08-29T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Statements/ })).toBeInTheDocument();
+
+    // Which column each statement belongs in, the author's line and the quote that proves
+    // it are the answer: the projection keeps all three off the student's screen.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('Bartek leter etter arbeid.')).toBeInTheDocument();
+    expect(preview.queryByText(/Teksten sier at han søker/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Det motsatte står i teksten/)).not.toBeInTheDocument();
   });
 
   it('leaves a multiple-choice document of the old form to the generic form', () => {

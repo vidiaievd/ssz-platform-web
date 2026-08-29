@@ -62,6 +62,13 @@ import {
   toExpectedAnswers as multipleChoiceToExpectedAnswers,
 } from '@/lib/shared-kernel/multiple-choice';
 import {
+  fromPersisted as multipleChoiceGroupFromPersisted,
+  isMultipleChoiceGroupDocument,
+  TEMPLATE_CODE as MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE,
+  toContent as multipleChoiceGroupToContent,
+  toExpectedAnswers as multipleChoiceGroupToExpectedAnswers,
+} from '@/lib/shared-kernel/multiple-choice-group';
+import {
   fromPersisted as sentenceSchemaFromPersisted,
   TEMPLATE_CODE as SENTENCE_SCHEMA_TEMPLATE_CODE,
   toContent as sentenceSchemaToContent,
@@ -94,6 +101,10 @@ import { MultipleChoiceBuilder } from './multiple-choice/builder';
 import { MultipleChoicePreview } from './multiple-choice/multiple-choice-preview';
 import type { MultipleChoiceDocument } from './multiple-choice/edits';
 import type { SavedDocument as SavedMultipleChoice } from './multiple-choice/use-multiple-choice-autosave';
+import { MultipleChoiceGroupBuilder } from './multiple-choice-group/builder';
+import { MultipleChoiceGroupPreview } from './multiple-choice-group/multiple-choice-group-preview';
+import type { MultipleChoiceGroupDocument } from './multiple-choice-group/edits';
+import type { SavedDocument as SavedMultipleChoiceGroup } from './multiple-choice-group/use-multiple-choice-group-autosave';
 import { SentenceSchemaBuilder } from './sentence-schema/builder';
 import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
 import type { SentenceSchemaDocument } from './sentence-schema/edits';
@@ -163,6 +174,10 @@ export function ExerciseEditorPane({
   /** The multiple-choice document as its builder currently has it, for the preview column. */
   const [multipleChoice, setMultipleChoice] = useState<MultipleChoiceDocument | null>(null);
 
+  /** The statement table as its builder currently has it, for the preview column. */
+  const [multipleChoiceGroup, setMultipleChoiceGroup] =
+    useState<MultipleChoiceGroupDocument | null>(null);
+
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
   const isTranslate = isTranslateCode(exercise?.templateCode);
@@ -203,6 +218,16 @@ export function ExerciseEditorPane({
   const isMultipleChoice =
     exercise?.templateCode === MULTIPLE_CHOICE_TEMPLATE_CODE &&
     isMultipleChoiceDocument(exercise.content);
+  /*
+    By the shape of the document as well as the template code — plan 54 §1.2. Two seeded
+    exercises were written in the old `items[]` form, where a question could carry its own
+    options; the handoff's model has only columns shared by every row, so there is no
+    migration and those two keep opening in the generic form until phase 7 retires it.
+    Everything created since this phase is a table of `rows` and belongs to the builder.
+  */
+  const isMultipleChoiceGroup =
+    exercise?.templateCode === MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE &&
+    isMultipleChoiceGroupDocument(exercise.content);
 
   return (
     <LessonEditorShell
@@ -250,6 +275,8 @@ export function ExerciseEditorPane({
           <SentenceSchemaPreview exercise={sentenceSchema} />
         ) : isMultipleChoice && multipleChoice !== null ? (
           <MultipleChoicePreview exercise={multipleChoice} />
+        ) : isMultipleChoiceGroup && multipleChoiceGroup !== null ? (
+          <MultipleChoiceGroupPreview exercise={multipleChoiceGroup} />
         ) : (
           <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
         )
@@ -416,6 +443,28 @@ export function ExerciseEditorPane({
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
               (cached) => (cached ? applySavedMultipleChoice(cached, updatedAt, saved) : cached),
+            )
+          }
+        />
+      ) : isMultipleChoiceGroup && exercise != null ? (
+        // A statement table owns a document because its key is not a field of any row:
+        // which column a statement belongs in is one id in the key column, shared with
+        // nine other statements over one set of columns, and the line that settles it is
+        // a quote from the passage beside it. The generic form had a context, a flat
+        // option list and a set of questions free to carry their own options — the shape
+        // this template left behind in plan 54, and the shape two documents are still in.
+        <MultipleChoiceGroupBuilder
+          key={exerciseId}
+          exerciseId={exerciseId}
+          containerId={container.id}
+          targetLanguage={container.targetLanguage}
+          initialExercise={multipleChoiceGroupDocumentFrom(exercise)}
+          onDocumentChange={setMultipleChoiceGroup}
+          onSavedRemote={(updatedAt, saved) =>
+            queryClient.setQueryData<ExerciseWithAnswers | null>(
+              authoringKeys.exercise(exerciseId),
+              (cached) =>
+                cached ? applySavedMultipleChoiceGroup(cached, updatedAt, saved) : cached,
             )
           }
         />
@@ -718,6 +767,48 @@ function applySavedMultipleChoice(
     updatedAt,
     content: { ...multipleChoiceToContent(saved.exercise) },
     expectedAnswers: { ...multipleChoiceToExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        { ...instruction, instructionText: saved.exercise.instruction.trim() },
+        ...rest,
+      ],
+    }),
+  };
+}
+
+/**
+ * The stored columns as the kernel's statement table, plus the row's token.
+ *
+ * The two columns are joined here and nowhere else: `content` holds the statements as text
+ * with the columns they are answered over, `expectedAnswers` which column each belongs in,
+ * the author's line and the quote that proves it. `fromPersisted` is what puts them back
+ * together, and it is deliberately total — a document written before a field existed comes
+ * back with that field empty rather than throwing, and `issues` reports what is missing.
+ */
+function multipleChoiceGroupDocumentFrom(
+  exercise: ExerciseWithAnswers,
+): MultipleChoiceGroupDocument {
+  return {
+    ...multipleChoiceGroupFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+  };
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ */
+function applySavedMultipleChoiceGroup(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedMultipleChoiceGroup,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...multipleChoiceGroupToContent(saved.exercise) },
+    expectedAnswers: { ...multipleChoiceGroupToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
         { ...instruction, instructionText: saved.exercise.instruction.trim() },

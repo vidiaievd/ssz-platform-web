@@ -26,6 +26,7 @@ import { TEMPLATE_CODE as WRITING_TASK_TEMPLATE_CODE } from '@/lib/shared-kernel
 import { TEMPLATE_CODE as SHORT_ANSWER_TEMPLATE_CODE } from '@/lib/shared-kernel/short-answer';
 import { TEMPLATE_CODE as SENTENCE_SCHEMA_TEMPLATE_CODE } from '@/lib/shared-kernel/sentence-schema';
 import { TEMPLATE_CODE as MULTIPLE_CHOICE_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice';
+import { TEMPLATE_CODE as MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice-group';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -38,6 +39,7 @@ import { createWritingTaskAction } from '../actions/writing-task';
 import { createShortAnswerAction } from '../actions/short-answer';
 import { createSentenceSchemaAction } from '../actions/sentence-schema';
 import { createMultipleChoiceAction } from '../actions/multiple-choice';
+import { createMultipleChoiceGroupAction } from '../actions/multiple-choice-group';
 import {
   createTranslateFromTargetAction,
   createTranslateToTargetAction,
@@ -81,6 +83,7 @@ type OwnBuilderTemplate =
   | typeof SHORT_ANSWER_TEMPLATE_CODE
   | typeof SENTENCE_SCHEMA_TEMPLATE_CODE
   | typeof MULTIPLE_CHOICE_TEMPLATE_CODE
+  | typeof MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
@@ -109,6 +112,13 @@ const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillActi
   // builder (plan 53 §8 Q5). Without a scaffold the builder opens on a document that has
   // no questions array at all, and the template's schema refuses it.
   [MULTIPLE_CHOICE_TEMPLATE_CODE]: createMultipleChoiceAction,
+  // The ninth, and the first whose generic form is not left behind by a rewrite so much
+  // as by a redesign: the old shape let every question carry its own options, which the
+  // handoff's model has no room for at all (plan 54 §8 Q1). Two seeded documents are
+  // still readable in the old form; nothing new is written that way, because without a
+  // scaffold the builder would open on a document with no `rows` and the template's
+  // schema would refuse it.
+  [MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE]: createMultipleChoiceGroupAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,
