@@ -28,11 +28,18 @@ const EXERCISE_TYPES_SET = new Set<string>(EXERCISE_TYPES);
  * written in the generic single-question form long after the others had their own builder.
  * Since plan 53 §8 Q5 it is not a way to create one: `multiple_choice` is created from its
  * own scaffold, and the generic form only opens the 121 documents already written that
- * way. The default names `multiple_choice_group` instead — the one template this form
- * still both creates and edits.
+ * way. `multiple_choice_group` took its place and then left the same way, in plan 54 §7:
+ * it too is created from a scaffold now, and its old shape — a question free to carry its
+ * own options — is one the handoff's model has no room for at all.
+ *
+ * So the default names `text_order`, which is what is actually left: of the eleven types
+ * an author may create, ten open their own builder from their own scaffold, and this is
+ * the one the generic form still both creates and edits. It is also the last of the
+ * thirteen templates with a design spec and no plan (audit 34 §9) — when that is written,
+ * this constant will have nothing true left to name.
  */
 export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
-  templateCode: 'multiple_choice_group',
+  templateCode: 'text_order',
   instructions: '',
   hint: '',
   difficultyLevel: undefined,

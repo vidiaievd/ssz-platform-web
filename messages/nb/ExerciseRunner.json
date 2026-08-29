@@ -56,6 +56,7 @@
   "multipleChoiceGroup": {
     "statement": "Påstand",
     "result": "Resultat",
+    "toText": "Til teksten",
     "answered": "{n}/{total} svart",
     "check": "Sjekk svarene",
     "checking": "Sjekker…",

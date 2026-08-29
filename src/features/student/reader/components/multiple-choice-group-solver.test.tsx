@@ -143,6 +143,7 @@ function mockApi(options: ApiOptions = {}) {
 function renderSolver(
   fetchMock: ReturnType<typeof mockApi>,
   onChecked?: (ok: boolean | null) => void,
+  sourceHref?: string,
 ) {
   vi.stubGlobal('fetch', fetchMock);
   // JSDOM measures every element at 0, which is the cards branch. The table is the
@@ -167,6 +168,7 @@ function renderSolver(
           exerciseId="ex-1"
           language="no"
           {...(onChecked === undefined ? {} : { onChecked })}
+          {...(sourceHref === undefined ? {} : { sourceHref })}
         />
       </NextIntlClientProvider>
     </QueryClientProvider>,
@@ -194,6 +196,19 @@ describe('MultipleChoiceGroupSolver', () => {
 
     expect(await screen.findByRole('rowheader', { name: /Bartek er fornøyd/ })).toBeInTheDocument();
     expect(screen.getByText('Bartek søker ny jobb.')).toBeInTheDocument();
+  });
+
+  it('hands the way back to the lesson down to the table', async () => {
+    // The document holds no lesson id — the builder never writes one (plan 54 Q5) — so
+    // the link exists only because the page around the solver resolved it.
+    renderSolver(
+      mockApi({ content: { ...PROJECTION, source: { mode: 'link', label: 'Tekst 1A' } } }),
+      undefined,
+      '/en/student/courses/c1/u1/t1',
+    );
+
+    const link = await screen.findByRole('link', { name: 'Go to the text: Tekst 1A' });
+    expect(link).toHaveAttribute('href', '/en/student/courses/c1/u1/t1');
   });
 
   it('refuses a table that arrived with its answer key on it', async () => {

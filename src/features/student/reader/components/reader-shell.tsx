@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import {
   ErrorState,
@@ -29,7 +29,9 @@ import { LiveLessonPage } from './live-lesson-page';
 import { ExercisePage } from './exercise-page';
 import { PracticePage } from './practice-page';
 import {
+  buildItemHref,
   findNextUnit,
+  findSourceLessonItemId,
   flattenSections,
   mapCourseLevelsToSidebarLevels,
   mapCourseUnitsToSidebarUnits,
@@ -59,6 +61,7 @@ export function ReaderShell({
   onNextItem,
 }: ReaderShellProps) {
   const t = useTranslations('Learning.reader.sidebar');
+  const locale = useLocale();
   const [collapsed, setCollapsed] = useState(false);
   // Destructured, not held as one object: passing `rail.setContainer` to a
   // `ref` makes the compiler treat the whole object as a ref, and reading
@@ -155,6 +158,20 @@ export function ReaderShell({
       : 'text';
   const activeTitle = practiceSection?.title ?? activeContentItem?.title ?? activeItem?.title ?? '';
 
+  /**
+   * The unit's own text, for the runners that offer a way back to it — today only
+   * `multiple_choice_group`'s «Til teksten» (plan 54 Q5). The exercise itself carries no
+   * lesson id; the reader is the layer that knows where an exercise stands.
+   *
+   * Prefixed here because the runner draws a plain anchor rather than the locale-aware
+   * `Link` — see the note on `sourceHref` in the table body.
+   */
+  const sourceLessonItemId = findSourceLessonItemId(contents);
+  const sourceHref =
+    sourceLessonItemId === null
+      ? undefined
+      : `/${locale}${buildItemHref(courseId, contents.moduleId, sourceLessonItemId)}`;
+
   const activeUnit = units.find((u) => u.id === unitId);
   const moduleVocabularyListId = allContentItems.find((i) => i.contentType === 'VOCABULARY_LIST')?.contentId;
 
@@ -193,6 +210,7 @@ export function ReaderShell({
         title={practiceSection.title}
         items={practiceSection.items}
         onExerciseChecked={handleExerciseChecked}
+        {...(sourceHref === undefined ? {} : { sourceHref })}
       />
     );
   } else if (activeKind === 'vocab' && activeContentItem) {
@@ -258,7 +276,13 @@ export function ReaderShell({
     );
   } else if (activeKind === 'exercise' && activeContentItem) {
     // key: remount per item so the solver's per-exercise state resets.
-    content = <ExercisePage key={activeContentItem.contentId} exerciseId={activeContentItem.contentId} />;
+    content = (
+      <ExercisePage
+        key={activeContentItem.contentId}
+        exerciseId={activeContentItem.contentId}
+        {...(sourceHref === undefined ? {} : { sourceHref })}
+      />
+    );
   }
   // Only prose is reader-adjustable: the other kinds are laid out around media
   // and cards, where width is a design decision rather than a reading-comfort one.

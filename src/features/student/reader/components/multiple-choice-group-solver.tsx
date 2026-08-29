@@ -32,6 +32,14 @@ export interface MultipleChoiceGroupSolverProps {
   onChecked?: (ok: boolean | null) => void;
   /** True when the table is one card in a stack of tasks rather than the whole screen. */
   stacked?: boolean;
+  /**
+   * Where «Til teksten» goes in `link` mode: the lesson this exercise sits under.
+   *
+   * The solver knows an exercise id and nothing else, and the document holds no lesson id
+   * — the builder never writes one (plan 54 Q5). The page around the runner is the only
+   * place that knows both, so it is the page that resolves the href.
+   */
+  sourceHref?: string;
 }
 
 /**
@@ -62,6 +70,7 @@ export function MultipleChoiceGroupSolver({
   language,
   onChecked,
   stacked = false,
+  sourceHref,
 }: MultipleChoiceGroupSolverProps) {
   const t = useTranslations('ExerciseRunner');
 
@@ -260,6 +269,7 @@ export function MultipleChoiceGroupSolver({
         onFinish={() => setPhase('done')}
         onRestart={restart}
         showProgressBar={!stacked}
+        {...(sourceHref === undefined ? {} : { sourceHref })}
         accent={PRACTICE_ACCENT}
       />
     </div>

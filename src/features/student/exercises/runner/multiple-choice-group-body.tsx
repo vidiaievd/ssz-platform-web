@@ -114,6 +114,15 @@ export interface MultipleChoiceGroupBodyProps {
    * counter stays either way, and both are ignored when the author turned progress off.
    */
   showProgressBar?: boolean;
+  /**
+   * Where «Til teksten» goes in `link` mode — the parent lesson of this exercise.
+   *
+   * It comes from the page and not from the document: the author never writes a lesson
+   * id (plan 54 Q5), and this component is handed a table, not a position in a course.
+   * Absent — in the builder preview, or wherever the exercise stands outside a unit —
+   * the link is not drawn, because a link with nowhere to go is a decoration.
+   */
+  sourceHref?: string;
   onCheck: () => void;
   /** «Prøv de feile igjen» — another check of the same table, on the next attempt. */
   onRetry: () => void;
@@ -157,6 +166,7 @@ export function MultipleChoiceGroupBody({
   error = null,
   interactive = true,
   showProgressBar = true,
+  sourceHref,
   onCheck,
   onRetry,
   onReveal,
@@ -236,11 +246,23 @@ export function MultipleChoiceGroupBody({
   }
 
   const asTable = width >= TABLE_AT && s.layout !== 'cards';
-  // `link` draws nothing at all, label included: the spec's «Til teksten» is a place to
-  // go, and where it goes is still Q5 — a heading naming a lesson with no way to reach it
-  // is worse than no heading. Phase 3 wrote every seeded table as `inline` for that reason.
   const passage =
     s.showText && projection.source.mode === 'inline' ? projection.source.text : undefined;
+  /**
+   * «Til teksten» — the way back to the lesson the statements are about (README §Setup).
+   *
+   * Drawn only when the page around this table said where that is. A `link` table whose
+   * exercise stands outside a unit still says nothing at all, label included: a heading
+   * naming a lesson with no way to reach it is worse than no heading (plan 54 Q5).
+   *
+   * A plain anchor, not the locale-aware `Link`: this file is re-exported by the runner
+   * barrel that every solver imports, and pulling `next/navigation` in through it puts a
+   * router in the way of eleven test suites that have no links in them. The href arrives
+   * ready to use — the reader prefixes the locale, as it does for its own routes.
+   */
+  const backToText =
+    projection.source.mode === 'link' && (sourceHref ?? '') !== '' ? sourceHref : undefined;
+  const sourceLabel = projection.source.label.trim();
   const split = width >= SPLIT_AT && passage !== undefined;
 
   /**
@@ -355,6 +377,21 @@ export function MultipleChoiceGroupBody({
       )}
 
       {projection.instruction.trim() !== '' && <Instr>{projection.instruction}</Instr>}
+
+      {backToText !== undefined && (
+        <a
+          href={backToText}
+          aria-label={
+            sourceLabel === '' ? undefined : `${t('multipleChoiceGroup.toText')}: ${sourceLabel}`
+          }
+          className="mb-3.5 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12.5px] font-semibold no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+          style={{ borderColor: 'var(--ssz-border-default)', color: 'var(--ssz-text-secondary)' }}
+        >
+          <BookOpen size={13} aria-hidden="true" />
+          {sourceLabel === '' ? t('multipleChoiceGroup.toText') : sourceLabel}
+          <ArrowRight size={13} aria-hidden="true" />
+        </a>
+      )}
 
       <div
         className={split ? 'grid gap-5' : 'flex flex-col gap-4'}

@@ -85,6 +85,7 @@ interface HarnessProps {
   verdict?: MultipleChoiceGroupSubmitDetails | null;
   locked?: string[];
   interactive?: boolean;
+  sourceHref?: string;
   onPick?: (rowId: string, columnId: string) => void;
   onCheck?: () => void;
   onRetry?: () => void;
@@ -100,6 +101,7 @@ function Harness({
   verdict = null,
   locked = [],
   interactive = true,
+  sourceHref,
   onPick = () => {},
   onCheck = () => {},
   onRetry = () => {},
@@ -117,6 +119,7 @@ function Harness({
         verdict={verdict}
         locked={locked}
         interactive={interactive}
+        {...(sourceHref === undefined ? {} : { sourceHref })}
         onCheck={onCheck}
         onRetry={onRetry}
         onReveal={onReveal}
@@ -214,6 +217,36 @@ describe('MultipleChoiceGroupBody — answering', () => {
 
     rerender(<Harness table={makeTable({ source: { mode: 'inline', label: 'Tekst 1A' } })} />);
     expect(screen.queryByText('Bartek søker ny jobb.')).not.toBeInTheDocument();
+  });
+
+  it('offers the way back to the lesson when the page said where it is', () => {
+    renderWide(
+      <Harness
+        table={makeTable({ source: { mode: 'link', label: 'Tekst 1A' } })}
+        sourceHref="/en/student/courses/c1/u1/i1"
+      />,
+    );
+
+    const link = screen.getByRole('link', { name: 'Go to the text: Tekst 1A' });
+    expect(link).toHaveAttribute('href', '/en/student/courses/c1/u1/i1');
+  });
+
+  it('falls back to the generic wording when the author left the link unlabelled', () => {
+    renderWide(
+      <Harness
+        table={makeTable({ source: { mode: 'link', label: '' } })}
+        sourceHref="/en/student/courses/c1/u1/i1"
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: 'Go to the text' })).toBeInTheDocument();
+  });
+
+  it('says nothing at all about a link it has nowhere to point', () => {
+    renderWide(<Harness table={makeTable({ source: { mode: 'link', label: 'Tekst 1A' } })} />);
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByText('Tekst 1A')).not.toBeInTheDocument();
   });
 
   it('has an empty state when the table has no deliverable statements', () => {

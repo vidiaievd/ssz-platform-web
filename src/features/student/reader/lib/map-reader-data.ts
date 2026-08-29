@@ -155,6 +155,21 @@ export function mapCourseUnitsToSidebarUnits(
 }
 
 /**
+ * The lesson the exercises of this unit were set on — where «Til teksten» goes back to.
+ *
+ * A sub-lesson is built around one passage and the exercises under it ask about that
+ * passage, so the parent is the unit's own text lesson rather than something the author
+ * points at: no builder writes a lesson id, and plan 54 Q5 decided none should have to.
+ * Null when the unit holds no text — a listening unit, a unit that is only practice —
+ * and the runner then draws no link at all.
+ */
+export function findSourceLessonItemId(contents: UnitContentsResult): string | null {
+  const items = [...contents.sections.flatMap((s) => s.items), ...contents.ungroupedItems];
+  const lesson = items.find((i) => mapContentItemKind(i.contentType, i.lessonKind) === 'text');
+  return lesson?.id ?? null;
+}
+
+/**
  * Route id the reader should open for a raw content item: exercises inside a
  * collapsed section are reached through their practice page, never directly.
  */

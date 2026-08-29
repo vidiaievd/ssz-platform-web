@@ -680,6 +680,14 @@ const SERVER_SOLVERS: Record<
     onChecked?: (ok: Ok) => void;
     /** True when this runner is one card in a stack of tasks; see `ExerciseSolverProps`. */
     stacked?: boolean;
+    /**
+     * Where the exercise's own material can be read — the lesson it sits under.
+     *
+     * On the shared signature although one runner reads it (`multiple_choice_group`'s
+     * «Til teksten»): the alternative is a cast at the one call site, and a runner that
+     * has no use for a lesson link simply does not destructure it.
+     */
+    sourceHref?: string;
   }) => React.ReactElement
 > = {
   word_bank_gap_fill: GapFillSolver,
@@ -783,6 +791,11 @@ function foldedLine(data: ExerciseWithAnswers): string {
 
 export interface ExerciseSolverProps {
   exerciseId: string;
+  /**
+   * The lesson this exercise sits under, for the runners that offer a way back to it.
+   * Resolved by the reader, which is the only layer that knows where an exercise stands.
+   */
+  sourceHref?: string;
   /** 1-based position, shown when the exercise is one task of a practice set. */
   index?: number;
   /** Fired once, when the learner checks this exercise. */
@@ -800,7 +813,13 @@ export interface ExerciseSolverProps {
  * One exercise: load → dispatch by template → grade client-side → feedback.
  * Used on its own (`ExercisePage`) and stacked by the practice page.
  */
-export function ExerciseSolver({ exerciseId, index, onChecked, stacked }: ExerciseSolverProps) {
+export function ExerciseSolver({
+  exerciseId,
+  index,
+  onChecked,
+  stacked,
+  sourceHref,
+}: ExerciseSolverProps) {
   const t = useTranslations('ExerciseRunner');
   const { data, isLoading, isError, refetch } = useExerciseForRunner(exerciseId);
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
@@ -870,6 +889,7 @@ export function ExerciseSolver({ exerciseId, index, onChecked, stacked }: Exerci
             {...(instr(data) === undefined ? {} : { instruction: instr(data) })}
             {...(onChecked === undefined ? {} : { onChecked })}
             {...(stacked === true ? { stacked: true } : {})}
+            {...(sourceHref === undefined ? {} : { sourceHref })}
           />
         )}
       </div>
@@ -934,8 +954,12 @@ export function ExerciseSolver({ exerciseId, index, onChecked, stacked }: Exerci
 
 export interface ExercisePageProps {
   exerciseId: string;
+  /** Passed through to the runner; see `ExerciseSolverProps`. */
+  sourceHref?: string;
 }
 
-export function ExercisePage({ exerciseId }: ExercisePageProps) {
-  return <ExerciseSolver exerciseId={exerciseId} />;
+export function ExercisePage({ exerciseId, sourceHref }: ExercisePageProps) {
+  return (
+    <ExerciseSolver exerciseId={exerciseId} {...(sourceHref === undefined ? {} : { sourceHref })} />
+  );
 }
