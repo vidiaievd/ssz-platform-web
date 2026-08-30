@@ -273,6 +273,7 @@
       "export": "Eksporter CSV",
       "more": "Vis mer",
       "failed": "Loggen kunne ikke leses.",
+      "unnamedReviewer": "Lærer",
       "unnamedStudent": "Elev",
       "unnamedExercise": "Oppgave",
       "took": "besvart på {age}",

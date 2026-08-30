@@ -273,6 +273,7 @@
       "export": "Export CSV",
       "more": "Show more",
       "failed": "The journal could not be read.",
+      "unnamedReviewer": "Reviewer",
       "unnamedStudent": "Learner",
       "unnamedExercise": "Exercise",
       "took": "answered in {age}",

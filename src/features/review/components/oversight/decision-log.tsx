@@ -77,7 +77,9 @@ export function DecisionLog({ school, period }: DecisionLogProps) {
                   minute: '2-digit',
                 })}
               </span>
-              <span className="truncate font-semibold">{item.reviewerName ?? item.reviewerId}</span>
+              <span className="truncate font-semibold">
+                {item.reviewerName ?? t('unnamedReviewer')}
+              </span>
               <span className="truncate text-(--ssz-text-secondary)">
                 {item.studentName ?? t('unnamedStudent')}
               </span>

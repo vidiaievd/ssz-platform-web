@@ -273,6 +273,7 @@
       "export": "Експорт CSV",
       "more": "Показати ще",
       "failed": "Не вдалося прочитати журнал.",
+      "unnamedReviewer": "Викладач",
       "unnamedStudent": "Учень",
       "unnamedExercise": "Вправа",
       "took": "відповідь за {age}",

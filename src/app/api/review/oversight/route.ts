@@ -57,8 +57,14 @@ interface EngineQueueItem {
 /** How many named rows the "stuck" list carries. Beyond this it stops being a list. */
 const STUCK_LIMIT = 25;
 
-/** How much of the school's queue is read to find those rows, oldest group first. */
-const STUCK_SCAN = 200;
+/**
+ * How much of the school's queue is read to find those rows, oldest group first.
+ *
+ * Capped at the engine's own ceiling on `limit` (`ReviewQueueRequestDto`, `@Max(100)`):
+ * anything higher 400s there, and the caught error silently emptied this whole section —
+ * "Not moving" read as "nothing is late" instead of "the read failed" (found 30.08).
+ */
+const STUCK_SCAN = 100;
 
 /**
  * The screen is opened about once a week and costs four services; a minute of staleness
