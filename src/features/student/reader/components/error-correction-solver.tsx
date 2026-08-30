@@ -23,7 +23,9 @@ import {
   PRACTICE_ACCENT,
   readStudentProjection,
   type ErrorCorrectionValue,
+  type ErrorCorrectionVerdicts,
 } from '@/features/student/exercises/runner';
+import type { AttemptRecord } from '@/features/student/exercises/types/attempts';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface ErrorCorrectionSolverProps {
@@ -103,6 +105,12 @@ export function ErrorCorrectionSolver({
   const [allTouched, setAllTouched] = useState(false);
   /** How the submission ended: approved outright, or handed to a teacher. */
   const [sent, setSent] = useState<'passed' | 'review' | null>(null);
+  /**
+   * The teacher's verdict, once one has read the submission. It is the only feedback this
+   * template can give beyond "it matched the key", and it arrives with the attempt rather
+   * than through this screen — nothing here asks for it.
+   */
+  const [review, setReview] = useState<AttemptReview | null>(null);
   const [submissions, setSubmissions] = useState(0);
   /**
    * How a failed `submit` actually left things (47.0.B) — `null` while nothing has
@@ -156,6 +164,9 @@ export function ErrorCorrectionSolver({
           // handed over is — otherwise a learner who comes back sees their own edits and
           // no sign they ever sent them.
           setSent(saved.status === 'ROUTED_FOR_REVIEW' ? 'review' : 'passed');
+          // A string, not merely "not null": an attempt read back from an engine that
+          // predates review carries no such field at all.
+          if (typeof saved.reviewedAt === 'string') setReview(readReview(saved));
         },
       },
     );
@@ -290,6 +301,7 @@ export function ErrorCorrectionSolver({
     setFeedback(null);
     setChecksLeft(null);
     setSent(null);
+    setReview(null);
     setSubmissions(0);
     setSendFailure(null);
     begin();
@@ -308,6 +320,7 @@ export function ErrorCorrectionSolver({
         mode="practice"
         accent={PRACTICE_ACCENT}
         pointOut={pointOut}
+        verdicts={review?.verdicts ?? null}
       />
 
       {sent === null ? (
@@ -389,18 +402,51 @@ export function ErrorCorrectionSolver({
               sent === 'passed' ? 'var(--ssz-feedback-ok-bg)' : 'var(--ssz-bg-surface-subtle)',
           }}
         >
-          <p
-            className="text-[14px] font-semibold"
-            style={{
-              color: sent === 'passed' ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-primary)',
-            }}
-          >
-            {sent === 'passed' ? t('errorCorrection.approved') : t('errorCorrection.withTeacher')}
-          </p>
-          {sent === 'review' && (
-            <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
-              {t('errorCorrection.withTeacherWhen')}
-            </p>
+          {review !== null ? (
+            <>
+              <p
+                className="text-[14px] font-semibold"
+                style={{
+                  color:
+                    review.status === 'RETURNED'
+                      ? 'var(--ssz-text-primary)'
+                      : 'var(--ssz-feedback-ok-fg)',
+                }}
+              >
+                {review.status === 'RETURNED'
+                  ? t('errorCorrection.review.sentBack')
+                  : t('errorCorrection.review.marked')}
+              </p>
+              {review.status !== 'RETURNED' && review.score !== null && (
+                <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+                  {t('errorCorrection.review.score', { score: review.score })}
+                </p>
+              )}
+              {/* The teacher's own words, where they wrote any. Nothing is put here in
+                  their place: a made-up explanation is worse than none. */}
+              {review.comment !== null && (
+                <p className="mt-2 text-[13px] text-(--ssz-text-primary)">{review.comment}</p>
+              )}
+            </>
+          ) : (
+            <>
+              <p
+                className="text-[14px] font-semibold"
+                style={{
+                  color:
+                    sent === 'passed' ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-primary)',
+                }}
+              >
+                {sent === 'passed'
+                  ? t('errorCorrection.approved')
+                  : t('errorCorrection.withTeacher')}
+              </p>
+              {sent === 'review' && (
+                <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+                  {t('errorCorrection.withTeacherWhen')}
+                </p>
+              )}
+            </>
           )}
           {projection.flow.attempts === 'free' && (
             <button
@@ -416,4 +462,41 @@ export function ErrorCorrectionSolver({
       )}
     </div>
   );
+}
+
+/** The teacher's verdict as this screen holds it. */
+interface AttemptReview {
+  status: AttemptRecord['status'];
+  score: number | null;
+  comment: string | null;
+  verdicts: ErrorCorrectionVerdicts;
+}
+
+/**
+ * The teacher's verdict, out of the attempt record.
+ *
+ * Read rather than trusted wholesale: the decisions are a JSON column upstream, and a
+ * shape this screen cannot read is one it should show nothing for rather than crash on.
+ */
+function readReview(attempt: AttemptRecord): AttemptReview {
+  const verdicts: ErrorCorrectionVerdicts = {};
+  for (const decision of attempt.reviewDecisions ?? []) {
+    if (typeof decision?.itemId !== 'string') continue;
+    verdicts[decision.itemId] = {
+      approved: decision.approved === true,
+      ...(typeof decision.comment === 'string' && decision.comment.trim() !== ''
+        ? { comment: decision.comment }
+        : {}),
+    };
+  }
+
+  return {
+    status: attempt.status,
+    score: attempt.score,
+    comment:
+      typeof attempt.reviewComment === 'string' && attempt.reviewComment.trim() !== ''
+        ? attempt.reviewComment
+        : null,
+    verdicts,
+  };
 }

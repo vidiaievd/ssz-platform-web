@@ -212,6 +212,14 @@
     "empty": {
       "title": "Nothing to answer yet",
       "body": "This exercise has no finished questions."
+    },
+    "review": {
+      "marked": "Your teacher has marked this",
+      "sentBack": "Your teacher sent this back",
+      "score": "{score} out of 100 for this attempt.",
+      "itemCounted": "counted",
+      "itemNotCounted": "not counted",
+      "itemNotCountedPlain": "Your teacher did not count this one."
     }
   },
   "writing": {
@@ -347,6 +355,9 @@
     "approved": "Everything correct — approved automatically",
     "withTeacher": "Handed in. Your teacher will look at it.",
     "withTeacherWhen": "Usually within 48 hours.",
+    "itemCounted": "counted",
+    "itemNotCounted": "not counted",
+    "itemNotCountedPlain": "Your teacher did not count this one.",
     "again": "Try again",
     "charPad": "Norwegian letters",
     "selfCheck": {
@@ -371,6 +382,11 @@
       "missing": "missing word",
       "spelling": "spelling",
       "function": "preposition or article"
+    },
+    "review": {
+      "marked": "Your teacher has marked this",
+      "sentBack": "Your teacher sent this back",
+      "score": "{score} out of 100 for this attempt."
     }
   },
   "gapFill": {

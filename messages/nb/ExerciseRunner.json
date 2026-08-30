@@ -212,6 +212,14 @@
     "empty": {
       "title": "Ingenting å svare på ennå",
       "body": "Oppgaven har ingen ferdige spørsmål."
+    },
+    "review": {
+      "marked": "Læreren din har vurdert dette",
+      "sentBack": "Læreren din sendte dette tilbake",
+      "score": "{score} av 100 på dette forsøket.",
+      "itemCounted": "teller",
+      "itemNotCounted": "teller ikke",
+      "itemNotCountedPlain": "Læreren din godtok ikke dette svaret."
     }
   },
   "writing": {
@@ -347,6 +355,9 @@
     "approved": "Alt riktig — godkjent automatisk",
     "withTeacher": "Levert. Læreren ser på det.",
     "withTeacherWhen": "Vanligvis innen 48 timer.",
+    "itemCounted": "teller",
+    "itemNotCounted": "teller ikke",
+    "itemNotCountedPlain": "Læreren din godtok ikke denne.",
     "again": "Prøv på nytt",
     "charPad": "Norske bokstaver",
     "selfCheck": {
@@ -371,6 +382,11 @@
       "missing": "manglende ord",
       "spelling": "staving",
       "function": "preposisjon eller artikkel"
+    },
+    "review": {
+      "marked": "Læreren din har vurdert dette",
+      "sentBack": "Læreren din sendte dette tilbake",
+      "score": "{score} av 100 på dette forsøket."
     }
   },
   "gapFill": {

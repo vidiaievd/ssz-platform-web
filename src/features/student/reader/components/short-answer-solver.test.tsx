@@ -92,6 +92,8 @@ interface ApiOptions {
   attemptStatus?: unknown;
   /** What the engine says is already handed in on the attempt it hands back. */
   answeredQuestions?: Array<{ questionId: string; text: string; verdict: string }>;
+  /** What `GET .../attempts` (no id) answers for the previous, already-closed attempt. */
+  last?: unknown;
 }
 
 function mockApi(options: ApiOptions = {}) {
@@ -118,7 +120,7 @@ function mockApi(options: ApiOptions = {}) {
       if (/\/attempts\/[^/]+$/.test(path)) {
         return json(options.attemptStatus ?? { status: 'IN_PROGRESS' });
       }
-      return json({ attempt: null });
+      return json(options.last ?? { attempt: null });
     }
 
     if (path.endsWith('/submit')) {
@@ -358,5 +360,108 @@ describe('ShortAnswerSolver', () => {
 
     await waitFor(() => expect(onChecked).toHaveBeenCalledWith(null));
     expect(screen.queryByText(/could not confirm/i)).not.toBeInTheDocument();
+  });
+
+  /**
+   * The recap of a previously closed attempt (plan 47 §4.1). `useStartAttempt` always
+   * hands back a fresh or resumed *live* attempt — never the one a teacher already
+   * closed — so this reads the last-attempt lookup separately and shows it in place of
+   * the writing form until the learner asks to redo it.
+   */
+  describe('the recap of a previous verdict', () => {
+    const LAST_ATTEMPT = {
+      attempt: {
+        id: 'att-0',
+        exerciseId: 'ex-1',
+        templateCode: 'short_answer',
+        status: 'SCORED',
+        checkMode: 'PRACTICE',
+        score: 50,
+        passed: null,
+        answersRevealed: false,
+        submittedAnswer: {
+          answers: [
+            { questionId: 'sa1', text: 'Tre år.' },
+            { questionId: 'sa2', text: 'Mer ansvar.' },
+          ],
+        },
+        validationDetails: null,
+        submittedAt: '2026-08-12T10:00:00.000Z',
+        scoredAt: '2026-08-14T12:00:00.000Z',
+        reviewedAt: '2026-08-14T12:00:00.000Z',
+        reviewComment: 'Bra jobbet, men se på setning to.',
+        reviewDecisions: [
+          { itemId: 'sa2', approved: false, comment: 'For kort til å telle som svar.' },
+        ],
+      },
+    };
+
+    it("shows the teacher's verdict and the words about the question it belongs to", async () => {
+      renderSolver(mockApi({ last: LAST_ATTEMPT }));
+
+      expect(await screen.findByText('Your teacher has marked this')).toBeInTheDocument();
+      expect(screen.getByText('50 out of 100 for this attempt.')).toBeInTheDocument();
+      expect(screen.getByText('Bra jobbet, men se på setning to.')).toBeInTheDocument();
+      // The teacher's word about one question sits with that question, not the other.
+      expect(screen.getByText('Hva vil Bartek gjerne ha i den nye jobben?')).toBeInTheDocument();
+      expect(screen.getByText('Mer ansvar.')).toBeInTheDocument();
+      expect(screen.getByText('not counted')).toBeInTheDocument();
+      expect(screen.getByText('For kort til å telle som svar.')).toBeInTheDocument();
+      // Only the question a teacher decided on is listed — the first was never routed.
+      expect(
+        screen.queryByText('Hvor lenge har Bartek jobbet i det samme firmaet?'),
+      ).not.toBeInTheDocument();
+      // No writing form while the recap is up.
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    });
+
+    it('says a question was not counted without inventing a reason for it', async () => {
+      renderSolver(
+        mockApi({
+          last: {
+            attempt: {
+              ...LAST_ATTEMPT.attempt,
+              reviewComment: null,
+              reviewDecisions: [{ itemId: 'sa2', approved: false }],
+            },
+          },
+        }),
+      );
+
+      expect(await screen.findByText('Your teacher did not count this one.')).toBeInTheDocument();
+    });
+
+    it('says when the work was sent back rather than marked', async () => {
+      renderSolver(
+        mockApi({
+          last: {
+            attempt: {
+              ...LAST_ATTEMPT.attempt,
+              status: 'RETURNED',
+              reviewComment: 'Prøv igjen med setning to.',
+              reviewDecisions: [],
+            },
+          },
+        }),
+      );
+
+      expect(await screen.findByText('Your teacher sent this back')).toBeInTheDocument();
+      expect(screen.getByText('Prøv igjen med setning to.')).toBeInTheDocument();
+      expect(screen.queryByText(/out of 100/)).not.toBeInTheDocument();
+    });
+
+    it('lets the learner start over, and does not bring the old verdict back', async () => {
+      renderSolver(mockApi({ last: LAST_ATTEMPT }));
+
+      await screen.findByText('Your teacher has marked this');
+      await userEvent.click(screen.getByRole('button', { name: 'Do it again' }));
+
+      // The fresh attempt this screen already started takes over — the writing form,
+      // not the recap that was just dismissed.
+      expect(
+        await screen.findByRole('heading', { name: /Hvor lenge har Bartek jobbet/ }),
+      ).toBeInTheDocument();
+      expect(screen.queryByText('Your teacher has marked this')).not.toBeInTheDocument();
+    });
   });
 });

@@ -281,6 +281,74 @@ describe('ErrorCorrectionSolver', () => {
     expect(screen.queryByRole('button', { name: 'Word: jeg' })).not.toBeInTheDocument();
   });
 
+  /**
+   * The verdict phase (plan 47 §4.1). For this template it is the only place a
+   * correction is ever called wrong — the machine may not say it, so the words on
+   * screen are the teacher's or there are none.
+   */
+  it("shows the teacher's verdict once one has read the submission", async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'SCORED',
+            score: 50,
+            reviewedAt: '2026-08-14T12:00:00.000Z',
+            reviewComment: 'Bra jobbet, men se på ordstillingen.',
+            reviewDecisions: [{ itemId: 'i1', approved: false, comment: 'Feil ord flyttet.' }],
+          },
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Your teacher has marked this')).toBeInTheDocument();
+    expect(screen.getByText('50 out of 100 for this attempt.')).toBeInTheDocument();
+    expect(screen.getByText('Bra jobbet, men se på ordstillingen.')).toBeInTheDocument();
+    // The teacher's word about one sentence sits with that sentence.
+    expect(screen.getByText('not counted')).toBeInTheDocument();
+    expect(screen.getByText('Feil ord flyttet.')).toBeInTheDocument();
+  });
+
+  it('says a sentence was not counted without inventing a reason for it', async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'SCORED',
+            score: 0,
+            reviewedAt: '2026-08-14T12:00:00.000Z',
+            reviewComment: null,
+            reviewDecisions: [{ itemId: 'i1', approved: false }],
+          },
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Your teacher did not count this one.')).toBeInTheDocument();
+  });
+
+  it('says when the work was sent back rather than marked', async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'RETURNED',
+            reviewedAt: '2026-08-14T12:00:00.000Z',
+            reviewComment: 'Prøv igjen med ordstillingen.',
+            reviewDecisions: [],
+          },
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Your teacher sent this back')).toBeInTheDocument();
+    expect(screen.getByText('Prøv igjen med ordstillingen.')).toBeInTheDocument();
+    expect(screen.queryByText(/out of 100/)).not.toBeInTheDocument();
+  });
+
   // An exercise-engine older than the masking ships the stored document instead of the
   // projection — and with it the answer key. The runner refuses rather than plays it.
   it('will not play an exercise the server never masked', async () => {

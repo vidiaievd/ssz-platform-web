@@ -238,6 +238,31 @@ describe('ErrorCorrectionBody', () => {
     expect(screen.getByText('Hva skjer med verbet?')).toBeInTheDocument();
   });
 
+  /**
+   * Plan 47 §4.1: once a teacher has read the submission, their word about one sentence
+   * sits with that sentence — never invented, and never the reference it was checked
+   * against.
+   */
+  it("shows a teacher's comment on the sentence it belongs to", () => {
+    renderBody({ verdicts: { i1: { approved: false, comment: 'Sjekk verbtiden.' } } });
+
+    expect(screen.getByText('not counted')).toBeInTheDocument();
+    expect(screen.getByText('Sjekk verbtiden.')).toBeInTheDocument();
+  });
+
+  it('says a sentence was not counted without inventing a reason when the teacher wrote none', () => {
+    renderBody({ verdicts: { i1: { approved: false } } });
+
+    expect(screen.getByText('Your teacher did not count this one.')).toBeInTheDocument();
+  });
+
+  it('says nothing further about a sentence the teacher counted', () => {
+    renderBody({ verdicts: { i1: { approved: true } } });
+
+    expect(screen.getByText('counted')).toBeInTheDocument();
+    expect(screen.queryByText('Your teacher did not count this one.')).not.toBeInTheDocument();
+  });
+
   it('reports that the exercise can be handed in only once every sentence is touched', () => {
     const onAnswerChange = vi.fn();
     const { rerender } = renderBody({ onAnswerChange });

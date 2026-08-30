@@ -95,7 +95,12 @@ export { outcomeOf, WritingTaskGraded } from './writing-task-graded';
 export type { WritingTaskGradedProps, WritingTaskOutcome } from './writing-task-graded';
 
 export { ErrorCorrectionBody } from './error-correction-body';
-export type { ErrorCorrectionBodyProps, ErrorCorrectionValue } from './error-correction-body';
+export type {
+  ErrorCorrectionBodyProps,
+  ErrorCorrectionValue,
+  ErrorCorrectionItemVerdict,
+  ErrorCorrectionVerdicts,
+} from './error-correction-body';
 export { readStudentProjection } from './error-correction-projection';
 
 export { TranslateRunnerBody } from './translate-runner-body';

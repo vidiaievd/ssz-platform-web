@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import {
   AttemptRequestError,
+  fetchLastAttempt,
   resolveSubmitFailure,
   useAnswerQuestion,
   useStartAttempt,
@@ -17,8 +18,12 @@ import {
   type ShortAnswerPhase,
   type ShortAnswerTally,
 } from '@/features/student/exercises/runner';
-import type { ResumedAnswer } from '@/features/student/exercises/types/attempts';
-import type { StudentProjection, StudentResult } from '@/lib/shared-kernel/short-answer';
+import type { AttemptRecord, ResumedAnswer } from '@/features/student/exercises/types/attempts';
+import type {
+  ProjectedQuestion,
+  StudentProjection,
+  StudentResult,
+} from '@/lib/shared-kernel/short-answer';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface ShortAnswerSolverProps {
@@ -87,11 +92,25 @@ export function ShortAnswerSolver({
   const [result, setResult] = useState<StudentResult | null>(null);
   const [tally, setTally] = useState<ShortAnswerTally>(EMPTY_TALLY);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * The teacher's verdict on the *previous* attempt, once one has read it. Set only on
+   * the very first `begin()` (see `reviewConsidered` below) — `useStartAttempt` always
+   * hands back a fresh or resumed *live* attempt, never the one a teacher already closed,
+   * so this is read separately and shown in its place until the learner asks to redo it.
+   */
+  const [review, setReview] = useState<AttemptReview | null>(null);
 
   /** Every answer handed in, in order — the aggregate `submit` closes the attempt with. */
   const answers = useRef<Array<{ questionId: string; text: string }>>([]);
   /** Wall-clock since the attempt opened; the engine records it per submission. */
   const openedAt = useRef(0);
+  /**
+   * The one-time read of the previous attempt's verdict. Without this guard, `restart()`
+   * calling `begin()` again would read the same closed attempt back — `fetchLastAttempt`
+   * has nothing newer to report until the fresh attempt this screen is about to start is
+   * itself submitted — and immediately re-show the recap the learner just asked past.
+   */
+  const reviewConsidered = useRef(false);
   /**
    * Bumped when a resumed attempt turns out to hold every answer and only needs closing.
    * A counter rather than a flag so a second resume — the close failed and the learner
@@ -143,7 +162,7 @@ export function ShortAnswerSolver({
     startMutate(
       { language },
       {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
           const set = readShortAnswerProjection(data.exerciseContent);
           if (set === null) {
             setUnusable(true);
@@ -154,10 +173,20 @@ export function ShortAnswerSolver({
           setProjection(set);
           openedAt.current = Date.now();
           resume(set, data.answeredQuestions ?? []);
+
+          if (reviewConsidered.current) return;
+          reviewConsidered.current = true;
+
+          const saved = await fetchLastAttempt(exerciseId);
+          // A string, not merely "not null": an attempt read back from an engine that
+          // predates review carries no such field at all.
+          if (saved !== null && typeof saved.reviewedAt === 'string') {
+            setReview(readReview(saved));
+          }
         },
       },
     );
-  }, [startMutate, language, resume]);
+  }, [startMutate, language, resume, exerciseId]);
 
   useEffect(() => {
     begin();
@@ -285,28 +314,213 @@ export function ShortAnswerSolver({
     setTally(EMPTY_TALLY);
     setError(null);
     setPhase('writing');
+    setReview(null);
     answers.current = [];
     begin();
   }
 
   return (
     <div>
-      <ShortAnswerBody
-        set={set}
-        index={index}
-        value={value}
-        onValueChange={setValue}
-        phase={phase}
-        result={result}
-        tally={tally}
-        sending={answer.isPending}
-        error={error}
-        onSubmit={hand}
-        onNext={next}
-        onRestart={restart}
-        showProgressBar={!stacked}
-        accent={PRACTICE_ACCENT}
-      />
+      {review !== null ? (
+        <ShortAnswerReviewRecap review={review} projection={projection} onAgain={restart} />
+      ) : (
+        <ShortAnswerBody
+          set={set}
+          index={index}
+          value={value}
+          onValueChange={setValue}
+          phase={phase}
+          result={result}
+          tally={tally}
+          sending={answer.isPending}
+          error={error}
+          onSubmit={hand}
+          onNext={next}
+          onRestart={restart}
+          showProgressBar={!stacked}
+          accent={PRACTICE_ACCENT}
+        />
+      )}
+    </div>
+  );
+}
+
+/** What a teacher decided about one question, once one has read the submission. */
+interface ShortAnswerItemVerdict {
+  approved: boolean;
+  comment?: string;
+}
+
+/** The teacher's decisions, by question. */
+type ShortAnswerVerdicts = Record<string, ShortAnswerItemVerdict>;
+
+/** The teacher's verdict on the previous attempt, as this screen holds it. */
+interface AttemptReview {
+  status: AttemptRecord['status'];
+  score: number | null;
+  comment: string | null;
+  verdicts: ShortAnswerVerdicts;
+  /** questionId → the learner's own text on that closed attempt. */
+  answers: Record<string, string>;
+}
+
+/**
+ * The teacher's verdict, out of the attempt record.
+ *
+ * Read rather than trusted wholesale: the decisions and the submitted answer are both
+ * JSON columns upstream, and a shape this screen cannot read is one it should show
+ * nothing for rather than crash on.
+ */
+function readReview(attempt: AttemptRecord): AttemptReview {
+  const verdicts: ShortAnswerVerdicts = {};
+  for (const decision of attempt.reviewDecisions ?? []) {
+    if (typeof decision?.itemId !== 'string') continue;
+    verdicts[decision.itemId] = {
+      approved: decision.approved === true,
+      ...(typeof decision.comment === 'string' && decision.comment.trim() !== ''
+        ? { comment: decision.comment }
+        : {}),
+    };
+  }
+
+  const answers: Record<string, string> = {};
+  const raw = attempt.submittedAnswer as { answers?: unknown } | null;
+  if (raw !== null && typeof raw === 'object' && Array.isArray(raw.answers)) {
+    for (const entry of raw.answers) {
+      if (typeof entry?.questionId === 'string' && typeof entry?.text === 'string') {
+        answers[entry.questionId] = entry.text;
+      }
+    }
+  }
+
+  return {
+    status: attempt.status,
+    score: attempt.score,
+    comment:
+      typeof attempt.reviewComment === 'string' && attempt.reviewComment.trim() !== ''
+        ? attempt.reviewComment
+        : null,
+    verdicts,
+    answers,
+  };
+}
+
+/**
+ * The previous attempt's verdict, read-only — what stands in for the writing form until
+ * the learner asks to redo it (plan 47 §4.1).
+ *
+ * Only the questions a teacher actually decided on are listed: the rest were either
+ * accepted outright by the auto-check or never reached a person, and this screen has no
+ * honest way to tell those two apart from here — showing nothing for them beats
+ * guessing. The reference each one was checked against never appears; only the position
+ * in the set and, where the teacher wrote one, the words they chose to explain it with.
+ */
+function ShortAnswerReviewRecap({
+  review,
+  projection,
+  onAgain,
+}: {
+  review: AttemptReview;
+  projection: StudentProjection;
+  onAgain: () => void;
+}) {
+  const t = useTranslations('ExerciseRunner');
+  const decided = projection.questions
+    .map((question) => ({ question, verdict: review.verdicts[question.id] }))
+    .filter(
+      (entry): entry is { question: ProjectedQuestion; verdict: ShortAnswerItemVerdict } =>
+        entry.verdict !== undefined,
+    );
+
+  return (
+    <div
+      className="rounded-2xl border px-4 py-3"
+      style={{
+        borderColor:
+          review.status === 'RETURNED'
+            ? 'var(--ssz-border-default)'
+            : 'var(--ssz-feedback-ok-line)',
+        background:
+          review.status === 'RETURNED'
+            ? 'var(--ssz-bg-surface-subtle)'
+            : 'var(--ssz-feedback-ok-bg)',
+      }}
+    >
+      <p
+        className="text-[14px] font-semibold"
+        style={{
+          color:
+            review.status === 'RETURNED'
+              ? 'var(--ssz-text-primary)'
+              : 'var(--ssz-feedback-ok-fg)',
+        }}
+      >
+        {review.status === 'RETURNED'
+          ? t('shortAnswer.review.sentBack')
+          : t('shortAnswer.review.marked')}
+      </p>
+      {review.status !== 'RETURNED' && review.score !== null && (
+        <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+          {t('shortAnswer.review.score', { score: review.score })}
+        </p>
+      )}
+      {/* The teacher's own words about the submission as a whole, where they wrote any. */}
+      {review.comment !== null && (
+        <p className="mt-2 text-[13px] text-(--ssz-text-primary)">{review.comment}</p>
+      )}
+
+      {decided.length > 0 && (
+        <ol className="mt-3 flex flex-col gap-2.5 border-t pt-3" style={{ borderColor: 'var(--ssz-border-default)' }}>
+          {decided.map(({ question, verdict }, index) => {
+            const answer = review.answers[question.id];
+            return (
+              <li key={question.id}>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] font-bold text-(--ssz-text-muted)">
+                    {t('shortAnswer.position', { n: index + 1, total: decided.length })}
+                  </span>
+                  <span
+                    className="text-[12px] font-semibold"
+                    style={{
+                      color: verdict.approved
+                        ? 'var(--ssz-feedback-ok-fg)'
+                        : 'var(--ssz-feedback-no-fg)',
+                    }}
+                  >
+                    {verdict.approved
+                      ? t('shortAnswer.review.itemCounted')
+                      : t('shortAnswer.review.itemNotCounted')}
+                  </span>
+                </div>
+                <p className="text-[13.5px] font-semibold">{question.prompt}</p>
+                {answer !== undefined && answer.trim() !== '' && (
+                  <p className="mt-0.5 text-[13px] text-(--ssz-text-secondary)">{answer}</p>
+                )}
+                {verdict.comment !== undefined && verdict.comment.trim() !== '' ? (
+                  <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+                    {verdict.comment}
+                  </p>
+                ) : (
+                  !verdict.approved && (
+                    <p className="mt-1 text-[12.5px] text-(--ssz-text-muted)">
+                      {t('shortAnswer.review.itemNotCountedPlain')}
+                    </p>
+                  )
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      <button
+        type="button"
+        onClick={onAgain}
+        className="mt-3 text-[12.5px] font-semibold underline underline-offset-2"
+        style={{ color: 'var(--ssz-text-secondary)' }}
+      >
+        {t('shortAnswer.done.again')}
+      </button>
     </div>
   );
 }
