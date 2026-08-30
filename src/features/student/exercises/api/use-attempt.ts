@@ -111,7 +111,19 @@ export async function fetchLastAttempt(exerciseId: string): Promise<AttemptRecor
 export type SubmitFailureResolution = 'delivered' | 'not-delivered' | 'unconfirmed';
 
 function resolveByStatus(status: AttemptStatus): SubmitFailureResolution {
-  return status === 'ROUTED_FOR_REVIEW' || status === 'SCORED' ? 'delivered' : 'not-delivered';
+  switch (status) {
+    case 'IN_PROGRESS':
+    case 'ABANDONED':
+      // `submit` requires IN_PROGRESS, so either one means it never took effect.
+      return 'not-delivered';
+    case 'SUBMITTED':
+    case 'ROUTED_FOR_REVIEW':
+    case 'SCORED':
+    case 'RETURNED':
+      // RETURNED is reachable only through ROUTED_FOR_REVIEW: a teacher who has already
+      // reviewed and sent the work back is proof it was delivered, not evidence it wasn't.
+      return 'delivered';
+  }
 }
 
 /**
