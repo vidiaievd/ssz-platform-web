@@ -3094,5 +3094,47 @@
       "live": "Dette er elevens egen tabell, sjekket med fasiten din.",
       "reshuffle": "Stokk på nytt"
     }
+  },
+  "coverage": {
+    "title": "Hva dette trener",
+    "total": "{count, plural, one {# oppgave} other {# oppgaver}}",
+    "empty": "Ingenting er lagt inn her ennå, så det er ingenting å telle.",
+    "loadError": "Fikk ikke regnet ut hva dette trener.",
+    "axis": {
+      "skill": "Kanal",
+      "focus": "Emne",
+      "form": "Svar"
+    },
+    "skill": {
+      "listening": "Lytting",
+      "reading": "Lesing",
+      "spoken": "Muntlig",
+      "written": "Skriving"
+    },
+    "focus": {
+      "vocabulary": "Ordforråd",
+      "grammar": "Grammatikk",
+      "orthography": "Rettskriving",
+      "pragmatics": "Språkbruk",
+      "unknown": "Ikke registrert"
+    },
+    "form": {
+      "bank": "Fra en liste",
+      "free": "Skrevet selv",
+      "mixed": "Begge deler",
+      "unknown": "Ikke registrert"
+    },
+    "emptySkills": "Ingenting her trener: {skills}.",
+    "diverges": "Den publiserte versjonen er annerledes: {cells}.",
+    "differenceCell": "{cell} {draft} mot {published}",
+    "publishedLabel": "Det elevene har nå",
+    "issue": {
+      "COV_SKILL_ABSENT": "Ingenting her trener {skill}.",
+      "COV_SINGLE_SKILL": "Alle {total} oppgavene trener {skill} og ingenting annet.",
+      "COV_NO_FREE_PRODUCTION": "I {total} oppgaver produserer eleven aldri noe selv — hvert svar velges blant det som allerede står der.",
+      "COV_MOSTLY_BANK": "{bank} av {total} oppgaver besvares ved å velge, ikke ved å produsere.",
+      "COV_FOCUS_UNKNOWN": "{unknown} av {total} oppgaver har ikke noe emne registrert — som regel er ingen ord eller regler koblet til dem.",
+      "COV_UNCLASSIFIED": "{count, plural, one {# oppgave bruker en mal denne rapporten ikke kjenner, og holdes utenfor tellingen.} other {# oppgaver bruker en mal denne rapporten ikke kjenner, og holdes utenfor tellingen.}}"
+    }
   }
 }

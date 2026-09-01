@@ -22,6 +22,13 @@ vi.mock('./review-publish-dialog', () => ({
   ReviewPublishDialog: ({ open }: { open: boolean }) =>
     open ? <div data-testid="review-publish-open" /> : null,
 }));
+// Counts the course through react-query, which this shell test does not stand
+// up; it is exercised in `coverage-strip.test.tsx`.
+vi.mock('./coverage-strip', () => ({
+  CoverageStrip: ({ containerId }: { containerId: string }) => (
+    <div data-testid="coverage-strip" data-container={containerId} />
+  ),
+}));
 vi.mock('./course-structure-panel', () => ({
   CourseStructurePanel: ({
     containerId,
@@ -105,6 +112,13 @@ describe('CourseEditorShell', () => {
   it('renders the curriculum tree panel as the primary surface', () => {
     renderShell('version-1');
     expect(screen.getByTestId('course-structure-panel')).toHaveTextContent('course-1/version-1');
+  });
+
+  it('says what the course trains, without the author opening anything', () => {
+    // Above the tree and unfolded: a channel nothing trains is invisible in a
+    // panel nobody opens.
+    renderShell('version-1');
+    expect(screen.getByTestId('coverage-strip')).toHaveAttribute('data-container', 'course-1');
   });
 
   it('shows a load error in place of the panel when there is no draft version', () => {

@@ -37,6 +37,13 @@ vi.mock('./section-assign-select', () => ({
 }));
 // Pulls in the publish server action, which cannot be imported client-side.
 vi.mock('./module-publish-block', () => ({ ModulePublishBlock: () => null }));
+// Counts the module through react-query; what the inspector owes it is the
+// container id of the node in hand, which is what this stub records.
+vi.mock('./coverage-strip', () => ({
+  CoverageStrip: ({ containerId }: { containerId: string }) => (
+    <div data-testid="coverage-strip" data-container={containerId} />
+  ),
+}));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,
@@ -196,6 +203,14 @@ describe('CurriculumInspector', () => {
       'aria-disabled',
       'true',
     );
+  });
+
+  it('counts what the module trains, not what the course around it trains', () => {
+    // A course balanced in aggregate can still hold a module that is nothing but
+    // reading, so the strip is pointed at the module's own container.
+    renderInspector({ kind: 'module', module: moduleNode() });
+
+    expect(screen.getByTestId('coverage-strip')).toHaveAttribute('data-container', 'module-1');
   });
 
   it("deletes the selected module through the panel's confirmation", () => {

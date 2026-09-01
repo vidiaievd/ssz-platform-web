@@ -28,6 +28,7 @@ import { renameSectionAction } from '../actions/section';
 import { renameItemAction } from '../actions/rename-item';
 import { assignItemSectionAction } from '../actions/container-item';
 import { ContainerStateBadge } from './container-state-badge';
+import { CoverageStrip } from './coverage-strip';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
 import { ModulePublishBlock } from './module-publish-block';
@@ -423,6 +424,13 @@ export function CurriculumInspector({
         />
 
         <p className="text-xs leading-relaxed text-muted-foreground">{t('structure.moduleHelp')}</p>
+
+        {/* A module is a container in its own right, so it is counted on its own
+            terms: a course balanced in aggregate can still have a module that is
+            nothing but reading. */}
+        <div className="border-t border-border pt-4">
+          <CoverageStrip containerId={mod.containerId} compact />
+        </div>
 
         {/* Students read a module's own published version, so material added
             here stays invisible until this module — not just the course — is

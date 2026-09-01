@@ -119,6 +119,91 @@ export interface ContainerActivity {
   hasMore: boolean;
 }
 
+// ─── Coverage: what a course actually trains (plan 55 §3.7) ─────────────────
+
+/**
+ * The three axes, mirrored from `@ssz/shared-kernel/skills`.
+ *
+ * Restated here rather than imported: the kernel is a package of the services
+ * repository and the web app does not depend on it. The lists are canonical —
+ * the order below is the order every row of the strip is drawn in — and they
+ * change only when the kernel's do.
+ */
+export const COVERAGE_SKILLS = ['listening', 'reading', 'spoken', 'written'] as const;
+export type CoverageSkill = (typeof COVERAGE_SKILLS)[number];
+
+export const COVERAGE_FOCUSES = ['vocabulary', 'grammar', 'orthography', 'pragmatics'] as const;
+export type CoverageFocus = (typeof COVERAGE_FOCUSES)[number];
+
+export const COVERAGE_FORMS = ['bank', 'free', 'mixed', 'unknown'] as const;
+export type CoverageForm = (typeof COVERAGE_FORMS)[number];
+
+export interface CoverageTallies {
+  /** Exercises counted. Not the sum of any row: one exercise can train two channels. */
+  total: number;
+  bySkill: Record<CoverageSkill, number>;
+  byFocus: Record<CoverageFocus | 'unknown', number>;
+  byForm: Record<CoverageForm, number>;
+  /** Channels nothing trains, named by the service rather than diffed out of `bySkill`. */
+  emptySkills: CoverageSkill[];
+  /** Exercises whose template the axis table does not know. */
+  unclassified: number;
+}
+
+/**
+ * A remark about the balance of a module, as a code and the numbers its
+ * sentence needs. The wording is written here, in four languages; the rule that
+ * produced it is not re-implemented (§1.7 — every validation surface in the UI
+ * is a filter over the kernel's output).
+ */
+export type CoverageIssue =
+  | { code: 'COV_SKILL_ABSENT'; level: 'warning'; skill: CoverageSkill }
+  | { code: 'COV_SINGLE_SKILL'; level: 'warning'; skill: CoverageSkill; total: number }
+  | { code: 'COV_NO_FREE_PRODUCTION'; level: 'warning'; total: number }
+  | { code: 'COV_MOSTLY_BANK'; level: 'info'; bank: number; total: number }
+  | { code: 'COV_FOCUS_UNKNOWN'; level: 'info'; unknown: number; total: number }
+  | { code: 'COV_UNCLASSIFIED'; level: 'warning'; count: number };
+
+export interface CoverageModuleReport {
+  containerId: string;
+  title: string;
+  coverage: CoverageTallies;
+  issues: CoverageIssue[];
+}
+
+export interface CoverageReport {
+  version: 'draft' | 'published';
+  /**
+   * False when the container has no such version. A course nobody published has
+   * no published coverage, which is a different claim from a course of zeroes.
+   */
+  available: boolean;
+  coverage: CoverageTallies;
+  issues: CoverageIssue[];
+  modules: CoverageModuleReport[];
+}
+
+/** A cell the draft and the published version disagree about. */
+export interface CoverageDifference {
+  axis: 'skill' | 'focus' | 'form';
+  key: string;
+  draft: number;
+  published: number;
+}
+
+export interface ContainerCoverage {
+  containerId: string;
+  containerType: string;
+  title: string;
+  draft: CoverageReport | null;
+  published: CoverageReport | null;
+  /** Decided by the service, so the web, the mobile app and every later reader agree. */
+  diverges: boolean;
+  differences: CoverageDifference[];
+}
+
+export type CoverageVersionScope = 'draft' | 'published' | 'both';
+
 // ─── Course structure (curriculum tree) ─────────────────────────────────────
 
 /** The node currently selected in the CurriculumTree, shown in the Inspector. */

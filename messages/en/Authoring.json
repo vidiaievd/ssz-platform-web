@@ -3094,5 +3094,47 @@
       "live": "This is the student’s own table, checked with your key.",
       "reshuffle": "Shuffle again"
     }
+  },
+  "coverage": {
+    "title": "What this trains",
+    "total": "{count, plural, one {# exercise} other {# exercises}}",
+    "empty": "Nothing has been placed here yet, so there is nothing to count.",
+    "loadError": "Could not work out what this trains.",
+    "axis": {
+      "skill": "Channel",
+      "focus": "Subject",
+      "form": "Answer"
+    },
+    "skill": {
+      "listening": "Listening",
+      "reading": "Reading",
+      "spoken": "Speaking",
+      "written": "Writing"
+    },
+    "focus": {
+      "vocabulary": "Vocabulary",
+      "grammar": "Grammar",
+      "orthography": "Spelling",
+      "pragmatics": "Register",
+      "unknown": "Not recorded"
+    },
+    "form": {
+      "bank": "From a list",
+      "free": "Typed",
+      "mixed": "Either",
+      "unknown": "Not recorded"
+    },
+    "emptySkills": "Nothing here trains: {skills}.",
+    "diverges": "The published version differs: {cells}.",
+    "differenceCell": "{cell} {draft} against {published}",
+    "publishedLabel": "What students have now",
+    "issue": {
+      "COV_SKILL_ABSENT": "Nothing here trains {skill}.",
+      "COV_SINGLE_SKILL": "All {total} exercises train {skill} and nothing else.",
+      "COV_NO_FREE_PRODUCTION": "Across {total} exercises the student never produces anything — every answer is chosen from what is offered.",
+      "COV_MOSTLY_BANK": "{bank} of {total} exercises are answered by choosing, not by producing.",
+      "COV_FOCUS_UNKNOWN": "{unknown} of {total} exercises have no subject recorded — usually no words or rules are linked to them.",
+      "COV_UNCLASSIFIED": "{count, plural, one {# exercise uses a template this report does not know, and is left out of the counts.} other {# exercises use a template this report does not know, and are left out of the counts.}}"
+    }
   }
 }

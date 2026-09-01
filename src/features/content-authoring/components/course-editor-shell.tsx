@@ -13,6 +13,7 @@ import { useCurriculumTree } from '../api/use-curriculum-tree';
 import { allCollapseKeys } from '../lib/structure-nodes';
 import { CourseSettingsDrawer } from './course-settings-drawer';
 import { CourseStructurePanel } from './course-structure-panel';
+import { CoverageStrip } from './coverage-strip';
 import { collectPublishRows } from '../lib/publish-rows';
 import { deriveContainerState } from './container-state-badge';
 import { ReviewPublishDialog } from './review-publish-dialog';
@@ -130,6 +131,14 @@ export function CourseEditorShell({
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
       />
+
+      {/* Under the counts and above the tree: the topbar says how big the course
+          is, this says what it is made of. Drawn expanded rather than folded
+          behind a toggle — a channel nothing trains is invisible in a panel
+          nobody opens. */}
+      <div className="rounded-xl border border-border bg-card p-4">
+        <CoverageStrip containerId={container.id} />
+      </div>
 
       {draftVersionId ? (
         <CourseStructurePanel
