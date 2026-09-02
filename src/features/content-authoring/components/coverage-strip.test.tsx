@@ -94,7 +94,10 @@ describe('CoverageStrip', () => {
     expect(
       screen.getByText('9 of 10 exercises are answered by choosing, not by producing.'),
     ).toBeInTheDocument();
-    expect(screen.getByText('Nothing here trains Listening.')).toBeInTheDocument();
+    // The absent-channel remark is left to the line that already names all of them at
+    // once, rather than repeated one channel per line underneath it.
+    expect(screen.queryByText('Nothing here trains Listening.')).not.toBeInTheDocument();
+    expect(screen.getByText(/Nothing here trains: Listening, Speaking/)).toBeInTheDocument();
   });
 
   it('drops a remark it has no wording for rather than crashing on it', () => {

@@ -3136,5 +3136,23 @@
       "COV_FOCUS_UNKNOWN": "{unknown} of {total} exercises have no subject recorded — usually no words or rules are linked to them.",
       "COV_UNCLASSIFIED": "{count, plural, one {# exercise uses a template this report does not know, and is left out of the counts.} other {# exercises use a template this report does not know, and are left out of the counts.}}"
     }
+  },
+  "axes": {
+    "title": "What this exercise trains",
+    "loadError": "Could not read what this exercise trains.",
+    "saveError": "Could not save what this exercise trains.",
+    "save": "Save what it trains",
+    "saved": "Saved. The coverage report counts this exercise the way you said.",
+    "withdraw": "Back to derived",
+    "withdrawn": "Withdrawn. The platform works this out again.",
+    "emptyHint": "Saved like this, the exercise counts towards nothing at all — a warm-up, left out of the coverage report. To let the platform work it out again, use “Back to derived”.",
+    "source": {
+      "override": "You set this yourself.",
+      "placement": "From where the exercise stands in its lesson.",
+      "document": "From a setting inside the exercise itself.",
+      "template": "Worked out from the exercise type.",
+      "atoms": "From the words and rules linked to this exercise.",
+      "unknown": "Nothing here says what this trains."
+    }
   }
 }

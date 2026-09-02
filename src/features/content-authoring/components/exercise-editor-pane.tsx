@@ -113,6 +113,7 @@ import { WritingTaskBuilder } from './writing-task/builder';
 import { WritingTaskPreview } from './writing-task/writing-task-preview';
 import type { SavedDocument as SavedWritingTask } from './writing-task/use-writing-task-autosave';
 import type { SavedDocument as SavedMatchPairs } from './match-pairs/use-match-pairs-autosave';
+import { ExerciseAxesPanel } from './exercise-axes-panel';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 
@@ -477,6 +478,15 @@ export function ExerciseEditorPane({
           container={container}
           onValuesChange={setPreviewValues}
         />
+      )}
+
+      {/* Below whichever builder this exercise uses, and outside its form: the axes are
+          their own resource with their own routes (plan 55 §3.5), so they save on their
+          own and no builder's "Done" is responsible for them. */}
+      {!isLoading && exercise != null && (
+        <div className="mt-6">
+          <ExerciseAxesPanel exerciseId={exerciseId} containerId={container.id} />
+        </div>
       )}
     </LessonEditorShell>
   );

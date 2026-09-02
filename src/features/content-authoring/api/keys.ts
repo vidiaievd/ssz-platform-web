@@ -9,6 +9,9 @@ export const authoringKeys = keyFactory('authoring', {
   preflight: (id: string) => ['preflight', id] as const,
   activity: (id: string) => ['activity', id] as const,
   coverage: (id: string, version: string) => ['coverage', id, version] as const,
+  /** Prefix of every coverage query — an override moves the module's strip and the course's. */
+  coverageAll: () => ['coverage'] as const,
+  exerciseAxes: (id: string) => ['exercise-axes', id] as const,
   lessons: (containerId: string) => ['lessons', containerId] as const,
   lesson: (id: string) => ['lesson', id] as const,
   lessonVariants: (lessonId: string) => ['lesson-variants', lessonId] as const,

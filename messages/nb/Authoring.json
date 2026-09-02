@@ -3136,5 +3136,23 @@
       "COV_FOCUS_UNKNOWN": "{unknown} av {total} oppgaver har ikke noe emne registrert — som regel er ingen ord eller regler koblet til dem.",
       "COV_UNCLASSIFIED": "{count, plural, one {# oppgave bruker en mal denne rapporten ikke kjenner, og holdes utenfor tellingen.} other {# oppgaver bruker en mal denne rapporten ikke kjenner, og holdes utenfor tellingen.}}"
     }
+  },
+  "axes": {
+    "title": "Hva denne oppgaven trener",
+    "loadError": "Fikk ikke lest hva denne oppgaven trener.",
+    "saveError": "Fikk ikke lagret hva denne oppgaven trener.",
+    "save": "Lagre hva den trener",
+    "saved": "Lagret. Rapporten teller oppgaven slik du sa.",
+    "withdraw": "Tilbake til utledet",
+    "withdrawn": "Trukket tilbake. Plattformen regner det ut selv igjen.",
+    "emptyHint": "Lagret slik teller oppgaven ingen steder — en oppvarming, holdt utenfor rapporten. Vil du at plattformen skal regne det ut igjen, bruk «Tilbake til utledet».",
+    "source": {
+      "override": "Dette har du satt selv.",
+      "placement": "Fra hvor oppgaven står i leksjonen.",
+      "document": "Fra en innstilling inne i selve oppgaven.",
+      "template": "Utledet av oppgavetypen.",
+      "atoms": "Fra ordene og reglene som er koblet til oppgaven.",
+      "unknown": "Ingenting her sier hva dette trener."
+    }
   }
 }

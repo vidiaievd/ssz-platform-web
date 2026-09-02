@@ -204,6 +204,29 @@ export interface ContainerCoverage {
 
 export type CoverageVersionScope = 'draft' | 'published' | 'both';
 
+/** Which rung of the priority chain produced a value (plan 55 §3.4). */
+export const SKILL_SOURCES = ['override', 'placement', 'document', 'template', 'unknown'] as const;
+export type SkillSource = (typeof SKILL_SOURCES)[number];
+
+/** The focus chain is shorter: neither placement nor the document says anything about the subject. */
+export const FOCUS_SOURCES = ['override', 'atoms', 'template', 'unknown'] as const;
+export type FocusSource = (typeof FOCUS_SOURCES)[number];
+
+/**
+ * What one exercise trains, and where that answer came from.
+ *
+ * The two sources are the point of the panel, not decoration: an author who cannot tell
+ * "the template guessed this" from "you declared this" will either never correct a wrong
+ * value or overwrite a right one.
+ */
+export interface ExerciseAxes {
+  skills: CoverageSkill[];
+  focus: CoverageFocus[];
+  form: CoverageForm;
+  skillSource: SkillSource;
+  focusSource: FocusSource;
+}
+
 // ─── Course structure (curriculum tree) ─────────────────────────────────────
 
 /** The node currently selected in the CurriculumTree, shown in the Inspector. */

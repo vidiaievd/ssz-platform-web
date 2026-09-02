@@ -151,7 +151,11 @@ function Tallies({
     count: coverage.byForm[form],
   }));
 
-  const known = issues.filter(isKnownIssue);
+  // `COV_SKILL_ABSENT` is dropped, not rendered: the line above already names every
+  // channel nothing trains, and the remark repeats it one channel per line. The rule
+  // itself stays in the kernel — this is a filter over its output (§1.7), not a second
+  // opinion about when a channel counts as absent.
+  const known = issues.filter((issue) => isKnownIssue(issue) && issue.code !== 'COV_SKILL_ABSENT');
 
   return (
     <div className="space-y-3">
