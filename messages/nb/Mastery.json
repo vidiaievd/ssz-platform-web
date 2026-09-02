@@ -1,0 +1,36 @@
+{
+  "skill": {
+    "listening": "Lytting",
+    "reading": "Lesing",
+    "spoken": "Muntlig",
+    "written": "Skriving",
+    "unknown": "Ikke registrert"
+  },
+  "focus": {
+    "vocabulary": "Ordforråd",
+    "grammar": "Grammatikk",
+    "orthography": "Rettskriving",
+    "pragmatics": "Språkbruk",
+    "unknown": "Ikke registrert"
+  },
+  "cell": "{skill} · {focus}",
+  "teacher": {
+    "title": "Hva øvingen viser",
+    "strongHeading": "Går bra",
+    "weakHeading": "Verdt å jobbe med",
+    "uncertainHeading": "For lite å si noe om",
+    "uncertainHint": "Øvd på, men for tynt til å bedømmes. En celle bedømmes når den veier omtrent {count, plural, one {# skrevet svar} other {# skrevne svar}}.",
+    "strongEmpty": "Ingenting er over grensen ennå.",
+    "weakEmpty": "Ingenting skiller seg ut som svakt.",
+    "uncertainEmpty": "Alt som er øvd på, har nok bak seg.",
+    "empty": "Ingen øving er registrert ennå, så det er ingenting å si.",
+    "unavailable": "Profilen kunne ikke hentes.",
+    "attempts": "{count, plural, one {# forsøk} other {# forsøk}}",
+    "successRate": "{percent} % riktig",
+    "unknownNote": "«Ikke registrert» er et svar i seg selv: en oppgave sier hva den trener bare når kurset sier det."
+  },
+  "student": {
+    "title": "Verdt litt jobb",
+    "subtitle": "Ut fra det du har øvd på i det siste."
+  }
+}

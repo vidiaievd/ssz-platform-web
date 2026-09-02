@@ -1,0 +1,36 @@
+{
+  "skill": {
+    "listening": "Listening",
+    "reading": "Reading",
+    "spoken": "Speaking",
+    "written": "Writing",
+    "unknown": "Not recorded"
+  },
+  "focus": {
+    "vocabulary": "Vocabulary",
+    "grammar": "Grammar",
+    "orthography": "Spelling",
+    "pragmatics": "Register",
+    "unknown": "Not recorded"
+  },
+  "cell": "{skill} · {focus}",
+  "teacher": {
+    "title": "What practice shows",
+    "strongHeading": "Going well",
+    "weakHeading": "Worth working on",
+    "uncertainHeading": "Not enough to say",
+    "uncertainHint": "Practised, but too thinly to judge. A cell is judged once it carries the weight of about {count, plural, one {# typed answer} other {# typed answers}}.",
+    "strongEmpty": "Nothing has cleared the bar yet.",
+    "weakEmpty": "Nothing stands out as weak.",
+    "uncertainEmpty": "Every cell that has been practised has enough behind it.",
+    "empty": "No practice has been recorded yet, so there is nothing to say.",
+    "unavailable": "The profile could not be loaded.",
+    "attempts": "{count, plural, one {# attempt} other {# attempts}}",
+    "successRate": "{percent}% right",
+    "unknownNote": "“Not recorded” is a real answer: an exercise says what it trains only when the course says so."
+  },
+  "student": {
+    "title": "Worth a bit of work",
+    "subtitle": "From what you have been practising lately."
+  }
+}

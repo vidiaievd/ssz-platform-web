@@ -18,6 +18,7 @@ import Invite from '../../../messages/en/Invite.json';
 import LanguageSwitcher from '../../../messages/en/LanguageSwitcher.json';
 import Learning from '../../../messages/en/Learning.json';
 import Marketing from '../../../messages/en/Marketing.json';
+import Mastery from '../../../messages/en/Mastery.json';
 import Media from '../../../messages/en/Media.json';
 import Nav from '../../../messages/en/Nav.json';
 import Notifications from '../../../messages/en/Notifications.json';
@@ -62,6 +63,7 @@ export const enMessages = {
   LanguageSwitcher,
   Learning,
   Marketing,
+  Mastery,
   Media,
   Nav,
   Notifications,
@@ -109,6 +111,7 @@ export const NAMESPACES = [
   'LanguageSwitcher',
   'Learning',
   'Marketing',
+  'Mastery',
   'Media',
   'Nav',
   'Notifications',
