@@ -18,3 +18,12 @@ export type { WeightInput } from './weight';
 export { evidenceWeight, failureWeight, succeededAt, successWeight } from './weight';
 
 export { foldAttempt } from './ewma';
+
+export type {
+  CellProfile,
+  CellVerdict,
+  UncertainCell,
+  WeakestCells,
+  WeakestCellsOptions,
+} from './verdict';
+export { weakestCells } from './verdict';
