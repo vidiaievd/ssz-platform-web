@@ -394,6 +394,7 @@ export function ExerciseEditorPane({
           exerciseId={exerciseId}
           containerId={container.id}
           initialExercise={writingTaskDocumentFrom(exercise, container.id)}
+          initialAudio={readAudioDraft(exercise.content, WRITING_TASK_TEMPLATE_CODE)}
           onDocumentChange={setWritingTask}
           onSavedRemote={(updatedAt, saved) =>
             queryClient.setQueryData<ExerciseWithAnswers | null>(
@@ -683,7 +684,13 @@ function applySavedWritingTask(
   return {
     ...cached,
     updatedAt,
-    content: { ...writingTaskToContent(saved.exercise) },
+    // The same two steps the save itself takes: the template's own persistence, then the
+    // layer that belongs to none of them.
+    content: applyAudioDraft(
+      { ...writingTaskToContent(saved.exercise) },
+      saved.audio,
+      WRITING_TASK_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...writingTaskToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [

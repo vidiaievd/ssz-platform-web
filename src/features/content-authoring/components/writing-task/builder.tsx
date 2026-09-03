@@ -28,6 +28,9 @@ import {
 } from '@/lib/shared-kernel/writing-task';
 
 import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
+import type { AudioDraft, AudioStepMap, PlacedAudioIssue } from '@/lib/shared-kernel/audio';
+
+import { foldAudioIntoStep, useAudioGateRows, useAudioProblems } from '../audio';
 import { BuilderGateDialog, BuilderSaveHint, BuilderStepNav, type GateRow } from '../builder-frame';
 import { BuilderConflictDialog, useBuilderSaveNotices } from '../builder-save-notices';
 import { EditorToolbarPortal } from '../editor-toolbar';
@@ -43,6 +46,17 @@ import {
 import { useIssueCopy } from './issue-copy';
 
 const STEPS: IssueStep[] = [1, 2, 3, 4];
+
+/**
+ * Where this builder keeps the audio layer — and it keeps less of it than the others.
+ *
+ * A clip here is a stimulus, not a question: "listen to this, then write about it". There
+ * are no items to time, no gate to open and no listen to ration, so the plan gives this
+ * type the switch and the source and nothing else (plan 56 phase 6). The three parts that
+ * are never drawn still need a step, because a finding has to land somewhere — they all
+ * point at step 1, where the clip is.
+ */
+const AUDIO_STEPS: AudioStepMap = { source: 1, segments: 1, rules: 1, transcript: 1 };
 const LAST_STEP = 4;
 
 export interface WritingTaskBuilderProps {
@@ -50,6 +64,8 @@ export interface WritingTaskBuilderProps {
   containerId: string;
   /** The document as loaded from `/exercises/:id/answers`, envelope included. */
   initialExercise: WritingTask;
+  /** The listening layer, carried beside the document (plan 56 phase 6). */
+  initialAudio: AudioDraft;
   onDocumentChange?: (exercise: WritingTask) => void;
   onSavedRemote?: (updatedAt: string, saved: SavedDocument) => void;
 }
@@ -73,12 +89,14 @@ export function WritingTaskBuilder({
   exerciseId,
   containerId,
   initialExercise,
+  initialAudio,
   onDocumentChange,
   onSavedRemote,
 }: WritingTaskBuilderProps) {
   const t = useTranslations('Authoring');
 
   const [exercise, setExercise] = useState(initialExercise);
+  const [audio, setAudio] = useState(initialAudio);
   const [step, setStep] = useState<IssueStep>(1);
   const [gateOpen, setGateOpen] = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
@@ -96,6 +114,7 @@ export function WritingTaskBuilder({
   const [opened] = useState(initialExercise);
 
   const autosave = useWritingTaskAutosave({
+    audio,
     exerciseId,
     containerId,
     exercise,
@@ -114,6 +133,14 @@ export function WritingTaskBuilder({
   }, [exercise]);
 
   const problems = useMemo(() => issues(exercise), [exercise]);
+
+  /**
+   * The layer's findings, in the same rail and the same gate as the type's own.
+   *
+   * No items are passed: this template has none to time, which is also why `items.ts`
+   * leaves it out of its table.
+   */
+  const audioProblems = useAudioProblems(audio, [], AUDIO_STEPS);
 
   const changedSinceOpen = !sameDocument(exercise, opened);
 
@@ -152,7 +179,12 @@ export function WritingTaskBuilder({
           longest thing this row ever holds.
         */}
         <div className="flex min-w-0 flex-1 items-stretch justify-between gap-3">
-          <WritingTaskSteps current={step} exercise={exercise} onSelect={setStep} />
+          <WritingTaskSteps
+            current={step}
+            exercise={exercise}
+            audioProblems={audioProblems}
+            onSelect={setStep}
+          />
           <div className="flex shrink-0 items-center gap-3 py-2">
             <BuilderSaveHint status={autosave.status} savedAt={autosave.savedAt} />
           </div>
@@ -160,7 +192,14 @@ export function WritingTaskBuilder({
       </EditorToolbarPortal>
 
       <div className="min-w-0">
-        {step === 1 && <StepTask exercise={exercise} onChange={setExercise} />}
+        {step === 1 && (
+          <StepTask
+            exercise={exercise}
+            onChange={setExercise}
+            audio={audio}
+            onAudioChange={setAudio}
+          />
+        )}
         {step === 2 && <StepFrame exercise={exercise} onChange={setExercise} />}
         {step === 3 && <StepMarking exercise={exercise} onChange={setExercise} />}
         {step === 4 && (
@@ -180,6 +219,7 @@ export function WritingTaskBuilder({
         open={gateOpen}
         exercise={exercise}
         problems={problems}
+        audioProblems={audioProblems}
         onOpenChange={setGateOpen}
         onGoToStep={(target) => {
           setStep(target as IssueStep);
@@ -245,16 +285,21 @@ export function WritingTaskBuilder({
 function WritingTaskSteps({
   current,
   exercise,
+  audioProblems,
   onSelect,
 }: {
   current: IssueStep;
   exercise: WritingTask;
+  audioProblems: PlacedAudioIssue[];
   onSelect: (step: IssueStep) => void;
 }) {
   const t = useTranslations('Authoring');
 
   const steps: BuilderStep[] = STEPS.map((step) => {
-    const state = stepState(exercise, step);
+    const state = foldAudioIntoStep(
+      stepState(exercise, step),
+      audioProblems.filter((issue) => issue.step === step),
+    );
     const label = t(`writingTask.shell.step${step}` as 'writingTask.shell.step1');
     const sub = t(`writingTask.shell.stepSub${step}` as 'writingTask.shell.stepSub1');
 
@@ -298,18 +343,22 @@ function GateDialog({
   open,
   exercise,
   problems,
+  audioProblems,
   onOpenChange,
   onGoToStep,
 }: {
   open: boolean;
   exercise: WritingTask;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   onOpenChange: (open: boolean) => void;
   onGoToStep: (step: number) => void;
 }) {
   const describeIssue = useIssueCopy(exercise);
+  const audioRows = useAudioGateRows(audioProblems);
 
   const rows: GateRow[] = [
+    ...audioRows,
     ...problems
       .filter((issue) => issue.level === 'blocker')
       .map((issue, index) => ({

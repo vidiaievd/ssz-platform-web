@@ -21,6 +21,8 @@ import {
   type TextLength,
 } from '@/lib/shared-kernel/writing-task';
 
+import { ExerciseAudioPlayer, type ExerciseAudioEngine } from '@/features/student/exercises/audio';
+
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode } from './types';
 
@@ -65,6 +67,14 @@ export interface WritingTaskBodyProps {
   attemptNo?: number;
   /** False in a preview or a read-only replay: the surfaces render, nothing accepts input. */
   interactive?: boolean;
+  /**
+   * The listening layer, when the task has one (plan 56 phase 6).
+   *
+   * A clip here is a stimulus — listen, then write about it — so it is a player and
+   * nothing more: no gate over the field and no listen limit, because the answer is a
+   * paragraph written in the student's own time.
+   */
+  audio?: ExerciseAudioEngine;
   /** What the autosave line shows. Owned by the caller, which is what actually saves. */
   saveState?: DraftSaveState;
   /**
@@ -149,6 +159,7 @@ export function WritingTaskBody({
   phase,
   attemptNo = 1,
   interactive = true,
+  audio,
   saveState = 'idle',
   imageUrl = null,
   mode = 'graded',
@@ -251,6 +262,12 @@ export function WritingTaskBody({
       </div>
 
       <Instr>{task.instruction || t('writingTask.defaultInstruction')}</Instr>
+
+      {audio !== undefined && audio.audio.enabled && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={interactive} />
+        </div>
+      )}
 
       {task.mode === 'picture' && (
         <figure className="mb-4">

@@ -26,7 +26,11 @@ const INSTRUCTION_LANGUAGE = 'en';
 const SCAFFOLD_POINT_ID = 'p1';
 
 export interface SaveWritingTaskInput {
-  content: PersistedContent;
+  /**
+   * The persisted document — the template's own shape, plus the audio block when the
+   * exercise has one. The layer belongs to no template (plan 56).
+   */
+  content: PersistedContent & Record<string, unknown>;
   expectedAnswers: PersistedAnswers;
   /** The `updatedAt` the builder last saw. The write is refused if the row moved on. */
   expectedUpdatedAt: string;

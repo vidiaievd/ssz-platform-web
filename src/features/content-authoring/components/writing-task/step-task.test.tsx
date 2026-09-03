@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
 import { emptyContent, LEN_DEFAULTS, type WritingTask } from '@/lib/shared-kernel/writing-task';
 
 import { StepTask } from './step-task';
@@ -42,6 +43,8 @@ function Harness({
   return (
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <StepTask
+        audio={readAudioDraft({}, 'writing_task')}
+        onAudioChange={() => {}}
         exercise={exercise}
         onChange={(next) => {
           onChange?.(next);

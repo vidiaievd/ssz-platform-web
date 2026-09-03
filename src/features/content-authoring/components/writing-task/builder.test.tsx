@@ -4,7 +4,15 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
 import { emptyContent, type WritingTask } from '@/lib/shared-kernel/writing-task';
+
+// The source card resolves the clip through media-service, and this builder's tests
+// mount no QueryClientProvider (plan 56 phase 6).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
 
 vi.mock('../../actions/writing-task', () => ({ saveWritingTaskAction: vi.fn() }));
 
@@ -52,10 +60,20 @@ function doc(overrides: Partial<WritingTask> = {}): WritingTask {
   };
 }
 
-function renderBuilder(exercise: WritingTask = doc()) {
+function renderBuilder(
+  exercise: WritingTask = doc(),
+  // Every builder carries the audio layer, and an exercise that has never had any reads
+  // as switched off (plan 56 phase 6).
+  audio: AudioDraft = readAudioDraft({}, 'writing_task'),
+) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <WritingTaskBuilder exerciseId="ex-1" containerId="module-1" initialExercise={exercise} />
+      <WritingTaskBuilder
+        exerciseId="ex-1"
+        containerId="module-1"
+        initialExercise={exercise}
+        initialAudio={audio}
+      />
     </NextIntlClientProvider>,
   );
   return { user: userEvent.setup() };
@@ -279,5 +297,42 @@ describe('WritingTaskBuilder autosave', () => {
     await new Promise((resolve) => setTimeout(resolve, 1_200));
 
     expect(saveWritingTaskAction).not.toHaveBeenCalled();
+  });
+
+  /*
+    The listening layer on this builder — the smallest mount of the six (plan 56 phase 6).
+    A clip is a stimulus here, so the author gets the switch and the source and no rules:
+    there is nothing to time, nothing to gate and no listen worth rationing.
+  */
+  describe('with audio', () => {
+    const listening = (over: Record<string, unknown> = {}): AudioDraft =>
+      readAudioDraft(
+        { audio: { enabled: true, source: 'asset', assetId: 'a-1', title: 'Intervju', ...over } },
+        'writing_task',
+      );
+
+    it('offers the switch and the clip, and no rules for hearing it', () => {
+      renderBuilder(doc(), listening());
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).toBeChecked();
+      expect(screen.getByText('The clip')).toBeInTheDocument();
+      expect(screen.queryByText('How they may listen')).not.toBeInTheDocument();
+    });
+
+    it('still reports an exercise that says listen with nothing to play', () => {
+      // The one finding this template can raise, on the step that owns the clip.
+      renderBuilder(doc(), listening({ assetId: '' }));
+
+      expect(
+        within(screen.getByRole('tab', { name: /The task/ })).getByText(/problem/),
+      ).toBeInTheDocument();
+    });
+
+    it('draws nothing at all while the switch is off', () => {
+      renderBuilder();
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).not.toBeChecked();
+      expect(screen.queryByText('The clip')).not.toBeInTheDocument();
+    });
   });
 });

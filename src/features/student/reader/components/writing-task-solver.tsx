@@ -24,6 +24,7 @@ import {
   type WritingTaskValue,
 } from '@/features/student/exercises/runner';
 import type { StudentProjection } from '@/lib/shared-kernel/writing-task';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface WritingTaskSolverProps {
@@ -66,6 +67,15 @@ export function WritingTaskSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<StudentProjection | null>(null);
+  /**
+   * The document as the engine dealt it, kept for the audio layer alone: the projection is
+   * the kernel's own shape and has no room for a block that is not the template's.
+   *
+   * No transcript state here, and none is owed: a clip on this template is a stimulus, and
+   * what it says is not an answer being withheld.
+   */
+  const [document, setDocument] = useState<unknown>(null);
+  const audio = useExerciseAudio(document);
   /** Set when the task arrived with its answer key still on it — see the reader. */
   const [unusable, setUnusable] = useState(false);
 
@@ -100,6 +110,7 @@ export function WritingTaskSolver({
 
           setAttemptId(data.attemptId);
           setProjection(task);
+          setDocument(data.exerciseContent);
           openedAt.current = Date.now();
 
           if (restoreConsidered.current) return;
@@ -270,6 +281,7 @@ export function WritingTaskSolver({
     <div>
       <WritingTaskBody
         task={task}
+        audio={audio}
         value={value}
         onValueChange={changeValue}
         phase={phase}

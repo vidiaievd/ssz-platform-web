@@ -5,6 +5,8 @@ import { useState, type ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 import type { StudentProjection } from '@/lib/shared-kernel/writing-task';
 
 import {
@@ -76,6 +78,7 @@ function Harness({
   attemptNo?: number;
   saveState?: 'idle' | 'saving' | 'saved';
   imageUrl?: string | null;
+  audio?: ExerciseAudioEngine;
 }) {
   const [value, setValue] = useState<WritingTaskValue>(initial);
   return (
@@ -317,5 +320,53 @@ describe('WritingTaskBody', () => {
 
     render(wrap(<Harness task={makeTask()} />));
     expect(screen.queryByText('Draft saved')).not.toBeInTheDocument();
+  });
+});
+
+/** The engine as the hook would hand it over, with nothing playing yet. */
+const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+  audio: { ...AUDIO_DEFAULT, enabled: true, assetId: 'asset-1', title: 'Intervju', duration: 96 },
+  segments: {},
+  element: null,
+  src: 'https://cdn.test/asset-1.mp3',
+  state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+  duration: 96,
+  playing: false,
+  plays: 0,
+  limit: 0,
+  exhausted: false,
+  heard: false,
+  gated: false,
+  canPlay: true,
+  failed: false,
+  loading: false,
+  speed: 1,
+  toggle: vi.fn(),
+  back: vi.fn(),
+  seekTo: vi.fn(),
+  playRange: vi.fn(),
+  cycleSpeed: vi.fn(),
+  reset: vi.fn(),
+  ...over,
+});
+
+/*
+  The listening layer on this type (plan 56 phase 6), and what it deliberately leaves out:
+  a clip here is a stimulus, so there is a player and no gate over the field. Even a
+  `gated` engine — which no builder on this template can produce — must not lock the
+  writing, because nothing about a paragraph waits for a recording.
+*/
+describe('WritingTaskBody — with audio', () => {
+  it('plays the clip above the task and leaves the field open', () => {
+    render(wrap(<Harness task={makeTask()} audio={engine({ gated: true })} />));
+
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).not.toHaveAttribute('readonly');
+  });
+
+  it('is not there at all for a task without it', () => {
+    render(wrap(<Harness task={makeTask()} />));
+
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
   });
 });

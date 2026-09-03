@@ -41,6 +41,9 @@ import {
   setSettings,
 } from './edits';
 import { ChipEditor } from '../chip-editor';
+import type { AudioDraft } from '@/lib/shared-kernel/audio';
+
+import { AudioEnableRow, AudioSourceCard } from '../audio';
 import { ImageSlot } from './image-slot';
 
 const MODE_ICONS: Record<Mode, typeof Mail> = {
@@ -56,6 +59,15 @@ const REGISTERS: LetterRegister[] = ['formal', 'informal'];
 export interface StepTaskProps {
   exercise: WritingTask;
   onChange: (next: WritingTask) => void;
+  /**
+   * The listening layer, held beside the document by the builder (plan 56 phase 6).
+   *
+   * A clip on this template is a stimulus — listen, then write — so only the switch and
+   * the source are offered: there is nothing to time, nothing to gate and no listen worth
+   * rationing when the answer is a paragraph the student writes in their own time.
+   */
+  audio: AudioDraft;
+  onAudioChange: (next: AudioDraft) => void;
 }
 
 /**
@@ -80,7 +92,7 @@ export interface StepTaskProps {
  * There is no title field, as in the four builders before it: the platform has no title
  * on an exercise.
  */
-export function StepTask({ exercise, onChange }: StepTaskProps) {
+export function StepTask({ exercise, onChange, audio, onAudioChange }: StepTaskProps) {
   const t = useTranslations('Authoring');
   const needs = modeConfig(exercise.mode).needs;
   const points = exercise.points;
@@ -125,6 +137,14 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
         <h2 className="text-base font-semibold">{t('writingTask.step1.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('writingTask.step1.lede')}</p>
       </div>
+
+      {/* Listening as a stimulus: the clip is what the student writes about. No gate and
+          no listen limit — the answer is written in their own time (plan 56 phase 6). */}
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+        <AudioEnableRow draft={audio} onChange={onAudioChange} />
+      </div>
+
+      {audio.audio.enabled && <AudioSourceCard draft={audio} onChange={onAudioChange} />}
 
       <section className="flex flex-col gap-2">
         <h3 className="text-xs font-medium">{t('writingTask.step1.modeLabel')}</h3>
@@ -414,7 +434,10 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
  * for that point do not match how anyone would write it — which is worth knowing before
  * an AI pre-check is built on top of them, and harmless until then.
  */
-function ModelAnswer({ exercise, onChange }: StepTaskProps) {
+function ModelAnswer({
+  exercise,
+  onChange,
+}: Pick<StepTaskProps, 'exercise' | 'onChange'>) {
   const t = useTranslations('Authoring');
   const analysis = analyse(exercise, exercise.model);
   const written = exercise.model.trim() !== '';

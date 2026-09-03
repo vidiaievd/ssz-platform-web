@@ -3,9 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { AppErrorCode } from '@/lib/errors';
-import { toContent, toExpectedAnswers, type WritingTask } from '@/lib/shared-kernel/writing-task';
+import { applyAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
+import {
+  TEMPLATE_CODE,
+  toContent,
+  toExpectedAnswers,
+  type WritingTask,
+} from '@/lib/shared-kernel/writing-task';
 
-import { saveWritingTaskAction, type SaveWritingTaskOutcome } from '../../actions/writing-task';
+import {
+  saveWritingTaskAction,
+  type SaveWritingTaskInput,
+  type SaveWritingTaskOutcome,
+} from '../../actions/writing-task';
 
 /** BEHAVIOR §1.5: edits coalesce, and the teacher never presses a save button. */
 const DEBOUNCE_MS = 800;
@@ -62,12 +72,19 @@ interface Options {
   exerciseId: string;
   containerId: string;
   exercise: WritingTask;
+  /**
+   * The listening layer, carried beside the document (plan 56). The kernel's document is
+   * shared with the services, and `toContent` would drop a block that belongs to no
+   * template either way.
+   */
+  audio: AudioDraft;
   /** The token the row now carries, with the document that was written to earn it. */
   onSaved: (updatedAt: string, saved: SavedDocument) => void;
 }
 
 export interface SavedDocument {
   exercise: WritingTask;
+  audio: AudioDraft;
 }
 
 /**
@@ -106,6 +123,7 @@ export function useWritingTaskAutosave({
   exerciseId,
   containerId,
   exercise,
+  audio,
   onSaved,
 }: Options): WritingTaskAutosave {
   const [status, setStatus] = useState<SaveStatus>('idle');
@@ -118,17 +136,18 @@ export function useWritingTaskAutosave({
   const [failures, setFailures] = useState(0);
 
   /** What was last written or loaded. Anything else on screen is unsaved work. */
-  const [baseline, setBaseline] = useState<SavedDocument>({ exercise });
+  const [baseline, setBaseline] = useState<SavedDocument>({ exercise, audio });
 
   /** What to save, read at flush time so a burst of edits saves once, at its latest. */
-  const pending = useRef({ exercise });
+  const pending = useRef({ exercise, audio });
   const attempt = useRef(0);
   const inFlight = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flushRef = useRef<() => Promise<void>>(() => Promise.resolve());
   const onSavedRef = useRef(onSaved);
 
-  const dirty = !sameDocument(exercise, baseline.exercise);
+  // The draft is replaced whole on every edit, exactly like the branches of the document.
+  const dirty = !sameDocument(exercise, baseline.exercise) || audio !== baseline.audio;
 
   const schedule = useCallback((delay: number) => {
     if (timer.current !== null) clearTimeout(timer.current);
@@ -146,13 +165,19 @@ export function useWritingTaskAutosave({
         schedule(DEBOUNCE_MS);
         return;
       }
-      const { exercise: document } = pending.current;
+      const { exercise: document, audio: draft } = pending.current;
 
       inFlight.current = true;
       setStatus('saving');
 
       const result = await saveWritingTaskAction(exerciseId, containerId, {
-        content: toContent(document),
+        // The template's own persistence, then the layer that belongs to none of them:
+        // `toContent` builds an explicit object and would drop the audio block.
+        content: applyAudioDraft(
+          toContent(document) as unknown as Record<string, unknown>,
+          draft,
+          TEMPLATE_CODE,
+        ) as SaveWritingTaskInput['content'],
         expectedAnswers: toExpectedAnswers(document),
         expectedUpdatedAt: force?.expectedUpdatedAt ?? document.updatedAt,
         // The one line the author wrote, written to the instruction row as well as into
@@ -198,7 +223,7 @@ export function useWritingTaskAutosave({
       setFailures(0);
       // Saved: this is now the version everything is compared against, so an untouched
       // document is not written a second time.
-      const saved: SavedDocument = { exercise: document };
+      const saved: SavedDocument = { exercise: document, audio: draft };
       setBaseline(saved);
       setConflictToken(null);
       setRejection(null);
@@ -213,7 +238,7 @@ export function useWritingTaskAutosave({
   // save so that a flush always reads the newest document rather than the one from the
   // render that queued it.
   useEffect(() => {
-    pending.current = { exercise };
+    pending.current = { exercise, audio };
     onSavedRef.current = onSaved;
     flushRef.current = () => flush();
   });
@@ -229,7 +254,7 @@ export function useWritingTaskAutosave({
     // The document is the trigger: every edit reschedules the one pending save. `status`
     // is deliberately not a dependency — it changes on every save and would reschedule.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exercise, dirty, schedule]);
+  }, [exercise, audio, dirty, schedule]);
 
   const retry = useCallback(() => {
     attempt.current = 0;
