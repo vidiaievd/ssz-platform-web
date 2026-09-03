@@ -293,9 +293,16 @@ export function ReaderShell({
   // time the page padding and the task card have taken their share, 820px left 716 — so
   // the board fell back to the phone layout on a desktop. The handoff draws it at ~950px;
   // this is that width, plus what the two paddings take.
+  //
+  // A single exercise opened by its own link gets the practice width for the same reason:
+  // the 680 below is a cap written for prose, and an exercise reaching it through the
+  // "everything else" branch got 616px of body — under `multiple_choice_group`'s own 640px
+  // table threshold. The same exercise then looked like a table on the practice page and
+  // like cards through a direct link. Wide bodies decide their own layout; narrow ones
+  // (short_answer, gap-fill) centre themselves inside whatever they are given.
   const effectiveMaxWidth =
     maxWidth ??
-    (practiceSection
+    (practiceSection || activeKind === 'exercise'
       ? 1040
       : activeKind === 'vocab'
         ? 780

@@ -21,12 +21,27 @@ function attemptIdOf(details: unknown): string | null {
  * Abandon the stale attempt and start again. Returns `null` if either step fails, so
  * the caller reports the conflict rather than a half-recovered state.
  *
+ * The fallback, not the first move: POST joins the open attempt where it can, and only
+ * reaches here when the attempt cannot be joined or is in the wrong check mode.
+ *
  * The draft travels across. Abandoning an attempt is safe for every template whose
  * unfinished work only ever lived in the browser — but an attempt can now hold a
  * server-side draft, and for `writing_task` that draft is the learner's text. Dropping
  * the row it sits on would make re-opening the page the one reliable way to lose an
  * evening's writing, which is exactly what saving it server-side was for. So the draft
  * is read before the abandon and written onto the fresh attempt after it.
+ *
+ * **Losing the race is not failing.** Two tabs on one exercise recover from the same
+ * stale attempt at the same moment: both abandon it, both start, and the second start
+ * conflicts with the attempt the first one just opened. That conflict names a *different*
+ * attempt than the one this recovery set out to clear, and the difference is the whole
+ * signal — the attempt is open, it is this learner's, and it can be submitted into. So
+ * it is joined rather than cleared. Clearing it would pull the exercise out from under
+ * the tab that is already using it.
+ *
+ * Once, not in a loop: a second conflict naming a second new attempt is no longer a race
+ * between two tabs but an engine that will not settle, and retrying it forever would only
+ * make that worse.
  */
 async function restart(
   exerciseId: string,
@@ -51,6 +66,41 @@ async function restart(
 
     if (carried !== null) await carryDraft(exerciseId, started.attemptId, carried);
     return started;
+  } catch (e) {
+    if (isAppError(e) && e.code === 'conflict') {
+      const winner = attemptIdOf(e.details);
+      // The draft is not carried again: the tab that won the race carried it onto this
+      // very attempt a moment ago, and writing the older copy over it would undo
+      // whatever has been typed since.
+      if (winner !== null && winner !== staleAttemptId) {
+        return join(exerciseId, winner, language, mode);
+      }
+    }
+    return null;
+  }
+}
+
+/**
+ * Ask for an attempt that is already open, by name, and get it back as a start.
+ *
+ * The engine hands over the attempt with its board — the projection is dealt server-side
+ * and seeded by the attempt's own id, so this is the same table, the same shuffle and the
+ * same masking the tab that opened it is looking at. Reading the attempt record instead
+ * would not do: it carries the answers and the draft, but not the content.
+ */
+async function join(
+  exerciseId: string,
+  attemptId: string,
+  language: string,
+  mode: CheckMode | undefined,
+): Promise<StartAttemptResponse | null> {
+  try {
+    return await serverFetch<StartAttemptResponse>({
+      service: 'exercises',
+      path: `/exercises/${exerciseId}/attempts`,
+      method: 'POST',
+      body: { language, joinAttemptId: attemptId, ...(mode === undefined ? {} : { mode }) },
+    });
   } catch {
     return null;
   }
@@ -104,11 +154,22 @@ async function carryDraft(
  *
  * **Re-opening is the common case, not an edge one.** The engine keeps an attempt
  * IN_PROGRESS until something is submitted, so a learner who leaves the page and comes
- * back conflicts with themselves every time. This route clears that: an attempt with
- * nothing submitted holds nothing worth keeping — the placements only ever lived in the
- * browser — so it is abandoned, which is the truth of what happened, and a fresh one is
- * started. Doing it here rather than in the client keeps a three-step recovery out of a
- * component's render path.
+ * back conflicts with themselves every time. This route resolves that, and it tries to
+ * *join* the open attempt before it tries to clear it.
+ *
+ * Joining first, because "an attempt with nothing submitted holds nothing worth keeping"
+ * turned out to be false in the one case that matters: a second tab. An attempt opened a
+ * second ago by a tab the learner is still looking at is indistinguishable from one left
+ * over from yesterday, and clearing it took the exercise out from under that tab — its
+ * hand-in came back 502 and the learner was told their answers could not be sent
+ * (measured 02.09, two tabs opened in turn). Joining is right for the stale case too: the
+ * attempt comes back with its own board, the draft is already on it, and re-opening a
+ * page stops leaving a trail of abandoned rows behind it.
+ *
+ * Clearing is still the fallback — when the attempt cannot be joined at all, and when it
+ * is in the wrong check mode, since a PRACTICE attempt must not swallow the learner's
+ * move to a GRADED one. Doing all of this here rather than in the client keeps a
+ * multi-step recovery out of a component's render path.
  *
  * One attempt is never abandoned, and this route never sees it: a `short_answer` set
  * that already holds handed-in answers comes back from the engine as a resumed attempt
@@ -149,6 +210,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (e.code === 'conflict') {
         const stale = attemptIdOf(e.details);
         if (stale !== null) {
+          /*
+           * The mode the caller would have got had there been no attempt open. This route
+           * never sends an assignmentId, so the engine's default for it is PRACTICE; an
+           * open attempt in the other mode is therefore not the one being asked for, and
+           * joining it would quietly answer a GRADED request with a PRACTICE board (or the
+           * reverse, handing over answers that were meant to be withheld). Mismatch falls
+           * through to the clear-and-restart below, which honours the mode as asked.
+           */
+          const wanted = mode ?? 'PRACTICE';
+          const joined = await join(id, stale, language, mode);
+          if (joined !== null && joined.checkMode === wanted) {
+            return NextResponse.json(joined);
+          }
+
           const restarted = await restart(id, stale, language, mode);
           if (restarted !== null) return NextResponse.json(restarted);
         }
