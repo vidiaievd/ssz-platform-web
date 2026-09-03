@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 import { AlertTriangle, Info, LayoutGrid, Rows3 } from 'lucide-react';
 
 import { Segmented } from '@/components/ui/segmented';
+
+import { AudioRulesCard } from '../audio';
 import {
   issues,
   passMark,
@@ -57,6 +59,14 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
         <h2 className="text-base font-semibold">{t('multipleChoiceGroup.step3.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('multipleChoiceGroup.step3.lede')}</p>
       </div>
+
+      {exercise.audio.audio.enabled && (
+        <AudioRulesCard
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+          itemNoun={t('multipleChoiceGroup.step3.audioItemNoun')}
+        />
+      )}
 
       <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
         <div className="flex flex-col gap-1.5">

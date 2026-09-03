@@ -3,11 +3,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { AppErrorCode } from '@/lib/errors';
-import { toContent, toExpectedAnswers } from '@/lib/shared-kernel/multiple-choice-group';
+import { applyAudioDraft } from '@/lib/shared-kernel/audio';
+import {
+  TEMPLATE_CODE,
+  toContent,
+  toExpectedAnswers,
+} from '@/lib/shared-kernel/multiple-choice-group';
 
 import {
   saveMultipleChoiceGroupAction,
   type SaveMultipleChoiceGroupOutcome,
+  type SaveMultipleChoiceGroupInput,
 } from '../../actions/multiple-choice-group';
 import type { MultipleChoiceGroupDocument } from './edits';
 
@@ -154,7 +160,13 @@ export function useMultipleChoiceGroupAutosave({
       setStatus('saving');
 
       const result = await saveMultipleChoiceGroupAction(exerciseId, containerId, {
-        content: toContent(document),
+        // The template's own persistence, then the layer that belongs to none of them:
+        // `toContent` builds an explicit object and would drop the audio block.
+        content: applyAudioDraft(
+          toContent(document) as unknown as Record<string, unknown>,
+          document.audio,
+          TEMPLATE_CODE,
+        ) as SaveMultipleChoiceGroupInput['content'],
         expectedAnswers: toExpectedAnswers(document),
         expectedUpdatedAt: force?.expectedUpdatedAt ?? document.updatedAt,
         // The one line the author wrote, written to the instruction row as well as into

@@ -6,6 +6,9 @@ import { AlertTriangle, Check, ClipboardPaste, Info, Plus, Trash2 } from 'lucide
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/input';
+import { withSegment } from '@/lib/shared-kernel/audio';
+
+import { AudioSegmentField } from '../audio';
 import {
   Dialog,
   DialogContent,
@@ -79,6 +82,7 @@ export function StepStatements({ exercise, onChange, language }: StepStatementsP
   const spread = balance(exercise);
   const ready = readyRows(exercise);
   const columns = exercise.columns;
+  const timecodes = exercise.audio.audio.enabled && exercise.audio.audio.useSegments;
   const grid = {
     gridTemplateColumns: `28px minmax(0,1fr) repeat(${columns.length}, 84px) 40px`,
   };
@@ -242,6 +246,24 @@ export function StepStatements({ exercise, onChange, language }: StepStatementsP
                       </Button>
                     </span>
                   </div>
+
+                  {/* Timecodes per row are the high-value case for this type: a table of
+                      statements about one dialogue, each with its own line to hear
+                      (INTEGRATION.md). Under the row rather than beside it — the grid is
+                      the table's, and a fifth column would break the header. */}
+                  {timecodes && (
+                    <div className="pt-1.5 pl-[38px]">
+                      <AudioSegmentField
+                        segment={exercise.audio.segments[row.id] ?? null}
+                        onChange={(segment) =>
+                          onChange({
+                            ...exercise,
+                            audio: withSegment(exercise.audio, row.id, segment),
+                          })
+                        }
+                      />
+                    </div>
+                  )}
 
                   {(missingAnswer || notes.length > 0) && (
                     <div className="flex flex-col gap-1 pt-1.5 pl-[38px]">

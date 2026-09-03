@@ -135,6 +135,13 @@ export interface SubmitAnswerResponse {
   feedback: { summary: string; hints?: string[]; correctAnswer?: unknown };
   /** Validator output. For gap-fill, a verdict and an explanation per gap. */
   details?: unknown;
+  /**
+   * What the clip said, for a listening exercise whose transcript shows after the answer.
+   *
+   * The hand-in is the end of the exercise, so there is nothing left to give away
+   * (plan 56 §3.3).
+   */
+  audioTranscript?: { transcript: string; translation: string };
 }
 
 /** `details` when the template is `word_bank_gap_fill`. */

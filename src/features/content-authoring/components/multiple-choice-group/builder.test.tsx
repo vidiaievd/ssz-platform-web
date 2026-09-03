@@ -4,6 +4,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice-group';
 import type { MultipleChoiceGroupContent } from '@/lib/shared-kernel/multiple-choice-group';
 import {
   exercise,
@@ -15,6 +17,13 @@ import {
 
 import type { MultipleChoiceGroupDocument } from './edits';
 
+// The source card resolves the clip through media-service, and this builder's tests
+// mount no QueryClientProvider (plan 56 phase 5).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
+
 vi.mock('../../actions/multiple-choice-group', () => ({ saveMultipleChoiceGroupAction: vi.fn() }));
 
 const { MultipleChoiceGroupBuilder } = await import('./builder');
@@ -24,7 +33,13 @@ const LOADED_AT = '2026-08-29T10:00:00.000Z';
 
 /** A table with nothing left to fix, so a test can add exactly one problem. */
 function doc(overrides: Partial<MultipleChoiceGroupContent> = {}): MultipleChoiceGroupDocument {
-  return { updatedAt: LOADED_AT, ...exercise(overrides) };
+  return {
+    updatedAt: LOADED_AT,
+    // Every builder document carries the audio layer, and an exercise that has never had
+    // any reads as switched off (plan 56 phase 5).
+    audio: readAudioDraft({}, TEMPLATE_CODE),
+    ...exercise(overrides),
+  };
 }
 
 function renderBuilder(document: MultipleChoiceGroupDocument = doc()) {
@@ -205,4 +220,51 @@ describe('MultipleChoiceGroupBuilder', () => {
 
     expect(screen.getByRole('button', { name: /Undo everything/ })).toBeInTheDocument();
   });
+
+  /* The listening layer on this builder (plan 56 phase 5). */
+  describe('with audio', () => {
+    const listening = (over: Record<string, unknown> = {}) => ({
+      ...doc(),
+      audio: readAudioDraft(
+        {
+          audio: {
+            enabled: true,
+            source: 'asset',
+            assetId: 'asset-1',
+            title: 'Dialog',
+            duration: 96,
+            settings: { transcriptWhen: 'never' },
+            ...over,
+          },
+        },
+        TEMPLATE_CODE,
+      ),
+    });
+
+    it('joins the material card rather than becoming a fourth mode of it', () => {
+      // The modes are exclusive and the handoff asks for text *and* audio together — a
+      // passage read aloud — so a fourth segment would forbid what it was added for.
+      renderBuilder(listening());
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).toBeChecked();
+      expect(screen.getByRole('radio', { name: 'Paste it in' })).toBeInTheDocument();
+      expect(screen.getByText('The clip')).toBeInTheDocument();
+    });
+
+    it('reports a missing clip as a blocker on the step that owns the fix', () => {
+      renderBuilder(listening({ assetId: '' }));
+
+      expect(
+        within(screen.getByRole('tab', { name: /Setup/ })).getByText(/problem/),
+      ).toBeInTheDocument();
+    });
+
+    it('draws nothing at all while the switch is off', () => {
+      renderBuilder();
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).not.toBeChecked();
+      expect(screen.queryByText('The clip')).not.toBeInTheDocument();
+    });
+  });
+
 });

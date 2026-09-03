@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { PRESETS, readyRows } from '@/lib/shared-kernel/multiple-choice-group';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import {
+  PRESETS,
+  readyRows,
+  TEMPLATE_CODE,
+} from '@/lib/shared-kernel/multiple-choice-group';
 import {
   exercise,
   RIGHT,
@@ -23,7 +28,12 @@ import {
 } from './edits';
 
 function doc(): MultipleChoiceGroupDocument {
-  return { updatedAt: '2026-08-29T10:00:00.000Z', ...exercise() };
+  return {
+    updatedAt: '2026-08-29T10:00:00.000Z',
+    // Every builder document carries the audio layer (plan 56 phase 5).
+    audio: readAudioDraft({}, TEMPLATE_CODE),
+    ...exercise(),
+  };
 }
 
 describe('multiple-choice-group edits', () => {

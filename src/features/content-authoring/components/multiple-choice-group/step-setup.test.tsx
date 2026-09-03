@@ -5,6 +5,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice-group';
 import type { MultipleChoiceGroupContent } from '@/lib/shared-kernel/multiple-choice-group';
 import { exercise } from '@/lib/shared-kernel/multiple-choice-group/fixtures.test-support';
 
@@ -12,7 +14,13 @@ import { StepSetup } from './step-setup';
 import type { MultipleChoiceGroupDocument } from './edits';
 
 function doc(overrides: Partial<MultipleChoiceGroupContent> = {}): MultipleChoiceGroupDocument {
-  return { updatedAt: '2026-08-29T10:00:00.000Z', ...exercise(overrides) };
+  return {
+    updatedAt: '2026-08-29T10:00:00.000Z',
+    // Every builder document carries the audio layer, and an exercise that has never had
+    // any reads as switched off (plan 56 phase 5).
+    audio: readAudioDraft({}, TEMPLATE_CODE),
+    ...exercise(overrides),
+  };
 }
 
 function Harness({

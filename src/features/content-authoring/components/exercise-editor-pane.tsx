@@ -806,6 +806,7 @@ function multipleChoiceGroupDocumentFrom(
   return {
     ...multipleChoiceGroupFromPersisted(exercise.content, exercise.expectedAnswers),
     updatedAt: exercise.updatedAt ?? '',
+    audio: readAudioDraft(exercise.content, MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE),
   };
 }
 

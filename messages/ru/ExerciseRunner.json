@@ -468,7 +468,8 @@
       "toItems": "К заданиям"
     },
     "itemNoun": {
-      "questions": "вопросы"
+      "questions": "вопросы",
+      "statements": "утверждения"
     }
   }
 }

@@ -20,6 +20,7 @@
 // An editor that spelled any of them out again would be the second place they are written
 // down, and the first to drift.
 
+import type { AudioDraft } from '@/lib/shared-kernel/audio';
 import {
   appendRows,
   applyPreset as applyColumnPreset,
@@ -46,6 +47,14 @@ import {
 export interface MultipleChoiceGroupDocument extends MultipleChoiceGroupContent {
   /** ISO. Doubles as the autosave concurrency token. */
   updatedAt: string;
+  /**
+   * The listening layer, edited beside the document (plan 56 phase 5).
+   *
+   * Not part of `MultipleChoiceGroupContent` for the reason the whole layer exists: the
+   * same block hangs on all thirteen templates, and `toContent` builds an explicit object
+   * that would drop it. `applyAudioDraft` writes it back at save time.
+   */
+  audio: AudioDraft;
 }
 
 /** README "Answer columns": `Add column` is disabled at four. */

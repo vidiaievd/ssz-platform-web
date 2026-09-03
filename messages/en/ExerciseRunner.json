@@ -468,7 +468,8 @@
       "toItems": "To the items"
     },
     "itemNoun": {
-      "questions": "questions"
+      "questions": "questions",
+      "statements": "statements"
     }
   }
 }

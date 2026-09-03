@@ -3057,7 +3057,8 @@
       "layoutLabel": "Oppsett på bred skjerm",
       "layoutTable": "Tabell",
       "layoutCards": "Kort",
-      "layoutHelp": "En telefon viser alltid kort."
+      "layoutHelp": "En telefon viser alltid kort.",
+      "audioItemNoun": "påstandene"
     },
     "step4": {
       "title": "Hvorfor hvert svar er som det er",

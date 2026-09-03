@@ -468,7 +468,8 @@
       "toItems": "Til oppgavene"
     },
     "itemNoun": {
-      "questions": "spørsmålene"
+      "questions": "spørsmålene",
+      "statements": "påstandene"
     }
   }
 }

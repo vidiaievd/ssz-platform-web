@@ -31,7 +31,11 @@ const SCAFFOLD_ROW_IDS = ['r1', 'r2', 'r3', 'r4'] as const;
 const SCAFFOLD_COLUMN_IDS = ['c1', 'c2'] as const;
 
 export interface SaveMultipleChoiceGroupInput {
-  content: PersistedContent;
+  /**
+   * The persisted document — the template's own shape, plus the audio block when the
+   * exercise has one. The layer belongs to no template (plan 56).
+   */
+  content: PersistedContent & Record<string, unknown>;
   expectedAnswers: PersistedAnswers;
   /** The `updatedAt` the builder last saw. The write is refused if the row moved on. */
   expectedUpdatedAt: string;

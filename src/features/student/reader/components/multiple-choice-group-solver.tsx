@@ -20,6 +20,7 @@ import type {
   MultipleChoiceGroupSubmittedAnswer,
 } from '@/features/student/exercises/types/attempts';
 import type { StudentProjection } from '@/lib/shared-kernel/multiple-choice-group';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface MultipleChoiceGroupSolverProps {
@@ -77,6 +78,16 @@ export function MultipleChoiceGroupSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<StudentProjection | null>(null);
+  /**
+   * The document as the engine dealt it, kept for the audio layer alone: the projection
+   * is the kernel's own shape and has no room for a block that is not the template's
+   * (plan 56).
+   */
+  const [document, setDocument] = useState<unknown>(null);
+  /** What the clip said, once the engine hands it over with the closing verdict. */
+  const [transcript, setTranscript] = useState<{ transcript: string; translation: string } | null>(
+    null,
+  );
   /** Set when the table arrived with its answer key still on it — see the projection reader. */
   const [unusable, setUnusable] = useState(false);
 
@@ -108,6 +119,8 @@ export function MultipleChoiceGroupSolver({
 
           setAttemptId(data.attemptId);
           setProjection(table);
+          setDocument(data.exerciseContent);
+          setTranscript(null);
           setAnswers({});
           setPhase('answering');
           setVerdict(null);
@@ -127,6 +140,12 @@ export function MultipleChoiceGroupSolver({
     setUnusable(false);
     begin();
   }, [begin]);
+
+  /**
+   * The listening layer, mounted once for the whole table rather than per row: the
+   * allowance, the gate and the playthrough belong to the exercise.
+   */
+  const audio = useExerciseAudio(document);
 
   if (!unusable && (start.isPending || (start.isSuccess && projection === null))) {
     return <LearningSkeleton variant="list" rows={4} />;
@@ -174,6 +193,8 @@ export function MultipleChoiceGroupSolver({
           setVerdict(details);
           setLocked(details.locked);
           setPhase('checked');
+          // The table is handed in, so the clip has nothing left to give away.
+          if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
 
           // Once, and on the first check: a corrected table is not evidence that the text
           // was understood, which is why the engine publishes its score event on the
@@ -263,6 +284,8 @@ export function MultipleChoiceGroupSolver({
         locked={locked}
         sending={submit.isPending}
         error={error}
+        audio={audio}
+        audioTranscript={transcript}
         onCheck={() => send()}
         onRetry={retry}
         onReveal={() => send(true)}

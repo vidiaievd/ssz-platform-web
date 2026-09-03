@@ -11,6 +11,13 @@ import type {
   MultipleChoiceGroupSubmitDetails,
 } from '@/features/student/exercises/types/attempts';
 
+import {
+  AudioLockNote,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
+
 import { Instr } from './instr';
 
 /**
@@ -109,6 +116,15 @@ export interface MultipleChoiceGroupBodyProps {
   /** False in a preview: everything renders, nothing accepts input (R6). */
   interactive?: boolean;
   /**
+   * The listening layer, when the table has one (plan 56).
+   *
+   * Absent means an exercise with no audio, and the body is then exactly what it was
+   * before this feature — no player, no gate, no chip.
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the key once the table is closed. */
+  audioTranscript?: { transcript: string; translation: string } | null;
+  /**
    * Whether the table draws its own progress bar. False where something outside it
    * already draws one — the practice stack counts tasks of the section. The `N/M svart`
    * counter stays either way, and both are ignored when the author turned progress off.
@@ -165,6 +181,8 @@ export function MultipleChoiceGroupBody({
   sending = false,
   error = null,
   interactive = true,
+  audio,
+  audioTranscript = null,
   showProgressBar = true,
   sourceHref,
   onCheck,
@@ -175,6 +193,8 @@ export function MultipleChoiceGroupBody({
   accent,
 }: MultipleChoiceGroupBodyProps) {
   const t = useTranslations('ExerciseRunner');
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  const audioLocked = audioOn && audio.gated;
   const [root, width] = useContainerWidth();
 
   const s = projection.settings;
@@ -297,7 +317,11 @@ export function MultipleChoiceGroupBody({
    * way: editing a table that has been judged is a judgement being edited.
    */
   function rowDisabled(rowId: string): boolean {
-    return !interactive || sending || phase !== 'answering' || locked.includes(rowId);
+    // `gated` joins the expression that was already here rather than adding a second
+    // lock — the rule INTEGRATION.md is most emphatic about.
+    return (
+      !interactive || sending || phase !== 'answering' || locked.includes(rowId) || audioLocked
+    );
   }
 
   /** The explanation under a row, or nothing at all when the server sent neither field. */
@@ -377,6 +401,13 @@ export function MultipleChoiceGroupBody({
       )}
 
       {projection.instruction.trim() !== '' && <Instr>{projection.instruction}</Instr>}
+
+      {audioOn && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={interactive} />
+          {audioLocked && <AudioLockNote itemNoun={t('audio.itemNoun.statements')} />}
+        </div>
+      )}
 
       {backToText !== undefined && (
         <a
@@ -594,12 +625,20 @@ export function MultipleChoiceGroupBody({
         </div>
       </div>
 
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
+      )}
+
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {!checked && (
           <>
             <button
               type="button"
-              disabled={!interactive || sending || remaining > 0}
+              disabled={!interactive || sending || audioLocked || remaining > 0}
               onClick={onCheck}
               className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
               style={{ background: accent }}

@@ -14,6 +14,7 @@ import {
   type ShowWhy,
 } from '@/lib/shared-kernel/multiple-choice-group';
 
+import { AudioTranscriptCard } from '../audio';
 import { setRow, setSettings, type MultipleChoiceGroupDocument } from './edits';
 
 export interface StepFeedbackProps {
@@ -51,6 +52,13 @@ export function StepFeedback({ exercise, onChange }: StepFeedbackProps) {
         <h2 className="text-base font-semibold">{t('multipleChoiceGroup.step4.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('multipleChoiceGroup.step4.lede')}</p>
       </div>
+
+      {exercise.audio.audio.enabled && (
+        <AudioTranscriptCard
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
+      )}
 
       <section className="flex flex-col gap-1.5 rounded-lg border border-border bg-surface p-4">
         <span className="text-xs font-medium">{t('multipleChoiceGroup.step4.showWhyLabel')}</span>

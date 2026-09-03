@@ -5,6 +5,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice-group';
 import type { Settings } from '@/lib/shared-kernel/multiple-choice-group';
 import {
   exercise,
@@ -18,7 +20,12 @@ import { StepDifficulty } from './step-difficulty';
 import type { MultipleChoiceGroupDocument } from './edits';
 
 function doc(overrides: Partial<Settings> = {}): MultipleChoiceGroupDocument {
-  return { updatedAt: '2026-08-29T10:00:00.000Z', ...exercise({ settings: settings(overrides) }) };
+  return {
+    updatedAt: '2026-08-29T10:00:00.000Z',
+    // Every builder document carries the audio layer (plan 56 phase 5).
+    audio: readAudioDraft({}, TEMPLATE_CODE),
+    ...exercise({ settings: settings(overrides) }),
+  };
 }
 
 function Harness({
@@ -77,6 +84,7 @@ describe('StepDifficulty', () => {
       <Harness
         initial={{
           updatedAt: '2026-08-29T10:00:00.000Z',
+          audio: readAudioDraft({}, TEMPLATE_CODE),
           ...exercise({
             rows: [row('Ferdig.', RIGHT.id), row('Ferdig to.', WRONG.id), row('Halvveis.')],
             settings: settings({ passThreshold: 100 }),

@@ -12,3 +12,4 @@ export {
   AudioTranscriptCard,
 } from './audio-cards';
 export { useAudioIssueCopy } from './audio-issue-copy';
+export { foldAudioIntoStep, useAudioGateRows, useAudioProblems } from './audio-problems';

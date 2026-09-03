@@ -6,6 +6,8 @@ import { AlertTriangle, Info, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import { Segmented } from '@/components/ui/segmented';
+
+import { AudioEnableRow, AudioSourceCard } from '../audio';
 import { matchesPreset, PRESETS, type SourceMode } from '@/lib/shared-kernel/multiple-choice-group';
 
 import {
@@ -109,6 +111,25 @@ export function StepSetup({ exercise, onChange }: StepSetupProps) {
             ]}
           />
         </div>
+
+        {/*
+          Audio joins the material card rather than becoming a fourth mode of it, which is
+          where this departs from INTEGRATION.md (plan 56 §5). The modes are exclusive and
+          the handoff itself asks for text *and* audio together — a passage read aloud is
+          the read-and-listen exercise it names — so a fourth segment would have had to
+          forbid the very combination it was added for.
+        */}
+        <AudioEnableRow
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
+
+        {exercise.audio.audio.enabled && (
+          <AudioSourceCard
+            draft={exercise.audio}
+            onChange={(audio) => onChange({ ...exercise, audio })}
+          />
+        )}
 
         {source.mode === 'none' && (
           <p className="flex items-start gap-1.5 text-xs text-muted-foreground">

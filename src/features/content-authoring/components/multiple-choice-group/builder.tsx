@@ -26,6 +26,9 @@ import {
   type IssueStep,
 } from '@/lib/shared-kernel/multiple-choice-group';
 
+import type { AudioStepMap, PlacedAudioIssue } from '@/lib/shared-kernel/audio';
+
+import { foldAudioIntoStep, useAudioGateRows, useAudioProblems } from '../audio';
 import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { BuilderGateDialog, BuilderSaveHint, BuilderStepNav, type GateRow } from '../builder-frame';
 import { BuilderConflictDialog, useBuilderSaveNotices } from '../builder-save-notices';
@@ -43,6 +46,13 @@ import {
 import { useIssueCopy } from './issue-copy';
 
 const STEPS: IssueStep[] = [1, 2, 3, 4];
+
+/**
+ * Where this builder keeps each part of the audio layer. The clip joins the material card
+ * on step 1, the timecodes sit with the statements on step 2, the rules are difficulty and
+ * the transcript is feedback.
+ */
+const AUDIO_STEPS: AudioStepMap = { source: 1, segments: 2, rules: 3, transcript: 4 };
 const LAST_STEP = 4;
 
 export interface MultipleChoiceGroupBuilderProps {
@@ -126,6 +136,13 @@ export function MultipleChoiceGroupBuilder({
     [exercise, targetLanguage],
   );
 
+  /** The layer's findings, in the same rail and the same gate as the type's own. */
+  const audioProblems = useAudioProblems(
+    exercise.audio,
+    exercise.rows.map((row) => row.id),
+    AUDIO_STEPS,
+  );
+
   const changedSinceOpen = !sameDocument(exercise, opened);
 
   const revert = () => {
@@ -150,6 +167,7 @@ export function MultipleChoiceGroupBuilder({
             current={step}
             exercise={exercise}
             targetLanguage={targetLanguage}
+            audioProblems={audioProblems}
             onSelect={setStep}
           />
           <div className="flex shrink-0 items-center gap-3 py-2">
@@ -181,6 +199,7 @@ export function MultipleChoiceGroupBuilder({
         open={gateOpen}
         exercise={exercise}
         problems={problems}
+        audioProblems={audioProblems}
         onOpenChange={setGateOpen}
         onGoToStep={(target) => {
           setStep(target as IssueStep);
@@ -251,17 +270,22 @@ function MultipleChoiceGroupSteps({
   current,
   exercise,
   targetLanguage,
+  audioProblems,
   onSelect,
 }: {
   current: IssueStep;
   exercise: MultipleChoiceGroupDocument;
   targetLanguage: string;
+  audioProblems: PlacedAudioIssue[];
   onSelect: (step: IssueStep) => void;
 }) {
   const t = useTranslations('Authoring');
 
   const steps: BuilderStep[] = STEPS.map((step) => {
-    const state = stepState(exercise, step, { language: targetLanguage });
+    const state = foldAudioIntoStep(
+      stepState(exercise, step, { language: targetLanguage }),
+      audioProblems.filter((issue) => issue.step === step),
+    );
     const label = t(`multipleChoiceGroup.shell.step${step}` as 'multipleChoiceGroup.shell.step1');
     const sub = t(
       `multipleChoiceGroup.shell.stepSub${step}` as 'multipleChoiceGroup.shell.stepSub1',
@@ -308,18 +332,22 @@ function GateDialog({
   open,
   exercise,
   problems,
+  audioProblems,
   onOpenChange,
   onGoToStep,
 }: {
   open: boolean;
   exercise: MultipleChoiceGroupDocument;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   onOpenChange: (open: boolean) => void;
   onGoToStep: (step: number) => void;
 }) {
   const describeIssue = useIssueCopy(exercise);
+  const audioRows = useAudioGateRows(audioProblems);
 
   const rows: GateRow[] = [
+    ...audioRows,
     ...problems
       .filter((issue) => issue.level === 'blocker')
       .map((issue, index) => ({

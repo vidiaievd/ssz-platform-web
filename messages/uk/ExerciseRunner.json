@@ -468,7 +468,8 @@
       "toItems": "До завдань"
     },
     "itemNoun": {
-      "questions": "запитання"
+      "questions": "запитання",
+      "statements": "твердження"
     }
   }
 }

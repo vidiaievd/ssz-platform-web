@@ -4,6 +4,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { AUDIO_DEFAULT, type ExerciseAudio } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 import { enMessages } from '@/lib/i18n/messages';
 import {
   DEFAULT_SETTINGS,
@@ -92,6 +94,7 @@ interface HarnessProps {
   onReveal?: () => void;
   onFinish?: () => void;
   onRestart?: () => void;
+  audio?: ExerciseAudioEngine;
 }
 
 function Harness({
@@ -101,6 +104,7 @@ function Harness({
   verdict = null,
   locked = [],
   interactive = true,
+  audio,
   sourceHref,
   onPick = () => {},
   onCheck = () => {},
@@ -119,6 +123,7 @@ function Harness({
         verdict={verdict}
         locked={locked}
         interactive={interactive}
+        {...(audio === undefined ? {} : { audio })}
         {...(sourceHref === undefined ? {} : { sourceHref })}
         onCheck={onCheck}
         onRetry={onRetry}
@@ -414,4 +419,72 @@ describe('MultipleChoiceGroupBody — done', () => {
     expect(screen.getByText('1 of 2 right.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Start over' })).toBeInTheDocument();
   });
+
+  /*
+    The listening layer on this type (plan 56 phase 5). Timecodes per row are its high-value
+    case — a table of statements about one dialogue, each with its own line to hear — and
+    the gate has to reach the cells, which are the only inputs this type owns.
+  */
+  describe('with audio', () => {
+    const audioBlock = (over: Record<string, unknown> = {}): ExerciseAudio => ({
+      ...AUDIO_DEFAULT,
+      enabled: true,
+      assetId: 'asset-1',
+      title: 'Dialog',
+      duration: 96,
+      ...over,
+      settings: { ...AUDIO_DEFAULT.settings, ...((over['settings'] as object) ?? {}) },
+    });
+
+    const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+      audio: audioBlock(),
+      segments: {},
+      element: null,
+      src: 'https://cdn.test/asset-1.mp3',
+      state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+      duration: 96,
+      playing: false,
+      plays: 0,
+      limit: 0,
+      exhausted: false,
+      heard: false,
+      gated: false,
+      canPlay: true,
+      failed: false,
+      loading: false,
+      speed: 1,
+      toggle: vi.fn(),
+      back: vi.fn(),
+      seekTo: vi.fn(),
+      playRange: vi.fn(),
+      cycleSpeed: vi.fn(),
+      reset: vi.fn(),
+      ...over,
+    });
+
+    it('puts a player above the table and leaves the table itself alone', () => {
+      renderWide(<Harness audio={engine()} />);
+
+      expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+      expect(screen.getAllByRole('radio').length).toBeGreaterThan(0);
+    });
+
+    it('locks the cells and the check button until the clip has been heard', () => {
+      renderWide(<Harness audio={engine({ gated: true })} />);
+
+      for (const cell of screen.getAllByRole('radio')) expect(cell).toBeDisabled();
+      expect(screen.getByRole('button', { name: /Check/ })).toBeDisabled();
+      expect(
+        screen.getByText('The statements open once you have heard the clip through once.'),
+      ).toBeInTheDocument();
+    });
+
+    it('is not there at all for a table without it', () => {
+      renderWide(<Harness />);
+
+      expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
+      for (const cell of screen.getAllByRole('radio')) expect(cell).toBeEnabled();
+    });
+  });
+
 });

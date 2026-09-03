@@ -3057,7 +3057,8 @@
       "layoutLabel": "Layout on a wide screen",
       "layoutTable": "Table",
       "layoutCards": "Cards",
-      "layoutHelp": "A phone is always cards."
+      "layoutHelp": "A phone is always cards.",
+      "audioItemNoun": "statements"
     },
     "step4": {
       "title": "Why each answer is what it is",
