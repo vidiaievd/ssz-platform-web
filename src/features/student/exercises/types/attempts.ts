@@ -225,6 +225,13 @@ export interface AnswerQuestionResponse<Result = ShortAnswerResult | MultipleCho
   result: Result;
   /** Whether this answer is on its way to a teacher, for the routing line. */
   routedForReview: boolean;
+  /**
+   * What the clip said, for a listening exercise whose transcript shows after the answer.
+   *
+   * Present only once the set is finished: one clip covers the whole set, so a transcript
+   * after the first of five questions would answer the other four (plan 56 §3.3).
+   */
+  audioTranscript?: { transcript: string; translation: string };
 }
 
 /**
@@ -345,6 +352,13 @@ export interface CheckRowResponse {
   /** Sentences in the set. */
   total: number;
   result: SentenceSchemaResult;
+  /**
+   * What the clip said, for a listening exercise whose transcript shows after the answer.
+   *
+   * Present only once the set is finished: one clip covers the whole set, so a transcript
+   * after the first of five questions would answer the other four (plan 56 §3.3).
+   */
+  audioTranscript?: { transcript: string; translation: string };
 }
 
 export type AttemptStatus =

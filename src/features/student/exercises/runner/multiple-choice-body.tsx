@@ -1,10 +1,19 @@
 'use client';
 
 import { ArrowRight, Check, CircleAlert, Info, RotateCcw, X } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import type { StudentProjection } from '@/lib/shared-kernel/multiple-choice';
 import type { MultipleChoiceResult } from '@/features/student/exercises/types/attempts';
+import {
+  AudioGateScreen,
+  AudioLockNote,
+  AudioSegmentButton,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
 
 import { Instr } from './instr';
 
@@ -56,6 +65,15 @@ export interface MultipleChoiceBodyProps {
   error?: string | null;
   /** False in a preview: everything renders, nothing accepts input. */
   interactive?: boolean;
+  /**
+   * The listening layer, when the set has one (plan 56).
+   *
+   * Absent means an exercise with no audio, and the body is then what it was before this
+   * feature down to the last element — no player, no gate, no chip, nothing hidden.
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the key once the set is finished. */
+  audioTranscript?: { transcript: string; translation: string } | null;
   /**
    * Whether the set draws its own progress bar. False where something outside it already
    * draws one — the practice stack counts tasks of the section, and two bars measuring
@@ -145,6 +163,8 @@ export function MultipleChoiceBody({
   sending = false,
   error = null,
   interactive = true,
+  audio,
+  audioTranscript = null,
   showProgressBar = true,
   onCheck,
   onRetry,
@@ -156,6 +176,17 @@ export function MultipleChoiceBody({
   const t = useTranslations('ExerciseRunner');
   const s = set.settings;
   const total = set.questions.length;
+
+  /**
+   * The listen-first screen has been passed. State of the body rather than of the engine:
+   * it is about this reading of the set, and a restart puts the learner back in front of
+   * it because a restart is a new attempt (BEHAVIOR §4).
+   */
+  const [entered, setEntered] = useState(false);
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  // Reaches every control the type owns, by extending the expressions that were already
+  // there. A second lock mechanism is how the two drift apart (INTEGRATION.md).
+  const locked = audioOn && audio.gated;
 
   if (total === 0) {
     return (
@@ -207,6 +238,21 @@ export function MultipleChoiceBody({
           </button>
         )}
       </div>
+    );
+  }
+
+  /*
+    `layout: 'gate'` fills the runner with the listen-first screen instead of the items.
+    After the last question it is a finished set, not a clip to hear again, so `done`
+    above wins — which is why this stands below it.
+  */
+  if (audioOn && audio.audio.settings.layout === 'gate' && !entered) {
+    return (
+      <AudioGateScreen
+        eng={audio}
+        interactive={interactive}
+        onStart={() => setEntered(true)}
+      />
     );
   }
 
@@ -263,6 +309,13 @@ export function MultipleChoiceBody({
 
       {set.instruction.trim() !== '' && <Instr>{set.instruction}</Instr>}
 
+      {audioOn && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={interactive} />
+          {locked && <AudioLockNote itemNoun={t('audio.itemNoun.questions')} />}
+        </div>
+      )}
+
       {/* `reading`, `grammar`, `vocab`. A `listening` transcript is the author's own and
           the projection never sends it (plan 53 §3.8). */}
       {question.context?.trim() && (
@@ -294,6 +347,14 @@ export function MultipleChoiceBody({
         {question.stem}
       </h3>
 
+      {audioOn && (
+        <AudioSegmentButton
+          eng={audio}
+          segment={audio.segments[question.id] ?? null}
+          disabled={!interactive || locked}
+        />
+      )}
+
       {/* `grid` is a wide-screen offer only, and it collapses again under 560px — a phone
           is always a list (README, "Empty and edge states"). */}
       <div
@@ -307,7 +368,7 @@ export function MultipleChoiceBody({
           const state = stateOf(option.id);
           const style = STATE_STYLE[state];
           const gone = state === 'gone';
-          const disabled = !interactive || gone || closed || sending;
+          const disabled = !interactive || gone || closed || sending || locked;
 
           return (
             <button
@@ -372,6 +433,14 @@ export function MultipleChoiceBody({
         />
       )}
 
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
+      )}
+
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {!judged &&
           (s.instant ? (
@@ -379,7 +448,7 @@ export function MultipleChoiceBody({
           ) : (
             <button
               type="button"
-              disabled={!interactive || sending || picked === null}
+              disabled={!interactive || sending || locked || picked === null}
               onClick={onCheck}
               className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
               style={{ background: accent }}
@@ -392,7 +461,7 @@ export function MultipleChoiceBody({
           <>
             <button
               type="button"
-              disabled={!interactive || sending}
+              disabled={!interactive || sending || locked}
               onClick={onRetry}
               className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
               style={{ background: accent }}
@@ -402,7 +471,7 @@ export function MultipleChoiceBody({
             </button>
             <button
               type="button"
-              disabled={!interactive || sending}
+              disabled={!interactive || sending || locked}
               onClick={onReveal}
               className="rounded-lg border px-4 py-2 text-[13px] font-semibold disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
               style={{

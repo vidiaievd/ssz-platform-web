@@ -21,7 +21,7 @@ import {
 import type { AllowanceContext, AllowanceState } from './allowance';
 import { canPlay, hasHeard, INITIAL_STATE, isExhausted, isGated, step } from './allowance';
 import { audioIssues, hasAudioBlocker, placeAudioIssues } from './issues';
-import { transcriptOnReveal, withStudentAudio } from './projection';
+import { segmentsOf, transcriptOnReveal, withStudentAudio } from './projection';
 import { deriveSkills } from '../skills/derive';
 import type { AudioSettings, ExerciseAudio } from './model';
 
@@ -499,5 +499,45 @@ describe('the joint with the skill axes (plan 55 §3.4)', () => {
     expect(deriveSkills({ templateCode: 'multiple_choice', content: off }).skills).toEqual([
       'reading',
     ]);
+  });
+});
+
+describe('timecodes across a projection', () => {
+  const timed = {
+    questions: [
+      { id: 'q1', stem: 'Hva feiler det Kari?', audio: { start: 22, end: 48 } },
+      { id: 'q2', stem: 'Hvor jobber hun?' },
+    ],
+    audio: { ...AUDIO_DEFAULT, enabled: true, assetId: 'a-1', useSegments: true, duration: 96 },
+  };
+
+  it('gathers the timecodes onto the block so a projection cannot drop them', () => {
+    // Nine per-template projections build a new object out of the content column, and an
+    // item's timecode is not a field any of them knows about. Teaching all nine to carry
+    // it would put the audio layer in nine places.
+    const projected = withStudentAudio({ instruction: 'Hør etter' }, timed, 'multiple_choice');
+    const audio = projected['audio'] as { segments?: Record<string, unknown> };
+
+    expect(audio.segments).toEqual({ q1: { start: 22, end: 48 } });
+  });
+
+  it('carries none when the author is not using timecodes', () => {
+    const off = { ...timed, audio: { ...timed.audio, useSegments: false } };
+    const audio = withStudentAudio({}, off, 'multiple_choice')['audio'] as Record<string, unknown>;
+    expect(audio['segments']).toBeUndefined();
+  });
+
+  it('finds the items wherever the template keeps them', () => {
+    expect(
+      Object.keys(
+        segmentsOf('match_pairs', {
+          pairs: [{ id: 'p1', audio: { start: 1, end: 2 } }],
+          audio: timed.audio,
+        }),
+      ),
+    ).toEqual(['p1']);
+
+    // A template with nothing to time is not a failure — it has no item key at all.
+    expect(segmentsOf('writing_task', { prompt: 'Skriv', audio: timed.audio })).toEqual({});
   });
 });

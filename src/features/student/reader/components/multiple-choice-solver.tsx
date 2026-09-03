@@ -18,6 +18,7 @@ import {
 } from '@/features/student/exercises/runner';
 import type { MultipleChoiceResult, ResumedPick } from '@/features/student/exercises/types/attempts';
 import type { StudentProjection } from '@/lib/shared-kernel/multiple-choice';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface MultipleChoiceSolverProps {
@@ -69,6 +70,19 @@ export function MultipleChoiceSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<StudentProjection | null>(null);
+  /**
+   * The document as the engine dealt it, kept for the audio layer alone.
+   *
+   * The projection above is the kernel's own shape and has no room for a block that is
+   * not the template's — so the audio is read off the document the attempt arrived with
+   * (plan 56). An exercise with no audio leaves this holding a document with no `audio`
+   * key, which the engine reads as switched off.
+   */
+  const [document, setDocument] = useState<unknown>(null);
+  /** What the clip said, once the engine hands it over with the last verdict. */
+  const [transcript, setTranscript] = useState<{ transcript: string; translation: string } | null>(
+    null,
+  );
   /** Set when the set arrived with its answer key still on it — see the projection reader. */
   const [unusable, setUnusable] = useState(false);
 
@@ -150,6 +164,8 @@ export function MultipleChoiceSolver({
 
           setAttemptId(data.attemptId);
           setProjection(set);
+          setDocument(data.exerciseContent);
+          setTranscript(null);
           openedAt.current = Date.now();
           resume(set, data.pickedOptions ?? []);
         },
@@ -210,6 +226,16 @@ export function MultipleChoiceSolver({
     closeSet();
   }, [arrival, attemptId, closeSet]);
 
+  /**
+   * The listening layer, if this set has one.
+   *
+   * Mounted above the early returns because a hook cannot be conditional, and mounted
+   * once for the whole set rather than per question: the allowance, the gate and the
+   * playthrough belong to the exercise, and one engine per question would hand out one
+   * listen per question (INTEGRATION.md, "Validation + runner").
+   */
+  const audio = useExerciseAudio(document);
+
   if (!unusable && (start.isPending || (start.isSuccess && projection === null))) {
     return <LearningSkeleton variant="list" rows={4} />;
   }
@@ -249,6 +275,9 @@ export function MultipleChoiceSolver({
           setAttempt(Math.max(1, verdict.attempt));
           if (verdict.eliminated !== undefined) setEliminated(verdict.eliminated);
           if (verdict.correct && verdict.attempt === 1) setScore((n) => n + 1);
+          // The last question closed, so the clip has nothing left to give away and the
+          // engine hands over what it said (plan 56 §3.3).
+          if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
           setPhase('judged');
         },
         // A refusal the engine will keep making (this question is closed, the attempt is
@@ -340,6 +369,8 @@ export function MultipleChoiceSolver({
         score={score}
         sending={answer.isPending}
         error={error}
+        audio={audio}
+        audioTranscript={transcript}
         onCheck={() => send(picked)}
         onRetry={retryQuestion}
         onReveal={() => send(null, true)}

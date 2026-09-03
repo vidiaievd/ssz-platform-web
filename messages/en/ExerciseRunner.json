@@ -439,5 +439,36 @@
     "checkCount": "Check ({n}/{m})",
     "attemptFootnote": "Attempt {n} · {correct} of {total} correct",
     "pickerLabel": "Halves that could complete: {left}"
+  },
+  "audio": {
+    "play": "Play",
+    "pause": "Pause",
+    "back10": "Back 10s",
+    "speed": "{rate}×",
+    "speedLabel": "Playback speed",
+    "position": "Position in the clip",
+    "playsLeft": "{left} of {limit} left",
+    "playsNone": "No listens left",
+    "transcript": "Transcript",
+    "fragment": "Play {from}–{to}",
+    "lockNote": "The items open once you have heard the clip through once.",
+    "lockNoteNamed": "The {items} open once you have heard the clip through once.",
+    "status": {
+      "idle": "Press to listen",
+      "playing": "Playing…",
+      "paused": "Paused",
+      "spent": "No listens left",
+      "failed": "The clip could not be played. The exercise is open anyway."
+    },
+    "gate": {
+      "title": "Listen first",
+      "ledeLocked": "Listen to the whole clip once. The items open afterwards.",
+      "ledeOpen": "You can listen again while you answer.",
+      "listenFirst": "Listen first",
+      "toItems": "To the items"
+    },
+    "itemNoun": {
+      "questions": "questions"
+    }
   }
 }

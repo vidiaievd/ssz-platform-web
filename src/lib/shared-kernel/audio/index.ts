@@ -48,4 +48,7 @@ export type {
 export { audioIssues, hasAudioBlocker, placeAudioIssues } from './issues';
 
 export type { StudentAudio } from './projection';
-export { redactTranscript, transcriptOnReveal, withStudentAudio } from './projection';
+export { deliveredSegments, redactTranscript, segmentsOf, transcriptOnReveal, withStudentAudio } from './projection';
+
+export type { IdentifiedItem } from './items';
+export { itemsOf } from './items';

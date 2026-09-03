@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import type { ReactElement } from 'react';
@@ -11,6 +11,9 @@ import {
   type StudentProjection,
 } from '@/lib/shared-kernel/multiple-choice';
 import type { MultipleChoiceResult } from '@/features/student/exercises/types/attempts';
+
+import { AUDIO_DEFAULT, type ExerciseAudio } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 
 import { MultipleChoiceBody, type MultipleChoicePhase } from './multiple-choice-body';
 
@@ -70,6 +73,7 @@ function makeResult(overrides: Partial<MultipleChoiceResult> = {}): MultipleChoi
 
 interface Props {
   set?: StudentProjection;
+  audio?: ExerciseAudioEngine;
   index?: number;
   picked?: string | null;
   phase?: MultipleChoicePhase;
@@ -98,6 +102,7 @@ function renderBody(props: Props = {}): ReactElement {
         attempt={props.attempt ?? 1}
         {...(props.eliminated ? { eliminated: props.eliminated } : {})}
         score={props.score ?? 0}
+        {...(props.audio ? { audio: props.audio } : {})}
         onCheck={props.onCheck ?? vi.fn()}
         onRetry={props.onRetry ?? vi.fn()}
         onReveal={props.onReveal ?? vi.fn()}
@@ -276,4 +281,119 @@ describe('MultipleChoiceBody', () => {
 
     expect(screen.getByText('Bartek har jobbet som elektriker i tre år.')).toBeInTheDocument();
   });
+
+  /*
+    The listening layer mounted on this type (plan 56, INTEGRATION.md). What matters here
+    is not the player — that has its own tests — but the two rules the integration recipe
+    is emphatic about: the gate has to reach *every* control the type owns, and an
+    exercise without audio has to be exactly what it was before the layer existed.
+  */
+  describe('with audio', () => {
+    type AudioOverrides = Partial<Omit<ExerciseAudio, 'settings'>> & {
+      settings?: Partial<ExerciseAudio['settings']>;
+    };
+
+    const audioBlock = (over: AudioOverrides = {}): ExerciseAudio => ({
+      ...AUDIO_DEFAULT,
+      enabled: true,
+      assetId: 'asset-1',
+      title: 'Dialog: på legekontoret',
+      duration: 96,
+      ...over,
+      settings: { ...AUDIO_DEFAULT.settings, ...over.settings },
+    });
+
+    const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+      audio: audioBlock(),
+      segments: {},
+      element: null,
+      src: 'https://cdn.test/asset-1.mp3',
+      state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+      duration: 96,
+      playing: false,
+      plays: 0,
+      limit: 0,
+      exhausted: false,
+      heard: false,
+      gated: false,
+      canPlay: true,
+      failed: false,
+      loading: false,
+      speed: 1,
+      toggle: vi.fn(),
+      back: vi.fn(),
+      seekTo: vi.fn(),
+      playRange: vi.fn(),
+      cycleSpeed: vi.fn(),
+      reset: vi.fn(),
+      ...over,
+    });
+
+    it('puts a player above the questions', () => {
+      renderBody({ audio: engine() });
+
+      expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+      expect(screen.getByText('Dialog: på legekontoret')).toBeInTheDocument();
+      // The question is still there: the player is above the items, not instead of them.
+      expect(screen.getByText('Han sa at han ___ syk.')).toBeInTheDocument();
+    });
+
+    it('locks every control the type owns until the clip has been heard', () => {
+      renderBody({
+        audio: engine({ audio: audioBlock({ settings: { gate: 'first' } }), gated: true }),
+        picked: 'a',
+      });
+
+      for (const option of ['er', 'var', 'har vært']) {
+        expect(screen.getByRole('button', { name: new RegExp(option) })).toBeDisabled();
+      }
+      expect(screen.getByRole('button', { name: 'Check' })).toBeDisabled();
+      expect(
+        screen.getByText('The questions open once you have heard the clip through once.'),
+      ).toBeInTheDocument();
+    });
+
+    it('unlocks them once it has', () => {
+      renderBody({
+        audio: engine({ audio: audioBlock({ settings: { gate: 'first' } }), heard: true }),
+        picked: 'a',
+      });
+
+      expect(screen.getByRole('button', { name: /er/ })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Check' })).toBeEnabled();
+    });
+
+    it('fills the runner with the listen-first screen under the gate layout', () => {
+      renderBody({
+        audio: engine({ audio: audioBlock({ settings: { layout: 'gate', gate: 'first' } }), gated: true }),
+      });
+
+      expect(screen.getByRole('button', { name: 'Listen first' })).toBeDisabled();
+      // No items at all until the way through is taken.
+      expect(screen.queryByText('Han sa at han ___ syk.')).not.toBeInTheDocument();
+    });
+
+    it('offers the fragment of the question on screen, and only that one', () => {
+      const eng = engine({
+        audio: audioBlock({ useSegments: true }),
+        segments: { q1: { start: 22, end: 48 }, q2: { start: 60, end: 80 } },
+      });
+      renderBody({ audio: eng, index: 0 });
+      expect(screen.getByRole('button', { name: /0:22–0:48/ })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /1:00–1:20/ })).not.toBeInTheDocument();
+      cleanup();
+
+      renderBody({ audio: eng, index: 1 });
+      expect(screen.getByRole('button', { name: /1:00–1:20/ })).toBeInTheDocument();
+    });
+
+    it('is not there at all for an exercise without it', () => {
+      renderBody();
+
+      expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Transcript' })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /er/ })).toBeEnabled();
+    });
+  });
+
 });

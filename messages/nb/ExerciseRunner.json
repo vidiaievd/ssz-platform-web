@@ -439,5 +439,36 @@
     "checkCount": "Sjekk ({n}/{m})",
     "attemptFootnote": "Forsøk {n} · {correct} av {total} riktige",
     "pickerLabel": "Halvdeler som kan fullføre: {left}"
+  },
+  "audio": {
+    "play": "Spill av",
+    "pause": "Pause",
+    "back10": "10 s tilbake",
+    "speed": "{rate}×",
+    "speedLabel": "Avspillingshastighet",
+    "position": "Posisjon i klippet",
+    "playsLeft": "{left} av {limit} igjen",
+    "playsNone": "Ingen avspillinger igjen",
+    "transcript": "Transkripsjon",
+    "fragment": "Spill {from}–{to}",
+    "lockNote": "Oppgavene åpner seg når du har hørt klippet ferdig én gang.",
+    "lockNoteNamed": "{items} åpner seg når du har hørt klippet ferdig én gang.",
+    "status": {
+      "idle": "Trykk for å lytte",
+      "playing": "Spiller av…",
+      "paused": "Pauset",
+      "spent": "Grensen er nådd",
+      "failed": "Klippet kunne ikke spilles av. Oppgaven er åpen likevel."
+    },
+    "gate": {
+      "title": "Lytt først",
+      "ledeLocked": "Hør hele klippet én gang. Oppgavene åpner seg etterpå.",
+      "ledeOpen": "Du kan lytte om igjen mens du svarer.",
+      "listenFirst": "Lytt først",
+      "toItems": "Til oppgavene"
+    },
+    "itemNoun": {
+      "questions": "spørsmålene"
+    }
   }
 }
