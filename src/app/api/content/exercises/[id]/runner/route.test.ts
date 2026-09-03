@@ -116,4 +116,68 @@ describe('GET /api/content/exercises/[id]/runner', () => {
 
     expect(res.status).toBe(502);
   });
+
+  /*
+    Plan 56 §3.3. The transcript is what the clip says, so it rides with the key: the
+    student projection withheld it, and a browser that already holds the key holds
+    nothing more by holding this.
+  */
+  describe('the transcript of a listening exercise', () => {
+    const audio = (transcriptWhen: string) => ({
+      audio: {
+        enabled: true,
+        source: 'asset',
+        assetId: 'asset-1',
+        title: 'Dialog',
+        transcript: 'Hei, jeg har vondt i halsen.',
+        translation: 'Hi, my throat hurts.',
+        settings: { transcriptWhen },
+      },
+    });
+
+    it('rides with the key when the teacher chose "after"', async () => {
+      vi.mocked(serverFetch)
+        .mockResolvedValueOnce(display('multiple_choice', { question: 'Hva?' }))
+        .mockResolvedValueOnce({
+          ...display('multiple_choice', { question: 'Hva?', ...audio('after') }),
+          expectedAnswers: { correct_option_id: 'b' },
+        });
+
+      const res = await GET(request(), { params });
+
+      await expect(res.json()).resolves.toMatchObject({
+        audioTranscript: {
+          transcript: 'Hei, jeg har vondt i halsen.',
+          translation: 'Hi, my throat hurts.',
+        },
+      });
+    });
+
+    it('is absent when the document served it already, or never will', async () => {
+      for (const when of ['always', 'never']) {
+        vi.mocked(serverFetch)
+          .mockResolvedValueOnce(display('multiple_choice', { question: 'Hva?' }))
+          .mockResolvedValueOnce({
+            ...display('multiple_choice', { question: 'Hva?', ...audio(when) }),
+            expectedAnswers: {},
+          });
+
+        const body = await (await GET(request(), { params })).json();
+        expect(body.audioTranscript).toBeUndefined();
+      }
+    });
+
+    it('is not fetched at all for a template the server grades', async () => {
+      // There is no second call to reach for: the engine hands the transcript over with
+      // the verdict instead.
+      vi.mocked(serverFetch).mockResolvedValueOnce(
+        display('word_bank_gap_fill', audio('after')),
+      );
+
+      const body = await (await GET(request(), { params })).json();
+
+      expect(body.audioTranscript).toBeUndefined();
+      expect(serverFetch).toHaveBeenCalledTimes(1);
+    });
+  });
 });

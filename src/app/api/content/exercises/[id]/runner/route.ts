@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
 import { gradedInBrowser } from '@/features/student/exercises/lib/grading-side';
+import { transcriptOnReveal } from '@/lib/shared-kernel/audio';
 import type { ExerciseDisplay, ExerciseWithAnswers } from '@/features/content/types';
 
 /**
@@ -25,6 +26,12 @@ import type { ExerciseDisplay, ExerciseWithAnswers } from '@/features/content/ty
  *
  * `expectedAnswers` is `{}` rather than absent when nothing is owed, so a caller reads
  * the same shape either way and cannot mistake "withheld" for "not loaded yet".
+ *
+ * The transcript of a listening exercise rides in the same seat, for the same reason
+ * (plan 56 §3.3). With `transcriptWhen: 'after'` it is withheld from the projection —
+ * it is what the clip says, which is the answer — and delivered by whatever delivers the
+ * key: here for a document the browser grades, on the verdict from the engine for one it
+ * does not. A browser that already holds the key holds nothing more by holding this.
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -49,9 +56,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       path: `/exercises/${id}/answers`,
     });
 
+    const owed = transcriptOnReveal(withAnswers.content);
+
     return NextResponse.json({
       ...display,
       expectedAnswers: withAnswers.expectedAnswers ?? {},
+      ...(owed === null ? {} : { audioTranscript: owed }),
     } satisfies ExerciseWithAnswers);
   } catch (e) {
     if (isAppError(e)) {

@@ -46,3 +46,6 @@ export type {
   PlacedAudioIssue,
 } from './issues';
 export { audioIssues, hasAudioBlocker, placeAudioIssues } from './issues';
+
+export type { StudentAudio } from './projection';
+export { redactTranscript, transcriptOnReveal, withStudentAudio } from './projection';
