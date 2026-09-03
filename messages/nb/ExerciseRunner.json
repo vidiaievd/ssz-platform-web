@@ -469,6 +469,7 @@
     },
     "itemNoun": {
       "questions": "spørsmålene",
+      "gaps": "gapene",
       "statements": "påstandene"
     }
   }

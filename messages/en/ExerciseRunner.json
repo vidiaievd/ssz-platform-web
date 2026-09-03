@@ -469,6 +469,7 @@
     },
     "itemNoun": {
       "questions": "questions",
+      "gaps": "gaps",
       "statements": "statements"
     }
   }

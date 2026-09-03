@@ -1110,6 +1110,7 @@
     "step3": {
       "title": "Feedback",
       "lede": "What a student is told after checking. Each gap needs one default explanation; anything you write for a particular wrong word is shown instead of it, when they choose exactly that word.",
+      "audioItemNoun": "gaps",
       "coverage": "{written} of {total} word pairs written",
       "coverageBar": "Pair explanations written",
       "onlyMissing": "Only words without an explanation",

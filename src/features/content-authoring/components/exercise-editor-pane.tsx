@@ -301,6 +301,9 @@ export function ExerciseEditorPane({
           initialExercise={gapFillDocumentFrom(exercise, container.id)}
           initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
           initialHint={firstInstruction(exercise)?.hintText ?? ''}
+          // Read off the raw column: the audio block belongs to no template, so
+          // `fromPersisted` neither knows nor carries it (plan 56 phase 5).
+          initialAudio={readAudioDraft(exercise.content, TEMPLATE_CODE)}
           onDocumentChange={(document, instructions) =>
             setGapFill({ exercise: document, instructions })
           }
@@ -532,7 +535,13 @@ function applySavedGapFill(
   return {
     ...cached,
     updatedAt,
-    content: { ...toContent(saved.exercise) },
+    // The same two steps the save itself takes: the template's own persistence, then the
+    // layer that belongs to none of them.
+    content: applyAudioDraft(
+      { ...toContent(saved.exercise) },
+      saved.audio,
+      TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...toExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [

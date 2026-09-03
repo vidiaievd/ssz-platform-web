@@ -11,6 +11,15 @@ import type {
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
+import {
+  AudioGateScreen,
+  AudioLockNote,
+  AudioSegmentButton,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
+
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
@@ -64,6 +73,15 @@ export interface WordBankGapFillBodyProps {
    * shown unbidden ends the exercise for them (BEHAVIOR §2.2).
    */
   revealed?: Record<GapKey, string>;
+  /**
+   * The listening layer, when the exercise has one (plan 56).
+   *
+   * Absent means an exercise with no audio, and the body is then exactly what it was
+   * before this feature — no player, no gate, no chip.
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the verdicts once the answers are in. */
+  audioTranscript?: { transcript: string; translation: string } | null;
 }
 
 const READING = 'var(--ssz-font-reading)';
@@ -104,11 +122,20 @@ export function WordBankGapFillBody({
   accent,
   results,
   revealed,
+  audio,
+  audioTranscript = null,
   showFeedback = true,
   pointOut = false,
 }: WordBankGapFillBodyProps) {
   const t = useTranslations('ExerciseRunner');
-  const isAnswering = phase === 'answering';
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  /*
+    The gate joins the expression the whole body already asks — every chip, every gap and
+    every drop target reads `isAnswering` — rather than adding a lock of its own. A second
+    mechanism is how the two drift apart (INTEGRATION.md).
+  */
+  const locked = audioOn && audio.gated;
+  const isAnswering = phase === 'answering' && !locked;
   /**
    * The learner types instead of choosing (plan decision 4). This is what absorbs the
    * old `fill_in_blank`: the grammar drills that never had a bank to choose from.
@@ -121,6 +148,12 @@ export function WordBankGapFillBody({
    * serves every sentence, so a word tap has to know where it is going.
    */
   const [armedKey, setArmedKey] = useState<GapKey | null>(null);
+  /**
+   * The listen-first screen has been passed. State of the body rather than of the engine:
+   * it is about this reading of the exercise, and starting over puts the learner back in
+   * front of it because that is a new attempt (BEHAVIOR §4).
+   */
+  const [entered, setEntered] = useState(false);
   const gapRefs = useRef(new Map<GapKey, HTMLButtonElement | null>());
 
   const filledCount = gaps.filter((gap) => (value[gap.gapKey] ?? '') !== '').length;
@@ -294,9 +327,31 @@ export function WordBankGapFillBody({
 
   const remaining = projection.bank === null ? 0 : projection.bank.length - spent.size;
 
+  /*
+    `layout: 'gate'` fills the runner with the listen-first screen instead of the
+    sentences. Nothing of the exercise is drawn behind it — the point of the layout is
+    that the words are not there to read while the clip plays.
+  */
+  if (audioOn && phase === 'answering' && audio.audio.settings.layout === 'gate' && !entered) {
+    return (
+      <AudioGateScreen
+        eng={audio}
+        interactive={phase === 'answering'}
+        onStart={() => setEntered(true)}
+      />
+    );
+  }
+
   return (
     <div>
       {instruction && <Instr>{instruction}</Instr>}
+
+      {audioOn && (
+        <div className="mb-4">
+          <ExerciseAudioPlayer eng={audio} interactive={phase === 'answering'} />
+          {locked && <AudioLockNote itemNoun={t('audio.itemNoun.gaps')} />}
+        </div>
+      )}
 
       {/* The reveal ends the attempt, so the bank has nothing left to offer. */}
       {projection.bank !== null && !isRevealed && (
@@ -506,6 +561,16 @@ export function WordBankGapFillBody({
               <p className="mt-1 text-[12.5px] text-(--ssz-text-muted)">{sentence.hint}</p>
             )}
 
+            {/* One line of the clip per sentence — the dictation case this type is
+                written for. Absent unless the author wrote a timecode for it. */}
+            {audioOn && (
+              <AudioSegmentButton
+                eng={audio}
+                segment={audio.segments[sentence.id] ?? null}
+                disabled={!isAnswering}
+              />
+            )}
+
             {hasResults &&
               sentence.tokens
                 .filter((token): token is ProjectedGapToken => token.kind === 'gap')
@@ -544,6 +609,14 @@ export function WordBankGapFillBody({
           </div>
         ))}
       </div>
+
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
+      )}
 
       {/* The marking is a colour and a pulse, so it is said in words too (AC-X7) —
           and this line is already live, which is how a screen-reader user hears it. */}

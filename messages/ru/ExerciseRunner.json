@@ -469,6 +469,7 @@
     },
     "itemNoun": {
       "questions": "вопросы",
+      "gaps": "пропуски",
       "statements": "утверждения"
     }
   }

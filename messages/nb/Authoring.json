@@ -1110,6 +1110,7 @@
     "step3": {
       "title": "Tilbakemelding",
       "lede": "Det eleven får vite etter en sjekk. Hver luke trenger én standardforklaring; det du skriver for et bestemt galt ord vises i stedet, når eleven velger nettopp det ordet.",
+      "audioItemNoun": "gapene",
       "coverage": "{written} av {total} ordpar skrevet",
       "coverageBar": "Skrevne parforklaringer",
       "onlyMissing": "Bare ord uten forklaring",
