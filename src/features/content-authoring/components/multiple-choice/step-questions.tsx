@@ -22,6 +22,9 @@ import {
   type QuestionKind,
 } from '@/lib/shared-kernel/multiple-choice';
 
+import { withSegment } from '@/lib/shared-kernel/audio';
+
+import { AudioEnableRow, AudioSegmentField, AudioSourceCard } from '../audio';
 import {
   addOption,
   addQuestion,
@@ -107,7 +110,21 @@ export function StepQuestions({ exercise, onChange }: StepQuestionsProps) {
             {t('multipleChoice.step1.instructionHelp')}
           </p>
         </div>
+
+        {/* Audio adds no wizard step: it is material, and material lives where the title
+            and the instruction live (plan 56, README "Authoring UI"). */}
+        <AudioEnableRow
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
       </div>
+
+      {exercise.audio.audio.enabled && (
+        <AudioSourceCard
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
+      )}
 
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="text-xs font-medium">
@@ -229,6 +246,7 @@ function QuestionCard({
   */
   const [contextOpen, setContextOpen] = useState(hasContext);
   const showContext = contextOpen || hasContext;
+  const timecodes = exercise.audio.audio.enabled && exercise.audio.audio.useSegments;
 
   return (
     <div
@@ -236,6 +254,14 @@ function QuestionCard({
         noStem || noKey ? 'border-error' : 'border-border'
       }`}
     >
+      {timecodes && (
+        <AudioSegmentField
+          segment={exercise.audio.segments[question.id] ?? null}
+          onChange={(segment) =>
+            onChange({ ...exercise, audio: withSegment(exercise.audio, question.id, segment) })
+          }
+        />
+      )}
       <div className="flex items-center gap-2">
         <span
           aria-hidden

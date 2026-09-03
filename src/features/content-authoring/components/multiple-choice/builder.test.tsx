@@ -1,8 +1,10 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice';
 import { enMessages } from '@/lib/i18n/messages';
 import type { MultipleChoiceContent } from '@/lib/shared-kernel/multiple-choice';
 import {
@@ -13,6 +15,13 @@ import {
 } from '@/lib/shared-kernel/multiple-choice/fixtures.test-support';
 
 import type { MultipleChoiceDocument } from './edits';
+
+// The source card resolves the clip through media-service, and this builder's tests
+// mount no QueryClientProvider (plan 56 phase 4).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
 
 vi.mock('../../actions/multiple-choice', () => ({ saveMultipleChoiceAction: vi.fn() }));
 
@@ -29,7 +38,10 @@ const LOADED_AT = '2026-08-28T10:00:00.000Z';
  * that already carries a warning would make every "clean rail" assertion about the wrong
  * thing.
  */
-function doc(overrides: Partial<MultipleChoiceContent> = {}): MultipleChoiceDocument {
+function doc(
+  overrides: Partial<MultipleChoiceContent> & { audio?: MultipleChoiceDocument['audio'] } = {},
+): MultipleChoiceDocument {
+  const { audio, ...rest } = overrides;
   const base = content({
     questions: [
       question({
@@ -40,9 +52,15 @@ function doc(overrides: Partial<MultipleChoiceContent> = {}): MultipleChoiceDocu
         ],
       }),
     ],
-    ...overrides,
+    ...rest,
   });
-  return { updatedAt: LOADED_AT, ...base };
+  return {
+    updatedAt: LOADED_AT,
+    // Every builder document carries the audio layer, and an exercise that has never had
+    // any reads as switched off (plan 56 phase 4).
+    audio: audio ?? readAudioDraft({}, TEMPLATE_CODE),
+    ...base,
+  };
 }
 
 function renderBuilder(exercise: MultipleChoiceDocument = doc()) {
@@ -202,4 +220,89 @@ describe('MultipleChoiceBuilder', () => {
 
     expect(screen.getByRole('button', { name: /Undo everything/ })).toBeInTheDocument();
   });
+
+  /*
+    The listening layer mounted on this builder (plan 56 phase 4). Three cards on three
+    steps, one issue list shared with the type's own, and a save that carries a block no
+    template knows about.
+  */
+  describe('with audio', () => {
+    const listening = (over: Record<string, unknown> = {}) =>
+      doc({
+        audio: readAudioDraft(
+          {
+            audio: {
+              enabled: true,
+              source: 'asset',
+              assetId: 'asset-1',
+              title: 'Dialog',
+              duration: 96,
+              settings: { transcriptWhen: 'never' },
+              ...over,
+            },
+          },
+          TEMPLATE_CODE,
+        ),
+      });
+
+    it('draws no audio at all while the switch is off', () => {
+      renderBuilder();
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).not.toBeChecked();
+      expect(screen.queryByText('The clip')).not.toBeInTheDocument();
+    });
+
+    it('puts the clip on step 1, the rules on step 3 and the transcript on step 4', async () => {
+      const { user } = renderBuilder(listening());
+
+      expect(screen.getByText('The clip')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('tab', { name: /Difficulty/ }));
+      expect(screen.getByText('How they may listen')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('tab', { name: /Feedback/ }));
+      expect(screen.getByText('Transcript')).toBeInTheDocument();
+    });
+
+    it('reports a missing clip as a blocker on the step that owns the fix', async () => {
+      const { user } = renderBuilder(listening({ assetId: '' }));
+
+      expect(
+        within(screen.getByRole('tab', { name: /Questions/ })).getByText('1 problem'),
+      ).toBeInTheDocument();
+
+      // And in the gate, in the same list as the type's own blockers — an exercise that
+      // says "listen" with nothing to play is as unassignable as one with no key.
+      await openGate(user);
+      expect(
+        screen.getByText('Listening is on but nothing is attached to play.'),
+      ).toBeInTheDocument();
+    });
+
+    it('carries the block into the save, which the template alone would drop', async () => {
+      const { user } = renderBuilder(listening());
+
+      await user.click(screen.getByRole('switch', { name: /Listening exercise/ }));
+      await waitFor(() => expect(saveMultipleChoiceAction).toHaveBeenCalled(), { timeout: 3000 });
+
+      const [, , input] = vi.mocked(saveMultipleChoiceAction).mock.calls.at(-1)!;
+      const audio = input.content['audio'] as Record<string, unknown>;
+      // Switched off, and still written: the clip has to survive so that switching back
+      // on restores it (BEHAVIOR §1).
+      expect(audio.enabled).toBe(false);
+      expect(audio.assetId).toBe('asset-1');
+    });
+
+    it('writes nothing for an exercise that never had audio', async () => {
+      const { user } = renderBuilder();
+
+      await user.click(screen.getByRole('tab', { name: /Feedback/ }));
+      await user.type(screen.getAllByRole('textbox')[0]!, 'x');
+      await waitFor(() => expect(saveMultipleChoiceAction).toHaveBeenCalled(), { timeout: 3000 });
+
+      const [, , input] = vi.mocked(saveMultipleChoiceAction).mock.calls.at(-1)!;
+      expect(input.content).not.toHaveProperty('audio');
+    });
+  });
+
 });

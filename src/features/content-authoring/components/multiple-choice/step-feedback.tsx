@@ -11,6 +11,7 @@ import {
   type Question,
 } from '@/lib/shared-kernel/multiple-choice';
 
+import { AudioTranscriptCard } from '../audio';
 import { setOption, setQuestion, type MultipleChoiceDocument } from './edits';
 
 const LETTERS = 'ABCDEFGH';
@@ -50,6 +51,15 @@ export function StepFeedback({ exercise, onChange }: StepFeedbackProps) {
         <h2 className="text-base font-semibold">{t('multipleChoice.step4.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('multipleChoice.step4.lede')}</p>
       </div>
+
+      {/* Above the per-question feedback, because it is feedback about the whole clip and
+          the policy decides when any of this is readable at all (plan 56). */}
+      {exercise.audio.audio.enabled && (
+        <AudioTranscriptCard
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
+      )}
 
       <section className="flex items-center gap-4 rounded-lg border border-border bg-surface p-4">
         <p className="text-2xl font-semibold tabular-nums">

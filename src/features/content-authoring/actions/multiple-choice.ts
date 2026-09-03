@@ -30,7 +30,12 @@ const SCAFFOLD_QUESTION_ID = 'q1';
 const SCAFFOLD_OPTION_IDS = ['o1', 'o2', 'o3'] as const;
 
 export interface SaveMultipleChoiceInput {
-  content: PersistedContent;
+  /**
+   * The persisted document — the template's own shape, plus the audio block when the
+   * exercise has one. The layer belongs to no template (plan 56), so the type says so
+   * rather than pretending `PersistedContent` grew a field.
+   */
+  content: PersistedContent & Record<string, unknown>;
   expectedAnswers: PersistedAnswers;
   /** The `updatedAt` the builder last saw. The write is refused if the row moved on. */
   expectedUpdatedAt: string;

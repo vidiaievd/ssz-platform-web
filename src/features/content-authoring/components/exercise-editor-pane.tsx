@@ -99,6 +99,8 @@ import type { ShortAnswerDocument } from './short-answer/edits';
 import type { SavedDocument as SavedShortAnswer } from './short-answer/use-short-answer-autosave';
 import { MultipleChoiceBuilder } from './multiple-choice/builder';
 import { MultipleChoicePreview } from './multiple-choice/multiple-choice-preview';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+
 import type { MultipleChoiceDocument } from './multiple-choice/edits';
 import type { SavedDocument as SavedMultipleChoice } from './multiple-choice/use-multiple-choice-autosave';
 import { MultipleChoiceGroupBuilder } from './multiple-choice-group/builder';
@@ -759,6 +761,9 @@ function multipleChoiceDocumentFrom(exercise: ExerciseWithAnswers): MultipleChoi
   return {
     ...multipleChoiceFromPersisted(exercise.content, exercise.expectedAnswers),
     updatedAt: exercise.updatedAt ?? '',
+    // Read off the raw column: the audio block belongs to no template, so
+    // `fromPersisted` neither knows nor carries it (plan 56 phase 4).
+    audio: readAudioDraft(exercise.content, MULTIPLE_CHOICE_TEMPLATE_CODE),
   };
 }
 

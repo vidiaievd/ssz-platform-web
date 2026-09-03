@@ -15,6 +15,7 @@
 // all assume `correctOption` is unambiguous, and an editor that set the flag directly
 // could break that assumption in one keystroke.
 
+import type { AudioDraft } from '@/lib/shared-kernel/audio';
 import {
   newOption,
   newQuestion,
@@ -37,6 +38,15 @@ import {
 export interface MultipleChoiceDocument extends MultipleChoiceContent {
   /** ISO. Doubles as the autosave concurrency token. */
   updatedAt: string;
+  /**
+   * The listening layer, edited beside the document rather than inside it (plan 56).
+   *
+   * It is not part of `MultipleChoiceContent` because it is not this template's: the same
+   * block hangs on all thirteen, and teaching each model about it would be thirteen
+   * copies of one field. `toContent` drops what it does not know, so the draft is written
+   * back on top of its output at save time — `applyAudioDraft`.
+   */
+  audio: AudioDraft;
 }
 
 /** README "Step 1": `Add option` is disabled at eight. */

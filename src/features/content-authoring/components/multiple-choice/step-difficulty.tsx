@@ -6,6 +6,7 @@ import { AlertTriangle, Grid2x2, Rows3 } from 'lucide-react';
 import { Segmented } from '@/components/ui/segmented';
 import { issues, type Layout, type RetryPolicy } from '@/lib/shared-kernel/multiple-choice';
 
+import { AudioRulesCard } from '../audio';
 import { ToggleRow } from '../toggle-row';
 import { setSettings, type MultipleChoiceDocument } from './edits';
 import { useIssueCopy } from './issue-copy';
@@ -44,6 +45,14 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
         <h2 className="text-base font-semibold">{t('multipleChoice.step3.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('multipleChoice.step3.lede')}</p>
       </div>
+
+      {exercise.audio.audio.enabled && (
+        <AudioRulesCard
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+          itemNoun={t('multipleChoice.step3.audioItemNoun')}
+        />
+      )}
 
       <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
         <ToggleRow

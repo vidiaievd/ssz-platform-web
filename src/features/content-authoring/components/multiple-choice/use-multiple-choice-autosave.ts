@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { AppErrorCode } from '@/lib/errors';
-import { toContent, toExpectedAnswers } from '@/lib/shared-kernel/multiple-choice';
+import { applyAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE, toContent, toExpectedAnswers } from '@/lib/shared-kernel/multiple-choice';
 
 import {
   saveMultipleChoiceAction,
+  type SaveMultipleChoiceInput,
   type SaveMultipleChoiceOutcome,
 } from '../../actions/multiple-choice';
 import type { MultipleChoiceDocument } from './edits';
@@ -149,7 +151,14 @@ export function useMultipleChoiceAutosave({
       setStatus('saving');
 
       const result = await saveMultipleChoiceAction(exerciseId, containerId, {
-        content: toContent(document),
+        // The template's own persistence, then the layer that belongs to none of them.
+        // `toContent` builds an explicit object — rightly, it must not write the
+        // builder's scratch state — so the audio block would be dropped without this.
+        content: applyAudioDraft(
+          toContent(document) as unknown as Record<string, unknown>,
+          document.audio,
+          TEMPLATE_CODE,
+        ) as SaveMultipleChoiceInput['content'],
         expectedAnswers: toExpectedAnswers(document),
         expectedUpdatedAt: force?.expectedUpdatedAt ?? document.updatedAt,
         // The one line the author wrote, written to the instruction row as well as into

@@ -16,6 +16,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
+  draftIssues,
+  placeAudioIssues,
+  type AudioStepMap,
+  type PlacedAudioIssue,
+} from '@/lib/shared-kernel/audio';
+import {
   answerableQuestions,
   coverage,
   filledOptions,
@@ -25,6 +31,7 @@ import {
   type IssueStep,
 } from '@/lib/shared-kernel/multiple-choice';
 
+import { useAudioIssueCopy } from '../audio';
 import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { BuilderGateDialog, BuilderSaveHint, BuilderStepNav, type GateRow } from '../builder-frame';
 import { BuilderConflictDialog, useBuilderSaveNotices } from '../builder-save-notices';
@@ -43,6 +50,13 @@ import { useIssueCopy } from './issue-copy';
 
 const STEPS: IssueStep[] = [1, 2, 3, 4];
 const LAST_STEP = 4;
+
+/**
+ * Where this builder keeps each part of the audio layer — INTEGRATION.md's one per-type
+ * mapping. The clip and the timecodes are material (step 1), the rules are difficulty
+ * (step 3), the transcript is feedback (step 4).
+ */
+const AUDIO_STEPS: AudioStepMap = { source: 1, segments: 1, rules: 3, transcript: 4 };
 
 export interface MultipleChoiceBuilderProps {
   exerciseId: string;
@@ -126,6 +140,25 @@ export function MultipleChoiceBuilder({
     [exercise, targetLanguage],
   );
 
+  /**
+   * The audio layer's own findings, placed on this builder's steps.
+   *
+   * Merged into every surface rather than shown in a section of their own: the rail, the
+   * gate and the server's preflight read one list, and an author who has switched
+   * listening on has one exercise to finish, not two.
+   */
+  const audioProblems = useMemo(
+    () =>
+      placeAudioIssues(
+        draftIssues(
+          exercise.audio,
+          exercise.questions.map((q) => q.id),
+        ),
+        AUDIO_STEPS,
+      ),
+    [exercise.audio, exercise.questions],
+  );
+
   const changedSinceOpen = !sameDocument(exercise, opened);
 
   const revert = () => {
@@ -150,6 +183,7 @@ export function MultipleChoiceBuilder({
             current={step}
             exercise={exercise}
             targetLanguage={targetLanguage}
+            audioProblems={audioProblems}
             onSelect={setStep}
           />
           <div className="flex shrink-0 items-center gap-3 py-2">
@@ -183,6 +217,7 @@ export function MultipleChoiceBuilder({
         open={gateOpen}
         exercise={exercise}
         problems={problems}
+        audioProblems={audioProblems}
         onOpenChange={setGateOpen}
         onGoToStep={(target) => {
           setStep(target as IssueStep);
@@ -252,19 +287,32 @@ function MultipleChoiceSteps({
   current,
   exercise,
   targetLanguage,
+  audioProblems,
   onSelect,
 }: {
   current: IssueStep;
   exercise: MultipleChoiceDocument;
   targetLanguage: string;
+  audioProblems: PlacedAudioIssue[];
   onSelect: (step: IssueStep) => void;
 }) {
   const t = useTranslations('Authoring');
 
   const steps: BuilderStep[] = STEPS.map((step) => {
-    const state = stepState(exercise, step, { language: targetLanguage });
+    const kernelState = stepState(exercise, step, { language: targetLanguage });
     const label = t(`multipleChoice.shell.step${step}` as 'multipleChoice.shell.step1');
     const sub = t(`multipleChoice.shell.stepSub${step}` as 'multipleChoice.shell.stepSub1');
+
+    // A step is as bad as its worst finding, whichever list it came from. Listening with
+    // nothing to play is a blocker on step 1 exactly as a question with no key is.
+    const here = audioProblems.filter((issue) => issue.step === step);
+    const audioBlockers = here.filter((issue) => issue.level === 'blocker').length;
+    const state =
+      audioBlockers > 0
+        ? ({ s: 'err', errs: (kernelState.s === 'err' ? kernelState.errs : 0) + audioBlockers } as const)
+        : here.length > 0 && kernelState.s !== 'err'
+          ? ({ s: 'warn' } as const)
+          : kernelState;
 
     if (state.s === 'err') {
       return {
@@ -307,16 +355,19 @@ function GateDialog({
   open,
   exercise,
   problems,
+  audioProblems,
   onOpenChange,
   onGoToStep,
 }: {
   open: boolean;
   exercise: MultipleChoiceDocument;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   onOpenChange: (open: boolean) => void;
   onGoToStep: (step: number) => void;
 }) {
   const describeIssue = useIssueCopy(exercise);
+  const describeAudio = useAudioIssueCopy();
 
   const rows: GateRow[] = [
     ...problems
@@ -325,6 +376,25 @@ function GateDialog({
         key: `blocker-${issue.code}-${index}`,
         level: 'blocker' as const,
         text: describeIssue(issue),
+        step: issue.step,
+      })),
+    // The audio layer's findings sit in the same list, blockers with blockers: an
+    // exercise that says "listen" and has nothing to play is as unassignable as one with
+    // no key, and a second list would let the two disagree about whether it is ready.
+    ...audioProblems
+      .filter((issue) => issue.level === 'blocker')
+      .map((issue, index) => ({
+        key: `audio-blocker-${issue.code}-${index}`,
+        level: 'blocker' as const,
+        text: describeAudio(issue),
+        step: issue.step,
+      })),
+    ...audioProblems
+      .filter((issue) => issue.level === 'warning')
+      .map((issue, index) => ({
+        key: `audio-warning-${issue.code}-${index}`,
+        level: 'warning' as const,
+        text: describeAudio(issue),
         step: issue.step,
       })),
     ...problems

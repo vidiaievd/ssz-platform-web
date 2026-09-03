@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it } from 'vitest';
 
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice';
 import { enMessages } from '@/lib/i18n/messages';
 import type { MultipleChoiceContent } from '@/lib/shared-kernel/multiple-choice';
 import { content, option, question } from '@/lib/shared-kernel/multiple-choice/fixtures.test-support';
@@ -12,7 +14,13 @@ import { StepDistractors } from './step-distractors';
 import type { MultipleChoiceDocument } from './edits';
 
 function doc(overrides: Partial<MultipleChoiceContent> = {}): MultipleChoiceDocument {
-  return { updatedAt: '2026-08-28T10:00:00.000Z', ...content(overrides) };
+  return {
+    updatedAt: '2026-08-28T10:00:00.000Z',
+    // Every builder document carries the audio layer, and an exercise that has never had
+    // any reads as switched off (plan 56 phase 4).
+    audio: readAudioDraft({}, TEMPLATE_CODE),
+    ...content(overrides),
+  };
 }
 
 function Harness({ initial, language }: { initial: MultipleChoiceDocument; language?: string }) {
