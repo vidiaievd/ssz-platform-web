@@ -470,7 +470,9 @@
     "itemNoun": {
       "questions": "questions",
       "gaps": "gaps",
-      "statements": "statements"
-    }
+      "statements": "statements",
+      "sentence": "sentence"
+    },
+    "lockNoteOwn": "This {item} opens once you have heard its recording."
   }
 }

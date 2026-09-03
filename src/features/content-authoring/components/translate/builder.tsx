@@ -28,6 +28,9 @@ import {
 } from '@/lib/shared-kernel/translate';
 import type { LevelGrammarRule } from '@/features/content-authoring/lib/level-grammar-rules';
 
+import type { AudioDraft, AudioStepMap, PlacedAudioIssue } from '@/lib/shared-kernel/audio';
+
+import { useAudioIssueCopy, useAudioProblems } from '../audio';
 import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepCheck } from './step-check';
@@ -40,6 +43,17 @@ import { useIssueCopy } from './issue-copy';
 /** The four steps of the rail, in authoring order. */
 const BUILT_STEPS: IssueStep[] = [1, 2, 3, 4];
 
+/**
+ * Where this builder keeps each part of the audio layer.
+ *
+ * The clip and the per-sentence recordings both belong to step 2, which is where the
+ * sentences are — a recording is *of* a sentence here, more literally than anywhere else.
+ * The rules go to step 4, beside the rest of how the exercise runs, and the transcript
+ * with them; under per-sentence recordings there is no transcript to write, because the
+ * sentence the recording speaks is the one on screen.
+ */
+const AUDIO_STEPS: AudioStepMap = { source: 2, segments: 2, rules: 4, transcript: 4 };
+
 export interface TranslateBuilderProps {
   exerciseId: string;
   containerId: string;
@@ -47,6 +61,11 @@ export interface TranslateBuilderProps {
   grammarRules?: LevelGrammarRule[];
   /** The document as loaded from `/exercises/:id/answers`, envelope included. */
   initialExercise: Translate;
+  /**
+   * The listening layer as the stored document carries it — a sibling of the document,
+   * because the kernel's `Translate` is shared with the services (plan 56 phase 6).
+   */
+  initialAudio: AudioDraft;
   /**
    * Reports every edit so the shell's preview column can render the student's view of the
    * document being written.
@@ -57,7 +76,7 @@ export interface TranslateBuilderProps {
    * its cached copy current: a cache holding a superseded token is a conflict the next
    * time this builder mounts from it.
    */
-  onSavedRemote?: (updatedAt: string, saved: Translate) => void;
+  onSavedRemote?: (updatedAt: string, saved: Translate, audio: AudioDraft) => void;
 }
 
 /**
@@ -77,12 +96,14 @@ export function TranslateBuilder({
   containerId,
   grammarRules,
   initialExercise,
+  initialAudio,
   onDocumentChange,
   onSavedRemote,
 }: TranslateBuilderProps) {
   const t = useTranslations('Authoring');
 
   const [exercise, setExercise] = useState(initialExercise);
+  const [audio, setAudio] = useState(initialAudio);
   const [step, setStep] = useState<IssueStep>(1);
   const [gateOpen, setGateOpen] = useState(false);
 
@@ -90,10 +111,11 @@ export function TranslateBuilder({
     exerciseId,
     containerId,
     exercise,
+    audio,
     // The token moves on with every save; the next write is compared against this one.
-    onSaved: (updatedAt, saved) => {
+    onSaved: (updatedAt, saved, savedAudio) => {
       setExercise((current) => ({ ...current, updatedAt }));
-      onSavedRemote?.(updatedAt, saved);
+      onSavedRemote?.(updatedAt, saved, savedAudio);
     },
   });
 
@@ -108,11 +130,33 @@ export function TranslateBuilder({
   const problems = useMemo(() => issues(exercise), [exercise]);
   const blockers = problems.filter((issue) => issue.level === 'blocker');
 
+  /**
+   * The layer's findings, in the same rail and the same gate as the type's own.
+   *
+   * The items carry their recordings, not just their ids: under `source: 'items'` what
+   * makes the exercise playable is that some sentence has one, and only the document
+   * knows that.
+   */
+  const audioProblems = useAudioProblems(
+    audio,
+    exercise.items.map((item) => ({
+      id: item.id,
+      ...(item.mediaId ? { clip: item.mediaId } : {}),
+    })),
+    AUDIO_STEPS,
+  );
+  const audioBlockers = audioProblems.filter((issue) => issue.level === 'blocker');
+
   return (
     <div className="flex flex-col gap-5">
       <EditorToolbarPortal>
         <div className="flex flex-1 items-stretch justify-between gap-3">
-          <TranslateSteps current={step} exercise={exercise} onSelect={setStep} />
+          <TranslateSteps
+            current={step}
+            exercise={exercise}
+            audioProblems={audioProblems}
+            onSelect={setStep}
+          />
           <div className="flex shrink-0 items-center gap-3 py-2">
             <SaveHint
               status={autosave.status}
@@ -130,11 +174,22 @@ export function TranslateBuilder({
 
       <div className="min-w-0">
         {step === 2 ? (
-          <StepSentences exercise={exercise} onChange={setExercise} />
+          <StepSentences
+            exercise={exercise}
+            onChange={setExercise}
+            audio={audio}
+            onAudioChange={setAudio}
+          />
         ) : step === 3 ? (
           <StepCheck exercise={exercise} onChange={setExercise} />
         ) : step === 4 ? (
-          <StepFlow exercise={exercise} onChange={setExercise} grammarRules={grammarRules} />
+          <StepFlow
+            exercise={exercise}
+            onChange={setExercise}
+            grammarRules={grammarRules}
+            audio={audio}
+            onAudioChange={setAudio}
+          />
         ) : (
           <StepDirection exercise={exercise} onChange={setExercise} />
         )}
@@ -145,7 +200,8 @@ export function TranslateBuilder({
       <GateDialog
         open={gateOpen}
         problems={problems}
-        blockerCount={blockers.length}
+        audioProblems={audioProblems}
+        blockerCount={blockers.length + audioBlockers.length}
         onOpenChange={setGateOpen}
         onGoToStep={(target) => {
           setStep(target);
@@ -165,16 +221,31 @@ export function TranslateBuilder({
 function TranslateSteps({
   current,
   exercise,
+  audioProblems,
   onSelect,
 }: {
   current: IssueStep;
   exercise: Translate;
+  audioProblems: PlacedAudioIssue[];
   onSelect: (step: IssueStep) => void;
 }) {
   const t = useTranslations('Authoring');
 
   const steps: BuilderStep[] = BUILT_STEPS.map((step) => {
-    const { state, blockers } = stepState(exercise, step);
+    const own = stepState(exercise, step);
+    // A step is as bad as its worst finding, whichever list it came from: listening
+    // switched on with nothing to play is a blocker exactly as a missing key is, and a
+    // rail that counted only the type's own would show green over an exercise the
+    // server's preflight refuses.
+    const here = audioProblems.filter((issue) => issue.step === step);
+    const audioBlockers = here.filter((issue) => issue.level === 'blocker').length;
+    const state =
+      audioBlockers > 0
+        ? 'err'
+        : here.some((issue) => issue.level === 'warning') && own.state !== 'err'
+          ? 'warn'
+          : own.state;
+    const blockers = (own.state === 'err' ? own.blockers : 0) + audioBlockers;
 
     return {
       n: step,
@@ -292,9 +363,18 @@ function SaveHint({ status, savedAt, canOverwrite, onRetry, onOverwrite }: SaveH
   );
 }
 
+/** One line of the gate, from either list — they are shown as one. */
+interface GateLine {
+  key: string;
+  level: 'blocker' | 'warning' | 'info';
+  step: IssueStep;
+  text: string;
+}
+
 interface GateDialogProps {
   open: boolean;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   blockerCount: number;
   onOpenChange: (open: boolean) => void;
   onGoToStep: (step: IssueStep) => void;
@@ -308,13 +388,38 @@ interface GateDialogProps {
  *
  * Every problem carries the step that owns the fix, so every row is a way there.
  */
-function GateDialog({ open, problems, blockerCount, onOpenChange, onGoToStep }: GateDialogProps) {
+function GateDialog({
+  open,
+  problems,
+  audioProblems,
+  blockerCount,
+  onOpenChange,
+  onGoToStep,
+}: GateDialogProps) {
   const t = useTranslations('Authoring');
   const describeIssue = useIssueCopy();
-  const ordered = [
-    ...problems.filter((issue) => issue.level === 'blocker'),
-    ...problems.filter((issue) => issue.level === 'warning'),
-    ...problems.filter((issue) => issue.level === 'info'),
+  const describeAudio = useAudioIssueCopy();
+
+  // One list, not two: an author who switched listening on has one exercise to finish.
+  const lines: GateLine[] = [
+    ...problems.map((issue, index) => ({
+      key: `own-${issue.code}-${index}`,
+      level: issue.level,
+      step: issue.step,
+      text: describeIssue(issue),
+    })),
+    ...audioProblems.map((issue, index) => ({
+      key: `audio-${issue.code}-${index}`,
+      level: issue.level,
+      step: issue.step as IssueStep,
+      text: describeAudio(issue),
+    })),
+  ];
+
+  const ordered: GateLine[] = [
+    ...lines.filter((line) => line.level === 'blocker'),
+    ...lines.filter((line) => line.level === 'warning'),
+    ...lines.filter((line) => line.level === 'info'),
   ];
 
   return (
@@ -331,11 +436,11 @@ function GateDialog({ open, problems, blockerCount, onOpenChange, onGoToStep }: 
           </p>
         ) : (
           <ul className="flex flex-col gap-1.5">
-            {ordered.map((issue, index) => {
+            {ordered.map((line) => {
               const icon =
-                issue.level === 'blocker' ? (
+                line.level === 'blocker' ? (
                   <CircleAlert className="mt-0.5 size-4 shrink-0 text-error" aria-hidden />
-                ) : issue.level === 'warning' ? (
+                ) : line.level === 'warning' ? (
                   <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning-700" aria-hidden />
                 ) : (
                   <CircleAlert
@@ -345,17 +450,17 @@ function GateDialog({ open, problems, blockerCount, onOpenChange, onGoToStep }: 
                 );
 
               return (
-                <li key={`${issue.code}-${index}`}>
+                <li key={line.key}>
                   <button
                     type="button"
-                    onClick={() => onGoToStep(issue.step)}
+                    onClick={() => onGoToStep(line.step)}
                     className="flex w-full items-start gap-2 rounded-md border border-border px-3 py-2 text-left text-sm hover:bg-[var(--ssz-bg-subtle)]"
                   >
                     {icon}
                     <span>
-                      <span className="block">{describeIssue(issue)}</span>
+                      <span className="block">{line.text}</span>
                       <span className="block text-xs text-muted-foreground">
-                        {t('translate.shell.gateGoToStep', { step: issue.step })}
+                        {t('translate.shell.gateGoToStep', { step: line.step })}
                       </span>
                     </span>
                   </button>

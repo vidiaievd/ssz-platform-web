@@ -99,7 +99,12 @@ import type { ShortAnswerDocument } from './short-answer/edits';
 import type { SavedDocument as SavedShortAnswer } from './short-answer/use-short-answer-autosave';
 import { MultipleChoiceBuilder } from './multiple-choice/builder';
 import { MultipleChoicePreview } from './multiple-choice/multiple-choice-preview';
-import { applyAudioDraft, readAudioDraft } from '@/lib/shared-kernel/audio';
+import {
+  applyAudioDraft,
+  itemsOf,
+  readAudioDraft,
+  type AudioDraft,
+} from '@/lib/shared-kernel/audio';
 
 import type { MultipleChoiceDocument } from './multiple-choice/edits';
 import type { SavedDocument as SavedMultipleChoice } from './multiple-choice/use-multiple-choice-autosave';
@@ -326,12 +331,13 @@ export function ExerciseEditorPane({
           exerciseId={exerciseId}
           containerId={container.id}
           initialExercise={translateDocumentFrom(exercise, container.id)}
+          initialAudio={translateAudioFrom(exercise)}
           grammarRules={grammarRules}
           onDocumentChange={setTranslate}
-          onSavedRemote={(updatedAt, saved) =>
+          onSavedRemote={(updatedAt, saved, audio) =>
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
-              (cached) => (cached ? applySavedTranslate(cached, updatedAt, saved) : cached),
+              (cached) => (cached ? applySavedTranslate(cached, updatedAt, saved, audio) : cached),
             )
           }
         />
@@ -887,6 +893,24 @@ function translateDocumentFrom(exercise: ExerciseWithAnswers, containerId: strin
 }
 
 /**
+ * The listening layer as this exercise carries it — plan 56 phase 6.
+ *
+ * With one adaptation no other type needs: a set whose sentences already have recordings
+ * (plan 42) but no audio block predates the merge, and it opens as what it is — listening
+ * on, one recording per sentence. Otherwise the switch would read "off" over an exercise
+ * that plainly plays audio, and the first save would write that lie down.
+ */
+function translateAudioFrom(exercise: ExerciseWithAnswers): AudioDraft {
+  const draft = readAudioDraft(exercise.content, exercise.templateCode);
+  if (draft.present) return draft;
+
+  const items = itemsOf(exercise.templateCode, exercise.content);
+  if (!items.some((item) => (item.clip ?? '') !== '')) return draft;
+
+  return { ...draft, audio: { ...draft.audio, enabled: true, source: 'items' } };
+}
+
+/**
  * The cached exercise as the save just left it on the server: both columns and the token,
  * so a later mount reads its own work rather than the version it started from.
  */
@@ -894,12 +918,19 @@ function applySavedTranslate(
   cached: ExerciseWithAnswers,
   updatedAt: string,
   saved: Translate,
+  audio: AudioDraft,
 ): ExerciseWithAnswers {
   const [instruction, ...rest] = cached.instructions ?? [];
   return {
     ...cached,
     updatedAt,
-    content: { ...translateToContent(saved) },
+    // The same two steps the save itself takes: the template's own persistence, then the
+    // layer that belongs to none of them.
+    content: applyAudioDraft(
+      { ...translateToContent(saved) },
+      audio,
+      saved.type,
+    ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...translateToExpectedAnswers(saved) },
     ...(instruction && {
       instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],

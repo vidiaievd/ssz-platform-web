@@ -70,6 +70,45 @@ export function AudioEnableRow({ draft, onChange }: AudioCardProps) {
 }
 
 /**
+ * Where the sound is: one clip for the whole exercise, or a recording on each item.
+ *
+ * Only drawn by a template that can hold a clip per item — today that is `translate`
+ * alone, which had per-sentence recordings before this layer existed (plan 42). It is the
+ * whole merge of phase 6: one switch above, one question here, and the rules below apply
+ * to whichever kind of clip ends up playing. Without it the author would meet two audio
+ * controls that know nothing about each other.
+ *
+ * Switching between the two keeps both: the exercise's clip survives a trip through
+ * per-item recordings, and the recordings survive a trip back.
+ */
+export function AudioModeRow({ draft, onChange, itemNoun }: AudioCardProps & { itemNoun: string }) {
+  const t = useTranslations('Authoring');
+  const perItem = draft.audio.source === 'items';
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label>{t('audio.modeLabel')}</Label>
+      <Segmented<'clip' | 'items'>
+        aria-label={t('audio.modeLabel')}
+        value={perItem ? 'items' : 'clip'}
+        onValueChange={(mode) =>
+          // Back to `asset` rather than to whatever it was: `link` and `lesson` are both
+          // reachable from the source card, and this control is not the place to guess.
+          onChange(withAudio(draft, { source: mode === 'items' ? 'items' : 'asset' }))
+        }
+        options={[
+          { value: 'clip', label: t('audio.modeClip') },
+          { value: 'items', label: t('audio.modeItems', { items: itemNoun }) },
+        ]}
+      />
+      <p className="text-xs text-muted-foreground">
+        {perItem ? t('audio.modeItemsHelp', { items: itemNoun }) : t('audio.modeClipHelp')}
+      </p>
+    </div>
+  );
+}
+
+/**
  * Where the clip comes from — README "AXSourceCard".
  *
  * Three sources, and only the active one decides what the student is played: switching
@@ -207,9 +246,7 @@ export function AudioSourceCard({ draft, onChange }: AudioCardProps) {
           </div>
         )}
 
-        {!hasClip(audio) && (
-          <p className="text-xs text-muted-foreground">{t('audio.noClipYet')}</p>
-        )}
+        {!hasClip(audio) && <p className="text-xs text-muted-foreground">{t('audio.noClipYet')}</p>}
 
         <div className="grid gap-3 sm:grid-cols-[2fr_1fr]">
           <div className="flex flex-col gap-1.5">

@@ -470,7 +470,9 @@
     "itemNoun": {
       "questions": "spørsmålene",
       "gaps": "gapene",
-      "statements": "påstandene"
-    }
+      "statements": "påstandene",
+      "sentence": "setningen"
+    },
+    "lockNoteOwn": "Denne {item} åpner seg når du har hørt opptaket sitt."
   }
 }

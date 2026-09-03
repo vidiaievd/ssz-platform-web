@@ -51,7 +51,7 @@ export type { StudentAudio } from './projection';
 export { deliveredSegments, redactTranscript, segmentsOf, transcriptOnReveal, withStudentAudio } from './projection';
 
 export type { IdentifiedItem } from './items';
-export { itemKey, itemsOf } from './items';
+export { hasItemClips, itemKey, itemsOf } from './items';
 
 export type { AudioDraft } from './authoring';
 export {

@@ -1688,7 +1688,8 @@
       "audioRemove": "Fjern",
       "audioNotForDirection": "Setningen leses på {lang} — det er ingenting her verdt å lese inn. Snu retningen for å lage en lytteoppgave.",
       "audioInvalidType": "Filen er ikke et lydformat plattformen godtar.",
-      "audioTooLarge": "Opptaket er større enn 100 MB."
+      "audioTooLarge": "Opptaket er større enn 100 MB.",
+      "audioItemNoun": "setning"
     },
     "step3": {
       "title": "Hva autosjekken godtar",
@@ -1811,7 +1812,8 @@
         "afterSubmit": "Studenten ser fasiten mens svaret venter i køen.",
         "afterGraded": "Fasiten kommer sammen med lærerens dom.",
         "never": "Fasiten blir mellom deg og de andre lærerne."
-      }
+      },
+      "audioItemNoun": "setningene"
     },
     "pool": {
       "title": "Hva øver dette på",
@@ -3215,6 +3217,11 @@
       "limitWithSeek": "Med spoling på begrenser ikke grensen egentlig noe.",
       "segInverted": "En tidskode slutter før den begynner, så fragmentet spiller ingenting.",
       "segBeyond": "En tidskode går forbi slutten av klippet."
-    }
+    },
+    "modeLabel": "Hvor lyden er",
+    "modeClip": "Ett klipp for hele settet",
+    "modeItems": "Ett opptak per {items}",
+    "modeClipHelp": "Ett opptak hele oppgaven handler om. Hvert element kan få sitt eget tidspunkt inn i det.",
+    "modeItemsHelp": "Hver av {items} har sitt eget opptak, og reglene under gjelder for alle."
   }
 }

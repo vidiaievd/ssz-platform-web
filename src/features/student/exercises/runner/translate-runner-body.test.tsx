@@ -299,8 +299,11 @@ describe('TranslateRunnerBody', () => {
       }),
     });
 
-    const player = screen.getByLabelText('The sentence, spoken');
-    expect(player).toHaveAttribute('src', 'https://cdn.test/a.mp3');
+    // The exercise player, not a bare `<audio controls>`: plan 56 phase 6 merged this
+    // template's per-sentence recordings into the listening layer, so a teacher's rules
+    // for hearing reach them. The clip is still the sentence's own.
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    expect(useMediaAsset).toHaveBeenCalledWith('media-9');
   });
 
   it('takes the player away once the work has been handed in', () => {
@@ -322,12 +325,72 @@ describe('TranslateRunnerBody', () => {
       }),
     });
 
-    expect(screen.queryByLabelText('The sentence, spoken')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
   });
 
   it('asks media-service for nothing when no sentence carries audio', () => {
     renderBody();
 
-    expect(useMediaAsset).not.toHaveBeenCalled();
+    // The hook runs for every card — hooks are not conditional — but a card with no
+    // recording asks it about nothing, which is a lookup that never leaves the browser.
+    expect(useMediaAsset).not.toHaveBeenCalledWith(expect.any(String));
+  });
+
+  /*
+    The rules the merge buys — plan 56 phase 6. They are the exercise's, asked once, and
+    they apply to each sentence's own recording: two plays means two plays of *this*
+    sentence, and the gate opens *this* field.
+  */
+  it('locks a sentence behind its own recording when the teacher asked for it', () => {
+    useMediaAsset.mockReturnValue({ data: { id: 'media-9', url: 'https://cdn.test/a.mp3' } });
+    renderBody({
+      projection: makeProjection({
+        dir: 'from_target',
+        audio: {
+          enabled: true,
+          source: 'items',
+          settings: { gate: 'first', plays: 2, seek: false },
+        },
+        items: [
+          {
+            id: 'i1',
+            dir: 'from_target',
+            source: 'Jeg har bodd i Tromsø i tre år.',
+            sourceLang: 'Norsk',
+            answerLang: 'Russisk',
+            gloss: [],
+            mediaId: 'media-9',
+          },
+        ],
+      } as Parameters<typeof makeProjection>[0]),
+    });
+
+    expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
+    expect(
+      screen.getByText('This sentence opens once you have heard its recording.'),
+    ).toBeInTheDocument();
+  });
+
+  it('leaves the field open when the exercise carries no rules at all', () => {
+    // A set written before the merge: it plays exactly as freely as plan 42 made it.
+    useMediaAsset.mockReturnValue({ data: { id: 'media-9', url: 'https://cdn.test/a.mp3' } });
+    renderBody({
+      projection: makeProjection({
+        dir: 'from_target',
+        items: [
+          {
+            id: 'i1',
+            dir: 'from_target',
+            source: 'Jeg har bodd i Tromsø i tre år.',
+            sourceLang: 'Norsk',
+            answerLang: 'Russisk',
+            gloss: [],
+            mediaId: 'media-9',
+          },
+        ],
+      }),
+    });
+
+    expect(screen.getByRole('textbox')).not.toHaveAttribute('readonly');
   });
 });

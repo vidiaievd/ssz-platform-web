@@ -27,6 +27,9 @@ import {
   type Translate,
 } from '@/lib/shared-kernel/translate';
 
+import { withSegment, type AudioDraft } from '@/lib/shared-kernel/audio';
+
+import { AudioEnableRow, AudioModeRow, AudioSegmentField, AudioSourceCard } from '../audio';
 import { ItemAudioSlot } from './item-audio-slot';
 import { TrTester } from './tr-tester';
 import {
@@ -51,6 +54,9 @@ const SHOWN_VARIANTS = 6;
 export interface StepSentencesProps {
   exercise: Translate;
   onChange: (next: Translate) => void;
+  /** The listening layer, held beside the document by the builder (plan 56 phase 6). */
+  audio: AudioDraft;
+  onAudioChange: (next: AudioDraft) => void;
 }
 
 /**
@@ -64,7 +70,7 @@ export interface StepSentencesProps {
  * machine cannot say why an answer is wrong, only the author's own explanation can.
  * Neither number gates anything (plan 42, "Разбор ошибки"); both are visible.
  */
-export function StepSentences({ exercise, onChange }: StepSentencesProps) {
+export function StepSentences({ exercise, onChange, audio, onAudioChange }: StepSentencesProps) {
   const t = useTranslations('Authoring');
   const totals = coverage(exercise);
   /** `single` is one sentence by definition; extra ones stay stored and are warned about. */
@@ -118,6 +124,27 @@ export function StepSentences({ exercise, onChange }: StepSentencesProps) {
         <p className="mt-1 text-sm text-muted-foreground">{t('translate.step2.lede')}</p>
       </div>
 
+      {/*
+        One switch and one question, and the second is what phase 6 is for: this template
+        had a recording per sentence long before the layer existed (plan 42), because its
+        sentences come from different sources. It is a source of the layer now rather than
+        a second audio control beside it.
+      */}
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+        <AudioEnableRow draft={audio} onChange={onAudioChange} />
+        {audio.audio.enabled && (
+          <AudioModeRow
+            draft={audio}
+            onChange={onAudioChange}
+            itemNoun={t('translate.step2.audioItemNoun')}
+          />
+        )}
+      </div>
+
+      {audio.audio.enabled && audio.audio.source !== 'items' && (
+        <AudioSourceCard draft={audio} onChange={onAudioChange} />
+      )}
+
       <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat value={totals.items} label={t('translate.step2.statSentences')} />
         <Stat value={totals.variants} label={t('translate.step2.statVariants')} />
@@ -155,6 +182,8 @@ export function StepSentences({ exercise, onChange }: StepSentencesProps) {
               item={item}
               index={index}
               expanded={expanded.has(item.id)}
+              audio={audio}
+              onAudioChange={onAudioChange}
               registerField={(element) => fields.current.set(item.id, element)}
               onChange={onChange}
               onToggleExpanded={() => toggleExpanded(item.id)}
@@ -195,6 +224,8 @@ interface ItemCardProps {
   item: Item;
   index: number;
   expanded: boolean;
+  audio: AudioDraft;
+  onAudioChange: (next: AudioDraft) => void;
   registerField: (element: HTMLTextAreaElement | null) => void;
   onChange: (next: Translate) => void;
   onToggleExpanded: () => void;
@@ -213,6 +244,8 @@ function ItemCard({
   item,
   index,
   expanded,
+  audio,
+  onAudioChange,
   registerField,
   onChange,
   onToggleExpanded,
@@ -222,6 +255,9 @@ function ItemCard({
   const keys = refsOf(item);
   const missingRef = item.source.trim() !== '' && keys.length === 0;
   const dir = itemDirection(exercise, item);
+  const perSentenceAudio = audio.audio.enabled && audio.audio.source === 'items';
+  const timecodes =
+    audio.audio.enabled && audio.audio.source !== 'items' && audio.audio.useSegments;
 
   return (
     <div
@@ -306,16 +342,28 @@ function ItemCard({
           onChange={(event) => onChange(setItem(exercise, item.id, { source: event.target.value }))}
         />
         {/* Audio belongs to the sentence being read, so it lives with it rather than in
-            the extras — and only when that sentence is in the language being learnt. */}
-        <ItemAudioSlot
-          mediaId={item.mediaId}
-          disabledReason={
-            dir === 'to_target'
-              ? t('translate.step2.audioNotForDirection', { lang: exercise.langs.explain })
-              : undefined
-          }
-          onChange={(mediaId) => onChange(setItem(exercise, item.id, { mediaId }))}
-        />
+            the extras — and only when that sentence is in the language being learnt.
+            Shown only under the per-sentence source: the alternative is one clip for the
+            whole set, and offering both at once is the two controls this merge removes. */}
+        {perSentenceAudio && (
+          <ItemAudioSlot
+            mediaId={item.mediaId}
+            disabledReason={
+              dir === 'to_target'
+                ? t('translate.step2.audioNotForDirection', { lang: exercise.langs.explain })
+                : undefined
+            }
+            onChange={(mediaId) => onChange(setItem(exercise, item.id, { mediaId }))}
+          />
+        )}
+
+        {/* The other source: one clip, and this sentence's slice of it. */}
+        {timecodes && (
+          <AudioSegmentField
+            segment={audio.segments[item.id] ?? null}
+            onChange={(segment) => onAudioChange(withSegment(audio, item.id, segment))}
+          />
+        )}
       </div>
 
       <p className="mt-3 flex items-center gap-1 text-xs font-medium">
@@ -402,9 +450,7 @@ function RefRow({ exercise, item, ref_, at, canRemove, onChange }: RefRowProps) 
           hasError={at === 0 && ref_.trim() === ''}
           aria-invalid={at === 0 && ref_.trim() === ''}
           aria-label={
-            at === 0
-              ? t('translate.step2.refPrimary')
-              : t('translate.step2.refAlt', { at })
+            at === 0 ? t('translate.step2.refPrimary') : t('translate.step2.refAlt', { at })
           }
           placeholder={t('translate.step2.refPlaceholder')}
           onChange={(event) => onChange(setRef(exercise, item.id, at, event.target.value))}

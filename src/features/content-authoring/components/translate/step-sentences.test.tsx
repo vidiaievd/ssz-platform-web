@@ -4,18 +4,36 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
 import type { Translate } from '@/lib/shared-kernel/translate';
 
 import { StepSentences } from './step-sentences';
 import { makeDoc, makeItem } from './test-doc';
 
-function renderStep(exercise: Translate = makeDoc(), onChange = vi.fn()) {
+// The clip card resolves the asset through media-service, and these tests mount no
+// QueryClientProvider (plan 56 phase 6).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
+
+function renderStep(
+  exercise: Translate = makeDoc(),
+  onChange = vi.fn(),
+  audio: AudioDraft = readAudioDraft({}, 'translate_to_target'),
+) {
+  const onAudioChange = vi.fn();
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <StepSentences exercise={exercise} onChange={onChange} />
+      <StepSentences
+        exercise={exercise}
+        onChange={onChange}
+        audio={audio}
+        onAudioChange={onAudioChange}
+      />
     </NextIntlClientProvider>,
   );
-  return { onChange, user: userEvent.setup() };
+  return { onChange, onAudioChange, user: userEvent.setup() };
 }
 
 describe('StepSentences', () => {
@@ -31,9 +49,7 @@ describe('StepSentences', () => {
 
     const variants = screen.getByText('Accepted variants').closest('div')!;
     expect(within(variants).getByText('3')).toBeInTheDocument();
-    expect(
-      screen.getByText('1 of 2 sentences accept more than one wording'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('1 of 2 sentences accept more than one wording')).toBeInTheDocument();
   });
 
   /** What the author wrote, expanded — the only way to see what an inline alternative did. */

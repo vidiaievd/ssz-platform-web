@@ -4,7 +4,15 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
 import type { Translate } from '@/lib/shared-kernel/translate';
+
+// The source card resolves the clip through media-service, and this builder's tests
+// mount no QueryClientProvider (plan 56 phase 6).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
 
 vi.mock('../../actions/translate', () => ({ saveTranslateAction: vi.fn() }));
 
@@ -14,10 +22,20 @@ const { makeDoc, makeItem } = await import('./test-doc');
 
 const LOADED_AT = '2026-08-14T10:00:00.000Z';
 
-function renderBuilder(exercise: Translate = makeDoc()) {
+function renderBuilder(
+  exercise: Translate = makeDoc(),
+  // Every builder carries the audio layer, and an exercise that has never had any reads
+  // as switched off (plan 56 phase 6).
+  audio: AudioDraft = readAudioDraft({}, 'translate_to_target'),
+) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <TranslateBuilder exerciseId="ex-1" containerId="module-1" initialExercise={exercise} />
+      <TranslateBuilder
+        exerciseId="ex-1"
+        containerId="module-1"
+        initialExercise={exercise}
+        initialAudio={audio}
+      />
     </NextIntlClientProvider>,
   );
   return { user: userEvent.setup() };
@@ -144,5 +162,77 @@ describe('TranslateBuilder', () => {
       await user.click(screen.getByRole('tab', { name: new RegExp(step) }));
       expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
     }
+  });
+
+  /*
+    The merge of phase 6: one switch, one question about where the sound is, and the same
+    rules either way. What the tests pin down is that the two sources are alternatives
+    rather than neighbours, and that the layer's blocker knows which one it is judging.
+  */
+  describe('with audio', () => {
+    const listening = (over: Record<string, unknown> = {}): AudioDraft =>
+      readAudioDraft({ audio: { enabled: true, source: 'items', ...over } }, 'translate_to_target');
+
+    it('offers a recording per sentence as a source of the layer, not beside it', async () => {
+      const { user } = renderBuilder(
+        makeDoc({ dir: 'from_target', items: [makeItem({ dir: 'from_target' })] }),
+        listening(),
+      );
+      await user.click(screen.getByRole('tab', { name: /The sentences/ }));
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).toBeChecked();
+      expect(screen.getByRole('radio', { name: /A recording per sentence/ })).toBeChecked();
+      // The exercise-wide clip card belongs to the other source, and only to it.
+      expect(screen.queryByText('The clip')).not.toBeInTheDocument();
+    });
+
+    it('shows the one clip instead when that is where the sound is', async () => {
+      const { user } = renderBuilder(makeDoc(), listening({ source: 'asset', assetId: 'a-1' }));
+      await user.click(screen.getByRole('tab', { name: /The sentences/ }));
+
+      expect(screen.getByRole('radio', { name: 'One clip for the set' })).toBeChecked();
+      expect(screen.getByText('The clip')).toBeInTheDocument();
+    });
+
+    it('blocks a listening set in which no sentence has been recorded', async () => {
+      const { user } = renderBuilder(
+        makeDoc({ dir: 'from_target', items: [makeItem({ dir: 'from_target' })] }),
+        listening(),
+      );
+
+      // Step 2 owns the fix, because that is where the sentences are.
+      expect(
+        within(screen.getByRole('tab', { name: /The sentences/ })).getByText(/problem/),
+      ).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Done' }));
+      expect(
+        within(screen.getByRole('dialog')).getByText(/nothing is attached to play/i),
+      ).toBeInTheDocument();
+    });
+
+    it('is satisfied once one sentence carries a recording', () => {
+      renderBuilder(
+        makeDoc({
+          dir: 'from_target',
+          items: [makeItem({ dir: 'from_target', mediaId: 'media-9' })],
+        }),
+        listening(),
+      );
+
+      expect(
+        within(screen.getByRole('tab', { name: /The sentences/ })).queryByText(/problem/),
+      ).not.toBeInTheDocument();
+    });
+
+    it('draws nothing at all while the switch is off', async () => {
+      const { user } = renderBuilder();
+      await user.click(screen.getByRole('tab', { name: /The sentences/ }));
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).not.toBeChecked();
+      expect(
+        screen.queryByRole('radio', { name: /A recording per sentence/ }),
+      ).not.toBeInTheDocument();
+    });
   });
 });

@@ -12,7 +12,13 @@ import type {
 } from '@/lib/shared-kernel/translate';
 
 import { CharPad } from '@/components/shared/char-pad';
-import { useMediaAsset } from '@/features/media';
+
+import {
+  AudioLockNote,
+  ExerciseAudioPlayer,
+  useExerciseAudio,
+} from '@/features/student/exercises/audio';
+import { audioOf, type ExerciseAudio } from '@/lib/shared-kernel/audio';
 
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
@@ -78,6 +84,17 @@ export interface TranslateRunnerBodyProps {
 
 const READING = 'var(--ssz-font-reading)';
 
+/**
+ * The listening layer's block, as this exercise carries it — plan 56 phase 6.
+ *
+ * A set of sentences with a recording each is `source: 'items'`, and what the block then
+ * says is only *how* they may be heard: the play limit, the gate, the speed. A document
+ * from before the merge has no block at all and reads as the defaults, which are the
+ * freedoms plan 42 gave it — unlimited replays, scrubbing, speed — so nothing changes for
+ * one of those beyond the player it is played in.
+ */
+const audioBlockOf = (projection: unknown): ExerciseAudio => audioOf(projection);
+
 /** The letters an English or a US layout does not have — `flow.keyboard`. */
 const NORWEGIAN_CHARS = ['æ', 'ø', 'å'] as const;
 
@@ -112,6 +129,9 @@ export function TranslateRunnerBody({
   const t = useTranslations('ExerciseRunner');
   const interactive = phase === 'answering';
   const { items, flow } = projection;
+  // Read off the projected document rather than passed in: the block rides with it, and a
+  // set from before the merge simply reads as the defaults (see `audioBlockOf`).
+  const audioRules = useMemo(() => audioBlockOf(projection), [projection]);
 
   const selfCheckByItem = useMemo(() => {
     const byItem = new Map<string, SelfCheckItem>();
@@ -180,6 +200,7 @@ export function TranslateRunnerBody({
           <TrCard
             key={item.id}
             item={item}
+            audioRules={audioRules}
             number={items.length > 1 ? index + 1 : null}
             showDirection={projection.dir === 'both'}
             answer={answerOf(value, item.id)}
@@ -203,6 +224,11 @@ export function TranslateRunnerBody({
 
 interface TrCardProps {
   item: ProjectedItem;
+  /**
+   * How this sentence's recording may be heard: the exercise's rules, which are the same
+   * for every sentence (plan 56 phase 6). The clip itself is the item's own.
+   */
+  audioRules: ExerciseAudio;
   /** `null` for a single-sentence exercise, where a number would only be furniture. */
   number: number | null;
   showDirection: boolean;
@@ -224,6 +250,7 @@ interface TrCardProps {
 
 /** One sentence: what to translate, the field to translate it in, and its tools. */
 function TrCard({
+  audioRules,
   item,
   number,
   showDirection,
@@ -243,6 +270,20 @@ function TrCard({
   const t = useTranslations('ExerciseRunner');
   const [hintOpen, setHintOpen] = useState(false);
   const field = useRef<HTMLTextAreaElement>(null);
+
+  /*
+    One allowance machine per sentence, and that is the merge doing its job: "two plays"
+    means two plays of *this* recording, and the gate opens *this* field. A single machine
+    for the set would have made the second sentence unplayable after the first was heard.
+
+    The hook is called for every card, including the ones with nothing to play: hooks are
+    not conditional, and an empty asset id asks media-service nothing.
+  */
+  const audioContent = useMemo(
+    () => ({ audio: { ...audioRules, source: 'asset' as const, assetId: item.mediaId ?? '' } }),
+    [audioRules, item.mediaId],
+  );
+  const audio = useExerciseAudio(audioContent);
 
   const border =
     outcome === 'pass'
@@ -320,13 +361,18 @@ function TrCard({
 
       {/* The recording of the sentence above, while the work is still open. It is mounted
           only when there is one, so a set without audio asks media-service nothing. */}
-      {item.mediaId !== undefined && interactive && <SourceAudio mediaId={item.mediaId} />}
+      {item.mediaId !== undefined && interactive && (
+        <div className="mb-2">
+          <ExerciseAudioPlayer eng={audio} interactive={interactive} />
+          {audio.gated && <AudioLockNote itemNoun={t('audio.itemNoun.sentence')} own />}
+        </div>
+      )}
 
       <textarea
         ref={field}
         rows={2}
         value={answer}
-        readOnly={!interactive}
+        readOnly={!interactive || audio.gated}
         aria-label={t('translate.fieldLabel', { n: number ?? 1 })}
         placeholder={t('translate.placeholder', { lang: item.answerLang.toLowerCase() })}
         onChange={(event) => onAnswerChange(event.target.value)}
@@ -416,29 +462,13 @@ function TrCard({
   );
 }
 
-/**
- * The sentence, spoken. Replaying is free: a translation exercise does not test whether
- * the learner remembers a recording, and `flow.replayLimit` — which the projection does
- * carry — would be a limit a page reload lifts anyway (plan 42, "Слот медиа").
- *
- * Its own component so that the media lookup happens only for a sentence that has audio.
- */
-function SourceAudio({ mediaId }: { mediaId: string }) {
-  const t = useTranslations('ExerciseRunner');
-  const { data: asset } = useMediaAsset(mediaId);
-
-  if (asset?.url === undefined || asset.url === null) return null;
-
-  return (
-    <audio
-      controls
-      preload="none"
-      src={asset.url}
-      aria-label={t('translate.audioLabel')}
-      className="mb-2 w-full"
-    />
-  );
-}
+/*
+  `SourceAudio` — the bare `<audio controls>` this template used to draw — is gone as of
+  plan 56 phase 6. The recording is still the sentence's own; what changed is that it is
+  played by the exercise player, so a teacher's rules for hearing it reach it. A set
+  written before the merge carries no rules and gets the defaults, which are the freedoms
+  plan 42 gave it: unlimited replays, scrubbing, speed.
+*/
 
 interface TrSelfCheckNoteProps {
   feedback: SelfCheckItem;

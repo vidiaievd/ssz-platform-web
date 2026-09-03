@@ -59,7 +59,7 @@ export function AudioGateScreen({
 }
 
 /** Why the items are not answering yet — BEHAVIOR.md §7. */
-export function AudioLockNote({ itemNoun }: { itemNoun?: string }) {
+export function AudioLockNote({ itemNoun, own = false }: { itemNoun?: string; own?: boolean }) {
   const t = useTranslations('ExerciseRunner');
 
   return (
@@ -69,7 +69,13 @@ export function AudioLockNote({ itemNoun }: { itemNoun?: string }) {
       style={{ color: 'var(--ssz-text-secondary)' }}
     >
       <Lock size={13} aria-hidden="true" className="mt-0.5 shrink-0" />
-      {itemNoun === undefined ? t('audio.lockNote') : t('audio.lockNoteNamed', { items: itemNoun })}
+      {/* `own` is the per-item source (plan 56 phase 6): the clip belongs to this one
+          item, so the sentence is about it and not about "the clip" of the exercise. */}
+      {itemNoun === undefined
+        ? t('audio.lockNote')
+        : own
+          ? t('audio.lockNoteOwn', { item: itemNoun })
+          : t('audio.lockNoteNamed', { items: itemNoun })}
     </p>
   );
 }
@@ -103,7 +109,9 @@ export function AudioSegmentButton({
     <button
       type="button"
       disabled={disabled || eng.failed}
-      onClick={() => (active && eng.playing ? eng.toggle() : eng.playRange(segment.start, segment.end))}
+      onClick={() =>
+        active && eng.playing ? eng.toggle() : eng.playRange(segment.start, segment.end)
+      }
       className="mt-2 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-semibold disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
       style={{
         borderColor: active ? 'var(--ssz-color-primary-500)' : 'var(--ssz-border-default)',
@@ -147,7 +155,7 @@ export function AudioTranscript({
   const [open, setOpen] = useState(false);
 
   const policy = audio.settings.transcriptWhen;
-  const words = policy === 'always' ? audio : (revealed ? delivered : null);
+  const words = policy === 'always' ? audio : revealed ? delivered : null;
 
   if (!audio.enabled || policy === 'never') return null;
   if (!words || words.transcript.trim() === '') return null;

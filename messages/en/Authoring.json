@@ -1688,7 +1688,8 @@
       "audioRemove": "Remove",
       "audioNotForDirection": "The sentence is read in {lang} — there is nothing here worth voicing. Turn the direction round to build a listening task.",
       "audioInvalidType": "That file is not an audio format the platform accepts.",
-      "audioTooLarge": "The recording is larger than 100 MB."
+      "audioTooLarge": "The recording is larger than 100 MB.",
+      "audioItemNoun": "sentence"
     },
     "step3": {
       "title": "What the check accepts",
@@ -1811,7 +1812,8 @@
         "afterSubmit": "The student sees the key while the answer waits in your queue.",
         "afterGraded": "The key arrives together with your verdict.",
         "never": "The key stays between you and the other teachers."
-      }
+      },
+      "audioItemNoun": "sentences"
     },
     "pool": {
       "title": "What does this practise",
@@ -3215,6 +3217,11 @@
       "limitWithSeek": "With scrubbing on, the listen limit does not really limit anything.",
       "segInverted": "A timecode ends before it starts, so the fragment plays nothing.",
       "segBeyond": "A timecode runs past the end of the clip."
-    }
+    },
+    "modeLabel": "Where the sound is",
+    "modeClip": "One clip for the set",
+    "modeItems": "A recording per {items}",
+    "modeClipHelp": "One recording the whole exercise is about. Each item can be given its own timecode into it.",
+    "modeItemsHelp": "Each of the {items} carries its own recording, and the rules below apply to every one of them."
   }
 }
