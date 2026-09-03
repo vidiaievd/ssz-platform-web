@@ -5,6 +5,8 @@ import { useState, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT, type ExerciseAudio } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 import {
   DEFAULT_SETTINGS,
   type StudentProjection,
@@ -78,6 +80,8 @@ interface HarnessProps {
   error?: string | null;
   sending?: boolean;
   showProgressBar?: boolean;
+  audio?: ExerciseAudioEngine;
+  audioTranscript?: { transcript: string; translation: string } | null;
 }
 
 /** The body owns nothing but the text; the harness plays the solver around it. */
@@ -92,6 +96,8 @@ function Harness({
   error = null,
   sending = false,
   showProgressBar = true,
+  audio,
+  audioTranscript = null,
 }: HarnessProps) {
   const [value, setValue] = useState('');
   return (
@@ -107,6 +113,8 @@ function Harness({
       error={error}
       onSubmit={onSubmit}
       onNext={onNext}
+      {...(audio === undefined ? {} : { audio })}
+      audioTranscript={audioTranscript}
       {...(onRestart === undefined ? {} : { onRestart })}
       showProgressBar={showProgressBar}
       accent="var(--ssz-runner-practice)"
@@ -269,5 +277,100 @@ describe('ShortAnswerBody', () => {
     render(wrap(<Harness error="The answer was not handed in. Please try again." />));
 
     expect(screen.getByText(/was not handed in/i)).toBeInTheDocument();
+  });
+
+  /*
+    The listening layer on this type (plan 56 phase 5). A set of open questions about one
+    clip is the case the handoff names first, and the two things worth pinning down are
+    that the gate reaches the only control this type owns — the text field — and that the
+    transcript is not on screen a moment before the engine hands it over.
+  */
+  describe('with audio', () => {
+    const audioBlock = (over: Record<string, unknown> = {}): ExerciseAudio => ({
+      ...AUDIO_DEFAULT,
+      enabled: true,
+      assetId: 'asset-1',
+      title: 'Dialog',
+      duration: 96,
+      transcript: 'Bartek har jobbet i tre år.',
+      ...over,
+      settings: { ...AUDIO_DEFAULT.settings, ...((over['settings'] as object) ?? {}) },
+    });
+
+    const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+      audio: audioBlock(),
+      segments: {},
+      element: null,
+      src: 'https://cdn.test/asset-1.mp3',
+      state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+      duration: 96,
+      playing: false,
+      plays: 0,
+      limit: 0,
+      exhausted: false,
+      heard: false,
+      gated: false,
+      canPlay: true,
+      failed: false,
+      loading: false,
+      speed: 1,
+      toggle: vi.fn(),
+      back: vi.fn(),
+      seekTo: vi.fn(),
+      playRange: vi.fn(),
+      cycleSpeed: vi.fn(),
+      reset: vi.fn(),
+      ...over,
+    });
+
+    it('puts a player above the question and leaves the question itself alone', () => {
+      render(wrap(<Harness audio={engine()} />));
+
+      expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).not.toHaveAttribute('readonly');
+    });
+
+    it('locks the field until the clip has been heard through once', () => {
+      render(wrap(<Harness audio={engine({ gated: true })} />));
+
+      expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
+      expect(
+        screen.getByText('The questions open once you have heard the clip through once.'),
+      ).toBeInTheDocument();
+    });
+
+    it('offers the fragment of the clip that belongs to the question on screen', () => {
+      render(wrap(<Harness audio={engine({ segments: { sa1: { start: 22, end: 48 } } })} />));
+
+      expect(screen.getByRole('button', { name: /0:22/ })).toBeInTheDocument();
+    });
+
+    it('offers what the clip said only once the engine has handed it over', async () => {
+      // Under `after` the words are not withheld by this component — they are not in the
+      // browser at all until the engine sends them with the last verdict (plan 56 §3.3).
+      const listening = engine({ audio: audioBlock({ settings: { transcriptWhen: 'after' } }) });
+
+      const { rerender } = render(wrap(<Harness audio={listening} phase="submitted" />));
+      expect(screen.queryByRole('button', { name: /Transcript/i })).not.toBeInTheDocument();
+
+      rerender(
+        wrap(
+          <Harness
+            audio={listening}
+            phase="submitted"
+            audioTranscript={{ transcript: 'Bartek har jobbet i tre år.', translation: '' }}
+          />,
+        ),
+      );
+      await userEvent.setup().click(screen.getByRole('button', { name: /Transcript/i }));
+      expect(screen.getByText(/Bartek har jobbet i tre år/)).toBeInTheDocument();
+    });
+
+    it('is not there at all for a set without it', () => {
+      render(wrap(<Harness />));
+
+      expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
+      expect(screen.getByRole('textbox')).not.toHaveAttribute('readonly');
+    });
   });
 });

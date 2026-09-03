@@ -11,6 +11,7 @@ import {
   type ShowModelPolicy,
 } from '@/lib/shared-kernel/short-answer';
 
+import { AudioRulesCard, AudioTranscriptCard } from '../audio';
 import { setQuestion, setSettings, type ShortAnswerDocument } from './edits';
 import { ToggleRow } from '../toggle-row';
 
@@ -50,6 +51,23 @@ export function StepVerdict({ exercise, onChange }: StepVerdictProps) {
         <h2 className="text-base font-semibold">{t('shortAnswer.step3.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('shortAnswer.step3.lede')}</p>
       </div>
+
+      {/* The rules for hearing the clip, and when what it says may be read. Both belong on
+          this step for the same reason: it is the step about what the student is given,
+          and a transcript handed over too early is the answer handed over too early. */}
+      {exercise.audio.audio.enabled && (
+        <>
+          <AudioRulesCard
+            draft={exercise.audio}
+            onChange={(audio) => onChange({ ...exercise, audio })}
+            itemNoun={t('shortAnswer.step3.audioItemNoun')}
+          />
+          <AudioTranscriptCard
+            draft={exercise.audio}
+            onChange={(audio) => onChange({ ...exercise, audio })}
+          />
+        </>
+      )}
 
       <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">

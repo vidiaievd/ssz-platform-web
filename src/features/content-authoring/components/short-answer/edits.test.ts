@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
 import {
   emptyContent,
+  TEMPLATE_CODE,
   usableElements,
   type ShortAnswerContent,
 } from '@/lib/shared-kernel/short-answer';
@@ -25,6 +27,7 @@ import {
 function doc(overrides: Partial<ShortAnswerContent> = {}): ShortAnswerDocument {
   return {
     updatedAt: '2026-08-23T10:00:00.000Z',
+    audio: readAudioDraft({}, TEMPLATE_CODE),
     ...emptyContent(),
     ...overrides,
   };

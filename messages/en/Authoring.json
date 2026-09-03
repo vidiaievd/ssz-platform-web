@@ -2474,6 +2474,7 @@
     "step3": {
       "title": "Verdict and feedback",
       "lede": "What counts as a pass, and what the student reads the moment they submit.",
+      "audioItemNoun": "questions",
       "passRuleLabel": "A pass needs",
       "passRuleHelp": "Optional elements never block a pass.",
       "passRule_all": "All elements",

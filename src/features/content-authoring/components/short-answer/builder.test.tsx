@@ -4,9 +4,21 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import { emptyContent, type ShortAnswerContent } from '@/lib/shared-kernel/short-answer';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import {
+  emptyContent,
+  TEMPLATE_CODE,
+  type ShortAnswerContent,
+} from '@/lib/shared-kernel/short-answer';
 
 import type { ShortAnswerDocument } from './edits';
+
+// The source card resolves the clip through media-service, and this builder's tests
+// mount no QueryClientProvider (plan 56 phase 5).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
 
 vi.mock('../../actions/short-answer', () => ({ saveShortAnswerAction: vi.fn() }));
 
@@ -44,6 +56,9 @@ function doc(overrides: Partial<ShortAnswerContent> = {}): ShortAnswerDocument {
 
   return {
     updatedAt: LOADED_AT,
+    // Every builder document carries the audio layer, and an exercise that has never had
+    // any reads as switched off (plan 56 phase 5).
+    audio: readAudioDraft({}, TEMPLATE_CODE),
     ...content,
     questions: [
       {
@@ -215,5 +230,50 @@ describe('ShortAnswerBuilder', () => {
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText(/Nobody ever reads these answers/)).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: /Looks good/ })).toBeEnabled();
+  });
+
+  /* The listening layer on this builder (plan 56 phase 5). */
+  describe('with audio', () => {
+    const listening = (over: Record<string, unknown> = {}): ShortAnswerDocument => ({
+      ...doc(),
+      audio: readAudioDraft(
+        {
+          audio: {
+            enabled: true,
+            source: 'asset',
+            assetId: 'asset-1',
+            title: 'Dialog',
+            duration: 96,
+            settings: { transcriptWhen: 'never' },
+            ...over,
+          },
+        },
+        TEMPLATE_CODE,
+      ),
+    });
+
+    it('puts the switch and the clip where the title and the instruction already are', () => {
+      renderBuilder(listening());
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).toBeChecked();
+      expect(screen.getByText('The clip')).toBeInTheDocument();
+    });
+
+    it('reports a missing clip as a blocker on the step that owns the fix', () => {
+      // Step 1, where the switch is: the layer's findings go into the type's own rail
+      // rather than a second list that could disagree with it.
+      renderBuilder(listening({ assetId: '' }));
+
+      expect(
+        within(screen.getByRole('tab', { name: /Questions/ })).getByText(/problem/),
+      ).toBeInTheDocument();
+    });
+
+    it('draws nothing at all while the switch is off', () => {
+      renderBuilder();
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).not.toBeChecked();
+      expect(screen.queryByText('The clip')).not.toBeInTheDocument();
+    });
   });
 });

@@ -25,6 +25,9 @@ import {
   type IssueStep,
 } from '@/lib/shared-kernel/short-answer';
 
+import type { AudioStepMap, PlacedAudioIssue } from '@/lib/shared-kernel/audio';
+
+import { foldAudioIntoStep, useAudioGateRows, useAudioProblems } from '../audio';
 import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
 import { BuilderGateDialog, BuilderSaveHint, BuilderStepNav, type GateRow } from '../builder-frame';
 import { BuilderConflictDialog, useBuilderSaveNotices } from '../builder-save-notices';
@@ -42,6 +45,17 @@ import {
 import { useIssueCopy } from './issue-copy';
 
 const STEPS: IssueStep[] = [1, 2, 3, 4];
+
+/**
+ * Where this builder keeps each part of the audio layer.
+ *
+ * The clip and the timecodes both sit on step 1, because that is where the questions are
+ * and a timecode belongs to a question. The rules and the transcript are both step 3:
+ * that step is what the student is given the moment they hand an answer in, and when the
+ * transcript is shown is exactly that question asked about the clip. Step 4 is the
+ * pipeline — AI and a teacher — and nothing about hearing is decided there.
+ */
+const AUDIO_STEPS: AudioStepMap = { source: 1, segments: 1, rules: 3, transcript: 3 };
 const LAST_STEP = 4;
 
 export interface ShortAnswerBuilderProps {
@@ -113,6 +127,13 @@ export function ShortAnswerBuilder({
 
   const problems = useMemo(() => issues(exercise), [exercise]);
 
+  /** The layer's findings, in the same rail and the same gate as the type's own. */
+  const audioProblems = useAudioProblems(
+    exercise.audio,
+    exercise.questions.map((question) => question.id),
+    AUDIO_STEPS,
+  );
+
   const changedSinceOpen = !sameDocument(exercise, opened);
 
   const revert = () => {
@@ -140,7 +161,12 @@ export function ShortAnswerBuilder({
           answered the four.
         */}
         <div className="flex min-w-0 flex-1 items-stretch justify-between gap-3">
-          <ShortAnswerSteps current={step} exercise={exercise} onSelect={setStep} />
+          <ShortAnswerSteps
+            current={step}
+            exercise={exercise}
+            audioProblems={audioProblems}
+            onSelect={setStep}
+          />
           <div className="flex shrink-0 items-center gap-3 py-2">
             <BuilderSaveHint status={autosave.status} savedAt={autosave.savedAt} />
           </div>
@@ -168,6 +194,7 @@ export function ShortAnswerBuilder({
         open={gateOpen}
         exercise={exercise}
         problems={problems}
+        audioProblems={audioProblems}
         onOpenChange={setGateOpen}
         onGoToStep={(target) => {
           setStep(target as IssueStep);
@@ -232,16 +259,21 @@ export function ShortAnswerBuilder({
 function ShortAnswerSteps({
   current,
   exercise,
+  audioProblems,
   onSelect,
 }: {
   current: IssueStep;
   exercise: ShortAnswerDocument;
+  audioProblems: PlacedAudioIssue[];
   onSelect: (step: IssueStep) => void;
 }) {
   const t = useTranslations('Authoring');
 
   const steps: BuilderStep[] = STEPS.map((step) => {
-    const state = stepState(exercise, step);
+    const state = foldAudioIntoStep(
+      stepState(exercise, step),
+      audioProblems.filter((issue) => issue.step === step),
+    );
     const label = t(`shortAnswer.shell.step${step}` as 'shortAnswer.shell.step1');
     const sub = t(`shortAnswer.shell.stepSub${step}` as 'shortAnswer.shell.stepSub1');
 
@@ -291,18 +323,22 @@ function GateDialog({
   open,
   exercise,
   problems,
+  audioProblems,
   onOpenChange,
   onGoToStep,
 }: {
   open: boolean;
   exercise: ShortAnswerDocument;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   onOpenChange: (open: boolean) => void;
   onGoToStep: (step: number) => void;
 }) {
   const describeIssue = useIssueCopy(exercise);
+  const audioRows = useAudioGateRows(audioProblems);
 
   const rows: GateRow[] = [
+    ...audioRows,
     ...problems
       .filter((issue) => issue.level === 'blocker')
       .map((issue, index) => ({

@@ -4,7 +4,12 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import { emptyContent, type ShortAnswerContent } from '@/lib/shared-kernel/short-answer';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import {
+  emptyContent,
+  TEMPLATE_CODE,
+  type ShortAnswerContent,
+} from '@/lib/shared-kernel/short-answer';
 
 vi.mock('next/navigation', () => ({ useParams: () => ({ schoolSlug: 'demo-school' }) }));
 vi.mock('@/lib/i18n/navigation', () => ({
@@ -31,6 +36,9 @@ function doc(overrides: Partial<ShortAnswerContent> = {}): ShortAnswerDocument {
 
   return {
     updatedAt: '2026-08-23T10:00:00.000Z',
+    // Every builder document carries the audio layer, and an exercise that has never had
+    // any reads as switched off (plan 56 phase 5).
+    audio: readAudioDraft({}, TEMPLATE_CODE),
     ...content,
     questions: [
       {

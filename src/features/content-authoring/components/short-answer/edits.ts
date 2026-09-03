@@ -9,6 +9,7 @@
 // what the server reads too, so anything this file worked out for itself would be a
 // second opinion about the same document.
 
+import type { AudioDraft } from '@/lib/shared-kernel/audio';
 import {
   newElement,
   newQuestion,
@@ -31,6 +32,14 @@ import {
 export interface ShortAnswerDocument extends ShortAnswerContent {
   /** ISO. Doubles as the autosave concurrency token. */
   updatedAt: string;
+  /**
+   * The listening layer, edited beside the document (plan 56 phase 5).
+   *
+   * Outside `ShortAnswerContent` for the reason the layer exists at all: the same block
+   * hangs on every template, and `toContent` builds an explicit object that would drop a
+   * field it does not know about. `applyAudioDraft` writes it back at save time.
+   */
+  audio: AudioDraft;
 }
 
 /** Beyond five elements a question stops being a short answer and becomes an essay. */

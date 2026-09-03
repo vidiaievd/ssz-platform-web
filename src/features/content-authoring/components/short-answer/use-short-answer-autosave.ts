@@ -3,9 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { AppErrorCode } from '@/lib/errors';
-import { toContent, toExpectedAnswers } from '@/lib/shared-kernel/short-answer';
+import { applyAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE, toContent, toExpectedAnswers } from '@/lib/shared-kernel/short-answer';
 
-import { saveShortAnswerAction, type SaveShortAnswerOutcome } from '../../actions/short-answer';
+import {
+  saveShortAnswerAction,
+  type SaveShortAnswerInput,
+  type SaveShortAnswerOutcome,
+} from '../../actions/short-answer';
 import type { ShortAnswerDocument } from './edits';
 
 /** IMPLEMENTATION.md "Persistence": ~850ms, and the teacher never presses a save button. */
@@ -146,7 +151,13 @@ export function useShortAnswerAutosave({
       setStatus('saving');
 
       const result = await saveShortAnswerAction(exerciseId, containerId, {
-        content: toContent(document),
+        // The template's own persistence, then the layer that belongs to none of them:
+        // `toContent` builds an explicit object and would drop the audio block.
+        content: applyAudioDraft(
+          toContent(document) as unknown as Record<string, unknown>,
+          document.audio,
+          TEMPLATE_CODE,
+        ) as SaveShortAnswerInput['content'],
         expectedAnswers: toExpectedAnswers(document),
         expectedUpdatedAt: force?.expectedUpdatedAt ?? document.updatedAt,
         // The one line the author wrote, written to the instruction row as well as into

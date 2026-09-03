@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import {
   Bot,
   Check,
@@ -14,6 +16,15 @@ import {
 import { useTranslations } from 'next-intl';
 
 import type { StudentProjection, StudentResult, Verdict } from '@/lib/shared-kernel/short-answer';
+
+import {
+  AudioGateScreen,
+  AudioLockNote,
+  AudioSegmentButton,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
 
 import { Instr } from './instr';
 
@@ -58,6 +69,21 @@ export interface ShortAnswerBodyProps {
   error?: string | null;
   /** False in a preview: everything renders, nothing accepts input. */
   interactive?: boolean;
+  /**
+   * The listening layer, when the set has one (plan 56).
+   *
+   * Absent means an exercise with no audio, and the body is then exactly what it was
+   * before this feature — no player, no gate, no chip.
+   */
+  audio?: ExerciseAudioEngine;
+  /**
+   * What the clip said, handed over with the last verdict.
+   *
+   * Not after the first question: one clip covers the whole set, so a transcript shown
+   * mid-set would answer everything still to come. The engine decides that — this only
+   * shows what it was given (plan 56 §3.3).
+   */
+  audioTranscript?: { transcript: string; translation: string } | null;
   /**
    * Whether the set draws its own progress bar. False where something outside it already
    * draws one — the practice stack counts tasks of the section, and two bars measuring
@@ -174,6 +200,8 @@ export function ShortAnswerBody({
   sending = false,
   error = null,
   interactive = true,
+  audio,
+  audioTranscript = null,
   showProgressBar = true,
   onSubmit,
   onNext,
@@ -181,8 +209,18 @@ export function ShortAnswerBody({
   accent,
 }: ShortAnswerBodyProps) {
   const t = useTranslations('ExerciseRunner');
+  /**
+   * The listen-first screen has been passed. State of the body rather than of the engine:
+   * it is about this reading of the set, and a restart puts the learner back in front of
+   * it because a restart is a new attempt (BEHAVIOR §4).
+   */
+  const [entered, setEntered] = useState(false);
   const s = set.settings;
   const total = set.questions.length;
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  // Reaches every control the type owns, by extending the expressions that were already
+  // there. A second lock mechanism is how the two drift apart (INTEGRATION.md).
+  const locked = audioOn && audio.gated;
 
   if (total === 0) {
     return (
@@ -241,6 +279,17 @@ export function ShortAnswerBody({
     );
   }
 
+  /*
+    `layout: 'gate'` fills the runner with the listen-first screen instead of the question.
+    Below `done`, which is a finished set rather than a clip to hear again, and below the
+    empty-set card for the same reason.
+  */
+  if (audioOn && audio.audio.settings.layout === 'gate' && !entered) {
+    return (
+      <AudioGateScreen eng={audio} interactive={interactive} onStart={() => setEntered(true)} />
+    );
+  }
+
   const question = set.questions[Math.min(index, total - 1)]!;
   const submitted = phase === 'submitted';
   const last = index + 1 >= total;
@@ -279,6 +328,13 @@ export function ShortAnswerBody({
 
       {set.instruction.trim() !== '' && <Instr>{set.instruction}</Instr>}
 
+      {audioOn && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={interactive} />
+          {locked && <AudioLockNote itemNoun={t('audio.itemNoun.questions')} />}
+        </div>
+      )}
+
       {/* `reading` only. A `listening` transcript is the author's own and the projection
           never sends it; an `opinion` question has no passage to send. */}
       {question.passage?.trim() && (
@@ -310,11 +366,19 @@ export function ShortAnswerBody({
         {question.prompt}
       </h3>
 
+      {audioOn && (
+        <AudioSegmentButton
+          eng={audio}
+          segment={audio.segments[question.id] ?? null}
+          disabled={!interactive || locked}
+        />
+      )}
+
       {/* Read-only rather than disabled once handed in: the answer stays selectable and
           stays readable to assistive technology (README, accessibility). */}
       <textarea
         value={value}
-        readOnly={!interactive || submitted}
+        readOnly={!interactive || submitted || locked}
         aria-label={t('shortAnswer.inputLabel')}
         placeholder={t('shortAnswer.placeholder')}
         onChange={(event) => onValueChange(event.target.value)}
@@ -422,6 +486,14 @@ export function ShortAnswerBody({
         </div>
       )}
 
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
+      )}
+
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {submitted ? (
           <button
@@ -436,7 +508,7 @@ export function ShortAnswerBody({
           <>
             <button
               type="button"
-              disabled={!interactive || sending || value.trim() === ''}
+              disabled={!interactive || sending || locked || value.trim() === ''}
               onClick={onSubmit}
               className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
               style={{ background: accent }}

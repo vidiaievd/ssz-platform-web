@@ -99,7 +99,7 @@ import type { ShortAnswerDocument } from './short-answer/edits';
 import type { SavedDocument as SavedShortAnswer } from './short-answer/use-short-answer-autosave';
 import { MultipleChoiceBuilder } from './multiple-choice/builder';
 import { MultipleChoicePreview } from './multiple-choice/multiple-choice-preview';
-import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import { applyAudioDraft, readAudioDraft } from '@/lib/shared-kernel/audio';
 
 import type { MultipleChoiceDocument } from './multiple-choice/edits';
 import type { SavedDocument as SavedMultipleChoice } from './multiple-choice/use-multiple-choice-autosave';
@@ -676,6 +676,9 @@ function shortAnswerDocumentFrom(exercise: ExerciseWithAnswers): ShortAnswerDocu
   return {
     ...shortAnswerFromPersisted(exercise.content, exercise.expectedAnswers),
     updatedAt: exercise.updatedAt ?? '',
+    // Read off the raw column: the audio block belongs to no template, so
+    // `fromPersisted` neither knows nor carries it (plan 56 phase 5).
+    audio: readAudioDraft(exercise.content, SHORT_ANSWER_TEMPLATE_CODE),
   };
 }
 
@@ -695,7 +698,15 @@ function applySavedShortAnswer(
   return {
     ...cached,
     updatedAt,
-    content: { ...shortAnswerToContent(saved.exercise) },
+    // The same two steps the save itself takes: the template's own persistence,
+    // then the layer that belongs to none of them. A cached document written
+    // without it would hand a remounted builder an exercise whose audio had
+    // vanished — and the next autosave would write that loss to the server.
+    content: applyAudioDraft(
+      { ...shortAnswerToContent(saved.exercise) },
+      saved.exercise.audio,
+      SHORT_ANSWER_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...shortAnswerToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
@@ -780,7 +791,15 @@ function applySavedMultipleChoice(
   return {
     ...cached,
     updatedAt,
-    content: { ...multipleChoiceToContent(saved.exercise) },
+    // The same two steps the save itself takes: the template's own persistence,
+    // then the layer that belongs to none of them. A cached document written
+    // without it would hand a remounted builder an exercise whose audio had
+    // vanished — and the next autosave would write that loss to the server.
+    content: applyAudioDraft(
+      { ...multipleChoiceToContent(saved.exercise) },
+      saved.exercise.audio,
+      MULTIPLE_CHOICE_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...multipleChoiceToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
@@ -823,7 +842,15 @@ function applySavedMultipleChoiceGroup(
   return {
     ...cached,
     updatedAt,
-    content: { ...multipleChoiceGroupToContent(saved.exercise) },
+    // The same two steps the save itself takes: the template's own persistence,
+    // then the layer that belongs to none of them. A cached document written
+    // without it would hand a remounted builder an exercise whose audio had
+    // vanished — and the next autosave would write that loss to the server.
+    content: applyAudioDraft(
+      { ...multipleChoiceGroupToContent(saved.exercise) },
+      saved.exercise.audio,
+      MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...multipleChoiceGroupToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [

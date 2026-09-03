@@ -2474,6 +2474,7 @@
     "step3": {
       "title": "Vurdering og tilbakemelding",
       "lede": "Hva som teller som bestått, og hva studenten leser i det svaret leveres.",
+      "audioItemNoun": "spørsmålene",
       "passRuleLabel": "Bestått krever",
       "passRuleHelp": "Valgfrie element blokkerer aldri et bestått svar.",
       "passRule_all": "Alle element",

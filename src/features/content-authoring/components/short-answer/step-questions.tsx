@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { withSegment } from '@/lib/shared-kernel/audio';
 import {
   gradeableQuestions,
   KINDS,
@@ -20,6 +21,7 @@ import {
   type QuestionKind,
 } from '@/lib/shared-kernel/short-answer';
 
+import { AudioEnableRow, AudioSegmentField, AudioSourceCard } from '../audio';
 import {
   addQuestion,
   duplicateQuestion,
@@ -84,7 +86,21 @@ export function StepQuestions({ exercise, onChange }: StepQuestionsProps) {
             {t('shortAnswer.step1.instructionHelp')}
           </p>
         </div>
+
+        {/* Audio adds no wizard step: it is material, and material lives where the title
+            and the instruction live (plan 56, README "Authoring UI"). */}
+        <AudioEnableRow
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
       </div>
+
+      {exercise.audio.audio.enabled && (
+        <AudioSourceCard
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
+      )}
 
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="text-xs font-medium">
@@ -161,6 +177,7 @@ function QuestionCard({
   const noModel = !noPrompt && question.model.trim() === '';
   const config = kindConfig(question.kind);
   const noPassage = config.needsPassage && question.passage.trim() === '';
+  const timecodes = exercise.audio.audio.enabled && exercise.audio.audio.useSegments;
 
   const update = (patch: Parameters<typeof setQuestion>[2]) =>
     onChange(setQuestion(exercise, question.id, patch));
@@ -171,6 +188,16 @@ function QuestionCard({
         noPrompt || noModel ? 'border-error' : 'border-border'
       }`}
     >
+      {/* A question of its own line in the clip — the case this type is written for: five
+          questions about one dialogue, each answered from a different half-minute of it. */}
+      {timecodes && (
+        <AudioSegmentField
+          segment={exercise.audio.segments[question.id] ?? null}
+          onChange={(segment) =>
+            onChange({ ...exercise, audio: withSegment(exercise.audio, question.id, segment) })
+          }
+        />
+      )}
       <div className="flex items-center gap-2">
         <span
           aria-hidden

@@ -24,6 +24,7 @@ import type {
   StudentProjection,
   StudentResult,
 } from '@/lib/shared-kernel/short-answer';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface ShortAnswerSolverProps {
@@ -80,6 +81,16 @@ export function ShortAnswerSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<StudentProjection | null>(null);
+  /**
+   * The document as the engine dealt it, kept for the audio layer alone: the projection is
+   * the kernel's own shape and has no room for a block that is not the template's
+   * (plan 56).
+   */
+  const [document, setDocument] = useState<unknown>(null);
+  /** What the clip said, once the engine hands it over with the last verdict. */
+  const [transcript, setTranscript] = useState<{ transcript: string; translation: string } | null>(
+    null,
+  );
   /** Set when the set arrived with its answer key still on it — see the projection reader. */
   const [unusable, setUnusable] = useState(false);
 
@@ -171,6 +182,8 @@ export function ShortAnswerSolver({
 
           setAttemptId(data.attemptId);
           setProjection(set);
+          setDocument(data.exerciseContent);
+          setTranscript(null);
           openedAt.current = Date.now();
           resume(set, data.answeredQuestions ?? []);
 
@@ -191,6 +204,13 @@ export function ShortAnswerSolver({
   useEffect(() => {
     begin();
   }, [begin]);
+
+  /**
+   * The listening layer, mounted once for the whole set rather than per question: the
+   * allowance, the gate and the playthrough belong to the exercise, and walking to the
+   * next question is not a new hearing of the clip.
+   */
+  const audio = useExerciseAudio(document);
 
   const retry = useCallback(() => {
     setUnusable(false);
@@ -269,6 +289,9 @@ export function ShortAnswerSolver({
         onSuccess: (data) => {
           answers.current = [...answers.current, { questionId, text: value }];
           setResult(data.result);
+          // Only ever sent with the last verdict of the set — one clip covers every
+          // question, so the engine holds it back until there is nothing left to answer.
+          if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
           setTally((counts) => ({
             ...counts,
             [data.result.verdict]: counts[data.result.verdict] + 1,
@@ -334,6 +357,8 @@ export function ShortAnswerSolver({
           tally={tally}
           sending={answer.isPending}
           error={error}
+          audio={audio}
+          audioTranscript={transcript}
           onSubmit={hand}
           onNext={next}
           onRestart={restart}
@@ -450,9 +475,7 @@ function ShortAnswerReviewRecap({
         className="text-[14px] font-semibold"
         style={{
           color:
-            review.status === 'RETURNED'
-              ? 'var(--ssz-text-primary)'
-              : 'var(--ssz-feedback-ok-fg)',
+            review.status === 'RETURNED' ? 'var(--ssz-text-primary)' : 'var(--ssz-feedback-ok-fg)',
         }}
       >
         {review.status === 'RETURNED'
@@ -470,7 +493,10 @@ function ShortAnswerReviewRecap({
       )}
 
       {decided.length > 0 && (
-        <ol className="mt-3 flex flex-col gap-2.5 border-t pt-3" style={{ borderColor: 'var(--ssz-border-default)' }}>
+        <ol
+          className="mt-3 flex flex-col gap-2.5 border-t pt-3"
+          style={{ borderColor: 'var(--ssz-border-default)' }}
+        >
           {decided.map(({ question, verdict }, index) => {
             const answer = review.answers[question.id];
             return (
