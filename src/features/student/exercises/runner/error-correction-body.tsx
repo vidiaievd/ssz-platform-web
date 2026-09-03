@@ -13,6 +13,14 @@ import type {
 
 import { CharPad } from '@/components/shared/char-pad';
 
+import {
+  AudioLockNote,
+  AudioSegmentButton,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
+
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
@@ -48,6 +56,17 @@ export interface ErrorCorrectionBodyProps {
    * learner pressed the primary action too early.
    */
   pointOut?: boolean;
+  /**
+   * The listening layer, when the exercise has one (plan 56 phase 6).
+   *
+   * The high-value shape here is dictation-with-corrections: the clip is the passage read
+   * *correctly*, and the text on screen is not. That is also why this type has an audio
+   * rule of its own — a transcript shown from the start would be the answers on screen
+   * (`transcriptGivesAway`, enforced in the builder and in publish preflight).
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the key once the work is in. */
+  audioTranscript?: { transcript: string; translation: string } | null;
   /**
    * The last self-check the server answered, if the learner has asked for one. Counts
    * only: how many mistakes are corrected per sentence, and how many edits landed where
@@ -116,9 +135,14 @@ export function ErrorCorrectionBody({
   pointOut = false,
   selfCheck = null,
   verdicts = null,
+  audio,
+  audioTranscript = null,
 }: ErrorCorrectionBodyProps) {
   const t = useTranslations('ExerciseRunner');
-  const interactive = phase === 'answering';
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  const locked = audioOn && audio.gated;
+  // The gate joins the expression every card already reads, rather than adding a second.
+  const interactive = phase === 'answering' && !locked;
 
   const selfCheckByItem = useMemo(() => {
     const byItem = new Map<string, SelfCheckItem>();
@@ -150,6 +174,13 @@ export function ErrorCorrectionBody({
   return (
     <div>
       {instruction !== undefined && instruction !== '' && <Instr>{instruction}</Instr>}
+
+      {audioOn && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={phase === 'answering'} />
+          {locked && <AudioLockNote itemNoun={t('audio.itemNoun.sentences')} />}
+        </div>
+      )}
 
       {projection.note !== '' && (
         <p className="mb-3 text-[13px] text-(--ssz-text-secondary)">{projection.note}</p>
@@ -192,6 +223,7 @@ export function ErrorCorrectionBody({
               accent={accent}
               mode={mode}
               untouched={pointOut && !isTouched(edits)}
+              {...(audioOn ? { audioEngine: audio } : {})}
               {...(feedback === undefined ? {} : { feedback })}
               verdict={verdicts?.[item.id] ?? null}
               onChange={(change) => update(item.id, change)}
@@ -202,6 +234,14 @@ export function ErrorCorrectionBody({
 
       {interactive && (
         <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)">{t('errorCorrection.howTo')}</p>
+      )}
+
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
       )}
     </div>
   );
@@ -218,6 +258,8 @@ interface EcCardProps {
   accent: string;
   mode: RunnerMode;
   untouched: boolean;
+  /** The clip engine, when the exercise has one — for this sentence's fragment chip. */
+  audioEngine?: ExerciseAudioEngine;
   feedback?: SelfCheckItem;
   /** What the teacher decided about this sentence, once one has. */
   verdict: ErrorCorrectionItemVerdict | null;
@@ -243,6 +285,7 @@ function EcCard({
   accent,
   mode,
   untouched,
+  audioEngine,
   feedback,
   verdict,
   onChange,
@@ -292,6 +335,16 @@ function EcCard({
           )}
         </div>
       </div>
+
+      {/* This sentence's line of the clip, when the author timed it. Free to replay: a
+          fragment spends no listen (BEHAVIOR §8). */}
+      {audioEngine !== undefined && (
+        <AudioSegmentButton
+          eng={audioEngine}
+          segment={audioEngine.segments[item.id] ?? null}
+          disabled={!interactive}
+        />
+      )}
 
       <EcSentence
         item={item}

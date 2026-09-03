@@ -472,7 +472,8 @@
       "gaps": "gaps",
       "statements": "statements",
       "sentence": "sentence",
-      "lines": "lines"
+      "lines": "lines",
+      "sentences": "sentences"
     },
     "lockNoteOwn": "This {item} opens once you have heard its recording."
   }

@@ -472,7 +472,8 @@
       "gaps": "gapene",
       "statements": "påstandene",
       "sentence": "setningen",
-      "lines": "linjene"
+      "lines": "linjene",
+      "sentences": "setningene"
     },
     "lockNoteOwn": "Denne {item} åpner seg når du har hørt opptaket sitt."
   }

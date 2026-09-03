@@ -1453,7 +1453,11 @@
       "AI_WITHOUT_CHECK": "AI-trinnet er på mens autosjekken er av.",
       "AI_UNLIMITED_BEFORE_SUBMIT": "Studenten ser AI-kommentaren før innlevering, uten grense på egensjekk.",
       "REFS_AFTER_SUBMIT_WITH_RETRIES": "Fasiten vises rett etter innlevering, og da er et nytt forsøk lite verdt."
-    }
+    },
+    "audioItemNoun": "setningene",
+    "audioSegments": "Tidskoder",
+    "audioSegmentFor": "Setning {index}",
+    "audioGivesAway": "Transkripsjonen vises fra start, og her er den fasiten — klippet er teksten lest riktig. Vis den etter svaret i stedet, eller ikke i det hele tatt."
   },
   "activity": {
     "title": "Aktivitet",

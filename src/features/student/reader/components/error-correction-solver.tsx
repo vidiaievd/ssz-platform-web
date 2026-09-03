@@ -26,6 +26,7 @@ import {
   type ErrorCorrectionVerdicts,
 } from '@/features/student/exercises/runner';
 import type { AttemptRecord } from '@/features/student/exercises/types/attempts';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface ErrorCorrectionSolverProps {
@@ -92,6 +93,15 @@ export function ErrorCorrectionSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<StudentProjection | null>(null);
+  /**
+   * The document as the engine dealt it, kept for the audio layer alone: the projection
+   * is the kernel's own shape and has no room for a block that is not the template's.
+   */
+  const [document, setDocument] = useState<unknown>(null);
+  /** What the clip said, once the engine hands it over with the submission. */
+  const [transcript, setTranscript] = useState<{ transcript: string; translation: string } | null>(
+    null,
+  );
   /** Set when the exercise arrived in a shape this runner must not play. */
   const [unusable, setUnusable] = useState(false);
 
@@ -142,6 +152,8 @@ export function ErrorCorrectionSolver({
 
           setAttemptId(data.attemptId);
           setProjection(projected);
+          setDocument(data.exerciseContent);
+          setTranscript(null);
           openedAt.current = Date.now();
 
           if (restoreConsidered.current) return;
@@ -175,6 +187,12 @@ export function ErrorCorrectionSolver({
   useEffect(() => {
     begin();
   }, [begin]);
+
+  /**
+   * The listening layer, mounted once for the whole exercise: the allowance, the gate and
+   * the playthrough belong to it, not to a sentence.
+   */
+  const audio = useExerciseAudio(document);
 
   const retry = useCallback(() => {
     setUnusable(false);
@@ -230,6 +248,8 @@ export function ErrorCorrectionSolver({
       {
         onSuccess: (data) => {
           clearAnswerDraft(exerciseId);
+          // The work is in, so the clip has nothing left to give away.
+          if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
           setSent(data.requiresReview ? 'review' : 'passed');
           // `null` on a routed answer: it has been done, and whether it was right is
           // the teacher's to say. The reader counts it as attempted either way.
@@ -321,6 +341,8 @@ export function ErrorCorrectionSolver({
         accent={PRACTICE_ACCENT}
         pointOut={pointOut}
         verdicts={review?.verdicts ?? null}
+        audio={audio}
+        audioTranscript={transcript}
       />
 
       {sent === null ? (

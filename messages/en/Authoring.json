@@ -1453,7 +1453,11 @@
       "AI_WITHOUT_CHECK": "The AI stage is on while the automatic check is off.",
       "AI_UNLIMITED_BEFORE_SUBMIT": "Students see the AI comment before submitting, with no limit on self-checks.",
       "REFS_AFTER_SUBMIT_WITH_RETRIES": "The answer key is shown right after submitting, which makes another attempt worth little."
-    }
+    },
+    "audioItemNoun": "sentences",
+    "audioSegments": "Timecodes",
+    "audioSegmentFor": "Sentence {index}",
+    "audioGivesAway": "The transcript is shown from the start, and on this exercise it is the answer — the clip is the passage read correctly. Show it after the answer instead, or not at all."
   },
   "activity": {
     "title": "Activity",

@@ -68,7 +68,7 @@ export {
 } from './engine';
 
 export type { Issue, IssueCode, IssueLevel, IssueStep, StepState } from './issues';
-export { blockers, isReady, issues, stepState, warnings } from './issues';
+export { blockers, isReady, issues, stepState, transcriptGivesAway, warnings } from './issues';
 
 export type {
   DocumentEnvelope,

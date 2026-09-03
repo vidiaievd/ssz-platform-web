@@ -350,11 +350,13 @@ export function ExerciseEditorPane({
           exerciseId={exerciseId}
           containerId={container.id}
           initialExercise={errorCorrectionDocumentFrom(exercise, container.id)}
+          initialAudio={readAudioDraft(exercise.content, exercise.templateCode)}
           onDocumentChange={setErrorCorrection}
-          onSavedRemote={(updatedAt, saved) =>
+          onSavedRemote={(updatedAt, saved, audio) =>
             queryClient.setQueryData<ExerciseWithAnswers | null>(
               authoringKeys.exercise(exerciseId),
-              (cached) => (cached ? applySavedErrorCorrection(cached, updatedAt, saved) : cached),
+              (cached) =>
+                cached ? applySavedErrorCorrection(cached, updatedAt, saved, audio) : cached,
             )
           }
         />
@@ -588,12 +590,19 @@ function applySavedErrorCorrection(
   cached: ExerciseWithAnswers,
   updatedAt: string,
   saved: ErrorCorrection,
+  audio: AudioDraft,
 ): ExerciseWithAnswers {
   const [instruction, ...rest] = cached.instructions ?? [];
   return {
     ...cached,
     updatedAt,
-    content: { ...errorCorrectionToContent(saved) },
+    // The same two steps the save itself takes: the template's own persistence, then the
+    // layer that belongs to none of them.
+    content: applyAudioDraft(
+      { ...errorCorrectionToContent(saved) },
+      audio,
+      ERROR_CORRECTION_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...errorCorrectionToExpectedAnswers(saved) },
     ...(instruction && {
       instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],
