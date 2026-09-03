@@ -2718,7 +2718,8 @@
       "orderLabel": "Rekkefølgen inne i et felt teller",
       "orderHelp": "Av godtar enhver rekkefølge blant biter som deler felt.",
       "tip": "En god rekkefølge: kjør den først med navn, hint og antall på; andre gang med bare navn; tredje gang med bare kortnøkler og stokket bank.",
-      "fieldsHidden": "De fem feltinnstillingene er skjult i modusen «bare ordstilling». Verdiene beholdes og kommer tilbake når du bytter modus i steg 1."
+      "fieldsHidden": "De fem feltinnstillingene er skjult i modusen «bare ordstilling». Verdiene beholdes og kommer tilbake når du bytter modus i steg 1.",
+      "audioItemNoun": "setningene"
     },
     "step4": {
       "title": "Si hvorfor, ikke bare feil",

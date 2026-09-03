@@ -7,6 +7,7 @@ import { issues } from '@/lib/shared-kernel/sentence-schema';
 
 import { ToggleRow } from '../toggle-row';
 import { useIssueCopy } from './issue-copy';
+import { AudioRulesCard } from '../audio';
 import { setSettings, type SentenceSchemaDocument } from './edits';
 
 export interface StepDifficultyProps {
@@ -54,6 +55,16 @@ export function StepDifficulty({ exercise, onChange }: StepDifficultyProps) {
         <h2 className="text-base font-semibold">{t('sentenceSchema.step3.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('sentenceSchema.step3.lede')}</p>
       </div>
+
+      {/* How the clip may be heard, beside the rest of what this step decides: how much
+          support the student gets before they start (plan 56). */}
+      {exercise.audio.audio.enabled && (
+        <AudioRulesCard
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+          itemNoun={t('sentenceSchema.step3.audioItemNoun')}
+        />
+      )}
 
       <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4">
         {!seq && (

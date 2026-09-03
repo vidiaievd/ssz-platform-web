@@ -24,6 +24,9 @@ import {
 } from '@/lib/shared-kernel/sentence-schema';
 
 import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
+import type { AudioStepMap, PlacedAudioIssue } from '@/lib/shared-kernel/audio';
+
+import { useAudioGateRows, useAudioProblems } from '../audio';
 import { BuilderGateDialog, BuilderSaveHint, BuilderStepNav, type GateRow } from '../builder-frame';
 import { BuilderConflictDialog, useBuilderSaveNotices } from '../builder-save-notices';
 import { EditorToolbarPortal } from '../editor-toolbar';
@@ -40,6 +43,15 @@ import {
 import { useIssueCopy } from './issue-copy';
 
 const STEPS: IssueStep[] = [1, 2, 3, 4];
+
+/**
+ * Where this builder keeps each part of the audio layer.
+ *
+ * Step 1 is the board — the schema every sentence is measured against — and step 2 is the
+ * sentences themselves, so both the clip and the timecodes belong to step 2. The rules go
+ * with the difficulty on step 3 and the transcript with the feedback on step 4.
+ */
+const AUDIO_STEPS: AudioStepMap = { source: 2, segments: 2, rules: 3, transcript: 4 };
 const LAST_STEP = 4;
 
 export interface SentenceSchemaBuilderProps {
@@ -122,6 +134,13 @@ export function SentenceSchemaBuilder({
 
   const problems = useMemo(() => issues(exercise), [exercise]);
 
+  /** The layer's findings, in the same rail and the same gate as the type's own. */
+  const audioProblems = useAudioProblems(
+    exercise.audio,
+    exercise.rows.map((row) => row.id),
+    AUDIO_STEPS,
+  );
+
   const changedSinceOpen = !sameDocument(exercise, opened);
 
   const revert = () => {
@@ -142,7 +161,12 @@ export function SentenceSchemaBuilder({
     <div className="flex flex-col gap-5">
       <EditorToolbarPortal>
         <div className="flex min-w-0 flex-1 items-stretch justify-between gap-3">
-          <SentenceSchemaSteps current={step} exercise={exercise} onSelect={setStep} />
+          <SentenceSchemaSteps
+            current={step}
+            exercise={exercise}
+            audioProblems={audioProblems}
+            onSelect={setStep}
+          />
           <div className="flex shrink-0 items-center gap-3 py-2">
             <BuilderSaveHint status={autosave.status} savedAt={autosave.savedAt} />
           </div>
@@ -176,6 +200,7 @@ export function SentenceSchemaBuilder({
         open={gateOpen}
         exercise={exercise}
         problems={problems}
+        audioProblems={audioProblems}
         onOpenChange={setGateOpen}
         onGoToStep={(target) => {
           setStep(target as IssueStep);
@@ -240,16 +265,33 @@ export function SentenceSchemaBuilder({
 function SentenceSchemaSteps({
   current,
   exercise,
+  audioProblems,
   onSelect,
 }: {
   current: IssueStep;
   exercise: SentenceSchemaDocument;
+  audioProblems: PlacedAudioIssue[];
   onSelect: (step: IssueStep) => void;
 }) {
   const t = useTranslations('Authoring');
 
   const steps: BuilderStep[] = STEPS.map((step) => {
-    const state = stepState(exercise, step);
+    // Both lists at once: a step is as bad as its worst finding, whichever list it came
+    // from. `stepState` here counts errors and warnings, so the fold is written in its
+    // shape rather than in the shared one.
+    const own = stepState(exercise, step);
+    const here = audioProblems.filter((issue) => issue.step === step && issue.level !== 'info');
+    const audioErrors = here.filter((issue) => issue.level === 'blocker').length;
+    const state = {
+      state:
+        audioErrors > 0
+          ? ('err' as const)
+          : here.length > 0 && own.state !== 'err'
+            ? ('warn' as const)
+            : own.state,
+      errors: own.errors + audioErrors,
+      warnings: own.warnings + here.length - audioErrors,
+    };
     const label = t(`sentenceSchema.shell.step${step}` as 'sentenceSchema.shell.step1');
     const sub = t(`sentenceSchema.shell.stepSub${step}` as 'sentenceSchema.shell.stepSub1');
 
@@ -297,18 +339,22 @@ function GateDialog({
   open,
   exercise,
   problems,
+  audioProblems,
   onOpenChange,
   onGoToStep,
 }: {
   open: boolean;
   exercise: SentenceSchemaDocument;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   onOpenChange: (open: boolean) => void;
   onGoToStep: (step: number) => void;
 }) {
   const describeIssue = useIssueCopy(exercise);
+  const audioRows = useAudioGateRows(audioProblems);
 
   const rows: GateRow[] = [
+    ...audioRows,
     ...problems
       .filter((issue) => issue.level === 'blocker')
       .map((issue, index) => ({

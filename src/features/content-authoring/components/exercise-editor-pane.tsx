@@ -753,6 +753,9 @@ function sentenceSchemaDocumentFrom(exercise: ExerciseWithAnswers): SentenceSche
   return {
     ...sentenceSchemaFromPersisted(exercise.content, exercise.expectedAnswers),
     updatedAt: exercise.updatedAt ?? '',
+    // Read off the raw column: the audio block belongs to no template, so
+    // `fromPersisted` neither knows nor carries it (plan 56 phase 6).
+    audio: readAudioDraft(exercise.content, SENTENCE_SCHEMA_TEMPLATE_CODE),
   };
 }
 
@@ -772,7 +775,13 @@ function applySavedSentenceSchema(
   return {
     ...cached,
     updatedAt,
-    content: { ...sentenceSchemaToContent(saved.exercise) },
+    // The same two steps the save itself takes: the template's own persistence, then the
+    // layer that belongs to none of them.
+    content: applyAudioDraft(
+      { ...sentenceSchemaToContent(saved.exercise) },
+      saved.exercise.audio,
+      SENTENCE_SCHEMA_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...sentenceSchemaToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [

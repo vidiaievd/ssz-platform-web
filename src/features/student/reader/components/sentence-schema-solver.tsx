@@ -27,6 +27,7 @@ import type {
   StudentProjection,
   StudentResult,
 } from '@/lib/shared-kernel/sentence-schema';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface SentenceSchemaSolverProps {
@@ -83,6 +84,15 @@ export function SentenceSchemaSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<StudentProjection | null>(null);
+  /**
+   * The document as the engine dealt it, kept for the audio layer alone: the projection is
+   * the kernel's own shape and has no room for a block that is not the template's.
+   */
+  const [document, setDocument] = useState<unknown>(null);
+  /** What the clip said, once the engine hands it over — with the last board, not the first. */
+  const [transcript, setTranscript] = useState<{ transcript: string; translation: string } | null>(
+    null,
+  );
   /** Set when the set arrived with its answer key still on it — see the projection reader. */
   const [unusable, setUnusable] = useState(false);
 
@@ -153,6 +163,8 @@ export function SentenceSchemaSolver({
 
           setAttemptId(data.attemptId);
           setProjection(set);
+          setDocument(data.exerciseContent);
+          setTranscript(null);
           openedAt.current = Date.now();
           closing.current = false;
           resume(set, data.checkedRows ?? []);
@@ -164,6 +176,13 @@ export function SentenceSchemaSolver({
   useEffect(() => {
     begin();
   }, [begin]);
+
+  /**
+   * The listening layer, mounted once for the whole set rather than per sentence: the
+   * allowance, the gate and the playthrough belong to the exercise, and walking to the
+   * next board is not a new hearing of the clip.
+   */
+  const audio = useExerciseAudio(document);
 
   const retryStart = useCallback(() => {
     setUnusable(false);
@@ -271,6 +290,9 @@ export function SentenceSchemaSolver({
       { rowId: row.id, placement: state.placement, reveal },
       {
         onSuccess: (data) => {
+          // Only ever sent once the set is finished: one clip covers every sentence, so
+          // the engine holds it back until there is nothing left to answer.
+          if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
           update(row.id, {
             result: data.result,
             attempt: data.result.attempt,
@@ -346,6 +368,8 @@ export function SentenceSchemaSolver({
   return (
     <div>
       <SentenceSchemaBody
+        audio={audio}
+        audioTranscript={transcript}
         row={row}
         settings={set.settings}
         index={index}

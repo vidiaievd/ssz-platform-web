@@ -473,7 +473,8 @@
       "statements": "påstandene",
       "sentence": "setningen",
       "lines": "linjene",
-      "sentences": "setningene"
+      "sentences": "setningene",
+      "pieces": "brikkene"
     },
     "lockNoteOwn": "Denne {item} åpner seg når du har hørt opptaket sitt."
   }

@@ -37,6 +37,9 @@ import {
   unassignChunk,
   type SentenceSchemaDocument,
 } from './edits';
+import { withSegment } from '@/lib/shared-kernel/audio';
+
+import { AudioSegmentField } from '../audio';
 
 export interface SentenceCardProps {
   exercise: SentenceSchemaDocument;
@@ -179,6 +182,16 @@ export function SentenceCard({
           onChange={(event) => onChange(setRowText(exercise, row.id, event.target.value))}
         />
       </label>
+
+      {/* This sentence's line of the clip, when the author asked for timecodes. */}
+      {exercise.audio.audio.enabled && exercise.audio.audio.useSegments && (
+        <AudioSegmentField
+          segment={exercise.audio.segments[row.id] ?? null}
+          onChange={(segment) =>
+            onChange({ ...exercise, audio: withSegment(exercise.audio, row.id, segment) })
+          }
+        />
+      )}
 
       {/*
         The prompt of a transformation task (plan 52 §3.8). Deliberately a plain input with

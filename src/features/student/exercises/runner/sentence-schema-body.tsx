@@ -13,6 +13,14 @@ import type {
   StudentResult,
 } from '@/lib/shared-kernel/sentence-schema';
 
+import {
+  AudioLockNote,
+  AudioSegmentButton,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
+
 import { fitsAsColumns, SchemaBoard } from './schema-board';
 import { WordBank } from './word-bank';
 
@@ -67,6 +75,16 @@ export interface SentenceSchemaBodyProps {
   error?: string | null;
   /** False in a preview: everything renders, nothing accepts input. */
   interactive?: boolean;
+  /**
+   * The listening layer, when the exercise has one (plan 56 phase 6).
+   *
+   * One clip for the set and a fragment per sentence: the player is mounted by the solver
+   * above the board, so it survives the walk from one sentence to the next — the
+   * allowance belongs to the exercise, not to the sentence on screen.
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the key once the set is closed. */
+  audioTranscript?: { transcript: string; translation: string } | null;
   onCheck: () => void;
   onRetry: () => void;
   onReveal: () => void;
@@ -126,13 +144,18 @@ export function SentenceSchemaBody({
   accent,
   deferred = false,
   lastSentence,
+  audio,
+  audioTranscript = null,
 }: SentenceSchemaBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const [root, width] = useContainerWidth();
   const [armedItem, setArmedItem] = useState<string | null>(null);
   const [armedField, setArmedField] = useState<string | null>(null);
 
-  const locked = phase === 'closed' || phase === 'done' || !interactive;
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  // The gate joins the expression the board already reads: `locked` is what stops a piece
+  // being placed, and a second mechanism is how the two drift apart.
+  const locked = phase === 'closed' || phase === 'done' || !interactive || (audioOn && audio.gated);
   const used = Object.values(placement).flat();
   const textOf = (itemId: string) => row.bank.find((item) => item.id === itemId)?.text ?? '';
   const placedChunks = used.length;
@@ -270,6 +293,18 @@ export function SentenceSchemaBody({
 
   return (
     <div ref={root}>
+      {audioOn && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={interactive} />
+          {audio.gated && <AudioLockNote itemNoun={t('audio.itemNoun.pieces')} />}
+          <AudioSegmentButton
+            eng={audio}
+            segment={audio.segments[row.id] ?? null}
+            disabled={locked}
+          />
+        </div>
+      )}
+
       {/* `.wb-run-top`: where the learner is, as a rule and a number. It was a sentence
           of bold text, which reads as a heading over the exercise rather than as its
           margin — and the design puts the emphasis on the board, not on the counter. */}
@@ -494,6 +529,14 @@ export function SentenceSchemaBody({
           </button>
         )}
       </div>
+
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
+      )}
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE } from '@/lib/shared-kernel/sentence-schema';
 import type { SentenceSchemaContent } from '@/lib/shared-kernel/sentence-schema';
 import {
   chunk,
@@ -15,6 +17,13 @@ import {
 import type { SentenceSchemaDocument } from './edits';
 
 vi.mock('../../actions/sentence-schema', () => ({ saveSentenceSchemaAction: vi.fn() }));
+
+// The source card resolves the clip through media-service, and this builder's tests
+// mount no QueryClientProvider (plan 56 phase 6).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
 
 const { SentenceSchemaBuilder } = await import('./builder');
 const { saveSentenceSchemaAction } = await import('../../actions/sentence-schema');
@@ -30,7 +39,14 @@ const LOADED_AT = '2026-08-26T10:00:00.000Z';
  */
 function doc(overrides: Partial<SentenceSchemaContent> = {}): SentenceSchemaDocument {
   const base = content({ rows: [row({ extras: [{ id: 'x1', text: 'boken' }] })] });
-  return { updatedAt: LOADED_AT, ...base, ...overrides };
+  return {
+    updatedAt: LOADED_AT,
+    // Every builder document carries the audio layer, and an exercise that has never had
+    // any reads as switched off (plan 56 phase 6).
+    audio: readAudioDraft({}, TEMPLATE_CODE),
+    ...base,
+    ...overrides,
+  };
 }
 
 function renderBuilder(exercise: SentenceSchemaDocument = doc()) {
@@ -207,5 +223,38 @@ describe('SentenceSchemaBuilder', () => {
     await user.click(screen.getByRole('button', { name: 'Put it back' }));
 
     expect(screen.getByLabelText('Exercise title')).toHaveValue('Ordstilling');
+  });
+
+  /* The listening layer on this builder (plan 56 phase 6). */
+  describe('with audio', () => {
+    const listening = (over: Record<string, unknown> = {}) => ({
+      ...doc(),
+      audio: readAudioDraft(
+        { audio: { enabled: true, source: 'asset', assetId: 'a-1', title: 'Diktat', ...over } },
+        TEMPLATE_CODE,
+      ),
+    });
+
+    it('puts the switch and the clip with the sentences, not with the board', () => {
+      renderBuilder(listening());
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).toBeChecked();
+      expect(screen.getByText('The clip')).toBeInTheDocument();
+    });
+
+    it('reports a missing clip as a blocker on the step that owns the fix', () => {
+      renderBuilder(listening({ assetId: '' }));
+
+      expect(
+        within(screen.getByRole('tab', { name: /Sentences/ })).getByText(/problem/),
+      ).toBeInTheDocument();
+    });
+
+    it('draws nothing at all while the switch is off', () => {
+      renderBuilder();
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).not.toBeChecked();
+      expect(screen.queryByText('The clip')).not.toBeInTheDocument();
+    });
   });
 });

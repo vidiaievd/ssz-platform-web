@@ -2718,7 +2718,8 @@
       "orderLabel": "Order inside a field counts",
       "orderHelp": "Off accepts any order among chunks that share a field.",
       "tip": "A good sequence: run it once with names, hints and counts on; a second time with names only; a third with the bare keys and a shuffled bank.",
-      "fieldsHidden": "The five field settings are hidden in word-order-only mode. Their values are kept and come back when you switch the mode on step 1."
+      "fieldsHidden": "The five field settings are hidden in word-order-only mode. Their values are kept and come back when you switch the mode on step 1.",
+      "audioItemNoun": "sentences"
     },
     "step4": {
       "title": "Say why, not just wrong",

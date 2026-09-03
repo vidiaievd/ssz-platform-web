@@ -5,6 +5,8 @@ import { useState, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 import {
   DEFAULT_SETTINGS,
   type Placement,
@@ -81,8 +83,10 @@ function Harness({
   onReveal = vi.fn(),
   onNext = vi.fn(),
   onRestart = vi.fn(),
+  audio,
 }: {
   row?: ProjectedRow;
+  audio?: ExerciseAudioEngine;
   settings?: Settings;
   phase?: SentenceSchemaPhase;
   result?: StudentResult | null;
@@ -114,6 +118,7 @@ function Harness({
         onReveal={onReveal}
         onNext={onNext}
         onRestart={onRestart}
+        {...(audio === undefined ? {} : { audio })}
         accent="var(--ssz-runner-practice)"
       />
     </NextIntlClientProvider>
@@ -391,5 +396,60 @@ describe('SentenceSchemaBody', () => {
     expect(screen.getByRole('button', { name: 'Do it again' })).toBeInTheDocument();
     // Plan 52 §5: the player owns navigation, so the card offers no "next exercise".
     expect(screen.queryByRole('button', { name: /next exercise/i })).not.toBeInTheDocument();
+  });
+});
+
+/** The engine as the hook would hand it over, with nothing playing yet. */
+const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+  audio: { ...AUDIO_DEFAULT, enabled: true, assetId: 'asset-1', title: 'Diktat', duration: 96 },
+  segments: {},
+  element: null,
+  src: 'https://cdn.test/asset-1.mp3',
+  state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+  duration: 96,
+  playing: false,
+  plays: 0,
+  limit: 0,
+  exhausted: false,
+  heard: false,
+  gated: false,
+  canPlay: true,
+  failed: false,
+  loading: false,
+  speed: 1,
+  toggle: vi.fn(),
+  back: vi.fn(),
+  seekTo: vi.fn(),
+  playRange: vi.fn(),
+  cycleSpeed: vi.fn(),
+  reset: vi.fn(),
+  ...over,
+});
+
+/*
+  The listening layer on this type (plan 56 phase 6). One clip for the set with a fragment
+  per sentence — the player is above the board and survives the walk from one sentence to
+  the next, because the allowance belongs to the exercise.
+*/
+describe('SentenceSchemaBody — with audio', () => {
+  it('plays the clip above the board and offers this sentence its own line', () => {
+    render(<Harness audio={engine({ segments: { r1: { start: 4, end: 12 } } })} />);
+
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /0:04/ })).toBeInTheDocument();
+  });
+
+  it('holds the board shut until the clip has been heard through once', () => {
+    render(<Harness audio={engine({ gated: true })} />);
+
+    expect(
+      screen.getByText('The pieces open once you have heard the clip through once.'),
+    ).toBeInTheDocument();
+  });
+
+  it('is not there at all for an exercise without it', () => {
+    render(<Harness />);
+
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
   });
 });

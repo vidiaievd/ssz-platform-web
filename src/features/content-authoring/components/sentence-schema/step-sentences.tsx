@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/input';
 import { deliverableRows, issues, type Issue, type Row } from '@/lib/shared-kernel/sentence-schema';
 
 import { ReorderWithAnnouncer } from '../lesson-reorder';
+import { AudioEnableRow, AudioSourceCard } from '../audio';
 import { SentenceCard } from './sentence-card';
 import { useIssueCopy } from './issue-copy';
 import {
@@ -65,6 +66,22 @@ export function StepSentences({ exercise, onChange, onGoToStep }: StepSentencesP
         <h2 className="text-base font-semibold">{t('sentenceSchema.step2.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('sentenceSchema.step2.lede')}</p>
       </div>
+
+      {/* Audio adds no fifth step: it is material, and the material of this template is
+          the sentences, which is this step (plan 56). */}
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+        <AudioEnableRow
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
+      </div>
+
+      {exercise.audio.audio.enabled && (
+        <AudioSourceCard
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
+      )}
 
       {/*
         Which of the two exercises this is, said on the step the builder opens on.

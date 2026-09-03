@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import { passes } from '@/lib/shared-kernel/sentence-schema';
 
+import { AudioTranscriptCard } from '../audio';
 import { setChunkNote, setWhy, type SentenceSchemaDocument } from './edits';
 
 export interface StepFeedbackProps {
@@ -46,6 +47,13 @@ export function StepFeedback({ exercise, onChange }: StepFeedbackProps) {
         <h2 className="text-base font-semibold">{t('sentenceSchema.step4.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('sentenceSchema.step4.lede')}</p>
       </div>
+
+      {exercise.audio.audio.enabled && (
+        <AudioTranscriptCard
+          draft={exercise.audio}
+          onChange={(audio) => onChange({ ...exercise, audio })}
+        />
+      )}
 
       <section className="flex items-center gap-4 rounded-lg border border-border bg-surface p-4">
         <p className="text-2xl font-semibold tabular-nums">

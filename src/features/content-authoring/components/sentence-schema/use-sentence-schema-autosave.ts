@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { AppErrorCode } from '@/lib/errors';
-import { toContent, toExpectedAnswers } from '@/lib/shared-kernel/sentence-schema';
+import { applyAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE, toContent, toExpectedAnswers } from '@/lib/shared-kernel/sentence-schema';
 
 import {
   saveSentenceSchemaAction,
+  type SaveSentenceSchemaInput,
   type SaveSentenceSchemaOutcome,
 } from '../../actions/sentence-schema';
 import type { SentenceSchemaDocument } from './edits';
@@ -149,7 +151,13 @@ export function useSentenceSchemaAutosave({
       setStatus('saving');
 
       const result = await saveSentenceSchemaAction(exerciseId, containerId, {
-        content: toContent(document),
+        // The template's own persistence, then the layer that belongs to none of them:
+        // `toContent` builds an explicit object and would drop the audio block.
+        content: applyAudioDraft(
+          toContent(document) as unknown as Record<string, unknown>,
+          document.audio,
+          TEMPLATE_CODE,
+        ) as SaveSentenceSchemaInput['content'],
         expectedAnswers: toExpectedAnswers(document),
         expectedUpdatedAt: force?.expectedUpdatedAt ?? document.updatedAt,
         // The one line the author wrote, written to the instruction row as well as into

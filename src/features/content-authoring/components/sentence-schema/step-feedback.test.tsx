@@ -5,6 +5,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+import { TEMPLATE_CODE } from '@/lib/shared-kernel/sentence-schema';
 import type { SentenceSchemaContent } from '@/lib/shared-kernel/sentence-schema';
 import { content, row } from '@/lib/shared-kernel/sentence-schema/fixtures.test-support';
 
@@ -12,7 +14,13 @@ import { StepFeedback } from './step-feedback';
 import type { SentenceSchemaDocument } from './edits';
 
 function doc(overrides: Partial<SentenceSchemaContent> = {}): SentenceSchemaDocument {
-  return { updatedAt: '2026-08-26T10:00:00.000Z', ...content(overrides) };
+  return {
+    updatedAt: '2026-08-26T10:00:00.000Z',
+    // Every builder document carries the audio layer, and one that has never had any
+    // reads as switched off (plan 56 phase 6).
+    audio: readAudioDraft({}, TEMPLATE_CODE),
+    ...content(overrides),
+  };
 }
 
 function Harness({

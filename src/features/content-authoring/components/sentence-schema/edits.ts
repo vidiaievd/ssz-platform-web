@@ -14,6 +14,7 @@
 // or swapping the language pack, invalidates every placement in reach. Nothing here tries
 // to remap them heuristically — it clears them, and the builder says so before the click.
 
+import type { AudioDraft } from '@/lib/shared-kernel/audio';
 import {
   join as joinChunks,
   newExtra,
@@ -42,6 +43,14 @@ import {
 export interface SentenceSchemaDocument extends SentenceSchemaContent {
   /** ISO. Doubles as the autosave concurrency token. */
   updatedAt: string;
+  /**
+   * The listening layer, edited beside the document (plan 56 phase 6).
+   *
+   * Outside `SentenceSchemaContent` for the reason the layer exists: the same block hangs
+   * on every template, and `toContent` builds an explicit object that would drop a field
+   * it does not know about. `applyAudioDraft` writes it back at save time.
+   */
+  audio: AudioDraft;
 }
 
 /** Only has to be unique within one exercise and stable across the edit session. */
