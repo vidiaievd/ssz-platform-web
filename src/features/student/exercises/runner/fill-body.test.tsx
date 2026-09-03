@@ -2,10 +2,17 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
+import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
+
 import { FillBody, type FillContent, type FillRationale } from './fill-body';
 
 const messages = {
   ExerciseRunner: {
+    // The listening layer's strings are the real ones: they are shared by every runner,
+    // and a local copy would be a second place to keep them (plan 56 phase 6).
+    audio: enMessages.ExerciseRunner.audio,
     fill: {
       defaultInstruction: 'Complete the sentence',
       blankLabel: 'Blank',
@@ -288,5 +295,57 @@ describe('FillBody — reveal states (word bank)', () => {
       renderFill({ phase: 'feedback', value: 'hjemme', ok: true, correctAnswer: 'hjemme' });
       expect(marker()).toBeNull();
     });
+  });
+});
+
+/** The engine as the hook would hand it over, with nothing playing yet. */
+const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+  audio: { ...AUDIO_DEFAULT, enabled: true, assetId: 'asset-1', title: 'Dialog', duration: 96 },
+  segments: {},
+  element: null,
+  src: 'https://cdn.test/asset-1.mp3',
+  state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+  duration: 96,
+  playing: false,
+  plays: 0,
+  limit: 0,
+  exhausted: false,
+  heard: false,
+  gated: false,
+  canPlay: true,
+  failed: false,
+  loading: false,
+  speed: 1,
+  toggle: vi.fn(),
+  back: vi.fn(),
+  seekTo: vi.fn(),
+  playRange: vi.fn(),
+  cycleSpeed: vi.fn(),
+  reset: vi.fn(),
+  ...over,
+});
+
+/*
+  The listening layer on a template with no builder (plan 56 phase 6). It gets the runner
+  half only, and that is not a gap: the layer is a property of the document, and a
+  document written by a seed carries it as well as one written by a builder.
+*/
+describe('with audio', () => {
+  it('plays the clip above the exercise', () => {
+    renderFill({ audio: engine() });
+
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+  });
+
+  it('locks the controls until the clip has been heard through once', () => {
+    renderFill({ audio: engine({ gated: true }) });
+
+    expect(screen.getByText('The items open once you have heard the clip through once.')).toBeInTheDocument();
+  });
+
+  it('is not there at all for an exercise without it', () => {
+    renderFill();
+
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
   });
 });

@@ -3,6 +3,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 
 import { PRACTICE_ACCENT } from './types';
 import { TextOrderBody, shuffleOrder, type TextOrderContent } from './text-order-body';
@@ -33,6 +35,41 @@ function renderBody(props: Partial<React.ComponentProps<typeof TextOrderBody>> =
     </NextIntlClientProvider>,
   );
 }
+
+/** The engine as the hook would hand it over, with nothing playing yet. */
+const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+  audio: {
+    ...AUDIO_DEFAULT,
+    enabled: true,
+    assetId: 'asset-1',
+    title: 'Dialog',
+    duration: 96,
+    transcript: 'Hi, I am Marina.',
+    ...((over.audio as object) ?? {}),
+  },
+  segments: {},
+  element: null,
+  src: 'https://cdn.test/asset-1.mp3',
+  state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+  duration: 96,
+  playing: false,
+  plays: 0,
+  limit: 0,
+  exhausted: false,
+  heard: false,
+  gated: false,
+  canPlay: true,
+  failed: false,
+  loading: false,
+  speed: 1,
+  toggle: vi.fn(),
+  back: vi.fn(),
+  seekTo: vi.fn(),
+  playRange: vi.fn(),
+  cycleSpeed: vi.fn(),
+  reset: vi.fn(),
+  ...over,
+});
 
 describe('shuffleOrder', () => {
   it('is deterministic for the same seed', () => {
@@ -95,5 +132,35 @@ describe('TextOrderBody', () => {
     // Correct and incorrect lines are tinted differently.
     const items = screen.getAllByRole('listitem');
     expect(items[0]!.style.background).not.toBe(items[1]!.style.background);
+  });
+});
+
+/*
+  The listening layer on this type (plan 56 phase 6). Its one peculiarity is what it does
+  *not* get: a fragment chip beside each line would put the lines in order for the
+  learner, which is the whole puzzle.
+*/
+describe('TextOrderBody — with audio', () => {
+  it('plays the clip above the lines and never times them', () => {
+    renderBody({ audio: engine({ segments: { a: { start: 0, end: 8 } } }) });
+
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /0:00/ })).not.toBeInTheDocument();
+  });
+
+  it('holds the lines still until the clip has been heard through once', () => {
+    renderBody({ audio: engine({ gated: true }) });
+
+    expect(screen.queryByRole('button', { name: /Move up/ })).not.toBeInTheDocument();
+    expect(
+      screen.getByText('The lines open once you have heard the clip through once.'),
+    ).toBeInTheDocument();
+  });
+
+  it('is not there at all for an exercise without it', () => {
+    renderBody();
+
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /Move up/ }).length).toBeGreaterThan(0);
   });
 });

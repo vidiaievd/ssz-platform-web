@@ -21,6 +21,7 @@ import {
   gradedInBrowser,
   type ClientGradedTemplate,
 } from '@/features/student/exercises/lib/grading-side';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import { SentenceSchemaSolver } from './sentence-schema-solver';
 import {
@@ -94,6 +95,20 @@ interface SolverProps {
 }
 
 const ACCENT = PRACTICE_ACCENT;
+
+/**
+ * The listening layer for the solvers on the old form — plan 56 phase 6.
+ *
+ * These templates are graded in the browser, so the document is here in full and the
+ * transcript owed under `after` arrives with the key, on the runner route, rather than on
+ * a verdict from the engine (`api/content/exercises/[id]/runner`). It is withheld until
+ * the answer is in for the same reason it is withheld everywhere else: on a listening
+ * exercise the transcript *is* the answer.
+ */
+function useRunnerAudio(display: ExerciseWithAnswers, phase: 'answering' | 'feedback') {
+  const audio = useExerciseAudio(display.content);
+  return { audio, transcript: phase === 'feedback' ? (display.audioTranscript ?? null) : null };
+}
 
 /* ── helpers ────────────────────────────────────────────────────────────── */
 
@@ -262,6 +277,7 @@ function McqGroupSolver({ display, phase, ok, revealed, retryNonce, onCheck }: S
 }
 
 function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
+  const { audio, transcript } = useRunnerAudio(display, phase);
   const [value, setValue] = useState('');
   const [seenRetry, setSeenRetry] = useState(retryNonce);
   if (retryNonce !== seenRetry) {
@@ -299,6 +315,8 @@ function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: Solve
         rationale={firstBlank?.rationale}
         correctAnswer={firstAccepted[0] ?? ''}
         revealed={revealed}
+        audio={audio}
+        audioTranscript={transcript}
       />
       {phase === 'answering' && (
         <CheckFooter
@@ -393,6 +411,7 @@ function issueSummary(
 }
 
 function WordBankFillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
+  const { audio, transcript } = useRunnerAudio(display, phase);
   const [value, setValue] = useState<WordBankFillValue>({});
   const [results, setResults] = useState<WordBankFillResults>({});
   const [canSubmit, setCanSubmit] = useState(false);
@@ -446,6 +465,8 @@ function WordBankFillSolver({ display, phase, ok, revealed, retryNonce, onCheck 
           wordNotes: wordNotes(c.word_notes),
           inputMode: c.input_mode === 'select' ? 'select' : 'chips',
         }}
+        audio={audio}
+        audioTranscript={transcript}
         value={value}
         onValueChange={setValue}
         onAnswerChange={setCanSubmit}
@@ -479,6 +500,7 @@ function WordBankFillSolver({ display, phase, ok, revealed, retryNonce, onCheck 
 function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
   const t = useTranslations('ExerciseRunner');
   const c = display.content;
+  const { audio, transcript } = useRunnerAudio(display, phase);
 
   const items: OrderLine[] = useMemo(
     () =>
@@ -523,6 +545,8 @@ function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
         mode="practice"
         accent={ACCENT}
         results={results}
+        audio={audio}
+        audioTranscript={transcript}
       />
       {phase === 'answering' && (
         <CheckFooter
