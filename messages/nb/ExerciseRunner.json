@@ -474,7 +474,8 @@
       "sentence": "setningen",
       "lines": "linjene",
       "sentences": "setningene",
-      "pieces": "brikkene"
+      "pieces": "brikkene",
+      "pairs": "parene"
     },
     "lockNoteOwn": "Denne {item} åpner seg når du har hørt opptaket sitt."
   }

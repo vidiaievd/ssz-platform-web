@@ -7,6 +7,14 @@ import { useTranslations } from 'next-intl';
 import { useContainerWidth } from '@/hooks';
 import type { PairId, RightId, StudentProjection } from '@/lib/shared-kernel/match-pairs';
 
+import {
+  AudioLockNote,
+  AudioSegmentButton,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
+
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
@@ -63,6 +71,16 @@ export interface MatchPairsBodyProps {
   pointOut?: boolean;
   /** The answers, and only after the learner asks for them. */
   revealed?: Record<PairId, RevealedSlot>;
+  /**
+   * The listening layer, when the exercise has one (plan 56 phase 6).
+   *
+   * One clip for the exercise, with a timecode per pair. Audio on a single *half* of a
+   * pair is a different model — one clip per item rather than one per exercise — and it
+   * stays out of this plan (§2, "out of bounds").
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the key once the pairs are checked. */
+  audioTranscript?: { transcript: string; translation: string } | null;
 }
 
 const READING = 'var(--ssz-font-reading)';
@@ -136,9 +154,16 @@ export function MatchPairsBody({
   revealed,
   showFeedback = true,
   pointOut = false,
+  audio,
+  audioTranscript = null,
 }: MatchPairsBodyProps) {
   const t = useTranslations('ExerciseRunner');
-  const isAnswering = phase === 'answering';
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  // Named for the gate rather than `locked`, which this body already uses for a slot that
+  // has been answered correctly and may not be edited again.
+  const gateShut = audioOn && audio.gated;
+  // The gate joins the expression every slot and every pool item already reads.
+  const isAnswering = phase === 'answering' && !gateShut;
   const isRevealed = revealed !== undefined;
   const { slots, pool, variant } = projection;
 
@@ -345,6 +370,13 @@ export function MatchPairsBody({
     <div ref={root}>
       {instruction !== undefined && <Instr>{instruction}</Instr>}
 
+      {audioOn && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={phase === 'answering'} />
+          {gateShut && <AudioLockNote itemNoun={t('audio.itemNoun.pairs')} />}
+        </div>
+      )}
+
       {/* On a phone the count belongs with the sentences; beside a pool column it
           belongs with the pool, which is what it counts down. */}
       {!poolHasColumn && remaining}
@@ -406,6 +438,16 @@ export function MatchPairsBody({
 
             return (
               <li key={slot.slotId}>
+                {/* This pair's line of the clip, when the author timed it. Free to
+                    replay: a fragment spends no listen (BEHAVIOR §8). */}
+                {audioOn && (
+                  <AudioSegmentButton
+                    eng={audio}
+                    segment={audio.segments[slot.slotId] ?? null}
+                    disabled={!isAnswering}
+                  />
+                )}
+
                 {/* A div rather than a button: the clear control is a real button and
                     HTML forbids nesting one inside another. BEHAVIOR §3 asks for
                     role="button" with Enter/Space here for exactly this reason. */}
@@ -586,6 +628,14 @@ export function MatchPairsBody({
           </div>
         )}
       </div>
+
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
+      )}
     </div>
   );
 }

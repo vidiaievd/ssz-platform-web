@@ -4,7 +4,15 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
 import { DEFAULT_SETTINGS, type MatchPairs } from '@/lib/shared-kernel/match-pairs';
+
+// The source card resolves the clip through media-service, and this builder's tests
+// mount no QueryClientProvider (plan 56 phase 6).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
 
 vi.mock('../../actions/match-pairs', () => ({ saveMatchPairsAction: vi.fn() }));
 
@@ -43,7 +51,13 @@ function doc(overrides: Partial<MatchPairs> = {}): MatchPairs {
   };
 }
 
-function renderBuilder(exercise: MatchPairs = doc(), variantChosen = true) {
+function renderBuilder(
+  exercise: MatchPairs = doc(),
+  variantChosen = true,
+  // Every builder carries the audio layer, and an exercise that has never had any reads
+  // as switched off (plan 56 phase 6).
+  audio: AudioDraft = readAudioDraft({}, 'match_pairs'),
+) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <MatchPairsBuilder
@@ -51,6 +65,7 @@ function renderBuilder(exercise: MatchPairs = doc(), variantChosen = true) {
         containerId="module-1"
         initialExercise={exercise}
         initialInstructions={exercise.instructions}
+        initialAudio={audio}
         initialVariantChosen={variantChosen}
       />
     </NextIntlClientProvider>,
@@ -197,5 +212,36 @@ describe('MatchPairsBuilder', () => {
 
     await user.click(screen.getByRole('button', { name: 'Edit in step 1' }));
     expect(screen.getByText('Pairs of halves')).toBeInTheDocument();
+  });
+
+  /* The listening layer on this builder (plan 56 phase 6). */
+  describe('with audio', () => {
+    const listening = (over: Record<string, unknown> = {}): AudioDraft =>
+      readAudioDraft(
+        { audio: { enabled: true, source: 'asset', assetId: 'a-1', title: 'Dialog', ...over } },
+        'match_pairs',
+      );
+
+    it('puts the switch and the clip with the pairs', () => {
+      renderBuilder(doc(), true, listening());
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).toBeChecked();
+      expect(screen.getByText('The clip')).toBeInTheDocument();
+    });
+
+    it('reports a missing clip as a blocker on the step that owns the fix', () => {
+      renderBuilder(doc(), true, listening({ assetId: '' }));
+
+      expect(
+        within(screen.getByRole('tab', { name: /Pairs/ })).getByText(/problem/),
+      ).toBeInTheDocument();
+    });
+
+    it('draws nothing at all while the switch is off', () => {
+      renderBuilder();
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).not.toBeChecked();
+      expect(screen.queryByText('The clip')).not.toBeInTheDocument();
+    });
   });
 });

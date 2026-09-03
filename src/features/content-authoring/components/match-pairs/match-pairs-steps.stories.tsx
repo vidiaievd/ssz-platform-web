@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { DEFAULT_SETTINGS, type MatchPairs, type Variant } from '@/lib/shared-kernel/match-pairs';
@@ -60,6 +61,8 @@ function Step1({ initial, variantChosen }: { initial: MatchPairs; variantChosen:
         exercise={exercise}
         onChange={setExercise}
         variantChosen={chosen}
+        audio={readAudioDraft({}, 'match_pairs')}
+        onAudioChange={() => {}}
         onVariantChosen={(variant: Variant) => {
           setChosen(true);
           setExercise((current) => ({ ...current, variant }));

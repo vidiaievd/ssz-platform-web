@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
@@ -56,6 +57,8 @@ function Harness({
       <StepPairs
         exercise={exercise}
         variantChosen={chosen}
+        audio={readAudioDraft({}, 'match_pairs')}
+        onAudioChange={() => {}}
         onVariantChosen={(variant) => {
           onVariantChosen?.(variant);
           setChosen(true);

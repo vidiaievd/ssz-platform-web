@@ -2101,7 +2101,8 @@
       "POOL_NO_DISTRACTORS": "Extra halves are switched on but none are written, so the last match is free",
       "POOL_TOO_SMALL": "Extras are off and there are only {count} pairs — the last ones solve themselves",
       "FB_NO_DEFAULT": "Pair {index} has no default explanation"
-    }
+    },
+    "audioItemNoun": "pairs"
   },
   "builder": {
     "saving": "Saving…",

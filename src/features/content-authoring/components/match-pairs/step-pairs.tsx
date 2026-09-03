@@ -32,6 +32,9 @@ import {
   type Variant,
 } from '@/lib/shared-kernel/match-pairs';
 
+import { withSegment, type AudioDraft, type ItemAudio } from '@/lib/shared-kernel/audio';
+
+import { AudioSegmentField } from '../audio';
 import { ReorderWithAnnouncer } from '../lesson-reorder';
 import {
   addPair,
@@ -63,6 +66,9 @@ export interface StepPairsProps {
    */
   variantChosen: boolean;
   onVariantChosen: (variant: Variant) => void;
+  /** The listening layer, held beside the document by the builder (plan 56 phase 6). */
+  audio: AudioDraft;
+  onAudioChange: (next: AudioDraft) => void;
   disabled?: boolean;
 }
 
@@ -83,6 +89,8 @@ export function StepPairs({
   onChange,
   variantChosen,
   onVariantChosen,
+  audio,
+  onAudioChange,
   disabled = false,
 }: StepPairsProps) {
   const t = useTranslations('Authoring');
@@ -210,6 +218,12 @@ export function StepPairs({
                   (issue) => issue.code === 'PAIR_LEFT_DUPLICATE' && issue.pairId === pair.id,
                 )}
                 rightLongWords={longRightWords(problems, pair.id)}
+                segment={
+                  audio.audio.enabled && audio.audio.useSegments
+                    ? (audio.segments[pair.id] ?? null)
+                    : undefined
+                }
+                onSegmentChange={(segment) => onAudioChange(withSegment(audio, pair.id, segment))}
                 disabled={disabled}
                 canDelete={exercise.pairs.length > 1}
                 registerInput={(el) => inputs.current.set(pair.id, el)}
@@ -379,6 +393,12 @@ interface PairCardProps {
   pair: Pair;
   index: number;
   why: string;
+  /**
+   * The slice of the clip this pair is heard in, or `undefined` when there is nothing to
+   * time — no audio, or the author has not asked for per-item timecodes.
+   */
+  segment?: ItemAudio | null;
+  onSegmentChange: (segment: ItemAudio | null) => void;
   halfEmpty: boolean;
   leftDuplicate: boolean;
   rightLongWords: number | null;
@@ -399,6 +419,8 @@ function PairCard({
   pair,
   index,
   why,
+  segment,
+  onSegmentChange,
   halfEmpty,
   leftDuplicate,
   rightLongWords,
@@ -435,6 +457,12 @@ function PairCard({
       </div>
 
       <div className="flex flex-col gap-3 p-3">
+        {/* The clip's line for this pair. One clip for the exercise with a timecode each —
+            audio on a single half is a different model and is out of this plan (§2). */}
+        {segment !== undefined && (
+          <AudioSegmentField segment={segment} onChange={onSegmentChange} />
+        )}
+
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <label

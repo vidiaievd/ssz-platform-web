@@ -33,16 +33,38 @@ import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepPairs } from './step-pairs';
 import { StepRightColumn } from './step-right-column';
 import { StepFeedback } from './step-feedback';
+import type { AudioDraft, AudioStepMap, PlacedAudioIssue } from '@/lib/shared-kernel/audio';
+
+import {
+  AudioEnableRow,
+  AudioRulesCard,
+  AudioSourceCard,
+  AudioTranscriptCard,
+  useAudioIssueCopy,
+  useAudioProblems,
+} from '../audio';
 import { useMatchPairsAutosave, type SavedDocument } from './use-match-pairs-autosave';
 import { useIssueCopy } from './issue-copy';
 
 const STEPS: IssueStep[] = [1, 2, 3];
+
+/**
+ * Where this builder keeps each part of the audio layer — three steps, not four.
+ *
+ * The clip and the timecodes go with the pairs on step 1; the rules and the transcript
+ * share step 3. One clip for the exercise with a timecode per pair, which is what the
+ * layer can express — audio on *one half* of a pair is a different model and stays out of
+ * this plan (§2, "out of bounds").
+ */
+const AUDIO_STEPS: AudioStepMap = { source: 1, segments: 1, rules: 3, transcript: 3 };
 
 export interface MatchPairsBuilderProps {
   exerciseId: string;
   containerId: string;
   /** The document as loaded from `/exercises/:id/answers`, envelope included. */
   initialExercise: MatchPairs;
+  /** The listening layer, carried beside the document (plan 56 phase 6). */
+  initialAudio: AudioDraft;
   initialInstructions: string;
   /**
    * Whether the stored content named a variant, or is only being read as `pairs` because
@@ -70,6 +92,7 @@ export function MatchPairsBuilder({
   exerciseId,
   containerId,
   initialExercise,
+  initialAudio,
   initialInstructions,
   initialVariantChosen,
   onDocumentChange,
@@ -78,12 +101,14 @@ export function MatchPairsBuilder({
   const t = useTranslations('Authoring');
 
   const [exercise, setExercise] = useState(initialExercise);
+  const [audio, setAudio] = useState(initialAudio);
   const [instructions, setInstructions] = useState(initialInstructions);
   const [variantChosen, setVariantChosen] = useState(initialVariantChosen);
   const [step, setStep] = useState<IssueStep>(1);
   const [gateOpen, setGateOpen] = useState(false);
 
   const autosave = useMatchPairsAutosave({
+    audio,
     exerciseId,
     containerId,
     exercise,
@@ -111,8 +136,17 @@ export function MatchPairsBuilder({
    * absent field parses as `pairs`, so "the author never chose" exists only here — and
    * only until the gate is passed once (plan 49, phase 4).
    */
+  /** The layer's findings, in the same rail and the same gate as the type's own. */
+  const audioProblems = useAudioProblems(
+    audio,
+    exercise.pairs.map((pair) => pair.id),
+    AUDIO_STEPS,
+  );
+
   const blockerCount =
-    problems.filter((issue) => issue.level === 'blocker').length + (variantChosen ? 0 : 1);
+    problems.filter((issue) => issue.level === 'blocker').length +
+    audioProblems.filter((issue) => issue.level === 'blocker').length +
+    (variantChosen ? 0 : 1);
 
   return (
     <div className="flex flex-col gap-5">
@@ -121,6 +155,7 @@ export function MatchPairsBuilder({
           <MatchPairsSteps
             current={step}
             problems={problems}
+            audioProblems={audioProblems}
             variantChosen={variantChosen}
             onSelect={setStep}
           />
@@ -159,9 +194,18 @@ export function MatchPairsBuilder({
               </p>
             </div>
 
+            {/* Audio adds no fourth step: it is material, and the material of this
+                template is the pairs, which is this step (plan 56). */}
+            <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+              <AudioEnableRow draft={audio} onChange={setAudio} />
+            </div>
+            {audio.audio.enabled && <AudioSourceCard draft={audio} onChange={setAudio} />}
+
             <StepPairs
               exercise={exercise}
               onChange={setExercise}
+              audio={audio}
+              onAudioChange={setAudio}
               variantChosen={variantChosen}
               onVariantChosen={(variant: Variant) => {
                 setVariantChosen(true);
@@ -179,7 +223,22 @@ export function MatchPairsBuilder({
           />
         )}
 
-        {step === 3 && <StepFeedback exercise={exercise} onChange={setExercise} />}
+        {step === 3 && (
+          <div className="flex flex-col gap-5">
+            <StepFeedback exercise={exercise} onChange={setExercise} />
+
+            {audio.audio.enabled && (
+              <>
+                <AudioRulesCard
+                  draft={audio}
+                  onChange={setAudio}
+                  itemNoun={t('matchPairs.audioItemNoun')}
+                />
+                <AudioTranscriptCard draft={audio} onChange={setAudio} />
+              </>
+            )}
+          </div>
+        )}
 
         <StepNav current={step} onSelect={setStep} onDone={() => setGateOpen(true)} />
       </div>
@@ -187,6 +246,7 @@ export function MatchPairsBuilder({
       <GateDialog
         open={gateOpen}
         problems={problems}
+        audioProblems={audioProblems}
         variantChosen={variantChosen}
         blockerCount={blockerCount}
         onOpenChange={setGateOpen}
@@ -207,18 +267,26 @@ export function MatchPairsBuilder({
 function MatchPairsSteps({
   current,
   problems,
+  audioProblems,
   variantChosen,
   onSelect,
 }: {
   current: IssueStep;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   variantChosen: boolean;
   onSelect: (step: IssueStep) => void;
 }) {
   const t = useTranslations('Authoring');
 
   const steps: BuilderStep[] = STEPS.map((step) => {
-    const own = problems.filter((issue) => issue.step === step);
+    // Both lists at once: a step is as bad as its worst finding, whichever list it came
+    // from, and a rail counting only the type's own would show green over an exercise its
+    // own publish preflight refuses.
+    const own = [
+      ...problems.filter((issue) => issue.step === step),
+      ...audioProblems.filter((issue) => issue.step === step && issue.level !== 'info'),
+    ];
     const blockers =
       own.filter((issue) => issue.level === 'blocker').length +
       (step === 1 && !variantChosen ? 1 : 0);
@@ -350,6 +418,7 @@ function SaveHint({ status, savedAt, canOverwrite, onRetry, onOverwrite }: SaveH
 interface GateDialogProps {
   open: boolean;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   variantChosen: boolean;
   blockerCount: number;
   onOpenChange: (open: boolean) => void;
@@ -366,6 +435,7 @@ interface GateDialogProps {
 function GateDialog({
   open,
   problems,
+  audioProblems,
   variantChosen,
   blockerCount,
   onOpenChange,
@@ -373,6 +443,7 @@ function GateDialog({
 }: GateDialogProps) {
   const t = useTranslations('Authoring');
   const describeIssue = useIssueCopy();
+  const describeAudio = useAudioIssueCopy();
 
   const rows: { key: string; level: 'blocker' | 'warning'; text: string; step: IssueStep }[] = [
     ...(variantChosen
@@ -400,6 +471,16 @@ function GateDialog({
         level: 'warning' as const,
         text: describeIssue(issue),
         step: issue.step,
+      })),
+    // The layer's findings, in the same list rather than under a heading of their own: an
+    // author who switched listening on has one exercise to finish, not two.
+    ...audioProblems
+      .filter((issue) => issue.level !== 'info')
+      .map((issue, index) => ({
+        key: `audio-${issue.code}-${index}`,
+        level: issue.level as 'blocker' | 'warning',
+        text: describeAudio(issue),
+        step: issue.step as IssueStep,
       })),
   ];
 

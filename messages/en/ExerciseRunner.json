@@ -474,7 +474,8 @@
       "sentence": "sentence",
       "lines": "lines",
       "sentences": "sentences",
-      "pieces": "pieces"
+      "pieces": "pieces",
+      "pairs": "pairs"
     },
     "lockNoteOwn": "This {item} opens once you have heard its recording."
   }

@@ -369,6 +369,7 @@ export function ExerciseEditorPane({
           exerciseId={exerciseId}
           containerId={container.id}
           initialExercise={matchPairsDocumentFrom(exercise, container.id)}
+          initialAudio={readAudioDraft(exercise.content, MATCH_PAIRS_TEMPLATE_CODE)}
           initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
           // An absent `variant` parses as `pairs`, which carries the weaker publication
           // rule. Only the raw column can still say whether anyone chose it.
@@ -638,7 +639,13 @@ function applySavedMatchPairs(
   return {
     ...cached,
     updatedAt,
-    content: { ...matchPairsToContent(saved.exercise) },
+    // The same two steps the save itself takes: the template's own persistence, then the
+    // layer that belongs to none of them.
+    content: applyAudioDraft(
+      { ...matchPairsToContent(saved.exercise) },
+      saved.audio,
+      MATCH_PAIRS_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...matchPairsToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [{ ...instruction, instructionText: saved.instructions.trim() }, ...rest],

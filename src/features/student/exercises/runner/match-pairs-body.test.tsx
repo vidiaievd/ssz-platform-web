@@ -5,6 +5,8 @@ import { useState, type ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 import type { StudentProjection } from '@/lib/shared-kernel/match-pairs';
 
 import {
@@ -50,6 +52,7 @@ function Harness({
   revealed,
   showFeedback = true,
   initialValue = {},
+  audio,
 }: {
   projection?: StudentProjection;
   onAnswerChange?: (canCheck: boolean) => void;
@@ -59,6 +62,7 @@ function Harness({
   revealed?: Record<string, RevealedSlot>;
   showFeedback?: boolean;
   initialValue?: MatchPairsValue;
+  audio?: ExerciseAudioEngine;
 }) {
   const [value, setValue] = useState<MatchPairsValue>(initialValue);
   return (
@@ -75,6 +79,7 @@ function Harness({
         showFeedback={showFeedback}
         {...(results === undefined ? {} : { results })}
         {...(revealed === undefined ? {} : { revealed })}
+        {...(audio === undefined ? {} : { audio })}
       />
     </NextIntlClientProvider>
   );
@@ -379,5 +384,59 @@ describe('MatchPairsBody — on a phone', () => {
     await user.click(slot('Kari tar imot Bartek'));
 
     expect(screen.queryByRole('group')).not.toBeInTheDocument();
+  });
+});
+
+/** The engine as the hook would hand it over, with nothing playing yet. */
+const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+  audio: { ...AUDIO_DEFAULT, enabled: true, assetId: 'asset-1', title: 'Dialog', duration: 96 },
+  segments: {},
+  element: null,
+  src: 'https://cdn.test/asset-1.mp3',
+  state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+  duration: 96,
+  playing: false,
+  plays: 0,
+  limit: 0,
+  exhausted: false,
+  heard: false,
+  gated: false,
+  canPlay: true,
+  failed: false,
+  loading: false,
+  speed: 1,
+  toggle: vi.fn(),
+  back: vi.fn(),
+  seekTo: vi.fn(),
+  playRange: vi.fn(),
+  cycleSpeed: vi.fn(),
+  reset: vi.fn(),
+  ...over,
+});
+
+/*
+  The listening layer on this type (plan 56 phase 6): one clip for the exercise, with a
+  timecode per pair. Audio on a single half is a different model and stays out (§2).
+*/
+describe('MatchPairsBody — with audio', () => {
+  it('plays the clip above the pairs and offers each its own line', () => {
+    renderWide(<Harness audio={engine({ segments: { p1: { start: 4, end: 12 } } })} />);
+
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /0:04/ })).toBeInTheDocument();
+  });
+
+  it('holds the pairs shut until the clip has been heard through once', () => {
+    renderWide(<Harness audio={engine({ gated: true })} />);
+
+    expect(
+      screen.getByText('The pairs open once you have heard the clip through once.'),
+    ).toBeInTheDocument();
+  });
+
+  it('is not there at all for an exercise without it', () => {
+    renderWide(<Harness />);
+
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
   });
 });

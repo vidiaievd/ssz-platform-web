@@ -21,6 +21,7 @@ import {
   type RevealedSlot,
   type SlotVerdict,
 } from '@/features/student/exercises/runner';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface MatchPairsSolverProps {
@@ -57,6 +58,16 @@ export function MatchPairsSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<MatchPairsAttemptContent | null>(null);
+  /** What the clip said, once the engine hands it over with the verdicts. */
+  const [transcript, setTranscript] = useState<{ transcript: string; translation: string } | null>(
+    null,
+  );
+
+  /**
+   * The listening layer, read off the projected document — the block rides with it, so
+   * there is nothing else to fetch and nothing to keep in step (plan 56 phase 6).
+   */
+  const audio = useExerciseAudio(projection);
 
   const submit = useSubmitAnswer(exerciseId, attemptId);
   const reveal = useRevealAnswers(exerciseId, attemptId);
@@ -91,6 +102,7 @@ export function MatchPairsSolver({
         onSuccess: async (data) => {
           setAttemptId(data.attemptId);
           setProjection(data.exerciseContent as MatchPairsAttemptContent);
+          setTranscript(null);
           openedAt.current = Date.now();
 
           if (restoreConsidered.current) return;
@@ -186,6 +198,8 @@ export function MatchPairsSolver({
             bySlot[pair.pairId] = { correct: pair.correct, explanation: pair.explanation };
           }
           setResults(bySlot);
+          // The pairs are checked, so the clip has nothing left to give away.
+          if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
           if (details !== undefined) {
             setTally({ correct: details.correctPairs, total: details.totalPairs });
           }
@@ -319,6 +333,8 @@ export function MatchPairsSolver({
 
       <MatchPairsBody
         projection={projection}
+        audio={audio}
+        audioTranscript={transcript}
         {...(instruction === undefined ? {} : { instruction })}
         value={value}
         onValueChange={setValue}

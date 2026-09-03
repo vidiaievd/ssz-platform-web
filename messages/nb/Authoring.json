@@ -2101,7 +2101,8 @@
       "POOL_NO_DISTRACTORS": "Ekstra halvdeler er på, men ingen er skrevet, så den siste koblingen er gratis",
       "POOL_TOO_SMALL": "Ekstra er av og det er bare {count} par — de siste løser seg selv",
       "FB_NO_DEFAULT": "Par {index} mangler standardforklaring"
-    }
+    },
+    "audioItemNoun": "parene"
   },
   "builder": {
     "saving": "Lagrer…",
