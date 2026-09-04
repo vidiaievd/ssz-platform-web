@@ -106,7 +106,17 @@
       "finished": "Ferdig",
       "clash": "Timeplankollisjon",
       "unassigned": "Ikke tildelt"
-    }
+    },
+    "searchAria": "Søk etter elever på navn eller e-post",
+    "minMax": "Min {min} · Maks {max}",
+    "tableAria": "Elevliste",
+    "columns": {
+      "student": "Elev",
+      "level": "Nivå",
+      "status": "Status",
+      "progress": "Framdrift"
+    },
+    "remove": "Fjern {name} fra gruppen"
   },
   "teachers": {
     "primaryHeading": "Primærlærer",
@@ -262,7 +272,12 @@
     "assigning": "Tildeler…",
     "cancel": "Avbryt",
     "successSimple": "Tildelt {name} som {role}",
-    "successWithWarnings": "Tildelt {name} som {role} — {count} advarsel overstyrt"
+    "successWithWarnings": "Tildelt {name} som {role} — {count} advarsel overstyrt",
+    "roleAria": "Lærerrolle",
+    "searchAria": "Søk etter lærer på navn",
+    "listAria": "Velg lærer",
+    "noMatch": "Ingen lærere samsvarer med søket.",
+    "serverRejected": "Serveren avviste: {reasons}. Bruk «Tildel likevel» for å overstyre."
   },
   "addStudents": {
     "title": "Legg til elever",
@@ -279,7 +294,12 @@
     "success": "La til {count} elev",
     "successPlural": "La til {count} elever",
     "successOverride": "La til {count} elever (over kapasitet — overstyring brukt)",
-    "error": "Kunne ikke legge til elever. Prøv igjen."
+    "error": "Kunne ikke legge til elever. Prøv igjen.",
+    "searchAria": "Søk etter elever",
+    "listAria": "Velg elever å legge til",
+    "addCount": "{count, plural, =0 {Legg til elever} one {Legg til # elev} other {Legg til # elever}}",
+    "selected": "{count, plural, one {# elev valgt} other {# elever valgt}}",
+    "selectAria": "Velg {name}"
   },
   "timetable": {
     "title": "Lærertimeplan",

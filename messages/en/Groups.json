@@ -106,7 +106,17 @@
       "finished": "Finished",
       "clash": "Schedule clash",
       "unassigned": "Unassigned"
-    }
+    },
+    "searchAria": "Search students by name or email",
+    "minMax": "Min {min} · Max {max}",
+    "tableAria": "Student roster",
+    "columns": {
+      "student": "Student",
+      "level": "Level",
+      "status": "Status",
+      "progress": "Progress"
+    },
+    "remove": "Remove {name} from the group"
   },
   "teachers": {
     "primaryHeading": "Primary teacher",
@@ -262,7 +272,12 @@
     "assigning": "Assigning…",
     "cancel": "Cancel",
     "successSimple": "Assigned {name} as {role}",
-    "successWithWarnings": "Assigned {name} as {role} — {count} warning overridden"
+    "successWithWarnings": "Assigned {name} as {role} — {count} warning overridden",
+    "roleAria": "Teacher role",
+    "searchAria": "Search teachers by name",
+    "listAria": "Select teacher",
+    "noMatch": "No teachers match your search.",
+    "serverRejected": "Server rejected: {reasons}. Use “Assign anyway” to override."
   },
   "addStudents": {
     "title": "Add students",
@@ -279,7 +294,12 @@
     "success": "Added {count} student",
     "successPlural": "Added {count} students",
     "successOverride": "Added {count} students (over capacity — override applied)",
-    "error": "Failed to add students. Please try again."
+    "error": "Failed to add students. Please try again.",
+    "searchAria": "Search students",
+    "listAria": "Select students to add",
+    "addCount": "{count, plural, =0 {Add students} one {Add # student} other {Add # students}}",
+    "selected": "{count, plural, one {# student selected} other {# students selected}}",
+    "selectAria": "Select {name}"
   },
   "timetable": {
     "title": "Teacher timetable",

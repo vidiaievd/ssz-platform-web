@@ -30,11 +30,11 @@ function slotWeeklyHours(slots: Slot[]): number {
 
 // ── Role picker ───────────────────────────────────────────────────────────────
 
-const ROLES: { value: TeacherRole; label: string }[] = [
-  { value: 'primary',    label: 'Primary' },
-  { value: 'co-primary', label: 'Co-primary' },
-  { value: 'substitute', label: 'Substitute' },
-];
+const ROLES = [
+  { value: 'primary',    labelKey: 'assignTeacher.roleOptions.primary' },
+  { value: 'co-primary', labelKey: 'assignTeacher.roleOptions.coPrimary' },
+  { value: 'substitute', labelKey: 'assignTeacher.roleOptions.substitute' },
+] as const satisfies ReadonlyArray<{ value: TeacherRole; labelKey: string }>;
 
 function isTeacherRole(value: string | null): value is TeacherRole {
   return value === 'primary' || value === 'co-primary' || value === 'substitute';
@@ -47,8 +47,14 @@ function RolePicker({
   value: TeacherRole;
   onChange: (r: TeacherRole) => void;
 }) {
+  const t = useTranslations('Groups');
+
   return (
-    <div role="radiogroup" aria-label="Teacher role" className="flex rounded-md border border-input overflow-hidden">
+    <div
+      role="radiogroup"
+      aria-label={t('assignTeacher.roleAria')}
+      className="flex rounded-md border border-input overflow-hidden"
+    >
       {ROLES.map((r) => (
         <button
           key={r.value}
@@ -65,7 +71,7 @@ function RolePicker({
             r.value !== 'primary' && 'border-l border-input',
           )}
         >
-          {r.label}
+          {t(r.labelKey)}
         </button>
       ))}
     </div>
@@ -167,14 +173,14 @@ type ValidationState =
   | { status: 'warn'; messages: string[] }
   | { status: 'error'; messages: string[] };
 
-function ValidationBlock({ state }: { state: ValidationState }) {
+function ValidationBlock({ state, okLabel }: { state: ValidationState; okLabel: string }) {
   if (state.status === 'idle') return null;
 
   if (state.status === 'ok') {
     return (
       <div className="flex items-center gap-2 rounded-md bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 px-3 py-2">
         <CheckCircle2 className="size-4 text-success-600 shrink-0" aria-hidden="true" />
-        <span className="text-sm text-success-700 dark:text-success-300">Good to assign</span>
+        <span className="text-sm text-success-700 dark:text-success-300">{okLabel}</span>
       </div>
     );
   }
@@ -316,16 +322,18 @@ export function TeacherAssignModal({
       } else {
         if (result.conflicts && result.conflicts.length > 0) {
           setServerError(
-            `Server rejected: ${result.conflicts.map((c) => c.type).join(', ')}. Use "Assign anyway" to override.`,
+            t('assignTeacher.serverRejected', {
+              reasons: result.conflicts.map((c) => c.type).join(', '),
+            }),
           );
         } else if (result.blocked) {
           setServerError(
             result.blocked === 'no-primary'
-              ? 'Assign a primary teacher first before adding a co-primary.'
-              : 'This assignment is not allowed.',
+              ? t('assignTeacher.errorNoPrimary')
+              : t('assignTeacher.errorBlocked'),
           );
         } else {
-          setServerError('Assignment failed. Please try again.');
+          setServerError(t('assignTeacher.errorGeneric'));
         }
       }
     });
@@ -336,15 +344,18 @@ export function TeacherAssignModal({
       <DialogContent className="sm:max-w-xl max-h-[90dvh] flex flex-col overflow-hidden p-0">
         <div className="flex flex-col gap-4 p-4 overflow-y-auto flex-1">
           <DialogHeader>
-            <DialogTitle>Assign teacher</DialogTitle>
+            <DialogTitle>{t('assignTeacher.title')}</DialogTitle>
             <DialogDescription>
-              Assigning to <strong>{groupName}</strong> · lang: {groupLang.toUpperCase()}
+              {t('assignTeacher.description', {
+                groupName,
+                lang: groupLang.toUpperCase(),
+              })}
             </DialogDescription>
           </DialogHeader>
 
           {/* Role picker */}
           <div className="flex flex-col gap-1.5">
-            <Label>Role</Label>
+            <Label>{t('assignTeacher.role')}</Label>
             <RolePicker value={role} onChange={(r) => { setRole(r); setSelectedId(null); }} />
           </div>
 
@@ -353,26 +364,26 @@ export function TeacherAssignModal({
             <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="sub-from">From date</Label>
+                  <Label htmlFor="sub-from">{t('assignTeacher.substituteFrom')}</Label>
                   <Input id="sub-from" type="date" value={subFrom} onChange={(e) => setSubFrom(e.target.value)} />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="sub-to">To date</Label>
+                  <Label htmlFor="sub-to">{t('assignTeacher.substituteTo')}</Label>
                   <Input id="sub-to" type="date" value={subTo} onChange={(e) => setSubTo(e.target.value)} />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="sub-reason">
-                  Reason <span className="text-error-500">*</span>
+                  {t('assignTeacher.substituteReason')} <span className="text-error-500">*</span>
                 </Label>
                 <Input
                   id="sub-reason"
-                  placeholder="e.g. Sick leave, vacation…"
+                  placeholder={t('assignTeacher.reasonPlaceholder')}
                   value={subReason}
                   onChange={(e) => setSubReason(e.target.value)}
                 />
                 {role === 'substitute' && !subReason.trim() && (
-                  <p className="text-xs text-error-600">Reason is required for substitutes.</p>
+                  <p className="text-xs text-error-600">{t('assignTeacher.reasonRequired')}</p>
                 )}
               </div>
             </div>
@@ -385,8 +396,8 @@ export function TeacherAssignModal({
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search teachers…"
-              aria-label="Search teachers by name"
+              placeholder={t('assignTeacher.search')}
+              aria-label={t('assignTeacher.searchAria')}
               className={cn(
                 'h-9 w-full rounded-md border border-input bg-background',
                 'pl-8 pr-3 text-sm text-(--ssz-text-primary)',
@@ -399,13 +410,13 @@ export function TeacherAssignModal({
           {/* Teacher listbox */}
           <div
             role="listbox"
-            aria-label="Select teacher"
+            aria-label={t('assignTeacher.listAria')}
             aria-required="true"
             className="flex flex-col gap-1 max-h-64 overflow-y-auto"
           >
             {filtered.length === 0 ? (
               <p className="text-sm text-(--ssz-text-muted) text-center py-6">
-                {candidates.length === 0 ? 'All teachers are already assigned.' : 'No teachers match your search.'}
+                {candidates.length === 0 ? t('assignTeacher.noTeachers') : t('assignTeacher.noMatch')}
               </p>
             ) : (
               filtered.map((c) => (
@@ -421,7 +432,7 @@ export function TeacherAssignModal({
           </div>
 
           {/* Validation block */}
-          <ValidationBlock state={validationState} />
+          <ValidationBlock state={validationState} okLabel={t('assignTeacher.validationOk')} />
 
           {/* Server error */}
           {serverError && (
@@ -437,17 +448,17 @@ export function TeacherAssignModal({
 
         <DialogFooter className="rounded-b-xl">
           <Button variant="outline" onClick={handleClose} disabled={isPending}>
-            Cancel
+            {t('addStudents.cancel')}
           </Button>
           <Button
             onClick={handleAssign}
             disabled={!canAssign || isPending}
           >
             {isPending
-              ? 'Assigning…'
+              ? t('assignTeacher.assigning')
               : needsOverride
-                ? 'Assign anyway'
-                : 'Assign teacher'}
+                ? t('assignTeacher.assignAnyway')
+                : t('assignTeacher.assign')}
           </Button>
         </DialogFooter>
       </DialogContent>

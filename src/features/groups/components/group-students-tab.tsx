@@ -4,6 +4,7 @@ import { useState, useTransition, useOptimistic, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Search, UserPlus, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -16,14 +17,14 @@ import type { RosterStudent, Group } from '../types';
 
 type Tone = 'neutral' | 'success' | 'warning' | 'destructive';
 
-const STUDENT_STATUS_CONFIG: Record<RosterStudent['status'], { tone: Tone; label: string }> = {
-  active:     { tone: 'success',     label: 'Active' },
-  'at-risk':  { tone: 'warning',     label: 'At risk' },
-  new:        { tone: 'accent' as Tone, label: 'New' },
-  finished:   { tone: 'neutral',     label: 'Finished' },
-  clash:      { tone: 'destructive', label: 'Schedule clash' },
-  unassigned: { tone: 'neutral',     label: 'Unassigned' },
-};
+const STUDENT_STATUS_CONFIG = {
+  active:     { tone: 'success',        labelKey: 'students.status.active' },
+  'at-risk':  { tone: 'warning',        labelKey: 'students.status.atRisk' },
+  new:        { tone: 'accent' as Tone, labelKey: 'students.status.new' },
+  finished:   { tone: 'neutral',        labelKey: 'students.status.finished' },
+  clash:      { tone: 'destructive',    labelKey: 'students.status.clash' },
+  unassigned: { tone: 'neutral',        labelKey: 'students.status.unassigned' },
+} as const satisfies Record<RosterStudent['status'], { tone: Tone; labelKey: string }>;
 
 type Props = {
   roster: RosterStudent[];
@@ -33,6 +34,7 @@ type Props = {
 };
 
 export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: Props) {
+  const t = useTranslations('Groups');
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [pending, startTransition] = useTransition();
@@ -61,9 +63,9 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
       await removeStudent(schoolId, group.id, student.userId);
       setRemovingId(null);
       router.refresh();
-      toast(`Removed ${student.name}`, {
+      toast(t('students.removed', { name: student.name }), {
         action: {
-          label: 'Undo',
+          label: t('students.undo'),
           onClick: () => {
             startTransition(async () => {
               await addStudents(schoolId, group.id, [student.userId]);
@@ -90,7 +92,7 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
           />
         </div>
         <p className="text-xs text-(--ssz-text-muted)">
-          Min {group.capacity.min} · Max {group.capacity.max}
+          {t('students.minMax', { min: group.capacity.min, max: group.capacity.max })}
         </p>
       </div>
 
@@ -102,8 +104,8 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search students…"
-            aria-label="Search students by name or email"
+            placeholder={t('students.search')}
+            aria-label={t('students.searchAria')}
             className={cn(
               'h-9 w-full rounded-md border border-input bg-background',
               'pl-8 pr-3 text-sm text-(--ssz-text-primary)',
@@ -115,7 +117,7 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
         <Button size="sm" asChild>
           <Link href={addStudentsHref}>
             <UserPlus className="size-3.5 mr-1.5" aria-hidden="true" />
-            Add students
+            {t('students.addStudents')}
           </Link>
         </Button>
       </div>
@@ -124,37 +126,37 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-16 text-center">
           <p className="text-sm text-(--ssz-text-muted)">
-            {optimisticRoster.length === 0 ? 'No students enrolled yet.' : 'No students match your search.'}
+            {optimisticRoster.length === 0 ? t('students.noEnrolled') : t('students.noMatch')}
           </p>
           {optimisticRoster.length === 0 && (
             <Button size="sm" asChild>
-              <Link href={addStudentsHref}>Add students</Link>
+              <Link href={addStudentsHref}>{t('students.addStudents')}</Link>
             </Button>
           )}
         </div>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
-          <table className="w-full text-sm" aria-label="Student roster">
+          <table className="w-full text-sm" aria-label={t('students.tableAria')}>
             <thead className="bg-muted/40 border-b border-border">
               <tr>
                 <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
-                  Student
+                  {t('students.columns.student')}
                 </th>
                 <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted) hidden sm:table-cell">
-                  Level
+                  {t('students.columns.level')}
                 </th>
                 <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
-                  Status
+                  {t('students.columns.status')}
                 </th>
                 <th className="text-right px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted) hidden md:table-cell">
-                  Progress
+                  {t('students.columns.progress')}
                 </th>
                 <th className="w-8" />
               </tr>
             </thead>
             <tbody>
               {filtered.map((student) => {
-                const { tone, label } = STUDENT_STATUS_CONFIG[student.status];
+                const { tone, labelKey } = STUDENT_STATUS_CONFIG[student.status];
                 const isRemoving = removingId === student.userId && pending;
                 return (
                   <tr
@@ -178,7 +180,7 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
                       <span className="font-mono text-xs text-(--ssz-text-secondary)">{student.level}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <StatusPill tone={tone}>{label}</StatusPill>
+                      <StatusPill tone={tone}>{t(labelKey)}</StatusPill>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
                       <div className="flex items-center justify-end gap-2">
@@ -199,7 +201,7 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
                         size="icon-sm"
                         onClick={() => handleRemove(student)}
                         disabled={isRemoving}
-                        aria-label={`Remove ${student.name}`}
+                        aria-label={t('students.remove', { name: student.name })}
                         className="text-(--ssz-text-muted) hover:text-error-600"
                       >
                         <X className="size-3.5" />

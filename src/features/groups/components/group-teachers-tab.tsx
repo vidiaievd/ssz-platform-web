@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { UserPlus, AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { TeacherRow } from './teacher-row';
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function GroupTeachersTab({ teachers, schoolId, groupId, assignTeacherHref }: Props) {
+  const tr = useTranslations('Groups');
   const primary    = teachers.find((t) => t.role === 'primary');
   const coPrimary  = teachers.find((t) => t.role === 'co-primary');
   const substitutes = teachers.filter((t) => t.role === 'substitute');
@@ -25,12 +27,12 @@ export function GroupTeachersTab({ teachers, schoolId, groupId, assignTeacherHre
       <section aria-labelledby="teacher-primary-heading">
         <div className="flex items-center justify-between mb-2">
           <h3 id="teacher-primary-heading" className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
-            Primary teacher
+            {tr('teachers.primaryHeading')}
           </h3>
           <Button variant="ghost" size="sm" asChild>
             <Link href={assignTeacherHref}>
               <UserPlus className="size-3.5 mr-1.5" aria-hidden="true" />
-              Assign teacher
+              {tr('teachers.assignTeacher')}
             </Link>
           </Button>
         </div>
@@ -42,14 +44,14 @@ export function GroupTeachersTab({ teachers, schoolId, groupId, assignTeacherHre
             <AlertCircle className="size-4 text-error-500 shrink-0" aria-hidden="true" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-error-700 dark:text-error-300">
-                No primary teacher
+                {tr('teachers.noPrimary')}
               </p>
               <p className="text-xs text-error-600/70 dark:text-error-400/70">
-                This group cannot run lessons without a primary teacher.
+                {tr('teachers.noPrimaryDescription')}
               </p>
             </div>
             <Button size="sm" asChild>
-              <Link href={assignTeacherHref}>Assign primary</Link>
+              <Link href={assignTeacherHref}>{tr('teachers.assignPrimary')}</Link>
             </Button>
           </div>
         )}
@@ -58,13 +60,13 @@ export function GroupTeachersTab({ teachers, schoolId, groupId, assignTeacherHre
       {/* Co-primary teacher */}
       <section aria-labelledby="teacher-coprimary-heading">
         <h3 id="teacher-coprimary-heading" className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-2">
-          Co-primary teacher
+          {tr('teachers.coPrimaryHeading')}
         </h3>
         {coPrimary ? (
           <TeacherRow teacher={coPrimary} schoolId={schoolId} groupId={groupId} canRemove />
         ) : (
           <p className="text-sm text-(--ssz-text-muted) italic px-3 py-2">
-            No co-primary teacher assigned.
+            {tr('teachers.noCoPrimary')}
           </p>
         )}
       </section>
@@ -73,7 +75,7 @@ export function GroupTeachersTab({ teachers, schoolId, groupId, assignTeacherHre
       {substitutes.length > 0 && (
         <section aria-labelledby="teacher-subs-heading">
           <h3 id="teacher-subs-heading" className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-2">
-            Substitutes
+            {tr('teachers.subsHeading')}
           </h3>
           <div className="flex flex-col gap-2">
             {substitutes.map((t) => (
