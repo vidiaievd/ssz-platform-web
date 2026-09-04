@@ -27,17 +27,21 @@
       "needAttention": "Потребують уваги",
       "allClear": "Усе гаразд",
       "studentsEnrolled": "Учнів зараховано",
-      "drafts": "Чернетки"
+      "drafts": "Чернетки",
+      "attentionHint": "блокувальні або дорадчі попередження",
+      "studentsHint": "у всіх групах",
+      "draftsHint": "ще не опубліковані"
     }
   },
   "filter": {
-    "search": "Пошук груп…",
+    "search": "Назва, курс, учитель…",
     "all": "Усі",
     "attention": "Потребують уваги",
     "drafts": "Чернетки",
     "sortAlerts": "Найбільше сповіщень",
     "sortName": "Назва А–Я",
-    "sortStudents": "Найбільше учнів"
+    "sortStudents": "Найбільше учнів",
+    "sortLabel": "Сортування"
   },
   "status": {
     "draft": "Чернетка",

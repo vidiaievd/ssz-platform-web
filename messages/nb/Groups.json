@@ -27,17 +27,21 @@
       "needAttention": "Trenger oppfølging",
       "allClear": "Alt i orden",
       "studentsEnrolled": "Påmeldte elever",
-      "drafts": "Utkast"
+      "drafts": "Utkast",
+      "attentionHint": "blokkerende eller rådgivende varsler",
+      "studentsHint": "på tvers av alle grupper",
+      "draftsHint": "ikke publisert ennå"
     }
   },
   "filter": {
-    "search": "Søk i grupper…",
+    "search": "Navn, kurs, lærer…",
     "all": "Alle",
     "attention": "Trenger oppfølging",
     "drafts": "Utkast",
     "sortAlerts": "Flest varsler",
     "sortName": "Navn A–Å",
-    "sortStudents": "Flest elever"
+    "sortStudents": "Flest elever",
+    "sortLabel": "Sorter"
   },
   "status": {
     "draft": "Utkast",

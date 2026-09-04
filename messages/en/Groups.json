@@ -27,17 +27,21 @@
       "needAttention": "Need attention",
       "allClear": "All clear",
       "studentsEnrolled": "Students enrolled",
-      "drafts": "Drafts"
+      "drafts": "Drafts",
+      "attentionHint": "blocking or advisory alerts",
+      "studentsHint": "across all groups",
+      "draftsHint": "not yet published"
     }
   },
   "filter": {
-    "search": "Search groups…",
+    "search": "Name, course, teacher…",
     "all": "All",
     "attention": "Needs attention",
     "drafts": "Drafts",
     "sortAlerts": "Most alerts",
     "sortName": "Name A–Z",
-    "sortStudents": "Most students"
+    "sortStudents": "Most students",
+    "sortLabel": "Sort"
   },
   "status": {
     "draft": "Draft",

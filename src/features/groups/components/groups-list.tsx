@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Users, CalendarRange } from 'lucide-react';
+import { Users, CalendarRange, Plus } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import { Button } from '@/components/ui/button';
@@ -47,17 +47,15 @@ function KpiCard({
 }: {
   label: string;
   value: number;
-  hint?: string;
+  hint: string;
   tone?: 'neutral' | 'danger';
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card px-4 py-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
-        {label}
-      </p>
+    <div className="rounded-lg border border-border bg-card p-4">
+      <p className="text-xs font-semibold text-(--ssz-text-muted)">{label}</p>
       <p
         className={cn(
-          'mt-1 text-2xl font-bold leading-none',
+          'mt-0.5 text-[26px] font-bold leading-[1.1] tracking-tight',
           tone === 'danger' && value > 0
             ? 'text-error-600 dark:text-error-400'
             : 'text-(--ssz-text-primary)',
@@ -65,7 +63,7 @@ function KpiCard({
       >
         {value}
       </p>
-      {hint && <p className="mt-1 text-xs text-(--ssz-text-muted)">{hint}</p>}
+      <p className="mt-0.5 text-[11.5px] text-(--ssz-text-muted)">{hint}</p>
     </div>
   );
 }
@@ -77,12 +75,10 @@ async function KpiStrip({ groups }: { groups: GroupHealthRowVM[] }) {
   const attention = attentionCount(groups);
   const students = groups.reduce((sum, g) => sum + g.studentCount, 0);
   const drafts = groups.filter((g) => g.status === 'draft').length;
-  const needTeacher = groups.filter((g) =>
-    g.alerts.some((a) => a.type === 'no-primary'),
-  ).length;
+  const needTeacher = groups.filter((g) => g.alerts.some((a) => a.type === 'no-primary')).length;
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-3.5">
+    <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
       <KpiCard
         label={t('list.kpi.activeGroups')}
         value={active}
@@ -92,10 +88,14 @@ async function KpiStrip({ groups }: { groups: GroupHealthRowVM[] }) {
         label={t('list.kpi.needAttention')}
         value={attention}
         tone="danger"
-        hint={attention === 0 ? t('list.kpi.allClear') : undefined}
+        hint={t('list.kpi.attentionHint')}
       />
-      <KpiCard label={t('list.kpi.studentsEnrolled')} value={students} />
-      <KpiCard label={t('list.kpi.drafts')} value={drafts} />
+      <KpiCard
+        label={t('list.kpi.studentsEnrolled')}
+        value={students}
+        hint={t('list.kpi.studentsHint')}
+      />
+      <KpiCard label={t('list.kpi.drafts')} value={drafts} hint={t('list.kpi.draftsHint')} />
     </div>
   );
 }
@@ -108,10 +108,10 @@ async function TableHeader() {
   return (
     <div
       className={cn(
-        'hidden lg:grid items-center gap-x-4 px-4 py-2',
-        'bg-muted/40 border-b border-border',
-        'text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted)',
-        'grid-cols-[1fr_auto_auto_120px_auto_auto_20px]',
+        'hidden lg:grid items-center gap-x-4 px-4 py-[11px]',
+        'bg-(--ssz-bg-subtle) border-b border-border',
+        'text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)',
+        'grid-cols-[1fr_auto_auto_100px_auto_auto_56px]',
       )}
       aria-hidden="true"
     >
@@ -130,44 +130,41 @@ async function TableHeader() {
 
 type Props = {
   groups: GroupHealthRowVM[];
+  schoolId: string;
   schoolSlug: string;
   filter: GroupFilter;
 };
 
-export async function GroupsList({ groups, schoolSlug, filter }: Props) {
+export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props) {
   const t = await getTranslations('Groups');
   const baseHref = `/school/${schoolSlug}`;
   const newGroupHref = `${baseHref}/groups/new`;
   const timetableHref = `${baseHref}/groups/timetable`;
 
-  const total      = groups.length;
-  const active     = groups.filter((g) => g.status === 'active').length;
-  const attention  = attentionCount(groups);
-  const drafts     = groups.filter((g) => g.status === 'draft').length;
-  const filtered   = filterGroups(groups, filter);
-  const isFiltered = Boolean(filter.q || (filter.segment && filter.segment !== 'all'));
+  const total = groups.length;
+  const active = groups.filter((g) => g.status === 'active').length;
+  const attention = attentionCount(groups);
+  const filtered = filterGroups(groups, filter);
 
   return (
     <div className="space-y-4">
       {/* Page header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-(--ssz-text-primary)">{t('list.title')}</h1>
-          <p className="mt-0.5 text-sm text-(--ssz-text-secondary)">
-            {t('list.count', { count: total })}
-            {active > 0 && <> · {active} {t('list.active')}</>}
-            {attention > 0 && (
-              <>
-                {' · '}
-                <span className="font-semibold text-error-600 dark:text-error-400">
-                  {attention} {attention === 1 ? t('list.attentionSingular') : t('list.attention')}
-                </span>
-              </>
-            )}
+          <h1 className="text-[27px] font-bold text-(--ssz-text-primary) tracking-tight">
+            {t('list.title')}
+          </h1>
+          <p className="mt-[5px] text-sm text-(--ssz-text-secondary)">
+            {t('list.count', { count: total })} · {active} {t('list.active')} ·{' '}
+            <span
+              className={cn(attention > 0 && 'font-semibold text-error-600 dark:text-error-400')}
+            >
+              {attention} {t('list.attention')}
+            </span>
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <Button variant="ghost" size="sm" asChild>
             <Link href={timetableHref}>
               <CalendarRange className="size-4 mr-1.5" aria-hidden="true" />
@@ -175,7 +172,10 @@ export async function GroupsList({ groups, schoolSlug, filter }: Props) {
             </Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href={newGroupHref}>{t('list.newGroup')}</Link>
+            <Link href={newGroupHref}>
+              <Plus className="size-4 mr-1.5" aria-hidden="true" />
+              {t('list.newGroup')}
+            </Link>
           </Button>
         </div>
       </div>
@@ -184,22 +184,40 @@ export async function GroupsList({ groups, schoolSlug, filter }: Props) {
       {total > 0 && <KpiStrip groups={groups} />}
 
       {/* Filter island (client) */}
-      <GroupListFilters attentionCount={attention} draftsCount={drafts} />
+      {total > 0 && <GroupListFilters totalCount={total} attentionCount={attention} />}
 
       {/* Table (≥1024) / cards (below) */}
-      {filtered.length === 0 ? (
-        <EmptyState filtered={isFiltered} newGroupHref={newGroupHref} />
+      {total === 0 ? (
+        <div className="rounded-lg border border-border overflow-hidden">
+          <EmptyState filtered={false} newGroupHref={newGroupHref} />
+        </div>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
           <TableHeader />
-          <div role="list" aria-label={t('list.title')}>
-            {filtered.map((group) => (
-              <div key={group.id} role="listitem">
-                <GroupHealthRow group={group} href={`${baseHref}/groups/${group.id}`} />
-                <GroupCard group={group} href={`${baseHref}/groups/${group.id}`} />
-              </div>
-            ))}
-          </div>
+          {filtered.length === 0 ? (
+            <p className="py-10 text-center text-sm text-(--ssz-text-muted)">
+              {t('list.filteredEmpty')}
+            </p>
+          ) : (
+            <div role="list" aria-label={t('list.title')}>
+              {filtered.map((group) => (
+                <div key={group.id} role="listitem">
+                  <GroupHealthRow
+                    group={group}
+                    href={`${baseHref}/groups/${group.id}`}
+                    schoolId={schoolId}
+                    schoolSlug={schoolSlug}
+                  />
+                  <GroupCard
+                    group={group}
+                    href={`${baseHref}/groups/${group.id}`}
+                    schoolId={schoolId}
+                    schoolSlug={schoolSlug}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

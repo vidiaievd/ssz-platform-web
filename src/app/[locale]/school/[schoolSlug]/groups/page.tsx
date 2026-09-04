@@ -39,6 +39,7 @@ export default async function GroupsPage({ params, searchParams }: Props) {
       )}
       <GroupsList
         groups={groups}
+        schoolId={school.id}
         schoolSlug={schoolSlug}
         filter={{
           q: q ?? '',
