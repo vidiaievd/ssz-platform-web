@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { TrendingUp, AlertTriangle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -24,6 +25,7 @@ function barColor(p: number, overloaded: boolean) {
 }
 
 export function TeacherSelector({ teachers, initialTeacherId }: Props) {
+  const t = useTranslations('Groups');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -43,14 +45,14 @@ export function TeacherSelector({ teachers, initialTeacherId }: Props) {
 
   if (teachers.length === 0) {
     return (
-      <p className="text-sm text-(--ssz-text-muted) px-3 py-4">No active teachers.</p>
+      <p className="text-sm text-(--ssz-text-muted) px-3 py-4">{t('timetable.noTeachers')}</p>
     );
   }
 
   const sorted = [...teachers].sort((a, b) => b.pct - a.pct);
 
   return (
-    <ul className="flex flex-col gap-0.5" role="listbox" aria-label="Select teacher">
+    <ul className="flex flex-col gap-0.5" role="listbox" aria-label={t('timetable.teacherListLabel')}>
       {sorted.map((t) => {
         const isActive = t.userId === activeId;
         const fill = pct(t.hours, t.max);

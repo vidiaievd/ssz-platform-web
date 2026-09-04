@@ -317,7 +317,24 @@
     },
     "conflictListTitle": "конфликт расписания",
     "conflictListTitlePlural": "конфликта расписания",
-    "conflictItem": "{day} конфликт: {groupA} пересекается с {groupB} — перенесите урок или переназначьте"
+    "conflictItem": "{day} конфликт: {groupA} пересекается с {groupB} — перенесите урок или переназначьте",
+    "hoursLine": "{hours}/{max} ч · {count, plural, one {# группа} few {# группы} many {# групп} other {# группы}}",
+    "clashes": "{count, plural, one {# накладка} few {# накладки} many {# накладок} other {# накладки}}",
+    "conflictsAria": "Накладки в расписании",
+    "gridAria": "Расписание на неделю",
+    "blockAria": "{group} · {time}",
+    "conflictBlockAria": "Накладка по времени: {group} ({time})",
+    "subSuffix": "замена",
+    "errorTitle": "Не удалось загрузить расписание",
+    "weekdayShort": {
+      "mon": "пн",
+      "tue": "вт",
+      "wed": "ср",
+      "thu": "чт",
+      "fri": "пт",
+      "sat": "сб",
+      "sun": "вс"
+    }
   },
   "mySchedule": {
     "title": "Моё расписание",

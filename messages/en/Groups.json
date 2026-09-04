@@ -317,7 +317,24 @@
     },
     "conflictListTitle": "schedule conflict",
     "conflictListTitlePlural": "schedule conflicts",
-    "conflictItem": "{day} clash: {groupA} overlaps {groupB} — move one slot or reassign"
+    "conflictItem": "{day} clash: {groupA} overlaps {groupB} — move one slot or reassign",
+    "hoursLine": "{hours}/{max}h · {count, plural, one {# group} other {# groups}}",
+    "clashes": "{count, plural, one {# clash} other {# clashes}}",
+    "conflictsAria": "Schedule conflicts",
+    "gridAria": "Weekly timetable",
+    "blockAria": "{group} · {time}",
+    "conflictBlockAria": "Time conflict: {group} ({time})",
+    "subSuffix": "sub",
+    "errorTitle": "Failed to load timetable",
+    "weekdayShort": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
   },
   "mySchedule": {
     "title": "My schedule",

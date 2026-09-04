@@ -317,7 +317,24 @@
     },
     "conflictListTitle": "timeplankollisjon",
     "conflictListTitlePlural": "timeplankollisjon",
-    "conflictItem": "{day} kollisjon: {groupA} overlapper {groupB} — flytt en time eller omfordel"
+    "conflictItem": "{day} kollisjon: {groupA} overlapper {groupB} — flytt en time eller omfordel",
+    "hoursLine": "{hours}/{max}t · {count, plural, one {# gruppe} other {# grupper}}",
+    "clashes": "{count, plural, one {# kollisjon} other {# kollisjoner}}",
+    "conflictsAria": "Timeplankollisjoner",
+    "gridAria": "Ukeplan",
+    "blockAria": "{group} · {time}",
+    "conflictBlockAria": "Tidskollisjon: {group} ({time})",
+    "subSuffix": "vikar",
+    "errorTitle": "Kunne ikke laste timeplanen",
+    "weekdayShort": {
+      "mon": "man",
+      "tue": "tir",
+      "wed": "ons",
+      "thu": "tor",
+      "fri": "fre",
+      "sat": "lør",
+      "sun": "søn"
+    }
   },
   "mySchedule": {
     "title": "Min timeplan",

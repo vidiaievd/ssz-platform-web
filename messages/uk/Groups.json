@@ -317,7 +317,24 @@
     },
     "conflictListTitle": "конфлікт розкладу",
     "conflictListTitlePlural": "конфлікти розкладу",
-    "conflictItem": "{day} конфлікт: {groupA} перетинається з {groupB} — перемістіть урок або перепризначте"
+    "conflictItem": "{day} конфлікт: {groupA} перетинається з {groupB} — перемістіть урок або перепризначте",
+    "hoursLine": "{hours}/{max} год · {count, plural, one {# група} few {# групи} many {# груп} other {# групи}}",
+    "clashes": "{count, plural, one {# накладка} few {# накладки} many {# накладок} other {# накладки}}",
+    "conflictsAria": "Накладки в розкладі",
+    "gridAria": "Розклад на тиждень",
+    "blockAria": "{group} · {time}",
+    "conflictBlockAria": "Накладка за часом: {group} ({time})",
+    "subSuffix": "заміна",
+    "errorTitle": "Не вдалося завантажити розклад",
+    "weekdayShort": {
+      "mon": "пн",
+      "tue": "вт",
+      "wed": "ср",
+      "thu": "чт",
+      "fri": "пт",
+      "sat": "сб",
+      "sun": "нд"
+    }
   },
   "mySchedule": {
     "title": "Мій розклад",
