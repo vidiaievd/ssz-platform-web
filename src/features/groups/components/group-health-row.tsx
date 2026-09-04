@@ -151,7 +151,15 @@ export async function GroupHealthRow({ group, href, schoolId, schoolSlug }: Prop
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
           )}
         />
-        <div className="relative min-w-0 flex items-center gap-3">
+        {/*
+          Deliberately not `relative`: a positioned element here would create
+          its own stacking order and, being later in the DOM than the link
+          above, would paint over it — capturing clicks and re-enabling text
+          selection instead of letting them reach the stretched link. Static
+          content has no such priority, so the invisible link on top still
+          gets the click; only GroupRowMenu below needs to win that fight.
+        */}
+        <div className="min-w-0 flex items-center gap-3">
           <LangTile lang={group.lang} label={t('row.langLabel', { lang: group.lang })} />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-(--ssz-text-primary) truncate">
