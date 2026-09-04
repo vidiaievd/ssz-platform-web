@@ -339,16 +339,29 @@ export async function getGroup(
     slots,
   };
 
-  const rosterStudents: RosterStudent[] = (roster ?? []).map((m) => ({
-    userId: m.userId,
-    name: m.name ?? '',
-    email: m.email ?? '',
-    avatarUrl: m.avatarUrl ?? null,
-    level: 'A1' as RosterStudent['level'],
-    status: 'active' as RosterStudent['status'],
-    progress: 0,
-    hasClash: false,
-  }));
+  // Level, progress and status come from the school's own student list — the same
+  // source the students screen reads, so a learner cannot be "at risk" on one screen
+  // and "active" on the other. A school whose list cannot be read degrades to the
+  // roster's own facts rather than failing the page.
+  const enrichment = await getRosterEnrichment(schoolId);
+
+  const rosterStudents: RosterStudent[] = (roster ?? []).map((m) => {
+    const extra = enrichment.get(m.userId);
+    return {
+      userId: m.userId,
+      name: m.name ?? '',
+      email: m.email ?? '',
+      avatarUrl: m.avatarUrl ?? null,
+      level: extra?.level ?? ((rawGroup.level ?? 'A1') as RosterStudent['level']),
+      status: extra?.status ?? ('active' as RosterStudent['status']),
+      progress: extra?.progress ?? 0,
+      // Left false deliberately. scheduling-service's clash endpoint says so itself:
+      // it does not track per-student group membership and returns every overlapping
+      // pair in the school, so asking it here would mark the whole roster as clashing
+      // the moment any two groups overlap. A wrong badge is worse than a missing one.
+      hasClash: false,
+    };
+  });
 
   return { ...group, roster: rosterStudents, alerts };
 }
@@ -760,6 +773,75 @@ export async function getStudentCandidates(
     capacity: groupData.capacity,
     candidates,
   };
+}
+
+// ── Roster enrichment ─────────────────────────────────────────────────────────
+
+type RosterExtra = {
+  level: RosterStudent['level'];
+  progress: number;
+  status: RosterStudent['status'];
+};
+
+/**
+ * Level, progress and derived status per student of a school, keyed by user id.
+ *
+ * One request for the whole school rather than one per roster row: a group of twenty
+ * would otherwise open twenty connections to say what a single list already knows.
+ */
+async function getRosterEnrichment(schoolId: string): Promise<Map<string, RosterExtra>> {
+  const empty = new Map<string, RosterExtra>();
+
+  try {
+    const raw = await serverFetch<
+      | {
+          items?: Array<{
+            userId: string;
+            level?: string;
+            progress?: number;
+            lastSeen?: string | null;
+            enrolledAt?: string;
+            groups?: Array<unknown>;
+          }>;
+        }
+      | Array<{
+          userId: string;
+          level?: string;
+          progress?: number;
+          lastSeen?: string | null;
+          enrolledAt?: string;
+          groups?: Array<unknown>;
+        }>
+    >({ service: 'organization', path: `/schools/${schoolId}/students` });
+
+    const items = Array.isArray(raw) ? raw : (raw.items ?? []);
+    const { deriveStatus } = await import('@/lib/students/status');
+
+    for (const item of items) {
+      // organization-service reports progress as a 0..1 ratio, which is also what the
+      // status rules read. The roster renders a percentage, so the conversion happens
+      // once, here, rather than in the component that draws the bar.
+      const progress = item.progress ?? 0;
+      const enrolledAt = item.enrolledAt ?? new Date().toISOString().slice(0, 10);
+      empty.set(item.userId, {
+        level: (item.level ?? 'A1') as RosterStudent['level'],
+        progress: Math.round(Math.max(0, Math.min(1, progress)) * 100),
+        status: deriveStatus({
+          // The roster row is inside this group by definition, so an empty group list
+          // here would only ever produce a false "unassigned".
+          groups: [{ id: 'this-group' }] as never,
+          clashes: [],
+          progress,
+          lastSeen: item.lastSeen ?? null,
+          enrolledAt,
+        }) as RosterStudent['status'],
+      });
+    }
+  } catch {
+    // Students list unavailable — the roster still renders from what the group knows.
+  }
+
+  return empty;
 }
 
 // ── Materials ─────────────────────────────────────────────────────────────────
