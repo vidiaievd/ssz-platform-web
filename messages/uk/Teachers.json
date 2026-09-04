@@ -182,7 +182,9 @@
     "deliver": "Позначити виконаним",
     "override": "Замінити",
     "overrideReason": "Причина заміни",
-    "lessonMapper": "Прив'язка модуль–урок"
+    "lessonMapper": "Прив'язка модуль–урок",
+    "sessions": "{delivered}/{planned} занять",
+    "deliveredNote": "Рахується за заняттями, позначеними проведеними в розкладі групи."
   },
   "forecast": {
     "title": "Прогноз і ємність",

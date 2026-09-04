@@ -177,7 +177,7 @@ describe('realProvider curriculum', () => {
     });
   });
 
-  it('PUTs the full plan with units sorted by order', async () => {
+  it('PUTs the plan with unit ids, sorted by order and without the derived count', async () => {
     respondByPath({ '/scheduling/groups/g1/curriculum': { id: 'p1' } });
 
     await realProvider.putCurriculum('g1', {
@@ -198,8 +198,8 @@ describe('realProvider curriculum', () => {
       body: {
         targetWeeklyHours: 4,
         units: [
-          { title: 'A', plannedSessions: 3, deliveredSessions: 1, requiredLevel: 'A2', status: 'active' },
-          { title: 'B', plannedSessions: 2, deliveredSessions: 0, requiredLevel: 'A1', status: 'planned' },
+          { id: 'u1', title: 'A', plannedSessions: 3, requiredLevel: 'A2', status: 'active' },
+          { id: 'u2', title: 'B', plannedSessions: 2, requiredLevel: 'A1', status: 'planned' },
         ],
       },
     });

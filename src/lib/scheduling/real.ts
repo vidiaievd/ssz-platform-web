@@ -394,7 +394,9 @@ export const realProvider: SchedulingProvider = {
   },
 
   async putCurriculum(groupId: string, plan: CurriculumPlan) {
-    // The upsert endpoint replaces the full unit list; order = array order.
+    // Order is the array order. Unit ids travel with the payload so the service
+    // updates units in place: a recreated unit loses the lessons taught against
+    // it, and with them the group's progress.
     await serverFetch({
       service: 'scheduling',
       path: `/scheduling/groups/${groupId}/curriculum`,
@@ -404,9 +406,9 @@ export const realProvider: SchedulingProvider = {
         units: [...plan.units]
           .sort((a, b) => a.order - b.order)
           .map((u) => ({
+            id: u.unitId,
             title: u.title,
             plannedSessions: u.plannedSessions,
-            deliveredSessions: u.deliveredSessions,
             requiredLevel: u.requiredLevel,
             status: u.status,
           })),
