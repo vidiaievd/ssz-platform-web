@@ -59,6 +59,7 @@ function renderCards(overrides: Partial<{
       alerts={overrides.alerts ?? []}
       courseView={courseView}
       canManage={overrides.canManage ?? true}
+      schoolId="11111111-1111-4111-8111-111111111111"
       schoolSlug="my-school"
     />,
   );

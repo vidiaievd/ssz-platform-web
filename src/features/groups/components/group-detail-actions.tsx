@@ -20,20 +20,19 @@ import type { Group } from '../types';
 
 type Props = {
   group: Group;
+  schoolId: string;
   schoolSlug: string;
 };
 
 type Dialog = 'archive' | 'delete' | null;
 
-export function GroupDetailActions({ group, schoolSlug }: Props) {
+export function GroupDetailActions({ group, schoolId, schoolSlug }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [editOpen, setEditOpen] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
 
-  // schoolSlug is used as schoolId here; the BFF resolves slug→id.
-  const schoolId = schoolSlug;
   const listHref = `/school/${schoolSlug}/groups`;
 
   const canDelete =

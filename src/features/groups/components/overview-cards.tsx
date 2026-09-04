@@ -61,6 +61,7 @@ type Props = {
   alerts: Alert[];
   courseView: CourseView;
   canManage: boolean;
+  schoolId: string;
   schoolSlug: string;
 };
 
@@ -71,6 +72,7 @@ export function OverviewCards({
   alerts,
   courseView,
   canManage,
+  schoolId,
   schoolSlug,
 }: Props) {
   const t = useTranslations('Groups');
@@ -181,7 +183,7 @@ export function OverviewCards({
           {primary ? (
             <TeacherRow
               teacher={primary}
-              schoolId={schoolSlug}
+              schoolId={schoolId}
               groupId={group.id}
               canRemove={false}
             />
@@ -245,7 +247,7 @@ export function OverviewCards({
       {canManage && (
         <CourseManageDialog
           group={group}
-          schoolId={schoolSlug}
+          schoolId={schoolId}
           open={courseDialogOpen}
           onOpenChange={setCourseDialogOpen}
         />

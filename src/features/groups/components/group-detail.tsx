@@ -16,6 +16,8 @@ type Props = {
   alerts: Alert[];
   lessons: Lesson[];
   courseView: CourseView;
+  /** Real school id (UUID) — mutations take this; schoolSlug is for hrefs only. */
+  schoolId: string;
   schoolSlug: string;
   canManage: boolean;
 };
@@ -26,6 +28,7 @@ export async function GroupDetail({
   alerts,
   lessons,
   courseView,
+  schoolId,
   schoolSlug,
   canManage,
 }: Props) {
@@ -47,6 +50,7 @@ export async function GroupDetail({
         group={group}
         alerts={alerts}
         courseView={courseView}
+        schoolId={schoolId}
         schoolSlug={schoolSlug}
         canManage={canManage}
       />
@@ -66,6 +70,7 @@ export async function GroupDetail({
         lessons={lessons}
         alerts={alerts}
         courseView={courseView}
+        schoolId={schoolId}
         schoolSlug={schoolSlug}
         canManage={canManage}
       />

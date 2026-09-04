@@ -23,11 +23,22 @@ type Props = {
   lessons: Lesson[];
   alerts: Alert[];
   courseView: CourseView;
+  /** Real school id (UUID) — every mutation below takes this. */
+  schoolId: string;
   schoolSlug: string;
   canManage: boolean;
 };
 
-export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSlug, canManage }: Props) {
+export function GroupTabs({
+  group,
+  roster,
+  lessons,
+  alerts,
+  courseView,
+  schoolId,
+  schoolSlug,
+  canManage,
+}: Props) {
   const t = useTranslations('Groups');
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -50,14 +61,6 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
   const detailBase = `/school/${schoolSlug}/groups/${group.id}`;
   const assignTeacherHref = `${detailBase}/assign-teacher`;
   const addStudentsHref   = `${detailBase}/add-students`;
-
-  // Resolve the schoolId from the group — we need it for remove actions.
-  // schoolId is not directly on the Group type, but we can derive it from the
-  // BFF queries. For now we pass it via schoolSlug and rely on the server action
-  // to accept the slug-or-id. Phase 5 will thread schoolId properly from page.tsx.
-  // As a workaround, the removal server actions accept schoolId — we'll pass
-  // schoolSlug as the identifier (server resolves slug → id).
-  const schoolId = schoolSlug; // resolved by the BFF
 
   const tabLabel: Record<TabKey, string> = {
     overview: t('tabs.overview'),
@@ -100,6 +103,7 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
             alerts={alerts}
             courseView={courseView}
             canManage={canManage}
+            schoolId={schoolId}
             schoolSlug={schoolSlug}
           />
         </div>

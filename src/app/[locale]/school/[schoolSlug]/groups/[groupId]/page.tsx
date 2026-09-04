@@ -40,6 +40,7 @@ export default async function GroupDetailPage({ params }: Props) {
     <main className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
       <GroupDetail
         group={group}
+        schoolId={school.id}
         roster={roster}
         alerts={alerts}
         lessons={lessons}
