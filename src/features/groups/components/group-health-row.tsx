@@ -46,7 +46,7 @@ export function TeacherStack({
     return (
       <span
         className={cn(
-          'inline-flex items-center rounded-full px-2.5 py-1',
+          'inline-flex items-center rounded-full px-[7px] py-[2px]',
           'text-[10.5px] font-bold whitespace-nowrap',
           'bg-error-100 text-error-700 dark:bg-error-900/40 dark:text-error-400',
         )}
