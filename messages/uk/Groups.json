@@ -70,7 +70,8 @@
     "students": "Учні",
     "teachers": "Учителі",
     "schedule": "Розклад",
-    "sectionLabel": "Розділ"
+    "sectionLabel": "Розділ",
+    "materials": "Матеріали"
   },
   "overview": {
     "teachersHeading": "Учителі",
@@ -405,5 +406,21 @@
     "updateError": "Не вдалося оновити курс",
     "materialsCount": "+{count} додатковий матеріал",
     "materialsCountPlural": "+{count} додаткових матеріалів"
+  },
+  "materials": {
+    "noCourse": "До групи поки не прив’язано курс.",
+    "attachCourse": "Прив’язати курс",
+    "counts": "{units, plural, one {# юніт} few {# юніти} many {# юнітів} other {# юніта}} · {lessons, plural, one {# урок} few {# уроки} many {# уроків} other {# уроку}}",
+    "published": "Опубліковано — учні бачать цю версію",
+    "notPublished": "Ще не опубліковано",
+    "notPublishedBody": "У курсу немає опублікованої версії, тому учні його поки не бачать.",
+    "openCourse": "Відкрити курс",
+    "change": "Змінити",
+    "planProgress": "План видано",
+    "curriculumHeading": "Зміст курсу",
+    "lessonCount": "{count, plural, one {# урок} few {# уроки} many {# уроків} other {# уроку}}",
+    "minutes": "{count} хв",
+    "emptyCourse": "У цьому курсі поки немає юнітів.",
+    "structureUnavailable": "Не вдалося прочитати структуру курсу. Картка вище досі показує, до чого прив’язана група."
   }
 }

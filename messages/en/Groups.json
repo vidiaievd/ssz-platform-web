@@ -70,7 +70,8 @@
     "students": "Students",
     "teachers": "Teachers",
     "schedule": "Schedule",
-    "sectionLabel": "Section"
+    "sectionLabel": "Section",
+    "materials": "Materials"
   },
   "overview": {
     "teachersHeading": "Teachers",
@@ -405,5 +406,21 @@
     "updateError": "Failed to update course",
     "materialsCount": "+{count} additional material",
     "materialsCountPlural": "+{count} additional materials"
+  },
+  "materials": {
+    "noCourse": "No course linked to this group yet.",
+    "attachCourse": "Attach a course",
+    "counts": "{units, plural, one {# unit} other {# units}} · {lessons, plural, one {# lesson} other {# lessons}}",
+    "published": "Published — students see this version",
+    "notPublished": "Not published yet",
+    "notPublishedBody": "The course has no published version, so students see nothing of it yet.",
+    "openCourse": "Open course",
+    "change": "Change",
+    "planProgress": "Plan delivered",
+    "curriculumHeading": "Curriculum",
+    "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
+    "minutes": "{count} min",
+    "emptyCourse": "This course has no units yet.",
+    "structureUnavailable": "Could not read the course structure. The card above still shows what the group is linked to."
   }
 }

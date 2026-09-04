@@ -70,7 +70,8 @@
     "students": "Ученики",
     "teachers": "Учителя",
     "schedule": "Расписание",
-    "sectionLabel": "Раздел"
+    "sectionLabel": "Раздел",
+    "materials": "Материалы"
   },
   "overview": {
     "teachersHeading": "Учителя",
@@ -405,5 +406,21 @@
     "updateError": "Не удалось обновить курс",
     "materialsCount": "+{count} дополнительный материал",
     "materialsCountPlural": "+{count} дополнительных материалов"
+  },
+  "materials": {
+    "noCourse": "К группе пока не привязан курс.",
+    "attachCourse": "Привязать курс",
+    "counts": "{units, plural, one {# юнит} few {# юнита} many {# юнитов} other {# юнита}} · {lessons, plural, one {# урок} few {# урока} many {# уроков} other {# урока}}",
+    "published": "Опубликован — ученики видят эту версию",
+    "notPublished": "Ещё не опубликован",
+    "notPublishedBody": "У курса нет опубликованной версии, поэтому ученики его пока не видят.",
+    "openCourse": "Открыть курс",
+    "change": "Изменить",
+    "planProgress": "План выдан",
+    "curriculumHeading": "Содержание курса",
+    "lessonCount": "{count, plural, one {# урок} few {# урока} many {# уроков} other {# урока}}",
+    "minutes": "{count} мин",
+    "emptyCourse": "В этом курсе пока нет юнитов.",
+    "structureUnavailable": "Не удалось прочитать структуру курса. Карточка выше по-прежнему показывает, к чему привязана группа."
   }
 }

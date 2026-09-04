@@ -18,6 +18,7 @@ import type {
   TeacherAvailabilityStatus,
 } from '@/features/groups/types';
 import type { Alert } from '@/features/dashboard/types';
+import type { CurriculumTree, ContainerPublishState } from '@/features/content/types';
 import type { AlertType, AlertSeverity } from '@/lib/groups/operations';
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -759,4 +760,108 @@ export async function getStudentCandidates(
     capacity: groupData.capacity,
     candidates,
   };
+}
+
+// ── Materials ─────────────────────────────────────────────────────────────────
+
+/** One unit of the linked course, as the Materials tab shows it. */
+export interface MaterialsUnit {
+  id: string;
+  title: string;
+  lessons: Array<{
+    id: string;
+    title: string;
+    kind: string;
+    durationMinutes: number | null;
+  }>;
+}
+
+export interface GroupMaterialsView {
+  course: {
+    id: string;
+    title: string;
+    publishState: ContainerPublishState | null;
+    /** Null when the course has never been published — students see nothing yet. */
+    versionId: string | null;
+  } | null;
+  units: MaterialsUnit[];
+  lessonCount: number;
+  /** True when the course exists but its structure could not be read. */
+  structureUnavailable: boolean;
+}
+
+const EMPTY_MATERIALS: GroupMaterialsView = {
+  course: null,
+  units: [],
+  lessonCount: 0,
+  structureUnavailable: false,
+};
+
+/**
+ * The linked course as students of this group get it: the **published** version,
+ * not the draft the author is editing. A course with no published version has no
+ * structure to show, and says so rather than showing the draft.
+ */
+export async function getGroupMaterials(group: Group): Promise<GroupMaterialsView> {
+  if (!group.courseId) return EMPTY_MATERIALS;
+
+  try {
+    const container = await serverFetch<{
+      id: string;
+      title: string;
+      publishState?: ContainerPublishState;
+      currentPublishedVersionId?: string | null;
+    }>({ service: 'content', path: `/containers/${group.courseId}` });
+
+    const versionId = container.currentPublishedVersionId ?? null;
+    const course = {
+      id: container.id,
+      title: container.title ?? group.courseName ?? '',
+      publishState: container.publishState ?? null,
+      versionId,
+    };
+    if (!versionId) return { ...EMPTY_MATERIALS, course };
+
+    const tree = await serverFetch<CurriculumTree>({
+      service: 'content',
+      path: `/containers/${group.courseId}/versions/${versionId}/tree`,
+    });
+
+    // A course keeps its units as modules under each level; a level exists even
+    // when the course has no level system, so both are flattened in order.
+    const units: MaterialsUnit[] = tree.levels.flatMap((level) =>
+      level.modules.map((module) => ({
+        id: module.id,
+        title: module.title ?? module.titleEn ?? '',
+        lessons: [
+          ...module.sections.flatMap((section) => section.items),
+          ...module.ungroupedItems,
+        ]
+          .sort((a, b) => a.position - b.position)
+          .map((item) => ({
+            id: item.id,
+            title: item.title ?? '',
+            kind: item.lessonKind ?? item.itemType,
+            durationMinutes: item.durationMinutes,
+          })),
+      })),
+    );
+
+    return {
+      course,
+      units,
+      lessonCount: units.reduce((sum, u) => sum + u.lessons.length, 0),
+      structureUnavailable: false,
+    };
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'not_found') return EMPTY_MATERIALS;
+    // The tab degrades to "structure unavailable" rather than taking the page down.
+    return {
+      ...EMPTY_MATERIALS,
+      course: group.courseId
+        ? { id: group.courseId, title: group.courseName ?? '', publishState: null, versionId: null }
+        : null,
+      structureUnavailable: true,
+    };
+  }
 }

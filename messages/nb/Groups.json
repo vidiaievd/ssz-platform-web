@@ -70,7 +70,8 @@
     "students": "Elever",
     "teachers": "Lærere",
     "schedule": "Timeplan",
-    "sectionLabel": "Avsnitt"
+    "sectionLabel": "Avsnitt",
+    "materials": "Materiell"
   },
   "overview": {
     "teachersHeading": "Lærere",
@@ -405,5 +406,21 @@
     "updateError": "Kunne ikke oppdatere kurs",
     "materialsCount": "+{count} tilleggsmateriell",
     "materialsCountPlural": "+{count} tilleggsmateriell"
+  },
+  "materials": {
+    "noCourse": "Ingen kurs er knyttet til denne gruppen ennå.",
+    "attachCourse": "Knytt et kurs",
+    "counts": "{units, plural, one {# enhet} other {# enheter}} · {lessons, plural, one {# leksjon} other {# leksjoner}}",
+    "published": "Publisert — elevene ser denne versjonen",
+    "notPublished": "Ikke publisert ennå",
+    "notPublishedBody": "Kurset har ingen publisert versjon, så elevene ser ingenting av det ennå.",
+    "openCourse": "Åpne kurset",
+    "change": "Endre",
+    "planProgress": "Plan gjennomført",
+    "curriculumHeading": "Læreplan",
+    "lessonCount": "{count, plural, one {# leksjon} other {# leksjoner}}",
+    "minutes": "{count} min",
+    "emptyCourse": "Dette kurset har ingen enheter ennå.",
+    "structureUnavailable": "Kunne ikke lese kursstrukturen. Kortet over viser fortsatt hva gruppen er knyttet til."
   }
 }

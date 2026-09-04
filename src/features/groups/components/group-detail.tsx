@@ -5,8 +5,10 @@ import { getTranslations } from "next-intl/server";
 import { GroupDetailHeader } from "./group-detail-header";
 import { GroupResolveBanner } from "./group-resolve-banner";
 import { GroupTabs } from "./group-tabs";
+import { GroupMaterialsTab } from "./group-materials-tab";
 import type { Group, RosterStudent, Lesson, CourseView } from "../types";
 import type { CurriculumUnit } from "@/features/teachers/types";
+import type { GroupMaterialsView } from "../api/queries";
 import type { Alert } from "@/features/dashboard/types";
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -20,6 +22,9 @@ type Props = {
   recentLessons: Lesson[];
   /** Units of the group's teaching plan; empty when no plan exists yet. */
   planUnits: CurriculumUnit[];
+  materials: GroupMaterialsView;
+  /** Share of the teaching plan delivered — the group's progress, not a student's. */
+  planProgressPct: number;
   courseView: CourseView;
   /** Real school id (UUID) — mutations take this; schoolSlug is for hrefs only. */
   schoolId: string;
@@ -34,6 +39,8 @@ export async function GroupDetail({
   lessons,
   recentLessons,
   planUnits,
+  materials,
+  planProgressPct,
   courseView,
   schoolId,
   schoolSlug,
@@ -77,6 +84,16 @@ export async function GroupDetail({
         lessons={lessons}
         recentLessons={recentLessons}
         planUnits={planUnits}
+        materialsSlot={
+          <GroupMaterialsTab
+            group={group}
+            materials={materials}
+            progressPct={planProgressPct}
+            schoolId={schoolId}
+            schoolSlug={schoolSlug}
+            canManage={canManage}
+          />
+        }
         alerts={alerts}
         courseView={courseView}
         schoolId={schoolId}

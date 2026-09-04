@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -16,7 +16,7 @@ import type { Group, RosterStudent, Lesson, CourseView } from '../types';
 import type { CurriculumUnit } from '@/features/teachers/types';
 import type { Alert } from '@/features/dashboard/types';
 
-type TabKey = 'overview' | 'students' | 'teachers' | 'schedule';
+type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule';
 
 type Props = {
   group: Group;
@@ -24,6 +24,8 @@ type Props = {
   lessons: Lesson[];
   recentLessons: Lesson[];
   planUnits: CurriculumUnit[];
+  /** Materials tab, rendered on the server — it reads the course structure. */
+  materialsSlot: ReactNode;
   alerts: Alert[];
   courseView: CourseView;
   /** Real school id (UUID) — every mutation below takes this. */
@@ -38,6 +40,7 @@ export function GroupTabs({
   lessons,
   recentLessons,
   planUnits,
+  materialsSlot,
   alerts,
   courseView,
   schoolId,
@@ -71,6 +74,7 @@ export function GroupTabs({
     overview: t('tabs.overview'),
     students: roster.length > 0 ? `${t('tabs.students')} ${roster.length}` : t('tabs.students'),
     teachers: t('tabs.teachers'),
+    materials: t('tabs.materials'),
     schedule: t('tabs.schedule'),
   };
 
@@ -86,6 +90,7 @@ export function GroupTabs({
           <SelectItem value="overview">{tabLabel.overview}</SelectItem>
           <SelectItem value="students">{tabLabel.students}</SelectItem>
           <SelectItem value="teachers">{tabLabel.teachers}</SelectItem>
+          <SelectItem value="materials">{tabLabel.materials}</SelectItem>
           <SelectItem value="schedule">{tabLabel.schedule}</SelectItem>
         </SelectContent>
       </Select>
@@ -94,6 +99,7 @@ export function GroupTabs({
         <TabsTrigger value="overview">{tabLabel.overview}</TabsTrigger>
         <TabsTrigger value="students">{tabLabel.students}</TabsTrigger>
         <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
+        <TabsTrigger value="materials">{tabLabel.materials}</TabsTrigger>
         <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>
       </TabsList>
 
@@ -133,6 +139,9 @@ export function GroupTabs({
           assignTeacherHref={assignTeacherHref}
         />
       </TabsContent>
+
+      {/* ── Materials ─────────────────────────────────────────────────────── */}
+      <TabsContent value="materials">{materialsSlot}</TabsContent>
 
       {/* ── Schedule ──────────────────────────────────────────────────────── */}
       <TabsContent value="schedule">
