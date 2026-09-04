@@ -106,6 +106,8 @@ import {
   type AudioDraft,
 } from '@/lib/shared-kernel/audio';
 
+import { AuthoringContainerProvider } from './authoring-container-context';
+
 import type { MultipleChoiceDocument } from './multiple-choice/edits';
 import type { SavedDocument as SavedMultipleChoice } from './multiple-choice/use-multiple-choice-autosave';
 import { MultipleChoiceGroupBuilder } from './multiple-choice-group/builder';
@@ -238,272 +240,280 @@ export function ExerciseEditorPane({
     isMultipleChoiceGroupDocument(exercise.content);
 
   return (
-    <LessonEditorShell
-      kind={kind}
-      title={lessonTitle || t('lessons.untitled')}
-      state={state}
-      isLive={isLive}
-      // An exercise document waits in its draft whatever its placement says.
-      savesHeldForPublish
-      saveStatus="idle"
-      savedAt={null}
-      publishSlot={
-        <>
-          {/*
+    /*
+      Which course this builder is editing in, said once for every builder under it. The
+      audio layer's `lesson` source reads it to offer the lessons of this course
+      (plan 56 §3.8); nothing else needs it yet, and nothing had to be threaded for it.
+    */
+    <AuthoringContainerProvider containerId={container.id}>
+      <LessonEditorShell
+        kind={kind}
+        title={lessonTitle || t('lessons.untitled')}
+        state={state}
+        isLive={isLive}
+        // An exercise document waits in its draft whatever its placement says.
+        savesHeldForPublish
+        saveStatus="idle"
+        savedAt={null}
+        publishSlot={
+          <>
+            {/*
             Only for the templates whose attempts can reach a queue. Closed-form exercises
             are scored the moment they are handed in, so a link to their marking queue
             would lead to a page that is empty by construction.
           */}
-          {reviewHref !== undefined &&
-            (isTranslate || isErrorCorrection || isWritingTask || isShortAnswer) && (
-              <Button asChild variant="outline" size="sm">
-                <Link href={reviewHref}>{t('review.openQueue')}</Link>
-              </Button>
-            )}
-          {publishSlot}
-        </>
-      }
-      preview={
-        isGapFill && gapFill !== null ? (
-          <GapFillPreview exercise={gapFill.exercise} instructions={gapFill.instructions} />
-        ) : isErrorCorrection && errorCorrection !== null ? (
-          <ErrorCorrectionPreview exercise={errorCorrection} />
-        ) : isTranslate && translate !== null ? (
-          <TranslatePreview exercise={translate} />
-        ) : isMatchPairs && matchPairs !== null ? (
-          <MatchPairsPreview
-            exercise={matchPairs.exercise}
-            instructions={matchPairs.instructions}
+            {reviewHref !== undefined &&
+              (isTranslate || isErrorCorrection || isWritingTask || isShortAnswer) && (
+                <Button asChild variant="outline" size="sm">
+                  <Link href={reviewHref}>{t('review.openQueue')}</Link>
+                </Button>
+              )}
+            {publishSlot}
+          </>
+        }
+        preview={
+          isGapFill && gapFill !== null ? (
+            <GapFillPreview exercise={gapFill.exercise} instructions={gapFill.instructions} />
+          ) : isErrorCorrection && errorCorrection !== null ? (
+            <ErrorCorrectionPreview exercise={errorCorrection} />
+          ) : isTranslate && translate !== null ? (
+            <TranslatePreview exercise={translate} />
+          ) : isMatchPairs && matchPairs !== null ? (
+            <MatchPairsPreview
+              exercise={matchPairs.exercise}
+              instructions={matchPairs.instructions}
+            />
+          ) : isWritingTask && writingTask !== null ? (
+            <WritingTaskPreview exercise={writingTask} />
+          ) : isShortAnswer && shortAnswer !== null ? (
+            <ShortAnswerPreview exercise={shortAnswer} />
+          ) : isSentenceSchema && sentenceSchema !== null ? (
+            <SentenceSchemaPreview exercise={sentenceSchema} />
+          ) : isMultipleChoice && multipleChoice !== null ? (
+            <MultipleChoicePreview exercise={multipleChoice} />
+          ) : isMultipleChoiceGroup && multipleChoiceGroup !== null ? (
+            <MultipleChoiceGroupPreview exercise={multipleChoiceGroup} />
+          ) : (
+            <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
+          )
+        }
+      >
+        {isLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-40 w-full rounded-2xl" />
+          </div>
+        ) : isGapFill ? (
+          // Gap-fill has its own three-step builder rather than a slice of the generic
+          // exercise form: its answers live inside the sentences, so authoring them means
+          // editing the document the kernel defines, not a set of fields.
+          <GapFillBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={gapFillDocumentFrom(exercise, container.id)}
+            initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
+            initialHint={firstInstruction(exercise)?.hintText ?? ''}
+            // Read off the raw column: the audio block belongs to no template, so
+            // `fromPersisted` neither knows nor carries it (plan 56 phase 5).
+            initialAudio={readAudioDraft(exercise.content, TEMPLATE_CODE)}
+            onDocumentChange={(document, instructions) =>
+              setGapFill({ exercise: document, instructions })
+            }
+            onSavedRemote={(updatedAt, saved) =>
+              // The cached exercise is what the builder mounts from next time. Left as it
+              // was fetched, that mount opens on a superseded version, and its first save
+              // is refused as somebody else's edit — with no one else in the building.
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedGapFill(cached, updatedAt, saved) : cached),
+              )
+            }
           />
-        ) : isWritingTask && writingTask !== null ? (
-          <WritingTaskPreview exercise={writingTask} />
-        ) : isShortAnswer && shortAnswer !== null ? (
-          <ShortAnswerPreview exercise={shortAnswer} />
-        ) : isSentenceSchema && sentenceSchema !== null ? (
-          <SentenceSchemaPreview exercise={sentenceSchema} />
-        ) : isMultipleChoice && multipleChoice !== null ? (
-          <MultipleChoicePreview exercise={multipleChoice} />
-        ) : isMultipleChoiceGroup && multipleChoiceGroup !== null ? (
-          <MultipleChoiceGroupPreview exercise={multipleChoiceGroup} />
+        ) : isTranslate && exercise !== undefined ? (
+          // Translate owns a document for the plainest reason of the three: the accepted
+          // translations *are* the answer, and authoring them is writing a set of sentences
+          // with a key each, not filling in a form field.
+          <TranslateBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={translateDocumentFrom(exercise, container.id)}
+            initialAudio={translateAudioFrom(exercise)}
+            grammarRules={grammarRules}
+            onDocumentChange={setTranslate}
+            onSavedRemote={(updatedAt, saved, audio) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) =>
+                  cached ? applySavedTranslate(cached, updatedAt, saved, audio) : cached,
+              )
+            }
+          />
+        ) : isErrorCorrection ? (
+          // Error correction owns a document too, and for a sharper reason than gap-fill:
+          // the mistakes are never written down, they are the difference between the two
+          // sentences the author types. There is no set of form fields that could hold that.
+          <ErrorCorrectionBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={errorCorrectionDocumentFrom(exercise, container.id)}
+            initialAudio={readAudioDraft(exercise.content, exercise.templateCode)}
+            onDocumentChange={setErrorCorrection}
+            onSavedRemote={(updatedAt, saved, audio) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) =>
+                  cached ? applySavedErrorCorrection(cached, updatedAt, saved, audio) : cached,
+              )
+            }
+          />
+        ) : isMatchPairs && exercise !== undefined ? (
+          // Match pairs owns a document for the sharpest reason of the four: the pairing
+          // *is* the content — a pair's right half is the answer to its left — so there is
+          // no set of form fields that could hold it without writing the answer twice.
+          <MatchPairsBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={matchPairsDocumentFrom(exercise, container.id)}
+            initialAudio={readAudioDraft(exercise.content, MATCH_PAIRS_TEMPLATE_CODE)}
+            initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
+            // An absent `variant` parses as `pairs`, which carries the weaker publication
+            // rule. Only the raw column can still say whether anyone chose it.
+            initialVariantChosen={hasExplicitVariant(exercise.content)}
+            onDocumentChange={(document, instructions) =>
+              setMatchPairs({ exercise: document, instructions })
+            }
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedMatchPairs(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isWritingTask && exercise !== undefined ? (
+          // A writing task owns a document because there is no answer to hold: the exercise
+          // *is* the task, the rubric a person marks against, and the settings that decide
+          // what the student may see while writing. The generic form has a prompt field and
+          // a word count, which is the shape this template left behind in plan 50.
+          <WritingTaskBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={writingTaskDocumentFrom(exercise, container.id)}
+            initialAudio={readAudioDraft(exercise.content, WRITING_TASK_TEMPLATE_CODE)}
+            onDocumentChange={setWritingTask}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedWritingTask(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isShortAnswer && exercise != null ? (
+          // Short answer owns a document because its key is not a list of accepted strings
+          // but a set of semantic elements, each carrying the phrasings a student might use
+          // — and those phrasings are the answer, written in the words the student is being
+          // asked to find. The generic form has one question field and a comma-separated
+          // list of accepted answers, which is the shape this template left behind in the
+          // plan; documents still in that shape never reach here.
+          <ShortAnswerBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={shortAnswerDocumentFrom(exercise)}
+            onDocumentChange={setShortAnswer}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedShortAnswer(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isSentenceSchema && exercise != null ? (
+          // Sentence schema owns a document because the answer is not written anywhere: it
+          // *is* where each chunk sits on the board, and that same placement is the word
+          // bank the student is handed. The generic form had a list of fields and a list of
+          // tokens, which is the shape this template left behind in plan 52.
+          <SentenceSchemaBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            targetLanguage={container.targetLanguage}
+            initialExercise={sentenceSchemaDocumentFrom(exercise)}
+            onDocumentChange={setSentenceSchema}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedSentenceSchema(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isMultipleChoice && exercise != null ? (
+          // Multiple choice owns a document because the answer is not a field of it: which
+          // option is right lives only in the key column, and every wrong option carries its
+          // own rebuttal beside the rule behind the right one. The generic form had a
+          // question, a flat option list and a single explanation — the shape this template
+          // left behind in plan 53, and the shape the other 121 documents are still in.
+          <MultipleChoiceBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            targetLanguage={container.targetLanguage}
+            initialExercise={multipleChoiceDocumentFrom(exercise)}
+            onDocumentChange={setMultipleChoice}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedMultipleChoice(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isMultipleChoiceGroup && exercise != null ? (
+          // A statement table owns a document because its key is not a field of any row:
+          // which column a statement belongs in is one id in the key column, shared with
+          // nine other statements over one set of columns, and the line that settles it is
+          // a quote from the passage beside it. The generic form had a context, a flat
+          // option list and a set of questions free to carry their own options — the shape
+          // this template left behind in plan 54, and the shape two documents are still in.
+          <MultipleChoiceGroupBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            targetLanguage={container.targetLanguage}
+            initialExercise={multipleChoiceGroupDocumentFrom(exercise)}
+            onDocumentChange={setMultipleChoiceGroup}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) =>
+                  cached ? applySavedMultipleChoiceGroup(cached, updatedAt, saved) : cached,
+              )
+            }
+          />
         ) : (
-          <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
-        )
-      }
-    >
-      {isLoading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-40 w-full rounded-2xl" />
-        </div>
-      ) : isGapFill ? (
-        // Gap-fill has its own three-step builder rather than a slice of the generic
-        // exercise form: its answers live inside the sentences, so authoring them means
-        // editing the document the kernel defines, not a set of fields.
-        <GapFillBuilder
-          key={exerciseId}
-          exerciseId={exerciseId}
-          containerId={container.id}
-          initialExercise={gapFillDocumentFrom(exercise, container.id)}
-          initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
-          initialHint={firstInstruction(exercise)?.hintText ?? ''}
-          // Read off the raw column: the audio block belongs to no template, so
-          // `fromPersisted` neither knows nor carries it (plan 56 phase 5).
-          initialAudio={readAudioDraft(exercise.content, TEMPLATE_CODE)}
-          onDocumentChange={(document, instructions) =>
-            setGapFill({ exercise: document, instructions })
-          }
-          onSavedRemote={(updatedAt, saved) =>
-            // The cached exercise is what the builder mounts from next time. Left as it
-            // was fetched, that mount opens on a superseded version, and its first save
-            // is refused as somebody else's edit — with no one else in the building.
-            queryClient.setQueryData<ExerciseWithAnswers | null>(
-              authoringKeys.exercise(exerciseId),
-              (cached) => (cached ? applySavedGapFill(cached, updatedAt, saved) : cached),
-            )
-          }
-        />
-      ) : isTranslate && exercise !== undefined ? (
-        // Translate owns a document for the plainest reason of the three: the accepted
-        // translations *are* the answer, and authoring them is writing a set of sentences
-        // with a key each, not filling in a form field.
-        <TranslateBuilder
-          key={exerciseId}
-          exerciseId={exerciseId}
-          containerId={container.id}
-          initialExercise={translateDocumentFrom(exercise, container.id)}
-          initialAudio={translateAudioFrom(exercise)}
-          grammarRules={grammarRules}
-          onDocumentChange={setTranslate}
-          onSavedRemote={(updatedAt, saved, audio) =>
-            queryClient.setQueryData<ExerciseWithAnswers | null>(
-              authoringKeys.exercise(exerciseId),
-              (cached) => (cached ? applySavedTranslate(cached, updatedAt, saved, audio) : cached),
-            )
-          }
-        />
-      ) : isErrorCorrection ? (
-        // Error correction owns a document too, and for a sharper reason than gap-fill:
-        // the mistakes are never written down, they are the difference between the two
-        // sentences the author types. There is no set of form fields that could hold that.
-        <ErrorCorrectionBuilder
-          key={exerciseId}
-          exerciseId={exerciseId}
-          containerId={container.id}
-          initialExercise={errorCorrectionDocumentFrom(exercise, container.id)}
-          initialAudio={readAudioDraft(exercise.content, exercise.templateCode)}
-          onDocumentChange={setErrorCorrection}
-          onSavedRemote={(updatedAt, saved, audio) =>
-            queryClient.setQueryData<ExerciseWithAnswers | null>(
-              authoringKeys.exercise(exerciseId),
-              (cached) =>
-                cached ? applySavedErrorCorrection(cached, updatedAt, saved, audio) : cached,
-            )
-          }
-        />
-      ) : isMatchPairs && exercise !== undefined ? (
-        // Match pairs owns a document for the sharpest reason of the four: the pairing
-        // *is* the content — a pair's right half is the answer to its left — so there is
-        // no set of form fields that could hold it without writing the answer twice.
-        <MatchPairsBuilder
-          key={exerciseId}
-          exerciseId={exerciseId}
-          containerId={container.id}
-          initialExercise={matchPairsDocumentFrom(exercise, container.id)}
-          initialAudio={readAudioDraft(exercise.content, MATCH_PAIRS_TEMPLATE_CODE)}
-          initialInstructions={firstInstruction(exercise)?.instructionText ?? ''}
-          // An absent `variant` parses as `pairs`, which carries the weaker publication
-          // rule. Only the raw column can still say whether anyone chose it.
-          initialVariantChosen={hasExplicitVariant(exercise.content)}
-          onDocumentChange={(document, instructions) =>
-            setMatchPairs({ exercise: document, instructions })
-          }
-          onSavedRemote={(updatedAt, saved) =>
-            queryClient.setQueryData<ExerciseWithAnswers | null>(
-              authoringKeys.exercise(exerciseId),
-              (cached) => (cached ? applySavedMatchPairs(cached, updatedAt, saved) : cached),
-            )
-          }
-        />
-      ) : isWritingTask && exercise !== undefined ? (
-        // A writing task owns a document because there is no answer to hold: the exercise
-        // *is* the task, the rubric a person marks against, and the settings that decide
-        // what the student may see while writing. The generic form has a prompt field and
-        // a word count, which is the shape this template left behind in plan 50.
-        <WritingTaskBuilder
-          key={exerciseId}
-          exerciseId={exerciseId}
-          containerId={container.id}
-          initialExercise={writingTaskDocumentFrom(exercise, container.id)}
-          initialAudio={readAudioDraft(exercise.content, WRITING_TASK_TEMPLATE_CODE)}
-          onDocumentChange={setWritingTask}
-          onSavedRemote={(updatedAt, saved) =>
-            queryClient.setQueryData<ExerciseWithAnswers | null>(
-              authoringKeys.exercise(exerciseId),
-              (cached) => (cached ? applySavedWritingTask(cached, updatedAt, saved) : cached),
-            )
-          }
-        />
-      ) : isShortAnswer && exercise != null ? (
-        // Short answer owns a document because its key is not a list of accepted strings
-        // but a set of semantic elements, each carrying the phrasings a student might use
-        // — and those phrasings are the answer, written in the words the student is being
-        // asked to find. The generic form has one question field and a comma-separated
-        // list of accepted answers, which is the shape this template left behind in the
-        // plan; documents still in that shape never reach here.
-        <ShortAnswerBuilder
-          key={exerciseId}
-          exerciseId={exerciseId}
-          containerId={container.id}
-          initialExercise={shortAnswerDocumentFrom(exercise)}
-          onDocumentChange={setShortAnswer}
-          onSavedRemote={(updatedAt, saved) =>
-            queryClient.setQueryData<ExerciseWithAnswers | null>(
-              authoringKeys.exercise(exerciseId),
-              (cached) => (cached ? applySavedShortAnswer(cached, updatedAt, saved) : cached),
-            )
-          }
-        />
-      ) : isSentenceSchema && exercise != null ? (
-        // Sentence schema owns a document because the answer is not written anywhere: it
-        // *is* where each chunk sits on the board, and that same placement is the word
-        // bank the student is handed. The generic form had a list of fields and a list of
-        // tokens, which is the shape this template left behind in plan 52.
-        <SentenceSchemaBuilder
-          key={exerciseId}
-          exerciseId={exerciseId}
-          containerId={container.id}
-          targetLanguage={container.targetLanguage}
-          initialExercise={sentenceSchemaDocumentFrom(exercise)}
-          onDocumentChange={setSentenceSchema}
-          onSavedRemote={(updatedAt, saved) =>
-            queryClient.setQueryData<ExerciseWithAnswers | null>(
-              authoringKeys.exercise(exerciseId),
-              (cached) => (cached ? applySavedSentenceSchema(cached, updatedAt, saved) : cached),
-            )
-          }
-        />
-      ) : isMultipleChoice && exercise != null ? (
-        // Multiple choice owns a document because the answer is not a field of it: which
-        // option is right lives only in the key column, and every wrong option carries its
-        // own rebuttal beside the rule behind the right one. The generic form had a
-        // question, a flat option list and a single explanation — the shape this template
-        // left behind in plan 53, and the shape the other 121 documents are still in.
-        <MultipleChoiceBuilder
-          key={exerciseId}
-          exerciseId={exerciseId}
-          containerId={container.id}
-          targetLanguage={container.targetLanguage}
-          initialExercise={multipleChoiceDocumentFrom(exercise)}
-          onDocumentChange={setMultipleChoice}
-          onSavedRemote={(updatedAt, saved) =>
-            queryClient.setQueryData<ExerciseWithAnswers | null>(
-              authoringKeys.exercise(exerciseId),
-              (cached) => (cached ? applySavedMultipleChoice(cached, updatedAt, saved) : cached),
-            )
-          }
-        />
-      ) : isMultipleChoiceGroup && exercise != null ? (
-        // A statement table owns a document because its key is not a field of any row:
-        // which column a statement belongs in is one id in the key column, shared with
-        // nine other statements over one set of columns, and the line that settles it is
-        // a quote from the passage beside it. The generic form had a context, a flat
-        // option list and a set of questions free to carry their own options — the shape
-        // this template left behind in plan 54, and the shape two documents are still in.
-        <MultipleChoiceGroupBuilder
-          key={exerciseId}
-          exerciseId={exerciseId}
-          containerId={container.id}
-          targetLanguage={container.targetLanguage}
-          initialExercise={multipleChoiceGroupDocumentFrom(exercise)}
-          onDocumentChange={setMultipleChoiceGroup}
-          onSavedRemote={(updatedAt, saved) =>
-            queryClient.setQueryData<ExerciseWithAnswers | null>(
-              authoringKeys.exercise(exerciseId),
-              (cached) =>
-                cached ? applySavedMultipleChoiceGroup(cached, updatedAt, saved) : cached,
-            )
-          }
-        />
-      ) : (
-        <ExerciseForm
-          // Remounts with fresh `defaultValues` when the loaded exercise changes.
-          key={exerciseId}
-          exerciseId={exerciseId}
-          initialValues={initialValues}
-          container={container}
-          onValuesChange={setPreviewValues}
-        />
-      )}
+          <ExerciseForm
+            // Remounts with fresh `defaultValues` when the loaded exercise changes.
+            key={exerciseId}
+            exerciseId={exerciseId}
+            initialValues={initialValues}
+            container={container}
+            onValuesChange={setPreviewValues}
+          />
+        )}
 
-      {/* Below whichever builder this exercise uses, and outside its form: the axes are
+        {/* Below whichever builder this exercise uses, and outside its form: the axes are
           their own resource with their own routes (plan 55 §3.5), so they save on their
           own and no builder's "Done" is responsible for them. */}
-      {!isLoading && exercise != null && (
-        <div className="mt-6">
-          <ExerciseAxesPanel exerciseId={exerciseId} containerId={container.id} />
-        </div>
-      )}
-    </LessonEditorShell>
+        {!isLoading && exercise != null && (
+          <div className="mt-6">
+            <ExerciseAxesPanel exerciseId={exerciseId} containerId={container.id} />
+          </div>
+        )}
+      </LessonEditorShell>
+    </AuthoringContainerProvider>
   );
 }
 

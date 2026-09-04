@@ -4,6 +4,7 @@
 // lets one player mount on all thirteen templates.
 
 export { useExerciseAudio } from './use-exercise-audio';
+export { useLessonClip } from './use-lesson-clip';
 export type { ExerciseAudioEngine, UseExerciseAudioOptions } from './use-exercise-audio';
 export { ExerciseAudioPlayer } from './exercise-audio-player';
 export { AudioGateScreen, AudioLockNote, AudioSegmentButton, AudioTranscript } from './audio-parts';

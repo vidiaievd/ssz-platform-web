@@ -3228,6 +3228,13 @@
     "modeClip": "One clip for the set",
     "modeItems": "A recording per {items}",
     "modeClipHelp": "One recording the whole exercise is about. Each item can be given its own timecode into it.",
-    "modeItemsHelp": "Each of the {items} carries its own recording, and the rules below apply to every one of them."
+    "modeItemsHelp": "Each of the {items} carries its own recording, and the rules below apply to every one of them.",
+    "sourceLesson": "From a lesson",
+    "lessonLabel": "Lesson",
+    "lessonPlaceholder": "Choose a lesson",
+    "lessonVariantLabel": "Variant",
+    "lessonVariantPlaceholder": "Choose a variant",
+    "lessonFound": "The students hear this lesson’s recording. Replacing it in the lesson replaces it here.",
+    "lessonNoNarration": "This variant has no recording, so there is nothing to play. Add one to the lesson, or choose another variant."
   }
 }

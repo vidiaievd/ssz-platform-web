@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
@@ -58,9 +59,27 @@ function makeProjection(overrides: Partial<StudentProjection> = {}): StudentProj
   };
 }
 
+/*
+  A query client, because every sentence card runs the listening layer's engine, and the
+  engine asks the network two questions: media-service for the clip, and — under
+  `source: 'lesson'` — the lesson the recording is borrowed from (plan 56 §3.8). A card
+  with no recording asks neither; the hooks still run, which is what needs the provider.
+*/
+function providers(ui: React.ReactElement) {
+  return (
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        {ui}
+      </NextIntlClientProvider>
+    </QueryClientProvider>
+  );
+}
+
 function renderBody(props: Partial<React.ComponentProps<typeof TranslateRunnerBody>> = {}) {
   return render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
+    providers(
       <TranslateRunnerBody
         projection={makeProjection()}
         value={{}}
@@ -70,8 +89,8 @@ function renderBody(props: Partial<React.ComponentProps<typeof TranslateRunnerBo
         mode="practice"
         accent={PRACTICE_ACCENT}
         {...props}
-      />
-    </NextIntlClientProvider>,
+      />,
+    ),
   );
 }
 
@@ -114,7 +133,7 @@ describe('TranslateRunnerBody', () => {
 
   it('reports the whole set is written only once every sentence has an answer', async () => {
     const user = userEvent.setup();
-    render(<Harness />);
+    render(providers(<Harness />));
 
     const [first, second] = screen.getAllByRole('textbox');
     await user.type(first!, 'Jeg har bodd i Tromsø i tre år.');
@@ -127,7 +146,7 @@ describe('TranslateRunnerBody', () => {
 
   it('does not count whitespace as an answer', async () => {
     const user = userEvent.setup();
-    render(<Harness />);
+    render(providers(<Harness />));
 
     const [first, second] = screen.getAllByRole('textbox');
     await user.type(first!, '   ');

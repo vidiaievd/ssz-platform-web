@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
@@ -18,9 +19,15 @@ vi.mock('@/features/media', () => ({
 
 function renderPreview(exercise: Translate = makeDoc()) {
   render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
-      <TranslatePreview exercise={exercise} />
-    </NextIntlClientProvider>,
+    // The preview renders the real runner body, whose sentence cards run the listening
+    // layer's engine — two network questions behind a query client (plan 56 phase 6).
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <TranslatePreview exercise={exercise} />
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
   );
 }
 

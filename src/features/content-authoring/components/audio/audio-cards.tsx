@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { AudioLines, Link2, Trash2, Upload } from 'lucide-react';
+import { AudioLines, BookOpen, Link2, Trash2, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,17 @@ import {
   type TranscriptPolicy,
 } from '@/lib/shared-kernel/audio';
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { findAudioNarration } from '@/lib/content/lesson-media-tokens';
+
+import { useAuthoringLessons, useLessonVariants } from '../../api/use-authoring-lessons';
+import { useAuthoringContainerId } from '../authoring-container-context';
 import { EditorCard } from '../editor-card';
 import { ToggleRow } from '../toggle-row';
 
@@ -115,9 +126,11 @@ export function AudioModeRow({ draft, onChange, itemNoun }: AudioCardProps & { i
  * from a file to a link keeps the file, because an author comparing two takes should not
  * have to upload the first one twice.
  *
- * `lesson` is declared in the model and not offered here. Plan 56 §3.8 puts it in phase 6
- * — it is the one source that has to read another aggregate — and a third tab that could
- * not do anything yet would be worse than the two that work.
+ * `lesson` is the third, and it arrived last for the reason §3.8 gives: it is the only
+ * source that has to read another aggregate. It stores a reference — a lesson and one of
+ * its variants — and never a copy, so replacing the recording in the lesson replaces it
+ * here. The tab is offered only where the builder knows which course it is in, because
+ * without that there is no list of lessons to choose from.
  */
 export function AudioSourceCard({ draft, onChange }: AudioCardProps) {
   const t = useTranslations('Authoring');
@@ -128,6 +141,13 @@ export function AudioSourceCard({ draft, onChange }: AudioCardProps) {
   const [duration, setDuration] = useState(formatDuration(draft.audio.duration));
 
   const { audio } = draft;
+  /*
+    Which course this builder is in, read from the screen rather than passed down: the
+    `lesson` tab offers the lessons of this course, and a card that had to be handed the
+    id would have meant threading it through nine builders. Absent — a preview, a test —
+    and the tab is simply not offered.
+  */
+  const containerId = useAuthoringContainerId();
   const { data: asset } = useMediaAsset(
     audio.source === 'asset' && audio.assetId !== '' ? audio.assetId : undefined,
   );
@@ -170,15 +190,20 @@ export function AudioSourceCard({ draft, onChange }: AudioCardProps) {
       <div className="flex flex-col gap-4">
         <Segmented<AudioSource>
           aria-label={t('audio.sourceTitle')}
-          value={audio.source === 'lesson' ? 'asset' : audio.source}
+          value={audio.source === 'items' ? 'asset' : audio.source}
           onValueChange={(source) => onChange(withAudio(draft, { source }))}
           options={[
             { value: 'asset', label: t('audio.sourceUpload'), icon: Upload },
             { value: 'link', label: t('audio.sourceLink'), icon: Link2 },
+            ...(containerId === null
+              ? []
+              : [{ value: 'lesson' as const, label: t('audio.sourceLesson'), icon: BookOpen }]),
           ]}
         />
 
-        {audio.source === 'link' ? (
+        {audio.source === 'lesson' ? (
+          <LessonClipPicker draft={draft} onChange={onChange} containerId={containerId ?? ''} />
+        ) : audio.source === 'link' ? (
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="audio-url">{t('audio.urlLabel')}</Label>
             <Input
@@ -308,6 +333,90 @@ function readDuration(file: File): Promise<number> {
     probe.addEventListener('error', () => done(0));
     probe.src = url;
   });
+}
+
+/**
+ * The lesson whose narration this exercise borrows — plan 56 §3.8.
+ *
+ * Two choices and no upload: a lesson, then which of its variants. The recording itself
+ * is never copied — what is stored is the reference, and the reader resolves it from the
+ * lesson body every time (`use-lesson-clip.ts`). That is the whole point of the mode:
+ * replacing the recording in the lesson replaces it in every exercise that borrows it.
+ *
+ * A variant with no narration is said so here rather than left to the gate: the author is
+ * looking at the list that would fix it.
+ */
+function LessonClipPicker({
+  draft,
+  onChange,
+  containerId,
+}: AudioCardProps & { containerId: string }) {
+  const t = useTranslations('Authoring');
+  const { audio } = draft;
+  const ref = audio.lessonRef;
+
+  const lessons = useAuthoringLessons(containerId, containerId !== '');
+  const variants = useLessonVariants(ref?.lessonId ?? '', (ref?.lessonId ?? '') !== '');
+
+  const chosen = variants.data?.find((variant) => variant.id === ref?.variant);
+  const narration = chosen === undefined ? null : findAudioNarration(chosen.bodyMarkdown);
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1.5">
+        <Label>{t('audio.lessonLabel')}</Label>
+        <Select
+          value={ref?.lessonId ?? ''}
+          onValueChange={(lessonId) =>
+            // A new lesson invalidates the variant that was chosen from the old one.
+            onChange(withAudio(draft, { lessonRef: { lessonId, variant: '' } }))
+          }
+        >
+          <SelectTrigger aria-label={t('audio.lessonLabel')}>
+            <SelectValue placeholder={t('audio.lessonPlaceholder')} />
+          </SelectTrigger>
+          <SelectContent>
+            {(lessons.data ?? []).map((lesson) => (
+              <SelectItem key={lesson.id} value={lesson.id}>
+                {lesson.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {ref !== null && ref.lessonId !== '' && (
+        <div className="flex flex-col gap-1.5">
+          <Label>{t('audio.lessonVariantLabel')}</Label>
+          <Select
+            value={ref.variant}
+            onValueChange={(variant) =>
+              onChange(withAudio(draft, { lessonRef: { lessonId: ref.lessonId, variant } }))
+            }
+          >
+            <SelectTrigger aria-label={t('audio.lessonVariantLabel')}>
+              <SelectValue placeholder={t('audio.lessonVariantPlaceholder')} />
+            </SelectTrigger>
+            <SelectContent>
+              {(variants.data ?? []).map((variant) => (
+                <SelectItem key={variant.id} value={variant.id}>
+                  {variant.displayTitle || variant.explanationLanguage}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {chosen !== undefined && (
+        <p
+          className={`text-xs ${narration === null ? 'text-warning-700' : 'text-muted-foreground'}`}
+        >
+          {narration === null ? t('audio.lessonNoNarration') : t('audio.lessonFound')}
+        </p>
+      )}
+    </div>
+  );
 }
 
 /**

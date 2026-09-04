@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
@@ -17,11 +18,21 @@ vi.mock('@/features/media', () => ({
   }),
 }));
 
+/*
+  A query client, because the engine asks two questions of the network: media-service for
+  the clip (mocked above) and, under `source: 'lesson'`, the lesson body the recording is
+  referenced from (plan 56 §3.8). Neither is asked for an exercise with no audio — the
+  hooks run, and both are handed nothing to look up.
+*/
 const wrap = (ui: React.ReactElement) =>
   render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
-      {ui}
-    </NextIntlClientProvider>,
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        {ui}
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
   );
 
 type AudioOverrides = Partial<Omit<ExerciseAudio, 'settings'>> & {
@@ -216,6 +227,7 @@ describe('useExerciseAudio', () => {
         <button type="button" onClick={() => eng.playRange(10, 20)}>
           fragment
         </button>
+        <output data-testid="src">{eng.src ?? 'none'}</output>
         <output data-testid="plays">{eng.plays}</output>
         <output data-testid="gated">{String(eng.gated)}</output>
       </div>
@@ -246,14 +258,22 @@ describe('useExerciseAudio', () => {
   });
 
   it('goes quiet when the runner is hidden', async () => {
-    const { rerender } = wrap(<Harness content={document()} />);
+    // Re-rendered through the same providers it was mounted in: a rerender that dropped
+    // one would remount the hook rather than re-run it, which is not what a hidden runner
+    // does to a player.
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const harness = (active: boolean) => (
+      <QueryClientProvider client={client}>
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <Harness content={document()} active={active} />
+        </NextIntlClientProvider>
+      </QueryClientProvider>
+    );
+
+    const { rerender } = render(harness(true));
     await userEvent.click(screen.getByRole('button', { name: 'Play' }));
 
-    rerender(
-      <NextIntlClientProvider locale="en" messages={enMessages}>
-        <Harness content={document()} active={false} />
-      </NextIntlClientProvider>,
-    );
+    rerender(harness(false));
 
     await waitFor(() => expect(pause).toHaveBeenCalled());
   });
@@ -276,5 +296,57 @@ describe('useExerciseAudio', () => {
   it('reads a document with no audio as silent, and asks media-service nothing', () => {
     wrap(<Harness content={{ questions: [] }} />);
     expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
+  });
+
+  /*
+    `source: 'lesson'` — plan 56 §3.8, phase 6. The document stores a reference and the
+    reader turns it into a clip, by reading the `[audio:id]` token out of the lesson body.
+    Resolved here rather than in a projection because two services project this block and
+    only one of them has lessons.
+  */
+  describe('borrowing a lesson recording', () => {
+    const lessonDoc = () => ({
+      audio: audioOn({
+        source: 'lesson' as const,
+        assetId: '',
+        lessonRef: { lessonId: 'lesson-1', variant: 'variant-1' },
+      }),
+    });
+
+    it('plays the recording the lesson body points at', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => [
+          { id: 'variant-2', bodyMarkdown: 'Ingen lyd her.' },
+          { id: 'variant-1', bodyMarkdown: 'Les teksten.\n\n[audio:media-9 "Opptak"]' },
+        ],
+      });
+      vi.stubGlobal('fetch', fetchMock);
+
+      wrap(<Harness content={lessonDoc()} />);
+
+      await waitFor(() =>
+        expect(screen.getByTestId('src')).toHaveTextContent('https://cdn.test/media-9.mp3'),
+      );
+      expect(fetchMock).toHaveBeenCalledWith('/api/content/lessons/lesson-1/variants');
+      vi.unstubAllGlobals();
+    });
+
+    it('leaves the exercise playable-looking but silent when the token is gone', async () => {
+      // The lesson lost its recording after the exercise borrowed it. That is a clip that
+      // cannot be played, which BEHAVIOR §11 says must never lock the learner out.
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => [{ id: 'variant-1', bodyMarkdown: 'Teksten, uten opptak.' }],
+        }),
+      );
+
+      wrap(<Harness content={lessonDoc()} />);
+
+      await waitFor(() => expect(screen.getByTestId('src')).toHaveTextContent('none'));
+      vi.unstubAllGlobals();
+    });
   });
 });

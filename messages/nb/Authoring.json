@@ -3228,6 +3228,13 @@
     "modeClip": "Ett klipp for hele settet",
     "modeItems": "Ett opptak per {items}",
     "modeClipHelp": "Ett opptak hele oppgaven handler om. Hvert element kan få sitt eget tidspunkt inn i det.",
-    "modeItemsHelp": "Hver av {items} har sitt eget opptak, og reglene under gjelder for alle."
+    "modeItemsHelp": "Hver av {items} har sitt eget opptak, og reglene under gjelder for alle.",
+    "sourceLesson": "Fra en leksjon",
+    "lessonLabel": "Leksjon",
+    "lessonPlaceholder": "Velg en leksjon",
+    "lessonVariantLabel": "Variant",
+    "lessonVariantPlaceholder": "Velg en variant",
+    "lessonFound": "Studentene hører opptaket fra denne leksjonen. Bytter du det i leksjonen, byttes det her.",
+    "lessonNoNarration": "Denne varianten har ikke noe opptak, så det er ingenting å spille av. Legg det til i leksjonen, eller velg en annen variant."
   }
 }

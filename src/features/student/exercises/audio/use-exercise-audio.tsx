@@ -20,6 +20,8 @@ import {
 } from '@/lib/shared-kernel/audio';
 import { useMediaAsset } from '@/features/media';
 
+import { useLessonClip } from './use-lesson-clip';
+
 /**
  * The browser's half of the playback engine — plan 56 §3.5.
  *
@@ -136,11 +138,25 @@ export function useExerciseAudio(
   const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  /*
+    A `lesson` clip is a reference to a recording that lives in a lesson body, so the id
+    comes back from there before media-service is asked anything (plan 56 §3.8). Resolved
+    in the browser rather than in a projection, because two services project this block and
+    only one of them has lessons — see `use-lesson-clip.ts`.
+  */
+  const lessonClip = useLessonClip(audio.source === 'lesson' ? audio.lessonRef : null);
+
   // A `link` clip is its own URL; an `asset` one is a storage key that media-service signs
   // for an hour, so it is resolved here rather than stored in the document. Asked for only
   // when there is an id to ask about — an exercise with no audio asks nothing.
+  const assetId =
+    audio.source === 'asset'
+      ? audio.assetId
+      : audio.source === 'lesson'
+        ? (lessonClip ?? '')
+        : '';
   const { data: asset, isError: assetFailed } = useMediaAsset(
-    audio.source === 'asset' && audio.assetId !== '' ? audio.assetId : undefined,
+    assetId === '' ? undefined : assetId,
   );
   const src =
     audio.source === 'link' ? (audio.url === '' ? null : audio.url) : (asset?.url ?? null);

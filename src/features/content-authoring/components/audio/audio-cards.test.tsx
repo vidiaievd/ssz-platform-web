@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { enMessages } from '@/lib/i18n/messages';
 import { readAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
 
+import { AuthoringContainerProvider } from '../authoring-container-context';
 import {
   AudioEnableRow,
   AudioRulesCard,
@@ -17,6 +18,18 @@ import {
 vi.mock('@/features/media', () => ({
   useMediaAsset: () => ({ data: undefined }),
   uploadAsset: vi.fn(),
+}));
+
+// The lessons of the course, as the `lesson` source reads them. One variant carries a
+// recording token and one does not — the two states the picker has to tell apart.
+vi.mock('../../api/use-authoring-lessons', () => ({
+  useAuthoringLessons: () => ({ data: [{ id: 'l-1', title: 'Leksjon 1' }] }),
+  useLessonVariants: () => ({
+    data: [
+      { id: 'v-1', displayTitle: 'Norsk — enkel', bodyMarkdown: 'Les.\n\n[audio:media-9]' },
+      { id: 'v-2', displayTitle: 'Norsk — full', bodyMarkdown: 'Les, uten opptak.' },
+    ],
+  }),
 }));
 
 const wrap = (ui: React.ReactElement) =>
@@ -75,6 +88,51 @@ describe('AudioEnableRow', () => {
 });
 
 describe('AudioSourceCard', () => {
+  /*
+    The third source — plan 56 §3.8. It borrows a lesson's recording by reference, so it
+    needs to know which course the builder is in; outside a course there is no list of
+    lessons and the tab is not offered at all.
+  */
+  describe('borrowing from a lesson', () => {
+    const inCourse = (ui: React.ReactElement) =>
+      wrap(<AuthoringContainerProvider containerId="course-1">{ui}</AuthoringContainerProvider>);
+
+    it('is not offered where the builder does not know its course', () => {
+      wrap(<AudioSourceCard draft={draftWith()} onChange={vi.fn()} />);
+
+      expect(screen.queryByRole('radio', { name: 'From a lesson' })).not.toBeInTheDocument();
+    });
+
+    it('stores a reference to the lesson and its variant, never the clip', async () => {
+      const onChange = vi.fn();
+      inCourse(
+        <AudioSourceCard
+          draft={draftWith({ source: 'lesson', lessonRef: { lessonId: 'l-1', variant: '' } })}
+          onChange={onChange}
+        />,
+      );
+
+      await userEvent.click(screen.getByRole('combobox', { name: 'Variant' }));
+      await userEvent.click(screen.getByRole('option', { name: 'Norsk — enkel' }));
+
+      const next: AudioDraft = onChange.mock.calls.at(-1)?.[0];
+      expect(next.audio.lessonRef).toEqual({ lessonId: 'l-1', variant: 'v-1' });
+      // The recording itself is not copied: nothing here writes an asset id.
+      expect(next.audio.assetId).toBe('asset-1');
+    });
+
+    it('says so when the chosen variant has no recording to borrow', () => {
+      inCourse(
+        <AudioSourceCard
+          draft={draftWith({ source: 'lesson', lessonRef: { lessonId: 'l-1', variant: 'v-2' } })}
+          onChange={vi.fn()}
+        />,
+      );
+
+      expect(screen.getByText(/has no recording/)).toBeInTheDocument();
+    });
+  });
+
   it('offers a URL field for a linked clip', async () => {
     const onChange = vi.fn();
     wrap(<AudioSourceCard draft={draftWith({ source: 'link' })} onChange={onChange} />);
