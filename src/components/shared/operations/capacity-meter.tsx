@@ -101,9 +101,14 @@ export function CapacityMeter({
             </>
           )}
         </span>
-        {count < min && (
-          <span className="text-[11px] text-warning-600 dark:text-warning-400">
-            min {min}
+        {tone === 'error' && (
+          <span className="text-[11px] font-semibold text-error-600 dark:text-error-400">
+            over
+          </span>
+        )}
+        {tone === 'warning' && (
+          <span className="text-[11px] font-semibold text-warning-600 dark:text-warning-400">
+            low
           </span>
         )}
       </div>

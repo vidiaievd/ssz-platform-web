@@ -100,32 +100,6 @@ async function KpiStrip({ groups }: { groups: GroupHealthRowVM[] }) {
   );
 }
 
-// ── Table header ──────────────────────────────────────────────────────────────
-
-async function TableHeader() {
-  const t = await getTranslations('Groups');
-
-  return (
-    <div
-      className={cn(
-        'hidden lg:grid items-center gap-x-4 px-4 py-[11px]',
-        'bg-(--ssz-bg-subtle) border-b border-border',
-        'text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)',
-        'grid-cols-[1fr_auto_auto_100px_auto_auto_56px]',
-      )}
-      aria-hidden="true"
-    >
-      <span>{t('list.columns.group')}</span>
-      <span>{t('list.columns.teacher')}</span>
-      <span>{t('list.columns.schedule')}</span>
-      <span>{t('list.columns.capacity')}</span>
-      <span>{t('list.columns.status')}</span>
-      <span>{t('list.columns.alerts')}</span>
-      <span />
-    </div>
-  );
-}
-
 // ── Main component ────────────────────────────────────────────────────────────
 
 type Props = {
@@ -191,34 +165,78 @@ export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props
         <div className="rounded-lg border border-border overflow-hidden">
           <EmptyState filtered={false} newGroupHref={newGroupHref} />
         </div>
-      ) : (
+      ) : filtered.length === 0 ? (
         <div className="rounded-lg border border-border overflow-hidden">
-          <TableHeader />
-          {filtered.length === 0 ? (
-            <p className="py-10 text-center text-sm text-(--ssz-text-muted)">
-              {t('list.filteredEmpty')}
-            </p>
-          ) : (
-            <div role="list" aria-label={t('list.title')}>
-              {filtered.map((group) => (
-                <div key={group.id} role="listitem">
-                  <GroupHealthRow
-                    group={group}
-                    href={`${baseHref}/groups/${group.id}`}
-                    schoolId={schoolId}
-                    schoolSlug={schoolSlug}
-                  />
-                  <GroupCard
-                    group={group}
-                    href={`${baseHref}/groups/${group.id}`}
-                    schoolId={schoolId}
-                    schoolSlug={schoolSlug}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          <p className="py-10 text-center text-sm text-(--ssz-text-muted)">
+            {t('list.filteredEmpty')}
+          </p>
         </div>
+      ) : (
+        <>
+          {/* Desktop: a real table, so every row's columns line up with the
+              header and with each other — a CSS grid per row cannot promise
+              that, since each row's own content sizes its own tracks. */}
+          <div className="hidden lg:block rounded-lg border border-border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] border-collapse">
+                <thead>
+                  <tr className="bg-(--ssz-bg-subtle) border-b border-border">
+                    <th
+                      className={cn(
+                        'text-left px-4 py-[11px] text-[10.5px] font-bold uppercase tracking-wide',
+                        'text-(--ssz-text-muted)',
+                      )}
+                    >
+                      {t('list.columns.group')}
+                    </th>
+                    <th className="text-left px-4 py-[11px] text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)">
+                      {t('list.columns.teacher')}
+                    </th>
+                    <th className="text-left px-4 py-[11px] text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)">
+                      {t('list.columns.schedule')}
+                    </th>
+                    <th className="text-left px-4 py-[11px] text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)">
+                      {t('list.columns.capacity')}
+                    </th>
+                    <th className="text-left px-4 py-[11px] text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)">
+                      {t('list.columns.status')}
+                    </th>
+                    <th className="text-left px-4 py-[11px] text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)">
+                      {t('list.columns.alerts')}
+                    </th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((group) => (
+                    <GroupHealthRow
+                      key={group.id}
+                      group={group}
+                      href={`${baseHref}/groups/${group.id}`}
+                      schoolId={schoolId}
+                      schoolSlug={schoolSlug}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Below 1024: cards, not a narrowed table (spec BEHAVIOR §10's
+              intermediate step drops capacity + status — the two facts this
+              list exists to show — so the card keeps all six instead). */}
+          <div className="lg:hidden rounded-lg border border-border overflow-hidden">
+            {filtered.map((group) => (
+              <GroupCard
+                key={group.id}
+                group={group}
+                href={`${baseHref}/groups/${group.id}`}
+                schoolId={schoolId}
+                schoolSlug={schoolSlug}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
