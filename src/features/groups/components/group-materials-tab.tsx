@@ -4,8 +4,10 @@ import { getTranslations } from 'next-intl/server';
 
 import { cn } from '@/lib/utils';
 import { CourseChangeButton } from './course-change-button';
+import { PlanUnitLinkControl } from './plan-unit-link-control';
 import type { Group } from '../types';
 import type { GroupMaterialsView } from '../api/queries';
+import type { CurriculumUnit } from '@/features/teachers/types';
 
 /** Ring showing how much of the teaching plan the group has been given. */
 function ProgressRing({ pct, label }: { pct: number; label: string }) {
@@ -59,6 +61,8 @@ type Props = {
   materials: GroupMaterialsView;
   /** Share of the teaching plan already delivered — group progress, never a student's. */
   progressPct: number;
+  /** Units of the teaching plan, each possibly stitched to a unit of the course. */
+  planUnits: CurriculumUnit[];
   schoolId: string;
   schoolSlug: string;
   canManage: boolean;
@@ -68,12 +72,17 @@ export async function GroupMaterialsTab({
   group,
   materials,
   progressPct,
+  planUnits,
   schoolId,
   schoolSlug,
   canManage,
 }: Props) {
   const t = await getTranslations('Groups');
   const { course, units, lessonCount, structureUnavailable } = materials;
+  const planByContentUnit = new Map(
+    planUnits.filter((u) => u.contentUnitId).map((u) => [u.contentUnitId!, u]),
+  );
+  const unstitched = planUnits.filter((u) => !u.contentUnitId);
 
   if (!course) {
     return (
@@ -169,10 +178,47 @@ export async function GroupMaterialsTab({
                   <span className="flex-1 min-w-0 text-sm font-medium text-(--ssz-text-primary) truncate">
                     {unit.title}
                   </span>
+
+                  {(() => {
+                    const planUnit = planByContentUnit.get(unit.id);
+                    if (!planUnit) return null;
+                    const done = planUnit.deliveredSessions >= planUnit.plannedSessions;
+                    return (
+                      <span
+                        className={cn(
+                          'rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+                          done
+                            ? 'bg-success-100 text-success-700 dark:bg-success-900/40 dark:text-success-400'
+                            : 'bg-muted text-(--ssz-text-secondary)',
+                        )}
+                      >
+                        {t('materials.taught', {
+                          delivered: planUnit.deliveredSessions,
+                          planned: planUnit.plannedSessions,
+                        })}
+                      </span>
+                    );
+                  })()}
+
                   <span className="text-xs text-(--ssz-text-muted) whitespace-nowrap">
                     {t('materials.lessonCount', { count: unit.lessons.length })}
                   </span>
                 </summary>
+
+                {canManage && planUnits.length > 0 && (
+                  <div className="border-t border-border px-4 py-2 flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-(--ssz-text-muted)">
+                      {t('materials.linkLabel')}
+                    </span>
+                    <PlanUnitLinkControl
+                      schoolId={schoolId}
+                      groupId={group.id}
+                      contentUnitId={unit.id}
+                      planUnits={planUnits}
+                      linkedUnitId={planByContentUnit.get(unit.id)?.unitId ?? null}
+                    />
+                  </div>
+                )}
 
                 {unit.lessons.length > 0 && (
                   <ul className="border-t border-border px-4 py-2 flex flex-col gap-1.5">
@@ -199,6 +245,37 @@ export async function GroupMaterialsTab({
           </div>
         )}
       </section>
+
+      {/* Plan units that teach nothing in this course — shown, not hidden */}
+      {unstitched.length > 0 && (
+        <section aria-labelledby="materials-unstitched-heading">
+          <h3
+            id="materials-unstitched-heading"
+            className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-3"
+          >
+            {t('materials.unstitchedHeading')}
+          </h3>
+          <ul className="flex flex-col gap-2">
+            {unstitched.map((unit) => (
+              <li
+                key={unit.unitId}
+                className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-2.5"
+              >
+                <span className="flex-1 min-w-0 truncate text-sm text-(--ssz-text-secondary)">
+                  {unit.title}
+                </span>
+                <span className="text-xs text-(--ssz-text-muted) whitespace-nowrap">
+                  {t('materials.taught', {
+                    delivered: unit.deliveredSessions,
+                    planned: unit.plannedSessions,
+                  })}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-(--ssz-text-muted)">{t('materials.unstitchedNote')}</p>
+        </section>
+      )}
 
       {/* Additional materials attached to the group itself */}
       <section aria-labelledby="materials-extra-heading">

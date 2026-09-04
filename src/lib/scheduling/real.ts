@@ -362,6 +362,7 @@ export const realProvider: SchedulingProvider = {
       units: Array<{
         id: string; title: string; order: number;
         plannedSessions: number; deliveredSessions: number;
+        contentUnitId: string | null;
         requiredLevel: string | null; status: string;
       }>;
     } | null>({
@@ -378,6 +379,7 @@ export const realProvider: SchedulingProvider = {
       order: u.order,
       plannedSessions: u.plannedSessions,
       deliveredSessions: u.deliveredSessions,
+      contentUnitId: u.contentUnitId ?? null,
       requiredLevel: (u.requiredLevel ?? 'A1') as CurriculumPlan['units'][number]['requiredLevel'],
       status: (['planned', 'active', 'done', 'overridden'].includes(u.status) ? u.status : 'planned') as CurriculumPlan['units'][number]['status'],
     }));
@@ -391,6 +393,20 @@ export const realProvider: SchedulingProvider = {
       targetWeeklyHours: plan.targetWeeklyHours,
       progressPct: planned > 0 ? Math.round((delivered / planned) * 100) : 0,
     };
+  },
+
+  async linkPlanUnit(planUnitId: string, contentUnitId: string | null): Promise<MutationResult> {
+    try {
+      await serverFetch({
+        service: 'scheduling',
+        path: `/scheduling/curriculum/units/${planUnitId}`,
+        method: 'PATCH',
+        body: { contentUnitId },
+      });
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message : 'Failed to link the unit' };
+    }
   },
 
   async putCurriculum(groupId: string, plan: CurriculumPlan) {
@@ -409,6 +425,7 @@ export const realProvider: SchedulingProvider = {
             id: u.unitId,
             title: u.title,
             plannedSessions: u.plannedSessions,
+            contentUnitId: u.contentUnitId,
             requiredLevel: u.requiredLevel,
             status: u.status,
           })),

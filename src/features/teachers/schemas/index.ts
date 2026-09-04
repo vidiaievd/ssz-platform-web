@@ -62,6 +62,7 @@ export const curriculumUnitSchema = z.object({
   order: z.number().int().min(1),
   plannedSessions: z.number().int().min(0),
   deliveredSessions: z.number().int().min(0),
+  contentUnitId: z.string().nullable().default(null),
   requiredLevel: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']),
   status: z.enum(['planned', 'active', 'done', 'overridden']),
 });

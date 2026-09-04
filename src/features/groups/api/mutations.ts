@@ -305,6 +305,30 @@ export async function addStudents(
 }
 
 /**
+ * Stitch a unit of the teaching plan to a unit of the linked course, so the
+ * course's own units can show how much of each has been taught. Passing null
+ * unstitches — a plan unit that teaches nothing in this course is a legitimate
+ * state, not an error.
+ */
+export async function linkPlanUnit(
+  schoolId: string,
+  groupId: string,
+  planUnitId: string,
+  contentUnitId: string | null,
+): Promise<MutationResult> {
+  try {
+    const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
+    const result = await getSchedulingProvider().linkPlanUnit(planUnitId, contentUnitId);
+    if (!result.ok) return result;
+    invalidate(groupCacheTags.group(groupId));
+    invalidate(groupCacheTags.groups(schoolId));
+    return { ok: true };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+/**
  * Record that a lesson happened and which unit of the plan it taught. This is
  * the only way group progress moves: the scheduler counts held lessons, and a
  * date that has passed says nothing on its own.

@@ -66,6 +66,8 @@ export interface SchedulingProvider {
 
   // ── curriculum ────────────────────────────────────────────────────────────
   getCurriculum(groupId: string): Promise<CurriculumPlan>;
+  /** Stitch a plan unit to a unit of the linked course, or pass null to unstitch. */
+  linkPlanUnit(planUnitId: string, contentUnitId: string | null): Promise<MutationResult>;
   putCurriculum(groupId: string, plan: CurriculumPlan): Promise<void>;
 
   // ── forecast ──────────────────────────────────────────────────────────────

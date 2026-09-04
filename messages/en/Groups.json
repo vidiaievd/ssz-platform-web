@@ -421,6 +421,13 @@
     "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
     "minutes": "{count} min",
     "emptyCourse": "This course has no units yet.",
-    "structureUnavailable": "Could not read the course structure. The card above still shows what the group is linked to."
+    "structureUnavailable": "Could not read the course structure. The card above still shows what the group is linked to.",
+    "taught": "{delivered}/{planned} taught",
+    "linkLabel": "Taught by plan unit",
+    "linkNone": "Not linked",
+    "linkSaved": "Unit link updated",
+    "linkError": "Could not update the unit link",
+    "unstitchedHeading": "Plan units not matched to the course",
+    "unstitchedNote": "These units of the teaching plan teach nothing in this course — link them above, or leave them as they are."
   }
 }

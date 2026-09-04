@@ -421,6 +421,13 @@
     "lessonCount": "{count, plural, one {# leksjon} other {# leksjoner}}",
     "minutes": "{count} min",
     "emptyCourse": "Dette kurset har ingen enheter ennå.",
-    "structureUnavailable": "Kunne ikke lese kursstrukturen. Kortet over viser fortsatt hva gruppen er knyttet til."
+    "structureUnavailable": "Kunne ikke lese kursstrukturen. Kortet over viser fortsatt hva gruppen er knyttet til.",
+    "taught": "{delivered}/{planned} undervist",
+    "linkLabel": "Undervises av planenhet",
+    "linkNone": "Ikke koblet",
+    "linkSaved": "Koblingen er oppdatert",
+    "linkError": "Kunne ikke oppdatere koblingen",
+    "unstitchedHeading": "Planenheter uten treff i kurset",
+    "unstitchedNote": "Disse enhetene i undervisningsplanen underviser ingenting i dette kurset — koble dem over, eller la dem være."
   }
 }

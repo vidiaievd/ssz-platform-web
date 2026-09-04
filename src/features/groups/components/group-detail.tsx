@@ -89,6 +89,7 @@ export async function GroupDetail({
             group={group}
             materials={materials}
             progressPct={planProgressPct}
+            planUnits={planUnits}
             schoolId={schoolId}
             schoolSlug={schoolSlug}
             canManage={canManage}
