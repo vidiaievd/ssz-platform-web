@@ -304,6 +304,29 @@ export async function addStudents(
   }
 }
 
+/**
+ * Record that a lesson happened and which unit of the plan it taught. This is
+ * the only way group progress moves: the scheduler counts held lessons, and a
+ * date that has passed says nothing on its own.
+ */
+export async function markLessonHeld(
+  schoolId: string,
+  groupId: string,
+  lessonId: string,
+  curriculumUnitId: string,
+): Promise<MutationResult> {
+  try {
+    const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
+    const result = await getSchedulingProvider().markLessonHeld(lessonId, curriculumUnitId);
+    if (!result.ok) return result;
+    invalidate(groupCacheTags.group(groupId));
+    invalidate(groupCacheTags.groups(schoolId));
+    return { ok: true };
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
 export async function removeStudent(
   schoolId: string,
   groupId: string,

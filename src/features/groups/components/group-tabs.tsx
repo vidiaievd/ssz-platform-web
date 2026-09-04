@@ -13,6 +13,7 @@ import { GroupTeachersTab } from './group-teachers-tab';
 import { GroupScheduleTab } from './group-schedule-tab';
 import { GroupEditDialog } from './group-edit-dialog';
 import type { Group, RosterStudent, Lesson, CourseView } from '../types';
+import type { CurriculumUnit } from '@/features/teachers/types';
 import type { Alert } from '@/features/dashboard/types';
 
 type TabKey = 'overview' | 'students' | 'teachers' | 'schedule';
@@ -21,6 +22,8 @@ type Props = {
   group: Group;
   roster: RosterStudent[];
   lessons: Lesson[];
+  recentLessons: Lesson[];
+  planUnits: CurriculumUnit[];
   alerts: Alert[];
   courseView: CourseView;
   /** Real school id (UUID) — every mutation below takes this. */
@@ -33,6 +36,8 @@ export function GroupTabs({
   group,
   roster,
   lessons,
+  recentLessons,
+  planUnits,
   alerts,
   courseView,
   schoolId,
@@ -134,6 +139,10 @@ export function GroupTabs({
         <GroupScheduleTab
           slots={group.slots}
           lessons={lessons}
+          recentLessons={recentLessons}
+          planUnits={planUnits}
+          schoolId={schoolId}
+          groupId={group.id}
           canManage={canManage}
           onEditSchedule={() => setEditScheduleOpen(true)}
         />

@@ -141,7 +141,19 @@
     "noSlots": "Ingen faste timer konfigurert.",
     "noLessons": "Ingen kommende timer planlagt.",
     "sub": "Vikar",
-    "editButton": "Rediger timeplan"
+    "editButton": "Rediger timeplan",
+    "recentHeading": "Gjennomførte timer",
+    "noRecent": "Ingen timer de siste ukene.",
+    "held": "Gjennomført",
+    "notHeld": "Ikke registrert",
+    "noUnit": "Ingen enhet knyttet",
+    "markHeld": "Merk gjennomført",
+    "marking": "Lagrer…",
+    "marked": "Timen er merket gjennomført",
+    "markError": "Kunne ikke merke timen gjennomført",
+    "unitLabel": "Læreplanenhet",
+    "pickUnit": "Velg enhet",
+    "noPlan": "Ingen undervisningsplan ennå"
   },
   "detail": {
     "back": "Grupper",

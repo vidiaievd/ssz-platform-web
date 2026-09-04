@@ -141,7 +141,19 @@
     "noSlots": "No recurring slots configured.",
     "noLessons": "No upcoming lessons scheduled.",
     "sub": "Sub",
-    "editButton": "Edit schedule"
+    "editButton": "Edit schedule",
+    "recentHeading": "Lessons held",
+    "noRecent": "No lessons in the last weeks.",
+    "held": "Held",
+    "notHeld": "Not recorded",
+    "noUnit": "No unit attached",
+    "markHeld": "Mark held",
+    "marking": "Saving…",
+    "marked": "Lesson marked as held",
+    "markError": "Could not mark the lesson held",
+    "unitLabel": "Curriculum unit",
+    "pickUnit": "Pick a unit",
+    "noPlan": "No teaching plan yet"
   },
   "detail": {
     "back": "Groups",

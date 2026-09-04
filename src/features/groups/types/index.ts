@@ -69,9 +69,14 @@ export interface RosterStudent {
   hasClash: boolean;
 }
 
+export type LessonStatus = 'scheduled' | 'moved' | 'cancelled' | 'held';
+
 export interface Lesson {
   id: string; groupId: string; date: ISODate; start: HHMM; end: HHMM;
   teacherId: string; teacherName: string; room: string; isSubstitute: boolean;
+  status: LessonStatus;
+  /** Curriculum unit this lesson teaches — set at generation, repointable by hand. */
+  curriculumUnitId: string | null;
 }
 
 export interface TimetableTeacher {

@@ -6,6 +6,7 @@ import { GroupDetailHeader } from "./group-detail-header";
 import { GroupResolveBanner } from "./group-resolve-banner";
 import { GroupTabs } from "./group-tabs";
 import type { Group, RosterStudent, Lesson, CourseView } from "../types";
+import type { CurriculumUnit } from "@/features/teachers/types";
 import type { Alert } from "@/features/dashboard/types";
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -15,6 +16,10 @@ type Props = {
   roster: RosterStudent[];
   alerts: Alert[];
   lessons: Lesson[];
+  /** Past lessons of the last weeks — the ones that can be marked held. */
+  recentLessons: Lesson[];
+  /** Units of the group's teaching plan; empty when no plan exists yet. */
+  planUnits: CurriculumUnit[];
   courseView: CourseView;
   /** Real school id (UUID) — mutations take this; schoolSlug is for hrefs only. */
   schoolId: string;
@@ -27,6 +32,8 @@ export async function GroupDetail({
   roster,
   alerts,
   lessons,
+  recentLessons,
+  planUnits,
   courseView,
   schoolId,
   schoolSlug,
@@ -68,6 +75,8 @@ export async function GroupDetail({
         group={group}
         roster={roster}
         lessons={lessons}
+        recentLessons={recentLessons}
+        planUnits={planUnits}
         alerts={alerts}
         courseView={courseView}
         schoolId={schoolId}

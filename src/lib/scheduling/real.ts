@@ -19,9 +19,38 @@ import type {
   OpsWarning,
 } from '@/features/groups/types';
 import type { Absence, SubstituteRequest, SubstituteCandidate, CurriculumPlan } from '@/features/teachers/types';
-import type { SchedulingProvider } from './provider';
+import type { MutationResult, SchedulingProvider } from './provider';
 
 const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
+
+/** One lesson as scheduling-service returns it. */
+interface RawLesson {
+  id: string;
+  groupId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  teacherId: string;
+  room: string | null;
+  status: string;
+  curriculumUnitId: string | null;
+}
+
+function toLesson(r: RawLesson): Lesson {
+  return {
+    id: r.id,
+    groupId: r.groupId,
+    date: r.date,
+    start: r.startTime,
+    end: r.endTime,
+    teacherId: r.teacherId,
+    teacherName: '', // enriched by the BFF caller when needed
+    room: r.room ?? '',
+    isSubstitute: false,
+    status: (r.status as Lesson['status']) ?? 'scheduled',
+    curriculumUnitId: r.curriculumUnitId ?? null,
+  };
+}
 
 // scheduling-service uses lowercase weekday codes; the web app uses capitalized.
 const WEEKDAY_TO_API: Record<Weekday, string> = {
@@ -93,25 +122,35 @@ export const realProvider: SchedulingProvider = {
   },
 
   async nextLessons(groupId: string, limit: number) {
-    const rows = await serverFetch<Array<{
-      id: string; groupId: string; date: string; startTime: string; endTime: string;
-      teacherId: string; room: string | null; status: string;
-    }>>({
+    const rows = await serverFetch<RawLesson[]>({
       service: 'scheduling',
       path: `/scheduling/groups/${groupId}/lessons/next`,
       query: { limit: String(limit) },
     });
-    return rows.map((r): Lesson => ({
-      id: r.id,
-      groupId: r.groupId,
-      date: r.date,
-      start: r.startTime,
-      end: r.endTime,
-      teacherId: r.teacherId,
-      teacherName: '', // enriched by BFF caller when needed
-      room: r.room ?? '',
-      isSubstitute: false,
-    }));
+    return rows.map(toLesson);
+  },
+
+  async lessonsInRange(groupId: string, from: string, to: string) {
+    const rows = await serverFetch<RawLesson[]>({
+      service: 'scheduling',
+      path: `/scheduling/groups/${groupId}/lessons`,
+      query: { from, to },
+    });
+    return rows.map(toLesson);
+  },
+
+  async markLessonHeld(lessonId: string, curriculumUnitId: string): Promise<MutationResult> {
+    try {
+      await serverFetch({
+        service: 'scheduling',
+        path: `/scheduling/lessons/${lessonId}`,
+        method: 'PATCH',
+        body: { status: 'held', curriculumUnitId },
+      });
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message : 'Failed to mark the lesson held' };
+    }
   },
 
   async schoolTimetable(schoolId: string) {
