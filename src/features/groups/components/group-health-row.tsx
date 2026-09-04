@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ChevronRight, CheckCircle2, Monitor, Users } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
@@ -9,7 +10,7 @@ import type { GroupHealthRowVM } from '../types';
 
 // ── Lang badge ────────────────────────────────────────────────────────────────
 
-function LangBadge({ lang }: { lang: string }) {
+export function LangBadge({ lang, label }: { lang: string; label: string }) {
   return (
     <span
       className={cn(
@@ -17,7 +18,7 @@ function LangBadge({ lang }: { lang: string }) {
         'text-[10px] font-bold uppercase tracking-wide leading-none shrink-0',
         'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300',
       )}
-      aria-label={`Language: ${lang}`}
+      aria-label={label}
     >
       {lang.slice(0, 2)}
     </span>
@@ -28,12 +29,14 @@ function LangBadge({ lang }: { lang: string }) {
 
 type TeacherInfo = { name: string; avatarUrl?: string | null } | null;
 
-function TeacherStack({
+export function TeacherStack({
   primary,
   coPrimary,
+  noTeacherLabel,
 }: {
   primary: TeacherInfo;
   coPrimary: TeacherInfo;
+  noTeacherLabel: string;
 }) {
   if (!primary) {
     return (
@@ -45,7 +48,7 @@ function TeacherStack({
         )}
       >
         <Users className="size-3" aria-hidden="true" />
-        No teacher
+        {noTeacherLabel}
       </span>
     );
   }
@@ -70,12 +73,18 @@ function TeacherStack({
 
 // ── Alert area ────────────────────────────────────────────────────────────────
 
-function AlertArea({ alerts }: { alerts: GroupHealthRowVM['alerts'] }) {
+export function AlertArea({
+  alerts,
+  okLabel,
+}: {
+  alerts: GroupHealthRowVM['alerts'];
+  okLabel: string;
+}) {
   if (alerts.length === 0) {
     return (
       <span className="inline-flex items-center gap-1 text-[11px] font-medium text-success-600 dark:text-success-400">
         <CheckCircle2 className="size-3" aria-hidden="true" />
-        OK
+        {okLabel}
       </span>
     );
   }
@@ -95,33 +104,35 @@ type Props = {
   href: string;
 };
 
-export function GroupHealthRow({ group, href }: Props) {
+/**
+ * The table row. Renders from 1024 up only — below that the list switches to
+ * `GroupCard`, because the columns this row exists for (capacity, status) are
+ * exactly the ones a narrower table has to drop (spec BEHAVIOR §10).
+ */
+export async function GroupHealthRow({ group, href }: Props) {
+  const t = await getTranslations('Groups');
   const dangerCount = group.alerts.filter((a) => a.severity === 'danger').length;
+  const label =
+    dangerCount > 0
+      ? `${group.name} — ${t('row.issues', { count: dangerCount })}`
+      : group.name;
 
   return (
     <Link
       href={href}
-      aria-label={`${group.name}${dangerCount > 0 ? ` — ${dangerCount} issue${dangerCount > 1 ? 's' : ''}` : ''}`}
+      aria-label={label}
       className={cn(
-        'grid items-center gap-x-4 px-4 py-3.5',
+        'hidden lg:grid items-center gap-x-4 px-4 py-3.5',
         'border-b border-border last:border-0',
         'transition-colors duration-100',
         'hover:bg-muted/50 focus-visible:bg-muted/50',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
-        // Responsive columns:
-        // mobile:  [name | alerts | chevron]
-        // sm:      + teacher
-        // md:      + schedule
-        // lg:      + capacity + status
-        'grid-cols-[1fr_auto_20px]',
-        'sm:grid-cols-[1fr_auto_auto_20px]',
-        'md:grid-cols-[1fr_auto_auto_auto_20px]',
-        'lg:grid-cols-[1fr_auto_auto_120px_auto_auto_20px]',
+        'grid-cols-[1fr_auto_auto_120px_auto_auto_20px]',
       )}
     >
       {/* Col 1 — lang + name + course/level */}
       <div className="min-w-0 flex items-center gap-2">
-        <LangBadge lang={group.lang} />
+        <LangBadge lang={group.lang} label={t('row.langLabel', { lang: group.lang })} />
         <div className="min-w-0">
           <p className="text-sm font-medium text-(--ssz-text-primary) truncate">{group.name}</p>
           {(group.courseName || group.level) && (
@@ -132,26 +143,26 @@ export function GroupHealthRow({ group, href }: Props) {
         </div>
       </div>
 
-      {/* Col 2 — teacher stack (hidden on mobile) */}
-      <div className="hidden sm:block">
-        <TeacherStack primary={group.primaryTeacher} coPrimary={group.coPrimaryTeacher} />
-      </div>
+      {/* Col 2 — teacher stack */}
+      <TeacherStack
+        primary={group.primaryTeacher}
+        coPrimary={group.coPrimaryTeacher}
+        noTeacherLabel={t('row.noTeacher')}
+      />
 
-      {/* Col 3 — schedule + mode (hidden until md) */}
-      <div className="hidden md:flex flex-col items-end gap-0.5">
+      {/* Col 3 — schedule + mode */}
+      <div className="flex flex-col items-end gap-0.5">
         <span className="text-xs text-(--ssz-text-secondary) whitespace-nowrap">
           {group.scheduleSummary}
         </span>
         <span className="inline-flex items-center gap-0.5 text-[10px] text-(--ssz-text-muted)">
-          {group.mode === 'online' ? (
-            <Monitor className="size-3" aria-hidden="true" />
-          ) : null}
-          {group.mode === 'online' ? 'Online' : 'In-person'}
+          {group.mode === 'online' ? <Monitor className="size-3" aria-hidden="true" /> : null}
+          {group.mode === 'online' ? t('row.online') : t('row.inPerson')}
         </span>
       </div>
 
-      {/* Col 4 — capacity meter (hidden until lg) */}
-      <div className="hidden lg:block w-[120px]">
+      {/* Col 4 — capacity meter */}
+      <div className="w-[120px]">
         <CapacityMeter
           count={group.studentCount}
           min={group.capacity.min}
@@ -160,21 +171,16 @@ export function GroupHealthRow({ group, href }: Props) {
         />
       </div>
 
-      {/* Col 5 — status pill (hidden until lg) */}
-      <div className="hidden lg:block">
-        <GroupStatusPill status={group.status} />
-      </div>
+      {/* Col 5 — status pill */}
+      <GroupStatusPill status={group.status} />
 
-      {/* Col 6 — alerts (always visible) */}
+      {/* Col 6 — alerts */}
       <div>
-        <AlertArea alerts={group.alerts} />
+        <AlertArea alerts={group.alerts} okLabel={t('row.ok')} />
       </div>
 
       {/* Col 7 — chevron */}
-      <ChevronRight
-        className="size-4 text-(--ssz-text-muted) shrink-0"
-        aria-hidden="true"
-      />
+      <ChevronRight className="size-4 text-(--ssz-text-muted) shrink-0" aria-hidden="true" />
     </Link>
   );
 }

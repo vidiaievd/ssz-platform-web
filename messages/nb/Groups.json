@@ -11,7 +11,24 @@
       "description": "Opprett din første gruppe for å komme i gang.",
       "action": "Ny gruppe"
     },
-    "filteredEmpty": "Ingen grupper samsvarer med filtrene dine."
+    "filteredEmpty": "Ingen grupper samsvarer med filtrene dine.",
+    "count": "{count, plural, one {# gruppe} other {# grupper}}",
+    "columns": {
+      "group": "Gruppe",
+      "teacher": "Lærere",
+      "schedule": "Timeplan",
+      "capacity": "Kapasitet",
+      "status": "Status",
+      "alerts": "Varsler"
+    },
+    "kpi": {
+      "activeGroups": "Aktive grupper",
+      "needTeacher": "{count, plural, =0 {alle har lærer} one {# mangler lærer} other {# mangler lærer}}",
+      "needAttention": "Trenger oppfølging",
+      "allClear": "Alt i orden",
+      "studentsEnrolled": "Påmeldte elever",
+      "drafts": "Utkast"
+    }
   },
   "filter": {
     "search": "Søk i grupper…",
@@ -38,7 +55,9 @@
     "noTeacher": "Ingen lærer",
     "online": "Nettbasert",
     "inPerson": "Fysisk",
-    "ok": "OK"
+    "ok": "OK",
+    "issues": "{count, plural, one {# problem} other {# problemer}}",
+    "langLabel": "Språk: {lang}"
   },
   "resolve": {
     "actionRequired": "Handling kreves",

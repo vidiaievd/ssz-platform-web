@@ -11,7 +11,24 @@
       "description": "Створіть першу групу, щоб почати.",
       "action": "Нова група"
     },
-    "filteredEmpty": "Жодна група не відповідає вашим фільтрам."
+    "filteredEmpty": "Жодна група не відповідає вашим фільтрам.",
+    "count": "{count, plural, one {# група} few {# групи} many {# груп} other {# групи}}",
+    "columns": {
+      "group": "Група",
+      "teacher": "Учителі",
+      "schedule": "Розклад",
+      "capacity": "Місця",
+      "status": "Статус",
+      "alerts": "Проблеми"
+    },
+    "kpi": {
+      "activeGroups": "Активні групи",
+      "needTeacher": "{count, plural, =0 {усі з учителем} one {# без учителя} few {# без учителя} many {# без учителя} other {# без учителя}}",
+      "needAttention": "Потребують уваги",
+      "allClear": "Усе гаразд",
+      "studentsEnrolled": "Учнів зараховано",
+      "drafts": "Чернетки"
+    }
   },
   "filter": {
     "search": "Пошук груп…",
@@ -38,7 +55,9 @@
     "noTeacher": "Немає вчителя",
     "online": "Онлайн",
     "inPerson": "Очно",
-    "ok": "OK"
+    "ok": "OK",
+    "issues": "{count, plural, one {# проблема} few {# проблеми} many {# проблем} other {# проблеми}}",
+    "langLabel": "Мова: {lang}"
   },
   "resolve": {
     "actionRequired": "Потрібна дія",

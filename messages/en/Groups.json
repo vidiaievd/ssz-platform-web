@@ -11,7 +11,24 @@
       "description": "Create your first group to get started.",
       "action": "New group"
     },
-    "filteredEmpty": "No groups match your filters."
+    "filteredEmpty": "No groups match your filters.",
+    "count": "{count, plural, one {# group} other {# groups}}",
+    "columns": {
+      "group": "Group",
+      "teacher": "Teachers",
+      "schedule": "Schedule",
+      "capacity": "Capacity",
+      "status": "Status",
+      "alerts": "Alerts"
+    },
+    "kpi": {
+      "activeGroups": "Active groups",
+      "needTeacher": "{count, plural, =0 {all staffed} one {# needs a teacher} other {# need a teacher}}",
+      "needAttention": "Need attention",
+      "allClear": "All clear",
+      "studentsEnrolled": "Students enrolled",
+      "drafts": "Drafts"
+    }
   },
   "filter": {
     "search": "Search groups…",
@@ -38,7 +55,9 @@
     "noTeacher": "No teacher",
     "online": "Online",
     "inPerson": "In-person",
-    "ok": "OK"
+    "ok": "OK",
+    "issues": "{count, plural, one {# issue} other {# issues}}",
+    "langLabel": "Language: {lang}"
   },
   "resolve": {
     "actionRequired": "Action required",

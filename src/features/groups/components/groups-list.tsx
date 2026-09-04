@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { filterGroups, attentionCount, type GroupFilter } from '../lib/filter-groups';
 import { GroupHealthRow } from './group-health-row';
+import { GroupCard } from './group-card';
 import { GroupListFilters } from './group-list-filters';
 import type { GroupHealthRowVM } from '../types';
 
 // ── Empty state ───────────────────────────────────────────────────────────────
 
-function EmptyState({ filtered, newGroupHref }: { filtered: boolean; newGroupHref: string }) {
+async function EmptyState({ filtered, newGroupHref }: { filtered: boolean; newGroupHref: string }) {
+  const t = await getTranslations('Groups');
+
   return (
     <div className="flex flex-col items-center gap-3 py-20 text-center">
       <div className="flex size-12 items-center justify-center rounded-full bg-muted">
@@ -19,45 +22,105 @@ function EmptyState({ filtered, newGroupHref }: { filtered: boolean; newGroupHre
       </div>
       <div>
         <p className="text-sm font-medium text-(--ssz-text-primary)">
-          {filtered ? 'No groups match your filters' : 'No groups yet'}
+          {filtered ? t('list.filteredEmpty') : t('list.empty.title')}
         </p>
-        <p className="mt-1 text-xs text-(--ssz-text-muted)">
-          {filtered
-            ? 'Try adjusting your search or filter criteria.'
-            : 'Create your first group to get started.'}
-        </p>
+        {!filtered && (
+          <p className="mt-1 text-xs text-(--ssz-text-muted)">{t('list.empty.description')}</p>
+        )}
       </div>
       {!filtered && (
         <Button asChild size="sm">
-          <Link href={newGroupHref}>New group</Link>
+          <Link href={newGroupHref}>{t('list.empty.action')}</Link>
         </Button>
       )}
     </div>
   );
 }
 
+// ── KPI strip ─────────────────────────────────────────────────────────────────
+
+function KpiCard({
+  label,
+  value,
+  hint,
+  tone = 'neutral',
+}: {
+  label: string;
+  value: number;
+  hint?: string;
+  tone?: 'neutral' | 'danger';
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-card px-4 py-3">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
+        {label}
+      </p>
+      <p
+        className={cn(
+          'mt-1 text-2xl font-bold leading-none',
+          tone === 'danger' && value > 0
+            ? 'text-error-600 dark:text-error-400'
+            : 'text-(--ssz-text-primary)',
+        )}
+      >
+        {value}
+      </p>
+      {hint && <p className="mt-1 text-xs text-(--ssz-text-muted)">{hint}</p>}
+    </div>
+  );
+}
+
+async function KpiStrip({ groups }: { groups: GroupHealthRowVM[] }) {
+  const t = await getTranslations('Groups');
+
+  const active = groups.filter((g) => g.status === 'active').length;
+  const attention = attentionCount(groups);
+  const students = groups.reduce((sum, g) => sum + g.studentCount, 0);
+  const drafts = groups.filter((g) => g.status === 'draft').length;
+  const needTeacher = groups.filter((g) =>
+    g.alerts.some((a) => a.type === 'no-primary'),
+  ).length;
+
+  return (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-3.5">
+      <KpiCard
+        label={t('list.kpi.activeGroups')}
+        value={active}
+        hint={t('list.kpi.needTeacher', { count: needTeacher })}
+      />
+      <KpiCard
+        label={t('list.kpi.needAttention')}
+        value={attention}
+        tone="danger"
+        hint={attention === 0 ? t('list.kpi.allClear') : undefined}
+      />
+      <KpiCard label={t('list.kpi.studentsEnrolled')} value={students} />
+      <KpiCard label={t('list.kpi.drafts')} value={drafts} />
+    </div>
+  );
+}
+
 // ── Table header ──────────────────────────────────────────────────────────────
 
-function TableHeader() {
+async function TableHeader() {
+  const t = await getTranslations('Groups');
+
   return (
     <div
       className={cn(
-        'grid items-center gap-x-4 px-4 py-2',
+        'hidden lg:grid items-center gap-x-4 px-4 py-2',
         'bg-muted/40 border-b border-border',
         'text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted)',
-        'grid-cols-[1fr_auto_20px]',
-        'sm:grid-cols-[1fr_auto_auto_20px]',
-        'md:grid-cols-[1fr_auto_auto_auto_20px]',
-        'lg:grid-cols-[1fr_auto_auto_120px_auto_auto_20px]',
+        'grid-cols-[1fr_auto_auto_120px_auto_auto_20px]',
       )}
       aria-hidden="true"
     >
-      <span>Group</span>
-      <span className="hidden sm:block">Teacher</span>
-      <span className="hidden md:block">Schedule</span>
-      <span className="hidden lg:block">Capacity</span>
-      <span className="hidden lg:block">Status</span>
-      <span>Alerts</span>
+      <span>{t('list.columns.group')}</span>
+      <span>{t('list.columns.teacher')}</span>
+      <span>{t('list.columns.schedule')}</span>
+      <span>{t('list.columns.capacity')}</span>
+      <span>{t('list.columns.status')}</span>
+      <span>{t('list.columns.alerts')}</span>
       <span />
     </div>
   );
@@ -91,7 +154,7 @@ export async function GroupsList({ groups, schoolSlug, filter }: Props) {
         <div>
           <h1 className="text-2xl font-bold text-(--ssz-text-primary)">{t('list.title')}</h1>
           <p className="mt-0.5 text-sm text-(--ssz-text-secondary)">
-            {total} {total === 1 ? 'group' : 'groups'}
+            {t('list.count', { count: total })}
             {active > 0 && <> · {active} {t('list.active')}</>}
             {attention > 0 && (
               <>
@@ -117,22 +180,23 @@ export async function GroupsList({ groups, schoolSlug, filter }: Props) {
         </div>
       </div>
 
+      {/* KPI strip */}
+      {total > 0 && <KpiStrip groups={groups} />}
+
       {/* Filter island (client) */}
       <GroupListFilters attentionCount={attention} draftsCount={drafts} />
 
-      {/* Table */}
+      {/* Table (≥1024) / cards (below) */}
       {filtered.length === 0 ? (
         <EmptyState filtered={isFiltered} newGroupHref={newGroupHref} />
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
           <TableHeader />
-          <div role="list" aria-label="Groups">
+          <div role="list" aria-label={t('list.title')}>
             {filtered.map((group) => (
               <div key={group.id} role="listitem">
-                <GroupHealthRow
-                  group={group}
-                  href={`${baseHref}/groups/${group.id}`}
-                />
+                <GroupHealthRow group={group} href={`${baseHref}/groups/${group.id}`} />
+                <GroupCard group={group} href={`${baseHref}/groups/${group.id}`} />
               </div>
             ))}
           </div>

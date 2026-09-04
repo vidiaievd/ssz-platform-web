@@ -11,7 +11,24 @@
       "description": "Создайте первую группу, чтобы начать.",
       "action": "Новая группа"
     },
-    "filteredEmpty": "Ни одна группа не соответствует вашим фильтрам."
+    "filteredEmpty": "Ни одна группа не соответствует вашим фильтрам.",
+    "count": "{count, plural, one {# группа} few {# группы} many {# групп} other {# группы}}",
+    "columns": {
+      "group": "Группа",
+      "teacher": "Учителя",
+      "schedule": "Расписание",
+      "capacity": "Места",
+      "status": "Статус",
+      "alerts": "Проблемы"
+    },
+    "kpi": {
+      "activeGroups": "Активные группы",
+      "needTeacher": "{count, plural, =0 {все с учителем} one {# без учителя} few {# без учителя} many {# без учителя} other {# без учителя}}",
+      "needAttention": "Требуют внимания",
+      "allClear": "Всё в порядке",
+      "studentsEnrolled": "Учеников зачислено",
+      "drafts": "Черновики"
+    }
   },
   "filter": {
     "search": "Поиск групп…",
@@ -38,7 +55,9 @@
     "noTeacher": "Нет учителя",
     "online": "Онлайн",
     "inPerson": "Очно",
-    "ok": "OK"
+    "ok": "OK",
+    "issues": "{count, plural, one {# проблема} few {# проблемы} many {# проблем} other {# проблемы}}",
+    "langLabel": "Язык: {lang}"
   },
   "resolve": {
     "actionRequired": "Требуется действие",
