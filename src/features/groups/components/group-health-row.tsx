@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
+import { TableRow, TableCell } from '@/components/ui/table';
 import { AlertChip, CapacityMeter } from '@/components/shared/operations';
 import { GroupStatusPill } from './group-status-pill';
 import { GroupRowMenu } from './group-row-menu';
@@ -94,7 +95,7 @@ export function AlertArea({
     );
   }
   return (
-    <div className="flex flex-wrap gap-1 max-w-[175px]">
+    <div className="flex flex-wrap gap-1">
       {alerts.map((a, i) => (
         <AlertChip key={i} alert={a} />
       ))}
@@ -112,16 +113,16 @@ type Props = {
 };
 
 /**
- * The table row. A real `<tr>`, not an independent CSS grid: the header and
- * every row used to size their own `1fr`/`auto` tracks off their own content,
- * so columns never lined up across rows (a "Time clash" chip is wider than an
- * empty alerts cell, so column 6 landed at a different x on every row). A
- * `<table>` sizes all rows' columns together, the way the spec's own markup
- * does.
+ * One row of the shared `<Table>` (see `ui/table.tsx`). Column widths live on
+ * the header's `<TableHead>`s in `groups-list.tsx`, combined with
+ * `table-layout: fixed` — that's what keeps every row's columns lined up with
+ * the header and with each other, which independent per-row CSS grids could
+ * never promise (a "Time clash" chip is wider than an empty alerts cell, so a
+ * grid-per-row layout put column six at a different x on every row).
  *
  * The row still navigates on click anywhere in it: the first cell carries an
- * invisible `<Link>` stretched over the whole `<tr>` (which is why the `<tr>`
- * is `relative`), and `GroupRowMenu` in the last cell sits later in the DOM —
+ * invisible `<Link>` stretched over the whole `<tr>` (which is why the row is
+ * `relative`), and `GroupRowMenu` in the last cell sits later in the DOM —
  * later wins the paint order at equal z-index — so it stays independently
  * clickable on top of the stretched link without needing its own z-index.
  */
@@ -134,15 +135,9 @@ export async function GroupHealthRow({ group, href, schoolId, schoolSlug }: Prop
       : group.name;
 
   return (
-    <tr
-      className={cn(
-        'relative',
-        'border-b border-border last:border-0',
-        'transition-colors duration-100 hover:bg-(--ssz-bg-subtle)',
-      )}
-    >
+    <TableRow className="relative">
       {/* Col 1 — lang + name + course/level, plus the stretched row link */}
-      <td className="px-4 py-3.5">
+      <TableCell>
         <Link
           href={href}
           aria-label={label}
@@ -172,19 +167,19 @@ export async function GroupHealthRow({ group, href, schoolId, schoolSlug }: Prop
             )}
           </div>
         </div>
-      </td>
+      </TableCell>
 
       {/* Col 2 — teacher stack */}
-      <td className="px-4 py-3.5">
+      <TableCell>
         <TeacherStack
           primary={group.primaryTeacher}
           coPrimary={group.coPrimaryTeacher}
           noTeacherLabel={t('row.noTeacher')}
         />
-      </td>
+      </TableCell>
 
       {/* Col 3 — schedule + mode */}
-      <td className="px-4 py-3.5">
+      <TableCell>
         <div className="flex flex-col gap-0.5">
           <span className="text-xs font-medium text-(--ssz-text-secondary) whitespace-nowrap">
             {group.scheduleSummary}
@@ -193,37 +188,35 @@ export async function GroupHealthRow({ group, href, schoolId, schoolSlug }: Prop
             {group.mode === 'online' ? t('row.online') : t('row.inPerson')}
           </span>
         </div>
-      </td>
+      </TableCell>
 
       {/* Col 4 — capacity meter */}
-      <td className="px-4 py-3.5">
-        <div className="w-[100px]">
-          <CapacityMeter
-            count={group.studentCount}
-            min={group.capacity.min}
-            max={group.capacity.max}
-            size="sm"
-          />
-        </div>
-      </td>
+      <TableCell>
+        <CapacityMeter
+          count={group.studentCount}
+          min={group.capacity.min}
+          max={group.capacity.max}
+          size="sm"
+        />
+      </TableCell>
 
       {/* Col 5 — status pill */}
-      <td className="px-4 py-3.5">
+      <TableCell>
         <GroupStatusPill status={group.status} />
-      </td>
+      </TableCell>
 
       {/* Col 6 — alerts */}
-      <td className="px-4 py-3.5">
+      <TableCell>
         <AlertArea alerts={group.alerts} okLabel={t('row.ok')} />
-      </td>
+      </TableCell>
 
       {/* Col 7 — row menu + chevron (later in the DOM than the stretched link, so it stays clickable) */}
-      <td className="px-3 py-3.5">
+      <TableCell className="px-3">
         <div className="relative flex items-center gap-1 justify-end">
           <GroupRowMenu schoolId={schoolId} schoolSlug={schoolSlug} group={group} />
           <ChevronRight className="size-4 text-(--ssz-text-muted) shrink-0" aria-hidden="true" />
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }

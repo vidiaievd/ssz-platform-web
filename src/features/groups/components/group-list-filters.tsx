@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Search, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -83,18 +84,13 @@ export function GroupListFilters({ totalCount, attentionCount }: Props) {
           className="absolute left-[11px] top-1/2 -translate-y-1/2 size-[15px] text-(--ssz-text-muted) pointer-events-none"
           aria-hidden="true"
         />
-        <input
+        <Input
           type="search"
           value={inputValue}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder={t('filter.search')}
           aria-label={t('filter.search')}
-          className={cn(
-            'h-9 w-full rounded-[10px] border border-input bg-background',
-            'pl-[33px] pr-8 text-sm text-(--ssz-text-primary)',
-            'placeholder:text-(--ssz-text-muted)',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          )}
+          className="h-9 pl-[33px] pr-8"
         />
         {inputValue && (
           <button

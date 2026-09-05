@@ -105,7 +105,10 @@ function buildScheduleSummary(slots: Slot[]): string {
     return days.indexOf(a.day) - days.indexOf(b.day);
   });
   const days = [...new Set(sorted.map((s) => s.day))].join('/');
-  const time = sorted[0]?.start ?? '';
+  const first = sorted[0];
+  // The end time matters as much as the start for "can I be somewhere else
+  // after this": a bare start hides whether two groups' slots actually clash.
+  const time = first ? `${first.start}–${first.end}` : '';
   return `${days} ${time}`.trim();
 }
 

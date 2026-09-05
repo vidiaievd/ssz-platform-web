@@ -102,12 +102,12 @@ export function CapacityMeter({
           )}
         </span>
         {tone === 'error' && (
-          <span className="text-[11px] font-semibold text-error-600 dark:text-error-400">
+          <span className="text-[11px] font-semibold text-error-700 dark:text-error-400">
             over
           </span>
         )}
         {tone === 'warning' && (
-          <span className="text-[11px] font-semibold text-warning-600 dark:text-warning-400">
+          <span className="text-[11px] font-semibold text-warning-700 dark:text-warning-400">
             low
           </span>
         )}
