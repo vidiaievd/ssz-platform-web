@@ -57,12 +57,17 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
         aria-selected={active}
         onClick={() => ctx.onValueChange(value)}
         className={cn(
-          "px-5 py-2.25 text-sm font-medium capitalize cursor-pointer",
+          "px-5 py-2.25 text-sm capitalize cursor-pointer",
           "border-b-2 -mb-0.5 transition-all duration-base ease-out-ssz",
           "focus-visible:outline-none focus-visible:shadow-focus-primary rounded-t-sm",
+          // The active tab reads as selected by being darker and bolder than
+          // its neighbors, not by switching to the brand color — a tab bar
+          // isn't a place brand color was ever asked to show up, and every
+          // other "which one is active" indicator in this app (nav, filters)
+          // already uses primary, so here it stopped meaning anything.
           active
-            ? "border-primary text-primary-600"
-            : "border-transparent text-(--ssz-text-secondary) hover:text-(--ssz-text-primary)",
+            ? "border-(--ssz-text-primary) text-(--ssz-text-primary) font-semibold"
+            : "border-transparent text-(--ssz-text-secondary) font-medium hover:text-(--ssz-text-primary)",
           className,
         )}
         {...props}
