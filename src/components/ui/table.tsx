@@ -35,14 +35,7 @@ const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    // border-strong, not the row-to-row border-default: this seam sits between
-    // the header (bg-subtle) and a hovered first row (also bg-subtle) — same
-    // color on both sides — and border-default is only one step darker than
-    // bg-subtle, so the line all but disappears exactly when a row is hovered.
-    className={cn(
-      "bg-(--ssz-bg-subtle) [&_tr]:border-b [&_tr]:border-(--ssz-border-strong)",
-      className,
-    )}
+    className={cn("bg-(--ssz-bg-subtle)", className)}
     {...props}
   />
 ));
