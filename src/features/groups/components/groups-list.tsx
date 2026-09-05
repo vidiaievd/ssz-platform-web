@@ -193,12 +193,12 @@ export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props
                       "Group is generous". Every column specified means any
                       leftover width is spread proportionally across all
                       seven instead of dumped into one. */}
-                  <TableHead className="w-[380px]">{t('list.columns.group')}</TableHead>
+                  <TableHead className="w-[400px]">{t('list.columns.group')}</TableHead>
                   <TableHead className="w-[90px]">{t('list.columns.teacher')}</TableHead>
                   <TableHead className="w-[160px]">{t('list.columns.schedule')}</TableHead>
                   <TableHead className="w-[130px]">{t('list.columns.capacity')}</TableHead>
                   <TableHead className="w-[100px]">{t('list.columns.status')}</TableHead>
-                  <TableHead className="w-[170px]">{t('list.columns.alerts')}</TableHead>
+                  <TableHead className="w-[150px]">{t('list.columns.alerts')}</TableHead>
                   {/* 80, not 64: the menu button (28px) + chevron (16px) + gap
                       (4px) + cell padding (24px) need 72px — 64 was flex-
                       shrinking the button's width while its height held at
