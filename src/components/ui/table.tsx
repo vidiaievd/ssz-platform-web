@@ -79,14 +79,17 @@ const TableHead = React.forwardRef<
     // was still invisible on screen: the cell's own (unset) border wins the
     // collapse regardless.
     //
-    // text-secondary, not border-strong: this seam sits between the header
-    // and a hovered first row, and both are bg-subtle. Screenshotted both
-    // side by side (same story) — border-strong (L 0.83) against bg-subtle
-    // (L 0.95) is a 0.12 gap that reads as no line at all once oklch hits
-    // sRGB; text-secondary (L 0.46) is the first candidate that actually
-    // shows.
+    // text-muted at 1.5px, not border-strong at 1px: this seam sits between
+    // the header and a hovered first row, and both are bg-subtle, so it needs
+    // more than an ordinary border to read at all. Screenshotted four
+    // candidates side by side in Storybook — border-strong stayed invisible
+    // even at 2px; text-muted only became a clean, visible line once widened
+    // to 1.5px, the same width an input's own border already uses. That
+    // combination — a text token, but the field's usual width — is the
+    // closest match to "looks like a normal field's border" that still shows
+    // between two identical backgrounds.
     className={cn(
-      "text-left px-4 py-[11px] whitespace-nowrap border-b border-(--ssz-text-secondary)",
+      "text-left px-4 py-[11px] whitespace-nowrap border-b-[1.5px] border-(--ssz-text-muted)",
       "text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)",
       className,
     )}

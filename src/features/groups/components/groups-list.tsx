@@ -185,10 +185,15 @@ export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props
                     — see the comment there for why a row-level border doesn't
                     survive border-collapse. */}
                 <TableRow className="hover:bg-transparent">
-                  {/* Group is the only column with no width: table-fixed hands
-                      it whatever's left after the other six, which is the
-                      point — a name is the one thing here worth the room. */}
-                  <TableHead>{t('list.columns.group')}</TableHead>
+                  {/* Explicit, not left to soak up the rest: an unset column
+                      under table-fixed takes 100% of whatever the other six
+                      don't use, and on a wide page with short names that's a
+                      few hundred empty pixels between the name and Teachers
+                      — reading as "Teachers is oddly far away" rather than
+                      "Group is generous". Every column specified means any
+                      leftover width is spread proportionally across all
+                      seven instead of dumped into one. */}
+                  <TableHead className="w-[380px]">{t('list.columns.group')}</TableHead>
                   <TableHead className="w-[90px]">{t('list.columns.teacher')}</TableHead>
                   <TableHead className="w-[160px]">{t('list.columns.schedule')}</TableHead>
                   <TableHead className="w-[130px]">{t('list.columns.capacity')}</TableHead>
