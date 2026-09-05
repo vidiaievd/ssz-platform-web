@@ -95,7 +95,7 @@ export function GroupTabs({
         </SelectContent>
       </Select>
 
-      <TabsList className="hidden md:flex overflow-x-auto">
+      <TabsList className="hidden md:flex overflow-x-auto overflow-y-hidden">
         <TabsTrigger value="overview">{tabLabel.overview}</TabsTrigger>
         <TabsTrigger value="students">{tabLabel.students}</TabsTrigger>
         <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
