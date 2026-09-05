@@ -1,0 +1,10 @@
+import { chromium } from 'playwright';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+const cookies = process.env.SSZ_AT ? [{ name: 'ssz_at', value: process.env.SSZ_AT, domain: 'localhost', path: '/' }] : [];
+if (cookies.length) await page.context().addCookies(cookies);
+await page.goto('http://localhost:3000/en/school/nordick/groups', { waitUntil: 'networkidle', timeout: 20000 }).catch(e => console.log('nav error', e.message));
+await page.waitForTimeout(500);
+await page.screenshot({ path: '/tmp/claude-1000/-home-dmytro-Documents-my-project-ssz-platform/150073ef-033e-4b2a-894f-96c281284e26/scratchpad/groups-page.png', fullPage: false });
+console.log('URL:', page.url());
+await browser.close();

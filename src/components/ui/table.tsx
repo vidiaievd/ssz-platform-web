@@ -71,8 +71,22 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <th
     ref={ref}
+    // The header/body divider lives here, not on the header's <tr>: under
+    // border-collapse (which this Table uses), collapsing resolves borders
+    // per cell, and a border set only at the row level doesn't survive that
+    // resolution — verified in Storybook (UI/Table), where the row-level
+    // border rendered with the right color/width in getComputedStyle and
+    // was still invisible on screen: the cell's own (unset) border wins the
+    // collapse regardless.
+    //
+    // text-secondary, not border-strong: this seam sits between the header
+    // and a hovered first row, and both are bg-subtle. Screenshotted both
+    // side by side (same story) — border-strong (L 0.83) against bg-subtle
+    // (L 0.95) is a 0.12 gap that reads as no line at all once oklch hits
+    // sRGB; text-secondary (L 0.46) is the first candidate that actually
+    // shows.
     className={cn(
-      "text-left px-4 py-[11px] whitespace-nowrap",
+      "text-left px-4 py-[11px] whitespace-nowrap border-b border-(--ssz-text-secondary)",
       "text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)",
       className,
     )}

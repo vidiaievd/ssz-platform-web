@@ -181,16 +181,10 @@ export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props
           <div className="hidden lg:block">
             <Table className="min-w-[900px] table-fixed">
               <TableHeader>
-                {/*
-                  border-strong, not TableRow's own border-default: this seam
-                  sits between the header and a hovered first row, and both
-                  sides of it are bg-subtle — border-default is only one step
-                  darker than bg-subtle, so the line all but disappears right
-                  when a row is hovered. Set directly here (not via an
-                  ancestor selector) so cn's merge — not cascade specificity —
-                  decides which border-color utility wins.
-                */}
-                <TableRow className="hover:bg-transparent border-(--ssz-border-strong)">
+                {/* The header/body divider itself lives on TableHead, not here
+                    — see the comment there for why a row-level border doesn't
+                    survive border-collapse. */}
+                <TableRow className="hover:bg-transparent">
                   {/* Group is the only column with no width: table-fixed hands
                       it whatever's left after the other six, which is the
                       point — a name is the one thing here worth the room. */}
