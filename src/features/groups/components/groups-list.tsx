@@ -182,13 +182,20 @@ export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props
             <Table className="min-w-[900px] table-fixed">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
+                  {/* Group is the only column with no width: table-fixed hands
+                      it whatever's left after the other six, which is the
+                      point — a name is the one thing here worth the room. */}
                   <TableHead>{t('list.columns.group')}</TableHead>
-                  <TableHead className="w-[110px]">{t('list.columns.teacher')}</TableHead>
-                  <TableHead className="w-[170px]">{t('list.columns.schedule')}</TableHead>
-                  <TableHead className="w-[140px]">{t('list.columns.capacity')}</TableHead>
-                  <TableHead className="w-[110px]">{t('list.columns.status')}</TableHead>
-                  <TableHead className="w-[210px]">{t('list.columns.alerts')}</TableHead>
-                  <TableHead className="w-[64px]" />
+                  <TableHead className="w-[90px]">{t('list.columns.teacher')}</TableHead>
+                  <TableHead className="w-[160px]">{t('list.columns.schedule')}</TableHead>
+                  <TableHead className="w-[130px]">{t('list.columns.capacity')}</TableHead>
+                  <TableHead className="w-[100px]">{t('list.columns.status')}</TableHead>
+                  <TableHead className="w-[170px]">{t('list.columns.alerts')}</TableHead>
+                  {/* 80, not 64: the menu button (28px) + chevron (16px) + gap
+                      (4px) + cell padding (24px) need 72px — 64 was flex-
+                      shrinking the button's width while its height held at
+                      28px, which is exactly how a square button goes flat. */}
+                  <TableHead className="w-[80px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>

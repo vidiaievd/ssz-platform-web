@@ -101,7 +101,11 @@ export function GroupRowMenu({ schoolId, schoolSlug, group }: Props) {
             variant="ghost"
             size="icon-sm"
             aria-label={t('detail.moreActions')}
-            className="size-7 text-(--ssz-text-muted)"
+            // shrink-0: the row's menu cell is a flex row sharing width with
+            // the chevron, and a flex item's explicit size is only a starting
+            // point — without this it was the width, not the height, that
+            // gave way when the cell ran tight, flattening a square button.
+            className="size-7 shrink-0 text-(--ssz-text-muted)"
           >
             <MoreHorizontal className="size-4" />
           </Button>
