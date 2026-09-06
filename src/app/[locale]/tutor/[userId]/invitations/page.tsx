@@ -9,7 +9,7 @@ export default async function TutoringInvitationsPage() {
   const pendingCount = invitations.filter((i) => i.status === 'pending').length;
 
   return (
-    <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+    <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2">
           <MailCheck className="h-5 w-5 text-muted-foreground" aria-hidden="true" />

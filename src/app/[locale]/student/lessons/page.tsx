@@ -8,7 +8,7 @@ export default async function LessonsPage() {
   const t = await getTranslations('Content');
 
   return (
-    <main className="container mx-auto max-w-6xl px-4 py-8">
+    <main className="container mx-auto max-w-page px-4 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">{t('lessonsTitle')}</h1>
         <p className="text-muted-foreground mt-1 text-sm">{t('lessonsSubtitle')}</p>

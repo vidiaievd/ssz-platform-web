@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function GroupsLoading() {
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-5 max-w-310 mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5 max-w-page mx-auto">
       {/* Page header */}
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-2">

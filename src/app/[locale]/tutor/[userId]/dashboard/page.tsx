@@ -25,7 +25,7 @@ export default async function TutorDashboardPage() {
   const firstName = profile?.displayName?.split(' ')[0] ?? null;
 
   return (
-    <div className="px-6 py-8 max-w-5xl mx-auto space-y-8">
+    <div className="px-6 py-8 max-w-page mx-auto space-y-8">
 
       {/* Greeting */}
       <div>
