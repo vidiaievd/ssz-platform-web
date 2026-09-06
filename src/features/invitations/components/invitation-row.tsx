@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { TableRow, TableCell } from '@/components/ui/table';
 import { InvitationStatusChip } from './invitation-status-chip';
 import { InvitationExpiry } from './invitation-expiry';
 import { ResendAction } from './resend-action';
@@ -59,46 +60,46 @@ export function InvitationRow({
   }
 
   return (
-    <tr className="border-b last:border-0 hover:bg-muted/40 transition-colors">
+    <TableRow>
       {/* Recipient */}
-      <td className="py-3 px-4 text-sm">
+      <TableCell className="text-sm">
         <div className="font-medium">{invitation.email}</div>
         {invitation.invitedByName && (
           <div className="text-xs text-muted-foreground">
             {t('table.invitedBy', { name: invitation.invitedByName })}
           </div>
         )}
-      </td>
+      </TableCell>
 
       {/* Role + Group */}
       {showRoleColumn && (
-        <td className="py-3 px-4 text-sm">
+        <TableCell className="text-sm">
           <div className="font-medium">{tRoles(invitation.role)}</div>
           {invitation.targetGroupName && (
             <div className="text-xs text-muted-foreground">
               {invitation.targetGroupName}
             </div>
           )}
-        </td>
+        </TableCell>
       )}
 
       {/* Status */}
-      <td className="py-3 px-4">
+      <TableCell>
         <InvitationStatusChip status={invitation.status} />
-      </td>
+      </TableCell>
 
       {/* Sent */}
-      <td className="py-3 px-4 text-sm text-muted-foreground">
+      <TableCell className="text-sm text-muted-foreground">
         {new Date(invitation.lastSentAt).toLocaleDateString()}
-      </td>
+      </TableCell>
 
       {/* Expiry */}
-      <td className="py-3 px-4">
+      <TableCell>
         <InvitationExpiry invitation={invitation} />
-      </td>
+      </TableCell>
 
       {/* Actions */}
-      <td className="py-3 px-4 text-right">
+      <TableCell className="text-right">
         {actionable ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -137,7 +138,7 @@ export function InvitationRow({
             </DropdownMenuContent>
           </DropdownMenu>
         ) : null}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }

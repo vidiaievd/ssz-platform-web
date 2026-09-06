@@ -79,15 +79,13 @@ const TableHead = React.forwardRef<
     // was still invisible on screen: the cell's own (unset) border wins the
     // collapse regardless.
     //
-    // neutral-500 at 1.5px: this seam sits between the header and a hovered
-    // first row, and both are bg-subtle, so an ordinary border (border-strong,
-    // even neutral-400) stays invisible regardless of width — screenshotted
-    // through neutral-300/400/500 side by side in Storybook to find where it
-    // actually starts reading as a line. text-muted (one step further down
-    // the same scale) also works but came back from review as heavier than
-    // intended; neutral-500 is the lightest step that still shows.
+    // border-default at 1.5px: matches the header/body seam on the group
+    // roster's toolbar band, which uses the same token — picked by direct
+    // comparison against the once-used neutral-500 (a deliberately heavier
+    // seam for a bg-subtle-on-bg-subtle case, kept in git history if that
+    // reasoning is ever needed again).
     className={cn(
-      "text-left px-4 py-[11px] whitespace-nowrap border-b-[1.5px] border-neutral-500",
+      "text-left px-4 py-[11px] whitespace-nowrap border-b-[1.5px] border-(--ssz-border-default)",
       "text-[10.5px] font-bold uppercase tracking-wide text-(--ssz-text-muted)",
       className,
     )}

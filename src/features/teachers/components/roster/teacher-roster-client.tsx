@@ -14,6 +14,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar } from "@/components/ui/avatar";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { LanguageChip } from "@/components/shared/operations/language-chip";
 import { PendingInvitesBadge } from "@/features/invitations/components/pending-invites-badge";
 import { removeTeacher } from "../../api/mutations";
@@ -92,96 +100,92 @@ export function TeacherRosterClient({ schoolId, schoolSlug, teachers }: Props) {
           </Button>
         </div>
       ) : (
-        <div className="rounded-lg border border-border overflow-hidden">
-          <table className="w-full text-sm" role="table" aria-label={t("tableLabel")}>
-            <thead className="bg-muted/50">
-              <tr>
-                <th scope="col" className="px-4 py-3 text-left font-medium text-(--ssz-text-secondary)">
-                  {t("columns.name")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left font-medium text-(--ssz-text-secondary) hidden sm:table-cell">
-                  {t("columns.email")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left font-medium text-(--ssz-text-secondary) hidden md:table-cell">
-                  {t("columns.languages")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left font-medium text-(--ssz-text-secondary)">
-                  {t("columns.status")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-right font-medium text-(--ssz-text-secondary)">
-                  <span className="sr-only">{t("columns.actions")}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border bg-card">
-              {teachers.map((teacher) => (
-                <tr key={teacher.userId} className="hover:bg-muted/30 transition-colors">
-                  {/* Name + avatar */}
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Avatar
-                        name={teacher.name || teacher.email}
-                        src={teacher.avatarUrl ?? undefined}
-                        size="sm"
-                      />
-                      <span className="font-medium text-(--ssz-text-primary) truncate">
-                        {teacher.name || teacher.email}
-                      </span>
-                    </div>
-                  </td>
+        <Table role="table" aria-label={t("tableLabel")}>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead scope="col">{t("columns.name")}</TableHead>
+              <TableHead scope="col" className="hidden sm:table-cell">
+                {t("columns.email")}
+              </TableHead>
+              <TableHead scope="col" className="hidden md:table-cell">
+                {t("columns.languages")}
+              </TableHead>
+              <TableHead scope="col" className="w-[130px]">
+                {t("columns.status")}
+              </TableHead>
+              <TableHead scope="col" className="w-[80px] text-right">
+                <span className="sr-only">{t("columns.actions")}</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {teachers.map((teacher) => (
+              <TableRow key={teacher.userId}>
+                {/* Name + avatar */}
+                <TableCell>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar
+                      name={teacher.name || teacher.email}
+                      src={teacher.avatarUrl ?? undefined}
+                      size="sm"
+                    />
+                    <span className="font-medium text-(--ssz-text-primary) truncate">
+                      {teacher.name || teacher.email}
+                    </span>
+                  </div>
+                </TableCell>
 
-                  {/* Email */}
-                  <td className="px-4 py-3 text-(--ssz-text-secondary) hidden sm:table-cell">
-                    <span className="truncate max-w-50 block">{teacher.email}</span>
-                  </td>
+                {/* Email */}
+                <TableCell className="text-(--ssz-text-secondary) hidden sm:table-cell">
+                  <span className="truncate max-w-50 block">{teacher.email}</span>
+                </TableCell>
 
-                  {/* Languages */}
-                  <td className="px-4 py-3 hidden md:table-cell">
-                    <div className="flex flex-wrap gap-1">
-                      {teacher.languages.length > 0 ? (
-                        teacher.languages.map((lang) => (
-                          <LanguageChip key={lang} lang={lang} />
-                        ))
-                      ) : (
-                        <span className="text-(--ssz-text-muted) text-xs">{t("noLanguages")}</span>
-                      )}
-                    </div>
-                  </td>
+                {/* Languages */}
+                <TableCell className="hidden md:table-cell">
+                  <div className="flex flex-wrap gap-1">
+                    {teacher.languages.length > 0 ? (
+                      teacher.languages.map((lang) => (
+                        <LanguageChip key={lang} lang={lang} />
+                      ))
+                    ) : (
+                      <span className="text-(--ssz-text-muted) text-xs">{t("noLanguages")}</span>
+                    )}
+                  </div>
+                </TableCell>
 
-                  {/* Status */}
-                  <td className="px-4 py-3">
-                    <StatusBadge status={teacher.status} />
-                  </td>
+                {/* Status */}
+                <TableCell>
+                  <StatusBadge status={teacher.status} />
+                </TableCell>
 
-                  {/* Actions */}
-                  <td className="px-4 py-3 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          aria-label={t("actions.menuLabel", { name: teacher.name || teacher.email })}
-                        >
-                          <MoreHorizontal className="size-4" aria-hidden="true" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive"
-                          onSelect={() => handleRemove(teacher.userId, teacher.name || teacher.email)}
-                        >
-                          <UserMinus className="mr-2 size-4" aria-hidden="true" />
-                          {t("actions.remove")}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                {/* Actions */}
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        aria-label={t("actions.menuLabel", { name: teacher.name || teacher.email })}
+                      >
+                        <MoreHorizontal className="size-4" aria-hidden="true" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onSelect={() => handleRemove(teacher.userId, teacher.name || teacher.email)}
+                      >
+                        <UserMinus className="mr-2 size-4" aria-hidden="true" />
+                        {t("actions.remove")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
       <AddTeacherModal

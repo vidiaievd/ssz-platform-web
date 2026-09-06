@@ -6,6 +6,14 @@ import { useTranslations } from "next-intl";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { MembershipRoleBadge } from "./membership-role-badge";
 import { MembershipRowKebab } from "./membership-row-kebab";
 import { RemoveFromGroupDialog } from "../dialogs/remove-from-group-dialog";
@@ -74,97 +82,89 @@ export function CurrentMembershipsTable({
 
   return (
     <>
-      <div className="rounded-xl border bg-card overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/30">
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
-                {t("detail.groups.cols.group")}
-              </th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
-                {t("detail.groups.cols.role")}
-              </th>
-              <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
-                {t("detail.groups.cols.teachers")}
-              </th>
-              <th className="hidden lg:table-cell px-4 py-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
-                {t("detail.groups.cols.schedule")}
-              </th>
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
-                {t("detail.groups.cols.since")}
-              </th>
-              {canManage && <th className="w-10" />}
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {memberships.map((m) => (
-              <tr key={m.id} className="hover:bg-subtle transition-colors">
-                {/* Group */}
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/school/${schoolSlug}/groups/${m.groupId}`}
-                    className="flex items-center gap-2 hover:underline"
-                  >
-                    <span className="flex h-7 w-7 shrink-0 flex-col items-center justify-center rounded bg-primary/10 text-[9px] font-bold text-primary leading-none text-center">
-                      <span>{m.lang.toUpperCase()}</span>
-                      <span>{m.level}</span>
-                    </span>
-                    <span className="font-medium truncate max-w-40">{m.groupName}</span>
-                    {m.groupStatus === "archived" && (
-                      <Badge variant="muted" className="text-[10px]">
-                        archived
-                      </Badge>
-                    )}
-                  </Link>
-                </td>
-                {/* Role */}
-                <td className="px-4 py-3">
-                  <MembershipRoleBadge
-                    role={m.role}
-                    label={t(`detail.groups.role.${m.role}`)}
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>{t("detail.groups.cols.group")}</TableHead>
+            <TableHead className="w-[130px]">{t("detail.groups.cols.role")}</TableHead>
+            <TableHead className="hidden w-[140px] md:table-cell">
+              {t("detail.groups.cols.teachers")}
+            </TableHead>
+            <TableHead className="hidden w-[160px] lg:table-cell">
+              {t("detail.groups.cols.schedule")}
+            </TableHead>
+            <TableHead className="w-[120px]">{t("detail.groups.cols.since")}</TableHead>
+            {canManage && <TableHead className="w-[80px]" />}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {memberships.map((m) => (
+            <TableRow key={m.id}>
+              {/* Group */}
+              <TableCell>
+                <Link
+                  href={`/school/${schoolSlug}/groups/${m.groupId}`}
+                  className="flex items-center gap-2 hover:underline"
+                >
+                  <span className="flex h-7 w-7 shrink-0 flex-col items-center justify-center rounded bg-primary/10 text-[9px] font-bold text-primary leading-none text-center">
+                    <span>{m.lang.toUpperCase()}</span>
+                    <span>{m.level}</span>
+                  </span>
+                  <span className="font-medium truncate max-w-40">{m.groupName}</span>
+                  {m.groupStatus === "archived" && (
+                    <Badge variant="muted" className="text-[10px]">
+                      archived
+                    </Badge>
+                  )}
+                </Link>
+              </TableCell>
+              {/* Role */}
+              <TableCell>
+                <MembershipRoleBadge
+                  role={m.role}
+                  label={t(`detail.groups.role.${m.role}`)}
+                />
+              </TableCell>
+              {/* Teachers */}
+              <TableCell className="hidden md:table-cell">
+                <TeacherStack teachers={m.teachers} />
+              </TableCell>
+              {/* Schedule */}
+              <TableCell className="hidden lg:table-cell text-xs whitespace-nowrap">
+                {m.schedule[0]
+                  ? `${m.schedule[0].day}${m.schedule[0].time ? ` ${m.schedule[0].time}` : ""}${m.schedule.length > 1 ? ` +${m.schedule.length - 1}` : ""}`
+                  : "—"}
+              </TableCell>
+              {/* Since */}
+              <TableCell>
+                <time
+                  dateTime={m.addedAt}
+                  className="text-xs text-(--ssz-text-secondary) whitespace-nowrap"
+                >
+                  {formatAddedAt(m.addedAt)}
+                </time>
+              </TableCell>
+              {/* Actions */}
+              {canManage && (
+                <TableCell>
+                  <MembershipRowKebab
+                    membershipId={m.id}
+                    groupId={m.groupId}
+                    groupName={m.groupName}
+                    studentId={studentId}
+                    studentName={studentName}
+                    schoolId={schoolId}
+                    schoolSlug={schoolSlug}
+                    currentRole={m.role}
+                    onTransfer={() => setDialog({ type: "transfer", membership: m })}
+                    onRemove={() => setDialog({ type: "remove", membership: m })}
                   />
-                </td>
-                {/* Teachers */}
-                <td className="hidden md:table-cell px-4 py-3">
-                  <TeacherStack teachers={m.teachers} />
-                </td>
-                {/* Schedule */}
-                <td className="hidden lg:table-cell px-4 py-3 text-xs whitespace-nowrap">
-                  {m.schedule[0]
-                    ? `${m.schedule[0].day}${m.schedule[0].time ? ` ${m.schedule[0].time}` : ""}${m.schedule.length > 1 ? ` +${m.schedule.length - 1}` : ""}`
-                    : "—"}
-                </td>
-                {/* Since */}
-                <td className="px-4 py-3">
-                  <time
-                    dateTime={m.addedAt}
-                    className="text-xs text-(--ssz-text-secondary) whitespace-nowrap"
-                  >
-                    {formatAddedAt(m.addedAt)}
-                  </time>
-                </td>
-                {/* Actions */}
-                {canManage && (
-                  <td className="px-2 py-3">
-                    <MembershipRowKebab
-                      membershipId={m.id}
-                      groupId={m.groupId}
-                      groupName={m.groupName}
-                      studentId={studentId}
-                      studentName={studentName}
-                      schoolId={schoolId}
-                      schoolSlug={schoolSlug}
-                      currentRole={m.role}
-                      onTransfer={() => setDialog({ type: "transfer", membership: m })}
-                      onRemove={() => setDialog({ type: "remove", membership: m })}
-                    />
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
       {dialog.type === "remove" && (
         <RemoveFromGroupDialog
