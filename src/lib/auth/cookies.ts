@@ -34,6 +34,33 @@ export async function writeAuthCookies(input: {
   store.set(REFRESH_TOKEN, input.refreshToken, { ...baseOptions, maxAge: THIRTY_DAYS });
 }
 
+/**
+ * Whether this context may write cookies at all — Server Action or Route Handler, not a
+ * Server Component render.
+ *
+ * Asked **before** a refresh, not after it, and that ordering is the whole point.
+ * Refreshing rotates: the server revokes the token it was given and issues a new one. A
+ * rotation whose result cannot be stored is worse than no refresh at all — the browser
+ * keeps a token the server has already revoked, and presenting it again is read as theft,
+ * which revokes the whole family and ends every session the user has (auth-service
+ * `RefreshTokenCommandHandler`). Found live 2026-09-06: saving in the exercise editor
+ * died with "Session expired" after a page had rendered against an expired access token.
+ *
+ * The probe rewrites the refresh cookie with the value it already holds, so it costs
+ * nothing where it succeeds and throws where writing is forbidden.
+ */
+export async function canWriteAuthCookies(): Promise<boolean> {
+  try {
+    const store = await cookies();
+    const current = store.get(REFRESH_TOKEN);
+    if (!current) return false;
+    store.set(REFRESH_TOKEN, current.value, { ...baseOptions, maxAge: THIRTY_DAYS });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function clearAuthCookies(): Promise<void> {
   const store = await cookies();
   store.delete(ACCESS_TOKEN);
