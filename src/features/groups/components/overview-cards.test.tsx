@@ -3,8 +3,7 @@ import { screen } from '@testing-library/react';
 
 import { renderWithProviders } from '@/test/render';
 import { OverviewCards } from './overview-cards';
-import type { Group, RosterStudent, Lesson, CourseView } from '../types';
-import type { Alert } from '@/features/dashboard/types';
+import type { Group } from '../types';
 
 // TeacherRow (rendered for the primary teacher) imports this server-action
 // module; its transitive deps touch server-only env vars that jsdom can't see.
@@ -12,7 +11,6 @@ vi.mock('../api/mutations', () => ({
   removeTeacher: vi.fn(),
 }));
 
-// CourseManageDialog (mounted whenever canManage) calls useRouter() unconditionally.
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
 }));
@@ -36,29 +34,12 @@ const baseGroup: Group = {
   ageBand: null,
 };
 
-const courseView: CourseView = {
-  courseId: null,
-  courseName: null,
-  lang: 'nb',
-  level: 'A2',
-  unitCount: null,
-};
-
-function renderCards(overrides: Partial<{
-  group: Group;
-  roster: RosterStudent[];
-  lessons: Lesson[];
-  alerts: Alert[];
-  canManage: boolean;
-}> = {}) {
+function renderCards(overrides: Partial<{ group: Group; canManage: boolean }> = {}) {
   return renderWithProviders(
     <OverviewCards
       group={overrides.group ?? baseGroup}
-      roster={overrides.roster ?? []}
-      lessons={overrides.lessons ?? []}
-      alerts={overrides.alerts ?? []}
-      courseView={courseView}
       canManage={overrides.canManage ?? true}
+      schoolId="11111111-1111-4111-8111-111111111111"
       schoolSlug="my-school"
     />,
   );
@@ -77,19 +58,35 @@ describe('OverviewCards', () => {
     expect(screen.queryByText('Assign primary')).not.toBeInTheDocument();
   });
 
-  it('shows "Add students" for an admin when there are 0 students', () => {
-    renderCards({ group: { ...baseGroup, studentCount: 0 }, canManage: true });
-    expect(screen.getByText('No students enrolled yet.')).toBeInTheDocument();
-    expect(screen.getByText('Add students')).toBeInTheDocument();
+  it('shows the min/max seat caption beside the capacity meter', () => {
+    renderCards({ group: { ...baseGroup, capacity: { min: 6, max: 12 } } });
+    expect(screen.getByText('min 6 · max 12 seats')).toBeInTheDocument();
   });
 
-  it('hides "Add students" for a teacher when there are 0 students', () => {
-    renderCards({ group: { ...baseGroup, studentCount: 0 }, canManage: false });
-    expect(screen.queryByText('Add students')).not.toBeInTheDocument();
+  it('shows "Add" for an admin', () => {
+    renderCards({ canManage: true });
+    expect(screen.getAllByText('Add').length).toBeGreaterThan(0);
   });
 
-  it('shows "No upcoming lessons" when the lesson list is empty', () => {
-    renderCards({ lessons: [] });
-    expect(screen.getByText('No upcoming lessons scheduled.')).toBeInTheDocument();
+  it('hides "Add" for a teacher (non-manager)', () => {
+    renderCards({ canManage: false });
+    expect(screen.queryByText('Add')).not.toBeInTheDocument();
+  });
+
+  it('shows the recurring-slots empty state when the group has no slots', () => {
+    renderCards({ group: { ...baseGroup, slots: [] } });
+    expect(screen.getByText('No recurring slots configured.')).toBeInTheDocument();
+  });
+
+  it('lists a recurring slot with its day, time and room', () => {
+    renderCards({
+      group: {
+        ...baseGroup,
+        slots: [{ day: 'Tue', start: '18:00', end: '19:30', room: 'Room 3' }],
+      },
+    });
+    expect(screen.getByText('Tue')).toBeInTheDocument();
+    expect(screen.getByText('18:00–19:30')).toBeInTheDocument();
+    expect(screen.getByText('Room 3')).toBeInTheDocument();
   });
 });

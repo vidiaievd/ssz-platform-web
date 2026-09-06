@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 import { cn } from '@/lib/utils';
 import { slotsOverlap } from '@/lib/groups/operations';
@@ -13,10 +14,16 @@ const PX_PER_HOUR     = 64; // pixels per hour
 
 const DAYS: Weekday[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
-const DAY_LABELS: Record<Weekday, string> = {
-  Mon: 'Mon', Tue: 'Tue', Wed: 'Wed', Thu: 'Thu', Fri: 'Fri',
-  Sat: 'Sat', Sun: 'Sun',
-};
+/** Message keys for the short weekday headers — the labels themselves are per-locale. */
+const DAY_LABEL_KEYS = {
+  Mon: 'timetable.weekdayShort.mon',
+  Tue: 'timetable.weekdayShort.tue',
+  Wed: 'timetable.weekdayShort.wed',
+  Thu: 'timetable.weekdayShort.thu',
+  Fri: 'timetable.weekdayShort.fri',
+  Sat: 'timetable.weekdayShort.sat',
+  Sun: 'timetable.weekdayShort.sun',
+} as const satisfies Record<Weekday, string>;
 
 const LANG_STYLES: Record<string, { bg: string; border: string; text: string }> = {
   nb: { bg: 'bg-blue-100 dark:bg-blue-900/30',   border: 'border-blue-300 dark:border-blue-700',   text: 'text-blue-900 dark:text-blue-200' },
@@ -103,7 +110,8 @@ type DayColumnProps = {
   schoolSlug: string;
 };
 
-function DayColumn({ day, lessons, conflictIndices, allLessons, schoolSlug }: DayColumnProps) {
+async function DayColumn({ day, lessons, conflictIndices, allLessons, schoolSlug }: DayColumnProps) {
+  const t = await getTranslations('Groups');
   const totalH = (GRID_END_HOUR - GRID_START_HOUR) * PX_PER_HOUR;
   const dayLessons = lessons.filter((l) => l.day === day);
 
@@ -165,9 +173,10 @@ function DayColumn({ day, lessons, conflictIndices, allLessons, schoolSlug }: Da
         const widthPct = isConflict && siblingCount > 0 ? `${100 / totalSlotCount}%` : 'calc(100% - 4px)';
         const leftPct  = isConflict && siblingCount > 0 ? `${(100 / totalSlotCount) * siblingIdx}%` : '2px';
 
+        const time = `${lesson.start}–${lesson.end}`;
         const ariaLabel = isConflict
-          ? `Time conflict: ${lesson.groupName} (${lesson.start}–${lesson.end})`
-          : `${lesson.groupName} · ${lesson.start}–${lesson.end}`;
+          ? t('timetable.conflictBlockAria', { group: lesson.groupName, time })
+          : t('timetable.blockAria', { group: lesson.groupName, time });
 
         return (
           <Link
@@ -192,7 +201,7 @@ function DayColumn({ day, lessons, conflictIndices, allLessons, schoolSlug }: Da
             {height >= 40 && (
               <span className="text-[10px] opacity-70 block truncate">
                 {lesson.lang.toUpperCase()} {lesson.start}–{lesson.end}
-                {isSub && ' (sub)'}
+                {isSub && ` (${t('timetable.subSuffix')})`}
               </span>
             )}
           </Link>
@@ -209,12 +218,13 @@ type Props = {
   schoolSlug: string;
 };
 
-export function TimetableGrid({ teacher, schoolSlug }: Props) {
+export async function TimetableGrid({ teacher, schoolSlug }: Props) {
+  const t = await getTranslations('Groups');
   const { lessons } = teacher;
   const conflictIndices = findConflictPairs(lessons);
 
   return (
-    <div className="overflow-x-auto" role="region" aria-label="Weekly timetable">
+    <div className="overflow-x-auto" role="region" aria-label={t('timetable.gridAria')}>
       {/* Minimum width so the grid is usable on mobile (horizontal scroll) */}
       <div style={{ minWidth: 480 }}>
       {/* Day headers */}
@@ -224,7 +234,7 @@ export function TimetableGrid({ teacher, schoolSlug }: Props) {
             key={day}
             className="flex-1 text-center text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) py-2 border-l border-border first:border-l-0"
           >
-            {DAY_LABELS[day]}
+            {t(DAY_LABEL_KEYS[day])}
           </div>
         ))}
       </div>

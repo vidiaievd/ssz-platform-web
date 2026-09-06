@@ -11,16 +11,37 @@
       "description": "Створіть першу групу, щоб почати.",
       "action": "Нова група"
     },
-    "filteredEmpty": "Жодна група не відповідає вашим фільтрам."
+    "filteredEmpty": "Жодна група не відповідає вашим фільтрам.",
+    "count": "{count, plural, one {# група} few {# групи} many {# груп} other {# групи}}",
+    "columns": {
+      "group": "Група",
+      "teacher": "Учителі",
+      "schedule": "Розклад",
+      "capacity": "Місця",
+      "status": "Статус",
+      "alerts": "Проблеми"
+    },
+    "kpi": {
+      "activeGroups": "Активні групи",
+      "needTeacher": "{count, plural, =0 {усі з учителем} one {# без учителя} few {# без учителя} many {# без учителя} other {# без учителя}}",
+      "needAttention": "Потребують уваги",
+      "allClear": "Усе гаразд",
+      "studentsEnrolled": "Учнів зараховано",
+      "drafts": "Чернетки",
+      "attentionHint": "блокувальні або дорадчі попередження",
+      "studentsHint": "у всіх групах",
+      "draftsHint": "ще не опубліковані"
+    }
   },
   "filter": {
-    "search": "Пошук груп…",
+    "search": "Назва, курс, учитель…",
     "all": "Усі",
     "attention": "Потребують уваги",
     "drafts": "Чернетки",
     "sortAlerts": "Найбільше сповіщень",
     "sortName": "Назва А–Я",
-    "sortStudents": "Найбільше учнів"
+    "sortStudents": "Найбільше учнів",
+    "sortLabel": "Сортування"
   },
   "status": {
     "draft": "Чернетка",
@@ -38,7 +59,9 @@
     "noTeacher": "Немає вчителя",
     "online": "Онлайн",
     "inPerson": "Очно",
-    "ok": "OK"
+    "ok": "OK",
+    "issues": "{count, plural, one {# проблема} few {# проблеми} many {# проблем} other {# проблеми}}",
+    "langLabel": "Мова: {lang}"
   },
   "resolve": {
     "actionRequired": "Потрібна дія",
@@ -51,30 +74,24 @@
     "students": "Учні",
     "teachers": "Учителі",
     "schedule": "Розклад",
-    "sectionLabel": "Розділ"
+    "sectionLabel": "Розділ",
+    "materials": "Матеріали"
   },
   "overview": {
     "teachersHeading": "Учителі",
     "rosterHeading": "Список учнів",
     "scheduleHeading": "Розклад",
     "noTeachers": "Учителів не призначено.",
-    "courseHeading": "Курс",
-    "nextLessonHeading": "Наступний урок",
+    "assign": "Призначити",
+    "add": "Додати",
+    "scheduleSummary": "{hours} год/тиждень · {mode}",
+    "minMaxSeats": "мін {min} · макс {max} місць",
     "ready": "Готово до запуску",
     "notReady": "Не готово до запуску",
-    "statusUnknown": "Статус невідомий — не вдалося перевірити конфлікти",
-    "clashCount": "{count} студент із конфліктом розкладу",
-    "clashCountPlural": "{count} студентів із конфліктом розкладу",
-    "manageStudents": "Керувати студентами →",
-    "manageTeachers": "Керувати вчителями →",
-    "openSchedule": "Відкрити розклад →",
-    "addSchedule": "Додати розклад →",
-    "coPrimaryCount": "+{count} співвчитель",
-    "subCount": "{count} замісник",
-    "subCountPlural": "{count} замісників"
+    "statusUnknown": "Статус невідомий — не вдалося перевірити конфлікти"
   },
   "students": {
-    "search": "Пошук учнів…",
+    "search": "Фільтр учнів…",
     "addStudents": "Додати учнів",
     "noEnrolled": "Учнів ще не зараховано.",
     "noMatch": "Жоден учень не відповідає пошуку.",
@@ -87,12 +104,23 @@
       "finished": "Завершив",
       "clash": "Конфлікт розкладу",
       "unassigned": "Не призначений"
-    }
+    },
+    "searchAria": "Пошук учнів за іменем або поштою",
+    "tableAria": "Список учнів",
+    "columns": {
+      "student": "Учень",
+      "level": "Рівень",
+      "status": "Статус",
+      "progress": "Прогрес"
+    },
+    "remove": "Прибрати {name} з групи",
+    "removeButton": "Прибрати"
   },
   "teachers": {
-    "primaryHeading": "Основний учитель",
-    "coPrimaryHeading": "Співвчитель",
+    "assignedHeading": "Призначені вчителі",
+    "assignedSub": "Один основний обов’язковий · один необов’язковий співвчитель · тимчасові заміни",
     "subsHeading": "Замісники",
+    "noSubstitutes": "Активних замін немає.",
     "noPrimary": "Немає основного вчителя",
     "noPrimaryDescription": "Група не може проводити уроки без основного вчителя.",
     "assignPrimary": "Призначити основного",
@@ -112,7 +140,19 @@
     "noSlots": "Регулярних уроків не налаштовано.",
     "noLessons": "Наступних уроків не заплановано.",
     "sub": "Зам",
-    "editButton": "Редагувати розклад"
+    "editButton": "Редагувати розклад",
+    "recentHeading": "Проведені заняття",
+    "noRecent": "За останні тижні занять не було.",
+    "held": "Проведено",
+    "notHeld": "Не позначено",
+    "noUnit": "Юніт не прив’язаний",
+    "markHeld": "Позначити проведеним",
+    "marking": "Зберігаємо…",
+    "marked": "Заняття позначено як проведене",
+    "markError": "Не вдалося позначити заняття",
+    "unitLabel": "Юніт навчального плану",
+    "pickUnit": "Виберіть юніт",
+    "noPlan": "Навчального плану поки немає"
   },
   "detail": {
     "back": "Групи",
@@ -213,12 +253,16 @@
   },
   "assignTeacher": {
     "title": "Призначити вчителя",
-    "description": "Призначення для {groupName} · мова: {lang}",
-    "role": "Роль",
+    "description": "до {groupName} · {schedule}",
+    "role": "Роль у цій групі",
+    "chooseTeacher": "Оберіть вчителя, який викладає {lang}",
     "roleOptions": {
       "primary": "Основний",
       "coPrimary": "Співвчитель",
-      "substitute": "Замісник"
+      "substitute": "Замісник",
+      "primarySub": "один обов’язковий",
+      "coPrimarySub": "необов’язковий другий",
+      "substituteSub": "тимчасова заміна"
     },
     "substituteFrom": "Дата початку",
     "substituteTo": "Дата завершення",
@@ -240,10 +284,15 @@
     "errorGeneric": "Призначення не вдалося. Спробуйте ще раз.",
     "assign": "Призначити вчителя",
     "assignAnyway": "Призначити попри все",
-    "assigning": "Призначення…",
+    "assigning": "Призначаємо…",
     "cancel": "Скасувати",
     "successSimple": "Призначено {name} як {role}",
-    "successWithWarnings": "Призначено {name} як {role} — {count} попередження перевизначено"
+    "successWithWarnings": "Призначено {name} як {role} — {count} попередження перевизначено",
+    "roleAria": "Роль учителя",
+    "searchAria": "Пошук учителя за іменем",
+    "listAria": "Вибір учителя",
+    "noMatch": "Жоден учитель не відповідає запиту.",
+    "serverRejected": "Сервер відхилив: {reasons}. Натисніть «Усе одно призначити», щоб перевизначити."
   },
   "addStudents": {
     "title": "Додати учнів",
@@ -260,7 +309,12 @@
     "success": "Додано {count} учня",
     "successPlural": "Додано {count} учнів",
     "successOverride": "Додано {count} учнів (понад місткість — перевизначення застосовано)",
-    "error": "Не вдалося додати учнів. Спробуйте ще раз."
+    "error": "Не вдалося додати учнів. Спробуйте ще раз.",
+    "searchAria": "Пошук учнів",
+    "listAria": "Вибір учнів для додавання",
+    "addCount": "{count, plural, =0 {Додати учнів} one {Додати # учня} few {Додати # учнів} many {Додати # учнів} other {Додати # учнів}}",
+    "selected": "{count, plural, one {вибрано # учня} few {вибрано # учнів} many {вибрано # учнів} other {вибрано # учнів}}",
+    "selectAria": "Вибрати {name}"
   },
   "timetable": {
     "title": "Розклад учителів",
@@ -278,7 +332,24 @@
     },
     "conflictListTitle": "конфлікт розкладу",
     "conflictListTitlePlural": "конфлікти розкладу",
-    "conflictItem": "{day} конфлікт: {groupA} перетинається з {groupB} — перемістіть урок або перепризначте"
+    "conflictItem": "{day} конфлікт: {groupA} перетинається з {groupB} — перемістіть урок або перепризначте",
+    "hoursLine": "{hours}/{max} год · {count, plural, one {# група} few {# групи} many {# груп} other {# групи}}",
+    "clashes": "{count, plural, one {# накладка} few {# накладки} many {# накладок} other {# накладки}}",
+    "conflictsAria": "Накладки в розкладі",
+    "gridAria": "Розклад на тиждень",
+    "blockAria": "{group} · {time}",
+    "conflictBlockAria": "Накладка за часом: {group} ({time})",
+    "subSuffix": "заміна",
+    "errorTitle": "Не вдалося завантажити розклад",
+    "weekdayShort": {
+      "mon": "пн",
+      "tue": "вт",
+      "wed": "ср",
+      "thu": "чт",
+      "fri": "пт",
+      "sat": "сб",
+      "sun": "нд"
+    }
   },
   "mySchedule": {
     "title": "Мій розклад",
@@ -337,5 +408,28 @@
     "updateError": "Не вдалося оновити курс",
     "materialsCount": "+{count} додатковий матеріал",
     "materialsCountPlural": "+{count} додаткових матеріалів"
+  },
+  "materials": {
+    "noCourse": "До групи поки не прив’язано курс.",
+    "attachCourse": "Прив’язати курс",
+    "counts": "{units, plural, one {# юніт} few {# юніти} many {# юнітів} other {# юніта}} · {lessons, plural, one {# урок} few {# уроки} many {# уроків} other {# уроку}}",
+    "published": "Опубліковано — учні бачать цю версію",
+    "notPublished": "Ще не опубліковано",
+    "notPublishedBody": "У курсу немає опублікованої версії, тому учні його поки не бачать.",
+    "openCourse": "Відкрити курс",
+    "change": "Змінити",
+    "planProgress": "План видано",
+    "curriculumHeading": "Зміст курсу",
+    "lessonCount": "{count, plural, one {# урок} few {# уроки} many {# уроків} other {# уроку}}",
+    "minutes": "{count} хв",
+    "emptyCourse": "У цьому курсі поки немає юнітів.",
+    "structureUnavailable": "Не вдалося прочитати структуру курсу. Картка вище досі показує, до чого прив’язана група.",
+    "taught": "{delivered}/{planned} проведено",
+    "linkLabel": "Юніт плану",
+    "linkNone": "Не прив’язаний",
+    "linkSaved": "Прив’язку оновлено",
+    "linkError": "Не вдалося оновити прив’язку",
+    "unstitchedHeading": "Юніти плану без пари в курсі",
+    "unstitchedNote": "Ці юніти навчального плану не навчають нічого з цього курсу — прив’яжіть їх вище або залиште як є."
   }
 }

@@ -65,13 +65,19 @@ export interface GroupHealthRowVM {
 export interface RosterStudent {
   userId: string; name: string; email: string; avatarUrl?: string | null;
   level: CEFR; status: 'active' | 'at-risk' | 'new' | 'finished' | 'clash' | 'unassigned';
+  /** 0..100. The students screen keeps a 0..1 ratio; the roster draws a percentage. */
   progress: number;
   hasClash: boolean;
 }
 
+export type LessonStatus = 'scheduled' | 'moved' | 'cancelled' | 'held';
+
 export interface Lesson {
   id: string; groupId: string; date: ISODate; start: HHMM; end: HHMM;
   teacherId: string; teacherName: string; room: string; isSubstitute: boolean;
+  status: LessonStatus;
+  /** Curriculum unit this lesson teaches — set at generation, repointable by hand. */
+  curriculumUnitId: string | null;
 }
 
 export interface TimetableTeacher {

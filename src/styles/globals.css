@@ -54,37 +54,63 @@
   --color-neutral-800: oklch(0.26  0.010 80);
   --color-neutral-900: oklch(0.18  0.010 80);
 
-  /* ─── Success ─── */
+  /* ─── Success ───
+     50/100/300/500/700 are the original anchors; 200/400/600/800/900 fill the
+     scale to match primary/secondary/neutral — components across the app
+     already reference the full range (bg-success-900/40 in dark mode,
+     text-success-600 for row text), and an undefined step isn't a wrong
+     color, it's no color: Tailwind can't emit a rule for a theme key that
+     doesn't exist, so the class silently does nothing. */
   --color-success:     oklch(0.60 0.13 145);
-  --color-success-50:  oklch(0.96 0.04 145);
-  --color-success-100: oklch(0.90 0.07 145);
-  --color-success-300: oklch(0.76 0.11 145);
-  --color-success-500: oklch(0.60 0.13 145);
-  --color-success-700: oklch(0.44 0.11 145);
+  --color-success-50:  oklch(0.96 0.04  145);
+  --color-success-100: oklch(0.90 0.07  145);
+  --color-success-200: oklch(0.83 0.09  145);
+  --color-success-300: oklch(0.76 0.11  145);
+  --color-success-400: oklch(0.68 0.12  145);
+  --color-success-500: oklch(0.60 0.13  145);
+  --color-success-600: oklch(0.52 0.12  145);
+  --color-success-700: oklch(0.44 0.11  145);
+  --color-success-800: oklch(0.34 0.09  145);
+  --color-success-900: oklch(0.24 0.07  145);
 
   /* ─── Warning ─── */
   --color-warning:     oklch(0.66 0.13 75);
   --color-warning-50:  oklch(0.97 0.03  75);
   --color-warning-100: oklch(0.92 0.065 75);
+  --color-warning-200: oklch(0.86 0.088 75);
   --color-warning-300: oklch(0.80 0.11  75);
+  --color-warning-400: oklch(0.73 0.12  75);
   --color-warning-500: oklch(0.66 0.13  75);
+  --color-warning-600: oklch(0.57 0.12  75);
   --color-warning-700: oklch(0.48 0.11  75);
+  --color-warning-800: oklch(0.38 0.09  75);
+  --color-warning-900: oklch(0.28 0.07  75);
 
   /* ─── Error ─── */
   --color-error:     oklch(0.55 0.125 15);
   --color-error-50:  oklch(0.97 0.025 15);
   --color-error-100: oklch(0.92 0.055 15);
+  --color-error-200: oklch(0.85 0.078 15);
   --color-error-300: oklch(0.78 0.10  15);
+  --color-error-400: oklch(0.665 0.113 15);
   --color-error-500: oklch(0.55 0.125 15);
+  --color-error-600: oklch(0.50 0.115 15);
   --color-error-700: oklch(0.44 0.105 15);
+  --color-error-800: oklch(0.34 0.085 15);
+  --color-error-900: oklch(0.24 0.065 15);
 
   /* ─── Info ─── */
   --color-info:     oklch(0.60 0.12 235);
   --color-info-50:  oklch(0.96 0.03  235);
   --color-info-100: oklch(0.91 0.055 235);
+  --color-info-200: oklch(0.84 0.078 235);
   --color-info-300: oklch(0.76 0.10  235);
+  --color-info-400: oklch(0.68 0.11  235);
   --color-info-500: oklch(0.60 0.12  235);
+  --color-info-600: oklch(0.52 0.11  235);
   --color-info-700: oklch(0.44 0.10  235);
+  --color-info-800: oklch(0.34 0.08  235);
+  --color-info-900: oklch(0.24 0.06  235);
 
   /* ─── Border radius ─── */
   --radius-xs:   4px;
@@ -115,6 +141,13 @@
   --animate-fade-out:  fade-out 180ms cubic-bezier(0.16,1,0.3,1);
   --animate-slide-in:  slide-in 280ms cubic-bezier(0.16,1,0.3,1);
   --animate-spin-slow: spin-slow 1s linear infinite;
+
+  /* ─── Page content column ─── */
+  /* One width for every admin surface (list, detail, dashboard), so the
+     content column never jumps as you move between nav items. 1240px is the
+     hi-fi design's own content column (Group Management spec §5); with the
+     shared p-4/sm:p-6/lg:p-8 page padding it nets out to 1176px of content. */
+  --container-page: 77.5rem; /* 1240px */
 
   /* ─── Transition durations and easing ─── */
   --duration-fast:   100ms;
@@ -210,33 +243,54 @@
     --ssz-color-neutral-800: oklch(0.26  0.010 80);
     --ssz-color-neutral-900: oklch(0.18  0.010 80);
 
-    /* Semantic: Success */
-    --ssz-color-success-50:  oklch(0.96 0.04 145);
-    --ssz-color-success-100: oklch(0.90 0.07 145);
-    --ssz-color-success-300: oklch(0.76 0.11 145);
-    --ssz-color-success-500: oklch(0.60 0.13 145);
-    --ssz-color-success-700: oklch(0.44 0.11 145);
+    /* Semantic: Success — mirrors --color-success-* in the @theme block above;
+       keep both in sync (see the comment there for why the full scale matters). */
+    --ssz-color-success-50:  oklch(0.96 0.04  145);
+    --ssz-color-success-100: oklch(0.90 0.07  145);
+    --ssz-color-success-200: oklch(0.83 0.09  145);
+    --ssz-color-success-300: oklch(0.76 0.11  145);
+    --ssz-color-success-400: oklch(0.68 0.12  145);
+    --ssz-color-success-500: oklch(0.60 0.13  145);
+    --ssz-color-success-600: oklch(0.52 0.12  145);
+    --ssz-color-success-700: oklch(0.44 0.11  145);
+    --ssz-color-success-800: oklch(0.34 0.09  145);
+    --ssz-color-success-900: oklch(0.24 0.07  145);
 
     /* Semantic: Warning */
     --ssz-color-warning-50:  oklch(0.97 0.03  75);
     --ssz-color-warning-100: oklch(0.92 0.065 75);
+    --ssz-color-warning-200: oklch(0.86 0.088 75);
     --ssz-color-warning-300: oklch(0.80 0.11  75);
+    --ssz-color-warning-400: oklch(0.73 0.12  75);
     --ssz-color-warning-500: oklch(0.66 0.13  75);
+    --ssz-color-warning-600: oklch(0.57 0.12  75);
     --ssz-color-warning-700: oklch(0.48 0.11  75);
+    --ssz-color-warning-800: oklch(0.38 0.09  75);
+    --ssz-color-warning-900: oklch(0.28 0.07  75);
 
     /* Semantic: Error */
     --ssz-color-error-50:  oklch(0.97 0.025 15);
     --ssz-color-error-100: oklch(0.92 0.055 15);
+    --ssz-color-error-200: oklch(0.85 0.078 15);
     --ssz-color-error-300: oklch(0.78 0.10  15);
+    --ssz-color-error-400: oklch(0.665 0.113 15);
     --ssz-color-error-500: oklch(0.55 0.125 15);
+    --ssz-color-error-600: oklch(0.50 0.115 15);
     --ssz-color-error-700: oklch(0.44 0.105 15);
+    --ssz-color-error-800: oklch(0.34 0.085 15);
+    --ssz-color-error-900: oklch(0.24 0.065 15);
 
     /* Semantic: Info */
     --ssz-color-info-50:  oklch(0.96 0.03  235);
     --ssz-color-info-100: oklch(0.91 0.055 235);
+    --ssz-color-info-200: oklch(0.84 0.078 235);
     --ssz-color-info-300: oklch(0.76 0.10  235);
+    --ssz-color-info-400: oklch(0.68 0.11  235);
     --ssz-color-info-500: oklch(0.60 0.12  235);
+    --ssz-color-info-600: oklch(0.52 0.11  235);
     --ssz-color-info-700: oklch(0.44 0.10  235);
+    --ssz-color-info-800: oklch(0.34 0.08  235);
+    --ssz-color-info-900: oklch(0.24 0.06  235);
 
     /* Lesson-type hues (CM_TYPES in design_handoff_course_management/coursemgmt/ui.jsx).
        Theme-invariant like the scale tokens above; type chips tint them at 16% via color-mix. */

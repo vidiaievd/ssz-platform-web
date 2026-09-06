@@ -1,4 +1,5 @@
 import { TrendingUp, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 import { cn } from '@/lib/utils';
 import { slotsOverlap } from '@/lib/groups/operations';
@@ -8,7 +9,8 @@ import type { TimetableTeacher } from '../types';
 
 // ── Teacher header ────────────────────────────────────────────────────────────
 
-function TeacherHeader({ teacher }: { teacher: TimetableTeacher }) {
+async function TeacherHeader({ teacher }: { teacher: TimetableTeacher }) {
+  const t = await getTranslations('Groups');
   const { name, hours, max, overloaded, groups, conflicts } = teacher;
   const pct = max > 0 ? Math.round((hours / max) * 100) : 0;
 
@@ -17,7 +19,7 @@ function TeacherHeader({ teacher }: { teacher: TimetableTeacher }) {
       <div className="flex-1 min-w-0">
         <h2 className="text-lg font-semibold text-(--ssz-text-primary)">{name}</h2>
         <p className="text-sm text-(--ssz-text-muted)">
-          {hours.toFixed(1)}/{max}h · {groups} {groups === 1 ? 'group' : 'groups'}
+          {t('timetable.hoursLine', { hours: hours.toFixed(1), max, count: groups })}
         </p>
       </div>
 
@@ -25,24 +27,24 @@ function TeacherHeader({ teacher }: { teacher: TimetableTeacher }) {
         {overloaded ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-error-100 dark:bg-error-900/40 text-error-700 dark:text-error-400 px-2.5 py-1 text-xs font-semibold">
             <TrendingUp className="size-3.5" aria-hidden="true" />
-            Over by {(hours - max).toFixed(1)}h
+            {t('timetable.overBy', { n: (hours - max).toFixed(1) })}
           </span>
         ) : pct >= 85 ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-warning-100 dark:bg-warning-900/40 text-warning-700 dark:text-warning-400 px-2.5 py-1 text-xs font-semibold">
             <TrendingUp className="size-3.5" aria-hidden="true" />
-            {pct}% load
+            {t('timetable.loadPct', { pct })}
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 rounded-full bg-success-100 dark:bg-success-900/40 text-success-700 dark:text-success-400 px-2.5 py-1 text-xs font-semibold">
             <CheckCircle2 className="size-3.5" aria-hidden="true" />
-            Clear
+            {t('timetable.clear')}
           </span>
         )}
 
         {conflicts > 0 && (
           <span className="inline-flex items-center gap-1 rounded-full bg-error-100 dark:bg-error-900/40 text-error-700 dark:text-error-400 px-2.5 py-1 text-xs font-semibold">
             <Clock className="size-3.5" aria-hidden="true" />
-            {conflicts} {conflicts === 1 ? 'clash' : 'clashes'}
+            {t('timetable.clashes', { count: conflicts })}
           </span>
         )}
       </div>
@@ -52,7 +54,8 @@ function TeacherHeader({ teacher }: { teacher: TimetableTeacher }) {
 
 // ── Conflict list ─────────────────────────────────────────────────────────────
 
-function ConflictList({ teacher }: { teacher: TimetableTeacher }) {
+async function ConflictList({ teacher }: { teacher: TimetableTeacher }) {
+  const t = await getTranslations('Groups');
   const { lessons } = teacher;
   const pairs: Array<{ a: typeof lessons[number]; b: typeof lessons[number] }> = [];
 
@@ -75,21 +78,24 @@ function ConflictList({ teacher }: { teacher: TimetableTeacher }) {
     <div
       className="rounded-lg border border-error-200 dark:border-error-800 bg-error-50 dark:bg-error-900/20 p-4 space-y-2"
       role="alert"
-      aria-label="Schedule conflicts"
+      aria-label={t('timetable.conflictsAria')}
     >
       <h3 className="text-sm font-semibold text-error-700 dark:text-error-300 flex items-center gap-1.5">
         <AlertTriangle className="size-4" aria-hidden="true" />
-        {pairs.length} schedule {pairs.length === 1 ? 'conflict' : 'conflicts'}
+        {pairs.length}{' '}
+        {pairs.length === 1
+          ? t('timetable.conflictListTitle')
+          : t('timetable.conflictListTitlePlural')}
       </h3>
 
       <ul className="flex flex-col gap-1.5">
         {pairs.map(({ a, b }, i) => (
           <li key={i} className="text-sm text-error-700 dark:text-error-300">
-            <span className="font-medium">{a.day} clash:</span>{' '}
-            <span className="font-semibold">{a.groupName}</span>{' '}
-            ({a.start}–{a.end}) overlaps{' '}
-            <span className="font-semibold">{b.groupName}</span>{' '}
-            ({b.start}–{b.end}) — move one slot or reassign
+            {t('timetable.conflictItem', {
+              day: a.day,
+              groupA: `${a.groupName} (${a.start}–${a.end})`,
+              groupB: `${b.groupName} (${b.start}–${b.end})`,
+            })}
           </li>
         ))}
       </ul>
@@ -99,20 +105,22 @@ function ConflictList({ teacher }: { teacher: TimetableTeacher }) {
 
 // ── Legend ────────────────────────────────────────────────────────────────────
 
-function Legend() {
+async function Legend() {
+  const t = await getTranslations('Groups');
+
   return (
     <div className="flex flex-wrap gap-4 text-xs text-(--ssz-text-muted)">
       <span className="flex items-center gap-1.5">
         <span className="inline-block size-3 rounded bg-primary-100 border border-primary-300" />
-        Lesson
+        {t('timetable.legend.lesson')}
       </span>
       <span className="flex items-center gap-1.5">
         <span className="inline-block size-3 rounded bg-muted/50 border border-dashed border-border" />
-        Sub cover
+        {t('timetable.legend.subCover')}
       </span>
       <span className="flex items-center gap-1.5">
         <span className="inline-block size-3 rounded bg-error-100 border border-error-400" />
-        Conflict
+        {t('timetable.legend.conflict')}
       </span>
     </div>
   );
@@ -126,7 +134,8 @@ type Props = {
   schoolSlug: string;
 };
 
-export function TeacherTimetable({ teachers, selectedTeacherId, schoolSlug }: Props) {
+export async function TeacherTimetable({ teachers, selectedTeacherId, schoolSlug }: Props) {
+  const t = await getTranslations('Groups');
   const selected = teachers.find((t) => t.userId === selectedTeacherId) ?? teachers[0] ?? null;
 
   return (
@@ -138,10 +147,10 @@ export function TeacherTimetable({ teachers, selectedTeacherId, schoolSlug }: Pr
           'rounded-lg border border-border bg-card p-3',
           'lg:sticky lg:top-6',
         )}
-        aria-label="Teacher list"
+        aria-label={t('timetable.teacherListLabel')}
       >
         <h3 className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-2 px-1">
-          Teachers
+          {t('timetable.teacherListLabel')}
         </h3>
         <TeacherSelector teachers={teachers} initialTeacherId={selectedTeacherId} />
       </aside>

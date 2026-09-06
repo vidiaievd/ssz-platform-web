@@ -30,6 +30,10 @@ export interface SchedulingProvider {
     slots: Array<Pick<Slot, 'day' | 'start' | 'end'>>,
   ): Promise<TeacherAvailability[]>;
   nextLessons(groupId: string, limit: number): Promise<Lesson[]>;
+  /** Lessons of one group between two ISO dates, whatever their status. */
+  lessonsInRange(groupId: string, from: string, to: string): Promise<Lesson[]>;
+  /** Record that a lesson actually happened, and which unit of the plan it taught. */
+  markLessonHeld(lessonId: string, curriculumUnitId: string): Promise<MutationResult>;
   /** Raw projection of every teacher's assigned future lessons — one query for the whole school. */
   schoolTimetable(schoolId: string): Promise<RawSchoolTimetableEntry[]>;
   /** Raw projection of a single teacher's assigned future lessons. */
@@ -62,6 +66,8 @@ export interface SchedulingProvider {
 
   // ── curriculum ────────────────────────────────────────────────────────────
   getCurriculum(groupId: string): Promise<CurriculumPlan>;
+  /** Stitch a plan unit to a unit of the linked course, or pass null to unstitch. */
+  linkPlanUnit(planUnitId: string, contentUnitId: string | null): Promise<MutationResult>;
   putCurriculum(groupId: string, plan: CurriculumPlan): Promise<void>;
 
   // ── forecast ──────────────────────────────────────────────────────────────

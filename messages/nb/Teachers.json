@@ -182,7 +182,9 @@
     "deliver": "Merk levert",
     "override": "Overstyr",
     "overrideReason": "Årsak til overstyring",
-    "lessonMapper": "Enhet–Time-kobling"
+    "lessonMapper": "Enhet–Time-kobling",
+    "sessions": "{delivered}/{planned} økter",
+    "deliveredNote": "Telles fra timer merket gjennomført i gruppens timeplan."
   },
   "forecast": {
     "title": "Prognose og kapasitet",

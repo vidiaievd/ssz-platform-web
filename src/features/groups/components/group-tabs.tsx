@@ -1,33 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { GroupHealthLine } from './group-health-line';
 import { OverviewCards } from './overview-cards';
 import { GroupStudentsTab } from './group-students-tab';
 import { GroupTeachersTab } from './group-teachers-tab';
 import { GroupScheduleTab } from './group-schedule-tab';
 import { GroupEditDialog } from './group-edit-dialog';
-import type { Group, RosterStudent, Lesson, CourseView } from '../types';
+import type { Group, RosterStudent, Lesson } from '../types';
+import type { CurriculumUnit } from '@/features/teachers/types';
 import type { Alert } from '@/features/dashboard/types';
 
-type TabKey = 'overview' | 'students' | 'teachers' | 'schedule';
+type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule';
 
 type Props = {
   group: Group;
   roster: RosterStudent[];
   lessons: Lesson[];
+  recentLessons: Lesson[];
+  planUnits: CurriculumUnit[];
+  /** Materials tab, rendered on the server — it reads the course structure. */
+  materialsSlot: ReactNode;
   alerts: Alert[];
-  courseView: CourseView;
+  /** Real school id (UUID) — every mutation below takes this. */
+  schoolId: string;
   schoolSlug: string;
   canManage: boolean;
 };
 
-export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSlug, canManage }: Props) {
+export function GroupTabs({
+  group,
+  roster,
+  lessons,
+  recentLessons,
+  planUnits,
+  materialsSlot,
+  alerts,
+  schoolId,
+  schoolSlug,
+  canManage,
+}: Props) {
   const t = useTranslations('Groups');
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -51,18 +69,11 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
   const assignTeacherHref = `${detailBase}/assign-teacher`;
   const addStudentsHref   = `${detailBase}/add-students`;
 
-  // Resolve the schoolId from the group — we need it for remove actions.
-  // schoolId is not directly on the Group type, but we can derive it from the
-  // BFF queries. For now we pass it via schoolSlug and rely on the server action
-  // to accept the slug-or-id. Phase 5 will thread schoolId properly from page.tsx.
-  // As a workaround, the removal server actions accept schoolId — we'll pass
-  // schoolSlug as the identifier (server resolves slug → id).
-  const schoolId = schoolSlug; // resolved by the BFF
-
   const tabLabel: Record<TabKey, string> = {
     overview: t('tabs.overview'),
     students: roster.length > 0 ? `${t('tabs.students')} ${roster.length}` : t('tabs.students'),
     teachers: t('tabs.teachers'),
+    materials: t('tabs.materials'),
     schedule: t('tabs.schedule'),
   };
 
@@ -78,16 +89,36 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
           <SelectItem value="overview">{tabLabel.overview}</SelectItem>
           <SelectItem value="students">{tabLabel.students}</SelectItem>
           <SelectItem value="teachers">{tabLabel.teachers}</SelectItem>
+          <SelectItem value="materials">{tabLabel.materials}</SelectItem>
           <SelectItem value="schedule">{tabLabel.schedule}</SelectItem>
         </SelectContent>
       </Select>
 
-      <TabsList className="hidden md:flex overflow-x-auto">
-        <TabsTrigger value="overview">{tabLabel.overview}</TabsTrigger>
-        <TabsTrigger value="students">{tabLabel.students}</TabsTrigger>
-        <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
-        <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>
-      </TabsList>
+      {/* overflow-x lives on this wrapper, not on TabsList itself: putting
+          overflow-x-auto directly on TabsList forces its own overflow-y to
+          compute as "auto" too (CSS's rule for a mixed visible/non-visible
+          pair), and the active tab's underline sits in the -mb-0.5 zone
+          TabsTrigger uses to overlap the row's own border — auto's very
+          first sub-pixel of "overflow" clipped that border away entirely.
+          A wrapper with no fixed height never overflows vertically on its
+          own, so it can carry the horizontal scroll without touching the
+          underline. */}
+      <div className="hidden md:block overflow-x-auto">
+        <TabsList>
+          <TabsTrigger value="overview">{tabLabel.overview}</TabsTrigger>
+          <TabsTrigger value="students">
+            {t('tabs.students')}
+            {roster.length > 0 && (
+              <Badge variant="muted" className="ml-1.5 text-[10px]">
+                {roster.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
+          <TabsTrigger value="materials">{tabLabel.materials}</TabsTrigger>
+          <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>
+        </TabsList>
+      </div>
 
       {/* ── Overview ──────────────────────────────────────────────────────── */}
       <TabsContent value="overview">
@@ -95,11 +126,8 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
           <GroupHealthLine alerts={alerts} status={group.status} />
           <OverviewCards
             group={group}
-            roster={roster}
-            lessons={lessons}
-            alerts={alerts}
-            courseView={courseView}
             canManage={canManage}
+            schoolId={schoolId}
             schoolSlug={schoolSlug}
           />
         </div>
@@ -111,6 +139,7 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
           roster={roster}
           group={group}
           schoolId={schoolId}
+          schoolSlug={schoolSlug}
           addStudentsHref={addStudentsHref}
         />
       </TabsContent>
@@ -125,11 +154,18 @@ export function GroupTabs({ group, roster, lessons, alerts, courseView, schoolSl
         />
       </TabsContent>
 
+      {/* ── Materials ─────────────────────────────────────────────────────── */}
+      <TabsContent value="materials">{materialsSlot}</TabsContent>
+
       {/* ── Schedule ──────────────────────────────────────────────────────── */}
       <TabsContent value="schedule">
         <GroupScheduleTab
           slots={group.slots}
           lessons={lessons}
+          recentLessons={recentLessons}
+          planUnits={planUnits}
+          schoolId={schoolId}
+          groupId={group.id}
           canManage={canManage}
           onEditSchedule={() => setEditScheduleOpen(true)}
         />

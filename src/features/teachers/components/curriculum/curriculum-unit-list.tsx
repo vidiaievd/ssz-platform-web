@@ -2,12 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { GripVertical, ChevronUp, ChevronDown, CheckSquare2, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { updateUnit, reorderUnits } from "../../api/mutations";
+import { reorderUnits } from "../../api/mutations";
 import type { CurriculumUnit, CurriculumPlan } from "../../types";
 
 type CurriculumUnitListProps = {
@@ -57,24 +56,6 @@ export function CurriculumUnitList({ schoolId, plan, onUpdated }: CurriculumUnit
     });
   }
 
-  function handleDeliver(unit: CurriculumUnit) {
-    const updated: CurriculumUnit = {
-      ...unit,
-      deliveredSessions: unit.deliveredSessions + 1,
-      status: unit.deliveredSessions + 1 >= unit.plannedSessions ? "done" : "active",
-    };
-    setUnits((prev) => prev.map((u) => u.unitId === unit.unitId ? updated : u));
-    startTransition(async () => {
-      const result = await updateUnit(schoolId, plan.groupId, updated);
-      if (!result.ok) {
-        toast.error(t("deliver"));
-        setUnits((prev) => prev.map((u) => u.unitId === unit.unitId ? unit : u));
-      } else {
-        onUpdated?.();
-      }
-    });
-  }
-
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -83,6 +64,8 @@ export function CurriculumUnitList({ schoolId, plan, onUpdated }: CurriculumUnit
           {Math.round(plan.progressPct)}% {t("statusDone").toLowerCase()}
         </div>
       </div>
+
+      <p className="text-xs text-(--ssz-text-muted)">{t("deliveredNote")}</p>
 
       {/* Progress bar */}
       <div
@@ -146,28 +129,13 @@ export function CurriculumUnitList({ schoolId, plan, onUpdated }: CurriculumUnit
                 </Badge>
               </div>
               <p className="text-xs text-(--ssz-text-muted) mt-0.5">
-                {unit.deliveredSessions}/{unit.plannedSessions} sessions
+                {t("sessions", {
+                  delivered: unit.deliveredSessions,
+                  planned: unit.plannedSessions,
+                })}
               </p>
             </div>
 
-            {/* Actions */}
-            {unit.status !== "done" && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-7 shrink-0 text-(--ssz-text-muted) hover:text-success-600"
-                aria-label={t("deliver")}
-                disabled={isPending}
-                onClick={() => handleDeliver(unit)}
-              >
-                {isPending ? (
-                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                ) : (
-                  <CheckSquare2 className="size-3.5" aria-hidden="true" />
-                )}
-              </Button>
-            )}
           </li>
         ))}
       </ul>

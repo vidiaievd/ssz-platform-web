@@ -4,6 +4,14 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { MembershipRoleBadge } from "../groups/membership-role-badge";
 import { CurrentMembershipsTable } from "../groups/current-memberships-table";
 import type { StudentInSchool, TeacherRef } from "@/features/students/types";
@@ -112,27 +120,25 @@ export async function GroupsTab({ student, schoolSlug, schoolId, assignHref, can
             {t("detail.groups.pastEmpty")}
           </p>
         ) : (
-          <table className="w-full text-sm border-t">
-            <thead>
-              <tr className="bg-muted/30">
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
-                  {t("detail.groups.cols.group")}
-                </th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
-                  {t("detail.groups.cols.role")}
-                </th>
-                <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
+          <Table
+            // The card chrome is the <details> above; the table adds only the
+            // seam under the summary, not a second card.
+            wrapperClassName="rounded-none border-0 border-t border-border bg-transparent"
+          >
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>{t("detail.groups.cols.group")}</TableHead>
+                <TableHead className="w-[130px]">{t("detail.groups.cols.role")}</TableHead>
+                <TableHead className="hidden w-[140px] md:table-cell">
                   {t("detail.groups.cols.teachers")}
-                </th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
-                  Period
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+                </TableHead>
+                <TableHead className="w-[170px]">Period</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {past.map((m) => (
-                <tr key={m.id} className="text-(--ssz-text-secondary)">
-                  <td className="px-4 py-3">
+                <TableRow key={m.id} className="text-(--ssz-text-secondary)">
+                  <TableCell>
                     <span className="flex items-center gap-2">
                       <span className="font-medium text-(--ssz-text-primary) truncate max-w-40">
                         {m.groupName}
@@ -143,25 +149,25 @@ export async function GroupsTab({ student, schoolSlug, schoolId, assignHref, can
                         </Badge>
                       )}
                     </span>
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell>
                     <MembershipRoleBadge
                       role={m.role}
                       label={t(`detail.groups.role.${m.role}`)}
                     />
-                  </td>
-                  <td className="hidden md:table-cell px-4 py-3">
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <TeacherStack teachers={m.teachers} />
-                  </td>
-                  <td className="px-4 py-3 text-xs whitespace-nowrap">
+                  </TableCell>
+                  <TableCell className="text-xs whitespace-nowrap">
                     {formatAddedAt(m.addedAt)}
                     {" – "}
                     {m.exitedAt ? formatAddedAt(m.exitedAt) : "—"}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
       </details>
     </div>

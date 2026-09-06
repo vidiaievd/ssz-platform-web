@@ -10,6 +10,13 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+} from '@/components/ui/table';
 import { InvitationRow } from './invitation-row';
 import { InvitationStatusChip } from './invitation-status-chip';
 import { InvitationExpiry } from './invitation-expiry';
@@ -86,7 +93,11 @@ export function InvitationsTable({
 
   if (isLoading) {
     return (
-      <div className="space-y-2 p-4" role="status" aria-label={tA11y('loadingLabel')}>
+      <div
+        className="rounded-lg border border-border bg-card space-y-2 p-4"
+        role="status"
+        aria-label={tA11y('loadingLabel')}
+      >
         {Array.from({ length: 5 }).map((_, i) => (
           <Skeleton key={i} className="h-12 w-full rounded-md" />
         ))}
@@ -96,7 +107,7 @@ export function InvitationsTable({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center gap-4 py-16 text-center">
+      <div className="rounded-lg border border-border bg-card flex flex-col items-center gap-4 py-16 text-center">
         <MailX className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
         <p className="text-sm text-muted-foreground">{error}</p>
         {onRetry && (
@@ -111,7 +122,7 @@ export function InvitationsTable({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 py-20 text-center">
+      <div className="rounded-lg border border-border bg-card flex flex-col items-center gap-3 py-20 text-center">
         <MailX className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
         <p className="text-sm text-muted-foreground">{t('empty')}</p>
       </div>
@@ -121,20 +132,21 @@ export function InvitationsTable({
   return (
     <div className="w-full">
       {/* ── Desktop table ─────────────────────────────────────────── */}
-      <table className="hidden w-full text-left sm:table">
-        <thead>
-          <tr className="border-b text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            <th scope="col" className="py-3 px-4">{t('recipient')}</th>
-            {showRoleColumn && <th scope="col" className="py-3 px-4">{t('roleGroup')}</th>}
-            <th scope="col" className="py-3 px-4">{t('status')}</th>
-            <th scope="col" className="py-3 px-4">{t('sent')}</th>
-            <th scope="col" className="py-3 px-4">{t('expires')}</th>
-            <th scope="col" className="py-3 px-4">
+      {/* Desktop only: below sm the same rows render as the card list below. */}
+      <Table wrapperClassName="hidden sm:block" aria-label={tA11y('listLabel')}>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead scope="col">{t('recipient')}</TableHead>
+            {showRoleColumn && <TableHead scope="col">{t('roleGroup')}</TableHead>}
+            <TableHead scope="col">{t('status')}</TableHead>
+            <TableHead scope="col">{t('sent')}</TableHead>
+            <TableHead scope="col">{t('expires')}</TableHead>
+            <TableHead scope="col" className="w-[80px]">
               <span className="sr-only">{t('actions')}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {items.map((inv) => (
             <InvitationRow
               key={inv.invitationId}
@@ -148,8 +160,8 @@ export function InvitationsTable({
               onResendSuccess={handleResendSuccess}
             />
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
 
       {/* ── Mobile cards ──────────────────────────────────────────── */}
       <ul className="sm:hidden space-y-3 p-4" aria-label={tA11y('listLabel')}>

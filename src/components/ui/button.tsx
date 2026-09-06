@@ -39,12 +39,17 @@ const buttonVariants = cva(
           "p-0 h-auto bg-transparent",
         ].join(" "),
       },
+      // Each size gets its own radius rather than reusing --radius-sm/lg: those
+      // tokens also back cards (16px) and modals (24px), and a button sized to
+      // match a card's roundness reads as over-rounded at button scale — the
+      // design's own button-radius progression (7/8/10/12px by size) is a
+      // distinct, smaller scale on purpose.
       size: {
-        sm: "text-sm px-[14px] py-[6px] rounded-sm",
-        md: "text-sm px-5 py-[9px] rounded-md",
-        lg: "text-base px-7 py-3 rounded-lg",
-        icon: "size-9 rounded-md p-0",
-        "icon-sm": "size-7 rounded-sm p-0",
+        sm: "text-sm px-[14px] py-[6px] rounded-[8px]",
+        md: "text-sm px-5 py-[9px] rounded-[10px]",
+        lg: "text-base px-7 py-3 rounded-[12px]",
+        icon: "size-9 rounded-[10px] p-0",
+        "icon-sm": "size-7 rounded-[8px] p-0",
       },
     },
     defaultVariants: {

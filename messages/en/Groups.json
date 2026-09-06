@@ -11,16 +11,37 @@
       "description": "Create your first group to get started.",
       "action": "New group"
     },
-    "filteredEmpty": "No groups match your filters."
+    "filteredEmpty": "No groups match your filters.",
+    "count": "{count, plural, one {# group} other {# groups}}",
+    "columns": {
+      "group": "Group",
+      "teacher": "Teachers",
+      "schedule": "Schedule",
+      "capacity": "Capacity",
+      "status": "Status",
+      "alerts": "Alerts"
+    },
+    "kpi": {
+      "activeGroups": "Active groups",
+      "needTeacher": "{count, plural, =0 {all staffed} one {# needs a teacher} other {# need a teacher}}",
+      "needAttention": "Need attention",
+      "allClear": "All clear",
+      "studentsEnrolled": "Students enrolled",
+      "drafts": "Drafts",
+      "attentionHint": "blocking or advisory alerts",
+      "studentsHint": "across all groups",
+      "draftsHint": "not yet published"
+    }
   },
   "filter": {
-    "search": "Search groups…",
+    "search": "Name, course, teacher…",
     "all": "All",
     "attention": "Needs attention",
     "drafts": "Drafts",
     "sortAlerts": "Most alerts",
     "sortName": "Name A–Z",
-    "sortStudents": "Most students"
+    "sortStudents": "Most students",
+    "sortLabel": "Sort"
   },
   "status": {
     "draft": "Draft",
@@ -38,7 +59,9 @@
     "noTeacher": "No teacher",
     "online": "Online",
     "inPerson": "In-person",
-    "ok": "OK"
+    "ok": "OK",
+    "issues": "{count, plural, one {# issue} other {# issues}}",
+    "langLabel": "Language: {lang}"
   },
   "resolve": {
     "actionRequired": "Action required",
@@ -51,30 +74,24 @@
     "students": "Students",
     "teachers": "Teachers",
     "schedule": "Schedule",
-    "sectionLabel": "Section"
+    "sectionLabel": "Section",
+    "materials": "Materials"
   },
   "overview": {
     "teachersHeading": "Teachers",
     "rosterHeading": "Roster",
     "scheduleHeading": "Schedule",
     "noTeachers": "No teachers assigned.",
-    "courseHeading": "Course",
-    "nextLessonHeading": "Next lesson",
+    "assign": "Assign",
+    "add": "Add",
+    "scheduleSummary": "{hours}h / week · {mode}",
+    "minMaxSeats": "min {min} · max {max} seats",
     "ready": "Ready to run",
     "notReady": "Not ready to run",
-    "statusUnknown": "Status unknown — couldn’t check conflicts",
-    "clashCount": "{count} student with a schedule clash",
-    "clashCountPlural": "{count} students with a schedule clash",
-    "manageStudents": "Manage students →",
-    "manageTeachers": "Manage teachers →",
-    "openSchedule": "Open schedule →",
-    "addSchedule": "Add schedule →",
-    "coPrimaryCount": "+{count} co-primary",
-    "subCount": "{count} sub",
-    "subCountPlural": "{count} subs"
+    "statusUnknown": "Status unknown — couldn’t check conflicts"
   },
   "students": {
-    "search": "Search students…",
+    "search": "Filter students…",
     "addStudents": "Add students",
     "noEnrolled": "No students enrolled yet.",
     "noMatch": "No students match your search.",
@@ -87,12 +104,23 @@
       "finished": "Finished",
       "clash": "Schedule clash",
       "unassigned": "Unassigned"
-    }
+    },
+    "searchAria": "Search students by name or email",
+    "tableAria": "Student roster",
+    "columns": {
+      "student": "Student",
+      "level": "Level",
+      "status": "Status",
+      "progress": "Progress"
+    },
+    "remove": "Remove {name} from the group",
+    "removeButton": "Remove"
   },
   "teachers": {
-    "primaryHeading": "Primary teacher",
-    "coPrimaryHeading": "Co-primary teacher",
+    "assignedHeading": "Assigned teachers",
+    "assignedSub": "One primary required · one optional co-primary · temporary substitutes",
     "subsHeading": "Substitutes",
+    "noSubstitutes": "No active substitutes.",
     "noPrimary": "No primary teacher",
     "noPrimaryDescription": "This group cannot run lessons without a primary teacher.",
     "assignPrimary": "Assign primary",
@@ -112,7 +140,19 @@
     "noSlots": "No recurring slots configured.",
     "noLessons": "No upcoming lessons scheduled.",
     "sub": "Sub",
-    "editButton": "Edit schedule"
+    "editButton": "Edit schedule",
+    "recentHeading": "Lessons held",
+    "noRecent": "No lessons in the last weeks.",
+    "held": "Held",
+    "notHeld": "Not recorded",
+    "noUnit": "No unit attached",
+    "markHeld": "Mark held",
+    "marking": "Saving…",
+    "marked": "Lesson marked as held",
+    "markError": "Could not mark the lesson held",
+    "unitLabel": "Curriculum unit",
+    "pickUnit": "Pick a unit",
+    "noPlan": "No teaching plan yet"
   },
   "detail": {
     "back": "Groups",
@@ -213,12 +253,16 @@
   },
   "assignTeacher": {
     "title": "Assign teacher",
-    "description": "Assigning to {groupName} · lang: {lang}",
-    "role": "Role",
+    "description": "to {groupName} · {schedule}",
+    "role": "Role on this group",
+    "chooseTeacher": "Choose a teacher who teaches {lang}",
     "roleOptions": {
       "primary": "Primary",
       "coPrimary": "Co-primary",
-      "substitute": "Substitute"
+      "substitute": "Substitute",
+      "primarySub": "one required",
+      "coPrimarySub": "optional second",
+      "substituteSub": "temporary cover"
     },
     "substituteFrom": "From date",
     "substituteTo": "To date",
@@ -243,7 +287,12 @@
     "assigning": "Assigning…",
     "cancel": "Cancel",
     "successSimple": "Assigned {name} as {role}",
-    "successWithWarnings": "Assigned {name} as {role} — {count} warning overridden"
+    "successWithWarnings": "Assigned {name} as {role} — {count} warning overridden",
+    "roleAria": "Teacher role",
+    "searchAria": "Search teachers by name",
+    "listAria": "Select teacher",
+    "noMatch": "No teachers match your search.",
+    "serverRejected": "Server rejected: {reasons}. Use “Assign anyway” to override."
   },
   "addStudents": {
     "title": "Add students",
@@ -260,7 +309,12 @@
     "success": "Added {count} student",
     "successPlural": "Added {count} students",
     "successOverride": "Added {count} students (over capacity — override applied)",
-    "error": "Failed to add students. Please try again."
+    "error": "Failed to add students. Please try again.",
+    "searchAria": "Search students",
+    "listAria": "Select students to add",
+    "addCount": "{count, plural, =0 {Add students} one {Add # student} other {Add # students}}",
+    "selected": "{count, plural, one {# student selected} other {# students selected}}",
+    "selectAria": "Select {name}"
   },
   "timetable": {
     "title": "Teacher timetable",
@@ -278,7 +332,24 @@
     },
     "conflictListTitle": "schedule conflict",
     "conflictListTitlePlural": "schedule conflicts",
-    "conflictItem": "{day} clash: {groupA} overlaps {groupB} — move one slot or reassign"
+    "conflictItem": "{day} clash: {groupA} overlaps {groupB} — move one slot or reassign",
+    "hoursLine": "{hours}/{max}h · {count, plural, one {# group} other {# groups}}",
+    "clashes": "{count, plural, one {# clash} other {# clashes}}",
+    "conflictsAria": "Schedule conflicts",
+    "gridAria": "Weekly timetable",
+    "blockAria": "{group} · {time}",
+    "conflictBlockAria": "Time conflict: {group} ({time})",
+    "subSuffix": "sub",
+    "errorTitle": "Failed to load timetable",
+    "weekdayShort": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
   },
   "mySchedule": {
     "title": "My schedule",
@@ -337,5 +408,28 @@
     "updateError": "Failed to update course",
     "materialsCount": "+{count} additional material",
     "materialsCountPlural": "+{count} additional materials"
+  },
+  "materials": {
+    "noCourse": "No course linked to this group yet.",
+    "attachCourse": "Attach a course",
+    "counts": "{units, plural, one {# unit} other {# units}} · {lessons, plural, one {# lesson} other {# lessons}}",
+    "published": "Published — students see this version",
+    "notPublished": "Not published yet",
+    "notPublishedBody": "The course has no published version, so students see nothing of it yet.",
+    "openCourse": "Open course",
+    "change": "Change",
+    "planProgress": "Plan delivered",
+    "curriculumHeading": "Curriculum",
+    "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
+    "minutes": "{count} min",
+    "emptyCourse": "This course has no units yet.",
+    "structureUnavailable": "Could not read the course structure. The card above still shows what the group is linked to.",
+    "taught": "{delivered}/{planned} taught",
+    "linkLabel": "Taught by plan unit",
+    "linkNone": "Not linked",
+    "linkSaved": "Unit link updated",
+    "linkError": "Could not update the unit link",
+    "unstitchedHeading": "Plan units not matched to the course",
+    "unstitchedNote": "These units of the teaching plan teach nothing in this course — link them above, or leave them as they are."
   }
 }

@@ -28,6 +28,14 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Segmented } from '@/components/ui/segmented';
 import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -83,8 +91,8 @@ function ContainerTableRow({ container }: ContainerRowProps) {
   const formatter = useFormatter();
   const containerHref = `/school/${schoolSlug}/content/${container.id}`;
   return (
-    <tr className="group border-b border-border transition-colors hover:bg-muted/40">
-      <td className="px-3 py-3">
+    <TableRow className="group">
+      <TableCell>
         <div className="flex items-center gap-2">
           <LanguageFlag code={container.targetLanguage} />
           <Link href={containerHref} className="font-medium text-sm hover:underline">
@@ -97,20 +105,20 @@ function ContainerTableRow({ container }: ContainerRowProps) {
           <Clock className="h-3 w-3" />
           {formatter.relativeTime(new Date(container.updatedAt), new Date())}
         </div>
-      </td>
-      <td className="px-3 py-3">
+      </TableCell>
+      <TableCell>
         <CardMeta container={container} />
-      </td>
-      <td className="px-3 py-3">
+      </TableCell>
+      <TableCell>
         <div className="flex flex-wrap items-center gap-1.5">
           <ContainerStateBadge state={state} />
           <PendingChangesBadge container={container} />
         </div>
-      </td>
-      <td className="px-3 py-3 text-right">
+      </TableCell>
+      <TableCell className="text-right">
         <ContainerOverflowMenu container={container} state={state} />
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -468,43 +476,25 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
             </Link>
           </div>
         ) : (
-          <div className="rounded-lg border border-border overflow-hidden">
-            <table className="w-full" role="table">
-              <thead className="bg-muted/30">
-                <tr className="border-b border-border">
-                  <th
-                    className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground"
-                    scope="col"
-                  >
-                    {t('colCourse')}
-                  </th>
-                  <th
-                    className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground"
-                    scope="col"
-                  >
-                    {t('colContent')}
-                  </th>
-                  <th
-                    className="px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground"
-                    scope="col"
-                  >
-                    {t('colState')}
-                  </th>
-                  <th
-                    className="w-12 px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground"
-                    scope="col"
-                  >
-                    <span className="sr-only">{t('colActions')}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {containers.map((c) => (
-                  <ContainerTableRow key={c.id} container={c} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table role="table">
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead scope="col">{t('colCourse')}</TableHead>
+                <TableHead scope="col">{t('colContent')}</TableHead>
+                <TableHead scope="col" className="w-[200px]">
+                  {t('colState')}
+                </TableHead>
+                <TableHead scope="col" className="w-[80px]">
+                  <span className="sr-only">{t('colActions')}</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {containers.map((c) => (
+                <ContainerTableRow key={c.id} container={c} />
+              ))}
+            </TableBody>
+          </Table>
         )}
       </DataState>
 

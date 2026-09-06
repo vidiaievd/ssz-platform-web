@@ -11,16 +11,37 @@
       "description": "Opprett din første gruppe for å komme i gang.",
       "action": "Ny gruppe"
     },
-    "filteredEmpty": "Ingen grupper samsvarer med filtrene dine."
+    "filteredEmpty": "Ingen grupper samsvarer med filtrene dine.",
+    "count": "{count, plural, one {# gruppe} other {# grupper}}",
+    "columns": {
+      "group": "Gruppe",
+      "teacher": "Lærere",
+      "schedule": "Timeplan",
+      "capacity": "Kapasitet",
+      "status": "Status",
+      "alerts": "Varsler"
+    },
+    "kpi": {
+      "activeGroups": "Aktive grupper",
+      "needTeacher": "{count, plural, =0 {alle har lærer} one {# mangler lærer} other {# mangler lærer}}",
+      "needAttention": "Trenger oppfølging",
+      "allClear": "Alt i orden",
+      "studentsEnrolled": "Påmeldte elever",
+      "drafts": "Utkast",
+      "attentionHint": "blokkerende eller rådgivende varsler",
+      "studentsHint": "på tvers av alle grupper",
+      "draftsHint": "ikke publisert ennå"
+    }
   },
   "filter": {
-    "search": "Søk i grupper…",
+    "search": "Navn, kurs, lærer…",
     "all": "Alle",
     "attention": "Trenger oppfølging",
     "drafts": "Utkast",
     "sortAlerts": "Flest varsler",
     "sortName": "Navn A–Å",
-    "sortStudents": "Flest elever"
+    "sortStudents": "Flest elever",
+    "sortLabel": "Sorter"
   },
   "status": {
     "draft": "Utkast",
@@ -38,7 +59,9 @@
     "noTeacher": "Ingen lærer",
     "online": "Nettbasert",
     "inPerson": "Fysisk",
-    "ok": "OK"
+    "ok": "OK",
+    "issues": "{count, plural, one {# problem} other {# problemer}}",
+    "langLabel": "Språk: {lang}"
   },
   "resolve": {
     "actionRequired": "Handling kreves",
@@ -51,30 +74,24 @@
     "students": "Elever",
     "teachers": "Lærere",
     "schedule": "Timeplan",
-    "sectionLabel": "Avsnitt"
+    "sectionLabel": "Avsnitt",
+    "materials": "Materiell"
   },
   "overview": {
     "teachersHeading": "Lærere",
     "rosterHeading": "Elevliste",
     "scheduleHeading": "Timeplan",
     "noTeachers": "Ingen lærere tildelt.",
-    "courseHeading": "Kurs",
-    "nextLessonHeading": "Neste time",
+    "assign": "Tildel",
+    "add": "Legg til",
+    "scheduleSummary": "{hours}t / uke · {mode}",
+    "minMaxSeats": "min {min} · maks {max} plasser",
     "ready": "Klar til å kjøre",
     "notReady": "Ikke klar til å kjøre",
-    "statusUnknown": "Status ukjent — kunne ikke sjekke konflikter",
-    "clashCount": "{count} elev med tidskonflikt",
-    "clashCountPlural": "{count} elever med tidskonflikt",
-    "manageStudents": "Administrer elever →",
-    "manageTeachers": "Administrer lærere →",
-    "openSchedule": "Åpne timeplan →",
-    "addSchedule": "Legg til timeplan →",
-    "coPrimaryCount": "+{count} medlærer",
-    "subCount": "{count} vikar",
-    "subCountPlural": "{count} vikarer"
+    "statusUnknown": "Status ukjent — kunne ikke sjekke konflikter"
   },
   "students": {
-    "search": "Søk etter elever…",
+    "search": "Filtrer elever…",
     "addStudents": "Legg til elever",
     "noEnrolled": "Ingen elever påmeldt ennå.",
     "noMatch": "Ingen elever samsvarer med søket ditt.",
@@ -87,12 +104,23 @@
       "finished": "Ferdig",
       "clash": "Timeplankollisjon",
       "unassigned": "Ikke tildelt"
-    }
+    },
+    "searchAria": "Søk etter elever på navn eller e-post",
+    "tableAria": "Elevliste",
+    "columns": {
+      "student": "Elev",
+      "level": "Nivå",
+      "status": "Status",
+      "progress": "Framdrift"
+    },
+    "remove": "Fjern {name} fra gruppen",
+    "removeButton": "Fjern"
   },
   "teachers": {
-    "primaryHeading": "Primærlærer",
-    "coPrimaryHeading": "Medlærer",
+    "assignedHeading": "Tildelte lærere",
+    "assignedSub": "Én primær kreves · én valgfri medlærer · midlertidige vikarer",
     "subsHeading": "Vikarer",
+    "noSubstitutes": "Ingen aktive vikarer.",
     "noPrimary": "Ingen primærlærer",
     "noPrimaryDescription": "Gruppen kan ikke ha timer uten en primærlærer.",
     "assignPrimary": "Tildel primærlærer",
@@ -112,7 +140,19 @@
     "noSlots": "Ingen faste timer konfigurert.",
     "noLessons": "Ingen kommende timer planlagt.",
     "sub": "Vikar",
-    "editButton": "Rediger timeplan"
+    "editButton": "Rediger timeplan",
+    "recentHeading": "Gjennomførte timer",
+    "noRecent": "Ingen timer de siste ukene.",
+    "held": "Gjennomført",
+    "notHeld": "Ikke registrert",
+    "noUnit": "Ingen enhet knyttet",
+    "markHeld": "Merk gjennomført",
+    "marking": "Lagrer…",
+    "marked": "Timen er merket gjennomført",
+    "markError": "Kunne ikke merke timen gjennomført",
+    "unitLabel": "Læreplanenhet",
+    "pickUnit": "Velg enhet",
+    "noPlan": "Ingen undervisningsplan ennå"
   },
   "detail": {
     "back": "Grupper",
@@ -213,12 +253,16 @@
   },
   "assignTeacher": {
     "title": "Tildel lærer",
-    "description": "Tildeler til {groupName} · språk: {lang}",
-    "role": "Rolle",
+    "description": "til {groupName} · {schedule}",
+    "role": "Rolle i denne gruppen",
+    "chooseTeacher": "Velg en lærer som underviser i {lang}",
     "roleOptions": {
       "primary": "Primær",
       "coPrimary": "Medlærer",
-      "substitute": "Vikar"
+      "substitute": "Vikar",
+      "primarySub": "én kreves",
+      "coPrimarySub": "valgfri nummer to",
+      "substituteSub": "midlertidig dekning"
     },
     "substituteFrom": "Fra dato",
     "substituteTo": "Til dato",
@@ -243,7 +287,12 @@
     "assigning": "Tildeler…",
     "cancel": "Avbryt",
     "successSimple": "Tildelt {name} som {role}",
-    "successWithWarnings": "Tildelt {name} som {role} — {count} advarsel overstyrt"
+    "successWithWarnings": "Tildelt {name} som {role} — {count} advarsel overstyrt",
+    "roleAria": "Lærerrolle",
+    "searchAria": "Søk etter lærer på navn",
+    "listAria": "Velg lærer",
+    "noMatch": "Ingen lærere samsvarer med søket.",
+    "serverRejected": "Serveren avviste: {reasons}. Bruk «Tildel likevel» for å overstyre."
   },
   "addStudents": {
     "title": "Legg til elever",
@@ -260,7 +309,12 @@
     "success": "La til {count} elev",
     "successPlural": "La til {count} elever",
     "successOverride": "La til {count} elever (over kapasitet — overstyring brukt)",
-    "error": "Kunne ikke legge til elever. Prøv igjen."
+    "error": "Kunne ikke legge til elever. Prøv igjen.",
+    "searchAria": "Søk etter elever",
+    "listAria": "Velg elever å legge til",
+    "addCount": "{count, plural, =0 {Legg til elever} one {Legg til # elev} other {Legg til # elever}}",
+    "selected": "{count, plural, one {# elev valgt} other {# elever valgt}}",
+    "selectAria": "Velg {name}"
   },
   "timetable": {
     "title": "Lærertimeplan",
@@ -278,7 +332,24 @@
     },
     "conflictListTitle": "timeplankollisjon",
     "conflictListTitlePlural": "timeplankollisjon",
-    "conflictItem": "{day} kollisjon: {groupA} overlapper {groupB} — flytt en time eller omfordel"
+    "conflictItem": "{day} kollisjon: {groupA} overlapper {groupB} — flytt en time eller omfordel",
+    "hoursLine": "{hours}/{max}t · {count, plural, one {# gruppe} other {# grupper}}",
+    "clashes": "{count, plural, one {# kollisjon} other {# kollisjoner}}",
+    "conflictsAria": "Timeplankollisjoner",
+    "gridAria": "Ukeplan",
+    "blockAria": "{group} · {time}",
+    "conflictBlockAria": "Tidskollisjon: {group} ({time})",
+    "subSuffix": "vikar",
+    "errorTitle": "Kunne ikke laste timeplanen",
+    "weekdayShort": {
+      "mon": "man",
+      "tue": "tir",
+      "wed": "ons",
+      "thu": "tor",
+      "fri": "fre",
+      "sat": "lør",
+      "sun": "søn"
+    }
   },
   "mySchedule": {
     "title": "Min timeplan",
@@ -337,5 +408,28 @@
     "updateError": "Kunne ikke oppdatere kurs",
     "materialsCount": "+{count} tilleggsmateriell",
     "materialsCountPlural": "+{count} tilleggsmateriell"
+  },
+  "materials": {
+    "noCourse": "Ingen kurs er knyttet til denne gruppen ennå.",
+    "attachCourse": "Knytt et kurs",
+    "counts": "{units, plural, one {# enhet} other {# enheter}} · {lessons, plural, one {# leksjon} other {# leksjoner}}",
+    "published": "Publisert — elevene ser denne versjonen",
+    "notPublished": "Ikke publisert ennå",
+    "notPublishedBody": "Kurset har ingen publisert versjon, så elevene ser ingenting av det ennå.",
+    "openCourse": "Åpne kurset",
+    "change": "Endre",
+    "planProgress": "Plan gjennomført",
+    "curriculumHeading": "Læreplan",
+    "lessonCount": "{count, plural, one {# leksjon} other {# leksjoner}}",
+    "minutes": "{count} min",
+    "emptyCourse": "Dette kurset har ingen enheter ennå.",
+    "structureUnavailable": "Kunne ikke lese kursstrukturen. Kortet over viser fortsatt hva gruppen er knyttet til.",
+    "taught": "{delivered}/{planned} undervist",
+    "linkLabel": "Undervises av planenhet",
+    "linkNone": "Ikke koblet",
+    "linkSaved": "Koblingen er oppdatert",
+    "linkError": "Kunne ikke oppdatere koblingen",
+    "unstitchedHeading": "Planenheter uten treff i kurset",
+    "unstitchedNote": "Disse enhetene i undervisningsplanen underviser ingenting i dette kurset — koble dem over, eller la dem være."
   }
 }

@@ -97,6 +97,8 @@ export interface CurriculumUnit {
   order: number;
   plannedSessions: number;
   deliveredSessions: number;
+  /** Unit of the linked course this plan unit teaches; null while unstitched. */
+  contentUnitId: string | null;
   requiredLevel: CEFR;
   status: UnitStatus;
 }

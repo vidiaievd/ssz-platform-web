@@ -182,7 +182,9 @@
     "deliver": "Mark delivered",
     "override": "Override",
     "overrideReason": "Reason for override",
-    "lessonMapper": "Unit–Lesson mapping"
+    "lessonMapper": "Unit–Lesson mapping",
+    "sessions": "{delivered}/{planned} sessions",
+    "deliveredNote": "Counted from lessons marked held on the group’s schedule."
   },
   "forecast": {
     "title": "Forecast & Capacity",

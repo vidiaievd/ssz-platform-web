@@ -18,6 +18,7 @@ import type {
   TeacherAvailabilityStatus,
 } from '@/features/groups/types';
 import type { Alert } from '@/features/dashboard/types';
+import type { CurriculumTree, ContainerPublishState } from '@/features/content/types';
 import type { AlertType, AlertSeverity } from '@/lib/groups/operations';
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -104,7 +105,10 @@ function buildScheduleSummary(slots: Slot[]): string {
     return days.indexOf(a.day) - days.indexOf(b.day);
   });
   const days = [...new Set(sorted.map((s) => s.day))].join('/');
-  const time = sorted[0]?.start ?? '';
+  const first = sorted[0];
+  // The end time matters as much as the start for "can I be somewhere else
+  // after this": a bare start hides whether two groups' slots actually clash.
+  const time = first ? `${first.start}–${first.end}` : '';
   return `${days} ${time}`.trim();
 }
 
@@ -338,16 +342,29 @@ export async function getGroup(
     slots,
   };
 
-  const rosterStudents: RosterStudent[] = (roster ?? []).map((m) => ({
-    userId: m.userId,
-    name: m.name ?? '',
-    email: m.email ?? '',
-    avatarUrl: m.avatarUrl ?? null,
-    level: 'A1' as RosterStudent['level'],
-    status: 'active' as RosterStudent['status'],
-    progress: 0,
-    hasClash: false,
-  }));
+  // Level, progress and status come from the school's own student list — the same
+  // source the students screen reads, so a learner cannot be "at risk" on one screen
+  // and "active" on the other. A school whose list cannot be read degrades to the
+  // roster's own facts rather than failing the page.
+  const enrichment = await getRosterEnrichment(schoolId);
+
+  const rosterStudents: RosterStudent[] = (roster ?? []).map((m) => {
+    const extra = enrichment.get(m.userId);
+    return {
+      userId: m.userId,
+      name: m.name ?? '',
+      email: m.email ?? '',
+      avatarUrl: m.avatarUrl ?? null,
+      level: extra?.level ?? ((rawGroup.level ?? 'A1') as RosterStudent['level']),
+      status: extra?.status ?? ('active' as RosterStudent['status']),
+      progress: extra?.progress ?? 0,
+      // Left false deliberately. scheduling-service's clash endpoint says so itself:
+      // it does not track per-student group membership and returns every overlapping
+      // pair in the school, so asking it here would mark the whole roster as clashing
+      // the moment any two groups overlap. A wrong badge is worse than a missing one.
+      hasClash: false,
+    };
+  });
 
   return { ...group, roster: rosterStudents, alerts };
 }
@@ -759,4 +776,177 @@ export async function getStudentCandidates(
     capacity: groupData.capacity,
     candidates,
   };
+}
+
+// ── Roster enrichment ─────────────────────────────────────────────────────────
+
+type RosterExtra = {
+  level: RosterStudent['level'];
+  progress: number;
+  status: RosterStudent['status'];
+};
+
+/**
+ * Level, progress and derived status per student of a school, keyed by user id.
+ *
+ * One request for the whole school rather than one per roster row: a group of twenty
+ * would otherwise open twenty connections to say what a single list already knows.
+ */
+async function getRosterEnrichment(schoolId: string): Promise<Map<string, RosterExtra>> {
+  const empty = new Map<string, RosterExtra>();
+
+  try {
+    const raw = await serverFetch<
+      | {
+          items?: Array<{
+            userId: string;
+            level?: string;
+            progress?: number;
+            lastSeen?: string | null;
+            enrolledAt?: string;
+            groups?: Array<unknown>;
+          }>;
+        }
+      | Array<{
+          userId: string;
+          level?: string;
+          progress?: number;
+          lastSeen?: string | null;
+          enrolledAt?: string;
+          groups?: Array<unknown>;
+        }>
+    >({ service: 'organization', path: `/schools/${schoolId}/students` });
+
+    const items = Array.isArray(raw) ? raw : (raw.items ?? []);
+    const { deriveStatus } = await import('@/lib/students/status');
+
+    for (const item of items) {
+      // organization-service reports progress as a 0..1 ratio, which is also what the
+      // status rules read. The roster renders a percentage, so the conversion happens
+      // once, here, rather than in the component that draws the bar.
+      const progress = item.progress ?? 0;
+      const enrolledAt = item.enrolledAt ?? new Date().toISOString().slice(0, 10);
+      empty.set(item.userId, {
+        level: (item.level ?? 'A1') as RosterStudent['level'],
+        progress: Math.round(Math.max(0, Math.min(1, progress)) * 100),
+        status: deriveStatus({
+          // The roster row is inside this group by definition, so an empty group list
+          // here would only ever produce a false "unassigned".
+          groups: [{ id: 'this-group' }] as never,
+          clashes: [],
+          progress,
+          lastSeen: item.lastSeen ?? null,
+          enrolledAt,
+        }) as RosterStudent['status'],
+      });
+    }
+  } catch {
+    // Students list unavailable — the roster still renders from what the group knows.
+  }
+
+  return empty;
+}
+
+// ── Materials ─────────────────────────────────────────────────────────────────
+
+/** One unit of the linked course, as the Materials tab shows it. */
+export interface MaterialsUnit {
+  id: string;
+  title: string;
+  lessons: Array<{
+    id: string;
+    title: string;
+    kind: string;
+    durationMinutes: number | null;
+  }>;
+}
+
+export interface GroupMaterialsView {
+  course: {
+    id: string;
+    title: string;
+    publishState: ContainerPublishState | null;
+    /** Null when the course has never been published — students see nothing yet. */
+    versionId: string | null;
+  } | null;
+  units: MaterialsUnit[];
+  lessonCount: number;
+  /** True when the course exists but its structure could not be read. */
+  structureUnavailable: boolean;
+}
+
+const EMPTY_MATERIALS: GroupMaterialsView = {
+  course: null,
+  units: [],
+  lessonCount: 0,
+  structureUnavailable: false,
+};
+
+/**
+ * The linked course as students of this group get it: the **published** version,
+ * not the draft the author is editing. A course with no published version has no
+ * structure to show, and says so rather than showing the draft.
+ */
+export async function getGroupMaterials(group: Group): Promise<GroupMaterialsView> {
+  if (!group.courseId) return EMPTY_MATERIALS;
+
+  try {
+    const container = await serverFetch<{
+      id: string;
+      title: string;
+      publishState?: ContainerPublishState;
+      currentPublishedVersionId?: string | null;
+    }>({ service: 'content', path: `/containers/${group.courseId}` });
+
+    const versionId = container.currentPublishedVersionId ?? null;
+    const course = {
+      id: container.id,
+      title: container.title ?? group.courseName ?? '',
+      publishState: container.publishState ?? null,
+      versionId,
+    };
+    if (!versionId) return { ...EMPTY_MATERIALS, course };
+
+    const tree = await serverFetch<CurriculumTree>({
+      service: 'content',
+      path: `/containers/${group.courseId}/versions/${versionId}/tree`,
+    });
+
+    // A course keeps its units as modules under each level; a level exists even
+    // when the course has no level system, so both are flattened in order.
+    const units: MaterialsUnit[] = tree.levels.flatMap((level) =>
+      level.modules.map((module) => ({
+        id: module.id,
+        title: module.title ?? module.titleEn ?? '',
+        lessons: [
+          ...module.sections.flatMap((section) => section.items),
+          ...module.ungroupedItems,
+        ]
+          .sort((a, b) => a.position - b.position)
+          .map((item) => ({
+            id: item.id,
+            title: item.title ?? '',
+            kind: item.lessonKind ?? item.itemType,
+            durationMinutes: item.durationMinutes,
+          })),
+      })),
+    );
+
+    return {
+      course,
+      units,
+      lessonCount: units.reduce((sum, u) => sum + u.lessons.length, 0),
+      structureUnavailable: false,
+    };
+  } catch (e) {
+    if (e instanceof AppError && e.code === 'not_found') return EMPTY_MATERIALS;
+    // The tab degrades to "structure unavailable" rather than taking the page down.
+    return {
+      ...EMPTY_MATERIALS,
+      course: group.courseId
+        ? { id: group.courseId, title: group.courseName ?? '', publishState: null, versionId: null }
+        : null,
+      structureUnavailable: true,
+    };
+  }
 }
