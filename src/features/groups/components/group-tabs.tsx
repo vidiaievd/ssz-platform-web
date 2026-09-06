@@ -6,13 +6,14 @@ import { useTranslations } from 'next-intl';
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { GroupHealthLine } from './group-health-line';
 import { OverviewCards } from './overview-cards';
 import { GroupStudentsTab } from './group-students-tab';
 import { GroupTeachersTab } from './group-teachers-tab';
 import { GroupScheduleTab } from './group-schedule-tab';
 import { GroupEditDialog } from './group-edit-dialog';
-import type { Group, RosterStudent, Lesson, CourseView } from '../types';
+import type { Group, RosterStudent, Lesson } from '../types';
 import type { CurriculumUnit } from '@/features/teachers/types';
 import type { Alert } from '@/features/dashboard/types';
 
@@ -27,7 +28,6 @@ type Props = {
   /** Materials tab, rendered on the server — it reads the course structure. */
   materialsSlot: ReactNode;
   alerts: Alert[];
-  courseView: CourseView;
   /** Real school id (UUID) — every mutation below takes this. */
   schoolId: string;
   schoolSlug: string;
@@ -42,7 +42,6 @@ export function GroupTabs({
   planUnits,
   materialsSlot,
   alerts,
-  courseView,
   schoolId,
   schoolSlug,
   canManage,
@@ -95,13 +94,31 @@ export function GroupTabs({
         </SelectContent>
       </Select>
 
-      <TabsList className="hidden md:flex overflow-x-auto overflow-y-hidden">
-        <TabsTrigger value="overview">{tabLabel.overview}</TabsTrigger>
-        <TabsTrigger value="students">{tabLabel.students}</TabsTrigger>
-        <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
-        <TabsTrigger value="materials">{tabLabel.materials}</TabsTrigger>
-        <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>
-      </TabsList>
+      {/* overflow-x lives on this wrapper, not on TabsList itself: putting
+          overflow-x-auto directly on TabsList forces its own overflow-y to
+          compute as "auto" too (CSS's rule for a mixed visible/non-visible
+          pair), and the active tab's underline sits in the -mb-0.5 zone
+          TabsTrigger uses to overlap the row's own border — auto's very
+          first sub-pixel of "overflow" clipped that border away entirely.
+          A wrapper with no fixed height never overflows vertically on its
+          own, so it can carry the horizontal scroll without touching the
+          underline. */}
+      <div className="hidden md:block overflow-x-auto">
+        <TabsList>
+          <TabsTrigger value="overview">{tabLabel.overview}</TabsTrigger>
+          <TabsTrigger value="students">
+            {t('tabs.students')}
+            {roster.length > 0 && (
+              <Badge variant="muted" className="ml-1.5 text-[10px]">
+                {roster.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
+          <TabsTrigger value="materials">{tabLabel.materials}</TabsTrigger>
+          <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>
+        </TabsList>
+      </div>
 
       {/* ── Overview ──────────────────────────────────────────────────────── */}
       <TabsContent value="overview">
@@ -109,10 +126,6 @@ export function GroupTabs({
           <GroupHealthLine alerts={alerts} status={group.status} />
           <OverviewCards
             group={group}
-            roster={roster}
-            lessons={lessons}
-            alerts={alerts}
-            courseView={courseView}
             canManage={canManage}
             schoolId={schoolId}
             schoolSlug={schoolSlug}
@@ -126,6 +139,7 @@ export function GroupTabs({
           roster={roster}
           group={group}
           schoolId={schoolId}
+          schoolSlug={schoolSlug}
           addStudentsHref={addStudentsHref}
         />
       </TabsContent>

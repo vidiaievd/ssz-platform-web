@@ -82,23 +82,16 @@
     "rosterHeading": "Список учнів",
     "scheduleHeading": "Розклад",
     "noTeachers": "Учителів не призначено.",
-    "courseHeading": "Курс",
-    "nextLessonHeading": "Наступний урок",
+    "assign": "Призначити",
+    "add": "Додати",
+    "scheduleSummary": "{hours} год/тиждень · {mode}",
+    "minMaxSeats": "мін {min} · макс {max} місць",
     "ready": "Готово до запуску",
     "notReady": "Не готово до запуску",
-    "statusUnknown": "Статус невідомий — не вдалося перевірити конфлікти",
-    "clashCount": "{count} студент із конфліктом розкладу",
-    "clashCountPlural": "{count} студентів із конфліктом розкладу",
-    "manageStudents": "Керувати студентами →",
-    "manageTeachers": "Керувати вчителями →",
-    "openSchedule": "Відкрити розклад →",
-    "addSchedule": "Додати розклад →",
-    "coPrimaryCount": "+{count} співвчитель",
-    "subCount": "{count} замісник",
-    "subCountPlural": "{count} замісників"
+    "statusUnknown": "Статус невідомий — не вдалося перевірити конфлікти"
   },
   "students": {
-    "search": "Пошук учнів…",
+    "search": "Фільтр учнів…",
     "addStudents": "Додати учнів",
     "noEnrolled": "Учнів ще не зараховано.",
     "noMatch": "Жоден учень не відповідає пошуку.",
@@ -113,7 +106,6 @@
       "unassigned": "Не призначений"
     },
     "searchAria": "Пошук учнів за іменем або поштою",
-    "minMax": "Мін. {min} · Макс. {max}",
     "tableAria": "Список учнів",
     "columns": {
       "student": "Учень",
@@ -121,12 +113,14 @@
       "status": "Статус",
       "progress": "Прогрес"
     },
-    "remove": "Прибрати {name} з групи"
+    "remove": "Прибрати {name} з групи",
+    "removeButton": "Прибрати"
   },
   "teachers": {
-    "primaryHeading": "Основний учитель",
-    "coPrimaryHeading": "Співвчитель",
+    "assignedHeading": "Призначені вчителі",
+    "assignedSub": "Один основний обов’язковий · один необов’язковий співвчитель · тимчасові заміни",
     "subsHeading": "Замісники",
+    "noSubstitutes": "Активних замін немає.",
     "noPrimary": "Немає основного вчителя",
     "noPrimaryDescription": "Група не може проводити уроки без основного вчителя.",
     "assignPrimary": "Призначити основного",
@@ -259,12 +253,16 @@
   },
   "assignTeacher": {
     "title": "Призначити вчителя",
-    "description": "Призначення для {groupName} · мова: {lang}",
-    "role": "Роль",
+    "description": "до {groupName} · {schedule}",
+    "role": "Роль у цій групі",
+    "chooseTeacher": "Оберіть вчителя, який викладає {lang}",
     "roleOptions": {
       "primary": "Основний",
       "coPrimary": "Співвчитель",
-      "substitute": "Замісник"
+      "substitute": "Замісник",
+      "primarySub": "один обов’язковий",
+      "coPrimarySub": "необов’язковий другий",
+      "substituteSub": "тимчасова заміна"
     },
     "substituteFrom": "Дата початку",
     "substituteTo": "Дата завершення",

@@ -4,7 +4,7 @@ import { useState, useTransition, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Search, CheckCircle2, AlertCircle, AlertTriangle, X } from 'lucide-react';
+import { Search, Check, AlertCircle, AlertTriangle, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose,
 } from '@/components/ui/dialog';
 import { assignTeacher } from '../api/mutations';
 import type { TeacherAssignCandidate } from '../api/queries';
@@ -28,13 +28,27 @@ function slotWeeklyHours(slots: Slot[]): number {
   }, 0);
 }
 
+const DAY_ORDER: Record<Slot['day'], number> = {
+  Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6,
+};
+
+/** "Mon/Fri 18:00–19:30" — mirrors buildScheduleSummary in api/queries.ts,
+ *  which is server-only and can't be imported into this client component. */
+function scheduleSummaryOf(slots: Slot[]): string {
+  if (slots.length === 0) return '—';
+  const sorted = [...slots].sort((a, b) => DAY_ORDER[a.day] - DAY_ORDER[b.day]);
+  const days = [...new Set(sorted.map((s) => s.day))].join('/');
+  const first = sorted[0];
+  return first ? `${days} ${first.start}–${first.end}` : days;
+}
+
 // ── Role picker ───────────────────────────────────────────────────────────────
 
 const ROLES = [
-  { value: 'primary',    labelKey: 'assignTeacher.roleOptions.primary' },
-  { value: 'co-primary', labelKey: 'assignTeacher.roleOptions.coPrimary' },
-  { value: 'substitute', labelKey: 'assignTeacher.roleOptions.substitute' },
-] as const satisfies ReadonlyArray<{ value: TeacherRole; labelKey: string }>;
+  { value: 'primary',    labelKey: 'assignTeacher.roleOptions.primary',    subKey: 'assignTeacher.roleOptions.primarySub' },
+  { value: 'co-primary', labelKey: 'assignTeacher.roleOptions.coPrimary',  subKey: 'assignTeacher.roleOptions.coPrimarySub' },
+  { value: 'substitute', labelKey: 'assignTeacher.roleOptions.substitute', subKey: 'assignTeacher.roleOptions.substituteSub' },
+] as const satisfies ReadonlyArray<{ value: TeacherRole; labelKey: string; subKey: string }>;
 
 function isTeacherRole(value: string | null): value is TeacherRole {
   return value === 'primary' || value === 'co-primary' || value === 'substitute';
@@ -50,11 +64,7 @@ function RolePicker({
   const t = useTranslations('Groups');
 
   return (
-    <div
-      role="radiogroup"
-      aria-label={t('assignTeacher.roleAria')}
-      className="flex rounded-md border border-input overflow-hidden"
-    >
+    <div role="radiogroup" aria-label={t('assignTeacher.roleAria')} className="flex gap-2">
       {ROLES.map((r) => (
         <button
           key={r.value}
@@ -63,15 +73,22 @@ function RolePicker({
           aria-checked={value === r.value}
           onClick={() => onChange(r.value)}
           className={cn(
-            'flex-1 px-3 py-1.5 text-sm font-medium transition-colors',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+            'flex-1 rounded-[12px] border-[1.5px] px-3.25 py-2.75 text-left transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             value === r.value
-              ? 'bg-primary text-white'
-              : 'bg-background text-(--ssz-text-secondary) hover:bg-muted',
-            r.value !== 'primary' && 'border-l border-input',
+              ? 'border-primary bg-primary-50 dark:bg-primary-900/20'
+              : 'border-(--ssz-border-default) hover:bg-subtle',
           )}
         >
-          {t(r.labelKey)}
+          <div
+            className={cn(
+              'text-[13.5px] font-bold',
+              value === r.value ? 'text-primary-700 dark:text-primary-300' : 'text-(--ssz-text-primary)',
+            )}
+          >
+            {t(r.labelKey)}
+          </div>
+          <div className="mt-0.5 text-[11px] text-(--ssz-text-muted)">{t(r.subKey)}</div>
         </button>
       ))}
     </div>
@@ -103,29 +120,29 @@ function TeacherOption({
       aria-selected={selected}
       onClick={onSelect}
       className={cn(
-        'flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer',
-        'border transition-colors',
+        'flex items-center gap-2.75 px-2.75 py-2.25 rounded-[12px] cursor-pointer',
+        'border-[1.5px] transition-colors',
         selected
           ? 'border-primary bg-primary-50 dark:bg-primary-900/20'
-          : 'border-transparent hover:bg-muted/60',
+          : 'border-(--ssz-border-default) hover:bg-subtle',
         dimmed && !selected && 'opacity-50',
       )}
     >
-      <Avatar name={candidate.name} src={candidate.avatarUrl ?? undefined} size="sm" />
+      <Avatar name={candidate.name} src={candidate.avatarUrl ?? undefined} size="sm" className="size-8.5" />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-sm font-medium text-(--ssz-text-primary) truncate">
+          <span className="text-[13.5px] font-semibold text-(--ssz-text-primary) truncate">
             {candidate.name}
           </span>
           {!candidate.langFit && (
             <span className="text-[10px] text-warning-600 dark:text-warning-400 font-medium">
-              lang mismatch
+              {t('assignTeacher.langMismatch')}
             </span>
           )}
           {candidate.availabilityStatus === 'conflict' && (
             <span className="text-[10px] text-error-600 dark:text-error-400 font-medium">
-              time clash
+              {t('assignTeacher.timeClash')}
             </span>
           )}
           {candidate.availabilityStatus === 'absent' && (
@@ -134,33 +151,30 @@ function TeacherOption({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-1">
-          <div
-            role="progressbar"
-            aria-label={`${candidate.name}: ${candidate.currentHours.toFixed(1)} of ${candidate.maxWeeklyHours}h`}
-            aria-valuenow={Math.round(fillPct)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            className="flex-1 h-1 rounded-full bg-border overflow-hidden"
-          >
-            <div
-              className={cn(
-                'h-full rounded-full transition-[width]',
-                wouldOverload ? 'bg-error-500' : fillPct >= 85 ? 'bg-warning-500' : 'bg-primary',
-              )}
-              style={{ width: `${fillPct}%` }}
-            />
-          </div>
-          <span className="text-[11px] text-(--ssz-text-muted) font-mono whitespace-nowrap">
-            {candidate.currentHours.toFixed(1)}/{candidate.maxWeeklyHours}h
-            {' · '}{candidate.currentGroups} {candidate.currentGroups === 1 ? 'group' : 'groups'}
-          </span>
+        <div className="mt-0.5 text-[11px] text-(--ssz-text-muted)">
+          {candidate.currentHours.toFixed(1)}/{candidate.maxWeeklyHours}h
+          {' · '}{candidate.currentGroups} {candidate.currentGroups === 1 ? 'group' : 'groups'}
         </div>
       </div>
 
-      {selected && (
-        <CheckCircle2 className="size-4 text-primary shrink-0" aria-hidden="true" />
-      )}
+      <div
+        role="progressbar"
+        aria-label={`${candidate.name}: ${candidate.currentHours.toFixed(1)} of ${candidate.maxWeeklyHours}h`}
+        aria-valuenow={Math.round(fillPct)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        className="w-18.5 h-1.25 rounded-full bg-border overflow-hidden shrink-0"
+      >
+        <div
+          className={cn(
+            'h-full rounded-full transition-[width]',
+            wouldOverload ? 'bg-error-500' : fillPct >= 85 ? 'bg-warning-500' : 'bg-primary',
+          )}
+          style={{ width: `${fillPct}%` }}
+        />
+      </div>
+
+      {selected && <Check className="size-4 text-primary shrink-0" aria-hidden="true" />}
     </div>
   );
 }
@@ -177,21 +191,22 @@ function ValidationBlock({ state, okLabel }: { state: ValidationState; okLabel: 
   if (state.status === 'idle') return null;
 
   if (state.status === 'ok') {
+    // Clean state carries no box — a banner is for something to resolve.
     return (
-      <div className="flex items-center gap-2 rounded-md bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 px-3 py-2">
-        <CheckCircle2 className="size-4 text-success-600 shrink-0" aria-hidden="true" />
-        <span className="text-sm text-success-700 dark:text-success-300">{okLabel}</span>
+      <div className="flex items-center gap-2 px-0.5 py-1">
+        <Check className="size-4 text-success-500 shrink-0" aria-hidden="true" />
+        <span className="text-[13px] font-medium text-success-700 dark:text-success-400">{okLabel}</span>
       </div>
     );
   }
 
   if (state.status === 'warn') {
     return (
-      <div className="flex flex-col gap-1 rounded-md bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 px-3 py-2">
+      <div className="flex flex-col gap-2 rounded-[14px] border-[1.5px] border-warning-500 bg-warning-50 dark:bg-warning-900/20 px-4 py-3.5">
         {state.messages.map((m, i) => (
-          <div key={i} className="flex items-start gap-2">
-            <AlertTriangle className="size-4 text-warning-600 shrink-0 mt-0.5" aria-hidden="true" />
-            <span className="text-sm text-warning-700 dark:text-warning-300">{m}</span>
+          <div key={i} className="flex items-start gap-2.25">
+            <AlertTriangle className="size-4 text-warning-500 shrink-0 mt-0.5" aria-hidden="true" />
+            <span className="text-[13px] leading-normal text-warning-700 dark:text-warning-300">{m}</span>
           </div>
         ))}
       </div>
@@ -199,11 +214,11 @@ function ValidationBlock({ state, okLabel }: { state: ValidationState; okLabel: 
   }
 
   return (
-    <div className="flex flex-col gap-1 rounded-md bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 px-3 py-2">
+    <div className="flex flex-col gap-2 rounded-[14px] border-[1.5px] border-error-500 bg-error-50 dark:bg-error-900/20 px-4 py-3.5">
       {state.messages.map((m, i) => (
-        <div key={i} className="flex items-start gap-2">
-          <AlertCircle className="size-4 text-error-600 shrink-0 mt-0.5" aria-hidden="true" />
-          <span className="text-sm text-error-700 dark:text-error-300">{m}</span>
+        <div key={i} className="flex items-start gap-2.25">
+          <AlertCircle className="size-4 text-error-500 shrink-0 mt-0.5" aria-hidden="true" />
+          <span className="text-[13px] leading-normal text-error-700 dark:text-error-300">{m}</span>
         </div>
       ))}
     </div>
@@ -264,20 +279,23 @@ export function TeacherAssignModal({
     const errors: string[] = [];
     const warns: string[] = [];
     if (selected.availabilityStatus === 'conflict') {
-      errors.push(`Schedule conflict: ${selected.name} already has a lesson at this time.`);
+      errors.push(t('assignTeacher.validationConflict', { name: selected.name }));
     }
     if (selected.availabilityStatus === 'absent') {
       errors.push(t('assignTeacher.validationAbsent', { name: selected.name }));
     }
     if (!selected.langFit) {
       warns.push(
-        `Language mismatch: teacher speaks ${selected.langs.join(', ') || '—'}, group language is ${groupLang.toUpperCase()}.`,
+        t('assignTeacher.validationLangMismatch', {
+          teacherLang: selected.langs.join(', ') || '—',
+          groupLang: groupLang.toUpperCase(),
+        }),
       );
     }
     if (wouldOverload) {
       const projected = (selected.currentHours + groupWeeklyHours).toFixed(1);
       warns.push(
-        `This would bring ${selected.name} to ${projected}/${selected.maxWeeklyHours}h per week.`,
+        t('assignTeacher.validationOverload', { name: selected.name, projected, max: selected.maxWeeklyHours }),
       );
     }
     if (errors.length > 0) return { status: 'error', messages: [...errors, ...warns] };
@@ -341,28 +359,44 @@ export function TeacherAssignModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-xl max-h-[90dvh] flex flex-col overflow-hidden p-0">
-        <div className="flex flex-col gap-4 p-4 overflow-y-auto flex-1">
-          <DialogHeader>
-            <DialogTitle>{t('assignTeacher.title')}</DialogTitle>
-            <DialogDescription>
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-155 max-h-[90dvh] flex flex-col overflow-hidden gap-0 p-0 rounded-xl border-[1.5px] border-(--ssz-border-default) shadow-(--ssz-shadow-xl) ring-0"
+      >
+        {/* Head */}
+        <div className="flex items-start justify-between gap-3 px-5.5 pt-5 pb-3.5">
+          <div>
+            <DialogTitle className="text-[18px] font-bold tracking-[-0.01em]">
+              {t('assignTeacher.title')}
+            </DialogTitle>
+            <DialogDescription className="mt-0.75 text-[13px] text-(--ssz-text-muted)">
               {t('assignTeacher.description', {
                 groupName,
-                lang: groupLang.toUpperCase(),
+                schedule: scheduleSummaryOf(groupSlots),
               })}
             </DialogDescription>
-          </DialogHeader>
+          </div>
+          <DialogClose asChild>
+            <Button variant="ghost" size="icon-sm" aria-label={t('assignTeacher.cancel')}>
+              <X className="size-4" />
+            </Button>
+          </DialogClose>
+        </div>
 
+        {/* Body */}
+        <div className="flex flex-col overflow-y-auto flex-1 px-5.5">
           {/* Role picker */}
-          <div className="flex flex-col gap-1.5">
-            <Label>{t('assignTeacher.role')}</Label>
+          <div className="flex flex-col gap-2 mb-5">
+            <p className="text-[12.5px] font-semibold text-(--ssz-text-secondary)">
+              {t('assignTeacher.role')}
+            </p>
             <RolePicker value={role} onChange={(r) => { setRole(r); setSelectedId(null); }} />
           </div>
 
           {/* Substitute fields */}
           {role === 'substitute' && (
-            <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2.75 rounded-[12px] border-[1.5px] border-dashed border-(--ssz-border-strong) bg-subtle p-3.5 mb-4">
+              <div className="grid grid-cols-2 gap-2.75">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="sub-from">{t('assignTeacher.substituteFrom')}</Label>
                   <Input id="sub-from" type="date" value={subFrom} onChange={(e) => setSubFrom(e.target.value)} />
@@ -389,46 +423,51 @@ export function TeacherAssignModal({
             </div>
           )}
 
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-(--ssz-text-muted)" aria-hidden="true" />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t('assignTeacher.search')}
-              aria-label={t('assignTeacher.searchAria')}
-              className={cn(
-                'h-9 w-full rounded-md border border-input bg-background',
-                'pl-8 pr-3 text-sm text-(--ssz-text-primary)',
-                'placeholder:text-(--ssz-text-muted)',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              )}
-            />
-          </div>
+          {/* Teacher list */}
+          <div className="flex flex-col gap-2 mb-4.5">
+            <p className="text-[12.5px] font-semibold text-(--ssz-text-secondary)">
+              {t('assignTeacher.chooseTeacher', { lang: groupLang.toUpperCase() })}
+            </p>
 
-          {/* Teacher listbox */}
-          <div
-            role="listbox"
-            aria-label={t('assignTeacher.listAria')}
-            aria-required="true"
-            className="flex flex-col gap-1 max-h-64 overflow-y-auto"
-          >
-            {filtered.length === 0 ? (
-              <p className="text-sm text-(--ssz-text-muted) text-center py-6">
-                {candidates.length === 0 ? t('assignTeacher.noTeachers') : t('assignTeacher.noMatch')}
-              </p>
-            ) : (
-              filtered.map((c) => (
-                <TeacherOption
-                  key={c.userId}
-                  candidate={c}
-                  selected={selectedId === c.userId}
-                  groupWeeklyHours={groupWeeklyHours}
-                  onSelect={() => setSelectedId(c.userId === selectedId ? null : c.userId)}
-                />
-              ))
-            )}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-(--ssz-text-muted)" aria-hidden="true" />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t('assignTeacher.search')}
+                aria-label={t('assignTeacher.searchAria')}
+                className={cn(
+                  'h-9 w-full rounded-md border-[1.5px] border-(--ssz-border-default) bg-surface',
+                  'pl-9 pr-3 text-sm text-(--ssz-text-primary)',
+                  'placeholder:text-(--ssz-text-muted)',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                )}
+              />
+            </div>
+
+            <div
+              role="listbox"
+              aria-label={t('assignTeacher.listAria')}
+              aria-required="true"
+              className="flex flex-col gap-1.75 max-h-64 overflow-y-auto"
+            >
+              {filtered.length === 0 ? (
+                <p className="text-sm text-(--ssz-text-muted) text-center py-6">
+                  {candidates.length === 0 ? t('assignTeacher.noTeachers') : t('assignTeacher.noMatch')}
+                </p>
+              ) : (
+                filtered.map((c) => (
+                  <TeacherOption
+                    key={c.userId}
+                    candidate={c}
+                    selected={selectedId === c.userId}
+                    groupWeeklyHours={groupWeeklyHours}
+                    onSelect={() => setSelectedId(c.userId === selectedId ? null : c.userId)}
+                  />
+                ))
+              )}
+            </div>
           </div>
 
           {/* Validation block */}
@@ -436,21 +475,25 @@ export function TeacherAssignModal({
 
           {/* Server error */}
           {serverError && (
-            <div className="flex items-start gap-2 rounded-md bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 px-3 py-2">
-              <AlertCircle className="size-4 text-error-600 shrink-0 mt-0.5" aria-hidden="true" />
-              <div className="flex-1 text-sm text-error-700 dark:text-error-300">{serverError}</div>
+            <div className="mt-2 flex items-start gap-2.25 rounded-[14px] border-[1.5px] border-error-500 bg-error-50 dark:bg-error-900/20 px-4 py-3.5">
+              <AlertCircle className="size-4 text-error-500 shrink-0 mt-0.5" aria-hidden="true" />
+              <div className="flex-1 text-[13px] leading-normal text-error-700 dark:text-error-300">{serverError}</div>
               <button type="button" onClick={() => setServerError(null)} className="text-error-600 hover:text-error-800">
                 <X className="size-3.5" />
               </button>
             </div>
           )}
+
+          <div className="pb-4" />
         </div>
 
-        <DialogFooter className="rounded-b-xl">
-          <Button variant="outline" onClick={handleClose} disabled={isPending}>
-            {t('addStudents.cancel')}
+        {/* Footer */}
+        <div className="flex justify-end gap-2.5 px-5.5 py-4 border-t-[1.5px] border-(--ssz-border-default)">
+          <Button variant="ghost" onClick={handleClose} disabled={isPending}>
+            {t('assignTeacher.cancel')}
           </Button>
           <Button
+            variant={needsOverride ? 'secondary' : 'primary'}
             onClick={handleAssign}
             disabled={!canAssign || isPending}
           >
@@ -460,7 +503,7 @@ export function TeacherAssignModal({
                 ? t('assignTeacher.assignAnyway')
                 : t('assignTeacher.assign')}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

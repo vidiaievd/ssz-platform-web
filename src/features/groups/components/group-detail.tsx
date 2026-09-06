@@ -96,7 +96,6 @@ export async function GroupDetail({
           />
         }
         alerts={alerts}
-        courseView={courseView}
         schoolId={schoolId}
         schoolSlug={schoolSlug}
         canManage={canManage}

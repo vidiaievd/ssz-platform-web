@@ -1,257 +1,212 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { UserPlus, CalendarPlus, Pencil } from 'lucide-react';
+import { Plus, AlertCircle, MapPin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { CapacityMeter } from '@/components/shared/operations';
 import { TeacherRow } from './teacher-row';
-import { CourseChip } from './course-chip';
-import { CourseManageDialog } from './course-manage-dialog';
-import type { Group, RosterStudent, Lesson, CourseView } from '../types';
-import type { Alert } from '@/features/dashboard/types';
+import type { Group, Weekday } from '../types';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const DAY_ORDER: Record<Weekday, number> = {
+  Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6,
+};
+
+/** Message keys for the short weekday labels — mirrors timetable-grid.tsx. */
+const DAY_LABEL_KEYS = {
+  Mon: 'timetable.weekdayShort.mon',
+  Tue: 'timetable.weekdayShort.tue',
+  Wed: 'timetable.weekdayShort.wed',
+  Thu: 'timetable.weekdayShort.thu',
+  Fri: 'timetable.weekdayShort.fri',
+  Sat: 'timetable.weekdayShort.sat',
+  Sun: 'timetable.weekdayShort.sun',
+} as const satisfies Record<Weekday, string>;
+
+function weeklyHours(slots: Group['slots']): number {
+  const total = slots.reduce((acc, s) => {
+    const [sh = 0, sm = 0] = s.start.split(':').map(Number);
+    const [eh = 0, em = 0] = s.end.split(':').map(Number);
+    return acc + (eh * 60 + em - sh * 60 - sm) / 60;
+  }, 0);
+  return Math.round(total * 10) / 10;
+}
 
 // ── Shared card shell ─────────────────────────────────────────────────────────
 
 function Card({
   heading,
+  sub,
   headerAction,
   children,
-  footer,
 }: {
   heading: string;
+  sub?: string;
   headerAction?: React.ReactNode;
   children: React.ReactNode;
-  footer?: React.ReactNode;
 }) {
   return (
     <section className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
-          {heading}
-        </h3>
+      <div className="flex items-end justify-between gap-2">
+        <div>
+          <h3 className="text-[15px] font-bold tracking-[-0.01em] text-(--ssz-text-primary)">
+            {heading}
+          </h3>
+          {sub && <p className="mt-0.75 text-[12.5px] text-(--ssz-text-muted)">{sub}</p>}
+        </div>
         {headerAction}
       </div>
       <div className="flex-1">{children}</div>
-      {footer && <div className="pt-1 border-t border-border/60">{footer}</div>}
     </section>
-  );
-}
-
-function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline underline-offset-2"
-    >
-      {children}
-    </Link>
   );
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
+// Spec: docs/design/design_handoff_group_management_hifi/Group-Management-Implementation-Spec.md §5, §12.5
+// Overview = Teachers panel (primary/co/subs) + Roster summary (count + CapacityMeter + min/max) + Schedule list.
+// No separate "Course" card (already summarized in the header via CourseChip and detailed in Materials) and
+// no "Next lesson" projection (that generated list lives only in the dedicated Schedule tab).
 type Props = {
   group: Group;
-  roster: RosterStudent[];
-  lessons: Lesson[];
-  alerts: Alert[];
-  courseView: CourseView;
   canManage: boolean;
   schoolId: string;
   schoolSlug: string;
 };
 
-export function OverviewCards({
-  group,
-  roster,
-  lessons,
-  alerts,
-  courseView,
-  canManage,
-  schoolId,
-  schoolSlug,
-}: Props) {
+export function OverviewCards({ group, canManage, schoolId, schoolSlug }: Props) {
   const t = useTranslations('Groups');
   const detailBase = `/school/${schoolSlug}/groups/${group.id}`;
-  const [courseDialogOpen, setCourseDialogOpen] = useState(false);
 
-  // ── Course ──
   const modeLabel = group.mode === 'online' ? t('row.online') : t('row.inPerson');
-  const materialsCount = group.materials.length;
+  const hours = weeklyHours(group.slots);
 
-  // ── Roster ──
-  const clashCount = roster.filter((s) => s.hasClash).length;
-
-  // ── Teachers ──
   const primary = group.teachers.find((gt) => gt.role === 'primary') ?? null;
-  const coPrimaryCount = group.teachers.filter((gt) => gt.role === 'co-primary').length;
-  const subCount = group.teachers.filter((gt) => gt.role === 'substitute').length;
-  const teacherSummaryParts = [
-    coPrimaryCount > 0 ? t('overview.coPrimaryCount', { count: coPrimaryCount }) : null,
-    subCount > 0
-      ? subCount > 1
-        ? t('overview.subCountPlural', { count: subCount })
-        : t('overview.subCount', { count: subCount })
-      : null,
-  ].filter(Boolean);
-  const noPrimaryAlert = alerts.some((a) => a.type === 'no-primary');
+  const coPrimary = group.teachers.find((gt) => gt.role === 'co-primary') ?? null;
+  const substitutes = group.teachers.filter((gt) => gt.role === 'substitute');
 
-  // ── Next lesson ──
-  const nextLesson = lessons[0] ?? null;
+  const sortedSlots = [...group.slots].sort(
+    (a, b) => DAY_ORDER[a.day] - DAY_ORDER[b.day] || a.start.localeCompare(b.start),
+  );
 
   return (
-    <>
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-      {/* Course */}
-      <Card
-        heading={t('overview.courseHeading')}
-        headerAction={canManage && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 -my-1"
-            onClick={() => setCourseDialogOpen(true)}
-          >
-            <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
-            {t('course.manage')}
-          </Button>
-        )}
-        footer={<CourseChip courseView={courseView} canManage={canManage} materials={group.materials} variant="link" />}
-      >
-        <div className="space-y-1">
-          {group.courseName ? (
-            <p className="text-sm text-(--ssz-text-secondary)">
-              {group.lang.toUpperCase()} · {group.courseName} · {modeLabel}
-            </p>
-          ) : (
-            <p className="text-sm text-(--ssz-text-muted) italic">{t('course.noCourse')}</p>
-          )}
-          {materialsCount > 0 && (
-            <p className="text-xs text-(--ssz-text-muted)">
-              {materialsCount > 1
-                ? t('course.materialsCountPlural', { count: materialsCount })
-                : t('course.materialsCount', { count: materialsCount })}
-            </p>
-          )}
-        </div>
-      </Card>
-
-      {/* Roster */}
-      <Card
-        heading={t('overview.rosterHeading')}
-        footer={<FooterLink href={`${detailBase}?tab=students`}>{t('overview.manageStudents')}</FooterLink>}
-      >
-        <div className="space-y-2">
-          <CapacityMeter
-            count={group.studentCount}
-            min={group.capacity.min}
-            max={group.capacity.max}
-          />
-          {group.studentCount === 0 ? (
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm text-(--ssz-text-muted) italic">{t('students.noEnrolled')}</p>
-              {canManage && (
-                <Link
-                  href={`${detailBase}/add-students`}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
-                >
-                  <UserPlus className="size-3.5" aria-hidden="true" />
-                  {t('students.addStudents')}
-                </Link>
-              )}
-            </div>
-          ) : clashCount > 0 ? (
-            <p className="text-xs text-error-700 dark:text-error-400">
-              {clashCount > 1
-                ? t('overview.clashCountPlural', { count: clashCount })
-                : t('overview.clashCount', { count: clashCount })}
-            </p>
-          ) : null}
-        </div>
-      </Card>
-
+    <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-4 items-start">
       {/* Teachers */}
       <Card
         heading={t('overview.teachersHeading')}
-        footer={<FooterLink href={`${detailBase}?tab=teachers`}>{t('overview.manageTeachers')}</FooterLink>}
+        headerAction={
+          canManage && (
+            <Button variant="ghost" size="sm" className="h-7 px-2 -my-1" asChild>
+              <Link href={`${detailBase}/assign-teacher`}>
+                <Plus className="size-3.5 mr-1.5" aria-hidden="true" />
+                {t('overview.assign')}
+              </Link>
+            </Button>
+          )
+        }
       >
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {primary ? (
-            <TeacherRow
-              teacher={primary}
-              schoolId={schoolId}
-              groupId={group.id}
-              canRemove={false}
-            />
+            <TeacherRow teacher={primary} schoolId={schoolId} groupId={group.id} canRemove={canManage} />
           ) : (
-            <div className="flex items-center justify-between gap-2">
-              <p
-                className={cn(
-                  'text-sm font-medium',
-                  noPrimaryAlert ? 'text-error-700 dark:text-error-400' : 'text-(--ssz-text-muted)',
-                )}
-              >
-                {t('teachers.noPrimary')}
-              </p>
+            <div className="flex items-center gap-3 rounded-lg border border-error-200 bg-error-50 dark:border-error-800 dark:bg-error-900/20 px-4 py-3">
+              <AlertCircle className="size-4 text-error-500 shrink-0" aria-hidden="true" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-error-700 dark:text-error-300">
+                  {t('teachers.noPrimary')}
+                </p>
+                <p className="text-xs text-error-600/70 dark:text-error-400/70">
+                  {t('teachers.noPrimaryDescription')}
+                </p>
+              </div>
               {canManage && (
-                <Link
-                  href={`${detailBase}/assign-teacher?role=primary`}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
-                >
-                  <UserPlus className="size-3.5" aria-hidden="true" />
-                  {t('teachers.assignPrimary')}
-                </Link>
+                <Button size="sm" asChild>
+                  <Link href={`${detailBase}/assign-teacher?role=primary`}>
+                    {t('teachers.assignPrimary')}
+                  </Link>
+                </Button>
               )}
             </div>
           )}
-          {teacherSummaryParts.length > 0 && (
-            <p className="text-xs text-(--ssz-text-muted)">{teacherSummaryParts.join(' · ')}</p>
+          {coPrimary && (
+            <TeacherRow teacher={coPrimary} schoolId={schoolId} groupId={group.id} canRemove={canManage} />
           )}
+          {substitutes.map((s) => (
+            <TeacherRow key={s.userId} teacher={s} schoolId={schoolId} groupId={group.id} canRemove={canManage} />
+          ))}
         </div>
       </Card>
 
-      {/* Next lesson */}
-      <Card
-        heading={t('overview.nextLessonHeading')}
-        footer={<FooterLink href={`${detailBase}?tab=schedule`}>{t('overview.openSchedule')}</FooterLink>}
-      >
-        {nextLesson ? (
-          <p className="text-sm text-(--ssz-text-secondary)">
-            {nextLesson.date} · {nextLesson.start}–{nextLesson.end} · {nextLesson.room}
-            {' · '}
-            {nextLesson.teacherName}
-            {nextLesson.isSubstitute && (
-              <span className="ml-1 text-xs text-(--ssz-text-muted)">({t('schedule.sub')})</span>
-            )}
-          </p>
-        ) : (
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-sm text-(--ssz-text-muted) italic">{t('schedule.noLessons')}</p>
-            {group.slots.length === 0 && canManage && (
-              <Link
-                href={`${detailBase}?tab=schedule`}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
-              >
-                <CalendarPlus className="size-3.5" aria-hidden="true" />
-                {t('overview.addSchedule')}
-              </Link>
-            )}
+      <div className="flex flex-col gap-4">
+        {/* Roster */}
+        <Card
+          heading={t('overview.rosterHeading')}
+          headerAction={
+            canManage && (
+              <Button variant="ghost" size="sm" className="h-7 px-2 -my-1" asChild>
+                <Link href={`${detailBase}/add-students`}>
+                  <Plus className="size-3.5 mr-1.5" aria-hidden="true" />
+                  {t('overview.add')}
+                </Link>
+              </Button>
+            )
+          }
+        >
+          <div className="flex items-center gap-4">
+            <div className="text-[38px] font-bold leading-none tracking-[-0.03em] text-(--ssz-text-primary)">
+              {group.studentCount}
+              <span className="text-sm font-medium text-(--ssz-text-muted)"> /{group.capacity.max}</span>
+            </div>
+            <div className="flex-1">
+              <CapacityMeter
+                count={group.studentCount}
+                min={group.capacity.min}
+                max={group.capacity.max}
+                hideLabel
+              />
+              <p className="mt-1.5 text-[11.5px] text-(--ssz-text-muted)">
+                {t('overview.minMaxSeats', { min: group.capacity.min, max: group.capacity.max })}
+              </p>
+            </div>
           </div>
-        )}
-      </Card>
+        </Card>
+
+        {/* Schedule */}
+        <Card
+          heading={t('overview.scheduleHeading')}
+          sub={t('overview.scheduleSummary', { hours, mode: modeLabel })}
+        >
+          {sortedSlots.length === 0 ? (
+            <p className="text-sm text-(--ssz-text-muted) italic">{t('schedule.noSlots')}</p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {sortedSlots.map((slot, i) => (
+                <div
+                  key={slot.id ?? i}
+                  className="flex items-center gap-3 rounded-lg border border-border px-3 py-2"
+                >
+                  <span className="text-xs font-bold text-primary-600 dark:text-primary-400 w-8 shrink-0">
+                    {t(DAY_LABEL_KEYS[slot.day])}
+                  </span>
+                  <span className="text-sm font-medium text-(--ssz-text-primary)">
+                    {slot.start}–{slot.end}
+                  </span>
+                  <div className="flex-1" />
+                  {slot.room && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold text-(--ssz-text-secondary)">
+                      <MapPin className="size-3" aria-hidden="true" />
+                      {slot.room}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
-      {canManage && (
-        <CourseManageDialog
-          group={group}
-          schoolId={schoolId}
-          open={courseDialogOpen}
-          onOpenChange={setCourseDialogOpen}
-        />
-      )}
-    </>
   );
 }

@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
-import { Search, UserPlus, X } from 'lucide-react';
+import { Search, UserPlus, Clock } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { StatusPill } from '@/components/ui/status-pill';
-import { CapacityMeter } from '@/components/shared/operations';
+import { TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { removeStudent, addStudents } from '../api/mutations';
 import type { RosterStudent, Group } from '../types';
 
@@ -30,10 +31,11 @@ type Props = {
   roster: RosterStudent[];
   group: Pick<Group, 'id' | 'capacity' | 'studentCount'>;
   schoolId: string;
+  schoolSlug: string;
   addStudentsHref: string;
 };
 
-export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: Props) {
+export function GroupStudentsTab({ roster, group, schoolId, schoolSlug, addStudentsHref }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [query, setQuery] = useState('');
@@ -78,142 +80,130 @@ export function GroupStudentsTab({ roster, group, schoolId, addStudentsHref }: P
   }
 
   return (
-    <div className="space-y-4">
+    <div>
       {/* Screen-reader live region for mutation announcements */}
       <div ref={liveRef} aria-live="polite" aria-atomic="true" className="sr-only" />
 
-      {/* Capacity summary */}
-      <div className="rounded-lg border border-border p-4 flex items-center gap-6 bg-card">
-        <div className="flex-1 max-w-[200px]">
-          <CapacityMeter
-            count={group.studentCount}
-            min={group.capacity.min}
-            max={group.capacity.max}
-          />
+      {/* One card holds the toolbar and the roster — spec §12.5 STUDENTS TAB:
+          gh-card gh-card--pad0, toolbar's own bottom border is the seam. */}
+      <div className="rounded-lg border-[1.5px] border-(--ssz-border-default) bg-card overflow-hidden">
+        {/* Deliberate deviation from spec §12.5 (whose toolbar sits on the
+            card's own surface): a gray toolbar band, matching other tables'
+            header treatment without bringing back the column labels. */}
+        <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-subtle border-b-[1.5px] border-(--ssz-border-default)">
+          <div className="relative w-60 max-w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-(--ssz-text-muted)" aria-hidden="true" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t('students.search')}
+              aria-label={t('students.searchAria')}
+              className={cn(
+                'h-9 w-full rounded-md border-[1.5px] border-(--ssz-border-default) bg-surface',
+                'pl-9 pr-3 text-sm text-(--ssz-text-primary)',
+                'placeholder:text-(--ssz-text-muted)',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              )}
+            />
+          </div>
+          <Button size="sm" asChild>
+            <Link href={addStudentsHref}>
+              <UserPlus className="size-3.5 mr-1.5" aria-hidden="true" />
+              {t('students.addStudents')}
+            </Link>
+          </Button>
         </div>
-        <p className="text-xs text-(--ssz-text-muted)">
-          {t('students.minMax', { min: group.capacity.min, max: group.capacity.max })}
-        </p>
-      </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-(--ssz-text-muted)" aria-hidden="true" />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('students.search')}
-            aria-label={t('students.searchAria')}
-            className={cn(
-              'h-9 w-full rounded-md border border-input bg-background',
-              'pl-8 pr-3 text-sm text-(--ssz-text-primary)',
-              'placeholder:text-(--ssz-text-muted)',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-16 text-center">
+            <p className="text-sm text-(--ssz-text-muted)">
+              {optimisticRoster.length === 0 ? t('students.noEnrolled') : t('students.noMatch')}
+            </p>
+            {optimisticRoster.length === 0 && (
+              <Button size="sm" asChild>
+                <Link href={addStudentsHref}>{t('students.addStudents')}</Link>
+              </Button>
             )}
-          />
-        </div>
-        <Button size="sm" asChild>
-          <Link href={addStudentsHref}>
-            <UserPlus className="size-3.5 mr-1.5" aria-hidden="true" />
-            {t('students.addStudents')}
-          </Link>
-        </Button>
-      </div>
-
-      {/* Roster table */}
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-16 text-center">
-          <p className="text-sm text-(--ssz-text-muted)">
-            {optimisticRoster.length === 0 ? t('students.noEnrolled') : t('students.noMatch')}
-          </p>
-          {optimisticRoster.length === 0 && (
-            <Button size="sm" asChild>
-              <Link href={addStudentsHref}>{t('students.addStudents')}</Link>
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="rounded-lg border border-border overflow-hidden">
-          <table className="w-full text-sm" aria-label={t('students.tableAria')}>
-            <thead className="bg-muted/40 border-b border-border">
+          </div>
+        ) : (
+          <table className="w-full border-collapse text-sm">
+            {/* No visible header — spec's roster mini-table skips it (unlike
+                the groups list table, §12.4); kept for screen readers only.
+                The gray band above is on the toolbar instead (deliberate
+                deviation), not on a column-label row. */}
+            <thead className="sr-only">
               <tr>
-                <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
-                  {t('students.columns.student')}
-                </th>
-                <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted) hidden sm:table-cell">
-                  {t('students.columns.level')}
-                </th>
-                <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
-                  {t('students.columns.status')}
-                </th>
-                <th className="text-right px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-(--ssz-text-muted) hidden md:table-cell">
-                  {t('students.columns.progress')}
-                </th>
-                <th className="w-8" />
+                <th scope="col">{t('students.columns.student')}</th>
+                <th scope="col">{t('students.columns.level')}</th>
+                <th scope="col">{t('students.columns.status')}</th>
+                <th scope="col">{t('students.columns.progress')}</th>
+                <th scope="col">{t('students.removeButton')}</th>
               </tr>
             </thead>
-            <tbody>
+            <TableBody>
               {filtered.map((student) => {
                 const { tone, labelKey } = STUDENT_STATUS_CONFIG[student.status];
                 const isRemoving = removingId === student.userId && pending;
                 return (
-                  <tr
+                  <TableRow
                     key={student.userId}
-                    className={cn(
-                      'border-b border-border last:border-0',
-                      'hover:bg-muted/30 transition-colors',
-                      isRemoving && 'opacity-50',
-                    )}
+                    onClick={() => router.push(`/school/${schoolSlug}/students/${student.userId}`)}
+                    className={cn('cursor-pointer', isRemoving && 'opacity-50')}
                   >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <Avatar name={student.name} src={student.avatarUrl ?? undefined} size="sm" />
+                    <TableCell className="py-2.75">
+                      <div className="flex items-center gap-2.75">
+                        <Avatar name={student.name} src={student.avatarUrl ?? undefined} size="sm" className="size-8" />
                         <div className="min-w-0">
-                          <p className="font-medium text-(--ssz-text-primary) truncate">{student.name}</p>
-                          <p className="text-xs text-(--ssz-text-muted) truncate">{student.email}</p>
+                          <p className="text-sm font-semibold text-(--ssz-text-primary) truncate">{student.name}</p>
+                          {student.email && (
+                            <p className="text-[11.5px] text-(--ssz-text-muted) truncate">{student.email}</p>
+                          )}
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <span className="font-mono text-xs text-(--ssz-text-secondary)">{student.level}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusPill tone={tone}>{t(labelKey)}</StatusPill>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <div className="flex items-center justify-end gap-2">
-                        <div className="w-16 h-1.5 rounded-full bg-border overflow-hidden">
+                    </TableCell>
+                    <TableCell className="py-2.75 hidden sm:table-cell">
+                      <Badge variant="muted">{student.level}</Badge>
+                    </TableCell>
+                    <TableCell className="py-2.75">
+                      <StatusPill tone={tone}>
+                        {student.status === 'clash' && (
+                          <Clock className="size-2.75 mr-1" aria-hidden="true" />
+                        )}
+                        {t(labelKey)}
+                      </StatusPill>
+                    </TableCell>
+                    <TableCell className="py-2.75 hidden md:table-cell w-35">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.25 rounded-full bg-border overflow-hidden">
                           <div
                             className="h-full rounded-full bg-primary-500"
                             style={{ width: `${student.progress}%` }}
                           />
                         </div>
-                        <span className="text-xs text-(--ssz-text-muted) w-7 text-right">
+                        <span className="text-[11px] font-semibold text-(--ssz-text-muted) w-8 text-right">
                           {student.progress}%
                         </span>
                       </div>
-                    </td>
-                    <td className="px-2 py-3 text-right">
+                    </TableCell>
+                    <TableCell className="py-2.75 text-right" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="sm"
                         onClick={() => handleRemove(student)}
                         disabled={isRemoving}
                         aria-label={t('students.remove', { name: student.name })}
-                        className="text-(--ssz-text-muted) hover:text-error-600"
                       >
-                        <X className="size-3.5" />
+                        {t('students.removeButton')}
                       </Button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
+            </TableBody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

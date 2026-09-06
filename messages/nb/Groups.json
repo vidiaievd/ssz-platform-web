@@ -82,23 +82,16 @@
     "rosterHeading": "Elevliste",
     "scheduleHeading": "Timeplan",
     "noTeachers": "Ingen lærere tildelt.",
-    "courseHeading": "Kurs",
-    "nextLessonHeading": "Neste time",
+    "assign": "Tildel",
+    "add": "Legg til",
+    "scheduleSummary": "{hours}t / uke · {mode}",
+    "minMaxSeats": "min {min} · maks {max} plasser",
     "ready": "Klar til å kjøre",
     "notReady": "Ikke klar til å kjøre",
-    "statusUnknown": "Status ukjent — kunne ikke sjekke konflikter",
-    "clashCount": "{count} elev med tidskonflikt",
-    "clashCountPlural": "{count} elever med tidskonflikt",
-    "manageStudents": "Administrer elever →",
-    "manageTeachers": "Administrer lærere →",
-    "openSchedule": "Åpne timeplan →",
-    "addSchedule": "Legg til timeplan →",
-    "coPrimaryCount": "+{count} medlærer",
-    "subCount": "{count} vikar",
-    "subCountPlural": "{count} vikarer"
+    "statusUnknown": "Status ukjent — kunne ikke sjekke konflikter"
   },
   "students": {
-    "search": "Søk etter elever…",
+    "search": "Filtrer elever…",
     "addStudents": "Legg til elever",
     "noEnrolled": "Ingen elever påmeldt ennå.",
     "noMatch": "Ingen elever samsvarer med søket ditt.",
@@ -113,7 +106,6 @@
       "unassigned": "Ikke tildelt"
     },
     "searchAria": "Søk etter elever på navn eller e-post",
-    "minMax": "Min {min} · Maks {max}",
     "tableAria": "Elevliste",
     "columns": {
       "student": "Elev",
@@ -121,12 +113,14 @@
       "status": "Status",
       "progress": "Framdrift"
     },
-    "remove": "Fjern {name} fra gruppen"
+    "remove": "Fjern {name} fra gruppen",
+    "removeButton": "Fjern"
   },
   "teachers": {
-    "primaryHeading": "Primærlærer",
-    "coPrimaryHeading": "Medlærer",
+    "assignedHeading": "Tildelte lærere",
+    "assignedSub": "Én primær kreves · én valgfri medlærer · midlertidige vikarer",
     "subsHeading": "Vikarer",
+    "noSubstitutes": "Ingen aktive vikarer.",
     "noPrimary": "Ingen primærlærer",
     "noPrimaryDescription": "Gruppen kan ikke ha timer uten en primærlærer.",
     "assignPrimary": "Tildel primærlærer",
@@ -259,12 +253,16 @@
   },
   "assignTeacher": {
     "title": "Tildel lærer",
-    "description": "Tildeler til {groupName} · språk: {lang}",
-    "role": "Rolle",
+    "description": "til {groupName} · {schedule}",
+    "role": "Rolle i denne gruppen",
+    "chooseTeacher": "Velg en lærer som underviser i {lang}",
     "roleOptions": {
       "primary": "Primær",
       "coPrimary": "Medlærer",
-      "substitute": "Vikar"
+      "substitute": "Vikar",
+      "primarySub": "én kreves",
+      "coPrimarySub": "valgfri nummer to",
+      "substituteSub": "midlertidig dekning"
     },
     "substituteFrom": "Fra dato",
     "substituteTo": "Til dato",

@@ -82,23 +82,16 @@
     "rosterHeading": "Roster",
     "scheduleHeading": "Schedule",
     "noTeachers": "No teachers assigned.",
-    "courseHeading": "Course",
-    "nextLessonHeading": "Next lesson",
+    "assign": "Assign",
+    "add": "Add",
+    "scheduleSummary": "{hours}h / week · {mode}",
+    "minMaxSeats": "min {min} · max {max} seats",
     "ready": "Ready to run",
     "notReady": "Not ready to run",
-    "statusUnknown": "Status unknown — couldn’t check conflicts",
-    "clashCount": "{count} student with a schedule clash",
-    "clashCountPlural": "{count} students with a schedule clash",
-    "manageStudents": "Manage students →",
-    "manageTeachers": "Manage teachers →",
-    "openSchedule": "Open schedule →",
-    "addSchedule": "Add schedule →",
-    "coPrimaryCount": "+{count} co-primary",
-    "subCount": "{count} sub",
-    "subCountPlural": "{count} subs"
+    "statusUnknown": "Status unknown — couldn’t check conflicts"
   },
   "students": {
-    "search": "Search students…",
+    "search": "Filter students…",
     "addStudents": "Add students",
     "noEnrolled": "No students enrolled yet.",
     "noMatch": "No students match your search.",
@@ -113,7 +106,6 @@
       "unassigned": "Unassigned"
     },
     "searchAria": "Search students by name or email",
-    "minMax": "Min {min} · Max {max}",
     "tableAria": "Student roster",
     "columns": {
       "student": "Student",
@@ -121,12 +113,14 @@
       "status": "Status",
       "progress": "Progress"
     },
-    "remove": "Remove {name} from the group"
+    "remove": "Remove {name} from the group",
+    "removeButton": "Remove"
   },
   "teachers": {
-    "primaryHeading": "Primary teacher",
-    "coPrimaryHeading": "Co-primary teacher",
+    "assignedHeading": "Assigned teachers",
+    "assignedSub": "One primary required · one optional co-primary · temporary substitutes",
     "subsHeading": "Substitutes",
+    "noSubstitutes": "No active substitutes.",
     "noPrimary": "No primary teacher",
     "noPrimaryDescription": "This group cannot run lessons without a primary teacher.",
     "assignPrimary": "Assign primary",
@@ -259,12 +253,16 @@
   },
   "assignTeacher": {
     "title": "Assign teacher",
-    "description": "Assigning to {groupName} · lang: {lang}",
-    "role": "Role",
+    "description": "to {groupName} · {schedule}",
+    "role": "Role on this group",
+    "chooseTeacher": "Choose a teacher who teaches {lang}",
     "roleOptions": {
       "primary": "Primary",
       "coPrimary": "Co-primary",
-      "substitute": "Substitute"
+      "substitute": "Substitute",
+      "primarySub": "one required",
+      "coPrimarySub": "optional second",
+      "substituteSub": "temporary cover"
     },
     "substituteFrom": "From date",
     "substituteTo": "To date",
