@@ -27,6 +27,8 @@ type Props = {
   outlineUnits: OutlineUnit[];
   /** The school's pass mark, for reading exam results. */
   passMark: number;
+  /** Every teacher of the school — cover is often somebody outside the group. */
+  schoolTeachers: Array<{ userId: string; name: string }>;
   /** Materials tab, rendered on the server — it reads the course structure. */
   materialsSlot: ReactNode;
   alerts: Alert[];
@@ -42,6 +44,7 @@ export function GroupTabs({
   sessions,
   outlineUnits,
   passMark,
+  schoolTeachers,
   materialsSlot,
   alerts,
   schoolId,
@@ -166,6 +169,9 @@ export function GroupTabs({
           sessions={sessions}
           units={outlineUnits}
           passMark={passMark}
+          roster={roster}
+          schoolTeachers={schoolTeachers}
+          schoolId={schoolId}
           canManage={canManage}
           onEditSchedule={() => setEditScheduleOpen(true)}
         />

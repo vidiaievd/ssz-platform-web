@@ -7,6 +7,7 @@ import {
   getGroupCourseOutline,
   getGroupCourseView,
   getGroupMaterials,
+  getSchoolTeachers,
 } from '@/features/groups/api/queries';
 import { canManageGroups } from '@/features/groups/lib/can-manage';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
@@ -49,10 +50,12 @@ export default async function GroupDetailPage({ params }: Props) {
 
   const { roster, alerts, ...group } = data;
   const canManage = canManageGroups(role);
-  const [courseView, materials, outline] = await Promise.all([
+  const [courseView, materials, outline, schoolTeachers] = await Promise.all([
     getGroupCourseView(group),
     getGroupMaterials(group),
     getGroupCourseOutline(group),
+    // The whole school, not just this group's teachers: cover is often external.
+    getSchoolTeachers(school.id),
   ]);
 
   return (
@@ -65,6 +68,7 @@ export default async function GroupDetailPage({ params }: Props) {
         sessions={sessions}
         outlineUnits={outline.units}
         passMark={passMark}
+        schoolTeachers={schoolTeachers}
         planUnits={plan?.units ?? []}
         materials={materials}
         planProgressPct={plan?.progressPct ?? 0}
