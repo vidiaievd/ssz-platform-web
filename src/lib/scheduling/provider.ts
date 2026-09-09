@@ -1,6 +1,8 @@
 import type {
   Slot,
   Lesson,
+  Session,
+  SessionScore,
   OpsWarning,
   TeacherAvailability,
   RawTimetableEntry,
@@ -16,9 +18,45 @@ import type {
   ForecastResult,
 } from '@/features/teachers/types';
 
-export type MutationResult =
-  | { ok: true; warnings?: string[] }
+export type MutationResult<T = never> =
+  | { ok: true; warnings?: string[]; data?: T }
   | { ok: false; error: string; details?: unknown };
+
+/** A change to a session. Absent means "leave alone"; null clears what can be cleared. */
+export interface SessionChanges {
+  type?: Session['type'];
+  status?: Session['status'];
+  date?: string;
+  start?: string;
+  end?: string;
+  room?: string | null;
+  teacherId?: string | null;
+  contentUnitId?: string | null;
+  contentLessonId?: string | null;
+  curriculumUnitId?: string | null;
+  attendance?: number | null;
+  note?: string | null;
+  passMark?: number | null;
+}
+
+export interface NewSessionInput {
+  date: string;
+  start: string;
+  end: string;
+  type?: Session['type'];
+  room?: string | null;
+  teacherId?: string | null;
+  contentUnitId?: string | null;
+  contentLessonId?: string | null;
+  note?: string | null;
+}
+
+/** What a regeneration pass did, and why it did nothing when it did nothing. */
+export interface RegenerateReport {
+  planned: number;
+  kept: number;
+  reason: string | null;
+}
 
 export interface SchedulingProvider {
   // ── existing (groups) ──────────────────────────────────────────────────────
@@ -34,6 +72,26 @@ export interface SchedulingProvider {
   lessonsInRange(groupId: string, from: string, to: string): Promise<Lesson[]>;
   /** Record that a lesson actually happened, and which unit of the plan it taught. */
   markLessonHeld(lessonId: string, curriculumUnitId: string): Promise<MutationResult>;
+
+  // ── sessions (schedule & log) ──────────────────────────────────────────────
+  /** Every session of a group. Not windowed: the log reads a whole course at once. */
+  groupSessions(schoolId: string, groupId: string): Promise<Session[]>;
+  /** Change one session. Absent fields are left alone; explicit nulls clear. */
+  patchSession(sessionId: string, changes: SessionChanges): Promise<MutationResult<Session>>;
+  /** Add a session outside the weekly pattern. */
+  createSession(
+    schoolId: string,
+    groupId: string,
+    input: NewSessionInput,
+  ): Promise<MutationResult<Session>>;
+  /** Only an extra session can be deleted; a planned one is cancelled instead. */
+  deleteSession(sessionId: string): Promise<MutationResult>;
+  /** Replace the marks of one exam. A student left out loses their mark. */
+  putSessionScores(sessionId: string, scores: SessionScore[]): Promise<MutationResult<Session>>;
+  /** Re-lay the untaught part of the plan; history is left as it is. */
+  regenerateSessions(schoolId: string, groupId: string): Promise<MutationResult<RegenerateReport>>;
+  /** The score at which a student passes an exam in this school. */
+  gradingPolicy(schoolId: string): Promise<number>;
   /** Raw projection of every teacher's assigned future lessons — one query for the whole school. */
   schoolTimetable(schoolId: string): Promise<RawSchoolTimetableEntry[]>;
   /** Raw projection of a single teacher's assigned future lessons. */

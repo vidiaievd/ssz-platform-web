@@ -80,6 +80,49 @@ export interface Lesson {
   curriculumUnitId: string | null;
 }
 
+/** An exam is a kind of session, not a separate thing — one log covers both. */
+export type SessionType = 'lesson' | 'exam' | 'make_up' | 'review';
+
+/** One student's mark on one exam. `null` means ungraded — not zero. */
+export interface SessionScore {
+  studentId: string;
+  score: number | null;
+}
+
+/**
+ * One meeting of a group: when it is, who teaches it, what it covers, and — once
+ * it has happened — what came of it. The unit the schedule-and-log tab reads.
+ */
+export interface Session {
+  id: string;
+  groupId: string;
+  schoolId: string;
+  slotId: string | null;
+  date: ISODate;
+  start: HHMM;
+  end: HHMM;
+  /** Null when nobody is assigned yet; such a session counts towards no teacher. */
+  teacherId: string | null;
+  room: string;
+  status: LessonStatus;
+  type: SessionType;
+  /** Unit of the group's teaching plan — what group progress is counted against. */
+  curriculumUnitId: string | null;
+  /** The course unit and item this session covers. Both null while no topic is set. */
+  contentUnitId: string | null;
+  contentLessonId: string | null;
+  /** How many turned up. Only meaningful once held, and never for an exam. */
+  attendance: number | null;
+  /** Why it was cancelled. */
+  note: string | null;
+  /** Added by hand, outside the weekly pattern. */
+  extra: boolean;
+  planIndex: number | null;
+  /** Pass mark for this exam alone; null follows the school's. */
+  passMark: number | null;
+  scores: SessionScore[];
+}
+
 export interface TimetableTeacher {
   userId: string; name: string; avatarUrl?: string | null;
   hours: number; max: number; pct: number; overloaded: boolean;
