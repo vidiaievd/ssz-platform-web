@@ -162,3 +162,25 @@ export interface TeacherAvailability {
 export type MutationResult =
   | { ok: true; warnings?: OpsWarning[] }
   | { ok: false; conflicts?: OpsWarning[]; warnings?: OpsWarning[]; blocked?: 'language' | 'no-primary' };
+/** One teachable item of a course unit, named by the identity a session stores. */
+export interface OutlineItem {
+  /** Stable id of the item itself — what `Session.contentLessonId` points at. */
+  id: string;
+  itemType: string;
+  kind: string | null;
+  title: string;
+}
+
+export interface OutlineUnit {
+  /** Stable id of the unit — what `Session.contentUnitId` points at. */
+  id: string;
+  title: string;
+  /** Position among the course's units, from 1 — the `Unit N` the tab prints. */
+  order: number;
+  items: OutlineItem[];
+}
+
+export interface CourseOutlineView {
+  units: OutlineUnit[];
+}
+

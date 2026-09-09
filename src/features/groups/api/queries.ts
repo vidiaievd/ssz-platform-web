@@ -2,6 +2,7 @@ import 'server-only';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
+import { env } from '@/lib/env';
 import { AppError } from '@/lib/errors';
 import { groupAlerts, teacherLoad, slotsOverlap, timeToMinutes, type GroupForOps } from '@/lib/groups/operations';
 // groupCacheTags are used by mutations (revalidateTag) — queries use no-store for now
@@ -16,6 +17,7 @@ import type {
   CourseView,
   TeacherAvailability,
   TeacherAvailabilityStatus,
+  CourseOutlineView,
 } from '@/features/groups/types';
 import type { Alert } from '@/features/dashboard/types';
 import type { CurriculumTree, ContainerPublishState } from '@/features/content/types';
@@ -948,5 +950,58 @@ export async function getGroupMaterials(group: Group): Promise<GroupMaterialsVie
         : null,
       structureUnavailable: true,
     };
+  }
+}
+
+// ── Course outline (schedule & log) ───────────────────────────────────────────
+
+const EMPTY_OUTLINE: CourseOutlineView = { units: [] };
+
+/**
+ * The course as scheduling-service laid the group's sessions over it: units and
+ * items keyed by their **stable** identity, not by the placement rows the
+ * curriculum tree carries. A session keeps the stable id precisely because
+ * placement rows are recreated on every publish, so the Materials tab's tree
+ * cannot be used to name a session's topic.
+ *
+ * Read straight from content-service's internal route — the same outline the
+ * scheduler read — so there is one description of a course's teaching order
+ * rather than two that can drift apart.
+ */
+export async function getGroupCourseOutline(group: Group): Promise<CourseOutlineView> {
+  if (!group.courseId || !env.CONTENT_SERVICE_INTERNAL_URL) return EMPTY_OUTLINE;
+
+  try {
+    const outline = await serverFetch<{
+      units: Array<{
+        id: string;
+        title: string | null;
+        order: number;
+        items: Array<{ id: string; itemType: string; kind: string | null; title: string | null }>;
+      }>;
+    }>({
+      service: 'content',
+      path: `/internal/containers/${group.courseId}/outline`,
+      directBaseUrl: env.CONTENT_SERVICE_INTERNAL_URL,
+      headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
+    });
+
+    return {
+      units: outline.units.map((unit) => ({
+        id: unit.id,
+        title: unit.title ?? '',
+        order: unit.order,
+        items: unit.items.map((item) => ({
+          id: item.id,
+          itemType: item.itemType,
+          kind: item.kind,
+          title: item.title ?? '',
+        })),
+      })),
+    };
+  } catch {
+    // The tab still renders: without the outline a session shows its date and
+    // status, only its topic goes unnamed.
+    return EMPTY_OUTLINE;
   }
 }

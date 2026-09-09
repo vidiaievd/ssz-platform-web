@@ -10,6 +10,8 @@ import {
   isSubstitute,
   nextSession,
   stateOf,
+  timelineWeeks,
+  topicOf,
   weekOf,
   weeklyRhythm,
   whoTaught,
@@ -357,5 +359,97 @@ describe('filterLog', () => {
       'later',
       'exam-later',
     ]);
+  });
+});
+
+describe('timelineWeeks', () => {
+  it('gives an empty week its own column, so a gap in the course still reads as a gap', () => {
+    const weeks = timelineWeeks(
+      [
+        session({ id: 'a', date: '2026-09-01', status: 'held' }),
+        // Nothing in week 2 — a break, not a shortening of the course.
+        session({ id: 'b', date: '2026-09-15' }),
+      ],
+      STAFF,
+    );
+
+    expect(weeks.map((w) => w.week)).toEqual([1, 2, 3]);
+    expect(weeks[1]!.cells).toEqual([]);
+    expect(weeks[2]!.cells.map((c) => c.session.id)).toEqual(['b']);
+  });
+
+  it('states each cell the way the log does', () => {
+    const weeks = timelineWeeks(
+      [
+        session({ id: 'held', date: '2026-09-01', status: 'held' }),
+        session({ id: 'cover', date: '2026-09-03', status: 'held', teacherId: 'nina' }),
+        session({ id: 'next', date: '2026-09-08' }),
+        session({ id: 'later', date: '2026-09-10' }),
+      ],
+      STAFF,
+    );
+
+    expect(weeks.flatMap((w) => w.cells).map((c) => c.state)).toEqual([
+      'held',
+      'sub',
+      'next',
+      'planned',
+    ]);
+  });
+
+  it('has no strip at all without sessions', () => {
+    expect(timelineWeeks([], STAFF)).toEqual([]);
+  });
+});
+
+describe('topicOf', () => {
+  const units = [
+    {
+      id: 'u1',
+      title: 'Meetings',
+      order: 2,
+      items: [
+        { id: 'l1', itemType: 'lesson', kind: 'text', title: 'Conditionals' },
+        { id: 'l2', itemType: 'exercise', kind: null, title: 'Drill' },
+      ],
+    },
+  ];
+
+  it('names the item a session teaches', () => {
+    expect(topicOf(session({ date: '2026-09-01' }), units)).toEqual({
+      unitOrder: 2,
+      unitTitle: 'Meetings',
+      itemTitle: 'Conditionals',
+      kind: 'text',
+    });
+  });
+
+  it('names the unit alone when the session is pinned to a whole unit', () => {
+    expect(topicOf(session({ date: '2026-09-01', contentLessonId: null }), units)).toEqual({
+      unitOrder: 2,
+      unitTitle: 'Meetings',
+      itemTitle: null,
+      kind: null,
+    });
+  });
+
+  it('falls back to the item kind when it is not a lesson', () => {
+    expect(topicOf(session({ date: '2026-09-01', contentLessonId: 'l2' }), units)?.kind).toBe(
+      'exercise',
+    );
+  });
+
+  it('finds the unit through the item when the session names no unit', () => {
+    const found = topicOf(
+      session({ date: '2026-09-01', contentUnitId: null, contentLessonId: 'l1' }),
+      units,
+    );
+    expect(found?.unitTitle).toBe('Meetings');
+  });
+
+  it('says nothing about a session with no topic — a legal state, not an error', () => {
+    expect(
+      topicOf(session({ date: '2026-09-01', contentUnitId: null, contentLessonId: null }), units),
+    ).toBeNull();
   });
 });

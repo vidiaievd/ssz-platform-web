@@ -13,8 +13,7 @@ import { GroupStudentsTab } from './group-students-tab';
 import { GroupTeachersTab } from './group-teachers-tab';
 import { GroupScheduleTab } from './group-schedule-tab';
 import { GroupEditDialog } from './group-edit-dialog';
-import type { Group, RosterStudent, Lesson } from '../types';
-import type { CurriculumUnit } from '@/features/teachers/types';
+import type { Group, RosterStudent, OutlineUnit, Session } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
 type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule';
@@ -22,9 +21,10 @@ type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule';
 type Props = {
   group: Group;
   roster: RosterStudent[];
-  lessons: Lesson[];
-  recentLessons: Lesson[];
-  planUnits: CurriculumUnit[];
+  /** Every session of the group — the schedule & log tab reads a whole course. */
+  sessions: Session[];
+  /** Units of the published course, for naming what a session teaches. */
+  outlineUnits: OutlineUnit[];
   /** Materials tab, rendered on the server — it reads the course structure. */
   materialsSlot: ReactNode;
   alerts: Alert[];
@@ -37,9 +37,8 @@ type Props = {
 export function GroupTabs({
   group,
   roster,
-  lessons,
-  recentLessons,
-  planUnits,
+  sessions,
+  outlineUnits,
   materialsSlot,
   alerts,
   schoolId,
@@ -160,12 +159,9 @@ export function GroupTabs({
       {/* ── Schedule ──────────────────────────────────────────────────────── */}
       <TabsContent value="schedule">
         <GroupScheduleTab
-          slots={group.slots}
-          lessons={lessons}
-          recentLessons={recentLessons}
-          planUnits={planUnits}
-          schoolId={schoolId}
-          groupId={group.id}
+          group={group}
+          sessions={sessions}
+          units={outlineUnits}
           canManage={canManage}
           onEditSchedule={() => setEditScheduleOpen(true)}
         />

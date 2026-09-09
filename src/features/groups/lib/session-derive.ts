@@ -1,4 +1,4 @@
-import type { Session, SessionScore } from '../types';
+import type { OutlineUnit, Session, SessionScore } from '../types';
 
 /**
  * Everything the schedule-and-log tab shows is derived from the list of sessions.
@@ -280,4 +280,79 @@ export function filterLog(
         .sort(byDate)
         .sort((a, b) => (a.id === next?.id ? -1 : b.id === next?.id ? 1 : 0));
   }
+}
+
+export interface TimelineCell {
+  session: Session;
+  state: SessionState;
+}
+
+export interface TimelineWeek {
+  /** Week number of the course, counted from the first session's date. */
+  week: number;
+  cells: TimelineCell[];
+}
+
+/**
+ * The course as a strip of weeks. A week with no session still gets a column —
+ * a fortnight's gap in the middle of a course is a fact about the course, and
+ * squeezing it out would make the strip lie about the rhythm.
+ */
+export function timelineWeeks(sessions: Session[], staff: TeachingStaff): TimelineWeek[] {
+  const ordered = [...sessions].sort(byDate);
+  const first = ordered[0];
+  if (!first) return [];
+
+  const next = nextSession(sessions);
+  const weeks = new Map<number, TimelineCell[]>();
+  let last = 1;
+
+  for (const session of ordered) {
+    const week = weekOf(session, first.date);
+    last = Math.max(last, week);
+    const cells = weeks.get(week) ?? [];
+    cells.push({ session, state: stateOf(session, staff, next) });
+    weeks.set(week, cells);
+  }
+
+  return Array.from({ length: last }, (_, i) => ({
+    week: i + 1,
+    cells: weeks.get(i + 1) ?? [],
+  }));
+}
+
+/** What a session teaches, as the tab names it. */
+export interface SessionTopic {
+  unitOrder: number;
+  unitTitle: string;
+  /** The item's own title; null when the session is pinned to a unit as a whole. */
+  itemTitle: string | null;
+  /** Material kind of the item, for the log's badge. */
+  kind: string | null;
+}
+
+/**
+ * Names a session's topic from the course outline. A session may point at an
+ * item, at a unit as a whole (a checkpoint, or a unit with nothing but
+ * exercises in it), or at nothing at all — the last is a legal state, not an
+ * error: nobody has planned that session yet.
+ */
+export function topicOf(session: Session, units: OutlineUnit[]): SessionTopic | null {
+  const unit =
+    units.find((u) => u.id === session.contentUnitId) ??
+    (session.contentLessonId
+      ? units.find((u) => u.items.some((i) => i.id === session.contentLessonId))
+      : undefined);
+  if (!unit) return null;
+
+  const item = session.contentLessonId
+    ? (unit.items.find((i) => i.id === session.contentLessonId) ?? null)
+    : null;
+
+  return {
+    unitOrder: unit.order,
+    unitTitle: unit.title,
+    itemTitle: item?.title ?? null,
+    kind: item?.kind ?? item?.itemType ?? null,
+  };
 }
