@@ -39,6 +39,8 @@ type Props = {
   /** Every teacher of the school: cover is often somebody outside the group. */
   schoolTeachers: AssignableTeacher[];
   schoolId: string;
+  /** The signed-in user, so a teacher is shown what they may actually change. */
+  viewerId: string | null;
   canManage: boolean;
   onEditSchedule: () => void;
 };
@@ -57,6 +59,7 @@ export function GroupScheduleTab({
   roster,
   schoolTeachers,
   schoolId,
+  viewerId,
   canManage,
   onEditSchedule,
 }: Props) {
@@ -66,6 +69,8 @@ export function GroupScheduleTab({
   const logRef = useRef<HTMLDivElement>(null);
   // `null` while closed, a session id to edit one, and 'new' to add an extra.
   const [editing, setEditing] = useState<string | 'new' | null>(null);
+
+  const viewer = { canManage, userId: viewerId };
 
   const staff = {
     primaryId: group.teachers.find((x) => x.role === 'primary')?.userId ?? null,
@@ -136,7 +141,11 @@ export function GroupScheduleTab({
         {/* Block 2 — where the course has got to */}
         <ScheduleStat
           overline={t('schedule.spanHeading')}
-          value={t('schedule.weekOf', { current: span.currentWeek, total: span.totalWeeks })}
+          value={
+            span.total === 0
+              ? '—'
+              : t('schedule.weekOf', { current: span.currentWeek, total: span.totalWeeks })
+          }
           caption={
             span.firstDate && span.lastDate
               ? t('schedule.spanCaption', {
@@ -255,7 +264,7 @@ export function GroupScheduleTab({
         teachers={schoolTeachers}
         passMark={passMark}
         taughtItemIds={taughtItemIds}
-        canManage={canManage}
+        viewer={viewer}
       />
     </div>
   );

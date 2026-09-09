@@ -21,6 +21,8 @@ type Props = {
   onChange: (value: TopicValue) => void;
   /** Items already covered by some other session, flagged so a topic is not taught twice by accident. */
   taughtItemIds: ReadonlySet<string>;
+  /** Read-only, for a viewer who may see the topic but not set it. */
+  disabled?: boolean;
 };
 
 /**
@@ -29,7 +31,7 @@ type Props = {
  * picked from the course — with "not assigned" left a legal state for sessions
  * nobody has planned yet.
  */
-export function TopicPicker({ units, value, onChange, taughtItemIds }: Props) {
+export function TopicPicker({ units, value, onChange, taughtItemIds, disabled = false }: Props) {
   const t = useTranslations('Groups');
   const [query, setQuery] = useState('');
 
@@ -62,6 +64,7 @@ export function TopicPicker({ units, value, onChange, taughtItemIds }: Props) {
             </Badge>
             <button
               type="button"
+              disabled={disabled}
               onClick={() => onChange({ contentUnitId: null, contentLessonId: null })}
               className="text-xs text-(--ssz-text-muted) underline-offset-2 hover:underline"
             >
@@ -84,6 +87,7 @@ export function TopicPicker({ units, value, onChange, taughtItemIds }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('schedule.searchMaterial')}
+          disabled={disabled}
           className="pl-8"
           aria-label={t('schedule.searchMaterial')}
         />
@@ -105,6 +109,7 @@ export function TopicPicker({ units, value, onChange, taughtItemIds }: Props) {
                   through — the item titles alone do not say. */}
               <button
                 type="button"
+                disabled={disabled}
                 onClick={() => onChange({ contentUnitId: unit.id, contentLessonId: null })}
                 className={cn(
                   'sticky top-0 z-10 flex w-full items-center gap-2 bg-(--ssz-bg-subtle) px-3 py-1.5 text-left text-[10.5px] font-bold uppercase tracking-[0.06em] text-(--ssz-text-muted)',
@@ -123,9 +128,8 @@ export function TopicPicker({ units, value, onChange, taughtItemIds }: Props) {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() =>
-                      onChange({ contentUnitId: unit.id, contentLessonId: item.id })
-                    }
+                    disabled={disabled}
+                    onClick={() => onChange({ contentUnitId: unit.id, contentLessonId: item.id })}
                     className={cn(
                       'flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors hover:bg-(--ssz-bg-subtle)',
                       isSelected && 'bg-primary-50 dark:bg-primary-900/20',

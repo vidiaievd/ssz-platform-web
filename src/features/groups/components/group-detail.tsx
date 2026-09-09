@@ -25,6 +25,8 @@ type Props = {
   passMark: number;
   /** Every teacher of the school — cover is often somebody outside the group. */
   schoolTeachers: Array<{ userId: string; name: string }>;
+  /** The signed-in user — a teacher only edits the sessions they teach. */
+  viewerId: string | null;
   /** Units of the group's teaching plan; empty when no plan exists yet. */
   planUnits: CurriculumUnit[];
   materials: GroupMaterialsView;
@@ -45,6 +47,7 @@ export async function GroupDetail({
   outlineUnits,
   passMark,
   schoolTeachers,
+  viewerId,
   planUnits,
   materials,
   planProgressPct,
@@ -92,6 +95,7 @@ export async function GroupDetail({
         outlineUnits={outlineUnits}
         passMark={passMark}
         schoolTeachers={schoolTeachers}
+        viewerId={viewerId}
         materialsSlot={
           <GroupMaterialsTab
             group={group}

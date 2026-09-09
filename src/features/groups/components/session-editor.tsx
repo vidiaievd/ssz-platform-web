@@ -36,6 +36,7 @@ import {
 import { ExamResults } from './exam-results';
 import { TopicPicker, type TopicValue } from './topic-picker';
 import { createSession, deleteSession, patchSession, putSessionScores } from '../api/mutations';
+import { creatableTypes, sessionRights, type Viewer } from '../lib/session-permissions';
 import { weekdayDayMonth } from '../lib/session-format';
 import { todayISO } from '../lib/today-iso';
 import type {
@@ -53,7 +54,6 @@ export interface AssignableTeacher {
   name: string;
 }
 
-const TYPES: SessionType[] = ['lesson', 'exam', 'make_up', 'review'];
 const STATUSES = ['scheduled', 'held', 'cancelled'] as const;
 
 /** Kept out of the teacher select's value, which cannot be an empty string. */
@@ -120,7 +120,8 @@ type Props = {
   passMark: number;
   /** Items other sessions already cover, so a topic is not taught twice by accident. */
   taughtItemIds: ReadonlySet<string>;
-  canManage: boolean;
+  /** Who is looking, and whether they run the school — the fields obey it. */
+  viewer: Viewer;
 };
 
 /**
@@ -139,7 +140,7 @@ export function SessionEditor({
   teachers,
   passMark,
   taughtItemIds,
-  canManage,
+  viewer,
 }: Props) {
   const t = useTranslations('Groups');
   const locale = useLocale();
@@ -151,6 +152,11 @@ export function SessionEditor({
   const [draft, setDraft] = useState<Draft>(initial);
   const [discardOpen, setDiscardOpen] = useState(false);
 
+  const rights = sessionRights(viewer, session);
+  // A new session is the viewer's to shape; an existing one obeys the rights.
+  const canRecord = session ? rights.canRecord : true;
+  const canReschedule = session ? rights.canReschedule : true;
+  const types = creatableTypes(viewer);
   const isExam = draft.type === 'exam';
   const invalidTime = draft.end <= draft.start;
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
@@ -288,7 +294,10 @@ export function SessionEditor({
                 aria-label={t('schedule.sessionType')}
                 value={draft.type}
                 onValueChange={(v) => set('type', v as SessionType)}
-                options={TYPES.map((value) => ({ value, label: t(`schedule.type.${value}`) }))}
+                options={(canReschedule ? types : [draft.type]).map((value) => ({
+                  value,
+                  label: t(`schedule.type.${value}`),
+                }))}
               />
             </Field>
 
@@ -298,6 +307,7 @@ export function SessionEditor({
                   type="date"
                   value={draft.date}
                   onChange={(e) => set('date', e.target.value)}
+                  disabled={!canReschedule}
                 />
               </Field>
               <Field label={t('schedule.start')}>
@@ -305,16 +315,26 @@ export function SessionEditor({
                   type="time"
                   value={draft.start}
                   onChange={(e) => set('start', e.target.value)}
+                  disabled={!canReschedule}
                 />
               </Field>
               <Field
                 label={t('schedule.end')}
                 error={invalidTime ? t('schedule.endBeforeStart') : undefined}
               >
-                <Input type="time" value={draft.end} onChange={(e) => set('end', e.target.value)} />
+                <Input
+                type="time"
+                value={draft.end}
+                onChange={(e) => set('end', e.target.value)}
+                disabled={!canReschedule}
+              />
               </Field>
               <Field label={t('schedule.room')}>
-                <Input value={draft.room} onChange={(e) => set('room', e.target.value)} />
+                <Input
+                value={draft.room}
+                onChange={(e) => set('room', e.target.value)}
+                disabled={!canReschedule}
+              />
               </Field>
             </div>
 
@@ -322,7 +342,7 @@ export function SessionEditor({
               <Select
                 value={draft.teacherId ?? UNASSIGNED}
                 onValueChange={(v) => set('teacherId', v === UNASSIGNED ? null : v)}
-                disabled={!canManage}
+                disabled={!rights.canChangeTeacher && session !== null}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -347,6 +367,7 @@ export function SessionEditor({
                 value={draft.topic}
                 onChange={(topic) => set('topic', topic)}
                 taughtItemIds={taughtItemIds}
+                disabled={!canRecord}
               />
             </Field>
 
@@ -356,7 +377,7 @@ export function SessionEditor({
                 aria-label={t('schedule.status')}
                 value={draft.status}
                 onValueChange={(v) => set('status', v as Draft['status'])}
-                options={STATUSES.map((value) => ({
+                options={(canReschedule ? STATUSES : ([draft.status] as const)).map((value) => ({
                   value,
                   label: t(`schedule.statusOption.${value}`),
                 }))}
@@ -374,6 +395,7 @@ export function SessionEditor({
                   max={group.studentCount}
                   value={draft.attendance}
                   onChange={(e) => set('attendance', e.target.value)}
+                  disabled={!canRecord}
                   className="w-[100px]"
                 />
               </Field>
@@ -398,7 +420,7 @@ export function SessionEditor({
           </div>
 
           <DialogFooter className="flex-row items-center justify-between gap-2">
-            {session && canManage ? (
+            {session && rights.canDelete ? (
               session.extra ? (
                 <Button variant="ghost" onClick={removeSession} disabled={isPending}>
                   <span className="text-error-600">{t('schedule.deleteSession')}</span>
@@ -418,7 +440,7 @@ export function SessionEditor({
               <Button variant="outline" onClick={() => requestClose(false)} disabled={isPending}>
                 {t('schedule.cancelEdit')}
               </Button>
-              <Button onClick={save} disabled={isPending || invalidTime}>
+              <Button onClick={save} disabled={isPending || invalidTime || !(canRecord || canReschedule)}>
                 {session ? t('schedule.saveChanges') : t('schedule.addSession')}
               </Button>
             </span>

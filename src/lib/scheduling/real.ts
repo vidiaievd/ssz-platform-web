@@ -229,20 +229,6 @@ export const realProvider: SchedulingProvider = {
     return rows.map(toLesson);
   },
 
-  async markLessonHeld(lessonId: string, curriculumUnitId: string): Promise<MutationResult> {
-    try {
-      await serverFetch({
-        service: 'scheduling',
-        path: `/scheduling/lessons/${lessonId}`,
-        method: 'PATCH',
-        body: { status: 'held', curriculumUnitId },
-      });
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e instanceof Error ? e.message : 'Failed to mark the lesson held' };
-    }
-  },
-
   async groupSessions(schoolId: string, groupId: string) {
     const rows = await serverFetch<RawSession[]>({
       service: 'scheduling',

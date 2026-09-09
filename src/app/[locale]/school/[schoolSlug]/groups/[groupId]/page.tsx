@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
+import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import {
   getGroup,
   getGroupCourseOutline,
@@ -45,6 +46,8 @@ export default async function GroupDetailPage({ params }: Props) {
     scheduling.getCurriculum(groupId).catch((): CurriculumPlan | null => null),
     getMySchoolRole(schoolSlug),
   ]);
+  // Who is looking: a teacher may only record the sessions they teach.
+  const viewer = await getCurrentUser();
 
   if (!data) notFound();
 
@@ -69,6 +72,7 @@ export default async function GroupDetailPage({ params }: Props) {
         outlineUnits={outline.units}
         passMark={passMark}
         schoolTeachers={schoolTeachers}
+        viewerId={viewer?.userId ?? null}
         planUnits={plan?.units ?? []}
         materials={materials}
         planProgressPct={plan?.progressPct ?? 0}

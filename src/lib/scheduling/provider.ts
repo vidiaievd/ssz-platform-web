@@ -70,8 +70,6 @@ export interface SchedulingProvider {
   nextLessons(groupId: string, limit: number): Promise<Lesson[]>;
   /** Lessons of one group between two ISO dates, whatever their status. */
   lessonsInRange(groupId: string, from: string, to: string): Promise<Lesson[]>;
-  /** Record that a lesson actually happened, and which unit of the plan it taught. */
-  markLessonHeld(lessonId: string, curriculumUnitId: string): Promise<MutationResult>;
 
   // ── sessions (schedule & log) ──────────────────────────────────────────────
   /** Every session of a group. Not windowed: the log reads a whole course at once. */
