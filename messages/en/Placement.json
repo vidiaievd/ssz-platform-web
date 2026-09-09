@@ -36,6 +36,11 @@
       "textareaLabel": "Your translation",
       "placeholder": "Write in {lang}…",
       "sampleAnswer": "Sample answer"
+    },
+    "unplayable": {
+      "title": "This question can't be shown",
+      "body": "It's written in a format the placement test doesn't play yet. We'll ask a different one instead — this won't count against you.",
+      "skip": "Ask another question"
     }
   },
   "result": {

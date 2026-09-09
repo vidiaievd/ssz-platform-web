@@ -1,0 +1,127 @@
+'use client';
+
+import { useMemo } from 'react';
+
+import {
+  draftIssues,
+  placeAudioIssues,
+  type AudioDraft,
+  type AudioStepMap,
+  type PlacedAudioIssue,
+} from '@/lib/shared-kernel/audio';
+
+import type { GateRow } from '../builder-frame';
+import { useAudioIssueCopy } from './audio-issue-copy';
+
+/**
+ * An item as the layer needs to see it: its id, and — for a template that keeps a clip on
+ * each item — that clip. Under `source: 'items'` the clips are what decide whether the
+ * exercise has anything to play at all, so an id alone is not enough there (plan 56
+ * phase 6). A template whose items can only carry timecodes passes bare ids.
+ */
+export interface AudioDraftItem {
+  id: string;
+  clip?: string;
+}
+
+/**
+ * Separators for the memo key: two characters no id or asset id can contain.
+ *
+ * Written as escapes rather than as the characters themselves — a literal control byte in
+ * a source file makes git call the file binary and stop showing its diffs.
+ */
+const FIELD = '\u0000';
+const ROW = '\u0001';
+
+/**
+ * The audio layer's findings, placed on the host builder's steps — plan 56 phase 5.
+ *
+ * Written once because it is the same two lines in every builder, and because the two
+ * lines are where a type could quietly get it wrong: a builder that forgot to fold these
+ * in would show a green rail over an exercise its own publish preflight refuses.
+ */
+export function useAudioProblems(
+  draft: AudioDraft,
+  items: readonly (string | AudioDraftItem)[],
+  steps: AudioStepMap,
+): PlacedAudioIssue[] {
+  // Flattened to a string rather than passed as an array, so that a re-render handing
+  // over an equal-but-new array does not recompute. The draft itself is replaced whole on
+  // every edit, so it is compared by identity.
+  const key = items
+    .map((item) => (typeof item === 'string' ? item : `${item.id}${FIELD}${item.clip ?? ''}`))
+    .join(ROW);
+
+  return useMemo(() => {
+    const parsed: AudioDraftItem[] =
+      key === ''
+        ? []
+        : key.split(ROW).map((row) => {
+            const [id = '', clip = ''] = row.split(FIELD);
+            return clip === '' ? { id } : { id, clip };
+          });
+
+    return placeAudioIssues(draftIssues(draft, parsed), steps);
+  }, [draft, key, steps]);
+}
+
+/** How a step looks: the shape every per-type kernel returns from `stepState`. */
+export interface StepSeverity {
+  s: 'ok' | 'warn' | 'err' | 'empty';
+  errs: number;
+}
+
+/**
+ * One step's status, from both lists at once.
+ *
+ * A step is as bad as its worst finding, whichever list it came from — listening switched
+ * on with nothing to play is a blocker on the step that owns the clip exactly as a
+ * question with no key is. Nothing is invented here: both inputs come from a kernel, and
+ * this only says which of them speaks louder.
+ */
+export function foldAudioIntoStep(
+  state: StepSeverity,
+  here: readonly PlacedAudioIssue[],
+): StepSeverity {
+  const blockers = here.filter((issue) => issue.level === 'blocker').length;
+  if (blockers > 0) {
+    return { s: 'err', errs: (state.s === 'err' ? state.errs : 0) + blockers };
+  }
+  // A warning does not overrule a blocker, and it does overrule "nothing written yet":
+  // an author who has attached a clip has written something.
+  if (here.some((issue) => issue.level === 'warning') && state.s !== 'err') {
+    return { s: 'warn', errs: 0 };
+  }
+  return state;
+}
+
+/**
+ * The layer's findings as rows of the pre-assign gate.
+ *
+ * The same list again, in the shape the shared gate takes. It goes in beside the type's
+ * own rows rather than under a heading of its own: an author who has switched listening
+ * on has one exercise to finish, not two, and two lists would let them disagree about
+ * whether it is ready.
+ */
+export function useAudioGateRows(problems: readonly PlacedAudioIssue[]): GateRow[] {
+  const describe = useAudioIssueCopy();
+
+  return [
+    ...problems
+      .filter((issue) => issue.level === 'blocker')
+      .map((issue, index) => ({
+        key: `audio-blocker-${issue.code}-${index}`,
+        level: 'blocker' as const,
+        text: describe(issue),
+        step: issue.step,
+      })),
+    ...problems
+      .filter((issue) => issue.level === 'warning')
+      .map((issue, index) => ({
+        key: `audio-warning-${issue.code}-${index}`,
+        level: 'warning' as const,
+        text: describe(issue),
+        step: issue.step,
+      })),
+  ];
+}

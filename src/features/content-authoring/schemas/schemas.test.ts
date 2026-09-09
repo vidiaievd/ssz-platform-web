@@ -346,27 +346,11 @@ describe('exerciseFormSchema', () => {
     }
   });
 
-  it('match_pairs: accepts 2+ pairs', () => {
-    expect(
-      parseExercise({
-        templateCode: 'match_pairs',
-        mpPairs: [
-          { left: 'hei', right: 'hello' },
-          { left: 'takk', right: 'thanks' },
-        ],
-      }).success,
-    ).toBe(true);
-  });
-
-  it('match_pairs: rejects fewer than 2 pairs', () => {
-    const result = parseExercise({
-      templateCode: 'match_pairs',
-      mpPairs: [{ left: 'hei', right: 'hello' }],
-    });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    const paths = result.error.issues.map((i) => i.path.join('.'));
-    expect(paths).toContain('mpPairs');
+  // Same for match_pairs (plan 49 §8): a pair owns its answer, its own pool id and a
+  // grid of explanations, none of which this form can hold. It is authored in
+  // `MatchPairsBuilder`.
+  it('match_pairs is not a form-editable type', () => {
+    expect(parseExercise({ templateCode: 'match_pairs' }).success).toBe(false);
   });
 
   it('short_answer: accepts a question with a reference answer', () => {
@@ -387,48 +371,5 @@ describe('exerciseFormSchema', () => {
     expect(result.success).toBe(false);
     if (result.success) return;
     expect(result.error.issues.map((i) => i.path.join('.'))).toContain('saReferenceAnswer');
-  });
-
-  it('writing_task: accepts a prompt', () => {
-    expect(
-      parseExercise({ templateCode: 'writing_task', wtPrompt: 'Write a letter.' }).success,
-    ).toBe(true);
-  });
-
-  it('writing_task: rejects when the prompt is missing', () => {
-    const result = parseExercise({ templateCode: 'writing_task' });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('wtPrompt');
-  });
-
-  it('sentence_schema: accepts a sentence with 2+ fields and assigned tokens', () => {
-    expect(
-      parseExercise({
-        templateCode: 'sentence_schema',
-        ssSentence: 'Lars har likt Lotte',
-        ssSchemaType: 'main',
-        ssFields: [{ label: 'Forfelt' }, { label: 'Verbal' }],
-        ssTokens: [
-          { text: 'Lars', fieldIndex: 0 },
-          { text: 'har', fieldIndex: 1 },
-        ],
-      }).success,
-    ).toBe(true);
-  });
-
-  it('sentence_schema: rejects a token assigned to an empty field', () => {
-    const result = parseExercise({
-      templateCode: 'sentence_schema',
-      ssSentence: 'S',
-      ssFields: [{ label: 'A' }, { label: '' }],
-      ssTokens: [
-        { text: 'x', fieldIndex: 0 },
-        { text: 'y', fieldIndex: 1 }, // field 1 has an empty label
-      ],
-    });
-    expect(result.success).toBe(false);
-    if (result.success) return;
-    expect(result.error.issues.map((i) => i.path.join('.'))).toContain('ssTokens');
   });
 });

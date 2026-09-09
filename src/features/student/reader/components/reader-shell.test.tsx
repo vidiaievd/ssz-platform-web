@@ -51,8 +51,8 @@ vi.mock('@/features/content', async () => {
 // ExercisePage imports this deep hook directly (not via the @/features/content
 // barrel), so it must be mocked to avoid a real useQuery without a provider.
 vi.mock('@/features/content/api/use-exercise', () => ({
-  useExercisesWithAnswers: () => [],
-  useExerciseWithAnswers: () => ({
+  useExercisesForRunner: () => [],
+  useExerciseForRunner: () => ({
     data: {
       id: 'exercise-1',
       templateCode: 'short_answer',
@@ -470,6 +470,46 @@ describe('ReaderShell', () => {
     fireEvent.click(screen.getByRole('button', { name: /try again/i }));
     expect(refetchCourse).toHaveBeenCalledTimes(1);
     expect(refetchUnit).toHaveBeenCalledTimes(1);
+  });
+
+  /*
+    An exercise opened by its own link used to fall into the "everything else" cap of
+    680, which is written for prose: minus the column's own padding it left 616px of
+    body, under `multiple_choice_group`'s 640px table threshold. The same exercise then
+    drew a table on the practice page and cards through a direct link.
+  */
+  it('gives a single exercise the same column width as the practice page', () => {
+    setup();
+    const { container } = renderShell();
+
+    const column = container.querySelector<HTMLElement>('div[class*="mx-auto"][style*="max-width"]')!;
+    expect(column.style.maxWidth).toBe('1040px');
+  });
+
+  it('leaves the prose cap alone for a text lesson', () => {
+    useCourseHome.mockReturnValue({ data: COURSE_HOME, isLoading: false, isError: false, refetch: vi.fn() });
+    useUnitContents.mockReturnValue({
+      data: UNIT_CONTENTS_WITH_TEXT,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    useLesson.mockReturnValue({ isLoading: false, isError: false, data: TEXT_LESSON, refetch: vi.fn() });
+    useMyStudentProfile.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: STUDENT_PROFILE,
+      refetch: vi.fn(),
+    });
+    useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: TEXT_VARIANT, refetch: vi.fn() });
+    useLessonParagraphs.mockReturnValue({ data: [{ target: 'Marta er sykepleier.', translation: 'Marta is a nurse.' }] });
+    useLessonGlossaryMarks.mockReturnValue({ data: [] });
+    useUnitVocabularyItems.mockReturnValue({ data: [] });
+
+    const { container } = renderShell({ itemId: 'text-1' });
+
+    const column = container.querySelector<HTMLElement>('div[class*="mx-auto"][style*="max-width"]')!;
+    expect(column.style.maxWidth).not.toBe('1040px');
   });
 
   it('renders VocabularyPage (not children) when the active item is a vocabulary list', () => {

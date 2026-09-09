@@ -29,6 +29,8 @@ export async function verifyEmailConfirmAction(token: string) {
     await writeAuthCookies({
       accessToken: tokens.accessToken!,
       refreshToken: tokens.refreshToken!,
+      accessTokenExpiresAt: tokens.accessTokenExpiresAt,
+      refreshTokenExpiresAt: tokens.refreshTokenExpiresAt,
     });
 
     // Step 3: fetch roles

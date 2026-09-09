@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import {
   ErrorState,
   LearningSkeleton,
   useCourseHome,
+  useFlushProgressOutbox,
   useUnitContents,
   useUpsertProgress,
 } from '@/features/learning';
@@ -28,7 +29,9 @@ import { LiveLessonPage } from './live-lesson-page';
 import { ExercisePage } from './exercise-page';
 import { PracticePage } from './practice-page';
 import {
+  buildItemHref,
   findNextUnit,
+  findSourceLessonItemId,
   flattenSections,
   mapCourseLevelsToSidebarLevels,
   mapCourseUnitsToSidebarUnits,
@@ -58,6 +61,7 @@ export function ReaderShell({
   onNextItem,
 }: ReaderShellProps) {
   const t = useTranslations('Learning.reader.sidebar');
+  const locale = useLocale();
   const [collapsed, setCollapsed] = useState(false);
   // Destructured, not held as one object: passing `rail.setContainer` to a
   // `ref` makes the compiler treat the whole object as a ref, and reading
@@ -69,11 +73,31 @@ export function ReaderShell({
   const courseHome = useCourseHome(courseId);
   const unitContents = useUnitContents(unitId);
   const upsertProgress = useUpsertProgress(courseId, unitId);
+  const flushProgressOutbox = useFlushProgressOutbox(courseId, unitId);
 
   const startedAtRef = useRef<number>(undefined);
   useEffect(() => {
     startedAtRef.current = Date.now();
   }, [itemId]);
+
+  // 47.0: a progress ping that fails is queued (`use-upsert-progress.ts`), not
+  // surfaced — the learner has no decision to make over a checkbox they didn't
+  // write. This is where the queue gets its other chances to leave silently.
+  useEffect(() => {
+    void flushProgressOutbox();
+    const onFocusRegained = () => void flushProgressOutbox();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void flushProgressOutbox();
+    };
+    window.addEventListener('online', onFocusRegained);
+    window.addEventListener('focus', onFocusRegained);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('online', onFocusRegained);
+      window.removeEventListener('focus', onFocusRegained);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [flushProgressOutbox]);
 
   const isLoading = courseHome.isLoading || unitContents.isLoading;
   const isError = courseHome.isError || unitContents.isError;
@@ -134,6 +158,20 @@ export function ReaderShell({
       : 'text';
   const activeTitle = practiceSection?.title ?? activeContentItem?.title ?? activeItem?.title ?? '';
 
+  /**
+   * The unit's own text, for the runners that offer a way back to it — today only
+   * `multiple_choice_group`'s «Til teksten» (plan 54 Q5). The exercise itself carries no
+   * lesson id; the reader is the layer that knows where an exercise stands.
+   *
+   * Prefixed here because the runner draws a plain anchor rather than the locale-aware
+   * `Link` — see the note on `sourceHref` in the table body.
+   */
+  const sourceLessonItemId = findSourceLessonItemId(contents);
+  const sourceHref =
+    sourceLessonItemId === null
+      ? undefined
+      : `/${locale}${buildItemHref(courseId, contents.moduleId, sourceLessonItemId)}`;
+
   const activeUnit = units.find((u) => u.id === unitId);
   const moduleVocabularyListId = allContentItems.find((i) => i.contentType === 'VOCABULARY_LIST')?.contentId;
 
@@ -172,6 +210,7 @@ export function ReaderShell({
         title={practiceSection.title}
         items={practiceSection.items}
         onExerciseChecked={handleExerciseChecked}
+        {...(sourceHref === undefined ? {} : { sourceHref })}
       />
     );
   } else if (activeKind === 'vocab' && activeContentItem) {
@@ -237,14 +276,34 @@ export function ReaderShell({
     );
   } else if (activeKind === 'exercise' && activeContentItem) {
     // key: remount per item so the solver's per-exercise state resets.
-    content = <ExercisePage key={activeContentItem.contentId} exerciseId={activeContentItem.contentId} />;
+    content = (
+      <ExercisePage
+        key={activeContentItem.contentId}
+        exerciseId={activeContentItem.contentId}
+        {...(sourceHref === undefined ? {} : { sourceHref })}
+      />
+    );
   }
   // Only prose is reader-adjustable: the other kinds are laid out around media
   // and cards, where width is a design decision rather than a reading-comfort one.
+  //
+  // Practice is the widest of them, and the reason is `sentence_schema`: its board is a
+  // chart of seven named fields side by side, and a chart that has to be scrolled to be
+  // read is not a chart. Seven columns need 764px at the handoff's own floor, and by the
+  // time the page padding and the task card have taken their share, 820px left 716 — so
+  // the board fell back to the phone layout on a desktop. The handoff draws it at ~950px;
+  // this is that width, plus what the two paddings take.
+  //
+  // A single exercise opened by its own link gets the practice width for the same reason:
+  // the 680 below is a cap written for prose, and an exercise reaching it through the
+  // "everything else" branch got 616px of body — under `multiple_choice_group`'s own 640px
+  // table threshold. The same exercise then looked like a table on the practice page and
+  // like cards through a direct link. Wide bodies decide their own layout; narrow ones
+  // (short_answer, gap-fill) centre themselves inside whatever they are given.
   const effectiveMaxWidth =
     maxWidth ??
-    (practiceSection
-      ? 820
+    (practiceSection || activeKind === 'exercise'
+      ? 1040
       : activeKind === 'vocab'
         ? 780
         : activeKind === 'video'

@@ -6,7 +6,12 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import { DEFAULT_SETTINGS, type WordBankGapFill } from '@/lib/shared-kernel/wordbank-gapfill';
+import { readAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
+import {
+  DEFAULT_SETTINGS,
+  TEMPLATE_CODE,
+  type WordBankGapFill,
+} from '@/lib/shared-kernel/wordbank-gapfill';
 
 import { StepSentences } from './step-sentences';
 
@@ -27,8 +32,17 @@ function doc(overrides: Partial<WordBankGapFill> = {}): WordBankGapFill {
 }
 
 /** Drives the controlled component the way the shell will, so edits accumulate. */
-function Harness({ initial, onChange }: { initial: WordBankGapFill; onChange?: () => void }) {
+function Harness({
+  initial,
+  onChange,
+  audio = readAudioDraft({}, TEMPLATE_CODE),
+}: {
+  initial: WordBankGapFill;
+  onChange?: () => void;
+  audio?: AudioDraft;
+}) {
   const [exercise, setExercise] = useState(initial);
+  const [draft, setDraft] = useState(audio);
   return (
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <StepSentences
@@ -37,14 +51,16 @@ function Harness({ initial, onChange }: { initial: WordBankGapFill; onChange?: (
           onChange?.();
           setExercise(next);
         }}
+        audio={draft}
+        onAudioChange={setDraft}
       />
     </NextIntlClientProvider>
   );
 }
 
-const renderStep = (initial: WordBankGapFill) => {
+const renderStep = (initial: WordBankGapFill, audio?: AudioDraft) => {
   const onChange = vi.fn();
-  render(<Harness initial={initial} onChange={onChange} />);
+  render(<Harness initial={initial} onChange={onChange} {...(audio ? { audio } : {})} />);
   return { user: userEvent.setup(), onChange };
 };
 

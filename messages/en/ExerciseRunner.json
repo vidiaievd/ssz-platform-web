@@ -28,6 +28,61 @@
     "defaultInstruction": "Choose the correct answer",
     "optionsLabel": "Answer options"
   },
+  "multipleChoice": {
+    "position": "{n}/{total}",
+    "check": "Check",
+    "checking": "Checking…",
+    "tapAnswer": "Tap an answer",
+    "tryAgain": "Try again",
+    "showAnswer": "Show the answer",
+    "next": "Next question",
+    "finish": "Finish",
+    "attempt": "Attempt {n}",
+    "right": "Correct.",
+    "generic": "Not right. Look at the sentence again.",
+    "sendFailed": "The answer could not be sent. Try again.",
+    "closedAlready": "This question is already finished.",
+    "closeFailed": "The set may not have been handed in. Try again.",
+    "empty": {
+      "title": "Nothing to answer yet",
+      "body": "A question needs text, at least two options and one of them marked correct."
+    },
+    "done": {
+      "title": "Finished",
+      "score": "{score} of {total} right on the first attempt.",
+      "again": "Start over"
+    }
+  },
+  "multipleChoiceGroup": {
+    "statement": "Statement",
+    "result": "Result",
+    "toText": "Go to the text",
+    "answered": "{n}/{total} answered",
+    "check": "Check the answers",
+    "checking": "Checking…",
+    "remaining": "{n} left",
+    "retryWrong": "Try the wrong ones again",
+    "showKey": "Show the answers",
+    "finish": "Finish",
+    "attempt": "Attempt {n}",
+    "allRight": "All correct",
+    "wrongCount": "{n, plural, one {# statement is wrong} other {# statements are wrong}}",
+    "lookAgain": "Look at them once more.",
+    "passed": "Passed",
+    "notPassed": "Not passed",
+    "scoreLine": "{pct}% right — {threshold}% is required.",
+    "sendFailed": "The answers could not be sent. Try again.",
+    "closedAlready": "This table is already finished.",
+    "empty": {
+      "title": "Nothing to answer yet",
+      "body": "A statement needs text and one column marked. Two finished statements make a table."
+    },
+    "done": {
+      "title": "Finished",
+      "score": "{score} of {total} right.",
+      "again": "Start over"
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Answers for question {n}",
     "answeredCount": "{done} of {total} questions answered",
@@ -59,7 +114,8 @@
     "itemWithTeacherWhen": "Your teacher reads this one.",
     "send": "Hand in to the teacher",
     "sending": "Sending…",
-    "sendFailed": "Could not send that — try again",
+    "sendFailedRetry": "That attempt didn't go through — your answer is still here, try again.",
+    "sendUnconfirmed": "Couldn't confirm that reached your teacher — try again.",
     "missing": "{count, plural, one {# sentence has no answer yet} other {# sentences have no answer yet}}",
     "exactPasses": "A sentence written exactly as the key is approved at once — the rest are read by a teacher",
     "allRead": "Every answer is read by a teacher",
@@ -102,6 +158,11 @@
     "helperIdle": "Tap a word on the left…",
     "helperArmed": "Now tap its match on the right."
   },
+  "set": {
+    "badge": "Question set",
+    "count": "{n, plural, one {# question} other {# questions}}",
+    "start": "Start · {n, plural, one {# question} other {# questions}}"
+  },
   "shortAnswer": {
     "defaultInstruction": "Answer the question",
     "inputLabel": "Your answer",
@@ -117,6 +178,48 @@
       "wrong": "wrong word: {n}",
       "extra": "extra word: {n}",
       "missing": "missing word: {n}"
+    },
+    "position": "{n}/{total}",
+    "submit": "Hand in answer",
+    "sending": "Handing in…",
+    "next": "Next question",
+    "finish": "Finish",
+    "irreversible": "An answer cannot be changed once handed in",
+    "covered": "{covered} of {total} points covered",
+    "tooShort": "The answer is too short to be checked automatically.",
+    "aiNote": "AI comment — language and content are assessed here.",
+    "aiNoteGrammar": "AI comment — language and content are assessed here, grammar included.",
+    "aiSoon": "coming",
+    "modelLabel": "Sample answer:",
+    "routing": "Sent to the teacher for review",
+    "routingAi": "Checked by AI · passed on to the teacher",
+    "routingIfUnclear": "{line} if anything is unclear",
+    "sendFailed": "The answer was not handed in. Please try again.",
+    "handedInAlready": "This answer has already been handed in.",
+    "closeFailed": "We could not confirm the exercise was handed in. Check “My work” before trying again.",
+    "verdict": {
+      "pass": "Passed",
+      "partial": "Partly",
+      "fail": "Not passed",
+      "wait": "Awaiting review"
+    },
+    "done": {
+      "title": "Handed in",
+      "tally": "{pass} passed · {partial} partly · {fail} not passed",
+      "teacher": "Your teacher is looking through your answers.",
+      "again": "Do it again"
+    },
+    "empty": {
+      "title": "Nothing to answer yet",
+      "body": "This exercise has no finished questions."
+    },
+    "review": {
+      "marked": "Your teacher has marked this",
+      "sentBack": "Your teacher sent this back",
+      "score": "{score} out of 100 for this attempt.",
+      "itemCounted": "counted",
+      "itemNotCounted": "not counted",
+      "itemNotCountedPlain": "Your teacher did not count this one."
     }
   },
   "writing": {
@@ -127,15 +230,88 @@
     "wordCount": "{count} words",
     "wordCountMin": "{count} / {min} words"
   },
+  "writingTask": {
+    "defaultInstruction": "Write your text",
+    "inputLabel": "Your text",
+    "placeholder": "Write your text here…",
+    "attemptNo": "submission {n}",
+    "checklistTitle": "This must be included",
+    "phrasesTitle": "Useful phrases",
+    "letterLine": "To: {recipient} · {register}",
+    "imageAlt": "Task picture",
+    "imageMissing": "the picture from the task",
+    "wordRange": "{count} / {min}–{max} words",
+    "wordRangeOpen": "{count} / {min}+ words",
+    "pasteOff": "pasting off",
+    "pasteBlocked": "Pasting is turned off for this task — write the text yourself.",
+    "saving": "Saving…",
+    "saved": "Draft saved",
+    "timeLeft": "{minutes} minutes left",
+    "rubricTitle": "How the text is graded",
+    "passLine": "{pass} of {max} points to pass",
+    "topLevel": "3 — {descriptor}",
+    "send": "Hand in to the teacher",
+    "sending": "Handing in…",
+    "readByTeacher": "Every submission is read by a teacher",
+    "needMore": "At least {min} words required — {left} to go",
+    "tooLong": "The text is over the {max}-word limit",
+    "sendFailedRetry": "The text was not handed in. Try again.",
+    "sendUnconfirmed": "We could not confirm the delivery. Check “My submissions” before handing in again.",
+    "delivered": "Handed in.",
+    "deliveredWhen": "Your teacher responds within 48 hours.",
+    "rewrite": "Rewrite and hand in again (submission {n})",
+    "points": "{score} / {max} points",
+    "percent": "{score}%",
+    "mark": "{mark}/3",
+    "outcome": {
+      "passed": "Passed",
+      "rewrite": "Needs a rewrite",
+      "failed": "Not passed"
+    },
+    "modes": {
+      "letter": "Letter",
+      "essay": "Essay",
+      "picture": "Picture description",
+      "retell": "Retelling",
+      "free": "Free writing"
+    },
+    "register": {
+      "formal": "formal language",
+      "informal": "informal language"
+    }
+  },
   "sentenceSchema": {
     "defaultInstruction": "Place each word in the right field",
     "bankLabel": "Words",
-    "bankEmpty": "All words placed",
     "fieldDropLabel": "Place in {field}",
-    "multiWordHint": "A field can hold more than one word",
-    "answerLabel": "Correct placement",
     "sourceLabel": "Original sentence",
-    "targetLabel": "Target sentence"
+    "takeBack": "Take «{word}» back",
+    "remaining": "{count} left",
+    "position": "Sentence {index} of {total}",
+    "attemptNo": "Attempt {count}",
+    "check": "Check ({placed}/{total})",
+    "fix": "Fix ({count})",
+    "reveal": "Show the correct schema",
+    "nextSentence": "Next sentence",
+    "wrongOrder": "Right field, wrong order inside it.",
+    "notInSentence": "That word does not belong in this sentence.",
+    "setDone": "All {count} sentences done",
+    "setTally": "{solved} solved · {revealed} shown",
+    "again": "Do it again",
+    "nothingToSolve": "Nothing to solve here yet — no sentence in this exercise is finished.",
+    "checkFailed": "The sentence could not be checked. Try again.",
+    "closedAlready": "This sentence is already finished.",
+    "closeFailed": "The set could not be handed in. Try again.",
+    "clause": {
+      "main": "Main clause",
+      "sub": "Subordinate clause",
+      "yesno": "Yes/no question",
+      "hv": "Question word",
+      "imp": "Imperative"
+    },
+    "skip": "Skip for now",
+    "skippedEarlier": "You put this one aside earlier",
+    "setTallySkipped": "{solved} solved · {revealed} shown · {skipped} skipped"
   },
   "unsupported": "This exercise type ({type}) isn’t playable yet.",
   "taskNumber": "Task {n}",
@@ -173,11 +349,15 @@
     "passageLabel": "Text",
     "send": "Hand in",
     "sending": "Sending…",
-    "sendFailed": "Could not send that — try again",
+    "sendFailedRetry": "That attempt didn't go through — your work is still here, try again.",
+    "sendUnconfirmed": "Couldn't confirm that reached your teacher — try again.",
     "untouched": "{count, plural, one {# sentence is still untouched} other {# sentences are still untouched}}",
     "approved": "Everything correct — approved automatically",
     "withTeacher": "Handed in. Your teacher will look at it.",
     "withTeacherWhen": "Usually within 48 hours.",
+    "itemCounted": "counted",
+    "itemNotCounted": "not counted",
+    "itemNotCountedPlain": "Your teacher did not count this one.",
     "again": "Try again",
     "charPad": "Norwegian letters",
     "selfCheck": {
@@ -202,6 +382,11 @@
       "missing": "missing word",
       "spelling": "spelling",
       "function": "preposition or article"
+    },
+    "review": {
+      "marked": "Your teacher has marked this",
+      "sentBack": "Your teacher sent this back",
+      "score": "{score} out of 100 for this attempt."
     }
   },
   "gapFill": {
@@ -224,5 +409,74 @@
     "restored": "Your last answer, saved {date}",
     "restoredScored": "{correct} of {total} gaps correct",
     "startOver": "Answer again"
+  },
+  "matchPairs": {
+    "helperIdle": "Tap a line, then tap the half that completes it",
+    "helperSlotArmed": "Now tap the half that completes it.",
+    "helperItemArmed": "Now tap the line it completes.",
+    "tapAHalf": "Tap to choose a half",
+    "emptySlot": "{left} — no half chosen",
+    "filledSlot": "{left} — {half}",
+    "revealedSlot": "{left} — the answer is {half}",
+    "remaining": "{count} left",
+    "check": "Check",
+    "checking": "Checking…",
+    "matchOneToCheck": "Match at least one",
+    "checkFailed": "Could not check that — try again",
+    "retryAttempt": "Fix your answers · attempt {n}",
+    "attemptCount": "Attempt {n}",
+    "restart": "Start over",
+    "revealFailed": "Could not show the answers — try again",
+    "restored": "Your last answer, saved {date}",
+    "restoredScored": "{correct} of {total} pairs correct",
+    "startOver": "Answer again",
+    "stateCorrect": "Correct",
+    "stateWrong": "Not right",
+    "filledSlotCorrect": "{left} — {half}, correct",
+    "filledSlotWrong": "{left} — {half}, not right",
+    "removeHalf": "Remove {half}",
+    "noPairs": "This exercise has no pairs yet.",
+    "checkCount": "Check ({n}/{m})",
+    "attemptFootnote": "Attempt {n} · {correct} of {total} correct",
+    "pickerLabel": "Halves that could complete: {left}"
+  },
+  "audio": {
+    "play": "Play",
+    "pause": "Pause",
+    "back10": "Back 10s",
+    "speed": "{rate}×",
+    "speedLabel": "Playback speed",
+    "position": "Position in the clip",
+    "playsLeft": "{left} of {limit} left",
+    "playsNone": "No listens left",
+    "transcript": "Transcript",
+    "fragment": "Play {from}–{to}",
+    "lockNote": "The items open once you have heard the clip through once.",
+    "lockNoteNamed": "The {items} open once you have heard the clip through once.",
+    "status": {
+      "idle": "Press to listen",
+      "playing": "Playing…",
+      "paused": "Paused",
+      "spent": "No listens left",
+      "failed": "The clip could not be played. The exercise is open anyway."
+    },
+    "gate": {
+      "title": "Listen first",
+      "ledeLocked": "Listen to the whole clip once. The items open afterwards.",
+      "ledeOpen": "You can listen again while you answer.",
+      "listenFirst": "Listen first",
+      "toItems": "To the items"
+    },
+    "itemNoun": {
+      "questions": "questions",
+      "gaps": "gaps",
+      "statements": "statements",
+      "sentence": "sentence",
+      "lines": "lines",
+      "sentences": "sentences",
+      "pieces": "pieces",
+      "pairs": "pairs"
+    },
+    "lockNoteOwn": "This {item} opens once you have heard its recording."
   }
 }

@@ -9,7 +9,7 @@ import type { StudentProfile } from '@/features/profile';
 const useLesson = vi.fn();
 const useBestLessonVariant = vi.fn();
 const useLessonListeningStages = vi.fn();
-const useExercisesWithAnswers = vi.fn();
+const useExercisesForRunner = vi.fn();
 const introduceCardMutate = vi.fn();
 const useIntroduceCard = vi.fn(() => ({ mutate: introduceCardMutate }));
 const useMyStudentProfile = vi.fn();
@@ -24,7 +24,7 @@ vi.mock('@/features/content', async () => {
     useLesson: (id: string) => useLesson(id),
     useBestLessonVariant: (...args: unknown[]) => useBestLessonVariant(...args),
     useLessonListeningStages: (...args: unknown[]) => useLessonListeningStages(...args),
-    useExercisesWithAnswers: (ids: string[]) => useExercisesWithAnswers(ids),
+    useExercisesForRunner: (ids: string[]) => useExercisesForRunner(ids),
     useIntroduceCard: () => useIntroduceCard(),
   };
 });
@@ -118,7 +118,7 @@ function mockHappyPath() {
   useMyStudentProfile.mockReturnValue({ isLoading: false, isError: false, data: PROFILE, refetch: vi.fn() });
   useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: VARIANT, refetch: vi.fn() });
   useLessonListeningStages.mockReturnValue({ isLoading: false, isError: false, data: STAGES, refetch: vi.fn() });
-  useExercisesWithAnswers.mockImplementation((ids: string[]) =>
+  useExercisesForRunner.mockImplementation((ids: string[]) =>
     ids.map((id) => ({ data: id === 'ex-gap-1' ? GAP_EXERCISE : id === 'ex-comp-1' ? COMP_EXERCISE : undefined })),
   );
   useMediaAsset.mockImplementation((id?: string) =>
@@ -156,7 +156,7 @@ describe('ListeningLessonPage', () => {
     useMyStudentProfile.mockReturnValue({ isLoading: true, isError: false, data: undefined, refetch: vi.fn() });
     useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: undefined, refetch: vi.fn() });
     useLessonListeningStages.mockReturnValue({ isLoading: false, isError: false, data: undefined, refetch: vi.fn() });
-    useExercisesWithAnswers.mockReturnValue([]);
+    useExercisesForRunner.mockReturnValue([]);
     renderPage();
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
   });
@@ -167,7 +167,7 @@ describe('ListeningLessonPage', () => {
     useMyStudentProfile.mockReturnValue({ isLoading: false, isError: false, data: PROFILE, refetch: vi.fn() });
     useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: undefined, refetch: vi.fn() });
     useLessonListeningStages.mockReturnValue({ isLoading: false, isError: false, data: undefined, refetch: vi.fn() });
-    useExercisesWithAnswers.mockReturnValue([]);
+    useExercisesForRunner.mockReturnValue([]);
     renderPage();
     fireEvent.click(screen.getByRole('button', { name: /try again/i }));
     expect(refetchLesson).toHaveBeenCalled();
@@ -209,7 +209,7 @@ describe('ListeningLessonPage', () => {
     useMyStudentProfile.mockReturnValue({ isLoading: false, isError: false, data: undefined, refetch: vi.fn() });
     useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: undefined, refetch: vi.fn() });
     useLessonListeningStages.mockReturnValue({ isLoading: false, isError: false, data: undefined, refetch: vi.fn() });
-    useExercisesWithAnswers.mockReturnValue([]);
+    useExercisesForRunner.mockReturnValue([]);
     renderPage();
     expect(screen.getByText("This lesson isn't ready for you yet")).toBeInTheDocument();
   });
@@ -219,7 +219,7 @@ describe('ListeningLessonPage', () => {
     useMyStudentProfile.mockReturnValue({ isLoading: false, isError: false, data: PROFILE, refetch: vi.fn() });
     useBestLessonVariant.mockReturnValue({ isLoading: false, isError: false, data: VARIANT, refetch: vi.fn() });
     useLessonListeningStages.mockReturnValue({ isLoading: false, isError: false, data: [], refetch: vi.fn() });
-    useExercisesWithAnswers.mockReturnValue([]);
+    useExercisesForRunner.mockReturnValue([]);
     useMediaAsset.mockReturnValue({ data: undefined });
     renderPage();
     expect(screen.getByText('No practice staged yet')).toBeInTheDocument();

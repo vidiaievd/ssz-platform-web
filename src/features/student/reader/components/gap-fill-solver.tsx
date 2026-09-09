@@ -20,6 +20,7 @@ import {
   type GapFillValue,
   type GapVerdict,
 } from '@/features/student/exercises/runner';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface GapFillSolverProps {
@@ -52,6 +53,16 @@ export function GapFillSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<GapFillAttemptContent | null>(null);
+  /** What the clip said, once the engine hands it over with the verdicts. */
+  const [transcript, setTranscript] = useState<{ transcript: string; translation: string } | null>(
+    null,
+  );
+
+  /**
+   * The listening layer, read off the projected document — the block rides with it, so
+   * there is nothing else to fetch and nothing to keep in step (plan 56).
+   */
+  const audio = useExerciseAudio(projection);
 
   const submit = useSubmitAnswer(exerciseId, attemptId);
   const reveal = useRevealAnswers(exerciseId, attemptId);
@@ -110,6 +121,7 @@ export function GapFillSolver({
         onSuccess: async (data) => {
           setAttemptId(data.attemptId);
           setProjection(data.exerciseContent as GapFillAttemptContent);
+          setTranscript(null);
           openedAt.current = Date.now();
 
           if (restoreConsidered.current) return;
@@ -188,6 +200,8 @@ export function GapFillSolver({
             byGap[gap.gapKey] = { correct: gap.correct, explanation: gap.explanation };
           }
           setResults(byGap);
+          // The answers are in, so the clip has nothing left to give away.
+          if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
           setSolved(data.correct);
           setReading(true);
           // Progress follows the first attempt; later ones are practice.
@@ -201,6 +215,9 @@ export function GapFillSolver({
   function showAnswers() {
     reveal.mutate(undefined, {
       onSuccess: (data) => {
+        // The reveal payload is discriminated by template — `match_pairs` reveals
+        // slots, not gaps — and this solver only ever asks about its own exercise.
+        if (data.templateCode !== 'word_bank_gap_fill') return;
         const byGap: Record<string, string> = {};
         for (const answer of data.answers) byGap[answer.gapKey] = answer.word;
         setRevealed(byGap);
@@ -322,6 +339,8 @@ export function GapFillSolver({
 
       <WordBankGapFillBody
         projection={projection}
+        audio={audio}
+        audioTranscript={transcript}
         {...(instruction === undefined ? {} : { instruction })}
         value={value}
         onValueChange={setValue}

@@ -31,6 +31,15 @@ function makeRequest(body: unknown) {
 
 const params = Promise.resolve({ id: 'ex-1' });
 
+/**
+ * The join POST that now precedes every clear-and-restart.
+ *
+ * POST tries to join the open attempt before it clears it, so a test about clearing has
+ * to say why joining was not the answer. `not_found` is the plainest reason: the attempt
+ * named in the 409 is no longer there to join.
+ */
+const JOIN_FAILS = () => new AppError('not_found', 'Attempt gone');
+
 beforeEach(() => vi.mocked(serverFetch).mockReset());
 
 describe('POST /api/exercises/[id]/attempts', () => {
@@ -81,6 +90,8 @@ describe('POST /api/exercises/[id]/attempts', () => {
           attemptId: 'att-9',
         }),
       )
+      .mockRejectedValueOnce(JOIN_FAILS()) // the attempt cannot be joined
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS' }) // GET the stale attempt: any draft?
       .mockResolvedValueOnce(undefined) // DELETE the stale attempt
       .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2' });
 
@@ -88,22 +99,213 @@ describe('POST /api/exercises/[id]/attempts', () => {
 
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toMatchObject({ attemptId: 'att-2' });
+    expect(serverFetch).toHaveBeenNthCalledWith(4, {
+      service: 'exercises',
+      path: '/exercises/ex-1/attempts/att-9',
+      method: 'DELETE',
+    });
+    // Nothing was written: an attempt with no draft leaves the fresh one empty rather
+    // than saving `null` over it.
+    expect(serverFetch).toHaveBeenCalledTimes(5);
+  });
+
+  it('carries a saved draft onto the fresh attempt', async () => {
+    // The reason this route may not simply throw the stale attempt away any more: it can
+    // hold a `writing_task` draft, and that draft is the learner's text. Losing it on
+    // re-opening the page would make the reload the one reliable way to lose an evening.
+    const draft = { text: 'Hei Kari, jeg skriver fordi…', ticked: ['p1'] };
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockRejectedValueOnce(JOIN_FAILS())
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS', draftAnswer: draft })
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2', templateCode: 'writing_task' })
+      .mockResolvedValueOnce({ savedAt: '2026-08-22T09:00:00.000Z' });
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
+    expect(serverFetch).toHaveBeenNthCalledWith(6, {
+      service: 'exercises',
+      path: '/exercises/ex-1/attempts/att-2/draft',
+      method: 'PUT',
+      body: { draftAnswer: draft },
+    });
+  });
+
+  it('still hands over the fresh attempt when the draft could not be carried', async () => {
+    // A lost draft is bad; an exercise that refuses to open because of it is worse, and
+    // the text is still on the abandoned row either way.
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockRejectedValueOnce(JOIN_FAILS())
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS', draftAnswer: { text: 'noe' } })
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2' })
+      .mockRejectedValueOnce(new Error('draft save failed'));
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toMatchObject({ attemptId: 'att-2' });
+  });
+
+  it('starts the fresh attempt even when the stale one cannot be read', async () => {
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockRejectedValueOnce(JOIN_FAILS())
+      .mockRejectedValueOnce(new Error('read failed'))
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2' });
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
+  });
+
+  it('reports the conflict when the stale attempt cannot be cleared', async () => {
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockRejectedValueOnce(JOIN_FAILS())
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS' })
+      .mockRejectedValueOnce(new Error('still there'));
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(409);
+    // The running attempt's id travels with the refusal: a caller holding an answer can
+    // submit it into the attempt that is already open rather than being told to wait for
+    // a state it cannot see or change (47.3).
+    await expect(res.json()).resolves.toEqual({
+      error: 'An attempt is already in progress',
+      attemptId: 'att-9',
+    });
+  });
+
+  /*
+    Two tabs opened in turn, which is the ordinary way a learner ends up with two of them.
+    The second sees the first tab's open attempt and cannot tell it from one left over from
+    yesterday. Clearing it took the exercise out from under the first tab: its hand-in came
+    back 502 and the learner was told their answers could not be sent (measured 02.09).
+  */
+  it('joins the open attempt instead of clearing it', async () => {
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-open' }))
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-open' });
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toMatchObject({ attemptId: 'att-open' });
     expect(serverFetch).toHaveBeenNthCalledWith(2, {
+      service: 'exercises',
+      path: '/exercises/ex-1/attempts',
+      method: 'POST',
+      body: { language: 'no', joinAttemptId: 'att-open' },
+    });
+    // Nothing was abandoned: the attempt the other tab is looking at is still open.
+    expect(vi.mocked(serverFetch).mock.calls.map(([c]) => c.method)).not.toContain('DELETE');
+  });
+
+  it('clears rather than joins an attempt that is in the wrong check mode', async () => {
+    // A PRACTICE attempt must not swallow the move to a GRADED one: the two differ in
+    // whether the answers travel to the browser at all.
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-9', checkMode: 'PRACTICE' })
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS' })
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-2', checkMode: 'GRADED' });
+
+    const res = await POST(makeRequest({ language: 'no', mode: 'GRADED' }), { params });
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toMatchObject({ attemptId: 'att-2', checkMode: 'GRADED' });
+    expect(serverFetch).toHaveBeenNthCalledWith(4, {
       service: 'exercises',
       path: '/exercises/ex-1/attempts/att-9',
       method: 'DELETE',
     });
   });
 
-  it('reports the conflict when the stale attempt cannot be cleared', async () => {
+  /*
+    Two tabs recovering from the same stale attempt in the same millisecond: both abandon
+    it, both start, and the loser is told about the attempt the winner just opened. That
+    attempt is open and submittable, so it is joined by name — abandoning it would pull
+    the exercise out from under the tab already using it.
+  */
+  it('joins the attempt that won the race instead of failing', async () => {
     vi.mocked(serverFetch)
       .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
-      .mockRejectedValueOnce(new Error('still there'));
+      .mockRejectedValueOnce(JOIN_FAILS())
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS' }) // GET the stale attempt: any draft?
+      .mockResolvedValueOnce(undefined) // DELETE the stale attempt
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-win' }))
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-win' });
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ ...STARTED, attemptId: 'att-win' });
+    expect(serverFetch).toHaveBeenLastCalledWith({
+      service: 'exercises',
+      path: '/exercises/ex-1/attempts',
+      method: 'POST',
+      body: { language: 'no', joinAttemptId: 'att-win' },
+    });
+  });
+
+  it('does not carry the stale draft onto the attempt it joined', async () => {
+    // The tab that won the race carried the draft onto that attempt a moment ago;
+    // writing the older copy over it would undo whatever has been typed since.
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockRejectedValueOnce(JOIN_FAILS())
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS', draftAnswer: { text: 'halvferdig' } })
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-win' }))
+      .mockResolvedValueOnce({ ...STARTED, attemptId: 'att-win' });
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(serverFetch).mock.calls.map(([c]) => c.method)).not.toContain('PUT');
+  });
+
+  it('reports the conflict when the second conflict names the attempt it just cleared', async () => {
+    // Same id twice is not a lost race — it is an engine that did not let go of the
+    // attempt this route abandoned, and joining it would be joining a dead row.
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockRejectedValueOnce(JOIN_FAILS())
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS' })
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }));
 
     const res = await POST(makeRequest({ language: 'no' }), { params });
 
     expect(res.status).toBe(409);
-    await expect(res.json()).resolves.toEqual({ error: 'An attempt is already in progress' });
+    await expect(res.json()).resolves.toEqual({
+      error: 'An attempt is already in progress',
+      attemptId: 'att-9',
+    });
+  });
+
+  it('reports the conflict when the joined attempt cannot be read back', async () => {
+    // One extra round, never a loop: if the join fails too, the caller is told the truth
+    // and gets the id it can still submit into.
+    vi.mocked(serverFetch)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-9' }))
+      .mockRejectedValueOnce(JOIN_FAILS())
+      .mockResolvedValueOnce({ status: 'IN_PROGRESS' })
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-win' }))
+      .mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { attemptId: 'att-other' }));
+
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(409);
+    expect(serverFetch).toHaveBeenCalledTimes(6);
   });
 
   it('reports the conflict when the engine names no attempt to clear', async () => {
@@ -111,6 +313,9 @@ describe('POST /api/exercises/[id]/attempts', () => {
 
     const res = await POST(makeRequest({ language: 'no' }), { params });
     expect(res.status).toBe(409);
+    // Nothing to carry on with: the attempt exists but this route cannot name it, and a
+    // submit aimed at a guess would be worse than the refusal.
+    await expect(res.json()).resolves.toEqual({ error: 'An attempt is already in progress' });
   });
 
   it('maps the errors the caller can act on', async () => {

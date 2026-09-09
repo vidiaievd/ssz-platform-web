@@ -9,6 +9,7 @@ import type {
 
 import {
   findNextUnit,
+  findSourceLessonItemId,
   mapCourseLevelsToSidebarLevels,
   mapUnitContentsToSections,
   practiceItemId,
@@ -205,5 +206,43 @@ describe('practice item ids', () => {
 
     expect(resolveNavigableItemId(contents, 'e1')).toBe('practice-sec-ex');
     expect(resolveNavigableItemId(contents, 'e3')).toBe('e3');
+  });
+});
+
+/* ── the lesson an exercise sits under ─────────────────────────────────── */
+
+describe('findSourceLessonItemId', () => {
+  const textItem = (id: string): UnitContentsItem => ({
+    ...exerciseItem(id, 'available'),
+    contentType: 'LESSON',
+    lessonKind: 'text',
+  });
+
+  it("picks the unit's text lesson, wherever in the unit it sits", () => {
+    const contents = contentsWith([
+      { id: 'sec-ex', title: 'Øvelser', items: [exerciseItem('e1', 'available')] },
+      { id: 'sec-text', title: 'Tekst', items: [textItem('t1')] },
+    ]);
+
+    expect(findSourceLessonItemId(contents)).toBe('t1');
+  });
+
+  it('reads the ungrouped items too', () => {
+    const contents = { ...contentsWith([]), ungroupedItems: [textItem('t1')] };
+
+    expect(findSourceLessonItemId(contents)).toBe('t1');
+  });
+
+  it('has nothing to offer a unit with no text', () => {
+    const contents = contentsWith([
+      { id: 'sec-ex', title: 'Øvelser', items: [exerciseItem('e1', 'available')] },
+      {
+        id: 'sec-audio',
+        title: 'Lytting',
+        items: [{ ...exerciseItem('a1', 'available'), contentType: 'LESSON', lessonKind: 'audio' }],
+      },
+    ]);
+
+    expect(findSourceLessonItemId(contents)).toBeNull();
   });
 });

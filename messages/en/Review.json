@@ -1,0 +1,446 @@
+{
+  "inbox": {
+    "eyebrow": "Review",
+    "title": "Waiting for you",
+    "subtitle": "{count, plural, one {# submission} other {# submissions}}",
+    "subtitleOverdue": "{count, plural, one {# longer than promised} other {# longer than promised}}",
+    "subtitleOverduePartial": "{count}+ longer than promised",
+    "subtitleOldest": "oldest {age}",
+    "groupBy": {
+      "label": "Group the queue by",
+      "exercise": "By exercise",
+      "student": "By learner"
+    },
+    "filter": {
+      "group": "Group",
+      "course": "Course",
+      "type": "Type",
+      "overdue": "Longer than promised",
+      "clear": "Clear filters",
+      "allGroups": "All groups",
+      "allCourses": "All courses",
+      "allTypes": "All types"
+    },
+    "group": {
+      "count": "{count}",
+      "expand": "Show the submissions in this group",
+      "collapse": "Hide the submissions in this group",
+      "batch": "Pass {count} clean"
+    },
+    "row": {
+      "lockedBy": "{name}",
+      "autoClean": "machine closed it",
+      "attempt": "try {n}",
+      "label": "{student} · {exercise} · waiting {age}",
+      "exerciseGone": "exercise removed",
+      "lockedByLabel": "being reviewed by {name}"
+    },
+    "empty": {
+      "title": "All reviewed",
+      "body": "Nothing in your groups is waiting for an answer. New work appears here the moment it is handed in.",
+      "filteredTitle": "Nothing under these filters",
+      "filteredBody": "Clear them to see the rest of the queue."
+    },
+    "failed": "The queue could not be loaded.",
+    "retry": "Try again",
+    "more": "Show more",
+    "moreLoading": "Loading…",
+    "position": "{i} of {n}",
+    "selectPrompt": "Pick a submission",
+    "selectBody": "Choose one on the left and it opens here."
+  },
+  "type": {
+    "short_answer": "Short answer",
+    "writing_task": "Writing",
+    "translate_to_target": "Translation into Norwegian",
+    "translate_from_target": "Translation from Norwegian",
+    "error_correction": "Error correction"
+  },
+  "age": {
+    "justNow": "just now",
+    "hours": "{n, plural, one {# hour} other {# hours}}",
+    "days": "{n, plural, one {# day} other {# days}}",
+    "overdueBy": {
+      "hours": "{n, plural, one {# hour past} other {# hours past}}",
+      "days": "{n, plural, one {# day past} other {# days past}}"
+    },
+    "scale": {
+      "fresh": "fresh",
+      "atSla": "at the promise ({n} h)",
+      "double": "twice the promise"
+    },
+    "spread": "{n, plural, one {# submission} other {# submissions}}, oldest {oldest}"
+  },
+  "submission": {
+    "failed": {
+      "title": "This submission could not be opened",
+      "body": "It may have been decided, or the connection dropped. Try again from the queue."
+    },
+    "conflict": {
+      "title": "{name} has just reviewed this",
+      "someone": "A colleague",
+      "approved": "Passed at {time}. Your draft is kept below.",
+      "returned": "Returned for revision at {time}. Your draft is kept below."
+    },
+    "windowExpired": {
+      "title": "You can no longer decide this one",
+      "body": "Your assignment to this group ended after the work was handed in. You can read it; the verdict belongs to whoever teaches the group now."
+    },
+    "lockExpired": {
+      "title": "Your marker on this submission ran out",
+      "body": "The fifteen minutes are up. Nobody else has taken it — carry on, and it will be marked for you again as you work."
+    },
+    "heldBy": {
+      "title": "{name} is looking at this one",
+      "body": "You are not blocked. It frees up in about fifteen minutes, and whoever decides first is the one who answers."
+    },
+    "exerciseGone": {
+      "title": "The exercise is no longer there",
+      "body": "Its author deleted or moved it after this was handed in. The path above is the one the learner saw, and the verdict is still yours to give."
+    },
+    "noDetails": {
+      "title": "The breakdown could not be built",
+      "body": "The answer is shown as it was handed in. Read it and decide as usual — the machine simply had nothing to compare it against."
+    },
+    "previous": {
+      "title": "Returned for revision",
+      "by": "{name} · {date}",
+      "someone": "a colleague",
+      "noComment": "No comment was left.",
+      "explain": "This is a separate try. The answer below is the new one."
+    },
+    "back": "Back to the queue",
+    "closedVerbatim": "{closed} of {total} closed by the machine, word for word",
+    "closedQuestions": "{closed} of {total} questions closed by the machine",
+    "elementsCovered": "{covered} of {total} points covered across the set",
+    "essay": "The work · {words, plural, one {# word} other {# words}}",
+    "sentence": {
+      "autoPassed": "closed by the machine",
+      "collapse": "collapse",
+      "blank": "nothing was written",
+      "against": "closest accepted answer: {ref}"
+    },
+    "comment": {
+      "charPad": "Norwegian letters",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "remove": "Remove",
+      "addToSentence": "Comment on this sentence",
+      "sentenceLabel": "Comment on this sentence",
+      "sentencePlaceholder": "What should the learner look at here?"
+    }
+  },
+  "rubric": {
+    "facts": "{words, plural, one {# word} other {# words}} · {paragraphs, plural, one {# paragraph} other {# paragraphs}} · {hit}/{needed} points phrased",
+    "tooShort": "under the length asked for",
+    "tooLong": "over the length asked for",
+    "tickedShort": "ticked",
+    "tickedNotHit": "The learner ticked this off but none of its keywords appear. They may have phrased it another way — read the text.",
+    "unnamedPoint": "Unnamed point",
+    "unnamed": "Unnamed criterion",
+    "unmarked": "Not marked yet.",
+    "weight": "×2",
+    "markOf": "Mark for {name}",
+    "score": "{points} of {max} points",
+    "threshold": "a pass is {passScore}",
+    "remaining": "{count, plural, one {# criterion left} other {# criteria left}}",
+    "incomplete": "Mark every criterion before deciding — a blank one is not a zero.",
+    "approve": "Pass · {points}/{max}",
+    "return": "Send back · {points}/{max}"
+  },
+  "decision": {
+    "commentLabel": "Comment on the whole submission",
+    "commentPlaceholder": "A comment on the work as a whole. Write it in Norwegian — the æøå pad is below. Your draft is kept as you type.",
+    "approve": "Pass",
+    "approveWithComment": "Pass with a comment",
+    "return": "Send back for revision",
+    "returnRequiresComment": "Say what should be changed — the work goes back to the learner together with your comment.",
+    "failed": "The verdict could not be recorded. Try again.",
+    "scoreIsServerSide": "Sending back needs a comment: the learner gets the work together with it. The score is worked out by the system from what was passed — no mark is entered by hand.",
+    "scoreIsRubric": "The verdict follows from the rubric: a total at or above the pass mark is a pass, below it goes back. The score is worked out by the system from the marks — no percentage is entered by hand.",
+    "next": "Next submission",
+    "sent": {
+      "approved": "Passed",
+      "returned": "Sent back for revision"
+    },
+    "keys": {
+      "approve": "pass",
+      "withComment": "with a comment",
+      "return": "send back",
+      "next": "next",
+      "send": "send"
+    }
+  },
+  "batch": {
+    "dialog": {
+      "title": "Pass {count} submissions the machine closed?",
+      "body": "These learners answered «{exercise}» exactly as the answer key has it, and nothing was left for a person to read.",
+      "thisExercise": "this exercise",
+      "irreversible": "There is no undo. Each learner is told their work was passed, and the verdict is recorded in your name.",
+      "cancel": "Cancel",
+      "confirm": "Pass {count}"
+    },
+    "done": "{count, plural, one {# submission passed} other {# submissions passed}}",
+    "skipped": {
+      "already_reviewed": "{count} already answered by a colleague",
+      "not_clean": "{count} needs reading after all — the answer key has changed",
+      "not_found": "{count} no longer waiting",
+      "not_pending": "{count} no longer waiting",
+      "unavailable": "{count} could not be checked"
+    },
+    "failed": "Nothing was passed — the batch could not be sent."
+  },
+  "oversight": {
+    "eyebrow": "School oversight",
+    "title": "Review",
+    "subtitle": "Where work has piled up, and who could use a hand. A delay here is a sign of load.",
+    "period": {
+      "label": "Period the replies are counted over",
+      "days": "{n} days"
+    },
+    "summary": {
+      "title": "The school",
+      "since": "Counted from {date} — before that, submissions carried no school.",
+      "sinceUnknown": "Nothing has been handed in for review yet.",
+      "pending": "Waiting",
+      "pendingSub": "across every group",
+      "overdue": "Longer than promised",
+      "promise": "the school promises {n} h",
+      "noPromise": "no response time set yet",
+      "oldest": "Oldest",
+      "oldestSub": "the longest anyone has waited",
+      "median": "Median reply",
+      "medianSub": "over the last {n} days",
+      "medianNone": "nothing was answered in this period",
+      "truncated": "The school has more waiting than this screen counts. The shape is right; the totals stop at the ceiling."
+    },
+    "spread": {
+      "title": "The whole queue by age"
+    },
+    "failed": "The load could not be read.",
+    "retry": "Try again",
+    "teachers": {
+      "title": "Teachers",
+      "sub": "Who is under pressure shows in the length of the tail, not in one number.",
+      "empty": "Nothing is waiting on anyone right now.",
+      "unnamed": "Name unavailable",
+      "noGroups": "no groups right now",
+      "pending": "waiting",
+      "overdue": "longer than promised",
+      "median": "median reply {age} · queue by age",
+      "noMedian": "nothing answered in this period",
+      "shared": "shared with a colleague",
+      "remind": "Remind",
+      "addReviewer": "Add a reviewer",
+      "reminded": "Reminded {name} — {n, plural, one {# submission} other {# submissions}} waiting",
+      "remindedAlready": "Already reminded today. The next one can go in about {hours, plural, one {# hour} other {# hours}}.",
+      "remindFailed": "The reminder could not be sent."
+    },
+    "groups": {
+      "title": "Groups",
+      "sub": "waiting · longer than promised",
+      "empty": "No group has anything waiting.",
+      "unnamed": "Group"
+    },
+    "courses": {
+      "title": "Courses",
+      "sub": "A course may promise a different response time",
+      "empty": "No course has anything waiting.",
+      "unnamed": "Course",
+      "promise": "responds within {n} h",
+      "noPromise": "no response time set",
+      "overridden": "set on the course",
+      "pending": "{n} waiting",
+      "legend": "waiting · longer than promised"
+    },
+    "stuck": {
+      "title": "Not moving",
+      "sub": "{n, plural, one {# submission has} other {# submissions have}} been waiting longer than promised",
+      "emptySub": "nothing is past its promised time",
+      "empty": "Everything waiting is still inside the time the school promised.",
+      "noReviewer": "learner is in no group — there is no reviewer",
+      "unnamedStudent": "Learner",
+      "unnamedExercise": "Exercise",
+      "unnamedGroup": "Group",
+      "assign": "Assign",
+      "reviewIt": "Review it yourself"
+    },
+    "journal": {
+      "title": "Decision journal",
+      "sub": "Over {n} days · who, when, and what came of it",
+      "empty": "Nobody has answered anything in this period.",
+      "export": "Export CSV",
+      "more": "Show more",
+      "failed": "The journal could not be read.",
+      "unnamedReviewer": "Reviewer",
+      "unnamedStudent": "Learner",
+      "unnamedExercise": "Exercise",
+      "took": "answered in {age}",
+      "verdict": {
+        "approved": "passed",
+        "returned": "sent back"
+      },
+      "csv": {
+        "reviewedAt": "Answered at",
+        "reviewer": "Reviewer",
+        "student": "Learner",
+        "course": "Course",
+        "exercise": "Exercise",
+        "verdict": "Outcome",
+        "hours": "Hours waited"
+      }
+    },
+    "assign": {
+      "title": "Add a reviewer",
+      "for": "{student} · {exercise}",
+      "someone": "This learner",
+      "someExercise": "this exercise",
+      "banner": {
+        "title": "This adds the person to the group's staff",
+        "body": "There is no separate «reviewer» role: whoever teaches the learner's group may answer their work. The person you add sees this group's whole queue in their inbox straight away."
+      },
+      "noGroup": {
+        "title": "This learner is in no group",
+        "body": "Nobody can be made responsible for this work until the learner belongs to a group — the rule runs through the group, not through the submission. Add them to one from the learners page, and their work joins that group's queue."
+      },
+      "group": "Group",
+      "teacher": "Teacher",
+      "chooseTeacher": "Choose a teacher…",
+      "role": "Role in the group",
+      "roleCoPrimary": "Co-teacher",
+      "roleSubstitute": "Substitute",
+      "from": "From",
+      "to": "Until",
+      "reason": "Reason",
+      "reasonRequired": "A substitution needs a reason.",
+      "cancel": "Cancel",
+      "submit": "Add",
+      "submitting": "Adding…",
+      "failed": "The reviewer could not be added.",
+      "assigned": "Added — the group's queue is now theirs as well.",
+      "forTeacher": "Alongside {name}"
+    }
+  },
+  "settings": {
+    "eyebrow": "School settings",
+    "title": "Response times",
+    "lede": "One number sets the whole urgency scale: the colour of the queue, what counts as stuck in oversight, and the date a learner is given while they wait.",
+    "sub": "The promise everything else is measured against",
+    "hours": "hours",
+    "respond": {
+      "label": "Answer within",
+      "hint": "Work older than this is coloured as waiting too long.",
+      "bounds": "Between {min} and {max} hours."
+    },
+    "escalate": {
+      "label": "Escalate after",
+      "hint": "When to tell someone else that there is still no answer.",
+      "beforeRespond": "Escalation cannot come before the promise itself."
+    },
+    "escalateTo": {
+      "label": "Escalate to",
+      "hint": "Receives a summary of what is stuck, not a letter per submission.",
+      "school_admins": "School administrators",
+      "owner": "Owner",
+      "primary_teacher": "The group's lead teacher"
+    },
+    "preview": "This is how the age scale reads at {n} h.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saved": "The response time is saved.",
+    "saveFailed": "The response time could not be saved.",
+    "failed": "The response time could not be read.",
+    "readOnly": "Only the owner and administrators can change this.",
+    "course": {
+      "title": "Response time",
+      "lede": "How long this course promises a learner will wait for a verdict.",
+      "ownTime": "Its own response time for this course",
+      "hours": "hours",
+      "inheritedIs": "Inherited value — {n} h. Clear the box to go back to it.",
+      "inheritedFrom": "Inherited from the school: {n} h.",
+      "noSchoolPromise": "The school has not set a response time yet.",
+      "bounds": "Between {min} and {max} hours.",
+      "save": "Save",
+      "saved": "The response time is saved.",
+      "saveFailed": "The response time could not be saved.",
+      "failed": "The response time could not be read.",
+      "fieldLabel": "Response time in hours"
+    }
+  },
+  "student": {
+    "eyebrow": "My work",
+    "title": "Handed in for marking",
+    "subtitle": "{pending, plural, =0 {Nothing is waiting on a teacher} one {# piece of work is waiting on a teacher} other {# pieces of work are waiting on a teacher}}, {returned, plural, =0 {nothing came back} one {# came back for another go} other {# came back for another go}}.",
+    "subtitlePartial": "Counted over what is loaded so far — scroll on for the rest.",
+    "tabs": {
+      "all": "All",
+      "pending": "Waiting",
+      "returned": "Another go",
+      "approved": "Marked"
+    },
+    "status": {
+      "pending": "Waiting to be marked",
+      "returned": "Back for another go",
+      "approved": "Marked"
+    },
+    "row": {
+      "attempt": "Attempt {n}",
+      "signed": "{teacher} · {when}",
+      "unsigned": "Marked {when}",
+      "open": "Open this submission",
+      "close": "Close this submission"
+    },
+    "due": {
+      "expected": "Answer expected {when}",
+      "unknown": "No response time set for this course",
+      "note": "That is the usual time this school takes, not a promise for the minute."
+    },
+    "pending": {
+      "body": "Handed in {age} ago, waiting in your teacher's queue."
+    },
+    "comment": {
+      "label": "Comment · {teacher}",
+      "unsigned": "Comment"
+    },
+    "approved": {
+      "noComment": "Marked as correct, with nothing to add."
+    },
+    "returned": {
+      "hint": "Another go is a new attempt — this comment stays here beside it.",
+      "superseded": "You have already had another go at this one — the newest attempt is the one that counts."
+    },
+    "group": {
+      "count": "{count, plural, one {# exercise} other {# exercises}} handed in"
+    },
+    "empty": {
+      "title": "Nothing handed in yet",
+      "body": "Work your teacher reads shows up here — with what they said about it.",
+      "filteredTitle": "Nothing here",
+      "filteredBody": "Nothing of yours is in this state right now."
+    },
+    "failed": "Could not load your work",
+    "retry": "Try again",
+    "more": "Show more",
+    "redo": {
+      "again": "Do it again",
+      "back": "Back to my work",
+      "banner": "{teacher} sent this back for another go",
+      "bannerUnsigned": "This came back for another go"
+    },
+    "resubmit": {
+      "label": "Your second go",
+      "placeholder": "Write it again, with the comment above in mind.",
+      "charPad": "Norwegian letters",
+      "submit": "Hand in again",
+      "sending": "Sending…",
+      "sent": "Sent. It is with your teacher again.",
+      "alreadyThere": "It was already with your teacher — nothing was sent twice.",
+      "failed": {
+        "not-sent": "That did not go through. Your text is still here — try again.",
+        "delivered": "It reached your teacher after all. Nothing more to do.",
+        "unconfirmed": "Could not confirm whether it went through. Your text is kept — check \"My work\" before sending again."
+      }
+    }
+  }
+}

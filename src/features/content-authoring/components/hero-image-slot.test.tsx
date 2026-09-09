@@ -39,7 +39,10 @@ describe('HeroImageSlot', () => {
     } as never);
     renderSlot('![A busy workday](media://media-1)\n\nSome text.');
 
-    expect(screen.getByAltText('A busy workday')).toHaveAttribute('src', 'https://cdn.example/hero.jpg');
+    expect(screen.getByAltText('A busy workday')).toHaveAttribute(
+      'src',
+      'https://cdn.example/hero.jpg',
+    );
     expect(screen.getByDisplayValue('A busy workday')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Replace' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remove' })).toBeInTheDocument();
@@ -71,7 +74,14 @@ describe('HeroImageSlot', () => {
 
   it('uploads a file and inserts a new token using the default alt text', async () => {
     vi.mocked(uploadAsset).mockResolvedValue({
-      asset: { id: 'media-2', url: 'https://cdn.example/new.jpg', mimeType: 'image/jpeg', size: 5, filename: 'a.jpg', createdAt: '' },
+      asset: {
+        id: 'media-2',
+        url: 'https://cdn.example/new.jpg',
+        mimeType: 'image/jpeg',
+        size: 5,
+        filename: 'a.jpg',
+        createdAt: '',
+      },
     });
     const onChange = renderSlot('Some text.');
 

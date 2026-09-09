@@ -21,6 +21,13 @@ import { CSS } from '@dnd-kit/utilities';
 import { ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import {
+  AudioLockNote,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
+
 import { Instr } from './instr';
 import { type RunnerMode, type RunnerPhase } from './types';
 
@@ -49,6 +56,16 @@ export type TextOrderResults = Record<string, boolean>;
 
 export interface TextOrderBodyProps {
   content: TextOrderContent;
+  /**
+   * The listening layer, when the exercise has one (plan 56 phase 6).
+   *
+   * This type gets the player, the gate and the transcript — and deliberately **not** the
+   * fragment chips. A timecode beside each line would order the lines: the puzzle is that
+   * they arrive shuffled, and "0:12" next to one and "0:31" next to another answers it.
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the key once the order has been checked. */
+  audioTranscript?: { transcript: string; translation: string } | null;
   /** Current order, as item ids. */
   value: string[];
   onValueChange: (value: string[]) => void;
@@ -196,8 +213,15 @@ export function TextOrderBody({
   ok,
   accent,
   results,
+  audio,
+  audioTranscript = null,
 }: TextOrderBodyProps) {
+  const t = useTranslations('ExerciseRunner');
   const reveal = phase === 'feedback';
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  // Joined to the expression the lines already read: `reveal` is what takes their handles
+  // away, and a gate that added a second one would be a second thing to keep in step.
+  const locked = audioOn && audio.gated;
   const byId = new Map(content.items.map((i) => [i.id, i]));
   const lines = value.map((id) => byId.get(id)).filter((l): l is OrderLine => l != null);
 
@@ -230,6 +254,13 @@ export function TextOrderBody({
     <div>
       {content.instruction && <Instr>{content.instruction}</Instr>}
 
+      {audioOn && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={!reveal} />
+          {locked && <AudioLockNote itemNoun={t('audio.itemNoun.lines')} />}
+        </div>
+      )}
+
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={value} strategy={verticalListSortingStrategy}>
           <ol className="flex flex-col gap-2">
@@ -239,7 +270,7 @@ export function TextOrderBody({
                 line={line}
                 position={i + 1}
                 total={lines.length}
-                reveal={reveal}
+                reveal={reveal || locked}
                 result={reveal && ok !== null ? results?.[line.id] : undefined}
                 onMove={(delta) => move(i, delta)}
                 accent={accent}
@@ -248,6 +279,14 @@ export function TextOrderBody({
           </ol>
         </SortableContext>
       </DndContext>
+
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
+      )}
     </div>
   );
 }

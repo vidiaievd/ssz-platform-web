@@ -99,7 +99,7 @@ export default async function SchoolIndexPage() {
     redirect(`/${locale}/onboarding/school`);
   }
   if (roles.includes('tutor')) {
-    redirect(`/${locale}/onboarding/tutor`);
+    redirect(`/${locale}/onboarding`);
   }
 
   redirect(`/${locale}/student/dashboard`);

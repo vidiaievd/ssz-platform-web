@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
 import {
   DEFAULT_AI,
   DEFAULT_CHECK,
@@ -14,13 +15,23 @@ import {
 import { StepFlow } from './step-flow';
 import { makeDoc, makeItem } from './test-doc';
 
-function renderStep(exercise: Translate = makeDoc(), onChange = vi.fn()) {
+function renderStep(
+  exercise: Translate = makeDoc(),
+  onChange = vi.fn(),
+  audio: AudioDraft = readAudioDraft({}, 'translate_to_target'),
+) {
+  const onAudioChange = vi.fn();
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <StepFlow exercise={exercise} onChange={onChange} />
+      <StepFlow
+        exercise={exercise}
+        onChange={onChange}
+        audio={audio}
+        onAudioChange={onAudioChange}
+      />
     </NextIntlClientProvider>,
   );
-  return { onChange, user: userEvent.setup() };
+  return { onChange, onAudioChange, user: userEvent.setup() };
 }
 
 describe('StepFlow', () => {

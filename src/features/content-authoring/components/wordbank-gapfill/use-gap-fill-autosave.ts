@@ -2,13 +2,19 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { applyAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
 import {
+  TEMPLATE_CODE,
   toContent,
   toExpectedAnswers,
   type WordBankGapFill,
 } from '@/lib/shared-kernel/wordbank-gapfill';
 
-import { saveGapFillAction, type SaveGapFillOutcome } from '../../actions/gap-fill';
+import {
+  saveGapFillAction,
+  type SaveGapFillInput,
+  type SaveGapFillOutcome,
+} from '../../actions/gap-fill';
 
 /** BEHAVIOR §1.5: edits coalesce, and the teacher never presses a save button. */
 const DEBOUNCE_MS = 800;
@@ -38,6 +44,14 @@ interface Options {
   exercise: WordBankGapFill;
   instructions: string;
   hint: string;
+  /**
+   * The listening layer, carried beside the document rather than inside it (plan 56).
+   *
+   * A sibling of `instructions` and `hint`, which is the shape this builder already has:
+   * the kernel type is shared with the services and knows nothing about a block that
+   * belongs to no template, and `toContent` would drop it either way.
+   */
+  audio: AudioDraft;
   /** The token the row now carries, with the document that was written to earn it. */
   onSaved: (updatedAt: string, saved: SavedDocument) => void;
 }
@@ -46,6 +60,7 @@ export interface SavedDocument {
   exercise: WordBankGapFill;
   instructions: string;
   hint: string;
+  audio: AudioDraft;
 }
 
 /**
@@ -86,6 +101,7 @@ export function useGapFillAutosave({
   exercise,
   instructions,
   hint,
+  audio,
   onSaved,
 }: Options): GapFillAutosave {
   const [status, setStatus] = useState<SaveStatus>('idle');
@@ -94,10 +110,15 @@ export function useGapFillAutosave({
   const [conflictToken, setConflictToken] = useState<string | null>(null);
 
   /** What was last written or loaded. Anything else on screen is unsaved work. */
-  const [baseline, setBaseline] = useState<SavedDocument>({ exercise, instructions, hint });
+  const [baseline, setBaseline] = useState<SavedDocument>({
+    exercise,
+    instructions,
+    hint,
+    audio,
+  });
 
   /** What to save, read at flush time so a burst of edits saves once, at its latest. */
-  const pending = useRef({ exercise, instructions, hint });
+  const pending = useRef({ exercise, instructions, hint, audio });
   const attempt = useRef(0);
   const inFlight = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -107,7 +128,9 @@ export function useGapFillAutosave({
   const dirty =
     !sameDocument(exercise, baseline.exercise) ||
     instructions !== baseline.instructions ||
-    hint !== baseline.hint;
+    hint !== baseline.hint ||
+    // Replaced whole on every edit, exactly like the branches of the document above.
+    audio !== baseline.audio;
 
   const schedule = useCallback((delay: number) => {
     if (timer.current !== null) clearTimeout(timer.current);
@@ -125,13 +148,24 @@ export function useGapFillAutosave({
         schedule(DEBOUNCE_MS);
         return;
       }
-      const { exercise: document, instructions: text, hint: hintText } = pending.current;
+      const {
+        exercise: document,
+        instructions: text,
+        hint: hintText,
+        audio: draft,
+      } = pending.current;
 
       inFlight.current = true;
       setStatus('saving');
 
       const result = await saveGapFillAction(exerciseId, containerId, {
-        content: toContent(document),
+        // The template's own persistence, then the layer that belongs to none of them:
+        // `toContent` builds an explicit object and would drop the audio block.
+        content: applyAudioDraft(
+          toContent(document) as unknown as Record<string, unknown>,
+          draft,
+          TEMPLATE_CODE,
+        ) as SaveGapFillInput['content'],
         expectedAnswers: toExpectedAnswers(document),
         expectedUpdatedAt: force?.expectedUpdatedAt ?? document.updatedAt,
         instructions: text,
@@ -162,7 +196,12 @@ export function useGapFillAutosave({
       attempt.current = 0;
       // Saved: this is now the version everything is compared against, so an untouched
       // document is not written a second time.
-      const saved: SavedDocument = { exercise: document, instructions: text, hint: hintText };
+      const saved: SavedDocument = {
+        exercise: document,
+        instructions: text,
+        hint: hintText,
+        audio: draft,
+      };
       setBaseline(saved);
       setConflictToken(null);
       setStatus('saved');
@@ -176,7 +215,7 @@ export function useGapFillAutosave({
   // save so that a flush always reads the newest document rather than the one from the
   // render that queued it.
   useEffect(() => {
-    pending.current = { exercise, instructions, hint };
+    pending.current = { exercise, instructions, hint, audio };
     onSavedRef.current = onSaved;
     flushRef.current = () => flush();
   });
@@ -190,7 +229,7 @@ export function useGapFillAutosave({
     // The document is the trigger: every edit reschedules the one pending save. `status`
     // is deliberately not a dependency — it changes on every save and would reschedule.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exercise, instructions, hint, dirty, schedule]);
+  }, [exercise, instructions, hint, audio, dirty, schedule]);
 
   const retry = useCallback(() => {
     attempt.current = 0;

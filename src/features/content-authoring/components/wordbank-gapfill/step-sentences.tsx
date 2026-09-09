@@ -33,7 +33,9 @@ import {
   type Sentence,
   type WordBankGapFill,
 } from '@/lib/shared-kernel/wordbank-gapfill';
+import { withSegment, type AudioDraft, type ItemAudio } from '@/lib/shared-kernel/audio';
 
+import { AudioSegmentField } from '../audio';
 import {
   addSentence,
   addSentences,
@@ -54,6 +56,12 @@ const READING = 'var(--ssz-font-reading)';
 export interface StepSentencesProps {
   exercise: WordBankGapFill;
   onChange: (next: WordBankGapFill) => void;
+  /**
+   * The listening layer, held beside the document by the builder (plan 56 phase 5). Only
+   * the timecodes are edited here — the switch and the clip are in the card above.
+   */
+  audio: AudioDraft;
+  onAudioChange: (next: AudioDraft) => void;
   disabled?: boolean;
 }
 
@@ -70,7 +78,13 @@ export interface StepSentencesProps {
  * takes its explanations with it, and unlike the coverage meter that text does not come
  * back, so the teacher is told the count first.
  */
-export function StepSentences({ exercise, onChange, disabled = false }: StepSentencesProps) {
+export function StepSentences({
+  exercise,
+  onChange,
+  audio,
+  onAudioChange,
+  disabled = false,
+}: StepSentencesProps) {
   const t = useTranslations('Authoring');
   const allGaps = gaps(exercise);
   const problems = issues(exercise);
@@ -222,6 +236,12 @@ export function StepSentences({ exercise, onChange, disabled = false }: StepSent
               sentence={sentence}
               index={index}
               labels={labelsOf(sentence.id)}
+              segment={
+                audio.audio.enabled && audio.audio.useSegments
+                  ? (audio.segments[sentence.id] ?? null)
+                  : undefined
+              }
+              onSegmentChange={(segment) => onAudioChange(withSegment(audio, sentence.id, segment))}
               // A blank card the teacher has not been in yet is not an error to them.
               showEmptyError={
                 touched.has(sentence.id) &&
@@ -320,6 +340,12 @@ interface SentenceCardProps {
   sentence: Sentence;
   index: number;
   labels: string[];
+  /**
+   * The slice of the clip this sentence is heard in, or `undefined` when there are no
+   * timecodes to write — no audio, or the author has not asked for per-item ones.
+   */
+  segment?: ItemAudio | null;
+  onSegmentChange: (segment: ItemAudio | null) => void;
   showEmptyError: boolean;
   showNoGapError: boolean;
   disabled: boolean;
@@ -337,6 +363,8 @@ function SentenceCard({
   sentence,
   index,
   labels,
+  segment,
+  onSegmentChange,
   showEmptyError,
   showNoGapError,
   disabled,
@@ -453,6 +481,12 @@ function SentenceCard({
                 : t('gapFill.step1.tokensHelpRemove')}
             </p>
           </div>
+        )}
+
+        {/* A sentence read out of one clip is the dictation case this type is written
+            for, and the timecode is what makes each line its own to hear. */}
+        {segment !== undefined && (
+          <AudioSegmentField segment={segment} onChange={onSegmentChange} />
         )}
 
         {showEmptyError && (

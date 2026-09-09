@@ -26,7 +26,6 @@ const TITLES = {
   vocabulary: 'Vocabulary',
   reading: 'Reading',
   listening: 'Listening',
-  practice: 'Practice',
   practiceInstructions: 'Choose the correct answer.',
 };
 
@@ -114,6 +113,29 @@ describe('applyCefrStarterScaffoldAction', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.moduleContainerId).toBe('mod-1');
+  });
+
+  // Plan 53 §8 Q5: the starter used to seed its practice exercise through the generic
+  // form, which wrote the old single-question shape — a document the multiple-choice
+  // builder never opens. It is created from that builder's own scaffold now, and the test
+  // asks the payload rather than the call, because the shape is the whole point.
+  it('seeds the practice exercise as a multiple-choice set, not a single question', async () => {
+    mockHappyPath();
+    let body: Record<string, unknown> | null = null;
+    server.use(
+      http.post('http://content.test/api/v1/exercises', async ({ request }) => {
+        body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ exerciseId: 'exc-1' }, { status: 201 });
+      }),
+    );
+
+    await applyCefrStarterScaffoldAction('course-1', 'nb', 'public', 'public_free', null, TITLES);
+
+    expect(body).not.toBeNull();
+    const content = (body as unknown as { content: Record<string, unknown> }).content;
+    expect(Array.isArray(content.questions)).toBe(true);
+    expect(content.question).toBeUndefined();
+    expect(content.instruction).toBe(TITLES.practiceInstructions);
   });
 
   it('propagates the underlying error code when module creation fails', async () => {

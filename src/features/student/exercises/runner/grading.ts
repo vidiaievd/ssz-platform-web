@@ -1,7 +1,5 @@
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
-import type { MatchPair } from './match-body';
-import type { SentenceSchemaExpectedAnswers } from './sentence-schema-body';
 import type { TextOrderExpectedAnswers, TextOrderResults } from './text-order-body';
 import type {
   WordBankFillExpectedAnswers,
@@ -59,29 +57,6 @@ export function gradeFreeText(expectedAnswers: FreeTextExpectedAnswers, value: s
   return expectedAnswers.accepted_answers.some((a) => normAnswer(a) === norm);
 }
 
-/**
- * Grade a match exercise — all pairs must be linked to their own ID.
- * Returns false if any pair is missing or crossed.
- */
-export function gradeMatch(pairs: MatchPair[], links: Record<string, string>): boolean {
-  return pairs.every((p) => links[p.id] === p.id);
-}
-
-/**
- * Grade a sentence-schema exercise — every field's ordered token list must
- * match the expected placement exactly.
- */
-export function gradeSentenceSchema(
-  expectedAnswers: SentenceSchemaExpectedAnswers,
-  value: Record<string, string[]>,
-): boolean {
-  return expectedAnswers.placements.every((p) => {
-    const submitted = value[p.field_id] ?? [];
-    return (
-      submitted.length === p.token_ids.length && p.token_ids.every((id, i) => id === submitted[i])
-    );
-  });
-}
 
 /**
  * Grade a block of multiple-choice questions. Mirrors the engine's

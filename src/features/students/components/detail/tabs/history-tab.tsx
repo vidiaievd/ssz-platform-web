@@ -4,6 +4,14 @@ import { getTranslations, getLocale } from "next-intl/server";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { MembershipRoleBadge } from "../groups/membership-role-badge";
 import type { StudentInSchool } from "@/features/students/types";
 import { formatDate } from "@/lib/i18n/formatters";
@@ -148,32 +156,35 @@ export async function HistoryTab({ student, schoolSlug }: Props) {
             title={t("detail.history.periods.empty.title")}
           />
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="pb-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
+          <Table
+            // Already inside a padded card, so the table drops the card chrome
+            // and its outer cell padding to stay flush with the heading above.
+            wrapperClassName="rounded-none border-0 bg-transparent"
+            className="[&_th:first-child]:pl-0 [&_td:first-child]:pl-0 [&_th:last-child]:pr-0 [&_td:last-child]:pr-0"
+          >
+            <TableHeader className="bg-transparent">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-[170px]">
                   {t("detail.history.periods.cols.period")}
-                </th>
-                <th className="pb-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
-                  {t("detail.history.periods.cols.group")}
-                </th>
-                <th className="hidden sm:table-cell pb-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
+                </TableHead>
+                <TableHead>{t("detail.history.periods.cols.group")}</TableHead>
+                <TableHead className="hidden w-[130px] sm:table-cell">
                   {t("detail.history.periods.cols.role")}
-                </th>
-                <th className="hidden md:table-cell pb-2.5 text-left text-xs font-medium text-(--ssz-text-secondary)">
+                </TableHead>
+                <TableHead className="hidden w-[130px] md:table-cell">
                   {t("detail.history.periods.cols.status")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {allMemberships.map((m) => (
-                <tr key={m.id}>
-                  <td className="py-3 text-xs text-(--ssz-text-secondary) whitespace-nowrap pr-3">
+                <TableRow key={m.id}>
+                  <TableCell className="text-xs text-(--ssz-text-secondary) whitespace-nowrap pr-3">
                     {fmt(m.addedAt)}
                     {" – "}
                     {m.exitedAt ? fmt(m.exitedAt) : t("detail.history.levels.present")}
-                  </td>
-                  <td className="py-3">
+                  </TableCell>
+                  <TableCell>
                     <Link
                       href={`/school/${schoolSlug}/groups/${m.groupId}`}
                       className="flex items-center gap-2 hover:underline"
@@ -184,11 +195,11 @@ export async function HistoryTab({ student, schoolSlug }: Props) {
                       </span>
                       <span className="truncate max-w-32">{m.groupName}</span>
                     </Link>
-                  </td>
-                  <td className="hidden sm:table-cell py-3">
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <MembershipRoleBadge role={m.role} />
-                  </td>
-                  <td className="hidden md:table-cell py-3">
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <span
                       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                         m.status === "active"
@@ -200,11 +211,11 @@ export async function HistoryTab({ student, schoolSlug }: Props) {
                         ? t("detail.history.periods.statusActive")
                         : t("detail.history.periods.statusCompleted")}
                     </span>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
       </div>
 

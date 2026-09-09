@@ -1,0 +1,16 @@
+/**
+ * The feature's public surface — client-safe by construction.
+ *
+ * `lib/sla-map.ts` and `lib/review-scope.ts` are deliberately absent: both are
+ * `server-only`, and re-exporting them here would break the first client component that
+ * imported anything at all from this barrel.
+ */
+export { AgeMark, useAgeWords } from './components/age-mark';
+export { CommentBox } from './components/submission/comment-box';
+export { SentenceList } from './components/submission/sentence-list';
+export { SentenceRow } from './components/submission/sentence-row';
+export { Chip, Segment, Sel } from './components/primitives';
+export type { SegmentOption, SelOption } from './components/primitives';
+export { AgeSpread } from './components/age-spread';
+export { ageRail, ageTextTone, ageTone, hoursSince, isOverdue, ratio } from './lib/age-scale';
+export * from './types';

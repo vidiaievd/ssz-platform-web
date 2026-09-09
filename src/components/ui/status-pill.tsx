@@ -20,7 +20,10 @@ export function StatusPill({ tone = 'neutral', children, className }: StatusPill
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold leading-none',
+        // py-0.5 + leading-none left descenders (g, p) in words like "Draft"
+        // touching the pill's own edge — leading-none is exactly zero space
+        // beyond the glyph's own metrics, so there was nothing left to give.
+        'inline-flex items-center rounded-full px-2 py-[3px] text-[11px] font-semibold leading-[1.1]',
         toneClasses[tone],
         className,
       )}

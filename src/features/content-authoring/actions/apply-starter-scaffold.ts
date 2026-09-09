@@ -9,15 +9,13 @@ import type { AccessTier, DifficultyLevel, Visibility } from '@/features/content
 import { createModuleAction } from './container';
 import { createLessonAction } from './lesson';
 import { createVocabularyListAction } from './vocabulary';
-import { createExerciseAction } from './exercise';
-import { minimalMcqValues } from '../lib/exercise-content';
+import { createMultipleChoiceAction } from './multiple-choice';
 
 export interface CefrStarterTitles {
   module: string;
   vocabulary: string;
   reading: string;
   listening: string;
-  practice: string;
   practiceInstructions: string;
 }
 
@@ -90,13 +88,18 @@ export async function applyCefrStarterScaffoldAction(
       ),
     );
 
+    // The practice exercise is a `multiple_choice` set, created from that builder's own
+    // scaffold (plan 53 §8 Q5). It used to be created through the generic form, which
+    // wrote the old single-question shape — a document the new builder would never open.
+    // The scaffold carries no question of its own, so the starter's practice title is not
+    // passed on: the author writes the first stem in the builder that opens.
     unwrap(
-      await createExerciseAction(
+      await createMultipleChoiceAction(
         moduleContainerId,
         targetLanguage,
         difficultyLevel,
         visibility,
-        minimalMcqValues(titles.practice, titles.practiceInstructions),
+        titles.practiceInstructions,
       ),
     );
 

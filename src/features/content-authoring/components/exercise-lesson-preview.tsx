@@ -125,38 +125,6 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
             empty
           ))}
 
-        {values.templateCode === 'match_pairs' &&
-          ((values.mpPairs ?? []).some((p) => p.left.trim() || p.right.trim()) ? (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex flex-col gap-2">
-                {(values.mpPairs ?? [])
-                  .filter((p) => p.left.trim())
-                  .map((p, i) => (
-                    <div
-                      key={i}
-                      className="rounded-[11px] border border-(--ssz-border-default) bg-surface px-3 py-2.5 text-sm text-(--ssz-text-primary)"
-                    >
-                      {p.left}
-                    </div>
-                  ))}
-              </div>
-              <div className="flex flex-col gap-2">
-                {(values.mpPairs ?? [])
-                  .filter((p) => p.right.trim())
-                  .map((p, i) => (
-                    <div
-                      key={i}
-                      className="rounded-[11px] border border-dashed border-(--ssz-border-default) bg-subtle px-3 py-2.5 text-sm text-(--ssz-text-primary)"
-                    >
-                      {p.right}
-                    </div>
-                  ))}
-              </div>
-            </div>
-          ) : (
-            empty
-          ))}
-
         {values.templateCode === 'short_answer' &&
           (values.saQuestion ? (
             <div>
@@ -168,70 +136,6 @@ export function ExerciseLessonPreview({ title, values }: ExerciseLessonPreviewPr
               )}
               <div className="rounded-[11px] border border-dashed border-(--ssz-border-default) bg-subtle px-3 py-3 text-sm text-muted-foreground">
                 {t('exercises.saAnswerPlaceholderPreview')}
-              </div>
-            </div>
-          ) : (
-            empty
-          ))}
-
-        {values.templateCode === 'writing_task' &&
-          (values.wtPrompt ? (
-            <div>
-              <p className="mb-2.5 text-[15px] font-semibold leading-normal text-(--ssz-text-primary)">
-                {values.wtPrompt}
-              </p>
-              {(values.wtTopics ?? []).some((tp) => tp.title.trim()) && (
-                <div className="flex flex-col gap-2">
-                  {(values.wtTopics ?? [])
-                    .filter((tp) => tp.title.trim())
-                    .map((tp, i) => (
-                      <div
-                        key={i}
-                        className="rounded-[11px] border border-(--ssz-border-default) bg-surface px-3.5 py-3 text-sm font-medium text-(--ssz-text-primary)"
-                      >
-                        {tp.title}
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            empty
-          ))}
-
-        {values.templateCode === 'sentence_schema' &&
-          (values.ssSentence ? (
-            <div>
-              {/* With a source sentence the target is held back from the learner,
-                  so the preview shows what they will actually start from. */}
-              <p className="mb-2.5 text-[15px] font-semibold leading-normal text-(--ssz-text-primary)">
-                {values.ssSourceSentence?.trim() || values.ssSentence}
-              </p>
-              <div className="mb-3 overflow-x-auto">
-                <div className="flex min-w-max gap-1.5">
-                  {(values.ssFields ?? [])
-                    .filter((f) => f.label.trim())
-                    .map((f, i) => (
-                      <div
-                        key={i}
-                        className="min-w-20 flex-1 rounded-md border border-dashed border-(--ssz-border-default) bg-subtle px-2 py-2 text-center"
-                      >
-                        <p className="text-[11px] font-medium text-muted-foreground">{f.label}</p>
-                      </div>
-                    ))}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {(values.ssTokens ?? [])
-                  .filter((tk) => tk.text.trim())
-                  .map((tk, i) => (
-                    <span
-                      key={i}
-                      className="rounded-full border border-(--ssz-border-default) bg-surface px-3 py-1 text-sm text-(--ssz-text-primary)"
-                    >
-                      {tk.text}
-                    </span>
-                  ))}
               </div>
             </div>
           ) : (

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress";
 import { StatusChip } from "@/features/students/components/status-chip";
+import { SkillProfileCard } from "@/features/mastery";
 import type { StudentInSchool, MembershipDetail } from "@/features/students/types";
 
 type Props = {
@@ -208,6 +209,10 @@ export async function OverviewTab({ student, schoolSlug, canEdit, groupsHref }: 
             </div>
           </div>
         </div>
+
+        {/* What practice says about this learner (plan 55 §6.1). `student.id` is the auth
+            user id — the same one attempts are recorded against — not a membership id. */}
+        <SkillProfileCard userId={student.id} />
       </div>
     </div>
   );

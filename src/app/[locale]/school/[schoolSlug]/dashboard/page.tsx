@@ -272,7 +272,7 @@ export default async function SchoolDashboardPage({ params }: Props) {
   const schoolSlugDisplay = school.slug ?? school.id;
 
   return (
-    <main className="p-4 sm:p-6 lg:p-8 space-y-5 max-w-350 mx-auto">
+    <main className="p-4 sm:p-6 lg:p-8 space-y-5 max-w-page mx-auto">
       {/* Page header */}
       <div>
         <h1 className="font-[Lora] text-2xl sm:text-3xl font-semibold text-(--ssz-text-primary)">

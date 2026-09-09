@@ -13,6 +13,42 @@ const base = {
 };
 
 describe('ExercisePreview — new exercise types', () => {
+  it('renders a short_answer set: what it is, every question, and no key', () => {
+    const exercise: ExerciseDisplay = {
+      ...base,
+      templateCode: 'short_answer',
+      content: {
+        title: 'Spørsmål til Tekst 1A',
+        instruction: 'Svar med egne ord.',
+        questions: [
+          {
+            id: 'q1',
+            kind: 'reading',
+            passage: 'Bartek har jobbet som elektriker i tre år.',
+            prompt: 'Hvor lenge har Bartek jobbet der?',
+          },
+          {
+            id: 'q2',
+            kind: 'listening',
+            passage: 'Programlederen sier …',
+            prompt: 'Hva sier hun?',
+          },
+        ],
+      },
+    };
+    renderWithProviders(<ExercisePreview exercise={exercise} />);
+
+    expect(screen.getByText('Question set')).toBeInTheDocument();
+    expect(screen.getByText('2 questions')).toBeInTheDocument();
+    expect(screen.getByText('Spørsmål til Tekst 1A')).toBeInTheDocument();
+    expect(screen.getByText('Hvor lenge har Bartek jobbet der?')).toBeInTheDocument();
+    expect(screen.getByText(/Bartek har jobbet som elektriker/)).toBeInTheDocument();
+    // A listening passage is the author's transcript, and the preview says so — the
+    // student is never shown it.
+    expect(screen.getByText('Transcript — the student does not see it')).toBeInTheDocument();
+    expect(screen.getAllByText('Answer')).toHaveLength(2);
+  });
+
   it('renders a short_answer question and an answer placeholder', () => {
     const exercise: ExerciseDisplay = {
       ...base,
@@ -27,49 +63,97 @@ describe('ExercisePreview — new exercise types', () => {
     expect(screen.getByText('Answer')).toBeInTheDocument();
   });
 
-  it('renders a writing_task prompt and its topic titles', () => {
+  it('renders a writing_task task: mode, length, prompt and checklist', () => {
     const exercise: ExerciseDisplay = {
       ...base,
       templateCode: 'writing_task',
       content: {
-        prompt: 'Skriv et kort leserinnlegg.',
-        options: [
-          { id: 'a', title: 'Gratis norskkurs til alle', body: '...' },
-          { id: 'b', title: 'Tog skal bli billigere' },
+        mode: 'letter',
+        instruction: 'Skriv et brev.',
+        prompt: 'Du vil klage på en vare du har kjøpt.',
+        letter: { register: 'formal', recipient: 'Kundeservice' },
+        points: [
+          { id: 'p1', text: 'Fortell hva du kjøpte', required: true },
+          { id: 'p2', text: 'Foreslå en løsning', required: false },
         ],
+        phrases: ['Jeg skriver fordi'],
+        settings: { minWords: 120, maxWords: 200 },
       },
     };
     renderWithProviders(<ExercisePreview exercise={exercise} />);
 
-    expect(screen.getByText('Skriv et kort leserinnlegg.')).toBeInTheDocument();
-    expect(screen.getByText('Gratis norskkurs til alle')).toBeInTheDocument();
-    expect(screen.getByText('Tog skal bli billigere')).toBeInTheDocument();
+    expect(screen.getByText('Letter')).toBeInTheDocument();
+    expect(screen.getByText('120–200 words')).toBeInTheDocument();
+    expect(screen.getByText('Du vil klage på en vare du har kjøpt.')).toBeInTheDocument();
+    expect(screen.getByText('Fortell hva du kjøpte')).toBeInTheDocument();
+    expect(screen.getByText('optional')).toBeInTheDocument();
+    expect(screen.getByText('Jeg skriver fordi')).toBeInTheDocument();
   });
 
-  it('renders a sentence_schema sentence, field labels and token chips', () => {
+  // A pre-plan-50 document coerces to an empty task rather than throwing: the old
+  // `prompt`/`options` pair is not the shape `readContent` reads, and nothing renders
+  // from it except the mode default.
+  it('renders a pre-plan-50 writing_task without throwing', () => {
+    const exercise: ExerciseDisplay = {
+      ...base,
+      templateCode: 'writing_task',
+      content: { prompt: 'Skriv et kort leserinnlegg.', options: [{ id: 'a', title: 'Tog' }] },
+    };
+    renderWithProviders(<ExercisePreview exercise={exercise} />);
+
+    expect(screen.getByText('Letter')).toBeInTheDocument();
+    expect(screen.queryByText('Tog')).not.toBeInTheDocument();
+  });
+
+  it('renders a sentence_schema set through the projection: fields and the shuffled bank', () => {
+    const exercise: ExerciseDisplay = {
+      ...base,
+      templateCode: 'sentence_schema',
+      content: {
+        instruction: 'Sett ordene på riktig plass.',
+        rows: [
+          {
+            id: 'r1',
+            clause: 'main',
+            source: 'Lars har aldri likt Lotte.',
+            fields: [
+              { id: 'forfelt', short: 'F', label: 'Forfelt' },
+              { id: 'verbal', short: 'v', label: 'Verbal' },
+            ],
+            bank: [
+              { id: 'c2', text: 'har' },
+              { id: 'c1', text: 'Lars' },
+            ],
+          },
+        ],
+        settings: { labels: true },
+      },
+    };
+    renderWithProviders(<ExercisePreview exercise={exercise} />);
+
+    // The prompt is what the learner starts from; the sentence they build is the answer
+    // and never reaches `/display` at all.
+    expect(screen.getByText('Lars har aldri likt Lotte.')).toBeInTheDocument();
+    expect(screen.getByText('Forfelt')).toBeInTheDocument();
+    expect(screen.getByText('Verbal')).toBeInTheDocument();
+    expect(screen.getByText('har')).toBeInTheDocument();
+    expect(screen.getByText('Lars')).toBeInTheDocument();
+  });
+
+  it('says a pre-plan-52 sentence_schema document needs rewriting instead of drawing it', () => {
     const exercise: ExerciseDisplay = {
       ...base,
       templateCode: 'sentence_schema',
       content: {
         sentence: 'Lars har aldri likt Lotte.',
-        fields: [
-          { id: 'forfelt', label: 'Forfelt' },
-          { id: 'verbal1', label: 'Verbal' },
-        ],
-        tokens: [
-          { id: 't1', text: 'Lars' },
-          { id: 't2', text: 'har' },
-        ],
+        fields: [{ id: 'forfelt', label: 'Forfelt' }],
+        tokens: [{ id: 't1', text: 'Lars' }],
       },
     };
     renderWithProviders(<ExercisePreview exercise={exercise} />);
 
-    expect(screen.getByText('Lars har aldri likt Lotte.')).toBeInTheDocument();
-    expect(screen.getByText('Forfelt')).toBeInTheDocument();
-    expect(screen.getByText('Verbal')).toBeInTheDocument();
-    // Tokens rendered as chips.
-    expect(screen.getByText('Lars')).toBeInTheDocument();
-    expect(screen.getByText('har')).toBeInTheDocument();
+    expect(screen.queryByText('Forfelt')).not.toBeInTheDocument();
+    expect(screen.getByText(/old shape/i)).toBeInTheDocument();
   });
 
   it('renders error_correction sentences as the student meets them, without the answers', () => {
@@ -106,5 +190,34 @@ describe('ExercisePreview — new exercise types', () => {
     // No numbering: a passage is one stretch of text, not a numbered set.
     expect(container.querySelector('ol')).toBeNull();
     expect(screen.getByText('I går jeg gikk på jobb.')).toBeInTheDocument();
+  });
+
+  // Plan 49 §8: the old branch read `content.left_items` / `right_items`, which
+  // `/display` has not served since the projection landed. Both columns come from the
+  // projection now, and the pool holds distractors the author never paired.
+  it('renders match_pairs from the student projection, distractors included', () => {
+    const exercise: ExerciseDisplay = {
+      ...base,
+      templateCode: 'match_pairs',
+      content: {
+        variant: 'halves',
+        slots: [
+          { slotId: 'p1', left: 'Kari tar imot Bartek' },
+          { slotId: 'p2', left: 'Han vil bytte jobb fordi' },
+        ],
+        pool: [
+          { itemId: 'r1', text: 'med et fast håndtrykk.' },
+          { itemId: 'r2', text: 'han vil ta mer ansvar.' },
+          { itemId: 'r3', text: 'på en byggeplass i Oslo.' },
+        ],
+        settings: { showRemaining: true },
+      },
+    };
+    renderWithProviders(<ExercisePreview exercise={exercise} />);
+
+    expect(screen.getByText('Kari tar imot Bartek')).toBeInTheDocument();
+    expect(screen.getByText('Han vil bytte jobb fordi')).toBeInTheDocument();
+    expect(screen.getByText('med et fast håndtrykk.')).toBeInTheDocument();
+    expect(screen.getByText('på en byggeplass i Oslo.')).toBeInTheDocument();
   });
 });

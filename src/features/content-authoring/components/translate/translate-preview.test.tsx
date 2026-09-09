@@ -1,6 +1,7 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import { DEFAULT_FLOW, type Translate } from '@/lib/shared-kernel/translate';
@@ -8,11 +9,25 @@ import { DEFAULT_FLOW, type Translate } from '@/lib/shared-kernel/translate';
 import { TranslatePreview } from './translate-preview';
 import { makeDoc, makeItem } from './test-doc';
 
+// The preview renders the real runner body, and every sentence card now runs the
+// listening layer's engine — which resolves a clip through media-service (plan 56
+// phase 6). These tests mount no QueryClientProvider.
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
+
 function renderPreview(exercise: Translate = makeDoc()) {
   render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
-      <TranslatePreview exercise={exercise} />
-    </NextIntlClientProvider>,
+    // The preview renders the real runner body, whose sentence cards run the listening
+    // layer's engine — two network questions behind a query client (plan 56 phase 6).
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <TranslatePreview exercise={exercise} />
+      </NextIntlClientProvider>
+    </QueryClientProvider>,
   );
 }
 

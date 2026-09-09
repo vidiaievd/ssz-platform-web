@@ -4,16 +4,13 @@ import {
   normAnswer,
   gradeMcq,
   gradeFill,
-  gradeSentenceSchema,
   gradeFreeText,
-  gradeMatch,
   type FreeTextExpectedAnswers,
   checkWordBankFill,
   checkTextOrder,
 } from './grading';
 import type { McqExpectedAnswers } from './mcq-body';
 import type { FillExpectedAnswers } from './fill-body';
-import type { MatchPair } from './match-body';
 
 /* ── normAnswer ──────────────────────────────────────────────────── */
 
@@ -158,61 +155,6 @@ describe('gradeFreeText', () => {
   });
 });
 
-/* ── gradeMatch ──────────────────────────────────────────────────── */
-
-describe('gradeMatch', () => {
-  const pairs: MatchPair[] = [
-    { id: 'p1', left: 'hus', right: 'house' },
-    { id: 'p2', left: 'bil', right: 'car' },
-  ];
-
-  it('returns true when all pairs are linked to their own id', () => {
-    expect(gradeMatch(pairs, { p1: 'p1', p2: 'p2' })).toBe(true);
-  });
-
-  it('returns false when one pair is wrong (crossed links)', () => {
-    expect(gradeMatch(pairs, { p1: 'p2', p2: 'p1' })).toBe(false);
-  });
-
-  it('returns false when a pair is missing from links', () => {
-    expect(gradeMatch(pairs, { p1: 'p1' })).toBe(false);
-  });
-
-  it('returns false for empty links', () => {
-    expect(gradeMatch(pairs, {})).toBe(false);
-  });
-
-  it('returns true for a single-pair set linked correctly', () => {
-    const one: MatchPair[] = [{ id: 'a', left: 'hund', right: 'dog' }];
-    expect(gradeMatch(one, { a: 'a' })).toBe(true);
-  });
-
-  it('returns false for a single-pair set linked wrongly', () => {
-    const one: MatchPair[] = [{ id: 'a', left: 'hund', right: 'dog' }];
-    expect(gradeMatch(one, { a: 'b' })).toBe(false);
-  });
-});
-
-describe('gradeSentenceSchema', () => {
-  const expected = {
-    placements: [
-      { field_id: 'f1', token_ids: ['t1'] },
-      { field_id: 'f2', token_ids: ['t2', 't3'] },
-    ],
-  };
-
-  it('returns true when every field matches exactly', () => {
-    expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t2', 't3'] })).toBe(true);
-  });
-
-  it('is order-sensitive within a field', () => {
-    expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t3', 't2'] })).toBe(false);
-  });
-
-  it('returns false when a field is missing tokens', () => {
-    expect(gradeSentenceSchema(expected, { f1: ['t1'], f2: ['t2'] })).toBe(false);
-  });
-});
 
 describe('checkWordBankFill', () => {
   const expected = {

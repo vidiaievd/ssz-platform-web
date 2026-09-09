@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
 import {
   DEFAULT_AI,
   DEFAULT_CHECK,
@@ -11,6 +12,13 @@ import {
   DEFAULT_HINTS,
   type ErrorCorrection,
 } from '@/lib/shared-kernel/error-correction';
+
+// The source card resolves the clip through media-service, and this builder's tests
+// mount no QueryClientProvider (plan 56 phase 6).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
 
 vi.mock('../../actions/error-correction', () => ({ saveErrorCorrectionAction: vi.fn() }));
 
@@ -46,10 +54,20 @@ function doc(overrides: Partial<ErrorCorrection> = {}): ErrorCorrection {
   };
 }
 
-function renderBuilder(exercise: ErrorCorrection = doc()) {
+function renderBuilder(
+  exercise: ErrorCorrection = doc(),
+  // Every builder carries the audio layer, and an exercise that has never had any reads
+  // as switched off (plan 56 phase 6).
+  audio: AudioDraft = readAudioDraft({}, 'error_correction'),
+) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <ErrorCorrectionBuilder exerciseId="ex-1" containerId="module-1" initialExercise={exercise} />
+      <ErrorCorrectionBuilder
+        exerciseId="ex-1"
+        containerId="module-1"
+        initialExercise={exercise}
+        initialAudio={audio}
+      />
     </NextIntlClientProvider>,
   );
   return { user: userEvent.setup() };
@@ -172,5 +190,59 @@ describe('ErrorCorrectionBuilder', () => {
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).queryByText(/AI/)).not.toBeInTheDocument();
     expect(within(dialog).getByText(/ready to assign/)).toBeInTheDocument();
+  });
+
+  /*
+    The listening layer, and the one audio rule this template owns (plan 56 §4): the clip
+    is the passage read correctly, so a transcript on screen from the start is the answers
+    on screen from the start.
+  */
+  describe('with audio', () => {
+    const listening = (over: Record<string, unknown> = {}): AudioDraft =>
+      readAudioDraft(
+        { audio: { enabled: true, source: 'asset', assetId: 'a-1', title: 'Diktat', ...over } },
+        'error_correction',
+      );
+
+    it('puts the switch and the clip on the step that carries the format', () => {
+      renderBuilder(doc(), listening());
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).toBeChecked();
+      expect(screen.getByText('The clip')).toBeInTheDocument();
+    });
+
+    it('refuses a transcript shown from the start, and says why', async () => {
+      const { user } = renderBuilder(
+        doc(),
+        listening({
+          transcript: 'I går gikk jeg på kino.',
+          settings: { transcriptWhen: 'always' },
+        }),
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Done' }));
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByText(/on this exercise it is the answer/)).toBeInTheDocument();
+      expect(within(dialog).getByRole('button', { name: /Fix/ })).toBeDisabled();
+    });
+
+    it('accepts the same transcript once it waits for the answer', async () => {
+      const { user } = renderBuilder(
+        doc(),
+        listening({ transcript: 'I går gikk jeg på kino.', settings: { transcriptWhen: 'after' } }),
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Done' }));
+      expect(
+        within(screen.getByRole('dialog')).queryByText(/on this exercise it is the answer/),
+      ).not.toBeInTheDocument();
+    });
+
+    it('draws nothing at all while the switch is off', () => {
+      renderBuilder();
+
+      expect(screen.getByRole('switch', { name: /Listening exercise/ })).not.toBeChecked();
+      expect(screen.queryByText('The clip')).not.toBeInTheDocument();
+    });
   });
 });

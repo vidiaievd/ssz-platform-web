@@ -4,7 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import type { Container, GlossaryMark, VocabularyItem, VocabularyList } from '@/features/content/types';
+import type {
+  Container,
+  GlossaryMark,
+  VocabularyItem,
+  VocabularyList,
+} from '@/features/content/types';
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 vi.mock('../actions/lesson-glossary', () => ({ markGlossaryWordAction: vi.fn() }));
@@ -21,9 +26,8 @@ Element.prototype.scrollIntoView = vi.fn();
 const { GlossaryMarkButton, GlossaryMarkedWords } = await import('./glossary-mark-panel');
 const { markGlossaryWordAction } = await import('../actions/lesson-glossary');
 const { unmarkGlossaryWordAction } = await import('../actions/lesson-spans');
-const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } = await import(
-  '../api/use-authoring-vocabulary'
-);
+const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } =
+  await import('../api/use-authoring-vocabulary');
 const { useLessonGlossaryMarks } = await import('../api/use-authoring-lessons');
 
 const CONTAINER: Container = {
@@ -80,7 +84,9 @@ beforeEach(() => {
 
 describe('GlossaryMarkButton', () => {
   it('prompts to save the anchor text first when there is no variant yet', () => {
-    renderWith(<GlossaryMarkButton lessonId="lesson-1" variantId={undefined} container={CONTAINER} />);
+    renderWith(
+      <GlossaryMarkButton lessonId="lesson-1" variantId={undefined} container={CONTAINER} />,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Mark word' }));
     expect(
       screen.getByText('Save the anchor text first to add glossary marks.'),
@@ -89,7 +95,9 @@ describe('GlossaryMarkButton', () => {
 
   it('shows a no-list note when the module has no vocabulary list', () => {
     vi.mocked(useAuthoringVocabularyLists).mockReturnValue({ data: [] } as never);
-    renderWith(<GlossaryMarkButton lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
+    renderWith(
+      <GlossaryMarkButton lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Mark word' }));
     expect(
       screen.getByText('This module has no vocabulary list yet — add one to mark glossary words.'),
@@ -97,7 +105,9 @@ describe('GlossaryMarkButton', () => {
   });
 
   it('marks the selected word and refreshes the marks query', async () => {
-    renderWith(<GlossaryMarkButton lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
+    renderWith(
+      <GlossaryMarkButton lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Mark word' }));
     fireEvent.click(screen.getByRole('combobox'));
@@ -114,11 +124,17 @@ describe('GlossaryMarkButton', () => {
 
 describe('GlossaryMarkedWords', () => {
   it('shows already-marked words with their lemma and occurrence count', () => {
-    const marks: GlossaryMark[] = [{ id: 'mark-1', vocabularyItemId: 'vocab-1', occurrenceCount: 2 }];
+    const marks: GlossaryMark[] = [
+      { id: 'mark-1', vocabularyItemId: 'vocab-1', occurrenceCount: 2 },
+    ];
     vi.mocked(useLessonGlossaryMarks).mockReturnValue({ data: marks } as never);
-    renderWith(<GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
+    renderWith(
+      <GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />,
+    );
     expect(screen.getByText('sykepleier ×2')).toBeInTheDocument();
-    expect(screen.getByText('Marked words become the module glossary — 1 word marked.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Marked words become the module glossary — 1 word marked.'),
+    ).toBeInTheDocument();
   });
 });
 
@@ -130,7 +146,9 @@ describe('GlossaryMarkedWords — unmarking', () => {
   });
 
   it('confirms before unmarking, because the removal cascades to this text’s annotations', async () => {
-    renderWith(<GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
+    renderWith(
+      <GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove “sykepleier” from the glossary' }));
     expect(unmarkGlossaryWordAction).not.toHaveBeenCalled();
@@ -145,7 +163,9 @@ describe('GlossaryMarkedWords — unmarking', () => {
   });
 
   it('leaves the word marked when the confirmation is dismissed', () => {
-    renderWith(<GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />);
+    renderWith(
+      <GlossaryMarkedWords lessonId="lesson-1" variantId="variant-1" container={CONTAINER} />,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove “sykepleier” from the glossary' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));

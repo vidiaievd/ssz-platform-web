@@ -1,25 +1,36 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { ListChecks } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { useExerciseWithAnswers } from '@/features/content/api/use-exercise';
+import { useExerciseForRunner } from '@/features/content/api/use-exercise';
 import { primaryHintText, primaryInstructionText } from '@/features/content/lib/instruction-text';
 import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
+import { MatchPairsSolver } from './match-pairs-solver';
+import { MultipleChoiceGroupSolver } from './multiple-choice-group-solver';
+import { MultipleChoiceSolver } from './multiple-choice-solver';
+import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
+import { WritingTaskSolver } from './writing-task-solver';
 import type { ExerciseWithAnswers } from '@/features/content/types';
+import { isMultipleChoiceDocument } from '@/lib/shared-kernel/multiple-choice';
+import { isShortAnswerDocument, readContent } from '@/lib/shared-kernel/short-answer';
+import {
+  gradedInBrowser,
+  type ClientGradedTemplate,
+} from '@/features/student/exercises/lib/grading-side';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { SentenceSchemaSolver } from './sentence-schema-solver';
 import {
   McqBody,
   McqGroupBody,
   keepCorrectPicks,
   checkMcqGroup,
   FillBody,
-  MatchBody,
-  ShortAnswerBody,
-  WritingBody,
-  SentenceSchemaBody,
+  ShortAnswerLegacyBody,
   WordBankFillBody,
   checkWordBankFill,
   keepCorrectBlanks,
@@ -27,10 +38,10 @@ import {
   checkTextOrder,
   shuffleOrder,
   gradeMcq,
-  gradeMatch,
   checkShortAnswer,
-  gradeSentenceSchema,
   normAnswer,
+  readSentenceSchemaProjection,
+  readMultipleChoiceProjection,
   PRACTICE_ACCENT,
   type McqContent,
   type McqGroupExpectedAnswers,
@@ -39,12 +50,6 @@ import {
   type McqGroupResults,
   type McqGroupValue,
   type FillRationale,
-  type MatchContent,
-  type MatchPair,
-  type SchemaField,
-  type SchemaToken,
-  type SchemaPlacements,
-  type WritingValue,
   type WordBankFillExpectedAnswers,
   type WordBankFillResults,
   type WordBankFillValue,
@@ -91,6 +96,20 @@ interface SolverProps {
 
 const ACCENT = PRACTICE_ACCENT;
 
+/**
+ * The listening layer for the solvers on the old form — plan 56 phase 6.
+ *
+ * These templates are graded in the browser, so the document is here in full and the
+ * transcript owed under `after` arrives with the key, on the runner route, rather than on
+ * a verdict from the engine (`api/content/exercises/[id]/runner`). It is withheld until
+ * the answer is in for the same reason it is withheld everywhere else: on a listening
+ * exercise the transcript *is* the answer.
+ */
+function useRunnerAudio(display: ExerciseWithAnswers, phase: 'answering' | 'feedback') {
+  const audio = useExerciseAudio(display.content);
+  return { audio, transcript: phase === 'feedback' ? (display.audioTranscript ?? null) : null };
+}
+
 /* ── helpers ────────────────────────────────────────────────────────────── */
 
 const str = (v: unknown): string => (typeof v === 'string' ? v : '');
@@ -123,7 +142,15 @@ function CheckFooter({ canSubmit, onCheck }: { canSubmit: boolean; onCheck: () =
 
 /* ── per-type solvers ───────────────────────────────────────────────────── */
 
-function McqSolver({ display, phase, ok, onCheck }: SolverProps) {
+/**
+ * The single-question form, still live under 121 seeded exercises (plan 53 §8 Q2).
+ *
+ * Untouched by the rewrite and dispatched to by document shape rather than by template
+ * code — a set of questions goes to `MultipleChoiceSolver` and is graded on the server.
+ * This one keeps the key in the browser, as it always has: its whole check is a
+ * comparison of option ids, and there is no second try to dose.
+ */
+function McqLegacySolver({ display, phase, ok, onCheck }: SolverProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const c = display.content;
   const options = useMemo(
@@ -250,6 +277,7 @@ function McqGroupSolver({ display, phase, ok, revealed, retryNonce, onCheck }: S
 }
 
 function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
+  const { audio, transcript } = useRunnerAudio(display, phase);
   const [value, setValue] = useState('');
   const [seenRetry, setSeenRetry] = useState(retryNonce);
   if (retryNonce !== seenRetry) {
@@ -287,6 +315,8 @@ function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: Solve
         rationale={firstBlank?.rationale}
         correctAnswer={firstAccepted[0] ?? ''}
         revealed={revealed}
+        audio={audio}
+        audioTranscript={transcript}
       />
       {phase === 'answering' && (
         <CheckFooter
@@ -304,63 +334,15 @@ function FillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: Solve
   );
 }
 
-function MatchSolver({ display, phase, ok, onCheck }: SolverProps) {
-  const [links, setLinks] = useState<Record<string, string>>({});
-  const c = display.content;
-
-  const pairs: MatchPair[] = useMemo(() => {
-    const leftById = new Map(
-      (Array.isArray(c.left_items) ? c.left_items : []).map((l) => [
-        str((l as { id?: unknown }).id),
-        str((l as { text?: unknown }).text),
-      ]),
-    );
-    const rightById = new Map(
-      (Array.isArray(c.right_items) ? c.right_items : []).map((r) => [
-        str((r as { id?: unknown }).id),
-        str((r as { text?: unknown }).text),
-      ]),
-    );
-    const answerPairs = Array.isArray(display.expectedAnswers.pairs)
-      ? display.expectedAnswers.pairs
-      : [];
-    return answerPairs.map((p) => {
-      const leftId = str((p as { left_id?: unknown }).left_id);
-      const rightId = str((p as { right_id?: unknown }).right_id);
-      return { id: leftId, left: leftById.get(leftId) ?? '', right: rightById.get(rightId) ?? '' };
-    });
-  }, [c.left_items, c.right_items, display.expectedAnswers.pairs]);
-
-  const content: MatchContent = {
-    pairs,
-    variant: c.variant === 'halves' ? 'halves' : 'pairs',
-    instruction: instr(display),
-  };
-  const allLinked = pairs.every((p) => links[p.id]);
-
-  return (
-    <>
-      <MatchBody
-        content={content}
-        links={links}
-        onLinksChange={setLinks}
-        onAnswerChange={() => {}}
-        phase={phase}
-        ok={ok}
-        mode="practice"
-        accent={ACCENT}
-      />
-      {phase === 'answering' && (
-        <CheckFooter
-          canSubmit={allLinked}
-          onCheck={() => onCheck({ ok: gradeMatch(pairs, links) })}
-        />
-      )}
-    </>
-  );
-}
-
-function ShortAnswerSolver({ display, phase, ok, retryNonce, onCheck }: SolverProps) {
+/**
+ * The single-question form, graded in the browser against a list of accepted strings.
+ *
+ * Still the shape of 144 seeded exercises (plan 51 §8 Q1), and untouched by this plan:
+ * those documents carry no semantic key, so there is nothing for the server grader to
+ * read. Which runner a learner gets is decided by the shape of the document, in
+ * `gradedOnServer` below — never by the template code, which is the same for both.
+ */
+function ShortAnswerLegacySolver({ display, phase, ok, retryNonce, onCheck }: SolverProps) {
   const t = useTranslations('ExerciseRunner');
   const [value, setValue] = useState('');
   const [diff, setDiff] = useState<DiffToken[] | null>(null);
@@ -376,7 +358,7 @@ function ShortAnswerSolver({ display, phase, ok, retryNonce, onCheck }: SolverPr
 
   return (
     <>
-      <ShortAnswerBody
+      <ShortAnswerLegacyBody
         content={{
           question: str(c.question),
           context: str(c.context) || undefined,
@@ -428,101 +410,8 @@ function issueSummary(
   return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
-function WritingSolver({ display, phase, ok, onCheck }: SolverProps) {
-  const [value, setValue] = useState<WritingValue>({ text: '', topicId: null });
-  const c = display.content;
-  const topics = (Array.isArray(c.options) ? c.options : [])
-    .filter(
-      (o): o is { id: string; title: string } => typeof (o as { id?: unknown }).id === 'string',
-    )
-    .map((o) => ({ id: o.id, title: str(o.title) }));
-  const minWords = typeof c.min_words === 'number' ? c.min_words : undefined;
-  const [canSubmit, setCanSubmit] = useState(false);
-
-  return (
-    <>
-      <WritingBody
-        content={{
-          prompt: str(c.prompt),
-          topics: topics.length > 0 ? topics : undefined,
-          minWords,
-          instruction: instr(display),
-        }}
-        value={value}
-        onValueChange={setValue}
-        onAnswerChange={setCanSubmit}
-        phase={phase}
-        ok={ok}
-        mode="practice"
-        accent={ACCENT}
-      />
-      {phase === 'answering' && (
-        // Writing is always routed for review — no client-side correctness.
-        <CheckFooter canSubmit={canSubmit} onCheck={() => onCheck({ ok: null })} />
-      )}
-    </>
-  );
-}
-
-function SentenceSchemaSolver({ display, phase, ok, revealed, onCheck }: SolverProps) {
-  const [value, setValue] = useState<SchemaPlacements>({});
-  const c = display.content;
-  const fields: SchemaField[] = (Array.isArray(c.fields) ? c.fields : [])
-    .filter(
-      (f): f is { id: string; label: string } => typeof (f as { id?: unknown }).id === 'string',
-    )
-    .map((f) => ({ id: f.id, label: str(f.label) }));
-  const tokens: SchemaToken[] = (Array.isArray(c.tokens) ? c.tokens : [])
-    .filter(
-      (tk): tk is { id: string; text: string } => typeof (tk as { id?: unknown }).id === 'string',
-    )
-    .map((tk) => ({ id: tk.id, text: str(tk.text) }));
-  const placements = (
-    Array.isArray(display.expectedAnswers.placements) ? display.expectedAnswers.placements : []
-  ).map((p) => ({
-    field_id: str((p as { field_id?: unknown }).field_id),
-    token_ids: strArr((p as { token_ids?: unknown }).token_ids),
-  }));
-  const [canSubmit, setCanSubmit] = useState(false);
-
-  return (
-    <>
-      <SentenceSchemaBody
-        content={{
-          sentence: str(c.sentence),
-          source_sentence: str(c.source_sentence) || undefined,
-          schema_type: c.schema_type === 'subordinate' ? 'subordinate' : 'main',
-          fields,
-          tokens,
-          instruction: instr(display),
-        }}
-        value={value}
-        onValueChange={setValue}
-        onAnswerChange={setCanSubmit}
-        phase={phase}
-        ok={ok}
-        mode="practice"
-        accent={ACCENT}
-        revealPlacements={
-          revealed ? Object.fromEntries(placements.map((p) => [p.field_id, p.token_ids])) : null
-        }
-      />
-      {phase === 'answering' && (
-        <CheckFooter
-          canSubmit={canSubmit}
-          onCheck={() =>
-            onCheck({
-              ok: gradeSentenceSchema({ placements }, value),
-              explanation: str(display.expectedAnswers.explanation) || undefined,
-            })
-          }
-        />
-      )}
-    </>
-  );
-}
-
 function WordBankFillSolver({ display, phase, ok, revealed, retryNonce, onCheck }: SolverProps) {
+  const { audio, transcript } = useRunnerAudio(display, phase);
   const [value, setValue] = useState<WordBankFillValue>({});
   const [results, setResults] = useState<WordBankFillResults>({});
   const [canSubmit, setCanSubmit] = useState(false);
@@ -576,6 +465,8 @@ function WordBankFillSolver({ display, phase, ok, revealed, retryNonce, onCheck 
           wordNotes: wordNotes(c.word_notes),
           inputMode: c.input_mode === 'select' ? 'select' : 'chips',
         }}
+        audio={audio}
+        audioTranscript={transcript}
         value={value}
         onValueChange={setValue}
         onAnswerChange={setCanSubmit}
@@ -609,6 +500,7 @@ function WordBankFillSolver({ display, phase, ok, revealed, retryNonce, onCheck 
 function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
   const t = useTranslations('ExerciseRunner');
   const c = display.content;
+  const { audio, transcript } = useRunnerAudio(display, phase);
 
   const items: OrderLine[] = useMemo(
     () =>
@@ -653,6 +545,8 @@ function TextOrderSolver({ display, phase, ok, onCheck }: SolverProps) {
         mode="practice"
         accent={ACCENT}
         results={results}
+        audio={audio}
+        audioTranscript={transcript}
       />
       {phase === 'answering' && (
         <CheckFooter
@@ -776,23 +670,30 @@ function FeedbackBanner({ graded, revealed, hint, onRetry, onToggleReveal }: Fee
 
 /* ── public component ───────────────────────────────────────────────────── */
 
-const SOLVERS: Record<string, (props: SolverProps) => React.ReactElement> = {
-  multiple_choice: McqSolver,
+/**
+ * The templates checked in the browser, and the runners that check them.
+ *
+ * Typed by `ClientGradedTemplate` rather than by `string`, so this map and the list the
+ * BFF withholds answer keys by cannot drift: a solver added here without its code in
+ * `CLIENT_GRADED_TEMPLATES` does not compile, and a code listed there without a solver
+ * here does not either. The two used to be the same fact stated once and read nowhere —
+ * the reader asked for every key and sorted it out afterwards.
+ */
+const SOLVERS: Record<ClientGradedTemplate, (props: SolverProps) => React.ReactElement> = {
+  multiple_choice: McqLegacySolver,
   multiple_choice_group: McqGroupSolver,
   fill_in_blank: FillSolver,
-  match_pairs: MatchSolver,
-  short_answer: ShortAnswerSolver,
-  writing_task: WritingSolver,
-  sentence_schema: SentenceSchemaSolver,
+  short_answer: ShortAnswerLegacySolver,
   word_bank_fill: WordBankFillSolver,
   text_order: TextOrderSolver,
 };
 
 /**
  * The templates graded on the server, which are therefore not `SolverProps` solvers at
- * all: they are never handed the answers, because for these three the answers are the
- * exercise — the words missing from the sentences, the mistakes to be found, the
- * accepted translations. Each drives its own attempt against the engine.
+ * all: they are never handed the answers, because for these the answers are the
+ * exercise — the words missing from the sentences, the half that completes each line,
+ * the mistakes to be found, the accepted translations. Each drives its own attempt
+ * against the engine.
  */
 const SERVER_SOLVERS: Record<
   string,
@@ -801,35 +702,158 @@ const SERVER_SOLVERS: Record<
     language: string;
     instruction?: string;
     onChecked?: (ok: Ok) => void;
+    /** True when this runner is one card in a stack of tasks; see `ExerciseSolverProps`. */
+    stacked?: boolean;
+    /**
+     * Where the exercise's own material can be read — the lesson it sits under.
+     *
+     * On the shared signature although one runner reads it (`multiple_choice_group`'s
+     * «Til teksten»): the alternative is a cast at the one call site, and a runner that
+     * has no use for a lesson link simply does not destructure it.
+     */
+    sourceHref?: string;
   }) => React.ReactElement
 > = {
   word_bank_gap_fill: GapFillSolver,
+  match_pairs: MatchPairsSolver,
   error_correction: ErrorCorrectionSolver,
   translate_to_target: TranslateSolver,
   translate_from_target: TranslateSolver,
+  // Not because its answers are secret — a written text has no answers — but because
+  // the task's own answer key is: the model answer and the point keywords never leave
+  // the server, and the attempt is where the draft and the teacher's verdict live.
+  writing_task: WritingTaskSolver,
+  // Its key is a set of anchor phrases — the answer written in the words the student is
+  // being asked to find — and the set is handed in a question at a time, each answer
+  // graded and recorded where the key is (plan 51 §3.2). Only documents of the new form
+  // arrive here; see `gradedOnServer`.
+  short_answer: ShortAnswerSolver,
+  // Its key is which field each piece belongs in, and the note under the board is
+  // resolved from the author's own per-chunk notes — so the marks come from the engine,
+  // one sentence at a time, with unlimited retries per sentence (plan 52 §3.2).
+  sentence_schema: SentenceSchemaSolver,
+  // The only one here whose key is not the exercise — an option id gives nothing away by
+  // itself. It is on the server because the *dosing* is: a second try and a 50/50 offered
+  // by a browser that already knows the right option are decoration, and the order the
+  // options arrive in is dealt per attempt for the same reason (plan 53 §3.2, §3.4).
+  // Only documents of the new form arrive here; see `gradedOnServer`.
+  multiple_choice: MultipleChoiceSolver,
+  // Its key is which shared column each statement belongs in, and it is on the server for
+  // the dosing rather than the secrecy: the retry budget, the freeze on rows that came out
+  // right and the moment the key becomes visible are all decisions a browser holding the
+  // answers could not make honestly (plan 54 §3.2, §3.3). Only documents of the new form
+  // arrive here; see `gradedOnServer`.
+  multiple_choice_group: MultipleChoiceGroupSolver,
 };
+
+/**
+ * Which runner this exercise gets, when the template alone does not decide.
+ *
+ * `short_answer` has two live document shapes and one template code: the new set of open
+ * questions, graded on the server, and the 144 single-question exercises still written
+ * in the old form, graded in the browser against accepted strings (plan 51 §8 Q1). The
+ * document says which is which — `content.questions` exists in one and cannot exist in
+ * the other — and the same test decides it in the validator and in the projections.
+ *
+ * `multiple_choice` and `multiple_choice_group` are the same arrangement, for the two
+ * shapes each of them has live (plan 53 §3.9, plan 54 §3.2).
+ */
+function gradedOnServer(data: ExerciseWithAnswers): boolean {
+  if (SERVER_SOLVERS[data.templateCode] === undefined) return false;
+  // The same predicate the BFF withholds keys by, read the other way round: a document
+  // the browser does not grade is one the server does.
+  return !gradedInBrowser(data.templateCode, data.content);
+}
+
+/**
+ * How many questions this exercise is a set of, or `null` when it is a single task.
+ *
+ * Three templates are sets: `short_answer`, one card holding several questions handed in
+ * one at a time; `sentence_schema`, one card holding several sentences checked one at a
+ * time; and `multiple_choice`, one card holding several questions each with its own
+ * budget of tries. The practice stack is built on "one task, one Check", so a
+ * set has to announce itself there rather than unfold into a player nobody asked to
+ * start (plan 51 phase 4 follow-up).
+ */
+function setSize(data: ExerciseWithAnswers): number | null {
+  if (data.templateCode === 'sentence_schema') {
+    const set = readSentenceSchemaProjection(data.content);
+    return set === null ? null : set.rows.length;
+  }
+  if (data.templateCode === 'multiple_choice') {
+    if (!isMultipleChoiceDocument(data.content)) return null;
+    const set = readMultipleChoiceProjection(data.content);
+    return set === null ? null : set.questions.length;
+  }
+  if (data.templateCode !== 'short_answer') return null;
+  if (!isShortAnswerDocument(data.content)) return null;
+  return readContent(data.content).questions.length;
+}
+
+/**
+ * The single line a folded set shows above its start button: the instruction in the
+ * learner's language when the author wrote one, otherwise the set's own words — its title
+ * where it has one, its own instruction where it does not. Never both: the folded card is
+ * a promise of what is inside, not a preview of it.
+ */
+function foldedLine(data: ExerciseWithAnswers): string {
+  const instruction = instr(data);
+  if (instruction !== undefined && instruction.trim() !== '') return instruction;
+  // The code as well as the shape: `isShortAnswerDocument` only asks whether `questions`
+  // is an array, and since plan 53 a `multiple_choice` set answers yes to that too — which
+  // sent it down this branch and folded it under its teacher-facing title.
+  if (data.templateCode === 'short_answer' && isShortAnswerDocument(data.content)) {
+    return readContent(data.content).title.trim();
+  }
+  // `multiple_choice` has no title in its projection — the set's own instruction, in the
+  // language being learned, is the closest thing to a promise of what is inside.
+  if (data.templateCode === 'multiple_choice') {
+    return readMultipleChoiceProjection(data.content)?.instruction.trim() ?? '';
+  }
+  return '';
+}
 
 export interface ExerciseSolverProps {
   exerciseId: string;
+  /**
+   * The lesson this exercise sits under, for the runners that offer a way back to it.
+   * Resolved by the reader, which is the only layer that knows where an exercise stands.
+   */
+  sourceHref?: string;
   /** 1-based position, shown when the exercise is one task of a practice set. */
   index?: number;
   /** Fired once, when the learner checks this exercise. */
   onChecked?: (ok: Ok) => void;
+  /**
+   * True when this is one card in a stack of tasks rather than the whole screen. A set
+   * then stays folded until the learner starts it — which also keeps the stack from
+   * opening an attempt on every set the moment the section loads — and drops the chrome
+   * the page around it already provides.
+   */
+  stacked?: boolean;
 }
 
 /**
  * One exercise: load → dispatch by template → grade client-side → feedback.
  * Used on its own (`ExercisePage`) and stacked by the practice page.
  */
-export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverProps) {
+export function ExerciseSolver({
+  exerciseId,
+  index,
+  onChecked,
+  stacked,
+  sourceHref,
+}: ExerciseSolverProps) {
   const t = useTranslations('ExerciseRunner');
-  const { data, isLoading, isError, refetch } = useExerciseWithAnswers(exerciseId);
+  const { data, isLoading, isError, refetch } = useExerciseForRunner(exerciseId);
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
   const [graded, setGraded] = useState<Graded | null>(null);
   /* Attempts are unlimited; the answers appear only when asked for. */
   const [attempts, setAttempts] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [retryNonce, setRetryNonce] = useState(0);
+  /** A set in a stack opens on request; everywhere else it is open from the start. */
+  const [opened, setOpened] = useState(false);
 
   // Per-item state is reset by remounting: the reader passes key={exerciseId}.
 
@@ -840,7 +864,11 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
   // the answers to pass down. Branching here keeps the other twelve untouched —
   // moving them to server-side grading is separate work with a shape of its own.
   const ServerSolver = SERVER_SOLVERS[data.templateCode];
-  if (ServerSolver !== undefined) {
+  if (ServerSolver !== undefined && gradedOnServer(data)) {
+    const questions = setSize(data);
+    // A set inside the stack: it says what it is, and waits to be started.
+    const folded = stacked === true && questions !== null && !opened;
+
     return (
       <div>
         {index != null && (
@@ -848,17 +876,55 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
             {t('taskNumber', { n: index })}
           </div>
         )}
-        <ServerSolver
-          exerciseId={exerciseId}
-          language={data.targetLanguage}
-          {...(instr(data) === undefined ? {} : { instruction: instr(data) })}
-          {...(onChecked === undefined ? {} : { onChecked })}
-        />
+        {questions !== null && stacked === true && (
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold"
+              style={{ background: 'var(--ssz-bg-subtle)', color: 'var(--ssz-text-secondary)' }}
+            >
+              <ListChecks size={12} aria-hidden="true" />
+              {t('set.badge')}
+            </span>
+            <span className="text-[12px] text-(--ssz-text-muted)">
+              {t('set.count', { n: questions })}
+            </span>
+          </div>
+        )}
+        {folded ? (
+          <>
+            {foldedLine(data) !== '' && (
+              <p className="mb-4 text-[14px] leading-relaxed text-(--ssz-text-secondary)">
+                {foldedLine(data)}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => setOpened(true)}
+              className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+              style={{ background: PRACTICE_ACCENT }}
+            >
+              {t('set.start', { n: questions })}
+            </button>
+          </>
+        ) : (
+          <ServerSolver
+            exerciseId={exerciseId}
+            language={data.targetLanguage}
+            {...(instr(data) === undefined ? {} : { instruction: instr(data) })}
+            {...(onChecked === undefined ? {} : { onChecked })}
+            {...(stacked === true ? { stacked: true } : {})}
+            {...(sourceHref === undefined ? {} : { sourceHref })}
+          />
+        )}
       </div>
     );
   }
 
-  const Solver = SOLVERS[data.templateCode];
+  // The cast is the lookup, not the map: `templateCode` is whatever the server sent, and
+  // a code with no runner is the empty state below rather than a crash.
+  const Solver = (
+    SOLVERS as Record<string, ((props: SolverProps) => React.ReactElement) | undefined>
+  )[data.templateCode];
   if (!Solver) {
     return (
       <div className="rounded-2xl border border-(--ssz-border-default) bg-surface px-6 py-12 text-center">
@@ -912,8 +978,12 @@ export function ExerciseSolver({ exerciseId, index, onChecked }: ExerciseSolverP
 
 export interface ExercisePageProps {
   exerciseId: string;
+  /** Passed through to the runner; see `ExerciseSolverProps`. */
+  sourceHref?: string;
 }
 
-export function ExercisePage({ exerciseId }: ExercisePageProps) {
-  return <ExerciseSolver exerciseId={exerciseId} />;
+export function ExercisePage({ exerciseId, sourceHref }: ExercisePageProps) {
+  return (
+    <ExerciseSolver exerciseId={exerciseId} {...(sourceHref === undefined ? {} : { sourceHref })} />
+  );
 }

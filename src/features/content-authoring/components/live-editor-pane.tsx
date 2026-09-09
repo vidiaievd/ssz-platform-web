@@ -30,7 +30,6 @@ interface LiveEditorPaneProps {
   /** Whether students can open this material right now — see `SaveScopeContext`. */
   isLive: boolean | null;
   container: Container;
-  backHref: string;
   publishSlot: ReactNode;
 }
 
@@ -75,7 +74,6 @@ export function LiveEditorPane({
   state,
   isLive,
   container,
-  backHref,
   publishSlot,
 }: LiveEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -143,7 +141,6 @@ export function LiveEditorPane({
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
       isLive={isLive}
-      backHref={backHref}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
       publishSlot={publishSlot}

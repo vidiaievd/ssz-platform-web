@@ -16,6 +16,11 @@ export interface PracticePageProps {
   items: UnitContentsItem[];
   /** Fired the first time a task is checked, so the reader can record progress. */
   onExerciseChecked?: (item: UnitContentsItem) => void;
+  /**
+   * The lesson these tasks were set on, for the runners that offer a way back to it —
+   * today `multiple_choice_group`'s «Til teksten». Absent when the unit holds no text.
+   */
+  sourceHref?: string;
 }
 
 /**
@@ -23,7 +28,7 @@ export interface PracticePageProps {
  * Check button and inline feedback, so grading stays per-exercise while the
  * reader stops paging through one question at a time.
  */
-export function PracticePage({ title, items, onExerciseChecked }: PracticePageProps) {
+export function PracticePage({ title, items, onExerciseChecked, sourceHref }: PracticePageProps) {
   const t = useTranslations('Learning.reader.practice');
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
 
@@ -83,7 +88,9 @@ export function PracticePage({ title, items, onExerciseChecked }: PracticePagePr
             <ExerciseSolver
               exerciseId={item.contentId}
               index={i + 1}
+              stacked
               onChecked={() => handleChecked(item)}
+              {...(sourceHref === undefined ? {} : { sourceHref })}
             />
           </li>
         ))}

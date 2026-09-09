@@ -1,42 +1,47 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Bell,
   BarChart3,
   BookOpen,
   CalendarRange,
+  ClipboardCheck,
   GraduationCap,
   Layers,
   LayoutDashboard,
   MailCheck,
   Search,
+  Gauge,
+  SquareCheckBig,
   Send,
   Settings,
   Users,
   Zap,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { cn } from "@/lib/utils";
-import type { CurrentUser } from "@/features/auth/types/current-user";
-import type { DashboardRole, SchoolType } from "@/features/dashboard/types";
-import type { SchoolRole } from "@/features/school/types";
-import { navGating } from "@/features/dashboard/lib/roles";
-import { NotificationBell } from "@/features/notifications";
-import type { NotificationLinkContext } from "@/features/notifications";
-import { useReviewsSummary } from "@/features/learning/api/use-reviews-summary";
-import { WorkspaceSwitcher, RoleBadge } from "@/features/workspaces";
-import { AlertBadge } from "./topbar/alert-badge";
-import { GlobalSearchTrigger } from "./topbar/global-search-trigger";
-import { TrialPill } from "./topbar/trial-pill";
-import { Sidebar } from "./sidebar/sidebar";
-import { MobileSidebar } from "./sidebar/mobile-sidebar";
-import { BottomTabBar } from "./sidebar/bottom-tab-bar";
-import { Topbar } from "./topbar/topbar";
-import type { NavSection } from "./sidebar/types";
-import type { UserMenuExtraItem } from "./topbar/user-menu";
+import { cn } from '@/lib/utils';
+import type { CurrentUser } from '@/features/auth/types/current-user';
+import type { DashboardRole, SchoolType } from '@/features/dashboard/types';
+import type { SchoolRole } from '@/features/school/types';
+import { navGating } from '@/features/dashboard/lib/roles';
+import { NotificationBell } from '@/features/notifications';
+import type { NotificationLinkContext } from '@/features/notifications';
+import { useReviewsSummary } from '@/features/learning/api/use-reviews-summary';
+import { useReviewQueueCount } from '@/features/review/api/use-review-queue';
+import { WorkspaceSwitcher, RoleBadge } from '@/features/workspaces';
+import { AlertBadge } from './topbar/alert-badge';
+import { GlobalSearchTrigger } from './topbar/global-search-trigger';
+import { TrialPill } from './topbar/trial-pill';
+import { Sidebar } from './sidebar/sidebar';
+import { MobileSidebar } from './sidebar/mobile-sidebar';
+import { BottomTabBar } from './sidebar/bottom-tab-bar';
+import { Topbar } from './topbar/topbar';
+import { TopbarSlot, TopbarSlotProvider } from './topbar/topbar-slot';
+import type { NavSection } from './sidebar/types';
+import type { UserMenuExtraItem } from './topbar/user-menu';
 
 export type SchoolContext = {
   role: DashboardRole;
@@ -49,70 +54,118 @@ export type SchoolContext = {
 
 const SCHEDULING_SCHOOL_ROLES = new Set<SchoolRole>(['OWNER', 'ADMIN', 'MANAGER', 'SCHEDULER']);
 
-function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSection[] {
+/** Who runs a school's review, as opposed to doing it (`BEHAVIOR.md` §C). */
+const REVIEW_OVERSIGHT_ROLES = new Set<SchoolRole>(['OWNER', 'ADMIN', 'MANAGER']);
+
+/** What the marking inbox contributes to the nav; absent for anyone without a queue. */
+type ReviewNav = { pending: number; hasOverdue: boolean } | null;
+
+function buildSchoolNav(
+  schoolSlug: string,
+  schoolCtx?: SchoolContext,
+  review: ReviewNav = null,
+): NavSection[] {
   const gating = schoolCtx ? navGating(schoolCtx.role) : null;
 
-  function disabled(navId: 'dashboard' | 'courses' | 'groups' | 'students' | 'teachers' | 'scheduling' | 'invitations' | 'settings'): boolean {
+  function disabled(
+    navId:
+      | 'dashboard'
+      | 'courses'
+      | 'groups'
+      | 'students'
+      | 'teachers'
+      | 'scheduling'
+      | 'invitations'
+      | 'settings',
+  ): boolean {
     return gating ? gating[navId] === 'locked' : false;
   }
 
+  const canOverseeReview =
+    !!schoolCtx?.schoolRole && REVIEW_OVERSIGHT_ROLES.has(schoolCtx.schoolRole);
+
   const canSeeScheduling =
-    !!schoolCtx?.schoolRole &&
-    SCHEDULING_SCHOOL_ROLES.has(schoolCtx.schoolRole);
+    !!schoolCtx?.schoolRole && SCHEDULING_SCHOOL_ROLES.has(schoolCtx.schoolRole);
 
   const mainItems = [
     {
       href: `/school/${schoolSlug}/dashboard`,
       icon: LayoutDashboard,
-      labelKey: "dashboard",
+      labelKey: 'dashboard',
       disabled: disabled('dashboard'),
-      lockReason: "Nav.locked.ownerOnly",
+      lockReason: 'Nav.locked.ownerOnly',
     },
+    ...(review
+      ? [
+          {
+            href: `/school/${schoolSlug}/review`,
+            icon: SquareCheckBig,
+            labelKey: 'review',
+            badge: review.pending,
+            badgeAlert: review.hasOverdue,
+            // Own item, own highlight: oversight lives under the inbox's path, and the
+            // default prefix match would light both up at once.
+            match: (pathname: string) =>
+              /\/school\/[^/]+\/review(?!\/oversight)(\/|$)/.test(pathname),
+          },
+        ]
+      : []),
+    ...(canOverseeReview
+      ? [
+          {
+            href: `/school/${schoolSlug}/review/oversight`,
+            icon: Gauge,
+            labelKey: 'reviewOversight',
+          },
+        ]
+      : []),
     {
       href: `/school/${schoolSlug}/content`,
       icon: BookOpen,
-      labelKey: "content",
+      labelKey: 'content',
       disabled: disabled('courses'),
     },
     {
       href: `/school/${schoolSlug}/groups`,
       icon: Layers,
-      labelKey: "groups",
+      labelKey: 'groups',
       disabled: disabled('groups'),
-      lockReason: "Nav.locked.adminOnly",
+      lockReason: 'Nav.locked.adminOnly',
     },
     {
       href: `/school/${schoolSlug}/students`,
       icon: Users,
-      labelKey: "students",
+      labelKey: 'students',
       disabled: disabled('students'),
-      lockReason: "Nav.locked.adminOnly",
+      lockReason: 'Nav.locked.adminOnly',
     },
     {
       href: `/school/${schoolSlug}/teachers`,
       icon: GraduationCap,
-      labelKey: "teachers",
+      labelKey: 'teachers',
       disabled: disabled('teachers'),
-      lockReason: "Nav.locked.adminOnly",
+      lockReason: 'Nav.locked.adminOnly',
     },
     ...(canSeeScheduling
-      ? [{
-          href: `/school/${schoolSlug}/scheduling`,
-          icon: CalendarRange,
-          labelKey: "scheduling",
-          disabled: disabled('scheduling'),
-        }]
+      ? [
+          {
+            href: `/school/${schoolSlug}/scheduling`,
+            icon: CalendarRange,
+            labelKey: 'scheduling',
+            disabled: disabled('scheduling'),
+          },
+        ]
       : []),
     {
       href: `/school/${schoolSlug}/invitations`,
       icon: MailCheck,
-      labelKey: "invitations",
+      labelKey: 'invitations',
       disabled: disabled('invitations'),
     },
     {
       href: `/school/${schoolSlug}/notifications`,
       icon: Bell,
-      labelKey: "notifications",
+      labelKey: 'notifications',
     },
   ];
 
@@ -123,9 +176,9 @@ function buildSchoolNav(schoolSlug: string, schoolCtx?: SchoolContext): NavSecti
         {
           href: `/school/${schoolSlug}/settings`,
           icon: Settings,
-          labelKey: "settings",
+          labelKey: 'settings',
           disabled: disabled('settings'),
-          lockReason: "Nav.locked.adminOnly",
+          lockReason: 'Nav.locked.adminOnly',
         },
       ],
     },
@@ -136,16 +189,14 @@ function buildTutorNav(userId: string): NavSection[] {
   return [
     {
       items: [
-        { href: `/tutor/${userId}/dashboard`, icon: LayoutDashboard, labelKey: "dashboard" },
-        { href: `/tutor/${userId}/students`, icon: Users, labelKey: "students" },
-        { href: `/tutor/${userId}/invitations`, icon: MailCheck, labelKey: "invitations" },
-        { href: `/tutor/${userId}/content`, icon: BookOpen, labelKey: "content" },
+        { href: `/tutor/${userId}/dashboard`, icon: LayoutDashboard, labelKey: 'dashboard' },
+        { href: `/tutor/${userId}/students`, icon: Users, labelKey: 'students' },
+        { href: `/tutor/${userId}/invitations`, icon: MailCheck, labelKey: 'invitations' },
+        { href: `/tutor/${userId}/content`, icon: BookOpen, labelKey: 'content' },
       ],
     },
     {
-      items: [
-        { href: `/tutor/${userId}/settings`, icon: Settings, labelKey: "settings" },
-      ],
+      items: [{ href: `/tutor/${userId}/settings`, icon: Settings, labelKey: 'settings' }],
     },
   ];
 }
@@ -154,23 +205,24 @@ function buildStudentNav(reviewsDue: number): NavSection[] {
   return [
     {
       items: [
-        { href: "/student/home", icon: LayoutDashboard, labelKey: "home" },
-        { href: "/student/my-courses", icon: BookOpen, labelKey: "myCourses" },
-        { href: "/student/catalogue", icon: Search, labelKey: "catalogue" },
-        { href: "/student/training", icon: Zap, labelKey: "training" },
-        { href: "/student/reviews", icon: Bell, labelKey: "reviews", badge: reviewsDue },
-        { href: "/student/progress", icon: BarChart3, labelKey: "progress" },
+        { href: '/student/home', icon: LayoutDashboard, labelKey: 'home' },
+        { href: '/student/my-courses', icon: BookOpen, labelKey: 'myCourses' },
+        { href: '/student/catalogue', icon: Search, labelKey: 'catalogue' },
+        { href: '/student/training', icon: Zap, labelKey: 'training' },
+        { href: '/student/reviews', icon: Bell, labelKey: 'reviews', badge: reviewsDue },
+        { href: '/student/submissions', icon: ClipboardCheck, labelKey: 'submissions' },
+        { href: '/student/progress', icon: BarChart3, labelKey: 'progress' },
       ],
     },
   ];
 }
 
 /** Student mobile bottom tab bar omits Progress, matching the design handoff. */
-function buildStudentMobileNav(sections: NavSection[]): NavSection["items"] {
-  return sections[0]?.items.filter((item) => item.labelKey !== "progress") ?? [];
+function buildStudentMobileNav(sections: NavSection[]): NavSection['items'] {
+  return sections[0]?.items.filter((item) => item.labelKey !== 'progress') ?? [];
 }
 
-export type AppShellVariant = "school" | "student" | "tutor";
+export type AppShellVariant = 'school' | 'student' | 'tutor';
 
 type AppShellProps = {
   variant: AppShellVariant;
@@ -184,56 +236,69 @@ type AppShellProps = {
 export function AppShell({ variant, user, schoolContext, tutorUserId, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const params = useParams<{ schoolSlug?: string; userId?: string }>();
-  const tNav = useTranslations("Nav");
+  const tNav = useTranslations('Nav');
 
-  const { data: reviewsSummary } = useReviewsSummary({ enabled: variant === "student" });
+  const { data: reviewsSummary } = useReviewsSummary({ enabled: variant === 'student' });
 
-  const resolvedTutorId = tutorUserId ?? params.userId ?? user.userId ?? "";
+  // The badge, not the queue: one count for the whole school, refetched on focus and
+  // invalidated by every verdict. The item appears only once the answer says this person
+  // has something to mark — until then the shell cannot know, so it shows nothing rather
+  // than an item that might turn out not to be theirs.
+  const { data: reviewCount } = useReviewQueueCount(
+    variant === 'school' ? (params.schoolSlug ?? '') : '',
+    variant === 'school',
+  );
+
+  const resolvedTutorId = tutorUserId ?? params.userId ?? user.userId ?? '';
 
   const sections: NavSection[] =
-    variant === "school"
-      ? buildSchoolNav(params.schoolSlug ?? "", schoolContext)
-      : variant === "tutor"
+    variant === 'school'
+      ? buildSchoolNav(
+          params.schoolSlug ?? '',
+          schoolContext,
+          reviewCount?.hasScope ? reviewCount : null,
+        )
+      : variant === 'tutor'
         ? buildTutorNav(resolvedTutorId)
         : buildStudentNav(reviewsSummary?.totalDue ?? 0);
 
   const userMenuExtraItems: UserMenuExtraItem[] | undefined =
-    variant === "student"
+    variant === 'student'
       ? [
-          { href: "/student/notifications", icon: Bell, label: tNav("notifications") },
-          { href: "/student/enrolled/requests", icon: Send, label: tNav("requests") },
-          { href: "/student/settings", icon: Settings, label: tNav("settings") },
+          { href: '/student/notifications', icon: Bell, label: tNav('notifications') },
+          { href: '/student/enrolled/requests', icon: Send, label: tNav('requests') },
+          { href: '/student/settings', icon: Settings, label: tNav('settings') },
         ]
       : undefined;
 
   const activeContextKey =
-    variant === "school" && schoolContext
+    variant === 'school' && schoolContext
       ? `school:${schoolContext.schoolId}`
-      : variant === "tutor"
-        ? "private_tutor"
-        : "student";
+      : variant === 'tutor'
+        ? 'private_tutor'
+        : 'student';
 
   const showRoleBadge =
-    variant === "school" &&
+    variant === 'school' &&
     schoolContext?.schoolRole &&
-    schoolContext.schoolRole !== "OWNER" &&
-    schoolContext.schoolRole !== "ADMIN";
+    schoolContext.schoolRole !== 'OWNER' &&
+    schoolContext.schoolRole !== 'ADMIN';
 
   const canSeeSchedulingAlerts =
-    variant === "school" &&
+    variant === 'school' &&
     !!schoolContext?.schoolRole &&
     SCHEDULING_SCHOOL_ROLES.has(schoolContext.schoolRole);
 
   const notificationsLinkContext: NotificationLinkContext =
-    variant === "school"
-      ? { workspaceKind: "school", schoolSlug: schoolContext?.school.slug }
-      : { workspaceKind: "student" };
+    variant === 'school'
+      ? { workspaceKind: 'school', schoolSlug: schoolContext?.school.slug }
+      : { workspaceKind: 'student' };
 
   const notificationsHref =
-    variant === "school" && schoolContext
+    variant === 'school' && schoolContext
       ? `/school/${schoolContext.school.slug}/notifications`
-      : variant === "student"
-        ? "/student/notifications"
+      : variant === 'student'
+        ? '/student/notifications'
         : undefined;
 
   const workspaceHeader = (collapsed: boolean) => (
@@ -248,42 +313,47 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-(--ssz-bg-base)">
-      <Sidebar
-        sections={sections}
-        schoolType={variant === "school" ? (schoolContext?.schoolType ?? "online") : undefined}
-        header={workspaceHeader}
-      />
-      <MobileSidebar
-        sections={sections}
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        header={workspaceHeader}
-      />
-
-      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-        <Topbar
-          user={user}
-          onMenuOpen={() => setMobileOpen(true)}
-          activeContextKey={activeContextKey}
-          search={variant === "school" ? <GlobalSearchTrigger /> : undefined}
-          userMenuExtraItems={userMenuExtraItems}
-          actions={
-            <div className="flex items-center gap-2">
-              {variant === "school" && <TrialPill />}
-              {canSeeSchedulingAlerts && <AlertBadge schoolId={schoolContext?.schoolId} />}
-              <NotificationBell
-                linkContext={notificationsLinkContext}
-                notificationsHref={notificationsHref}
-              />
-            </div>
-          }
+    <TopbarSlotProvider>
+      <div className="flex h-screen overflow-hidden bg-(--ssz-bg-base)">
+        <Sidebar
+          sections={sections}
+          schoolType={variant === 'school' ? (schoolContext?.schoolType ?? 'online') : undefined}
+          header={workspaceHeader}
         />
-        <main className={cn("flex-1 overflow-auto", variant === "student" && "pb-16 md:pb-0")}>
-          {children}
-        </main>
+        <MobileSidebar
+          sections={sections}
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          header={workspaceHeader}
+        />
+
+        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+          <Topbar
+            user={user}
+            onMenuOpen={() => setMobileOpen(true)}
+            activeContextKey={activeContextKey}
+            // The bar's middle is a slot a page can fill — the lesson editor puts its
+            // breadcrumb there, the way the builder specs draw it. Nothing claims it on
+            // most pages, and the search stub stays.
+            search={<TopbarSlot fallback={variant === 'school' ? <GlobalSearchTrigger /> : null} />}
+            userMenuExtraItems={userMenuExtraItems}
+            actions={
+              <div className="flex items-center gap-2">
+                {variant === 'school' && <TrialPill />}
+                {canSeeSchedulingAlerts && <AlertBadge schoolId={schoolContext?.schoolId} />}
+                <NotificationBell
+                  linkContext={notificationsLinkContext}
+                  notificationsHref={notificationsHref}
+                />
+              </div>
+            }
+          />
+          <main className={cn('flex-1 overflow-auto', variant === 'student' && 'pb-16 md:pb-0')}>
+            {children}
+          </main>
+        </div>
+        {variant === 'student' && <BottomTabBar items={buildStudentMobileNav(sections)} />}
       </div>
-      {variant === "student" && <BottomTabBar items={buildStudentMobileNav(sections)} />}
-    </div>
+    </TopbarSlotProvider>
   );
 }

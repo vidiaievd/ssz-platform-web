@@ -27,6 +27,18 @@ import {
   type WordBankGapFill,
 } from '@/lib/shared-kernel/wordbank-gapfill';
 
+import type { AudioDraft, AudioStepMap, PlacedAudioIssue } from '@/lib/shared-kernel/audio';
+
+import {
+  AudioEnableRow,
+  AudioRulesCard,
+  AudioSourceCard,
+  AudioTranscriptCard,
+  useAudioIssueCopy,
+  useAudioProblems,
+} from '../audio';
+import { BuilderStepRail, type BuilderStep } from '../builder-step-rail';
+import { EditorToolbarPortal } from '../editor-toolbar';
 import { StepSentences } from './step-sentences';
 import { StepWordBank } from './step-word-bank';
 import { StepFeedback } from './step-feedback';
@@ -35,6 +47,16 @@ import { useIssueCopy } from './issue-copy';
 
 const STEPS: IssueStep[] = [1, 2, 3];
 
+/**
+ * Where this builder keeps each part of the audio layer — three steps, not four.
+ *
+ * The clip and the timecodes go with the sentences on step 1, because a timecode belongs
+ * to a sentence. The rules and the transcript are both step 3: that is the step about
+ * what the student is told, and when the words of the clip may be read is that same
+ * question. Step 2 is the word bank, and nothing about hearing is decided there.
+ */
+const AUDIO_STEPS: AudioStepMap = { source: 1, segments: 1, rules: 3, transcript: 3 };
+
 export interface GapFillBuilderProps {
   exerciseId: string;
   containerId: string;
@@ -42,6 +64,12 @@ export interface GapFillBuilderProps {
   initialExercise: WordBankGapFill;
   initialInstructions: string;
   initialHint: string;
+  /**
+   * The listening layer as the stored document carries it. A sibling of the instruction
+   * and the hint, which is how this builder already holds everything that is not part of
+   * the kernel's document (plan 56 phase 5).
+   */
+  initialAudio: AudioDraft;
   /** Module vocabulary offered as distractors in step 2. */
   suggestions?: string[];
   /**
@@ -76,6 +104,7 @@ export function GapFillBuilder({
   initialExercise,
   initialInstructions,
   initialHint,
+  initialAudio,
   suggestions = [],
   onDocumentChange,
   onSavedRemote,
@@ -85,6 +114,7 @@ export function GapFillBuilder({
   const [exercise, setExercise] = useState(initialExercise);
   const [instructions, setInstructions] = useState(initialInstructions);
   const [hint, setHint] = useState(initialHint);
+  const [audio, setAudio] = useState(initialAudio);
   const [step, setStep] = useState<IssueStep>(1);
   const [gateOpen, setGateOpen] = useState(false);
 
@@ -94,6 +124,7 @@ export function GapFillBuilder({
     exercise,
     instructions,
     hint,
+    audio,
     // The token moves on with every save; the next write is compared against this one.
     onSaved: (updatedAt, saved) => {
       setExercise((current) => ({ ...current, updatedAt }));
@@ -115,23 +146,38 @@ export function GapFillBuilder({
   );
   const blockers = problems.filter((issue) => issue.level === 'blocker');
 
+  /** The layer's findings, in the same rail and the same gate as the type's own. */
+  const audioProblems = useAudioProblems(
+    audio,
+    exercise.sentences.map((sentence) => sentence.id),
+    AUDIO_STEPS,
+  );
+  const audioBlockers = audioProblems.filter((issue) => issue.level === 'blocker');
+
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <StepRail current={step} problems={problems} onSelect={setStep} />
-        <div className="flex items-center gap-3">
-          <SaveHint
-            status={autosave.status}
-            savedAt={autosave.savedAt}
-            canOverwrite={autosave.canOverwrite}
-            onRetry={autosave.retry}
-            onOverwrite={autosave.overwrite}
+      <EditorToolbarPortal>
+        <div className="flex flex-1 items-stretch justify-between gap-3">
+          <GapFillSteps
+            current={step}
+            problems={problems}
+            audioProblems={audioProblems}
+            onSelect={setStep}
           />
-          <Button type="button" onClick={() => setGateOpen(true)}>
-            {t('gapFill.shell.done')}
-          </Button>
+          <div className="flex shrink-0 items-center gap-3 py-2">
+            <SaveHint
+              status={autosave.status}
+              savedAt={autosave.savedAt}
+              canOverwrite={autosave.canOverwrite}
+              onRetry={autosave.retry}
+              onOverwrite={autosave.overwrite}
+            />
+            <Button type="button" onClick={() => setGateOpen(true)}>
+              {t('gapFill.shell.done')}
+            </Button>
+          </div>
         </div>
-      </div>
+      </EditorToolbarPortal>
 
       <div className="min-w-0">
         <div>
@@ -166,9 +212,20 @@ export function GapFillBuilder({
                     onChange={(event) => setHint(event.target.value)}
                   />
                 </div>
+
+                {/* Audio adds no fourth step: it is material, and material lives where the
+                    instruction already lives (plan 56, README "Authoring UI"). */}
+                <AudioEnableRow draft={audio} onChange={setAudio} />
               </div>
 
-              <StepSentences exercise={exercise} onChange={setExercise} />
+              {audio.audio.enabled && <AudioSourceCard draft={audio} onChange={setAudio} />}
+
+              <StepSentences
+                exercise={exercise}
+                onChange={setExercise}
+                audio={audio}
+                onAudioChange={setAudio}
+              />
             </div>
           )}
 
@@ -181,7 +238,24 @@ export function GapFillBuilder({
             />
           )}
 
-          {step === 3 && <StepFeedback exercise={exercise} onChange={setExercise} />}
+          {step === 3 && (
+            <div className="flex flex-col gap-5">
+              <StepFeedback exercise={exercise} onChange={setExercise} />
+
+              {/* Under the feedback rather than above it: the per-gap rows are what this
+                  step is for, and the clip's rules are settings about the same screen. */}
+              {audio.audio.enabled && (
+                <>
+                  <AudioRulesCard
+                    draft={audio}
+                    onChange={setAudio}
+                    itemNoun={t('gapFill.step3.audioItemNoun')}
+                  />
+                  <AudioTranscriptCard draft={audio} onChange={setAudio} />
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         <StepNav current={step} onSelect={setStep} onDone={() => setGateOpen(true)} />
@@ -190,7 +264,8 @@ export function GapFillBuilder({
       <GateDialog
         open={gateOpen}
         problems={problems}
-        blockerCount={blockers.length}
+        audioProblems={audioProblems}
+        blockerCount={blockers.length + audioBlockers.length}
         onOpenChange={setGateOpen}
         onGoToStep={(target) => {
           setStep(target);
@@ -201,57 +276,59 @@ export function GapFillBuilder({
   );
 }
 
-interface StepRailProps {
+/** Where the problems are, per step, in the rail every builder shares. */
+function GapFillSteps({
+  current,
+  problems,
+  audioProblems,
+  onSelect,
+}: {
   current: IssueStep;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   onSelect: (step: IssueStep) => void;
-}
-
-/**
- * Where the problems are, per step. A rail rather than a wizard: any step is reachable,
- * and the badge is a count in words as well as a colour (AC-B26, AC-X7).
- */
-function StepRail({ current, problems, onSelect }: StepRailProps) {
+}) {
   const t = useTranslations('Authoring');
 
-  return (
-    <div role="tablist" aria-label={t('gapFill.shell.stepsLabel')} className="flex gap-1">
-      {STEPS.map((step) => {
-        const own = problems.filter((issue) => issue.step === step);
-        const blockers = own.filter((issue) => issue.level === 'blocker').length;
-        const warnings = own.length - blockers;
-        const isActive = step === current;
+  const steps: BuilderStep[] = STEPS.map((step) => {
+    // Both lists at once: a step is as bad as its worst finding, whichever list it came
+    // from. A rail that counted only the type's own would show green over an exercise its
+    // own publish preflight refuses.
+    const own = [
+      ...problems.filter((issue) => issue.step === step),
+      // `info` never reaches the rail from the audio layer for the same reason it never
+      // reaches the gate: it changes no answer.
+      ...audioProblems.filter((issue) => issue.step === step && issue.level !== 'info'),
+    ];
+    const blockers = own.filter((issue) => issue.level === 'blocker').length;
+    const warnings = own.length - blockers;
 
-        return (
-          <button
-            key={step}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => onSelect(step)}
-            className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
-              isActive
-                ? 'border-primary bg-primary-50 text-primary'
-                : 'border-border text-[var(--ssz-text-secondary)] hover:bg-[var(--ssz-bg-subtle)]'
-            }`}
-          >
-            <span className="font-semibold">{step}</span>
-            <span>{t(`gapFill.shell.step${step}` as 'gapFill.shell.step1')}</span>
-            {blockers > 0 ? (
-              <span className="rounded-full bg-error px-1.5 text-[11px] font-semibold text-white">
-                {t('gapFill.shell.blockerCount', { count: blockers })}
-              </span>
-            ) : warnings > 0 ? (
-              <span className="rounded-full bg-warning-100 px-1.5 text-[11px] font-semibold text-warning-700">
-                {t('gapFill.shell.warningCount', { count: warnings })}
-              </span>
-            ) : (
-              <span className="text-[11px] text-success-700">{t('gapFill.shell.stepOk')}</span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+    return {
+      n: step,
+      label: t(`gapFill.shell.step${step}` as 'gapFill.shell.step1'),
+      sub: t(`gapFill.shell.stepSub${step}` as 'gapFill.shell.stepSub1'),
+      ...(blockers > 0
+        ? {
+            status: 'blockers' as const,
+            blockers,
+            statusLabel: t('gapFill.shell.blockerCount', { count: blockers }),
+          }
+        : warnings > 0
+          ? {
+              status: 'warn' as const,
+              statusLabel: t('gapFill.shell.warningCount', { count: warnings }),
+            }
+          : { status: 'ok' as const, statusLabel: t('gapFill.shell.stepOk') }),
+    };
+  });
+
+  return (
+    <BuilderStepRail
+      steps={steps}
+      current={current}
+      onSelect={(step) => onSelect(step as IssueStep)}
+      label={t('gapFill.shell.stepsLabel')}
+    />
   );
 }
 
@@ -350,9 +427,18 @@ function SaveHint({ status, savedAt, canOverwrite, onRetry, onOverwrite }: SaveH
 interface GateDialogProps {
   open: boolean;
   problems: Issue[];
+  audioProblems: PlacedAudioIssue[];
   blockerCount: number;
   onOpenChange: (open: boolean) => void;
   onGoToStep: (step: IssueStep) => void;
+}
+
+/** One line of the gate, from either list — they are shown as one. */
+interface GateLine {
+  key: string;
+  level: 'blocker' | 'warning';
+  step: IssueStep;
+  text: string;
 }
 
 /**
@@ -360,12 +446,42 @@ interface GateDialogProps {
  * first. It is a report, not a state change — readiness is decided by container
  * pre-flight from the same rules, so there is nothing here to flip.
  */
-function GateDialog({ open, problems, blockerCount, onOpenChange, onGoToStep }: GateDialogProps) {
+function GateDialog({
+  open,
+  problems,
+  audioProblems,
+  blockerCount,
+  onOpenChange,
+  onGoToStep,
+}: GateDialogProps) {
   const t = useTranslations('Authoring');
   const describeIssue = useIssueCopy();
-  const ordered = [
-    ...problems.filter((issue) => issue.level === 'blocker'),
-    ...problems.filter((issue) => issue.level === 'warning'),
+  const describeAudio = useAudioIssueCopy();
+
+  /*
+    One list, not two. An author who switched listening on has one exercise to finish, and
+    two lists under two headings would let them disagree about whether it is ready.
+  */
+  const lines: GateLine[] = [
+    ...problems.map((issue, index) => ({
+      key: `own-${issue.code}-${index}`,
+      level: issue.level,
+      step: issue.step,
+      text: describeIssue(issue),
+    })),
+    ...audioProblems
+      .filter((issue) => issue.level !== 'info')
+      .map((issue, index) => ({
+        key: `audio-${issue.code}-${index}`,
+        level: issue.level as 'blocker' | 'warning',
+        step: issue.step as IssueStep,
+        text: describeAudio(issue),
+      })),
+  ];
+
+  const ordered: GateLine[] = [
+    ...lines.filter((line) => line.level === 'blocker'),
+    ...lines.filter((line) => line.level === 'warning'),
   ];
 
   return (
@@ -382,14 +498,14 @@ function GateDialog({ open, problems, blockerCount, onOpenChange, onGoToStep }: 
           </p>
         ) : (
           <ul className="flex flex-col gap-1.5">
-            {ordered.map((issue, index) => (
-              <li key={`${issue.code}-${index}`}>
+            {ordered.map((line) => (
+              <li key={line.key}>
                 <button
                   type="button"
-                  onClick={() => onGoToStep(issue.step)}
+                  onClick={() => onGoToStep(line.step)}
                   className="flex w-full items-start gap-2 rounded-md border border-border px-3 py-2 text-left text-sm hover:bg-[var(--ssz-bg-subtle)]"
                 >
-                  {issue.level === 'blocker' ? (
+                  {line.level === 'blocker' ? (
                     <CircleAlert className="mt-0.5 size-4 shrink-0 text-error" aria-hidden />
                   ) : (
                     <AlertTriangle
@@ -398,9 +514,9 @@ function GateDialog({ open, problems, blockerCount, onOpenChange, onGoToStep }: 
                     />
                   )}
                   <span>
-                    <span className="block">{describeIssue(issue)}</span>
+                    <span className="block">{line.text}</span>
                     <span className="block text-xs text-muted-foreground">
-                      {t('gapFill.shell.gateGoToStep', { step: issue.step })}
+                      {t('gapFill.shell.gateGoToStep', { step: line.step })}
                     </span>
                   </span>
                 </button>

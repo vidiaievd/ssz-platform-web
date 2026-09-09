@@ -41,7 +41,7 @@ import {
 import {
   useLesson,
   useBestLessonVariant,
-  useExercisesWithAnswers,
+  useExercisesForRunner,
   useLessonParagraphs,
   useLessonGlossaryMarks,
   useLessonListeningStages,
@@ -59,7 +59,9 @@ import { useScrollRestoration } from '../hooks/use-scroll-restoration';
 import { useReadingModeStore, type ReadingMode, type TextWidth } from '../stores/reading-mode-store';
 import { ReaderRailSlot, useReaderRailVisible } from './reader-rail';
 import { TextComprehensionCheck } from './text-comprehension-check';
+import { UnsupportedStagesNotice } from './unsupported-stages-notice';
 import {
+  isUnsupportedStageDocument,
   parseComprehensionExercise,
   parseGapFillExercise,
   type ListeningComprehensionItem,
@@ -586,8 +588,8 @@ export function TextLessonPage({
         .sort((a, b) => a.position - b.position),
     [stagesQuery.data],
   );
-  const gapFillExercises = useExercisesWithAnswers(gapFillStages.map((s) => s.exerciseId));
-  const compExercises = useExercisesWithAnswers(compStages.map((s) => s.exerciseId));
+  const gapFillExercises = useExercisesForRunner(gapFillStages.map((s) => s.exerciseId));
+  const compExercises = useExercisesForRunner(compStages.map((s) => s.exerciseId));
 
   // An exercise whose content does not fit the template shape is dropped rather
   // than rendered half-parsed, exactly as the listening flow drops it.
@@ -611,6 +613,12 @@ export function TextLessonPage({
         .filter((item): item is ListeningComprehensionItem => item !== null),
     [compStages, compExercises],
   );
+
+  // Stages whose exercise this reader cannot draw — counted rather than dropped in silence.
+  const unsupportedStageCount = useMemo(() => {
+    const displays = [...gapFillExercises, ...compExercises].map((q) => q.data);
+    return displays.filter((d) => d !== undefined && isUnsupportedStageDocument(d)).length;
+  }, [gapFillExercises, compExercises]);
 
   /**
    * Renderable paragraphs, each carrying the index it holds in the variant's
@@ -949,6 +957,8 @@ export function TextLessonPage({
           </GlossaryTargetProvider>
         </GlossIntensityProvider>
       )}
+
+      <UnsupportedStagesNotice count={unsupportedStageCount} />
 
       <TextComprehensionCheck gapFillItems={gapFillItems} compItems={compItems} />
     </div>

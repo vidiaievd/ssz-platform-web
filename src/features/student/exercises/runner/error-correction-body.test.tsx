@@ -5,6 +5,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 import {
   DEFAULT_HINTS,
   type SelfCheckItem,
@@ -238,6 +240,31 @@ describe('ErrorCorrectionBody', () => {
     expect(screen.getByText('Hva skjer med verbet?')).toBeInTheDocument();
   });
 
+  /**
+   * Plan 47 §4.1: once a teacher has read the submission, their word about one sentence
+   * sits with that sentence — never invented, and never the reference it was checked
+   * against.
+   */
+  it("shows a teacher's comment on the sentence it belongs to", () => {
+    renderBody({ verdicts: { i1: { approved: false, comment: 'Sjekk verbtiden.' } } });
+
+    expect(screen.getByText('not counted')).toBeInTheDocument();
+    expect(screen.getByText('Sjekk verbtiden.')).toBeInTheDocument();
+  });
+
+  it('says a sentence was not counted without inventing a reason when the teacher wrote none', () => {
+    renderBody({ verdicts: { i1: { approved: false } } });
+
+    expect(screen.getByText('Your teacher did not count this one.')).toBeInTheDocument();
+  });
+
+  it('says nothing further about a sentence the teacher counted', () => {
+    renderBody({ verdicts: { i1: { approved: true } } });
+
+    expect(screen.getByText('counted')).toBeInTheDocument();
+    expect(screen.queryByText('Your teacher did not count this one.')).not.toBeInTheDocument();
+  });
+
   it('reports that the exercise can be handed in only once every sentence is touched', () => {
     const onAnswerChange = vi.fn();
     const { rerender } = renderBody({ onAnswerChange });
@@ -365,5 +392,59 @@ describe('ErrorCorrectionBody', () => {
     expect(
       screen.queryByRole('button', { name: 'Insert a word at position 3' }),
     ).not.toBeInTheDocument();
+  });
+});
+
+/** The engine as the hook would hand it over, with nothing playing yet. */
+const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+  audio: { ...AUDIO_DEFAULT, enabled: true, assetId: 'asset-1', title: 'Diktat', duration: 96 },
+  segments: {},
+  element: null,
+  src: 'https://cdn.test/asset-1.mp3',
+  state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+  duration: 96,
+  playing: false,
+  plays: 0,
+  limit: 0,
+  exhausted: false,
+  heard: false,
+  gated: false,
+  canPlay: true,
+  failed: false,
+  loading: false,
+  speed: 1,
+  toggle: vi.fn(),
+  back: vi.fn(),
+  seekTo: vi.fn(),
+  playRange: vi.fn(),
+  cycleSpeed: vi.fn(),
+  reset: vi.fn(),
+  ...over,
+});
+
+/*
+  The listening layer on this type (plan 56 phase 6). Its shape here is dictation with
+  corrections: the clip is the passage read correctly, and the text on screen is not.
+*/
+describe('ErrorCorrectionBody — with audio', () => {
+  it('plays the clip above the sentences and offers each its own line', () => {
+    renderBody({ audio: engine({ segments: { i1: { start: 4, end: 12 } } }) });
+
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /0:04/ })).toBeInTheDocument();
+  });
+
+  it('holds the sentences shut until the clip has been heard through once', () => {
+    renderBody({ audio: engine({ gated: true }) });
+
+    expect(
+      screen.getByText('The sentences open once you have heard the clip through once.'),
+    ).toBeInTheDocument();
+  });
+
+  it('is not there at all for an exercise without it', () => {
+    renderBody();
+
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
   });
 });

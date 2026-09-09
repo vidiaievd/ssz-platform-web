@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT, type ExerciseAudio } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 import type { StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
 
 import { WordBankGapFillBody, type GapFillValue, type GapVerdict } from './wordbank-gapfill-body';
@@ -47,9 +49,13 @@ function makeProjection(overrides: Partial<StudentProjection> = {}): StudentProj
 function Harness({
   projection = makeProjection(),
   onAnswerChange = vi.fn(),
+  audio,
+  audioTranscript = null,
 }: {
   projection?: StudentProjection;
   onAnswerChange?: (allFilled: boolean) => void;
+  audio?: ExerciseAudioEngine;
+  audioTranscript?: { transcript: string; translation: string } | null;
 }) {
   const [value, setValue] = useState<GapFillValue>({});
   return (
@@ -62,10 +68,51 @@ function Harness({
         phase="answering"
         mode="practice"
         accent="var(--ssz-runner-practice)"
+        {...(audio === undefined ? {} : { audio })}
+        audioTranscript={audioTranscript}
       />
     </NextIntlClientProvider>
   );
 }
+
+/** The block as the author wrote it, off the projected document. */
+const audioBlock = (over: Record<string, unknown> = {}): ExerciseAudio => ({
+  ...AUDIO_DEFAULT,
+  enabled: true,
+  assetId: 'asset-1',
+  title: 'Diktat',
+  duration: 96,
+  transcript: 'Jeg vil gjerne bestille en kaffe.',
+  ...over,
+  settings: { ...AUDIO_DEFAULT.settings, ...((over['settings'] as object) ?? {}) },
+});
+
+/** The engine as the hook would hand it over, with nothing playing yet. */
+const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+  audio: audioBlock(),
+  segments: {},
+  element: null,
+  src: 'https://cdn.test/asset-1.mp3',
+  state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+  duration: 96,
+  playing: false,
+  plays: 0,
+  limit: 0,
+  exhausted: false,
+  heard: false,
+  gated: false,
+  canPlay: true,
+  failed: false,
+  loading: false,
+  speed: 1,
+  toggle: vi.fn(),
+  back: vi.fn(),
+  seekTo: vi.fn(),
+  playRange: vi.fn(),
+  cycleSpeed: vi.fn(),
+  reset: vi.fn(),
+  ...over,
+});
 
 const gap = (label: string) => screen.getByRole('button', { name: new RegExp(`^${label}:`) });
 const chip = (word: string) => screen.getByRole('button', { name: word });
@@ -517,5 +564,60 @@ describe('WordBankGapFillBody — typed instead of chosen', () => {
     // word in the sentence, the same as in a chosen-word exercise.
     expect(screen.queryByRole('textbox', { name: /^G1:/ })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^G1:/ })).toHaveTextContent('bestille');
+  });
+});
+
+/*
+  The listening layer on this type (plan 56 phase 5). Dictation is what it is for — the
+  clip says the sentence and the learner writes the words back — so the two things worth
+  pinning down are that the gate reaches the bank as well as the gaps, and that a
+  timecode gives each sentence its own line to hear.
+*/
+describe('WordBankGapFillBody — with audio', () => {
+  it('puts a player above the sentences and leaves the exercise itself alone', () => {
+    render(<Harness audio={engine()} />);
+
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    expect(chip('bestille')).toBeEnabled();
+  });
+
+  it('locks the bank and the gaps until the clip has been heard through once', () => {
+    render(<Harness audio={engine({ gated: true })} />);
+
+    expect(chip('bestille')).toBeDisabled();
+    expect(gap('G1')).toBeDisabled();
+    expect(
+      screen.getByText('The gaps open once you have heard the clip through once.'),
+    ).toBeInTheDocument();
+  });
+
+  it('offers each sentence the slice of the clip it is heard in', () => {
+    render(<Harness audio={engine({ segments: { s2: { start: 22, end: 48 } } })} />);
+
+    // Only the sentence the author wrote a timecode for: the other plays the whole clip.
+    expect(screen.getAllByRole('button', { name: /0:22/ })).toHaveLength(1);
+  });
+
+  it('offers what the clip said only once the engine has handed it over', async () => {
+    const listening = engine({ audio: audioBlock({ settings: { transcriptWhen: 'after' } }) });
+
+    const { rerender } = render(<Harness audio={listening} />);
+    expect(screen.queryByRole('button', { name: /Transcript/i })).not.toBeInTheDocument();
+
+    rerender(
+      <Harness
+        audio={listening}
+        audioTranscript={{ transcript: 'Jeg vil gjerne bestille en kaffe.', translation: '' }}
+      />,
+    );
+    await userEvent.setup().click(screen.getByRole('button', { name: /Transcript/i }));
+    expect(screen.getByText(/Jeg vil gjerne bestille en kaffe/)).toBeInTheDocument();
+  });
+
+  it('is not there at all for an exercise without it', () => {
+    render(<Harness />);
+
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
+    expect(chip('bestille')).toBeEnabled();
   });
 });

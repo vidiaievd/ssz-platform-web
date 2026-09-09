@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
-import { LayoutDashboard, Settings } from 'lucide-react';
+import { LayoutDashboard, Settings, SquareCheckBig } from 'lucide-react';
 
 import { renderWithProviders } from '@/test/render';
 import { useUiStore } from '@/stores/ui-store';
@@ -31,6 +31,17 @@ const SECTIONS_WITH_LOCKED: NavSection[] = [
     ],
   },
 ];
+
+/** The marking inbox: a count, and a dot when part of it is late (review criterion 9). */
+function reviewSections(badge: number, badgeAlert = false): NavSection[] {
+  return [
+    {
+      items: [
+        { href: '/school/review', icon: SquareCheckBig, labelKey: 'review', badge, badgeAlert },
+      ],
+    },
+  ];
+}
 
 describe('Sidebar', () => {
   beforeEach(() => {
@@ -88,6 +99,27 @@ describe('Sidebar', () => {
     renderWithProviders(<Sidebar sections={SECTIONS} />);
     expect(screen.queryByText('Hybrid')).not.toBeInTheDocument();
     expect(screen.queryByText('Online only')).not.toBeInTheDocument();
+  });
+
+  it('shows the waiting count on an item that has one', () => {
+    renderWithProviders(<Sidebar sections={reviewSections(27)} />);
+    expect(screen.getByLabelText('27 waiting')).toHaveTextContent('27');
+  });
+
+  /** The dot says "open this now"; how many are late is the screen's business, not the nav's. */
+  it('marks lateness with a dot and never with a second number', () => {
+    renderWithProviders(<Sidebar sections={reviewSections(27, true)} />);
+
+    const badge = screen.getByLabelText('27 waiting, some past the promised time');
+    expect(badge).toHaveTextContent('27');
+    expect(badge.querySelectorAll('span')).toHaveLength(1);
+  });
+
+  it('drops the badge entirely when nothing is waiting', () => {
+    renderWithProviders(<Sidebar sections={reviewSections(0, true)} />);
+
+    expect(screen.getByRole('link', { name: /review/i })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/waiting/)).not.toBeInTheDocument();
   });
 
   it('collapse state persists across remounts', () => {

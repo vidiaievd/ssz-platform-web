@@ -10,13 +10,13 @@ export default async function TutorIndexPage() {
   const [locale, tutorProfile] = await Promise.all([getLocale(), getTutorProfile()]);
 
   if (!tutorProfile) {
-    redirect(`/${locale}/onboarding/tutor`);
+    redirect(`/${locale}/onboarding`);
   }
 
   // Use stable userId from JWT, not a generated name-based slug
   const userId = user.userId;
   if (!userId) {
-    redirect(`/${locale}/onboarding/tutor`);
+    redirect(`/${locale}/onboarding`);
   }
 
   redirect(`/${locale}/tutor/${userId}/dashboard`);

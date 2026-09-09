@@ -3,9 +3,18 @@
 import { useMutation } from '@tanstack/react-query';
 
 import type {
+  AnswerQuestionRequest,
+  AnswerQuestionResponse,
   AttemptRecord,
+  CheckRowRequest,
+  CheckRowResponse,
+  DraftResponse,
+  AttemptStatus,
+  AttemptStatusResponse,
   LastAttemptResponse,
   RevealAnswersResponse,
+  SaveDraftRequest,
+  SaveDraftResponse,
   SelfCheckRequest,
   SelfCheckResponse,
   StartAttemptRequest,
@@ -40,8 +49,20 @@ export class AttemptRequestError extends Error {
 }
 
 async function post<TResponse>(url: string, body?: unknown): Promise<TResponse> {
+  return send('POST', url, body);
+}
+
+async function put<TResponse>(url: string, body?: unknown): Promise<TResponse> {
+  return send('PUT', url, body);
+}
+
+async function send<TResponse>(
+  method: 'POST' | 'PUT',
+  url: string,
+  body?: unknown,
+): Promise<TResponse> {
   const res = await fetch(url, {
-    method: 'POST',
+    method,
     headers: { 'content-type': 'application/json' },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
@@ -75,6 +96,55 @@ export async function fetchLastAttempt(exerciseId: string): Promise<AttemptRecor
   }
 }
 
+/**
+ * How a failed `submit` actually left things (47.0.B).
+ *
+ * A failed check does not mean a failed submission: the engine has already accepted the
+ * work by the time it is scored or routed, so a request that reaches that far and then
+ * loses its response on the way back must not be treated the same as one that never
+ * arrived. `'delivered'` — the attempt moved on without this screen's help, and the
+ * right thing is to say so, calmly, with no button. `'not-delivered'` — nothing
+ * happened; the work is still in hand and worth another try. `'unconfirmed'` — even the
+ * question could not be answered, so neither "sent" nor "lost" would be honest; only
+ * "couldn't tell" is.
+ */
+export type SubmitFailureResolution = 'delivered' | 'not-delivered' | 'unconfirmed';
+
+function resolveByStatus(status: AttemptStatus): SubmitFailureResolution {
+  switch (status) {
+    case 'IN_PROGRESS':
+    case 'ABANDONED':
+      // `submit` requires IN_PROGRESS, so either one means it never took effect.
+      return 'not-delivered';
+    case 'SUBMITTED':
+    case 'ROUTED_FOR_REVIEW':
+    case 'SCORED':
+    case 'RETURNED':
+      // RETURNED is reachable only through ROUTED_FOR_REVIEW: a teacher who has already
+      // reviewed and sent the work back is proof it was delivered, not evidence it wasn't.
+      return 'delivered';
+  }
+}
+
+/**
+ * Asks the engine what became of an attempt after its `submit` call failed. Never
+ * rejects: a check that itself fails to answer is exactly the case this exists to
+ * report, not a reason to throw past the caller.
+ */
+export async function resolveSubmitFailure(
+  exerciseId: string,
+  attemptId: string,
+): Promise<SubmitFailureResolution> {
+  try {
+    const res = await fetch(`/api/exercises/${exerciseId}/attempts/${attemptId}`);
+    if (!res.ok) return 'unconfirmed';
+    const data = (await res.json()) as AttemptStatusResponse;
+    return resolveByStatus(data.status);
+  } catch {
+    return 'unconfirmed';
+  }
+}
+
 export function useStartAttempt(exerciseId: string) {
   return useMutation<StartAttemptResponse, Error, StartAttemptRequest>({
     mutationFn: (body) => post(`/api/exercises/${exerciseId}/attempts`, body),
@@ -104,6 +174,86 @@ export function useSelfCheck(exerciseId: string, attemptId: string | null) {
       return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/self-check`, body);
     },
   });
+}
+
+/**
+ * Hand in one question of a set — `short_answer` writes, `multiple_choice` picks.
+ *
+ * A mutation, and the plainest one here. The attempt stays in progress and gains one
+ * answered question, graded on the server — for `short_answer` because the phrases the
+ * answer is matched against *are* the answer, for `multiple_choice` because the retry
+ * and the 50/50 mean nothing once the browser knows the key (plan 53 §3.2). Whether a
+ * second try is allowed is the attempt's business and is refused upstream, which is
+ * where "irreversible" has to live: a button is not a rule.
+ *
+ * Generic in the verdict rather than returning the union: the two templates hand back
+ * different shapes, and a caller that has to narrow what it asked for would narrow it
+ * wrongly on the first refactor. `templateCode` on the response says which arrived.
+ */
+export function useAnswerQuestion<Result>(exerciseId: string, attemptId: string | null) {
+  return useMutation<AnswerQuestionResponse<Result>, Error, AnswerQuestionRequest>({
+    mutationFn: (body) => {
+      if (attemptId === null) throw new Error('No attempt in progress');
+      return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/answers`, body);
+    },
+  });
+}
+
+/**
+ * Check one sentence of a `sentence_schema` set, or ask to be shown it.
+ *
+ * The board goes up rather than the verdict coming down, for the reason the type was
+ * rewritten: which field a piece belongs in is the answer, and it never reaches the
+ * browser (plan 52 §3.2). Unlimited — being wrong here is a step in solving, not a
+ * verdict — until the sentence closes by being solved or shown.
+ *
+ * The attempt stays in progress. It is closed by `POST /submit` with every board in one
+ * aggregate, which regrades all of them.
+ */
+export function useCheckRow(exerciseId: string, attemptId: string | null) {
+  return useMutation<CheckRowResponse, Error, CheckRowRequest>({
+    mutationFn: (body) => {
+      if (attemptId === null) throw new Error('No attempt in progress');
+      return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/rows`, body);
+    },
+  });
+}
+
+/**
+ * Autosave, for the one template whose unfinished work is worth keeping.
+ *
+ * A mutation rather than anything automatic: what is saved and when is the runner's
+ * decision — it debounces, and it stops the moment the draft phase ends. The response
+ * carries the server's own timestamp, which is what the runner shows; a client clock is
+ * not evidence that anything was stored.
+ */
+export function useSaveDraft(exerciseId: string, attemptId: string | null) {
+  return useMutation<SaveDraftResponse, Error, SaveDraftRequest>({
+    mutationFn: (body) => {
+      if (attemptId === null) throw new Error('No attempt in progress');
+      return put(`/api/exercises/${exerciseId}/attempts/${attemptId}/draft`, body);
+    },
+  });
+}
+
+/**
+ * The draft already on this attempt, for a learner coming back to unfinished writing.
+ *
+ * Never rejects, like `fetchLastAttempt`: a restore that cannot be answered leaves the
+ * learner at an empty field, which is where they would have been without it, and that is
+ * not worth an error screen over an exercise that works.
+ */
+export async function fetchDraft(
+  exerciseId: string,
+  attemptId: string,
+): Promise<DraftResponse | null> {
+  try {
+    const res = await fetch(`/api/exercises/${exerciseId}/attempts/${attemptId}/draft`);
+    if (!res.ok) return null;
+    return (await res.json()) as DraftResponse;
+  } catch {
+    return null;
+  }
 }
 
 export function useRevealAnswers(exerciseId: string, attemptId: string | null) {

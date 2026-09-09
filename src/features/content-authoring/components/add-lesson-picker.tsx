@@ -21,6 +21,12 @@ import type { DifficultyLevel, LessonKind, Visibility } from '@/features/content
 import { TEMPLATE_CODE } from '@/lib/shared-kernel/wordbank-gapfill';
 import { TEMPLATE_CODE as ERROR_CORRECTION_TEMPLATE_CODE } from '@/lib/shared-kernel/error-correction';
 import { TRANSLATE_TYPES } from '@/lib/shared-kernel/translate';
+import { TEMPLATE_CODE as MATCH_PAIRS_TEMPLATE_CODE } from '@/lib/shared-kernel/match-pairs';
+import { TEMPLATE_CODE as WRITING_TASK_TEMPLATE_CODE } from '@/lib/shared-kernel/writing-task';
+import { TEMPLATE_CODE as SHORT_ANSWER_TEMPLATE_CODE } from '@/lib/shared-kernel/short-answer';
+import { TEMPLATE_CODE as SENTENCE_SCHEMA_TEMPLATE_CODE } from '@/lib/shared-kernel/sentence-schema';
+import { TEMPLATE_CODE as MULTIPLE_CHOICE_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice';
+import { TEMPLATE_CODE as MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice-group';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -28,6 +34,12 @@ import { createGrammarRuleAction } from '../actions/grammar';
 import { createExerciseAction } from '../actions/exercise';
 import { createGapFillAction } from '../actions/gap-fill';
 import { createErrorCorrectionAction } from '../actions/error-correction';
+import { createMatchPairsAction } from '../actions/match-pairs';
+import { createWritingTaskAction } from '../actions/writing-task';
+import { createShortAnswerAction } from '../actions/short-answer';
+import { createSentenceSchemaAction } from '../actions/sentence-schema';
+import { createMultipleChoiceAction } from '../actions/multiple-choice';
+import { createMultipleChoiceGroupAction } from '../actions/multiple-choice-group';
 import {
   createTranslateFromTargetAction,
   createTranslateToTargetAction,
@@ -66,11 +78,47 @@ interface AddLessonPickerProps {
 type OwnBuilderTemplate =
   | typeof TEMPLATE_CODE
   | typeof ERROR_CORRECTION_TEMPLATE_CODE
+  | typeof MATCH_PAIRS_TEMPLATE_CODE
+  | typeof WRITING_TASK_TEMPLATE_CODE
+  | typeof SHORT_ANSWER_TEMPLATE_CODE
+  | typeof SENTENCE_SCHEMA_TEMPLATE_CODE
+  | typeof MULTIPLE_CHOICE_TEMPLATE_CODE
+  | typeof MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
   [TEMPLATE_CODE]: createGapFillAction,
   [ERROR_CORRECTION_TEMPLATE_CODE]: createErrorCorrectionAction,
+  // Without a scaffold this template's content schema refuses the exercise outright:
+  // it requires a pair, and the generic form has no way to write one.
+  [MATCH_PAIRS_TEMPLATE_CODE]: createMatchPairsAction,
+  // The generic form's writing_task fields describe the shape this template left behind
+  // in plan 50. Without a scaffold a new exercise would be created in the old shape and
+  // refused by the template's schema — and the builder would open on nothing.
+  [WRITING_TASK_TEMPLATE_CODE]: createWritingTaskAction,
+  // The generic form still edits the 144 `short_answer` documents of the old form, but
+  // nothing new is written that way (plan 51 §8 Q1). Without a scaffold a new exercise
+  // would be created single-question, and the builder — which dispatches on the shape of
+  // the document — would never open for it.
+  [SHORT_ANSWER_TEMPLATE_CODE]: createShortAnswerAction,
+  // Unlike short answer, there is no old form left to create by accident: plan 52 §8 Q7
+  // rewrote all seven documents of this type, so the scaffold is the only way in. Without
+  // one the template's content schema refuses the exercise outright — it wants `rows`,
+  // and the generic form has no way to write one.
+  [SENTENCE_SCHEMA_TEMPLATE_CODE]: createSentenceSchemaAction,
+  // The eighth entry and the last of the thirteen templates to get one. This type was the
+  // platform's default — `DEFAULT_EXERCISE_VALUES.templateCode` — which is exactly why it
+  // was still being created in the generic form long after every other type had its own
+  // builder (plan 53 §8 Q5). Without a scaffold the builder opens on a document that has
+  // no questions array at all, and the template's schema refuses it.
+  [MULTIPLE_CHOICE_TEMPLATE_CODE]: createMultipleChoiceAction,
+  // The ninth, and the first whose generic form is not left behind by a rewrite so much
+  // as by a redesign: the old shape let every question carry its own options, which the
+  // handoff's model has no room for at all (plan 54 §8 Q1). Two seeded documents are
+  // still readable in the old form; nothing new is written that way, because without a
+  // scaffold the builder would open on a document with no `rows` and the template's
+  // schema would refuse it.
+  [MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE]: createMultipleChoiceGroupAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,

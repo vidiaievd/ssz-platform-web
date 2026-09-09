@@ -489,6 +489,15 @@ export interface ExerciseDisplay {
 /** Exercise as returned by `GET /exercises/:id/answers` — adds `expectedAnswers` for authoring. */
 export interface ExerciseWithAnswers extends ExerciseDisplay {
   expectedAnswers: Record<string, unknown>;
+  /**
+   * What the clip said, for a listening exercise whose transcript shows after the answer
+   * (plan 56 §3.3).
+   *
+   * It travels with the key and nowhere else, because on a listening exercise it *is* the
+   * key. Present only on the runner route, and only for a document the browser grades —
+   * for the rest the engine hands it over with the verdict.
+   */
+  audioTranscript?: { transcript: string; translation: string };
 }
 
 /** Exercise template metadata from `GET /exercise-templates`. */

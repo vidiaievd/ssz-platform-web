@@ -1,5 +1,7 @@
 {
   "dashboard": "Oversikt",
+  "review": "Retting",
+  "reviewOversight": "Retteoversikt",
   "content": "Innhold",
   "groups": "Grupper",
   "students": "Elever",
@@ -18,5 +20,8 @@
   "catalogue": "Katalog",
   "training": "Trening",
   "reviews": "Repetisjon",
-  "progress": "Fremgang"
+  "progress": "Fremgang",
+  "badgeCount": "{count} venter",
+  "badgeCountOverdue": "{count} venter, noe er over fristen",
+  "submissions": "Mitt arbeid"
 }

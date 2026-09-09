@@ -3,24 +3,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Search, X, ArrowDownUp } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { Segment, SortKey } from '../lib/filter-groups';
 
 type Props = {
+  totalCount: number;
   attentionCount: number;
-  draftsCount: number;
 };
 
-export function GroupListFilters({ attentionCount, draftsCount }: Props) {
+export function GroupListFilters({ totalCount, attentionCount }: Props) {
   const t = useTranslations('Groups');
 
   const sortLabels: Record<SortKey, string> = {
@@ -76,25 +77,20 @@ export function GroupListFilters({ attentionCount, draftsCount }: Props) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-3">
       {/* Search */}
-      <div className="relative">
+      <div className="relative w-[260px]">
         <Search
-          className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-(--ssz-text-muted)"
+          className="absolute left-[11px] top-1/2 -translate-y-1/2 size-[15px] text-(--ssz-text-muted) pointer-events-none"
           aria-hidden="true"
         />
-        <input
+        <Input
           type="search"
           value={inputValue}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder={t('filter.search')}
           aria-label={t('filter.search')}
-          className={cn(
-            'h-9 w-52 rounded-md border border-input bg-background',
-            'pl-8 pr-8 text-sm text-(--ssz-text-primary)',
-            'placeholder:text-(--ssz-text-muted)',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          )}
+          className="h-9 pl-[33px] pr-8"
         />
         {inputValue && (
           <button
@@ -109,71 +105,45 @@ export function GroupListFilters({ attentionCount, draftsCount }: Props) {
       </div>
 
       {/* Segment pills */}
-      <div className="flex items-center gap-1" role="group" aria-label="Filter groups">
+      <div className="flex items-center gap-1.5" role="group" aria-label="Filter groups">
         <SegmentButton
           active={segment === 'all'}
           onClick={() => updateParam({ segment: 'all' })}
         >
-          {t('filter.all')}
+          {t('filter.all')} {totalCount}
         </SegmentButton>
         <SegmentButton
           active={segment === 'attention'}
           onClick={() => updateParam({ segment: 'attention' })}
-          danger={attentionCount > 0}
+          tone="danger"
         >
-          {t('filter.attention')}
-          {attentionCount > 0 && (
-            <span className={cn(
-              'ml-1 inline-flex items-center justify-center rounded-full px-1.5 min-w-[18px] h-[18px]',
-              'text-[10px] font-bold leading-none',
-              segment === 'attention'
-                ? 'bg-error-700 text-white dark:bg-error-600'
-                : 'bg-error-100 text-error-700 dark:bg-error-900/40 dark:text-error-400',
-            )}>
-              {attentionCount}
-            </span>
-          )}
+          {t('filter.attention')} {attentionCount}
         </SegmentButton>
         <SegmentButton
           active={segment === 'drafts'}
           onClick={() => updateParam({ segment: 'drafts' })}
         >
           {t('filter.drafts')}
-          {draftsCount > 0 && (
-            <span className={cn(
-              'ml-1 inline-flex items-center justify-center rounded-full px-1.5 min-w-[18px] h-[18px]',
-              'text-[10px] font-bold leading-none',
-              segment === 'drafts'
-                ? 'bg-primary-700 text-white dark:bg-primary-600'
-                : 'bg-muted text-(--ssz-text-muted)',
-            )}>
-              {draftsCount}
-            </span>
-          )}
         </SegmentButton>
       </div>
 
       {/* Sort */}
-      <div className="ml-auto">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-(--ssz-text-secondary)">
-              <ArrowDownUp className="size-3.5" aria-hidden="true" />
-              {sortLabels[sort]}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+      <div className="ml-auto flex items-center gap-2.5">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-(--ssz-text-muted)">
+          {t('filter.sortLabel')}
+        </span>
+        <Select value={sort} onValueChange={(v) => updateParam({ sort: v })}>
+          <SelectTrigger className="h-9 w-[150px] text-sm" aria-label={t('filter.sortLabel')}>
+            <SelectValue>{sortLabels[sort]}</SelectValue>
+          </SelectTrigger>
+          <SelectContent align="end">
             {(Object.keys(sortLabels) as SortKey[]).map((key) => (
-              <DropdownMenuItem
-                key={key}
-                onClick={() => updateParam({ sort: key })}
-                className={sort === key ? 'font-semibold' : ''}
-              >
+              <SelectItem key={key} value={key}>
                 {sortLabels[key]}
-              </DropdownMenuItem>
+              </SelectItem>
             ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
@@ -183,12 +153,12 @@ export function GroupListFilters({ attentionCount, draftsCount }: Props) {
 
 function SegmentButton({
   active,
-  danger,
+  tone = 'primary',
   onClick,
   children,
 }: {
   active: boolean;
-  danger?: boolean;
+  tone?: 'primary' | 'danger';
   onClick: () => void;
   children: React.ReactNode;
 }) {
@@ -198,13 +168,14 @@ function SegmentButton({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors',
+        'inline-flex items-center rounded-full border px-[13px] py-[7px]',
+        'text-[12.5px] font-semibold whitespace-nowrap transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         active
-          ? danger
-            ? 'bg-error-600 text-white dark:bg-error-700'
-            : 'bg-primary-600 text-white dark:bg-primary-700'
-          : 'bg-muted text-(--ssz-text-secondary) hover:bg-muted/80',
+          ? tone === 'danger'
+            ? 'border-error-500 bg-error-50 text-error-700 dark:bg-error-900/25 dark:text-error-400'
+            : 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/25 dark:text-primary-300'
+          : 'border-border bg-(--ssz-bg-surface) text-(--ssz-text-secondary) hover:bg-(--ssz-bg-subtle)',
       )}
     >
       {children}

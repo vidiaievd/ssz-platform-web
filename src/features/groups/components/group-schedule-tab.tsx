@@ -5,7 +5,9 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { LessonHeldControl } from './lesson-held-control';
 import type { Slot, Lesson, Weekday } from '../types';
+import type { CurriculumUnit } from '@/features/teachers/types';
 
 const DAY_ORDER: Record<Weekday, number> = {
   Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6,
@@ -19,11 +21,24 @@ const DAY_FULL: Record<Weekday, string> = {
 type Props = {
   slots: Slot[];
   lessons: Lesson[];
+  recentLessons: Lesson[];
+  planUnits: CurriculumUnit[];
+  schoolId: string;
+  groupId: string;
   canManage: boolean;
   onEditSchedule: () => void;
 };
 
-export function GroupScheduleTab({ slots, lessons, canManage, onEditSchedule }: Props) {
+export function GroupScheduleTab({
+  slots,
+  lessons,
+  recentLessons,
+  planUnits,
+  schoolId,
+  groupId,
+  canManage,
+  onEditSchedule,
+}: Props) {
   const t = useTranslations('Groups');
   const sortedSlots = [...slots].sort(
     (a, b) => DAY_ORDER[a.day] - DAY_ORDER[b.day] || a.start.localeCompare(b.start),
@@ -117,6 +132,67 @@ export function GroupScheduleTab({ slots, lessons, canManage, onEditSchedule }: 
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </section>
+
+      {/* Lessons that have already happened — the only place group progress moves */}
+      <section aria-labelledby="schedule-recent-heading">
+        <h3
+          id="schedule-recent-heading"
+          className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-3"
+        >
+          {t('schedule.recentHeading')}
+        </h3>
+
+        {recentLessons.length === 0 ? (
+          <p className="text-sm text-(--ssz-text-muted) italic px-3 py-2">
+            {t('schedule.noRecent')}
+          </p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {recentLessons.map((lesson) => {
+              const unit = planUnits.find((u) => u.unitId === lesson.curriculumUnitId);
+              return (
+                <div
+                  key={lesson.id}
+                  className={cn(
+                    'flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border px-4 py-3',
+                    lesson.status === 'held'
+                      ? 'border-success-200 bg-success-50 dark:border-success-800 dark:bg-success-900/10'
+                      : 'border-border bg-card',
+                  )}
+                >
+                  <span className="text-sm font-medium text-(--ssz-text-primary) whitespace-nowrap">
+                    {lesson.date}
+                  </span>
+                  <span className="text-sm text-(--ssz-text-secondary) whitespace-nowrap">
+                    {lesson.start} – {lesson.end}
+                  </span>
+                  <span className="flex-1 min-w-0 text-xs text-(--ssz-text-muted) truncate">
+                    {unit ? unit.title : t('schedule.noUnit')}
+                  </span>
+
+                  {lesson.status === 'held' ? (
+                    <span className="rounded-full bg-success-100 text-success-700 dark:bg-success-900/40 dark:text-success-400 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap">
+                      {t('schedule.held')}
+                    </span>
+                  ) : canManage ? (
+                    <LessonHeldControl
+                      schoolId={schoolId}
+                      groupId={groupId}
+                      lessonId={lesson.id}
+                      units={planUnits}
+                      defaultUnitId={lesson.curriculumUnitId}
+                    />
+                  ) : (
+                    <span className="text-[11px] text-(--ssz-text-muted) whitespace-nowrap">
+                      {t('schedule.notHeld')}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </section>

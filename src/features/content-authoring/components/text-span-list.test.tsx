@@ -4,7 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import type { Container, LessonTextSpan, VocabularyItem, VocabularyList } from '@/features/content/types';
+import type {
+  Container,
+  LessonTextSpan,
+  VocabularyItem,
+  VocabularyList,
+} from '@/features/content/types';
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 vi.mock('../actions/lesson-spans', () => ({
@@ -20,9 +25,8 @@ vi.mock('../api/use-authoring-vocabulary', () => ({
 const { TextSpanList } = await import('./text-span-list');
 const { deleteTextSpanAction, updateTextSpanAction } = await import('../actions/lesson-spans');
 const { useLessonTextSpans } = await import('../api/use-authoring-lessons');
-const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } = await import(
-  '../api/use-authoring-vocabulary'
-);
+const { useAuthoringVocabularyLists, useAuthoringVocabularyItems } =
+  await import('../api/use-authoring-vocabulary');
 
 const CONTAINER: Container = {
   id: 'module-1',
@@ -38,8 +42,15 @@ const CONTAINER: Container = {
   updatedAt: '',
 };
 
-const LIST: VocabularyList = { id: 'list-1', title: 'Arbeidsliv', targetLanguage: 'no', createdAt: '' };
-const ITEMS: VocabularyItem[] = [{ id: 'vocab-1', lemma: 'sykepleier', translations: [], examples: [] }];
+const LIST: VocabularyList = {
+  id: 'list-1',
+  title: 'Arbeidsliv',
+  targetLanguage: 'no',
+  createdAt: '',
+};
+const ITEMS: VocabularyItem[] = [
+  { id: 'vocab-1', lemma: 'sykepleier', translations: [], examples: [] },
+];
 
 function span(overrides: Partial<LessonTextSpan> = {}): LessonTextSpan {
   return {
@@ -69,11 +80,18 @@ function renderList(spans: LessonTextSpan[]) {
   );
 }
 
-const flush = () => act(async () => { await Promise.resolve(); });
+const flush = () =>
+  act(async () => {
+    await Promise.resolve();
+  });
 
 beforeEach(() => {
-  vi.mocked(deleteTextSpanAction).mockReset().mockResolvedValue({ ok: true, value: undefined } as never);
-  vi.mocked(updateTextSpanAction).mockReset().mockResolvedValue({ ok: true, value: span() } as never);
+  vi.mocked(deleteTextSpanAction)
+    .mockReset()
+    .mockResolvedValue({ ok: true, value: undefined } as never);
+  vi.mocked(updateTextSpanAction)
+    .mockReset()
+    .mockResolvedValue({ ok: true, value: span() } as never);
   vi.mocked(useAuthoringVocabularyLists).mockReturnValue({ data: [LIST] } as never);
   vi.mocked(useAuthoringVocabularyItems).mockReturnValue({
     data: { items: ITEMS, total: 1, page: 1, limit: 20, totalPages: 1 },
@@ -94,7 +112,9 @@ describe('TextSpanList', () => {
   });
 
   it('falls back to the note as a chunk’s label', () => {
-    renderList([span({ kind: 'chunk', refId: null, note: 'Fast uttrykk', textSnapshot: 'på grunn av' })]);
+    renderList([
+      span({ kind: 'chunk', refId: null, note: 'Fast uttrykk', textSnapshot: 'på grunn av' }),
+    ]);
     expect(screen.getByText('— Fast uttrykk')).toBeInTheDocument();
   });
 
@@ -165,7 +185,9 @@ describe('TextSpanList', () => {
   });
 
   it('saves an edited note without touching kind or referent', async () => {
-    renderList([span({ kind: 'chunk', refId: null, note: 'Fast uttrykk', textSnapshot: 'på grunn av' })]);
+    renderList([
+      span({ kind: 'chunk', refId: null, note: 'Fast uttrykk', textSnapshot: 'på grunn av' }),
+    ]);
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit the note on “på grunn av”' }));
     const field = screen.getByLabelText('Note (optional)');

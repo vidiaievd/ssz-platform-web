@@ -100,5 +100,9 @@
   "matchColumnRight": "Treff",
   "translatePrompt": "Oversett:",
   "shortAnswerAnswer": "Svar",
-  "writingTopics": "Temaer"
+  "shortAnswerTranscript": "Transkripsjon — eleven ser den ikke",
+  "writingWords": "ord",
+  "writingPointOptional": "valgfritt",
+  "sentenceSchemaCount": "{n, plural, one {# setning} other {# setninger}}",
+  "sentenceSchemaNotASet": "Denne oppgaven er skrevet i den gamle formen og kan ikke vises. Åpne den i redigeringen for å skrive den om til et sett med setninger."
 }

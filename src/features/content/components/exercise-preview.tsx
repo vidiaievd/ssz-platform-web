@@ -3,7 +3,12 @@ import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/card';
 import { readContent as readErrorCorrectionContent } from '@/lib/shared-kernel/error-correction';
+import {
+  isShortAnswerDocument,
+  readContent as readShortAnswerContent,
+} from '@/lib/shared-kernel/short-answer';
 import { readContent as readTranslateContent } from '@/lib/shared-kernel/translate';
+import { readContent as readWritingTaskContent } from '@/lib/shared-kernel/writing-task';
 import type { ExerciseDisplay } from '../types';
 
 interface ExercisePreviewProps {
@@ -115,96 +120,14 @@ export function ExercisePreview({ exercise }: ExercisePreviewProps) {
           <TranslateContent content={content} code={code} />
         )}
 
-        {code === 'match_pairs' && (
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-muted-foreground mb-1 text-xs font-medium">{t('matchColumnLeft')}</p>
-              <ul className="space-y-1.5">
-                {asItems(content.left_items).map((o, i) => (
-                  <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
-                    {o.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="text-muted-foreground mb-1 text-xs font-medium">{t('matchColumnRight')}</p>
-              <ul className="space-y-1.5">
-                {asItems(content.right_items).map((o, i) => (
-                  <li key={i} className="rounded-md border border-dashed border-border px-3 py-2 text-sm">
-                    {o.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
+        {code === 'match_pairs' && <MatchPairsContent content={content} />}
 
-        {code === 'short_answer' && (
-          <div className="space-y-2">
-            {typeof content.question === 'string' && <p className="text-sm font-medium">{content.question}</p>}
-            {typeof content.context === 'string' && content.context && (
-              <p className="text-muted-foreground text-xs">{content.context}</p>
-            )}
-            <div className="rounded-md border border-dashed border-border px-3 py-2">
-              <p className="text-muted-foreground text-xs">{t('shortAnswerAnswer')}</p>
-            </div>
-          </div>
-        )}
+        {code === 'short_answer' && <ShortAnswerContent content={content} />}
 
-        {code === 'writing_task' && (
-          <div className="space-y-2">
-            {typeof content.prompt === 'string' && <p className="text-sm font-medium">{content.prompt}</p>}
-            {Array.isArray(content.options) && content.options.length > 0 && (
-              <div>
-                <p className="text-muted-foreground mb-1 text-xs font-medium">{t('writingTopics')}</p>
-                <ul className="space-y-1.5">
-                  {(content.options as LabeledItem[]).map((o, i) => (
-                    <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
-                      {typeof (o as { title?: unknown }).title === 'string'
-                        ? (o as { title: string }).title
-                        : ''}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
+        {code === 'writing_task' && <WritingTaskPrompt content={content} />}
 
-        {code === 'sentence_schema' && (
-          <div className="space-y-2">
-            {typeof content.sentence === 'string' && <p className="text-sm font-medium">{content.sentence}</p>}
-            <div className="overflow-x-auto">
-              <div className="flex min-w-max gap-1.5">
-                {(Array.isArray(content.fields) ? (content.fields as LabeledItem[]) : []).map((f, i) => (
-                  <div
-                    key={i}
-                    className="min-w-20 flex-1 rounded-md border border-dashed border-border px-2 py-2 text-center"
-                  >
-                    <p className="text-muted-foreground text-[11px] font-medium">
-                      {typeof (f as { label?: unknown }).label === 'string'
-                        ? (f as { label: string }).label
-                        : ''}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {Array.isArray(content.tokens) && content.tokens.length > 0 && (
-              <div>
-                <p className="text-muted-foreground mb-1 text-xs font-medium">{t('wordBank')}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {asItems(content.tokens).map((tok, i) => (
-                    <Badge key={i} variant="muted" className="text-xs">
-                      {tok.text}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {code === 'sentence_schema' && <SentenceSchemaContent content={content} />}
+
         {code === 'word_bank_fill' && (
           <div className="space-y-2">
             {Array.isArray(content.word_bank) && content.word_bank.length > 0 && (
@@ -292,6 +215,217 @@ function ErrorCorrectionContent({ content }: { content: Record<string, unknown> 
 }
 
 /**
+ * The task as the student meets it, and nothing else.
+ *
+ * `content` is the answer-free half of the document by construction (plan 50): the
+ * example answer, the level descriptors and the point keywords live in
+ * `expected_answers`, which never reaches this component. So the checklist can be shown
+ * whole — there is no key in it to hide — while the rubric cannot be shown at all, since
+ * its descriptors are the half that stayed behind.
+ *
+ * Pre-plan-50 documents (`prompt` / `options` / `min_words`) coerce to an empty task
+ * rather than throwing: `readContent` fills defaults, and what is missing simply does not
+ * render.
+ */
+function WritingTaskPrompt({ content }: { content: Record<string, unknown> }) {
+  const t = useTranslations('Content');
+  const tw = useTranslations('ExerciseRunner.writingTask');
+  const { mode, instruction, prompt, source, letter, points, phrases, settings } =
+    readWritingTaskContent(content);
+  const { minWords, maxWords } = settings;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant="muted" className="text-xs">
+          {tw(`modes.${mode}`)}
+        </Badge>
+        {minWords > 0 && (
+          <span className="text-muted-foreground text-xs">
+            {maxWords > 0 ? `${minWords}–${maxWords}` : `${minWords}+`} {t('writingWords')}
+          </span>
+        )}
+      </div>
+
+      {instruction !== '' && <p className="text-muted-foreground text-xs">{instruction}</p>}
+      {prompt !== '' && <p className="text-sm font-medium">{prompt}</p>}
+
+      {mode === 'letter' && letter.recipient !== '' && (
+        <p className="text-muted-foreground text-xs">
+          {tw('letterLine', {
+            recipient: letter.recipient,
+            register: tw(`register.${letter.register}`),
+          })}
+        </p>
+      )}
+
+      {mode === 'retell' && source !== '' && (
+        <p className="rounded-md border border-border px-3 py-2 text-sm leading-relaxed">
+          {source}
+        </p>
+      )}
+
+      {points.length > 0 && (
+        <div>
+          <p className="text-muted-foreground mb-1 text-xs font-medium">{tw('checklistTitle')}</p>
+          <ul className="space-y-1.5">
+            {points.map((point) => (
+              <li key={point.id} className="rounded-md border border-border px-3 py-2 text-sm">
+                {point.text}
+                {!point.required && (
+                  <span className="text-muted-foreground ml-1.5 text-xs">
+                    {t('writingPointOptional')}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {phrases.length > 0 && (
+        <div>
+          <p className="text-muted-foreground mb-1 text-xs font-medium">{tw('phrasesTitle')}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {phrases.map((phrase, i) => (
+              <Badge key={i} variant="muted" className="text-xs">
+                {phrase}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * short_answer — one template code over two live document shapes (plan 51 §8 Q1).
+ *
+ * The new form is a set of open questions; the old one is a single question with a
+ * context line, and 144 exercises are still written in it. The document says which is
+ * which — `questions` is an array in one and absent from the other — and this is the
+ * same test the validator, the runners and the BFF dispatch on.
+ *
+ * Neither branch can show an answer. For the old form the accepted strings live in
+ * `expected_answers`; for the new one so do the semantic elements, their anchor phrases
+ * and the model answer — and those are the answer written in the words the student is
+ * asked to find. `/display` serves neither column, so the preview shows the questions
+ * and marks where the answer would go.
+ */
+function ShortAnswerContent({ content }: { content: Record<string, unknown> }) {
+  const t = useTranslations('Content');
+  const ts = useTranslations('ExerciseRunner.set');
+
+  if (!isShortAnswerDocument(content)) {
+    return (
+      <div className="space-y-2">
+        {typeof content.question === 'string' && (
+          <p className="text-sm font-medium">{content.question}</p>
+        )}
+        {typeof content.context === 'string' && content.context && (
+          <p className="text-muted-foreground text-xs">{content.context}</p>
+        )}
+        <div className="rounded-md border border-dashed border-border px-3 py-2">
+          <p className="text-muted-foreground text-xs">{t('shortAnswerAnswer')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { title, instruction, questions } = readShortAnswerContent(content);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant="muted" className="text-xs">
+          {ts('badge')}
+        </Badge>
+        <span className="text-muted-foreground text-xs">
+          {ts('count', { n: questions.length })}
+        </span>
+      </div>
+
+      {title !== '' && <p className="text-sm font-medium">{title}</p>}
+      {instruction !== '' && <p className="text-muted-foreground text-xs">{instruction}</p>}
+
+      <ol className="space-y-2">
+        {questions.map((question, i) => (
+          <li key={question.id} className="space-y-1.5 rounded-md border border-border px-3 py-2">
+            <p className="text-sm font-medium">
+              <span className="text-muted-foreground mr-1.5 text-xs">{i + 1}.</span>
+              {question.prompt}
+            </p>
+            {question.passage !== '' && (
+              <p className="text-muted-foreground border-l-2 border-border pl-2 text-xs leading-relaxed whitespace-pre-wrap">
+                {question.kind === 'listening' && (
+                  <span className="mr-1.5 font-medium">{t('shortAnswerTranscript')}</span>
+                )}
+                {question.passage}
+              </p>
+            )}
+            <div className="rounded-md border border-dashed border-border px-3 py-1.5">
+              <p className="text-muted-foreground text-xs">{t('shortAnswerAnswer')}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/**
+ * match_pairs — read-only, and read through the projection.
+ *
+ * `/display` serves this template as a student projection (plan 49): left halves as
+ * `slots`, every right half — answers and distractors alike — as one shuffled `pool`.
+ * That is the same thing the learner sees, and it is the only shape available here: the
+ * pairing never leaves the server, so this preview cannot show which half answers which
+ * slot, and must not pretend to.
+ *
+ * Pre-plan-49 documents reach `/display` through the same projection, so the legacy
+ * `left_items` / `right_items` shape is handled upstream and never arrives here.
+ */
+function MatchPairsContent({ content }: { content: Record<string, unknown> }) {
+  const t = useTranslations('Content');
+  const slots = Array.isArray(content.slots)
+    ? (content.slots as { left?: unknown }[]).map((slot) =>
+        typeof slot.left === 'string' ? slot.left : '',
+      )
+    : [];
+  const pool = Array.isArray(content.pool)
+    ? (content.pool as { text?: unknown }[]).map((item) =>
+        typeof item.text === 'string' ? item.text : '',
+      )
+    : [];
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <div>
+        <p className="text-muted-foreground mb-1 text-xs font-medium">{t('matchColumnLeft')}</p>
+        <ul className="space-y-1.5">
+          {slots.map((left, i) => (
+            <li key={i} className="rounded-md border border-border px-3 py-2 text-sm">
+              {left}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <p className="text-muted-foreground mb-1 text-xs font-medium">{t('matchColumnRight')}</p>
+        <ul className="space-y-1.5">
+          {pool.map((text, i) => (
+            <li key={i} className="rounded-md border border-dashed border-border px-3 py-2 text-sm">
+              {text}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/**
  * The sentences to translate, and nothing else: the accepted translations are the answer
  * key and live in `expected_answers`, which `/display` does not serve. Read through the
  * kernel rather than off the raw record — the direction of a sentence may differ from the
@@ -326,6 +460,100 @@ function TranslateContent({
             {item.source}
           </li>
         ))}
+      </ol>
+    </div>
+  );
+}
+
+/**
+ * sentence_schema — read-only, and read through the projection.
+ *
+ * `/display` serves this template as a student projection (plan 52 §3.2): the fields of
+ * each sentence, the bank the server shuffled, and the prompt where there is one. Which
+ * field a chunk belongs in never leaves the server, so this preview cannot show the
+ * finished board and must not pretend to — what a teacher sees here is what the learner
+ * starts from.
+ *
+ * A document that is not a set says so instead of drawing an empty board. All seven
+ * seeded exercises were rewritten (§8 Q7), so one arriving in the pre-plan-52 shape is a
+ * leftover that needs rewriting rather than an exercise with nothing in it — and that is
+ * the same answer the validator, the runners and the projection give it.
+ */
+function SentenceSchemaContent({ content }: { content: Record<string, unknown> }) {
+  const t = useTranslations('Content');
+  const ts = useTranslations('ExerciseRunner.set');
+
+  const rows = Array.isArray(content.rows) ? (content.rows as Record<string, unknown>[]) : null;
+  if (rows === null) {
+    return <p className="text-muted-foreground text-sm">{t('sentenceSchemaNotASet')}</p>;
+  }
+
+  const instruction = typeof content.instruction === 'string' ? content.instruction : '';
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant="muted" className="text-xs">
+          {ts('badge')}
+        </Badge>
+        <span className="text-muted-foreground text-xs">
+          {t('sentenceSchemaCount', { n: rows.length })}
+        </span>
+      </div>
+
+      {instruction !== '' && <p className="text-muted-foreground text-xs">{instruction}</p>}
+
+      <ol className="space-y-2">
+        {rows.map((row, i) => {
+          const fields = Array.isArray(row.fields)
+            ? (row.fields as { short?: unknown; label?: unknown }[])
+            : [];
+          const bank = asItems(row.bank);
+          const source = typeof row.source === 'string' ? row.source : '';
+
+          return (
+            <li key={i} className="space-y-2 rounded-md border border-border px-3 py-2">
+              {/* The sentence to rewrite, where there is one. The sentence being built is
+                  the answer, and it is not in this payload at all. */}
+              {source !== '' && (
+                <p className="text-sm font-medium">
+                  <span className="text-muted-foreground mr-1.5 text-xs">{i + 1}.</span>
+                  {source}
+                </p>
+              )}
+              <div className="overflow-x-auto">
+                <div className="flex min-w-max gap-1.5">
+                  {fields.map((field, j) => (
+                    <div
+                      key={j}
+                      className="min-w-20 flex-1 rounded-md border border-dashed border-border px-2 py-2 text-center"
+                    >
+                      <p className="text-muted-foreground text-[11px] font-medium">
+                        {typeof field.label === 'string' && field.label !== ''
+                          ? field.label
+                          : typeof field.short === 'string'
+                            ? field.short
+                            : ''}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {bank.length > 0 && (
+                <div>
+                  <p className="text-muted-foreground mb-1 text-xs font-medium">{t('wordBank')}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {bank.map((item, j) => (
+                      <Badge key={j} variant="muted" className="text-xs">
+                        {item.text}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ol>
     </div>
   );

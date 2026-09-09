@@ -4,6 +4,7 @@ import { useState, useTransition, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Search, AlertTriangle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -37,6 +38,7 @@ export function StudentAssignModal({
   candidates: initialCandidates,
   schoolId,
 }: Props) {
+  const t = useTranslations('Groups');
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data } = useStudentCandidates(schoolId, groupId, {
@@ -88,13 +90,19 @@ export function StudentAssignModal({
       );
       if (result.ok) {
         const n = selectedIds.size;
-        toast.success(`Added ${n} student${n > 1 ? 's' : ''}${overCap ? ' (over capacity — override applied)' : ''}`);
+        toast.success(
+          overCap
+            ? t('addStudents.successOverride', { count: n })
+            : n === 1
+              ? t('addStudents.success', { count: n })
+              : t('addStudents.successPlural', { count: n }),
+        );
         queryClient.invalidateQueries({ queryKey: groupKeys.studentCandidates(schoolId, groupId) });
         queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         router.back();
         router.refresh();
       } else {
-        toast.error('Failed to add students. Please try again.');
+        toast.error(t('addStudents.error'));
       }
     });
   }
@@ -104,9 +112,9 @@ export function StudentAssignModal({
       <DialogContent className="sm:max-w-lg max-h-[90dvh] flex flex-col overflow-hidden p-0">
         <div className="flex flex-col gap-4 p-4 overflow-y-auto flex-1">
           <DialogHeader>
-            <DialogTitle>Add students</DialogTitle>
+            <DialogTitle>{t('addStudents.title')}</DialogTitle>
             <DialogDescription>
-              Adding to <strong>{groupName}</strong>. Select one or more students.
+              {t('addStudents.description', { groupName })}
             </DialogDescription>
           </DialogHeader>
 
@@ -121,13 +129,16 @@ export function StudentAssignModal({
             {overCap && (
               <div className="flex items-center gap-1.5 text-xs text-warning-700 dark:text-warning-300">
                 <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
-                Adding {selectedIds.size} brings the group to {projected}, above the {capacity.max}-seat cap.
-                You can still add with an override.
+                {t('addStudents.overCapWarning', {
+                  count: selectedIds.size,
+                  projected,
+                  max: capacity.max,
+                })}
               </div>
             )}
             {underMin && (
               <p className="text-xs text-(--ssz-text-muted)">
-                Note: group will still be under minimum ({capacity.min}) after adding.
+                {t('addStudents.underMinNote', { min: capacity.min })}
               </p>
             )}
           </div>
@@ -139,8 +150,8 @@ export function StudentAssignModal({
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by name or email…"
-              aria-label="Search students"
+              placeholder={t('addStudents.search')}
+              aria-label={t('addStudents.searchAria')}
               className={cn(
                 'h-9 w-full rounded-md border border-input bg-background',
                 'pl-8 pr-3 text-sm text-(--ssz-text-primary)',
@@ -153,7 +164,7 @@ export function StudentAssignModal({
           {/* Selection count */}
           {selectedIds.size > 0 && (
             <p className="text-xs text-primary font-medium">
-              {selectedIds.size} student{selectedIds.size > 1 ? 's' : ''} selected
+              {t('addStudents.selected', { count: selectedIds.size })}
             </p>
           )}
 
@@ -161,14 +172,14 @@ export function StudentAssignModal({
           <div
             role="listbox"
             aria-multiselectable="true"
-            aria-label="Select students to add"
+            aria-label={t('addStudents.listAria')}
             className="flex flex-col gap-1 max-h-72 overflow-y-auto"
           >
             {filtered.length === 0 ? (
               <p className="text-sm text-(--ssz-text-muted) text-center py-6">
                 {candidates.length === 0
-                  ? 'All school students are already enrolled in this group.'
-                  : 'No students match your search.'}
+                  ? t('addStudents.noStudents')
+                  : t('addStudents.noMatch')}
               </p>
             ) : (
               filtered.map((c) => {
@@ -190,7 +201,7 @@ export function StudentAssignModal({
                     <Checkbox
                       checked={isSelected}
                       onCheckedChange={() => toggleStudent(c.userId)}
-                      aria-label={`Select ${c.name}`}
+                      aria-label={t('addStudents.selectAria', { name: c.name })}
                       onClick={(e) => e.stopPropagation()}
                     />
                     <Avatar name={c.name} src={c.avatarUrl ?? undefined} size="sm" />
@@ -212,17 +223,17 @@ export function StudentAssignModal({
 
         <DialogFooter className="rounded-b-xl">
           <Button variant="outline" onClick={handleClose} disabled={isPending}>
-            Cancel
+            {t('addStudents.cancel')}
           </Button>
           <Button
             onClick={handleAdd}
             disabled={selectedIds.size === 0 || isPending}
           >
             {isPending
-              ? 'Adding…'
+              ? t('addStudents.adding')
               : overCap
-                ? `Add ${selectedIds.size} (override capacity)`
-                : `Add ${selectedIds.size || ''} student${selectedIds.size !== 1 ? 's' : ''}`.trim()}
+                ? t('addStudents.addOverride', { count: selectedIds.size })
+                : t('addStudents.addCount', { count: selectedIds.size })}
           </Button>
         </DialogFooter>
       </DialogContent>

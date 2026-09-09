@@ -171,6 +171,9 @@ function Caret({ expanded, onToggle, label }: { expanded: boolean; onToggle: () 
     <button
       type="button"
       aria-label={label}
+      // The state belongs on the control that changes it. It used to sit on the row,
+      // which is not a button and cannot carry it (see the note on the list below).
+      aria-expanded={expanded}
       onClick={(e) => {
         e.stopPropagation();
         onToggle();
@@ -507,8 +510,12 @@ function BlockRow({
       // The row the pointer is carrying is drawn by the overlay instead; this
       // one stays in the list as the gap the others slide around.
       style={{ transform: CSS.Translate.toString(transform), transition }}
-      role="treeitem"
-      aria-selected={selected}
+      // A row is a cluster of controls about one piece of material — open it, rename it,
+      // move it — so it is named after that material and announced as one thing. This is
+      // also the handle by which a row is found, now that it is not a `treeitem`.
+      role="group"
+      aria-label={item.title ?? ''}
+      aria-current={selected ? true : undefined}
       tabIndex={0}
       onClick={() => onSelect(select())}
       onKeyDown={(e) => {
@@ -756,9 +763,11 @@ function ModuleCard({
       )}
     >
       <header
-        role="treeitem"
-        aria-selected={selected}
-        aria-expanded={expanded}
+        // Named and grouped for the same reason a material row is: it is the controls
+        // for one module, and the thing a reader — or a test — reaches for by name.
+        role="group"
+        aria-label={mod.title ?? ''}
+        aria-current={selected ? true : undefined}
         tabIndex={0}
         onClick={() => onSelect({ kind: 'module', module: mod })}
         onKeyDown={(e) => {
@@ -1636,7 +1645,17 @@ export function CurriculumTree({
       onDragEnd={handleDragEnd}
       onDragCancel={endDrag}
     >
-      <div role="tree">
+      {/*
+        Not `role="tree"`, deliberately.
+        A tree promises keyboard behaviour this editor does not have — arrows between
+        items, Left/Right to fold, typeahead — and announcing "treeitem, 2 of 5" to
+        someone who then cannot move with the arrow keys is a worse answer than
+        announcing nothing. The container also holds things no tree may hold: drop
+        zones, the bulk bar, the buttons that add a level. Selection is `aria-current`,
+        which is global and true here; folding is announced by the caret that does it.
+        Making this a real tree means building the navigation first — see plans 38/39.
+      */}
+      <div>
         {viewTree.levels.length === 0 && (
           <p className="py-6 text-center text-sm text-muted-foreground">{t('structure.empty')}</p>
         )}
@@ -1666,9 +1685,9 @@ export function CurriculumTree({
               {(levelDrag) => (
               <>
               <header
-                role="treeitem"
-                aria-selected={selected}
-                aria-expanded={expanded}
+                role="group"
+                aria-label={level.title ?? ''}
+                aria-current={selected ? true : undefined}
                 tabIndex={0}
                 onClick={() => onSelect({ kind: 'level', level })}
                 onKeyDown={(e) => {

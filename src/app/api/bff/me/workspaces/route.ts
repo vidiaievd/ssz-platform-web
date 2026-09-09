@@ -20,12 +20,17 @@ export async function GET() {
 
   const [schoolsResult, tutorGroupResult, rolesResult] = await Promise.allSettled([
     serverFetch<SchoolsPayload>({ service: 'organization', path: '/schools' }),
-    serverFetch<{ id: string; name: string } | null>({ service: 'organization', path: '/tutoring/group' }),
+    serverFetch<{ id: string; name: string } | null>({
+      service: 'organization',
+      path: '/tutoring/group',
+      // Probed for every user: 404 when a tutor has no group yet, 403 when the
+      // account has no 'tutor' role at all. Both are normal, not failures.
+      expectedErrorStatuses: [403, 404],
+    }),
     serverFetch<UserRolesResponse>({ service: 'auth', path: '/auth/roles' }),
   ]);
 
-  const roles =
-    rolesResult.status === 'fulfilled' ? (rolesResult.value.roles ?? []) : [];
+  const roles = rolesResult.status === 'fulfilled' ? (rolesResult.value.roles ?? []) : [];
 
   const contexts: WorkspaceContext[] = [];
 
@@ -86,4 +91,3 @@ export async function GET() {
 // ── POST /api/bff/me/workspaces/activate ──────────────────────────────────
 // Note: activate lives in a sub-route file (activate/route.ts)
 // This file handles only GET for /api/bff/me/workspaces.
-

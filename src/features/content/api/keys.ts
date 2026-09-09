@@ -29,4 +29,6 @@ export const contentKeys = keyFactory('content', {
   grammarExplanation: (ruleId: string) => ['grammar-rule', ruleId, 'explanation'] as const,
   exercise: (id: string) => ['exercise', id] as const,
   exerciseAnswers: (id: string) => ['exercise', id, 'answers'] as const,
+  /** What a learner is served: the published document, key only where the browser grades. */
+  exerciseForRunner: (id: string) => ['exercise', id, 'runner'] as const,
 });

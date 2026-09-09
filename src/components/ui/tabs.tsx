@@ -57,12 +57,19 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
         aria-selected={active}
         onClick={() => ctx.onValueChange(value)}
         className={cn(
-          "px-5 py-2.25 text-sm font-medium capitalize cursor-pointer",
+          "px-5 py-2.25 text-sm capitalize cursor-pointer",
           "border-b-2 -mb-0.5 transition-all duration-base ease-out-ssz",
           "focus-visible:outline-none focus-visible:shadow-focus-primary rounded-t-sm",
+          // Two separate signals, not one: the label goes dark and bold
+          // (emphasis, same as any selected state), and the underline stays
+          // the brand accent — a small deliberate flourish, not the thing
+          // doing the "this one is active" work by itself. Coloring the
+          // label too, as the previous version did, made both jobs the
+          // underline's, and the label read as merely tinted rather than
+          // selected.
           active
-            ? "border-primary text-primary-600"
-            : "border-transparent text-(--ssz-text-secondary) hover:text-(--ssz-text-primary)",
+            ? "border-primary text-(--ssz-text-primary) font-semibold"
+            : "border-transparent text-(--ssz-text-secondary) font-medium hover:text-(--ssz-text-primary)",
           className,
         )}
         {...props}

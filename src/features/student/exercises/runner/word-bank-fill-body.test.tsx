@@ -3,6 +3,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 
 import { PRACTICE_ACCENT } from './types';
 import {
@@ -372,5 +374,59 @@ describe('WordBankFillBody — reusable words', () => {
   it('keeps every word lit when the drill reuses them across blanks', () => {
     renderBody({ content: { ...content, reusableWords: true }, value: picked });
     expect(bankWord('show off').getAttribute('style')).toContain('opacity: 1');
+  });
+});
+
+/** The engine as the hook would hand it over, with nothing playing yet. */
+const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+  audio: { ...AUDIO_DEFAULT, enabled: true, assetId: 'asset-1', title: 'Dialog', duration: 96 },
+  segments: {},
+  element: null,
+  src: 'https://cdn.test/asset-1.mp3',
+  state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+  duration: 96,
+  playing: false,
+  plays: 0,
+  limit: 0,
+  exhausted: false,
+  heard: false,
+  gated: false,
+  canPlay: true,
+  failed: false,
+  loading: false,
+  speed: 1,
+  toggle: vi.fn(),
+  back: vi.fn(),
+  seekTo: vi.fn(),
+  playRange: vi.fn(),
+  cycleSpeed: vi.fn(),
+  reset: vi.fn(),
+  ...over,
+});
+
+/*
+  The listening layer on a template with no builder (plan 56 phase 6). It gets the runner
+  half only, and that is not a gap: the layer is a property of the document, and a
+  document written by a seed carries it as well as one written by a builder.
+*/
+describe('with audio', () => {
+  it('plays the clip above the exercise', () => {
+    renderBody({ audio: engine() });
+
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+  });
+
+  it('locks the controls until the clip has been heard through once', () => {
+    renderBody({ audio: engine({ gated: true }) });
+
+    expect(
+      screen.getByText('The gaps open once you have heard the clip through once.'),
+    ).toBeInTheDocument();
+  });
+
+  it('is not there at all for an exercise without it', () => {
+    renderBody();
+
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
   });
 });

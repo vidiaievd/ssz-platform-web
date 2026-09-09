@@ -100,5 +100,9 @@
   "matchColumnRight": "Соответствия",
   "translatePrompt": "Переведите:",
   "shortAnswerAnswer": "Ответ",
-  "writingTopics": "Темы"
+  "shortAnswerTranscript": "Транскрипт — ученик его не видит",
+  "writingWords": "слов",
+  "writingPointOptional": "необязательно",
+  "sentenceSchemaCount": "{n, plural, one {# предложение} few {# предложения} many {# предложений} other {# предложения}}",
+  "sentenceSchemaNotASet": "Это упражнение написано в старой форме и не может быть показано. Откройте его в редакторе, чтобы переписать как набор предложений."
 }

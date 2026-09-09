@@ -33,7 +33,6 @@ interface AudioEditorPaneProps {
   /** Whether students can open this material right now — see `SaveScopeContext`. */
   isLive: boolean | null;
   container: Container;
-  backHref: string;
   publishSlot: ReactNode;
 }
 
@@ -44,7 +43,6 @@ export function AudioEditorPane({
   state,
   isLive,
   container,
-  backHref,
   publishSlot,
 }: AudioEditorPaneProps) {
   const t = useTranslations('Authoring');
@@ -106,7 +104,6 @@ export function AudioEditorPane({
       title={titleValue || lessonTitle || t('lessons.untitled')}
       state={state}
       isLive={isLive}
-      backHref={backHref}
       saveStatus={unsaved.status}
       savedAt={unsaved.savedAt}
       publishSlot={publishSlot}

@@ -163,7 +163,30 @@
       "bodyWithComment": "Your teacher wrote: {comment}",
       "bodyReturned": "Have another look and hand it in again.",
       "bodyReturnedWithComment": "Your teacher wrote: {comment}",
-      "bodyFallback": "Open the exercise to see what your teacher said."
+      "bodyFallback": "Open the exercise to see what your teacher said.",
+      "titleNamed": "Your teacher has marked “{exercise}”",
+      "titleReturnedNamed": "Your teacher sent “{exercise}” back",
+      "bodyApprovedWithNote": "Marked as correct, with a note on one of the sentences."
+    },
+    "REVIEW_DIGEST": {
+      "title": "{count, plural, one {# submission is waiting for you} other {# submissions are waiting for you}}",
+      "titleFallback": "Work is waiting to be marked",
+      "body": "{groups, plural, one {In # group} other {Across # groups}} · the oldest has been waiting {hours, plural, one {# hour} other {# hours}}.",
+      "bodyFallback": "Open your marking queue to see what is waiting."
+    },
+    "REVIEW_ESCALATION": {
+      "title": "{count, plural, one {# submission has been waiting too long} other {# submissions have been waiting too long}}",
+      "titleFallback": "Work has been waiting too long",
+      "body": "The oldest has waited {hours, plural, one {# hour} other {# hours}} — past the {promised} your school allows. Consider asking a second marker.",
+      "bodyFallback": "Open your marking queue — something has been waiting past what your school allows.",
+      "bodySchool": "The oldest has waited {hours, plural, one {# hour} other {# hours}} and nobody has picked it up. Someone may need a second marker."
+    },
+    "REVIEW_SCHOOL_SUMMARY": {
+      "title": "{count, plural, one {# submission is waiting across your school} other {# submissions are waiting across your school}}",
+      "titleFallback": "This week’s marking across your school",
+      "body": "{overdue, plural, one {# is past your response time} other {# are past your response time}} · the oldest has waited {days, plural, =0 {less than a day} one {# day} other {# days}}.",
+      "bodyOnTime": "All of it is within your response time · the oldest has waited {days, plural, =0 {less than a day} one {# day} other {# days}}.",
+      "bodyFallback": "Open the marking overview to see how your school is keeping up."
     }
   }
 }

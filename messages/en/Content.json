@@ -100,5 +100,9 @@
   "matchColumnRight": "Matches",
   "translatePrompt": "Translate:",
   "shortAnswerAnswer": "Answer",
-  "writingTopics": "Topics"
+  "shortAnswerTranscript": "Transcript — the student does not see it",
+  "writingWords": "words",
+  "writingPointOptional": "optional",
+  "sentenceSchemaCount": "{n, plural, one {# sentence} other {# sentences}}",
+  "sentenceSchemaNotASet": "This exercise is written in the old shape and cannot be shown. Open it in the builder to rewrite it as a set of sentences."
 }

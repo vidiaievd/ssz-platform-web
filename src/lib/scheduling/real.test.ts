@@ -153,8 +153,8 @@ describe('realProvider curriculum', () => {
         schoolId: 's1',
         targetWeeklyHours: 4,
         units: [
-          { id: 'u1', title: 'Greetings', order: 1, plannedSessions: 4, deliveredSessions: 4, requiredLevel: 'A1', status: 'done' },
-          { id: 'u2', title: 'Numbers', order: 2, plannedSessions: 4, deliveredSessions: 6, requiredLevel: null, status: 'weird' },
+          { id: 'u1', title: 'Greetings', order: 1, plannedSessions: 4, deliveredSessions: 4, contentUnitId: null, requiredLevel: 'A1', status: 'done' },
+          { id: 'u2', title: 'Numbers', order: 2, plannedSessions: 4, deliveredSessions: 6, contentUnitId: null, requiredLevel: null, status: 'weird' },
         ],
       },
     });
@@ -163,8 +163,8 @@ describe('realProvider curriculum', () => {
     expect(plan.planId).toBe('p1');
     expect(plan.targetWeeklyHours).toBe(4);
     expect(plan.units).toEqual([
-      { unitId: 'u1', title: 'Greetings', order: 1, plannedSessions: 4, deliveredSessions: 4, requiredLevel: 'A1', status: 'done' },
-      { unitId: 'u2', title: 'Numbers', order: 2, plannedSessions: 4, deliveredSessions: 6, requiredLevel: 'A1', status: 'planned' },
+      { unitId: 'u1', title: 'Greetings', order: 1, plannedSessions: 4, deliveredSessions: 4, contentUnitId: null, requiredLevel: 'A1', status: 'done' },
+      { unitId: 'u2', title: 'Numbers', order: 2, plannedSessions: 4, deliveredSessions: 6, contentUnitId: null, requiredLevel: 'A1', status: 'planned' },
     ]);
     // delivered capped at planned per unit: (4 + 4) / 8
     expect(plan.progressPct).toBe(100);
@@ -177,7 +177,7 @@ describe('realProvider curriculum', () => {
     });
   });
 
-  it('PUTs the full plan with units sorted by order', async () => {
+  it('PUTs the plan with unit ids, sorted by order and without the derived count', async () => {
     respondByPath({ '/scheduling/groups/g1/curriculum': { id: 'p1' } });
 
     await realProvider.putCurriculum('g1', {
@@ -186,8 +186,8 @@ describe('realProvider curriculum', () => {
       targetWeeklyHours: 4,
       progressPct: 0,
       units: [
-        { unitId: 'u2', title: 'B', order: 2, plannedSessions: 2, deliveredSessions: 0, requiredLevel: 'A1', status: 'planned' },
-        { unitId: 'u1', title: 'A', order: 1, plannedSessions: 3, deliveredSessions: 1, requiredLevel: 'A2', status: 'active' },
+        { unitId: 'u2', title: 'B', order: 2, plannedSessions: 2, deliveredSessions: 0, contentUnitId: null, requiredLevel: 'A1', status: 'planned' },
+        { unitId: 'u1', title: 'A', order: 1, plannedSessions: 3, deliveredSessions: 1, contentUnitId: null, requiredLevel: 'A2', status: 'active' },
       ],
     });
 
@@ -198,8 +198,8 @@ describe('realProvider curriculum', () => {
       body: {
         targetWeeklyHours: 4,
         units: [
-          { title: 'A', plannedSessions: 3, deliveredSessions: 1, requiredLevel: 'A2', status: 'active' },
-          { title: 'B', plannedSessions: 2, deliveredSessions: 0, requiredLevel: 'A1', status: 'planned' },
+          { id: 'u1', title: 'A', plannedSessions: 3, contentUnitId: null, requiredLevel: 'A2', status: 'active' },
+          { id: 'u2', title: 'B', plannedSessions: 2, contentUnitId: null, requiredLevel: 'A1', status: 'planned' },
         ],
       },
     });

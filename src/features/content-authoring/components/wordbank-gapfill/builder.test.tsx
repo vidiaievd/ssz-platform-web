@@ -1,10 +1,22 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
-import { DEFAULT_SETTINGS, type WordBankGapFill } from '@/lib/shared-kernel/wordbank-gapfill';
+import { readAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
+import {
+  DEFAULT_SETTINGS,
+  TEMPLATE_CODE,
+  type WordBankGapFill,
+} from '@/lib/shared-kernel/wordbank-gapfill';
+
+// The source card resolves the clip through media-service, and this builder's tests
+// mount no QueryClientProvider (plan 56 phase 5).
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
 
 vi.mock('../../actions/gap-fill', () => ({ saveGapFillAction: vi.fn() }));
 
@@ -31,7 +43,12 @@ function doc(overrides: Partial<WordBankGapFill> = {}): WordBankGapFill {
   };
 }
 
-function renderBuilder(exercise: WordBankGapFill = doc()) {
+function renderBuilder(
+  exercise: WordBankGapFill = doc(),
+  // Every builder carries the audio layer, and an exercise that has never had any reads
+  // as switched off (plan 56 phase 5).
+  audio: AudioDraft = readAudioDraft({}, TEMPLATE_CODE),
+) {
   render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <GapFillBuilder
@@ -40,6 +57,7 @@ function renderBuilder(exercise: WordBankGapFill = doc()) {
         initialExercise={exercise}
         initialInstructions="Fyll inn ordene."
         initialHint=""
+        initialAudio={audio}
       />
     </NextIntlClientProvider>,
   );
@@ -230,5 +248,47 @@ describe('GapFillBuilder', () => {
 
     expect(screen.getByText(/ready to assign/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Looks good' })).toBeEnabled();
+  });
+});
+
+/* The listening layer on this builder (plan 56 phase 5). */
+describe('GapFillBuilder — with audio', () => {
+  const listening = (over: Record<string, unknown> = {}): AudioDraft =>
+    readAudioDraft(
+      {
+        audio: {
+          enabled: true,
+          source: 'asset',
+          assetId: 'asset-1',
+          title: 'Diktat',
+          duration: 96,
+          settings: { transcriptWhen: 'never' },
+          ...over,
+        },
+      },
+      TEMPLATE_CODE,
+    );
+
+  it('puts the switch and the clip where the instruction already is', () => {
+    renderBuilder(doc(), listening());
+
+    expect(screen.getByRole('switch', { name: /Listening exercise/ })).toBeChecked();
+    expect(screen.getByText('The clip')).toBeInTheDocument();
+  });
+
+  it('reports a missing clip as a blocker on the step that owns the fix', () => {
+    // Three steps, not four: the clip is step 1's, with the sentences it is read from.
+    renderBuilder(doc(), listening({ assetId: '' }));
+
+    expect(
+      within(screen.getByRole('tab', { name: /Sentences/ })).getByText('1 problem'),
+    ).toBeInTheDocument();
+  });
+
+  it('draws nothing at all while the switch is off', () => {
+    renderBuilder();
+
+    expect(screen.getByRole('switch', { name: /Listening exercise/ })).not.toBeChecked();
+    expect(screen.queryByText('The clip')).not.toBeInTheDocument();
   });
 });

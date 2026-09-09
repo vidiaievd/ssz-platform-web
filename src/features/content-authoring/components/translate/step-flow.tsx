@@ -15,6 +15,9 @@ import {
 } from '@/lib/shared-kernel/translate';
 
 import type { LevelGrammarRule } from '@/features/content-authoring/lib/level-grammar-rules';
+import type { AudioDraft } from '@/lib/shared-kernel/audio';
+
+import { AudioRulesCard, AudioTranscriptCard } from '../audio';
 
 import { QueuePreview } from './queue-preview';
 import { RulePoolPanel } from './rule-pool-panel';
@@ -32,6 +35,9 @@ const AI_CHECKS: (keyof Ai['checks'])[] = ['grammar', 'order', 'lexis', 'registe
 export interface StepFlowProps {
   exercise: Translate;
   onChange: (next: Translate) => void;
+  /** The listening layer, held beside the document by the builder (plan 56 phase 6). */
+  audio: AudioDraft;
+  onAudioChange: (next: AudioDraft) => void;
   /**
    * The rules of this Leksjon, for the pool panel. Absent where the builder is mounted
    * without a curriculum around it — the panel is then left out rather than shown empty,
@@ -51,7 +57,13 @@ export interface StepFlowProps {
  * eventually draft the comment they send. The switches write to `ai`, which the document
  * has carried since its first save; nothing calls a model, and every AI surface says so.
  */
-export function StepFlow({ exercise, onChange, grammarRules }: StepFlowProps) {
+export function StepFlow({
+  exercise,
+  onChange,
+  grammarRules,
+  audio,
+  onAudioChange,
+}: StepFlowProps) {
   const t = useTranslations('Authoring');
   const { flow, ai, check } = exercise;
 
@@ -97,6 +109,26 @@ export function StepFlow({ exercise, onChange, grammarRules }: StepFlowProps) {
           detail={t('translate.step4.stageTeacherDetail')}
         />
       </ol>
+
+      {/*
+        How the clip may be heard, whichever kind it is: one for the set, or one per
+        sentence. The rules are the layer's and they are asked once — that is what the
+        merge buys, and it is why they sit on this step rather than beside the recordings.
+      */}
+      {audio.audio.enabled && (
+        <>
+          <AudioRulesCard
+            draft={audio}
+            onChange={onAudioChange}
+            itemNoun={t('translate.step4.audioItemNoun')}
+          />
+          {/* A transcript is what *the* clip says. Under per-sentence recordings the
+              sentence is already on the screen — it is the thing being translated. */}
+          {audio.audio.source !== 'items' && (
+            <AudioTranscriptCard draft={audio} onChange={onAudioChange} />
+          )}
+        </>
+      )}
 
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
         <ToggleRow

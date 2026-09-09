@@ -11,30 +11,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+import { useLanguageOptions } from '../../hooks/use-language-options';
 import { useCreateCourseStore } from '../../stores/create-course';
 import { slugify } from '../../lib/slugify';
-
-export const CREATE_COURSE_LANGUAGES = [
-  { code: 'nb', label: 'Norwegian (Bokmål)' },
-  { code: 'nn', label: 'Norwegian (Nynorsk)' },
-  { code: 'en', label: 'English' },
-  { code: 'uk', label: 'Ukrainian' },
-  { code: 'ru', label: 'Russian' },
-  { code: 'de', label: 'German' },
-  { code: 'fr', label: 'French' },
-  { code: 'es', label: 'Spanish' },
-  { code: 'it', label: 'Italian' },
-  { code: 'pl', label: 'Polish' },
-  { code: 'sv', label: 'Swedish' },
-  { code: 'da', label: 'Danish' },
-  { code: 'fi', label: 'Finnish' },
-  { code: 'nl', label: 'Dutch' },
-  { code: 'pt', label: 'Portuguese' },
-  { code: 'ar', label: 'Arabic' },
-  { code: 'zh', label: 'Chinese' },
-  { code: 'ja', label: 'Japanese' },
-  { code: 'ko', label: 'Korean' },
-] as const;
 
 interface StepBasicsProps {
   variant?: 'wizard' | 'quick';
@@ -43,6 +22,7 @@ interface StepBasicsProps {
 /** Basics step (title/language/slug preview/description) — shared by the guided wizard and the quick-create panel. */
 export function StepBasics({ variant = 'wizard' }: StepBasicsProps) {
   const t = useTranslations('Authoring.createCourse');
+  const languageOptions = useLanguageOptions();
   const { basics, updateBasics } = useCreateCourseStore();
   const slug = slugify(basics.title);
 
@@ -73,9 +53,9 @@ export function StepBasics({ variant = 'wizard' }: StepBasicsProps) {
               <SelectValue placeholder={t('basics.languagePlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              {CREATE_COURSE_LANGUAGES.map((lang) => (
+              {languageOptions.map((lang) => (
                 <SelectItem key={lang.code} value={lang.code}>
-                  {lang.label}
+                  {lang.name}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -42,11 +42,19 @@ type Props = {
   group: Group;
   alerts: Alert[];
   courseView: CourseView;
+  schoolId: string;
   schoolSlug: string;
   canManage: boolean;
 };
 
-export async function GroupDetailHeader({ group, alerts, courseView, schoolSlug, canManage }: Props) {
+export async function GroupDetailHeader({
+  group,
+  alerts,
+  courseView,
+  schoolId,
+  schoolSlug,
+  canManage,
+}: Props) {
   const t = await getTranslations('Groups');
 
   return (
@@ -75,6 +83,7 @@ export async function GroupDetailHeader({ group, alerts, courseView, schoolSlug,
       {canManage && (
         <GroupDetailActions
           group={group}
+          schoolId={schoolId}
           schoolSlug={schoolSlug}
         />
       )}

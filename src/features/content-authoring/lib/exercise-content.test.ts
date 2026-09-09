@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   buildExercisePayload,
   parseExerciseToForm,
-  minimalMcqValues,
   minimalExerciseValues,
 } from './exercise-content';
 import { EXERCISE_TYPES, exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -20,11 +19,6 @@ const base: ExerciseFormValues = {
   fibText: '',
   fibBlanks: [{ answers: '' }],
   fibWordBank: '',
-  mpVariant: 'pairs',
-  mpPairs: [
-    { left: '', right: '' },
-    { left: '', right: '' },
-  ],
   wbfWordBank: '',
   wbfSentences: [{ text: '', answers: [''] }],
   toKind: 'dialogue',
@@ -170,33 +164,6 @@ describe('buildExercisePayload', () => {
 
     expect(parsed.fibBlanks?.[0]?.rationaleOptions?.[0]?.verdict).toBe('wrong');
   });
-
-  it('match_pairs: emits left/right items with ids and pairs mapping', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'match_pairs',
-      mpPairs: [
-        { left: 'hei', right: 'hello' },
-        { left: 'takk', right: 'thanks' },
-      ],
-    });
-    expect(content).toEqual({
-      left_items: [
-        { id: 'l-0', text: 'hei' },
-        { id: 'l-1', text: 'takk' },
-      ],
-      right_items: [
-        { id: 'r-0', text: 'hello' },
-        { id: 'r-1', text: 'thanks' },
-      ],
-    });
-    expect(expectedAnswers).toEqual({
-      pairs: [
-        { left_id: 'l-0', right_id: 'r-0' },
-        { left_id: 'l-1', right_id: 'r-1' },
-      ],
-    });
-  });
 });
 
 describe('build → parse round-trips', () => {
@@ -220,17 +187,6 @@ describe('build → parse round-trips', () => {
         fibText: 'Jeg ___1___ her.',
         fibBlanks: [{ answers: 'bor, er' }],
         fibWordBank: 'bor, er, går',
-      },
-    },
-    {
-      name: 'match_pairs',
-      values: {
-        ...base,
-        templateCode: 'match_pairs',
-        mpPairs: [
-          { left: 'hei', right: 'hello' },
-          { left: 'takk', right: 'thanks' },
-        ],
       },
     },
   ];
@@ -379,16 +335,6 @@ describe('parseExerciseToForm', () => {
   });
 });
 
-describe('minimalMcqValues', () => {
-  it('produces a valid two-option MCQ with the given question', () => {
-    const values = minimalMcqValues('Practice', 'Choose the correct answer.');
-    const { content, expectedAnswers } = buildExercisePayload(values);
-    expect(content.question).toBe('Practice');
-    expect((content.options as unknown[]).length).toBe(2);
-    expect(expectedAnswers.correct_option_ids).toEqual(['opt-0']);
-  });
-});
-
 describe('minimalExerciseValues', () => {
   // The picker creates the exercise before the author types anything, and
   // `createExerciseAction` runs the form schema over it — a template whose
@@ -489,137 +435,6 @@ describe('short_answer & writing_task', () => {
 
     const parsed = parseExerciseToForm({ templateCode: 'short_answer', content, expectedAnswers });
     expect(parsed.saAccepted).toBe('avisa som jeg leser, er seriøs | avisa jeg leser, er seriøs');
-  });
-
-  it('writing_task: builds prompt + topic options with ids + min_words', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'writing_task',
-      wtPrompt: 'Skriv et leserinnlegg.',
-      wtMinWords: '60',
-      wtTopics: [{ title: 'Gratis norskkurs' }, { title: '' }, { title: 'Tog billigere' }],
-      wtRubric: 'Struktur, argument',
-    });
-    expect(content.prompt).toBe('Skriv et leserinnlegg.');
-    expect(content.min_words).toBe(60);
-    expect(content.options).toEqual([
-      { id: 'topic-0', title: 'Gratis norskkurs' },
-      { id: 'topic-1', title: 'Tog billigere' },
-    ]);
-    expect(expectedAnswers.rubric).toBe('Struktur, argument');
-  });
-
-  it('writing_task: omits options/min_words/rubric when empty', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'writing_task',
-      wtPrompt: 'Skriv.',
-    });
-    expect('options' in content).toBe(false);
-    expect('min_words' in content).toBe(false);
-    expect('rubric' in expectedAnswers).toBe(false);
-  });
-});
-
-describe('sentence_schema', () => {
-  it('builds fields/tokens with ids and ordered per-field placements', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'sentence_schema',
-      ssSentence: 'Lars har aldri likt Lotte.',
-      ssSchemaType: 'main',
-      ssFields: [{ label: 'Forfelt' }, { label: 'Verbal' }, { label: 'Sluttfelt' }],
-      ssTokens: [
-        { text: 'Lars', fieldIndex: 0 },
-        { text: 'har', fieldIndex: 1 },
-        { text: 'Lotte', fieldIndex: 2 },
-      ],
-    });
-    expect(content.sentence).toBe('Lars har aldri likt Lotte.');
-    expect(content.schema_type).toBe('main');
-    expect(content.fields).toEqual([
-      { id: 'f-0', label: 'Forfelt' },
-      { id: 'f-1', label: 'Verbal' },
-      { id: 'f-2', label: 'Sluttfelt' },
-    ]);
-    expect(content.tokens).toEqual([
-      { id: 't-0', text: 'Lars' },
-      { id: 't-1', text: 'har' },
-      { id: 't-2', text: 'Lotte' },
-    ]);
-    expect(expectedAnswers.placements).toEqual([
-      { field_id: 'f-0', token_ids: ['t-0'] },
-      { field_id: 'f-1', token_ids: ['t-1'] },
-      { field_id: 'f-2', token_ids: ['t-2'] },
-    ]);
-  });
-
-  it('keeps token order within a field', () => {
-    const { expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'sentence_schema',
-      ssSentence: 'S',
-      ssFields: [{ label: 'A' }, { label: 'B' }],
-      ssTokens: [
-        { text: 'x', fieldIndex: 1 },
-        { text: 'y', fieldIndex: 0 },
-        { text: 'z', fieldIndex: 1 },
-      ],
-    });
-    expect(expectedAnswers.placements).toEqual([
-      { field_id: 'f-0', token_ids: ['t-1'] },
-      { field_id: 'f-1', token_ids: ['t-0', 't-2'] },
-    ]);
-  });
-
-  it('drops empty fields and remaps token assignments by original index', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'sentence_schema',
-      ssSentence: 'S',
-      // index 1 is empty and should be dropped; token assigned to index 2 must
-      // follow the surviving field.
-      ssFields: [{ label: 'A' }, { label: '' }, { label: 'C' }],
-      ssTokens: [
-        { text: 'a', fieldIndex: 0 },
-        { text: 'c', fieldIndex: 2 },
-      ],
-    });
-    expect(content.fields).toEqual([
-      { id: 'f-0', label: 'A' },
-      { id: 'f-1', label: 'C' },
-    ]);
-    expect(expectedAnswers.placements).toEqual([
-      { field_id: 'f-0', token_ids: ['t-0'] },
-      { field_id: 'f-1', token_ids: ['t-1'] },
-    ]);
-  });
-
-  it('round-trips through parse (field index reconstructed from placements)', () => {
-    const values = {
-      ...base,
-      templateCode: 'sentence_schema' as const,
-      ssSentence: 'Lars har likt Lotte',
-      ssSchemaType: 'subordinate' as const,
-      ssFields: [{ label: 'A' }, { label: 'B' }],
-      ssTokens: [
-        { text: 'Lars', fieldIndex: 0 },
-        { text: 'har', fieldIndex: 1 },
-      ],
-    };
-    const { content, expectedAnswers } = buildExercisePayload(values);
-    const parsed = parseExerciseToForm({
-      templateCode: 'sentence_schema',
-      content,
-      expectedAnswers,
-    });
-    expect(parsed.ssSentence).toBe('Lars har likt Lotte');
-    expect(parsed.ssSchemaType).toBe('subordinate');
-    expect(parsed.ssFields).toEqual([{ label: 'A' }, { label: 'B' }]);
-    expect(parsed.ssTokens).toEqual([
-      { text: 'Lars', fieldIndex: 0 },
-      { text: 'har', fieldIndex: 1 },
-    ]);
   });
 });
 
@@ -867,41 +682,6 @@ describe('text_order', () => {
       { text: 'Hi, I am Marina.', speaker: 'Marina' },
       { text: 'Nice to meet you.', speaker: 'Alex' },
     ]);
-  });
-});
-
-describe('match_pairs layout variant', () => {
-  const pairs = [
-    { left: 'Do you live …', right: '… near here?' },
-    { left: 'How long have you …', right: '… lived here?' },
-  ];
-
-  it('stores the halves layout and round-trips it', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'match_pairs',
-      mpVariant: 'halves',
-      mpPairs: pairs,
-    });
-
-    expect(content.variant).toBe('halves');
-    expect(
-      parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant,
-    ).toBe('halves');
-  });
-
-  it('omits the key for the default word-pairs layout', () => {
-    const { content, expectedAnswers } = buildExercisePayload({
-      ...base,
-      templateCode: 'match_pairs',
-      mpVariant: 'pairs',
-      mpPairs: pairs,
-    });
-
-    expect('variant' in content).toBe(false);
-    expect(
-      parseExerciseToForm({ templateCode: 'match_pairs', content, expectedAnswers }).mpVariant,
-    ).toBe('pairs');
   });
 });
 

@@ -17,6 +17,7 @@ import {
   ReviewsDueCard,
   StudyRhythmPanel,
 } from '@/features/student/home/components';
+import { WorkOnThis } from '@/features/mastery';
 import type { StudentSchool } from '@/features/student/types';
 
 export default async function StudentHomePage() {
@@ -74,6 +75,9 @@ export default async function StudentHomePage() {
       <div className="mt-8.5 grid items-start gap-6.5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <MyCoursesPreview />
         <div className="flex flex-col gap-3.5">
+          {/* Renders nothing at all until practice has something to say (plan 55 §6.2),
+              so it leads the column instead of leaving a hole in the middle of it. */}
+          {user?.userId && <WorkOnThis userId={user.userId} />}
           <StudyRhythmPanel />
           <ExploreCoursesCta />
         </div>

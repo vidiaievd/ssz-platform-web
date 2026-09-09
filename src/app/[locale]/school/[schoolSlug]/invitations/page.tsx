@@ -29,7 +29,7 @@ export default async function InvitationsPage({ params, searchParams }: Props) {
 
   if (!school) {
     return (
-      <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+      <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto">
         <p className="text-sm text-muted-foreground">School not found.</p>
       </main>
     );
@@ -73,7 +73,7 @@ export default async function InvitationsPage({ params, searchParams }: Props) {
       : t('noPending');
 
   return (
-    <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+    <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>

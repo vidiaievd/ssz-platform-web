@@ -4,6 +4,13 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { AnswerNoteMarker, buildAnswerNote, type Rationale, type WordNotes } from './answer-note';
+import {
+  AudioLockNote,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
+
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
@@ -84,6 +91,15 @@ export interface WordBankFillBodyProps {
   results?: WordBankFillResults;
   /** Once set, a missed blank's note may name the answer and quote the rule. */
   revealed?: boolean;
+  /**
+   * The listening layer, when the exercise has one (plan 56 phase 6).
+   *
+   * No builder writes this template — it lives on the old shared form — so it gets the
+   * runner half only, which is enough: the layer is a property of the document.
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the key once the blanks have been checked. */
+  audioTranscript?: { transcript: string; translation: string } | null;
 }
 
 const OK_LINE = 'var(--ssz-feedback-ok-line)';
@@ -162,10 +178,15 @@ export function WordBankFillBody({
   accent,
   results,
   revealed = false,
+  audio,
+  audioTranscript = null,
 }: WordBankFillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const reveal = phase === 'feedback';
-  const isAnswering = phase === 'answering';
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  const locked = audioOn && audio.gated;
+  // Joined to the expression every chip, blank and dropdown already reads.
+  const isAnswering = phase === 'answering' && !locked;
   const asSelect = content.inputMode === 'select';
   /* Which blank's note is open — at most one, so opening a new one closes it. */
   const [openNote, setOpenNote] = useState<string | null>(null);
@@ -250,6 +271,13 @@ export function WordBankFillBody({
   return (
     <div>
       {content.instruction && <Instr>{content.instruction}</Instr>}
+
+      {audioOn && (
+        <div className="mb-4">
+          <ExerciseAudioPlayer eng={audio} interactive={phase === 'answering'} />
+          {locked && <AudioLockNote itemNoun={t('audio.itemNoun.gaps')} />}
+        </div>
+      )}
 
       {/* In select mode every dropdown carries the whole bank, so a strip of
           the same words above the sentences would only repeat itself. */}
@@ -436,6 +464,14 @@ export function WordBankFillBody({
               : t('wordBank.helperArmed')}{' '}
           {t('wordBank.filledCount', { done: filled.length, total: blanks.length })}
         </p>
+      )}
+
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
       )}
     </div>
   );

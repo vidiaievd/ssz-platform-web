@@ -1,0 +1,446 @@
+{
+  "inbox": {
+    "eyebrow": "Retting",
+    "title": "Venter på deg",
+    "subtitle": "{count, plural, one {# innlevering} other {# innleveringer}}",
+    "subtitleOverdue": "{count, plural, one {# over fristen} other {# over fristen}}",
+    "subtitleOverduePartial": "{count}+ over fristen",
+    "subtitleOldest": "eldste {age}",
+    "groupBy": {
+      "label": "Grupper køen etter",
+      "exercise": "Etter oppgave",
+      "student": "Etter elev"
+    },
+    "filter": {
+      "group": "Gruppe",
+      "course": "Kurs",
+      "type": "Type",
+      "overdue": "Over fristen",
+      "clear": "Fjern filtre",
+      "allGroups": "Alle grupper",
+      "allCourses": "Alle kurs",
+      "allTypes": "Alle typer"
+    },
+    "group": {
+      "count": "{count}",
+      "expand": "Vis innleveringene i denne gruppen",
+      "collapse": "Skjul innleveringene i denne gruppen",
+      "batch": "Godkjenn {count} rene"
+    },
+    "row": {
+      "lockedBy": "{name}",
+      "autoClean": "maskinen lukket den",
+      "attempt": "forsøk {n}",
+      "label": "{student} · {exercise} · har ventet {age}",
+      "exerciseGone": "oppgaven er slettet",
+      "lockedByLabel": "vurderes av {name}"
+    },
+    "empty": {
+      "title": "Alt er rettet",
+      "body": "Ingenting i gruppene dine venter på svar. Nytt arbeid dukker opp her så snart det leveres.",
+      "filteredTitle": "Ingenting med disse filtrene",
+      "filteredBody": "Fjern dem for å se resten av køen."
+    },
+    "failed": "Køen kunne ikke lastes.",
+    "retry": "Prøv igjen",
+    "more": "Vis flere",
+    "moreLoading": "Laster …",
+    "position": "{i} av {n}",
+    "selectPrompt": "Velg en innlevering",
+    "selectBody": "Velg en til venstre, så åpnes den her."
+  },
+  "type": {
+    "short_answer": "Kort svar",
+    "writing_task": "Skriving",
+    "translate_to_target": "Oversettelse til norsk",
+    "translate_from_target": "Oversettelse fra norsk",
+    "error_correction": "Feilretting"
+  },
+  "age": {
+    "justNow": "akkurat nå",
+    "hours": "{n, plural, one {# time} other {# timer}}",
+    "days": "{n, plural, one {# dag} other {# dager}}",
+    "overdueBy": {
+      "hours": "{n, plural, one {# time over} other {# timer over}}",
+      "days": "{n, plural, one {# dag over} other {# dager over}}"
+    },
+    "scale": {
+      "fresh": "fersk",
+      "atSla": "ved fristen ({n} t)",
+      "double": "dobbelt så lenge"
+    },
+    "spread": "{n, plural, one {# innlevering} other {# innleveringer}}, eldste {oldest}"
+  },
+  "submission": {
+    "failed": {
+      "title": "Denne innleveringen kunne ikke åpnes",
+      "body": "Den kan være vurdert allerede, eller forbindelsen falt ut. Prøv igjen fra køen."
+    },
+    "conflict": {
+      "title": "{name} har nettopp vurdert denne",
+      "someone": "En kollega",
+      "approved": "Godkjent {time}. Utkastet ditt er beholdt nedenfor.",
+      "returned": "Sendt til retting {time}. Utkastet ditt er beholdt nedenfor."
+    },
+    "windowExpired": {
+      "title": "Du kan ikke lenger vurdere denne",
+      "body": "Tilknytningen din til gruppen tok slutt etter at arbeidet ble levert. Du kan lese det; vurderingen tilhører den som har gruppen nå."
+    },
+    "lockExpired": {
+      "title": "Merket ditt på denne innleveringen gikk ut",
+      "body": "De femten minuttene er over. Ingen andre har tatt den — fortsett, så merkes den for deg igjen mens du jobber."
+    },
+    "heldBy": {
+      "title": "{name} ser på denne nå",
+      "body": "Du er ikke blokkert. Den blir ledig om lag femten minutter, og den som vurderer først, er den som svarer."
+    },
+    "exerciseGone": {
+      "title": "Oppgaven finnes ikke lenger",
+      "body": "Forfatteren slettet eller flyttet den etter innleveringen. Stien over er den eleven så, og vurderingen er fortsatt din å gi."
+    },
+    "noDetails": {
+      "title": "Analysen kunne ikke bygges",
+      "body": "Svaret vises slik det ble levert. Les og vurder som vanlig — maskinen hadde rett og slett ingenting å sammenligne med."
+    },
+    "previous": {
+      "title": "Sendt til retting",
+      "by": "{name} · {date}",
+      "someone": "en kollega",
+      "noComment": "Ingen kommentar ble lagt igjen.",
+      "explain": "Dette er et eget forsøk. Svaret nedenfor er det nye."
+    },
+    "back": "Tilbake til køen",
+    "closedVerbatim": "{closed} av {total} lukket av maskinen, ord for ord",
+    "closedQuestions": "{closed} av {total} spørsmål lukket av maskinen",
+    "elementsCovered": "{covered} av {total} punkter dekket i hele settet",
+    "essay": "Teksten · {words, plural, one {# ord} other {# ord}}",
+    "sentence": {
+      "autoPassed": "lukket av maskinen",
+      "collapse": "lukk",
+      "blank": "ingenting er skrevet",
+      "against": "nærmeste godtatte svar: {ref}"
+    },
+    "comment": {
+      "charPad": "Norske bokstaver",
+      "save": "Lagre",
+      "cancel": "Avbryt",
+      "edit": "Endre",
+      "remove": "Fjern",
+      "addToSentence": "Kommenter denne setningen",
+      "sentenceLabel": "Kommentar til denne setningen",
+      "sentencePlaceholder": "Hva bør eleven se på her?"
+    }
+  },
+  "rubric": {
+    "facts": "{words, plural, one {# ord} other {# ord}} · {paragraphs, plural, one {# avsnitt} other {# avsnitt}} · {hit}/{needed} punkter nevnt",
+    "tooShort": "kortere enn oppgaven ber om",
+    "tooLong": "lengre enn oppgaven ber om",
+    "tickedShort": "huket av",
+    "tickedNotHit": "Studenten har huket av for dette, men ingen av nøkkelordene står i teksten. De kan ha formulert det annerledes — les teksten.",
+    "unnamedPoint": "Punkt uten navn",
+    "unnamed": "Kriterium uten navn",
+    "unmarked": "Ikke vurdert ennå.",
+    "weight": "×2",
+    "markOf": "Nivå for {name}",
+    "score": "{points} av {max} poeng",
+    "threshold": "bestått fra {passScore}",
+    "remaining": "{count, plural, one {# kriterium igjen} other {# kriterier igjen}}",
+    "incomplete": "Sett et nivå på alle kriteriene før du vurderer — et blankt kriterium teller ikke som null.",
+    "approve": "Godkjenn · {points}/{max}",
+    "return": "Send tilbake · {points}/{max}"
+  },
+  "decision": {
+    "commentLabel": "Kommentar til hele besvarelsen",
+    "commentPlaceholder": "Kommentar til hele arbeidet. Skriv på norsk — æøå-panelet står under. Utkastet lagres mens du skriver.",
+    "approve": "Godkjenn",
+    "approveWithComment": "Godkjenn med kommentar",
+    "return": "Send til retting",
+    "returnRequiresComment": "Skriv hva som bør endres — eleven får arbeidet tilbake sammen med kommentaren din.",
+    "failed": "Avgjørelsen ble ikke lagret. Prøv igjen.",
+    "scoreIsServerSide": "Retur krever en kommentar: eleven får arbeidet sammen med den. Poengsummen regnes ut av systemet ut fra det som ble godkjent — ingen karakter settes for hånd.",
+    "scoreIsRubric": "Vurderingen følger av rubrikken: en sum på eller over grensen er bestått, under går tilbake. Poengsummen regnes ut av systemet fra nivåene — ingen prosent tastes inn for hånd.",
+    "next": "Neste besvarelse",
+    "sent": {
+      "approved": "Godkjent",
+      "returned": "Sendt til retting"
+    },
+    "keys": {
+      "approve": "godkjenn",
+      "withComment": "med kommentar",
+      "return": "send tilbake",
+      "next": "neste",
+      "send": "send"
+    }
+  },
+  "batch": {
+    "dialog": {
+      "title": "Godkjenne {count} besvarelser maskinen lukket?",
+      "body": "Disse elevene svarte på «{exercise}» nøyaktig som fasiten, og ingenting ble liggende igjen til et menneske.",
+      "thisExercise": "denne oppgaven",
+      "irreversible": "Dette kan ikke angres. Hver elev får beskjed om at arbeidet er godkjent, og avgjørelsen føres i ditt navn.",
+      "cancel": "Avbryt",
+      "confirm": "Godkjenn {count}"
+    },
+    "done": "{count, plural, one {# besvarelse godkjent} other {# besvarelser godkjent}}",
+    "skipped": {
+      "already_reviewed": "{count} er allerede besvart av en kollega",
+      "not_clean": "{count} må leses likevel — fasiten er endret",
+      "not_found": "{count} venter ikke lenger",
+      "not_pending": "{count} venter ikke lenger",
+      "unavailable": "{count} kunne ikke sjekkes"
+    },
+    "failed": "Ingenting ble godkjent — bunken kunne ikke sendes."
+  },
+  "oversight": {
+    "eyebrow": "Skoleoversikt",
+    "title": "Retting",
+    "subtitle": "Hvor arbeidet har hopet seg opp, og hvem som trenger en hånd. Forsinkelse er et tegn på arbeidsmengde.",
+    "period": {
+      "label": "Perioden svarene telles over",
+      "days": "{n} dager"
+    },
+    "summary": {
+      "title": "Skolen",
+      "since": "Telles fra {date} — før det bar ikke innleveringene noen skole.",
+      "sinceUnknown": "Ingenting er levert inn til retting ennå.",
+      "pending": "Venter",
+      "pendingSub": "på tvers av alle grupper",
+      "overdue": "Lenger enn lovet",
+      "promise": "skolen lover {n} t",
+      "noPromise": "ingen svartid er satt ennå",
+      "oldest": "Eldste",
+      "oldestSub": "har ventet lengst",
+      "median": "Median svartid",
+      "medianSub": "siste {n} dager",
+      "medianNone": "ingenting ble besvart i denne perioden",
+      "truncated": "Skolen har mer som venter enn denne skjermen teller. Formen stemmer; totalene stopper ved taket."
+    },
+    "spread": {
+      "title": "Hele køen etter alder"
+    },
+    "failed": "Kunne ikke lese arbeidsmengden.",
+    "retry": "Prøv igjen",
+    "teachers": {
+      "title": "Lærere",
+      "sub": "Hvem som har det tungt, vises i lengden på halen — ikke i ett tall.",
+      "empty": "Ingenting venter på noen nå.",
+      "unnamed": "Navn utilgjengelig",
+      "noGroups": "ingen grupper nå",
+      "pending": "venter",
+      "overdue": "lenger enn lovet",
+      "median": "median svartid {age} · køen etter alder",
+      "noMedian": "besvarte ingenting i denne perioden",
+      "shared": "deler køen med en kollega",
+      "remind": "Minn på",
+      "addReviewer": "Legg til en retter",
+      "reminded": "Minnet {name} på — {n, plural, one {# innlevering} other {# innleveringer}} venter",
+      "remindedAlready": "Allerede minnet på i dag. Neste kan gå om omtrent {hours, plural, one {# time} other {# timer}}.",
+      "remindFailed": "Påminnelsen kunne ikke sendes."
+    },
+    "groups": {
+      "title": "Grupper",
+      "sub": "venter · lenger enn lovet",
+      "empty": "Ingen gruppe har noe som venter.",
+      "unnamed": "Gruppe"
+    },
+    "courses": {
+      "title": "Kurs",
+      "sub": "Et kurs kan love en annen svartid",
+      "empty": "Ingen kurs har noe som venter.",
+      "unnamed": "Kurs",
+      "promise": "svarer innen {n} t",
+      "noPromise": "ingen svartid satt",
+      "overridden": "satt på kurset",
+      "pending": "{n} venter",
+      "legend": "venter · lenger enn lovet"
+    },
+    "stuck": {
+      "title": "Står stille",
+      "sub": "{n, plural, one {# innlevering har} other {# innleveringer har}} ventet lenger enn lovet",
+      "emptySub": "ingenting er forbi den lovede tiden",
+      "empty": "Alt som venter, er fortsatt innenfor tiden skolen lovet.",
+      "noReviewer": "eleven er ikke i noen gruppe — det finnes ingen retter",
+      "unnamedStudent": "Elev",
+      "unnamedExercise": "Oppgave",
+      "unnamedGroup": "Gruppe",
+      "assign": "Tildel",
+      "reviewIt": "Rett den selv"
+    },
+    "journal": {
+      "title": "Beslutningslogg",
+      "sub": "Siste {n} dager · hvem, når og hva det ble til",
+      "empty": "Ingen har besvart noe i denne perioden.",
+      "export": "Eksporter CSV",
+      "more": "Vis mer",
+      "failed": "Loggen kunne ikke leses.",
+      "unnamedReviewer": "Lærer",
+      "unnamedStudent": "Elev",
+      "unnamedExercise": "Oppgave",
+      "took": "besvart på {age}",
+      "verdict": {
+        "approved": "godkjent",
+        "returned": "sendt tilbake"
+      },
+      "csv": {
+        "reviewedAt": "Besvart",
+        "reviewer": "Retter",
+        "student": "Elev",
+        "course": "Kurs",
+        "exercise": "Oppgave",
+        "verdict": "Utfall",
+        "hours": "Timer ventet"
+      }
+    },
+    "assign": {
+      "title": "Legg til en retter",
+      "for": "{student} · {exercise}",
+      "someone": "Denne eleven",
+      "someExercise": "denne oppgaven",
+      "banner": {
+        "title": "Dette legger personen til i gruppens stab",
+        "body": "Det finnes ingen egen «retter»-rolle: den som underviser elevens gruppe, kan svare på arbeidet deres. Den du legger til, ser hele køen til denne gruppen i innboksen med en gang."
+      },
+      "noGroup": {
+        "title": "Eleven er ikke i noen gruppe",
+        "body": "Så lenge eleven ikke tilhører en gruppe, kan ingen gjøres ansvarlig for arbeidet — regelen går gjennom gruppen, ikke gjennom innleveringen. Legg eleven i en gruppe fra elevsiden, så havner arbeidet i den gruppens kø."
+      },
+      "group": "Gruppe",
+      "teacher": "Lærer",
+      "chooseTeacher": "Velg en lærer…",
+      "role": "Rolle i gruppen",
+      "roleCoPrimary": "Medlærer",
+      "roleSubstitute": "Vikar",
+      "from": "Fra",
+      "to": "Til",
+      "reason": "Grunn",
+      "reasonRequired": "En vikariat trenger en grunn.",
+      "cancel": "Avbryt",
+      "submit": "Legg til",
+      "submitting": "Legger til…",
+      "failed": "Retteren kunne ikke legges til.",
+      "assigned": "Lagt til — gruppens kø er nå deres også.",
+      "forTeacher": "Sammen med {name}"
+    }
+  },
+  "settings": {
+    "eyebrow": "Skoleinnstillinger",
+    "title": "Svartider",
+    "lede": "Ett tall setter hele hastegradsskalaen: fargen i køen, hva som teller som fastlåst i oversikten, og datoen eleven får mens de venter.",
+    "sub": "Løftet alt annet måles mot",
+    "hours": "timer",
+    "respond": {
+      "label": "Svar innen",
+      "hint": "Arbeid eldre enn dette farges som noe som har ventet for lenge.",
+      "bounds": "Mellom {min} og {max} timer."
+    },
+    "escalate": {
+      "label": "Eskaler etter",
+      "hint": "Når noen andre skal få beskjed om at svaret fortsatt mangler.",
+      "beforeRespond": "Eskaleringen kan ikke komme før selve løftet."
+    },
+    "escalateTo": {
+      "label": "Eskaler til",
+      "hint": "Får en oversikt over det som står stille, ikke ett brev per innlevering.",
+      "school_admins": "Skoleadministratorer",
+      "owner": "Eier",
+      "primary_teacher": "Gruppens hovedlærer"
+    },
+    "preview": "Slik leses aldersskalaen ved {n} t.",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "saved": "Svartiden er lagret.",
+    "saveFailed": "Svartiden kunne ikke lagres.",
+    "failed": "Svartiden kunne ikke leses.",
+    "readOnly": "Bare eieren og administratorer kan endre dette.",
+    "course": {
+      "title": "Svartid",
+      "lede": "Hvor lenge dette kurset lover at en elev venter på et svar.",
+      "ownTime": "Egen svartid for dette kurset",
+      "hours": "timer",
+      "inheritedIs": "Arvet verdi — {n} t. Fjern haken for å gå tilbake til den.",
+      "inheritedFrom": "Arves fra skolen: {n} t.",
+      "noSchoolPromise": "Skolen har ikke satt noen svartid ennå.",
+      "bounds": "Mellom {min} og {max} timer.",
+      "save": "Lagre",
+      "saved": "Svartiden er lagret.",
+      "saveFailed": "Svartiden kunne ikke lagres.",
+      "failed": "Svartiden kunne ikke leses.",
+      "fieldLabel": "Svartid i timer"
+    }
+  },
+  "student": {
+    "eyebrow": "Mitt arbeid",
+    "title": "Levert til retting",
+    "subtitle": "{pending, plural, =0 {Ingenting venter på læreren} one {# arbeid venter på læreren} other {# arbeider venter på læreren}}, {returned, plural, =0 {ingenting kom tilbake} one {# kom tilbake til ny runde} other {# kom tilbake til ny runde}}.",
+    "subtitlePartial": "Talt over det som er lastet så langt — det er mer lenger ned.",
+    "tabs": {
+      "all": "Alle",
+      "pending": "Venter",
+      "returned": "Ny runde",
+      "approved": "Rettet"
+    },
+    "status": {
+      "pending": "Venter på retting",
+      "returned": "Tilbake til ny runde",
+      "approved": "Rettet"
+    },
+    "row": {
+      "attempt": "Forsøk {n}",
+      "signed": "{teacher} · {when}",
+      "unsigned": "Rettet {when}",
+      "open": "Åpne innleveringen",
+      "close": "Lukk innleveringen"
+    },
+    "due": {
+      "expected": "Svar ventes {when}",
+      "unknown": "Ingen svarfrist er satt for dette kurset",
+      "note": "Det er tiden skolen vanligvis bruker, ikke et løfte om svar i minuttet."
+    },
+    "pending": {
+      "body": "Levert for {age} siden, ligger i køen til læreren."
+    },
+    "comment": {
+      "label": "Kommentar · {teacher}",
+      "unsigned": "Kommentar"
+    },
+    "approved": {
+      "noComment": "Rettet, uten merknader."
+    },
+    "returned": {
+      "hint": "En ny runde er et nytt forsøk — kommentaren blir stående her ved siden av.",
+      "superseded": "Du har allerede tatt en ny runde på denne — det er det nyeste forsøket som gjelder."
+    },
+    "group": {
+      "count": "{count, plural, one {# oppgave} other {# oppgaver}} levert"
+    },
+    "empty": {
+      "title": "Ingenting levert ennå",
+      "body": "Arbeid som læreren leser dukker opp her — sammen med det de sa om det.",
+      "filteredTitle": "Ingenting her",
+      "filteredBody": "Du har ingenting i denne tilstanden nå."
+    },
+    "failed": "Kunne ikke laste arbeidet ditt",
+    "retry": "Prøv igjen",
+    "more": "Vis mer",
+    "redo": {
+      "again": "Prøv på nytt",
+      "back": "Tilbake til arbeidet mitt",
+      "banner": "{teacher} sendte denne tilbake til en ny runde",
+      "bannerUnsigned": "Denne kom tilbake til en ny runde"
+    },
+    "resubmit": {
+      "label": "Den nye runden din",
+      "placeholder": "Skriv den om igjen, med kommentaren over i tankene.",
+      "charPad": "Norske bokstaver",
+      "submit": "Lever på nytt",
+      "sending": "Sender …",
+      "sent": "Sendt. Den ligger hos læreren din igjen.",
+      "alreadyThere": "Den lå allerede hos læreren din — ingenting ble sendt to ganger.",
+      "failed": {
+        "not-sent": "Det gikk ikke gjennom. Teksten din står her fortsatt — prøv igjen.",
+        "delivered": "Den nådde læreren din likevel. Ingenting mer å gjøre.",
+        "unconfirmed": "Kunne ikke bekrefte om den gikk gjennom. Teksten er tatt vare på — sjekk «Arbeidet mitt» før du sender på nytt."
+      }
+    }
+  }
+}

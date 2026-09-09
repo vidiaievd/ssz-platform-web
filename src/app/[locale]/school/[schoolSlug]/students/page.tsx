@@ -22,7 +22,7 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
 
   if (!school) {
     return (
-      <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+      <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto">
         <p className="text-sm text-muted-foreground">{t('notFound')}</p>
       </main>
     );
@@ -38,7 +38,7 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
   ]);
 
   return (
-    <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+    <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-6">
       {/* Pending invites indicator */}
       {pendingInvitesCount === null ? (
         <p className="text-sm text-destructive">Failed to load pending invitations count.</p>

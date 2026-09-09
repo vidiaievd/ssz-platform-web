@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
@@ -14,6 +14,12 @@ vi.mock('../actions/exercise', () => ({
 vi.mock('../actions/gap-fill', () => ({ saveGapFillAction: vi.fn() }));
 vi.mock('../actions/error-correction', () => ({ saveErrorCorrectionAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({ saveTranslateAction: vi.fn() }));
+vi.mock('../actions/match-pairs', () => ({ saveMatchPairsAction: vi.fn() }));
+vi.mock('../actions/writing-task', () => ({ saveWritingTaskAction: vi.fn() }));
+vi.mock('../actions/short-answer', () => ({ saveShortAnswerAction: vi.fn() }));
+vi.mock('../actions/sentence-schema', () => ({ saveSentenceSchemaAction: vi.fn() }));
+vi.mock('../actions/multiple-choice', () => ({ saveMultipleChoiceAction: vi.fn() }));
+vi.mock('../actions/multiple-choice-group', () => ({ saveMultipleChoiceGroupAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -64,7 +70,6 @@ function renderPane(isLive: boolean | null = false) {
           state="draft"
           isLive={isLive}
           container={CONTAINER}
-          backHref="/school/my-school/content/course-1"
           publishSlot={null}
         />
       </NextIntlClientProvider>
@@ -187,6 +192,262 @@ describe('ExerciseEditorPane', () => {
     // sentence is there word by word and the answer key is not.
     expect(screen.getAllByText('kino.').length).toBeGreaterThan(0);
     expect(screen.queryByText('gikk jeg')).not.toBeInTheDocument();
+  });
+
+  it('opens the writing-task builder, and its preview keeps the answer key back', () => {
+    // The stored shape is the one plan 50 phase 2 rewrote: the checklist point's text is
+    // in `content`, the phrasings that would satisfy it and the model answer are not.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-wt',
+        templateCode: 'writing_task',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: {
+          mode: 'letter',
+          instruction: 'Skriv et brev.',
+          prompt: 'Du har nettopp flyttet til en ny by.',
+          letter: { register: 'informal', recipient: 'En venn' },
+          points: [{ id: 'p1', text: 'Fortell hvor du bor nå', required: true }],
+          rubric: [{ id: 'c1', name: 'Oppgaveløsning', weight: 2, metric: 'points' }],
+          settings: { minWords: 120, maxWords: 200, passScore: 4 },
+        },
+        expectedAnswers: {
+          points: { p1: { keywords: ['flyttet til Bergen'] } },
+          rubric: { c1: { levels: ['a', 'b', 'c', 'Alle punktene er dekket'] } },
+          model: 'Hei Anna! Jeg har flyttet til Bergen.',
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Skriv et brev.' }],
+        updatedAt: '2026-08-22T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /The task/ })).toBeInTheDocument();
+    expect(screen.getByLabelText('The task itself')).toHaveValue(
+      'Du har nettopp flyttet til en ny by.',
+    );
+
+    // The answer key belongs on the author's screen and nowhere else. Scoped to the
+    // preview column, because the keywords and the model answer are step-1 fields — it
+    // is the student's side that must not carry them.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('Du har nettopp flyttet til en ny by.')).toBeInTheDocument();
+    expect(preview.getByText('Fortell hvor du bor nå')).toBeInTheDocument();
+    expect(preview.queryByText(/flyttet til Bergen/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Alle punktene er dekket/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Hei Anna/)).not.toBeInTheDocument();
+  });
+
+  it('opens the short-answer builder on a document of the new form, key held back', () => {
+    // The dispatch is on the shape of the document, not on the template code — plan 51
+    // §8 Q1. `questions` is what says this one is of the new form.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-sa',
+        templateCode: 'short_answer',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: {
+          title: '',
+          instruction: 'Svar med én til tre setninger.',
+          questions: [
+            {
+              id: 'q1',
+              kind: 'reading',
+              passage: 'Fra 1. januar må alle syklister ha lys foran og bak.',
+              prompt: 'Hva er nytt fra 1. januar?',
+            },
+          ],
+          settings: {
+            passRule: 'all',
+            minWords: 3,
+            showModel: 'onClose',
+            teacherReview: 'flagged',
+          },
+        },
+        expectedAnswers: {
+          questions: {
+            q1: {
+              elements: [{ id: 'e1', label: 'kravet', anchors: ['lys foran'], required: true }],
+              model: 'Alle syklister må ha lys foran og bak.',
+              why: 'Teksten sier hva regelen krever.',
+            },
+          },
+        },
+        instructions: [
+          { instructionLanguage: 'en', instructionText: 'Svar med én til tre setninger.' },
+        ],
+        updatedAt: '2026-08-23T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Answer key/ })).toBeInTheDocument();
+
+    // The anchor phrases and the model answer are the answer written in the words the
+    // student is being asked to find; the projection keeps both off their screen.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('Hva er nytt fra 1. januar?')).toBeInTheDocument();
+    expect(preview.queryByText(/Alle syklister må ha lys/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Teksten sier hva regelen krever/)).not.toBeInTheDocument();
+    expect(preview.queryByText('kravet')).not.toBeInTheDocument();
+  });
+
+  it('opens the multiple-choice builder on a set, key held back', () => {
+    // Dispatch on the template code *and* the shape of the document — plan 53 §3.9. 121
+    // of this type's 131 seeded exercises are still single questions; `questions` is what
+    // says this one is a set.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-mc',
+        templateCode: 'multiple_choice',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: {
+          title: 'Indirekte tale',
+          instruction: 'Velg det riktige svaret.',
+          questions: [
+            {
+              id: 'q1',
+              kind: 'grammar',
+              context: '',
+              stem: 'Han sa at han ___ syk.',
+              options: [
+                { id: 'a', text: 'er', fixed: false },
+                { id: 'b', text: 'var', fixed: false },
+              ],
+            },
+          ],
+          settings: { letters: true, layout: 'list', shuffle: false, retry: 'one' },
+        },
+        expectedAnswers: {
+          questions: {
+            q1: {
+              correctOptionId: 'b',
+              why: 'Presens blir preteritum etter «sa».',
+              options: { a: 'Presens holder ikke her.' },
+            },
+          },
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Velg det riktige svaret.' }],
+        updatedAt: '2026-08-28T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Distractors/ })).toBeInTheDocument();
+
+    // The rule and the rebuttals are the answer: the projection keeps all three off the
+    // student's screen until a pick closes the question.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('Han sa at han ___ syk.')).toBeInTheDocument();
+    expect(preview.queryByText(/Presens blir preteritum/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Presens holder ikke her/)).not.toBeInTheDocument();
+  });
+
+  it('opens the statement-table builder on a table, key held back', () => {
+    // Dispatch on the template code *and* the shape of the document — plan 54 §1.2. The
+    // two documents of the old form keep `items`; `rows` is what says this one is a table.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-mcg',
+        templateCode: 'multiple_choice_group',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: {
+          title: 'Riktig eller galt',
+          instruction: 'Les teksten.',
+          source: { mode: 'inline', label: 'Tekst 1A', text: 'Bartek søker ny jobb.' },
+          columns: [
+            { id: 'c1', label: 'Riktig', short: 'R' },
+            { id: 'c2', label: 'Galt', short: 'G' },
+          ],
+          rows: [
+            { id: 'r1', text: 'Bartek leter etter arbeid.' },
+            { id: 'r2', text: 'Bartek har sluttet å søke.' },
+          ],
+          settings: {
+            numbering: true,
+            shuffleRows: false,
+            layout: 'auto',
+            showText: true,
+            retry: 'one',
+            lockCorrect: true,
+            showWhy: 'wrong',
+            revealKey: true,
+            passThreshold: 70,
+            progress: true,
+          },
+        },
+        expectedAnswers: {
+          rows: {
+            r1: { answer: 'c1', why: 'Teksten sier at han søker.', quote: 'søker ny jobb' },
+            r2: { answer: 'c2', why: 'Det motsatte står i teksten.', quote: '' },
+          },
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Les teksten.' }],
+        updatedAt: '2026-08-29T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Statements/ })).toBeInTheDocument();
+
+    // Which column each statement belongs in, the author's line and the quote that proves
+    // it are the answer: the projection keeps all three off the student's screen.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('Bartek leter etter arbeid.')).toBeInTheDocument();
+    expect(preview.queryByText(/Teksten sier at han søker/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Det motsatte står i teksten/)).not.toBeInTheDocument();
+  });
+
+  it('leaves a multiple-choice document of the old form to the generic form', () => {
+    // The default fixture of this suite is one of the 121. Asserted explicitly so the
+    // dispatch cannot start claiming them by template code alone.
+    renderPane();
+
+    expect(screen.queryByRole('tab', { name: /Distractors/ })).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue('Hva heter du?')).toBeInTheDocument();
+  });
+
+  it('leaves a short-answer document of the old form to the generic form', () => {
+    // 144 of these are still live, and the builder cannot edit one: there are no
+    // questions, no elements and no model answer to open it on.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-sa',
+        templateCode: 'short_answer',
+        targetLanguage: 'no',
+        difficultyLevel: 'B1',
+        content: { question: 'Hvorfor trenger de egenkapital?', context: 'Tekst 3A.' },
+        expectedAnswers: {
+          reference_answer: 'Fordi banken krever det.',
+          accepted_answers: ['Fordi banken krever det.'],
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Svar kort.' }],
+        updatedAt: '2026-08-23T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.queryByRole('tab', { name: /Answer key/ })).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue('Hvorfor trenger de egenkapital?')).toBeInTheDocument();
   });
 
   it('confirms a save as pending a publish, on live material too', async () => {

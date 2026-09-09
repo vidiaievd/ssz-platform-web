@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Ban, Bot, CircleAlert, Info, Pencil, Undo2, User } from 'lucide-react';
+import { Bot, Info, Pencil, Undo2, User } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SentenceRow } from '@/features/review/components/submission/sentence-row';
+import type { TranslateItemDetail } from '@/features/content-authoring/types/review';
 import {
   answerLang,
   judge,
@@ -16,9 +18,7 @@ import {
   type Translate,
 } from '@/lib/shared-kernel/translate';
 
-import { DiffLine, VerdictChip } from './tr-marks';
-
-const READING = 'var(--ssz-font-reading)';
+import { DiffLegend } from './tr-marks';
 
 export interface QueuePreviewProps {
   exercise: Translate;
@@ -28,23 +28,26 @@ export interface QueuePreviewProps {
  * What a handed-in set looks like on the teacher's side, over answers the author writes
  * themselves.
  *
- * The prototype fills this section with three canned submissions. There are none here on
+ * The prototype filled this section with three canned submissions. There are none here on
  * purpose: invented student answers would be the one thing on this screen that is not
  * true about this exercise, and the number they carry — how much of the set lands on a
  * teacher — is precisely the number an author comes to this section to find out. So the
- * answers are the author's own, judged by the same kernel the server runs, and the card
- * around them is the real shape of a submission: hits collapsed to a line, everything
- * else opened up with its diff, the author's notes and the guards that fired.
+ * answers are the author's own, judged by the same kernel the server runs.
  *
- * The three actions are drawn and inert. The queue screen itself is plan 42's phase 8, and
- * a button that looked live would promise a screen that does not exist yet — but leaving
- * the actions out would hide the part of the design that explains why the queue is not
- * optional for this template.
+ * The card around them is not a drawing of the review screen but the review screen's own
+ * `SentenceRow`, fed a breakdown built here instead of by the engine. One component and
+ * one judgement means an author cannot be shown a card the teacher will not get: when the
+ * marking screen changes, this preview changes with it. What is deliberately not here is
+ * the author's explanation of the key — the teacher's screen does not carry it either,
+ * and a preview that showed more than the real thing would be the wrong kind of helpful.
  */
 export function QueuePreview({ exercise }: QueuePreviewProps) {
   const t = useTranslations('Authoring');
   const items = runItems(exercise);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  // Local and thrown away: the point is that the affordance is there, sentence by
+  // sentence, exactly where the teacher will find it.
+  const [comments, setComments] = useState<Record<string, string>>({});
 
   if (items.length === 0) {
     return (
@@ -58,12 +61,12 @@ export function QueuePreview({ exercise }: QueuePreviewProps) {
   }
 
   const written = items.filter((item) => (answers[item.id] ?? '').trim() !== '');
-  const judged = items.map((item) => ({
-    item,
-    answer: answers[item.id] ?? '',
-    judgement: judge(exercise.check, item, answers[item.id] ?? ''),
-  }));
-  const passed = judged.filter((row) => route(exercise.check, row.judgement) === 'pass').length;
+  const judged = items.map((item) => {
+    const answer = answers[item.id] ?? '';
+    const judgement = judge(exercise.check, item, answer);
+    return { item, detail: asDetail(exercise, item, answer, judgement) };
+  });
+  const passed = judged.filter((row) => row.detail.routing === 'pass').length;
 
   return (
     <section className="flex flex-col gap-3">
@@ -78,7 +81,7 @@ export function QueuePreview({ exercise }: QueuePreviewProps) {
             <Input
               id={`tr-queue-${item.id}`}
               value={answers[item.id] ?? ''}
-              style={{ fontFamily: READING }}
+              style={{ fontFamily: 'var(--ssz-font-reading)' }}
               placeholder={t('translate.queue.answerPlaceholder', {
                 lang: answerLang(exercise, item).toLowerCase(),
               })}
@@ -108,54 +111,57 @@ export function QueuePreview({ exercise }: QueuePreviewProps) {
             </span>
           </p>
 
-          <ul className="flex flex-col gap-3">
-            {judged.map(({ item, answer, judgement }, index) =>
-              route(exercise.check, judgement) === 'pass' ? (
-                <li key={item.id} className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="text-xs font-semibold text-muted-foreground">{index + 1}</span>
-                  <span style={{ fontFamily: READING }}>{answer}</span>
-                  <span className="flex-1" />
-                  <VerdictChip verdict={judgement.verdict} />
-                </li>
-              ) : (
-                <li key={item.id} className="flex flex-col gap-2 border-t border-border pt-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold text-muted-foreground">{index + 1}</span>
-                    <span className="text-xs text-muted-foreground">{item.source}</span>
-                    <span className="flex-1" />
-                    <VerdictChip verdict={judgement.verdict} />
-                    {judgement.verdict !== 'empty' && judgement.verdict !== 'noref' && (
-                      <span className="text-[11px] text-muted-foreground">
-                        {t('translate.tester.sim', { percent: Math.round(judgement.sim * 100) })}
-                      </span>
-                    )}
-                  </div>
+          {judged.some((row) => row.detail.routing !== 'pass') && (
+            <div className="flex justify-end">
+              <DiffLegend />
+            </div>
+          )}
 
-                  {judgement.tokens.length > 0 && <DiffLine tokens={judgement.tokens} />}
-
-                  <Notes item={item} judgement={judgement} />
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button type="button" variant="secondary" size="sm" disabled>
-                      {t('translate.queue.approve')}
-                    </Button>
-                    <Button type="button" variant="ghost" size="sm" disabled>
-                      <Pencil className="size-3.5" aria-hidden />
-                      {t('translate.queue.comment')}
-                    </Button>
-                    <Button type="button" variant="ghost" size="sm" disabled>
-                      <Undo2 className="size-3.5" aria-hidden />
-                      {t('translate.queue.sendBack')}
-                    </Button>
-                  </div>
-                </li>
-              ),
-            )}
+          <ul className="flex flex-col gap-2">
+            {judged.map(({ item, detail }, index) => (
+              <SentenceRow
+                // Remounted when the routing flips, so a row that has just become a hit
+                // collapses: `SentenceRow` decides open-or-closed once, which is right on
+                // the marking screen — where the breakdown arrives finished — and wrong
+                // here, where the author is editing the answer under it.
+                key={`${item.id}:${detail.routing}`}
+                detail={detail}
+                index={index + 1}
+                prompt={item.source}
+                teacherNote={item.teacherNote ?? undefined}
+                comment={comments[item.id]}
+                onComment={(value) =>
+                  setComments((current) => {
+                    const next = { ...current };
+                    if (value === undefined) delete next[item.id];
+                    else next[item.id] = value;
+                    return next;
+                  })
+                }
+              />
+            ))}
           </ul>
+
+          {/* The verdict is one decision about the whole submission, taken at the foot of
+              the marking screen — which is where these three sit there too. Inert here:
+              this submission is the author's own, and there is nobody to send it back to. */}
+          <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+            <Button type="button" variant="secondary" size="sm" disabled>
+              {t('translate.queue.approve')}
+            </Button>
+            <Button type="button" variant="ghost" size="sm" disabled>
+              <Pencil className="size-3.5" aria-hidden />
+              {t('translate.queue.comment')}
+            </Button>
+            <Button type="button" variant="ghost" size="sm" disabled>
+              <Undo2 className="size-3.5" aria-hidden />
+              {t('translate.queue.sendBack')}
+            </Button>
+          </div>
 
           <p className="flex items-start gap-2 text-xs text-muted-foreground">
             <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-            {t('translate.queue.actionsSoon')}
+            {t('translate.queue.actionsInInbox')}
           </p>
 
           {/* The AI stage keeps its place in the card and nothing else — no model is
@@ -177,6 +183,34 @@ export function QueuePreview({ exercise }: QueuePreviewProps) {
   );
 }
 
+/**
+ * The author's own answer, in the shape the engine sends a teacher.
+ *
+ * Everything `SentenceRow` reads comes from the judgement; nothing is invented for the
+ * preview. `itemId` is the authoring item's id because in a real submission it is too —
+ * that is what a comment is filed against.
+ */
+function asDetail(
+  exercise: Translate,
+  item: Item,
+  answer: string,
+  judgement: Judgement,
+): TranslateItemDetail {
+  return {
+    itemId: item.id,
+    similarity: judgement.sim,
+    routing: route(exercise.check, judgement),
+    prompt: item.source,
+    note: item.teacherNote ?? null,
+    verdict: judgement.verdict,
+    ref: judgement.ref,
+    submitted: answer,
+    tokens: judgement.tokens,
+    missing: judgement.missing,
+    banned: judgement.banned,
+  };
+}
+
 function Heading() {
   const t = useTranslations('Authoring');
 
@@ -185,49 +219,5 @@ function Heading() {
       <h3 className="text-xs font-medium">{t('translate.queue.title')}</h3>
       <p className="mt-1 text-xs text-muted-foreground">{t('translate.queue.lede')}</p>
     </div>
-  );
-}
-
-/**
- * Everything written about this sentence that only the teacher sees: the note the author
- * left for them, the explanation of the key, and the guards the answer tripped.
- */
-function Notes({ item, judgement }: { item: Item; judgement: Judgement }) {
-  const t = useTranslations('Authoring');
-  const teacherNote = (item.teacherNote ?? '').trim();
-  const explanation = (item.explanation ?? '').trim();
-
-  return (
-    <>
-      {teacherNote !== '' && (
-        <p className="flex items-start gap-2 text-xs text-[var(--ssz-text-secondary)]">
-          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          {teacherNote}
-        </p>
-      )}
-      {explanation !== '' && (
-        <p className="text-xs text-muted-foreground">
-          {t('translate.queue.explanation', { text: explanation })}
-        </p>
-      )}
-      {judgement.missing.map((guard, index) => (
-        <p key={`m${index}`} className="flex items-start gap-2 text-xs text-warning-700">
-          <CircleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          <span>
-            {t('translate.tester.requireMissed', { text: guard.text })}
-            {guard.note !== undefined && guard.note !== '' && ` — ${guard.note}`}
-          </span>
-        </p>
-      ))}
-      {judgement.banned.map((guard, index) => (
-        <p key={`b${index}`} className="flex items-start gap-2 text-xs text-error">
-          <Ban className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          <span>
-            {t('translate.tester.forbidHit', { text: guard.text })}
-            {guard.note !== undefined && guard.note !== '' && ` — ${guard.note}`}
-          </span>
-        </p>
-      ))}
-    </>
   );
 }

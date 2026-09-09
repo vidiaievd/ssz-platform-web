@@ -41,21 +41,66 @@ export type {
   McqGroupValue,
 } from './mcq-group-body';
 
-export { MatchBody } from './match-body';
-export type { MatchBodyProps, MatchContent, MatchPair } from './match-body';
+export { MatchPairsBody } from './match-pairs-body';
+export type {
+  MatchPairsBodyProps,
+  MatchPairsValue,
+  RevealedSlot,
+  SlotVerdict,
+} from './match-pairs-body';
 
 export { ShortAnswerBody } from './short-answer-body';
 export type {
   ShortAnswerBodyProps,
-  ShortAnswerContent,
-  ShortAnswerExpectedAnswers,
+  ShortAnswerPhase,
+  ShortAnswerTally,
 } from './short-answer-body';
+export { readShortAnswerProjection } from './short-answer-projection';
+
+export { MultipleChoiceBody } from './multiple-choice-body';
+export type { MultipleChoiceBodyProps, MultipleChoicePhase } from './multiple-choice-body';
+export { readMultipleChoiceProjection } from './multiple-choice-projection';
+
+export { MultipleChoiceGroupBody } from './multiple-choice-group-body';
+export type {
+  MultipleChoiceGroupBodyProps,
+  MultipleChoiceGroupPhase,
+} from './multiple-choice-group-body';
+export { readMultipleChoiceGroupProjection } from './multiple-choice-group-projection';
+
+/* The single-question form, still live under 144 seeded exercises (plan 51 §8 Q1).
+   Dispatched to by document shape, not by template code. */
+export { ShortAnswerLegacyBody } from './short-answer-legacy-body';
+export type {
+  ShortAnswerLegacyBodyProps,
+  ShortAnswerLegacyContent,
+  ShortAnswerLegacyExpectedAnswers,
+} from './short-answer-legacy-body';
 
 export { WritingBody } from './writing-body';
 export type { WritingBodyProps, WritingContent, WritingValue, WritingTopic } from './writing-body';
 
+export { measure, submitGate, WritingTaskBody } from './writing-task-body';
+export type {
+  DraftSaveState,
+  SubmitBlock,
+  SubmitGate,
+  WritingTaskBodyProps,
+  WritingTaskPhase,
+  WritingTaskValue,
+} from './writing-task-body';
+
+export { readWritingTaskProjection } from './writing-task-projection';
+export { outcomeOf, WritingTaskGraded } from './writing-task-graded';
+export type { WritingTaskGradedProps, WritingTaskOutcome } from './writing-task-graded';
+
 export { ErrorCorrectionBody } from './error-correction-body';
-export type { ErrorCorrectionBodyProps, ErrorCorrectionValue } from './error-correction-body';
+export type {
+  ErrorCorrectionBodyProps,
+  ErrorCorrectionValue,
+  ErrorCorrectionItemVerdict,
+  ErrorCorrectionVerdicts,
+} from './error-correction-body';
 export { readStudentProjection } from './error-correction-projection';
 
 export { TranslateRunnerBody } from './translate-runner-body';
@@ -90,14 +135,12 @@ export type {
 } from './word-bank-fill-body';
 
 export { SentenceSchemaBody } from './sentence-schema-body';
-export type {
-  SentenceSchemaBodyProps,
-  SentenceSchemaContent,
-  SentenceSchemaExpectedAnswers,
-  SchemaField,
-  SchemaToken,
-  SchemaPlacements,
-} from './sentence-schema-body';
+export type { SentenceSchemaBodyProps, SentenceSchemaPhase } from './sentence-schema-body';
+export { SchemaBoard } from './schema-board';
+export type { BoardLayout, SchemaBoardProps } from './schema-board';
+export { WordBank } from './word-bank';
+export type { WordBankProps } from './word-bank';
+export { readSentenceSchemaProjection } from './sentence-schema-projection';
 
 export {
   normAnswer,
@@ -105,8 +148,6 @@ export {
   checkMcqGroup,
   gradeFill,
   gradeFreeText,
-  gradeMatch,
-  gradeSentenceSchema,
   checkWordBankFill,
   checkTextOrder,
 } from './grading';

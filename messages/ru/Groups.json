@@ -11,16 +11,37 @@
       "description": "Создайте первую группу, чтобы начать.",
       "action": "Новая группа"
     },
-    "filteredEmpty": "Ни одна группа не соответствует вашим фильтрам."
+    "filteredEmpty": "Ни одна группа не соответствует вашим фильтрам.",
+    "count": "{count, plural, one {# группа} few {# группы} many {# групп} other {# группы}}",
+    "columns": {
+      "group": "Группа",
+      "teacher": "Учителя",
+      "schedule": "Расписание",
+      "capacity": "Места",
+      "status": "Статус",
+      "alerts": "Проблемы"
+    },
+    "kpi": {
+      "activeGroups": "Активные группы",
+      "needTeacher": "{count, plural, =0 {все с учителем} one {# без учителя} few {# без учителя} many {# без учителя} other {# без учителя}}",
+      "needAttention": "Требуют внимания",
+      "allClear": "Всё в порядке",
+      "studentsEnrolled": "Учеников зачислено",
+      "drafts": "Черновики",
+      "attentionHint": "блокирующие или советующие предупреждения",
+      "studentsHint": "по всем группам",
+      "draftsHint": "ещё не опубликованы"
+    }
   },
   "filter": {
-    "search": "Поиск групп…",
+    "search": "Название, курс, учитель…",
     "all": "Все",
     "attention": "Требуют внимания",
     "drafts": "Черновики",
     "sortAlerts": "Больше всего предупреждений",
     "sortName": "Название А–Я",
-    "sortStudents": "Больше всего учеников"
+    "sortStudents": "Больше всего учеников",
+    "sortLabel": "Сортировка"
   },
   "status": {
     "draft": "Черновик",
@@ -38,7 +59,9 @@
     "noTeacher": "Нет учителя",
     "online": "Онлайн",
     "inPerson": "Очно",
-    "ok": "OK"
+    "ok": "OK",
+    "issues": "{count, plural, one {# проблема} few {# проблемы} many {# проблем} other {# проблемы}}",
+    "langLabel": "Язык: {lang}"
   },
   "resolve": {
     "actionRequired": "Требуется действие",
@@ -51,30 +74,24 @@
     "students": "Ученики",
     "teachers": "Учителя",
     "schedule": "Расписание",
-    "sectionLabel": "Раздел"
+    "sectionLabel": "Раздел",
+    "materials": "Материалы"
   },
   "overview": {
     "teachersHeading": "Учителя",
     "rosterHeading": "Список учеников",
     "scheduleHeading": "Расписание",
     "noTeachers": "Учителей не назначено.",
-    "courseHeading": "Курс",
-    "nextLessonHeading": "Следующий урок",
+    "assign": "Назначить",
+    "add": "Добавить",
+    "scheduleSummary": "{hours} ч/нед · {mode}",
+    "minMaxSeats": "мин {min} · макс {max} мест",
     "ready": "Готово к запуску",
     "notReady": "Не готово к запуску",
-    "statusUnknown": "Статус неизвестен — не удалось проверить конфликты",
-    "clashCount": "{count} студент с конфликтом расписания",
-    "clashCountPlural": "{count} студентов с конфликтом расписания",
-    "manageStudents": "Управление студентами →",
-    "manageTeachers": "Управление учителями →",
-    "openSchedule": "Открыть расписание →",
-    "addSchedule": "Добавить расписание →",
-    "coPrimaryCount": "+{count} со-учитель",
-    "subCount": "{count} заместитель",
-    "subCountPlural": "{count} заместителей"
+    "statusUnknown": "Статус неизвестен — не удалось проверить конфликты"
   },
   "students": {
-    "search": "Поиск учеников…",
+    "search": "Фильтр учеников…",
     "addStudents": "Добавить учеников",
     "noEnrolled": "Учеников ещё нет.",
     "noMatch": "Ни один ученик не соответствует поиску.",
@@ -87,12 +104,23 @@
       "finished": "Завершил",
       "clash": "Конфликт расписания",
       "unassigned": "Не назначен"
-    }
+    },
+    "searchAria": "Поиск учеников по имени или почте",
+    "tableAria": "Список учеников",
+    "columns": {
+      "student": "Ученик",
+      "level": "Уровень",
+      "status": "Статус",
+      "progress": "Прогресс"
+    },
+    "remove": "Убрать {name} из группы",
+    "removeButton": "Убрать"
   },
   "teachers": {
-    "primaryHeading": "Основной учитель",
-    "coPrimaryHeading": "Со-учитель",
+    "assignedHeading": "Назначенные учителя",
+    "assignedSub": "Один основной обязателен · один необязательный со-учитель · временные замены",
     "subsHeading": "Заместители",
+    "noSubstitutes": "Активных замен нет.",
     "noPrimary": "Нет основного учителя",
     "noPrimaryDescription": "Группа не может проводить уроки без основного учителя.",
     "assignPrimary": "Назначить основного",
@@ -112,7 +140,19 @@
     "noSlots": "Регулярных уроков не настроено.",
     "noLessons": "Ближайших уроков не запланировано.",
     "sub": "Зам",
-    "editButton": "Изменить расписание"
+    "editButton": "Изменить расписание",
+    "recentHeading": "Проведённые занятия",
+    "noRecent": "За последние недели занятий не было.",
+    "held": "Проведено",
+    "notHeld": "Не отмечено",
+    "noUnit": "Юнит не привязан",
+    "markHeld": "Отметить проведённым",
+    "marking": "Сохраняем…",
+    "marked": "Занятие отмечено как проведённое",
+    "markError": "Не удалось отметить занятие",
+    "unitLabel": "Юнит учебного плана",
+    "pickUnit": "Выберите юнит",
+    "noPlan": "Учебного плана пока нет"
   },
   "detail": {
     "back": "Группы",
@@ -213,12 +253,16 @@
   },
   "assignTeacher": {
     "title": "Назначить учителя",
-    "description": "Назначение для {groupName} · язык: {lang}",
-    "role": "Роль",
+    "description": "к {groupName} · {schedule}",
+    "role": "Роль в этой группе",
+    "chooseTeacher": "Выберите учителя, который преподаёт {lang}",
     "roleOptions": {
       "primary": "Основной",
       "coPrimary": "Со-учитель",
-      "substitute": "Заместитель"
+      "substitute": "Заместитель",
+      "primarySub": "один обязателен",
+      "coPrimarySub": "необязательный второй",
+      "substituteSub": "временная замена"
     },
     "substituteFrom": "Дата начала",
     "substituteTo": "Дата окончания",
@@ -240,10 +284,15 @@
     "errorGeneric": "Назначение не удалось. Попробуйте снова.",
     "assign": "Назначить учителя",
     "assignAnyway": "Назначить в любом случае",
-    "assigning": "Назначение…",
+    "assigning": "Назначаем…",
     "cancel": "Отменить",
     "successSimple": "Назначен {name} как {role}",
-    "successWithWarnings": "Назначен {name} как {role} — {count} предупреждение переопределено"
+    "successWithWarnings": "Назначен {name} как {role} — {count} предупреждение переопределено",
+    "roleAria": "Роль учителя",
+    "searchAria": "Поиск учителя по имени",
+    "listAria": "Выбор учителя",
+    "noMatch": "Ни один учитель не подходит под запрос.",
+    "serverRejected": "Сервер отклонил: {reasons}. Нажмите «Всё равно назначить», чтобы переопределить."
   },
   "addStudents": {
     "title": "Добавить учеников",
@@ -260,7 +309,12 @@
     "success": "Добавлен {count} ученик",
     "successPlural": "Добавлено {count} учеников",
     "successOverride": "Добавлено {count} учеников (превышение вместимости — переопределение применено)",
-    "error": "Не удалось добавить учеников. Попробуйте снова."
+    "error": "Не удалось добавить учеников. Попробуйте снова.",
+    "searchAria": "Поиск учеников",
+    "listAria": "Выбор учеников для добавления",
+    "addCount": "{count, plural, =0 {Добавить учеников} one {Добавить # ученика} few {Добавить # учеников} many {Добавить # учеников} other {Добавить # учеников}}",
+    "selected": "{count, plural, one {выбран # ученик} few {выбрано # ученика} many {выбрано # учеников} other {выбрано # учеников}}",
+    "selectAria": "Выбрать {name}"
   },
   "timetable": {
     "title": "Расписание учителей",
@@ -278,7 +332,24 @@
     },
     "conflictListTitle": "конфликт расписания",
     "conflictListTitlePlural": "конфликта расписания",
-    "conflictItem": "{day} конфликт: {groupA} пересекается с {groupB} — перенесите урок или переназначьте"
+    "conflictItem": "{day} конфликт: {groupA} пересекается с {groupB} — перенесите урок или переназначьте",
+    "hoursLine": "{hours}/{max} ч · {count, plural, one {# группа} few {# группы} many {# групп} other {# группы}}",
+    "clashes": "{count, plural, one {# накладка} few {# накладки} many {# накладок} other {# накладки}}",
+    "conflictsAria": "Накладки в расписании",
+    "gridAria": "Расписание на неделю",
+    "blockAria": "{group} · {time}",
+    "conflictBlockAria": "Накладка по времени: {group} ({time})",
+    "subSuffix": "замена",
+    "errorTitle": "Не удалось загрузить расписание",
+    "weekdayShort": {
+      "mon": "пн",
+      "tue": "вт",
+      "wed": "ср",
+      "thu": "чт",
+      "fri": "пт",
+      "sat": "сб",
+      "sun": "вс"
+    }
   },
   "mySchedule": {
     "title": "Моё расписание",
@@ -337,5 +408,28 @@
     "updateError": "Не удалось обновить курс",
     "materialsCount": "+{count} дополнительный материал",
     "materialsCountPlural": "+{count} дополнительных материалов"
+  },
+  "materials": {
+    "noCourse": "К группе пока не привязан курс.",
+    "attachCourse": "Привязать курс",
+    "counts": "{units, plural, one {# юнит} few {# юнита} many {# юнитов} other {# юнита}} · {lessons, plural, one {# урок} few {# урока} many {# уроков} other {# урока}}",
+    "published": "Опубликован — ученики видят эту версию",
+    "notPublished": "Ещё не опубликован",
+    "notPublishedBody": "У курса нет опубликованной версии, поэтому ученики его пока не видят.",
+    "openCourse": "Открыть курс",
+    "change": "Изменить",
+    "planProgress": "План выдан",
+    "curriculumHeading": "Содержание курса",
+    "lessonCount": "{count, plural, one {# урок} few {# урока} many {# уроков} other {# урока}}",
+    "minutes": "{count} мин",
+    "emptyCourse": "В этом курсе пока нет юнитов.",
+    "structureUnavailable": "Не удалось прочитать структуру курса. Карточка выше по-прежнему показывает, к чему привязана группа.",
+    "taught": "{delivered}/{planned} проведено",
+    "linkLabel": "Юнит плана",
+    "linkNone": "Не привязан",
+    "linkSaved": "Привязка обновлена",
+    "linkError": "Не удалось обновить привязку",
+    "unstitchedHeading": "Юниты плана без пары в курсе",
+    "unstitchedNote": "Эти юниты учебного плана не учат ничего из этого курса — привяжите их выше или оставьте как есть."
   }
 }

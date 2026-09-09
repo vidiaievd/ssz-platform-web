@@ -6,14 +6,21 @@ import { useTranslations } from 'next-intl';
 import {
   AttemptRequestError,
   fetchLastAttempt,
+  resolveSubmitFailure,
   useSelfCheck,
   useStartAttempt,
   useSubmitAnswer,
+  type SubmitFailureResolution,
 } from '@/features/student/exercises/api/use-attempt';
 import type {
   AttemptRecord,
   TranslateSubmitDetails,
 } from '@/features/student/exercises/types/attempts';
+import {
+  clearAnswerDraft,
+  readAnswerDraft,
+  saveAnswerDraft,
+} from '@/features/student/exercises/lib/answer-draft';
 import { readSubmission, toSubmission } from '@/lib/shared-kernel/translate';
 import type { SelfCheckFeedback, StudentProjection } from '@/lib/shared-kernel/translate';
 import {
@@ -81,6 +88,13 @@ export function TranslateSolver({
    */
   const [review, setReview] = useState<AttemptReview | null>(null);
   const [submissions, setSubmissions] = useState(0);
+  /**
+   * How a failed `submit` actually left things (47.0.B) — `null` while nothing has
+   * failed, or once the check above resolved it as delivered, in which case `sent`
+   * already carries the news and this has nothing further to say.
+   */
+  const [sendFailure, setSendFailure] = useState<SubmitFailureResolution | null>(null);
+  const [confirmingDelivery, setConfirmingDelivery] = useState(false);
 
   /** Wall-clock since the attempt opened; the engine records it per submission. */
   const openedAt = useRef(0);
@@ -110,10 +124,19 @@ export function TranslateSolver({
           restoreConsidered.current = true;
 
           const saved = await fetchLastAttempt(exerciseId);
-          if (saved === null) return;
-          const answers = readSubmission(saved.submittedAnswer);
-          if (Object.keys(answers).length === 0) return;
+          const answers = saved === null ? {} : readSubmission(saved.submittedAnswer);
+          if (saved === null || Object.keys(answers).length === 0) {
+            // Nothing was ever handed in, so anything the learner had written is only in
+            // the browser — and reopening the exercise abandoned the attempt that held
+            // it (47.0.C). The draft is the only copy there is.
+            const draft = readTranslateDraft(readAnswerDraft(exerciseId));
+            if (draft !== null) setValue(draft);
+            return;
+          }
 
+          // Handed-in work wins over the draft that produced it: what reached the engine
+          // is the answer of record, and the draft is now history.
+          clearAnswerDraft(exerciseId);
           setValue(answers);
           // What the teacher decided is not this screen's to say, but that the work was
           // handed over is — otherwise a learner who comes back sees their own sentences
@@ -172,6 +195,7 @@ export function TranslateSolver({
   }
 
   function send() {
+    setSendFailure(null);
     submit.mutate(
       {
         submittedAnswer: { answers: toSubmission(items, value) },
@@ -179,12 +203,29 @@ export function TranslateSolver({
       },
       {
         onSuccess: (data) => {
+          clearAnswerDraft(exerciseId);
           setSent(data.requiresReview ? 'review' : 'passed');
           setRouting(readRouting(data.details));
           // `null` on a routed answer: it has been done, and whether it was right is the
           // teacher's to say. The reader counts it as attempted either way.
           if (submissions === 0) onChecked?.(data.requiresReview ? null : data.correct);
           setSubmissions((n) => n + 1);
+        },
+        onError: async () => {
+          if (attemptId === null) return;
+          setConfirmingDelivery(true);
+          const resolution = await resolveSubmitFailure(exerciseId, attemptId);
+          setConfirmingDelivery(false);
+          if (resolution === 'delivered') {
+            // It reached the engine; only the response was lost. Saying so calmly is
+            // owed here — a second "send" would try to hand in what is already there.
+            clearAnswerDraft(exerciseId);
+            setSent('review');
+            if (submissions === 0) onChecked?.(null);
+            setSubmissions((n) => n + 1);
+          } else {
+            setSendFailure(resolution);
+          }
         },
       },
     );
@@ -200,6 +241,10 @@ export function TranslateSolver({
   function changeValue(next: TranslateValue) {
     setValue(next);
     setFeedback(null);
+    // Kept for a reload the learner did not plan, not for sending on their behalf
+    // (47.0.C) — a failed hand-in leaves the sentences here, and this is what leaves
+    // them here across a refresh too.
+    saveAnswerDraft(exerciseId, next);
   }
 
   function askSelfCheck() {
@@ -223,6 +268,7 @@ export function TranslateSolver({
   }
 
   function again() {
+    clearAnswerDraft(exerciseId);
     setValue({});
     setFeedback(null);
     setChecksLeft(null);
@@ -230,6 +276,7 @@ export function TranslateSolver({
     setRouting(null);
     setReview(null);
     setSubmissions(0);
+    setSendFailure(null);
     begin();
   }
 
@@ -293,12 +340,12 @@ export function TranslateSolver({
           )}
           <button
             type="button"
-            disabled={submit.isPending}
+            disabled={submit.isPending || confirmingDelivery}
             onClick={allWritten ? send : showEmpty}
             className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
             style={{ background: PRACTICE_ACCENT }}
           >
-            {submit.isPending ? t('translate.sending') : t('translate.send')}
+            {submit.isPending || confirmingDelivery ? t('translate.sending') : t('translate.send')}
           </button>
           {/*
             Why the button is off, or — once it is on — what handing in will do. The
@@ -312,9 +359,21 @@ export function TranslateSolver({
                 ? t('translate.exactPasses')
                 : t('translate.allRead')}
           </span>
-          {submit.isError && (
+          {/*
+            47.0.B: a failed `submit` is resolved against the server before this shows
+            anything — "not-delivered" (nothing arrived, try again) reads differently
+            from "unconfirmed" (the check itself failed, so neither "sent" nor "lost"
+            would be true). A `resolveSubmitFailure` call that found the work already
+            delivered skips this entirely and moves `sent` on instead.
+          */}
+          {sendFailure === 'not-delivered' && (
             <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('translate.sendFailed')}
+              {t('translate.sendFailedRetry')}
+            </span>
+          )}
+          {sendFailure === 'unconfirmed' && (
+            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+              {t('translate.sendUnconfirmed')}
             </span>
           )}
         </div>
@@ -388,6 +447,23 @@ export function TranslateSolver({
       )}
     </div>
   );
+}
+
+/**
+ * A stored draft as this template can use it, or `null`.
+ *
+ * Read rather than trusted: what comes back is whatever was in storage under this key,
+ * possibly written by an older build of this runner. A sentence that is not a string is
+ * dropped, and nothing that fails here reaches the field.
+ */
+function readTranslateDraft(raw: unknown): TranslateValue | null {
+  if (typeof raw !== 'object' || raw === null) return null;
+
+  const value: TranslateValue = {};
+  for (const [itemId, text] of Object.entries(raw)) {
+    if (typeof text === 'string') value[itemId] = text;
+  }
+  return Object.keys(value).length === 0 ? null : value;
 }
 
 /** The teacher's verdict as this screen holds it. */

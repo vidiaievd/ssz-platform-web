@@ -28,6 +28,61 @@
     "defaultInstruction": "Velg riktig svar",
     "optionsLabel": "Svaralternativer"
   },
+  "multipleChoice": {
+    "position": "{n}/{total}",
+    "check": "Sjekk",
+    "checking": "Sjekker…",
+    "tapAnswer": "Trykk på et svar",
+    "tryAgain": "Prøv igjen",
+    "showAnswer": "Vis svaret",
+    "next": "Neste spørsmål",
+    "finish": "Ferdig",
+    "attempt": "Forsøk {n}",
+    "right": "Riktig.",
+    "generic": "Ikke riktig. Se på setningen en gang til.",
+    "sendFailed": "Svaret kunne ikke sendes. Prøv igjen.",
+    "closedAlready": "Dette spørsmålet er allerede ferdig.",
+    "closeFailed": "Settet ble kanskje ikke levert. Prøv igjen.",
+    "empty": {
+      "title": "Ingenting å svare på ennå",
+      "body": "Et spørsmål trenger tekst, minst to alternativer og ett av dem merket som riktig."
+    },
+    "done": {
+      "title": "Ferdig",
+      "score": "{score} av {total} riktig på første forsøk.",
+      "again": "Gjør på nytt"
+    }
+  },
+  "multipleChoiceGroup": {
+    "statement": "Påstand",
+    "result": "Resultat",
+    "toText": "Til teksten",
+    "answered": "{n}/{total} svart",
+    "check": "Sjekk svarene",
+    "checking": "Sjekker…",
+    "remaining": "{n} igjen",
+    "retryWrong": "Prøv de feile igjen",
+    "showKey": "Vis fasit",
+    "finish": "Fullfør",
+    "attempt": "Forsøk {n}",
+    "allRight": "Alt riktig",
+    "wrongCount": "{n, plural, one {# påstand er feil} other {# påstander er feil}}",
+    "lookAgain": "Se på dem en gang til.",
+    "passed": "Bestått",
+    "notPassed": "Ikke bestått",
+    "scoreLine": "{pct}% riktig — kravet er {threshold}%.",
+    "sendFailed": "Svarene kunne ikke sendes. Prøv igjen.",
+    "closedAlready": "Denne tabellen er allerede ferdig.",
+    "empty": {
+      "title": "Ingenting å svare på ennå",
+      "body": "En påstand trenger tekst og én merket kolonne. To ferdige påstander blir en tabell."
+    },
+    "done": {
+      "title": "Ferdig",
+      "score": "{score} av {total} riktig.",
+      "again": "Gjør på nytt"
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Svar på spørsmål {n}",
     "answeredCount": "{done} av {total} spørsmål besvart",
@@ -59,7 +114,8 @@
     "itemWithTeacherWhen": "Læreren ser svaret ditt med en gang.",
     "send": "Lever til læreren",
     "sending": "Sender…",
-    "sendFailed": "Kunne ikke levere — prøv igjen",
+    "sendFailedRetry": "Det forsøket ble ikke levert — svaret ditt er fortsatt her, prøv igjen.",
+    "sendUnconfirmed": "Fikk ikke bekreftet at dette nådde læreren — prøv igjen.",
     "missing": "{count, plural, one {# setning mangler svar} other {# setninger mangler svar}}",
     "exactPasses": "Treff på fasiten godkjennes med én gang — resten leses av en lærer",
     "allRead": "Alle svar leses av en lærer",
@@ -102,6 +158,11 @@
     "helperIdle": "Trykk på et ord til venstre…",
     "helperArmed": "Trykk nå på samsvarende ord til høyre."
   },
+  "set": {
+    "badge": "Spørsmålssett",
+    "count": "{n, plural, one {# spørsmål} other {# spørsmål}}",
+    "start": "Start · {n, plural, one {# spørsmål} other {# spørsmål}}"
+  },
   "shortAnswer": {
     "defaultInstruction": "Svar på spørsmålet",
     "inputLabel": "Svaret ditt",
@@ -117,6 +178,48 @@
       "wrong": "feil ord: {n}",
       "extra": "overflødige ord: {n}",
       "missing": "manglende ord: {n}"
+    },
+    "position": "{n}/{total}",
+    "submit": "Lever svaret",
+    "sending": "Leverer…",
+    "next": "Neste spørsmål",
+    "finish": "Ferdig",
+    "irreversible": "Svaret kan ikke endres etter levering",
+    "covered": "{covered} av {total} punkter dekket",
+    "tooShort": "Svaret er for kort til å vurderes automatisk.",
+    "aiNote": "AI-kommentar — språk og innhold vurderes her.",
+    "aiNoteGrammar": "AI-kommentar — språk og innhold vurderes her, inkludert grammatikk.",
+    "aiSoon": "kommer",
+    "modelLabel": "Eksempelsvar:",
+    "routing": "Sendt til læreren for vurdering",
+    "routingAi": "Sjekket av AI · sendt videre til læreren",
+    "routingIfUnclear": "{line} hvis noe er uklart",
+    "sendFailed": "Svaret ble ikke levert. Prøv en gang til.",
+    "handedInAlready": "Dette svaret er allerede levert.",
+    "closeFailed": "Vi fikk ikke bekreftet at oppgaven ble levert. Sjekk «Arbeidene mine» før du prøver igjen.",
+    "verdict": {
+      "pass": "Godkjent",
+      "partial": "Delvis",
+      "fail": "Ikke godkjent",
+      "wait": "Til vurdering"
+    },
+    "done": {
+      "title": "Levert",
+      "tally": "{pass} godkjent · {partial} delvis · {fail} ikke godkjent",
+      "teacher": "Læreren ser over svarene dine.",
+      "again": "Gjør på nytt"
+    },
+    "empty": {
+      "title": "Ingenting å svare på ennå",
+      "body": "Oppgaven har ingen ferdige spørsmål."
+    },
+    "review": {
+      "marked": "Læreren din har vurdert dette",
+      "sentBack": "Læreren din sendte dette tilbake",
+      "score": "{score} av 100 på dette forsøket.",
+      "itemCounted": "teller",
+      "itemNotCounted": "teller ikke",
+      "itemNotCountedPlain": "Læreren din godtok ikke dette svaret."
     }
   },
   "writing": {
@@ -127,15 +230,88 @@
     "wordCount": "{count} ord",
     "wordCountMin": "{count} / {min} ord"
   },
+  "writingTask": {
+    "defaultInstruction": "Skriv teksten din",
+    "inputLabel": "Teksten din",
+    "placeholder": "Skriv teksten din her…",
+    "attemptNo": "innlevering {n}",
+    "checklistTitle": "Dette må være med",
+    "phrasesTitle": "Nyttige uttrykk",
+    "letterLine": "Til: {recipient} · {register}",
+    "imageAlt": "Oppgavebilde",
+    "imageMissing": "bildet fra oppgaven",
+    "wordRange": "{count} / {min}–{max} ord",
+    "wordRangeOpen": "{count} / {min}+ ord",
+    "pasteOff": "innliming av",
+    "pasteBlocked": "Innliming er slått av i denne oppgaven — skriv teksten selv.",
+    "saving": "Lagrer…",
+    "saved": "Utkast lagret",
+    "timeLeft": "{minutes} minutter igjen",
+    "rubricTitle": "Slik vurderes teksten",
+    "passLine": "{pass} av {max} poeng for å bestå",
+    "topLevel": "3 — {descriptor}",
+    "send": "Lever til læreren",
+    "sending": "Leverer…",
+    "readByTeacher": "Alle svar leses av en lærer",
+    "needMore": "Minst {min} ord kreves — {left} igjen",
+    "tooLong": "Teksten er over maksgrensen på {max} ord",
+    "sendFailedRetry": "Teksten ble ikke levert. Prøv en gang til.",
+    "sendUnconfirmed": "Vi fikk ikke bekreftet leveringen. Sjekk «Mine innleveringer» før du leverer på nytt.",
+    "delivered": "Levert.",
+    "deliveredWhen": "Læreren gir tilbakemelding innen 48 timer.",
+    "rewrite": "Skriv om og lever på nytt (innlevering {n})",
+    "points": "{score} / {max} poeng",
+    "percent": "{score} %",
+    "mark": "{mark}/3",
+    "outcome": {
+      "passed": "Bestått",
+      "rewrite": "Til omskriving",
+      "failed": "Ikke bestått"
+    },
+    "modes": {
+      "letter": "Brev",
+      "essay": "Tekst",
+      "picture": "Bildebeskrivelse",
+      "retell": "Gjenfortelling",
+      "free": "Fritekst"
+    },
+    "register": {
+      "formal": "formelt språk",
+      "informal": "uformelt språk"
+    }
+  },
   "sentenceSchema": {
     "defaultInstruction": "Plasser hvert ord i riktig felt",
     "bankLabel": "Ord",
-    "bankEmpty": "Alle ord er plassert",
     "fieldDropLabel": "Plasser i {field}",
-    "multiWordHint": "Ett felt kan romme flere ord",
-    "answerLabel": "Riktig plassering",
     "sourceLabel": "Utgangssetning",
-    "targetLabel": "Målsetning"
+    "takeBack": "Ta «{word}» tilbake",
+    "remaining": "{count} igjen",
+    "position": "Setning {index} av {total}",
+    "attemptNo": "Forsøk {count}",
+    "check": "Sjekk ({placed}/{total})",
+    "fix": "Rett opp ({count})",
+    "reveal": "Vis riktig skjema",
+    "nextSentence": "Neste setning",
+    "wrongOrder": "Riktig felt, men feil rekkefølge inni det.",
+    "notInSentence": "Det ordet hører ikke til i denne setningen.",
+    "setDone": "Alle {count} setningene er ferdige",
+    "setTally": "{solved} løst · {revealed} vist",
+    "again": "Gjør på nytt",
+    "nothingToSolve": "Ingenting å løse her ennå — ingen setning i oppgaven er ferdig.",
+    "checkFailed": "Setningen kunne ikke sjekkes. Prøv igjen.",
+    "closedAlready": "Denne setningen er allerede ferdig.",
+    "closeFailed": "Oppgaven kunne ikke leveres. Prøv igjen.",
+    "clause": {
+      "main": "Helsetning",
+      "sub": "Leddsetning",
+      "yesno": "Ja/nei-spørsmål",
+      "hv": "Spørreord",
+      "imp": "Imperativ"
+    },
+    "skip": "Hopp over",
+    "skippedEarlier": "Denne la du til side tidligere",
+    "setTallySkipped": "{solved} løst · {revealed} vist · {skipped} hoppet over"
   },
   "unsupported": "Denne oppgavetypen ({type}) kan ikke løses ennå.",
   "taskNumber": "Oppgave {n}",
@@ -173,11 +349,15 @@
     "passageLabel": "Tekst",
     "send": "Lever",
     "sending": "Sender…",
-    "sendFailed": "Kunne ikke sende — prøv igjen",
+    "sendFailedRetry": "Det forsøket ble ikke levert — arbeidet ditt er fortsatt her, prøv igjen.",
+    "sendUnconfirmed": "Fikk ikke bekreftet at dette nådde læreren — prøv igjen.",
     "untouched": "{count, plural, one {# setning er ikke rørt} other {# setninger er ikke rørt}}",
     "approved": "Alt riktig — godkjent automatisk",
     "withTeacher": "Levert. Læreren ser på det.",
     "withTeacherWhen": "Vanligvis innen 48 timer.",
+    "itemCounted": "teller",
+    "itemNotCounted": "teller ikke",
+    "itemNotCountedPlain": "Læreren din godtok ikke denne.",
     "again": "Prøv på nytt",
     "charPad": "Norske bokstaver",
     "selfCheck": {
@@ -202,6 +382,11 @@
       "missing": "manglende ord",
       "spelling": "staving",
       "function": "preposisjon eller artikkel"
+    },
+    "review": {
+      "marked": "Læreren din har vurdert dette",
+      "sentBack": "Læreren din sendte dette tilbake",
+      "score": "{score} av 100 på dette forsøket."
     }
   },
   "gapFill": {
@@ -224,5 +409,74 @@
     "restored": "Ditt forrige svar, lagret {date}",
     "restoredScored": "{correct} av {total} luker riktig",
     "startOver": "Svar på nytt"
+  },
+  "matchPairs": {
+    "helperIdle": "Trykk på en linje, og så på halvdelen som fullfører den",
+    "helperSlotArmed": "Trykk nå på halvdelen som fullfører den.",
+    "helperItemArmed": "Trykk nå på linjen den fullfører.",
+    "tapAHalf": "Trykk for å velge en halvdel",
+    "emptySlot": "{left} — ingen halvdel valgt",
+    "filledSlot": "{left} — {half}",
+    "revealedSlot": "{left} — svaret er {half}",
+    "remaining": "{count} igjen",
+    "check": "Sjekk",
+    "checking": "Sjekker…",
+    "matchOneToCheck": "Koble minst én",
+    "checkFailed": "Kunne ikke sjekke — prøv igjen",
+    "retryAttempt": "Rett opp svarene · forsøk {n}",
+    "attemptCount": "Forsøk {n}",
+    "restart": "Start på nytt",
+    "revealFailed": "Kunne ikke vise svarene — prøv igjen",
+    "restored": "Ditt forrige svar, lagret {date}",
+    "restoredScored": "{correct} av {total} par riktige",
+    "startOver": "Svar på nytt",
+    "stateCorrect": "Riktig",
+    "stateWrong": "Ikke riktig",
+    "filledSlotCorrect": "{left} — {half}, riktig",
+    "filledSlotWrong": "{left} — {half}, ikke riktig",
+    "removeHalf": "Fjern {half}",
+    "noPairs": "Denne oppgaven har ingen par ennå.",
+    "checkCount": "Sjekk ({n}/{m})",
+    "attemptFootnote": "Forsøk {n} · {correct} av {total} riktige",
+    "pickerLabel": "Halvdeler som kan fullføre: {left}"
+  },
+  "audio": {
+    "play": "Spill av",
+    "pause": "Pause",
+    "back10": "10 s tilbake",
+    "speed": "{rate}×",
+    "speedLabel": "Avspillingshastighet",
+    "position": "Posisjon i klippet",
+    "playsLeft": "{left} av {limit} igjen",
+    "playsNone": "Ingen avspillinger igjen",
+    "transcript": "Transkripsjon",
+    "fragment": "Spill {from}–{to}",
+    "lockNote": "Oppgavene åpner seg når du har hørt klippet ferdig én gang.",
+    "lockNoteNamed": "{items} åpner seg når du har hørt klippet ferdig én gang.",
+    "status": {
+      "idle": "Trykk for å lytte",
+      "playing": "Spiller av…",
+      "paused": "Pauset",
+      "spent": "Grensen er nådd",
+      "failed": "Klippet kunne ikke spilles av. Oppgaven er åpen likevel."
+    },
+    "gate": {
+      "title": "Lytt først",
+      "ledeLocked": "Hør hele klippet én gang. Oppgavene åpner seg etterpå.",
+      "ledeOpen": "Du kan lytte om igjen mens du svarer.",
+      "listenFirst": "Lytt først",
+      "toItems": "Til oppgavene"
+    },
+    "itemNoun": {
+      "questions": "spørsmålene",
+      "gaps": "gapene",
+      "statements": "påstandene",
+      "sentence": "setningen",
+      "lines": "linjene",
+      "sentences": "setningene",
+      "pieces": "brikkene",
+      "pairs": "parene"
+    },
+    "lockNoteOwn": "Denne {item} åpner seg når du har hørt opptaket sitt."
   }
 }

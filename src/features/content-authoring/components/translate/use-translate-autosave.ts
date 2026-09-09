@@ -2,14 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  toContent,
-  toExpectedAnswers,
-  type Translate,
-} from '@/lib/shared-kernel/translate';
+import { applyAudioDraft, type AudioDraft } from '@/lib/shared-kernel/audio';
+import { toContent, toExpectedAnswers, type Translate } from '@/lib/shared-kernel/translate';
 
 import {
   saveTranslateAction,
+  type SaveTranslateInput,
   type SaveTranslateOutcome,
 } from '../../actions/translate';
 
@@ -39,8 +37,14 @@ interface Options {
   exerciseId: string;
   containerId: string;
   exercise: Translate;
+  /**
+   * The listening layer, carried beside the document (plan 56). The kernel's `Translate`
+   * is shared with the services and knows nothing about a block that belongs to no
+   * template, and `toContent` would drop it either way.
+   */
+  audio: AudioDraft;
   /** The token the row now carries, with the document that was written to earn it. */
-  onSaved: (updatedAt: string, saved: Translate) => void;
+  onSaved: (updatedAt: string, saved: Translate, audio: AudioDraft) => void;
 }
 
 /**
@@ -79,6 +83,7 @@ export function useTranslateAutosave({
   exerciseId,
   containerId,
   exercise,
+  audio,
   onSaved,
 }: Options): TranslateAutosave {
   const [status, setStatus] = useState<SaveStatus>('idle');
@@ -87,17 +92,21 @@ export function useTranslateAutosave({
   const [conflictToken, setConflictToken] = useState<string | null>(null);
 
   /** What was last written or loaded. Anything else on screen is unsaved work. */
-  const [baseline, setBaseline] = useState<Translate>(exercise);
+  const [baseline, setBaseline] = useState<{ exercise: Translate; audio: AudioDraft }>({
+    exercise,
+    audio,
+  });
 
   /** What to save, read at flush time so a burst of edits saves once, at its latest. */
-  const pending = useRef(exercise);
+  const pending = useRef({ exercise, audio });
   const attempt = useRef(0);
   const inFlight = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flushRef = useRef<() => Promise<void>>(() => Promise.resolve());
   const onSavedRef = useRef(onSaved);
 
-  const dirty = !sameDocument(exercise, baseline);
+  // The draft is replaced whole on every edit, exactly like the branches of the document.
+  const dirty = !sameDocument(exercise, baseline.exercise) || audio !== baseline.audio;
 
   const schedule = useCallback((delay: number) => {
     if (timer.current !== null) clearTimeout(timer.current);
@@ -115,13 +124,19 @@ export function useTranslateAutosave({
         schedule(DEBOUNCE_MS);
         return;
       }
-      const document = pending.current;
+      const { exercise: document, audio: draft } = pending.current;
 
       inFlight.current = true;
       setStatus('saving');
 
       const result = await saveTranslateAction(exerciseId, containerId, {
-        content: toContent(document),
+        // The template's own persistence, then the layer that belongs to none of them:
+        // `toContent` builds an explicit object and would drop the audio block.
+        content: applyAudioDraft(
+          toContent(document) as unknown as Record<string, unknown>,
+          draft,
+          document.type,
+        ) as SaveTranslateInput['content'],
         expectedAnswers: toExpectedAnswers(document),
         expectedUpdatedAt: force?.expectedUpdatedAt ?? document.updatedAt,
         instructions: document.instructions,
@@ -151,11 +166,11 @@ export function useTranslateAutosave({
       attempt.current = 0;
       // Saved: this is now the version everything is compared against, so an untouched
       // document is not written a second time.
-      setBaseline(document);
+      setBaseline({ exercise: document, audio: draft });
       setConflictToken(null);
       setStatus('saved');
       setSavedAt(new Date());
-      onSavedRef.current(outcome.updatedAt, document);
+      onSavedRef.current(outcome.updatedAt, document, draft);
     },
     [exerciseId, containerId, schedule],
   );
@@ -164,7 +179,7 @@ export function useTranslateAutosave({
   // save so that a flush always reads the newest document rather than the one from the
   // render that queued it.
   useEffect(() => {
-    pending.current = exercise;
+    pending.current = { exercise, audio };
     onSavedRef.current = onSaved;
     flushRef.current = () => flush();
   });
@@ -178,7 +193,7 @@ export function useTranslateAutosave({
     // The document is the trigger: every edit reschedules the one pending save. `status`
     // is deliberately not a dependency — it changes on every save and would reschedule.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exercise, dirty, schedule]);
+  }, [exercise, audio, dirty, schedule]);
 
   const retry = useCallback(() => {
     attempt.current = 0;

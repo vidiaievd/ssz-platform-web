@@ -33,7 +33,6 @@ type MembersPayload = Array<{
   joinedAt?: string;
 }>;
 type ContainersPayload = { items?: unknown[]; total?: number } | unknown[];
-type ReviewPayload = { items?: unknown[]; total?: number } | unknown[];
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
@@ -116,13 +115,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
       serverFetch({
         service: "content",
         path: "/containers",
-        query: { schoolId, limit: 1 },
-      }),
-    ),
-    fetchCount<ReviewPayload>(() =>
-      serverFetch({
-        service: "progress",
-        path: "/review/submissions/pending",
         query: { schoolId, limit: 1 },
       }),
     ),

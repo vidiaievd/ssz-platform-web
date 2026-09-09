@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
@@ -120,7 +120,8 @@ describe('CourseStructurePanel', () => {
   });
 
   // The level title now appears twice — once in the outline rail, once in the
-  // tree — so the click has to name which one it means.
+  // list of levels — so the click has to name which one it means. The row carries
+  // the level's name as a group, which is the half that is not the rail.
   it('renders the tree and inspector, and loads the inspector on selection', () => {
     vi.mocked(useCurriculumTree).mockReturnValue({
       data: ONE_LEVEL_TREE,
@@ -133,7 +134,7 @@ describe('CourseStructurePanel', () => {
       screen.getByText('Select an item to inspect and edit its settings.'),
     ).toBeInTheDocument();
 
-    fireEvent.click(within(screen.getByRole('tree')).getByText('A1 — Beginner'));
+    fireEvent.click(screen.getByRole('group', { name: 'A1 — Beginner' }));
     expect(
       screen.queryByText('Select an item to inspect and edit its settings.'),
     ).not.toBeInTheDocument();

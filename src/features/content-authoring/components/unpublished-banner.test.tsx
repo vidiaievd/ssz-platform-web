@@ -67,9 +67,7 @@ describe('UnpublishedBanner', () => {
     renderBanner(makeTree('pending_changes', ['published', 'pending_changes', 'draft']));
 
     expect(screen.getByText('3 items have unpublished changes.')).toBeInTheDocument();
-    expect(
-      screen.getByText('Students still see the last published version.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Students still see the last published version.')).toBeInTheDocument();
   });
 
   it('uses the singular form for a single pending row', () => {

@@ -8,6 +8,10 @@ export const authoringKeys = keyFactory('authoring', {
   container: (id: string) => ['container', id] as const,
   preflight: (id: string) => ['preflight', id] as const,
   activity: (id: string) => ['activity', id] as const,
+  coverage: (id: string, version: string) => ['coverage', id, version] as const,
+  /** Prefix of every coverage query — an override moves the module's strip and the course's. */
+  coverageAll: () => ['coverage'] as const,
+  exerciseAxes: (id: string) => ['exercise-axes', id] as const,
   lessons: (containerId: string) => ['lessons', containerId] as const,
   lesson: (id: string) => ['lesson', id] as const,
   lessonVariants: (lessonId: string) => ['lesson-variants', lessonId] as const,
@@ -34,10 +38,6 @@ export const authoringKeys = keyFactory('authoring', {
   grammarExplanations: (ruleId: string) => ['grammar-explanations', ruleId] as const,
   exercises: (containerId: string) => ['exercises', containerId] as const,
   exerciseRuleLinks: (exerciseId: string) => ['exercise-rule-links', exerciseId] as const,
-  reviewQueue: (exerciseId: string) => ['review-queue', exerciseId] as const,
-  /** Every course inbox, as one prefix: marking a submission changes whichever holds it. */
-  courseReviewQueues: () => ['course-review-queue'] as const,
-  courseReviewQueue: (containerId: string) => ['course-review-queue', containerId] as const,
   exercise: (id: string) => ['exercise', id] as const,
   sections: (containerId: string) => ['sections', containerId] as const,
   versions: (containerId: string) => ['versions', containerId] as const,

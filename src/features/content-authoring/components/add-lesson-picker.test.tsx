@@ -10,6 +10,12 @@ vi.mock('../actions/grammar', () => ({ createGrammarRuleAction: vi.fn() }));
 vi.mock('../actions/exercise', () => ({ createExerciseAction: vi.fn() }));
 vi.mock('../actions/gap-fill', () => ({ createGapFillAction: vi.fn() }));
 vi.mock('../actions/error-correction', () => ({ createErrorCorrectionAction: vi.fn() }));
+vi.mock('../actions/match-pairs', () => ({ createMatchPairsAction: vi.fn() }));
+vi.mock('../actions/writing-task', () => ({ createWritingTaskAction: vi.fn() }));
+vi.mock('../actions/short-answer', () => ({ createShortAnswerAction: vi.fn() }));
+vi.mock('../actions/sentence-schema', () => ({ createSentenceSchemaAction: vi.fn() }));
+vi.mock('../actions/multiple-choice', () => ({ createMultipleChoiceAction: vi.fn() }));
+vi.mock('../actions/multiple-choice-group', () => ({ createMultipleChoiceGroupAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
@@ -22,6 +28,8 @@ const { createVocabularyListAction } = await import('../actions/vocabulary');
 const { createGrammarRuleAction } = await import('../actions/grammar');
 const { createExerciseAction } = await import('../actions/exercise');
 const { createGapFillAction } = await import('../actions/gap-fill');
+const { createMultipleChoiceAction } = await import('../actions/multiple-choice');
+const { createMultipleChoiceGroupAction } = await import('../actions/multiple-choice-group');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -148,14 +156,47 @@ describe('AddLessonPicker', () => {
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 
-  it('scaffolds a placeholder exercise on the picked template', async () => {
+  it('creates a multiple choice from its own scaffold, not from the generic form', async () => {
+    // The last of the thirteen templates to stop being created generically (plan 53 §8
+    // Q5). Without the scaffold, "Add exercise → Multiple choice" writes the old
+    // single-question shape, and the builder — which needs a set — never opens for it.
+    vi.mocked(createMultipleChoiceAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-13', itemId: 'item-13' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Multiple choice'));
+
+    await waitFor(() => expect(createMultipleChoiceAction).toHaveBeenCalled());
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it('creates a statement table from its own scaffold, not from the generic form', async () => {
+    // Plan 54 phase 5. The generic form still opens the two documents of the old
+    // `items[]` form, but nothing new is written that way: without the scaffold the
+    // builder would mount on a document with no `rows`, which the template's schema
+    // refuses outright.
+    vi.mocked(createMultipleChoiceGroupAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-14', itemId: 'item-14' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Multiple choice group'));
+
+    await waitFor(() => expect(createMultipleChoiceGroupAction).toHaveBeenCalled());
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it('scaffolds a placeholder exercise on a template that has no builder of its own', async () => {
     vi.mocked(createExerciseAction).mockResolvedValue({
       ok: true,
       value: { exerciseId: 'ex-1', itemId: 'item-4' },
     } as never);
     const { onCreated } = renderPicker();
 
-    fireEvent.click(screen.getByText('Multiple choice group'));
+    fireEvent.click(screen.getByText('Put in order'));
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith('item-4'));
     expect(createExerciseAction).toHaveBeenCalledWith(
@@ -164,9 +205,11 @@ describe('AddLessonPicker', () => {
       'A2',
       'public',
       expect.objectContaining({
-        templateCode: 'multiple_choice_group',
-        mcgSharedOptions: [{ text: 'Option 1' }, { text: 'Option 2' }],
-        mcgItems: [{ question: 'New Practice', options: [], correctIndex: 0, explanation: '' }],
+        templateCode: 'text_order',
+        toLines: [
+          { text: 'First line', speaker: '' },
+          { text: 'Second line', speaker: '' },
+        ],
       }),
       'school-1',
     );

@@ -103,10 +103,14 @@ const SELF_CHECK = {
 function mockApi(
   responses: {
     submit?: unknown;
+    submitFails?: boolean;
     startFails?: boolean;
     last?: unknown;
     selfCheck?: unknown;
     selfCheckStatus?: number;
+    /** What `GET .../attempts/:attemptId` answers when a failed `submit` checks in (47.0.B). */
+    attemptStatus?: unknown;
+    attemptStatusFails?: boolean;
   } = {},
 ) {
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -121,12 +125,26 @@ function mockApi(
     }
 
     if (init?.method === undefined) {
+      // `GET .../attempts/<attemptId>` (47.0.B's status check) vs.
+      // `GET .../attempts` (the last-finished-attempt lookup) — same verb, different path.
+      if (/\/attempts\/[^/]+$/.test(path)) {
+        if (responses.attemptStatusFails) {
+          return new Response(JSON.stringify({ error: 'nope' }), { status: 502 });
+        }
+        return new Response(
+          JSON.stringify(responses.attemptStatus ?? { status: 'IN_PROGRESS' }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }
       return new Response(JSON.stringify(responses.last ?? { attempt: null }), {
         status: 200,
         headers: { 'content-type': 'application/json' },
       });
     }
     if (responses.startFails && !path.endsWith('/submit')) {
+      return new Response(JSON.stringify({ error: 'nope' }), { status: 502 });
+    }
+    if (path.endsWith('/submit') && responses.submitFails) {
       return new Response(JSON.stringify({ error: 'nope' }), { status: 502 });
     }
     return new Response(JSON.stringify(path.endsWith('/submit') ? responses.submit : STARTED), {
@@ -166,6 +184,7 @@ async function correctIt() {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  window.localStorage.clear();
 });
 
 describe('ErrorCorrectionSolver', () => {
@@ -260,6 +279,74 @@ describe('ErrorCorrectionSolver', () => {
     // The learner's own correction is back on screen, alongside the word it replaced.
     expect(await screen.findAllByRole('button', { name: 'Word: gikk' })).toHaveLength(2);
     expect(screen.queryByRole('button', { name: 'Word: jeg' })).not.toBeInTheDocument();
+  });
+
+  /**
+   * The verdict phase (plan 47 §4.1). For this template it is the only place a
+   * correction is ever called wrong — the machine may not say it, so the words on
+   * screen are the teacher's or there are none.
+   */
+  it("shows the teacher's verdict once one has read the submission", async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'SCORED',
+            score: 50,
+            reviewedAt: '2026-08-14T12:00:00.000Z',
+            reviewComment: 'Bra jobbet, men se på ordstillingen.',
+            reviewDecisions: [{ itemId: 'i1', approved: false, comment: 'Feil ord flyttet.' }],
+          },
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Your teacher has marked this')).toBeInTheDocument();
+    expect(screen.getByText('50 out of 100 for this attempt.')).toBeInTheDocument();
+    expect(screen.getByText('Bra jobbet, men se på ordstillingen.')).toBeInTheDocument();
+    // The teacher's word about one sentence sits with that sentence.
+    expect(screen.getByText('not counted')).toBeInTheDocument();
+    expect(screen.getByText('Feil ord flyttet.')).toBeInTheDocument();
+  });
+
+  it('says a sentence was not counted without inventing a reason for it', async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'SCORED',
+            score: 0,
+            reviewedAt: '2026-08-14T12:00:00.000Z',
+            reviewComment: null,
+            reviewDecisions: [{ itemId: 'i1', approved: false }],
+          },
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Your teacher did not count this one.')).toBeInTheDocument();
+  });
+
+  it('says when the work was sent back rather than marked', async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'RETURNED',
+            reviewedAt: '2026-08-14T12:00:00.000Z',
+            reviewComment: 'Prøv igjen med ordstillingen.',
+            reviewDecisions: [],
+          },
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Your teacher sent this back')).toBeInTheDocument();
+    expect(screen.getByText('Prøv igjen med ordstillingen.')).toBeInTheDocument();
+    expect(screen.queryByText(/out of 100/)).not.toBeInTheDocument();
   });
 
   // An exercise-engine older than the masking ships the stored document instead of the
@@ -359,5 +446,85 @@ describe('ErrorCorrectionSolver', () => {
 
     expect(await screen.findByRole('button', { name: 'Hand in' })).toBeInTheDocument();
     expect(await word('jeg')).toBeInTheDocument();
+  });
+
+  /**
+   * 47.0.B: a failed `submit` is not a verdict on its own — the work may already have
+   * reached the teacher, only the response got lost on the way back.
+   */
+  describe('when submit fails', () => {
+    it('shows "handed in" — not an error — when the attempt already reached the teacher', async () => {
+      renderSolver(mockApi({ submitFails: true, attemptStatus: { status: 'ROUTED_FOR_REVIEW' } }));
+
+      await correctIt();
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in' }));
+
+      expect(
+        await screen.findByText('Handed in. Your teacher will look at it.'),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/did not go through|couldn't confirm/i)).not.toBeInTheDocument();
+    });
+
+    it('offers a resend, and says the last attempt did not go through, when nothing arrived', async () => {
+      renderSolver(mockApi({ submitFails: true, attemptStatus: { status: 'IN_PROGRESS' } }));
+
+      await correctIt();
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in' }));
+
+      expect(
+        await screen.findByText("That attempt didn't go through — your work is still here, try again."),
+      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Hand in' })).toBeEnabled();
+    });
+
+    it('says it could not confirm delivery, not that the work was lost, when the check itself fails', async () => {
+      renderSolver(mockApi({ submitFails: true, attemptStatusFails: true }));
+
+      await correctIt();
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in' }));
+
+      expect(
+        await screen.findByText("Couldn't confirm that reached your teacher — try again."),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/didn't go through/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('the unsent draft (47.0.C)', () => {
+    /**
+     * Reopening the exercise abandons the attempt the edits lived in, so without a draft
+     * in the browser a reload is where the correction actually disappears — including the
+     * reload that follows a failed hand-in.
+     */
+    it('keeps the correction across a reload, before anything is handed in', async () => {
+      const { unmount } = renderSolver(mockApi());
+      await correctIt();
+      unmount();
+
+      renderSolver(mockApi({ submit: ROUTED }));
+
+      // Proof that the edits came back, not merely that the screen looks calm: an
+      // untouched sentence refuses to be handed in at all.
+      await userEvent.click(await screen.findByRole('button', { name: 'Hand in' }));
+      expect(
+        await screen.findByText('Handed in. Your teacher will look at it.'),
+      ).toBeInTheDocument();
+      expect(screen.queryByText('1 sentence is still untouched')).not.toBeInTheDocument();
+    });
+
+    it('forgets the draft once the work has reached the engine', async () => {
+      const { unmount } = renderSolver(mockApi({ submit: ROUTED }));
+      await correctIt();
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in' }));
+      await screen.findByText('Handed in. Your teacher will look at it.');
+      unmount();
+
+      // A fresh visit with nothing on record: the sentence is untouched again, because
+      // nothing should have come back out of storage.
+      renderSolver(mockApi());
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Hand in' }));
+      expect(screen.getByText('1 sentence is still untouched')).toBeInTheDocument();
+    });
   });
 });

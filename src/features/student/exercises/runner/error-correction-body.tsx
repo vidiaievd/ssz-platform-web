@@ -13,11 +13,28 @@ import type {
 
 import { CharPad } from '@/components/shared/char-pad';
 
+import {
+  AudioLockNote,
+  AudioSegmentButton,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
+
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
 /** itemId → the edits the learner made to that sentence. */
 export type ErrorCorrectionValue = Record<string, StudentEdits>;
+
+/** What a teacher decided about one sentence, once one has read the submission. */
+export interface ErrorCorrectionItemVerdict {
+  approved: boolean;
+  comment?: string;
+}
+
+/** The teacher's decisions, by sentence. */
+export type ErrorCorrectionVerdicts = Record<string, ErrorCorrectionItemVerdict>;
 
 export interface ErrorCorrectionBodyProps {
   /**
@@ -40,12 +57,32 @@ export interface ErrorCorrectionBodyProps {
    */
   pointOut?: boolean;
   /**
+   * The listening layer, when the exercise has one (plan 56 phase 6).
+   *
+   * The high-value shape here is dictation-with-corrections: the clip is the passage read
+   * *correctly*, and the text on screen is not. That is also why this type has an audio
+   * rule of its own — a transcript shown from the start would be the answers on screen
+   * (`transcriptGivesAway`, enforced in the builder and in publish preflight).
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the key once the work is in. */
+  audioTranscript?: { transcript: string; translation: string } | null;
+  /**
    * The last self-check the server answered, if the learner has asked for one. Counts
    * only: how many mistakes are corrected per sentence, and how many edits landed where
    * there was no mistake. Which words are wrong is not in here and must not be — that
    * stays withheld until the work is graded (BEHAVIOR §C.1).
    */
   selfCheck?: SelfCheckFeedback | null;
+  /**
+   * What a teacher decided, per sentence, once one has read the submission.
+   *
+   * This is the only place this template ever says that a correction was wrong. The
+   * engine may not — the auto-check of this template only ever approves — so the words
+   * here are a person's, and where they wrote none the card says only that the sentence
+   * was not counted (plan 47 §4.1).
+   */
+  verdicts?: ErrorCorrectionVerdicts | null;
 }
 
 const READING = 'var(--ssz-font-reading)';
@@ -97,9 +134,15 @@ export function ErrorCorrectionBody({
   accent,
   pointOut = false,
   selfCheck = null,
+  verdicts = null,
+  audio,
+  audioTranscript = null,
 }: ErrorCorrectionBodyProps) {
   const t = useTranslations('ExerciseRunner');
-  const interactive = phase === 'answering';
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  const locked = audioOn && audio.gated;
+  // The gate joins the expression every card already reads, rather than adding a second.
+  const interactive = phase === 'answering' && !locked;
 
   const selfCheckByItem = useMemo(() => {
     const byItem = new Map<string, SelfCheckItem>();
@@ -131,6 +174,13 @@ export function ErrorCorrectionBody({
   return (
     <div>
       {instruction !== undefined && instruction !== '' && <Instr>{instruction}</Instr>}
+
+      {audioOn && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={phase === 'answering'} />
+          {locked && <AudioLockNote itemNoun={t('audio.itemNoun.sentences')} />}
+        </div>
+      )}
 
       {projection.note !== '' && (
         <p className="mb-3 text-[13px] text-(--ssz-text-secondary)">{projection.note}</p>
@@ -173,7 +223,9 @@ export function ErrorCorrectionBody({
               accent={accent}
               mode={mode}
               untouched={pointOut && !isTouched(edits)}
+              {...(audioOn ? { audioEngine: audio } : {})}
               {...(feedback === undefined ? {} : { feedback })}
+              verdict={verdicts?.[item.id] ?? null}
               onChange={(change) => update(item.id, change)}
             />
           );
@@ -182,6 +234,14 @@ export function ErrorCorrectionBody({
 
       {interactive && (
         <p className="mt-4 text-[12.5px] text-(--ssz-text-muted)">{t('errorCorrection.howTo')}</p>
+      )}
+
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
       )}
     </div>
   );
@@ -198,7 +258,11 @@ interface EcCardProps {
   accent: string;
   mode: RunnerMode;
   untouched: boolean;
+  /** The clip engine, when the exercise has one — for this sentence's fragment chip. */
+  audioEngine?: ExerciseAudioEngine;
   feedback?: SelfCheckItem;
+  /** What the teacher decided about this sentence, once one has. */
+  verdict: ErrorCorrectionItemVerdict | null;
   onChange: (change: (edits: StudentEdits) => StudentEdits) => void;
 }
 
@@ -221,7 +285,9 @@ function EcCard({
   accent,
   mode,
   untouched,
+  audioEngine,
   feedback,
+  verdict,
   onChange,
 }: EcCardProps) {
   const t = useTranslations('ExerciseRunner');
@@ -238,20 +304,47 @@ function EcCard({
     >
       <div className="mb-1.5 flex items-center justify-between gap-3">
         <span className="text-[12px] font-bold text-(--ssz-text-muted)">{label}</span>
-        {/*
-          How many mistakes *this* card holds, and only in `passage` — where the card is
-          the whole text, so it says no more than the total already does. Across separate
-          sentences it would say which ones are clean, and that is a different and much
-          larger hint than "there are three mistakes here somewhere": the learner could
-          stop reading four of five sentences. The handoff draws the line in the same
-          place (BEHAVIOR §B, ec/preview.jsx).
-        */}
-        {passage && item.errorCount !== undefined && (
-          <span className="text-[12px] text-(--ssz-text-muted)">
-            {t('errorCorrection.inThis', { count: item.errorCount })}
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {/*
+            How many mistakes *this* card holds, and only in `passage` — where the card is
+            the whole text, so it says no more than the total already does. Across separate
+            sentences it would say which ones are clean, and that is a different and much
+            larger hint than "there are three mistakes here somewhere": the learner could
+            stop reading four of five sentences. The handoff draws the line in the same
+            place (BEHAVIOR §B, ec/preview.jsx).
+          */}
+          {passage && item.errorCount !== undefined && (
+            <span className="text-[12px] text-(--ssz-text-muted)">
+              {t('errorCorrection.inThis', { count: item.errorCount })}
+            </span>
+          )}
+          {/* A teacher's word outranks the machine's silence — this template's auto-check
+              never says a correction is wrong, so once a person has, their word is the
+              only one on screen. */}
+          {verdict !== null && (
+            <span
+              className="text-[12px] font-semibold"
+              style={{
+                color: verdict.approved
+                  ? 'var(--ssz-feedback-ok-fg)'
+                  : 'var(--ssz-feedback-no-fg)',
+              }}
+            >
+              {verdict.approved ? t('errorCorrection.itemCounted') : t('errorCorrection.itemNotCounted')}
+            </span>
+          )}
+        </div>
       </div>
+
+      {/* This sentence's line of the clip, when the author timed it. Free to replay: a
+          fragment spends no listen (BEHAVIOR §8). */}
+      {audioEngine !== undefined && (
+        <AudioSegmentButton
+          eng={audioEngine}
+          segment={audioEngine.segments[item.id] ?? null}
+          disabled={!interactive}
+        />
+      )}
 
       <EcSentence
         item={item}
@@ -298,6 +391,22 @@ function EcCard({
       {feedback !== undefined && (
         <SelfCheckNote feedback={feedback} showSpanCount={showSpanCount} />
       )}
+
+      {/*
+        Once a teacher has read it, their words replace the header badge above as the
+        explanation — and where they wrote none, the card says only that the sentence was
+        not counted. Inventing a reason here is the one thing this template must never do.
+      */}
+      {verdict !== null &&
+        (verdict.comment !== undefined && verdict.comment.trim() !== '' ? (
+          <p className="mt-2 text-[12.5px] text-(--ssz-text-secondary)">{verdict.comment}</p>
+        ) : (
+          !verdict.approved && (
+            <p className="mt-2 text-[12.5px] text-(--ssz-text-muted)">
+              {t('errorCorrection.itemNotCountedPlain')}
+            </p>
+          )
+        ))}
     </li>
   );
 }

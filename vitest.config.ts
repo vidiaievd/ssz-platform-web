@@ -46,6 +46,17 @@ export default defineConfig({
       {
         extends: true,
         plugins: [storybookTest({ configDir: path.join(dirname, '.storybook') })],
+        resolve: {
+          alias: {
+            // A story renders a client component in a real browser, and a client
+            // component may import a server action — which Next compiles to a reference
+            // and never ships, but a story loads for real, down to the server-only
+            // environment underneath it. These two shims stop that descent at the
+            // boundary Next would have stopped it at.
+            'server-only': path.resolve(dirname, './src/test/server-only-shim.ts'),
+            '@/lib/env': path.resolve(dirname, './src/test/env-browser-shim.ts'),
+          },
+        },
         test: {
           name: 'storybook',
           browser: {

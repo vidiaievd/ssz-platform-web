@@ -7,10 +7,7 @@ export const EXERCISE_TYPES = [
   'multiple_choice',
   'multiple_choice_group',
   'fill_in_blank',
-  'match_pairs',
   'short_answer',
-  'writing_task',
-  'sentence_schema',
   'word_bank_fill',
   'text_order',
 ] as const;
@@ -25,11 +22,22 @@ export type ExerciseType = (typeof EXERCISE_TYPES)[number];
  * would make the form fall back to `multiple_choice` and rewrite their content on the
  * next save.
  *
- * `word_bank_gap_fill`, `error_correction` and the translate pair are here but not there:
- * each has its own builder, and the generic form has no fields for any of them. Translate
- * left `EXERCISE_TYPES` in plan 42 §9 — its content is a set of sentences with an answer
- * key each, which no slice of this form can hold; the editor pane routes both codes to
- * `TranslateBuilder` before the generic form is ever reached.
+ * `word_bank_gap_fill`, `error_correction`, `match_pairs`, `writing_task` and the
+ * translate pair are here but not there: each has its own builder, and the generic form
+ * has no fields for any of them. Translate left `EXERCISE_TYPES` in plan 42 §9 — its
+ * content is a set of sentences with an answer key each, which no slice of this form can
+ * hold; the editor pane routes both codes to `TranslateBuilder` before the generic form is
+ * ever reached. `match_pairs` left it in plan 49 §8 for the same reason: a pair now owns
+ * its answer, its own pool id and a grid of explanations, and the editor pane routes it to
+ * `MatchPairsBuilder`. `writing_task` left it in plan 50 §7: the document carries a mode,
+ * a checklist with keywords, a weighted rubric with level descriptors and a settings
+ * block, split across both JSON columns — the four `wt*` fields this form used to hold
+ * described a shape the template no longer accepts, and the editor pane routes the code
+ * to `WritingTaskBuilder`. `sentence_schema` left it in plan 52 §7: a document is now a
+ * set of sentences over one field schema, where the key is which field each chunk belongs
+ * in — five `ss*` fields could describe one sentence with one placement each, and the
+ * template no longer accepts that shape at all (§8 Q7 rewrote all seven exercises). The
+ * editor pane routes the code to `SentenceSchemaBuilder`.
  */
 export const CREATABLE_EXERCISE_TYPES = [
   'multiple_choice',
@@ -46,11 +54,7 @@ export const CREATABLE_EXERCISE_TYPES = [
 ] as const;
 export type CreatableExerciseType = (typeof CREATABLE_EXERCISE_TYPES)[number];
 
-export const MATCH_VARIANTS = ['pairs', 'halves'] as const;
-
 export const TEXT_ORDER_KINDS = ['dialogue', 'sentences'] as const;
-
-export const SENTENCE_SCHEMA_TYPES = ['main', 'subordinate'] as const;
 
 // Verdicts for a rationale option: the accepted answer, one that is grammatical
 // but not chosen in this context, and one that simply fails.
@@ -145,13 +149,6 @@ export const exerciseFormSchema = z
       .optional(),
     fibWordBank: z.string().max(1000).optional(),
 
-    // match_pairs — `mpVariant` only changes presentation (word pairs vs
-    // numbered/lettered sentence halves), never scoring.
-    mpVariant: z.enum(MATCH_VARIANTS).optional(),
-    mpPairs: z
-      .array(z.object({ left: z.string().max(500), right: z.string().max(500) }))
-      .optional(),
-
     // short_answer — `saAccepted` lists every acceptable phrasing, separated by
     // `|`. Not a comma: a transformation answer routinely contains one
     // ("Hadde jeg tid, ville jeg hjulpet"), and splitting on it would file half
@@ -161,24 +158,6 @@ export const exerciseFormSchema = z
     saContext: z.string().max(2000).optional(),
     saReferenceAnswer: z.string().max(2000).optional(),
     saAccepted: z.string().max(2000).optional(),
-
-    // writing_task — `wtTopics` are optional "choose one" prompts.
-    wtPrompt: z.string().max(2000).optional(),
-    wtMinWords: z.string().max(6).optional(),
-    wtTopics: z.array(z.object({ title: z.string().max(500) })).optional(),
-    wtRubric: z.string().max(2000).optional(),
-
-    // sentence_schema — the learner drops sentence tokens into ordered fields.
-    // Each token records which field (by index) it belongs to; -1 = unassigned.
-    ssSentence: z.string().max(2000).optional(),
-    // Optional starting point: when set the exercise becomes a transformation
-    // and `ssSentence` is held back from the learner until the answer is checked.
-    ssSourceSentence: z.string().max(2000).optional(),
-    ssSchemaType: z.enum(SENTENCE_SCHEMA_TYPES).optional(),
-    ssFields: z.array(z.object({ label: z.string().max(200) })).optional(),
-    ssTokens: z
-      .array(z.object({ text: z.string().max(200), fieldIndex: z.number().int() }))
-      .optional(),
 
     // word_bank_fill — several sentences sharing one comma-separated bank.
     // `answers[j]` holds the accepted answers (comma-separated) for the j-th
@@ -280,16 +259,6 @@ export const exerciseFormSchema = z
         }
         break;
       }
-      case 'match_pairs': {
-        if ((data.mpPairs ?? []).filter((p) => p.left.trim() && p.right.trim()).length < 2) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['mpPairs'],
-            message: 'At least 2 complete pairs required',
-          });
-        }
-        break;
-      }
       case 'short_answer': {
         if (!data.saQuestion?.trim()) {
           ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['saQuestion'], message: 'Required' });
@@ -300,12 +269,6 @@ export const exerciseFormSchema = z
             path: ['saReferenceAnswer'],
             message: 'Required',
           });
-        }
-        break;
-      }
-      case 'writing_task': {
-        if (!data.wtPrompt?.trim()) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['wtPrompt'], message: 'Required' });
         }
         break;
       }
@@ -367,43 +330,6 @@ export const exerciseFormSchema = z
             code: z.ZodIssueCode.custom,
             path: ['toLines'],
             message: 'At least 2 lines required',
-          });
-        }
-        break;
-      }
-      case 'sentence_schema': {
-        if (!data.ssSentence?.trim()) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['ssSentence'], message: 'Required' });
-        }
-        const labelledFields = (data.ssFields ?? []).filter((f) => f.label.trim());
-        if (labelledFields.length < 2) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['ssFields'],
-            message: 'At least 2 fields required',
-          });
-        }
-        const filledTokens = (data.ssTokens ?? []).filter((tk) => tk.text.trim());
-        if (filledTokens.length < 2) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['ssTokens'],
-            message: 'At least 2 tokens required',
-          });
-        }
-        // Every filled token must be assigned to a field with a non-empty label.
-        const fieldCount = (data.ssFields ?? []).length;
-        const hasUnassigned = filledTokens.some(
-          (tk) =>
-            tk.fieldIndex < 0 ||
-            tk.fieldIndex >= fieldCount ||
-            !(data.ssFields ?? [])[tk.fieldIndex]?.label.trim(),
-        );
-        if (hasUnassigned) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['ssTokens'],
-            message: 'Every word must be assigned to a field',
           });
         }
         break;

@@ -523,6 +523,10 @@
       "taskCount": "{n} tasks in this set",
       "setProgress": "Checked {done} of {total}",
       "taskDone": "Done"
+    },
+    "unsupportedStages": {
+      "title": "{count, plural, one {One question isn't shown here} other {# questions aren't shown here}}",
+      "body": "They're written in a format this lesson doesn't play yet. The rest of the lesson works as usual."
     }
   }
 }

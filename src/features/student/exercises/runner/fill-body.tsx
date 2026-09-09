@@ -4,6 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { AnswerNoteMarker, buildAnswerNote, type Rationale, type WordNotes } from './answer-note';
+import {
+  AudioLockNote,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
+
 import { Instr } from './instr';
 import { modeAccentSoft, type RunnerMode, type RunnerPhase } from './types';
 
@@ -54,6 +61,16 @@ export interface FillBodyProps {
   correctAnswer?: string;
   /** Once set, a missed blank's note may name the answer and quote the rule. */
   revealed?: boolean;
+  /**
+   * The listening layer, when the exercise has one (plan 56 phase 6).
+   *
+   * This template has no builder — it lives on the old shared form — so it gets the
+   * runner half only. That is not a gap: the layer is a property of the document, and a
+   * document written by hand or by a seed carries it just as well.
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, delivered with the key once the blank has been checked. */
+  audioTranscript?: { transcript: string; translation: string } | null;
 }
 
 /* ── color constants ─────────────────────────────────────────────── */
@@ -108,11 +125,17 @@ export function FillBody({
   rationale,
   correctAnswer = '',
   revealed = false,
+  audio,
+  audioTranscript = null,
 }: FillBodyProps) {
   const t = useTranslations('ExerciseRunner');
   const accentSoft = modeAccentSoft(mode);
   const reveal = phase === 'feedback';
-  const isAnswering = phase === 'answering';
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  const locked = audioOn && audio.gated;
+  // The gate joins the expression every control here already reads, rather than adding a
+  // second one: the blank, the word chips and the keyboard shortcut all ask `isAnswering`.
+  const isAnswering = phase === 'answering' && !locked;
   const hasWordBank = Array.isArray(content.wordBank) && content.wordBank.length > 0;
   const { before, after } = parseBlanks(content.textWithBlanks);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -168,6 +191,13 @@ export function FillBody({
   return (
     <>
       <Instr>{instruction}</Instr>
+
+      {audioOn && (
+        <div className="mb-3">
+          <ExerciseAudioPlayer eng={audio} interactive={phase === 'answering'} />
+          {locked && <AudioLockNote />}
+        </div>
+      )}
 
       {/* Gloss / translation hint */}
       {content.gloss && (
@@ -311,6 +341,13 @@ export function FillBody({
         </div>
       )}
 
+      {audioOn && (
+        <AudioTranscript
+          audio={audio.audio}
+          revealed={audioTranscript !== null}
+          delivered={audioTranscript}
+        />
+      )}
     </>
   );
 }

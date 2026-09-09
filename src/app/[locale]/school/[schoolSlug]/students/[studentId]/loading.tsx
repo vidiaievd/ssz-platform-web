@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function StudentDetailLoading() {
   return (
-    <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-5">
+    <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-5">
       {/* Back link */}
       <Skeleton className="h-5 w-32" />
 

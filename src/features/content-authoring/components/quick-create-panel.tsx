@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 
 import { useCreateCourseFlow } from '../hooks/use-create-course-flow';
 import { useCreateCourseStore, type LevelSystem, type Starter } from '../stores/create-course';
-import { CREATE_COURSE_LANGUAGES } from './create-course-steps/step-basics';
+import { useLanguageOptions } from '../hooks/use-language-options';
 
 const LEVEL_SYSTEMS: LevelSystem[] = ['cefr', 'custom', 'single'];
 
@@ -66,6 +66,7 @@ function StarterChip({
 /** Single-card "the essentials" alternative to the guided wizard — same create() orchestration. */
 export function QuickCreatePanel() {
   const t = useTranslations('Authoring.createCourse');
+  const languageOptions = useLanguageOptions();
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const contentBase = `/school/${schoolSlug}/content`;
 
@@ -99,9 +100,9 @@ export function QuickCreatePanel() {
                 <SelectValue placeholder={t('basics.languagePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                {CREATE_COURSE_LANGUAGES.map((lang) => (
+                {languageOptions.map((lang) => (
                   <SelectItem key={lang.code} value={lang.code}>
-                    {lang.label}
+                    {lang.name}
                   </SelectItem>
                 ))}
               </SelectContent>

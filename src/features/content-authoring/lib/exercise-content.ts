@@ -20,8 +20,26 @@ const EXERCISE_TYPES_SET = new Set<string>(EXERCISE_TYPES);
  * functions are the single place that knows those shapes.
  */
 
+/**
+ * The blank form.
+ *
+ * `templateCode` was `multiple_choice` from the first day of authoring, and that made this
+ * constant the platform's default exercise type — the reason that type was still being
+ * written in the generic single-question form long after the others had their own builder.
+ * Since plan 53 §8 Q5 it is not a way to create one: `multiple_choice` is created from its
+ * own scaffold, and the generic form only opens the 121 documents already written that
+ * way. `multiple_choice_group` took its place and then left the same way, in plan 54 §7:
+ * it too is created from a scaffold now, and its old shape — a question free to carry its
+ * own options — is one the handoff's model has no room for at all.
+ *
+ * So the default names `text_order`, which is what is actually left: of the eleven types
+ * an author may create, ten open their own builder from their own scaffold, and this is
+ * the one the generic form still both creates and edits. It is also the last of the
+ * thirteen templates with a design spec and no plan (audit 34 §9) — when that is written,
+ * this constant will have nothing true left to name.
+ */
 export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
-  templateCode: 'multiple_choice',
+  templateCode: 'text_order',
   instructions: '',
   hint: '',
   difficultyLevel: undefined,
@@ -35,27 +53,10 @@ export const DEFAULT_EXERCISE_VALUES: ExerciseFormValues = {
   fibText: '',
   fibBlanks: [{ answers: '', rationaleExplanation: '', rationaleOptions: [] }],
   fibWordBank: '',
-  mpVariant: 'pairs',
-  mpPairs: [
-    { left: '', right: '' },
-    { left: '', right: '' },
-  ],
   saQuestion: '',
   saContext: '',
   saReferenceAnswer: '',
   saAccepted: '',
-  wtPrompt: '',
-  wtMinWords: '',
-  wtTopics: [],
-  wtRubric: '',
-  ssSentence: '',
-  ssSourceSentence: '',
-  ssSchemaType: 'main',
-  ssFields: [{ label: '' }, { label: '' }],
-  ssTokens: [
-    { text: '', fieldIndex: 0 },
-    { text: '', fieldIndex: 0 },
-  ],
   wbfWordBank: '',
   wbfSentences: [{ text: '', answers: [''], rationales: [] }],
   wbfWordNotes: [],
@@ -86,6 +87,10 @@ export function minimalExerciseValues(
   const base = { ...DEFAULT_EXERCISE_VALUES, templateCode, instructions };
 
   switch (templateCode) {
+    // Reachable only through this function's own type: the picker sends `multiple_choice`
+    // to `createMultipleChoiceAction` instead (plan 53 §8 Q5), so nothing creates the old
+    // single-question shape any more. Kept because the switch is exhaustive over
+    // `ExerciseType`, which still has to cover what the generic form can *edit*.
     case 'multiple_choice':
       return {
         ...base,
@@ -105,28 +110,8 @@ export function minimalExerciseValues(
         fibText: 'Write a sentence with a ___1___ in it.',
         fibBlanks: [{ answers: 'blank', rationaleExplanation: '', rationaleOptions: [] }],
       };
-    case 'match_pairs':
-      return {
-        ...base,
-        mpPairs: [
-          { left: 'Left 1', right: 'Right 1' },
-          { left: 'Left 2', right: 'Right 2' },
-        ],
-      };
     case 'short_answer':
       return { ...base, saQuestion: prompt, saReferenceAnswer: 'Reference answer' };
-    case 'writing_task':
-      return { ...base, wtPrompt: prompt };
-    case 'sentence_schema':
-      return {
-        ...base,
-        ssSentence: 'Jeg leser boka.',
-        ssFields: [{ label: 'Field 1' }, { label: 'Field 2' }],
-        ssTokens: [
-          { text: 'Jeg', fieldIndex: 0 },
-          { text: 'leser', fieldIndex: 1 },
-        ],
-      };
     case 'word_bank_fill':
       return {
         ...base,
@@ -142,11 +127,6 @@ export function minimalExerciseValues(
         ],
       };
   }
-}
-
-/** A minimal, valid multiple-choice draft — used to seed starter exercises. */
-export function minimalMcqValues(question: string, instructions: string): ExerciseFormValues {
-  return minimalExerciseValues('multiple_choice', question, instructions);
 }
 
 /** Blank ids in reading order, e.g. "a ___1___ b ___3___" → [1, 3]. */
@@ -293,21 +273,6 @@ function rawExercisePayload(values: ExerciseFormValues): ExercisePayload {
         expectedAnswers: { blanks },
       };
     }
-    case 'match_pairs': {
-      const pairs = (values.mpPairs ?? []).filter((p) => p.left.trim() && p.right.trim());
-      const leftItems = pairs.map((p, i) => ({ id: `l-${i}`, text: p.left.trim() }));
-      const rightItems = pairs.map((p, i) => ({ id: `r-${i}`, text: p.right.trim() }));
-      return {
-        content: {
-          left_items: leftItems,
-          right_items: rightItems,
-          variant: values.mpVariant === 'halves' ? 'halves' : undefined,
-        },
-        expectedAnswers: {
-          pairs: pairs.map((_, i) => ({ left_id: `l-${i}`, right_id: `r-${i}` })),
-        },
-      };
-    }
     case 'short_answer': {
       // `|`, not a comma — these answers are whole sentences and often contain
       // one. See the note on `saAccepted` in schemas/exercise.ts.
@@ -320,22 +285,6 @@ function rawExercisePayload(values: ExerciseFormValues): ExercisePayload {
         expectedAnswers: {
           reference_answer: values.saReferenceAnswer?.trim() ?? '',
           accepted_answers: accepted.length > 0 ? accepted : undefined,
-        },
-      };
-    }
-    case 'writing_task': {
-      const topics = (values.wtTopics ?? [])
-        .filter((tp) => tp.title.trim())
-        .map((tp, i) => ({ id: `topic-${i}`, title: tp.title.trim() }));
-      const minWords = Number.parseInt(values.wtMinWords ?? '', 10);
-      return {
-        content: {
-          prompt: values.wtPrompt?.trim() ?? '',
-          options: topics.length > 0 ? topics : undefined,
-          min_words: Number.isFinite(minWords) && minWords > 0 ? minWords : undefined,
-        },
-        expectedAnswers: {
-          rubric: values.wtRubric?.trim() || undefined,
         },
       };
     }
@@ -381,50 +330,6 @@ function rawExercisePayload(values: ExerciseFormValues): ExercisePayload {
         content: { items, kind: values.toKind ?? 'dialogue' },
         // The authored order is the answer; content order carries no meaning.
         expectedAnswers: { order: items.map((i) => i.id) },
-      };
-    }
-    case 'sentence_schema': {
-      // Keep only labelled fields; remember original index -> stable field id so
-      // token assignments (by original index) survive the filtering.
-      const fieldIdByOriginalIndex = new Map<number, string>();
-      const fields: Array<{ id: string; label: string }> = [];
-      (values.ssFields ?? []).forEach((f, originalIndex) => {
-        if (f.label.trim()) {
-          const fieldId = `f-${fields.length}`;
-          fieldIdByOriginalIndex.set(originalIndex, fieldId);
-          fields.push({ id: fieldId, label: f.label.trim() });
-        }
-      });
-
-      const tokens: Array<{ id: string; text: string }> = [];
-      // Token order within a field follows the order tokens appear in the list.
-      const tokenIdsByFieldId = new Map<string, string[]>();
-      (values.ssTokens ?? []).forEach((tk) => {
-        if (!tk.text.trim()) return;
-        const tokenId = `t-${tokens.length}`;
-        tokens.push({ id: tokenId, text: tk.text.trim() });
-        const fieldId = fieldIdByOriginalIndex.get(tk.fieldIndex);
-        if (fieldId) {
-          const arr = tokenIdsByFieldId.get(fieldId) ?? [];
-          arr.push(tokenId);
-          tokenIdsByFieldId.set(fieldId, arr);
-        }
-      });
-
-      const placements = fields.map((f) => ({
-        field_id: f.id,
-        token_ids: tokenIdsByFieldId.get(f.id) ?? [],
-      }));
-
-      return {
-        content: {
-          sentence: values.ssSentence?.trim() ?? '',
-          source_sentence: values.ssSourceSentence?.trim() || undefined,
-          schema_type: values.ssSchemaType ?? 'main',
-          fields,
-          tokens,
-        },
-        expectedAnswers: { placements },
       };
     }
   }
@@ -663,41 +568,6 @@ export function parseExerciseToForm(exercise: {
         fibWordBank: wordBank,
       };
     }
-    case 'match_pairs': {
-      const leftItems = Array.isArray(content.left_items)
-        ? (content.left_items as McqOption[])
-        : [];
-      const rightItems = Array.isArray(content.right_items)
-        ? (content.right_items as McqOption[])
-        : [];
-      const rightById = new Map(
-        rightItems.map((r) => [String(r.id), typeof r.text === 'string' ? r.text : '']),
-      );
-      const answerPairs = Array.isArray(expectedAnswers.pairs)
-        ? (expectedAnswers.pairs as Array<{ left_id?: unknown; right_id?: unknown }>)
-        : [];
-      const rightByLeftId = new Map(
-        answerPairs.map((p) => [String(p.left_id), String(p.right_id)]),
-      );
-      const pairs = leftItems.map((l) => {
-        const rightId = rightByLeftId.get(String(l.id));
-        return {
-          left: typeof l.text === 'string' ? l.text : '',
-          right: rightId ? (rightById.get(rightId) ?? '') : '',
-        };
-      });
-      return {
-        ...base,
-        mpVariant: content.variant === 'halves' ? 'halves' : 'pairs',
-        mpPairs:
-          pairs.length >= 2
-            ? pairs
-            : [
-                { left: '', right: '' },
-                { left: '', right: '' },
-              ],
-      };
-    }
     case 'short_answer': {
       const accepted = Array.isArray(expectedAnswers.accepted_answers)
         ? (expectedAnswers.accepted_answers as unknown[]).map(String).join(' | ')
@@ -711,20 +581,6 @@ export function parseExerciseToForm(exercise: {
             ? expectedAnswers.reference_answer
             : '',
         saAccepted: accepted,
-      };
-    }
-    case 'writing_task': {
-      const topics = Array.isArray(content.options)
-        ? (content.options as Array<{ title?: unknown }>).map((o) => ({
-            title: typeof o.title === 'string' ? o.title : '',
-          }))
-        : [];
-      return {
-        ...base,
-        wtPrompt: typeof content.prompt === 'string' ? content.prompt : '',
-        wtMinWords: typeof content.min_words === 'number' ? String(content.min_words) : '',
-        wtTopics: topics,
-        wtRubric: typeof expectedAnswers.rubric === 'string' ? expectedAnswers.rubric : '',
       };
     }
     case 'text_order': {
@@ -783,53 +639,6 @@ export function parseExerciseToForm(exercise: {
         wbfWordNotes: Object.entries(wordNotes)
           .filter(([, note]) => typeof note === 'string')
           .map(([word, note]) => ({ word, note: note as string })),
-      };
-    }
-    case 'sentence_schema': {
-      const rawFields = Array.isArray(content.fields)
-        ? (content.fields as Array<{ id?: unknown; label?: unknown }>)
-        : [];
-      const fields = rawFields.map((f) => ({
-        label: typeof f.label === 'string' ? f.label : '',
-      }));
-      const fieldIndexById = new Map<string, number>(rawFields.map((f, i) => [String(f.id), i]));
-
-      // Reconstruct each token's field from the placements.
-      const placements = Array.isArray(expectedAnswers.placements)
-        ? (expectedAnswers.placements as Array<{ field_id?: unknown; token_ids?: unknown }>)
-        : [];
-      const fieldIdByTokenId = new Map<string, string>();
-      for (const p of placements) {
-        const tokenIds = Array.isArray(p.token_ids) ? (p.token_ids as unknown[]) : [];
-        for (const tid of tokenIds) fieldIdByTokenId.set(String(tid), String(p.field_id));
-      }
-
-      const rawTokens = Array.isArray(content.tokens)
-        ? (content.tokens as Array<{ id?: unknown; text?: unknown }>)
-        : [];
-      const tokens = rawTokens.map((tk) => {
-        const fieldId = fieldIdByTokenId.get(String(tk.id));
-        const fieldIndex = fieldId !== undefined ? (fieldIndexById.get(fieldId) ?? -1) : -1;
-        return { text: typeof tk.text === 'string' ? tk.text : '', fieldIndex };
-      });
-
-      const schemaType =
-        content.schema_type === 'subordinate' ? ('subordinate' as const) : ('main' as const);
-
-      return {
-        ...base,
-        ssSentence: typeof content.sentence === 'string' ? content.sentence : '',
-        ssSourceSentence:
-          typeof content.source_sentence === 'string' ? content.source_sentence : '',
-        ssSchemaType: schemaType,
-        ssFields: fields.length >= 2 ? fields : [{ label: '' }, { label: '' }],
-        ssTokens:
-          tokens.length >= 2
-            ? tokens
-            : [
-                { text: '', fieldIndex: 0 },
-                { text: '', fieldIndex: 0 },
-              ],
       };
     }
   }

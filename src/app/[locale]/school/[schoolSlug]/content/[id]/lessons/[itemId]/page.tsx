@@ -3,10 +3,11 @@ import { getTranslations } from 'next-intl/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
-import { Breadcrumbs, type BreadcrumbItem } from '@/components/shared/breadcrumbs';
+import type { BreadcrumbItem } from '@/components/shared/breadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/lib/i18n/navigation';
 import type { Container, ContainerVersion, CurriculumTree } from '@/features/content/types';
+import { TopbarBreadcrumb } from '@/features/content-authoring/components/topbar-breadcrumb';
 import { TextEditorPane } from '@/features/content-authoring/components/text-editor-pane';
 import { VideoEditorPane } from '@/features/content-authoring/components/video-editor-pane';
 import { AudioEditorPane } from '@/features/content-authoring/components/audio-editor-pane';
@@ -87,8 +88,13 @@ export default async function LessonEditorPage({
   ];
 
   return (
-    <main className="mx-auto max-w-7xl p-8">
-      <Breadcrumbs items={breadcrumbItems} className="mb-5" />
+    // Full height and full width: the editor is a workspace, not an article. The
+    // padding lives on the columns inside `LessonEditorShell`, because its preview
+    // panel has to reach the right edge of the window — a container that pads both
+    // sides would spend that width on nothing.
+    <div className="flex h-full min-h-0 flex-col">
+      {/* Into the app's top bar, where the specs put it. */}
+      <TopbarBreadcrumb items={breadcrumbItems} />
       {kind === 'text' ? (
         <TextEditorPane
           kind={kind}
@@ -98,7 +104,6 @@ export default async function LessonEditorPage({
           isLive={item.isLive}
           container={moduleContainer}
           grammarRules={levelGrammarRules}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'video' ? (
@@ -109,7 +114,6 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'audio' ? (
@@ -120,7 +124,6 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'vocab' ? (
@@ -130,7 +133,6 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'grammar' ? (
@@ -141,7 +143,6 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       ) : kind === 'exercise' ? (
@@ -153,8 +154,7 @@ export default async function LessonEditorPage({
           isLive={item.isLive}
           container={moduleContainer}
           grammarRules={levelGrammarRules}
-          backHref={backHref}
-          reviewHref={`${backHref}/lessons/${itemId}/review`}
+          reviewHref={`/school/${schoolSlug}/review?course=${id}`}
           publishSlot={publishSlot}
         />
       ) : (
@@ -165,10 +165,9 @@ export default async function LessonEditorPage({
           state={item.state}
           isLive={item.isLive}
           container={moduleContainer}
-          backHref={backHref}
           publishSlot={publishSlot}
         />
       )}
-    </main>
+    </div>
   );
 }

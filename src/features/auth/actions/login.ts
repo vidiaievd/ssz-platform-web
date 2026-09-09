@@ -76,6 +76,8 @@ async function finishLogin(tokens: AuthTokensResponse): Promise<LoginActionResul
   await writeAuthCookies({
     accessToken: tokens.accessToken!,
     refreshToken: tokens.refreshToken!,
+    accessTokenExpiresAt: tokens.accessTokenExpiresAt,
+    refreshTokenExpiresAt: tokens.refreshTokenExpiresAt,
   });
 
   const authHeader = { Authorization: `Bearer ${tokens.accessToken}` };
