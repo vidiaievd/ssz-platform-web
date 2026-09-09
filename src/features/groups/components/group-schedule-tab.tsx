@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useState } from 'react';
 import { Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLocale, useTranslations } from 'next-intl';
@@ -7,9 +8,17 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CourseTimeline } from './course-timeline';
+import { LessonLog } from './lesson-log';
+import { AssessmentPanel, CoveragePanel, WhoTaughtPanel } from './schedule-panels';
 import { NextSessionCard } from './next-session-card';
 import { ScheduleStat } from './schedule-stat';
-import { courseSpan, deliveryStats, nextSession, weeklyRhythm } from '../lib/session-derive';
+import {
+  courseSpan,
+  deliveryStats,
+  nextSession,
+  weeklyRhythm,
+  type LogFilter,
+} from '../lib/session-derive';
 import { dayMonth, weekdayDayMonth } from '../lib/session-format';
 import type { Group, OutlineUnit, Session, Weekday } from '../types';
 
@@ -23,6 +32,8 @@ type Props = {
   sessions: Session[];
   /** Units of the published course, for naming what a session teaches. */
   units: OutlineUnit[];
+  /** The school's pass mark; an exam may override it for itself. */
+  passMark: number;
   canManage: boolean;
   onEditSchedule: () => void;
 };
@@ -33,9 +44,18 @@ type Props = {
  * — nothing is counted twice or stored, so this tab and Materials cannot
  * disagree about the same group.
  */
-export function GroupScheduleTab({ group, sessions, units, canManage, onEditSchedule }: Props) {
+export function GroupScheduleTab({
+  group,
+  sessions,
+  units,
+  passMark,
+  canManage,
+  onEditSchedule,
+}: Props) {
   const t = useTranslations('Groups');
   const locale = useLocale();
+  const [filter, setFilter] = useState<LogFilter>('recent');
+  const logRef = useRef<HTMLDivElement>(null);
 
   const staff = {
     primaryId: group.teachers.find((x) => x.role === 'primary')?.userId ?? null,
@@ -53,6 +73,13 @@ export function GroupScheduleTab({ group, sessions, units, canManage, onEditSche
   // The editor arrives with its own phase; until then every entry point says so
   // rather than silently doing nothing.
   const openEditor = () => toast.info(t('schedule.editorSoon'));
+
+  // The one call to action on the tab: it does not navigate anywhere, it turns
+  // the log into the list of what needs attention.
+  const showIssues = () => {
+    setFilter('issues');
+    logRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <div className="flex flex-col gap-[18px]">
@@ -141,9 +168,13 @@ export function GroupScheduleTab({ group, sessions, units, canManage, onEditSche
             </Badge>
           </div>
           {delivery.withoutTopic > 0 && (
-            <p className="mt-2 text-xs text-warning-700 dark:text-warning-400">
+            <button
+              type="button"
+              onClick={showIssues}
+              className="mt-2 text-left text-xs font-medium text-warning-700 underline-offset-2 hover:underline dark:text-warning-400"
+            >
               {t('schedule.withoutTopic', { n: delivery.withoutTopic })}
-            </p>
+            </button>
           )}
         </ScheduleStat>
       </div>
@@ -169,6 +200,34 @@ export function GroupScheduleTab({ group, sessions, units, canManage, onEditSche
         onEditSession={openEditor}
         onAddSession={openEditor}
       />
+
+      {/* Blocks 6 and 7 — the record, and what it adds up to */}
+      <div
+        ref={logRef}
+        className="grid scroll-mt-4 grid-cols-[repeat(auto-fit,minmax(320px,1fr))] items-start gap-[18px]"
+      >
+        <LessonLog
+          sessions={sessions}
+          units={units}
+          teachers={group.teachers}
+          staff={staff}
+          studentCount={group.studentCount}
+          filter={filter}
+          onFilterChange={setFilter}
+          onEditSession={openEditor}
+        />
+
+        <div className="flex flex-col gap-[18px]">
+          <AssessmentPanel
+            sessions={sessions}
+            units={units}
+            passMark={passMark}
+            onEditSession={openEditor}
+          />
+          <WhoTaughtPanel sessions={sessions} teachers={group.teachers} staff={staff} />
+          <CoveragePanel sessions={sessions} units={units} />
+        </div>
+      </div>
     </div>
   );
 }

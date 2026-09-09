@@ -21,6 +21,8 @@ type Props = {
   sessions: Session[];
   /** Units of the published course, for naming what a session teaches. */
   outlineUnits: OutlineUnit[];
+  /** The school's pass mark, for reading exam results. */
+  passMark: number;
   /** Units of the group's teaching plan; empty when no plan exists yet. */
   planUnits: CurriculumUnit[];
   materials: GroupMaterialsView;
@@ -39,6 +41,7 @@ export async function GroupDetail({
   alerts,
   sessions,
   outlineUnits,
+  passMark,
   planUnits,
   materials,
   planProgressPct,
@@ -84,6 +87,7 @@ export async function GroupDetail({
         roster={roster}
         sessions={sessions}
         outlineUnits={outlineUnits}
+        passMark={passMark}
         materialsSlot={
           <GroupMaterialsTab
             group={group}

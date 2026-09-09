@@ -185,7 +185,46 @@
       "cancelled": "Avlyst",
       "next": "Neste",
       "planned": "Planlagt"
-    }
+    },
+    "logHeading": "Timelogg",
+    "logCaption": "Hvem underviste, hvilket tema, hvordan gruppa gjorde det",
+    "logEmptyTitle": "Ingenting her",
+    "logEmptyBody": "Ingen timer passer dette filteret.",
+    "showAll": "Vis alle {n}",
+    "showLess": "Vis færre",
+    "extra": "ekstra",
+    "unassigned": "ikke tildelt",
+    "noResults": "ingen resultater",
+    "avgPct": "snitt {n} %",
+    "filter": {
+      "recent": "Nylige",
+      "issues": "Avvik",
+      "exams": "Prøver",
+      "upcoming": "Kommende"
+    },
+    "kind": {
+      "reading": "Lesing",
+      "listening": "Lytting",
+      "video": "Video",
+      "speaking": "Muntlig",
+      "vocabulary": "Ordforråd",
+      "grammar": "Grammatikk",
+      "exercise": "Øving"
+    },
+    "assessmentHeading": "Vurdering",
+    "assessmentCaption": "{graded} av {total} prøver vurdert",
+    "checkpointOf": "Prøve for enhet {n}",
+    "checkpoint": "Prøve",
+    "examNotGraded": "{date} · ikke vurdert",
+    "examPassed": "{date} · {passed}/{graded} bestått",
+    "noExams": "Ingen prøver i dette kurset ennå. Legg til én som ekstra time.",
+    "whoTaughtHeading": "Hvem underviste",
+    "whoTaughtCaption": "{n} timer gjennomført",
+    "noneDelivered": "Ingen timer er gjennomført ennå.",
+    "unknownTeacher": "Tidligere lærer",
+    "coverageHeading": "Dekning per enhet",
+    "coverageCaption": "Undervist mot planlagt",
+    "noCourseUnits": "Ingen kurs knyttet til, så det er ingenting å dekke."
   },
   "detail": {
     "back": "Grupper",

@@ -185,7 +185,46 @@
       "cancelled": "Скасовано",
       "next": "Наступне",
       "planned": "Заплановано"
-    }
+    },
+    "logHeading": "Журнал занять",
+    "logCaption": "Хто вів, яка тема, як упоралася група",
+    "logEmptyTitle": "Тут порожньо",
+    "logEmptyBody": "Під цей фільтр занять немає.",
+    "showAll": "Показати всі ({n})",
+    "showLess": "Згорнути",
+    "extra": "дод.",
+    "unassigned": "не призначено",
+    "noResults": "немає балів",
+    "avgPct": "середній {n}%",
+    "filter": {
+      "recent": "Недавні",
+      "issues": "Проблеми",
+      "exams": "Зрізи",
+      "upcoming": "Найближчі"
+    },
+    "kind": {
+      "reading": "Читання",
+      "listening": "Аудіювання",
+      "video": "Відео",
+      "speaking": "Говоріння",
+      "vocabulary": "Лексика",
+      "grammar": "Граматика",
+      "exercise": "Вправа"
+    },
+    "assessmentHeading": "Успішність",
+    "assessmentCaption": "оцінено зрізів: {graded} з {total}",
+    "checkpointOf": "Зріз за юнітом {n}",
+    "checkpoint": "Зріз",
+    "examNotGraded": "{date} · не оцінено",
+    "examPassed": "{date} · склали {passed} з {graded}",
+    "noExams": "Зрізів у цьому курсі поки немає. Додайте його як дод. заняття.",
+    "whoTaughtHeading": "Хто вів",
+    "whoTaughtCaption": "проведено занять: {n}",
+    "noneDelivered": "Занять ще не проводили.",
+    "unknownTeacher": "Колишній викладач",
+    "coverageHeading": "Покриття за юнітами",
+    "coverageCaption": "Пройдено проти запланованого",
+    "noCourseUnits": "Курс не прив’язано — покривати нема чого."
   },
   "detail": {
     "back": "Групи",

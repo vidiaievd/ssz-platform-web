@@ -185,7 +185,46 @@
       "cancelled": "Cancelled",
       "next": "Next",
       "planned": "Planned"
-    }
+    },
+    "logHeading": "Lesson log",
+    "logCaption": "Who taught, what topic, how the group did",
+    "logEmptyTitle": "Nothing here",
+    "logEmptyBody": "No sessions match this filter.",
+    "showAll": "Show all {n}",
+    "showLess": "Show less",
+    "extra": "extra",
+    "unassigned": "unassigned",
+    "noResults": "no results",
+    "avgPct": "avg {n}%",
+    "filter": {
+      "recent": "Recent",
+      "issues": "Issues",
+      "exams": "Exams",
+      "upcoming": "Upcoming"
+    },
+    "kind": {
+      "reading": "Reading",
+      "listening": "Listening",
+      "video": "Video",
+      "speaking": "Speaking",
+      "vocabulary": "Vocabulary",
+      "grammar": "Grammar",
+      "exercise": "Exercise"
+    },
+    "assessmentHeading": "Assessment",
+    "assessmentCaption": "{graded} of {total} checkpoints graded",
+    "checkpointOf": "Unit {n} checkpoint",
+    "checkpoint": "Checkpoint",
+    "examNotGraded": "{date} · not graded",
+    "examPassed": "{date} · {passed}/{graded} passed",
+    "noExams": "No exams in this course yet. Add one as an extra session.",
+    "whoTaughtHeading": "Who taught",
+    "whoTaughtCaption": "{n} sessions delivered",
+    "noneDelivered": "Nothing has been delivered yet.",
+    "unknownTeacher": "Former teacher",
+    "coverageHeading": "Coverage by unit",
+    "coverageCaption": "Topics taught vs. planned",
+    "noCourseUnits": "No course attached, so there is nothing to cover."
   },
   "detail": {
     "back": "Groups",

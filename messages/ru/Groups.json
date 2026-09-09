@@ -185,7 +185,46 @@
       "cancelled": "Отменено",
       "next": "Следующее",
       "planned": "Запланировано"
-    }
+    },
+    "logHeading": "Журнал занятий",
+    "logCaption": "Кто вёл, какая тема, как справилась группа",
+    "logEmptyTitle": "Здесь пусто",
+    "logEmptyBody": "Под этот фильтр занятий нет.",
+    "showAll": "Показать все ({n})",
+    "showLess": "Свернуть",
+    "extra": "доп.",
+    "unassigned": "не назначен",
+    "noResults": "нет баллов",
+    "avgPct": "средний {n}%",
+    "filter": {
+      "recent": "Недавние",
+      "issues": "Проблемы",
+      "exams": "Срезы",
+      "upcoming": "Ближайшие"
+    },
+    "kind": {
+      "reading": "Чтение",
+      "listening": "Аудирование",
+      "video": "Видео",
+      "speaking": "Говорение",
+      "vocabulary": "Лексика",
+      "grammar": "Грамматика",
+      "exercise": "Упражнение"
+    },
+    "assessmentHeading": "Успеваемость",
+    "assessmentCaption": "оценено срезов: {graded} из {total}",
+    "checkpointOf": "Срез по юниту {n}",
+    "checkpoint": "Срез",
+    "examNotGraded": "{date} · не оценён",
+    "examPassed": "{date} · сдали {passed} из {graded}",
+    "noExams": "Срезов в этом курсе пока нет. Добавьте его как доп. занятие.",
+    "whoTaughtHeading": "Кто вёл",
+    "whoTaughtCaption": "проведено занятий: {n}",
+    "noneDelivered": "Занятий пока не проводили.",
+    "unknownTeacher": "Бывший преподаватель",
+    "coverageHeading": "Покрытие по юнитам",
+    "coverageCaption": "Пройдено против запланированного",
+    "noCourseUnits": "Курс не привязан — покрывать нечего."
   },
   "detail": {
     "back": "Группы",

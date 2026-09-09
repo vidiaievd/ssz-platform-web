@@ -15,6 +15,9 @@ import { GroupDetail } from '@/features/groups/components/group-detail';
 import type { Session } from '@/features/groups/types';
 import type { CurriculumPlan } from '@/features/teachers/types';
 
+/** What a student passes an exam on when the school has said nothing else. */
+const DEFAULT_PASS_MARK = 60;
+
 type Props = {
   params: Promise<{ schoolSlug: string; groupId: string; locale: string }>;
 };
@@ -33,9 +36,11 @@ export default async function GroupDetailPage({ params }: Props) {
     return [];
   };
 
-  const [data, sessions, plan, role] = await Promise.all([
+  const [data, sessions, passMark, plan, role] = await Promise.all([
     getGroup(school.id, groupId),
     scheduling.groupSessions(school.id, groupId).catch(degradeToEmpty),
+    // The school's pass mark, and the spec's default when the school has none.
+    scheduling.gradingPolicy(school.id).catch(() => DEFAULT_PASS_MARK),
     scheduling.getCurriculum(groupId).catch((): CurriculumPlan | null => null),
     getMySchoolRole(schoolSlug),
   ]);
@@ -59,6 +64,7 @@ export default async function GroupDetailPage({ params }: Props) {
         alerts={alerts}
         sessions={sessions}
         outlineUnits={outline.units}
+        passMark={passMark}
         planUnits={plan?.units ?? []}
         materials={materials}
         planProgressPct={plan?.progressPct ?? 0}

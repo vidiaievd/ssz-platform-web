@@ -25,6 +25,8 @@ type Props = {
   sessions: Session[];
   /** Units of the published course, for naming what a session teaches. */
   outlineUnits: OutlineUnit[];
+  /** The school's pass mark, for reading exam results. */
+  passMark: number;
   /** Materials tab, rendered on the server — it reads the course structure. */
   materialsSlot: ReactNode;
   alerts: Alert[];
@@ -39,6 +41,7 @@ export function GroupTabs({
   roster,
   sessions,
   outlineUnits,
+  passMark,
   materialsSlot,
   alerts,
   schoolId,
@@ -162,6 +165,7 @@ export function GroupTabs({
           group={group}
           sessions={sessions}
           units={outlineUnits}
+          passMark={passMark}
           canManage={canManage}
           onEditSchedule={() => setEditScheduleOpen(true)}
         />
