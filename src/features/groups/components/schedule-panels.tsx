@@ -89,7 +89,7 @@ export function AssessmentPanel({
       {rows.length === 0 ? (
         <p className="text-xs text-(--ssz-text-muted)">{t('schedule.noExams')}</p>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex max-h-[320px] flex-col gap-3 overflow-y-auto">
           {rows.map(({ session, title, marks }) => (
             <li key={session.id}>
               <button
@@ -218,7 +218,7 @@ export function CoveragePanel({
       {rows.length === 0 ? (
         <p className="text-xs text-(--ssz-text-muted)">{t('schedule.noCourseUnits')}</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex max-h-[320px] flex-col gap-2 overflow-y-auto">
           {rows.map(({ unit, stats }) => (
             <li key={unit.id} className="flex items-center gap-2">
               <span

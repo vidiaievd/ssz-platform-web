@@ -89,7 +89,11 @@ export function weeklyRhythm(slots: Array<{ start: string; end: string }>): Week
 export interface CourseSpan {
   firstDate: string | null;
   lastDate: string | null;
-  /** The week the last held session falls in — where the group actually is. */
+  /**
+   * Which week of the course today falls in — where the group is on the
+   * calendar, not how much it has got through. Delivery is counted separately,
+   * and a group that has fallen behind is still in the week it is in.
+   */
   currentWeek: number;
   /** The week the last planned session falls in. */
   totalWeeks: number;
@@ -99,18 +103,24 @@ export interface CourseSpan {
   pct: number;
 }
 
-export function courseSpan(sessions: Session[]): CourseSpan {
+export function courseSpan(
+  sessions: Session[],
+  today = new Date().toISOString().slice(0, 10),
+): CourseSpan {
   const ordered = [...sessions].sort(byDate);
   const first = ordered[0] ?? null;
   const last = ordered.at(-1) ?? null;
   const held = ordered.filter((s) => s.status === 'held');
-  const lastHeld = held.at(-1) ?? null;
+  const totalWeeks = first && last ? weekOf(last, first.date) : 0;
+  // Before the course starts it is in no week yet; after it ends it stays in
+  // its last one rather than counting weeks nobody is teaching.
+  const week = first ? weekOf({ ...first, date: today }, first.date) : 0;
 
   return {
     firstDate: first?.date ?? null,
     lastDate: last?.date ?? null,
-    currentWeek: first && lastHeld ? weekOf(lastHeld, first.date) : 0,
-    totalWeeks: first && last ? weekOf(last, first.date) : 0,
+    currentWeek: Math.min(Math.max(week, 0), totalWeeks),
+    totalWeeks,
     done: held.length,
     total: ordered.length,
     pct: ordered.length ? Math.round((held.length / ordered.length) * 100) : 0,

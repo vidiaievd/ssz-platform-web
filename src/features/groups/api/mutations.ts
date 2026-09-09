@@ -336,6 +336,14 @@ export async function linkPlanUnit(
 // ── Sessions (schedule & log) ─────────────────────────────────────────────────
 
 /**
+ * Session writes carry the reason they failed rather than a bare flag: the
+ * service refuses things the editor cannot know about in advance — a session
+ * held before it happened, a teacher without rights — and the editor has
+ * nothing useful to say unless it can repeat that reason.
+ */
+type SessionResult = { ok: true } | { ok: false; error: string };
+
+/**
  * All session writes share the same two invalidations: the group's own page and
  * the school's group list, whose progress column reads the same facts.
  */
@@ -349,7 +357,7 @@ export async function patchSession(
   groupId: string,
   sessionId: string,
   changes: SessionChanges,
-): Promise<MutationResult> {
+): Promise<SessionResult> {
   const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
   const result = await getSchedulingProvider().patchSession(sessionId, changes);
   if (!result.ok) return result;
@@ -361,7 +369,7 @@ export async function createSession(
   schoolId: string,
   groupId: string,
   input: NewSessionInput,
-): Promise<MutationResult> {
+): Promise<SessionResult> {
   const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
   const result = await getSchedulingProvider().createSession(schoolId, groupId, input);
   if (!result.ok) return result;
@@ -373,7 +381,7 @@ export async function deleteSession(
   schoolId: string,
   groupId: string,
   sessionId: string,
-): Promise<MutationResult> {
+): Promise<SessionResult> {
   const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
   const result = await getSchedulingProvider().deleteSession(sessionId);
   if (!result.ok) return result;
@@ -386,7 +394,7 @@ export async function putSessionScores(
   groupId: string,
   sessionId: string,
   scores: SessionScore[],
-): Promise<MutationResult> {
+): Promise<SessionResult> {
   const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
   const result = await getSchedulingProvider().putSessionScores(sessionId, scores);
   if (!result.ok) return result;

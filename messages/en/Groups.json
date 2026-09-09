@@ -263,7 +263,11 @@
     "discardTitle": "Discard your changes?",
     "discardBody": "This session has edits that have not been saved.",
     "keepEditing": "Keep editing",
-    "discard": "Discard"
+    "discard": "Discard",
+    "noSessionsYet": "No sessions planned for this group yet.",
+    "rebuild": "Build the plan",
+    "rebuiltToast": "{n} sessions planned",
+    "rebuildNothing": "There was nothing to plan."
   },
   "detail": {
     "back": "Groups",

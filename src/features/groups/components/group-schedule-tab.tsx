@@ -154,7 +154,9 @@ export function GroupScheduleTab({
                   done: span.done,
                   total: span.total,
                 })
-              : t('schedule.noSessions')
+              : group.courseId
+                ? t('schedule.noSessionsYet')
+                : t('schedule.noSessions')
           }
         >
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
@@ -169,7 +171,9 @@ export function GroupScheduleTab({
                   date: weekdayDayMonth(next.date, locale),
                   time: next.start,
                 })
-              : t('schedule.courseFinished')}
+              : span.total > 0
+                ? t('schedule.courseFinished')
+                : null}
           </p>
         </ScheduleStat>
 
@@ -217,6 +221,9 @@ export function GroupScheduleTab({
       <CourseTimeline
         sessions={sessions}
         units={units}
+        hasCourse={group.courseId !== null}
+        schoolId={schoolId}
+        groupId={group.id}
         staff={staff}
         perWeek={rhythm.perWeek}
         canManage={canManage}

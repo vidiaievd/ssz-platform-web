@@ -134,23 +134,32 @@ describe('weekOf', () => {
 });
 
 describe('courseSpan', () => {
-  it('places the group by its last held session, not by today', () => {
-    const span = courseSpan([
-      session({ date: '2026-09-07', status: 'held' }),
-      session({ date: '2026-09-14', status: 'held' }),
-      session({ date: '2026-09-21' }),
-      session({ date: '2026-10-05' }),
-    ]);
+  const COURSE = [
+    session({ date: '2026-09-07', status: 'held' }),
+    session({ date: '2026-09-14', status: 'held' }),
+    session({ date: '2026-09-21' }),
+    session({ date: '2026-10-05' }),
+  ];
 
-    expect(span).toEqual({
+  it('places the group in the week today falls in, however far behind it is', () => {
+    expect(courseSpan(COURSE, '2026-09-23')).toEqual({
       firstDate: '2026-09-07',
       lastDate: '2026-10-05',
-      currentWeek: 2,
+      // Two sessions delivered, but the calendar is in week three either way.
+      currentWeek: 3,
       totalWeeks: 5,
       done: 2,
       total: 4,
       pct: 50,
     });
+  });
+
+  it('is in no week at all before the course starts', () => {
+    expect(courseSpan(COURSE, '2026-08-30').currentWeek).toBe(0);
+  });
+
+  it('stays in the last week once the course is over', () => {
+    expect(courseSpan(COURSE, '2027-01-01').currentWeek).toBe(5);
   });
 
   it('says nothing rather than dividing by zero on an empty course', () => {

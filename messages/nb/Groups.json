@@ -263,7 +263,11 @@
     "discardTitle": "Forkaste endringene?",
     "discardBody": "Denne timen har endringer som ikke er lagret.",
     "keepEditing": "Fortsett",
-    "discard": "Forkast"
+    "discard": "Forkast",
+    "noSessionsYet": "Ingen timer er planlagt for denne gruppa ennå.",
+    "rebuild": "Bygg planen",
+    "rebuiltToast": "{n} timer planlagt",
+    "rebuildNothing": "Det var ingenting å planlegge."
   },
   "detail": {
     "back": "Grupper",

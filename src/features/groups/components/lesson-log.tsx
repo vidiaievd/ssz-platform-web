@@ -263,6 +263,7 @@ function LogRow({ session, state, topic, teacher, studentCount, locale, onEdit }
           </span>
         </span>
 
+        <span className="ml-auto flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
         <span className="shrink-0">
           {isExam ? (
             <Badge variant="error">{t('schedule.exam')}</Badge>
@@ -299,6 +300,7 @@ function LogRow({ session, state, topic, teacher, studentCount, locale, onEdit }
             aria-hidden="true"
           />
         </span>
+        </span>
       </button>
     </li>
   );
@@ -322,21 +324,29 @@ function Metric({
   noResults: string;
   average: (n: number) => string;
 }) {
-  if (session.status !== 'held') return <>—</>;
-
+  // An exam speaks through its marks. They are worth showing the moment they
+  // exist — an exam sat but not yet recorded as held still has a result, and
+  // hiding it behind the status would make the log say less than the school
+  // knows.
   if (marks) {
-    if (marks.average === null) return <span className="text-(--ssz-text-muted)">{noResults}</span>;
+    if (marks.average === null) {
+      return session.status === 'held' ? (
+        <span className="text-(--ssz-text-muted)">{noResults}</span>
+      ) : (
+        <>—</>
+      );
+    }
     const tone = gradeTone(marks.average);
     return (
-      <Badge
-        variant={tone === 'warn' ? 'warning' : tone === 'danger' ? 'error' : tone}
-      >
+      <Badge variant={tone === 'warn' ? 'warning' : tone === 'danger' ? 'error' : tone}>
         {average(marks.average)}
       </Badge>
     );
   }
 
-  if (session.attendance === null) return <>—</>;
+  // A lesson speaks through its turnout, and only once it has happened: a dash
+  // rather than a zero, which would read as "nobody came".
+  if (session.status !== 'held' || session.attendance === null) return <>—</>;
   return (
     <>
       {session.attendance}/{studentCount}

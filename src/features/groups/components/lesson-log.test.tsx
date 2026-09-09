@@ -140,6 +140,29 @@ describe('LessonLog', () => {
     expect(screen.getByText('avg 70%')).toBeInTheDocument();
   });
 
+  it('shows an exam’s marks even before it is recorded as held', () => {
+    renderLog([
+      session({
+        id: 'e2',
+        date: '2020-01-02',
+        type: 'exam',
+        status: 'scheduled',
+        attendance: null,
+        scores: [{ studentId: 'a', score: 80 }],
+      }),
+    ]);
+
+    expect(screen.getByText('avg 80%')).toBeInTheDocument();
+  });
+
+  it('leaves a planned exam without marks at a dash, not at "no results"', () => {
+    renderLog([
+      session({ id: 'e3', date: '2020-01-02', type: 'exam', status: 'scheduled', attendance: null }),
+    ]);
+
+    expect(screen.queryByText('no results')).not.toBeInTheDocument();
+  });
+
   it('has an empty state instead of an empty card', () => {
     renderLog([], 'issues');
     expect(screen.getByText('Nothing here')).toBeInTheDocument();

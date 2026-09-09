@@ -1,9 +1,13 @@
 'use client';
 
-import { Plus } from 'lucide-react';
+import { useTransition } from 'react';
+import { Plus, RefreshCw } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { regenerateSessions } from '../api/mutations';
 import { cn } from '@/lib/utils';
 import { timelineWeeks, topicOf, type SessionState } from '../lib/session-derive';
 import { dayMonth } from '../lib/session-format';
@@ -21,6 +25,10 @@ const CELL_TONE: Record<SessionState, string> = {
 type Props = {
   sessions: Session[];
   units: OutlineUnit[];
+  /** Whether a course is attached at all — it decides what an empty strip means. */
+  hasCourse: boolean;
+  schoolId: string;
+  groupId: string;
   staff: { primaryId: string | null; coPrimaryId: string | null };
   perWeek: number;
   canManage: boolean;
@@ -36,6 +44,9 @@ type Props = {
 export function CourseTimeline({
   sessions,
   units,
+  hasCourse,
+  schoolId,
+  groupId,
   staff,
   perWeek,
   canManage,
@@ -63,16 +74,21 @@ export function CourseTimeline({
             {t('schedule.timelineCaption', { weeks: weeks.length, perWeek })}
           </p>
         </div>
-        {canManage && (
-          <Button variant="outline" size="sm" onClick={onAddSession}>
-            <Plus className="size-3.5 mr-1.5" aria-hidden="true" />
-            {t('schedule.addSession')}
-          </Button>
-        )}
+        {/* A teacher may add a session too — a make-up class for their own
+            group. Which kinds they may add is the editor's business. */}
+        <Button variant="outline" size="sm" onClick={onAddSession}>
+          <Plus className="size-3.5 mr-1.5" aria-hidden="true" />
+          {t('schedule.addSession')}
+        </Button>
       </div>
 
       {weeks.length === 0 ? (
-        <p className="py-2 text-sm italic text-(--ssz-text-muted)">{t('schedule.noSessions')}</p>
+        <div className="flex flex-wrap items-center gap-3 py-2">
+          <p className="text-sm italic text-(--ssz-text-muted)">
+            {hasCourse ? t('schedule.noSessionsYet') : t('schedule.noSessions')}
+          </p>
+          {hasCourse && canManage && <RebuildButton schoolId={schoolId} groupId={groupId} />}
+        </div>
       ) : (
         <div className="overflow-x-auto pb-1">
           <div className="flex gap-1">
@@ -129,5 +145,43 @@ export function CourseTimeline({
         </li>
       </ul>
     </section>
+  );
+}
+
+/**
+ * Lays the plan over the course for a group that has none. The usual trigger is
+ * publishing the group, which a group can be past without ever having had a
+ * plan built — this is the way back from that.
+ */
+function RebuildButton({ schoolId, groupId }: { schoolId: string; groupId: string }) {
+  const t = useTranslations('Groups');
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={isPending}
+      onClick={() =>
+        startTransition(async () => {
+          const result = await regenerateSessions(schoolId, groupId);
+          if (!result.ok) {
+            toast.error(result.error);
+            return;
+          }
+          const { planned, reason } = result.report;
+          if (planned === 0) {
+            toast.info(reason ?? t('schedule.rebuildNothing'));
+            return;
+          }
+          toast.success(t('schedule.rebuiltToast', { n: planned }));
+          router.refresh();
+        })
+      }
+    >
+      <RefreshCw className="size-3.5 mr-1.5" aria-hidden="true" />
+      {t('schedule.rebuild')}
+    </Button>
   );
 }

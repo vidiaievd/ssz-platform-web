@@ -210,7 +210,7 @@ export function SessionEditor({
           note: draft.note || null,
         });
         if (!result.ok) {
-          toast.error(t('schedule.saveError'));
+          toast.error(result.error || t('schedule.saveError'));
           return;
         }
         toast.success(t('schedule.addedToast'));
@@ -221,14 +221,14 @@ export function SessionEditor({
 
       const result = await patchSession(schoolId, group.id, session.id, changes);
       if (!result.ok) {
-        toast.error(t('schedule.saveError'));
+        toast.error(result.error || t('schedule.saveError'));
         return;
       }
 
       if (isExam) {
         const marks = await putSessionScores(schoolId, group.id, session.id, draft.scores);
         if (!marks.ok) {
-          toast.error(t('schedule.scoresError'));
+          toast.error(marks.error || t('schedule.scoresError'));
           return;
         }
       }
@@ -247,7 +247,7 @@ export function SessionEditor({
         note: draft.note || t('schedule.removedFromPlan'),
       });
       if (!result.ok) {
-        toast.error(t('schedule.saveError'));
+        toast.error(result.error || t('schedule.saveError'));
         return;
       }
       toast.success(t('schedule.cancelledToast'));
@@ -261,7 +261,7 @@ export function SessionEditor({
     startTransition(async () => {
       const result = await deleteSession(schoolId, group.id, session.id);
       if (!result.ok) {
-        toast.error(t('schedule.saveError'));
+        toast.error(result.error || t('schedule.saveError'));
         return;
       }
       toast.success(t('schedule.removedToast'));

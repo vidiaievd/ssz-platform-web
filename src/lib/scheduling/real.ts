@@ -31,8 +31,18 @@ import type {
 
 const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
 
+/**
+ * The reason the service gave, when it gave one. Its own message is what a
+ * manager can act on — "A session cannot be held before it happens" — while
+ * `AppError`'s own text names a route and a status code, which is for us.
+ */
 function messageOf(e: unknown, fallback: string): string {
-  return e instanceof Error ? e.message : fallback;
+  if (e instanceof AppError) {
+    const detail = (e.details as { message?: unknown } | null)?.message;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail) && typeof detail[0] === 'string') return detail[0];
+  }
+  return fallback;
 }
 
 /** Runs a call and shapes it as a MutationResult, so callers never see a throw. */
