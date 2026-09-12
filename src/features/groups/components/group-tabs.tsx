@@ -12,19 +12,26 @@ import { OverviewCards } from './overview-cards';
 import { GroupStudentsTab } from './group-students-tab';
 import { GroupTeachersTab } from './group-teachers-tab';
 import { GroupScheduleTab } from './group-schedule-tab';
+import { GroupProgressTab } from './group-progress-tab';
 import { GroupEditDialog } from './group-edit-dialog';
-import type { Group, RosterStudent, Lesson } from '../types';
-import type { CurriculumUnit } from '@/features/teachers/types';
+import type { Group, RosterStudent, OutlineUnit, Session } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
-type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule';
+type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule' | 'progress';
 
 type Props = {
   group: Group;
   roster: RosterStudent[];
-  lessons: Lesson[];
-  recentLessons: Lesson[];
-  planUnits: CurriculumUnit[];
+  /** Every session of the group — the schedule & log tab reads a whole course. */
+  sessions: Session[];
+  /** Units of the published course, for naming what a session teaches. */
+  outlineUnits: OutlineUnit[];
+  /** The school's pass mark, for reading exam results. */
+  passMark: number;
+  /** Every teacher of the school — cover is often somebody outside the group. */
+  schoolTeachers: Array<{ userId: string; name: string }>;
+  /** The signed-in user — a teacher only edits the sessions they teach. */
+  viewerId: string | null;
   /** Materials tab, rendered on the server — it reads the course structure. */
   materialsSlot: ReactNode;
   alerts: Alert[];
@@ -32,19 +39,24 @@ type Props = {
   schoolId: string;
   schoolSlug: string;
   canManage: boolean;
+  /** May this viewer see named learners' results — the heatmap inside the Progress tab. */
+  canSeePersonalResults: boolean;
 };
 
 export function GroupTabs({
   group,
   roster,
-  lessons,
-  recentLessons,
-  planUnits,
+  sessions,
+  outlineUnits,
+  passMark,
+  schoolTeachers,
+  viewerId,
   materialsSlot,
   alerts,
   schoolId,
   schoolSlug,
   canManage,
+  canSeePersonalResults,
 }: Props) {
   const t = useTranslations('Groups');
   const searchParams = useSearchParams();
@@ -75,6 +87,7 @@ export function GroupTabs({
     teachers: t('tabs.teachers'),
     materials: t('tabs.materials'),
     schedule: t('tabs.schedule'),
+    progress: t('tabs.progress'),
   };
 
   return (
@@ -91,6 +104,7 @@ export function GroupTabs({
           <SelectItem value="teachers">{tabLabel.teachers}</SelectItem>
           <SelectItem value="materials">{tabLabel.materials}</SelectItem>
           <SelectItem value="schedule">{tabLabel.schedule}</SelectItem>
+          <SelectItem value="progress">{tabLabel.progress}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -117,6 +131,7 @@ export function GroupTabs({
           <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
           <TabsTrigger value="materials">{tabLabel.materials}</TabsTrigger>
           <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>
+          <TabsTrigger value="progress">{tabLabel.progress}</TabsTrigger>
         </TabsList>
       </div>
 
@@ -160,15 +175,31 @@ export function GroupTabs({
       {/* ── Schedule ──────────────────────────────────────────────────────── */}
       <TabsContent value="schedule">
         <GroupScheduleTab
-          slots={group.slots}
-          lessons={lessons}
-          recentLessons={recentLessons}
-          planUnits={planUnits}
+          group={group}
+          sessions={sessions}
+          units={outlineUnits}
+          passMark={passMark}
+          roster={roster}
+          schoolTeachers={schoolTeachers}
           schoolId={schoolId}
-          groupId={group.id}
+          viewerId={viewerId}
           canManage={canManage}
           onEditSchedule={() => setEditScheduleOpen(true)}
         />
+      </TabsContent>
+
+      {/* ── Progress ──────────────────────────────────────────────────────── */}
+      {/* Mounted only while open: the tab fetches a projection of its own, and five
+          other tabs should not wait on analytics to render. */}
+      <TabsContent value="progress">
+        {activeTab === 'progress' && (
+          <GroupProgressTab
+            schoolId={schoolId}
+            groupId={group.id}
+            schoolSlug={schoolSlug}
+            canSeePersonalResults={canSeePersonalResults}
+          />
+        )}
       </TabsContent>
     </Tabs>
 

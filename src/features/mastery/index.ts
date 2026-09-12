@@ -9,4 +9,5 @@ export type {
   MasterySkill,
   MasteryUncertainCell,
   MasteryVerdict,
+  WeaknessReason,
 } from './types';

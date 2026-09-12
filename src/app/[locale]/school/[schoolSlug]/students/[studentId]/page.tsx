@@ -15,13 +15,23 @@ import { OverviewTab } from "@/features/students/components/detail/tabs/overview
 import { GroupsTab } from "@/features/students/components/detail/tabs/groups-tab";
 import { HistoryTab } from "@/features/students/components/detail/tabs/history-tab";
 import { StubTab } from "@/features/students/components/detail/tabs/stub-tab";
+import { MasteryTab } from "@/features/students/components/detail/tabs/mastery-tab";
+import { canSeePersonalResults } from "@/features/groups/lib/can-manage";
 
 type Props = {
   params: Promise<{ schoolSlug: string; studentId: string; locale: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; group?: string }>;
 };
 
-const VALID_TABS: TabKey[] = ["overview", "groups", "history", "notes", "payments", "bonuses"];
+const VALID_TABS: TabKey[] = [
+  "overview",
+  "groups",
+  "mastery",
+  "history",
+  "notes",
+  "payments",
+  "bonuses",
+];
 
 function resolveTab(raw: string | undefined): TabKey {
   if (raw && (VALID_TABS as string[]).includes(raw)) return raw as TabKey;
@@ -30,7 +40,7 @@ function resolveTab(raw: string | undefined): TabKey {
 
 export default async function StudentDetailPage({ params, searchParams }: Props) {
   const { schoolSlug, studentId } = await params;
-  const { tab: rawTab } = await searchParams;
+  const { tab: rawTab, group: preferredGroup } = await searchParams;
   const activeTab = resolveTab(rawTab);
 
   const t = await getTranslations("Students");
@@ -46,6 +56,15 @@ export default async function StudentDetailPage({ params, searchParams }: Props)
   const active = student.memberships.filter((m) => m.status === "active");
   const assignHref = `/school/${schoolSlug}/students/${studentId}/assign-group`;
   const isOwner = role === 'OWNER';
+  // The same rule the group's heatmap is behind (plan 58 §2 F): a scheduler builds hours
+  // and rooms, and one learner's results are none of their business.
+  const showMastery = canSeePersonalResults(role);
+  // A hand-typed `?tab=mastery` from a role without that right falls back to the overview
+  // rather than to a refusal: the tab is hidden from them, not taken away from them.
+  const tab: TabKey = activeTab === "mastery" && !showMastery ? "overview" : activeTab;
+  const groups = active
+    .map((m) => ({ id: m.groupId, name: m.groupName }))
+    .sort((a, b) => Number(b.id === preferredGroup) - Number(a.id === preferredGroup));
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-5">
@@ -96,10 +115,14 @@ export default async function StudentDetailPage({ params, searchParams }: Props)
       </div>
 
       {/* Tab bar */}
-      <StudentTabs activeTab={activeTab} activeGroupCount={active.length} />
+      <StudentTabs
+        activeTab={tab}
+        activeGroupCount={active.length}
+        showMastery={showMastery}
+      />
 
       {/* Tab content */}
-      {activeTab === "overview" && (
+      {tab === "overview" && (
         <OverviewTab
           student={student}
           schoolSlug={schoolSlug}
@@ -108,7 +131,7 @@ export default async function StudentDetailPage({ params, searchParams }: Props)
           groupsHref={`/school/${schoolSlug}/students/${studentId}?tab=groups`}
         />
       )}
-      {activeTab === "groups" && (
+      {tab === "groups" && (
         <GroupsTab
           student={student}
           schoolSlug={schoolSlug}
@@ -117,24 +140,36 @@ export default async function StudentDetailPage({ params, searchParams }: Props)
           canManage={isOwner}
         />
       )}
-      {activeTab === "history" && (
+      {tab === "mastery" && (
+        <MasteryTab
+          schoolId={school.id}
+          schoolSlug={schoolSlug}
+          studentId={studentId}
+          // Every active group, with the one the reader came from first: a teacher who
+          // clicked a cell of their own group's map must land on that group's numbers,
+          // not on whichever membership happens to sort first.
+          groups={groups}
+          assignHref={`/school/${schoolSlug}/groups`}
+        />
+      )}
+      {tab === "history" && (
         <HistoryTab student={student} schoolSlug={schoolSlug} />
       )}
-      {activeTab === "notes" && (
+      {tab === "notes" && (
         <StubTab
           icon={StickyNote}
           title={t("detail.stubs.notes.title")}
           body={t("detail.stubs.notes.body")}
         />
       )}
-      {activeTab === "payments" && (
+      {tab === "payments" && (
         <StubTab
           icon={CreditCard}
           title={t("detail.stubs.payments.title")}
           body={t("detail.stubs.payments.body")}
         />
       )}
-      {activeTab === "bonuses" && (
+      {tab === "bonuses" && (
         <StubTab
           icon={Star}
           title={t("detail.stubs.bonuses.title")}

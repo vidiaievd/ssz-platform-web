@@ -7,6 +7,7 @@ const cell = (successRateEwma: number, focus: MasteryVerdict['focus']): MasteryV
   skill: 'reading',
   focus,
   successRateEwma,
+  reason: null,
   meanStability: null,
   medianSecondsPerItem: null,
   attempts: 12,

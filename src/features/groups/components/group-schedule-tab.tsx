@@ -1,201 +1,278 @@
 'use client';
 
-import { Calendar, Clock, MapPin, Pencil, Users } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useRef, useState } from 'react';
+import { Pencil } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { LessonHeldControl } from './lesson-held-control';
-import type { Slot, Lesson, Weekday } from '../types';
-import type { CurriculumUnit } from '@/features/teachers/types';
+import { CourseTimeline } from './course-timeline';
+import { LessonLog } from './lesson-log';
+import { SessionEditor, type AssignableTeacher } from './session-editor';
+import { AssessmentPanel, CoveragePanel, WhoTaughtPanel } from './schedule-panels';
+import { NextSessionCard } from './next-session-card';
+import { ScheduleStat } from './schedule-stat';
+import {
+  courseSpan,
+  deliveryStats,
+  nextSession,
+  weeklyRhythm,
+  type LogFilter,
+} from '../lib/session-derive';
+import { dayMonth, weekdayDayMonth } from '../lib/session-format';
+import type { Group, OutlineUnit, RosterStudent, Session, Weekday } from '../types';
 
 const DAY_ORDER: Record<Weekday, number> = {
   Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6,
 };
 
-const DAY_FULL: Record<Weekday, string> = {
-  Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday',
-  Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
-};
-
 type Props = {
-  slots: Slot[];
-  lessons: Lesson[];
-  recentLessons: Lesson[];
-  planUnits: CurriculumUnit[];
+  group: Group;
+  /** Every session of the group — the log reads a whole course, not a window. */
+  sessions: Session[];
+  /** Units of the published course, for naming what a session teaches. */
+  units: OutlineUnit[];
+  /** The school's pass mark; an exam may override it for itself. */
+  passMark: number;
+  /** The group's students — the exam results table and the turnout hint read it. */
+  roster: RosterStudent[];
+  /** Every teacher of the school: cover is often somebody outside the group. */
+  schoolTeachers: AssignableTeacher[];
   schoolId: string;
-  groupId: string;
+  /** The signed-in user, so a teacher is shown what they may actually change. */
+  viewerId: string | null;
   canManage: boolean;
   onEditSchedule: () => void;
 };
 
+/**
+ * Schedule & log: the rhythm the group runs on, and the record of what actually
+ * happened. Every number here is derived from the sessions (see `session-derive`)
+ * — nothing is counted twice or stored, so this tab and Materials cannot
+ * disagree about the same group.
+ */
 export function GroupScheduleTab({
-  slots,
-  lessons,
-  recentLessons,
-  planUnits,
+  group,
+  sessions,
+  units,
+  passMark,
+  roster,
+  schoolTeachers,
   schoolId,
-  groupId,
+  viewerId,
   canManage,
   onEditSchedule,
 }: Props) {
   const t = useTranslations('Groups');
-  const sortedSlots = [...slots].sort(
+  const locale = useLocale();
+  const [filter, setFilter] = useState<LogFilter>('recent');
+  const logRef = useRef<HTMLDivElement>(null);
+  // `null` while closed, a session id to edit one, and 'new' to add an extra.
+  const [editing, setEditing] = useState<string | 'new' | null>(null);
+
+  const viewer = { canManage, userId: viewerId };
+
+  const staff = {
+    primaryId: group.teachers.find((x) => x.role === 'primary')?.userId ?? null,
+    coPrimaryId: group.teachers.find((x) => x.role === 'co-primary')?.userId ?? null,
+  };
+
+  const sortedSlots = [...group.slots].sort(
     (a, b) => DAY_ORDER[a.day] - DAY_ORDER[b.day] || a.start.localeCompare(b.start),
   );
+  const rhythm = weeklyRhythm(group.slots);
+  const span = courseSpan(sessions);
+  const delivery = deliveryStats(sessions, staff);
+  const next = nextSession(sessions);
+  // Topics already spoken for, so the picker can say so before a second session
+  // is given the same one.
+  const taughtItemIds = new Set(
+    sessions
+      .filter((s) => s.id !== editing && s.contentLessonId)
+      .map((s) => s.contentLessonId as string),
+  );
+
+
+  // The one call to action on the tab: it does not navigate anywhere, it turns
+  // the log into the list of what needs attention.
+  const showIssues = () => {
+    setFilter('issues');
+    logRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Recurring slots */}
-      <section aria-labelledby="schedule-slots-heading">
-        <div className="flex items-center justify-between mb-3">
-          <h3 id="schedule-slots-heading" className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted)">
-            {t('schedule.recurringHeading')}
-          </h3>
+    <div className="flex flex-col gap-[18px]">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-[18px]">
+        {/* Block 1 — the pattern the group is supposed to run on */}
+        <ScheduleStat
+          overline={t('schedule.rhythmHeading')}
+          value={t('schedule.perWeek', { n: rhythm.perWeek })}
+          caption={t('schedule.rhythmCaption', {
+            hours: rhythm.weeklyHours,
+            mode: group.mode === 'online' ? t('row.online') : t('row.inPerson'),
+          })}
+        >
+          <ul className="mt-3 flex flex-col gap-1 text-xs text-(--ssz-text-secondary)">
+            {sortedSlots.map((slot, i) => (
+              <li key={slot.id ?? i} className="flex items-center gap-2">
+                <span className="w-[30px] font-bold text-primary-600">{slot.day}</span>
+                <span className="tabular-nums">
+                  {slot.start}–{slot.end}
+                </span>
+                {slot.room && (
+                  <span className="ml-auto whitespace-nowrap text-(--ssz-text-muted)">
+                    {slot.room}
+                  </span>
+                )}
+              </li>
+            ))}
+            {sortedSlots.length === 0 && (
+              <li className="italic text-(--ssz-text-muted)">{t('schedule.noSlots')}</li>
+            )}
+          </ul>
           {canManage && (
-            <Button variant="outline" size="sm" onClick={onEditSchedule}>
+            <Button variant="ghost" size="sm" className="mt-2 -ml-2" onClick={onEditSchedule}>
               <Pencil className="size-3.5 mr-1.5" aria-hidden="true" />
-              {t('schedule.editButton')}
+              {t('schedule.changePattern')}
             </Button>
           )}
-        </div>
+        </ScheduleStat>
 
-        {sortedSlots.length === 0 ? (
-          <p className="text-sm text-(--ssz-text-muted) italic px-3 py-2">
-            {t('schedule.noSlots')}
-          </p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {sortedSlots.map((slot, i) => (
-              <div
-                key={slot.id ?? i}
-                className="flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-3"
-              >
-                <div className="flex-1 grid grid-cols-3 gap-x-4 gap-y-1">
-                  <span className="flex items-center gap-1.5 text-sm font-medium text-(--ssz-text-primary)">
-                    <Calendar className="size-3.5 text-(--ssz-text-muted)" aria-hidden="true" />
-                    {DAY_FULL[slot.day]}
-                  </span>
-                  <span className="flex items-center gap-1.5 text-sm text-(--ssz-text-secondary)">
-                    <Clock className="size-3.5 text-(--ssz-text-muted)" aria-hidden="true" />
-                    {slot.start} – {slot.end}
-                  </span>
-                  {slot.room && (
-                    <span className="flex items-center gap-1.5 text-sm text-(--ssz-text-secondary)">
-                      <MapPin className="size-3.5 text-(--ssz-text-muted)" aria-hidden="true" />
-                      {slot.room}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Upcoming lessons */}
-      <section aria-labelledby="schedule-lessons-heading">
-        <h3 id="schedule-lessons-heading" className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-3">
-          {t('schedule.upcomingHeading')}
-        </h3>
-
-        {lessons.length === 0 ? (
-          <p className="text-sm text-(--ssz-text-muted) italic px-3 py-2">
-            {t('schedule.noLessons')}
-          </p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {lessons.map((lesson) => (
-              <div
-                key={lesson.id}
-                className={cn(
-                  'flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-3',
-                  lesson.isSubstitute && 'border-warning-200 bg-warning-50 dark:border-warning-800 dark:bg-warning-900/10',
-                )}
-              >
-                <div className="flex-1 min-w-0 grid grid-cols-[auto_1fr_auto] items-center gap-x-4">
-                  <span className="text-sm font-medium text-(--ssz-text-primary) whitespace-nowrap">
-                    {lesson.date}
-                  </span>
-                  <span className="text-sm text-(--ssz-text-secondary) whitespace-nowrap">
-                    {lesson.start} – {lesson.end}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
-                    <Users className="size-3" aria-hidden="true" />
-                    {lesson.teacherName}
-                    {lesson.isSubstitute && (
-                      <span className="ml-1 rounded-full bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-400 px-1.5 py-0.5 text-[10px] font-semibold">
-                        {t('schedule.sub')}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Lessons that have already happened — the only place group progress moves */}
-      <section aria-labelledby="schedule-recent-heading">
-        <h3
-          id="schedule-recent-heading"
-          className="text-xs font-semibold uppercase tracking-wide text-(--ssz-text-muted) mb-3"
+        {/* Block 2 — where the course has got to */}
+        <ScheduleStat
+          overline={t('schedule.spanHeading')}
+          value={
+            span.total === 0
+              ? '—'
+              : t('schedule.weekOf', { current: span.currentWeek, total: span.totalWeeks })
+          }
+          caption={
+            span.firstDate && span.lastDate
+              ? t('schedule.spanCaption', {
+                  from: dayMonth(span.firstDate, locale),
+                  to: dayMonth(span.lastDate, locale),
+                  done: span.done,
+                  total: span.total,
+                })
+              : group.courseId
+                ? t('schedule.noSessionsYet')
+                : t('schedule.noSessions')
+          }
         >
-          {t('schedule.recentHeading')}
-        </h3>
-
-        {recentLessons.length === 0 ? (
-          <p className="text-sm text-(--ssz-text-muted) italic px-3 py-2">
-            {t('schedule.noRecent')}
-          </p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {recentLessons.map((lesson) => {
-              const unit = planUnits.find((u) => u.unitId === lesson.curriculumUnitId);
-              return (
-                <div
-                  key={lesson.id}
-                  className={cn(
-                    'flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border px-4 py-3',
-                    lesson.status === 'held'
-                      ? 'border-success-200 bg-success-50 dark:border-success-800 dark:bg-success-900/10'
-                      : 'border-border bg-card',
-                  )}
-                >
-                  <span className="text-sm font-medium text-(--ssz-text-primary) whitespace-nowrap">
-                    {lesson.date}
-                  </span>
-                  <span className="text-sm text-(--ssz-text-secondary) whitespace-nowrap">
-                    {lesson.start} – {lesson.end}
-                  </span>
-                  <span className="flex-1 min-w-0 text-xs text-(--ssz-text-muted) truncate">
-                    {unit ? unit.title : t('schedule.noUnit')}
-                  </span>
-
-                  {lesson.status === 'held' ? (
-                    <span className="rounded-full bg-success-100 text-success-700 dark:bg-success-900/40 dark:text-success-400 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap">
-                      {t('schedule.held')}
-                    </span>
-                  ) : canManage ? (
-                    <LessonHeldControl
-                      schoolId={schoolId}
-                      groupId={groupId}
-                      lessonId={lesson.id}
-                      units={planUnits}
-                      defaultUnitId={lesson.curriculumUnitId}
-                    />
-                  ) : (
-                    <span className="text-[11px] text-(--ssz-text-muted) whitespace-nowrap">
-                      {t('schedule.notHeld')}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary-500 transition-[width]"
+              style={{ width: `${span.pct}%` }}
+            />
           </div>
-        )}
-      </section>
+          <p className="mt-2 text-xs text-(--ssz-text-muted)">
+            {next
+              ? t('schedule.nextOn', {
+                  date: weekdayDayMonth(next.date, locale),
+                  time: next.start,
+                })
+              : span.total > 0
+                ? t('schedule.courseFinished')
+                : null}
+          </p>
+        </ScheduleStat>
+
+        {/* Block 3 — how delivery is actually going */}
+        <ScheduleStat
+          overline={t('schedule.deliveryHeading')}
+          value={
+            delivery.averageAttendance === null
+              ? '—'
+              : `${delivery.averageAttendance}/${group.studentCount}`
+          }
+          caption={t('schedule.averageAttendance')}
+        >
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <Badge variant="success">{t('schedule.heldCount', { n: delivery.held })}</Badge>
+            <Badge variant="warning">{t('schedule.subCount', { n: delivery.substituted })}</Badge>
+            <Badge variant={delivery.cancelled > 0 ? 'error' : 'muted'}>
+              {t('schedule.cancelledCount', { n: delivery.cancelled })}
+            </Badge>
+          </div>
+          {delivery.withoutTopic > 0 && (
+            <button
+              type="button"
+              onClick={showIssues}
+              className="mt-2 text-left text-xs font-medium text-warning-700 underline-offset-2 hover:underline dark:text-warning-400"
+            >
+              {t('schedule.withoutTopic', { n: delivery.withoutTopic })}
+            </button>
+          )}
+        </ScheduleStat>
+      </div>
+
+      {/* Block 4 — the one session anybody can still act on */}
+      {next && (
+        <NextSessionCard
+          session={next}
+          units={units}
+          teachers={group.teachers}
+          canManage={canManage}
+          onEdit={setEditing}
+        />
+      )}
+
+      {/* Block 5 — the whole course at a glance */}
+      <CourseTimeline
+        sessions={sessions}
+        units={units}
+        hasCourse={group.courseId !== null}
+        schoolId={schoolId}
+        groupId={group.id}
+        staff={staff}
+        perWeek={rhythm.perWeek}
+        canManage={canManage}
+        onEditSession={setEditing}
+        onAddSession={() => setEditing('new')}
+      />
+
+      {/* Blocks 6 and 7 — the record, and what it adds up to */}
+      <div
+        ref={logRef}
+        className="grid scroll-mt-4 grid-cols-[repeat(auto-fit,minmax(320px,1fr))] items-start gap-[18px]"
+      >
+        <LessonLog
+          sessions={sessions}
+          units={units}
+          teachers={group.teachers}
+          staff={staff}
+          studentCount={group.studentCount}
+          filter={filter}
+          onFilterChange={setFilter}
+          onEditSession={setEditing}
+        />
+
+        <div className="flex flex-col gap-[18px]">
+          <AssessmentPanel
+            sessions={sessions}
+            units={units}
+            passMark={passMark}
+            onEditSession={setEditing}
+          />
+          <WhoTaughtPanel sessions={sessions} teachers={group.teachers} staff={staff} />
+          <CoveragePanel sessions={sessions} units={units} />
+        </div>
+      </div>
+
+      <SessionEditor
+        key={editing ?? 'closed'}
+        open={editing !== null}
+        onOpenChange={(open) => setEditing(open ? editing : null)}
+        session={sessions.find((x) => x.id === editing) ?? null}
+        group={group}
+        schoolId={schoolId}
+        units={units}
+        roster={roster}
+        teachers={schoolTeachers}
+        passMark={passMark}
+        taughtItemIds={taughtItemIds}
+        viewer={viewer}
+      />
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { GroupDetailHeader } from "./group-detail-header";
 import { GroupResolveBanner } from "./group-resolve-banner";
 import { GroupTabs } from "./group-tabs";
 import { GroupMaterialsTab } from "./group-materials-tab";
-import type { Group, RosterStudent, Lesson, CourseView } from "../types";
+import type { Group, RosterStudent, CourseView, OutlineUnit, Session } from "../types";
 import type { CurriculumUnit } from "@/features/teachers/types";
 import type { GroupMaterialsView } from "../api/queries";
 import type { Alert } from "@/features/dashboard/types";
@@ -17,9 +17,16 @@ type Props = {
   group: Group;
   roster: RosterStudent[];
   alerts: Alert[];
-  lessons: Lesson[];
-  /** Past lessons of the last weeks — the ones that can be marked held. */
-  recentLessons: Lesson[];
+  /** Every session of the group — the schedule & log tab reads a whole course. */
+  sessions: Session[];
+  /** Units of the published course, for naming what a session teaches. */
+  outlineUnits: OutlineUnit[];
+  /** The school's pass mark, for reading exam results. */
+  passMark: number;
+  /** Every teacher of the school — cover is often somebody outside the group. */
+  schoolTeachers: Array<{ userId: string; name: string }>;
+  /** The signed-in user — a teacher only edits the sessions they teach. */
+  viewerId: string | null;
   /** Units of the group's teaching plan; empty when no plan exists yet. */
   planUnits: CurriculumUnit[];
   materials: GroupMaterialsView;
@@ -30,14 +37,19 @@ type Props = {
   schoolId: string;
   schoolSlug: string;
   canManage: boolean;
+  /** May this viewer see named learners' results — the heatmap of the Progress tab. */
+  canSeePersonalResults: boolean;
 };
 
 export async function GroupDetail({
   group,
   roster,
   alerts,
-  lessons,
-  recentLessons,
+  sessions,
+  outlineUnits,
+  passMark,
+  schoolTeachers,
+  viewerId,
   planUnits,
   materials,
   planProgressPct,
@@ -45,6 +57,7 @@ export async function GroupDetail({
   schoolId,
   schoolSlug,
   canManage,
+  canSeePersonalResults,
 }: Props) {
   const t = await getTranslations("Groups");
   const listHref = `/school/${schoolSlug}/groups`;
@@ -81,9 +94,11 @@ export async function GroupDetail({
       <GroupTabs
         group={group}
         roster={roster}
-        lessons={lessons}
-        recentLessons={recentLessons}
-        planUnits={planUnits}
+        sessions={sessions}
+        outlineUnits={outlineUnits}
+        passMark={passMark}
+        schoolTeachers={schoolTeachers}
+        viewerId={viewerId}
         materialsSlot={
           <GroupMaterialsTab
             group={group}
@@ -99,6 +114,7 @@ export async function GroupDetail({
         schoolId={schoolId}
         schoolSlug={schoolSlug}
         canManage={canManage}
+        canSeePersonalResults={canSeePersonalResults}
       />
     </div>
   );

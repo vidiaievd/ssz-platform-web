@@ -1,0 +1,170 @@
+{
+  "unavailable": "Vi fikk ikke kontakt med analysetjenesten, så denne fanen er tom. Det er et faktum om tjenesten, ikke om gruppa — ingenting har gått tapt.",
+  "state": {
+    "ok": "Målt",
+    "low": "Målt",
+    "notStarted": "Ikke begynt",
+    "insufficient": "For lite til å dømme",
+    "notDelivered": "Ikke undervist ennå",
+    "unlinked": "Ingen kursenhet bak",
+    "noContent": "Kurset har ikke dette"
+  },
+  "legend": {
+    "scale": "Tilegnet 0 → 100 %"
+  },
+  "summary": {
+    "delivered": "Undervist",
+    "deliveredSub": "{held} av {planned} timer holdt",
+    "absorbed": "Tilegnet, median",
+    "absorbedSub": "Av det som ble undervist",
+    "belowLine": "Under streken",
+    "notJudgeable": "Kan ikke dømmes",
+    "notJudgeableSub": "Celler under {threshold} vektede forsøk",
+    "notJudgeableHint": "En dom krever omtrent {threshold} vektede forsøk. Under det nekter profilen å dømme, og slike celler skraveres i stedet for å få en score.",
+    "lastActivity": "Siste aktivitet"
+  },
+  "chart": {
+    "title": "Undervist mot tilegnet",
+    "viewAll": "Alt arbeid",
+    "viewContext": "Etter hvor det ble gjort",
+    "viewLabel": "Hvordan lese arbeidet",
+    "show": "Vis diagram",
+    "qualityStrip": "Kvaliteten på det som ble forsøkt, per enhet — skravert der ingenting ble forsøkt",
+    "noTimetable": "Vi fikk ikke spurt timeplanen, så ingen enhet er merket som undervist eller ikke. Timer kan godt ha vært holdt."
+  },
+  "unit": {
+    "lessons": "{count, plural, =0 {ingen timer} one {# time} other {# timer}}",
+    "spread": "{median} % median, {p25}–{p75} % blant {n, plural, one {# elev} other {# elever}}",
+    "unlinked": "Undervist, men denne planenheten har ingen kursenhet bak seg, så ingenting den dekket kan telles.",
+    "notDelivered": "Ikke undervist ennå.",
+    "insufficient": "Bare {learners, plural, one {# elev har} other {# elever har}} forsøkt den — under terskelen på {threshold}, så ingen dom vises.",
+    "noContent": "Denne enheten har ingenting å gjøre.",
+    "notStarted": "Undervist, men ingen har åpnet den ennå."
+  },
+  "context": {
+    "homework": "Lekser",
+    "self_study": "Egenstudier",
+    "classwork": "Klassearbeid",
+    "unsaid": "Ikke registrert",
+    "attempts": "{count, plural, =0 {ingen forsøk} one {# forsøk} other {# forsøk}}",
+    "note": "Hvor arbeidet skjer har bare vært registrert siden {from}; alt eldre havner i «Ikke registrert». Klassearbeid står tomt til forsøk som startes i en time blir merket som det.",
+    "unattributed": "{count, plural, one {# forsøk nevner} other {# forsøk nevner}} ingen kurs i det hele tatt og kunne ikke plasseres."
+  },
+  "unlinked": {
+    "title": "{count, plural, one {# undervist planenhet har} other {# underviste planenheter har}} ingen kursenhet bak seg",
+    "body": "Disse timene ble holdt, og ingenting de dekket kan telles før planenheten navngir en kursenhet.",
+    "action": "Åpne planen"
+  },
+  "empty": {
+    "noCourse": {
+      "title": "Ingen kurs er knyttet til denne gruppa",
+      "body": "Det er ingenting å måle mot før gruppa underviser i noe.",
+      "action": "Knytt til et kurs"
+    },
+    "noLessons": {
+      "title": "Ingen timer holdt ennå",
+      "body": "Framgang sammenligner det som ble undervist med det som ble tilegnet, og ingenting er undervist ennå.",
+      "action": "Åpne timeplanen"
+    },
+    "noAttempts": {
+      "body": "{units, plural, =0 {Ingenting undervist ennå} one {# enhet undervist} other {# enheter undervist}}, ingenting målt ennå. Tilegnet viser en strek, ikke en null — ingen har forsøkt noe."
+    }
+  },
+  "footer": {
+    "updated": "Oppdatert {when}",
+    "behind": "projeksjonen kan ligge etter"
+  },
+  "heatmap": {
+    "title": "Elever × enheter",
+    "subtitle": "En median skjuler den som holder på å drukne. Dette gjør ikke det.",
+    "student": "Elev",
+    "show": "Vis varmekart",
+    "sortRoster": "Listerekkefølge",
+    "sortLowest": "Svakest først",
+    "sortLabel": "Rekkefølge på elevene",
+    "empty": "Ingen står på gruppas liste ennå.",
+    "unavailable": "Vi fikk ikke lastet kartet per elev. Diagrammet over er upåvirket.",
+    "neverSeen": "«Ikke sett ennå» betyr at ingenting er registrert for eleven i det hele tatt — det er ikke det samme som å henge etter.",
+    "tipHead": "{name} · Enhet {no} {title}",
+    "tipMeasured": "{value} % av enheten bestått",
+    "tipInsufficient": "{sample} av {threshold} vektede forsøk — ingen dom",
+    "neverSeenShort": "ikke sett ennå"
+  },
+  "mastery": {
+    "empty": {
+      "title": "Ingenting er målt for denne eleven ennå",
+      "body": "Ingen av forsøkene har nådd profilen. Ferdighetsrutenettet står tomt med vilje — en tom profil er ikke en svak profil.",
+      "action": "Gi første lekse"
+    },
+    "summary": {
+      "own": "Tatt med seg",
+      "ownSub": "Median i gruppa {median} %",
+      "ownNoScale": "Ingen gruppeskala å lese det mot",
+      "inGroup": "I gruppa",
+      "inGroupSub": "Lavere enn {lower} av {measured} målte medelever",
+      "inGroupNoScale": "Ingen i gruppa er målt ennå",
+      "attempts": "Forsøk",
+      "attemptsSub": "{count, plural, one {# forsøk til nevner} other {# forsøk til nevner}} ikke noe kurs i det hele tatt",
+      "weakPairs": "Svake par",
+      "weakPairsSub": "Ferdighet × emne profilen har merket"
+    },
+    "legend": {
+      "scale": "Treffprosent 0 → 100 %"
+    },
+    "grid": {
+      "title": "Ferdighet × emne",
+      "subtitle": "Fargen er vektet treffprosent. En dom krever {threshold} vektede observasjoner — under det nekter profilen å dømme, og sier fra.",
+      "note": "En tom rad er et faktum om kurset, ikke om eleven: en kanal katalogen ikke har oppgaver for, kan ikke måles. Det meste ligger under «Ikke registrert» til kurset sier hva hver oppgave trener.",
+      "unclassified": "{count, plural, one {# forsøk} other {# forsøk}} kunne ikke plasseres i rutenettet i det hele tatt.",
+      "coverageUnavailable": "Vi fikk ikke spurt kurset hva det lærer bort, så ingen rute påstår at kurset mangler dette."
+    },
+    "cell": {
+      "noItems": "ingen oppgaver",
+      "notStarted": "ikke begynt",
+      "stable": "stabil {days} d",
+      "shortfall": "{sample}/{threshold}",
+      "tipMeasured": "{value} % vektet treffprosent"
+    },
+    "reason": {
+      "forgets": {
+        "label": "Glemmer fort",
+        "body": "Riktig i timen, borte på noen dager. Flytt repetisjonen nærmere heller enn å undervise det på nytt."
+      },
+      "never-knew": {
+        "label": "Aldri lært",
+        "body": "Stabilt, og stabilt feil — det var den gale regelen som ble lært. Undervis det på nytt; mer drilling hjelper ikke."
+      },
+      "watch": {
+        "label": "Holder stand",
+        "body": "Innenfor rekkevidde, bare tregere enn gruppa. Står her fordi noe må komme først."
+      },
+      "unknown": {
+        "body": "Svakt, og ingenting er registrert om hvor lenge det sitter — ingenting her skiller glemsel fra aldri å ha lært det."
+      }
+    },
+    "work": {
+      "title": "Hva bør jobbes med",
+      "subtitle": "Samme lave tall, motsatt handling — forskjellen er stabiliteten.",
+      "empty": "Ingenting har nok bak seg til å kalles svakt ennå.",
+      "unavailable": "Vi fikk ikke lastet profilen, så det er ingenting å foreslå. Rutenettet ved siden av er upåvirket.",
+      "stability": "stabilitet {days} d",
+      "samples": "{count, plural, one {# vektet observasjon} other {# vektede observasjoner}}",
+      "action": "Åpne kurset"
+    },
+    "context": {
+      "title": "Hvor arbeidet skjer",
+      "subtitle": "Én stolpe, ikke enda et diagram."
+    },
+    "position": {
+      "title": "Mot gruppa",
+      "median": "median",
+      "own": "Denne eleven",
+      "body": "Tatt med seg {own} % mot en median i gruppa på {median} %. {lower, plural, =0 {Ingen medelev ligger lavere} one {# medelev ligger lavere} other {# medelever ligger lavere}}.",
+      "measured": "{measured, plural, one {# medelev har} other {# medelever har}} et tall selv, denne eleven medregnet.",
+      "none": "Ingen i denne gruppa har et tall ennå, så det finnes ingen skala å plassere eleven på. Det er ikke sisteplass — det er ingen rangering i det hele tatt."
+    },
+    "group": {
+      "readAgainst": "Lest mot {name}. Også i:"
+    }
+  }
+}

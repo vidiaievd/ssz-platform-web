@@ -15,6 +15,7 @@ const RawVerdict = z.object({
   skill: Skill,
   focus: Focus,
   successRateEwma: z.number(),
+  reason: z.enum(['forgets', 'never-knew', 'watch']).nullable().default(null),
   meanStability: z.number().nullable(),
   medianSecondsPerItem: z.number().nullable(),
   attempts: z.number(),

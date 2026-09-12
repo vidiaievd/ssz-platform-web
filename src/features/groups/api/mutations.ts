@@ -10,7 +10,12 @@ function invalidate(tag: string) {
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors/app-error';
 import { resolveSchoolId } from '@/features/school/api/resolve-school-id';
-import type { MutationResult, Slot } from '@/features/groups/types';
+import type { MutationResult, SessionScore, Slot } from '@/features/groups/types';
+import type {
+  NewSessionInput,
+  RegenerateReport,
+  SessionChanges,
+} from '@/lib/scheduling/provider';
 import { groupCacheTags } from './keys';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -328,27 +333,89 @@ export async function linkPlanUnit(
   }
 }
 
+// ── Sessions (schedule & log) ─────────────────────────────────────────────────
+
 /**
- * Record that a lesson happened and which unit of the plan it taught. This is
- * the only way group progress moves: the scheduler counts held lessons, and a
- * date that has passed says nothing on its own.
+ * Session writes carry the reason they failed rather than a bare flag: the
+ * service refuses things the editor cannot know about in advance — a session
+ * held before it happened, a teacher without rights — and the editor has
+ * nothing useful to say unless it can repeat that reason.
  */
-export async function markLessonHeld(
+type SessionResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * All session writes share the same two invalidations: the group's own page and
+ * the school's group list, whose progress column reads the same facts.
+ */
+function invalidateSessions(schoolId: string, groupId: string): void {
+  invalidate(groupCacheTags.group(groupId));
+  invalidate(groupCacheTags.groups(schoolId));
+}
+
+export async function patchSession(
   schoolId: string,
   groupId: string,
-  lessonId: string,
-  curriculumUnitId: string,
-): Promise<MutationResult> {
-  try {
-    const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
-    const result = await getSchedulingProvider().markLessonHeld(lessonId, curriculumUnitId);
-    if (!result.ok) return result;
-    invalidate(groupCacheTags.group(groupId));
-    invalidate(groupCacheTags.groups(schoolId));
-    return { ok: true };
-  } catch (e) {
-    return mapError(e);
-  }
+  sessionId: string,
+  changes: SessionChanges,
+): Promise<SessionResult> {
+  const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
+  const result = await getSchedulingProvider().patchSession(sessionId, changes);
+  if (!result.ok) return result;
+  invalidateSessions(schoolId, groupId);
+  return { ok: true };
+}
+
+export async function createSession(
+  schoolId: string,
+  groupId: string,
+  input: NewSessionInput,
+): Promise<SessionResult> {
+  const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
+  const result = await getSchedulingProvider().createSession(schoolId, groupId, input);
+  if (!result.ok) return result;
+  invalidateSessions(schoolId, groupId);
+  return { ok: true };
+}
+
+export async function deleteSession(
+  schoolId: string,
+  groupId: string,
+  sessionId: string,
+): Promise<SessionResult> {
+  const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
+  const result = await getSchedulingProvider().deleteSession(sessionId);
+  if (!result.ok) return result;
+  invalidateSessions(schoolId, groupId);
+  return { ok: true };
+}
+
+export async function putSessionScores(
+  schoolId: string,
+  groupId: string,
+  sessionId: string,
+  scores: SessionScore[],
+): Promise<SessionResult> {
+  const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
+  const result = await getSchedulingProvider().putSessionScores(sessionId, scores);
+  if (!result.ok) return result;
+  invalidateSessions(schoolId, groupId);
+  return { ok: true };
+}
+
+/**
+ * Its own return shape rather than the groups' MutationResult: a rebuild has
+ * something to say even when it succeeds — how much it planned, how much it left
+ * alone, and why it planned nothing when it planned nothing.
+ */
+export async function regenerateSessions(
+  schoolId: string,
+  groupId: string,
+): Promise<{ ok: true; report: RegenerateReport } | { ok: false; error: string }> {
+  const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
+  const result = await getSchedulingProvider().regenerateSessions(schoolId, groupId);
+  if (!result.ok) return { ok: false, error: result.error };
+  invalidateSessions(schoolId, groupId);
+  return { ok: true, report: result.data ?? { planned: 0, kept: 0, reason: null } };
 }
 
 export async function removeStudent(

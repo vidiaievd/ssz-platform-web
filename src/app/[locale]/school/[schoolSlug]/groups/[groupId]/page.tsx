@@ -2,23 +2,23 @@ import { notFound } from 'next/navigation';
 
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
-import { getGroup, getGroupCourseView, getGroupMaterials } from '@/features/groups/api/queries';
-import { canManageGroups } from '@/features/groups/lib/can-manage';
+import { getCurrentUser } from '@/features/auth/api/get-current-user';
+import {
+  getGroup,
+  getGroupCourseOutline,
+  getGroupCourseView,
+  getGroupMaterials,
+  getSchoolTeachers,
+} from '@/features/groups/api/queries';
+import { canManageGroups, canSeePersonalResults } from '@/features/groups/lib/can-manage';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
 import { AppError } from '@/lib/errors';
 import { GroupDetail } from '@/features/groups/components/group-detail';
-import type { Lesson } from '@/features/groups/types';
+import type { Session } from '@/features/groups/types';
 import type { CurriculumPlan } from '@/features/teachers/types';
 
-/** How far back the "recent lessons" list on the schedule tab looks. */
-const RECENT_WINDOW_DAYS = 30;
-const RECENT_LIMIT = 8;
-
-function isoDaysAgo(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  return d.toISOString().slice(0, 10);
-}
+/** What a student passes an exam on when the school has said nothing else. */
+const DEFAULT_PASS_MARK = 60;
 
 type Props = {
   params: Promise<{ schoolSlug: string; groupId: string; locale: string }>;
@@ -31,34 +31,34 @@ export default async function GroupDetailPage({ params }: Props) {
   if (!school) notFound();
 
   const scheduling = getSchedulingProvider();
-  const degradeToEmpty = (err: unknown): Lesson[] => {
+  // The schedule tab is one tab of five: scheduling being down empties it
+  // rather than taking the whole group page with it.
+  const degradeToEmpty = (err: unknown): Session[] => {
     if (!(err instanceof AppError && err.code === 'upstream_unavailable')) throw err;
     return [];
   };
 
-  const [data, lessons, recentAll, plan, role] = await Promise.all([
+  const [data, sessions, passMark, plan, role] = await Promise.all([
     getGroup(school.id, groupId),
-    scheduling.nextLessons(groupId, 10).catch(degradeToEmpty),
-    scheduling
-      .lessonsInRange(groupId, isoDaysAgo(RECENT_WINDOW_DAYS), isoDaysAgo(0))
-      .catch(degradeToEmpty),
+    scheduling.groupSessions(school.id, groupId).catch(degradeToEmpty),
+    // The school's pass mark, and the spec's default when the school has none.
+    scheduling.gradingPolicy(school.id).catch(() => DEFAULT_PASS_MARK),
     scheduling.getCurriculum(groupId).catch((): CurriculumPlan | null => null),
     getMySchoolRole(schoolSlug),
   ]);
-
-  // Newest first, cancelled lessons left out — there is nothing to record about them.
-  const recentLessons = recentAll
-    .filter((l) => l.status !== 'cancelled')
-    .sort((a, b) => b.date.localeCompare(a.date) || b.start.localeCompare(a.start))
-    .slice(0, RECENT_LIMIT);
+  // Who is looking: a teacher may only record the sessions they teach.
+  const viewer = await getCurrentUser();
 
   if (!data) notFound();
 
   const { roster, alerts, ...group } = data;
   const canManage = canManageGroups(role);
-  const [courseView, materials] = await Promise.all([
+  const [courseView, materials, outline, schoolTeachers] = await Promise.all([
     getGroupCourseView(group),
     getGroupMaterials(group),
+    getGroupCourseOutline(group),
+    // The whole school, not just this group's teachers: cover is often external.
+    getSchoolTeachers(school.id),
   ]);
 
   return (
@@ -68,14 +68,18 @@ export default async function GroupDetailPage({ params }: Props) {
         schoolId={school.id}
         roster={roster}
         alerts={alerts}
-        lessons={lessons}
-        recentLessons={recentLessons}
+        sessions={sessions}
+        outlineUnits={outline.units}
+        passMark={passMark}
+        schoolTeachers={schoolTeachers}
+        viewerId={viewer?.userId ?? null}
         planUnits={plan?.units ?? []}
         materials={materials}
         planProgressPct={plan?.progressPct ?? 0}
         courseView={courseView}
         schoolSlug={schoolSlug}
         canManage={canManage}
+        canSeePersonalResults={canSeePersonalResults(role)}
       />
     </main>
   );

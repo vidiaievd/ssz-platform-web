@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`every state gets its own shape > renders insufficient distinguishably 1`] = `"background: repeating-linear-gradient(45deg, oklch(var(--ssz-secondary-ch) / 0.18) 0 4px, oklch(var(--ssz-secondary-ch) / 0.55) 4px 6px); border: 1px solid oklch(var(--ssz-secondary-ch) / 0.55); color: var(--ssz-text-primary);"`;
+
+exports[`every state gets its own shape > renders low distinguishably 1`] = `"background: oklch(0.738 0.109 112); color: oklch(0.372 0.111 112); border: 1px solid transparent;"`;
+
+exports[`every state gets its own shape > renders noContent distinguishably 1`] = `"background: var(--ssz-bg-subtle); border: 1px solid transparent; color: var(--ssz-text-muted); opacity: 0.65;"`;
+
+exports[`every state gets its own shape > renders notDelivered distinguishably 1`] = `"background: var(--ssz-bg-subtle); border: 1px solid transparent; color: var(--ssz-text-muted); opacity: 0.6;"`;
+
+exports[`every state gets its own shape > renders notStarted distinguishably 1`] = `"background: var(--ssz-bg-surface); border: 1.5px dashed var(--ssz-border-strong); color: var(--ssz-text-muted);"`;
+
+exports[`every state gets its own shape > renders ok distinguishably 1`] = `"background: oklch(0.738 0.109 112); color: oklch(0.372 0.111 112); border: 1px solid transparent;"`;
+
+exports[`every state gets its own shape > renders unlinked distinguishably 1`] = `"background: transparent; border-top: medium; border-bottom: medium; color: var(--ssz-text-muted);"`;

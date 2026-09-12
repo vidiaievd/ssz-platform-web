@@ -16,12 +16,47 @@ import type {
   RawTimetableEntry,
   RawSchoolTimetableEntry,
   Lesson,
+  Session,
+  SessionScore,
   OpsWarning,
 } from '@/features/groups/types';
 import type { Absence, SubstituteRequest, SubstituteCandidate, CurriculumPlan } from '@/features/teachers/types';
-import type { MutationResult, SchedulingProvider } from './provider';
+import type {
+  MutationResult,
+  NewSessionInput,
+  RegenerateReport,
+  SchedulingProvider,
+  SessionChanges,
+} from './provider';
 
 const notReady = () => new AppError('upstream_unavailable', 'scheduling-service not ready');
+
+/**
+ * The reason the service gave, when it gave one. Its own message is what a
+ * manager can act on — "A session cannot be held before it happens" — while
+ * `AppError`'s own text names a route and a status code, which is for us.
+ */
+function messageOf(e: unknown, fallback: string): string {
+  if (e instanceof AppError) {
+    const detail = (e.details as { message?: unknown } | null)?.message;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail) && typeof detail[0] === 'string') return detail[0];
+  }
+  return fallback;
+}
+
+/** Runs a call and shapes it as a MutationResult, so callers never see a throw. */
+async function asResult<Raw, Out>(
+  call: () => Promise<Raw>,
+  map: (raw: Raw) => Out,
+  fallback: string,
+): Promise<MutationResult<Out>> {
+  try {
+    return { ok: true, data: map(await call()) };
+  } catch (e) {
+    return { ok: false, error: messageOf(e, fallback) };
+  }
+}
 
 /** One lesson as scheduling-service returns it. */
 interface RawLesson {
@@ -50,6 +85,71 @@ function toLesson(r: RawLesson): Lesson {
     status: (r.status as Lesson['status']) ?? 'scheduled',
     curriculumUnitId: r.curriculumUnitId ?? null,
   };
+}
+
+/** One session as scheduling-service returns it. */
+interface RawSession {
+  id: string;
+  groupId: string;
+  schoolId: string;
+  slotId: string | null;
+  date: string;
+  startTime: string;
+  endTime: string;
+  teacherId: string | null;
+  room: string | null;
+  status: string;
+  type: string;
+  curriculumUnitId: string | null;
+  contentUnitId: string | null;
+  contentLessonId: string | null;
+  attendance: number | null;
+  note: string | null;
+  extra: boolean;
+  planIndex: number | null;
+  passMark: number | null;
+  scores: SessionScore[];
+}
+
+function toSession(r: RawSession): Session {
+  return {
+    id: r.id,
+    groupId: r.groupId,
+    schoolId: r.schoolId,
+    slotId: r.slotId,
+    date: r.date,
+    start: r.startTime,
+    end: r.endTime,
+    teacherId: r.teacherId,
+    room: r.room ?? '',
+    status: (r.status as Session['status']) ?? 'scheduled',
+    type: (r.type as Session['type']) ?? 'lesson',
+    curriculumUnitId: r.curriculumUnitId,
+    contentUnitId: r.contentUnitId,
+    contentLessonId: r.contentLessonId,
+    attendance: r.attendance,
+    note: r.note,
+    extra: r.extra,
+    planIndex: r.planIndex,
+    passMark: r.passMark,
+    scores: r.scores ?? [],
+  };
+}
+
+/**
+ * Field names differ on purpose: the web says start/end, the service says
+ * startTime/endTime. Only keys the caller actually set are forwarded, so an
+ * absent field stays absent and an explicit null still clears.
+ */
+function toApiSessionChanges(changes: SessionChanges): Record<string, unknown> {
+  const { start, end, ...rest } = changes;
+  const body: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(rest)) {
+    if (value !== undefined) body[key] = value;
+  }
+  if (start !== undefined) body.startTime = start;
+  if (end !== undefined) body.endTime = end;
+  return body;
 }
 
 // scheduling-service uses lowercase weekday codes; the web app uses capitalized.
@@ -139,18 +239,89 @@ export const realProvider: SchedulingProvider = {
     return rows.map(toLesson);
   },
 
-  async markLessonHeld(lessonId: string, curriculumUnitId: string): Promise<MutationResult> {
+  async groupSessions(schoolId: string, groupId: string) {
+    const rows = await serverFetch<RawSession[]>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/groups/${groupId}/sessions`,
+    });
+    return rows.map(toSession);
+  },
+
+  async patchSession(sessionId: string, changes: SessionChanges) {
+    return asResult(
+      () =>
+        serverFetch<RawSession>({
+          service: 'scheduling',
+          path: `/scheduling/sessions/${sessionId}`,
+          method: 'PATCH',
+          body: toApiSessionChanges(changes),
+        }),
+      toSession,
+      'Failed to save the session',
+    );
+  },
+
+  async createSession(schoolId: string, groupId: string, input: NewSessionInput) {
+    const { start, end, ...rest } = input;
+    return asResult(
+      () =>
+        serverFetch<RawSession>({
+          service: 'scheduling',
+          path: `/scheduling/schools/${schoolId}/groups/${groupId}/sessions`,
+          method: 'POST',
+          body: { ...rest, startTime: start, endTime: end },
+        }),
+      toSession,
+      'Failed to add the session',
+    );
+  },
+
+  async deleteSession(sessionId: string): Promise<MutationResult> {
     try {
       await serverFetch({
         service: 'scheduling',
-        path: `/scheduling/lessons/${lessonId}`,
-        method: 'PATCH',
-        body: { status: 'held', curriculumUnitId },
+        path: `/scheduling/sessions/${sessionId}`,
+        method: 'DELETE',
       });
       return { ok: true };
     } catch (e) {
-      return { ok: false, error: e instanceof Error ? e.message : 'Failed to mark the lesson held' };
+      return { ok: false, error: messageOf(e, 'Failed to delete the session') };
     }
+  },
+
+  async putSessionScores(sessionId: string, scores: SessionScore[]) {
+    return asResult(
+      () =>
+        serverFetch<RawSession>({
+          service: 'scheduling',
+          path: `/scheduling/sessions/${sessionId}/scores`,
+          method: 'PUT',
+          body: { scores },
+        }),
+      toSession,
+      'Failed to save the results',
+    );
+  },
+
+  async regenerateSessions(schoolId: string, groupId: string) {
+    return asResult(
+      () =>
+        serverFetch<RegenerateReport>({
+          service: 'scheduling',
+          path: `/scheduling/schools/${schoolId}/groups/${groupId}/sessions/regenerate`,
+          method: 'POST',
+        }),
+      (report) => report,
+      'Failed to rebuild the plan',
+    );
+  },
+
+  async gradingPolicy(schoolId: string) {
+    const policy = await serverFetch<{ passMark: number }>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/grading-policy`,
+    });
+    return policy.passMark;
   },
 
   async schoolTimetable(schoolId: string) {

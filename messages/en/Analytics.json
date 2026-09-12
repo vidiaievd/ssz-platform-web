@@ -1,0 +1,170 @@
+{
+  "unavailable": "We could not reach the analytics service, so this tab is empty. That is a fact about the service, not about this group — nothing here has been lost.",
+  "state": {
+    "ok": "Measured",
+    "low": "Measured",
+    "notStarted": "Not started",
+    "insufficient": "Not enough to judge",
+    "notDelivered": "Not taught yet",
+    "unlinked": "No course unit behind it",
+    "noContent": "The course has none of this"
+  },
+  "legend": {
+    "scale": "Absorbed 0 → 100%"
+  },
+  "summary": {
+    "delivered": "Delivered",
+    "deliveredSub": "{held} of {planned} lessons held",
+    "absorbed": "Absorbed median",
+    "absorbedSub": "Of what was taught",
+    "belowLine": "Below the line",
+    "notJudgeable": "Not judgeable",
+    "notJudgeableSub": "Cells under {threshold} weighted samples",
+    "notJudgeableHint": "A verdict needs about {threshold} weighted samples. Below that the profile refuses to judge, and these cells are hatched rather than scored.",
+    "lastActivity": "Last activity"
+  },
+  "chart": {
+    "title": "Delivered against absorbed",
+    "viewAll": "All work",
+    "viewContext": "By where it was done",
+    "viewLabel": "How to read the work",
+    "show": "Show chart",
+    "qualityStrip": "Quality of what was attempted, per unit — hatched where nothing was attempted",
+    "noTimetable": "We could not ask the timetable, so no unit is marked as taught or untaught. Lessons may well have been held."
+  },
+  "unit": {
+    "lessons": "{count, plural, =0 {no lessons} one {# lesson} other {# lessons}}",
+    "spread": "{median}% median, {p25}–{p75}% across {n, plural, one {# student} other {# students}}",
+    "unlinked": "Taught, but this plan unit has no course unit behind it, so nothing it covered can be counted.",
+    "notDelivered": "Not taught yet.",
+    "insufficient": "Only {learners, plural, one {# student has} other {# students have}} attempted it — under the threshold of {threshold}, so no verdict is shown.",
+    "noContent": "This unit has no items to complete.",
+    "notStarted": "Taught, but nobody has opened it yet."
+  },
+  "context": {
+    "homework": "Homework",
+    "self_study": "Self-study",
+    "classwork": "Classwork",
+    "unsaid": "Not recorded",
+    "attempts": "{count, plural, =0 {no attempts} one {# attempt} other {# attempts}}",
+    "note": "Where work happens has only been recorded since {from}; anything older sits in “Not recorded”. Classwork stays empty until attempts started in a lesson are marked as such.",
+    "unattributed": "{count, plural, one {# attempt names} other {# attempts name}} no course at all and could not be placed in any bucket."
+  },
+  "unlinked": {
+    "title": "{count, plural, one {# taught plan unit has} other {# taught plan units have}} no course unit behind them",
+    "body": "These lessons happened, and nothing they covered can be counted until the plan unit names a course unit.",
+    "action": "Open the plan"
+  },
+  "empty": {
+    "noCourse": {
+      "title": "No course is attached to this group",
+      "body": "There is nothing to measure against until the group is teaching something.",
+      "action": "Attach a course"
+    },
+    "noLessons": {
+      "title": "No lessons held yet",
+      "body": "Progress compares what was taught with what was taken away, and nothing has been taught yet.",
+      "action": "Open schedule"
+    },
+    "noAttempts": {
+      "body": "{units, plural, =0 {Nothing taught yet} one {# unit taught} other {# units taught}}, nothing measured yet. Absorbed shows a dash, not a zero — nobody has attempted anything."
+    }
+  },
+  "footer": {
+    "updated": "Updated {when}",
+    "behind": "the projection may be behind"
+  },
+  "heatmap": {
+    "title": "Students × units",
+    "subtitle": "A median hides the person who is drowning. This does not.",
+    "student": "Student",
+    "show": "Show heatmap",
+    "sortRoster": "Roster order",
+    "sortLowest": "Lowest first",
+    "sortLabel": "How to order the students",
+    "empty": "Nobody is on this group's roster yet.",
+    "unavailable": "We could not load the per-student map. The chart above is unaffected.",
+    "neverSeen": "“Never seen” means nothing has been recorded for that learner at all — which is not the same as falling behind.",
+    "tipHead": "{name} · Unit {no} {title}",
+    "tipMeasured": "{value}% of the unit passed",
+    "tipInsufficient": "{sample} of {threshold} weighted samples — no verdict",
+    "neverSeenShort": "never seen"
+  },
+  "mastery": {
+    "empty": {
+      "title": "Nothing measured for this student yet",
+      "body": "No attempt of theirs has reached the profile. The skill grid stays blank on purpose — an empty profile is not a weak one.",
+      "action": "Assign first homework"
+    },
+    "summary": {
+      "own": "Absorbed, own",
+      "ownSub": "Group median {median}%",
+      "ownNoScale": "No group scale to read it against",
+      "inGroup": "In the group",
+      "inGroupSub": "Lower than {lower} of {measured} measured classmates",
+      "inGroupNoScale": "Nobody in the group has been measured yet",
+      "attempts": "Attempts",
+      "attemptsSub": "{count, plural, one {# more attempt names} other {# more attempts name}} no course at all",
+      "weakPairs": "Weak pairs",
+      "weakPairsSub": "Skill × focus the profile has flagged"
+    },
+    "legend": {
+      "scale": "Success rate 0 → 100%"
+    },
+    "grid": {
+      "title": "Skill × focus",
+      "subtitle": "Colour is the weighted success rate. A verdict needs {threshold} weighted samples — below that the profile refuses to judge, and says so.",
+      "note": "An empty row is a fact about the course, not about this student: a channel the catalogue has no items for cannot be measured. Most work sits under “Not recorded” until the course says what each exercise trains.",
+      "unclassified": "{count, plural, one {# attempt} other {# attempts}} could not be placed in the grid at all.",
+      "coverageUnavailable": "We could not ask the course what it teaches, so no cell claims the course has none of it."
+    },
+    "cell": {
+      "noItems": "no items",
+      "notStarted": "not started",
+      "stable": "{days}d stable",
+      "shortfall": "{sample}/{threshold}",
+      "tipMeasured": "{value}% weighted success rate"
+    },
+    "reason": {
+      "forgets": {
+        "label": "Forgets fast",
+        "body": "Right in the lesson, gone within days. Bring the review closer rather than teaching it again."
+      },
+      "never-knew": {
+        "label": "Never learned",
+        "body": "Stable, and stably wrong — the wrong rule is what was learnt. Teach it again; more drilling will not help."
+      },
+      "watch": {
+        "label": "Holding",
+        "body": "Within range, just slower than the group. Listed because something has to come first."
+      },
+      "unknown": {
+        "body": "Weak, and nothing is recorded about how long it survives — nothing here tells forgetting apart from never having learnt it."
+      }
+    },
+    "work": {
+      "title": "What to work on",
+      "subtitle": "The same low score, opposite actions — the difference is stability.",
+      "empty": "Nothing carries enough evidence to be called weak yet.",
+      "unavailable": "We could not load the profile, so there is nothing to suggest. The grid beside it is unaffected.",
+      "stability": "stability {days}d",
+      "samples": "{count, plural, one {# weighted sample} other {# weighted samples}}",
+      "action": "Open the course"
+    },
+    "context": {
+      "title": "Where the work happens",
+      "subtitle": "One bar, not a second chart."
+    },
+    "position": {
+      "title": "Against the group",
+      "median": "median",
+      "own": "This student",
+      "body": "Absorbed {own}% against a group median of {median}%. {lower, plural, =0 {No classmate sits lower} one {# classmate sits lower} other {# classmates sit lower}}.",
+      "measured": "{measured, plural, one {# classmate has} other {# classmates have}} a number of their own, this student included.",
+      "none": "Nobody in this group has a number yet, so there is no scale to place this student on. That is not last place — it is no ranking at all."
+    },
+    "group": {
+      "readAgainst": "Read against {name}. Also in:"
+    }
+  }
+}
