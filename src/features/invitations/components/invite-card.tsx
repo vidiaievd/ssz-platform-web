@@ -46,6 +46,8 @@ function resolveWorkspacePath(preview: InvitePreview): string {
 }
 
 export function InviteCard({ token, preview, currentUser }: Props) {
+  // A tutoring invitation names no school — the tutor's own name is all there is.
+  const isTutoring = preview.schoolName === null;
   const t = useTranslations("Invite");
   const tRoles = useTranslations("Invitations.roles");
   const formatter = useFormatter();
@@ -105,8 +107,10 @@ export function InviteCard({ token, preview, currentUser }: Props) {
         return;
       }
       const message = result.alreadyMember
-        ? t("accept.alreadyMember")
-        : t("accept.success", { schoolName: preview.schoolName });
+        ? t(isTutoring ? "accept.alreadyMemberTutoring" : "accept.alreadyMember")
+        : isTutoring
+          ? t("accept.successTutoring")
+          : t("accept.success", { schoolName: preview.schoolName ?? "" });
       setLiveMessage(message);
       toast.success(message);
       router.replace(workspacePath);
@@ -128,21 +132,27 @@ export function InviteCard({ token, preview, currentUser }: Props) {
             : t("greeting.noName")}
         </h1>
         <p className="text-sm text-(--ssz-text-muted)">
-          {t("title.invited", { schoolName: preview.schoolName })}
+          {isTutoring
+            ? preview.invitedByName
+              ? t("title.invitedByTutor", { tutorName: preview.invitedByName })
+              : t("title.invitedByTutorUnnamed")
+            : t("title.invited", { schoolName: preview.schoolName ?? "" })}
         </p>
       </div>
 
       {/* Invitation details card */}
       <div className="rounded-xl border border-border bg-surface divide-y divide-border">
 
-        {/* School */}
-        <div className="flex items-start gap-3 px-5 py-3.5">
-          <Building2 className="size-4 shrink-0 mt-0.5 text-(--ssz-text-muted)" aria-hidden />
-          <div className="min-w-0">
-            <p className="text-xs text-(--ssz-text-muted) mb-0.5">{t("detail.school")}</p>
-            <p className="text-sm font-medium text-(--ssz-text-primary)">{preview.schoolName}</p>
+        {/* School — a tutoring invitation has none */}
+        {!isTutoring && (
+          <div className="flex items-start gap-3 px-5 py-3.5">
+            <Building2 className="size-4 shrink-0 mt-0.5 text-(--ssz-text-muted)" aria-hidden />
+            <div className="min-w-0">
+              <p className="text-xs text-(--ssz-text-muted) mb-0.5">{t("detail.school")}</p>
+              <p className="text-sm font-medium text-(--ssz-text-primary)">{preview.schoolName}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Role */}
         <div className="flex items-start gap-3 px-5 py-3.5">

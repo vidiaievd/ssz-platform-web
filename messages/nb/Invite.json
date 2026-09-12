@@ -1,7 +1,9 @@
 {
   "title": {
     "invited": "Du er invitert til {schoolName}",
-    "role": "som {role}"
+    "role": "som {role}",
+    "invitedByTutor": "{tutorName} har invitert deg til å lære sammen",
+    "invitedByTutorUnnamed": "Du er invitert til å lære sammen"
   },
   "meta": {
     "invitedBy": "Invitert av: {name}",
@@ -27,7 +29,9 @@
     "syncing": "Aksepterer invitasjon…",
     "success": "Velkommen til {schoolName}!",
     "alreadyMember": "Du er allerede medlem av denne skolen",
-    "error": "Kunne ikke akseptere invitasjonen"
+    "error": "Kunne ikke akseptere invitasjonen",
+    "successTutoring": "Velkommen! Nå kan du begynne å lære.",
+    "alreadyMemberTutoring": "Du lærer allerede med denne læreren"
   },
   "state": {
     "invalid": {
@@ -36,11 +40,13 @@
     },
     "expired": {
       "title": "Invitasjonen har utløpt",
-      "body": "Be skolen om å sende deg en ny invitasjon."
+      "body": "Be skolen om å sende deg en ny invitasjon.",
+      "bodyTutoring": "Be læreren din om å sende deg en ny invitasjon."
     },
     "revoked": {
       "title": "Invitasjonen er tilbakekalt",
-      "body": "Skolen har tilbakekalt denne invitasjonen."
+      "body": "Skolen har tilbakekalt denne invitasjonen.",
+      "bodyTutoring": "Læreren din har tilbakekalt denne invitasjonen."
     },
     "accepted": {
       "title": "Allerede akseptert",

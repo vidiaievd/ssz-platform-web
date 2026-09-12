@@ -31,6 +31,8 @@ export default async function InvitePage({ params }: Params) {
   };
   const terminalState = statusToTerminal[preview.status];
   if (terminalState) {
+    // A tutoring invitation carries no school, and none may be named to the invitee.
+    const variant = preview.schoolName === null ? 'tutoring' : 'school';
     const workspacePath =
       preview.role === 'STUDENT' || !preview.schoolSlug
         ? '/student'
@@ -38,6 +40,7 @@ export default async function InvitePage({ params }: Params) {
     return (
       <InviteTerminal
         state={terminalState}
+        variant={variant}
         workspacePath={currentUser ? workspacePath : undefined}
       />
     );
