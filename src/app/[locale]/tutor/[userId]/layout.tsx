@@ -8,6 +8,7 @@ import { getMyProfile } from '@/features/profile/api/get-my-profile';
 import { profileKeys } from '@/features/profile/api/keys';
 import { AppShell } from '@/components/shared/app-shell';
 import { WorkspaceActivator } from '@/features/workspaces/components/workspace-activator';
+import { getTutorWorkspace } from '@/features/tutoring/api/get-tutor-workspace';
 
 type Props = {
   children: React.ReactNode;
@@ -25,15 +26,25 @@ export default async function TutorWorkspaceLayout({ children, params }: Props) 
   }
 
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: profileKeys.me(),
-    queryFn: getMyProfile,
-  });
+  const [workspace] = await Promise.all([
+    // The shell needs the workspace id for the marking badge, and this is the one place
+    // every tutor screen passes through.
+    getTutorWorkspace(),
+    queryClient.prefetchQuery({
+      queryKey: profileKeys.me(),
+      queryFn: getMyProfile,
+    }),
+  ]);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <WorkspaceActivator contextKey="private_tutor" />
-      <AppShell variant="tutor" user={user} tutorUserId={userId}>
+      <AppShell
+        variant="tutor"
+        user={user}
+        tutorUserId={userId}
+        tutorWorkspaceId={workspace?.schoolId}
+      >
         {children}
       </AppShell>
     </HydrationBoundary>

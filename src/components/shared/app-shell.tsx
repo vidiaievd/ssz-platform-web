@@ -185,11 +185,24 @@ function buildSchoolNav(
   ];
 }
 
-function buildTutorNav(userId: string): NavSection[] {
+function buildTutorNav(userId: string, review: ReviewNav = null): NavSection[] {
   return [
     {
       items: [
         { href: `/tutor/${userId}/dashboard`, icon: LayoutDashboard, labelKey: 'dashboard' },
+        // No oversight twin beside it: a tutor is the only reviewer in their workspace,
+        // and a screen showing their own load by name is a screen about one person.
+        ...(review
+          ? [
+              {
+                href: `/tutor/${userId}/review`,
+                icon: SquareCheckBig,
+                labelKey: 'review',
+                badge: review.pending,
+                badgeAlert: review.hasOverdue,
+              },
+            ]
+          : []),
         { href: `/tutor/${userId}/students`, icon: Users, labelKey: 'students' },
         { href: `/tutor/${userId}/invitations`, icon: MailCheck, labelKey: 'invitations' },
         { href: `/tutor/${userId}/content`, icon: BookOpen, labelKey: 'content' },
@@ -230,10 +243,22 @@ type AppShellProps = {
   schoolContext?: SchoolContext;
   /** Stable userId for the tutor workspace nav links */
   tutorUserId?: string;
+  /**
+   * The tutor's workspace id, for the badge on their marking inbox. The shell cannot read
+   * it itself — it is a server call — and the count route takes a school slug or id.
+   */
+  tutorWorkspaceId?: string;
   children: React.ReactNode;
 };
 
-export function AppShell({ variant, user, schoolContext, tutorUserId, children }: AppShellProps) {
+export function AppShell({
+  variant,
+  user,
+  schoolContext,
+  tutorUserId,
+  tutorWorkspaceId,
+  children,
+}: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const params = useParams<{ schoolSlug?: string; userId?: string }>();
   const tNav = useTranslations('Nav');
@@ -244,9 +269,15 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
   // invalidated by every verdict. The item appears only once the answer says this person
   // has something to mark — until then the shell cannot know, so it shows nothing rather
   // than an item that might turn out not to be theirs.
+  const reviewCountFor =
+    variant === 'school'
+      ? (params.schoolSlug ?? '')
+      : variant === 'tutor'
+        ? (tutorWorkspaceId ?? '')
+        : '';
   const { data: reviewCount } = useReviewQueueCount(
-    variant === 'school' ? (params.schoolSlug ?? '') : '',
-    variant === 'school',
+    reviewCountFor,
+    variant === 'school' || variant === 'tutor',
   );
 
   const resolvedTutorId = tutorUserId ?? params.userId ?? user.userId ?? '';
@@ -259,7 +290,7 @@ export function AppShell({ variant, user, schoolContext, tutorUserId, children }
           reviewCount?.hasScope ? reviewCount : null,
         )
       : variant === 'tutor'
-        ? buildTutorNav(resolvedTutorId)
+        ? buildTutorNav(resolvedTutorId, reviewCount?.hasScope ? reviewCount : null)
         : buildStudentNav(reviewsSummary?.totalDue ?? 0);
 
   const userMenuExtraItems: UserMenuExtraItem[] | undefined =

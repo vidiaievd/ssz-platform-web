@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import { getMySchools } from '@/features/school/api/get-my-schools';
+import { getTutorWorkspace } from '@/features/tutoring/api/get-tutor-workspace';
 import type { SchoolRole } from '@/features/school/types';
 import { env } from '@/lib/env';
 
@@ -49,25 +50,57 @@ export async function resolveReviewScope(
 
   const schools = await getMySchools();
   const school = schools.find((s) => s.slug === schoolSlugOrId || s.id === schoolSlugOrId);
+
+  // A private tutor's workspace is deliberately absent from "my schools" — nothing may
+  // call it a school where the tutor can read it — so their own queue would be a 403
+  // without this. Only their own workspace matches, so the route still tells an outsider
+  // nothing, and they own it, which makes them its OWNER here as on the server.
+  const workspace = school ? null : await ownWorkspace(user.roles, schoolSlugOrId);
+
+  const resolved = school
+    ? { id: school.id, role: school.myRole ?? null }
+    : workspace
+      ? { id: workspace.schoolId, role: 'OWNER' as SchoolRole }
+      : null;
+
   // Not a member, or no such school — the same answer either way, so that probing the
   // route cannot be used to discover which schools exist.
-  if (!school) {
+  if (!resolved) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
-    const scope = await reviewScopeAt(school.id, user.userId, new Date().toISOString());
+    const scope = await reviewScopeAt(resolved.id, user.userId, new Date().toISOString());
 
     return {
-      schoolId: school.id,
+      schoolId: resolved.id,
       teacherId: user.userId,
-      role: school.myRole ?? null,
+      role: resolved.role,
       groupIds: scope.groupIds,
       containerIds: scope.containerIds,
     };
   } catch {
     return NextResponse.json({ error: 'Failed to read the review scope' }, { status: 502 });
   }
+}
+
+/**
+ * The caller's own solo workspace, when that is what they are asking about.
+ *
+ * Asked only of a tutor and only after "my schools" came back without a match: reading the
+ * workspace provisions one for a tutor who predates them, and that is not something a
+ * stranger's 403 should trigger.
+ */
+async function ownWorkspace(
+  roles: string[],
+  schoolSlugOrId: string,
+): Promise<{ schoolId: string } | null> {
+  if (!roles.some((role) => role.toLowerCase() === 'tutor')) return null;
+
+  const workspace = await getTutorWorkspace();
+  if (!workspace || workspace.schoolId !== schoolSlugOrId) return null;
+
+  return { schoolId: workspace.schoolId };
 }
 
 /** Who may look at a whole school's review load, rather than at their own queue. */
