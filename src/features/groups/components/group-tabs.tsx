@@ -12,11 +12,12 @@ import { OverviewCards } from './overview-cards';
 import { GroupStudentsTab } from './group-students-tab';
 import { GroupTeachersTab } from './group-teachers-tab';
 import { GroupScheduleTab } from './group-schedule-tab';
+import { GroupProgressTab } from './group-progress-tab';
 import { GroupEditDialog } from './group-edit-dialog';
 import type { Group, RosterStudent, OutlineUnit, Session } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 
-type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule';
+type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule' | 'progress';
 
 type Props = {
   group: Group;
@@ -83,6 +84,7 @@ export function GroupTabs({
     teachers: t('tabs.teachers'),
     materials: t('tabs.materials'),
     schedule: t('tabs.schedule'),
+    progress: t('tabs.progress'),
   };
 
   return (
@@ -99,6 +101,7 @@ export function GroupTabs({
           <SelectItem value="teachers">{tabLabel.teachers}</SelectItem>
           <SelectItem value="materials">{tabLabel.materials}</SelectItem>
           <SelectItem value="schedule">{tabLabel.schedule}</SelectItem>
+          <SelectItem value="progress">{tabLabel.progress}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -125,6 +128,7 @@ export function GroupTabs({
           <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
           <TabsTrigger value="materials">{tabLabel.materials}</TabsTrigger>
           <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>
+          <TabsTrigger value="progress">{tabLabel.progress}</TabsTrigger>
         </TabsList>
       </div>
 
@@ -179,6 +183,15 @@ export function GroupTabs({
           canManage={canManage}
           onEditSchedule={() => setEditScheduleOpen(true)}
         />
+      </TabsContent>
+
+      {/* ── Progress ──────────────────────────────────────────────────────── */}
+      {/* Mounted only while open: the tab fetches a projection of its own, and five
+          other tabs should not wait on analytics to render. */}
+      <TabsContent value="progress">
+        {activeTab === 'progress' && (
+          <GroupProgressTab schoolId={schoolId} groupId={group.id} schoolSlug={schoolSlug} />
+        )}
       </TabsContent>
     </Tabs>
 

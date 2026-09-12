@@ -75,7 +75,8 @@
     "teachers": "Teachers",
     "schedule": "Schedule & log",
     "sectionLabel": "Section",
-    "materials": "Materials"
+    "materials": "Materials",
+    "progress": "Progress"
   },
   "overview": {
     "teachersHeading": "Teachers",

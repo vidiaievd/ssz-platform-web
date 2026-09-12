@@ -75,7 +75,8 @@
     "teachers": "Lærere",
     "schedule": "Timeplan og logg",
     "sectionLabel": "Avsnitt",
-    "materials": "Materiell"
+    "materials": "Materiell",
+    "progress": "Framgang"
   },
   "overview": {
     "teachersHeading": "Lærere",

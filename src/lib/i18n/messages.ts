@@ -1,4 +1,5 @@
 import Account from '../../../messages/en/Account.json';
+import Analytics from '../../../messages/en/Analytics.json';
 import Assignments from '../../../messages/en/Assignments.json';
 import Auth from '../../../messages/en/Auth.json';
 import Authoring from '../../../messages/en/Authoring.json';
@@ -44,6 +45,7 @@ import WorkspaceSwitcher from '../../../messages/en/WorkspaceSwitcher.json';
 
 export const enMessages = {
   Account,
+  Analytics,
   Assignments,
   Auth,
   Authoring,
@@ -92,6 +94,7 @@ export type Messages = typeof enMessages;
 
 export const NAMESPACES = [
   'Account',
+  'Analytics',
   'Assignments',
   'Auth',
   'Authoring',
@@ -208,6 +211,10 @@ export const STUDENT_NAMESPACES = [
 export const SCHOOL_NAMESPACES = [
   'School',
   'Groups',
+  // The progress surfaces of plan 58 — the group's chart, the learner's grid and the
+  // course's result all speak one vocabulary of cell states, so it lives in one
+  // namespace rather than being restated in three.
+  'Analytics',
   'Students',
   'Teachers',
   'Scheduling',

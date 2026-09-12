@@ -1,0 +1,77 @@
+{
+  "unavailable": "We could not reach the analytics service, so this tab is empty. That is a fact about the service, not about this group — nothing here has been lost.",
+  "state": {
+    "ok": "Measured",
+    "low": "Measured",
+    "notStarted": "Not started",
+    "insufficient": "Not enough to judge",
+    "notDelivered": "Not taught yet",
+    "unlinked": "No course unit behind it",
+    "noContent": "The course has none of this"
+  },
+  "legend": {
+    "scale": "Absorbed 0 → 100%"
+  },
+  "summary": {
+    "delivered": "Delivered",
+    "deliveredSub": "{held} of {planned} lessons held",
+    "absorbed": "Absorbed median",
+    "absorbedSub": "Of what was taught",
+    "belowLine": "Below the line",
+    "notJudgeable": "Not judgeable",
+    "notJudgeableSub": "Cells under {threshold} weighted samples",
+    "notJudgeableHint": "A verdict needs about {threshold} weighted samples. Below that the profile refuses to judge, and these cells are hatched rather than scored.",
+    "lastActivity": "Last activity"
+  },
+  "chart": {
+    "title": "Delivered against absorbed",
+    "viewAll": "All work",
+    "viewContext": "By where it was done",
+    "viewLabel": "How to read the work",
+    "show": "Show chart",
+    "qualityStrip": "Quality of what was attempted, per unit — hatched where nothing was attempted",
+    "noTimetable": "We could not ask the timetable, so no unit is marked as taught or untaught. Lessons may well have been held."
+  },
+  "unit": {
+    "lessons": "{count, plural, =0 {no lessons} one {# lesson} other {# lessons}}",
+    "spread": "{median}% median, {p25}–{p75}% across {n, plural, one {# student} other {# students}}",
+    "unlinked": "Taught, but this plan unit has no course unit behind it, so nothing it covered can be counted.",
+    "notDelivered": "Not taught yet.",
+    "insufficient": "Only {learners, plural, one {# student has} other {# students have}} attempted it — under the threshold of {threshold}, so no verdict is shown.",
+    "noContent": "This unit has no items to complete.",
+    "notStarted": "Taught, but nobody has opened it yet."
+  },
+  "context": {
+    "homework": "Homework",
+    "self_study": "Self-study",
+    "classwork": "Classwork",
+    "unsaid": "Not recorded",
+    "attempts": "{count, plural, =0 {no attempts} one {# attempt} other {# attempts}}",
+    "note": "Where work happens has only been recorded since {from}; anything older sits in “Not recorded”. Classwork stays empty until attempts started in a lesson are marked as such.",
+    "unattributed": "{count, plural, one {# attempt names} other {# attempts name}} no course at all and could not be placed in any bucket."
+  },
+  "unlinked": {
+    "title": "{count, plural, one {# taught plan unit has} other {# taught plan units have}} no course unit behind them",
+    "body": "These lessons happened, and nothing they covered can be counted until the plan unit names a course unit.",
+    "action": "Open the plan"
+  },
+  "empty": {
+    "noCourse": {
+      "title": "No course is attached to this group",
+      "body": "There is nothing to measure against until the group is teaching something.",
+      "action": "Attach a course"
+    },
+    "noLessons": {
+      "title": "No lessons held yet",
+      "body": "Progress compares what was taught with what was taken away, and nothing has been taught yet.",
+      "action": "Open schedule"
+    },
+    "noAttempts": {
+      "body": "{units, plural, =0 {Nothing taught yet} one {# unit taught} other {# units taught}}, nothing measured yet. Absorbed shows a dash, not a zero — nobody has attempted anything."
+    }
+  },
+  "footer": {
+    "updated": "Updated {when}",
+    "behind": "the projection may be behind"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "unavailable": "Vi fikk ikke kontakt med analysetjenesten, så denne fanen er tom. Det er et faktum om tjenesten, ikke om gruppa — ingenting har gått tapt.",
+  "state": {
+    "ok": "Målt",
+    "low": "Målt",
+    "notStarted": "Ikke begynt",
+    "insufficient": "For lite til å dømme",
+    "notDelivered": "Ikke undervist ennå",
+    "unlinked": "Ingen kursenhet bak",
+    "noContent": "Kurset har ikke dette"
+  },
+  "legend": {
+    "scale": "Tilegnet 0 → 100 %"
+  },
+  "summary": {
+    "delivered": "Undervist",
+    "deliveredSub": "{held} av {planned} timer holdt",
+    "absorbed": "Tilegnet, median",
+    "absorbedSub": "Av det som ble undervist",
+    "belowLine": "Under streken",
+    "notJudgeable": "Kan ikke dømmes",
+    "notJudgeableSub": "Celler under {threshold} vektede forsøk",
+    "notJudgeableHint": "En dom krever omtrent {threshold} vektede forsøk. Under det nekter profilen å dømme, og slike celler skraveres i stedet for å få en score.",
+    "lastActivity": "Siste aktivitet"
+  },
+  "chart": {
+    "title": "Undervist mot tilegnet",
+    "viewAll": "Alt arbeid",
+    "viewContext": "Etter hvor det ble gjort",
+    "viewLabel": "Hvordan lese arbeidet",
+    "show": "Vis diagram",
+    "qualityStrip": "Kvaliteten på det som ble forsøkt, per enhet — skravert der ingenting ble forsøkt",
+    "noTimetable": "Vi fikk ikke spurt timeplanen, så ingen enhet er merket som undervist eller ikke. Timer kan godt ha vært holdt."
+  },
+  "unit": {
+    "lessons": "{count, plural, =0 {ingen timer} one {# time} other {# timer}}",
+    "spread": "{median} % median, {p25}–{p75} % blant {n, plural, one {# elev} other {# elever}}",
+    "unlinked": "Undervist, men denne planenheten har ingen kursenhet bak seg, så ingenting den dekket kan telles.",
+    "notDelivered": "Ikke undervist ennå.",
+    "insufficient": "Bare {learners, plural, one {# elev har} other {# elever har}} forsøkt den — under terskelen på {threshold}, så ingen dom vises.",
+    "noContent": "Denne enheten har ingenting å gjøre.",
+    "notStarted": "Undervist, men ingen har åpnet den ennå."
+  },
+  "context": {
+    "homework": "Lekser",
+    "self_study": "Egenstudier",
+    "classwork": "Klassearbeid",
+    "unsaid": "Ikke registrert",
+    "attempts": "{count, plural, =0 {ingen forsøk} one {# forsøk} other {# forsøk}}",
+    "note": "Hvor arbeidet skjer har bare vært registrert siden {from}; alt eldre havner i «Ikke registrert». Klassearbeid står tomt til forsøk som startes i en time blir merket som det.",
+    "unattributed": "{count, plural, one {# forsøk nevner} other {# forsøk nevner}} ingen kurs i det hele tatt og kunne ikke plasseres."
+  },
+  "unlinked": {
+    "title": "{count, plural, one {# undervist planenhet har} other {# underviste planenheter har}} ingen kursenhet bak seg",
+    "body": "Disse timene ble holdt, og ingenting de dekket kan telles før planenheten navngir en kursenhet.",
+    "action": "Åpne planen"
+  },
+  "empty": {
+    "noCourse": {
+      "title": "Ingen kurs er knyttet til denne gruppa",
+      "body": "Det er ingenting å måle mot før gruppa underviser i noe.",
+      "action": "Knytt til et kurs"
+    },
+    "noLessons": {
+      "title": "Ingen timer holdt ennå",
+      "body": "Framgang sammenligner det som ble undervist med det som ble tilegnet, og ingenting er undervist ennå.",
+      "action": "Åpne timeplanen"
+    },
+    "noAttempts": {
+      "body": "{units, plural, =0 {Ingenting undervist ennå} one {# enhet undervist} other {# enheter undervist}}, ingenting målt ennå. Tilegnet viser en strek, ikke en null — ingen har forsøkt noe."
+    }
+  },
+  "footer": {
+    "updated": "Oppdatert {when}",
+    "behind": "projeksjonen kan ligge etter"
+  }
+}
