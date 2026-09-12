@@ -20,7 +20,21 @@ import type { Locale } from "@/lib/i18n/config";
 type Props = {
   student: StudentInSchool;
   schoolSlug: string;
+  /** False for a private tutor — there is no group screen to link a name to. */
+  linkGroups?: boolean;
 };
+
+function GroupBadge({ lang, level, name }: { lang: string; level: string; name: string }) {
+  return (
+    <>
+      <span className="flex h-6 w-6 shrink-0 flex-col items-center justify-center rounded bg-primary/10 text-[8px] font-bold text-primary leading-none">
+        <span>{lang.toUpperCase()}</span>
+        <span>{level}</span>
+      </span>
+      <span className="truncate max-w-32">{name}</span>
+    </>
+  );
+}
 
 function EmptyCard({
   icon: Icon,
@@ -40,7 +54,7 @@ function EmptyCard({
   );
 }
 
-export async function HistoryTab({ student, schoolSlug }: Props) {
+export async function HistoryTab({ student, schoolSlug, linkGroups = true }: Props) {
   const t = await getTranslations("Students");
   const locale = (await getLocale()) as Locale;
 
@@ -125,7 +139,7 @@ export async function HistoryTab({ student, schoolSlug }: Props) {
                   </p>
                   {entry.groupName && (
                     <p className="text-xs mt-0.5">
-                      {entry.groupId ? (
+                      {entry.groupId && linkGroups ? (
                         <Link
                           href={`/school/${schoolSlug}/groups/${entry.groupId}`}
                           className="hover:underline text-(--ssz-text-link)"
@@ -185,16 +199,18 @@ export async function HistoryTab({ student, schoolSlug }: Props) {
                     {m.exitedAt ? fmt(m.exitedAt) : t("detail.history.levels.present")}
                   </TableCell>
                   <TableCell>
-                    <Link
-                      href={`/school/${schoolSlug}/groups/${m.groupId}`}
-                      className="flex items-center gap-2 hover:underline"
-                    >
-                      <span className="flex h-6 w-6 shrink-0 flex-col items-center justify-center rounded bg-primary/10 text-[8px] font-bold text-primary leading-none">
-                        <span>{m.lang.toUpperCase()}</span>
-                        <span>{m.level}</span>
+                    {linkGroups ? (
+                      <Link
+                        href={`/school/${schoolSlug}/groups/${m.groupId}`}
+                        className="flex items-center gap-2 hover:underline"
+                      >
+                        <GroupBadge lang={m.lang} level={m.level} name={m.groupName} />
+                      </Link>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <GroupBadge lang={m.lang} level={m.level} name={m.groupName} />
                       </span>
-                      <span className="truncate max-w-32">{m.groupName}</span>
-                    </Link>
+                    )}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <MembershipRoleBadge role={m.role} />

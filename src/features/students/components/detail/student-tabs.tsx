@@ -21,9 +21,26 @@ type Props = {
   activeGroupCount: number;
   /** A scheduler has no business reading one learner's results, so they get no tab. */
   showMastery: boolean;
+  /**
+   * Which tabs exist at all. A private tutor keeps overview and history: groups,
+   * payments and bonuses describe a school's relationship with a learner, not a
+   * tutor's (plan 59, phase 2).
+   */
+  tabs?: TabKey[];
 };
 
-export function StudentTabs({ activeTab, activeGroupCount, showMastery }: Props) {
+const ALL_TABS: TabKey[] = [
+  "overview",
+  "groups",
+  "mastery",
+  "history",
+  "notes",
+  "payments",
+  "bonuses",
+];
+
+export function StudentTabs({ activeTab, activeGroupCount, showMastery, tabs = ALL_TABS }: Props) {
+  const shown = new Set(tabs);
   const t = useTranslations("Students");
   const router = useRouter();
   const pathname = usePathname();
@@ -41,20 +58,32 @@ export function StudentTabs({ activeTab, activeGroupCount, showMastery }: Props)
   return (
     <Tabs value={activeTab} onValueChange={setTab}>
       <TabsList className="overflow-x-auto shrink-0">
-        <TabsTrigger value="overview">{t("detail.tabs.overview")}</TabsTrigger>
-        <TabsTrigger value="groups">
-          {t("detail.tabs.groups")}
-          {activeGroupCount > 0 && (
-            <Badge variant="muted" className="ml-1.5 text-[10px]">
-              {activeGroupCount}
-            </Badge>
-          )}
-        </TabsTrigger>
-        {showMastery && <TabsTrigger value="mastery">{t("detail.tabs.mastery")}</TabsTrigger>}
-        <TabsTrigger value="history">{t("detail.tabs.history")}</TabsTrigger>
-        <TabsTrigger value="notes">{t("detail.tabs.notes")}</TabsTrigger>
-        <TabsTrigger value="payments">{t("detail.tabs.payments")}</TabsTrigger>
-        <TabsTrigger value="bonuses">{t("detail.tabs.bonuses")}</TabsTrigger>
+        {shown.has("overview") && (
+          <TabsTrigger value="overview">{t("detail.tabs.overview")}</TabsTrigger>
+        )}
+        {shown.has("groups") && (
+          <TabsTrigger value="groups">
+            {t("detail.tabs.groups")}
+            {activeGroupCount > 0 && (
+              <Badge variant="muted" className="ml-1.5 text-[10px]">
+                {activeGroupCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+        )}
+        {shown.has("mastery") && showMastery && (
+          <TabsTrigger value="mastery">{t("detail.tabs.mastery")}</TabsTrigger>
+        )}
+        {shown.has("history") && (
+          <TabsTrigger value="history">{t("detail.tabs.history")}</TabsTrigger>
+        )}
+        {shown.has("notes") && <TabsTrigger value="notes">{t("detail.tabs.notes")}</TabsTrigger>}
+        {shown.has("payments") && (
+          <TabsTrigger value="payments">{t("detail.tabs.payments")}</TabsTrigger>
+        )}
+        {shown.has("bonuses") && (
+          <TabsTrigger value="bonuses">{t("detail.tabs.bonuses")}</TabsTrigger>
+        )}
       </TabsList>
     </Tabs>
   );

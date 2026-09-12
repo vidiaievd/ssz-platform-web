@@ -16,5 +16,19 @@
       "title": "Nylige elever",
       "empty": "Ingen elever ennå. Del profilen din for å komme i gang."
     }
+  },
+  "students": {
+    "title": "Elevene mine",
+    "count": "{count, plural, =0 {Ingen elever ennå} one {# elev} other {# elever}}",
+    "invite": "Inviter en elev",
+    "searchPlaceholder": "Søk på navn eller e-post",
+    "clearSearch": "Tøm søket",
+    "neverSeen": "Aldri",
+    "emptyTitle": "Ingen elever ennå",
+    "emptyBody": "Inviter den første eleven din på e-post — de blir med så snart de takker ja.",
+    "emptyFiltered": "Ingen elever passer søket.",
+    "backToStudents": "Tilbake til elevene",
+    "loadFailed": "Kunne ikke laste elevene dine. Prøv igjen.",
+    "matching": "{count, plural, =0 {ingen treff} one {# treff} other {# treff}}"
   }
 }

@@ -18,6 +18,12 @@ type Props = {
   schoolId: string;
   canEdit: boolean;
   groupsHref: string;
+  /**
+   * False for a private tutor: their learners are all in the one group they teach,
+   * so a card listing it says nothing and its links lead to screens a tutor has not
+   * got (plan 59, phase 2).
+   */
+  showGroups?: boolean;
 };
 
 function CopyButton({ value }: { value: string }) {
@@ -33,7 +39,13 @@ function CopyButton({ value }: { value: string }) {
   );
 }
 
-export async function OverviewTab({ student, schoolSlug, canEdit, groupsHref }: Props) {
+export async function OverviewTab({
+  student,
+  schoolSlug,
+  canEdit,
+  groupsHref,
+  showGroups = true,
+}: Props) {
   const t = await getTranslations("Students");
   const locale = (await getLocale()) as Locale;
 
@@ -140,12 +152,14 @@ export async function OverviewTab({ student, schoolSlug, canEdit, groupsHref }: 
 
       {/* ── Right: Active groups + Quick stats ─────────────── */}
       <div className="space-y-4">
-        <ActiveGroupsCard
-          memberships={activeMemberships}
-          schoolSlug={schoolSlug}
-          groupsHref={groupsHref}
-          t={t}
-        />
+        {showGroups && (
+          <ActiveGroupsCard
+            memberships={activeMemberships}
+            schoolSlug={schoolSlug}
+            groupsHref={groupsHref}
+            t={t}
+          />
+        )}
 
         {/* Quick stats card */}
         <div className="rounded-xl border bg-card p-5 space-y-4">
