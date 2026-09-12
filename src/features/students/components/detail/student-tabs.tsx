@@ -7,14 +7,23 @@ import { useCallback } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
-export type TabKey = "overview" | "groups" | "history" | "notes" | "payments" | "bonuses";
+export type TabKey =
+  | "overview"
+  | "groups"
+  | "mastery"
+  | "history"
+  | "notes"
+  | "payments"
+  | "bonuses";
 
 type Props = {
   activeTab: TabKey;
   activeGroupCount: number;
+  /** A scheduler has no business reading one learner's results, so they get no tab. */
+  showMastery: boolean;
 };
 
-export function StudentTabs({ activeTab, activeGroupCount }: Props) {
+export function StudentTabs({ activeTab, activeGroupCount, showMastery }: Props) {
   const t = useTranslations("Students");
   const router = useRouter();
   const pathname = usePathname();
@@ -41,6 +50,7 @@ export function StudentTabs({ activeTab, activeGroupCount }: Props) {
             </Badge>
           )}
         </TabsTrigger>
+        {showMastery && <TabsTrigger value="mastery">{t("detail.tabs.mastery")}</TabsTrigger>}
         <TabsTrigger value="history">{t("detail.tabs.history")}</TabsTrigger>
         <TabsTrigger value="notes">{t("detail.tabs.notes")}</TabsTrigger>
         <TabsTrigger value="payments">{t("detail.tabs.payments")}</TabsTrigger>

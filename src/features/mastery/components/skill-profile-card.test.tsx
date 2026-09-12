@@ -21,6 +21,7 @@ const verdict = (over: Partial<MasteryVerdict> = {}): MasteryVerdict => ({
   skill: 'reading',
   focus: 'grammar',
   successRateEwma: 0.4,
+  reason: null,
   meanStability: null,
   medianSecondsPerItem: null,
   attempts: 12,

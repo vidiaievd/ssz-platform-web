@@ -20,9 +20,19 @@ export interface MasteryCell {
   focus: MasteryFocus;
 }
 
+/**
+ * What kind of weakness a cell is — decided in `weakestCells()`, never here.
+ *
+ * `null` is the fourth and honest answer: with no stability recorded, nothing tells
+ * "forgets it" from "never learned it", and a screen must say the pair is weak without
+ * claiming to know which.
+ */
+export type WeaknessReason = 'forgets' | 'never-knew' | 'watch';
+
 /** A cell the profile is willing to speak about: it cleared `minWeightedSample`. */
 export interface MasteryVerdict extends MasteryCell {
   successRateEwma: number;
+  reason: WeaknessReason | null;
   meanStability: number | null;
   medianSecondsPerItem: number | null;
   attempts: number;

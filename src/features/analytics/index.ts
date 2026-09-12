@@ -12,6 +12,14 @@ export type { HeatmapProps, HeatmapSort, HeatmapUnit } from './components/heatma
 export { ZeroLegend, Swatch } from './components/zero-legend';
 export type { LegendItem, LegendKey } from './components/zero-legend';
 export { SkillGrid } from './components/skill-grid';
+export { MasteryCell } from './components/mastery-cell';
+export type {
+  MasteryCellData,
+  MasteryCellLabels,
+  MasteryCellProps,
+} from './components/mastery-cell';
+export { PositionScale } from './components/position-scale';
+export type { PositionScaleProps } from './components/position-scale';
 export { DeliveredAbsorbed } from './components/delivered-absorbed';
 export type {
   ChartUnit,

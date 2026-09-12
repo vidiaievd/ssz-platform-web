@@ -89,5 +89,82 @@
     "tipMeasured": "{value}% of the unit passed",
     "tipInsufficient": "{sample} of {threshold} weighted samples — no verdict",
     "neverSeenShort": "never seen"
+  },
+  "mastery": {
+    "empty": {
+      "title": "Nothing measured for this student yet",
+      "body": "No attempt of theirs has reached the profile. The skill grid stays blank on purpose — an empty profile is not a weak one.",
+      "action": "Assign first homework"
+    },
+    "summary": {
+      "own": "Absorbed, own",
+      "ownSub": "Group median {median}%",
+      "ownNoScale": "No group scale to read it against",
+      "inGroup": "In the group",
+      "inGroupSub": "Lower than {lower} of {measured} measured classmates",
+      "inGroupNoScale": "Nobody in the group has been measured yet",
+      "attempts": "Attempts",
+      "attemptsSub": "{count, plural, one {# more attempt names} other {# more attempts name}} no course at all",
+      "weakPairs": "Weak pairs",
+      "weakPairsSub": "Skill × focus the profile has flagged"
+    },
+    "legend": {
+      "scale": "Success rate 0 → 100%"
+    },
+    "grid": {
+      "title": "Skill × focus",
+      "subtitle": "Colour is the weighted success rate. A verdict needs {threshold} weighted samples — below that the profile refuses to judge, and says so.",
+      "note": "An empty row is a fact about the course, not about this student: a channel the catalogue has no items for cannot be measured. Most work sits under “Not recorded” until the course says what each exercise trains.",
+      "unclassified": "{count, plural, one {# attempt} other {# attempts}} could not be placed in the grid at all.",
+      "coverageUnavailable": "We could not ask the course what it teaches, so no cell claims the course has none of it."
+    },
+    "cell": {
+      "noItems": "no items",
+      "notStarted": "not started",
+      "stable": "{days}d stable",
+      "shortfall": "{sample}/{threshold}",
+      "tipMeasured": "{value}% weighted success rate"
+    },
+    "reason": {
+      "forgets": {
+        "label": "Forgets fast",
+        "body": "Right in the lesson, gone within days. Bring the review closer rather than teaching it again."
+      },
+      "never-knew": {
+        "label": "Never learned",
+        "body": "Stable, and stably wrong — the wrong rule is what was learnt. Teach it again; more drilling will not help."
+      },
+      "watch": {
+        "label": "Holding",
+        "body": "Within range, just slower than the group. Listed because something has to come first."
+      },
+      "unknown": {
+        "body": "Weak, and nothing is recorded about how long it survives — nothing here tells forgetting apart from never having learnt it."
+      }
+    },
+    "work": {
+      "title": "What to work on",
+      "subtitle": "The same low score, opposite actions — the difference is stability.",
+      "empty": "Nothing carries enough evidence to be called weak yet.",
+      "unavailable": "We could not load the profile, so there is nothing to suggest. The grid beside it is unaffected.",
+      "stability": "stability {days}d",
+      "samples": "{count, plural, one {# weighted sample} other {# weighted samples}}",
+      "action": "Open the course"
+    },
+    "context": {
+      "title": "Where the work happens",
+      "subtitle": "One bar, not a second chart."
+    },
+    "position": {
+      "title": "Against the group",
+      "median": "median",
+      "own": "This student",
+      "body": "Absorbed {own}% against a group median of {median}%. {lower, plural, =0 {No classmate sits lower} one {# classmate sits lower} other {# classmates sit lower}}.",
+      "measured": "{measured, plural, one {# classmate has} other {# classmates have}} a number of their own, this student included.",
+      "none": "Nobody in this group has a number yet, so there is no scale to place this student on. That is not last place — it is no ranking at all."
+    },
+    "group": {
+      "readAgainst": "Read against {name}. Also in:"
+    }
   }
 }

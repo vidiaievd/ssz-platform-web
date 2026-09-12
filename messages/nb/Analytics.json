@@ -89,5 +89,82 @@
     "tipMeasured": "{value} % av enheten bestått",
     "tipInsufficient": "{sample} av {threshold} vektede forsøk — ingen dom",
     "neverSeenShort": "ikke sett ennå"
+  },
+  "mastery": {
+    "empty": {
+      "title": "Ingenting er målt for denne eleven ennå",
+      "body": "Ingen av forsøkene har nådd profilen. Ferdighetsrutenettet står tomt med vilje — en tom profil er ikke en svak profil.",
+      "action": "Gi første lekse"
+    },
+    "summary": {
+      "own": "Tatt med seg",
+      "ownSub": "Median i gruppa {median} %",
+      "ownNoScale": "Ingen gruppeskala å lese det mot",
+      "inGroup": "I gruppa",
+      "inGroupSub": "Lavere enn {lower} av {measured} målte medelever",
+      "inGroupNoScale": "Ingen i gruppa er målt ennå",
+      "attempts": "Forsøk",
+      "attemptsSub": "{count, plural, one {# forsøk til nevner} other {# forsøk til nevner}} ikke noe kurs i det hele tatt",
+      "weakPairs": "Svake par",
+      "weakPairsSub": "Ferdighet × emne profilen har merket"
+    },
+    "legend": {
+      "scale": "Treffprosent 0 → 100 %"
+    },
+    "grid": {
+      "title": "Ferdighet × emne",
+      "subtitle": "Fargen er vektet treffprosent. En dom krever {threshold} vektede observasjoner — under det nekter profilen å dømme, og sier fra.",
+      "note": "En tom rad er et faktum om kurset, ikke om eleven: en kanal katalogen ikke har oppgaver for, kan ikke måles. Det meste ligger under «Ikke registrert» til kurset sier hva hver oppgave trener.",
+      "unclassified": "{count, plural, one {# forsøk} other {# forsøk}} kunne ikke plasseres i rutenettet i det hele tatt.",
+      "coverageUnavailable": "Vi fikk ikke spurt kurset hva det lærer bort, så ingen rute påstår at kurset mangler dette."
+    },
+    "cell": {
+      "noItems": "ingen oppgaver",
+      "notStarted": "ikke begynt",
+      "stable": "stabil {days} d",
+      "shortfall": "{sample}/{threshold}",
+      "tipMeasured": "{value} % vektet treffprosent"
+    },
+    "reason": {
+      "forgets": {
+        "label": "Glemmer fort",
+        "body": "Riktig i timen, borte på noen dager. Flytt repetisjonen nærmere heller enn å undervise det på nytt."
+      },
+      "never-knew": {
+        "label": "Aldri lært",
+        "body": "Stabilt, og stabilt feil — det var den gale regelen som ble lært. Undervis det på nytt; mer drilling hjelper ikke."
+      },
+      "watch": {
+        "label": "Holder stand",
+        "body": "Innenfor rekkevidde, bare tregere enn gruppa. Står her fordi noe må komme først."
+      },
+      "unknown": {
+        "body": "Svakt, og ingenting er registrert om hvor lenge det sitter — ingenting her skiller glemsel fra aldri å ha lært det."
+      }
+    },
+    "work": {
+      "title": "Hva bør jobbes med",
+      "subtitle": "Samme lave tall, motsatt handling — forskjellen er stabiliteten.",
+      "empty": "Ingenting har nok bak seg til å kalles svakt ennå.",
+      "unavailable": "Vi fikk ikke lastet profilen, så det er ingenting å foreslå. Rutenettet ved siden av er upåvirket.",
+      "stability": "stabilitet {days} d",
+      "samples": "{count, plural, one {# vektet observasjon} other {# vektede observasjoner}}",
+      "action": "Åpne kurset"
+    },
+    "context": {
+      "title": "Hvor arbeidet skjer",
+      "subtitle": "Én stolpe, ikke enda et diagram."
+    },
+    "position": {
+      "title": "Mot gruppa",
+      "median": "median",
+      "own": "Denne eleven",
+      "body": "Tatt med seg {own} % mot en median i gruppa på {median} %. {lower, plural, =0 {Ingen medelev ligger lavere} one {# medelev ligger lavere} other {# medelever ligger lavere}}.",
+      "measured": "{measured, plural, one {# medelev har} other {# medelever har}} et tall selv, denne eleven medregnet.",
+      "none": "Ingen i denne gruppa har et tall ennå, så det finnes ingen skala å plassere eleven på. Det er ikke sisteplass — det er ingen rangering i det hele tatt."
+    },
+    "group": {
+      "readAgainst": "Lest mot {name}. Også i:"
+    }
   }
 }

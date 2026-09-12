@@ -95,3 +95,47 @@ export interface GroupHeatmap {
   units: Array<{ unitId: string; no: number; title: string }>;
   rows: HeatmapRow[];
 }
+
+/** One pair of the learner's grid — DATA_MODEL §3.3, screen C. */
+export interface StudentGridCell {
+  skill: string;
+  focus: string;
+  state: CellState;
+  /** Whole percent, or `null` whenever nothing was measured. */
+  ewma: number | null;
+  /** Days a right answer survives — the number behind "forgets fast". */
+  meanStability: number | null;
+  attempts: number;
+  weightedSample: number;
+}
+
+export interface StudentGrid {
+  studentId: string;
+  courseId: string | null;
+  minWeightedSample: number;
+  /** Content could not be asked what the course trains; no cell claims `noContent`. */
+  coverageUnavailable: boolean;
+  /** No attempt at all: the screen prints its empty state instead of a grid. */
+  nothingMeasured: boolean;
+  /** Attempts in a channel the grid does not draw — said out loud, never dropped. */
+  unclassifiedAttempts: number;
+  cells: StudentGridCell[];
+}
+
+/** Where one learner stands against their group — `null` when there is no scale. */
+export interface StudentPosition {
+  own: number;
+  groupMedian: number;
+  percentile: number;
+  lowerThan: number;
+  band: 'below' | 'middle' | 'above';
+  measured: number;
+}
+
+export interface StudentWorkContext {
+  studentId: string;
+  courseId: string | null;
+  buckets: WorkContextBucket[];
+  /** Attempts naming no course at all, and so in no bucket. */
+  unattributed: number;
+}

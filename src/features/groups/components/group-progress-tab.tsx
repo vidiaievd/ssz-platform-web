@@ -565,7 +565,9 @@ function HeatmapPanel({
     const index = data.units.findIndex((u) => u.unitId === unit.unitId);
     const cell = row.cells[index];
     if (!cell || !isMeasured(cell.state)) return null;
-    return `/school/${schoolSlug}/students/${row.studentId}?tab=mastery&unit=${unit.unitId}`;
+    // The group travels with the link: a learner in three groups has three sets of
+    // numbers, and the one worth opening is the one whose cell was clicked.
+    return `/school/${schoolSlug}/students/${row.studentId}?tab=mastery&group=${groupId}&unit=${unit.unitId}`;
   };
 
   return (
