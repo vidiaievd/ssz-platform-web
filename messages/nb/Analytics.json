@@ -73,5 +73,21 @@
   "footer": {
     "updated": "Oppdatert {when}",
     "behind": "projeksjonen kan ligge etter"
+  },
+  "heatmap": {
+    "title": "Elever × enheter",
+    "subtitle": "En median skjuler den som holder på å drukne. Dette gjør ikke det.",
+    "student": "Elev",
+    "show": "Vis varmekart",
+    "sortRoster": "Listerekkefølge",
+    "sortLowest": "Svakest først",
+    "sortLabel": "Rekkefølge på elevene",
+    "empty": "Ingen står på gruppas liste ennå.",
+    "unavailable": "Vi fikk ikke lastet kartet per elev. Diagrammet over er upåvirket.",
+    "neverSeen": "«Ikke sett ennå» betyr at ingenting er registrert for eleven i det hele tatt — det er ikke det samme som å henge etter.",
+    "tipHead": "{name} · Enhet {no} {title}",
+    "tipMeasured": "{value} % av enheten bestått",
+    "tipInsufficient": "{sample} av {threshold} vektede forsøk — ingen dom",
+    "neverSeenShort": "ikke sett ennå"
   }
 }

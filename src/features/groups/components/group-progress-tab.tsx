@@ -5,21 +5,30 @@ import { useTranslations, useFormatter } from 'next-intl';
 
 import {
   DeliveredAbsorbed,
+  Heatmap,
   Note,
   PaDefs,
   Stat,
   ZeroLegend,
+  useHeatmapSort,
   type ChartAbsorbed,
   type ChartDelivered,
+  type HeatmapUnit,
   type LegendItem,
 } from '@/features/analytics';
-import { pictureOf, type GroupProgress, type GroupProgressUnit } from '@/features/analytics/types';
+import {
+  pictureOf,
+  type GroupProgress,
+  type GroupProgressUnit,
+  type HeatmapRow,
+} from '@/features/analytics/types';
 import { isMeasured } from '@/lib/shared-kernel/analytics';
 import { Button } from '@/components/ui/button';
 import { Card, CardBody } from '@/components/ui/card';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 
+import { useGroupHeatmap } from '../api/use-group-heatmap';
 import { useGroupProgress } from '../api/use-group-progress';
 
 type View = 'all' | 'context';
@@ -31,10 +40,13 @@ export function GroupProgressTab({
   schoolId,
   groupId,
   schoolSlug,
+  canSeePersonalResults,
 }: {
   schoolId: string;
   groupId: string;
   schoolSlug: string;
+  /** False for a scheduler: the heatmap carries named results and they have no use for them. */
+  canSeePersonalResults: boolean;
 }) {
   const t = useTranslations('Analytics');
   const { data, isPending, isError } = useGroupProgress(schoolId, groupId);
@@ -58,17 +70,29 @@ export function GroupProgressTab({
     );
   }
 
-  return <Progress data={data} schoolSlug={schoolSlug} groupId={groupId} />;
+  return (
+    <Progress
+      data={data}
+      schoolId={schoolId}
+      schoolSlug={schoolSlug}
+      groupId={groupId}
+      canSeePersonalResults={canSeePersonalResults}
+    />
+  );
 }
 
 function Progress({
   data,
+  schoolId,
   schoolSlug,
   groupId,
+  canSeePersonalResults,
 }: {
   data: GroupProgress;
+  schoolId: string;
   schoolSlug: string;
   groupId: string;
+  canSeePersonalResults: boolean;
 }) {
   const t = useTranslations('Analytics');
   const format = useFormatter();
@@ -237,6 +261,15 @@ function Progress({
             )}
           </CardBody>
         </Card>
+      )}
+
+      {canSeePersonalResults && picture !== 'noLessons' && (
+        <HeatmapPanel
+          schoolId={schoolId}
+          schoolSlug={schoolSlug}
+          groupId={groupId}
+          legend={legend}
+        />
       )}
 
       {data.unlinkedPlanUnits.length > 0 && (
@@ -459,6 +492,134 @@ function Empty({
             <a href={href}>{actionLabel}</a>
           </Button>
         </div>
+      </CardBody>
+    </Card>
+  );
+}
+
+/**
+ * The map of every learner against every unit, under the chart it explains.
+ *
+ * Its own query and its own failure: a role that may not read named results is refused
+ * this route outright, and that refusal must empty this panel rather than the chart
+ * above it. Folded away on a phone for the same reason the chart is — the summary has
+ * already been read in full by then.
+ */
+function HeatmapPanel({
+  schoolId,
+  schoolSlug,
+  groupId,
+  legend,
+}: {
+  schoolId: string;
+  schoolSlug: string;
+  groupId: string;
+  legend: LegendItem[];
+}) {
+  const t = useTranslations('Analytics');
+  const format = useFormatter();
+  const [sort, setSort] = useHeatmapSort('roster');
+  const { data, isPending, isError } = useGroupHeatmap(schoolId, groupId);
+
+  if (isPending) return <Skeleton className="h-48 w-full" />;
+  if (isError || !data) {
+    return (
+      <Card>
+        <CardBody>
+          <Note tone="warn" icon="warn">
+            {t('heatmap.unavailable')}
+          </Note>
+        </CardBody>
+      </Card>
+    );
+  }
+
+  /** The whole sentence, so a reader is never left to decode a shape on their own. */
+  const tip = (row: HeatmapRow, unit: HeatmapUnit, index: number) => {
+    const cell = row.cells[index];
+    if (!cell) return row.displayName;
+
+    const state = t(`state.${cell.state}` as 'state.ok');
+    const head = t('heatmap.tipHead', { name: row.displayName, no: unit.no, title: unit.title });
+
+    if (cell.state === 'insufficient') {
+      return `${head} — ${t('heatmap.tipInsufficient', {
+        sample: cell.weightedSample,
+        threshold: data.minWeightedSample,
+      })}`;
+    }
+    if (cell.value !== null) {
+      return `${head} — ${t('heatmap.tipMeasured', { value: cell.value })}`;
+    }
+    return `${head} — ${state}`;
+  };
+
+  const lastSeen = (row: HeatmapRow) =>
+    row.lastActivityAt === null
+      ? t('heatmap.neverSeenShort')
+      : format.relativeTime(new Date(row.lastActivityAt), Date.now());
+
+  // Only a measured cell leads anywhere: clicking "not taught yet" would take a teacher
+  // to a learner's profile to answer a question that is not about the learner (§B).
+  const href = (row: HeatmapRow, unit: HeatmapUnit) => {
+    const index = data.units.findIndex((u) => u.unitId === unit.unitId);
+    const cell = row.cells[index];
+    if (!cell || !isMeasured(cell.state)) return null;
+    return `/school/${schoolSlug}/students/${row.studentId}?tab=mastery&unit=${unit.unitId}`;
+  };
+
+  return (
+    <Card>
+      <CardBody className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold text-(--ssz-text-primary)">{t('heatmap.title')}</h3>
+            <p className="text-xs text-(--ssz-text-secondary)">{t('heatmap.subtitle')}</p>
+          </div>
+          <Segmented
+            size="sm"
+            options={[
+              { value: 'roster', label: t('heatmap.sortRoster') },
+              { value: 'lowest', label: t('heatmap.sortLowest') },
+            ]}
+            value={sort}
+            onValueChange={(next) => setSort(next as typeof sort)}
+            aria-label={t('heatmap.sortLabel')}
+          />
+        </div>
+
+        <details className="space-y-3 sm:hidden">
+          <summary className="cursor-pointer text-sm font-semibold text-(--ssz-text-secondary)">
+            {t('heatmap.show')}
+          </summary>
+          <Heatmap
+            units={data.units}
+            rows={data.rows}
+            sort={sort}
+            tip={tip}
+            href={href}
+            lastSeen={lastSeen}
+            labels={{ student: t('heatmap.student'), empty: t('heatmap.empty') }}
+          />
+          <ZeroLegend items={legend} compact />
+        </details>
+
+        <div className="hidden space-y-3 sm:block">
+          <Heatmap
+            units={data.units}
+            rows={data.rows}
+            sort={sort}
+            tip={tip}
+            href={href}
+            lastSeen={lastSeen}
+            labels={{ student: t('heatmap.student'), empty: t('heatmap.empty') }}
+          />
+          <ZeroLegend items={legend} compact />
+        </div>
+
+        {data.rows.some((row) => row.lastActivityAt === null) && (
+          <p className="text-xs text-(--ssz-text-muted)">{t('heatmap.neverSeen')}</p>
+        )}
       </CardBody>
     </Card>
   );

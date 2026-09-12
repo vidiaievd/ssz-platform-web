@@ -37,6 +37,8 @@ type Props = {
   schoolId: string;
   schoolSlug: string;
   canManage: boolean;
+  /** May this viewer see named learners' results — the heatmap of the Progress tab. */
+  canSeePersonalResults: boolean;
 };
 
 export async function GroupDetail({
@@ -55,6 +57,7 @@ export async function GroupDetail({
   schoolId,
   schoolSlug,
   canManage,
+  canSeePersonalResults,
 }: Props) {
   const t = await getTranslations("Groups");
   const listHref = `/school/${schoolSlug}/groups`;
@@ -111,6 +114,7 @@ export async function GroupDetail({
         schoolId={schoolId}
         schoolSlug={schoolSlug}
         canManage={canManage}
+        canSeePersonalResults={canSeePersonalResults}
       />
     </div>
   );

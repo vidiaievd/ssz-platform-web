@@ -10,7 +10,7 @@ import {
   getGroupMaterials,
   getSchoolTeachers,
 } from '@/features/groups/api/queries';
-import { canManageGroups } from '@/features/groups/lib/can-manage';
+import { canManageGroups, canSeePersonalResults } from '@/features/groups/lib/can-manage';
 import { getSchedulingProvider } from '@/lib/scheduling/provider';
 import { AppError } from '@/lib/errors';
 import { GroupDetail } from '@/features/groups/components/group-detail';
@@ -79,6 +79,7 @@ export default async function GroupDetailPage({ params }: Props) {
         courseView={courseView}
         schoolSlug={schoolSlug}
         canManage={canManage}
+        canSeePersonalResults={canSeePersonalResults(role)}
       />
     </main>
   );

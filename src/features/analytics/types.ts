@@ -76,3 +76,22 @@ export function pictureOf(progress: GroupProgress): ProgressPicture {
   if (progress.summary.absorbedMedian === null) return 'noAttempts';
   return 'full';
 }
+
+/** One learner's row of the heatmap — DATA_MODEL §3.2. */
+export interface HeatmapRow {
+  studentId: string;
+  displayName: string;
+  lastActivityAt: string | null;
+  /** Strictly one per unit, in the order of `units`. */
+  cells: Array<{ state: CellState; value: number | null; weightedSample: number }>;
+}
+
+export interface GroupHeatmap {
+  groupId: string;
+  courseId: string | null;
+  updatedAt: string;
+  minWeightedSample: number;
+  deliveryUnavailable: boolean;
+  units: Array<{ unitId: string; no: number; title: string }>;
+  rows: HeatmapRow[];
+}

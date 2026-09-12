@@ -39,6 +39,8 @@ type Props = {
   schoolId: string;
   schoolSlug: string;
   canManage: boolean;
+  /** May this viewer see named learners' results — the heatmap inside the Progress tab. */
+  canSeePersonalResults: boolean;
 };
 
 export function GroupTabs({
@@ -54,6 +56,7 @@ export function GroupTabs({
   schoolId,
   schoolSlug,
   canManage,
+  canSeePersonalResults,
 }: Props) {
   const t = useTranslations('Groups');
   const searchParams = useSearchParams();
@@ -190,7 +193,12 @@ export function GroupTabs({
           other tabs should not wait on analytics to render. */}
       <TabsContent value="progress">
         {activeTab === 'progress' && (
-          <GroupProgressTab schoolId={schoolId} groupId={group.id} schoolSlug={schoolSlug} />
+          <GroupProgressTab
+            schoolId={schoolId}
+            groupId={group.id}
+            schoolSlug={schoolSlug}
+            canSeePersonalResults={canSeePersonalResults}
+          />
         )}
       </TabsContent>
     </Tabs>

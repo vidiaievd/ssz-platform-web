@@ -55,12 +55,17 @@ const progress = (over: Partial<GroupProgress> = {}): GroupProgress => ({
   ...over,
 });
 
-function renderTab() {
+function renderTab(heatmap = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
       <QueryClientProvider client={client}>
-        <GroupProgressTab schoolId={SCHOOL} groupId={GROUP} schoolSlug="nordick" />
+        <GroupProgressTab
+          schoolId={SCHOOL}
+          groupId={GROUP}
+          schoolSlug="nordick"
+          canSeePersonalResults={heatmap}
+        />
       </QueryClientProvider>
     </NextIntlClientProvider>,
   );
@@ -68,6 +73,33 @@ function renderTab() {
 
 const answer = (body: unknown, ok = true) =>
   vi.fn().mockResolvedValue({ ok, json: async () => body } as Response);
+
+/** Routes the two queries the tab makes by URL, so the heatmap can fail on its own. */
+const route = (progressBody: unknown, heatmapBody: unknown, heatmapOk = true) =>
+  vi
+    .fn()
+    .mockImplementation(async (url: string) =>
+      url.endsWith('/heatmap')
+        ? ({ ok: heatmapOk, json: async () => heatmapBody } as Response)
+        : ({ ok: true, json: async () => progressBody } as Response),
+    );
+
+const heatmapBody = {
+  groupId: GROUP,
+  courseId: 'course-1',
+  updatedAt: new Date().toISOString(),
+  minWeightedSample: 8,
+  deliveryUnavailable: false,
+  units: [{ unitId: 'u1', no: 1, title: 'Leksjon 17' }],
+  rows: [
+    {
+      studentId: 's1',
+      displayName: 'Anna Lind',
+      lastActivityAt: new Date().toISOString(),
+      cells: [{ state: 'ok' as const, value: 70, weightedSample: 12 }],
+    },
+  ],
+};
 
 beforeEach(() => {
   vi.restoreAllMocks();
@@ -134,6 +166,40 @@ describe('what the tab says when it cannot say anything', () => {
     renderTab();
 
     expect(await screen.findByText(/fact about the service, not about this group/)).toBeTruthy();
+  });
+});
+
+describe('who may see named results', () => {
+  it('does not even ask for the map when the viewer may not see it', async () => {
+    const fetcher = route(progress(), heatmapBody);
+    vi.stubGlobal('fetch', fetcher);
+    renderTab(false);
+
+    await screen.findByText('Delivered against absorbed');
+    expect(screen.queryByText('Students × units')).toBeNull();
+    // A scheduler's browser never carries these rows at all.
+    expect(fetcher.mock.calls.every(([url]) => !String(url).endsWith('/heatmap'))).toBe(true);
+  });
+
+  it('draws the map, and links only from a measured cell', async () => {
+    vi.stubGlobal('fetch', route(progress(), heatmapBody));
+    renderTab(true);
+
+    expect(await screen.findByText('Students × units')).toBeTruthy();
+    // Two copies in the DOM — the phone's folded one and the desktop one — and jsdom
+    // renders both, closed `details` included.
+    expect(await screen.findAllByText('Anna Lind')).toHaveLength(2);
+
+    const links = await screen.findAllByRole('link', { name: /Anna Lind/ });
+    expect(links[0]?.getAttribute('href')).toBe('/school/nordick/students/s1?tab=mastery&unit=u1');
+  });
+
+  it('empties the map alone when it fails, leaving the chart standing', async () => {
+    vi.stubGlobal('fetch', route(progress(), { error: 'nope' }, false));
+    renderTab(true);
+
+    expect(await screen.findByText(/could not load the per-student map/)).toBeTruthy();
+    expect(screen.getByText('Delivered against absorbed')).toBeTruthy();
   });
 });
 

@@ -7,6 +7,8 @@
 export { PaDefs } from './components/pa-defs';
 export { HeatCell } from './components/heat-cell';
 export type { HeatCellData, HeatCellProps } from './components/heat-cell';
+export { Heatmap, useHeatmapSort } from './components/heatmap';
+export type { HeatmapProps, HeatmapSort, HeatmapUnit } from './components/heatmap';
 export { ZeroLegend, Swatch } from './components/zero-legend';
 export type { LegendItem, LegendKey } from './components/zero-legend';
 export { SkillGrid } from './components/skill-grid';

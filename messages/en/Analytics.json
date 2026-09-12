@@ -73,5 +73,21 @@
   "footer": {
     "updated": "Updated {when}",
     "behind": "the projection may be behind"
+  },
+  "heatmap": {
+    "title": "Students × units",
+    "subtitle": "A median hides the person who is drowning. This does not.",
+    "student": "Student",
+    "show": "Show heatmap",
+    "sortRoster": "Roster order",
+    "sortLowest": "Lowest first",
+    "sortLabel": "How to order the students",
+    "empty": "Nobody is on this group's roster yet.",
+    "unavailable": "We could not load the per-student map. The chart above is unaffected.",
+    "neverSeen": "“Never seen” means nothing has been recorded for that learner at all — which is not the same as falling behind.",
+    "tipHead": "{name} · Unit {no} {title}",
+    "tipMeasured": "{value}% of the unit passed",
+    "tipInsufficient": "{sample} of {threshold} weighted samples — no verdict",
+    "neverSeenShort": "never seen"
   }
 }
