@@ -10,6 +10,12 @@ export function atomErrorResponse(e: unknown, message: string): NextResponse {
   if (e instanceof AppError && e.code === 'unauthenticated') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  // Already retired — the state the caller asked for, reached without them. Passing it
+  // through as 410 lets the panel treat it as done; swallowed into 502 it reads as a
+  // failure and the author retries something that has already happened.
+  if (e instanceof AppError && e.code === 'gone') {
+    return NextResponse.json({ error: 'Gone' }, { status: 410 });
+  }
   if (e instanceof AppError && e.code === 'forbidden') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
