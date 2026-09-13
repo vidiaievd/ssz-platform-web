@@ -53,6 +53,34 @@
       "forbidden": "Du kan ikke opprette grupper her.",
       "failed": "Kunne ikke opprette gruppen. Prøv igjen."
     },
-    "toggleGroup": "Vis elevene i {name}"
+    "toggleGroup": "Vis elevene i {name}",
+    "scheduleLessons": {
+      "trigger": "Sett opp timer",
+      "title": "Timer med {name}",
+      "description": "Et fast tidspunkt i uken, og kurset som undervises.",
+      "day": "Dag",
+      "start": "Fra",
+      "end": "Til",
+      "from": "Starter",
+      "endBeforeStart": "Slutt må komme etter start.",
+      "courseLabel": "Kurs",
+      "coursePick": "Velg kurs",
+      "courseClear": "Fjern kurs",
+      "courseHint": "Uten kurs blir det et tidspunkt i uken uten noe planlagt i det.",
+      "cancel": "Avbryt",
+      "submit": "Sett opp",
+      "scheduled": "Timene med {name} ligger i timeplanen din.",
+      "forbidden": "Du kan ikke sette opp timer her.",
+      "failed": "Kunne ikke sette opp timene. Prøv igjen.",
+      "weekday": {
+        "mon": "Mandag",
+        "tue": "Tirsdag",
+        "wed": "Onsdag",
+        "thu": "Torsdag",
+        "fri": "Fredag",
+        "sat": "Lørdag",
+        "sun": "Søndag"
+      }
+    }
   }
 }

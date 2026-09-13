@@ -53,8 +53,17 @@ export function splitRosterByGroup(students: StudentListItem[]): RosterSplit {
     }
   }
 
+  // A group of one is not a group. It is how a tutor's one-to-one lessons are kept — the
+  // model has no other way to hang a lesson on a person (plan 62, §2 A) — and drawing it
+  // as a group would put a fold in the roster around a single name.
+  const real: RosterGroup[] = [];
+  for (const group of groups.values()) {
+    if (group.students.length === 1) solo.push(group.students[0]!);
+    else real.push(group);
+  }
+
   return {
-    groups: [...groups.values()].sort((a, b) => a.name.localeCompare(b.name)),
-    solo,
+    groups: real.sort((a, b) => a.name.localeCompare(b.name)),
+    solo: solo.sort((a, b) => a.name.localeCompare(b.name)),
   };
 }

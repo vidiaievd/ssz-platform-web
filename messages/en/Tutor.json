@@ -53,6 +53,34 @@
       "forbidden": "You cannot create groups here.",
       "failed": "Could not create the group. Please try again."
     },
-    "toggleGroup": "Show the learners in {name}"
+    "toggleGroup": "Show the learners in {name}",
+    "scheduleLessons": {
+      "trigger": "Schedule lessons",
+      "title": "Lessons with {name}",
+      "description": "A weekly time, and the course to teach through it.",
+      "day": "Day",
+      "start": "From",
+      "end": "To",
+      "from": "Starting",
+      "endBeforeStart": "The end has to come after the start.",
+      "courseLabel": "Course",
+      "coursePick": "Choose a course",
+      "courseClear": "Remove course",
+      "courseHint": "Without a course there is a time in the week and nothing planned in it.",
+      "cancel": "Cancel",
+      "submit": "Schedule",
+      "scheduled": "Lessons with {name} are in your schedule.",
+      "forbidden": "You cannot schedule lessons here.",
+      "failed": "Could not set up the lessons. Please try again.",
+      "weekday": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    }
   }
 }

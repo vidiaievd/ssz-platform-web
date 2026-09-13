@@ -11,6 +11,7 @@ import { StudentTabs, type TabKey } from '@/features/students/components/detail/
 import { OverviewTab } from '@/features/students/components/detail/tabs/overview-tab';
 import { HistoryTab } from '@/features/students/components/detail/tabs/history-tab';
 import { StudentNudgeButton } from '@/features/students/components/student-nudge-button';
+import { ScheduleLessonsDialog } from '@/features/tutoring/components/schedule-lessons-dialog';
 
 type Props = {
   params: Promise<{ workspaceId: string; studentId: string; locale: string }>;
@@ -59,7 +60,18 @@ export async function TutorStudentCard({ params, searchParams }: Props) {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {/* Lessons with one learner are a group of one, and this is the only place the
+              tutor ever has to think about it — here it is called what it is. */}
+          {student.memberships.filter(
+            (m) => m.status === 'active' && m.groupId !== workspace.groupId,
+          ).length === 0 && (
+            <ScheduleLessonsDialog
+              workspaceId={workspace.schoolId}
+              userId={student.id}
+              learnerName={student.name}
+            />
+          )}
           <StudentNudgeButton
             schoolId={workspace.schoolId}
             userId={student.id}

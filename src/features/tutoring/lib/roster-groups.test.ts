@@ -48,23 +48,37 @@ describe('splitRosterByGroup', () => {
       learner('kari', [HOME, MONDAY]),
     ]);
 
-    expect(groups.map((g) => g.name)).toEqual(['Monday 08:00', 'Tuesday 19:00']);
-    expect(groups.map((g) => g.students.map((s) => s.userId))).toEqual([
-      ['kari'],
-      ['anna', 'ivan'],
-    ]);
-    expect(solo.map((s) => s.userId)).toEqual(['per']);
+    // Monday holds one learner, so it is not drawn as a group at all — see below.
+    expect(groups.map((g) => g.name)).toEqual(['Tuesday 19:00']);
+    expect(groups.map((g) => g.students.map((s) => s.userId))).toEqual([['anna', 'ivan']]);
+    expect(solo.map((s) => s.userId)).toEqual(['kari', 'per']);
+  });
+
+  // A tutor's one-to-one lessons are kept as a group of one: the model has no other way to
+  // hang a lesson on a person, and the roster must not put a fold around a single name.
+  it('draws a group of one as the learner, not as a group', () => {
+    const { groups, solo } = splitRosterByGroup([learner('ola', [HOME, MONDAY])]);
+
+    expect(groups).toEqual([]);
+    expect(solo.map((s) => s.userId)).toEqual(['ola']);
   });
 
   it('lists a learner under each group they are in, and not among the solo ones', () => {
-    const { groups, solo } = splitRosterByGroup([learner('anna', [HOME, TUESDAY, MONDAY])]);
+    const { groups, solo } = splitRosterByGroup([
+      learner('anna', [HOME, TUESDAY, MONDAY]),
+      learner('ivan', [HOME, TUESDAY]),
+      learner('kari', [HOME, MONDAY]),
+    ]);
 
-    expect(groups.map((g) => g.students.map((s) => s.userId))).toEqual([['anna'], ['anna']]);
+    expect(groups.map((g) => g.students.map((s) => s.userId))).toEqual([
+      ['anna', 'kari'],
+      ['anna', 'ivan'],
+    ]);
     expect(solo).toEqual([]);
   });
 
   it('treats a group without the flag as a real one — a school roster has no home group', () => {
-    const { groups, solo } = splitRosterByGroup([learner('anna', [TUESDAY])]);
+    const { groups, solo } = splitRosterByGroup([learner('anna', [TUESDAY]), learner('ivan', [TUESDAY])]);
 
     expect(groups).toHaveLength(1);
     expect(solo).toEqual([]);
