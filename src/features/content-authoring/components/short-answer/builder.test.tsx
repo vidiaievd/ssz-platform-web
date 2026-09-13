@@ -23,7 +23,7 @@ vi.mock('@/features/media', () => ({
 vi.mock('../../actions/short-answer', () => ({ saveShortAnswerAction: vi.fn() }));
 
 // Step 4 links into the marking queue, which needs the school route around it.
-vi.mock('next/navigation', () => ({ useParams: () => ({ schoolSlug: 'demo-school' }) }));
+vi.mock('next/navigation', () => ({ useParams: () => ({ workspaceId: 'demo-school' }) }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,

@@ -2,19 +2,85 @@
   "dashboard": {
     "greeting": "Velkommen tilbake! 👋",
     "greetingNamed": "Velkommen tilbake, {name}! 👋",
-    "subtitle": "Her er en oversikt over din undervisningsaktivitet.",
+    "subtitle": "Her er en oversikt over undervisningen din.",
+    "profileFailed": "Kunne ikke laste profilen din.",
     "stats": {
-      "students": "Aktive elever",
-      "lessons": "Timer denne måneden",
-      "rating": "Gjennomsnittlig vurdering"
+      "sectionLabel": "Uken din",
+      "students": "Aktive elever · 7 d",
+      "lessons": "Fullførte leksjoner · 7 d",
+      "groups": "Grupper",
+      "groupsHint": "i tillegg til elevene du underviser alene"
     },
-    "upcoming": {
-      "title": "Kommende timer",
-      "empty": "Ingen kommende timer planlagt."
+    "review": {
+      "title": "Venter på retting",
+      "waiting": "{count, plural, one {# besvarelse} other {# besvarelser}}",
+      "hint": "Fra elevene dine, eldst først.",
+      "open": "Åpne køen",
+      "emptyTitle": "Ingenting å rette",
+      "emptyBody": "Arbeid elevene leverer inn dukker opp her."
+    }
+  },
+  "students": {
+    "title": "Elevene mine",
+    "count": "{count, plural, =0 {Ingen elever ennå} one {# elev} other {# elever}}",
+    "invite": "Inviter en elev",
+    "searchPlaceholder": "Søk på navn eller e-post",
+    "clearSearch": "Tøm søket",
+    "neverSeen": "Aldri",
+    "emptyTitle": "Ingen elever ennå",
+    "emptyBody": "Inviter den første eleven din på e-post — de blir med så snart de takker ja.",
+    "emptyFiltered": "Ingen elever passer søket.",
+    "backToStudents": "Tilbake til elevene",
+    "loadFailed": "Kunne ikke laste elevene dine. Prøv igjen.",
+    "matching": "{count, plural, =0 {ingen treff} one {# treff} other {# treff}}",
+    "groupCount": "{count, plural, =0 {ingen elever} one {# elev} other {# elever}}",
+    "groupEmpty": "Ingen i denne gruppen ennå.",
+    "createGroup": {
+      "trigger": "Ny gruppe",
+      "title": "Ny gruppe",
+      "description": "Et navn, et kurs hvis gruppen har ett, og hvem som er med. Alt kan endres senere.",
+      "nameLabel": "Navn",
+      "namePlaceholder": "Tirsdag 19:00",
+      "courseLabel": "Kurs (valgfritt)",
+      "coursePick": "Velg kurs",
+      "courseClear": "Fjern kurs",
+      "studentsLabel": "Elever {count, plural, =0 {} other {(# valgt)}}",
+      "studentsEmpty": "Ingen elever å legge til ennå — inviter noen først.",
+      "cancel": "Avbryt",
+      "submit": "Opprett gruppe",
+      "created": "Gruppen «{name}» er opprettet.",
+      "createdPartly": "Gruppen «{name}» er opprettet, men {count, plural, one {# elev} other {# elever}} kunne ikke legges til.",
+      "forbidden": "Du kan ikke opprette grupper her.",
+      "failed": "Kunne ikke opprette gruppen. Prøv igjen."
     },
-    "students": {
-      "title": "Nylige elever",
-      "empty": "Ingen elever ennå. Del profilen din for å komme i gang."
+    "toggleGroup": "Vis elevene i {name}",
+    "scheduleLessons": {
+      "trigger": "Sett opp timer",
+      "title": "Timer med {name}",
+      "description": "Et fast tidspunkt i uken, og kurset som undervises.",
+      "day": "Dag",
+      "start": "Fra",
+      "end": "Til",
+      "from": "Starter",
+      "endBeforeStart": "Slutt må komme etter start.",
+      "courseLabel": "Kurs",
+      "coursePick": "Velg kurs",
+      "courseClear": "Fjern kurs",
+      "courseHint": "Uten kurs blir det et tidspunkt i uken uten noe planlagt i det.",
+      "cancel": "Avbryt",
+      "submit": "Sett opp",
+      "scheduled": "Timene med {name} ligger i timeplanen din.",
+      "forbidden": "Du kan ikke sette opp timer her.",
+      "failed": "Kunne ikke sette opp timene. Prøv igjen.",
+      "weekday": {
+        "mon": "Mandag",
+        "tue": "Tirsdag",
+        "wed": "Onsdag",
+        "thu": "Torsdag",
+        "fri": "Fredag",
+        "sat": "Lørdag",
+        "sun": "Søndag"
+      }
     }
   }
 }

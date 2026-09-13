@@ -5,16 +5,17 @@ import { getTranslations } from 'next-intl/server';
 import { cn } from '@/lib/utils';
 import { AlertChip } from '@/components/shared/operations';
 import type { Alert } from '@/features/dashboard/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   alerts: Alert[];
   groupId: string;
-  schoolSlug: string;
+  workspaceId: string;
   canManage: boolean;
 };
 
-function fixHref(alert: Alert, groupId: string, schoolSlug: string): string {
-  const base = `/school/${schoolSlug}/groups/${groupId}`;
+function fixHref(alert: Alert, groupId: string, workspaceId: string): string {
+  const base = wsHref(workspaceId, `groups/${groupId}`);
   switch (alert.type) {
     case 'no-primary':
       return `${base}/assign-teacher?role=primary`;
@@ -27,7 +28,7 @@ function fixHref(alert: Alert, groupId: string, schoolSlug: string): string {
   }
 }
 
-export async function GroupResolveBanner({ alerts, groupId, schoolSlug, canManage }: Props) {
+export async function GroupResolveBanner({ alerts, groupId, workspaceId, canManage }: Props) {
   if (!alerts.length) return null;
   const t = await getTranslations('Groups');
   const hasDanger = alerts.some((a) => a.severity === 'danger');
@@ -66,7 +67,7 @@ export async function GroupResolveBanner({ alerts, groupId, schoolSlug, canManag
             </div>
             {canManage && (
               <Link
-                href={fixHref(alert, groupId, schoolSlug)}
+                href={fixHref(alert, groupId, workspaceId)}
                 className={cn(
                   'text-xs font-semibold shrink-0 underline-offset-2 hover:underline',
                   alert.severity === 'danger'

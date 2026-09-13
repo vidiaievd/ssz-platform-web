@@ -7,12 +7,14 @@ vi.mock('@/lib/api/server-fetcher', () => ({ serverFetch: vi.fn() }));
 vi.mock('@/lib/api/profile-directory', () => ({ fetchProfileSummaries: vi.fn() }));
 vi.mock('@/features/auth/api/get-current-user', () => ({ getCurrentUser: vi.fn() }));
 vi.mock('@/features/school/api/get-my-schools', () => ({ getMySchools: vi.fn() }));
+vi.mock('@/features/tutoring/api/get-tutor-workspace', () => ({ getTutorWorkspace: vi.fn() }));
 
 const { GET } = await import('./route');
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { fetchProfileSummaries } from '@/lib/api/profile-directory';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import { getMySchools } from '@/features/school/api/get-my-schools';
+import { getTutorWorkspace } from '@/features/tutoring/api/get-tutor-workspace';
 import type { SchoolRole } from '@/features/school/types';
 
 const SCHOOL_ID = '11111111-1111-4111-8111-111111111111';
@@ -104,6 +106,9 @@ function member(role: SchoolRole) {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(getCurrentUser).mockResolvedValue({ roles: ['tutor'], userId: TEACHER });
+  // A tutor with no workspace of their own: these cases are about school membership, and
+  // the solo-workspace fallback (plan 59 §4) has its own tests in review-scope.test.ts.
+  vi.mocked(getTutorWorkspace).mockResolvedValue(null);
   member('TEACHER');
   vi.mocked(fetchProfileSummaries).mockResolvedValue({
     'student-1': { userId: 'student-1', displayName: 'Anna Kowalska' },

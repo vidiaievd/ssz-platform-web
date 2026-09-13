@@ -7,6 +7,8 @@ export interface SkillGridProps<TCell> {
   renderCell: (cell: TCell, skill: string, focus: string) => ReactNode;
   colLabel?: (focus: string) => string;
   rowLabel?: (skill: string) => string;
+  /** Named out loud. Without it the grid is announced as a table of nothing in particular. */
+  label?: string;
 }
 
 /**
@@ -24,32 +26,44 @@ export function SkillGrid<TCell>({
   renderCell,
   colLabel,
   rowLabel,
+  label,
 }: SkillGridProps<TCell>) {
   return (
     <div className="overflow-x-auto">
       <div
+        role="grid"
+        aria-label={label}
         className="grid min-w-[520px] gap-1.5"
         style={{ gridTemplateColumns: `104px repeat(${foci.length}, minmax(78px, 1fr))` }}
       >
-        <div />
-        {foci.map((focus) => (
-          <div
-            key={focus}
-            className="pb-0.5 text-center text-[11px] font-bold text-(--ssz-text-secondary) capitalize"
-          >
-            {colLabel ? colLabel(focus) : focus}
-          </div>
-        ))}
+        {/* `display: contents` on the rows: the cells stay direct children of the CSS
+            grid, which is what lays them out, while a screen reader is given the rows
+            and headers a table needs to be read at all. */}
+        <div role="row" className="contents">
+          <div role="columnheader" />
+          {foci.map((focus) => (
+            <div
+              key={focus}
+              role="columnheader"
+              className="pb-0.5 text-center text-[11px] font-bold text-(--ssz-text-secondary) capitalize"
+            >
+              {colLabel ? colLabel(focus) : focus}
+            </div>
+          ))}
+        </div>
 
         {skills.map((skill) => (
-          <Fragment key={skill}>
-            <div className="flex items-center text-[12.5px] font-bold text-(--ssz-text-primary) capitalize">
+          <div role="row" className="contents" key={skill}>
+            <div
+              role="rowheader"
+              className="flex items-center text-[12.5px] font-bold text-(--ssz-text-primary) capitalize"
+            >
               {rowLabel ? rowLabel(skill) : skill}
             </div>
             {foci.map((focus) => (
-              <div key={focus}>{renderCell(cell(skill, focus), skill, focus)}</div>
+              <Fragment key={focus}>{renderCell(cell(skill, focus), skill, focus)}</Fragment>
             ))}
-          </Fragment>
+          </div>
         ))}
       </div>
     </div>

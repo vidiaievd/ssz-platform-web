@@ -1,11 +1,12 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { useRouter } from '@/lib/i18n/navigation';
+import { wsHref } from '@/features/workspaces/lib/href';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 import type { ContainerFormValues } from '../schemas/container';
 
 import { createContainerAction } from '../actions/container';
@@ -25,7 +26,7 @@ const DEFAULT_ACCESS_TIER: ContainerFormValues['accessTier'] = 'assigned_only';
  */
 export function useCreateCourseFlow() {
   const router = useRouter();
-  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const workspaceId = useWorkspaceRef();
   const t = useTranslations('Authoring.createCourse');
   const store = useCreateCourseStore();
   const [isPending, startTransition] = useTransition();
@@ -94,7 +95,7 @@ export function useCreateCourseFlow() {
 
       store.setCreating(false);
       store.reset();
-      router.push(`/school/${schoolSlug}/content/${containerId}`);
+      router.push(wsHref(workspaceId, `content/${containerId}`));
     });
   }
 

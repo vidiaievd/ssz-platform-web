@@ -86,6 +86,22 @@ describe('getGroup', () => {
     expect(group?.capacity).toEqual({ min: 4, max: 15 });
   });
 
+  it('reads the status in the spelling the API actually answers in — lowercase', async () => {
+    mockFetch.mockImplementation((opts: { service: string; path: string }) => {
+      if (opts.service === 'organization' && opts.path === '/schools/school-1/groups/g1') {
+        // organization-service serialises the Prisma enum's mapped value, so an open
+        // group says 'active', not 'ACTIVE'. Reading only the upper-cased spelling made
+        // every open group render as a draft on its own page.
+        return Promise.resolve({ ...RAW_GROUP, status: 'active' });
+      }
+      return Promise.resolve([]);
+    });
+
+    const group = await getGroup('school-1', 'g1');
+
+    expect(group?.status).toBe('active');
+  });
+
   it('maps the backend\'s "in_person" mode to the frontend\'s "in-person"', async () => {
     mockOrgFetch();
 
@@ -155,7 +171,7 @@ describe('getTimetable / getTeacherLoads', () => {
 
   function mockSchoolFetch() {
     mockFetch.mockImplementation((opts: { service: string; path: string }) => {
-      if (opts.service === 'organization' && opts.path === '/schools/school-2/members') {
+      if (opts.service === 'organization' && opts.path === '/schools/school-2/teachers') {
         return Promise.resolve(TEACHERS);
       }
       if (opts.service === 'organization' && opts.path === '/schools/school-2/groups') {
@@ -250,7 +266,7 @@ describe('getTeacherSchedule', () => {
 
   function mockSchoolFetch() {
     mockFetch.mockImplementation((opts: { service: string; path: string }) => {
-      if (opts.service === 'organization' && opts.path === '/schools/school-3/members') {
+      if (opts.service === 'organization' && opts.path === '/schools/school-3/teachers') {
         return Promise.resolve(TEACHERS);
       }
       if (opts.service === 'organization' && opts.path === '/schools/school-3/groups') {

@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NotificationListItem } from './notification-list-item';
 import type { Notification } from '../types';
 
-const SCHOOL_CONTEXT = { workspaceKind: 'school' as const, schoolSlug: 'greenwood' };
+const SCHOOL_CONTEXT = { workspaceKind: 'school' as const, workspaceId: 'greenwood' };
 
 const noop = () => {};
 

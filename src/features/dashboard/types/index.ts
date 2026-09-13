@@ -184,6 +184,7 @@ export type WidgetId =
   | 'kpis'
   | 'operationsBanner'
   | 'groupsWidget'
+  | 'groupGaps'
   | 'teacherWorkload'
   | 'activity'
   | 'courseHealth'

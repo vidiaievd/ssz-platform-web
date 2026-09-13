@@ -11,13 +11,20 @@ import { ProgressBar } from "@/components/ui/progress";
 import { StatusChip } from "@/features/students/components/status-chip";
 import { SkillProfileCard } from "@/features/mastery";
 import type { StudentInSchool, MembershipDetail } from "@/features/students/types";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   student: StudentInSchool;
-  schoolSlug: string;
+  workspaceId: string;
   schoolId: string;
   canEdit: boolean;
   groupsHref: string;
+  /**
+   * False for a private tutor: their learners are all in the one group they teach,
+   * so a card listing it says nothing and its links lead to screens a tutor has not
+   * got (plan 59, phase 2).
+   */
+  showGroups?: boolean;
 };
 
 function CopyButton({ value }: { value: string }) {
@@ -33,7 +40,13 @@ function CopyButton({ value }: { value: string }) {
   );
 }
 
-export async function OverviewTab({ student, schoolSlug, canEdit, groupsHref }: Props) {
+export async function OverviewTab({
+  student,
+  workspaceId,
+  canEdit,
+  groupsHref,
+  showGroups = true,
+}: Props) {
   const t = await getTranslations("Students");
   const locale = (await getLocale()) as Locale;
 
@@ -140,12 +153,14 @@ export async function OverviewTab({ student, schoolSlug, canEdit, groupsHref }: 
 
       {/* ── Right: Active groups + Quick stats ─────────────── */}
       <div className="space-y-4">
-        <ActiveGroupsCard
-          memberships={activeMemberships}
-          schoolSlug={schoolSlug}
-          groupsHref={groupsHref}
-          t={t}
-        />
+        {showGroups && (
+          <ActiveGroupsCard
+            memberships={activeMemberships}
+            workspaceId={workspaceId}
+            groupsHref={groupsHref}
+            t={t}
+          />
+        )}
 
         {/* Quick stats card */}
         <div className="rounded-xl border bg-card p-5 space-y-4">
@@ -220,12 +235,12 @@ export async function OverviewTab({ student, schoolSlug, canEdit, groupsHref }: 
 
 async function ActiveGroupsCard({
   memberships,
-  schoolSlug,
+  workspaceId,
   groupsHref,
   t,
 }: {
   memberships: MembershipDetail[];
-  schoolSlug: string;
+  workspaceId: string;
   groupsHref: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any;
@@ -251,7 +266,7 @@ async function ActiveGroupsCard({
         {memberships.map((m) => (
           <li key={m.id}>
             <Link
-              href={`/school/${schoolSlug}/groups/${m.groupId}`}
+              href={wsHref(workspaceId, `groups/${m.groupId}`)}
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-subtle transition-colors"
             >
               <span className="flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded-md bg-primary/10 text-[10px] font-bold text-primary leading-none text-center">

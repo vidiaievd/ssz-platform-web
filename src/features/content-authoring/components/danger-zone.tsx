@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useParams } from 'next/navigation';
 import { useRouter } from '@/lib/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
@@ -23,6 +22,8 @@ import {
 import { Input } from '@/components/ui/input';
 
 import type { ContainerVersion, CurriculumTree } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 import type { ContainerState, SchoolRole } from '../types';
 import { authoringKeys } from '../api/keys';
 
@@ -116,7 +117,7 @@ function countTreeContent(tree: CurriculumTree): { modules: number; lessons: num
 export function DangerZone({ containerId, containerTitle, state, role }: DangerZoneProps) {
   const t = useTranslations('Authoring.dangerZone');
   const router = useRouter();
-  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const workspaceId = useWorkspaceRef();
   const [, startTransition] = useTransition();
 
   const isOwner = role === 'owner';
@@ -188,7 +189,7 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
       return;
     }
     toast.success(t('deleteForever.success'));
-    startTransition(() => router.push(`/school/${schoolSlug}/content`));
+    startTransition(() => router.push(wsHref(workspaceId, 'content')));
   };
 
   return (

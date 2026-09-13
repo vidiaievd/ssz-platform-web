@@ -74,6 +74,14 @@ export interface SchedulingProvider {
   // ── sessions (schedule & log) ──────────────────────────────────────────────
   /** Every session of a group. Not windowed: the log reads a whole course at once. */
   groupSessions(schoolId: string, groupId: string): Promise<Session[]>;
+  /**
+   * One teacher's own sessions between two dates, across every group they hold.
+   *
+   * Windowed, unlike the group's log, because this answers "what is my week" rather than
+   * "how has this course gone". Cancelled sessions come with it: a lesson called off is
+   * something the week has to show.
+   */
+  mySessions(from: string, to: string): Promise<Session[]>;
   /** Change one session. Absent fields are left alone; explicit nulls clear. */
   patchSession(sessionId: string, changes: SessionChanges): Promise<MutationResult<Session>>;
   /** Add a session outside the weekly pattern. */

@@ -10,6 +10,12 @@ export interface StudentGroupRef {
   lang: LangCode;
   level: CEFR;
   scheduleSummary?: string;
+  /**
+   * The group a workspace keeps for itself. Only a tutor's SOLO workspace has one, and
+   * it holds every learner, so a screen that groups the roster must never draw it as a
+   * group (plan 59, §5.1).
+   */
+  isDefault?: boolean;
   teachers?: Array<{
     userId: string;
     name: string;

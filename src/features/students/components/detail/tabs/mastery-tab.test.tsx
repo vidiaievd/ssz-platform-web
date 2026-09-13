@@ -98,7 +98,7 @@ const draw = async (over: Partial<StudentMastery> = {}) => {
   render(
     await MasteryTab({
       schoolId: 'school-1',
-      schoolSlug: 'nordick',
+      workspaceId: 'nordick',
       studentId: 's1',
       groups: [{ id: 'g1', name: 'NO-A2-2026' }],
       assignHref: '/school/nordick/groups',

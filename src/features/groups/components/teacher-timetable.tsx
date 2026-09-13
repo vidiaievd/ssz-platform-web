@@ -131,10 +131,10 @@ async function Legend() {
 type Props = {
   teachers: TimetableTeacher[];
   selectedTeacherId: string | null;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
-export async function TeacherTimetable({ teachers, selectedTeacherId, schoolSlug }: Props) {
+export async function TeacherTimetable({ teachers, selectedTeacherId, workspaceId }: Props) {
   const t = await getTranslations('Groups');
   const selected = teachers.find((t) => t.userId === selectedTeacherId) ?? teachers[0] ?? null;
 
@@ -161,7 +161,7 @@ export async function TeacherTimetable({ teachers, selectedTeacherId, schoolSlug
           <>
             <TeacherHeader teacher={selected} />
             <div className="rounded-lg border border-border bg-card p-4 overflow-x-auto">
-              <TimetableGrid teacher={selected} schoolSlug={schoolSlug} />
+              <TimetableGrid teacher={selected} workspaceId={workspaceId} />
             </div>
             <ConflictList teacher={selected} />
             <Legend />

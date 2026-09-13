@@ -1,7 +1,6 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useParams } from 'next/navigation';
 import { useForm, useController } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
@@ -20,6 +19,8 @@ import {
 } from '@/components/ui/select';
 import { useRouter } from '@/lib/i18n/navigation';
 import type { Container } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 
 import {
   containerFormSchema,
@@ -41,7 +42,7 @@ export function ContainerForm(props: ContainerFormProps) {
   const tErrors = useTranslations('Errors');
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const workspaceId = useWorkspaceRef();
   const [isPending, startTransition] = useTransition();
   const languageOptions = useLanguageOptions();
 
@@ -96,7 +97,7 @@ export function ContainerForm(props: ContainerFormProps) {
         }
         await queryClient.invalidateQueries({ queryKey: authoringKeys.containers() });
         toast.success(t('form.createSuccess'));
-        router.push(`/school/${schoolSlug}/content/${result.value.id}`);
+        router.push(wsHref(workspaceId, `content/${result.value.id}`));
         return;
       }
 

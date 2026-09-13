@@ -1,4 +1,5 @@
 import type { CheckSeverity, PreflightCheck } from '../types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 export interface RuleViolation {
   ruleCode: string;
@@ -22,21 +23,21 @@ const ITEM_ROUTE_TYPES = new Set(['LESSON', 'EXERCISE', 'VOCABULARY_LIST', 'GRAM
 
 function resolveFixDeepLink(
   v: RuleViolation,
-  ctx: { schoolSlug: string; containerId: string },
+  ctx: { workspaceId: string; containerId: string },
 ): string | null {
-  const containerBase = `/school/${ctx.schoolSlug}/content/${ctx.containerId}`;
+  const containerBase = wsHref(ctx.workspaceId, `content/${ctx.containerId}`);
 
   if (ITEM_ROUTE_TYPES.has(v.itemType)) {
     return `${containerBase}/lessons/${v.itemId}`;
   }
   if (v.itemType === 'CONTAINER' && v.ruleCode === 'MODULE_EMPTY') {
-    return `/school/${ctx.schoolSlug}/content/${v.itemId}`;
+    return wsHref(ctx.workspaceId, `content/${v.itemId}`);
   }
   return null;
 }
 
 export interface MapViolationContext {
-  schoolSlug: string;
+  workspaceId: string;
   containerId: string;
   /**
    * Display title per content id, from the version's items. Rules that name

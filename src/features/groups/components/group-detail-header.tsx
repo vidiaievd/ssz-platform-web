@@ -43,8 +43,10 @@ type Props = {
   alerts: Alert[];
   courseView: CourseView;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   canManage: boolean;
+  /** Where the actions go after the group is gone — see GroupDetail. */
+  listHref?: string;
 };
 
 export async function GroupDetailHeader({
@@ -52,8 +54,9 @@ export async function GroupDetailHeader({
   alerts,
   courseView,
   schoolId,
-  schoolSlug,
+  workspaceId,
   canManage,
+  listHref,
 }: Props) {
   const t = await getTranslations('Groups');
 
@@ -84,7 +87,8 @@ export async function GroupDetailHeader({
         <GroupDetailActions
           group={group}
           schoolId={schoolId}
-          schoolSlug={schoolSlug}
+          workspaceId={workspaceId}
+          listHref={listHref}
         />
       )}
     </div>

@@ -9,6 +9,9 @@ import type { InvitationsProvider, ResendResult } from './provider';
 
 type PreviewDto = InvitePreview;
 
+/** The tutoring endpoint carries no school fields at all — say so explicitly. */
+type TutoringPreviewDto = Omit<InvitePreview, 'schoolName' | 'schoolSlug'>;
+
 type SchoolInvitationDto = Omit<Invitation, 'token'>;
 
 type TutoringInvitationDto = {
@@ -41,11 +44,12 @@ export const realProvider: InvitationsProvider = {
     } catch (schoolErr) {
       if (schoolErr instanceof AppError && schoolErr.code === 'not_found') {
         try {
-          return await serverFetch<PreviewDto>({
+          const tutoring = await serverFetch<TutoringPreviewDto>({
             service: 'organization',
             path: `/tutoring/invitations/${token}`,
             anonymous: true,
           });
+          return { ...tutoring, schoolName: null, schoolSlug: null };
         } catch (tutoringErr) {
           // Propagate tutoring error (not_found / gone)
           throw tutoringErr;

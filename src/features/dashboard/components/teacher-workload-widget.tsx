@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { WidgetCard } from './widget-card';
 import { WidgetEmptyState } from './widget-empty-state';
 import { TeacherWorkloadBar } from './teacher-workload-bar';
@@ -8,7 +9,7 @@ import type { WidgetData, TeacherWorkloadData } from '../types';
 
 type TeacherWorkloadWidgetProps = {
   teacherWorkload: WidgetData<TeacherWorkloadData>;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
 function TeacherWorkloadSkeleton() {
@@ -29,8 +30,8 @@ function TeacherWorkloadSkeleton() {
   );
 }
 
-export function TeacherWorkloadWidget({ teacherWorkload, schoolSlug }: TeacherWorkloadWidgetProps) {
-  const timetableHref = `/school/${schoolSlug}/groups/timetable`;
+export function TeacherWorkloadWidget({ teacherWorkload, workspaceId }: TeacherWorkloadWidgetProps) {
+  const timetableHref = wsHref(workspaceId, 'groups/timetable');
 
   if (teacherWorkload.status === 'unavailable') {
     return <TeacherWorkloadSkeleton />;

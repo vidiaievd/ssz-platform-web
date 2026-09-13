@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
 
 import {
@@ -23,10 +23,12 @@ import {
   type HeatmapRow,
 } from '@/features/analytics/types';
 import { isMeasured } from '@/lib/shared-kernel/analytics';
+import { track } from '@/lib/analytics/track';
 import { Button } from '@/components/ui/button';
 import { Card, CardBody } from '@/components/ui/card';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { useGroupHeatmap } from '../api/use-group-heatmap';
 import { useGroupProgress } from '../api/use-group-progress';
@@ -39,12 +41,12 @@ const STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 export function GroupProgressTab({
   schoolId,
   groupId,
-  schoolSlug,
+  workspaceId,
   canSeePersonalResults,
 }: {
   schoolId: string;
   groupId: string;
-  schoolSlug: string;
+  workspaceId: string;
   /** False for a scheduler: the heatmap carries named results and they have no use for them. */
   canSeePersonalResults: boolean;
 }) {
@@ -74,7 +76,7 @@ export function GroupProgressTab({
     <Progress
       data={data}
       schoolId={schoolId}
-      schoolSlug={schoolSlug}
+      workspaceId={workspaceId}
       groupId={groupId}
       canSeePersonalResults={canSeePersonalResults}
     />
@@ -84,13 +86,13 @@ export function GroupProgressTab({
 function Progress({
   data,
   schoolId,
-  schoolSlug,
+  workspaceId,
   groupId,
   canSeePersonalResults,
 }: {
   data: GroupProgress;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   groupId: string;
   canSeePersonalResults: boolean;
 }) {
@@ -106,7 +108,14 @@ function Progress({
   const [now] = useState(() => Date.now());
 
   const picture = pictureOf(data);
-  const groupHref = `/school/${schoolSlug}/groups/${groupId}`;
+  const groupHref = wsHref(workspaceId, `groups/${groupId}`);
+
+  // Which of the four pictures a teacher actually opens is the question this event was
+  // added for: four of the five kinds of emptiness are more common than full data today,
+  // and how often each is what somebody sees decides which of them earn more work.
+  useEffect(() => {
+    track({ name: 'progress_tab_opened', groupId, dataState: picture });
+  }, [groupId, picture]);
 
   if (picture === 'noCourse') {
     return (
@@ -139,6 +148,21 @@ function Progress({
   ];
 
   const stale = now - new Date(data.updatedAt).getTime() > STALE_AFTER_MS;
+
+  // The state travels with the click: a teacher opening "not taught yet" columns is
+  // asking a different question from one opening measured ones.
+  const pick = (index: number | null) => {
+    setPicked(index);
+    const unit = index === null ? null : data.units[index];
+    if (unit) {
+      track({
+        name: 'progress_unit_selected',
+        groupId,
+        unitId: unit.unitId,
+        cellState: unit.state,
+      });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -206,7 +230,14 @@ function Progress({
                   { value: 'context', label: t('chart.viewContext') },
                 ]}
                 value={view}
-                onValueChange={(next) => setView(next as View)}
+                onValueChange={(next) => {
+                  setView(next as View);
+                  track({
+                    name: 'progress_context_toggled',
+                    groupId,
+                    mode: next === 'context' ? 'by_context' : 'all',
+                  });
+                }}
                 aria-label={t('chart.viewLabel')}
               />
             </div>
@@ -231,7 +262,7 @@ function Progress({
                     absorbed={absorbed}
                     quality={quality}
                     picked={picked}
-                    onPick={setPicked}
+                    onPick={pick}
                     height={240}
                   />
                   <ChartKey legend={legend} label={t('chart.qualityStrip')} />
@@ -243,7 +274,7 @@ function Progress({
                     absorbed={absorbed}
                     quality={quality}
                     picked={picked}
-                    onPick={setPicked}
+                    onPick={pick}
                   />
                   <ChartKey legend={legend} label={t('chart.qualityStrip')} />
                 </div>
@@ -266,14 +297,14 @@ function Progress({
       {canSeePersonalResults && picture !== 'noLessons' && (
         <HeatmapPanel
           schoolId={schoolId}
-          schoolSlug={schoolSlug}
+          workspaceId={workspaceId}
           groupId={groupId}
           legend={legend}
         />
       )}
 
       {data.unlinkedPlanUnits.length > 0 && (
-        <UnlinkedBlock data={data} href={`${groupHref}?tab=schedule`} />
+        <UnlinkedBlock data={data} groupId={groupId} href={`${groupHref}?tab=schedule`} />
       )}
 
       <p className="text-xs text-(--ssz-text-muted)">
@@ -311,6 +342,8 @@ function Chart({
   onPick: (index: number | null) => void;
   height?: number;
 }) {
+  const t = useTranslations('Analytics');
+
   return (
     <DeliveredAbsorbed
       units={data.units}
@@ -319,6 +352,13 @@ function Chart({
       quality={quality}
       picked={picked}
       height={height}
+      tableLabels={{
+        caption: t('chart.tableCaption'),
+        unit: t('chart.tableUnit'),
+        delivered: t('chart.tableDelivered'),
+        absorbed: t('chart.tableAbsorbed'),
+        unmeasured: t('chart.tableUnmeasured'),
+      }}
       // Clicking the same column again clears it: the panel is a detail of a choice,
       // and there has to be a way back to no choice at all.
       onPick={(index) => onPick(picked === index ? null : index)}
@@ -438,7 +478,15 @@ function ContextBar({ bucket }: { bucket: GroupProgress['workContext'][number] }
  * These are lessons that really happened and cannot be counted anywhere, so hiding the
  * block when it is inconvenient would hide the one thing a teacher can actually fix.
  */
-function UnlinkedBlock({ data, href }: { data: GroupProgress; href: string }) {
+function UnlinkedBlock({
+  data,
+  groupId,
+  href,
+}: {
+  data: GroupProgress;
+  groupId: string;
+  href: string;
+}) {
   const t = useTranslations('Analytics');
   const format = useFormatter();
 
@@ -462,7 +510,18 @@ function UnlinkedBlock({ data, href }: { data: GroupProgress; href: string }) {
                 : ''}
             </span>
             <Button asChild size="sm" variant="outline">
-              <a href={href}>{t('unlinked.action')}</a>
+              <a
+                href={href}
+                onClick={() =>
+                  track({
+                    name: 'unlinked_unit_link_clicked',
+                    groupId,
+                    curriculumUnitId: unit.curriculumUnitId,
+                  })
+                }
+              >
+                {t('unlinked.action')}
+              </a>
             </Button>
           </li>
         ))}
@@ -507,12 +566,12 @@ function Empty({
  */
 function HeatmapPanel({
   schoolId,
-  schoolSlug,
+  workspaceId,
   groupId,
   legend,
 }: {
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   groupId: string;
   legend: LegendItem[];
 }) {
@@ -567,7 +626,10 @@ function HeatmapPanel({
     if (!cell || !isMeasured(cell.state)) return null;
     // The group travels with the link: a learner in three groups has three sets of
     // numbers, and the one worth opening is the one whose cell was clicked.
-    return `/school/${schoolSlug}/students/${row.studentId}?tab=mastery&group=${groupId}&unit=${unit.unitId}`;
+    return wsHref(
+      workspaceId,
+      `students/${row.studentId}?tab=mastery&group=${groupId}&unit=${unit.unitId}`,
+    );
   };
 
   return (
@@ -601,7 +663,19 @@ function HeatmapPanel({
             tip={tip}
             href={href}
             lastSeen={lastSeen}
-            labels={{ student: t('heatmap.student'), empty: t('heatmap.empty') }}
+            onOpen={(row, unit, index) =>
+              track({
+                name: 'heatmap_cell_opened',
+                groupId,
+                unitId: unit.unitId,
+                cellState: row.cells[index]?.state ?? 'notStarted',
+              })
+            }
+            labels={{
+              student: t('heatmap.student'),
+              empty: t('heatmap.empty'),
+              grid: t('heatmap.gridLabel'),
+            }}
           />
           <ZeroLegend items={legend} compact />
         </details>
@@ -614,7 +688,19 @@ function HeatmapPanel({
             tip={tip}
             href={href}
             lastSeen={lastSeen}
-            labels={{ student: t('heatmap.student'), empty: t('heatmap.empty') }}
+            onOpen={(row, unit, index) =>
+              track({
+                name: 'heatmap_cell_opened',
+                groupId,
+                unitId: unit.unitId,
+                cellState: row.cells[index]?.state ?? 'notStarted',
+              })
+            }
+            labels={{
+              student: t('heatmap.student'),
+              empty: t('heatmap.empty'),
+              grid: t('heatmap.gridLabel'),
+            }}
           />
           <ZeroLegend items={legend} compact />
         </div>

@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { serverFetch } from "@/lib/api/server-fetcher";
 import { AppError } from "@/lib/errors";
 import { getSchool } from "@/features/school/api/get-school";
-import { getSchoolBySlug } from "@/features/school/api/get-school-by-slug";
+import { getSchoolByRef } from "@/features/school/api/get-school-by-ref";
 import { readAccessToken } from "@/lib/auth/cookies";
 import {
   fetchDashboardKpis,
@@ -42,7 +42,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   // or a slug: GET /api/v1/schools/{id} vs GET /api/v1/schools/by-slug/{slug}.
   const school = UUID_RE.test(id)
     ? await getSchool(id)
-    : await getSchoolBySlug(id);
+    : await getSchoolByRef(id);
 
   if (!school) {
     return NextResponse.json({ error: "School not found" }, { status: 404 });

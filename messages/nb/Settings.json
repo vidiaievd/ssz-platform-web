@@ -3,6 +3,21 @@
     "profile": "Profil",
     "account": "Konto",
     "notifications": "Varsler",
-    "review": "Svartid for retting"
+    "review": "Svartid for retting",
+    "progress": "Hva elevene ser"
+  },
+  "progress": {
+    "eyebrow": "Skole",
+    "title": "Hva elevene ser",
+    "lede": "Hva elevene dine får vite om sin egen framgang. Ingenting her endrer det du selv ser.",
+    "sub": "Gjelder alle elever ved denne skolen.",
+    "failed": "Vi fikk ikke lastet innstillingene for denne skolen.",
+    "saveFailed": "Endringen ble ikke lagret.",
+    "readOnly": "Bare en eier eller administrator kan endre dette.",
+    "position": {
+      "label": "Fortell elevene hvor de ligger i gruppa",
+      "onHint": "Hver elev ser én setning — «du ligger omtrent midt i gruppa». Aldri en plassering, en persentil, en medelevs resultat eller gruppas median.",
+      "offHint": "Elevene får ikke vite noe om gruppa. De ser fortsatt hva det er verdt å jobbe med videre."
+    }
   }
 }

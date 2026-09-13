@@ -40,7 +40,7 @@ function renderCards(overrides: Partial<{ group: Group; canManage: boolean }> = 
       group={overrides.group ?? baseGroup}
       canManage={overrides.canManage ?? true}
       schoolId="11111111-1111-4111-8111-111111111111"
-      schoolSlug="my-school"
+      workspaceId="my-school"
     />,
   );
 }

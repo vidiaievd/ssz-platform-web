@@ -17,6 +17,7 @@ import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardBody } from '@/components/ui/card';
 import { FOCUSES, SKILLS } from '@/lib/shared-kernel/skills/model';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { getStudentMastery } from '../../../api/get-student-mastery';
 
@@ -65,13 +66,13 @@ const REASON_TONE: Record<WeaknessReason, BadgeProps['variant']> = {
  */
 export async function MasteryTab({
   schoolId,
-  schoolSlug,
+  workspaceId,
   studentId,
   groups,
   assignHref,
 }: {
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   studentId: string;
   /** The learner's active groups, most relevant first; empty for a learner in none. */
   groups: ReadonlyArray<{ id: string; name: string }>;
@@ -138,7 +139,7 @@ export async function MasteryTab({
             .map((group) => (
               <a
                 key={group.id}
-                href={`/school/${schoolSlug}/students/${studentId}?tab=mastery&group=${group.id}`}
+                href={wsHref(workspaceId, `students/${studentId}?tab=mastery&group=${group.id}`)}
                 className="ml-2 underline underline-offset-2 hover:text-(--ssz-text-primary)"
               >
                 {group.name}
@@ -161,7 +162,7 @@ export async function MasteryTab({
       <Grid grid={data.grid} naming={naming} t={t} />
 
       <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
-        <WhatToWorkOn profile={data.profile} schoolSlug={schoolSlug} naming={naming} t={t} />
+        <WhatToWorkOn profile={data.profile} workspaceId={workspaceId} naming={naming} t={t} />
 
         <div className="space-y-5">
           <WhereTheWorkHappens workContext={data.workContext} t={t} />
@@ -294,6 +295,7 @@ function Grid({ grid, naming, t }: { grid: StudentGrid; naming: Naming; t: Trans
         </div>
 
         <SkillGrid
+          label={t('mastery.grid.title')}
           skills={SKILLS}
           foci={FOCUS_AXIS}
           cell={(skill, focus) => byCell.get(`${skill}:${focus}`)}
@@ -336,12 +338,12 @@ function Grid({ grid, naming, t }: { grid: StudentGrid; naming: Naming; t: Trans
  */
 function WhatToWorkOn({
   profile,
-  schoolSlug,
+  workspaceId,
   naming,
   t,
 }: {
   profile: MasteryProfile | null;
-  schoolSlug: string;
+  workspaceId: string;
   naming: Naming;
   t: Translate;
 }) {
@@ -375,7 +377,7 @@ function WhatToWorkOn({
               <WeakRow
                 key={`${verdict.skill}:${verdict.focus}`}
                 verdict={verdict}
-                schoolSlug={schoolSlug}
+                workspaceId={workspaceId}
                 naming={naming}
                 t={t}
               />
@@ -389,12 +391,12 @@ function WhatToWorkOn({
 
 function WeakRow({
   verdict,
-  schoolSlug,
+  workspaceId,
   naming,
   t,
 }: {
   verdict: MasteryVerdict;
-  schoolSlug: string;
+  workspaceId: string;
   naming: Naming;
   t: Translate;
 }) {
@@ -436,7 +438,7 @@ function WeakRow({
       {/* The course is where anything is actually done about this, so the row ends with
           a way there rather than with a number to admire. */}
       <a
-        href={`/school/${schoolSlug}/content`}
+        href={wsHref(workspaceId, 'content')}
         className="mt-2 inline-block text-[12px] font-semibold text-(--ssz-text-secondary) underline underline-offset-2 hover:text-(--ssz-text-primary)"
       >
         {t('mastery.work.action')}

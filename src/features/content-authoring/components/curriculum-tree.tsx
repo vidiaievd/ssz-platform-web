@@ -43,6 +43,7 @@ import type {
   DifficultyLevel,
   Visibility,
 } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
@@ -124,7 +125,7 @@ interface CurriculumTreeProps {
   /** The course's owning school — inherited by every node created from the tree. */
   ownerSchoolId?: string | null;
   /** Needed to link a block row straight to its editor. */
-  schoolSlug: string;
+  workspaceId: string;
   /**
    * Collapse keys (see `lib/structure-nodes`) of the nodes currently folded.
    * Owned by the shell so the topbar's Expand/Collapse all can drive it; a key
@@ -454,7 +455,7 @@ function BlockRow({
   sectionId,
   selectedId,
   onSelect,
-  schoolSlug,
+  workspaceId,
   courseContainerId,
   rename,
   check,
@@ -466,7 +467,7 @@ function BlockRow({
   sectionId: string | null;
   selectedId: string | null;
   onSelect: (selection: CurriculumTreeSelection) => void;
-  schoolSlug: string;
+  workspaceId: string;
   courseContainerId: string;
   rename: RenameControls;
   check: CheckControls;
@@ -594,7 +595,7 @@ function BlockRow({
       <span className="flex-1" />
       <RowTools visible={selected}>
         <Link
-          href={`/school/${schoolSlug}/content/${courseContainerId}/lessons/${item.id}`}
+          href={wsHref(workspaceId, `content/${courseContainerId}/lessons/${item.id}`)}
           aria-label={t('structure.openLessonEditor')}
           onClick={(e) => e.stopPropagation()}
           className={TOOL_BUTTON}
@@ -622,7 +623,7 @@ function ModuleCard({
   difficultyLevel,
   visibility,
   ownerSchoolId,
-  schoolSlug,
+  workspaceId,
   filters,
   matches,
   rename,
@@ -636,7 +637,7 @@ function ModuleCard({
   code: string;
   /** Position among its level's modules — drives Move up/down. */
   moduleIndex: number;
-  schoolSlug: string;
+  workspaceId: string;
   filters: StructureFilters;
   /** Shared with the tree so a module's rows and its own expansion agree on what matches. */
   matches: (item: CurriculumTreeItemNode) => boolean;
@@ -721,7 +722,7 @@ function ModuleCard({
                 sectionId={section?.id ?? null}
                 selectedId={selectedId}
                 onSelect={onSelect}
-                schoolSlug={schoolSlug}
+                workspaceId={workspaceId}
                 courseContainerId={mod.containerId}
                 rename={rename}
                 check={check}
@@ -731,7 +732,7 @@ function ModuleCard({
                     kind="item"
                     nodeTitle={item.title ?? ''}
                     onRename={isRenamableItem(item) ? () => rename.begin(item.id) : undefined}
-                    editorHref={`/school/${schoolSlug}/content/${mod.containerId}/lessons/${item.id}`}
+                    editorHref={wsHref(workspaceId, `content/${mod.containerId}/lessons/${item.id}`)}
                     canMoveUp={index > 0}
                     canMoveDown={index < siblings.length - 1}
                     onMoveUp={() => onNudge(item.id, -1)}
@@ -954,7 +955,7 @@ export function CurriculumTree({
   visibility,
   accessTier,
   ownerSchoolId,
-  schoolSlug,
+  workspaceId,
   collapsed,
   onToggleCollapse,
   filters,
@@ -1521,7 +1522,7 @@ export function CurriculumTree({
       if (!found) return;
       event.preventDefault();
       router.push(
-        `/school/${schoolSlug}/content/${found.moduleContainerId}/lessons/${found.item.id}`,
+        wsHref(workspaceId, `content/${found.moduleContainerId}/lessons/${found.item.id}`),
       );
     }
   }
@@ -1820,7 +1821,7 @@ export function CurriculumTree({
                       difficultyLevel={difficultyLevel}
                       visibility={visibility}
                       ownerSchoolId={ownerSchoolId}
-                      schoolSlug={schoolSlug}
+                      workspaceId={workspaceId}
                       filters={filters}
                       matches={matches}
                       rename={rename}
@@ -1845,7 +1846,7 @@ export function CurriculumTree({
                           sectionId={level.id}
                           selectedId={selectedId}
                           onSelect={onSelect}
-                          schoolSlug={schoolSlug}
+                          workspaceId={workspaceId}
                           courseContainerId={courseContainerId}
                           rename={rename}
                           check={check}
@@ -1901,7 +1902,7 @@ export function CurriculumTree({
                 sectionId={null}
                 selectedId={selectedId}
                 onSelect={onSelect}
-                schoolSlug={schoolSlug}
+                workspaceId={workspaceId}
                 courseContainerId={courseContainerId}
                 rename={rename}
                 check={check}

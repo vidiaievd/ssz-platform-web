@@ -45,7 +45,8 @@ describe('mockProvider.preview', () => {
   it('returns tutoring preview for tutoring-* token', async () => {
     const preview = await mockProvider.preview('tutoring-abc');
     expect(preview.status).toBe('pending');
-    expect(preview.schoolSlug).toBe('');
+    expect(preview.schoolName).toBeNull();
+    expect(preview.schoolSlug).toBeNull();
     expect(preview.role).toBe('STUDENT');
   });
 });

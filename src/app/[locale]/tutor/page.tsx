@@ -3,9 +3,11 @@ import { getLocale } from 'next-intl/server';
 
 import { requireAnyRole } from '@/lib/auth/protect';
 import { getTutorProfile } from '@/features/profile/api/get-tutor-profile';
+import { getTutorWorkspace } from '@/features/tutoring/api/get-tutor-workspace';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 export default async function TutorIndexPage() {
-  const user = await requireAnyRole(['tutor']);
+  await requireAnyRole(['tutor']);
 
   const [locale, tutorProfile] = await Promise.all([getLocale(), getTutorProfile()]);
 
@@ -13,11 +15,13 @@ export default async function TutorIndexPage() {
     redirect(`/${locale}/onboarding`);
   }
 
-  // Use stable userId from JWT, not a generated name-based slug
-  const userId = user.userId;
-  if (!userId) {
+  // A tutor's screens are their workspace's screens now, so this lands where a school
+  // admin lands: inside the workspace, on its dashboard. The server provisions one for a
+  // tutor who registered before workspaces existed, so a miss here is a real failure.
+  const workspace = await getTutorWorkspace();
+  if (!workspace) {
     redirect(`/${locale}/onboarding`);
   }
 
-  redirect(`/${locale}/tutor/${userId}/dashboard`);
+  redirect(`/${locale}${wsHref(workspace.schoolId, 'dashboard')}`);
 }

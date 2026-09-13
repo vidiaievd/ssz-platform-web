@@ -33,6 +33,7 @@ type OrgGroup = {
   lang?: string;
   level?: string;
   status?: string;
+  isDefault?: boolean;
   mode?: string;
   capacityMin?: number;
   capacityMax?: number;
@@ -62,8 +63,12 @@ type OrgMember = {
 };
 
 function mapGroupStatus(s?: string): Group['status'] {
-  if (s === 'ACTIVE') return 'active';
-  if (s === 'ARCHIVED') return 'archived';
+  // organization-service answers in the Prisma enum's mapped spelling — lowercase — while
+  // the member-role enums beside it come back upper-cased. Matching only one of the two
+  // made every open group read as a draft on its own page.
+  const value = s?.toLowerCase();
+  if (value === 'active') return 'active';
+  if (value === 'archived') return 'archived';
   return 'draft';
 }
 
@@ -334,6 +339,7 @@ export async function getGroup(
     lang: rawGroup.lang ?? 'en',
     level: (rawGroup.level ?? 'A1') as Group['level'],
     status: mapGroupStatus(rawGroup.status),
+    isDefault: rawGroup.isDefault ?? false,
     mode: mapGroupMode(rawGroup.mode),
     capacity: { min: rawGroup.capacityMin ?? 0, max: rawGroup.capacityMax ?? 999 },
     studentCount: rawGroup.studentCount ?? 0,
@@ -402,16 +408,25 @@ type SchoolTeacher = {
   langs: string[];
 };
 
-function mapSchoolTeachers(raw: OrgMember[]): SchoolTeacher[] {
-  return raw
-    .filter((m) => m.role === 'TEACHER')
-    .map((m) => ({
-      userId: m.userId,
-      name: m.name ?? '',
-      avatarUrl: m.avatarUrl ?? null,
-      maxWeeklyHours: m.maxWeeklyHours ?? 20,
-      langs: m.langs ?? [],
-    }));
+/** The enriched teacher row organization-service answers with. */
+type OrgTeacher = {
+  userId: string;
+  name?: string | null;
+  avatarUrl?: string | null;
+  maxWeeklyHours?: number | null;
+  langs?: string[];
+};
+
+function mapSchoolTeachers(raw: OrgTeacher[]): SchoolTeacher[] {
+  return raw.map((t) => ({
+    userId: t.userId,
+    name: t.name ?? '',
+    avatarUrl: t.avatarUrl ?? null,
+    // The endpoint answers null for a teacher nobody has given a load to; the screens
+    // below have always read that as the default week.
+    maxWeeklyHours: t.maxWeeklyHours ?? 20,
+    langs: t.langs ?? [],
+  }));
 }
 
 /**
@@ -421,11 +436,13 @@ function mapSchoolTeachers(raw: OrgMember[]): SchoolTeacher[] {
  * a genuinely empty roster.
  */
 export async function getSchoolTeachers(schoolId: string): Promise<SchoolTeacher[]> {
-  const raw = await safeFetch<OrgMember[]>(() =>
+  const raw = await safeFetch<OrgTeacher[]>(() =>
     serverFetch({
       service: 'organization',
-      path: `/schools/${schoolId}/members`,
-      query: { role: 'TEACHER' },
+      // The teachers endpoint, not the roster filtered by role: a private tutor teaches
+      // their own workspace without a roster row saying so, and the roster answered an
+      // empty list — which is why their own sessions showed "?" where their name belongs.
+      path: `/schools/${schoolId}/teachers`,
     }),
   );
   return raw ? mapSchoolTeachers(raw) : [];
@@ -440,10 +457,9 @@ export async function getSchoolTeachersResult(
   schoolId: string,
 ): Promise<{ teachers: SchoolTeacher[]; error: string | null }> {
   try {
-    const raw = await serverFetch<OrgMember[]>({
+    const raw = await serverFetch<OrgTeacher[]>({
       service: 'organization',
-      path: `/schools/${schoolId}/members`,
-      query: { role: 'TEACHER' },
+      path: `/schools/${schoolId}/teachers`,
     });
     return { teachers: mapSchoolTeachers(raw), error: null };
   } catch (err) {

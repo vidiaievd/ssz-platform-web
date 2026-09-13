@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatusPill } from '@/components/ui/status-pill';
 import { TableBody, TableRow, TableCell } from '@/components/ui/table';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { removeStudent, addStudents } from '../api/mutations';
 import type { RosterStudent, Group } from '../types';
 
@@ -31,11 +32,11 @@ type Props = {
   roster: RosterStudent[];
   group: Pick<Group, 'id' | 'capacity' | 'studentCount'>;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   addStudentsHref: string;
 };
 
-export function GroupStudentsTab({ roster, group, schoolId, schoolSlug, addStudentsHref }: Props) {
+export function GroupStudentsTab({ roster, group, schoolId, workspaceId, addStudentsHref }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [query, setQuery] = useState('');
@@ -148,7 +149,7 @@ export function GroupStudentsTab({ roster, group, schoolId, schoolSlug, addStude
                 return (
                   <TableRow
                     key={student.userId}
-                    onClick={() => router.push(`/school/${schoolSlug}/students/${student.userId}`)}
+                    onClick={() => router.push(wsHref(workspaceId, `students/${student.userId}`))}
                     className={cn('cursor-pointer', isRemoving && 'opacity-50')}
                   >
                     <TableCell className="py-2.75">

@@ -18,12 +18,13 @@ import { Button } from "@/components/ui/button";
 import { RemoveFromSchoolDialog } from "./dialogs/remove-from-school-dialog";
 import { archiveStudent } from "@/features/students/api/mutations";
 import { studentKeys } from "@/features/students/api/keys";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   studentId: string;
   studentName: string;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   activeGroupCount: number;
   isArchived?: boolean;
   isOwner: boolean;
@@ -33,7 +34,7 @@ export function StudentActionMenu({
   studentId,
   studentName,
   schoolId,
-  schoolSlug,
+  workspaceId,
   activeGroupCount,
   isArchived = false,
   isOwner,
@@ -63,13 +64,13 @@ export function StudentActionMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-52">
           <DropdownMenuItem asChild>
-            <a href={`/school/${schoolSlug}/students/${studentId}/edit`}>
+            <a href={wsHref(workspaceId, `students/${studentId}/edit`)}>
               <Pencil className="mr-2 h-4 w-4" />
               {t("detail.actions.editInfo")}
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <a href={`/school/${schoolSlug}/students/${studentId}/level`}>
+            <a href={wsHref(workspaceId, `students/${studentId}/level`)}>
               <GraduationCap className="mr-2 h-4 w-4" />
               {t("detail.actions.changeLevel")}
             </a>
@@ -100,7 +101,7 @@ export function StudentActionMenu({
         studentId={studentId}
         studentName={studentName}
         schoolId={schoolId}
-        schoolSlug={schoolSlug}
+        workspaceId={workspaceId}
         activeGroupCount={activeGroupCount}
         onClose={() => setRemoveDialogOpen(false)}
       />

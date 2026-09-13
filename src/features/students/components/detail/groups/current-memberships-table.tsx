@@ -21,6 +21,7 @@ import { TransferGroupDialog } from "../dialogs/transfer-group-dialog";
 import type { MembershipDetail, TeacherRef } from "@/features/students/types";
 import { formatDate } from "@/lib/i18n/formatters";
 import type { Locale } from "@/lib/i18n/config";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type DialogState =
   | { type: "none" }
@@ -32,7 +33,7 @@ type Props = {
   studentId: string;
   studentName: string;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   canManage: boolean;
   locale: Locale;
 };
@@ -71,7 +72,7 @@ export function CurrentMembershipsTable({
   studentId,
   studentName,
   schoolId,
-  schoolSlug,
+  workspaceId,
   canManage,
   locale,
 }: Props) {
@@ -103,7 +104,7 @@ export function CurrentMembershipsTable({
               {/* Group */}
               <TableCell>
                 <Link
-                  href={`/school/${schoolSlug}/groups/${m.groupId}`}
+                  href={wsHref(workspaceId, `groups/${m.groupId}`)}
                   className="flex items-center gap-2 hover:underline"
                 >
                   <span className="flex h-7 w-7 shrink-0 flex-col items-center justify-center rounded bg-primary/10 text-[9px] font-bold text-primary leading-none text-center">
@@ -154,7 +155,7 @@ export function CurrentMembershipsTable({
                     studentId={studentId}
                     studentName={studentName}
                     schoolId={schoolId}
-                    schoolSlug={schoolSlug}
+                    workspaceId={workspaceId}
                     currentRole={m.role}
                     onTransfer={() => setDialog({ type: "transfer", membership: m })}
                     onRemove={() => setDialog({ type: "remove", membership: m })}
@@ -182,7 +183,7 @@ export function CurrentMembershipsTable({
           studentId={studentId}
           studentName={studentName}
           schoolId={schoolId}
-          schoolSlug={schoolSlug}
+          workspaceId={workspaceId}
           onClose={() => setDialog({ type: "none" })}
         />
       )}

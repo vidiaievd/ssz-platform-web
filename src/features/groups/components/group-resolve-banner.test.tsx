@@ -17,10 +17,10 @@ const noPrimaryAlert: Alert = { type: 'no-primary', severity: 'danger', label: '
 const conflictAlert: Alert = { type: 'conflict', severity: 'warn', label: 'Schedule clash' };
 const overAlert: Alert = { type: 'over', severity: 'warn', label: 'Over capacity' };
 
-async function renderBanner(props: Omit<Parameters<typeof GroupResolveBanner>[0], 'groupId' | 'schoolSlug'>) {
+async function renderBanner(props: Omit<Parameters<typeof GroupResolveBanner>[0], 'groupId' | 'workspaceId'>) {
   const element = await GroupResolveBanner({
     groupId: 'g1',
-    schoolSlug: 'my-school',
+    workspaceId: 'my-school',
     ...props,
   });
   return render(element);
@@ -28,26 +28,26 @@ async function renderBanner(props: Omit<Parameters<typeof GroupResolveBanner>[0]
 
 describe('GroupResolveBanner', () => {
   it('renders nothing when there are no alerts', async () => {
-    const element = await GroupResolveBanner({ alerts: [], groupId: 'g1', schoolSlug: 'my-school', canManage: true });
+    const element = await GroupResolveBanner({ alerts: [], groupId: 'g1', workspaceId: 'my-school', canManage: true });
     expect(element).toBeNull();
   });
 
   it('links "no-primary" alerts to the assign-teacher route with role=primary', async () => {
     await renderBanner({ alerts: [noPrimaryAlert], canManage: true });
     const link = screen.getByRole('link', { name: 'Fix →' });
-    expect(link).toHaveAttribute('href', '/school/my-school/groups/g1/assign-teacher?role=primary');
+    expect(link).toHaveAttribute('href', '/w/my-school/groups/g1/assign-teacher?role=primary');
   });
 
   it('links "conflict" alerts to the assign-teacher route', async () => {
     await renderBanner({ alerts: [conflictAlert], canManage: true });
     const link = screen.getByRole('link', { name: 'Fix →' });
-    expect(link).toHaveAttribute('href', '/school/my-school/groups/g1/assign-teacher');
+    expect(link).toHaveAttribute('href', '/w/my-school/groups/g1/assign-teacher');
   });
 
   it('links "over"/"under" alerts to the add-students route', async () => {
     await renderBanner({ alerts: [overAlert], canManage: true });
     const link = screen.getByRole('link', { name: 'Fix →' });
-    expect(link).toHaveAttribute('href', '/school/my-school/groups/g1/add-students');
+    expect(link).toHaveAttribute('href', '/w/my-school/groups/g1/add-students');
   });
 
   it('hides "Fix →" links for a teacher (non-manager)', async () => {

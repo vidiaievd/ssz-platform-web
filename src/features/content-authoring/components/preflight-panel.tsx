@@ -1,6 +1,5 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle, CheckCircle2, XCircle, ExternalLink, RefreshCw } from 'lucide-react';
@@ -8,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Link } from '@/lib/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 
 import type { CheckSeverity, PreflightCheck, PreflightResult } from '../types';
 import { authoringKeys } from '../api/keys';
@@ -107,12 +107,12 @@ export function PreflightPanel({
   onPublishAnyway,
 }: PreflightPanelProps) {
   const t = useTranslations('Authoring.preflight');
-  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const workspaceId = useWorkspaceRef();
   const { data, isLoading, error, refetch } = useQuery<PreflightResult>({
-    queryKey: [...authoringKeys.preflight(containerId), schoolSlug],
+    queryKey: [...authoringKeys.preflight(containerId), workspaceId],
     queryFn: async () => {
       const res = await fetch(
-        `/api/content/containers/${containerId}/preflight?schoolSlug=${encodeURIComponent(schoolSlug)}`,
+        `/api/content/containers/${containerId}/preflight?workspaceId=${encodeURIComponent(workspaceId)}`,
       );
       if (!res.ok) throw new Error('Preflight failed');
       return res.json() as Promise<PreflightResult>;

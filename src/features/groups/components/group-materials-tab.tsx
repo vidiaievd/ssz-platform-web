@@ -8,6 +8,7 @@ import { PlanUnitLinkControl } from './plan-unit-link-control';
 import type { Group } from '../types';
 import type { GroupMaterialsView } from '../api/queries';
 import type { CurriculumUnit } from '@/features/teachers/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 /** Ring showing how much of the teaching plan the group has been given. */
 function ProgressRing({ pct, label }: { pct: number; label: string }) {
@@ -64,7 +65,7 @@ type Props = {
   /** Units of the teaching plan, each possibly stitched to a unit of the course. */
   planUnits: CurriculumUnit[];
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   canManage: boolean;
 };
 
@@ -74,7 +75,7 @@ export async function GroupMaterialsTab({
   progressPct,
   planUnits,
   schoolId,
-  schoolSlug,
+  workspaceId,
   canManage,
 }: Props) {
   const t = await getTranslations('Groups');
@@ -124,7 +125,7 @@ export async function GroupMaterialsTab({
 
             <div className="mt-3 flex items-center gap-2 flex-wrap">
               <Link
-                href={`/school/${schoolSlug}/content/${course.id}`}
+                href={wsHref(workspaceId, `content/${course.id}`)}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
               >
                 <ExternalLink className="size-3.5" aria-hidden="true" />
@@ -297,7 +298,7 @@ export async function GroupMaterialsTab({
               >
                 <BookOpen className="size-3.5 text-(--ssz-text-muted) shrink-0" aria-hidden="true" />
                 <Link
-                  href={`/school/${schoolSlug}/content/${material.courseId}`}
+                  href={wsHref(workspaceId, `content/${material.courseId}`)}
                   className="flex-1 min-w-0 truncate text-sm text-(--ssz-text-secondary) hover:underline"
                 >
                   {material.courseName ?? material.courseId}

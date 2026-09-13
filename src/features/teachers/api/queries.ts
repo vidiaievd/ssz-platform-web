@@ -1,5 +1,6 @@
 import 'server-only';
 import { cache } from 'react';
+import { cookies } from 'next/headers';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import type {
@@ -37,9 +38,22 @@ function makeUrl(path: string): string {
   return `${base}${path}`;
 }
 
+/**
+ * Read one of this app's own BFF routes from a server component.
+ *
+ * The session has to travel by hand. A server-side `fetch` starts a new request that
+ * carries none of the browser's cookies, so every screen built this way asked its own BFF
+ * as a stranger and was told the session had expired — the workload screen showed "no
+ * teachers in this school" to schools that have six.
+ */
 async function safeFetch<T>(url: string, init?: RequestInit): Promise<T | Unavailable> {
   try {
-    const res = await fetch(url, { ...init, cache: 'no-store' });
+    const cookie = (await cookies()).toString();
+    const res = await fetch(url, {
+      ...init,
+      cache: 'no-store',
+      headers: { ...(init?.headers ?? {}), ...(cookie ? { cookie } : {}) },
+    });
     if (!res.ok) return { status: 'unavailable' };
     return (await res.json()) as T;
   } catch {

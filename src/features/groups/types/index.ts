@@ -33,6 +33,11 @@ export interface Group {
   materials: GroupMaterial[];
   lang: LangCode; level: CEFR;
   status: GroupStatus; mode: GroupMode;
+  /**
+   * The group a workspace keeps for itself. Only a private tutor's has one, it holds every
+   * learner of theirs, and it is never shown as a group (plan 59, §5.1).
+   */
+  isDefault?: boolean;
   capacity: { min: number; max: number };
   studentCount: number;
   startDate: ISODate | null; endDate: ISODate | null;

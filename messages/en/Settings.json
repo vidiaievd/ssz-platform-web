@@ -3,6 +3,21 @@
     "profile": "Profile",
     "account": "Account",
     "notifications": "Notifications",
-    "review": "Review response time"
+    "review": "Review response time",
+    "progress": "What students see"
+  },
+  "progress": {
+    "eyebrow": "School",
+    "title": "What students see",
+    "lede": "What your learners are told about their own progress. Nothing here changes what you see.",
+    "sub": "Applies to every learner of this school.",
+    "failed": "We could not load this school's settings.",
+    "saveFailed": "The change was not saved.",
+    "readOnly": "Only an owner or an administrator can change this.",
+    "position": {
+      "label": "Tell learners where they stand in their group",
+      "onHint": "Each learner sees one sentence — “you are around the middle of your group”. Never a rank, a percentile, a classmate's result, or the group's median.",
+      "offHint": "Learners are told nothing about the group. They still see what is worth working on next."
+    }
   }
 }

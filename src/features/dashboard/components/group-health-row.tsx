@@ -2,13 +2,14 @@ import Link from 'next/link';
 
 import { AlertChip } from './alert-chip';
 import type { GroupHealth } from '../types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type GroupHealthRowProps = {
   group: GroupHealth;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
-export function GroupHealthRow({ group, schoolSlug }: GroupHealthRowProps) {
+export function GroupHealthRow({ group, workspaceId }: GroupHealthRowProps) {
   return (
     <li className="flex items-center gap-3 py-2.5 min-w-0">
       {/* Lang badge */}
@@ -19,7 +20,7 @@ export function GroupHealthRow({ group, schoolSlug }: GroupHealthRowProps) {
       {/* Name + teacher/capacity */}
       <div className="flex-1 min-w-0">
         <Link
-          href={`/school/${schoolSlug}/groups/${group.id}`}
+          href={wsHref(workspaceId, `groups/${group.id}`)}
           className="block text-sm font-medium text-(--ssz-text-primary) hover:underline truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
         >
           {group.name}

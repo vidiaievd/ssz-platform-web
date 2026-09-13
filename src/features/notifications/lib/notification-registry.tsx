@@ -2,6 +2,7 @@ import {
   AlertCircle,
   AlertTriangle,
   Bell,
+  CalendarClock,
   CalendarOff,
   CalendarX,
   CheckCircle2,
@@ -19,6 +20,7 @@ import {
 import type { useTranslations } from 'next-intl';
 
 import { hoursSince } from '@/features/review/lib/age-scale';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import type {
   AttemptReviewedData,
@@ -39,7 +41,7 @@ export type NotificationsTranslator = ReturnType<typeof useTranslations<'Notific
 
 export interface NotificationLinkContext {
   workspaceKind: 'school' | 'student';
-  schoolSlug?: string;
+  workspaceId?: string;
 }
 
 export interface NotificationRegistryEntry {
@@ -85,6 +87,16 @@ function isReviewEscalationData(data: unknown): data is ReviewEscalationData {
 
 function isReviewSchoolSummaryData(data: unknown): data is ReviewSchoolSummaryData {
   return !!data && typeof data === 'object' && 'pending' in data && 'oldestAgeHours' in data;
+}
+
+/** The shape a lesson reminder carries; anything else falls back to the plain wording. */
+function asLessonReminder(
+  data: unknown,
+): { startTime: string; endTime: string; isExam: boolean } | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const { startTime, endTime, isExam } = data as Record<string, unknown>;
+  if (typeof startTime !== 'string' || typeof endTime !== 'string') return null;
+  return { startTime, endTime, isExam: isExam === true };
 }
 
 function isAttemptReviewedData(data: unknown): data is AttemptReviewedData {
@@ -146,6 +158,35 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     actionable: false,
     resolveTitle: (_data, t) => t('types.STUDY_REMINDER.title'),
     resolveBody: (_data, t) => t('types.STUDY_REMINDER.body'),
+    getLink: noLink,
+  },
+  /**
+   * A lesson tomorrow (plan 62).
+   *
+   * The time is the whole message: the learner knows who teaches them and what the course
+   * is, and what a notification can add is the hour — and that a checkpoint is not an
+   * ordinary lesson.
+   */
+  LESSON_REMINDER: {
+    icon: CalendarClock,
+    category: 'Learning',
+    priority: 'normal',
+    actionable: false,
+    resolveTitle: (data, t) => {
+      const reminder = asLessonReminder(data);
+      if (reminder === null) return t('types.LESSON_REMINDER.title');
+      return reminder.isExam
+        ? t('types.LESSON_REMINDER.titleExam', { time: reminder.startTime })
+        : t('types.LESSON_REMINDER.titleNamed', { time: reminder.startTime });
+    },
+    resolveBody: (data, t) => {
+      const reminder = asLessonReminder(data);
+      if (reminder === null) return t('types.LESSON_REMINDER.body');
+      return t('types.LESSON_REMINDER.bodyNamed', {
+        from: reminder.startTime,
+        to: reminder.endTime,
+      });
+    },
     getLink: noLink,
   },
   TEACHER_ABSENCE: {
@@ -219,9 +260,9 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     resolveTitle: (_data, t) => t('types.TEACHER_PROFILE_CHANGED.title'),
     resolveBody: (_data, t) => t('types.TEACHER_PROFILE_CHANGED.body'),
     getLink: (data, ctx) => {
-      if (ctx.workspaceKind !== 'school' || !ctx.schoolSlug) return undefined;
+      if (ctx.workspaceKind !== 'school' || !ctx.workspaceId) return undefined;
       if (!isTeacherProfileChangedData(data)) return undefined;
-      return `/school/${ctx.schoolSlug}/teachers/${data.teacherUserId}`;
+      return wsHref(ctx.workspaceId, `teachers/${data.teacherUserId}`);
     },
   },
   ENROLLMENT_REQUEST: {
@@ -238,8 +279,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         ? t('types.ENROLLMENT_REQUEST.body', { schoolName: data.schoolName })
         : '',
     getLink: (_data, ctx) => {
-      if (ctx.workspaceKind !== 'school' || !ctx.schoolSlug) return undefined;
-      return `/school/${ctx.schoolSlug}/enrollment/requests`;
+      if (ctx.workspaceKind !== 'school' || !ctx.workspaceId) return undefined;
+      return wsHref(ctx.workspaceId, 'enrollment/requests');
     },
   },
   ENROLLMENT_APPROVED: {
@@ -277,8 +318,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         ? t('types.PLACEMENT_REVIEW_READY.body', { school: data.schoolName })
         : t('types.PLACEMENT_REVIEW_READY.bodyFallback'),
     getLink: (_data, ctx) =>
-      ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? `/school/${ctx.schoolSlug}/enrollment/placement`
+      ctx.workspaceKind === 'school' && ctx.workspaceId
+        ? wsHref(ctx.workspaceId, 'enrollment/placement')
         : undefined,
   },
   GROUP_ASSIGNED: {
@@ -390,8 +431,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
       });
     },
     getLink: (_data, ctx) =>
-      ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? `/school/${ctx.schoolSlug}/review`
+      ctx.workspaceKind === 'school' && ctx.workspaceId
+        ? wsHref(ctx.workspaceId, 'review')
         : undefined,
   },
   /**
@@ -417,8 +458,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         : t('types.REVIEW_ESCALATION.body', { hours, promised: data.escalateAfterHours });
     },
     getLink: (_data, ctx) =>
-      ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? `/school/${ctx.schoolSlug}/review`
+      ctx.workspaceKind === 'school' && ctx.workspaceId
+        ? wsHref(ctx.workspaceId, 'review')
         : undefined,
   },
   /**
@@ -451,8 +492,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
           });
     },
     getLink: (_data, ctx) =>
-      ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? `/school/${ctx.schoolSlug}/review/oversight`
+      ctx.workspaceKind === 'school' && ctx.workspaceId
+        ? wsHref(ctx.workspaceId, 'review/oversight')
         : undefined,
   },
 };

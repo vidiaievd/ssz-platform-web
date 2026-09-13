@@ -35,6 +35,21 @@ export interface DeliveredAbsorbedProps {
   onPick?: (index: number) => void;
   height?: number;
   ariaLabel?: string;
+  /**
+   * Headers for the table a screen reader is given instead of the drawing.
+   *
+   * Omitted, the table is not rendered at all: an unlabelled table of numbers is worse
+   * than the `aria-label` on its own, and the caller that has the translations is the
+   * only one that can label it.
+   */
+  tableLabels?: {
+    caption: string;
+    unit: string;
+    delivered: string;
+    absorbed: string;
+    /** How a cell with no judgeable number is read out — "not measured", in words. */
+    unmeasured: string;
+  };
 }
 
 const W = 920;
@@ -61,6 +76,7 @@ export function DeliveredAbsorbed({
   onPick,
   height = 300,
   ariaLabel = 'Delivered versus absorbed, per course unit',
+  tableLabels,
 }: DeliveredAbsorbedProps) {
   const H = height;
   const PB = showQuality ? 62 : 34;
@@ -122,6 +138,38 @@ export function DeliveredAbsorbed({
 
   return (
     <div className="w-full overflow-x-auto">
+      {/* The same numbers, in the order the chart draws them. A line and a band cannot be
+          read out; this can, and it says "not measured" in words wherever the line breaks
+          rather than leaving the cell blank. */}
+      {tableLabels && (
+        <table className="sr-only">
+          <caption>{tableLabels.caption}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{tableLabels.unit}</th>
+              <th scope="col">{tableLabels.delivered}</th>
+              <th scope="col">{tableLabels.absorbed}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {units.map((unit, index) => (
+              <tr key={unit.unitId}>
+                <th scope="row">{`${unit.no}. ${unit.title}`}</th>
+                <td>
+                  {delivered[index]?.value == null
+                    ? tableLabels.unmeasured
+                    : `${Math.round((delivered[index]!.value as number) * 100)}%`}
+                </td>
+                <td>
+                  {absorbed[index]?.median == null
+                    ? tableLabels.unmeasured
+                    : `${absorbed[index]!.median}%`}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="block w-full min-w-[660px]"

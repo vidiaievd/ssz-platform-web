@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { WorkspacesResponse, WorkspaceContext } from '../types';
+import { wsHref } from '../lib/href';
 
 export const workspacesKeys = {
   all: () => ['workspaces'] as const,
@@ -42,8 +43,11 @@ export function useActivateWorkspace() {
   });
 }
 
-export function contextToUrl(ctx: WorkspaceContext, locale: string, userId?: string): string {
-  if (ctx.type === 'school') return `/${locale}/school/${ctx.schoolSlug}/dashboard`;
-  if (ctx.type === 'private_tutor') return `/${locale}/tutor/${userId ?? ctx.tutorGroupId}/dashboard`;
+export function contextToUrl(ctx: WorkspaceContext, locale: string): string {
+  if (ctx.type === 'school') return `/${locale}${wsHref(ctx.schoolSlug, 'dashboard')}`;
+  // The tutor's own index resolves their workspace and lands inside it. Building
+  // `/w/<id>/…` here is not possible: the switcher knows the tutor's group, not the
+  // workspace that holds it (plan 61, phase 4).
+  if (ctx.type === 'private_tutor') return `/${locale}/tutor`;
   return `/${locale}/student/dashboard`;
 }

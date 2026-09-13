@@ -1,15 +1,17 @@
 import 'server-only';
 
-import { getMySchools } from './get-my-schools';
+import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import type { SchoolRole } from '../types';
 
 /**
- * Returns the current user's role in the given school (by slug or id).
- * Returns null if the school is not found or the user has no role.
- * Uses the cached school list — no extra round-trip when called after getMySchools.
+ * The current user's role in one workspace, by id or slug. Null when it is not theirs.
+ *
+ * Asked of the server rather than of "my schools", because that list is a school list: a
+ * private tutor's own workspace is deliberately absent from it, and answering from it gave
+ * a tutor standing in their own space the role of a `teacher` — enough to hide the danger
+ * zone and half the course settings from the person who owns the course (plan 61).
  */
 export async function getMySchoolRole(schoolSlug: string): Promise<SchoolRole | null> {
-  const schools = await getMySchools();
-  const school = schools.find((s) => s.slug === schoolSlug || s.id === schoolSlug);
-  return school?.myRole ?? null;
+  const workspace = await resolveWorkspace(schoolSlug);
+  return workspace?.myRole ?? null;
 }

@@ -44,7 +44,7 @@ describe('NotificationBell', () => {
 
     renderWithProviders(
       <NotificationBell
-        linkContext={{ workspaceKind: 'school', schoolSlug: 'greenwood' }}
+        linkContext={{ workspaceKind: 'school', workspaceId: 'greenwood' }}
         notificationsHref="/school/greenwood/notifications"
       />,
     );
@@ -61,7 +61,7 @@ describe('NotificationBell', () => {
 
     renderWithProviders(
       <NotificationBell
-        linkContext={{ workspaceKind: 'school', schoolSlug: 'greenwood' }}
+        linkContext={{ workspaceKind: 'school', workspaceId: 'greenwood' }}
         notificationsHref="/school/greenwood/notifications"
       />,
     );

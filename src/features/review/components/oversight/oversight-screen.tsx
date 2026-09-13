@@ -8,6 +8,7 @@ import { Bell, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { useOversight } from '../../api/use-oversight';
 import { useRemindReviewer } from '../../api/use-remind-reviewer';
@@ -172,7 +173,7 @@ export function OversightScreen({ school }: OversightScreenProps) {
 
           <StuckList
             items={data.stuck}
-            reviewHref={(id) => `/school/${school}/review?submission=${encodeURIComponent(id)}`}
+            reviewHref={(id) => wsHref(school, `review?submission=${encodeURIComponent(id)}`)}
             onAssign={(item) =>
               setAssigning({
                 kind: 'submission',

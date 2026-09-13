@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { cn } from '@/lib/utils';
 import { slotsOverlap } from '@/lib/groups/operations';
+import { wsHref } from '@/features/workspaces/lib/href';
 import type { TimetableTeacher, Weekday } from '../types';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -107,10 +108,10 @@ type DayColumnProps = {
   lessons: Lesson[];
   conflictIndices: Set<number>;
   allLessons: Lesson[];
-  schoolSlug: string;
+  workspaceId: string;
 };
 
-async function DayColumn({ day, lessons, conflictIndices, allLessons, schoolSlug }: DayColumnProps) {
+async function DayColumn({ day, lessons, conflictIndices, allLessons, workspaceId }: DayColumnProps) {
   const t = await getTranslations('Groups');
   const totalH = (GRID_END_HOUR - GRID_START_HOUR) * PX_PER_HOUR;
   const dayLessons = lessons.filter((l) => l.day === day);
@@ -181,7 +182,7 @@ async function DayColumn({ day, lessons, conflictIndices, allLessons, schoolSlug
         return (
           <Link
             key={globalIndex}
-            href={`/school/${schoolSlug}/groups/${lesson.groupId}`}
+            href={wsHref(workspaceId, `groups/${lesson.groupId}`)}
             aria-label={ariaLabel}
             className={cn(
               'absolute rounded px-1.5 py-0.5 text-[11px] font-medium leading-tight overflow-hidden',
@@ -215,10 +216,10 @@ async function DayColumn({ day, lessons, conflictIndices, allLessons, schoolSlug
 
 type Props = {
   teacher: TimetableTeacher;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
-export async function TimetableGrid({ teacher, schoolSlug }: Props) {
+export async function TimetableGrid({ teacher, workspaceId }: Props) {
   const t = await getTranslations('Groups');
   const { lessons } = teacher;
   const conflictIndices = findConflictPairs(lessons);
@@ -249,7 +250,7 @@ export async function TimetableGrid({ teacher, schoolSlug }: Props) {
             lessons={lessons}
             conflictIndices={conflictIndices}
             allLessons={lessons}
-            schoolSlug={schoolSlug}
+            workspaceId={workspaceId}
           />
         ))}
       </div>

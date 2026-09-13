@@ -8,10 +8,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const schoolSlug = request.nextUrl.searchParams.get('schoolSlug') ?? '';
+  const workspaceId = request.nextUrl.searchParams.get('workspaceId') ?? '';
 
   try {
-    const result = await getContainerPreflight(schoolSlug, id);
+    const result = await getContainerPreflight(workspaceId, id);
     return NextResponse.json(result);
   } catch (e) {
     if (isAppError(e) && e.code === 'not_found') {

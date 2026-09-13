@@ -142,7 +142,7 @@ function CollapsibleTree(props: {
       onSelect={props.onSelect}
       onChanged={props.onChanged}
       courseContainerId="course-1"
-      schoolSlug="my-school"
+      workspaceId="my-school"
       filters={props.filters ?? EMPTY_FILTERS}
       targetLanguage="no"
       difficultyLevel="A2"
@@ -393,7 +393,7 @@ describe('CurriculumTree', () => {
     const row = screen.getByRole('group', { name: 'En vanlig arbeidsdag' });
     expect(within(row).getByRole('link', { name: 'Open lesson editor' })).toHaveAttribute(
       'href',
-      '/school/my-school/content/module-1/lessons/item-1',
+      '/w/my-school/content/module-1/lessons/item-1',
     );
   });
 
@@ -432,7 +432,7 @@ describe('CurriculumTree', () => {
 
       expect(
         within(menu).getByRole('menuitem', { name: new RegExp('Open lesson editor') }),
-      ).toHaveAttribute('href', '/school/my-school/content/module-1/lessons/item-1');
+      ).toHaveAttribute('href', '/w/my-school/content/module-1/lessons/item-1');
     });
 
     // Duplicate and per-block publishing have no backend (plan 38 §3), so the
@@ -981,7 +981,7 @@ describe('CurriculumTree', () => {
           onSelect={vi.fn()}
           onChanged={vi.fn()}
           courseContainerId="course-1"
-          schoolSlug="my-school"
+          workspaceId="my-school"
           filters={EMPTY_FILTERS}
           targetLanguage="no"
           difficultyLevel="A2"
@@ -1154,7 +1154,7 @@ describe('CurriculumTree', () => {
 
       fireEvent.keyDown(document, { key: 'Enter' });
 
-      expect(routerPush).toHaveBeenCalledWith('/school/my-school/content/module-1/lessons/item-1');
+      expect(routerPush).toHaveBeenCalledWith('/w/my-school/content/module-1/lessons/item-1');
     });
   });
 });

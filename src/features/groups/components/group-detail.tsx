@@ -4,12 +4,13 @@ import { getTranslations } from "next-intl/server";
 
 import { GroupDetailHeader } from "./group-detail-header";
 import { GroupResolveBanner } from "./group-resolve-banner";
-import { GroupTabs } from "./group-tabs";
+import { GroupTabs, type TabKey } from "./group-tabs";
 import { GroupMaterialsTab } from "./group-materials-tab";
 import type { Group, RosterStudent, CourseView, OutlineUnit, Session } from "../types";
 import type { CurriculumUnit } from "@/features/teachers/types";
 import type { GroupMaterialsView } from "../api/queries";
 import type { Alert } from "@/features/dashboard/types";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -33,12 +34,21 @@ type Props = {
   /** Share of the teaching plan delivered — the group's progress, not a student's. */
   planProgressPct: number;
   courseView: CourseView;
-  /** Real school id (UUID) — mutations take this; schoolSlug is for hrefs only. */
+  /** Real school id (UUID) — mutations take this; workspaceId is for hrefs only. */
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   canManage: boolean;
   /** May this viewer see named learners' results — the heatmap of the Progress tab. */
   canSeePersonalResults: boolean;
+  /** Which tabs this workspace has; a school passes nothing and keeps all six. */
+  tabs?: TabKey[];
+  /**
+   * Where leaving this group goes. A school has a list of groups to go back to; a private
+   * tutor's list of groups is their roster, so they go there (plan 59, §5.2).
+   */
+  listHref?: string;
+  /** What that link is called; a school's says "Groups". */
+  listLabel?: string;
 };
 
 export async function GroupDetail({
@@ -55,12 +65,14 @@ export async function GroupDetail({
   planProgressPct,
   courseView,
   schoolId,
-  schoolSlug,
+  workspaceId,
   canManage,
   canSeePersonalResults,
+  tabs,
+  listHref = wsHref(workspaceId, 'groups'),
+  listLabel,
 }: Props) {
   const t = await getTranslations("Groups");
-  const listHref = `/school/${schoolSlug}/groups`;
 
   return (
     <div className="space-y-5">
@@ -70,7 +82,7 @@ export async function GroupDetail({
         className="inline-flex items-center gap-1 text-sm text-(--ssz-text-secondary) hover:text-(--ssz-text-primary) transition-colors"
       >
         <ChevronLeft className="size-3.5" aria-hidden="true" />
-        {t("detail.back")}
+        {listLabel ?? t("detail.back")}
       </Link>
 
       <GroupDetailHeader
@@ -78,15 +90,16 @@ export async function GroupDetail({
         alerts={alerts}
         courseView={courseView}
         schoolId={schoolId}
-        schoolSlug={schoolSlug}
+        workspaceId={workspaceId}
         canManage={canManage}
+        listHref={listHref}
       />
 
       {/* Resolve-first banner */}
       <GroupResolveBanner
         alerts={alerts}
         groupId={group.id}
-        schoolSlug={schoolSlug}
+        workspaceId={workspaceId}
         canManage={canManage}
       />
 
@@ -106,15 +119,16 @@ export async function GroupDetail({
             progressPct={planProgressPct}
             planUnits={planUnits}
             schoolId={schoolId}
-            schoolSlug={schoolSlug}
+            workspaceId={workspaceId}
             canManage={canManage}
           />
         }
         alerts={alerts}
         schoolId={schoolId}
-        schoolSlug={schoolSlug}
+        workspaceId={workspaceId}
         canManage={canManage}
         canSeePersonalResults={canSeePersonalResults}
+        tabs={tabs}
       />
     </div>
   );

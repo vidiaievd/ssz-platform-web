@@ -53,7 +53,7 @@ const baseGroup: Group = {
 
 function renderDialog(onOpenChange = vi.fn(), group: Group = baseGroup) {
   return renderWithProviders(
-    <GroupEditDialog group={group} schoolId="my-school" schoolSlug="my-school" open onOpenChange={onOpenChange} />,
+    <GroupEditDialog group={group} schoolId="my-school" workspaceId="my-school" open onOpenChange={onOpenChange} />,
   );
 }
 

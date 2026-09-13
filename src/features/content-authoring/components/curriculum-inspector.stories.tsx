@@ -13,7 +13,7 @@ type Story = StoryObj<typeof meta>;
 
 const commonArgs = {
   courseContainerId: 'course-1',
-  schoolSlug: 'my-school',
+  workspaceId: 'my-school',
   onChanged: () => {},
   onDelete: () => {},
 };

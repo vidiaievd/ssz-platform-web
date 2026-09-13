@@ -5,8 +5,9 @@ import { getInvitationsProvider } from '@/lib/invitations/provider';
 import type { ISODate } from '@/features/groups/types';
 
 export interface StudentInvitePayload {
-  schoolSlug: string;
-  schoolName: string;
+  /** Null for a tutoring invitation — there is no school behind it. */
+  schoolSlug: string | null;
+  schoolName: string | null;
   /** Email is locked in the registration form — cannot be reassigned. */
   email: string;
   expiresAt: ISODate;

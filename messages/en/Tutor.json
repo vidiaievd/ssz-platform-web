@@ -3,18 +3,84 @@
     "greeting": "Welcome back! 👋",
     "greetingNamed": "Welcome back, {name}! 👋",
     "subtitle": "Here's an overview of your tutoring activity.",
+    "profileFailed": "Failed to load your profile.",
     "stats": {
-      "students": "Active students",
-      "lessons": "Lessons this month",
-      "rating": "Average rating"
+      "sectionLabel": "Your week",
+      "students": "Active students · 7d",
+      "lessons": "Lessons completed · 7d",
+      "groups": "Groups",
+      "groupsHint": "besides the learners you teach alone"
     },
-    "upcoming": {
-      "title": "Upcoming lessons",
-      "empty": "No upcoming lessons scheduled."
+    "review": {
+      "title": "Waiting to be marked",
+      "waiting": "{count, plural, one {# submission} other {# submissions}}",
+      "hint": "From your learners, oldest first.",
+      "open": "Open the queue",
+      "emptyTitle": "Nothing to mark",
+      "emptyBody": "Work your learners hand in shows up here."
+    }
+  },
+  "students": {
+    "title": "My students",
+    "count": "{count, plural, =0 {No students yet} one {# student} other {# students}}",
+    "invite": "Invite a student",
+    "searchPlaceholder": "Search by name or email",
+    "clearSearch": "Clear search",
+    "neverSeen": "Never",
+    "emptyTitle": "No students yet",
+    "emptyBody": "Invite your first student by email — they join as soon as they accept.",
+    "emptyFiltered": "No students match your search.",
+    "backToStudents": "Back to students",
+    "loadFailed": "Failed to load your students. Please try again.",
+    "matching": "{count, plural, =0 {none match} one {# match} other {# matches}}",
+    "groupCount": "{count, plural, =0 {no learners} one {# learner} other {# learners}}",
+    "groupEmpty": "Nobody in this group yet.",
+    "createGroup": {
+      "trigger": "New group",
+      "title": "New group",
+      "description": "A name, a course if it has one, and who is in it. You can change all of it later.",
+      "nameLabel": "Name",
+      "namePlaceholder": "Tuesday 19:00",
+      "courseLabel": "Course (optional)",
+      "coursePick": "Choose a course",
+      "courseClear": "Remove course",
+      "studentsLabel": "Students {count, plural, =0 {} other {(# selected)}}",
+      "studentsEmpty": "No students to add yet — invite someone first.",
+      "cancel": "Cancel",
+      "submit": "Create group",
+      "created": "Group “{name}” created.",
+      "createdPartly": "Group “{name}” created, but {count, plural, one {# student} other {# students}} could not be added.",
+      "forbidden": "You cannot create groups here.",
+      "failed": "Could not create the group. Please try again."
     },
-    "students": {
-      "title": "Recent students",
-      "empty": "No students yet. Share your profile to get started."
+    "toggleGroup": "Show the learners in {name}",
+    "scheduleLessons": {
+      "trigger": "Schedule lessons",
+      "title": "Lessons with {name}",
+      "description": "A weekly time, and the course to teach through it.",
+      "day": "Day",
+      "start": "From",
+      "end": "To",
+      "from": "Starting",
+      "endBeforeStart": "The end has to come after the start.",
+      "courseLabel": "Course",
+      "coursePick": "Choose a course",
+      "courseClear": "Remove course",
+      "courseHint": "Without a course there is a time in the week and nothing planned in it.",
+      "cancel": "Cancel",
+      "submit": "Schedule",
+      "scheduled": "Lessons with {name} are in your schedule.",
+      "forbidden": "You cannot schedule lessons here.",
+      "failed": "Could not set up the lessons. Please try again.",
+      "weekday": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
     }
   }
 }

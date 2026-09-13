@@ -66,8 +66,8 @@ function mockPreview(token: string): InvitePreview {
   if (token.startsWith('valid-') || token.startsWith('tutoring-')) {
     const isTutoring = token.startsWith('tutoring-');
     return {
-      schoolName: isTutoring ? 'My Students' : 'Nordic Language Academy',
-      schoolSlug: isTutoring ? '' : 'nordic-language-academy',
+      schoolName: isTutoring ? null : 'Nordic Language Academy',
+      schoolSlug: isTutoring ? null : 'nordic-language-academy',
       role: isTutoring ? 'STUDENT' : 'TEACHER',
       kind: 'register',
       email: 'invite@example.com',

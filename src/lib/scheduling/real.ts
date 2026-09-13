@@ -247,6 +247,17 @@ export const realProvider: SchedulingProvider = {
     return rows.map(toSession);
   },
 
+  async mySessions(from: string, to: string) {
+    const rows = await serverFetch<RawSession[]>({
+      service: 'scheduling',
+      // `me`, not the caller's user id: the token already says who is asking, and a screen
+      // that had to look its own id up first would ask two services for one question.
+      path: '/scheduling/teachers/me/sessions',
+      query: { from, to },
+    });
+    return rows.map(toSession);
+  },
+
   async patchSession(sessionId: string, changes: SessionChanges) {
     return asResult(
       () =>

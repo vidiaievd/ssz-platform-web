@@ -234,7 +234,7 @@ type Props = {
   groupSlots: Slot[];
   candidates: TeacherAssignCandidate[];
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
 export function TeacherAssignModal({
@@ -244,7 +244,7 @@ export function TeacherAssignModal({
   groupSlots,
   candidates,
   schoolId,
-  schoolSlug: _schoolSlug,
+  workspaceId: _schoolSlug,
 }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();

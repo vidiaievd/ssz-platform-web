@@ -8,11 +8,17 @@ import { Button } from '@/components/ui/button';
 
 export type TerminalState = 'invalid' | 'expired' | 'revoked' | 'accepted' | 'error';
 
+export type TerminalVariant = 'school' | 'tutoring';
+
 type Props = {
   state: TerminalState;
+  /** A tutoring invitation must never mention a school. Defaults to 'school'. */
+  variant?: TerminalVariant;
   workspacePath?: string;
   onRetry?: () => void;
 };
+
+/** Only these two bodies name the sender; the rest read the same either way. */
 
 const ICONS: Record<TerminalState, React.ElementType> = {
   invalid: XCircle,
@@ -30,9 +36,15 @@ const ICON_CLASSES: Record<TerminalState, string> = {
   error: 'text-(--ssz-text-muted)',
 };
 
-export function InviteTerminal({ state, workspacePath, onRetry }: Props) {
+export function InviteTerminal({ state, variant = 'school', workspacePath, onRetry }: Props) {
   const t = useTranslations('Invite');
   const Icon = ICONS[state];
+  const body =
+    variant === 'tutoring' && state === 'expired'
+      ? t('state.expired.bodyTutoring')
+      : variant === 'tutoring' && state === 'revoked'
+        ? t('state.revoked.bodyTutoring')
+        : t(`state.${state}.body`);
 
   return (
     <div className="flex flex-col items-center gap-4 text-center">
@@ -46,7 +58,7 @@ export function InviteTerminal({ state, workspacePath, onRetry }: Props) {
           {t(`state.${state}.title`)}
         </h1>
         <p className="text-sm text-(--ssz-text-secondary)">
-          {t(`state.${state}.body`)}
+          {body}
         </p>
       </div>
 

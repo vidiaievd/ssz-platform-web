@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Layers, Zap, ChevronRight } from 'lucide-react';
 
 import { Segmented } from '@/components/ui/segmented';
 import { Link } from '@/lib/i18n/navigation';
+import { wsHref } from '@/features/workspaces/lib/href';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 
 import { useCreateCourseStore, type CreateCourseFlow } from '../stores/create-course';
 import { CreateCourseWizard } from './create-course-wizard';
@@ -16,7 +18,7 @@ import { QuickCreatePanel } from './quick-create-panel';
 export function CreateCoursePage() {
   const t = useTranslations('Authoring');
   const tCreate = useTranslations('Authoring.createCourse');
-  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const workspaceId = useWorkspaceRef();
   const searchParams = useSearchParams();
   const { flow, setFlow } = useCreateCourseStore();
 
@@ -34,7 +36,7 @@ export function CreateCoursePage() {
         className="mb-3 flex items-center gap-1.5 text-sm text-(--ssz-text-muted)"
       >
         <Link
-          href={`/school/${schoolSlug}/content`}
+          href={wsHref(workspaceId, 'content')}
           className="hover:text-(--ssz-text-secondary) hover:underline"
         >
           {t('breadcrumb.courses')}

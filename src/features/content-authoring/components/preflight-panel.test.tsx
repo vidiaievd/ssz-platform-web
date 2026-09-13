@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { enMessages } from '@/lib/i18n/messages';
 import type { PreflightResult } from '../types';
 
-vi.mock('next/navigation', () => ({ useParams: () => ({ schoolSlug: 'my-school' }) }));
+vi.mock('next/navigation', () => ({ useParams: () => ({ workspaceId: 'my-school' }) }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({ href, children }: { href: string; children: React.ReactNode }) => (
     <a href={href}>{children}</a>

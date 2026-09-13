@@ -40,6 +40,7 @@ type RawStudentMember = {
     name: string;
     lang?: string;
     level?: string;
+    isDefault?: boolean;
     scheduleSummary?: string;
     teachers?: Array<{
       userId: string;
@@ -70,6 +71,7 @@ function mapGroupRef(g: NonNullable<RawStudentMember['groups']>[number]): Studen
     name: g.name,
     lang: (g.lang ?? 'en') as LangCode,
     level: (g.level ?? 'A1') as CEFR,
+    isDefault: g.isDefault ?? false,
     scheduleSummary: g.scheduleSummary,
     teachers: (g.teachers ?? []).map((t) => ({
       userId: t.userId,
@@ -211,15 +213,40 @@ export async function getStudent(
 
 // ── Groups (for enroll dialog picker) ────────────────────────────────────────
 
-export type GroupSelectOption = { id: string; name: string; lang: string; level: string };
+export type GroupSelectOption = {
+  id: string;
+  name: string;
+  lang: string;
+  level: string;
+  /** The workspace's own group — see StudentGroupRef.isDefault. */
+  isDefault: boolean;
+  /** The course the group is taught from; null while none is linked. */
+  courseId: string | null;
+};
 
 export async function getGroupsForSelect(schoolId: string): Promise<GroupSelectOption[]> {
   try {
-    const raw = await serverFetch<Array<{ id: string; name: string; lang?: string; level?: string }>>({
+    const raw = await serverFetch<
+      Array<{
+        id: string;
+        name: string;
+        lang?: string;
+        level?: string;
+        isDefault?: boolean;
+        courseId?: string | null;
+      }>
+    >({
       service: 'organization',
       path: `/schools/${schoolId}/groups`,
     });
-    return raw.map((g) => ({ id: g.id, name: g.name, lang: g.lang ?? '', level: g.level ?? '' }));
+    return raw.map((g) => ({
+      id: g.id,
+      name: g.name,
+      lang: g.lang ?? '',
+      level: g.level ?? '',
+      isDefault: g.isDefault ?? false,
+      courseId: g.courseId ?? null,
+    }));
   } catch {
     return [];
   }

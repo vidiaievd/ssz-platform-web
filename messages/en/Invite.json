@@ -1,7 +1,9 @@
 {
   "title": {
     "invited": "You've been invited to {schoolName}",
-    "role": "as {role}"
+    "role": "as {role}",
+    "invitedByTutor": "{tutorName} invited you to learn together",
+    "invitedByTutorUnnamed": "You've been invited to learn together"
   },
   "meta": {
     "invitedBy": "Invited by: {name}",
@@ -27,7 +29,9 @@
     "syncing": "Accepting invitation…",
     "success": "Welcome to {schoolName}!",
     "alreadyMember": "You're already a member of this school",
-    "error": "Failed to accept invitation"
+    "error": "Failed to accept invitation",
+    "successTutoring": "Welcome aboard! You're all set to start learning.",
+    "alreadyMemberTutoring": "You're already learning with this tutor"
   },
   "state": {
     "invalid": {
@@ -36,11 +40,13 @@
     },
     "expired": {
       "title": "Invitation expired",
-      "body": "Ask the school to send you a new invitation."
+      "body": "Ask the school to send you a new invitation.",
+      "bodyTutoring": "Ask your tutor to send you a new invitation."
     },
     "revoked": {
       "title": "Invitation revoked",
-      "body": "The school has revoked this invitation."
+      "body": "The school has revoked this invitation.",
+      "bodyTutoring": "Your tutor has revoked this invitation."
     },
     "accepted": {
       "title": "Already accepted",

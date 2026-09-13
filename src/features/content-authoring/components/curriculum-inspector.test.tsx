@@ -74,7 +74,7 @@ function renderInspector(
       <CurriculumInspector
         selection={selection}
         courseContainerId="course-1"
-        schoolSlug="my-school"
+        workspaceId="my-school"
         onChanged={onChanged}
         onDelete={onDelete}
       />
@@ -283,7 +283,7 @@ describe('CurriculumInspector', () => {
         <CurriculumInspector
           selection={itemSelection(itemNode({ itemType: 'exercise', refId: 'exercise-1' }))}
           courseContainerId="course-1"
-          schoolSlug="my-school"
+          workspaceId="my-school"
           onChanged={vi.fn()}
           onDelete={vi.fn()}
         />
@@ -307,7 +307,7 @@ describe('CurriculumInspector', () => {
     // Not the course: a block inside a module is edited through its module.
     expect(screen.getByRole('link', { name: 'Open editor' })).toHaveAttribute(
       'href',
-      '/school/my-school/content/module-7/lessons/item-1',
+      '/w/my-school/content/module-7/lessons/item-1',
     );
   });
 

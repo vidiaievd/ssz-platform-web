@@ -23,7 +23,7 @@ import { onboardingSettingsSchema, type OnboardingSettingsInput } from '@/featur
 import type { SchoolOnboardingSettings } from '@/features/enrollment/types';
 
 type Props = {
-  schoolSlug: string;
+  workspaceId: string;
   initialSettings: SchoolOnboardingSettings;
 };
 
@@ -33,7 +33,7 @@ const STEP_LABELS: Record<string, string> = {
   interview: 'Interview',
 };
 
-export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
+export function OnboardingSettingsForm({ workspaceId, initialSettings }: Props) {
   const t = useTranslations('Enrollment.Settings');
 
   const {
@@ -59,7 +59,7 @@ export function OnboardingSettingsForm({ schoolSlug, initialSettings }: Props) {
   const previewSteps = onboardingSteps(watchedSettings as SchoolOnboardingSettings);
 
   async function onSubmit(data: OnboardingSettingsInput) {
-    const res = await fetch(`/api/enrollment/schools/${schoolSlug}/settings`, {
+    const res = await fetch(`/api/enrollment/schools/${workspaceId}/settings`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),

@@ -5,8 +5,9 @@ export type InvitationKind = 'register' | 'onboard_existing';
 export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
 
 export type InvitePreview = {
-  schoolName: string;
-  schoolSlug: string;
+  /** Null for a tutoring invitation — a tutor has no school to name. */
+  schoolName: string | null;
+  schoolSlug: string | null;
   role: InvitationRole;
   kind: InvitationKind;
   email: string;

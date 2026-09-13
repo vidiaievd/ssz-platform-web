@@ -1,6 +1,5 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Bot, ExternalLink, Target, User } from 'lucide-react';
 
@@ -11,6 +10,8 @@ import {
   TEMPLATE_CODE,
   type TeacherReviewPolicy,
 } from '@/lib/shared-kernel/short-answer';
+import { wsHref } from '@/features/workspaces/lib/href';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 
 import { setSettings, type ShortAnswerDocument } from './edits';
 import { PipelineStage } from '../pipeline-stage';
@@ -152,16 +153,16 @@ export function StepReview({ exercise, containerId, onChange }: StepReviewProps)
  */
 function QueueLink({ containerId }: { containerId: string }) {
   const t = useTranslations('Authoring');
-  const { schoolSlug } = useParams<{ schoolSlug?: string }>();
+  const workspaceId = useWorkspaceRef();
 
-  if (!schoolSlug) return null;
+  if (!workspaceId) return null;
 
   return (
     <section className="flex flex-col gap-2 rounded-lg border border-dashed border-border p-4">
       <h3 className="text-xs font-medium">{t('shortAnswer.step4.queueLabel')}</h3>
       <p className="text-xs text-muted-foreground">{t('shortAnswer.step4.queueHelp')}</p>
       <Link
-        href={`/school/${schoolSlug}/review?course=${containerId}&type=${TEMPLATE_CODE}`}
+        href={wsHref(workspaceId, `review?course=${containerId}&type=${TEMPLATE_CODE}`)}
         className="flex w-fit items-center gap-1.5 text-sm text-primary hover:underline"
       >
         <ExternalLink className="size-3.5" aria-hidden />

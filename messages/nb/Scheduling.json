@@ -21,5 +21,64 @@
   },
   "stub": {
     "body": "Denne seksjonen kommer snart."
+  },
+  "my": {
+    "title": "Timene mine",
+    "subtitle": "Alt du underviser, på ett sted",
+    "week": "Uke",
+    "month": "Måned",
+    "today": "I dag",
+    "previous": "Forrige",
+    "next": "Neste",
+    "exam": "Prøve",
+    "extra": "Ekstra",
+    "noTopic": "Uten tema ennå",
+    "emptyWeek": "Ingenting planlagt denne uken.",
+    "emptyMonth": "Ingenting planlagt denne måneden.",
+    "emptyBody": "Timer dukker opp her så snart en gruppe har et ukemønster.",
+    "loadFailed": "Vi fikk ikke lest timeplanen din. Ingenting er tapt — prøv igjen.",
+    "count": "{count, plural, =0 {ingen timer} one {# time} other {# timer}}",
+    "dayLabel": "{weekday} {date}",
+    "status": {
+      "held": "Gjennomført",
+      "cancelled": "Avlyst",
+      "moved": "Flyttet"
+    },
+    "actions": {
+      "label": "Handlinger for {title}",
+      "markHeld": "Merk som gjennomført",
+      "cancel": "Avlys timen",
+      "move": "Flytt den",
+      "moveTitle": "Flytt timen med {title}",
+      "moveDescription": "Velg dagen og tiden den faktisk holdes.",
+      "date": "Dato",
+      "from": "Fra",
+      "to": "Til",
+      "back": "Tilbake",
+      "moveSubmit": "Flytt",
+      "heldDone": "Merket som gjennomført.",
+      "cancelledDone": "Timen er avlyst.",
+      "movedDone": "Timen er flyttet.",
+      "failed": "Kunne ikke endre timen."
+    },
+    "add": {
+      "trigger": "Legg til time",
+      "title": "En ekstra time",
+      "description": "Utenfor ukemønsteret — en igjentime, eller en time byttet mot en som falt bort.",
+      "with": "Med",
+      "date": "Dato",
+      "from": "Fra",
+      "to": "Til",
+      "cancel": "Avbryt",
+      "submit": "Legg til",
+      "added": "Timen ligger i uken din.",
+      "failed": "Kunne ikke legge til timen."
+    },
+    "learner": {
+      "title": "Neste timer",
+      "all": "Hele timeplanen →",
+      "none": "Ingenting planlagt de neste {days} dagene.",
+      "noTopic": "Uten tema ennå"
+    }
   }
 }

@@ -144,6 +144,15 @@ export interface CoverageTallies {
   bySkill: Record<CoverageSkill, number>;
   byFocus: Record<CoverageFocus | 'unknown', number>;
   byForm: Record<CoverageForm, number>;
+  /**
+   * The `skill × focus` table the two tallies above are the margins of.
+   *
+   * Needed because a pair can be empty while neither of its margins is: a course with
+   * twelve listening exercises and forty grammar ones may contain no listening-grammar
+   * exercise at all. Screen E asks exactly that question — "taught but nobody got there"
+   * against "not taught at all" — and only a cell of this table separates the two.
+   */
+  byPair: Record<CoverageSkill, Record<CoverageFocus | 'unknown', number>>;
   /** Channels nothing trains, named by the service rather than diffed out of `bySkill`. */
   emptySkills: CoverageSkill[];
   /** Exercises whose template the axis table does not know. */
@@ -247,3 +256,35 @@ export type CurriculumTreeSelection =
        */
       containerId: string;
     };
+
+// ─── Screen E: what came out of the course (plan 58 §3.5) ──────────────────
+
+/**
+ * One `skill × focus` cell, as analytics counted it over everybody who took the course.
+ *
+ * No learner is named here, in any form — not by id, not by being alone in a cell. That
+ * is why `learners` is a count: a cell of one is one person's profile wearing the
+ * course's name, and the screen is told so rather than left to draw a conclusion from it.
+ *
+ * `items` is deliberately not part of this — it comes from the coverage report loaded
+ * beside it (plan 58 §2 C), so that "how many exercises" has one source.
+ */
+export interface CourseResultCell {
+  skill: string;
+  focus: string;
+  attempts: number;
+  /** Whole percent, weighted by evidence rather than by head. `null` when nothing was weighed. */
+  ewma: number | null;
+  learners: number;
+  weightedSample: number;
+}
+
+export interface CourseResult {
+  containerId: string;
+  minWeightedSample: number;
+  learners: number;
+  /** Groups whose attempts were recorded. Undercounts history older than the column. */
+  groups: number;
+  /** Only the cells somebody attempted; the grid supplies the rest from coverage. */
+  cells: CourseResultCell[];
+}

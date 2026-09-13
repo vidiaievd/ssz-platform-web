@@ -7,12 +7,14 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import type { Container } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import type { PreflightResult, SchoolRole } from '../types';
 import { useCurriculumTree } from '../api/use-curriculum-tree';
 import { allCollapseKeys } from '../lib/structure-nodes';
 import { CourseSettingsDrawer } from './course-settings-drawer';
 import { CourseStructurePanel } from './course-structure-panel';
+import { CoverageResultGrid } from './coverage-result-grid';
 import { CoverageStrip } from './coverage-strip';
 import { collectPublishRows } from '../lib/publish-rows';
 import { deriveContainerState } from './container-state-badge';
@@ -22,7 +24,7 @@ import { StructureTopbar } from './structure-topbar';
 
 interface CourseEditorShellProps {
   container: Container;
-  schoolSlug: string;
+  workspaceId: string;
   schoolRole?: SchoolRole;
   preflightResult?: PreflightResult;
   /** Draft version id (always present — containers keep one draft version). Null only on fetch failure. */
@@ -41,7 +43,7 @@ interface CourseEditorShellProps {
  */
 export function CourseEditorShell({
   container,
-  schoolSlug,
+  workspaceId,
   schoolRole = 'owner',
   preflightResult,
   draftVersionId,
@@ -96,7 +98,7 @@ export function CourseEditorShell({
       <StructureTopbar
         ref={topbarRef}
         title={container.title}
-        coursesHref={`/school/${schoolSlug}/content`}
+        coursesHref={wsHref(workspaceId, 'content')}
         state={deriveContainerState(container)}
         versionNumber={publishedVersionNumber}
         updatedAt={container.updatedAt}
@@ -104,7 +106,7 @@ export function CourseEditorShell({
         previewHref={
           container.containerType === 'course' ? `/student/courses/${container.id}` : null
         }
-        reviewInboxHref={`/school/${schoolSlug}/review?course=${container.id}`}
+        reviewInboxHref={wsHref(workspaceId, `review?course=${container.id}`)}
         onExpandAll={() => setCollapsed(new Set())}
         onCollapseAll={() => setCollapsed(new Set(allCollapseKeys(tree)))}
         onReview={() => setPublishOpen(true)}
@@ -140,11 +142,17 @@ export function CourseEditorShell({
         <CoverageStrip containerId={container.id} />
       </div>
 
+      {/* And underneath it, the same course seen from the other end: what came of
+          teaching it. A course, not a module — a module's results are the course's
+          results sliced too thin to read, and the published version is what learners
+          actually took. */}
+      {container.containerType === 'course' && <CoverageResultGrid containerId={container.id} />}
+
       {draftVersionId ? (
         <CourseStructurePanel
           containerId={container.id}
           versionId={draftVersionId}
-          schoolSlug={schoolSlug}
+          workspaceId={workspaceId}
           targetLanguage={container.targetLanguage}
           difficultyLevel={container.difficultyLevel}
           visibility={container.visibility}

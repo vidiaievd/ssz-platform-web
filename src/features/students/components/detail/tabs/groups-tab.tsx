@@ -20,7 +20,7 @@ import type { Locale } from "@/lib/i18n/config";
 
 type Props = {
   student: StudentInSchool;
-  schoolSlug: string;
+  workspaceId: string;
   schoolId: string;
   assignHref: string;
   canManage: boolean;
@@ -55,7 +55,7 @@ function TeacherStack({ teachers }: { teachers: TeacherRef[] }) {
   );
 }
 
-export async function GroupsTab({ student, schoolSlug, schoolId, assignHref, canManage }: Props) {
+export async function GroupsTab({ student, workspaceId, schoolId, assignHref, canManage }: Props) {
   const t = await getTranslations("Students");
   const locale = (await getLocale()) as Locale;
 
@@ -96,7 +96,7 @@ export async function GroupsTab({ student, schoolSlug, schoolId, assignHref, can
             studentId={student.id}
             studentName={student.name}
             schoolId={schoolId}
-            schoolSlug={schoolSlug}
+            workspaceId={workspaceId}
             canManage={canManage}
             locale={locale}
           />

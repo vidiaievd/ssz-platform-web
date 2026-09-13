@@ -7,12 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { studentTeachers } from '@/lib/students/status';
 import type { StudentDetail, TeacherRef } from '@/features/students/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { RemoveFromGroupButton } from './remove-from-group-button';
 
 type Props = {
   student: StudentDetail;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   addToGroupHref: string;
 };
 
@@ -47,7 +48,7 @@ function TeacherStack({ teachers }: { teachers: TeacherRef[] }) {
   );
 }
 
-export async function StudentGroupsPanel({ student, schoolId, schoolSlug, addToGroupHref }: Props) {
+export async function StudentGroupsPanel({ student, schoolId, workspaceId, addToGroupHref }: Props) {
   const t = await getTranslations('Students');
   const allTeachers = studentTeachers(student.groups);
 
@@ -93,7 +94,7 @@ export async function StudentGroupsPanel({ student, schoolId, schoolSlug, addToG
 
               {/* Link to group */}
               <Link
-                href={`/school/${schoolSlug}/groups/${g.id}`}
+                href={wsHref(workspaceId, `groups/${g.id}`)}
                 className="rounded p-1 hover:bg-accent transition-colors"
                 aria-label={t('detail.openGroup', { name: g.name })}
               >

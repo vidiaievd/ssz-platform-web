@@ -13,7 +13,7 @@ type Props = {
   group: GroupHealthRowVM;
   href: string;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
 /**
@@ -21,7 +21,7 @@ type Props = {
  * (a table with columns dropped) hides capacity and status — the two facts the
  * triage list exists to show — so the row becomes a card that keeps all six.
  */
-export async function GroupCard({ group, href, schoolId, schoolSlug }: Props) {
+export async function GroupCard({ group, href, schoolId, workspaceId }: Props) {
   const t = await getTranslations('Groups');
   const dangerCount = group.alerts.filter((a) => a.severity === 'danger').length;
   const label =
@@ -52,7 +52,7 @@ export async function GroupCard({ group, href, schoolId, schoolSlug }: Props) {
         </div>
         <GroupStatusPill status={group.status} />
         <div className="flex items-center gap-1 shrink-0">
-          <GroupRowMenu schoolId={schoolId} schoolSlug={schoolSlug} group={group} />
+          <GroupRowMenu schoolId={schoolId} workspaceId={workspaceId} group={group} />
           <ChevronRight className="size-4 text-(--ssz-text-muted)" aria-hidden="true" />
         </div>
       </div>

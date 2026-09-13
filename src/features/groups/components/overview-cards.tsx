@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { CapacityMeter } from '@/components/shared/operations';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { TeacherRow } from './teacher-row';
 import type { Group, Weekday } from '../types';
 
@@ -74,12 +75,23 @@ type Props = {
   group: Group;
   canManage: boolean;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
+  /**
+   * A workspace with no Teachers tab has no teachers panel either: a private tutor is the
+   * only teacher of their group, so the card would be about themselves (plan 59, §5.2).
+   */
+  showTeachers?: boolean;
 };
 
-export function OverviewCards({ group, canManage, schoolId, schoolSlug }: Props) {
+export function OverviewCards({
+  group,
+  canManage,
+  schoolId,
+  workspaceId,
+  showTeachers = true,
+}: Props) {
   const t = useTranslations('Groups');
-  const detailBase = `/school/${schoolSlug}/groups/${group.id}`;
+  const detailBase = wsHref(workspaceId, `groups/${group.id}`);
 
   const modeLabel = group.mode === 'online' ? t('row.online') : t('row.inPerson');
   const hours = weeklyHours(group.slots);
@@ -93,8 +105,15 @@ export function OverviewCards({ group, canManage, schoolId, schoolSlug }: Props)
   );
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-4 items-start">
+    <div
+      className={
+        showTeachers
+          ? 'grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-4 items-start'
+          : 'grid grid-cols-1 gap-4 items-start'
+      }
+    >
       {/* Teachers */}
+      {showTeachers && (
       <Card
         heading={t('overview.teachersHeading')}
         headerAction={
@@ -139,6 +158,7 @@ export function OverviewCards({ group, canManage, schoolId, schoolSlug }: Props)
           ))}
         </div>
       </Card>
+      )}
 
       <div className="flex flex-col gap-4">
         {/* Roster */}

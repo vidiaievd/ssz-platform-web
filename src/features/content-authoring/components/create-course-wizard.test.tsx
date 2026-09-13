@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { enMessages } from '@/lib/i18n/messages';
 
 vi.mock('next/navigation', () => ({
-  useParams: () => ({ schoolSlug: 'demo-school' }),
+  useParams: () => ({ workspaceId: 'demo-school' }),
 }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({

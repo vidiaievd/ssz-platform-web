@@ -32,6 +32,11 @@ export type School = {
   myRole?: SchoolRole | null;
   /** Capabilities for MANAGER role; null for all other roles */
   myCapabilities?: string[] | null;
+  /**
+   * Whether learners of this school are told, in one sentence, roughly where they stand
+   * in their group. Absent from a service older than the column, which showed it.
+   */
+  showGroupPositionToStudents?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -64,6 +69,10 @@ export type NameAvailabilityResponse = {
 export type SlugAvailabilityResponse = {
   available: boolean;
   suggestions: string[];
+};
+
+export type SchoolSettingsBody = {
+  showGroupPositionToStudents?: boolean;
 };
 
 export type CreateSchoolBody = {

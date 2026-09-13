@@ -35,7 +35,7 @@ type Props = {
   studentId: string;
   studentName: string;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   availableGroups?: GroupOption[];
   onClose: () => void;
 };

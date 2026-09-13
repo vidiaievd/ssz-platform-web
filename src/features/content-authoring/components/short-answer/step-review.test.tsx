@@ -11,7 +11,7 @@ import {
   type ShortAnswerContent,
 } from '@/lib/shared-kernel/short-answer';
 
-vi.mock('next/navigation', () => ({ useParams: () => ({ schoolSlug: 'demo-school' }) }));
+vi.mock('next/navigation', () => ({ useParams: () => ({ workspaceId: 'demo-school' }) }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,
@@ -136,7 +136,7 @@ describe('StepReview', () => {
 
     expect(screen.getByRole('link', { name: /Open the marking queue/ })).toHaveAttribute(
       'href',
-      '/school/demo-school/review?course=module-1&type=short_answer',
+      '/w/demo-school/review?course=module-1&type=short_answer',
     );
   });
 });

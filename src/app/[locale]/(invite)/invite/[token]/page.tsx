@@ -6,6 +6,7 @@ import { AppError } from '@/lib/errors';
 import { InviteCard } from '@/features/invitations/components/invite-card';
 import { InviteTerminal } from '@/features/invitations/components/invite-terminal';
 import type { TerminalState } from '@/features/invitations/components/invite-terminal';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Params = { params: Promise<{ token: string; locale: string }> };
 
@@ -31,13 +32,16 @@ export default async function InvitePage({ params }: Params) {
   };
   const terminalState = statusToTerminal[preview.status];
   if (terminalState) {
+    // A tutoring invitation carries no school, and none may be named to the invitee.
+    const variant = preview.schoolName === null ? 'tutoring' : 'school';
     const workspacePath =
       preview.role === 'STUDENT' || !preview.schoolSlug
         ? '/student'
-        : `/school/${preview.schoolSlug}`;
+        : wsHref(preview.schoolSlug);
     return (
       <InviteTerminal
         state={terminalState}
+        variant={variant}
         workspacePath={currentUser ? workspacePath : undefined}
       />
     );

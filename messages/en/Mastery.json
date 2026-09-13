@@ -32,5 +32,23 @@
   "student": {
     "title": "Worth a bit of work",
     "subtitle": "From what you have been practising lately."
+  },
+  "worthALook": {
+    "title": "Worth a look this week",
+    "reason": {
+      "forgets": "You get this right in the moment and it fades within days. Come back to it sooner rather than learning it again.",
+      "never-knew": "This one is steady, and steadily off — it is the rule itself that needs another look, not more repetitions.",
+      "watch": "Nothing wrong here; it is simply the slowest of what you are practising, and something has to come first.",
+      "unknown": "This one is shaky, and nothing recorded yet says whether it slips away or never quite landed."
+    },
+    "thin": "Too few attempts to say anything yet — three more and this turns into real feedback."
+  },
+  "standing": {
+    "title": "Where you stand",
+    "below": "You are behind most of your group right now",
+    "middle": "You are around the middle of your group",
+    "above": "You are ahead of most of your group",
+    "note": "Read against the others studying the same material. It moves with every week of work.",
+    "noteNamed": "Read against the others in {group}. It moves with every week of work."
   }
 }

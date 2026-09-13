@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { WidgetCard } from './widget-card';
 import type { DashboardRole, QuickAction } from '../types';
 import { quickActionsFor } from '../lib/roles';
@@ -52,30 +53,30 @@ const ACTION_LABELS: Record<string, string> = {
 
 type QuickActionsProps = {
   role: DashboardRole;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
-function resolveHref(action: QuickAction, schoolSlug: string): string {
+function resolveHref(action: QuickAction, workspaceId: string): string {
   const routes: Record<string, string> = {
-    'new-course':        `/school/${schoolSlug}/content`,
-    'new-group':         `/school/${schoolSlug}/groups/new`,
-    'invite-teacher':    `/school/${schoolSlug}/students`,
-    'enroll-student':    `/school/${schoolSlug}/students`,
-    'import-csv':        `/school/${schoolSlug}/students`,
-    'edit-branding':     `/school/${schoolSlug}/settings`,
-    'teacher-timetable': `/school/${schoolSlug}/groups/timetable`,
-    'monthly-report':    `/school/${schoolSlug}/dashboard`,
-    'new-lesson':        `/school/${schoolSlug}/content`,
-    'my-groups':         `/school/${schoolSlug}/groups`,
-    'my-timetable':      `/school/${schoolSlug}/my-schedule`,
-    'schedule-class':    `/school/${schoolSlug}/groups`,
-    'grade-queue':       `/school/${schoolSlug}/dashboard`,
-    'message-class':     `/school/${schoolSlug}/students`,
+    'new-course':        wsHref(workspaceId, 'content'),
+    'new-group':         wsHref(workspaceId, 'groups/new'),
+    'invite-teacher':    wsHref(workspaceId, 'students'),
+    'enroll-student':    wsHref(workspaceId, 'students'),
+    'import-csv':        wsHref(workspaceId, 'students'),
+    'edit-branding':     wsHref(workspaceId, 'settings'),
+    'teacher-timetable': wsHref(workspaceId, 'groups/timetable'),
+    'monthly-report':    wsHref(workspaceId, 'dashboard'),
+    'new-lesson':        wsHref(workspaceId, 'content'),
+    'my-groups':         wsHref(workspaceId, 'groups'),
+    'my-timetable':      wsHref(workspaceId, 'my-schedule'),
+    'schedule-class':    wsHref(workspaceId, 'groups'),
+    'grade-queue':       wsHref(workspaceId, 'dashboard'),
+    'message-class':     wsHref(workspaceId, 'students'),
   };
-  return routes[action.id] ?? `/school/${schoolSlug}/dashboard`;
+  return routes[action.id] ?? wsHref(workspaceId, 'dashboard');
 }
 
-export function QuickActions({ role, schoolSlug }: QuickActionsProps) {
+export function QuickActions({ role, workspaceId }: QuickActionsProps) {
   const actions = quickActionsFor(role);
 
   if (actions.length === 0) return null;
@@ -86,7 +87,7 @@ export function QuickActions({ role, schoolSlug }: QuickActionsProps) {
         {actions.map((action) => {
           const Icon = ICON_MAP[action.icon];
           const label = ACTION_LABELS[action.id] ?? action.id;
-          const href = resolveHref(action, schoolSlug);
+          const href = resolveHref(action, workspaceId);
 
           return (
             <Link

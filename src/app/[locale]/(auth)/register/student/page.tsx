@@ -30,7 +30,7 @@ export default async function RegisterStudentPage({ searchParams }: Props) {
     try {
       const payload = await decodeStudentInvite(intent.token);
       prefillEmail = payload.email;
-      schoolName = payload.schoolName;
+      schoolName = payload.schoolName ?? undefined;
     } catch {
       // Token is invalid/expired — fall through to explore (form will show generic view)
     }

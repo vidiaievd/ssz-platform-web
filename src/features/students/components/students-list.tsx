@@ -9,17 +9,18 @@ import { useStudentBulkSelect } from './students-filters';
 import { StudentRow } from './student-row';
 import type { StudentListItem, SegmentKey } from '@/features/students/types';
 import { segmentPredicate } from '@/lib/students/status';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   students: StudentListItem[];
-  schoolSlug: string;
+  workspaceId: string;
   activeSegment: SegmentKey;
   search: string;
 };
 
 export function StudentsList({
   students,
-  schoolSlug,
+  workspaceId,
   activeSegment,
   search,
 }: Props) {
@@ -67,7 +68,7 @@ export function StudentsList({
         <div key={s.userId} role="listitem">
           <StudentRow
             student={s}
-            href={`/school/${schoolSlug}/students/${s.userId}`}
+            href={wsHref(workspaceId, `students/${s.userId}`)}
             selected={selectedIds.has(s.userId)}
             onSelect={toggle}
           />
