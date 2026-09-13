@@ -2,6 +2,7 @@ import {
   AlertCircle,
   AlertTriangle,
   Bell,
+  CalendarClock,
   CalendarOff,
   CalendarX,
   CheckCircle2,
@@ -88,6 +89,16 @@ function isReviewSchoolSummaryData(data: unknown): data is ReviewSchoolSummaryDa
   return !!data && typeof data === 'object' && 'pending' in data && 'oldestAgeHours' in data;
 }
 
+/** The shape a lesson reminder carries; anything else falls back to the plain wording. */
+function asLessonReminder(
+  data: unknown,
+): { startTime: string; endTime: string; isExam: boolean } | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const { startTime, endTime, isExam } = data as Record<string, unknown>;
+  if (typeof startTime !== 'string' || typeof endTime !== 'string') return null;
+  return { startTime, endTime, isExam: isExam === true };
+}
+
 function isAttemptReviewedData(data: unknown): data is AttemptReviewedData {
   return !!data && typeof data === 'object' && 'attemptId' in data && 'outcome' in data;
 }
@@ -147,6 +158,35 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     actionable: false,
     resolveTitle: (_data, t) => t('types.STUDY_REMINDER.title'),
     resolveBody: (_data, t) => t('types.STUDY_REMINDER.body'),
+    getLink: noLink,
+  },
+  /**
+   * A lesson tomorrow (plan 62).
+   *
+   * The time is the whole message: the learner knows who teaches them and what the course
+   * is, and what a notification can add is the hour — and that a checkpoint is not an
+   * ordinary lesson.
+   */
+  LESSON_REMINDER: {
+    icon: CalendarClock,
+    category: 'Learning',
+    priority: 'normal',
+    actionable: false,
+    resolveTitle: (data, t) => {
+      const reminder = asLessonReminder(data);
+      if (reminder === null) return t('types.LESSON_REMINDER.title');
+      return reminder.isExam
+        ? t('types.LESSON_REMINDER.titleExam', { time: reminder.startTime })
+        : t('types.LESSON_REMINDER.titleNamed', { time: reminder.startTime });
+    },
+    resolveBody: (data, t) => {
+      const reminder = asLessonReminder(data);
+      if (reminder === null) return t('types.LESSON_REMINDER.body');
+      return t('types.LESSON_REMINDER.bodyNamed', {
+        from: reminder.startTime,
+        to: reminder.endTime,
+      });
+    },
     getLink: noLink,
   },
   TEACHER_ABSENCE: {

@@ -21,7 +21,8 @@ export type NotificationType =
   | 'ATTEMPT_REVIEWED'
   | 'REVIEW_DIGEST'
   | 'REVIEW_ESCALATION'
-  | 'REVIEW_SCHOOL_SUMMARY';
+  | 'REVIEW_SCHOOL_SUMMARY'
+  | 'LESSON_REMINDER';
 
 export type NotificationCategory = 'Enrollment' | 'Staff' | 'Learning' | 'System';
 

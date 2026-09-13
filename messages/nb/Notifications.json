@@ -187,6 +187,13 @@
       "body": "{overdue, plural, one {# er over svarfristen} other {# er over svarfristen}} · den eldste har ventet {days, plural, =0 {mindre enn ett døgn} one {# dag} other {# dager}}.",
       "bodyOnTime": "Alt ligger innenfor svarfristen · den eldste har ventet {days, plural, =0 {mindre enn ett døgn} one {# dag} other {# dager}}.",
       "bodyFallback": "Åpne retteoversikten for å se hvordan skolen ligger an."
+    },
+    "LESSON_REMINDER": {
+      "title": "En time i morgen",
+      "titleNamed": "Time i morgen kl. {time}",
+      "titleExam": "Prøve i morgen kl. {time}",
+      "body": "Se timeplanen for tidspunktet.",
+      "bodyNamed": "{from}–{to}. Vi ses."
     }
   }
 }

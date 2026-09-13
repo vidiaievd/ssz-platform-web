@@ -187,6 +187,13 @@
       "body": "{overdue, plural, one {# is past your response time} other {# are past your response time}} · the oldest has waited {days, plural, =0 {less than a day} one {# day} other {# days}}.",
       "bodyOnTime": "All of it is within your response time · the oldest has waited {days, plural, =0 {less than a day} one {# day} other {# days}}.",
       "bodyFallback": "Open the marking overview to see how your school is keeping up."
+    },
+    "LESSON_REMINDER": {
+      "title": "A lesson tomorrow",
+      "titleNamed": "Lesson tomorrow at {time}",
+      "titleExam": "Checkpoint tomorrow at {time}",
+      "body": "Check your schedule for the time.",
+      "bodyNamed": "{from}–{to}. See you there."
     }
   }
 }
