@@ -186,7 +186,11 @@ function buildSchoolNav(
   ];
 }
 
-function buildTutorNav(userId: string, review: ReviewNav = null): NavSection[] {
+function buildTutorNav(
+  userId: string,
+  workspaceId: string | undefined,
+  review: ReviewNav = null,
+): NavSection[] {
   return [
     {
       items: [
@@ -206,7 +210,12 @@ function buildTutorNav(userId: string, review: ReviewNav = null): NavSection[] {
           : []),
         { href: `/tutor/${userId}/students`, icon: Users, labelKey: 'students' },
         { href: `/tutor/${userId}/invitations`, icon: MailCheck, labelKey: 'invitations' },
-        { href: `/tutor/${userId}/content`, icon: BookOpen, labelKey: 'content' },
+        // Authoring is addressed by workspace, not by contour: the tutor's courses and a
+        // school's open the same screen (plan 61). Without a workspace there is nothing to
+        // point at, and the item would lead where it used to — a 404.
+        ...(workspaceId
+          ? [{ href: wsHref(workspaceId, 'content'), icon: BookOpen, labelKey: 'content' }]
+          : []),
       ],
     },
     {
@@ -261,7 +270,10 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const params = useParams<{ schoolSlug?: string; userId?: string }>();
+  const params = useParams<{ workspaceId?: string; schoolSlug?: string; userId?: string }>();
+  // The same shell is reached from both trees while the move is under way: `/w/<id>/…`
+  // for the sections that have moved, `/school/<slug>/…` for those that have not.
+  const workspaceSegment = params.workspaceId ?? params.schoolSlug ?? '';
   const tNav = useTranslations('Nav');
 
   const { data: reviewsSummary } = useReviewsSummary({ enabled: variant === 'student' });
@@ -272,7 +284,7 @@ export function AppShell({
   // than an item that might turn out not to be theirs.
   const reviewCountFor =
     variant === 'school'
-      ? (params.schoolSlug ?? '')
+      ? workspaceSegment
       : variant === 'tutor'
         ? (tutorWorkspaceId ?? '')
         : '';
@@ -286,12 +298,16 @@ export function AppShell({
   const sections: NavSection[] =
     variant === 'school'
       ? buildSchoolNav(
-          params.schoolSlug ?? '',
+          workspaceSegment,
           schoolContext,
           reviewCount?.hasScope ? reviewCount : null,
         )
       : variant === 'tutor'
-        ? buildTutorNav(resolvedTutorId, reviewCount?.hasScope ? reviewCount : null)
+        ? buildTutorNav(
+            resolvedTutorId,
+            tutorWorkspaceId ?? params.workspaceId,
+            reviewCount?.hasScope ? reviewCount : null,
+          )
         : buildStudentNav(reviewsSummary?.totalDue ?? 0);
 
   const userMenuExtraItems: UserMenuExtraItem[] | undefined =

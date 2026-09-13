@@ -100,7 +100,7 @@ function renderShell(draftVersionId: string | null, pendingModules = 0) {
     <NextIntlClientProvider locale="en" messages={enMessages}>
       <CourseEditorShell
         container={CONTAINER}
-        schoolSlug="my-school"
+        workspaceId="my-school"
         draftVersionId={draftVersionId}
         publishedVersionNumber={2}
       />

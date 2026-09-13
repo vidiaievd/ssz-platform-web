@@ -23,7 +23,7 @@ import { StructureTopbar } from './structure-topbar';
 
 interface CourseEditorShellProps {
   container: Container;
-  schoolSlug: string;
+  workspaceId: string;
   schoolRole?: SchoolRole;
   preflightResult?: PreflightResult;
   /** Draft version id (always present — containers keep one draft version). Null only on fetch failure. */
@@ -42,7 +42,7 @@ interface CourseEditorShellProps {
  */
 export function CourseEditorShell({
   container,
-  schoolSlug,
+  workspaceId,
   schoolRole = 'owner',
   preflightResult,
   draftVersionId,
@@ -97,7 +97,7 @@ export function CourseEditorShell({
       <StructureTopbar
         ref={topbarRef}
         title={container.title}
-        coursesHref={wsHref(schoolSlug, 'content')}
+        coursesHref={wsHref(workspaceId, 'content')}
         state={deriveContainerState(container)}
         versionNumber={publishedVersionNumber}
         updatedAt={container.updatedAt}
@@ -105,7 +105,7 @@ export function CourseEditorShell({
         previewHref={
           container.containerType === 'course' ? `/student/courses/${container.id}` : null
         }
-        reviewInboxHref={wsHref(schoolSlug, `review?course=${container.id}`)}
+        reviewInboxHref={wsHref(workspaceId, `review?course=${container.id}`)}
         onExpandAll={() => setCollapsed(new Set())}
         onCollapseAll={() => setCollapsed(new Set(allCollapseKeys(tree)))}
         onReview={() => setPublishOpen(true)}
@@ -145,7 +145,7 @@ export function CourseEditorShell({
         <CourseStructurePanel
           containerId={container.id}
           versionId={draftVersionId}
-          schoolSlug={schoolSlug}
+          workspaceId={workspaceId}
           targetLanguage={container.targetLanguage}
           difficultyLevel={container.difficultyLevel}
           visibility={container.visibility}

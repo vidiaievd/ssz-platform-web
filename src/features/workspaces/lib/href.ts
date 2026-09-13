@@ -1,16 +1,17 @@
 import type { WorkspaceKind } from '../api/resolve-workspace';
 
 /**
- * Whether workspace screens are addressed by workspace yet.
+ * The sections that live at `/w/<workspaceId>/…` already.
  *
- * The move from `/school/<slug>/…` to `/w/<id>/…` touches every link in the staff
- * surfaces at once, but the routes themselves arrive section by section (plan 61). While
- * this is `false` the helper keeps producing the addresses that exist today, so the links
- * can all be rewritten in one mechanical pass long before anything moves.
+ * The move off `/school/<slug>/…` arrives section by section (plan 61), so this is a set
+ * and not a switch: a section that has not moved keeps its old address, and every link to
+ * it keeps working, whoever built the link. Add a section's first path segment here on the
+ * commit that moves its routes.
  *
- * Delete it, and the branch below, once the last section has moved.
+ * Delete this, and the branch in `buildHref`, once the last section has moved and the old
+ * tree is nothing but redirects.
  */
-export const WORKSPACE_ROUTES = false;
+export const WORKSPACE_ROUTES: ReadonlySet<string> = new Set(['content']);
 
 /**
  * A workspace, as much of it as the caller happens to hold.
@@ -31,7 +32,13 @@ export type WorkspaceRef =
  * places that need an absolute path prefix this themselves.
  */
 export function wsHref(ws: WorkspaceRef, path = ''): string {
-  return buildHref(WORKSPACE_ROUTES, ws, path);
+  return buildHref(hasMoved(path), ws, path);
+}
+
+/** Which section a path belongs to — its first segment, before any `/`, `?` or `#`. */
+function hasMoved(path: string): boolean {
+  const section = path.replace(/^\/+/, '').split(/[/?#]/, 1)[0] ?? '';
+  return WORKSPACE_ROUTES.has(section);
 }
 
 /**

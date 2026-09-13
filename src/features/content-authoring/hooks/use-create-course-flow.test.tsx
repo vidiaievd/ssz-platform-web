@@ -6,7 +6,7 @@ import { enMessages } from '@/lib/i18n/messages';
 
 const push = vi.fn();
 vi.mock('next/navigation', () => ({
-  useParams: () => ({ schoolSlug: 'demo-school' }),
+  useParams: () => ({ workspaceId: 'demo-school' }),
 }));
 vi.mock('@/lib/i18n/navigation', () => ({
   useRouter: () => ({ push }),
@@ -73,7 +73,7 @@ describe('useCreateCourseFlow', () => {
     const { result } = renderHook(() => useCreateCourseFlow(), { wrapper });
     act(() => result.current.create());
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/school/demo-school/content/course-1'));
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/w/demo-school/content/course-1'));
 
     expect(createContainerAction).toHaveBeenCalledOnce();
     expect(createContainerAction.mock.calls[0]![0]).toMatchObject({
@@ -100,7 +100,7 @@ describe('useCreateCourseFlow', () => {
     const { result } = renderHook(() => useCreateCourseFlow(), { wrapper });
     act(() => result.current.create());
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/school/demo-school/content/course-1'));
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/w/demo-school/content/course-1'));
 
     expect(syncStructureSectionsAction).toHaveBeenCalledWith('course-1', expect.any(Array));
     expect(applyCefrStarterScaffoldAction).toHaveBeenCalledWith(
@@ -140,7 +140,7 @@ describe('useCreateCourseFlow', () => {
     const { result } = renderHook(() => useCreateCourseFlow(), { wrapper });
     act(() => result.current.create());
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/school/demo-school/content/course-1'));
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/w/demo-school/content/course-1'));
     expect(toastError).toHaveBeenCalledOnce();
     expect(toastSuccess).not.toHaveBeenCalled();
   });

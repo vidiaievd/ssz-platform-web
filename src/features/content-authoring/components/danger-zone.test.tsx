@@ -5,7 +5,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 
-vi.mock('next/navigation', () => ({ useParams: () => ({ schoolSlug: 'my-school' }) }));
+vi.mock('next/navigation', () => ({ useParams: () => ({ workspaceId: 'my-school' }) }));
 vi.mock('@/lib/i18n/navigation', () => ({
   useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
 }));

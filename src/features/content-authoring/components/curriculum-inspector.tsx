@@ -50,7 +50,7 @@ interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
   /** The course's own container id — levels are sections on it. */
   courseContainerId: string;
-  schoolSlug: string;
+  workspaceId: string;
   /** Called after a rename persists, so the caller can refetch the tree. */
   onChanged: () => void;
   /** Opens the delete confirmation, which the panel owns (`useNodeDeletion`). */
@@ -231,7 +231,7 @@ function itemPublishSegment(item: CurriculumTreeItemNode): string {
 export function CurriculumInspector({
   selection,
   courseContainerId,
-  schoolSlug,
+  workspaceId,
   onChanged,
   onDelete,
 }: CurriculumInspectorProps) {
@@ -440,7 +440,7 @@ export function CurriculumInspector({
         <ModulePublishBlock publishState={mod.publishState} />
 
         <InspectorFooter
-          editorHref={wsHref(schoolSlug, `content/${mod.containerId}`)}
+          editorHref={wsHref(workspaceId, `content/${mod.containerId}`)}
           onDelete={() =>
             onDelete({
               kind: 'module',
@@ -592,7 +592,7 @@ export function CurriculumInspector({
       </div>
 
       <InspectorFooter
-        editorHref={wsHref(schoolSlug, `content/${containerId}/lessons/${item.id}`)}
+        editorHref={wsHref(workspaceId, `content/${containerId}/lessons/${item.id}`)}
         onDelete={() => onDelete({ kind: 'item', id: item.id, title: item.title ?? '' })}
       />
     </div>

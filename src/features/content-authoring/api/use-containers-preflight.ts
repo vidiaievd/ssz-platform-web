@@ -1,11 +1,11 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useQueries } from '@tanstack/react-query';
 
 import type { PreflightResult } from '../types';
 
 import { authoringKeys } from './keys';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 
 export interface PreflightEntry {
   result: PreflightResult | undefined;
@@ -27,14 +27,14 @@ export function useContainersPreflight(
   containerIds: string[],
   enabled = true,
 ): Map<string, PreflightEntry> {
-  const { schoolSlug } = useParams<{ schoolSlug: string }>();
+  const workspaceId = useWorkspaceRef();
 
   const results = useQueries({
     queries: containerIds.map((containerId) => ({
-      queryKey: [...authoringKeys.preflight(containerId), schoolSlug],
+      queryKey: [...authoringKeys.preflight(containerId), workspaceId],
       queryFn: async () => {
         const res = await fetch(
-          `/api/content/containers/${containerId}/preflight?schoolSlug=${encodeURIComponent(schoolSlug)}`,
+          `/api/content/containers/${containerId}/preflight?workspaceId=${encodeURIComponent(workspaceId)}`,
         );
         if (!res.ok) throw new Error('Preflight failed');
         return res.json() as Promise<PreflightResult>;

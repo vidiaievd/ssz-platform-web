@@ -124,7 +124,7 @@ function InteractiveTree() {
       onSelect={setSelection}
       onChanged={() => {}}
       courseContainerId="course-1"
-      schoolSlug="my-school"
+      workspaceId="my-school"
       filters={EMPTY_FILTERS}
       targetLanguage="no"
       difficultyLevel="A2"
@@ -147,7 +147,7 @@ type Story = StoryObj<typeof meta>;
 
 const commonArgs = {
   courseContainerId: 'course-1',
-  schoolSlug: 'my-school',
+  workspaceId: 'my-school',
   filters: EMPTY_FILTERS,
   targetLanguage: 'no',
   difficultyLevel: 'A2',

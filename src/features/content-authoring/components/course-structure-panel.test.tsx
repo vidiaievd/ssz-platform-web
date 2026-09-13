@@ -66,7 +66,7 @@ function renderPanel() {
       <CourseStructurePanel
         containerId="course-1"
         versionId="version-1"
-        schoolSlug="my-school"
+        workspaceId="my-school"
         targetLanguage="no"
         difficultyLevel="A2"
         visibility="public"

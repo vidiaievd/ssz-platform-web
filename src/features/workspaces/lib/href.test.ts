@@ -7,6 +7,17 @@ describe('wsHref', () => {
     expect(wsHref('nordick', 'groups')).toBe('/school/nordick/groups');
   });
 
+  it('sends a section that has moved to its workspace address', () => {
+    expect(WORKSPACE_ROUTES.has('content')).toBe(true);
+    expect(wsHref('ws-1', 'content')).toBe('/w/ws-1/content');
+    expect(wsHref('ws-1', 'content/c-1/lessons/l-2')).toBe('/w/ws-1/content/c-1/lessons/l-2');
+  });
+
+  it('does not mistake a section for another whose name it starts with', () => {
+    // `contents` is not `content`; only the whole first segment counts.
+    expect(wsHref('nordick', 'contents')).toBe('/school/nordick/contents');
+  });
+
   it('gives the workspace root when asked for no screen', () => {
     expect(wsHref('nordick')).toBe('/school/nordick');
   });
@@ -15,8 +26,8 @@ describe('wsHref', () => {
     expect(wsHref('nordick', 'review?course=abc&type=writing_task')).toBe(
       '/school/nordick/review?course=abc&type=writing_task',
     );
-    expect(wsHref('nordick', 'content/c-1/lessons/l-2')).toBe(
-      '/school/nordick/content/c-1/lessons/l-2',
+    expect(wsHref('nordick', 'students/s-1?tab=mastery')).toBe(
+      '/school/nordick/students/s-1?tab=mastery',
     );
   });
 
@@ -30,8 +41,11 @@ describe('wsHref', () => {
     expect(wsHref({ id: 'ws-1', slug: null })).toBe('/school/ws-1');
   });
 
-  it('is still switched off — every link above is the address that exists today', () => {
-    expect(WORKSPACE_ROUTES).toBe(false);
+  it('leaves every section that has not moved where it is', () => {
+    for (const section of ['groups', 'students', 'review', 'settings', 'dashboard']) {
+      expect(WORKSPACE_ROUTES.has(section)).toBe(false);
+      expect(wsHref('nordick', section)).toBe(`/school/nordick/${section}`);
+    }
   });
 
   it('addresses a screen by workspace id once the routes are switched on', () => {

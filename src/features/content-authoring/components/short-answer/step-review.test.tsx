@@ -11,7 +11,7 @@ import {
   type ShortAnswerContent,
 } from '@/lib/shared-kernel/short-answer';
 
-vi.mock('next/navigation', () => ({ useParams: () => ({ schoolSlug: 'demo-school' }) }));
+vi.mock('next/navigation', () => ({ useParams: () => ({ workspaceId: 'demo-school' }) }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,

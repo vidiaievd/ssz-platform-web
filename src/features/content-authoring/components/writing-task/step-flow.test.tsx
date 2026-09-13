@@ -7,8 +7,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { enMessages } from '@/lib/i18n/messages';
 import { emptyContent, type WritingTask } from '@/lib/shared-kernel/writing-task';
 
-const schoolSlug = vi.hoisted(() => ({ current: 'demo-school' as string | undefined }));
-vi.mock('next/navigation', () => ({ useParams: () => ({ schoolSlug: schoolSlug.current }) }));
+const workspaceId = vi.hoisted(() => ({ current: 'demo-school' as string | undefined }));
+vi.mock('next/navigation', () => ({ useParams: () => ({ workspaceId: workspaceId.current }) }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({
     href,
@@ -173,14 +173,14 @@ describe('the queue link', () => {
   });
 
   it('says nothing at all outside a school route, where there is nowhere to link', () => {
-    schoolSlug.current = undefined;
+    workspaceId.current = undefined;
     try {
       renderStep();
       expect(
         screen.queryByRole('link', { name: /Open the marking queue/ }),
       ).not.toBeInTheDocument();
     } finally {
-      schoolSlug.current = 'demo-school';
+      workspaceId.current = 'demo-school';
     }
   });
 });

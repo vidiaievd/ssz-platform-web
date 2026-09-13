@@ -1,6 +1,5 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Check, Plus, Zap, Clipboard } from 'lucide-react';
 
@@ -16,6 +15,7 @@ import {
 import { Link } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { wsHref } from '@/features/workspaces/lib/href';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 
 import { useCreateCourseFlow } from '../hooks/use-create-course-flow';
 import { useCreateCourseStore, type LevelSystem, type Starter } from '../stores/create-course';
@@ -68,8 +68,8 @@ function StarterChip({
 export function QuickCreatePanel() {
   const t = useTranslations('Authoring.createCourse');
   const languageOptions = useLanguageOptions();
-  const { schoolSlug } = useParams<{ schoolSlug: string }>();
-  const contentBase = wsHref(schoolSlug, 'content');
+  const workspaceId = useWorkspaceRef();
+  const contentBase = wsHref(workspaceId, 'content');
 
   const { basics, updateBasics, levelSystem, setLevelSystem, starter, setStarter, reset } =
     useCreateCourseStore();

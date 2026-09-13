@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { mapPreflightViolation, type RuleViolation } from './map-preflight-violation';
 
-const CTX = { schoolSlug: 'nordick', containerId: 'module-1' };
+const CTX = { workspaceId: 'nordick', containerId: 'module-1' };
 
 function violation(overrides: Partial<RuleViolation> = {}): RuleViolation {
   return {
@@ -21,7 +21,7 @@ describe('mapPreflightViolation', () => {
     // is opened from, so the link looked broken.
     const check = mapPreflightViolation(violation(), CTX);
 
-    expect(check.fixDeepLink).toBe('/school/nordick/content/module-1/lessons/exercise-9');
+    expect(check.fixDeepLink).toBe('/w/nordick/content/module-1/lessons/exercise-9');
   });
 
   it.each(['LESSON', 'VOCABULARY_LIST', 'GRAMMAR_RULE'])(
@@ -29,7 +29,7 @@ describe('mapPreflightViolation', () => {
     (itemType) => {
       const check = mapPreflightViolation(violation({ itemType, itemId: 'ref-1' }), CTX);
 
-      expect(check.fixDeepLink).toBe('/school/nordick/content/module-1/lessons/ref-1');
+      expect(check.fixDeepLink).toBe('/w/nordick/content/module-1/lessons/ref-1');
     },
   );
 
@@ -39,7 +39,7 @@ describe('mapPreflightViolation', () => {
       CTX,
     );
 
-    expect(check.fixDeepLink).toBe('/school/nordick/content/module-2');
+    expect(check.fixDeepLink).toBe('/w/nordick/content/module-2');
   });
 
   it('offers no link for rules that name no editable item', () => {

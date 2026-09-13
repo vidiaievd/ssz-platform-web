@@ -7,3 +7,4 @@ export { RoleBadge } from './components/role-badge';
 // wsHref is imported directly from './lib/href' at call sites — it is used by server
 // components and tests that have no business pulling this barrel's React components in.
 export { wsHref, WORKSPACE_ROUTES, type WorkspaceRef } from './lib/href';
+export { useWorkspaceRef } from './lib/use-workspace-ref';

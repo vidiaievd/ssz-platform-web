@@ -10,6 +10,7 @@ import { CourseEditorShell } from '@/features/content-authoring/components/cours
 import { getContainerPreflight } from '@/features/content-authoring/lib/get-container-preflight';
 import type { PreflightResult, SchoolRole } from '@/features/content-authoring/types';
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
+import { NoAccess } from '@/features/content-authoring/components/no-access';
 
 function TabsSkeleton() {
   return (
@@ -23,12 +24,12 @@ function TabsSkeleton() {
 export default async function ContainerDetailPage({
   params,
 }: {
-  params: Promise<{ schoolSlug: string; id: string }>;
+  params: Promise<{ workspaceId: string; id: string }>;
 }) {
-  const { schoolSlug, id } = await params;
+  const { workspaceId, id } = await params;
   const [t, orgRole] = await Promise.all([
     getTranslations('Authoring'),
-    getMySchoolRole(schoolSlug),
+    getMySchoolRole(workspaceId),
   ]);
 
   const schoolRole: SchoolRole =
@@ -46,6 +47,8 @@ export default async function ContainerDetailPage({
     });
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') notFound();
+    // Somebody else's course is not a broken platform.
+    if (e instanceof AppError && e.code === 'forbidden') return <NoAccess />;
     throw e;
   }
 
@@ -69,7 +72,7 @@ export default async function ContainerDetailPage({
     // Also for an already-published container: editing it opens a new draft
     // version, and re-publishing needs the same pre-flight as the first release.
     if (draftVersionId) {
-      preflight = await getContainerPreflight(schoolSlug, id);
+      preflight = await getContainerPreflight(workspaceId, id);
     }
   } catch (err) {
     console.error('[content/id] versions fetch failed:', err);
@@ -81,7 +84,7 @@ export default async function ContainerDetailPage({
       <Suspense fallback={<TabsSkeleton />}>
         <CourseEditorShell
           container={container}
-          schoolSlug={schoolSlug}
+          workspaceId={workspaceId}
           schoolRole={schoolRole}
           preflightResult={preflight}
           draftVersionId={draftVersionId}

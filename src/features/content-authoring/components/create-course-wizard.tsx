@@ -1,6 +1,5 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 
@@ -8,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Stepper, type StepDef } from '@/components/ui/stepper';
 import { Link } from '@/lib/i18n/navigation';
 import { wsHref } from '@/features/workspaces/lib/href';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 
 import { useCreateCourseFlow } from '../hooks/use-create-course-flow';
 import { useCreateCourseStore } from '../stores/create-course';
@@ -21,8 +21,8 @@ const TOTAL_STEPS = 3;
 /** Guided 3-step wizard (Basics → Levels → Starter) with a sticky live preview. Creation happens once, on the final step. */
 export function CreateCourseWizard() {
   const t = useTranslations('Authoring.createCourse');
-  const { schoolSlug } = useParams<{ schoolSlug: string }>();
-  const contentBase = wsHref(schoolSlug, 'content');
+  const workspaceId = useWorkspaceRef();
+  const contentBase = wsHref(workspaceId, 'content');
 
   const store = useCreateCourseStore();
   const { create, isCreating, canCreate } = useCreateCourseFlow();

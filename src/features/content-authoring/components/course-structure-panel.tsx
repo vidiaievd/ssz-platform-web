@@ -27,7 +27,7 @@ import { UnpublishedBanner } from './unpublished-banner';
 interface CourseStructurePanelProps {
   containerId: string;
   versionId: string;
-  schoolSlug: string;
+  workspaceId: string;
   /** Inherited by new lessons/vocab/grammar items (and modules) created from the tree. */
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
@@ -64,7 +64,7 @@ function StructureSkeleton() {
 export function CourseStructurePanel({
   containerId,
   versionId,
-  schoolSlug,
+  workspaceId,
   targetLanguage,
   difficultyLevel,
   visibility,
@@ -163,7 +163,7 @@ export function CourseStructurePanel({
               onSelect={setSelection}
               onChanged={handleChanged}
               courseContainerId={containerId}
-              schoolSlug={schoolSlug}
+              workspaceId={workspaceId}
               targetLanguage={targetLanguage}
               difficultyLevel={difficultyLevel}
               visibility={visibility}
@@ -184,7 +184,7 @@ export function CourseStructurePanel({
             <CurriculumInspector
               selection={selection}
               courseContainerId={containerId}
-              schoolSlug={schoolSlug}
+              workspaceId={workspaceId}
               onChanged={() => handleChanged()}
               onDelete={deletion.request}
             />

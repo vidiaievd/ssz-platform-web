@@ -1,6 +1,5 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Bot, ExternalLink, PenLine, User } from 'lucide-react';
 
@@ -16,6 +15,7 @@ import {
   type WritingTask,
 } from '@/lib/shared-kernel/writing-task';
 import { wsHref } from '@/features/workspaces/lib/href';
+import { useWorkspaceRef } from '@/features/workspaces/lib/use-workspace-ref';
 
 import { setAi, setSettings } from './edits';
 import { ToggleRow } from '../toggle-row';
@@ -238,16 +238,16 @@ export function StepFlow({ exercise, containerId, onChange }: StepFlowProps) {
  */
 function QueueLink({ containerId }: { containerId: string }) {
   const t = useTranslations('Authoring');
-  const { schoolSlug } = useParams<{ schoolSlug?: string }>();
+  const workspaceId = useWorkspaceRef();
 
-  if (!schoolSlug) return null;
+  if (!workspaceId) return null;
 
   return (
     <section className="flex flex-col gap-2 rounded-lg border border-dashed border-border p-4">
       <h3 className="text-xs font-medium">{t('writingTask.step4.queueLabel')}</h3>
       <p className="text-xs text-muted-foreground">{t('writingTask.step4.queueHelp')}</p>
       <Link
-        href={wsHref(schoolSlug, `review?course=${containerId}&type=writing_task`)}
+        href={wsHref(workspaceId, `review?course=${containerId}&type=writing_task`)}
         className="flex w-fit items-center gap-1.5 text-sm text-primary hover:underline"
       >
         <ExternalLink className="size-3.5" aria-hidden />

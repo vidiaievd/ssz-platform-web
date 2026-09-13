@@ -19,13 +19,14 @@ import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-i
 import { collectLevelGrammarRules } from '@/features/content-authoring/lib/level-grammar-rules';
 import { getMaterialKind } from '@/features/content-authoring/lib/material-kind';
 import { wsHref } from '@/features/workspaces/lib/href';
+import { NoAccess } from '@/features/content-authoring/components/no-access';
 
 export default async function LessonEditorPage({
   params,
 }: {
-  params: Promise<{ schoolSlug: string; id: string; itemId: string }>;
+  params: Promise<{ workspaceId: string; id: string; itemId: string }>;
 }) {
-  const { schoolSlug, id, itemId } = await params;
+  const { workspaceId, id, itemId } = await params;
 
   let container: Container;
   try {
@@ -35,6 +36,8 @@ export default async function LessonEditorPage({
     });
   } catch (e) {
     if (e instanceof AppError && e.code === 'not_found') notFound();
+    // Somebody else's course is not a broken platform.
+    if (e instanceof AppError && e.code === 'forbidden') return <NoAccess />;
     throw e;
   }
 
@@ -68,7 +71,7 @@ export default async function LessonEditorPage({
   // Annotating grammar in a text points at the rules of its own Leksjon; the
   // tree above already holds them, so the editor needs no request of its own.
   const levelGrammarRules = collectLevelGrammarRules(tree, moduleContainerId);
-  const backHref = wsHref(schoolSlug, `content/${id}`);
+  const backHref = wsHref(workspaceId, `content/${id}`);
   const t = await getTranslations('Authoring');
   // Deliberately not a publish button: students read the *module's* published
   // version, so publishing the course from here changed nothing for this
@@ -82,7 +85,7 @@ export default async function LessonEditorPage({
   const sectionCrumb =
     levelTitle && sectionTitle ? `${levelTitle} · ${sectionTitle}` : (levelTitle ?? sectionTitle);
   const breadcrumbItems: BreadcrumbItem[] = [
-    { label: t('breadcrumb.courses'), href: wsHref(schoolSlug, 'content') },
+    { label: t('breadcrumb.courses'), href: wsHref(workspaceId, 'content') },
     { label: container.title, href: backHref },
     ...(sectionCrumb ? [{ label: sectionCrumb }] : []),
     { label: item.title ?? t('lessons.untitled') },
@@ -155,7 +158,7 @@ export default async function LessonEditorPage({
           isLive={item.isLive}
           container={moduleContainer}
           grammarRules={levelGrammarRules}
-          reviewHref={wsHref(schoolSlug, `review?course=${id}`)}
+          reviewHref={wsHref(workspaceId, `review?course=${id}`)}
           publishSlot={publishSlot}
         />
       ) : (

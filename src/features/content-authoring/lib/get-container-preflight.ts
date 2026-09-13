@@ -30,7 +30,7 @@ const EMPTY_RESULT: PreflightResult = {
  * directly to content-service via CONTENT_SERVICE_INTERNAL_URL.
  */
 export async function getContainerPreflight(
-  schoolSlug: string,
+  workspaceId: string,
   containerId: string,
 ): Promise<PreflightResult> {
   const versionsResp = await serverFetch<{ items: ContainerVersion[] }>({
@@ -72,7 +72,7 @@ export async function getContainerPreflight(
   const itemTitles = new Map(items.map((i) => [i.itemId, i.title]));
 
   const checks = violations.map((v) =>
-    mapPreflightViolation(v, { schoolSlug, containerId, itemTitles }),
+    mapPreflightViolation(v, { workspaceId, containerId, itemTitles }),
   );
   const blockerCount = checks.filter((c) => c.severity === 'blocker').length;
   const warningCount = checks.filter((c) => c.severity === 'warning').length;

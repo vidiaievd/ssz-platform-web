@@ -6,7 +6,7 @@ import { enMessages } from '@/lib/i18n/messages';
 
 let flowParam: string | null = null;
 vi.mock('next/navigation', () => ({
-  useParams: () => ({ schoolSlug: 'demo-school' }),
+  useParams: () => ({ workspaceId: 'demo-school' }),
   useSearchParams: () => ({ get: (key: string) => (key === 'flow' ? flowParam : null) }),
 }));
 vi.mock('@/lib/i18n/navigation', () => ({
