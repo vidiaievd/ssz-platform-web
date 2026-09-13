@@ -3,18 +3,21 @@
     "greeting": "Welcome back! 👋",
     "greetingNamed": "Welcome back, {name}! 👋",
     "subtitle": "Here's an overview of your tutoring activity.",
+    "profileFailed": "Failed to load your profile.",
     "stats": {
-      "students": "Active students",
-      "lessons": "Lessons this month",
-      "rating": "Average rating"
+      "sectionLabel": "Your week",
+      "students": "Active students · 7d",
+      "lessons": "Lessons completed · 7d",
+      "groups": "Groups",
+      "groupsHint": "besides the learners you teach alone"
     },
-    "upcoming": {
-      "title": "Upcoming lessons",
-      "empty": "No upcoming lessons scheduled."
-    },
-    "students": {
-      "title": "Recent students",
-      "empty": "No students yet. Share your profile to get started."
+    "review": {
+      "title": "Waiting to be marked",
+      "waiting": "{count, plural, one {# submission} other {# submissions}}",
+      "hint": "From your learners, oldest first.",
+      "open": "Open the queue",
+      "emptyTitle": "Nothing to mark",
+      "emptyBody": "Work your learners hand in shows up here."
     }
   },
   "students": {

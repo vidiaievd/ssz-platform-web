@@ -233,11 +233,20 @@ export const fetchGroupNames = cache(async function (
   schoolId: string,
 ): Promise<Record<string, string>> {
   try {
-    const groups = await serverFetch<{ id: string; name: string }[]>({
+    const groups = await serverFetch<{ id: string; name: string; isDefault?: boolean }[]>({
       service: 'organization',
       path: `/schools/${schoolId}/groups`,
     });
-    return Object.fromEntries(groups.map((group) => [group.id, group.name]));
+    return Object.fromEntries(
+      groups
+        // A solo workspace's own group holds every learner the tutor has, so filtering the
+        // queue by it filters nothing — and naming it on screen is the one thing a tutor's
+        // workspace never does (plan 59, §5.1). Its submissions stay in the queue; what
+        // goes is its filter option and the label on its rows, both of which would be the
+        // same word beside everything.
+        .filter((group) => !group.isDefault)
+        .map((group) => [group.id, group.name]),
+    );
   } catch {
     return {};
   }

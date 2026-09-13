@@ -213,15 +213,30 @@ export async function getStudent(
 
 // ── Groups (for enroll dialog picker) ────────────────────────────────────────
 
-export type GroupSelectOption = { id: string; name: string; lang: string; level: string };
+export type GroupSelectOption = {
+  id: string;
+  name: string;
+  lang: string;
+  level: string;
+  /** The workspace's own group — see StudentGroupRef.isDefault. */
+  isDefault: boolean;
+};
 
 export async function getGroupsForSelect(schoolId: string): Promise<GroupSelectOption[]> {
   try {
-    const raw = await serverFetch<Array<{ id: string; name: string; lang?: string; level?: string }>>({
+    const raw = await serverFetch<
+      Array<{ id: string; name: string; lang?: string; level?: string; isDefault?: boolean }>
+    >({
       service: 'organization',
       path: `/schools/${schoolId}/groups`,
     });
-    return raw.map((g) => ({ id: g.id, name: g.name, lang: g.lang ?? '', level: g.level ?? '' }));
+    return raw.map((g) => ({
+      id: g.id,
+      name: g.name,
+      lang: g.lang ?? '',
+      level: g.level ?? '',
+      isDefault: g.isDefault ?? false,
+    }));
   } catch {
     return [];
   }

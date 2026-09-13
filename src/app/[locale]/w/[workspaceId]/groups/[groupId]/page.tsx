@@ -3,7 +3,6 @@ import { getTranslations } from 'next-intl/server';
 
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
 import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
-import { getTutorWorkspace } from '@/features/tutoring/api/get-tutor-workspace';
 import { wsHref } from '@/features/workspaces/lib/href';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import {
@@ -74,10 +73,7 @@ export default async function GroupDetailPage({ params }: Props) {
 
   // The group a solo workspace keeps for itself holds everybody and is never shown as a
   // screen — it has no name on display and no page (plan 59, §5.1).
-  if (isSolo) {
-    const home = await getTutorWorkspace();
-    if (home?.groupId === group.id) notFound();
-  }
+  if (isSolo && group.isDefault) notFound();
 
   const canManage = canManageGroups(role);
   const [courseView, materials, outline, schoolTeachers] = await Promise.all([

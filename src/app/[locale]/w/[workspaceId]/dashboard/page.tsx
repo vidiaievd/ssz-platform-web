@@ -22,5 +22,9 @@ export default async function WorkspaceDashboardPage({ params }: Props) {
   const workspace = await resolveWorkspace(workspaceId);
   if (!workspace) notFound();
 
-  return workspace.kind === 'SOLO' ? <TutorDashboard /> : <SchoolDashboard params={params} />;
+  return workspace.kind === 'SOLO' ? (
+    <TutorDashboard workspaceId={workspace.id} />
+  ) : (
+    <SchoolDashboard params={params} />
+  );
 }

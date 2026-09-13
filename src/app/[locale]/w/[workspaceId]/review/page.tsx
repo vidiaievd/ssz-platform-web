@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { getSchoolByRef } from '@/features/school/api/get-school-by-ref';
+import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { ReviewInbox } from '@/features/review/components/inbox/review-inbox';
 
 type Props = {
@@ -32,8 +32,11 @@ export async function generateMetadata({ params }: Props) {
 export default async function SchoolReviewPage({ params }: Props) {
   const { workspaceId } = await params;
 
-  const school = await getSchoolByRef(workspaceId);
-  if (!school) notFound();
+  // By id, not by slug: a solo workspace has a slug of its own making, and the review
+  // scope only ever recognises a tutor's workspace by its id — a queue asked for by slug
+  // came back 403 on the tutor's own work.
+  const workspace = await resolveWorkspace(workspaceId);
+  if (!workspace) notFound();
 
   return (
     // `h-full`, not `flex-1`: the shell renders its pages inside a plain block with a
@@ -42,7 +45,7 @@ export default async function SchoolReviewPage({ params }: Props) {
     // headings and the panel's header off the top of the screen with it.
     <main className="flex h-full min-h-0 flex-col">
       <Suspense>
-        <ReviewInbox school={school.slug ?? school.id} />
+        <ReviewInbox school={workspace.id} />
       </Suspense>
     </main>
   );

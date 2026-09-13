@@ -33,6 +33,7 @@ type OrgGroup = {
   lang?: string;
   level?: string;
   status?: string;
+  isDefault?: boolean;
   mode?: string;
   capacityMin?: number;
   capacityMax?: number;
@@ -338,6 +339,7 @@ export async function getGroup(
     lang: rawGroup.lang ?? 'en',
     level: (rawGroup.level ?? 'A1') as Group['level'],
     status: mapGroupStatus(rawGroup.status),
+    isDefault: rawGroup.isDefault ?? false,
     mode: mapGroupMode(rawGroup.mode),
     capacity: { min: rawGroup.capacityMin ?? 0, max: rawGroup.capacityMax ?? 999 },
     studentCount: rawGroup.studentCount ?? 0,

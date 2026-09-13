@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
-import { getSchoolByRef } from '@/features/school/api/get-school-by-ref';
+import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { SubmissionPanel } from '@/features/review/components/submission/submission-panel';
 import { wsHref } from '@/features/workspaces/lib/href';
 
@@ -31,8 +31,11 @@ export async function generateMetadata({ params }: Props) {
 export default async function SubmissionPage({ params }: Props) {
   const { workspaceId, submissionId, locale } = await params;
 
-  const school = await getSchoolByRef(workspaceId);
-  if (!school) notFound();
+  // By id, not by slug: a solo workspace has a slug of its own making, and the review
+  // scope only ever recognises a tutor's workspace by its id — a queue asked for by slug
+  // came back 403 on the tutor's own work.
+  const workspace = await resolveWorkspace(workspaceId);
+  if (!workspace) notFound();
 
   const t = await getTranslations('Review');
 
@@ -45,7 +48,7 @@ export default async function SubmissionPage({ params }: Props) {
         <ArrowLeft aria-hidden className="h-4 w-4" />
         {t('submission.back')}
       </Link>
-      <SubmissionPanel school={school.slug ?? school.id} id={submissionId} />
+      <SubmissionPanel school={workspace.id} id={submissionId} />
     </main>
   );
 }

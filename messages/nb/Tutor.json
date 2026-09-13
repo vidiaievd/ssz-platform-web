@@ -2,19 +2,22 @@
   "dashboard": {
     "greeting": "Velkommen tilbake! 👋",
     "greetingNamed": "Velkommen tilbake, {name}! 👋",
-    "subtitle": "Her er en oversikt over din undervisningsaktivitet.",
+    "subtitle": "Her er en oversikt over undervisningen din.",
+    "profileFailed": "Kunne ikke laste profilen din.",
     "stats": {
-      "students": "Aktive elever",
-      "lessons": "Timer denne måneden",
-      "rating": "Gjennomsnittlig vurdering"
+      "sectionLabel": "Uken din",
+      "students": "Aktive elever · 7 d",
+      "lessons": "Fullførte leksjoner · 7 d",
+      "groups": "Grupper",
+      "groupsHint": "i tillegg til elevene du underviser alene"
     },
-    "upcoming": {
-      "title": "Kommende timer",
-      "empty": "Ingen kommende timer planlagt."
-    },
-    "students": {
-      "title": "Nylige elever",
-      "empty": "Ingen elever ennå. Del profilen din for å komme i gang."
+    "review": {
+      "title": "Venter på retting",
+      "waiting": "{count, plural, one {# besvarelse} other {# besvarelser}}",
+      "hint": "Fra elevene dine, eldst først.",
+      "open": "Åpne køen",
+      "emptyTitle": "Ingenting å rette",
+      "emptyBody": "Arbeid elevene leverer inn dukker opp her."
     }
   },
   "students": {
