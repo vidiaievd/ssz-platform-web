@@ -6,6 +6,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { getMySchedule } from '@/features/schedule/api/get-my-schedule';
 import { ScheduleGrid } from '@/features/schedule/components/schedule-grid';
+import { AddLessonDialog } from '@/features/schedule/components/add-lesson-dialog';
+import { getGroupsForSelect } from '@/features/students/api/queries';
 import { isoDay, parseDay, rangeOf, shift, type RangeKind } from '@/features/schedule/lib/range';
 import { Button } from '@/components/ui/button';
 import { wsHref } from '@/features/workspaces/lib/href';
@@ -35,7 +37,16 @@ export default async function SchedulePage({ params, searchParams }: Props) {
   const anchor = parseDay(on) ?? today;
   const range = rangeOf(kind, anchor);
 
-  const { sessions, error } = await getMySchedule(workspace.id, range);
+  const [{ sessions, error }, groups] = await Promise.all([
+    getMySchedule(workspace.id, range),
+    getGroupsForSelect(workspace.id),
+  ]);
+
+  // Whom an extra lesson can be with: everybody the tutor actually teaches. The group the
+  // workspace keeps for itself holds all of them and teaches none, so it is not offered.
+  const targets = groups
+    .filter((group) => !group.isDefault)
+    .map((group) => ({ groupId: group.id, title: group.name }));
 
   const href = (next: { kind?: RangeKind; on?: Date | null }) => {
     const nextKind = next.kind ?? kind;
@@ -63,7 +74,7 @@ export default async function SchedulePage({ params, searchParams }: Props) {
           <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
 
-        {/* Two scales of one question, and the way back to now. */}
+        {/* Two scales of one question, the way back to now, and one more lesson. */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5">
             <Button
@@ -97,6 +108,12 @@ export default async function SchedulePage({ params, searchParams }: Props) {
               <ChevronRight className="size-4" aria-hidden="true" />
             </Link>
           </Button>
+
+          <AddLessonDialog
+            workspaceId={workspace.id}
+            targets={targets}
+            defaultDate={isoDay(anchor)}
+          />
         </div>
       </div>
 

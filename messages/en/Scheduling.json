@@ -43,6 +43,36 @@
       "held": "Held",
       "cancelled": "Cancelled",
       "moved": "Moved"
+    },
+    "actions": {
+      "label": "Actions for {title}",
+      "markHeld": "Mark as held",
+      "cancel": "Cancel the lesson",
+      "move": "Move it",
+      "moveTitle": "Move the lesson with {title}",
+      "moveDescription": "Pick the day and time it is actually taught.",
+      "date": "Date",
+      "from": "From",
+      "to": "To",
+      "back": "Back",
+      "moveSubmit": "Move",
+      "heldDone": "Marked as held.",
+      "cancelledDone": "The lesson is cancelled.",
+      "movedDone": "The lesson has moved.",
+      "failed": "Could not change the lesson."
+    },
+    "add": {
+      "trigger": "Add a lesson",
+      "title": "An extra lesson",
+      "description": "Outside the weekly pattern — a make-up, or an hour swapped for a missed one.",
+      "with": "With",
+      "date": "Date",
+      "from": "From",
+      "to": "To",
+      "cancel": "Cancel",
+      "submit": "Add",
+      "added": "The lesson is in your week.",
+      "failed": "Could not add the lesson."
     }
   }
 }
