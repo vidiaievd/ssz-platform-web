@@ -30,7 +30,12 @@
     "viewLabel": "How to read the work",
     "show": "Show chart",
     "qualityStrip": "Quality of what was attempted, per unit — hatched where nothing was attempted",
-    "noTimetable": "We could not ask the timetable, so no unit is marked as taught or untaught. Lessons may well have been held."
+    "noTimetable": "We could not ask the timetable, so no unit is marked as taught or untaught. Lessons may well have been held.",
+    "tableCaption": "Taught against taken away, unit by unit",
+    "tableUnit": "Unit",
+    "tableDelivered": "Taught",
+    "tableAbsorbed": "Taken away",
+    "tableUnmeasured": "Not measured"
   },
   "unit": {
     "lessons": "{count, plural, =0 {no lessons} one {# lesson} other {# lessons}}",
@@ -88,7 +93,8 @@
     "tipHead": "{name} · Unit {no} {title}",
     "tipMeasured": "{value}% of the unit passed",
     "tipInsufficient": "{sample} of {threshold} weighted samples — no verdict",
-    "neverSeenShort": "never seen"
+    "neverSeenShort": "never seen",
+    "gridLabel": "Every learner against every unit. Use the arrow keys to move, Enter to open a cell."
   },
   "mastery": {
     "empty": {

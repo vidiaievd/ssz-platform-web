@@ -46,7 +46,11 @@ export function MasteryCell({ cell, minWeightedSample, labels, tip }: MasteryCel
 
   return (
     <div
+      // The same sentence as the tooltip, because a shape is not readable out loud: every
+      // cell of every grid in this package names its state in words (BEHAVIOR, §accessibility).
+      role="gridcell"
       title={tip}
+      aria-label={tip}
       className="box-border grid h-[52px] place-items-center gap-px rounded-[9px] p-1 text-center"
       style={style}
     >

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { isMeasured } from '@/lib/shared-kernel/analytics';
 
@@ -25,7 +25,9 @@ export interface HeatmapProps {
   /** Where a measured cell leads. Returning `null` makes the cell inert. */
   href?: (row: HeatmapRow, unit: HeatmapUnit) => string | null;
   sort?: HeatmapSort;
-  labels: { student: string; empty: string };
+  /** Told when a cell is opened, so the screen can record which kinds of emptiness matter. */
+  onOpen?: (row: HeatmapRow, unit: HeatmapUnit, index: number) => void;
+  labels: { student: string; empty: string; grid: string };
 }
 
 const CELL_W = 34;
@@ -50,9 +52,11 @@ export function Heatmap({
   href,
   lastSeen,
   sort = 'roster',
+  onOpen,
   labels,
 }: HeatmapProps) {
   const ordered = useMemo(() => order(rows, sort), [rows, sort]);
+  const { cellProps, gridProps } = useGridKeys(ordered.length, units.length);
 
   if (rows.length === 0 || units.length === 0) {
     return <p className="text-sm text-(--ssz-text-secondary)">{labels.empty}</p>;
@@ -86,7 +90,12 @@ export function Heatmap({
 
       {/* Scrolling unit columns */}
       <div className="flex-1 overflow-x-auto">
-        <div style={{ minWidth: units.length * COL_W }}>
+        <div
+          style={{ minWidth: units.length * COL_W }}
+          role="grid"
+          aria-label={labels.grid}
+          {...gridProps}
+        >
           <div
             className="grid h-[34px] items-end pb-1.5"
             style={{ gridTemplateColumns: `repeat(${units.length}, minmax(${COL_W}px, 1fr))` }}
@@ -102,32 +111,53 @@ export function Heatmap({
             ))}
           </div>
 
-          {ordered.map((row) => (
+          {ordered.map((row, rowIndex) => (
             <div
               key={row.studentId}
+              role="row"
+              aria-label={row.displayName}
               className="grid h-[38px] items-center justify-items-center border-t border-(--ssz-border-default)"
               style={{ gridTemplateColumns: `repeat(${units.length}, minmax(${COL_W}px, 1fr))` }}
             >
               {units.map((unit, index) => {
                 const cell = row.cells[index];
-                if (!cell) return <span key={unit.unitId} />;
+                if (!cell) return <span key={unit.unitId} role="gridcell" />;
 
                 const to = href?.(row, unit) ?? null;
                 const sentence = tip(row, unit, index);
 
-                return to === null ? (
-                  <HeatCell
+                // The cell itself is the focusable thing, whether it leads anywhere or
+                // not: a keyboard reader walking the map needs every cell announced,
+                // including the empty ones — those are most of what this map says.
+                return (
+                  <div
                     key={unit.unitId}
-                    cell={cell}
-                    width={CELL_W}
-                    height={CELL_H}
-                    tip={sentence}
-                    label={sentence}
-                  />
-                ) : (
-                  <a key={unit.unitId} href={to} title={sentence} aria-label={sentence}>
-                    <HeatCell cell={cell} width={CELL_W} height={CELL_H} />
-                  </a>
+                    role="gridcell"
+                    aria-label={sentence}
+                    title={sentence}
+                    className="rounded-[5px] focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) focus-visible:outline-none"
+                    {...cellProps(rowIndex, index, () => {
+                      if (to === null) return;
+                      onOpen?.(row, unit, index);
+                      window.location.assign(to);
+                    })}
+                  >
+                    {to === null ? (
+                      <HeatCell cell={cell} width={CELL_W} height={CELL_H} />
+                    ) : (
+                      // Still a link for a mouse and for anything that lists links, but
+                      // out of the tab order: the cell around it is the one tab stop, and
+                      // the arrows move between cells.
+                      <a
+                        href={to}
+                        aria-label={sentence}
+                        tabIndex={-1}
+                        onClick={() => onOpen?.(row, unit, index)}
+                      >
+                        <HeatCell cell={cell} width={CELL_W} height={CELL_H} />
+                      </a>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -173,6 +203,57 @@ function order(rows: readonly HeatmapRow[], sort: HeatmapSort): HeatmapRow[] {
       return a.score - b.score || a.index - b.index;
     })
     .map((entry) => entry.row);
+}
+
+/**
+ * Arrow keys across the map, one tab stop for the whole of it.
+ *
+ * A grid of thirty units by fifteen learners is four hundred and fifty tab stops, which
+ * is not navigation — it is a wall. The map takes a single stop and the arrows move
+ * inside it, which is what `role="grid"` promises a screen-reader user it will do.
+ */
+function useGridKeys(rows: number, cols: number) {
+  const [active, setActive] = useState<[number, number]>([0, 0]);
+  const cells = useRef(new Map<string, HTMLDivElement>());
+
+  const focus = useCallback((r: number, c: number) => {
+    setActive([r, c]);
+    cells.current.get(`${r}:${c}`)?.focus();
+  }, []);
+
+  const gridProps = {
+    onKeyDown: (event: React.KeyboardEvent) => {
+      const [r, c] = active;
+      const moves: Record<string, [number, number] | undefined> = {
+        ArrowRight: [r, Math.min(c + 1, cols - 1)],
+        ArrowLeft: [r, Math.max(c - 1, 0)],
+        ArrowDown: [Math.min(r + 1, rows - 1), c],
+        ArrowUp: [Math.max(r - 1, 0), c],
+        Home: [r, 0],
+        End: [r, cols - 1],
+      };
+      const next = moves[event.key];
+      if (!next) return;
+      event.preventDefault();
+      focus(next[0], next[1]);
+    },
+  };
+
+  const cellProps = (r: number, c: number, open: () => void) => ({
+    ref: (node: HTMLDivElement | null) => {
+      if (node) cells.current.set(`${r}:${c}`, node);
+      else cells.current.delete(`${r}:${c}`);
+    },
+    tabIndex: active[0] === r && active[1] === c ? 0 : -1,
+    onFocus: () => setActive([r, c]),
+    onKeyDown: (event: React.KeyboardEvent) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      open();
+    },
+  });
+
+  return { cellProps, gridProps };
 }
 
 /** A sort control the caller can render; kept here so the two stay in step. */

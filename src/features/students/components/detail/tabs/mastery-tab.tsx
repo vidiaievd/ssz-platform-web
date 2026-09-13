@@ -295,6 +295,7 @@ function Grid({ grid, naming, t }: { grid: StudentGrid; naming: Naming; t: Trans
         </div>
 
         <SkillGrid
+          label={t('mastery.grid.title')}
           skills={SKILLS}
           foci={FOCUS_AXIS}
           cell={(skill, focus) => byCell.get(`${skill}:${focus}`)}

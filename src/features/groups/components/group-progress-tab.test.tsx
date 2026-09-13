@@ -155,8 +155,11 @@ describe('the four pictures a group can be', () => {
     renderTab();
 
     await waitFor(() => expect(document.querySelector('svg[role="img"]')).toBeTruthy());
-    expect(screen.getByText('70%')).toBeTruthy();
+    // Twice over: once in the summary a sighted reader sees, once in the hidden table a
+    // screen reader is given instead of the drawing.
+    expect(screen.getAllByText('70%').length).toBeGreaterThan(0);
     expect(screen.getByText('1/4')).toBeTruthy();
+    expect(screen.getAllByRole('table', { hidden: true }).length).toBeGreaterThan(0);
   });
 });
 
@@ -191,7 +194,9 @@ describe('who may see named results', () => {
     expect(await screen.findAllByText('Anna Lind')).toHaveLength(2);
 
     const links = await screen.findAllByRole('link', { name: /Anna Lind/ });
-    expect(links[0]?.getAttribute('href')).toBe('/w/nordick/students/s1?tab=mastery&group=group-1&unit=u1');
+    expect(links[0]?.getAttribute('href')).toBe(
+      '/w/nordick/students/s1?tab=mastery&group=group-1&unit=u1',
+    );
   });
 
   it('empties the map alone when it fails, leaving the chart standing', async () => {

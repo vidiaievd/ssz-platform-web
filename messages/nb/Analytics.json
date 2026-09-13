@@ -30,7 +30,12 @@
     "viewLabel": "Hvordan lese arbeidet",
     "show": "Vis diagram",
     "qualityStrip": "Kvaliteten på det som ble forsøkt, per enhet — skravert der ingenting ble forsøkt",
-    "noTimetable": "Vi fikk ikke spurt timeplanen, så ingen enhet er merket som undervist eller ikke. Timer kan godt ha vært holdt."
+    "noTimetable": "Vi fikk ikke spurt timeplanen, så ingen enhet er merket som undervist eller ikke. Timer kan godt ha vært holdt.",
+    "tableCaption": "Undervist mot tatt med seg, enhet for enhet",
+    "tableUnit": "Enhet",
+    "tableDelivered": "Undervist",
+    "tableAbsorbed": "Tatt med seg",
+    "tableUnmeasured": "Ikke målt"
   },
   "unit": {
     "lessons": "{count, plural, =0 {ingen timer} one {# time} other {# timer}}",
@@ -88,7 +93,8 @@
     "tipHead": "{name} · Enhet {no} {title}",
     "tipMeasured": "{value} % av enheten bestått",
     "tipInsufficient": "{sample} av {threshold} vektede forsøk — ingen dom",
-    "neverSeenShort": "ikke sett ennå"
+    "neverSeenShort": "ikke sett ennå",
+    "gridLabel": "Hver elev mot hver enhet. Bruk piltastene for å flytte, Enter for å åpne en celle."
   },
   "mastery": {
     "empty": {

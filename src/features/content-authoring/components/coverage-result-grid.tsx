@@ -180,6 +180,7 @@ export function CoverageResultGrid({
               </div>
 
               <SkillGrid
+                label={t('courseResult.grid.title')}
                 skills={SKILLS}
                 foci={FOCUS_AXIS}
                 cell={(s, f) => cells.find((cell) => cell.skill === s && cell.focus === f)!}

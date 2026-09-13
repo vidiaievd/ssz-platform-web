@@ -11,6 +11,7 @@ import { Segmented } from '@/components/ui/segmented';
 import { DualBar } from '@/features/analytics/components/dual-bar';
 import { Note } from '@/features/analytics/components/note';
 import { wsHref } from '@/features/workspaces/lib/href';
+import { track } from '@/lib/analytics/track';
 import type { WidgetData } from '../types';
 import type { GroupGap } from '@/lib/dashboard/types';
 
@@ -79,7 +80,7 @@ export function DeliveredAbsorbedRow({ gaps, workspaceId }: Props) {
         <div className="space-y-3">
           <ul role="list" className="divide-y divide-border">
             {comparable.map((group) => (
-              <GapRow key={group.groupId} group={group} workspaceId={workspaceId} />
+              <GapRow key={group.groupId} group={group} workspaceId={workspaceId} sort={sort} />
             ))}
           </ul>
 
@@ -90,7 +91,7 @@ export function DeliveredAbsorbedRow({ gaps, workspaceId }: Props) {
               </p>
               <ul role="list" className="divide-y divide-border">
                 {notComparable.map((group) => (
-                  <GapRow key={group.groupId} group={group} workspaceId={workspaceId} />
+                  <GapRow key={group.groupId} group={group} workspaceId={workspaceId} sort={sort} />
                 ))}
               </ul>
               <Note>{t('notComparableNote')}</Note>
@@ -102,7 +103,16 @@ export function DeliveredAbsorbedRow({ gaps, workspaceId }: Props) {
   );
 }
 
-function GapRow({ group, workspaceId }: { group: GroupGap; workspaceId: string }) {
+function GapRow({
+  group,
+  workspaceId,
+  sort,
+}: {
+  group: GroupGap;
+  workspaceId: string;
+  /** Travels with the click: which ordering a row was opened from is the useful half. */
+  sort: 'gap' | 'all';
+}) {
   const t = useTranslations('Analytics.groupGaps');
   const gap = gapOf(group);
 
@@ -128,6 +138,7 @@ function GapRow({ group, workspaceId }: { group: GroupGap; workspaceId: string }
     <li className="min-w-0">
       <Link
         href={wsHref(workspaceId, `groups/${group.groupId}?tab=progress`)}
+        onClick={() => track({ name: 'gap_widget_group_opened', groupId: group.groupId, sort })}
         className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 rounded py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <div className="min-w-0 flex-1 basis-full sm:basis-0">

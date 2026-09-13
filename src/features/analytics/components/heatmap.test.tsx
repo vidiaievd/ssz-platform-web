@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Heatmap } from './heatmap';
 import type { HeatmapRow } from '../types';
@@ -17,7 +18,11 @@ const measured = (value: number) => ({ state: 'ok' as const, value, weightedSamp
 const untouched = { state: 'notStarted' as const, value: null, weightedSample: 0 };
 const untaught = { state: 'notDelivered' as const, value: null, weightedSample: 0 };
 
-const labels = { student: 'Student', empty: 'Nobody yet' };
+const labels = {
+  student: 'Student',
+  empty: 'Nobody yet',
+  grid: 'Every learner against every unit',
+};
 const tip = (r: HeatmapRow, u: { no: number }) => `${r.displayName} · Unit ${u.no}`;
 
 describe('the map shows everybody', () => {
@@ -115,5 +120,103 @@ describe('what a cell does when clicked', () => {
 
     expect(screen.queryAllByRole('link')).toHaveLength(0);
     expect(screen.getAllByTitle('Anna · Unit 1')).toHaveLength(1);
+  });
+});
+
+describe('walking the map without a mouse', () => {
+  const grid = () =>
+    render(
+      <Heatmap
+        units={units}
+        rows={[
+          row('a', 'Anna', [measured(70), measured(40), untouched]),
+          row('b', 'Bjørn', [untouched, measured(55), untaught]),
+        ]}
+        tip={tip}
+        labels={labels}
+      />,
+    );
+
+  it('is one tab stop, not four hundred', () => {
+    grid();
+
+    const cells = screen.getAllByRole('gridcell');
+    expect(cells.filter((cell) => cell.getAttribute('tabindex') === '0')).toHaveLength(1);
+  });
+
+  it('moves with the arrow keys, including across empty cells', async () => {
+    const user = userEvent.setup();
+    grid();
+
+    const cells = screen.getAllByRole('gridcell');
+    await user.tab();
+    expect(cells[0]).toHaveFocus();
+
+    await user.keyboard('{ArrowRight}');
+    expect(cells[1]).toHaveFocus();
+
+    // Down a row and onto a cell nobody has touched: the empty ones are most of what
+    // this map says, and skipping them would hide exactly that.
+    await user.keyboard('{ArrowDown}');
+    expect(cells[4]).toHaveFocus();
+    expect(cells[4]?.getAttribute('aria-label')).toContain('Bjørn');
+  });
+
+  it('stops at the edges rather than wrapping onto another learner', async () => {
+    const user = userEvent.setup();
+    grid();
+
+    const cells = screen.getAllByRole('gridcell');
+    await user.tab();
+    await user.keyboard('{ArrowLeft}{ArrowUp}');
+    expect(cells[0]).toHaveFocus();
+  });
+
+  it('opens a measured cell on Enter', async () => {
+    const user = userEvent.setup();
+    const onOpen = vi.fn();
+    const assign = vi.fn();
+    vi.stubGlobal('location', { assign });
+
+    render(
+      <Heatmap
+        units={units}
+        rows={[row('a', 'Anna', [measured(70), untouched, untouched])]}
+        tip={tip}
+        href={(r, u) => (u.no === 1 ? `/students/${r.studentId}?unit=${u.unitId}` : null)}
+        onOpen={onOpen}
+        labels={labels}
+      />,
+    );
+
+    await user.tab();
+    await user.keyboard('{Enter}');
+
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(assign).toHaveBeenCalledWith('/students/a?unit=u1');
+
+    vi.unstubAllGlobals();
+  });
+
+  it('does nothing on Enter where the cell leads nowhere', async () => {
+    const user = userEvent.setup();
+    const assign = vi.fn();
+    vi.stubGlobal('location', { assign });
+
+    render(
+      <Heatmap
+        units={units}
+        rows={[row('a', 'Anna', [untaught, untaught, untaught])]}
+        tip={tip}
+        href={() => null}
+        labels={labels}
+      />,
+    );
+
+    await user.tab();
+    await user.keyboard('{Enter}');
+    expect(assign).not.toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
   });
 });
