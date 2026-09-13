@@ -73,6 +73,12 @@
       "submit": "Add",
       "added": "The lesson is in your week.",
       "failed": "Could not add the lesson."
+    },
+    "learner": {
+      "title": "Next lessons",
+      "all": "Whole schedule →",
+      "none": "Nothing scheduled in the next {days} days.",
+      "noTopic": "No topic yet"
     }
   }
 }

@@ -73,6 +73,12 @@
       "submit": "Legg til",
       "added": "Timen ligger i uken din.",
       "failed": "Kunne ikke legge til timen."
+    },
+    "learner": {
+      "title": "Neste timer",
+      "all": "Hele timeplanen →",
+      "none": "Ingenting planlagt de neste {days} dagene.",
+      "noTopic": "Uten tema ennå"
     }
   }
 }

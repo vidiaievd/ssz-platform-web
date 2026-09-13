@@ -12,6 +12,7 @@ import { OverviewTab } from '@/features/students/components/detail/tabs/overview
 import { HistoryTab } from '@/features/students/components/detail/tabs/history-tab';
 import { StudentNudgeButton } from '@/features/students/components/student-nudge-button';
 import { ScheduleLessonsDialog } from '@/features/tutoring/components/schedule-lessons-dialog';
+import { LearnerLessons } from '@/features/schedule/components/learner-lessons';
 
 type Props = {
   params: Promise<{ workspaceId: string; studentId: string; locale: string }>;
@@ -79,6 +80,14 @@ export async function TutorStudentCard({ params, searchParams }: Props) {
           />
         </div>
       </div>
+
+      {/* When they are next seen, from the same schedule the week is drawn from. */}
+      <LearnerLessons
+        workspaceId={workspace.schoolId}
+        groupIds={student.memberships
+          .filter((m) => m.status === 'active' && m.groupId !== workspace.groupId)
+          .map((m) => m.groupId)}
+      />
 
       <StudentTabs
         activeTab={tab}
