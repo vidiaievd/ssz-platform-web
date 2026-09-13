@@ -109,6 +109,24 @@ export type TeacherLoadPayload = {
 
 // ─── BFF composite response ────────────────────────────────────────────────────
 
+export type GroupGap = {
+  groupId: string;
+  name: string;
+  courseId: string | null;
+  courseTitle: string | null;
+  students: number;
+  /** Whole percent of the course taught. `null` — the timetable could not be asked. */
+  delivered: number | null;
+  /** Whole percent the group's median learner took away. `null` — nobody measured. */
+  absorbed: number | null;
+  state: 'ok' | 'noCourse' | 'noAttempts';
+};
+
+export type GroupGapsPayload = {
+  groups: GroupGap[];
+  updatedAt: string;
+};
+
 export type Unavailable = { status: 'unavailable' };
 
 export type DashboardCompositeResponse = {

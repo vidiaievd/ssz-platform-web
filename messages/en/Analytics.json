@@ -166,5 +166,23 @@
     "group": {
       "readAgainst": "Read against {name}. Also in:"
     }
+  },
+  "groupGaps": {
+    "title": "Taught against taken away",
+    "subtitle": "Where a group's learners are furthest behind what they were taught",
+    "sortLabel": "How to order the groups",
+    "sortByGap": "By gap",
+    "sortAll": "All groups",
+    "notComparable": "Not comparable yet",
+    "notComparableNote": "These groups have nothing to compare: one side of the comparison does not exist yet. It is not a verdict on them.",
+    "noCourse": "No course attached — nothing to compare",
+    "noAttempts": "Taught {delivered}%, no attempts yet",
+    "noTimetable": "We could not ask the timetable",
+    "untitledCourse": "Untitled course",
+    "students": "{count, plural, =0 {no learners} one {# learner} other {# learners}}",
+    "gapPoints": "{points} pt",
+    "barsLabel": "{name}: taught {delivered}%, taken away {absorbed}%",
+    "emptyTitle": "No groups yet",
+    "emptyBody": "Once a group is running, this is where its two numbers meet."
   }
 }

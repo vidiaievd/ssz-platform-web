@@ -166,5 +166,23 @@
     "group": {
       "readAgainst": "Lest mot {name}. Også i:"
     }
+  },
+  "groupGaps": {
+    "title": "Undervist mot tatt med",
+    "subtitle": "Hvor elevene ligger lengst bak det de har blitt undervist i",
+    "sortLabel": "Rekkefølge på gruppene",
+    "sortByGap": "Etter avstand",
+    "sortAll": "Alle grupper",
+    "notComparable": "Ikke sammenlignbart ennå",
+    "notComparableNote": "Disse gruppene har ingenting å sammenligne: den ene siden finnes ikke ennå. Det er ingen dom over dem.",
+    "noCourse": "Ingen kurs knyttet til — ingenting å sammenligne",
+    "noAttempts": "Undervist {delivered} %, ingen besvarelser ennå",
+    "noTimetable": "Vi fikk ikke spurt timeplanen",
+    "untitledCourse": "Kurs uten tittel",
+    "students": "{count, plural, =0 {ingen elever} one {# elev} other {# elever}}",
+    "gapPoints": "{points} p",
+    "barsLabel": "{name}: undervist {delivered} %, tatt med {absorbed} %",
+    "emptyTitle": "Ingen grupper ennå",
+    "emptyBody": "Når en gruppe er i gang, møtes de to tallene her."
   }
 }

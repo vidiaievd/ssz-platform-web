@@ -12,6 +12,7 @@ import {
   fetchActivity,
   fetchGroupsHealth,
   fetchTeacherLoad,
+  fetchGroupGaps,
 } from '@/lib/dashboard/queries';
 
 import type {
@@ -33,6 +34,8 @@ import type {
   ActivityPayload,
   GroupsHealthPayload,
   TeacherLoadPayload,
+  GroupGapsPayload,
+  GroupGap,
   Unavailable,
 } from '@/lib/dashboard/types';
 
@@ -49,6 +52,7 @@ import { TeacherQueueCard } from '@/features/dashboard/components/teacher-queue-
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
 import { OperationsBanner } from '@/features/dashboard/components/operations-banner';
 import { GroupsWidget } from '@/features/dashboard/components/groups-widget';
+import { DeliveredAbsorbedRow } from '@/features/dashboard/components/delivered-absorbed-row';
 import { TeacherWorkloadWidget } from '@/features/dashboard/components/teacher-workload-widget';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -90,6 +94,16 @@ function tagToTone(tag: ActivityItem['tag']): ActivityItem['tone'] {
     case 'milestone': return 'success';
     default: return 'neutral';
   }
+}
+
+function adaptGroupGaps(result: WidgetResult<GroupGapsPayload>): WidgetData<GroupGap[]> {
+  if ('status' in (result as object) && (result as Unavailable).status === 'unavailable') {
+    return { status: 'unavailable' };
+  }
+  const payload = result as GroupGapsPayload;
+  // An empty list is a real answer — a school with no groups yet — and the widget says so
+  // itself rather than disappearing.
+  return { status: 'ok', data: payload.groups ?? [] };
 }
 
 function adaptActivity(result: WidgetResult<ActivityPayload>): WidgetData<ActivityItem[]> {
@@ -218,14 +232,16 @@ export async function SchoolDashboard({ params }: Props) {
   const schoolType = deriveSchoolType(school);
 
   // ── 2. Parallel widget data fetch ──────────────────────────────────────────
-  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload] = await Promise.all([
-    fetchDashboardKpis(school.id),
-    fetchAtRisk(school.id, 3),
-    fetchCourseHealth(school.id),
-    fetchActivity(school.id, 6),
-    fetchGroupsHealth(school.id, role),
-    fetchTeacherLoad(school.id),
-  ]);
+  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload, groupGaps] =
+    await Promise.all([
+      fetchDashboardKpis(school.id),
+      fetchAtRisk(school.id, 3),
+      fetchCourseHealth(school.id),
+      fetchActivity(school.id, 6),
+      fetchGroupsHealth(school.id, role),
+      fetchTeacherLoad(school.id),
+      fetchGroupGaps(school.id),
+    ]);
 
   // ── 3. Adapt to WidgetData<T> + derive data state ─────────────────────────
   const kpisWidget = adaptKpis(kpis);
@@ -234,6 +250,7 @@ export async function SchoolDashboard({ params }: Props) {
   const atRiskWidget = adaptAtRisk(atRisk);
   const groupsHealthWidget = adaptGroupsHealth(groupsHealth);
   const teacherWorkloadWidget = adaptTeacherWorkload(teacherWorkload);
+  const groupGapsWidget = adaptGroupGaps(groupGaps);
 
   const hasActivity = activityWidget.status === 'ok' && activityWidget.data.length > 0;
   const coursesCount = courseHealthWidget.status === 'ok' ? courseHealthWidget.data.length : 0;
@@ -323,6 +340,13 @@ export async function SchoolDashboard({ params }: Props) {
                 role={role}
                 workspaceId={schoolSlugDisplay}
               />
+            </Suspense>
+          )}
+
+          {/* Taught against taken away (plan 58, screen D) */}
+          {canSeeWidget('groupGaps', ctx) && (
+            <Suspense fallback={<WidgetCard title="Taught against taken away" loading />}>
+              <DeliveredAbsorbedRow gaps={groupGapsWidget} workspaceId={schoolSlugDisplay} />
             </Suspense>
           )}
 

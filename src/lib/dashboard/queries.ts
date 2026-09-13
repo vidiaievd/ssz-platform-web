@@ -7,6 +7,7 @@ import type {
   CourseHealthPayload,
   ActivityPayload,
   GroupsHealthPayload,
+  GroupGapsPayload,
   TeacherLoadPayload,
   Unavailable,
 } from './types';
@@ -26,6 +27,21 @@ export async function fetchDashboardKpis(schoolId: string): Promise<WidgetResult
     serverFetch<KpisPayload>({
       service: 'analytics',
       path: `/analytics/schools/${schoolId}/kpis`,
+    }),
+  );
+}
+
+/**
+ * Every group of the school, taught against taken away — the gap widget (plan 58, §D).
+ *
+ * One call for the whole widget: the numbers are the group Progress tab's own, and asking
+ * per row would make a school of twenty groups twenty round trips for one screen.
+ */
+export async function fetchGroupGaps(schoolId: string): Promise<WidgetResult<GroupGapsPayload>> {
+  return safeWidgetFetch(() =>
+    serverFetch<GroupGapsPayload>({
+      service: 'analytics',
+      path: `/analytics/schools/${schoolId}/group-gaps`,
     }),
   );
 }

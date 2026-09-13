@@ -128,6 +128,12 @@ export function canSeeWidget(
     case 'groupsWidget':
       return role !== 'editor' && dataState !== 'empty';
 
+    // Taught against taken away — anyone who teaches here. A teacher sees the school's
+    // groups, as they do in the groups widget above; what the row leads to is the group's
+    // own Progress tab, which is theirs to read either way (plan 58 §D).
+    case 'groupGaps':
+      return role !== 'editor' && dataState !== 'empty';
+
     // Teacher workload — admins only (teacher sees own KPIs instead)
     case 'teacherWorkload':
       return isAdmin && dataState !== 'empty';
