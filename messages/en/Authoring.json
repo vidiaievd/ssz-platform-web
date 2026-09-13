@@ -3236,5 +3236,41 @@
     "lessonVariantPlaceholder": "Choose a variant",
     "lessonFound": "The students hear this lesson’s recording. Replacing it in the lesson replaces it here.",
     "lessonNoNarration": "This variant has no recording, so there is nothing to play. Add one to the lesson, or choose another variant."
+  },
+  "atoms": {
+    "title": "What this rule is made of",
+    "lede": "Split a rule where two of its parts can be wrong independently: if you can picture a learner who is reliably right about one and reliably wrong about the other, they are separate atoms. If you cannot, leave them together.",
+    "add": "Add an atom",
+    "loading": "Looking…",
+    "loadFailed": "Could not load the atoms of this rule.",
+    "empty": "Not cut up yet — the rule counts as one thing a learner either knows or does not.",
+    "keyTaken": "This rule already has an atom under that key.",
+    "saveFailed": "Could not save the atom.",
+    "moved": "Atom moved.",
+    "cancel": "Cancel",
+    "moveUp": "Move {atom} up",
+    "moveDown": "Move {atom} down",
+    "edit": "Edit {atom}",
+    "retire": "Retire {atom}",
+    "track": {
+      "grammar": "Grammar",
+      "lexis": "Lexis"
+    },
+    "fields": {
+      "title": "What the atom is",
+      "titlePlaceholder": "Definite plural (-ene)",
+      "key": "Key",
+      "track": "Track",
+      "trackHint": "Lexis is right for facts learnt one word at a time even inside a grammar rule — the gender of a noun is the standard case.",
+      "note": "Note for yourself",
+      "notePlaceholder": "husene, bøkene. Contrast with the indefinite plural."
+    },
+    "move": {
+      "title": "Move to another rule",
+      "lede": "Splitting a rule is creating another one and carrying part of its atoms across. Nothing a learner has already proved travels with the atom, so the move costs them nothing.",
+      "target": "Destination rule",
+      "keyPlaceholder": "New key, if taken",
+      "action": "Move"
+    }
   }
 }

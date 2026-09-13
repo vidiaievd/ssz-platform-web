@@ -434,6 +434,30 @@ export interface GrammarRule {
   sectionId?: string | null;
 }
 
+/** Which SRS track an atom is scored on — plan 63, §2 C. */
+export type AtomTrack = 'lexis' | 'grammar';
+
+/**
+ * One thing a grammar rule teaches that can be known, or not known, on its own.
+ *
+ * `track` is `lexis` for the facts a learner picks up one word at a time even though they
+ * live inside a grammar rule — the gender of a noun is the standard case, and scoring it
+ * as grammar reads as "handles the definite form badly" when the truth is that forty nouns
+ * have not been learnt yet.
+ */
+export interface GrammarRuleAtom {
+  id: string;
+  grammarRuleId: string;
+  /** A slug, not an address: cards and exercise targets point at `id`. */
+  key: string;
+  title: string;
+  description: string | null;
+  track: AtomTrack;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /**
  * One grammar rule whose exercise pool holds a given exercise — the pool read from the
  * exercise's side, which is the direction an author works in.

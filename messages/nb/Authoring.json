@@ -3236,5 +3236,41 @@
     "lessonVariantPlaceholder": "Velg en variant",
     "lessonFound": "Studentene hører opptaket fra denne leksjonen. Bytter du det i leksjonen, byttes det her.",
     "lessonNoNarration": "Denne varianten har ikke noe opptak, så det er ingenting å spille av. Legg det til i leksjonen, eller velg en annen variant."
+  },
+  "atoms": {
+    "title": "Hva regelen består av",
+    "lede": "Del en regel der to deler kan være feil uavhengig av hverandre: kan du se for deg en elev som stabilt har rett i den ene og stabilt tar feil i den andre, er de to atomer. Kan du ikke det, la dem stå samlet.",
+    "add": "Legg til et atom",
+    "loading": "Ser etter …",
+    "loadFailed": "Fikk ikke hentet atomene til denne regelen.",
+    "empty": "Ikke delt opp ennå — regelen teller som én ting eleven enten kan eller ikke kan.",
+    "keyTaken": "Regelen har allerede et atom med den nøkkelen.",
+    "saveFailed": "Fikk ikke lagret atomet.",
+    "moved": "Atomet er flyttet.",
+    "cancel": "Avbryt",
+    "moveUp": "Flytt {atom} opp",
+    "moveDown": "Flytt {atom} ned",
+    "edit": "Rediger {atom}",
+    "retire": "Pensjoner {atom}",
+    "track": {
+      "grammar": "Grammatikk",
+      "lexis": "Ordforråd"
+    },
+    "fields": {
+      "title": "Hva atomet er",
+      "titlePlaceholder": "Bestemt form flertall (-ene)",
+      "key": "Nøkkel",
+      "track": "Spor",
+      "trackHint": "Ordforråd er riktig for det som læres ett ord om gangen, også inne i en grammatikkregel — kjønnet til et substantiv er standardtilfellet.",
+      "note": "Notat til deg selv",
+      "notePlaceholder": "husene, bøkene. Sett opp mot ubestemt flertall."
+    },
+    "move": {
+      "title": "Flytt til en annen regel",
+      "lede": "Å dele en regel er å lage en ny og flytte noen av atomene over. Ingenting eleven allerede har vist følger med atomet, så flyttingen koster dem ingenting.",
+      "target": "Regelen det flyttes til",
+      "keyPlaceholder": "Ny nøkkel, hvis opptatt",
+      "action": "Flytt"
+    }
   }
 }

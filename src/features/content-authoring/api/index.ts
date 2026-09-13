@@ -11,4 +11,5 @@ export * from './use-authoring-shares';
 export * from './use-authoring-tags';
 export * from './use-authoring-vocabulary';
 export * from './use-exercise-rule-pool';
+export * from './use-grammar-atoms';
 export * from './use-my-containers';

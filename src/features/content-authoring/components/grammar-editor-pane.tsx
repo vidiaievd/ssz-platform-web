@@ -16,13 +16,17 @@ import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { grammarEditorFormSchema, type GrammarEditorFormValues } from '../schemas/grammar';
 import { updateGrammarRuleAction, saveGrammarExplanationAction } from '../actions/grammar';
-import { useAuthoringGrammarExplanations } from '../api/use-authoring-grammar';
+import {
+  useAuthoringGrammarExplanations,
+  useAuthoringGrammarRules,
+} from '../api/use-authoring-grammar';
 import { authoringKeys } from '../api/keys';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LessonEditorShell } from './lesson-editor-shell';
 import { useSaveScopeText } from './save-scope';
 import { EditorCard } from './editor-card';
 import { GrammarLessonPreview } from './grammar-lesson-preview';
+import { GrammarAtomsPanel } from './grammar-atoms-panel';
 
 interface GrammarEditorPaneProps {
   kind: MaterialKind;
@@ -52,6 +56,9 @@ export function GrammarEditorPane({
   const [localExplanationId, setLocalExplanationId] = useState<string | null>(null);
 
   const { data: explanations, isLoading } = useAuthoringGrammarExplanations(ruleId);
+  // Where an atom can be moved to: splitting this rule means creating another one in the
+  // same course and carrying part of its atoms across.
+  const { data: courseRules = [] } = useAuthoringGrammarRules(container.id);
   const defaultExplanation = explanations?.[0];
   const explanationId = localExplanationId ?? defaultExplanation?.id ?? null;
 
@@ -247,6 +254,11 @@ export function GrammarEditorPane({
               </div>
             )}
           </EditorCard>
+
+          <GrammarAtomsPanel
+            ruleId={ruleId}
+            otherRules={courseRules.filter((rule) => rule.id !== ruleId)}
+          />
 
           <Button
             type="button"
