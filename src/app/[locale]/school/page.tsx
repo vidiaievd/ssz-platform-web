@@ -11,7 +11,6 @@ function resolveContextUrl(
   key: string,
   contexts: WorkspaceContext[],
   locale: string,
-  userId?: string,
 ): string | null {
   if (key.startsWith('school:')) {
     const schoolId = key.slice('school:'.length);
@@ -22,7 +21,7 @@ function resolveContextUrl(
   if (key === 'private_tutor') {
     const ctx = contexts.find((c) => c.type === 'private_tutor');
     if (!ctx || ctx.type !== 'private_tutor') return null;
-    return `/${locale}/tutor/${userId ?? ctx.tutorGroupId}/dashboard`;
+    return `/${locale}/tutor`;
   }
   if (key === 'student') {
     const ctx = contexts.find((c) => c.type === 'student');
@@ -56,7 +55,6 @@ export default async function SchoolIndexPage() {
 
   const { contexts, lastActiveContextKey } = workspaces;
   const user = await getCurrentUser();
-  const userId = user?.userId;
   const roles = user?.roles ?? [];
 
   // Restore last active context if it still exists.
@@ -65,7 +63,7 @@ export default async function SchoolIndexPage() {
   if (lastActiveContextKey) {
     const skipStudent = lastActiveContextKey === 'student' && roles.includes('teacher');
     if (!skipStudent) {
-      const target = resolveContextUrl(lastActiveContextKey, contexts, locale, userId);
+      const target = resolveContextUrl(lastActiveContextKey, contexts, locale);
       if (target) redirect(target);
     }
   }
@@ -80,7 +78,7 @@ export default async function SchoolIndexPage() {
 
   const tutorCtx = contexts.find((c) => c.type === 'private_tutor');
   if (tutorCtx && tutorCtx.type === 'private_tutor') {
-    redirect(`/${locale}/tutor/${userId ?? tutorCtx.tutorGroupId}/dashboard`);
+    redirect(`/${locale}/tutor`);
   }
 
   // Teacher role is checked before student context: a user can hold both roles

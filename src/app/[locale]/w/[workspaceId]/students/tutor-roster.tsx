@@ -6,17 +6,18 @@ import { Button } from '@/components/ui/button';
 import { formatRelative } from '@/lib/i18n/formatters';
 import type { Locale } from '@/lib/i18n/config';
 import { getTutorWorkspace } from '@/features/tutoring/api/get-tutor-workspace';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { getStudents } from '@/features/students/api/queries';
 import { TutorStudentRow } from '@/features/tutoring/components/tutor-student-row';
 import { TutorStudentsSearch } from '@/features/tutoring/components/tutor-students-search';
 
 type Props = {
-  params: Promise<{ userId: string; locale: string }>;
+  params: Promise<{ workspaceId: string; locale: string }>;
   searchParams: Promise<{ q?: string }>;
 };
 
-export default async function TutorStudentsPage({ params, searchParams }: Props) {
-  const { userId } = await params;
+export async function TutorRoster({ params, searchParams }: Props) {
+  const { workspaceId } = await params;
   const { q } = await searchParams;
   const [t, locale] = await Promise.all([getTranslations('Tutor.students'), getLocale()]);
 
@@ -40,7 +41,7 @@ export default async function TutorStudentsPage({ params, searchParams }: Props)
           s.name.toLowerCase().includes(needle) || s.email.toLowerCase().includes(needle),
       )
     : all;
-  const invitationsHref = `/tutor/${userId}/invitations`;
+  const invitationsHref = wsHref(workspaceId, 'invitations');
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-6">
@@ -87,7 +88,7 @@ export default async function TutorStudentsPage({ params, searchParams }: Props)
             <div key={s.userId} role="listitem">
               <TutorStudentRow
                 student={s}
-                href={`/tutor/${userId}/students/${s.userId}`}
+                href={wsHref(workspaceId, `students/${s.userId}`)}
                 lastSeenLabel={
                   s.lastSeen
                     ? formatRelative(new Date(s.lastSeen), locale as Locale)

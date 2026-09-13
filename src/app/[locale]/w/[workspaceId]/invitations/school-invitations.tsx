@@ -13,7 +13,7 @@ type Props = {
   searchParams: Promise<{ audience?: string }>;
 };
 
-export default async function InvitationsPage({ params, searchParams }: Props) {
+export async function SchoolInvitations({ params, searchParams }: Props) {
   const { workspaceId } = await params;
   const { audience: audienceRaw } = await searchParams;
   const t = await getTranslations('Invitations.page');

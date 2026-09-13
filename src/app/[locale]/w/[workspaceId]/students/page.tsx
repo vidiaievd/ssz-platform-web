@@ -1,61 +1,30 @@
-import { Suspense } from 'react';
-import { getTranslations } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 
-import { getSchoolByRef } from '@/features/school/api/get-school-by-ref';
-import { getStudents, getGroupsForSelect } from '@/features/students/api/queries';
-import { StudentsRosterClient } from '@/features/students/components/students-roster-client';
-import { EnrollShell } from '@/features/students/components/enroll-shell';
-import { getPendingCount } from '@/features/invitations/api/queries';
-import { PendingInvitesLink } from '@/features/invitations/components/pending-invites-link';
-import { wsHref } from '@/features/workspaces/lib/href';
+import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
+import { SchoolRoster } from './school-roster';
+import { TutorRoster } from './tutor-roster';
 
 type Props = {
   params: Promise<{ workspaceId: string; locale: string }>;
   searchParams: Promise<{ q?: string; segment?: string }>;
 };
 
-export default async function SchoolStudentsPage({ params, searchParams }: Props) {
+/**
+ * Everyone learning here.
+ *
+ * A school's roster is segmented, enrolled in bulk and filtered in the browser; a tutor's
+ * is four columns and one search field, because a workspace of a dozen learners does not
+ * need the machinery. Same address, chosen by `kind`.
+ */
+export default async function WorkspaceStudentsPage({ params, searchParams }: Props) {
   const { workspaceId } = await params;
-  const { q } = await searchParams;
-  const t = await getTranslations('Students');
 
-  const school = await getSchoolByRef(workspaceId);
+  const workspace = await resolveWorkspace(workspaceId);
+  if (!workspace) notFound();
 
-  if (!school) {
-    return (
-      <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto">
-        <p className="text-sm text-muted-foreground">{t('notFound')}</p>
-      </main>
-    );
-  }
-
-  const [studentsResult, pendingInvitesCount, groups] = await Promise.all([
-    getStudents(school.id, { search: q }),
-    getPendingCount(school.id, 'students').catch((err) => {
-      console.error('[students/page] getPendingCount failed:', err);
-      return null;
-    }),
-    getGroupsForSelect(school.id),
-  ]);
-
-  return (
-    <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-6">
-      {/* Pending invites indicator */}
-      {pendingInvitesCount === null ? (
-        <p className="text-sm text-destructive">Failed to load pending invitations count.</p>
-      ) : pendingInvitesCount > 0 ? (
-        <PendingInvitesLink
-          count={pendingInvitesCount}
-          href={wsHref(workspaceId, 'invitations?audience=students')}
-        />
-      ) : null}
-
-      {/* Enroll dialog — URL-driven (?enroll=1) */}
-      <Suspense>
-        <EnrollShell schoolId={school.id} groups={groups} />
-      </Suspense>
-
-      <StudentsRosterClient schoolId={school.id} workspaceId={workspaceId} initial={studentsResult} />
-    </main>
+  return workspace.kind === 'SOLO' ? (
+    <TutorRoster params={params} searchParams={searchParams} />
+  ) : (
+    <SchoolRoster params={params} searchParams={searchParams} />
   );
 }

@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { getTutoringInvitations } from '@/features/invitations/api/queries';
 import { TutoringInvitationsTableClient } from './tutoring-invitations-client';
 
-export default async function TutoringInvitationsPage() {
+export async function TutorInvitations() {
   const t = await getTranslations('Invitations.page');
   const invitations = await getTutoringInvitations();
   const pendingCount = invitations.filter((i) => i.status === 'pending').length;

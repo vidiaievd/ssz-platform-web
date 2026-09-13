@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
 import { getTutorWorkspace } from '@/features/tutoring/api/get-tutor-workspace';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { getStudentInSchool } from '@/features/students/api/queries';
 import { Avatar } from '@/components/ui/avatar';
 import { StudentTabs, type TabKey } from '@/features/students/components/detail/student-tabs';
@@ -12,7 +13,7 @@ import { HistoryTab } from '@/features/students/components/detail/tabs/history-t
 import { StudentNudgeButton } from '@/features/students/components/student-nudge-button';
 
 type Props = {
-  params: Promise<{ userId: string; studentId: string; locale: string }>;
+  params: Promise<{ workspaceId: string; studentId: string; locale: string }>;
   searchParams: Promise<{ tab?: string }>;
 };
 
@@ -20,8 +21,8 @@ type Props = {
 // describe a school's relationship with a learner (plan 59, §4).
 const TUTOR_TABS: TabKey[] = ['overview', 'history'];
 
-export default async function TutorStudentDetailPage({ params, searchParams }: Props) {
-  const { userId, studentId } = await params;
+export async function TutorStudentCard({ params, searchParams }: Props) {
+  const { workspaceId, studentId } = await params;
   const { tab: rawTab } = await searchParams;
   const tab: TabKey = rawTab === 'history' ? 'history' : 'overview';
 
@@ -34,7 +35,7 @@ export default async function TutorStudentDetailPage({ params, searchParams }: P
   return (
     <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-5">
       <Link
-        href={`/tutor/${userId}/students`}
+        href={wsHref(workspaceId, 'students')}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />

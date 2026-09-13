@@ -3,7 +3,7 @@ import { BookOpen, Users, Star } from 'lucide-react';
 
 import { getMyProfile } from '@/features/profile/api/get-my-profile';
 
-export default async function TutorDashboardPage() {
+export async function TutorDashboard() {
   const [t, locale] = await Promise.all([getTranslations('Tutor'), getLocale()]);
 
   let profile: Awaited<ReturnType<typeof getMyProfile>> | null = null;

@@ -196,7 +196,7 @@ type Props = {
   params: Promise<{ workspaceId: string; locale: string }>;
 };
 
-export default async function SchoolDashboardPage({ params }: Props) {
+export async function SchoolDashboard({ params }: Props) {
   const { workspaceId } = await params;
   await headers(); // opt into dynamic rendering
 

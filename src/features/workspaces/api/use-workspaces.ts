@@ -43,8 +43,11 @@ export function useActivateWorkspace() {
   });
 }
 
-export function contextToUrl(ctx: WorkspaceContext, locale: string, userId?: string): string {
+export function contextToUrl(ctx: WorkspaceContext, locale: string): string {
   if (ctx.type === 'school') return `/${locale}${wsHref(ctx.schoolSlug, 'dashboard')}`;
-  if (ctx.type === 'private_tutor') return `/${locale}/tutor/${userId ?? ctx.tutorGroupId}/dashboard`;
+  // The tutor's own index resolves their workspace and lands inside it. Building
+  // `/w/<id>/…` here is not possible: the switcher knows the tutor's group, not the
+  // workspace that holds it (plan 61, phase 4).
+  if (ctx.type === 'private_tutor') return `/${locale}/tutor`;
   return `/${locale}/student/dashboard`;
 }

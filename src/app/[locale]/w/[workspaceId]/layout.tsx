@@ -83,7 +83,6 @@ export default async function WorkspaceLayout({ children, params }: Props) {
         variant={isSolo ? 'tutor' : 'school'}
         user={user}
         schoolContext={schoolContext}
-        tutorUserId={isSolo ? (user.userId ?? undefined) : undefined}
         tutorWorkspaceId={isSolo ? workspace.id : undefined}
       >
         {children}

@@ -186,21 +186,21 @@ function buildSchoolNav(
   ];
 }
 
-function buildTutorNav(
-  userId: string,
-  workspaceId: string | undefined,
-  review: ReviewNav = null,
-): NavSection[] {
+function buildTutorNav(workspaceId: string | undefined, review: ReviewNav = null): NavSection[] {
+  // Nothing to point at until the workspace is known; the shell renders no items rather
+  // than items that lead nowhere.
+  if (!workspaceId) return [];
+
   return [
     {
       items: [
-        { href: `/tutor/${userId}/dashboard`, icon: LayoutDashboard, labelKey: 'dashboard' },
+        { href: wsHref(workspaceId, 'dashboard'), icon: LayoutDashboard, labelKey: 'dashboard' },
         // No oversight twin beside it: a tutor is the only reviewer in their workspace,
         // and a screen showing their own load by name is a screen about one person.
         ...(review
           ? [
               {
-                href: `/tutor/${userId}/review`,
+                href: wsHref(workspaceId, 'review'),
                 icon: SquareCheckBig,
                 labelKey: 'review',
                 badge: review.pending,
@@ -208,18 +208,13 @@ function buildTutorNav(
               },
             ]
           : []),
-        { href: `/tutor/${userId}/students`, icon: Users, labelKey: 'students' },
-        { href: `/tutor/${userId}/invitations`, icon: MailCheck, labelKey: 'invitations' },
-        // Authoring is addressed by workspace, not by contour: the tutor's courses and a
-        // school's open the same screen (plan 61). Without a workspace there is nothing to
-        // point at, and the item would lead where it used to — a 404.
-        ...(workspaceId
-          ? [{ href: wsHref(workspaceId, 'content'), icon: BookOpen, labelKey: 'content' }]
-          : []),
+        { href: wsHref(workspaceId, 'students'), icon: Users, labelKey: 'students' },
+        { href: wsHref(workspaceId, 'invitations'), icon: MailCheck, labelKey: 'invitations' },
+        { href: wsHref(workspaceId, 'content'), icon: BookOpen, labelKey: 'content' },
       ],
     },
     {
-      items: [{ href: `/tutor/${userId}/settings`, icon: Settings, labelKey: 'settings' }],
+      items: [{ href: wsHref(workspaceId, 'settings'), icon: Settings, labelKey: 'settings' }],
     },
   ];
 }
@@ -251,8 +246,6 @@ type AppShellProps = {
   variant: AppShellVariant;
   user: CurrentUser;
   schoolContext?: SchoolContext;
-  /** Stable userId for the tutor workspace nav links */
-  tutorUserId?: string;
   /**
    * The tutor's workspace id, for the badge on their marking inbox. The shell cannot read
    * it itself — it is a server call — and the count route takes a school slug or id.
@@ -265,7 +258,6 @@ export function AppShell({
   variant,
   user,
   schoolContext,
-  tutorUserId,
   tutorWorkspaceId,
   children,
 }: AppShellProps) {
@@ -291,8 +283,6 @@ export function AppShell({
     variant === 'school' || variant === 'tutor',
   );
 
-  const resolvedTutorId = tutorUserId ?? params.userId ?? user.userId ?? '';
-
   const sections: NavSection[] =
     variant === 'school'
       ? buildSchoolNav(
@@ -302,7 +292,6 @@ export function AppShell({
         )
       : variant === 'tutor'
         ? buildTutorNav(
-            resolvedTutorId,
             tutorWorkspaceId ?? params.workspaceId,
             reviewCount?.hasScope ? reviewCount : null,
           )
@@ -349,11 +338,7 @@ export function AppShell({
 
   const workspaceHeader = (collapsed: boolean) => (
     <div className="flex items-center gap-2 min-w-0">
-      <WorkspaceSwitcher
-        activeContextKey={activeContextKey}
-        userId={resolvedTutorId || undefined}
-        collapsed={collapsed}
-      />
+      <WorkspaceSwitcher activeContextKey={activeContextKey} collapsed={collapsed} />
       {!collapsed && showRoleBadge && <RoleBadge role={schoolContext!.schoolRole!} />}
     </div>
   );

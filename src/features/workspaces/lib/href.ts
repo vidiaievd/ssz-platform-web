@@ -1,69 +1,27 @@
 import type { WorkspaceKind } from '../api/resolve-workspace';
 
 /**
- * The sections that live at `/w/<workspaceId>/…` already.
- *
- * The move off `/school/<slug>/…` arrives section by section (plan 61), so this is a set
- * and not a switch: a section that has not moved keeps its old address, and every link to
- * it keeps working, whoever built the link. Add a section's first path segment here on the
- * commit that moves its routes.
- *
- * Delete this, and the branch in `buildHref`, once the last section has moved and the old
- * tree is nothing but redirects.
- */
-export const WORKSPACE_ROUTES: ReadonlySet<string> = new Set([
-  '',
-  'content',
-  'dashboard',
-  'enrollment',
-  'groups',
-  'invitations',
-  'my-schedule',
-  'notifications',
-  'review',
-  'scheduling',
-  'settings',
-  'students',
-  'teachers',
-]);
-
-/**
  * A workspace, as much of it as the caller happens to hold.
  *
- * Most call sites have only the segment they were routed with — a school's slug today, a
- * workspace id afterwards — and that is deliberately enough: which of the two is the
- * canonical address is this module's business, not theirs.
+ * Most call sites have only the segment they were routed with, and that is deliberately
+ * enough: what a workspace address looks like is this module's business, not theirs.
  */
-export type WorkspaceRef =
-  | string
-  | { id: string; slug?: string | null; kind?: WorkspaceKind };
+export type WorkspaceRef = string | { id: string; slug?: string | null; kind?: WorkspaceKind };
 
 /**
  * The address of a screen inside one workspace.
  *
- * `wsHref(school, 'groups')`, `wsHref(ws, `content/${id}`)`, `wsHref(ws)` for its root.
- * The result carries no locale: links in the app are relative to it, and the handful of
- * places that need an absolute path prefix this themselves.
+ * `wsHref(ws, 'groups')`, `wsHref(ws, `content/${id}`)`, `wsHref(ws)` for its front page.
+ * Every staff screen lives here now — a school's and a private tutor's alike, which is the
+ * whole point: the same screen, one address, and which of the two is drawn follows from
+ * the workspace's kind rather than from the URL (plan 61).
+ *
+ * The result carries no locale: links in the app are relative to it, and the few places
+ * that need an absolute path prefix it themselves.
  */
 export function wsHref(ws: WorkspaceRef, path = ''): string {
-  return buildHref(hasMoved(path), ws, path);
-}
-
-/** Which section a path belongs to — its first segment, before any `/`, `?` or `#`. */
-function hasMoved(path: string): boolean {
-  const section = path.replace(/^\/+/, '').split(/[/?#]/, 1)[0] ?? '';
-  return WORKSPACE_ROUTES.has(section);
-}
-
-/**
- * The two addresses side by side, so that the one that does not exist yet is still
- * something a test can hold. `wsHref` is this with the flag already applied.
- */
-export function buildHref(byWorkspace: boolean, ws: WorkspaceRef, path = ''): string {
-  const segment = typeof ws === 'string' ? ws : byWorkspace ? ws.id : (ws.slug ?? ws.id);
-
-  const root = byWorkspace ? `/w/${segment}` : `/school/${segment}`;
+  const segment = typeof ws === 'string' ? ws : ws.id;
   const tail = path.replace(/^\/+/, '');
 
-  return tail ? `${root}/${tail}` : root;
+  return tail ? `/w/${segment}/${tail}` : `/w/${segment}`;
 }

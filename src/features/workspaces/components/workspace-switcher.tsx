@@ -23,7 +23,6 @@ import { RoleBadge } from './role-badge';
 
 type Props = {
   activeContextKey: string;
-  userId?: string;
   /** Render avatar-only, for the collapsed sidebar. */
   collapsed?: boolean;
 };
@@ -92,7 +91,7 @@ function ctxLabel(ctx: WorkspaceContext, tPrivate: string, tStudent: string): st
   return tStudent;
 }
 
-export function WorkspaceSwitcher({ activeContextKey, userId, collapsed }: Props) {
+export function WorkspaceSwitcher({ activeContextKey, collapsed }: Props) {
   const t = useTranslations('WorkspaceSwitcher');
   const router = useRouter();
   const locale = useLocale();
@@ -160,7 +159,7 @@ export function WorkspaceSwitcher({ activeContextKey, userId, collapsed }: Props
   function handleSelect(ctx: WorkspaceContext) {
     const key = toContextKey(ctx);
     if (key === activeContextKey) return;
-    router.push(contextToUrl(ctx, locale, userId));
+    router.push(contextToUrl(ctx, locale));
     activate.mutate(key);
   }
 
