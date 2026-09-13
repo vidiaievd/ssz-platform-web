@@ -18,7 +18,9 @@ import type { Group, RosterStudent, OutlineUnit, Session } from '../types';
 import type { Alert } from '@/features/dashboard/types';
 import { wsHref } from '@/features/workspaces/lib/href';
 
-type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule' | 'progress';
+export type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule' | 'progress';
+
+const ALL_TABS: TabKey[] = ['overview', 'students', 'teachers', 'materials', 'schedule', 'progress'];
 
 type Props = {
   group: Group;
@@ -42,6 +44,12 @@ type Props = {
   canManage: boolean;
   /** May this viewer see named learners' results — the heatmap inside the Progress tab. */
   canSeePersonalResults: boolean;
+  /**
+   * Which tabs this workspace has. A school has all six; a private tutor is the only
+   * teacher of their group and hands out materials as assignments, so Teachers and
+   * Materials would be a tab about themselves and a tab about nothing (plan 59, §5.2).
+   */
+  tabs?: TabKey[];
 };
 
 export function GroupTabs({
@@ -58,13 +66,19 @@ export function GroupTabs({
   workspaceId,
   canManage,
   canSeePersonalResults,
+  tabs = ALL_TABS,
 }: Props) {
   const t = useTranslations('Groups');
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const activeTab = (searchParams.get('tab') as TabKey | null) ?? 'overview';
+  const requestedTab = searchParams.get('tab') as TabKey | null;
+  // A tab this workspace does not have — a kept link, or a tab hidden since — falls back
+  // to the first one rather than leaving the page with nothing selected.
+  const activeTab =
+    requestedTab && tabs.includes(requestedTab) ? requestedTab : (tabs[0] ?? 'overview');
+  const has = (tab: TabKey) => tabs.includes(tab);
   const [editScheduleOpen, setEditScheduleOpen] = useState(false);
 
   function handleTabChange(tab: string) {
@@ -100,12 +114,11 @@ export function GroupTabs({
           <SelectValue>{tabLabel[activeTab]}</SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="overview">{tabLabel.overview}</SelectItem>
-          <SelectItem value="students">{tabLabel.students}</SelectItem>
-          <SelectItem value="teachers">{tabLabel.teachers}</SelectItem>
-          <SelectItem value="materials">{tabLabel.materials}</SelectItem>
-          <SelectItem value="schedule">{tabLabel.schedule}</SelectItem>
-          <SelectItem value="progress">{tabLabel.progress}</SelectItem>
+          {tabs.map((tab) => (
+            <SelectItem key={tab} value={tab}>
+              {tabLabel[tab]}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
@@ -120,19 +133,21 @@ export function GroupTabs({
           underline. */}
       <div className="hidden md:block overflow-x-auto">
         <TabsList>
-          <TabsTrigger value="overview">{tabLabel.overview}</TabsTrigger>
-          <TabsTrigger value="students">
-            {t('tabs.students')}
-            {roster.length > 0 && (
-              <Badge variant="muted" className="ml-1.5 text-[10px]">
-                {roster.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>
-          <TabsTrigger value="materials">{tabLabel.materials}</TabsTrigger>
-          <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>
-          <TabsTrigger value="progress">{tabLabel.progress}</TabsTrigger>
+          {has('overview') && <TabsTrigger value="overview">{tabLabel.overview}</TabsTrigger>}
+          {has('students') && (
+            <TabsTrigger value="students">
+              {t('tabs.students')}
+              {roster.length > 0 && (
+                <Badge variant="muted" className="ml-1.5 text-[10px]">
+                  {roster.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          )}
+          {has('teachers') && <TabsTrigger value="teachers">{tabLabel.teachers}</TabsTrigger>}
+          {has('materials') && <TabsTrigger value="materials">{tabLabel.materials}</TabsTrigger>}
+          {has('schedule') && <TabsTrigger value="schedule">{tabLabel.schedule}</TabsTrigger>}
+          {has('progress') && <TabsTrigger value="progress">{tabLabel.progress}</TabsTrigger>}
         </TabsList>
       </div>
 
@@ -145,6 +160,7 @@ export function GroupTabs({
             canManage={canManage}
             schoolId={schoolId}
             workspaceId={workspaceId}
+            showTeachers={has('teachers')}
           />
         </div>
       </TabsContent>
@@ -161,17 +177,19 @@ export function GroupTabs({
       </TabsContent>
 
       {/* ── Teachers ──────────────────────────────────────────────────────── */}
-      <TabsContent value="teachers">
-        <GroupTeachersTab
-          teachers={group.teachers}
-          schoolId={schoolId}
-          groupId={group.id}
-          assignTeacherHref={assignTeacherHref}
-        />
-      </TabsContent>
+      {has('teachers') && (
+        <TabsContent value="teachers">
+          <GroupTeachersTab
+            teachers={group.teachers}
+            schoolId={schoolId}
+            groupId={group.id}
+            assignTeacherHref={assignTeacherHref}
+          />
+        </TabsContent>
+      )}
 
       {/* ── Materials ─────────────────────────────────────────────────────── */}
-      <TabsContent value="materials">{materialsSlot}</TabsContent>
+      {has('materials') && <TabsContent value="materials">{materialsSlot}</TabsContent>}
 
       {/* ── Schedule ──────────────────────────────────────────────────────── */}
       <TabsContent value="schedule">

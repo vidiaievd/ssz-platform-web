@@ -49,6 +49,7 @@
       "createdPartly": "Gruppen «{name}» er opprettet, men {count, plural, one {# elev} other {# elever}} kunne ikke legges til.",
       "forbidden": "Du kan ikke opprette grupper her.",
       "failed": "Kunne ikke opprette gruppen. Prøv igjen."
-    }
+    },
+    "toggleGroup": "Vis elevene i {name}"
   }
 }

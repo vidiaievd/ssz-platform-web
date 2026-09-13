@@ -114,6 +114,7 @@ export async function TutorRoster({ params, searchParams }: Props) {
           groups={groups.map((g) => ({
             id: g.id,
             name: g.name,
+            href: wsHref(workspaceId, `groups/${g.id}`),
             level: g.level,
             scheduleSummary: g.scheduleSummary,
             rows: g.students.map(toRow),

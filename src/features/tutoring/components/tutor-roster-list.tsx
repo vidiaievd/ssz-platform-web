@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ChevronRight, Users } from 'lucide-react';
 
@@ -16,6 +17,8 @@ export type RosterRow = {
 export type RosterGroupSection = {
   id: string;
   name: string;
+  /** The group's own page — the roster is the only way in, since groups have no menu entry. */
+  href: string;
   level: string;
   scheduleSummary?: string;
   rows: RosterRow[];
@@ -58,18 +61,30 @@ export function TutorRosterList({ groups, solo, expandAll = false }: Props) {
         const open = isOpen(group.id);
         return (
           <div key={group.id} role="listitem" className="space-y-1">
-            <button
-              type="button"
-              onClick={() => toggle(group.id)}
-              aria-expanded={open}
-              aria-controls={`tutor-group-${group.id}`}
-              className="flex w-full items-center gap-3 rounded-lg border bg-card px-4 py-3 text-left transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <ChevronRight
-                className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-90' : ''}`}
-                aria-hidden
-              />
-              <span className="min-w-0 flex-1 truncate text-sm font-medium">{group.name}</span>
+            {/* Opening a group and going to it are two different intentions, so they are two
+                controls: the chevron unfolds the learners in place, the name is a link. */}
+            <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-accent/40">
+              <button
+                type="button"
+                onClick={() => toggle(group.id)}
+                aria-expanded={open}
+                aria-controls={`tutor-group-${group.id}`}
+                aria-label={t('toggleGroup', { name: group.name })}
+                className="-m-1 shrink-0 rounded p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <ChevronRight
+                  className={`h-4 w-4 transition-transform ${open ? 'rotate-90' : ''}`}
+                  aria-hidden
+                />
+              </button>
+
+              <Link
+                href={group.href}
+                className="min-w-0 flex-1 truncate text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {group.name}
+              </Link>
+
               {group.scheduleSummary && (
                 <span className="hidden truncate text-xs text-muted-foreground sm:block">
                   {group.scheduleSummary}
@@ -81,7 +96,7 @@ export function TutorRosterList({ groups, solo, expandAll = false }: Props) {
               <span className="shrink-0 text-xs text-muted-foreground">
                 {t('groupCount', { count: group.rows.length })}
               </span>
-            </button>
+            </div>
 
             {open && (
               <div id={`tutor-group-${group.id}`} className="space-y-1 pl-4 sm:pl-7">

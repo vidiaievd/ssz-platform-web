@@ -23,18 +23,20 @@ type Props = {
   group: Group;
   schoolId: string;
   workspaceId: string;
+  /** Where to land once this group no longer exists; a school's list of groups by default. */
+  listHref?: string;
 };
 
 type Dialog = 'archive' | 'delete' | null;
 
-export function GroupDetailActions({ group, schoolId, workspaceId }: Props) {
+export function GroupDetailActions({ group, schoolId, workspaceId, listHref }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [editOpen, setEditOpen] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
 
-  const listHref = wsHref(workspaceId, 'groups');
+  const leaveHref = listHref ?? wsHref(workspaceId, 'groups');
 
   const canDelete =
     (group.status === 'draft' || group.status === 'archived') && group.studentCount === 0;
@@ -81,7 +83,7 @@ export function GroupDetailActions({ group, schoolId, workspaceId }: Props) {
       const result = await deleteGroup(schoolId, group.id);
       if (result.ok) {
         toast.success(t('detail.deleted'));
-        router.push(listHref);
+        router.push(leaveHref);
       } else {
         toast.error(t('detail.deleteError'));
       }

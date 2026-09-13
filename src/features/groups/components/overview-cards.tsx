@@ -76,9 +76,20 @@ type Props = {
   canManage: boolean;
   schoolId: string;
   workspaceId: string;
+  /**
+   * A workspace with no Teachers tab has no teachers panel either: a private tutor is the
+   * only teacher of their group, so the card would be about themselves (plan 59, §5.2).
+   */
+  showTeachers?: boolean;
 };
 
-export function OverviewCards({ group, canManage, schoolId, workspaceId }: Props) {
+export function OverviewCards({
+  group,
+  canManage,
+  schoolId,
+  workspaceId,
+  showTeachers = true,
+}: Props) {
   const t = useTranslations('Groups');
   const detailBase = wsHref(workspaceId, `groups/${group.id}`);
 
@@ -94,8 +105,15 @@ export function OverviewCards({ group, canManage, schoolId, workspaceId }: Props
   );
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-4 items-start">
+    <div
+      className={
+        showTeachers
+          ? 'grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-4 items-start'
+          : 'grid grid-cols-1 gap-4 items-start'
+      }
+    >
       {/* Teachers */}
+      {showTeachers && (
       <Card
         heading={t('overview.teachersHeading')}
         headerAction={
@@ -140,6 +158,7 @@ export function OverviewCards({ group, canManage, schoolId, workspaceId }: Props
           ))}
         </div>
       </Card>
+      )}
 
       <div className="flex flex-col gap-4">
         {/* Roster */}

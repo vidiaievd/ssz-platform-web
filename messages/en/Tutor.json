@@ -49,6 +49,7 @@
       "createdPartly": "Group “{name}” created, but {count, plural, one {# student} other {# students}} could not be added.",
       "forbidden": "You cannot create groups here.",
       "failed": "Could not create the group. Please try again."
-    }
+    },
+    "toggleGroup": "Show the learners in {name}"
   }
 }

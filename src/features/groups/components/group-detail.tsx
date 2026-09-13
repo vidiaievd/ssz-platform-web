@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { GroupDetailHeader } from "./group-detail-header";
 import { GroupResolveBanner } from "./group-resolve-banner";
-import { GroupTabs } from "./group-tabs";
+import { GroupTabs, type TabKey } from "./group-tabs";
 import { GroupMaterialsTab } from "./group-materials-tab";
 import type { Group, RosterStudent, CourseView, OutlineUnit, Session } from "../types";
 import type { CurriculumUnit } from "@/features/teachers/types";
@@ -40,6 +40,15 @@ type Props = {
   canManage: boolean;
   /** May this viewer see named learners' results — the heatmap of the Progress tab. */
   canSeePersonalResults: boolean;
+  /** Which tabs this workspace has; a school passes nothing and keeps all six. */
+  tabs?: TabKey[];
+  /**
+   * Where leaving this group goes. A school has a list of groups to go back to; a private
+   * tutor's list of groups is their roster, so they go there (plan 59, §5.2).
+   */
+  listHref?: string;
+  /** What that link is called; a school's says "Groups". */
+  listLabel?: string;
 };
 
 export async function GroupDetail({
@@ -59,9 +68,11 @@ export async function GroupDetail({
   workspaceId,
   canManage,
   canSeePersonalResults,
+  tabs,
+  listHref = wsHref(workspaceId, 'groups'),
+  listLabel,
 }: Props) {
   const t = await getTranslations("Groups");
-  const listHref = wsHref(workspaceId, 'groups');
 
   return (
     <div className="space-y-5">
@@ -71,7 +82,7 @@ export async function GroupDetail({
         className="inline-flex items-center gap-1 text-sm text-(--ssz-text-secondary) hover:text-(--ssz-text-primary) transition-colors"
       >
         <ChevronLeft className="size-3.5" aria-hidden="true" />
-        {t("detail.back")}
+        {listLabel ?? t("detail.back")}
       </Link>
 
       <GroupDetailHeader
@@ -81,6 +92,7 @@ export async function GroupDetail({
         schoolId={schoolId}
         workspaceId={workspaceId}
         canManage={canManage}
+        listHref={listHref}
       />
 
       {/* Resolve-first banner */}
@@ -116,6 +128,7 @@ export async function GroupDetail({
         workspaceId={workspaceId}
         canManage={canManage}
         canSeePersonalResults={canSeePersonalResults}
+        tabs={tabs}
       />
     </div>
   );

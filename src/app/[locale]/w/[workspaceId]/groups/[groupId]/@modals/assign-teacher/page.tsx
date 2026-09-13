@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { getSchoolByRef } from '@/features/school/api/get-school-by-ref';
+import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { getTeacherAssignCandidates } from '@/features/groups/api/queries';
 import { TeacherAssignModal } from '@/features/groups/components/teacher-assign-modal';
 
@@ -11,11 +11,11 @@ type Props = {
 export default async function AssignTeacherModal({ params }: Props) {
   const { workspaceId, groupId } = await params;
 
-  const school = await getSchoolByRef(workspaceId);
-  if (!school) notFound();
+  const workspace = await resolveWorkspace(workspaceId);
+  if (!workspace) notFound();
 
   const { groupName, groupLang, groupSlots, candidates } =
-    await getTeacherAssignCandidates(school.id, groupId);
+    await getTeacherAssignCandidates(workspace.id, groupId);
 
   return (
     <TeacherAssignModal
@@ -24,7 +24,7 @@ export default async function AssignTeacherModal({ params }: Props) {
       groupLang={groupLang}
       groupSlots={groupSlots}
       candidates={candidates}
-      schoolId={school.id}
+      schoolId={workspace.id}
       workspaceId={workspaceId}
     />
   );

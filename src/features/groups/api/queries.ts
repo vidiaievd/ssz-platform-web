@@ -62,8 +62,12 @@ type OrgMember = {
 };
 
 function mapGroupStatus(s?: string): Group['status'] {
-  if (s === 'ACTIVE') return 'active';
-  if (s === 'ARCHIVED') return 'archived';
+  // organization-service answers in the Prisma enum's mapped spelling — lowercase — while
+  // the member-role enums beside it come back upper-cased. Matching only one of the two
+  // made every open group read as a draft on its own page.
+  const value = s?.toLowerCase();
+  if (value === 'active') return 'active';
+  if (value === 'archived') return 'archived';
   return 'draft';
 }
 
