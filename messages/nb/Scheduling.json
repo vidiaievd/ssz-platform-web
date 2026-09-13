@@ -21,5 +21,28 @@
   },
   "stub": {
     "body": "Denne seksjonen kommer snart."
+  },
+  "my": {
+    "title": "Timene mine",
+    "subtitle": "Alt du underviser, på ett sted",
+    "week": "Uke",
+    "month": "Måned",
+    "today": "I dag",
+    "previous": "Forrige",
+    "next": "Neste",
+    "exam": "Prøve",
+    "extra": "Ekstra",
+    "noTopic": "Uten tema ennå",
+    "emptyWeek": "Ingenting planlagt denne uken.",
+    "emptyMonth": "Ingenting planlagt denne måneden.",
+    "emptyBody": "Timer dukker opp her så snart en gruppe har et ukemønster.",
+    "loadFailed": "Vi fikk ikke lest timeplanen din. Ingenting er tapt — prøv igjen.",
+    "count": "{count, plural, =0 {ingen timer} one {# time} other {# timer}}",
+    "dayLabel": "{weekday} {date}",
+    "status": {
+      "held": "Gjennomført",
+      "cancelled": "Avlyst",
+      "moved": "Flyttet"
+    }
   }
 }

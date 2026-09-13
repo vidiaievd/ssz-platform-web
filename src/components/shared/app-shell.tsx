@@ -7,6 +7,7 @@ import {
   Bell,
   BarChart3,
   BookOpen,
+  CalendarDays,
   CalendarRange,
   ClipboardCheck,
   GraduationCap,
@@ -209,6 +210,9 @@ function buildTutorNav(workspaceId: string | undefined, review: ReviewNav = null
             ]
           : []),
         { href: wsHref(workspaceId, 'students'), icon: Users, labelKey: 'students' },
+        // The tutor's own week. The school's scheduling section is four screens about
+        // cover, workload and forecast; this is one screen about the lessons they teach.
+        { href: wsHref(workspaceId, 'schedule'), icon: CalendarDays, labelKey: 'schedule' },
         { href: wsHref(workspaceId, 'invitations'), icon: MailCheck, labelKey: 'invitations' },
         { href: wsHref(workspaceId, 'content'), icon: BookOpen, labelKey: 'content' },
       ],

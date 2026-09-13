@@ -220,12 +220,21 @@ export type GroupSelectOption = {
   level: string;
   /** The workspace's own group — see StudentGroupRef.isDefault. */
   isDefault: boolean;
+  /** The course the group is taught from; null while none is linked. */
+  courseId: string | null;
 };
 
 export async function getGroupsForSelect(schoolId: string): Promise<GroupSelectOption[]> {
   try {
     const raw = await serverFetch<
-      Array<{ id: string; name: string; lang?: string; level?: string; isDefault?: boolean }>
+      Array<{
+        id: string;
+        name: string;
+        lang?: string;
+        level?: string;
+        isDefault?: boolean;
+        courseId?: string | null;
+      }>
     >({
       service: 'organization',
       path: `/schools/${schoolId}/groups`,
@@ -236,6 +245,7 @@ export async function getGroupsForSelect(schoolId: string): Promise<GroupSelectO
       lang: g.lang ?? '',
       level: g.level ?? '',
       isDefault: g.isDefault ?? false,
+      courseId: g.courseId ?? null,
     }));
   } catch {
     return [];
