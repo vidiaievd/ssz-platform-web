@@ -3272,5 +3272,34 @@
       "keyPlaceholder": "Ny nøkkel, hvis opptatt",
       "action": "Flytt"
     }
+  },
+  "targets": {
+    "title": "Hva hver del av oppgaven handler om",
+    "lede": "En elev har rett eller feil i noe mindre enn en oppgave. Si hvilket atom hvert hull prøver, så kan hukommelsen planlegges på selve kunnskapen og ikke på siden — og en ny oppgave om samme atom teller som samme kunnskap, ikke som en ny.",
+    "loadFailed": "Fikk ikke lest hva denne oppgaven handler om.",
+    "saveFailed": "Fikk ikke lagret hva denne delen handler om.",
+    "wholeExercise": "Oppgaven som helhet",
+    "unaddressed": "sier ennå ingenting om seg selv",
+    "retiredAtom": "Pensjonert atom",
+    "toggleRole": "Bytt rolle for {atom}",
+    "remove": "Fjern {atom}",
+    "suggested": "Forslag:",
+    "addAtom": "Legg til et atom{item}",
+    "noItems": "Ingenting å peke på inne i denne oppgaven ennå.",
+    "rulesWithoutAtoms": "Øver på regler ingen har delt opp i atomer ennå: {rules}. Del dem opp i regelredigeringen, så får forslagene her noe å tilby.",
+    "role": {
+      "focus": "fokus",
+      "context": "kontekst"
+    },
+    "broken": {
+      "item_missing": "Hullet dette pekte på er borte — en hullnøkkel holder en tokenindeks, så en endring i setningen flytter den. Pek på nytt.",
+      "atom_missing": "Atomet under er pensjonert."
+    },
+    "reason": {
+      "word_exact": "Hullet svarer med dette ordet.",
+      "word_inflected": "Hullet svarer med en form av dette ordet.",
+      "rule_single_atom": "Det eneste atomet i en regel oppgaven øver på.",
+      "rule_candidate": "Ett atom i en regel oppgaven øver på — du velger."
+    }
   }
 }

@@ -40,6 +40,9 @@ export const authoringKeys = keyFactory('authoring', {
   grammarAtoms: (ruleId: string) => ['grammar-atoms', ruleId] as const,
   exercises: (containerId: string) => ['exercises', containerId] as const,
   exerciseRuleLinks: (exerciseId: string) => ['exercise-rule-links', exerciseId] as const,
+  exerciseTargets: (exerciseId: string) => ['exercise-targets', exerciseId] as const,
+  exerciseTargetSuggestions: (exerciseId: string) =>
+    ['exercise-target-suggestions', exerciseId] as const,
   exercise: (id: string) => ['exercise', id] as const,
   sections: (containerId: string) => ['sections', containerId] as const,
   versions: (containerId: string) => ['versions', containerId] as const,

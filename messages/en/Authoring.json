@@ -3272,5 +3272,34 @@
       "keyPlaceholder": "New key, if taken",
       "action": "Move"
     }
+  },
+  "targets": {
+    "title": "What each piece of this is about",
+    "lede": "A learner is right or wrong about something smaller than an exercise. Say which atom each gap examines and their memory can be scheduled on the fact rather than on the page — and a second exercise on the same atom counts as the same knowledge, not as a new one.",
+    "loadFailed": "Could not read what this exercise is about.",
+    "saveFailed": "Could not save what this item is about.",
+    "wholeExercise": "The exercise as a whole",
+    "unaddressed": "says nothing about itself yet",
+    "retiredAtom": "Retired atom",
+    "toggleRole": "Switch the role of {atom}",
+    "remove": "Remove {atom}",
+    "suggested": "Suggested:",
+    "addAtom": "Add an atom{item}",
+    "noItems": "Nothing to address inside this exercise yet.",
+    "rulesWithoutAtoms": "Practises rules nobody has cut into atoms yet: {rules}. Cut them up in the rule editor and the suggestions here will have something to offer.",
+    "role": {
+      "focus": "focus",
+      "context": "context"
+    },
+    "broken": {
+      "item_missing": "The gap this addressed is gone — a gap key holds a token index, so editing the sentence moves it. Re-anchor it.",
+      "atom_missing": "The atom underneath has been retired."
+    },
+    "reason": {
+      "word_exact": "The gap answers this word.",
+      "word_inflected": "The gap answers a form of this word.",
+      "rule_single_atom": "The only atom of a rule this exercise practises.",
+      "rule_candidate": "One atom of a rule this exercise practises — you choose."
+    }
   }
 }

@@ -12,6 +12,8 @@ vi.mock('../actions/grammar', () => ({
 }));
 vi.mock('../api/use-authoring-grammar', () => ({
   useAuthoringGrammarExplanations: vi.fn(),
+  // The pane reads the course's other rules to offer them as somewhere to move an atom.
+  useAuthoringGrammarRules: () => ({ data: [] }),
 }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({

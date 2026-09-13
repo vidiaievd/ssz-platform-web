@@ -288,3 +288,69 @@ export interface CourseResult {
   /** Only the cells somebody attempted; the grid supplies the rest from coverage. */
   cells: CourseResultCell[];
 }
+
+// ─── What each piece of an exercise is about (plan 63 §2 D) ─────────────────
+
+export type AtomType = 'vocabulary_item' | 'grammar_rule_atom';
+export type TargetRole = 'focus' | 'context';
+
+/**
+ * One atom an item is about, resolved against the exercise as it stands now.
+ *
+ * `broken` is computed on every read and never stored, because neither half of a target is
+ * stable on its own: a gap key holds a token index, so editing the sentence moves it
+ * (`item_missing`), and the atom underneath can be retired (`atom_missing`). The panel
+ * reports both rather than hiding them — a target silently dropped is an author believing
+ * a gap is addressed when it is not.
+ */
+export interface ResolvedTarget {
+  atomType: AtomType;
+  atomId: string;
+  role: TargetRole;
+  /** `null` when the atom is gone; `broken` then says `atom_missing`. */
+  atomTitle: string | null;
+  track: string | null;
+  broken: 'atom_missing' | 'item_missing' | null;
+}
+
+export interface ItemTargets {
+  /** `null` addresses the whole exercise — the only option for templates that grade as one. */
+  itemKey: string | null;
+  label: string | null;
+  targets: ResolvedTarget[];
+}
+
+export interface ExerciseTargets {
+  exerciseId: string;
+  templateCode: string;
+  /** False when the template grades as a whole; `items` then holds one `itemKey: null` row. */
+  addressable: boolean;
+  items: ItemTargets[];
+}
+
+export interface TargetSuggestion {
+  atomType: AtomType;
+  atomId: string;
+  title: string;
+  track: string;
+  role: TargetRole;
+  /** `word_exact` | `word_inflected` | `rule_single_atom` | `rule_candidate`. */
+  reason: string;
+  /** False where the author has to choose — a rule with several atoms, or an ambiguous word. */
+  confident: boolean;
+}
+
+export interface ItemSuggestions {
+  itemKey: string | null;
+  label: string | null;
+  alreadyAddressed: boolean;
+  suggestions: TargetSuggestion[];
+}
+
+export interface TargetSuggestions {
+  exerciseId: string;
+  templateCode: string;
+  items: ItemSuggestions[];
+  /** Rules this exercise practises that nobody has cut into atoms yet. */
+  rulesWithoutAtoms: Array<{ ruleId: string; title: string }>;
+}
