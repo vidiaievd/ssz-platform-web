@@ -25,6 +25,7 @@ export default async function SchoolSettingsLayout({ children, params }: Props) 
     { href: wsHref(workspaceId, 'settings/account'), label: t('nav.account') },
     { href: wsHref(workspaceId, 'settings/notifications'), label: t('nav.notifications') },
     { href: wsHref(workspaceId, 'settings/review'), label: t('nav.review') },
+    { href: wsHref(workspaceId, 'settings/progress'), label: t('nav.progress') },
   ];
 
   return <SettingsLayout nav={nav}>{children}</SettingsLayout>;

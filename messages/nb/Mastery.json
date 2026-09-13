@@ -32,5 +32,23 @@
   "student": {
     "title": "Verdt litt jobb",
     "subtitle": "Ut fra det du har øvd på i det siste."
+  },
+  "worthALook": {
+    "title": "Verdt et blikk denne uka",
+    "reason": {
+      "forgets": "Du treffer dette der og da, og det blekner i løpet av noen dager. Kom tilbake til det tidligere heller enn å lære det på nytt.",
+      "never-knew": "Denne sitter stabilt, og stabilt feil — det er selve regelen som trenger et nytt blikk, ikke flere repetisjoner.",
+      "watch": "Ingenting galt her; det er bare det tregeste av det du øver på, og noe må komme først.",
+      "unknown": "Denne vakler, og ingenting som er registrert sier ennå om den glipper unna eller aldri helt satt seg."
+    },
+    "thin": "For få forsøk til å si noe ennå — tre til, så blir dette ordentlig tilbakemelding."
+  },
+  "standing": {
+    "title": "Hvor du ligger",
+    "below": "Du ligger bak de fleste i gruppa akkurat nå",
+    "middle": "Du ligger omtrent midt i gruppa",
+    "above": "Du ligger foran de fleste i gruppa",
+    "note": "Lest mot de andre som jobber med det samme stoffet. Det flytter seg for hver uke med arbeid.",
+    "noteNamed": "Lest mot de andre i {group}. Det flytter seg for hver uke med arbeid."
   }
 }

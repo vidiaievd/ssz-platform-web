@@ -7,6 +7,7 @@ import type {
   Invitation,
   InviteMemberBody,
   NameAvailabilityResponse,
+  SchoolSettingsBody,
   SlugAvailabilityResponse,
   School,
 } from '../types';
@@ -128,7 +129,7 @@ export function useCreateSchool() {
 export function useUpdateSchool(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: Partial<CreateSchoolBody>) => {
+    mutationFn: async (body: Partial<CreateSchoolBody> & SchoolSettingsBody) => {
       const res = await fetch(`/api/schools/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
