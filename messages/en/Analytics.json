@@ -184,5 +184,58 @@
     "barsLabel": "{name}: taught {delivered}%, taken away {absorbed}%",
     "emptyTitle": "No groups yet",
     "emptyBody": "Once a group is running, this is where its two numbers meet."
+  },
+  "courseResult": {
+    "title": "Coverage against result",
+    "notPublished": "Nothing is published yet, so there is nothing learners could have taken. What the draft trains is in the strip above.",
+    "summary": {
+      "items": "Items",
+      "classified": "Classified",
+      "classifiedSub": "{count, plural, one {# exercise the axis table does not know} other {# exercises the axis table does not know}}",
+      "learners": "Learners",
+      "learnersSub": "Across {count, plural, one {# group} other {# groups}}",
+      "learnersNoGroups": "Which groups they were in is not recorded for this history",
+      "unreached": "Covered, unreached",
+      "unreachedSub": "Pairs the course teaches that nobody has attempted",
+      "notTaught": "Not taught at all",
+      "notTaughtSub": "Pairs with no exercise behind them"
+    },
+    "grid": {
+      "title": "Result against coverage",
+      "subtitle": "Colour is the weighted success rate of everybody who took this course. A verdict needs {threshold} weighted samples; below that the cell declines to judge.",
+      "subtitleNoResult": "The results could not be loaded, so the grid shows the material only.",
+      "privacy": "Aggregate over everybody who took the course. No learner is named here, in the grid or on hover — this screen is about the material.",
+      "soleLearner": "{count, plural, one {# cell rests on a single learner} other {# cells rest on a single learner}}. That is one person's profile wearing the course's name, not a verdict on what you wrote."
+    },
+    "cell": {
+      "items": "{count} items",
+      "unreached": "items · unreached",
+      "notTaught": "not taught",
+      "shortfall": "{sample}/{threshold}"
+    },
+    "tip": {
+      "measured": "{pair}: {value}% across {learners, plural, one {# learner} other {# learners}}, over {items} items",
+      "unreached": "{pair}: {items} items, nobody has attempted them",
+      "notTaught": "{pair}: the course has no exercise for this pair",
+      "insufficient": "{pair}: attempted, but too little evidence to judge ({items} items)"
+    },
+    "holes": {
+      "schedule": {
+        "title": "{count, plural, =0 {Everything covered has been reached} one {# pair covered but unreached} other {# pairs covered but unreached}}",
+        "body": "The material is there and nobody has got to it. That is a question for the timetable and for what is being assigned, not for the course."
+      },
+      "content": {
+        "title": "{count, plural, =0 {Every pair has material} one {# pair not taught at all} other {# pairs not taught at all}}",
+        "body": "No exercise trains these. A question for the course itself — and an empty pair is a decision until it is written down as one."
+      }
+    },
+    "form": {
+      "title": "Recognition against production"
+    },
+    "legend": {
+      "scale": "Success rate 0 → 100%",
+      "unreached": "Covered, unreached",
+      "notTaught": "Not taught"
+    }
   }
 }

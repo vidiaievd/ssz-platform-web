@@ -20,6 +20,12 @@ function tallies(overrides: Partial<CoverageTallies> = {}): CoverageTallies {
     bySkill: { listening: 0, reading: 8, spoken: 0, written: 2 },
     byFocus: { vocabulary: 6, grammar: 3, orthography: 0, pragmatics: 0, unknown: 1 },
     byForm: { bank: 7, free: 3, mixed: 0, unknown: 0 },
+    byPair: {
+      listening: { vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 },
+      reading: { vocabulary: 6, grammar: 1, orthography: 0, pragmatics: 0, unknown: 1 },
+      spoken: { vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 },
+      written: { vocabulary: 0, grammar: 2, orthography: 0, pragmatics: 0, unknown: 0 },
+    },
     emptySkills: ['listening', 'spoken'],
     unclassified: 0,
     ...overrides,

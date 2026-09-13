@@ -184,5 +184,58 @@
     "barsLabel": "{name}: undervist {delivered} %, tatt med {absorbed} %",
     "emptyTitle": "Ingen grupper ennå",
     "emptyBody": "Når en gruppe er i gang, møtes de to tallene her."
+  },
+  "courseResult": {
+    "title": "Dekning mot resultat",
+    "notPublished": "Ingenting er publisert ennå, så det finnes ikke noe elevene kunne ha tatt. Hva utkastet trener står i stripen over.",
+    "summary": {
+      "items": "Oppgaver",
+      "classified": "Klassifisert",
+      "classifiedSub": "{count, plural, one {# oppgave aksetabellen ikke kjenner} other {# oppgaver aksetabellen ikke kjenner}}",
+      "learners": "Elever",
+      "learnersSub": "Fordelt på {count, plural, one {# gruppe} other {# grupper}}",
+      "learnersNoGroups": "Hvilke grupper de var i, er ikke registrert for denne historikken",
+      "unreached": "Dekket, ikke nådd",
+      "unreachedSub": "Par kurset underviser, som ingen har forsøkt",
+      "notTaught": "Ikke undervist i det hele tatt",
+      "notTaughtSub": "Par uten en eneste oppgave bak seg"
+    },
+    "grid": {
+      "title": "Resultat mot dekning",
+      "subtitle": "Fargen er den vektede treffprosenten til alle som har tatt kurset. En dom krever {threshold} vektede observasjoner; under det dømmer ikke cellen.",
+      "subtitleNoResult": "Resultatene kunne ikke lastes, så rutenettet viser bare materialet.",
+      "privacy": "Aggregat over alle som har tatt kurset. Ingen elev navngis her, verken i rutenettet eller ved hover — denne skjermen handler om materialet.",
+      "soleLearner": "{count, plural, one {# celle hviler på én enkelt elev} other {# celler hviler på én enkelt elev}}. Det er én persons profil med kursets navn på, ikke en dom over det du har skrevet."
+    },
+    "cell": {
+      "items": "{count} oppgaver",
+      "unreached": "oppgaver · ikke nådd",
+      "notTaught": "ikke undervist",
+      "shortfall": "{sample}/{threshold}"
+    },
+    "tip": {
+      "measured": "{pair}: {value} % hos {learners, plural, one {# elev} other {# elever}}, over {items} oppgaver",
+      "unreached": "{pair}: {items} oppgaver, ingen har forsøkt dem",
+      "notTaught": "{pair}: kurset har ingen oppgave for dette paret",
+      "insufficient": "{pair}: forsøkt, men for lite grunnlag til å dømme ({items} oppgaver)"
+    },
+    "holes": {
+      "schedule": {
+        "title": "{count, plural, =0 {Alt som er dekket, er nådd} one {# par dekket, men ikke nådd} other {# par dekket, men ikke nådd}}",
+        "body": "Materialet finnes, og ingen har kommet dit. Det er et spørsmål til timeplanen og til hva som deles ut, ikke til kurset."
+      },
+      "content": {
+        "title": "{count, plural, =0 {Alle par har materiale} one {# par uten undervisning} other {# par uten undervisning}}",
+        "body": "Ingen oppgave trener disse. Et spørsmål til selve kurset — et tomt par er en beslutning, helt til den skrives ned som en."
+      }
+    },
+    "form": {
+      "title": "Gjenkjenning mot produksjon"
+    },
+    "legend": {
+      "scale": "Treffprosent 0 → 100 %",
+      "unreached": "Dekket, ikke nådd",
+      "notTaught": "Ikke undervist"
+    }
   }
 }

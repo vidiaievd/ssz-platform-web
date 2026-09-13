@@ -14,6 +14,7 @@ import { useCurriculumTree } from '../api/use-curriculum-tree';
 import { allCollapseKeys } from '../lib/structure-nodes';
 import { CourseSettingsDrawer } from './course-settings-drawer';
 import { CourseStructurePanel } from './course-structure-panel';
+import { CoverageResultGrid } from './coverage-result-grid';
 import { CoverageStrip } from './coverage-strip';
 import { collectPublishRows } from '../lib/publish-rows';
 import { deriveContainerState } from './container-state-badge';
@@ -140,6 +141,12 @@ export function CourseEditorShell({
       <div className="rounded-xl border border-border bg-card p-4">
         <CoverageStrip containerId={container.id} />
       </div>
+
+      {/* And underneath it, the same course seen from the other end: what came of
+          teaching it. A course, not a module — a module's results are the course's
+          results sliced too thin to read, and the published version is what learners
+          actually took. */}
+      {container.containerType === 'course' && <CoverageResultGrid containerId={container.id} />}
 
       {draftVersionId ? (
         <CourseStructurePanel

@@ -29,6 +29,13 @@ vi.mock('./coverage-strip', () => ({
     <div data-testid="coverage-strip" data-container={containerId} />
   ),
 }));
+// Same reason as the strip above: two react-query hooks, exercised in
+// `coverage-result-grid.test.tsx`.
+vi.mock('./coverage-result-grid', () => ({
+  CoverageResultGrid: ({ containerId }: { containerId: string }) => (
+    <div data-testid="coverage-result-grid" data-container={containerId} />
+  ),
+}));
 vi.mock('./course-structure-panel', () => ({
   CourseStructurePanel: ({
     containerId,
