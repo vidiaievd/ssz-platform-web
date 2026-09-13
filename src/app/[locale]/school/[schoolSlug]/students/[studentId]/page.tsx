@@ -17,6 +17,7 @@ import { HistoryTab } from "@/features/students/components/detail/tabs/history-t
 import { StubTab } from "@/features/students/components/detail/tabs/stub-tab";
 import { MasteryTab } from "@/features/students/components/detail/tabs/mastery-tab";
 import { canSeePersonalResults } from "@/features/groups/lib/can-manage";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   params: Promise<{ schoolSlug: string; studentId: string; locale: string }>;
@@ -54,7 +55,7 @@ export default async function StudentDetailPage({ params, searchParams }: Props)
   if (!school || !student) notFound();
 
   const active = student.memberships.filter((m) => m.status === "active");
-  const assignHref = `/school/${schoolSlug}/students/${studentId}/assign-group`;
+  const assignHref = wsHref(schoolSlug, `students/${studentId}/assign-group`);
   const isOwner = role === 'OWNER';
   // The same rule the group's heatmap is behind (plan 58 §2 F): a scheduler builds hours
   // and rooms, and one learner's results are none of their business.
@@ -70,7 +71,7 @@ export default async function StudentDetailPage({ params, searchParams }: Props)
     <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-5">
       {/* Back link */}
       <Link
-        href={`/school/${schoolSlug}/students`}
+        href={wsHref(schoolSlug, 'students')}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -128,7 +129,7 @@ export default async function StudentDetailPage({ params, searchParams }: Props)
           schoolSlug={schoolSlug}
           schoolId={school.id}
           canEdit={isOwner}
-          groupsHref={`/school/${schoolSlug}/students/${studentId}?tab=groups`}
+          groupsHref={wsHref(schoolSlug, `students/${studentId}?tab=groups`)}
         />
       )}
       {tab === "groups" && (
@@ -149,7 +150,7 @@ export default async function StudentDetailPage({ params, searchParams }: Props)
           // clicked a cell of their own group's map must land on that group's numbers,
           // not on whichever membership happens to sort first.
           groups={groups}
-          assignHref={`/school/${schoolSlug}/groups`}
+          assignHref={wsHref(schoolSlug, 'groups')}
         />
       )}
       {tab === "history" && (

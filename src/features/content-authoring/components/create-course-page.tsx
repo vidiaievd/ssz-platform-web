@@ -7,6 +7,7 @@ import { Layers, Zap, ChevronRight } from 'lucide-react';
 
 import { Segmented } from '@/components/ui/segmented';
 import { Link } from '@/lib/i18n/navigation';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { useCreateCourseStore, type CreateCourseFlow } from '../stores/create-course';
 import { CreateCourseWizard } from './create-course-wizard';
@@ -34,7 +35,7 @@ export function CreateCoursePage() {
         className="mb-3 flex items-center gap-1.5 text-sm text-(--ssz-text-muted)"
       >
         <Link
-          href={`/school/${schoolSlug}/content`}
+          href={wsHref(schoolSlug, 'content')}
           className="hover:text-(--ssz-text-secondary) hover:underline"
         >
           {t('breadcrumb.courses')}

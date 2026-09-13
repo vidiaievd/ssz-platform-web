@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { useRouter } from '@/lib/i18n/navigation';
 import type { Container } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import {
   containerFormSchema,
@@ -96,7 +97,7 @@ export function ContainerForm(props: ContainerFormProps) {
         }
         await queryClient.invalidateQueries({ queryKey: authoringKeys.containers() });
         toast.success(t('form.createSuccess'));
-        router.push(`/school/${schoolSlug}/content/${result.value.id}`);
+        router.push(wsHref(schoolSlug, `content/${result.value.id}`));
         return;
       }
 

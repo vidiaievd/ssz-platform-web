@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { track } from '@/lib/analytics/track';
+import { wsHref } from '@/features/workspaces/lib/href';
 import type { BasicsFormValues } from '../../schemas';
 import { useCreateWizardStore } from '../../stores/create-wizard-store';
 import { useCreateSchool } from '../../api/use-schools';
@@ -144,7 +145,7 @@ export function CreateSchoolWizard({ tutorEmail: _ }: CreateSchoolWizardProps) {
       track({ name: 'school_create_succeeded' });
       setIsNavigating(true);
       reset();
-      router.push(`/school/${school.slug ?? school.id}/dashboard`);
+      router.push(wsHref(school.slug ?? school.id, 'dashboard'));
     } catch (e) {
       const err = e as { status?: number; message?: string };
       const reason = err.status === 409 ? 'name_taken' : 'network';

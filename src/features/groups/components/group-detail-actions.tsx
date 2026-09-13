@@ -14,6 +14,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { GroupEditDialog } from './group-edit-dialog';
 import { archiveGroup, deleteGroup, duplicateGroup, publishGroup } from '../api/mutations';
 import type { Group } from '../types';
@@ -33,7 +34,7 @@ export function GroupDetailActions({ group, schoolId, schoolSlug }: Props) {
   const [editOpen, setEditOpen] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
 
-  const listHref = `/school/${schoolSlug}/groups`;
+  const listHref = wsHref(schoolSlug, 'groups');
 
   const canDelete =
     (group.status === 'draft' || group.status === 'archived') && group.studentCount === 0;
@@ -43,7 +44,7 @@ export function GroupDetailActions({ group, schoolId, schoolSlug }: Props) {
       const result = await duplicateGroup(schoolId, group.id);
       if (result.ok && result.id) {
         toast.success(t('detail.duplicated'));
-        router.push(`/school/${schoolSlug}/groups/${result.id}`);
+        router.push(wsHref(schoolSlug, `groups/${result.id}`));
       } else {
         toast.error(t('detail.duplicateError'));
       }

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import type { InvitePreview, InvitationRole } from "@/features/invitations/types";
 import type { CurrentUser } from "@/features/auth/types/current-user";
 import { acceptInvitation } from "@/features/invitations/api/mutations";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 // Language endonyms — proper nouns, not translated
 const LANG_NAMES: Record<string, string> = {
@@ -42,7 +43,7 @@ function resolveWorkspacePath(preview: InvitePreview): string {
   if (preview.role === "STUDENT" || !preview.schoolSlug) {
     return "/student";
   }
-  return `/school/${preview.schoolSlug}`;
+  return wsHref(preview.schoolSlug);
 }
 
 export function InviteCard({ token, preview, currentUser }: Props) {

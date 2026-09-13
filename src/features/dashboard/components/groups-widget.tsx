@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { WidgetCard } from './widget-card';
 import { WidgetEmptyState } from './widget-empty-state';
 import { GroupHealthRow } from './group-health-row';
@@ -33,7 +34,7 @@ function GroupsWidgetSkeleton() {
 }
 
 export function GroupsWidget({ groupsHealth, role, schoolSlug }: GroupsWidgetProps) {
-  const groupsHref = `/school/${schoolSlug}/groups`;
+  const groupsHref = wsHref(schoolSlug, 'groups');
   const isTeacher = role === 'teacher';
 
   if (groupsHealth.status === 'unavailable') {

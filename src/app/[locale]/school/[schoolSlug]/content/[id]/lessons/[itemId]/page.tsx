@@ -18,6 +18,7 @@ import { ExerciseEditorPane } from '@/features/content-authoring/components/exer
 import { findItemWithModule } from '@/features/content-authoring/lib/find-tree-item';
 import { collectLevelGrammarRules } from '@/features/content-authoring/lib/level-grammar-rules';
 import { getMaterialKind } from '@/features/content-authoring/lib/material-kind';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 export default async function LessonEditorPage({
   params,
@@ -67,7 +68,7 @@ export default async function LessonEditorPage({
   // Annotating grammar in a text points at the rules of its own Leksjon; the
   // tree above already holds them, so the editor needs no request of its own.
   const levelGrammarRules = collectLevelGrammarRules(tree, moduleContainerId);
-  const backHref = `/school/${schoolSlug}/content/${id}`;
+  const backHref = wsHref(schoolSlug, `content/${id}`);
   const t = await getTranslations('Authoring');
   // Deliberately not a publish button: students read the *module's* published
   // version, so publishing the course from here changed nothing for this
@@ -81,7 +82,7 @@ export default async function LessonEditorPage({
   const sectionCrumb =
     levelTitle && sectionTitle ? `${levelTitle} · ${sectionTitle}` : (levelTitle ?? sectionTitle);
   const breadcrumbItems: BreadcrumbItem[] = [
-    { label: t('breadcrumb.courses'), href: `/school/${schoolSlug}/content` },
+    { label: t('breadcrumb.courses'), href: wsHref(schoolSlug, 'content') },
     { label: container.title, href: backHref },
     ...(sectionCrumb ? [{ label: sectionCrumb }] : []),
     { label: item.title ?? t('lessons.untitled') },
@@ -154,7 +155,7 @@ export default async function LessonEditorPage({
           isLive={item.isLive}
           container={moduleContainer}
           grammarRules={levelGrammarRules}
-          reviewHref={`/school/${schoolSlug}/review?course=${id}`}
+          reviewHref={wsHref(schoolSlug, `review?course=${id}`)}
           publishSlot={publishSlot}
         />
       ) : (

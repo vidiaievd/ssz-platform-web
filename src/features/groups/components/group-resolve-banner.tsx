@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { cn } from '@/lib/utils';
 import { AlertChip } from '@/components/shared/operations';
 import type { Alert } from '@/features/dashboard/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   alerts: Alert[];
@@ -14,7 +15,7 @@ type Props = {
 };
 
 function fixHref(alert: Alert, groupId: string, schoolSlug: string): string {
-  const base = `/school/${schoolSlug}/groups/${groupId}`;
+  const base = wsHref(schoolSlug, `groups/${groupId}`);
   switch (alert.type) {
     case 'no-primary':
       return `${base}/assign-teacher?role=primary`;

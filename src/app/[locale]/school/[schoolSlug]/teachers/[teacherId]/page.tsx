@@ -8,6 +8,7 @@ import { getTeacherSchedule } from "@/features/groups/api/queries";
 import { timeToMinutes } from "@/lib/groups/operations";
 import { TeacherScheduleClient } from "@/features/teachers/components/schedule/teacher-schedule-client";
 import type { Lesson } from "@/features/teachers/components/schedule/weekly-grid";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   params: Promise<{ schoolSlug: string; locale: string; teacherId: string }>;
@@ -75,7 +76,7 @@ export default async function TeacherSchedulePage({ params }: Props) {
     <main className="p-4 sm:p-6 space-y-5">
       {/* Back link */}
       <Link
-        href={`/${locale}/school/${schoolSlug}/teachers`}
+        href={`/${locale}${wsHref(schoolSlug, 'teachers')}`}
         className="inline-flex items-center gap-1.5 text-sm text-(--ssz-text-secondary) hover:text-(--ssz-text-primary) transition-colors"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />

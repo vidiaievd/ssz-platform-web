@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { cn } from '@/lib/utils';
 import { slotsOverlap } from '@/lib/groups/operations';
+import { wsHref } from '@/features/workspaces/lib/href';
 import type { TimetableTeacher, Weekday } from '../types';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -181,7 +182,7 @@ async function DayColumn({ day, lessons, conflictIndices, allLessons, schoolSlug
         return (
           <Link
             key={globalIndex}
-            href={`/school/${schoolSlug}/groups/${lesson.groupId}`}
+            href={wsHref(schoolSlug, `groups/${lesson.groupId}`)}
             aria-label={ariaLabel}
             className={cn(
               'absolute rounded px-1.5 py-0.5 text-[11px] font-medium leading-tight overflow-hidden',

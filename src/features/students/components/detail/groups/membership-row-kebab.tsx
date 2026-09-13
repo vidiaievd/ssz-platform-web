@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import type { MembershipRole } from "@/features/students/types";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   membershipId: string;
@@ -51,7 +52,7 @@ export function MembershipRowKebab({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuItem asChild>
-          <a href={`/school/${schoolSlug}/groups/${groupId}`} target="_blank" rel="noreferrer">
+          <a href={wsHref(schoolSlug, `groups/${groupId}`)} target="_blank" rel="noreferrer">
             <ExternalLink className="mr-2 h-4 w-4" />
             {t("detail.groups.actions.view")}
           </a>

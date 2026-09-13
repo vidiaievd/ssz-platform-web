@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { WorkspacesResponse, WorkspaceContext } from '../types';
+import { wsHref } from '../lib/href';
 
 export const workspacesKeys = {
   all: () => ['workspaces'] as const,
@@ -43,7 +44,7 @@ export function useActivateWorkspace() {
 }
 
 export function contextToUrl(ctx: WorkspaceContext, locale: string, userId?: string): string {
-  if (ctx.type === 'school') return `/${locale}/school/${ctx.schoolSlug}/dashboard`;
+  if (ctx.type === 'school') return `/${locale}${wsHref(ctx.schoolSlug, 'dashboard')}`;
   if (ctx.type === 'private_tutor') return `/${locale}/tutor/${userId ?? ctx.tutorGroupId}/dashboard`;
   return `/${locale}/student/dashboard`;
 }

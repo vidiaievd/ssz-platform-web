@@ -23,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 
 import type { ContainerVersion, CurriculumTree } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 import type { ContainerState, SchoolRole } from '../types';
 import { authoringKeys } from '../api/keys';
 
@@ -188,7 +189,7 @@ export function DangerZone({ containerId, containerTitle, state, role }: DangerZ
       return;
     }
     toast.success(t('deleteForever.success'));
-    startTransition(() => router.push(`/school/${schoolSlug}/content`));
+    startTransition(() => router.push(wsHref(schoolSlug, 'content')));
   };
 
   return (

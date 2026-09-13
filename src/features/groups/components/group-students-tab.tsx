@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatusPill } from '@/components/ui/status-pill';
 import { TableBody, TableRow, TableCell } from '@/components/ui/table';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { removeStudent, addStudents } from '../api/mutations';
 import type { RosterStudent, Group } from '../types';
 
@@ -148,7 +149,7 @@ export function GroupStudentsTab({ roster, group, schoolId, schoolSlug, addStude
                 return (
                   <TableRow
                     key={student.userId}
-                    onClick={() => router.push(`/school/${schoolSlug}/students/${student.userId}`)}
+                    onClick={() => router.push(wsHref(schoolSlug, `students/${student.userId}`))}
                     className={cn('cursor-pointer', isRemoving && 'opacity-50')}
                   >
                     <TableCell className="py-2.75">

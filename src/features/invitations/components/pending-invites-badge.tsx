@@ -6,6 +6,7 @@ import { Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { InvitationRole } from "../types";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   schoolId: string;
@@ -34,7 +35,7 @@ export function PendingInvitesBadge({ schoolId, schoolSlug, role }: Props) {
   if (count === 0) return null;
 
   const audience = role === "TEACHER" ? "teachers" : role === "STUDENT" ? "students" : undefined;
-  const href = `/school/${schoolSlug}/invitations${audience ? `?audience=${audience}` : ""}`;
+  const href = wsHref(schoolSlug, `invitations${audience ? `?audience=${audience}` : ""}`);
   const label = count === 1 ? t("singular") : t("plural", { count });
 
   return (

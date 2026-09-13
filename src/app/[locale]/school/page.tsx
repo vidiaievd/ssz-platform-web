@@ -5,6 +5,7 @@ import { getWorkspaces } from '@/features/workspaces/api/get-workspaces';
 import { STAFF_ROLES } from '@/features/workspaces/types';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import type { WorkspaceContext } from '@/features/workspaces/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 function resolveContextUrl(
   key: string,
@@ -16,7 +17,7 @@ function resolveContextUrl(
     const schoolId = key.slice('school:'.length);
     const ctx = contexts.find((c) => c.type === 'school' && c.schoolId === schoolId);
     if (!ctx || ctx.type !== 'school') return null;
-    return `/${locale}/school/${ctx.schoolSlug}/dashboard`;
+    return `/${locale}${wsHref(ctx.schoolSlug, 'dashboard')}`;
   }
   if (key === 'private_tutor') {
     const ctx = contexts.find((c) => c.type === 'private_tutor');
@@ -74,7 +75,7 @@ export default async function SchoolIndexPage() {
     (c) => c.type === 'school' && STAFF_ROLES.includes(c.role),
   );
   if (schoolCtx && schoolCtx.type === 'school') {
-    redirect(`/${locale}/school/${schoolCtx.schoolSlug}/dashboard`);
+    redirect(`/${locale}${wsHref(schoolCtx.schoolSlug, 'dashboard')}`);
   }
 
   const tutorCtx = contexts.find((c) => c.type === 'private_tutor');

@@ -7,6 +7,7 @@ import { StudentsRosterClient } from '@/features/students/components/students-ro
 import { EnrollShell } from '@/features/students/components/enroll-shell';
 import { getPendingCount } from '@/features/invitations/api/queries';
 import { PendingInvitesLink } from '@/features/invitations/components/pending-invites-link';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   params: Promise<{ schoolSlug: string; locale: string }>;
@@ -45,7 +46,7 @@ export default async function SchoolStudentsPage({ params, searchParams }: Props
       ) : pendingInvitesCount > 0 ? (
         <PendingInvitesLink
           count={pendingInvitesCount}
-          href={`/school/${schoolSlug}/invitations?audience=students`}
+          href={wsHref(schoolSlug, 'invitations?audience=students')}
         />
       ) : null}
 

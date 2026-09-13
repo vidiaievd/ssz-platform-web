@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardBody } from '@/components/ui/card';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { useGroupHeatmap } from '../api/use-group-heatmap';
 import { useGroupProgress } from '../api/use-group-progress';
@@ -106,7 +107,7 @@ function Progress({
   const [now] = useState(() => Date.now());
 
   const picture = pictureOf(data);
-  const groupHref = `/school/${schoolSlug}/groups/${groupId}`;
+  const groupHref = wsHref(schoolSlug, `groups/${groupId}`);
 
   if (picture === 'noCourse') {
     return (
@@ -567,7 +568,7 @@ function HeatmapPanel({
     if (!cell || !isMeasured(cell.state)) return null;
     // The group travels with the link: a learner in three groups has three sets of
     // numbers, and the one worth opening is the one whose cell was clicked.
-    return `/school/${schoolSlug}/students/${row.studentId}?tab=mastery&group=${groupId}&unit=${unit.unitId}`;
+    return wsHref(schoolSlug, `students/${row.studentId}?tab=mastery&group=${groupId}&unit=${unit.unitId}`);
   };
 
   return (

@@ -2,6 +2,7 @@ import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type OperationsBannerProps = {
   conflictCount: number;
@@ -20,7 +21,7 @@ export function OperationsBanner({ conflictCount, noTeacherCount, schoolSlug }: 
     parts.push(`${noTeacherCount} ${noTeacherCount === 1 ? 'group' : 'groups'} with no teacher`);
   }
 
-  const groupsHref = `/school/${schoolSlug}/groups`;
+  const groupsHref = wsHref(schoolSlug, 'groups');
 
   return (
     <div

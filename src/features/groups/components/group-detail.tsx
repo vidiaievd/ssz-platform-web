@@ -10,6 +10,7 @@ import type { Group, RosterStudent, CourseView, OutlineUnit, Session } from "../
 import type { CurriculumUnit } from "@/features/teachers/types";
 import type { GroupMaterialsView } from "../api/queries";
 import type { Alert } from "@/features/dashboard/types";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -60,7 +61,7 @@ export async function GroupDetail({
   canSeePersonalResults,
 }: Props) {
   const t = await getTranslations("Groups");
-  const listHref = `/school/${schoolSlug}/groups`;
+  const listHref = wsHref(schoolSlug, 'groups');
 
   return (
     <div className="space-y-5">

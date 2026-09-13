@@ -7,6 +7,7 @@ import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import { getTeacherSchedule } from '@/features/groups/api/queries';
 import { MyScheduleView } from '@/features/groups/components/my-schedule-view';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   params: Promise<{ schoolSlug: string; locale: string }>;
@@ -25,7 +26,7 @@ export default async function MySchedulePage({ params }: Props) {
     <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-5">
       <div>
         <Link
-          href={`/school/${schoolSlug}/dashboard`}
+          href={wsHref(schoolSlug, 'dashboard')}
           className="inline-flex items-center gap-1 text-sm text-(--ssz-text-secondary) hover:text-(--ssz-text-primary) transition-colors mb-3"
         >
           <ChevronLeft className="size-3.5" aria-hidden="true" />

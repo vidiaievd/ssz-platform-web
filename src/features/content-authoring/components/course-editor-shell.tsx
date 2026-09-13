@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import type { Container } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import type { PreflightResult, SchoolRole } from '../types';
 import { useCurriculumTree } from '../api/use-curriculum-tree';
@@ -96,7 +97,7 @@ export function CourseEditorShell({
       <StructureTopbar
         ref={topbarRef}
         title={container.title}
-        coursesHref={`/school/${schoolSlug}/content`}
+        coursesHref={wsHref(schoolSlug, 'content')}
         state={deriveContainerState(container)}
         versionNumber={publishedVersionNumber}
         updatedAt={container.updatedAt}
@@ -104,7 +105,7 @@ export function CourseEditorShell({
         previewHref={
           container.containerType === 'course' ? `/student/courses/${container.id}` : null
         }
-        reviewInboxHref={`/school/${schoolSlug}/review?course=${container.id}`}
+        reviewInboxHref={wsHref(schoolSlug, `review?course=${container.id}`)}
         onExpandAll={() => setCollapsed(new Set())}
         onCollapseAll={() => setCollapsed(new Set(allCollapseKeys(tree)))}
         onReview={() => setPublishOpen(true)}

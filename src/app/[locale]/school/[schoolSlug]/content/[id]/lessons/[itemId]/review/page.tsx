@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   params: Promise<{ locale: string; schoolSlug: string; id: string }>;
@@ -14,5 +15,5 @@ type Props = {
  */
 export default async function ExerciseReviewRedirectPage({ params }: Props) {
   const { locale, schoolSlug, id } = await params;
-  redirect(`/${locale}/school/${schoolSlug}/review?course=${encodeURIComponent(id)}`);
+  redirect(`/${locale}${wsHref(schoolSlug, `review?course=${encodeURIComponent(id)}`)}`);
 }

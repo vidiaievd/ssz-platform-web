@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Tab = {
   id: string;
@@ -14,10 +15,10 @@ type Tab = {
 };
 
 const TABS: Tab[] = [
-  { id: "overview",    segment: "",            href: (s) => `/school/${s}/scheduling` },
-  { id: "cover",       segment: "/cover",      href: (s) => `/school/${s}/scheduling/cover` },
-  { id: "curriculum",  segment: "/curriculum", href: (s) => `/school/${s}/scheduling/curriculum` },
-  { id: "forecast",    segment: "/forecast",   href: (s) => `/school/${s}/scheduling/forecast` },
+  { id: "overview",    segment: "",            href: (s) => wsHref(s, 'scheduling') },
+  { id: "cover",       segment: "/cover",      href: (s) => wsHref(s, 'scheduling/cover') },
+  { id: "curriculum",  segment: "/curriculum", href: (s) => wsHref(s, 'scheduling/curriculum') },
+  { id: "forecast",    segment: "/forecast",   href: (s) => wsHref(s, 'scheduling/forecast') },
 ];
 
 type Props = { children: ReactNode };
@@ -31,7 +32,7 @@ export default function SchedulingLayout({ children }: Props) {
 
   function isActive(tab: Tab): boolean {
     if (!pathname) return false;
-    const base = `/school/${schoolSlug}/scheduling`;
+    const base = wsHref(schoolSlug, 'scheduling');
     if (tab.id === "overview") {
       return pathname === base || pathname.endsWith("/scheduling");
     }

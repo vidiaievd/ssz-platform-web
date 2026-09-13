@@ -17,6 +17,7 @@ import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardBody } from '@/components/ui/card';
 import { FOCUSES, SKILLS } from '@/lib/shared-kernel/skills/model';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { getStudentMastery } from '../../../api/get-student-mastery';
 
@@ -138,7 +139,7 @@ export async function MasteryTab({
             .map((group) => (
               <a
                 key={group.id}
-                href={`/school/${schoolSlug}/students/${studentId}?tab=mastery&group=${group.id}`}
+                href={wsHref(schoolSlug, `students/${studentId}?tab=mastery&group=${group.id}`)}
                 className="ml-2 underline underline-offset-2 hover:text-(--ssz-text-primary)"
               >
                 {group.name}
@@ -436,7 +437,7 @@ function WeakRow({
       {/* The course is where anything is actually done about this, so the row ends with
           a way there rather than with a number to admire. */}
       <a
-        href={`/school/${schoolSlug}/content`}
+        href={wsHref(schoolSlug, 'content')}
         className="mt-2 inline-block text-[12px] font-semibold text-(--ssz-text-secondary) underline underline-offset-2 hover:text-(--ssz-text-primary)"
       >
         {t('mastery.work.action')}

@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Stepper } from '@/components/ui/stepper';
 import { cn } from '@/lib/utils';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { createGroup, updateSlots, assignTeacher, addStudents } from '../api/mutations';
 import { useSchoolStudents } from '../api/use-student-candidates';
 import { useGroupCreateWizardStore } from '../stores/create-wizard-store';
@@ -69,7 +70,7 @@ export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timeta
 
   function handleBack() {
     if (currentStep > 0) setStep(currentStep - 1);
-    else router.push(`/${locale}/school/${schoolSlug}/groups`);
+    else router.push(`/${locale}${wsHref(schoolSlug, 'groups')}`);
   }
 
   function handleContinue() {
@@ -133,7 +134,7 @@ export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timeta
 
         toast.success('Group created as draft');
         reset(schoolId);
-        router.push(`/${locale}/school/${schoolSlug}/groups/${groupId}`);
+        router.push(`/${locale}${wsHref(schoolSlug, `groups/${groupId}`)}`);
       } catch {
         setSubmitError('An unexpected error occurred. Please try again.');
         setSubmitting(false);

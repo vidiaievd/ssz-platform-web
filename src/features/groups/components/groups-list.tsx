@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { filterGroups, attentionCount, type GroupFilter } from '../lib/filter-groups';
 import { GroupHealthRow } from './group-health-row';
 import { GroupCard } from './group-card';
@@ -112,7 +113,7 @@ type Props = {
 
 export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props) {
   const t = await getTranslations('Groups');
-  const baseHref = `/school/${schoolSlug}`;
+  const baseHref = wsHref(schoolSlug);
   const newGroupHref = `${baseHref}/groups/new`;
   const timetableHref = `${baseHref}/groups/timetable`;
 

@@ -7,6 +7,7 @@ import { getPublicSchool } from '@/features/school/api/get-public-school';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
 import { SettingsLayout } from '@/components/shared/settings-layout';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 const ALLOWED_ROLES = ['OWNER', 'ADMIN'] as const;
 
@@ -49,17 +50,17 @@ export default async function EnrollmentLayout({ children, params }: Props) {
 
   const nav = [
     {
-      href: `/school/${schoolSlug}/enrollment/settings`,
+      href: wsHref(schoolSlug, 'enrollment/settings'),
       label: t('navSettings'),
     },
     {
-      href: `/school/${schoolSlug}/enrollment/placement`,
+      href: wsHref(schoolSlug, 'enrollment/placement'),
       label: t('navPlacement'),
     },
     ...(showRequests
       ? [
           {
-            href: `/school/${schoolSlug}/enrollment/requests`,
+            href: wsHref(schoolSlug, 'enrollment/requests'),
             label: t('navRequests'),
           },
         ]

@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { useRouter } from '@/lib/i18n/navigation';
+import { wsHref } from '@/features/workspaces/lib/href';
 import type { ContainerFormValues } from '../schemas/container';
 
 import { createContainerAction } from '../actions/container';
@@ -94,7 +95,7 @@ export function useCreateCourseFlow() {
 
       store.setCreating(false);
       store.reset();
-      router.push(`/school/${schoolSlug}/content/${containerId}`);
+      router.push(wsHref(schoolSlug, `content/${containerId}`));
     });
   }
 

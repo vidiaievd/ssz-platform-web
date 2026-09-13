@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   currentSchool: { name: string; slug: string };
@@ -36,7 +37,7 @@ export function SchoolSwitcher({ currentSchool }: Props) {
 
   function handleSelect(slug: string) {
     if (slug !== currentSchool.slug) {
-      router.push(`/${locale}/school/${slug}/dashboard`);
+      router.push(`/${locale}${wsHref(slug, 'dashboard')}`);
     }
   }
 

@@ -19,6 +19,7 @@ import {
 import type { useTranslations } from 'next-intl';
 
 import { hoursSince } from '@/features/review/lib/age-scale';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import type {
   AttemptReviewedData,
@@ -221,7 +222,7 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     getLink: (data, ctx) => {
       if (ctx.workspaceKind !== 'school' || !ctx.schoolSlug) return undefined;
       if (!isTeacherProfileChangedData(data)) return undefined;
-      return `/school/${ctx.schoolSlug}/teachers/${data.teacherUserId}`;
+      return wsHref(ctx.schoolSlug, `teachers/${data.teacherUserId}`);
     },
   },
   ENROLLMENT_REQUEST: {
@@ -239,7 +240,7 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         : '',
     getLink: (_data, ctx) => {
       if (ctx.workspaceKind !== 'school' || !ctx.schoolSlug) return undefined;
-      return `/school/${ctx.schoolSlug}/enrollment/requests`;
+      return wsHref(ctx.schoolSlug, 'enrollment/requests');
     },
   },
   ENROLLMENT_APPROVED: {
@@ -278,7 +279,7 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         : t('types.PLACEMENT_REVIEW_READY.bodyFallback'),
     getLink: (_data, ctx) =>
       ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? `/school/${ctx.schoolSlug}/enrollment/placement`
+        ? wsHref(ctx.schoolSlug, 'enrollment/placement')
         : undefined,
   },
   GROUP_ASSIGNED: {
@@ -391,7 +392,7 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     },
     getLink: (_data, ctx) =>
       ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? `/school/${ctx.schoolSlug}/review`
+        ? wsHref(ctx.schoolSlug, 'review')
         : undefined,
   },
   /**
@@ -418,7 +419,7 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     },
     getLink: (_data, ctx) =>
       ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? `/school/${ctx.schoolSlug}/review`
+        ? wsHref(ctx.schoolSlug, 'review')
         : undefined,
   },
   /**
@@ -452,7 +453,7 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     },
     getLink: (_data, ctx) =>
       ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? `/school/${ctx.schoolSlug}/review/oversight`
+        ? wsHref(ctx.schoolSlug, 'review/oversight')
         : undefined,
   },
 };

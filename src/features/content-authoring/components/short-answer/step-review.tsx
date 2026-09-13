@@ -11,6 +11,7 @@ import {
   TEMPLATE_CODE,
   type TeacherReviewPolicy,
 } from '@/lib/shared-kernel/short-answer';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { setSettings, type ShortAnswerDocument } from './edits';
 import { PipelineStage } from '../pipeline-stage';
@@ -161,7 +162,7 @@ function QueueLink({ containerId }: { containerId: string }) {
       <h3 className="text-xs font-medium">{t('shortAnswer.step4.queueLabel')}</h3>
       <p className="text-xs text-muted-foreground">{t('shortAnswer.step4.queueHelp')}</p>
       <Link
-        href={`/school/${schoolSlug}/review?course=${containerId}&type=${TEMPLATE_CODE}`}
+        href={wsHref(schoolSlug, `review?course=${containerId}&type=${TEMPLATE_CODE}`)}
         className="flex w-fit items-center gap-1.5 text-sm text-primary hover:underline"
       >
         <ExternalLink className="size-3.5" aria-hidden />

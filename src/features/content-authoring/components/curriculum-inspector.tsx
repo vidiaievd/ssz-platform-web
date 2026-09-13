@@ -15,6 +15,7 @@ import type {
   CurriculumTreeLevelNode,
   CurriculumTreeModuleNode,
 } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
@@ -439,7 +440,7 @@ export function CurriculumInspector({
         <ModulePublishBlock publishState={mod.publishState} />
 
         <InspectorFooter
-          editorHref={`/school/${schoolSlug}/content/${mod.containerId}`}
+          editorHref={wsHref(schoolSlug, `content/${mod.containerId}`)}
           onDelete={() =>
             onDelete({
               kind: 'module',
@@ -591,7 +592,7 @@ export function CurriculumInspector({
       </div>
 
       <InspectorFooter
-        editorHref={`/school/${schoolSlug}/content/${containerId}/lessons/${item.id}`}
+        editorHref={wsHref(schoolSlug, `content/${containerId}/lessons/${item.id}`)}
         onDelete={() => onDelete({ kind: 'item', id: item.id, title: item.title ?? '' })}
       />
     </div>

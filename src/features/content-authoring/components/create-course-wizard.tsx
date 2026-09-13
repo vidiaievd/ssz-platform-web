@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Stepper, type StepDef } from '@/components/ui/stepper';
 import { Link } from '@/lib/i18n/navigation';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { useCreateCourseFlow } from '../hooks/use-create-course-flow';
 import { useCreateCourseStore } from '../stores/create-course';
@@ -21,7 +22,7 @@ const TOTAL_STEPS = 3;
 export function CreateCourseWizard() {
   const t = useTranslations('Authoring.createCourse');
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
-  const contentBase = `/school/${schoolSlug}/content`;
+  const contentBase = wsHref(schoolSlug, 'content');
 
   const store = useCreateCourseStore();
   const { create, isCreating, canCreate } = useCreateCourseFlow();

@@ -16,6 +16,7 @@ import { GroupProgressTab } from './group-progress-tab';
 import { GroupEditDialog } from './group-edit-dialog';
 import type { Group, RosterStudent, OutlineUnit, Session } from '../types';
 import type { Alert } from '@/features/dashboard/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type TabKey = 'overview' | 'students' | 'teachers' | 'materials' | 'schedule' | 'progress';
 
@@ -77,7 +78,7 @@ export function GroupTabs({
     router.replace(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false });
   }
 
-  const detailBase = `/school/${schoolSlug}/groups/${group.id}`;
+  const detailBase = wsHref(schoolSlug, `groups/${group.id}`);
   const assignTeacherHref = `${detailBase}/assign-teacher`;
   const addStudentsHref   = `${detailBase}/add-students`;
 

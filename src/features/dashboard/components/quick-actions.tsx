@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { WidgetCard } from './widget-card';
 import type { DashboardRole, QuickAction } from '../types';
 import { quickActionsFor } from '../lib/roles';
@@ -57,22 +58,22 @@ type QuickActionsProps = {
 
 function resolveHref(action: QuickAction, schoolSlug: string): string {
   const routes: Record<string, string> = {
-    'new-course':        `/school/${schoolSlug}/content`,
-    'new-group':         `/school/${schoolSlug}/groups/new`,
-    'invite-teacher':    `/school/${schoolSlug}/students`,
-    'enroll-student':    `/school/${schoolSlug}/students`,
-    'import-csv':        `/school/${schoolSlug}/students`,
-    'edit-branding':     `/school/${schoolSlug}/settings`,
-    'teacher-timetable': `/school/${schoolSlug}/groups/timetable`,
-    'monthly-report':    `/school/${schoolSlug}/dashboard`,
-    'new-lesson':        `/school/${schoolSlug}/content`,
-    'my-groups':         `/school/${schoolSlug}/groups`,
-    'my-timetable':      `/school/${schoolSlug}/my-schedule`,
-    'schedule-class':    `/school/${schoolSlug}/groups`,
-    'grade-queue':       `/school/${schoolSlug}/dashboard`,
-    'message-class':     `/school/${schoolSlug}/students`,
+    'new-course':        wsHref(schoolSlug, 'content'),
+    'new-group':         wsHref(schoolSlug, 'groups/new'),
+    'invite-teacher':    wsHref(schoolSlug, 'students'),
+    'enroll-student':    wsHref(schoolSlug, 'students'),
+    'import-csv':        wsHref(schoolSlug, 'students'),
+    'edit-branding':     wsHref(schoolSlug, 'settings'),
+    'teacher-timetable': wsHref(schoolSlug, 'groups/timetable'),
+    'monthly-report':    wsHref(schoolSlug, 'dashboard'),
+    'new-lesson':        wsHref(schoolSlug, 'content'),
+    'my-groups':         wsHref(schoolSlug, 'groups'),
+    'my-timetable':      wsHref(schoolSlug, 'my-schedule'),
+    'schedule-class':    wsHref(schoolSlug, 'groups'),
+    'grade-queue':       wsHref(schoolSlug, 'dashboard'),
+    'message-class':     wsHref(schoolSlug, 'students'),
   };
-  return routes[action.id] ?? `/school/${schoolSlug}/dashboard`;
+  return routes[action.id] ?? wsHref(schoolSlug, 'dashboard');
 }
 
 export function QuickActions({ role, schoolSlug }: QuickActionsProps) {

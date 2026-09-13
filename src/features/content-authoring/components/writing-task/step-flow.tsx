@@ -15,6 +15,7 @@ import {
   type RevisionPolicy,
   type WritingTask,
 } from '@/lib/shared-kernel/writing-task';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { setAi, setSettings } from './edits';
 import { ToggleRow } from '../toggle-row';
@@ -246,7 +247,7 @@ function QueueLink({ containerId }: { containerId: string }) {
       <h3 className="text-xs font-medium">{t('writingTask.step4.queueLabel')}</h3>
       <p className="text-xs text-muted-foreground">{t('writingTask.step4.queueHelp')}</p>
       <Link
-        href={`/school/${schoolSlug}/review?course=${containerId}&type=writing_task`}
+        href={wsHref(schoolSlug, `review?course=${containerId}&type=writing_task`)}
         className="flex w-fit items-center gap-1.5 text-sm text-primary hover:underline"
       >
         <ExternalLink className="size-3.5" aria-hidden />

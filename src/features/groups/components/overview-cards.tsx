@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { CapacityMeter } from '@/components/shared/operations';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { TeacherRow } from './teacher-row';
 import type { Group, Weekday } from '../types';
 
@@ -79,7 +80,7 @@ type Props = {
 
 export function OverviewCards({ group, canManage, schoolId, schoolSlug }: Props) {
   const t = useTranslations('Groups');
-  const detailBase = `/school/${schoolSlug}/groups/${group.id}`;
+  const detailBase = wsHref(schoolSlug, `groups/${group.id}`);
 
   const modeLabel = group.mode === 'online' ? t('row.online') : t('row.inPerson');
   const hours = weeklyHours(group.slots);

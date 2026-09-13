@@ -46,6 +46,7 @@ import { DataState } from '@/components/shared/data-state';
 import { Link } from '@/lib/i18n/navigation';
 import { useUrlFilters } from '@/lib/url-filters/use-url-filters';
 import type { Container } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import type { ContainerState, SchoolRole } from '../types';
 import { ContainerStateBadge, deriveContainerState } from './container-state-badge';
@@ -89,7 +90,7 @@ function ContainerTableRow({ container }: ContainerRowProps) {
   const state = deriveContainerState(container);
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
   const formatter = useFormatter();
-  const containerHref = `/school/${schoolSlug}/content/${container.id}`;
+  const containerHref = wsHref(schoolSlug, `content/${container.id}`);
   return (
     <TableRow className="group">
       <TableCell>
@@ -176,7 +177,7 @@ interface ContainerOverflowMenuProps {
 function ContainerOverflowMenu({ container, state }: ContainerOverflowMenuProps) {
   const t = useTranslations('Authoring.list');
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
-  const containerHref = `/school/${schoolSlug}/content/${container.id}`;
+  const containerHref = wsHref(schoolSlug, `content/${container.id}`);
 
   const stub = (action: string) => () => toast.info(t('itemActionStub', { action }));
 
@@ -232,7 +233,7 @@ function ContainerOverflowMenu({ container, state }: ContainerOverflowMenuProps)
 function ContainerGridCard({ container }: { container: Container }) {
   const state = deriveContainerState(container);
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
-  const containerHref = `/school/${schoolSlug}/content/${container.id}`;
+  const containerHref = wsHref(schoolSlug, `content/${container.id}`);
   return (
     <div className="group relative flex flex-col rounded-lg border border-border bg-background overflow-hidden hover:shadow-md transition-shadow">
       <CourseCover language={container.targetLanguage} />
@@ -264,7 +265,7 @@ function ContainerGridCard({ container }: { container: Container }) {
 function ListEmptyState() {
   const t = useTranslations('Authoring.list');
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
-  const newHref = `/school/${schoolSlug}/content/new`;
+  const newHref = wsHref(schoolSlug, 'content/new');
   return (
     <div className="flex flex-col items-center gap-6 rounded-xl border-2 border-dashed border-border py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
@@ -336,7 +337,7 @@ interface MyContainersListProps {
 export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps) {
   const t = useTranslations('Authoring.list');
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
-  const newContainerHref = `/school/${schoolSlug}/content/new`;
+  const newContainerHref = wsHref(schoolSlug, 'content/new');
   const [filters, setFilters] = useUrlFilters(listFilterSchema);
   const deferredSearch = useDeferredValue(filters.search);
 

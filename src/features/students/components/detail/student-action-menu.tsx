@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { RemoveFromSchoolDialog } from "./dialogs/remove-from-school-dialog";
 import { archiveStudent } from "@/features/students/api/mutations";
 import { studentKeys } from "@/features/students/api/keys";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   studentId: string;
@@ -63,13 +64,13 @@ export function StudentActionMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-52">
           <DropdownMenuItem asChild>
-            <a href={`/school/${schoolSlug}/students/${studentId}/edit`}>
+            <a href={wsHref(schoolSlug, `students/${studentId}/edit`)}>
               <Pencil className="mr-2 h-4 w-4" />
               {t("detail.actions.editInfo")}
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <a href={`/school/${schoolSlug}/students/${studentId}/level`}>
+            <a href={wsHref(schoolSlug, `students/${studentId}/level`)}>
               <GraduationCap className="mr-2 h-4 w-4" />
               {t("detail.actions.changeLevel")}
             </a>

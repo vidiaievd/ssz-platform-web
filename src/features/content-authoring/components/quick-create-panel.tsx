@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Link } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import { useCreateCourseFlow } from '../hooks/use-create-course-flow';
 import { useCreateCourseStore, type LevelSystem, type Starter } from '../stores/create-course';
@@ -68,7 +69,7 @@ export function QuickCreatePanel() {
   const t = useTranslations('Authoring.createCourse');
   const languageOptions = useLanguageOptions();
   const { schoolSlug } = useParams<{ schoolSlug: string }>();
-  const contentBase = `/school/${schoolSlug}/content`;
+  const contentBase = wsHref(schoolSlug, 'content');
 
   const { basics, updateBasics, levelSystem, setLevelSystem, starter, setStarter, reset } =
     useCreateCourseStore();

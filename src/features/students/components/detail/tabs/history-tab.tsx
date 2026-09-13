@@ -16,6 +16,7 @@ import { MembershipRoleBadge } from "../groups/membership-role-badge";
 import type { StudentInSchool } from "@/features/students/types";
 import { formatDate } from "@/lib/i18n/formatters";
 import type { Locale } from "@/lib/i18n/config";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   student: StudentInSchool;
@@ -141,7 +142,7 @@ export async function HistoryTab({ student, schoolSlug, linkGroups = true }: Pro
                     <p className="text-xs mt-0.5">
                       {entry.groupId && linkGroups ? (
                         <Link
-                          href={`/school/${schoolSlug}/groups/${entry.groupId}`}
+                          href={wsHref(schoolSlug, `groups/${entry.groupId}`)}
                           className="hover:underline text-(--ssz-text-link)"
                         >
                           {entry.groupName}
@@ -201,7 +202,7 @@ export async function HistoryTab({ student, schoolSlug, linkGroups = true }: Pro
                   <TableCell>
                     {linkGroups ? (
                       <Link
-                        href={`/school/${schoolSlug}/groups/${m.groupId}`}
+                        href={wsHref(schoolSlug, `groups/${m.groupId}`)}
                         className="flex items-center gap-2 hover:underline"
                       >
                         <GroupBadge lang={m.lang} level={m.level} name={m.groupName} />

@@ -6,6 +6,7 @@ import { ChevronLeft } from 'lucide-react';
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { getTimetable } from '@/features/groups/api/queries';
 import { TeacherTimetable } from '@/features/groups/components/teacher-timetable';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { AlertCircle } from 'lucide-react';
 
 type Props = {
@@ -33,7 +34,7 @@ export default async function TimetablePage({ params, searchParams }: Props) {
       {/* Header */}
       <div>
         <Link
-          href={`/school/${schoolSlug}/groups`}
+          href={wsHref(schoolSlug, 'groups')}
           className="inline-flex items-center gap-1 text-sm text-(--ssz-text-secondary) hover:text-(--ssz-text-primary) transition-colors mb-3"
         >
           <ChevronLeft className="size-3.5" aria-hidden="true" />

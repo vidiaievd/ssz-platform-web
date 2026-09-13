@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { WidgetCard } from './widget-card';
 import { WidgetEmptyState } from './widget-empty-state';
 import { TeacherWorkloadBar } from './teacher-workload-bar';
@@ -30,7 +31,7 @@ function TeacherWorkloadSkeleton() {
 }
 
 export function TeacherWorkloadWidget({ teacherWorkload, schoolSlug }: TeacherWorkloadWidgetProps) {
-  const timetableHref = `/school/${schoolSlug}/groups/timetable`;
+  const timetableHref = wsHref(schoolSlug, 'groups/timetable');
 
   if (teacherWorkload.status === 'unavailable') {
     return <TeacherWorkloadSkeleton />;

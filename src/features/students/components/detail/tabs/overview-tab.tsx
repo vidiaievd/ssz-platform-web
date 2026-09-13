@@ -11,6 +11,7 @@ import { ProgressBar } from "@/components/ui/progress";
 import { StatusChip } from "@/features/students/components/status-chip";
 import { SkillProfileCard } from "@/features/mastery";
 import type { StudentInSchool, MembershipDetail } from "@/features/students/types";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   student: StudentInSchool;
@@ -265,7 +266,7 @@ async function ActiveGroupsCard({
         {memberships.map((m) => (
           <li key={m.id}>
             <Link
-              href={`/school/${schoolSlug}/groups/${m.groupId}`}
+              href={wsHref(schoolSlug, `groups/${m.groupId}`)}
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-subtle transition-colors"
             >
               <span className="flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded-md bg-primary/10 text-[10px] font-bold text-primary leading-none text-center">

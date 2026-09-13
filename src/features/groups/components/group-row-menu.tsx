@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { archiveGroup, deleteGroup, duplicateGroup } from '../api/mutations';
 import type { GroupHealthRowVM } from '../types';
 
@@ -48,7 +49,7 @@ export function GroupRowMenu({ schoolId, schoolSlug, group }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [dialog, setDialog] = useState<Dialog>(null);
-  const detailHref = `/school/${schoolSlug}/groups/${group.id}`;
+  const detailHref = wsHref(schoolSlug, `groups/${group.id}`);
 
   const canDelete =
     (group.status === 'draft' || group.status === 'archived') && group.studentCount === 0;
@@ -58,7 +59,7 @@ export function GroupRowMenu({ schoolId, schoolSlug, group }: Props) {
       const result = await duplicateGroup(schoolId, group.id);
       if (result.ok && result.id) {
         toast.success(t('detail.duplicated'));
-        router.push(`/school/${schoolSlug}/groups/${result.id}`);
+        router.push(wsHref(schoolSlug, `groups/${result.id}`));
       } else {
         toast.error(t('detail.duplicateError'));
       }

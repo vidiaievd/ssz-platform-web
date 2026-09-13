@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type NudgeResult =
   | { success: true; nudged: number }
@@ -18,7 +19,7 @@ export async function nudgeAtRiskStudents(schoolSlug: string, schoolId: string):
       body: { scope: 'all-at-risk' },
     });
 
-    revalidatePath(`/school/${schoolSlug}/dashboard`);
+    revalidatePath(wsHref(schoolSlug, 'dashboard'));
 
     return { success: true, nudged: data.nudged };
   } catch (e) {

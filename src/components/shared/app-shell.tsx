@@ -32,6 +32,7 @@ import type { NotificationLinkContext } from '@/features/notifications';
 import { useReviewsSummary } from '@/features/learning/api/use-reviews-summary';
 import { useReviewQueueCount } from '@/features/review/api/use-review-queue';
 import { WorkspaceSwitcher, RoleBadge } from '@/features/workspaces';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { AlertBadge } from './topbar/alert-badge';
 import { GlobalSearchTrigger } from './topbar/global-search-trigger';
 import { TrialPill } from './topbar/trial-pill';
@@ -89,7 +90,7 @@ function buildSchoolNav(
 
   const mainItems = [
     {
-      href: `/school/${schoolSlug}/dashboard`,
+      href: wsHref(schoolSlug, 'dashboard'),
       icon: LayoutDashboard,
       labelKey: 'dashboard',
       disabled: disabled('dashboard'),
@@ -98,7 +99,7 @@ function buildSchoolNav(
     ...(review
       ? [
           {
-            href: `/school/${schoolSlug}/review`,
+            href: wsHref(schoolSlug, 'review'),
             icon: SquareCheckBig,
             labelKey: 'review',
             badge: review.pending,
@@ -113,34 +114,34 @@ function buildSchoolNav(
     ...(canOverseeReview
       ? [
           {
-            href: `/school/${schoolSlug}/review/oversight`,
+            href: wsHref(schoolSlug, 'review/oversight'),
             icon: Gauge,
             labelKey: 'reviewOversight',
           },
         ]
       : []),
     {
-      href: `/school/${schoolSlug}/content`,
+      href: wsHref(schoolSlug, 'content'),
       icon: BookOpen,
       labelKey: 'content',
       disabled: disabled('courses'),
     },
     {
-      href: `/school/${schoolSlug}/groups`,
+      href: wsHref(schoolSlug, 'groups'),
       icon: Layers,
       labelKey: 'groups',
       disabled: disabled('groups'),
       lockReason: 'Nav.locked.adminOnly',
     },
     {
-      href: `/school/${schoolSlug}/students`,
+      href: wsHref(schoolSlug, 'students'),
       icon: Users,
       labelKey: 'students',
       disabled: disabled('students'),
       lockReason: 'Nav.locked.adminOnly',
     },
     {
-      href: `/school/${schoolSlug}/teachers`,
+      href: wsHref(schoolSlug, 'teachers'),
       icon: GraduationCap,
       labelKey: 'teachers',
       disabled: disabled('teachers'),
@@ -149,7 +150,7 @@ function buildSchoolNav(
     ...(canSeeScheduling
       ? [
           {
-            href: `/school/${schoolSlug}/scheduling`,
+            href: wsHref(schoolSlug, 'scheduling'),
             icon: CalendarRange,
             labelKey: 'scheduling',
             disabled: disabled('scheduling'),
@@ -157,13 +158,13 @@ function buildSchoolNav(
         ]
       : []),
     {
-      href: `/school/${schoolSlug}/invitations`,
+      href: wsHref(schoolSlug, 'invitations'),
       icon: MailCheck,
       labelKey: 'invitations',
       disabled: disabled('invitations'),
     },
     {
-      href: `/school/${schoolSlug}/notifications`,
+      href: wsHref(schoolSlug, 'notifications'),
       icon: Bell,
       labelKey: 'notifications',
     },
@@ -174,7 +175,7 @@ function buildSchoolNav(
     {
       items: [
         {
-          href: `/school/${schoolSlug}/settings`,
+          href: wsHref(schoolSlug, 'settings'),
           icon: Settings,
           labelKey: 'settings',
           disabled: disabled('settings'),
@@ -327,7 +328,7 @@ export function AppShell({
 
   const notificationsHref =
     variant === 'school' && schoolContext
-      ? `/school/${schoolContext.school.slug}/notifications`
+      ? wsHref(schoolContext.school.slug, 'notifications')
       : variant === 'student'
         ? '/student/notifications'
         : undefined;

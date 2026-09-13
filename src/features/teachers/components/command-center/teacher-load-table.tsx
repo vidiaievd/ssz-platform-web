@@ -17,6 +17,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import type { TeacherLoadRow } from "../../types";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type TeacherLoadTableProps = {
   teachers: TeacherLoadRow[];
@@ -30,7 +31,7 @@ export function TeacherLoadTable({ teachers, onRemove }: TeacherLoadTableProps) 
   const params = useParams<{ locale: string; schoolSlug: string }>();
 
   function handleRowClick(teacherId: string) {
-    router.push(`/${params.locale}/school/${params.schoolSlug}/teachers/${teacherId}`);
+    router.push(`/${params.locale}${wsHref(params.schoolSlug, `teachers/${teacherId}`)}`);
   }
 
   if (!teachers.length) return null;

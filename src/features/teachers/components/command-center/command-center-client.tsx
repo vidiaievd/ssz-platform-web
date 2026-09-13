@@ -17,6 +17,7 @@ import { TeacherLoadTable } from "./teacher-load-table";
 import { PriorityQueue } from "./priority-queue";
 import { RoomUtilizationList } from "./room-utilization-list";
 import { AddTeacherModal } from "./add-teacher-modal";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type CommandCenterClientProps = {
   schoolId: string;
@@ -95,7 +96,7 @@ export function CommandCenterClient({
       {pendingTeacherInviteCount > 0 && (
         <PendingInvitesLink
           count={pendingTeacherInviteCount}
-          href={`/school/${schoolSlug}/invitations?audience=teachers`}
+          href={wsHref(schoolSlug, 'invitations?audience=teachers')}
         />
       )}
 

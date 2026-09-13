@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
 import { SettingsLayout } from '@/components/shared/settings-layout';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   children: React.ReactNode;
@@ -20,10 +21,10 @@ export default async function SchoolSettingsLayout({ children, params }: Props) 
   const t = await getTranslations('Settings');
 
   const nav = [
-    { href: `/school/${schoolSlug}/settings/profile`, label: t('nav.profile') },
-    { href: `/school/${schoolSlug}/settings/account`, label: t('nav.account') },
-    { href: `/school/${schoolSlug}/settings/notifications`, label: t('nav.notifications') },
-    { href: `/school/${schoolSlug}/settings/review`, label: t('nav.review') },
+    { href: wsHref(schoolSlug, 'settings/profile'), label: t('nav.profile') },
+    { href: wsHref(schoolSlug, 'settings/account'), label: t('nav.account') },
+    { href: wsHref(schoolSlug, 'settings/notifications'), label: t('nav.notifications') },
+    { href: wsHref(schoolSlug, 'settings/review'), label: t('nav.review') },
   ];
 
   return <SettingsLayout nav={nav}>{children}</SettingsLayout>;

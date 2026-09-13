@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { removeFromSchool } from "@/features/students/api/mutations";
 import { studentKeys } from "@/features/students/api/keys";
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   open: boolean;
@@ -50,7 +51,7 @@ export function RemoveFromSchoolDialog({
       if (result.ok) {
         queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         onClose();
-        router.push(`/school/${schoolSlug}/students`);
+        router.push(wsHref(schoolSlug, 'students'));
       } else {
         toast.error("Failed to remove from school. Please try again.");
       }

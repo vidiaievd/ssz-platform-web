@@ -43,6 +43,7 @@ import type {
   DifficultyLevel,
   Visibility,
 } from '@/features/content/types';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
@@ -594,7 +595,7 @@ function BlockRow({
       <span className="flex-1" />
       <RowTools visible={selected}>
         <Link
-          href={`/school/${schoolSlug}/content/${courseContainerId}/lessons/${item.id}`}
+          href={wsHref(schoolSlug, `content/${courseContainerId}/lessons/${item.id}`)}
           aria-label={t('structure.openLessonEditor')}
           onClick={(e) => e.stopPropagation()}
           className={TOOL_BUTTON}
@@ -731,7 +732,7 @@ function ModuleCard({
                     kind="item"
                     nodeTitle={item.title ?? ''}
                     onRename={isRenamableItem(item) ? () => rename.begin(item.id) : undefined}
-                    editorHref={`/school/${schoolSlug}/content/${mod.containerId}/lessons/${item.id}`}
+                    editorHref={wsHref(schoolSlug, `content/${mod.containerId}/lessons/${item.id}`)}
                     canMoveUp={index > 0}
                     canMoveDown={index < siblings.length - 1}
                     onMoveUp={() => onNudge(item.id, -1)}
@@ -1521,7 +1522,7 @@ export function CurriculumTree({
       if (!found) return;
       event.preventDefault();
       router.push(
-        `/school/${schoolSlug}/content/${found.moduleContainerId}/lessons/${found.item.id}`,
+        wsHref(schoolSlug, `content/${found.moduleContainerId}/lessons/${found.item.id}`),
       );
     }
   }

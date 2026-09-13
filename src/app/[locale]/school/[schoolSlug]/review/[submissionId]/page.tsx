@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { getSchoolBySlug } from '@/features/school/api/get-school-by-slug';
 import { SubmissionPanel } from '@/features/review/components/submission/submission-panel';
+import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   params: Promise<{ schoolSlug: string; submissionId: string; locale: string }>;
@@ -38,7 +39,7 @@ export default async function SubmissionPage({ params }: Props) {
   return (
     <main className="flex h-full min-h-0 flex-col">
       <Link
-        href={`/${locale}/school/${schoolSlug}/review`}
+        href={`/${locale}${wsHref(schoolSlug, 'review')}`}
         className="flex items-center gap-1.5 px-5 pt-4 text-[13px] font-semibold text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft aria-hidden className="h-4 w-4" />
