@@ -29,6 +29,26 @@
     "emptyFiltered": "No students match your search.",
     "backToStudents": "Back to students",
     "loadFailed": "Failed to load your students. Please try again.",
-    "matching": "{count, plural, =0 {none match} one {# match} other {# matches}}"
+    "matching": "{count, plural, =0 {none match} one {# match} other {# matches}}",
+    "groupCount": "{count, plural, =0 {no learners} one {# learner} other {# learners}}",
+    "groupEmpty": "Nobody in this group yet.",
+    "createGroup": {
+      "trigger": "New group",
+      "title": "New group",
+      "description": "A name, a course if it has one, and who is in it. You can change all of it later.",
+      "nameLabel": "Name",
+      "namePlaceholder": "Tuesday 19:00",
+      "courseLabel": "Course (optional)",
+      "coursePick": "Choose a course",
+      "courseClear": "Remove course",
+      "studentsLabel": "Students {count, plural, =0 {} other {(# selected)}}",
+      "studentsEmpty": "No students to add yet — invite someone first.",
+      "cancel": "Cancel",
+      "submit": "Create group",
+      "created": "Group “{name}” created.",
+      "createdPartly": "Group “{name}” created, but {count, plural, one {# student} other {# students}} could not be added.",
+      "forbidden": "You cannot create groups here.",
+      "failed": "Could not create the group. Please try again."
+    }
   }
 }

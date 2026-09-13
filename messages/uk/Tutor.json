@@ -29,6 +29,26 @@
     "emptyFiltered": "Під пошук ніхто не підходить.",
     "backToStudents": "До списку учнів",
     "loadFailed": "Не вдалося завантажити учнів. Спробуйте ще раз.",
-    "matching": "{count, plural, =0 {збігів немає} one {# збіг} few {# збіги} many {# збігів} other {# збігу}}"
+    "matching": "{count, plural, =0 {збігів немає} one {# збіг} few {# збіги} many {# збігів} other {# збігу}}",
+    "groupCount": "{count, plural, =0 {немає учнів} one {# учень} few {# учні} other {# учнів}}",
+    "groupEmpty": "У цій групі поки нікого немає.",
+    "createGroup": {
+      "trigger": "Нова група",
+      "title": "Нова група",
+      "description": "Назва, курс — якщо він є, і хто до неї входить. Усе можна змінити пізніше.",
+      "nameLabel": "Назва",
+      "namePlaceholder": "Вівторок 19:00",
+      "courseLabel": "Курс (необовʼязково)",
+      "coursePick": "Обрати курс",
+      "courseClear": "Прибрати курс",
+      "studentsLabel": "Учні {count, plural, =0 {} other {(обрано #)}}",
+      "studentsEmpty": "Поки нікого додати — спершу запросіть учня.",
+      "cancel": "Скасувати",
+      "submit": "Створити групу",
+      "created": "Групу «{name}» створено.",
+      "createdPartly": "Групу «{name}» створено, але {count, plural, one {# учня} few {# учнів} other {# учнів}} не вдалося додати.",
+      "forbidden": "Тут не можна створювати групи.",
+      "failed": "Не вдалося створити групу. Спробуйте ще раз."
+    }
   }
 }

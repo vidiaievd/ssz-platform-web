@@ -40,6 +40,7 @@ type RawStudentMember = {
     name: string;
     lang?: string;
     level?: string;
+    isDefault?: boolean;
     scheduleSummary?: string;
     teachers?: Array<{
       userId: string;
@@ -70,6 +71,7 @@ function mapGroupRef(g: NonNullable<RawStudentMember['groups']>[number]): Studen
     name: g.name,
     lang: (g.lang ?? 'en') as LangCode,
     level: (g.level ?? 'A1') as CEFR,
+    isDefault: g.isDefault ?? false,
     scheduleSummary: g.scheduleSummary,
     teachers: (g.teachers ?? []).map((t) => ({
       userId: t.userId,

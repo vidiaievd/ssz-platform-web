@@ -8,8 +8,11 @@ import type { Locale } from '@/lib/i18n/config';
 import { getTutorWorkspace } from '@/features/tutoring/api/get-tutor-workspace';
 import { wsHref } from '@/features/workspaces/lib/href';
 import { getStudents } from '@/features/students/api/queries';
-import { TutorStudentRow } from '@/features/tutoring/components/tutor-student-row';
 import { TutorStudentsSearch } from '@/features/tutoring/components/tutor-students-search';
+import { TutorRosterList } from '@/features/tutoring/components/tutor-roster-list';
+import type { RosterRow } from '@/features/tutoring/components/tutor-roster-list';
+import { CreateTutorGroupDialog } from '@/features/tutoring/components/create-tutor-group-dialog';
+import { splitRosterByGroup } from '@/features/tutoring/lib/roster-groups';
 
 type Props = {
   params: Promise<{ workspaceId: string; locale: string }>;
@@ -43,6 +46,15 @@ export async function TutorRoster({ params, searchParams }: Props) {
     : all;
   const invitationsHref = wsHref(workspaceId, 'invitations');
 
+  const { groups, solo } = splitRosterByGroup(students);
+  const toRow = (s: (typeof students)[number]): RosterRow => ({
+    student: s,
+    href: wsHref(workspaceId, `students/${s.userId}`),
+    lastSeenLabel: s.lastSeen
+      ? formatRelative(new Date(s.lastSeen), locale as Locale)
+      : t('neverSeen'),
+  });
+
   return (
     <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -56,12 +68,27 @@ export async function TutorRoster({ params, searchParams }: Props) {
           </p>
         </div>
 
-        <Button size="sm" asChild>
-          <Link href={invitationsHref}>
-            <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
-            {t('invite')}
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* A group is made from people who are already here, so the picker has nothing
+              to offer until somebody has accepted an invitation. */}
+          {all.length > 0 && (
+            <CreateTutorGroupDialog
+              workspaceId={workspace.schoolId}
+              candidates={all.map((s) => ({
+                userId: s.userId,
+                name: s.name,
+                email: s.email,
+                avatarUrl: s.avatarUrl ?? null,
+              }))}
+            />
+          )}
+          <Button size="sm" asChild>
+            <Link href={invitationsHref}>
+              <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
+              {t('invite')}
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <TutorStudentsSearch />
@@ -83,21 +110,17 @@ export async function TutorRoster({ params, searchParams }: Props) {
           )}
         </div>
       ) : (
-        <div className="space-y-1" role="list" aria-label={t('title')}>
-          {students.map((s) => (
-            <div key={s.userId} role="listitem">
-              <TutorStudentRow
-                student={s}
-                href={wsHref(workspaceId, `students/${s.userId}`)}
-                lastSeenLabel={
-                  s.lastSeen
-                    ? formatRelative(new Date(s.lastSeen), locale as Locale)
-                    : t('neverSeen')
-                }
-              />
-            </div>
-          ))}
-        </div>
+        <TutorRosterList
+          groups={groups.map((g) => ({
+            id: g.id,
+            name: g.name,
+            level: g.level,
+            scheduleSummary: g.scheduleSummary,
+            rows: g.students.map(toRow),
+          }))}
+          solo={solo.map(toRow)}
+          expandAll={Boolean(needle)}
+        />
       )}
     </main>
   );

@@ -29,6 +29,26 @@
     "emptyFiltered": "Ingen elever passer søket.",
     "backToStudents": "Tilbake til elevene",
     "loadFailed": "Kunne ikke laste elevene dine. Prøv igjen.",
-    "matching": "{count, plural, =0 {ingen treff} one {# treff} other {# treff}}"
+    "matching": "{count, plural, =0 {ingen treff} one {# treff} other {# treff}}",
+    "groupCount": "{count, plural, =0 {ingen elever} one {# elev} other {# elever}}",
+    "groupEmpty": "Ingen i denne gruppen ennå.",
+    "createGroup": {
+      "trigger": "Ny gruppe",
+      "title": "Ny gruppe",
+      "description": "Et navn, et kurs hvis gruppen har ett, og hvem som er med. Alt kan endres senere.",
+      "nameLabel": "Navn",
+      "namePlaceholder": "Tirsdag 19:00",
+      "courseLabel": "Kurs (valgfritt)",
+      "coursePick": "Velg kurs",
+      "courseClear": "Fjern kurs",
+      "studentsLabel": "Elever {count, plural, =0 {} other {(# valgt)}}",
+      "studentsEmpty": "Ingen elever å legge til ennå — inviter noen først.",
+      "cancel": "Avbryt",
+      "submit": "Opprett gruppe",
+      "created": "Gruppen «{name}» er opprettet.",
+      "createdPartly": "Gruppen «{name}» er opprettet, men {count, plural, one {# elev} other {# elever}} kunne ikke legges til.",
+      "forbidden": "Du kan ikke opprette grupper her.",
+      "failed": "Kunne ikke opprette gruppen. Prøv igjen."
+    }
   }
 }
