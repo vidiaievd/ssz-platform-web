@@ -75,12 +75,12 @@ type Props = {
   group: Group;
   canManage: boolean;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
-export function OverviewCards({ group, canManage, schoolId, schoolSlug }: Props) {
+export function OverviewCards({ group, canManage, schoolId, workspaceId }: Props) {
   const t = useTranslations('Groups');
-  const detailBase = wsHref(schoolSlug, `groups/${group.id}`);
+  const detailBase = wsHref(workspaceId, `groups/${group.id}`);
 
   const modeLabel = group.mode === 'online' ? t('row.online') : t('row.inPerson');
   const hours = weeklyHours(group.slots);

@@ -45,12 +45,12 @@ const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 type Props = {
   group: Group;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function GroupEditDialog({ group, schoolId, schoolSlug, open, onOpenChange }: Props) {
+export function GroupEditDialog({ group, schoolId, workspaceId, open, onOpenChange }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -58,7 +58,7 @@ export function GroupEditDialog({ group, schoolId, schoolSlug, open, onOpenChang
   const [courseName, setCourseName] = useState(group.courseName ?? null);
   const [slots, setSlots] = useState<DraftSlot[]>(() => group.slots.map(toDraftSlot));
   const [slotsDirty, setSlotsDirty] = useState(false);
-  const { data: offeredAgeBands } = useSchoolAgeBands(schoolSlug);
+  const { data: offeredAgeBands } = useSchoolAgeBands(workspaceId);
 
   const {
     register,

@@ -5,12 +5,11 @@ import { useParams } from 'next/navigation';
 /**
  * The workspace the current screen stands in, as its address spells it.
  *
- * Components must not care which tree they were rendered from: while the move is under
- * way the same screen can arrive as `/w/<workspaceId>/…` or, for a section that has not
- * moved yet, as `/school/<slug>/…`. Both are the segment `wsHref` wants back, so this
- * returns whichever the route provided.
+ * A component has no business knowing which route rendered it, and after the move there
+ * is only one that can: every staff screen lives under `/w/<workspaceId>/…`, and the old
+ * tree is a redirect with nothing under it.
  */
 export function useWorkspaceRef(): string {
-  const params = useParams<{ workspaceId?: string; schoolSlug?: string }>();
-  return params.workspaceId ?? params.schoolSlug ?? '';
+  const params = useParams<{ workspaceId?: string }>();
+  return params.workspaceId ?? '';
 }

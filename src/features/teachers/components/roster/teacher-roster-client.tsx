@@ -30,7 +30,7 @@ import type { TeacherRosterRow, RosterStatus } from "../../types";
 
 type Props = {
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   teachers: TeacherRosterRow[];
 };
 
@@ -48,7 +48,7 @@ function StatusBadge({ status }: { status: RosterStatus }) {
   );
 }
 
-export function TeacherRosterClient({ schoolId, schoolSlug, teachers }: Props) {
+export function TeacherRosterClient({ schoolId, workspaceId, teachers }: Props) {
   const t = useTranslations("Teachers.roster");
   const router = useRouter();
   const [addOpen, setAddOpen] = useState(false);
@@ -77,7 +77,7 @@ export function TeacherRosterClient({ schoolId, schoolSlug, teachers }: Props) {
   return (
     <main className="p-4 sm:p-6 space-y-5">
       {/* Pending invitations badge (non-blocking — loads after first paint) */}
-      <PendingInvitesBadge schoolId={schoolId} schoolSlug={schoolSlug} role="TEACHER" />
+      <PendingInvitesBadge schoolId={schoolId} workspaceId={workspaceId} role="TEACHER" />
 
       {/* Header */}
       <div className="flex items-center justify-between gap-3">

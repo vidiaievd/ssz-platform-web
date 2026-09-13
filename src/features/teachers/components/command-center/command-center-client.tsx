@@ -21,7 +21,7 @@ import { wsHref } from '@/features/workspaces/lib/href';
 
 type CommandCenterClientProps = {
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   isHybrid: boolean;
   initial: CommandCenterResponse;
   pendingTeacherInviteCount?: number;
@@ -29,7 +29,7 @@ type CommandCenterClientProps = {
 
 export function CommandCenterClient({
   schoolId,
-  schoolSlug,
+  workspaceId,
   isHybrid,
   initial,
   pendingTeacherInviteCount = 0,
@@ -96,7 +96,7 @@ export function CommandCenterClient({
       {pendingTeacherInviteCount > 0 && (
         <PendingInvitesLink
           count={pendingTeacherInviteCount}
-          href={wsHref(schoolSlug, 'invitations?audience=teachers')}
+          href={wsHref(workspaceId, 'invitations?audience=teachers')}
         />
       )}
 

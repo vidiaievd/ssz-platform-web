@@ -22,7 +22,7 @@ type Props = {
   studentId: string;
   studentName: string;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   currentRole: MembershipRole;
   onTransfer: () => void;
   onRemove: () => void;
@@ -31,7 +31,7 @@ type Props = {
 export function MembershipRowKebab({
   groupId,
   groupName,
-  schoolSlug,
+  workspaceId,
   onTransfer,
   onRemove,
 }: Props) {
@@ -52,7 +52,7 @@ export function MembershipRowKebab({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuItem asChild>
-          <a href={wsHref(schoolSlug, `groups/${groupId}`)} target="_blank" rel="noreferrer">
+          <a href={wsHref(workspaceId, `groups/${groupId}`)} target="_blank" rel="noreferrer">
             <ExternalLink className="mr-2 h-4 w-4" />
             {t("detail.groups.actions.view")}
           </a>

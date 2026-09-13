@@ -40,14 +40,14 @@ type TeacherMeta = {
 
 type Props = {
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   locale: string;
   teachers: TeacherMeta[];
   timetable: TimetableTeacher[];
   students: StudentCandidate[];
 };
 
-export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timetable, students: initialStudents }: Props) {
+export function GroupCreateFlow({ schoolId, workspaceId, locale, teachers, timetable, students: initialStudents }: Props) {
   const router = useRouter();
   const { data: students } = useSchoolStudents(schoolId, { initialData: initialStudents });
   const [isPending, startTransition] = useTransition();
@@ -70,7 +70,7 @@ export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timeta
 
   function handleBack() {
     if (currentStep > 0) setStep(currentStep - 1);
-    else router.push(`/${locale}${wsHref(schoolSlug, 'groups')}`);
+    else router.push(`/${locale}${wsHref(workspaceId, 'groups')}`);
   }
 
   function handleContinue() {
@@ -134,7 +134,7 @@ export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timeta
 
         toast.success('Group created as draft');
         reset(schoolId);
-        router.push(`/${locale}${wsHref(schoolSlug, `groups/${groupId}`)}`);
+        router.push(`/${locale}${wsHref(workspaceId, `groups/${groupId}`)}`);
       } catch {
         setSubmitError('An unexpected error occurred. Please try again.');
         setSubmitting(false);
@@ -159,7 +159,7 @@ export function GroupCreateFlow({ schoolId, schoolSlug, locale, teachers, timeta
       {/* Step content */}
       <div className={cn('min-h-[320px]', isPending && 'opacity-50 pointer-events-none')}>
         {currentStep === 0 && <StepCourse />}
-        {currentStep === 1 && <StepDetails schoolSlug={schoolSlug} />}
+        {currentStep === 1 && <StepDetails workspaceId={workspaceId} />}
         {currentStep === 2 && <StepSchedule />}
         {currentStep === 3 && <StepTeachers teachers={teachers} timetable={timetable} />}
         {currentStep === 4 && <StepStudents students={students} />}

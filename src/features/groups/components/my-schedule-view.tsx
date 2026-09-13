@@ -6,10 +6,10 @@ import type { TimetableTeacher } from '../types';
 
 type Props = {
   teacher: TimetableTeacher;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
-export async function MyScheduleView({ teacher, schoolSlug }: Props) {
+export async function MyScheduleView({ teacher, workspaceId }: Props) {
   const t = await getTranslations('Groups.mySchedule');
   const { hours, max, groups, conflicts, lessons } = teacher;
 
@@ -33,7 +33,7 @@ export async function MyScheduleView({ teacher, schoolSlug }: Props) {
         </div>
       ) : (
         <div className="rounded-lg border border-border bg-card p-4 overflow-x-auto">
-          <TimetableGrid teacher={teacher} schoolSlug={schoolSlug} />
+          <TimetableGrid teacher={teacher} workspaceId={workspaceId} />
         </div>
       )}
     </div>

@@ -38,7 +38,7 @@ type Props = {
   alerts: Alert[];
   /** Real school id (UUID) — every mutation below takes this. */
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   canManage: boolean;
   /** May this viewer see named learners' results — the heatmap inside the Progress tab. */
   canSeePersonalResults: boolean;
@@ -55,7 +55,7 @@ export function GroupTabs({
   materialsSlot,
   alerts,
   schoolId,
-  schoolSlug,
+  workspaceId,
   canManage,
   canSeePersonalResults,
 }: Props) {
@@ -78,7 +78,7 @@ export function GroupTabs({
     router.replace(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false });
   }
 
-  const detailBase = wsHref(schoolSlug, `groups/${group.id}`);
+  const detailBase = wsHref(workspaceId, `groups/${group.id}`);
   const assignTeacherHref = `${detailBase}/assign-teacher`;
   const addStudentsHref   = `${detailBase}/add-students`;
 
@@ -144,7 +144,7 @@ export function GroupTabs({
             group={group}
             canManage={canManage}
             schoolId={schoolId}
-            schoolSlug={schoolSlug}
+            workspaceId={workspaceId}
           />
         </div>
       </TabsContent>
@@ -155,7 +155,7 @@ export function GroupTabs({
           roster={roster}
           group={group}
           schoolId={schoolId}
-          schoolSlug={schoolSlug}
+          workspaceId={workspaceId}
           addStudentsHref={addStudentsHref}
         />
       </TabsContent>
@@ -197,7 +197,7 @@ export function GroupTabs({
           <GroupProgressTab
             schoolId={schoolId}
             groupId={group.id}
-            schoolSlug={schoolSlug}
+            workspaceId={workspaceId}
             canSeePersonalResults={canSeePersonalResults}
           />
         )}
@@ -207,7 +207,7 @@ export function GroupTabs({
       <GroupEditDialog
         group={group}
         schoolId={schoolId}
-        schoolSlug={schoolSlug}
+        workspaceId={workspaceId}
         open={editScheduleOpen}
         onOpenChange={setEditScheduleOpen}
       />

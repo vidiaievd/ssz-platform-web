@@ -10,7 +10,7 @@ import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   role?: InvitationRole;
 };
 
@@ -23,7 +23,7 @@ async function fetchPendingCount(schoolId: string, role?: InvitationRole): Promi
   return data.count;
 }
 
-export function PendingInvitesBadge({ schoolId, schoolSlug, role }: Props) {
+export function PendingInvitesBadge({ schoolId, workspaceId, role }: Props) {
   const t = useTranslations("Invitations.pendingLink");
 
   const { data: count = 0 } = useQuery({
@@ -35,7 +35,7 @@ export function PendingInvitesBadge({ schoolId, schoolSlug, role }: Props) {
   if (count === 0) return null;
 
   const audience = role === "TEACHER" ? "teachers" : role === "STUDENT" ? "students" : undefined;
-  const href = wsHref(schoolSlug, `invitations${audience ? `?audience=${audience}` : ""}`);
+  const href = wsHref(workspaceId, `invitations${audience ? `?audience=${audience}` : ""}`);
   const label = count === 1 ? t("singular") : t("plural", { count });
 
   return (

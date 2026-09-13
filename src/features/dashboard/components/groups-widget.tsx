@@ -12,7 +12,7 @@ import type { DashboardRole, WidgetData, GroupsHealthData } from '../types';
 type GroupsWidgetProps = {
   groupsHealth: WidgetData<GroupsHealthData>;
   role: DashboardRole;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
 function GroupsWidgetSkeleton() {
@@ -33,8 +33,8 @@ function GroupsWidgetSkeleton() {
   );
 }
 
-export function GroupsWidget({ groupsHealth, role, schoolSlug }: GroupsWidgetProps) {
-  const groupsHref = wsHref(schoolSlug, 'groups');
+export function GroupsWidget({ groupsHealth, role, workspaceId }: GroupsWidgetProps) {
+  const groupsHref = wsHref(workspaceId, 'groups');
   const isTeacher = role === 'teacher';
 
   if (groupsHealth.status === 'unavailable') {
@@ -87,7 +87,7 @@ export function GroupsWidget({ groupsHealth, role, schoolSlug }: GroupsWidgetPro
         <>
           <ul className="divide-y divide-border">
             {(isTeacher ? groups : attentionGroups).map((group) => (
-              <GroupHealthRow key={group.id} group={group} schoolSlug={schoolSlug} />
+              <GroupHealthRow key={group.id} group={group} workspaceId={workspaceId} />
             ))}
           </ul>
 

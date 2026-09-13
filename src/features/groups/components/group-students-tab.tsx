@@ -32,11 +32,11 @@ type Props = {
   roster: RosterStudent[];
   group: Pick<Group, 'id' | 'capacity' | 'studentCount'>;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   addStudentsHref: string;
 };
 
-export function GroupStudentsTab({ roster, group, schoolId, schoolSlug, addStudentsHref }: Props) {
+export function GroupStudentsTab({ roster, group, schoolId, workspaceId, addStudentsHref }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [query, setQuery] = useState('');
@@ -149,7 +149,7 @@ export function GroupStudentsTab({ roster, group, schoolId, schoolSlug, addStude
                 return (
                   <TableRow
                     key={student.userId}
-                    onClick={() => router.push(wsHref(schoolSlug, `students/${student.userId}`))}
+                    onClick={() => router.push(wsHref(workspaceId, `students/${student.userId}`))}
                     className={cn('cursor-pointer', isRemoving && 'opacity-50')}
                   >
                     <TableCell className="py-2.75">

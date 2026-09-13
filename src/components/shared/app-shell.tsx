@@ -62,7 +62,7 @@ const REVIEW_OVERSIGHT_ROLES = new Set<SchoolRole>(['OWNER', 'ADMIN', 'MANAGER']
 type ReviewNav = { pending: number; hasOverdue: boolean } | null;
 
 function buildSchoolNav(
-  schoolSlug: string,
+  workspaceId: string,
   schoolCtx?: SchoolContext,
   review: ReviewNav = null,
 ): NavSection[] {
@@ -90,7 +90,7 @@ function buildSchoolNav(
 
   const mainItems = [
     {
-      href: wsHref(schoolSlug, 'dashboard'),
+      href: wsHref(workspaceId, 'dashboard'),
       icon: LayoutDashboard,
       labelKey: 'dashboard',
       disabled: disabled('dashboard'),
@@ -99,7 +99,7 @@ function buildSchoolNav(
     ...(review
       ? [
           {
-            href: wsHref(schoolSlug, 'review'),
+            href: wsHref(workspaceId, 'review'),
             icon: SquareCheckBig,
             labelKey: 'review',
             badge: review.pending,
@@ -114,34 +114,34 @@ function buildSchoolNav(
     ...(canOverseeReview
       ? [
           {
-            href: wsHref(schoolSlug, 'review/oversight'),
+            href: wsHref(workspaceId, 'review/oversight'),
             icon: Gauge,
             labelKey: 'reviewOversight',
           },
         ]
       : []),
     {
-      href: wsHref(schoolSlug, 'content'),
+      href: wsHref(workspaceId, 'content'),
       icon: BookOpen,
       labelKey: 'content',
       disabled: disabled('courses'),
     },
     {
-      href: wsHref(schoolSlug, 'groups'),
+      href: wsHref(workspaceId, 'groups'),
       icon: Layers,
       labelKey: 'groups',
       disabled: disabled('groups'),
       lockReason: 'Nav.locked.adminOnly',
     },
     {
-      href: wsHref(schoolSlug, 'students'),
+      href: wsHref(workspaceId, 'students'),
       icon: Users,
       labelKey: 'students',
       disabled: disabled('students'),
       lockReason: 'Nav.locked.adminOnly',
     },
     {
-      href: wsHref(schoolSlug, 'teachers'),
+      href: wsHref(workspaceId, 'teachers'),
       icon: GraduationCap,
       labelKey: 'teachers',
       disabled: disabled('teachers'),
@@ -150,7 +150,7 @@ function buildSchoolNav(
     ...(canSeeScheduling
       ? [
           {
-            href: wsHref(schoolSlug, 'scheduling'),
+            href: wsHref(workspaceId, 'scheduling'),
             icon: CalendarRange,
             labelKey: 'scheduling',
             disabled: disabled('scheduling'),
@@ -158,13 +158,13 @@ function buildSchoolNav(
         ]
       : []),
     {
-      href: wsHref(schoolSlug, 'invitations'),
+      href: wsHref(workspaceId, 'invitations'),
       icon: MailCheck,
       labelKey: 'invitations',
       disabled: disabled('invitations'),
     },
     {
-      href: wsHref(schoolSlug, 'notifications'),
+      href: wsHref(workspaceId, 'notifications'),
       icon: Bell,
       labelKey: 'notifications',
     },
@@ -175,7 +175,7 @@ function buildSchoolNav(
     {
       items: [
         {
-          href: wsHref(schoolSlug, 'settings'),
+          href: wsHref(workspaceId, 'settings'),
           icon: Settings,
           labelKey: 'settings',
           disabled: disabled('settings'),
@@ -270,10 +270,8 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const params = useParams<{ workspaceId?: string; schoolSlug?: string; userId?: string }>();
-  // The same shell is reached from both trees while the move is under way: `/w/<id>/…`
-  // for the sections that have moved, `/school/<slug>/…` for those that have not.
-  const workspaceSegment = params.workspaceId ?? params.schoolSlug ?? '';
+  const params = useParams<{ workspaceId?: string; userId?: string }>();
+  const workspaceSegment = params.workspaceId ?? '';
   const tNav = useTranslations('Nav');
 
   const { data: reviewsSummary } = useReviewsSummary({ enabled: variant === 'student' });
@@ -339,7 +337,7 @@ export function AppShell({
 
   const notificationsLinkContext: NotificationLinkContext =
     variant === 'school'
-      ? { workspaceKind: 'school', schoolSlug: schoolContext?.school.slug }
+      ? { workspaceKind: 'school', workspaceId: schoolContext?.school.slug }
       : { workspaceKind: 'student' };
 
   const notificationsHref =

@@ -15,7 +15,7 @@ import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   student: StudentInSchool;
-  schoolSlug: string;
+  workspaceId: string;
   schoolId: string;
   canEdit: boolean;
   groupsHref: string;
@@ -42,7 +42,7 @@ function CopyButton({ value }: { value: string }) {
 
 export async function OverviewTab({
   student,
-  schoolSlug,
+  workspaceId,
   canEdit,
   groupsHref,
   showGroups = true,
@@ -156,7 +156,7 @@ export async function OverviewTab({
         {showGroups && (
           <ActiveGroupsCard
             memberships={activeMemberships}
-            schoolSlug={schoolSlug}
+            workspaceId={workspaceId}
             groupsHref={groupsHref}
             t={t}
           />
@@ -235,12 +235,12 @@ export async function OverviewTab({
 
 async function ActiveGroupsCard({
   memberships,
-  schoolSlug,
+  workspaceId,
   groupsHref,
   t,
 }: {
   memberships: MembershipDetail[];
-  schoolSlug: string;
+  workspaceId: string;
   groupsHref: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any;
@@ -266,7 +266,7 @@ async function ActiveGroupsCard({
         {memberships.map((m) => (
           <li key={m.id}>
             <Link
-              href={wsHref(schoolSlug, `groups/${m.groupId}`)}
+              href={wsHref(workspaceId, `groups/${m.groupId}`)}
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-subtle transition-colors"
             >
               <span className="flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded-md bg-primary/10 text-[10px] font-bold text-primary leading-none text-center">

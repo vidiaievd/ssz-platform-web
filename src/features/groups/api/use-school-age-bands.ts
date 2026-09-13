@@ -9,11 +9,11 @@ import type { AgeBand } from '../types';
  * Which age bands a school offers, gating the age-band selector on the
  * group create wizard and edit dialog (configured in onboarding settings).
  */
-export function useSchoolAgeBands(schoolSlug: string) {
+export function useSchoolAgeBands(workspaceId: string) {
   return useQuery<AgeBand[]>({
-    queryKey: groupKeys.onboardingSettings(schoolSlug),
+    queryKey: groupKeys.onboardingSettings(workspaceId),
     queryFn: async () => {
-      const res = await fetch(`/api/enrollment/schools/${schoolSlug}/settings`);
+      const res = await fetch(`/api/enrollment/schools/${workspaceId}/settings`);
       if (!res.ok) throw new Error('Failed to fetch onboarding settings');
       const data: { ageBands: { values: AgeBand[] } } = await res.json();
       return data.ageBands.values;

@@ -14,11 +14,11 @@ import type { StudentsListResult, SegmentKey } from '@/features/students/types';
 
 type Props = {
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   initial: StudentsListResult;
 };
 
-export function StudentsRosterClient({ schoolId, schoolSlug, initial }: Props) {
+export function StudentsRosterClient({ schoolId, workspaceId, initial }: Props) {
   const t = useTranslations('Students');
   const searchParams = useSearchParams();
   const q = searchParams.get('q') ?? '';
@@ -112,7 +112,7 @@ export function StudentsRosterClient({ schoolId, schoolSlug, initial }: Props) {
       ) : (
         <StudentsList
           students={students}
-          schoolSlug={schoolSlug}
+          workspaceId={workspaceId}
           activeSegment={activeSegment}
           search={q}
         />

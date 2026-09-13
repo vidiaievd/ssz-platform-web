@@ -22,19 +22,19 @@ import type { Group } from '../types';
 type Props = {
   group: Group;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
 type Dialog = 'archive' | 'delete' | null;
 
-export function GroupDetailActions({ group, schoolId, schoolSlug }: Props) {
+export function GroupDetailActions({ group, schoolId, workspaceId }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [editOpen, setEditOpen] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
 
-  const listHref = wsHref(schoolSlug, 'groups');
+  const listHref = wsHref(workspaceId, 'groups');
 
   const canDelete =
     (group.status === 'draft' || group.status === 'archived') && group.studentCount === 0;
@@ -44,7 +44,7 @@ export function GroupDetailActions({ group, schoolId, schoolSlug }: Props) {
       const result = await duplicateGroup(schoolId, group.id);
       if (result.ok && result.id) {
         toast.success(t('detail.duplicated'));
-        router.push(wsHref(schoolSlug, `groups/${result.id}`));
+        router.push(wsHref(workspaceId, `groups/${result.id}`));
       } else {
         toast.error(t('detail.duplicateError'));
       }
@@ -149,7 +149,7 @@ export function GroupDetailActions({ group, schoolId, schoolSlug }: Props) {
       <GroupEditDialog
         group={group}
         schoolId={schoolId}
-        schoolSlug={schoolSlug}
+        workspaceId={workspaceId}
         open={editOpen}
         onOpenChange={setEditOpen}
       />

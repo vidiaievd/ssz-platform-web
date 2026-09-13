@@ -40,12 +40,12 @@ const STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 export function GroupProgressTab({
   schoolId,
   groupId,
-  schoolSlug,
+  workspaceId,
   canSeePersonalResults,
 }: {
   schoolId: string;
   groupId: string;
-  schoolSlug: string;
+  workspaceId: string;
   /** False for a scheduler: the heatmap carries named results and they have no use for them. */
   canSeePersonalResults: boolean;
 }) {
@@ -75,7 +75,7 @@ export function GroupProgressTab({
     <Progress
       data={data}
       schoolId={schoolId}
-      schoolSlug={schoolSlug}
+      workspaceId={workspaceId}
       groupId={groupId}
       canSeePersonalResults={canSeePersonalResults}
     />
@@ -85,13 +85,13 @@ export function GroupProgressTab({
 function Progress({
   data,
   schoolId,
-  schoolSlug,
+  workspaceId,
   groupId,
   canSeePersonalResults,
 }: {
   data: GroupProgress;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   groupId: string;
   canSeePersonalResults: boolean;
 }) {
@@ -107,7 +107,7 @@ function Progress({
   const [now] = useState(() => Date.now());
 
   const picture = pictureOf(data);
-  const groupHref = wsHref(schoolSlug, `groups/${groupId}`);
+  const groupHref = wsHref(workspaceId, `groups/${groupId}`);
 
   if (picture === 'noCourse') {
     return (
@@ -267,7 +267,7 @@ function Progress({
       {canSeePersonalResults && picture !== 'noLessons' && (
         <HeatmapPanel
           schoolId={schoolId}
-          schoolSlug={schoolSlug}
+          workspaceId={workspaceId}
           groupId={groupId}
           legend={legend}
         />
@@ -508,12 +508,12 @@ function Empty({
  */
 function HeatmapPanel({
   schoolId,
-  schoolSlug,
+  workspaceId,
   groupId,
   legend,
 }: {
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   groupId: string;
   legend: LegendItem[];
 }) {
@@ -568,7 +568,7 @@ function HeatmapPanel({
     if (!cell || !isMeasured(cell.state)) return null;
     // The group travels with the link: a learner in three groups has three sets of
     // numbers, and the one worth opening is the one whose cell was clicked.
-    return wsHref(schoolSlug, `students/${row.studentId}?tab=mastery&group=${groupId}&unit=${unit.unitId}`);
+    return wsHref(workspaceId, `students/${row.studentId}?tab=mastery&group=${groupId}&unit=${unit.unitId}`);
   };
 
   return (

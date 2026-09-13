@@ -11,7 +11,7 @@ const searchParamsStore = new URLSearchParams();
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push }),
-  usePathname: () => '/school/greenwood/notifications',
+  usePathname: () => '/w/greenwood/notifications',
   useSearchParams: () => searchParamsStore,
 }));
 
@@ -71,7 +71,7 @@ describe('NotificationsPage', () => {
   it('renders a rich ENROLLMENT_REQUEST row with the student name, not the raw enum', async () => {
     mockListResponse([ENROLLMENT_REQUEST]);
 
-    renderWithProviders(<NotificationsPage linkContext={{ workspaceKind: 'school', schoolSlug: 'greenwood' }} locale="en" />);
+    renderWithProviders(<NotificationsPage linkContext={{ workspaceKind: 'school', workspaceId: 'greenwood' }} locale="en" />);
 
     expect(await screen.findByText(/Maria Hansen/)).toBeInTheDocument();
     expect(screen.queryByText('ENROLLMENT_REQUEST')).not.toBeInTheDocument();
@@ -89,12 +89,12 @@ describe('NotificationsPage', () => {
     mockListResponse([ENROLLMENT_REQUEST]);
     const user = userEvent.setup();
 
-    renderWithProviders(<NotificationsPage linkContext={{ workspaceKind: 'school', schoolSlug: 'greenwood' }} locale="en" />);
+    renderWithProviders(<NotificationsPage linkContext={{ workspaceKind: 'school', workspaceId: 'greenwood' }} locale="en" />);
 
     const row = await screen.findByRole('article', { name: /Maria Hansen/ });
     await user.click(within(row).getByText(/Maria Hansen/));
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/school/greenwood/enrollment/requests'));
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/w/greenwood/enrollment/requests'));
   });
 
   it('approves an enrollment request inline and archives the notification on success', async () => {
@@ -102,7 +102,7 @@ describe('NotificationsPage', () => {
     const user = userEvent.setup();
 
     renderWithProviders(
-      <NotificationsPage linkContext={{ workspaceKind: 'school', schoolSlug: 'greenwood' }} locale="en" />,
+      <NotificationsPage linkContext={{ workspaceKind: 'school', workspaceId: 'greenwood' }} locale="en" />,
     );
 
     const row = await screen.findByRole('article', { name: /Maria Hansen/ });

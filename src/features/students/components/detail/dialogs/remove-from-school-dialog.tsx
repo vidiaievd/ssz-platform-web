@@ -26,7 +26,7 @@ type Props = {
   studentId: string;
   studentName: string;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   activeGroupCount: number;
   onClose: () => void;
 };
@@ -36,7 +36,7 @@ export function RemoveFromSchoolDialog({
   studentId,
   studentName,
   schoolId,
-  schoolSlug,
+  workspaceId,
   activeGroupCount,
   onClose,
 }: Props) {
@@ -51,7 +51,7 @@ export function RemoveFromSchoolDialog({
       if (result.ok) {
         queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         onClose();
-        router.push(wsHref(schoolSlug, 'students'));
+        router.push(wsHref(workspaceId, 'students'));
       } else {
         toast.error("Failed to remove from school. Please try again.");
       }

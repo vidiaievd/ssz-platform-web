@@ -4,13 +4,15 @@ import { buildHref, wsHref, WORKSPACE_ROUTES } from './href';
 
 describe('wsHref', () => {
   it('addresses a screen inside a workspace', () => {
-    expect(wsHref('nordick', 'groups')).toBe('/school/nordick/groups');
+    expect(wsHref('ws-1', 'groups')).toBe('/w/ws-1/groups');
+    expect(wsHref('ws-1', 'content/c-1/lessons/l-2')).toBe('/w/ws-1/content/c-1/lessons/l-2');
   });
 
-  it('sends a section that has moved to its workspace address', () => {
-    expect(WORKSPACE_ROUTES.has('content')).toBe(true);
-    expect(wsHref('ws-1', 'content')).toBe('/w/ws-1/content');
-    expect(wsHref('ws-1', 'content/c-1/lessons/l-2')).toBe('/w/ws-1/content/c-1/lessons/l-2');
+  it('leaves a section nobody has moved where it is', () => {
+    // Every staff section has moved; a path that names none of them is not one of ours,
+    // and inventing `/w/…` for it would point at a route that does not exist.
+    expect(WORKSPACE_ROUTES.has('catalogue')).toBe(false);
+    expect(wsHref('nordick', 'catalogue')).toBe('/school/nordick/catalogue');
   });
 
   it('does not mistake a section for another whose name it starts with', () => {
@@ -19,33 +21,31 @@ describe('wsHref', () => {
   });
 
   it('gives the workspace root when asked for no screen', () => {
-    expect(wsHref('nordick')).toBe('/school/nordick');
+    expect(wsHref('ws-1')).toBe('/w/ws-1');
   });
 
   it('keeps query strings and nested segments intact', () => {
-    expect(wsHref('nordick', 'review?course=abc&type=writing_task')).toBe(
-      '/school/nordick/review?course=abc&type=writing_task',
+    expect(wsHref('ws-1', 'review?course=abc&type=writing_task')).toBe(
+      '/w/ws-1/review?course=abc&type=writing_task',
     );
-    expect(wsHref('nordick', 'students/s-1?tab=mastery')).toBe(
-      '/school/nordick/students/s-1?tab=mastery',
-    );
+    expect(wsHref('ws-1', 'students/s-1?tab=mastery')).toBe('/w/ws-1/students/s-1?tab=mastery');
   });
 
   it('does not double the separator when the caller writes a leading slash', () => {
-    expect(wsHref('nordick', '/groups')).toBe('/school/nordick/groups');
+    expect(wsHref('ws-1', '/groups')).toBe('/w/ws-1/groups');
   });
 
-  it('prefers the slug over the id while the old routes are the real ones', () => {
-    expect(wsHref({ id: 'ws-1', slug: 'nordick' })).toBe('/school/nordick');
-    // A solo workspace has no slug to prefer, and it is addressed by id even today.
-    expect(wsHref({ id: 'ws-1', slug: null })).toBe('/school/ws-1');
-  });
-
-  it('leaves every section that has not moved where it is', () => {
-    for (const section of ['groups', 'students', 'review', 'settings', 'dashboard']) {
-      expect(WORKSPACE_ROUTES.has(section)).toBe(false);
-      expect(wsHref('nordick', section)).toBe(`/school/nordick/${section}`);
+  it('addresses every staff section by workspace', () => {
+    for (const section of ['content', 'groups', 'students', 'review', 'settings', 'dashboard']) {
+      expect(WORKSPACE_ROUTES.has(section)).toBe(true);
+      expect(wsHref('ws-1', section)).toBe(`/w/ws-1/${section}`);
     }
+  });
+
+  it('takes the id over the slug now that the workspace is the address', () => {
+    expect(wsHref({ id: 'ws-1', slug: 'nordick' }, 'groups')).toBe('/w/ws-1/groups');
+    // A solo workspace has no slug at all — it was never addressable by one.
+    expect(wsHref({ id: 'ws-1', slug: null }, 'groups')).toBe('/w/ws-1/groups');
   });
 
   it('addresses a screen by workspace id once the routes are switched on', () => {

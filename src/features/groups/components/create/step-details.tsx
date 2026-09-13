@@ -21,13 +21,13 @@ const AGE_BAND_LABEL: Record<AgeBand, string> = {
 };
 
 type Props = {
-  schoolSlug: string;
+  workspaceId: string;
 };
 
-export function StepDetails({ schoolSlug }: Props) {
+export function StepDetails({ workspaceId }: Props) {
   const { name, lang, level, mode, capacity, startDate, endDate, ageBand, setField } =
     useGroupCreateWizardStore();
-  const { data: offeredAgeBands } = useSchoolAgeBands(schoolSlug);
+  const { data: offeredAgeBands } = useSchoolAgeBands(workspaceId);
 
   const capError =
     capacity.min < 0

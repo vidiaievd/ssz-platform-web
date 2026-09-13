@@ -34,8 +34,8 @@ describe('notification-registry', () => {
     const entry = getNotificationEntry('ENROLLMENT_REQUEST');
 
     expect(entry.actionable).toBe(true);
-    expect(entry.getLink(undefined, { workspaceKind: 'school', schoolSlug: 'greenwood' })).toBe(
-      '/school/greenwood/enrollment/requests',
+    expect(entry.getLink(undefined, { workspaceKind: 'school', workspaceId: 'greenwood' })).toBe(
+      '/w/greenwood/enrollment/requests',
     );
     expect(entry.getLink(undefined, { workspaceKind: 'student' })).toBeUndefined();
   });
@@ -79,8 +79,8 @@ describe('notification-registry', () => {
   it('routes PLACEMENT_REVIEW_READY to the admin placement queue, not a student page', () => {
     const entry = getNotificationEntry('PLACEMENT_REVIEW_READY');
 
-    expect(entry.getLink(undefined, { workspaceKind: 'school', schoolSlug: 'greenwood' })).toBe(
-      '/school/greenwood/enrollment/placement',
+    expect(entry.getLink(undefined, { workspaceKind: 'school', workspaceId: 'greenwood' })).toBe(
+      '/w/greenwood/enrollment/placement',
     );
     expect(entry.getLink(undefined, { workspaceKind: 'student' })).toBeUndefined();
   });
@@ -111,8 +111,8 @@ describe('notification-registry', () => {
     it('sends a teacher to their own marking queue, and a learner nowhere', () => {
       const entry = getNotificationEntry('REVIEW_DIGEST');
 
-      expect(entry.getLink(digest, { workspaceKind: 'school', schoolSlug: 'greenwood' })).toBe(
-        '/school/greenwood/review',
+      expect(entry.getLink(digest, { workspaceKind: 'school', workspaceId: 'greenwood' })).toBe(
+        '/w/greenwood/review',
       );
       expect(entry.getLink(digest, { workspaceKind: 'student' })).toBeUndefined();
     });
@@ -163,8 +163,8 @@ describe('notification-registry', () => {
       expect(entry.resolveTitle(data, t)).toBe('24 submissions are waiting across your school');
       expect(entry.resolveBody(data, t)).toContain('5 are past your response time');
       expect(entry.resolveBody(data, t)).toContain('3 days');
-      expect(entry.getLink(data, { workspaceKind: 'school', schoolSlug: 'greenwood' })).toBe(
-        '/school/greenwood/review/oversight',
+      expect(entry.getLink(data, { workspaceKind: 'school', workspaceId: 'greenwood' })).toBe(
+        '/w/greenwood/review/oversight',
       );
     });
 

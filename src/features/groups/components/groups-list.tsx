@@ -107,13 +107,13 @@ async function KpiStrip({ groups }: { groups: GroupHealthRowVM[] }) {
 type Props = {
   groups: GroupHealthRowVM[];
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   filter: GroupFilter;
 };
 
-export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props) {
+export async function GroupsList({ groups, schoolId, workspaceId, filter }: Props) {
   const t = await getTranslations('Groups');
-  const baseHref = wsHref(schoolSlug);
+  const baseHref = wsHref(workspaceId);
   const newGroupHref = `${baseHref}/groups/new`;
   const timetableHref = `${baseHref}/groups/timetable`;
 
@@ -214,7 +214,7 @@ export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props
                     group={group}
                     href={`${baseHref}/groups/${group.id}`}
                     schoolId={schoolId}
-                    schoolSlug={schoolSlug}
+                    workspaceId={workspaceId}
                   />
                 ))}
               </TableBody>
@@ -231,7 +231,7 @@ export async function GroupsList({ groups, schoolId, schoolSlug, filter }: Props
                 group={group}
                 href={`${baseHref}/groups/${group.id}`}
                 schoolId={schoolId}
-                schoolSlug={schoolSlug}
+                workspaceId={workspaceId}
               />
             ))}
           </div>

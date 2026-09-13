@@ -30,7 +30,7 @@ import type { GroupHealthRowVM } from '../types';
 
 type Props = {
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   group: Pick<GroupHealthRowVM, 'id' | 'name' | 'status' | 'studentCount'>;
 };
 
@@ -44,12 +44,12 @@ type Dialog = 'archive' | 'delete' | null;
  * where every one of those fields is already editable, so a second lightweight
  * edit form here would just be a worse copy of it.
  */
-export function GroupRowMenu({ schoolId, schoolSlug, group }: Props) {
+export function GroupRowMenu({ schoolId, workspaceId, group }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [dialog, setDialog] = useState<Dialog>(null);
-  const detailHref = wsHref(schoolSlug, `groups/${group.id}`);
+  const detailHref = wsHref(workspaceId, `groups/${group.id}`);
 
   const canDelete =
     (group.status === 'draft' || group.status === 'archived') && group.studentCount === 0;
@@ -59,7 +59,7 @@ export function GroupRowMenu({ schoolId, schoolSlug, group }: Props) {
       const result = await duplicateGroup(schoolId, group.id);
       if (result.ok && result.id) {
         toast.success(t('detail.duplicated'));
-        router.push(wsHref(schoolSlug, `groups/${result.id}`));
+        router.push(wsHref(workspaceId, `groups/${result.id}`));
       } else {
         toast.error(t('detail.duplicateError'));
       }

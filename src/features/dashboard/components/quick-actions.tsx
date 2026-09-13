@@ -53,30 +53,30 @@ const ACTION_LABELS: Record<string, string> = {
 
 type QuickActionsProps = {
   role: DashboardRole;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
-function resolveHref(action: QuickAction, schoolSlug: string): string {
+function resolveHref(action: QuickAction, workspaceId: string): string {
   const routes: Record<string, string> = {
-    'new-course':        wsHref(schoolSlug, 'content'),
-    'new-group':         wsHref(schoolSlug, 'groups/new'),
-    'invite-teacher':    wsHref(schoolSlug, 'students'),
-    'enroll-student':    wsHref(schoolSlug, 'students'),
-    'import-csv':        wsHref(schoolSlug, 'students'),
-    'edit-branding':     wsHref(schoolSlug, 'settings'),
-    'teacher-timetable': wsHref(schoolSlug, 'groups/timetable'),
-    'monthly-report':    wsHref(schoolSlug, 'dashboard'),
-    'new-lesson':        wsHref(schoolSlug, 'content'),
-    'my-groups':         wsHref(schoolSlug, 'groups'),
-    'my-timetable':      wsHref(schoolSlug, 'my-schedule'),
-    'schedule-class':    wsHref(schoolSlug, 'groups'),
-    'grade-queue':       wsHref(schoolSlug, 'dashboard'),
-    'message-class':     wsHref(schoolSlug, 'students'),
+    'new-course':        wsHref(workspaceId, 'content'),
+    'new-group':         wsHref(workspaceId, 'groups/new'),
+    'invite-teacher':    wsHref(workspaceId, 'students'),
+    'enroll-student':    wsHref(workspaceId, 'students'),
+    'import-csv':        wsHref(workspaceId, 'students'),
+    'edit-branding':     wsHref(workspaceId, 'settings'),
+    'teacher-timetable': wsHref(workspaceId, 'groups/timetable'),
+    'monthly-report':    wsHref(workspaceId, 'dashboard'),
+    'new-lesson':        wsHref(workspaceId, 'content'),
+    'my-groups':         wsHref(workspaceId, 'groups'),
+    'my-timetable':      wsHref(workspaceId, 'my-schedule'),
+    'schedule-class':    wsHref(workspaceId, 'groups'),
+    'grade-queue':       wsHref(workspaceId, 'dashboard'),
+    'message-class':     wsHref(workspaceId, 'students'),
   };
-  return routes[action.id] ?? wsHref(schoolSlug, 'dashboard');
+  return routes[action.id] ?? wsHref(workspaceId, 'dashboard');
 }
 
-export function QuickActions({ role, schoolSlug }: QuickActionsProps) {
+export function QuickActions({ role, workspaceId }: QuickActionsProps) {
   const actions = quickActionsFor(role);
 
   if (actions.length === 0) return null;
@@ -87,7 +87,7 @@ export function QuickActions({ role, schoolSlug }: QuickActionsProps) {
         {actions.map((action) => {
           const Icon = ICON_MAP[action.icon];
           const label = ACTION_LABELS[action.id] ?? action.id;
-          const href = resolveHref(action, schoolSlug);
+          const href = resolveHref(action, workspaceId);
 
           return (
             <Link

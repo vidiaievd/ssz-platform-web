@@ -13,14 +13,14 @@ import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
   students: StudentListItem[];
-  schoolSlug: string;
+  workspaceId: string;
   activeSegment: SegmentKey;
   search: string;
 };
 
 export function StudentsList({
   students,
-  schoolSlug,
+  workspaceId,
   activeSegment,
   search,
 }: Props) {
@@ -68,7 +68,7 @@ export function StudentsList({
         <div key={s.userId} role="listitem">
           <StudentRow
             student={s}
-            href={wsHref(schoolSlug, `students/${s.userId}`)}
+            href={wsHref(workspaceId, `students/${s.userId}`)}
             selected={selectedIds.has(s.userId)}
             onSelect={toggle}
           />

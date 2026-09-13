@@ -63,7 +63,7 @@ function renderTab(heatmap = false) {
         <GroupProgressTab
           schoolId={SCHOOL}
           groupId={GROUP}
-          schoolSlug="nordick"
+          workspaceId="nordick"
           canSeePersonalResults={heatmap}
         />
       </QueryClientProvider>
@@ -191,7 +191,7 @@ describe('who may see named results', () => {
     expect(await screen.findAllByText('Anna Lind')).toHaveLength(2);
 
     const links = await screen.findAllByRole('link', { name: /Anna Lind/ });
-    expect(links[0]?.getAttribute('href')).toBe('/school/nordick/students/s1?tab=mastery&group=group-1&unit=u1');
+    expect(links[0]?.getAttribute('href')).toBe('/w/nordick/students/s1?tab=mastery&group=group-1&unit=u1');
   });
 
   it('empties the map alone when it fails, leaving the chart standing', async () => {

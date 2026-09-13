@@ -9,11 +9,11 @@ import { nudgeAtRiskStudents } from '../api/nudge-at-risk';
 
 type NudgeAllButtonProps = {
   count: number;
-  schoolSlug: string;
+  workspaceId: string;
   schoolId: string;
 };
 
-export function NudgeAllButton({ count, schoolSlug, schoolId }: NudgeAllButtonProps) {
+export function NudgeAllButton({ count, workspaceId, schoolId }: NudgeAllButtonProps) {
   const [isPending, startTransition] = useTransition();
   const [nudged, setOptimisticNudged] = useOptimistic(false);
   const [done, setDone] = useState(false);
@@ -22,7 +22,7 @@ export function NudgeAllButton({ count, schoolSlug, schoolId }: NudgeAllButtonPr
     if (done || isPending) return;
     startTransition(async () => {
       setOptimisticNudged(true);
-      const result = await nudgeAtRiskStudents(schoolSlug, schoolId);
+      const result = await nudgeAtRiskStudents(workspaceId, schoolId);
       if (result.success) {
         setDone(true);
         toast.success(`Nudged ${result.nudged} students`);

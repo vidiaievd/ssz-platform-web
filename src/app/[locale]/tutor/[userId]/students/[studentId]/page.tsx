@@ -78,7 +78,7 @@ export default async function TutorStudentDetailPage({ params, searchParams }: P
         <OverviewTab
           student={student}
           // No group screens exist for a tutor, so nothing links to one.
-          schoolSlug=""
+          workspaceId=""
           schoolId={workspace.schoolId}
           canEdit={false}
           groupsHref=""
@@ -86,7 +86,7 @@ export default async function TutorStudentDetailPage({ params, searchParams }: P
         />
       )}
       {tab === 'history' && (
-        <HistoryTab student={student} schoolSlug="" linkGroups={false} />
+        <HistoryTab student={student} workspaceId="" linkGroups={false} />
       )}
     </main>
   );

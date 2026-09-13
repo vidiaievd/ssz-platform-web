@@ -7,7 +7,7 @@ import type { WidgetData, AtRiskStudent } from '../types';
 
 type AtRiskListProps = {
   atRisk: WidgetData<{ students: AtRiskStudent[]; total: number }>;
-  schoolSlug: string;
+  workspaceId: string;
   schoolId: string;
 };
 
@@ -22,7 +22,7 @@ function formatLastSeen(iso: string): string {
   }
 }
 
-export function AtRiskList({ atRisk, schoolSlug, schoolId }: AtRiskListProps) {
+export function AtRiskList({ atRisk, workspaceId, schoolId }: AtRiskListProps) {
   if (atRisk.status === 'unavailable') {
     return <WidgetCard title="At-risk students" loading />;
   }
@@ -32,7 +32,7 @@ export function AtRiskList({ atRisk, schoolSlug, schoolId }: AtRiskListProps) {
     : { students: [] as AtRiskStudent[], total: 0 };
 
   const footerRight = (
-    <NudgeAllButton count={total} schoolSlug={schoolSlug} schoolId={schoolId} />
+    <NudgeAllButton count={total} workspaceId={workspaceId} schoolId={schoolId} />
   );
 
   return (

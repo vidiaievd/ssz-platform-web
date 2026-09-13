@@ -11,7 +11,21 @@ import type { WorkspaceKind } from '../api/resolve-workspace';
  * Delete this, and the branch in `buildHref`, once the last section has moved and the old
  * tree is nothing but redirects.
  */
-export const WORKSPACE_ROUTES: ReadonlySet<string> = new Set(['content']);
+export const WORKSPACE_ROUTES: ReadonlySet<string> = new Set([
+  '',
+  'content',
+  'dashboard',
+  'enrollment',
+  'groups',
+  'invitations',
+  'my-schedule',
+  'notifications',
+  'review',
+  'scheduling',
+  'settings',
+  'students',
+  'teachers',
+]);
 
 /**
  * A workspace, as much of it as the caller happens to hold.

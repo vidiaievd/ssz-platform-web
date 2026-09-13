@@ -40,7 +40,7 @@ export type NotificationsTranslator = ReturnType<typeof useTranslations<'Notific
 
 export interface NotificationLinkContext {
   workspaceKind: 'school' | 'student';
-  schoolSlug?: string;
+  workspaceId?: string;
 }
 
 export interface NotificationRegistryEntry {
@@ -220,9 +220,9 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
     resolveTitle: (_data, t) => t('types.TEACHER_PROFILE_CHANGED.title'),
     resolveBody: (_data, t) => t('types.TEACHER_PROFILE_CHANGED.body'),
     getLink: (data, ctx) => {
-      if (ctx.workspaceKind !== 'school' || !ctx.schoolSlug) return undefined;
+      if (ctx.workspaceKind !== 'school' || !ctx.workspaceId) return undefined;
       if (!isTeacherProfileChangedData(data)) return undefined;
-      return wsHref(ctx.schoolSlug, `teachers/${data.teacherUserId}`);
+      return wsHref(ctx.workspaceId, `teachers/${data.teacherUserId}`);
     },
   },
   ENROLLMENT_REQUEST: {
@@ -239,8 +239,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         ? t('types.ENROLLMENT_REQUEST.body', { schoolName: data.schoolName })
         : '',
     getLink: (_data, ctx) => {
-      if (ctx.workspaceKind !== 'school' || !ctx.schoolSlug) return undefined;
-      return wsHref(ctx.schoolSlug, 'enrollment/requests');
+      if (ctx.workspaceKind !== 'school' || !ctx.workspaceId) return undefined;
+      return wsHref(ctx.workspaceId, 'enrollment/requests');
     },
   },
   ENROLLMENT_APPROVED: {
@@ -278,8 +278,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         ? t('types.PLACEMENT_REVIEW_READY.body', { school: data.schoolName })
         : t('types.PLACEMENT_REVIEW_READY.bodyFallback'),
     getLink: (_data, ctx) =>
-      ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? wsHref(ctx.schoolSlug, 'enrollment/placement')
+      ctx.workspaceKind === 'school' && ctx.workspaceId
+        ? wsHref(ctx.workspaceId, 'enrollment/placement')
         : undefined,
   },
   GROUP_ASSIGNED: {
@@ -391,8 +391,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
       });
     },
     getLink: (_data, ctx) =>
-      ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? wsHref(ctx.schoolSlug, 'review')
+      ctx.workspaceKind === 'school' && ctx.workspaceId
+        ? wsHref(ctx.workspaceId, 'review')
         : undefined,
   },
   /**
@@ -418,8 +418,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
         : t('types.REVIEW_ESCALATION.body', { hours, promised: data.escalateAfterHours });
     },
     getLink: (_data, ctx) =>
-      ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? wsHref(ctx.schoolSlug, 'review')
+      ctx.workspaceKind === 'school' && ctx.workspaceId
+        ? wsHref(ctx.workspaceId, 'review')
         : undefined,
   },
   /**
@@ -452,8 +452,8 @@ export const notificationRegistry: Record<NotificationType, NotificationRegistry
           });
     },
     getLink: (_data, ctx) =>
-      ctx.workspaceKind === 'school' && ctx.schoolSlug
-        ? wsHref(ctx.schoolSlug, 'review/oversight')
+      ctx.workspaceKind === 'school' && ctx.workspaceId
+        ? wsHref(ctx.workspaceId, 'review/oversight')
         : undefined,
   },
 };

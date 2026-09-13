@@ -168,7 +168,7 @@ describe('the queue link', () => {
 
     expect(screen.getByRole('link', { name: /Open the marking queue/ })).toHaveAttribute(
       'href',
-      '/school/demo-school/review?course=course-7&type=writing_task',
+      '/w/demo-school/review?course=course-7&type=writing_task',
     );
   });
 

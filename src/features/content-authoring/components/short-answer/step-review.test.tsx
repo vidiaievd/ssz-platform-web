@@ -136,7 +136,7 @@ describe('StepReview', () => {
 
     expect(screen.getByRole('link', { name: /Open the marking queue/ })).toHaveAttribute(
       'href',
-      '/school/demo-school/review?course=module-1&type=short_answer',
+      '/w/demo-school/review?course=module-1&type=short_answer',
     );
   });
 });

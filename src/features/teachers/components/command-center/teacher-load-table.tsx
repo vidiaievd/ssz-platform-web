@@ -28,10 +28,10 @@ export function TeacherLoadTable({ teachers, onRemove }: TeacherLoadTableProps) 
   const t = useTranslations("Teachers.commandCenter.table");
   const tRoster = useTranslations("Teachers.roster.removeGuard");
   const router = useRouter();
-  const params = useParams<{ locale: string; schoolSlug: string }>();
+  const params = useParams<{ locale: string; workspaceId: string }>();
 
   function handleRowClick(teacherId: string) {
-    router.push(`/${params.locale}${wsHref(params.schoolSlug, `teachers/${teacherId}`)}`);
+    router.push(`/${params.locale}${wsHref(params.workspaceId, `teachers/${teacherId}`)}`);
   }
 
   if (!teachers.length) return null;

@@ -34,9 +34,9 @@ type Props = {
   /** Share of the teaching plan delivered — the group's progress, not a student's. */
   planProgressPct: number;
   courseView: CourseView;
-  /** Real school id (UUID) — mutations take this; schoolSlug is for hrefs only. */
+  /** Real school id (UUID) — mutations take this; workspaceId is for hrefs only. */
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
   canManage: boolean;
   /** May this viewer see named learners' results — the heatmap of the Progress tab. */
   canSeePersonalResults: boolean;
@@ -56,12 +56,12 @@ export async function GroupDetail({
   planProgressPct,
   courseView,
   schoolId,
-  schoolSlug,
+  workspaceId,
   canManage,
   canSeePersonalResults,
 }: Props) {
   const t = await getTranslations("Groups");
-  const listHref = wsHref(schoolSlug, 'groups');
+  const listHref = wsHref(workspaceId, 'groups');
 
   return (
     <div className="space-y-5">
@@ -79,7 +79,7 @@ export async function GroupDetail({
         alerts={alerts}
         courseView={courseView}
         schoolId={schoolId}
-        schoolSlug={schoolSlug}
+        workspaceId={workspaceId}
         canManage={canManage}
       />
 
@@ -87,7 +87,7 @@ export async function GroupDetail({
       <GroupResolveBanner
         alerts={alerts}
         groupId={group.id}
-        schoolSlug={schoolSlug}
+        workspaceId={workspaceId}
         canManage={canManage}
       />
 
@@ -107,13 +107,13 @@ export async function GroupDetail({
             progressPct={planProgressPct}
             planUnits={planUnits}
             schoolId={schoolId}
-            schoolSlug={schoolSlug}
+            workspaceId={workspaceId}
             canManage={canManage}
           />
         }
         alerts={alerts}
         schoolId={schoolId}
-        schoolSlug={schoolSlug}
+        workspaceId={workspaceId}
         canManage={canManage}
         canSeePersonalResults={canSeePersonalResults}
       />

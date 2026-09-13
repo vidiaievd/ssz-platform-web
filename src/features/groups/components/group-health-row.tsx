@@ -109,7 +109,7 @@ type Props = {
   group: GroupHealthRowVM;
   href: string;
   schoolId: string;
-  schoolSlug: string;
+  workspaceId: string;
 };
 
 /**
@@ -126,7 +126,7 @@ type Props = {
  * later wins the paint order at equal z-index — so it stays independently
  * clickable on top of the stretched link without needing its own z-index.
  */
-export async function GroupHealthRow({ group, href, schoolId, schoolSlug }: Props) {
+export async function GroupHealthRow({ group, href, schoolId, workspaceId }: Props) {
   const t = await getTranslations('Groups');
   const dangerCount = group.alerts.filter((a) => a.severity === 'danger').length;
   const label =
@@ -213,7 +213,7 @@ export async function GroupHealthRow({ group, href, schoolId, schoolSlug }: Prop
       {/* Col 7 — row menu + chevron (later in the DOM than the stretched link, so it stays clickable) */}
       <TableCell className="px-3">
         <div className="relative flex items-center gap-1 justify-end">
-          <GroupRowMenu schoolId={schoolId} schoolSlug={schoolSlug} group={group} />
+          <GroupRowMenu schoolId={schoolId} workspaceId={workspaceId} group={group} />
           <ChevronRight className="size-4 text-(--ssz-text-muted) shrink-0" aria-hidden="true" />
         </div>
       </TableCell>
