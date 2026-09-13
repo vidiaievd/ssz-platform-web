@@ -171,7 +171,7 @@ describe('getTimetable / getTeacherLoads', () => {
 
   function mockSchoolFetch() {
     mockFetch.mockImplementation((opts: { service: string; path: string }) => {
-      if (opts.service === 'organization' && opts.path === '/schools/school-2/members') {
+      if (opts.service === 'organization' && opts.path === '/schools/school-2/teachers') {
         return Promise.resolve(TEACHERS);
       }
       if (opts.service === 'organization' && opts.path === '/schools/school-2/groups') {
@@ -266,7 +266,7 @@ describe('getTeacherSchedule', () => {
 
   function mockSchoolFetch() {
     mockFetch.mockImplementation((opts: { service: string; path: string }) => {
-      if (opts.service === 'organization' && opts.path === '/schools/school-3/members') {
+      if (opts.service === 'organization' && opts.path === '/schools/school-3/teachers') {
         return Promise.resolve(TEACHERS);
       }
       if (opts.service === 'organization' && opts.path === '/schools/school-3/groups') {
