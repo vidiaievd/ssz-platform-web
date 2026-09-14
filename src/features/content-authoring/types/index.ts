@@ -213,6 +213,92 @@ export interface ContainerCoverage {
 
 export type CoverageVersionScope = 'draft' | 'published' | 'both';
 
+// ─── Atom coverage (plan 63 §4.2) ────────────────────────────────────────────
+//
+// The coverage report above counts exercises by channel and subject. This one counts the
+// facts: the words a unit's texts introduce and the atoms of the rules it teaches,
+// against the items that name them. Different question, different shape, same rule about
+// where the thinking lives — the service decides, this is a renderer over its answer.
+
+export const MODALITIES = ['recognition', 'recall', 'production', 'unknown'] as const;
+export type Modality = (typeof MODALITIES)[number];
+
+export type ModalityTally = Record<Modality, number>;
+
+/** Where a scope says it teaches an atom. Empty means it only practises it. */
+export type AtomIntroductionSource = 'relation' | 'glossary' | 'text_span' | 'exercise_pool';
+
+export interface AtomCoverageEntry {
+  atomType: 'vocabulary_item' | 'grammar_rule_atom' | string;
+  atomId: string;
+  title: string;
+  track: 'lexis' | 'grammar' | string;
+  parentId: string | null;
+  parentTitle: string | null;
+  introducedBy: AtomIntroductionSource[];
+  exercises: number;
+  /** Items that test it. Zero is what "never tested" counts. */
+  focusItems: number;
+  /** Items that merely required it — the word inside a gap testing an ending. */
+  contextItems: number;
+  /** Testing items by modality. Context is not here: it examined nothing. */
+  byModality: ModalityTally;
+}
+
+/**
+ * A finding, as a code and the numbers its sentence needs — the same contract the
+ * skill report's remarks follow, and for the same reason: the wording is written here
+ * in four languages, the rule is not re-implemented.
+ */
+export interface AtomCoverageIssue {
+  code: string;
+  severity: 'warning' | 'note';
+  atomType?: string;
+  atomId?: string;
+  title?: string;
+  ruleId?: string;
+  modality?: Modality;
+  count?: number;
+  total?: number;
+}
+
+export interface AtomCoverageSummary {
+  introduced: number;
+  introducedByTrack: Record<string, number>;
+  tested: number;
+  untested: number;
+  contextOnly: number;
+  singleModality: number;
+  practisedElsewhere: number;
+  byModality: ModalityTally;
+  exercises: number;
+  /** Of those, the ones carrying any address at all — what every finding is read against. */
+  exercisesAddressed: number;
+}
+
+export interface AtomCoverageScope {
+  containerId: string;
+  title: string;
+  summary: AtomCoverageSummary;
+  issues: AtomCoverageIssue[];
+}
+
+export interface AtomCoverage {
+  containerId: string;
+  containerType: string;
+  title: string;
+  version: 'draft' | 'published';
+  /** False when there is no such version — not a container that teaches nothing. */
+  available: boolean;
+  summary: AtomCoverageSummary;
+  issues: AtomCoverageIssue[];
+  atoms: AtomCoverageEntry[];
+  rulesWithoutAtoms: Array<{ ruleId: string; title: string }>;
+  units: AtomCoverageScope[];
+}
+
+export type AtomCoverageVersionScope = 'draft' | 'published';
+
 /** Which rung of the priority chain produced a value (plan 55 §3.4). */
 export const SKILL_SOURCES = ['override', 'placement', 'document', 'template', 'unknown'] as const;
 export type SkillSource = (typeof SKILL_SOURCES)[number];

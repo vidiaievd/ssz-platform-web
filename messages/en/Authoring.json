@@ -3301,5 +3301,51 @@
       "rule_single_atom": "The only atom of a rule this exercise practises.",
       "rule_candidate": "One atom of a rule this exercise practises — you choose."
     }
+  },
+  "atomCoverage": {
+    "title": "What this teaches, against what it asks",
+    "subtitle": "{count, plural, =0 {nothing introduced yet} one {# fact introduced} other {# facts introduced}}",
+    "empty": "Nothing here introduces a word or a rule yet, so there is nothing to test against.",
+    "noVersion": "This version does not exist yet.",
+    "loadError": "Could not work out what this teaches.",
+    "figure": {
+      "introduced": "Introduced",
+      "introducedSub": "{lexis} words · {grammar} rule atoms",
+      "tested": "Tested",
+      "untested": "Never tested",
+      "singleModality": "One way only"
+    },
+    "addressedWarning": "{addressed} of {total} exercises say what they are about. Read everything below against that — an unaddressed exercise cannot test anything, as far as this report can see.",
+    "addressedAll": "All {total, plural, one {# exercise says} other {# exercises say}} what they are about.",
+    "modalityHeading": "How the learner is asked",
+    "modality": {
+      "recognition": "Picked from a list",
+      "recall": "From memory",
+      "production": "Produced",
+      "unknown": "Not judged"
+    },
+    "issue": {
+      "atom_untested": "{count, plural, one {# fact this teaches and never tests} other {# facts this teaches and never tests}}",
+      "atom_context_only": "{count, plural, one {# fact is required but never examined} other {# facts are required but never examined}}",
+      "atom_single_modality_recognition": "{count, plural, one {# fact is only ever picked from a list} other {# facts are only ever picked from a list}}",
+      "atom_single_modality_recall": "{count, plural, one {# fact is only ever asked from memory} other {# facts are only ever asked from memory}}",
+      "atom_single_modality_production": "{count, plural, one {# fact is only ever produced} other {# facts are only ever produced}}",
+      "atom_single_modality_unknown": "{count, plural, one {# fact is tested one way only} other {# facts are tested one way only}}",
+      "atom_unknown_modality": "{count, plural, one {# fact is tested only by exercises nobody has judged} other {# facts are tested only by exercises nobody has judged}}",
+      "rule_without_atoms": "{count, plural, one {# rule has not been cut into atoms} other {# rules have not been cut into atoms}}",
+      "scope_no_production": "Not one item here asks the learner to produce language."
+    },
+    "more": "+{count} more",
+    "units": "{count, plural, one {# unit} other {# units}}, one by one",
+    "column": {
+      "unit": "Unit",
+      "introduced": "Taught",
+      "tested": "Tested",
+      "untested": "Never",
+      "production": "Produced",
+      "addressed": "Addressed"
+    },
+    "unitAddressed": "{addressed}/{total}",
+    "practisedElsewhere": "{count, plural, one {# fact practised here is taught elsewhere} other {# facts practised here are taught elsewhere}} — revision, counted as no gap."
   }
 }

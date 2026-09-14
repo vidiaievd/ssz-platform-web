@@ -3301,5 +3301,51 @@
       "rule_single_atom": "Det eneste atomet i en regel oppgaven øver på.",
       "rule_candidate": "Ett atom i en regel oppgaven øver på — du velger."
     }
+  },
+  "atomCoverage": {
+    "title": "Hva dette lærer bort, mot hva det spør om",
+    "subtitle": "{count, plural, =0 {ingenting introdusert ennå} one {# faktum introdusert} other {# fakta introdusert}}",
+    "empty": "Her introduseres verken ord eller regler ennå, så det er ingenting å teste mot.",
+    "noVersion": "Denne versjonen finnes ikke ennå.",
+    "loadError": "Klarte ikke å regne ut hva dette lærer bort.",
+    "figure": {
+      "introduced": "Introdusert",
+      "introducedSub": "{lexis} ord · {grammar} regelatomer",
+      "tested": "Testet",
+      "untested": "Aldri testet",
+      "singleModality": "Bare én måte"
+    },
+    "addressedWarning": "{addressed} av {total} oppgaver sier hva de handler om. Les alt under med det i bakhodet — en umerket oppgave tester ingenting, slik denne rapporten ser det.",
+    "addressedAll": "Alle {total, plural, one {# oppgave sier} other {# oppgaver sier}} hva de handler om.",
+    "modalityHeading": "Hvordan eleven blir spurt",
+    "modality": {
+      "recognition": "Valgt fra en liste",
+      "recall": "Fra hukommelsen",
+      "production": "Produsert",
+      "unknown": "Ikke vurdert"
+    },
+    "issue": {
+      "atom_untested": "{count, plural, one {# faktum læres bort og testes aldri} other {# fakta læres bort og testes aldri}}",
+      "atom_context_only": "{count, plural, one {# faktum kreves, men prøves aldri} other {# fakta kreves, men prøves aldri}}",
+      "atom_single_modality_recognition": "{count, plural, one {# faktum velges bare fra en liste} other {# fakta velges bare fra en liste}}",
+      "atom_single_modality_recall": "{count, plural, one {# faktum spørres bare fra hukommelsen} other {# fakta spørres bare fra hukommelsen}}",
+      "atom_single_modality_production": "{count, plural, one {# faktum bare produseres} other {# fakta bare produseres}}",
+      "atom_single_modality_unknown": "{count, plural, one {# faktum testes på bare én måte} other {# fakta testes på bare én måte}}",
+      "atom_unknown_modality": "{count, plural, one {# faktum testes bare av oppgaver ingen har vurdert} other {# fakta testes bare av oppgaver ingen har vurdert}}",
+      "rule_without_atoms": "{count, plural, one {# regel er ikke delt i atomer} other {# regler er ikke delt i atomer}}",
+      "scope_no_production": "Ikke én oppgave her ber eleven produsere språk."
+    },
+    "more": "+{count} til",
+    "units": "{count, plural, one {# enhet} other {# enheter}}, én for én",
+    "column": {
+      "unit": "Enhet",
+      "introduced": "Lærer",
+      "tested": "Tester",
+      "untested": "Aldri",
+      "production": "Produsert",
+      "addressed": "Merket"
+    },
+    "unitAddressed": "{addressed}/{total}",
+    "practisedElsewhere": "{count, plural, one {# faktum øves her, men læres et annet sted} other {# fakta øves her, men læres et annet sted}} — repetisjon, ikke et hull."
   }
 }

@@ -1,6 +1,11 @@
 import 'server-only';
 
-import type { StudentGrid, StudentPosition, StudentWorkContext } from '@/features/analytics/types';
+import type {
+  ModalityGap,
+  StudentGrid,
+  StudentPosition,
+  StudentWorkContext,
+} from '@/features/analytics/types';
 import { getMasteryProfile } from '@/features/mastery/api/get-mastery-profile';
 import type { MasteryProfile } from '@/features/mastery/types';
 import { serverFetch } from '@/lib/api/server-fetcher';
@@ -16,6 +21,15 @@ export interface StudentMastery {
   workContext: StudentWorkContext | null;
   /** The weakest cells with their reason — the profile, not the grid. */
   profile: MasteryProfile | null;
+  /**
+   * Facts this learner knows one way and not another (plan 63 §4.1).
+   *
+   * A different question from the profile above, not a finer version of it: the profile
+   * says which skill × focus cell is weak, this says which fact the learner recognises
+   * and cannot produce. A learner can have no weak cell at all and still have twenty
+   * words they have only ever picked off a list.
+   */
+  modalityGap: ModalityGap | null;
 }
 
 /**
@@ -66,7 +80,7 @@ export async function getStudentMastery({
 }): Promise<StudentMastery> {
   const { groupId, courseId } = await pickGroup(schoolId, groupIds);
 
-  const [grid, position, workContext, profile] = await Promise.all([
+  const [grid, position, workContext, profile, modalityGap] = await Promise.all([
     ask(() =>
       serverFetch<StudentGrid>({
         service: 'analytics',
@@ -91,9 +105,16 @@ export async function getStudentMastery({
       }),
     ),
     getMasteryProfile(studentId, courseId === null ? {} : { courseId }),
+    ask(() =>
+      serverFetch<ModalityGap>({
+        service: 'analytics',
+        path: `/analytics/students/${studentId}/modality-gap`,
+        query: { courseId: courseId ?? undefined },
+      }),
+    ),
   ]);
 
-  return { groupId, courseId, grid, position, workContext, profile };
+  return { groupId, courseId, grid, position, workContext, profile, modalityGap };
 }
 
 /**

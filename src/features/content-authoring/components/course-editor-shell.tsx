@@ -16,6 +16,7 @@ import { CourseSettingsDrawer } from './course-settings-drawer';
 import { CourseStructurePanel } from './course-structure-panel';
 import { CoverageResultGrid } from './coverage-result-grid';
 import { CoverageStrip } from './coverage-strip';
+import { AtomCoverageReport } from './atom-coverage-report';
 import { collectPublishRows } from '../lib/publish-rows';
 import { deriveContainerState } from './container-state-badge';
 import { ReviewPublishDialog } from './review-publish-dialog';
@@ -140,6 +141,15 @@ export function CourseEditorShell({
           nobody opens. */}
       <div className="rounded-xl border border-border bg-card p-4">
         <CoverageStrip containerId={container.id} />
+      </div>
+
+      {/* The same question asked of the facts rather than of the exercises: the strip
+          above says this course is 84% picking an answer off a list, and this says which
+          twenty-six words that leaves untested. Beside it rather than inside it — one
+          counts exercises and the other counts what they are about, and a reader who
+          cannot tell which is which will trust neither. */}
+      <div className="rounded-xl border border-border bg-card p-4">
+        <AtomCoverageReport containerId={container.id} />
       </div>
 
       {/* And underneath it, the same course seen from the other end: what came of

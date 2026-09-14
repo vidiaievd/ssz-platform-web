@@ -243,5 +243,43 @@
       "unreached": "Dekket, ikke nådd",
       "notTaught": "Ikke undervist"
     }
+  },
+  "modality": {
+    "title": "Kjenner bare på én måte",
+    "subtitle": "Fakta eleven kjenner igjen, men ikke får produsert. Flere av de samme oppgavene flytter ikke dette.",
+    "unavailable": "Klarte ikke å spørre hva eleven bare kjenner på én måte.",
+    "emptyUnaddressed": "Ingenting eleven har gjort sier hvilket faktum det handlet om, så ingenting kan sammenlignes. Det er et hull i merkingen av kurset, ikke i eleven — dekningsrapporten på kurset sier hvor.",
+    "emptyEven": "{count, plural, =0 {Ingenting har nok grunnlag til å dømmes ennå.} one {Det ene faktumet med nok grunnlag sitter jevnt.} other {Alle # fakta med nok grunnlag sitter jevnt.}}",
+    "unnamed": "Ikke navngitt faktum",
+    "gapValue": "−{percent}%",
+    "never": "aldri spurt",
+    "attempts": "({count, plural, one {# forsøk} other {# forsøk}})",
+    "axis": {
+      "recognition": "Fra en liste",
+      "recall": "Fra hukommelsen",
+      "production": "Produsert"
+    },
+    "verdict": {
+      "recognition_only": {
+        "label": "Bare gjenkjenning",
+        "body": "Svarte riktig hver gang svaret sto på skjermen blant andre, og ble aldri bedt om å hente det fram selv. Ingenting her sier om hun kan bruke det."
+      },
+      "production_untried": {
+        "label": "Aldri produsert",
+        "body": "Henter det fram sikkert, men har aldri brukt det i eget språk. En skrive- eller taleoppgave er det neste å gi."
+      },
+      "production_failing": {
+        "label": "Svikter i produksjon",
+        "body": "Kjenner det igjen sikkert og bommer når det skal produseres. Kunnskapen har ikke nådd bruk — øvelse der eleven skriver eller sier det, ikke flere valg."
+      },
+      "recall_failing": {
+        "label": "Svikter fra hukommelsen",
+        "body": "Velger riktig fra en liste og bommer når lista tas bort. Det som ser ut som kunnskap, er gjenkjenning."
+      }
+    },
+    "evidence": "{atoms, plural, one {# faktum} other {# fakta}} med adresse, {observations, plural, one {# observasjon} other {# observasjoner}}. Et faktum dømmes fra {threshold}.",
+    "insufficient": "{count, plural, one {# har for tynt grunnlag til å dømmes.} other {# har for tynt grunnlag til å dømmes.}}",
+    "noProduction": "Ingenting eleven har gjort var en produksjonsoppgave i det hele tatt — det er et faktum om kurset.",
+    "namesUnavailable": "Fakta kunne ikke navngis akkurat nå; funnene over står fortsatt."
   }
 }

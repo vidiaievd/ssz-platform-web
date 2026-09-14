@@ -36,6 +36,13 @@ vi.mock('./coverage-result-grid', () => ({
     <div data-testid="coverage-result-grid" data-container={containerId} />
   ),
 }));
+// And the fact-level report beside it, for the same reason again — its own behaviour is
+// exercised in `atom-coverage-report.test.tsx`.
+vi.mock('./atom-coverage-report', () => ({
+  AtomCoverageReport: ({ containerId }: { containerId: string }) => (
+    <div data-testid="atom-coverage-report" data-container={containerId} />
+  ),
+}));
 vi.mock('./course-structure-panel', () => ({
   CourseStructurePanel: ({
     containerId,

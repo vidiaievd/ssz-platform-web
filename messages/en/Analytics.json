@@ -243,5 +243,43 @@
       "unreached": "Covered, unreached",
       "notTaught": "Not taught"
     }
+  },
+  "modality": {
+    "title": "Known one way only",
+    "subtitle": "Facts this learner recognises and cannot produce. More of the same exercises will not move these.",
+    "unavailable": "Could not ask what this learner knows one way only.",
+    "emptyUnaddressed": "Nothing this learner has done says which fact it was about, so nothing can be compared. That is a gap in the course’s markup, not in the learner — the coverage report on the course says where.",
+    "emptyEven": "{count, plural, =0 {Nothing has enough evidence to judge yet.} one {The one fact with enough evidence is known evenly.} other {All # facts with enough evidence are known evenly.}}",
+    "unnamed": "Unnamed fact",
+    "gapValue": "−{percent}%",
+    "never": "never asked",
+    "attempts": "({count, plural, one {# try} other {# tries}})",
+    "axis": {
+      "recognition": "From a list",
+      "recall": "From memory",
+      "production": "Produced"
+    },
+    "verdict": {
+      "recognition_only": {
+        "label": "Recognition only",
+        "body": "Answered right every time it was on screen among others, and never once asked for from memory. Nothing here says whether they can use it."
+      },
+      "production_untried": {
+        "label": "Never produced",
+        "body": "Recalled reliably, and never asked to use it in their own language. A writing or speaking task is the next thing to set."
+      },
+      "production_failing": {
+        "label": "Fails when produced",
+        "body": "Recognised reliably and goes wrong when they have to produce it. The knowledge has not reached use — practice that makes them write or say it, not more picking."
+      },
+      "recall_failing": {
+        "label": "Fails from memory",
+        "body": "Picked out of a list reliably and goes wrong when the list is taken away. What looks like knowing it is recognising it."
+      }
+    },
+    "evidence": "{atoms, plural, one {# fact} other {# facts}} with an address, {observations, plural, one {# observation} other {# observations}}. A fact is judged after {threshold}.",
+    "insufficient": "{count, plural, one {# has too little evidence to judge.} other {# have too little evidence to judge.}}",
+    "noProduction": "Nothing they have done was a production task at all — that is a fact about the course.",
+    "namesUnavailable": "The facts could not be named just now; the findings above still stand."
   }
 }

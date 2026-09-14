@@ -132,6 +132,74 @@ export interface StudentPosition {
   measured: number;
 }
 
+// ─── The recognition ↔ production gap (plan 63 §4.1) ─────────────────────────
+
+export const GAP_MODALITIES = ['recognition', 'recall', 'production', 'unknown'] as const;
+export type GapModality = (typeof GAP_MODALITIES)[number];
+
+export interface ModalityReading {
+  attempts: number;
+  correct: number;
+  /** `null` for a modality never attempted — the opposite statement from a zero. */
+  successRate: number | null;
+  meanStability: number | null;
+  lastAt: string | null;
+}
+
+/**
+ * What is lopsided about one fact.
+ *
+ * The first two are about what was never asked and carry no gap number; the two
+ * `_failing` ones are about what was asked and went badly.
+ */
+export type GapVerdict =
+  | 'recognition_only'
+  | 'production_untried'
+  | 'production_failing'
+  | 'recall_failing';
+
+export interface ModalityGapRow {
+  atomType: string;
+  atomId: string;
+  /** `null` when content-service could not be asked; the finding still stands. */
+  title: string | null;
+  track: string | null;
+  parentId: string | null;
+  verdict: GapVerdict;
+  /** How far the deeper modality falls below the shallow one, 0..1; `null` if never tried. */
+  gap: number | null;
+  byModality: Record<GapModality, ModalityReading>;
+  /** Ratings of the atom's own card — the same answers seen from the card side. */
+  cardReviews: number;
+}
+
+export interface ModalityGapSummary {
+  addressedAtoms: number;
+  judged: number;
+  insufficient: number;
+  recognitionOnly: number;
+  productionUntried: number;
+  productionFailing: number;
+  recallFailing: number;
+  even: number;
+  observations: number;
+  contextObservations: number;
+  cardReviews: number;
+  byModality: Record<GapModality, number>;
+}
+
+export interface ModalityGap {
+  studentId: string;
+  courseId: string | null;
+  /** The bar a verdict was made under, reported so the screen can name it. */
+  minAttempts: number;
+  thresholds: { strong: number; failing: number };
+  /** False when the atom names could not be asked for — labels missing, findings intact. */
+  namesAvailable: boolean;
+  summary: ModalityGapSummary;
+  gaps: ModalityGapRow[];
+}
+
 export interface StudentWorkContext {
   studentId: string;
   courseId: string | null;
