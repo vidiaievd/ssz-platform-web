@@ -51,8 +51,8 @@ interface CourseStructurePanelProps {
 
 function StructureSkeleton() {
   return (
-    <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[236px_minmax(0,1fr)_348px]">
-      <Skeleton className="hidden h-64 w-full rounded-2xl xl:block" />
+    <div className="grid grid-cols-1 items-start gap-6 min-[1000px]:grid-cols-[260px_minmax(0,1fr)] min-[1400px]:grid-cols-[236px_minmax(0,1fr)_348px]">
+      <Skeleton className="hidden h-64 w-full rounded-2xl min-[1000px]:block" />
       <Skeleton className="h-96 w-full rounded-2xl" />
       <Skeleton className="h-64 w-full rounded-2xl" />
     </div>
@@ -147,8 +147,12 @@ export function CourseStructurePanel({
           height, or their sticky children have no room to travel and scroll
           away with the tree. The tree card gets `self-start` back so it still
           hugs its content. */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[236px_minmax(0,1fr)_348px]">
-        <div className="hidden xl:block">
+      {/* Three columns while there is room for three; at 1400px the inspector
+          drops into the flow under the tree rather than squeezing it; at 1000px
+          the rail goes too — a jump list 120px wide is not a jump list
+          (BEHAVIOR §4). */}
+      <div className="grid grid-cols-1 gap-6 min-[1000px]:grid-cols-[260px_minmax(0,1fr)] min-[1400px]:grid-cols-[236px_minmax(0,1fr)_348px]">
+        <div className="hidden min-[1000px]:block">
           <OutlineRail
             tree={tree}
             courseContainerId={containerId}
@@ -192,8 +196,11 @@ export function CourseStructurePanel({
           </div>
         </div>
 
-        <div>
-          <div className="ssz-surface sticky top-[var(--structure-sticky-top,1rem)] rounded-2xl border border-border p-4.5 shadow-[var(--ssz-shadow-xs)]">
+        {/* Below 1400px it is a panel under the tree, spanning the tree's
+            column: sticky is for a side pane, and a full-width block that
+            follows the scroll would cover what it describes. */}
+        <div className="min-[1000px]:col-start-2 min-[1400px]:col-start-3">
+          <div className="ssz-surface rounded-2xl border border-border p-4.5 shadow-[var(--ssz-shadow-xs)] min-[1400px]:sticky min-[1400px]:top-[var(--structure-sticky-top,1rem)]">
             <h2 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
               {t('structure.inspectorTitle')}
             </h2>

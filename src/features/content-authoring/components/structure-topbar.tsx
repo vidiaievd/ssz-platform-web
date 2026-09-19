@@ -46,6 +46,15 @@ interface StructureTopbarProps {
   ref?: React.Ref<HTMLElement>;
 }
 
+/** How much is waiting behind a button, in the colour of something unfinished. */
+function CountPill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="ml-1 rounded-full bg-error-100 px-1.5 text-[11px] font-bold tabular-nums text-error-700">
+      {children}
+    </span>
+  );
+}
+
 /**
  * Page header for the structure editor: identity on the left, the actions that
  * apply to the whole course on the right. Sticky, because the tree below it is
@@ -88,12 +97,17 @@ export function StructureTopbar({
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h1 className="text-2xl font-semibold">{title}</h1>
-        <ContainerStateBadge state={state} />
-        {versionNumber != null && (
-          <span className="font-mono text-xs text-muted-foreground">
-            {t('topbar.version', { number: versionNumber })}
-          </span>
-        )}
+        {/* State and version as one chip: they are one fact — what students can
+            open — and side by side as two they read as two claims that could
+            disagree. The dot carries the state for anyone reading in
+            greyscale. */}
+        <ContainerStateBadge
+          state={state}
+          dot
+          suffix={
+            versionNumber != null ? t('topbar.version', { number: versionNumber }) : undefined
+          }
+        />
         <span className="text-xs text-muted-foreground">
           {t('topbar.lastEdited', {
             date: format.dateTime(new Date(updatedAt), { dateStyle: 'medium' }),
@@ -121,11 +135,7 @@ export function StructureTopbar({
           <Button size="sm" onClick={onReview}>
             <Upload className="size-4" />
             {t('reviewPublish.trigger')}
-            {pendingCount > 0 && (
-              <span className="ml-1 rounded-full bg-primary-foreground/20 px-1.5 text-[11px] font-bold">
-                {pendingCount}
-              </span>
-            )}
+            {pendingCount > 0 && <CountPill>{pendingCount}</CountPill>}
           </Button>
         </div>
       </div>
@@ -148,7 +158,7 @@ export function StructureTopbar({
 
         {/* Below 1000px the counts go: the tabs have to stay reachable, and six
             numbers wrapped over three lines are not a strip any more. */}
-        <div className="hidden pb-2 lg:block">{metrics}</div>
+        <div className="hidden pb-2 min-[1000px]:block">{metrics}</div>
       </div>
 
       {healthStrip}

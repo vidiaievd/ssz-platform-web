@@ -188,6 +188,14 @@ describe('CourseEditorShell', () => {
     );
   });
 
+  // State and version are one fact — what students can open — and reading them
+  // as two chips invites the question of which one is right (plan 64, phase 5).
+  it('says the state and the live version as one chip', () => {
+    renderShell('version-1');
+
+    expect(screen.getByLabelText('Status: Draft — v2')).toHaveTextContent('Draft· v2');
+  });
+
   it('counts the course in the header whichever view is open', () => {
     renderShell('version-1', 2, 'coverage');
     expect(screen.getByText('Modules').closest('div')).toHaveTextContent('2');

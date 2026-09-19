@@ -105,8 +105,11 @@ function AxisCell({ cell, empty, peak }: { cell: Cell; empty: boolean; peak: num
             )}
             style={{
               width: `${(cell.count / peak) * 100}%`,
+              // Hatched rather than tinted: "nobody recorded this" has to be
+              // told from a real count without relying on colour. Struck out of
+              // the surface colour, so it reads the same in both themes.
               backgroundImage: cell.notRecorded
-                ? 'repeating-linear-gradient(45deg, transparent 0 3px, rgba(255,255,255,0.55) 3px 6px)'
+                ? 'repeating-linear-gradient(45deg, transparent 0 3px, var(--color-card) 3px 6px)'
                 : undefined,
             }}
           />
