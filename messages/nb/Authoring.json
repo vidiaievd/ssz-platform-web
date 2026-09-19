@@ -3178,8 +3178,11 @@
       "document": "Fra en innstilling inne i selve oppgaven.",
       "template": "Utledet av oppgavetypen.",
       "atoms": "Fra ordene og reglene som er koblet til oppgaven.",
-      "unknown": "Ingenting her sier hva dette trener."
-    }
+      "unknown": "Ingenting her sier hva dette trener.",
+      "formHint": "Hvordan svaret lages, fra typen og innstillingene dens."
+    },
+    "refine": "Juster",
+    "refineClose": "Lukk"
   },
   "audio": {
     "enableLabel": "Lytteoppgave",

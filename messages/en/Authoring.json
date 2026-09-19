@@ -3178,8 +3178,11 @@
       "document": "From a setting inside the exercise itself.",
       "template": "Worked out from the exercise type.",
       "atoms": "From the words and rules linked to this exercise.",
-      "unknown": "Nothing here says what this trains."
-    }
+      "unknown": "Nothing here says what this trains.",
+      "formHint": "How the answer is produced, from the type and its settings."
+    },
+    "refine": "Refine",
+    "refineClose": "Close"
   },
   "audio": {
     "enableLabel": "Listening exercise",

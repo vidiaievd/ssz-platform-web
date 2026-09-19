@@ -123,7 +123,7 @@ import { WritingTaskPreview } from './writing-task/writing-task-preview';
 import type { SavedDocument as SavedWritingTask } from './writing-task/use-writing-task-autosave';
 import type { SavedDocument as SavedMatchPairs } from './match-pairs/use-match-pairs-autosave';
 import { ExerciseTargetsPanel } from './exercise-targets-panel';
-import { ExerciseAxesPanel } from './exercise-axes-panel';
+import { ExerciseCoverageCard } from './exercise-coverage-card';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 
@@ -188,6 +188,26 @@ export function ExerciseEditorPane({
   /** The statement table as its builder currently has it, for the preview column. */
   const [multipleChoiceGroup, setMultipleChoiceGroup] =
     useState<MultipleChoiceGroupDocument | null>(null);
+
+  /**
+   * Whichever builder is open, as it stands this second.
+   *
+   * The nine documents above are kept for the preview column; the axes card reads the
+   * same thing for the same reason — the flags that move the channel (the audio toggle,
+   * the gap-fill input mode, the translation direction) live inside the document, and a
+   * card reading the saved copy would be a day behind the screen it sits under.
+   */
+  const liveDocument: unknown =
+    gapFill?.exercise ??
+    errorCorrection ??
+    translate ??
+    matchPairs?.exercise ??
+    writingTask ??
+    shortAnswer ??
+    sentenceSchema ??
+    multipleChoice ??
+    multipleChoiceGroup ??
+    null;
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
   const isErrorCorrection = exercise?.templateCode === ERROR_CORRECTION_TEMPLATE_CODE;
@@ -507,11 +527,19 @@ export function ExerciseEditorPane({
 
         {/* Below whichever builder this exercise uses, and outside its form: the axes are
           their own resource with their own routes (plan 55 §3.5), so they save on their
-          own and no builder's "Done" is responsible for them. */}
+          own and no builder's "Done" is responsible for them.
+          Read from the document the builder is holding rather than from the one last
+          saved — nine builders can move the channel from inside (the audio toggle, the
+          translation direction, the gap-fill input mode), and an author who has to save
+          and reopen to see it learns to distrust the number (plan 64, phase 8). */}
         {!isLoading && exercise != null && (
-          <div className="mt-6">
-            <ExerciseAxesPanel exerciseId={exerciseId} containerId={container.id} />
-          </div>
+          <ExerciseCoverageCard
+            className="mt-6"
+            exerciseId={exerciseId}
+            containerId={container.id}
+            templateCode={exercise.templateCode}
+            document={liveDocument ?? exercise.content}
+          />
         )}
 
         {/* Beside the axes, and for the same reason: the address of each item is a table of
