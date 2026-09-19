@@ -187,7 +187,15 @@
       "word_bank_fill": "Ordbank-lukeoppgave",
       "text_order": "Sett i rekkefølge",
       "error_correction": "Finn og rett feil",
-      "word_bank_gap_fill": "Fyll inn ordene"
+      "word_bank_gap_fill": "Fyll inn ordene",
+      "sort_into_buckets": "Sorter i grupper",
+      "highlight_in_text": "Marker i teksten",
+      "dictation": "Diktat",
+      "inflection_table": "Bøyningstabell",
+      "read_aloud": "Les høyt",
+      "speaking_prompt": "Snakk",
+      "minimal_pairs": "Lytt og velg",
+      "information_transfer": "Fyll ut skjema"
     },
     "difficultyLevel": "Vanskelighetsgrad",
     "difficultyLevelNone": "Alle nivåer",

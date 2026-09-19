@@ -593,7 +593,15 @@ export function CurriculumInspector({
 
       <InspectorFooter
         editorHref={wsHref(workspaceId, `content/${containerId}/lessons/${item.id}`)}
-        onDelete={() => onDelete({ kind: 'item', id: item.id, title: item.title ?? '' })}
+        onDelete={() =>
+          onDelete({
+            kind: 'item',
+            id: item.id,
+            title: item.title ?? '',
+            materialKind: getMaterialKind(item),
+            templateCode: item.templateCode,
+          })
+        }
       />
     </div>
   );

@@ -187,7 +187,15 @@
       "word_bank_fill": "Пропуски з банком слів",
       "text_order": "Розставити по порядку",
       "error_correction": "Знайти та виправити помилки",
-      "word_bank_gap_fill": "Заповнення пропусків"
+      "word_bank_gap_fill": "Заповнення пропусків",
+      "sort_into_buckets": "Розподіл за групами",
+      "highlight_in_text": "Виділення в тексті",
+      "dictation": "Диктант",
+      "inflection_table": "Таблиця форм",
+      "read_aloud": "Читання вголос",
+      "speaking_prompt": "Усна відповідь",
+      "minimal_pairs": "Послухай і обери",
+      "information_transfer": "Заповнення форми"
     },
     "difficultyLevel": "Складність",
     "difficultyLevelNone": "Будь-який рівень",

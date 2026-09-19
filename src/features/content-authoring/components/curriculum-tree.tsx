@@ -47,6 +47,7 @@ import { wsHref } from '@/features/workspaces/lib/href';
 
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
+import { BlockTypeIcon } from './block-type-icon';
 import {
   isFiltering,
   matchesFilters,
@@ -320,15 +321,11 @@ function SectionDropZone({
  */
 function BlockDragCard({ item }: { item: CurriculumTreeItemNode }) {
   const materialLabel = useMaterialLabel();
-  const def = getLessonTypeDefinition(getMaterialKind(item));
-  const Icon = def.icon;
 
   return (
     <div className="flex w-fit max-w-100 cursor-grabbing items-center gap-2 rounded-sm border border-primary-200 bg-surface px-2 py-1.25 shadow-[var(--ssz-shadow-lg)]">
       <GripVertical size={13} className="shrink-0 text-muted-foreground" />
-      <Glyph style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}>
-        <Icon size={12} style={{ color: `var(${def.hueVar})` }} />
-      </Glyph>
+      <BlockTypeIcon kind={getMaterialKind(item)} templateCode={item.templateCode} size={12} />
       <span className="truncate text-sm text-foreground">{item.title}</span>
       <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
         {materialLabel(item)}
@@ -481,8 +478,6 @@ function BlockRow({
 }) {
   const t = useTranslations('Authoring');
   const materialLabel = useMaterialLabel();
-  const def = getLessonTypeDefinition(getMaterialKind(item));
-  const Icon = def.icon;
   const selected = selectedId === item.id;
   const checked = check.isChecked(item.id);
 
@@ -563,9 +558,7 @@ function BlockRow({
         aria-label={t('bulk.selectBlock', { name: item.title ?? '' })}
         className="size-3.75 rounded-xs"
       />
-      <Glyph style={{ background: `color-mix(in oklch, var(${def.hueVar}) 16%, transparent)` }}>
-        <Icon size={12} style={{ color: `var(${def.hueVar})` }} />
-      </Glyph>
+      <BlockTypeIcon kind={getMaterialKind(item)} templateCode={item.templateCode} />
       <InlineRename
         value={item.title ?? ''}
         editing={rename.activeId === item.id}
@@ -741,7 +734,13 @@ function ModuleCard({
                     currentSectionId={section?.id ?? null}
                     onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
                     onDelete={() =>
-                      onRequestDelete({ kind: 'item', id: item.id, title: item.title ?? '' })
+                      onRequestDelete({
+                        kind: 'item',
+                        id: item.id,
+                        title: item.title ?? '',
+                        materialKind: getMaterialKind(item),
+                        templateCode: item.templateCode,
+                      })
                     }
                     className={TOOL_BUTTON}
                   />
@@ -1444,7 +1443,15 @@ export function CurriculumTree({
     }
 
     const found = findItemWithModule(tree, id);
-    return found ? { kind: 'item', id, title: found.item.title ?? '' } : null;
+    return found
+      ? {
+          kind: 'item',
+          id,
+          title: found.item.title ?? '',
+          materialKind: getMaterialKind(found.item),
+          templateCode: found.item.templateCode,
+        }
+      : null;
   }
 
   /** Whether F2 has anything to open on this node — an exercise has no title of its own (B8). */

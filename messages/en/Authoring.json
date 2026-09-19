@@ -191,7 +191,15 @@
       "word_bank_fill": "Word bank gap-fill",
       "text_order": "Put in order",
       "error_correction": "Find and correct mistakes",
-      "word_bank_gap_fill": "Gap-fill"
+      "word_bank_gap_fill": "Gap-fill",
+      "sort_into_buckets": "Sort into groups",
+      "highlight_in_text": "Highlight in the text",
+      "dictation": "Dictation",
+      "inflection_table": "Inflection table",
+      "read_aloud": "Read aloud",
+      "speaking_prompt": "Speaking prompt",
+      "minimal_pairs": "Listen and choose",
+      "information_transfer": "Fill in a form"
     },
     "difficultyLevel": "Difficulty",
     "difficultyLevelNone": "Any level",

@@ -100,6 +100,15 @@ export interface CurriculumTreeItemNode {
    * the row is waiting, or when the owning container has never been published.
    */
   pendingChange: ItemPendingChange | null;
+  /**
+   * Which exercise template this row uses — `word_bank_gap_fill`, `match_pairs`
+   * and so on. Null for every other item type, and for a server that predates
+   * the field.
+   *
+   * The title already carries the template's display name; the code is here
+   * because a picture cannot be keyed off a name that gets translated.
+   */
+  templateCode?: string | null;
   durationMinutes: number | null;
   xpReward: number | null;
 }

@@ -187,7 +187,15 @@
       "word_bank_fill": "Пропуски с банком слов",
       "text_order": "Расставить по порядку",
       "error_correction": "Найти и исправить ошибки",
-      "word_bank_gap_fill": "Заполнение пропусков"
+      "word_bank_gap_fill": "Заполнение пропусков",
+      "sort_into_buckets": "Распределение по группам",
+      "highlight_in_text": "Выделение в тексте",
+      "dictation": "Диктант",
+      "inflection_table": "Таблица форм",
+      "read_aloud": "Чтение вслух",
+      "speaking_prompt": "Устный ответ",
+      "minimal_pairs": "Послушай и выбери",
+      "information_transfer": "Заполнение формы"
     },
     "difficultyLevel": "Сложность",
     "difficultyLevelNone": "Любой уровень",
