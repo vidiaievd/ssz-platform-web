@@ -3351,5 +3351,16 @@
   "view": {
     "structure": "Struktur",
     "coverage": "Dekning"
+  },
+  "health": {
+    "label": "Dekning i utkastet",
+    "signal": {
+      "listening": "Lytting",
+      "speaking": "Muntlig",
+      "produced": "Egne svar",
+      "neverTested": "Aldri testet",
+      "notRecorded": "Ikke registrert"
+    },
+    "openReport": "Åpne dekningsrapporten →"
   }
 }

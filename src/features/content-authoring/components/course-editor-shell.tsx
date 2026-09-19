@@ -19,8 +19,10 @@ import { CoverageResultGrid } from './coverage-result-grid';
 import { CoverageStrip } from './coverage-strip';
 import { AtomCoverageReport } from './atom-coverage-report';
 import { collectPublishRows } from '../lib/publish-rows';
+import type { HealthAnchor } from '../lib/health-signals';
 import { deriveContainerState } from './container-state-badge';
 import { ReviewPublishDialog } from './review-publish-dialog';
+import { StructureHealthStrip } from './structure-health-strip';
 import { StructureMetrics } from './structure-metrics';
 import { StructureTopbar, type EditorView } from './structure-topbar';
 
@@ -67,6 +69,10 @@ export function CourseEditorShell({
   // review against and so links back here instead of publishing on its own.
   const [publishOpen, setPublishOpen] = useState(searchParams.get('publish') === '1');
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  // Which coverage card a health signal asked for, while the view is still
+  // switching: the card is not mounted until it has. A ref rather than state —
+  // nothing renders differently for it, it is a note for the next paint.
+  const pendingAnchorRef = useRef<HealthAnchor | null>(null);
 
   // The view is in the URL, not in state: a report worth sending someone is
   // worth linking to, and "open the full report" from inside the tree has to
@@ -88,6 +94,28 @@ export function CourseEditorShell({
     },
     [view, searchParams, router, pathname],
   );
+
+  // A signal asks for the Coverage tab and for one card on it. The switch goes
+  // through the same handler the tabs use, so the URL stays the record of which
+  // view is open; the scroll waits for the card to exist.
+  const handleOpenCoverage = useCallback(
+    (anchor: HealthAnchor) => {
+      if (view === 'coverage') {
+        document.getElementById(anchor)?.scrollIntoView({ block: 'start' });
+        return;
+      }
+      pendingAnchorRef.current = anchor;
+      handleViewChange('coverage');
+    },
+    [view, handleViewChange],
+  );
+
+  useEffect(() => {
+    const anchor = pendingAnchorRef.current;
+    if (view !== 'coverage' || !anchor) return;
+    pendingAnchorRef.current = null;
+    document.getElementById(anchor)?.scrollIntoView({ block: 'start' });
+  }, [view]);
 
   // The topbar is sticky and its height changes — with the viewport (the action
   // row wraps) and with the view (tabs and, from phase 1, the health strip) —
@@ -150,6 +178,11 @@ export function CourseEditorShell({
           </Button>
         }
         metrics={<StructureMetrics tree={tree} unpublished={pendingCount} />}
+        healthStrip={
+          view === 'structure' ? (
+            <StructureHealthStrip containerId={container.id} onOpenCoverage={handleOpenCoverage} />
+          ) : null
+        }
       />
 
       <ReviewPublishDialog
@@ -172,7 +205,10 @@ export function CourseEditorShell({
           {/* What the course is made of, by the exercises it holds. Drawn
               expanded rather than folded behind a toggle — a channel nothing
               trains is invisible in a panel nobody opens. */}
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div
+            id="coverage-skills"
+            className="scroll-mt-[var(--structure-sticky-top)] rounded-xl border border-border bg-card p-4"
+          >
             <CoverageStrip containerId={container.id} />
           </div>
 
@@ -181,7 +217,10 @@ export function CourseEditorShell({
               twenty-six words that leaves untested. Beside it rather than inside it — one
               counts exercises and the other counts what they are about, and a reader who
               cannot tell which is which will trust neither. */}
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div
+            id="coverage-atoms"
+            className="scroll-mt-[var(--structure-sticky-top)] rounded-xl border border-border bg-card p-4"
+          >
             <AtomCoverageReport containerId={container.id} />
           </div>
 

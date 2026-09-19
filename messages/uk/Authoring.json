@@ -3351,5 +3351,16 @@
   "view": {
     "structure": "Структура",
     "coverage": "Покриття"
+  },
+  "health": {
+    "label": "Покриття чернетки",
+    "signal": {
+      "listening": "Аудіювання",
+      "speaking": "Говоріння",
+      "produced": "Відповіді від себе",
+      "neverTested": "Не перевіряється",
+      "notRecorded": "Не визначено"
+    },
+    "openReport": "Відкрити звіт про покриття →"
   }
 }

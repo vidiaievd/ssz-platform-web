@@ -3351,5 +3351,16 @@
   "view": {
     "structure": "Structure",
     "coverage": "Coverage"
+  },
+  "health": {
+    "label": "Draft coverage",
+    "signal": {
+      "listening": "Listening",
+      "speaking": "Speaking",
+      "produced": "Produced answers",
+      "neverTested": "Never tested",
+      "notRecorded": "Not recorded"
+    },
+    "openReport": "Open coverage report →"
   }
 }

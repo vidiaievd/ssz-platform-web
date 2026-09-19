@@ -3351,5 +3351,16 @@
   "view": {
     "structure": "Структура",
     "coverage": "Покрытие"
+  },
+  "health": {
+    "label": "Покрытие черновика",
+    "signal": {
+      "listening": "Аудирование",
+      "speaking": "Говорение",
+      "produced": "Ответы от себя",
+      "neverTested": "Не проверяется",
+      "notRecorded": "Не определён"
+    },
+    "openReport": "Открыть отчёт о покрытии →"
   }
 }

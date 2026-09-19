@@ -36,6 +36,12 @@ interface StructureTopbarProps {
   settingsTrigger: React.ReactNode;
   /** The metric strip; a slot because it needs the tree, which the shell already holds. */
   metrics: React.ReactNode;
+  /**
+   * The draft's zeroes, drawn on the Structure tab only. Inside the header
+   * rather than under it so that switching tabs changes the measured height and
+   * the sticky panes below follow it (plan 64, phase 1).
+   */
+  healthStrip?: React.ReactNode;
   /** The shell measures the rendered header to park the sticky side panes below it. */
   ref?: React.Ref<HTMLElement>;
 }
@@ -59,6 +65,7 @@ export function StructureTopbar({
   onReview,
   settingsTrigger,
   metrics,
+  healthStrip,
   ref,
 }: StructureTopbarProps) {
   const t = useTranslations('Authoring');
@@ -143,6 +150,8 @@ export function StructureTopbar({
             numbers wrapped over three lines are not a strip any more. */}
         <div className="hidden pb-2 lg:block">{metrics}</div>
       </div>
+
+      {healthStrip}
     </header>
   );
 }

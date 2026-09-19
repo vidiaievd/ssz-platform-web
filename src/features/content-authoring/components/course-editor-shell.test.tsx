@@ -48,6 +48,20 @@ vi.mock('./atom-coverage-report', () => ({
     <div data-testid="atom-coverage-report" data-container={containerId} />
   ),
 }));
+// Two react-query hooks of its own; its behaviour is exercised in
+// `structure-health-strip.test.tsx`. Here it only has to be a thing that asks
+// for a card on the other tab.
+vi.mock('./structure-health-strip', () => ({
+  StructureHealthStrip: ({
+    onOpenCoverage,
+  }: {
+    onOpenCoverage: (anchor: 'coverage-skills' | 'coverage-atoms') => void;
+  }) => (
+    <div data-testid="health-strip">
+      <button onClick={() => onOpenCoverage('coverage-atoms')}>Never tested</button>
+    </div>
+  ),
+}));
 vi.mock('./course-structure-panel', () => ({
   CourseStructurePanel: ({
     containerId,
@@ -183,6 +197,27 @@ describe('CourseEditorShell', () => {
     renderShell('version-1', 2, 'coverage');
     expect(screen.getByText('Modules').closest('div')).toHaveTextContent('2');
     expect(screen.getByRole('button', { name: /Review & publish/ })).toHaveTextContent('2');
+  });
+
+  // The band belongs to the tree: on the report every one of its numbers is on
+  // screen in full, and a summary above them would only be a second opinion.
+  it('draws the draft zeroes on the tree and drops them on the report', () => {
+    renderShell('version-1');
+    expect(screen.getByTestId('health-strip')).toBeInTheDocument();
+  });
+
+  it('keeps the health strip off the report tab', () => {
+    renderShell('version-1', 0, 'coverage');
+    expect(screen.queryByTestId('health-strip')).not.toBeInTheDocument();
+  });
+
+  it('opens the report when a health signal is clicked', () => {
+    renderShell('version-1');
+    fireEvent.click(screen.getByRole('button', { name: 'Never tested' }));
+    expect(replace).toHaveBeenCalledWith(
+      '/w/my-school/content/course-1?view=coverage',
+      expect.objectContaining({ scroll: false }),
+    );
   });
 
   it('shows a load error in place of the panel when there is no draft version', () => {
