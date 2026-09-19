@@ -28,8 +28,8 @@
 // one combined `source` would have to lie about one of them.
 
 import { templateProfile } from './by-template';
-import type { Focus, FocusSource, Form, Skill, SkillSource } from './model';
-import { orderFocuses, orderSkills, parseFocuses, parseSkills } from './model';
+import type { Focus, FocusSource, Form, Modality, Skill, SkillSource } from './model';
+import { isModality, orderFocuses, orderSkills, parseFocuses, parseSkills } from './model';
 
 /** How the exercise sits in its lesson. Every field optional: most exercises have none. */
 export interface Placement {
@@ -58,12 +58,30 @@ export interface Placement {
 export interface SkillOverride {
   skills?: unknown;
   focus?: unknown;
+  /**
+   * What the author said about *how* the exercise is answered (plan 63 §2 E).
+   *
+   * Nothing writes it yet — there is no column for it — and the field is here so that the
+   * rung exists in one place when something does. An unrecognised value is ignored rather
+   * than trusted, exactly as the two lists above are filtered.
+   */
+  modality?: unknown;
   setAt?: Date | string | null;
 }
 
 export interface AtomRef {
   atomType: string;
   atomId?: string;
+  /**
+   * Which element of the exercise names this atom, where the catalogue records it
+   * (`ExerciseItemTarget.itemKey`). Null for an atom named by the whole exercise, which
+   * is all the older `PRACTICED_BY` graph can say.
+   *
+   * The key is what makes a subject a share rather than a flag: a set of eight questions,
+   * three about words and five about a rule, is three-eighths vocabulary — not "both
+   * subjects, equally" (plan 64, decision H).
+   */
+  itemKey?: string | null;
 }
 
 export interface DeriveInput {
@@ -76,12 +94,33 @@ export interface DeriveInput {
   override?: SkillOverride | null;
 }
 
+/**
+ * How much of the exercise each subject accounts for, 0–1 per subject.
+ *
+ * Shares of *elements*, not of exercises, and they need not sum to 1: an element about a
+ * word inside a rule names both subjects and counts in both. Empty whenever the subject
+ * did not come from the atom graph — a template's hint is a claim about the type, and
+ * weighing it would invent a precision nobody recorded.
+ */
+export type FocusWeights = Partial<Record<Focus, number>>;
+
 export interface DerivedProfile {
   skills: Skill[];
   focus: Focus[];
+  /** Empty unless `focusSource` is `atoms`. See `FocusWeights`. */
+  focusWeights: FocusWeights;
   form: Form;
+  /** How the learner had to know it — plan 63 §2 E. */
+  modality: Modality;
   skillSource: SkillSource;
   focusSource: FocusSource;
+  /**
+   * Which rung answered the modality. Its own chain — override → document → template —
+   * because placement says nothing about how an answer is produced: a `short_answer`
+   * standing as a listening stage is heard rather than read, and still written from
+   * nothing.
+   */
+  modalitySource: SkillSource;
 }
 
 function hasSpoken(override: SkillOverride | null | undefined): boolean {
@@ -115,7 +154,10 @@ function record(value: unknown): Record<string, unknown> | null {
  *   production), `bank` means chosen from a strip (recognition). The template merged two
  *   old types, so the document is the only thing that can tell them apart.
  */
-function fromDocument(templateCode: string, content: unknown): { skills: Skill[]; form?: Form } | null {
+function fromDocument(
+  templateCode: string,
+  content: unknown,
+): { skills: Skill[]; form?: Form; modality?: Modality } | null {
   const doc = record(content);
   if (!doc) return null;
 
@@ -124,8 +166,11 @@ function fromDocument(templateCode: string, content: unknown): { skills: Skill[]
 
   if (templateCode === 'word_bank_gap_fill') {
     const input = record(doc['settings'])?.['input'];
-    if (input === 'free') return { skills: ['written'], form: 'free' };
-    if (input === 'bank') return { skills: ['reading'], form: 'bank' };
+    // Typed from nothing is retrieval; chosen off a strip is recognition. The same flag
+    // settles all three columns, which is the whole argument for reading the document
+    // here rather than splitting the template back in two.
+    if (input === 'free') return { skills: ['written'], form: 'free', modality: 'recall' };
+    if (input === 'bank') return { skills: ['reading'], form: 'bank', modality: 'recognition' };
   }
 
   return null;
@@ -140,15 +185,51 @@ function fromDocument(templateCode: string, content: unknown): { skills: Skill[]
  * `unknown` bucket, and the reason the grammar-rule pool (audit 34 §5 item 3) matters
  * beyond spaced repetition.
  */
+function atomFocus(atom: AtomRef): Focus | null {
+  const type = atom.atomType.toLowerCase();
+  if (type.includes('grammar')) return 'grammar';
+  if (type.includes('word') || type.includes('vocab')) return 'vocabulary';
+  return null;
+}
+
 function fromAtoms(atoms: readonly AtomRef[] | undefined): Focus[] | null {
   if (!atoms || atoms.length === 0) return null;
   const found = new Set<Focus>();
   for (const atom of atoms) {
-    const type = atom.atomType.toLowerCase();
-    if (type.includes('grammar')) found.add('grammar');
-    else if (type.includes('word') || type.includes('vocab')) found.add('vocabulary');
+    const focus = atomFocus(atom);
+    if (focus) found.add(focus);
   }
   return found.size > 0 ? orderFocuses(found) : null;
+}
+
+/**
+ * The same graph, read by element rather than by exercise.
+ *
+ * An atom with no `itemKey` stands for the whole exercise and gets a bucket of its own,
+ * so a catalogue that predates element-level targets still weighs in at 1 — the older
+ * shape says "this exercise is about grammar", which is exactly one element's worth of
+ * evidence and should not read as eight.
+ */
+function weighAtoms(atoms: readonly AtomRef[] | undefined): FocusWeights {
+  if (!atoms || atoms.length === 0) return {};
+
+  const byItem = new Map<string, Set<Focus>>();
+  for (const atom of atoms) {
+    const focus = atomFocus(atom);
+    if (!focus) continue;
+    const key = atom.itemKey ?? '';
+    const bucket = byItem.get(key) ?? new Set<Focus>();
+    bucket.add(focus);
+    byItem.set(key, bucket);
+  }
+
+  if (byItem.size === 0) return {};
+
+  const weights: FocusWeights = {};
+  for (const foci of byItem.values()) {
+    for (const focus of foci) weights[focus] = (weights[focus] ?? 0) + 1 / byItem.size;
+  }
+  return weights;
 }
 
 export function deriveSkills(input: DeriveInput): DerivedProfile {
@@ -184,6 +265,7 @@ export function deriveSkills(input: DeriveInput): DerivedProfile {
 
   let focus: Focus[];
   let focusSource: FocusSource;
+  let focusWeights: FocusWeights = {};
 
   if (hasSpoken(input.override)) {
     focus = parseFocuses(input.override?.focus);
@@ -193,6 +275,7 @@ export function deriveSkills(input: DeriveInput): DerivedProfile {
     if (fromGraph) {
       focus = fromGraph;
       focusSource = 'atoms';
+      focusWeights = weighAtoms(input.atoms);
     } else if (profile && profile.focus.length > 0) {
       focus = orderFocuses(profile.focus);
       focusSource = 'template';
@@ -202,5 +285,17 @@ export function deriveSkills(input: DeriveInput): DerivedProfile {
     }
   }
 
-  return { skills, focus, form, skillSource, focusSource };
+  const overriddenModality = hasSpoken(input.override) && isModality(input.override?.modality);
+  const modality: Modality = overriddenModality
+    ? (input.override?.modality as Modality)
+    : (document?.modality ?? profile?.modality ?? 'unknown');
+  const modalitySource: SkillSource = overriddenModality
+    ? 'override'
+    : document?.modality
+      ? 'document'
+      : profile?.modality && profile.modality !== 'unknown'
+        ? 'template'
+        : 'unknown';
+
+  return { skills, focus, focusWeights, form, modality, skillSource, focusSource, modalitySource };
 }
