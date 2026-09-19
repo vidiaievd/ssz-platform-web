@@ -1493,8 +1493,6 @@
   "topbar": {
     "version": "v{number}",
     "lastEdited": "Sist endret {date}",
-    "expandAll": "Utvid alle",
-    "collapseAll": "Slå sammen alle",
     "previewAsStudent": "Forhåndsvis som elev"
   },
   "metrics": {
@@ -1528,7 +1526,9 @@
     "stateEdited": "Endret",
     "stateDraft": "Utkast",
     "clear": "Nullstill",
-    "noMatchesInModule": "Ingenting her passer med filtrene."
+    "noMatchesInModule": "Ingenting her passer med filtrene.",
+    "expandAll": "Vis alt",
+    "collapseAll": "Skjul alt"
   },
   "bulk": {
     "label": "Masshandlinger for de valgte blokkene",
@@ -3347,5 +3347,9 @@
     },
     "unitAddressed": "{addressed}/{total}",
     "practisedElsewhere": "{count, plural, one {# faktum øves her, men læres et annet sted} other {# fakta øves her, men læres et annet sted}} — repetisjon, ikke et hull."
+  },
+  "view": {
+    "structure": "Struktur",
+    "coverage": "Dekning"
   }
 }

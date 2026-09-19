@@ -74,6 +74,8 @@ function renderPanel() {
         collapsed={new Set()}
         onToggleCollapse={vi.fn()}
         onExpand={vi.fn()}
+        onExpandAll={vi.fn()}
+        onCollapseAll={vi.fn()}
         onReview={vi.fn()}
       />
     </NextIntlClientProvider>,

@@ -1,8 +1,9 @@
 'use client';
 
-import { Search, X } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown, Search, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -23,6 +24,9 @@ import {
 interface StructureToolbarProps {
   filters: StructureFilters;
   onChange: (filters: StructureFilters) => void;
+  /** Folding is the shell's to do — it owns every node — but it is read here, above the tree it folds. */
+  onExpandAll: () => void;
+  onCollapseAll: () => void;
 }
 
 /**
@@ -32,7 +36,12 @@ interface StructureToolbarProps {
  * stay put whatever is typed here, so an author never loses their place in a
  * course while looking for one exercise (BEHAVIOR.md §3, acceptance 4).
  */
-export function StructureToolbar({ filters, onChange }: StructureToolbarProps) {
+export function StructureToolbar({
+  filters,
+  onChange,
+  onExpandAll,
+  onCollapseAll,
+}: StructureToolbarProps) {
   const t = useTranslations('Authoring.toolbar');
   const active = isFiltering(filters);
 
@@ -84,6 +93,18 @@ export function StructureToolbar({ filters, onChange }: StructureToolbarProps) {
           <SelectItem value="draft">{t('stateDraft')}</SelectItem>
         </SelectContent>
       </Select>
+
+      {/* Folding belongs over the tree rather than in the page header: the
+          header now carries the tabs, and "Collapse all" means nothing on the
+          coverage report. */}
+      <Button variant="ghost" size="sm" onClick={onExpandAll}>
+        <ChevronsUpDown className="size-4" />
+        {t('expandAll')}
+      </Button>
+      <Button variant="ghost" size="sm" onClick={onCollapseAll}>
+        <ChevronsDownUp className="size-4" />
+        {t('collapseAll')}
+      </Button>
 
       {active && (
         <button

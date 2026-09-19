@@ -40,6 +40,9 @@ interface CourseStructurePanelProps {
   onToggleCollapse: (key: string) => void;
   /** Unfolds one node — the rail needs this to jump into a collapsed level. */
   onExpand: (key: string) => void;
+  /** Folds or unfolds everything; read from the toolbar above the tree. */
+  onExpandAll: () => void;
+  onCollapseAll: () => void;
   /** Opens the publish dialog, which the shell owns. */
   onReview: () => void;
 }
@@ -73,6 +76,8 @@ export function CourseStructurePanel({
   collapsed,
   onToggleCollapse,
   onExpand,
+  onExpandAll,
+  onCollapseAll,
   onReview,
 }: CourseStructurePanelProps) {
   const t = useTranslations('Authoring');
@@ -152,7 +157,12 @@ export function CourseStructurePanel({
         </div>
 
         <div className="ssz-surface self-start rounded-2xl border border-border p-3.5 shadow-[var(--ssz-shadow-xs)]">
-          <StructureToolbar filters={filters} onChange={setFilters} />
+          <StructureToolbar
+            filters={filters}
+            onChange={setFilters}
+            onExpandAll={onExpandAll}
+            onCollapseAll={onCollapseAll}
+          />
           <div className="mt-2.5">
             <UnpublishedBanner tree={tree} onReview={onReview} />
           </div>

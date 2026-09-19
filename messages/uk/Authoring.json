@@ -1493,8 +1493,6 @@
   "topbar": {
     "version": "v{number}",
     "lastEdited": "Востаннє змінено {date}",
-    "expandAll": "Розгорнути все",
-    "collapseAll": "Згорнути все",
     "previewAsStudent": "Переглянути як студент"
   },
   "metrics": {
@@ -1528,7 +1526,9 @@
     "stateEdited": "Змінено",
     "stateDraft": "Чернетка",
     "clear": "Очистити",
-    "noMatchesInModule": "Тут немає нічого, що відповідає фільтрам."
+    "noMatchesInModule": "Тут немає нічого, що відповідає фільтрам.",
+    "expandAll": "Розгорнути все",
+    "collapseAll": "Згорнути все"
   },
   "bulk": {
     "label": "Масові дії для вибраних блоків",
@@ -3347,5 +3347,9 @@
     },
     "unitAddressed": "{addressed}/{total}",
     "practisedElsewhere": "{count, plural, one {# факт тут повторюється, а вводиться в іншому місці} few {# факти тут повторюються, а вводяться в іншому місці} other {# фактів тут повторюються, а вводяться в іншому місці}} — це повторення, дірою не рахується."
+  },
+  "view": {
+    "structure": "Структура",
+    "coverage": "Покриття"
   }
 }

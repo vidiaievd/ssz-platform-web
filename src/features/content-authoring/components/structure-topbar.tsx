@@ -1,13 +1,17 @@
 'use client';
 
-import { ChevronsDownUp, ChevronsUpDown, ExternalLink, Inbox, Upload } from 'lucide-react';
+import { ExternalLink, Inbox, Upload } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/lib/i18n/navigation';
 
 import type { ContainerState } from '../types';
 import { ContainerStateBadge } from './container-state-badge';
+
+/** The two halves of the screen: the tree an author edits, the report it earns. */
+export type EditorView = 'structure' | 'coverage';
 
 interface StructureTopbarProps {
   title: string;
@@ -24,8 +28,9 @@ interface StructureTopbarProps {
   previewHref: string | null;
   /** The course's marking inbox. `null` for containers whose material nobody hands in. */
   reviewInboxHref: string | null;
-  onExpandAll: () => void;
-  onCollapseAll: () => void;
+  /** Which half is on screen. Lives in the URL, so the report can be linked to. */
+  view: EditorView;
+  onViewChange: (view: EditorView) => void;
   onReview: () => void;
   /** The settings drawer owns its own trigger, so it comes in as a slot. */
   settingsTrigger: React.ReactNode;
@@ -49,8 +54,8 @@ export function StructureTopbar({
   pendingCount,
   previewHref,
   reviewInboxHref,
-  onExpandAll,
-  onCollapseAll,
+  view,
+  onViewChange,
   onReview,
   settingsTrigger,
   metrics,
@@ -89,14 +94,6 @@ export function StructureTopbar({
         </span>
 
         <div className="ml-auto flex flex-wrap items-center gap-1.5">
-          <Button variant="ghost" size="sm" onClick={onExpandAll}>
-            <ChevronsUpDown className="size-4" />
-            {t('topbar.expandAll')}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onCollapseAll}>
-            <ChevronsDownUp className="size-4" />
-            {t('topbar.collapseAll')}
-          </Button>
           {reviewInboxHref && (
             <Button asChild variant="outline" size="sm">
               <Link href={reviewInboxHref}>
@@ -126,7 +123,26 @@ export function StructureTopbar({
         </div>
       </div>
 
-      <div className="mt-3 border-t border-border pt-3">{metrics}</div>
+      {/* Row two: which half of the screen is open, and how big the course is.
+          Together because they answer one question between them — the tabs say
+          what is being read, the counts say what it is being read against, and
+          splitting them would let a reader take the numbers for the tab's. */}
+      <div className="mt-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-t border-border pt-1">
+        <Tabs value={view} onValueChange={(next) => onViewChange(next as EditorView)}>
+          <TabsList className="border-b-0">
+            <TabsTrigger value="structure" className="px-3 py-2">
+              {t('view.structure')}
+            </TabsTrigger>
+            <TabsTrigger value="coverage" className="px-3 py-2">
+              {t('view.coverage')}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Below 1000px the counts go: the tabs have to stay reachable, and six
+            numbers wrapped over three lines are not a strip any more. */}
+        <div className="hidden pb-2 lg:block">{metrics}</div>
+      </div>
     </header>
   );
 }

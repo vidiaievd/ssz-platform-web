@@ -1493,8 +1493,6 @@
   "topbar": {
     "version": "v{number}",
     "lastEdited": "Last edited {date}",
-    "expandAll": "Expand all",
-    "collapseAll": "Collapse all",
     "previewAsStudent": "Preview as student"
   },
   "metrics": {
@@ -1528,7 +1526,9 @@
     "stateEdited": "Edited",
     "stateDraft": "Draft",
     "clear": "Clear",
-    "noMatchesInModule": "Nothing here matches the filters."
+    "noMatchesInModule": "Nothing here matches the filters.",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all"
   },
   "bulk": {
     "label": "Bulk actions for the selected blocks",
@@ -3347,5 +3347,9 @@
     },
     "unitAddressed": "{addressed}/{total}",
     "practisedElsewhere": "{count, plural, one {# fact practised here is taught elsewhere} other {# facts practised here are taught elsewhere}} — revision, counted as no gap."
+  },
+  "view": {
+    "structure": "Structure",
+    "coverage": "Coverage"
   }
 }
