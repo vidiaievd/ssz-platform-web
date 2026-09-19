@@ -45,6 +45,8 @@ interface CourseStructurePanelProps {
   onCollapseAll: () => void;
   /** Opens the publish dialog, which the shell owns. */
   onReview: () => void;
+  /** Where the tree starts filtered, when something sent the author here to look at one thing. */
+  initialFilters?: StructureFilters;
 }
 
 function StructureSkeleton() {
@@ -79,10 +81,14 @@ export function CourseStructurePanel({
   onExpandAll,
   onCollapseAll,
   onReview,
+  initialFilters,
 }: CourseStructurePanelProps) {
   const t = useTranslations('Authoring');
   const [selection, setSelection] = useState<CurriculumTreeSelection | null>(null);
-  const [filters, setFilters] = useState<StructureFilters>(EMPTY_FILTERS);
+  // Seeded, not controlled: a triage button hands the tree a starting filter,
+  // and from then on the toolbar owns it — a URL that kept overriding what the
+  // author typed would be a filter they cannot clear.
+  const [filters, setFilters] = useState<StructureFilters>(initialFilters ?? EMPTY_FILTERS);
   const { data: tree, isLoading, isError, refetch } = useCurriculumTree(containerId, versionId);
 
   /**

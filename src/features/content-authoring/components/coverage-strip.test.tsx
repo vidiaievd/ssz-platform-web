@@ -169,4 +169,43 @@ describe('CoverageStrip', () => {
 
     expect(screen.getByText('Could not work out what this trains.')).toBeInTheDocument();
   });
+
+  // COVERAGE.md §1.2 — three states told apart by shape, not by colour alone:
+  // a zero is a claim about the material, "not recorded" is a claim about what
+  // was written down about it, and an empty row is neither.
+  it('draws a zero as a zero and an unrecorded count as neither', () => {
+    renderStrip({ data: coverage() });
+
+    const listening = screen.getByText('Listening').closest('div')?.parentElement;
+    expect(listening?.querySelector('.border-dashed')).toBeInTheDocument();
+
+    const notRecorded = screen.getAllByText('Not recorded')[0]?.closest('div')?.parentElement;
+    expect(notRecorded?.querySelector('.border-dashed')).not.toBeInTheDocument();
+  });
+
+  it('says a row has no material at all rather than calling it four zeroes', () => {
+    renderStrip({
+      data: coverage({
+        draft: report(
+          tallies({
+            total: 4,
+            byForm: { bank: 0, free: 0, mixed: 0, unknown: 0 },
+          }),
+        ),
+      }),
+    });
+
+    expect(cell('From a list')).toContain('–');
+    expect(cell('Typed')).toContain('–');
+  });
+
+  // An exercise can carry two channels, so a row never sums to the total —
+  // which is exactly why the caption says what the bars may be compared against.
+  it('says what the bars are measured against', () => {
+    renderStrip({ data: coverage() });
+
+    expect(
+      screen.getByText('bars compare inside this row only · longest = 8 of 10'),
+    ).toBeInTheDocument();
+  });
 });

@@ -44,48 +44,104 @@ interface Cell {
   key: string;
   label: string;
   count: number;
+  /**
+   * `notRecorded` is the "nobody said" bucket — the `unknown` cell of the
+   * subject and answer axes. It is not a zero: a zero is a claim about the
+   * material, and this is a claim about what was written down about it
+   * (COVERAGE.md §1.2).
+   */
+  notRecorded?: boolean;
+}
+
+/**
+ * One cell of an axis: its label, its number, and a bar that means something
+ * only next to the other cells of the same row.
+ *
+ * Three states, told apart by shape and not by colour alone, because the report
+ * is read in print and by people who do not see the difference between amber
+ * and red:
+ *  - nothing of this kind → red number and a dashed outline where the bar goes;
+ *  - nobody recorded it → grey number and a hatched bar;
+ *  - no material at all in the row → a flat cell with a dash, which is neither
+ *    of the above and must not read as "you trained none of this".
+ */
+function AxisCell({ cell, empty, peak }: { cell: Cell; empty: boolean; peak: number }) {
+  const zero = cell.count === 0;
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-baseline justify-between gap-1.5">
+        <span
+          className={cn('truncate text-xs', zero ? 'text-muted-foreground' : 'text-foreground')}
+        >
+          {cell.label}
+        </span>
+        <b
+          className={cn(
+            'text-xs font-semibold tabular-nums',
+            empty
+              ? 'text-muted-foreground'
+              : cell.notRecorded
+                ? 'text-muted-foreground'
+                : zero
+                  ? 'text-error-700 dark:text-error-400'
+                  : 'text-foreground',
+          )}
+        >
+          {empty ? '–' : cell.count}
+        </b>
+      </div>
+
+      {empty ? (
+        <div className="h-1.5 rounded-full bg-muted/60" />
+      ) : zero ? (
+        <div className="h-1.5 rounded-full border border-dashed border-error-300" />
+      ) : (
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div
+            className={cn(
+              'h-full rounded-full',
+              cell.notRecorded ? 'bg-muted-foreground/40' : 'bg-primary',
+            )}
+            style={{
+              width: `${(cell.count / peak) * 100}%`,
+              backgroundImage: cell.notRecorded
+                ? 'repeating-linear-gradient(45deg, transparent 0 3px, rgba(255,255,255,0.55) 3px 6px)'
+                : undefined,
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 function AxisRow({ label, cells, compact }: { label: string; cells: Cell[]; compact: boolean }) {
+  const t = useTranslations('Authoring.coverage');
   // The share is taken against the busiest cell, not against the total: rows are
   // read as "which of these dominates", and against a total that no row sums to
   // — an exercise can carry two skills — every bar would be a different fraction
-  // of a different whole.
-  const peak = Math.max(...cells.map((cell) => cell.count), 1);
+  // of a different whole. Which is exactly why the caption says so.
+  const highest = Math.max(...cells.map((cell) => cell.count), 0);
+  const peak = Math.max(highest, 1);
+  const total = cells.reduce((sum, cell) => sum + cell.count, 0);
+  const empty = highest === 0;
 
   return (
     <div className="space-y-1.5">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </span>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          {label}
+        </span>
+        {!empty && (
+          <span className="text-[10px] text-muted-foreground">
+            {t('barsCaption', { peak: highest, total })}
+          </span>
+        )}
+      </div>
       <div className={cn('grid gap-x-4 gap-y-2', compact ? 'grid-cols-2' : 'grid-cols-4')}>
         {cells.map((cell) => (
-          <div key={cell.key} className="space-y-1">
-            <div className="flex items-baseline justify-between gap-1.5">
-              <span
-                className={cn(
-                  'truncate text-xs',
-                  cell.count === 0 ? 'text-muted-foreground' : 'text-foreground',
-                )}
-              >
-                {cell.label}
-              </span>
-              <b
-                className={cn(
-                  'text-xs font-semibold tabular-nums',
-                  cell.count === 0 ? 'text-muted-foreground' : 'text-foreground',
-                )}
-              >
-                {cell.count}
-              </b>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${(cell.count / peak) * 100}%` }}
-              />
-            </div>
-          </div>
+          <AxisCell key={cell.key} cell={cell} empty={empty} peak={peak} />
         ))}
       </div>
     </div>
@@ -144,11 +200,13 @@ function Tallies({
     key: focus,
     label: t(`focus.${focus}` as 'focus.vocabulary'),
     count: coverage.byFocus[focus],
+    notRecorded: focus === 'unknown',
   }));
   const formCells = COVERAGE_FORMS.map((form) => ({
     key: form,
     label: t(`form.${form}` as 'form.bank'),
     count: coverage.byForm[form],
+    notRecorded: form === 'unknown',
   }));
 
   // `COV_SKILL_ABSENT` is dropped, not rendered: the line above already names every

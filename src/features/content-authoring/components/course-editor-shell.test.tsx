@@ -27,25 +27,23 @@ vi.mock('./review-publish-dialog', () => ({
   ReviewPublishDialog: ({ open }: { open: boolean }) =>
     open ? <div data-testid="review-publish-open" /> : null,
 }));
-// Counts the course through react-query, which this shell test does not stand
-// up; it is exercised in `coverage-strip.test.tsx`.
-vi.mock('./coverage-strip', () => ({
-  CoverageStrip: ({ containerId }: { containerId: string }) => (
-    <div data-testid="coverage-strip" data-container={containerId} />
-  ),
-}));
-// Same reason as the strip above: two react-query hooks, exercised in
-// `coverage-result-grid.test.tsx`.
-vi.mock('./coverage-result-grid', () => ({
-  CoverageResultGrid: ({ containerId }: { containerId: string }) => (
-    <div data-testid="coverage-result-grid" data-container={containerId} />
-  ),
-}));
-// And the fact-level report beside it, for the same reason again — its own behaviour is
-// exercised in `atom-coverage-report.test.tsx`.
-vi.mock('./atom-coverage-report', () => ({
-  AtomCoverageReport: ({ containerId }: { containerId: string }) => (
-    <div data-testid="atom-coverage-report" data-container={containerId} />
+// The report is three react-query cards in a layout of its own; what the shell
+// owes it is the container it is about and which version students have, which
+// is what this stub records. Its own behaviour is exercised in
+// `coverage-view.test.tsx`.
+vi.mock('./coverage-view', () => ({
+  CoverageView: ({
+    containerId,
+    publishedVersionNumber,
+  }: {
+    containerId: string;
+    publishedVersionNumber: number | null;
+  }) => (
+    <div
+      data-testid="coverage-view"
+      data-container={containerId}
+      data-version={String(publishedVersionNumber)}
+    />
   ),
 }));
 // Two react-query hooks of its own; its behaviour is exercised in
@@ -160,16 +158,13 @@ describe('CourseEditorShell', () => {
   it('opens on the tree and keeps the report off screen', () => {
     renderShell('version-1');
     expect(screen.getByTestId('course-structure-panel')).toBeInTheDocument();
-    expect(screen.queryByTestId('coverage-strip')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('coverage-view')).not.toBeInTheDocument();
   });
 
   it('says what the course trains when the report is the view asked for', () => {
     renderShell('version-1', 0, 'coverage');
-    expect(screen.getByTestId('coverage-strip')).toHaveAttribute('data-container', 'course-1');
-    expect(screen.getByTestId('atom-coverage-report')).toHaveAttribute(
-      'data-container',
-      'course-1',
-    );
+    expect(screen.getByTestId('coverage-view')).toHaveAttribute('data-container', 'course-1');
+    expect(screen.getByTestId('coverage-view')).toHaveAttribute('data-version', '2');
     expect(screen.queryByTestId('course-structure-panel')).not.toBeInTheDocument();
   });
 

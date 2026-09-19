@@ -3160,7 +3160,8 @@
       "COV_MOSTLY_BANK": "{bank} av {total} oppgaver besvares ved å velge, ikke ved å produsere.",
       "COV_FOCUS_UNKNOWN": "{unknown} av {total} oppgaver har ikke noe emne registrert — som regel er ingen ord eller regler koblet til dem.",
       "COV_UNCLASSIFIED": "{count, plural, one {# oppgave bruker en mal denne rapporten ikke kjenner, og holdes utenfor tellingen.} other {# oppgaver bruker en mal denne rapporten ikke kjenner, og holdes utenfor tellingen.}}"
-    }
+    },
+    "barsCaption": "stolpene sammenlignes bare innenfor denne raden · lengst = {peak} av {total}"
   },
   "axes": {
     "title": "Hva denne oppgaven trener",
@@ -3380,5 +3381,37 @@
     "exercises": "telt i oppgaver",
     "facts": "telt i fakta",
     "results": "telt i resultater"
+  },
+  "triage": {
+    "title": "Krever din oppmerksomhet",
+    "showMore": "Vis {count} til",
+    "showLess": "Vis færre",
+    "action": {
+      "exercises": "Åpne oppgaver",
+      "grammar": "Åpne grammatikk",
+      "vocab": "Åpne ordforråd",
+      "text": "Åpne tekster"
+    },
+    "sub": {
+      "COV_SKILL_ABSENT": "En kanal som ingenting trener, er en kanal studentene aldri øver på her.",
+      "COV_SINGLE_SKILL": "Når én kanal bærer alt, er resten utestet — ikke utelatt med hensikt.",
+      "COV_NO_FREE_PRODUCTION": "Å kjenne igjen et svar og å produsere et er to ulike ferdigheter; bare én av dem bygges her.",
+      "COV_MOSTLY_BANK": "Å velge er lettere enn å produsere, og et kurs av valg overdriver hva studentene faktisk kan.",
+      "atom_untested": "Lært, men aldri spurt om: studenten får aldri vite at hen har glemt det.",
+      "scope_no_production": "Alt her gjenkjennes eller settes sammen; ingenting produseres fra hukommelsen.",
+      "rule_without_atoms": "En regel som ikke er delt i atomer, kan ingen oppgave adressere — og dermed ikke teste.",
+      "atom_context_only": "Fakta trengs for å svare, men svaret avhenger aldri av det — det er øving, ikke testing.",
+      "atom_single_modality_recognition": "Å plukke et ord fra en liste viser ikke at det kan huskes eller produseres.",
+      "atom_single_modality_recall": "Husket, men aldri brukt i en setning studenten lager selv.",
+      "atom_single_modality_production": "Produsert, men aldri sjekket for gjenkjenning, så en nesten-treffer går for godkjent.",
+      "atom_single_modality_unknown": "Én måte å spørre på er én type belegg, uansett hvilken måte det er."
+    }
+  },
+  "zones": {
+    "draft": "Utkastet ditt",
+    "draftAgainstVersion": "Mot v{version}, som studentene har nå · {exercises} oppgaver, {facts} fakta",
+    "draftNeverPublished": "Aldri publisert · {exercises} oppgaver, {facts} fakta",
+    "students": "Det studentene har nå",
+    "studentsHint": "Den publiserte versjonen, og hva undervisningen ga."
   }
 }

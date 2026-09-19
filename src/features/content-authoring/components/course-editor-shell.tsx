@@ -15,10 +15,9 @@ import { useCurriculumTree } from '../api/use-curriculum-tree';
 import { allCollapseKeys } from '../lib/structure-nodes';
 import { CourseSettingsDrawer } from './course-settings-drawer';
 import { CourseStructurePanel } from './course-structure-panel';
-import { CoverageResultGrid } from './coverage-result-grid';
-import { CoverageStrip } from './coverage-strip';
-import { AtomCoverageReport } from './atom-coverage-report';
+import { CoverageView } from './coverage-view';
 import { collectPublishRows } from '../lib/publish-rows';
+import { filtersFromParams } from '../lib/structure-filters';
 import type { HealthAnchor } from '../lib/health-signals';
 import { deriveContainerState } from './container-state-badge';
 import { ReviewPublishDialog } from './review-publish-dialog';
@@ -78,6 +77,11 @@ export function CourseEditorShell({
   // worth linking to, and "open the full report" from inside the tree has to
   // be an ordinary link rather than a click that only works from here.
   const view: EditorView = searchParams.get('view') === 'coverage' ? 'coverage' : 'structure';
+
+  // A triage button in the report lands here with the tree already filtered to
+  // the material its finding is about. Read once, on the way in: from then on
+  // the toolbar owns the filters.
+  const initialFilters = filtersFromParams(searchParams);
 
   const handleViewChange = useCallback(
     (next: EditorView) => {
@@ -201,37 +205,11 @@ export function CourseEditorShell({
       />
 
       {view === 'coverage' ? (
-        <div className="space-y-4">
-          {/* What the course is made of, by the exercises it holds. Drawn
-              expanded rather than folded behind a toggle — a channel nothing
-              trains is invisible in a panel nobody opens. */}
-          <div
-            id="coverage-skills"
-            className="scroll-mt-[var(--structure-sticky-top)] rounded-xl border border-border bg-card p-4"
-          >
-            <CoverageStrip containerId={container.id} />
-          </div>
-
-          {/* The same question asked of the facts rather than of the exercises: the strip
-              above says this course is 84% picking an answer off a list, and this says which
-              twenty-six words that leaves untested. Beside it rather than inside it — one
-              counts exercises and the other counts what they are about, and a reader who
-              cannot tell which is which will trust neither. */}
-          <div
-            id="coverage-atoms"
-            className="scroll-mt-[var(--structure-sticky-top)] rounded-xl border border-border bg-card p-4"
-          >
-            <AtomCoverageReport containerId={container.id} />
-          </div>
-
-          {/* And underneath it, the same course seen from the other end: what came of
-              teaching it. A course, not a module — a module's results are the course's
-              results sliced too thin to read, and the published version is what learners
-              actually took. */}
-          {container.containerType === 'course' && (
-            <CoverageResultGrid containerId={container.id} />
-          )}
-        </div>
+        <CoverageView
+          containerId={container.id}
+          containerType={container.containerType}
+          publishedVersionNumber={publishedVersionNumber}
+        />
       ) : draftVersionId ? (
         <CourseStructurePanel
           containerId={container.id}
@@ -248,6 +226,7 @@ export function CourseEditorShell({
           onExpandAll={() => setCollapsed(new Set())}
           onCollapseAll={() => setCollapsed(new Set(allCollapseKeys(tree)))}
           onReview={() => setPublishOpen(true)}
+          initialFilters={initialFilters}
         />
       ) : (
         <p className="text-muted-foreground py-10 text-center text-sm">

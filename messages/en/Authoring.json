@@ -3160,7 +3160,8 @@
       "COV_MOSTLY_BANK": "{bank} of {total} exercises are answered by choosing, not by producing.",
       "COV_FOCUS_UNKNOWN": "{unknown} of {total} exercises have no subject recorded — usually no words or rules are linked to them.",
       "COV_UNCLASSIFIED": "{count, plural, one {# exercise uses a template this report does not know, and is left out of the counts.} other {# exercises use a template this report does not know, and are left out of the counts.}}"
-    }
+    },
+    "barsCaption": "bars compare inside this row only · longest = {peak} of {total}"
   },
   "axes": {
     "title": "What this exercise trains",
@@ -3380,5 +3381,37 @@
     "exercises": "counted in exercises",
     "facts": "counted in facts",
     "results": "counted in results"
+  },
+  "triage": {
+    "title": "Needs your attention",
+    "showMore": "Show {count} more",
+    "showLess": "Show fewer",
+    "action": {
+      "exercises": "Open exercises",
+      "grammar": "Open grammar",
+      "vocab": "Open vocabulary",
+      "text": "Open texts"
+    },
+    "sub": {
+      "COV_SKILL_ABSENT": "A channel nothing trains is a channel your students never practise here.",
+      "COV_SINGLE_SKILL": "One channel carrying everything means the rest are untested, not absent by design.",
+      "COV_NO_FREE_PRODUCTION": "Recognising an answer and producing one are different abilities; only one of them is being built.",
+      "COV_MOSTLY_BANK": "Choosing is easier than producing, and a course made of choices overstates what learners can do.",
+      "atom_untested": "Taught and never asked about: the learner has no way to find out they have forgotten it.",
+      "scope_no_production": "Everything here is recognised or arranged; nothing is produced from memory.",
+      "rule_without_atoms": "A rule that is not cut into atoms cannot be addressed by an exercise, so nothing can test it.",
+      "atom_context_only": "The fact is needed to answer, but the answer never turns on it — that is practice, not testing.",
+      "atom_single_modality_recognition": "Picking a word off a list does not show it can be recalled or produced.",
+      "atom_single_modality_recall": "Recalled but never produced in a sentence of the learner's own.",
+      "atom_single_modality_production": "Produced but never checked for recognition, so a near-miss reads as a pass.",
+      "atom_single_modality_unknown": "One way of asking is one kind of evidence, whichever way it is."
+    }
+  },
+  "zones": {
+    "draft": "Your draft",
+    "draftAgainstVersion": "Against v{version}, which students have now · {exercises} exercises, {facts} facts",
+    "draftNeverPublished": "Never published · {exercises} exercises, {facts} facts",
+    "students": "What students have now",
+    "studentsHint": "The published version, and what came of teaching it."
   }
 }
