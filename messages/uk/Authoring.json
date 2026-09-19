@@ -622,7 +622,12 @@
     "showHintsHint": "З’являються після першої помилки",
     "visibleToStudents": "Видно учням",
     "visibleToStudentsHint": "Приховані блоки лишаються в структурі",
-    "blockId": "ID блока"
+    "blockId": "ID блока",
+    "fieldsTab": "Поля",
+    "coverageTab": "Покриття",
+    "moduleCoverageTitle": "Що тренує цей урок",
+    "moduleCoverageSubtitle": "Чернетка · {count, plural, one {# вправа} few {# вправи} many {# вправ} other {# вправи}} у цьому уроці",
+    "openFullReport": "Відкрити повний звіт →"
   },
   "settings": {
     "trigger": "Налаштування",
@@ -3370,5 +3375,10 @@
       "notRecorded": "Не визначено"
     },
     "openReport": "Відкрити звіт про покриття →"
+  },
+  "units": {
+    "exercises": "рахується у вправах",
+    "facts": "рахується у фактах",
+    "results": "рахується у результатах"
   }
 }

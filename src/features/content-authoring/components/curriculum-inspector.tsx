@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/lib/i18n/navigation';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
@@ -29,7 +30,7 @@ import { renameSectionAction } from '../actions/section';
 import { renameItemAction } from '../actions/rename-item';
 import { assignItemSectionAction } from '../actions/container-item';
 import { ContainerStateBadge } from './container-state-badge';
-import { CoverageStrip } from './coverage-strip';
+import { ModuleCoverageTab } from './module-coverage-tab';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
 import { ModulePublishBlock } from './module-publish-block';
@@ -239,6 +240,12 @@ export function CurriculumInspector({
   const tContent = useTranslations('Content');
   const tErrors = useTranslations('Errors');
   const undo = useStructureUndo();
+  /**
+   * Which half of a module's inspector is open. Kept here rather than per
+   * selection so it survives clicking from one module to the next: an author
+   * comparing what two modules train should not have to reopen the tab.
+   */
+  const [moduleTab, setModuleTab] = useState<'fields' | 'coverage'>('fields');
 
   const publishOptions = [
     { value: 'draft', label: t('publishState.draft') },
@@ -361,95 +368,113 @@ export function CurriculumInspector({
           />
         </InspectorHead>
 
-        <div className="grid grid-cols-2 gap-3">
-          <StubField label={t('structure.code')} value={STUB_PLACEHOLDERS.code} />
-          <InspectorField
-            label={t('structure.estMinutes')}
-            value={t('structure.minutes', { count: estimatedMinutes })}
-          />
-        </div>
+        <Tabs
+          value={moduleTab}
+          onValueChange={(next) => setModuleTab(next as 'fields' | 'coverage')}
+        >
+          <TabsList>
+            <TabsTrigger value="fields" className="px-3 py-1.5 text-xs">
+              {t('structure.fieldsTab')}
+            </TabsTrigger>
+            <TabsTrigger value="coverage" className="px-3 py-1.5 text-xs">
+              {t('structure.coverageTab')}
+            </TabsTrigger>
+          </TabsList>
 
-        {/* The tree's `titleEn` is a container localization row, not a field on
+          <TabsContent value="fields" className="flex flex-col gap-4 pt-4">
+            <div className="grid grid-cols-2 gap-3">
+              <StubField label={t('structure.code')} value={STUB_PLACEHOLDERS.code} />
+              <InspectorField
+                label={t('structure.estMinutes')}
+                value={t('structure.minutes', { count: estimatedMinutes })}
+              />
+            </div>
+
+            {/* The tree's `titleEn` is a container localization row, not a field on
             the module — see `setContainerTitleEnAction`. */}
-        <EditableField
-          label={t('structure.titleEn')}
-          saveLabel={t('structure.saveTitleEn')}
-          savedMessage={t('structure.titleEnSaved')}
-          value={mod.titleEn ?? ''}
-          onSave={async (next) => {
-            const previous = mod.titleEn;
-            const result = await setContainerTitleEnAction(
-              mod.containerId,
-              next,
-              previous !== null,
-            );
-            if (!result.ok) {
-              toast.error(tErrors(result.error.code));
-              throw new Error(result.error.code);
-            }
-            undo.record({
-              label: t('undo.renamed', { name: next }),
-              // Whether the localization row exists now is what the save just
-              // decided: a non-empty subtitle created or kept it, an empty one
-              // deleted it.
-              revert: async () =>
-                (
-                  await setContainerTitleEnAction(
-                    mod.containerId,
-                    previous ?? '',
-                    next.trim() !== '',
-                  )
-                ).ok,
-            });
-            onChanged();
-          }}
-        />
+            <EditableField
+              label={t('structure.titleEn')}
+              saveLabel={t('structure.saveTitleEn')}
+              savedMessage={t('structure.titleEnSaved')}
+              value={mod.titleEn ?? ''}
+              onSave={async (next) => {
+                const previous = mod.titleEn;
+                const result = await setContainerTitleEnAction(
+                  mod.containerId,
+                  next,
+                  previous !== null,
+                );
+                if (!result.ok) {
+                  toast.error(tErrors(result.error.code));
+                  throw new Error(result.error.code);
+                }
+                undo.record({
+                  label: t('undo.renamed', { name: next }),
+                  // Whether the localization row exists now is what the save just
+                  // decided: a non-empty subtitle created or kept it, an empty one
+                  // deleted it.
+                  revert: async () =>
+                    (
+                      await setContainerTitleEnAction(
+                        mod.containerId,
+                        previous ?? '',
+                        next.trim() !== '',
+                      )
+                    ).ok,
+                });
+                onChanged();
+              }}
+            />
 
-        <div>
-          <CountRow label={t('structure.blocks')} value={blocks.length} />
-          <CountRow label={t('structure.sections')} value={mod.sections.length} />
-        </div>
+            <div>
+              <CountRow label={t('structure.blocks')} value={blocks.length} />
+              <CountRow label={t('structure.sections')} value={mod.sections.length} />
+            </div>
 
-        <StubTextareaField
-          label={t('structure.learningGoals')}
-          placeholder={t('structure.learningGoalsPlaceholder')}
-        />
-        <StubSwitchRow
-          label={t('structure.homeworkByDefault')}
-          hint={t('structure.homeworkByDefaultHint')}
-        />
-        <StubSwitchRow
-          label={t('structure.includeInSrs')}
-          hint={t('structure.includeInSrsHint')}
-          on
-        />
+            <StubTextareaField
+              label={t('structure.learningGoals')}
+              placeholder={t('structure.learningGoalsPlaceholder')}
+            />
+            <StubSwitchRow
+              label={t('structure.homeworkByDefault')}
+              hint={t('structure.homeworkByDefaultHint')}
+            />
+            <StubSwitchRow
+              label={t('structure.includeInSrs')}
+              hint={t('structure.includeInSrsHint')}
+              on
+            />
 
-        <p className="text-xs leading-relaxed text-muted-foreground">{t('structure.moduleHelp')}</p>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {t('structure.moduleHelp')}
+            </p>
 
-        {/* A module is a container in its own right, so it is counted on its own
-            terms: a course balanced in aggregate can still have a module that is
-            nothing but reading. */}
-        <div className="border-t border-border pt-4">
-          <CoverageStrip containerId={mod.containerId} compact />
-        </div>
-
-        {/* Students read a module's own published version, so material added
+            {/* Students read a module's own published version, so material added
             here stays invisible until this module — not just the course — is
             published. Reported rather than offered as a segment: the release
             itself happens in one place, "Review & publish". */}
-        <ModulePublishBlock publishState={mod.publishState} />
+            <ModulePublishBlock publishState={mod.publishState} />
 
-        <InspectorFooter
-          editorHref={wsHref(workspaceId, `content/${mod.containerId}`)}
-          onDelete={() =>
-            onDelete({
-              kind: 'module',
-              id: mod.id,
-              title: mod.title ?? '',
-              blockCount: blocks.length,
-            })
-          }
-        />
+            <InspectorFooter
+              editorHref={wsHref(workspaceId, `content/${mod.containerId}`)}
+              onDelete={() =>
+                onDelete({
+                  kind: 'module',
+                  id: mod.id,
+                  title: mod.title ?? '',
+                  blockCount: blocks.length,
+                })
+              }
+            />
+          </TabsContent>
+
+          {/* A module is a container in its own right, so it is counted on its
+              own terms: a course balanced in aggregate can still hold a module
+              that is nothing but reading. */}
+          <TabsContent value="coverage" className="pt-4">
+            <ModuleCoverageTab containerId={mod.containerId} />
+          </TabsContent>
+        </Tabs>
       </div>
     );
   }

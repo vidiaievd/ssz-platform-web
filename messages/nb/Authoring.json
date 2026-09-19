@@ -622,7 +622,12 @@
     "showHintsHint": "Vises etter første feilsvar",
     "visibleToStudents": "Synlig for elevene",
     "visibleToStudentsHint": "Skjulte blokker blir stående i oversikten",
-    "blockId": "Blokk-id"
+    "blockId": "Blokk-id",
+    "fieldsTab": "Felter",
+    "coverageTab": "Dekning",
+    "moduleCoverageTitle": "Hva denne leksjonen trener",
+    "moduleCoverageSubtitle": "Utkast · {count, plural, one {# oppgave} other {# oppgaver}} i denne leksjonen",
+    "openFullReport": "Åpne hele rapporten →"
   },
   "settings": {
     "trigger": "Innstillinger",
@@ -3370,5 +3375,10 @@
       "notRecorded": "Ikke registrert"
     },
     "openReport": "Åpne dekningsrapporten →"
+  },
+  "units": {
+    "exercises": "telt i oppgaver",
+    "facts": "telt i fakta",
+    "results": "telt i resultater"
   }
 }

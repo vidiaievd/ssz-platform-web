@@ -622,7 +622,12 @@
     "showHintsHint": "Появляются после первой ошибки",
     "visibleToStudents": "Видно ученикам",
     "visibleToStudentsHint": "Скрытые блоки остаются в структуре",
-    "blockId": "ID блока"
+    "blockId": "ID блока",
+    "fieldsTab": "Поля",
+    "coverageTab": "Покрытие",
+    "moduleCoverageTitle": "Что тренирует этот урок",
+    "moduleCoverageSubtitle": "Черновик · {count, plural, one {# упражнение} few {# упражнения} many {# упражнений} other {# упражнения}} в этом уроке",
+    "openFullReport": "Открыть полный отчёт →"
   },
   "settings": {
     "trigger": "Настройки",
@@ -3370,5 +3375,10 @@
       "notRecorded": "Не определён"
     },
     "openReport": "Открыть отчёт о покрытии →"
+  },
+  "units": {
+    "exercises": "считается в упражнениях",
+    "facts": "считается в фактах",
+    "results": "считается в результатах"
   }
 }

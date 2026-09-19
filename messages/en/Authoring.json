@@ -622,7 +622,12 @@
     "showHintsHint": "Reveal after the first wrong answer",
     "visibleToStudents": "Visible to students",
     "visibleToStudentsHint": "Hidden blocks stay in the outline",
-    "blockId": "Block id"
+    "blockId": "Block id",
+    "fieldsTab": "Fields",
+    "coverageTab": "Coverage",
+    "moduleCoverageTitle": "What this module trains",
+    "moduleCoverageSubtitle": "Draft · {count, plural, one {# exercise} other {# exercises}} in this module",
+    "openFullReport": "Open the full report →"
   },
   "settings": {
     "trigger": "Settings",
@@ -3370,5 +3375,10 @@
       "notRecorded": "Not recorded"
     },
     "openReport": "Open coverage report →"
+  },
+  "units": {
+    "exercises": "counted in exercises",
+    "facts": "counted in facts",
+    "results": "counted in results"
   }
 }

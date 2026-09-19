@@ -208,6 +208,12 @@ interface CoverageStripProps {
   containerId: string;
   /** Two columns per row instead of four — the inspector is a narrow pane. */
   compact?: boolean;
+  /**
+   * Drops the strip's own heading, for a caller that has already said what is
+   * being counted and in what unit. Two headings one above the other would read
+   * as two reports.
+   */
+  hideHeading?: boolean;
   className?: string;
 }
 
@@ -223,7 +229,12 @@ interface CoverageStripProps {
  * the service's answer, and this is a renderer over it (§1.7) — the alternative
  * is the same rule written twice, drifting apart at the first change.
  */
-export function CoverageStrip({ containerId, compact = false, className }: CoverageStripProps) {
+export function CoverageStrip({
+  containerId,
+  compact = false,
+  hideHeading = false,
+  className,
+}: CoverageStripProps) {
   const t = useTranslations('Authoring.coverage');
   const [showPublished, setShowPublished] = useState(false);
   const { data, isLoading, isError } = useContainerCoverage(containerId);
@@ -233,7 +244,7 @@ export function CoverageStrip({ containerId, compact = false, className }: Cover
 
   return (
     <section className={cn('space-y-3', className)} aria-label={t('title')}>
-      <div className="flex items-center gap-2">
+      <div className={cn('flex items-center gap-2', hideHeading && 'sr-only')}>
         <Target className="size-3.5 text-muted-foreground" aria-hidden />
         <span className="text-xs font-bold tracking-wide text-muted-foreground">{t('title')}</span>
         {draft && draft.coverage.total > 0 && (
