@@ -47,3 +47,19 @@ export { coverage, diff, diverges, share, tally } from './coverage';
 
 export type { CoverageIssue, CoverageIssueLevel, CoverageIssueOptions } from './issues';
 export { coverageIssues, warnings } from './issues';
+
+export type { Recipe, RecipeAxis, RecipeElement, RecipeIssue, RecipePresetId, RecipeRule } from './recipe';
+export {
+  checkElements,
+  checkRecipe,
+  elementsOf,
+  EMPTY_RECIPE,
+  matches,
+  MAX_RECIPE_RULES,
+  parseRecipe,
+  parseRule,
+  readRecipe,
+  RECIPE_AXES,
+  RECIPE_PRESET_IDS,
+  RECIPE_PRESETS,
+} from './recipe';
