@@ -24,6 +24,7 @@ const COVERAGE = {
       bySkill: { listening: 0, reading: 31, spoken: 0, written: 9 },
       byFocus: { vocabulary: 20, grammar: 20, orthography: 0, pragmatics: 0, unknown: 0 },
       byForm: { bank: 34, free: 0, mixed: 6, unknown: 0 },
+      byModality: { recognition: 34, recall: 6, production: 0, unknown: 0 },
       byPair: {},
       emptySkills: ['listening', 'spoken'],
       unclassified: 37,

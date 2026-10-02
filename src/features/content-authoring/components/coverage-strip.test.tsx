@@ -20,6 +20,7 @@ function tallies(overrides: Partial<CoverageTallies> = {}): CoverageTallies {
     bySkill: { listening: 0, reading: 8, spoken: 0, written: 2 },
     byFocus: { vocabulary: 6, grammar: 3, orthography: 0, pragmatics: 0, unknown: 1 },
     byForm: { bank: 7, free: 3, mixed: 0, unknown: 0 },
+    byModality: { recognition: 6, recall: 3, production: 1, unknown: 0 },
     byPair: {
       listening: { vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 },
       reading: { vocabulary: 6, grammar: 1, orthography: 0, pragmatics: 0, unknown: 1 },
@@ -83,8 +84,11 @@ describe('CoverageStrip', () => {
   it('counts recognition against production, which the skill row cannot show', () => {
     renderStrip({ data: coverage() });
 
-    expect(cell('From a list')).toContain('7');
-    expect(cell('Typed')).toContain('3');
+    // Read off `byModality`, not `byForm` (plan 64, decision G): seven exercises had a
+    // bank on screen, and one of them still had to be rebuilt from the rule.
+    expect(cell('Picked out')).toContain('6');
+    expect(cell('Recalled')).toContain('3');
+    expect(cell('Produced')).toContain('1');
   });
 
   it('renders a remark from its code and numbers, not from prose the service sent', () => {
@@ -155,6 +159,7 @@ describe('CoverageStrip', () => {
             bySkill: { listening: 0, reading: 0, spoken: 0, written: 0 },
             byFocus: { vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 },
             byForm: { bank: 0, free: 0, mixed: 0, unknown: 0 },
+            byModality: { recognition: 0, recall: 0, production: 0, unknown: 0 },
           }),
         ),
       }),
@@ -190,13 +195,14 @@ describe('CoverageStrip', () => {
           tallies({
             total: 4,
             byForm: { bank: 0, free: 0, mixed: 0, unknown: 0 },
+            byModality: { recognition: 0, recall: 0, production: 0, unknown: 0 },
           }),
         ),
       }),
     });
 
-    expect(cell('From a list')).toContain('–');
-    expect(cell('Typed')).toContain('–');
+    expect(cell('Picked out')).toContain('–');
+    expect(cell('Produced')).toContain('–');
   });
 
   // An exercise can carry two channels, so a row never sums to the total —

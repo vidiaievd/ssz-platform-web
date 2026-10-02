@@ -45,10 +45,12 @@ export function computeHealthSignals(
       anchor: 'coverage-skills',
     },
     {
-      // Answers the student produces rather than picks. `mixed` is not counted:
-      // an exercise that accepts either is not proof that anyone typed anything.
+      // Answers the student writes in their own words — the same number the report's
+      // third row prints as `Produced`, so the strip and the report cannot disagree
+      // (plan 64, decision G). Recall is not counted: typing one form into a gap is
+      // retrieval, not production.
       id: 'produced',
-      value: draft.coverage.byForm.free ?? 0,
+      value: draft.coverage.byModality.production ?? 0,
       tone: 'bad',
       anchor: 'coverage-skills',
     },

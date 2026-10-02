@@ -3149,6 +3149,12 @@
       "mixed": "Begge deler",
       "unknown": "Ikke registrert"
     },
+    "modality": {
+      "recognition": "Gjenkjent",
+      "recall": "Husket",
+      "production": "Formulert selv",
+      "unknown": "Ikke registrert"
+    },
     "emptySkills": "Ingenting her trener: {skills}.",
     "diverges": "Den publiserte versjonen er annerledes: {cells}.",
     "differenceCell": "{cell} {draft} mot {published}",
@@ -3179,7 +3185,7 @@
       "template": "Utledet av oppgavetypen.",
       "atoms": "Fra ordene og reglene som er koblet til oppgaven.",
       "unknown": "Ingenting her sier hva dette trener.",
-      "formHint": "Hvordan svaret lages, fra typen og innstillingene dens."
+      "modalityHint": "Hvordan svaret må være kjent, ut fra typen og innstillingene."
     },
     "refine": "Juster",
     "refineClose": "Lukk"

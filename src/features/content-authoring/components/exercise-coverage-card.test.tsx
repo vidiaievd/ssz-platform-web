@@ -54,7 +54,8 @@ describe('ExerciseCoverageCard', () => {
   it('follows the document in hand rather than the one last saved', () => {
     renderCard({ document: { audio: { enabled: true } } });
 
-    expect(screen.getByText('Listening')).toBeInTheDocument();
+    // Criterion 9: heard *and* written, without a save in between.
+    expect(screen.getByText('Listening, Writing')).toBeInTheDocument();
     expect(screen.getByText('From a setting inside the exercise itself.')).toBeInTheDocument();
   });
 

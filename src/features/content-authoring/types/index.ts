@@ -138,12 +138,22 @@ export type CoverageFocus = (typeof COVERAGE_FOCUSES)[number];
 export const COVERAGE_FORMS = ['bank', 'free', 'mixed', 'unknown'] as const;
 export type CoverageForm = (typeof COVERAGE_FORMS)[number];
 
+/** How the answer had to be known — the axis the report reads since plan 64, decision G. */
+export const COVERAGE_MODALITIES = ['recognition', 'recall', 'production', 'unknown'] as const;
+export type CoverageModality = (typeof COVERAGE_MODALITIES)[number];
+
 export interface CoverageTallies {
   /** Exercises counted. Not the sum of any row: one exercise can train two channels. */
   total: number;
   bySkill: Record<CoverageSkill, number>;
   byFocus: Record<CoverageFocus | 'unknown', number>;
+  /** Whether a bank was on screen. Kept by the service for its rules; not drawn. */
   byForm: Record<CoverageForm, number>;
+  /**
+   * How the answer had to be known. The third row of the report: `byForm` puts chunks to
+   * order and options to pick in one bucket, this does not (plan 64, decision G).
+   */
+  byModality: Record<CoverageModality, number>;
   /**
    * The `skill × focus` table the two tallies above are the margins of.
    *
@@ -318,6 +328,11 @@ export interface ExerciseAxes {
   skills: CoverageSkill[];
   focus: CoverageFocus[];
   form: CoverageForm;
+  /**
+   * Absent from the service's answer today, which is why it is optional: only the live
+   * draft in the builder fills it (`mergeAxes`).
+   */
+  modality?: CoverageModality;
   skillSource: SkillSource;
   focusSource: FocusSource;
 }

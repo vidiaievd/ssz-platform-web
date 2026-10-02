@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { useContainerCoverage } from '../api/use-container-coverage';
 import {
   COVERAGE_FOCUSES,
-  COVERAGE_FORMS,
+  COVERAGE_MODALITIES,
   COVERAGE_SKILLS,
   type CoverageDifference,
   type CoverageIssue,
@@ -205,11 +205,14 @@ function Tallies({
     count: coverage.byFocus[focus],
     notRecorded: focus === 'unknown',
   }));
-  const formCells = COVERAGE_FORMS.map((form) => ({
-    key: form,
-    label: t(`form.${form}` as 'form.bank'),
-    count: coverage.byForm[form],
-    notRecorded: form === 'unknown',
+  // `modality`, not `form`: a bank of chunks to put in order and a bank of options to
+  // pick from are the same `form`, and only one of them can be done without the rule
+  // (plan 64, decision G).
+  const answerCells = COVERAGE_MODALITIES.map((modality) => ({
+    key: modality,
+    label: t(`modality.${modality}` as 'modality.recognition'),
+    count: coverage.byModality[modality],
+    notRecorded: modality === 'unknown',
   }));
 
   // `COV_SKILL_ABSENT` is dropped, not rendered: the line above already names every
@@ -225,7 +228,7 @@ function Tallies({
       {/* Last and least prominent by position, first in what it tells an author:
           a course can be balanced across all four channels and still be, 84% of
           it, picking an answer off a list (§3.7). */}
-      <AxisRow label={t('axis.form')} cells={formCells} compact={compact} />
+      <AxisRow label={t('axis.form')} cells={answerCells} compact={compact} />
 
       {coverage.emptySkills.length > 0 && (
         <p className="text-xs text-muted-foreground">

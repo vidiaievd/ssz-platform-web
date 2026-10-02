@@ -25,7 +25,8 @@ describe('mergeAxes', () => {
 
     const axes = mergeAxes(saved(), draft);
 
-    expect(axes.skills).toEqual(['listening']);
+    // Heard and still written: the recording moves the input, not the answer (plan 64, F).
+    expect(axes.skills).toEqual(['listening', 'written']);
     expect(axes.skillSource).toBe('document');
   });
 

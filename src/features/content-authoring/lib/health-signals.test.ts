@@ -13,6 +13,7 @@ function draftReport(over: Partial<CoverageReport['coverage']> = {}): CoverageRe
       bySkill: { listening: 0, reading: 31, spoken: 0, written: 9 },
       byFocus: { vocabulary: 20, grammar: 20, orthography: 0, pragmatics: 0, unknown: 0 },
       byForm: { bank: 34, free: 0, mixed: 6, unknown: 0 },
+      byModality: { recognition: 34, recall: 6, production: 0, unknown: 0 },
       byPair: {} as CoverageReport['coverage']['byPair'],
       emptySkills: ['listening', 'spoken'],
       unclassified: 37,
@@ -89,11 +90,16 @@ describe('computeHealthSignals', () => {
     });
   });
 
-  // `mixed` accepts either a typed answer or a picked one, which is not
-  // evidence that anyone typed anything.
+  // The same number as the report's `Produced`: typing one form into a gap is
+  // recall, and a typed answer is not by itself a produced one (plan 64, decision G).
   it('counts only answers the student must produce', () => {
     const signals = computeHealthSignals(
-      coverage(draftReport({ byForm: { bank: 30, free: 3, mixed: 7, unknown: 0 } })),
+      coverage(
+        draftReport({
+          byForm: { bank: 30, free: 10, mixed: 0, unknown: 0 },
+          byModality: { recognition: 30, recall: 7, production: 3, unknown: 0 },
+        }),
+      ),
       atoms(2),
     );
 

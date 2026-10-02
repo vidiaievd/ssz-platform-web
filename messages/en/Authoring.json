@@ -3149,6 +3149,12 @@
       "mixed": "Either",
       "unknown": "Not recorded"
     },
+    "modality": {
+      "recognition": "Picked out",
+      "recall": "Recalled",
+      "production": "Produced",
+      "unknown": "Not recorded"
+    },
     "emptySkills": "Nothing here trains: {skills}.",
     "diverges": "The published version differs: {cells}.",
     "differenceCell": "{cell} {draft} against {published}",
@@ -3179,7 +3185,7 @@
       "template": "Worked out from the exercise type.",
       "atoms": "From the words and rules linked to this exercise.",
       "unknown": "Nothing here says what this trains.",
-      "formHint": "How the answer is produced, from the type and its settings."
+      "modalityHint": "How the answer has to be known, from the type and its settings."
     },
     "refine": "Refine",
     "refineClose": "Close"

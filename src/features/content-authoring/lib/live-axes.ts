@@ -1,6 +1,12 @@
 import type { DerivedProfile } from '@/lib/shared-kernel/skills';
 
-import type { CoverageFocus, CoverageForm, CoverageSkill, ExerciseAxes } from '../types';
+import type {
+  CoverageFocus,
+  CoverageForm,
+  CoverageModality,
+  CoverageSkill,
+  ExerciseAxes,
+} from '../types';
 
 /**
  * What the exercise trains as it stands in the builder, right now.
@@ -27,5 +33,8 @@ export function mergeAxes(saved: ExerciseAxes | undefined, draft: DerivedProfile
     // `form` has no override of its own: only the template and the document speak to it,
     // and the document in hand is newer than the one the service read.
     form: (saved?.skillSource === 'override' ? saved.form : draft.form) as CoverageForm,
+    // Nothing writes a modality override yet and placement never moves it, so the live
+    // document is the whole answer (plan 64, decision G).
+    modality: draft.modality as CoverageModality,
   };
 }

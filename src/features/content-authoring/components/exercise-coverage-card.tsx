@@ -100,8 +100,8 @@ export function ExerciseCoverageCard({
         />
         <Axis
           label={tAxis('axis.form')}
-          value={tAxis(`form.${axes.form}` as 'form.bank')}
-          source={t('source.formHint')}
+          value={tAxis(`modality.${axes.modality ?? 'unknown'}` as 'modality.recognition')}
+          source={t('source.modalityHint')}
         />
       </dl>
 

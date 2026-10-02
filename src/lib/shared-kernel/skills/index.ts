@@ -39,6 +39,7 @@ export type {
   CoverageDifference,
   FocusTally,
   FormTally,
+  ModalityTally,
   PairTally,
   SkillTally,
 } from './coverage';
