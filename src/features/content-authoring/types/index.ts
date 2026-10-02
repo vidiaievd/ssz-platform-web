@@ -188,6 +188,16 @@ export type CoverageIssue =
 /** The lesson recipe speaks the kernel's vocabulary; the copy in this repo is the source. */
 export type { Recipe, RecipeIssue, RecipeRule } from '@/lib/shared-kernel/skills';
 
+/** A course's recipe as content-service resolves it — the one applied and the one behind it. */
+export interface CourseCoverageRecipe {
+  /** What the lessons are checked against: the course's own, else the workspace's, else empty. */
+  recipe: Recipe;
+  /** The workspace's — what "inherit" means here. Null: no school, or the school set none. */
+  inherited: Recipe | null;
+  /** True when the course has its own, including an empty one that opts out. */
+  overridden: boolean;
+}
+
 export interface CoverageModuleReport {
   containerId: string;
   title: string;

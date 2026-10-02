@@ -3471,6 +3471,50 @@
     "dot": {
       "label": "{count, plural, one {# recipe rule} other {# recipe rules}} not met",
       "title": "Against the course recipe"
+    },
+    "editor": {
+      "title": "Lesson recipe",
+      "lede": "What every lesson of this course is expected to train. Lessons that miss it get a dot in the tree and a line in the coverage report.",
+      "mode": {
+        "inherit": "Use the workspace's recipe",
+        "own": "This course's own recipe",
+        "none": "No recipe for this course"
+      },
+      "noWorkspaceRecipe": "Your workspace has no recipe, so lessons are not checked.",
+      "inheritedCount": "{count, plural, one {# rule} other {# rules}}",
+      "startFrom": "Start from",
+      "presetPlaceholder": "a preset…",
+      "preset": {
+        "balanced_a1_a2": "Balanced A1–A2",
+        "exam_b1": "B1 exam preparation",
+        "grammar_intensive": "Grammar intensive"
+      },
+      "addRule": "Add rule",
+      "ruleLabel": "Rule {n}",
+      "removeRule": "Remove rule {n}",
+      "axisLabel": "What the rule counts by",
+      "valuesLabel": "Values",
+      "negate": "not",
+      "boundLabel": "Bound",
+      "bound": {
+        "min": "At least",
+        "maxShare": "At most"
+      },
+      "amountLabel": "Amount",
+      "unit": {
+        "items": "items",
+        "percent": "% of items"
+      },
+      "incomplete": "Pick at least one value.",
+      "invalid": "Every rule needs at least one value and a sensible bound.",
+      "emptyOwn": "A recipe of its own needs at least one rule. To check nothing, choose “No recipe”.",
+      "noneHint": "Lessons of this course are not checked, whatever the workspace sets.",
+      "neverBlocks": "The recipe never blocks publishing.",
+      "save": "Save recipe",
+      "saved": "Recipe saved",
+      "saveFailed": "The recipe could not be saved",
+      "refused": "The recipe was refused: a rule names something the platform does not know.",
+      "failed": "The recipe could not be loaded."
     }
   }
 }

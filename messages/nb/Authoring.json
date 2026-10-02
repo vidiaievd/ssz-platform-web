@@ -3471,6 +3471,50 @@
     "dot": {
       "label": "{count, plural, one {# regel} other {# regler}} i oppskriften ikke oppfylt",
       "title": "Mot kursets oppskrift"
+    },
+    "editor": {
+      "title": "Leksjonsoppskrift",
+      "lede": "Hva hver leksjon i kurset skal trene. Leksjoner som ikke oppfyller den, får en prikk i treet og en linje i dekningsrapporten.",
+      "mode": {
+        "inherit": "Bruk arbeidsområdets oppskrift",
+        "own": "Kursets egen oppskrift",
+        "none": "Ingen oppskrift for dette kurset"
+      },
+      "noWorkspaceRecipe": "Arbeidsområdet har ingen oppskrift, så leksjonene sjekkes ikke.",
+      "inheritedCount": "{count, plural, one {# regel} other {# regler}}",
+      "startFrom": "Start fra",
+      "presetPlaceholder": "en mal …",
+      "preset": {
+        "balanced_a1_a2": "Balansert A1–A2",
+        "exam_b1": "Forberedelse til B1-prøve",
+        "grammar_intensive": "Grammatikkintensiv"
+      },
+      "addRule": "Legg til regel",
+      "ruleLabel": "Regel {n}",
+      "removeRule": "Fjern regel {n}",
+      "axisLabel": "Hva regelen teller etter",
+      "valuesLabel": "Verdier",
+      "negate": "ikke",
+      "boundLabel": "Grense",
+      "bound": {
+        "min": "Minst",
+        "maxShare": "Høyst"
+      },
+      "amountLabel": "Mengde",
+      "unit": {
+        "items": "punkter",
+        "percent": "% av punktene"
+      },
+      "incomplete": "Velg minst én verdi.",
+      "invalid": "Hver regel trenger minst én verdi og en fornuftig grense.",
+      "emptyOwn": "En egen oppskrift trenger minst én regel. Velg «Ingen oppskrift» for å ikke sjekke noe.",
+      "noneHint": "Leksjonene i dette kurset sjekkes ikke, uansett hva arbeidsområdet har satt.",
+      "neverBlocks": "Oppskriften blokkerer aldri publisering.",
+      "save": "Lagre oppskrift",
+      "saved": "Oppskriften er lagret",
+      "saveFailed": "Oppskriften kunne ikke lagres",
+      "refused": "Oppskriften ble avvist: en regel nevner noe plattformen ikke kjenner.",
+      "failed": "Oppskriften kunne ikke lastes."
     }
   }
 }
