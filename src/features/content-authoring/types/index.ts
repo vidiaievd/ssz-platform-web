@@ -1,3 +1,5 @@
+import type { Recipe, RecipeIssue } from '@/lib/shared-kernel/skills';
+
 /** Three-state lifecycle per the Course Management spec (CF-4). */
 export type ContainerState = 'draft' | 'published' | 'archived';
 
@@ -183,11 +185,20 @@ export type CoverageIssue =
   | { code: 'COV_FOCUS_UNKNOWN'; level: 'info'; unknown: number; total: number }
   | { code: 'COV_UNCLASSIFIED'; level: 'warning'; count: number };
 
+/** The lesson recipe speaks the kernel's vocabulary; the copy in this repo is the source. */
+export type { Recipe, RecipeIssue, RecipeRule } from '@/lib/shared-kernel/skills';
+
 export interface CoverageModuleReport {
   containerId: string;
   title: string;
   coverage: CoverageTallies;
   issues: CoverageIssue[];
+  /**
+   * What this lesson lacks against the course's recipe (plan 64, decisions L–P), counted
+   * in items rather than exercises. Warnings only. Optional because a report from a
+   * service older than phase 10 does not carry it, and that reads as "nothing to say".
+   */
+  recipeIssues?: RecipeIssue[];
 }
 
 export interface CoverageReport {
@@ -214,6 +225,8 @@ export interface ContainerCoverage {
   containerId: string;
   containerType: string;
   title: string;
+  /** The recipe the lessons were checked against — the course's, its workspace's, or empty. */
+  recipe?: Recipe;
   draft: CoverageReport | null;
   published: CoverageReport | null;
   /** Decided by the service, so the web, the mobile app and every later reader agree. */

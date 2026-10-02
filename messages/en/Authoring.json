@@ -3422,5 +3422,55 @@
     "draftNeverPublished": "Never published · {exercises} exercises, {facts} facts",
     "students": "What students have now",
     "studentsHint": "The published version, and what came of teaching it."
+  },
+  "recipe": {
+    "axis": {
+      "input": "Material",
+      "output": "Answer",
+      "modality": "Known by",
+      "skill": "Channel",
+      "focus": "Subject"
+    },
+    "input": {
+      "text": "Text to read",
+      "audio": "Recording",
+      "video": "Video",
+      "image": "Picture",
+      "none": "Nothing to take in"
+    },
+    "output": {
+      "none": "Nothing written",
+      "written_target": "Written in the target language",
+      "written_l1": "Written in the explanation language",
+      "spoken": "Spoken"
+    },
+    "target": {
+      "is": "{axis}: {values}",
+      "not": "{axis}: not {values}"
+    },
+    "rule": {
+      "min": "at least {min, plural, one {# item} other {# items}} — {target}",
+      "maxShare": "at most {share}% of items — {target}"
+    },
+    "issue": {
+      "RECIPE_BELOW_MIN": "{lessons} of {total} {total, plural, one {lesson falls} other {lessons fall}} short of the recipe: {rule}",
+      "RECIPE_ABOVE_SHARE": "{lessons} of {total} {total, plural, one {lesson goes} other {lessons go}} over the recipe: {rule}"
+    },
+    "lesson": {
+      "RECIPE_BELOW_MIN": "{count} of the {min} needed: {rule}",
+      "RECIPE_ABOVE_SHARE": "{count} of {total} items: {rule}"
+    },
+    "remedy": {
+      "types": "Closes it: {types}.",
+      "typesOrAudio": "Closes it: {types} — or turn on a recording in an exercise.",
+      "audioOnly": "Closes it: turn on a recording in an exercise.",
+      "none": "No exercise type closes this yet.",
+      "soon": "{type} (soon)",
+      "more": "{count} more"
+    },
+    "dot": {
+      "label": "{count, plural, one {# recipe rule} other {# recipe rules}} not met",
+      "title": "Against the course recipe"
+    }
   }
 }

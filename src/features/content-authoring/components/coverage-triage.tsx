@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useAtomCoverage } from '../api/use-atom-coverage';
 import { useContainerCoverage } from '../api/use-container-coverage';
 import { buildTriage, type TriageRow, type TriageTarget } from '../lib/coverage-triage';
+import { useRecipeText } from '../hooks/use-recipe-text';
 
 /** How many findings are shown before the rest fold behind a button. */
 const SHOWN = 3;
@@ -22,10 +23,22 @@ function targetHref(pathname: string, target: TriageTarget): string {
 
 function Row({ row, pathname }: { row: TriageRow; pathname: string }) {
   const t = useTranslations('Authoring');
+  const recipe = useRecipeText();
   const text =
-    row.source === 'skill'
-      ? t(`coverage.issue.${row.code}` as 'coverage.issue.COV_SKILL_ABSENT', row.values)
-      : t(`atomCoverage.issue.${row.code}` as 'atomCoverage.issue.atom_untested', row.values);
+    row.source === 'recipe' && row.rule
+      ? t(`recipe.issue.${row.code}` as 'recipe.issue.RECIPE_BELOW_MIN', {
+          ...row.values,
+          rule: recipe.rule(row.rule),
+        })
+      : row.source === 'skill'
+        ? t(`coverage.issue.${row.code}` as 'coverage.issue.COV_SKILL_ABSENT', row.values)
+        : t(`atomCoverage.issue.${row.code}` as 'atomCoverage.issue.atom_untested', row.values);
+  // A recipe row's second line is the cure, not the reason: the author chose the rule,
+  // and telling them why it matters would be telling them their own method.
+  const sub =
+    row.source === 'recipe' && row.rule
+      ? recipe.remedies(row.rule)
+      : t(`triage.sub.${row.code}` as 'triage.sub.atom_untested');
 
   return (
     <li className="flex items-start gap-3 border-b border-border py-2.5 last:border-b-0">
@@ -43,9 +56,7 @@ function Row({ row, pathname }: { row: TriageRow; pathname: string }) {
 
       <div className="min-w-0 flex-1">
         <p className="text-sm text-foreground">{text}</p>
-        <p className="text-xs text-muted-foreground">
-          {t(`triage.sub.${row.code}` as 'triage.sub.atom_untested')}
-        </p>
+        <p className="text-xs text-muted-foreground">{sub}</p>
       </div>
 
       {row.target && (

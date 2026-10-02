@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 
 import type { MaterialKind } from '@/lib/content/lesson-types';
+import type { Focus, Input, Modality, Output } from '@/lib/shared-kernel/skills';
 
 /**
  * Whether the type can be created today. `planned` rows are catalogue entries
@@ -43,9 +44,16 @@ export type ExerciseTypeStatus = 'live' | 'planned';
  * coverage report exists to avoid.
  */
 export interface PlannedAxes {
-  input: 'text' | 'audio' | 'video' | 'image' | 'none';
-  output: 'none' | 'written_target' | 'written_l1' | 'spoken';
-  retrieval: 'select' | 'recombine' | 'recall' | 'produce' | 'monitor';
+  input: Input;
+  output: Output;
+  /**
+   * How the answer has to be known — the axis the lesson recipe speaks. Spec 19 wrote
+   * these rows with a five-value `retrieval`; decision G of plan 64 gave that role to
+   * `modality`, and a recipe could not advise a type described in a scale it does not read.
+   */
+  modality: Modality;
+  /** Only where the type is structurally about one subject — rule 2 of `by-template.ts`. */
+  focus?: readonly Focus[];
 }
 
 export interface ExerciseTypeDefinition {
@@ -169,7 +177,7 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     section: 'exercise',
     icon: Columns3,
     status: 'planned',
-    axes: { input: 'text', output: 'none', retrieval: 'recombine' },
+    axes: { input: 'text', output: 'none', modality: 'recognition' },
   },
   highlight_in_text: {
     code: 'highlight_in_text',
@@ -177,7 +185,7 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     section: 'exercise',
     icon: Highlighter,
     status: 'planned',
-    axes: { input: 'text', output: 'none', retrieval: 'select' },
+    axes: { input: 'text', output: 'none', modality: 'recognition' },
   },
   dictation: {
     code: 'dictation',
@@ -185,7 +193,7 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     section: 'exercise',
     icon: Mic,
     status: 'planned',
-    axes: { input: 'audio', output: 'written_target', retrieval: 'recall' },
+    axes: { input: 'audio', output: 'written_target', modality: 'recall' },
   },
   inflection_table: {
     code: 'inflection_table',
@@ -193,7 +201,7 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     section: 'grammar',
     icon: Table,
     status: 'planned',
-    axes: { input: 'text', output: 'written_target', retrieval: 'recall' },
+    axes: { input: 'text', output: 'written_target', modality: 'recall', focus: ['grammar'] },
   },
   read_aloud: {
     code: 'read_aloud',
@@ -201,7 +209,8 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     section: 'exercise',
     icon: Speech,
     status: 'planned',
-    axes: { input: 'text', output: 'spoken', retrieval: 'produce' },
+    // The words are on screen: what is retrieved is how they sound, not what to say.
+    axes: { input: 'text', output: 'spoken', modality: 'recall' },
   },
   speaking_prompt: {
     code: 'speaking_prompt',
@@ -209,7 +218,7 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     section: 'exercise',
     icon: Mic,
     status: 'planned',
-    axes: { input: 'text', output: 'spoken', retrieval: 'produce' },
+    axes: { input: 'text', output: 'spoken', modality: 'production' },
   },
   minimal_pairs: {
     code: 'minimal_pairs',
@@ -217,7 +226,7 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     section: 'exercise',
     icon: Ear,
     status: 'planned',
-    axes: { input: 'audio', output: 'none', retrieval: 'select' },
+    axes: { input: 'audio', output: 'none', modality: 'recognition' },
   },
   information_transfer: {
     code: 'information_transfer',
@@ -225,7 +234,7 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     section: 'exercise',
     icon: ClipboardList,
     status: 'planned',
-    axes: { input: 'text', output: 'written_target', retrieval: 'recall' },
+    axes: { input: 'text', output: 'written_target', modality: 'recall' },
   },
 };
 
@@ -233,6 +242,15 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
 export function exerciseType(code: string | null | undefined): ExerciseTypeDefinition | undefined {
   return code ? EXERCISE_TYPES[code] : undefined;
 }
+
+/**
+ * Live, and still opened by the general form, but absorbed by `word_bank_gap_fill`
+ * (plan 35): nothing should advise an author to make a new one.
+ */
+export const RETIRED_EXERCISE_TYPES: ReadonlySet<string> = new Set([
+  'fill_in_blank',
+  'word_bank_fill',
+]);
 
 /** The codes an author may actually create, in catalogue order. */
 export function liveExerciseTypes(): ExerciseTypeDefinition[] {

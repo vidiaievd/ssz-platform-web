@@ -3422,5 +3422,55 @@
     "draftNeverPublished": "Ніколи не публікувалося · {exercises} вправ, {facts} фактів",
     "students": "Те, що мають студенти",
     "studentsHint": "Опублікована версія і те, що вийшло з навчання."
+  },
+  "recipe": {
+    "axis": {
+      "input": "Матеріал",
+      "output": "Відповідь",
+      "modality": "Як знають відповідь",
+      "skill": "Канал",
+      "focus": "Предмет"
+    },
+    "input": {
+      "text": "Текст для читання",
+      "audio": "Аудіозапис",
+      "video": "Відео",
+      "image": "Зображення",
+      "none": "Сприймати нічого"
+    },
+    "output": {
+      "none": "Нічого не пишуть",
+      "written_target": "Пишуть мовою, що вивчається",
+      "written_l1": "Пишуть мовою пояснень",
+      "spoken": "Говорять"
+    },
+    "target": {
+      "is": "{axis}: {values}",
+      "not": "{axis}: не {values}"
+    },
+    "rule": {
+      "min": "не менше {min, plural, one {# пункту} few {# пунктів} many {# пунктів} other {# пункту}} — {target}",
+      "maxShare": "не більше {share} % пунктів — {target}"
+    },
+    "issue": {
+      "RECIPE_BELOW_MIN": "{lessons} з {total} уроків не дотягують до рецепта: {rule}",
+      "RECIPE_ABOVE_SHARE": "{lessons} з {total} уроків виходять за рецепт: {rule}"
+    },
+    "lesson": {
+      "RECIPE_BELOW_MIN": "{count} з {min} потрібних: {rule}",
+      "RECIPE_ABOVE_SHARE": "{count} з {total} пунктів: {rule}"
+    },
+    "remedy": {
+      "types": "Закривають: {types}.",
+      "typesOrAudio": "Закривають: {types} — або увімкніть аудіозапис у вправі.",
+      "audioOnly": "Закриває: аудіозапис, увімкнений у вправі.",
+      "none": "Поки жоден тип вправ цього не закриває.",
+      "soon": "{type} (незабаром)",
+      "more": "ще {count}"
+    },
+    "dot": {
+      "label": "Не виконано {count, plural, one {# правило} few {# правила} many {# правил} other {# правила}} рецепта",
+      "title": "За рецептом курсу"
+    }
   }
 }

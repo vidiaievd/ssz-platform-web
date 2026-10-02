@@ -81,3 +81,53 @@ describe('CoverageTriage', () => {
     expect(container).toBeEmptyDOMElement();
   });
 });
+
+describe('CoverageTriage — the lesson recipe', () => {
+  // The check of plan 64, phase 10, as the author reads it: what is missing, in how many
+  // lessons, and which types would close it.
+  it('names the rule, the lessons that miss it, and the types that close it', () => {
+    const produces = { axis: 'output', values: ['none'], negate: true, min: 1 };
+    vi.mocked(useContainerCoverage).mockReturnValue({
+      data: {
+        draft: {
+          available: true,
+          issues: [],
+          modules: [
+            {
+              containerId: 'm1',
+              coverage: { total: 3 },
+              issues: [],
+              recipeIssues: [
+                {
+                  code: 'RECIPE_BELOW_MIN',
+                  level: 'warning',
+                  ruleIndex: 0,
+                  rule: produces,
+                  count: 0,
+                  min: 1,
+                  total: 3,
+                },
+              ],
+            },
+          ],
+        },
+      } as unknown as ContainerCoverage,
+    } as never);
+    vi.mocked(useAtomCoverage).mockReturnValue({ data: undefined } as never);
+
+    render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <CoverageTriage containerId="course-1" />
+      </NextIntlClientProvider>,
+    );
+
+    expect(
+      screen.getByText(
+        '1 of 1 lesson falls short of the recipe: at least 1 item — Answer: not Nothing written',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/^Closes it: Gap-fill, .*Translate to target, .*and 8 more\.$/),
+    ).toBeInTheDocument();
+  });
+});

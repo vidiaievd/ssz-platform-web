@@ -3422,5 +3422,55 @@
     "draftNeverPublished": "Aldri publisert · {exercises} oppgaver, {facts} fakta",
     "students": "Det studentene har nå",
     "studentsHint": "Den publiserte versjonen, og hva undervisningen ga."
+  },
+  "recipe": {
+    "axis": {
+      "input": "Materiale",
+      "output": "Svar",
+      "modality": "Kunnskap vist ved",
+      "skill": "Kanal",
+      "focus": "Emne"
+    },
+    "input": {
+      "text": "Tekst å lese",
+      "audio": "Lydopptak",
+      "video": "Video",
+      "image": "Bilde",
+      "none": "Ingenting å ta inn"
+    },
+    "output": {
+      "none": "Ingenting skrevet",
+      "written_target": "Skrevet på målspråket",
+      "written_l1": "Skrevet på forklaringsspråket",
+      "spoken": "Muntlig"
+    },
+    "target": {
+      "is": "{axis}: {values}",
+      "not": "{axis}: ikke {values}"
+    },
+    "rule": {
+      "min": "minst {min, plural, one {# punkt} other {# punkter}} — {target}",
+      "maxShare": "høyst {share} % av punktene — {target}"
+    },
+    "issue": {
+      "RECIPE_BELOW_MIN": "{lessons} av {total} leksjoner når ikke opp til oppskriften: {rule}",
+      "RECIPE_ABOVE_SHARE": "{lessons} av {total} leksjoner går over oppskriften: {rule}"
+    },
+    "lesson": {
+      "RECIPE_BELOW_MIN": "{count} av {min} nødvendige: {rule}",
+      "RECIPE_ABOVE_SHARE": "{count} av {total} punkter: {rule}"
+    },
+    "remedy": {
+      "types": "Løses med: {types}.",
+      "typesOrAudio": "Løses med: {types} — eller slå på lydopptak i en oppgave.",
+      "audioOnly": "Løses med: slå på lydopptak i en oppgave.",
+      "none": "Ingen oppgavetype løser dette ennå.",
+      "soon": "{type} (kommer)",
+      "more": "{count} til"
+    },
+    "dot": {
+      "label": "{count, plural, one {# regel} other {# regler}} i oppskriften ikke oppfylt",
+      "title": "Mot kursets oppskrift"
+    }
   }
 }

@@ -45,7 +45,7 @@ import type {
 } from '@/features/content/types';
 import { wsHref } from '@/features/workspaces/lib/href';
 
-import type { CurriculumTreeSelection } from '../types';
+import type { CurriculumTreeSelection, RecipeIssue } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
 import { BlockTypeIcon } from './block-type-icon';
 import {
@@ -72,6 +72,7 @@ import { renameItemAction } from '../actions/rename-item';
 import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
 import { findItemWithModule } from '../lib/find-tree-item';
 import { PublishStateBadge } from './publish-state-badge';
+import { RecipeDot } from './recipe-dot';
 import { ItemChangeBadge } from './item-change-badge';
 import { MoveSection } from './curriculum-item-reorder';
 import { AddLessonPicker } from './add-lesson-picker';
@@ -136,6 +137,12 @@ interface CurriculumTreeProps {
   onToggleCollapse: (key: string) => void;
   /** Narrows which blocks are shown. Levels and modules are never hidden by it. */
   filters: StructureFilters;
+  /**
+   * What each lesson lacks against the course recipe, by module container id — from the
+   * coverage report the structure tab already loads. Absent while it loads, or when the
+   * recipe is empty: no dot is the right picture of both.
+   */
+  recipeIssues?: ReadonlyMap<string, readonly RecipeIssue[]>;
 }
 
 /** Which node is being renamed in place, and how to save it. */
@@ -625,8 +632,11 @@ function ModuleCard({
   onNudge,
   expanded,
   onToggleExpanded,
+  recipeIssues = [],
 }: {
   module: CurriculumTreeModuleNode;
+  /** What this lesson lacks against the course recipe. Empty draws nothing. */
+  recipeIssues?: readonly RecipeIssue[];
   code: string;
   /** Position among its level's modules — drives Move up/down. */
   moduleIndex: number;
@@ -830,6 +840,7 @@ function ModuleCard({
           {t('structure.lessonCount', { count: allItems.length })}
           {minutes > 0 && ` · ${t('structure.minutes', { count: minutes })}`}
         </span>
+        <RecipeDot issues={recipeIssues} />
         <PublishStateBadge state={mod.publishState} />
         <RowTools visible={selected}>
           <button
@@ -958,6 +969,7 @@ export function CurriculumTree({
   collapsed,
   onToggleCollapse,
   filters,
+  recipeIssues,
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
@@ -1837,6 +1849,7 @@ export function CurriculumTree({
                       onNudge={nudge}
                       expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
                       onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
+                      recipeIssues={recipeIssues?.get(mod.containerId)}
                     />
                   ))}
 

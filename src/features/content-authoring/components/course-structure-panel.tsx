@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { AccessTier, DifficultyLevel, Visibility } from '@/features/content/types';
 
 import { useCurriculumTree } from '../api/use-curriculum-tree';
+import { useContainerCoverage } from '../api/use-container-coverage';
+import { recipeIssuesByModule } from '../lib/coverage-triage';
 import type { CurriculumTreeSelection } from '../types';
 import {
   findItemSelection,
@@ -90,6 +92,9 @@ export function CourseStructurePanel({
   // author typed would be a filter they cannot clear.
   const [filters, setFilters] = useState<StructureFilters>(initialFilters ?? EMPTY_FILTERS);
   const { data: tree, isLoading, isError, refetch } = useCurriculumTree(containerId, versionId);
+  // The same report the health strip reads, so the dots cost no request of their own.
+  const { data: coverage } = useContainerCoverage(containerId);
+  const recipeIssues = useMemo(() => recipeIssuesByModule(coverage), [coverage]);
 
   /**
    * Deleting from the inspector's footer, confirmed in the same dialog the row
@@ -192,6 +197,7 @@ export function CourseStructurePanel({
               collapsed={collapsed}
               onToggleCollapse={onToggleCollapse}
               filters={filters}
+              recipeIssues={recipeIssues}
             />
           </div>
         </div>
