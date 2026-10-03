@@ -83,6 +83,44 @@
       "again": "Gjør på nytt"
     }
   },
+  "sortIntoBuckets": {
+    "check": "Sjekk",
+    "checkCount": "Sjekk ({n})",
+    "checking": "Sjekker …",
+    "retryWrong": "Prøv de feile på nytt ({n})",
+    "showKey": "Vis riktig plassering",
+    "finish": "Fullfør",
+    "attempt": "Forsøk {n}",
+    "attemptOf": "Forsøk {n} av {max}",
+    "score": "{correct} av {total} riktige",
+    "remaining": "{n} igjen",
+    "poolTitle": "Ord",
+    "poolDrop": "Slipp her for å ta den tilbake",
+    "zoneLabel": "{label}, {n, plural, one {# element} other {# elementer}}",
+    "zoneIdle": "Slipp elementer her",
+    "zoneTap": "Trykk for å slippe her",
+    "selected": "{text} er valgt. Velg en sone å legge den i.",
+    "tilePlaced": "{text}, i {bucket}. Trykk for å ta den tilbake.",
+    "tileLocked": "{text}, i {bucket}, riktig",
+    "tileWrong": "{text}, i {bucket}, feil",
+    "tileKey": "{text} hører hjemme i {bucket}",
+    "stateCorrect": "Riktig",
+    "stateWrong": "Feil",
+    "rule": "Regel",
+    "listen": "Lytt: {text}",
+    "hint": "Hint",
+    "sendFailed": "Plasseringene kunne ikke sendes. Prøv igjen.",
+    "closedAlready": "Denne oppgaven er allerede avsluttet.",
+    "empty": {
+      "title": "Ingenting å sortere ennå",
+      "body": "Oppgaven trenger minst to soner og noen elementer."
+    },
+    "done": {
+      "title": "Ferdig",
+      "score": "{score} av {total} riktige på første sjekk.",
+      "again": "Start på nytt"
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Svar på spørsmål {n}",
     "answeredCount": "{done} av {total} spørsmål besvart",
@@ -475,7 +513,8 @@
       "lines": "linjene",
       "sentences": "setningene",
       "pieces": "brikkene",
-      "pairs": "parene"
+      "pairs": "parene",
+      "items": "elementene"
     },
     "lockNoteOwn": "Denne {item} åpner seg når du har hørt opptaket sitt."
   }

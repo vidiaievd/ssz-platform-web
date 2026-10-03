@@ -29,6 +29,8 @@ export interface ItemAudioSlotProps {
    */
   disabledReason?: string;
   onChange: (mediaId: string | undefined) => void;
+  /** Replaces "Audio of the sentence" for a template whose items are not sentences. */
+  label?: string;
 }
 
 /**
@@ -41,7 +43,7 @@ export interface ItemAudioSlotProps {
  * listening template that will need one, and a limit enforced in the browser is a limit a
  * page reload removes.
  */
-export function ItemAudioSlot({ mediaId, disabledReason, onChange }: ItemAudioSlotProps) {
+export function ItemAudioSlot({ mediaId, disabledReason, onChange, label }: ItemAudioSlotProps) {
   const t = useTranslations('Authoring');
   const tMedia = useTranslations('Media');
   const input = useRef<HTMLInputElement>(null);
@@ -82,7 +84,7 @@ export function ItemAudioSlot({ mediaId, disabledReason, onChange }: ItemAudioSl
         <>
           <p className="flex items-center gap-1 text-xs font-medium">
             <Volume2 className="size-3.5" aria-hidden />
-            {t('translate.step2.audioLabel')}
+            {label ?? t('translate.step2.audioLabel')}
           </p>
           <AttachedAudio mediaId={mediaId} />
           {/* An attachment made before the direction changed still plays, and can still be

@@ -17,6 +17,17 @@ export interface MatrixRow {
   /** What the row's sticky header cell shows — usually the item with its answer marked. */
   header: ReactNode;
   answerColumnId: string;
+  /**
+   * Further columns that are also correct for this row, and so locked like the first.
+   * Absent for the types that have one answer; `sort_into_buckets` fills it from an
+   * item's `also` (AC-F3). Additive: a row without it behaves exactly as before.
+   */
+  acceptedColumnIds?: readonly string[] | undefined;
+}
+
+/** Whether a column is one of the row's correct answers — nothing wrong to explain there. */
+function isAnswer(row: MatrixRow, columnId: string): boolean {
+  return columnId === row.answerColumnId || (row.acceptedColumnIds?.includes(columnId) ?? false);
 }
 
 export interface MatrixColumn {
@@ -110,9 +121,7 @@ export function FeedbackMatrix({
   const cells = useMemo(
     () =>
       rows.flatMap((row) =>
-        columns
-          .filter((column) => column.id !== row.answerColumnId)
-          .map((column) => ({ row, column })),
+        columns.filter((column) => !isAnswer(row, column.id)).map((column) => ({ row, column })),
       ),
     [rows, columns],
   );
@@ -179,7 +188,7 @@ export function FeedbackMatrix({
                   // The cell where a row meets its own answer can never hold an
                   // explanation — there is nothing wrong to explain there. That is what
                   // the row's `why` is for, over in the list view.
-                  if (column.id === row.answerColumnId) {
+                  if (isAnswer(row, column.id)) {
                     return (
                       <td key={column.id} className="px-3 py-2 text-center">
                         <span
