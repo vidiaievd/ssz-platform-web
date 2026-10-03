@@ -1,21 +1,40 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import { RECIPE_PRESETS } from '@/lib/shared-kernel/skills';
 import type { WorkspaceCoverageRecipe } from '../../types';
 
-vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { dismiss: vi.fn() }) }));
+vi.mock('sonner', () => ({
+  toast: Object.assign(vi.fn(), { dismiss: vi.fn(), success: vi.fn() }),
+}));
 vi.mock('../../api/use-coverage-recipe', () => ({
   useWorkspaceCoverageRecipe: vi.fn(),
-  useSaveWorkspaceCoverageRecipe: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
-  InvalidRecipeError: class extends Error {},
-  RecipeForbiddenError: class extends Error {},
+  useSaveWorkspaceCoverageRecipe: vi.fn(),
+  InvalidRecipeError: class InvalidRecipeError extends Error {},
+  RecipeForbiddenError: class RecipeForbiddenError extends Error {},
 }));
 
 const { WorkspaceRecipeSettings } = await import('./workspace-recipe-settings');
-const { useWorkspaceCoverageRecipe } = await import('../../api/use-coverage-recipe');
+const {
+  useWorkspaceCoverageRecipe,
+  useSaveWorkspaceCoverageRecipe,
+  InvalidRecipeError,
+  RecipeForbiddenError,
+} = await import('../../api/use-coverage-recipe');
+const { toast } = await import('sonner');
+
+type Callbacks = {
+  onSuccess: (saved: WorkspaceCoverageRecipe) => void;
+  onError: (e: Error) => void;
+};
+const mutate = vi.fn<(recipe: unknown, callbacks: Callbacks) => void>();
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(useSaveWorkspaceCoverageRecipe).mockReturnValue({ mutate, isPending: false } as never);
+});
 
 const SAVED: WorkspaceCoverageRecipe = {
   schoolId: 'school-1',
@@ -90,5 +109,166 @@ describe('WorkspaceRecipeSettings, read-only', () => {
     renderPage({ ...SAVED, recipe: { rules: [] } });
     expect(screen.getByText('No rules: lessons will not be checked')).toBeInTheDocument();
     expect(screen.queryByText(/No recipe yet/)).toBeNull();
+  });
+});
+
+const saveButton = () => screen.getByRole('button', { name: 'Save recipe' });
+const lastToast = () => vi.mocked(toast).mock.calls.at(-1)!;
+const undoLast = () =>
+  (lastToast()[1] as unknown as { action: { onClick: () => void } }).action.onClick();
+
+describe('WorkspaceRecipeSettings, editing', () => {
+  it('starts a recipe that was never set from a preset, without badges', () => {
+    renderPage({ ...SAVED, recipe: null, updatedAt: null }, { canEdit: true });
+    expect(screen.getByText('Nothing to save yet')).toBeInTheDocument();
+    expect(saveButton()).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('radio', { name: /B1 exam preparation/ }));
+
+    expect(screen.getAllByRole('listitem', { name: /^Rule \d$/ })).toHaveLength(4);
+    expect(screen.queryByText('New')).toBeNull();
+    expect(screen.queryByText(/No recipe yet/)).toBeNull();
+    expect(lastToast()[0]).toBe('B1 exam preparation added. Review the rules, then save.');
+    expect(saveButton()).toBeEnabled();
+  });
+
+  it('replaces rules with a preset, and undoes it', () => {
+    renderPage(SAVED, { canEdit: true });
+
+    fireEvent.click(screen.getByRole('radio', { name: /Grammar intensive/ }));
+    expect(lastToast()[0]).toBe('Rules replaced with Grammar intensive.');
+    expect(screen.getByRole('radio', { name: /Grammar intensive/ })).toBeChecked();
+
+    act(() => undoLast());
+    expect(screen.getByRole('radio', { name: /Balanced A1–A2/ })).toBeChecked();
+    expect(screen.getByText('No unsaved changes')).toBeInTheDocument();
+  });
+
+  it('marks an edited rule, keeps the preset it came from, and discards back', () => {
+    renderPage(SAVED, { canEdit: true });
+
+    const rule = screen.getByRole('listitem', { name: 'Rule 3' });
+    fireEvent.change(
+      within(rule).getByRole('textbox', { name: 'Rule 3 — Share of items, percent' }),
+      {
+        target: { value: '70' },
+      },
+    );
+
+    expect(within(rule).getByText('Edited')).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /Balanced A1–A2/ })).toBeChecked();
+    expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
+    expect(screen.queryByText('Edited')).toBeNull();
+    expect(screen.getByText('No unsaved changes')).toBeInTheDocument();
+  });
+
+  it('holds back a new rule until a value is ticked', () => {
+    renderPage(SAVED, { canEdit: true });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add rule' }));
+    const rule = screen.getByRole('listitem', { name: 'Rule 4' });
+    expect(within(rule).getByText('New')).toBeInTheDocument();
+    expect(
+      within(rule).getByRole('combobox', { name: 'Rule 4 — What the rule counts by' }),
+    ).toHaveFocus();
+    expect(within(rule).getByText('Tick at least one value.')).toBeInTheDocument();
+    expect(screen.getByText('Rule 4 needs a fix before you can save.')).toBeInTheDocument();
+    expect(saveButton()).toBeDisabled();
+
+    fireEvent.click(within(rule).getByRole('checkbox', { name: 'Picture' }));
+    expect(saveButton()).toBeEnabled();
+  });
+
+  it('deletes a rule with an undo, and moves focus to the next one', () => {
+    renderPage(SAVED, { canEdit: true });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete rule 1' }));
+    expect(screen.getAllByRole('listitem', { name: /^Rule \d$/ })).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Delete rule 1' })).toHaveFocus();
+    expect(lastToast()[0]).toBe('Rule 1 deleted.');
+
+    act(() => undoLast());
+    expect(screen.getAllByRole('listitem', { name: /^Rule \d$/ })).toHaveLength(3);
+  });
+
+  // Saving the last rule away is a choice: it turns the check off.
+  it('saves a recipe of no rules as such', () => {
+    renderPage(SAVED, { canEdit: true });
+    for (let i = 0; i < 3; i++)
+      fireEvent.click(screen.getByRole('button', { name: 'Delete rule 1' }));
+
+    expect(screen.getByText('No rules: lessons will not be checked')).toBeInTheDocument();
+    fireEvent.click(saveButton());
+    expect(mutate).toHaveBeenCalledWith({ rules: [] }, expect.anything());
+  });
+
+  it('saves, and says so', () => {
+    renderPage(SAVED, { canEdit: true });
+    fireEvent.click(screen.getByRole('radio', { name: /Grammar intensive/ }));
+    fireEvent.click(saveButton());
+
+    expect(mutate).toHaveBeenCalledWith(RECIPE_PRESETS.grammar_intensive, expect.anything());
+    expect(screen.getByRole('button', { name: 'Saving…' })).toBeDisabled();
+
+    act(() =>
+      mutate.mock.calls[0]![1].onSuccess({
+        ...SAVED,
+        recipe: RECIPE_PRESETS.grammar_intensive,
+        updatedAt: '2026-10-03T08:00:00.000Z',
+      }),
+    );
+    expect(screen.getByText('Saved just now')).toBeInTheDocument();
+    expect(screen.getByText('Last saved Oct 3, 2026')).toBeInTheDocument();
+    expect(screen.queryByText('New')).toBeNull();
+    expect(toast.success).toHaveBeenCalled();
+  });
+
+  // BEHAVIOR §5: an edit made while the save was in flight stays a draft.
+  it('keeps an edit made during the save as unsaved', () => {
+    renderPage(SAVED, { canEdit: true });
+    fireEvent.click(screen.getByRole('radio', { name: /Grammar intensive/ }));
+    fireEvent.click(saveButton());
+    fireEvent.click(screen.getByRole('button', { name: 'Delete rule 1' }));
+
+    act(() => mutate.mock.calls[0]![1].onSuccess(SAVED));
+    expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
+  });
+
+  it('keeps the edits and offers to try again when the save fails', () => {
+    renderPage(SAVED, { canEdit: true });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete rule 1' }));
+    fireEvent.click(saveButton());
+
+    act(() => mutate.mock.calls[0]![1].onError(new Error('offline')));
+    expect(
+      screen.getByText('Couldn’t save. Check your connection and try again.'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeEnabled();
+    expect(screen.getAllByRole('listitem', { name: /^Rule \d$/ })).toHaveLength(2);
+  });
+
+  it('holds a refused recipe back until it changes', () => {
+    renderPage(SAVED, { canEdit: true });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete rule 1' }));
+    fireEvent.click(saveButton());
+
+    act(() => mutate.mock.calls[0]![1].onError(new InvalidRecipeError('no')));
+    expect(screen.getByText('Not saved: the server didn’t accept the recipe.')).toBeInTheDocument();
+    expect(saveButton()).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete rule 1' }));
+    expect(saveButton()).toBeEnabled();
+  });
+
+  it('turns read-only when the service refuses the role', () => {
+    renderPage(SAVED, { canEdit: true });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete rule 1' }));
+    fireEvent.click(saveButton());
+
+    act(() => mutate.mock.calls[0]![1].onError(new RecipeForbiddenError('no')));
+    expect(screen.getByText(/View only\. Owners and content admins/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Save recipe' })).toBeNull();
   });
 });

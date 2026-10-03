@@ -40,7 +40,6 @@ export function RecipeRuleCard({
   rule,
   number,
   change = null,
-  rejected = false,
   onChange,
   onDelete,
 }: {
@@ -48,8 +47,6 @@ export function RecipeRuleCard({
   /** One-based position; every accessible name carries it. */
   number: number;
   change?: 'new' | 'edited' | null;
-  /** The service refused this rule on the last save. */
-  rejected?: boolean;
   onChange?: (next: DraftRule) => void;
   onDelete?: () => void;
 }) {
@@ -64,7 +61,7 @@ export function RecipeRuleCard({
   const disabled = !onChange;
   const errors = ruleErrors(rule);
   const errorOn = (field: RuleError['field']) => errors.some((e) => e.field === field);
-  const broken = errors.length > 0 || rejected;
+  const broken = errors.length > 0;
   const describedBy = broken ? errorId : undefined;
 
   return (
@@ -241,16 +238,18 @@ export function RecipeRuleCard({
       </p>
 
       {broken && (
-        <div id={errorId} role={rejected ? 'alert' : undefined} className="flex flex-col gap-1">
-          {(rejected ? [tErr('rejected')] : errors.map((e) => tErr(e.key))).map((message) => (
-            <p
-              key={message}
-              className="flex items-center gap-1.5 text-xs font-semibold text-(--ssz-color-error-700)"
-            >
-              <AlertCircle className="size-3.5 shrink-0" aria-hidden />
-              {message}
-            </p>
-          ))}
+        <div id={errorId} className="flex flex-col gap-1">
+          {errors
+            .map((e) => tErr(e.key))
+            .map((message) => (
+              <p
+                key={message}
+                className="flex items-center gap-1.5 text-xs font-semibold text-(--ssz-color-error-700)"
+              >
+                <AlertCircle className="size-3.5 shrink-0" aria-hidden />
+                {message}
+              </p>
+            ))}
         </div>
       )}
     </li>

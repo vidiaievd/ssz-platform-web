@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
 import { SettingsLayout } from '@/components/shared/settings-layout';
+import { UnsavedChangesProvider } from '@/features/account/components/unsaved-changes-provider';
 import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { wsHref } from '@/features/workspaces/lib/href';
 import { settingsPagesFor } from '@/features/workspaces/lib/settings-pages';
@@ -34,5 +35,11 @@ export default async function SchoolSettingsLayout({ children, params }: Props) 
       : {}),
   }));
 
-  return <SettingsLayout nav={nav}>{children}</SettingsLayout>;
+  // The recipe page holds a draft; the provider asks before the settings nav or a reload
+  // drops it.
+  return (
+    <UnsavedChangesProvider>
+      <SettingsLayout nav={nav}>{children}</SettingsLayout>
+    </UnsavedChangesProvider>
+  );
 }

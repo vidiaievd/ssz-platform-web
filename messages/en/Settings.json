@@ -104,8 +104,7 @@
     "err": {
       "tickOne": "Tick at least one value.",
       "shareRange": "Use a share from 0 to 99 %.",
-      "minOne": "Use 1 item or more.",
-      "rejected": "The server didn’t accept this rule. Change or delete it, then save again."
+      "minOne": "Use 1 item or more."
     },
     "advise": {
       "title": "What this recipe will advise",
@@ -129,7 +128,6 @@
       "saved": "Saved just now",
       "error": "Couldn’t save. Check your connection and try again.",
       "errorSub": "Your edits are still here. Nothing was changed in your courses.",
-      "rejected": "Not saved: the server didn’t accept rule {n}.",
       "rejectedAll": "Not saved: the server didn’t accept the recipe.",
       "caption": "{kind, select, solo {Saving re-checks every lesson in all your courses right away. Nothing is blocked from publishing.} other {Saving re-checks every lesson in every course that follows this recipe right away. Nothing is blocked from publishing.}}",
       "discard": "Discard changes",
@@ -144,7 +142,6 @@
       "added": "{preset} added. Review the rules, then save.",
       "deleted": "Rule {n} deleted.",
       "undo": "Undo"
-    },
-    "leave": "You have unsaved changes to the recipe. Leave without saving?"
+    }
   }
 }

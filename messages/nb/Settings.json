@@ -104,8 +104,7 @@
     "err": {
       "tickOne": "Kryss av minst én verdi.",
       "shareRange": "Bruk en andel fra 0 til 99 %.",
-      "minOne": "Bruk 1 punkt eller flere.",
-      "rejected": "Serveren godtok ikke denne regelen. Endre eller slett den, og lagre på nytt."
+      "minOne": "Bruk 1 punkt eller flere."
     },
     "advise": {
       "title": "Hva denne oppskriften vil anbefale",
@@ -129,7 +128,6 @@
       "saved": "Lagret akkurat nå",
       "error": "Kunne ikke lagre. Sjekk tilkoblingen og prøv igjen.",
       "errorSub": "Endringene dine er fortsatt her. Ingenting ble endret i kursene dine.",
-      "rejected": "Ikke lagret: serveren godtok ikke regel {n}.",
       "rejectedAll": "Ikke lagret: serveren godtok ikke oppskriften.",
       "caption": "{kind, select, solo {Lagring sjekker alle timer i alle kursene dine på nytt med en gang. Ingenting blir stoppet fra publisering.} other {Lagring sjekker alle timer i alle kurs som følger denne oppskriften på nytt med en gang. Ingenting blir stoppet fra publisering.}}",
       "discard": "Forkast endringer",
@@ -144,7 +142,6 @@
       "added": "{preset} lagt til. Se over reglene, og lagre.",
       "deleted": "Regel {n} slettet.",
       "undo": "Angre"
-    },
-    "leave": "Du har ulagrede endringer i oppskriften. Gå uten å lagre?"
+    }
   }
 }
