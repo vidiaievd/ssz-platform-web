@@ -42,6 +42,7 @@ export type ExerciseType = (typeof EXERCISE_TYPES)[number];
 export const CREATABLE_EXERCISE_TYPES = [
   'multiple_choice',
   'multiple_choice_group',
+  'sort_into_buckets',
   'word_bank_gap_fill',
   'translate_to_target',
   'translate_from_target',

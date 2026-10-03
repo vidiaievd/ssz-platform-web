@@ -74,6 +74,12 @@ import {
   toContent as sentenceSchemaToContent,
   toExpectedAnswers as sentenceSchemaToExpectedAnswers,
 } from '@/lib/shared-kernel/sentence-schema';
+import {
+  fromPersisted as sortIntoBucketsFromPersisted,
+  TEMPLATE_CODE as SORT_INTO_BUCKETS_TEMPLATE_CODE,
+  toContent as sortIntoBucketsToContent,
+  toExpectedAnswers as sortIntoBucketsToExpectedAnswers,
+} from '@/lib/shared-kernel/sort-into-buckets';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -114,6 +120,10 @@ import { MultipleChoiceGroupBuilder } from './multiple-choice-group/builder';
 import { MultipleChoiceGroupPreview } from './multiple-choice-group/multiple-choice-group-preview';
 import type { MultipleChoiceGroupDocument } from './multiple-choice-group/edits';
 import type { SavedDocument as SavedMultipleChoiceGroup } from './multiple-choice-group/use-multiple-choice-group-autosave';
+import { SortIntoBucketsBuilder } from './sort-into-buckets/builder';
+import { SortIntoBucketsPreview } from './sort-into-buckets/sort-into-buckets-preview';
+import type { SortIntoBucketsDocument } from './sort-into-buckets/edits';
+import type { SavedDocument as SavedSortIntoBuckets } from './sort-into-buckets/use-sort-into-buckets-autosave';
 import { SentenceSchemaBuilder } from './sentence-schema/builder';
 import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
 import type { SentenceSchemaDocument } from './sentence-schema/edits';
@@ -189,6 +199,9 @@ export function ExerciseEditorPane({
   const [multipleChoiceGroup, setMultipleChoiceGroup] =
     useState<MultipleChoiceGroupDocument | null>(null);
 
+  /** The sorting board as its builder currently has it, for the preview column. */
+  const [sortIntoBuckets, setSortIntoBuckets] = useState<SortIntoBucketsDocument | null>(null);
+
   /**
    * Whichever builder is open, as it stands this second.
    *
@@ -207,6 +220,7 @@ export function ExerciseEditorPane({
     sentenceSchema ??
     multipleChoice ??
     multipleChoiceGroup ??
+    sortIntoBuckets ??
     null;
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
@@ -259,6 +273,13 @@ export function ExerciseEditorPane({
   const isMultipleChoiceGroup =
     exercise?.templateCode === MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE &&
     isMultipleChoiceGroupDocument(exercise.content);
+  /*
+    By the template code alone, like `sentence_schema` and unlike the types with an old
+    form: the template is new, so there is no second shape to dispatch on, and the shape
+    of a half-written board (no items at all) must never send it to the generic form
+    (plan 53's lesson).
+  */
+  const isSortIntoBuckets = exercise?.templateCode === SORT_INTO_BUCKETS_TEMPLATE_CODE;
 
   return (
     /*
@@ -314,6 +335,8 @@ export function ExerciseEditorPane({
             <MultipleChoicePreview exercise={multipleChoice} />
           ) : isMultipleChoiceGroup && multipleChoiceGroup !== null ? (
             <MultipleChoiceGroupPreview exercise={multipleChoiceGroup} />
+          ) : isSortIntoBuckets && sortIntoBuckets !== null ? (
+            <SortIntoBucketsPreview exercise={sortIntoBuckets} />
           ) : (
             <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
           )
@@ -511,6 +534,25 @@ export function ExerciseEditorPane({
                 authoringKeys.exercise(exerciseId),
                 (cached) =>
                   cached ? applySavedMultipleChoiceGroup(cached, updatedAt, saved) : cached,
+              )
+            }
+          />
+        ) : isSortIntoBuckets && exercise != null ? (
+          // A sorting board owns a document because its key is not a field of any tile:
+          // which bucket an item belongs in (and the others it also fits) is in the key
+          // column, and every wrong bucket owes an explanation beside it. The generic
+          // form has no field for any of that.
+          <SortIntoBucketsBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            targetLanguage={container.targetLanguage}
+            initialExercise={sortIntoBucketsDocumentFrom(exercise)}
+            onDocumentChange={setSortIntoBuckets}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedSortIntoBuckets(cached, updatedAt, saved) : cached),
               )
             }
           />
@@ -947,6 +989,46 @@ function applySavedMultipleChoiceGroup(
       MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE,
     ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...multipleChoiceGroupToExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        { ...instruction, instructionText: saved.exercise.instruction.trim() },
+        ...rest,
+      ],
+    }),
+  };
+}
+
+/** The stored columns as the kernel's sorting board, plus the row's token. */
+function sortIntoBucketsDocumentFrom(exercise: ExerciseWithAnswers): SortIntoBucketsDocument {
+  return {
+    ...sortIntoBucketsFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+    audio: readAudioDraft(exercise.content, SORT_INTO_BUCKETS_TEMPLATE_CODE),
+  };
+}
+
+/**
+ * The cached exercise as the save just left it on the server: both columns and the token,
+ * so a later mount reads its own work rather than the version it started from.
+ */
+function applySavedSortIntoBuckets(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedSortIntoBuckets,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    // The template's own persistence, then the layer that belongs to none of them: a cache
+    // written without it would hand a remounted builder an exercise whose audio had
+    // vanished, and the next autosave would write that loss to the server.
+    content: applyAudioDraft(
+      { ...sortIntoBucketsToContent(saved.exercise) },
+      saved.exercise.audio,
+      SORT_INTO_BUCKETS_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
+    expectedAnswers: { ...sortIntoBucketsToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
         { ...instruction, instructionText: saved.exercise.instruction.trim() },

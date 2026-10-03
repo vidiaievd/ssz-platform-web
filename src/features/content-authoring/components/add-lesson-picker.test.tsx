@@ -16,6 +16,7 @@ vi.mock('../actions/short-answer', () => ({ createShortAnswerAction: vi.fn() }))
 vi.mock('../actions/sentence-schema', () => ({ createSentenceSchemaAction: vi.fn() }));
 vi.mock('../actions/multiple-choice', () => ({ createMultipleChoiceAction: vi.fn() }));
 vi.mock('../actions/multiple-choice-group', () => ({ createMultipleChoiceGroupAction: vi.fn() }));
+vi.mock('../actions/sort-into-buckets', () => ({ createSortIntoBucketsAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
@@ -30,6 +31,7 @@ const { createExerciseAction } = await import('../actions/exercise');
 const { createGapFillAction } = await import('../actions/gap-fill');
 const { createMultipleChoiceAction } = await import('../actions/multiple-choice');
 const { createMultipleChoiceGroupAction } = await import('../actions/multiple-choice-group');
+const { createSortIntoBucketsAction } = await import('../actions/sort-into-buckets');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -186,6 +188,21 @@ describe('AddLessonPicker', () => {
     fireEvent.click(screen.getByText('Multiple choice group'));
 
     await waitFor(() => expect(createMultipleChoiceGroupAction).toHaveBeenCalled());
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it('creates a sorting task from its own scaffold, not from the generic form', async () => {
+    // Plan 66 phase 7: the type enters the add menu only with a scaffold. The generic form
+    // has no field for the buckets or for which one an item belongs in.
+    vi.mocked(createSortIntoBucketsAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-15', itemId: 'item-15' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Sort into groups'));
+
+    await waitFor(() => expect(createSortIntoBucketsAction).toHaveBeenCalled());
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 

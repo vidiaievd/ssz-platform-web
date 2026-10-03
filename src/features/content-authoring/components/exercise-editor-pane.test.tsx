@@ -20,6 +20,7 @@ vi.mock('../actions/short-answer', () => ({ saveShortAnswerAction: vi.fn() }));
 vi.mock('../actions/sentence-schema', () => ({ saveSentenceSchemaAction: vi.fn() }));
 vi.mock('../actions/multiple-choice', () => ({ saveMultipleChoiceAction: vi.fn() }));
 vi.mock('../actions/multiple-choice-group', () => ({ saveMultipleChoiceGroupAction: vi.fn() }));
+vi.mock('../actions/sort-into-buckets', () => ({ saveSortIntoBucketsAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -412,6 +413,65 @@ describe('ExerciseEditorPane', () => {
     expect(preview.getByText('Bartek leter etter arbeid.')).toBeInTheDocument();
     expect(preview.queryByText(/Teksten sier at han søker/)).not.toBeInTheDocument();
     expect(preview.queryByText(/Det motsatte står i teksten/)).not.toBeInTheDocument();
+  });
+
+  it('opens the sorting builder by template code, key held back from the preview', () => {
+    // Plan 66 phase 7. By the code alone: even a half-written board with no items at all
+    // must open the builder, never the generic form (plan 53's lesson).
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-sib',
+        templateCode: 'sort_into_buckets',
+        targetLanguage: 'no',
+        difficultyLevel: 'A2',
+        content: {
+          title: 'Kjønn',
+          instruction: 'Sorter ordene.',
+          buckets: [
+            { id: 'b1', label: 'en', rule: 'hankjønn' },
+            { id: 'b2', label: 'ei', rule: 'hunkjønn' },
+          ],
+          useNone: false,
+          noneLabel: '',
+          items: [
+            { id: 'i1', text: 'bil' },
+            { id: 'i2', text: 'bok' },
+            { id: 'i3', text: 'stol' },
+            { id: 'i4', text: 'dør' },
+          ],
+          settings: {
+            shuffle: false,
+            showRemaining: false,
+            hints: true,
+            revealKey: true,
+            attempts: 0,
+            threshold: 70,
+          },
+        },
+        expectedAnswers: {
+          items: {
+            i1: { bucketId: 'b1', also: [], why: 'Hankjønn.' },
+            i2: { bucketId: 'b2', also: [], why: 'Hunkjønn.' },
+            i3: { bucketId: 'b1', also: [], why: 'Hankjønn.' },
+            i4: { bucketId: 'b2', also: [], why: 'Hunkjønn.' },
+          },
+          fb: {},
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Sorter ordene.' }],
+        updatedAt: '2026-10-03T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Buckets/ })).toBeInTheDocument();
+    // The same body the runner draws, dealt through the projection: the tiles are there,
+    // and nothing of the key (the rule, the reason) is.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('bil')).toBeInTheDocument();
+    expect(preview.queryByText(/Hunkjønn/)).not.toBeInTheDocument();
   });
 
   it('leaves a multiple-choice document of the old form to the generic form', () => {

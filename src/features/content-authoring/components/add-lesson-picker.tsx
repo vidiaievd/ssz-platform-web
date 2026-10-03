@@ -27,6 +27,7 @@ import { TEMPLATE_CODE as SHORT_ANSWER_TEMPLATE_CODE } from '@/lib/shared-kernel
 import { TEMPLATE_CODE as SENTENCE_SCHEMA_TEMPLATE_CODE } from '@/lib/shared-kernel/sentence-schema';
 import { TEMPLATE_CODE as MULTIPLE_CHOICE_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice';
 import { TEMPLATE_CODE as MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice-group';
+import { TEMPLATE_CODE as SORT_INTO_BUCKETS_TEMPLATE_CODE } from '@/lib/shared-kernel/sort-into-buckets';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -40,6 +41,7 @@ import { createShortAnswerAction } from '../actions/short-answer';
 import { createSentenceSchemaAction } from '../actions/sentence-schema';
 import { createMultipleChoiceAction } from '../actions/multiple-choice';
 import { createMultipleChoiceGroupAction } from '../actions/multiple-choice-group';
+import { createSortIntoBucketsAction } from '../actions/sort-into-buckets';
 import {
   createTranslateFromTargetAction,
   createTranslateToTargetAction,
@@ -85,6 +87,7 @@ type OwnBuilderTemplate =
   | typeof SENTENCE_SCHEMA_TEMPLATE_CODE
   | typeof MULTIPLE_CHOICE_TEMPLATE_CODE
   | typeof MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE
+  | typeof SORT_INTO_BUCKETS_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
@@ -120,6 +123,10 @@ const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillActi
   // scaffold the builder would open on a document with no `rows` and the template's
   // schema would refuse it.
   [MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE]: createMultipleChoiceGroupAction,
+  // The tenth. The template's content schema has no `minItems`, so a document made by the
+  // generic form would be accepted and open on nothing the builder can use; the scaffold
+  // is two empty buckets and three empty items (plan 66 §4.1).
+  [SORT_INTO_BUCKETS_TEMPLATE_CODE]: createSortIntoBucketsAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,
