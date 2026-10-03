@@ -260,7 +260,7 @@ export function RecipeRuleCard({
  * "at least 1 item — Answer: not Nothing written". A finished rule reads exactly as the
  * dot and the triage say it; an unfinished one shows what is missing in its place.
  */
-function RulePhrase({ rule }: { rule: DraftRule }) {
+export function RulePhrase({ rule }: { rule: DraftRule }) {
   const t = useTranslations('Settings.recipe.rule');
   const tAxis = useTranslations('Authoring.recipe.axis');
   const text = useRecipeText();

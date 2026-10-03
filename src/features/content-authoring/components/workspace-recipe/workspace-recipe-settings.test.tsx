@@ -272,3 +272,49 @@ describe('WorkspaceRecipeSettings, editing', () => {
     expect(screen.queryByRole('button', { name: 'Save recipe' })).toBeNull();
   });
 });
+
+describe('WorkspaceRecipeSettings, what it will advise', () => {
+  const advise = () =>
+    screen.getByRole('heading', { name: 'What this recipe will advise' }).closest('section')!;
+
+  it('names the types that close a floor and keep a ceiling under', () => {
+    renderPage(SAVED);
+
+    const card = advise();
+    expect(within(card).getAllByText('Closes it:')).not.toHaveLength(0);
+    expect(within(card).getByText('Keeps it under:')).toBeInTheDocument();
+  });
+
+  it('shows five types, then the rest on request', () => {
+    renderPage(SAVED);
+
+    const more = within(advise()).getByRole('button', {
+      name: /^Show \d+ more exercise types for rule 1$/,
+    });
+    const row = more.closest('li')!;
+    const before = row.querySelectorAll('span.rounded-\\[4px\\]').length;
+    fireEvent.click(more);
+    expect(row.querySelectorAll('span.rounded-\\[4px\\]').length).toBeGreaterThan(before);
+    expect(within(row).queryByRole('button', { name: /more exercise types/ })).toBeNull();
+  });
+
+  // Nothing on the platform is heard by default; the audio layer is what makes it so.
+  it('suggests a recording for a rule about hearing', () => {
+    renderPage(SAVED);
+
+    expect(within(advise()).getByText('or turn on a recording in an exercise')).toBeInTheDocument();
+  });
+
+  it('asks for the fix before advising on an unfinished rule', () => {
+    renderPage(SAVED, { canEdit: true });
+    fireEvent.click(screen.getByRole('button', { name: 'Add rule' }));
+
+    expect(within(advise()).getByText('Fix rule 4 to see what closes it.')).toBeInTheDocument();
+  });
+
+  it('is not shown without rules', () => {
+    renderPage({ ...SAVED, recipe: { rules: [] } });
+
+    expect(screen.queryByRole('heading', { name: 'What this recipe will advise' })).toBeNull();
+  });
+});

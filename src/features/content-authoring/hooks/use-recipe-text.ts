@@ -48,19 +48,22 @@ export function useRecipeText() {
       : t('recipe.rule.maxShare', { share: Math.round((r.maxShare ?? 0) * 100), target });
   }
 
+  /** The types that would close a rule, by name: live first, then the planned ones. */
+  function remedyNames(r: RecipeRule): { live: string[]; planned: string[]; audioLayer: boolean } {
+    const { live, planned, audioLayer } = remediesFor(r);
+    const name = (labelKey: string) =>
+      t(`exercises.types.${labelKey}` as 'exercises.types.short_answer');
+    return {
+      live: live.map((type) => name(type.labelKey)),
+      planned: planned.map((type) => name(type.labelKey)),
+      audioLayer,
+    };
+  }
+
   /** "Closes it: Short answer, Writing task, Dictation (soon)". */
   function remedies(r: RecipeRule): string {
-    const { live, planned, audioLayer } = remediesFor(r);
-    const names = [
-      ...live.map((type) =>
-        t(`exercises.types.${type.labelKey}` as 'exercises.types.short_answer'),
-      ),
-      ...planned.map((type) =>
-        t('recipe.remedy.soon', {
-          type: t(`exercises.types.${type.labelKey}` as 'exercises.types.dictation'),
-        }),
-      ),
-    ];
+    const { live, planned, audioLayer } = remedyNames(r);
+    const names = [...live, ...planned.map((type) => t('recipe.remedy.soon', { type }))];
     const shown = names.slice(0, NAMED);
     if (names.length > NAMED) shown.push(t('recipe.remedy.more', { count: names.length - NAMED }));
 
@@ -72,5 +75,5 @@ export function useRecipeText() {
       : t('recipe.remedy.types', { types });
   }
 
-  return { rule, remedies, valueLabel };
+  return { rule, remedies, remedyNames, valueLabel };
 }
