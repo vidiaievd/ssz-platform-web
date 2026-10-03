@@ -157,7 +157,11 @@ export function CourseStructurePanel({
           the rail goes too — a jump list 120px wide is not a jump list
           (BEHAVIOR §4). */}
       <div className="grid grid-cols-1 gap-6 min-[1000px]:grid-cols-[260px_minmax(0,1fr)] min-[1400px]:grid-cols-[236px_minmax(0,1fr)_348px]">
-        <div className="hidden min-[1000px]:block">
+        {/* Spans the inspector's row too while that sits under the tree (below
+            1400px): a sticky pane can only travel inside its own grid area, so
+            confined to the tree's row it ran out at the end of the tree and was
+            carried up behind the header. */}
+        <div className="hidden min-[1000px]:row-span-2 min-[1000px]:block min-[1400px]:row-span-1">
           <OutlineRail
             tree={tree}
             courseContainerId={containerId}
@@ -171,34 +175,36 @@ export function CourseStructurePanel({
           />
         </div>
 
-        <div className="ssz-surface self-start rounded-2xl border border-border p-3.5 shadow-[var(--ssz-shadow-xs)]">
+        <div className="ssz-surface self-start overflow-hidden rounded-2xl border border-border shadow-[var(--ssz-shadow-xs)]">
           <StructureToolbar
             filters={filters}
             onChange={setFilters}
             onExpandAll={onExpandAll}
             onCollapseAll={onCollapseAll}
           />
-          <div className="mt-2.5">
-            <UnpublishedBanner tree={tree} onReview={onReview} />
-          </div>
-          <div className="mt-2.5">
-            <CurriculumTree
-              tree={tree}
-              selectedId={selectedId}
-              onSelect={setSelection}
-              onChanged={handleChanged}
-              courseContainerId={containerId}
-              workspaceId={workspaceId}
-              targetLanguage={targetLanguage}
-              difficultyLevel={difficultyLevel}
-              visibility={visibility}
-              accessTier={accessTier}
-              ownerSchoolId={ownerSchoolId}
-              collapsed={collapsed}
-              onToggleCollapse={onToggleCollapse}
-              filters={filters}
-              recipeIssues={recipeIssues}
-            />
+          <div className="p-3.5">
+            <div>
+              <UnpublishedBanner tree={tree} onReview={onReview} />
+            </div>
+            <div className="mt-2.5">
+              <CurriculumTree
+                tree={tree}
+                selectedId={selectedId}
+                onSelect={setSelection}
+                onChanged={handleChanged}
+                courseContainerId={containerId}
+                workspaceId={workspaceId}
+                targetLanguage={targetLanguage}
+                difficultyLevel={difficultyLevel}
+                visibility={visibility}
+                accessTier={accessTier}
+                ownerSchoolId={ownerSchoolId}
+                collapsed={collapsed}
+                onToggleCollapse={onToggleCollapse}
+                filters={filters}
+                recipeIssues={recipeIssues}
+              />
+            </div>
           </div>
         </div>
 
@@ -206,10 +212,10 @@ export function CourseStructurePanel({
             column: sticky is for a side pane, and a full-width block that
             follows the scroll would cover what it describes. */}
         <div className="min-[1000px]:col-start-2 min-[1400px]:col-start-3">
-          <div className="ssz-surface rounded-2xl border border-border p-4.5 shadow-[var(--ssz-shadow-xs)] min-[1400px]:sticky min-[1400px]:top-[var(--structure-sticky-top,1rem)]">
-            <h2 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              {t('structure.inspectorTitle')}
-            </h2>
+          <div
+            aria-label={t('structure.inspectorTitle')}
+            className="ssz-surface flex flex-col overflow-hidden rounded-2xl border border-border shadow-[var(--ssz-shadow-xs)] min-[1400px]:sticky min-[1400px]:top-[var(--structure-sticky-top,1rem)] min-[1400px]:max-h-[calc(100vh-3.5rem-var(--structure-sticky-top,1rem)-1rem)]"
+          >
             <CurriculumInspector
               selection={selection}
               courseContainerId={containerId}

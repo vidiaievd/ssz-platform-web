@@ -627,7 +627,9 @@
     "coverageTab": "Покрытие",
     "moduleCoverageTitle": "Что тренирует этот урок",
     "moduleCoverageSubtitle": "Черновик · {count, plural, one {# упражнение} few {# упражнения} many {# упражнений} other {# упражнения}} в этом уроке",
-    "openFullReport": "Открыть полный отчёт →"
+    "openFullReport": "Открыть полный отчёт →",
+    "courseCoverageTitle": "Что тренирует этот курс",
+    "courseCoverageSubtitle": "Черновик · {count, plural, one {# упражнение} few {# упражнения} many {# упражнений} other {# упражнения}} в этом курсе"
   },
   "settings": {
     "trigger": "Настройки",

@@ -201,7 +201,6 @@
 ───────────────────────────────────────────── */
 
 @layer base {
-
   /* ═══ COLOR PALETTE — scale tokens (hue-based, theme-invariant) ═══
      These are source-of-truth colors. Alias tokens below reference them.
      Components must NEVER use scale tokens directly — use aliases only. */
@@ -724,4 +723,13 @@
   .dark .ssz-age-text {
     color: var(--age-text-dark);
   }
+}
+
+/* Every scrollbar in the app: thin, in the colour of the primary buttons, on a
+   transparent track. The standard properties rather than `::-webkit-scrollbar`,
+   which browsers ignore as soon as these are set — one rule, both engines.
+   Outside the layers on purpose: a layered rule loses to any unlayered one. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
 }

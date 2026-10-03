@@ -627,7 +627,9 @@
     "coverageTab": "Coverage",
     "moduleCoverageTitle": "What this module trains",
     "moduleCoverageSubtitle": "Draft · {count, plural, one {# exercise} other {# exercises}} in this module",
-    "openFullReport": "Open the full report →"
+    "openFullReport": "Open the full report →",
+    "courseCoverageTitle": "What this course trains",
+    "courseCoverageSubtitle": "Draft · {count, plural, one {# exercise} other {# exercises}} in this course"
   },
   "settings": {
     "trigger": "Settings",

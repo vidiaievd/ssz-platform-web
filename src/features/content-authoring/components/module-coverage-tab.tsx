@@ -10,6 +10,8 @@ import { CoverageStrip } from './coverage-strip';
 interface ModuleCoverageTabProps {
   /** The module being inspected. A module is a container, so it is counted on its own terms. */
   containerId: string;
+  /** Which sentence to say: the same card reads for a module and for the whole course. */
+  scope?: 'module' | 'course';
 }
 
 /**
@@ -24,26 +26,32 @@ interface ModuleCoverageTabProps {
  * question in a different unit, and the one mistake that makes the whole report
  * useless is adding two of them together.
  */
-export function ModuleCoverageTab({ containerId }: ModuleCoverageTabProps) {
+export function ModuleCoverageTab({ containerId, scope = 'module' }: ModuleCoverageTabProps) {
   const t = useTranslations('Authoring');
   const pathname = usePathname();
   const { data } = useContainerCoverage(containerId);
   const total = data?.draft?.coverage.total ?? 0;
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h3 className="text-[13px] font-bold text-foreground">
-            {t('structure.moduleCoverageTitle')}
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            {t('structure.moduleCoverageSubtitle', { count: total })}
-          </p>
-        </div>
-        <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <span className="h-0.5 w-3 bg-primary" aria-hidden />
           {t('units.exercises')}
         </span>
+        <h3 className="text-lg font-bold leading-tight text-foreground">
+          {t(
+            scope === 'course' ? 'structure.courseCoverageTitle' : 'structure.moduleCoverageTitle',
+          )}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {t(
+            scope === 'course'
+              ? 'structure.courseCoverageSubtitle'
+              : 'structure.moduleCoverageSubtitle',
+            { count: total },
+          )}
+        </p>
       </div>
 
       <CoverageStrip containerId={containerId} compact hideHeading />

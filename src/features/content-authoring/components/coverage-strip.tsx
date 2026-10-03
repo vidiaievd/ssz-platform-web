@@ -65,20 +65,39 @@ interface Cell {
  *  - no material at all in the row → a flat cell with a dash, which is neither
  *    of the above and must not read as "you trained none of this".
  */
-function AxisCell({ cell, empty, peak }: { cell: Cell; empty: boolean; peak: number }) {
+function AxisCell({
+  cell,
+  empty,
+  peak,
+  compact,
+}: {
+  cell: Cell;
+  empty: boolean;
+  peak: number;
+  compact: boolean;
+}) {
   const zero = cell.count === 0;
 
   return (
     <div className="space-y-1">
-      <div className="flex items-baseline justify-between gap-1.5">
+      <div
+        className={cn(
+          compact ? 'flex flex-col gap-0.5' : 'flex items-baseline justify-between gap-1.5',
+        )}
+      >
         <span
-          className={cn('truncate text-xs', zero ? 'text-muted-foreground' : 'text-foreground')}
+          className={cn(
+            'truncate',
+            compact ? 'text-sm' : 'text-xs',
+            zero && !compact ? 'text-muted-foreground' : 'text-foreground',
+          )}
         >
           {cell.label}
         </span>
         <b
           className={cn(
-            'text-xs font-semibold tabular-nums',
+            'tabular-nums',
+            compact ? 'text-2xl font-medium leading-none' : 'text-xs font-semibold',
             empty
               ? 'text-muted-foreground'
               : cell.notRecorded
@@ -132,19 +151,24 @@ function AxisRow({ label, cells, compact }: { label: string; cells: Cell[]; comp
 
   return (
     <div className="space-y-1.5">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      <div
+        className={cn(
+          'flex gap-x-3',
+          compact ? 'flex-col gap-y-1' : 'flex-wrap items-baseline justify-between',
+        )}
+      >
+        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
           {label}
         </span>
         {!empty && (
-          <span className="text-[10px] text-muted-foreground">
+          <span className={cn('text-[10px] text-muted-foreground', compact && 'font-mono')}>
             {t('barsCaption', { peak: highest, total })}
           </span>
         )}
       </div>
       <div className={cn('grid gap-x-4 gap-y-2', compact ? 'grid-cols-2' : 'grid-cols-4')}>
         {cells.map((cell) => (
-          <AxisCell key={cell.key} cell={cell} empty={empty} peak={peak} />
+          <AxisCell key={cell.key} cell={cell} empty={empty} peak={peak} compact={compact} />
         ))}
       </div>
     </div>
@@ -222,7 +246,7 @@ function Tallies({
   const known = issues.filter((issue) => isKnownIssue(issue) && issue.code !== 'COV_SKILL_ABSENT');
 
   return (
-    <div className="space-y-3">
+    <div className={compact ? 'space-y-5' : 'space-y-3'}>
       <AxisRow label={t('axis.skill')} cells={skillCells} compact={compact} />
       <AxisRow label={t('axis.focus')} cells={focusCells} compact={compact} />
       {/* Last and least prominent by position, first in what it tells an author:

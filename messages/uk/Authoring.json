@@ -627,7 +627,9 @@
     "coverageTab": "Покриття",
     "moduleCoverageTitle": "Що тренує цей урок",
     "moduleCoverageSubtitle": "Чернетка · {count, plural, one {# вправа} few {# вправи} many {# вправ} other {# вправи}} у цьому уроці",
-    "openFullReport": "Відкрити повний звіт →"
+    "openFullReport": "Відкрити повний звіт →",
+    "courseCoverageTitle": "Що тренує цей курс",
+    "courseCoverageSubtitle": "Чернетка · {count, plural, one {# вправа} few {# вправи} many {# вправ} other {# вправи}} у цьому курсі"
   },
   "settings": {
     "trigger": "Налаштування",

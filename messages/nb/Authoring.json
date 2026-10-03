@@ -627,7 +627,9 @@
     "coverageTab": "Dekning",
     "moduleCoverageTitle": "Hva denne leksjonen trener",
     "moduleCoverageSubtitle": "Utkast · {count, plural, one {# oppgave} other {# oppgaver}} i denne leksjonen",
-    "openFullReport": "Åpne hele rapporten →"
+    "openFullReport": "Åpne hele rapporten →",
+    "courseCoverageTitle": "Hva dette kurset trener",
+    "courseCoverageSubtitle": "Utkast · {count, plural, one {# oppgave} other {# oppgaver}} i dette kurset"
   },
   "settings": {
     "trigger": "Innstillinger",

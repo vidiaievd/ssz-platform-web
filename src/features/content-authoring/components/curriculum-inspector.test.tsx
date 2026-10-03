@@ -205,16 +205,16 @@ describe('CurriculumInspector', () => {
     );
   });
 
-  it('counts what the module trains, not what the course around it trains', () => {
-    // A course balanced in aggregate can still hold a module that is nothing but
-    // reading, so the strip is pointed at the module's own container.
+  it('counts what the whole course trains, whatever is selected', () => {
+    // Nothing is counted per module or per exercise, so the tab says the same
+    // thing for a module as for no selection at all.
     renderInspector({ kind: 'module', module: moduleNode() });
 
     // A tab away from the form, and the form is what opens: the numbers are for
     // reading, the fields are what the author came to change (plan 64, phase 3).
     expect(screen.queryByTestId('coverage-strip')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Coverage' }));
-    expect(screen.getByTestId('coverage-strip')).toHaveAttribute('data-container', 'module-1');
+    expect(screen.getByTestId('coverage-strip')).toHaveAttribute('data-container', 'course-1');
   });
 
   it('keeps the form on screen while the numbers are a tab away', () => {
