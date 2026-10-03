@@ -3,6 +3,7 @@
 import { Search, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -20,9 +21,16 @@ import {
   type StructureFilters,
 } from '../lib/structure-filters';
 
+/** Plain text in the design: the ghost variant's outline is dropped. */
+const FOLD_BUTTON =
+  'border-0 px-2 text-xs font-medium text-foreground hover:bg-transparent hover:underline';
+
 interface StructureToolbarProps {
   filters: StructureFilters;
   onChange: (filters: StructureFilters) => void;
+  /** Folding is the shell's to do — it owns every node — but it is read here, above the tree it folds. */
+  onExpandAll: () => void;
+  onCollapseAll: () => void;
 }
 
 /**
@@ -32,12 +40,17 @@ interface StructureToolbarProps {
  * stay put whatever is typed here, so an author never loses their place in a
  * course while looking for one exercise (BEHAVIOR.md §3, acceptance 4).
  */
-export function StructureToolbar({ filters, onChange }: StructureToolbarProps) {
+export function StructureToolbar({
+  filters,
+  onChange,
+  onExpandAll,
+  onCollapseAll,
+}: StructureToolbarProps) {
   const t = useTranslations('Authoring.toolbar');
   const active = isFiltering(filters);
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-3 border-b border-border px-3.5 py-3">
       <div className="relative min-w-50 flex-1">
         <Search
           size={14}
@@ -50,7 +63,7 @@ export function StructureToolbar({ filters, onChange }: StructureToolbarProps) {
           onChange={(e) => onChange({ ...filters, query: e.target.value })}
           placeholder={t('searchPlaceholder')}
           aria-label={t('searchPlaceholder')}
-          className="h-8 pl-8 text-sm"
+          className="h-8 rounded-lg bg-muted/60 pl-8 text-[13px]"
         />
       </div>
 
@@ -58,7 +71,11 @@ export function StructureToolbar({ filters, onChange }: StructureToolbarProps) {
         value={filters.type}
         onValueChange={(type) => onChange({ ...filters, type: type as BlockTypeFilter })}
       >
-        <SelectTrigger size="sm" aria-label={t('allTypes')} className="w-44">
+        <SelectTrigger
+          size="sm"
+          aria-label={t('allTypes')}
+          className="w-auto text-xs [&_svg]:size-3.5"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -74,7 +91,11 @@ export function StructureToolbar({ filters, onChange }: StructureToolbarProps) {
         value={filters.state}
         onValueChange={(state) => onChange({ ...filters, state: state as BlockStateFilter })}
       >
-        <SelectTrigger size="sm" aria-label={t('anyState')} className="w-36">
+        <SelectTrigger
+          size="sm"
+          aria-label={t('anyState')}
+          className="w-auto text-xs [&_svg]:size-3.5"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -84,6 +105,16 @@ export function StructureToolbar({ filters, onChange }: StructureToolbarProps) {
           <SelectItem value="draft">{t('stateDraft')}</SelectItem>
         </SelectContent>
       </Select>
+
+      {/* Folding belongs over the tree rather than in the page header: the
+          header now carries the tabs, and "Collapse all" means nothing on the
+          coverage report. */}
+      <Button variant="ghost" size="sm" onClick={onExpandAll} className={FOLD_BUTTON}>
+        {t('expandAll')}
+      </Button>
+      <Button variant="ghost" size="sm" onClick={onCollapseAll} className={FOLD_BUTTON}>
+        {t('collapseAll')}
+      </Button>
 
       {active && (
         <button

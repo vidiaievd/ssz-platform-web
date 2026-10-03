@@ -15,6 +15,9 @@ vi.mock('./preflight-panel', () => ({
 }));
 vi.mock('./sharing-panel', () => ({ SharingPanel: () => <div data-testid="sharing-panel" /> }));
 vi.mock('./tag-input', () => ({ TagInput: () => <div data-testid="tag-input" /> }));
+vi.mock('./course-recipe-field', () => ({
+  CourseRecipeField: () => <div data-testid="course-recipe-field" />,
+}));
 vi.mock('./discard-draft-dialog', () => ({ DiscardDraftDialog: () => null }));
 // Pulls a server action through its restore button; it has its own suite.
 vi.mock('./version-history-block', () => ({

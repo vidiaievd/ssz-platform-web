@@ -35,10 +35,11 @@ describe('navGating', () => {
     expect(gating.settings).toBe('locked');
   });
 
-  it('editor sees only courses/moderation enabled', () => {
+  it('editor sees only courses/moderation/settings enabled', () => {
     const gating = navGating('editor');
     expect(gating.courses).toBe('enabled');
     expect(gating.moderation).toBe('enabled');
+    expect(gating.settings).toBe('enabled');
     expect(gating.dashboard).toBe('locked');
     expect(gating.students).toBe('locked');
     expect(gating.analytics).toBe('locked');

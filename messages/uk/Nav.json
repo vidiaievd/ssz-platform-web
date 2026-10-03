@@ -24,5 +24,26 @@
   "progress": "Прогрес",
   "badgeCount": "{count} очікує",
   "badgeCountOverdue": "{count} очікує, дещо довше обіцяного строку",
-  "submissions": "Мої роботи"
+  "submissions": "Мої роботи",
+  "crumb": {
+    "new": "Новий",
+    "timetable": "Сітка розкладу",
+    "cover": "Заміни",
+    "curriculum": "Навчальний план",
+    "forecast": "Прогноз",
+    "substitutions": "Заміни",
+    "enrollment": "Набір",
+    "placement": "Тест на рівень",
+    "account": "Акаунт",
+    "profile": "Профіль",
+    "appearance": "Оформлення",
+    "security": "Безпека",
+    "recipe": "Рецепт уроку",
+    "mySchedule": "Мій розклад",
+    "assignments": "Завдання",
+    "srs": "Повторення",
+    "stats": "Статистика",
+    "onboarding": "Знайомство",
+    "schools": "Школи"
+  }
 }

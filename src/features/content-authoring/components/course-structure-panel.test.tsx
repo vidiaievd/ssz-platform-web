@@ -6,6 +6,10 @@ import { enMessages } from '@/lib/i18n/messages';
 import type { CurriculumTree as CurriculumTreeData } from '@/features/content/types';
 
 vi.mock('../api/use-curriculum-tree', () => ({ useCurriculumTree: vi.fn() }));
+// The tree's recipe dots read the coverage report the health strip already loads.
+vi.mock('../api/use-container-coverage', () => ({
+  useContainerCoverage: () => ({ data: undefined }),
+}));
 vi.mock('../actions/container-item', () => ({
   reorderContainerItemsAction: vi.fn(),
   assignItemSectionAction: vi.fn(),
@@ -74,6 +78,8 @@ function renderPanel() {
         collapsed={new Set()}
         onToggleCollapse={vi.fn()}
         onExpand={vi.fn()}
+        onExpandAll={vi.fn()}
+        onCollapseAll={vi.fn()}
         onReview={vi.fn()}
       />
     </NextIntlClientProvider>,

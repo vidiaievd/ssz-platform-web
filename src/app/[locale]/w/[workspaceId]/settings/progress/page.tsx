@@ -1,7 +1,6 @@
-import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
+import { requireSettingsPage } from '@/features/workspaces/api/require-settings-page';
 import { StudentPositionSetting } from '@/features/school/components/settings/student-position-setting';
 
 type Props = {
@@ -24,8 +23,7 @@ export async function generateMetadata({ params }: Props) {
 export default async function SchoolProgressSettingsPage({ params }: Props) {
   const { workspaceId } = await params;
 
-  const role = await getMySchoolRole(workspaceId);
-  if (role === null) notFound();
+  const { myRole: role } = await requireSettingsPage(workspaceId, 'progress');
 
   const t = await getTranslations('Settings.progress');
 

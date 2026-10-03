@@ -20,6 +20,7 @@ function tallies(overrides: Partial<CoverageTallies> = {}): CoverageTallies {
     bySkill: { listening: 0, reading: 8, spoken: 0, written: 2 },
     byFocus: { vocabulary: 6, grammar: 3, orthography: 0, pragmatics: 0, unknown: 1 },
     byForm: { bank: 7, free: 3, mixed: 0, unknown: 0 },
+    byModality: { recognition: 6, recall: 3, production: 1, unknown: 0 },
     byPair: {
       listening: { vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 },
       reading: { vocabulary: 6, grammar: 1, orthography: 0, pragmatics: 0, unknown: 1 },
@@ -83,8 +84,11 @@ describe('CoverageStrip', () => {
   it('counts recognition against production, which the skill row cannot show', () => {
     renderStrip({ data: coverage() });
 
-    expect(cell('From a list')).toContain('7');
-    expect(cell('Typed')).toContain('3');
+    // Read off `byModality`, not `byForm` (plan 64, decision G): seven exercises had a
+    // bank on screen, and one of them still had to be rebuilt from the rule.
+    expect(cell('Picked out')).toContain('6');
+    expect(cell('Recalled')).toContain('3');
+    expect(cell('Produced')).toContain('1');
   });
 
   it('renders a remark from its code and numbers, not from prose the service sent', () => {
@@ -155,6 +159,7 @@ describe('CoverageStrip', () => {
             bySkill: { listening: 0, reading: 0, spoken: 0, written: 0 },
             byFocus: { vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 },
             byForm: { bank: 0, free: 0, mixed: 0, unknown: 0 },
+            byModality: { recognition: 0, recall: 0, production: 0, unknown: 0 },
           }),
         ),
       }),
@@ -168,5 +173,45 @@ describe('CoverageStrip', () => {
     renderStrip({ isError: true });
 
     expect(screen.getByText('Could not work out what this trains.')).toBeInTheDocument();
+  });
+
+  // COVERAGE.md §1.2 — three states told apart by shape, not by colour alone:
+  // a zero is a claim about the material, "not recorded" is a claim about what
+  // was written down about it, and an empty row is neither.
+  it('draws a zero as a zero and an unrecorded count as neither', () => {
+    renderStrip({ data: coverage() });
+
+    const listening = screen.getByText('Listening').closest('div')?.parentElement;
+    expect(listening?.querySelector('.border-dashed')).toBeInTheDocument();
+
+    const notRecorded = screen.getAllByText('Not recorded')[0]?.closest('div')?.parentElement;
+    expect(notRecorded?.querySelector('.border-dashed')).not.toBeInTheDocument();
+  });
+
+  it('says a row has no material at all rather than calling it four zeroes', () => {
+    renderStrip({
+      data: coverage({
+        draft: report(
+          tallies({
+            total: 4,
+            byForm: { bank: 0, free: 0, mixed: 0, unknown: 0 },
+            byModality: { recognition: 0, recall: 0, production: 0, unknown: 0 },
+          }),
+        ),
+      }),
+    });
+
+    expect(cell('Picked out')).toContain('–');
+    expect(cell('Produced')).toContain('–');
+  });
+
+  // An exercise can carry two channels, so a row never sums to the total —
+  // which is exactly why the caption says what the bars may be compared against.
+  it('says what the bars are measured against', () => {
+    renderStrip({ data: coverage() });
+
+    expect(
+      screen.getByText('bars compare inside this row only · longest = 8 of 10'),
+    ).toBeInTheDocument();
   });
 });

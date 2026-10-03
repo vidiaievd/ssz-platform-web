@@ -1,6 +1,12 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import { requireSettingsPage } from '@/features/workspaces/api/require-settings-page';
 
-export default function SchoolAccountSettingsPage() {
+type Props = { params: Promise<{ workspaceId: string }> };
+
+export default async function SchoolAccountSettingsPage({ params }: Props) {
+  const { workspaceId } = await params;
+  await requireSettingsPage(workspaceId, 'account');
+
   return (
     <div className="p-6 md:p-8 space-y-4">
       <h1 className="text-2xl font-semibold">Account</h1>

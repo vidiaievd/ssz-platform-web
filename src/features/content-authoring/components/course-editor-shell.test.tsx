@@ -9,11 +9,16 @@ vi.mock('./course-settings-drawer', () => ({
   CourseSettingsDrawer: ({ open }: { open: boolean }) =>
     open ? <div data-testid="settings-drawer-open" /> : null,
 }));
-vi.mock('next/navigation', () => ({ useSearchParams: () => new URLSearchParams() }));
+// The view lives in the URL, so the test drives it the way the browser does.
+let searchParams = new URLSearchParams();
+const replace = vi.fn();
+vi.mock('next/navigation', () => ({ useSearchParams: () => searchParams }));
 vi.mock('@/lib/i18n/navigation', () => ({
   Link: ({ href, children }: { href: string; children: React.ReactNode }) => (
     <a href={href}>{children}</a>
   ),
+  useRouter: () => ({ replace }),
+  usePathname: () => '/w/my-school/content/course-1',
 }));
 vi.mock('../api/use-curriculum-tree', () => ({ useCurriculumTree: vi.fn() }));
 // The real dialog pulls in the publish server action, which cannot load in a
@@ -22,18 +27,37 @@ vi.mock('./review-publish-dialog', () => ({
   ReviewPublishDialog: ({ open }: { open: boolean }) =>
     open ? <div data-testid="review-publish-open" /> : null,
 }));
-// Counts the course through react-query, which this shell test does not stand
-// up; it is exercised in `coverage-strip.test.tsx`.
-vi.mock('./coverage-strip', () => ({
-  CoverageStrip: ({ containerId }: { containerId: string }) => (
-    <div data-testid="coverage-strip" data-container={containerId} />
+// The report is three react-query cards in a layout of its own; what the shell
+// owes it is the container it is about and which version students have, which
+// is what this stub records. Its own behaviour is exercised in
+// `coverage-view.test.tsx`.
+vi.mock('./coverage-view', () => ({
+  CoverageView: ({
+    containerId,
+    publishedVersionNumber,
+  }: {
+    containerId: string;
+    publishedVersionNumber: number | null;
+  }) => (
+    <div
+      data-testid="coverage-view"
+      data-container={containerId}
+      data-version={String(publishedVersionNumber)}
+    />
   ),
 }));
-// Same reason as the strip above: two react-query hooks, exercised in
-// `coverage-result-grid.test.tsx`.
-vi.mock('./coverage-result-grid', () => ({
-  CoverageResultGrid: ({ containerId }: { containerId: string }) => (
-    <div data-testid="coverage-result-grid" data-container={containerId} />
+// Two react-query hooks of its own; its behaviour is exercised in
+// `structure-health-strip.test.tsx`. Here it only has to be a thing that asks
+// for a card on the other tab.
+vi.mock('./structure-health-strip', () => ({
+  StructureHealthStrip: ({
+    onOpenCoverage,
+  }: {
+    onOpenCoverage: (anchor: 'coverage-skills' | 'coverage-atoms') => void;
+  }) => (
+    <div data-testid="health-strip">
+      <button onClick={() => onOpenCoverage('coverage-atoms')}>Never tested</button>
+    </div>
   ),
 }));
 vi.mock('./course-structure-panel', () => ({
@@ -41,13 +65,19 @@ vi.mock('./course-structure-panel', () => ({
     containerId,
     versionId,
     collapsed,
+    onExpandAll,
+    onCollapseAll,
   }: {
     containerId: string;
     versionId: string;
     collapsed: ReadonlySet<string>;
+    onExpandAll: () => void;
+    onCollapseAll: () => void;
   }) => (
     <div data-testid="course-structure-panel" data-collapsed={[...collapsed].join(',')}>
       {containerId}/{versionId}
+      <button onClick={onExpandAll}>Expand all</button>
+      <button onClick={onCollapseAll}>Collapse all</button>
     </div>
   ),
 }));
@@ -70,7 +100,9 @@ const CONTAINER: Container = {
   updatedAt: '2026-01-01T00:00:00Z',
 };
 
-function renderShell(draftVersionId: string | null, pendingModules = 0) {
+function renderShell(draftVersionId: string | null, pendingModules = 0, view?: string) {
+  searchParams = new URLSearchParams(view ? `view=${view}` : '');
+  replace.mockClear();
   vi.mocked(useCurriculumTree).mockReturnValue({
     data: {
       versionId: 'version-1',
@@ -121,11 +153,74 @@ describe('CourseEditorShell', () => {
     expect(screen.getByTestId('course-structure-panel')).toHaveTextContent('course-1/version-1');
   });
 
-  it('says what the course trains, without the author opening anything', () => {
-    // Above the tree and unfolded: a channel nothing trains is invisible in a
-    // panel nobody opens.
+  // Two views of one screen (plan 64, phase 0). The tree is what opens; the
+  // report is a tab away and, above all, a link away.
+  it('opens on the tree and keeps the report off screen', () => {
     renderShell('version-1');
-    expect(screen.getByTestId('coverage-strip')).toHaveAttribute('data-container', 'course-1');
+    expect(screen.getByTestId('course-structure-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('coverage-view')).not.toBeInTheDocument();
+  });
+
+  it('says what the course trains when the report is the view asked for', () => {
+    renderShell('version-1', 0, 'coverage');
+    expect(screen.getByTestId('coverage-view')).toHaveAttribute('data-container', 'course-1');
+    expect(screen.getByTestId('coverage-view')).toHaveAttribute('data-version', '2');
+    expect(screen.queryByTestId('course-structure-panel')).not.toBeInTheDocument();
+  });
+
+  it('puts the view in the URL rather than in state, so the report can be linked to', () => {
+    renderShell('version-1');
+    fireEvent.click(screen.getByRole('tab', { name: 'Coverage' }));
+    expect(replace).toHaveBeenCalledWith(
+      '/w/my-school/content/course-1?view=coverage',
+      expect.objectContaining({ scroll: false }),
+    );
+  });
+
+  // The structure tab is the default, so it is spelt by the absence of the
+  // parameter — otherwise every course URL would carry a redundant tail.
+  it('drops the parameter on the way back to the tree', () => {
+    renderShell('version-1', 0, 'coverage');
+    fireEvent.click(screen.getByRole('tab', { name: 'Structure' }));
+    expect(replace).toHaveBeenCalledWith(
+      '/w/my-school/content/course-1',
+      expect.objectContaining({ scroll: false }),
+    );
+  });
+
+  // State and version are one fact — what students can open — and reading them
+  // as two chips invites the question of which one is right (plan 64, phase 5).
+  it('says the state and the live version as one chip', () => {
+    renderShell('version-1');
+
+    expect(screen.getByLabelText('Status: Draft — v2')).toHaveTextContent('Draft· v2');
+  });
+
+  it('counts the course in the header whichever view is open', () => {
+    renderShell('version-1', 2, 'coverage');
+    expect(screen.getByText('Modules').closest('div')).toHaveTextContent('2');
+    expect(screen.getByRole('button', { name: /Review & publish/ })).toHaveTextContent('2');
+  });
+
+  // The band belongs to the tree: on the report every one of its numbers is on
+  // screen in full, and a summary above them would only be a second opinion.
+  it('draws the draft zeroes on the tree and drops them on the report', () => {
+    renderShell('version-1');
+    expect(screen.getByTestId('health-strip')).toBeInTheDocument();
+  });
+
+  it('keeps the health strip off the report tab', () => {
+    renderShell('version-1', 0, 'coverage');
+    expect(screen.queryByTestId('health-strip')).not.toBeInTheDocument();
+  });
+
+  it('opens the report when a health signal is clicked', () => {
+    renderShell('version-1');
+    fireEvent.click(screen.getByRole('button', { name: 'Never tested' }));
+    expect(replace).toHaveBeenCalledWith(
+      '/w/my-school/content/course-1?view=coverage',
+      expect.objectContaining({ scroll: false }),
+    );
   });
 
   it('shows a load error in place of the panel when there is no draft version', () => {
@@ -170,7 +265,7 @@ describe('CourseEditorShell', () => {
 
   // Collapse state lives in the shell precisely so these two buttons, which sit
   // above the tree, can drive every node at once.
-  it('folds and unfolds every level and module from the topbar', () => {
+  it('folds and unfolds every level and module from the tree toolbar', () => {
     renderShell('version-1', 2);
     const panel = () => screen.getByTestId('course-structure-panel');
     expect(panel()).toHaveAttribute('data-collapsed', '');

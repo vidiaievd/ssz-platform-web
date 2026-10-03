@@ -12,6 +12,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import type { MaterialKind } from '@/lib/content/lesson-types';
+
+import { BlockTypeIcon } from './block-type-icon';
 
 /** `blocks` is the multi-select case: one confirmation for the ticked rows. */
 export type DeletableNodeKind = 'level' | 'module' | 'item' | 'blocks';
@@ -25,6 +28,13 @@ export interface DeleteNodeTarget {
   moduleCount?: number;
   /** Levels, modules and bulk — how many blocks are affected. */
   blockCount?: number;
+  /**
+   * Blocks only — what the row holds, so the confirmation shows the same tile
+   * the row does. A title alone is thin evidence that the right row is about to
+   * go: two exercises in a section can carry the same template name.
+   */
+  materialKind?: MaterialKind;
+  templateCode?: string | null;
 }
 
 interface DeleteNodeDialogProps {
@@ -62,7 +72,14 @@ export function DeleteNodeDialog({
         {target && (
           <>
             <AlertDialogHeader>
-              <AlertDialogTitle>
+              <AlertDialogTitle className="flex items-center gap-2">
+                {target.materialKind && (
+                  <BlockTypeIcon
+                    kind={target.materialKind}
+                    templateCode={target.templateCode}
+                    size={13}
+                  />
+                )}
                 {t(`${target.kind}.title` as 'level.title', {
                   name: target.title,
                   blocks: target.blockCount ?? 0,

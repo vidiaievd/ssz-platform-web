@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
 import { SettingsLayout } from '@/components/shared/settings-layout';
+import { UnsavedChangesProvider } from '@/features/account/components/unsaved-changes-provider';
+import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { wsHref } from '@/features/workspaces/lib/href';
+import { settingsPagesFor } from '@/features/workspaces/lib/settings-pages';
 
 type Props = {
   children: React.ReactNode;
@@ -13,20 +15,31 @@ type Props = {
 export default async function SchoolSettingsLayout({ children, params }: Props) {
   const { workspaceId } = await params;
 
-  const role = await getMySchoolRole(workspaceId);
-  if (!role || !['OWNER', 'ADMIN'].includes(role)) {
-    notFound();
-  }
+  const workspace = await resolveWorkspace(workspaceId);
+  const pages = workspace ? settingsPagesFor(workspace.myRole, workspace.kind) : [];
+  if (pages.length === 0) notFound();
 
   const t = await getTranslations('Settings');
 
-  const nav = [
-    { href: wsHref(workspaceId, 'settings/profile'), label: t('nav.profile') },
-    { href: wsHref(workspaceId, 'settings/account'), label: t('nav.account') },
-    { href: wsHref(workspaceId, 'settings/notifications'), label: t('nav.notifications') },
-    { href: wsHref(workspaceId, 'settings/review'), label: t('nav.review') },
-    { href: wsHref(workspaceId, 'settings/progress'), label: t('nav.progress') },
-  ];
+  const nav = pages.map((page) => ({
+    href: wsHref(workspaceId, `settings/${page}`),
+    label: t(`nav.${page}`),
+    ...(page === 'recipe'
+      ? {
+          badge: (
+            <span className="text-[10px] font-bold tracking-[0.06em] text-(--ssz-text-accent) uppercase">
+              {t('nav.new')}
+            </span>
+          ),
+        }
+      : {}),
+  }));
 
-  return <SettingsLayout nav={nav}>{children}</SettingsLayout>;
+  // The recipe page holds a draft; the provider asks before the settings nav or a reload
+  // drops it.
+  return (
+    <UnsavedChangesProvider>
+      <SettingsLayout nav={nav}>{children}</SettingsLayout>
+    </UnsavedChangesProvider>
+  );
 }

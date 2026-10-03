@@ -35,7 +35,7 @@ import { useReviewQueueCount } from '@/features/review/api/use-review-queue';
 import { WorkspaceSwitcher, RoleBadge } from '@/features/workspaces';
 import { wsHref } from '@/features/workspaces/lib/href';
 import { AlertBadge } from './topbar/alert-badge';
-import { GlobalSearchTrigger } from './topbar/global-search-trigger';
+import { AutoBreadcrumbs } from './topbar/auto-breadcrumbs';
 import { TrialPill } from './topbar/trial-pill';
 import { Sidebar } from './sidebar/sidebar';
 import { MobileSidebar } from './sidebar/mobile-sidebar';
@@ -367,10 +367,10 @@ export function AppShell({
             user={user}
             onMenuOpen={() => setMobileOpen(true)}
             activeContextKey={activeContextKey}
-            // The bar's middle is a slot a page can fill — the lesson editor puts its
-            // breadcrumb there, the way the builder specs draw it. Nothing claims it on
-            // most pages, and the search stub stays.
-            search={<TopbarSlot fallback={variant === 'school' ? <GlobalSearchTrigger /> : null} />}
+            // The bar's middle is the breadcrumb. Pages that know more than the path
+            // does — the course and lesson editors, whose trail names a record — fill the
+            // slot themselves; every other page gets the trail read off its route.
+            search={<TopbarSlot fallback={<AutoBreadcrumbs />} />}
             userMenuExtraItems={userMenuExtraItems}
             actions={
               <div className="flex items-center gap-2">

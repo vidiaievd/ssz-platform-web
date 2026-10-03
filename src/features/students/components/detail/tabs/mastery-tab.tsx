@@ -11,7 +11,15 @@ import {
   type LegendItem,
   type MasteryCellData,
 } from '@/features/analytics';
-import type { StudentGrid, StudentPosition, StudentWorkContext } from '@/features/analytics/types';
+import type {
+  GapModality,
+  ModalityGap,
+  ModalityGapRow,
+  StudentGrid,
+  StudentPosition,
+  StudentWorkContext,
+} from '@/features/analytics/types';
+import { GAP_MODALITIES } from '@/features/analytics/types';
 import type { MasteryProfile, MasteryVerdict, WeaknessReason } from '@/features/mastery/types';
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -56,10 +64,11 @@ const REASON_TONE: Record<WeaknessReason, BadgeProps['variant']> = {
 /**
  * Screen C — one learner's profile on the school side, plan 58 phase 9.
  *
- * Five blocks, and the order is the argument: how much of the taught course this learner
- * took away, what the practice looks like pair by pair, what to do about the weakest of
- * them, where the work happens, and only then where they stand against the group. The
- * comparison comes last on purpose — it is the least actionable number on the screen.
+ * Six blocks, and the order is the argument: how much of the taught course this learner
+ * took away, what the practice looks like pair by pair, which facts they know one way
+ * only, what to do about the weakest pairs, where the work happens, and only then where
+ * they stand against the group. The comparison comes last on purpose — it is the least
+ * actionable number on the screen.
  *
  * A learner with no attempt at all gets no grid. An empty grid reads as a bad grid, and
  * "we have measured nothing yet" is not a verdict about anybody.
@@ -160,6 +169,11 @@ export async function MasteryTab({
           into half of a laptop the last column falls off the edge — which reads as a
           broken table rather than as a column to scroll to. */}
       <Grid grid={data.grid} naming={naming} t={t} />
+
+      {/* Directly under the grid, because it answers the question the grid raises. A cell
+          at 78% hides two learners: one who knows the words and one who can pick them out
+          of five. Nothing else on this screen can tell them apart. */}
+      <KnownOneWayOnly gap={data.modalityGap} t={t} />
 
       <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
         <WhatToWorkOn profile={data.profile} workspaceId={workspaceId} naming={naming} t={t} />
@@ -325,6 +339,143 @@ function Grid({ grid, naming, t }: { grid: StudentGrid; naming: Naming; t: Trans
         </Note>
       </CardBody>
     </Card>
+  );
+}
+
+/** How each verdict is badged. The label is copy; the tone is a reading of it. */
+const VERDICT_TONE: Record<ModalityGapRow['verdict'], BadgeProps['variant']> = {
+  production_failing: 'error',
+  recall_failing: 'error',
+  recognition_only: 'warning',
+  production_untried: 'info',
+};
+
+/** At most five: this is a list to act on this week, not an inventory. */
+const MAX_GAPS = 5;
+
+function percent(value: number | null): string {
+  return value === null ? '—' : `${Math.round(value * 100)}%`;
+}
+
+/**
+ * What this learner knows one way and not another — plan 63 §4.1.
+ *
+ * The screen's one answer to "what should we work on" that is not a percentage. A learner
+ * at 90% picking a word off a list and 30% typing the same word is not uneven about
+ * vocabulary: their knowledge has reached recognition and gone no further, and the cure is
+ * production rather than more of the same exercises.
+ *
+ * Two silences are deliberate. A modality never attempted prints a dash, never a zero —
+ * "never asked" and "asked and failed" are opposite findings, and the verdicts keep them
+ * apart. And an empty block says which of the two empties it is: nothing addressed (a fact
+ * about the course, and the author's coverage report is where it is answered), or nothing
+ * lopsided in what was.
+ */
+function KnownOneWayOnly({ gap, t }: { gap: ModalityGap | null; t: Translate }) {
+  if (gap === null) {
+    return (
+      <Card>
+        <CardBody>
+          <Note tone="warn" icon="warn">
+            {t('modality.unavailable')}
+          </Note>
+        </CardBody>
+      </Card>
+    );
+  }
+
+  const rows = gap.gaps.slice(0, MAX_GAPS);
+
+  return (
+    <Card>
+      <CardBody className="space-y-3">
+        <div>
+          <h3 className="text-sm font-bold text-(--ssz-text-primary)">{t('modality.title')}</h3>
+          <p className="text-xs text-(--ssz-text-secondary)">{t('modality.subtitle')}</p>
+        </div>
+
+        {rows.length === 0 ? (
+          <p className="text-sm text-(--ssz-text-secondary)">
+            {gap.summary.addressedAtoms === 0
+              ? t('modality.emptyUnaddressed')
+              : t('modality.emptyEven', { count: gap.summary.judged })}
+          </p>
+        ) : (
+          <ul className="space-y-2.5">
+            {rows.map((row) => (
+              <GapRow key={`${row.atomType}:${row.atomId}`} row={row} t={t} />
+            ))}
+          </ul>
+        )}
+
+        {/* What the verdicts above stand on, printed whether or not there are any: a thin
+            answer here usually means the course is unaddressed rather than the learner
+            untested, and that is not visible from the rows. */}
+        <p className="text-[11.5px] leading-[1.5] text-(--ssz-text-muted)">
+          {t('modality.evidence', {
+            atoms: gap.summary.addressedAtoms,
+            observations: gap.summary.observations,
+            threshold: gap.minAttempts,
+          })}
+          {gap.summary.insufficient > 0
+            ? ` ${t('modality.insufficient', { count: gap.summary.insufficient })}`
+            : ''}
+          {gap.summary.byModality.production === 0 ? ` ${t('modality.noProduction')}` : ''}
+        </p>
+
+        {!gap.namesAvailable && <Note>{t('modality.namesUnavailable')}</Note>}
+      </CardBody>
+    </Card>
+  );
+}
+
+function GapRow({ row, t }: { row: ModalityGapRow; t: Translate }) {
+  return (
+    <li className="rounded-xl border-[1.5px] border-(--ssz-border-default) bg-(--ssz-bg-surface) px-3.5 py-3">
+      <div className="mb-1.5 flex flex-wrap items-center gap-2">
+        <span className="text-[13.5px] font-bold text-(--ssz-text-primary)">
+          {/* A name when content could be asked, and the honest placeholder when not —
+              never a uuid, which tells the teacher nothing at all. */}
+          {row.title ?? t('modality.unnamed')}
+        </span>
+        <Badge variant={VERDICT_TONE[row.verdict]}>
+          {t(`modality.verdict.${row.verdict}.label` as 'modality.verdict.recognition_only.label')}
+        </Badge>
+        <span className="flex-1" />
+        {row.gap !== null && (
+          <span className="text-xs font-bold" style={{ color: rampInk(100 - row.gap * 100) }}>
+            {t('modality.gapValue', { percent: Math.round(row.gap * 100) })}
+          </span>
+        )}
+      </div>
+
+      <div className="mb-1.5 flex flex-wrap gap-3.5 text-[11.5px] text-(--ssz-text-muted)">
+        {GAP_MODALITIES.filter((modality) => modality !== 'unknown').map((modality) => {
+          const reading = row.byModality[modality as GapModality];
+          return (
+            <span key={modality}>
+              {t(`modality.axis.${modality}` as 'modality.axis.recognition')}{' '}
+              <b
+                className={
+                  reading.attempts === 0
+                    ? 'font-semibold text-(--ssz-text-muted)'
+                    : 'font-semibold text-(--ssz-text-primary)'
+                }
+              >
+                {percent(reading.successRate)}
+              </b>{' '}
+              {reading.attempts === 0
+                ? t('modality.never')
+                : t('modality.attempts', { count: reading.attempts })}
+            </span>
+          );
+        })}
+      </div>
+
+      <p className="text-[12.5px] leading-[1.5] text-(--ssz-text-secondary)">
+        {t(`modality.verdict.${row.verdict}.body` as 'modality.verdict.recognition_only.body')}
+      </p>
+    </li>
   );
 }
 

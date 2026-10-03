@@ -11,7 +11,9 @@ export function useCurriculumTree(containerId: string, versionId: string | null 
     queryKey: authoringKeys.tree(containerId, versionId ?? ''),
     queryFn: async () => {
       const res = await fetch(`/api/content/containers/${containerId}/versions/${versionId}/tree`);
-      if (!res.ok) throw new Error('Failed to fetch curriculum tree');
+      if (!res.ok) {
+        throw Object.assign(new Error('Failed to fetch curriculum tree'), { status: res.status });
+      }
       return res.json() as Promise<CurriculumTree>;
     },
     enabled: !!containerId && !!versionId,

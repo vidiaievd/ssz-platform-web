@@ -24,5 +24,26 @@
   "progress": "Fremgang",
   "badgeCount": "{count} venter",
   "badgeCountOverdue": "{count} venter, noe er over fristen",
-  "submissions": "Mitt arbeid"
+  "submissions": "Mitt arbeid",
+  "crumb": {
+    "new": "Ny",
+    "timetable": "Timeplan",
+    "cover": "Vikar",
+    "curriculum": "Læreplan",
+    "forecast": "Prognose",
+    "substitutions": "Vikarer",
+    "enrollment": "Påmelding",
+    "placement": "Nivåtest",
+    "account": "Konto",
+    "profile": "Profil",
+    "appearance": "Utseende",
+    "security": "Sikkerhet",
+    "recipe": "Leksjonsoppskrift",
+    "mySchedule": "Min timeplan",
+    "assignments": "Oppgaver",
+    "srs": "Repetisjon",
+    "stats": "Statistikk",
+    "onboarding": "Oppstart",
+    "schools": "Skoler"
+  }
 }

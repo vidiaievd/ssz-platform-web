@@ -24,5 +24,26 @@
   "progress": "Прогресс",
   "badgeCount": "{count} ждёт",
   "badgeCountOverdue": "{count} ждёт, часть дольше обещанного срока",
-  "submissions": "Мои работы"
+  "submissions": "Мои работы",
+  "crumb": {
+    "new": "Новый",
+    "timetable": "Сетка расписания",
+    "cover": "Замены",
+    "curriculum": "Учебный план",
+    "forecast": "Прогноз",
+    "substitutions": "Замены",
+    "enrollment": "Набор",
+    "placement": "Тест на уровень",
+    "account": "Аккаунт",
+    "profile": "Профиль",
+    "appearance": "Оформление",
+    "security": "Безопасность",
+    "recipe": "Рецепт урока",
+    "mySchedule": "Моё расписание",
+    "assignments": "Задания",
+    "srs": "Повторение",
+    "stats": "Статистика",
+    "onboarding": "Знакомство",
+    "schools": "Школы"
+  }
 }

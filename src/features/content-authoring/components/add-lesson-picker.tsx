@@ -47,6 +47,7 @@ import {
 import { assignItemSectionAction } from '../actions/container-item';
 import { minimalExerciseValues } from '../lib/exercise-content';
 import { CREATABLE_EXERCISE_TYPES, type CreatableExerciseType } from '../schemas/exercise';
+import { exerciseType } from '../lib/exercise-type-registry';
 
 interface AddLessonPickerProps {
   open: boolean;
@@ -285,7 +286,6 @@ export function AddLessonPicker({
   }
 
   const exerciseDef = getLessonTypeDefinition('exercise');
-  const ExerciseIcon = exerciseDef.icon;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -328,17 +328,23 @@ export function AddLessonPicker({
               {t('addLesson.groupExercises')}
             </h3>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {CREATABLE_EXERCISE_TYPES.map((code) => (
-                <PickerCard
-                  key={code}
-                  label={tExercises(`types.${code}`)}
-                  hueVar={exerciseDef.hueVar}
-                  icon={<ExerciseIcon size={16} style={{ color: `var(${exerciseDef.hueVar})` }} />}
-                  disabled={isPending}
-                  busy={pendingTemplate === code}
-                  onClick={() => handlePickTemplate(code)}
-                />
-              ))}
+              {CREATABLE_EXERCISE_TYPES.map((code) => {
+                // One picture per type here too, and the same picture the tree
+                // will draw once the block exists: the menu is where an author
+                // first learns the pairing.
+                const Icon = exerciseType(code)?.icon ?? exerciseDef.icon;
+                return (
+                  <PickerCard
+                    key={code}
+                    label={tExercises(`types.${code}`)}
+                    hueVar={exerciseDef.hueVar}
+                    icon={<Icon size={16} style={{ color: `var(${exerciseDef.hueVar})` }} />}
+                    disabled={isPending}
+                    busy={pendingTemplate === code}
+                    onClick={() => handlePickTemplate(code)}
+                  />
+                );
+              })}
             </div>
           </section>
         </div>

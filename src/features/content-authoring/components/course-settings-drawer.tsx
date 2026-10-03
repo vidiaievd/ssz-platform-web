@@ -23,6 +23,7 @@ import { SharingPanel } from './sharing-panel';
 import { TagInput } from './tag-input';
 import { ActivityBlock } from './activity-block';
 import { VersionHistoryBlock } from './version-history-block';
+import { CourseRecipeField } from './course-recipe-field';
 import { CourseSlaField } from '@/features/review/components/settings/course-sla-field';
 
 type SettingsTab = 'overview' | 'activity' | 'tags' | 'sharing';
@@ -93,6 +94,10 @@ export function CourseSettingsDrawer({
                   a fortnight's essay and a five-minute drill are answered on different
                   clocks (plan 46 §46.6). */}
               <CourseSlaField containerId={container.id} />
+              {/* What every lesson is expected to train (plan 64, phase 10). Beside the
+                  response time for the same reason: a property of this material, which the
+                  workspace sets once and a course may depart from. */}
+              <CourseRecipeField containerId={container.id} />
               {isOwnerOrAdmin && (
                 <DangerZone
                   containerId={container.id}

@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { useContainerCoverage } from '../api/use-container-coverage';
 import {
   COVERAGE_FOCUSES,
-  COVERAGE_FORMS,
+  COVERAGE_MODALITIES,
   COVERAGE_SKILLS,
   type CoverageDifference,
   type CoverageIssue,
@@ -44,48 +44,131 @@ interface Cell {
   key: string;
   label: string;
   count: number;
+  /**
+   * `notRecorded` is the "nobody said" bucket — the `unknown` cell of the
+   * subject and answer axes. It is not a zero: a zero is a claim about the
+   * material, and this is a claim about what was written down about it
+   * (COVERAGE.md §1.2).
+   */
+  notRecorded?: boolean;
+}
+
+/**
+ * One cell of an axis: its label, its number, and a bar that means something
+ * only next to the other cells of the same row.
+ *
+ * Three states, told apart by shape and not by colour alone, because the report
+ * is read in print and by people who do not see the difference between amber
+ * and red:
+ *  - nothing of this kind → red number and a dashed outline where the bar goes;
+ *  - nobody recorded it → grey number and a hatched bar;
+ *  - no material at all in the row → a flat cell with a dash, which is neither
+ *    of the above and must not read as "you trained none of this".
+ */
+function AxisCell({
+  cell,
+  empty,
+  peak,
+  compact,
+}: {
+  cell: Cell;
+  empty: boolean;
+  peak: number;
+  compact: boolean;
+}) {
+  const zero = cell.count === 0;
+
+  return (
+    <div className="space-y-1">
+      <div
+        className={cn(
+          compact ? 'flex flex-col gap-0.5' : 'flex items-baseline justify-between gap-1.5',
+        )}
+      >
+        <span
+          className={cn(
+            'truncate',
+            compact ? 'text-sm' : 'text-xs',
+            zero && !compact ? 'text-muted-foreground' : 'text-foreground',
+          )}
+        >
+          {cell.label}
+        </span>
+        <b
+          className={cn(
+            'tabular-nums',
+            compact ? 'text-2xl font-medium leading-none' : 'text-xs font-semibold',
+            empty
+              ? 'text-muted-foreground'
+              : cell.notRecorded
+                ? 'text-muted-foreground'
+                : zero
+                  ? 'text-error-700 dark:text-error-400'
+                  : 'text-foreground',
+          )}
+        >
+          {empty ? '–' : cell.count}
+        </b>
+      </div>
+
+      {empty ? (
+        <div className="h-1.5 rounded-full bg-muted/60" />
+      ) : zero ? (
+        <div className="h-1.5 rounded-full border border-dashed border-error-300" />
+      ) : (
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div
+            className={cn(
+              'h-full rounded-full',
+              cell.notRecorded ? 'bg-muted-foreground/40' : 'bg-primary',
+            )}
+            style={{
+              width: `${(cell.count / peak) * 100}%`,
+              // Hatched rather than tinted: "nobody recorded this" has to be
+              // told from a real count without relying on colour. Struck out of
+              // the surface colour, so it reads the same in both themes.
+              backgroundImage: cell.notRecorded
+                ? 'repeating-linear-gradient(45deg, transparent 0 3px, var(--color-card) 3px 6px)'
+                : undefined,
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 function AxisRow({ label, cells, compact }: { label: string; cells: Cell[]; compact: boolean }) {
+  const t = useTranslations('Authoring.coverage');
   // The share is taken against the busiest cell, not against the total: rows are
   // read as "which of these dominates", and against a total that no row sums to
   // — an exercise can carry two skills — every bar would be a different fraction
-  // of a different whole.
-  const peak = Math.max(...cells.map((cell) => cell.count), 1);
+  // of a different whole. Which is exactly why the caption says so.
+  const highest = Math.max(...cells.map((cell) => cell.count), 0);
+  const peak = Math.max(highest, 1);
+  const total = cells.reduce((sum, cell) => sum + cell.count, 0);
+  const empty = highest === 0;
 
   return (
     <div className="space-y-1.5">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </span>
+      <div
+        className={cn(
+          'flex gap-x-3',
+          compact ? 'flex-col gap-y-1' : 'flex-wrap items-baseline justify-between',
+        )}
+      >
+        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          {label}
+        </span>
+        {!empty && (
+          <span className={cn('text-[10px] text-muted-foreground', compact && 'font-mono')}>
+            {t('barsCaption', { peak: highest, total })}
+          </span>
+        )}
+      </div>
       <div className={cn('grid gap-x-4 gap-y-2', compact ? 'grid-cols-2' : 'grid-cols-4')}>
         {cells.map((cell) => (
-          <div key={cell.key} className="space-y-1">
-            <div className="flex items-baseline justify-between gap-1.5">
-              <span
-                className={cn(
-                  'truncate text-xs',
-                  cell.count === 0 ? 'text-muted-foreground' : 'text-foreground',
-                )}
-              >
-                {cell.label}
-              </span>
-              <b
-                className={cn(
-                  'text-xs font-semibold tabular-nums',
-                  cell.count === 0 ? 'text-muted-foreground' : 'text-foreground',
-                )}
-              >
-                {cell.count}
-              </b>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${(cell.count / peak) * 100}%` }}
-              />
-            </div>
-          </div>
+          <AxisCell key={cell.key} cell={cell} empty={empty} peak={peak} compact={compact} />
         ))}
       </div>
     </div>
@@ -144,11 +227,16 @@ function Tallies({
     key: focus,
     label: t(`focus.${focus}` as 'focus.vocabulary'),
     count: coverage.byFocus[focus],
+    notRecorded: focus === 'unknown',
   }));
-  const formCells = COVERAGE_FORMS.map((form) => ({
-    key: form,
-    label: t(`form.${form}` as 'form.bank'),
-    count: coverage.byForm[form],
+  // `modality`, not `form`: a bank of chunks to put in order and a bank of options to
+  // pick from are the same `form`, and only one of them can be done without the rule
+  // (plan 64, decision G).
+  const answerCells = COVERAGE_MODALITIES.map((modality) => ({
+    key: modality,
+    label: t(`modality.${modality}` as 'modality.recognition'),
+    count: coverage.byModality[modality],
+    notRecorded: modality === 'unknown',
   }));
 
   // `COV_SKILL_ABSENT` is dropped, not rendered: the line above already names every
@@ -158,13 +246,13 @@ function Tallies({
   const known = issues.filter((issue) => isKnownIssue(issue) && issue.code !== 'COV_SKILL_ABSENT');
 
   return (
-    <div className="space-y-3">
+    <div className={compact ? 'space-y-5' : 'space-y-3'}>
       <AxisRow label={t('axis.skill')} cells={skillCells} compact={compact} />
       <AxisRow label={t('axis.focus')} cells={focusCells} compact={compact} />
       {/* Last and least prominent by position, first in what it tells an author:
           a course can be balanced across all four channels and still be, 84% of
           it, picking an answer off a list (§3.7). */}
-      <AxisRow label={t('axis.form')} cells={formCells} compact={compact} />
+      <AxisRow label={t('axis.form')} cells={answerCells} compact={compact} />
 
       {coverage.emptySkills.length > 0 && (
         <p className="text-xs text-muted-foreground">
@@ -208,6 +296,12 @@ interface CoverageStripProps {
   containerId: string;
   /** Two columns per row instead of four — the inspector is a narrow pane. */
   compact?: boolean;
+  /**
+   * Drops the strip's own heading, for a caller that has already said what is
+   * being counted and in what unit. Two headings one above the other would read
+   * as two reports.
+   */
+  hideHeading?: boolean;
   className?: string;
 }
 
@@ -223,7 +317,12 @@ interface CoverageStripProps {
  * the service's answer, and this is a renderer over it (§1.7) — the alternative
  * is the same rule written twice, drifting apart at the first change.
  */
-export function CoverageStrip({ containerId, compact = false, className }: CoverageStripProps) {
+export function CoverageStrip({
+  containerId,
+  compact = false,
+  hideHeading = false,
+  className,
+}: CoverageStripProps) {
   const t = useTranslations('Authoring.coverage');
   const [showPublished, setShowPublished] = useState(false);
   const { data, isLoading, isError } = useContainerCoverage(containerId);
@@ -233,7 +332,7 @@ export function CoverageStrip({ containerId, compact = false, className }: Cover
 
   return (
     <section className={cn('space-y-3', className)} aria-label={t('title')}>
-      <div className="flex items-center gap-2">
+      <div className={cn('flex items-center gap-2', hideHeading && 'sr-only')}>
         <Target className="size-3.5 text-muted-foreground" aria-hidden />
         <span className="text-xs font-bold tracking-wide text-muted-foreground">{t('title')}</span>
         {draft && draft.coverage.total > 0 && (

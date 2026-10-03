@@ -1,3 +1,5 @@
+import type { Recipe, RecipeIssue } from '@/lib/shared-kernel/skills';
+
 /** Three-state lifecycle per the Course Management spec (CF-4). */
 export type ContainerState = 'draft' | 'published' | 'archived';
 
@@ -138,12 +140,22 @@ export type CoverageFocus = (typeof COVERAGE_FOCUSES)[number];
 export const COVERAGE_FORMS = ['bank', 'free', 'mixed', 'unknown'] as const;
 export type CoverageForm = (typeof COVERAGE_FORMS)[number];
 
+/** How the answer had to be known — the axis the report reads since plan 64, decision G. */
+export const COVERAGE_MODALITIES = ['recognition', 'recall', 'production', 'unknown'] as const;
+export type CoverageModality = (typeof COVERAGE_MODALITIES)[number];
+
 export interface CoverageTallies {
   /** Exercises counted. Not the sum of any row: one exercise can train two channels. */
   total: number;
   bySkill: Record<CoverageSkill, number>;
   byFocus: Record<CoverageFocus | 'unknown', number>;
+  /** Whether a bank was on screen. Kept by the service for its rules; not drawn. */
   byForm: Record<CoverageForm, number>;
+  /**
+   * How the answer had to be known. The third row of the report: `byForm` puts chunks to
+   * order and options to pick in one bucket, this does not (plan 64, decision G).
+   */
+  byModality: Record<CoverageModality, number>;
   /**
    * The `skill × focus` table the two tallies above are the margins of.
    *
@@ -173,11 +185,48 @@ export type CoverageIssue =
   | { code: 'COV_FOCUS_UNKNOWN'; level: 'info'; unknown: number; total: number }
   | { code: 'COV_UNCLASSIFIED'; level: 'warning'; count: number };
 
+/** The lesson recipe speaks the kernel's vocabulary; the copy in this repo is the source. */
+export type { Recipe, RecipeIssue, RecipeRule } from '@/lib/shared-kernel/skills';
+
+/** A course's recipe as content-service resolves it — the one applied and the one behind it. */
+export interface CourseCoverageRecipe {
+  /** What the lessons are checked against: the course's own, else the workspace's, else empty. */
+  recipe: Recipe;
+  /** The workspace's — what "inherit" means here. Null: no school, or the school set none. */
+  inherited: Recipe | null;
+  /** True when the course has its own, including an empty one that opts out. */
+  overridden: boolean;
+}
+
+/** A workspace's recipe — the standard its courses inherit (plan 65). */
+export interface WorkspaceCoverageRecipe {
+  schoolId: string;
+  /** Null: never set, nothing is checked. `{ rules: [] }`: set to ask for nothing. */
+  recipe: Recipe | null;
+  updatedAt: string | null;
+}
+
+/** How the courses of a workspace use its recipe (plan 65, phase 5). */
+export interface WorkspaceRecipeCourses {
+  total: number;
+  follow: number;
+  own: number;
+  none: number;
+  /** The courses that do not follow, in title order. */
+  exceptions: { courseId: string; title: string; mode: 'own' | 'none'; ruleCount: number }[];
+}
+
 export interface CoverageModuleReport {
   containerId: string;
   title: string;
   coverage: CoverageTallies;
   issues: CoverageIssue[];
+  /**
+   * What this lesson lacks against the course's recipe (plan 64, decisions L–P), counted
+   * in items rather than exercises. Warnings only. Optional because a report from a
+   * service older than phase 10 does not carry it, and that reads as "nothing to say".
+   */
+  recipeIssues?: RecipeIssue[];
 }
 
 export interface CoverageReport {
@@ -204,6 +253,8 @@ export interface ContainerCoverage {
   containerId: string;
   containerType: string;
   title: string;
+  /** The recipe the lessons were checked against — the course's, its workspace's, or empty. */
+  recipe?: Recipe;
   draft: CoverageReport | null;
   published: CoverageReport | null;
   /** Decided by the service, so the web, the mobile app and every later reader agree. */
@@ -212,6 +263,92 @@ export interface ContainerCoverage {
 }
 
 export type CoverageVersionScope = 'draft' | 'published' | 'both';
+
+// ─── Atom coverage (plan 63 §4.2) ────────────────────────────────────────────
+//
+// The coverage report above counts exercises by channel and subject. This one counts the
+// facts: the words a unit's texts introduce and the atoms of the rules it teaches,
+// against the items that name them. Different question, different shape, same rule about
+// where the thinking lives — the service decides, this is a renderer over its answer.
+
+export const MODALITIES = ['recognition', 'recall', 'production', 'unknown'] as const;
+export type Modality = (typeof MODALITIES)[number];
+
+export type ModalityTally = Record<Modality, number>;
+
+/** Where a scope says it teaches an atom. Empty means it only practises it. */
+export type AtomIntroductionSource = 'relation' | 'glossary' | 'text_span' | 'exercise_pool';
+
+export interface AtomCoverageEntry {
+  atomType: 'vocabulary_item' | 'grammar_rule_atom' | string;
+  atomId: string;
+  title: string;
+  track: 'lexis' | 'grammar' | string;
+  parentId: string | null;
+  parentTitle: string | null;
+  introducedBy: AtomIntroductionSource[];
+  exercises: number;
+  /** Items that test it. Zero is what "never tested" counts. */
+  focusItems: number;
+  /** Items that merely required it — the word inside a gap testing an ending. */
+  contextItems: number;
+  /** Testing items by modality. Context is not here: it examined nothing. */
+  byModality: ModalityTally;
+}
+
+/**
+ * A finding, as a code and the numbers its sentence needs — the same contract the
+ * skill report's remarks follow, and for the same reason: the wording is written here
+ * in four languages, the rule is not re-implemented.
+ */
+export interface AtomCoverageIssue {
+  code: string;
+  severity: 'warning' | 'note';
+  atomType?: string;
+  atomId?: string;
+  title?: string;
+  ruleId?: string;
+  modality?: Modality;
+  count?: number;
+  total?: number;
+}
+
+export interface AtomCoverageSummary {
+  introduced: number;
+  introducedByTrack: Record<string, number>;
+  tested: number;
+  untested: number;
+  contextOnly: number;
+  singleModality: number;
+  practisedElsewhere: number;
+  byModality: ModalityTally;
+  exercises: number;
+  /** Of those, the ones carrying any address at all — what every finding is read against. */
+  exercisesAddressed: number;
+}
+
+export interface AtomCoverageScope {
+  containerId: string;
+  title: string;
+  summary: AtomCoverageSummary;
+  issues: AtomCoverageIssue[];
+}
+
+export interface AtomCoverage {
+  containerId: string;
+  containerType: string;
+  title: string;
+  version: 'draft' | 'published';
+  /** False when there is no such version — not a container that teaches nothing. */
+  available: boolean;
+  summary: AtomCoverageSummary;
+  issues: AtomCoverageIssue[];
+  atoms: AtomCoverageEntry[];
+  rulesWithoutAtoms: Array<{ ruleId: string; title: string }>;
+  units: AtomCoverageScope[];
+}
+
+export type AtomCoverageVersionScope = 'draft' | 'published';
 
 /** Which rung of the priority chain produced a value (plan 55 §3.4). */
 export const SKILL_SOURCES = ['override', 'placement', 'document', 'template', 'unknown'] as const;
@@ -232,6 +369,11 @@ export interface ExerciseAxes {
   skills: CoverageSkill[];
   focus: CoverageFocus[];
   form: CoverageForm;
+  /**
+   * Absent from the service's answer today, which is why it is optional: only the live
+   * draft in the builder fills it (`mergeAxes`).
+   */
+  modality?: CoverageModality;
   skillSource: SkillSource;
   focusSource: FocusSource;
 }
@@ -287,4 +429,70 @@ export interface CourseResult {
   groups: number;
   /** Only the cells somebody attempted; the grid supplies the rest from coverage. */
   cells: CourseResultCell[];
+}
+
+// ─── What each piece of an exercise is about (plan 63 §2 D) ─────────────────
+
+export type AtomType = 'vocabulary_item' | 'grammar_rule_atom';
+export type TargetRole = 'focus' | 'context';
+
+/**
+ * One atom an item is about, resolved against the exercise as it stands now.
+ *
+ * `broken` is computed on every read and never stored, because neither half of a target is
+ * stable on its own: a gap key holds a token index, so editing the sentence moves it
+ * (`item_missing`), and the atom underneath can be retired (`atom_missing`). The panel
+ * reports both rather than hiding them — a target silently dropped is an author believing
+ * a gap is addressed when it is not.
+ */
+export interface ResolvedTarget {
+  atomType: AtomType;
+  atomId: string;
+  role: TargetRole;
+  /** `null` when the atom is gone; `broken` then says `atom_missing`. */
+  atomTitle: string | null;
+  track: string | null;
+  broken: 'atom_missing' | 'item_missing' | null;
+}
+
+export interface ItemTargets {
+  /** `null` addresses the whole exercise — the only option for templates that grade as one. */
+  itemKey: string | null;
+  label: string | null;
+  targets: ResolvedTarget[];
+}
+
+export interface ExerciseTargets {
+  exerciseId: string;
+  templateCode: string;
+  /** False when the template grades as a whole; `items` then holds one `itemKey: null` row. */
+  addressable: boolean;
+  items: ItemTargets[];
+}
+
+export interface TargetSuggestion {
+  atomType: AtomType;
+  atomId: string;
+  title: string;
+  track: string;
+  role: TargetRole;
+  /** `word_exact` | `word_inflected` | `rule_single_atom` | `rule_candidate`. */
+  reason: string;
+  /** False where the author has to choose — a rule with several atoms, or an ambiguous word. */
+  confident: boolean;
+}
+
+export interface ItemSuggestions {
+  itemKey: string | null;
+  label: string | null;
+  alreadyAddressed: boolean;
+  suggestions: TargetSuggestion[];
+}
+
+export interface TargetSuggestions {
+  exerciseId: string;
+  templateCode: string;
+  items: ItemSuggestions[];
+  /** Rules this exercise practises that nobody has cut into atoms yet. */
+  rulesWithoutAtoms: Array<{ ruleId: string; title: string }>;
 }

@@ -39,8 +39,8 @@ vi.mock('./section-assign-select', () => ({
 vi.mock('./module-publish-block', () => ({ ModulePublishBlock: () => null }));
 // Counts the module through react-query; what the inspector owes it is the
 // container id of the node in hand, which is what this stub records.
-vi.mock('./coverage-strip', () => ({
-  CoverageStrip: ({ containerId }: { containerId: string }) => (
+vi.mock('./module-coverage-tab', () => ({
+  ModuleCoverageTab: ({ containerId }: { containerId: string }) => (
     <div data-testid="coverage-strip" data-container={containerId} />
   ),
 }));
@@ -205,12 +205,26 @@ describe('CurriculumInspector', () => {
     );
   });
 
-  it('counts what the module trains, not what the course around it trains', () => {
-    // A course balanced in aggregate can still hold a module that is nothing but
-    // reading, so the strip is pointed at the module's own container.
+  it('counts what the whole course trains, whatever is selected', () => {
+    // Nothing is counted per module or per exercise, so the tab says the same
+    // thing for a module as for no selection at all.
     renderInspector({ kind: 'module', module: moduleNode() });
 
-    expect(screen.getByTestId('coverage-strip')).toHaveAttribute('data-container', 'module-1');
+    // A tab away from the form, and the form is what opens: the numbers are for
+    // reading, the fields are what the author came to change (plan 64, phase 3).
+    expect(screen.queryByTestId('coverage-strip')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Coverage' }));
+    expect(screen.getByTestId('coverage-strip')).toHaveAttribute('data-container', 'course-1');
+  });
+
+  it('keeps the form on screen while the numbers are a tab away', () => {
+    renderInspector({ kind: 'module', module: moduleNode() });
+
+    expect(screen.getByLabelText('Learning goals — not available yet')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Coverage' }));
+    expect(screen.queryByLabelText('Learning goals — not available yet')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Fields' }));
+    expect(screen.getByLabelText('Learning goals — not available yet')).toBeInTheDocument();
   });
 
   it("deletes the selected module through the panel's confirmation", () => {

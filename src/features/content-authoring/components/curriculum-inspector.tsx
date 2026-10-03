@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/lib/i18n/navigation';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
@@ -29,7 +30,7 @@ import { renameSectionAction } from '../actions/section';
 import { renameItemAction } from '../actions/rename-item';
 import { assignItemSectionAction } from '../actions/container-item';
 import { ContainerStateBadge } from './container-state-badge';
-import { CoverageStrip } from './coverage-strip';
+import { ModuleCoverageTab } from './module-coverage-tab';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
 import { ModulePublishBlock } from './module-publish-block';
@@ -228,7 +229,7 @@ function itemPublishSegment(item: CurriculumTreeItemNode): string {
   return item.pendingChange ? 'edited' : 'published';
 }
 
-export function CurriculumInspector({
+function InspectorFields({
   selection,
   courseContainerId,
   workspaceId,
@@ -361,95 +362,92 @@ export function CurriculumInspector({
           />
         </InspectorHead>
 
-        <div className="grid grid-cols-2 gap-3">
-          <StubField label={t('structure.code')} value={STUB_PLACEHOLDERS.code} />
-          <InspectorField
-            label={t('structure.estMinutes')}
-            value={t('structure.minutes', { count: estimatedMinutes })}
-          />
-        </div>
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3">
+            <StubField label={t('structure.code')} value={STUB_PLACEHOLDERS.code} />
+            <InspectorField
+              label={t('structure.estMinutes')}
+              value={t('structure.minutes', { count: estimatedMinutes })}
+            />
+          </div>
 
-        {/* The tree's `titleEn` is a container localization row, not a field on
+          {/* The tree's `titleEn` is a container localization row, not a field on
             the module — see `setContainerTitleEnAction`. */}
-        <EditableField
-          label={t('structure.titleEn')}
-          saveLabel={t('structure.saveTitleEn')}
-          savedMessage={t('structure.titleEnSaved')}
-          value={mod.titleEn ?? ''}
-          onSave={async (next) => {
-            const previous = mod.titleEn;
-            const result = await setContainerTitleEnAction(
-              mod.containerId,
-              next,
-              previous !== null,
-            );
-            if (!result.ok) {
-              toast.error(tErrors(result.error.code));
-              throw new Error(result.error.code);
-            }
-            undo.record({
-              label: t('undo.renamed', { name: next }),
-              // Whether the localization row exists now is what the save just
-              // decided: a non-empty subtitle created or kept it, an empty one
-              // deleted it.
-              revert: async () =>
-                (
-                  await setContainerTitleEnAction(
-                    mod.containerId,
-                    previous ?? '',
-                    next.trim() !== '',
-                  )
-                ).ok,
-            });
-            onChanged();
-          }}
-        />
+          <EditableField
+            label={t('structure.titleEn')}
+            saveLabel={t('structure.saveTitleEn')}
+            savedMessage={t('structure.titleEnSaved')}
+            value={mod.titleEn ?? ''}
+            onSave={async (next) => {
+              const previous = mod.titleEn;
+              const result = await setContainerTitleEnAction(
+                mod.containerId,
+                next,
+                previous !== null,
+              );
+              if (!result.ok) {
+                toast.error(tErrors(result.error.code));
+                throw new Error(result.error.code);
+              }
+              undo.record({
+                label: t('undo.renamed', { name: next }),
+                // Whether the localization row exists now is what the save just
+                // decided: a non-empty subtitle created or kept it, an empty one
+                // deleted it.
+                revert: async () =>
+                  (
+                    await setContainerTitleEnAction(
+                      mod.containerId,
+                      previous ?? '',
+                      next.trim() !== '',
+                    )
+                  ).ok,
+              });
+              onChanged();
+            }}
+          />
 
-        <div>
-          <CountRow label={t('structure.blocks')} value={blocks.length} />
-          <CountRow label={t('structure.sections')} value={mod.sections.length} />
-        </div>
+          <div>
+            <CountRow label={t('structure.blocks')} value={blocks.length} />
+            <CountRow label={t('structure.sections')} value={mod.sections.length} />
+          </div>
 
-        <StubTextareaField
-          label={t('structure.learningGoals')}
-          placeholder={t('structure.learningGoalsPlaceholder')}
-        />
-        <StubSwitchRow
-          label={t('structure.homeworkByDefault')}
-          hint={t('structure.homeworkByDefaultHint')}
-        />
-        <StubSwitchRow
-          label={t('structure.includeInSrs')}
-          hint={t('structure.includeInSrsHint')}
-          on
-        />
+          <StubTextareaField
+            label={t('structure.learningGoals')}
+            placeholder={t('structure.learningGoalsPlaceholder')}
+          />
+          <StubSwitchRow
+            label={t('structure.homeworkByDefault')}
+            hint={t('structure.homeworkByDefaultHint')}
+          />
+          <StubSwitchRow
+            label={t('structure.includeInSrs')}
+            hint={t('structure.includeInSrsHint')}
+            on
+          />
 
-        <p className="text-xs leading-relaxed text-muted-foreground">{t('structure.moduleHelp')}</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {t('structure.moduleHelp')}
+          </p>
 
-        {/* A module is a container in its own right, so it is counted on its own
-            terms: a course balanced in aggregate can still have a module that is
-            nothing but reading. */}
-        <div className="border-t border-border pt-4">
-          <CoverageStrip containerId={mod.containerId} compact />
-        </div>
-
-        {/* Students read a module's own published version, so material added
+          {/* Students read a module's own published version, so material added
             here stays invisible until this module — not just the course — is
             published. Reported rather than offered as a segment: the release
             itself happens in one place, "Review & publish". */}
-        <ModulePublishBlock publishState={mod.publishState} />
+          <ModulePublishBlock publishState={mod.publishState} />
 
-        <InspectorFooter
-          editorHref={wsHref(workspaceId, `content/${mod.containerId}`)}
-          onDelete={() =>
-            onDelete({
-              kind: 'module',
-              id: mod.id,
-              title: mod.title ?? '',
-              blockCount: blocks.length,
-            })
-          }
-        />
+          <InspectorFooter
+            editorHref={wsHref(workspaceId, `content/${mod.containerId}`)}
+            onDelete={() =>
+              onDelete({
+                kind: 'module',
+                id: mod.id,
+                title: mod.title ?? '',
+                blockCount: blocks.length,
+              })
+            }
+          />
+        </div>
       </div>
     );
   }
@@ -593,8 +591,62 @@ export function CurriculumInspector({
 
       <InspectorFooter
         editorHref={wsHref(workspaceId, `content/${containerId}/lessons/${item.id}`)}
-        onDelete={() => onDelete({ kind: 'item', id: item.id, title: item.title ?? '' })}
+        onDelete={() =>
+          onDelete({
+            kind: 'item',
+            id: item.id,
+            title: item.title ?? '',
+            materialKind: getMaterialKind(item),
+            templateCode: item.templateCode,
+          })
+        }
       />
     </div>
+  );
+}
+
+type InspectorTab = 'fields' | 'coverage';
+
+/**
+ * The side panel: the selected node's form, and what the whole course trains.
+ *
+ * The tabs sit on the panel rather than inside a module's form so they are
+ * there whatever is selected — the course's numbers do not depend on a
+ * selection. Coverage is the course's alone: nothing is counted per module or
+ * per exercise in the panel, and a tab that changed with the selection would
+ * suggest it is. The open tab is kept here, above the selection, so it survives
+ * clicking from one node to the next.
+ *
+ * The panel is a column with a scrolling body: pinned beside the tree it is
+ * taller than the screen once the report is open, and the page should not have
+ * to be scrolled to read the end of it.
+ */
+export function CurriculumInspector(props: CurriculumInspectorProps) {
+  const t = useTranslations('Authoring');
+  const [tab, setTab] = useState<InspectorTab>('fields');
+
+  return (
+    <Tabs
+      value={tab}
+      onValueChange={(next) => setTab(next as InspectorTab)}
+      className="min-h-0 flex-1"
+    >
+      <TabsList className="shrink-0 border-b px-2">
+        <TabsTrigger value="fields" className="-mb-px px-3.5 py-2.5 text-[13px]">
+          {t('structure.fieldsTab')}
+        </TabsTrigger>
+        <TabsTrigger value="coverage" className="-mb-px px-3.5 py-2.5 text-[13px]">
+          {t('structure.coverageTab')}
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="fields" className="mt-0 min-h-0 flex-1 overflow-y-auto p-4.5">
+        <InspectorFields {...props} />
+      </TabsContent>
+
+      <TabsContent value="coverage" className="mt-0 min-h-0 flex-1 overflow-y-auto p-4.5">
+        <ModuleCoverageTab containerId={props.courseContainerId} scope="course" />
+      </TabsContent>
+    </Tabs>
   );
 }

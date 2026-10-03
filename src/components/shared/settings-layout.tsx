@@ -35,7 +35,10 @@ export function SettingsLayout({ nav, children }: SettingsLayoutProps) {
   return (
     <div className="h-full flex flex-col md:flex-row">
       <aside className="md:w-56 shrink-0 border-b md:border-b-0 md:border-r border-border md:overflow-y-auto">
-        <nav aria-label="Settings navigation" className="flex md:flex-col gap-1 p-3">
+        <nav
+          aria-label="Settings navigation"
+          className="flex md:flex-col gap-1 p-3 max-md:overflow-x-auto"
+        >
           {nav.map((item) => {
             const active = pathname.endsWith(item.href) || pathname.includes(item.href + '/');
             const Icon = item.icon ? ICON_MAP[item.icon] : undefined;
@@ -44,7 +47,7 @@ export function SettingsLayout({ nav, children }: SettingsLayoutProps) {
                 key={item.href}
                 href={item.href as Parameters<typeof Link>[0]['href']}
                 className={cn(
-                  'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors max-md:shrink-0',
                   active
                     ? 'border-l-2 border-primary bg-accent text-accent-foreground pl-2.5'
                     : 'text-(--ssz-text-muted) hover:bg-accent/60 hover:text-accent-foreground',

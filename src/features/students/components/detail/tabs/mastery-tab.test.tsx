@@ -3,7 +3,13 @@ import { createTranslator } from 'next-intl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages as en } from '@/lib/i18n/messages';
-import type { StudentGrid, StudentPosition, StudentWorkContext } from '@/features/analytics/types';
+import type {
+  ModalityGap,
+  ModalityGapRow,
+  StudentGrid,
+  StudentPosition,
+  StudentWorkContext,
+} from '@/features/analytics/types';
 import type { MasteryProfile, MasteryVerdict } from '@/features/mastery/types';
 import { FOCUSES, SKILLS } from '@/lib/shared-kernel/skills/model';
 
@@ -83,6 +89,56 @@ const workContext = (over: Partial<StudentWorkContext> = {}): StudentWorkContext
   ...over,
 });
 
+const gap = (over: Partial<ModalityGap> = {}): ModalityGap => ({
+  studentId: 's1',
+  courseId: 'c1',
+  minAttempts: 3,
+  thresholds: { strong: 0.8, failing: 0.6 },
+  namesAvailable: true,
+  summary: {
+    addressedAtoms: 15,
+    judged: 9,
+    insufficient: 6,
+    recognitionOnly: 3,
+    productionUntried: 0,
+    productionFailing: 1,
+    recallFailing: 0,
+    even: 5,
+    observations: 42,
+    contextObservations: 0,
+    cardReviews: 42,
+    byModality: { recognition: 15, recall: 15, production: 12, unknown: 0 },
+  },
+  gaps: [],
+  ...over,
+});
+
+const reading = (attempts: number, successRate: number | null) => ({
+  attempts,
+  correct: successRate === null ? 0 : Math.round(attempts * successRate),
+  successRate,
+  meanStability: null,
+  lastAt: null,
+});
+
+const gapRow = (over: Partial<ModalityGapRow> = {}): ModalityGapRow => ({
+  atomType: 'vocabulary_item',
+  atomId: 'w1',
+  title: 'søknad',
+  track: 'lexis',
+  parentId: null,
+  verdict: 'recognition_only',
+  gap: null,
+  byModality: {
+    recognition: reading(3, 1),
+    recall: reading(0, null),
+    production: reading(0, null),
+    unknown: reading(0, null),
+  },
+  cardReviews: 3,
+  ...over,
+});
+
 const data = (over: Partial<StudentMastery> = {}): StudentMastery => ({
   groupId: 'g1',
   courseId: 'c1',
@@ -90,6 +146,7 @@ const data = (over: Partial<StudentMastery> = {}): StudentMastery => ({
   position: position(),
   workContext: workContext(),
   profile: profile(),
+  modalityGap: gap(),
   ...over,
 });
 
@@ -161,6 +218,104 @@ describe('MasteryTab', () => {
 
     const weakPairs = screen.getByText('Weak pairs').closest('div')?.parentElement;
     expect(weakPairs).toHaveTextContent('0');
+  });
+
+  // The block exists because a cell at 78% hides two learners: one who knows the words
+  // and one who can pick them out of five. The verdict is the finding, not the number.
+  it('names a fact the learner only ever recognises', async () => {
+    await draw({ modalityGap: gap({ gaps: [gapRow()] }) });
+
+    expect(screen.getByText('Known one way only')).toBeInTheDocument();
+    expect(screen.getByText('søknad')).toBeInTheDocument();
+    expect(screen.getByText('Recognition only')).toBeInTheDocument();
+    expect(screen.getByText(/never once asked for from memory/i)).toBeInTheDocument();
+  });
+
+  /**
+   * A modality never attempted is a dash. A zero would say they produce it as badly as
+   * they recognise it — the opposite of what the row is reporting.
+   */
+  it('prints a dash for a modality nobody ever asked, never a zero', async () => {
+    await draw({ modalityGap: gap({ gaps: [gapRow()] }) });
+
+    const row = screen.getByText('søknad').closest('li') as HTMLElement;
+    expect(row).toHaveTextContent('Produced — never asked');
+    expect(row).not.toHaveTextContent('Produced 0%');
+  });
+
+  it('measures the gap where the deeper modality was tried and went badly', async () => {
+    await draw({
+      modalityGap: gap({
+        gaps: [
+          gapRow({
+            verdict: 'production_failing',
+            gap: 0.67,
+            byModality: {
+              recognition: reading(3, 1),
+              recall: reading(0, null),
+              production: reading(3, 0.33),
+              unknown: reading(0, null),
+            },
+          }),
+        ],
+      }),
+    });
+
+    expect(screen.getByText('Fails when produced')).toBeInTheDocument();
+    expect(screen.getByText('−67%')).toBeInTheDocument();
+  });
+
+  /**
+   * The two empties are different findings, and the first one is about the course: with
+   * nothing addressed there is nothing to compare, and saying "known evenly" there would
+   * be a verdict drawn from no evidence at all.
+   */
+  it('tells an unaddressed catalogue apart from a learner with no lopsided facts', async () => {
+    await draw({ modalityGap: gap({ summary: { ...gap().summary, addressedAtoms: 0 } }) });
+    expect(screen.getByText(/gap in the course’s markup, not in the learner/i)).toBeInTheDocument();
+
+    screen.getByText('Known one way only');
+  });
+
+  it('says the facts are known evenly when they are', async () => {
+    await draw({ modalityGap: gap() });
+
+    expect(
+      screen.getByText(/All 9 facts with enough evidence are known evenly/),
+    ).toBeInTheDocument();
+  });
+
+  it('says the service could not be asked rather than showing an even learner', async () => {
+    await draw({ modalityGap: null });
+
+    expect(
+      screen.getByText('Could not ask what this learner knows one way only.'),
+    ).toBeInTheDocument();
+  });
+
+  /**
+   * A thin answer here usually means the course is unaddressed rather than the learner
+   * untested, and that is invisible from the rows themselves.
+   */
+  it('prints the evidence the verdicts stand on', async () => {
+    await draw({ modalityGap: gap({ gaps: [gapRow()] }) });
+
+    expect(screen.getByText(/15 facts with an address, 42 observations/)).toBeInTheDocument();
+    expect(screen.getByText(/6 have too little evidence to judge/)).toBeInTheDocument();
+  });
+
+  it('says a course with no production task at all is a fact about the course', async () => {
+    await draw({
+      modalityGap: gap({
+        gaps: [gapRow()],
+        summary: {
+          ...gap().summary,
+          byModality: { recognition: 15, recall: 15, production: 0, unknown: 0 },
+        },
+      }),
+    });
+
+    expect(screen.getByText(/that is a fact about the course/i)).toBeInTheDocument();
   });
 
   it('draws no scale where the group has no median, and says why', async () => {

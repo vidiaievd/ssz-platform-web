@@ -24,5 +24,26 @@
   "progress": "Progress",
   "badgeCount": "{count} waiting",
   "badgeCountOverdue": "{count} waiting, some past the promised time",
-  "submissions": "My work"
+  "submissions": "My work",
+  "crumb": {
+    "new": "New",
+    "timetable": "Timetable",
+    "cover": "Cover",
+    "curriculum": "Curriculum",
+    "forecast": "Forecast",
+    "substitutions": "Substitutions",
+    "enrollment": "Enrollment",
+    "placement": "Placement test",
+    "account": "Account",
+    "profile": "Profile",
+    "appearance": "Appearance",
+    "security": "Security",
+    "recipe": "Lesson recipe",
+    "mySchedule": "My schedule",
+    "assignments": "Assignments",
+    "srs": "Review",
+    "stats": "Statistics",
+    "onboarding": "Onboarding",
+    "schools": "Schools"
+  }
 }

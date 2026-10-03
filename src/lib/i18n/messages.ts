@@ -234,6 +234,10 @@ export const SCHOOL_NAMESPACES = [
   'Notifications',
   'Profile',
   'Settings',
+  // The settings layout wraps its pages in the account's unsaved-changes guard, whose
+  // dialog translates against `Account.unsavedChanges` — without it the lesson recipe
+  // page logged a missing message on every render.
+  'Account',
   'Tutor',
   'TeacherPending',
   'WorkspaceSwitcher',

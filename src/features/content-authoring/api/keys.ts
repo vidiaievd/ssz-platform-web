@@ -11,6 +11,12 @@ export const authoringKeys = keyFactory('authoring', {
   coverage: (id: string, version: string) => ['coverage', id, version] as const,
   /** Prefix of every coverage query — an override moves the module's strip and the course's. */
   coverageAll: () => ['coverage'] as const,
+  atomCoverage: (id: string, version: string) => ['atom-coverage', id, version] as const,
+  coverageRecipe: (id: string) => ['coverage-recipe', id] as const,
+  /** Prefix of every course recipe — each carries the workspace's as `inherited`. */
+  coverageRecipeAll: () => ['coverage-recipe'] as const,
+  workspaceRecipe: (schoolId: string) => ['workspace-recipe', schoolId] as const,
+  workspaceRecipeCourses: (schoolId: string) => ['workspace-recipe-courses', schoolId] as const,
   courseResult: (id: string) => ['course-result', id] as const,
   exerciseAxes: (id: string) => ['exercise-axes', id] as const,
   lessons: (containerId: string) => ['lessons', containerId] as const,
@@ -37,8 +43,12 @@ export const authoringKeys = keyFactory('authoring', {
   grammarRules: (containerId: string) => ['grammar-rules', containerId] as const,
   grammarRule: (id: string) => ['grammar-rule', id] as const,
   grammarExplanations: (ruleId: string) => ['grammar-explanations', ruleId] as const,
+  grammarAtoms: (ruleId: string) => ['grammar-atoms', ruleId] as const,
   exercises: (containerId: string) => ['exercises', containerId] as const,
   exerciseRuleLinks: (exerciseId: string) => ['exercise-rule-links', exerciseId] as const,
+  exerciseTargets: (exerciseId: string) => ['exercise-targets', exerciseId] as const,
+  exerciseTargetSuggestions: (exerciseId: string) =>
+    ['exercise-target-suggestions', exerciseId] as const,
   exercise: (id: string) => ['exercise', id] as const,
   sections: (containerId: string) => ['sections', containerId] as const,
   versions: (containerId: string) => ['versions', containerId] as const,

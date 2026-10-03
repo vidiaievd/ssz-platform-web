@@ -77,3 +77,22 @@ export function matchesFilters(
   if (!query) return true;
   return `${item.title ?? ''} ${typeLabel}`.toLowerCase().includes(query);
 }
+
+/**
+ * The filters a URL asks the tree to start with.
+ *
+ * Only what the toolbar itself can express: a link that filtered by something
+ * the author cannot then clear from the toolbar would be a trap. Anything
+ * unrecognised is ignored rather than rejected — a stale link should open the
+ * tree, not an error.
+ */
+export function filtersFromParams(params: {
+  get(name: string): string | null;
+}): StructureFilters | undefined {
+  const type = params.get('type');
+  const state = params.get('state');
+  const typeOk = (['vocab', 'text', 'grammar', 'exercises'] as const).find((t) => t === type);
+  const stateOk = (['published', 'edited', 'draft'] as const).find((s) => s === state);
+  if (!typeOk && !stateOk) return undefined;
+  return { query: '', type: typeOk ?? 'all', state: stateOk ?? 'all' };
+}
