@@ -42,6 +42,7 @@ const ONE_OF_EACH: Record<Issue['code'], Issue> = {
   SB_BUCKET_NO_RULE: { code: 'SB_BUCKET_NO_RULE', level: 'warning', step: 3, bucketId: EN.id },
   SB_COUNTER_ARITHMETIC: { code: 'SB_COUNTER_ARITHMETIC', level: 'warning', step: 4 },
   SB_ONE_SHOT_KEY: { code: 'SB_ONE_SHOT_KEY', level: 'warning', step: 4 },
+  SB_CEILING_LOWERED: { code: 'SB_CEILING_LOWERED', level: 'warning', step: 4, cause: 'both' },
 };
 
 function Lines({ bare }: { bare: boolean }) {
@@ -63,11 +64,11 @@ const draw = (bare: boolean) =>
   );
 
 describe('useIssueCopy', () => {
-  it('has words for all sixteen codes, with every parameter filled in', () => {
+  it('has words for all seventeen codes, with every parameter filled in', () => {
     draw(false);
 
     const lines = screen.getAllByRole('listitem').map((li) => li.textContent ?? '');
-    expect(lines).toHaveLength(16);
+    expect(lines).toHaveLength(17);
     for (const line of lines) {
       // A missing message reads back as its own key; an unfilled one keeps its braces.
       expect(line).not.toMatch(/SB_|issues\.|\{|\}/);

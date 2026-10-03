@@ -3145,6 +3145,7 @@
       "SB_NO_EXPLANATION": "Explain why a wrong bucket is wrong for this item.",
       "SB_BUCKET_NO_RULE": "This bucket has no rule, so nothing is shown with the answer.",
       "SB_COUNTER_ARITHMETIC": "Counting what is left turns the last tiles into arithmetic. Add a refusal bucket or turn the counter off.",
+      "SB_CEILING_LOWERED": "{cause, select, counter {With the counter on} skew {With most items in one bucket} other {With the counter on and most items in one bucket}}, a right answer here counts as weaker evidence in the student's progress.",
       "SB_ONE_SHOT_KEY": "With one check and the answers shown, the student sees the key after a single try."
     },
     "step1": {

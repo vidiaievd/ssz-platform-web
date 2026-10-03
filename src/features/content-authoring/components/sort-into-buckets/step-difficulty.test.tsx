@@ -54,6 +54,19 @@ describe('StepDifficulty', () => {
     expect(screen.getByText(/turns the last tiles into arithmetic. Add/)).toBeInTheDocument();
   });
 
+  it('says the evidence ceiling drops with the counter, a refusal bucket or not (phase 9)', async () => {
+    const { user } = renderStep({ ...exercise(), useNone: true, noneLabel: 'Ingen av delene' });
+    const lowered = /counts as weaker evidence/;
+
+    expect(screen.queryByText(lowered)).not.toBeInTheDocument();
+    await user.click(screen.getByRole('switch', { name: /Show how many are left/ }));
+    expect(
+      screen.getByText(/With the counter on, a right answer here counts as weaker/),
+    ).toBeInTheDocument();
+    // The refusal bucket silences the arithmetic, not the ceiling.
+    expect(screen.queryByText(/turns the last tiles into arithmetic. Add/)).not.toBeInTheDocument();
+  });
+
   it('restates the pass mark in items as the slider moves (AC-D2)', () => {
     renderStep(exercise());
 

@@ -3145,6 +3145,7 @@
       "SB_NO_EXPLANATION": "Forklar hvorfor en gal kategori er gal for dette elementet.",
       "SB_BUCKET_NO_RULE": "Denne kategorien har ingen regel, så ingenting vises sammen med svaret.",
       "SB_COUNTER_ARITHMETIC": "Å telle det som er igjen gjør de siste brikkene til regning. Legg til «ingen av delene» eller slå av telleren.",
+      "SB_CEILING_LOWERED": "{cause, select, counter {Med telleren på} skew {Når de fleste elementene ligger i én kategori} other {Med telleren på og de fleste elementene i én kategori}} teller et riktig svar her som svakere bevis i elevens progresjon.",
       "SB_ONE_SHOT_KEY": "Med én sjekk og fasit synlig ser eleven fasiten etter ett forsøk."
     },
     "step1": {

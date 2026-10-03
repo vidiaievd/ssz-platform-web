@@ -31,7 +31,9 @@ export interface StepDifficultyProps<T extends SortIntoBucketsContent> {
  * Nothing here touches the buckets or the items (AC-D4) — every control goes through
  * `setSettings`, which rewrites `settings` and nothing else. Two contradictions are said
  * beside the switch that causes them and not only in the gate: counting what is left with
- * no refusal bucket (AC-D1), and one check with the key shown. Both are warnings.
+ * no refusal bucket (AC-D1), and one check with the key shown. Both are warnings. So is the
+ * lowered evidence ceiling (AC-D1, plan 66 phase 9): it sits under the counter, its usual
+ * cause, and names a skewed board too, which lowers the ceiling as well.
  *
  * The audio layer's enable row and source live here (the spec's step 4); the per-item row
  * is in step 2, where the item is.
@@ -73,6 +75,7 @@ export function StepDifficulty<T extends SortIntoBucketsContent>({
             onChange={(showRemaining) => onChange(setSettings(exercise, { showRemaining }))}
           />
           <Note issue={noteFor('SB_COUNTER_ARITHMETIC')} describe={describeIssue} />
+          <Note issue={noteFor('SB_CEILING_LOWERED')} describe={describeIssue} />
         </div>
         <ToggleRow
           label={t('step4.hintsLabel')}

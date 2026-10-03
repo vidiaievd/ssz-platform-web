@@ -47,6 +47,7 @@ export function useIssueCopy(
       total: 'total' in issue ? issue.total : 0,
       words: 'words' in issue ? issue.words : 0,
       share: 'share' in issue ? Math.round(issue.share * 100) : 0,
+      cause: 'cause' in issue ? issue.cause : 'counter',
     });
     if (options.bare === true) return message;
 

@@ -25,13 +25,14 @@ export {
   SB_SKEW_SHARE,
 } from './model';
 
-export type { BucketBalance, Cell, Coverage, ShownBucket } from './derive';
+export type { BucketBalance, CeilingCause, Cell, Coverage, ShownBucket } from './derive';
 export {
   accepted,
   accepts,
   balance,
   bucket,
   buckets,
+  ceilingCause,
   cells,
   coverage,
   feedbackFor,
