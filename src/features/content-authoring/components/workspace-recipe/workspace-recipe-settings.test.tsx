@@ -12,6 +12,7 @@ vi.mock('sonner', () => ({
 vi.mock('../../api/use-coverage-recipe', () => ({
   useWorkspaceCoverageRecipe: vi.fn(),
   useSaveWorkspaceCoverageRecipe: vi.fn(),
+  useWorkspaceRecipeCourses: vi.fn(() => ({ data: undefined })),
   InvalidRecipeError: class InvalidRecipeError extends Error {},
   RecipeForbiddenError: class RecipeForbiddenError extends Error {},
 }));
@@ -20,6 +21,7 @@ const { WorkspaceRecipeSettings } = await import('./workspace-recipe-settings');
 const {
   useWorkspaceCoverageRecipe,
   useSaveWorkspaceCoverageRecipe,
+  useWorkspaceRecipeCourses,
   InvalidRecipeError,
   RecipeForbiddenError,
 } = await import('../../api/use-coverage-recipe');
@@ -316,5 +318,53 @@ describe('WorkspaceRecipeSettings, what it will advise', () => {
     renderPage({ ...SAVED, recipe: { rules: [] } });
 
     expect(screen.queryByRole('heading', { name: 'What this recipe will advise' })).toBeNull();
+  });
+});
+
+describe('WorkspaceRecipeSettings, courses', () => {
+  const COURSES = {
+    total: 4,
+    follow: 2,
+    own: 1,
+    none: 1,
+    exceptions: [
+      { courseId: 'b1', title: 'Norsk B1', mode: 'own' as const, ruleCount: 4 },
+      { courseId: 'drift', title: 'Norsk drift', mode: 'none' as const, ruleCount: 0 },
+    ],
+  };
+
+  it('counts the courses and links the ones that differ to their settings', () => {
+    vi.mocked(useWorkspaceRecipeCourses).mockReturnValue({ data: COURSES } as never);
+    renderPage(SAVED);
+
+    expect(
+      screen.getByText('How the 4 courses in this workspace use the recipe.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Follow this recipe').previousSibling).toHaveTextContent('2');
+    expect(screen.getByRole('link', { name: 'Norsk B1' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/w/school-1/content/b1?settings=1'),
+    );
+    expect(screen.getByText('Own recipe · 4 rules')).toBeInTheDocument();
+    expect(screen.getByText('No recipe')).toBeInTheDocument();
+  });
+
+  it('says it in one line while nothing is saved', () => {
+    vi.mocked(useWorkspaceRecipeCourses).mockReturnValue({ data: COURSES } as never);
+    renderPage({ ...SAVED, recipe: null, updatedAt: null });
+
+    expect(
+      screen.getByText(
+        'All 4 courses inherit the workspace recipe. Until one is saved, nothing is checked.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Courses that differ')).toBeNull();
+  });
+
+  it('is not drawn without data', () => {
+    vi.mocked(useWorkspaceRecipeCourses).mockReturnValue({ data: undefined } as never);
+    renderPage(SAVED);
+
+    expect(screen.queryByRole('heading', { name: 'Courses' })).toBeNull();
   });
 });

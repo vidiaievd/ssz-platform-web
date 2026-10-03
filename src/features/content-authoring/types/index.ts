@@ -206,6 +206,16 @@ export interface WorkspaceCoverageRecipe {
   updatedAt: string | null;
 }
 
+/** How the courses of a workspace use its recipe (plan 65, phase 5). */
+export interface WorkspaceRecipeCourses {
+  total: number;
+  follow: number;
+  own: number;
+  none: number;
+  /** The courses that do not follow, in title order. */
+  exceptions: { courseId: string; title: string; mode: 'own' | 'none'; ruleCount: number }[];
+}
+
 export interface CoverageModuleReport {
   containerId: string;
   title: string;

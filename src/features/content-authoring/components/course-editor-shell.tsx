@@ -63,7 +63,8 @@ export function CourseEditorShell({
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  // Opened from the workspace recipe page's list of courses that differ (plan 65).
+  const [settingsOpen, setSettingsOpen] = useState(searchParams.get('settings') === '1');
   // Opened straight from a lesson editor, which has no tree of its own to
   // review against and so links back here instead of publishing on its own.
   const [publishOpen, setPublishOpen] = useState(searchParams.get('publish') === '1');

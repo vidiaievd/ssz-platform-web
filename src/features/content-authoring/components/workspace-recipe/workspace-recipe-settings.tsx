@@ -31,6 +31,7 @@ import {
 import { RecipeActionBar, type SaveStatus } from './recipe-action-bar';
 import { RecipeAdvise } from './recipe-advise';
 import { RecipeCard } from './recipe-card';
+import { RecipeCourses } from './recipe-courses';
 import { RecipePresets } from './recipe-presets';
 import { RecipeRuleCard, ruleAxisId, ruleDeleteId } from './recipe-rule-card';
 
@@ -315,6 +316,8 @@ function RecipeEditor({
       </RecipeCard>
 
       {rules.length > 0 && <RecipeAdvise rules={rules} />}
+
+      <RecipeCourses schoolId={schoolId} kind={kind} neverSet={saved.rules === null} />
 
       {editable ? (
         <RecipeActionBar

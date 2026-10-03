@@ -142,6 +142,17 @@
       "added": "{preset} added. Review the rules, then save.",
       "deleted": "Rule {n} deleted.",
       "undo": "Undo"
+    },
+    "courses": {
+      "title": "Courses",
+      "sub": "{kind, select, solo {How your {n} courses use the recipe.} other {How the {n} courses in this workspace use the recipe.}}",
+      "follow": "{kind, select, solo {Follow your recipe} other {Follow this recipe}}",
+      "own": "Have their own",
+      "none": "Use no recipe",
+      "differ": "Courses that differ",
+      "never": "{n, plural, one {The one course inherits the workspace recipe. Until one is saved, nothing is checked.} other {All # courses inherit the workspace recipe. Until one is saved, nothing is checked.}}",
+      "modeOwn": "{count, plural, one {Own recipe · # rule} other {Own recipe · # rules}}",
+      "modeNone": "No recipe"
     }
   }
 }

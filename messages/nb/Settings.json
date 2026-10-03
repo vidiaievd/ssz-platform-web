@@ -142,6 +142,17 @@
       "added": "{preset} lagt til. Se over reglene, og lagre.",
       "deleted": "Regel {n} slettet.",
       "undo": "Angre"
+    },
+    "courses": {
+      "title": "Kurs",
+      "sub": "{kind, select, solo {Hvordan de {n} kursene dine bruker oppskriften.} other {Hvordan de {n} kursene i dette arbeidsområdet bruker oppskriften.}}",
+      "follow": "{kind, select, solo {Følger oppskriften din} other {Følger denne oppskriften}}",
+      "own": "Har sin egen",
+      "none": "Bruker ingen oppskrift",
+      "differ": "Kurs som avviker",
+      "never": "{n, plural, one {Det ene kurset arver arbeidsområdets oppskrift. Til en er lagret, sjekkes ingenting.} other {Alle # kurs arver arbeidsområdets oppskrift. Til en er lagret, sjekkes ingenting.}}",
+      "modeOwn": "{count, plural, one {Egen oppskrift · # regel} other {Egen oppskrift · # regler}}",
+      "modeNone": "Ingen oppskrift"
     }
   }
 }

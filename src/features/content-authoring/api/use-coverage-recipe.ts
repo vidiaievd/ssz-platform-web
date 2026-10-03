@@ -2,7 +2,12 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { CourseCoverageRecipe, Recipe, WorkspaceCoverageRecipe } from '../types';
+import type {
+  CourseCoverageRecipe,
+  Recipe,
+  WorkspaceCoverageRecipe,
+  WorkspaceRecipeCourses,
+} from '../types';
 
 import { authoringKeys } from './keys';
 
@@ -92,5 +97,19 @@ export function useSaveWorkspaceCoverageRecipe(schoolId: string) {
       void queryClient.invalidateQueries({ queryKey: authoringKeys.coverageAll() });
       void queryClient.invalidateQueries({ queryKey: authoringKeys.coverageRecipeAll() });
     },
+  });
+}
+
+/** How the workspace's courses use its recipe; the card is drawn only when this answers. */
+export function useWorkspaceRecipeCourses(schoolId: string) {
+  return useQuery<WorkspaceRecipeCourses>({
+    queryKey: authoringKeys.workspaceRecipeCourses(schoolId),
+    queryFn: async () => {
+      const res = await fetch(`/api/content/coverage-recipes/workspaces/${schoolId}/courses`);
+      if (!res.ok) throw new Error('Failed to read the courses');
+      return res.json() as Promise<WorkspaceRecipeCourses>;
+    },
+    enabled: schoolId !== '',
+    staleTime: 60_000,
   });
 }
