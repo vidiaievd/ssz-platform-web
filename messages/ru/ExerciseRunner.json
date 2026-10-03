@@ -83,6 +83,43 @@
       "again": "Пройти заново"
     }
   },
+  "sortIntoBuckets": {
+    "check": "Проверить",
+    "checkCount": "Проверить ({n})",
+    "checking": "Проверяем…",
+    "retryWrong": "Ещё раз неверные ({n})",
+    "showKey": "Показать правильное размещение",
+    "finish": "Завершить",
+    "attempt": "Попытка {n}",
+    "attemptOf": "Попытка {n} из {max}",
+    "score": "{correct} из {total} верно",
+    "remaining": "осталось {n}",
+    "poolTitle": "Элементы",
+    "poolDrop": "Бросьте сюда, чтобы забрать обратно",
+    "zoneLabel": "{label}, {n, plural, one {# элемент} few {# элемента} many {# элементов} other {# элемента}}",
+    "zoneIdle": "Бросьте элементы сюда",
+    "zoneTap": "Нажмите, чтобы положить сюда",
+    "selected": "Выбрано «{text}». Выберите зону, куда его положить.",
+    "tilePlaced": "{text}, в зоне «{bucket}». Нажмите, чтобы забрать обратно.",
+    "tileLocked": "{text}, в зоне «{bucket}», верно",
+    "tileWrong": "{text}, в зоне «{bucket}», неверно",
+    "tileKey": "{text} относится к «{bucket}»",
+    "stateCorrect": "Верно",
+    "stateWrong": "Неверно",
+    "rule": "Правило",
+    "hint": "Подсказка",
+    "sendFailed": "Не удалось отправить размещение. Попробуйте ещё раз.",
+    "closedAlready": "Это задание уже завершено.",
+    "empty": {
+      "title": "Пока нечего сортировать",
+      "body": "Для задания нужны минимум две зоны и несколько элементов."
+    },
+    "done": {
+      "title": "Завершено",
+      "score": "{score} из {total} верно с первой проверки.",
+      "again": "Начать заново"
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Ответы на вопрос {n}",
     "answeredCount": "Отвечено {done} из {total} вопросов",

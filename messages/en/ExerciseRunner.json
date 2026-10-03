@@ -83,6 +83,43 @@
       "again": "Start over"
     }
   },
+  "sortIntoBuckets": {
+    "check": "Check",
+    "checkCount": "Check ({n})",
+    "checking": "Checking…",
+    "retryWrong": "Try the wrong ones again ({n})",
+    "showKey": "Show the correct placement",
+    "finish": "Finish",
+    "attempt": "Attempt {n}",
+    "attemptOf": "Attempt {n} of {max}",
+    "score": "{correct} of {total} right",
+    "remaining": "{n} left",
+    "poolTitle": "Items",
+    "poolDrop": "Drop here to take it back",
+    "zoneLabel": "{label}, {n, plural, one {# item} other {# items}}",
+    "zoneIdle": "Drop items here",
+    "zoneTap": "Tap to drop here",
+    "selected": "{text} selected. Choose a zone to put it in.",
+    "tilePlaced": "{text}, in {bucket}. Press to take it back.",
+    "tileLocked": "{text}, in {bucket}, correct",
+    "tileWrong": "{text}, in {bucket}, wrong",
+    "tileKey": "{text}, belongs in {bucket}",
+    "stateCorrect": "Correct",
+    "stateWrong": "Wrong",
+    "rule": "Rule",
+    "hint": "Hint",
+    "sendFailed": "The placements could not be sent. Try again.",
+    "closedAlready": "This board is already finished.",
+    "empty": {
+      "title": "Nothing to sort yet",
+      "body": "The exercise needs at least two zones and some items."
+    },
+    "done": {
+      "title": "Finished",
+      "score": "{score} of {total} right on the first check.",
+      "again": "Start over"
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Answers for question {n}",
     "answeredCount": "{done} of {total} questions answered",
