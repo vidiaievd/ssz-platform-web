@@ -7,6 +7,7 @@ import type {
 } from '@/lib/shared-kernel/match-pairs';
 import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
 import type { StudentProjection as MultipleChoiceGroupProjection } from '@/lib/shared-kernel/multiple-choice-group';
+import type { StudentProjection as SortIntoBucketsProjection } from '@/lib/shared-kernel/sort-into-buckets';
 import type { StudentResult as ShortAnswerResult } from '@/lib/shared-kernel/short-answer';
 import type { StudentResult as SentenceSchemaResult } from '@/lib/shared-kernel/sentence-schema';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
@@ -333,6 +334,67 @@ export interface MultipleChoiceGroupSubmitDetails {
   closed: boolean;
   locked: string[];
   items: MultipleChoiceGroupItemResult[];
+}
+
+/** What a `sort_into_buckets` attempt is dealt: the board, with no key on it (plan 66 §3.4). */
+export type SortIntoBucketsAttemptContent = SortIntoBucketsProjection;
+
+/**
+ * What one check of the board carries up — plan 66 §3.1.
+ *
+ * `placements` is the whole board every time; an item left in the pool is simply absent.
+ * `reveal` is «Vis riktig plassering», which closes the board and records the attempt as
+ * failed. Which check this is, which tiles are locked and where each tile stood on the
+ * first check are the attempt's facts and the engine writes its own — none is sent.
+ */
+export interface SortIntoBucketsSubmittedAnswer {
+  placements: { itemId: string; bucketId: string }[];
+  reveal?: boolean;
+}
+
+/**
+ * One tile's outcome in a check.
+ *
+ * `explanation` is the engine's resolved note on why the *chosen* zone is wrong.
+ * `correctBucketId` and `why` arrive only once the board is closed and the author left the
+ * key visible — never beside a tile that still has a retry.
+ */
+export interface SortIntoBucketsItemResult {
+  itemId: string;
+  /** The zone the tile is in now; `null` when it was left in the pool. */
+  chosenBucketId: string | null;
+  /** Right now. */
+  correct: boolean;
+  /** Right on the first check — what the score counts. */
+  firstCorrect: boolean;
+  firstAnswer: string | null;
+  explanation?: string;
+  correctBucketId?: string;
+  why?: string;
+}
+
+/**
+ * `details` when the template is `sort_into_buckets` — the board after a check.
+ *
+ * `closed` and `locked` are the two the runner may not second-guess, as for
+ * `multiple_choice_group`: a closed board refuses a further check whatever budget is left,
+ * and `locked` survives a retry, so it is held apart from the verdict.
+ */
+export interface SortIntoBucketsSubmitDetails {
+  totalItems: number;
+  /** Right on the first check. */
+  passedItems: number;
+  /** Right now — the summary line «K av T riktige». */
+  correctNow: number;
+  /** 1-based: which check of the board this was. */
+  attempt: number;
+  /** Checks left after this one; `null` is unlimited. */
+  checksLeft: number | null;
+  closed: boolean;
+  revealed: boolean;
+  locked: string[];
+  rules: { bucketId: string; rule: string }[];
+  items: SortIntoBucketsItemResult[];
 }
 
 /** Check one sentence of a `sentence_schema` set, or ask to be shown it. */

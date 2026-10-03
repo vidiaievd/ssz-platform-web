@@ -173,3 +173,5 @@ export {
   type GapVerdict,
   type WordBankGapFillBodyProps,
 } from './wordbank-gapfill-body';
+
+export { readSortIntoBucketsProjection } from './sort-into-buckets-projection';
