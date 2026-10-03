@@ -6,6 +6,14 @@ import { enMessages } from '@/lib/i18n/messages';
 import { RECIPE_PRESETS } from '@/lib/shared-kernel/skills';
 import type { WorkspaceCoverageRecipe } from '../../types';
 
+// The real module pulls in next/navigation, which jsdom tests cannot load.
+vi.mock('@/lib/i18n/navigation', () => ({
+  Link: ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 vi.mock('sonner', () => ({
   toast: Object.assign(vi.fn(), { dismiss: vi.fn(), success: vi.fn() }),
 }));
