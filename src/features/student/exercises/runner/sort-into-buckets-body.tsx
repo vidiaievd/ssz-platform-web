@@ -428,7 +428,7 @@ export function SortIntoBucketsBody({
       style={
         wide
           ? undefined
-          : { background: 'var(--ssz-bg-page)', borderColor: 'var(--ssz-border-default)' }
+          : { background: 'var(--ssz-bg-surface)', borderColor: 'var(--ssz-border-default)' }
       }
     >
       {pool.length > 0 && (
