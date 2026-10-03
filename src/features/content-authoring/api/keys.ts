@@ -13,6 +13,9 @@ export const authoringKeys = keyFactory('authoring', {
   coverageAll: () => ['coverage'] as const,
   atomCoverage: (id: string, version: string) => ['atom-coverage', id, version] as const,
   coverageRecipe: (id: string) => ['coverage-recipe', id] as const,
+  /** Prefix of every course recipe — each carries the workspace's as `inherited`. */
+  coverageRecipeAll: () => ['coverage-recipe'] as const,
+  workspaceRecipe: (schoolId: string) => ['workspace-recipe', schoolId] as const,
   courseResult: (id: string) => ['course-result', id] as const,
   exerciseAxes: (id: string) => ['exercise-axes', id] as const,
   lessons: (containerId: string) => ['lessons', containerId] as const,

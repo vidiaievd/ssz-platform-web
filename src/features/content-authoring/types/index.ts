@@ -198,6 +198,14 @@ export interface CourseCoverageRecipe {
   overridden: boolean;
 }
 
+/** A workspace's recipe — the standard its courses inherit (plan 65). */
+export interface WorkspaceCoverageRecipe {
+  schoolId: string;
+  /** Null: never set, nothing is checked. `{ rules: [] }`: set to ask for nothing. */
+  recipe: Recipe | null;
+  updatedAt: string | null;
+}
+
 export interface CoverageModuleReport {
   containerId: string;
   title: string;
