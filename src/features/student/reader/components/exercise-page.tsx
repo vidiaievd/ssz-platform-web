@@ -10,6 +10,7 @@ import { ErrorCorrectionSolver } from './error-correction-solver';
 import { GapFillSolver } from './gap-fill-solver';
 import { MatchPairsSolver } from './match-pairs-solver';
 import { MultipleChoiceGroupSolver } from './multiple-choice-group-solver';
+import { SortIntoBucketsSolver } from './sort-into-buckets-solver';
 import { MultipleChoiceSolver } from './multiple-choice-solver';
 import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
@@ -744,6 +745,10 @@ const SERVER_SOLVERS: Record<
   // answers could not make honestly (plan 54 §3.2, §3.3). Only documents of the new form
   // arrive here; see `gradedOnServer`.
   multiple_choice_group: MultipleChoiceGroupSolver,
+  // Its key is which zone each tile belongs in — and the retry, the freeze on right tiles
+  // and the moment the key shows are all dosing, which a browser holding the key cannot do
+  // (plan 66 §3.1). Not in `CLIENT_GRADED_TEMPLATES`: the board is graded here from the start.
+  sort_into_buckets: SortIntoBucketsSolver,
 };
 
 /**
