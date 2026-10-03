@@ -65,7 +65,7 @@ export function RecipeCourses({
                   >
                     <Link
                       href={`${wsHref(schoolId, `content/${course.courseId}`)}?settings=1`}
-                      className="text-sm font-semibold text-(--ssz-color-primary-700) hover:underline"
+                      className="text-sm font-semibold text-(--ssz-text-accent) hover:underline"
                     >
                       {course.title}
                     </Link>

@@ -72,7 +72,7 @@ function AdviseRow({
     <li className="grid grid-cols-[28px_1fr] gap-x-3 gap-y-2 border-t border-(--ssz-border-default) py-3 first:border-t-0 first:pt-0 last:pb-0">
       <span
         aria-hidden
-        className="grid size-6 place-items-center rounded-full border border-(--ssz-color-warning-100) bg-(--ssz-color-warning-50) text-[11px] font-bold text-(--ssz-color-warning-700)"
+        className="grid size-6 place-items-center rounded-full border border-warning-100 bg-warning-50 text-[11px] font-bold text-warning-700 dark:border-warning-800 dark:bg-warning-900/40 dark:text-warning-300"
       >
         {number}
       </span>
@@ -138,7 +138,7 @@ function Remedies({
           type="button"
           onClick={onExpand}
           aria-label={t('moreLabel', { count: hidden, n: number })}
-          className="rounded-[4px] px-1 text-xs font-semibold text-(--ssz-color-primary-700) hover:underline focus-visible:ring-[3px] focus-visible:ring-(--ssz-color-primary-500)/30 focus-visible:outline-none"
+          className="rounded-[4px] px-1 text-xs font-semibold text-(--ssz-text-accent) hover:underline focus-visible:ring-[3px] focus-visible:ring-(--ssz-border-focus)/30 focus-visible:outline-none"
         >
           {t('more', { count: hidden })}
         </button>
@@ -146,7 +146,7 @@ function Remedies({
       {planned.map((name) => (
         <span key={name} className={`${CHIP} gap-1 border-dashed border-(--ssz-border-strong)`}>
           {name}
-          <span className="text-[9px] font-bold tracking-[0.06em] text-(--ssz-color-info-700) uppercase">
+          <span className="text-[9px] font-bold tracking-[0.06em] text-info-700 dark:text-info-300 uppercase">
             {t('soon')}
           </span>
         </span>

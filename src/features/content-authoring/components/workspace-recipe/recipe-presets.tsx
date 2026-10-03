@@ -64,9 +64,9 @@ export function RecipePresets({
                 }
               }}
               className={cn(
-                'relative flex flex-col items-start gap-1 rounded-[10px] border py-3 pr-3 pl-[38px] text-left focus-visible:ring-[3px] focus-visible:ring-(--ssz-color-primary-500)/30 focus-visible:outline-none disabled:cursor-not-allowed',
+                'relative flex flex-col items-start gap-1 rounded-[10px] border py-3 pr-3 pl-[38px] text-left focus-visible:ring-[3px] focus-visible:ring-(--ssz-border-focus)/30 focus-visible:outline-none disabled:cursor-not-allowed',
                 on
-                  ? 'border-(--ssz-color-primary-600) bg-(--ssz-color-primary-50) shadow-[inset_0_0_0_1px_var(--ssz-color-primary-600)]'
+                  ? 'border-(--ssz-border-focus) bg-(--ssz-bg-accent) shadow-[inset_0_0_0_1px_var(--ssz-border-focus)]'
                   : 'border-(--ssz-border-default) enabled:hover:border-(--ssz-border-strong)',
               )}
             >
@@ -74,10 +74,10 @@ export function RecipePresets({
                 aria-hidden
                 className={cn(
                   'absolute top-[14px] left-3 grid size-4 place-items-center rounded-full border-[1.5px]',
-                  on ? 'border-(--ssz-color-primary-600)' : 'border-(--ssz-border-strong)',
+                  on ? 'border-(--ssz-border-focus)' : 'border-(--ssz-border-strong)',
                 )}
               >
-                {on && <span className="size-2 rounded-full bg-(--ssz-color-primary-600)" />}
+                {on && <span className="size-2 rounded-full bg-(--ssz-bg-brand-solid)" />}
               </span>
               <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
                 {tName(id)}

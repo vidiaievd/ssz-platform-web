@@ -228,8 +228,8 @@ function RecipeEditor({
   return (
     <>
       {!editable && (
-        <div className="flex gap-3 rounded-[10px] border border-(--ssz-color-info-100) bg-(--ssz-color-info-50) px-4 py-3 text-sm">
-          <Info className="mt-0.5 size-4 shrink-0 text-(--ssz-color-info-700)" aria-hidden />
+        <div className="flex gap-3 rounded-[10px] border border-info-100 bg-info-50 dark:border-info-800 dark:bg-info-900/40 px-4 py-3 text-sm">
+          <Info className="mt-0.5 size-4 shrink-0 text-info-700 dark:text-info-300" aria-hidden />
           <div>
             <p className="font-semibold">{t('readonly.title')}</p>
             <p className="text-(--ssz-text-secondary)">{t('readonly.who')}</p>
@@ -261,7 +261,7 @@ function RecipeEditor({
               <span
                 className={
                   rules.length >= MAX_RECIPE_RULES
-                    ? 'font-semibold text-(--ssz-color-warning-700)'
+                    ? 'font-semibold text-warning-700 dark:text-warning-300'
                     : undefined
                 }
               >
@@ -306,7 +306,7 @@ function RecipeEditor({
                 type="button"
                 id={ADD_RULE_ID}
                 onClick={addRule}
-                className="flex h-10 w-full items-center justify-center gap-2 rounded-[10px] border border-dashed border-(--ssz-border-strong) text-sm font-semibold text-(--ssz-text-secondary) hover:border-(--ssz-color-primary-300) hover:bg-(--ssz-color-primary-50) hover:text-(--ssz-color-primary-700) focus-visible:ring-[3px] focus-visible:ring-(--ssz-color-primary-500)/30 focus-visible:outline-none pointer-coarse:h-11"
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-[10px] border border-dashed border-(--ssz-border-strong) text-sm font-semibold text-(--ssz-text-secondary) hover:border-(--ssz-border-focus)/50 hover:bg-(--ssz-bg-accent) hover:text-(--ssz-text-accent) focus-visible:ring-[3px] focus-visible:ring-(--ssz-border-focus)/30 focus-visible:outline-none pointer-coarse:h-11"
               >
                 <Plus className="size-4" aria-hidden />
                 {t('rules.add')}
@@ -376,7 +376,10 @@ function EmptyRules({ never }: { never: boolean }) {
 function RecipeSkeleton() {
   const t = useTranslations('Settings.recipe');
   return (
-    <div aria-busy="true" className="flex flex-col gap-5">
+    <div
+      aria-busy="true"
+      className="flex flex-col gap-5 motion-reduce:[&_[data-slot=skeleton]]:animate-none"
+    >
       <span className="sr-only" role="status">
         {t('loading')}
       </span>

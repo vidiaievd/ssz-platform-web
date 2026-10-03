@@ -21,8 +21,8 @@ import {
 } from '../../lib/recipe-draft';
 
 const FIELD =
-  'h-9 rounded-md border border-(--ssz-border-default) bg-(--ssz-bg-base) px-3 text-sm outline-none focus-visible:border-(--ssz-color-primary-600) focus-visible:ring-[3px] focus-visible:ring-(--ssz-color-primary-500)/30 disabled:cursor-not-allowed disabled:text-(--ssz-text-muted)';
-const FIELD_ERROR = 'border-(--ssz-color-error-500) bg-(--ssz-color-error-50)';
+  'h-9 rounded-md border border-(--ssz-border-default) bg-(--ssz-bg-base) px-3 text-sm outline-none focus-visible:border-(--ssz-border-focus) focus-visible:ring-[3px] focus-visible:ring-(--ssz-border-focus)/30 disabled:cursor-not-allowed disabled:text-(--ssz-text-muted)';
+const FIELD_ERROR = 'border-(--ssz-color-error-500) bg-error-50 dark:bg-error-900/40';
 
 /** Element ids a parent may move focus to — after Add rule, and after a delete. */
 export const ruleAxisId = (rule: DraftRule) => `${rule.id}-axis`;
@@ -72,7 +72,7 @@ export function RecipeRuleCard({
         broken
           ? 'border-(--ssz-color-error-500) shadow-[inset_3px_0_0_var(--ssz-color-error-500)]'
           : change === 'new'
-            ? 'border-(--ssz-color-primary-300)'
+            ? 'border-(--ssz-border-focus)/50'
             : 'border-(--ssz-border-default)',
       )}
     >
@@ -84,7 +84,7 @@ export function RecipeRuleCard({
           {t('heading', { n: number })}
         </h4>
         {change && (
-          <span className="rounded-full bg-(--ssz-color-primary-50) px-2 py-0.5 text-[10px] font-bold tracking-[0.06em] text-(--ssz-color-primary-700) uppercase">
+          <span className="rounded-full bg-(--ssz-bg-accent) px-2 py-0.5 text-[10px] font-bold tracking-[0.06em] text-(--ssz-text-accent) uppercase">
             {t(change)}
           </span>
         )}
@@ -95,7 +95,7 @@ export function RecipeRuleCard({
             id={ruleDeleteId(rule)}
             aria-label={t('delete', { n: number })}
             onClick={onDelete}
-            className="grid size-8 place-items-center rounded-md text-(--ssz-text-muted) hover:bg-(--ssz-color-error-50) hover:text-(--ssz-color-error-700) focus-visible:ring-[3px] focus-visible:ring-(--ssz-color-primary-500)/30 focus-visible:outline-none"
+            className="grid size-8 place-items-center rounded-md text-(--ssz-text-muted) hover:bg-error-50 hover:text-error-700 dark:hover:bg-error-900/40 dark:hover:text-error-400 focus-visible:ring-[3px] focus-visible:ring-(--ssz-border-focus)/30 focus-visible:outline-none"
           >
             <Trash2 className="size-4" aria-hidden />
           </button>
@@ -175,11 +175,11 @@ export function RecipeRuleCard({
                   disabled={disabled}
                   onClick={() => onChange?.(toggleValue(rule, value))}
                   className={cn(
-                    'inline-flex min-h-8 items-center gap-2 rounded-md border py-1 pr-3 pl-2 text-sm font-medium focus-visible:ring-[3px] focus-visible:ring-(--ssz-color-primary-500)/30 focus-visible:outline-none disabled:cursor-not-allowed pointer-coarse:min-h-11',
+                    'inline-flex min-h-8 items-center gap-2 rounded-md border py-1 pr-3 pl-2 text-sm font-medium focus-visible:ring-[3px] focus-visible:ring-(--ssz-border-focus)/30 focus-visible:outline-none disabled:cursor-not-allowed pointer-coarse:min-h-11',
                     on
-                      ? 'border-(--ssz-color-primary-600) bg-(--ssz-color-primary-50) text-(--ssz-color-primary-700)'
+                      ? 'border-(--ssz-border-focus) bg-(--ssz-bg-accent) text-(--ssz-text-accent)'
                       : errorOn('values')
-                        ? 'border-(--ssz-color-error-100)'
+                        ? 'border-error-100 dark:border-error-800'
                         : 'border-(--ssz-border-default)',
                   )}
                 >
@@ -188,7 +188,7 @@ export function RecipeRuleCard({
                     className={cn(
                       'grid size-4 place-items-center rounded-[4px] border-[1.5px]',
                       on
-                        ? 'border-(--ssz-color-primary-600) bg-(--ssz-color-primary-600) text-white'
+                        ? 'border-(--ssz-bg-brand-solid) bg-(--ssz-bg-brand-solid) text-(--ssz-text-on-brand)'
                         : 'border-(--ssz-border-strong)',
                     )}
                   >
@@ -212,9 +212,9 @@ export function RecipeRuleCard({
             disabled={disabled}
             onClick={() => onChange?.({ ...rule, negate: !rule.negate })}
             className={cn(
-              'relative h-5 w-9 shrink-0 rounded-full border transition-colors duration-180 ease-[cubic-bezier(.16,1,.3,1)] focus-visible:ring-[3px] focus-visible:ring-(--ssz-color-primary-500)/30 focus-visible:outline-none disabled:cursor-not-allowed',
+              'relative h-5 w-9 shrink-0 rounded-full border transition-colors duration-180 ease-[cubic-bezier(.16,1,.3,1)] focus-visible:ring-[3px] focus-visible:ring-(--ssz-border-focus)/30 focus-visible:outline-none disabled:cursor-not-allowed',
               rule.negate
-                ? 'border-(--ssz-color-primary-600) bg-(--ssz-color-primary-600)'
+                ? 'border-(--ssz-bg-brand-solid) bg-(--ssz-bg-brand-solid)'
                 : 'border-(--ssz-border-strong) bg-(--ssz-bg-muted)',
             )}
           >
@@ -244,7 +244,7 @@ export function RecipeRuleCard({
             .map((message) => (
               <p
                 key={message}
-                className="flex items-center gap-1.5 text-xs font-semibold text-(--ssz-color-error-700)"
+                className="flex items-center gap-1.5 text-xs font-semibold text-error-700 dark:text-error-400"
               >
                 <AlertCircle className="size-3.5 shrink-0" aria-hidden />
                 {message}
@@ -293,7 +293,7 @@ export function RulePhrase({ rule }: { rule: DraftRule }) {
               values.length > 0 ? (
                 or.format(values)
               ) : (
-                <em className="text-(--ssz-color-error-700)">{t('pick')}</em>
+                <em className="text-error-700 dark:text-error-400">{t('pick')}</em>
               ),
           }),
       })}

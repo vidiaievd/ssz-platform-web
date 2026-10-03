@@ -66,7 +66,7 @@ export function RecipeActionBar({
         <p
           className={cn(
             'flex items-center gap-2 text-sm font-semibold',
-            line.tone === 'error' && 'text-(--ssz-color-error-700)',
+            line.tone === 'error' && 'text-error-700 dark:text-error-400',
           )}
         >
           <span
@@ -74,7 +74,7 @@ export function RecipeActionBar({
             className={cn(
               'size-2 shrink-0 rounded-full',
               line.tone === 'neutral' && 'bg-(--ssz-border-strong)',
-              line.tone === 'primary' && 'bg-(--ssz-color-primary-600)',
+              line.tone === 'primary' && 'bg-(--ssz-bg-brand-solid)',
               line.tone === 'success' && 'bg-(--ssz-color-success-500)',
               line.tone === 'error' && 'bg-(--ssz-color-error-500)',
             )}
@@ -91,7 +91,7 @@ export function RecipeActionBar({
           type="button"
           onClick={onDiscard}
           disabled={saving || !dirty}
-          className="h-9 flex-1 rounded-md px-4 text-sm font-semibold hover:bg-(--ssz-bg-subtle) focus-visible:ring-[3px] focus-visible:ring-(--ssz-color-primary-500)/30 focus-visible:outline-none disabled:cursor-not-allowed disabled:text-(--ssz-text-muted) disabled:hover:bg-transparent sm:flex-none pointer-coarse:h-11"
+          className="h-9 flex-1 rounded-md px-4 text-sm font-semibold hover:bg-(--ssz-bg-subtle) focus-visible:ring-[3px] focus-visible:ring-(--ssz-border-focus)/30 focus-visible:outline-none disabled:cursor-not-allowed disabled:text-(--ssz-text-muted) disabled:hover:bg-transparent sm:flex-none pointer-coarse:h-11"
         >
           {t('discard')}
         </button>
@@ -101,7 +101,7 @@ export function RecipeActionBar({
           disabled={!canSave}
           aria-busy={saving || undefined}
           aria-describedby={captionId}
-          className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-md bg-(--ssz-color-primary-600) px-4 text-sm font-semibold text-(--ssz-text-inverse) hover:bg-(--ssz-color-primary-700) focus-visible:ring-[3px] focus-visible:ring-(--ssz-color-primary-500)/30 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-(--ssz-bg-subtle) disabled:text-(--ssz-text-muted) sm:flex-none pointer-coarse:h-11"
+          className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-md bg-(--ssz-bg-brand-solid) px-4 text-sm font-semibold text-(--ssz-text-on-brand) hover:bg-(--ssz-bg-brand-solid)/90 focus-visible:ring-[3px] focus-visible:ring-(--ssz-border-focus)/30 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-(--ssz-bg-subtle) disabled:text-(--ssz-text-muted) sm:flex-none pointer-coarse:h-11"
         >
           {saving && (
             <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />

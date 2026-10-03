@@ -27,7 +27,7 @@ export default async function SchoolSettingsLayout({ children, params }: Props) 
     ...(page === 'recipe'
       ? {
           badge: (
-            <span className="text-[10px] font-bold tracking-[0.06em] text-(--ssz-color-primary-700) uppercase">
+            <span className="text-[10px] font-bold tracking-[0.06em] text-(--ssz-text-accent) uppercase">
               {t('nav.new')}
             </span>
           ),
