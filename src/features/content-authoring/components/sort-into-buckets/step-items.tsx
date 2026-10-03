@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input, Textarea } from '@/components/ui/input';
+import { withSegment, type AudioDraft } from '@/lib/shared-kernel/audio';
 import {
   balance,
   buckets,
@@ -31,7 +32,9 @@ import {
   type SortIntoBucketsContent,
 } from '@/lib/shared-kernel/sort-into-buckets';
 
+import { AudioSegmentField } from '../audio';
 import { ReorderWithAnnouncer } from '../lesson-reorder';
+import { ItemAudioSlot } from '../translate/item-audio-slot';
 import {
   addItem,
   applyBulkPaste,
@@ -48,6 +51,12 @@ const READING = 'var(--ssz-font-reading)';
 export interface StepItemsProps<T extends SortIntoBucketsContent> {
   exercise: T;
   onChange: (next: T) => void;
+  /**
+   * The audio layer's draft, when the host builder has one. Absent, the disclosure has no
+   * audio row — the step stays usable on a bare content document.
+   */
+  audio?: AudioDraft;
+  onAudioChange?: (next: AudioDraft) => void;
 }
 
 /**
@@ -64,12 +73,14 @@ export interface StepItemsProps<T extends SortIntoBucketsContent> {
  * and the kernel's issues — the amber and the red outline are the `SB_SKEWED` and
  * `SB_BUCKET_EMPTY` findings drawn, not a second opinion about the same thing.
  *
- * What is **not** here yet: the per-item audio row of the disclosure. It belongs to the
- * audio layer and arrives with it (plan 66 phase 7).
+ * The disclosure ends with the item's audio row once the layer is on (AC-D3): a recording
+ * of its own under `source: 'items'`, or its slice of the one clip under timecodes.
  */
 export function StepItems<T extends SortIntoBucketsContent>({
   exercise,
   onChange,
+  audio,
+  onAudioChange,
 }: StepItemsProps<T>) {
   const t = useTranslations('Authoring.sortIntoBuckets');
   const describeIssue = useIssueCopy(exercise);
@@ -89,6 +100,10 @@ export function StepItems<T extends SortIntoBucketsContent>({
     found.filter((issue) => 'bucketId' in issue && issue.bucketId === id);
   const general = found.filter((issue) => !('itemId' in issue) && !('bucketId' in issue));
   const bucketLevel = found.filter((issue) => 'bucketId' in issue);
+
+  const layer = audio?.audio.enabled === true && onAudioChange !== undefined ? audio : null;
+  const perItem = layer?.audio.source === 'items';
+  const timecodes = layer !== null && !perItem && layer.audio.useSegments;
 
   const nameOf = (label: string) => (label.trim() === '' ? t('step2.unnamedBucket') : label);
 
@@ -311,6 +326,32 @@ export function StepItems<T extends SortIntoBucketsContent>({
                       }
                     />
                   </div>
+
+                  {layer !== null && onAudioChange !== undefined && (
+                    <div className="flex flex-col gap-1">
+                      {perItem && (
+                        <ItemAudioSlot
+                          label={t('step2.audioLabel')}
+                          mediaId={item.mediaId}
+                          onChange={(mediaId) => onChange(setItem(exercise, item.id, { mediaId }))}
+                        />
+                      )}
+                      {timecodes && (
+                        <>
+                          <p className="text-xs font-medium">{t('step2.audioLabel')}</p>
+                          <AudioSegmentField
+                            segment={layer.segments[item.id] ?? null}
+                            onChange={(segment) =>
+                              onAudioChange(withSegment(layer, item.id, segment))
+                            }
+                          />
+                        </>
+                      )}
+                      {!perItem && !timecodes && (
+                        <p className="text-xs text-muted-foreground">{t('step2.audioWhole')}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
