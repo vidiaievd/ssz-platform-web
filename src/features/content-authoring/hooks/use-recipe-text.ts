@@ -72,5 +72,5 @@ export function useRecipeText() {
       : t('recipe.remedy.types', { types });
   }
 
-  return { rule, remedies };
+  return { rule, remedies, valueLabel };
 }

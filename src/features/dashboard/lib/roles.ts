@@ -27,7 +27,8 @@ const ALL_NAV: NavId[] = [
 
 // teacher can see their own cohorts + timetable via Groups
 const TEACHER_NAV: NavId[] = ['dashboard', 'courses', 'groups', 'students'];
-const EDITOR_NAV: NavId[] = ['courses', 'moderation'];
+// settings: the lesson recipe is the one page there an editor reaches (plan 65)
+const EDITOR_NAV: NavId[] = ['courses', 'moderation', 'settings'];
 
 export function navGating(role: DashboardRole): Record<NavId, 'enabled' | 'locked'> {
   const enabled = new Set<NavId>(

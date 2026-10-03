@@ -1,7 +1,6 @@
-import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
+import { requireSettingsPage } from '@/features/workspaces/api/require-settings-page';
 import { SlaSettings } from '@/features/review/components/settings/sla-settings';
 
 type Props = {
@@ -26,8 +25,7 @@ export async function generateMetadata({ params }: Props) {
 export default async function SchoolReviewSettingsPage({ params }: Props) {
   const { workspaceId } = await params;
 
-  const role = await getMySchoolRole(workspaceId);
-  if (role === null) notFound();
+  const { myRole: role } = await requireSettingsPage(workspaceId, 'review');
 
   const t = await getTranslations('Review.settings');
 

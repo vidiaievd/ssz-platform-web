@@ -1,6 +1,12 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import { requireSettingsPage } from '@/features/workspaces/api/require-settings-page';
 
-export default function SchoolNotificationsSettingsPage() {
+type Props = { params: Promise<{ workspaceId: string }> };
+
+export default async function SchoolNotificationsSettingsPage({ params }: Props) {
+  const { workspaceId } = await params;
+  await requireSettingsPage(workspaceId, 'notifications');
+
   return (
     <div className="p-6 md:p-8 space-y-4">
       <h1 className="text-2xl font-semibold">Notifications</h1>

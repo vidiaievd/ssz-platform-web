@@ -4,7 +4,9 @@
     "account": "Account",
     "notifications": "Notifications",
     "review": "Review response time",
-    "progress": "What students see"
+    "progress": "What students see",
+    "recipe": "Lesson recipe",
+    "new": "New"
   },
   "progress": {
     "eyebrow": "School",
@@ -19,5 +21,130 @@
       "onHint": "Each learner sees one sentence — “you are around the middle of your group”. Never a rank, a percentile, a classmate's result, or the group's median.",
       "offHint": "Learners are told nothing about the group. They still see what is worth working on next."
     }
+  },
+  "recipe": {
+    "eyebrow": "Teaching standards",
+    "title": "Lesson recipe",
+    "lead1": "{kind, select, solo {A lesson recipe is your teaching standard: a short list of rules about what every lesson should contain. It applies to every lesson in all your courses. Any course can switch to its own recipe, or to none, in its settings.} other {A lesson recipe is your school’s teaching standard: a short list of rules about what every lesson should contain. It applies to every lesson in every course of this workspace. Any course can switch to its own recipe, or to none, in its settings.}}",
+    "lead2": "The recipe never blocks publishing. When a lesson misses a rule, its author sees an amber dot <dot></dot> on the lesson in the course tree and a line in the coverage report.",
+    "loading": "Loading the lesson recipe…",
+    "failed": "We could not load the lesson recipe.",
+    "readonly": {
+      "title": "View only. Owners and content admins can change the lesson recipe.",
+      "who": "Ask an owner or a content admin if a rule should change."
+    },
+    "card": {
+      "title": "Your recipe",
+      "metaSaved": "Last saved {date}",
+      "metaNever": "Not set yet"
+    },
+    "never": {
+      "title": "{kind, select, solo {No recipe yet, so lessons in your courses are not checked.} other {No recipe yet, so lessons in this workspace are not checked.}}",
+      "body": "Pick a preset to start. You can change every rule before saving, and nothing is checked until you save."
+    },
+    "presets": {
+      "title": "Start from a preset",
+      "note": "Picking a preset replaces the rules below. You can undo it, and nothing is saved until you press Save.",
+      "edited": "Edited",
+      "line": {
+        "balanced_a1_a2": "Something heard, something written, no more than 60% picked from a list.",
+        "exam_b1": "Reading, listening and writing every lesson; picking capped at 50%.",
+        "grammar_intensive": "Mostly grammar, retrieved rather than recognised."
+      }
+    },
+    "rules": {
+      "title": "Rules",
+      "count": "{n} of {max}",
+      "emptyNever": {
+        "title": "No rules yet",
+        "body": "Pick a preset above, or add a rule yourself. A recipe with no rules means lessons are not checked."
+      },
+      "empty": {
+        "title": "No rules: lessons will not be checked",
+        "body": "That is a valid choice. Saving turns the check off for every course that follows this recipe. Pick a preset or add a rule to turn it back on."
+      },
+      "add": "Add rule",
+      "limit": "<b>{max} of {max} rules.</b> That is the most a recipe can hold. Remove a rule to add another."
+    },
+    "rule": {
+      "heading": "Rule {n}",
+      "new": "New",
+      "edited": "Edited",
+      "countsBy": "Counts by",
+      "limit": "Limit",
+      "atLeast": "At least",
+      "atMost": "At most",
+      "unitItems": "items",
+      "unitShare": "% of items",
+      "not": "<b>Not</b> · everything except ticked",
+      "readsAs": "Reads as",
+      "phraseMin": "at least {n, plural, one {# item} other {# items}}",
+      "phraseMinBlank": "at least … items",
+      "phraseMax": "at most {n}% of items",
+      "blank": "…",
+      "target": "{axis}: <v></v>",
+      "targetNot": "{axis}: not <v></v>",
+      "phrase": "{bound} — <target></target>",
+      "pick": "pick a value",
+      "axisLabel": "Rule {n} — What the rule counts by",
+      "boundLabel": "Rule {n} — Limit type",
+      "amountMin": "Rule {n} — Number of items",
+      "amountShare": "Rule {n} — Share of items, percent",
+      "valuesSr": "— Rule {n} values",
+      "notLabel": "Rule {n} — Count everything except the ticked values",
+      "delete": "Delete rule {n}",
+      "hint": {
+        "input": "what the learner takes in",
+        "output": "what the learner produces",
+        "modality": "how the answer is found",
+        "skill": "which skill it trains",
+        "focus": "what it is about"
+      }
+    },
+    "err": {
+      "tickOne": "Tick at least one value.",
+      "shareRange": "Use a share from 0 to 99 %.",
+      "minOne": "Use 1 item or more.",
+      "rejected": "The server didn’t accept this rule. Change or delete it, then save again."
+    },
+    "advise": {
+      "title": "What this recipe will advise",
+      "sub": "When a lesson misses a rule, its author sees this in the tip on the amber dot.",
+      "closes": "Closes it:",
+      "keepsUnder": "Keeps it under:",
+      "more": "+{count} more",
+      "moreLabel": "Show {count} more exercise types for rule {n}",
+      "soon": "soon",
+      "recording": "or turn on a recording in an exercise",
+      "none": "No exercise type closes this yet.",
+      "fix": "Fix rule {n} to see what closes it.",
+      "previewLesson": "Lesson"
+    },
+    "bar": {
+      "clean": "No unsaved changes",
+      "nothing": "Nothing to save yet",
+      "dirty": "Unsaved changes",
+      "invalid": "{count, plural, one {Rule {list} needs a fix before you can save.} other {Rules {list} need a fix before you can save.}}",
+      "saving": "Saving…",
+      "saved": "Saved just now",
+      "error": "Couldn’t save. Check your connection and try again.",
+      "errorSub": "Your edits are still here. Nothing was changed in your courses.",
+      "rejected": "Not saved: the server didn’t accept rule {n}.",
+      "rejectedAll": "Not saved: the server didn’t accept the recipe.",
+      "caption": "{kind, select, solo {Saving re-checks every lesson in all your courses right away. Nothing is blocked from publishing.} other {Saving re-checks every lesson in every course that follows this recipe right away. Nothing is blocked from publishing.}}",
+      "discard": "Discard changes",
+      "save": "Save recipe",
+      "retry": "Try again",
+      "readonly": "View only · Last saved {date}",
+      "readonlyNever": "View only · Not set yet"
+    },
+    "toast": {
+      "saved": "{kind, select, solo {Recipe saved. Lesson notes in your courses are up to date.} other {Recipe saved. Lesson notes in every course that follows it are up to date.}}",
+      "replaced": "Rules replaced with {preset}.",
+      "added": "{preset} added. Review the rules, then save.",
+      "deleted": "Rule {n} deleted.",
+      "undo": "Undo"
+    },
+    "leave": "You have unsaved changes to the recipe. Leave without saving?"
   }
 }

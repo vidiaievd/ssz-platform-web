@@ -4,7 +4,9 @@
     "account": "Konto",
     "notifications": "Varsler",
     "review": "Svartid for retting",
-    "progress": "Hva elevene ser"
+    "progress": "Hva elevene ser",
+    "recipe": "Timeoppskrift",
+    "new": "Ny"
   },
   "progress": {
     "eyebrow": "Skole",
@@ -19,5 +21,130 @@
       "onHint": "Hver elev ser én setning — «du ligger omtrent midt i gruppa». Aldri en plassering, en persentil, en medelevs resultat eller gruppas median.",
       "offHint": "Elevene får ikke vite noe om gruppa. De ser fortsatt hva det er verdt å jobbe med videre."
     }
+  },
+  "recipe": {
+    "eyebrow": "Undervisningsstandard",
+    "title": "Timeoppskrift",
+    "lead1": "{kind, select, solo {En timeoppskrift er din undervisningsstandard: en kort liste med regler for hva hver time bør inneholde. Den gjelder alle timer i alle kursene dine. Hvert kurs kan bytte til sin egen oppskrift, eller ingen, i innstillingene sine.} other {En timeoppskrift er skolens undervisningsstandard: en kort liste med regler for hva hver time bør inneholde. Den gjelder alle timer i alle kurs i dette arbeidsområdet. Hvert kurs kan bytte til sin egen oppskrift, eller ingen, i innstillingene sine.}}",
+    "lead2": "Oppskriften stopper aldri publisering. Når en time ikke oppfyller en regel, ser forfatteren en gul prikk <dot></dot> ved timen i kurstreet og en linje i dekningsrapporten.",
+    "loading": "Laster timeoppskriften …",
+    "failed": "Vi kunne ikke laste timeoppskriften.",
+    "readonly": {
+      "title": "Kun visning. Eiere og innholdsadministratorer kan endre timeoppskriften.",
+      "who": "Spør en eier eller en innholdsadministrator hvis en regel bør endres."
+    },
+    "card": {
+      "title": "Din oppskrift",
+      "metaSaved": "Sist lagret {date}",
+      "metaNever": "Ikke satt ennå"
+    },
+    "never": {
+      "title": "{kind, select, solo {Ingen oppskrift ennå, så timene i kursene dine blir ikke sjekket.} other {Ingen oppskrift ennå, så timene i dette arbeidsområdet blir ikke sjekket.}}",
+      "body": "Velg en mal for å begynne. Du kan endre hver regel før du lagrer, og ingenting sjekkes før du lagrer."
+    },
+    "presets": {
+      "title": "Start fra en mal",
+      "note": "Når du velger en mal, erstattes reglene nedenfor. Du kan angre, og ingenting lagres før du trykker Lagre.",
+      "edited": "Endret",
+      "line": {
+        "balanced_a1_a2": "Noe hørt, noe skrevet, høyst 60 % valgt fra en liste.",
+        "exam_b1": "Lesing, lytting og skriving hver time; valg fra liste høyst 50 %.",
+        "grammar_intensive": "Mest grammatikk, hentet fram fremfor gjenkjent."
+      }
+    },
+    "rules": {
+      "title": "Regler",
+      "count": "{n} av {max}",
+      "emptyNever": {
+        "title": "Ingen regler ennå",
+        "body": "Velg en mal ovenfor, eller legg til en regel selv. En oppskrift uten regler betyr at timene ikke sjekkes."
+      },
+      "empty": {
+        "title": "Ingen regler: timene blir ikke sjekket",
+        "body": "Det er et gyldig valg. Lagring slår av sjekken for alle kurs som følger denne oppskriften. Velg en mal eller legg til en regel for å slå den på igjen."
+      },
+      "add": "Legg til regel",
+      "limit": "<b>{max} av {max} regler.</b> Det er det meste en oppskrift kan ha. Fjern en regel for å legge til en ny."
+    },
+    "rule": {
+      "heading": "Regel {n}",
+      "new": "Ny",
+      "edited": "Endret",
+      "countsBy": "Teller etter",
+      "limit": "Grense",
+      "atLeast": "Minst",
+      "atMost": "Høyst",
+      "unitItems": "punkter",
+      "unitShare": "% av punktene",
+      "not": "<b>Ikke</b> · alt unntatt det avkryssede",
+      "readsAs": "Leses som",
+      "phraseMin": "minst {n, plural, one {# punkt} other {# punkter}}",
+      "phraseMinBlank": "minst … punkter",
+      "phraseMax": "høyst {n} % av punktene",
+      "blank": "…",
+      "target": "{axis}: <v></v>",
+      "targetNot": "{axis}: ikke <v></v>",
+      "phrase": "{bound} — <target></target>",
+      "pick": "velg en verdi",
+      "axisLabel": "Regel {n} — Hva regelen teller etter",
+      "boundLabel": "Regel {n} — Type grense",
+      "amountMin": "Regel {n} — Antall punkter",
+      "amountShare": "Regel {n} — Andel av punktene, prosent",
+      "valuesSr": "— verdier for regel {n}",
+      "notLabel": "Regel {n} — Tell alt unntatt de avkryssede verdiene",
+      "delete": "Slett regel {n}",
+      "hint": {
+        "input": "hva eleven tar inn",
+        "output": "hva eleven lager",
+        "modality": "hvordan svaret blir funnet",
+        "skill": "hvilken ferdighet den trener",
+        "focus": "hva den handler om"
+      }
+    },
+    "err": {
+      "tickOne": "Kryss av minst én verdi.",
+      "shareRange": "Bruk en andel fra 0 til 99 %.",
+      "minOne": "Bruk 1 punkt eller flere.",
+      "rejected": "Serveren godtok ikke denne regelen. Endre eller slett den, og lagre på nytt."
+    },
+    "advise": {
+      "title": "Hva denne oppskriften vil anbefale",
+      "sub": "Når en time ikke oppfyller en regel, ser forfatteren dette i tipset ved den gule prikken.",
+      "closes": "Løses med:",
+      "keepsUnder": "Holdes nede med:",
+      "more": "+{count} til",
+      "moreLabel": "Vis {count} flere oppgavetyper for regel {n}",
+      "soon": "snart",
+      "recording": "eller slå på et opptak i en oppgave",
+      "none": "Ingen oppgavetype løser dette ennå.",
+      "fix": "Rett regel {n} for å se hva som løser den.",
+      "previewLesson": "Time"
+    },
+    "bar": {
+      "clean": "Ingen ulagrede endringer",
+      "nothing": "Ingenting å lagre ennå",
+      "dirty": "Ulagrede endringer",
+      "invalid": "{count, plural, one {Regel {list} må rettes før du kan lagre.} other {Regel {list} må rettes før du kan lagre.}}",
+      "saving": "Lagrer …",
+      "saved": "Lagret akkurat nå",
+      "error": "Kunne ikke lagre. Sjekk tilkoblingen og prøv igjen.",
+      "errorSub": "Endringene dine er fortsatt her. Ingenting ble endret i kursene dine.",
+      "rejected": "Ikke lagret: serveren godtok ikke regel {n}.",
+      "rejectedAll": "Ikke lagret: serveren godtok ikke oppskriften.",
+      "caption": "{kind, select, solo {Lagring sjekker alle timer i alle kursene dine på nytt med en gang. Ingenting blir stoppet fra publisering.} other {Lagring sjekker alle timer i alle kurs som følger denne oppskriften på nytt med en gang. Ingenting blir stoppet fra publisering.}}",
+      "discard": "Forkast endringer",
+      "save": "Lagre oppskrift",
+      "retry": "Prøv igjen",
+      "readonly": "Kun visning · Sist lagret {date}",
+      "readonlyNever": "Kun visning · Ikke satt ennå"
+    },
+    "toast": {
+      "saved": "{kind, select, solo {Oppskriften er lagret. Merknadene i kursene dine er oppdatert.} other {Oppskriften er lagret. Merknadene i alle kurs som følger den er oppdatert.}}",
+      "replaced": "Reglene er erstattet med {preset}.",
+      "added": "{preset} lagt til. Se over reglene, og lagre.",
+      "deleted": "Regel {n} slettet.",
+      "undo": "Angre"
+    },
+    "leave": "Du har ulagrede endringer i oppskriften. Gå uten å lagre?"
   }
 }
