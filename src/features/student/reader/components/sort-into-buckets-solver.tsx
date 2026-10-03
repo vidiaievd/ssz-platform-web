@@ -21,6 +21,7 @@ import type {
   SortIntoBucketsSubmittedAnswer,
 } from '@/features/student/exercises/types/attempts';
 import type { StudentProjection } from '@/lib/shared-kernel/sort-into-buckets';
+import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 
 export interface SortIntoBucketsSolverProps {
@@ -78,6 +79,16 @@ export function SortIntoBucketsSolver({
   const start = useStartAttempt(exerciseId);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [projection, setProjection] = useState<StudentProjection | null>(null);
+  /**
+   * The document as the engine dealt it, kept for the audio layer alone: the projection
+   * is the kernel's own shape and has no room for a block that is not the template's
+   * (plan 56).
+   */
+  const [document, setDocument] = useState<unknown>(null);
+  /** What the clip said, once the engine hands it over with the closing verdict. */
+  const [transcript, setTranscript] = useState<{ transcript: string; translation: string } | null>(
+    null,
+  );
   /** Set when the board arrived with its answer key still on it — see the projection reader. */
   const [unusable, setUnusable] = useState(false);
 
@@ -109,6 +120,8 @@ export function SortIntoBucketsSolver({
 
           setAttemptId(data.attemptId);
           setProjection(board);
+          setDocument(data.exerciseContent);
+          setTranscript(null);
           setPlacements({});
           setPhase('answering');
           setVerdict(null);
@@ -129,6 +142,12 @@ export function SortIntoBucketsSolver({
     setUnusable(false);
     begin();
   }, [begin]);
+
+  /**
+   * The listening layer, mounted once for the whole board rather than per tile: the
+   * allowance, the gate and the playthrough belong to the exercise.
+   */
+  const audio = useExerciseAudio(document);
 
   if (!unusable && (start.isPending || (start.isSuccess && projection === null))) {
     return <LearningSkeleton variant="list" rows={4} />;
@@ -177,6 +196,7 @@ export function SortIntoBucketsSolver({
           setLocked(details.locked);
           setAttempt(details.attempt);
           setPhase('checked');
+          if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
 
           // Once, and on the first check: a corrected board is not evidence that the
           // distinction was understood, which is why the engine publishes its score event
@@ -268,6 +288,8 @@ export function SortIntoBucketsSolver({
         onFinish={() => setPhase('done')}
         onRestart={restart}
         accent={PRACTICE_ACCENT}
+        audio={audio}
+        audioTranscript={transcript}
       />
     </div>
   );

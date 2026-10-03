@@ -107,6 +107,7 @@
     "stateCorrect": "Riktig",
     "stateWrong": "Feil",
     "rule": "Regel",
+    "listen": "Lytt: {text}",
     "hint": "Hint",
     "sendFailed": "Plasseringene kunne ikke sendes. Prøv igjen.",
     "closedAlready": "Denne oppgaven er allerede avsluttet.",
@@ -512,7 +513,8 @@
       "lines": "linjene",
       "sentences": "setningene",
       "pieces": "brikkene",
-      "pairs": "parene"
+      "pairs": "parene",
+      "items": "elementene"
     },
     "lockNoteOwn": "Denne {item} åpner seg når du har hørt opptaket sitt."
   }

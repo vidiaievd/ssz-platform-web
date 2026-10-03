@@ -107,6 +107,7 @@
     "stateCorrect": "Correct",
     "stateWrong": "Wrong",
     "rule": "Rule",
+    "listen": "Listen: {text}",
     "hint": "Hint",
     "sendFailed": "The placements could not be sent. Try again.",
     "closedAlready": "This board is already finished.",
@@ -512,7 +513,8 @@
       "lines": "lines",
       "sentences": "sentences",
       "pieces": "pieces",
-      "pairs": "pairs"
+      "pairs": "pairs",
+      "items": "items"
     },
     "lockNoteOwn": "This {item} opens once you have heard its recording."
   }

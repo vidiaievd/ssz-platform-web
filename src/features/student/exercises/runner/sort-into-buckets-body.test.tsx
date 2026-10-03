@@ -6,6 +6,8 @@ import { useState, type ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { AUDIO_DEFAULT, type ExerciseAudio } from '@/lib/shared-kernel/audio';
+import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
 import type { ProjectedSettings, StudentProjection } from '@/lib/shared-kernel/sort-into-buckets';
 import type {
   SortIntoBucketsItemResult,
@@ -17,6 +19,13 @@ import {
   type SortIntoBucketsPhase,
   type SortIntoBucketsPlacements,
 } from './sort-into-buckets-body';
+
+// A tile's own recording is resolved through the media service; here it is a URL at once.
+vi.mock('@/features/media/api/use-assets', () => ({
+  useMediaAsset: (id: string | undefined) => ({
+    data: id === undefined ? undefined : { id, url: `https://cdn.test/${id}.mp3` },
+  }),
+}));
 
 function makeBoard(settings: Partial<ProjectedSettings> = {}): StudentProjection {
   return {
@@ -79,6 +88,7 @@ interface HarnessProps {
   onRetry?: () => void;
   onReveal?: () => void;
   onFinish?: () => void;
+  audio?: ExerciseAudioEngine;
 }
 
 /** Holds the placements the way the solver does, so a tap actually moves a tile. */
@@ -94,6 +104,7 @@ function Harness({
   onRetry = () => {},
   onReveal = () => {},
   onFinish = () => {},
+  audio,
 }: HarnessProps): ReactElement {
   const [placements, setPlacements] = useState(initial);
   return (
@@ -119,6 +130,7 @@ function Harness({
         onReveal={onReveal}
         onFinish={onFinish}
         accent="#000"
+        {...(audio === undefined ? {} : { audio })}
       />
     </NextIntlClientProvider>
   );
@@ -473,5 +485,96 @@ describe('SortIntoBucketsBody — accessibility (AC-X11)', () => {
   it.each(states)('has none on a desktop while %s', async (_name, props) => {
     const { container } = renderWide(<Harness {...props} />);
     expect(await violationsIn(container)).toEqual([]);
+  });
+});
+
+/*
+  The listening layer (plan 56) on a board: one player for the whole exercise, a gate that
+  reaches the tiles, and — for the tile in hand — its line of the clip or its own recording.
+*/
+describe('SortIntoBucketsBody — with audio', () => {
+  const audioBlock = (over: Record<string, unknown> = {}): ExerciseAudio => ({
+    ...AUDIO_DEFAULT,
+    enabled: true,
+    assetId: 'asset-1',
+    title: 'Ordliste',
+    duration: 40,
+    ...over,
+    settings: { ...AUDIO_DEFAULT.settings, ...((over['settings'] as object) ?? {}) },
+  });
+
+  const engine = (over: Partial<ExerciseAudioEngine> = {}): ExerciseAudioEngine => ({
+    audio: audioBlock(),
+    segments: {},
+    element: null,
+    src: 'https://cdn.test/asset-1.mp3',
+    state: { pos: 0, playing: false, plays: 0, completed: 0, range: null },
+    duration: 40,
+    playing: false,
+    plays: 0,
+    limit: 0,
+    exhausted: false,
+    heard: false,
+    gated: false,
+    canPlay: true,
+    failed: false,
+    loading: false,
+    speed: 1,
+    toggle: vi.fn(),
+    back: vi.fn(),
+    seekTo: vi.fn(),
+    playRange: vi.fn(),
+    cycleSpeed: vi.fn(),
+    reset: vi.fn(),
+    ...over,
+  });
+
+  it('puts a player above the board and leaves the tiles movable', async () => {
+    const user = userEvent.setup();
+    render(<Harness audio={engine()} />);
+
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    await user.click(tile('bok'));
+    expect(tile('bok')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('locks the tiles and the check until the clip has been heard', async () => {
+    const user = userEvent.setup();
+    render(<Harness audio={engine({ gated: true })} initial={{ i1: 'b-en' }} />);
+
+    expect(
+      screen.getByText('The items open once you have heard the clip through once.'),
+    ).toBeInTheDocument();
+    await user.click(tile('bil'));
+    expect(tile('bil')).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: /^Check/ })).toBeDisabled();
+  });
+
+  it('offers the line of the clip for the tile in hand', async () => {
+    const user = userEvent.setup();
+    const eng = engine({ segments: { i1: { start: 4, end: 7 } } });
+    render(<Harness audio={eng} />);
+
+    await user.click(tile('bok'));
+    await user.click(screen.getByRole('button', { name: /0:04/ }));
+    expect(eng.playRange).toHaveBeenCalledWith(4, 7);
+  });
+
+  it("offers the tile's own recording while it is in hand, and only then", async () => {
+    const user = userEvent.setup();
+    const board = makeBoard();
+    board.items = board.items.map((item) =>
+      item.id === 'i1' ? { ...item, mediaId: 'rec-bok' } : item,
+    );
+    render(<Harness board={board} audio={engine({ audio: audioBlock({ source: 'items' }) })} />);
+
+    expect(screen.queryByRole('button', { name: 'Listen: bok' })).not.toBeInTheDocument();
+    await user.click(tile('bok'));
+    expect(screen.getByRole('button', { name: 'Listen: bok' })).toBeEnabled();
+  });
+
+  it('is not there at all for a board without it', () => {
+    render(<Harness />);
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
   });
 });

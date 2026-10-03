@@ -1,10 +1,18 @@
 'use client';
 
-import { useState, type DragEvent, type ReactNode } from 'react';
-import { ArrowRight, Check, CircleAlert, RotateCcw, X } from 'lucide-react';
+import { useEffect, useRef, useState, type DragEvent, type ReactNode } from 'react';
+import { ArrowRight, Check, CircleAlert, Play, RotateCcw, Square, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { useContainerWidth } from '@/hooks';
+import { useMediaAsset } from '@/features/media/api/use-assets';
+import {
+  AudioLockNote,
+  AudioSegmentButton,
+  AudioTranscript,
+  ExerciseAudioPlayer,
+  type ExerciseAudioEngine,
+} from '@/features/student/exercises/audio';
 import type { StudentProjection } from '@/lib/shared-kernel/sort-into-buckets';
 import type {
   SortIntoBucketsItemResult,
@@ -82,6 +90,14 @@ export interface SortIntoBucketsBodyProps {
   onFinish: () => void;
   onRestart?: () => void;
   accent: string;
+  /**
+   * The listening layer, mounted once for the whole board by whoever owns the document
+   * (plan 56). Absent means an exercise with no audio, and the board is then exactly what
+   * it was without it.
+   */
+  audio?: ExerciseAudioEngine;
+  /** What the clip said, once the engine hands it over with the closing verdict. */
+  audioTranscript?: { transcript: string; translation: string } | null;
 }
 
 /**
@@ -122,8 +138,11 @@ export function SortIntoBucketsBody({
   onFinish,
   onRestart,
   accent,
+  audio,
+  audioTranscript = null,
 }: SortIntoBucketsBodyProps) {
   const t = useTranslations('ExerciseRunner.sortIntoBuckets');
+  const tAudio = useTranslations('ExerciseRunner.audio');
   const [root, width] = useContainerWidth();
   const [selected, setSelected] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
@@ -136,7 +155,11 @@ export function SortIntoBucketsBody({
     (verdict?.items ?? []).map((item) => [item.itemId, item]),
   );
   const closed = verdict?.closed === true;
-  const canEdit = interactive && phase !== 'done' && !closed && !sending;
+  const audioOn = audio !== undefined && audio.audio.enabled;
+  // A `gate` layout locks the tiles until the clip has been heard through once; it joins
+  // the one expression that already decides whether a tile may move, not a second lock.
+  const audioLocked = audioOn && audio.gated;
+  const canEdit = interactive && phase !== 'done' && !closed && !sending && !audioLocked;
   const bucketLabel = new Map(buckets.map((b) => [b.id, b.label]));
 
   /** Which state a tile is in, and which zone it is drawn in (`null` is the pool). */
@@ -469,7 +492,7 @@ export function SortIntoBucketsBody({
                 answer is still never a dead end, but the retry leads. */}
             <button
               type="button"
-              disabled={!interactive || sending || unchecked === 0}
+              disabled={!interactive || sending || audioLocked || unchecked === 0}
               onClick={onCheck}
               className={
                 verdict !== null && wrong > 0
@@ -527,7 +550,9 @@ export function SortIntoBucketsBody({
     </div>
   );
 
-  const selectedText = items.find((item) => item.id === selected)?.text;
+  const inHand = items.find((item) => item.id === selected);
+  const selectedText = inHand?.text;
+  const segment = inHand !== undefined && audioOn ? (audio.segments[inHand.id] ?? null) : null;
 
   return (
     <div
@@ -537,6 +562,29 @@ export function SortIntoBucketsBody({
       }}
     >
       {instruction !== undefined && instruction !== '' && <Instr>{instruction}</Instr>}
+
+      {audioOn && (
+        <div className="mb-4">
+          <ExerciseAudioPlayer eng={audio} interactive={interactive} />
+          {audioLocked && <AudioLockNote itemNoun={tAudio('itemNoun.items')} />}
+        </div>
+      )}
+
+      {/* The tile in hand may be heard before it is put down: its line of the clip, when
+          the author timed one, or its own recording under `source: 'items'`. Both free —
+          a fragment spends no listen (plan 56 BEHAVIOR §8). */}
+      {inHand !== undefined && (segment !== null || inHand.mediaId !== undefined) && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          {audioOn && <AudioSegmentButton eng={audio} segment={segment} disabled={audioLocked} />}
+          {inHand.mediaId !== undefined && (
+            <TileRecordingButton
+              key={inHand.id}
+              mediaId={inHand.mediaId}
+              label={t('listen', { text: inHand.text })}
+            />
+          )}
+        </div>
+      )}
 
       {/* The verdict, and what is in hand, spoken. The per-tile explanations are ordinary
           text under their zone and need no announcing of their own. */}
@@ -563,6 +611,79 @@ export function SortIntoBucketsBody({
         </div>
         {!wide && poolBlock}
       </div>
+
+      {audioOn && (
+        <div className="mt-4">
+          <AudioTranscript
+            audio={audio.audio}
+            revealed={audioTranscript !== null}
+            delivered={audioTranscript}
+          />
+        </div>
+      )}
     </div>
+  );
+}
+
+/**
+ * A tile's own recording, played on request.
+ *
+ * Mounted only for the tile in hand, so a board of twelve recorded tiles asks the media
+ * service for one URL rather than twelve. The URL is signed for an hour and resolved when
+ * the tile is picked up, never stored.
+ */
+function TileRecordingButton({ mediaId, label }: { mediaId: string; label: string }) {
+  const asset = useMediaAsset(mediaId);
+  const url = asset.data?.url;
+  const element = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+
+  // One element per URL. Mounted with a key per tile, so another tile picked up — or this
+  // one put down — releases whatever was playing.
+  useEffect(() => {
+    if (url === undefined) return;
+    const clip = new Audio(url);
+    const stop = () => setPlaying(false);
+    clip.addEventListener('ended', stop);
+    clip.addEventListener('error', stop);
+    element.current = clip;
+    return () => {
+      clip.pause();
+      clip.removeEventListener('ended', stop);
+      clip.removeEventListener('error', stop);
+      element.current = null;
+    };
+  }, [url]);
+
+  function toggle() {
+    const clip = element.current;
+    if (clip === null) return;
+    if (playing) {
+      clip.pause();
+      clip.currentTime = 0;
+      setPlaying(false);
+      return;
+    }
+    setPlaying(true);
+    void clip.play().catch(() => setPlaying(false));
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={url === undefined}
+      aria-label={label}
+      aria-pressed={playing}
+      className="inline-flex items-center justify-center rounded-full border disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+      style={{
+        width: TAP_MIN,
+        height: TAP_MIN,
+        borderColor: 'var(--ssz-border-default)',
+        color: 'var(--ssz-text-secondary)',
+      }}
+    >
+      {playing ? <Square size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+    </button>
   );
 }
