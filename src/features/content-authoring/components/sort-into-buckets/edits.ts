@@ -1,3 +1,4 @@
+import type { AudioDraft } from '@/lib/shared-kernel/audio';
 import {
   addBucket as addBucketTo,
   addItem as addItemTo,
@@ -14,8 +15,12 @@ import {
   updateItem as updateItemIn,
   type Bucket,
   type BucketPreset,
+  type Settings,
   type SortIntoBucketsContent,
   type SortItem,
+  setDefaultFeedback,
+  setOverride as setOverrideIn,
+  updateSettings,
 } from '@/lib/shared-kernel/sort-into-buckets';
 
 /**
@@ -29,6 +34,17 @@ import {
  * extras survive, which is also why none of these needs to know what they are.
  */
 type Doc = SortIntoBucketsContent;
+
+/**
+ * The document as the builder holds it: the kernel's content plus the row's token and the
+ * audio layer's draft. The envelope lives here, not in the kernel, because `updatedAt` is
+ * a fact about a Prisma row and the layer belongs to no template (plan 56).
+ */
+export interface SortIntoBucketsDocument extends SortIntoBucketsContent {
+  /** ISO. Doubles as the autosave concurrency token. */
+  updatedAt: string;
+  audio: AudioDraft;
+}
 
 function keep<T extends Doc>(ex: T, next: Doc): T {
   return { ...ex, ...next };
@@ -88,7 +104,7 @@ export function addItem<T extends Doc>(ex: T): T {
 export function setItem<T extends Doc>(
   ex: T,
   id: string,
-  patch: Partial<Pick<SortItem, 'text' | 'why'>>,
+  patch: Partial<Pick<SortItem, 'text' | 'why' | 'mediaId'>>,
 ): T {
   return keep(ex, updateItemIn(ex, id, patch));
 }
@@ -115,4 +131,26 @@ export function toggleAlso<T extends Doc>(ex: T, itemId: string, bucketId: strin
 
 export function applyBulkPaste<T extends Doc>(ex: T, text: string): T {
   return keep(ex, appendItems(ex, parseBulk(ex, text).items));
+}
+
+// ── Feedback and settings (steps 3 and 4) ───────────────────────────────────
+
+/** The required default: why a wrong bucket is wrong for this item. */
+export function setDefault<T extends Doc>(ex: T, itemId: string, text: string): T {
+  return keep(ex, setDefaultFeedback(ex, itemId, text));
+}
+
+/** A text for one (item × wrong bucket) cell; empty removes it. Both views write this. */
+export function setOverride<T extends Doc>(
+  ex: T,
+  itemId: string,
+  bucketId: string,
+  text: string,
+): T {
+  return keep(ex, setOverrideIn(ex, itemId, bucketId, text));
+}
+
+/** Step 4 touches `settings` and nothing else (AC-D4). */
+export function setSettings<T extends Doc>(ex: T, patch: Partial<Settings>): T {
+  return keep(ex, updateSettings(ex, patch));
 }
