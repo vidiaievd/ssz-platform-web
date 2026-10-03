@@ -55,14 +55,6 @@ const scored = (details: Record<string, unknown>, correct = false) => ({
   details,
 });
 
-const unplaced = (itemId: string) => ({
-  itemId,
-  chosenBucketId: null,
-  correct: false,
-  firstCorrect: false,
-  firstAnswer: null,
-});
-
 /** `bil` right, `bok` wrong in `en`, `sol` placed in `ei` and right. */
 const OPEN = {
   totalItems: 3,
