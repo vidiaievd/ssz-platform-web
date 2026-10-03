@@ -9,76 +9,43 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  FOCUSES,
-  INPUTS,
   MAX_RECIPE_RULES,
-  MODALITIES,
-  OUTPUTS,
   RECIPE_AXES,
   RECIPE_PRESET_IDS,
-  RECIPE_PRESETS,
-  SKILLS,
-  readRecipe,
   type RecipeAxis,
+  type RecipePresetId,
 } from '@/lib/shared-kernel/skills';
 
-import type { Recipe, RecipeRule } from '../types';
+import type { Recipe } from '../types';
 import {
   InvalidRecipeError,
   useCourseCoverageRecipe,
   useSaveCourseCoverageRecipe,
 } from '../api/use-coverage-recipe';
 import { useRecipeText } from '../hooks/use-recipe-text';
+import {
+  RECIPE_VALUES,
+  fromDraft,
+  newRule,
+  presetDraft,
+  setAxis,
+  setBound,
+  toDrafts,
+  toRecipe,
+  toggleValue,
+  type DraftBound,
+  type DraftRule,
+} from '../lib/recipe-draft';
 
 type Mode = 'inherit' | 'own' | 'none';
-
-/** A rule as the form holds it: the share in whole percent, the bound as a choice. */
-interface DraftRule {
-  axis: RecipeAxis;
-  values: string[];
-  negate: boolean;
-  bound: 'min' | 'maxShare';
-  amount: number;
-}
 
 interface Draft {
   mode: Mode;
   rules: DraftRule[];
 }
 
-/**
- * The values a rule may name on each axis. `unknown` is left out of modality: it is the
- * report admitting a gap, and a rule asking for more of it would be asking for less judgement.
- */
-const VALUES: Record<RecipeAxis, readonly string[]> = {
-  input: INPUTS,
-  output: OUTPUTS,
-  modality: MODALITIES.filter((m) => m !== 'unknown'),
-  skill: SKILLS,
-  focus: FOCUSES,
-};
-
 const SELECT =
   'rounded-[9px] border-[1.5px] border-border bg-(--ssz-bg-base) px-2 py-1.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:text-muted-foreground';
-
-function toDraft(rule: RecipeRule): DraftRule {
-  return {
-    axis: rule.axis,
-    values: [...rule.values],
-    negate: rule.negate === true,
-    bound: rule.min !== undefined ? 'min' : 'maxShare',
-    amount: rule.min !== undefined ? rule.min : Math.round((rule.maxShare ?? 0) * 100),
-  };
-}
-
-function fromDraft(rule: DraftRule): unknown {
-  return {
-    axis: rule.axis,
-    values: rule.values,
-    ...(rule.negate ? { negate: true } : {}),
-    ...(rule.bound === 'min' ? { min: rule.amount } : { maxShare: rule.amount / 100 }),
-  };
-}
 
 function modeOf(recipe: { overridden: boolean; recipe: Recipe }): Mode {
   if (!recipe.overridden) return 'inherit';
@@ -118,13 +85,13 @@ export function CourseRecipeField({
 
   const current: Draft = draft ?? {
     mode: modeOf(data),
-    rules: data.overridden ? data.recipe.rules.map(toDraft) : [],
+    rules: data.overridden ? toDrafts(data.recipe) : [],
   };
   const edit = (next: Partial<Draft>) => setDraft({ ...current, ...next });
-  const editRule = (index: number, next: Partial<DraftRule>) =>
-    edit({ rules: current.rules.map((rule, i) => (i === index ? { ...rule, ...next } : rule)) });
+  const editRule = (next: DraftRule) =>
+    edit({ rules: current.rules.map((rule) => (rule.id === next.id ? next : rule)) });
 
-  const own = current.mode === 'own' ? readRecipe({ rules: current.rules.map(fromDraft) }) : null;
+  const own = current.mode === 'own' ? toRecipe(current.rules) : null;
   const invalid = current.mode === 'own' && (own === null || own.rules.length === 0);
   const outgoing: Recipe | null =
     current.mode === 'inherit' ? null : current.mode === 'none' ? { rules: [] } : own;
@@ -146,7 +113,7 @@ export function CourseRecipeField({
     // changes nothing — the same rule the response time follows.
     const rules =
       mode === 'own' && current.rules.length === 0
-        ? (data.inherited ?? data.recipe).rules.map(toDraft)
+        ? toDrafts(data.inherited ?? data.recipe)
         : current.rules;
     edit({ mode, rules });
   };
@@ -201,8 +168,8 @@ export function CourseRecipeField({
               value=""
               disabled={!canEdit}
               onChange={(e) => {
-                const preset = RECIPE_PRESETS[e.target.value as keyof typeof RECIPE_PRESETS];
-                if (preset) edit({ rules: (preset.rules as readonly RecipeRule[]).map(toDraft) });
+                const id = e.target.value as RecipePresetId;
+                if (RECIPE_PRESET_IDS.includes(id)) edit({ rules: presetDraft(id) });
               }}
             >
               <option value="">{t('presetPlaceholder')}</option>
@@ -217,12 +184,12 @@ export function CourseRecipeField({
           <ol className="flex flex-col gap-2.5">
             {current.rules.map((rule, index) => (
               <RuleRow
-                key={index}
+                key={rule.id}
                 index={index}
                 rule={rule}
                 canEdit={canEdit}
-                onChange={(next) => editRule(index, next)}
-                onRemove={() => edit({ rules: current.rules.filter((_, i) => i !== index) })}
+                onChange={editRule}
+                onRemove={() => edit({ rules: current.rules.filter((r) => r.id !== rule.id) })}
               />
             ))}
           </ol>
@@ -234,14 +201,7 @@ export function CourseRecipeField({
                 size="sm"
                 variant="ghost"
                 disabled={current.rules.length >= MAX_RECIPE_RULES}
-                onClick={() =>
-                  edit({
-                    rules: [
-                      ...current.rules,
-                      { axis: 'output', values: [], negate: false, bound: 'min', amount: 1 },
-                    ],
-                  })
-                }
+                onClick={() => edit({ rules: [...current.rules, newRule('output')] })}
               >
                 <Plus className="size-4" />
                 {t('addRule')}
@@ -289,13 +249,13 @@ function RuleRow({
   index: number;
   rule: DraftRule;
   canEdit: boolean;
-  onChange: (next: Partial<DraftRule>) => void;
+  onChange: (next: DraftRule) => void;
   onRemove: () => void;
 }) {
   const t = useTranslations('Authoring.recipe.editor');
   const tr = useTranslations('Authoring');
   const text = useRecipeText();
-  const parsed = readRecipe({ rules: [fromDraft(rule)] })?.rules[0];
+  const parsed = fromDraft(rule);
 
   const valueLabel = (value: string) => {
     switch (rule.axis) {
@@ -323,8 +283,7 @@ function RuleRow({
           className={SELECT}
           value={rule.axis}
           disabled={!canEdit}
-          // A value of one axis means nothing on another; the list starts empty again.
-          onChange={(e) => onChange({ axis: e.target.value as RecipeAxis, values: [] })}
+          onChange={(e) => onChange(setAxis(rule, e.target.value as RecipeAxis))}
         >
           {RECIPE_AXES.map((axis) => (
             <option key={axis} value={axis}>
@@ -337,7 +296,7 @@ function RuleRow({
           <Checkbox
             checked={rule.negate}
             disabled={!canEdit}
-            onCheckedChange={(checked) => onChange({ negate: checked === true })}
+            onCheckedChange={(checked) => onChange({ ...rule, negate: checked === true })}
           />
           {t('negate')}
         </label>
@@ -357,19 +316,12 @@ function RuleRow({
       </div>
 
       <div role="group" aria-label={t('valuesLabel')} className="flex flex-wrap gap-x-3 gap-y-1.5">
-        {VALUES[rule.axis].map((value) => (
+        {RECIPE_VALUES[rule.axis].map((value) => (
           <label key={value} className="flex items-center gap-1.5 text-[12.5px]">
             <Checkbox
               checked={rule.values.includes(value)}
               disabled={!canEdit}
-              onCheckedChange={(checked) =>
-                onChange({
-                  values:
-                    checked === true
-                      ? [...rule.values, value]
-                      : rule.values.filter((v) => v !== value),
-                })
-              }
+              onCheckedChange={() => onChange(toggleValue(rule, value))}
             />
             {valueLabel(value)}
           </label>
@@ -382,10 +334,7 @@ function RuleRow({
           className={SELECT}
           value={rule.bound}
           disabled={!canEdit}
-          onChange={(e) => {
-            const bound = e.target.value as DraftRule['bound'];
-            onChange({ bound, amount: bound === 'min' ? 1 : 60 });
-          }}
+          onChange={(e) => onChange(setBound(rule, e.target.value as DraftBound))}
         >
           <option value="min">{t('bound.min')}</option>
           <option value="maxShare">{t('bound.maxShare')}</option>
@@ -396,9 +345,9 @@ function RuleRow({
           aria-label={t('amountLabel')}
           min={rule.bound === 'min' ? 1 : 0}
           max={rule.bound === 'min' ? undefined : 99}
-          value={rule.amount}
+          value={rule.n}
           disabled={!canEdit}
-          onChange={(e) => onChange({ amount: Number(e.target.value) })}
+          onChange={(e) => onChange({ ...rule, n: e.target.value })}
           className={`${SELECT} w-20`}
         />
         <span className="text-muted-foreground">
