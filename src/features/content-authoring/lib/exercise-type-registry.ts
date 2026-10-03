@@ -68,8 +68,8 @@ export interface ExerciseTypeDefinition {
 }
 
 /**
- * Every exercise type the editor knows of: the thirteen the catalogue can
- * create, and the eight the catalogue has written down.
+ * Every exercise type the editor knows of: the ones the kernel judges, and
+ * the ones the catalogue has only written down.
  *
  * One glyph per type, and the pairing is the point — recognition is built on a
  * type and its picture staying together, not on any particular picture
@@ -169,16 +169,17 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     icon: Blocks,
     status: 'live',
   },
-
-  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
+  // Plan 66. Live from the moment the kernel judges it (`by-template.ts`), which is what
+  // this status means to the recipe; the add-block menu is `CREATABLE_EXERCISE_TYPES`.
   sort_into_buckets: {
     code: 'sort_into_buckets',
     labelKey: 'sort_into_buckets',
     section: 'exercise',
     icon: Columns3,
-    status: 'planned',
-    axes: { input: 'text', output: 'none', modality: 'recognition' },
+    status: 'live',
   },
+
+  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
   highlight_in_text: {
     code: 'highlight_in_text',
     labelKey: 'highlight_in_text',
