@@ -212,12 +212,17 @@ export function HighlightInTextPreview({ exercise }: HighlightInTextPreviewProps
         </Button>
       </div>
 
-      <div className="flex-1 overflow-auto p-4">
-        {device === 'desktop' ? (
-          <div style={{ minWidth: DESKTOP_MIN }}>{body}</div>
-        ) : (
-          <div className="mx-auto max-w-[390px]">{body}</div>
-        )}
+      {/* No vertical padding on the scroller itself: the phone body pins its Check bar with
+          `sticky bottom-0`, which stops at the scroller's content edge — a padded scroller
+          left a strip of passage showing under the bar. The spacing lives one level in. */}
+      <div className="flex-1 overflow-auto px-4">
+        <div className="py-4">
+          {device === 'desktop' ? (
+            <div style={{ minWidth: DESKTOP_MIN }}>{body}</div>
+          ) : (
+            <div className="mx-auto max-w-[390px]">{body}</div>
+          )}
+        </div>
       </div>
       <p className="m-0 px-4 pb-3 text-[11px] text-(--ssz-text-muted)">{t('note')}</p>
     </div>
