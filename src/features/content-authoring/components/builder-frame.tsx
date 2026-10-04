@@ -113,6 +113,11 @@ export interface GateRow {
   level: 'blocker' | 'warning';
   text: string;
   step: number;
+  /**
+   * What following the row does, when the type names it — «Paste the text», «Name it».
+   * Absent, the row says which step it goes to.
+   */
+  action?: string;
 }
 
 export interface BuilderGateDialogProps {
@@ -184,7 +189,7 @@ export function BuilderGateDialog({
                   <span>
                     <span className="block">{row.text}</span>
                     <span className="block text-xs text-muted-foreground">
-                      {t('gateGoToStep', { step: row.step })}
+                      {row.action ?? t('gateGoToStep', { step: row.step })}
                     </span>
                   </span>
                 </button>

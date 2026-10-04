@@ -11,6 +11,7 @@ import { GapFillSolver } from './gap-fill-solver';
 import { MatchPairsSolver } from './match-pairs-solver';
 import { MultipleChoiceGroupSolver } from './multiple-choice-group-solver';
 import { SortIntoBucketsSolver } from './sort-into-buckets-solver';
+import { HighlightInTextSolver } from './highlight-in-text-solver';
 import { MultipleChoiceSolver } from './multiple-choice-solver';
 import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
@@ -749,6 +750,11 @@ const SERVER_SOLVERS: Record<
   // and the moment the key shows are all dosing, which a browser holding the key cannot do
   // (plan 66 §3.1). Not in `CLIENT_GRADED_TEMPLATES`: the board is graded here from the start.
   sort_into_buckets: SortIntoBucketsSolver,
+  // Its key is which words in the passage answer each question, and the dosing is per
+  // question — a check returns a count of what was missed, never where, and only a reveal
+  // shows the key (plan 67 §3.5). One attempt holds every question; the engine keeps it open
+  // until the last one closes (plan 67, Q1-A).
+  highlight_in_text: HighlightInTextSolver,
 };
 
 /**

@@ -179,15 +179,17 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     status: 'live',
   },
 
-  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
+  // Plan 67. Live as soon as the kernel judges it, like `sort_into_buckets` above; creatable
+  // through `CREATABLE_EXERCISE_TYPES` since phase 7 of the plan.
   highlight_in_text: {
     code: 'highlight_in_text',
     labelKey: 'highlight_in_text',
     section: 'exercise',
     icon: Highlighter,
-    status: 'planned',
-    axes: { input: 'text', output: 'none', modality: 'recognition' },
+    status: 'live',
   },
+
+  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
   dictation: {
     code: 'dictation',
     labelKey: 'dictation',

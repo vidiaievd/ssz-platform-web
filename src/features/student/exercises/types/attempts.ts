@@ -56,6 +56,11 @@ export interface StartAttemptResponse {
   answeredQuestions?: ResumedAnswer[];
   checkedRows?: ResumedRow[];
   pickedOptions?: ResumedPick[];
+  /**
+   * `highlight_in_text`: how each question of a resumed attempt stands — the attempt stays
+   * open until its last question closes (plan 67, phase 4). Empty on a fresh attempt.
+   */
+  questionStates?: HighlightInTextQuestionState[];
 }
 
 /** One question of a `short_answer` set already handed in on the resumed attempt. */
@@ -395,6 +400,75 @@ export interface SortIntoBucketsSubmitDetails {
   locked: string[];
   rules: { bucketId: string; rule: string }[];
   items: SortIntoBucketsItemResult[];
+}
+
+/**
+ * What one submit of a `highlight_in_text` question carries up — plan 67, phase 4.
+ *
+ * One question at a time. `marks` are character offsets into the projection's `text`,
+ * `end` exclusive; the server snaps them to tokens and merges overlaps. `reveal` is «Vis
+ * fasit», which closes the question and spends no check. Which check this is and how every
+ * question stands are the attempt's facts, and the engine writes its own over anything sent.
+ */
+export interface HighlightInTextSubmittedAnswer {
+  questionId: string;
+  marks: { start: number; end: number }[];
+  reveal?: true;
+}
+
+/** One of the student's marks after a check, as the server snapped it. */
+export interface HighlightInTextCell {
+  start: number;
+  end: number;
+  state: 'exact' | 'near' | 'fp';
+  /** The key span a `near` mark overlaps — where the answer really begins and ends. */
+  keyStart?: number;
+  keyEnd?: number;
+}
+
+/** How one question of the attempt stands — the progress rail (AC-S12) and a resumed attempt. */
+export interface HighlightInTextQuestionState {
+  questionId: string;
+  checks: number;
+  firstScore: number | null;
+  firstPassed: boolean | null;
+  passed: boolean;
+  revealed: boolean;
+  closed: boolean;
+}
+
+/**
+ * `details` when the template is `highlight_in_text` — one question after one submit.
+ *
+ * `pct` / `passed` are this question on this check. `miss` is a count and never positions
+ * (AC-S5); `missHint` / `fpHint` arrive only for the failure that happened and only when the
+ * author allowed hints; `key` only on a reveal. `closed` is the server's word and the buttons
+ * are drawn from it, never from a count kept in the browser.
+ */
+export interface HighlightInTextSubmitDetails {
+  questionId: string;
+  pct: number;
+  passed: boolean;
+  exact: number;
+  near: number;
+  miss: number;
+  fp: number;
+  total: number;
+  cells: HighlightInTextCell[];
+  missHint?: string;
+  fpHint?: string;
+  key?: { n: number; start: number; end: number; why?: string }[];
+  /** Which check of this question this was. */
+  attempt: number;
+  /** Checks of this question left; `null` is unlimited. */
+  checksLeft: number | null;
+  closed: boolean;
+  revealed: boolean;
+  questions: HighlightInTextQuestionState[];
+  /** Every question is closed — the submit that closed the attempt. */
+  complete: boolean;
+  attemptPct: number;
+  attemptPassed: boolean;
 }
 
 /** Check one sentence of a `sentence_schema` set, or ask to be shown it. */

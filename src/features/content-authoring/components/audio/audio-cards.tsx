@@ -423,13 +423,16 @@ function LessonClipPicker({
  * How the clip may be heard — README "AXRulesCard".
  *
  * `itemNoun` is the one string each exercise type overrides: the author is told the
- * questions lock, or the statements, or the gaps.
+ * questions lock, or the statements, or the gaps. `segments: false` drops the per-item
+ * timecode switch for a type whose clip has no items to time — one passage read aloud
+ * (`highlight_in_text`).
  */
 export function AudioRulesCard({
   draft,
   onChange,
   itemNoun,
-}: AudioCardProps & { itemNoun: string }) {
+  segments = true,
+}: AudioCardProps & { itemNoun: string; segments?: boolean }) {
   const t = useTranslations('Authoring');
   const s = draft.audio.settings;
 
@@ -492,12 +495,14 @@ export function AudioRulesCard({
             onChange(withAudioSettings(draft, { gate: (on ? 'first' : 'none') as GateMode }))
           }
         />
-        <ToggleRow
-          label={t('audio.segmentsLabel')}
-          help={t('audio.segmentsHelp')}
-          checked={draft.audio.useSegments}
-          onChange={(useSegments) => onChange(withAudio(draft, { useSegments }))}
-        />
+        {segments && (
+          <ToggleRow
+            label={t('audio.segmentsLabel')}
+            help={t('audio.segmentsHelp')}
+            checked={draft.audio.useSegments}
+            onChange={(useSegments) => onChange(withAudio(draft, { useSegments }))}
+          />
+        )}
       </div>
     </EditorCard>
   );

@@ -21,6 +21,7 @@ vi.mock('../actions/sentence-schema', () => ({ saveSentenceSchemaAction: vi.fn()
 vi.mock('../actions/multiple-choice', () => ({ saveMultipleChoiceAction: vi.fn() }));
 vi.mock('../actions/multiple-choice-group', () => ({ saveMultipleChoiceGroupAction: vi.fn() }));
 vi.mock('../actions/sort-into-buckets', () => ({ saveSortIntoBucketsAction: vi.fn() }));
+vi.mock('../actions/highlight-in-text', () => ({ saveHighlightInTextAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -472,6 +473,60 @@ describe('ExerciseEditorPane', () => {
     const preview = within(screen.getByLabelText('Student preview, phone'));
     expect(preview.getByText('bil')).toBeInTheDocument();
     expect(preview.queryByText(/Hunkjønn/)).not.toBeInTheDocument();
+  });
+
+  it('opens the marking builder by template code, key held back from the preview', () => {
+    // Plan 67 phase 7. By the code alone, like sort: a blank scaffold — no text, one empty
+    // question — must open the builder, never the generic form.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-hit',
+        templateCode: 'highlight_in_text',
+        targetLanguage: 'no',
+        difficultyLevel: 'A2',
+        content: {
+          title: 'Ferie',
+          instruction: 'Les teksten.',
+          text: 'I fjor reiste vi til Bodø.',
+          questions: [{ id: 'q1', prompt: 'Finn verbet.', unit: 'word' }],
+          settings: {
+            attempts: 0,
+            threshold: 70,
+            penalty: 'half',
+            showCount: false,
+            hints: true,
+            revealKey: true,
+          },
+        },
+        expectedAnswers: {
+          questions: {
+            q1: {
+              spans: [{ id: 's1', start: 7, end: 13, why: 'Preteritum av reise.' }],
+              missHint: 'Se etter -te.',
+              fpHint: '',
+            },
+          },
+          orphans: [],
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Les teksten.' }],
+        updatedAt: '2026-10-04T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Questions/ })).toBeInTheDocument();
+    // The runner's own body over the projection: the question is there, the key is not —
+    // no word is marked and no reason is printed.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('Finn verbet.')).toBeInTheDocument();
+    expect(preview.queryByText(/Preteritum av reise/)).not.toBeInTheDocument();
+    expect(preview.getByRole('button', { name: 'reiste' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   it('leaves a multiple-choice document of the old form to the generic form', () => {
