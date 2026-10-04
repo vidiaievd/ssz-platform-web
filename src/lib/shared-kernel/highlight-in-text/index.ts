@@ -117,7 +117,7 @@ export {
 } from './persistence';
 
 export type { ProjectedQuestion, ProjectedSettings, StudentProjection } from './projection';
-export { toStudentProjection } from './projection';
+export { toStudentProjection, withGradedSettings } from './projection';
 
 export type { LanguagePack } from './presets';
 export { instructionFor, packFor, PACKS } from './presets';
