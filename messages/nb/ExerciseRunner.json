@@ -121,6 +121,41 @@
       "again": "Start på nytt"
     }
   },
+  "highlightInText": {
+    "check": "Sjekk",
+    "checkCount": "Sjekk ({n})",
+    "checking": "Sjekker …",
+    "retry": "Prøv på nytt",
+    "showKey": "Vis fasit",
+    "next": "Neste spørsmål",
+    "clear": "Nullstill",
+    "attempt": "Forsøk {n}",
+    "attemptOf": "Forsøk {n} av {max}",
+    "tapWords": "Trykk på ordene.",
+    "tapOrDrag": "Trykk, eller dra over flere ord.",
+    "count": "Det er {n} å finne.",
+    "marked": "<b>{n}</b> markert",
+    "markedOf": "<b>{n}</b> markert av {total}",
+    "verdict": "{correct} av {total} riktig{fp, plural, =0 {} other { · # for mye}}",
+    "score": "— {pct}%.",
+    "scoreAfter": "— {pct}% etter fratrekk.",
+    "near": "{n, plural, one {# markering traff delvis.} other {# markeringer traff delvis.}} Ta med hele uttrykket, verken mer eller mindre.",
+    "announce": "{correct} av {total} riktig{fp, plural, =0 {} other {, # for mye}}",
+    "rail": "Spørsmål {n} av {total}, {done} ferdig",
+    "untitled": "Uten tittel",
+    "legend": {
+      "right": "riktig",
+      "extra": "for mye",
+      "missed": "ikke funnet",
+      "key": "fasit"
+    },
+    "sendFailed": "Markeringene kunne ikke sendes. Prøv igjen.",
+    "closedAlready": "Dette spørsmålet er allerede avsluttet.",
+    "empty": {
+      "title": "Ingenting å markere ennå",
+      "body": "En tekst, et spørsmål og noen markerte svar, så dukker oppgaven opp her."
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Svar på spørsmål {n}",
     "answeredCount": "{done} av {total} spørsmål besvart",

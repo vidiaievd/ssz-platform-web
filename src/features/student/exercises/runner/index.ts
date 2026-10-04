@@ -181,3 +181,11 @@ export type {
   SortIntoBucketsPhase,
   SortIntoBucketsPlacements,
 } from './sort-into-buckets-body';
+
+export { MarkableText } from './markable-text';
+export type { MarkableTextProps, MarkCell, MarkState } from './markable-text';
+export { readHighlightInTextProjection } from './highlight-in-text-projection';
+export { extendMark, keepExact, passageCells, toggleMark, toWire } from './highlight-in-text-marks';
+export type { PassageCells, StudentMarks } from './highlight-in-text-marks';
+export { HighlightInTextBody } from './highlight-in-text-body';
+export type { HighlightInTextBodyProps, HighlightInTextLayout } from './highlight-in-text-body';

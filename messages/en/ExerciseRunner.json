@@ -121,6 +121,41 @@
       "again": "Start over"
     }
   },
+  "highlightInText": {
+    "check": "Check",
+    "checkCount": "Check ({n})",
+    "checking": "Checking…",
+    "retry": "Try again",
+    "showKey": "Show the answer",
+    "next": "Next question",
+    "clear": "Clear",
+    "attempt": "Attempt {n}",
+    "attemptOf": "Attempt {n} of {max}",
+    "tapWords": "Tap the words.",
+    "tapOrDrag": "Tap, or drag across several words.",
+    "count": "There are {n} to find.",
+    "marked": "<b>{n}</b> marked",
+    "markedOf": "<b>{n}</b> marked of {total}",
+    "verdict": "{correct} of {total} right{fp, plural, =0 {} other { · # too many}}",
+    "score": "— {pct}%.",
+    "scoreAfter": "— {pct}% after the deduction.",
+    "near": "{n, plural, one {# mark was a partial hit.} other {# marks were partial hits.}} Take the whole expression, no more and no less.",
+    "announce": "{correct} of {total} right{fp, plural, =0 {} other {, # marked too much}}",
+    "rail": "Question {n} of {total}, {done} done",
+    "untitled": "Untitled",
+    "legend": {
+      "right": "right",
+      "extra": "too many",
+      "missed": "not found",
+      "key": "answer"
+    },
+    "sendFailed": "The marks could not be sent. Try again.",
+    "closedAlready": "This question is already finished.",
+    "empty": {
+      "title": "Nothing to mark yet",
+      "body": "A passage, a question and a few marked answers, and the exercise appears here."
+    }
+  },
   "mcqGroup": {
     "questionOptions": "Answers for question {n}",
     "answeredCount": "{done} of {total} questions answered",
