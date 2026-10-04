@@ -3717,6 +3717,24 @@
       "restart": "Restart the attempt",
       "empty": "Write a sentence on step 2 to see what a student is handed.",
       "note": "This is the student’s own screen. Checks here run on your key in this browser and are not recorded."
+    },
+    "shell": {
+      "step1": "Recording",
+      "step2": "Key",
+      "step3": "Marking",
+      "step4": "Difficulty",
+      "stepSub1": "the whole prompt",
+      "stepSub2": "what is said",
+      "stepSub3": "errors and reasons",
+      "stepSub4": "dials and delivery",
+      "stepsLabel": "Steps of the dictation"
+    },
+    "gate": {
+      "sentences": "{count, plural, one {# sentence} other {# sentences}}, {words, plural, one {# word} other {# words}}, each one its own verdict",
+      "whyWritten": "Every sentence says what went wrong",
+      "reasons": "{count, plural, one {# focus word carries its own reason} other {# focus words carry their own reasons}}",
+      "transcriptClosed": "The transcript stays closed until the check",
+      "replayable": "Every sentence can be replayed on its own"
     }
   },
   "coverage": {

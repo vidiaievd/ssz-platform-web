@@ -3717,6 +3717,24 @@
       "restart": "Start forsøket på nytt",
       "empty": "Skriv en setning i steg 2 for å se hva eleven får.",
       "note": "Dette er elevens egen skjerm. Sjekker her kjører mot nøkkelen din i denne nettleseren og registreres ikke."
+    },
+    "shell": {
+      "step1": "Opptak",
+      "step2": "Nøkkel",
+      "step3": "Merking",
+      "step4": "Vanskelighet",
+      "stepSub1": "hele oppgaven",
+      "stepSub2": "det som sies",
+      "stepSub3": "feil og begrunnelser",
+      "stepSub4": "valg og levering",
+      "stepsLabel": "Stegene i diktaten"
+    },
+    "gate": {
+      "sentences": "{count, plural, one {# setning} other {# setninger}}, {words, plural, one {# ord} other {# ord}}, hver med sin egen dom",
+      "whyWritten": "Hver setning sier hva som gikk galt",
+      "reasons": "{count, plural, one {# fokusord har sin egen begrunnelse} other {# fokusord har hver sin begrunnelse}}",
+      "transcriptClosed": "Transkripsjonen er lukket til etter sjekken",
+      "replayable": "Hver setning kan spilles av for seg"
     }
   },
   "coverage": {
