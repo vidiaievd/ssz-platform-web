@@ -199,15 +199,18 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     status: 'live',
   },
 
-  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
+  // Plan 69. Live as soon as the kernel judges it, like the three above; creatable only through
+  // `CREATABLE_EXERCISE_TYPES` (phase 7 of the plan). Still in the grammar section it was
+  // catalogued under: the columns are rules, and that is where an author looks for it.
   inflection_table: {
     code: 'inflection_table',
     labelKey: 'inflection_table',
     section: 'grammar',
     icon: Table,
-    status: 'planned',
-    axes: { input: 'text', output: 'written_target', modality: 'recall', focus: ['grammar'] },
+    status: 'live',
   },
+
+  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
   read_aloud: {
     code: 'read_aloud',
     labelKey: 'read_aloud',
