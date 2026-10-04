@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { AudioLines, BookOpen, Link2, Trash2, Upload } from 'lucide-react';
@@ -588,13 +588,32 @@ export function AudioTranscriptCard({ draft, onChange }: AudioCardProps) {
 export function AudioSegmentField({
   segment,
   onChange,
+  compact = false,
+  name,
 }: {
   segment: ItemAudio | null;
   onChange: (next: ItemAudio | null) => void;
+  /** One quiet row — «0:12 → 0:19» — for a list of items that each carry a timecode. */
+  compact?: boolean;
+  /** Names the pair for a screen reader when there are several on the page: «Segment 2». */
+  name?: string;
 }) {
   const t = useTranslations('Authoring');
+  const id = useId();
   const [from, setFrom] = useState(segment === null ? '' : formatDuration(segment.start));
   const [to, setTo] = useState(segment === null ? '' : formatDuration(segment.end));
+
+  // A value set from outside — «Set start here» next to the field — has to show in it. The
+  // fields were seeded once and ignored every later change; a timecode that came from the
+  // field itself parses back to what is already there, so typing is never overwritten.
+  const [seen, setSeen] = useState(segment);
+  if (segment !== seen) {
+    setSeen(segment);
+    if (segment !== null) {
+      if (parseDuration(from) !== segment.start) setFrom(formatDuration(segment.start));
+      if (parseDuration(to) !== segment.end) setTo(formatDuration(segment.end));
+    }
+  }
 
   function push(nextFrom: string, nextTo: string) {
     const start = parseDuration(nextFrom);
@@ -602,14 +621,50 @@ export function AudioSegmentField({
     onChange(start === null || end === null ? null : { start, end });
   }
 
+  const fromLabel =
+    name === undefined ? t('audio.segmentFrom') : `${name} — ${t('audio.segmentFrom')}`;
+  const toLabel = name === undefined ? t('audio.segmentTo') : `${name} — ${t('audio.segmentTo')}`;
+
+  if (compact) {
+    return (
+      <span className="flex items-center gap-1.5">
+        <Input
+          aria-label={fromLabel}
+          value={from}
+          placeholder="0:22"
+          inputMode="numeric"
+          className="h-8 w-16 px-2 text-center font-mono text-xs"
+          onChange={(e) => {
+            setFrom(e.target.value);
+            push(e.target.value, to);
+          }}
+        />
+        <span aria-hidden="true" className="text-xs text-(--ssz-text-muted)">
+          →
+        </span>
+        <Input
+          aria-label={toLabel}
+          value={to}
+          placeholder="0:48"
+          inputMode="numeric"
+          className="h-8 w-16 px-2 text-center font-mono text-xs"
+          onChange={(e) => {
+            setTo(e.target.value);
+            push(from, e.target.value);
+          }}
+        />
+      </span>
+    );
+  }
+
   return (
     <div className="mb-3 flex flex-wrap items-end gap-2">
       <div className="flex flex-col gap-1">
-        <Label htmlFor="segment-from" className="text-xs">
-          {t('audio.segmentFrom')}
+        <Label htmlFor={`${id}-from`} className="text-xs">
+          {fromLabel}
         </Label>
         <Input
-          id="segment-from"
+          id={`${id}-from`}
           value={from}
           placeholder="0:22"
           inputMode="numeric"
@@ -621,11 +676,11 @@ export function AudioSegmentField({
         />
       </div>
       <div className="flex flex-col gap-1">
-        <Label htmlFor="segment-to" className="text-xs">
-          {t('audio.segmentTo')}
+        <Label htmlFor={`${id}-to`} className="text-xs">
+          {toLabel}
         </Label>
         <Input
-          id="segment-to"
+          id={`${id}-to`}
           value={to}
           placeholder="0:48"
           inputMode="numeric"

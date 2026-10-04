@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
@@ -249,5 +250,63 @@ describe('AudioSegmentField', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Clear' }));
     expect(onChange).toHaveBeenLastCalledWith(null);
+  });
+});
+
+describe('AudioSegmentField — the additions for a list of items', () => {
+  it('shows a value set from outside, such as «Set start here» next to it', () => {
+    const { rerender } = wrap(<AudioSegmentField segment={null} onChange={vi.fn()} />);
+    expect(screen.getByLabelText('From')).toHaveValue('');
+
+    rerender(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <AudioSegmentField segment={{ start: 12, end: 19 }} onChange={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByLabelText('From')).toHaveValue('0:12');
+    expect(screen.getByLabelText('To')).toHaveValue('0:19');
+  });
+
+  it('does not overwrite what is being typed with the pair it just wrote', async () => {
+    function Held() {
+      const [segment, setSegment] = useState<{ start: number; end: number } | null>({
+        start: 22,
+        end: 48,
+      });
+      return <AudioSegmentField segment={segment} onChange={setSegment} />;
+    }
+    wrap(<Held />);
+    const from = screen.getByLabelText('From');
+    await userEvent.clear(from);
+    await userEvent.type(from, '1');
+    // Mid-keystroke: «1» is 1 s, the held pair follows, and the field keeps what was typed.
+    expect(from).toHaveValue('1');
+    await userEvent.type(from, ':05');
+    expect(from).toHaveValue('1:05');
+  });
+
+  it('draws one quiet row, named per item, with no Clear button of its own', () => {
+    wrap(
+      <AudioSegmentField
+        compact
+        name="Segment 2"
+        segment={{ start: 22, end: 48 }}
+        onChange={vi.fn()}
+      />,
+    );
+    expect(screen.getByLabelText('Segment 2 — From')).toHaveValue('0:22');
+    expect(screen.getByLabelText('Segment 2 — To')).toHaveValue('0:48');
+    expect(screen.queryByRole('button', { name: 'Clear' })).toBeNull();
+  });
+
+  it('keeps ids apart when several of them are on one page', () => {
+    wrap(
+      <>
+        <AudioSegmentField segment={null} onChange={vi.fn()} name="One" />
+        <AudioSegmentField segment={null} onChange={vi.fn()} name="Two" />
+      </>,
+    );
+    const ids = screen.getAllByRole('textbox').map((el) => el.id);
+    expect(new Set(ids).size).toBe(4);
   });
 });

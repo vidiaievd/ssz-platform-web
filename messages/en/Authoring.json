@@ -3507,6 +3507,109 @@
       "note": "Checked here with the same rules as the server. Nothing is recorded."
     }
   },
+  "dictation": {
+    "subject": {
+      "segment": "Segment {index}",
+      "join": "{subject} — {message}"
+    },
+    "issues": {
+      "DICT_NO_TITLE": "The exercise has no title — teachers cannot find it in the module.",
+      "DICT_CLIP_TOO_LONG": "The clip is {time} long — past 3:00 a dictation is a test, not practice.",
+      "DICT_NO_KEY": "Nothing is written down — there is no sentence to check against.",
+      "DICT_EMPTY_SEGMENT": "It is empty. Write the sentence or delete the segment.",
+      "DICT_SEGMENT_TOO_LONG": "{words, plural, one {# word} other {# words}} is long — past 18 a dictation tests memory, not spelling.",
+      "DICT_SEGMENT_TOO_SHORT": "{words, plural, one {# word} other {# words}} is too few to hear a word boundary.",
+      "DICT_TIMECODE_MISSING": "It has no timecode, so there is no fragment to replay.",
+      "DICT_DUPLICATE_SEGMENT": "It repeats an earlier sentence.",
+      "DICT_TOO_MANY_SEGMENTS": "{count} sentences — past 8 it is a lesson, not an exercise.",
+      "DICT_NO_WHY": "It has no reason to show when the sentence comes back wrong.",
+      "DICT_NO_FOCUS": "No word is marked as the point of the dictation — the report cannot say what was missed.",
+      "DICT_FOCUS_WITHOUT_REASON": "A focus word has no reason, so a miss on it is only a red mark.",
+      "DICT_TRANSCRIPT_ALWAYS": "The transcript is readable from the start — and it is the answer key.",
+      "DICT_ONE_PLAY_MANY_SEGMENTS": "One listen has to carry {count} sentences — that tests memory more than spelling.",
+      "DICT_NO_RETRY_NO_KEY": "One check and no way to see the key leaves a failed sentence with nothing to learn from."
+    },
+    "fixes": {
+      "DICT_NO_TITLE": "Name it",
+      "DICT_CLIP_TOO_LONG": "Shorten the clip",
+      "DICT_NO_KEY": "Write the key",
+      "DICT_EMPTY_SEGMENT": "Fill or remove them",
+      "DICT_SEGMENT_TOO_LONG": "Split the sentence",
+      "DICT_SEGMENT_TOO_SHORT": "Lengthen it",
+      "DICT_TIMECODE_MISSING": "Set the timecode",
+      "DICT_DUPLICATE_SEGMENT": "Change or remove it",
+      "DICT_TOO_MANY_SEGMENTS": "Split the exercise",
+      "DICT_NO_WHY": "Write the reason",
+      "DICT_NO_FOCUS": "Mark the words",
+      "DICT_FOCUS_WITHOUT_REASON": "Write the reason",
+      "DICT_TRANSCRIPT_ALWAYS": "Change the transcript",
+      "DICT_ONE_PLAY_MANY_SEGMENTS": "Allow more listens",
+      "DICT_NO_RETRY_NO_KEY": "Review the settings"
+    },
+    "step1": {
+      "eyebrow": "Step 1 of 4",
+      "title": "The recording",
+      "lede": "In every other type the audio is a layer on top of something readable. Here it is the whole prompt: the student has nothing on screen but an empty field, so the clip has to be clean, slow enough to write from, and short.",
+      "titleLabel": "Exercise title",
+      "titlePlaceholder": "e.g. Dictation: kj, skj and double consonants",
+      "instructionLabel": "Instruction above the field",
+      "instructionPlaceholder": "Write what you hear.",
+      "instructionHelp": "The standing instruction. It stays on screen while they type.",
+      "listenTitle": "Listen to it yourself",
+      "listenNote": "the author's player — no limits apply here",
+      "listenSimulated": "simulated clip — silent, as long as the length you entered",
+      "tip": "Read at dictation pace with a clear pause between sentences, and leave a second of silence at each end. A clip recorded at conversational speed forces every student to use the 0.75× button, which is the same as recording it slowly but worse."
+    },
+    "step2": {
+      "eyebrow": "Step 2 of 4",
+      "title": "The key",
+      "lede": "Exactly what is said, written the way it should be written. One sentence per segment: each becomes its own field, its own verdict and its own line in the report, so “the student cannot spell kjøkken” survives as a fact and not as a percentage of a paragraph.",
+      "shapeLabel": "Shape of the dictation",
+      "shapeSegments": "Sentence by sentence",
+      "shapeWhole": "One continuous text",
+      "shapeSegmentsHelp": "Each sentence is an element: its own field, its own replay button, its own verdict. This is the default and the only shape that reports per sentence.",
+      "shapeWholeHelp": "One field for the whole clip. The diff still runs word by word, but the exercise reports a single number and the student cannot replay one sentence.",
+      "join": {
+        "title": "{count, plural, one {# sentence becomes} other {# sentences become}} one text.",
+        "body": "Timecodes are dropped, since one field plays the whole clip. This is what the key will read:",
+        "empty": "Nothing is written yet.",
+        "focus": "{count, plural, one {# focus word moves} other {# focus words move}} with it.",
+        "apply": "Apply",
+        "cancel": "Cancel"
+      },
+      "paste": {
+        "title": "Paste the whole text once",
+        "placeholder": "Paste the transcript. Sentence breaks become segments and the timecodes are estimated from the length of each sentence.",
+        "split": "Split into {count, plural, one {# segment} other {# segments}}",
+        "note": "Estimated timecodes are a starting point — listen through and correct them."
+      },
+      "list": {
+        "segmentsTitle": "Segments",
+        "textTitle": "The text",
+        "note": "{segments, plural, one {# segment} other {# segments}} · {words, plural, one {# word} other {# words}} · {timed} timed"
+      },
+      "row": {
+        "textLabel": "Segment {index}: the sentence",
+        "placeholder": "Write the sentence exactly as it is read.",
+        "words": "{count, plural, one {# word} other {# words}}",
+        "name": "Segment {index}",
+        "estimated": "estimated",
+        "estimatedTitle": "Estimated from the length of the sentence — listen and correct it",
+        "play": "Play",
+        "playLabel": "Play segment {index}",
+        "setStart": "Set start here",
+        "setStartLabel": "Set the start of segment {index} to the player position",
+        "setStartTitle": "Use the player position as the start of this segment",
+        "setEnd": "Set end",
+        "setEndLabel": "Set the end of segment {index} to the player position",
+        "remove": "Delete segment {index}",
+        "add": "Segment",
+        "ceiling": "{max} is the ceiling — past that it is a lesson."
+      },
+      "warnTitle": "The key is the answer.",
+      "warnBody": "Segment text, the reasons in step 3 and the transcript stay in expected_answers and reach the browser only inside the verdict. Nothing here is sent with the exercise content."
+    }
+  },
   "coverage": {
     "title": "What this trains",
     "total": "{count, plural, one {# exercise} other {# exercises}}",
