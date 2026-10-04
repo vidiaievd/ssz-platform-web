@@ -22,13 +22,15 @@ describe('remediesFor', () => {
     expect(live).not.toContain('match_pairs');
   });
 
-  // No bare template is heard: the cure today is the recording, and tomorrow dictation.
-  it('sends a listening rule to the audio layer and the planned listening types', () => {
+  // Dictation is the one bare template that is heard (plan 68); for the rest the cure is
+  // the recording.
+  it('sends a listening rule to dictation, the audio layer and the planned listening types', () => {
     const result = codes({ axis: 'input', values: ['audio', 'video'], min: 1 });
 
-    expect(result.live).toEqual([]);
+    expect(result.live).toEqual(['dictation']);
     expect(result.audioLayer).toBe(true);
-    expect(result.planned).toEqual(expect.arrayContaining(['dictation', 'minimal_pairs']));
+    expect(result.planned).toEqual(expect.arrayContaining(['minimal_pairs']));
+    expect(result.planned).not.toContain('dictation');
   });
 
   // Adding more of what a ceiling caps only makes it worse.
