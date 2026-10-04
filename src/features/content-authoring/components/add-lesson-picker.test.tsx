@@ -33,6 +33,7 @@ const { createGapFillAction } = await import('../actions/gap-fill');
 const { createMultipleChoiceAction } = await import('../actions/multiple-choice');
 const { createMultipleChoiceGroupAction } = await import('../actions/multiple-choice-group');
 const { createSortIntoBucketsAction } = await import('../actions/sort-into-buckets');
+const { createHighlightInTextAction } = await import('../actions/highlight-in-text');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -204,6 +205,22 @@ describe('AddLessonPicker', () => {
     fireEvent.click(screen.getByText('Sort into groups'));
 
     await waitFor(() => expect(createSortIntoBucketsAction).toHaveBeenCalled());
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it('leaves the marking exercise\'s instruction empty so the course language\'s own line is used', async () => {
+    // Plan 67 phase 9: the picker's interface-language placeholder used to beat the pack, so
+    // a Norwegian course opened on «Complete the exercise.».
+    vi.mocked(createHighlightInTextAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-16', itemId: 'item-16' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Highlight in the text'));
+
+    await waitFor(() => expect(createHighlightInTextAction).toHaveBeenCalled());
+    expect(vi.mocked(createHighlightInTextAction).mock.calls[0]![4]).toBe('');
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 

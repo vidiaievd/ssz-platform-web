@@ -247,6 +247,10 @@ export function AddLessonPicker({
       type: tContent(`materialType.exercise` as 'materialType.text'),
     });
     const instructions = t('addLesson.defaultInstructions');
+    // The marking builder starts from the course language's own line (plan 67 §3.7), and the
+    // picker has no field to type one in — so the interface-language placeholder above would
+    // beat the pack every time. Empty means «use the pack».
+    const scaffoldInstructions = templateCode === HIGHLIGHT_IN_TEXT_TEMPLATE_CODE ? '' : instructions;
 
     startTransition(async () => {
       // Templates with their own builder are not shapes of the generic exercise form —
@@ -257,7 +261,7 @@ export function AddLessonPicker({
             targetLanguage,
             difficultyLevel,
             visibility,
-            instructions,
+            scaffoldInstructions,
             ownerSchoolId,
           )
         : await createExerciseAction(
