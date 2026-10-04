@@ -189,3 +189,11 @@ export { extendMark, keepExact, passageCells, toggleMark, toWire } from './highl
 export type { PassageCells, StudentMarks } from './highlight-in-text-marks';
 export { HighlightInTextBody } from './highlight-in-text-body';
 export type { HighlightInTextBodyProps, HighlightInTextLayout } from './highlight-in-text-body';
+
+export { DiffLegend, DiffLine, DiffScore, DiffTally, deviationPhrase } from './diff-line';
+export type { DiffLineProps } from './diff-line';
+export { readDictationProjection } from './dictation-projection';
+export { DictationBody } from './dictation-body';
+export type { DictationBodyProps, DictationLayout } from './dictation-body';
+export { DictationReaderCard } from './dictation-reader-card';
+export type { DictationReaderCardProps } from './dictation-reader-card';

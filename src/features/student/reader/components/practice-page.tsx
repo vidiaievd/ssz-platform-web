@@ -91,6 +91,7 @@ export function PracticePage({ title, items, onExerciseChecked, sourceHref }: Pr
               stacked
               onChecked={() => handleChecked(item)}
               {...(sourceHref === undefined ? {} : { sourceHref })}
+              {...(item.title === null ? {} : { title: item.title })}
             />
           </li>
         ))}

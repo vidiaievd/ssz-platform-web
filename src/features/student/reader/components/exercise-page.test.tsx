@@ -16,6 +16,12 @@ vi.mock('./short-answer-solver', () => ({
   ShortAnswerSolver: () => <div>server-graded short answer</div>,
 }));
 
+// The start card and the attempt are the dictation runner's own (dictation-solver.test);
+// here only the routing, and the title the card is headed with (plan 68, Q6-A).
+vi.mock('./dictation-solver', () => ({
+  DictationSolver: ({ title }: { title?: string }) => <div>dictation runner: {title}</div>,
+}));
+
 // Stub the learning barrel — its transitive imports pull in next/navigation,
 // which isn't resolvable in the unit test environment.
 vi.mock('@/features/learning', () => ({
@@ -112,6 +118,16 @@ describe('ExercisePage', () => {
 
     expect(screen.getByText('server-graded short answer')).toBeInTheDocument();
     expect(screen.queryByLabelText('Your answer')).not.toBeInTheDocument();
+  });
+
+  it('sends a dictation to its server-graded runner, with the lesson item’s title', () => {
+    mockExercise({
+      templateCode: 'dictation',
+      content: { instruction: '', mode: 'segments', segments: [{ id: 's1' }], settings: {} },
+    });
+    renderWithProviders(<ExercisePage exerciseId="e1" title="Kjøkkenet" />);
+
+    expect(screen.getByText('dictation runner: Kjøkkenet')).toBeInTheDocument();
   });
 
   it('auto-grades a short_answer that matches an accepted answer', () => {

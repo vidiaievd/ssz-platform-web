@@ -58,8 +58,21 @@ export function AudioGateScreen({
   );
 }
 
-/** Why the items are not answering yet — BEHAVIOR.md §7. */
-export function AudioLockNote({ itemNoun, own = false }: { itemNoun?: string; own?: boolean }) {
+/**
+ * Why the items are not answering yet — BEHAVIOR.md §7.
+ *
+ * `message` replaces the layer's sentence for a type whose locked thing is not a set of
+ * items — `dictation` locks one field (plan 68 §7.8).
+ */
+export function AudioLockNote({
+  itemNoun,
+  own = false,
+  message,
+}: {
+  itemNoun?: string;
+  own?: boolean;
+  message?: string;
+}) {
   const t = useTranslations('ExerciseRunner');
 
   return (
@@ -71,11 +84,13 @@ export function AudioLockNote({ itemNoun, own = false }: { itemNoun?: string; ow
       <Lock size={13} aria-hidden="true" className="mt-0.5 shrink-0" />
       {/* `own` is the per-item source (plan 56 phase 6): the clip belongs to this one
           item, so the sentence is about it and not about "the clip" of the exercise. */}
-      {itemNoun === undefined
-        ? t('audio.lockNote')
-        : own
-          ? t('audio.lockNoteOwn', { item: itemNoun })
-          : t('audio.lockNoteNamed', { items: itemNoun })}
+      {message !== undefined
+        ? message
+        : itemNoun === undefined
+          ? t('audio.lockNote')
+          : own
+            ? t('audio.lockNoteOwn', { item: itemNoun })
+            : t('audio.lockNoteNamed', { items: itemNoun })}
     </p>
   );
 }

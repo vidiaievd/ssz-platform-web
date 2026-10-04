@@ -385,6 +385,39 @@ describe('GET /api/exercises/[id]/attempts', () => {
     await expect(res.json()).resolves.toEqual({ attempt: scored });
   });
 
+  // A dictation or highlight attempt with checked items is resumed by the engine, and the
+  // reader's start card steps aside for it (plan 68, Q6-A). Only a yes — no state crosses.
+  it('reports an open attempt holding checked items as resumable', async () => {
+    vi.mocked(serverFetch).mockResolvedValue({
+      items: [
+        {
+          ...scored,
+          id: 'att-3',
+          templateCode: 'dictation',
+          status: 'IN_PROGRESS',
+          segmentStates: [{ segmentId: 's1', checks: 1, lastText: 'paa kjøkkenet' }],
+        },
+        scored,
+      ],
+    });
+
+    const res = await GET(makeGetRequest(), { params });
+    const body = await res.json();
+
+    expect(body).toEqual({ attempt: scored, resumable: true });
+    expect(JSON.stringify(body)).not.toContain('kjøkkenet');
+  });
+
+  it('does not call an open attempt with nothing on it resumable', async () => {
+    vi.mocked(serverFetch).mockResolvedValue({
+      items: [{ ...scored, id: 'att-3', status: 'IN_PROGRESS', segmentStates: [] }],
+    });
+
+    const res = await GET(makeGetRequest(), { params });
+
+    await expect(res.json()).resolves.toEqual({ attempt: null });
+  });
+
   it('reports no attempt when the learner has never finished one', async () => {
     vi.mocked(serverFetch).mockResolvedValue({ items: [] });
 
