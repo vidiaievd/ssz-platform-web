@@ -489,6 +489,17 @@
     --ssz-feedback-no-bg:   oklch(0.97 0.025 15);
     --ssz-feedback-no-line: oklch(0.55 0.125 15);
     --ssz-feedback-no-fg:   oklch(0.44 0.105 15);
+    /* The two further states of a corrected line (dictation, plan 68 §7.1): a near
+       miss in the warning hue, and the key — a missing word, a revealed sentence — in
+       the brand hue. Same contract: fill, outline, label; `key-strong` is the
+       sentence itself. Every pair is ≥ 6.6:1 here and ≥ 10:1 in .dark. */
+    --ssz-feedback-near-bg:   oklch(0.97 0.03  75);
+    --ssz-feedback-near-line: oklch(0.66 0.13  75);
+    --ssz-feedback-near-fg:   oklch(0.46 0.105 75);
+    --ssz-feedback-key-bg:     oklch(0.97 0.025 168);
+    --ssz-feedback-key-line:   oklch(0.70 0.10  168);
+    --ssz-feedback-key-fg:     oklch(0.42 0.09  168);
+    --ssz-feedback-key-strong: oklch(0.34 0.07  168);
 
     /* Exercise runner mode accents (practice = sage teal, graded = amber) and
        their soft fills for a selected-but-not-yet-checked option. */
@@ -547,7 +558,10 @@
 
     --ssz-text-primary:   oklch(0.93 0.008 80);
     --ssz-text-secondary: oklch(0.72 0.010 80);
-    --ssz-text-muted:     oklch(0.52 0.010 80);
+    /* 0.62, not 0.52: at 0.52 muted text measured 3.06–3.47:1 on base, surface and
+       subtle — under AA for the 11–13px labels it is used for. 0.62 gives 4.63–5.24:1
+       and still sits clearly below --ssz-text-secondary (plan 68, phase 5). */
+    --ssz-text-muted:     oklch(0.62 0.010 80);
     --ssz-text-inverse:   oklch(0.18 0.010 80);
     --ssz-text-link:      oklch(0.79 0.09  168);
     --ssz-text-link-hover:oklch(0.87 0.075 168);
@@ -606,6 +620,13 @@
     --ssz-feedback-no-bg:   oklch(0.29 0.045 15);
     --ssz-feedback-no-line: oklch(0.65 0.14  15);
     --ssz-feedback-no-fg:   oklch(0.91 0.075 15);
+    --ssz-feedback-near-bg:   oklch(0.29 0.05  75);
+    --ssz-feedback-near-line: oklch(0.72 0.12  75);
+    --ssz-feedback-near-fg:   oklch(0.91 0.09  75);
+    --ssz-feedback-key-bg:     oklch(0.29 0.045 168);
+    --ssz-feedback-key-line:   oklch(0.70 0.10  168);
+    --ssz-feedback-key-fg:     oklch(0.91 0.07  168);
+    --ssz-feedback-key-strong: oklch(0.94 0.05  168);
 
     /* Accents lift on dark surfaces and their soft fills need more opacity to
        stay visible against --ssz-bg-surface. */
