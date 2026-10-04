@@ -106,6 +106,8 @@ export type {
   FirstCheck,
   FocusMiss,
   KeyFocus,
+  LastCheck,
+  RevealedKey,
   SegmentState,
   VerdictOp,
 } from './grading';
