@@ -90,6 +90,7 @@ const FAILED = {
   passed: false,
   words: WORDS,
   ops: OPS,
+  nearCredit: false,
   focus: [],
   why: 'It happened yesterday.',
   attempt: 1,

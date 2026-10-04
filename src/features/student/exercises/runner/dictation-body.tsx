@@ -37,9 +37,9 @@ const TAP_MIN = 44;
 const SETTLE = 'fade-down var(--ssz-duration-slow) var(--ssz-ease-out)';
 
 const TONE = {
-  ok: { background: 'var(--ssz-color-success-50)', color: 'var(--ssz-color-success-700)' },
-  bad: { background: 'var(--ssz-color-error-50)', color: 'var(--ssz-color-error-700)' },
-  reveal: { background: 'var(--ssz-color-primary-50)', color: 'var(--ssz-color-primary-700)' },
+  ok: { background: 'var(--ssz-feedback-ok-bg)', color: 'var(--ssz-feedback-ok-fg)' },
+  bad: { background: 'var(--ssz-feedback-no-bg)', color: 'var(--ssz-feedback-no-fg)' },
+  reveal: { background: 'var(--ssz-feedback-key-bg)', color: 'var(--ssz-feedback-key-fg)' },
 } as const;
 
 const FOCUS =
@@ -77,8 +77,6 @@ export interface DictationBodyProps {
   done?: boolean;
   /** The attempt's score and pass, from the server — the summary's head. */
   result?: { pct: number; passed: boolean } | null;
-  /** Reasons the server gave on failed checks, by sentence — the summary repeats them. */
-  reasons?: Readonly<Record<string, string>>;
   /** «Sjekk» rests for a moment after a check — the server would refuse it (Q4-A). */
   cooling?: boolean;
   sending?: boolean;
@@ -122,7 +120,6 @@ export function DictationBody({
   attempt,
   done = false,
   result = null,
-  reasons = {},
   cooling = false,
   sending = false,
   error = null,
@@ -183,7 +180,9 @@ export function DictationBody({
         <ol className="m-0 flex list-none flex-col p-0">
           {segments.map((s, k) => {
             const st = stateOf(s.id);
-            const reason = st?.passed === true ? '' : (reasons[s.id] ?? st?.key?.why ?? '');
+            // The reason the last check came back with, kept on the sentence's state so a
+            // reload still has it; a revealed sentence has the one its reveal showed.
+            const reason = st?.passed === true ? '' : (st?.last?.why ?? st?.key?.why ?? '');
             return (
               <li
                 key={s.id}
@@ -412,7 +411,7 @@ export function DictationBody({
         <div
           data-block="key"
           className="flex flex-col gap-2 rounded-(--ssz-radius-sm) px-3 py-2.5"
-          style={{ background: 'var(--ssz-color-primary-50)', animation: SETTLE }}
+          style={{ background: 'var(--ssz-feedback-key-bg)', animation: SETTLE }}
         >
           <BlockLabel>{t('key')}</BlockLabel>
           <KeyText text={key.text} />
@@ -422,14 +421,9 @@ export function DictationBody({
   );
 
   // ── the verdict ──────────────────────────────────────────────────────────
-  // A typo note only where typos were counted; «half credit» only where the score shows it
-  // was given — more than the exact words alone could earn. The rule itself is not sent
-  // (deviation 15), so this is read off the numbers the server did send.
-  const halfCredit =
-    checked &&
-    verdict.words.near > 0 &&
-    verdict.words.total > 0 &&
-    verdict.pct > Math.round((verdict.words.exact * 100) / verdict.words.total);
+  // A typo note only where typos were counted; «half credit» only where the server says this
+  // check gave it — the rule itself is never sent ahead of a check (deviation 15).
+  const halfCredit = checked && verdict.nearCredit;
   const headline = checked
     ? passed
       ? t('passed')
@@ -618,8 +612,8 @@ export function DictationBody({
                   className="flex items-center gap-[9px] rounded-(--ssz-radius-sm) px-2 py-1.5 text-xs"
                   style={{
                     fontVariantNumeric: 'tabular-nums',
-                    background: now ? 'var(--ssz-color-primary-50)' : undefined,
-                    color: now ? 'var(--ssz-color-primary-700)' : 'var(--ssz-text-muted)',
+                    background: now ? 'var(--ssz-feedback-key-bg)' : undefined,
+                    color: now ? 'var(--ssz-feedback-key-fg)' : 'var(--ssz-text-muted)',
                   }}
                 >
                   <Num n={k + 1} />
@@ -701,7 +695,7 @@ function KeyText({ text }: { text: string }) {
         fontFamily: 'var(--ssz-font-reading)',
         fontSize: 'var(--ssz-text-lg)',
         lineHeight: 'var(--ssz-leading-relaxed)',
-        color: 'var(--ssz-color-primary-800)',
+        color: 'var(--ssz-feedback-key-strong)',
       }}
     >
       {text}

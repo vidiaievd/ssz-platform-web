@@ -66,8 +66,8 @@ export function DictationReaderCard({
           aria-hidden="true"
           className="grid size-10 shrink-0 place-items-center rounded-(--ssz-radius-md)"
           style={{
-            background: 'var(--ssz-color-primary-50)',
-            color: 'var(--ssz-color-primary-700)',
+            background: 'var(--ssz-feedback-key-bg)',
+            color: 'var(--ssz-feedback-key-fg)',
           }}
         >
           <Headphones size={18} />

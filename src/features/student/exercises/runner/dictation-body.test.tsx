@@ -4,7 +4,7 @@ import axe from 'axe-core';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
 
-import { enMessages } from '@/lib/i18n/messages';
+import { enMessages, loadMessages } from '@/lib/i18n/messages';
 import { AUDIO_DEFAULT } from '@/lib/shared-kernel/audio';
 import type { SegmentState, StudentProjection, VerdictOp } from '@/lib/shared-kernel/dictation';
 import type { ExerciseAudioEngine } from '@/features/student/exercises/audio';
@@ -89,6 +89,7 @@ function details(over: Partial<DictationSubmitDetails> = {}): DictationSubmitDet
     passed: false,
     words: WORDS,
     ops: OPS,
+    nearCredit: false,
     focus: [{ focusId: 'f1', word: 'kjøkkenet', why: 'kj, not sj.' }],
     why: 'Listen for the soft k.',
     attempt: 1,
@@ -309,8 +310,42 @@ describe('DictationBody — after a check', () => {
     expect(screen.getByText('2 of 6 words right — 1 typo.')).toBeInTheDocument();
   });
 
-  it('says half credit only when the score shows it was given', () => {
-    renderBody({ verdict: details({ pct: 42 }) });
+  it.each([
+    ['en', 1, '1 of 1 word right.'],
+    ['en', 6, '2 of 6 words right — 1 typo.'],
+    ['ru', 1, 'Правильно 1 из 1 слова.'],
+    ['ru', 6, 'Правильно 2 из 6 слов — 1 опечатка.'],
+    ['uk', 1, 'Правильно 1 з 1 слова.'],
+    ['nb', 6, '2 av 6 ord riktig — 1 skrivefeil.'],
+  ] as const)('agrees the count with the number of words — %s, %i', async (locale, total, text) => {
+    const messages = await loadMessages(locale);
+    const words =
+      total === 1 ? { total: 1, exact: 1, near: 0, wrong: 0, missing: 0, extra: 0 } : WORDS;
+    render(
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        <DictationBody
+          projection={PROJECTION}
+          segmentIndex={0}
+          states={[]}
+          text=""
+          verdict={details({ words, ...(total === 1 ? { pct: 60 } : {}) })}
+          attempt={1}
+          accent="#0a7"
+          layout="phone"
+          onText={vi.fn()}
+          onCheck={vi.fn()}
+          onRetry={vi.fn()}
+          onReveal={vi.fn()}
+          onNext={vi.fn()}
+          onFinish={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByText(text, { selector: '[data-tone] b' })).toBeInTheDocument();
+  });
+
+  it('says half credit only when the server says this check gave it', () => {
+    renderBody({ verdict: details({ pct: 42, nearCredit: true }) });
     expect(screen.getByText('2 of 6 words right — 1 typo (half credit).')).toBeInTheDocument();
   });
 
@@ -458,14 +493,14 @@ describe('DictationBody — the summary (AC-R10)', () => {
   const done = {
     done: true,
     result: { pct: 66, passed: false },
-    reasons: { s1: 'Listen for the soft k.' },
     states: [
       state('s1', {
         checks: 2,
         firstScore: 0.33,
         firstPassed: false,
         closed: true,
-        last: { pct: 50, words: WORDS, ops: OPS },
+        // The reason survives a reload on the sentence's own state (AC-R10).
+        last: { pct: 50, words: WORDS, ops: OPS, why: 'Listen for the soft k.' },
       }),
       state('s2', {
         checks: 1,

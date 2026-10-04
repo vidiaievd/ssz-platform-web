@@ -514,6 +514,8 @@ export interface DictationSubmitDetails {
   passed: boolean;
   words: WordCounts;
   ops: VerdictOp[];
+  /** Near misses earned half a word each on this check — «half credit» in the verdict. */
+  nearCredit: boolean;
   focus: FocusMiss[];
   why?: string;
   key?: RevealedKey;

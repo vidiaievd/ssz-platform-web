@@ -29,26 +29,26 @@ const LINE: Record<'md' | 'sm', CSSProperties> = {
 
 const CHIP = {
   extra: {
-    background: 'var(--ssz-color-error-50)',
-    color: 'var(--ssz-color-error-700)',
+    background: 'var(--ssz-feedback-no-bg)',
+    color: 'var(--ssz-feedback-no-fg)',
     textDecoration: 'line-through',
     textDecorationThickness: '1.5px',
     padding: '2px 4px',
   },
   miss: {
-    background: 'var(--ssz-color-primary-50)',
-    color: 'var(--ssz-color-primary-700)',
-    boxShadow: 'inset 0 -2px 0 0 var(--ssz-color-primary-400)',
+    background: 'var(--ssz-feedback-key-bg)',
+    color: 'var(--ssz-feedback-key-fg)',
+    boxShadow: 'inset 0 -2px 0 0 var(--ssz-feedback-key-line)',
     padding: '2px 4px',
   },
   near: {
-    background: 'var(--ssz-color-warning-50)',
-    color: 'var(--ssz-color-warning-700)',
+    background: 'var(--ssz-feedback-near-bg)',
+    color: 'var(--ssz-feedback-near-fg)',
     padding: '2px 5px',
   },
   wrong: {
-    background: 'var(--ssz-color-error-50)',
-    color: 'var(--ssz-color-error-700)',
+    background: 'var(--ssz-feedback-no-bg)',
+    color: 'var(--ssz-feedback-no-fg)',
     padding: '2px 5px',
   },
 } satisfies Record<string, CSSProperties>;
@@ -153,7 +153,7 @@ function Op({ op, t }: { op: VerdictOp; t: T }) {
           <b
             style={{
               fontWeight: 'var(--ssz-weight-semibold)',
-              color: 'var(--ssz-color-success-700)',
+              color: 'var(--ssz-feedback-ok-fg)',
             }}
           >
             {op.expected}
@@ -175,12 +175,12 @@ const SWATCH: Record<Swatch, CSSProperties> = {
   near: { background: 'var(--ssz-color-warning-500)' },
   wrong: { background: 'var(--ssz-color-error-500)' },
   missing: {
-    background: 'var(--ssz-color-primary-50)',
-    boxShadow: 'inset 0 -3px 0 0 var(--ssz-color-primary-400)',
+    background: 'var(--ssz-feedback-key-bg)',
+    boxShadow: 'inset 0 -3px 0 0 var(--ssz-feedback-key-line)',
   },
   extra: {
-    background: 'var(--ssz-color-error-50)',
-    boxShadow: 'inset 0 0 0 1.5px var(--ssz-color-error-500)',
+    background: 'var(--ssz-feedback-no-bg)',
+    boxShadow: 'inset 0 0 0 1.5px var(--ssz-feedback-no-line)',
   },
 };
 
@@ -252,7 +252,7 @@ export function DiffScore({
               ? 'var(--ssz-text-sm)'
               : 'var(--ssz-text-lg)',
         fontVariantNumeric: 'tabular-nums',
-        color: ok ? 'var(--ssz-color-success-700)' : 'var(--ssz-color-error-700)',
+        color: ok ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-feedback-no-fg)',
       }}
     >
       {pct}%

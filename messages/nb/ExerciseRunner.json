@@ -576,7 +576,7 @@
     "lockNote": "Feltet åpner seg når klippet er hørt én gang.",
     "rail": "Setning {n} av {total}",
     "listNow": "nå",
-    "summaryCount": "{n} av {total} setninger riktig",
+    "summaryCount": "{n} av {total, plural, one {# setning} other {# setninger}} riktig",
     "summarySub": "Ortografi · diktat",
     "tally": {
       "eq": "{n} riktig",

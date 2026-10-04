@@ -168,8 +168,6 @@ function DictationRun({ exerciseId, instruction, language, onChecked }: Dictatio
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [result, setResult] = useState<{ pct: number; passed: boolean } | null>(null);
-  /** The reason each failed check came back with, for the summary to repeat. */
-  const [reasons, setReasons] = useState<Record<string, string>>({});
   const [cooling, setCooling] = useState(false);
 
   /** Wall-clock since the attempt opened; the engine records it per submission. */
@@ -285,10 +283,6 @@ function DictationRun({ exerciseId, instruction, language, onChecked }: Dictatio
           setAttempt(details.attempt);
           setResult({ pct: details.attemptPct, passed: details.attemptPassed });
           if (!reveal) cool();
-          const why = details.why;
-          if (why !== undefined && why.trim() !== '') {
-            setReasons((current) => ({ ...current, [details.segmentId]: why }));
-          }
 
           // Once, and when the attempt closes: that submit is the one the engine scores and
           // publishes evidence on, with every sentence's first check in it.
@@ -365,7 +359,6 @@ function DictationRun({ exerciseId, instruction, language, onChecked }: Dictatio
       attempt={attempt}
       done={done}
       result={result}
-      reasons={reasons}
       cooling={cooling}
       sending={submit.isPending}
       error={error}
