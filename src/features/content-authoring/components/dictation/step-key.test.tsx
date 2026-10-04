@@ -239,6 +239,14 @@ describe('StepKey — the segments', () => {
     expect(last().segments[0]?.focus).toEqual([{ id: 'f1', wordIndex: 3, why: 'kj' }]);
   });
 
+  it('starts a new segment where the last timed one ends, and asks only for the end', async () => {
+    const { last } = draw(keyed(seg('Jeg hørte kjøkkenet.', { start: 0, end: 12 })));
+    await userEvent.click(screen.getByRole('button', { name: 'Segment' }));
+    expect(last().segments.at(-1)!.audio).toEqual({ start: 12, end: 12 });
+    const second = screen.getByRole('textbox', { name: 'Segment 2: the sentence' }).closest('li')!;
+    expect(within(second).getByText(/ends before it starts/i)).toBeInTheDocument();
+  });
+
   it('adds segments up to the ceiling of eight, then says so', async () => {
     draw(keyed(seg('En.')));
     for (let i = 0; i < 7; i++) {
