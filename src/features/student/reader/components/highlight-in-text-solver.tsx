@@ -99,6 +99,7 @@ export function HighlightInTextSolver({
   const [verdict, setVerdict] = useState<HighlightInTextSubmitDetails | null>(null);
   const [attempt, setAttempt] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [startFailed, setStartFailed] = useState(false);
 
   /** Wall-clock since the attempt opened; the engine records it per submission. */
   const openedAt = useRef(0);
@@ -109,42 +110,51 @@ export function HighlightInTextSolver({
   const tokens = useMemo(() => tokenize(text), [text]);
   const paragraphOf = useMemo(() => paragraphOfTokens(text, tokens), [text, tokens]);
 
-  const startMutate = start.mutate;
+  const startAsync = start.mutateAsync;
   const begin = useCallback(() => {
-    startMutate(
-      { language },
-      {
-        onSuccess: (data) => {
-          const passage = readHighlightInTextProjection(data.exerciseContent);
-          if (passage === null) {
-            setUnusable(true);
-            return;
-          }
+    // A promise, not `mutate(vars, { onSuccess })`: the per-call callbacks belong to the
+    // mutation observer, and when React re-mounts the component (strict mode) the observer
+    // lets go of them — the start would succeed and nothing would ever read its answer.
+    // For the same reason the screen does not read `start.isPending` / `start.isError`: an
+    // observer that was let go stops hearing about the mutation. The solver keeps its own.
+    setStartFailed(false);
+    startAsync({ language })
+      .then((data) => {
+        const passage = readHighlightInTextProjection(data.exerciseContent);
+        if (passage === null) {
+          setUnusable(true);
+          return;
+        }
 
-          const resumed = data.questionStates ?? [];
-          const open = passage.questions.findIndex(
-            (q) => resumed.find((s) => s.questionId === q.id)?.closed !== true,
-          );
-          const at = open === -1 ? 0 : open;
-          const here = resumed.find((s) => s.questionId === passage.questions[at]?.id);
+        const resumed = data.questionStates ?? [];
+        const open = passage.questions.findIndex(
+          (q) => resumed.find((s) => s.questionId === q.id)?.closed !== true,
+        );
+        const at = open === -1 ? 0 : open;
+        const here = resumed.find((s) => s.questionId === passage.questions[at]?.id);
 
-          setAttemptId(data.attemptId);
-          setProjection(passage);
-          setDocument(data.exerciseContent);
-          setTranscript(null);
-          setStates(resumed);
-          setQuestionIndex(at);
-          setMarks([]);
-          setVerdict(null);
-          setAttempt((here?.checks ?? 0) + 1);
-          setError(null);
-          openedAt.current = Date.now();
-        },
-      },
-    );
-  }, [startMutate, language]);
+        setAttemptId(data.attemptId);
+        setProjection(passage);
+        setDocument(data.exerciseContent);
+        setTranscript(null);
+        setStates(resumed);
+        setQuestionIndex(at);
+        setMarks([]);
+        setVerdict(null);
+        setAttempt((here?.checks ?? 0) + 1);
+        setError(null);
+        openedAt.current = Date.now();
+      })
+      .catch(() => setStartFailed(true));
+  }, [startAsync, language]);
 
+  // Once per mount. React's dev double-run of effects would otherwise send two starts a
+  // millisecond apart, and the engine — which checks for an open attempt and then inserts —
+  // writes both, leaving a second `in_progress` row nobody will ever finish (plan 67, ph. 9).
+  const started = useRef(false);
   useEffect(() => {
+    if (started.current) return;
+    started.current = true;
     begin();
   }, [begin]);
 
@@ -155,10 +165,10 @@ export function HighlightInTextSolver({
 
   const audio = useExerciseAudio(document);
 
-  if (!unusable && (start.isPending || (start.isSuccess && projection === null))) {
+  if (!unusable && !startFailed && projection === null) {
     return <LearningSkeleton variant="list" rows={4} />;
   }
-  if (unusable || start.isError || projection === null || attemptId === null) {
+  if (unusable || startFailed || projection === null || attemptId === null) {
     return <ErrorState onRetry={retryStart} />;
   }
 

@@ -1,3 +1,4 @@
+import { StrictMode, type ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -151,12 +152,15 @@ interface ApiOptions {
   /** Each submit in order; the last one repeats. */
   submits?: unknown[];
   submitStatus?: number;
+  /** Status of the start request; the first `startFailures` of them. */
+  startFailures?: number;
 }
 
 function mockApi(options: ApiOptions = {}) {
   const submits = options.submits ?? [scored(FAILED)];
   const bodies: Array<{ submittedAnswer: unknown }> = [];
   let handed = 0;
+  let failedStarts = 0;
 
   const fetchMock = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
@@ -180,6 +184,10 @@ function mockApi(options: ApiOptions = {}) {
       return json({ attempt: null });
     }
 
+    if (failedStarts < (options.startFailures ?? 0)) {
+      failedStarts += 1;
+      return json({ error: 'down' }, 500);
+    }
     return json({ ...STARTED, ...options.started });
   });
 
@@ -189,19 +197,22 @@ function mockApi(options: ApiOptions = {}) {
 function renderSolver(
   fetchMock: ReturnType<typeof mockApi>,
   onChecked?: (ok: boolean | null) => void,
+  wrap: (node: ReactElement) => ReactElement = (node) => node,
 ) {
   vi.stubGlobal('fetch', fetchMock);
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   return render(
-    <QueryClientProvider client={client}>
-      <NextIntlClientProvider locale="en" messages={enMessages}>
-        <HighlightInTextSolver
-          exerciseId="ex-1"
-          language="no"
-          {...(onChecked === undefined ? {} : { onChecked })}
-        />
-      </NextIntlClientProvider>
-    </QueryClientProvider>,
+    wrap(
+      <QueryClientProvider client={client}>
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <HighlightInTextSolver
+            exerciseId="ex-1"
+            language="no"
+            {...(onChecked === undefined ? {} : { onChecked })}
+          />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    ),
   );
 }
 
@@ -282,6 +293,32 @@ describe('HighlightInTextSolver', () => {
     // The attempt's verdict, not the last question's.
     expect(onChecked).toHaveBeenCalledWith(false);
     expect(api.bodies[1]?.submittedAnswer).toEqual({ questionId: 'q2', marks: [range('sommer')] });
+  });
+
+  it('starts one attempt, not two, when effects run twice (React strict mode)', async () => {
+    const api = mockApi();
+    renderSolver(api, undefined, (node) => <StrictMode>{node}</StrictMode>);
+
+    const starts = () =>
+      api.mock.calls.filter(
+        ([url, init]) => !String(url).endsWith('/submit') && init?.method === 'POST',
+      );
+    // The passage must actually appear: a guard that stopped the second start but lost the
+    // first one's answer would leave the skeleton up for good.
+    expect(await screen.findByRole('group', { name: /./ })).toBeInTheDocument();
+    // Let a second start, if there were one, land before counting.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(starts()).toHaveLength(1);
+  });
+
+  it('shows the error screen when the attempt cannot be started, and starts again on retry', async () => {
+    renderSolver(mockApi({ startFailures: 1 }));
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Reload' }));
+
+    expect(
+      await screen.findByRole('group', { name: 'Find the verbs in the past tense.' }),
+    ).toBeInTheDocument();
   });
 
   it('resumes an open attempt on the first question still open, at the next check', async () => {
