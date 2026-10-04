@@ -3671,6 +3671,40 @@
         "mark": "Mark as a focus word",
         "noReason": "No reason written yet"
       }
+    },
+    "step4": {
+      "eyebrow": "Step 4 of 4",
+      "title": "Difficulty and delivery",
+      "lede": "How the clip is heard and how a sentence is checked. None of this changes the key — it changes how much a student has to carry in their head.",
+      "itemNoun": "the sentences",
+      "transcript": {
+        "title": "The transcript",
+        "never": "Never",
+        "after": "After the check",
+        "always": "Always",
+        "neverHelp": "The text of a sentence is never shown, not even after it is solved.",
+        "afterHelp": "A sentence’s text opens once it is closed — passed, out of checks, or revealed.",
+        "alwaysHelp": "The transcript is the answer key. Readable from the start, there is nothing left to hear."
+      },
+      "countLabel": "Show how many words the sentence has",
+      "countHelp": "A counter above the field. It helps, and it lowers the evidence ceiling.",
+      "hintsLabel": "Show the reason when the check fails",
+      "hintsHelp": "The line you wrote for the sentence appears under a failed check.",
+      "revealLabel": "Let the student reveal the correct sentence",
+      "revealHelp": "Shows the key with every focus word explained. A reveal is not a check.",
+      "attemptsLabel": "Attempts per sentence",
+      "attemptsUnlimited": "Unlimited",
+      "attemptsHelp": "Each check of one sentence counts. Only the first one decides the score.",
+      "passLabel": "Pass mark — {threshold}% of the words in a sentence",
+      "passHelp": "{mark} of {total, plural, one {# word} other {# words}} in segment 1.",
+      "passHelpEmpty": "Write a sentence on step 2 to see this in words.",
+      "passStrict": "100% means one wrong letter fails the sentence.",
+      "ceiling": {
+        "none": "Full success and full failure both count as evidence — nothing here caps it.",
+        "count": "Evidence ceiling: capped, because the word counter gives the length of the answer away.",
+        "transcript": "Evidence ceiling: capped, because the transcript is readable before the check.",
+        "both": "Evidence ceiling: capped, because the word counter and the open transcript both give the answer away."
+      }
     }
   },
   "coverage": {

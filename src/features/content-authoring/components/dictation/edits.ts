@@ -170,3 +170,12 @@ export function putBack<T extends Doc>(ex: T, orphanId: string): T {
 export function dropOrphan<T extends Doc>(ex: T, orphanId: string): T {
   return keep(ex, dropOrphanFrom(ex, orphanId));
 }
+
+/** Who may read the transcript — the one audio setting step 4 owns apart from the layer's cards. */
+export function setTranscriptWhen<T extends Doc>(
+  ex: T,
+  transcriptWhen: ExerciseAudio['settings']['transcriptWhen'],
+): T {
+  const audio: ExerciseAudio = { ...ex.audio, settings: { ...ex.audio.settings, transcriptWhen } };
+  return keep(ex, update(ex, { audio }));
+}

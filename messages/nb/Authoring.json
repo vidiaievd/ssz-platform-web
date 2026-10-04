@@ -3671,6 +3671,40 @@
         "mark": "Merk som fokusord",
         "noReason": "Ingen begrunnelse skrevet ennå"
       }
+    },
+    "step4": {
+      "eyebrow": "Steg 4 av 4",
+      "title": "Vanskelighet og levering",
+      "lede": "Hvordan lydklippet høres og hvordan en setning sjekkes. Ingenting her endrer nøkkelen – det endrer hvor mye eleven må holde i hodet.",
+      "itemNoun": "setningene",
+      "transcript": {
+        "title": "Transkripsjonen",
+        "never": "Aldri",
+        "after": "Etter sjekken",
+        "always": "Alltid",
+        "neverHelp": "Teksten til en setning vises aldri, heller ikke etter at den er løst.",
+        "afterHelp": "Teksten åpnes når setningen er avsluttet – bestått, sjekkene brukt opp eller vist.",
+        "alwaysHelp": "Transkripsjonen er fasiten. Er den synlig fra start, er det ingenting igjen å høre."
+      },
+      "countLabel": "Vis hvor mange ord setningen har",
+      "countHelp": "En teller over feltet. Den hjelper, og den senker bevistaket.",
+      "hintsLabel": "Vis begrunnelsen når sjekken feiler",
+      "hintsHelp": "Linjen du skrev for setningen vises under en mislykket sjekk.",
+      "revealLabel": "La eleven vise riktig setning",
+      "revealHelp": "Viser nøkkelen med alle fokusord forklart. Å vise fasit er ikke en sjekk.",
+      "attemptsLabel": "Forsøk per setning",
+      "attemptsUnlimited": "Ubegrenset",
+      "attemptsHelp": "Hver sjekk av én setning teller. Bare den første avgjør poengsummen.",
+      "passLabel": "Bestått – {threshold} % av ordene i en setning",
+      "passHelp": "{mark} av {total, plural, one {# ord} other {# ord}} i segment 1.",
+      "passHelpEmpty": "Skriv en setning i steg 2 for å se dette i ord.",
+      "passStrict": "100 % betyr at én feil bokstav gir ikke bestått.",
+      "ceiling": {
+        "none": "Full suksess og full fiasko teller begge som bevis – ingenting her setter tak.",
+        "count": "Bevistak: begrenset, fordi ordtelleren røper lengden på svaret.",
+        "transcript": "Bevistak: begrenset, fordi transkripsjonen kan leses før sjekken.",
+        "both": "Bevistak: begrenset, fordi ordtelleren og den åpne transkripsjonen røper svaret."
+      }
     }
   },
   "coverage": {
