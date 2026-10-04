@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Segmented } from '@/components/ui/segmented';
 import { Textarea } from '@/components/ui/textarea';
 import { ExerciseAudioPlayer } from '@/features/student/exercises/audio';
-import { type AudioIssue } from '@/lib/shared-kernel/audio';
+import { toTenths, type AudioIssue } from '@/lib/shared-kernel/audio';
 import {
   allWords,
   audioIssuesOf,
@@ -81,7 +81,7 @@ export function StepKey<T extends DictationContent>({
   const { segments, mode } = exercise;
   const empty = segments.length <= 1 && !segments.some((s) => s.text.trim() !== '');
   const sentences = sentencesOf(paste, packOf(exercise.language));
-  const pos = Math.round(eng.state.pos);
+  const pos = toTenths(eng.state.pos);
   const found = issues(exercise).filter((issue) => issue.step === 2);
   const audioFound = audioIssuesOf(exercise).filter((issue) => issue.part === 'segments');
 

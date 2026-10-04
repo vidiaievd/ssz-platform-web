@@ -61,9 +61,10 @@ describe('setTimecodeEdge — «Set start here» / «Set end» (AC-B3)', () => {
     expect(setTimecodeEdge(ex, id, 'start', 12).segments[0]?.audio).toEqual({ start: 12, end: 19 });
   });
 
-  it('rounds to the whole second the field shows', () => {
+  it('keeps a tenth of a second, so an end does not cut the last word short', () => {
     const { ex, id } = withSegment({ start: 3, end: 19 });
-    expect(setTimecodeEdge(ex, id, 'end', 17.6).segments[0]?.audio).toEqual({ start: 3, end: 18 });
+    expect(setTimecodeEdge(ex, id, 'end', 17.64).segments[0]?.audio).toEqual({ start: 3, end: 17.6 });
+    expect(setTimecodeEdge(ex, id, 'end', 5.46).segments[0]?.audio).toEqual({ start: 3, end: 5.5 });
   });
 
   it('with no timecode yet, a start is the whole pair until the end is set', () => {

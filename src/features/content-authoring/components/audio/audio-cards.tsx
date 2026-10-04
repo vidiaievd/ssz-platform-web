@@ -13,8 +13,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useMediaAsset, uploadAsset } from '@/features/media';
 import {
   formatDuration,
+  formatTimecode,
   hasClip,
   parseDuration,
+  parseTimecode,
   withAudio,
   withAudioSettings,
   type AudioDraft,
@@ -600,8 +602,8 @@ export function AudioSegmentField({
 }) {
   const t = useTranslations('Authoring');
   const id = useId();
-  const [from, setFrom] = useState(segment === null ? '' : formatDuration(segment.start));
-  const [to, setTo] = useState(segment === null ? '' : formatDuration(segment.end));
+  const [from, setFrom] = useState(segment === null ? '' : formatTimecode(segment.start));
+  const [to, setTo] = useState(segment === null ? '' : formatTimecode(segment.end));
 
   // A value set from outside — «Set start here» next to the field — has to show in it. The
   // fields were seeded once and ignored every later change; a timecode that came from the
@@ -610,14 +612,14 @@ export function AudioSegmentField({
   if (segment !== seen) {
     setSeen(segment);
     if (segment !== null) {
-      if (parseDuration(from) !== segment.start) setFrom(formatDuration(segment.start));
-      if (parseDuration(to) !== segment.end) setTo(formatDuration(segment.end));
+      if (parseTimecode(from) !== segment.start) setFrom(formatTimecode(segment.start));
+      if (parseTimecode(to) !== segment.end) setTo(formatTimecode(segment.end));
     }
   }
 
   function push(nextFrom: string, nextTo: string) {
-    const start = parseDuration(nextFrom);
-    const end = parseDuration(nextTo);
+    const start = parseTimecode(nextFrom);
+    const end = parseTimecode(nextTo);
     onChange(start === null || end === null ? null : { start, end });
   }
 
@@ -631,7 +633,7 @@ export function AudioSegmentField({
         <Input
           aria-label={fromLabel}
           value={from}
-          placeholder="0:22"
+          placeholder="m:ss"
           inputMode="numeric"
           className="h-8 w-16 px-2 text-center font-mono text-xs"
           onChange={(e) => {
@@ -645,7 +647,7 @@ export function AudioSegmentField({
         <Input
           aria-label={toLabel}
           value={to}
-          placeholder="0:48"
+          placeholder="m:ss"
           inputMode="numeric"
           className="h-8 w-16 px-2 text-center font-mono text-xs"
           onChange={(e) => {
@@ -666,7 +668,7 @@ export function AudioSegmentField({
         <Input
           id={`${id}-from`}
           value={from}
-          placeholder="0:22"
+          placeholder="m:ss"
           inputMode="numeric"
           className="w-24"
           onChange={(e) => {
@@ -682,7 +684,7 @@ export function AudioSegmentField({
         <Input
           id={`${id}-to`}
           value={to}
-          placeholder="0:48"
+          placeholder="m:ss"
           inputMode="numeric"
           className="w-24"
           onChange={(e) => {

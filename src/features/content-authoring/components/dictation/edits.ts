@@ -1,4 +1,4 @@
-import type { AudioDraft, ExerciseAudio } from '@/lib/shared-kernel/audio';
+import { toTenths, type AudioDraft, type ExerciseAudio } from '@/lib/shared-kernel/audio';
 import {
   addSegment as addSegmentTo,
   applySplit as applySplitTo,
@@ -92,7 +92,8 @@ export function setSegmentAudio<T extends Doc>(
  * A timecode is a pair, so the other end comes from the one already there. With none yet, a
  * start takes the position for both ends and an end starts at 0:00 — the pair is then empty
  * or inverted until the author sets the other end, which the audio layer says in words.
- * Positions are whole seconds, the resolution the field shows.
+ * Positions are kept to a tenth of a second: a sentence rarely ends on a whole second, and
+ * an end rounded down cuts the last word short.
  */
 export function setTimecodeEdge<T extends Doc>(
   ex: T,
@@ -102,7 +103,7 @@ export function setTimecodeEdge<T extends Doc>(
 ): T {
   const seg = ex.segments.find((s) => s.id === id);
   if (!seg) return ex;
-  const at = Math.round(position);
+  const at = toTenths(position);
   const next =
     edge === 'start'
       ? { start: at, end: seg.audio?.end ?? at }

@@ -364,7 +364,7 @@ export function ContentsSidebar({
         </div>
         <div className="mb-1.5 flex items-center justify-between">
           <span className="text-[11.5px] font-semibold text-secondary-foreground">
-            {t('completed', { pct: course.percentComplete })}
+            {t('completed', { pct: Math.round(course.percentComplete) })}
           </span>
           <span className="text-[11px] text-muted-foreground">
             {course.itemsDone}/{course.itemsTotal}

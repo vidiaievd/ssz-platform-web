@@ -244,6 +244,19 @@ describe('AudioSegmentField', () => {
     expect(onChange).toHaveBeenLastCalledWith({ start: 22, end: 48 });
   });
 
+  it('takes a tenth of a second, and shows one that was set from outside', async () => {
+    const onChange = vi.fn();
+    const { unmount } = wrap(<AudioSegmentField segment={null} onChange={onChange} />);
+    await userEvent.type(screen.getByLabelText('From'), '0:03.5');
+    await userEvent.type(screen.getByLabelText('To'), '0:05.5');
+    expect(onChange).toHaveBeenLastCalledWith({ start: 3.5, end: 5.5 });
+    unmount();
+
+    wrap(<AudioSegmentField segment={{ start: 3.5, end: 6 }} onChange={vi.fn()} />);
+    expect(screen.getByLabelText('From')).toHaveValue('0:03.5');
+    expect(screen.getByLabelText('To')).toHaveValue('0:06');
+  });
+
   it('clears the timecode rather than leaving half of one', async () => {
     const onChange = vi.fn();
     wrap(<AudioSegmentField segment={{ start: 22, end: 48 }} onChange={onChange} />);

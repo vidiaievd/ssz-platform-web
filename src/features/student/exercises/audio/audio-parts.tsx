@@ -4,7 +4,7 @@ import { ChevronDown, Headphones, Lock, Play, Square } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { formatDuration, type ExerciseAudio, type ItemAudio } from '@/lib/shared-kernel/audio';
+import { formatTimecode, type ExerciseAudio, type ItemAudio } from '@/lib/shared-kernel/audio';
 
 import { ExerciseAudioPlayer } from './exercise-audio-player';
 import type { ExerciseAudioEngine } from './use-exercise-audio';
@@ -140,8 +140,8 @@ export function AudioSegmentButton({
         <Play size={11} aria-hidden="true" />
       )}
       {t('audio.fragment', {
-        from: formatDuration(segment.start),
-        to: formatDuration(segment.end),
+        from: formatTimecode(segment.start),
+        to: formatTimecode(segment.end),
       })}
     </button>
   );
