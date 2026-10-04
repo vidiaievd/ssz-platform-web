@@ -3608,6 +3608,69 @@
       },
       "warnTitle": "The key is the answer.",
       "warnBody": "Segment text, the reasons in step 3 and the transcript stay in expected_answers and reach the browser only inside the verdict. Nothing here is sent with the exercise content."
+    },
+    "step3": {
+      "eyebrow": "Step 3 of 4",
+      "title": "Errors and reasons",
+      "lede": "Decide what counts as a mistake, then mark the words this dictation is about and say why each is spelled the way it is. A marked word is never “almost right” — it is named when it is missed.",
+      "empty": {
+        "title": "Nothing written down yet",
+        "body": "Marking works on sentences. Write the key first, then come back here.",
+        "back": "Back to the key"
+      },
+      "rules": {
+        "title": "What counts as an error",
+        "caseLabel": "Capital letters count",
+        "caseHelp": "Off: “oslo” and “Oslo” are the same word.",
+        "punctuationLabel": "Punctuation counts",
+        "punctuationHelp": "Off: commas and full stops are not compared."
+      },
+      "near": {
+        "label": "Almost right",
+        "strict": "Wrong",
+        "flag": "Wrong, named",
+        "half": "Half a word",
+        "strictHelp": "A slip of one letter is wrong, like any other mistake.",
+        "flagHelp": "A slip of one letter is wrong, but the report calls it a slip of the hand.",
+        "halfHelp": "A slip of one letter earns half a word. A marked word never does."
+      },
+      "try": {
+        "title": "Try a student answer",
+        "note": "segment {index} · graded with the rules above",
+        "note2": "The same diff runs on the server. Nothing in this panel is stored — change the answer or the rules above and watch the line."
+      },
+      "coverage": {
+        "title": "{written} / {total} focus words with a reason",
+        "meter": "Focus words with a reason",
+        "hint": "Click the words below that this dictation is about.",
+        "ok": "Every focus word explains itself.",
+        "silent": "{count, plural, one {# of them is marked but silent.} other {# of them are marked but silent.}}"
+      },
+      "orphans": {
+        "title": "{count, plural, one {# marked word lost its place} other {# marked words lost their place}}",
+        "segment": "Segment {index}",
+        "putBack": "Put it back",
+        "gone": "that word is gone",
+        "drop": "Drop the mark on “{surface}”"
+      },
+      "seg": {
+        "title": "Segment {index}",
+        "focusCount": "{count, plural, one {# focus word} other {# focus words}}",
+        "pick": "Click the words this dictation is about",
+        "pickHelp": "Pick the words a student is likely to misspell. They are reported by name.",
+        "pickLabel": "Segment {index}: the words",
+        "whyFor": "Why “{word}” is spelled that way",
+        "whyPlaceholder": "Why this one is spelled that way — one line",
+        "unmark": "Unmark “{word}”",
+        "whyLabel": "What to say when the sentence comes back wrong",
+        "whyHint": "One line shown under a failed check, when hints are on.",
+        "whyRequired": "Required — a dictation that answers only “wrong” teaches copying.",
+        "whyPlaceholderSegment": "e.g. Say it aloud: the sound is written with kj."
+      },
+      "picker": {
+        "mark": "Mark as a focus word",
+        "noReason": "No reason written yet"
+      }
     }
   },
   "coverage": {

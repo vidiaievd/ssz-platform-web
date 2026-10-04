@@ -3608,6 +3608,69 @@
       },
       "warnTitle": "Fasiten er svaret.",
       "warnBody": "Segmentteksten, begrunnelsene i steg 3 og utskriften blir liggende i expected_answers og når nettleseren bare i dommen. Ingenting her sendes med øvelsens innhold."
+    },
+    "step3": {
+      "eyebrow": "Steg 3 av 4",
+      "title": "Feil og begrunnelser",
+      "lede": "Bestem hva som regnes som feil, og merk så ordene diktaten handler om og si hvorfor hvert av dem skrives slik. Et merket ord er aldri «nesten riktig» – det nevnes ved navn når det glipper.",
+      "empty": {
+        "title": "Ingenting er skrevet ennå",
+        "body": "Merking virker på setninger. Skriv nøkkelen først, og kom så tilbake hit.",
+        "back": "Tilbake til nøkkelen"
+      },
+      "rules": {
+        "title": "Hva som regnes som feil",
+        "caseLabel": "Store bokstaver teller",
+        "caseHelp": "Av: «oslo» og «Oslo» er samme ord.",
+        "punctuationLabel": "Tegnsetting teller",
+        "punctuationHelp": "Av: komma og punktum sammenlignes ikke."
+      },
+      "near": {
+        "label": "Nesten riktig",
+        "strict": "Feil",
+        "flag": "Feil, med navn",
+        "half": "Et halvt ord",
+        "strictHelp": "En slurvefeil på én bokstav er feil, som alle andre feil.",
+        "flagHelp": "En slurvefeil på én bokstav er feil, men rapporten kaller den en skrivefeil.",
+        "halfHelp": "En slurvefeil på én bokstav gir et halvt ord. Et merket ord får aldri det."
+      },
+      "try": {
+        "title": "Prøv et elevsvar",
+        "note": "segment {index} · rettet med reglene over",
+        "note2": "Samme diff kjører på serveren. Ingenting i dette panelet lagres – endre svaret eller reglene over og se linjen endre seg."
+      },
+      "coverage": {
+        "title": "{written} / {total} fokusord med begrunnelse",
+        "meter": "Fokusord med begrunnelse",
+        "hint": "Klikk på ordene under som diktaten handler om.",
+        "ok": "Hvert fokusord forklarer seg selv.",
+        "silent": "{count, plural, one {# av dem er merket, men uten begrunnelse.} other {# av dem er merket, men uten begrunnelse.}}"
+      },
+      "orphans": {
+        "title": "{count, plural, one {# merket ord mistet plassen} other {# merkede ord mistet plassen}}",
+        "segment": "Segment {index}",
+        "putBack": "Sett tilbake",
+        "gone": "ordet er borte",
+        "drop": "Fjern merket på «{surface}»"
+      },
+      "seg": {
+        "title": "Segment {index}",
+        "focusCount": "{count, plural, one {# fokusord} other {# fokusord}}",
+        "pick": "Klikk på ordene diktaten handler om",
+        "pickHelp": "Velg ordene en elev sannsynligvis staver feil. De rapporteres ved navn.",
+        "pickLabel": "Segment {index}: ordene",
+        "whyFor": "Hvorfor «{word}» skrives slik",
+        "whyPlaceholder": "Hvorfor akkurat dette ordet skrives slik – én linje",
+        "unmark": "Fjern merket på «{word}»",
+        "whyLabel": "Hva som skal sies når setningen blir feil",
+        "whyHint": "Én linje som vises under en mislykket sjekk, når hint er på.",
+        "whyRequired": "Påkrevd – en diktat som bare svarer «feil» lærer bort kopiering.",
+        "whyPlaceholderSegment": "f.eks. Si det høyt: lyden skrives med kj."
+      },
+      "picker": {
+        "mark": "Merk som fokusord",
+        "noReason": "Ingen begrunnelse skrevet ennå"
+      }
     }
   },
   "coverage": {

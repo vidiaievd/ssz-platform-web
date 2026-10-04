@@ -2,14 +2,24 @@ import type { AudioDraft, ExerciseAudio } from '@/lib/shared-kernel/audio';
 import {
   addSegment as addSegmentTo,
   applySplit as applySplitTo,
+  canPutBack as canPutBackIn,
+  dropOrphan as dropOrphanFrom,
   packOf,
+  putBack as putBackIn,
   removeSegment as removeSegmentFrom,
+  setFocusWhy as setFocusWhyOf,
   setMode as setModeOf,
   setSegmentAudio as setSegmentAudioOf,
   setSegmentText as setSegmentTextOf,
+  setSegmentWhy as setSegmentWhyOf,
+  toggleFocus as toggleFocusOf,
   update,
+  updateMarking,
+  updateSettings,
   type DictationContent,
+  type Marking,
   type Mode,
+  type Settings,
 } from '@/lib/shared-kernel/dictation';
 
 /**
@@ -119,4 +129,44 @@ export function removeSegment<T extends Doc>(ex: T, id: string): T {
 export function applySplit<T extends Doc>(ex: T, text: string): { ex: T; estimated: string[] } {
   const result = applySplitTo(ex, text, packOf(ex.language));
   return { ex: keep(ex, result.ex), estimated: result.estimated };
+}
+
+// ── Marking and delivery ────────────────────────────────────────────────────
+
+export function setMarking<T extends Doc>(ex: T, patch: Partial<Marking>): T {
+  return keep(ex, updateMarking(ex, patch));
+}
+
+export function setSettings<T extends Doc>(ex: T, patch: Partial<Settings>): T {
+  return keep(ex, updateSettings(ex, patch));
+}
+
+/** A click on a word: it becomes a focus word with no reason yet, or stops being one. */
+export function toggleFocus<T extends Doc>(ex: T, segmentId: string, wordIndex: number): T {
+  return keep(ex, toggleFocusOf(ex, segmentId, wordIndex));
+}
+
+export function setFocusWhy<T extends Doc>(
+  ex: T,
+  segmentId: string,
+  focusId: string,
+  why: string,
+): T {
+  return keep(ex, setFocusWhyOf(ex, segmentId, focusId, why));
+}
+
+export function setSegmentWhy<T extends Doc>(ex: T, id: string, why: string): T {
+  return keep(ex, setSegmentWhyOf(ex, id, why));
+}
+
+export function canPutBack(ex: Doc, orphanId: string): boolean {
+  return canPutBackIn(ex, orphanId);
+}
+
+export function putBack<T extends Doc>(ex: T, orphanId: string): T {
+  return keep(ex, putBackIn(ex, orphanId));
+}
+
+export function dropOrphan<T extends Doc>(ex: T, orphanId: string): T {
+  return keep(ex, dropOrphanFrom(ex, orphanId));
 }
