@@ -3296,6 +3296,138 @@
       "reshuffle": "Reshuffle"
     }
   },
+  "highlightInText": {
+    "subject": {
+      "question": "Question {index}",
+      "join": "{subject} — {message}"
+    },
+    "issues": {
+      "HT_NO_TEXT": "There is no text to mark in.",
+      "HT_NO_TITLE": "The exercise has no title — teachers cannot find it in the module.",
+      "HT_TEXT_SHORT": "{words} words is short — noticing needs enough context for the feature to repeat.",
+      "HT_TEXT_LONG": "{words} words is a long scroll on a phone. Split it into two exercises.",
+      "HT_ORPHANED_MARKS": "{count, plural, one {# mark lost its place} other {# marks lost their place}} when the text changed.",
+      "HT_NO_QUESTIONS": "A text with no question is a reading passage, not an exercise.",
+      "HT_QUESTION_NO_PROMPT": "It has no wording.",
+      "HT_QUESTION_NO_SPANS": "Nothing is marked as the answer.",
+      "HT_SPANS_OVERLAP": "Two marks cover the same words — the verdict cannot say which one was found.",
+      "HT_SPAN_OFF_TOKENS": "A mark does not sit on whole words of the current text. Mark it again.",
+      "HT_TOO_FEW_SPANS": "{count, plural, one {# mark} other {# marks}} — under three, one lucky tap passes it.",
+      "HT_DENSITY_HIGH": "It marks {share}% of the text. Past 40% a student who marks everything scores well.",
+      "HT_UNIT_MISMATCH": "It is set to single words but contains a phrase mark.",
+      "HT_DUPLICATE_PROMPT": "It asks the same thing as another question.",
+      "HT_TOO_MANY_QUESTIONS": "More than four passes over one text turns into a worksheet.",
+      "HT_NO_MISS_HINT": "It gives no reason for what was missed.",
+      "HT_NO_FP_HINT": "It has nothing to say about a wrong mark — the traps in the text stay unexplained.",
+      "HT_PENALTY_OFF": "With no penalty for extra marks, marking the whole text scores full marks. Evidence from this exercise is capped while it is off.",
+      "HT_COUNT_SHOWN": "Showing how many marks are expected turns the tail of the task into counting. Evidence from this exercise is capped while it is on.",
+      "HT_ONE_SHOT_REVEAL": "One attempt plus an answer key means most students read the key instead of looking."
+    },
+    "fixes": {
+      "HT_NO_TEXT": "Paste the text",
+      "HT_NO_TITLE": "Name it",
+      "HT_TEXT_SHORT": "Lengthen the text",
+      "HT_TEXT_LONG": "Shorten the text",
+      "HT_ORPHANED_MARKS": "Re-place or drop them",
+      "HT_NO_QUESTIONS": "Add a question",
+      "HT_QUESTION_NO_PROMPT": "Write the question",
+      "HT_QUESTION_NO_SPANS": "Mark the answers",
+      "HT_SPANS_OVERLAP": "Separate them",
+      "HT_SPAN_OFF_TOKENS": "Mark it again",
+      "HT_TOO_FEW_SPANS": "Mark more",
+      "HT_DENSITY_HIGH": "Narrow the question",
+      "HT_UNIT_MISMATCH": "Switch it to phrases",
+      "HT_DUPLICATE_PROMPT": "Reword one",
+      "HT_TOO_MANY_QUESTIONS": "Split the exercise",
+      "HT_NO_MISS_HINT": "Write the explanation",
+      "HT_NO_FP_HINT": "Write it",
+      "HT_PENALTY_OFF": "Review the toggles",
+      "HT_COUNT_SHOWN": "Review the toggles",
+      "HT_ONE_SHOT_REVEAL": "Review the toggles"
+    },
+    "step1": {
+      "eyebrow": "Step 1 of 4",
+      "title": "The text",
+      "lede": "One passage, marked in place. The student never types and never chooses from a list — they point at what is already in front of them, which is the step between reading a text and producing the form.",
+      "titleLabel": "Exercise title",
+      "titlePlaceholder": "e.g. The past tense in a holiday story",
+      "instructionLabel": "Instruction above the text",
+      "instructionPlaceholder": "Read the text and mark what the question asks for.",
+      "instructionHelp": "The standing instruction. Each question adds its own line under it.",
+      "passageTitle": "The passage",
+      "passageNote": "{count, plural, one {# word} other {# words}} · blank line starts a paragraph",
+      "passagePlaceholder": "Paste or write the passage. 40–200 words works on both clients.",
+      "pending": {
+        "title": "{count, plural, one {# mark is} other {# marks are}} already placed in this text.",
+        "body": "Each one is re-found by the words it covers, in the same order of occurrence. Anything that no longer exists becomes a loose mark in step 2 rather than disappearing.",
+        "inspect": "See what moves",
+        "apply": "Apply the edit",
+        "lost": "{count, plural, one {# mark will lose its place} other {# marks will lose their place}} and wait for you in step 2.",
+        "kept": "Every mark finds its words again.",
+        "nothing": "Nothing is marked yet, so nothing can break."
+      },
+      "readsTitle": "How it reads",
+      "readsNote": "{count, plural, one {# question} other {# questions}} over this text",
+      "tip": "Pick a passage where the feature repeats six to ten times and where at least two near misses exist — a compound form next to the simple one. Marking is only worth the click when there is something to be wrong about."
+    },
+    "step2": {
+      "eyebrow": "Step 2 of 4",
+      "title": "Questions",
+      "lede": "Up to {max} questions over the same passage. Each is scored on its own and reported on its own — the student reads once and passes over the text several times, which is what a second pass is for.",
+      "noText": {
+        "title": "No text to mark in",
+        "body": "A question here is a question about a passage. Paste the passage first and the marking surface appears.",
+        "back": "Back to the text"
+      },
+      "orphans": {
+        "title": "{count, plural, one {# mark lost its place} other {# marks lost their place}} when the text changed",
+        "putBack": "Put it back",
+        "gone": "those words are gone",
+        "drop": "Drop the mark «{surface}»"
+      },
+      "untitledQuestion": "Question {index}",
+      "newQuestion": "New question",
+      "tabsLabel": "Questions",
+      "addQuestion": "Question",
+      "ceiling": "{max} is the ceiling",
+      "promptLabel": "What the student is asked to mark",
+      "promptPlaceholder": "e.g. Mark every verb in the past tense.",
+      "unitLabel": "Unit of marking",
+      "unit": {
+        "word": "Single words",
+        "phrase": "Phrases"
+      },
+      "unitHelp": {
+        "word": "One tap on a word marks it. Nothing longer can be selected.",
+        "phrase": "Tap a word, or press and drag across several to mark a whole phrase."
+      },
+      "unitMismatch": "This question already contains a phrase mark.",
+      "canvas": {
+        "title": "Mark the answers",
+        "noteWord": "click a word",
+        "notePhrase": "click, or drag across words",
+        "count": "<b>{count}</b> {count, plural, one {mark} other {marks}} · {marked} of {words} words",
+        "overlap": "Two marks overlap",
+        "clear": "Clear marks"
+      },
+      "key": {
+        "title": "The key",
+        "note": "why each one counts — shown with the answers",
+        "whyLabel": "Why mark {n} «{surface}» counts",
+        "whyPlaceholder": "Why this one — one line",
+        "remove": "Remove mark {n} «{surface}»",
+        "emptyTitle": "Nothing marked yet",
+        "emptyBody": "Click the words in the text above that answer this question. They appear here for you to explain."
+      },
+      "density": {
+        "title": "How much of the text each question claims",
+        "note": "past 40% marking everything passes",
+        "bar": "Share of the text marked by «{label}»"
+      },
+      "remove": "Delete “{prompt}” and its {count, plural, one {# mark} other {# marks}}",
+      "tip": "Mark the traps too, in the question they belong to: a form that looks like the answer but is not must stay unmarked — and the explanation for why a student marked it belongs in step 3, not here."
+    }
+  },
   "coverage": {
     "title": "What this trains",
     "total": "{count, plural, one {# exercise} other {# exercises}}",

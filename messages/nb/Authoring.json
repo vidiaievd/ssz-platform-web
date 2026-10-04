@@ -3296,6 +3296,138 @@
       "reshuffle": "Bland på nytt"
     }
   },
+  "highlightInText": {
+    "subject": {
+      "question": "Spørsmål {index}",
+      "join": "{subject} — {message}"
+    },
+    "issues": {
+      "HT_NO_TEXT": "Det finnes ingen tekst å markere i.",
+      "HT_NO_TITLE": "Oppgaven har ingen tittel — lærere finner den ikke i modulen.",
+      "HT_TEXT_SHORT": "{words} ord er kort — å legge merke til noe krever nok sammenheng til at trekket gjentar seg.",
+      "HT_TEXT_LONG": "{words} ord er mye å bla i på en telefon. Del den i to oppgaver.",
+      "HT_ORPHANED_MARKS": "{count, plural, one {# markering mistet plassen sin} other {# markeringer mistet plassen sin}} da teksten ble endret.",
+      "HT_NO_QUESTIONS": "En tekst uten spørsmål er en lesetekst, ikke en oppgave.",
+      "HT_QUESTION_NO_PROMPT": "Det mangler formulering.",
+      "HT_QUESTION_NO_SPANS": "Ingenting er markert som svar.",
+      "HT_SPANS_OVERLAP": "To markeringer dekker de samme ordene — vurderingen kan ikke si hvilken som ble funnet.",
+      "HT_SPAN_OFF_TOKENS": "En markering ligger ikke på hele ord i den nåværende teksten. Marker den på nytt.",
+      "HT_TOO_FEW_SPANS": "{count, plural, one {# markering} other {# markeringer}} — under tre klarer ett heldig trykk det.",
+      "HT_DENSITY_HIGH": "Det markerer {share} % av teksten. Over 40 % får en elev som markerer alt, god skår.",
+      "HT_UNIT_MISMATCH": "Det er satt til enkeltord, men har en frasemarkering.",
+      "HT_DUPLICATE_PROMPT": "Det spør om det samme som et annet spørsmål.",
+      "HT_TOO_MANY_QUESTIONS": "Mer enn fire gjennomganger av én tekst blir et arbeidsark.",
+      "HT_NO_MISS_HINT": "Det gir ingen forklaring på det som ble oversett.",
+      "HT_NO_FP_HINT": "Det sier ingenting om en feil markering — fellene i teksten forblir uforklart.",
+      "HT_PENALTY_OFF": "Uten trekk for ekstra markeringer gir det full skår å markere hele teksten. Evidensen fra oppgaven er begrenset så lenge det er av.",
+      "HT_COUNT_SHOWN": "Å vise hvor mange markeringer som ventes, gjør slutten av oppgaven til telling. Evidensen fra oppgaven er begrenset så lenge det er på.",
+      "HT_ONE_SHOT_REVEAL": "Ett forsøk pluss fasit betyr at de fleste elever leser fasiten i stedet for å lete."
+    },
+    "fixes": {
+      "HT_NO_TEXT": "Lim inn teksten",
+      "HT_NO_TITLE": "Gi den navn",
+      "HT_TEXT_SHORT": "Gjør teksten lengre",
+      "HT_TEXT_LONG": "Gjør teksten kortere",
+      "HT_ORPHANED_MARKS": "Plasser eller slett dem",
+      "HT_NO_QUESTIONS": "Legg til et spørsmål",
+      "HT_QUESTION_NO_PROMPT": "Skriv spørsmålet",
+      "HT_QUESTION_NO_SPANS": "Marker svarene",
+      "HT_SPANS_OVERLAP": "Skill dem",
+      "HT_SPAN_OFF_TOKENS": "Marker den på nytt",
+      "HT_TOO_FEW_SPANS": "Marker flere",
+      "HT_DENSITY_HIGH": "Snevre inn spørsmålet",
+      "HT_UNIT_MISMATCH": "Bytt til fraser",
+      "HT_DUPLICATE_PROMPT": "Omformuler ett",
+      "HT_TOO_MANY_QUESTIONS": "Del opp oppgaven",
+      "HT_NO_MISS_HINT": "Skriv forklaringen",
+      "HT_NO_FP_HINT": "Skriv den",
+      "HT_PENALTY_OFF": "Se over bryterne",
+      "HT_COUNT_SHOWN": "Se over bryterne",
+      "HT_ONE_SHOT_REVEAL": "Se over bryterne"
+    },
+    "step1": {
+      "eyebrow": "Steg 1 av 4",
+      "title": "Teksten",
+      "lede": "Én tekst, markert der den står. Eleven skriver aldri og velger aldri fra en liste — de peker på det som allerede står foran dem, og det er steget mellom å lese en tekst og å produsere formen.",
+      "titleLabel": "Oppgavens tittel",
+      "titlePlaceholder": "f.eks. Preteritum i en feriefortelling",
+      "instructionLabel": "Instruksjon over teksten",
+      "instructionPlaceholder": "Les teksten og marker det oppgaven spør om.",
+      "instructionHelp": "Den faste instruksjonen. Hvert spørsmål legger til sin egen linje under den.",
+      "passageTitle": "Teksten",
+      "passageNote": "{count, plural, one {# ord} other {# ord}} · tom linje starter et avsnitt",
+      "passagePlaceholder": "Lim inn eller skriv teksten. 40–200 ord fungerer på begge klientene.",
+      "pending": {
+        "title": "{count, plural, one {# markering er} other {# markeringer er}} allerede plassert i denne teksten.",
+        "body": "Hver av dem finnes igjen ut fra ordene den dekker, i samme rekkefølge. Det som ikke finnes lenger, blir en løs markering i steg 2 i stedet for å forsvinne.",
+        "inspect": "Se hva som flytter seg",
+        "apply": "Bruk endringen",
+        "lost": "{count, plural, one {# markering mister plassen sin} other {# markeringer mister plassen sin}} og venter på deg i steg 2.",
+        "kept": "Alle markeringene finner ordene sine igjen.",
+        "nothing": "Ingenting er markert ennå, så ingenting kan gå i stykker."
+      },
+      "readsTitle": "Slik leses den",
+      "readsNote": "{count, plural, one {# spørsmål} other {# spørsmål}} til denne teksten",
+      "tip": "Velg en tekst der trekket gjentar seg seks til ti ganger og der det finnes minst to nesten-treff — hadde fisket ved siden av fisket. Markering er bare verdt klikket når det er noe å ta feil av."
+    },
+    "step2": {
+      "eyebrow": "Steg 2 av 4",
+      "title": "Spørsmål",
+      "lede": "Opptil {max} spørsmål til den samme teksten. Hvert vurderes og rapporteres for seg — eleven leser én gang og går gjennom teksten flere ganger, og det er det en ny gjennomgang er til for.",
+      "noText": {
+        "title": "Ingen tekst å markere i",
+        "body": "Et spørsmål her er et spørsmål om en tekst. Lim inn teksten først, så dukker markeringsflaten opp.",
+        "back": "Tilbake til teksten"
+      },
+      "orphans": {
+        "title": "{count, plural, one {# markering mistet plassen sin} other {# markeringer mistet plassen sin}} da teksten ble endret",
+        "putBack": "Sett den tilbake",
+        "gone": "de ordene er borte",
+        "drop": "Slett markeringen «{surface}»"
+      },
+      "untitledQuestion": "Spørsmål {index}",
+      "newQuestion": "Nytt spørsmål",
+      "tabsLabel": "Spørsmål",
+      "addQuestion": "Spørsmål",
+      "ceiling": "{max} er taket",
+      "promptLabel": "Hva eleven skal markere",
+      "promptPlaceholder": "f.eks. Marker alle verbene som står i preteritum.",
+      "unitLabel": "Markeringsenhet",
+      "unit": {
+        "word": "Enkeltord",
+        "phrase": "Fraser"
+      },
+      "unitHelp": {
+        "word": "Ett trykk på et ord markerer det. Ingenting lengre kan velges.",
+        "phrase": "Trykk på et ord, eller trykk og dra over flere for å markere en hel frase."
+      },
+      "unitMismatch": "Dette spørsmålet har allerede en frasemarkering.",
+      "canvas": {
+        "title": "Marker svarene",
+        "noteWord": "klikk på et ord",
+        "notePhrase": "klikk, eller dra over ord",
+        "count": "<b>{count}</b> {count, plural, one {markering} other {markeringer}} · {marked} av {words} ord",
+        "overlap": "To markeringer overlapper",
+        "clear": "Fjern markeringer"
+      },
+      "key": {
+        "title": "Fasiten",
+        "note": "hvorfor hver enkelt teller — vises med svarene",
+        "whyLabel": "Hvorfor markering {n} «{surface}» teller",
+        "whyPlaceholder": "Hvorfor denne — én linje",
+        "remove": "Fjern markering {n} «{surface}»",
+        "emptyTitle": "Ingenting markert ennå",
+        "emptyBody": "Klikk på ordene i teksten over som svarer på dette spørsmålet. De dukker opp her så du kan forklare dem."
+      },
+      "density": {
+        "title": "Hvor mye av teksten hvert spørsmål tar",
+        "note": "over 40 % består den som markerer alt",
+        "bar": "Andel av teksten markert av «{label}»"
+      },
+      "remove": "Slett «{prompt}» og {count, plural, one {# markering} other {# markeringer}}",
+      "tip": "Marker fellene også, i spørsmålet de hører til: hadde fisket er ikke preteritum og skal stå umarkert — men forklaringen på hvorfor en elev markerte det, hører hjemme i steg 3, ikke her."
+    }
+  },
   "coverage": {
     "title": "Hva dette trener",
     "total": "{count, plural, one {# oppgave} other {# oppgaver}}",
