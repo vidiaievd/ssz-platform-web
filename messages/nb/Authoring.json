@@ -3705,6 +3705,18 @@
         "transcript": "Bevistak: begrenset, fordi transkripsjonen kan leses før sjekken.",
         "both": "Bevistak: begrenset, fordi ordtelleren og den åpne transkripsjonen røper svaret."
       }
+    },
+    "preview": {
+      "phone": "VoxOrd",
+      "desktop": "Web",
+      "reader": "Leser",
+      "deviceLabel": "Enhet",
+      "modeLabel": "Forhåndsvisning",
+      "static": "Statisk",
+      "live": "Live",
+      "restart": "Start forsøket på nytt",
+      "empty": "Skriv en setning i steg 2 for å se hva eleven får.",
+      "note": "Dette er elevens egen skjerm. Sjekker her kjører mot nøkkelen din i denne nettleseren og registreres ikke."
     }
   },
   "coverage": {

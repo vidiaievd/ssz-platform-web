@@ -3705,6 +3705,18 @@
         "transcript": "Evidence ceiling: capped, because the transcript is readable before the check.",
         "both": "Evidence ceiling: capped, because the word counter and the open transcript both give the answer away."
       }
+    },
+    "preview": {
+      "phone": "VoxOrd",
+      "desktop": "Web",
+      "reader": "Reader",
+      "deviceLabel": "Device",
+      "modeLabel": "Preview mode",
+      "static": "Static",
+      "live": "Live",
+      "restart": "Restart the attempt",
+      "empty": "Write a sentence on step 2 to see what a student is handed.",
+      "note": "This is the student’s own screen. Checks here run on your key in this browser and are not recorded."
     }
   },
   "coverage": {
