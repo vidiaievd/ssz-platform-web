@@ -4,7 +4,7 @@ import { ChevronDown, Headphones, Lock, Play, Square } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { formatDuration, type ExerciseAudio, type ItemAudio } from '@/lib/shared-kernel/audio';
+import { formatTimecode, type ExerciseAudio, type ItemAudio } from '@/lib/shared-kernel/audio';
 
 import { ExerciseAudioPlayer } from './exercise-audio-player';
 import type { ExerciseAudioEngine } from './use-exercise-audio';
@@ -58,8 +58,21 @@ export function AudioGateScreen({
   );
 }
 
-/** Why the items are not answering yet — BEHAVIOR.md §7. */
-export function AudioLockNote({ itemNoun, own = false }: { itemNoun?: string; own?: boolean }) {
+/**
+ * Why the items are not answering yet — BEHAVIOR.md §7.
+ *
+ * `message` replaces the layer's sentence for a type whose locked thing is not a set of
+ * items — `dictation` locks one field (plan 68 §7.8).
+ */
+export function AudioLockNote({
+  itemNoun,
+  own = false,
+  message,
+}: {
+  itemNoun?: string;
+  own?: boolean;
+  message?: string;
+}) {
   const t = useTranslations('ExerciseRunner');
 
   return (
@@ -71,11 +84,13 @@ export function AudioLockNote({ itemNoun, own = false }: { itemNoun?: string; ow
       <Lock size={13} aria-hidden="true" className="mt-0.5 shrink-0" />
       {/* `own` is the per-item source (plan 56 phase 6): the clip belongs to this one
           item, so the sentence is about it and not about "the clip" of the exercise. */}
-      {itemNoun === undefined
-        ? t('audio.lockNote')
-        : own
-          ? t('audio.lockNoteOwn', { item: itemNoun })
-          : t('audio.lockNoteNamed', { items: itemNoun })}
+      {message !== undefined
+        ? message
+        : itemNoun === undefined
+          ? t('audio.lockNote')
+          : own
+            ? t('audio.lockNoteOwn', { item: itemNoun })
+            : t('audio.lockNoteNamed', { items: itemNoun })}
     </p>
   );
 }
@@ -125,8 +140,8 @@ export function AudioSegmentButton({
         <Play size={11} aria-hidden="true" />
       )}
       {t('audio.fragment', {
-        from: formatDuration(segment.start),
-        to: formatDuration(segment.end),
+        from: formatTimecode(segment.start),
+        to: formatTimecode(segment.end),
       })}
     </button>
   );

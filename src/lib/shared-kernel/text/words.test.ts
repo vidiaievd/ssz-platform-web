@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
 // GENERATED FILE — DO NOT EDIT.
-// Source: ssz-platform/packages/shared-kernel/src/highlight-in-text/tokenize.test.ts
+// Source: ssz-platform/packages/shared-kernel/src/text/words.test.ts
 // Regenerate with `npm run kernel:sync`; verify with `npm run kernel:check`.
 // ---------------------------------------------------------------------------
 
@@ -8,8 +8,8 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { tokenize, wordsOf } from './tokenize';
-import { TOKENIZER_FIXTURE } from './tokenizer-fixture';
+import { tokenize, wordsOf } from './words';
+import { TOKENIZER_FIXTURE } from './words-fixture';
 
 describe('tokenize', () => {
   it('AC-M1: finds exactly the fixture words, each at its own offsets', () => {

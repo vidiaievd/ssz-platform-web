@@ -281,6 +281,7 @@ export function ReaderShell({
         key={activeContentItem.contentId}
         exerciseId={activeContentItem.contentId}
         {...(sourceHref === undefined ? {} : { sourceHref })}
+        {...(activeContentItem.title === null ? {} : { title: activeContentItem.title })}
       />
     );
   }

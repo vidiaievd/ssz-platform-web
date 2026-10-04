@@ -97,6 +97,22 @@ export async function fetchLastAttempt(exerciseId: string): Promise<AttemptRecor
 }
 
 /**
+ * Whether this learner has an open attempt the engine will resume — one with checked items
+ * on it (plan 68, Q6-A). Never rejects: a lookup that fails is read as «no», which shows the
+ * start card, and starting from it still joins the open attempt.
+ */
+export async function fetchResumable(exerciseId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/exercises/${exerciseId}/attempts`);
+    if (!res.ok) return false;
+    const data = (await res.json()) as LastAttemptResponse;
+    return data.resumable === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * How a failed `submit` actually left things (47.0.B).
  *
  * A failed check does not mean a failed submission: the engine has already accepted the

@@ -11,6 +11,13 @@ import type { StudentProjection as SortIntoBucketsProjection } from '@/lib/share
 import type { StudentResult as ShortAnswerResult } from '@/lib/shared-kernel/short-answer';
 import type { StudentResult as SentenceSchemaResult } from '@/lib/shared-kernel/sentence-schema';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
+import type {
+  FocusMiss,
+  RevealedKey,
+  SegmentState,
+  VerdictOp,
+  WordCounts,
+} from '@/lib/shared-kernel/dictation';
 
 /**
  * The exercise-engine attempt API, as this client uses it.
@@ -61,6 +68,12 @@ export interface StartAttemptResponse {
    * open until its last question closes (plan 67, phase 4). Empty on a fresh attempt.
    */
   questionStates?: HighlightInTextQuestionState[];
+  /**
+   * `dictation`: how each sentence of a resumed attempt stands, with what the learner has
+   * already been shown about it — the last checked text, the revealed sentence, the
+   * transcript slice (plan 68, phase 4). Empty on a fresh attempt.
+   */
+  segmentStates?: SegmentState[];
 }
 
 /** One question of a `short_answer` set already handed in on the resumed attempt. */
@@ -471,6 +484,55 @@ export interface HighlightInTextSubmitDetails {
   attemptPassed: boolean;
 }
 
+/**
+ * What one submit of a `dictation` sentence carries up — plan 68, phase 4.
+ *
+ * One sentence at a time. `text` is what the learner typed, sent as typed: the server
+ * normalises and tokenizes it. `reveal` is «Vis fasit», which closes the sentence and spends
+ * no check; `text` may then be left out. Which check this is and how every sentence stands
+ * are the attempt's facts, and the engine writes its own over anything sent.
+ */
+export interface DictationSubmittedAnswer {
+  segmentId: string;
+  text?: string;
+  reveal?: true;
+}
+
+/**
+ * `details` when the template is `dictation` — one sentence after one submit (the runner
+ * contract of plan 68, phase 4).
+ *
+ * `pct` / `passed` are this sentence on this check — on a reveal, the first check and
+ * `false`. `ops` is the corrected line, empty on a reveal. `why` arrives only for a failed
+ * check under hints; `key` only on a reveal; `transcriptSlice` only on the submit that
+ * closed the sentence, and only under the `after` policy. `score` on the response and
+ * `attemptPct` here are the attempt's — the mean of every sentence's first check.
+ */
+export interface DictationSubmitDetails {
+  segmentId: string;
+  pct: number;
+  passed: boolean;
+  words: WordCounts;
+  ops: VerdictOp[];
+  /** Near misses earned half a word each on this check — «half credit» in the verdict. */
+  nearCredit: boolean;
+  focus: FocusMiss[];
+  why?: string;
+  key?: RevealedKey;
+  transcriptSlice?: string;
+  /** Which check of this sentence this was (a reveal reports the last). */
+  attempt: number;
+  /** Checks of this sentence left; `null` is unlimited. */
+  checksLeft: number | null;
+  closed: boolean;
+  revealed: boolean;
+  segments: SegmentState[];
+  /** Every sentence is closed — the submit that closed the attempt. */
+  complete: boolean;
+  attemptPct: number;
+  attemptPassed: boolean;
+}
+
 /** Check one sentence of a `sentence_schema` set, or ask to be shown it. */
 export interface CheckRowRequest {
   rowId: string;
@@ -564,6 +626,13 @@ export interface GapFillSubmittedAnswer {
 
 export interface LastAttemptResponse {
   attempt: AttemptRecord | null;
+  /**
+   * Present, and `true`, when an attempt is still open with work on it the engine resumes —
+   * a sentence of a `dictation` or a question of a `highlight_in_text` already checked
+   * (plan 68, Q6-A: the reader skips its start card and goes straight back in). Absent
+   * otherwise, including for an open attempt with nothing on it.
+   */
+  resumable?: true;
 }
 
 /**

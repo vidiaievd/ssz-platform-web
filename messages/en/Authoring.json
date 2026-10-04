@@ -3507,6 +3507,236 @@
       "note": "Checked here with the same rules as the server. Nothing is recorded."
     }
   },
+  "dictation": {
+    "subject": {
+      "segment": "Segment {index}",
+      "join": "{subject} — {message}"
+    },
+    "issues": {
+      "DICT_NO_TITLE": "The exercise has no title — teachers cannot find it in the module.",
+      "DICT_CLIP_TOO_LONG": "The clip is {time} long — past 3:00 a dictation is a test, not practice.",
+      "DICT_NO_KEY": "Nothing is written down — there is no sentence to check against.",
+      "DICT_EMPTY_SEGMENT": "It is empty. Write the sentence or delete the segment.",
+      "DICT_SEGMENT_TOO_LONG": "{words, plural, one {# word} other {# words}} is long — past 18 a dictation tests memory, not spelling.",
+      "DICT_SEGMENT_TOO_SHORT": "{words, plural, one {# word} other {# words}} is too few to hear a word boundary.",
+      "DICT_TIMECODE_MISSING": "It has no timecode, so there is no fragment to replay.",
+      "DICT_DUPLICATE_SEGMENT": "It repeats an earlier sentence.",
+      "DICT_TOO_MANY_SEGMENTS": "{count} sentences — past 8 it is a lesson, not an exercise.",
+      "DICT_NO_WHY": "It has no reason to show when the sentence comes back wrong.",
+      "DICT_NO_FOCUS": "No word is marked as the point of the dictation — the report cannot say what was missed.",
+      "DICT_FOCUS_WITHOUT_REASON": "A focus word has no reason, so a miss on it is only a red mark.",
+      "DICT_TRANSCRIPT_ALWAYS": "The transcript is readable from the start — and it is the answer key.",
+      "DICT_ONE_PLAY_MANY_SEGMENTS": "One listen has to carry {count} sentences — that tests memory more than spelling.",
+      "DICT_NO_RETRY_NO_KEY": "One check and no way to see the key leaves a failed sentence with nothing to learn from."
+    },
+    "fixes": {
+      "DICT_NO_TITLE": "Name it",
+      "DICT_CLIP_TOO_LONG": "Shorten the clip",
+      "DICT_NO_KEY": "Write the key",
+      "DICT_EMPTY_SEGMENT": "Fill or remove them",
+      "DICT_SEGMENT_TOO_LONG": "Split the sentence",
+      "DICT_SEGMENT_TOO_SHORT": "Lengthen it",
+      "DICT_TIMECODE_MISSING": "Set the timecode",
+      "DICT_DUPLICATE_SEGMENT": "Change or remove it",
+      "DICT_TOO_MANY_SEGMENTS": "Split the exercise",
+      "DICT_NO_WHY": "Write the reason",
+      "DICT_NO_FOCUS": "Mark the words",
+      "DICT_FOCUS_WITHOUT_REASON": "Write the reason",
+      "DICT_TRANSCRIPT_ALWAYS": "Change the transcript",
+      "DICT_ONE_PLAY_MANY_SEGMENTS": "Allow more listens",
+      "DICT_NO_RETRY_NO_KEY": "Review the settings"
+    },
+    "step1": {
+      "eyebrow": "Step 1 of 4",
+      "title": "The recording",
+      "lede": "In every other type the audio is a layer on top of something readable. Here it is the whole prompt: the student has nothing on screen but an empty field, so the clip has to be clean, slow enough to write from, and short.",
+      "titleLabel": "Exercise title",
+      "titlePlaceholder": "e.g. Dictation: kj, skj and double consonants",
+      "instructionLabel": "Instruction above the field",
+      "instructionPlaceholder": "Write what you hear.",
+      "instructionHelp": "The standing instruction. It stays on screen while they type.",
+      "listenTitle": "Listen to it yourself",
+      "listenNote": "the author's player — no limits apply here",
+      "listenSimulated": "simulated clip — silent, as long as the length you entered",
+      "tip": "Read at dictation pace with a clear pause between sentences, and leave a second of silence at each end. A clip recorded at conversational speed forces every student to use the 0.75× button, which is the same as recording it slowly but worse."
+    },
+    "step2": {
+      "eyebrow": "Step 2 of 4",
+      "title": "The key",
+      "lede": "Exactly what is said, written the way it should be written. One sentence per segment: each becomes its own field, its own verdict and its own line in the report, so “the student cannot spell kjøkken” survives as a fact and not as a percentage of a paragraph.",
+      "shapeLabel": "Shape of the dictation",
+      "shapeSegments": "Sentence by sentence",
+      "shapeWhole": "One continuous text",
+      "shapeSegmentsHelp": "Each sentence is an element: its own field, its own replay button, its own verdict. This is the default and the only shape that reports per sentence.",
+      "shapeWholeHelp": "One field for the whole clip. The diff still runs word by word, but the exercise reports a single number and the student cannot replay one sentence.",
+      "join": {
+        "title": "{count, plural, one {# sentence becomes} other {# sentences become}} one text.",
+        "body": "Timecodes are dropped, since one field plays the whole clip. This is what the key will read:",
+        "empty": "Nothing is written yet.",
+        "focus": "{count, plural, one {# focus word moves} other {# focus words move}} with it.",
+        "apply": "Apply",
+        "cancel": "Cancel"
+      },
+      "paste": {
+        "title": "Paste the whole text once",
+        "placeholder": "Paste the transcript. Sentence breaks become segments and the timecodes are estimated from the length of each sentence.",
+        "split": "Split into {count, plural, one {# segment} other {# segments}}",
+        "note": "Estimated timecodes are a starting point — listen through and correct them."
+      },
+      "list": {
+        "segmentsTitle": "Segments",
+        "textTitle": "The text",
+        "note": "{segments, plural, one {# segment} other {# segments}} · {words, plural, one {# word} other {# words}} · {timed} timed"
+      },
+      "row": {
+        "textLabel": "Segment {index}: the sentence",
+        "placeholder": "Write the sentence exactly as it is read.",
+        "words": "{count, plural, one {# word} other {# words}}",
+        "name": "Segment {index}",
+        "estimated": "estimated",
+        "estimatedTitle": "Estimated from the length of the sentence — listen and correct it",
+        "play": "Play",
+        "playLabel": "Play segment {index}",
+        "setStart": "Set start here",
+        "setStartLabel": "Set the start of segment {index} to the player position",
+        "setStartTitle": "Use the player position as the start of this segment",
+        "setEnd": "Set end",
+        "setEndLabel": "Set the end of segment {index} to the player position",
+        "remove": "Delete segment {index}",
+        "add": "Segment",
+        "ceiling": "{max} is the ceiling — past that it is a lesson."
+      },
+      "warnTitle": "The key is the answer.",
+      "warnBody": "Segment text, the reasons in step 3 and the transcript stay in expected_answers and reach the browser only inside the verdict. Nothing here is sent with the exercise content."
+    },
+    "step3": {
+      "eyebrow": "Step 3 of 4",
+      "title": "Errors and reasons",
+      "lede": "Decide what counts as a mistake, then mark the words this dictation is about and say why each is spelled the way it is. A marked word is never “almost right” — it is named when it is missed.",
+      "empty": {
+        "title": "Nothing written down yet",
+        "body": "Marking works on sentences. Write the key first, then come back here.",
+        "back": "Back to the key"
+      },
+      "rules": {
+        "title": "What counts as an error",
+        "caseLabel": "Capital letters count",
+        "caseHelp": "Off: “oslo” and “Oslo” are the same word.",
+        "punctuationLabel": "Punctuation counts",
+        "punctuationHelp": "Off: commas and full stops are not compared."
+      },
+      "near": {
+        "label": "Almost right",
+        "strict": "Wrong",
+        "flag": "Wrong, named",
+        "half": "Half a word",
+        "strictHelp": "A slip of one letter is wrong, like any other mistake.",
+        "flagHelp": "A slip of one letter is wrong, but the report calls it a slip of the hand.",
+        "halfHelp": "A slip of one letter earns half a word. A marked word never does."
+      },
+      "try": {
+        "title": "Try a student answer",
+        "note": "segment {index} · graded with the rules above",
+        "note2": "The same diff runs on the server. Nothing in this panel is stored — change the answer or the rules above and watch the line."
+      },
+      "coverage": {
+        "title": "{written} / {total} focus words with a reason",
+        "meter": "Focus words with a reason",
+        "hint": "Click the words below that this dictation is about.",
+        "ok": "Every focus word explains itself.",
+        "silent": "{count, plural, one {# of them is marked but silent.} other {# of them are marked but silent.}}"
+      },
+      "orphans": {
+        "title": "{count, plural, one {# marked word lost its place} other {# marked words lost their place}}",
+        "segment": "Segment {index}",
+        "putBack": "Put it back",
+        "gone": "that word is gone",
+        "drop": "Drop the mark on “{surface}”"
+      },
+      "seg": {
+        "title": "Segment {index}",
+        "focusCount": "{count, plural, one {# focus word} other {# focus words}}",
+        "pick": "Click the words this dictation is about",
+        "pickHelp": "Pick the words a student is likely to misspell. They are reported by name.",
+        "pickLabel": "Segment {index}: the words",
+        "whyFor": "Why “{word}” is spelled that way",
+        "whyPlaceholder": "Why this one is spelled that way — one line",
+        "unmark": "Unmark “{word}”",
+        "whyLabel": "What to say when the sentence comes back wrong",
+        "whyHint": "One line shown under a failed check, when hints are on.",
+        "whyRequired": "Required — a dictation that answers only “wrong” teaches copying.",
+        "whyPlaceholderSegment": "e.g. Say it aloud: the sound is written with kj."
+      },
+      "picker": {
+        "mark": "Mark as a focus word",
+        "noReason": "No reason written yet"
+      }
+    },
+    "step4": {
+      "eyebrow": "Step 4 of 4",
+      "title": "Difficulty and delivery",
+      "lede": "How the clip is heard and how a sentence is checked. None of this changes the key — it changes how much a student has to carry in their head.",
+      "itemNoun": "the sentences",
+      "transcript": {
+        "title": "The transcript",
+        "never": "Never",
+        "after": "After the check",
+        "always": "Always",
+        "neverHelp": "The text of a sentence is never shown, not even after it is solved.",
+        "afterHelp": "A sentence’s text opens once it is closed — passed, out of checks, or revealed.",
+        "alwaysHelp": "The transcript is the answer key. Readable from the start, there is nothing left to hear."
+      },
+      "countLabel": "Show how many words the sentence has",
+      "countHelp": "A counter above the field. It helps, and it lowers the evidence ceiling.",
+      "hintsLabel": "Show the reason when the check fails",
+      "hintsHelp": "The line you wrote for the sentence appears under a failed check.",
+      "revealLabel": "Let the student reveal the correct sentence",
+      "revealHelp": "Shows the key with every focus word explained. A reveal is not a check.",
+      "attemptsLabel": "Attempts per sentence",
+      "attemptsUnlimited": "Unlimited",
+      "attemptsHelp": "Each check of one sentence counts. Only the first one decides the score.",
+      "passLabel": "Pass mark — {threshold}% of the words in a sentence",
+      "passHelp": "{mark} of {total, plural, one {# word} other {# words}} in segment 1.",
+      "passHelpEmpty": "Write a sentence on step 2 to see this in words.",
+      "passStrict": "100% means one wrong letter fails the sentence.",
+      "ceiling": {
+        "none": "Full success and full failure both count as evidence — nothing here caps it.",
+        "count": "Evidence ceiling: capped, because the word counter gives the length of the answer away.",
+        "transcript": "Evidence ceiling: capped, because the transcript is readable before the check.",
+        "both": "Evidence ceiling: capped, because the word counter and the open transcript both give the answer away."
+      }
+    },
+    "preview": {
+      "phone": "VoxOrd",
+      "desktop": "Web",
+      "reader": "Reader",
+      "deviceLabel": "Device",
+      "modeLabel": "Preview mode",
+      "static": "Static",
+      "live": "Live",
+      "restart": "Restart the attempt",
+      "empty": "Write a sentence on step 2 to see what a student is handed.",
+      "note": "This is the student’s own screen. Checks here run on your key in this browser and are not recorded."
+    },
+    "shell": {
+      "step1": "Recording",
+      "step2": "Key",
+      "step3": "Marking",
+      "step4": "Difficulty",
+      "stepSub1": "the whole prompt",
+      "stepSub2": "what is said",
+      "stepSub3": "errors and reasons",
+      "stepSub4": "dials and delivery",
+      "stepsLabel": "Steps of the dictation"
+    },
+    "gate": {
+      "sentences": "{count, plural, one {# sentence} other {# sentences}}, {words, plural, one {# word} other {# words}}, each one its own verdict",
+      "whyWritten": "Every sentence says what went wrong",
+      "reasons": "{count, plural, one {# focus word carries its own reason} other {# focus words carry their own reasons}}",
+      "transcriptClosed": "The transcript stays closed until the check",
+      "replayable": "Every sentence can be replayed on its own"
+    }
+  },
   "coverage": {
     "title": "What this trains",
     "total": "{count, plural, one {# exercise} other {# exercises}}",

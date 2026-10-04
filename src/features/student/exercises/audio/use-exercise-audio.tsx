@@ -20,6 +20,7 @@ import {
 } from '@/lib/shared-kernel/audio';
 import { useMediaAsset } from '@/features/media';
 
+import { silentClip } from './silent-clip';
 import { useLessonClip } from './use-lesson-clip';
 
 /**
@@ -95,6 +96,12 @@ const SPEEDS = [0.75, 1, 1.25] as const;
 export interface UseExerciseAudioOptions {
   /** False pauses playback and refuses input: a hidden runner must not keep playing. */
   active?: boolean;
+  /**
+   * Play a silent clip of the stored length when no file is attached. For the builder only
+   * (plan 68, Q7-A): «Set start here» has to work before a recording exists. A runner never
+   * passes it — a student with no clip has a broken exercise, and the engine says so.
+   */
+  simulate?: boolean;
 }
 
 /**
@@ -118,7 +125,7 @@ const IDLE: Playback = {
 
 export function useExerciseAudio(
   content: unknown,
-  { active = true }: UseExerciseAudioOptions = {},
+  { active = true, simulate = false }: UseExerciseAudioOptions = {},
 ): ExerciseAudioEngine {
   const audio = useMemo(() => audioOf(content), [content]);
   const segments = useMemo(() => deliveredSegments(content), [content]);
@@ -158,8 +165,21 @@ export function useExerciseAudio(
   const { data: asset, isError: assetFailed } = useMediaAsset(
     assetId === '' ? undefined : assetId,
   );
-  const src =
+  const realSrc =
     audio.source === 'link' ? (audio.url === '' ? null : audio.url) : (asset?.url ?? null);
+  // A `lesson` clip counts as attached while its id is still being looked up.
+  const hasSource =
+    audio.source === 'link'
+      ? audio.url !== ''
+      : audio.source === 'lesson'
+        ? audio.lessonRef !== null
+        : assetId !== '';
+  // Only while nothing is attached: a file that is still loading keeps its own state.
+  const simulated = useMemo(
+    () => (simulate && !hasSource ? silentClip(audio.duration) : null),
+    [simulate, hasSource, audio.duration],
+  );
+  const src = realSrc ?? simulated;
 
   const duration = elementDuration > 0 ? elementDuration : audio.duration;
   const ctx: AllowanceContext = useMemo(

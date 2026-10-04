@@ -18,6 +18,7 @@ vi.mock('../actions/multiple-choice', () => ({ createMultipleChoiceAction: vi.fn
 vi.mock('../actions/multiple-choice-group', () => ({ createMultipleChoiceGroupAction: vi.fn() }));
 vi.mock('../actions/sort-into-buckets', () => ({ createSortIntoBucketsAction: vi.fn() }));
 vi.mock('../actions/highlight-in-text', () => ({ createHighlightInTextAction: vi.fn() }));
+vi.mock('../actions/dictation', () => ({ createDictationAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
@@ -34,6 +35,7 @@ const { createMultipleChoiceAction } = await import('../actions/multiple-choice'
 const { createMultipleChoiceGroupAction } = await import('../actions/multiple-choice-group');
 const { createSortIntoBucketsAction } = await import('../actions/sort-into-buckets');
 const { createHighlightInTextAction } = await import('../actions/highlight-in-text');
+const { createDictationAction } = await import('../actions/dictation');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -221,6 +223,23 @@ describe('AddLessonPicker', () => {
 
     await waitFor(() => expect(createHighlightInTextAction).toHaveBeenCalled());
     expect(vi.mocked(createHighlightInTextAction).mock.calls[0]![4]).toBe('');
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it('creates a dictation from its own scaffold, with the course language\'s own instruction', async () => {
+    // Plan 68 phase 7: a dictation owns its document — the generic form cannot write a key —
+    // and, like the marking builder, starts from the pack's line rather than the placeholder.
+    vi.mocked(createDictationAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-17', itemId: 'item-17' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Dictation'));
+
+    await waitFor(() => expect(createDictationAction).toHaveBeenCalled());
+    expect(vi.mocked(createDictationAction).mock.calls[0]![1]).toBe('no');
+    expect(vi.mocked(createDictationAction).mock.calls[0]![4]).toBe('');
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 

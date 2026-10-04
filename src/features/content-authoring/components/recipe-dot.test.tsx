@@ -54,7 +54,8 @@ describe('RecipeDot', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Closes it: .*Dictation \(soon\).* — or turn on a recording in an exercise\./,
+        // Dictation is live since plan 68: named first, without «(soon)».
+        /Closes it: Dictation and .*\(soon\) — or turn on a recording in an exercise\./,
       ),
     ).toBeInTheDocument();
     expect(

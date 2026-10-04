@@ -189,15 +189,17 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     status: 'live',
   },
 
-  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
+  // Plan 68. Live as soon as the kernel judges it, like the two above; creatable only through
+  // `CREATABLE_EXERCISE_TYPES` (phase 7 of the plan).
   dictation: {
     code: 'dictation',
     labelKey: 'dictation',
     section: 'exercise',
     icon: Mic,
-    status: 'planned',
-    axes: { input: 'audio', output: 'written_target', modality: 'recall' },
+    status: 'live',
   },
+
+  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
   inflection_table: {
     code: 'inflection_table',
     labelKey: 'inflection_table',

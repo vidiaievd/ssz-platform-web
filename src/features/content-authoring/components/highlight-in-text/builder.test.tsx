@@ -161,6 +161,8 @@ describe('HighlightInTextBuilder — autosave', () => {
 });
 
 describe('HighlightInTextBuilder — accessibility (AC-X6)', () => {
+  // Five full-page axe runs in one test: about three seconds alone, past vitest's default
+  // five under the load of the whole suite. The time is axe's, not the builder's.
   it('has no axe violations on any of the four steps, nor on the gate', async () => {
     const { user, baseElement } = renderBuilder();
     for (const step of ['Text', 'Questions', 'Feedback', 'Difficulty']) {
@@ -169,5 +171,5 @@ describe('HighlightInTextBuilder — accessibility (AC-X6)', () => {
     }
     await user.click(screen.getByRole('button', { name: /Review & finish/ }));
     expect((await axe.run(baseElement, PAGE_RULES)).violations).toEqual([]);
-  });
+  }, 20_000);
 });

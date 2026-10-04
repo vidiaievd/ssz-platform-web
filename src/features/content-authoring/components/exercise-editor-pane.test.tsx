@@ -22,6 +22,7 @@ vi.mock('../actions/multiple-choice', () => ({ saveMultipleChoiceAction: vi.fn()
 vi.mock('../actions/multiple-choice-group', () => ({ saveMultipleChoiceGroupAction: vi.fn() }));
 vi.mock('../actions/sort-into-buckets', () => ({ saveSortIntoBucketsAction: vi.fn() }));
 vi.mock('../actions/highlight-in-text', () => ({ saveHighlightInTextAction: vi.fn() }));
+vi.mock('../actions/dictation', () => ({ saveDictationAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -473,6 +474,54 @@ describe('ExerciseEditorPane', () => {
     const preview = within(screen.getByLabelText('Student preview, phone'));
     expect(preview.getByText('bil')).toBeInTheDocument();
     expect(preview.queryByText(/Hunkjønn/)).not.toBeInTheDocument();
+  });
+
+  it('opens the dictation builder by template code, key held back from the preview', () => {
+    // Plan 68 phase 7. By the code alone: a blank scaffold — one empty sentence — must open
+    // the builder, never the generic form.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-dc',
+        templateCode: 'dictation',
+        targetLanguage: 'no',
+        difficultyLevel: 'A2',
+        content: {
+          title: 'Diktat: kj',
+          instruction: 'Skriv det du hører.',
+          mode: 'segments',
+          language: 'no',
+          audio: { enabled: true, source: 'link', url: 'https://x.test/a.mp3', duration: 20 },
+          segments: [{ id: 's1', audio: { start: 0, end: 8 } }],
+          marking: { caseSensitive: false, punctuation: false, near: 'flag', extraCost: 1 },
+          settings: {
+            attempts: 2,
+            threshold: 80,
+            showWordCount: false,
+            revealKey: true,
+            hints: true,
+          },
+        },
+        expectedAnswers: {
+          segments: {
+            s1: { text: 'Jeg hørte kjøkkenet.', why: 'kj, ikke sj.', focus: [] },
+          },
+          orphans: [],
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Skriv det du hører.' }],
+        updatedAt: '2026-10-04T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Recording/ })).toBeInTheDocument();
+    // The runner's own body over the projection: the field is there, the key is not.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByRole('textbox')).toBeInTheDocument();
+    expect(preview.queryByText(/kjøkkenet/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/kj, ikke sj/)).not.toBeInTheDocument();
   });
 
   it('opens the marking builder by template code, key held back from the preview', () => {

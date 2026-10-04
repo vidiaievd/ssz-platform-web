@@ -3507,6 +3507,236 @@
       "note": "Sjekket her med de samme reglene som serveren. Ingenting lagres."
     }
   },
+  "dictation": {
+    "subject": {
+      "segment": "Setning {index}",
+      "join": "{subject} — {message}"
+    },
+    "issues": {
+      "DICT_NO_TITLE": "Øvelsen mangler tittel — lærere finner den ikke i modulen.",
+      "DICT_CLIP_TOO_LONG": "Klippet er {time} langt — over 3:00 er et diktat en prøve, ikke øving.",
+      "DICT_NO_KEY": "Ingenting er skrevet ned — det finnes ingen setning å sjekke mot.",
+      "DICT_EMPTY_SEGMENT": "Den er tom. Skriv setningen eller slett segmentet.",
+      "DICT_SEGMENT_TOO_LONG": "{words, plural, one {# ord} other {# ord}} er langt — over 18 tester diktatet hukommelse, ikke rettskriving.",
+      "DICT_SEGMENT_TOO_SHORT": "{words, plural, one {# ord} other {# ord}} er for lite til å høre en ordgrense.",
+      "DICT_TIMECODE_MISSING": "Den har ingen tidskode, så det finnes ikke noe fragment å spille om igjen.",
+      "DICT_DUPLICATE_SEGMENT": "Den gjentar en tidligere setning.",
+      "DICT_TOO_MANY_SEGMENTS": "{count} setninger — over 8 er det en leksjon, ikke en øvelse.",
+      "DICT_NO_WHY": "Den har ingen begrunnelse å vise når setningen blir feil.",
+      "DICT_NO_FOCUS": "Ingen ord er markert som poenget med diktatet — rapporten kan ikke si hva som ble bommet på.",
+      "DICT_FOCUS_WITHOUT_REASON": "Et fokusord har ingen begrunnelse, så en bom på det er bare en rød strek.",
+      "DICT_TRANSCRIPT_ALWAYS": "Utskriften kan leses fra start — og den er fasiten.",
+      "DICT_ONE_PLAY_MANY_SEGMENTS": "Én avspilling må bære {count} setninger — det tester hukommelse mer enn rettskriving.",
+      "DICT_NO_RETRY_NO_KEY": "Én sjekk og ingen måte å se fasiten på gir en feil setning ingenting å lære av."
+    },
+    "fixes": {
+      "DICT_NO_TITLE": "Gi den navn",
+      "DICT_CLIP_TOO_LONG": "Korte ned klippet",
+      "DICT_NO_KEY": "Skriv fasiten",
+      "DICT_EMPTY_SEGMENT": "Fyll ut eller fjern dem",
+      "DICT_SEGMENT_TOO_LONG": "Del setningen",
+      "DICT_SEGMENT_TOO_SHORT": "Gjør den lengre",
+      "DICT_TIMECODE_MISSING": "Sett tidskoden",
+      "DICT_DUPLICATE_SEGMENT": "Endre eller fjern den",
+      "DICT_TOO_MANY_SEGMENTS": "Del øvelsen",
+      "DICT_NO_WHY": "Skriv begrunnelsen",
+      "DICT_NO_FOCUS": "Marker ordene",
+      "DICT_FOCUS_WITHOUT_REASON": "Skriv begrunnelsen",
+      "DICT_TRANSCRIPT_ALWAYS": "Endre utskriften",
+      "DICT_ONE_PLAY_MANY_SEGMENTS": "Tillat flere avspillinger",
+      "DICT_NO_RETRY_NO_KEY": "Se over innstillingene"
+    },
+    "step1": {
+      "eyebrow": "Steg 1 av 4",
+      "title": "Opptaket",
+      "lede": "I alle andre typer er lyden et lag oppå noe som kan leses. Her er den hele oppgaven: eleven har ingenting på skjermen bortsett fra et tomt felt, så klippet må være rent, sakte nok til å skrive etter, og kort.",
+      "titleLabel": "Tittel på øvelsen",
+      "titlePlaceholder": "f.eks. Diktat: kj, skj og dobbel konsonant",
+      "instructionLabel": "Instruksjon over feltet",
+      "instructionPlaceholder": "Skriv det du hører.",
+      "instructionHelp": "Den faste instruksjonen. Den står på skjermen mens de skriver.",
+      "listenTitle": "Hør på det selv",
+      "listenNote": "forfatterens avspiller — ingen begrensninger gjelder her",
+      "listenSimulated": "simulert klipp — stille, like langt som lengden du oppga",
+      "tip": "Les i diktattempo med en tydelig pause mellom setningene, og la det være et sekund stillhet i hver ende. Et klipp som er lest i samtaletempo tvinger hver elev til å bruke 0,75×-knappen, som er det samme som å spille det inn sakte, bare verre."
+    },
+    "step2": {
+      "eyebrow": "Steg 2 av 4",
+      "title": "Fasiten",
+      "lede": "Nøyaktig det som sies, skrevet slik det skal skrives. Én setning per segment: hver blir sitt eget felt, sin egen dom og sin egen linje i rapporten, så «eleven kan ikke skrive kjøkken» består som et faktum og ikke som en prosent av et avsnitt.",
+      "shapeLabel": "Diktatets form",
+      "shapeSegments": "Setning for setning",
+      "shapeWhole": "Én sammenhengende tekst",
+      "shapeSegmentsHelp": "Hver setning er et element: eget felt, egen avspillingsknapp, egen dom. Dette er standard og den eneste formen som rapporterer per setning.",
+      "shapeWholeHelp": "Ett felt for hele klippet. Differansen går fortsatt ord for ord, men øvelsen rapporterer ett tall, og eleven kan ikke spille av én setning om igjen.",
+      "join": {
+        "title": "{count, plural, one {# setning blir} other {# setninger blir}} til én tekst.",
+        "body": "Tidskodene fjernes, siden ett felt spiller hele klippet. Slik kommer fasiten til å lyde:",
+        "empty": "Ingenting er skrevet ennå.",
+        "focus": "{count, plural, one {# fokusord flyttes} other {# fokusord flyttes}} med.",
+        "apply": "Bruk",
+        "cancel": "Avbryt"
+      },
+      "paste": {
+        "title": "Lim inn hele teksten én gang",
+        "placeholder": "Lim inn utskriften. Setningsskiller blir segmenter, og tidskodene anslås ut fra lengden på hver setning.",
+        "split": "Del i {count, plural, one {# segment} other {# segmenter}}",
+        "note": "Anslåtte tidskoder er et utgangspunkt — hør gjennom og rett dem."
+      },
+      "list": {
+        "segmentsTitle": "Segmenter",
+        "textTitle": "Teksten",
+        "note": "{segments, plural, one {# segment} other {# segmenter}} · {words, plural, one {# ord} other {# ord}} · {timed} med tidskode"
+      },
+      "row": {
+        "textLabel": "Segment {index}: setningen",
+        "placeholder": "Skriv setningen nøyaktig slik den leses.",
+        "words": "{count, plural, one {# ord} other {# ord}}",
+        "name": "Segment {index}",
+        "estimated": "anslått",
+        "estimatedTitle": "Anslått ut fra lengden på setningen — hør og rett den",
+        "play": "Spill",
+        "playLabel": "Spill segment {index}",
+        "setStart": "Sett start her",
+        "setStartLabel": "Sett starten på segment {index} til avspillerens posisjon",
+        "setStartTitle": "Bruk avspillerens posisjon som start på dette segmentet",
+        "setEnd": "Sett slutt",
+        "setEndLabel": "Sett slutten på segment {index} til avspillerens posisjon",
+        "remove": "Slett segment {index}",
+        "add": "Segment",
+        "ceiling": "{max} er taket — over det er det en leksjon."
+      },
+      "warnTitle": "Fasiten er svaret.",
+      "warnBody": "Segmentteksten, begrunnelsene i steg 3 og utskriften blir liggende i expected_answers og når nettleseren bare i dommen. Ingenting her sendes med øvelsens innhold."
+    },
+    "step3": {
+      "eyebrow": "Steg 3 av 4",
+      "title": "Feil og begrunnelser",
+      "lede": "Bestem hva som regnes som feil, og merk så ordene diktaten handler om og si hvorfor hvert av dem skrives slik. Et merket ord er aldri «nesten riktig» – det nevnes ved navn når det glipper.",
+      "empty": {
+        "title": "Ingenting er skrevet ennå",
+        "body": "Merking virker på setninger. Skriv nøkkelen først, og kom så tilbake hit.",
+        "back": "Tilbake til nøkkelen"
+      },
+      "rules": {
+        "title": "Hva som regnes som feil",
+        "caseLabel": "Store bokstaver teller",
+        "caseHelp": "Av: «oslo» og «Oslo» er samme ord.",
+        "punctuationLabel": "Tegnsetting teller",
+        "punctuationHelp": "Av: komma og punktum sammenlignes ikke."
+      },
+      "near": {
+        "label": "Nesten riktig",
+        "strict": "Feil",
+        "flag": "Feil, med navn",
+        "half": "Et halvt ord",
+        "strictHelp": "En slurvefeil på én bokstav er feil, som alle andre feil.",
+        "flagHelp": "En slurvefeil på én bokstav er feil, men rapporten kaller den en skrivefeil.",
+        "halfHelp": "En slurvefeil på én bokstav gir et halvt ord. Et merket ord får aldri det."
+      },
+      "try": {
+        "title": "Prøv et elevsvar",
+        "note": "segment {index} · rettet med reglene over",
+        "note2": "Samme diff kjører på serveren. Ingenting i dette panelet lagres – endre svaret eller reglene over og se linjen endre seg."
+      },
+      "coverage": {
+        "title": "{written} / {total} fokusord med begrunnelse",
+        "meter": "Fokusord med begrunnelse",
+        "hint": "Klikk på ordene under som diktaten handler om.",
+        "ok": "Hvert fokusord forklarer seg selv.",
+        "silent": "{count, plural, one {# av dem er merket, men uten begrunnelse.} other {# av dem er merket, men uten begrunnelse.}}"
+      },
+      "orphans": {
+        "title": "{count, plural, one {# merket ord mistet plassen} other {# merkede ord mistet plassen}}",
+        "segment": "Segment {index}",
+        "putBack": "Sett tilbake",
+        "gone": "ordet er borte",
+        "drop": "Fjern merket på «{surface}»"
+      },
+      "seg": {
+        "title": "Segment {index}",
+        "focusCount": "{count, plural, one {# fokusord} other {# fokusord}}",
+        "pick": "Klikk på ordene diktaten handler om",
+        "pickHelp": "Velg ordene en elev sannsynligvis staver feil. De rapporteres ved navn.",
+        "pickLabel": "Segment {index}: ordene",
+        "whyFor": "Hvorfor «{word}» skrives slik",
+        "whyPlaceholder": "Hvorfor akkurat dette ordet skrives slik – én linje",
+        "unmark": "Fjern merket på «{word}»",
+        "whyLabel": "Hva som skal sies når setningen blir feil",
+        "whyHint": "Én linje som vises under en mislykket sjekk, når hint er på.",
+        "whyRequired": "Påkrevd – en diktat som bare svarer «feil» lærer bort kopiering.",
+        "whyPlaceholderSegment": "f.eks. Si det høyt: lyden skrives med kj."
+      },
+      "picker": {
+        "mark": "Merk som fokusord",
+        "noReason": "Ingen begrunnelse skrevet ennå"
+      }
+    },
+    "step4": {
+      "eyebrow": "Steg 4 av 4",
+      "title": "Vanskelighet og levering",
+      "lede": "Hvordan lydklippet høres og hvordan en setning sjekkes. Ingenting her endrer nøkkelen – det endrer hvor mye eleven må holde i hodet.",
+      "itemNoun": "setningene",
+      "transcript": {
+        "title": "Transkripsjonen",
+        "never": "Aldri",
+        "after": "Etter sjekken",
+        "always": "Alltid",
+        "neverHelp": "Teksten til en setning vises aldri, heller ikke etter at den er løst.",
+        "afterHelp": "Teksten åpnes når setningen er avsluttet – bestått, sjekkene brukt opp eller vist.",
+        "alwaysHelp": "Transkripsjonen er fasiten. Er den synlig fra start, er det ingenting igjen å høre."
+      },
+      "countLabel": "Vis hvor mange ord setningen har",
+      "countHelp": "En teller over feltet. Den hjelper, og den senker bevistaket.",
+      "hintsLabel": "Vis begrunnelsen når sjekken feiler",
+      "hintsHelp": "Linjen du skrev for setningen vises under en mislykket sjekk.",
+      "revealLabel": "La eleven vise riktig setning",
+      "revealHelp": "Viser nøkkelen med alle fokusord forklart. Å vise fasit er ikke en sjekk.",
+      "attemptsLabel": "Forsøk per setning",
+      "attemptsUnlimited": "Ubegrenset",
+      "attemptsHelp": "Hver sjekk av én setning teller. Bare den første avgjør poengsummen.",
+      "passLabel": "Bestått – {threshold} % av ordene i en setning",
+      "passHelp": "{mark} av {total, plural, one {# ord} other {# ord}} i segment 1.",
+      "passHelpEmpty": "Skriv en setning i steg 2 for å se dette i ord.",
+      "passStrict": "100 % betyr at én feil bokstav gir ikke bestått.",
+      "ceiling": {
+        "none": "Full suksess og full fiasko teller begge som bevis – ingenting her setter tak.",
+        "count": "Bevistak: begrenset, fordi ordtelleren røper lengden på svaret.",
+        "transcript": "Bevistak: begrenset, fordi transkripsjonen kan leses før sjekken.",
+        "both": "Bevistak: begrenset, fordi ordtelleren og den åpne transkripsjonen røper svaret."
+      }
+    },
+    "preview": {
+      "phone": "VoxOrd",
+      "desktop": "Web",
+      "reader": "Leser",
+      "deviceLabel": "Enhet",
+      "modeLabel": "Forhåndsvisning",
+      "static": "Statisk",
+      "live": "Live",
+      "restart": "Start forsøket på nytt",
+      "empty": "Skriv en setning i steg 2 for å se hva eleven får.",
+      "note": "Dette er elevens egen skjerm. Sjekker her kjører mot nøkkelen din i denne nettleseren og registreres ikke."
+    },
+    "shell": {
+      "step1": "Opptak",
+      "step2": "Nøkkel",
+      "step3": "Merking",
+      "step4": "Vanskelighet",
+      "stepSub1": "hele oppgaven",
+      "stepSub2": "det som sies",
+      "stepSub3": "feil og begrunnelser",
+      "stepSub4": "valg og levering",
+      "stepsLabel": "Stegene i diktaten"
+    },
+    "gate": {
+      "sentences": "{count, plural, one {# setning} other {# setninger}}, {words, plural, one {# ord} other {# ord}}, hver med sin egen dom",
+      "whyWritten": "Hver setning sier hva som gikk galt",
+      "reasons": "{count, plural, one {# fokusord har sin egen begrunnelse} other {# fokusord har hver sin begrunnelse}}",
+      "transcriptClosed": "Transkripsjonen er lukket til etter sjekken",
+      "replayable": "Hver setning kan spilles av for seg"
+    }
+  },
   "coverage": {
     "title": "Hva dette trener",
     "total": "{count, plural, one {# oppgave} other {# oppgaver}}",

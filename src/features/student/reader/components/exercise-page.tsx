@@ -12,6 +12,7 @@ import { MatchPairsSolver } from './match-pairs-solver';
 import { MultipleChoiceGroupSolver } from './multiple-choice-group-solver';
 import { SortIntoBucketsSolver } from './sort-into-buckets-solver';
 import { HighlightInTextSolver } from './highlight-in-text-solver';
+import { DictationSolver } from './dictation-solver';
 import { MultipleChoiceSolver } from './multiple-choice-solver';
 import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
@@ -714,6 +715,11 @@ const SERVER_SOLVERS: Record<
      * has no use for a lesson link simply does not destructure it.
      */
     sourceHref?: string;
+    /**
+     * The exercise's title, from the lesson item that holds it — the projections carry
+     * none. Read by `dictation`'s start card (plan 68, Q6-A); unread by the rest.
+     */
+    title?: string;
   }) => React.ReactElement
 > = {
   word_bank_gap_fill: GapFillSolver,
@@ -755,6 +761,10 @@ const SERVER_SOLVERS: Record<
   // shows the key (plan 67 §3.5). One attempt holds every question; the engine keeps it open
   // until the last one closes (plan 67, Q1-A).
   highlight_in_text: HighlightInTextSolver,
+  // Its key is the sentences themselves, and the dosing is per sentence — a check returns the
+  // corrected line of what was typed, the sentence only on a reveal, the transcript a closed
+  // sentence at a time (plan 68 §3.5, §3.6). One attempt holds every sentence, as above.
+  dictation: DictationSolver,
 };
 
 /**
@@ -833,6 +843,8 @@ export interface ExerciseSolverProps {
   sourceHref?: string;
   /** 1-based position, shown when the exercise is one task of a practice set. */
   index?: number;
+  /** The title of the lesson item, for the runners that open on a card (plan 68, Q6-A). */
+  title?: string;
   /** Fired once, when the learner checks this exercise. */
   onChecked?: (ok: Ok) => void;
   /**
@@ -854,6 +866,7 @@ export function ExerciseSolver({
   onChecked,
   stacked,
   sourceHref,
+  title,
 }: ExerciseSolverProps) {
   const t = useTranslations('ExerciseRunner');
   const { data, isLoading, isError, refetch } = useExerciseForRunner(exerciseId);
@@ -925,6 +938,7 @@ export function ExerciseSolver({
             {...(onChecked === undefined ? {} : { onChecked })}
             {...(stacked === true ? { stacked: true } : {})}
             {...(sourceHref === undefined ? {} : { sourceHref })}
+            {...(title === undefined ? {} : { title })}
           />
         )}
       </div>
@@ -991,10 +1005,16 @@ export interface ExercisePageProps {
   exerciseId: string;
   /** Passed through to the runner; see `ExerciseSolverProps`. */
   sourceHref?: string;
+  /** Passed through to the runner; see `ExerciseSolverProps`. */
+  title?: string;
 }
 
-export function ExercisePage({ exerciseId, sourceHref }: ExercisePageProps) {
+export function ExercisePage({ exerciseId, sourceHref, title }: ExercisePageProps) {
   return (
-    <ExerciseSolver exerciseId={exerciseId} {...(sourceHref === undefined ? {} : { sourceHref })} />
+    <ExerciseSolver
+      exerciseId={exerciseId}
+      {...(sourceHref === undefined ? {} : { sourceHref })}
+      {...(title === undefined ? {} : { title })}
+    />
   );
 }

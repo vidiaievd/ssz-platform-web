@@ -280,6 +280,19 @@ function learnerFacingDetails(templateCode: string, details: unknown): unknown {
 }
 
 /**
+ * Whether an open attempt carries per-item states the engine resumes from — the two
+ * templates handed in one item at a time inside one attempt (plans 67 and 68). Read off the
+ * record as `unknown`: the fields are those templates' own, and only their presence matters.
+ */
+function holdsItemStates(attempt: AttemptRecord): boolean {
+  const record = attempt as unknown as Record<string, unknown>;
+  return ['segmentStates', 'questionStates'].some((field) => {
+    const states = record[field];
+    return Array.isArray(states) && states.length > 0;
+  });
+}
+
+/**
  * The learner's last finished attempt at this exercise, or `null`.
  *
  * A list endpoint would be the obvious proxy, but the client has one question — "what
@@ -288,6 +301,10 @@ function learnerFacingDetails(templateCode: string, details: unknown): unknown {
  * finished once it has been scored or routed to a teacher, and IN_PROGRESS rows are
  * skipped: POST above abandons an empty one on sight, and a resumed `short_answer` set
  * is still being answered — either way it is not a past answer to show.
+ *
+ * The open one is reported beside it, as a yes/no only, when it holds checked items the
+ * engine will resume: a runner that opens on a start card has to know whether to show it
+ * before it starts anything (plan 68, Q6-A).
  */
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -313,7 +330,13 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
             validationDetails: learnerFacingDetails(found.templateCode, found.validationDetails),
           };
 
-    return NextResponse.json({ attempt: last } satisfies LastAttemptResponse);
+    const open = page.items.find((a) => a.status === 'IN_PROGRESS');
+    const resumable = open !== undefined && holdsItemStates(open);
+
+    return NextResponse.json({
+      attempt: last,
+      ...(resumable ? { resumable: true as const } : {}),
+    } satisfies LastAttemptResponse);
   } catch (e) {
     if (isAppError(e)) {
       if (e.code === 'unauthenticated') {

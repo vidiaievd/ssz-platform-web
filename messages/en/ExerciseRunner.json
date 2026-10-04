@@ -552,5 +552,87 @@
       "items": "items"
     },
     "lockNoteOwn": "This {item} opens once you have heard its recording."
+  },
+  "dictation": {
+    "check": "Check",
+    "checking": "Checking…",
+    "retry": "Try again",
+    "showKey": "Show the answer",
+    "next": "Next sentence",
+    "finish": "Done",
+    "attempt": "Attempt {n}",
+    "attemptOf": "Attempt {n} of {max}",
+    "fieldSentence": "Sentence {n}",
+    "fieldWhole": "The whole text",
+    "words": "{n, plural, one {# word} other {# words}}",
+    "wordsOf": "<b>{n}</b> / {total, plural, one {# word} other {# words}}",
+    "placeholder": "Write what you hear…",
+    "placeholderGated": "Listen to the clip first",
+    "corrected": "Corrected",
+    "key": "Answer",
+    "passed": "Spelled correctly",
+    "verdict": "{correct} of {total, plural, one {# word} other {# words}} right{near, plural, =0 {} one { — # typo} other { — # typos}}{half, select, true { (half credit)} other {}}.",
+    "focusDefault": "This word is the point of the dictation.",
+    "lockNote": "The field opens once you have heard the clip through once.",
+    "rail": "Sentence {n} of {total}",
+    "listNow": "now",
+    "summaryCount": "{n} of {total, plural, one {# sentence} other {# sentences}} right",
+    "summarySub": "Orthography · dictation",
+    "tally": {
+      "eq": "{n} right",
+      "near": "{n} almost",
+      "wrong": "{n} wrong",
+      "missing": "{n} missing",
+      "extra": "{n} too many"
+    },
+    "legend": {
+      "eq": "right",
+      "near": "almost",
+      "wrong": "wrong",
+      "missing": "missing",
+      "extra": "too many"
+    },
+    "title": {
+      "extra": "Not in the recording",
+      "missing": "Missing",
+      "focus": "This word is the point of the dictation"
+    },
+    "cls": {
+      "typo": "Typo — one letter from right",
+      "case": "Capital or small letter",
+      "punctuation": "Punctuation",
+      "diacritic": "That letter is not in the word — letters with marks are letters of their own",
+      "boundary": "Word boundary — one word written as two, or two as one",
+      "wrong": "A different word"
+    },
+    "clsShort": {
+      "typo": "typo",
+      "case": "capital",
+      "punctuation": "punctuation",
+      "diacritic": "letter with a mark",
+      "boundary": "word boundary",
+      "wrong": "wrong word"
+    },
+    "sr": {
+      "sub": "wrote {wrote}, correct {expected}",
+      "missing": "missing {expected}",
+      "extra": "extra {wrote}"
+    },
+    "sendFailed": "The sentence could not be sent. Try again.",
+    "closedAlready": "This sentence is already finished.",
+    "tooFast": "Wait a moment before checking again.",
+    "untitled": "Untitled",
+    "empty": {
+      "title": "Nothing to write yet",
+      "body": "A recording and the sentences that are said in it, and the exercise appears here."
+    },
+    "card": {
+      "defaultTitle": "Dictation",
+      "sentences": "{n, plural, one {# sentence} other {# sentences}}",
+      "plays": "{n, plural, one {# playback} other {# playbacks}}",
+      "freePlay": "unlimited playback",
+      "badge": "Orthography",
+      "start": "Start the dictation"
+    }
   }
 }

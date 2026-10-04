@@ -552,5 +552,87 @@
       "items": "elementene"
     },
     "lockNoteOwn": "Denne {item} åpner seg når du har hørt opptaket sitt."
+  },
+  "dictation": {
+    "check": "Sjekk",
+    "checking": "Sjekker …",
+    "retry": "Prøv på nytt",
+    "showKey": "Vis fasit",
+    "next": "Neste setning",
+    "finish": "Ferdig",
+    "attempt": "Forsøk {n}",
+    "attemptOf": "Forsøk {n} av {max}",
+    "fieldSentence": "Setning {n}",
+    "fieldWhole": "Hele teksten",
+    "words": "{n} ord",
+    "wordsOf": "<b>{n}</b> / {total} ord",
+    "placeholder": "Skriv det du hører…",
+    "placeholderGated": "Hør klippet først",
+    "corrected": "Rettet",
+    "key": "Fasit",
+    "passed": "Riktig skrevet",
+    "verdict": "{correct} av {total} ord riktig{near, plural, =0 {} other { — # skrivefeil}}{half, select, true { (halv uttelling)} other {}}.",
+    "focusDefault": "Dette ordet er poenget med diktaten.",
+    "lockNote": "Feltet åpner seg når klippet er hørt én gang.",
+    "rail": "Setning {n} av {total}",
+    "listNow": "nå",
+    "summaryCount": "{n} av {total, plural, one {# setning} other {# setninger}} riktig",
+    "summarySub": "Ortografi · diktat",
+    "tally": {
+      "eq": "{n} riktig",
+      "near": "{n} nesten",
+      "wrong": "{n} feil",
+      "missing": "{n} mangler",
+      "extra": "{n} for mye"
+    },
+    "legend": {
+      "eq": "riktig",
+      "near": "nesten",
+      "wrong": "feil",
+      "missing": "mangler",
+      "extra": "for mye"
+    },
+    "title": {
+      "extra": "Ikke i opptaket",
+      "missing": "Mangler",
+      "focus": "Dette ordet er poenget med diktaten"
+    },
+    "cls": {
+      "typo": "Skrivefeil — én bokstav fra riktig",
+      "case": "Stor/liten bokstav",
+      "punctuation": "Tegnsetting",
+      "diacritic": "Bokstaven finnes ikke i ordet — å, ø og æ er egne bokstaver",
+      "boundary": "Ordgrense — ett ord skrevet som to, eller to som ett",
+      "wrong": "Et annet ord"
+    },
+    "clsShort": {
+      "typo": "skrivefeil",
+      "case": "stor bokstav",
+      "punctuation": "tegn",
+      "diacritic": "å/ø/æ",
+      "boundary": "ordgrense",
+      "wrong": "feil ord"
+    },
+    "sr": {
+      "sub": "skrev {wrote}, riktig {expected}",
+      "missing": "mangler {expected}",
+      "extra": "for mye {wrote}"
+    },
+    "sendFailed": "Setningen kunne ikke sendes. Prøv igjen.",
+    "closedAlready": "Denne setningen er allerede avsluttet.",
+    "tooFast": "Vent et øyeblikk før du sjekker igjen.",
+    "untitled": "Uten tittel",
+    "empty": {
+      "title": "Ingenting å skrive ennå",
+      "body": "Et opptak og setningene som sies i det, så dukker oppgaven opp her."
+    },
+    "card": {
+      "defaultTitle": "Diktat",
+      "sentences": "{n, plural, one {# setning} other {# setninger}}",
+      "plays": "{n, plural, one {# avspilling} other {# avspillinger}}",
+      "freePlay": "fri avspilling",
+      "badge": "Ortografi",
+      "start": "Start diktaten"
+    }
   }
 }
