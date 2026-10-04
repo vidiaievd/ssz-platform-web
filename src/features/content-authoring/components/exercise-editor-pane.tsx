@@ -86,6 +86,12 @@ import {
   toContent as highlightInTextToContent,
   toExpectedAnswers as highlightInTextToExpectedAnswers,
 } from '@/lib/shared-kernel/highlight-in-text';
+import {
+  fromPersisted as dictationFromPersisted,
+  TEMPLATE_CODE as DICTATION_TEMPLATE_CODE,
+  toContent as dictationToContent,
+  toExpectedAnswers as dictationToExpectedAnswers,
+} from '@/lib/shared-kernel/dictation';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -134,6 +140,10 @@ import { HighlightInTextBuilder } from './highlight-in-text/builder';
 import { HighlightInTextPreview } from './highlight-in-text/highlight-in-text-preview';
 import type { HighlightInTextDocument } from './highlight-in-text/edits';
 import type { SavedDocument as SavedHighlightInText } from './highlight-in-text/use-highlight-in-text-autosave';
+import { DictationBuilder } from './dictation/builder';
+import { DictationPreview } from './dictation/dictation-preview';
+import type { DictationDocument } from './dictation/edits';
+import type { SavedDocument as SavedDictation } from './dictation/use-dictation-autosave';
 import { SentenceSchemaBuilder } from './sentence-schema/builder';
 import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
 import type { SentenceSchemaDocument } from './sentence-schema/edits';
@@ -215,6 +225,9 @@ export function ExerciseEditorPane({
   /** The marking exercise as its builder currently has it, for the preview column. */
   const [highlightInText, setHighlightInText] = useState<HighlightInTextDocument | null>(null);
 
+  /** The dictation as its builder currently has it, for the preview column. */
+  const [dictation, setDictation] = useState<DictationDocument | null>(null);
+
   /**
    * Whichever builder is open, as it stands this second.
    *
@@ -235,6 +248,7 @@ export function ExerciseEditorPane({
     multipleChoiceGroup ??
     sortIntoBuckets ??
     highlightInText ??
+    dictation ??
     null;
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
@@ -296,6 +310,9 @@ export function ExerciseEditorPane({
   const isSortIntoBuckets = exercise?.templateCode === SORT_INTO_BUCKETS_TEMPLATE_CODE;
   /* By the template code alone, like `sort_into_buckets`: a new template with one shape. */
   const isHighlightInText = exercise?.templateCode === HIGHLIGHT_IN_TEXT_TEMPLATE_CODE;
+  /* By the template code alone: a new template with one shape, and a half-written one (one
+     empty sentence) must never fall through to the generic form (plan 53's lesson). */
+  const isDictation = exercise?.templateCode === DICTATION_TEMPLATE_CODE;
 
   return (
     /*
@@ -355,6 +372,8 @@ export function ExerciseEditorPane({
             <SortIntoBucketsPreview exercise={sortIntoBuckets} />
           ) : isHighlightInText && highlightInText !== null ? (
             <HighlightInTextPreview exercise={highlightInText} />
+          ) : isDictation && dictation !== null ? (
+            <DictationPreview exercise={dictation} />
           ) : (
             <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
           )
@@ -588,6 +607,23 @@ export function ExerciseEditorPane({
               queryClient.setQueryData<ExerciseWithAnswers | null>(
                 authoringKeys.exercise(exerciseId),
                 (cached) => (cached ? applySavedHighlightInText(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isDictation && exercise != null ? (
+          // A dictation owns a document because its key is sentences with reasons and focus
+          // words, split across both columns, with a recording behind them — nothing the
+          // generic form has a field for.
+          <DictationBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={dictationDocumentFrom(exercise)}
+            onDocumentChange={setDictation}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedDictation(cached, updatedAt, saved) : cached),
               )
             }
           />
@@ -1098,6 +1134,38 @@ function applySavedHighlightInText(
       HIGHLIGHT_IN_TEXT_TEMPLATE_CODE,
     ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...highlightInTextToExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        { ...instruction, instructionText: saved.exercise.instruction.trim() },
+        ...rest,
+      ],
+    }),
+  };
+}
+
+/**
+ * The stored columns as the kernel's dictation, plus the row's token. The audio block is part
+ * of the document (`toContent` writes it), so no layer recipe is read on top (plan 68 ph. 7).
+ */
+function dictationDocumentFrom(exercise: ExerciseWithAnswers): DictationDocument {
+  return {
+    ...dictationFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+  };
+}
+
+/** The cached exercise as the save left it — both columns and the token. */
+function applySavedDictation(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedDictation,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...dictationToContent(saved.exercise) } as unknown as ExerciseWithAnswers['content'],
+    expectedAnswers: { ...dictationToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
         { ...instruction, instructionText: saved.exercise.instruction.trim() },

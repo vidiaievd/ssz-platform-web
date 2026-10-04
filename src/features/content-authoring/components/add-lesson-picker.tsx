@@ -29,6 +29,7 @@ import { TEMPLATE_CODE as MULTIPLE_CHOICE_TEMPLATE_CODE } from '@/lib/shared-ker
 import { TEMPLATE_CODE as MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice-group';
 import { TEMPLATE_CODE as SORT_INTO_BUCKETS_TEMPLATE_CODE } from '@/lib/shared-kernel/sort-into-buckets';
 import { TEMPLATE_CODE as HIGHLIGHT_IN_TEXT_TEMPLATE_CODE } from '@/lib/shared-kernel/highlight-in-text';
+import { TEMPLATE_CODE as DICTATION_TEMPLATE_CODE } from '@/lib/shared-kernel/dictation';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -43,6 +44,7 @@ import { createSentenceSchemaAction } from '../actions/sentence-schema';
 import { createMultipleChoiceAction } from '../actions/multiple-choice';
 import { createMultipleChoiceGroupAction } from '../actions/multiple-choice-group';
 import { createSortIntoBucketsAction } from '../actions/sort-into-buckets';
+import { createDictationAction } from '../actions/dictation';
 import { createHighlightInTextAction } from '../actions/highlight-in-text';
 import {
   createTranslateFromTargetAction,
@@ -91,6 +93,7 @@ type OwnBuilderTemplate =
   | typeof MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE
   | typeof SORT_INTO_BUCKETS_TEMPLATE_CODE
   | typeof HIGHLIGHT_IN_TEXT_TEMPLATE_CODE
+  | typeof DICTATION_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
@@ -134,6 +137,9 @@ const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillActi
   // columns; the scaffold is an empty passage and one empty question, with the course
   // language's instruction (plan 67 §3.7).
   [HIGHLIGHT_IN_TEXT_TEMPLATE_CODE]: createHighlightInTextAction,
+  // The twelfth. One empty sentence, listening switched on with the defaults of DECISIONS §7,
+  // and the course language stamped as the pack that classifies its errors (plan 68 Q2-A).
+  [DICTATION_TEMPLATE_CODE]: createDictationAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,
@@ -247,10 +253,13 @@ export function AddLessonPicker({
       type: tContent(`materialType.exercise` as 'materialType.text'),
     });
     const instructions = t('addLesson.defaultInstructions');
-    // The marking builder starts from the course language's own line (plan 67 §3.7), and the
+    // The marking and dictation builders start from the course language's own line (plan 67 §3.7), and the
     // picker has no field to type one in — so the interface-language placeholder above would
     // beat the pack every time. Empty means «use the pack».
-    const scaffoldInstructions = templateCode === HIGHLIGHT_IN_TEXT_TEMPLATE_CODE ? '' : instructions;
+    const scaffoldInstructions =
+      templateCode === HIGHLIGHT_IN_TEXT_TEMPLATE_CODE || templateCode === DICTATION_TEMPLATE_CODE
+        ? ''
+        : instructions;
 
     startTransition(async () => {
       // Templates with their own builder are not shapes of the generic exercise form —

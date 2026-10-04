@@ -44,6 +44,7 @@ export const CREATABLE_EXERCISE_TYPES = [
   'multiple_choice_group',
   'sort_into_buckets',
   'highlight_in_text',
+  'dictation',
   'word_bank_gap_fill',
   'translate_to_target',
   'translate_from_target',
