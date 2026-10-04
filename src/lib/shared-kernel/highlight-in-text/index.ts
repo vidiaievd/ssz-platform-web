@@ -98,7 +98,7 @@ export type {
   KeySpan,
   QuestionState,
 } from './grading';
-export { check, grade } from './grading';
+export { check, grade, readQuestionStates } from './grading';
 
 export type {
   PersistedAnswers,
