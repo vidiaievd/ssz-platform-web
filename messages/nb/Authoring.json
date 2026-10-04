@@ -3345,6 +3345,17 @@
       "HT_COUNT_SHOWN": "Se over bryterne",
       "HT_ONE_SHOT_REVEAL": "Se over bryterne"
     },
+    "shell": {
+      "stepsLabel": "Byggetrinn",
+      "step1": "Tekst",
+      "step2": "Spørsmål",
+      "step3": "Tilbakemelding",
+      "step4": "Vanskelighet",
+      "stepSub1": "én tekst",
+      "stepSub2": "hva som skal markeres",
+      "stepSub3": "oversett og for mye",
+      "stepSub4": "innstillinger og levering"
+    },
     "step1": {
       "eyebrow": "Steg 1 av 4",
       "title": "Teksten",
@@ -3426,6 +3437,74 @@
       },
       "remove": "Slett «{prompt}» og {count, plural, one {# markering} other {# markeringer}}",
       "tip": "Marker fellene også, i spørsmålet de hører til: hadde fisket er ikke preteritum og skal stå umarkert — men forklaringen på hvorfor en elev markerte det, hører hjemme i steg 3, ikke her."
+    },
+    "step3": {
+      "eyebrow": "Steg 3 av 4",
+      "title": "Hva vurderingen sier",
+      "lede": "En markeringsoppgave kan slå feil i to retninger, og de trenger ulike ord. Å overse en form betyr at eleven ikke ser den ennå; å markere en ekstra betyr at de bruker en regel som er for vid.",
+      "coverage": {
+        "label": "markeringer med begrunnelse",
+        "missing": "{count, plural, one {# av dem sier} other {# av dem sier}} fortsatt bare «riktig».",
+        "done": "Hver markering forklarer seg selv når svarene vises."
+      },
+      "onlyEmpty": "Bare det som fortsatt er tomt",
+      "untitled": "Spørsmål uten tittel",
+      "marks": "{count, plural, one {# markering} other {# markeringer}}",
+      "missLabel": "Når de oversåg en",
+      "missRequired": "Påkrevd — uten den sier en oversett markering ingenting.",
+      "missHelp": "Vises under teksten når minst én markering mangler.",
+      "missPlaceholder": "Nevn signalet de burde ha sett.",
+      "fpLabel": "Når de markerte noe ekstra",
+      "fpHelp": "Vises når en markering havner utenfor fasiten. Her får fellene i teksten navn.",
+      "fpPlaceholder": "f.eks. hadde fisket er to ord og en annen tid.",
+      "reasonsLabel": "Begrunnelse per markering",
+      "reasonsHelp": "Valgfritt, én linje hver. De vises ved fasiten når eleven åpner den.",
+      "reasonLabel": "Begrunnelse for markering {n} «{surface}»",
+      "allWritten": "Ingenting er tomt — alle spørsmål og markeringer har ordene sine."
+    },
+    "step4": {
+      "eyebrow": "Steg 4 av 4",
+      "title": "Vanskelighet og levering",
+      "lede": "Ingenting her endrer innholdet. Trekket er den ene bryteren som avgjør om oppgaven måler noe: uten kostnad for en ekstra markering lønner det seg å markere hvert ord.",
+      "penaltyTitle": "Kostnad for en ekstra markering",
+      "penalty": {
+        "off": "Ingen",
+        "half": "En halv",
+        "full": "En hel"
+      },
+      "penaltyExample": "Med {count} markeringer i «{prompt}» gir alle unntatt to funnet og tre feil {score} %.",
+      "penaltyGeneric": "Hver markering utenfor fasiten trekker fra en del av en funnet.",
+      "near": "En markering som overlapper de riktige ordene uten å treffe dem nøyaktig, teller verken som riktig eller feil: halv uttelling gis aldri i det stille, vurderingen viser grensen i stedet.",
+      "countLabel": "Si hvor mange markeringer som ventes",
+      "countHelp": "En teller over teksten. Den gjør siste tredjedel av oppgaven til regning — av med mindre gruppen sliter.",
+      "hintsLabel": "Vis hintet når sjekken feiler",
+      "hintsHelp": "Linjen om oversette markeringer fra steg 3, under teksten. Forsøket teller fortsatt som feilet.",
+      "revealLabel": "La eleven åpne fasiten",
+      "revealHelp": "Markerer hvert svar med begrunnelsen. Avslutter spørsmålet.",
+      "attemptsLabel": "Forsøk per spørsmål",
+      "attemptsUnlimited": "Ubegrenset",
+      "attemptsHelp": "Et nytt forsøk beholder markeringene som var riktige og fjerner resten.",
+      "passLabel": "Beståttgrense — {threshold} % per spørsmål",
+      "passHelp": "{mark} av {total} markeringer i første spørsmål, etter trekk.",
+      "audioOff": "Av. Med lyd på får teksten en avspillingsknapp, og inndata-aksen blir tekst + lyd.",
+      "audioItemNoun": "teksten"
+    },
+    "gate": {
+      "questions": "{count, plural, one {# spørsmål} other {# spørsmål}} til {words} ord, {marks} markeringer i fasiten",
+      "missExplained": "Hvert spørsmål forklarer det som ble oversett",
+      "reasons": "{count, plural, one {# markering har} other {# markeringer har}} sin egen begrunnelse",
+      "penalty": "En ekstra markering koster — å markere alt består ikke",
+      "noOrphans": "Ingen markeringer flyter løst etter tekstendringer"
+    },
+    "preview": {
+      "phone": "VoxOrd",
+      "desktop": "Web",
+      "deviceLabel": "Enhet",
+      "modeLabel": "Forhåndsvisning",
+      "static": "Statisk",
+      "live": "Aktiv",
+      "restart": "Start forsøket på nytt",
+      "note": "Sjekket her med de samme reglene som serveren. Ingenting lagres."
     }
   },
   "coverage": {

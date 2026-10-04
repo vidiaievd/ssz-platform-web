@@ -80,6 +80,12 @@ import {
   toContent as sortIntoBucketsToContent,
   toExpectedAnswers as sortIntoBucketsToExpectedAnswers,
 } from '@/lib/shared-kernel/sort-into-buckets';
+import {
+  fromPersisted as highlightInTextFromPersisted,
+  TEMPLATE_CODE as HIGHLIGHT_IN_TEXT_TEMPLATE_CODE,
+  toContent as highlightInTextToContent,
+  toExpectedAnswers as highlightInTextToExpectedAnswers,
+} from '@/lib/shared-kernel/highlight-in-text';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -124,6 +130,10 @@ import { SortIntoBucketsBuilder } from './sort-into-buckets/builder';
 import { SortIntoBucketsPreview } from './sort-into-buckets/sort-into-buckets-preview';
 import type { SortIntoBucketsDocument } from './sort-into-buckets/edits';
 import type { SavedDocument as SavedSortIntoBuckets } from './sort-into-buckets/use-sort-into-buckets-autosave';
+import { HighlightInTextBuilder } from './highlight-in-text/builder';
+import { HighlightInTextPreview } from './highlight-in-text/highlight-in-text-preview';
+import type { HighlightInTextDocument } from './highlight-in-text/edits';
+import type { SavedDocument as SavedHighlightInText } from './highlight-in-text/use-highlight-in-text-autosave';
 import { SentenceSchemaBuilder } from './sentence-schema/builder';
 import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
 import type { SentenceSchemaDocument } from './sentence-schema/edits';
@@ -202,6 +212,9 @@ export function ExerciseEditorPane({
   /** The sorting board as its builder currently has it, for the preview column. */
   const [sortIntoBuckets, setSortIntoBuckets] = useState<SortIntoBucketsDocument | null>(null);
 
+  /** The marking exercise as its builder currently has it, for the preview column. */
+  const [highlightInText, setHighlightInText] = useState<HighlightInTextDocument | null>(null);
+
   /**
    * Whichever builder is open, as it stands this second.
    *
@@ -221,6 +234,7 @@ export function ExerciseEditorPane({
     multipleChoice ??
     multipleChoiceGroup ??
     sortIntoBuckets ??
+    highlightInText ??
     null;
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
@@ -280,6 +294,8 @@ export function ExerciseEditorPane({
     (plan 53's lesson).
   */
   const isSortIntoBuckets = exercise?.templateCode === SORT_INTO_BUCKETS_TEMPLATE_CODE;
+  /* By the template code alone, like `sort_into_buckets`: a new template with one shape. */
+  const isHighlightInText = exercise?.templateCode === HIGHLIGHT_IN_TEXT_TEMPLATE_CODE;
 
   return (
     /*
@@ -337,6 +353,8 @@ export function ExerciseEditorPane({
             <MultipleChoiceGroupPreview exercise={multipleChoiceGroup} />
           ) : isSortIntoBuckets && sortIntoBuckets !== null ? (
             <SortIntoBucketsPreview exercise={sortIntoBuckets} />
+          ) : isHighlightInText && highlightInText !== null ? (
+            <HighlightInTextPreview exercise={highlightInText} />
           ) : (
             <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
           )
@@ -553,6 +571,23 @@ export function ExerciseEditorPane({
               queryClient.setQueryData<ExerciseWithAnswers | null>(
                 authoringKeys.exercise(exerciseId),
                 (cached) => (cached ? applySavedSortIntoBuckets(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isHighlightInText && exercise != null ? (
+          // A marking exercise owns a document because its key is a set of character ranges
+          // in the passage, per question, with a reason each — nothing the generic form has
+          // a field for.
+          <HighlightInTextBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={highlightInTextDocumentFrom(exercise)}
+            onDocumentChange={setHighlightInText}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedHighlightInText(cached, updatedAt, saved) : cached),
               )
             }
           />
@@ -1029,6 +1064,40 @@ function applySavedSortIntoBuckets(
       SORT_INTO_BUCKETS_TEMPLATE_CODE,
     ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...sortIntoBucketsToExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        { ...instruction, instructionText: saved.exercise.instruction.trim() },
+        ...rest,
+      ],
+    }),
+  };
+}
+
+/** The stored columns as the kernel's marking exercise, plus the row's token. */
+function highlightInTextDocumentFrom(exercise: ExerciseWithAnswers): HighlightInTextDocument {
+  return {
+    ...highlightInTextFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+    audio: readAudioDraft(exercise.content, HIGHLIGHT_IN_TEXT_TEMPLATE_CODE),
+  };
+}
+
+/** The cached exercise as the save left it — both columns, the audio block and the token. */
+function applySavedHighlightInText(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedHighlightInText,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    content: applyAudioDraft(
+      { ...highlightInTextToContent(saved.exercise) },
+      saved.exercise.audio,
+      HIGHLIGHT_IN_TEXT_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
+    expectedAnswers: { ...highlightInTextToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
         { ...instruction, instructionText: saved.exercise.instruction.trim() },

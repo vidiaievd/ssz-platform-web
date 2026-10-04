@@ -179,8 +179,8 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     status: 'live',
   },
 
-  // Plan 67. Live as soon as the kernel judges it, like `sort_into_buckets` above; it becomes
-  // creatable only through `CREATABLE_EXERCISE_TYPES` (phase 7 of the plan).
+  // Plan 67. Live as soon as the kernel judges it, like `sort_into_buckets` above; creatable
+  // through `CREATABLE_EXERCISE_TYPES` since phase 7 of the plan.
   highlight_in_text: {
     code: 'highlight_in_text',
     labelKey: 'highlight_in_text',

@@ -3345,6 +3345,17 @@
       "HT_COUNT_SHOWN": "Review the toggles",
       "HT_ONE_SHOT_REVEAL": "Review the toggles"
     },
+    "shell": {
+      "stepsLabel": "Builder steps",
+      "step1": "Text",
+      "step2": "Questions",
+      "step3": "Feedback",
+      "step4": "Difficulty",
+      "stepSub1": "one passage",
+      "stepSub2": "what to mark",
+      "stepSub3": "missed and extra",
+      "stepSub4": "dials and delivery"
+    },
     "step1": {
       "eyebrow": "Step 1 of 4",
       "title": "The text",
@@ -3426,6 +3437,74 @@
       },
       "remove": "Delete “{prompt}” and its {count, plural, one {# mark} other {# marks}}",
       "tip": "Mark the traps too, in the question they belong to: a form that looks like the answer but is not must stay unmarked — and the explanation for why a student marked it belongs in step 3, not here."
+    },
+    "step3": {
+      "eyebrow": "Step 3 of 4",
+      "title": "What the verdict says",
+      "lede": "A marking exercise fails in two directions and they need different words. Missing a form means the student cannot see it yet; marking an extra one means they are using a rule that is too wide.",
+      "coverage": {
+        "label": "marks with a reason",
+        "missing": "{count, plural, one {# of them still says} other {# of them still say}} only “correct”.",
+        "done": "Every mark explains itself when the answers are shown."
+      },
+      "onlyEmpty": "Only what is still empty",
+      "untitled": "Untitled question",
+      "marks": "{count, plural, one {# mark} other {# marks}}",
+      "missLabel": "When they missed one",
+      "missRequired": "Required — without it a missed mark says nothing.",
+      "missHelp": "Shown under the text when at least one mark is missing.",
+      "missPlaceholder": "Name the signal they should have seen.",
+      "fpLabel": "When they marked something extra",
+      "fpHelp": "Shown when a mark falls outside the key. This is where the traps in the text get named.",
+      "fpPlaceholder": "e.g. a compound form is two words and a different tense.",
+      "reasonsLabel": "Per-mark reasons",
+      "reasonsHelp": "Optional, one line each. They print next to the key when the student reveals it.",
+      "reasonLabel": "Reason for mark {n} «{surface}»",
+      "allWritten": "Nothing is empty — every question and every mark has its words."
+    },
+    "step4": {
+      "eyebrow": "Step 4 of 4",
+      "title": "Difficulty and delivery",
+      "lede": "Nothing here changes the content. The penalty is the one dial that decides whether the exercise measures anything: with no cost for an extra mark, marking every word is a winning strategy.",
+      "penaltyTitle": "Cost of an extra mark",
+      "penalty": {
+        "off": "None",
+        "half": "Half a mark",
+        "full": "A full mark"
+      },
+      "penaltyExample": "With {count} marks in “{prompt}”, finding all but two and adding three wrong scores {score}%.",
+      "penaltyGeneric": "Each mark outside the key removes part of a found one.",
+      "near": "A mark that overlaps the right words without matching them exactly counts as neither: half credit is never silently awarded, the verdict shows the boundary instead.",
+      "countLabel": "Say how many marks are expected",
+      "countHelp": "A counter above the text. It turns the last third of the task into arithmetic — off unless the group is struggling.",
+      "hintsLabel": "Show the hint when the check fails",
+      "hintsHelp": "The missed-mark line from step 3, under the text. The attempt still counts as failed.",
+      "revealLabel": "Let the student reveal the key",
+      "revealHelp": "Highlights every answer with its reason. Ends the question.",
+      "attemptsLabel": "Attempts per question",
+      "attemptsUnlimited": "Unlimited",
+      "attemptsHelp": "A retry keeps the marks that were right and clears the rest.",
+      "passLabel": "Pass mark — {threshold}% per question",
+      "passHelp": "{mark} of {total} marks in the first question, after the penalty.",
+      "audioOff": "Off. With audio on, the passage carries a play button and the input axis becomes text + audio.",
+      "audioItemNoun": "the text"
+    },
+    "gate": {
+      "questions": "{count, plural, one {# question} other {# questions}} over {words} words, {marks} marks in the key",
+      "missExplained": "Every question explains what was missed",
+      "reasons": "{count, plural, one {# mark carries its own reason} other {# marks carry their own reason}}",
+      "penalty": "An extra mark costs — marking everything does not pass",
+      "noOrphans": "No marks are floating loose after text edits"
+    },
+    "preview": {
+      "phone": "VoxOrd",
+      "desktop": "Web",
+      "deviceLabel": "Device",
+      "modeLabel": "Preview mode",
+      "static": "Static",
+      "live": "Live",
+      "restart": "Restart the attempt",
+      "note": "Checked here with the same rules as the server. Nothing is recorded."
     }
   },
   "coverage": {

@@ -28,6 +28,7 @@ import { TEMPLATE_CODE as SENTENCE_SCHEMA_TEMPLATE_CODE } from '@/lib/shared-ker
 import { TEMPLATE_CODE as MULTIPLE_CHOICE_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice';
 import { TEMPLATE_CODE as MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE } from '@/lib/shared-kernel/multiple-choice-group';
 import { TEMPLATE_CODE as SORT_INTO_BUCKETS_TEMPLATE_CODE } from '@/lib/shared-kernel/sort-into-buckets';
+import { TEMPLATE_CODE as HIGHLIGHT_IN_TEXT_TEMPLATE_CODE } from '@/lib/shared-kernel/highlight-in-text';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -42,6 +43,7 @@ import { createSentenceSchemaAction } from '../actions/sentence-schema';
 import { createMultipleChoiceAction } from '../actions/multiple-choice';
 import { createMultipleChoiceGroupAction } from '../actions/multiple-choice-group';
 import { createSortIntoBucketsAction } from '../actions/sort-into-buckets';
+import { createHighlightInTextAction } from '../actions/highlight-in-text';
 import {
   createTranslateFromTargetAction,
   createTranslateToTargetAction,
@@ -88,6 +90,7 @@ type OwnBuilderTemplate =
   | typeof MULTIPLE_CHOICE_TEMPLATE_CODE
   | typeof MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE
   | typeof SORT_INTO_BUCKETS_TEMPLATE_CODE
+  | typeof HIGHLIGHT_IN_TEXT_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
@@ -127,6 +130,10 @@ const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillActi
   // generic form would be accepted and open on nothing the builder can use; the scaffold
   // is two empty buckets and three empty items (plan 66 §4.1).
   [SORT_INTO_BUCKETS_TEMPLATE_CODE]: createSortIntoBucketsAction,
+  // The eleventh. The passage, the questions and the key are one document split across both
+  // columns; the scaffold is an empty passage and one empty question, with the course
+  // language's instruction (plan 67 §3.7).
+  [HIGHLIGHT_IN_TEXT_TEMPLATE_CODE]: createHighlightInTextAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,

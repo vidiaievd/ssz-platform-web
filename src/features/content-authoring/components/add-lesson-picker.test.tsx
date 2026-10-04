@@ -17,6 +17,7 @@ vi.mock('../actions/sentence-schema', () => ({ createSentenceSchemaAction: vi.fn
 vi.mock('../actions/multiple-choice', () => ({ createMultipleChoiceAction: vi.fn() }));
 vi.mock('../actions/multiple-choice-group', () => ({ createMultipleChoiceGroupAction: vi.fn() }));
 vi.mock('../actions/sort-into-buckets', () => ({ createSortIntoBucketsAction: vi.fn() }));
+vi.mock('../actions/highlight-in-text', () => ({ createHighlightInTextAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
