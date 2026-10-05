@@ -17,7 +17,7 @@ export function StepHead({
 }: {
   eyebrow: string;
   title: string;
-  lede?: string;
+  lede?: ReactNode;
 }) {
   return (
     <div>
@@ -194,7 +194,7 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center gap-2.5 rounded-(--ssz-radius-md) border border-dashed border-(--ssz-border-strong) bg-(--ssz-bg-surface) px-6 py-12 text-center">
       <Icon size={26} aria-hidden="true" className="text-(--ssz-text-muted)" />
-      <h4 className="m-0 text-base font-semibold">{title}</h4>
+      <h3 className="m-0 text-base font-semibold">{title}</h3>
       <p className="m-0 max-w-[46ch] text-sm text-(--ssz-text-secondary)">{body}</p>
       {action}
     </div>

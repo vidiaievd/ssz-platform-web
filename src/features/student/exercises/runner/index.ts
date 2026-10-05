@@ -197,3 +197,14 @@ export { DictationBody } from './dictation-body';
 export type { DictationBodyProps, DictationLayout } from './dictation-body';
 export { DictationReaderCard } from './dictation-reader-card';
 export type { DictationReaderCardProps } from './dictation-reader-card';
+
+export { readInflectionTableProjection } from './inflection-table-projection';
+export { InflectionTableBody } from './inflection-table-body';
+export type {
+  InflectionTableBodyProps,
+  InflectionTableLayout,
+  InflectionTablePhase,
+  InflectionTableValues,
+} from './inflection-table-body';
+export { InflectionTableReaderCard } from './inflection-table-reader-card';
+export type { InflectionTableReaderCardProps } from './inflection-table-reader-card';

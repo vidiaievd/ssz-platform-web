@@ -293,6 +293,21 @@ function holdsItemStates(attempt: AttemptRecord): boolean {
 }
 
 /**
+ * Whether the newest attempt is an `inflection_table` scored but not closed — checks left. A
+ * whole board is scored by its first check, so it is never `IN_PROGRESS` between checks, and
+ * the engine resumes it from its scored row all the same (plan 69, phase 9). The engine's own
+ * rule, restated for the yes/no: the newest attempt that is not still opening, and only if
+ * its last check left the table open.
+ */
+function holdsOpenBoard(items: AttemptRecord[]): boolean {
+  const newest = items.find((a) => a.status !== 'IN_PROGRESS');
+  if (newest === undefined || newest.status !== 'SCORED') return false;
+  if (newest.templateCode !== 'inflection_table') return false;
+  const details = newest.validationDetails as { closed?: unknown } | null | undefined;
+  return details?.closed === false;
+}
+
+/**
  * The learner's last finished attempt at this exercise, or `null`.
  *
  * A list endpoint would be the obvious proxy, but the client has one question — "what
@@ -331,7 +346,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
           };
 
     const open = page.items.find((a) => a.status === 'IN_PROGRESS');
-    const resumable = open !== undefined && holdsItemStates(open);
+    const resumable = (open !== undefined && holdsItemStates(open)) || holdsOpenBoard(page.items);
 
     return NextResponse.json({
       attempt: last,

@@ -634,5 +634,43 @@
       "badge": "Орфография",
       "start": "Начать диктант"
     }
+  },
+  "inflectionTable": {
+    "defaultTitle": "Спряжение",
+    "defaultInstruction": "Заполните таблицу.",
+    "check": "Проверить",
+    "checking": "Проверяем …",
+    "retryWrong": "Повторить неверные ({n}/{max})",
+    "bankLabel": "Формы",
+    "bankHint": "Выберите форму, затем коснитесь ячейки.",
+    "bankSelected": "Выбрано {form}. Выберите ячейку, куда её положить.",
+    "cellFor": "{lemma}, {slot}",
+    "cellEmpty": "пусто",
+    "cellRight": "верно",
+    "cellWrong": "неверно",
+    "cellClear": "Коснитесь, чтобы убрать форму",
+    "rowAll": "вся строка",
+    "rowPart": "{ok}/{n}",
+    "score": "{k} из {n} ячеек",
+    "passed": "Зачтено",
+    "below": "Ниже проходного балла ({pct} %)",
+    "wrote": "вы написали",
+    "blank": "пусто",
+    "allRight": "Вся таблица верна. Готово парадигм: {n}.",
+    "nearDiacritic": "Буква важна: å, ø и æ — это не a, o и ae.",
+    "nearEnding": "Основа верна, окончание неверно.",
+    "sendFailed": "Ответ не удалось отправить. Попробуйте ещё раз.",
+    "closedAlready": "Это задание уже завершено.",
+    "empty": {
+      "title": "Пустая таблица",
+      "body": "В задании ещё нет слов."
+    },
+    "card": {
+      "start": "Начать таблицу",
+      "cells": "{n, plural, one {# ячейка} few {# ячейки} many {# ячеек} other {# ячейки}}",
+      "lemmas": "{n, plural, one {# слово} few {# слова} many {# слов} other {# слова}}"
+    },
+    "rowHead": "Строка",
+    "progress": "Прогресс"
   }
 }

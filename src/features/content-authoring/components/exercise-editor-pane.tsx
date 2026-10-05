@@ -92,6 +92,12 @@ import {
   toContent as dictationToContent,
   toExpectedAnswers as dictationToExpectedAnswers,
 } from '@/lib/shared-kernel/dictation';
+import {
+  fromPersisted as inflectionTableFromPersisted,
+  TEMPLATE_CODE as INFLECTION_TABLE_TEMPLATE_CODE,
+  toContent as inflectionTableToContent,
+  toExpectedAnswers as inflectionTableToExpectedAnswers,
+} from '@/lib/shared-kernel/inflection-table';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -144,6 +150,10 @@ import { DictationBuilder } from './dictation/builder';
 import { DictationPreview } from './dictation/dictation-preview';
 import type { DictationDocument } from './dictation/edits';
 import type { SavedDocument as SavedDictation } from './dictation/use-dictation-autosave';
+import { InflectionTableBuilder } from './inflection-table/builder';
+import type { InflectionTableDocument } from './inflection-table/edits';
+import { InflectionTablePreview } from './inflection-table/inflection-table-preview';
+import type { SavedDocument as SavedInflectionTable } from './inflection-table/use-inflection-table-autosave';
 import { SentenceSchemaBuilder } from './sentence-schema/builder';
 import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
 import type { SentenceSchemaDocument } from './sentence-schema/edits';
@@ -228,6 +238,9 @@ export function ExerciseEditorPane({
   /** The dictation as its builder currently has it, for the preview column. */
   const [dictation, setDictation] = useState<DictationDocument | null>(null);
 
+  /** The inflection table as its builder currently has it, for the preview column. */
+  const [inflectionTable, setInflectionTable] = useState<InflectionTableDocument | null>(null);
+
   /**
    * Whichever builder is open, as it stands this second.
    *
@@ -249,6 +262,15 @@ export function ExerciseEditorPane({
     sortIntoBuckets ??
     highlightInText ??
     dictation ??
+    // The persisted shape, audio block included: the axes read `audio.enabled` and
+    // `input.mode` off the document, and the builder's draft holds the former one level deeper.
+    (inflectionTable !== null
+      ? applyAudioDraft(
+          { ...inflectionTableToContent(inflectionTable) } as unknown as Record<string, unknown>,
+          inflectionTable.audio,
+          INFLECTION_TABLE_TEMPLATE_CODE,
+        )
+      : null) ??
     null;
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
@@ -313,6 +335,8 @@ export function ExerciseEditorPane({
   /* By the template code alone: a new template with one shape, and a half-written one (one
      empty sentence) must never fall through to the generic form (plan 53's lesson). */
   const isDictation = exercise?.templateCode === DICTATION_TEMPLATE_CODE;
+  /* By the template code alone: a new template with one shape (plan 53's lesson). */
+  const isInflectionTable = exercise?.templateCode === INFLECTION_TABLE_TEMPLATE_CODE;
 
   return (
     /*
@@ -374,6 +398,8 @@ export function ExerciseEditorPane({
             <HighlightInTextPreview exercise={highlightInText} />
           ) : isDictation && dictation !== null ? (
             <DictationPreview exercise={dictation} />
+          ) : isInflectionTable && inflectionTable !== null ? (
+            <InflectionTablePreview exercise={inflectionTable} />
           ) : (
             <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
           )
@@ -624,6 +650,23 @@ export function ExerciseEditorPane({
               queryClient.setQueryData<ExerciseWithAnswers | null>(
                 authoringKeys.exercise(exerciseId),
                 (cached) => (cached ? applySavedDictation(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isInflectionTable && exercise != null ? (
+          // A table owns a document because its key is a form per cell with a reason and
+          // variants, split across both columns, over a pack of columns the author cannot
+          // edit — nothing the generic form has a field for.
+          <InflectionTableBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={inflectionTableDocumentFrom(exercise)}
+            onDocumentChange={setInflectionTable}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedInflectionTable(cached, updatedAt, saved) : cached),
               )
             }
           />
@@ -1166,6 +1209,42 @@ function applySavedDictation(
     updatedAt,
     content: { ...dictationToContent(saved.exercise) } as unknown as ExerciseWithAnswers['content'],
     expectedAnswers: { ...dictationToExpectedAnswers(saved.exercise) },
+    ...(instruction && {
+      instructions: [
+        { ...instruction, instructionText: saved.exercise.instruction.trim() },
+        ...rest,
+      ],
+    }),
+  };
+}
+
+/** The stored columns as the kernel's inflection table, plus the row's token and the audio draft. */
+function inflectionTableDocumentFrom(exercise: ExerciseWithAnswers): InflectionTableDocument {
+  return {
+    ...inflectionTableFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+    audio: readAudioDraft(exercise.content, INFLECTION_TABLE_TEMPLATE_CODE),
+  };
+}
+
+/** The cached exercise as the save left it — both columns, the audio block and the token. */
+function applySavedInflectionTable(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedInflectionTable,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  return {
+    ...cached,
+    updatedAt,
+    // The template's own persistence, then the layer that belongs to none of them: a cache
+    // written without it would hand a remounted builder an exercise whose audio had vanished.
+    content: applyAudioDraft(
+      { ...inflectionTableToContent(saved.exercise) },
+      saved.exercise.audio,
+      INFLECTION_TABLE_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
+    expectedAnswers: { ...inflectionTableToExpectedAnswers(saved.exercise) },
     ...(instruction && {
       instructions: [
         { ...instruction, instructionText: saved.exercise.instruction.trim() },

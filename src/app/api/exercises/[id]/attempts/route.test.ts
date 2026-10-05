@@ -408,6 +408,55 @@ describe('GET /api/exercises/[id]/attempts', () => {
     expect(JSON.stringify(body)).not.toContain('kjøkkenet');
   });
 
+  // A whole board is scored by its first check and never sits IN_PROGRESS between checks, so
+  // the engine resumes it from its scored row (plan 69, phase 9) — and the card steps aside.
+  it('reports an inflection table left open by its last check as resumable', async () => {
+    const board = {
+      ...scored,
+      id: 'att-4',
+      templateCode: 'inflection_table',
+      status: 'SCORED',
+      validationDetails: { closed: false, checksLeft: 1, items: [] },
+    };
+    vi.mocked(serverFetch).mockResolvedValue({ items: [board] });
+
+    const res = await GET(makeGetRequest(), { params });
+    const body = await res.json();
+
+    expect(body.resumable).toBe(true);
+  });
+
+  it('does not call a closed inflection table resumable', async () => {
+    const board = {
+      ...scored,
+      id: 'att-4',
+      templateCode: 'inflection_table',
+      status: 'SCORED',
+      validationDetails: { closed: true, checksLeft: 0, items: [] },
+    };
+    vi.mocked(serverFetch).mockResolvedValue({ items: [board] });
+
+    const res = await GET(makeGetRequest(), { params });
+
+    expect((await res.json()).resumable).toBeUndefined();
+  });
+
+  it('does not resume an old open board once a newer attempt exists', async () => {
+    const open = {
+      ...scored,
+      id: 'att-4',
+      templateCode: 'inflection_table',
+      status: 'SCORED',
+      validationDetails: { closed: false, items: [] },
+    };
+    const newer = { ...open, id: 'att-5', validationDetails: { closed: true, items: [] } };
+    vi.mocked(serverFetch).mockResolvedValue({ items: [newer, open] });
+
+    const res = await GET(makeGetRequest(), { params });
+
+    expect((await res.json()).resumable).toBeUndefined();
+  });
+
   it('does not call an open attempt with nothing on it resumable', async () => {
     vi.mocked(serverFetch).mockResolvedValue({
       items: [{ ...scored, id: 'att-3', status: 'IN_PROGRESS', segmentStates: [] }],

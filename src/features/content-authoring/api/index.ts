@@ -2,6 +2,7 @@ export * from './keys';
 export * from './use-authoring-exercises';
 export * from './use-container-activity';
 export * from './use-container-coverage';
+export * from './use-course-dictionary';
 export * from './use-course-result';
 export * from './use-exercise-axes';
 export * from './use-authoring-grammar';

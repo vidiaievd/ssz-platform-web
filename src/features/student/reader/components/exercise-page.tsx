@@ -13,6 +13,7 @@ import { MultipleChoiceGroupSolver } from './multiple-choice-group-solver';
 import { SortIntoBucketsSolver } from './sort-into-buckets-solver';
 import { HighlightInTextSolver } from './highlight-in-text-solver';
 import { DictationSolver } from './dictation-solver';
+import { InflectionTableSolver } from './inflection-table-solver';
 import { MultipleChoiceSolver } from './multiple-choice-solver';
 import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
@@ -765,6 +766,10 @@ const SERVER_SOLVERS: Record<
   // corrected line of what was typed, the sentence only on a reveal, the transcript a closed
   // sentence at a time (plan 68 §3.5, §3.6). One attempt holds every sentence, as above.
   dictation: DictationSolver,
+  // Its key is the form of every asked cell, and the dosing is per check — which cells are
+  // wrong and why every time, the correct form only by `revealKey`, the budget and the freeze
+  // on right cells on the server (plan 69 §3.4, §3.5). A card first, then one attempt.
+  inflection_table: InflectionTableSolver,
 };
 
 /**

@@ -30,6 +30,7 @@ import { TEMPLATE_CODE as MULTIPLE_CHOICE_GROUP_TEMPLATE_CODE } from '@/lib/shar
 import { TEMPLATE_CODE as SORT_INTO_BUCKETS_TEMPLATE_CODE } from '@/lib/shared-kernel/sort-into-buckets';
 import { TEMPLATE_CODE as HIGHLIGHT_IN_TEXT_TEMPLATE_CODE } from '@/lib/shared-kernel/highlight-in-text';
 import { TEMPLATE_CODE as DICTATION_TEMPLATE_CODE } from '@/lib/shared-kernel/dictation';
+import { TEMPLATE_CODE as INFLECTION_TABLE_TEMPLATE_CODE } from '@/lib/shared-kernel/inflection-table';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -45,6 +46,7 @@ import { createMultipleChoiceAction } from '../actions/multiple-choice';
 import { createMultipleChoiceGroupAction } from '../actions/multiple-choice-group';
 import { createSortIntoBucketsAction } from '../actions/sort-into-buckets';
 import { createDictationAction } from '../actions/dictation';
+import { createInflectionTableAction } from '../actions/inflection-table';
 import { createHighlightInTextAction } from '../actions/highlight-in-text';
 import {
   createTranslateFromTargetAction,
@@ -94,6 +96,7 @@ type OwnBuilderTemplate =
   | typeof SORT_INTO_BUCKETS_TEMPLATE_CODE
   | typeof HIGHLIGHT_IN_TEXT_TEMPLATE_CODE
   | typeof DICTATION_TEMPLATE_CODE
+  | typeof INFLECTION_TABLE_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
@@ -140,6 +143,10 @@ const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillActi
   // The twelfth. One empty sentence, listening switched on with the defaults of DECISIONS §7,
   // and the course language stamped as the pack that classifies its errors (plan 68 Q2-A).
   [DICTATION_TEMPLATE_CODE]: createDictationAction,
+  // The fourteenth. The course language's first paradigm with every slot in play and no rows;
+  // the columns are the pack's, so a document made by the generic form would have none
+  // (plan 69 §3.7).
+  [INFLECTION_TABLE_TEMPLATE_CODE]: createInflectionTableAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,
@@ -257,7 +264,9 @@ export function AddLessonPicker({
     // picker has no field to type one in — so the interface-language placeholder above would
     // beat the pack every time. Empty means «use the pack».
     const scaffoldInstructions =
-      templateCode === HIGHLIGHT_IN_TEXT_TEMPLATE_CODE || templateCode === DICTATION_TEMPLATE_CODE
+      templateCode === HIGHLIGHT_IN_TEXT_TEMPLATE_CODE ||
+      templateCode === DICTATION_TEMPLATE_CODE ||
+      templateCode === INFLECTION_TABLE_TEMPLATE_CODE
         ? ''
         : instructions;
 
