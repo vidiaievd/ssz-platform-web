@@ -3,9 +3,10 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
 import {
   addManualRow,
   emptyContent,
@@ -14,16 +15,26 @@ import {
   type InflectionTableContent,
 } from '@/lib/shared-kernel/inflection-table';
 
+vi.mock('@/features/media', () => ({
+  useMediaAsset: () => ({ data: undefined }),
+  uploadAsset: vi.fn(),
+}));
+vi.mock('../../actions/inflection-table', () => ({ saveInflectionTableAction: vi.fn() }));
 vi.mock('../../api/use-course-dictionary', () => ({
   useCourseDictionary: () => ({ data: [], isPending: false, isError: false, isSuccess: true }),
 }));
 
 const { InflectionTableBuilder } = await import('./builder');
+const { saveInflectionTableAction } = await import('../../actions/inflection-table');
 
 const PAGE_RULES = { rules: { region: { enabled: false }, 'color-contrast': { enabled: false } } };
 const LOADED_AT = '2026-10-05T10:00:00.000Z';
 
-const doc = (content: InflectionTableContent) => ({ ...content, updatedAt: LOADED_AT });
+const doc = (content: InflectionTableContent) => ({
+  ...content,
+  updatedAt: LOADED_AT,
+  audio: readAudioDraft({}, 'inflection_table'),
+});
 
 function renderBuilder(content: InflectionTableContent, onDocumentChange?: () => void) {
   const view = render(
@@ -31,6 +42,7 @@ function renderBuilder(content: InflectionTableContent, onDocumentChange?: () =>
       <NextIntlClientProvider locale="en" messages={enMessages}>
         <InflectionTableBuilder
           exerciseId="ex-1"
+          containerId="module-1"
           initialExercise={doc(content)}
           onDocumentChange={onDocumentChange}
         />
@@ -138,5 +150,121 @@ describe('InflectionTableBuilder — accessibility', () => {
     expect((await axe.run(container, PAGE_RULES)).violations).toEqual([]);
     await user.click(stepTab('Forms'));
     expect((await axe.run(container, PAGE_RULES)).violations).toEqual([]);
+  });
+});
+
+describe('InflectionTableBuilder — steps 3 to 5', () => {
+  it('opens reasons, difficulty and audio from the rail', async () => {
+    const { user } = renderBuilder(sampleContent());
+    await user.click(stepTab('Reasons'));
+    expect(
+      screen.getByRole('heading', { name: 'Why this form and not that one' }),
+    ).toBeInTheDocument();
+    await user.click(stepTab('Difficulty'));
+    expect(
+      screen.getByRole('heading', { name: 'Dials, kept away from content' }),
+    ).toBeInTheDocument();
+    await user.click(stepTab('Audio'));
+    expect(
+      screen.getByRole('heading', { name: 'Optional, and attached the usual way' }),
+    ).toBeInTheDocument();
+  });
+
+  it('puts a blocker on the reasons step as soon as a key has none (IT-B8)', () => {
+    const base = sampleContent();
+    const row = base.rows[0]!;
+    const cells = Object.fromEntries(
+      Object.entries(row.cells).map(([id, c]) => [id, { ...c, why: '' }]),
+    );
+    renderBuilder({ ...base, rows: [{ ...row, cells }, ...base.rows.slice(1)] });
+    expect(within(stepTab('Reasons')).getByText('3 problems')).toBeInTheDocument();
+  });
+
+  it('folds the audio layer’s findings into step 5 (IT-B12)', async () => {
+    const { user } = renderBuilder(sampleContent());
+    expect(within(stepTab('Audio')).getByText('ready')).toBeInTheDocument();
+    await user.click(stepTab('Audio'));
+    await user.click(
+      screen.getByRole('switch', { name: new RegExp(enMessages.Authoring.audio.enableLabel) }),
+    );
+    // Listening on, with no clip behind it: nothing to play.
+    expect(within(stepTab('Audio')).getByText(/problem/)).toBeInTheDocument();
+  });
+});
+
+describe('InflectionTableBuilder — the gate', () => {
+  it('adds up repeated findings into one line with a number, and lists what already passes', async () => {
+    const base = sampleContent();
+    const rows = base.rows.map((row) => ({
+      ...row,
+      cells: Object.fromEntries(
+        Object.entries(row.cells).map(([id, c]) => [id, { ...c, why: '' }]),
+      ),
+    }));
+    const { user } = renderBuilder({ ...base, rows });
+    await user.click(stepTab('Audio'));
+    await user.click(screen.getByRole('button', { name: /Review & finish/ }));
+    const dialog = await screen.findByRole('dialog');
+    const asked = rows.length * 3;
+    expect(
+      within(dialog).getByText(`${asked} cells would tell the student “wrong” with no reason.`),
+    ).toBeInTheDocument();
+    expect(within(dialog).getAllByText(/would tell the student/)).toHaveLength(1);
+    expect(
+      within(dialog).getByText(/Columns come from Norsk bokmål · kjernepakke/),
+    ).toBeInTheDocument();
+  });
+
+  it('names a single finding by its row and column', async () => {
+    const base = sampleContent();
+    const row = base.rows[0]!;
+    const cells = { ...row.cells, defSg: { ...row.cells['defSg']!, why: '' } };
+    const { user } = renderBuilder({ ...base, rows: [{ ...row, cells }, ...base.rows.slice(1)] });
+    await user.click(stepTab('Audio'));
+    await user.click(screen.getByRole('button', { name: /Review & finish/ }));
+    const dialog = await screen.findByRole('dialog');
+    expect(
+      within(dialog).getByText(/en jobb · Bestemt entall — This cell would tell the student/),
+    ).toBeInTheDocument();
+  });
+
+  it('says it is clear for a finished table', async () => {
+    const { user } = renderBuilder(sampleContent());
+    await user.click(stepTab('Audio'));
+    await user.click(screen.getByRole('button', { name: /Review & finish/ }));
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText(/Nothing standing in the way/)).toBeInTheDocument();
+  });
+});
+
+describe('InflectionTableBuilder — saving', () => {
+  beforeEach(() => {
+    vi.mocked(saveInflectionTableAction).mockResolvedValue({
+      ok: true,
+      value: { status: 'saved', updatedAt: '2026-10-05T10:00:05.000Z' },
+    });
+  });
+  afterEach(() => vi.clearAllMocks());
+
+  it('saves an edit by itself, both columns, on the token it loaded with', async () => {
+    const { user } = renderBuilder(sampleContent());
+    await user.type(screen.getByRole('textbox', { name: 'Instructions to the student' }), '!');
+    await vi.waitFor(() => expect(saveInflectionTableAction).toHaveBeenCalledTimes(1), {
+      timeout: 3_000,
+    });
+    const [exerciseId, containerId, input] = vi.mocked(saveInflectionTableAction).mock.calls[0]!;
+    expect([exerciseId, containerId]).toEqual(['ex-1', 'module-1']);
+    expect(input.expectedUpdatedAt).toBe(LOADED_AT);
+    expect(input.instructions.endsWith('!')).toBe(true);
+    expect(input.expectedAnswers.cells['r1:defSg']?.value).toBe('jobben');
+  });
+
+  it('offers to put the exercise back once something changed, and does', async () => {
+    const { user } = renderBuilder(sampleContent());
+    expect(screen.queryByRole('button', { name: /Undo everything/ })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('switch', { name: 'Bestemt flertall in the table' }));
+    await user.click(screen.getByRole('button', { name: /Undo everything since I opened this/ }));
+    await user.click(screen.getByRole('button', { name: 'Put it back' }));
+    expect(screen.getByRole('switch', { name: 'Bestemt flertall in the table' })).toBeChecked();
   });
 });

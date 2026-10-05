@@ -19,6 +19,7 @@ vi.mock('../actions/multiple-choice-group', () => ({ createMultipleChoiceGroupAc
 vi.mock('../actions/sort-into-buckets', () => ({ createSortIntoBucketsAction: vi.fn() }));
 vi.mock('../actions/highlight-in-text', () => ({ createHighlightInTextAction: vi.fn() }));
 vi.mock('../actions/dictation', () => ({ createDictationAction: vi.fn() }));
+vi.mock('../actions/inflection-table', () => ({ createInflectionTableAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
@@ -36,6 +37,7 @@ const { createMultipleChoiceGroupAction } = await import('../actions/multiple-ch
 const { createSortIntoBucketsAction } = await import('../actions/sort-into-buckets');
 const { createHighlightInTextAction } = await import('../actions/highlight-in-text');
 const { createDictationAction } = await import('../actions/dictation');
+const { createInflectionTableAction } = await import('../actions/inflection-table');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -240,6 +242,22 @@ describe('AddLessonPicker', () => {
     await waitFor(() => expect(createDictationAction).toHaveBeenCalled());
     expect(vi.mocked(createDictationAction).mock.calls[0]![1]).toBe('no');
     expect(vi.mocked(createDictationAction).mock.calls[0]![4]).toBe('');
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it("creates an inflection table from its own scaffold, with the pack's own instruction (IT-X4)", async () => {
+    // Plan 69 phase 7: the columns are the pack's, so the generic form cannot make one.
+    vi.mocked(createInflectionTableAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-18', itemId: 'item-18' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Inflection table'));
+
+    await waitFor(() => expect(createInflectionTableAction).toHaveBeenCalled());
+    expect(vi.mocked(createInflectionTableAction).mock.calls[0]![1]).toBe('no');
+    expect(vi.mocked(createInflectionTableAction).mock.calls[0]![4]).toBe('');
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 

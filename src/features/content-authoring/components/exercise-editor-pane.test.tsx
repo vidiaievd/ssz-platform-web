@@ -23,6 +23,7 @@ vi.mock('../actions/multiple-choice-group', () => ({ saveMultipleChoiceGroupActi
 vi.mock('../actions/sort-into-buckets', () => ({ saveSortIntoBucketsAction: vi.fn() }));
 vi.mock('../actions/highlight-in-text', () => ({ saveHighlightInTextAction: vi.fn() }));
 vi.mock('../actions/dictation', () => ({ saveDictationAction: vi.fn() }));
+vi.mock('../actions/inflection-table', () => ({ saveInflectionTableAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -522,6 +523,61 @@ describe('ExerciseEditorPane', () => {
     expect(preview.getByRole('textbox')).toBeInTheDocument();
     expect(preview.queryByText(/kjøkkenet/)).not.toBeInTheDocument();
     expect(preview.queryByText(/kj, ikke sj/)).not.toBeInTheDocument();
+  });
+
+  it('opens the inflection-table builder by template code, key held back from the preview', () => {
+    // Plan 69 phase 7. By the code alone: a blank scaffold — the pack's first paradigm and no
+    // rows — must open the builder, never the generic form.
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-it',
+        templateCode: 'inflection_table',
+        targetLanguage: 'nb',
+        difficultyLevel: 'A2',
+        content: {
+          title: 'Substantiv',
+          instruction: 'Fyll ut bøyingen.',
+          language: 'nb',
+          packId: 'nb-core',
+          packVersion: '2.4',
+          paradigmId: 'noun',
+          slots: ['indefSg', 'defSg'],
+          rows: [
+            {
+              id: 'r1',
+              lemma: 'ei bok',
+              gloss: 'book',
+              dictId: null,
+              cells: { indefSg: { mode: 'prefill', value: 'bok' }, defSg: { mode: 'ask' } },
+            },
+          ],
+          input: { mode: 'type', bankExtra: 3, shuffleRows: true },
+          settings: {
+            attempts: 2,
+            threshold: 75,
+            revealKey: 'afterLast',
+            hintFirstLetter: false,
+            rowVerdict: true,
+          },
+        },
+        expectedAnswers: {
+          cells: { 'r1:defSg': { value: 'boka', accept: [], why: 'Hunkjønn.' } },
+        },
+        instructions: [{ instructionLanguage: 'en', instructionText: 'Fyll ut bøyingen.' }],
+        updatedAt: '2026-10-05T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Paradigm/ })).toBeInTheDocument();
+    // The runner's own body over the projection: the row is there, the key is not.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText('ei bok')).toBeInTheDocument();
+    expect(preview.queryByText('boka')).not.toBeInTheDocument();
+    expect(preview.queryByText(/Hunkjønn/)).not.toBeInTheDocument();
   });
 
   it('opens the marking builder by template code, key held back from the preview', () => {

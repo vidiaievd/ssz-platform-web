@@ -1,4 +1,6 @@
+import type { AudioDraft } from '@/lib/shared-kernel/audio';
 import {
+  addAccept as addAcceptTo,
   addManualRow as addManualRowTo,
   addRow,
   bulkFirstGiven as bulkFirstGivenOf,
@@ -7,16 +9,22 @@ import {
   packOf,
   paradigmOf,
   pickParadigm as pickParadigmOf,
+  removeAccept as removeAcceptFrom,
   removeRow as removeRowFrom,
   setCellMode as setCellModeOf,
   setCellValue as setCellValueOf,
   setInstruction as setInstructionOf,
   setLemma as setLemmaOf,
+  setWhy as setWhyOf,
   slotsInPlay,
   toggleSlot as toggleSlotOf,
+  updateInput as updateInputOf,
+  updateSettings as updateSettingsOf,
   type CellMode,
   type DictionaryEntry,
   type InflectionTableContent,
+  type InputSettings,
+  type Settings,
 } from '@/lib/shared-kernel/inflection-table';
 
 /**
@@ -30,10 +38,15 @@ import {
  */
 type Doc = InflectionTableContent;
 
-/** The document as the builder holds it: the kernel's content plus the row's token. */
+/**
+ * The document as the builder holds it: the kernel's content plus the row's token and the
+ * audio layer's draft (plan 56). Same envelope as `sort_into_buckets` and `highlight_in_text`:
+ * the layer belongs to no template, so it rides beside the document, not inside the kernel's.
+ */
 export interface InflectionTableDocument extends InflectionTableContent {
   /** ISO. Doubles as the autosave concurrency token. */
   updatedAt: string;
+  audio: AudioDraft;
 }
 
 function keep<T extends Doc>(ex: T, next: Doc): T {
@@ -101,4 +114,34 @@ export function bulkFirstGiven<T extends Doc>(ex: T): T {
 
 export function bulkOpenAll<T extends Doc>(ex: T): T {
   return keep(ex, bulkOpenAllOf(ex));
+}
+
+// ── Step 3 ──────────────────────────────────────────────────────────────────
+
+export function setWhy<T extends Doc>(ex: T, rowId: string, slotId: string, why: string): T {
+  return keep(ex, setWhyOf(ex, rowId, slotId, why));
+}
+
+/** A variant for this cell only; the kernel trims it and refuses an empty, doubled or key-equal one. */
+export function addAccept<T extends Doc>(ex: T, rowId: string, slotId: string, variant: string): T {
+  return keep(ex, addAcceptTo(ex, rowId, slotId, variant));
+}
+
+export function removeAccept<T extends Doc>(
+  ex: T,
+  rowId: string,
+  slotId: string,
+  index: number,
+): T {
+  return keep(ex, removeAcceptFrom(ex, rowId, slotId, index));
+}
+
+// ── Step 4 ──────────────────────────────────────────────────────────────────
+
+export function setInput<T extends Doc>(ex: T, patch: Partial<InputSettings>): T {
+  return keep(ex, updateInputOf(ex, patch));
+}
+
+export function setSettings<T extends Doc>(ex: T, patch: Partial<Settings>): T {
+  return keep(ex, updateSettingsOf(ex, patch));
 }

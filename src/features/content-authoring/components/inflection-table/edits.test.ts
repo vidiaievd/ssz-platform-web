@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { readAudioDraft } from '@/lib/shared-kernel/audio';
+
 import {
   emptyContent,
   IT_MAX_ROWS,
@@ -29,6 +31,7 @@ const BOK: DictionaryEntry = {
 const doc = (content: InflectionTableContent = emptyContent('nb')): InflectionTableDocument => ({
   ...content,
   updatedAt: '2026-10-05T10:00:00.000Z',
+  audio: readAudioDraft({}, 'inflection_table'),
 });
 
 describe('inflection-table edits — the document keeps its token', () => {
