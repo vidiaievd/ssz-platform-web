@@ -19,6 +19,8 @@ export const authoringKeys = keyFactory('authoring', {
   workspaceRecipeCourses: (schoolId: string) => ['workspace-recipe-courses', schoolId] as const,
   courseResult: (id: string) => ['course-result', id] as const,
   exerciseAxes: (id: string) => ['exercise-axes', id] as const,
+  courseDictionary: (exerciseId: string, pos: string, lang: string) =>
+    ['course-dictionary', exerciseId, pos, lang] as const,
   lessons: (containerId: string) => ['lessons', containerId] as const,
   lesson: (id: string) => ['lesson', id] as const,
   lessonVariants: (lessonId: string) => ['lesson-variants', lessonId] as const,
