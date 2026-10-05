@@ -634,5 +634,43 @@
       "badge": "Orthography",
       "start": "Start the dictation"
     }
+  },
+  "inflectionTable": {
+    "defaultTitle": "Inflection",
+    "defaultInstruction": "Fill in the table.",
+    "check": "Check",
+    "checking": "Checking …",
+    "retryWrong": "Retry the wrong ones ({n}/{max})",
+    "bankLabel": "Forms",
+    "bankHint": "Pick a form, then tap a cell.",
+    "bankSelected": "{form} is selected. Choose a cell to put it in.",
+    "cellFor": "{lemma}, {slot}",
+    "cellEmpty": "empty",
+    "cellRight": "correct",
+    "cellWrong": "wrong",
+    "cellClear": "Tap to take the form out again",
+    "rowAll": "whole row",
+    "rowPart": "{ok}/{n}",
+    "score": "{k} of {n} cells",
+    "passed": "Passed",
+    "below": "Below the pass mark ({pct} %)",
+    "wrote": "you wrote",
+    "blank": "empty",
+    "allRight": "The whole table is right. {n, plural, one {# paradigm} other {# paradigms}} done.",
+    "nearDiacritic": "The letter counts: å, ø and æ are not a, o and ae.",
+    "nearEnding": "Right stem, wrong ending.",
+    "sendFailed": "The answer could not be sent. Try again.",
+    "closedAlready": "This exercise is already finished.",
+    "empty": {
+      "title": "Empty table",
+      "body": "The exercise has no lemmas yet."
+    },
+    "card": {
+      "start": "Start the table",
+      "cells": "{n, plural, one {# cell} other {# cells}}",
+      "lemmas": "{n, plural, one {# lemma} other {# lemmas}}"
+    },
+    "rowHead": "Row",
+    "progress": "Progress"
   }
 }

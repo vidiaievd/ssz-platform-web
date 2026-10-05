@@ -8,6 +8,7 @@ import type {
 import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gapfill';
 import type { StudentProjection as MultipleChoiceGroupProjection } from '@/lib/shared-kernel/multiple-choice-group';
 import type { StudentProjection as SortIntoBucketsProjection } from '@/lib/shared-kernel/sort-into-buckets';
+import type { NearMiss as InflectionTableNearMiss } from '@/lib/shared-kernel/inflection-table';
 import type { StudentResult as ShortAnswerResult } from '@/lib/shared-kernel/short-answer';
 import type { StudentResult as SentenceSchemaResult } from '@/lib/shared-kernel/sentence-schema';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
@@ -413,6 +414,74 @@ export interface SortIntoBucketsSubmitDetails {
   locked: string[];
   rules: { bucketId: string; rule: string }[];
   items: SortIntoBucketsItemResult[];
+}
+
+/**
+ * What one check of an `inflection_table` carries up — plan 69 §3.4.
+ *
+ * `cells` is every asked cell by `rowId:slotId`, locked ones included; a cell left empty is
+ * simply absent. Which check this is, which cells are locked and what each held on the first
+ * check are the attempt's facts and the engine writes its own — none is sent.
+ */
+export interface InflectionTableSubmittedAnswer {
+  cells: Record<string, string>;
+}
+
+/**
+ * One cell's outcome in a check. `near` and `why` come on every check for a wrong cell
+ * (DECISIONS §3); `correctForm` only when `revealKey` allows the key now.
+ */
+export interface InflectionTableItemResult {
+  /** `rowId:slotId`. */
+  itemId: string;
+  rowId: string;
+  slotId: string;
+  /** What stands in the cell now; empty when it was left empty. */
+  value: string;
+  /** Right now. */
+  correct: boolean;
+  /** Right on the first check — what the score counts. */
+  firstCorrect: boolean;
+  firstAnswer: string;
+  near?: InflectionTableNearMiss;
+  why?: string;
+  correctForm?: string;
+}
+
+/** The row grain: recorded on every check, drawn only under `settings.rowVerdict`. */
+export interface InflectionTableRowResult {
+  rowId: string;
+  asked: number;
+  /** Right now. */
+  ok: number;
+  firstOk: number;
+}
+
+/**
+ * `details` when the template is `inflection_table` — the table after a check.
+ *
+ * `closed` and `locked` are the two the runner may not second-guess: a closed table refuses a
+ * further check whatever budget is left, and `locked` outlives the verdict. `passedItems`,
+ * `pct` and `passed` are the first check's — later checks change what is on screen, never the
+ * score. The pass mark itself is not sent (plan 69, deviation 15).
+ */
+export interface InflectionTableSubmitDetails {
+  totalItems: number;
+  /** Right on the first check. */
+  passedItems: number;
+  /** Right now — the progress line and the live region. */
+  correctNow: number;
+  /** Bank mode: cells filled wrongly on the first check, each costing a right one. */
+  falsePositives: number;
+  pct: number;
+  passed: boolean;
+  /** 1-based: which check of the table this was. */
+  attempt: number;
+  checksLeft: number;
+  closed: boolean;
+  locked: string[];
+  rows: InflectionTableRowResult[];
+  items: InflectionTableItemResult[];
 }
 
 /**

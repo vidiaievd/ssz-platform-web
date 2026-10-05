@@ -634,5 +634,43 @@
       "badge": "Ortografi",
       "start": "Start diktaten"
     }
+  },
+  "inflectionTable": {
+    "defaultTitle": "Bøying",
+    "defaultInstruction": "Fyll ut bøyingen.",
+    "check": "Sjekk",
+    "checking": "Sjekker …",
+    "retryWrong": "Prøv de gale på nytt ({n}/{max})",
+    "bankLabel": "Former",
+    "bankHint": "Velg en form, og trykk så på en celle.",
+    "bankSelected": "{form} er valgt. Velg en celle å legge den i.",
+    "cellFor": "{lemma}, {slot}",
+    "cellEmpty": "tom",
+    "cellRight": "riktig",
+    "cellWrong": "feil",
+    "cellClear": "Trykk for å ta formen ut igjen",
+    "rowAll": "hele raden",
+    "rowPart": "{ok}/{n}",
+    "score": "{k} av {n} celler",
+    "passed": "Bestått",
+    "below": "Under grensen ({pct} %)",
+    "wrote": "du skrev",
+    "blank": "tom",
+    "allRight": "Hele tabellen stemmer. {n, plural, one {# paradigme} other {# paradigmer}} ferdig.",
+    "nearDiacritic": "Bokstaven teller: å, ø og æ er ikke a, o og ae.",
+    "nearEnding": "Riktig stamme, feil endelse.",
+    "sendFailed": "Svaret kunne ikke sendes. Prøv igjen.",
+    "closedAlready": "Denne oppgaven er allerede avsluttet.",
+    "empty": {
+      "title": "Tom tabell",
+      "body": "Oppgaven har ingen oppslagsord ennå."
+    },
+    "card": {
+      "start": "Start bøyingen",
+      "cells": "{n, plural, one {# celle} other {# celler}}",
+      "lemmas": "{n, plural, one {# oppslagsord} other {# oppslagsord}}"
+    },
+    "rowHead": "Rad",
+    "progress": "Fremdrift"
   }
 }
