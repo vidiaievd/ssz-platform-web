@@ -75,6 +75,14 @@ export interface StartAttemptResponse {
    * transcript slice (plan 68, phase 4). Empty on a fresh attempt.
    */
   segmentStates?: SegmentState[];
+  /**
+   * `inflection_table`: the last check of a table that was scored but left open — each cell
+   * with the value it held and its verdict, the frozen cells, the checks left (plan 69, phase
+   * 9). The details that check returned, so nothing the learner was not shown. `null` on a
+   * fresh attempt. A whole board is scored by its first check and never sits `IN_PROGRESS`
+   * between checks, so this is how a reload gets the table back.
+   */
+  boardCheck?: InflectionTableSubmitDetails | null;
 }
 
 /** One question of a `short_answer` set already handed in on the resumed attempt. */

@@ -85,6 +85,7 @@ interface ApiOptions {
   submits?: unknown[];
   submitStatuses?: number[];
   resumable?: boolean;
+  started?: unknown;
   display?: unknown;
 }
 
@@ -127,7 +128,7 @@ function mockApi(options: ApiOptions = {}) {
       return json({ attempt: null, ...(options.resumable === true ? { resumable: true } : {}) });
     }
 
-    return json(STARTED);
+    return json(options.started ?? STARTED);
   });
 
   return Object.assign(fetchMock, { bodies });
@@ -193,6 +194,32 @@ describe('InflectionTableSolver — the card (Q4-A)', () => {
     renderSolver(mockApi({ resumable: true }));
     expect(await field('en jobb', 'Bestemt entall')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Start the table/ })).toBeNull();
+  });
+
+  it('puts the table back as the last check left it when the engine resumes it', async () => {
+    const back = scored(TYPED).details;
+    const api = mockApi({ resumable: true, started: { ...STARTED, boardCheck: back } });
+    renderSolver(api);
+
+    // The cells as they were written, marked by that check, and the way on from here.
+    expect(await field('en jobb', 'Bestemt entall')).toHaveValue('jobber');
+    expect(await field('en jobb', 'Ubestemt flertall')).toHaveValue('jobber');
+    expect(
+      await screen.findByRole('button', { name: /Retry the wrong ones \(1\/2\)/ }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Check' })).toBeNull();
+  });
+
+  it('does not report the first check a second time after a resume', async () => {
+    const onChecked = vi.fn();
+    const api = mockApi({
+      resumable: true,
+      started: { ...STARTED, boardCheck: scored(TYPED).details },
+    });
+    renderSolver(api, { onChecked });
+
+    await screen.findByRole('button', { name: /Retry the wrong ones/ });
+    expect(onChecked).not.toHaveBeenCalled();
   });
 
   it('refuses a card drawn from a document that carries the key', async () => {

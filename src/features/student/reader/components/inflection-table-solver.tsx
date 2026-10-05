@@ -175,17 +175,36 @@ function InflectionTableRun({
             return;
           }
 
+          // A table the engine hands back as it stood after a check: the cells as they were
+          // written, the verdict that came with them, the budget already spent. Only a verdict
+          // of the right shape counts; anything else opens a plain, empty table.
+          const resumed = data.boardCheck;
+          const back =
+            resumed != null && Array.isArray(resumed.items) && Array.isArray(resumed.locked)
+              ? resumed
+              : null;
+
           setAttemptId(data.attemptId);
           setProjection(table);
           setDocument(data.exerciseContent);
           setTranscript(null);
-          setValues({});
-          setPhase('answering');
-          setVerdict(null);
-          setLocked([]);
-          setAttempt(1);
+          setValues(
+            back === null
+              ? {}
+              : Object.fromEntries(
+                  back.items
+                    .filter((item) => item.value !== '')
+                    .map((item) => [item.itemId, item.value]),
+                ),
+          );
+          setPhase(back === null ? 'answering' : 'checked');
+          setVerdict(back);
+          setLocked(back === null ? [] : back.locked);
+          setAttempt(back === null ? 1 : back.attempt);
           setError(null);
           openedAt.current = Date.now();
+          // The first check was reported before the reload; it is not evidence a second time.
+          if (back !== null) reported.current = true;
         },
       },
     );
