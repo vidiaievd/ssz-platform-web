@@ -132,12 +132,14 @@ export function DictionaryPicker({
                   <span className="text-[11px] text-(--ssz-text-muted)">
                     {[entry.gloss, entry.unit].filter((part) => part !== '').join(' · ')}
                   </span>
+                  <span className="font-mono text-xs break-words text-(--ssz-text-secondary)">
+                    {forms}
+                  </span>
                 </span>
-                <span className="font-mono text-xs text-(--ssz-text-secondary)">{forms}</span>
                 {used ? (
-                  <Check size={15} aria-hidden="true" />
+                  <Check size={15} className="shrink-0" aria-hidden="true" />
                 ) : (
-                  <Plus size={15} aria-hidden="true" />
+                  <Plus size={15} className="shrink-0" aria-hidden="true" />
                 )}
               </button>
             );

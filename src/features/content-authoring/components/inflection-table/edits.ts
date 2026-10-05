@@ -3,6 +3,7 @@ import {
   addAccept as addAcceptTo,
   addManualRow as addManualRowTo,
   addRow,
+  bare,
   bulkFirstGiven as bulkFirstGivenOf,
   bulkOpenAll as bulkOpenAllOf,
   fromDictionary,
@@ -86,8 +87,21 @@ export function removeRow<T extends Doc>(ex: T, rowId: string): T {
   return keep(ex, removeRowFrom(ex, rowId));
 }
 
+/**
+ * A typed row's given cell follows the lemma — «ei bok» gives `bok` — for as long as the author has
+ * not written anything else there. A row linked to the dictionary has its forms from the entry.
+ */
 export function setLemma<T extends Doc>(ex: T, rowId: string, lemma: string): T {
-  return keep(ex, setLemmaOf(ex, rowId, lemma));
+  const next = setLemmaOf(ex, rowId, lemma);
+  const pack = packOf(ex);
+  const row = ex.rows.find((r) => r.id === rowId);
+  const first = slotsInPlay(ex)[0];
+  if (!pack || !row || row.dictId !== null || !first) return keep(ex, next);
+  const cell = row.cells[first.id];
+  if (!cell || cell.mode !== 'prefill' || cell.value !== bare(row.lemma, pack)) {
+    return keep(ex, next);
+  }
+  return keep(ex, setCellValueOf(next, rowId, first.id, bare(lemma, pack)));
 }
 
 export function setCellMode<T extends Doc>(

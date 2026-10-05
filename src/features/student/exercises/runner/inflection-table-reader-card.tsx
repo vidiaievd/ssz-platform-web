@@ -74,75 +74,77 @@ export function InflectionTableReaderCard({
         <b className="text-base">{heading}</b>
       </div>
 
-      <table className="w-full border-separate border-spacing-0">
-        <thead>
-          <tr>
-            <th scope="col">
-              <span className="sr-only">{projection.paradigm.lemmaLabel}</span>
-            </th>
-            {projection.slots.map((slot) => (
-              <th
-                key={slot.id}
-                scope="col"
-                className="whitespace-nowrap px-2 py-1.5 text-left text-[11px] font-semibold uppercase tracking-wider text-(--ssz-text-muted)"
-              >
-                {slot.short}
+      <div className="overflow-x-auto">
+        <table className="w-full border-separate border-spacing-0">
+          <thead>
+            <tr>
+              <th scope="col">
+                <span className="sr-only">{projection.paradigm.lemmaLabel}</span>
               </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {projection.rows.slice(0, PREVIEW_ROWS).map((row) => (
-            <tr key={row.id}>
-              <th
-                scope="row"
-                className="whitespace-nowrap border-t py-2 pl-0 pr-2.5 text-left"
-                style={{ borderColor: 'var(--ssz-border-default)' }}
-              >
-                <b
-                  className="block text-base font-semibold"
-                  style={{ fontFamily: READING }}
-                  lang={projection.language || undefined}
+              {projection.slots.map((slot) => (
+                <th
+                  key={slot.id}
+                  scope="col"
+                  className="px-2 py-1.5 text-left align-bottom text-[11px] font-semibold uppercase tracking-wider text-(--ssz-text-muted)"
                 >
-                  {row.lemma}
-                </b>
-              </th>
-              {projection.slots.map((slot) => {
-                const cell = row.cells[slot.id];
-                return (
-                  <td
-                    key={slot.id}
-                    className="border-t py-1.5 pl-0 pr-1.5"
-                    style={{ borderColor: 'var(--ssz-border-default)' }}
-                  >
-                    {cell?.mode === 'prefill' ? (
-                      <span
-                        className="inline-block px-1 py-[7px] text-base text-(--ssz-text-muted)"
-                        style={{ fontFamily: READING }}
-                      >
-                        {cell.value}
-                      </span>
-                    ) : cell?.mode === 'ask' ? (
-                      <span
-                        aria-hidden="true"
-                        className="inline-block"
-                        style={{
-                          minWidth: 64,
-                          minHeight: 30,
-                          border: '1px solid var(--ssz-border-strong)',
-                          borderBottomWidth: 2,
-                          borderRadius: 'var(--ssz-radius-sm)',
-                          background: 'var(--ssz-bg-subtle)',
-                        }}
-                      />
-                    ) : null}
-                  </td>
-                );
-              })}
+                  {slot.short}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {projection.rows.slice(0, PREVIEW_ROWS).map((row) => (
+              <tr key={row.id}>
+                <th
+                  scope="row"
+                  className="whitespace-nowrap border-t py-2 pl-0 pr-2.5 text-left"
+                  style={{ borderColor: 'var(--ssz-border-default)' }}
+                >
+                  <b
+                    className="block text-base font-semibold"
+                    style={{ fontFamily: READING }}
+                    lang={projection.language || undefined}
+                  >
+                    {row.lemma}
+                  </b>
+                </th>
+                {projection.slots.map((slot) => {
+                  const cell = row.cells[slot.id];
+                  return (
+                    <td
+                      key={slot.id}
+                      className="border-t py-1.5 pl-0 pr-1.5"
+                      style={{ borderColor: 'var(--ssz-border-default)' }}
+                    >
+                      {cell?.mode === 'prefill' ? (
+                        <span
+                          className="inline-block px-1 py-[7px] text-base text-(--ssz-text-muted)"
+                          style={{ fontFamily: READING }}
+                        >
+                          {cell.value}
+                        </span>
+                      ) : cell?.mode === 'ask' ? (
+                        <span
+                          aria-hidden="true"
+                          className="inline-block"
+                          style={{
+                            minWidth: 48,
+                            minHeight: 30,
+                            border: '1px solid var(--ssz-border-strong)',
+                            borderBottomWidth: 2,
+                            borderRadius: 'var(--ssz-radius-sm)',
+                            background: 'var(--ssz-bg-subtle)',
+                          }}
+                        />
+                      ) : null}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <p className="m-0 text-[11px] text-(--ssz-text-muted)">
         {t('card.cells', { n: asked })} · {t('card.lemmas', { n: projection.rows.length })}

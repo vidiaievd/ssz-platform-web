@@ -14,6 +14,7 @@ import {
   addManualRow,
   pickParadigm,
   setCellMode,
+  setLemma,
   setInstruction,
   toggleSlot,
   type InflectionTableDocument,
@@ -64,5 +65,37 @@ describe('inflection-table edits — the document keeps its token', () => {
   it('adds nothing without a pack', () => {
     const ex = doc(emptyContent('xx'));
     expect(addFromDictionary(ex, BOK)).toBe(ex);
+  });
+});
+
+describe("inflection-table edits — a typed row's given cell follows the lemma", () => {
+  const given = (ex: InflectionTableDocument) => {
+    const row = ex.rows[0]!;
+    return row.cells[Object.keys(row.cells)[0]!]!.value;
+  };
+
+  it('writes the bare word while the cell is untouched', () => {
+    let ex = addManualRow(doc());
+    const id = ex.rows[0]!.id;
+    for (const typed of ['e', 'ei', 'ei b', 'ei bok']) ex = setLemma(ex, id, typed);
+    expect(given(ex)).toBe('bok');
+  });
+
+  it('leaves a cell the author has changed alone', () => {
+    let ex = addManualRow(doc());
+    const id = ex.rows[0]!.id;
+    ex = setLemma(ex, id, 'ei bok');
+    const slot = Object.keys(ex.rows[0]!.cells)[0]!;
+    ex = {
+      ...ex,
+      rows: [
+        {
+          ...ex.rows[0]!,
+          cells: { ...ex.rows[0]!.cells, [slot]: { ...ex.rows[0]!.cells[slot]!, value: 'boka' } },
+        },
+      ],
+    };
+    ex = setLemma(ex, id, 'ei bøk');
+    expect(given(ex)).toBe('boka');
   });
 });

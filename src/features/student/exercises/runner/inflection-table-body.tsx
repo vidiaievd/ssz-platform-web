@@ -237,6 +237,9 @@ export function InflectionTableBody({
             autoCapitalize="off"
             autoComplete="off"
             spellCheck={false}
+            // An input's default intrinsic width (size 20) keeps the table wider than its column and
+            // push the row chip out of view; the cell's own minWidth and the table share the room.
+            size={10}
             lang={projection.language || undefined}
             className={`w-full ${FOCUS}`}
             style={cellStyle(state)}
@@ -334,7 +337,7 @@ export function InflectionTableBody({
                   <th
                     key={s.id}
                     scope="col"
-                    className="whitespace-nowrap px-2 py-1.5 text-left text-[11px] font-semibold uppercase tracking-wider text-(--ssz-text-muted)"
+                    className="px-2 py-1.5 text-left align-bottom text-[11px] font-semibold uppercase tracking-wider text-(--ssz-text-muted)"
                   >
                     {s.label}
                   </th>
