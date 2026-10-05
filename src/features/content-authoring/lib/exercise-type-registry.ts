@@ -210,24 +210,18 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     status: 'live',
   },
 
-  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
+  // Speech, recorded and graded by a person (plan 70). Its three tasks — reading aloud, a
+  // monologue, a turn in a dialogue — are modes of one type, so the catalogue's separate
+  // `speaking_prompt` is gone: it is `read_aloud` with `mode: 'monologue' | 'dialogue'`.
   read_aloud: {
     code: 'read_aloud',
     labelKey: 'read_aloud',
     section: 'exercise',
     icon: Speech,
-    status: 'planned',
-    // The words are on screen: what is retrieved is how they sound, not what to say.
-    axes: { input: 'text', output: 'spoken', modality: 'recall' },
+    status: 'live',
   },
-  speaking_prompt: {
-    code: 'speaking_prompt',
-    labelKey: 'speaking_prompt',
-    section: 'exercise',
-    icon: Mic,
-    status: 'planned',
-    axes: { input: 'text', output: 'spoken', modality: 'production' },
-  },
+
+  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
   minimal_pairs: {
     code: 'minimal_pairs',
     labelKey: 'minimal_pairs',

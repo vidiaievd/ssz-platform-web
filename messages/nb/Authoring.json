@@ -193,7 +193,6 @@
       "dictation": "Diktat",
       "inflection_table": "Bøyningstabell",
       "read_aloud": "Les høyt",
-      "speaking_prompt": "Snakk",
       "minimal_pairs": "Lytt og velg",
       "information_transfer": "Fyll ut skjema"
     },
@@ -3965,6 +3964,7 @@
       "vocabulary": "Ordforråd",
       "grammar": "Grammatikk",
       "orthography": "Rettskriving",
+      "pronunciation": "Uttale",
       "pragmatics": "Språkbruk",
       "unknown": "Ikke registrert"
     },

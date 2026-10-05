@@ -193,7 +193,6 @@
       "dictation": "Диктант",
       "inflection_table": "Таблиця форм",
       "read_aloud": "Читання вголос",
-      "speaking_prompt": "Усна відповідь",
       "minimal_pairs": "Послухай і обери",
       "information_transfer": "Заповнення форми"
     },
@@ -3965,6 +3964,7 @@
       "vocabulary": "Лексика",
       "grammar": "Граматика",
       "orthography": "Орфографія",
+      "pronunciation": "Вимова",
       "pragmatics": "Доречність",
       "unknown": "Не вказано"
     },

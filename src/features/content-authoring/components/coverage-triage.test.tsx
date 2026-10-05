@@ -127,7 +127,7 @@ describe('CoverageTriage — the lesson recipe', () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/^Closes it: Gap-fill, .*Translate to target, .*and 8 more\.$/),
+      screen.getByText(/^Closes it: Gap-fill, .*Translate to target, .*and 7 more\.$/),
     ).toBeInTheDocument();
   });
 });

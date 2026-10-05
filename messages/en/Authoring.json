@@ -197,7 +197,6 @@
       "dictation": "Dictation",
       "inflection_table": "Inflection table",
       "read_aloud": "Read aloud",
-      "speaking_prompt": "Speaking prompt",
       "minimal_pairs": "Listen and choose",
       "information_transfer": "Fill in a form"
     },
@@ -3965,6 +3964,7 @@
       "vocabulary": "Vocabulary",
       "grammar": "Grammar",
       "orthography": "Spelling",
+      "pronunciation": "Pronunciation",
       "pragmatics": "Register",
       "unknown": "Not recorded"
     },

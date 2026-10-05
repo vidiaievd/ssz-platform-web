@@ -193,7 +193,6 @@
       "dictation": "Диктант",
       "inflection_table": "Таблица форм",
       "read_aloud": "Чтение вслух",
-      "speaking_prompt": "Устный ответ",
       "minimal_pairs": "Послушай и выбери",
       "information_transfer": "Заполнение формы"
     },
@@ -3965,6 +3964,7 @@
       "vocabulary": "Лексика",
       "grammar": "Грамматика",
       "orthography": "Орфография",
+      "pronunciation": "Произношение",
       "pragmatics": "Уместность",
       "unknown": "Не указан"
     },
