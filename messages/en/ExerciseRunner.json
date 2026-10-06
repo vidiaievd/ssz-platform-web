@@ -672,5 +672,113 @@
     },
     "rowHead": "Row",
     "progress": "Progress"
+  },
+  "readAloud": {
+    "defaultTitle": "Speaking",
+    "defaultInstruction": "Record your answer.",
+    "noPrompts": "There is nothing to record in this task yet.",
+    "progress": "Recordings made",
+    "promptN": "Task {n}",
+    "imagePlaceholder": "The picture to describe",
+    "rubricGuide": "What the teacher listens for",
+    "mic": {
+      "head": "Microphone check",
+      "hint": "Say something short — «hello, hello» will do. Nothing is recorded here.",
+      "ok": "The microphone works.",
+      "silent": "We can't hear anything. Check that the right microphone is selected.",
+      "ready": "Ready",
+      "denied": "The browser has no access to the microphone. Allow it in the address bar and try again.",
+      "noDevice": "No microphone found. Connect one and try again."
+    },
+    "retry": "Try again",
+    "prep": {
+      "head": "Preparation",
+      "sub": {
+        "read": "The microphone opens automatically. Read through the text.",
+        "monologue": "The microphone opens automatically. Look at the picture and the plan.",
+        "dialogue": "The microphone opens automatically. Read the line."
+      },
+      "startNow": "Start now"
+    },
+    "count": {
+      "sub": "The microphone opens in a moment."
+    },
+    "rec": {
+      "head": "Recording",
+      "max": "max {time}",
+      "stop": "Stop"
+    },
+    "idle": {
+      "head": "Recording {n}/{total}",
+      "range": "min {min} · max {max}"
+    },
+    "interrupted": "The recording was interrupted — it doesn't count. Record it again.",
+    "take": {
+      "label": "Recording {n}",
+      "play": "Play {label}",
+      "pause": "Pause",
+      "uploading": "Uploading"
+    },
+    "chooseTake": "Choose the recording you hand in",
+    "chooseThis": "Choose {label}",
+    "uploadFailed": "The recording was not uploaded.",
+    "noListenBack": "The recording is saved. You won't hear it again in this task.",
+    "short": "The recording is shorter than {min} — record it again.",
+    "start": "Start recording",
+    "again": "Record again ({left} left)",
+    "spent": "You have used {n, plural, one {your only recording} other {all # recordings}}.",
+    "chosenNote": "You hand in the recording you have chosen.",
+    "prev": "Previous",
+    "next": "Next",
+    "submit": "Hand in to the teacher",
+    "sending": "Handing in…",
+    "left": "{n, plural, one {# recording} other {# recordings}} left.",
+    "tooShort": "Too short: {labels} — record again.",
+    "uploading": "Waiting for the recordings to upload.",
+    "readByTeacher": "Every recording is listened to by a teacher.",
+    "submittedTake": "Handed-in recording: {label}",
+    "steps": {
+      "atTeacher": "with the teacher",
+      "graded": "graded"
+    },
+    "sent": {
+      "title": "Handed in.",
+      "body": "The teacher listens to the recording and answers within 48 hours. You'll be notified."
+    },
+    "refused": {
+      "retake": "The recording for {labels} was not accepted — record it again.",
+      "notReady": "The recording for {labels} is still uploading. Try again in a moment.",
+      "length": "The recording for {labels} has the wrong length — record it again."
+    },
+    "mediaUnavailable": "The recordings couldn't be checked right now. Try again in a moment.",
+    "sendFailed": "Couldn't hand in. Try again.",
+    "sendUnconfirmed": "We couldn't confirm whether the recordings were handed in. Reload the page to see.",
+    "graded": {
+      "outcome": {
+        "passed": "Passed",
+        "rewrite": "Record again",
+        "failed": "Not passed"
+      },
+      "points": "{score} / {max} points",
+      "passedCount": "{k} of {n} recordings passed",
+      "promptPassed": "Passed",
+      "promptAgain": "Not passed",
+      "hidden": "The teacher has graded the recording. The criteria are not shown in this task.",
+      "mark": "{mark}/3",
+      "model": "Hear the model reading",
+      "redo": "Record again and hand in"
+    },
+    "card": {
+      "defaultTitle": "Speaking task",
+      "facts": "{mode} · {n, plural, one {# recording} other {# recordings}} · graded by a teacher",
+      "mode": {
+        "read": "reading aloud",
+        "monologue": "monologue from support",
+        "dialogue": "a turn in a dialogue"
+      },
+      "rules": "{n, plural, one {# recording} other {# recordings}} per task · answer within 48 hours",
+      "rulesListen": "{n, plural, one {# recording} other {# recordings}} per task, you can hear yourself first · answer within 48 hours",
+      "start": "Start"
+    }
   }
 }

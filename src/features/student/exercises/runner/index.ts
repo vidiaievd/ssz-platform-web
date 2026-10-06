@@ -208,3 +208,12 @@ export type {
 } from './inflection-table-body';
 export { InflectionTableReaderCard } from './inflection-table-reader-card';
 export type { InflectionTableReaderCardProps } from './inflection-table-reader-card';
+
+export { readReadAloudProjection } from './read-aloud-projection';
+export { ReadAloudBody } from './read-aloud-body';
+export type { ReadAloudBodyProps, ReadAloudLayout, ReadAloudStage } from './read-aloud-body';
+export { ReadAloudGraded } from './read-aloud-graded';
+export type { ReadAloudGradedProps } from './read-aloud-graded';
+export { ReadAloudReaderCard } from './read-aloud-reader-card';
+export type { ReadAloudReaderCardProps } from './read-aloud-reader-card';
+export type { TakeSource } from './read-aloud-parts';

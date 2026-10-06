@@ -672,5 +672,113 @@
     },
     "rowHead": "Rad",
     "progress": "Fremdrift"
+  },
+  "readAloud": {
+    "defaultTitle": "Muntlig",
+    "defaultInstruction": "Ta opp svaret ditt.",
+    "noPrompts": "Oppgaven har ingenting å ta opp ennå.",
+    "progress": "Opptak gjort",
+    "promptN": "Oppgave {n}",
+    "imagePlaceholder": "Bildet du skal beskrive",
+    "rubricGuide": "Dette lytter læreren etter",
+    "mic": {
+      "head": "Mikrofonsjekk",
+      "hint": "Si noe kort — «hei, hei» holder. Vi tar ikke opp noe her.",
+      "ok": "Mikrofonen fungerer.",
+      "silent": "Vi hører ingenting. Sjekk at riktig mikrofon er valgt.",
+      "ready": "Klar",
+      "denied": "Nettleseren har ikke tilgang til mikrofonen. Gi tilgang i adressefeltet og prøv igjen.",
+      "noDevice": "Fant ingen mikrofon. Koble til en og prøv igjen."
+    },
+    "retry": "Prøv igjen",
+    "prep": {
+      "head": "Forberedelse",
+      "sub": {
+        "read": "Mikrofonen åpner automatisk. Les gjennom teksten.",
+        "monologue": "Mikrofonen åpner automatisk. Se på bildet og planen.",
+        "dialogue": "Mikrofonen åpner automatisk. Les replikken."
+      },
+      "startNow": "Start nå"
+    },
+    "count": {
+      "sub": "Mikrofonen åpner om et øyeblikk."
+    },
+    "rec": {
+      "head": "Tar opp",
+      "max": "maks {time}",
+      "stop": "Stopp"
+    },
+    "idle": {
+      "head": "Opptak {n}/{total}",
+      "range": "min {min} · maks {max}"
+    },
+    "interrupted": "Opptaket ble avbrutt — det telles ikke. Ta det opp på nytt.",
+    "take": {
+      "label": "Opptak {n}",
+      "play": "Spill av {label}",
+      "pause": "Pause",
+      "uploading": "Lastes opp"
+    },
+    "chooseTake": "Velg opptaket du leverer",
+    "chooseThis": "Velg {label}",
+    "uploadFailed": "Opptaket ble ikke lastet opp.",
+    "noListenBack": "Opptaket er lagret. Du hører det ikke igjen i denne oppgaven.",
+    "short": "Opptaket er kortere enn {min} — ta det opp på nytt.",
+    "start": "Start opptak",
+    "again": "Ta opp på nytt ({left} igjen)",
+    "spent": "Du har brukt alle {n} opptakene.",
+    "chosenNote": "Du leverer opptaket du har valgt.",
+    "prev": "Forrige",
+    "next": "Neste",
+    "submit": "Lever til læreren",
+    "sending": "Leverer…",
+    "left": "{n} opptak gjenstår.",
+    "tooShort": "For kort: {labels} — ta opp på nytt.",
+    "uploading": "Venter på at opptakene lastes opp.",
+    "readByTeacher": "Alle opptak lyttes gjennom av en lærer.",
+    "submittedTake": "Innlevert opptak: {label}",
+    "steps": {
+      "atTeacher": "hos læreren",
+      "graded": "vurdert"
+    },
+    "sent": {
+      "title": "Levert.",
+      "body": "Læreren hører gjennom opptaket og svarer innen 48 timer. Du får varsel."
+    },
+    "refused": {
+      "retake": "Opptaket for {labels} ble ikke godtatt — ta det opp på nytt.",
+      "notReady": "Opptaket for {labels} lastes fortsatt opp. Prøv igjen om litt.",
+      "length": "Opptaket for {labels} har feil lengde — ta det opp på nytt."
+    },
+    "mediaUnavailable": "Opptakene kunne ikke sjekkes akkurat nå. Prøv igjen om litt.",
+    "sendFailed": "Kunne ikke levere. Prøv igjen.",
+    "sendUnconfirmed": "Vi fikk ikke bekreftet om opptakene ble levert. Last inn siden på nytt for å se.",
+    "graded": {
+      "outcome": {
+        "passed": "Bestått",
+        "rewrite": "Til nytt opptak",
+        "failed": "Ikke bestått"
+      },
+      "points": "{score} / {max} poeng",
+      "passedCount": "{k} av {n} opptak bestått",
+      "promptPassed": "Bestått",
+      "promptAgain": "Ikke bestått",
+      "hidden": "Læreren har vurdert opptaket. Kriteriene vises ikke i denne oppgaven.",
+      "mark": "{mark}/3",
+      "model": "Hør modellopplesningen",
+      "redo": "Ta opp på nytt og lever"
+    },
+    "card": {
+      "defaultTitle": "Muntlig oppgave",
+      "facts": "{mode} · {n} opptak · vurderes av lærer",
+      "mode": {
+        "read": "lese høyt",
+        "monologue": "monolog på støtte",
+        "dialogue": "replikk i dialog"
+      },
+      "rules": "{n} opptak per oppgave · svar innen 48 timer",
+      "rulesListen": "{n} opptak per oppgave, du kan høre deg selv først · svar innen 48 timer",
+      "start": "Start"
+    }
   }
 }

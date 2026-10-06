@@ -24,6 +24,22 @@ export async function POST(
     if (e instanceof AppError && e.code === 'unauthenticated') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    // Refused on ingest — a recording over the ceilings, a file that is not audio (plan 70
+    // §3.4). The service's code travels on: «too long» and «try again» are different screens.
+    if (e instanceof AppError && e.code === 'validation') {
+      const code = refusalCode(e.details);
+      return NextResponse.json(
+        { error: 'Upload refused', ...(code === null ? {} : { code }) },
+        { status: 422 },
+      );
+    }
     return NextResponse.json({ error: 'Failed to finalize upload' }, { status: 502 });
   }
+}
+
+/** media-service puts its refusal code in `message` (`UnprocessableEntityException(code)`). */
+function refusalCode(details: unknown): string | null {
+  if (typeof details !== 'object' || details === null) return null;
+  const { message } = details as { message?: unknown };
+  return typeof message === 'string' && /^[A-Z][A-Z_]+$/.test(message) ? message : null;
 }
