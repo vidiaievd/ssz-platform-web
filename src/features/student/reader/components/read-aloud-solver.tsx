@@ -64,6 +64,13 @@ export interface ReadAloudSolverProps {
 
 const FINISHED = new Set(['ROUTED_FOR_REVIEW', 'SCORED', 'RETURNED']);
 
+/** Refusals that mean the take itself is unusable — it goes back to the budget. */
+const RETAKE_CODES = new Set([
+  'RA_RECORDING_NOT_FOUND',
+  'RA_RECORDING_FAILED',
+  'RA_RECORDING_LENGTH',
+]);
+
 /** Media keys of a recording read by its owner — url, length, peaks and whose attempt it is. */
 const recordingKey = (assetId: string) => ['media', 'recording', assetId] as const;
 
@@ -450,6 +457,23 @@ function ReadAloudSession({
     upload(take);
   }
 
+  /**
+   * A take the server cannot use goes, and gives its slot back (decided 06.10): the file is gone
+   * or broken, or the server measured it outside the prompt's range. Recording again is the only
+   * fix, and a spent budget must not stand in its way. «Still uploading» is not a refusal — the
+   * take is fine and only late.
+   */
+  function takeBack(e: AttemptRequestError, sent: SubmittedRecording[]) {
+    if (!RETAKE_CODES.has(e.code ?? '')) return;
+    for (const itemId of e.itemIds) {
+      const assetId = sent.find((r) => r.itemId === itemId)?.assetId;
+      const take = recorder.state.takes[itemId]?.find((x) => x.assetId === assetId);
+      if (assetId === undefined || take === undefined) continue;
+      recorder.refused(itemId, take.n);
+      void fetch(`/api/media/assets/${assetId}`, { method: 'DELETE' }).catch(() => undefined);
+    }
+  }
+
   function refusal(e: AttemptRequestError): string {
     const labels = e.itemIds.map(labelOf).join(', ') || labelOf(projection.prompts[0]?.id ?? '');
     if (e.code === 'RA_RECORDING_NOT_READY') return t('refused.notReady', { labels });
@@ -487,6 +511,7 @@ function ReadAloudSession({
             e.code?.startsWith('RA_RECORDING_')
           ) {
             setError(refusal(e));
+            takeBack(e, submission.recordings);
             return;
           }
           if (e instanceof AttemptRequestError && e.status === 503) {

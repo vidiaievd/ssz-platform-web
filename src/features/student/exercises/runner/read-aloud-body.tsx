@@ -540,7 +540,8 @@ function RecorderBlock({
           >
             {own.map((take, i) => {
               const selected = rec.chooseBest && pick === i;
-              const label = t('take.label', { n: take.n });
+              // By place, not by `n`: a refused take leaves a gap in the numbers.
+              const label = t('take.label', { n: i + 1 });
               return (
                 <div key={take.n} className="flex flex-col gap-1">
                   <div
@@ -564,10 +565,10 @@ function RecorderBlock({
                         }}
                         className={`rounded-full ${RA_FOCUS}`}
                       >
-                        <TakeNumber n={take.n} selected={selected} />
+                        <TakeNumber n={i + 1} selected={selected} />
                       </button>
                     ) : (
-                      <TakeNumber n={take.n} />
+                      <TakeNumber n={i + 1} />
                     )}
                     <TakePlayer
                       source={sourceOf(take.ref, take.assetId)}

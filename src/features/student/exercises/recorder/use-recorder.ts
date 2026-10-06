@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 
 import {
   initialState,
+  nextTakeNumber,
   reduce,
   takesOf,
   ticking,
@@ -62,6 +63,8 @@ export interface RecorderHandle {
   uploaded: (itemId: string, n: number, assetId: string) => void;
   uploadFailed: (itemId: string, n: number) => void;
   uploadRetry: (itemId: string, n: number) => void;
+  /** The server refused this take at hand-in: it goes, and the slot comes back. */
+  refused: (itemId: string, n: number) => void;
 }
 
 /**
@@ -114,7 +117,7 @@ export function useRecorder({
   const { phase } = state;
   const prompt = config.prompts[state.index];
   const itemId = prompt?.id ?? null;
-  const nextN = itemId === null ? 0 : takesOf(state, itemId).length + 1;
+  const nextN = itemId === null ? 0 : nextTakeNumber(takesOf(state, itemId));
 
   // The level check opens the microphone as soon as it is on screen.
   useEffect(() => {
@@ -231,5 +234,6 @@ export function useRecorder({
     uploaded: (id, n, assetId) => dispatch({ type: 'uploaded', itemId: id, n, assetId }),
     uploadFailed: (id, n) => dispatch({ type: 'uploadFailed', itemId: id, n }),
     uploadRetry: (id, n) => dispatch({ type: 'uploadRetry', itemId: id, n }),
+    refused: (id, n) => dispatch({ type: 'refused', itemId: id, n }),
   };
 }

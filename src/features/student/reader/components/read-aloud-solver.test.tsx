@@ -236,6 +236,28 @@ describe('ReadAloudSolver', () => {
     );
   });
 
+  it('gives a refused take back to the budget, even the last one (decided 06.10)', async () => {
+    const api = mockApi({
+      submitStatus: 422,
+      submitBody: { error: 'Recordings refused', code: 'RA_RECORDING_FAILED', itemIds: ['p1aaaa'] },
+    });
+    renderSolver(api);
+    await userEvent.click(await screen.findByRole('button', { name: 'Start' }));
+    await record();
+    await record();
+    await record();
+    expect(await screen.findByText('You have used all 3 recordings.')).toBeInTheDocument();
+    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    await waitFor(() => expect(send).toBeEnabled());
+    await userEvent.click(send);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('was not accepted');
+    expect(
+      await screen.findByRole('button', { name: 'Record again (1 left)' }),
+    ).toBeInTheDocument();
+    expect(api.deletes).toEqual(['asset-3']);
+  });
+
   it('says the recordings could not be checked when media is down (RA-U10)', async () => {
     const api = mockApi({
       submitStatus: 503,
