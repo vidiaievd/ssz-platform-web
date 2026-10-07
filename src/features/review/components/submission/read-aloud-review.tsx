@@ -324,7 +324,7 @@ function Material({ detail }: { detail: ReadAloudPromptDetail }) {
         )}
         {material.partner.trim() !== '' && (
           <p className="m-0" style={{ fontFamily: READING }}>
-            <b style={{ fontFamily: 'inherit' }}>{t('partner')}</b> «{material.partner}»
+            <b style={{ fontFamily: 'inherit' }}>{t('partner')}</b> {material.partner}
           </p>
         )}
       </div>

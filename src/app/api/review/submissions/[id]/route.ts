@@ -23,6 +23,7 @@ interface EngineVerdict {
   at: string;
   reviewerId: string;
   comment: string | null;
+  decisions?: ReviewItemDecision[] | null;
 }
 
 /** The engine's answer to `GET :attemptId/review` (plan 44.7). */

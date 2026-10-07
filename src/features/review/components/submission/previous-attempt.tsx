@@ -13,9 +13,18 @@ import type { ReviewVerdictRecord } from '../../types';
  * because it is the one block on the screen that is *not* this submission — the boundary
  * has to be visible at a glance, or the old comment gets read as part of the new work.
  */
-export function PreviousAttempt({ verdict }: { verdict: ReviewVerdictRecord }) {
+export function PreviousAttempt({
+  verdict,
+  labelOf,
+}: {
+  verdict: ReviewVerdictRecord;
+  /** Names an item for the per-item rulings; absent, the ruling is shown without a heading. */
+  labelOf?: (itemId: string) => string;
+}) {
   const t = useTranslations('Review.submission.previous');
   const format = useFormatter();
+  const rulings = (verdict.decisions ?? []).filter((d) => (d.comment ?? '').trim() !== '');
+  const written = verdict.comment !== null && verdict.comment.trim() !== '';
 
   return (
     <section
@@ -37,7 +46,24 @@ export function PreviousAttempt({ verdict }: { verdict: ReviewVerdictRecord }) {
         </p>
       </div>
 
-      {verdict.comment === null || verdict.comment.trim() === '' ? (
+      {!written && rulings.length > 0 ? (
+        <ul className="mt-2 flex flex-col gap-2">
+          {rulings.map((ruling) => {
+            const label = labelOf?.(ruling.itemId) ?? '';
+            return (
+              <li key={ruling.itemId}>
+                {label === '' ? null : <p className="text-[12.5px] font-semibold">{label}</p>}
+                <p
+                  className="whitespace-pre-wrap text-[14px] leading-relaxed"
+                  style={{ fontFamily: 'var(--ssz-font-reading)' }}
+                >
+                  {ruling.comment}
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      ) : !written ? (
         <p className="mt-2 text-[13px] italic text-muted-foreground">{t('noComment')}</p>
       ) : (
         <p

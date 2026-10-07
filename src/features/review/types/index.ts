@@ -153,6 +153,11 @@ export interface ReviewVerdictRecord {
   /** Null when the directory could not answer; the banner then names the outcome only. */
   reviewerName: string | null;
   comment: string | null;
+  /**
+   * What was ruled on each item, on the previous try only. A recorded-speech template has
+   * no overall comment — everything the reviewer said sits here, one entry per prompt.
+   */
+  decisions?: ReviewItemDecision[] | null;
 }
 
 /** The exercise a submission belongs to, as the reviewer's screen needs to read it. */

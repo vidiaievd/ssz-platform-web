@@ -282,7 +282,9 @@ export function SubmissionPanel({
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5 py-4">
         <SubmissionNotes submission={data} lock={lock} conflict={conflict} />
-        {data.previous === null ? null : <PreviousAttempt verdict={data.previous} />}
+        {data.previous === null ? null : (
+          <PreviousAttempt verdict={data.previous} labelOf={promptLabelOf(data)} />
+        )}
         <SentenceList
           submission={data}
           comments={draft.sentences}
@@ -372,6 +374,16 @@ function rubricDecisionOf(
 }
 
 /** Whose verdict already stands on this submission, if anyone's. */
+/**
+ * How a prompt of the new try is named, for the rulings made on the one before it. Only a
+ * recorded-speech submission has prompts; for any other template there is nothing to name.
+ */
+function promptLabelOf(submission: ReviewSubmission): ((itemId: string) => string) | undefined {
+  if (submission.exercise.type !== 'read_aloud') return undefined;
+  const prompts = readReadAloudDetails(submission.details)?.prompts ?? [];
+  return (itemId) => prompts.find((prompt) => prompt.itemId === itemId)?.label ?? '';
+}
+
 function verdictOf(
   submission: ReviewSubmission,
   conflict: ReviewConflict | null,

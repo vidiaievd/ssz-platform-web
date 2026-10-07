@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
+import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
@@ -123,12 +124,12 @@ function mockApi(options: ApiOptions = {}) {
 
 let port: MockRecorder;
 
-function renderSolver(api: ReturnType<typeof mockApi>, onChecked = vi.fn()) {
+function renderSolver(api: ReturnType<typeof mockApi>, onChecked = vi.fn(), strict = false) {
   vi.stubGlobal('fetch', api);
   const client = new QueryClient({
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
-  render(
+  const tree = (
     <QueryClientProvider client={client}>
       <NextIntlClientProvider locale="en" messages={enMessages}>
         <ReadAloudSolver
@@ -138,8 +139,9 @@ function renderSolver(api: ReturnType<typeof mockApi>, onChecked = vi.fn()) {
           createPort={() => port}
         />
       </NextIntlClientProvider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
+  render(strict ? <StrictMode>{tree}</StrictMode> : tree);
   return onChecked;
 }
 
@@ -170,6 +172,17 @@ describe('ReadAloudSolver', () => {
     await screen.findByText(/reading aloud · 1 recording/);
     expect(port.calls.open).toBe(0);
     expect(api.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false);
+  });
+
+  it('opens one try however many times the effect runs (strict mode)', async () => {
+    const api = mockApi();
+    renderSolver(api, vi.fn(), true);
+    await userEvent.click(await screen.findByRole('button', { name: 'Start' }));
+    await screen.findByRole('button', { name: /^(Ready|Start recording)/ });
+    const starts = api.mock.calls.filter(
+      ([url, init]) => init?.method === 'POST' && String(url).endsWith('/attempts'),
+    );
+    expect(starts).toHaveLength(1);
   });
 
   it('records, uploads against the attempt, saves the draft and hands in (RA-U2, RA-R10, RA-R11)', async () => {

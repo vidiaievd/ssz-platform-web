@@ -193,64 +193,77 @@ function ReadAloudRun({
     opening: Opening;
   } | null>(null);
   const [unusable, setUnusable] = useState(false);
+  const [failed, setFailed] = useState(false);
   /** The past is looked at once — a redo opens a clean attempt, not the verdict again. */
   const considered = useRef(false);
 
-  const startMutate = start.mutate;
+  const startAsync = start.mutateAsync;
+  /*
+   * Read through the promise, not through `mutate`'s callbacks: strict mode unsubscribes the
+   * mutation's observer between its two effect runs, and the callbacks of a start fired before
+   * that are never called — the screen would wait for an answer that has already come.
+   */
   const begin = useCallback(() => {
-    startMutate(
-      { language },
-      {
-        onSuccess: async (data) => {
-          const projection = readReadAloudProjection(data.exerciseContent);
-          if (projection === null) {
-            setUnusable(true);
-            return;
+    setFailed(false);
+    startAsync({ language })
+      .then(async (data) => {
+        const projection = readReadAloudProjection(data.exerciseContent);
+        if (projection === null) {
+          setUnusable(true);
+          return;
+        }
+
+        let opening: Opening = { stage: 'draft', draft: null };
+        if (!considered.current) {
+          considered.current = true;
+          const [saved, last] = await Promise.all([
+            fetchDraft(exerciseId, data.attemptId),
+            fetchLastAttempt(exerciseId),
+          ]);
+          const mine = last !== null && last.templateCode === TEMPLATE_CODE ? last : null;
+          const handedIn = readSubmission(mine?.submittedAnswer)?.recordings ?? [];
+          const draft = await verifiedDraft(
+            readDraft(saved?.draftAnswer),
+            data.attemptId,
+            (asset) => queryClient.setQueryData(recordingKey(asset.id), asset),
+          );
+
+          if (mine !== null && mine.status === 'ROUTED_FOR_REVIEW') {
+            opening = { stage: 'sent', recordings: handedIn };
+          } else if (Object.keys(draft.takes).length > 0) {
+            opening = { stage: 'draft', draft };
+          } else if (mine !== null && FINISHED.has(mine.status)) {
+            opening = { stage: 'graded', recordings: handedIn, verdict: mine };
           }
+        }
 
-          let opening: Opening = { stage: 'draft', draft: null };
-          if (!considered.current) {
-            considered.current = true;
-            const [saved, last] = await Promise.all([
-              fetchDraft(exerciseId, data.attemptId),
-              fetchLastAttempt(exerciseId),
-            ]);
-            const mine = last !== null && last.templateCode === TEMPLATE_CODE ? last : null;
-            const handedIn = readSubmission(mine?.submittedAnswer)?.recordings ?? [];
-            const draft = await verifiedDraft(
-              readDraft(saved?.draftAnswer),
-              data.attemptId,
-              (asset) => queryClient.setQueryData(recordingKey(asset.id), asset),
-            );
+        setSession({
+          attemptId: data.attemptId,
+          projection,
+          document: data.exerciseContent,
+          opening,
+        });
+      })
+      .catch(() => setFailed(true));
+  }, [startAsync, language, exerciseId, queryClient]);
 
-            if (mine !== null && mine.status === 'ROUTED_FOR_REVIEW') {
-              opening = { stage: 'sent', recordings: handedIn };
-            } else if (Object.keys(draft.takes).length > 0) {
-              opening = { stage: 'draft', draft };
-            } else if (mine !== null && FINISHED.has(mine.status)) {
-              opening = { stage: 'graded', recordings: handedIn, verdict: mine };
-            }
-          }
-
-          setSession({
-            attemptId: data.attemptId,
-            projection,
-            document: data.exerciseContent,
-            opening,
-          });
-        },
-      },
-    );
-  }, [startMutate, language, exerciseId, queryClient]);
-
+  /**
+   * The opening start happens once per exercise. Strict mode runs an effect twice on mount,
+   * and two starts a few milliseconds apart both find nothing open on a returned exercise —
+   * each opens a try, and one of them is left dangling with no recording on it.
+   */
+  const startedFor = useRef<string | null>(null);
   useEffect(() => {
+    const key = `${exerciseId}:${language}`;
+    if (startedFor.current === key) return;
+    startedFor.current = key;
     begin();
-  }, [begin]);
+  }, [begin, exerciseId, language]);
 
-  if (!unusable && (start.isPending || (start.isSuccess && session === null))) {
+  if (!unusable && !failed && session === null) {
     return <LearningSkeleton variant="list" rows={4} />;
   }
-  if (unusable || start.isError || session === null) {
+  if (unusable || failed || session === null) {
     return (
       <ErrorState
         onRetry={() => {

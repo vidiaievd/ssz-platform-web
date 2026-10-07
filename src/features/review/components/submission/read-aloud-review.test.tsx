@@ -216,6 +216,32 @@ describe('a read_aloud submission in the inbox (plan 70 §7.11)', () => {
     expect(within(await block('Avsnitt 2')).queryByText('Listen for:')).not.toBeInTheDocument();
   });
 
+  it('shows the partner line as the author wrote it, without quotation marks of its own', async () => {
+    upstream({
+      ...SUBMISSION,
+      details: {
+        ...DETAILS,
+        mode: 'dialogue',
+        prompts: [
+          {
+            ...DETAILS.prompts[0]!,
+            material: {
+              kind: 'dialogue',
+              situation: 'Du er hos fastlegen.',
+              partner: '«Hva kan jeg hjelpe deg med i dag?»',
+            },
+          },
+        ],
+      },
+    });
+    renderPanel();
+
+    const first = await block('Avsnitt 1');
+    expect(within(first).getByText(/Hva kan jeg hjelpe deg med i dag/)).toHaveTextContent(
+      'The partner says: «Hva kan jeg hjelpe deg med i dag?»',
+    );
+  });
+
   it('has no comment on the whole — the comments belong to the prompts', async () => {
     upstream();
     renderPanel();
