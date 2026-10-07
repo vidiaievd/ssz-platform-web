@@ -5,6 +5,11 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 import type { Container } from '@/features/content/types';
+import {
+  sampleDocument,
+  toContent as readAloudToContent,
+  toExpectedAnswers as readAloudToExpectedAnswers,
+} from '@/lib/shared-kernel/read-aloud';
 
 vi.mock('../actions/exercise', () => ({
   updateExerciseAction: vi.fn(),
@@ -24,6 +29,7 @@ vi.mock('../actions/sort-into-buckets', () => ({ saveSortIntoBucketsAction: vi.f
 vi.mock('../actions/highlight-in-text', () => ({ saveHighlightInTextAction: vi.fn() }));
 vi.mock('../actions/dictation', () => ({ saveDictationAction: vi.fn() }));
 vi.mock('../actions/inflection-table', () => ({ saveInflectionTableAction: vi.fn() }));
+vi.mock('../actions/read-aloud', () => ({ saveReadAloudAction: vi.fn() }));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -523,6 +529,35 @@ describe('ExerciseEditorPane', () => {
     expect(preview.getByRole('textbox')).toBeInTheDocument();
     expect(preview.queryByText(/kjøkkenet/)).not.toBeInTheDocument();
     expect(preview.queryByText(/kj, ikke sj/)).not.toBeInTheDocument();
+  });
+
+  it('opens the read-aloud builder by template code, notes and descriptors held back from the preview (RA-B19)', () => {
+    // Plan 70 phase 8. By the code alone: a blank scaffold — one empty prompt — must open the
+    // builder, never the generic form.
+    const ex = sampleDocument();
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-ra',
+        templateCode: 'read_aloud',
+        targetLanguage: 'nb',
+        difficultyLevel: 'A2',
+        content: readAloudToContent(ex),
+        expectedAnswers: readAloudToExpectedAnswers(ex),
+        instructions: [{ instructionLanguage: 'en', instructionText: ex.instruction }],
+        updatedAt: '2026-10-07T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Listen for/ })).toBeInTheDocument();
+    // The runner's own body over the projection: the passage is there, the brief is not.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(preview.getByText(/Jeg søkte/)).toBeInTheDocument();
+    expect(preview.queryByText(/Lytt etter kj\/sj/)).not.toBeInTheDocument();
+    expect(preview.queryByText(/Tydelig og trygg uttale/)).not.toBeInTheDocument();
   });
 
   it('opens the inflection-table builder by template code, key held back from the preview', () => {

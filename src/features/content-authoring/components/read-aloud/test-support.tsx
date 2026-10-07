@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
 
 import { enMessages } from '@/lib/i18n/messages';
@@ -27,9 +28,11 @@ export const sampleReadAloud = (): ReadAloudDocument => documentOf(sampleDocumen
 
 export function Intl({ children }: { children: ReactNode }) {
   return (
-    <NextIntlClientProvider locale="en" messages={enMessages}>
-      {children}
-    </NextIntlClientProvider>
+    <QueryClientProvider client={new QueryClient()}>
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        {children}
+      </NextIntlClientProvider>
+    </QueryClientProvider>
   );
 }
 

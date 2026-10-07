@@ -4519,6 +4519,119 @@
       "RA_CHOOSE_NO_EFFECT": "Tillat flere forsøk",
       "RA_NO_MIC_CHECK": "Slå den på",
       "RA_AI_NOT_LIVE": "Les merknaden"
+    },
+    "step4": {
+      "eyebrow": "Steg 4",
+      "title": "Opptak",
+      "lede": "Innstillingene som avgjør hvor tilgivende mikrofonen er — holdt adskilt fra innholdet med vilje. Alt her er også en grense for hva opplastingen og køen må bære.",
+      "takesLabel": "Forsøk per oppgave",
+      "chooseBest": {
+        "label": "Velg det beste opptaket",
+        "help": "Studenten leverer ett opptak. Av: det siste forsøket sendes automatisk."
+      },
+      "listenBack": {
+        "label": "Lytt tilbake før levering",
+        "help": "Å høre seg selv er mesteparten av læringen. Slå av bare når du vil ha det første, uredigerte forsøket."
+      },
+      "countdown": {
+        "label": "Nedtelling før mikrofonen åpnes",
+        "help": "3 · 2 · 1, så det første ordet ikke blir klippet."
+      },
+      "micCheck": {
+        "label": "Mikrofonsjekk først",
+        "help": "En nivåtest på to sekunder. Stille opptak er det vanligste køen kaster bort tid på."
+      },
+      "keepAll": {
+        "label": "Send de forkastede forsøkene også",
+        "help": "Læreren hører forsøkene i tillegg til det valgte. Nyttig for diagnose, tyngre for lagring og for studentens nerver."
+      },
+      "lengthTitle": "Lengde per oppgave",
+      "promptN": "Oppgave {index}",
+      "prep": "Forb.",
+      "min": "Min",
+      "max": "Maks",
+      "readsIn": "teksten leses på <b>{time}</b>",
+      "ceilingSize": "≈ <b>{size} KB</b> ved taket",
+      "envelope": "Opplastingsramme: <b>{mime}</b>, {ceiling} og {mb} MB som hard grense, lagret som <kind>submission_recording</kind> mot innleveringen. Denne øvelsen sender høyst <b>{size} KB</b> per student."
+    },
+    "step5": {
+      "eyebrow": "Steg 5",
+      "title": "Flyt og vurdering",
+      "lede": "Tale vurderes ikke av maskin: hvert opptak går til vurderingskøen, og et menneske setter karakter. KI-trinnet er tegnet, kan slås på og kaller ingenting.",
+      "pipeline": "Hva som skjer med et opptak",
+      "stage": {
+        "nowWhen": "nå",
+        "now": "Opptak",
+        "nowBody": "Studenten tar opp, velger et forsøk og leverer.",
+        "nowTag": "live",
+        "aiWhen": "trinn 2",
+        "ai": "AI-forsjekk",
+        "aiBody": "Transkripsjon og et uttalehint før læreren åpner kortet.",
+        "aiOff": "av · plan 48",
+        "aiPreview": "forhåndsvisning · plan 48",
+        "teacherWhen": "til slutt",
+        "teacher": "Lærer",
+        "teacherBody": "Fyller ut skjemaet, skriver kommentaren, gir vurderingen. Kan ikke slås av.",
+        "teacherTag": "alltid"
+      },
+      "aiStage": {
+        "label": "KI-forsjekk (ikke live)",
+        "help": "Viser det kommende trinnet så køens oppsett ikke endres senere. Ingen forespørsel sendes."
+      },
+      "ai": {
+        "transcript": {
+          "label": "Automatisk transkripsjon",
+          "help": "Det maskinen hørte, så læreren kan skanne mot teksten."
+        },
+        "pronunciation": {
+          "label": "Uttalehint",
+          "help": "Per fokusord: hørt / ikke hørt. Et hint, aldri en karakter."
+        },
+        "draft": {
+          "label": "Utkast til skjema",
+          "help": "Fyller ut nivåene på forhånd. Læreren bekrefter eller flytter hvert enkelt."
+        }
+      },
+      "visibilityLabel": "Hvem ser KI-resultatet",
+      "visibility": {
+        "teacher": "Bare læreren",
+        "studentAfter": "Studenten, etter vurdering"
+      },
+      "revisionLabel": "Etter et svakt opptak",
+      "revision": {
+        "once": "Én levering",
+        "return": "Kan sendes tilbake"
+      },
+      "revisionNote": "Et opptak som sendes tilbake skriver framdrift og vurderer hukommelsen på veien — en fri form som aldri registrerer en feil er en bug, ikke en innstilling.",
+      "queueEyebrow": "Kø",
+      "queueTitle": "Lærervurdering",
+      "queueHelp": "Hvert opptak vurderes i den felles vurderingskøen, med låser og påminnelser. Den viser alle opplesningsoppgaver i dette kurset, din blant dem.",
+      "queueLink": "Åpne vurderingskøen"
+    },
+    "gate": {
+      "prompts": "{count, plural, one {# oppgave} other {# oppgaver}} — hver med eget opptak, egen itemId og egen rad i rapporten",
+      "notes": "Hver oppgave forteller vurdereren hva det skal lyttes etter",
+      "rubric": "{count, plural, one {# kriterium} other {# kriterier}}, {pass}/{max} for å bestå · {shown} vises for studenten",
+      "takes": "{count, plural, one {# forsøk} other {# forsøk}} · maks {time} per opptak",
+      "takesListen": "{count, plural, one {# forsøk} other {# forsøk}} med avlytting · maks {time} per opptak",
+      "queue": "Går til vurderingskøen — maskinen gir aldri en vurdering på egen hånd",
+      "revision": "Et svakt opptak kan sendes tilbake for et nytt forsøk"
+    },
+    "preview": {
+      "phone": "Telefon",
+      "desktop": "Skrivebord",
+      "reader": "Leserkort",
+      "deviceLabel": "Enhet",
+      "modeLabel": "Forhåndsvisning",
+      "static": "Statisk",
+      "live": "Live",
+      "restart": "Start forsøket på nytt",
+      "empty": "Ingenting å vise ennå — legg til en oppgave.",
+      "noteStatic": "Statisk forhåndsvisning: alt er tegnet, ingenting tar imot input, og ingen mikrofon åpnes.",
+      "noteLive": "Live forhåndsvisning: tar opp med mikrofonen din. Opptakene blir i nettleseren — ingenting lastes opp, og ingenting lagres som et forsøk.",
+      "simulate": "Simuler lærerens vurdering",
+      "simulateNote": "Setter «2» på alle kriterier. Den ekte vurderingen er et menneskes.",
+      "simulatedComment": "Lærerens kommentar vises her."
     }
   }
 }

@@ -4519,6 +4519,119 @@
       "RA_CHOOSE_NO_EFFECT": "Allow more takes",
       "RA_NO_MIC_CHECK": "Turn it on",
       "RA_AI_NOT_LIVE": "Read the note"
+    },
+    "step4": {
+      "eyebrow": "Step 4",
+      "title": "Recording",
+      "lede": "The dials that decide how forgiving the microphone is — kept apart from the content on purpose. Everything here is also a limit on what the upload and the queue have to carry.",
+      "takesLabel": "Takes per prompt",
+      "chooseBest": {
+        "label": "Choose the best take",
+        "help": "The student submits one recording. Off: the last take is sent automatically."
+      },
+      "listenBack": {
+        "label": "Listen back before submitting",
+        "help": "Hearing yourself is most of the learning. Off only when you want the first, unedited attempt."
+      },
+      "countdown": {
+        "label": "Countdown before the microphone opens",
+        "help": "3 · 2 · 1, so the first word is not cut off."
+      },
+      "micCheck": {
+        "label": "Microphone check first",
+        "help": "A two-second level test. Silent recordings are the most common thing the queue wastes time on."
+      },
+      "keepAll": {
+        "label": "Send the discarded takes too",
+        "help": "The teacher hears the attempts as well as the chosen one. Useful for diagnosis, heavier on storage and on the student's nerves."
+      },
+      "lengthTitle": "Length per prompt",
+      "promptN": "Prompt {index}",
+      "prep": "Prep",
+      "min": "Min",
+      "max": "Max",
+      "readsIn": "text reads in <b>{time}</b>",
+      "ceilingSize": "≈ <b>{size} KB</b> at the ceiling",
+      "envelope": "Upload envelope: <b>{mime}</b>, {ceiling} and {mb} MB hard ceiling, stored as <kind>submission_recording</kind> against the submission. This exercise sends at most <b>{size} KB</b> per student."
+    },
+    "step5": {
+      "eyebrow": "Step 5",
+      "title": "Flow and review",
+      "lede": "Speech is not machine-graded: every recording goes to the review queue and a person marks it. The AI stage is drawn, switchable and calls nothing.",
+      "pipeline": "What happens to a recording",
+      "stage": {
+        "nowWhen": "now",
+        "now": "Opptak",
+        "nowBody": "The student records, picks a take and submits.",
+        "nowTag": "live",
+        "aiWhen": "stage 2",
+        "ai": "AI-forsjekk",
+        "aiBody": "Transcript and a pronunciation hint before the teacher opens the card.",
+        "aiOff": "off · plan 48",
+        "aiPreview": "preview · plan 48",
+        "teacherWhen": "final",
+        "teacher": "Lærer",
+        "teacherBody": "Fills the rubric, writes the comment, returns the verdict. Cannot be switched off.",
+        "teacherTag": "always"
+      },
+      "aiStage": {
+        "label": "AI pre-check (not live)",
+        "help": "Displays the future stage so the queue layout does not change later. No request is made."
+      },
+      "ai": {
+        "transcript": {
+          "label": "Automatic transcript",
+          "help": "What the machine heard, for the teacher to scan against the text."
+        },
+        "pronunciation": {
+          "label": "Pronunciation hint",
+          "help": "Per focus word: heard / not heard. A hint, never a mark."
+        },
+        "draft": {
+          "label": "Draft rubric",
+          "help": "Pre-fills the levels. The teacher confirms or moves every one."
+        }
+      },
+      "visibilityLabel": "Who sees the AI output",
+      "visibility": {
+        "teacher": "Teacher only",
+        "studentAfter": "Student, after grading"
+      },
+      "revisionLabel": "After a weak recording",
+      "revision": {
+        "once": "One submission",
+        "return": "Can be sent back"
+      },
+      "revisionNote": "A returned recording writes progress and rates memory on the way back — a free form that never records a failure is a bug, not a setting.",
+      "queueEyebrow": "Queue",
+      "queueTitle": "Teacher review",
+      "queueHelp": "Every recording is graded in the shared review queue, with its locks and reminders. It lists all read-aloud exercises of this course, yours among them.",
+      "queueLink": "Open the review queue"
+    },
+    "gate": {
+      "prompts": "{count, plural, one {# prompt} other {# prompts}} — each one its own recording, its own itemId and its own row in the report",
+      "notes": "Every prompt tells the grader what to listen for",
+      "rubric": "{count, plural, one {# criterion} other {# criteria}}, {pass}/{max} to pass · {shown} shown to the student",
+      "takes": "{count, plural, one {# take} other {# takes}} · max {time} per recording",
+      "takesListen": "{count, plural, one {# take} other {# takes}} with listen-back · max {time} per recording",
+      "queue": "Goes to the review queue — the machine never returns a verdict on its own",
+      "revision": "A weak recording can be sent back for another take"
+    },
+    "preview": {
+      "phone": "Phone",
+      "desktop": "Desktop",
+      "reader": "Reader card",
+      "deviceLabel": "Device",
+      "modeLabel": "Preview mode",
+      "static": "Static",
+      "live": "Live",
+      "restart": "Restart the attempt",
+      "empty": "Nothing to preview yet — add a prompt.",
+      "noteStatic": "Static preview: everything is drawn, nothing accepts input and no microphone is opened.",
+      "noteLive": "Live preview: records with your microphone. Takes stay in this browser — nothing is uploaded and nothing is saved as an attempt.",
+      "simulate": "Simulate the teacher's verdict",
+      "simulateNote": "Marks every criterion «2». The real verdict is a person's.",
+      "simulatedComment": "The teacher's comment appears here."
     }
   }
 }
