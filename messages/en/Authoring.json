@@ -4341,5 +4341,184 @@
       "refused": "The recipe was refused: a rule names something the platform does not know.",
       "failed": "The recipe could not be loaded."
     }
+  },
+  "readAloud": {
+    "shell": {
+      "step1": "Task",
+      "step2": "Listen for",
+      "step3": "Rubric",
+      "step4": "Recording",
+      "step5": "Flow",
+      "stepSub1": "mode and material",
+      "stepSub2": "the grader's brief",
+      "stepSub3": "how it is scored",
+      "stepSub4": "takes and limits",
+      "stepSub5": "review and queue",
+      "stepsLabel": "Steps of the read-aloud exercise"
+    },
+    "subject": {
+      "prompt": "Prompt {index}"
+    },
+    "need": {
+      "text": "no text to read",
+      "support": "neither a picture nor a plan",
+      "turn": "no partner line to answer"
+    },
+    "audioItemNoun": "opptakene",
+    "modes": {
+      "read": {
+        "label": "Read aloud",
+        "desc": "A known text is read out. Pronunciation and flow, not content."
+      },
+      "monologue": {
+        "label": "Monologue from support",
+        "desc": "Describe the picture or tell it from a plan."
+      },
+      "dialogue": {
+        "label": "A turn in a dialogue",
+        "desc": "Answer a line in a given situation."
+      }
+    },
+    "step1": {
+      "eyebrow": "Step 1",
+      "title": "The task",
+      "lede": "Three speaking tasks share one type. The mode decides what the student is looking at while the microphone is open — nothing else branches.",
+      "titleLabel": "Title",
+      "modeLabel": "Mode",
+      "retrieval": "retrieval: {value}",
+      "evidenceRead": "Evidence: success ceiling medium, failure floor low — a clean reading proves decoding and pronunciation, not that the student can produce the language.",
+      "evidenceProduce": "Evidence: success ceiling high, failure floor medium — unscripted speech is the strongest evidence the platform can collect, and a weak recording can mean nerves.",
+      "instructionLabel": "Instruction to the student",
+      "instructionHelp": "One line, in the course language. The recording rules are shown by the runner — do not repeat them here.",
+      "promptsEyebrow": "Prompts",
+      "promptsCount": "{count, plural, one {# recording} other {# recordings}}",
+      "addPrompt": "Add prompt",
+      "promptsTip": "Every prompt is one element: its own <b>itemId</b>, its own recording, its own row in the queue and its own line in the report. A three-prompt exercise is three verdicts, not an average.",
+      "promptLabel": "Label of prompt {index}",
+      "removePrompt": "Delete prompt: {label}",
+      "textLabel": "Text to read aloud",
+      "textRequired": "Without a text there is nothing to read.",
+      "textMeasure": "{words, plural, one {# word} other {# words}} · about {time} aloud",
+      "planLabel": "Plan the student sees",
+      "planHelp": "Bullet points, not sentences. Shown beside the microphone the whole time.",
+      "pointText": "Plan point {index}",
+      "pointRequired": "must be covered",
+      "pointOptional": "optional",
+      "removePoint": "Remove plan point {index}",
+      "addPoint": "Add point",
+      "situationLabel": "Situation",
+      "situationHelp": "One line of context: who is talking, where.",
+      "partnerLabel": "The line the student answers",
+      "partnerRequired": "Without the partner's line there is nothing to answer.",
+      "audioTitle": "Audio layer",
+      "audioNote": "shared · plan 56",
+      "audioOff": {
+        "read": "A model reading gives the student the target for the sounds they are graded on.",
+        "monologue": "A monologue rarely needs a clip — leave it off.",
+        "dialogue": "Attach the partner line as audio and the turn becomes listening plus speaking."
+      },
+      "titlePlaceholder": "Les høyt — jobbsøknad",
+      "instructionPlaceholder": "Les teksten høyt.",
+      "textPlaceholder": "Lim inn avsnittet fra leksjonen…",
+      "pointPlaceholder": "Hvem er på bildet?",
+      "situationPlaceholder": "Du er på legekontoret.",
+      "partnerPlaceholder": "«Hva kan jeg hjelpe deg med i dag?»"
+    },
+    "step2": {
+      "eyebrow": "Step 2",
+      "title": "What we listen for",
+      "lede": "Nothing here reaches the student before the verdict. It is the grader's brief: the sounds you marked and the note that says what a good answer sounds like on this prompt.",
+      "warn": "A recording that comes back «3 of 12» with no reason costs the student the lesson. The note is a blocker, exactly as the per-item explanation is in every other type.",
+      "pickLabel": "Mark the words you are grading",
+      "pickHelp": "Tap a word to make it a focus word. The teacher sees them highlighted while listening; the student sees them only in the feedback.",
+      "focusNoteLabel": "What to listen for in «{word}»",
+      "removeFocus": "Remove focus word «{word}»",
+      "noteLabel": "Listening note",
+      "noteRequired": "A prompt without a note cannot be graded consistently — and cannot be assigned.",
+      "focusNotePlaceholder": "Hva skal læreren lytte etter her?",
+      "notePlaceholder": "Hva skiller et godt opptak fra et halvgodt her?"
+    },
+    "step3": {
+      "eyebrow": "Step 3",
+      "title": "Rubric",
+      "lede": "A human grades every recording, so the rubric is the exercise's only key. Three criteria is the working default: pronunciation and content carry double weight, flow single.",
+      "pointsToPass": "points to pass",
+      "passBar": "Pass mark against the maximum",
+      "passLabel": "Points needed to pass",
+      "addCriterion": "Add criterion",
+      "showRubricLabel": "Rubric shown to the student",
+      "showRubric": {
+        "always": "Always",
+        "afterGraded": "After grading",
+        "never": "Never"
+      },
+      "showModelLabel": "Model reading shown after grading",
+      "showModel": {
+        "afterGraded": "After grading",
+        "never": "Never"
+      },
+      "criterionNo": "Criterion {index}",
+      "nameLabel": "Name of criterion {index}",
+      "weightLabel": "Weight of {label}",
+      "visible": "shown to the student",
+      "teacherOnly": "teacher only",
+      "expand": "Show the levels of {label}",
+      "removeCriterion": "Delete criterion {label}",
+      "descLabel": "What {label} is about",
+      "levelLabel": "Level {level} of {label}",
+      "levelPlaceholder": "Describe level {level}",
+      "collapsed": "3 — {top} · 0 — {bottom}",
+      "descPlaceholder": "Hva kriteriet handler om"
+    },
+    "issues": {
+      "RA_NO_PROMPTS": "No prompts yet — nothing to record.",
+      "RA_PROMPT_NO_MATERIAL": "{subject} has {what}. The student would face an empty screen with an open microphone.",
+      "RA_TEXT_TOO_LONG": "{subject} is {words} words. Above ~90 the recording tests stamina, not pronunciation.",
+      "RA_PLAN_TOO_LONG": "{subject} has {points} plan points — the monologue becomes a list read aloud.",
+      "RA_MANY_PROMPTS": "{count} recordings in one exercise is a long sitting, and the whole set lands in the queue at once.",
+      "RA_NO_MODEL": "No model reading attached. Without one the student has no target for the sounds they are being graded on.",
+      "RA_PARTNER_TEXT_ONLY": "The partner line is text only. Spoken input makes the turn a listening task as well.",
+      "RA_NO_NOTE": "{subject} tells the teacher nothing about what to listen for. The verdict would be a number with no reason behind it.",
+      "RA_NO_FOCUS": "No focus words marked. The teacher grades pronunciation with nothing to aim at, and two teachers will hear different things.",
+      "RA_RUBRIC_EMPTY": "The rubric is empty — a human grader has nothing to fill in.",
+      "RA_CRITERION_NO_NAME": "Criterion {index} has no name.",
+      "RA_PASS_ABOVE_MAX": "The pass mark ({passScore}) is above the maximum ({max}) — nobody can pass.",
+      "RA_LEVEL_EMPTY": "«{name}» has an empty level descriptor. Two teachers will grade differently.",
+      "RA_RUBRIC_HIDDEN": "No criterion is shown to the student. They get a score and no reason.",
+      "RA_MODEL_NEVER_SHOWN": "The model reading is never shown after grading, so a student who mispronounced never hears the target.",
+      "RA_OVER_CEILING": "{subject} allows {limit} — over the {ceiling} upload ceiling.",
+      "RA_RANGE_INVALID": "{subject}: the minimum is not below the maximum, so nothing can be submitted.",
+      "RA_READ_EXCEEDS_MAX": "{subject} takes about {read} to read aloud but stops at {limit}.",
+      "RA_BLIND_RETAKES": "{takes} takes with listen-back off: the student re-records blind and cannot tell which take was better.",
+      "RA_ONE_TAKE": "One take only. Defensible for spontaneity, harsh for a first recording — most students need a throwaway attempt.",
+      "RA_CHOOSE_NO_EFFECT": "«Choose the best take» has no effect with a single take.",
+      "RA_NO_MIC_CHECK": "No microphone check. Silent recordings reach the queue and cost the teacher the review slot.",
+      "RA_AI_NOT_LIVE": "The AI pre-check is a designed surface, not a live service (plan 48). Nothing is called and the teacher still grades every recording."
+    },
+    "fixes": {
+      "RA_NO_PROMPTS": "Add a prompt",
+      "RA_PROMPT_NO_MATERIAL": "Add the material",
+      "RA_TEXT_TOO_LONG": "Split it",
+      "RA_PLAN_TOO_LONG": "Trim the plan",
+      "RA_MANY_PROMPTS": "Split the exercise",
+      "RA_NO_MODEL": "Attach the audio",
+      "RA_PARTNER_TEXT_ONLY": "Attach the audio",
+      "RA_NO_NOTE": "Write the listening note",
+      "RA_NO_FOCUS": "Mark the sounds",
+      "RA_RUBRIC_EMPTY": "Add criteria",
+      "RA_CRITERION_NO_NAME": "Name it",
+      "RA_PASS_ABOVE_MAX": "Lower it",
+      "RA_LEVEL_EMPTY": "Fill the levels",
+      "RA_RUBRIC_HIDDEN": "Show at least one",
+      "RA_MODEL_NEVER_SHOWN": "Reconsider",
+      "RA_OVER_CEILING": "Lower the limit",
+      "RA_RANGE_INVALID": "Fix the range",
+      "RA_READ_EXCEEDS_MAX": "Raise the limit",
+      "RA_BLIND_RETAKES": "Turn listen-back on",
+      "RA_ONE_TAKE": "Reconsider",
+      "RA_CHOOSE_NO_EFFECT": "Allow more takes",
+      "RA_NO_MIC_CHECK": "Turn it on",
+      "RA_AI_NOT_LIVE": "Read the note"
+    }
   }
 }
