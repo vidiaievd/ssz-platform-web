@@ -151,4 +151,14 @@ export { toStudentProjection } from './projection';
 export type { Draft, DraftTake, Submission, SubmittedRecording, SubmittedTake } from './submission';
 export { readDraft, readSubmission, toDraft, toSubmission, unsentAssets } from './submission';
 
+export type { CarriedPrompt, CarriedRuling, ReturnedTry } from './carry';
+export {
+  carriedFrom,
+  carriedPrompts,
+  freshPart,
+  marksWithCarried,
+  scoreSubmission,
+  withCarried,
+} from './carry';
+
 export { SAMPLE_PROMPT_IDS, sampleDocument } from './fixture';
