@@ -63,6 +63,23 @@ function readPrompt(value: unknown): ReadAloudPromptDetail | null {
       seconds: seconds(recording.seconds) ?? 0,
       takes: count(recording.takes) ?? 1,
     },
+    carried: readCarried(raw.carried),
+  };
+}
+
+/** A malformed ruling is not one: the prompt then reads as new, and the teacher marks it. */
+function readCarried(value: unknown): ReadAloudPromptDetail['carried'] {
+  const raw = record(value);
+  if (raw === null) return null;
+  const attempt = count(raw.attempt);
+  const max = count(raw.max);
+  const points = count(raw.points);
+  if (attempt === null || attempt < 1 || max === null || points === null) return null;
+  return {
+    attempt,
+    points,
+    max,
+    comment: typeof raw.comment === 'string' ? raw.comment : '',
   };
 }
 

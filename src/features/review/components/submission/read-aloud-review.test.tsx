@@ -34,6 +34,7 @@ const DETAILS: ReadAloudDetails = {
       minSeconds: 15,
       maxSeconds: 60,
       recording: { assetId: 'asset-1', seconds: 21, takes: 2 },
+      carried: null,
     },
     {
       itemId: 'p2',
@@ -44,6 +45,7 @@ const DETAILS: ReadAloudDetails = {
       minSeconds: 15,
       maxSeconds: 60,
       recording: { assetId: 'asset-2', seconds: 18, takes: 1 },
+      carried: null,
     },
   ],
 };
@@ -330,6 +332,44 @@ describe('a read_aloud submission in the inbox (plan 70 §7.11)', () => {
       sentenceComments: { p1: 'Fin flyt.', p2: 'Godt.' },
     });
     expect(decisionBody()).not.toHaveProperty('score');
+  });
+
+  it('folds a carried prompt, asks nothing of it and still counts it in the total (phase 11b)', async () => {
+    const user = userEvent.setup();
+    const carried = { attempt: 1, points: 6, max: 6, comment: 'Veldig fin.' };
+    upstream({
+      ...SUBMISSION,
+      attemptNo: 2,
+      details: {
+        ...DETAILS,
+        prompts: [{ ...DETAILS.prompts[0]!, carried }, DETAILS.prompts[1]!],
+      },
+      submittedAnswer: {
+        recordings: [
+          {
+            itemId: 'p1',
+            assetId: 'asset-1',
+            seconds: 21,
+            takes: 2,
+            carried: { ...carried, attemptId: 'att-0', marks: { flow: 3, sounds: 3 } },
+          },
+          { itemId: 'p2', assetId: 'asset-2', seconds: 18, takes: 1 },
+        ],
+      },
+    });
+    renderPanel();
+
+    const folded = await screen.findByRole('group', { name: 'Avsnitt 1' });
+    expect(within(folded).getByText('passed in attempt 1')).toBeInTheDocument();
+    expect(within(folded).getByText('Veldig fin.')).toBeInTheDocument();
+    expect(within(folded).queryByRole('group', { name: 'Mark for Flyt' })).toBeNull();
+    expect(screen.queryByRole('article', { name: 'Avsnitt 1' })).toBeNull();
+
+    // Only the new prompt is to be marked and commented; the total is over both.
+    await markPrompt(user, 'Avsnitt 2', 3, 3);
+    expect(screen.getByRole('button', { name: 'Approve (12/12)' })).toBeDisabled();
+    await commentOn(user, 'Avsnitt 2', 'Godt.');
+    expect(screen.getByRole('button', { name: 'Approve (12/12)' })).toBeEnabled();
   });
 
   it('says so when the server refuses a prompt without a comment', async () => {

@@ -224,6 +224,11 @@ export interface ReadAloudPromptDetail {
   minSeconds: number | null;
   maxSeconds: number | null;
   recording: { assetId: string; seconds: number; takes: number };
+  /**
+   * Passed in an earlier try and carried into this one (phase 11b): shown folded and read-only,
+   * nobody grades it again. Null for a prompt recorded in this try.
+   */
+  carried: { attempt: number; points: number; max: number; comment: string } | null;
 }
 
 /**

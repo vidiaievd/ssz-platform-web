@@ -52,6 +52,8 @@ interface PromptView {
   assetId: string;
   seconds: number;
   takes: number;
+  /** Passed in an earlier try: drawn folded and read-only, with no marks to give. */
+  carried: ReadAloudPromptDetail['carried'];
 }
 
 /**
@@ -89,26 +91,38 @@ export function ReadAloudReview({
           {t('noPlayback.body')}
         </Note>
       )}
-      {prompts.map((prompt, index) => (
-        <PromptBlock
-          key={prompt.itemId}
-          index={index + 1}
-          prompt={prompt}
-          playback={submission.playback?.[prompt.assetId] ?? null}
-          playbackKnown={submission.playback !== null}
-          snapshot={snapshot}
-          marks={marksOf(marks, prompt.itemId)}
-          onMark={(criterionId, mark) => onMark(markKey(prompt.itemId, criterionId), mark)}
-          comment={
-            editable
-              ? (comments[prompt.itemId] ?? '')
-              : (decided.get(prompt.itemId)?.comment ?? comments[prompt.itemId] ?? '')
-          }
-          onComment={(value) => onComment(prompt.itemId, value)}
-          editable={editable}
-          fallbackLabel={t('promptFallback', { n: index + 1 })}
-        />
-      ))}
+      {prompts.map((prompt, index) =>
+        prompt.carried !== null ? (
+          <CarriedBlock
+            key={prompt.itemId}
+            index={index + 1}
+            prompt={prompt}
+            carried={prompt.carried}
+            playback={submission.playback?.[prompt.assetId] ?? null}
+            playbackKnown={submission.playback !== null}
+            fallbackLabel={t('promptFallback', { n: index + 1 })}
+          />
+        ) : (
+          <PromptBlock
+            key={prompt.itemId}
+            index={index + 1}
+            prompt={prompt}
+            playback={submission.playback?.[prompt.assetId] ?? null}
+            playbackKnown={submission.playback !== null}
+            snapshot={snapshot}
+            marks={marksOf(marks, prompt.itemId)}
+            onMark={(criterionId, mark) => onMark(markKey(prompt.itemId, criterionId), mark)}
+            comment={
+              editable
+                ? (comments[prompt.itemId] ?? '')
+                : (decided.get(prompt.itemId)?.comment ?? comments[prompt.itemId] ?? '')
+            }
+            onComment={(value) => onComment(prompt.itemId, value)}
+            editable={editable}
+            fallbackLabel={t('promptFallback', { n: index + 1 })}
+          />
+        ),
+      )}
     </section>
   );
 }
@@ -127,6 +141,14 @@ function promptsOf(submission: ReviewSubmission, details: ReadAloudDetails | nul
         assetId: recording.assetId,
         seconds: recording.seconds,
         takes: recording.takes,
+        carried: recording.carried
+          ? {
+              attempt: recording.carried.attempt,
+              points: recording.carried.points,
+              max: recording.carried.max,
+              comment: recording.carried.comment,
+            }
+          : (detail?.carried ?? null),
       };
     });
   }
@@ -138,7 +160,74 @@ function promptsOf(submission: ReviewSubmission, details: ReadAloudDetails | nul
     assetId: detail.recording.assetId,
     seconds: detail.recording.seconds,
     takes: detail.recording.takes,
+    carried: detail.carried,
   }));
+}
+
+/**
+ * A prompt passed in an earlier try (phase 11b): folded, read-only — «passed in attempt N» with
+ * the comment it passed on and its recording to listen to. It is not the reviewer's to mark and
+ * is not counted among what is left to do.
+ */
+function CarriedBlock({
+  index,
+  prompt,
+  carried,
+  playback,
+  playbackKnown,
+  fallbackLabel,
+}: {
+  index: number;
+  prompt: PromptView;
+  carried: NonNullable<PromptView['carried']>;
+  playback: ReviewPlayback | null;
+  playbackKnown: boolean;
+  fallbackLabel: string;
+}) {
+  const t = useTranslations('Review.readAloud');
+  const label = prompt.label.trim() === '' ? fallbackLabel : prompt.label;
+  const seconds =
+    playback?.durationMs != null && playback.durationMs > 0
+      ? playback.durationMs / 1000
+      : prompt.seconds;
+
+  return (
+    <details
+      aria-label={label}
+      className="rounded-(--ssz-radius-md) border bg-(--ssz-bg-subtle) p-(--ssz-space-3)"
+      style={{ borderColor: 'var(--ssz-border-default)' }}
+    >
+      <summary className={`flex cursor-pointer items-center gap-2.5 text-sm ${FOCUS_RING}`}>
+        <b className="min-w-0 flex-1 truncate">
+          <span className="tabular-nums">{index}.</span> {label}
+        </b>
+        <span className="text-xs font-semibold" style={{ color: 'var(--ssz-color-success-700)' }}>
+          {t('carried.passedIn', { attempt: carried.attempt })}
+        </span>
+        <span className="text-xs tabular-nums text-(--ssz-text-muted)" style={{ fontFamily: MONO }}>
+          {carried.points}/{carried.max}
+        </span>
+      </summary>
+      <div className="mt-2.5 flex flex-col gap-2">
+        {playbackKnown && playback === null ? (
+          <p className="text-[12.5px] text-(--ssz-text-muted)">{t('player.gone')}</p>
+        ) : (
+          <ReviewTakePlayer
+            src={playback?.url ?? null}
+            peaks={playback?.peaks ?? null}
+            seconds={seconds}
+            label={t('player.label')}
+          />
+        )}
+        {carried.comment.trim() !== '' && (
+          <p className="m-0 text-[12.5px] text-(--ssz-text-secondary)">
+            <b>{t('carried.comment')}</b> {carried.comment}
+          </p>
+        )}
+        <p className="m-0 text-[11.5px] text-(--ssz-text-muted)">{t('carried.readOnly')}</p>
+      </div>
+    </details>
+  );
 }
 
 /** `ra-qcard`: one prompt, its recording and its marking. */

@@ -14,7 +14,11 @@ import {
 } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { readSpeakingSnapshot, readSubmission, scorePrompts } from '@/lib/shared-kernel/read-aloud';
+import {
+  readSpeakingSnapshot,
+  readSubmission,
+  scoreSubmission,
+} from '@/lib/shared-kernel/read-aloud';
 import { scoreRubric } from '@/lib/shared-kernel/writing-task';
 
 import { useReviewDecision, type ReviewConflict, type ReviewVerdict } from '../../api/use-decision';
@@ -345,10 +349,10 @@ function rubricDecisionOf(
   if (submission.exercise.type === 'read_aloud') {
     const snapshot = readSpeakingSnapshot(submission.rubric);
     if (snapshot === null) return null;
-    const itemIds = (readSubmission(submission.submittedAnswer)?.recordings ?? []).map(
-      (recording) => recording.itemId,
-    );
-    const scored = scorePrompts(snapshot, draft.marks, itemIds);
+    const recordings = readSubmission(submission.submittedAnswer)?.recordings ?? [];
+    // Carried prompts count in the total, frozen, and are nothing left to mark or comment on.
+    const itemIds = recordings.filter((recording) => !recording.carried).map((r) => r.itemId);
+    const scored = scoreSubmission(snapshot, draft.marks, recordings);
     return {
       points: scored.points,
       max: scored.max,

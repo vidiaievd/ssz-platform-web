@@ -445,6 +445,11 @@
     }
   },
   "readAloud": {
+    "carried": {
+      "passedIn": "зачтено в попытке {attempt}",
+      "comment": "Комментарий:",
+      "readOnly": "Зачтено раньше — повторно не оценивается."
+    },
     "promptFallback": "Запись {n}",
     "takes": "{count, plural, one {# дубль} few {# дубля} many {# дублей} other {# дубля}}",
     "scoreOf": "{points} из {max} баллов",

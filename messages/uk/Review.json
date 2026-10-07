@@ -445,6 +445,11 @@
     }
   },
   "readAloud": {
+    "carried": {
+      "passedIn": "зараховано в спробі {attempt}",
+      "comment": "Коментар:",
+      "readOnly": "Зараховано раніше — повторно не оцінюється."
+    },
     "promptFallback": "Запис {n}",
     "takes": "{count, plural, one {# дубль} few {# дублі} many {# дублів} other {# дубля}}",
     "scoreOf": "{points} з {max} балів",

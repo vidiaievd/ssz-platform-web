@@ -445,6 +445,11 @@
     }
   },
   "readAloud": {
+    "carried": {
+      "passedIn": "passed in attempt {attempt}",
+      "comment": "Comment:",
+      "readOnly": "Passed earlier — not graded again."
+    },
     "promptFallback": "Recording {n}",
     "takes": "{count, plural, one {# take} other {# takes}}",
     "scoreOf": "{points} of {max} points",

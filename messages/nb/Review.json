@@ -445,6 +445,11 @@
     }
   },
   "readAloud": {
+    "carried": {
+      "passedIn": "bestått i forsøk {attempt}",
+      "comment": "Kommentar:",
+      "readOnly": "Bestått tidligere — vurderes ikke på nytt."
+    },
     "promptFallback": "Opptak {n}",
     "takes": "{count, plural, one {# opptak} other {# opptak}}",
     "scoreOf": "{points} av {max} poeng",
