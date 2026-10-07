@@ -179,6 +179,22 @@ export function resolveNavigableItemId(contents: UnitContentsResult, itemId: str
 }
 
 /**
+ * Whether `itemId` names nothing in this unit's current contents.
+ *
+ * Publishing a module writes a new version with new section and item ids, so an address taken
+ * from an earlier version — a bookmark, a link in a message — stops matching anything. Such an
+ * address is stale, not empty: the reader sends the learner to the unit's entry instead of
+ * telling them the page is on its way.
+ */
+export function isStaleItemId(contents: UnitContentsResult, itemId: string): boolean {
+  const practiceId = practiceSectionIdOf(itemId);
+  if (practiceId !== null) return !contents.sections.some((s) => s.id === practiceId);
+  return ![...contents.sections.flatMap((s) => s.items), ...contents.ungroupedItems].some(
+    (i) => i.id === itemId,
+  );
+}
+
+/**
  * Same as `mapCourseUnitsToSidebarUnits`, but keeps the course's "Leksjon"
  * grouping: the BFF already hands the units out grouped by course-version
  * section (`CourseHomePayload.levels`), so the reader only has to carry it

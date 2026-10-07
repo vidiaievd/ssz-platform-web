@@ -10,6 +10,7 @@ import type {
 import {
   findNextUnit,
   findSourceLessonItemId,
+  isStaleItemId,
   mapCourseLevelsToSidebarLevels,
   mapUnitContentsToSections,
   practiceItemId,
@@ -206,6 +207,26 @@ describe('practice item ids', () => {
 
     expect(resolveNavigableItemId(contents, 'e1')).toBe('practice-sec-ex');
     expect(resolveNavigableItemId(contents, 'e3')).toBe('e3');
+  });
+});
+
+describe('isStaleItemId', () => {
+  const contents = contentsWith([
+    {
+      id: 'sec-ex',
+      title: 'Øvelser',
+      items: [exerciseItem('e1', 'available'), exerciseItem('e2', 'available')],
+    },
+  ]);
+
+  it('knows the ids of the current version, items and practice pages alike', () => {
+    expect(isStaleItemId(contents, 'e1')).toBe(false);
+    expect(isStaleItemId(contents, practiceItemId('sec-ex'))).toBe(false);
+  });
+
+  it('calls an address from an earlier version stale (plan 70 finding 7)', () => {
+    expect(isStaleItemId(contents, 'e-from-v8')).toBe(true);
+    expect(isStaleItemId(contents, practiceItemId('sec-from-v8'))).toBe(true);
   });
 });
 

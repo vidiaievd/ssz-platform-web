@@ -66,6 +66,24 @@ describe('useReadAloudAutosave (RA-B16)', () => {
     expect(result.current.status).toBe('saved');
   });
 
+  it('sends the token the previous save earned, not the one the screen has not caught up to (plan 70 finding 4)', async () => {
+    let finish!: (v: unknown) => void;
+    save.mockImplementationOnce(() => new Promise((resolve) => (finish = resolve)) as never);
+    save.mockResolvedValue({ ok: true, value: { status: 'saved', updatedAt: 't2' } });
+    const { rerender } = mount(doc());
+
+    rerender({ exercise: doc('Les høyt 2') });
+    await act(() => vi.advanceTimersByTimeAsync(851)); // save 1 goes out, carrying t0
+    // A second edit lands while it is on the wire; the screen still shows t0.
+    rerender({ exercise: doc('Les høyt 3') });
+    await act(async () => finish({ ok: true, value: { status: 'saved', updatedAt: 't1' } }));
+    await act(() => vi.advanceTimersByTimeAsync(900));
+
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(save.mock.calls[0]![2].expectedUpdatedAt).toBe('t0');
+    expect(save.mock.calls[1]![2].expectedUpdatedAt).toBe('t1');
+  });
+
   it('writes the audio block beside the document when the layer is on, and not inside the kernel’s content (RA-B16)', async () => {
     save.mockResolvedValue({ ok: true, value: { status: 'saved', updatedAt: 't1' } });
     const base = doc();
