@@ -35,6 +35,9 @@ export const env = createEnv({
     // Direct (non-gateway) URL to analytics-service, for its `/internal/*` routes — the
     // learner's mastery profile, which the gateway deliberately does not expose.
     ANALYTICS_SERVICE_INTERNAL_URL: z.string().url().optional(),
+    // Direct (non-gateway) URL to media-service, for its `/internal/*` routes — signed links
+    // to a submission's recordings for its reviewer, which the gateway deliberately does not expose.
+    MEDIA_SERVICE_INTERNAL_URL: z.string().url().optional(),
     // Shared secret expected by InternalAuthGuard on the services' `/internal/*` routes.
     INTERNAL_SERVICE_TOKEN: z.string().optional(),
 
@@ -77,6 +80,7 @@ export const env = createEnv({
     EXERCISE_SERVICE_INTERNAL_URL: process.env.EXERCISE_SERVICE_INTERNAL_URL,
     ORGANIZATION_SERVICE_INTERNAL_URL: process.env.ORGANIZATION_SERVICE_INTERNAL_URL,
     ANALYTICS_SERVICE_INTERNAL_URL: process.env.ANALYTICS_SERVICE_INTERNAL_URL,
+    MEDIA_SERVICE_INTERNAL_URL: process.env.MEDIA_SERVICE_INTERNAL_URL,
     INTERNAL_SERVICE_TOKEN: process.env.INTERNAL_SERVICE_TOKEN,
     UPSTREAM_TIMEOUT_MS: process.env.UPSTREAM_TIMEOUT_MS,
     UPSTREAM_API_PREFIX: process.env.UPSTREAM_API_PREFIX,

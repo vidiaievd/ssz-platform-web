@@ -54,7 +54,8 @@
     "writing_task": "Writing",
     "translate_to_target": "Translation into Norwegian",
     "translate_from_target": "Translation from Norwegian",
-    "error_correction": "Error correction"
+    "error_correction": "Error correction",
+    "read_aloud": "Read aloud"
   },
   "age": {
     "justNow": "just now",
@@ -442,5 +443,47 @@
         "unconfirmed": "Could not confirm whether it went through. Your text is kept — check \"My work\" before sending again."
       }
     }
+  },
+  "readAloud": {
+    "carried": {
+      "passedIn": "passed in attempt {attempt}",
+      "comment": "Comment:",
+      "readOnly": "Passed earlier — not graded again."
+    },
+    "promptFallback": "Recording {n}",
+    "takes": "{count, plural, one {# take} other {# takes}}",
+    "scoreOf": "{points} of {max} points",
+    "scoreUnset": "Not marked, out of {max} points",
+    "player": {
+      "label": "Submitted recording",
+      "play": "Play {label}",
+      "pause": "Pause",
+      "seek": "Position in {label}",
+      "position": "{at} of {total}",
+      "speed": "Speed",
+      "gone": "The recording is no longer in storage."
+    },
+    "noPlayback": {
+      "title": "The recordings cannot be played right now",
+      "body": "The media service did not answer. Reload the page in a moment — the submission will wait."
+    },
+    "materialGone": "The exercise was changed or deleted after this was handed in. The recording is marked as before.",
+    "listenFor": "Listen for:",
+    "situation": "Situation:",
+    "partner": "The partner says:",
+    "picture": "Picture:",
+    "plan": "Prompts to cover",
+    "rubricOf": "Marking of {label}",
+    "comment": {
+      "label": "Feedback to the student",
+      "placeholder": "What worked, and what should the student listen for next time?",
+      "required": "The verdict does not go out without a comment."
+    },
+    "approve": "Approve ({points}/{max})",
+    "returnForRetake": "Send back for a new recording ({points}/{max})",
+    "closeNotPassed": "Close as not passed ({points}/{max})",
+    "commentsMissing": "{count, plural, one {# recording has no comment} other {# recordings have no comment}} — the verdict does not go out without one.",
+    "commentsRequired": "Every recording needs a comment before the verdict can be sent.",
+    "scoreIsPerPrompt": "Each recording is marked on its own: it passes when its points reach the threshold for one recording, and the submission is approved when every one passes. The total is computed from the levels."
   }
 }

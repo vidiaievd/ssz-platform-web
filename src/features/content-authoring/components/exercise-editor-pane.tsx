@@ -98,6 +98,12 @@ import {
   toContent as inflectionTableToContent,
   toExpectedAnswers as inflectionTableToExpectedAnswers,
 } from '@/lib/shared-kernel/inflection-table';
+import {
+  fromPersisted as readAloudFromPersisted,
+  TEMPLATE_CODE as READ_ALOUD_TEMPLATE_CODE,
+  toContent as readAloudToContent,
+  toExpectedAnswers as readAloudToExpectedAnswers,
+} from '@/lib/shared-kernel/read-aloud';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -154,6 +160,10 @@ import { InflectionTableBuilder } from './inflection-table/builder';
 import type { InflectionTableDocument } from './inflection-table/edits';
 import { InflectionTablePreview } from './inflection-table/inflection-table-preview';
 import type { SavedDocument as SavedInflectionTable } from './inflection-table/use-inflection-table-autosave';
+import { ReadAloudBuilder } from './read-aloud/builder';
+import type { ReadAloudDocument } from './read-aloud/edits';
+import { ReadAloudPreview } from './read-aloud/read-aloud-preview';
+import type { SavedDocument as SavedReadAloud } from './read-aloud/use-read-aloud-autosave';
 import { SentenceSchemaBuilder } from './sentence-schema/builder';
 import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
 import type { SentenceSchemaDocument } from './sentence-schema/edits';
@@ -241,6 +251,9 @@ export function ExerciseEditorPane({
   /** The inflection table as its builder currently has it, for the preview column. */
   const [inflectionTable, setInflectionTable] = useState<InflectionTableDocument | null>(null);
 
+  /** The speaking exercise as its builder currently has it, for the preview column. */
+  const [readAloud, setReadAloud] = useState<ReadAloudDocument | null>(null);
+
   /**
    * Whichever builder is open, as it stands this second.
    *
@@ -269,6 +282,13 @@ export function ExerciseEditorPane({
           { ...inflectionTableToContent(inflectionTable) } as unknown as Record<string, unknown>,
           inflectionTable.audio,
           INFLECTION_TABLE_TEMPLATE_CODE,
+        )
+      : null) ??
+    (readAloud !== null
+      ? applyAudioDraft(
+          { ...readAloudToContent(readAloud) } as unknown as Record<string, unknown>,
+          readAloud.audio,
+          READ_ALOUD_TEMPLATE_CODE,
         )
       : null) ??
     null;
@@ -337,6 +357,8 @@ export function ExerciseEditorPane({
   const isDictation = exercise?.templateCode === DICTATION_TEMPLATE_CODE;
   /* By the template code alone: a new template with one shape (plan 53's lesson). */
   const isInflectionTable = exercise?.templateCode === INFLECTION_TABLE_TEMPLATE_CODE;
+  /* By the template code alone: a new template with one shape (plan 53's lesson). */
+  const isReadAloud = exercise?.templateCode === READ_ALOUD_TEMPLATE_CODE;
 
   return (
     /*
@@ -400,6 +422,8 @@ export function ExerciseEditorPane({
             <DictationPreview exercise={dictation} />
           ) : isInflectionTable && inflectionTable !== null ? (
             <InflectionTablePreview exercise={inflectionTable} />
+          ) : isReadAloud && readAloud !== null ? (
+            <ReadAloudPreview exercise={readAloud} />
           ) : (
             <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
           )
@@ -667,6 +691,23 @@ export function ExerciseEditorPane({
               queryClient.setQueryData<ExerciseWithAnswers | null>(
                 authoringKeys.exercise(exerciseId),
                 (cached) => (cached ? applySavedInflectionTable(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isReadAloud && exercise != null ? (
+          // Speech owns a document because its key is a note and focus words per prompt and
+          // four level descriptors per criterion, split across both columns — nothing the
+          // generic form has a field for.
+          <ReadAloudBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={readAloudDocumentFrom(exercise)}
+            onDocumentChange={setReadAloud}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedReadAloud(cached, updatedAt, saved) : cached),
               )
             }
           />
@@ -1369,4 +1410,39 @@ function ExerciseForm({ exerciseId, initialValues, container, onValuesChange }: 
       </Button>
     </form>
   );
+}
+
+/** The stored columns as the kernel's read-aloud document, plus the row's token and the audio draft. */
+function readAloudDocumentFrom(exercise: ExerciseWithAnswers): ReadAloudDocument {
+  return {
+    ...readAloudFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+    audio: readAudioDraft(exercise.content, READ_ALOUD_TEMPLATE_CODE),
+  };
+}
+
+/** The cached exercise as the save left it — both columns, the audio block and the token. */
+function applySavedReadAloud(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedReadAloud,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  const line = saved.exercise.instruction.trim();
+  return {
+    ...cached,
+    updatedAt,
+    // The template's own persistence, then the layer that belongs to none of them: a cache
+    // written without it would hand a remounted builder an exercise whose audio had vanished.
+    content: applyAudioDraft(
+      { ...readAloudToContent(saved.exercise) },
+      saved.exercise.audio,
+      READ_ALOUD_TEMPLATE_CODE,
+    ) as ExerciseWithAnswers['content'],
+    expectedAnswers: { ...readAloudToExpectedAnswers(saved.exercise) },
+    ...(instruction &&
+      line !== '' && {
+        instructions: [{ ...instruction, instructionText: line }, ...rest],
+      }),
+  };
 }

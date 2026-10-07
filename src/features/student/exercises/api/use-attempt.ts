@@ -42,6 +42,10 @@ export class AttemptRequestError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    /** The machine-readable reason, where the route sends one (`RA_RECORDING_LENGTH`, …). */
+    readonly code: string | null = null,
+    /** The items a refusal is about — the prompts whose recordings `read_aloud` refused. */
+    readonly itemIds: string[] = [],
   ) {
     super(message);
     this.name = 'AttemptRequestError';
@@ -67,10 +71,18 @@ async function send<TResponse>(
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
   if (!res.ok) {
-    const problem = (await res.json().catch(() => null)) as { error?: string } | null;
+    const problem = (await res.json().catch(() => null)) as {
+      error?: string;
+      code?: unknown;
+      itemIds?: unknown;
+    } | null;
     throw new AttemptRequestError(
       problem?.error ?? `Request failed with ${res.status}`,
       res.status,
+      typeof problem?.code === 'string' ? problem.code : null,
+      Array.isArray(problem?.itemIds)
+        ? problem.itemIds.filter((x): x is string => typeof x === 'string')
+        : [],
     );
   }
   return res.json() as Promise<TResponse>;

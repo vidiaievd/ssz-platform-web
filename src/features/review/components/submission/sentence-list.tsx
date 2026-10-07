@@ -5,10 +5,14 @@ import { useTranslations } from 'next-intl';
 import { DiffLegend } from '@/features/content-authoring/components/translate/tr-marks';
 import type { ReviewDetails } from '@/features/content-authoring/types/review';
 
+import { readSpeakingSnapshot } from '@/lib/shared-kernel/read-aloud';
+
+import { readReadAloudDetails } from '../../lib/read-aloud-details';
 import { readShortAnswerDetails } from '../../lib/short-answer-details';
 import { readWritingTaskDetails } from '../../lib/writing-task-details';
 import type { ReviewSubmission } from '../../types';
 
+import { ReadAloudReview } from './read-aloud-review';
 import { RubricMarks } from './rubric-marks';
 import { isTranslateDetail, SentenceRow } from './sentence-row';
 
@@ -19,7 +23,10 @@ export interface SentenceListProps {
   /** Comments on single sentences, by item id — owned by the panel, saved with the verdict. */
   comments: Record<string, string>;
   onComment: (itemId: string, value: string | undefined) => void;
-  /** Rubric marks so far, by criterion id — `writing_task` only. Owned by the panel. */
+  /**
+   * Rubric marks so far, owned by the panel: by criterion id for `writing_task`, by
+   * `itemId:criterionId` for `read_aloud` (plan 70 §3.6).
+   */
   marks: Record<string, number>;
   onMark: (criterionId: string, mark: number) => void;
   /** False once a verdict stands: the rubric becomes a record of what was decided. */
@@ -48,6 +55,29 @@ export function SentenceList({
   editable,
 }: SentenceListProps) {
   const t = useTranslations('Review.submission');
+
+  // Recorded speech: one block per prompt, each marked and commented on its own (plan 70
+  // §7.11). Without a readable rubric snapshot there is nothing to mark against, and the
+  // recordings fall through to the raw answer below like any unreadable breakdown.
+  const speaking =
+    submission.exercise.type === 'read_aloud' ? readSpeakingSnapshot(submission.rubric) : null;
+  if (speaking !== null) {
+    return (
+      <ReadAloudReview
+        submission={submission}
+        details={readReadAloudDetails(submission.details)}
+        snapshot={speaking}
+        marks={submission.rubricMarks ?? marks}
+        onMark={onMark}
+        comments={comments}
+        onComment={onComment}
+        editable={editable}
+      />
+    );
+  }
+  if (submission.exercise.type === 'read_aloud') {
+    return <RawAnswer answer={submission.submittedAnswer} />;
+  }
 
   if (submission.exercise.type === 'writing_task') {
     return (

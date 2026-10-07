@@ -105,4 +105,38 @@ describe('POST /api/exercises/[id]/attempts/[attemptId]/submit', () => {
     const res = await POST(makeRequest(BODY), { params });
     expect(res.status).toBe(502);
   });
+
+  it('passes a read_aloud refusal on with its code and prompts (plan 70 §3.5)', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(
+      new AppError('validation', 'Upstream 422', {
+        code: 'RA_RECORDING_LENGTH',
+        itemIds: ['p1', 7],
+        statusCode: 422,
+      }),
+    );
+    const res = await POST(makeRequest(BODY), { params });
+    expect(res.status).toBe(422);
+    await expect(res.json()).resolves.toEqual({
+      error: 'Recordings refused',
+      code: 'RA_RECORDING_LENGTH',
+      itemIds: ['p1'],
+    });
+  });
+
+  it('reports media being down as 503, not as a lost hand-in (RA-U10)', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(
+      new AppError('upstream_unavailable', 'Upstream 503', { code: 'MEDIA_UNAVAILABLE' }),
+    );
+    const res = await POST(makeRequest(BODY), { params });
+    expect(res.status).toBe(503);
+    await expect(res.json()).resolves.toMatchObject({ code: 'MEDIA_UNAVAILABLE' });
+  });
+
+  it('keeps an ordinary 422 a 502', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(
+      new AppError('validation', 'Upstream 422', { message: 'Failed to submit answer' }),
+    );
+    const res = await POST(makeRequest(BODY), { params });
+    expect(res.status).toBe(502);
+  });
 });

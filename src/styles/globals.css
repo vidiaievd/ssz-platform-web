@@ -196,6 +196,8 @@
 @keyframes fade-down { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slide-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 @keyframes spin-slow { to { transform: rotate(360deg); } }
+/* The «Tar opp» dot of a recording in progress (read_aloud, `ra.css`). */
+@keyframes ra-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
 /* ─────────────────────────────────────────────
    SSZ DESIGN TOKENS — CSS Custom Properties

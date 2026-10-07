@@ -123,6 +123,14 @@ export function useSentenceSchemaAutosave({
   const pending = useRef({ exercise });
   const attempt = useRef(0);
   const inFlight = useRef(false);
+  /**
+   * The token the last save earned, and the one it was sent with. A save finishing hands the
+   * new token to the screen, but the screen catches up on its next render; an edit whose
+   * debounce fires in between would go out with the old token and lose to our own save.
+   */
+  const earned = useRef<{ sent: string; got: string } | null>(null);
+  const tokenFor = (shown: string) =>
+    earned.current !== null && earned.current.sent === shown ? earned.current.got : shown;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flushRef = useRef<() => Promise<void>>(() => Promise.resolve());
   const onSavedRef = useRef(onSaved);
@@ -159,7 +167,7 @@ export function useSentenceSchemaAutosave({
           TEMPLATE_CODE,
         ) as SaveSentenceSchemaInput['content'],
         expectedAnswers: toExpectedAnswers(document),
-        expectedUpdatedAt: force?.expectedUpdatedAt ?? document.updatedAt,
+        expectedUpdatedAt: force?.expectedUpdatedAt ?? tokenFor(document.updatedAt),
         // The one line the author wrote, written to the instruction row as well as into
         // the document. The platform requires an instruction row before an exercise may be
         // published, and the reader prefers it (it is the translated one) — but asking the
@@ -201,6 +209,7 @@ export function useSentenceSchemaAutosave({
 
       attempt.current = 0;
       setFailures(0);
+      earned.current = { sent: document.updatedAt, got: outcome.updatedAt };
       // Saved: this is now the version everything is compared against, so an untouched
       // document is not written a second time.
       const saved: SavedDocument = { exercise: document };

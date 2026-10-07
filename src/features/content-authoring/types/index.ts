@@ -134,7 +134,7 @@ export interface ContainerActivity {
 export const COVERAGE_SKILLS = ['listening', 'reading', 'spoken', 'written'] as const;
 export type CoverageSkill = (typeof COVERAGE_SKILLS)[number];
 
-export const COVERAGE_FOCUSES = ['vocabulary', 'grammar', 'orthography', 'pragmatics'] as const;
+export const COVERAGE_FOCUSES = ['vocabulary', 'grammar', 'orthography', 'pronunciation', 'pragmatics'] as const;
 export type CoverageFocus = (typeof COVERAGE_FOCUSES)[number];
 
 export const COVERAGE_FORMS = ['bank', 'free', 'mixed', 'unknown'] as const;

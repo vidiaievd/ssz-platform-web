@@ -24,8 +24,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     if (e instanceof AppError && e.code === 'validation') {
-      return NextResponse.json({ error: 'Invalid upload request' }, { status: 422 });
+      // A recording refused before any byte moves — over 8 MB, not audio (plan 70 §3.4).
+      const code = refusalCode(e.details);
+      return NextResponse.json(
+        { error: 'Invalid upload request', ...(code === null ? {} : { code }) },
+        { status: 422 },
+      );
     }
     return NextResponse.json({ error: 'Failed to request upload' }, { status: 502 });
   }
+}
+
+/** media-service puts a domain refusal's code in `message`; validation prose is not a code. */
+function refusalCode(details: unknown): string | null {
+  if (typeof details !== 'object' || details === null) return null;
+  const { message } = details as { message?: unknown };
+  return typeof message === 'string' && /^[A-Z][A-Z_]+$/.test(message) ? message : null;
 }

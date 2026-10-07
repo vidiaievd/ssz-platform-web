@@ -27,12 +27,14 @@ import { ListeningLessonPage } from './listening-lesson-page';
 import { GrammarLessonPage } from './grammar-lesson-page';
 import { LiveLessonPage } from './live-lesson-page';
 import { ExercisePage } from './exercise-page';
+import { UnitEntryRedirect } from './unit-entry-redirect';
 import { PracticePage } from './practice-page';
 import {
   buildItemHref,
   findNextUnit,
   findSourceLessonItemId,
   flattenSections,
+  isStaleItemId,
   mapCourseLevelsToSidebarLevels,
   mapCourseUnitsToSidebarUnits,
   mapContentItemKind,
@@ -125,6 +127,12 @@ export function ReaderShell({
 
   const { courseInfo, units, levels, progress } = courseHome.data;
   const contents = unitContents.data;
+
+  // An address from before the module was last published names nothing now (ids are
+  // per-version): go to the unit's entry rather than to a page that says it is coming.
+  if (isStaleItemId(contents, itemId)) {
+    return <UnitEntryRedirect courseId={courseId} unitId={unitId} />;
+  }
 
   const formatMinutes = (minutes: number) => t('durationMinutes', { n: minutes });
   const activeUnitSections = mapUnitContentsToSections(contents, courseId, formatMinutes, {

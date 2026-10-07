@@ -31,6 +31,7 @@ import { TEMPLATE_CODE as SORT_INTO_BUCKETS_TEMPLATE_CODE } from '@/lib/shared-k
 import { TEMPLATE_CODE as HIGHLIGHT_IN_TEXT_TEMPLATE_CODE } from '@/lib/shared-kernel/highlight-in-text';
 import { TEMPLATE_CODE as DICTATION_TEMPLATE_CODE } from '@/lib/shared-kernel/dictation';
 import { TEMPLATE_CODE as INFLECTION_TABLE_TEMPLATE_CODE } from '@/lib/shared-kernel/inflection-table';
+import { TEMPLATE_CODE as READ_ALOUD_TEMPLATE_CODE } from '@/lib/shared-kernel/read-aloud';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -47,6 +48,7 @@ import { createMultipleChoiceGroupAction } from '../actions/multiple-choice-grou
 import { createSortIntoBucketsAction } from '../actions/sort-into-buckets';
 import { createDictationAction } from '../actions/dictation';
 import { createInflectionTableAction } from '../actions/inflection-table';
+import { createReadAloudAction } from '../actions/read-aloud';
 import { createHighlightInTextAction } from '../actions/highlight-in-text';
 import {
   createTranslateFromTargetAction,
@@ -97,6 +99,7 @@ type OwnBuilderTemplate =
   | typeof HIGHLIGHT_IN_TEXT_TEMPLATE_CODE
   | typeof DICTATION_TEMPLATE_CODE
   | typeof INFLECTION_TABLE_TEMPLATE_CODE
+  | typeof READ_ALOUD_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
@@ -147,6 +150,10 @@ const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillActi
   // the columns are the pack's, so a document made by the generic form would have none
   // (plan 69 §3.7).
   [INFLECTION_TABLE_TEMPLATE_CODE]: createInflectionTableAction,
+  // The fifteenth. One empty `read` prompt, the course language's default rubric and the dials
+  // of DECISIONS §7; the listening note and the descriptors live in the key column, so a
+  // document made by the generic form would have no key at all (plan 70 §3.1).
+  [READ_ALOUD_TEMPLATE_CODE]: createReadAloudAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,

@@ -18,14 +18,14 @@ function tallies(overrides: Partial<CoverageTallies> = {}): CoverageTallies {
   return {
     total: 10,
     bySkill: { listening: 0, reading: 8, spoken: 0, written: 2 },
-    byFocus: { vocabulary: 6, grammar: 3, orthography: 0, pragmatics: 0, unknown: 1 },
+    byFocus: { vocabulary: 6, grammar: 3, orthography: 0, pronunciation: 0, pragmatics: 0, unknown: 1 },
     byForm: { bank: 7, free: 3, mixed: 0, unknown: 0 },
     byModality: { recognition: 6, recall: 3, production: 1, unknown: 0 },
     byPair: {
-      listening: { vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 },
-      reading: { vocabulary: 6, grammar: 1, orthography: 0, pragmatics: 0, unknown: 1 },
-      spoken: { vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 },
-      written: { vocabulary: 0, grammar: 2, orthography: 0, pragmatics: 0, unknown: 0 },
+      listening: { vocabulary: 0, grammar: 0, orthography: 0, pronunciation: 0, pragmatics: 0, unknown: 0 },
+      reading: { vocabulary: 6, grammar: 1, orthography: 0, pronunciation: 0, pragmatics: 0, unknown: 1 },
+      spoken: { vocabulary: 0, grammar: 0, orthography: 0, pronunciation: 0, pragmatics: 0, unknown: 0 },
+      written: { vocabulary: 0, grammar: 2, orthography: 0, pronunciation: 0, pragmatics: 0, unknown: 0 },
     },
     emptySkills: ['listening', 'spoken'],
     unclassified: 0,
@@ -157,7 +157,7 @@ describe('CoverageStrip', () => {
           tallies({
             total: 0,
             bySkill: { listening: 0, reading: 0, spoken: 0, written: 0 },
-            byFocus: { vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 },
+            byFocus: { vocabulary: 0, grammar: 0, orthography: 0, pronunciation: 0, pragmatics: 0, unknown: 0 },
             byForm: { bank: 0, free: 0, mixed: 0, unknown: 0 },
             byModality: { recognition: 0, recall: 0, production: 0, unknown: 0 },
           }),

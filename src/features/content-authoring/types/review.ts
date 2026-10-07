@@ -199,3 +199,48 @@ export interface WritingTaskDetails {
   neededCount: number;
   points: WritingTaskPointDetail[];
 }
+
+/** One prompt of a `read_aloud` submission, as the engine reads it for the queue (plan 70 §3.5). */
+export interface ReadAloudPromptDetail {
+  itemId: string;
+  label: string;
+  /**
+   * The material of the exercise's current mode; null for a prompt the author deleted after
+   * the work was handed in — the recording is still listed and still graded.
+   */
+  material:
+    | { kind: 'read'; text: string }
+    | {
+        kind: 'monologue';
+        image: { assetId: string; caption: string; alt: string } | null;
+        plan: { id: string; text: string; required: boolean }[];
+      }
+    | { kind: 'dialogue'; situation: string; partner: string }
+    | null;
+  /** The author's brief to the grader — «Lyttepunkt». Teacher-only. */
+  note: string;
+  /** Words to listen for, with their notes. `read` only. */
+  focus: { id: string; word: string; note: string }[];
+  minSeconds: number | null;
+  maxSeconds: number | null;
+  recording: { assetId: string; seconds: number; takes: number };
+  /**
+   * Passed in an earlier try and carried into this one (phase 11b): shown folded and read-only,
+   * nobody grades it again. Null for a prompt recorded in this try.
+   */
+  carried: { attempt: number; points: number; max: number; comment: string } | null;
+}
+
+/**
+ * What the machine says about recorded speech: nothing about the speech. The prompts, what the
+ * author asked the grader to listen for, and which take the student handed in — the verdict is a
+ * person's from the first mark to the last (README idea 3).
+ */
+export interface ReadAloudDetails {
+  totalItems: number;
+  passedItems: number;
+  mode: 'read' | 'monologue' | 'dialogue';
+  /** What a failing verdict does to the student — names the queue's one button. */
+  revision: 'once' | 'return';
+  prompts: ReadAloudPromptDetail[];
+}

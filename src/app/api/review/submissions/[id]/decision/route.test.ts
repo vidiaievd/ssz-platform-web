@@ -162,6 +162,23 @@ describe('POST /api/review/submissions/[id]/decision', () => {
     expect(await response.json()).toEqual({ code: 'RUBRIC_INCOMPLETE', missing: ['c-lang'] });
   });
 
+  it('names the read_aloud prompts that still have no comment (plan 70, RA-Q4)', async () => {
+    upstream({
+      verdictFails: new AppError('validation', 'Upstream 422', {
+        code: 'READ_ALOUD_COMMENT_REQUIRED',
+        missing: ['p2'],
+      }),
+    });
+
+    const response = await POST(
+      request({ verdict: 'approved', rubricMarks: { 'p1:flow': 3 } }),
+      context,
+    );
+
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({ code: 'READ_ALOUD_COMMENT_REQUIRED', missing: ['p2'] });
+  });
+
   it('hands back the next submission in the queue, not the top of it', async () => {
     upstream();
     // att-1 is older than the one just decided; att-3 is the one that follows it.

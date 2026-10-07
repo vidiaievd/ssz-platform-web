@@ -122,3 +122,97 @@ export async function uploadAsset({
     },
   };
 }
+
+/** The kind media-service keeps a student's spoken answer under (plan 70, Q2-A). */
+export const RECORDING_ENTITY_TYPE = 'submission_recording';
+
+/**
+ * Why a recording did not make it into storage. `code` is media-service's own when it refused
+ * the file (`RECORDING_TOO_LONG`, `RECORDING_TOO_LARGE`, `RECORDING_UNREADABLE`,
+ * `MIME_TYPE_NOT_ALLOWED`) and `null` when the request simply failed.
+ */
+export class RecordingUploadError extends Error {
+  constructor(
+    readonly code: string | null,
+    readonly status: number | null,
+  ) {
+    super(code ?? `Recording upload failed${status === null ? '' : ` (${status})`}`);
+    this.name = 'RecordingUploadError';
+  }
+}
+
+type UploadRecordingOptions = {
+  blob: Blob;
+  /** As the recorder produced it; the codec parameter is dropped for storage. */
+  mimeType: string;
+  /** The attempt the recording answers — the asset's `entityId` (RA-U2). */
+  attemptId: string;
+  /** A file name for the asset row, e.g. `p1-take-2.webm`. */
+  filename: string;
+  onProgress?: UploadProgressCallback;
+};
+
+/**
+ * One take of a `read_aloud` prompt, into media-service (plan 70 §3.4).
+ *
+ * The same three steps as `uploadAsset` — slot, PUT to MinIO, finalize — with the attempt as
+ * the owner of the asset, and without the fourth: the runner already holds the take (a `blob:`
+ * URL), so there is nothing to fetch back. Finalize is where the service measures the stored
+ * object and refuses one over the ceilings, and its code is kept, because «too long» and «the
+ * network dropped» want different words on the screen.
+ */
+export async function uploadRecording({
+  blob,
+  mimeType,
+  attemptId,
+  filename,
+  onProgress,
+}: UploadRecordingOptions): Promise<{ assetId: string }> {
+  // The signed PUT does not bind a content type; the bare one is what the object is served as.
+  const type = (mimeType.split(';')[0] ?? '').trim().toLowerCase() || 'audio/webm';
+  const file = new File([blob], filename, { type });
+
+  const body: RequestUploadBody = {
+    mimeType: type,
+    sizeBytes: file.size,
+    originalFilename: filename,
+    entityType: RECORDING_ENTITY_TYPE,
+    entityId: attemptId,
+  };
+
+  let requestRes: Response;
+  try {
+    requestRes = await fetch('/api/media/uploads/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new RecordingUploadError(null, null);
+  }
+  if (!requestRes.ok) throw new RecordingUploadError(await codeOf(requestRes), requestRes.status);
+
+  const { assetId, uploadUrl } = (await requestRes.json()) as RequestUploadResponse;
+
+  try {
+    await uploadToPresignedUrl(uploadUrl, file, onProgress);
+  } catch {
+    throw new RecordingUploadError(null, null);
+  }
+
+  let finalizeRes: Response;
+  try {
+    finalizeRes = await fetch(`/api/media/uploads/${assetId}/finalize`, { method: 'POST' });
+  } catch {
+    throw new RecordingUploadError(null, null);
+  }
+  if (!finalizeRes.ok)
+    throw new RecordingUploadError(await codeOf(finalizeRes), finalizeRes.status);
+
+  return { assetId };
+}
+
+async function codeOf(res: Response): Promise<string | null> {
+  const body = (await res.json().catch(() => null)) as { code?: unknown } | null;
+  return typeof body?.code === 'string' ? body.code : null;
+}

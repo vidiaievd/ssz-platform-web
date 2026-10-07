@@ -17,13 +17,13 @@ vi.mock('../api/use-course-result', () => ({
 
 const { CoverageResultGrid } = await import('./coverage-result-grid');
 
-const zeroes = () => ({ vocabulary: 0, grammar: 0, orthography: 0, pragmatics: 0, unknown: 0 });
+const zeroes = () => ({ vocabulary: 0, grammar: 0, orthography: 0, pronunciation: 0, pragmatics: 0, unknown: 0 });
 
 function tallies(overrides: Partial<CoverageTallies> = {}): CoverageTallies {
   return {
     total: 12,
     bySkill: { listening: 0, reading: 9, spoken: 0, written: 3 },
-    byFocus: { vocabulary: 6, grammar: 3, orthography: 0, pragmatics: 0, unknown: 3 },
+    byFocus: { vocabulary: 6, grammar: 3, orthography: 0, pronunciation: 0, pragmatics: 0, unknown: 3 },
     byForm: { bank: 9, free: 3, mixed: 0, unknown: 0 },
     byModality: { recognition: 9, recall: 2, production: 1, unknown: 0 },
     byPair: {
@@ -116,12 +116,13 @@ describe('CoverageResultGrid', () => {
   it('counts the two holes separately in the summary', () => {
     renderGrid({ coverage: coverage(), result: result() });
 
-    // Twenty cells: one measured (reading × vocabulary), two covered and unreached
-    // (reading × grammar, written × unknown), seventeen with no material behind them.
+    // Twenty-four cells since `pronunciation` joined the focus axis (plan 70): one measured
+    // (reading × vocabulary), two covered and unreached (reading × grammar, written × unknown),
+    // twenty-one with no material behind them.
     // The label appears twice — once as a figure, once in the legend beside the grid.
     expect(screen.getAllByText('Covered, unreached')).toHaveLength(2);
     expect(screen.getByText('2 pairs covered but unreached')).toBeInTheDocument();
-    expect(screen.getByText('17 pairs not taught at all')).toBeInTheDocument();
+    expect(screen.getByText('21 pairs not taught at all')).toBeInTheDocument();
   });
 
   it('reads the item count from coverage, never from analytics', () => {

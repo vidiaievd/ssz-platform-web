@@ -193,7 +193,6 @@
       "dictation": "Diktat",
       "inflection_table": "Bøyningstabell",
       "read_aloud": "Les høyt",
-      "speaking_prompt": "Snakk",
       "minimal_pairs": "Lytt og velg",
       "information_transfer": "Fyll ut skjema"
     },
@@ -3965,6 +3964,7 @@
       "vocabulary": "Ordforråd",
       "grammar": "Grammatikk",
       "orthography": "Rettskriving",
+      "pronunciation": "Uttale",
       "pragmatics": "Språkbruk",
       "unknown": "Ikke registrert"
     },
@@ -4340,6 +4340,298 @@
       "saveFailed": "Oppskriften kunne ikke lagres",
       "refused": "Oppskriften ble avvist: en regel nevner noe plattformen ikke kjenner.",
       "failed": "Oppskriften kunne ikke lastes."
+    }
+  },
+  "readAloud": {
+    "shell": {
+      "step1": "Oppgave",
+      "step2": "Lytt etter",
+      "step3": "Vurderingsskjema",
+      "step4": "Opptak",
+      "step5": "Flyt",
+      "stepSub1": "modus og materiale",
+      "stepSub2": "læreren sitt notat",
+      "stepSub3": "hvordan det poengsettes",
+      "stepSub4": "forsøk og grenser",
+      "stepSub5": "vurdering og kø",
+      "stepsLabel": "Stegene i opplesningsoppgaven"
+    },
+    "subject": {
+      "prompt": "Oppgave {index}"
+    },
+    "need": {
+      "text": "ingen tekst å lese",
+      "support": "verken bilde eller plan",
+      "turn": "ingen replikk å svare på"
+    },
+    "audioItemNoun": "opptakene",
+    "modes": {
+      "read": {
+        "label": "Lese høyt",
+        "desc": "Kjent tekst leses opp. Uttale og flyt, ikke innhold."
+      },
+      "monologue": {
+        "label": "Monolog på støtte",
+        "desc": "Beskriv bildet eller fortell etter en plan."
+      },
+      "dialogue": {
+        "label": "Replikk i dialog",
+        "desc": "Svar på en replikk i en gitt situasjon."
+      }
+    },
+    "step1": {
+      "eyebrow": "Steg 1",
+      "title": "Oppgaven",
+      "lede": "Tre taleoppgaver deler én type. Modusen bestemmer hva studenten ser på mens mikrofonen er åpen — ingenting annet forgrener seg.",
+      "titleLabel": "Tittel",
+      "modeLabel": "Modus",
+      "retrieval": "retrieval: {value}",
+      "evidenceRead": "Evidens: tak for suksess middels, gulv for feil lavt — en ren opplesning viser avkoding og uttale, ikke at studenten kan produsere språket.",
+      "evidenceProduce": "Evidens: tak for suksess høyt, gulv for feil middels — uforberedt tale er den sterkeste evidensen plattformen kan samle, og et svakt opptak kan skyldes nerver.",
+      "instructionLabel": "Instruksjon til studenten",
+      "instructionHelp": "Én linje, på kursspråket. Reglene for opptaket vises av løperen — ikke gjenta dem her.",
+      "promptsEyebrow": "Oppgaver",
+      "promptsCount": "{count, plural, one {# opptak} other {# opptak}}",
+      "addPrompt": "Legg til oppgave",
+      "promptsTip": "Hver oppgave er ett element: egen <b>itemId</b>, eget opptak, egen rad i køen og egen linje i rapporten. En oppgave med tre deler gir tre vurderinger, ikke et gjennomsnitt.",
+      "promptLabel": "Navn på oppgave {index}",
+      "removePrompt": "Slett oppgave: {label}",
+      "textLabel": "Tekst som leses høyt",
+      "textRequired": "Uten tekst er det ingenting å lese.",
+      "textMeasure": "{words, plural, one {# ord} other {# ord}} · omtrent {time} høyt",
+      "planLabel": "Planen studenten ser",
+      "planHelp": "Stikkord, ikke setninger. Vises ved siden av mikrofonen hele tiden.",
+      "pointText": "Planpunkt {index}",
+      "pointRequired": "må dekkes",
+      "pointOptional": "valgfritt",
+      "removePoint": "Fjern planpunkt {index}",
+      "addPoint": "Legg til punkt",
+      "situationLabel": "Situasjon",
+      "situationHelp": "Én linje med kontekst: hvem snakker, og hvor.",
+      "partnerLabel": "Replikken studenten svarer på",
+      "partnerRequired": "Uten replikken er det ingenting å svare på.",
+      "audioTitle": "Lydlag",
+      "audioNote": "delt · plan 56",
+      "audioOff": {
+        "read": "En modellopplesning gir studenten et mål for lydene som vurderes.",
+        "monologue": "En monolog trenger sjelden lydklipp — la det stå av.",
+        "dialogue": "Legg ved replikken som lyd, så blir svaret både lytting og tale."
+      },
+      "titlePlaceholder": "Les høyt — jobbsøknad",
+      "instructionPlaceholder": "Les teksten høyt.",
+      "textPlaceholder": "Lim inn avsnittet fra leksjonen…",
+      "pointPlaceholder": "Hvem er på bildet?",
+      "situationPlaceholder": "Du er på legekontoret.",
+      "partnerPlaceholder": "«Hva kan jeg hjelpe deg med i dag?»"
+    },
+    "step2": {
+      "eyebrow": "Steg 2",
+      "title": "Hva vi lytter etter",
+      "lede": "Ingenting her når studenten før vurderingen. Det er notatet til læreren: lydene du markerte og merknaden som sier hvordan et godt svar høres ut på denne oppgaven.",
+      "warn": "Et opptak som kommer tilbake med «3 av 12» uten begrunnelse koster studenten leksjonen. Notatet er en blokkering, akkurat som forklaringen per element i alle andre typer.",
+      "pickLabel": "Marker ordene du vurderer",
+      "pickHelp": "Trykk på et ord for å gjøre det til et fokusord. Læreren ser dem uthevet under lytting; studenten ser dem bare i tilbakemeldingen.",
+      "focusNoteLabel": "Hva det skal lyttes etter i «{word}»",
+      "removeFocus": "Fjern fokusordet «{word}»",
+      "noteLabel": "Lyttepunkt",
+      "noteRequired": "En oppgave uten notat kan ikke vurderes jevnt — og kan ikke tildeles.",
+      "focusNotePlaceholder": "Hva skal læreren lytte etter her?",
+      "notePlaceholder": "Hva skiller et godt opptak fra et halvgodt her?"
+    },
+    "step3": {
+      "eyebrow": "Steg 3",
+      "title": "Vurderingsskjema",
+      "lede": "Et menneske vurderer hvert opptak, så skjemaet er øvelsens eneste fasit. Tre kriterier er standard: uttale og innhold teller dobbelt, flyt enkelt.",
+      "pointsToPass": "poeng for å bestå",
+      "passBar": "Beståttgrense mot maksimum",
+      "passLabel": "Poeng som trengs for å bestå",
+      "addCriterion": "Legg til kriterium",
+      "showRubricLabel": "Skjemaet vises for studenten",
+      "showRubric": {
+        "always": "Alltid",
+        "afterGraded": "Etter vurdering",
+        "never": "Aldri"
+      },
+      "showModelLabel": "Modellopplesning vises etter vurdering",
+      "showModel": {
+        "afterGraded": "Etter vurdering",
+        "never": "Aldri"
+      },
+      "criterionNo": "Kriterium {index}",
+      "nameLabel": "Navn på kriterium {index}",
+      "weightLabel": "Vekt for {label}",
+      "visible": "vises for studenten",
+      "teacherOnly": "bare læreren",
+      "expand": "Vis nivåene for {label}",
+      "removeCriterion": "Slett kriteriet {label}",
+      "descLabel": "Hva {label} handler om",
+      "levelLabel": "Nivå {level} for {label}",
+      "levelPlaceholder": "Beskriv nivå {level}",
+      "collapsed": "3 — {top} · 0 — {bottom}",
+      "descPlaceholder": "Hva kriteriet handler om"
+    },
+    "issues": {
+      "RA_NO_PROMPTS": "Ingen oppgaver ennå — ingenting å ta opp.",
+      "RA_PROMPT_NO_MATERIAL": "{subject} har {what}. Studenten ville møtt en tom skjerm med åpen mikrofon.",
+      "RA_TEXT_TOO_LONG": "{subject} er på {words} ord. Over ca. 90 tester opptaket utholdenhet, ikke uttale.",
+      "RA_PLAN_TOO_LONG": "{subject} har {points} planpunkter — monologen blir en liste som leses opp.",
+      "RA_MANY_PROMPTS": "{count} opptak i én øvelse er en lang økt, og hele settet havner i køen samtidig.",
+      "RA_NO_MODEL": "Ingen modellopplesning er lagt ved. Uten den har studenten ikke noe mål for lydene som vurderes.",
+      "RA_PARTNER_TEXT_ONLY": "Replikken er bare tekst. Talt innspill gjør svaret til en lytteoppgave også.",
+      "RA_NO_NOTE": "{subject} sier ingenting til læreren om hva det skal lyttes etter. Vurderingen ville vært et tall uten begrunnelse.",
+      "RA_NO_FOCUS": "Ingen fokusord er markert. Læreren vurderer uttale uten noe å sikte på, og to lærere vil høre ulike ting.",
+      "RA_RUBRIC_EMPTY": "Vurderingsskjemaet er tomt — en menneskelig vurderer har ingenting å fylle ut.",
+      "RA_CRITERION_NO_NAME": "Kriterium {index} har ikke noe navn.",
+      "RA_PASS_ABOVE_MAX": "Beståttgrensen ({passScore}) er over maksimum ({max}) — ingen kan bestå.",
+      "RA_LEVEL_EMPTY": "«{name}» har en tom nivåbeskrivelse. To lærere vil vurdere ulikt.",
+      "RA_RUBRIC_HIDDEN": "Ingen kriterier vises for studenten. De får en poengsum uten begrunnelse.",
+      "RA_MODEL_NEVER_SHOWN": "Modellopplesningen vises aldri etter vurdering, så en student som uttalte feil hører aldri målet.",
+      "RA_OVER_CEILING": "{subject} tillater {limit} — over opplastingsgrensen på {ceiling}.",
+      "RA_RANGE_INVALID": "{subject}: minimum er ikke under maksimum, så ingenting kan leveres.",
+      "RA_READ_EXCEEDS_MAX": "{subject} tar omtrent {read} å lese høyt, men stopper på {limit}.",
+      "RA_BLIND_RETAKES": "{takes} forsøk uten avlytting: studenten tar opp på nytt i blinde og kan ikke avgjøre hvilket opptak som var best.",
+      "RA_ONE_TAKE": "Bare ett forsøk. Forsvarlig for spontanitet, hardt for et første opptak — de fleste studenter trenger et prøveforsøk.",
+      "RA_CHOOSE_NO_EFFECT": "«Velg det beste opptaket» har ingen virkning med ett enkelt forsøk.",
+      "RA_NO_MIC_CHECK": "Ingen mikrofonsjekk. Stille opptak havner i køen og koster læreren vurderingstid.",
+      "RA_AI_NOT_LIVE": "KI-forsjekken er en tegnet flate, ikke en levende tjeneste (plan 48). Ingenting kalles, og læreren vurderer fortsatt hvert opptak."
+    },
+    "fixes": {
+      "RA_NO_PROMPTS": "Legg til en oppgave",
+      "RA_PROMPT_NO_MATERIAL": "Legg til materialet",
+      "RA_TEXT_TOO_LONG": "Del den opp",
+      "RA_PLAN_TOO_LONG": "Kort ned planen",
+      "RA_MANY_PROMPTS": "Del opp øvelsen",
+      "RA_NO_MODEL": "Legg ved lyden",
+      "RA_PARTNER_TEXT_ONLY": "Legg ved lyden",
+      "RA_NO_NOTE": "Skriv lyttepunktet",
+      "RA_NO_FOCUS": "Marker lydene",
+      "RA_RUBRIC_EMPTY": "Legg til kriterier",
+      "RA_CRITERION_NO_NAME": "Gi det navn",
+      "RA_PASS_ABOVE_MAX": "Senk den",
+      "RA_LEVEL_EMPTY": "Fyll ut nivåene",
+      "RA_RUBRIC_HIDDEN": "Vis minst ett",
+      "RA_MODEL_NEVER_SHOWN": "Vurder på nytt",
+      "RA_OVER_CEILING": "Senk grensen",
+      "RA_RANGE_INVALID": "Rett opp spennet",
+      "RA_READ_EXCEEDS_MAX": "Hev grensen",
+      "RA_BLIND_RETAKES": "Slå på avlytting",
+      "RA_ONE_TAKE": "Vurder på nytt",
+      "RA_CHOOSE_NO_EFFECT": "Tillat flere forsøk",
+      "RA_NO_MIC_CHECK": "Slå den på",
+      "RA_AI_NOT_LIVE": "Les merknaden"
+    },
+    "step4": {
+      "eyebrow": "Steg 4",
+      "title": "Opptak",
+      "lede": "Innstillingene som avgjør hvor tilgivende mikrofonen er — holdt adskilt fra innholdet med vilje. Alt her er også en grense for hva opplastingen og køen må bære.",
+      "takesLabel": "Forsøk per oppgave",
+      "chooseBest": {
+        "label": "Velg det beste opptaket",
+        "help": "Studenten leverer ett opptak. Av: det siste forsøket sendes automatisk."
+      },
+      "listenBack": {
+        "label": "Lytt tilbake før levering",
+        "help": "Å høre seg selv er mesteparten av læringen. Slå av bare når du vil ha det første, uredigerte forsøket."
+      },
+      "countdown": {
+        "label": "Nedtelling før mikrofonen åpnes",
+        "help": "3 · 2 · 1, så det første ordet ikke blir klippet."
+      },
+      "micCheck": {
+        "label": "Mikrofonsjekk først",
+        "help": "En nivåtest på to sekunder. Stille opptak er det vanligste køen kaster bort tid på."
+      },
+      "keepAll": {
+        "label": "Send de forkastede forsøkene også",
+        "help": "Læreren hører forsøkene i tillegg til det valgte. Nyttig for diagnose, tyngre for lagring og for studentens nerver."
+      },
+      "lengthTitle": "Lengde per oppgave",
+      "promptN": "Oppgave {index}",
+      "prep": "Forb.",
+      "min": "Min",
+      "max": "Maks",
+      "readsIn": "teksten leses på <b>{time}</b>",
+      "ceilingSize": "≈ <b>{size} KB</b> ved taket",
+      "envelope": "Opplastingsramme: <b>{mime}</b>, {ceiling} og {mb} MB som hard grense, lagret som <kind>submission_recording</kind> mot innleveringen. Denne øvelsen sender høyst <b>{size} KB</b> per student."
+    },
+    "step5": {
+      "eyebrow": "Steg 5",
+      "title": "Flyt og vurdering",
+      "lede": "Tale vurderes ikke av maskin: hvert opptak går til vurderingskøen, og et menneske setter karakter. KI-trinnet er tegnet, kan slås på og kaller ingenting.",
+      "pipeline": "Hva som skjer med et opptak",
+      "stage": {
+        "nowWhen": "nå",
+        "now": "Opptak",
+        "nowBody": "Studenten tar opp, velger et forsøk og leverer.",
+        "nowTag": "live",
+        "aiWhen": "trinn 2",
+        "ai": "AI-forsjekk",
+        "aiBody": "Transkripsjon og et uttalehint før læreren åpner kortet.",
+        "aiOff": "av · plan 48",
+        "aiPreview": "forhåndsvisning · plan 48",
+        "teacherWhen": "til slutt",
+        "teacher": "Lærer",
+        "teacherBody": "Fyller ut skjemaet, skriver kommentaren, gir vurderingen. Kan ikke slås av.",
+        "teacherTag": "alltid"
+      },
+      "aiStage": {
+        "label": "KI-forsjekk (ikke live)",
+        "help": "Viser det kommende trinnet så køens oppsett ikke endres senere. Ingen forespørsel sendes."
+      },
+      "ai": {
+        "transcript": {
+          "label": "Automatisk transkripsjon",
+          "help": "Det maskinen hørte, så læreren kan skanne mot teksten."
+        },
+        "pronunciation": {
+          "label": "Uttalehint",
+          "help": "Per fokusord: hørt / ikke hørt. Et hint, aldri en karakter."
+        },
+        "draft": {
+          "label": "Utkast til skjema",
+          "help": "Fyller ut nivåene på forhånd. Læreren bekrefter eller flytter hvert enkelt."
+        }
+      },
+      "visibilityLabel": "Hvem ser KI-resultatet",
+      "visibility": {
+        "teacher": "Bare læreren",
+        "studentAfter": "Studenten, etter vurdering"
+      },
+      "revisionLabel": "Etter et svakt opptak",
+      "revision": {
+        "once": "Én levering",
+        "return": "Kan sendes tilbake"
+      },
+      "revisionNote": "Et opptak som sendes tilbake skriver framdrift og vurderer hukommelsen på veien — en fri form som aldri registrerer en feil er en bug, ikke en innstilling.",
+      "queueEyebrow": "Kø",
+      "queueTitle": "Lærervurdering",
+      "queueHelp": "Hvert opptak vurderes i den felles vurderingskøen, med låser og påminnelser. Den viser alle opplesningsoppgaver i dette kurset, din blant dem.",
+      "queueLink": "Åpne vurderingskøen"
+    },
+    "gate": {
+      "prompts": "{count, plural, one {# oppgave} other {# oppgaver}} — hver med eget opptak, egen itemId og egen rad i rapporten",
+      "notes": "Hver oppgave forteller vurdereren hva det skal lyttes etter",
+      "rubric": "{count, plural, one {# kriterium} other {# kriterier}}, {pass}/{max} for å bestå · {shown} vises for studenten",
+      "takes": "{count, plural, one {# forsøk} other {# forsøk}} · maks {time} per opptak",
+      "takesListen": "{count, plural, one {# forsøk} other {# forsøk}} med avlytting · maks {time} per opptak",
+      "queue": "Går til vurderingskøen — maskinen gir aldri en vurdering på egen hånd",
+      "revision": "Et svakt opptak kan sendes tilbake for et nytt forsøk"
+    },
+    "preview": {
+      "phone": "Telefon",
+      "desktop": "Skrivebord",
+      "reader": "Leserkort",
+      "deviceLabel": "Enhet",
+      "modeLabel": "Forhåndsvisning",
+      "static": "Statisk",
+      "live": "Live",
+      "restart": "Start forsøket på nytt",
+      "empty": "Ingenting å vise ennå — legg til en oppgave.",
+      "noteStatic": "Statisk forhåndsvisning: alt er tegnet, ingenting tar imot input, og ingen mikrofon åpnes.",
+      "noteLive": "Live forhåndsvisning: tar opp med mikrofonen din. Opptakene blir i nettleseren — ingenting lastes opp, og ingenting lagres som et forsøk.",
+      "simulate": "Simuler lærerens vurdering",
+      "simulateNote": "Setter «2» på alle kriterier. Den ekte vurderingen er et menneskes.",
+      "simulatedComment": "Lærerens kommentar vises her."
     }
   }
 }

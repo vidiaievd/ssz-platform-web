@@ -33,6 +33,15 @@ export type AssetResponse = {
   sizeBytes: number;
   originalFilename: string | null;
   createdAt: string;
+  /** `PENDING_UPLOAD → UPLOADED → PROCESSING → READY`, or `FAILED` / `DELETED`. */
+  status?: string;
+  entityType?: string | null;
+  /** For a `submission_recording`, the attempt it was made for (plan 70, Q2-A). */
+  entityId?: string | null;
+  /** Measured on ingest for recordings; null until then and for everything else. */
+  durationMs?: number | null;
+  /** 0..1 waveform, computed by the audio worker; null until it has run. */
+  peaks?: number[] | null;
 };
 
 export type FinalizeUploadResponse = {

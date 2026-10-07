@@ -57,7 +57,14 @@ function upstream(
     // `Partial` alone keeps the fixture's own literal types, and a case that hands back
     // `details: null` is exactly what this route exists to survive.
     submission?:
-      | (Partial<Omit<EngineSubmission, 'details' | 'text' | 'rubricSnapshot' | 'rubricMarks'>> & {
+      | (Partial<
+          Omit<
+            EngineSubmission,
+            'details' | 'text' | 'rubricSnapshot' | 'rubricMarks' | 'submittedAnswer'
+          >
+        > & {
+          submittedAnswer?: unknown;
+          reviewDecisions?: unknown;
           details?: unknown;
           text?: string | null;
           rubricSnapshot?: unknown;
@@ -66,6 +73,8 @@ function upstream(
       | 'missing';
     scopeNow?: string[];
     scopeThen?: string[];
+    /** media-service's playback answer; an Error makes it fail. */
+    playback?: unknown;
   } = {},
 ) {
   const now = overrides.scopeNow ?? ['group-1'];
@@ -87,6 +96,10 @@ function upstream(
       return { respondWithinHours: 24, overridden: true };
     }
     if (opts.path.endsWith('/groups')) return [{ id: 'group-1', name: 'A2 kveld' }];
+    if (opts.path === '/internal/media/assets/playback') {
+      if (overrides.playback instanceof Error) throw overrides.playback;
+      return overrides.playback ?? [];
+    }
     throw new Error(`unexpected upstream call: ${opts.path}`);
   });
 }
@@ -236,6 +249,81 @@ describe('GET /api/review/submissions/[id]', () => {
   it('does not reveal whether an attempt of another school exists', async () => {
     upstream({ submission: 'missing' });
     expect((await call()).status).toBe(404);
+  });
+
+  describe('read_aloud recordings (plan 70, RA-Q8)', () => {
+    const READ_ALOUD = {
+      templateCode: 'read_aloud',
+      submittedAnswer: {
+        recordings: [
+          {
+            itemId: 'p1',
+            assetId: 'asset-1',
+            seconds: 21,
+            takes: 2,
+            discarded: [{ assetId: 'asset-0', seconds: 9 }],
+          },
+          { itemId: 'p2', assetId: 'asset-2', seconds: 30, takes: 1 },
+        ],
+      },
+      reviewDecisions: null,
+    };
+    const PLAYBACK = {
+      id: 'asset-1',
+      url: 'http://minio/rec-1.mp3?sig',
+      mimeType: 'audio/mpeg',
+      expiresAt: '2026-10-07T12:00:00.000Z',
+      durationMs: 21_400,
+      peaks: [0.2, 0.8],
+    };
+
+    const playbackCall = () =>
+      vi
+        .mocked(serverFetch)
+        .mock.calls.find(
+          ([opts]) => (opts as { path: string }).path === '/internal/media/assets/playback',
+        )?.[0] as { body: { ids: string[] }; headers: Record<string, string> } | undefined;
+
+    it('signs the handed-in takes only, and keys the links by asset', async () => {
+      upstream({ submission: READ_ALOUD, playback: [PLAYBACK] });
+      const body = await (await call()).json();
+
+      // The chosen take per prompt; the discarded one is never asked for.
+      expect(playbackCall()?.body).toEqual({ ids: ['asset-1', 'asset-2'] });
+      expect(playbackCall()?.headers).toHaveProperty('x-internal-token');
+      const { id: _id, ...link } = PLAYBACK;
+      expect(body.playback).toEqual({ 'asset-1': link });
+    });
+
+    it('asks for nothing before the reader is authorised', async () => {
+      upstream({ submission: READ_ALOUD, scopeNow: ['group-9'], scopeThen: ['group-9'] });
+
+      expect((await call()).status).toBe(403);
+      expect(playbackCall()).toBeUndefined();
+    });
+
+    it('keeps the submission readable when media-service does not answer', async () => {
+      upstream({ submission: READ_ALOUD, playback: new Error('down') });
+      const response = await call();
+
+      expect(response.status).toBe(200);
+      expect((await response.json()).playback).toBeNull();
+    });
+
+    it('passes the per-prompt rulings of a delivered verdict through', async () => {
+      const rulings = [{ itemId: 'p1', approved: true, comment: 'Fin flyt.' }];
+      upstream({ submission: { ...READ_ALOUD, reviewDecisions: rulings } });
+
+      expect((await (await call()).json()).reviewDecisions).toEqual(rulings);
+    });
+
+    it('asks media-service nothing for any other template', async () => {
+      upstream();
+      const body = await (await call()).json();
+
+      expect(playbackCall()).toBeUndefined();
+      expect(body.playback).toBeNull();
+    });
   });
 
   it('refuses a school the caller is not a member of, before asking the engine', async () => {

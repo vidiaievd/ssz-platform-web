@@ -32,7 +32,7 @@ export type { TemplateProfile } from './by-template';
 export { BY_TEMPLATE, templateProfile } from './by-template';
 
 export type { AtomRef, DeriveInput, DerivedProfile, Placement, SkillOverride } from './derive';
-export { deriveSkills } from './derive';
+export { deriveSkills, structuralFocus } from './derive';
 
 export type {
   Coverage,

@@ -101,6 +101,14 @@ export function useTranslateAutosave({
   const pending = useRef({ exercise, audio });
   const attempt = useRef(0);
   const inFlight = useRef(false);
+  /**
+   * The token the last save earned, and the one it was sent with. A save finishing hands the
+   * new token to the screen, but the screen catches up on its next render; an edit whose
+   * debounce fires in between would go out with the old token and lose to our own save.
+   */
+  const earned = useRef<{ sent: string; got: string } | null>(null);
+  const tokenFor = (shown: string) =>
+    earned.current !== null && earned.current.sent === shown ? earned.current.got : shown;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flushRef = useRef<() => Promise<void>>(() => Promise.resolve());
   const onSavedRef = useRef(onSaved);
@@ -138,7 +146,7 @@ export function useTranslateAutosave({
           document.type,
         ) as SaveTranslateInput['content'],
         expectedAnswers: toExpectedAnswers(document),
-        expectedUpdatedAt: force?.expectedUpdatedAt ?? document.updatedAt,
+        expectedUpdatedAt: force?.expectedUpdatedAt ?? tokenFor(document.updatedAt),
         instructions: document.instructions,
       });
       inFlight.current = false;
@@ -164,6 +172,7 @@ export function useTranslateAutosave({
       }
 
       attempt.current = 0;
+      earned.current = { sent: document.updatedAt, got: outcome.updatedAt };
       // Saved: this is now the version everything is compared against, so an untouched
       // document is not written a second time.
       setBaseline({ exercise: document, audio: draft });

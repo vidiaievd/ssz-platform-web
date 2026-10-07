@@ -20,6 +20,7 @@ vi.mock('../actions/sort-into-buckets', () => ({ createSortIntoBucketsAction: vi
 vi.mock('../actions/highlight-in-text', () => ({ createHighlightInTextAction: vi.fn() }));
 vi.mock('../actions/dictation', () => ({ createDictationAction: vi.fn() }));
 vi.mock('../actions/inflection-table', () => ({ createInflectionTableAction: vi.fn() }));
+vi.mock('../actions/read-aloud', () => ({ createReadAloudAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
@@ -38,6 +39,7 @@ const { createSortIntoBucketsAction } = await import('../actions/sort-into-bucke
 const { createHighlightInTextAction } = await import('../actions/highlight-in-text');
 const { createDictationAction } = await import('../actions/dictation');
 const { createInflectionTableAction } = await import('../actions/inflection-table');
+const { createReadAloudAction } = await import('../actions/read-aloud');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -258,6 +260,22 @@ describe('AddLessonPicker', () => {
     await waitFor(() => expect(createInflectionTableAction).toHaveBeenCalled());
     expect(vi.mocked(createInflectionTableAction).mock.calls[0]![1]).toBe('no');
     expect(vi.mocked(createInflectionTableAction).mock.calls[0]![4]).toBe('');
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it('creates a read-aloud exercise from its own scaffold, with no instruction of the picker’s (RA-B19)', async () => {
+    // Plan 70 phase 8: the note and the descriptors are the key column, so the generic form
+    // cannot make one. The line is the author's, in the course language — none is invented.
+    vi.mocked(createReadAloudAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-19', itemId: 'item-19' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Read aloud'));
+
+    await waitFor(() => expect(createReadAloudAction).toHaveBeenCalled());
+    expect(vi.mocked(createReadAloudAction).mock.calls[0]![1]).toBe('no');
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 

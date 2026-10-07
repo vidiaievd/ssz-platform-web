@@ -14,6 +14,7 @@ import { SortIntoBucketsSolver } from './sort-into-buckets-solver';
 import { HighlightInTextSolver } from './highlight-in-text-solver';
 import { DictationSolver } from './dictation-solver';
 import { InflectionTableSolver } from './inflection-table-solver';
+import { ReadAloudSolver } from './read-aloud-solver';
 import { MultipleChoiceSolver } from './multiple-choice-solver';
 import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
@@ -770,6 +771,11 @@ const SERVER_SOLVERS: Record<
   // wrong and why every time, the correct form only by `revealKey`, the budget and the freeze
   // on right cells on the server (plan 69 §3.4, §3.5). A card first, then one attempt.
   inflection_table: InflectionTableSolver,
+  // Not graded at all by a machine — a person listens (README idea 3). Here because the key is
+  // still a key: the listening notes, the focus words and the level descriptors stay on the
+  // server, and the attempt is where the recordings, the draft and the verdict live (plan 70).
+  // A card first, then one attempt.
+  read_aloud: ReadAloudSolver,
 };
 
 /**

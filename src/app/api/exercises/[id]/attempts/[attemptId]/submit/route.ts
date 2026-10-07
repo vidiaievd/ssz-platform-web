@@ -52,7 +52,39 @@ export async function POST(
       if (e.code === 'not_found') {
         return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
       }
+      // `read_aloud` recordings that do not stand up (plan 70 §3.5): the code and the prompts
+      // it names, so the runner can point at the take to record again. Nothing was written.
+      const refusal = recordingRefusal(e.details);
+      if (e.code === 'validation' && refusal !== null) {
+        return NextResponse.json({ error: 'Recordings refused', ...refusal }, { status: 422 });
+      }
+      // The engine could not ask media-service about the recordings. Nothing was written and
+      // the draft is intact — a try again later, not a failure to resolve.
+      if (e.code === 'upstream_unavailable' && codeOf(e.details) === 'MEDIA_UNAVAILABLE') {
+        return NextResponse.json(
+          { error: 'Recordings could not be checked', code: 'MEDIA_UNAVAILABLE' },
+          { status: 503 },
+        );
+      }
     }
     return NextResponse.json({ error: 'Failed to check the answer' }, { status: 502 });
   }
+}
+
+function codeOf(details: unknown): string | null {
+  if (typeof details !== 'object' || details === null) return null;
+  const { code } = details as { code?: unknown };
+  return typeof code === 'string' ? code : null;
+}
+
+function recordingRefusal(details: unknown): { code: string; itemIds: string[] } | null {
+  const code = codeOf(details);
+  if (code === null || !code.startsWith('RA_RECORDING_')) return null;
+  const { itemIds } = details as { itemIds?: unknown };
+  return {
+    code,
+    itemIds: Array.isArray(itemIds)
+      ? itemIds.filter((x): x is string => typeof x === 'string')
+      : [],
+  };
 }
