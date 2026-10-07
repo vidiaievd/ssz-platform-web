@@ -54,7 +54,8 @@
     "writing_task": "Skriving",
     "translate_to_target": "Oversettelse til norsk",
     "translate_from_target": "Oversettelse fra norsk",
-    "error_correction": "Feilretting"
+    "error_correction": "Feilretting",
+    "read_aloud": "Les høyt"
   },
   "age": {
     "justNow": "akkurat nå",
@@ -442,5 +443,42 @@
         "unconfirmed": "Kunne ikke bekrefte om den gikk gjennom. Teksten er tatt vare på — sjekk «Arbeidet mitt» før du sender på nytt."
       }
     }
+  },
+  "readAloud": {
+    "promptFallback": "Opptak {n}",
+    "takes": "{count, plural, one {# opptak} other {# opptak}}",
+    "scoreOf": "{points} av {max} poeng",
+    "scoreUnset": "Ikke vurdert, av {max} poeng",
+    "player": {
+      "label": "Innlevert opptak",
+      "play": "Spill av {label}",
+      "pause": "Pause",
+      "seek": "Posisjon i {label}",
+      "position": "{at} av {total}",
+      "speed": "Hastighet",
+      "gone": "Opptaket finnes ikke lenger i lagringen."
+    },
+    "noPlayback": {
+      "title": "Opptakene kan ikke spilles av akkurat nå",
+      "body": "Medietjenesten svarte ikke. Last inn siden på nytt om litt — innleveringen venter."
+    },
+    "materialGone": "Oppgaven er endret eller slettet etter innleveringen. Opptaket vurderes som før.",
+    "listenFor": "Lyttepunkt:",
+    "situation": "Situasjon:",
+    "partner": "Samtalepartneren:",
+    "picture": "Bilde:",
+    "plan": "Støttepunkter",
+    "rubricOf": "Vurdering av {label}",
+    "comment": {
+      "label": "Tilbakemelding til studenten",
+      "placeholder": "Hva fungerte, og hva skal studenten lytte etter neste gang?",
+      "required": "Uten kommentar går vurderingen ikke ut."
+    },
+    "approve": "Godkjenn ({points}/{max})",
+    "returnForRetake": "Send tilbake for nytt opptak ({points}/{max})",
+    "closeNotPassed": "Fullfør som ikke bestått ({points}/{max})",
+    "commentsMissing": "{count, plural, one {# opptak mangler kommentar} other {# opptak mangler kommentar}} — uten kommentar går vurderingen ikke ut.",
+    "commentsRequired": "Hvert opptak trenger en kommentar før vurderingen kan sendes.",
+    "scoreIsPerPrompt": "Hvert opptak vurderes for seg: det er bestått når poengene når grensen for ett opptak, og innleveringen godkjennes når alle er bestått. Summen regnes ut av systemet fra nivåene."
   }
 }

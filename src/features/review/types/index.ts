@@ -12,16 +12,18 @@
 // components, so a route handler importing a type from it would pull client code into a
 // server bundle — and both features happen to name a type `ReviewQueueResponse`.
 import type {
+  ReadAloudDetails,
   ReviewDetails,
   ShortAnswerDetails,
   WritingTaskDetails,
 } from '@/features/content-authoring/types/review';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 
-/** The five templates whose check may refuse to close, and so reach a person. */
+/** The templates whose check may refuse to close, and so reach a person. */
 export const REVIEWABLE_EXERCISE_TYPES = [
   'short_answer',
   'writing_task',
+  'read_aloud',
   'translate_to_target',
   'translate_from_target',
   'error_correction',
@@ -210,7 +212,7 @@ export interface ReviewSubmission {
    * reports no items at all. `readShortAnswerDetails` is what tells them apart, and it
    * refuses whole rather than filling in zeros (plan 51 §6.7).
    */
-  details: ReviewDetails | ShortAnswerDetails | WritingTaskDetails | null;
+  details: ReviewDetails | ShortAnswerDetails | WritingTaskDetails | ReadAloudDetails | null;
   /** `writing_task` only: the essay itself. */
   text: string | null;
   /**
@@ -228,9 +230,42 @@ export interface ReviewSubmission {
    * unset and are never pre-filled.
    */
   rubricMarks: Record<string, number> | null;
+  /**
+   * The per-item rulings behind a verdict already delivered — for `read_aloud`, each prompt's
+   * comment and whether it passed. Null while the submission is waiting.
+   */
+  reviewDecisions: ReviewItemDecision[] | null;
+  /**
+   * `read_aloud` only: where each handed-in recording can be heard, keyed by asset id.
+   *
+   * Signed links with an expiry, asked for after the reviewer has been authorised for this
+   * submission and only for the assets the submission itself names (plan 70 Q2, RA-Q8). Null
+   * when media-service did not answer — the screen says the recordings cannot be played right
+   * now rather than drawing players that do nothing. An asset missing from the map is one
+   * media-service no longer holds.
+   */
+  playback: Record<string, ReviewPlayback> | null;
   submittedAnswer: unknown;
   /** Whether this caller may still decide it — an expired substitution may only read. */
   canDecide: boolean;
+}
+
+/** One item's ruling, as the engine stored it with the verdict. */
+export interface ReviewItemDecision {
+  itemId: string;
+  approved: boolean;
+  comment?: string | null;
+}
+
+/** One recording, playable by the reviewer until `expiresAt`. */
+export interface ReviewPlayback {
+  url: string;
+  mimeType: string;
+  expiresAt: string;
+  /** Measured by media-service on ingest; null until it has been. */
+  durationMs: number | null;
+  /** 0..1, drawn server-side; null until processing has finished — a flat bar meanwhile. */
+  peaks: number[] | null;
 }
 
 /** What a lock call answers: who holds the submission now, and until when. */

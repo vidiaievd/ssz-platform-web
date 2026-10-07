@@ -27,8 +27,27 @@ export function useSubmission(school: string, id: string | null) {
     enabled: school !== '' && id !== null,
     staleTime: 10_000,
     refetchOnWindowFocus: true,
+    // A `read_aloud` submission carries signed links, and a link is not cached past its
+    // signature (plan 70, phase 9.1): the read is repeated a minute before the first expires,
+    // so a teacher who listens slowly never presses play on a dead URL.
+    refetchInterval: (query) => untilLinksExpire(query.state.data),
     retry: false,
   });
+}
+
+const RELINK_MARGIN_MS = 60_000;
+const RELINK_FLOOR_MS = 15_000;
+
+/** How long until the submission's playback links need re-signing; false when it has none. */
+export function untilLinksExpire(
+  submission: ReviewSubmission | undefined,
+  now = Date.now(),
+): number | false {
+  const links = Object.values(submission?.playback ?? {});
+  if (links.length === 0) return false;
+  const first = Math.min(...links.map((link) => Date.parse(link.expiresAt)));
+  if (!Number.isFinite(first)) return false;
+  return Math.max(first - now - RELINK_MARGIN_MS, RELINK_FLOOR_MS);
 }
 
 /** Renew no more than once a minute, however much typing happens in between. */

@@ -14,11 +14,13 @@ import {
 } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { readSpeakingSnapshot, readSubmission, scorePrompts } from '@/lib/shared-kernel/read-aloud';
 import { scoreRubric } from '@/lib/shared-kernel/writing-task';
 
 import { useReviewDecision, type ReviewConflict, type ReviewVerdict } from '../../api/use-decision';
 import { useReviewLock, useSubmission, type ReviewLockLifecycle } from '../../api/use-submission';
 import { useReviewShortcuts } from '../../hooks/use-review-shortcuts';
+import { readReadAloudDetails } from '../../lib/read-aloud-details';
 import { DEFAULT_FILTERS } from '../../lib/queue-filters';
 import { selectDraft, useReviewDraftsStore } from '../../stores/review-drafts';
 import { useReviewViewStore } from '../../stores/review-view-store';
@@ -201,30 +203,17 @@ export function SubmissionPanel({
   const written = draft.comment.trim() !== '';
   const withComment = written || Object.keys(draft.sentences).length > 0;
 
-  /**
-   * What the marks come to, for a submission graded by rubric.
-   *
-   * Read from the snapshot on the submission rather than from the exercise: the marks
-   * mean what the criteria said when the work was queued, and the engine scores them the
-   * same way against the same copy. This is the screen agreeing with the server, not a
-   * second opinion — the verdict it shows is the one the server will derive.
-   */
-  const outcome = data?.rubric ? scoreRubric(data.rubric, draft.marks) : null;
-  const rubric: RubricDecision | null =
-    outcome === null
-      ? null
-      : {
-          points: outcome.points,
-          max: outcome.max,
-          complete: outcome.complete,
-          missing: outcome.missing.length,
-          passed: outcome.passed,
-        };
+  // What the marks come to — see `rubricDecisionOf`.
+  const rubric: RubricDecision | null = data ? rubricDecisionOf(data, draft) : null;
 
   // With a rubric the verdict is not a choice, so the three digits are not bound: what
   // they would offer is a verdict the marks do not support and the server would refuse.
-  // The rubric's own action needs the same comment a plain return needs.
-  const rubricReady = rubric !== null && rubric.complete && (rubric.passed || written);
+  // The rubric's own action needs the same comment a plain return needs — or, for recorded
+  // speech, a comment on every prompt whatever the verdict (plan 70, RA-Q4).
+  const rubricReady =
+    rubric !== null &&
+    rubric.complete &&
+    (rubric.perPrompt ? rubric.perPrompt.uncommented === 0 : rubric.passed || written);
 
   useReviewShortcuts({
     approve: decidable && rubric === null ? () => decide('approved') : undefined,
@@ -313,9 +302,11 @@ export function SubmissionPanel({
         error={
           decision.error?.code === 'RETURN_REQUIRES_COMMENT'
             ? t('decision.returnRequiresComment')
-            : decision.error !== null && decision.error.status !== 409
-              ? t('decision.failed')
-              : null
+            : decision.error?.code === 'READ_ALOUD_COMMENT_REQUIRED'
+              ? t('readAloud.commentsRequired')
+              : decision.error !== null && decision.error.status !== 409
+                ? t('decision.failed')
+                : null
         }
         settled={settled}
         canDecide={data.canDecide}
@@ -328,6 +319,56 @@ export function SubmissionPanel({
       />
     </article>
   );
+}
+
+/**
+ * What the marks currently come to, for a submission graded by rubric.
+ *
+ * Read from the snapshot on the submission rather than from the exercise: the marks mean
+ * what the criteria said when the work was queued, and the engine scores them the same way
+ * against the same copy. This is the screen agreeing with the server, not a second opinion —
+ * the verdict it shows is the one the server will derive.
+ *
+ * Recorded speech is scored a prompt at a time over the prompts the student handed in (plan
+ * 70 Q1-A): each passes on its own points, the submission passes when all of them do, and the
+ * button carries the sum. The prompts are read off the submitted answer, as the engine reads
+ * them, so the two count the same marks.
+ */
+function rubricDecisionOf(
+  submission: ReviewSubmission,
+  draft: { marks: Record<string, number>; sentences: Record<string, string> },
+): RubricDecision | null {
+  if (!submission.rubric) return null;
+
+  if (submission.exercise.type === 'read_aloud') {
+    const snapshot = readSpeakingSnapshot(submission.rubric);
+    if (snapshot === null) return null;
+    const itemIds = (readSubmission(submission.submittedAnswer)?.recordings ?? []).map(
+      (recording) => recording.itemId,
+    );
+    const scored = scorePrompts(snapshot, draft.marks, itemIds);
+    return {
+      points: scored.points,
+      max: scored.max,
+      complete: scored.complete,
+      missing: scored.missing.length,
+      passed: scored.passed,
+      perPrompt: {
+        revision: readReadAloudDetails(submission.details)?.revision ?? 'return',
+        uncommented: itemIds.filter((itemId) => (draft.sentences[itemId] ?? '').trim() === '')
+          .length,
+      },
+    };
+  }
+
+  const outcome = scoreRubric(submission.rubric, draft.marks);
+  return {
+    points: outcome.points,
+    max: outcome.max,
+    complete: outcome.complete,
+    missing: outcome.missing.length,
+    passed: outcome.passed,
+  };
 }
 
 /** Whose verdict already stands on this submission, if anyone's. */

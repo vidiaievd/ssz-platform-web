@@ -40,6 +40,8 @@ const BASE: ReviewSubmission = {
   text: null,
   rubric: null,
   rubricMarks: null,
+  reviewDecisions: null,
+  playback: null,
   submittedAnswer: {},
   canDecide: true,
 };

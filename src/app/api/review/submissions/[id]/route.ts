@@ -7,9 +7,14 @@ import { hoursSince, isOverdue } from '@/features/review/lib/age-scale';
 import { buildSlaMap } from '@/features/review/lib/sla-map';
 import { fetchGroupNames, resolveReviewScope } from '@/features/review/lib/review-scope';
 import { authorizeSubmission, refuseSubmission } from '@/features/review/lib/submission-access';
+import { fetchRecordingPlayback, recordingIdsOf } from '@/features/review/lib/recording-playback';
 import type { ReviewDetails } from '@/features/content-authoring/types/review';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
-import type { ReviewSubmission, ReviewVerdictRecord } from '@/features/review/types';
+import type {
+  ReviewItemDecision,
+  ReviewSubmission,
+  ReviewVerdictRecord,
+} from '@/features/review/types';
 
 /** A verdict as the engine records it — a reviewer id, and no name to go with it. */
 interface EngineVerdict {
@@ -42,6 +47,7 @@ interface EngineSubmission {
   text: string | null;
   rubricSnapshot: RubricSnapshot | null;
   rubricMarks: Record<string, number> | null;
+  reviewDecisions?: ReviewItemDecision[] | null;
   submittedAnswer: unknown;
 }
 
@@ -102,9 +108,14 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     ].filter((value): value is string => Boolean(value)),
   );
 
-  const [sla, groupNames] = await Promise.all([
+  const [sla, groupNames, playback] = await Promise.all([
     buildSlaMap(scope.schoolId, submission.containerId ? [submission.containerId] : []),
     fetchGroupNames(scope.schoolId),
+    // Only after the read has been authorised above, and only for the assets the engine's copy
+    // of the submission names: media-service signs whatever it is handed (plan 70 Q2, RA-Q8).
+    submission.templateCode === 'read_aloud'
+      ? fetchRecordingPlayback(recordingIdsOf(submission.submittedAnswer))
+      : Promise.resolve(null),
   ]);
 
   const slaHours = sla.slaFor(submission.containerId);
@@ -156,6 +167,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     // queued — the marks a teacher sets have to mean what the criteria said then.
     rubric: submission.rubricSnapshot ?? null,
     rubricMarks: submission.rubricMarks ?? null,
+    reviewDecisions: submission.reviewDecisions ?? null,
+    playback,
     submittedAnswer: submission.submittedAnswer,
     canDecide: access.write,
   };

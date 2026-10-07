@@ -42,6 +42,8 @@ const BASE: ReviewSubmission = {
   text: 'Jeg har bodd i Norge i tre år.',
   rubric: null,
   rubricMarks: null,
+  reviewDecisions: null,
+  playback: null,
   submittedAnswer: {},
   canDecide: true,
 };

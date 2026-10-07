@@ -91,6 +91,17 @@ export interface RubricDecision {
   missing: number;
   /** `points >= passScore`, compared in rubric points. */
   passed: boolean;
+  /**
+   * Recorded speech (plan 70 §7.11): the marks and a comment belong to each prompt, so there is
+   * no comment on the whole and the one button waits for every prompt's. Absent for a rubric
+   * marked once over the whole work.
+   */
+  perPrompt?: {
+    /** What a failing verdict does — names the button. */
+    revision: 'once' | 'return';
+    /** Prompts with nothing written for the student yet. */
+    uncommented: number;
+  };
 }
 
 /**
@@ -129,9 +140,11 @@ export function DecisionPanel({
 }: DecisionPanelProps) {
   const t = useTranslations('Review.decision');
   const tRubric = useTranslations('Review.rubric');
+  const tSpeech = useTranslations('Review.readAloud');
 
   const written = comment.trim() !== '';
   const readOnly = settled !== null || !canDecide;
+  const perPrompt = rubric?.perPrompt ?? null;
 
   return (
     <footer className="flex flex-col gap-3 border-t border-border bg-(--ssz-bg-surface) px-5 pb-4 pt-3.5">
@@ -156,17 +169,24 @@ export function DecisionPanel({
 
       {/* Kept mounted when read-only rather than swapped for a paragraph: the draft is
           the thing a teacher reaches for after a conflict, and a textarea is where
-          selecting and copying it already works. */}
-      <CommentBox
-        label={t('commentLabel')}
-        placeholder={readOnly ? undefined : t('commentPlaceholder')}
-        value={comment}
-        onChange={onCommentChange}
-        inputRef={inputRef}
-        maxLength={COMMENT_MAX}
-        error={error}
-        readOnly={readOnly}
-      />
+          selecting and copying it already works. Recorded speech has no comment on the
+          whole — each prompt carries its own above — so only the refusal is said here. */}
+      {perPrompt === null ? (
+        <CommentBox
+          label={t('commentLabel')}
+          placeholder={readOnly ? undefined : t('commentPlaceholder')}
+          value={comment}
+          onChange={onCommentChange}
+          inputRef={inputRef}
+          maxLength={COMMENT_MAX}
+          error={error}
+          readOnly={readOnly}
+        />
+      ) : error === null ? null : (
+        <p role="alert" className="text-[12.5px] text-(--ssz-color-error-600)">
+          {error}
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         {readOnly ? (
@@ -225,7 +245,10 @@ export function DecisionPanel({
                 // A failing score sends the work back, and the work goes back with the
                 // comment attached: the same rule as the plain return, arrived at by
                 // arithmetic instead of by a button.
-                disabled={!rubric.complete || (!rubric.passed && !written)}
+                disabled={
+                  !rubric.complete ||
+                  (perPrompt !== null ? perPrompt.uncommented > 0 : !rubric.passed && !written)
+                }
                 onClick={() => onDecide(rubric.passed ? 'approved' : 'returned')}
               >
                 {rubric.passed ? (
@@ -233,10 +256,19 @@ export function DecisionPanel({
                 ) : (
                   <Undo2 aria-hidden className="mr-1.5 h-4 w-4" />
                 )}
-                {tRubric(rubric.passed ? 'approve' : 'return', {
-                  points: rubric.points,
-                  max: rubric.max,
-                })}
+                {perPrompt !== null
+                  ? tSpeech(
+                      rubric.passed
+                        ? 'approve'
+                        : perPrompt.revision === 'return'
+                          ? 'returnForRetake'
+                          : 'closeNotPassed',
+                      { points: rubric.points, max: rubric.max },
+                    )
+                  : tRubric(rubric.passed ? 'approve' : 'return', {
+                      points: rubric.points,
+                      max: rubric.max,
+                    })}
               </Button>
             )}
           </>
@@ -252,9 +284,16 @@ export function DecisionPanel({
           {tRubric('incomplete')}
         </p>
       )}
+      {perPrompt !== null && !readOnly && rubric?.complete && perPrompt.uncommented > 0 && (
+        <p className="text-[11.5px] text-warning-700" role="status">
+          {tSpeech('commentsMissing', { count: perPrompt.uncommented })}
+        </p>
+      )}
 
       <p className="text-[11.5px] leading-relaxed text-muted-foreground">
-        {t(rubric === null ? 'scoreIsServerSide' : 'scoreIsRubric')}
+        {perPrompt !== null
+          ? tSpeech('scoreIsPerPrompt')
+          : t(rubric === null ? 'scoreIsServerSide' : 'scoreIsRubric')}
       </p>
     </footer>
   );

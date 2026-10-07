@@ -183,6 +183,16 @@ async function refuseVerdict(error: unknown): Promise<NextResponse> {
     );
   }
 
+  // A `read_aloud` prompt with nothing said about it (README idea 2) — which prompts, so the
+  // screen can point at their comment fields. Like the incomplete rubric, the screen keeps the
+  // action disabled first; this is the server agreeing.
+  if (details.code === 'READ_ALOUD_COMMENT_REQUIRED') {
+    return NextResponse.json(
+      { code: 'READ_ALOUD_COMMENT_REQUIRED', missing: details.missing ?? [] },
+      { status: 422 },
+    );
+  }
+
   return NextResponse.json({ error: 'Failed to record the verdict' }, { status: 502 });
 }
 
