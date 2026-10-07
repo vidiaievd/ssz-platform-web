@@ -33,6 +33,17 @@ describe('readReadAloudProjection', () => {
     expect(read?.rubric?.[0]?.levels).toHaveLength(4);
   });
 
+  it('reads the carried prompts and ignores entries the exercise does not have (phase 11b)', () => {
+    const p = deal();
+    p['carried'] = [
+      { itemId: 'p1aaaa', attempt: 1 },
+      { itemId: 'gone', attempt: 1 },
+      { itemId: 'p2bbbb', attempt: 0 },
+    ];
+    expect(readReadAloudProjection(p)?.carried).toEqual([{ itemId: 'p1aaaa', attempt: 1 }]);
+    expect(readReadAloudProjection(deal())?.carried).toBeUndefined();
+  });
+
   it.each([
     [
       'a listening note',

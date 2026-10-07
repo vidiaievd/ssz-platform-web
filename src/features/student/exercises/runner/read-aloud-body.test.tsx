@@ -56,14 +56,18 @@ function Harness({
   stage = 'draft',
   draft = null,
   onSubmit = () => undefined,
+  carriedIds = [],
 }: {
   ex: ReadAloudContent;
   port: MockRecorder | null;
   stage?: ReadAloudStage;
   draft?: Draft | null;
   onSubmit?: () => void;
+  /** Prompts passed earlier: out of the recorder, into the «passed» list. */
+  carriedIds?: string[];
 }) {
-  const projection = deal(ex);
+  const whole = deal(ex);
+  const projection = { ...whole, prompts: whole.prompts.filter((p) => !carriedIds.includes(p.id)) };
   const config: RecorderConfig = { prompts: projection.prompts, recording: projection.recording };
   const recorder = useRecorder({ config, port, initialDraft: draft });
   return (
@@ -72,6 +76,9 @@ function Harness({
       recorder={recorder}
       config={config}
       stage={stage}
+      carried={whole.prompts
+        .filter((p) => carriedIds.includes(p.id))
+        .map((p) => ({ itemId: p.id, label: p.label, attempt: 1 }))}
       sourceOf={(ref) => ({ src: ref, peaks: null })}
       submitted={[{ itemId: 'p1aaaa', assetId: 'a1', seconds: 20, takes: 1 }]}
       onSubmit={onSubmit}
@@ -175,6 +182,14 @@ describe('ReadAloudBody', () => {
     expect(screen.getByText('with the teacher')).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('Handed in.');
     expect(screen.queryByRole('button', { name: 'Hand in to the teacher' })).toBeNull();
+  });
+
+  it('lists the carried prompts as passed and counts only what is left (phase 11b)', () => {
+    render(wrap(<Harness ex={quick()} port={port} carriedIds={['p1aaaa']} />));
+    expect(screen.getByRole('status')).toHaveTextContent('Already passed (1)');
+    expect(screen.getByRole('status')).toHaveTextContent('passed in attempt 1');
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuemax', '1');
+    expect(screen.queryByText('Jeg søkte', { exact: false })).toBeNull();
   });
 
   it('draws each mode’s material only (RA-M2)', () => {

@@ -28,6 +28,7 @@ import {
   ReadAloudGraded,
   ReadAloudReaderCard,
   readReadAloudProjection,
+  type CarriedItem,
   type ReadAloudStage,
   type TakeSource,
 } from '@/features/student/exercises/runner';
@@ -357,9 +358,26 @@ function ReadAloudSession({
 }: SessionProps) {
   const t = useTranslations('ExerciseRunner.readAloud');
   const [port] = useState(createPort);
+  /*
+   * Prompts passed on an earlier try are not recorded again (phase 11b): the recorder, its
+   * counter and the hand-in hold only the prompts still to do, and the passed ones are listed
+   * above it. The server glues them back on, so the submission carries the new ones alone.
+   */
+  const { todo, carried } = useMemo(() => {
+    const passed = new Map((projection.carried ?? []).map((c) => [c.itemId, c.attempt]));
+    return {
+      todo: { ...projection, prompts: projection.prompts.filter((p) => !passed.has(p.id)) },
+      carried: projection.prompts.flatMap((p, i): CarriedItem[] => {
+        const attempt = passed.get(p.id);
+        return attempt === undefined
+          ? []
+          : [{ itemId: p.id, label: p.label.trim() || t('promptN', { n: i + 1 }), attempt }];
+      }),
+    };
+  }, [projection, t]);
   const config = useMemo<RecorderConfig>(
-    () => ({ prompts: projection.prompts, recording: projection.recording }),
-    [projection],
+    () => ({ prompts: todo.prompts, recording: todo.recording }),
+    [todo],
   );
 
   const [stage, setStage] = useState<ReadAloudStage>(opening.stage);
@@ -562,7 +580,8 @@ function ReadAloudSession({
 
   return (
     <ReadAloudBody
-      projection={projection}
+      projection={todo}
+      carried={carried}
       recorder={recorder}
       config={config}
       {...(title === undefined ? {} : { title })}

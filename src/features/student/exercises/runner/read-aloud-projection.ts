@@ -2,6 +2,7 @@ import {
   DEFAULT_RECORDING,
   isMode,
   RA_MAX_TAKES,
+  type CarriedPrompt,
   type ProjectedCriterion,
   type ProjectedPrompt,
   type Recording,
@@ -53,6 +54,8 @@ export function readReadAloudProjection(value: unknown): StudentProjection | nul
     }
   }
 
+  const carried = readCarried(value['carried'], prompts);
+
   return {
     title: str(value['title']),
     instruction: str(value['instruction']),
@@ -62,7 +65,27 @@ export function readReadAloudProjection(value: unknown): StudentProjection | nul
     recording: readRecording(value['recording']),
     settings,
     ...(rubric === undefined ? {} : { rubric }),
+    ...(carried.length === 0 ? {} : { carried }),
   };
+}
+
+/**
+ * Prompts passed in an earlier try (phase 11b). Only what the server tells — which prompt, from
+ * which try; an entry for a prompt the exercise does not have is not one.
+ */
+function readCarried(raw: unknown, prompts: readonly ProjectedPrompt[]): CarriedPrompt[] {
+  if (!Array.isArray(raw)) return [];
+  const known = new Set(prompts.map((p) => p.id));
+  return raw.flatMap((c): CarriedPrompt[] =>
+    isRecord(c) &&
+    typeof c['itemId'] === 'string' &&
+    known.has(c['itemId']) &&
+    typeof c['attempt'] === 'number' &&
+    Number.isInteger(c['attempt']) &&
+    c['attempt'] >= 1
+      ? [{ itemId: c['itemId'], attempt: c['attempt'] }]
+      : [],
+  );
 }
 
 function readPrompt(raw: unknown): ProjectedPrompt | null {

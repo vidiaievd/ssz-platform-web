@@ -736,6 +736,10 @@
     "tooShort": "For kort: {labels} — ta opp på nytt.",
     "uploading": "Venter på at opptakene lastes opp.",
     "readByTeacher": "Alle opptak lyttes gjennom av en lærer.",
+    "carried": {
+      "title": "Bestått tidligere ({n})",
+      "inAttempt": "bestått i forsøk {attempt}"
+    },
     "submittedTake": "Innlevert opptak: {label}",
     "steps": {
       "atTeacher": "hos læreren",

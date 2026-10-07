@@ -736,6 +736,10 @@
     "tooShort": "Закоротко: {labels} — запишіть заново.",
     "uploading": "Чекаємо, поки завантажаться записи.",
     "readByTeacher": "Усі записи прослуховує викладач.",
+    "carried": {
+      "title": "Вже зараховано ({n})",
+      "inAttempt": "зараховано в спробі {attempt}"
+    },
     "submittedTake": "Здано запис: {label}",
     "steps": {
       "atTeacher": "у викладача",

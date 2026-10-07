@@ -43,6 +43,14 @@ import {
   type TakeSource,
 } from './read-aloud-parts';
 
+/** A carried prompt, named for the «passed» list above the recorder. */
+export interface CarriedItem {
+  itemId: string;
+  label: string;
+  /** The try it was passed in, from 1. */
+  attempt: number;
+}
+
 export type ReadAloudLayout = 'phone' | 'desktop';
 export type ReadAloudStage = 'draft' | 'sent' | 'graded';
 
@@ -61,6 +69,11 @@ export interface ReadAloudBodyProps {
   stage: ReadAloudStage;
   /** Where a take can be heard from — by its `blob:` URL before the upload, its asset after. */
   sourceOf: (ref: string | null, assetId: string | null) => TakeSource;
+  /**
+   * Prompts passed in an earlier try, which the recorder does not hold: `projection.prompts` and
+   * `config.prompts` are the ones still to record, these are shown as done (phase 11b).
+   */
+  carried?: readonly CarriedItem[];
   /** What was handed in, for the players after sending. */
   submitted?: readonly SubmittedRecording[];
   /** The teacher's verdict, drawn under the handed-in takes in `graded`. */
@@ -97,6 +110,7 @@ export function ReadAloudBody({
   instruction,
   stage,
   sourceOf,
+  carried = [],
   submitted = [],
   graded,
   onSubmit,
@@ -168,6 +182,7 @@ export function ReadAloudBody({
 
       {stage === 'draft' ? (
         <>
+          {carried.length > 0 && <CarriedList items={carried} />}
           {audioOn && <ExerciseAudioPlayer eng={audio} tone="quiet" interactive={interactive} />}
           {projection.rubric !== undefined && <RubricGuide criteria={projection.rubric} />}
 
@@ -248,6 +263,33 @@ export function ReadAloudBody({
           {stage === 'graded' && graded}
         </>
       )}
+    </div>
+  );
+}
+
+/** Prompts that already passed: nothing to record, nothing to open (phase 11b). */
+function CarriedList({ items }: { items: readonly CarriedItem[] }) {
+  const t = useTranslations('ExerciseRunner.readAloud');
+  return (
+    <div
+      role="status"
+      className="flex flex-col gap-1.5 rounded-(--ssz-radius-md) border p-(--ssz-space-3) text-sm"
+      style={{
+        background: 'var(--ssz-color-success-50)',
+        borderColor: 'var(--ssz-color-success-500)',
+        color: 'var(--ssz-color-success-700)',
+      }}
+    >
+      <b>{t('carried.title', { n: items.length })}</b>
+      <ul className="m-0 flex list-none flex-col gap-1 p-0">
+        {items.map((c) => (
+          <li key={c.itemId} className="flex items-center gap-2">
+            <Check size={14} aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">{c.label}</span>
+            <span className="text-xs">{t('carried.inAttempt', { attempt: c.attempt })}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

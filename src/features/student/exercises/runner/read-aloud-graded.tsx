@@ -164,7 +164,11 @@ export function ReadAloudGraded({
                         : 'var(--ssz-color-warning-700)',
                     }}
                   >
-                    {decision.approved ? t('graded.promptPassed') : t('graded.promptAgain')}
+                    {r.carried
+                      ? t('carried.inAttempt', { attempt: r.carried.attempt })
+                      : decision.approved
+                        ? t('graded.promptPassed')
+                        : t('graded.promptAgain')}
                   </span>
                 )}
                 {result !== null && (

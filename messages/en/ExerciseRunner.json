@@ -736,6 +736,10 @@
     "tooShort": "Too short: {labels} — record again.",
     "uploading": "Waiting for the recordings to upload.",
     "readByTeacher": "Every recording is listened to by a teacher.",
+    "carried": {
+      "title": "Already passed ({n})",
+      "inAttempt": "passed in attempt {attempt}"
+    },
     "submittedTake": "Handed-in recording: {label}",
     "steps": {
       "atTeacher": "with the teacher",
