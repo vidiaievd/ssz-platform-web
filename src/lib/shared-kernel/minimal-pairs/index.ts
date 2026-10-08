@@ -89,7 +89,7 @@ export {
 } from './derive';
 
 export type { DealtProbe, DrawnProbe, History, Rand, WordHistory } from './sampler';
-export { deal, historyKey, lcg, sample } from './sampler';
+export { deal, historyKey, lcg, readDraw, sample } from './sampler';
 
 export type { PairResult, PickRefusal, PickVerdict, ProbeRecord, ProbeState, Summary } from './judge';
 export {
@@ -101,6 +101,8 @@ export {
   readProbeRecords,
   summarize,
 } from './judge';
+
+export { atomsForMemory, CONTRAST_ATOM_TYPE, contrastAtomId, contrastAtoms, ratesWords } from './memory';
 
 export type { ProbeOption, ProbeReveal, ProbeView, RevealedOption } from './probe';
 export { revealOf, toProbeView } from './probe';
@@ -122,6 +124,6 @@ export {
 } from './persistence';
 
 export type { StudentProjection } from './projection';
-export { toStudentProjection } from './projection';
+export { toStudentProjection, withGradedSettings } from './projection';
 
 export { SAMPLE_PAIR_IDS, sampleDocument } from './fixture';

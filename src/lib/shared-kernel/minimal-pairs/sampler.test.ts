@@ -14,7 +14,7 @@ import { filledWords } from './derive';
 import { setSet } from './edits';
 import { sampleDocument } from './fixture';
 import type { MinimalPairsContent } from './model';
-import { deal, lcg, sample } from './sampler';
+import { deal, lcg, readDraw, sample } from './sampler';
 
 function textOf(ex: MinimalPairsContent, wordId: string): string {
   return ex.pairs.flatMap((p) => p.words).find((w) => w.id === wordId)?.text ?? '?';
@@ -129,5 +129,16 @@ describe('deal', () => {
   it('offers every word of the set with «all words»', () => {
     const ex = setSet(sampleDocument(), { options: 'all' });
     expect(deal(ex, lcg(5))[0]!.optionIds).toHaveLength(9);
+  });
+});
+
+describe('readDraw', () => {
+  it('reads back what deal wrote and drops what it did not', () => {
+    const dealt = deal(sampleDocument(), lcg(7));
+    expect(readDraw(JSON.parse(JSON.stringify(dealt)))).toEqual(dealt);
+    expect(readDraw(null)).toEqual([]);
+    expect(readDraw([{ n: 1 }, 'x', { n: 2, pairId: 'p', wordId: 'w', optionIds: ['w', 3] }])).toEqual([
+      { n: 2, pairId: 'p', wordId: 'w', side: 0, optionIds: ['w'] },
+    ]);
   });
 });
