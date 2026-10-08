@@ -3965,6 +3965,7 @@
       "grammar": "Грамматика",
       "orthography": "Орфография",
       "pronunciation": "Произношение",
+      "phonology": "Звуковые контрасты",
       "pragmatics": "Уместность",
       "unknown": "Не указан"
     },
