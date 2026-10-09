@@ -182,6 +182,11 @@ export interface ModalityGapSummary {
   productionFailing: number;
   recallFailing: number;
   even: number;
+  /**
+   * Atoms of a kind known only one way by nature (a phonological contrast is heard, never
+   * recalled), so never judged. Optional: an analytics service older than plan 72 omits it.
+   */
+  notCompared?: number;
   observations: number;
   contextObservations: number;
   cardReviews: number;
