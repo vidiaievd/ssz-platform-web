@@ -110,6 +110,12 @@ import {
   toContent as minimalPairsToContent,
   toExpectedAnswers as minimalPairsToExpectedAnswers,
 } from '@/lib/shared-kernel/minimal-pairs';
+import {
+  fromPersisted as informationTransferFromPersisted,
+  TEMPLATE_CODE as INFORMATION_TRANSFER_TEMPLATE_CODE,
+  toContent as informationTransferToContent,
+  toExpectedAnswers as informationTransferToExpectedAnswers,
+} from '@/lib/shared-kernel/information-transfer';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -174,6 +180,10 @@ import { MinimalPairsBuilder } from './minimal-pairs/builder';
 import type { MinimalPairsDocument } from './minimal-pairs/edits';
 import { MinimalPairsPreview } from './minimal-pairs/minimal-pairs-preview';
 import type { SavedDocument as SavedMinimalPairs } from './minimal-pairs/use-minimal-pairs-autosave';
+import { InformationTransferBuilder } from './information-transfer/builder';
+import type { InformationTransferDocument } from './information-transfer/edits';
+import { InformationTransferPreview } from './information-transfer/information-transfer-preview';
+import type { SavedDocument as SavedInformationTransfer } from './information-transfer/use-information-transfer-autosave';
 import { SentenceSchemaBuilder } from './sentence-schema/builder';
 import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
 import type { SentenceSchemaDocument } from './sentence-schema/edits';
@@ -267,6 +277,10 @@ export function ExerciseEditorPane({
   /** The listening-discrimination set as its builder currently has it, for the preview column. */
   const [minimalPairs, setMinimalPairs] = useState<MinimalPairsDocument | null>(null);
 
+  /** The information-transfer blank as its builder currently has it, for the preview column. */
+  const [informationTransfer, setInformationTransfer] =
+    useState<InformationTransferDocument | null>(null);
+
   /**
    * Whichever builder is open, as it stands this second.
    *
@@ -306,6 +320,11 @@ export function ExerciseEditorPane({
       : null) ??
     // No audio block: the type carries its clips in the document (plan 72 §3.13).
     (minimalPairs !== null ? { ...minimalPairsToContent(minimalPairs) } : null) ??
+    // The audio block is inline and `toContent` writes `enabled` from the source switch, so the
+    // persisted shape already says which way `input` points (plan 73 §3.1).
+    (informationTransfer !== null
+      ? { ...informationTransferToContent(informationTransfer) }
+      : null) ??
     null;
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
@@ -376,6 +395,8 @@ export function ExerciseEditorPane({
   const isReadAloud = exercise?.templateCode === READ_ALOUD_TEMPLATE_CODE;
   /* By the template code alone: a new template with one shape (plan 53's lesson). */
   const isMinimalPairs = exercise?.templateCode === MINIMAL_PAIRS_TEMPLATE_CODE;
+  /* By the template code alone: a new template with one shape (plan 53's lesson). */
+  const isInformationTransfer = exercise?.templateCode === INFORMATION_TRANSFER_TEMPLATE_CODE;
 
   return (
     /*
@@ -443,6 +464,8 @@ export function ExerciseEditorPane({
             <ReadAloudPreview exercise={readAloud} />
           ) : isMinimalPairs && minimalPairs !== null ? (
             <MinimalPairsPreview exercise={minimalPairs} />
+          ) : isInformationTransfer && informationTransfer !== null ? (
+            <InformationTransferPreview exercise={informationTransfer} />
           ) : (
             <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
           )
@@ -744,6 +767,24 @@ export function ExerciseEditorPane({
               queryClient.setQueryData<ExerciseWithAnswers | null>(
                 authoringKeys.exercise(exerciseId),
                 (cached) => (cached ? applySavedMinimalPairs(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isInformationTransfer && exercise != null ? (
+          // A blank owns a document because its key is an expected answer and a reason per cell,
+          // split across both columns and read through a format pack the author cannot edit —
+          // nothing the generic form has a field for.
+          <InformationTransferBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={informationTransferDocumentFrom(exercise)}
+            onDocumentChange={setInformationTransfer}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) =>
+                  cached ? applySavedInformationTransfer(cached, updatedAt, saved) : cached,
               )
             }
           />
@@ -1504,6 +1545,36 @@ function applySavedMinimalPairs(
     updatedAt,
     content: { ...minimalPairsToContent(saved.exercise) } as ExerciseWithAnswers['content'],
     expectedAnswers: { ...minimalPairsToExpectedAnswers(saved.exercise) },
+    ...(instruction &&
+      line !== '' && {
+        instructions: [{ ...instruction, instructionText: line }, ...rest],
+      }),
+  };
+}
+
+/** The stored columns as the kernel's information-transfer document, plus the row's token. */
+function informationTransferDocumentFrom(
+  exercise: ExerciseWithAnswers,
+): InformationTransferDocument {
+  return {
+    ...informationTransferFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+  };
+}
+
+/** The cached exercise as the save left it — both columns and the token. */
+function applySavedInformationTransfer(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedInformationTransfer,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  const line = saved.exercise.instruction.trim();
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...informationTransferToContent(saved.exercise) } as ExerciseWithAnswers['content'],
+    expectedAnswers: { ...informationTransferToExpectedAnswers(saved.exercise) },
     ...(instruction &&
       line !== '' && {
         instructions: [{ ...instruction, instructionText: line }, ...rest],

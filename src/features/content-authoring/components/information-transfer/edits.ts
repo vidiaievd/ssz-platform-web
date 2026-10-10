@@ -4,23 +4,29 @@ import {
   moveField as moveFieldIn,
   removeExpected as removeExpectedFrom,
   removeField as removeFieldFrom,
+  setAnswering as setAnsweringOf,
   setAudio,
   setExpected as setExpectedOf,
   setField as setFieldOf,
   setFieldAudio as setFieldAudioOf,
   setFocus as setFocusOf,
   setForm as setFormOf,
+  setGrading as setGradingOf,
   setInstruction as setInstructionOf,
   setLanguage as setLanguageOf,
   setPassage as setPassageOf,
   setPassageTitle as setPassageTitleOf,
+  setScoring as setScoringOf,
   setSourceKind as setSourceKindOf,
   setTitle as setTitleOf,
+  type Answering,
   type Field,
   type FieldType,
   type Form,
+  type Grading,
   type InfFocus,
   type InformationTransferContent,
+  type Scoring,
   type SourceKind,
 } from '@/lib/shared-kernel/information-transfer';
 
@@ -137,4 +143,19 @@ export function removeExpected<T extends Doc>(ex: T, fieldId: string, k: number)
 
 export function setFieldAudio<T extends Doc>(ex: T, fieldId: string, audio: ItemAudio | null): T {
   return keep(ex, setFieldAudioOf(ex, fieldId, audio));
+}
+
+// ── Steps 3–5 — what counts, how it is played, what it rates ────────────────
+
+export function setGrading<T extends Doc>(ex: T, patch: Partial<Grading>): T {
+  return keep(ex, setGradingOf(ex, patch));
+}
+
+export function setAnswering<T extends Doc>(ex: T, patch: Partial<Answering>): T {
+  return keep(ex, setAnsweringOf(ex, patch));
+}
+
+/** The pass mark is clamped by the kernel, as the number field of step 5 expects. */
+export function setScoring<T extends Doc>(ex: T, patch: Partial<Scoring>): T {
+  return keep(ex, setScoringOf(ex, patch));
 }

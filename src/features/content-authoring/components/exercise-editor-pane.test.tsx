@@ -11,6 +11,11 @@ import {
   toExpectedAnswers as minimalPairsToExpectedAnswers,
 } from '@/lib/shared-kernel/minimal-pairs';
 import {
+  sampleContent as informationTransferSample,
+  toContent as informationTransferToContent,
+  toExpectedAnswers as informationTransferToExpectedAnswers,
+} from '@/lib/shared-kernel/information-transfer';
+import {
   sampleDocument,
   toContent as readAloudToContent,
   toExpectedAnswers as readAloudToExpectedAnswers,
@@ -36,6 +41,7 @@ vi.mock('../actions/dictation', () => ({ saveDictationAction: vi.fn() }));
 vi.mock('../actions/inflection-table', () => ({ saveInflectionTableAction: vi.fn() }));
 vi.mock('../actions/read-aloud', () => ({ saveReadAloudAction: vi.fn() }));
 vi.mock('../actions/minimal-pairs', () => ({ saveMinimalPairsAction: vi.fn() }));
+vi.mock('../actions/information-transfer', () => ({ saveInformationTransferAction: vi.fn() }));
 // The set's clips go through the media client, which reads server config at import.
 vi.mock('@/features/media', () => ({
   uploadAsset: vi.fn(),
@@ -600,6 +606,33 @@ describe('ExerciseEditorPane', () => {
     const preview = within(screen.getByLabelText('Student preview, phone'));
     expect(await preview.findByText('1/12')).toBeInTheDocument();
     expect(preview.queryByText(/Startparet/)).not.toBeInTheDocument();
+  });
+
+  it('opens the information-transfer builder by template code, the key held back from the preview (INF-B29)', () => {
+    // Plan 73 phase 7. By the code alone: a blank scaffold — one empty field — must open the
+    // builder, never the generic form.
+    const ex = informationTransferSample('text');
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-inf',
+        templateCode: 'information_transfer',
+        targetLanguage: 'nb',
+        difficultyLevel: 'A2',
+        content: informationTransferToContent(ex),
+        expectedAnswers: informationTransferToExpectedAnswers(ex),
+        instructions: [{ instructionLanguage: 'en', instructionText: ex.instruction }],
+        updatedAt: '2026-10-10T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Answers/ })).toBeInTheDocument();
+    // The runner's own body over the projection: the cells are there, the reasons are not.
+    expect(screen.getAllByRole('textbox', { name: 'Klokkeslett' }).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/det er etasjen, ikke rommet/)).not.toBeInTheDocument();
   });
 
   it('opens the inflection-table builder by template code, key held back from the preview', () => {

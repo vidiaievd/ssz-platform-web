@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import type { FieldType, Issue } from '@/lib/shared-kernel/information-transfer';
 
-/** The issues steps 1 and 2 draw — the rest get their words in phase 7 with their steps. */
+/** The issues steps 1 and 2 draw on their own cards — the key the core cannot read included. */
 export type SourceOrFormIssue =
   | Extract<Issue, { step: 1 | 2 }>
   | Extract<Issue, { code: 'INF_KEY_UNREADABLE' }>;
@@ -18,9 +18,9 @@ export interface IssueCopy {
    * What is wrong, in the teacher's language. `bare` is for a line drawn on the field's own
    * card, where «Field 2 («Klokkeslett»)» would name what the reader is already looking at.
    */
-  describe: (issue: SourceOrFormIssue, options?: { bare?: boolean }) => string;
+  describe: (issue: Issue, options?: { bare?: boolean }) => string;
   /** The label of the button that goes and fixes it — the prototype's `fix`. */
-  fix: (issue: SourceOrFormIssue) => string;
+  fix: (issue: Issue) => string;
 }
 
 /**
@@ -73,7 +73,7 @@ export function useTypeDescription(): (type: FieldType) => string {
 }
 
 /**
- * The words for a kernel issue (plan 73, phase 6).
+ * The words for a kernel issue (plan 73, phases 6–7).
  *
  * The kernel names what is wrong and where — a code, a field id, the parameters — and never
  * the sentence, so the rail, the steps and the gate say the same thing (INF-B1). A field is
@@ -83,7 +83,7 @@ export function useIssueCopy(): IssueCopy {
   const t = useTranslations('Authoring.informationTransfer');
   const typeLabel = useTypeLabel();
 
-  const subjectOf = (issue: SourceOrFormIssue, bare: boolean): string => {
+  const subjectOf = (issue: Issue, bare: boolean): string => {
     if (!('fieldId' in issue)) return '';
     if (bare) return t('subject.thisField');
     const label = 'label' in issue ? issue.label : '';
@@ -102,8 +102,12 @@ export function useIssueCopy(): IssueCopy {
         count: 'count' in issue ? issue.count : 0,
         min: 'min' in issue ? issue.min : 0,
         max: 'max' in issue ? issue.max : 0,
+        pct: 'pct' in issue ? issue.pct : 0,
         type: issue.code === 'INF_KEY_UNREADABLE' ? typeLabel(issue.type).toLowerCase() : '',
       }),
-    fix: (issue) => t(`fixes.${issue.code}` as 'fixes.INF_NO_PASSAGE'),
+    fix: (issue) =>
+      t(`fixes.${issue.code}` as 'fixes.INF_NO_PASSAGE', {
+        suggestion: 'suggestion' in issue ? issue.suggestion : '',
+      }),
   };
 }

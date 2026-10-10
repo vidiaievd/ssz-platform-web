@@ -3979,7 +3979,20 @@
       "INF_FEW_FIELDS": "{count, plural, one {# field} other {# fields}}. Under {min} the exercise stops being selective: there is nothing to sift.",
       "INF_MANY_FIELDS": "{count} fields. Above {max} the student is transcribing the source instead of picking facts out of it.",
       "INF_ALL_FREE_TEXT": "Every field is free text. The format normalisers do nothing here, and the exercise leans on spelling — fine for a reading source, harsh for audio.",
-      "INF_KEY_UNREADABLE": "{subject}: «{value}» cannot be read as a {type}. The core would reject the author’s own key, so every answer fails."
+      "INF_KEY_UNREADABLE": "{subject}: «{value}» cannot be read as a {type}. The core would reject the author’s own key, so every answer fails.",
+      "INF_TIME_AMBIGUOUS": "{subject}: «{value}» is ambiguous between morning and afternoon, so both are accepted. Write it as 24-hour if only one is right.",
+      "INF_KEY_FAILS_GRADER": "Your own key does not pass your own grader. One of the expected values is unreadable for its field type.",
+      "INF_TYPOS_ON": "Typos are forgiven on names and words (one character). Loosens spelling, which this type does not measure.",
+      "INF_SPELLED_OFF": "Spelled-out numerals are rejected. A student who writes a time or a sum in words instead of digits is marked wrong for notation.",
+      "INF_CASE_SENSITIVE": "Case-sensitive. «anne lise berg» would be marked wrong, which measures the shift key.",
+      "INF_ONE_PLAY_MANY": "One playback for {count} cells is a memory test. Two is the working default for a form.",
+      "INF_NO_SEGMENTS": "{count} cells and no timecodes. Per-field fragments let the student go back to the price without hearing the whole message again.",
+      "INF_SOURCE_HIDDEN": "The source is hidden while answering, and the source is a text. The student would fill the form from memory — that is a different exercise.",
+      "INF_PASS_TOO_HIGH": "Pass at {pct}% of {count} cells — one mis-heard digit fails the exercise.",
+      "INF_REQUIRED_ALL": "Every required cell must be right on top of the percentage. Use it when one fact carries the task — the time of an appointment.",
+      "INF_NO_MEMORY": "Nothing written to memory. The exercise reports and nothing comes back.",
+      "INF_SKILL_CARD_LATER": "The skill is recorded as evidence now; its own review schedule arrives after plan 63 phase 7 — until then the form comes back cell by cell.",
+      "INF_EXPOSURE_LATER": "Exposure is stored with the exercise and not yet written to the word."
     },
     "fixes": {
       "INF_NO_PASSAGE": "Paste the notice or schedule",
@@ -3997,7 +4010,20 @@
       "INF_FEW_FIELDS": "Add fields",
       "INF_MANY_FIELDS": "Split the exercise",
       "INF_ALL_FREE_TEXT": "Consider a number or a time",
-      "INF_KEY_UNREADABLE": "Fix the value or change the type"
+      "INF_KEY_UNREADABLE": "Fix the value or change the type",
+      "INF_TIME_AMBIGUOUS": "Use {suggestion}",
+      "INF_KEY_FAILS_GRADER": "Look at the accepted forms",
+      "INF_TYPOS_ON": "Read the note",
+      "INF_SPELLED_OFF": "Reconsider",
+      "INF_CASE_SENSITIVE": "Turn it off",
+      "INF_ONE_PLAY_MANY": "Allow two",
+      "INF_NO_SEGMENTS": "Turn timecodes on",
+      "INF_SOURCE_HIDDEN": "Keep the text visible",
+      "INF_PASS_TOO_HIGH": "Lower it",
+      "INF_REQUIRED_ALL": "Read the note",
+      "INF_NO_MEMORY": "Reconsider",
+      "INF_SKILL_CARD_LATER": "Read the note",
+      "INF_EXPOSURE_LATER": "Read the note"
     },
     "types": {
       "time": {
@@ -4103,6 +4129,151 @@
         "already": "already a field",
         "close": "Close"
       }
+    },
+    "step3": {
+      "eyebrow": "Step 3",
+      "title": "What counts as the same answer",
+      "lede": "Format rules live in the core, per field type — not in a list of spellings you have to remember to write. Your extra wordings in step 2 are for the lexical cases only: an abbreviation, a short form of a name.",
+      "spelled": {
+        "label": "Accept spelled-out numerals",
+        "help": "A clock time or a sum written in words counts as the digits it names. The lexicon comes from the language pack.",
+        "noPack": "This course has no language pack, so there is no lexicon of numerals to read — times and numbers are read from digits only."
+      },
+      "typos": {
+        "label": "Forgive one typo in words and names",
+        "help": "Lexical fields only. Never applies to a number: 405 is not a typo for 450, it is the wrong fact."
+      },
+      "strictCase": {
+        "label": "Case-sensitive",
+        "help": "Off by default. A capital letter is not the fact being tested."
+      },
+      "accepted": {
+        "title": "Accepted forms, per cell",
+        "passes": "your key passes your grader",
+        "fails": "your key fails your grader",
+        "emptyTitle": "No expected answers yet",
+        "emptyBody": "Write the answers in step 2 and the accepted set appears here.",
+        "caption": "Green means the notation is one of yours; grey means the core recognised the fact in a notation you did not write and counted it — the student sees both marked correct, with the canonical form beside the grey one.",
+        "unnamed": "unnamed",
+        "chips": "Accepted forms of «{label}»",
+        "nothing": "nothing the core can read",
+        "tryLabel": "Try an answer for «{label}»",
+        "tryPlaceholder": "try an answer",
+        "tryIdle": "runs the real validator",
+        "tryOk": "accepted, as written",
+        "tryFormat": "accepted → {canonical}",
+        "tryTypo": "accepted as a typo",
+        "tryUnread": "cannot be read as a {type}",
+        "tryWrong": "wrong fact"
+      },
+      "rule": {
+        "title": "Where the rule lives",
+        "body": "A list of accepted spellings per cell was the other option, and it fails the same way every time: the author writes «14:00» and «kl. 14», the student writes «kl 14» without the full stop, and the cell is red for punctuation. Formats are a closed problem — clock, date, amount, phone — so the core owns them and the author only names the fact. See <mono>DECISIONS §1</mono>."
+      }
+    },
+    "step4": {
+      "eyebrow": "Step 4",
+      "title": "How it is played",
+      "lede": "Difficulty lives here and nowhere else: what is visible while they write, how many goes they get, when the key opens. The content in steps 1–3 does not change between an A1 class and a B1 one.",
+      "itemNoun": "form",
+      "showSource": {
+        "label": "The text while they fill the form",
+        "help": "Hiding a written source turns this into a memory exercise — a different type.",
+        "always": "Always visible",
+        "afterAnswer": "Hidden while answering"
+      },
+      "attempts": {
+        "label": "Attempts on the whole form",
+        "help": "A second go after the verdict, with the cells that were right kept.",
+        "unlimited": "Unlimited"
+      },
+      "hints": {
+        "label": "Hints on the cells",
+        "help": "The hint from step 2. «After one attempt» keeps the first go clean.",
+        "start": "From the start",
+        "afterOne": "After one attempt",
+        "never": "Never"
+      },
+      "reveal": {
+        "label": "When the answers are shown",
+        "help": "The explanation always comes with the verdict; this is about the expected value itself.",
+        "immediately": "With the verdict",
+        "afterLastAttempt": "After the last attempt",
+        "never": "Never"
+      },
+      "oneAtATime": {
+        "label": "One cell at a time",
+        "help": "Off shows the whole blank — the classic Norskprøve layout. On walks through {count, plural, one {# cell} other {# cells}} one by one, which helps on a phone and hurts the skill: the point is choosing what to listen for."
+      },
+      "fragmentsTip": "With timecodes on, each cell gets its own «play the fragment» button for the part of the clip it belongs to. Fragments are free — they never spend a playback — so the limit stays a limit on hearing the whole message, not on checking one number."
+    },
+    "step5": {
+      "eyebrow": "Step 5",
+      "title": "Result and memory",
+      "lede": "Graded on the server, cell by cell. The exercise-level percentage is a summary of the cell verdicts, never a substitute for them: the teacher needs to know which fact was missed, not that four of six were right.",
+      "need": "{need} of {count} cells",
+      "passMeter": "Pass mark",
+      "passField": "Pass mark, percent",
+      "requiredAll": {
+        "label": "Every required cell must be right",
+        "help": "On top of the percentage. Use it when one fact carries the task — the time of the appointment, the deadline."
+      },
+      "rates": {
+        "title": "What the answers rate"
+      },
+      "memory": {
+        "label": "Memory writes",
+        "skill": "The skill",
+        "skillWords": "Skill + words",
+        "none": "Nothing"
+      },
+      "atoms": {
+        "skill": "Rated by the form as a whole. The genre is the thing that transfers: a student who can fill one form off an announcement can fill the next one, whatever the words were.",
+        "words": "Only the <mono>word</mono> and <mono>name</mono> cells carry a word atom. A time or a price is not vocabulary, and rating one would put noise into the word's schedule.",
+        "wordsName": "words · per lexical cell"
+      },
+      "exposure": {
+        "label": "Log words as met",
+        "help": "Exposure event on the lexical cells — no rating, no change to a review date. Feeds «met in 4 exercises» on the word card."
+      },
+      "teacher": {
+        "title": "What the teacher gets",
+        "lead": "One row per cell across the group. A column everyone misses is a teaching signal about a format — times told with «halv», prices said as «fire femti» — and it is invisible in a single percentage.",
+        "caption": "The per-cell numbers appear in the exercise report (planned). Every attempt already records them."
+      }
+    },
+    "gate": {
+      "cells": "{count, plural, one {# cell} other {# cells}}, each with an id, an expected answer and an explanation",
+      "graded": "Graded on the server, cell by cell · partial credit · pass at {pass}%{required}",
+      "requiredAll": " and every required cell right",
+      "formats": "Formats normalised in the core for {count, plural, one {# cell} other {# cells}}{spelled} — from the {pack} pack",
+      "formatsDigits": "Formats normalised in the core for {count, plural, one {# cell} other {# cells}} — from digits only",
+      "spelled": ", spelled-out numerals included",
+      "audioSource": "Audio source · {plays}{fragments}",
+      "freePlay": "free playback",
+      "playbacks": "{count, plural, one {# playback} other {# playbacks}}",
+      "fragments": " · a fragment per cell, free of charge",
+      "textSource": "Text source, visible while the form is filled",
+      "memory": "Rates {skill}{words}{exposure}",
+      "memoryWords": " and the lexical cells",
+      "memoryExposure": "; lexical cells: exposure is stored, not yet written",
+      "memoryNone": "Writes nothing to memory",
+      "addressing": "itemKey = fieldId · ExerciseItemTarget addresses each cell on its own",
+      "evidence": "Evidence: success ceiling medium, failure floor low. A filled form proves the student can sift a notice of this genre for facts — enough to carry a listening unit, not enough to carry comprehension. One missed cell proves nothing on its own, which is why the cell verdicts, not the percentage, are what the report is built from.",
+      "notFreeForm": "Not a free form: the type is graded by <mono>information-transfer.validator.ts</mono> and never routed to a teacher. A cell the core cannot read is reported to the student as unreadable, never routed to a human."
+    },
+    "preview": {
+      "title": "Preview",
+      "phone": "Phone",
+      "desktop": "Desktop",
+      "reader": "Reader card",
+      "deviceLabel": "Device",
+      "modeLabel": "Preview mode",
+      "static": "Static",
+      "live": "Live",
+      "restart": "Restart the attempt",
+      "noteStatic": "Static preview: the blank is drawn, nothing accepts input.",
+      "noteLive": "This is the student’s own screen. Checks here run on your key in this browser and are not recorded."
     }
   },
   "coverage": {

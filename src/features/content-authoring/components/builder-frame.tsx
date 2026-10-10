@@ -1,7 +1,8 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, CircleAlert } from 'lucide-react';
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, CircleAlert, Info } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -129,6 +130,13 @@ export interface BuilderGateDialogProps {
    * who marks it. Optional: a builder with nothing worth restating passes nothing.
    */
   passes?: string[];
+  /**
+   * What the kernel notes without asking for a fix — its `info` findings. Neither blocks nor
+   * warns; a builder whose handoff draws them in the gate passes them, the rest leave it out.
+   */
+  infos?: string[];
+  /** Closing paragraphs under the summary — the evidence line, what grades the type. */
+  notes?: ReactNode[];
   onOpenChange: (open: boolean) => void;
   onGoToStep: (step: number) => void;
 }
@@ -151,6 +159,8 @@ export function BuilderGateDialog({
   open,
   rows,
   passes = [],
+  infos = [],
+  notes = [],
   onOpenChange,
   onGoToStep,
 }: BuilderGateDialogProps) {
@@ -198,6 +208,17 @@ export function BuilderGateDialog({
           </ul>
         )}
 
+        {infos.length > 0 && (
+          <ul className="flex flex-col gap-1">
+            {infos.map((info) => (
+              <li key={info} className="flex items-start gap-2 text-xs text-muted-foreground">
+                <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                <span>{info}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
         {passes.length > 0 && (
           <ul className="flex flex-col gap-1 border-t border-border pt-3">
             {passes.map((pass) => (
@@ -208,6 +229,12 @@ export function BuilderGateDialog({
             ))}
           </ul>
         )}
+
+        {notes.map((note, index) => (
+          <p key={index} className="m-0 text-xs text-muted-foreground">
+            {note}
+          </p>
+        ))}
 
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
