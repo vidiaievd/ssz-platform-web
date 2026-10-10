@@ -12,6 +12,7 @@ import type {
   AttemptStatus,
   AttemptStatusResponse,
   LastAttemptResponse,
+  MinimalPairsProbe,
   RevealAnswersResponse,
   SaveDraftRequest,
   SaveDraftResponse,
@@ -46,6 +47,8 @@ export class AttemptRequestError extends Error {
     readonly code: string | null = null,
     /** The items a refusal is about — the prompts whose recordings `read_aloud` refused. */
     readonly itemIds: string[] = [],
+    /** How many sittings `minimal_pairs` allows, on its `MP_SITTINGS_SPENT` refusal. */
+    readonly allowed: number | null = null,
   ) {
     super(message);
     this.name = 'AttemptRequestError';
@@ -75,6 +78,7 @@ async function send<TResponse>(
       error?: string;
       code?: unknown;
       itemIds?: unknown;
+      allowed?: unknown;
     } | null;
     throw new AttemptRequestError(
       problem?.error ?? `Request failed with ${res.status}`,
@@ -83,6 +87,7 @@ async function send<TResponse>(
       Array.isArray(problem?.itemIds)
         ? problem.itemIds.filter((x): x is string => typeof x === 'string')
         : [],
+      typeof problem?.allowed === 'number' ? problem.allowed : null,
     );
   }
   return res.json() as Promise<TResponse>;
@@ -224,6 +229,22 @@ export function useAnswerQuestion<Result>(exerciseId: string, attemptId: string 
       if (attemptId === null) throw new Error('No attempt in progress');
       return post(`/api/exercises/${exerciseId}/attempts/${attemptId}/answers`, body);
     },
+  });
+}
+
+/**
+ * The probe a `minimal_pairs` sitting is on (plan 72 §3.6).
+ *
+ * A mutation although it writes nothing: it is asked for at a moment — the start, «Neste» — and
+ * its answer carries a signed link that a cache would hand back after it died. Asking twice
+ * returns the same probe until it is answered, so a reload lands where the learner was.
+ *
+ * The attempt is the variable rather than a hook argument: the first probe is asked for in the
+ * same breath as the start that named the attempt, before any render could pass it down.
+ */
+export function useHandOutProbe(exerciseId: string) {
+  return useMutation<MinimalPairsProbe, Error, string>({
+    mutationFn: (attemptId) => post(`/api/exercises/${exerciseId}/attempts/${attemptId}/items`),
   });
 }
 

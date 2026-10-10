@@ -784,5 +784,61 @@
       "rulesListen": "{n} opptak per oppgave, du kan høre deg selv først · svar innen 48 timer",
       "start": "Start"
     }
+  },
+  "minimalPairs": {
+    "defaultTitle": "Lyttetrening",
+    "defaultInstruction": "Trykk på ordet du hørte.",
+    "progress": "Fremdrift",
+    "play": "Spill av ordet",
+    "pause": "Pause",
+    "playWord": "Spill av {word}",
+    "playsLeft": "{left} av {total} avspillinger igjen",
+    "noPlaysLeft": "Ingen avspillinger igjen",
+    "freePlay": "Lytt så mange ganger du vil",
+    "synthetic": "syntetisk stemme",
+    "retry": "Ikke helt. Hør en gang til og prøv på nytt.",
+    "right": "Riktig.",
+    "wrong": "Det var «{word}».",
+    "compare": "Hør «{chosen}» og «{target}»",
+    "chosen": "du valgte",
+    "heard": "du hørte",
+    "next": "Neste",
+    "seeResult": "Se resultatet",
+    "staticPreview": "Statisk forhåndsvisning",
+    "empty": {
+      "title": "Ingen prøver",
+      "body": "Ingen ordpar har to ord med lyd ennå."
+    },
+    "failure": {
+      "media": "Lyden kan ikke spilles av akkurat nå.",
+      "probe": "Oppgaven kunne ikke lastes.",
+      "answer": "Svaret ble ikke sendt. Prøv igjen.",
+      "finish": "Resultatet kunne ikke hentes.",
+      "start": "Lyttetreningen kunne ikke startes.",
+      "emptySet": "Ingen ordpar har lyd ennå.",
+      "tryAgain": "Prøv igjen"
+    },
+    "summary": {
+      "passed": "Bestått",
+      "again": "Prøv igjen",
+      "score": "{pct}% riktig · kravet er {pass}%",
+      "hearPair": "Hør paret",
+      "wordsReturn": "Ordene du bommet på kommer tilbake av seg selv.",
+      "contrastScheduled": "Kontrasten <b>{label}</b> er lagt inn i repetisjonen din.",
+      "contrastNotHere": "Kontrasten <b>{label}</b> er lagt inn i repetisjonen din — men ikke i denne oppgaven.",
+      "allRight": "Alle par riktig. Kontrasten regnes som sittende og kommer sjeldnere tilbake.",
+      "newRound": "Ny runde",
+      "sittingsSpent": "{n, plural, one {Du har brukt den ene runden.} other {Du har brukt alle # rundene.}}"
+    },
+    "card": {
+      "probes": "{n, plural, one {# prøve} other {# prøver}}",
+      "minutes": "ca. {min} min",
+      "defaultInstruction": "Du hører ett ord. Trykk på ordet du hørte.",
+      "plays": "{n} avspillinger per ord",
+      "freePlay": "fri avspilling",
+      "answerAtOnce": "svar med én gang",
+      "hearDifference": "du hører forskjellen når du bommer",
+      "start": "Start"
+    }
   }
 }

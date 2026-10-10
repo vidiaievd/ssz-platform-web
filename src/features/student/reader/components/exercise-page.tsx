@@ -15,6 +15,7 @@ import { HighlightInTextSolver } from './highlight-in-text-solver';
 import { DictationSolver } from './dictation-solver';
 import { InflectionTableSolver } from './inflection-table-solver';
 import { ReadAloudSolver } from './read-aloud-solver';
+import { MinimalPairsSolver } from './minimal-pairs-solver';
 import { MultipleChoiceSolver } from './multiple-choice-solver';
 import { ShortAnswerSolver } from './short-answer-solver';
 import { TranslateSolver } from './translate-solver';
@@ -776,6 +777,11 @@ const SERVER_SOLVERS: Record<
   // server, and the attempt is where the recordings, the draft and the verdict live (plan 70).
   // A card first, then one attempt.
   read_aloud: ReadAloudSolver,
+  // Its key is which word each clip is, and it is on the server for that and for the dosing: the
+  // draw is made when the attempt opens and each probe is handed out by its own command, so the
+  // order never sits in the page; the key comes back only as a probe closes (plan 72 §3.6). A
+  // card first, then one sitting.
+  minimal_pairs: MinimalPairsSolver,
 };
 
 /**

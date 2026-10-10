@@ -335,6 +335,33 @@ describe('POST /api/exercises/[id]/attempts', () => {
     const res = await POST(makeRequest({ language: 'no' }), { params });
     expect(res.status).toBe(502);
   });
+
+  // `minimal_pairs` (plan 72, Q4-A): the runner says «all N sittings are used» from this.
+  it('carries a refused sitting through with its code and the allowance', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(
+      new AppError('validation', 'spent', {
+        message: 'All the sittings this exercise allows are used',
+        code: 'MP_SITTINGS_SPENT',
+        allowed: 3,
+      }),
+    );
+    const spent = await POST(makeRequest({ language: 'no' }), { params });
+    expect(spent.status).toBe(422);
+    await expect(spent.json()).resolves.toMatchObject({ code: 'MP_SITTINGS_SPENT', allowed: 3 });
+
+    vi.mocked(serverFetch).mockRejectedValueOnce(
+      new AppError('validation', 'empty', { code: 'MP_EMPTY_SET' }),
+    );
+    const empty = await POST(makeRequest({ language: 'no' }), { params });
+    expect(empty.status).toBe(422);
+    await expect(empty.json()).resolves.toMatchObject({ code: 'MP_EMPTY_SET' });
+  });
+
+  it('keeps any other refusal of a start a plain failure', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('validation', 'Failed'));
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+    expect(res.status).toBe(502);
+  });
 });
 
 function makeGetRequest() {
@@ -451,6 +478,37 @@ describe('GET /api/exercises/[id]/attempts', () => {
     };
     const newer = { ...open, id: 'att-5', validationDetails: { closed: true, items: [] } };
     vi.mocked(serverFetch).mockResolvedValue({ items: [newer, open] });
+
+    const res = await GET(makeGetRequest(), { params });
+
+    expect((await res.json()).resumable).toBeUndefined();
+  });
+
+  // A sitting with answered probes is resumed on the probe it was on (plan 72, MP-R15).
+  it('reports an open minimal-pairs sitting with answered probes as resumable', async () => {
+    const sitting = {
+      ...scored,
+      id: 'att-6',
+      templateCode: 'minimal_pairs',
+      status: 'IN_PROGRESS',
+      pickedOptions: [{ questionId: 'p1', picks: ['w1'], closed: true }],
+    };
+    vi.mocked(serverFetch).mockResolvedValue({ items: [sitting] });
+
+    const res = await GET(makeGetRequest(), { params });
+
+    expect((await res.json()).resumable).toBe(true);
+  });
+
+  it('does not read picks as resumable for any other template', async () => {
+    const set = {
+      ...scored,
+      id: 'att-7',
+      templateCode: 'multiple_choice',
+      status: 'IN_PROGRESS',
+      pickedOptions: [{ questionId: 'q1', picks: ['a'], closed: true }],
+    };
+    vi.mocked(serverFetch).mockResolvedValue({ items: [set] });
 
     const res = await GET(makeGetRequest(), { params });
 

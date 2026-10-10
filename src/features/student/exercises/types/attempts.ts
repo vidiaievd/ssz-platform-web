@@ -610,6 +610,80 @@ export interface DictationSubmitDetails {
   attemptPassed: boolean;
 }
 
+/**
+ * The probe a `minimal_pairs` sitting is on — `POST /attempts/:id/items` (plan 72 §3.6).
+ *
+ * The clip to play and the buttons, never which button the clip is. A button is spelled only
+ * when the author shows spelling «always», has its meaning only under «always», and IPA only
+ * beside a spelling. The link is signed for the hour and is not kept past the probe.
+ */
+export interface MinimalPairsProbe {
+  /** 1-based place in the sitting. */
+  n: number;
+  total: number;
+  /** What `/answers` names this probe by: `p<n>`. */
+  questionId: string;
+  clip: {
+    url: string;
+    expiresAt: string;
+    durationMs: number;
+    provenance: 'studio' | 'teacher' | 'tts';
+    /** A dialect id of the language pack, or empty. */
+    dialect: string;
+  };
+  options: Array<{ id: string; text?: string; gloss?: string; ipa?: string }>;
+  /** `tries` is 1 on a second chance after a reload. `closed` is always false. */
+  state: { tries: number; maxTries: number; closed: boolean };
+  /** How each earlier probe went on its first answer — the pips after a reload. */
+  closedProbes: Array<{ n: number; correct: boolean }>;
+}
+
+/**
+ * One answer to a `minimal_pairs` probe — the `result` of `/answers` (plan 72 §3.6).
+ *
+ * Until the probe closes: right or wrong and the tries left, nothing else — a second chance is
+ * for listening again, not for reading the key. On closing: the key, every button spelled, and
+ * on a miss with A/B on the two links to play back to back (both or neither).
+ */
+export interface MinimalPairsProbeVerdict {
+  questionId: string;
+  n: number;
+  optionId: string;
+  correct: boolean;
+  closed: boolean;
+  tries: number;
+  triesLeft: number;
+  /** The first answer is the one that scores — what the pip shows. */
+  firstCorrect: boolean;
+  keyOptionId?: string;
+  options?: Array<{ id: string; text: string; gloss?: string; ipa?: string }>;
+  compare?: { chosen: string; target: string };
+}
+
+/**
+ * `details` of a `minimal_pairs` submit — the result as the student sees it (plan 72 §3.7).
+ *
+ * `passPct` comes only here, never in the projection. `pairs` lists the pairs that came up, each
+ * with its spellings in the pair's order and a signed link per word for «Hør paret» (an empty
+ * string where a clip could not be signed). `memory` words the closing line; absent from
+ * sittings scored before it was recorded.
+ */
+export interface MinimalPairsSubmitDetails {
+  right: number;
+  total: number;
+  score: number;
+  passed: boolean;
+  passPct: number;
+  memory?: 'contrast' | 'contrast+word' | 'none';
+  pairs: Array<{
+    pairId: string;
+    words: string[];
+    played: number;
+    correct: number;
+    clips: string[];
+  }>;
+}
+
 /** Check one sentence of a `sentence_schema` set, or ask to be shown it. */
 export interface CheckRowRequest {
   rowId: string;

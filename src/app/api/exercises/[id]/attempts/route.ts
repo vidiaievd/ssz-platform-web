@@ -120,6 +120,17 @@ async function draftOf(exerciseId: string, attemptId: string): Promise<unknown |
   }
 }
 
+/** The engine's two refusals of a `minimal_pairs` start, read off the 422 body. */
+function sittingRefusal(
+  details: unknown,
+): { code: 'MP_SITTINGS_SPENT'; allowed: number } | { code: 'MP_EMPTY_SET' } | null {
+  if (typeof details !== 'object' || details === null) return null;
+  const { code, allowed } = details as { code?: unknown; allowed?: unknown };
+  if (code === 'MP_SITTINGS_SPENT' && typeof allowed === 'number') return { code, allowed };
+  if (code === 'MP_EMPTY_SET') return { code };
+  return null;
+}
+
 /**
  * Put the carried draft on the new attempt.
  *
@@ -207,6 +218,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (e.code === 'not_found') {
         return NextResponse.json({ error: 'Exercise not found' }, { status: 404 });
       }
+      // `minimal_pairs` refusing a new sitting (plan 72, Q4-A): the code and how many sittings
+      // the author allows, so the runner can say «you have used all N» and put «Ny runde» away.
+      // A set with no pair to play is refused the same way. Anything else stays a 502.
+      const refusal = e.code === 'validation' ? sittingRefusal(e.details) : null;
+      if (refusal !== null) {
+        return NextResponse.json(
+          { error: 'No sitting can be started', ...refusal },
+          { status: 422 },
+        );
+      }
       if (e.code === 'conflict') {
         const stale = attemptIdOf(e.details);
         if (stale !== null) {
@@ -280,13 +301,18 @@ function learnerFacingDetails(templateCode: string, details: unknown): unknown {
 }
 
 /**
- * Whether an open attempt carries per-item states the engine resumes from — the two
- * templates handed in one item at a time inside one attempt (plans 67 and 68). Read off the
+ * Whether an open attempt carries per-item states the engine resumes from — the templates
+ * handed in one item at a time inside one attempt (plans 67, 68 and 72). Read off the
  * record as `unknown`: the fields are those templates' own, and only their presence matters.
  */
 function holdsItemStates(attempt: AttemptRecord): boolean {
   const record = attempt as unknown as Record<string, unknown>;
-  return ['segmentStates', 'questionStates'].some((field) => {
+  const fields = ['segmentStates', 'questionStates'];
+  // A `minimal_pairs` sitting keeps its answered probes as picks (plan 72, phase 5). Only for
+  // that template: an open `multiple_choice` set holds picks too, but it has no start card to
+  // skip, and its runner does not ask.
+  if (attempt.templateCode === 'minimal_pairs') fields.push('pickedOptions');
+  return fields.some((field) => {
     const states = record[field];
     return Array.isArray(states) && states.length > 0;
   });

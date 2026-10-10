@@ -216,4 +216,39 @@ export { ReadAloudGraded } from './read-aloud-graded';
 export type { ReadAloudGradedProps } from './read-aloud-graded';
 export { ReadAloudReaderCard } from './read-aloud-reader-card';
 export type { ReadAloudReaderCardProps } from './read-aloud-reader-card';
+
+export {
+  readMinimalPairsProjection,
+  readMinimalPairsSummary,
+  readProbe,
+  readProbeVerdict,
+} from './minimal-pairs-projection';
+export { MinimalPairsBody, PlayButton as MinimalPairsPlayButton } from './minimal-pairs-body';
+export type { MinimalPairsBodyProps, MinimalPairsLayout } from './minimal-pairs-body';
+export { MinimalPairsSummary } from './minimal-pairs-summary';
+export type { MinimalPairsSummaryProps } from './minimal-pairs-summary';
+export { MinimalPairsReaderCard } from './minimal-pairs-reader-card';
+export type { MinimalPairsReaderCardProps } from './minimal-pairs-reader-card';
+export {
+  AUTOPLAY_DELAY_MS,
+  COMPARE_DELAY_MS,
+  INITIAL_SITTING,
+  PROBE_CLIP,
+  sittingReducer,
+  useMinimalPairsSitting,
+} from './minimal-pairs-sitting';
+export type {
+  Sitting,
+  SittingDriver,
+  SittingFailure,
+  SittingOptions,
+  SittingState,
+} from './minimal-pairs-sitting';
+export {
+  createBrowserClipPlayer,
+  createMockClipPlayer,
+  SEQUENCE_GAP_MS,
+  useClipPlayer,
+} from './minimal-pairs-clips';
+export type { Clip, ClipPlayer, Clips, MockClipPlayer, PlayOutcome } from './minimal-pairs-clips';
 export type { TakeSource } from './read-aloud-parts';
