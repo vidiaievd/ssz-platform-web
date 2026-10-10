@@ -3944,6 +3944,167 @@
       "note": "Dette er elevens egen skjerm. Rettingen her bruker fasiten din i denne nettleseren og blir ikke registrert."
     }
   },
+  "informationTransfer": {
+    "shell": {
+      "step1": "Kilde",
+      "step2": "Skjema",
+      "step3": "Svar",
+      "step4": "Gjennomføring",
+      "step5": "Resultat",
+      "stepSub1": "tekst eller opptak",
+      "stepSub2": "feltene",
+      "stepSub3": "hva som regnes som riktig",
+      "stepSub4": "hvordan det spilles",
+      "stepSub5": "poeng og hukommelse",
+      "stepsLabel": "Trinn i informasjonsoverføringen"
+    },
+    "subject": {
+      "field": "Felt {n}",
+      "fieldLabelled": "Felt {n} («{label}»)",
+      "thisField": "Dette feltet"
+    },
+    "issues": {
+      "INF_NO_PASSAGE": "Ingen kildetekst. Det er ingenting å hente informasjon fra.",
+      "INF_NO_TRANSCRIPT": "Ingen transkripsjon. Uten den kan byggeren ikke sjekke et eneste forventet svar mot kilden, og hele kontrollen under går i blinde.",
+      "INF_NO_TITLE": "Oppgaven har ingen tittel — øvingslisten har ingenting å vise for den.",
+      "INF_NO_INSTRUCTION": "Ingen instruksjon. Eleven ser et tomt skjema og aner ikke hva det hører til.",
+      "INF_NO_PACK": "Ingen språkpakke for «{language}». Klokkeslett, datoer og tall leses bare fra sifre; klokkeord og tall skrevet med bokstaver forstås ikke.",
+      "INF_NO_FIELDS": "Skjemaet har ingen felt.",
+      "INF_FIELD_NO_LABEL": "{subject} har ingen ledetekst. En celle uten ledetekst i et skjema kan ikke besvares.",
+      "INF_DUPLICATE_LABEL": "{subject} har samme ledetekst som et annet felt. Rapporten viser to like rader, og ingen vet hvilken celle som feilet.",
+      "INF_FIELD_NO_KEY": "{subject} har ikke noe forventet svar — cellen kan aldri vurderes.",
+      "INF_FIELD_NO_WHY": "{subject} har ingen forklaring. En elev som bommer på denne cellen får en rød boks og ingen grunn.",
+      "INF_KEY_NOT_IN_SOURCE": "{subject}: «{value}» står ikke i kilden. Enten avviker formuleringen fra det eleven får lese, eller så finnes ikke opplysningen der i det hele tatt.",
+      "INF_SENTENCE_ANSWER": "{subject} forventer en hel setning. Det er et kortsvar-spørsmål, ikke en skjemacelle — denne typen er for fakta man kan løfte ut.",
+      "INF_FEW_FIELDS": "{count, plural, one {# felt} other {# felt}}. Under {min} er ikke oppgaven selektiv lenger: det er ingenting å sile.",
+      "INF_MANY_FIELDS": "{count} felt. Over {max} skriver eleven av kilden i stedet for å plukke ut fakta.",
+      "INF_ALL_FREE_TEXT": "Alle feltene er fri tekst. Formatnormaliseringen gjør ingenting her, og oppgaven hviler på rettskriving — greit for en lesekilde, hardt for lyd.",
+      "INF_KEY_UNREADABLE": "{subject}: «{value}» kan ikke leses som {type}. Kjernen ville avvist forfatterens eget fasitsvar, så hvert svar feiler."
+    },
+    "fixes": {
+      "INF_NO_PASSAGE": "Lim inn kunngjøringen eller timeplanen",
+      "INF_NO_TRANSCRIPT": "Skriv transkripsjonen",
+      "INF_NO_TITLE": "Gi den en tittel",
+      "INF_NO_INSTRUCTION": "Skriv én linje",
+      "INF_NO_PACK": "Se språkpakken",
+      "INF_NO_FIELDS": "Legg til et felt",
+      "INF_FIELD_NO_LABEL": "Gi feltet et navn",
+      "INF_DUPLICATE_LABEL": "Gi det ene nytt navn",
+      "INF_FIELD_NO_KEY": "Skriv svaret",
+      "INF_FIELD_NO_WHY": "Skriv «hvorfor»",
+      "INF_KEY_NOT_IN_SOURCE": "Sjekk mot kilden",
+      "INF_SENTENCE_ANSWER": "Gjør det kortere eller bytt type",
+      "INF_FEW_FIELDS": "Legg til felt",
+      "INF_MANY_FIELDS": "Del opp oppgaven",
+      "INF_ALL_FREE_TEXT": "Vurder et tall eller et klokkeslett",
+      "INF_KEY_UNREADABLE": "Rett verdien eller bytt type"
+    },
+    "types": {
+      "time": {
+        "label": "Klokkeslett",
+        "desc": "Klokkeslett. Alle skrivemåter pakken kjenner, både 12- og 24-timers.",
+        "example": "17:30"
+      },
+      "date": {
+        "label": "Dato",
+        "desc": "Dag og måned. Året ignoreres med mindre du skriver et.",
+        "example": "03.03"
+      },
+      "number": {
+        "label": "Tall",
+        "desc": "Vanlig antall eller romnummer. Sifre eller ord.",
+        "example": "204"
+      },
+      "money": {
+        "label": "Pris",
+        "desc": "Beløp med eller uten valuta.",
+        "example": "450"
+      },
+      "phone": {
+        "label": "Telefon",
+        "desc": "Bare sifre etter normalisering; gruppering og landkode ignoreres.",
+        "example": "22456789"
+      },
+      "name": {
+        "label": "Navn eller sted",
+        "desc": "Egennavn. Store og små bokstaver tilgis, rettskrivingen ikke — med mindre du tillater skrivefeil."
+      },
+      "word": {
+        "label": "Ord eller frase",
+        "desc": "Et kort leksikalsk svar. Tegnsetting og store bokstaver tilgis."
+      }
+    },
+    "step1": {
+      "eyebrow": "Trinn 1",
+      "title": "Kilden",
+      "lede": "En kunngjøring som skal leses eller høres. Én bryter avgjør hvilken, og det er den samme bryteren som flytter inndata-aksen — ingenting annet i oppgaven endres.",
+      "titleLabel": "Tittel",
+      "instructionLabel": "Instruksjon til eleven",
+      "instructionHelp": "Én linje. Lyttereglene tegnes av spilleren — ikke gjenta dem her.",
+      "sourceLabel": "Hvor opplysningene kommer fra",
+      "sourceHelp": "Bytter inndata: tekst eller lyd.",
+      "sourceText": "En tekst",
+      "sourceAudio": "Et opptak",
+      "focusLabel": "Fokusakse",
+      "focusHelp": "Hva oppgaven regnes som trening i.",
+      "focusPragmatics": "Pragmatikk",
+      "focusVocabulary": "Ordforråd",
+      "packLabel": "Språkpakke",
+      "packNone": "Ingen pakke for dette språket",
+      "packTip": "<b>Pakken, ikke koden.</b> Klokkeord, månedsnavn, tallord og valuta kommer fra kursets språkpakke — <mono>{pack}</mono>. Normaliseringen selv kjenner ikke noe språk, så den samme oppgavetypen virker i et kurs på alle språk som har en pakke.",
+      "textTitle": "Teksten eleven leser",
+      "words": "{count, plural, one {# ord} other {# ord}}",
+      "passageTitleLabel": "Overskrift over kilden",
+      "passageTitleHelp": "Hva eleven ser på: en timeplan, en kunngjøring, en annonse.",
+      "passageLabel": "Tekst",
+      "passageMissing": "Uten kilde er det ingenting å hente ut.",
+      "textTip": "La teksten inneholde mer enn skjemaet spør om. Ferdigheten er å plukke ut fire fakta fra en side — en kilde som inneholder nøyaktig de fire svarene trener lesing, ikke utvelgelse.",
+      "transcriptCallout": "<b>Transkripsjonen er ikke valgfri her.</b> Hver kontroll i trinn 2 — «står dette faktumet egentlig i kilden», «sies svaret to ganger» — leser transkripsjonen. Om eleven noen gang får se den, er en egen innstilling ovenfor."
+    },
+    "step2": {
+      "eyebrow": "Trinn 2",
+      "title": "Skjemaet",
+      "lede": "Hvert felt er ett faktum og ett element i oppgaven: egen vurdering, egen forklaring, egen rad i rapporten. Id-en følger med — å endre rekkefølgen flytter aldri en forklaring.",
+      "formTitleLabel": "Skjemaets overskrift",
+      "formTitleHelp": "Hva eleven fyller ut.",
+      "layoutLabel": "Oppsett",
+      "layoutForm": "Ledetekst ved siden av",
+      "layoutTable": "Ledetekst over",
+      "fieldsEyebrow": "Felt",
+      "ready": "{ready} av {total} klare",
+      "lift": "Løft ut av kilden",
+      "liftCount": "Løft ut av kilden ({count})",
+      "add": "Legg til felt",
+      "fieldNew": "Nytt felt",
+      "moveUp": "Flytt opp",
+      "moveDown": "Flytt ned",
+      "delete": "Slett felt",
+      "labelLabel": "Ledetekst på cellen",
+      "kindLabel": "Type svar",
+      "unitLabel": "Enhet",
+      "unitHelp": "Etterledd",
+      "expectedLabel": "Forventet svar",
+      "wordingPlaceholder": "en annen godtatt formulering",
+      "removeWording": "Fjern formulering",
+      "unreadable": "«{value}» kan ikke leses som {type} — ditt eget fasitsvar ville feilet.",
+      "notInSource": "Finnes ikke i kilden. Sjekk formuleringen.",
+      "spellings": "{count} skrivemåter godtas, pluss alle skrivemåter kjernen kjenner.",
+      "whyLabel": "Forklaring som vises etter svaret",
+      "whyMissing": "Blokkering: en rød celle uten grunn koster eleven leksjonen.",
+      "whyHelp": "Vises ved bom, og ved riktig svar når fasiten vises.",
+      "hintLabel": "Hjelpetekst under ledeteksten",
+      "hintHelp": "Valgfri. Står på selve skjemaet — en merknad som «dag og måned» eller «kl.».",
+      "requiredLabel": "Obligatorisk",
+      "requiredHelp": "En obligatorisk celle kan gjøres avgjørende i seg selv i trinn 5. Valgfrie celler teller fortsatt med i prosenten.",
+      "scan": {
+        "title": "Fakta funnet i kilden",
+        "subText": "Klokkeslett, datoer, beløp og telefonnumre byggeren ser i teksten. Å sette inn ett lager et felt med typen og det forventede svaret ferdig utfylt — ledeteksten og forklaringen skriver du selv.",
+        "subTranscript": "Klokkeslett, datoer, beløp og telefonnumre byggeren ser i transkripsjonen. Å sette inn ett lager et felt med typen og det forventede svaret ferdig utfylt — ledeteksten og forklaringen skriver du selv.",
+        "already": "allerede et felt",
+        "close": "Lukk"
+      }
+    }
+  },
   "coverage": {
     "title": "Hva dette trener",
     "total": "{count, plural, one {# oppgave} other {# oppgaver}}",
