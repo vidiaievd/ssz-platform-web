@@ -4691,10 +4691,10 @@
       "nb": {
         "kjsj": {
           "desc": "«kjære» versus «skjære». The distinction is disappearing among younger Norwegian speakers — and in every TTS voice.",
-          "note": "Russian and Ukrainian speakers hear both as ш. Without this distinction the difference in spelling disappears too."
+          "note": "Russian and Ukrainian speakers hear both as ш — and then mix up the spellings kj, skj and sj as well."
         },
         "length": {
-          "desc": "«tak» versus «takk». Vowel length carries meaning in Norwegian; the consonant after it is the signal.",
+          "desc": "«tak» versus «takk». Vowel length carries meaning in Norwegian. In writing it shows in the consonant: after a short vowel it is doubled.",
           "note": "Slavic speakers have no phonemic length and often hear no difference until it is pointed out."
         },
         "vowel": {
@@ -4702,8 +4702,8 @@
           "note": "The y/u/i triangle is the hardest: three phonemes where many languages have one or two."
         },
         "tone": {
-          "desc": "«bønder» versus «bønner». The tonal accent separates word pairs that are otherwise identical.",
-          "note": "Needs a consistent dialect: the tonemes are inverted between Bergen and Eastern Norway. Set the dialect on the recording."
+          "desc": "«bønder» versus «bønner». The tonal accent (toneme 1 or 2) separates word pairs that are otherwise identical.",
+          "note": "The tonemes sound the other way round in Bergen and in Eastern Norway, so both clips of a pair must be in one dialect. Set the dialect on the recording."
         },
         "consonant": {
           "desc": "«kjøre» versus «kjøpe». Close word pairs that are not phonological minimal pairs but get confused in listening.",
