@@ -221,15 +221,18 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     status: 'live',
   },
 
-  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
+  // Listening discrimination (plan 72): one word of a minimal pair is played, the student taps the
+  // word they heard. Live as soon as the kernel judges it, like the types above; creatable only
+  // through `CREATABLE_EXERCISE_TYPES` (phase 8 of the plan).
   minimal_pairs: {
     code: 'minimal_pairs',
     labelKey: 'minimal_pairs',
     section: 'exercise',
     icon: Ear,
-    status: 'planned',
-    axes: { input: 'audio', output: 'none', modality: 'recognition' },
+    status: 'live',
   },
+
+  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
   information_transfer: {
     code: 'information_transfer',
     labelKey: 'information_transfer',

@@ -162,12 +162,16 @@ const CALLOUT = {
 
 export function Callout({
   tone = 'info',
+  icon,
   children,
 }: {
   tone?: keyof typeof CALLOUT;
+  /** In place of the tone's own icon — the handoff's `Callout icon=…`. */
+  icon?: LucideIcon;
   children: ReactNode;
 }) {
-  const { icon: Icon, style } = CALLOUT[tone];
+  const { icon: toneIcon, style } = CALLOUT[tone];
+  const Icon = icon ?? toneIcon;
   return (
     <div
       data-tone={tone}

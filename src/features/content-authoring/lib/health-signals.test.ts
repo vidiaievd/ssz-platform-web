@@ -11,7 +11,7 @@ function draftReport(over: Partial<CoverageReport['coverage']> = {}): CoverageRe
     coverage: {
       total: 40,
       bySkill: { listening: 0, reading: 31, spoken: 0, written: 9 },
-      byFocus: { vocabulary: 20, grammar: 20, orthography: 0, pronunciation: 0, pragmatics: 0, unknown: 0 },
+      byFocus: { vocabulary: 20, grammar: 20, orthography: 0, pronunciation: 0, phonology: 0, pragmatics: 0, unknown: 0 },
       byForm: { bank: 34, free: 0, mixed: 6, unknown: 0 },
       byModality: { recognition: 34, recall: 6, production: 0, unknown: 0 },
       byPair: {} as CoverageReport['coverage']['byPair'],

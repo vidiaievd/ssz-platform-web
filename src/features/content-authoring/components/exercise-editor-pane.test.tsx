@@ -6,6 +6,11 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { enMessages } from '@/lib/i18n/messages';
 import type { Container } from '@/features/content/types';
 import {
+  sampleDocument as minimalPairsSample,
+  toContent as minimalPairsToContent,
+  toExpectedAnswers as minimalPairsToExpectedAnswers,
+} from '@/lib/shared-kernel/minimal-pairs';
+import {
   sampleDocument,
   toContent as readAloudToContent,
   toExpectedAnswers as readAloudToExpectedAnswers,
@@ -30,6 +35,15 @@ vi.mock('../actions/highlight-in-text', () => ({ saveHighlightInTextAction: vi.f
 vi.mock('../actions/dictation', () => ({ saveDictationAction: vi.fn() }));
 vi.mock('../actions/inflection-table', () => ({ saveInflectionTableAction: vi.fn() }));
 vi.mock('../actions/read-aloud', () => ({ saveReadAloudAction: vi.fn() }));
+vi.mock('../actions/minimal-pairs', () => ({ saveMinimalPairsAction: vi.fn() }));
+// The set's clips go through the media client, which reads server config at import.
+vi.mock('@/features/media', () => ({
+  uploadAsset: vi.fn(),
+  useMediaAsset: () => ({ data: undefined, isLoading: false }),
+}));
+vi.mock('@/features/profile', () => ({
+  useMyProfile: () => ({ data: { displayName: 'Kari Nordmann' } }),
+}));
 vi.mock('../api/use-authoring-exercises', () => ({
   useAuthoringExercise: vi.fn(),
 }));
@@ -558,6 +572,34 @@ describe('ExerciseEditorPane', () => {
     expect(preview.getByText(/Jeg søkte/)).toBeInTheDocument();
     expect(preview.queryByText(/Lytt etter kj\/sj/)).not.toBeInTheDocument();
     expect(preview.queryByText(/Tydelig og trygg uttale/)).not.toBeInTheDocument();
+  });
+
+  it('opens the minimal-pairs builder by template code, the key held back from the preview (MP-B29)', async () => {
+    // Plan 72 phase 8. By the code alone: a blank scaffold — one empty pair — must open the
+    // builder, never the generic form.
+    const ex = minimalPairsSample();
+    vi.mocked(useAuthoringExercise).mockReturnValue({
+      data: {
+        id: 'exercise-1',
+        exerciseTemplateId: 'tpl-mp',
+        templateCode: 'minimal_pairs',
+        targetLanguage: 'nb',
+        difficultyLevel: 'A2',
+        content: minimalPairsToContent(ex),
+        expectedAnswers: minimalPairsToExpectedAnswers(ex),
+        instructions: [{ instructionLanguage: 'en', instructionText: ex.instruction }],
+        updatedAt: '2026-10-10T10:00:00.000Z',
+      },
+      isLoading: false,
+    } as never);
+
+    renderPane();
+
+    expect(screen.getByRole('tab', { name: /Probes/ })).toBeInTheDocument();
+    // The runner's own body over the projection: the first probe is there, the note is not.
+    const preview = within(screen.getByLabelText('Student preview, phone'));
+    expect(await preview.findByText('1/12')).toBeInTheDocument();
+    expect(preview.queryByText(/Startparet/)).not.toBeInTheDocument();
   });
 
   it('opens the inflection-table builder by template code, key held back from the preview', () => {

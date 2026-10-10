@@ -21,6 +21,7 @@ vi.mock('../actions/highlight-in-text', () => ({ createHighlightInTextAction: vi
 vi.mock('../actions/dictation', () => ({ createDictationAction: vi.fn() }));
 vi.mock('../actions/inflection-table', () => ({ createInflectionTableAction: vi.fn() }));
 vi.mock('../actions/read-aloud', () => ({ createReadAloudAction: vi.fn() }));
+vi.mock('../actions/minimal-pairs', () => ({ createMinimalPairsAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
@@ -40,6 +41,7 @@ const { createHighlightInTextAction } = await import('../actions/highlight-in-te
 const { createDictationAction } = await import('../actions/dictation');
 const { createInflectionTableAction } = await import('../actions/inflection-table');
 const { createReadAloudAction } = await import('../actions/read-aloud');
+const { createMinimalPairsAction } = await import('../actions/minimal-pairs');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -276,6 +278,22 @@ describe('AddLessonPicker', () => {
 
     await waitFor(() => expect(createReadAloudAction).toHaveBeenCalled());
     expect(vi.mocked(createReadAloudAction).mock.calls[0]![1]).toBe('no');
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it('creates a minimal-pairs exercise from its own scaffold (MP-B29)', async () => {
+    // Plan 72 phase 8: the clips, the note per pair and the dials are one document in two
+    // columns, so the generic form cannot make one.
+    vi.mocked(createMinimalPairsAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-20', itemId: 'item-20' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Listen and choose'));
+
+    await waitFor(() => expect(createMinimalPairsAction).toHaveBeenCalled());
+    expect(vi.mocked(createMinimalPairsAction).mock.calls[0]![1]).toBe('no');
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 

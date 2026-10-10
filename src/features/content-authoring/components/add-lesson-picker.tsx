@@ -32,6 +32,7 @@ import { TEMPLATE_CODE as HIGHLIGHT_IN_TEXT_TEMPLATE_CODE } from '@/lib/shared-k
 import { TEMPLATE_CODE as DICTATION_TEMPLATE_CODE } from '@/lib/shared-kernel/dictation';
 import { TEMPLATE_CODE as INFLECTION_TABLE_TEMPLATE_CODE } from '@/lib/shared-kernel/inflection-table';
 import { TEMPLATE_CODE as READ_ALOUD_TEMPLATE_CODE } from '@/lib/shared-kernel/read-aloud';
+import { TEMPLATE_CODE as MINIMAL_PAIRS_TEMPLATE_CODE } from '@/lib/shared-kernel/minimal-pairs';
 
 import { createLessonAction } from '../actions/lesson';
 import { createVocabularyListAction } from '../actions/vocabulary';
@@ -49,6 +50,7 @@ import { createSortIntoBucketsAction } from '../actions/sort-into-buckets';
 import { createDictationAction } from '../actions/dictation';
 import { createInflectionTableAction } from '../actions/inflection-table';
 import { createReadAloudAction } from '../actions/read-aloud';
+import { createMinimalPairsAction } from '../actions/minimal-pairs';
 import { createHighlightInTextAction } from '../actions/highlight-in-text';
 import {
   createTranslateFromTargetAction,
@@ -100,6 +102,7 @@ type OwnBuilderTemplate =
   | typeof DICTATION_TEMPLATE_CODE
   | typeof INFLECTION_TABLE_TEMPLATE_CODE
   | typeof READ_ALOUD_TEMPLATE_CODE
+  | typeof MINIMAL_PAIRS_TEMPLATE_CODE
   | (typeof TRANSLATE_TYPES)[number];
 
 const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillAction> = {
@@ -154,6 +157,10 @@ const OWN_BUILDER_SCAFFOLDS: Record<OwnBuilderTemplate, typeof createGapFillActi
   // of DECISIONS §7; the listening note and the descriptors live in the key column, so a
   // document made by the generic form would have no key at all (plan 70 §3.1).
   [READ_ALOUD_TEMPLATE_CODE]: createReadAloudAction,
+  // The sixteenth. One empty pair in the course language and no family chosen; the clips, the
+  // note per pair and the dials live in the document, so one made by the generic form would be
+  // a shape the builder cannot open (plan 72 §3.1).
+  [MINIMAL_PAIRS_TEMPLATE_CODE]: createMinimalPairsAction,
   // Two codes, two scaffolds: the worked pair a new exercise opens with has to read the
   // way its direction says (plan 42, decision 3).
   translate_to_target: createTranslateToTargetAction,

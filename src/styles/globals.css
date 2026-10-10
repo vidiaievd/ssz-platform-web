@@ -198,6 +198,8 @@
 @keyframes spin-slow { to { transform: rotate(360deg); } }
 /* The «Tar opp» dot of a recording in progress (read_aloud, `ra.css`). */
 @keyframes ra-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+/* The ring round a clip that is sounding (minimal_pairs, `mp.css`). */
+@keyframes mp-ping { 0% { transform: scale(0.88); opacity: 0.5; } 100% { transform: scale(1.15); opacity: 0; } }
 
 /* ─────────────────────────────────────────────
    SSZ DESIGN TOKENS — CSS Custom Properties

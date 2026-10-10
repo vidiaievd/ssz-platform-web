@@ -55,6 +55,8 @@ export function uploadToPresignedUrl(
 type UploadAvatarOptions = {
   file: File;
   purpose?: MediaPurpose;
+  /** What owns the asset — the exercise a clip belongs to (plan 72 §3.4). */
+  entityId?: string;
   onProgress?: UploadProgressCallback;
 };
 
@@ -68,6 +70,7 @@ type UploadAvatarOptions = {
 export async function uploadAsset({
   file,
   purpose = 'avatar',
+  entityId,
   onProgress,
 }: UploadAvatarOptions): Promise<FinalizeUploadResponse> {
   // Step 1 — request presigned URL
@@ -76,6 +79,7 @@ export async function uploadAsset({
     sizeBytes: file.size,
     originalFilename: file.name,
     entityType: PURPOSE_TO_ENTITY_TYPE[purpose],
+    ...(entityId === undefined ? {} : { entityId }),
   };
 
   const requestRes = await fetch('/api/media/uploads/request', {
