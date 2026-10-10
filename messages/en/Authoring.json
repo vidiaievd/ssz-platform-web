@@ -4731,7 +4731,7 @@
       "play": "Play «{word}»",
       "noAudio": "no audio",
       "record": "Record",
-      "stop": "Stopp",
+      "stop": "Stop",
       "recordingOf": "Recording «{word}»",
       "upload": "Upload",
       "uploadOf": "Upload a clip for «{word}»",
@@ -4830,7 +4830,7 @@
         "again": "Draw again",
         "emptyTitle": "Nothing to draw",
         "emptyBody": "No pair has two words with audio yet.",
-        "note": "Each cell is one command to the runner: POST /attempts/:id/items returns the clip url and the option ids, never the answer."
+        "note": "Each cell is one probe the runner asks for: it gets the clip and the buttons, never the answer."
       }
     },
     "step4": {

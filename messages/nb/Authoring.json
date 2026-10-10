@@ -4830,7 +4830,7 @@
         "again": "Trekk på nytt",
         "emptyTitle": "Ingenting å trekke",
         "emptyBody": "Ingen par har to ord med lyd ennå.",
-        "note": "Hver celle er én kommando til kjøreren: POST /attempts/:id/items gir klippets url og alternativ-id-ene, aldri svaret."
+        "note": "Hver celle er én prøve kjøreren ber om: den får klippet og knappene, aldri svaret."
       }
     },
     "step4": {
