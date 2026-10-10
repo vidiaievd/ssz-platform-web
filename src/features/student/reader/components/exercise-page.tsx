@@ -14,6 +14,7 @@ import { SortIntoBucketsSolver } from './sort-into-buckets-solver';
 import { HighlightInTextSolver } from './highlight-in-text-solver';
 import { DictationSolver } from './dictation-solver';
 import { InflectionTableSolver } from './inflection-table-solver';
+import { InformationTransferSolver } from './information-transfer-solver';
 import { ReadAloudSolver } from './read-aloud-solver';
 import { MinimalPairsSolver } from './minimal-pairs-solver';
 import { MultipleChoiceSolver } from './multiple-choice-solver';
@@ -782,6 +783,11 @@ const SERVER_SOLVERS: Record<
   // order never sits in the page; the key comes back only as a probe closes (plan 72 §3.6). A
   // card first, then one sitting.
   minimal_pairs: MinimalPairsSolver,
+  // Its key is the value of every field, read off a text or a recording the learner is given,
+  // and the dosing is per check — the verdict and the reason of every cell each time, the
+  // standard form or the key only by `revealKey`, the transcript only when the blank closes
+  // (plan 73 §3.6). A card first, then one attempt.
+  information_transfer: InformationTransferSolver,
 };
 
 /**

@@ -180,7 +180,10 @@ function InflectionTableRun({
           // of the right shape counts; anything else opens a plain, empty table.
           const resumed = data.boardCheck;
           const back =
-            resumed != null && Array.isArray(resumed.items) && Array.isArray(resumed.locked)
+            resumed != null &&
+            'rows' in resumed &&
+            Array.isArray(resumed.items) &&
+            Array.isArray(resumed.locked)
               ? resumed
               : null;
 

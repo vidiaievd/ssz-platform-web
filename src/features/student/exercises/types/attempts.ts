@@ -9,6 +9,7 @@ import type { GapKey, StudentProjection } from '@/lib/shared-kernel/wordbank-gap
 import type { StudentProjection as MultipleChoiceGroupProjection } from '@/lib/shared-kernel/multiple-choice-group';
 import type { StudentProjection as SortIntoBucketsProjection } from '@/lib/shared-kernel/sort-into-buckets';
 import type { NearMiss as InflectionTableNearMiss } from '@/lib/shared-kernel/inflection-table';
+import type { Verdict as InformationTransferVerdict } from '@/lib/shared-kernel/information-transfer';
 import type { StudentResult as ShortAnswerResult } from '@/lib/shared-kernel/short-answer';
 import type { StudentResult as SentenceSchemaResult } from '@/lib/shared-kernel/sentence-schema';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
@@ -80,9 +81,11 @@ export interface StartAttemptResponse {
    * with the value it held and its verdict, the frozen cells, the checks left (plan 69, phase
    * 9). The details that check returned, so nothing the learner was not shown. `null` on a
    * fresh attempt. A whole board is scored by its first check and never sits `IN_PROGRESS`
-   * between checks, so this is how a reload gets the table back.
+   * between checks, so this is how a reload gets the table back. `information_transfer`
+   * resumes the same way with its own shape; the solver tells them apart by `rows` (the
+   * table's) and `passPct` (the blank's).
    */
-  boardCheck?: InflectionTableSubmitDetails | null;
+  boardCheck?: InflectionTableSubmitDetails | InformationTransferSubmitDetails | null;
 }
 
 /** One question of a `short_answer` set already handed in on the resumed attempt. */
@@ -896,3 +899,62 @@ export type RevealAnswersResponse =
       answers: RevealedSlotAnswer[];
       attemptClosed: boolean;
     };
+
+/**
+ * What one check of an `information_transfer` blank carries up — plan 73 §3.6.
+ *
+ * `cells` is every field by id, locked ones included; a cell left empty is simply absent.
+ * Which check this is, which cells are locked and what each held on the first check are the
+ * attempt's facts and the engine writes its own — none is sent.
+ */
+export interface InformationTransferSubmittedAnswer {
+  cells: Record<string, string>;
+}
+
+/**
+ * One cell's outcome in a check. `why` comes on every check for a cell not counted;
+ * `canonical` is the standard form of a `format` verdict or, for a wrong or unread cell, the
+ * key — and only where `revealKey` lets it out now; `hint` only under `hintsAfter: 1`.
+ */
+export interface InformationTransferItemResult {
+  /** The field id. */
+  itemId: string;
+  /** What stands in the cell now; empty when it was left empty. */
+  value: string;
+  verdict: InformationTransferVerdict;
+  /** Counted now. */
+  correct: boolean;
+  canonical?: string;
+  why?: string;
+  hint?: string;
+}
+
+/**
+ * `details` when the template is `information_transfer` — the blank after a check, and again
+ * as `boardCheck` on a reload of a blank left open.
+ *
+ * `pct`, `passed` and `passedItems` are the first check's: later checks change what is on
+ * screen (`correctNow`), never the score. The pass mark rides here, never with the projection
+ * (plan 73, deviation 14).
+ */
+export interface InformationTransferSubmitDetails {
+  totalItems: number;
+  /** Right on the first check. */
+  passedItems: number;
+  /** Right now — the progress bar. */
+  correctNow: number;
+  pct: number;
+  passed: boolean;
+  passPct: number;
+  /** Required cells missed on the first check. */
+  missedRequired: number;
+  /** 1-based: which check of the blank this was. */
+  attempt: number;
+  /** Checks still allowed, or `null` for unlimited. */
+  checksLeft: number | null;
+  closed: boolean;
+  /** Whether the key of the cells not counted is in this result. */
+  revealed: boolean;
+  locked: string[];
+  items: InformationTransferItemResult[];
+}

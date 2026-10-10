@@ -252,3 +252,13 @@ export {
 } from './minimal-pairs-clips';
 export type { Clip, ClipPlayer, Clips, MockClipPlayer, PlayOutcome } from './minimal-pairs-clips';
 export type { TakeSource } from './read-aloud-parts';
+export { readInformationTransferProjection } from './information-transfer-projection';
+export { InformationTransferBody } from './information-transfer-body';
+export type {
+  InformationTransferBodyProps,
+  InformationTransferLayout,
+  InformationTransferPhase,
+  InformationTransferValues,
+} from './information-transfer-body';
+export { InformationTransferReaderCard } from './information-transfer-reader-card';
+export type { InformationTransferReaderCardProps } from './information-transfer-reader-card';

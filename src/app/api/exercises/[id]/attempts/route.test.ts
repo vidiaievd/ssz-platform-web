@@ -453,6 +453,36 @@ describe('GET /api/exercises/[id]/attempts', () => {
     expect(body.resumable).toBe(true);
   });
 
+  it('reports an information_transfer blank left open by its last check as resumable', async () => {
+    const board = {
+      ...scored,
+      id: 'att-4',
+      templateCode: 'information_transfer',
+      status: 'SCORED',
+      validationDetails: { closed: false, checksLeft: 1, items: [] },
+    };
+    vi.mocked(serverFetch).mockResolvedValue({ items: [board] });
+
+    const res = await GET(makeGetRequest(), { params });
+
+    expect((await res.json()).resumable).toBe(true);
+  });
+
+  it('does not call a closed information_transfer blank resumable', async () => {
+    const board = {
+      ...scored,
+      id: 'att-4',
+      templateCode: 'information_transfer',
+      status: 'SCORED',
+      validationDetails: { closed: true, checksLeft: 0, items: [] },
+    };
+    vi.mocked(serverFetch).mockResolvedValue({ items: [board] });
+
+    const res = await GET(makeGetRequest(), { params });
+
+    expect((await res.json()).resumable).toBeUndefined();
+  });
+
   it('does not call a closed inflection table resumable', async () => {
     const board = {
       ...scored,

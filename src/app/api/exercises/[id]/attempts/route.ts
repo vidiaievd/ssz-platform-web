@@ -319,7 +319,7 @@ function holdsItemStates(attempt: AttemptRecord): boolean {
 }
 
 /**
- * Whether the newest attempt is an `inflection_table` scored but not closed — checks left. A
+ * Whether the newest attempt is an `inflection_table` or `information_transfer` scored but not closed — checks left. A
  * whole board is scored by its first check, so it is never `IN_PROGRESS` between checks, and
  * the engine resumes it from its scored row all the same (plan 69, phase 9). The engine's own
  * rule, restated for the yes/no: the newest attempt that is not still opening, and only if
@@ -328,7 +328,12 @@ function holdsItemStates(attempt: AttemptRecord): boolean {
 function holdsOpenBoard(items: AttemptRecord[]): boolean {
   const newest = items.find((a) => a.status !== 'IN_PROGRESS');
   if (newest === undefined || newest.status !== 'SCORED') return false;
-  if (newest.templateCode !== 'inflection_table') return false;
+  if (
+    newest.templateCode !== 'inflection_table' &&
+    newest.templateCode !== 'information_transfer'
+  ) {
+    return false;
+  }
   const details = newest.validationDetails as { closed?: unknown } | null | undefined;
   return details?.closed === false;
 }
