@@ -4634,5 +4634,235 @@
       "simulateNote": "Marks every criterion «2». The real verdict is a person's.",
       "simulatedComment": "The teacher's comment appears here."
     }
+  },
+  "minimalPairs": {
+    "shell": {
+      "step1": "Pairs",
+      "step2": "Audio",
+      "step3": "Probes",
+      "step4": "Feedback",
+      "step5": "Result",
+      "stepSub1": "contrast and words",
+      "stepSub2": "one clip per word",
+      "stepSub3": "how many, how drawn",
+      "stepSub4": "after the tap",
+      "stepSub5": "scoring and memory",
+      "stepsLabel": "Steps of the minimal-pairs exercise"
+    },
+    "subject": {
+      "pair": "Pair {index}",
+      "side": "{side, select, 0 {A} 1 {B} other {C}}"
+    },
+    "step1": {
+      "eyebrow": "Step 1",
+      "title": "Contrast and pairs",
+      "lede": "One exercise trains one contrast. The pair is what you author; a probe is one word of one pair, played once — the runner builds those in step 3.",
+      "titleLabel": "Title",
+      "contrastLabel": "Contrast",
+      "contrastHint": "Decides the TTS policy, the report grouping and the atom the answers rate.",
+      "noPack": "There are no contrast families for this course's language yet ({language}). Minimal pairs can be authored once its language pack exists.",
+      "instructionLabel": "Instruction to the student",
+      "instructionHint": "One line. The listening rules are drawn by the runner — do not repeat them here.",
+      "pairsEyebrow": "Pairs",
+      "pairsCount": "{pairs, plural, one {# pair} other {# pairs}} · {words} playable words",
+      "fromLibrary": "From the library",
+      "addPair": "Add pair",
+      "newPair": "New pair",
+      "otherContrast": "Different contrast from the rest of the set",
+      "deletePair": "Delete pair",
+      "colWord": "Word",
+      "colGloss": "Meaning shown in feedback",
+      "colIpa": "IPA",
+      "word": "Word {side} of {pair}",
+      "gloss": "Meaning of word {side} of {pair}",
+      "ipa": "IPA of word {side} of {pair}",
+      "removeWord": "Remove word {side} of {pair}",
+      "thirdWord": "Third word",
+      "pairContrast": "Contrast of {pair}",
+      "noteLabel": "Note for the teacher",
+      "noteHint": "Optional. Why this pair is in the set; never shown to the student."
+    },
+    "tts": {
+      "no": "ingen syntetisk tale",
+      "risky": "syntetisk tale: sjekk hver fil",
+      "ok": "syntetisk tale tillatt"
+    },
+    "contrasts": {
+      "nb": {
+        "kjsj": {
+          "desc": "«kjære» versus «skjære». The distinction is disappearing among younger Norwegian speakers — and in every TTS voice.",
+          "note": "Russian and Ukrainian speakers hear both as ш. Without this distinction the difference in spelling disappears too."
+        },
+        "length": {
+          "desc": "«tak» versus «takk». Vowel length carries meaning in Norwegian; the consonant after it is the signal.",
+          "note": "Slavic speakers have no phonemic length and often hear no difference until it is pointed out."
+        },
+        "vowel": {
+          "desc": "«skal» versus «skål», «har» versus «hår». The Norwegian rounded vowels against the unrounded ones.",
+          "note": "The y/u/i triangle is the hardest: three phonemes where many languages have one or two."
+        },
+        "tone": {
+          "desc": "«bønder» versus «bønner». The tonal accent separates word pairs that are otherwise identical.",
+          "note": "Needs a consistent dialect: the tonemes are inverted between Bergen and Eastern Norway. Set the dialect on the recording."
+        },
+        "consonant": {
+          "desc": "«kjøre» versus «kjøpe». Close word pairs that are not phonological minimal pairs but get confused in listening.",
+          "note": "Train recognition of the whole word, not one sound. Keep the words in the same word class."
+        }
+      }
+    },
+    "library": {
+      "title": "Pair library — {label}",
+      "sub": "Pairs the phonology bank already holds for this contrast. A tick means studio recordings exist and are attached on insert — the rest arrive without audio.",
+      "recorded": "opptak finnes",
+      "none": "uten lyd",
+      "already": "already in the set",
+      "empty": "The library has no pairs for this contrast yet.",
+      "close": "Close"
+    },
+    "step2": {
+      "eyebrow": "Step 2",
+      "title": "The recordings",
+      "lede": "One clip per word — not one file with timecodes. The probe order is drawn per attempt, so a shared file would tie the exercise to a fixed order and to a fixed gap between words.",
+      "covered": "words with audio",
+      "coverage": "Words with audio",
+      "slice": "Slice one file",
+      "hearAB": "Hear A/B",
+      "play": "Play «{word}»",
+      "noAudio": "no audio",
+      "record": "Record",
+      "stop": "Stopp",
+      "recordingOf": "Recording «{word}»",
+      "upload": "Upload",
+      "uploadOf": "Upload a clip for «{word}»",
+      "tts": "TTS",
+      "ttsBlocked": "Synthesis merges this contrast — not allowed here",
+      "ttsGenerate": "Generate with TTS",
+      "removeClip": "Remove clip of «{word}»",
+      "uploading": "Uploading…",
+      "synthesizing": "Synthesizing…",
+      "processing": "Measuring…",
+      "processingFailed": "The clip could not be processed. Remove it and try again.",
+      "micDenied": "The browser was not allowed to use the microphone.",
+      "micNoDevice": "No microphone was found.",
+      "uploadFailed": "The clip could not be uploaded. Try again.",
+      "ttsFailed": "Synthesis failed. Try again, or record the word.",
+      "mixedVoices": "<b>Two voices in one pair ({voices}).</b> The student can pass by telling the speakers apart. Re-record one of them, or relabel if it is the same session.",
+      "useVoice": "Use «{voice}» for both",
+      "spread": "{ms} ms apart — length answers the probe before the sound does.",
+      "dialectLabel": "Dialect of the recording",
+      "dialectHint": "Tonemes are inverted between east and west. The student sees this under the player.",
+      "dialectNone": "not set",
+      "policyTitle": "Synthetic speech policy",
+      "policy": {
+        "no": "Blocked for this contrast. Every Norwegian TTS voice the platform has tested merges kj into sj and flattens tonemes — the two clips would be identical files with different names, and the exercise would train the merger it is meant to prevent.",
+        "risky": "Allowed with a check. Engines render length inconsistently between words; generate, then listen to both clips back to back before you publish.",
+        "ok": "Allowed. Vowel quality and ordinary consonants survive synthesis. The student is told the voice is synthetic under the player, and the clip carries provenance = tts into the report."
+      },
+      "policyFamily": "<b>{label}.</b> {text}"
+    },
+    "prov": {
+      "studio": "Studio",
+      "teacher": "Lærer",
+      "tts": "Syntetisk"
+    },
+    "slice": {
+      "tip": "<b>Studio session in one file.</b> Drop the whole take here, mark a region per word, and the builder cuts it into one asset per word on save. The model keeps no timecodes — after slicing every word owns its own clip, exactly as if it had been uploaded on its own.",
+      "drop": "Drop the session file here",
+      "dropHint": "One recording with every word in pair order, a short pause between them.",
+      "choose": "Choose a file",
+      "decoding": "Reading the file…",
+      "decodeFailed": "The browser could not read this file as audio.",
+      "summary": "{file} · {time} · {count, plural, one {# region} other {# regions}} detected by silence",
+      "targets": "The regions go to the words without audio, in pair order: {words}.",
+      "noTargets": "Every word already has audio. Remove a clip to slice into it.",
+      "noRegions": "No word was found — the file is silent or one unbroken sound.",
+      "region": "Region {index} — {word}",
+      "regionStart": "Start of region {index}",
+      "regionEnd": "End of region {index}",
+      "cancel": "Cancel",
+      "cut": "Cut into {count, plural, one {# clip} other {# clips}}",
+      "cutting": "Cutting…",
+      "cutFailed": "{count, plural, one {# clip} other {# clips}} could not be uploaded. Those words are still without audio."
+    },
+    "step3": {
+      "eyebrow": "Step 3",
+      "title": "The probe set",
+      "lede": "Delivery is the multiple_choice runner: the attempt opens once and each probe is handed out by its own command, so the order is drawn per student and never sits in the page."
+    },
+    "step4": {
+      "eyebrow": "Step 4",
+      "title": "What happens after the tap",
+      "lede": "The correction is the exercise. A phonemic contrast is learned in the two seconds after a wrong answer, while the sound is still in working memory — not from a score at the end."
+    },
+    "step5": {
+      "eyebrow": "Step 5",
+      "title": "Result and memory",
+      "lede": "Graded on the server, one probe at a time: the answer is an option id and the key stays behind until the probe closes. The only real decision is what the result is allowed to move."
+    },
+    "issues": {
+      "MP_NO_CONTRAST": "No contrast family is chosen — or the course's language ({language}) has none. The set has nothing to rate.",
+      "MP_NO_PAIRS": "No pairs yet — there is nothing to play.",
+      "MP_PAIR_UNDER_TWO": "{subject} has fewer than two words. A discrimination probe needs something to be discriminated from.",
+      "MP_PAIR_DUPLICATE": "{subject} repeats the same spelling twice — the probe has two correct answers.",
+      "MP_GROUP_TOO_LARGE": "{subject} has {words} words. Above three the probe stops being a discrimination task and becomes recall.",
+      "MP_FEW_PAIRS": "{ready, plural, one {# usable pair} other {# usable pairs}}. The same words come round every second probe and the student starts recognising the recording, not the sound.",
+      "MP_NO_GLOSS": "{subject} has no glosses, so the feedback shows two spellings and no meanings.",
+      "MP_MIXED_CONTRASTS": "The set mixes contrast families. Accuracy then belongs to no single contrast, so the result is written per pair and the set-level number means less.",
+      "MP_WORD_NO_CLIP": "«{text}» has no recording. A probe on it would play silence.",
+      "MP_PAIR_MIXED_VOICES": "{subject} mixes voices ({voices}). The student can answer from the voice colour without hearing the sound at all.",
+      "MP_TTS_BLOCKED": "{count, plural, one {# clip is} other {# clips are}} synthetic, and «{label}» is the one thing synthesis gets wrong: the engine merges the two sounds. The exercise would teach the merger.",
+      "MP_CLIP_TOO_LONG": "«{text}» is {length} — longer than a single word should be. Trim the silence at the ends.",
+      "MP_PAIR_LENGTH_SPREAD": "{subject}: the clips differ by {ms} ms. Clip length becomes the cue and the contrast is never heard.",
+      "MP_TTS_RISKY": "{count, plural, one {# synthetic clip} other {# synthetic clips}} on «{label}». Most engines render it inconsistently — check each clip by ear before publishing.",
+      "MP_DIALECT_MISSING": "Tonemes are inverted between Eastern and Western dialects. Without a dialect on every clip the set is unteachable outside one region.",
+      "MP_TTS_NOTE": "{count, plural, one {# clip is} other {# clips are}} synthetic. Allowed for this contrast; the student is told so under the player.",
+      "MP_POOL_TOO_SMALL": "{probes} probes asked for, {pool} words available, and repeats are off — the set cannot be filled.",
+      "MP_FEW_PROBES": "{probes} probes. Under {min}, one lucky guess moves the score by more than ten points.",
+      "MP_MANY_PROBES": "{probes} probes. Over {max} the ear tires and the last answers measure fatigue.",
+      "MP_UNLIMITED_REPLAYS": "Unlimited replays. With enough listens any pair can be told apart by elimination, which is not what the exercise measures.",
+      "MP_TOO_MANY_OPTIONS": "«All words as options» gives {options} buttons per probe. Past six it is a vocabulary test with audio.",
+      "MP_NO_IMMEDIATE": "No immediate feedback. Phonemic training works by hearing the correction while the sound is still in memory; a score at the end trains nothing.",
+      "MP_NO_AB": "Without the A/B comparison a wrong answer tells the student they were wrong and not what the difference sounds like.",
+      "MP_SPELLING_HIDDEN": "Hiding the spelling until after the answer turns the options into «A or B» buttons. Harder, and honest for a pure-ear task.",
+      "MP_SECOND_CHANCE": "A second chance is recorded as a separate probe result. The first answer still rates the contrast atom.",
+      "MP_WORD_MEMORY": "Writing to the word atoms too: hearing a word among two options is weak evidence that the word is known, and it will pull the word's review date out.",
+      "MP_PASS_TOO_HIGH": "Pass at {passPct}%. With {probes} probes that is at most one mistake, and a mis-click fails the set.",
+      "MP_NO_MEMORY": "Nothing is written to memory. The exercise scores and reports, but the contrast never comes back on its own.",
+      "MP_CONTRAST_CARD_LATER": "The contrast is recorded as evidence now; its own review schedule arrives after plan 63 phase 7 — until then the set comes back as one card.",
+      "MP_EXPOSURE_LATER": "Exposure is stored with the exercise and not yet written to the word."
+    },
+    "fixes": {
+      "MP_NO_CONTRAST": "Choose a contrast",
+      "MP_NO_PAIRS": "Add a pair",
+      "MP_PAIR_UNDER_TWO": "Write both words",
+      "MP_PAIR_DUPLICATE": "Fix the words",
+      "MP_GROUP_TOO_LARGE": "Split the group",
+      "MP_FEW_PAIRS": "Add pairs",
+      "MP_NO_GLOSS": "Add the meanings",
+      "MP_MIXED_CONTRASTS": "Split by contrast",
+      "MP_WORD_NO_CLIP": "Record or generate it",
+      "MP_PAIR_MIXED_VOICES": "One voice per pair",
+      "MP_TTS_BLOCKED": "Use recorded speech",
+      "MP_CLIP_TOO_LONG": "Trim the clip",
+      "MP_PAIR_LENGTH_SPREAD": "Re-record the shorter one",
+      "MP_TTS_RISKY": "Listen through",
+      "MP_DIALECT_MISSING": "Set the dialect",
+      "MP_TTS_NOTE": "Read the note",
+      "MP_POOL_TOO_SMALL": "Allow repeats or add pairs",
+      "MP_FEW_PROBES": "Raise the count",
+      "MP_MANY_PROBES": "Lower the count",
+      "MP_UNLIMITED_REPLAYS": "Cap at two",
+      "MP_TOO_MANY_OPTIONS": "Show the pair only",
+      "MP_NO_IMMEDIATE": "Turn it on",
+      "MP_NO_AB": "Turn on A/B",
+      "MP_SPELLING_HIDDEN": "Keep in mind",
+      "MP_SECOND_CHANCE": "Read the note",
+      "MP_WORD_MEMORY": "Rate the contrast only",
+      "MP_PASS_TOO_HIGH": "Lower it",
+      "MP_NO_MEMORY": "Reconsider",
+      "MP_CONTRAST_CARD_LATER": "Read the note",
+      "MP_EXPOSURE_LATER": "Read the note"
+    }
   }
 }

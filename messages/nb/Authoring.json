@@ -4634,5 +4634,235 @@
       "simulateNote": "Setter «2» på alle kriterier. Den ekte vurderingen er et menneskes.",
       "simulatedComment": "Lærerens kommentar vises her."
     }
+  },
+  "minimalPairs": {
+    "shell": {
+      "step1": "Par",
+      "step2": "Lyd",
+      "step3": "Prøver",
+      "step4": "Tilbakemelding",
+      "step5": "Resultat",
+      "stepSub1": "kontrast og ord",
+      "stepSub2": "ett klipp per ord",
+      "stepSub3": "hvor mange, hvordan trukket",
+      "stepSub4": "etter trykket",
+      "stepSub5": "poeng og minne",
+      "stepsLabel": "Stegene i minimalpar-oppgaven"
+    },
+    "subject": {
+      "pair": "Par {index}",
+      "side": "{side, select, 0 {A} 1 {B} other {C}}"
+    },
+    "step1": {
+      "eyebrow": "Steg 1",
+      "title": "Kontrast og par",
+      "lede": "Én oppgave trener én kontrast. Paret er det du skriver; en prøve er ett ord fra ett par, spilt av én gang — det bygger kjøreren i steg 3.",
+      "titleLabel": "Tittel",
+      "contrastLabel": "Kontrast",
+      "contrastHint": "Avgjør reglene for syntetisk tale, grupperingen i rapporten og atomet svarene vurderer.",
+      "noPack": "Det finnes ingen kontrastfamilier for kursets språk ennå ({language}). Minimalpar kan lages når språkpakken finnes.",
+      "instructionLabel": "Instruksjon til eleven",
+      "instructionHint": "Én linje. Lytteregler tegner kjøreren selv — ikke gjenta dem her.",
+      "pairsEyebrow": "Par",
+      "pairsCount": "{pairs, plural, one {# par} other {# par}} · {words} spillbare ord",
+      "fromLibrary": "Fra biblioteket",
+      "addPair": "Legg til par",
+      "newPair": "Nytt par",
+      "otherContrast": "Annen kontrast enn resten av settet",
+      "deletePair": "Slett paret",
+      "colWord": "Ord",
+      "colGloss": "Betydning i tilbakemeldingen",
+      "colIpa": "IPA",
+      "word": "Ord {side} i {pair}",
+      "gloss": "Betydningen av ord {side} i {pair}",
+      "ipa": "IPA for ord {side} i {pair}",
+      "removeWord": "Fjern ord {side} i {pair}",
+      "thirdWord": "Tredje ord",
+      "pairContrast": "Kontrasten i {pair}",
+      "noteLabel": "Notat til læreren",
+      "noteHint": "Valgfritt. Hvorfor paret er med i settet; vises aldri til eleven."
+    },
+    "tts": {
+      "no": "ingen syntetisk tale",
+      "risky": "syntetisk tale: sjekk hver fil",
+      "ok": "syntetisk tale tillatt"
+    },
+    "contrasts": {
+      "nb": {
+        "kjsj": {
+          "desc": "«kjære» mot «skjære». Skillet holder på å forsvinne hos yngre norsktalende — og i alle TTS-stemmer.",
+          "note": "Russisk- og ukrainsktalende hører begge som ш. Uten dette skillet forsvinner også forskjellen i skrift."
+        },
+        "length": {
+          "desc": "«tak» mot «takk». Vokallengde bærer betydning på norsk; konsonanten etterpå er signalet.",
+          "note": "Slavisktalende har ikke fonemisk lengde og hører ofte ingen forskjell før den er pekt ut."
+        },
+        "vowel": {
+          "desc": "«skal» mot «skål», «har» mot «hår». De norske rundede vokalene mot de urundede.",
+          "note": "y/u/i-trekanten er den tyngste: tre fonemer der mange språk har ett eller to."
+        },
+        "tone": {
+          "desc": "«bønder» mot «bønner». Tonelaget skiller ordpar som ellers er identiske.",
+          "note": "Krever dialektkonsistens: tonem er motsatt i Bergen og på Østlandet. Angi dialekt på opptaket."
+        },
+        "consonant": {
+          "desc": "«kjøre» mot «kjøpe». Nære ordpar som ikke er et fonologisk minimalpar, men forveksles i lytting.",
+          "note": "Tren gjenkjenning av hele ordbildet, ikke én lyd. Hold ordene i samme ordklasse."
+        }
+      }
+    },
+    "library": {
+      "title": "Parbibliotek — {label}",
+      "sub": "Par fonologibanken allerede har for denne kontrasten. En hake betyr at studioopptak finnes og legges ved når paret settes inn — resten kommer uten lyd.",
+      "recorded": "opptak finnes",
+      "none": "uten lyd",
+      "already": "allerede i settet",
+      "empty": "Biblioteket har ingen par for denne kontrasten ennå.",
+      "close": "Lukk"
+    },
+    "step2": {
+      "eyebrow": "Steg 2",
+      "title": "Opptakene",
+      "lede": "Ett klipp per ord — ikke én fil med tidskoder. Rekkefølgen på prøvene trekkes for hvert forsøk, så en felles fil ville bundet oppgaven til én rekkefølge og én fast pause mellom ordene.",
+      "covered": "ord med lyd",
+      "coverage": "Ord med lyd",
+      "slice": "Del opp én fil",
+      "hearAB": "Hør A/B",
+      "play": "Spill av «{word}»",
+      "noAudio": "ingen lyd",
+      "record": "Ta opp",
+      "stop": "Stopp",
+      "recordingOf": "Tar opp «{word}»",
+      "upload": "Last opp",
+      "uploadOf": "Last opp et klipp for «{word}»",
+      "tts": "TTS",
+      "ttsBlocked": "Syntese slår sammen denne kontrasten — ikke tillatt her",
+      "ttsGenerate": "Lag med TTS",
+      "removeClip": "Fjern klippet for «{word}»",
+      "uploading": "Laster opp…",
+      "synthesizing": "Syntetiserer…",
+      "processing": "Måler…",
+      "processingFailed": "Klippet kunne ikke behandles. Fjern det og prøv igjen.",
+      "micDenied": "Nettleseren fikk ikke bruke mikrofonen.",
+      "micNoDevice": "Fant ingen mikrofon.",
+      "uploadFailed": "Klippet kunne ikke lastes opp. Prøv igjen.",
+      "ttsFailed": "Syntesen mislyktes. Prøv igjen, eller ta opp ordet.",
+      "mixedVoices": "<b>To stemmer i ett par ({voices}).</b> Eleven kan bestå ved å skille talerne fra hverandre. Ta opp ett av ordene på nytt, eller gi dem samme navn hvis det er samme økt.",
+      "useVoice": "Bruk «{voice}» for begge",
+      "spread": "{ms} ms forskjell — lengden svarer på prøven før lyden gjør det.",
+      "dialectLabel": "Dialekt i opptaket",
+      "dialectHint": "Tonemene er motsatt i øst og vest. Eleven ser dette under avspilleren.",
+      "dialectNone": "ikke angitt",
+      "policyTitle": "Regler for syntetisk tale",
+      "policy": {
+        "no": "Sperret for denne kontrasten. Hver norske TTS-stemme plattformen har testet, slår sammen kj og sj og flater ut tonemene — de to klippene ville vært like filer med ulike navn, og oppgaven ville trent nettopp sammenfallet den skal forhindre.",
+        "risky": "Tillatt med kontroll. Motorene gjengir lengde ulikt fra ord til ord; lag klippene og lytt til begge etter hverandre før du publiserer.",
+        "ok": "Tillatt. Vokalkvalitet og vanlige konsonanter overlever syntesen. Eleven får vite under avspilleren at stemmen er syntetisk, og klippet bærer provenance = tts inn i rapporten."
+      },
+      "policyFamily": "<b>{label}.</b> {text}"
+    },
+    "prov": {
+      "studio": "Studio",
+      "teacher": "Lærer",
+      "tts": "Syntetisk"
+    },
+    "slice": {
+      "tip": "<b>Studioøkt i én fil.</b> Slipp hele opptaket her, merk et område per ord, så deler byggeren det opp i ett lydklipp per ord når du lagrer. Modellen beholder ingen tidskoder — etter oppdelingen eier hvert ord sitt eget klipp, akkurat som om det var lastet opp alene.",
+      "drop": "Slipp øktfilen her",
+      "dropHint": "Ett opptak med alle ordene i parrekkefølge og en kort pause mellom dem.",
+      "choose": "Velg en fil",
+      "decoding": "Leser filen…",
+      "decodeFailed": "Nettleseren kunne ikke lese denne filen som lyd.",
+      "summary": "{file} · {time} · {count, plural, one {# område} other {# områder}} funnet ved stillhet",
+      "targets": "Områdene går til ordene uten lyd, i parrekkefølge: {words}.",
+      "noTargets": "Alle ordene har allerede lyd. Fjern et klipp for å dele opp til det.",
+      "noRegions": "Fant ingen ord — filen er stille eller én sammenhengende lyd.",
+      "region": "Område {index} — {word}",
+      "regionStart": "Start på område {index}",
+      "regionEnd": "Slutt på område {index}",
+      "cancel": "Avbryt",
+      "cut": "Del i {count, plural, one {# klipp} other {# klipp}}",
+      "cutting": "Deler opp…",
+      "cutFailed": "{count, plural, one {# klipp} other {# klipp}} kunne ikke lastes opp. De ordene er fortsatt uten lyd."
+    },
+    "step3": {
+      "eyebrow": "Steg 3",
+      "title": "Prøvesettet",
+      "lede": "Leveringen er multiple_choice-kjøreren: forsøket åpnes én gang og hver prøve deles ut med sin egen kommando, så rekkefølgen trekkes per elev og ligger aldri i siden."
+    },
+    "step4": {
+      "eyebrow": "Steg 4",
+      "title": "Hva som skjer etter trykket",
+      "lede": "Rettingen er selve oppgaven. En fonemisk kontrast læres i de to sekundene etter et feil svar, mens lyden fortsatt er i arbeidsminnet — ikke av en poengsum til slutt."
+    },
+    "step5": {
+      "eyebrow": "Steg 5",
+      "title": "Resultat og minne",
+      "lede": "Vurderes på serveren, én prøve om gangen: svaret er en alternativ-id, og fasiten blir der til prøven lukkes. Det eneste egentlige valget er hva resultatet får lov til å flytte."
+    },
+    "issues": {
+      "MP_NO_CONTRAST": "Ingen kontrastfamilie er valgt — eller kursets språk ({language}) har ingen. Settet har ingenting å vurdere.",
+      "MP_NO_PAIRS": "Ingen par ennå — det finnes ingenting å spille av.",
+      "MP_PAIR_UNDER_TWO": "{subject} har færre enn to ord. En skilleprøve trenger noe å skille fra.",
+      "MP_PAIR_DUPLICATE": "{subject} har samme skrivemåte to ganger — prøven får to riktige svar.",
+      "MP_GROUP_TOO_LARGE": "{subject} har {words} ord. Over tre slutter prøven å være skilletrening og blir gjenkalling.",
+      "MP_FEW_PAIRS": "{ready, plural, one {# brukbart par} other {# brukbare par}}. De samme ordene kommer igjen annenhver prøve, og eleven begynner å kjenne igjen opptaket, ikke lyden.",
+      "MP_NO_GLOSS": "{subject} har ingen betydninger, så tilbakemeldingen viser to skrivemåter og ingen betydning.",
+      "MP_MIXED_CONTRASTS": "Settet blander kontrastfamilier. Treffsikkerheten tilhører da ingen enkelt kontrast, så resultatet skrives per par, og tallet for hele settet betyr mindre.",
+      "MP_WORD_NO_CLIP": "«{text}» har ikke noe opptak. En prøve på det ville spilt stillhet.",
+      "MP_PAIR_MIXED_VOICES": "{subject} blander stemmer ({voices}). Eleven kan svare ut fra stemmefargen uten å høre lyden i det hele tatt.",
+      "MP_TTS_BLOCKED": "{count, plural, one {# klipp er} other {# klipp er}} syntetisk, og «{label}» er nettopp det syntesen tar feil på: motoren slår sammen de to lydene. Oppgaven ville lært bort sammenfallet.",
+      "MP_CLIP_TOO_LONG": "«{text}» er {length} — lengre enn ett ord bør være. Klipp bort stillheten i endene.",
+      "MP_PAIR_LENGTH_SPREAD": "{subject}: klippene skiller seg med {ms} ms. Lengden blir signalet, og kontrasten blir aldri hørt.",
+      "MP_TTS_RISKY": "{count, plural, one {# syntetisk klipp} other {# syntetiske klipp}} på «{label}». De fleste motorer gjengir den ujevnt — lytt gjennom hvert klipp før du publiserer.",
+      "MP_DIALECT_MISSING": "Tonemene er motsatt i østlandsk og vestlandsk. Uten dialekt på hvert klipp kan settet ikke brukes utenfor én region.",
+      "MP_TTS_NOTE": "{count, plural, one {# klipp er} other {# klipp er}} syntetisk. Tillatt for denne kontrasten; eleven får beskjed under avspilleren.",
+      "MP_POOL_TOO_SMALL": "{probes} prøver ønsket, {pool} ord tilgjengelig, og gjentakelser er av — settet kan ikke fylles.",
+      "MP_FEW_PROBES": "{probes} prøver. Under {min} flytter én heldig gjetning resultatet mer enn ti poeng.",
+      "MP_MANY_PROBES": "{probes} prøver. Over {max} blir øret slitent, og de siste svarene måler tretthet.",
+      "MP_UNLIMITED_REPLAYS": "Ubegrenset avspilling. Med nok lytting kan alle par skilles ved utelukkelse, og det er ikke det oppgaven måler.",
+      "MP_TOO_MANY_OPTIONS": "«Alle ordene som alternativer» gir {options} knapper per prøve. Over seks er det en ordforrådstest med lyd.",
+      "MP_NO_IMMEDIATE": "Ingen umiddelbar tilbakemelding. Fonemtrening virker ved å høre rettingen mens lyden fortsatt er i minnet; en poengsum til slutt trener ingenting.",
+      "MP_NO_AB": "Uten A/B-sammenligningen forteller et feil svar eleven at det var feil, men ikke hvordan forskjellen høres ut.",
+      "MP_SPELLING_HIDDEN": "Når skrivemåten skjules til etter svaret, blir alternativene «A eller B»-knapper. Vanskeligere, og ærlig for en ren øreoppgave.",
+      "MP_SECOND_CHANCE": "En ny sjanse registreres som et eget prøveresultat. Det første svaret vurderer fortsatt kontrastatomet.",
+      "MP_WORD_MEMORY": "Skriver også til ordatomene: å høre et ord blant to alternativer er svakt bevis på at ordet kan, og det vil skyve ut repetisjonsdatoen for ordet.",
+      "MP_PASS_TOO_HIGH": "Bestått ved {passPct} %. Med {probes} prøver er det høyst én feil, og et feiltrykk stryker settet.",
+      "MP_NO_MEMORY": "Ingenting skrives til minnet. Oppgaven gir poeng og rapport, men kontrasten kommer aldri tilbake av seg selv.",
+      "MP_CONTRAST_CARD_LATER": "Kontrasten registreres som bevis nå; sin egen repetisjonsplan får den etter fase 7 av plan 63 — til da kommer settet tilbake som ett kort.",
+      "MP_EXPOSURE_LATER": "Eksponeringen lagres med oppgaven og skrives ennå ikke til ordet."
+    },
+    "fixes": {
+      "MP_NO_CONTRAST": "Velg en kontrast",
+      "MP_NO_PAIRS": "Legg til et par",
+      "MP_PAIR_UNDER_TWO": "Skriv begge ordene",
+      "MP_PAIR_DUPLICATE": "Rett ordene",
+      "MP_GROUP_TOO_LARGE": "Del opp gruppen",
+      "MP_FEW_PAIRS": "Legg til par",
+      "MP_NO_GLOSS": "Legg til betydningene",
+      "MP_MIXED_CONTRASTS": "Del opp etter kontrast",
+      "MP_WORD_NO_CLIP": "Ta opp eller lag det",
+      "MP_PAIR_MIXED_VOICES": "Én stemme per par",
+      "MP_TTS_BLOCKED": "Bruk innspilt tale",
+      "MP_CLIP_TOO_LONG": "Klipp til klippet",
+      "MP_PAIR_LENGTH_SPREAD": "Ta opp det korteste på nytt",
+      "MP_TTS_RISKY": "Lytt gjennom",
+      "MP_DIALECT_MISSING": "Angi dialekten",
+      "MP_TTS_NOTE": "Les notatet",
+      "MP_POOL_TOO_SMALL": "Tillat gjentakelser eller legg til par",
+      "MP_FEW_PROBES": "Øk antallet",
+      "MP_MANY_PROBES": "Senk antallet",
+      "MP_UNLIMITED_REPLAYS": "Begrens til to",
+      "MP_TOO_MANY_OPTIONS": "Vis bare paret",
+      "MP_NO_IMMEDIATE": "Slå det på",
+      "MP_NO_AB": "Slå på A/B",
+      "MP_SPELLING_HIDDEN": "Ha det i bakhodet",
+      "MP_SECOND_CHANCE": "Les notatet",
+      "MP_WORD_MEMORY": "Vurder bare kontrasten",
+      "MP_PASS_TOO_HIGH": "Senk det",
+      "MP_NO_MEMORY": "Tenk over det",
+      "MP_CONTRAST_CARD_LATER": "Les notatet",
+      "MP_EXPOSURE_LATER": "Les notatet"
+    }
   }
 }
