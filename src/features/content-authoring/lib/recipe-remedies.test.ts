@@ -63,8 +63,16 @@ describe('remediesFor', () => {
       }
   });
 
+  // A notice read for its facts is about pragmatics by default (plan 73).
+  it('sends a pragmatics rule to the form', () => {
+    expect(codes({ axis: 'focus', values: ['pragmatics'], min: 1 }).live).toEqual([
+      'information_transfer',
+    ]);
+  });
+
+  // No bare template takes in a picture: the monologue does only when its document has one.
   it('can say that nothing closes a rule yet', () => {
-    expect(codes({ axis: 'focus', values: ['pragmatics'], min: 1 })).toEqual({
+    expect(codes({ axis: 'input', values: ['image'], min: 1 })).toEqual({
       live: [],
       planned: [],
       audioLayer: false,

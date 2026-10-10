@@ -23,10 +23,10 @@ describe('exercise type registry', () => {
   });
 
   // Spec 19 §3: a catalogue entry does not make a type authorable — it has no
-  // template in the seed and no validator in the engine.
+  // template in the seed and no validator in the engine. Since plan 73 every candidate of
+  // the catalogue is built, so the list may be empty; the rule waits for the next one.
   it('keeps planned types out of the add-block menu', () => {
     const planned = Object.values(EXERCISE_TYPES).filter((t) => t.status === 'planned');
-    expect(planned.length).toBeGreaterThan(0);
     for (const type of planned) {
       expect(CREATABLE_EXERCISE_TYPES).not.toContain(type.code as never);
       // The recipe needs to know what a type would train before it exists.
