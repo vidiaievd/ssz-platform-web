@@ -47,6 +47,7 @@ export const CREATABLE_EXERCISE_TYPES = [
   'dictation',
   'inflection_table',
   'read_aloud',
+  'minimal_pairs',
   'word_bank_gap_fill',
   'translate_to_target',
   'translate_from_target',

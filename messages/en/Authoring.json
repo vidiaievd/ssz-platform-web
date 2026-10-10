@@ -4788,17 +4788,120 @@
     "step3": {
       "eyebrow": "Step 3",
       "title": "The probe set",
-      "lede": "Delivery is the multiple_choice runner: the attempt opens once and each probe is handed out by its own command, so the order is drawn per student and never sits in the page."
+      "lede": "Delivery is the multiple_choice runner: the attempt opens once and each probe is handed out by its own command, so the order is drawn per student and never sits in the page.",
+      "probesUnit": "probes",
+      "fromWords": "from {count, plural, one {# word} other {# words}}",
+      "probesMeter": "Probes against the scale of 20",
+      "band": "{min}–{max} is the working band",
+      "probesField": "Number of probes",
+      "sampling": {
+        "label": "How probes are drawn",
+        "hint": "Balanced walks every word once before repeating any, and never lets the answer sit on the same side more than {run, plural, one {once} other {# times}} in a row.",
+        "balanced": "Balanced",
+        "random": "Random",
+        "weakest": "Weakest first"
+      },
+      "weakestTip": "Reads the student's own <mono>contrast:{id}</mono> history and over-samples the words they have missed. On a first sitting there is no history and it falls back to balanced.",
+      "options": {
+        "label": "Options shown per probe",
+        "hint": "«The pair» is the classic two-button probe. «All words» turns the set into a closed vocabulary choice.",
+        "pair": "The pair (2–3)",
+        "all": "All words in the set"
+      },
+      "plays": {
+        "label": "Replays per probe",
+        "hint": "A replay is the same clip again. Two is the default: one to hear it, one to check.",
+        "unlimited": "Unlimited"
+      },
+      "autoplay": {
+        "label": "Play by itself when the probe opens",
+        "help": "Off makes every probe start with a tap. On keeps the rhythm of a listening drill."
+      },
+      "repeat": {
+        "label": "A word may come up more than once",
+        "help": "Off caps the set at {count, plural, one {# probe} other {# probes}} — one per word."
+      },
+      "shuffle": {
+        "label": "Shuffle the buttons",
+        "help": "Off keeps A left and B right in every probe, which students learn within four probes."
+      },
+      "draw": {
+        "title": "One draw",
+        "again": "Draw again",
+        "emptyTitle": "Nothing to draw",
+        "emptyBody": "No pair has two words with audio yet.",
+        "note": "Each cell is one command to the runner: POST /attempts/:id/items returns the clip url and the option ids, never the answer."
+      }
     },
     "step4": {
       "eyebrow": "Step 4",
       "title": "What happens after the tap",
-      "lede": "The correction is the exercise. A phonemic contrast is learned in the two seconds after a wrong answer, while the sound is still in working memory — not from a score at the end."
+      "lede": "The correction is the exercise. A phonemic contrast is learned in the two seconds after a wrong answer, while the sound is still in working memory — not from a score at the end.",
+      "immediate": {
+        "label": "Verdict straight away",
+        "help": "Right or wrong shown on the button the moment it is tapped."
+      },
+      "abCompare": {
+        "label": "A/B comparison on a wrong answer",
+        "help": "Plays what they chose, then what was said, back to back with a short gap."
+      },
+      "secondChance": {
+        "label": "Second chance before it counts",
+        "help": "One free retry on the same probe. The first answer is still what rates the contrast."
+      },
+      "showIpa": {
+        "label": "Show IPA in the feedback",
+        "help": "ˈçæːɾə / ˈʃæːɾə. Useful once the class has met the symbols, noise before that."
+      },
+      "spelling": {
+        "label": "Spelling on the buttons",
+        "hint": "Hidden spelling gives «A or B» buttons: a pure ear task, and much harder.",
+        "always": "Always",
+        "afterAnswer": "Only after the answer"
+      },
+      "gloss": {
+        "label": "Meaning of the words",
+        "hint": "The gloss from step 1.",
+        "always": "Always",
+        "afterAnswer": "After the answer",
+        "never": "Never"
+      },
+      "tip": "Spelling «always» plus meaning «after the answer» is the pairing most teachers land on: the student answers by ear, and the meaning arrives as the reward rather than as a clue."
     },
     "step5": {
       "eyebrow": "Step 5",
       "title": "Result and memory",
-      "lede": "Graded on the server, one probe at a time: the answer is an option id and the key stays behind until the probe closes. The only real decision is what the result is allowed to move."
+      "lede": "Graded on the server, one probe at a time: the answer is an option id and the key stays behind until the probe closes. The only real decision is what the result is allowed to move.",
+      "need": "{need} of {probes} correct",
+      "passMeter": "Pass mark",
+      "passField": "Pass mark, percent",
+      "rates": {
+        "title": "What the answers rate"
+      },
+      "memory": {
+        "label": "Memory writes",
+        "contrast": "The contrast",
+        "contrast+word": "Contrast + words",
+        "none": "Nothing"
+      },
+      "atoms": {
+        "contrast": "A phonological atom, not a word. Rated by every probe in the set, scheduled on its own, and shown in the report as «hører kj/sj: 9 av 12».",
+        "words": "The word atoms. Picking a word out of two is weak evidence that the word is known — turning this on moves review dates on the strength of a coin-flippable choice."
+      },
+      "exposure": {
+        "label": "Log the word as heard",
+        "help": "Writes an exposure event on the word atom — no rating, no change to the review date. Feeds «seen in 4 exercises» in the word card."
+      },
+      "sittings": {
+        "label": "Sittings allowed",
+        "hint": "Unlimited unless you set a number. Discrimination improves with repetition; a cap is unusual here.",
+        "unlimited": "Unlimited"
+      },
+      "teacher": {
+        "title": "What the teacher gets",
+        "lead": "Per pair: how often it was played and how often it was heard right. A pair below 50% across a group is the signal the sound needs a lesson, not more probes.",
+        "caption": "The per-pair numbers appear in the exercise report (planned). Every attempt already records them."
+      }
     },
     "issues": {
       "MP_NO_CONTRAST": "No contrast family is chosen — or the course's language ({language}) has none. The set has nothing to rate.",
@@ -4863,6 +4966,40 @@
       "MP_NO_MEMORY": "Reconsider",
       "MP_CONTRAST_CARD_LATER": "Read the note",
       "MP_EXPOSURE_LATER": "Read the note"
+    },
+    "gate": {
+      "pairs": "{ready, plural, one {# usable pair} other {# usable pairs}}, {words, plural, one {# word} other {# words}}, {clips, plural, one {# recording} other {# recordings}}",
+      "probes": "{count} probes drawn {how} per attempt — the order never reaches the page twice the same",
+      "sampling": {
+        "balanced": "balanced",
+        "random": "at random",
+        "weakest": "weakest-first"
+      },
+      "plays": "{replays} per probe · {verdict}",
+      "playsUnlimited": "Unlimited replays",
+      "playsLimited": "{count, plural, one {# replay} other {# replays}}",
+      "verdictLater": "no verdict until the end",
+      "verdictAb": "immediate verdict with A/B on a miss",
+      "verdictNow": "immediate verdict",
+      "graded": "Graded on the server against the option id · pass at {pass}%",
+      "memoryNone": "Writes nothing to memory",
+      "memoryContrast": "Rates contrast:{id} only",
+      "memoryContrastExposure": "Rates contrast:{id} only; the words get an exposure event, no rating — stored, not yet written to the word",
+      "memoryWords": "Rates contrast:{id} and the words",
+      "noSynthetic": "No synthetic speech in the set"
+    },
+    "preview": {
+      "phone": "Phone",
+      "desktop": "Desktop",
+      "reader": "Reader card",
+      "deviceLabel": "Device",
+      "modeLabel": "Preview mode",
+      "static": "Static",
+      "live": "Live",
+      "restart": "Restart the sitting",
+      "empty": "Nothing to preview yet — a pair needs two words with audio.",
+      "noteStatic": "Static preview: the first probe is drawn, nothing plays and nothing accepts input.",
+      "noteLive": "Live preview: a local sitting over your own clips. Nothing is sent and nothing is saved as an attempt."
     }
   }
 }

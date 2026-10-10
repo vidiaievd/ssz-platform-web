@@ -4788,17 +4788,120 @@
     "step3": {
       "eyebrow": "Steg 3",
       "title": "Prøvesettet",
-      "lede": "Leveringen er multiple_choice-kjøreren: forsøket åpnes én gang og hver prøve deles ut med sin egen kommando, så rekkefølgen trekkes per elev og ligger aldri i siden."
+      "lede": "Leveringen er multiple_choice-kjøreren: forsøket åpnes én gang og hver prøve deles ut med sin egen kommando, så rekkefølgen trekkes per elev og ligger aldri i siden.",
+      "probesUnit": "prøver",
+      "fromWords": "fra {count, plural, one {# ord} other {# ord}}",
+      "probesMeter": "Prøver mot skalaen på 20",
+      "band": "{min}–{max} er arbeidsområdet",
+      "probesField": "Antall prøver",
+      "sampling": {
+        "label": "Hvordan prøvene trekkes",
+        "hint": "Balansert går gjennom hvert ord én gang før noe gjentas, og lar aldri svaret ligge på samme side mer enn {run, plural, one {én gang} other {# ganger}} på rad.",
+        "balanced": "Balansert",
+        "random": "Tilfeldig",
+        "weakest": "Svakeste først"
+      },
+      "weakestTip": "Leser elevens egen <mono>contrast:{id}</mono>-historikk og trekker oftere de ordene eleven har bommet på. Første gang finnes det ingen historikk, og trekkingen er balansert.",
+      "options": {
+        "label": "Alternativer per prøve",
+        "hint": "«Paret» er den klassiske prøven med to knapper. «Alle ord» gjør settet til et lukket ordvalg.",
+        "pair": "Paret (2–3)",
+        "all": "Alle ordene i settet"
+      },
+      "plays": {
+        "label": "Avspillinger per prøve",
+        "hint": "En avspilling er det samme klippet igjen. To er standard: én for å høre, én for å sjekke.",
+        "unlimited": "Ubegrenset"
+      },
+      "autoplay": {
+        "label": "Spill av av seg selv når prøven åpnes",
+        "help": "Av gir en prøve som starter med et trykk. På beholder rytmen i en lytteøvelse."
+      },
+      "repeat": {
+        "label": "Et ord kan komme opp flere ganger",
+        "help": "Av begrenser settet til {count, plural, one {# prøve} other {# prøver}} — én per ord."
+      },
+      "shuffle": {
+        "label": "Bland knappene",
+        "help": "Av holder A til venstre og B til høyre i hver prøve, noe elevene lærer på fire prøver."
+      },
+      "draw": {
+        "title": "Ett trekk",
+        "again": "Trekk på nytt",
+        "emptyTitle": "Ingenting å trekke",
+        "emptyBody": "Ingen par har to ord med lyd ennå.",
+        "note": "Hver celle er én kommando til kjøreren: POST /attempts/:id/items gir klippets url og alternativ-id-ene, aldri svaret."
+      }
     },
     "step4": {
       "eyebrow": "Steg 4",
       "title": "Hva som skjer etter trykket",
-      "lede": "Rettingen er selve oppgaven. En fonemisk kontrast læres i de to sekundene etter et feil svar, mens lyden fortsatt er i arbeidsminnet — ikke av en poengsum til slutt."
+      "lede": "Rettingen er selve oppgaven. En fonemisk kontrast læres i de to sekundene etter et feil svar, mens lyden fortsatt er i arbeidsminnet — ikke av en poengsum til slutt.",
+      "immediate": {
+        "label": "Svar med en gang",
+        "help": "Riktig eller galt vises på knappen i det den trykkes."
+      },
+      "abCompare": {
+        "label": "A/B-sammenligning ved feil svar",
+        "help": "Spiller det eleven valgte, så det som ble sagt, rett etter hverandre med en kort pause."
+      },
+      "secondChance": {
+        "label": "Ny sjanse før det teller",
+        "help": "Ett gratis nytt forsøk på samme prøve. Det første svaret er fortsatt det som vurderer kontrasten."
+      },
+      "showIpa": {
+        "label": "Vis IPA i tilbakemeldingen",
+        "help": "ˈçæːɾə / ˈʃæːɾə. Nyttig når klassen har møtt tegnene, støy før det."
+      },
+      "spelling": {
+        "label": "Skrivemåte på knappene",
+        "hint": "Skjult skrivemåte gir «A eller B»-knapper: en ren øreoppgave, og mye vanskeligere.",
+        "always": "Alltid",
+        "afterAnswer": "Bare etter svaret"
+      },
+      "gloss": {
+        "label": "Ordenes betydning",
+        "hint": "Oversettelsen fra steg 1.",
+        "always": "Alltid",
+        "afterAnswer": "Etter svaret",
+        "never": "Aldri"
+      },
+      "tip": "Skrivemåte «alltid» og betydning «etter svaret» er kombinasjonen de fleste lærere ender på: eleven svarer på gehør, og betydningen kommer som belønning, ikke som hint."
     },
     "step5": {
       "eyebrow": "Steg 5",
       "title": "Resultat og minne",
-      "lede": "Vurderes på serveren, én prøve om gangen: svaret er en alternativ-id, og fasiten blir der til prøven lukkes. Det eneste egentlige valget er hva resultatet får lov til å flytte."
+      "lede": "Vurderes på serveren, én prøve om gangen: svaret er en alternativ-id, og fasiten blir der til prøven lukkes. Det eneste egentlige valget er hva resultatet får lov til å flytte.",
+      "need": "{need} av {probes} riktige",
+      "passMeter": "Bestått-grense",
+      "passField": "Bestått-grense i prosent",
+      "rates": {
+        "title": "Hva svarene vurderer"
+      },
+      "memory": {
+        "label": "Hva som skrives til minnet",
+        "contrast": "Kontrasten",
+        "contrast+word": "Kontrast + ord",
+        "none": "Ingenting"
+      },
+      "atoms": {
+        "contrast": "Et fonologisk atom, ikke et ord. Vurderes av hver prøve i settet, får sin egen repetisjonsplan og vises i rapporten som «hører kj/sj: 9 av 12».",
+        "words": "Ordatomene. Å velge et ord blant to er svakt bevis på at ordet er kjent — å slå dette på flytter repetisjonsdatoer på grunnlag av et valg som kan gjettes."
+      },
+      "exposure": {
+        "label": "Logg ordet som hørt",
+        "help": "Skriver en eksponeringshendelse på ordatomet — ingen vurdering, ingen endring i repetisjonsdatoen. Mater «sett i 4 oppgaver» på ordkortet."
+      },
+      "sittings": {
+        "label": "Tillatte runder",
+        "hint": "Ubegrenset hvis du ikke setter et tall. Hørsel trenes med repetisjon; en grense er uvanlig her.",
+        "unlimited": "Ubegrenset"
+      },
+      "teacher": {
+        "title": "Hva læreren får",
+        "lead": "Per par: hvor ofte det ble spilt og hvor ofte det ble hørt riktig. Et par under 50 % i en gruppe er signalet om at lyden trenger en leksjon, ikke flere prøver.",
+        "caption": "Tallene per par kommer i oppgaverapporten (planlagt). Hvert forsøk registrerer dem allerede."
+      }
     },
     "issues": {
       "MP_NO_CONTRAST": "Ingen kontrastfamilie er valgt — eller kursets språk ({language}) har ingen. Settet har ingenting å vurdere.",
@@ -4863,6 +4966,40 @@
       "MP_NO_MEMORY": "Tenk over det",
       "MP_CONTRAST_CARD_LATER": "Les notatet",
       "MP_EXPOSURE_LATER": "Les notatet"
+    },
+    "gate": {
+      "pairs": "{ready, plural, one {# brukbart par} other {# brukbare par}}, {words, plural, one {# ord} other {# ord}}, {clips, plural, one {# opptak} other {# opptak}}",
+      "probes": "{count} prøver trukket {how} per forsøk — rekkefølgen når aldri siden likt to ganger",
+      "sampling": {
+        "balanced": "balansert",
+        "random": "tilfeldig",
+        "weakest": "svakeste først"
+      },
+      "plays": "{replays} per prøve · {verdict}",
+      "playsUnlimited": "Ubegrenset antall avspillinger",
+      "playsLimited": "{count, plural, one {# avspilling} other {# avspillinger}}",
+      "verdictLater": "ingen dom før til slutt",
+      "verdictAb": "svar med en gang og A/B ved feil",
+      "verdictNow": "svar med en gang",
+      "graded": "Vurderes på serveren mot alternativ-id · bestått ved {pass} %",
+      "memoryNone": "Skriver ingenting til minnet",
+      "memoryContrast": "Vurderer bare contrast:{id}",
+      "memoryContrastExposure": "Vurderer bare contrast:{id}; ordene får en eksponeringshendelse, ingen vurdering — lagret, ikke skrevet til ordet ennå",
+      "memoryWords": "Vurderer contrast:{id} og ordene",
+      "noSynthetic": "Ingen syntetisk tale i settet"
+    },
+    "preview": {
+      "phone": "Telefon",
+      "desktop": "Skrivebord",
+      "reader": "Lesekort",
+      "deviceLabel": "Enhet",
+      "modeLabel": "Forhåndsvisning",
+      "static": "Statisk",
+      "live": "Live",
+      "restart": "Start runden på nytt",
+      "empty": "Ingenting å forhåndsvise ennå — et par trenger to ord med lyd.",
+      "noteStatic": "Statisk forhåndsvisning: den første prøven er tegnet, ingenting spilles og ingenting tar imot svar.",
+      "noteLive": "Live-forhåndsvisning: en lokal runde med dine egne klipp. Ingenting sendes og ingenting lagres som forsøk."
     }
   }
 }

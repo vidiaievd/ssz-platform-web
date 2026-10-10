@@ -104,6 +104,12 @@ import {
   toContent as readAloudToContent,
   toExpectedAnswers as readAloudToExpectedAnswers,
 } from '@/lib/shared-kernel/read-aloud';
+import {
+  fromPersisted as minimalPairsFromPersisted,
+  TEMPLATE_CODE as MINIMAL_PAIRS_TEMPLATE_CODE,
+  toContent as minimalPairsToContent,
+  toExpectedAnswers as minimalPairsToExpectedAnswers,
+} from '@/lib/shared-kernel/minimal-pairs';
 import type { MaterialKind } from '@/lib/content/lesson-types';
 
 import { exerciseFormSchema, type ExerciseFormValues } from '../schemas/exercise';
@@ -164,6 +170,10 @@ import { ReadAloudBuilder } from './read-aloud/builder';
 import type { ReadAloudDocument } from './read-aloud/edits';
 import { ReadAloudPreview } from './read-aloud/read-aloud-preview';
 import type { SavedDocument as SavedReadAloud } from './read-aloud/use-read-aloud-autosave';
+import { MinimalPairsBuilder } from './minimal-pairs/builder';
+import type { MinimalPairsDocument } from './minimal-pairs/edits';
+import { MinimalPairsPreview } from './minimal-pairs/minimal-pairs-preview';
+import type { SavedDocument as SavedMinimalPairs } from './minimal-pairs/use-minimal-pairs-autosave';
 import { SentenceSchemaBuilder } from './sentence-schema/builder';
 import { SentenceSchemaPreview } from './sentence-schema/sentence-schema-preview';
 import type { SentenceSchemaDocument } from './sentence-schema/edits';
@@ -254,6 +264,9 @@ export function ExerciseEditorPane({
   /** The speaking exercise as its builder currently has it, for the preview column. */
   const [readAloud, setReadAloud] = useState<ReadAloudDocument | null>(null);
 
+  /** The listening-discrimination set as its builder currently has it, for the preview column. */
+  const [minimalPairs, setMinimalPairs] = useState<MinimalPairsDocument | null>(null);
+
   /**
    * Whichever builder is open, as it stands this second.
    *
@@ -291,6 +304,8 @@ export function ExerciseEditorPane({
           READ_ALOUD_TEMPLATE_CODE,
         )
       : null) ??
+    // No audio block: the type carries its clips in the document (plan 72 §3.13).
+    (minimalPairs !== null ? { ...minimalPairsToContent(minimalPairs) } : null) ??
     null;
 
   const isGapFill = exercise?.templateCode === TEMPLATE_CODE;
@@ -359,6 +374,8 @@ export function ExerciseEditorPane({
   const isInflectionTable = exercise?.templateCode === INFLECTION_TABLE_TEMPLATE_CODE;
   /* By the template code alone: a new template with one shape (plan 53's lesson). */
   const isReadAloud = exercise?.templateCode === READ_ALOUD_TEMPLATE_CODE;
+  /* By the template code alone: a new template with one shape (plan 53's lesson). */
+  const isMinimalPairs = exercise?.templateCode === MINIMAL_PAIRS_TEMPLATE_CODE;
 
   return (
     /*
@@ -424,6 +441,8 @@ export function ExerciseEditorPane({
             <InflectionTablePreview exercise={inflectionTable} />
           ) : isReadAloud && readAloud !== null ? (
             <ReadAloudPreview exercise={readAloud} />
+          ) : isMinimalPairs && minimalPairs !== null ? (
+            <MinimalPairsPreview exercise={minimalPairs} />
           ) : (
             <ExerciseLessonPreview title={lessonTitle ?? ''} values={previewValues} />
           )
@@ -708,6 +727,23 @@ export function ExerciseEditorPane({
               queryClient.setQueryData<ExerciseWithAnswers | null>(
                 authoringKeys.exercise(exerciseId),
                 (cached) => (cached ? applySavedReadAloud(cached, updatedAt, saved) : cached),
+              )
+            }
+          />
+        ) : isMinimalPairs && exercise != null ? (
+          // A set owns a document because its key is which clip is which word, over a pack of
+          // contrast families the author cannot edit, with the teacher's note per pair in the
+          // other column — nothing the generic form has a field for.
+          <MinimalPairsBuilder
+            key={exerciseId}
+            exerciseId={exerciseId}
+            containerId={container.id}
+            initialExercise={minimalPairsDocumentFrom(exercise)}
+            onDocumentChange={setMinimalPairs}
+            onSavedRemote={(updatedAt, saved) =>
+              queryClient.setQueryData<ExerciseWithAnswers | null>(
+                authoringKeys.exercise(exerciseId),
+                (cached) => (cached ? applySavedMinimalPairs(cached, updatedAt, saved) : cached),
               )
             }
           />
@@ -1440,6 +1476,34 @@ function applySavedReadAloud(
       READ_ALOUD_TEMPLATE_CODE,
     ) as ExerciseWithAnswers['content'],
     expectedAnswers: { ...readAloudToExpectedAnswers(saved.exercise) },
+    ...(instruction &&
+      line !== '' && {
+        instructions: [{ ...instruction, instructionText: line }, ...rest],
+      }),
+  };
+}
+
+/** The stored columns as the kernel's minimal-pairs document, plus the row's token. */
+function minimalPairsDocumentFrom(exercise: ExerciseWithAnswers): MinimalPairsDocument {
+  return {
+    ...minimalPairsFromPersisted(exercise.content, exercise.expectedAnswers),
+    updatedAt: exercise.updatedAt ?? '',
+  };
+}
+
+/** The cached exercise as the save left it — both columns and the token. */
+function applySavedMinimalPairs(
+  cached: ExerciseWithAnswers,
+  updatedAt: string,
+  saved: SavedMinimalPairs,
+): ExerciseWithAnswers {
+  const [instruction, ...rest] = cached.instructions ?? [];
+  const line = saved.exercise.instruction.trim();
+  return {
+    ...cached,
+    updatedAt,
+    content: { ...minimalPairsToContent(saved.exercise) } as ExerciseWithAnswers['content'],
+    expectedAnswers: { ...minimalPairsToExpectedAnswers(saved.exercise) },
     ...(instruction &&
       line !== '' && {
         instructions: [{ ...instruction, instructionText: line }, ...rest],

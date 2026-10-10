@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   AudioWaveform,
@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import { Input } from '@/components/ui/input';
 import type { ContrastIcon, Provenance, TtsPolicy } from '@/lib/shared-kernel/minimal-pairs';
 
 /**
@@ -189,5 +190,117 @@ export function SectionHead({
       </div>
       {children !== undefined && <div className="flex flex-wrap gap-2">{children}</div>}
     </div>
+  );
+}
+
+/**
+ * `wb-cov` with its meter: the figure, what it is counted against, a bar and the number field.
+ * `band` draws the working range over the bar (`wb-bar[data-band]`, step 3); a plain bar without
+ * it is step 5's pass mark.
+ */
+export function MeterRow({
+  figure,
+  unit,
+  sub,
+  value,
+  band,
+  barLabel,
+  barSub,
+  children,
+}: {
+  figure: number;
+  unit: string;
+  sub: string;
+  /** 0–100, how far the bar is filled. */
+  value: number;
+  band?: { from: number; to: number };
+  barLabel: string;
+  barSub?: string;
+  /** The number field. */
+  children: ReactNode;
+}) {
+  const width = Math.max(0, Math.min(100, value));
+  return (
+    <div className="flex flex-wrap items-center gap-4 rounded-(--ssz-radius-md) border border-(--ssz-border-default) bg-(--ssz-bg-surface) p-4">
+      <div>
+        <span className="text-2xl font-bold tracking-tight tabular-nums">
+          {figure}
+          <i className="text-base font-normal text-(--ssz-text-muted) not-italic"> {unit}</i>
+        </span>
+        <p className="m-0 text-xs text-(--ssz-text-muted)">{sub}</p>
+      </div>
+      <div className="min-w-[120px] flex-1">
+        <div
+          role="meter"
+          aria-label={barLabel}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(width)}
+          className="relative h-1.5 overflow-hidden rounded-full bg-(--ssz-bg-muted)"
+        >
+          {band !== undefined && (
+            <u
+              data-testid="mp-band"
+              className="absolute inset-y-0 no-underline opacity-70"
+              style={{
+                left: `${band.from}%`,
+                width: `${band.to - band.from}%`,
+                background: 'var(--ssz-color-success-100)',
+              }}
+            />
+          )}
+          <i
+            className="relative block h-full rounded-[inherit] transition-[width] duration-(--ssz-duration-slow) ease-(--ssz-ease-out)"
+            style={{ width: `${width}%`, background: 'var(--ssz-color-primary-500)' }}
+          />
+        </div>
+        {barSub !== undefined && (
+          <p className="m-0 mt-1.5 text-xs text-(--ssz-text-muted)">{barSub}</p>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * The 78 px centred number field of `mp-num`.
+ *
+ * What is typed is kept as text until the field is left: a field that always showed the clamped
+ * number could never be emptied on the way to the next one. A readable number is committed (the
+ * kernel clamps it) as it is typed; on leaving, the field shows what the document holds.
+ */
+export function NumberField({
+  value,
+  min,
+  max,
+  step,
+  label,
+  onCommit,
+}: {
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  label: string;
+  onCommit: (value: number) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <Input
+      type="number"
+      aria-label={label}
+      className="w-[78px] text-center tabular-nums"
+      min={min}
+      max={max}
+      {...(step === undefined ? {} : { step })}
+      value={draft ?? String(value)}
+      onChange={(event) => {
+        setDraft(event.target.value);
+        const typed = Number.parseInt(event.target.value, 10);
+        if (Number.isFinite(typed)) onCommit(typed);
+      }}
+      onBlur={() => setDraft(null)}
+    />
   );
 }
