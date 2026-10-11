@@ -21,6 +21,12 @@ import {
   hasMaterial,
   planOf,
 } from '../read-aloud/index';
+import {
+  expectedOf,
+  fromPersisted as informationTransferFromPersisted,
+  isLexicalType,
+  readyFields,
+} from '../information-transfer/index';
 import { tokenize } from '../text/words';
 import type { DerivedTarget, ExerciseItem, ExerciseItems } from './model';
 
@@ -38,6 +44,7 @@ const ENVELOPE = { id: '', moduleId: '', title: '', instructions: '', updatedAt:
  * plan 67: its verdict is per question, sent the same way. `dictation` joined with plan 68:
  * its verdict is per sentence. `inflection_table` joined with plan 69: its verdict is per cell.
  * `read_aloud` joined with plan 70: one prompt, one recording, one verdict from the teacher.
+ * `information_transfer` joined with plan 73: its verdict is per cell, `itemKey = fieldId` (README).
  * `minimal_pairs` (plan 72) stays out: its probes are drawn per attempt and it is scored as one set,
  * so its words are addressed at the exercise level by the targets panel, like `writing_task`. A
  * template that grades as a whole gains nothing from per-piece targets — the evidence would
@@ -53,6 +60,7 @@ export const ADDRESSABLE_TEMPLATES: readonly string[] = [
   'dictation',
   'inflection_table',
   'read_aloud',
+  'information_transfer',
 ];
 
 export function isAddressableTemplate(templateCode: string): boolean {
@@ -86,6 +94,8 @@ export function itemsOf(
       return inflectionItems(content, expectedAnswers);
     case 'read_aloud':
       return readAloudItems(content, expectedAnswers);
+    case 'information_transfer':
+      return informationTransferItems(content, expectedAnswers);
     default:
       return null;
   }
@@ -307,6 +317,31 @@ function readAloudItems(content: unknown, expectedAnswers: unknown): ExerciseIte
           matchValues: [...new Set([...focused, ...tokenize(material).map((t) => t.w)])],
         },
       ];
+    });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * A cell of the blank — `itemKey = fieldId` of the handoff (README «Registry rows»): its own
+ * verdict, its own explanation. Only ready cells, the ones a learner is graded on. Labelled
+ * `Klokkeslett — 17:30`. Only a `word` or `name` cell offers anything to the suggester: a time,
+ * a price or a phone number is not vocabulary (DECISIONS §4), and suggesting a word for «450»
+ * would be noise.
+ */
+function informationTransferItems(content: unknown, expectedAnswers: unknown): ExerciseItem[] {
+  try {
+    const document = informationTransferFromPersisted(content, expectedAnswers);
+    return readyFields(document).map((f) => {
+      const expected = expectedOf(f);
+      const value = expected[0] ?? '';
+      return {
+        key: f.id,
+        label: `${f.label.trim()} — ${value}`,
+        value,
+        matchValues: isLexicalType(f.type) ? expected : [],
+      };
     });
   } catch {
     return [];

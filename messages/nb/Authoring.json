@@ -3944,6 +3944,338 @@
       "note": "Dette er elevens egen skjerm. Rettingen her bruker fasiten din i denne nettleseren og blir ikke registrert."
     }
   },
+  "informationTransfer": {
+    "shell": {
+      "step1": "Kilde",
+      "step2": "Skjema",
+      "step3": "Svar",
+      "step4": "Gjennomføring",
+      "step5": "Resultat",
+      "stepSub1": "tekst eller opptak",
+      "stepSub2": "feltene",
+      "stepSub3": "hva som regnes som riktig",
+      "stepSub4": "hvordan det spilles",
+      "stepSub5": "poeng og hukommelse",
+      "stepsLabel": "Trinn i informasjonsoverføringen"
+    },
+    "subject": {
+      "field": "Felt {n}",
+      "fieldLabelled": "Felt {n} («{label}»)",
+      "thisField": "Dette feltet"
+    },
+    "issues": {
+      "INF_NO_PASSAGE": "Ingen kildetekst. Det er ingenting å hente informasjon fra.",
+      "INF_NO_TRANSCRIPT": "Ingen transkripsjon. Uten den kan byggeren ikke sjekke et eneste forventet svar mot kilden, og hele kontrollen under går i blinde.",
+      "INF_NO_TITLE": "Oppgaven har ingen tittel — øvingslisten har ingenting å vise for den.",
+      "INF_NO_INSTRUCTION": "Ingen instruksjon. Eleven ser et tomt skjema og aner ikke hva det hører til.",
+      "INF_NO_PACK": "Ingen språkpakke for «{language}». Klokkeslett, datoer og tall leses bare fra sifre; klokkeord og tall skrevet med bokstaver forstås ikke.",
+      "INF_NO_FIELDS": "Skjemaet har ingen felt.",
+      "INF_FIELD_NO_LABEL": "{subject} har ingen ledetekst. En celle uten ledetekst i et skjema kan ikke besvares.",
+      "INF_DUPLICATE_LABEL": "{subject} har samme ledetekst som et annet felt. Rapporten viser to like rader, og ingen vet hvilken celle som feilet.",
+      "INF_FIELD_NO_KEY": "{subject} har ikke noe forventet svar — cellen kan aldri vurderes.",
+      "INF_FIELD_NO_WHY": "{subject} har ingen forklaring. En elev som bommer på denne cellen får en rød boks og ingen grunn.",
+      "INF_KEY_NOT_IN_SOURCE": "{subject}: «{value}» står ikke i kilden. Enten avviker formuleringen fra det eleven får lese, eller så finnes ikke opplysningen der i det hele tatt.",
+      "INF_SENTENCE_ANSWER": "{subject} forventer en hel setning. Det er et kortsvar-spørsmål, ikke en skjemacelle — denne typen er for fakta man kan løfte ut.",
+      "INF_FEW_FIELDS": "{count, plural, one {# felt} other {# felt}}. Under {min} er ikke oppgaven selektiv lenger: det er ingenting å sile.",
+      "INF_MANY_FIELDS": "{count} felt. Over {max} skriver eleven av kilden i stedet for å plukke ut fakta.",
+      "INF_ALL_FREE_TEXT": "Alle feltene er fri tekst. Formatnormaliseringen gjør ingenting her, og oppgaven hviler på rettskriving — greit for en lesekilde, hardt for lyd.",
+      "INF_KEY_UNREADABLE": "{subject}: «{value}» kan ikke leses som {type}. Kjernen ville avvist forfatterens eget fasitsvar, så hvert svar feiler.",
+      "INF_TIME_AMBIGUOUS": "{subject}: «{value}» kan bety både formiddag og ettermiddag, så begge godtas. Skriv det i 24-timersformat hvis bare ett er riktig.",
+      "INF_KEY_FAILS_GRADER": "Din egen fasit består ikke din egen retting. En av de forventede verdiene kan ikke leses for felttypen sin.",
+      "INF_TYPOS_ON": "Skrivefeil tilgis i navn og ord (ett tegn). Gjør rettskrivingen løsere, og den måler ikke denne typen.",
+      "INF_SPELLED_OFF": "Tall skrevet med bokstaver avvises. En elev som skriver et klokkeslett eller et beløp med ord i stedet for sifre, får feil for skrivemåten.",
+      "INF_CASE_SENSITIVE": "Skiller mellom store og små bokstaver. «anne lise berg» ville blitt rettet som feil, og det måler bare shift-tasten.",
+      "INF_ONE_PLAY_MANY": "Én avspilling for {count} felt er en hukommelsestest. To er standard for et skjema.",
+      "INF_NO_SEGMENTS": "{count} felt og ingen tidskoder. Fragmenter per felt lar eleven gå tilbake til prisen uten å høre hele beskjeden på nytt.",
+      "INF_SOURCE_HIDDEN": "Kilden er skjult mens eleven svarer, og kilden er en tekst. Eleven ville fylt ut skjemaet etter hukommelsen — det er en annen oppgave.",
+      "INF_PASS_TOO_HIGH": "Bestått ved {pct} % av {count} felt — ett feilhørt siffer gjør at oppgaven ikke bestås.",
+      "INF_REQUIRED_ALL": "Alle obligatoriske felt må være riktige i tillegg til prosenten. Bruk det når ett faktum bærer oppgaven — tidspunktet for en avtale.",
+      "INF_NO_MEMORY": "Ingenting skrives til minnet. Oppgaven rapporterer, og ingenting kommer tilbake.",
+      "INF_SKILL_CARD_LATER": "Ferdigheten registreres som belegg nå; sin egen repetisjonsplan får den etter fase 7 av plan 63 — til da kommer skjemaet tilbake felt for felt.",
+      "INF_EXPOSURE_LATER": "Eksponeringen lagres med oppgaven og skrives ennå ikke til ordet."
+    },
+    "fixes": {
+      "INF_NO_PASSAGE": "Lim inn kunngjøringen eller timeplanen",
+      "INF_NO_TRANSCRIPT": "Skriv transkripsjonen",
+      "INF_NO_TITLE": "Gi den en tittel",
+      "INF_NO_INSTRUCTION": "Skriv én linje",
+      "INF_NO_PACK": "Se språkpakken",
+      "INF_NO_FIELDS": "Legg til et felt",
+      "INF_FIELD_NO_LABEL": "Gi feltet et navn",
+      "INF_DUPLICATE_LABEL": "Gi det ene nytt navn",
+      "INF_FIELD_NO_KEY": "Skriv svaret",
+      "INF_FIELD_NO_WHY": "Skriv «hvorfor»",
+      "INF_KEY_NOT_IN_SOURCE": "Sjekk mot kilden",
+      "INF_SENTENCE_ANSWER": "Gjør det kortere eller bytt type",
+      "INF_FEW_FIELDS": "Legg til felt",
+      "INF_MANY_FIELDS": "Del opp oppgaven",
+      "INF_ALL_FREE_TEXT": "Vurder et tall eller et klokkeslett",
+      "INF_KEY_UNREADABLE": "Rett verdien eller bytt type",
+      "INF_TIME_AMBIGUOUS": "Bruk {suggestion}",
+      "INF_KEY_FAILS_GRADER": "Se på de godtatte formene",
+      "INF_TYPOS_ON": "Les merknaden",
+      "INF_SPELLED_OFF": "Tenk over det",
+      "INF_CASE_SENSITIVE": "Slå det av",
+      "INF_ONE_PLAY_MANY": "Tillat to",
+      "INF_NO_SEGMENTS": "Slå på tidskoder",
+      "INF_SOURCE_HIDDEN": "La teksten være synlig",
+      "INF_PASS_TOO_HIGH": "Senk den",
+      "INF_REQUIRED_ALL": "Les merknaden",
+      "INF_NO_MEMORY": "Tenk over det",
+      "INF_SKILL_CARD_LATER": "Les merknaden",
+      "INF_EXPOSURE_LATER": "Les merknaden"
+    },
+    "types": {
+      "time": {
+        "label": "Klokkeslett",
+        "desc": "Klokkeslett. Alle skrivemåter pakken kjenner, både 12- og 24-timers.",
+        "example": "17:30"
+      },
+      "date": {
+        "label": "Dato",
+        "desc": "Dag og måned. Året ignoreres med mindre du skriver et.",
+        "example": "03.03"
+      },
+      "number": {
+        "label": "Tall",
+        "desc": "Vanlig antall eller romnummer. Sifre eller ord.",
+        "example": "204"
+      },
+      "money": {
+        "label": "Pris",
+        "desc": "Beløp med eller uten valuta.",
+        "example": "450"
+      },
+      "phone": {
+        "label": "Telefon",
+        "desc": "Bare sifre etter normalisering; gruppering og landkode ignoreres.",
+        "example": "22456789"
+      },
+      "name": {
+        "label": "Navn eller sted",
+        "desc": "Egennavn. Store og små bokstaver tilgis, rettskrivingen ikke — med mindre du tillater skrivefeil."
+      },
+      "word": {
+        "label": "Ord eller frase",
+        "desc": "Et kort leksikalsk svar. Tegnsetting og store bokstaver tilgis."
+      }
+    },
+    "step1": {
+      "eyebrow": "Trinn 1",
+      "title": "Kilden",
+      "lede": "En kunngjøring som skal leses eller høres. Én bryter avgjør hvilken, og det er den samme bryteren som flytter inndata-aksen — ingenting annet i oppgaven endres.",
+      "titleLabel": "Tittel",
+      "instructionLabel": "Instruksjon til eleven",
+      "instructionHelp": "Én linje. Lyttereglene tegnes av spilleren — ikke gjenta dem her.",
+      "sourceLabel": "Hvor opplysningene kommer fra",
+      "sourceHelp": "Bytter inndata: tekst eller lyd.",
+      "sourceText": "En tekst",
+      "sourceAudio": "Et opptak",
+      "focusLabel": "Fokusakse",
+      "focusHelp": "Hva oppgaven regnes som trening i.",
+      "focusPragmatics": "Pragmatikk",
+      "focusVocabulary": "Ordforråd",
+      "packLabel": "Språkpakke",
+      "packNone": "Ingen pakke for dette språket",
+      "packTip": "<b>Pakken, ikke koden.</b> Klokkeord, månedsnavn, tallord og valuta kommer fra kursets språkpakke — <mono>{pack}</mono>. Normaliseringen selv kjenner ikke noe språk, så den samme oppgavetypen virker i et kurs på alle språk som har en pakke.",
+      "textTitle": "Teksten eleven leser",
+      "words": "{count, plural, one {# ord} other {# ord}}",
+      "passageTitleLabel": "Overskrift over kilden",
+      "passageTitleHelp": "Hva eleven ser på: en timeplan, en kunngjøring, en annonse.",
+      "passageLabel": "Tekst",
+      "passageMissing": "Uten kilde er det ingenting å hente ut.",
+      "textTip": "La teksten inneholde mer enn skjemaet spør om. Ferdigheten er å plukke ut fire fakta fra en side — en kilde som inneholder nøyaktig de fire svarene trener lesing, ikke utvelgelse.",
+      "transcriptCallout": "<b>Transkripsjonen er ikke valgfri her.</b> Hver kontroll i trinn 2 — «står dette faktumet egentlig i kilden», «sies svaret to ganger» — leser transkripsjonen. Om eleven noen gang får se den, er en egen innstilling ovenfor."
+    },
+    "step2": {
+      "eyebrow": "Trinn 2",
+      "title": "Skjemaet",
+      "lede": "Hvert felt er ett faktum og ett element i oppgaven: egen vurdering, egen forklaring, egen rad i rapporten. Id-en følger med — å endre rekkefølgen flytter aldri en forklaring.",
+      "formTitleLabel": "Skjemaets overskrift",
+      "formTitleHelp": "Hva eleven fyller ut.",
+      "layoutLabel": "Oppsett",
+      "layoutForm": "Ledetekst ved siden av",
+      "layoutTable": "Ledetekst over",
+      "fieldsEyebrow": "Felt",
+      "ready": "{ready} av {total} klare",
+      "lift": "Løft ut av kilden",
+      "liftCount": "Løft ut av kilden ({count})",
+      "add": "Legg til felt",
+      "fieldNew": "Nytt felt",
+      "moveUp": "Flytt opp",
+      "moveDown": "Flytt ned",
+      "delete": "Slett felt",
+      "labelLabel": "Ledetekst på cellen",
+      "kindLabel": "Type svar",
+      "unitLabel": "Enhet",
+      "unitHelp": "Etterledd",
+      "expectedLabel": "Forventet svar",
+      "wordingPlaceholder": "en annen godtatt formulering",
+      "removeWording": "Fjern formulering",
+      "unreadable": "«{value}» kan ikke leses som {type} — ditt eget fasitsvar ville feilet.",
+      "notInSource": "Finnes ikke i kilden. Sjekk formuleringen.",
+      "spellings": "{count} skrivemåter godtas, pluss alle skrivemåter kjernen kjenner.",
+      "whyLabel": "Forklaring som vises etter svaret",
+      "whyMissing": "Blokkering: en rød celle uten grunn koster eleven leksjonen.",
+      "whyHelp": "Vises ved bom, og ved riktig svar når fasiten vises.",
+      "hintLabel": "Hjelpetekst under ledeteksten",
+      "hintHelp": "Valgfri. Står på selve skjemaet — en merknad som «dag og måned» eller «kl.».",
+      "requiredLabel": "Obligatorisk",
+      "requiredHelp": "En obligatorisk celle kan gjøres avgjørende i seg selv i trinn 5. Valgfrie celler teller fortsatt med i prosenten.",
+      "scan": {
+        "title": "Fakta funnet i kilden",
+        "subText": "Klokkeslett, datoer, beløp og telefonnumre byggeren ser i teksten. Å sette inn ett lager et felt med typen og det forventede svaret ferdig utfylt — ledeteksten og forklaringen skriver du selv.",
+        "subTranscript": "Klokkeslett, datoer, beløp og telefonnumre byggeren ser i transkripsjonen. Å sette inn ett lager et felt med typen og det forventede svaret ferdig utfylt — ledeteksten og forklaringen skriver du selv.",
+        "already": "allerede et felt",
+        "close": "Lukk"
+      }
+    },
+    "step3": {
+      "eyebrow": "Steg 3",
+      "title": "Hva som teller som samme svar",
+      "lede": "Formatreglene bor i kjernen, per felttype — ikke i en liste over skrivemåter du må huske å skrive. De ekstra formuleringene dine i steg 2 er bare for leksikalske tilfeller: en forkortelse, en kortform av et navn.",
+      "spelled": {
+        "label": "Godta tall skrevet med bokstaver",
+        "help": "Et klokkeslett eller et beløp skrevet med ord teller som sifrene det står for. Ordforrådet kommer fra språkpakken.",
+        "noPack": "Kurset har ingen språkpakke, så det finnes ikke noe tallordforråd å lese — klokkeslett og tall leses bare fra sifre."
+      },
+      "typos": {
+        "label": "Tilgi én skrivefeil i ord og navn",
+        "help": "Bare leksikalske felt. Gjelder aldri tall: 405 er ikke en skrivefeil for 450, det er feil faktum."
+      },
+      "strictCase": {
+        "label": "Skill mellom store og små bokstaver",
+        "help": "Av som standard. En stor bokstav er ikke faktumet som testes."
+      },
+      "accepted": {
+        "title": "Godtatte former, per felt",
+        "passes": "fasiten din består rettingen din",
+        "fails": "fasiten din består ikke rettingen din",
+        "emptyTitle": "Ingen forventede svar ennå",
+        "emptyBody": "Skriv svarene i steg 2, så vises de godtatte formene her.",
+        "caption": "Grønn betyr at skrivemåten er en av dine; grå betyr at kjernen kjente igjen faktumet i en skrivemåte du ikke skrev, og godtok den — eleven ser begge rettet som riktige, med standardformen ved siden av den grå.",
+        "unnamed": "uten navn",
+        "chips": "Godtatte former for «{label}»",
+        "nothing": "ingenting kjernen kan lese",
+        "tryLabel": "Prøv et svar for «{label}»",
+        "tryPlaceholder": "prøv et svar",
+        "tryIdle": "kjører den ekte rettingen",
+        "tryOk": "godtatt, slik det står",
+        "tryFormat": "godtatt → {canonical}",
+        "tryTypo": "godtatt som skrivefeil",
+        "tryUnread": "kan ikke leses som {type}",
+        "tryWrong": "feil faktum"
+      },
+      "rule": {
+        "title": "Hvor regelen bor",
+        "body": "En liste over godtatte skrivemåter per felt var det andre alternativet, og det svikter likt hver gang: forfatteren skriver «14:00» og «kl. 14», eleven skriver «kl 14» uten punktum, og feltet blir rødt for tegnsettingen. Formater er et lukket problem — klokke, dato, beløp, telefon — så kjernen eier dem, og forfatteren navngir bare faktumet. Se <mono>DECISIONS §1</mono>."
+      }
+    },
+    "step4": {
+      "eyebrow": "Steg 4",
+      "title": "Hvordan den spilles",
+      "lede": "Vanskelighetsgraden bor her og ingen andre steder: hva som er synlig mens de skriver, hvor mange forsøk de får, når fasiten åpnes. Innholdet i steg 1–3 endres ikke mellom en A1-gruppe og en B1-gruppe.",
+      "itemNoun": "skjemaet",
+      "showSource": {
+        "label": "Teksten mens de fyller ut skjemaet",
+        "help": "Å skjule en skrevet kilde gjør dette til en hukommelsesoppgave — en annen type.",
+        "always": "Alltid synlig",
+        "afterAnswer": "Skjult mens de svarer"
+      },
+      "attempts": {
+        "label": "Forsøk på hele skjemaet",
+        "help": "Et nytt forsøk etter rettingen, med de riktige feltene beholdt.",
+        "unlimited": "Ubegrenset"
+      },
+      "hints": {
+        "label": "Hint i feltene",
+        "help": "Hintet fra steg 2. «Etter ett forsøk» holder første forsøk rent.",
+        "start": "Fra start",
+        "afterOne": "Etter ett forsøk",
+        "never": "Aldri"
+      },
+      "reveal": {
+        "label": "Når svarene vises",
+        "help": "Forklaringen kommer alltid med rettingen; dette gjelder selve den forventede verdien.",
+        "immediately": "Med rettingen",
+        "afterLastAttempt": "Etter siste forsøk",
+        "never": "Aldri"
+      },
+      "oneAtATime": {
+        "label": "Ett felt om gangen",
+        "help": "Av viser hele skjemaet — det klassiske Norskprøve-oppsettet. På går gjennom {count} felt ett etter ett, noe som hjelper på telefon og svekker ferdigheten: poenget er å velge hva man skal lytte etter."
+      },
+      "fragmentsTip": "Med tidskoder på får hvert felt sin egen «spill av fragmentet»-knapp for den delen av opptaket det hører til. Fragmenter er gratis — de bruker aldri en avspilling — så grensen forblir en grense for å høre hele beskjeden, ikke for å sjekke ett tall."
+    },
+    "step5": {
+      "eyebrow": "Steg 5",
+      "title": "Resultat og minne",
+      "lede": "Rettes på serveren, felt for felt. Prosenten for oppgaven er en oppsummering av feltenes resultater, aldri en erstatning for dem: læreren må vite hvilket faktum som ble bommet på, ikke at fire av seks var riktige.",
+      "need": "{need} av {count} felt",
+      "passMeter": "Krav for å bestå",
+      "passField": "Krav for å bestå, prosent",
+      "requiredAll": {
+        "label": "Alle obligatoriske felt må være riktige",
+        "help": "I tillegg til prosenten. Bruk det når ett faktum bærer oppgaven — tidspunktet for avtalen, fristen."
+      },
+      "rates": {
+        "title": "Hva svarene vurderer"
+      },
+      "memory": {
+        "label": "Skrives til minnet",
+        "skill": "Ferdigheten",
+        "skillWords": "Ferdighet + ord",
+        "none": "Ingenting"
+      },
+      "atoms": {
+        "skill": "Vurderes av skjemaet som helhet. Det er sjangeren som overføres: en elev som kan fylle ut ett skjema etter en beskjed, kan fylle ut det neste, uansett hvilke ord det var.",
+        "words": "Bare <mono>word</mono>- og <mono>name</mono>-feltene bærer et ordatom. Et klokkeslett eller en pris er ikke ordforråd, og å vurdere det ville lagt støy i ordets plan.",
+        "wordsName": "ord · per leksikalsk felt"
+      },
+      "exposure": {
+        "label": "Registrer ord som møtt",
+        "help": "Eksponeringshendelse på de leksikalske feltene — ingen vurdering, ingen endring av repetisjonsdato. Gir «møtt i 4 oppgaver» på ordkortet."
+      },
+      "teacher": {
+        "title": "Hva læreren får",
+        "lead": "Én rad per felt for hele gruppen. En kolonne alle bommer på, er et undervisningssignal om et format — klokkeslett sagt med «halv», priser sagt som «fire femti» — og den er usynlig i én enkelt prosent.",
+        "caption": "Tallene per felt kommer i oppgaverapporten (planlagt). Hvert forsøk registrerer dem allerede."
+      }
+    },
+    "gate": {
+      "cells": "{count} felt, hvert med id, forventet svar og forklaring",
+      "graded": "Rettes på serveren, felt for felt · delvis uttelling · bestått ved {pass} %{required}",
+      "requiredAll": " og alle obligatoriske felt riktige",
+      "formats": "Formater normaliseres i kjernen for {count} felt{spelled} — fra pakken {pack}",
+      "formatsDigits": "Formater normaliseres i kjernen for {count} felt — bare fra sifre",
+      "spelled": ", tall skrevet med bokstaver inkludert",
+      "audioSource": "Lydkilde · {plays}{fragments}",
+      "freePlay": "fri avspilling",
+      "playbacks": "{count, plural, one {# avspilling} other {# avspillinger}}",
+      "fragments": " · et fragment per felt, gratis",
+      "textSource": "Tekstkilde, synlig mens skjemaet fylles ut",
+      "memory": "Vurderer {skill}{words}{exposure}",
+      "memoryWords": " og de leksikalske feltene",
+      "memoryExposure": "; leksikalske felt: eksponeringen lagres, skrives ennå ikke",
+      "memoryNone": "Skriver ingenting til minnet",
+      "addressing": "itemKey = fieldId · ExerciseItemTarget adresserer hvert felt for seg",
+      "evidence": "Belegg: suksesstak middels, feilgulv lavt. Et utfylt skjema viser at eleven kan sile en beskjed av denne sjangeren for fakta — nok til å bære en lytteenhet, ikke nok til å bære forståelse. Ett bommet felt beviser ingenting alene, og derfor bygges rapporten på feltenes resultater, ikke på prosenten.",
+      "notFreeForm": "Ikke et fritt svar: typen rettes av <mono>information-transfer.validator.ts</mono> og sendes aldri til en lærer. Et felt kjernen ikke kan lese, meldes til eleven som uleselig og sendes aldri til et menneske."
+    },
+    "preview": {
+      "title": "Forhåndsvisning",
+      "phone": "Telefon",
+      "desktop": "Datamaskin",
+      "reader": "Leserkort",
+      "deviceLabel": "Enhet",
+      "modeLabel": "Visningsmodus",
+      "static": "Statisk",
+      "live": "Live",
+      "restart": "Start forsøket på nytt",
+      "noteStatic": "Statisk forhåndsvisning: skjemaet tegnes, ingenting tar imot inndata.",
+      "noteLive": "Dette er elevens egen skjerm. Sjekkene her kjøres mot fasiten din i denne nettleseren og registreres ikke."
+    }
+  },
   "coverage": {
     "title": "Hva dette trener",
     "total": "{count, plural, one {# oppgave} other {# oppgaver}}",

@@ -232,14 +232,14 @@ export const EXERCISE_TYPES: Readonly<Record<string, ExerciseTypeDefinition>> = 
     status: 'live',
   },
 
-  // ── Catalogue, not yet built (spec 19 §3) ──────────────────────────────────
+  // A blank filled in from a notice or an announcement (plan 73). The last of spec 19's catalogue:
+  // with it every candidate is built, and `planned` has no member left until a new one is written.
   information_transfer: {
     code: 'information_transfer',
     labelKey: 'information_transfer',
     section: 'exercise',
     icon: ClipboardList,
-    status: 'planned',
-    axes: { input: 'text', output: 'written_target', modality: 'recall' },
+    status: 'live',
   },
 };
 

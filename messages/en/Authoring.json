@@ -3944,6 +3944,338 @@
       "note": "This is the student’s own screen. Checks here run on your key in this browser and are not recorded."
     }
   },
+  "informationTransfer": {
+    "shell": {
+      "step1": "Source",
+      "step2": "Blank",
+      "step3": "Answers",
+      "step4": "Delivery",
+      "step5": "Result",
+      "stepSub1": "text or recording",
+      "stepSub2": "the fields",
+      "stepSub3": "what counts as right",
+      "stepSub4": "how it is played",
+      "stepSub5": "scoring and memory",
+      "stepsLabel": "Steps of the information transfer"
+    },
+    "subject": {
+      "field": "Field {n}",
+      "fieldLabelled": "Field {n} («{label}»)",
+      "thisField": "This field"
+    },
+    "issues": {
+      "INF_NO_PASSAGE": "No source text. There is nothing to transfer information from.",
+      "INF_NO_TRANSCRIPT": "No transcript. Without it the builder cannot check a single expected answer against the source, and the whole audit below goes blind.",
+      "INF_NO_TITLE": "The exercise has no title — the practice list has nothing to show for it.",
+      "INF_NO_INSTRUCTION": "No instruction. The student sees a blank form and no idea what it belongs to.",
+      "INF_NO_PACK": "No language pack for «{language}». Times, dates and numbers are read from digits only; clock words and spelled-out numerals are not understood.",
+      "INF_NO_FIELDS": "The blank has no fields.",
+      "INF_FIELD_NO_LABEL": "{subject} has no label. An unlabelled cell in a form is unanswerable.",
+      "INF_DUPLICATE_LABEL": "{subject} shares its label with another field. The report will show two identical rows and nobody will know which cell failed.",
+      "INF_FIELD_NO_KEY": "{subject} has no expected answer — the cell can never be graded.",
+      "INF_FIELD_NO_WHY": "{subject} has no explanation. A student who misses this cell would see a red box and no reason.",
+      "INF_KEY_NOT_IN_SOURCE": "{subject}: «{value}» does not appear in the source. Either the wording differs from what the student will read, or the fact is not there at all.",
+      "INF_SENTENCE_ANSWER": "{subject} expects a whole sentence. That is a short_answer question, not a form cell — this type is for facts you can lift out.",
+      "INF_FEW_FIELDS": "{count, plural, one {# field} other {# fields}}. Under {min} the exercise stops being selective: there is nothing to sift.",
+      "INF_MANY_FIELDS": "{count} fields. Above {max} the student is transcribing the source instead of picking facts out of it.",
+      "INF_ALL_FREE_TEXT": "Every field is free text. The format normalisers do nothing here, and the exercise leans on spelling — fine for a reading source, harsh for audio.",
+      "INF_KEY_UNREADABLE": "{subject}: «{value}» cannot be read as a {type}. The core would reject the author’s own key, so every answer fails.",
+      "INF_TIME_AMBIGUOUS": "{subject}: «{value}» is ambiguous between morning and afternoon, so both are accepted. Write it as 24-hour if only one is right.",
+      "INF_KEY_FAILS_GRADER": "Your own key does not pass your own grader. One of the expected values is unreadable for its field type.",
+      "INF_TYPOS_ON": "Typos are forgiven on names and words (one character). Loosens spelling, which this type does not measure.",
+      "INF_SPELLED_OFF": "Spelled-out numerals are rejected. A student who writes a time or a sum in words instead of digits is marked wrong for notation.",
+      "INF_CASE_SENSITIVE": "Case-sensitive. «anne lise berg» would be marked wrong, which measures the shift key.",
+      "INF_ONE_PLAY_MANY": "One playback for {count} cells is a memory test. Two is the working default for a form.",
+      "INF_NO_SEGMENTS": "{count} cells and no timecodes. Per-field fragments let the student go back to the price without hearing the whole message again.",
+      "INF_SOURCE_HIDDEN": "The source is hidden while answering, and the source is a text. The student would fill the form from memory — that is a different exercise.",
+      "INF_PASS_TOO_HIGH": "Pass at {pct}% of {count} cells — one mis-heard digit fails the exercise.",
+      "INF_REQUIRED_ALL": "Every required cell must be right on top of the percentage. Use it when one fact carries the task — the time of an appointment.",
+      "INF_NO_MEMORY": "Nothing written to memory. The exercise reports and nothing comes back.",
+      "INF_SKILL_CARD_LATER": "The skill is recorded as evidence now; its own review schedule arrives after plan 63 phase 7 — until then the form comes back cell by cell.",
+      "INF_EXPOSURE_LATER": "Exposure is stored with the exercise and not yet written to the word."
+    },
+    "fixes": {
+      "INF_NO_PASSAGE": "Paste the notice or schedule",
+      "INF_NO_TRANSCRIPT": "Write the transcript",
+      "INF_NO_TITLE": "Give it a title",
+      "INF_NO_INSTRUCTION": "Write one line",
+      "INF_NO_PACK": "See the language pack",
+      "INF_NO_FIELDS": "Add a field",
+      "INF_FIELD_NO_LABEL": "Name the field",
+      "INF_DUPLICATE_LABEL": "Rename one",
+      "INF_FIELD_NO_KEY": "Write the answer",
+      "INF_FIELD_NO_WHY": "Write the «why»",
+      "INF_KEY_NOT_IN_SOURCE": "Check against the source",
+      "INF_SENTENCE_ANSWER": "Shorten it or change type",
+      "INF_FEW_FIELDS": "Add fields",
+      "INF_MANY_FIELDS": "Split the exercise",
+      "INF_ALL_FREE_TEXT": "Consider a number or a time",
+      "INF_KEY_UNREADABLE": "Fix the value or change the type",
+      "INF_TIME_AMBIGUOUS": "Use {suggestion}",
+      "INF_KEY_FAILS_GRADER": "Look at the accepted forms",
+      "INF_TYPOS_ON": "Read the note",
+      "INF_SPELLED_OFF": "Reconsider",
+      "INF_CASE_SENSITIVE": "Turn it off",
+      "INF_ONE_PLAY_MANY": "Allow two",
+      "INF_NO_SEGMENTS": "Turn timecodes on",
+      "INF_SOURCE_HIDDEN": "Keep the text visible",
+      "INF_PASS_TOO_HIGH": "Lower it",
+      "INF_REQUIRED_ALL": "Read the note",
+      "INF_NO_MEMORY": "Reconsider",
+      "INF_SKILL_CARD_LATER": "Read the note",
+      "INF_EXPOSURE_LATER": "Read the note"
+    },
+    "types": {
+      "time": {
+        "label": "Time",
+        "desc": "Clock time. Any notation the pack knows, 12- and 24-hour both.",
+        "example": "17:30"
+      },
+      "date": {
+        "label": "Date",
+        "desc": "Day and month. The year is ignored unless you write one.",
+        "example": "03.03"
+      },
+      "number": {
+        "label": "Number",
+        "desc": "Plain count or room number. Digits or words.",
+        "example": "204"
+      },
+      "money": {
+        "label": "Price",
+        "desc": "Amount with or without the currency.",
+        "example": "450"
+      },
+      "phone": {
+        "label": "Phone",
+        "desc": "Digits only after normalisation; grouping and country code are ignored.",
+        "example": "22456789"
+      },
+      "name": {
+        "label": "Name or place",
+        "desc": "Proper noun. Case is forgiven, spelling is not — unless you allow typos."
+      },
+      "word": {
+        "label": "Word or phrase",
+        "desc": "A short lexical answer. Punctuation and case forgiven."
+      }
+    },
+    "step1": {
+      "eyebrow": "Step 1",
+      "title": "The source",
+      "lede": "A notice to read or an announcement to hear. One switch decides which, and it is the same switch that moves the input axis — nothing else in the exercise changes.",
+      "titleLabel": "Title",
+      "instructionLabel": "Instruction to the student",
+      "instructionHelp": "One line. The listening rules are drawn by the runner — do not repeat them here.",
+      "sourceLabel": "Where the facts come from",
+      "sourceHelp": "Switches input: text or audio.",
+      "sourceText": "A text",
+      "sourceAudio": "A recording",
+      "focusLabel": "Focus axis",
+      "focusHelp": "What the exercise is credited as training.",
+      "focusPragmatics": "Pragmatics",
+      "focusVocabulary": "Vocabulary",
+      "packLabel": "Language pack",
+      "packNone": "No pack for this language",
+      "packTip": "<b>The pack, not the code.</b> Clock words, month names, numerals and the currency come from the language pack of the course — <mono>{pack}</mono>. The normaliser itself knows no language, so the same exercise type works in a course of any language that has a pack.",
+      "textTitle": "The text the student reads",
+      "words": "{count, plural, one {# word} other {# words}}",
+      "passageTitleLabel": "Heading over the source",
+      "passageTitleHelp": "What the student is looking at: a timetable, a notice, an advert.",
+      "passageLabel": "Text",
+      "passageMissing": "Without a source there is nothing to transfer.",
+      "textTip": "Keep more in the text than the form asks for. The skill is picking four facts out of a page — a source that contains exactly the four answers trains reading, not selection.",
+      "transcriptCallout": "<b>The transcript is not optional here.</b> Every check in step 2 — «is this fact actually in the source», «is the answer said twice» — reads the transcript. Whether the student ever sees it is a separate setting above."
+    },
+    "step2": {
+      "eyebrow": "Step 2",
+      "title": "The blank",
+      "lede": "Each field is one fact and one element of the exercise: its own verdict, its own explanation, its own row in the report. The id travels with it — reordering the form never moves an explanation.",
+      "formTitleLabel": "Heading of the form",
+      "formTitleHelp": "What the student is filling in.",
+      "layoutLabel": "Layout",
+      "layoutForm": "Labels beside",
+      "layoutTable": "Labels above",
+      "fieldsEyebrow": "Fields",
+      "ready": "{ready} of {total} ready",
+      "lift": "Lift from the source",
+      "liftCount": "Lift from the source ({count})",
+      "add": "Add field",
+      "fieldNew": "New field",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "delete": "Delete field",
+      "labelLabel": "Label on the cell",
+      "kindLabel": "Kind of answer",
+      "unitLabel": "Unit",
+      "unitHelp": "Suffix",
+      "expectedLabel": "Expected answer",
+      "wordingPlaceholder": "another accepted wording",
+      "removeWording": "Remove wording",
+      "unreadable": "«{value}» cannot be read as a {type} — your own key would fail.",
+      "notInSource": "Not found in the source. Check the wording.",
+      "spellings": "{count} spellings accepted, plus every notation the core knows.",
+      "whyLabel": "Explanation shown after the answer",
+      "whyMissing": "Blocker: a red cell with no reason costs the student the lesson.",
+      "whyHelp": "Shown on a miss, and on a pass when the key is revealed.",
+      "hintLabel": "Hint under the label",
+      "hintHelp": "Optional. Written on the form itself — a note such as «day and month» or «o’clock».",
+      "requiredLabel": "Required",
+      "requiredHelp": "A required cell can be made to matter on its own in step 5. Optional cells still count in the percentage.",
+      "scan": {
+        "title": "Facts found in the source",
+        "subText": "Times, dates, amounts and phone numbers the builder can see in the text. Inserting one creates a field with the type and the expected value already set — you still write the label and the explanation.",
+        "subTranscript": "Times, dates, amounts and phone numbers the builder can see in the transcript. Inserting one creates a field with the type and the expected value already set — you still write the label and the explanation.",
+        "already": "already a field",
+        "close": "Close"
+      }
+    },
+    "step3": {
+      "eyebrow": "Step 3",
+      "title": "What counts as the same answer",
+      "lede": "Format rules live in the core, per field type — not in a list of spellings you have to remember to write. Your extra wordings in step 2 are for the lexical cases only: an abbreviation, a short form of a name.",
+      "spelled": {
+        "label": "Accept spelled-out numerals",
+        "help": "A clock time or a sum written in words counts as the digits it names. The lexicon comes from the language pack.",
+        "noPack": "This course has no language pack, so there is no lexicon of numerals to read — times and numbers are read from digits only."
+      },
+      "typos": {
+        "label": "Forgive one typo in words and names",
+        "help": "Lexical fields only. Never applies to a number: 405 is not a typo for 450, it is the wrong fact."
+      },
+      "strictCase": {
+        "label": "Case-sensitive",
+        "help": "Off by default. A capital letter is not the fact being tested."
+      },
+      "accepted": {
+        "title": "Accepted forms, per cell",
+        "passes": "your key passes your grader",
+        "fails": "your key fails your grader",
+        "emptyTitle": "No expected answers yet",
+        "emptyBody": "Write the answers in step 2 and the accepted set appears here.",
+        "caption": "Green means the notation is one of yours; grey means the core recognised the fact in a notation you did not write and counted it — the student sees both marked correct, with the canonical form beside the grey one.",
+        "unnamed": "unnamed",
+        "chips": "Accepted forms of «{label}»",
+        "nothing": "nothing the core can read",
+        "tryLabel": "Try an answer for «{label}»",
+        "tryPlaceholder": "try an answer",
+        "tryIdle": "runs the real validator",
+        "tryOk": "accepted, as written",
+        "tryFormat": "accepted → {canonical}",
+        "tryTypo": "accepted as a typo",
+        "tryUnread": "cannot be read as a {type}",
+        "tryWrong": "wrong fact"
+      },
+      "rule": {
+        "title": "Where the rule lives",
+        "body": "A list of accepted spellings per cell was the other option, and it fails the same way every time: the author writes «14:00» and «kl. 14», the student writes «kl 14» without the full stop, and the cell is red for punctuation. Formats are a closed problem — clock, date, amount, phone — so the core owns them and the author only names the fact. See <mono>DECISIONS §1</mono>."
+      }
+    },
+    "step4": {
+      "eyebrow": "Step 4",
+      "title": "How it is played",
+      "lede": "Difficulty lives here and nowhere else: what is visible while they write, how many goes they get, when the key opens. The content in steps 1–3 does not change between an A1 class and a B1 one.",
+      "itemNoun": "form",
+      "showSource": {
+        "label": "The text while they fill the form",
+        "help": "Hiding a written source turns this into a memory exercise — a different type.",
+        "always": "Always visible",
+        "afterAnswer": "Hidden while answering"
+      },
+      "attempts": {
+        "label": "Attempts on the whole form",
+        "help": "A second go after the verdict, with the cells that were right kept.",
+        "unlimited": "Unlimited"
+      },
+      "hints": {
+        "label": "Hints on the cells",
+        "help": "The hint from step 2. «After one attempt» keeps the first go clean.",
+        "start": "From the start",
+        "afterOne": "After one attempt",
+        "never": "Never"
+      },
+      "reveal": {
+        "label": "When the answers are shown",
+        "help": "The explanation always comes with the verdict; this is about the expected value itself.",
+        "immediately": "With the verdict",
+        "afterLastAttempt": "After the last attempt",
+        "never": "Never"
+      },
+      "oneAtATime": {
+        "label": "One cell at a time",
+        "help": "Off shows the whole blank — the classic Norskprøve layout. On walks through {count, plural, one {# cell} other {# cells}} one by one, which helps on a phone and hurts the skill: the point is choosing what to listen for."
+      },
+      "fragmentsTip": "With timecodes on, each cell gets its own «play the fragment» button for the part of the clip it belongs to. Fragments are free — they never spend a playback — so the limit stays a limit on hearing the whole message, not on checking one number."
+    },
+    "step5": {
+      "eyebrow": "Step 5",
+      "title": "Result and memory",
+      "lede": "Graded on the server, cell by cell. The exercise-level percentage is a summary of the cell verdicts, never a substitute for them: the teacher needs to know which fact was missed, not that four of six were right.",
+      "need": "{need} of {count} cells",
+      "passMeter": "Pass mark",
+      "passField": "Pass mark, percent",
+      "requiredAll": {
+        "label": "Every required cell must be right",
+        "help": "On top of the percentage. Use it when one fact carries the task — the time of the appointment, the deadline."
+      },
+      "rates": {
+        "title": "What the answers rate"
+      },
+      "memory": {
+        "label": "Memory writes",
+        "skill": "The skill",
+        "skillWords": "Skill + words",
+        "none": "Nothing"
+      },
+      "atoms": {
+        "skill": "Rated by the form as a whole. The genre is the thing that transfers: a student who can fill one form off an announcement can fill the next one, whatever the words were.",
+        "words": "Only the <mono>word</mono> and <mono>name</mono> cells carry a word atom. A time or a price is not vocabulary, and rating one would put noise into the word's schedule.",
+        "wordsName": "words · per lexical cell"
+      },
+      "exposure": {
+        "label": "Log words as met",
+        "help": "Exposure event on the lexical cells — no rating, no change to a review date. Feeds «met in 4 exercises» on the word card."
+      },
+      "teacher": {
+        "title": "What the teacher gets",
+        "lead": "One row per cell across the group. A column everyone misses is a teaching signal about a format — times told with «halv», prices said as «fire femti» — and it is invisible in a single percentage.",
+        "caption": "The per-cell numbers appear in the exercise report (planned). Every attempt already records them."
+      }
+    },
+    "gate": {
+      "cells": "{count, plural, one {# cell} other {# cells}}, each with an id, an expected answer and an explanation",
+      "graded": "Graded on the server, cell by cell · partial credit · pass at {pass}%{required}",
+      "requiredAll": " and every required cell right",
+      "formats": "Formats normalised in the core for {count, plural, one {# cell} other {# cells}}{spelled} — from the {pack} pack",
+      "formatsDigits": "Formats normalised in the core for {count, plural, one {# cell} other {# cells}} — from digits only",
+      "spelled": ", spelled-out numerals included",
+      "audioSource": "Audio source · {plays}{fragments}",
+      "freePlay": "free playback",
+      "playbacks": "{count, plural, one {# playback} other {# playbacks}}",
+      "fragments": " · a fragment per cell, free of charge",
+      "textSource": "Text source, visible while the form is filled",
+      "memory": "Rates {skill}{words}{exposure}",
+      "memoryWords": " and the lexical cells",
+      "memoryExposure": "; lexical cells: exposure is stored, not yet written",
+      "memoryNone": "Writes nothing to memory",
+      "addressing": "itemKey = fieldId · ExerciseItemTarget addresses each cell on its own",
+      "evidence": "Evidence: success ceiling medium, failure floor low. A filled form proves the student can sift a notice of this genre for facts — enough to carry a listening unit, not enough to carry comprehension. One missed cell proves nothing on its own, which is why the cell verdicts, not the percentage, are what the report is built from.",
+      "notFreeForm": "Not a free form: the type is graded by <mono>information-transfer.validator.ts</mono> and never routed to a teacher. A cell the core cannot read is reported to the student as unreadable, never routed to a human."
+    },
+    "preview": {
+      "title": "Preview",
+      "phone": "Phone",
+      "desktop": "Desktop",
+      "reader": "Reader card",
+      "deviceLabel": "Device",
+      "modeLabel": "Preview mode",
+      "static": "Static",
+      "live": "Live",
+      "restart": "Restart the attempt",
+      "noteStatic": "Static preview: the blank is drawn, nothing accepts input.",
+      "noteLive": "This is the student’s own screen. Checks here run on your key in this browser and are not recorded."
+    }
+  },
   "coverage": {
     "title": "What this trains",
     "total": "{count, plural, one {# exercise} other {# exercises}}",

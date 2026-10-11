@@ -840,5 +840,60 @@
       "hearDifference": "you hear the difference when you miss",
       "start": "Start"
     }
+  },
+  "informationTransfer": {
+    "defaultTitle": "Form filling",
+    "defaultInstruction": "Fill in the form.",
+    "defaultInstructionCard": "Fill in the form from the source.",
+    "form": "Form",
+    "fieldN": "Field {n}",
+    "stepOf": "{k} of {n}",
+    "next": "Next field",
+    "check": "Check the answers",
+    "checking": "Checking …",
+    "retry": "Fix {n, plural, one {# field} other {# fields}} · attempt {k} of {max}",
+    "retryUnlimited": "Fix {n, plural, one {# field} other {# fields}}",
+    "newRound": "New round",
+    "noKey": "The key is not shown in this exercise. The explanations above say what went wrong.",
+    "progress": "Progress",
+    "passed": "Passed",
+    "tryAgain": "Try again",
+    "scoreLine": "{pct}% correct · the pass mark is {need}%",
+    "requiredMissed": "a required field is missing",
+    "sendFailed": "The answer could not be sent. Try again.",
+    "closedAlready": "This exercise is already finished.",
+    "empty": {
+      "title": "No fields",
+      "body": "The form has no finished fields yet."
+    },
+    "mark": {
+      "ok": "correct",
+      "typo": "almost — correct",
+      "unread": "unreadable",
+      "empty": "empty",
+      "wrong": "wrong"
+    },
+    "hint": {
+      "format": "Your spelling is accepted. The standard form is «{form}».",
+      "answer": "Correct answer:",
+      "unreadTime": "This could not be read as a time.",
+      "unreadDate": "This could not be read as a date.",
+      "unreadNumber": "This could not be read as a number.",
+      "unreadMoney": "This could not be read as an amount.",
+      "unreadPhone": "This could not be read as a phone number."
+    },
+    "card": {
+      "listening": "Listening",
+      "reading": "Reading",
+      "cells": "{n, plural, one {# field} other {# fields}}",
+      "minutes": "about {n} min",
+      "plays": "{n, plural, one {# playback} other {# playbacks}}",
+      "freePlay": "unlimited playback",
+      "textVisible": "the text stays visible",
+      "fragments": "a fragment per field",
+      "attempts": "{n, plural, one {# attempt} other {# attempts}}",
+      "unlimitedAttempts": "unlimited attempts",
+      "start": "Start"
+    }
   }
 }

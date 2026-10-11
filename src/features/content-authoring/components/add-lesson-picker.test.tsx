@@ -22,6 +22,7 @@ vi.mock('../actions/dictation', () => ({ createDictationAction: vi.fn() }));
 vi.mock('../actions/inflection-table', () => ({ createInflectionTableAction: vi.fn() }));
 vi.mock('../actions/read-aloud', () => ({ createReadAloudAction: vi.fn() }));
 vi.mock('../actions/minimal-pairs', () => ({ createMinimalPairsAction: vi.fn() }));
+vi.mock('../actions/information-transfer', () => ({ createInformationTransferAction: vi.fn() }));
 vi.mock('../actions/translate', () => ({
   createTranslateToTargetAction: vi.fn(),
   createTranslateFromTargetAction: vi.fn(),
@@ -42,6 +43,7 @@ const { createDictationAction } = await import('../actions/dictation');
 const { createInflectionTableAction } = await import('../actions/inflection-table');
 const { createReadAloudAction } = await import('../actions/read-aloud');
 const { createMinimalPairsAction } = await import('../actions/minimal-pairs');
+const { createInformationTransferAction } = await import('../actions/information-transfer');
 const { assignItemSectionAction } = await import('../actions/container-item');
 
 const DEFAULT_PROPS = {
@@ -294,6 +296,22 @@ describe('AddLessonPicker', () => {
 
     await waitFor(() => expect(createMinimalPairsAction).toHaveBeenCalled());
     expect(vi.mocked(createMinimalPairsAction).mock.calls[0]![1]).toBe('no');
+    expect(createExerciseAction).not.toHaveBeenCalled();
+  });
+
+  it('creates an information-transfer exercise from its own scaffold (INF-B29)', async () => {
+    // Plan 73 phase 7: the expected answers and the reasons live in the key column, keyed by
+    // field id, so the generic form cannot make one.
+    vi.mocked(createInformationTransferAction).mockResolvedValue({
+      ok: true,
+      value: { exerciseId: 'ex-21', itemId: 'item-21' },
+    });
+    renderPicker();
+
+    fireEvent.click(screen.getByText('Fill in a form'));
+
+    await waitFor(() => expect(createInformationTransferAction).toHaveBeenCalled());
+    expect(vi.mocked(createInformationTransferAction).mock.calls[0]![1]).toBe('no');
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 

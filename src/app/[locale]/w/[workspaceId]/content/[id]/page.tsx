@@ -65,6 +65,24 @@ export default async function ContainerDetailPage({
     });
     const draftVersion = versionsResp.items.find((v) => v.status === 'draft');
     draftVersionId = draftVersion?.id ?? null;
+
+    // A published container can be left without a draft (a rollback, an unpublish, a publish that
+    // did not open the next one). The structure tab reads the draft, so without one it answers
+    // «could not load» for a perfectly healthy module. The endpoint is idempotent — it copies the
+    // published version only when there is no draft — and refuses a viewer, who keeps the old
+    // empty state instead of an error.
+    if (draftVersionId === null && container.currentPublishedVersionId) {
+      try {
+        const created = await serverFetch<{ versionId: string }>({
+          service: 'content',
+          path: `/containers/${id}/draft`,
+          method: 'POST',
+        });
+        draftVersionId = created.versionId;
+      } catch (err) {
+        console.error('[content/id] opening a draft failed:', err);
+      }
+    }
     publishedVersionNumber =
       versionsResp.items.find((v) => v.id === container.currentPublishedVersionId)?.versionNumber ??
       null;

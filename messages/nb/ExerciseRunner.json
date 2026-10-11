@@ -840,5 +840,60 @@
       "hearDifference": "du hører forskjellen når du bommer",
       "start": "Start"
     }
+  },
+  "informationTransfer": {
+    "defaultTitle": "Utfylling",
+    "defaultInstruction": "Fyll ut skjemaet.",
+    "defaultInstructionCard": "Fyll ut skjemaet etter kilden.",
+    "form": "Skjema",
+    "fieldN": "Felt {n}",
+    "stepOf": "{k} av {n}",
+    "next": "Neste felt",
+    "check": "Sjekk svarene",
+    "checking": "Sjekker …",
+    "retry": "Rett opp {n} felt · forsøk {k} av {max}",
+    "retryUnlimited": "Rett opp {n} felt",
+    "newRound": "Ny runde",
+    "noKey": "Fasiten vises ikke i denne oppgaven. Forklaringene over sier hva som gikk galt.",
+    "progress": "Fremdrift",
+    "passed": "Bestått",
+    "tryAgain": "Prøv igjen",
+    "scoreLine": "{pct}% riktig · kravet er {need}%",
+    "requiredMissed": "et obligatorisk felt mangler",
+    "sendFailed": "Svaret kunne ikke sendes. Prøv igjen.",
+    "closedAlready": "Denne oppgaven er allerede avsluttet.",
+    "empty": {
+      "title": "Ingen felt",
+      "body": "Skjemaet har ingen ferdige felt ennå."
+    },
+    "mark": {
+      "ok": "riktig",
+      "typo": "nesten — riktig",
+      "unread": "uleselig",
+      "empty": "tomt",
+      "wrong": "feil"
+    },
+    "hint": {
+      "format": "Skrivemåten din er godtatt. Standardformen er «{form}».",
+      "answer": "Riktig svar:",
+      "unreadTime": "Dette kunne ikke leses som et klokkeslett.",
+      "unreadDate": "Dette kunne ikke leses som en dato.",
+      "unreadNumber": "Dette kunne ikke leses som et tall.",
+      "unreadMoney": "Dette kunne ikke leses som et beløp.",
+      "unreadPhone": "Dette kunne ikke leses som et telefonnummer."
+    },
+    "card": {
+      "listening": "Lytting",
+      "reading": "Lesing",
+      "cells": "{n} felt",
+      "minutes": "ca. {n} min",
+      "plays": "{n, plural, one {# avspilling} other {# avspillinger}}",
+      "freePlay": "fri avspilling",
+      "textVisible": "teksten er synlig hele tiden",
+      "fragments": "fragment per felt",
+      "attempts": "{n} forsøk",
+      "unlimitedAttempts": "ubegrenset antall forsøk",
+      "start": "Start"
+    }
   }
 }
