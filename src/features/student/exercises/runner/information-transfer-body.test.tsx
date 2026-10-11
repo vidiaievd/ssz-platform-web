@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it, vi } from 'vitest';
@@ -302,6 +302,15 @@ describe('InformationTransferReaderCard', () => {
     expect(screen.getByText('Reading · 6 fields · about 5 min')).toBeInTheDocument();
     expect(screen.getByText('the text stays visible · 2 attempts')).toBeInTheDocument();
     expect(screen.queryByText(/75/)).toBeNull();
+  });
+
+  it('falls back to the exercise title where no lesson names it, then to the default', () => {
+    const named = dealInf();
+    card({ ...named, title: 'Kurs på biblioteket' }, { title: undefined });
+    expect(screen.getByRole('region', { name: 'Kurs på biblioteket' })).toBeInTheDocument();
+    cleanup();
+    card({ ...named, title: '' }, { title: undefined });
+    expect(screen.getByRole('region', { name: 'Form filling' })).toBeInTheDocument();
   });
 
   it('describes a listening blank with its plays and fragments', () => {

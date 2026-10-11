@@ -10,7 +10,11 @@ const FOCUS =
 
 export interface InformationTransferReaderCardProps {
   projection: StudentProjection;
-  /** The exercise's title, from the lesson it sits in — the projection carries none. */
+  /**
+   * The exercise's title as the lesson names it. Optional: a blank opened straight from its own
+   * page has no lesson around it, and then the title the author gave the exercise (the
+   * projection's) stands in.
+   */
   title?: string;
   /** Listens allowed on a recording; `0` is unlimited. Read off the audio block, not the blank. */
   plays?: number;
@@ -40,7 +44,8 @@ export function InformationTransferReaderCard({
   accent,
 }: InformationTransferReaderCardProps) {
   const t = useTranslations('ExerciseRunner.informationTransfer');
-  const heading = title === undefined || title.trim() === '' ? t('defaultTitle') : title;
+  const named = [title, projection.title].find((n) => n !== undefined && n.trim() !== '');
+  const heading = named ?? t('defaultTitle');
 
   const audio = projection.sourceKind === 'audio';
   const cells = projection.fields.length;
