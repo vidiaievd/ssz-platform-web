@@ -41,6 +41,8 @@ export async function requestNarration(input: {
   pauseScale?: number;
   /** The narrator's catalog id; omitted is the language's default voice. */
   voiceId?: string;
+  /** Voice per speaker of the dialogue; speakers left out are given voices by media-service. */
+  speakerVoices?: Record<string, string>;
 }): Promise<NarrationRequestResponse> {
   const res = await fetch('/api/media/narration', {
     method: 'POST',
@@ -54,6 +56,9 @@ export async function requestNarration(input: {
       ...(input.lengthScale !== undefined ? { lengthScale: input.lengthScale } : {}),
       ...(input.pauseScale !== undefined ? { pauseScale: input.pauseScale } : {}),
       ...(input.voiceId ? { voiceId: input.voiceId } : {}),
+      ...(input.speakerVoices && Object.keys(input.speakerVoices).length > 0
+        ? { speakerVoices: input.speakerVoices }
+        : {}),
     }),
   });
   if (!res.ok) {

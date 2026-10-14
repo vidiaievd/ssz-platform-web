@@ -27,7 +27,7 @@ import type {
 } from '@/features/media';
 import { formatDate } from '@/lib/i18n/formatters';
 import type { Locale } from '@/lib/i18n/config';
-import { toNarrationScript } from '@/lib/shared-kernel/narration';
+import { narrationSpeakers, toNarrationScript } from '@/lib/shared-kernel/narration';
 
 import {
   findAudioNarration,
@@ -88,6 +88,9 @@ const sameStyle = (a: NarrationStyle, b: NarrationStyle) =>
  * hash comes from the same kernel script media-service spoke, so a changed picture or label
  * does not count, an edited word does.
  */
+/** The «let media-service choose» option of a speaker's voice. */
+const AUTO_VOICE = 'auto';
+
 export function AudioNarrationRow({
   body,
   onChange,
@@ -145,6 +148,23 @@ export function AudioNarrationRow({
     `${voice.gender === 'female' ? t('editor.audioNarrationVoiceFemale') : t('editor.audioNarrationVoiceMale')} · ${voice.name}`;
   // What the badge names: the catalog's name for the narrator, or the model's for an older narration.
   const spokenVoice0 = defaults?.voices.find((v) => v.id === asset?.synthesis?.voiceId);
+
+  // Who speaks in the dialogue, and with which voice (plan 74, phase 8). Untouched, a speaker
+  // keeps the voice the current narration gave them, so "narrate again" repeats it; «Auto» leaves
+  // the choice to media-service, which gives each speaker a voice of their own.
+  const speakers = useMemo(
+    () => (lang ? narrationSpeakers(toNarrationScript(body, lang).segments) : []),
+    [body, lang],
+  );
+  const [chosenSpeakerVoices, setChosenSpeakerVoices] = useState<Record<string, string>>({});
+  const spokenSpeakerVoices = synthesized ? (asset?.synthesis?.voices ?? {}) : {};
+  const speakerVoiceOf = (speaker: string): string =>
+    chosenSpeakerVoices[speaker] ?? spokenSpeakerVoices[speaker] ?? AUTO_VOICE;
+  const speakerVoices = Object.fromEntries(
+    speakers
+      .map((speaker) => [speaker, speakerVoiceOf(speaker)] as const)
+      .filter(([, voice]) => voice !== AUTO_VOICE && defaults?.voices.some((v) => v.id === voice)),
+  );
   const spokenVoiceName = spokenVoice0 ? voiceLabel(spokenVoice0) : (asset?.synthesis?.voice ?? '');
 
   /** Point the token at `nextId` and mark the asset it named as replaced. */
@@ -194,6 +214,7 @@ export function AudioNarrationRow({
         level: level ?? null,
         ...(style ? { lengthScale: style.lengthScale, pauseScale: style.pauseScale } : {}),
         ...(voiceId ? { voiceId } : {}),
+        speakerVoices,
       });
       replaceWith(result.assetId);
     } catch (e) {
@@ -242,6 +263,39 @@ export function AudioNarrationRow({
                 ))}
               </select>
             </Field>
+          )}
+          {defaults.voices.length > 1 && speakers.length > 0 && (
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1 text-sm font-medium">
+                {t('editor.audioNarrationSpeakers')}
+              </legend>
+              {speakers.map((speaker) => (
+                <label key={speaker} className="flex items-center gap-3">
+                  <span className="w-28 shrink-0 truncate font-medium">{speaker}</span>
+                  <select
+                    aria-label={t('editor.audioNarrationSpeakerVoice', { speaker })}
+                    value={speakerVoiceOf(speaker)}
+                    onChange={(e) =>
+                      setChosenSpeakerVoices((current) => ({
+                        ...current,
+                        [speaker]: e.target.value,
+                      }))
+                    }
+                    className="h-9 flex-1 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <option value={AUTO_VOICE}>{t('editor.audioNarrationSpeakerAuto')}</option>
+                    {defaults.voices.map((voice) => (
+                      <option key={voice.id} value={voice.id}>
+                        {voiceLabel(voice)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+              <p className="text-xs text-muted-foreground">
+                {t('editor.audioNarrationSpeakersHint')}
+              </p>
+            </fieldset>
           )}
           <Field
             label={t('editor.audioNarrationPace', { value: style.lengthScale.toFixed(2) })}

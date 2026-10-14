@@ -195,6 +195,7 @@ describe('AudioNarrationRow', () => {
         lengthScale: 1.7,
         pauseScale: 1,
         voiceId: 'talesyntese',
+        speakerVoices: {},
       });
       expect(onChange).toHaveBeenCalledWith('Hei, Taras!\n\n[audio:n-1]');
       // Nothing was replaced, so nothing is marked.
@@ -212,7 +213,9 @@ describe('AudioNarrationRow', () => {
 
         expect(screen.getByLabelText('Speech pace: ×2.00')).toHaveValue('2');
         expect(screen.getByLabelText('Pauses between paragraphs: ×1.0')).toHaveValue('1');
-        expect(screen.getByText('Default for level A1: pace ×2.00, pauses ×1.0')).toBeInTheDocument();
+        expect(
+          screen.getByText('Default for level A1: pace ×2.00, pauses ×1.0'),
+        ).toBeInTheDocument();
       });
 
       it('sends the level and the chosen pace and pauses with the request', async () => {
@@ -220,7 +223,9 @@ describe('AudioNarrationRow', () => {
         renderRow('Hei.', vi.fn(), { lang: 'nb', level: 'B1' });
 
         fireEvent.change(screen.getByLabelText(/Speech pace/), { target: { value: '2.2' } });
-        fireEvent.change(screen.getByLabelText(/Pauses between paragraphs/), { target: { value: '1.5' } });
+        fireEvent.change(screen.getByLabelText(/Pauses between paragraphs/), {
+          target: { value: '1.5' },
+        });
         await synthesizeClick();
 
         expect(requestNarration).toHaveBeenCalledWith(
@@ -273,13 +278,17 @@ describe('AudioNarrationRow', () => {
 
         const voice = screen.getByLabelText('Voice');
         expect(voice).toHaveValue('talesyntese');
-        expect(screen.getByRole('option', { name: 'Male · Talesyntese (default)' })).toBeInTheDocument();
+        expect(
+          screen.getByRole('option', { name: 'Male · Talesyntese (default)' }),
+        ).toBeInTheDocument();
         expect(screen.getByRole('option', { name: 'Female · KON' })).toBeInTheDocument();
 
         fireEvent.change(voice, { target: { value: 'nvcc-kon' } });
         await synthesizeClick();
 
-        expect(requestNarration).toHaveBeenCalledWith(expect.objectContaining({ voiceId: 'nvcc-kon' }));
+        expect(requestNarration).toHaveBeenCalledWith(
+          expect.objectContaining({ voiceId: 'nvcc-kon' }),
+        );
       });
 
       it('resets the voice too, and keeps the reset off while the default voice is chosen', () => {
@@ -308,7 +317,10 @@ describe('AudioNarrationRow', () => {
         const body = 'Hei, Taras!\n\n[audio:n-1 "Les"]';
         const asset = synthesizedAsset('n-1', body);
         vi.mocked(useMediaAsset).mockReturnValue({
-          data: { ...asset, synthesis: { ...asset.synthesis, voiceId: 'nvcc-kon', speaker: 'KON' } },
+          data: {
+            ...asset,
+            synthesis: { ...asset.synthesis, voiceId: 'nvcc-kon', speaker: 'KON' },
+          },
         } as never);
         vi.mocked(requestNarration).mockResolvedValue({ assetId: 'n-2' } as never);
         renderRow(body, vi.fn(), { lang: 'nb' });
@@ -319,12 +331,56 @@ describe('AudioNarrationRow', () => {
           fireEvent.click(screen.getByRole('button', { name: 'Narrate again' }));
         });
 
-        expect(requestNarration).toHaveBeenCalledWith(expect.objectContaining({ voiceId: 'nvcc-kon' }));
+        expect(requestNarration).toHaveBeenCalledWith(
+          expect.objectContaining({ voiceId: 'nvcc-kon' }),
+        );
+      });
+
+      it('lists who speaks, leaves them on Auto, and sends the voice chosen for one', async () => {
+        vi.mocked(requestNarration).mockResolvedValue({ assetId: 'n-1' } as never);
+        renderRow('**Erik:** Én side.\n\n**Silje:** Takk!', vi.fn(), { lang: 'nb' });
+
+        const erik = screen.getByLabelText('Voice of Erik');
+        expect(erik).toHaveValue('auto');
+        expect(screen.getByLabelText('Voice of Silje')).toHaveValue('auto');
+
+        fireEvent.change(screen.getByLabelText('Voice of Silje'), {
+          target: { value: 'nvcc-kon' },
+        });
+        await synthesizeClick();
+
+        // Erik stays Auto, which media-service fills in; only the choice made is sent.
+        expect(requestNarration).toHaveBeenCalledWith(
+          expect.objectContaining({ speakerVoices: { Silje: 'nvcc-kon' } }),
+        );
+      });
+
+      it('narrates again with the voices the speakers were given last time', async () => {
+        const body = '**Erik:** Én side.\n\n[audio:n-1]';
+        const asset = synthesizedAsset('n-1', body);
+        vi.mocked(useMediaAsset).mockReturnValue({
+          data: { ...asset, synthesis: { ...asset.synthesis, voices: { Erik: 'nvcc-kon' } } },
+        } as never);
+        vi.mocked(requestNarration).mockResolvedValue({ assetId: 'n-2' } as never);
+        renderRow(body, vi.fn(), { lang: 'nb' });
+
+        expect(screen.getByLabelText('Voice of Erik')).toHaveValue('nvcc-kon');
+        await act(async () => {
+          fireEvent.click(screen.getByRole('button', { name: 'Narrate again' }));
+        });
+        expect(requestNarration).toHaveBeenCalledWith(
+          expect.objectContaining({ speakerVoices: { Erik: 'nvcc-kon' } }),
+        );
       });
 
       it('has no settings for a recording a person made', () => {
         vi.mocked(useMediaAsset).mockReturnValue({
-          data: { id: 'rec-1', url: 'https://cdn.example/rec.mp3', status: 'READY', origin: 'UPLOAD' },
+          data: {
+            id: 'rec-1',
+            url: 'https://cdn.example/rec.mp3',
+            status: 'READY',
+            origin: 'UPLOAD',
+          },
         } as never);
         renderRow('Hei.\n\n[audio:rec-1]', vi.fn(), { lang: 'nb' });
 
