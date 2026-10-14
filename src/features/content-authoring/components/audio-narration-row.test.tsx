@@ -72,6 +72,10 @@ const DEFAULTS = {
     B1: { lengthScale: 1.7, pauseScale: 1 },
     C1: { lengthScale: 1.4, pauseScale: 1 },
   },
+  voices: [
+    { id: 'talesyntese', name: 'Talesyntese', gender: 'male', isDefault: true },
+    { id: 'nvcc-kon', name: 'KON', gender: 'female', isDefault: false },
+  ],
   min: { lengthScale: 1, pauseScale: 0.5 },
   max: { lengthScale: 2.5, pauseScale: 2 },
 };
@@ -190,6 +194,7 @@ describe('AudioNarrationRow', () => {
         level: null,
         lengthScale: 1.7,
         pauseScale: 1,
+        voiceId: 'talesyntese',
       });
       expect(onChange).toHaveBeenCalledWith('Hei, Taras!\n\n[audio:n-1]');
       // Nothing was replaced, so nothing is marked.
@@ -260,6 +265,61 @@ describe('AudioNarrationRow', () => {
         expect(requestNarration).toHaveBeenCalledWith(
           expect.objectContaining({ lengthScale: 2.3, pauseScale: 0.7 }),
         );
+      });
+
+      it('offers the voices, the default one marked, and sends the one chosen', async () => {
+        vi.mocked(requestNarration).mockResolvedValue({ assetId: 'n-1' } as never);
+        renderRow('Hei.', vi.fn(), { lang: 'nb', level: 'B1' });
+
+        const voice = screen.getByLabelText('Voice');
+        expect(voice).toHaveValue('talesyntese');
+        expect(screen.getByRole('option', { name: 'Male · Talesyntese (default)' })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: 'Female · KON' })).toBeInTheDocument();
+
+        fireEvent.change(voice, { target: { value: 'nvcc-kon' } });
+        await synthesizeClick();
+
+        expect(requestNarration).toHaveBeenCalledWith(expect.objectContaining({ voiceId: 'nvcc-kon' }));
+      });
+
+      it('resets the voice too, and keeps the reset off while the default voice is chosen', () => {
+        renderRow('Hei.', vi.fn(), { lang: 'nb', level: 'B1' });
+        const reset = screen.getByRole('button', { name: 'Reset to default' });
+        expect(reset).toBeDisabled();
+
+        fireEvent.change(screen.getByLabelText('Voice'), { target: { value: 'nvcc-kon' } });
+        expect(reset).toBeEnabled();
+
+        fireEvent.click(reset);
+        expect(screen.getByLabelText('Voice')).toHaveValue('talesyntese');
+        expect(reset).toBeDisabled();
+      });
+
+      it('has no voice choice while the service offers a single voice', () => {
+        vi.mocked(useNarrationDefaults).mockReturnValue({
+          data: { ...DEFAULTS, voices: [DEFAULTS.voices[0]] },
+        } as never);
+        renderRow('Hei.', vi.fn(), { lang: 'nb' });
+
+        expect(screen.queryByLabelText('Voice')).toBeNull();
+      });
+
+      it('narrates again with the voice the current narration was spoken by, and names it in the badge', async () => {
+        const body = 'Hei, Taras!\n\n[audio:n-1 "Les"]';
+        const asset = synthesizedAsset('n-1', body);
+        vi.mocked(useMediaAsset).mockReturnValue({
+          data: { ...asset, synthesis: { ...asset.synthesis, voiceId: 'nvcc-kon', speaker: 'KON' } },
+        } as never);
+        vi.mocked(requestNarration).mockResolvedValue({ assetId: 'n-2' } as never);
+        renderRow(body, vi.fn(), { lang: 'nb' });
+
+        expect(screen.getByText('Synthesized · Female · KON')).toBeInTheDocument();
+        expect(screen.getByLabelText('Voice')).toHaveValue('nvcc-kon');
+        await act(async () => {
+          fireEvent.click(screen.getByRole('button', { name: 'Narrate again' }));
+        });
+
+        expect(requestNarration).toHaveBeenCalledWith(expect.objectContaining({ voiceId: 'nvcc-kon' }));
       });
 
       it('has no settings for a recording a person made', () => {

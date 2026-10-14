@@ -772,7 +772,12 @@
     "audioNarrationPausesLonger": "Длиннее",
     "audioNarrationSettingsDefaultForLevel": "По умолчанию для уровня {level}: темп ×{pace}, паузы ×1.0",
     "audioNarrationSettingsDefault": "По умолчанию: темп ×{pace}, паузы ×1.0",
-    "audioNarrationSettingsReset": "Сбросить к настройкам по умолчанию"
+    "audioNarrationSettingsReset": "Сбросить к настройкам по умолчанию",
+    "audioNarrationVoice": "Голос",
+    "audioNarrationVoiceFemale": "Женский",
+    "audioNarrationVoiceMale": "Мужской",
+    "audioNarrationVoiceDefaultMark": "по умолчанию",
+    "audioNarrationSynthVoice": "Этот голос недоступен. Выберите другой."
   },
   "spans": {
     "markSelection": "Разметить выделенное",

@@ -1,7 +1,12 @@
 import type { NarrationRequestResponse } from '../types';
 
 /** Why media-service refused a narration; `null` for anything it did not name. */
-export type NarrationRefusal = 'EMPTY_TEXT' | 'TEXT_TOO_LONG' | 'LANGUAGE_NOT_SUPPORTED' | null;
+export type NarrationRefusal =
+  | 'EMPTY_TEXT'
+  | 'TEXT_TOO_LONG'
+  | 'LANGUAGE_NOT_SUPPORTED'
+  | 'VOICE_NOT_AVAILABLE'
+  | null;
 
 export class NarrationRequestError extends Error {
   constructor(
@@ -13,7 +18,12 @@ export class NarrationRequestError extends Error {
   }
 }
 
-const REFUSALS = new Set(['EMPTY_TEXT', 'TEXT_TOO_LONG', 'LANGUAGE_NOT_SUPPORTED']);
+const REFUSALS = new Set([
+  'EMPTY_TEXT',
+  'TEXT_TOO_LONG',
+  'LANGUAGE_NOT_SUPPORTED',
+  'VOICE_NOT_AVAILABLE',
+]);
 
 /**
  * Ask for a synthesized narration of a lesson body (plan 74). Returns as soon as the job is
@@ -29,6 +39,8 @@ export async function requestNarration(input: {
   /** The author's own pace and pauses; each falls back to the level's default. */
   lengthScale?: number;
   pauseScale?: number;
+  /** The narrator's catalog id; omitted is the language's default voice. */
+  voiceId?: string;
 }): Promise<NarrationRequestResponse> {
   const res = await fetch('/api/media/narration', {
     method: 'POST',
@@ -41,6 +53,7 @@ export async function requestNarration(input: {
       ...(input.level ? { level: input.level } : {}),
       ...(input.lengthScale !== undefined ? { lengthScale: input.lengthScale } : {}),
       ...(input.pauseScale !== undefined ? { pauseScale: input.pauseScale } : {}),
+      ...(input.voiceId ? { voiceId: input.voiceId } : {}),
     }),
   });
   if (!res.ok) {

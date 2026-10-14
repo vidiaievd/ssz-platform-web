@@ -772,7 +772,12 @@
     "audioNarrationPausesLonger": "Довші",
     "audioNarrationSettingsDefaultForLevel": "За замовчуванням для рівня {level}: темп ×{pace}, паузи ×1.0",
     "audioNarrationSettingsDefault": "За замовчуванням: темп ×{pace}, паузи ×1.0",
-    "audioNarrationSettingsReset": "Скинути до налаштувань за замовчуванням"
+    "audioNarrationSettingsReset": "Скинути до налаштувань за замовчуванням",
+    "audioNarrationVoice": "Голос",
+    "audioNarrationVoiceFemale": "Жіночий",
+    "audioNarrationVoiceMale": "Чоловічий",
+    "audioNarrationVoiceDefaultMark": "за замовчуванням",
+    "audioNarrationSynthVoice": "Цей голос недоступний. Оберіть інший."
   },
   "spans": {
     "markSelection": "Позначити виділене",

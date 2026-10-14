@@ -9,4 +9,4 @@ export {
   uploadRecording,
   uploadToPresignedUrl,
 } from './lib/upload';
-export type { AssetResponse, AssetSynthesis, NarrationDefaults, NarrationRequestResponse, NarrationStyle, MediaAsset, RequestUploadBody, RequestUploadResponse, FinalizeUploadResponse, MediaPurpose } from './types';
+export type { AssetResponse, AssetSynthesis, NarrationDefaults, NarrationRequestResponse, NarrationStyle, NarrationVoice, MediaAsset, RequestUploadBody, RequestUploadResponse, FinalizeUploadResponse, MediaPurpose } from './types';

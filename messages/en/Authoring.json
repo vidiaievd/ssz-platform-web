@@ -772,7 +772,12 @@
     "audioNarrationPausesLonger": "Longer",
     "audioNarrationSettingsDefaultForLevel": "Default for level {level}: pace ×{pace}, pauses ×1.0",
     "audioNarrationSettingsDefault": "Default: pace ×{pace}, pauses ×1.0",
-    "audioNarrationSettingsReset": "Reset to default"
+    "audioNarrationSettingsReset": "Reset to default",
+    "audioNarrationVoice": "Voice",
+    "audioNarrationVoiceFemale": "Female",
+    "audioNarrationVoiceMale": "Male",
+    "audioNarrationVoiceDefaultMark": "default",
+    "audioNarrationSynthVoice": "That voice is not available. Choose another one."
   },
   "spans": {
     "markSelection": "Annotate selection",

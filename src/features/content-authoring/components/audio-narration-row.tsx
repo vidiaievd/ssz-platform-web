@@ -19,7 +19,12 @@ import {
   useMediaAsset,
   usePreviousAsset,
 } from '@/features/media';
-import type { AssetResponse, NarrationDefaults, NarrationStyle } from '@/features/media';
+import type {
+  AssetResponse,
+  NarrationDefaults,
+  NarrationStyle,
+  NarrationVoice,
+} from '@/features/media';
 import { formatDate } from '@/lib/i18n/formatters';
 import type { Locale } from '@/lib/i18n/config';
 import { toNarrationScript } from '@/lib/shared-kernel/narration';
@@ -111,7 +116,7 @@ export function AudioNarrationRow({
   // Pace and pauses of the next synthesis. Untouched, they follow what the current narration was
   // spoken with (so "narrate again" repeats it), and failing that the course level's default;
   // a slider or the reset button makes them explicit.
-  const { data: defaults } = useNarrationDefaults();
+  const { data: defaults } = useNarrationDefaults(lang);
   const levelDefault = defaultStyleFor(defaults, level);
   const [chosenStyle, setChosenStyle] = useState<NarrationStyle | null>(null);
   const spokenWith =
@@ -123,6 +128,24 @@ export function AudioNarrationRow({
   const style = chosenStyle ?? spokenWith ?? levelDefault;
   const styleIsDefault =
     style !== undefined && levelDefault !== undefined && sameStyle(style, levelDefault);
+
+  // The narrator of the next synthesis: the author's pick, else the one the current narration was
+  // spoken by, else the service's default voice.
+  const defaultVoice = defaults?.voices.find((v) => v.isDefault) ?? defaults?.voices[0];
+  const [chosenVoice, setChosenVoice] = useState<string | null>(null);
+  const spokenVoice =
+    synthesized &&
+    asset?.synthesis?.voiceId &&
+    defaults?.voices.some((v) => v.id === asset.synthesis?.voiceId)
+      ? asset.synthesis.voiceId
+      : undefined;
+  const voiceId = chosenVoice ?? spokenVoice ?? defaultVoice?.id;
+  const voiceIsDefault = voiceId === undefined || voiceId === defaultVoice?.id;
+  const voiceLabel = (voice: NarrationVoice) =>
+    `${voice.gender === 'female' ? t('editor.audioNarrationVoiceFemale') : t('editor.audioNarrationVoiceMale')} · ${voice.name}`;
+  // What the badge names: the catalog's name for the narrator, or the model's for an older narration.
+  const spokenVoice0 = defaults?.voices.find((v) => v.id === asset?.synthesis?.voiceId);
+  const spokenVoiceName = spokenVoice0 ? voiceLabel(spokenVoice0) : (asset?.synthesis?.voice ?? '');
 
   /** Point the token at `nextId` and mark the asset it named as replaced. */
   function replaceWith(nextId: string) {
@@ -170,6 +193,7 @@ export function AudioNarrationRow({
         lessonId: lessonId ?? null,
         level: level ?? null,
         ...(style ? { lengthScale: style.lengthScale, pauseScale: style.pauseScale } : {}),
+        ...(voiceId ? { voiceId } : {}),
       });
       replaceWith(result.assetId);
     } catch (e) {
@@ -181,7 +205,9 @@ export function AudioNarrationRow({
             ? t('editor.audioNarrationSynthTooLong')
             : reason === 'LANGUAGE_NOT_SUPPORTED'
               ? t('editor.audioNarrationSynthLanguage')
-              : t('editor.audioNarrationSynthFailed'),
+              : reason === 'VOICE_NOT_AVAILABLE'
+                ? t('editor.audioNarrationSynthVoice')
+                : t('editor.audioNarrationSynthFailed'),
       );
     } finally {
       setBusy(null);
@@ -200,6 +226,23 @@ export function AudioNarrationRow({
           <SlidersHorizontal className="size-4" aria-hidden /> {t('editor.audioNarrationSettings')}
         </summary>
         <div className="mt-3 flex flex-col gap-4">
+          {defaults.voices.length > 1 && voiceId && (
+            <Field label={t('editor.audioNarrationVoice')} htmlFor="narration-voice">
+              <select
+                id="narration-voice"
+                value={voiceId}
+                onChange={(e) => setChosenVoice(e.target.value)}
+                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {defaults.voices.map((voice) => (
+                  <option key={voice.id} value={voice.id}>
+                    {voiceLabel(voice)}
+                    {voice.isDefault ? ` (${t('editor.audioNarrationVoiceDefaultMark')})` : ''}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
           <Field
             label={t('editor.audioNarrationPace', { value: style.lengthScale.toFixed(2) })}
             htmlFor="narration-pace"
@@ -253,8 +296,11 @@ export function AudioNarrationRow({
               type="button"
               size="sm"
               variant="ghost"
-              onClick={() => setChosenStyle(levelDefault ?? null)}
-              disabled={styleIsDefault}
+              onClick={() => {
+                setChosenStyle(levelDefault ?? null);
+                setChosenVoice(defaultVoice?.id ?? null);
+              }}
+              disabled={styleIsDefault && voiceIsDefault}
             >
               <RotateCcw aria-hidden /> {t('editor.audioNarrationSettingsReset')}
             </Button>
@@ -302,7 +348,7 @@ export function AudioNarrationRow({
             <div className="flex flex-wrap items-center gap-2">
               {synthesized ? (
                 <Badge variant="info">
-                  {t('editor.audioNarrationSynthBadge', { voice: asset.synthesis?.voice ?? '' })}
+                  {t('editor.audioNarrationSynthBadge', { voice: spokenVoiceName })}
                 </Badge>
               ) : (
                 <Badge variant="muted">{t('editor.audioNarrationRecordingBadge')}</Badge>

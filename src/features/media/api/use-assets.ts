@@ -77,11 +77,11 @@ export function useDeleteAsset() {
  * Default narration pace per course level, and the range each setting accepts. The table is
  * media-service's, so a change of defaults there reaches the editor without a release.
  */
-export function useNarrationDefaults() {
+export function useNarrationDefaults(lang = 'nb') {
   return useQuery({
-    queryKey: mediaKeys.narrationDefaults(),
+    queryKey: mediaKeys.narrationDefaults(lang),
     queryFn: async () => {
-      const res = await fetch('/api/media/narration/defaults');
+      const res = await fetch(`/api/media/narration/defaults?lang=${encodeURIComponent(lang)}`);
       if (!res.ok) throw new Error('Failed to fetch narration defaults');
       return res.json() as Promise<NarrationDefaults>;
     },

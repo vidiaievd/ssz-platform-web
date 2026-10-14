@@ -772,7 +772,12 @@
     "audioNarrationPausesLonger": "Lengre",
     "audioNarrationSettingsDefaultForLevel": "Standard for nivå {level}: tempo ×{pace}, pauser ×1.0",
     "audioNarrationSettingsDefault": "Standard: tempo ×{pace}, pauser ×1.0",
-    "audioNarrationSettingsReset": "Tilbakestill til standard"
+    "audioNarrationSettingsReset": "Tilbakestill til standard",
+    "audioNarrationVoice": "Stemme",
+    "audioNarrationVoiceFemale": "Kvinne",
+    "audioNarrationVoiceMale": "Mann",
+    "audioNarrationVoiceDefaultMark": "standard",
+    "audioNarrationSynthVoice": "Den stemmen er ikke tilgjengelig. Velg en annen."
   },
   "spans": {
     "markSelection": "Merk utvalg",

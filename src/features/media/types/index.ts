@@ -42,6 +42,10 @@ export type AssetSynthesis = {
   pauseScale?: number;
   /** The course level the pace default came from. */
   level?: string;
+  /** The catalog id of the narrator; older narrations name only `voice`. */
+  voiceId?: string;
+  /** The speaker inside a multi-speaker voice model. */
+  speaker?: string;
 };
 
 /** How a narration is delivered: the words' speed and the pauses between segments. */
@@ -51,11 +55,22 @@ export type NarrationStyle = {
   pauseScale: number;
 };
 
+/** A narrator an author can choose (media-service's voice catalog). */
+export type NarrationVoice = {
+  id: string;
+  name: string;
+  gender: 'female' | 'male';
+  /** What a narration gets when no voice is chosen. */
+  isDefault: boolean;
+};
+
 /** Wire answer of GET /media/narration/defaults. */
 export type NarrationDefaults = {
   /** For a course whose level is not a CEFR one. */
   fallback: NarrationStyle;
   byLevel: Record<string, NarrationStyle>;
+  /** The voices offered for the language, the default first. */
+  voices: NarrationVoice[];
   min: NarrationStyle;
   max: NarrationStyle;
 };
@@ -93,6 +108,7 @@ export type NarrationRequestResponse = {
   status: string;
   voice: string;
   textHash: string;
+  voiceId: string;
   segments: number;
   characters: number;
   lengthScale: number;
