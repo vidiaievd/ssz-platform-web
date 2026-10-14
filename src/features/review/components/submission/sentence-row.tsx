@@ -180,6 +180,10 @@ function ItemVerdict({ detail }: { detail: ReviewItemDetail }) {
     if (detail.verdict === null) {
       return <VerdictPill tone="muted">{t('review.saNoVerdict')}</VerdictPill>;
     }
+    // A gap is not an answer that missed: it is graded as `fail`, and named for what it is.
+    if (detail.skipped) {
+      return <VerdictPill tone="muted">{t('review.saSkipped')}</VerdictPill>;
+    }
 
     return (
       <VerdictPill tone={SA_VERDICT_TONE[detail.verdict]}>
@@ -263,9 +267,16 @@ function ShortAnswerBody({ detail }: { detail: ShortAnswerItemDetail }) {
 
   return (
     <>
-      <p className="text-[14.5px] leading-relaxed" style={{ fontFamily: READING }}>
-        {detail.submitted.trim() === '' ? t('blank') : detail.submitted}
-      </p>
+      {detail.skipped ? (
+        <p className="flex items-start gap-2 text-[12px] text-muted-foreground">
+          <Info aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          {tAuthoring('review.saSkippedNote')}
+        </p>
+      ) : (
+        <p className="text-[14.5px] leading-relaxed" style={{ fontFamily: READING }}>
+          {detail.submitted.trim() === '' ? t('blank') : detail.submitted}
+        </p>
+      )}
 
       {/* A deleted question is the one row where the numbers below would be invented, so
           they are not drawn at all. The answer still is: somebody has to read it. */}

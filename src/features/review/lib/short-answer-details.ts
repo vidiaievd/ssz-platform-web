@@ -101,6 +101,7 @@ function readItem(value: unknown): ShortAnswerItemDetail | null {
     prompt: typeof raw.prompt === 'string' ? raw.prompt : null,
     verdict,
     submitted: raw.submitted,
+    skipped: raw.skipped === true,
     covered,
     total,
     tooShort: raw.tooShort === true,

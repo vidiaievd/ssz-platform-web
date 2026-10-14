@@ -254,9 +254,10 @@
     },
     "position": "{n}/{total}",
     "submit": "Hand in answer",
+    "skip": "Skip",
     "sending": "Handing in…",
     "next": "Next question",
-    "finish": "Finish",
+    "finish": "Send for checking",
     "irreversible": "An answer cannot be changed once handed in",
     "covered": "{covered} of {total} points covered",
     "tooShort": "The answer is too short to be checked automatically.",
@@ -280,7 +281,8 @@
       "title": "Handed in",
       "tally": "{pass} passed · {partial} partly · {fail} not passed",
       "teacher": "Your teacher is looking through your answers.",
-      "again": "Do it again"
+      "again": "Do it again",
+      "skipped": "No answer: {count}"
     },
     "empty": {
       "title": "Nothing to answer yet",
@@ -293,6 +295,14 @@
       "itemCounted": "counted",
       "itemNotCounted": "not counted",
       "itemNotCountedPlain": "Your teacher did not count this one."
+    },
+    "gaps": {
+      "title": "Some questions have no answer",
+      "desc": "Answered {answered} of {total}.",
+      "back": "Back to skipped ({count})",
+      "confirm": "{count, plural, one {# question has no answer — it will count as wrong.} other {# questions have no answer — they will count as wrong.}} Send anyway?",
+      "confirmSend": "Send",
+      "cancel": "Cancel"
     }
   },
   "writing": {

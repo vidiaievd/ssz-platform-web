@@ -14,6 +14,7 @@ const details = {
       itemId: 'q1',
       prompt: 'Hva må alle syklister ha?',
       submitted: 'Alle må ha lys foran og bak.',
+      skipped: false,
       verdict: 'pass',
       covered: 1,
       total: 1,
@@ -27,6 +28,7 @@ const details = {
       itemId: 'q2',
       prompt: 'Er det lurt å sykle om vinteren?',
       submitted: 'Nei. Kanskje.',
+      skipped: false,
       verdict: 'partial',
       covered: 1,
       total: 2,
@@ -90,6 +92,20 @@ describe('readShortAnswerDetails', () => {
   // The whole point of §6.7: one unreadable question refuses the whole breakdown, so the
   // screen falls back to the answer as it was handed in. Dropping the row instead would
   // leave a tally counting questions that are no longer on screen.
+  it('reads a skipped question, and takes a payload from before skipping as none skipped', () => {
+    const [first, second] = details.items;
+    const read = readShortAnswerDetails({
+      ...details,
+      items: [
+        { ...first, skipped: undefined },
+        { ...second, submitted: '', skipped: true, verdict: 'fail', covered: 0, words: 0 },
+      ],
+    });
+
+    expect(read!.items[0]!.skipped).toBe(false);
+    expect(read!.items[1]).toMatchObject({ itemId: 'q2', skipped: true, verdict: 'fail' });
+  });
+
   it('refuses the whole set when one question does not parse', () => {
     const [first, second] = details.items;
 

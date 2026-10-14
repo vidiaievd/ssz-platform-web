@@ -1951,6 +1951,8 @@
     "saModel": "Model answer: {text}",
     "saQuestionGone": "The question was deleted after the student answered it. Nothing can be said about the answer — read it and decide yourself.",
     "saNoVerdict": "not judged",
+    "saSkipped": "no answer",
+    "saSkippedNote": "The student skipped this question and sent the set without answering it. It counts as not approved.",
     "inboxTrigger": "Marking inbox",
     "courseTitle": "Marking inbox",
     "courseSubtitle": "Everything your students have handed in across this course.",

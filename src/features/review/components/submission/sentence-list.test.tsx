@@ -87,6 +87,7 @@ const question = (over: Partial<ShortAnswerItemDetail> = {}): ShortAnswerItemDet
   prompt: 'Hva må alle syklister ha?',
   verdict: 'partial',
   submitted: 'De må ha lys.',
+  skipped: false,
   covered: 1,
   total: 2,
   tooShort: false,
@@ -259,6 +260,18 @@ describe('SentenceList', () => {
       expect(screen.getByText('not judged')).toBeInTheDocument();
       expect(screen.queryByText(/points covered$/)).toBeNull();
       expect(screen.getByText(/deleted after the student answered/)).toBeInTheDocument();
+    });
+
+    it('names a skipped question a gap, not an answer that missed', () => {
+      renderList(
+        SHORT_ANSWER([
+          question({ skipped: true, submitted: '', verdict: 'fail', covered: 0, words: 0 }),
+        ]),
+      );
+
+      expect(screen.getByText('no answer')).toBeInTheDocument();
+      expect(screen.queryByText('Does not pass')).toBeNull();
+      expect(screen.getByText(/skipped this question/)).toBeInTheDocument();
     });
 
     it('folds a question the machine closed by itself', async () => {
