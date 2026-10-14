@@ -8,6 +8,7 @@ import type { LessonTextSpan, VocabularyItem } from '@/features/content/types';
 
 import { GlossaryPopover } from './glossary-popover';
 import { KnowWordButton } from './know-word-button';
+import { AddToMyWordsButton } from '@/features/my-words/components/add-to-my-words-button';
 import { toGlossaryTag } from '../lib/pos-tag';
 import { SpanAnnotation } from './span-annotation';
 import { useGlossIntensity } from './gloss-intensity-provider';
@@ -137,7 +138,16 @@ function GlossaryWord({
       form={entry.form}
       formLabel={entry.formLabel}
       contextSentence={contextSentence}
-      footer={<KnowWordButton vocabularyItemId={item.id} className="w-full" />}
+      footer={
+        <div className="flex w-full flex-col gap-1.5">
+          <KnowWordButton vocabularyItemId={item.id} className="w-full" />
+          <AddToMyWordsButton
+            surfaceForm={text}
+            contextSentence={contextSentence}
+            className="w-full"
+          />
+        </div>
+      }
       lang={lang}
       previewOnly={target === 'panel'}
       onSelect={handleSelect}
@@ -253,7 +263,9 @@ export function GlossaryText({
   /** Emphasis runs of `[from, to)`, the innermost thing rendered either way. */
   function emphasised(from: number, to: number): ReactNode[] {
     return sliceMarks(marks, from, to).map((piece) => (
-      <Fragment key={piece.start}>{withEmphasis(text.slice(piece.start, piece.end), piece.kinds)}</Fragment>
+      <Fragment key={piece.start}>
+        {withEmphasis(text.slice(piece.start, piece.end), piece.kinds)}
+      </Fragment>
     ));
   }
 

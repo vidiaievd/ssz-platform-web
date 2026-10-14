@@ -214,6 +214,11 @@ export interface LessonProseProps {
   spansHidden?: boolean;
   /** BCP-47 language of grammar explanations, loaded when an annotation opens. */
   explanationLanguage?: string;
+  /**
+   * Index of the paragraph this chunk is, when its words may be added to «My words»
+   * (plan 75). Set on the target-language text only — never on a translation.
+   */
+  captureParagraph?: number;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -228,6 +233,7 @@ export function LessonProse({
   authoredVocabulary = false,
   spansHidden = false,
   explanationLanguage,
+  captureParagraph,
   className,
   style,
 }: LessonProseProps) {
@@ -235,7 +241,13 @@ export function LessonProse({
   const placed = useMemo(() => projectSpansOntoBlocks(blocks, spans ?? []), [blocks, spans]);
 
   return (
-    <div lang={lang} className={cn('flex flex-col gap-3.5', className)} style={style}>
+    <div
+      lang={lang}
+      className={cn('flex flex-col gap-3.5', className)}
+      style={style}
+      // Kept in step with CAPTURE_PARAGRAPH_ATTR, which the word context menu looks for.
+      data-capture-paragraph={captureParagraph}
+    >
       <Blocks
         blocks={blocks}
         glossary={glossary}
