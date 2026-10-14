@@ -564,6 +564,8 @@
     "deleteCourse": "Ordet forsvinner fra ordene dine. Det blir værende i kursets repetisjon.",
     "deleteConfirm": "Slett",
     "deck": "Kortstokk: {title}",
-    "noDeck": "Bare i «Mine ord»"
+    "noDeck": "Bare i «Mine ord»",
+    "addToMyWords": "Legg til i mine ord",
+    "contextHint": "Høyreklikk på et ord — eller hold fingeren på det — for å legge det til i mine ord"
   }
 }

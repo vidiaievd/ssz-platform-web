@@ -564,6 +564,8 @@
     "deleteCourse": "The word leaves your words. It stays in the course's review.",
     "deleteConfirm": "Delete",
     "deck": "Deck: {title}",
-    "noDeck": "Only in my words"
+    "noDeck": "Only in my words",
+    "addToMyWords": "Add to my words",
+    "contextHint": "Right-click a word — or press and hold it — to add it to my words"
   }
 }

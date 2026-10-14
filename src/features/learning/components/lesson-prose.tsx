@@ -245,7 +245,7 @@ export function LessonProse({
       lang={lang}
       className={cn('flex flex-col gap-3.5', className)}
       style={style}
-      // Kept in step with CAPTURE_PARAGRAPH_ATTR, which the selection reader looks for.
+      // Kept in step with CAPTURE_PARAGRAPH_ATTR, which the word context menu looks for.
       data-capture-paragraph={captureParagraph}
     >
       <Blocks

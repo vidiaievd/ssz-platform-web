@@ -66,7 +66,7 @@ import {
   type TextWidth,
 } from '../stores/reading-mode-store';
 import { ReaderRailSlot, useReaderRailVisible } from './reader-rail';
-import { SelectionCapture, WordCaptureProvider } from '@/features/my-words';
+import { WordCaptureProvider, WordContextMenu } from '@/features/my-words';
 import { TextComprehensionCheck } from './text-comprehension-check';
 import { UnsupportedStagesNotice } from './unsupported-stages-notice';
 import {
@@ -500,6 +500,7 @@ export function TextLessonPage({
   unitId,
 }: TextLessonPageProps) {
   const t = useTranslations('Learning.reader.text.page');
+  const tMyWords = useTranslations('Learning.myWords');
   const tContent = useTranslations('Content');
   const tMode = useTranslations('Learning.reader.text.mode');
   const tGloss = useTranslations('Learning.reader.text.gloss');
@@ -955,6 +956,9 @@ export function TextLessonPage({
                       {t('tapToLookUp')}
                     </p>
                   )}
+                  <p className="mt-1.5 text-xs text-(--ssz-text-muted)">
+                    {tMyWords('contextHint')}
+                  </p>
                 </section>
               </div>
               {/*
@@ -990,7 +994,7 @@ export function TextLessonPage({
             <GlossIntensityProvider resolve={resolveIntensity}>
               <GlossaryTargetProvider target={railVisible ? 'panel' : 'popover'}>
                 <LookupTelemetryProvider lessonId={lessonId} lessonVariantId={variant.data.id}>
-                  <SelectionCapture>
+                  <WordContextMenu lang={lesson.data.targetLanguage}>
                     <ModeComponent
                       paragraphs={proseParagraphs}
                       glossary={glossary}
@@ -1002,7 +1006,7 @@ export function TextLessonPage({
                       authoredVocabulary={authoredVocabulary}
                       spansHidden={glossVisibility === 'off'}
                     />
-                  </SelectionCapture>
+                  </WordContextMenu>
                 </LookupTelemetryProvider>
               </GlossaryTargetProvider>
             </GlossIntensityProvider>
