@@ -762,7 +762,17 @@
     "devicePhone": "Phone",
     "deviceDesktop": "Desktop",
     "previewOnPhone": "Student preview, phone",
-    "previewOnDesktop": "Student preview, desktop"
+    "previewOnDesktop": "Student preview, desktop",
+    "audioNarrationSettings": "Narration settings",
+    "audioNarrationPace": "Speech pace: ×{value}",
+    "audioNarrationPaceFaster": "Faster",
+    "audioNarrationPaceSlower": "Slower",
+    "audioNarrationPauses": "Pauses between paragraphs: ×{value}",
+    "audioNarrationPausesShorter": "Shorter",
+    "audioNarrationPausesLonger": "Longer",
+    "audioNarrationSettingsDefaultForLevel": "Default for level {level}: pace ×{pace}, pauses ×1.0",
+    "audioNarrationSettingsDefault": "Default: pace ×{pace}, pauses ×1.0",
+    "audioNarrationSettingsReset": "Reset to default"
   },
   "spans": {
     "markSelection": "Annotate selection",

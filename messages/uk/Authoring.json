@@ -762,7 +762,17 @@
     "devicePhone": "Телефон",
     "deviceDesktop": "Комп’ютер",
     "previewOnPhone": "Перегляд учня, телефон",
-    "previewOnDesktop": "Перегляд учня, комп’ютер"
+    "previewOnDesktop": "Перегляд учня, комп’ютер",
+    "audioNarrationSettings": "Параметри озвучення",
+    "audioNarrationPace": "Темп мовлення: ×{value}",
+    "audioNarrationPaceFaster": "Швидше",
+    "audioNarrationPaceSlower": "Повільніше",
+    "audioNarrationPauses": "Паузи між абзацами: ×{value}",
+    "audioNarrationPausesShorter": "Коротші",
+    "audioNarrationPausesLonger": "Довші",
+    "audioNarrationSettingsDefaultForLevel": "За замовчуванням для рівня {level}: темп ×{pace}, паузи ×1.0",
+    "audioNarrationSettingsDefault": "За замовчуванням: темп ×{pace}, паузи ×1.0",
+    "audioNarrationSettingsReset": "Скинути до налаштувань за замовчуванням"
   },
   "spans": {
     "markSelection": "Позначити виділене",

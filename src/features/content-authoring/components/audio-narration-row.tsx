@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { AudioLines, Loader2, RotateCcw, Upload } from 'lucide-react';
+import { AudioLines, Loader2, RotateCcw, SlidersHorizontal, Upload } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,11 +14,12 @@ import {
   NarrationRequestError,
   requestNarration,
   supersedeAsset,
+  useNarrationDefaults,
   uploadAsset,
   useMediaAsset,
   usePreviousAsset,
 } from '@/features/media';
-import type { AssetResponse } from '@/features/media';
+import type { AssetResponse, NarrationDefaults, NarrationStyle } from '@/features/media';
 import { formatDate } from '@/lib/i18n/formatters';
 import type { Locale } from '@/lib/i18n/config';
 import { toNarrationScript } from '@/lib/shared-kernel/narration';
@@ -54,7 +55,24 @@ interface AudioNarrationRowProps {
   lang?: string;
   /** Stored on a synthesized narration as its entity id. */
   lessonId?: string;
+  /** The course's CEFR level: the default pace of the narration is chosen for it. */
+  level?: string;
 }
+
+const SLIDER_EPSILON = 0.001;
+
+/** The level's default style, or the service's fallback for a course on another level system. */
+function defaultStyleFor(
+  defaults: NarrationDefaults | undefined,
+  level?: string,
+): NarrationStyle | undefined {
+  if (!defaults) return undefined;
+  return (level ? defaults.byLevel[level] : undefined) ?? defaults.fallback;
+}
+
+const sameStyle = (a: NarrationStyle, b: NarrationStyle) =>
+  Math.abs(a.lengthScale - b.lengthScale) < SLIDER_EPSILON &&
+  Math.abs(a.pauseScale - b.pauseScale) < SLIDER_EPSILON;
 
 /**
  * The lesson's narration: an uploaded recording, or speech synthesis (plan 74).
@@ -65,7 +83,13 @@ interface AudioNarrationRowProps {
  * hash comes from the same kernel script media-service spoke, so a changed picture or label
  * does not count, an edited word does.
  */
-export function AudioNarrationRow({ body, onChange, lang, lessonId }: AudioNarrationRowProps) {
+export function AudioNarrationRow({
+  body,
+  onChange,
+  lang,
+  lessonId,
+  level,
+}: AudioNarrationRowProps) {
   const t = useTranslations('Authoring');
   const tMedia = useTranslations('Media');
   const locale = useLocale() as Locale;
@@ -83,6 +107,22 @@ export function AudioNarrationRow({ body, onChange, lang, lessonId }: AudioNarra
   const synthesized = asset?.origin === 'SYNTHESIZED';
   const stale = useStaleSynthesis(asset, body);
   const restorable = previous != null && isRestorable(previous);
+
+  // Pace and pauses of the next synthesis. Untouched, they follow what the current narration was
+  // spoken with (so "narrate again" repeats it), and failing that the course level's default;
+  // a slider or the reset button makes them explicit.
+  const { data: defaults } = useNarrationDefaults();
+  const levelDefault = defaultStyleFor(defaults, level);
+  const [chosenStyle, setChosenStyle] = useState<NarrationStyle | null>(null);
+  const spokenWith =
+    synthesized &&
+    asset?.synthesis?.lengthScale !== undefined &&
+    asset.synthesis.pauseScale !== undefined
+      ? { lengthScale: asset.synthesis.lengthScale, pauseScale: asset.synthesis.pauseScale }
+      : null;
+  const style = chosenStyle ?? spokenWith ?? levelDefault;
+  const styleIsDefault =
+    style !== undefined && levelDefault !== undefined && sameStyle(style, levelDefault);
 
   /** Point the token at `nextId` and mark the asset it named as replaced. */
   function replaceWith(nextId: string) {
@@ -128,6 +168,8 @@ export function AudioNarrationRow({ body, onChange, lang, lessonId }: AudioNarra
         lang,
         label: narration?.label ?? null,
         lessonId: lessonId ?? null,
+        level: level ?? null,
+        ...(style ? { lengthScale: style.lengthScale, pauseScale: style.pauseScale } : {}),
       });
       replaceWith(result.assetId);
     } catch (e) {
@@ -150,6 +192,76 @@ export function AudioNarrationRow({ body, onChange, lang, lessonId }: AudioNarra
     if (!previous || !narration) return;
     replaceWith(previous.id);
   }
+
+  const settings =
+    lang && defaults && style ? (
+      <details className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm">
+        <summary className="flex cursor-pointer items-center gap-2 font-medium">
+          <SlidersHorizontal className="size-4" aria-hidden /> {t('editor.audioNarrationSettings')}
+        </summary>
+        <div className="mt-3 flex flex-col gap-4">
+          <Field
+            label={t('editor.audioNarrationPace', { value: style.lengthScale.toFixed(2) })}
+            htmlFor="narration-pace"
+          >
+            <input
+              id="narration-pace"
+              type="range"
+              className="w-full accent-primary"
+              min={defaults.min.lengthScale}
+              max={defaults.max.lengthScale}
+              step={0.05}
+              value={style.lengthScale}
+              onChange={(e) => setChosenStyle({ ...style, lengthScale: Number(e.target.value) })}
+            />
+            <span className="flex justify-between text-xs text-muted-foreground">
+              <span>{t('editor.audioNarrationPaceFaster')}</span>
+              <span>{t('editor.audioNarrationPaceSlower')}</span>
+            </span>
+          </Field>
+          <Field
+            label={t('editor.audioNarrationPauses', { value: style.pauseScale.toFixed(1) })}
+            htmlFor="narration-pauses"
+          >
+            <input
+              id="narration-pauses"
+              type="range"
+              className="w-full accent-primary"
+              min={defaults.min.pauseScale}
+              max={defaults.max.pauseScale}
+              step={0.1}
+              value={style.pauseScale}
+              onChange={(e) => setChosenStyle({ ...style, pauseScale: Number(e.target.value) })}
+            />
+            <span className="flex justify-between text-xs text-muted-foreground">
+              <span>{t('editor.audioNarrationPausesShorter')}</span>
+              <span>{t('editor.audioNarrationPausesLonger')}</span>
+            </span>
+          </Field>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              {level && defaults.byLevel[level]
+                ? t('editor.audioNarrationSettingsDefaultForLevel', {
+                    level,
+                    pace: defaults.byLevel[level].lengthScale.toFixed(2),
+                  })
+                : t('editor.audioNarrationSettingsDefault', {
+                    pace: defaults.fallback.lengthScale.toFixed(2),
+                  })}
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setChosenStyle(levelDefault ?? null)}
+              disabled={styleIsDefault}
+            >
+              <RotateCcw aria-hidden /> {t('editor.audioNarrationSettingsReset')}
+            </Button>
+          </div>
+        </div>
+      </details>
+    ) : null;
 
   const synthButton = (label: string) =>
     lang ? (
@@ -214,6 +326,8 @@ export function AudioNarrationRow({ body, onChange, lang, lessonId }: AudioNarra
             />
           </Field>
 
+          {(synthesized || failed) && !pending && settings}
+
           <div className="flex flex-wrap gap-2">
             {(synthesized || failed) && synthButton(t('editor.audioNarrationResynthesize'))}
             <Button
@@ -254,27 +368,30 @@ export function AudioNarrationRow({ body, onChange, lang, lessonId }: AudioNarra
           </div>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => inputRef.current?.click()}
-            disabled={busy !== null}
-            loading={busy === 'upload'}
-          >
-            <Upload aria-hidden /> {t('editor.audioNarrationUpload')}
-          </Button>
-          {lang && (
+        <div className="flex flex-col gap-3">
+          {settings}
+          <div className="flex flex-wrap gap-2">
             <Button
               type="button"
               variant="outline"
-              onClick={() => void synthesize()}
+              onClick={() => inputRef.current?.click()}
               disabled={busy !== null}
-              loading={busy === 'synthesis'}
+              loading={busy === 'upload'}
             >
-              <AudioLines aria-hidden /> {t('editor.audioNarrationSynthesize')}
+              <Upload aria-hidden /> {t('editor.audioNarrationUpload')}
             </Button>
-          )}
+            {lang && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void synthesize()}
+                disabled={busy !== null}
+                loading={busy === 'synthesis'}
+              >
+                <AudioLines aria-hidden /> {t('editor.audioNarrationSynthesize')}
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

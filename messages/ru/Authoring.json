@@ -762,7 +762,17 @@
     "devicePhone": "Телефон",
     "deviceDesktop": "Компьютер",
     "previewOnPhone": "Превью ученика, телефон",
-    "previewOnDesktop": "Превью ученика, компьютер"
+    "previewOnDesktop": "Превью ученика, компьютер",
+    "audioNarrationSettings": "Параметры озвучки",
+    "audioNarrationPace": "Темп речи: ×{value}",
+    "audioNarrationPaceFaster": "Быстрее",
+    "audioNarrationPaceSlower": "Медленнее",
+    "audioNarrationPauses": "Паузы между абзацами: ×{value}",
+    "audioNarrationPausesShorter": "Короче",
+    "audioNarrationPausesLonger": "Длиннее",
+    "audioNarrationSettingsDefaultForLevel": "По умолчанию для уровня {level}: темп ×{pace}, паузы ×1.0",
+    "audioNarrationSettingsDefault": "По умолчанию: темп ×{pace}, паузы ×1.0",
+    "audioNarrationSettingsReset": "Сбросить к настройкам по умолчанию"
   },
   "spans": {
     "markSelection": "Разметить выделенное",

@@ -244,6 +244,7 @@ export function TextEditorPane({
             onChange={handleBodyTokenChange}
             lang={container.targetLanguage}
             lessonId={lessonId}
+            level={container.difficultyLevel}
           />
 
           <Button

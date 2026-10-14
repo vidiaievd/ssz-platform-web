@@ -762,7 +762,17 @@
     "devicePhone": "Telefon",
     "deviceDesktop": "Datamaskin",
     "previewOnPhone": "Elevvisning, telefon",
-    "previewOnDesktop": "Elevvisning, datamaskin"
+    "previewOnDesktop": "Elevvisning, datamaskin",
+    "audioNarrationSettings": "Innstillinger for opplesing",
+    "audioNarrationPace": "Taletempo: ×{value}",
+    "audioNarrationPaceFaster": "Raskere",
+    "audioNarrationPaceSlower": "Saktere",
+    "audioNarrationPauses": "Pauser mellom avsnitt: ×{value}",
+    "audioNarrationPausesShorter": "Kortere",
+    "audioNarrationPausesLonger": "Lengre",
+    "audioNarrationSettingsDefaultForLevel": "Standard for nivå {level}: tempo ×{pace}, pauser ×1.0",
+    "audioNarrationSettingsDefault": "Standard: tempo ×{pace}, pauser ×1.0",
+    "audioNarrationSettingsReset": "Tilbakestill til standard"
   },
   "spans": {
     "markSelection": "Merk utvalg",

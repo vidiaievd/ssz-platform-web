@@ -24,6 +24,11 @@ export async function requestNarration(input: {
   lang: string;
   label?: string | null;
   lessonId?: string | null;
+  /** The course's CEFR level: media-service picks the pace for it. */
+  level?: string | null;
+  /** The author's own pace and pauses; each falls back to the level's default. */
+  lengthScale?: number;
+  pauseScale?: number;
 }): Promise<NarrationRequestResponse> {
   const res = await fetch('/api/media/narration', {
     method: 'POST',
@@ -33,6 +38,9 @@ export async function requestNarration(input: {
       lang: input.lang,
       ...(input.label ? { label: input.label } : {}),
       ...(input.lessonId ? { lessonId: input.lessonId } : {}),
+      ...(input.level ? { level: input.level } : {}),
+      ...(input.lengthScale !== undefined ? { lengthScale: input.lengthScale } : {}),
+      ...(input.pauseScale !== undefined ? { pauseScale: input.pauseScale } : {}),
     }),
   });
   if (!res.ok) {

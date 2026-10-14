@@ -11,6 +11,7 @@ vi.mock('@/features/media', async () => {
   return {
     ...actual,
     useMediaAsset: vi.fn(),
+    useNarrationDefaults: vi.fn(),
     usePreviousAsset: vi.fn(),
     uploadAsset: vi.fn(),
     requestNarration: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock('@/features/media', async () => {
 const { AudioNarrationRow } = await import('./audio-narration-row');
 const {
   useMediaAsset,
+  useNarrationDefaults,
   usePreviousAsset,
   uploadAsset,
   requestNarration,
@@ -33,7 +35,7 @@ const { toast } = await import('sonner');
 function renderRow(
   body: string,
   onChange = vi.fn(),
-  props: { lang?: string; lessonId?: string } = {},
+  props: { lang?: string; lessonId?: string; level?: string } = {},
 ) {
   render(
     <QueryClientProvider client={new QueryClient()}>
@@ -63,7 +65,19 @@ function synthesizedAsset(id: string, spokenBody: string, overrides: Record<stri
   };
 }
 
+const DEFAULTS = {
+  fallback: { lengthScale: 1.7, pauseScale: 1 },
+  byLevel: {
+    A1: { lengthScale: 2, pauseScale: 1 },
+    B1: { lengthScale: 1.7, pauseScale: 1 },
+    C1: { lengthScale: 1.4, pauseScale: 1 },
+  },
+  min: { lengthScale: 1, pauseScale: 0.5 },
+  max: { lengthScale: 2.5, pauseScale: 2 },
+};
+
 beforeEach(() => {
+  vi.mocked(useNarrationDefaults).mockReturnValue({ data: DEFAULTS } as never);
   vi.mocked(uploadAsset).mockReset();
   vi.mocked(toast.error).mockReset();
   vi.mocked(useMediaAsset).mockReturnValue({ data: undefined, isLoading: false } as never);
@@ -173,10 +187,89 @@ describe('AudioNarrationRow', () => {
         lang: 'nb',
         label: null,
         lessonId: 'lesson-1',
+        level: null,
+        lengthScale: 1.7,
+        pauseScale: 1,
       });
       expect(onChange).toHaveBeenCalledWith('Hei, Taras!\n\n[audio:n-1]');
       // Nothing was replaced, so nothing is marked.
       expect(supersedeAsset).not.toHaveBeenCalled();
+    });
+
+    describe('settings', () => {
+      const synthesizeClick = async () =>
+        act(async () => {
+          fireEvent.click(screen.getByRole('button', { name: 'Narrate with synthesis' }));
+        });
+
+      it("starts from the course level's default pace and says so", () => {
+        renderRow('Hei.', vi.fn(), { lang: 'nb', level: 'A1' });
+
+        expect(screen.getByLabelText('Speech pace: ×2.00')).toHaveValue('2');
+        expect(screen.getByLabelText('Pauses between paragraphs: ×1.0')).toHaveValue('1');
+        expect(screen.getByText('Default for level A1: pace ×2.00, pauses ×1.0')).toBeInTheDocument();
+      });
+
+      it('sends the level and the chosen pace and pauses with the request', async () => {
+        vi.mocked(requestNarration).mockResolvedValue({ assetId: 'n-1' } as never);
+        renderRow('Hei.', vi.fn(), { lang: 'nb', level: 'B1' });
+
+        fireEvent.change(screen.getByLabelText(/Speech pace/), { target: { value: '2.2' } });
+        fireEvent.change(screen.getByLabelText(/Pauses between paragraphs/), { target: { value: '1.5' } });
+        await synthesizeClick();
+
+        expect(requestNarration).toHaveBeenCalledWith(
+          expect.objectContaining({ level: 'B1', lengthScale: 2.2, pauseScale: 1.5 }),
+        );
+      });
+
+      it('resets to the level default, and offers the reset only when something differs', () => {
+        renderRow('Hei.', vi.fn(), { lang: 'nb', level: 'B1' });
+        const reset = screen.getByRole('button', { name: 'Reset to default' });
+        expect(reset).toBeDisabled();
+
+        fireEvent.change(screen.getByLabelText(/Speech pace/), { target: { value: '2.2' } });
+        expect(reset).toBeEnabled();
+
+        fireEvent.click(reset);
+        expect(screen.getByLabelText('Speech pace: ×1.70')).toHaveValue('1.7');
+        expect(reset).toBeDisabled();
+      });
+
+      it('falls back to the service default for a level it has no table for', () => {
+        renderRow('Hei.', vi.fn(), { lang: 'nb', level: 'N4' });
+
+        expect(screen.getByLabelText('Speech pace: ×1.70')).toBeInTheDocument();
+        expect(screen.getByText('Default: pace ×1.70, pauses ×1.0')).toBeInTheDocument();
+      });
+
+      it('repeats what the current synthesis was spoken with when narrating again', async () => {
+        const body = 'Hei, Taras!\n\n[audio:n-1 "Les"]';
+        const asset = synthesizedAsset('n-1', body);
+        vi.mocked(useMediaAsset).mockReturnValue({
+          data: { ...asset, synthesis: { ...asset.synthesis, lengthScale: 2.3, pauseScale: 0.7 } },
+        } as never);
+        vi.mocked(requestNarration).mockResolvedValue({ assetId: 'n-2' } as never);
+        renderRow(body, vi.fn(), { lang: 'nb', level: 'B1' });
+
+        expect(screen.getByLabelText('Speech pace: ×2.30')).toBeInTheDocument();
+        await act(async () => {
+          fireEvent.click(screen.getByRole('button', { name: 'Narrate again' }));
+        });
+
+        expect(requestNarration).toHaveBeenCalledWith(
+          expect.objectContaining({ lengthScale: 2.3, pauseScale: 0.7 }),
+        );
+      });
+
+      it('has no settings for a recording a person made', () => {
+        vi.mocked(useMediaAsset).mockReturnValue({
+          data: { id: 'rec-1', url: 'https://cdn.example/rec.mp3', status: 'READY', origin: 'UPLOAD' },
+        } as never);
+        renderRow('Hei.\n\n[audio:rec-1]', vi.fn(), { lang: 'nb' });
+
+        expect(screen.queryByText('Narration settings')).toBeNull();
+      });
     });
 
     it('names the reason a narration was refused', async () => {

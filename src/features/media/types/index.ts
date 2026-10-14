@@ -36,6 +36,28 @@ export type AssetSynthesis = {
   /** `narrationTextHash` of the spoken text; differs from the current body once it is edited. */
   textHash: string;
   segments: number;
+  /** Phoneme length multiplier it was spoken with (plan 74, phase 6); absent on older ones. */
+  lengthScale?: number;
+  /** Multiplier on the pauses between paragraphs and turns. */
+  pauseScale?: number;
+  /** The course level the pace default came from. */
+  level?: string;
+};
+
+/** How a narration is delivered: the words' speed and the pauses between segments. */
+export type NarrationStyle = {
+  /** Above 1 speaks slower. */
+  lengthScale: number;
+  pauseScale: number;
+};
+
+/** Wire answer of GET /media/narration/defaults. */
+export type NarrationDefaults = {
+  /** For a course whose level is not a CEFR one. */
+  fallback: NarrationStyle;
+  byLevel: Record<string, NarrationStyle>;
+  min: NarrationStyle;
+  max: NarrationStyle;
 };
 
 // Shape returned by GET /media/assets/:id (media-service's AssetResponseDto).
@@ -73,6 +95,8 @@ export type NarrationRequestResponse = {
   textHash: string;
   segments: number;
   characters: number;
+  lengthScale: number;
+  pauseScale: number;
 };
 
 export type FinalizeUploadResponse = {

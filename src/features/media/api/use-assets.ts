@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { AssetResponse, MediaAsset } from '../types';
+import type { AssetResponse, MediaAsset, NarrationDefaults } from '../types';
 import { mediaKeys } from './keys';
 
 export function useMyAssets() {
@@ -70,5 +70,21 @@ export function useDeleteAsset() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: mediaKeys.assets() });
     },
+  });
+}
+
+/**
+ * Default narration pace per course level, and the range each setting accepts. The table is
+ * media-service's, so a change of defaults there reaches the editor without a release.
+ */
+export function useNarrationDefaults() {
+  return useQuery({
+    queryKey: mediaKeys.narrationDefaults(),
+    queryFn: async () => {
+      const res = await fetch('/api/media/narration/defaults');
+      if (!res.ok) throw new Error('Failed to fetch narration defaults');
+      return res.json() as Promise<NarrationDefaults>;
+    },
+    staleTime: 10 * 60_000,
   });
 }
