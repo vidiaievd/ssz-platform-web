@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const data = await serverFetch({
       service: 'media',
-      path: '/media/narration/defaults',
+      path: `/media/narration/defaults?lang=${encodeURIComponent(lang)}`,
       method: 'GET',
     });
     return NextResponse.json(data);
