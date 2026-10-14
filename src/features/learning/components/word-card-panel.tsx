@@ -11,6 +11,7 @@ import { getGlossaryMode } from '../lib/glossary-mode';
 import { useSelectedWordStore, type SelectedWord } from '../stores/selected-word-store';
 import { POS_STYLES } from './glossary-popover';
 import { KnowWordButton } from './know-word-button';
+import { AddToMyWordsButton } from '@/features/my-words/components/add-to-my-words-button';
 import { WordForms } from './word-forms';
 import { WordParadigmTable } from './word-paradigm-table';
 import { toGlossaryTag } from '../lib/pos-tag';
@@ -49,7 +50,8 @@ function Card({
   const { play, playing, pending } = useWordAudio(item.lemma, item.audioMediaId, targetLanguage);
   const href = dictionaryUrl(item.lemma, targetLanguage);
 
-  const translation = item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
+  const translation =
+    item.translations.find((tr) => tr.languageCode === locale) ?? item.translations[0];
   const mode = getGlossaryMode(cefrLevel ?? '');
   const gloss =
     mode === 'definition'
@@ -152,6 +154,10 @@ function Card({
 
       <div className="flex flex-col items-start gap-2 border-t border-(--ssz-border-default) pt-3">
         <KnowWordButton vocabularyItemId={item.id} />
+        <AddToMyWordsButton
+          surfaceForm={form ?? item.lemma}
+          contextSentence={contextSentence ?? null}
+        />
         {href && (
           <a
             href={href}

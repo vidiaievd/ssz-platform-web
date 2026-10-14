@@ -528,5 +528,19 @@
       "title": "{count, plural, one {Ett spørsmål vises ikke her} other {# spørsmål vises ikke her}}",
       "body": "De er skrevet i et format denne leksjonen ennå ikke spiller. Resten av leksjonen fungerer som vanlig."
     }
+  },
+  "myWords": {
+    "add": "Til mine ord",
+    "save": "Legg til i mine ord",
+    "close": "Lukk",
+    "looking": "Slår opp…",
+    "translationPlaceholder": "Din oversettelse — eller legg den til senere",
+    "inText": "i teksten: {form}",
+    "fromCourse": "Oversettelse fra kurset",
+    "alreadyAdded": "Allerede i ordene dine",
+    "waitingForTranslation": "Venter på oversettelse",
+    "added": "Lagt til",
+    "saveError": "Kunne ikke legge til ordet — prøv igjen",
+    "refused": "Bare ett ord kan legges til"
   }
 }

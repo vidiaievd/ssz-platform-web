@@ -528,5 +528,19 @@
       "title": "{count, plural, one {One question isn't shown here} other {# questions aren't shown here}}",
       "body": "They're written in a format this lesson doesn't play yet. The rest of the lesson works as usual."
     }
+  },
+  "myWords": {
+    "add": "Add to my words",
+    "save": "Add to my words",
+    "close": "Close",
+    "looking": "Looking it up…",
+    "translationPlaceholder": "Your translation — or add it later",
+    "inText": "in the text: {form}",
+    "fromCourse": "Translation from the course",
+    "alreadyAdded": "Already in your words",
+    "waitingForTranslation": "Waiting for a translation",
+    "added": "Added",
+    "saveError": "Could not add the word — try again",
+    "refused": "Only a single word can be added"
   }
 }
