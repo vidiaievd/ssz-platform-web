@@ -25,6 +25,19 @@ export type MediaAsset = {
   createdAt: string;
 };
 
+/** How a synthesized asset was made (plan 74) — media-service's AssetSynthesisResponseDto. */
+export type AssetSynthesis = {
+  provider: string;
+  /** The narrator's voice. */
+  voice: string;
+  /** Speaker → voice, when characters have voices of their own. */
+  voices?: Record<string, string>;
+  lang: string;
+  /** `narrationTextHash` of the spoken text; differs from the current body once it is edited. */
+  textHash: string;
+  segments: number;
+};
+
 // Shape returned by GET /media/assets/:id (media-service's AssetResponseDto).
 export type AssetResponse = {
   id: string;
@@ -42,6 +55,24 @@ export type AssetResponse = {
   durationMs?: number | null;
   /** 0..1 waveform, computed by the audio worker; null until it has run. */
   peaks?: number[] | null;
+  /** Plan 74: a person's file or speech synthesis. Absent from an older service. */
+  origin?: 'UPLOAD' | 'SYNTHESIZED';
+  synthesis?: AssetSynthesis | null;
+  /** Set while a lesson body names another asset in this one's place (D5). */
+  supersededAt?: string | null;
+  supersededBy?: string | null;
+  /** The replaced asset can be restored until then; null while it is in use. */
+  restorableUntil?: string | null;
+};
+
+/** Wire answer of POST /media/narration. */
+export type NarrationRequestResponse = {
+  assetId: string;
+  status: string;
+  voice: string;
+  textHash: string;
+  segments: number;
+  characters: number;
 };
 
 export type FinalizeUploadResponse = {

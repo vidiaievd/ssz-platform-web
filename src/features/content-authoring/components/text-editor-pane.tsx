@@ -239,7 +239,12 @@ export function TextEditorPane({
             onChange={handleBodyTokenChange}
           />
 
-          <AudioNarrationRow body={bodyValue ?? ''} onChange={handleBodyTokenChange} />
+          <AudioNarrationRow
+            body={bodyValue ?? ''}
+            onChange={handleBodyTokenChange}
+            lang={container.targetLanguage}
+            lessonId={lessonId}
+          />
 
           <Button
             type="button"

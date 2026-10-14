@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { MediaAsset } from '../types';
+import type { AssetResponse, MediaAsset } from '../types';
 import { mediaKeys } from './keys';
 
 export function useMyAssets() {
@@ -17,13 +17,42 @@ export function useMyAssets() {
   });
 }
 
-export function useMediaAsset(id: string | undefined) {
+/** Statuses after which an asset no longer changes on its own. */
+const SETTLED_STATUSES = new Set(['READY', 'FAILED', 'DELETED']);
+const PENDING_POLL_MS = 2_000;
+
+export function useMediaAsset(
+  id: string | undefined,
+  options: { pollWhilePending?: boolean } = {},
+) {
   return useQuery({
     queryKey: mediaKeys.asset(id ?? ''),
     queryFn: async () => {
       const res = await fetch(`/api/media/assets/${id}`);
       if (!res.ok) throw new Error('Failed to fetch asset');
-      return res.json() as Promise<Pick<MediaAsset, 'id' | 'url'>>;
+      return res.json() as Promise<AssetResponse>;
+    },
+    enabled: !!id,
+    staleTime: 60_000,
+    // A narration is being spoken, or an upload processed: ask again until it settles.
+    refetchInterval: (query) =>
+      options.pollWhilePending &&
+      query.state.data &&
+      !SETTLED_STATUSES.has(query.state.data.status ?? 'READY')
+        ? PENDING_POLL_MS
+        : false,
+  });
+}
+
+/** The lesson asset `id` replaced, while it can still be restored; null when there is none. */
+export function usePreviousAsset(id: string | undefined) {
+  return useQuery({
+    queryKey: mediaKeys.previous(id ?? ''),
+    queryFn: async () => {
+      const res = await fetch(`/api/media/assets/${id}/previous`);
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error('Failed to fetch the previous asset');
+      return res.json() as Promise<AssetResponse>;
     },
     enabled: !!id,
     staleTime: 60_000,
