@@ -27,15 +27,18 @@ import {
 } from '@/features/student/exercises/audio';
 
 import { Instr } from './instr';
+import { nextUnreached, unansweredCount, type ShortAnswerWalk } from './short-answer-walk';
 
 /**
  * Where the runner is in one question — README "Screen 2", state machine.
  *
- * `writing` and `submitted` belong to the question, `done` to the set. Not `RunnerPhase`:
- * the shared `answering | feedback` pair describes an exercise that is checked once, and
- * this one is handed in a question at a time with no way back to any of them.
+ * `writing` and `submitted` belong to the question, `review` and `done` to the set. `review`
+ * is every question answered or skipped with some skipped: nothing to answer on screen, the
+ * way back to the skipped ones and the way to send. Not `RunnerPhase`: the shared
+ * `answering | feedback` pair describes an exercise that is checked once, and this one is
+ * handed in a question at a time.
  */
-export type ShortAnswerPhase = 'writing' | 'submitted' | 'done';
+export type ShortAnswerPhase = 'writing' | 'submitted' | 'review' | 'done';
 
 /** How the set came out, counted as the answers were handed in. */
 export interface ShortAnswerTally {
@@ -92,7 +95,18 @@ export interface ShortAnswerBodyProps {
    * says. Ignored when the author turned progress off (`settings.progress`).
    */
   showProgressBar?: boolean;
+  /**
+   * Questions handed in and skipped, by id. Given, the set is walked with skips: one dot per
+   * question in place of the bar, and the closing button knows about the gaps. Absent — the
+   * builder's preview — the set walks top to bottom as it always did.
+   */
+  walk?: ShortAnswerWalk;
+  /** Pass over the question on screen; it stays open. Absent: no Skip. */
+  onSkip?: () => void;
+  /** Open the next skipped question. */
+  onBackToSkipped?: () => void;
   onSubmit: () => void;
+  /** The next question, or — when there is none — send the set. */
   onNext: () => void;
   /** Start the set over. Absent where a fresh attempt cannot be had. */
   onRestart?: () => void;
@@ -203,12 +217,17 @@ export function ShortAnswerBody({
   audio,
   audioTranscript = null,
   showProgressBar = true,
+  walk,
+  onSkip,
+  onBackToSkipped,
   onSubmit,
   onNext,
   onRestart,
   accent,
 }: ShortAnswerBodyProps) {
   const t = useTranslations('ExerciseRunner');
+  /** «Send with gaps?» is open — asked before a set with unanswered questions goes. */
+  const [confirming, setConfirming] = useState(false);
   /**
    * The listen-first screen has been passed. State of the body rather than of the engine:
    * it is about this reading of the set, and a restart puts the learner back in front of
@@ -221,6 +240,115 @@ export function ShortAnswerBody({
   // Reaches every control the type owns, by extending the expressions that were already
   // there. A second lock mechanism is how the two drift apart (INTEGRATION.md).
   const locked = audioOn && audio.gated;
+  const ids = set.questions.map((q) => q.id);
+  const unanswered = walk ? unansweredCount(ids, walk) : 0;
+  const skippedCount = walk?.skipped.length ?? 0;
+
+  /** Send the set, or first ask whether to send it with questions left unanswered. */
+  const send = () => {
+    if (unanswered > 0) setConfirming(true);
+    else onNext();
+  };
+
+  /*
+    The gaps question, under the button that raised it. Inline rather than a dialog: it is
+    one sentence and two buttons, about the set right above it.
+  */
+  const confirmBox = confirming ? (
+    <div
+      role="alertdialog"
+      aria-labelledby="sa-gaps-confirm"
+      className="mt-3 flex flex-col gap-2.5 rounded-xl px-4 py-3"
+      style={{
+        border: '1px solid var(--ssz-color-warning-500)',
+        background: 'var(--ssz-color-warning-50)',
+      }}
+    >
+      <p id="sa-gaps-confirm" className="m-0 text-[13px] text-(--ssz-color-warning-700)">
+        {t('shortAnswer.gaps.confirm', { count: unanswered })}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setConfirming(false);
+            onNext();
+          }}
+          className="rounded-lg px-4 py-2 text-[13px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+          style={{ background: accent }}
+        >
+          {t('shortAnswer.gaps.confirmSend')}
+        </button>
+        <button
+          type="button"
+          onClick={() => setConfirming(false)}
+          className="rounded-lg border px-4 py-2 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+          style={{ borderColor: 'var(--ssz-border-default)', color: 'var(--ssz-text-secondary)' }}
+        >
+          {t('shortAnswer.gaps.cancel')}
+        </button>
+      </div>
+    </div>
+  ) : null;
+
+  /** «Back to skipped» first, «Send for checking» as the way past it. */
+  const gapsButtons = (
+    <div className="mt-4 flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        onClick={() => {
+          setConfirming(false);
+          onBackToSkipped?.();
+        }}
+        className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+        style={{ background: accent }}
+      >
+        {t('shortAnswer.gaps.back', { count: skippedCount })}
+      </button>
+      <button
+        type="button"
+        onClick={send}
+        className="rounded-xl border px-5 py-2.5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+        style={{ borderColor: 'var(--ssz-border-default)', color: 'var(--ssz-text-secondary)' }}
+      >
+        {t('shortAnswer.finish')}
+      </button>
+    </div>
+  );
+
+  /*
+    One dot per question: handed in, skipped, on screen, not reached yet. With skips the set
+    is no longer walked top to bottom, and a bar filling left to right would say it was.
+  */
+  const dots = walk ? (
+    <div className="flex flex-1 flex-wrap items-center gap-1.5" aria-hidden="true">
+      {ids.map((id, i) => {
+        const answered = walk.answered.includes(id);
+        const skipped = !answered && walk.skipped.includes(id);
+        const current = phase !== 'review' && i === index;
+        return (
+          <span
+            key={id}
+            className="inline-block rounded-full"
+            style={{
+              width: current ? 12 : 9,
+              height: current ? 12 : 9,
+              background: answered ? accent : 'transparent',
+              border: `2px solid ${
+                answered
+                  ? accent
+                  : skipped
+                    ? 'var(--ssz-color-warning-500)'
+                    : current
+                      ? 'var(--ssz-text-primary)'
+                      : 'var(--ssz-border-default)'
+              }`,
+            }}
+          />
+        );
+      })}
+    </div>
+  ) : null;
 
   if (total === 0) {
     return (
@@ -256,6 +384,11 @@ export function ShortAnswerBody({
           {t('shortAnswer.done.tally', { ...tally })}
           {withTeacher ? ` ${t('shortAnswer.done.teacher')}` : ''}
         </p>
+        {unanswered > 0 && (
+          <p className="m-0 text-[13px] text-(--ssz-text-muted)">
+            {t('shortAnswer.done.skipped', { count: unanswered })}
+          </p>
+        )}
         {/* A `submit` that could not be confirmed — the answers are in, the set may not
             be closed. Said here rather than swallowed, because the learner is the one
             who can try again. */}
@@ -290,9 +423,27 @@ export function ShortAnswerBody({
     );
   }
 
+  if (phase === 'review') {
+    return (
+      <>
+        {s.progress && dots && <div className="mb-3 flex items-center gap-3">{dots}</div>}
+        <div className="flex flex-col items-center gap-1.5 px-6 py-8 text-center" role="status">
+          <h4 className="m-0 text-[16px] font-bold text-(--ssz-text-primary)">
+            {t('shortAnswer.gaps.title')}
+          </h4>
+          <p className="m-0 text-[13.5px] text-(--ssz-text-secondary)">
+            {t('shortAnswer.gaps.desc', { answered: walk?.answered.length ?? 0, total })}
+          </p>
+        </div>
+        {gapsButtons}
+        {confirmBox}
+      </>
+    );
+  }
+
   const question = set.questions[Math.min(index, total - 1)]!;
   const submitted = phase === 'submitted';
-  const last = index + 1 >= total;
+  const last = walk ? nextUnreached(ids, index, walk) === null : index + 1 >= total;
   // The bar counts the question being answered as done the moment it is handed in, so
   // the last answer fills it rather than leaving the set looking unfinished.
   const progress = ((index + (submitted ? 1 : 0)) / total) * 100;
@@ -305,7 +456,8 @@ export function ShortAnswerBody({
     <>
       {s.progress && (
         <div className="mb-3 flex items-center gap-3">
-          {showProgressBar && (
+          {showProgressBar && dots}
+          {showProgressBar && !dots && (
             <div
               className="h-1 flex-1 overflow-hidden rounded-full"
               style={{ background: 'var(--ssz-bg-muted)' }}
@@ -494,36 +646,56 @@ export function ShortAnswerBody({
         />
       )}
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        {submitted ? (
-          <button
-            type="button"
-            onClick={onNext}
-            className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
-            style={{ background: accent }}
-          >
-            {last ? t('shortAnswer.finish') : t('shortAnswer.next')}
-          </button>
-        ) : (
-          <>
+      {submitted && last && skippedCount > 0 && onBackToSkipped ? (
+        gapsButtons
+      ) : (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          {submitted ? (
             <button
               type="button"
-              disabled={!interactive || sending || locked || value.trim() === ''}
-              onClick={onSubmit}
-              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+              onClick={last ? send : onNext}
+              className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
               style={{ background: accent }}
             >
-              <Send size={14} aria-hidden="true" />
-              {sending ? t('shortAnswer.sending') : t('shortAnswer.submit')}
+              {last ? t('shortAnswer.finish') : t('shortAnswer.next')}
             </button>
-            {interactive && (
-              <span className="text-[12.5px] text-(--ssz-text-muted)">
-                {t('shortAnswer.irreversible')}
-              </span>
-            )}
-          </>
-        )}
-      </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                disabled={!interactive || sending || locked || value.trim() === ''}
+                onClick={onSubmit}
+                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+                style={{ background: accent }}
+              >
+                <Send size={14} aria-hidden="true" />
+                {sending ? t('shortAnswer.sending') : t('shortAnswer.submit')}
+              </button>
+              {interactive && onSkip && (
+                <button
+                  type="button"
+                  disabled={sending}
+                  onClick={onSkip}
+                  className="rounded-xl border px-4 py-2.5 text-[14px] font-semibold disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus)"
+                  style={{
+                    borderColor: 'var(--ssz-border-default)',
+                    color: 'var(--ssz-text-secondary)',
+                  }}
+                >
+                  {t('shortAnswer.skip')}
+                </button>
+              )}
+              {interactive && (
+                <span className="text-[12.5px] text-(--ssz-text-muted)">
+                  {t('shortAnswer.irreversible')}
+                </span>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {confirmBox}
 
       {error !== null && (
         <p

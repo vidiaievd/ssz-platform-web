@@ -1951,6 +1951,8 @@
     "saModel": "Eksempelsvar: {text}",
     "saQuestionGone": "Spørsmålet ble slettet etter at studenten svarte. Ingenting kan sies om svaret — les det og avgjør selv.",
     "saNoVerdict": "ikke vurdert",
+    "saSkipped": "ikke besvart",
+    "saSkippedNote": "Studenten hoppet over spørsmålet og leverte settet uten å svare. Det teller som ikke godkjent.",
     "inboxTrigger": "Innboks",
     "courseTitle": "Innboks for retting",
     "courseSubtitle": "Alt elevene dine har levert i dette kurset.",

@@ -214,7 +214,7 @@ describe('ShortAnswerSolver', () => {
     await handIn('Han har jobbet der i tre år.');
     await userEvent.click(await screen.findByRole('button', { name: /next question/i }));
     await handIn('Mer ansvar.');
-    await userEvent.click(await screen.findByRole('button', { name: /finish/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /send for checking/i }));
 
     await waitFor(() => expect(onChecked).toHaveBeenCalledWith(null));
 
@@ -226,6 +226,61 @@ describe('ShortAnswerSolver', () => {
       ],
     });
     expect(screen.getByRole('status')).toHaveTextContent('1 passed · 1 partly · 0 not passed');
+  });
+
+  it('skips a question, comes back to it, and answers it', async () => {
+    const fetchMock = mockApi();
+    renderSolver(fetchMock);
+    await screen.findByRole('textbox');
+
+    await userEvent.click(screen.getByRole('button', { name: /^skip$/i }));
+    expect(screen.getByRole('heading', { name: /Hva vil Bartek gjerne ha/ })).toBeInTheDocument();
+
+    await handIn('Mer ansvar.');
+    // Nothing left to reach and one skipped: back to it first, sending as the way past.
+    await userEvent.click(await screen.findByRole('button', { name: /back to skipped \(1\)/i }));
+    expect(
+      screen.getByRole('heading', { name: /Hvor lenge har Bartek jobbet/ }),
+    ).toBeInTheDocument();
+
+    await handIn('Han har jobbet der i tre år.');
+    await userEvent.click(await screen.findByRole('button', { name: /send for checking/i }));
+
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/submit'))).toBe(true),
+    );
+    const submit = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/submit'));
+    expect(JSON.parse(String(submit?.[1]?.body)).submittedAnswer).toEqual({
+      answers: [
+        { questionId: 'sa2', text: 'Mer ansvar.' },
+        { questionId: 'sa1', text: 'Han har jobbet der i tre år.' },
+      ],
+    });
+  });
+
+  it('asks before sending a set with a question left unanswered, then sends without it', async () => {
+    const fetchMock = mockApi();
+    renderSolver(fetchMock);
+    await screen.findByRole('textbox');
+
+    await userEvent.click(screen.getByRole('button', { name: /^skip$/i }));
+    await handIn('Mer ansvar.');
+    await userEvent.click(await screen.findByRole('button', { name: /send for checking/i }));
+
+    // Not sent yet: the gap is named first.
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('1 question has no answer');
+    expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/submit'))).toBe(false);
+
+    await userEvent.click(screen.getByRole('button', { name: /^send$/i }));
+
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/submit'))).toBe(true),
+    );
+    const submit = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/submit'));
+    expect(JSON.parse(String(submit?.[1]?.body)).submittedAnswer).toEqual({
+      answers: [{ questionId: 'sa2', text: 'Mer ansvar.' }],
+    });
+    expect(await screen.findByText('No answer: 1')).toBeInTheDocument();
   });
 
   // Plan 51 §8 Q6: a reload continues the set instead of replaying it.
@@ -245,7 +300,7 @@ describe('ShortAnswerSolver', () => {
     expect(screen.getByText('2/2')).toBeInTheDocument();
 
     await handIn('Mer ansvar.');
-    await userEvent.click(await screen.findByRole('button', { name: /finish/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /send for checking/i }));
 
     await waitFor(() => expect(onChecked).toHaveBeenCalledWith(null));
 
@@ -339,7 +394,7 @@ describe('ShortAnswerSolver', () => {
     await handIn('Han har jobbet der i tre år.');
     await userEvent.click(await screen.findByRole('button', { name: /next question/i }));
     await handIn('Mer ansvar.');
-    await userEvent.click(await screen.findByRole('button', { name: /finish/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /send for checking/i }));
 
     expect(await screen.findByText(/could not confirm/i)).toBeInTheDocument();
     expect(onChecked).not.toHaveBeenCalled();
@@ -356,7 +411,7 @@ describe('ShortAnswerSolver', () => {
     await handIn('Han har jobbet der i tre år.');
     await userEvent.click(await screen.findByRole('button', { name: /next question/i }));
     await handIn('Mer ansvar.');
-    await userEvent.click(await screen.findByRole('button', { name: /finish/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /send for checking/i }));
 
     await waitFor(() => expect(onChecked).toHaveBeenCalledWith(null));
     expect(screen.queryByText(/could not confirm/i)).not.toBeInTheDocument();

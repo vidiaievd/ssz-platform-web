@@ -18,6 +18,12 @@ import {
   type ShortAnswerPhase,
   type ShortAnswerTally,
 } from '@/features/student/exercises/runner';
+import {
+  EMPTY_WALK,
+  nextSkipped,
+  nextUnreached,
+  type ShortAnswerWalk,
+} from '@/features/student/exercises/runner/short-answer-walk';
 import type { AttemptRecord, ResumedAnswer } from '@/features/student/exercises/types/attempts';
 import type {
   ProjectedQuestion,
@@ -48,8 +54,10 @@ const EMPTY_TALLY: ShortAnswerTally = { pass: 0, partial: 0, fail: 0 };
 /**
  * `short_answer` played against the server, a question at a time.
  *
- * The set is walked question by question: write, hand in, read the verdict, move on with
- * no way back. Every verdict on the screen came from the engine, because the key is a
+ * The set is walked question by question: write, hand in, read the verdict, move on. A
+ * question may be skipped and come back to; the set walks the questions not reached yet
+ * first, then offers the skipped ones beside sending. Sending with gaps is allowed after a
+ * confirmation — the engine grades a gap as an answer that said nothing. Every verdict on the screen came from the engine, because the key is a
  * set of anchor phrases — the answer written in the words the student is being asked to
  * find — and a browser holding it would be holding the answers (plan 51 §3.2).
  *
@@ -98,6 +106,8 @@ export function ShortAnswerSolver({
   const submit = useSubmitAnswer(exerciseId, attemptId);
 
   const [index, setIndex] = useState(0);
+  /** Questions handed in and skipped — see `ShortAnswerWalk`. */
+  const [walk, setWalk] = useState<ShortAnswerWalk>(EMPTY_WALK);
   const [value, setValue] = useState('');
   const [phase, setPhase] = useState<ShortAnswerPhase>('writing');
   const [result, setResult] = useState<StudentResult | null>(null);
@@ -155,6 +165,9 @@ export function ShortAnswerSolver({
     setError(null);
 
     const handedIn = new Set(known.map((a) => a.questionId));
+    // Skips are not kept between sittings: a question skipped before the reload is simply
+    // one not reached yet.
+    setWalk({ answered: [...handedIn], skipped: [] });
     const next = set.questions.findIndex((q) => !handedIn.has(q.id));
 
     if (next === -1) {
@@ -288,6 +301,10 @@ export function ShortAnswerSolver({
       {
         onSuccess: (data) => {
           answers.current = [...answers.current, { questionId, text: value }];
+          setWalk((w) => ({
+            answered: [...w.answered, questionId],
+            skipped: w.skipped.filter((id) => id !== questionId),
+          }));
           setResult(data.result);
           // Only ever sent with the last verdict of the set — one clip covers every
           // question, so the engine holds it back until there is nothing left to answer.
@@ -311,17 +328,47 @@ export function ShortAnswerSolver({
     );
   }
 
-  function next() {
+  const ids = questions.map((q) => q.id);
+
+  /** Open the question at `target`, or the review of the gaps when there is none. */
+  function goTo(target: number | null) {
     setResult(null);
     setValue('');
     setError(null);
-
-    if (index + 1 < questions.length) {
-      setIndex(index + 1);
-      setPhase('writing');
+    if (target === null) {
+      setPhase('review');
       return;
     }
+    setIndex(target);
+    setPhase('writing');
+  }
+
+  /** The next question not reached yet — or, with none left, send the set. */
+  function next() {
+    const target = nextUnreached(ids, index, walk);
+    if (target !== null) {
+      goTo(target);
+      return;
+    }
+    setResult(null);
+    setValue('');
+    setError(null);
     closeSet();
+  }
+
+  /** Pass over the question on screen: nothing is sent, and it stays open. */
+  function skip() {
+    if (question === undefined || answer.isPending) return;
+    const skipped = {
+      ...walk,
+      skipped: [...walk.skipped.filter((id) => id !== question.id), question.id],
+    };
+    setWalk(skipped);
+    goTo(nextUnreached(ids, index, skipped));
+  }
+
+  function backToSkipped() {
+    goTo(nextSkipped(ids, index, walk));
   }
 
   /**
@@ -332,6 +379,7 @@ export function ShortAnswerSolver({
    */
   function restart() {
     setIndex(0);
+    setWalk(EMPTY_WALK);
     setValue('');
     setResult(null);
     setTally(EMPTY_TALLY);
@@ -359,6 +407,9 @@ export function ShortAnswerSolver({
           error={error}
           audio={audio}
           audioTranscript={transcript}
+          walk={walk}
+          onSkip={skip}
+          onBackToSkipped={backToSkipped}
           onSubmit={hand}
           onNext={next}
           onRestart={restart}

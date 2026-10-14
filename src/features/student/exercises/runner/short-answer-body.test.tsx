@@ -200,7 +200,7 @@ describe('ShortAnswerBody', () => {
     expect(screen.queryByRole('button', { name: /hand in answer/i })).not.toBeInTheDocument();
   });
 
-  it('offers the next question, and "Finish" on the last one', async () => {
+  it('offers the next question, and "Send for checking" on the last one', async () => {
     const onNext = vi.fn();
     const { rerender } = render(
       wrap(<Harness phase="submitted" result={makeResult()} onNext={onNext} />),
@@ -210,7 +210,7 @@ describe('ShortAnswerBody', () => {
     expect(onNext).toHaveBeenCalledOnce();
 
     rerender(wrap(<Harness phase="submitted" index={1} result={makeResult()} onNext={onNext} />));
-    expect(screen.getByRole('button', { name: /finish/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /send for checking/i })).toBeInTheDocument();
   });
 
   it('shows the model answer only when it arrived', () => {

@@ -118,6 +118,12 @@ export interface ShortAnswerElementDetail {
 export interface ShortAnswerItemDetail extends ReviewItemCommon {
   verdict: ShortAnswerVerdict | null;
   submitted: string;
+  /**
+   * The student skipped the question and sent the set without it. The engine grades it as
+   * an empty answer — `fail`, nothing covered — and says so, so the row can tell a gap
+   * from an answer that missed. Absent (false) on submissions made before skipping existed.
+   */
+  skipped: boolean;
   /** Required elements covered, out of the required elements there are. */
   covered: number;
   total: number;

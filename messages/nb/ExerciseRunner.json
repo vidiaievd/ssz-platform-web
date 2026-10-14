@@ -254,9 +254,10 @@
     },
     "position": "{n}/{total}",
     "submit": "Lever svaret",
+    "skip": "Hopp over",
     "sending": "Leverer…",
     "next": "Neste spørsmål",
-    "finish": "Ferdig",
+    "finish": "Send til vurdering",
     "irreversible": "Svaret kan ikke endres etter levering",
     "covered": "{covered} av {total} punkter dekket",
     "tooShort": "Svaret er for kort til å vurderes automatisk.",
@@ -280,7 +281,8 @@
       "title": "Levert",
       "tally": "{pass} godkjent · {partial} delvis · {fail} ikke godkjent",
       "teacher": "Læreren ser over svarene dine.",
-      "again": "Gjør på nytt"
+      "again": "Gjør på nytt",
+      "skipped": "Ikke besvart: {count}"
     },
     "empty": {
       "title": "Ingenting å svare på ennå",
@@ -293,6 +295,14 @@
       "itemCounted": "teller",
       "itemNotCounted": "teller ikke",
       "itemNotCountedPlain": "Læreren din godtok ikke dette svaret."
+    },
+    "gaps": {
+      "title": "Noen spørsmål er ikke besvart",
+      "desc": "Besvart {answered} av {total}.",
+      "back": "Tilbake til de overhoppede ({count})",
+      "confirm": "{count, plural, one {# spørsmål er ikke besvart — det teller som feil.} other {# spørsmål er ikke besvart — de teller som feil.}} Sende likevel?",
+      "confirmSend": "Send",
+      "cancel": "Avbryt"
     }
   },
   "writing": {
