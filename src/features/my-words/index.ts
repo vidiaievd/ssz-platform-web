@@ -5,3 +5,4 @@ export { SelectionCapture } from './components/selection-capture';
 export { AddToMyWordsButton } from './components/add-to-my-words-button';
 export { CAPTURE_PARAGRAPH_ATTR } from './lib/read-word-selection';
 export { useMyWords, useUpdateMyWord, useDeleteMyWord } from './api/hooks';
+export { MyWordsView } from './components/my-words-view';

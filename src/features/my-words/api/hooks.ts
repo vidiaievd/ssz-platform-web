@@ -4,12 +4,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { CaptureWordInput, PersonalWord } from '../types';
 import {
-  deleteMyWord,
   fetchMyWords,
   fetchWordLookup,
   introduceWord,
   patchMyWord,
   postCaptureWord,
+  removeMyWord,
 } from './client';
 import { myWordsKeys } from './keys';
 
@@ -74,7 +74,7 @@ export function useUpdateMyWord() {
 export function useDeleteMyWord() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (entryId: string) => deleteMyWord(entryId),
+    mutationFn: (word: PersonalWord) => removeMyWord(word),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: myWordsKeys.all }),
   });
 }

@@ -541,6 +541,27 @@
     "waitingForTranslation": "Waiting for a translation",
     "added": "Added",
     "saveError": "Could not add the word — try again",
-    "refused": "Only a single word can be added"
+    "refused": "Only a single word can be added",
+    "pageEyebrow": "Vocabulary",
+    "pageTitle": "My words",
+    "pageSubtitle": "Words you added from texts. Translated ones are in your review.",
+    "filterAll": "All · {count}",
+    "filterPending": "Waiting for a translation · {count}",
+    "filterLabel": "Which words",
+    "empty": "No words yet",
+    "emptyHint": "Select an unfamiliar word in a lesson text and press «Add to my words».",
+    "emptyPending": "Every word has a translation.",
+    "loadError": "Could not load your words",
+    "retry": "Try again",
+    "translationShort": "Translation",
+    "saveTranslation": "Save",
+    "edit": "Change",
+    "cancel": "Cancel",
+    "courseBadge": "from the course",
+    "delete": "Delete",
+    "deleteTitle": "Delete «{word}»?",
+    "deleteOwn": "The word leaves your words and your review. Added again, it comes back with its history.",
+    "deleteCourse": "The word leaves your words. It stays in the course's review.",
+    "deleteConfirm": "Delete"
   }
 }

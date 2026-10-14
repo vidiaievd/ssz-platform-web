@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import {
   Bell,
   BarChart3,
+  BookMarked,
   BookOpen,
   CalendarDays,
   CalendarRange,
@@ -231,6 +232,7 @@ function buildStudentNav(reviewsDue: number): NavSection[] {
         { href: '/student/my-courses', icon: BookOpen, labelKey: 'myCourses' },
         { href: '/student/catalogue', icon: Search, labelKey: 'catalogue' },
         { href: '/student/training', icon: Zap, labelKey: 'training' },
+        { href: '/student/my-words', icon: BookMarked, labelKey: 'myWords' },
         { href: '/student/reviews', icon: Bell, labelKey: 'reviews', badge: reviewsDue },
         { href: '/student/submissions', icon: ClipboardCheck, labelKey: 'submissions' },
         { href: '/student/progress', icon: BarChart3, labelKey: 'progress' },

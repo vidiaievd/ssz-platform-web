@@ -33,6 +33,9 @@ export async function POST(request: NextRequest) {
       const status = e.code === 'unauthenticated' ? 401 : 502;
       return NextResponse.json({ error: e.message }, { status });
     }
-    return NextResponse.json({ error: 'Failed to bulk-introduce vocabulary list' }, { status: 502 });
+    return NextResponse.json(
+      { error: 'Failed to bulk-introduce vocabulary list' },
+      { status: 502 },
+    );
   }
 }
