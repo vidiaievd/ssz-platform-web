@@ -175,6 +175,10 @@ function WordRow({
 
           {!editing && word.translation && <p className="mt-0.5 text-[15px]">{word.translation}</p>}
 
+          <p className="mt-1 text-xs text-(--ssz-text-muted)">
+            {word.deck ? t('deck', { title: word.deck.title }) : t('noDeck')}
+          </p>
+
           {word.contextSentence && (
             <p
               lang={word.targetLanguage}

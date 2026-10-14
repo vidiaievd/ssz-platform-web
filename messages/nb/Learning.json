@@ -562,6 +562,8 @@
     "deleteTitle": "Slette «{word}»?",
     "deleteOwn": "Ordet forsvinner fra ordene dine og fra repetisjonen. Legger du det til igjen, kommer det tilbake med historikken sin.",
     "deleteCourse": "Ordet forsvinner fra ordene dine. Det blir værende i kursets repetisjon.",
-    "deleteConfirm": "Slett"
+    "deleteConfirm": "Slett",
+    "deck": "Kortstokk: {title}",
+    "noDeck": "Bare i «Mine ord»"
   }
 }

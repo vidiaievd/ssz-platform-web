@@ -27,6 +27,7 @@ const word = (overrides: Record<string, unknown> = {}) => ({
   ownWord: true,
   contextSentence: null,
   source: null,
+  deck: null,
   createdAt: '2026-10-14T00:00:00.000Z',
   ...overrides,
 });

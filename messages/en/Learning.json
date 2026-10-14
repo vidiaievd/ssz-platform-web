@@ -562,6 +562,8 @@
     "deleteTitle": "Delete «{word}»?",
     "deleteOwn": "The word leaves your words and your review. Added again, it comes back with its history.",
     "deleteCourse": "The word leaves your words. It stays in the course's review.",
-    "deleteConfirm": "Delete"
+    "deleteConfirm": "Delete",
+    "deck": "Deck: {title}",
+    "noDeck": "Only in my words"
   }
 }
