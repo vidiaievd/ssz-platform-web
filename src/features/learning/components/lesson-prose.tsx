@@ -3,10 +3,15 @@
 import { useMemo } from 'react';
 
 import type { LessonTextSpan } from '@/features/content/types';
+import { useMediaAsset } from '@/features/media';
 import { cn } from '@/lib/utils';
 
 import { GlossaryText } from './glossary-text';
-import { parseMarkdownBlocks, type MappedText, type MarkdownBlock } from '../lib/parse-markdown-blocks';
+import {
+  parseMarkdownBlocks,
+  type MappedText,
+  type MarkdownBlock,
+} from '../lib/parse-markdown-blocks';
 import { projectSpansOntoBlocks, type ProjectedSpan } from '../lib/project-span';
 import { type GlossaryIndex } from '../lib/tokenize-glossary';
 
@@ -162,6 +167,8 @@ function Blocks({
                 />
               </blockquote>
             );
+          case 'image':
+            return <LessonImage key={i} mediaId={block.mediaId} alt={block.alt} />;
           default:
             return (
               <p
@@ -236,5 +243,23 @@ export function LessonProse({
         annotations={{ placed, authoredVocabulary, spansHidden, explanationLanguage }}
       />
     </div>
+  );
+}
+
+/** An image placed in the text, fetched by its media id; its caption is the alt text. */
+function LessonImage({ mediaId, alt }: { mediaId: string; alt: string }) {
+  const { data: asset } = useMediaAsset(mediaId);
+  return (
+    <figure className="m-0 flex flex-col gap-1.5">
+      {asset?.url ? (
+        // eslint-disable-next-line @next/next/no-img-element -- a signed media URL, not a static asset
+        <img src={asset.url} alt={alt} className="w-full rounded-xl object-contain" />
+      ) : (
+        <div className="aspect-video w-full rounded-xl bg-(--ssz-bg-subtle)" />
+      )}
+      {alt !== '' && (
+        <figcaption className="text-center text-[13px] text-(--ssz-text-muted)">{alt}</figcaption>
+      )}
+    </figure>
   );
 }

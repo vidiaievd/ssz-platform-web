@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   findAudioNarration,
   findHeroImage,
+  imageToken,
+  isShownOutsideProse,
   findVideoSource,
   isMediaOnlyParagraph,
   removeAudioNarration,
@@ -18,8 +20,8 @@ describe('hero image token', () => {
     expect(findHeroImage('Just some text.')).toBeNull();
   });
 
-  it('finds the first image token and its alt text', () => {
-    const body = 'Intro.\n\n![A busy workday](media://media-1)\n\nMore text.';
+  it('finds the image token that opens the body, and its alt text', () => {
+    const body = '![A busy workday](media://media-1)\n\nIntro.\n\nMore text.';
     expect(findHeroImage(body)).toEqual({ alt: 'A busy workday', mediaId: 'media-1' });
   });
 
@@ -32,10 +34,10 @@ describe('hero image token', () => {
     expect(setHeroImage('', 'media-1', 'Alt text')).toBe('![Alt text](media://media-1)');
   });
 
-  it('replaces an existing token in place, preserving surrounding text', () => {
-    const body = 'Intro.\n\n![Old alt](media://old-id)\n\nMore text.';
+  it('replaces an existing cover in place, preserving the text after it', () => {
+    const body = '![Old alt](media://old-id)\n\nIntro.\n\nMore text.';
     const result = setHeroImage(body, 'new-id', 'New alt');
-    expect(result).toBe('Intro.\n\n![New alt](media://new-id)\n\nMore text.');
+    expect(result).toBe('![New alt](media://new-id)\n\nIntro.\n\nMore text.');
   });
 
   it('removes the token and collapses the resulting leading blank lines', () => {
@@ -95,9 +97,7 @@ describe('video source token', () => {
   });
 
   it('inserts a new token at the top when none exists', () => {
-    expect(setVideoSource('Existing body.', 'media-3')).toBe(
-      '[video:media-3]\n\nExisting body.',
-    );
+    expect(setVideoSource('Existing body.', 'media-3')).toBe('[video:media-3]\n\nExisting body.');
   });
 
   it('inserts a bare token when the body is empty', () => {
@@ -135,5 +135,25 @@ describe('isMediaOnlyParagraph', () => {
   it('is false for prose, even if it contains a token plus other text', () => {
     expect(isMediaOnlyParagraph('![Alt text](media://media-1) and some more text')).toBe(false);
     expect(isMediaOnlyParagraph('Just some text.')).toBe(false);
+  });
+});
+
+describe('images inside the text (not the cover)', () => {
+  it('takes only an image that opens the body for the cover', () => {
+    const body = 'Taras åpner kontoret.\n\n![Et kontor](media://img-2)';
+    expect(findHeroImage(body)).toBeNull();
+    // Setting a cover puts it at the top and leaves the image in the text alone.
+    expect(setHeroImage(body, 'cover-1', 'Forside')).toBe(`![Forside](media://cover-1)\n\n${body}`);
+  });
+
+  it('draws the cover and the players outside the prose, and an image in the text inside it', () => {
+    expect(isShownOutsideProse('![Forside](media://cover-1)', 0)).toBe(true);
+    expect(isShownOutsideProse('[audio:n-1]', 7)).toBe(true);
+    expect(isShownOutsideProse('![Et kontor](media://img-2)', 3)).toBe(false);
+    expect(isShownOutsideProse('Taras åpner kontoret.', 0)).toBe(false);
+  });
+
+  it('writes an image token whose alt cannot break it', () => {
+    expect(imageToken('img-2', 'Et [stort] kontor')).toBe('![Et stort kontor](media://img-2)');
   });
 });

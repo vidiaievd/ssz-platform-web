@@ -5,12 +5,14 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { AudioLines, BookOpen, Link2, Trash2, Upload } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Segmented } from '@/components/ui/segmented';
 import { Textarea } from '@/components/ui/textarea';
 import { useMediaAsset, uploadAsset } from '@/features/media';
+import type { AssetResponse } from '@/features/media';
 import {
   formatDuration,
   formatTimecode,
@@ -251,9 +253,12 @@ export function AudioSourceCard({ draft, onChange }: AudioCardProps) {
           <div className="flex items-center gap-3 rounded-xl border border-border p-3">
             <AudioLines className="size-4 shrink-0 text-muted-foreground" aria-hidden />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">
-                {audio.fileName === '' ? audio.title : audio.fileName}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="truncate text-sm font-medium">
+                  {audio.fileName === '' ? audio.title : audio.fileName}
+                </p>
+                <SynthesizedBadge asset={asset} />
+              </div>
               {asset?.url !== undefined && asset.url !== null && (
                 <audio controls preload="none" src={asset.url} className="mt-2 w-full" />
               )}
@@ -362,6 +367,7 @@ function LessonClipPicker({
 
   const chosen = variants.data?.find((variant) => variant.id === ref?.variant);
   const narration = chosen === undefined ? null : findAudioNarration(chosen.bodyMarkdown);
+  const { data: narrationAsset } = useMediaAsset(narration?.mediaId);
 
   return (
     <div className="flex flex-col gap-3">
@@ -414,10 +420,25 @@ function LessonClipPicker({
         <p
           className={`text-xs ${narration === null ? 'text-warning-700' : 'text-muted-foreground'}`}
         >
-          {narration === null ? t('audio.lessonNoNarration') : t('audio.lessonFound')}
+          {narration === null ? t('audio.lessonNoNarration') : t('audio.lessonFound')}{' '}
+          {narration !== null && <SynthesizedBadge asset={narrationAsset} />}
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * "Synthesized · voice" for audio speech synthesis made (plan 74, D4). Only the author sees
+ * it — the student's player does not say how a clip was made.
+ */
+function SynthesizedBadge({ asset }: { asset: AssetResponse | undefined }) {
+  const t = useTranslations('Authoring');
+  if (asset?.origin !== 'SYNTHESIZED') return null;
+  return (
+    <Badge variant="info" className="shrink-0">
+      {t('audio.synthesizedBadge', { voice: asset.synthesis?.voice ?? '' })}
+    </Badge>
   );
 }
 

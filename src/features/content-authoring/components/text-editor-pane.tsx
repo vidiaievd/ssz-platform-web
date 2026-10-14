@@ -33,9 +33,12 @@ import { TextSpanList } from './text-span-list';
 import {
   MarkdownFormatMenu,
   applyMarkdownFormat,
+  insertBlock,
   type MarkdownFormat,
 } from './markdown-format-menu';
+import { imageToken } from '@/lib/content/lesson-media-tokens';
 import { HeroImageSlot } from './hero-image-slot';
+import { InsertImageButton } from './insert-image-button';
 import { AudioNarrationRow } from './audio-narration-row';
 import { ListeningStageListEditor } from './listening-stage-list-editor';
 
@@ -136,6 +139,27 @@ export function TextEditorPane({
   const bodyField = register('body', { onChange: () => unsaved.markDirty() });
   const bodyRef = useRef<HTMLTextAreaElement | null>(null);
 
+  /** Place an uploaded image at the caret, on a paragraph of its own, its caption selected. */
+  function handleImage(mediaId: string, alt: string) {
+    const el = bodyRef.current;
+    if (!el) return;
+    const token = imageToken(mediaId, alt);
+    const next = insertBlock(
+      el.value,
+      el.selectionStart,
+      el.selectionEnd,
+      token,
+      2,
+      token.indexOf(']') - 2,
+    );
+    setValue('body', next.value, { shouldDirty: true });
+    unsaved.markDirty();
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(next.selStart, next.selEnd);
+    });
+  }
+
   function handleFormat(format: MarkdownFormat) {
     const el = bodyRef.current;
     if (!el) return;
@@ -193,6 +217,7 @@ export function TextEditorPane({
             right={
               <div className="flex items-center gap-1.5">
                 <MarkdownFormatMenu onInsert={handleFormat} />
+                <InsertImageButton onUploaded={handleImage} />
                 <TextSpanMenu
                   lessonId={lessonId}
                   variantId={defaultVariant?.id}
@@ -239,7 +264,13 @@ export function TextEditorPane({
             onChange={handleBodyTokenChange}
           />
 
-          <AudioNarrationRow body={bodyValue ?? ''} onChange={handleBodyTokenChange} />
+          <AudioNarrationRow
+            body={bodyValue ?? ''}
+            onChange={handleBodyTokenChange}
+            lang={container.targetLanguage}
+            lessonId={lessonId}
+            level={container.difficultyLevel}
+          />
 
           <Button
             type="button"

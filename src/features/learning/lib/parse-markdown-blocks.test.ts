@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import { expectValidSourceMap } from '@/test/source-map';
 
-import { collectMappedTexts, parseMarkdownBlocks, type MarkdownBlock } from './parse-markdown-blocks';
+import {
+  collectMappedTexts,
+  parseMarkdownBlocks,
+  type MarkdownBlock,
+} from './parse-markdown-blocks';
 
 /**
  * Structure assertions below compare whole blocks. Each one also carries a
@@ -25,6 +29,8 @@ function structure(chunk: string): unknown[] {
             head: block.head.map((cell) => cell.text),
             rows: block.rows.map((row) => row.map((cell) => cell.text)),
           };
+        case 'image':
+          return { kind: 'image', mediaId: block.mediaId, alt: block.alt };
         default:
           return { kind: 'paragraph', text: block.text };
       }
@@ -33,6 +39,14 @@ function structure(chunk: string): unknown[] {
 }
 
 describe('parseMarkdownBlocks', () => {
+  it('reads an image on a line of its own as an image, apart from the text around it', () => {
+    expect(structure('Han åpner kontoret.\n![Et kontor](media://abc-1)\nDet er stille.')).toEqual([
+      { kind: 'paragraph', text: 'Han åpner kontoret.' },
+      { kind: 'image', mediaId: 'abc-1', alt: 'Et kontor' },
+      { kind: 'paragraph', text: 'Det er stille.' },
+    ]);
+  });
+
   it('joins a soft-wrapped paragraph into one block', () => {
     const blocks = structure(
       'Bartek har jobbet som elektriker i det samme firmaet i tre år. Han\ntrives med kollegaene.',
@@ -126,7 +140,9 @@ describe('parseMarkdownBlocks', () => {
   // source would put `|---|` in front of the reader.
   it('reads a pipe table as a table', () => {
     const blocks = structure(
-      ['| Modalverb | Betydning |', '|---|---|', '| kan | ability |', '| må | necessity |'].join('\n'),
+      ['| Modalverb | Betydning |', '|---|---|', '| kan | ability |', '| må | necessity |'].join(
+        '\n',
+      ),
     );
     expect(blocks).toEqual([
       {
@@ -142,9 +158,12 @@ describe('parseMarkdownBlocks', () => {
 
   it('keeps the header row out of the paragraph above it', () => {
     const blocks = structure(
-      ['Modalverbene bøyes slik:', '| Infinitiv | Presens |', '| --- | --- |', '| å kunne | kan |'].join(
-        '\n',
-      ),
+      [
+        'Modalverbene bøyes slik:',
+        '| Infinitiv | Presens |',
+        '| --- | --- |',
+        '| å kunne | kan |',
+      ].join('\n'),
     );
     expect(blocks).toEqual([
       { kind: 'paragraph', text: 'Modalverbene bøyes slik:' },
@@ -221,7 +240,8 @@ describe('parseMarkdownBlocks source map', () => {
   });
 
   it('projects a soft-wrapped paragraph across the line break', () => {
-    const chunk = 'Bartek har jobbet som elektriker i det samme firmaet i tre år. Han\ntrives med kollegaene.';
+    const chunk =
+      'Bartek har jobbet som elektriker i det samme firmaet i tre år. Han\ntrives med kollegaene.';
     const [block] = parseMarkdownBlocks(chunk);
     if (block?.kind !== 'paragraph') throw new Error('expected a paragraph');
 
@@ -260,6 +280,8 @@ describe('parseMarkdownBlocks source map', () => {
     const table = blocks[0];
     if (table?.kind !== 'table') throw new Error('expected a table');
     const cell = table.rows[0]![0]!;
-    expect(chunk.slice(cell.sourceIndexOf[0]!, cell.sourceIndexOf[cell.text.length]!)).toBe('å kunne');
+    expect(chunk.slice(cell.sourceIndexOf[0]!, cell.sourceIndexOf[cell.text.length]!)).toBe(
+      'å kunne',
+    );
   });
 });

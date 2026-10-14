@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 
-import { GlossaryParagraph, type GlossaryIndex } from '@/features/learning';
+import { LessonProse, type GlossaryIndex } from '@/features/learning';
+import { isShownOutsideProse } from '@/lib/content/lesson-media-tokens';
 
 import { splitParagraphs } from '../lib/split-paragraphs';
 
@@ -14,7 +15,8 @@ interface TextLessonPreviewProps {
 /** Live "exactly what the learner sees" preview for a TEXT lesson, rendered inside `PhoneFrame`. */
 export function TextLessonPreview({ title, body, glossary, lang }: TextLessonPreviewProps) {
   const t = useTranslations('Authoring');
-  const paragraphs = splitParagraphs(body);
+  // Drawn as the reader draws it: dialogue, quotes, lists, tables and images, not raw markup.
+  const paragraphs = splitParagraphs(body).filter((p, i) => !isShownOutsideProse(p, i));
 
   return (
     <div>
@@ -28,7 +30,7 @@ export function TextLessonPreview({ title, body, glossary, lang }: TextLessonPre
           <p className="italic text-muted-foreground">{t('lessons.previewEmpty')}</p>
         ) : (
           paragraphs.map((p, i) => (
-            <GlossaryParagraph key={i} text={p} glossary={glossary} lang={lang} className="mb-3" />
+            <LessonProse key={i} text={p} glossary={glossary} lang={lang} className="mb-3" />
           ))
         )}
       </div>

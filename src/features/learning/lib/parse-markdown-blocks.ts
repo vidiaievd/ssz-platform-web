@@ -32,7 +32,9 @@ export type MarkdownBlock =
   | { kind: 'list'; items: MappedText[] }
   | { kind: 'quote'; blocks: MarkdownBlock[] }
   /** GFM pipe table. `head` is the header row; `rows` the body, ragged rows kept as authored. */
-  | { kind: 'table'; head: MappedText[]; rows: MappedText[][] };
+  | { kind: 'table'; head: MappedText[]; rows: MappedText[][] }
+  /** An image of the text on a line of its own, `![alt](media://id)` — no text to annotate. */
+  | { kind: 'image'; mediaId: string; alt: string };
 
 const HEADING = /^(#{1,6})\s+(.*)$/;
 const BULLET = /^[-*+]\s+(.*)$/;
@@ -40,6 +42,7 @@ const QUOTE = /^>\s?(.*)$/;
 /** The `|---|:--:|` line under a header row — what marks a pipe table as a table. */
 const TABLE_DELIMITER = /^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?$/;
 const HAS_PIPE = /\|/;
+const IMAGE_LINE = /^!\[([^\]]*)\]\(media:\/\/([A-Za-z0-9_-]+)\)$/;
 
 /**
  * Splits one pipe-table row into cells, keeping each cell's place in the chunk.
@@ -145,6 +148,8 @@ function remapBlocks(blocks: MarkdownBlock[], outer: number[]): MarkdownBlock[] 
         };
       case 'quote':
         return { ...block, blocks: remapBlocks(block.blocks, outer) };
+      case 'image':
+        return block;
       default:
         return { ...block, sourceIndexOf: composeSourceMaps(outer, block.sourceIndexOf) };
     }
@@ -169,6 +174,8 @@ export function collectMappedTexts(blocks: MarkdownBlock[]): MappedText[] {
         return [...block.head, ...block.rows.flat()];
       case 'quote':
         return collectMappedTexts(block.blocks);
+      case 'image':
+        return [];
       default:
         return [block];
     }
@@ -217,6 +224,12 @@ export function parseMarkdownBlocks(chunk: string): MarkdownBlock[] {
     }
 
     const trimmedLine = trimmedPiece(chunk, lineStart[i]!, lineEnd);
+    const image = IMAGE_LINE.exec(trimmedLine.text);
+    if (image) {
+      blocks.push({ kind: 'image', alt: image[1]!.trim(), mediaId: image[2]! });
+      i += 1;
+      continue;
+    }
     const heading = HEADING.exec(trimmedLine.text);
     if (heading) {
       // `(.*)$` runs to the end of the trimmed line, so its capture starts that
@@ -283,7 +296,14 @@ export function parseMarkdownBlocks(chunk: string): MarkdownBlock[] {
       const current = lines[i]!;
       if (!current.trim()) break;
       const trimmed = current.trim();
-      if (HEADING.test(trimmed) || BULLET.test(trimmed) || QUOTE.test(current.trimStart())) break;
+      if (
+        HEADING.test(trimmed) ||
+        BULLET.test(trimmed) ||
+        QUOTE.test(current.trimStart()) ||
+        IMAGE_LINE.test(trimmed)
+      ) {
+        break;
+      }
       // A header row belongs to the table below it, not to the paragraph above.
       const following = lines[i + 1];
       if (

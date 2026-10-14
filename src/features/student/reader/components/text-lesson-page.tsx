@@ -51,12 +51,20 @@ import {
 import type { LessonTextSpan } from '@/features/content/types';
 import { useMyStudentProfile } from '@/features/profile';
 import { useMediaAsset } from '@/features/media';
-import { findAudioNarration, findHeroImage, isMediaOnlyParagraph } from '@/lib/content/lesson-media-tokens';
+import {
+  findAudioNarration,
+  findHeroImage,
+  isShownOutsideProse,
+} from '@/lib/content/lesson-media-tokens';
 import { cn } from '@/lib/utils';
 
 import { useGrammarRuleLinks } from '../hooks/use-grammar-rule-links';
 import { useScrollRestoration } from '../hooks/use-scroll-restoration';
-import { useReadingModeStore, type ReadingMode, type TextWidth } from '../stores/reading-mode-store';
+import {
+  useReadingModeStore,
+  type ReadingMode,
+  type TextWidth,
+} from '../stores/reading-mode-store';
 import { ReaderRailSlot, useReaderRailVisible } from './reader-rail';
 import { TextComprehensionCheck } from './text-comprehension-check';
 import { UnsupportedStagesNotice } from './unsupported-stages-notice';
@@ -230,13 +238,7 @@ const WIDTH_ICON = { narrow: AlignJustify, medium: AlignLeft, wide: StretchHoriz
  * end is the typographic optimum; the wide end is there because a fixed 680px
  * column on a 1900px screen reads as wasted space whatever the rule says.
  */
-function WidthToggle({
-  width,
-  onChange,
-}: {
-  width: TextWidth;
-  onChange: (w: TextWidth) => void;
-}) {
+function WidthToggle({ width, onChange }: { width: TextWidth; onChange: (w: TextWidth) => void }) {
   const t = useTranslations('Learning.reader.text.width');
   return (
     <ToggleGroup
@@ -329,7 +331,11 @@ function ImmersiveMode({
           )}
           style={{ transitionDuration: 'var(--ssz-duration-fast)' }}
         >
-          {showTranslation ? <EyeOff size={13} aria-hidden="true" /> : <Eye size={13} aria-hidden="true" />}
+          {showTranslation ? (
+            <EyeOff size={13} aria-hidden="true" />
+          ) : (
+            <Eye size={13} aria-hidden="true" />
+          )}
           {showTranslation ? t('hideTranslation') : t('showTranslation')}
         </button>
       )}
@@ -506,7 +512,10 @@ export function TextLessonPage({
   useEffect(() => {
     if (!secondPassActive) return;
     const startedAt = Date.now();
-    const interval = setInterval(() => setElapsedSeconds(Math.round((Date.now() - startedAt) / 1000)), 1000);
+    const interval = setInterval(
+      () => setElapsedSeconds(Math.round((Date.now() - startedAt) / 1000)),
+      1000,
+    );
     return () => clearInterval(interval);
   }, [secondPassActive]);
 
@@ -535,7 +544,10 @@ export function TextLessonPage({
   // gates below: a text must render even when its check does not (spec 17 §5.4).
   const stagesQuery = useLessonListeningStages(lessonId, variant.data?.id);
 
-  const heroImage = useMemo(() => findHeroImage(variant.data?.bodyMarkdown ?? ''), [variant.data?.bodyMarkdown]);
+  const heroImage = useMemo(
+    () => findHeroImage(variant.data?.bodyMarkdown ?? ''),
+    [variant.data?.bodyMarkdown],
+  );
   const narration = useMemo(
     () => findAudioNarration(variant.data?.bodyMarkdown ?? ''),
     [variant.data?.bodyMarkdown],
@@ -635,7 +647,7 @@ export function TextLessonPage({
     () =>
       (paragraphsQuery.data ?? [])
         .map((paragraph, index) => ({ ...paragraph, index }))
-        .filter((paragraph) => !isMediaOnlyParagraph(paragraph.target)),
+        .filter((paragraph) => !isShownOutsideProse(paragraph.target, paragraph.index)),
     [paragraphsQuery.data],
   );
 
@@ -695,7 +707,8 @@ export function TextLessonPage({
   );
   // Scaffolding fades with level: A1–A2 start bilingual, B1+ start immersive.
   // A student's own choice (once made) always wins over the level default.
-  const levelDefaultMode: ReadingMode = cefrLevel === 'A1' || cefrLevel === 'A2' ? 'bilingual' : 'immersive';
+  const levelDefaultMode: ReadingMode =
+    cefrLevel === 'A1' || cefrLevel === 'A2' ? 'bilingual' : 'immersive';
   const desiredMode = mode ?? levelDefaultMode;
   // A persisted/derived 'bilingual' preference must not strand the reader on an empty screen.
   const effectiveMode = availableModes.includes(desiredMode) ? desiredMode : 'immersive';
@@ -749,97 +762,115 @@ export function TextLessonPage({
   }
 
   const ModeComponent =
-    effectiveMode === 'bilingual' ? BilingualMode : effectiveMode === 'focus' ? FocusMode : ImmersiveMode;
+    effectiveMode === 'bilingual'
+      ? BilingualMode
+      : effectiveMode === 'focus'
+        ? FocusMode
+        : ImmersiveMode;
 
   return (
     // Wraps the rail slot as well as the prose: the slot is a portal, and React
     // context follows the tree it is written in, not the DOM it lands in.
     <GrammarLinkProvider links={grammarLinks}>
-    <div ref={scrollAnchorRef}>
-      {heroImage && (
-        /*
+      <div ref={scrollAnchorRef}>
+        {heroImage && (
+          /*
           `object-contain` on a fixed 16:9 frame, not `object-cover` on a fixed
           height: course art is drawn illustration, and cropping it to a ~3:1
           band cut the figures' heads and feet off. Letterboxing against the
           subtle background costs a little space and mangles nothing.
         */
-        <div className="mb-6.5 aspect-video overflow-hidden rounded-[20px] bg-subtle">
-          {heroAsset.data?.url && (
-            // eslint-disable-next-line @next/next/no-img-element -- author-uploaded lesson asset
-            <img src={heroAsset.data.url} alt={heroImage.alt} className="h-full w-full object-contain" />
-          )}
-        </div>
-      )}
-
-      <div className="mb-4.5">
-        <div className="mb-1.5 flex items-center justify-between gap-3">
-          <div className="text-[11px] font-bold tracking-wider text-(--ssz-color-primary-600) uppercase">
-            {t('eyebrow', { unit: unitPosition, course: courseTitle, type: tContent('materialType.text') })}
+          <div className="mb-6.5 aspect-video overflow-hidden rounded-[20px] bg-subtle">
+            {heroAsset.data?.url && (
+              // eslint-disable-next-line @next/next/no-img-element -- author-uploaded lesson asset
+              <img
+                src={heroAsset.data.url}
+                alt={heroImage.alt}
+                className="h-full w-full object-contain"
+              />
+            )}
           </div>
-          {!!variant.data.estimatedReadingMinutes && (
-            <span className="text-xs font-medium text-(--ssz-text-muted)">
-              {t('estimatedReadingMinutes', { minutes: variant.data.estimatedReadingMinutes })}
-            </span>
-          )}
-        </div>
-        <h1 className="font-reading mb-1.5 text-[29px] leading-[1.15] font-semibold tracking-tight text-(--ssz-text-primary)">
-          {variant.data.displayTitle || lesson.data.title}
-        </h1>
-        {variant.data.displayDescription && (
-          <p className="text-sm text-(--ssz-text-muted) italic">{variant.data.displayDescription}</p>
         )}
-      </div>
 
-      {status === 'completed' && !secondPassActive && glossVisibility !== 'off' && (
-        <div className="mb-5.5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-[1.5px] border-(--ssz-border-default) bg-surface px-4.5 py-3.5">
-          <div>
-            <p className="text-sm font-semibold text-(--ssz-text-primary)">{t('secondPassOfferTitle')}</p>
-            <p className="text-xs text-(--ssz-text-muted)">{t('secondPassOfferBody')}</p>
+        <div className="mb-4.5">
+          <div className="mb-1.5 flex items-center justify-between gap-3">
+            <div className="text-[11px] font-bold tracking-wider text-(--ssz-color-primary-600) uppercase">
+              {t('eyebrow', {
+                unit: unitPosition,
+                course: courseTitle,
+                type: tContent('materialType.text'),
+              })}
+            </div>
+            {!!variant.data.estimatedReadingMinutes && (
+              <span className="text-xs font-medium text-(--ssz-text-muted)">
+                {t('estimatedReadingMinutes', { minutes: variant.data.estimatedReadingMinutes })}
+              </span>
+            )}
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setGlossVisibility('off');
-              setElapsedSeconds(0);
-              setSecondPassActive(true);
-            }}
-            className="rounded-lg border-[1.5px] border-(--ssz-color-primary-500) px-3.5 py-1.5 text-xs font-semibold text-(--ssz-color-primary-600)"
-          >
-            {t('secondPassStart')}
-          </button>
+          <h1 className="font-reading mb-1.5 text-[29px] leading-[1.15] font-semibold tracking-tight text-(--ssz-text-primary)">
+            {variant.data.displayTitle || lesson.data.title}
+          </h1>
+          {variant.data.displayDescription && (
+            <p className="text-sm text-(--ssz-text-muted) italic">
+              {variant.data.displayDescription}
+            </p>
+          )}
         </div>
-      )}
 
-      {secondPassActive && (
-        <div className="mb-5.5 text-xs font-semibold text-(--ssz-text-muted)">
-          {t('secondPassStats', { time: formatMinutesSeconds(elapsedSeconds), wpm })}
-        </div>
-      )}
+        {status === 'completed' && !secondPassActive && glossVisibility !== 'off' && (
+          <div className="mb-5.5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-[1.5px] border-(--ssz-border-default) bg-surface px-4.5 py-3.5">
+            <div>
+              <p className="text-sm font-semibold text-(--ssz-text-primary)">
+                {t('secondPassOfferTitle')}
+              </p>
+              <p className="text-xs text-(--ssz-text-muted)">{t('secondPassOfferBody')}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setGlossVisibility('off');
+                setElapsedSeconds(0);
+                setSecondPassActive(true);
+              }}
+              className="rounded-lg border-[1.5px] border-(--ssz-color-primary-500) px-3.5 py-1.5 text-xs font-semibold text-(--ssz-color-primary-600)"
+            >
+              {t('secondPassStart')}
+            </button>
+          </div>
+        )}
 
-      {/*
+        {secondPassActive && (
+          <div className="mb-5.5 text-xs font-semibold text-(--ssz-text-muted)">
+            {t('secondPassStats', { time: formatMinutesSeconds(elapsedSeconds), wpm })}
+          </div>
+        )}
+
+        {/*
         Inline only while the rail is off screen. In the rail these same
         controls stay put as the prose scrolls, which is the point of moving
         them: on a six-minute text the old row was several screens above the
         paragraph the reader wanted to change the setting for.
       */}
-      {!railVisible && (
-      <div className="mb-5.5 flex flex-wrap items-center gap-3.5">
-        <ModeToggle mode={effectiveMode} modes={availableModes} onChange={setMode} />
-        {hasGlossing && <GlossToggle visibility={glossVisibility} onChange={setGlossVisibility} />}
-        <WidthToggle width={textWidth} onChange={setTextWidth} />
-        {glossary.size > 0 && glossVisibility !== 'off' && (
-          <span className="flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
-            <span
-              className="inline-block w-6.5 align-middle border-b-[1.5px] border-dotted border-(--ssz-color-primary-500)"
-              aria-hidden="true"
-            />
-            {t('tapToLookUp')}
-          </span>
+        {!railVisible && (
+          <div className="mb-5.5 flex flex-wrap items-center gap-3.5">
+            <ModeToggle mode={effectiveMode} modes={availableModes} onChange={setMode} />
+            {hasGlossing && (
+              <GlossToggle visibility={glossVisibility} onChange={setGlossVisibility} />
+            )}
+            <WidthToggle width={textWidth} onChange={setTextWidth} />
+            {glossary.size > 0 && glossVisibility !== 'off' && (
+              <span className="flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
+                <span
+                  className="inline-block w-6.5 align-middle border-b-[1.5px] border-dotted border-(--ssz-color-primary-500)"
+                  aria-hidden="true"
+                />
+                {t('tapToLookUp')}
+              </span>
+            )}
+          </div>
         )}
-      </div>
-      )}
 
-      {/*
+        {/*
         The rail is its own scroll container, so what goes there stays on screen
         while the prose scrolls — no sticky positioning needed. The slot is
         rendered only when there is something to put in it: mounting it with an
@@ -848,7 +879,7 @@ export function TextLessonPage({
         Below the rail's breakpoint the slot renders nothing and these fall back
         inline, which is why the two branches are exclusive rather than both mounted.
       */}
-      {/*
+        {/*
         One slot, not several: with separate portals the rail's order would be
         the order the slots happened to mount in, which changes the moment a
         section becomes conditional.
@@ -857,111 +888,120 @@ export function TextLessonPage({
         varies — empty hint versus a full paradigm. Anything below it would be
         shoved down and back on every lookup, so nothing is below it.
       */}
-      <ReaderRailSlot>
-        <div>
-        <div className="flex flex-col gap-5 p-4">
-            {narration && (
+        <ReaderRailSlot>
+          <div>
+            <div className="flex flex-col gap-5 p-4">
+              {narration && (
+                <section>
+                  <h2 className="mb-2 text-[10.5px] font-bold tracking-wide text-(--ssz-text-muted) uppercase">
+                    {t('railAudio')}
+                  </h2>
+                  <AudioPlayer
+                    src={narrationAsset.data?.url}
+                    label={variant.data.displayTitle || lesson.data.title}
+                    interactive={!!narrationAsset.data?.url}
+                  />
+                </section>
+              )}
               <section>
                 <h2 className="mb-2 text-[10.5px] font-bold tracking-wide text-(--ssz-text-muted) uppercase">
-                  {t('railAudio')}
+                  {t('railReading')}
                 </h2>
-                <AudioPlayer
-                  src={narrationAsset.data?.url}
-                  label={variant.data.displayTitle || lesson.data.title}
-                  interactive={!!narrationAsset.data?.url}
-                />
-              </section>
-            )}
-            <section>
-              <h2 className="mb-2 text-[10.5px] font-bold tracking-wide text-(--ssz-text-muted) uppercase">
-                {t('railReading')}
-              </h2>
-              {/*
+                {/*
                 Label beside the group rather than above it: three stacked
                 heading+control pairs would be twice as tall for no extra
                 clarity, and the rail's height is what keeps these controls
                 reachable without a scroll.
               */}
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-(--ssz-text-secondary)">{tMode('label')}</span>
-                  <ModeToggle mode={effectiveMode} modes={availableModes} onChange={setMode} compact />
-                </div>
-                {hasGlossing && (
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-(--ssz-text-secondary)">{tGloss('label')}</span>
-                    <GlossToggle visibility={glossVisibility} onChange={setGlossVisibility} compact />
+                    <span className="text-xs text-(--ssz-text-secondary)">{tMode('label')}</span>
+                    <ModeToggle
+                      mode={effectiveMode}
+                      modes={availableModes}
+                      onChange={setMode}
+                      compact
+                    />
                   </div>
-                )}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-(--ssz-text-secondary)">{tWidth('label')}</span>
-                  <WidthToggle width={textWidth} onChange={setTextWidth} />
+                  {hasGlossing && (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-(--ssz-text-secondary)">{tGloss('label')}</span>
+                      <GlossToggle
+                        visibility={glossVisibility}
+                        onChange={setGlossVisibility}
+                        compact
+                      />
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-(--ssz-text-secondary)">{tWidth('label')}</span>
+                    <WidthToggle width={textWidth} onChange={setTextWidth} />
+                  </div>
                 </div>
-              </div>
-              {glossary.size > 0 && glossVisibility !== 'off' && (
-                <p className="mt-2.5 flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
-                  <span
-                    className="inline-block w-6.5 border-b-[1.5px] border-dotted border-(--ssz-color-primary-500) align-middle"
-                    aria-hidden="true"
-                  />
-                  {t('tapToLookUp')}
-                </p>
-              )}
-            </section>
-          </div>
-          {/*
+                {glossary.size > 0 && glossVisibility !== 'off' && (
+                  <p className="mt-2.5 flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
+                    <span
+                      className="inline-block w-6.5 border-b-[1.5px] border-dotted border-(--ssz-color-primary-500) align-middle"
+                      aria-hidden="true"
+                    />
+                    {t('tapToLookUp')}
+                  </p>
+                )}
+              </section>
+            </div>
+            {/*
             One card, not two stacked: the rail answers "what am I looking at
             right now", and the reader's last click is what decides. The word
             card is the resting state, so the column keeps its height whether or
             not this text carries annotations.
           */}
-          {selectedAnnotation ? (
-            <AnnotationCardPanel
-              explanationLanguage={variant.data.explanationLanguage}
-              cefrLevel={cefrLevel}
+            {selectedAnnotation ? (
+              <AnnotationCardPanel
+                explanationLanguage={variant.data.explanationLanguage}
+                cefrLevel={cefrLevel}
+              />
+            ) : (
+              <WordCardPanel targetLanguage={lesson.data.targetLanguage} cefrLevel={cefrLevel} />
+            )}
+          </div>
+        </ReaderRailSlot>
+
+        {narration && !railVisible && (
+          <div className="mb-6.5">
+            <AudioPlayer
+              src={narrationAsset.data?.url}
+              label={variant.data.displayTitle || lesson.data.title}
+              interactive={!!narrationAsset.data?.url}
             />
-          ) : (
-            <WordCardPanel targetLanguage={lesson.data.targetLanguage} cefrLevel={cefrLevel} />
-          )}
-        </div>
-      </ReaderRailSlot>
+          </div>
+        )}
 
-      {narration && !railVisible && (
-        <div className="mb-6.5">
-          <AudioPlayer
-            src={narrationAsset.data?.url}
-            label={variant.data.displayTitle || lesson.data.title}
-            interactive={!!narrationAsset.data?.url}
-          />
-        </div>
-      )}
+        {proseParagraphs.length === 0 ? (
+          <p className="text-sm text-(--ssz-text-muted) italic">{t('noParagraphs')}</p>
+        ) : (
+          <GlossIntensityProvider resolve={resolveIntensity}>
+            <GlossaryTargetProvider target={railVisible ? 'panel' : 'popover'}>
+              <LookupTelemetryProvider lessonId={lessonId} lessonVariantId={variant.data.id}>
+                <ModeComponent
+                  paragraphs={proseParagraphs}
+                  glossary={glossary}
+                  targetLang={lesson.data.targetLanguage}
+                  translationLang={variant.data.explanationLanguage}
+                  cefrLevel={cefrLevel}
+                  hasTranslations={hasTranslations}
+                  spansByParagraph={spansByParagraph}
+                  authoredVocabulary={authoredVocabulary}
+                  spansHidden={glossVisibility === 'off'}
+                />
+              </LookupTelemetryProvider>
+            </GlossaryTargetProvider>
+          </GlossIntensityProvider>
+        )}
 
-      {proseParagraphs.length === 0 ? (
-        <p className="text-sm text-(--ssz-text-muted) italic">{t('noParagraphs')}</p>
-      ) : (
-        <GlossIntensityProvider resolve={resolveIntensity}>
-          <GlossaryTargetProvider target={railVisible ? 'panel' : 'popover'}>
-          <LookupTelemetryProvider lessonId={lessonId} lessonVariantId={variant.data.id}>
-            <ModeComponent
-              paragraphs={proseParagraphs}
-              glossary={glossary}
-              targetLang={lesson.data.targetLanguage}
-              translationLang={variant.data.explanationLanguage}
-              cefrLevel={cefrLevel}
-              hasTranslations={hasTranslations}
-              spansByParagraph={spansByParagraph}
-              authoredVocabulary={authoredVocabulary}
-              spansHidden={glossVisibility === 'off'}
-            />
-          </LookupTelemetryProvider>
-          </GlossaryTargetProvider>
-        </GlossIntensityProvider>
-      )}
+        <UnsupportedStagesNotice count={unsupportedStageCount} />
 
-      <UnsupportedStagesNotice count={unsupportedStageCount} />
-
-      <TextComprehensionCheck gapFillItems={gapFillItems} compItems={compItems} />
-    </div>
+        <TextComprehensionCheck gapFillItems={gapFillItems} compItems={compItems} />
+      </div>
     </GrammarLinkProvider>
   );
 }
