@@ -178,6 +178,16 @@ function hasOwnBuilder(code: CreatableExerciseType): code is OwnBuilderTemplate 
   return code in OWN_BUILDER_SCAFFOLDS;
 }
 
+/** Scaffolds that write their own instruction when the picker hands them an empty one. */
+const WRITES_OWN_INSTRUCTION: ReadonlySet<string> = new Set([
+  HIGHLIGHT_IN_TEXT_TEMPLATE_CODE,
+  DICTATION_TEMPLATE_CODE,
+  INFLECTION_TABLE_TEMPLATE_CODE,
+  READ_ALOUD_TEMPLATE_CODE,
+  MINIMAL_PAIRS_TEMPLATE_CODE,
+  INFORMATION_TRANSFER_TEMPLATE_CODE,
+]);
+
 const LESSON_KINDS: readonly LessonKind[] = ['text', 'video', 'audio', 'live'];
 
 function isLessonKind(kind: MaterialKind): kind is LessonKind {
@@ -281,15 +291,12 @@ export function AddLessonPicker({
       type: tContent(`materialType.exercise` as 'materialType.text'),
     });
     const instructions = t('addLesson.defaultInstructions');
-    // The marking and dictation builders start from the course language's own line (plan 67 §3.7), and the
-    // picker has no field to type one in — so the interface-language placeholder above would
-    // beat the pack every time. Empty means «use the pack».
-    const scaffoldInstructions =
-      templateCode === HIGHLIGHT_IN_TEXT_TEMPLATE_CODE ||
-      templateCode === DICTATION_TEMPLATE_CODE ||
-      templateCode === INFLECTION_TABLE_TEMPLATE_CODE
-        ? ''
-        : instructions;
+    // Some scaffolds write a line of their own when handed none: the marking, dictation and
+    // table builders the course language's (plan 67 §3.7), read aloud, minimal pairs and
+    // information transfer one that names the task. The picker has no field to type one in,
+    // so the generic placeholder above would beat that line every time — and, stored as the
+    // instruction, it also hid the reader card's own. Empty means «use the type's line».
+    const scaffoldInstructions = WRITES_OWN_INSTRUCTION.has(templateCode) ? '' : instructions;
 
     startTransition(async () => {
       // Templates with their own builder are not shapes of the generic exercise form —
