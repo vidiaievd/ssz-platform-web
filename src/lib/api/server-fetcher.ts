@@ -65,7 +65,7 @@ export type ServerFetchOptions<TBody = unknown> = {
   anonymous?: boolean;
   /** Override the default timeout. */
   timeoutMs?: number;
-  /** Forward the user agent / accept-language. Default true. */
+  /** Forward the accept-language and the client's address (X-Forwarded-For). Default true. */
   forwardClientHeaders?: boolean;
   /**
    * Upstream statuses that are a normal outcome for this call, not a fault.
@@ -98,6 +98,8 @@ export async function serverFetch<TData = unknown, TBody = unknown>(
     const incoming = await headers();
     const acceptLanguage = incoming.get('accept-language');
     if (acceptLanguage) baseHeaders['Accept-Language'] = acceptLanguage;
+    const clientAddress = nearestForwardedFor(incoming.get('x-forwarded-for'));
+    if (clientAddress) baseHeaders['X-Forwarded-For'] = clientAddress;
   }
 
   return doRequest(url, baseHeaders, opts, false);
@@ -238,6 +240,27 @@ function isRetriableNetworkError(err: unknown): boolean {
     causeCode === 'ECONNRESET' ||
     causeCode === 'ECONNREFUSED'
   );
+}
+
+/**
+ * The address of whoever called this server, for the gateway's per-client rate limit.
+ *
+ * Every learner reaches the services through this one BFF, so without it nginx counts them
+ * all as one address and a busy page spends the whole web's bucket (plan 76, Q10). The
+ * gateway trusts the header only from the BFF's address (`set_real_ip_from`).
+ *
+ * The rightmost entry is the hop nearest to us: Next sets the header from the socket when
+ * none came in, and a proxy in front of it appends the address it saw — the one entry a
+ * client cannot forge. When a browser talks to Next directly (dev) and sends its own header,
+ * Next keeps it, and so does this; behind a proxy that cannot happen.
+ */
+export function nearestForwardedFor(header: string | null): string | null {
+  if (!header) return null;
+  const hops = header
+    .split(',')
+    .map((hop) => hop.trim())
+    .filter((hop) => hop !== '');
+  return hops.at(-1) ?? null;
 }
 
 function mapStatusToCode(status: number): AppErrorCode {
