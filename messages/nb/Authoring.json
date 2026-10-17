@@ -1623,6 +1623,7 @@
     "failed": "Kunne ikke angre det.",
     "nothing": "Ingenting å angre.",
     "renamed": "Nytt navn: «{name}».",
+    "titleCleared": "Tittelen er fjernet.",
     "moved": "Flyttet «{name}».",
     "movedToSection": "Flyttet «{name}» til en annen seksjon.",
     "removed": "Fjernet «{name}».",

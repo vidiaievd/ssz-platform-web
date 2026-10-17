@@ -21,21 +21,27 @@ interface InlineRenameProps {
  * means to keep it, and losing the edit to a stray click is the more expensive
  * mistake. Escape is the explicit way out.
  */
-export function InlineRename({
+export function InlineRename({ children, editing, ...input }: InlineRenameProps) {
+  if (!editing) return <>{children}</>;
+  return <RenameInput {...input} />;
+}
+
+/**
+ * The field itself, mounted only while editing, so each edit seeds its draft
+ * from the title as it is now — no effect needed to keep the two in step. Held
+ * by `InlineRename` instead, the draft outlived the edit: a title changed
+ * elsewhere (the inspector) reopened as the old one, and the blur that commits
+ * wrote that old title back.
+ */
+function RenameInput({
   value,
-  children,
-  editing,
   onCommit,
   onCancel,
   className,
-}: InlineRenameProps) {
-  // The input only exists while editing, so mounting it seeds the draft from the
-  // current title — no effect needed to keep the two in step.
+}: Omit<InlineRenameProps, 'children' | 'editing'>) {
   const [draft, setDraft] = useState(value);
   // Guards against blur firing after Enter or Escape already resolved the edit.
   const settled = useRef(false);
-
-  if (!editing) return <>{children}</>;
 
   function settle(commit: boolean) {
     if (settled.current) return;

@@ -279,16 +279,58 @@ describe('CurriculumInspector', () => {
     vi.useRealTimers();
   });
 
-  it('cannot rename an exercise, which is labelled by its template', () => {
+  // Plan 39, B8: an exercise's title is optional. The field holds only what the
+  // author wrote; the label the row falls back to is the placeholder.
+  it('names an unnamed exercise, its fallback label standing in as the placeholder', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(renameItemAction).mockResolvedValue({ ok: true, value: undefined } as never);
     renderInspector(
-      itemSelection(itemNode({ itemType: 'exercise', refId: 'exercise-1', title: 'Gap fill' })),
+      itemSelection(
+        itemNode({ itemType: 'exercise', refId: 'exercise-1', title: 'Gap fill', ownTitle: null }),
+      ),
     );
 
-    expect(screen.getByLabelText('Title — not available yet')).toHaveAttribute(
-      'aria-disabled',
-      'true',
+    const field = screen.getByLabelText('Title');
+    expect(field).toHaveValue('');
+    expect(field).toHaveAttribute('placeholder', 'Gap fill');
+
+    fireEvent.change(field, { target: { value: 'Kjønn på substantiv' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    });
+
+    expect(renameItemAction).toHaveBeenCalledWith(
+      'exercise',
+      'exercise-1',
+      'module-1',
+      'Kjønn på substantiv',
     );
-    expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
+  it('clears an exercise title when the field is saved blank', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(renameItemAction).mockResolvedValue({ ok: true, value: undefined } as never);
+    renderInspector(
+      itemSelection(
+        itemNode({
+          itemType: 'exercise',
+          refId: 'exercise-1',
+          title: 'Kjønn på substantiv',
+          ownTitle: 'Kjønn på substantiv',
+        }),
+      ),
+    );
+
+    const field = screen.getByLabelText('Title');
+    expect(field).toHaveValue('Kjønn på substantiv');
+    fireEvent.change(field, { target: { value: '' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    });
+
+    expect(renameItemAction).toHaveBeenCalledWith('exercise', 'exercise-1', 'module-1', '');
+    vi.useRealTimers();
   });
 
   it('offers exercise-only settings on an exercise, and visibility on everything else', () => {

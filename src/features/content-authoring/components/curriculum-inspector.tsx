@@ -21,7 +21,12 @@ import { wsHref } from '@/features/workspaces/lib/href';
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
 import { moduleItems } from '../lib/structure-filters';
-import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
+import {
+  isRenamableItem,
+  isTitleOptional,
+  ownTitleOf,
+  type RenamableItemType,
+} from '../lib/renamable-item';
 import { rollUpLevelPublishState } from '../lib/structure-nodes';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { useStructureUndo } from '../hooks/use-structure-undo';
@@ -114,6 +119,7 @@ function EditableField({
   saveLabel,
   savedMessage,
   value,
+  placeholder,
   onSave,
 }: {
   label: string;
@@ -121,6 +127,8 @@ function EditableField({
   saveLabel: string;
   savedMessage: string;
   value: string;
+  /** What stands in when the field is left blank, for a field that may be. */
+  placeholder?: string;
   onSave: (next: string) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(value);
@@ -139,6 +147,7 @@ function EditableField({
             unsaved.markDirty();
           }}
           aria-label={label}
+          placeholder={placeholder}
           className="h-8 text-sm"
         />
         <PanelSaveButton unsaved={unsaved} label={saveLabel} successMessage={savedMessage} />
@@ -476,17 +485,20 @@ function InspectorFields({
         </div>
       </div>
 
-      {/* An exercise row is labelled by its template's name and has no title of
-          its own to write to (B8) — which is also why two exercises in a row
-          read the same. */}
+      {/* An exercise's title is optional (B8): the field holds only what the author
+          wrote, and the label the row falls back to — the document's title, then
+          the template name — shows as the placeholder. Clearing it brings that back. */}
       {isRenamableItem(item) ? (
         <EditableField
           label={t('structure.titleField')}
           saveLabel={t('form.save')}
           savedMessage={t('structure.titleSaved')}
-          value={item.title ?? ''}
+          value={ownTitleOf(item)}
+          placeholder={
+            isTitleOptional(item.itemType) && !item.ownTitle ? (item.title ?? '') : undefined
+          }
           onSave={async (next) => {
-            const previous = item.title ?? '';
+            const previous = ownTitleOf(item);
             const itemType = item.itemType as RenamableItemType;
             const result = await renameItemAction(itemType, item.refId, containerId, next);
             if (!result.ok) {
@@ -494,7 +506,9 @@ function InspectorFields({
               throw new Error(result.error.code);
             }
             undo.record({
-              label: t('undo.renamed', { name: next }),
+              label: next.trim()
+                ? t('undo.renamed', { name: next.trim() })
+                : t('undo.titleCleared'),
               revert: async () =>
                 (await renameItemAction(itemType, item.refId, containerId, previous)).ok,
             });

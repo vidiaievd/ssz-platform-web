@@ -822,9 +822,10 @@ describe('CurriculumTree', () => {
       expect(screen.getByText('Samfunn og kultur')).toBeInTheDocument();
     });
 
-    // An exercise row is labelled by its template's name; there is no
-    // per-exercise title field to write to.
-    it('does not offer rename on an exercise row', () => {
+    // Plan 39, B8: an exercise has a title of its own, so its row renames like any
+    // other block — through the exercise, not the placement.
+    it('renames an exercise row through the exercise', async () => {
+      vi.mocked(renameItemAction).mockResolvedValue({ ok: true, value: undefined } as never);
       const [level] = TREE.levels;
       const [module_] = level!.modules;
       const [section] = module_!.sections;
@@ -844,8 +845,10 @@ describe('CurriculumTree', () => {
                       {
                         ...item!,
                         itemType: 'exercise',
+                        refId: 'exercise-1',
                         lessonKind: null,
                         title: 'Gap-Fill',
+                        ownTitle: null,
                       },
                     ],
                   },
@@ -858,8 +861,18 @@ describe('CurriculumTree', () => {
 
       renderTree(vi.fn(), vi.fn(), exerciseTree);
       fireEvent.doubleClick(screen.getByText('Gap-Fill'));
+      const input = screen.getByDisplayValue('Gap-Fill');
+      fireEvent.change(input, { target: { value: 'Kjønn på substantiv' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
 
-      expect(screen.queryByDisplayValue('Gap-Fill')).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(renameItemAction).toHaveBeenCalledWith(
+          'exercise',
+          'exercise-1',
+          'course-1',
+          'Kjønn på substantiv',
+        ),
+      );
     });
   });
 

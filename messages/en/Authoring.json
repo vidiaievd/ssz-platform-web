@@ -1623,6 +1623,7 @@
     "failed": "Could not undo that.",
     "nothing": "Nothing to undo.",
     "renamed": "Renamed to “{name}”.",
+    "titleCleared": "Title cleared.",
     "moved": "Moved “{name}”.",
     "movedToSection": "Moved “{name}” to another section.",
     "removed": "Removed “{name}”.",

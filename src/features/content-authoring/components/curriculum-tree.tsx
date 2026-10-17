@@ -69,7 +69,7 @@ import {
   reorderContainerItemsAction,
 } from '../actions/container-item';
 import { renameItemAction } from '../actions/rename-item';
-import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
+import { isRenamableItem, ownTitleOf, type RenamableItemType } from '../lib/renamable-item';
 import { findItemWithModule } from '../lib/find-tree-item';
 import { PublishStateBadge } from './publish-state-badge';
 import { RecipeDot } from './recipe-dot';
@@ -1001,7 +1001,7 @@ export function CurriculumTree({
       setRenamingId(null);
       const save = resolveRename(id, title);
       if (!save) return;
-      const previousTitle = titleOf(id);
+      const previousTitle = savedTitleOf(id);
       save.then((result) => {
         if (!result.ok) {
           toast.error(tErrors(result.error.code));
@@ -1466,7 +1466,7 @@ export function CurriculumTree({
       : null;
   }
 
-  /** Whether F2 has anything to open on this node — an exercise has no title of its own (B8). */
+  /** Whether F2 has anything to open on this node: every node with a title of its own. */
   function canRename(id: string): boolean {
     if (tree.levels.some((level) => level.id === id)) return true;
     if (tree.levels.flatMap((l) => l.modules).some((mod) => mod.id === id)) return true;
@@ -1571,6 +1571,19 @@ export function CurriculumTree({
       ...tree.levels.flatMap((l) => [...l.items, ...l.modules.flatMap((m) => moduleItems(m))]),
     ].find((i) => i.id === id);
     return item?.title ?? null;
+  }
+
+  /**
+   * What reverting a rename writes back: the title as the author saved it. The same
+   * as `titleOf` except for an exercise, whose shown label may be a fallback — a
+   * blank here clears its title again.
+   */
+  function savedTitleOf(id: string): string | null {
+    const item = [
+      ...tree.ungroupedItems,
+      ...tree.levels.flatMap((l) => [...l.items, ...l.modules.flatMap((m) => moduleItems(m))]),
+    ].find((i) => i.id === id);
+    return item ? ownTitleOf(item) : titleOf(id);
   }
 
   function resolveRename(id: string, title: string) {
