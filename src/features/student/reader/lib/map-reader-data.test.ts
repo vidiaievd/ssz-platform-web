@@ -186,6 +186,9 @@ describe('mapUnitContentsToSections — exercise sections', () => {
     expect(status([exerciseItem('a', 'locked'), exerciseItem('b', 'locked')])).toBe('locked');
     expect(status([exerciseItem('a', 'completed'), exerciseItem('b', 'available')])).toBe('in_progress');
     expect(status([exerciseItem('a', 'available'), exerciseItem('b', 'available')])).toBe('available');
+    // Plan 76, 2.6: all handed in, part of it still with a teacher.
+    expect(status([exerciseItem('a', 'completed'), exerciseItem('b', 'submitted')])).toBe('submitted');
+    expect(status([exerciseItem('a', 'submitted'), exerciseItem('b', 'available')])).toBe('in_progress');
   });
 });
 

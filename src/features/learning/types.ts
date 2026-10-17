@@ -260,7 +260,13 @@ export interface ExpandedExerciseRef {
 
 /* ─── Unit contents (reader sidebar/footer nav data source, BE3.1/BE3.3) ─── */
 
-export type UnitContentsItemStatus = 'locked' | 'available' | 'in_progress' | 'completed';
+export type UnitContentsItemStatus =
+  | 'locked'
+  | 'available'
+  | 'in_progress'
+  /** Handed to a teacher, no verdict yet (plan 76, 2.6). */
+  | 'submitted'
+  | 'completed';
 
 export interface UnitContentsItem {
   id: string;

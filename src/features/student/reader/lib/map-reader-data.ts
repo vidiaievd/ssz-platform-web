@@ -89,8 +89,10 @@ export function isPracticeSection(section: UnitContentsSection): boolean {
 /** Worst-first rollup: the entry mirrors how far the learner is through the set. */
 function rollUpStatus(items: UnitContentsItem[]): UnitContentsItemStatus {
   if (items.every((i) => i.status === 'completed')) return 'completed';
+  // Everything handed in, some of it still with a teacher (plan 76, 2.6).
+  if (items.every((i) => i.status === 'completed' || i.status === 'submitted')) return 'submitted';
   if (items.every((i) => i.status === 'locked')) return 'locked';
-  if (items.some((i) => i.status === 'completed' || i.status === 'in_progress')) return 'in_progress';
+  if (items.some((i) => i.status !== 'available' && i.status !== 'locked')) return 'in_progress';
   return 'available';
 }
 

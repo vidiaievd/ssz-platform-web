@@ -10,6 +10,7 @@ import {
   useFlushProgressOutbox,
   useUnitContents,
   useUpsertProgress,
+  useRefreshProgress,
 } from '@/features/learning';
 import { LANG_EMOJI } from '@/features/student/course-home';
 
@@ -75,6 +76,7 @@ export function ReaderShell({
   const courseHome = useCourseHome(courseId);
   const unitContents = useUnitContents(unitId);
   const upsertProgress = useUpsertProgress(courseId, unitId);
+  const refreshProgress = useRefreshProgress(courseId, unitId);
   const flushProgressOutbox = useFlushProgressOutbox(courseId, unitId);
 
   const startedAtRef = useRef<number>(undefined);
@@ -184,7 +186,13 @@ export function ReaderShell({
   const moduleVocabularyListId = allContentItems.find((i) => i.contentType === 'VOCABULARY_LIST')?.contentId;
 
   function handleNext() {
-    if (activeContentItem && activeContentItem.status !== 'completed') {
+    // An exercise is done when the engine says it passed (plan 76, 2.6) — moving past it
+    // is not finishing it. Everything else here is done by being read.
+    if (
+      activeContentItem &&
+      activeContentItem.contentType !== 'EXERCISE' &&
+      activeContentItem.status !== 'completed'
+    ) {
       const timeSpentSeconds = Math.max(
         0,
         Math.round((Date.now() - (startedAtRef.current ?? Date.now())) / 1000),
@@ -199,15 +207,13 @@ export function ReaderShell({
     onNextItem?.();
   }
 
-  /** Records completion for one task of a practice set as it is checked. */
-  function handleExerciseChecked(item: (typeof allContentItems)[number]) {
-    if (item.status === 'completed') return;
-    upsertProgress.mutate({
-      contentType: item.contentType,
-      contentId: item.contentId,
-      timeSpentSeconds: 0,
-      completed: true,
-    });
+  /**
+   * A task was checked: look again once the engine's verdict has reached progress. The
+   * reader used to record the task as done here, whatever the verdict — a failed one, or
+   * one handed to a teacher — and that is where «Done» before approval came from.
+   */
+  function handleExerciseChecked() {
+    refreshProgress();
   }
 
   let content: ReactNode = children;
@@ -288,6 +294,7 @@ export function ReaderShell({
       <ExercisePage
         key={activeContentItem.contentId}
         exerciseId={activeContentItem.contentId}
+        onChecked={handleExerciseChecked}
         {...(sourceHref === undefined ? {} : { sourceHref })}
         {...(activeContentItem.title === null ? {} : { title: activeContentItem.title })}
       />

@@ -868,7 +868,10 @@ export interface ExerciseSolverProps {
   index?: number;
   /** The title of the lesson item, for the runners that open on a card (plan 68, Q6-A). */
   title?: string;
-  /** Fired once, when the learner checks this exercise. */
+  /**
+   * Fired every time the learner checks this exercise. The page reads progress again on
+   * it (plan 76, 2.6); what the check meant is the engine's to record, not the page's.
+   */
   onChecked?: (ok: Ok) => void;
   /**
    * True when this is one card in a stack of tasks rather than the whole screen. A set
@@ -896,7 +899,6 @@ export function ExerciseSolver({
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
   const [graded, setGraded] = useState<Graded | null>(null);
   /* Attempts are unlimited; the answers appear only when asked for. */
-  const [attempts, setAttempts] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [retryNonce, setRetryNonce] = useState(0);
   /** A set in a stack opens on request; everywhere else it is open from the start. */
@@ -999,11 +1001,9 @@ export function ExerciseSolver({
         onCheck={(g) => {
           setGraded(g);
           setPhase('feedback');
-          setAttempts((n) => n + 1);
           // A right answer explains itself; a wrong one waits to be asked.
           if (g.ok !== false) setRevealed(true);
-          // Progress follows the first attempt — that is the honest signal.
-          if (attempts === 0) onChecked?.(g.ok);
+          onChecked?.(g.ok);
         }}
       />
       {phase === 'feedback' && graded && (
@@ -1030,12 +1030,15 @@ export interface ExercisePageProps {
   sourceHref?: string;
   /** Passed through to the runner; see `ExerciseSolverProps`. */
   title?: string;
+  /** Passed through to the runner; see `ExerciseSolverProps`. */
+  onChecked?: (ok: Ok) => void;
 }
 
-export function ExercisePage({ exerciseId, sourceHref, title }: ExercisePageProps) {
+export function ExercisePage({ exerciseId, sourceHref, title, onChecked }: ExercisePageProps) {
   return (
     <ExerciseSolver
       exerciseId={exerciseId}
+      {...(onChecked === undefined ? {} : { onChecked })}
       {...(sourceHref === undefined ? {} : { sourceHref })}
       {...(title === undefined ? {} : { title })}
     />

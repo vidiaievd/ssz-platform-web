@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, ChevronDown, ChevronLeft, List, Lock } from 'lucide-react';
+import { Check, ChevronDown, ChevronLeft, List, Lock, Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Link } from '@/lib/i18n/navigation';
@@ -35,6 +35,8 @@ function ItemRow({ item, active }: { item: ReaderSidebarSection['items'][number]
   const def = getLessonTypeDefinition(item.kind);
   const Icon = def.icon;
   const done = item.status === 'completed';
+  // Handed to a teacher (plan 76, 2.6): the learner's part is done, the verdict is not.
+  const submitted = item.status === 'submitted';
   const locked = item.status === 'locked';
 
   const row = (
@@ -57,6 +59,8 @@ function ItemRow({ item, active }: { item: ReaderSidebarSection['items'][number]
       >
         {done ? (
           <Check size={12} className="text-(--ssz-text-on-brand)" />
+        ) : submitted ? (
+          <Send size={11} className="text-secondary-foreground" />
         ) : locked ? (
           <Lock size={11} className="text-muted-foreground" />
         ) : (

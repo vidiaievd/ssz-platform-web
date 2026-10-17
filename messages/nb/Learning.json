@@ -522,7 +522,8 @@
     "practice": {
       "taskCount": "{n} oppgaver i dette settet",
       "setProgress": "Sjekket {done} av {total}",
-      "taskDone": "Fullført"
+      "taskDone": "Fullført",
+      "taskSubmitted": "Levert"
     },
     "unsupportedStages": {
       "title": "{count, plural, one {Ett spørsmål vises ikke her} other {# spørsmål vises ikke her}}",

@@ -522,7 +522,8 @@
     "practice": {
       "taskCount": "{n} завдань у цьому наборі",
       "setProgress": "Перевірено {done} із {total}",
-      "taskDone": "Пройдено"
+      "taskDone": "Пройдено",
+      "taskSubmitted": "Здано"
     },
     "unsupportedStages": {
       "title": "{count, plural, one {Одне запитання тут не показано} few {# запитання тут не показані} many {# запитань тут не показані} other {# запитань тут не показані}}",

@@ -25,7 +25,7 @@ import type {
 interface RawCourseProgressItem {
   contentType: string;
   contentId: string;
-  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED' | 'COMPLETED' | 'NEEDS_REVIEW';
   completedAt: string | null;
   score: number | null;
   /** Sub-lesson (module) this leaf belongs to; null when directly under the course. */
@@ -81,6 +81,11 @@ interface UnitRollup {
  * optional items never block progression. A sub-lesson with no required items
  * falls back to "all items done", and an empty one is complete by definition
  * so it can't stall the sequential chain.
+ *
+ * Done, for the gate, includes work handed to a teacher (plan 76, Q11-A): the
+ * learner has done their part, and a verdict that takes three days must not hold
+ * the next sub-lesson shut. A task failed by the machine does not open it — it is
+ * there to be done again. The count shown stays the passed ones.
  */
 function rollUpByUnit(items: RawCourseProgressItem[]): Map<string, UnitRollup> {
   const byUnit = new Map<string, RawCourseProgressItem[]>();
@@ -98,7 +103,7 @@ function rollUpByUnit(items: RawCourseProgressItem[]): Map<string, UnitRollup> {
     rollups.set(moduleId, {
       total: unitItems.length,
       completed: unitItems.filter((i) => i.status === 'COMPLETED').length,
-      isComplete: gating.every((i) => i.status === 'COMPLETED'),
+      isComplete: gating.every((i) => i.status === 'COMPLETED' || i.status === 'SUBMITTED'),
     });
   }
   return rollups;

@@ -15,7 +15,7 @@ const PARAMS = { params: Promise.resolve({ courseId: 'course-1' }) };
 // Raw learning-service shapes (post course-redesign) — see route.ts adapter.
 // Leaves carry `moduleId`/`isRequired` so the route can roll progress up per
 // sub-lesson without extra fetches.
-type RawStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+type RawStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED' | 'COMPLETED';
 
 function leaf(
   contentId: string,
@@ -288,6 +288,35 @@ describe('GET /api/learning/course-home/[courseId]', () => {
     const body = await res.json();
     expect(body.units[0].status).toBe('done');
     expect(body.units[1].status).toBe('active');
+  });
+
+  /**
+   * Plan 76, Q11-A: work handed to a teacher opens the next sub-lesson — the learner has
+   * done their part — and a task failed by the machine does not.
+   */
+  it('lets submitted work open the next unit, and a failed task hold it shut', async () => {
+    const sequential = { ...MOCK_CONTAINER, gatingMode: 'sequential' as const };
+    mockUpstreams({
+      progress: {
+        ...RAW_PROGRESS,
+        items: [leaf('lesson-1', 'mod-1', 'COMPLETED'), leaf('exercise-1', 'mod-1', 'SUBMITTED'), leaf('vocab-1', 'mod-2', 'NOT_STARTED')],
+      },
+      container: sequential,
+    });
+    const submitted = await (await GET(makeRequest(), PARAMS)).json();
+    expect(submitted.units.map((u: { status: string }) => u.status)).toEqual(['done', 'active']);
+    // The count shown is the passed ones only.
+    expect(submitted.units[0].completedLessons).toBe(1);
+
+    mockUpstreams({
+      progress: {
+        ...RAW_PROGRESS,
+        items: [leaf('lesson-1', 'mod-1', 'COMPLETED'), leaf('exercise-1', 'mod-1', 'IN_PROGRESS'), leaf('vocab-1', 'mod-2', 'NOT_STARTED')],
+      },
+      container: sequential,
+    });
+    const failed = await (await GET(makeRequest(), PARAMS)).json();
+    expect(failed.units.map((u: { status: string }) => u.status)).toEqual(['active', 'locked']);
   });
 
   it('marks every unit done when the course is fully completed', async () => {

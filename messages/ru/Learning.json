@@ -522,7 +522,8 @@
     "practice": {
       "taskCount": "{n} заданий в этом наборе",
       "setProgress": "Проверено {done} из {total}",
-      "taskDone": "Пройдено"
+      "taskDone": "Пройдено",
+      "taskSubmitted": "Сдано"
     },
     "unsupportedStages": {
       "title": "{count, plural, one {Один вопрос здесь не показан} few {# вопроса здесь не показаны} many {# вопросов здесь не показаны} other {# вопросов здесь не показаны}}",
